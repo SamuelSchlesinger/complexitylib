@@ -17,13 +17,37 @@ search-problem classes.
 def pair (x y : List Bool) : List Bool :=
   (x.flatMap fun b => [b, b]) ++ [false, true] ++ y
 
-private theorem pair_nil_eq (y : List Bool) :
+@[simp]
+theorem pair_nil_eq (y : List Bool) :
     pair [] y = false :: true :: y := by
   simp [pair]
 
-private theorem pair_cons_eq (b : Bool) (x y : List Bool) :
+@[simp]
+theorem pair_cons_eq (b : Bool) (x y : List Bool) :
     pair (b :: x) y = b :: b :: pair x y := by
   simp [pair, List.append_assoc]
+
+/-- Decode a paired binary string back into two components.
+    Left inverse of `pair`: `unpair (pair x y) = (x, y)`.
+    Returns `([], [])` for strings not in the image of `pair`. -/
+def unpair : List Bool → List Bool × List Bool
+  | false :: false :: rest =>
+    let (x, y) := unpair rest
+    (false :: x, y)
+  | true :: true :: rest =>
+    let (x, y) := unpair rest
+    (true :: x, y)
+  | false :: true :: rest => ([], rest)
+  | _ => ([], [])
+
+/-- `unpair` is a left inverse of `pair`. -/
+@[simp]
+theorem unpair_pair (x y : List Bool) : unpair (pair x y) = (x, y) := by
+  induction x with
+  | nil => rfl
+  | cons b x' ih =>
+    rw [pair_cons_eq]
+    cases b <;> simp only [unpair, ih]
 
 /-- `pair` is injective: if `pair x₁ y₁ = pair x₂ y₂` then `x₁ = x₂` and `y₁ = y₂`. -/
 theorem pair_injective {x₁ x₂ : List Bool} {y₁ y₂ : List Bool}
