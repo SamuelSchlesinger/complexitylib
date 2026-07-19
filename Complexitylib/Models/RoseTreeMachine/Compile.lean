@@ -102,6 +102,15 @@ those subroutines will compose through.
 
 namespace Complexity
 
+/-- Map a read symbol to a writable symbol, sending the start marker `▷` to
+blank. Used by the compiler's machines to write back a symbol they just read
+without ever emitting `▷` (which is not a member of the write alphabet). -/
+def Γ.toΓwId : Γ → Γw
+  | .zero => .zero
+  | .one => .one
+  | .blank => .blank
+  | .start => .blank
+
 namespace RoseTreeMachine
 
 open Complexity.TM
@@ -311,6 +320,62 @@ def Compiled (m : ℕ) (p : Prog) : Prop :=
   ∃ (k : ℕ) (M : TM k) (slot : Fin m → Fin k) (res : Fin k) (a b : ℕ),
     CompilesUnder M slot res p a b
 
+/-- The empty-node writer: a 4-state machine over `m + 1` work tapes. From the
+start state it steps all heads right off the left marker, then writes `0` and
+`1` on the last (result) work tape, preserving all other tapes by writing back
+what they read. This realizes `Prog.empty`, materializing `[false, true]` (the
+`Data.toBits` of the empty node) on the result tape in three steps. -/
+def emptyNodeTM (m : ℕ) : TM (m + 1) where
+  Q := Fin 4
+  qstart := 0
+  qhalt := 3
+  δ := fun q _ wHeads _ =>
+    ( (if q = 0 then 1 else if q = 1 then 2 else 3),
+      (fun i => if i = Fin.last m
+                then (if q = 1 then Γw.zero else if q = 2 then Γw.one else Γw.blank)
+                else (wHeads i).toΓwId),
+      Γw.blank,
+      Dir3.right,
+      (fun _ => Dir3.right),
+      Dir3.right )
+  δ_right_of_start := by
+    intro q iHead wHeads oHead
+    exact ⟨fun _ => rfl, fun _ _ => rfl, fun _ => rfl⟩
+
+/-- The configuration reached by one step of `emptyNodeTM` from a state `q`. -/
+def emptyStepOut (m : ℕ) (cc : Cfg (m + 1) (Fin 4)) (q : Fin 4) : Cfg (m + 1) (Fin 4) :=
+  { state := if q = 0 then 1 else if q = 1 then 2 else 3
+    input := cc.input.move .right
+    work := fun i => (cc.work i).writeAndMove
+      ((if i = Fin.last m
+        then (if q = 1 then Γw.zero else if q = 2 then Γw.one else Γw.blank)
+        else ((cc.work i).read).toΓwId) : Γ) .right
+    output := cc.output.writeAndMove ((Γw.blank : Γ)) .right }
+
+/-- One step of `emptyNodeTM` from a non-halted state matches `emptyStepOut`. -/
+theorem emptyStep (m : ℕ) (cc : Cfg (m + 1) (emptyNodeTM m).Q) (q : Fin 4)
+    (hq : cc.state = q) (hq3 : q ≠ 3) :
+    (emptyNodeTM m).step cc = some (emptyStepOut m cc q) := by
+  unfold TM.step
+  rw [if_neg (by rw [hq]; exact hq3)]
+  subst hq
+  simp only [emptyNodeTM, emptyStepOut, apply_ite Γw.toΓ]
+
+/-- One rightward write-and-move advances the head by one. -/
+theorem writeAndMove_right_head (t : Tape) (s : Γ) :
+    (t.writeAndMove s Dir3.right).head = t.head + 1 := by
+  simp [Tape.writeAndMove, Tape.move, Tape.write_head]
+
+/-- A rightward write-and-move leaves the same cells as writing in place. -/
+theorem writeAndMove_right_cells (t : Tape) (s : Γ) :
+    (t.writeAndMove s Dir3.right).cells = (t.write s).cells := by
+  simp [Tape.writeAndMove, Tape.move_cells]
+
+/-- Writing at a nonzero head updates exactly that cell. -/
+theorem write_cells_of_ne_zero {t : Tape} (h : t.head ≠ 0) (s : Γ) :
+    (t.write s).cells = Function.update t.cells t.head s := by
+  simp [Tape.write, h]
+
 /-- **Compiler part — `var i`** (statement only). A variable read compiles: the
 machine copies the argument tape `slot i` (when `i < m`, else the empty node) to
 the result tape. Matches `ProgSem.var`, whose time and space are the size of the
@@ -318,11 +383,98 @@ read value. -/
 theorem compiled_var (m i : ℕ) : Compiled m (Prog.var i) := by
   sorry
 
-/-- **Compiler part — `empty`** (statement only). The empty constructor compiles
-to a machine that writes the empty node `Data.empty.toBits = [false, true]` on
-the result tape. Matches `ProgSem.empty` (time and space `2`). -/
+/-- **Compiler part — `empty`.** The empty constructor compiles to `emptyNodeTM`,
+a 4-state machine that writes the empty node `Data.empty.toBits = [false, true]`
+on the result tape in three steps (all heads advance rightward each step).
+Matches `ProgSem.empty` (time and space `2`): the run has length `3 ≤ 2·2 + 2`
+and every reachable work head stays within `2·2 + 2`. -/
 theorem compiled_empty (m : ℕ) : Compiled m Prog.empty := by
-  sorry
+  refine ⟨m + 1, emptyNodeTM m, Fin.castSucc, Fin.last m, 2, 2, ?_⟩
+  intro env result t s hsem c hstart
+  cases hsem
+  have hstate : c.state = (0 : Fin 4) := hstart.state
+  have hres0 : c.work (Fin.last m) = Tape.init [] :=
+    hstart.cleanTape (Fin.last m) (fun j => (Fin.castSucc_lt_last j).ne')
+  have hheads0 : ∀ i, (c.work i).head = 0 := by
+    intro i
+    refine Fin.lastCases ?_ ?_ i
+    · rw [hres0]; rfl
+    · intro j; rw [hstart.envTape j]; rfl
+  set c1 := emptyStepOut m c 0 with hc1
+  set c2 := emptyStepOut m c1 1 with hc2
+  set c3 := emptyStepOut m c2 2 with hc3
+  have hs0 : (emptyNodeTM m).step c = some c1 := emptyStep m c 0 hstate (by decide)
+  have hc1state : c1.state = 1 := by rw [hc1]; simp [emptyStepOut]
+  have hs1 : (emptyNodeTM m).step c1 = some c2 := emptyStep m c1 1 hc1state (by decide)
+  have hc2state : c2.state = 2 := by rw [hc2]; simp [emptyStepOut]
+  have hs2 : (emptyNodeTM m).step c2 = some c3 := emptyStep m c2 2 hc2state (by decide)
+  have hc3state : c3.state = 3 := by rw [hc3]; simp [emptyStepOut]
+  have htrace : (emptyNodeTM m).reachesIn 3 c c3 := .step hs0 (.step hs1 (.step hs2 .zero))
+  -- The result tape after three steps.
+  set t0 : Tape := Tape.init [] with ht0
+  set t1 : Tape := t0.writeAndMove ((Γw.blank : Γ)) Dir3.right with ht1
+  set t2 : Tape := t1.writeAndMove ((Γw.zero : Γ)) Dir3.right with ht2
+  set t3 : Tape := t2.writeAndMove ((Γw.one : Γ)) Dir3.right with ht3
+  have rres : c3.work (Fin.last m) = t3 := by
+    simp only [hc3, hc2, hc1, emptyStepOut, ht3, ht2, ht1, ht0, hres0]
+    simp
+  have hh1 : t1.head = 1 := by rw [ht1, writeAndMove_right_head]; rfl
+  have hh2 : t2.head = 2 := by rw [ht2, writeAndMove_right_head, hh1]
+  -- Cells of the result tape.
+  have hc2cells : t2.cells = Function.update t0.cells 1 ((Γw.zero : Γ)) := by
+    rw [ht2, writeAndMove_right_cells, write_cells_of_ne_zero (by rw [hh1]; decide),
+      hh1, ht1, writeAndMove_right_cells, Tape.write, ht0]
+    simp
+  have hc3cells : t3.cells =
+      Function.update (Function.update t0.cells 1 ((Γw.zero : Γ))) 2 ((Γw.one : Γ)) := by
+    rw [ht3, writeAndMove_right_cells, write_cells_of_ne_zero (by rw [hh2]; decide),
+      hh2, hc2cells]
+  have hle : (3 : ℕ) ≤ 2 * 2 + 2 := by omega
+  refine ⟨⟨c3, 3, hle, htrace, ?_, ?_⟩, ?_⟩
+  · -- halted
+    show c3.state = (emptyNodeTM m).qhalt
+    rw [hc3state]; rfl
+  · -- the result tape holds `[false, true]`
+    rw [rres]
+    have htb : (Data.l []).toBits = [false, true] := by simp
+    rw [htb, Tape.HasOutput]
+    refine ⟨?_, ?_⟩
+    · intro i hi
+      rcases i with _ | _ | i
+      · rw [hc3cells, Function.update_of_ne (by decide), Function.update_self]; rfl
+      · rw [hc3cells, Function.update_self]; rfl
+      · simp only [List.length_cons, List.length_nil] at hi; omega
+    · rw [hc3cells, Function.update_of_ne (by decide), Function.update_of_ne (by decide), ht0]
+      simp
+  · -- space bound: every reachable configuration keeps work heads within `2·2 + 2`
+    have head_c1 : ∀ i, (c1.work i).head = (c.work i).head + 1 := by
+      intro i; rw [hc1]; simp only [emptyStepOut]; exact writeAndMove_right_head _ _
+    have head_c2 : ∀ i, (c2.work i).head = (c1.work i).head + 1 := by
+      intro i; rw [hc2]; simp only [emptyStepOut]; exact writeAndMove_right_head _ _
+    have head_c3 : ∀ i, (c3.work i).head = (c2.work i).head + 1 := by
+      intro i; rw [hc3]; simp only [emptyStepOut]; exact writeAndMove_right_head _ _
+    have B0 : ∀ i, (c.work i).head ≤ 2 * 2 + 2 := fun i => by rw [hheads0 i]; omega
+    have B1 : ∀ i, (c1.work i).head ≤ 2 * 2 + 2 := fun i => by
+      rw [head_c1 i, hheads0 i]; omega
+    have B2 : ∀ i, (c2.work i).head ≤ 2 * 2 + 2 := fun i => by
+      rw [head_c2 i, head_c1 i, hheads0 i]; omega
+    have B3 : ∀ i, (c3.work i).head ≤ 2 * 2 + 2 := fun i => by
+      rw [head_c3 i, head_c2 i, head_c1 i, hheads0 i]; omega
+    have hc3h : c3.state = (emptyNodeTM m).qhalt := hc3state
+    have hnone : (emptyNodeTM m).step c3 = none := step_eq_none_iff_halted.mpr hc3h
+    intro c'' hreach i
+    rcases Relation.ReflTransGen.cases_head hreach with rfl | ⟨d1, hd1, hr1⟩
+    · exact B0 i
+    · simp only [TM.stepRel] at hd1; rw [hs0] at hd1; injection hd1 with hd1; subst hd1
+      rcases Relation.ReflTransGen.cases_head hr1 with rfl | ⟨d2, hd2, hr2⟩
+      · exact B1 i
+      · simp only [TM.stepRel] at hd2; rw [hs1] at hd2; injection hd2 with hd2; subst hd2
+        rcases Relation.ReflTransGen.cases_head hr2 with rfl | ⟨d3, hd3, hr3⟩
+        · exact B2 i
+        · simp only [TM.stepRel] at hd3; rw [hs2] at hd3; injection hd3 with hd3; subst hd3
+          rcases Relation.ReflTransGen.cases_head hr3 with rfl | ⟨d4, hd4, _⟩
+          · exact B3 i
+          · simp only [TM.stepRel] at hd4; rw [hnone] at hd4; exact absurd hd4 (by simp)
 
 /-- **Compiler part — `cons h t`** (statement only). Given compiled sub-machines
 for `h` and `t`, `cons` runs them on disjoint tape banks and prepends the head
