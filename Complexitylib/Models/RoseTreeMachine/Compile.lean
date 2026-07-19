@@ -46,6 +46,10 @@ Two structural facts make this achievable for the `InPlace` fragment:
 
 ## Main results
 
+- `RoseTreeMachine.inPlace_compilesToTM` — **the full compiler theorem** (stated
+  now; proof deferred, see *Scope*): every `InPlace` program compiles to a single
+  Turing machine, usable as a subroutine, whose time and space are within a
+  constant factor of the program's RTM bounds.
 - `RoseTreeMachine.dataSize_encode_bool`, `dataSize_encode_listBool` — the binary
   encoding of a `List Bool` has `Data.size` linear in the list length; the
   reusable bridge between input length and RTM cost.
@@ -61,12 +65,18 @@ Two structural facts make this achievable for the `InPlace` fragment:
 ## Scope
 
 This is the first verified slice of the `InPlace`-RTM → TM compiler. The
-inductive constructors (`cons`, `elim`, `ifEq`, `while_`, and the immediately
-consumed `app`/`fn` let-binding) require concrete data-manipulation
+headline `inPlace_compilesToTM` is stated but its proof is currently `sorry`:
+the inductive constructors (`cons`, `elim`, `ifEq`, `while_`, and the
+immediately consumed `app`/`fn` let-binding) require concrete data-manipulation
 subroutines over the `Data` encoding and are tracked as future work in
-`ROADMAP.md` (track N0). The framework here — the `InPlaceRealizedByTM`
-predicate, the encoding-size bridge, and the two proven base cases — fixes the
-interface those constructors will compose through.
+`ROADMAP.md` (track N0). The base cases are already proven (`empty_realized`,
+`identity_time_matches`). The framework here — the `InPlaceRealizedByTM`
+predicate, the encoding-size bridge, the two proven base cases, and the fixed
+statement of `inPlace_compilesToTM` — pins down the interface those constructors
+will compose through.
+
+> Note: `inPlace_compilesToTM` uses `sorry`, so `lake build --wfail` and the
+> axiom guard will report it until the proof is supplied.
 -/
 
 namespace Complexity
@@ -222,6 +232,43 @@ theorem identity_time_matches :
       M.ComputesInTime id T ∧ ∀ n, T n ≤ 4 * n + 2 :=
   ⟨InPlace.var, var0_computesBoolFun_id, 0, copyInputToOutputTM (n := 0),
     (fun m => m + 2), copyInputToOutputTM_computesInTime 0, fun n => by dsimp only; omega⟩
+
+-- ════════════════════════════════════════════════════════════════════════
+-- The full compiler theorem (statement; proof is tracked future work)
+-- ════════════════════════════════════════════════════════════════════════
+
+/-- **The full in-place RTM → Turing-machine compiler theorem.**
+
+For every first-order (`InPlace`) rose tree machine program `p`, there is a
+Turing machine `M` and constants `a`, `b` such that, whenever `p` computes a
+binary function `f` within RTM time `tR` and space `sR`, the *single* machine
+`M` computes the same `f` within Turing-machine time `a·tR + a` and auxiliary
+space `b·sR + b`.
+
+The machine `M` and constants `a`, `b` depend only on `p` (they are produced by
+compiling `p`), not on the function `f` being analyzed; by value-determinism of
+`ProgSem` there is at most one such `f`. The constants capture the "match up to
+a constant factor" convention documented at the top of this file.
+
+Because `M` carries ordinary `ComputesInTime` / `ComputesInSpace` certificates,
+it is directly usable as a **subroutine** — for instance composed with other
+machines through `TM.seqTM` or `TM.compositionTM`.
+
+The proof compiles `p` by structural recursion on the `InPlace` derivation,
+implementing each constructor with `Data`-manipulation subroutines over the
+binary encoding and accumulating the resource bounds compositionally. The base
+cases `empty` and `var 0` are already discharged by `empty_realized` and
+`identity_time_matches`; the inductive constructors (`cons`, `elim`, `ifEq`,
+`while_`, and the immediately consumed `app`/`fn` let-binding) remain to be
+built (tracked in `ROADMAP.md`, track N0). The statement is provided now so the
+subroutine interface is fixed; the proof is deferred. -/
+theorem inPlace_compilesToTM (p : Prog) (hp : InPlace p) :
+    ∃ (k : ℕ) (M : TM k) (a b : ℕ),
+      ∀ (f : List Bool → List Bool) (tR sR : ℕ → ℕ),
+        p.ComputesBoolFunInTimeAndSpace f tR sR →
+        M.ComputesInTime f (fun n => a * tR n + a) ∧
+        M.ComputesInSpace f (fun n => b * sR n + b) := by
+  sorry
 
 end RoseTreeMachine
 
