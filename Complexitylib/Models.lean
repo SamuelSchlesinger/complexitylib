@@ -59,6 +59,7 @@ import Complexitylib.Models.RandomAccessMachine
 import Complexitylib.Models.RoseTreeMachine.Data
 import Complexitylib.Models.RoseTreeMachine.DataEncode
 import Complexitylib.Models.RoseTreeMachine.Prog
+import Complexitylib.Models.RoseTreeMachine.Compile
 
 /-!
 # Computation models
