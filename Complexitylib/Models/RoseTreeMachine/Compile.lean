@@ -37,19 +37,32 @@ Two structural facts make this achievable for the `InPlace` fragment:
 
 ## Main definitions
 
-- `RoseTreeMachine.InPlaceRealizedByTM` — the correspondence predicate: an
-  `InPlace` program computing a binary function `f` is realized by some Turing
-  machine that computes `f` with time and space bounds dominated by the
-  program's RTM bounds.
+- `RoseTreeMachine.CompilesUnder` — the internal, **layout-relative** compiler
+  contract: a machine implements a program for an environment layout that places
+  one program argument per work tape (`slot : Fin m → Fin k`) and deposits the
+  result on a chosen tape, with time/space matched to the RTM `ProgSem` bounds.
+  This is where "multiple inputs map to tapes" lives.
+- `RoseTreeMachine.LoadedStart` — the multi-tape analogue of `Cfg.init`: the
+  starting configuration for `CompilesUnder`, with each argument serialized onto
+  its designated tape via `Data.toBits`.
+- `RoseTreeMachine.InPlaceRealizedByTM` — the (single-input) correspondence
+  predicate: an `InPlace` program computing a binary function `f` is realized by
+  some Turing machine that computes `f` with time and space bounds dominated by
+  the program's RTM bounds.
 - `RoseTreeMachine.emptyOutputTM` — the one-state machine that halts immediately
   with empty output.
 
 ## Main results
 
-- `RoseTreeMachine.inPlace_compilesToTM` — **the full compiler theorem** (stated
-  now; proof deferred, see *Scope*): every `InPlace` program compiles to a single
-  Turing machine, usable as a subroutine, whose time and space are within a
-  constant factor of the program's RTM bounds.
+- `RoseTreeMachine.inPlace_compilesToTM` — **the full public compiler theorem**
+  (stated now; proof deferred, see *Scope*): every `InPlace` program compiles to
+  a single Turing machine, usable as a subroutine, whose time and space are
+  within a constant factor of the program's RTM bounds.
+- `RoseTreeMachine.compilesUnder_of_inPlace` — **the internal recursion**
+  (statement only): every `InPlace` program compiles, for a fixed argument
+  arity, to a machine plus a tape layout satisfying `CompilesUnder`. This is the
+  theorem proved by structural recursion; `inPlace_compilesToTM` is its
+  single-argument wrapper.
 - `RoseTreeMachine.dataSize_encode_bool`, `dataSize_encode_listBool` — the binary
   encoding of a `List Bool` has `Data.size` linear in the list length; the
   reusable bridge between input length and RTM cost.
@@ -65,18 +78,21 @@ Two structural facts make this achievable for the `InPlace` fragment:
 ## Scope
 
 This is the first verified slice of the `InPlace`-RTM → TM compiler. The
-headline `inPlace_compilesToTM` is stated but its proof is currently `sorry`:
+headline `inPlace_compilesToTM` and the internal recursion
+`compilesUnder_of_inPlace` are stated but their proofs are currently `sorry`:
 the inductive constructors (`cons`, `elim`, `ifEq`, `while_`, and the
 immediately consumed `app`/`fn` let-binding) require concrete data-manipulation
 subroutines over the `Data` encoding and are tracked as future work in
 `ROADMAP.md` (track N0). The base cases are already proven (`empty_realized`,
-`identity_time_matches`). The framework here — the `InPlaceRealizedByTM`
-predicate, the encoding-size bridge, the two proven base cases, and the fixed
-statement of `inPlace_compilesToTM` — pins down the interface those constructors
-will compose through.
+`identity_time_matches`). The framework here — the `CompilesUnder` /
+`LoadedStart` layout-relative interface, the `InPlaceRealizedByTM` predicate,
+the `Data.toBits` tape serialization, the encoding-size bridge, the two proven
+base cases, and the fixed statements of both theorems — pins down the interface
+those constructors will compose through.
 
-> Note: `inPlace_compilesToTM` uses `sorry`, so `lake build --wfail` and the
-> axiom guard will report it until the proof is supplied.
+> Note: `compilesUnder_of_inPlace` and `inPlace_compilesToTM` use `sorry`, so
+> `lake build --wfail` and the axiom guard will report them until the proofs are
+> supplied.
 -/
 
 namespace Complexity
@@ -237,6 +253,69 @@ theorem identity_time_matches :
 -- The full compiler theorem (statement; proof is tracked future work)
 -- ════════════════════════════════════════════════════════════════════════
 
+/-- A *loaded start configuration* for the internal, layout-relative compiler
+interface. The environment of an in-place program is a list of first-order
+`Data` values `env : Fin m → Data`; a `LoadedStart` places entry `j` on the
+designated work tape `slot j` (as its balanced-parenthesis serialization
+`Data.toBits`) and leaves every other tape blank, with the machine in its start
+state. This is the multi-tape analogue of `Cfg.init`: one work tape per program
+argument, chosen by the caller through `slot`. -/
+structure LoadedStart {k m : ℕ} (M : TM k) (slot : Fin m → Fin k)
+    (env : Fin m → Data) (c : Cfg k M.Q) : Prop where
+  /-- The machine is in its start state. -/
+  state : c.state = M.qstart
+  /-- The dedicated input tape is unused (blank). -/
+  input : c.input = Tape.init []
+  /-- The output tape starts blank. -/
+  output : c.output = Tape.init []
+  /-- Environment entry `j` sits on tape `slot j`, serialized via `Data.toBits`. -/
+  envTape : ∀ j, c.work (slot j) = Tape.init ((env j).toBits.map Γ.ofBool)
+  /-- Every non-environment work tape starts blank. -/
+  cleanTape : ∀ i, (∀ j, i ≠ slot j) → c.work i = Tape.init []
+
+/-- **The internal, layout-relative compiler contract.** `CompilesUnder M slot
+res p a b` says the machine `M` implements program `p` for the environment
+layout `slot` (argument `j` on work tape `slot j`) with the result deposited on
+work tape `res`: for every first-order environment `env` and every RTM
+derivation `ProgSem … p (.data result) t s`, starting from any `LoadedStart`,
+the machine halts within `a·t + a` steps having written `result.toBits` on tape
+`res`, and no reachable configuration moves any work head past cell `b·s + b`.
+
+Because `Data.toBits` has length `Data.size` (`Data.toBits_length`), the tape
+space charged here is exactly the RTM `Data.size` measure, so the space bound
+`b·s + b` matches the RTM space `s` up to the constant `b`. This is the
+predicate the structural recursion over `InPlace` is proved against; the public
+`inPlace_compilesToTM` is the single-argument (`m = 1`) specialization wrapped
+with a fixed input-tape ↦ argument-tape prologue and a result-tape ↦ output-tape
+epilogue. -/
+def CompilesUnder {k m : ℕ} (M : TM k) (slot : Fin m → Fin k) (res : Fin k)
+    (p : Prog) (a b : ℕ) : Prop :=
+  ∀ (env : Fin m → Data) (result : Data) (t s : ℕ),
+    ProgSem (List.ofFn (fun j => Value.data (env j))) p (Value.data result) t s →
+    ∀ c : Cfg k M.Q, LoadedStart M slot env c →
+      (∃ (c' : Cfg k M.Q) (t' : ℕ), t' ≤ a * t + a ∧ M.reachesIn t' c c' ∧
+        M.halted c' ∧ (c'.work res).HasOutput result.toBits) ∧
+      (∀ c'', M.reaches c c'' → ∀ i, (c''.work i).head ≤ b * s + b)
+
+/-- **The internal compiler recursion (statement only; proof deferred).** For a
+fixed argument arity `m`, every first-order (`InPlace`) program compiles to a
+Turing machine together with a tape layout (`slot`, `res`) and constant factors
+`a`, `b` satisfying the layout-relative contract `CompilesUnder`.
+
+This is the workhorse proved by structural recursion on the `InPlace`
+derivation: `var i` reads tape `slot i`; `empty` writes the empty node; `cons`
+runs its two sub-machines on disjoint tape banks and concatenates; `elim`,
+`ifEq`, and `while_` branch/loop over the sub-machines; and the immediately
+consumed `app`/`fn` let-binding allocates one fresh environment tape (extending
+`slot` for the `σ ++ [v]` body). Each constructor composes the sub-machines'
+`CompilesUnder` certificates, accumulating `a`, `b` additively — matching the
+`ProgSem` cost rules up to a constant. The base cases mirror `empty_realized`
+and `identity_time_matches`. -/
+theorem compilesUnder_of_inPlace {m : ℕ} (p : Prog) (hp : InPlace p) :
+    ∃ (k : ℕ) (M : TM k) (slot : Fin m → Fin k) (res : Fin k) (a b : ℕ),
+      CompilesUnder M slot res p a b := by
+  sorry
+
 /-- **The full in-place RTM → Turing-machine compiler theorem.**
 
 For every first-order (`InPlace`) rose tree machine program `p`, there is a
@@ -253,6 +332,16 @@ a constant factor" convention documented at the top of this file.
 Because `M` carries ordinary `ComputesInTime` / `ComputesInSpace` certificates,
 it is directly usable as a **subroutine** — for instance composed with other
 machines through `TM.seqTM` or `TM.compositionTM`.
+
+This public statement keeps the standard single-input / single-output interface
+of the whole subroutine ecosystem; the multi-tape flexibility (one work tape per
+program argument) lives in the internal layout-relative contract
+`CompilesUnder` / `compilesUnder_of_inPlace`. The plan is to derive this theorem
+as the `m = 1` specialization of `compilesUnder_of_inPlace`, wrapping the
+resulting machine with a prologue that unpacks the single input tape onto the
+one environment tape and an epilogue that copies the result tape to the output
+tape. Tape *renumbering* for arbitrary call sites is then handled externally by
+the existing `Lift` / `RetargetCompute` / `Placement` combinators.
 
 The proof compiles `p` by structural recursion on the `InPlace` derivation,
 implementing each constructor with `Data`-manipulation subroutines over the
