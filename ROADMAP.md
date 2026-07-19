@@ -168,7 +168,11 @@ another controller-local proof.
     statements are `sorry` for now. The inductive constructors (`cons`, `elim`,
     `ifEq`, `while_`, and the immediately consumed `app`/`fn` let-binding) need
     concrete `Data`-manipulation subroutines and remain to be composed through
-    the `CompilesUnder` interface.
+    the `CompilesUnder` interface. The compiler recursion is fully decomposed:
+    `compilesUnder_of_inPlace` assembles the per-constructor parts
+    (`compiled_var`/`compiled_empty`/`compiled_cons`/`compiled_elim`/
+    `compiled_ifEq`/`compiled_while`/`compiled_app`) by induction with no
+    `sorry`; the parts themselves are the remaining obligations.
 - [x] Audit proof-engineering mechanics across representative machine and circuit
   constructions: inventory repeated state/tape/wire bookkeeping, run or trace
   stitching, semantic transport, and resource accounting, then prototype the

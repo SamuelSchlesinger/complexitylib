@@ -58,11 +58,15 @@ Two structural facts make this achievable for the `InPlace` fragment:
   (stated now; proof deferred, see *Scope*): every `InPlace` program compiles to
   a single Turing machine, usable as a subroutine, whose time and space are
   within a constant factor of the program's RTM bounds.
-- `RoseTreeMachine.compilesUnder_of_inPlace` — **the internal recursion**
-  (statement only): every `InPlace` program compiles, for a fixed argument
-  arity, to a machine plus a tape layout satisfying `CompilesUnder`. This is the
-  theorem proved by structural recursion; `inPlace_compilesToTM` is its
-  single-argument wrapper.
+- `RoseTreeMachine.compilesUnder_of_inPlace` — **the internal recursion**: every
+  `InPlace` program compiles, for any argument arity, to a machine plus a tape
+  layout satisfying `CompilesUnder`. The recursion *assembly* is complete (no
+  `sorry`); it dispatches each program constructor to its individual part.
+- `RoseTreeMachine.compiled_var`, `compiled_empty`, `compiled_cons`,
+  `compiled_elim`, `compiled_ifEq`, `compiled_while`, `compiled_app` — the
+  **individual compiler parts**, one per `InPlace` constructor, each turning
+  compiled sub-programs into the compiled composite (statements only; these are
+  the remaining `Data`-manipulation obligations).
 - `RoseTreeMachine.dataSize_encode_bool`, `dataSize_encode_listBool` — the binary
   encoding of a `List Bool` has `Data.size` linear in the list length; the
   reusable bridge between input length and RTM cost.
@@ -78,21 +82,22 @@ Two structural facts make this achievable for the `InPlace` fragment:
 ## Scope
 
 This is the first verified slice of the `InPlace`-RTM → TM compiler. The
-headline `inPlace_compilesToTM` and the internal recursion
-`compilesUnder_of_inPlace` are stated but their proofs are currently `sorry`:
-the inductive constructors (`cons`, `elim`, `ifEq`, `while_`, and the
-immediately consumed `app`/`fn` let-binding) require concrete data-manipulation
-subroutines over the `Data` encoding and are tracked as future work in
-`ROADMAP.md` (track N0). The base cases are already proven (`empty_realized`,
-`identity_time_matches`). The framework here — the `CompilesUnder` /
-`LoadedStart` layout-relative interface, the `InPlaceRealizedByTM` predicate,
-the `Data.toBits` tape serialization, the encoding-size bridge, the two proven
-base cases, and the fixed statements of both theorems — pins down the interface
-those constructors will compose through.
+compiler recursion is now fully decomposed: `compilesUnder_of_inPlace` assembles
+the per-constructor parts `compiled_var`, `compiled_empty`, `compiled_cons`,
+`compiled_elim`, `compiled_ifEq`, `compiled_while`, and `compiled_app` by
+induction on the `InPlace` derivation — this assembly is complete, with no
+`sorry`. Each individual part is stated but still `sorry`: it needs concrete
+`Data`-manipulation subroutines over the tape serialization, tracked as future
+work in `ROADMAP.md` (track N0). The `List Bool`-level base cases are separately
+proven (`empty_realized`, `identity_time_matches`). The framework here — the
+`CompilesUnder` / `LoadedStart` layout-relative interface, the `Data.toBits`
+tape serialization, the `InPlaceRealizedByTM` predicate, the encoding-size
+bridge, and the fixed part/assembly/wrapper statements — pins down the interface
+those subroutines will compose through.
 
-> Note: `compilesUnder_of_inPlace` and `inPlace_compilesToTM` use `sorry`, so
-> `lake build --wfail` and the axiom guard will report them until the proofs are
-> supplied.
+> Note: the `compiled_*` parts and `inPlace_compilesToTM` use `sorry` (and
+> `compilesUnder_of_inPlace` depends on the parts), so `lake build --wfail` and
+> the axiom guard will report them until the parts are proved.
 -/
 
 namespace Complexity
@@ -297,24 +302,99 @@ def CompilesUnder {k m : ℕ} (M : TM k) (slot : Fin m → Fin k) (res : Fin k)
         M.halted c' ∧ (c'.work res).HasOutput result.toBits) ∧
       (∀ c'', M.reaches c c'' → ∀ i, (c''.work i).head ≤ b * s + b)
 
-/-- **The internal compiler recursion (statement only; proof deferred).** For a
-fixed argument arity `m`, every first-order (`InPlace`) program compiles to a
-Turing machine together with a tape layout (`slot`, `res`) and constant factors
-`a`, `b` satisfying the layout-relative contract `CompilesUnder`.
+/-- `Compiled m p`: the first-order program `p` compiles, for argument arity
+`m`, to *some* Turing machine and tape layout satisfying the layout-relative
+contract `CompilesUnder`. This is the codomain of the compiler recursion
+`compilesUnder_of_inPlace`, and the shared shape of the per-constructor building
+blocks below. -/
+def Compiled (m : ℕ) (p : Prog) : Prop :=
+  ∃ (k : ℕ) (M : TM k) (slot : Fin m → Fin k) (res : Fin k) (a b : ℕ),
+    CompilesUnder M slot res p a b
 
-This is the workhorse proved by structural recursion on the `InPlace`
-derivation: `var i` reads tape `slot i`; `empty` writes the empty node; `cons`
-runs its two sub-machines on disjoint tape banks and concatenates; `elim`,
-`ifEq`, and `while_` branch/loop over the sub-machines; and the immediately
-consumed `app`/`fn` let-binding allocates one fresh environment tape (extending
-`slot` for the `σ ++ [v]` body). Each constructor composes the sub-machines'
-`CompilesUnder` certificates, accumulating `a`, `b` additively — matching the
-`ProgSem` cost rules up to a constant. The base cases mirror `empty_realized`
-and `identity_time_matches`. -/
-theorem compilesUnder_of_inPlace {m : ℕ} (p : Prog) (hp : InPlace p) :
-    ∃ (k : ℕ) (M : TM k) (slot : Fin m → Fin k) (res : Fin k) (a b : ℕ),
-      CompilesUnder M slot res p a b := by
+/-- **Compiler part — `var i`** (statement only). A variable read compiles: the
+machine copies the argument tape `slot i` (when `i < m`, else the empty node) to
+the result tape. Matches `ProgSem.var`, whose time and space are the size of the
+read value. -/
+theorem compiled_var (m i : ℕ) : Compiled m (Prog.var i) := by
   sorry
+
+/-- **Compiler part — `empty`** (statement only). The empty constructor compiles
+to a machine that writes the empty node `Data.empty.toBits = [false, true]` on
+the result tape. Matches `ProgSem.empty` (time and space `2`). -/
+theorem compiled_empty (m : ℕ) : Compiled m Prog.empty := by
+  sorry
+
+/-- **Compiler part — `cons h t`** (statement only). Given compiled sub-machines
+for `h` and `t`, `cons` runs them on disjoint tape banks and prepends the head
+value to the tail list on the result tape. Matches `ProgSem.cons`
+(time/space add). -/
+theorem compiled_cons {m : ℕ} {h t : Prog}
+    (ih_h : Compiled m h) (ih_t : Compiled m t) : Compiled m (Prog.cons h t) := by
+  sorry
+
+/-- **Compiler part — `elim v emp (fn (fn body))`** (statement only). Given
+compiled sub-machines for the scrutinee `v` and the empty branch `emp` at arity
+`m`, and for the cons branch `body` at arity `m + 2` (the two fresh tapes hold
+the destructured head and tail), `elim` branches on whether `v` is the empty
+node. Matches `ProgSem.elim_nil` / `ProgSem.elim_cons`. -/
+theorem compiled_elim {m : ℕ} {v emp body : Prog}
+    (ih_v : Compiled m v) (ih_emp : Compiled m emp) (ih_body : Compiled (m + 2) body) :
+    Compiled m (Prog.elim v emp (.fn (.fn body))) := by
+  sorry
+
+/-- **Compiler part — `ifEq x y then_ else_`** (statement only). Given compiled
+sub-machines for all four arguments at arity `m`, `ifEq` compares the values of
+`x` and `y` and runs the matching branch. Matches `ProgSem.ifEq_then` /
+`ProgSem.ifEq_else`. -/
+theorem compiled_ifEq {m : ℕ} {x y then_ else_ : Prog}
+    (ih_x : Compiled m x) (ih_y : Compiled m y)
+    (ih_then : Compiled m then_) (ih_else : Compiled m else_) :
+    Compiled m (Prog.ifEq x y then_ else_) := by
+  sorry
+
+/-- **Compiler part — `while_ init (fn body)`** (statement only). Given a
+compiled sub-machine for `init` at arity `m` and for the loop `body` at arity
+`m + 1` (the fresh tape holds the accumulator), `while_` iterates the body on the
+accumulator tape until its head is empty. Matches `ProgSem.while_` /
+`WhileSem` (which already uses `max` for space, exactly the loop's reuse). -/
+theorem compiled_while {m : ℕ} {init body : Prog}
+    (ih_init : Compiled m init) (ih_body : Compiled (m + 1) body) :
+    Compiled m (Prog.while_ init (.fn body)) := by
+  sorry
+
+/-- **Compiler part — `app (fn body) arg`** (the in-place `let`; statement only).
+Given a compiled sub-machine for `arg` at arity `m` and for `body` at arity
+`m + 1`, `app` evaluates `arg` onto a fresh environment tape and then runs
+`body`. Matches `ProgSem.app` composed with `AppSem.mk` (running `body` in
+`σ ++ [v]`). Nested uses give multi-argument `let`-chains, hence arbitrary
+arities. -/
+theorem compiled_app {m : ℕ} {body arg : Prog}
+    (ih_body : Compiled (m + 1) body) (ih_arg : Compiled m arg) :
+    Compiled m (Prog.app (.fn body) arg) := by
+  sorry
+
+/-- **The internal compiler recursion.** For every argument arity `m`, every
+first-order (`InPlace`) program compiles to a Turing machine together with a tape
+layout satisfying the layout-relative contract `CompilesUnder`.
+
+The recursion structure is fully assembled here: induction on the `InPlace`
+derivation dispatches each program constructor to its compiler part
+(`compiled_var`, `compiled_empty`, `compiled_cons`, `compiled_elim`,
+`compiled_ifEq`, `compiled_while`, `compiled_app`), threading the argument arity
+so that `elim`/`while_`/`app` compile their body at the extended arity (`m + 2`,
+`m + 1`, `m + 1`) that the `σ`-extension of the operational semantics uses. Only
+the individual parts carry `sorry`; the assembly below is complete. -/
+theorem compilesUnder_of_inPlace {m : ℕ} (p : Prog) (hp : InPlace p) :
+    Compiled m p := by
+  induction hp generalizing m with
+  | var => exact compiled_var m _
+  | empty => exact compiled_empty m
+  | cons _ _ ih_h ih_t => exact compiled_cons ih_h ih_t
+  | elim _ _ _ ih_v ih_emp ih_body => exact compiled_elim ih_v ih_emp ih_body
+  | ifEq _ _ _ _ ih_x ih_y ih_then ih_else =>
+      exact compiled_ifEq ih_x ih_y ih_then ih_else
+  | while_ _ _ ih_init ih_body => exact compiled_while ih_init ih_body
+  | app _ _ ih_body ih_arg => exact compiled_app ih_body ih_arg
 
 /-- **The full in-place RTM → Turing-machine compiler theorem.**
 
