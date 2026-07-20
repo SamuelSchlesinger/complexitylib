@@ -38,6 +38,15 @@ Two structural facts make this achievable for the `InPlace` fragment:
 
 ## Main definitions
 
+- `RoseTreeMachine.SubroutineLayout` — a caller-chosen tape layout (argument
+  tapes `argIdx`, result tape `resIdx`, `sc` scratch tapes `scratchIdx`, all
+  pairwise distinct) for running an in-place program at tape indices of the
+  caller's choosing, in the style of the binary-arithmetic subroutines.
+- `RoseTreeMachine.Prog.RunsAsSubroutine` — the **public subroutine contract**:
+  the compiled machine, run from a `SubroutineLayout.Loaded` start, halts with
+  the result on the result tape, frames every other tape (arguments preserved,
+  scratch restored blank), and matches the RTM time/space bounds up to a
+  constant. This is what `inPlace_compilesToTM` establishes.
 - `RoseTreeMachine.CompilesUnder` — the internal, **layout-relative** compiler
   contract: a machine implements a program for an environment layout that places
   one program argument per work tape (`slot : Fin m → Fin k`) and deposits the
@@ -53,15 +62,13 @@ Two structural facts make this achievable for the `InPlace` fragment:
 
 - `RoseTreeMachine.inPlace_compilesToTM` — **the full public compiler theorem**
   (stated now; proof deferred, see *Scope*): every `InPlace` program of arity
-  `m` compiles to a subroutine that the caller runs at tape indices of their
-  choosing — argument tapes `argIdx : Fin m → Fin k`, a result tape `resIdx`,
-  and `sc` scratch tapes `scratchIdx : Fin sc → Fin k` (the scratch count `sc`
-  is exposed) — in the style of `binaryAddIntoTM`. Inputs live on the chosen
-  argument work tapes (not the dedicated input tape) as their `Data.toBits`
-  serialization; the machine halts within `a·t + a` steps with
-  `HasOutput result.toBits` on the result tape, leaves **every other tape
-  exactly as it started** (arguments preserved, scratch restored blank), and
-  stays within `b·s + b` auxiliary space. Because the encoding is `Data.toBits`,
+  `m` compiles to a reusable tape-indexed subroutine
+  (`Prog.RunsAsSubroutine m`). The caller runs it at tape indices of their
+  choosing (a `SubroutineLayout`); inputs live on the chosen argument work tapes
+  (not the dedicated input tape) as their `Data.toBits` serialization; the
+  machine halts with `HasOutput result.toBits` on the result tape, leaves every
+  other tape exactly as it started, and matches the RTM time/space bounds up to
+  a constant. Because the encoding is `Data.toBits`,
   `Data.toBits_length` makes the space charge coincide exactly with the RTM
   `Data.size` measure.
 - `RoseTreeMachine.compilesUnder_of_inPlace` — **the internal recursion**: every
@@ -459,76 +466,86 @@ theorem compilesUnder_of_inPlace {m : ℕ} (p : Prog) (hp : InPlace p) :
   | while_ _ _ ih_init ih_body => exact compiled_while ih_init ih_body
   | app _ _ ih_body ih_arg => exact compiled_app ih_body ih_arg
 
-/-- **The full in-place RTM → Turing-machine compiler theorem (subroutine
-form).**
+/-- **A caller-chosen tape layout** for running an `m`-argument in-place RTM
+program as a subroutine on a `Fin k` tape bank using `sc` scratch tapes. As with
+the binary-arithmetic subroutines, the caller picks every index; the fields
+record that they are pairwise distinct so the machine can treat them as
+independent registers.
 
-For every first-order (`InPlace`) rose tree machine program `p` of argument
-arity `m`, there is a scratch-tape count `sc` and constants `a`, `b`, all
-depending only on `p`, such that the program can be run *at tape indices the
-caller chooses*, in the style of the binary-arithmetic subroutines
-(`binaryAddIntoTM` etc.):
+- `argIdx j` — the tape variable `j` is read from;
+- `resIdx` — the tape the result is written to;
+- `scratchIdx l` — the `l`-th auxiliary tape the machine may use. -/
+structure SubroutineLayout (m sc k : ℕ) where
+  /-- Variable `j` is read from work tape `argIdx j`. -/
+  argIdx : Fin m → Fin k
+  /-- The result is deposited on work tape `resIdx`. -/
+  resIdx : Fin k
+  /-- The `sc` auxiliary work tapes the machine may use. -/
+  scratchIdx : Fin sc → Fin k
+  /-- Distinct variables use distinct tapes. -/
+  argIdx_inj : Function.Injective argIdx
+  /-- Distinct scratch slots use distinct tapes. -/
+  scratchIdx_inj : Function.Injective scratchIdx
+  /-- No argument tape coincides with the result tape. -/
+  arg_ne_res : ∀ j, argIdx j ≠ resIdx
+  /-- No scratch tape coincides with the result tape. -/
+  scratch_ne_res : ∀ l, scratchIdx l ≠ resIdx
+  /-- Argument tapes and scratch tapes are disjoint. -/
+  arg_ne_scratch : ∀ j l, argIdx j ≠ scratchIdx l
 
-* The caller owns a tape bank `Fin k` and picks the tapes freely:
-  - `argIdx : Fin m → Fin k` — variable `j` is read from work tape `argIdx j`
-    (the "variable index → tape index" map is caller-supplied, not fixed);
-  - `resIdx : Fin k` — the result is deposited here;
-  - `scratchIdx : Fin sc → Fin k` — the `sc` auxiliary tapes the machine needs.
-  These must be pairwise disjoint (`argIdx`/`scratchIdx` injective and their
-  ranges disjoint from each other and from `resIdx`).
-* Inputs live on the chosen work tapes — **not** on the dedicated input tape,
-  which stays blank — each serialized via its balanced-parenthesis form
-  `Data.toBits` (`(` ↦ `false`, `)` ↦ `true`). The result-tape and every
-  scratch tape start blank.
+/-- The starting tape assignment expected by a `SubroutineLayout`: environment
+entry `j` sits on its argument tape as the balanced-parenthesis serialization
+`Data.toBits`, and the result and scratch tapes start blank. Tapes outside the
+layout are unconstrained (and preserved as a frame). -/
+def SubroutineLayout.Loaded {m sc k : ℕ} (L : SubroutineLayout m sc k)
+    (env : Fin m → Data) (work : Fin k → Tape) : Prop :=
+  (∀ j, work (L.argIdx j) = Tape.init ((env j).toBits.map Γ.ofBool)) ∧
+  work L.resIdx = Tape.init [] ∧
+  (∀ l, work (L.scratchIdx l) = Tape.init [])
 
-Then a machine `M : TM k` (built from the chosen indices) satisfies a
-space-aware Hoare contract: whenever `p` maps the environment `env` to `result`
-in RTM time `t` and space `s`
-(`ProgSem (List.ofFn (Value.data ∘ env)) p (.data result) t s`), starting from
-that loaded configuration `M` halts within `a·t + a` steps in a configuration
-where
+/-- **The public subroutine contract.** `p.RunsAsSubroutine m` says the
+`m`-argument in-place program `p` compiles to a reusable Turing-machine
+subroutine: there is a scratch-tape count `sc` and constants `a`, `b`
+(depending only on `p`), so that for *any* caller layout `L : SubroutineLayout
+m sc k` there is a machine `M : TM k` that, whenever `p` maps `env` to `result`
+in RTM time `t` and space `s`, run from a `Loaded` start
 
-* the result tape `resIdx` satisfies `HasOutput result.toBits`, and
-* **every other tape is exactly as it started** (`∀ i ≠ resIdx, work i =
-  work₀ i`): the argument tapes are preserved read-only, the scratch tapes are
-  restored to blank, and any tape the machine never touched is untouched;
+* halts within `a·t + a` steps with `result.toBits` on the result tape
+  (`HasOutput`),
+* leaves **every other tape exactly as it started** (`∀ i ≠ resIdx`): arguments
+  preserved read-only, scratch restored blank, untouched tapes untouched, and
+* keeps all work heads within `b·s + b` auxiliary space.
 
-and every reachable configuration keeps its work heads (and input-head travel)
-within `b·s + b` auxiliary space. Because the physical encoding is `Data.toBits`
-and `Data.toBits_length : d.toBits.length = d.size`, this space charge coincides
-exactly with the RTM `Data.size` measure up to the constant `b`.
+Inputs live on the chosen argument work tapes, *not* the dedicated input tape
+(which stays blank), so the space charge is over `Data.toBits`; by
+`Data.toBits_length` it matches the RTM `Data.size` measure up to `b`. Exposing
+`sc` tells the caller how many auxiliary tapes to reserve, and the
+"only the result tape changes" frame makes `M` freely composable. -/
+def Prog.RunsAsSubroutine (p : Prog) (m : ℕ) : Prop :=
+  ∃ sc a b : ℕ, ∀ {k : ℕ} (L : SubroutineLayout m sc k),
+    ∃ M : TM k, ∀ (env : Fin m → Data) (result : Data) (t s : ℕ)
+      (work₀ : Fin k → Tape),
+      ProgSem (List.ofFn (fun j => Value.data (env j))) p (Value.data result) t s →
+      L.Loaded env work₀ →
+      M.HoareTimeSpace
+        (fun inp work out => inp = Tape.init [] ∧ work = work₀ ∧ out = Tape.init [])
+        (fun inp work out => inp = Tape.init [] ∧ out = Tape.init [] ∧
+          (work L.resIdx).HasOutput result.toBits ∧
+          (∀ i, i ≠ L.resIdx → work i = work₀ i))
+        (a * t + a) 0 (b * s + b)
 
-Exposing `sc` tells the caller how many auxiliary tapes to reserve; the
-"only the result tape changes" frame makes `M` freely reusable as a
-**subroutine**, composable with the other tape-indexed machines. This is the
-public face of the internal layout-relative contract `CompilesUnder` /
-`compilesUnder_of_inPlace`, which serializes environments the same way.
+/-- **The full in-place RTM → Turing-machine compiler theorem.** Every
+first-order (`InPlace`) rose tree machine program compiles, at any argument
+arity `m`, to a reusable tape-indexed Turing-machine subroutine
+(`Prog.RunsAsSubroutine`): the caller runs it at tape indices of their choosing,
+inputs are serialized via `Data.toBits`, and time/space match the RTM `ProgSem`
+bounds up to a constant. See `Prog.RunsAsSubroutine` for the precise contract.
 
 The base case `empty` is discharged by `compiled_empty`; the remaining
 constructors are tracked in `ROADMAP.md`, track N0. The statement is provided
 now so the subroutine interface is fixed; the proof is deferred. -/
-theorem inPlace_compilesToTM (m : ℕ) (p : Prog) (hp : InPlace p) :
-    ∃ (sc a b : ℕ),
-      ∀ (k : ℕ) (argIdx : Fin m → Fin k) (resIdx : Fin k)
-        (scratchIdx : Fin sc → Fin k),
-        Function.Injective argIdx → Function.Injective scratchIdx →
-        (∀ j, argIdx j ≠ resIdx) → (∀ l, scratchIdx l ≠ resIdx) →
-        (∀ j l, argIdx j ≠ scratchIdx l) →
-        ∃ M : TM k,
-          ∀ (env : Fin m → Data) (result : Data) (t s : ℕ)
-            (work₀ : Fin k → Tape),
-            ProgSem (List.ofFn (fun j => Value.data (env j))) p
-              (Value.data result) t s →
-            (∀ j, work₀ (argIdx j) = Tape.init ((env j).toBits.map Γ.ofBool)) →
-            work₀ resIdx = Tape.init [] →
-            (∀ l, work₀ (scratchIdx l) = Tape.init []) →
-            M.HoareTimeSpace
-              (fun inp work out =>
-                inp = Tape.init [] ∧ work = work₀ ∧ out = Tape.init [])
-              (fun inp work out =>
-                inp = Tape.init [] ∧ out = Tape.init [] ∧
-                (work resIdx).HasOutput result.toBits ∧
-                (∀ i, i ≠ resIdx → work i = work₀ i))
-              (a * t + a) 0 (b * s + b) := by
+theorem inPlace_compilesToTM {m : ℕ} (p : Prog) (hp : InPlace p) :
+    p.RunsAsSubroutine m := by
   sorry
 
 end RoseTreeMachine
