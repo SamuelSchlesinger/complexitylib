@@ -45,10 +45,6 @@ Two structural facts make this achievable for the `InPlace` fragment:
 - `RoseTreeMachine.LoadedStart` — the multi-tape analogue of `Cfg.init`: the
   starting configuration for `CompilesUnder`, with each argument serialized onto
   its designated tape via `Data.toBits`.
-- `RoseTreeMachine.InPlaceRealizedByTM` — the (single-input) correspondence
-  predicate: an `InPlace` program computing a binary function `f` is realized by
-  some Turing machine that computes `f` with time and space bounds dominated by
-  the program's RTM bounds.
 - `RoseTreeMachine.emptyOutputTM` — the one-state machine that halts immediately
   with empty output.
 
@@ -56,8 +52,12 @@ Two structural facts make this achievable for the `InPlace` fragment:
 
 - `RoseTreeMachine.inPlace_compilesToTM` — **the full public compiler theorem**
   (stated now; proof deferred, see *Scope*): every `InPlace` program compiles to
-  a single Turing machine, usable as a subroutine, whose time and space are
-  within a constant factor of the program's RTM bounds.
+  a single Turing machine that, on any well-formed input `d.toBits` (the
+  balanced-parenthesis serialization of a first-order value `d`), halts with
+  `result.toBits` on its output tape and stays within the RTM time/space bounds
+  up to a constant factor. Because the physical tape encoding is `Data.toBits`,
+  `Data.toBits_length` makes the space charge coincide exactly with the RTM
+  `Data.size` measure. Ill-formed (non-`d.toBits`) inputs are left unconstrained.
 - `RoseTreeMachine.compilesUnder_of_inPlace` — **the internal recursion**: every
   `InPlace` program compiles, for any argument arity, to a machine plus a tape
   layout satisfying `CompilesUnder`. The recursion *assembly* is complete (no
@@ -65,19 +65,11 @@ Two structural facts make this achievable for the `InPlace` fragment:
 - `RoseTreeMachine.compiled_var`, `compiled_empty`, `compiled_cons`,
   `compiled_elim`, `compiled_ifEq`, `compiled_while`, `compiled_app` — the
   **individual compiler parts**, one per `InPlace` constructor, each turning
-  compiled sub-programs into the compiled composite (statements only; these are
-  the remaining `Data`-manipulation obligations).
-- `RoseTreeMachine.dataSize_encode_bool`, `dataSize_encode_listBool` — the binary
-  encoding of a `List Bool` has `Data.size` linear in the list length; the
-  reusable bridge between input length and RTM cost.
+  compiled sub-programs into the compiled composite. `compiled_empty` is proven;
+  the rest are stated only (the remaining `Data`-manipulation obligations).
 - `RoseTreeMachine.emptyOutputTM_computesInTime` /
   `emptyOutputTM_computesInSpace` — the trivial machine computes `fun _ => []`
   in zero time and zero auxiliary space.
-- `RoseTreeMachine.empty_realized` — the `InPlace` program `empty` is realized by
-  a Turing machine with matching time *and* space.
-- `RoseTreeMachine.identity_time_matches` — the `InPlace` program `var 0` and the
-  input-to-output copy machine both compute the identity, with the machine's
-  exact time bound `n + 2` dominated by the program's RTM bound `4·n + 2`.
 
 ## Scope
 
@@ -86,14 +78,13 @@ compiler recursion is now fully decomposed: `compilesUnder_of_inPlace` assembles
 the per-constructor parts `compiled_var`, `compiled_empty`, `compiled_cons`,
 `compiled_elim`, `compiled_ifEq`, `compiled_while`, and `compiled_app` by
 induction on the `InPlace` derivation — this assembly is complete, with no
-`sorry`. Each individual part is stated but still `sorry`: it needs concrete
-`Data`-manipulation subroutines over the tape serialization, tracked as future
-work in `ROADMAP.md` (track N0). The `List Bool`-level base cases are separately
-proven (`empty_realized`, `identity_time_matches`). The framework here — the
-`CompilesUnder` / `LoadedStart` layout-relative interface, the `Data.toBits`
-tape serialization, the `InPlaceRealizedByTM` predicate, the encoding-size
-bridge, and the fixed part/assembly/wrapper statements — pins down the interface
-those subroutines will compose through.
+`sorry`. Of the individual parts, `compiled_empty` is proven; each remaining
+part is stated but still `sorry`: it needs concrete `Data`-manipulation
+subroutines over the tape serialization, tracked as future work in `ROADMAP.md`
+(track N0). The framework here — the `CompilesUnder` / `LoadedStart`
+layout-relative interface, the `Data.toBits` tape serialization, and the fixed
+part/assembly/wrapper statements — pins down the interface those subroutines
+will compose through.
 
 > Note: the `compiled_*` parts and `inPlace_compilesToTM` use `sorry` (and
 > `compilesUnder_of_inPlace` depends on the parts), so `lake build --wfail` and
@@ -114,33 +105,6 @@ def Γ.toΓwId : Γ → Γw
 namespace RoseTreeMachine
 
 open Complexity.TM
-
--- ════════════════════════════════════════════════════════════════════════
--- Encoding-size bridge: `Data.size` of a binary encoding is linear
--- ════════════════════════════════════════════════════════════════════════
-
-/-- Each `Bool` encodes to a `Data` value of size at most `4` (`false ↦ 2`,
-`true ↦ 4`). -/
-lemma dataSize_encode_bool (b : Bool) : Data.size (DataEncode.encode b) ≤ 4 := by
-  cases b <;> simp [DataEncode.encode]
-
-/-- The binary encoding of a `List Bool` has `Data.size` bounded linearly by the
-list length: `Data.size (encode x) ≤ 4·|x| + 2`. This is the bridge between a
-Turing machine's input length `n` and the RTM cost of manipulating `encode x`. -/
-lemma dataSize_encode_listBool (x : List Bool) :
-    Data.size (DataEncode.encode x) ≤ 4 * x.length + 2 := by
-  induction x with
-  | nil => simp [DataEncode.encode]
-  | cons b bs ih =>
-    have hrw : DataEncode.encode (b :: bs)
-        = Data.l (DataEncode.encode b :: bs.map DataEncode.encode) := by
-      simp [DataEncode.encode]
-    have hbs : Data.l (bs.map DataEncode.encode) = DataEncode.encode bs := by
-      simp [DataEncode.encode]
-    rw [hrw, Data.cons_size, hbs]
-    have hb := dataSize_encode_bool b
-    simp only [List.length_cons]
-    omega
 
 -- ════════════════════════════════════════════════════════════════════════
 -- A halted configuration only reaches itself
@@ -204,65 +168,6 @@ theorem emptyOutputTM_computesInSpace (n : ℕ) :
     exact ⟨(emptyOutputTM n).initCfg x, Relation.ReflTransGen.refl, rfl, hasOutput_init_nil⟩
 
 -- ════════════════════════════════════════════════════════════════════════
--- The correspondence predicate and the proven base cases
--- ════════════════════════════════════════════════════════════════════════
-
-/-- An `InPlace` rose tree machine program `p` computing the binary function `f`
-is *realized by a Turing machine* when some machine computes the same `f` with
-time and space bounds dominated by `p`'s RTM `ProgSem` bounds. This is the
-compiler's per-program correctness-and-resource contract. -/
-def InPlaceRealizedByTM (p : Prog) (f : List Bool → List Bool) : Prop :=
-  InPlace p ∧
-  ∃ tR sR : ℕ → ℕ, p.ComputesBoolFunInTimeAndSpace f tR sR ∧
-    ∃ (k : ℕ) (M : TM k) (tT sT : ℕ → ℕ),
-      M.ComputesInTime f tT ∧ M.ComputesInSpace f sT ∧
-      (∀ n, tT n ≤ tR n) ∧ (∀ n, sT n ≤ sR n)
-
-/-- **The `empty` program is realized by a Turing machine with matching time and
-space.** The `InPlace` program `empty` computes the constant empty-string
-function in RTM time and space `2`, and `emptyOutputTM` computes the same
-function in `0` time and `0` auxiliary space, both dominated by `2`. -/
-theorem empty_realized : InPlaceRealizedByTM Prog.empty (fun _ => []) := by
-  refine ⟨InPlace.empty, (fun _ => 2), (fun _ => 2), ?_, 0, emptyOutputTM 0,
-    (fun _ => 0), (fun _ => 0), emptyOutputTM_computesInTime 0,
-    emptyOutputTM_computesInSpace 0, fun _ => by dsimp only; omega,
-    fun _ => by dsimp only; omega⟩
-  intro x
-  refine ⟨2, le_refl _, 2, le_refl _, ?_⟩
-  show ProgSem [Value.data (DataEncode.encode x)] Prog.empty
-    (Value.data (DataEncode.encode ([] : List Bool))) 2 2
-  rw [DataEncode_list_nil]
-  exact ProgSem.empty
-
-/-- The `InPlace` program `var 0` computes the identity binary function in RTM
-time and space `4·n + 2` (the `Data.size` of the encoded input, bounded via
-`dataSize_encode_listBool`). -/
-theorem var0_computesBoolFun_id :
-    (Prog.var 0).ComputesBoolFunInTimeAndSpace id
-      (fun n => 4 * n + 2) (fun n => 4 * n + 2) := by
-  intro x
-  refine ⟨Data.size (DataEncode.encode x), dataSize_encode_listBool x,
-    Data.size (DataEncode.encode x), dataSize_encode_listBool x, ?_⟩
-  show ProgSem [Value.data (DataEncode.encode x)] (Prog.var 0)
-    (Value.data (DataEncode.encode (id x))) _ _
-  have h : ProgSem [Value.data (DataEncode.encode x)] (Prog.var 0) _ _ _ := ProgSem.var
-  simpa using h
-
-/-- **The `var 0` program and the copy machine both compute the identity, with
-matching (linear) time.** The `InPlace` program `var 0` computes the identity in
-RTM time `4·n + 2`, and `copyInputToOutputTM` computes the identity in the exact
-time bound `n + 2 ≤ 4·n + 2`. (The copy machine also uses only its fixed,
-here empty, work-tape bank; a formal `ComputesInSpace` certificate is tracked
-with the remaining constructors.) -/
-theorem identity_time_matches :
-    InPlace (Prog.var 0) ∧
-    (Prog.var 0).ComputesBoolFunInTimeAndSpace id (fun n => 4 * n + 2)
-      (fun n => 4 * n + 2) ∧
-    ∃ (k : ℕ) (M : TM k) (T : ℕ → ℕ),
-      M.ComputesInTime id T ∧ ∀ n, T n ≤ 4 * n + 2 :=
-  ⟨InPlace.var, var0_computesBoolFun_id, 0, copyInputToOutputTM (n := 0),
-    (fun m => m + 2), copyInputToOutputTM_computesInTime 0, fun n => by dsimp only; omega⟩
-
 -- ════════════════════════════════════════════════════════════════════════
 -- The full compiler theorem (statement; proof is tracked future work)
 -- ════════════════════════════════════════════════════════════════════════
@@ -551,44 +456,49 @@ theorem compilesUnder_of_inPlace {m : ℕ} (p : Prog) (hp : InPlace p) :
 /-- **The full in-place RTM → Turing-machine compiler theorem.**
 
 For every first-order (`InPlace`) rose tree machine program `p`, there is a
-Turing machine `M` and constants `a`, `b` such that, whenever `p` computes a
-binary function `f` within RTM time `tR` and space `sR`, the *single* machine
-`M` computes the same `f` within Turing-machine time `a·tR + a` and auxiliary
-space `b·sR + b`.
+Turing machine `M` and constants `a`, `b` such that, on any *well-formed* input
+— the balanced-parenthesis serialization `d.toBits` of a first-order value `d`
+(`(` ↦ `false`, `)` ↦ `true`) — `M` reproduces the program's behaviour: whenever
+`p` maps `d` to `result` in RTM time `t` and space `s`
+(`ProgSem [.data d] p (.data result) t s`, i.e. `p.ComputesInTimeAndSpace`), the
+*single* machine `M` halts on input `d.toBits` within `a·t + a` steps with
+`result.toBits` on its output tape, and every reachable configuration keeps its
+work heads (and input-head travel) within `b·s + b`.
+
+Inputs that are *not* of the form `d.toBits` — the ill-formed bit strings — are
+left unconstrained: the statement quantifies over the source values `d`
+directly, so it speaks only about well-formed inputs. This uses `Data.toBits` as
+the physical tape encoding, so `Data.toBits_length : d.toBits.length = d.size`
+makes the Turing-machine space charge coincide exactly with the RTM `Data.size`
+space measure (no constant blow-up), and the statement lines up directly with
+the internal `LoadedStart` / `CompilesUnder` layout, which already serializes
+values via `Data.toBits`.
 
 The machine `M` and constants `a`, `b` depend only on `p` (they are produced by
-compiling `p`), not on the function `f` being analyzed; by value-determinism of
-`ProgSem` there is at most one such `f`. The constants capture the "match up to
-a constant factor" convention documented at the top of this file.
+compiling `p`). `M.IsTransducer` records the one-way output discipline required
+of a space-bounded transducer, so `M` is directly usable as a **subroutine** —
+composed with other machines through `TM.seqTM` or `TM.compositionTM`. The
+multi-tape flexibility (one work tape per program argument) lives in the
+internal layout-relative contract `CompilesUnder` / `compilesUnder_of_inPlace`.
+The plan is to derive this theorem as the `m = 1` specialization of
+`compilesUnder_of_inPlace`, wrapping the resulting machine with a prologue that
+unpacks the single input tape onto the one environment tape and an epilogue that
+copies the result tape to the output tape. Tape *renumbering* for arbitrary call
+sites is then handled externally by the existing `Lift` / `RetargetCompute` /
+`Placement` combinators.
 
-Because `M` carries ordinary `ComputesInTime` / `ComputesInSpace` certificates,
-it is directly usable as a **subroutine** — for instance composed with other
-machines through `TM.seqTM` or `TM.compositionTM`.
-
-This public statement keeps the standard single-input / single-output interface
-of the whole subroutine ecosystem; the multi-tape flexibility (one work tape per
-program argument) lives in the internal layout-relative contract
-`CompilesUnder` / `compilesUnder_of_inPlace`. The plan is to derive this theorem
-as the `m = 1` specialization of `compilesUnder_of_inPlace`, wrapping the
-resulting machine with a prologue that unpacks the single input tape onto the
-one environment tape and an epilogue that copies the result tape to the output
-tape. Tape *renumbering* for arbitrary call sites is then handled externally by
-the existing `Lift` / `RetargetCompute` / `Placement` combinators.
-
-The proof compiles `p` by structural recursion on the `InPlace` derivation,
-implementing each constructor with `Data`-manipulation subroutines over the
-binary encoding and accumulating the resource bounds compositionally. The base
-cases `empty` and `var 0` are already discharged by `empty_realized` and
-`identity_time_matches`; the inductive constructors (`cons`, `elim`, `ifEq`,
-`while_`, and the immediately consumed `app`/`fn` let-binding) remain to be
-built (tracked in `ROADMAP.md`, track N0). The statement is provided now so the
-subroutine interface is fixed; the proof is deferred. -/
+The base case `empty` is discharged by `compiled_empty`; the remaining
+constructors are tracked in `ROADMAP.md`, track N0. The statement is provided
+now so the subroutine interface is fixed; the proof is deferred. -/
 theorem inPlace_compilesToTM (p : Prog) (hp : InPlace p) :
-    ∃ (k : ℕ) (M : TM k) (a b : ℕ),
-      ∀ (f : List Bool → List Bool) (tR sR : ℕ → ℕ),
-        p.ComputesBoolFunInTimeAndSpace f tR sR →
-        M.ComputesInTime f (fun n => a * tR n + a) ∧
-        M.ComputesInSpace f (fun n => b * sR n + b) := by
+    ∃ (k : ℕ) (M : TM k) (a b : ℕ), M.IsTransducer ∧
+      ∀ (d result : Data) (t s : ℕ),
+        p.ComputesInTimeAndSpace d result t s →
+          (∃ (c' : Cfg k M.Q) (t' : ℕ), t' ≤ a * t + a ∧
+            M.reachesIn t' (M.initCfg d.toBits) c' ∧ M.halted c' ∧
+            c'.output.HasOutput result.toBits) ∧
+          (∀ c', M.reaches (M.initCfg d.toBits) c' →
+            c'.WithinAuxSpace d.toBits.length (b * s + b)) := by
   sorry
 
 end RoseTreeMachine
