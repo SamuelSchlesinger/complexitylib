@@ -38,10 +38,12 @@ Two structural facts make this achievable for the `InPlace` fragment:
 
 ## Main definitions
 
-- `RoseTreeMachine.SubroutineLayout` — a caller-chosen tape layout (argument
-  tapes `argIdx`, result tape `resIdx`, `sc` scratch tapes `scratchIdx`, all
-  pairwise distinct) for running an in-place program at tape indices of the
-  caller's choosing, in the style of the binary-arithmetic subroutines.
+- `RoseTreeMachine.SubroutineLayout` — a caller-chosen tape layout: a single
+  injective `place` map assigning each slot (an argument, the result, or a
+  scratch tape) a distinct physical tape in the caller's bank, for running an
+  in-place program at tape indices of the caller's choosing, in the style of the
+  binary-arithmetic subroutines. Role accessors `argIdx`/`resIdx`/`scratchIdx`
+  and their pairwise-distinctness follow from injectivity of `place`.
 - `RoseTreeMachine.Prog.RunsAsSubroutine` — the **public subroutine contract**:
   the compiled machine, run from a `SubroutineLayout.Loaded` start, halts with
   the result on the result tape, frames every other tape (arguments preserved,
@@ -466,42 +468,65 @@ theorem compilesUnder_of_inPlace {m : ℕ} (p : Prog) (hp : InPlace p) :
   | while_ _ _ ih_init ih_body => exact compiled_while ih_init ih_body
   | app _ _ ih_body ih_arg => exact compiled_app ih_body ih_arg
 
+/-- The tapes a subroutine occupies, indexed uniformly by role: `m` argument
+slots, one result slot, and `sc` scratch slots. A `SubroutineLayout` maps this
+slot space injectively into the caller's tape bank. -/
+abbrev SubroutineSlot (m sc : ℕ) := Fin m ⊕ Unit ⊕ Fin sc
+
 /-- **A caller-chosen tape layout** for running an `m`-argument in-place RTM
 program as a subroutine on a `Fin k` tape bank using `sc` scratch tapes. As with
-the binary-arithmetic subroutines, the caller picks every index; the fields
-record that they are pairwise distinct so the machine can treat them as
-independent registers.
-
-- `argIdx j` — the tape variable `j` is read from;
-- `resIdx` — the tape the result is written to;
-- `scratchIdx l` — the `l`-th auxiliary tape the machine may use. -/
+the binary-arithmetic subroutines, the caller picks the tapes; a single
+injective `place` assigns each slot (argument, result, or scratch) a distinct
+physical tape, so the machine can treat them as independent registers. -/
 structure SubroutineLayout (m sc k : ℕ) where
-  /-- Variable `j` is read from work tape `argIdx j`. -/
-  argIdx : Fin m → Fin k
-  /-- The result is deposited on work tape `resIdx`. -/
-  resIdx : Fin k
-  /-- The `sc` auxiliary work tapes the machine may use. -/
-  scratchIdx : Fin sc → Fin k
-  /-- Distinct variables use distinct tapes. -/
-  argIdx_inj : Function.Injective argIdx
-  /-- Distinct scratch slots use distinct tapes. -/
-  scratchIdx_inj : Function.Injective scratchIdx
-  /-- No argument tape coincides with the result tape. -/
-  arg_ne_res : ∀ j, argIdx j ≠ resIdx
-  /-- No scratch tape coincides with the result tape. -/
-  scratch_ne_res : ∀ l, scratchIdx l ≠ resIdx
-  /-- Argument tapes and scratch tapes are disjoint. -/
-  arg_ne_scratch : ∀ j l, argIdx j ≠ scratchIdx l
+  /-- The physical tape each slot occupies. -/
+  place : SubroutineSlot m sc → Fin k
+  /-- Distinct slots occupy distinct tapes. -/
+  place_inj : Function.Injective place
+
+namespace SubroutineLayout
+
+variable {m sc k : ℕ} (L : SubroutineLayout m sc k)
+
+/-- The tape variable `j` is read from. -/
+def argIdx (j : Fin m) : Fin k := L.place (.inl j)
+
+/-- The tape the result is written to. -/
+def resIdx : Fin k := L.place (.inr (.inl ()))
+
+/-- The `l`-th auxiliary tape the machine may use. -/
+def scratchIdx (l : Fin sc) : Fin k := L.place (.inr (.inr l))
+
+/-- Distinct variables use distinct tapes. -/
+theorem argIdx_inj : Function.Injective L.argIdx := fun _ _ h =>
+  Sum.inl_injective (L.place_inj h)
+
+/-- Distinct scratch slots use distinct tapes. -/
+theorem scratchIdx_inj : Function.Injective L.scratchIdx := fun _ _ h =>
+  Sum.inr_injective (Sum.inr_injective (L.place_inj h))
+
+/-- No argument tape coincides with the result tape. -/
+theorem arg_ne_res (j : Fin m) : L.argIdx j ≠ L.resIdx := fun h => by
+  simpa using L.place_inj h
+
+/-- No scratch tape coincides with the result tape. -/
+theorem scratch_ne_res (l : Fin sc) : L.scratchIdx l ≠ L.resIdx := fun h => by
+  simpa using L.place_inj h
+
+/-- Argument tapes and scratch tapes are disjoint. -/
+theorem arg_ne_scratch (j : Fin m) (l : Fin sc) : L.argIdx j ≠ L.scratchIdx l :=
+  fun h => by simpa using L.place_inj h
 
 /-- The starting tape assignment expected by a `SubroutineLayout`: environment
 entry `j` sits on its argument tape as the balanced-parenthesis serialization
 `Data.toBits`, and the result and scratch tapes start blank. Tapes outside the
 layout are unconstrained (and preserved as a frame). -/
-def SubroutineLayout.Loaded {m sc k : ℕ} (L : SubroutineLayout m sc k)
-    (env : Fin m → Data) (work : Fin k → Tape) : Prop :=
+def Loaded (env : Fin m → Data) (work : Fin k → Tape) : Prop :=
   (∀ j, work (L.argIdx j) = Tape.init ((env j).toBits.map Γ.ofBool)) ∧
   work L.resIdx = Tape.init [] ∧
   (∀ l, work (L.scratchIdx l) = Tape.init [])
+
+end SubroutineLayout
 
 /-- **The public subroutine contract.** `p.RunsAsSubroutine m` says the
 `m`-argument in-place program `p` compiles to a reusable Turing-machine
