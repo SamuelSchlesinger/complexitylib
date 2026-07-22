@@ -108,13 +108,20 @@ entry `j` sits on its argument tape as the balanced-parenthesis serialization
 is **parked** (head at cell 1, just past the `▷` marker): a parked head is
 fixed by `idleDir`, so tapes the machine does not touch stay literally
 unchanged, and the convention matches the binary-arithmetic subroutines
-(e.g. `clearWorkTM`). Tapes outside the layout are unconstrained (and preserved
-as a frame). -/
+(e.g. `clearWorkTM`). Tapes outside the layout carry no prescribed contents, but
+they too must be **parked at head 1** (`Parked ∧ head ≤ 1`): parkedness makes the
+machine leave them literally unchanged (a head resting past a stray `▷` could be
+mutated across an idle step), and the head-1 bound keeps them inside the `b·s+b`
+auxiliary-space budget from the very first configuration. Every layout tape
+already sits at head 1, so this constrains only the caller's spare tapes. This
+makes the "every non-result tape is preserved" frame in `RunsAsSubroutine` hold
+for the whole bank, not just the layout tapes. -/
 def Loaded (env : Fin m → Data) (work : Fin k → Tape) : Prop :=
   (∀ j, work (L.argIdx j) =
       (Tape.init ((env j).toBits.map Γ.ofBool)).move Dir3.right) ∧
   work L.resIdx = (Tape.init []).move Dir3.right ∧
-  (∀ l, work (L.scratchIdx l) = (Tape.init []).move Dir3.right)
+  (∀ l, work (L.scratchIdx l) = (Tape.init []).move Dir3.right) ∧
+  (∀ i, Parked (work i) ∧ (work i).head ≤ 1)
 
 end SubroutineLayout
 

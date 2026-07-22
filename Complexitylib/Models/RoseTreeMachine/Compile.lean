@@ -31,12 +31,12 @@ lives in `Complexitylib.Models.RoseTreeMachine.Compile.Internal`.
 
 This is the first verified slice of the `InPlace`-RTM → TM compiler. The
 compiler recursion `Compile.Internal.compilesUnder_of_inPlace` is fully
-decomposed into per-constructor parts; of those, `compiled_empty` is proven and
-each remaining part is stated but still `sorry` (it needs concrete
-`Data`-manipulation subroutines over the tape serialization, tracked in
-`ROADMAP.md`, track N0). The final theorem below is therefore also `sorry` for
-now, so `lake build --wfail` and the axiom guard will report it until the parts
-are proved.
+decomposed into per-constructor parts and `inPlace_compilesToTM` is wired to it;
+of those parts, `compiled_empty` is proven and each remaining part is stated but
+still `sorry` (it needs concrete `Data`-manipulation subroutines over the tape
+serialization, tracked in `ROADMAP.md`, track N0). The final theorem below
+therefore transitively depends on `sorry`, so `lake build --wfail` and the axiom
+guard will report it until the parts are proved.
 -/
 
 namespace Complexity
@@ -54,8 +54,8 @@ The base case `empty` is discharged by `Compile.Internal.compiled_empty`; the
 remaining constructors are tracked in `ROADMAP.md`, track N0. The statement is
 provided now so the subroutine interface is fixed; the proof is deferred. -/
 theorem inPlace_compilesToTM {m : ℕ} (p : Prog) (hp : InPlace p) :
-    p.RunsAsSubroutine m := by
-  sorry
+    p.RunsAsSubroutine m :=
+  compilesUnder_of_inPlace p hp
 
 end RoseTreeMachine
 
