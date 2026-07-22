@@ -5,6 +5,7 @@ Authors: Christian Reitwiessner
 -/
 import Complexitylib.Models.RoseTreeMachine.Prog
 import Complexitylib.Models.TuringMachine.Hoare.Space.Defs
+import Complexitylib.Models.TuringMachine.Registers
 
 /-!
 # Compiling in-place rose tree machine programs to Turing machines — contract
@@ -103,12 +104,17 @@ theorem arg_ne_scratch (j : Fin m) (l : Fin sc) : L.argIdx j ≠ L.scratchIdx l 
 
 /-- The starting tape assignment expected by a `SubroutineLayout`: environment
 entry `j` sits on its argument tape as the balanced-parenthesis serialization
-`Data.toBits`, and the result and scratch tapes start blank. Tapes outside the
-layout are unconstrained (and preserved as a frame). -/
+`Data.toBits`, and the result and scratch tapes start blank. Every layout tape
+is **parked** (head at cell 1, just past the `▷` marker): a parked head is
+fixed by `idleDir`, so tapes the machine does not touch stay literally
+unchanged, and the convention matches the binary-arithmetic subroutines
+(e.g. `clearWorkTM`). Tapes outside the layout are unconstrained (and preserved
+as a frame). -/
 def Loaded (env : Fin m → Data) (work : Fin k → Tape) : Prop :=
-  (∀ j, work (L.argIdx j) = Tape.init ((env j).toBits.map Γ.ofBool)) ∧
-  work L.resIdx = Tape.init [] ∧
-  (∀ l, work (L.scratchIdx l) = Tape.init [])
+  (∀ j, work (L.argIdx j) =
+      (Tape.init ((env j).toBits.map Γ.ofBool)).move Dir3.right) ∧
+  work L.resIdx = (Tape.init []).move Dir3.right ∧
+  (∀ l, work (L.scratchIdx l) = (Tape.init []).move Dir3.right)
 
 end SubroutineLayout
 
@@ -125,20 +131,26 @@ in RTM time `t` and space `s`, run from a `Loaded` start
   preserved read-only, scratch restored blank, untouched tapes untouched, and
 * keeps all work heads within `b·s + b` auxiliary space.
 
-Inputs live on the chosen argument work tapes, *not* the dedicated input tape
-(which stays blank), so the space charge is over `Data.toBits`; by
-`Data.toBits_length` it matches the RTM `Data.size` measure up to `b`. Exposing
-`sc` tells the caller how many auxiliary tapes to reserve, and the
-"only the result tape changes" frame makes `M` freely composable. -/
+The dedicated input and output tapes are not used by the compiler: the caller
+supplies them **parked** (`Parked inp₀`, `Parked out₀`) so the machine leaves
+them literally unchanged (`inp = inp₀ ∧ out = out₀`), and the input head starts
+at cell 1 (`inp₀.head ≤ 1`) so it fits the `0 + space + 1` input allowance.
+
+Inputs live on the chosen argument work tapes, *not* the dedicated input tape,
+so the space charge is over `Data.toBits`; by `Data.toBits_length` it matches
+the RTM `Data.size` measure up to `b`. Exposing `sc` tells the caller how many
+auxiliary tapes to reserve, and the "only the result tape changes" frame makes
+`M` freely composable. -/
 def Prog.RunsAsSubroutine (p : Prog) (m : ℕ) : Prop :=
   ∃ sc a b : ℕ, ∀ {k : ℕ} (L : SubroutineLayout m sc k),
     ∃ M : TM k, ∀ (env : Fin m → Data) (result : Data) (t s : ℕ)
-      (work₀ : Fin k → Tape),
+      (work₀ : Fin k → Tape) (inp₀ out₀ : Tape),
       ProgSem (List.ofFn (fun j => Value.data (env j))) p (Value.data result) t s →
       L.Loaded env work₀ →
+      Parked inp₀ → inp₀.head ≤ 1 → Parked out₀ →
       M.HoareTimeSpace
-        (fun inp work out => inp = Tape.init [] ∧ work = work₀ ∧ out = Tape.init [])
-        (fun inp work out => inp = Tape.init [] ∧ out = Tape.init [] ∧
+        (fun inp work out => inp = inp₀ ∧ work = work₀ ∧ out = out₀)
+        (fun inp work out => inp = inp₀ ∧ out = out₀ ∧
           (work L.resIdx).HasOutput result.toBits ∧
           (∀ i, i ≠ L.resIdx → work i = work₀ i))
         (a * t + a) 0 (b * s + b)
