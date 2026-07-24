@@ -66,6 +66,82 @@ theorem branchWorkSymbolTM_reachesIn_different_frame
   branchWorkSymbolTM_reachesIn_different_frame_internal idx symbol onEqual
     onDifferent inp work out hdifferent hinp hwork hout hreach hhalt
 
+/-- A direct symbol dispatch followed by the equal branch preserves its
+time-only Hoare contract. -/
+theorem branchWorkSymbolTM_hoareTime_equal
+    (idx : Fin n) (symbol : Γ) (onEqual onDifferent : TM n)
+    {pre post : TapePred n} {time : ℕ}
+    (hequal : ∀ inp work out, pre inp work out →
+      (work idx).read = symbol)
+    (hinput : ∀ inp work out, pre inp work out →
+      inp.read ≠ Γ.start)
+    (hwork : ∀ inp work out, pre inp work out →
+      ∀ i, (work i).read ≠ Γ.start)
+    (houtput : ∀ inp work out, pre inp work out →
+      out.read ≠ Γ.start)
+    (hbranch : onEqual.HoareTime pre post time) :
+    (branchWorkSymbolTM idx symbol onEqual onDifferent).HoareTime
+      pre post (time + 1) :=
+  branchWorkSymbolTM_hoareTime_equal_internal idx symbol onEqual onDifferent
+    hequal hinput hwork houtput hbranch
+
+/-- A direct symbol dispatch followed by the different branch preserves its
+time-only Hoare contract. -/
+theorem branchWorkSymbolTM_hoareTime_different
+    (idx : Fin n) (symbol : Γ) (onEqual onDifferent : TM n)
+    {pre post : TapePred n} {time : ℕ}
+    (hdifferent : ∀ inp work out, pre inp work out →
+      (work idx).read ≠ symbol)
+    (hinput : ∀ inp work out, pre inp work out →
+      inp.read ≠ Γ.start)
+    (hwork : ∀ inp work out, pre inp work out →
+      ∀ i, (work i).read ≠ Γ.start)
+    (houtput : ∀ inp work out, pre inp work out →
+      out.read ≠ Γ.start)
+    (hbranch : onDifferent.HoareTime pre post time) :
+    (branchWorkSymbolTM idx symbol onEqual onDifferent).HoareTime
+      pre post (time + 1) :=
+  branchWorkSymbolTM_hoareTime_different_internal idx symbol onEqual
+    onDifferent hdifferent hinput hwork houtput hbranch
+
+/-- A direct symbol dispatch followed by the equal branch preserves the
+branch's all-prefix space bound. -/
+theorem branchWorkSymbolTM_hoareTimeSpace_equal
+    (idx : Fin n) (symbol : Γ) (onEqual onDifferent : TM n)
+    {pre post : TapePred n} {time inputLength space : ℕ}
+    (hequal : ∀ inp work out, pre inp work out →
+      (work idx).read = symbol)
+    (hinput : ∀ inp work out, pre inp work out →
+      inp.read ≠ Γ.start)
+    (hwork : ∀ inp work out, pre inp work out →
+      ∀ i, (work i).read ≠ Γ.start)
+    (houtput : ∀ inp work out, pre inp work out →
+      out.read ≠ Γ.start)
+    (hbranch : onEqual.HoareTimeSpace pre post time inputLength space) :
+    (branchWorkSymbolTM idx symbol onEqual onDifferent).HoareTimeSpace
+      pre post (time + 1) inputLength space :=
+  branchWorkSymbolTM_hoareTimeSpace_equal_internal idx symbol onEqual
+    onDifferent hequal hinput hwork houtput hbranch
+
+/-- A direct symbol dispatch followed by the different branch preserves the
+branch's all-prefix space bound. -/
+theorem branchWorkSymbolTM_hoareTimeSpace_different
+    (idx : Fin n) (symbol : Γ) (onEqual onDifferent : TM n)
+    {pre post : TapePred n} {time inputLength space : ℕ}
+    (hdifferent : ∀ inp work out, pre inp work out →
+      (work idx).read ≠ symbol)
+    (hinput : ∀ inp work out, pre inp work out →
+      inp.read ≠ Γ.start)
+    (hwork : ∀ inp work out, pre inp work out →
+      ∀ i, (work i).read ≠ Γ.start)
+    (houtput : ∀ inp work out, pre inp work out →
+      out.read ≠ Γ.start)
+    (hbranch : onDifferent.HoareTimeSpace pre post time inputLength space) :
+    (branchWorkSymbolTM idx symbol onEqual onDifferent).HoareTimeSpace
+      pre post (time + 1) inputLength space :=
+  branchWorkSymbolTM_hoareTimeSpace_different_internal idx symbol onEqual
+    onDifferent hdifferent hinput hwork houtput hbranch
+
 /-- A direct work-symbol branch is a transducer when both selected branches
 are transducers. -/
 theorem IsTransducer.branchWorkSymbolTM

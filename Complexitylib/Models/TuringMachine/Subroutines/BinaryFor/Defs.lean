@@ -275,6 +275,71 @@ structure BinaryForLoopSpaceSpec {n : ℕ} {body : TM n}
       (spec.iterationStartCfg value) cfg →
     cfg.WithinAuxSpace inputLength spaceBound
 
+/-- A bounded execution certificate for one reachable segment of a canonical
+binary count-up loop.
+
+Unlike `BinaryForLoopSpec`, iterations may finish before their advertised
+bound and obligations below `startValue` are not requested. This is the
+appropriate interface for bodies whose actual runtime is selected from a
+bounded Hoare witness. -/
+structure BinaryForSegmentSpec {n : ℕ} (body : TM n)
+    (counterIdx limitIdx : Fin n) (bodyTime : ℕ → ℕ)
+    (startValue limitValue : ℕ) where
+  /-- The counter and preserved-limit tapes are distinct. -/
+  counter_ne_limit : counterIdx ≠ limitIdx
+  /-- Canonical scanner configuration at each reachable counter value. -/
+  scanCfg : ℕ → Cfg n (binaryForTM body counterIdx limitIdx).Q
+  /-- Configuration at the composite body-plus-successor entry. -/
+  iterationStartCfg : ℕ → Cfg n (binaryForTM body counterIdx limitIdx).Q
+  /-- Configuration after the composite body-plus-successor iteration. -/
+  iterationDoneCfg : ℕ → Cfg n (binaryForTM body counterIdx limitIdx).Q
+  /-- Final halted driver configuration. -/
+  doneCfg : Cfg n (binaryForTM body counterIdx limitIdx).Q
+  /-- A nonterminal comparison enters the composite iteration exactly. -/
+  testRun : ∀ value, startValue ≤ value → value < limitValue →
+    (binaryForTM body counterIdx limitIdx).reachesIn
+      (binaryForCompareTime limitValue) (scanCfg value)
+      (iterationStartCfg value)
+  /-- Selected actual runtime of each reachable composite iteration. -/
+  iterationTime : ℕ → ℕ
+  /-- The selected runtime stays within the advertised iteration bound. -/
+  iterationTime_le : ∀ value, startValue ≤ value → value < limitValue →
+    iterationTime value ≤ binaryForIterationTime bodyTime value
+  /-- The composite iteration runs for its selected actual runtime. -/
+  iterationRun : ∀ value, startValue ≤ value → value < limitValue →
+    (binaryForTM body counterIdx limitIdx).reachesIn (iterationTime value)
+      (iterationStartCfg value) (iterationDoneCfg value)
+  /-- The preserving loopback seam starts the next comparison. -/
+  loopbackStep : ∀ value, startValue ≤ value → value < limitValue →
+    (binaryForTM body counterIdx limitIdx).step (iterationDoneCfg value) =
+      some (scanCfg (value + 1))
+  /-- Equality at the limit completes the final comparison exactly. -/
+  doneRun :
+    (binaryForTM body counterIdx limitIdx).reachesIn
+      (binaryForCompareTime limitValue) (scanCfg limitValue) doneCfg
+  /-- The supplied final driver configuration is genuinely halted. -/
+  doneHalted : (binaryForTM body counterIdx limitIdx).halted doneCfg
+
+/-- All-prefix auxiliary-space obligations for a bounded reachable loop
+segment. -/
+structure BinaryForSegmentSpaceSpec {n : ℕ} {body : TM n}
+    {counterIdx limitIdx : Fin n} {bodyTime : ℕ → ℕ}
+    {startValue limitValue : ℕ}
+    (spec : BinaryForSegmentSpec body counterIdx limitIdx bodyTime
+      startValue limitValue) (inputLength spaceBound : ℕ) where
+  /-- Every reachable comparison prefix stays inside the shared budget. -/
+  testPrefixWithin : ∀ value time cfg, startValue ≤ value →
+    value ≤ limitValue → time ≤ binaryForCompareTime limitValue →
+    (binaryForTM body counterIdx limitIdx).reachesIn time
+      (spec.scanCfg value) cfg →
+    cfg.WithinAuxSpace inputLength spaceBound
+  /-- Every reachable composite-iteration prefix stays inside the budget. -/
+  iterationPrefixWithin : ∀ value time cfg, startValue ≤ value →
+    value < limitValue → time ≤ spec.iterationTime value →
+    (binaryForTM body counterIdx limitIdx).reachesIn time
+      (spec.iterationStartCfg value) cfg →
+    cfg.WithinAuxSpace inputLength spaceBound
+
 end TM
 
 end Complexity

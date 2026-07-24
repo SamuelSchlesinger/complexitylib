@@ -4,6 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
 import Complexitylib.Models.TuringMachine.Combinators
+import Complexitylib.Models.TuringMachine.Hoare.Space.Defs
 
 /-!
 # Work-tape placement
@@ -123,6 +124,20 @@ def placeWorkCfg (tm : TM n) (pre post : ℕ)
     if h : placeWorkInMiddle pre n i then c.work (placeWorkCoord pre n i h)
     else extras i
   output := c.output
+
+/-- Lift a tape predicate into a stable placed-work frame. The source input and
+output remain physical input and output tapes; only the source work vector is
+embedded into the middle block. -/
+def placeWorkPred (tm : TM n) (pre post : ℕ)
+    (extras : Fin (pre + n + post) → Tape) (predicate : TapePred n) :
+    TapePred (pre + n + post) :=
+  fun inp work out =>
+    ∃ sourceWork, predicate inp sourceWork out ∧
+      work = (placeWorkCfg tm pre post extras
+        { state := tm.qstart,
+          input := inp,
+          work := sourceWork,
+          output := out }).work
 
 /-- Apply the placement machine's idle work-tape action to an extra-tape frame.
 Only values outside the middle block are observable through `placeWorkCfg`. -/

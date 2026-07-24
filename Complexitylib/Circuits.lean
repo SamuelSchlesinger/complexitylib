@@ -8,6 +8,10 @@ import Complexitylib.Circuits.BitString
 import Complexitylib.Circuits.DecisionTree
 import Complexitylib.Circuits.Formula
 import Complexitylib.Circuits.FormulaEncoding
+import Complexitylib.Circuits.FormulaEncoding.Navigation
+import Complexitylib.Circuits.FormulaEncoding.ForwardNavigation
+import Complexitylib.Circuits.FormulaEncoding.BitNavigation
+import Complexitylib.Circuits.FormulaEncoding.ProbeNavigation
 import Complexitylib.Circuits.CircuitFormula
 import Complexitylib.Circuits.Restriction
 import Complexitylib.Circuits.BranchingProgram
@@ -17,7 +21,16 @@ import Complexitylib.Circuits.BarringtonBridge
 import Complexitylib.Circuits.BarringtonRepr
 import Complexitylib.Circuits.BarringtonLength
 import Complexitylib.Circuits.BarringtonCompiler
+import Complexitylib.Circuits.BarringtonStreaming
+import Complexitylib.Circuits.BarringtonSlots
+import Complexitylib.Circuits.BarringtonSlotQuery
+import Complexitylib.Circuits.BarringtonTokenQuery
+import Complexitylib.Circuits.BarringtonBitQuery
+import Complexitylib.Circuits.BarringtonBitSerializer
+import Complexitylib.Circuits.BarringtonProbeQuery
+import Complexitylib.Circuits.BarringtonProbeSerializer
 import Complexitylib.Circuits.BranchingProgramEncoding
+import Complexitylib.Circuits.BranchingProgramEncoding.Machine
 import Complexitylib.Circuits.BarringtonCodeGenerator
 import Complexitylib.Circuits.BarringtonFamily
 import Complexitylib.Circuits.BarringtonConverse
@@ -101,6 +114,17 @@ convention.
   format needed by the remaining log-space uniformity proof.
   `barringtonCompileCode_spec` then connects canonical formula bits to canonical
   program bits, exact semantics, and a serialized output-size bound.
+  `barringtonCompileStream_instruction?` gives the corresponding exact
+  random-access instruction view without constructing the complete program,
+  while `barringtonCompileSlot?_eq_instruction?` follows one branch of the
+  fixed `4^D` address schedule and returns exactly its selected instruction,
+  while `barringtonCompileTokensSlot?_eq_instruction?` carries that query over
+  canonical postfix tokens using stack-free child-span recovery, and
+  `barringtonCompileBitsSlot?_eq_instruction?` performs the same query directly
+  over canonical encoded formula bits. `barringtonCompileProbeSlot?_eq_instruction?`
+  further replaces the complete bit list by a position-indexed source oracle,
+  with explicit finite decoding fuel. `barringtonCompileBitsCode_eq` then proves
+  the fixed-address two-pass serializer emits the exact canonical code.
   `BoolFunFamily.onTotalAssignments_mem_Width5BP` applies the theorem to the
   total-assignment view of an actual typed `NC1` circuit family.
 
@@ -116,6 +140,8 @@ Public modules (definitions a reviewer should read):
   fan-in-two circuit DAGs to Boolean formulas, with a factor-two depth bound
 * `Complexitylib.Circuits.FormulaEncoding` — canonical iterative postfix formula
   codec with exact round trips and code length
+* `Complexitylib.Circuits.FormulaEncoding.ProbeNavigation` — exact token,
+  subtree, and child-span navigation through a position-indexed bit oracle
 * `Complexitylib.Circuits.CircuitFormula.Family` — family-level unfolding and
   the typed-`NC1` bridge to width-`5` branching programs
 * `Complexitylib.Circuits.Family` — circuit families, list semantics, pointwise
@@ -124,10 +150,26 @@ Public modules (definitions a reviewer should read):
   evaluation and the nonuniform Barrington equivalence
 * `Complexitylib.Circuits.BarringtonCompiler` — executable finite `S₅` search
   and formula-to-program compilation with the `4 ^ depth` bound
+* `Complexitylib.Circuits.BarringtonStreaming` — random-access compilation by
+  instruction index without materializing the complete recursive program
+* `Complexitylib.Circuits.BarringtonSlots` — exact placement of compiled
+  instructions in a depth-bounded fixed-address schedule
+* `Complexitylib.Circuits.BarringtonSlotQuery` — structural first/last occupied
+  addresses and exact direct lookup in that fixed schedule
+* `Complexitylib.Circuits.BarringtonTokenQuery` — the same exact fixed-slot
+  query over canonical postfix token streams, without reconstructing a formula
+* `Complexitylib.Circuits.BarringtonBitQuery` — the fixed-slot query directly
+  over canonical encoded formula bits, with bit-level child-span recovery
+* `Complexitylib.Circuits.BarringtonBitSerializer` — exact two-pass canonical
+  serialization by scanning the fixed encoded-bit address schedule
+* `Complexitylib.Circuits.BarringtonProbeQuery` — exact fixed-address queries
+  through restartable position-indexed formula-code probes
 * `Complexitylib.Circuits.BranchingProgramEncoding` — canonical seven-bit
   permutation ranks, instruction/program codecs, and exact size bounds
+* `Complexitylib.Circuits.BranchingProgramEncoding.Machine` — framed,
+  one-way machine emission of canonical instruction codes from binary registers
 * `Complexitylib.Circuits.BarringtonCodeGenerator` — the total bitstring-level
-  formula-code-to-program-code target for the remaining `FL` implementation
+  formula-code-to-program-code reference for promised log-depth `FL` generation
 * `Complexitylib.Circuits.Encoding` — canonical proof-free encoding, validation,
   and iterative evaluation of fan-in-two AND/OR circuits
 * `Complexitylib.Circuits.Encoding.Family` — tagged encoding and evaluation at

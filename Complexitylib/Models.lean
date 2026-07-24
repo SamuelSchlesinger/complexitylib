@@ -7,6 +7,7 @@ import Complexitylib.Models.TuringMachine
 import Complexitylib.Models.TuringMachine.Trace
 import Complexitylib.Models.TuringMachine.SingleTape
 import Complexitylib.Models.TuringMachine.Combinators
+import Complexitylib.Models.TuringMachine.Combinators.Started
 import Complexitylib.Models.TuringMachine.Combinators.ForBinaryWork
 import Complexitylib.Models.TuringMachine.Combinators.ForInput
 import Complexitylib.Models.TuringMachine.Combinators.ForWorkOnes
@@ -37,6 +38,8 @@ import Complexitylib.Models.TuringMachine.Subroutines.BinaryFor
 import Complexitylib.Models.TuringMachine.Subroutines.BinaryLength
 import Complexitylib.Models.TuringMachine.Subroutines.BinaryPred
 import Complexitylib.Models.TuringMachine.Subroutines.BinarySucc
+import Complexitylib.Models.TuringMachine.Subroutines.BlankWorkPrefix
+import Complexitylib.Models.TuringMachine.Subroutines.BlankWorkPrefixMany
 import Complexitylib.Models.TuringMachine.Subroutines.ClearWork
 import Complexitylib.Models.TuringMachine.Subroutines.CopyOutput
 import Complexitylib.Models.TuringMachine.Subroutines.CopyWorkOutput
@@ -46,9 +49,25 @@ import Complexitylib.Models.TuringMachine.Subroutines.PairSplit
 import Complexitylib.Models.TuringMachine.Subroutines.ScanRight
 import Complexitylib.Models.TuringMachine.Subroutines.ResetBinary
 import Complexitylib.Models.TuringMachine.Subroutines.ResetBinaryMany
+import Complexitylib.Models.TuringMachine.Subroutines.RewindInputSpace
 import Complexitylib.Models.TuringMachine.Subroutines.UnaryLength
 import Complexitylib.Models.TuringMachine.OutputBounds
+import Complexitylib.Models.TuringMachine.OutputCursor
+import Complexitylib.Models.TuringMachine.OutputProbe
+import Complexitylib.Models.TuringMachine.OutputProbeConsume
+import Complexitylib.Models.TuringMachine.OutputProbeCountOnes
+import Complexitylib.Models.TuringMachine.OutputProbeDecodeNat
+import Complexitylib.Models.TuringMachine.OutputProbeDecodeTag
+import Complexitylib.Models.TuringMachine.OutputProbeDecodeToken
+import Complexitylib.Models.TuringMachine.OutputProbeDispatch
+import Complexitylib.Models.TuringMachine.OutputProbeLatch
+import Complexitylib.Models.TuringMachine.OutputProbeIndexed
+import Complexitylib.Models.TuringMachine.OutputProbeScan
+import Complexitylib.Models.TuringMachine.OutputProbeCleanup
+import Complexitylib.Models.TuringMachine.OutputProbeFrame
+import Complexitylib.Models.TuringMachine.RetargetOutputFrame
 import Complexitylib.Models.TuringMachine.SpaceTime
+import Complexitylib.Models.TuringMachine.SpaceTime.WorkSupport
 import Complexitylib.Models.TuringMachine.Placement
 import Complexitylib.Models.TuringMachine.Composition
 import Complexitylib.Models.TuringMachine.Composition.PairWithInput
@@ -80,7 +99,7 @@ reusable read-only-input and binary-work-tape loops, binary count-up loops,
 binary successor,
 binary predecessor and length, value-iterating and width-linear canonical binary
 addition, fixed-constant addition, copying, multiply-add, and fixed-polynomial
-evaluation, framed work-tape clearing,
+evaluation, framed work-tape clearing and binary-bounded sparse-prefix reset,
 unary length, and pair-emission subroutines,
 computed-value/input fanout, finite space-to-time bounds, determinism results,
 the universal machine, and the logarithmic-cost random access machine

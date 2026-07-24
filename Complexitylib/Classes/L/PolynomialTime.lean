@@ -18,6 +18,10 @@ bound. Consequently `L ⊆ P` and `FL ⊆ FP`.
   polynomial reduced-configuration bound
 - `L_subset_P` — deterministic log-space languages are polynomial-time
 - `FL_subset_FP` — deterministic log-space functions are polynomial-time
+- `mem_FL_polynomial_output_length` — their output length is polynomially
+  bounded
+- `mem_FL_output_bound_log_width` — an index into that bound fits in
+  logarithmic space
 -/
 
 namespace Complexity
@@ -47,5 +51,26 @@ theorem L_subset_P : L ⊆ P :=
 computable in polynomial time.** -/
 theorem FL_subset_FP : FL ⊆ FP :=
   FL_subset_FP_internal
+
+/-- Every deterministic log-space transducer function has output length
+bounded pointwise by a polynomial in its input length. This is the key size
+fact used by recomputation-based log-space composition: an output position
+needs only logarithmically many bits. -/
+theorem mem_FL_polynomial_output_length
+    {f : List Bool → List Bool} (hf : f ∈ FL) :
+    ∃ p : Polynomial ℕ, ∀ input,
+      (f input).length ≤ p.eval input.length :=
+  mem_FL_polynomial_output_length_internal hf
+
+/-- Every `FL` function admits a polynomial output bound whose binary width is
+logarithmic. Thus a recomputation-based consumer can keep an output position
+in `O(log n)` auxiliary space even though the output itself may be
+polynomially long. -/
+theorem mem_FL_output_bound_log_width
+    {f : List Bool → List Bool} (hf : f ∈ FL) :
+    ∃ p : Polynomial ℕ,
+      (∀ input, (f input).length ≤ p.eval input.length) ∧
+      (fun n => (p.eval n).size) =O (fun n => Nat.log 2 n) :=
+  mem_FL_output_bound_log_width_internal hf
 
 end Complexity

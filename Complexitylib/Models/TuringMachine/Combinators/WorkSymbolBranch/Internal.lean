@@ -5,6 +5,7 @@ Authors: Samuel Schlesinger
 -/
 import Complexitylib.Models.TuringMachine.Combinators.Internal.Generic
 import Complexitylib.Models.TuringMachine.Combinators.WorkSymbolBranch.Defs
+import Complexitylib.Models.TuringMachine.Hoare.Space
 
 /-!
 # Direct work-symbol branch combinator — proof internals
@@ -224,6 +225,214 @@ theorem branchWorkSymbolTM_reachesIn_different_frame_internal
       hreach), ?_, rfl, rfl, rfl⟩
   exact (workSymbolDifferentWrap_halted_iff idx symbol onEqual onDifferent
     c').2 hhalt
+
+theorem branchWorkSymbolTM_hoareTime_equal_internal
+    (idx : Fin n) (symbol : Γ) (onEqual onDifferent : TM n)
+    {pre post : TapePred n} {time : ℕ}
+    (hequal : ∀ inp work out, pre inp work out →
+      (work idx).read = symbol)
+    (hinput : ∀ inp work out, pre inp work out →
+      inp.read ≠ Γ.start)
+    (hwork : ∀ inp work out, pre inp work out →
+      ∀ i, (work i).read ≠ Γ.start)
+    (houtput : ∀ inp work out, pre inp work out →
+      out.read ≠ Γ.start)
+    (hbranch : onEqual.HoareTime pre post time) :
+    (branchWorkSymbolTM idx symbol onEqual onDifferent).HoareTime
+      pre post (time + 1) := by
+  intro inp work out hpre
+  obtain ⟨done, branchSteps, hsteps, hreach, hhalt, hpost⟩ :=
+    hbranch inp work out hpre
+  obtain ⟨wrapped, hwrapped, hwrappedHalt, hwrappedInput,
+      hwrappedWork, hwrappedOutput⟩ :=
+    branchWorkSymbolTM_reachesIn_equal_frame_internal idx symbol onEqual
+      onDifferent inp work out (hequal inp work out hpre)
+      (hinput inp work out hpre) (hwork inp work out hpre)
+      (houtput inp work out hpre) hreach hhalt
+  refine ⟨wrapped, branchSteps + 1, by omega, hwrapped, hwrappedHalt, ?_⟩
+  simpa only [hwrappedInput, hwrappedWork, hwrappedOutput] using hpost
+
+theorem branchWorkSymbolTM_hoareTime_different_internal
+    (idx : Fin n) (symbol : Γ) (onEqual onDifferent : TM n)
+    {pre post : TapePred n} {time : ℕ}
+    (hdifferent : ∀ inp work out, pre inp work out →
+      (work idx).read ≠ symbol)
+    (hinput : ∀ inp work out, pre inp work out →
+      inp.read ≠ Γ.start)
+    (hwork : ∀ inp work out, pre inp work out →
+      ∀ i, (work i).read ≠ Γ.start)
+    (houtput : ∀ inp work out, pre inp work out →
+      out.read ≠ Γ.start)
+    (hbranch : onDifferent.HoareTime pre post time) :
+    (branchWorkSymbolTM idx symbol onEqual onDifferent).HoareTime
+      pre post (time + 1) := by
+  intro inp work out hpre
+  obtain ⟨done, branchSteps, hsteps, hreach, hhalt, hpost⟩ :=
+    hbranch inp work out hpre
+  obtain ⟨wrapped, hwrapped, hwrappedHalt, hwrappedInput,
+      hwrappedWork, hwrappedOutput⟩ :=
+    branchWorkSymbolTM_reachesIn_different_frame_internal idx symbol onEqual
+      onDifferent inp work out (hdifferent inp work out hpre)
+      (hinput inp work out hpre) (hwork inp work out hpre)
+      (houtput inp work out hpre) hreach hhalt
+  refine ⟨wrapped, branchSteps + 1, by omega, hwrapped, hwrappedHalt, ?_⟩
+  simpa only [hwrappedInput, hwrappedWork, hwrappedOutput] using hpost
+
+theorem branchWorkSymbolTM_hoareTimeSpace_equal_internal
+    (idx : Fin n) (symbol : Γ) (onEqual onDifferent : TM n)
+    {pre post : TapePred n} {time inputLength space : ℕ}
+    (hequal : ∀ inp work out, pre inp work out →
+      (work idx).read = symbol)
+    (hinput : ∀ inp work out, pre inp work out →
+      inp.read ≠ Γ.start)
+    (hwork : ∀ inp work out, pre inp work out →
+      ∀ i, (work i).read ≠ Γ.start)
+    (houtput : ∀ inp work out, pre inp work out →
+      out.read ≠ Γ.start)
+    (hbranch : onEqual.HoareTimeSpace pre post time inputLength space) :
+    (branchWorkSymbolTM idx symbol onEqual onDifferent).HoareTimeSpace
+      pre post (time + 1) inputLength space := by
+  constructor
+  · intro inp work out hpre
+    obtain ⟨done, branchSteps, hsteps, hreach, hhalt, hpost⟩ :=
+      hbranch.1 inp work out hpre
+    obtain ⟨wrapped, hwrapped, hwrappedHalt, hwrappedInput,
+        hwrappedWork, hwrappedOutput⟩ :=
+      branchWorkSymbolTM_reachesIn_equal_frame_internal idx symbol onEqual
+        onDifferent inp work out (hequal inp work out hpre)
+        (hinput inp work out hpre) (hwork inp work out hpre)
+        (houtput inp work out hpre) hreach hhalt
+    refine ⟨wrapped, branchSteps + 1, by omega, hwrapped,
+      hwrappedHalt, ?_⟩
+    simpa only [hwrappedInput, hwrappedWork, hwrappedOutput] using hpost
+  · intro inp work out hpre current hcurrent
+    obtain ⟨currentSteps, hcurrentRun⟩ :=
+      (branchWorkSymbolTM idx symbol onEqual onDifferent).reaches_to_reachesIn
+        hcurrent
+    obtain ⟨done, branchSteps, _hsteps, hbranchRun, hbranchHalt, _hpost⟩ :=
+      hbranch.1 inp work out hpre
+    obtain ⟨wrapped, hfullRun, hfullHalt, _hwrappedInput,
+        _hwrappedWork, _hwrappedOutput⟩ :=
+      branchWorkSymbolTM_reachesIn_equal_frame_internal idx symbol onEqual
+        onDifferent inp work out (hequal inp work out hpre)
+        (hinput inp work out hpre) (hwork inp work out hpre)
+        (houtput inp work out hpre) hbranchRun hbranchHalt
+    have hcurrentLe : currentSteps ≤ branchSteps + 1 :=
+      (branchWorkSymbolTM idx symbol onEqual onDifferent).reachesIn_le_halt
+        hcurrentRun hfullRun hfullHalt
+    cases currentSteps with
+    | zero =>
+        cases hcurrentRun
+        exact hbranch.2 inp work out hpre _ Relation.ReflTransGen.refl
+    | succ tailSteps =>
+        have htailLe : tailSteps ≤ branchSteps := by omega
+        obtain ⟨branchCurrent, hbranchPrefix, _hbranchSuffix⟩ :=
+          reachesIn_prefix_internal hbranchRun htailLe
+        have hwrappedPrefix :=
+          branchWorkSymbolTM_equal_reachesIn idx symbol onEqual onDifferent
+            hbranchPrefix
+        have hdispatch := branchWorkSymbolTM_dispatch_equal idx symbol
+          onEqual onDifferent inp work out (hequal inp work out hpre)
+          (hinput inp work out hpre) (hwork inp work out hpre)
+          (houtput inp work out hpre)
+        have hcanonical :
+            (branchWorkSymbolTM idx symbol onEqual onDifferent).reachesIn
+              (tailSteps + 1)
+              { state :=
+                  (branchWorkSymbolTM idx symbol onEqual onDifferent).qstart
+                input := inp
+                work := work
+                output := out }
+              (workSymbolEqualWrap idx symbol onEqual onDifferent
+                branchCurrent) :=
+          .step hdispatch hwrappedPrefix
+        have hcurrentEq : current =
+            workSymbolEqualWrap idx symbol onEqual onDifferent
+              branchCurrent :=
+          (branchWorkSymbolTM idx symbol onEqual onDifferent).reachesIn_right_unique
+            hcurrentRun hcanonical
+        subst current
+        simpa [workSymbolEqualWrap] using
+          hbranch.2 inp work out hpre branchCurrent
+            (reaches_of_reachesIn hbranchPrefix)
+
+theorem branchWorkSymbolTM_hoareTimeSpace_different_internal
+    (idx : Fin n) (symbol : Γ) (onEqual onDifferent : TM n)
+    {pre post : TapePred n} {time inputLength space : ℕ}
+    (hdifferent : ∀ inp work out, pre inp work out →
+      (work idx).read ≠ symbol)
+    (hinput : ∀ inp work out, pre inp work out →
+      inp.read ≠ Γ.start)
+    (hwork : ∀ inp work out, pre inp work out →
+      ∀ i, (work i).read ≠ Γ.start)
+    (houtput : ∀ inp work out, pre inp work out →
+      out.read ≠ Γ.start)
+    (hbranch : onDifferent.HoareTimeSpace pre post time inputLength space) :
+    (branchWorkSymbolTM idx symbol onEqual onDifferent).HoareTimeSpace
+      pre post (time + 1) inputLength space := by
+  constructor
+  · intro inp work out hpre
+    obtain ⟨done, branchSteps, hsteps, hreach, hhalt, hpost⟩ :=
+      hbranch.1 inp work out hpre
+    obtain ⟨wrapped, hwrapped, hwrappedHalt, hwrappedInput,
+        hwrappedWork, hwrappedOutput⟩ :=
+      branchWorkSymbolTM_reachesIn_different_frame_internal idx symbol
+        onEqual onDifferent inp work out (hdifferent inp work out hpre)
+        (hinput inp work out hpre) (hwork inp work out hpre)
+        (houtput inp work out hpre) hreach hhalt
+    refine ⟨wrapped, branchSteps + 1, by omega, hwrapped,
+      hwrappedHalt, ?_⟩
+    simpa only [hwrappedInput, hwrappedWork, hwrappedOutput] using hpost
+  · intro inp work out hpre current hcurrent
+    obtain ⟨currentSteps, hcurrentRun⟩ :=
+      (branchWorkSymbolTM idx symbol onEqual onDifferent).reaches_to_reachesIn
+        hcurrent
+    obtain ⟨done, branchSteps, _hsteps, hbranchRun, hbranchHalt, _hpost⟩ :=
+      hbranch.1 inp work out hpre
+    obtain ⟨wrapped, hfullRun, hfullHalt, _hwrappedInput,
+        _hwrappedWork, _hwrappedOutput⟩ :=
+      branchWorkSymbolTM_reachesIn_different_frame_internal idx symbol
+        onEqual onDifferent inp work out (hdifferent inp work out hpre)
+        (hinput inp work out hpre) (hwork inp work out hpre)
+        (houtput inp work out hpre) hbranchRun hbranchHalt
+    have hcurrentLe : currentSteps ≤ branchSteps + 1 :=
+      (branchWorkSymbolTM idx symbol onEqual onDifferent).reachesIn_le_halt
+        hcurrentRun hfullRun hfullHalt
+    cases currentSteps with
+    | zero =>
+        cases hcurrentRun
+        exact hbranch.2 inp work out hpre _ Relation.ReflTransGen.refl
+    | succ tailSteps =>
+        have htailLe : tailSteps ≤ branchSteps := by omega
+        obtain ⟨branchCurrent, hbranchPrefix, _hbranchSuffix⟩ :=
+          reachesIn_prefix_internal hbranchRun htailLe
+        have hwrappedPrefix :=
+          branchWorkSymbolTM_different_reachesIn idx symbol onEqual
+            onDifferent hbranchPrefix
+        have hdispatch := branchWorkSymbolTM_dispatch_different idx symbol
+          onEqual onDifferent inp work out (hdifferent inp work out hpre)
+          (hinput inp work out hpre) (hwork inp work out hpre)
+          (houtput inp work out hpre)
+        have hcanonical :
+            (branchWorkSymbolTM idx symbol onEqual onDifferent).reachesIn
+              (tailSteps + 1)
+              { state :=
+                  (branchWorkSymbolTM idx symbol onEqual onDifferent).qstart
+                input := inp
+                work := work
+                output := out }
+              (workSymbolDifferentWrap idx symbol onEqual onDifferent
+                branchCurrent) :=
+          .step hdispatch hwrappedPrefix
+        have hcurrentEq : current =
+            workSymbolDifferentWrap idx symbol onEqual onDifferent
+              branchCurrent :=
+          (branchWorkSymbolTM idx symbol onEqual onDifferent).reachesIn_right_unique
+            hcurrentRun hcanonical
+        subst current
+        simpa [workSymbolDifferentWrap] using
+          hbranch.2 inp work out hpre branchCurrent
+            (reaches_of_reachesIn hbranchPrefix)
 
 theorem IsTransducer.branchWorkSymbolTM_internal
     {idx : Fin n} {symbol : Γ} {onEqual onDifferent : TM n}

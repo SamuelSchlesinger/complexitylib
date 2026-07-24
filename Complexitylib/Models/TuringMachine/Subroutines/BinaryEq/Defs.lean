@@ -99,6 +99,21 @@ def binaryEqTM {n : ℕ} (lhsIdx rhsIdx resultIdx : Fin n) : TM n where
 def binaryEqTime (lhs rhs : List Bool) : ℕ :=
   max lhs.length rhs.length + 1
 
+/-- Compare two canonical binary strings, then rewind both read cursors and
+the one-bit result cursor. This is the compositional form used by iterative
+controllers whose next phase must start from a completely parked frame. -/
+def binaryEqRewindTM {n : ℕ} (lhsIdx rhsIdx resultIdx : Fin n) : TM n :=
+  seqTM (binaryEqTM lhsIdx rhsIdx resultIdx)
+    (seqTM (rewindWorkTM lhsIdx)
+      (seqTM (rewindWorkTM rhsIdx) (rewindWorkTM resultIdx)))
+
+/-- Runtime of equality followed by the three canonical rewinds. -/
+def binaryEqRewindTime (lhs rhs : List Bool) : ℕ :=
+  let comparisonTime := binaryEqTime lhs rhs
+  comparisonTime + 1 +
+    ((comparisonTime + 1 + 2) + 1 +
+      ((comparisonTime + 1 + 2) + 1 + (2 + 2)))
+
 end TM
 
 end Complexity

@@ -9,7 +9,7 @@ import Complexitylib.Circuits.BarringtonCodeGenerator.Internal
 /-!
 # Bitstring-level Barrington code generator
 
-`barringtonCompileCode` is the exact total function targeted by the remaining
+`barringtonCompileCode` is the exact extensional reference used by the remaining
 uniformity proof. On a canonical postfix formula code it emits the canonical
 code of `barringtonCompile formula barringtonTargetBase`; malformed inputs map
 to the empty string.
@@ -17,7 +17,10 @@ to the empty string.
 This module proves the complete extensional specification independently of a
 machine implementation: output decoding recovers the executable program, its
 evaluation matches the source formula, and its instruction count is at most
-`4 ^ depth`. The next layer must realize this particular function in `FL`.
+`4 ^ depth`. The unbounded function is not itself expected to lie in `FL`, since
+arbitrary linear-depth inputs have exponentially long outputs. The next layer
+must build a total `FL` generator that agrees with it along a promised
+logarithmic-depth family.
 
 ## Main results
 

@@ -28,45 +28,6 @@ Thus many iterations can retain logarithmic auxiliary space.
 
 namespace Complexity
 
-namespace TM
-
-variable {n : ℕ}
-
-/-- A bounded reachable-segment certificate terminates within the standard
-recursive binary-loop bound. -/
-theorem BinaryForSegmentSpec.reachesIn {body : TM n}
-    {counterIdx limitIdx : Fin n} {bodyTime : ℕ → ℕ}
-    {startValue limitValue : ℕ}
-    (spec : BinaryForSegmentSpec body counterIdx limitIdx bodyTime
-      startValue limitValue)
-    (count value : ℕ) (hstart : startValue ≤ value)
-    (hlimit : value + count = limitValue) :
-    ∃ time, time ≤ binaryForLoopTime bodyTime limitValue value count ∧
-      (binaryForTM body counterIdx limitIdx).reachesIn time
-        (spec.scanCfg value) spec.doneCfg :=
-  spec.reachesIn_internal count value hstart hlimit
-
-/-- Phase-local segment bounds cover every reachable prefix of the whole
-count-up loop. -/
-theorem BinaryForSegmentSpaceSpec.prefix_withinAuxSpace
-    {body : TM n} {counterIdx limitIdx : Fin n} {bodyTime : ℕ → ℕ}
-    {startValue limitValue inputLength spaceBound : ℕ}
-    {spec : BinaryForSegmentSpec body counterIdx limitIdx bodyTime
-      startValue limitValue}
-    (spaceSpec : BinaryForSegmentSpaceSpec spec inputLength spaceBound)
-    (count value time : ℕ)
-    (cfg : Cfg n (binaryForTM body counterIdx limitIdx).Q)
-    (hstart : startValue ≤ value)
-    (hlimit : value + count = limitValue)
-    (hreach : (binaryForTM body counterIdx limitIdx).reachesIn time
-      (spec.scanCfg value) cfg)
-    (htime : time ≤ binaryForLoopTime bodyTime limitValue value count) :
-    cfg.WithinAuxSpace inputLength spaceBound :=
-  spaceSpec.prefix_withinAuxSpace_internal count value time cfg hstart
-    hlimit hreach htime
-
-end TM
-
 namespace BinaryRoutine
 
 variable {n : ℕ}

@@ -66,6 +66,12 @@ theorem barringtonTargetBase_spec :
     barringtonTargetBase.IsCycle ∧ orderOf barringtonTargetBase = 5 :=
   barringtonTargetBase_spec_internal
 
+/-- The canonical target moves point zero, so every compiled family can use a
+single fixed decision point. -/
+theorem barringtonTargetBase_moves_zero :
+    barringtonTargetBase (0 : Fin 5) ≠ 0 :=
+  barringtonTargetBase_moves_zero_internal
+
 /-- The canonical left factor is a `5`-cycle for every target value. -/
 theorem barringtonLeft_spec (target : Perm (Fin 5)) :
     (barringtonLeft target).IsCycle ∧

@@ -18,6 +18,8 @@ are parked away from the left-end marker.
 
 - `TM.placeWorkTM_step_placeWorkCfg` — exact step with an evolving frame
 - `TM.placeWorkTM_reachesIn_placeWorkCfg_stable` — exact stable-frame simulation
+- `TM.placeWorkTM_reachesIn_placeWorkCfg_stable_withinAuxSpace` — stable-frame
+  simulation preserving all-prefix space bounds
 - `TM.placeWorkTM_reachesIn_placeWorkParkedCfg` — canonical parked simulation
 - `TM.placeWorkTM_computesInTime` — same-time preservation of computation
 -/
@@ -27,6 +29,17 @@ namespace Complexity
 namespace TM
 
 variable {n : ℕ}
+
+/-- Updating one physical tape in a placed machine's middle block is exactly
+the placement of the corresponding source-work update. -/
+theorem placeWorkCfg_work_update (tm : TM n) (pre post : ℕ)
+    (extras : Fin (pre + n + post) → Tape) (c : Cfg n tm.Q)
+    (idx : Fin n) (tape : Tape) :
+    Function.update (placeWorkCfg tm pre post extras c).work
+        (placeWorkIdx pre post idx) tape =
+      (placeWorkCfg tm pre post extras
+        { c with work := Function.update c.work idx tape }).work :=
+  placeWorkCfg_work_update_internal tm pre post extras c idx tape
 
 /-- A placed step simulates one source step while applying the prescribed idle
 action to the arbitrary physical extra-tape frame. -/
@@ -69,6 +82,48 @@ theorem placeWorkTM_reachesIn_placeWorkCfg_stable (tm : TM n)
       (placeWorkCfg tm pre post extras c)
       (placeWorkCfg tm pre post extras c') :=
   placeWorkTM_reachesIn_placeWorkCfg_stable_internal tm pre post extras hreach hextra
+
+/-- A stable placement preserves an all-prefix source-space certificate while
+charging the surrounding controller frame only for its largest head. -/
+theorem placeWorkTM_reachesIn_placeWorkCfg_stable_withinAuxSpace
+    (tm : TM n) (pre post : ℕ)
+    (extras : Fin (pre + n + post) → Tape)
+    {t inputLength sourceSpace frameSpace : ℕ} {c c' : Cfg n tm.Q}
+    (hreach : tm.reachesIn t c c')
+    (hextra : ∀ i, ¬placeWorkInMiddle pre n i → (extras i).read ≠ Γ.start)
+    (hsource : ∀ elapsed cfg, elapsed ≤ t →
+      tm.reachesIn elapsed c cfg →
+      cfg.WithinAuxSpace inputLength sourceSpace)
+    (hframe : ∀ i, ¬placeWorkInMiddle pre n i →
+      (extras i).head ≤ frameSpace) :
+    (placeWorkTM pre post tm).reachesIn t
+        (placeWorkCfg tm pre post extras c)
+        (placeWorkCfg tm pre post extras c') ∧
+      ∀ elapsed cfg, elapsed ≤ t →
+        (placeWorkTM pre post tm).reachesIn elapsed
+          (placeWorkCfg tm pre post extras c) cfg →
+        cfg.WithinAuxSpace inputLength (max sourceSpace frameSpace) :=
+  placeWorkTM_reachesIn_placeWorkCfg_stable_withinAuxSpace_internal
+    tm pre post extras hreach hextra hsource hframe
+
+/-- A stable placed frame lifts a source time-and-space Hoare contract with
+the same time bound and the maximum of the source and frame space bounds. -/
+theorem placeWorkTM_hoareTimeSpace_frame (tm : TM n)
+    (pre post : ℕ) (extras : Fin (pre + n + post) → Tape)
+    {sourcePre sourcePost : TapePred n}
+    {time inputLength sourceSpace frameSpace : ℕ}
+    (hsource : tm.HoareTimeSpace sourcePre sourcePost time inputLength
+      sourceSpace)
+    (hextras : ∀ i, ¬placeWorkInMiddle pre n i →
+      (extras i).read ≠ Γ.start)
+    (hframe : ∀ i, ¬placeWorkInMiddle pre n i →
+      (extras i).head ≤ frameSpace) :
+    (placeWorkTM pre post tm).HoareTimeSpace
+      (placeWorkPred tm pre post extras sourcePre)
+      (placeWorkPred tm pre post extras sourcePost)
+      time inputLength (max sourceSpace frameSpace) :=
+  placeWorkTM_hoareTimeSpace_frame_internal tm pre post extras hsource
+    hextras hframe
 
 /-- Start-invariant positive-head extras remain an exact frame throughout a
 bounded source run. -/
@@ -129,6 +184,12 @@ theorem placeWorkTM_computesInTime (tm : TM n) (pre post : ℕ)
     (hcomp : tm.ComputesInTime f T) :
     (placeWorkTM pre post tm).ComputesInTime f T :=
   placeWorkTM_computesInTime_internal tm pre post hcomp
+
+/-- Work-tape placement leaves the source output action unchanged. -/
+theorem IsTransducer.placeWorkTM {tm : TM n} (htrans : tm.IsTransducer)
+    (pre post : ℕ) :
+    (placeWorkTM pre post tm).IsTransducer :=
+  htrans.placeWorkTM_internal pre post
 
 end TM
 

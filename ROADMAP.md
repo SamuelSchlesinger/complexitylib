@@ -1174,8 +1174,306 @@ programs by log-depth circuits and a clearly stated uniformity convention.
   transformer `barringtonCompileCode`, proving generated-code decoding, exact
   formula semantics, the `4 ^ depth` instruction bound, and serialized length
   at most `4^depth + 1 + 4^depth * (inputCodeLength + 15)`. The remaining steps
-  are a verified log-space transducer realizing this function and the resulting
-  uniform family-level lift.
+  are a verified total log-space generator that agrees with this reference on
+  a promised logarithmic-depth family, plus the resulting uniform family-level
+  lift. The unbounded reference itself is not an `FL` candidate: arbitrary
+  linear-depth inputs can require exponentially long output.
+  `Classes/BarringtonUniform` now formalizes the correct promise-family boundary:
+  canonical `FL` generators define `FormulaFamily.Uniform` and
+  `BPFamily.Uniform`, the concrete `FormulaFamily.barringtonProgram` has fixed
+  decision point zero, exact semantics, and polynomial length. The machine
+  resource prerequisites now also expose that every `FL` output has a
+  pointwise polynomial length bound with logarithmic-width indices, and prove
+  that the *complete serialized code* of the concrete Barrington family
+  (including terminated-unary variable fields) is polynomially bounded with
+  logarithmic-width cursors. Thus the remaining construction may use
+  recomputation and binary output positions without hiding a space blowup.
+  `Models/TuringMachine/OutputCursor` now supplies the machine-level simulation
+  kernel for that construction: `OutputCursor` quotients an append-only output
+  prefix to finite control, exact step and run commutation are proved, and the
+  executable `suppressOutputTM` retains the source input/work behavior while
+  keeping its physical output empty. Its bounded-time computation theorem
+  includes the final normalization seam. Observed cursor runs now count output
+  advances exactly, including the theorem that the accumulated count from an
+  initial configuration equals the final physical output-head position.
+  `Models/TuringMachine/OutputProbe` adds the executable binary
+  position/capture controller: non-right source steps preserve its extra
+  countdown tape, right steps invoke the verified little-endian predecessor,
+  and a finite start-marker mask normalizes and exactly restores any source
+  heads parked on `▷` around that subroutine. Whole observed cursor runs now
+  consume exactly their counted output advances, and a halted source on the
+  selected Boolean frontier cell reaches the probe halt state with that
+  one-bit physical output. The companion theorem covers cells finalized by an
+  earlier right move, so the semantic capture cases are complete. Every prefix
+  of a complete replay now stays within the source invariant's space plus the
+  largest countdown's binary width, without accumulating predecessor costs.
+  Canonical blank-output specializations also discharge the probe's physical
+  head-and-cells premises after every positive-length replay.
+  Output-frontier monotonicity and exact crossing now combine those two capture
+  cases into one machine theorem for every valid index of a completed
+  space-bounded transducer output. A generic post-sentinel wrapper now turns
+  that result into a restartable query interface whose input, scratch,
+  countdown, and physical-output tapes all enter parked at cell one. The
+  output-retargeted form places the captured bit on a fresh work tape while
+  preserving a parked blank real output, so repeated queries can compose
+  without replaying the enclosing machine's sentinel transition. Successful
+  valid-index queries now carry the replay bound through the two capture
+  transitions, the restart wrapper, and output retargeting, including the
+  fresh work tape that stores the selected bit; the controller can therefore
+  cite one all-prefix space certificate for each complete query phase.
+  `Circuits/BarringtonStreaming` now replaces complete program construction by
+  a target-independent exact instruction-count recurrence and random-access
+  instruction stream, with every query proved equal to the reference compiler.
+  `Circuits/BarringtonSlots` schedules that same exact program inside `4^D`
+  optional fixed-address slots for any promised depth bound `D`: erasing empty
+  slots recovers the reference compiler byte-for-byte, and counting occupied
+  slots recovers its exact instruction count. This removes recursive child-
+  length arithmetic from the machine controller while keeping its output
+  unchanged. `Circuits/BarringtonSlotQuery` now gives target-independent
+  structural recurrences for the first and last occupied addresses and a
+  direct query that follows only the selected base-four block; every queried
+  slot is proved equal to the list-valued fixed schedule, including the
+  inverse-block and postmultiplication transformations used by negation,
+  conjunction, and disjunction.
+  `FormulaEncoding/Navigation` supplies its stack-free postfix tree primitive:
+  a backwards owed-subtree scan recovers exact child spans using one cursor and
+  one counter. `Circuits/BarringtonTokenQuery` now lifts the direct fixed-slot
+  recurrence from inductive formulas to canonical postfix token streams:
+  binary child spans are recovered by that backwards scan, and every token-
+  stream query is proved equal to the reference compiler's selected
+  instruction. `FormulaEncoding/BitNavigation` now implements exact random
+  access and subtree scans over the canonical framed bits themselves, including
+  child-span recovery inside arbitrary token context. `BarringtonBitQuery`
+  follows the selected base-four address directly over those bits and proves
+  every result equals the fixed-slot compiler. `BarringtonBitSerializer` fixes
+  the complete two-pass output algorithm: scan all `4^D` addresses to obtain
+  the exact instruction count, then erase empty addresses and emit the canonical
+  program code; under the promised depth bound its output is byte-for-byte the
+  executable Barrington compiler's code. `FormulaEncoding/ProbeNavigation`
+  replaces the in-memory code by a position-indexed bit oracle with total
+  finite-fuel decoders and exact token/subtree/child-span correctness.
+  `BarringtonProbeQuery` then proves that first/last occupancy and every direct
+  fixed-address instruction query through that oracle agree with the reference
+  compiler. Its machine-facing query has now also been factored through a
+  target-free Boolean occupancy kernel: bounded scans over exactly `4^D`
+  addresses recover the first and last occupied slots, and substituting those
+  scans into every postmultiplication site preserves each queried instruction
+  exactly. This removes nested recursive first/last evaluation from the
+  serializer controller. `BPInstrTransform` now packages every pending inverse
+  and postmultiplication of a selected instruction as an explicit finite type:
+  both permutation branches undergo one shared `left * p^(±1) * right` map,
+  while the unbounded variable index is preserved. Thus recursive descent need
+  not store a transformation stack on work tapes.
+  `Models/TuringMachine/Subroutines/BlankWorkPrefix` now supplies the
+  missing replay-reset primitive: it blanks an arbitrary sparse work prefix
+  bounded by a preserved binary limit, rewinds the target from an arbitrary
+  in-bound head position, restores its scratch counter, and proves exact time
+  plus an all-prefix space envelope. `BlankWorkPrefixMany` serially applies that
+  primitive to a fixed sparse tape list without multiplying the peak-space
+  bound. Successful output probes now also expose that their countdown ends as
+  the canonical zero tape, including after restart, output retargeting, and
+  placement in a larger controller frame, and give an exact blank-support bound
+  for every query-owned tape. `OutputProbeCleanup` combines an exact-space input
+  rewind with the fixed-list reset to restore the source, countdown, and
+  capture tapes while preserving the controller frame. `OutputProbeConsume`
+  now supplies the concrete restartable controller step: it reads the captured
+  bit before
+  cleanup, restores the exact canonical frame, dispatches to the matching
+  continuation, and carries an explicit all-prefix space maximum through the
+  whole query-consume-reset sequence. `OutputProbeLatch` now turns that
+  finite-control result into a reusable canonical binary zero-or-one latch
+  after cleanup while preserving an arbitrary outer serializer frame.
+  Output probes are now total at every positive numeric position: the complete
+  source run is split into crossed, final-frontier, and beyond-frontier cases,
+  blank or absent positions emit canonical zero, and every branch retains the
+  source-space-plus-binary-index all-prefix bound. Valid indices keep the
+  stronger theorem identifying the emitted bit with the source function. This
+  totality now passes through arbitrary real-output and controller frames,
+  consume/reset, and the persistent canonical bit latch, so bounded serializer
+  loops no longer need a valid-index side condition at each oracle query.
+  `OutputProbeIndexed` now bridges the remaining ghost-index boundary: it
+  copies a preserved zero-based controller register into the private probe
+  countdown, increments to the probe's one-based convention, and composes that
+  preparation with the total framed latch. The public contract preserves every
+  non-countdown tape exactly and carries the combined all-prefix space bound,
+  so `BinaryFor` clients can use a concrete machine register as their query
+  address. `OutputProbeDispatch` now turns that persistent latch into a direct
+  full-controller Boolean branch: valid indices select the exact source bit,
+  parked frame seams are discharged once, and arbitrary zero/one continuations
+  inherit a compositional time/space contract. Its resetting form now clears a
+  true one-bit latch before the selected continuation, while the false branch
+  reuses the already-canonical zero frame; both branches therefore reestablish
+  the identical restart invariant with explicit clearing cost. This is the
+  reusable iteration body boundary for the occupancy and serializer scans.
+  The bounded-runtime `BinaryForSegmentSpec` and its all-prefix companion have
+  now moved from the experimental routine adapter to the public `BinaryFor`
+  API, so source-dependent probe runtimes can be selected existentially per
+  address while remaining under one advertised loop bound. Its canonical
+  witness adapter now packages those existential Hoare runs without repeated
+  choice plumbing. The matching initial-bound adapter now turns canonical
+  comparison/iteration entry bounds plus runtime reserve into the full
+  all-prefix `BinaryForSegmentSpaceSpec`, without replaying phase semantics.
+  `OutputProbeScan` performs the concrete machine wiring:
+  it embeds address and limit registers behind the probe frame, queries and
+  resets the latch, runs the selected continuation, increments the address,
+  and preserves one-way output safety through the complete bounded scan.
+  `OutputProbeCountOnes` now supplies the serializer's first-pass branch body:
+  a zero probe preserves the complete reset-latch frame, while a one probe
+  increments exactly one canonical binary count register. The composed
+  query-reset-count step has an explicit time/space contract and the enclosing
+  count-up scan remains one-way-output safe. Its exact outer-loop invariant is
+  now formalized as well: after address `k`, the count register contains the
+  number of true bits in the first `k` source positions. Canonical restored
+  latch frames make Hoare endpoints literal loop configurations, and bounded
+  per-address body witnesses now package into a complete
+  `BinaryForSegmentSpec`; the halted frame exposes `List.count true` when the
+  scan limit is the full bit length. Those body witnesses are now derived
+  directly from the source transducer's `ComputesInSpace` contract and the
+  canonical restored frame: finite frame maxima discharge the concrete
+  indexed-latch and branch seams, and noncomputably selected per-address
+  runtimes assemble a complete exact-prefix segment certificate. The remaining
+  first-pass resource proof is specifically to attach an all-prefix segment-
+  space certificate with a bound suitable for the final logarithmic asymptotic
+  argument. `OutputProbeDecodeNat` now starts the Barrington-specific formula
+  query controller: it gives terminated-unary headers and variable fields a
+  concrete bounded probe loop with cursor, accumulator, fuel, and persistent
+  success registers. Its pure controller is proved exactly equal to the
+  established oracle decoder, including fuel exhaustion, and the complete
+  concrete machine is one-way-output safe. Its selected zero/one continuations
+  now have literal restored-frame contracts, and a valid source address plus
+  `ComputesInSpace` derives the complete active query/reset/update step without
+  caller-supplied replay witnesses. The outer active-flag branch is now
+  certified in both states and exposed through one source-derived body theorem
+  whose post-frame follows the same finite-list bit as the pure decoder
+  recurrence. The exact `BinaryFor` lift is now complete as well: an injective
+  six-role controller layout supplies canonical comparison, iteration, and
+  halted frames; source-derived per-query runtimes assemble a complete segment
+  whose final registers are the pure decoder state at the fuel bound.
+  `OutputProbeDecodeTag` now supplies the next controller layer's six-way pure
+  classifier, a concrete three-probe machine, one-way-output safety, and an
+  exact source-derived contract for each query/reset/retain/cursor step. Those
+  three contracts now compose into one exact run whose literal final frame
+  retains all three source bits and advances the cursor by exactly three. A
+  direct controller-symbol tree now dispatches that frame to all six legal
+  continuations or the reserved-tag failure branch, and the combined theorem
+  composes source-derived probing and exact two- or three-step dispatch in one
+  run. `OutputProbeDecodeToken` now gives the tag and terminated-unary layers
+  one injective nine-role controller layout with definitionally shared cursor
+  and scratch registers. Its exact cleanup phase resets all three retained tag
+  bits to a canonical zero frame without changing any other controller tape;
+  invariant-restoring dispatch now wraps every legal and invalid continuation
+  in that same cleanup contract. Selected-continuation variants of both the
+  retained-tag and normalized-token contracts require only the branch that can
+  actually execute, so constant tokens do not inherit an impossible variable-
+  payload precondition. The source-derived token theorem now composes all three
+  probes, tag retention, canonical cleanup, and selected dispatch in one exact
+  machine run. The variable branch is now instantiated concretely by the
+  bounded terminated-unary machine through the shared layout. The generic
+  `BinaryForSegmentSpec.hoareTime` adapter and the source-derived
+  `ComputesInSpace.outputProbeDecodeNatTM_hoareTime` theorem now expose that
+  complete loop between canonical initialized and final latch frames.
+  `ComputesInSpace.outputProbeDecodeTokenVar_hoareTime` now transports the
+  normalized post-tag frame into that canonical unary start frame and certifies
+  the concrete variable continuation. `BranchingProgramEncoding/Machine` now
+  supplies the serializer leaf itself: it emits a dynamic terminated-unary
+  variable field followed by two finite-control permutation ranks, restores the
+  complete input/work frame, and carries explicit time, all-prefix space, and
+  one-way-output contracts. Constant and variable Barrington instructions are
+  exposed as direct specializations. A restored-latch adapter now transports
+  those emitters through the complete restartable-query frame, and
+  `outputProbeDecodeVarInstrTM_hoareTime` certifies the whole normalized
+  `.var` continuation from bounded payload decoding through exact instruction
+  emission. The leaf dispatcher is concrete as well: `.tru` uses the constant
+  emitter, `.fls` uses the certified no-output frame adapter, and only the
+  recursive connective continuations remain parameters. A generic selected-
+  branch contract exposes that exact machine boundary without demanding proofs
+  for unreachable leaf or recursive branches. Its three source-level leaf
+  contracts are now certified end to end: `.var` alone assumes and decodes a
+  bounded terminated-unary payload before appending the exact dynamic
+  instruction, `.tru` appends the exact constant instruction without a payload
+  assumption, and `.fls` preserves the accumulator unchanged. The next local
+  seam is the recursive address/navigation controller for `.neg`, `.conj`, and
+  `.disj`. Its numeric state is now stack-free: `BarringtonSlotCursor` keeps the
+  original fixed address plus one reflection bit, splits each effective address
+  into its current base-four block and remaining local slot, and toggles only
+  that bit when descent enters an inverse block. Its branch equations identify
+  right-child and inverse-block selection with the two corresponding binary
+  address bits xor that reflection flag. The four-way machine dispatcher over
+  two captured canonical bit tapes is now concrete, costs exactly two framed
+  transitions beyond its selected continuation, preserves the continuation's
+  all-prefix space budget, and is one-way on output. Its raw-bit continuation
+  is proved equal to the cursor's semantic branch. A one-transition capture
+  primitive now canonicalizes the currently positioned source bit, optionally
+  moves the preserved address head left, carries an all-prefix space contract,
+  and is one-way on output. Its three-transition high/low composition captures
+  one adjacent base-four digit, leaves the source on the low bit, preserves all
+  unrelated tapes, carries its own all-prefix space contract, and remains one-
+  way on output. The runtime positioner is now concrete as a canonical binary
+  count-up loop whose certified two-transition body advances one base-four
+  digit, followed by a certified one-transition move onto the current high bit;
+  its exact loop invariant identifies iteration `v` with head offset `2 * v`.
+  The complete positioner lands on bit `2 * fuel + 1`, preserves the address
+  cells, advances its canonical counter exactly to `fuel`, and carries the
+  all-prefix bound `initialSpace + 2 * fuel + 2 * fuel.size + 6` rather than a
+  time-derived quadratic bound. Positioned canonical cells are also proved to
+  expose exactly `Nat.testBit`, including implicit blank high bits. Positioning
+  and the three-transition adjacent-bit capture now compose into one public
+  exact contract, and the resulting raw bits feed the four-way dispatcher and
+  any selected continuation. The end-to-end branch retains the tight
+  positioning-plus-three all-prefix budget, adds exactly the two dispatch
+  transitions, and remains one-way on output. The cursor-facing theorem hides
+  the raw-bit arithmetic behind the semantic left/right/inverse choice. After
+  this one-time positioning phase, recursive slot descent no longer rescans
+  from the address origin: one transition moves onto the next lower digit and
+  simultaneously resets both bit latches, then the existing three-transition
+  capture and two-transition dispatcher select the next semantic child. This
+  constant-cost recursive step has an explicit all-prefix bound and preserves
+  one-way output behavior. Postfix child navigation now also has a forward-
+  streaming invariant tailored to the existing token decoder: scanning a
+  binary root's child body maintains only the evaluation-stack height and the
+  most recent height-one boundary. That boundary is proved to be exactly the
+  end of the left child in both token count and encoded-bit offset, eliminating
+  repeated backward ordinal seeks. The machine-side numeric step is now
+  concrete as well: eight distinct binary registers hold the cursor, stack
+  height, token count, retained boundaries, constant one, verdict, and copy
+  scratch. One certified call applies the token arity, increments the token
+  count, performs normalized binary equality, conditionally copies both
+  boundaries, restores scratch, and preserves one-way output behavior. The
+  numeric step is now wrapped around the existing fixed-tag/terminated-unary
+  token decoder by an injective sixteen-role controller layout. The decoder and
+  scan share exactly the source cursor; every other register is structurally
+  disjoint. The concrete dispatcher maps variables, constants, negation, and
+  both binary connectives to arities zero, zero, one, and two respectively. A
+  completed variable decoder now has a certified normalization phase that
+  clears its value and loop counter, restores its active flag, preserves the
+  complete numeric scan frame literally, and remains one-way on output.
+  Source-derived one-token contracts now cover both sides of the dispatcher:
+  every legal fixed token maps through one tag-to-arity theorem, while a
+  variable composes bounded payload probing, the pure decoder's terminal
+  cursor/value state, normalization, and the arity-zero update. The numeric
+  scan invariant now transports automatically into restored latch frames,
+  through fixed-tag cleanup, and through the variable decoder's cursor update;
+  source theorems need only the original stable scan frame. Canonical variable
+  encodings also have an exact successful decoder result with arbitrary extra
+  fuel, exposing the post-token cursor and terminated active state. The bounded
+  scan now has its own injective eighteen-role layout and concrete count-up
+  wrapper: the first sixteen roles project to the complete token step, while a
+  fresh iteration counter and preserved token limit are certified distinct
+  from every token role. This avoids aliasing the loop counter with the
+  semantic token count already incremented by the body. The next seam is the
+  stream-indexed loop invariant for that wrapper, followed by the
+  finite-control cursor/transform updates.
+  `BarringtonProbeSerializer` fixes the complete oracle-level two-pass output
+  and proves that its counted header, filtered instruction stream, and final
+  code agree byte-for-byte with the executable compiler. The remaining
+  construction is to iterate these latched controller steps through the oracle
+  recurrences and the two serializer scans, together with the resulting
+  logarithmic-space proof.
+  Finally,
+  `uniformFormulaNC1_subset_uniformWidth5BP_of_compilation` reduces the forward
+  uniform theorem to the single named obligation
+  `UniformBarringtonCompilation`. Proving that obligation is the remaining
+  machine-level work.
 
 **Formalization hazards.** Permutation multiplication order differs between texts
 and libraries; fix it with executable examples before proving the induction.

@@ -5,6 +5,7 @@ Authors: Samuel Schlesinger
 -/
 import Complexitylib.Classes.L
 import Complexitylib.Classes.P.Defs
+import Complexitylib.Models.TuringMachine.OutputBounds
 import Complexitylib.Models.TuringMachine.SpaceTime
 
 /-!
@@ -129,5 +130,28 @@ theorem FL_subset_FP_internal : FL ⊆ FP := by
   exact ⟨1 + (2 * c + 1) * k, k, tm,
     fun n => tm.transducerConfigBound n (S n),
     hcomp.computesInTime_configBound, htime⟩
+
+/-- Internal polynomial output-length bound for every log-space transducer
+function. -/
+theorem mem_FL_polynomial_output_length_internal
+    {f : List Bool → List Bool} (hf : f ∈ FL) :
+    ∃ p : Polynomial ℕ, ∀ input,
+      (f input).length ≤ p.eval input.length := by
+  obtain ⟨_d, _k, tm, time, hcomputes, htime⟩ :=
+    FL_subset_FP_internal hf
+  obtain ⟨p, hp⟩ := BigO.pow_polynomial_bound htime
+  exact ⟨p, fun input =>
+    (hcomputes.output_length_le input).trans (hp input.length)⟩
+
+/-- Internal logarithmic-width corollary for a polynomial output bound. -/
+theorem mem_FL_output_bound_log_width_internal
+    {f : List Bool → List Bool} (hf : f ∈ FL) :
+    ∃ p : Polynomial ℕ,
+      (∀ input, (f input).length ≤ p.eval input.length) ∧
+      (fun n => (p.eval n).size) =O (fun n => Nat.log 2 n) := by
+  obtain ⟨p, hp⟩ := mem_FL_polynomial_output_length_internal hf
+  refine ⟨p, hp, ?_⟩
+  exact BigO.natSize_of_pow
+    (BigO.of_polynomial_bound p (fun _ => le_rfl))
 
 end Complexity

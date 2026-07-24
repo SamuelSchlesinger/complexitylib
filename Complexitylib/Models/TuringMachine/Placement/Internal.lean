@@ -5,6 +5,7 @@ Authors: Samuel Schlesinger
 -/
 import Complexitylib.Models.TuringMachine.Placement.Defs
 import Complexitylib.Models.TuringMachine.Internal
+import Complexitylib.Models.TuringMachine.SpaceTime.Internal.Reachability
 
 /-!
 # Work-tape placement correctness internals
@@ -18,6 +19,30 @@ parked frame are fixed points of that action.
 namespace Complexity
 
 namespace TM
+
+theorem placeWorkCfg_work_update_internal (tm : TM n) (pre post : ℕ)
+    (extras : Fin (pre + n + post) → Tape) (c : Cfg n tm.Q)
+    (idx : Fin n) (tape : Tape) :
+    Function.update (placeWorkCfg tm pre post extras c).work
+        (placeWorkIdx pre post idx) tape =
+      (placeWorkCfg tm pre post extras
+        { c with work := Function.update c.work idx tape }).work := by
+  funext i
+  by_cases hphysical : i = placeWorkIdx pre post idx
+  · subst i
+    simp
+  · rw [Function.update_of_ne hphysical]
+    by_cases hmiddle : placeWorkInMiddle pre n i
+    · dsimp only [placeWorkCfg]
+      simp only [hmiddle, dite_true]
+      rw [Function.update_of_ne]
+      intro hcoord
+      apply hphysical
+      rw [← hcoord]
+      exact (placeWorkIdx_placeWorkCoord i hmiddle).symm
+    · rw [placeWorkCfg_work_extra tm pre post extras c i hmiddle]
+      rw [placeWorkCfg_work_extra tm pre post extras
+        { c with work := Function.update c.work idx tape } i hmiddle]
 
 variable {n pre post : ℕ}
 
@@ -118,6 +143,55 @@ theorem placeWorkTM_reachesIn_placeWorkCfg_stable_internal (tm : TM n)
         hstep]
       rfl) ih
 
+/-- An all-prefix source-space certificate lifts through a stable placement.
+The placed source tapes use `sourceSpace`; the preserved surrounding frame
+uses `frameSpace`, so the combined machine uses their maximum. -/
+theorem placeWorkTM_reachesIn_placeWorkCfg_stable_withinAuxSpace_internal
+    (tm : TM n) (pre post : ℕ)
+    (extras : Fin (pre + n + post) → Tape)
+    {t inputLength sourceSpace frameSpace : ℕ} {c c' : Cfg n tm.Q}
+    (hreach : tm.reachesIn t c c')
+    (hextra : ∀ i, ¬placeWorkInMiddle pre n i → (extras i).read ≠ Γ.start)
+    (hsource : ∀ elapsed cfg, elapsed ≤ t →
+      tm.reachesIn elapsed c cfg →
+      cfg.WithinAuxSpace inputLength sourceSpace)
+    (hframe : ∀ i, ¬placeWorkInMiddle pre n i →
+      (extras i).head ≤ frameSpace) :
+    (placeWorkTM pre post tm).reachesIn t
+        (placeWorkCfg tm pre post extras c)
+        (placeWorkCfg tm pre post extras c') ∧
+      ∀ elapsed cfg, elapsed ≤ t →
+        (placeWorkTM pre post tm).reachesIn elapsed
+          (placeWorkCfg tm pre post extras c) cfg →
+        cfg.WithinAuxSpace inputLength (max sourceSpace frameSpace) := by
+  refine ⟨placeWorkTM_reachesIn_placeWorkCfg_stable_internal
+    tm pre post extras hreach hextra, ?_⟩
+  intro elapsed cfg helapsed hplaced
+  have hlength : elapsed + (t - elapsed) = t :=
+    Nat.add_sub_of_le helapsed
+  rw [← hlength] at hreach
+  obtain ⟨sourceMid, hsourceMid, _hsourceRest⟩ :=
+    reachesIn_split_internal hreach
+  have hplacedMid := placeWorkTM_reachesIn_placeWorkCfg_stable_internal
+    tm pre post extras hsourceMid hextra
+  have hcfg : cfg = placeWorkCfg tm pre post extras sourceMid :=
+    (placeWorkTM pre post tm).reachesIn_right_unique hplaced hplacedMid
+  subst cfg
+  have hmidBound := hsource elapsed sourceMid helapsed hsourceMid
+  constructor
+  · intro i
+    by_cases hmid : placeWorkInMiddle pre n i
+    · let j := placeWorkCoord pre n i hmid
+      have hindex : placeWorkIdx pre post j = i :=
+        placeWorkIdx_placeWorkCoord i hmid
+      rw [← hindex, placeWorkCfg_work_middle]
+      exact le_trans (hmidBound.1 j) (le_max_left _ _)
+    · rw [placeWorkCfg_work_extra tm pre post extras sourceMid i hmid]
+      exact le_trans (hframe i hmid) (le_max_right _ _)
+  · exact le_trans hmidBound.2 (by
+      have := le_max_left sourceSpace frameSpace
+      omega)
+
 /-- The canonical parked frame is fixed by a placed source step. -/
 theorem placeWorkTM_step_placeWorkParkedCfg_internal (tm : TM n) (pre post : ℕ)
     (c : Cfg n tm.Q) :
@@ -201,6 +275,76 @@ theorem placeWorkTM_computesInTime_internal (tm : TM n) (pre post : ℕ)
     exact hhalt
   · rw [houtput]
     exact hout
+
+/-- A stable placed frame lifts a source time-and-space Hoare contract without
+time overhead and charges only the maximum source/frame space. -/
+theorem placeWorkTM_hoareTimeSpace_frame_internal (tm : TM n)
+    (pre post : ℕ) (extras : Fin (pre + n + post) → Tape)
+    {sourcePre sourcePost : TapePred n}
+    {time inputLength sourceSpace frameSpace : ℕ}
+    (hsource : tm.HoareTimeSpace sourcePre sourcePost time inputLength
+      sourceSpace)
+    (hextras : ∀ i, ¬placeWorkInMiddle pre n i →
+      (extras i).read ≠ Γ.start)
+    (hframe : ∀ i, ¬placeWorkInMiddle pre n i →
+      (extras i).head ≤ frameSpace) :
+    (placeWorkTM pre post tm).HoareTimeSpace
+      (placeWorkPred tm pre post extras sourcePre)
+      (placeWorkPred tm pre post extras sourcePost)
+      time inputLength (max sourceSpace frameSpace) := by
+  constructor
+  · rintro inp work out ⟨sourceWork, hpre, rfl⟩
+    obtain ⟨done, elapsed, helapsed, hreach, hhalt, hpost⟩ :=
+      hsource.1 inp sourceWork out hpre
+    let sourceStart : Cfg n tm.Q :=
+      { state := tm.qstart,
+        input := inp,
+        work := sourceWork,
+        output := out }
+    let placedDone := placeWorkCfg tm pre post extras done
+    have hplaced : (placeWorkTM pre post tm).reachesIn elapsed
+        (placeWorkCfg tm pre post extras sourceStart) placedDone := by
+      exact placeWorkTM_reachesIn_placeWorkCfg_stable_internal tm pre post
+        extras hreach hextras
+    refine ⟨placedDone, elapsed, helapsed, ?_, ?_, ?_⟩
+    · simpa only [sourceStart] using hplaced
+    · exact hhalt
+    · refine ⟨done.work, ?_, rfl⟩
+      simpa only [placedDone, placeWorkCfg_input, placeWorkCfg_output] using
+        hpost
+  · rintro inp work out ⟨sourceWork, hpre, rfl⟩ current hcurrent
+    obtain ⟨done, elapsed, _helapsed, hreach, hhalt, _hpost⟩ :=
+      hsource.1 inp sourceWork out hpre
+    let sourceStart : Cfg n tm.Q :=
+      { state := tm.qstart,
+        input := inp,
+        work := sourceWork,
+        output := out }
+    have hsourcePrefix : ∀ steps cfg, steps ≤ elapsed →
+        tm.reachesIn steps sourceStart cfg →
+        cfg.WithinAuxSpace inputLength sourceSpace := by
+      intro steps cfg _hsteps hprefix
+      exact hsource.2 inp sourceWork out hpre cfg
+        (tm.reaches_of_reachesIn hprefix)
+    have hplaced :=
+      placeWorkTM_reachesIn_placeWorkCfg_stable_withinAuxSpace_internal
+        tm pre post extras hreach hextras hsourcePrefix hframe
+    obtain ⟨currentTime, hcurrentRun⟩ :=
+      (placeWorkTM pre post tm).reaches_to_reachesIn hcurrent
+    have hdoneHalted : (placeWorkTM pre post tm).halted
+        (placeWorkCfg tm pre post extras done) :=
+      hhalt
+    have hcurrentTime : currentTime ≤ elapsed :=
+      (placeWorkTM pre post tm).reachesIn_le_halt hcurrentRun hplaced.1
+        hdoneHalted
+    exact hplaced.2 currentTime current hcurrentTime hcurrentRun
+
+theorem IsTransducer.placeWorkTM_internal {tm : TM n}
+    (htrans : tm.IsTransducer) (pre post : ℕ) :
+    (placeWorkTM pre post tm).IsTransducer := by
+  intro state inputHead workHeads outputHead
+  simpa only [placeWorkTM] using htrans state inputHead
+    (fun i => workHeads (placeWorkIdx pre post i)) outputHead
 
 end TM
 

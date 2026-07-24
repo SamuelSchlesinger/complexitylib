@@ -70,6 +70,11 @@ theorem barringtonTargetBase_spec_internal :
   · decide
   · decide
 
+/-- Internal check that the canonical target moves the fixed query point zero. -/
+theorem barringtonTargetBase_moves_zero_internal :
+    barringtonTargetBase (0 : Fin 5) ≠ 0 := by
+  decide
+
 private theorem cycleType_five {cycle : Perm (Fin 5)}
     (hcycle : cycle.IsCycle) (horder : orderOf cycle = 5) :
     cycle.cycleType = {5} := by
