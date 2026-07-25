@@ -115,6 +115,40 @@ theorem Data.inductionL {motive : Data → Prop}
     (d : Data) : motive d :=
   Data.recL nil cons d
 
+mutual
+/-- Serialize a `Data` value to a balanced-parenthesis bit string: a node
+`Data.l xs` becomes `false` (open bracket), the concatenated serializations of
+its children, then `true` (close bracket). This is the physical layout used to
+store a `Data` value on a Turing-machine tape; its length equals `Data.size`
+(see `Data.toBits_length`), so the tape uses exactly `d.size` cells. -/
+def Data.toBits : Data → List Bool
+  | .l xs => false :: Data.toBitsList xs ++ [true]
+/-- Concatenated serializations of a list of `Data` nodes; the recursive helper
+of `Data.toBits`. -/
+def Data.toBitsList : List Data → List Bool
+  | [] => []
+  | x :: xs => Data.toBits x ++ Data.toBitsList xs
+end
+
+@[simp] lemma Data.toBits_l (xs : List Data) :
+    (Data.l xs).toBits = false :: Data.toBitsList xs ++ [true] := rfl
+
+@[simp] lemma Data.toBitsList_nil : Data.toBitsList [] = [] := rfl
+
+@[simp] lemma Data.toBitsList_cons (x : Data) (xs : List Data) :
+    Data.toBitsList (x :: xs) = x.toBits ++ Data.toBitsList xs := rfl
+
+/-- The serialization length equals `Data.size`: a tape holding `d.toBits` uses
+exactly `d.size` cells. This is the bridge between RTM space (`Data.size`) and
+the Turing-machine tape space that stores the value. -/
+@[simp] lemma Data.toBits_length (d : Data) : d.toBits.length = d.size := by
+  induction d using Data.inductionL with
+  | nil => simp
+  | cons x xs ihx ihxs =>
+    simp only [Data.toBits_l, Data.toBitsList_cons, Data.cons_size,
+      List.length_append, List.length_cons, List.length_nil] at *
+    omega
+
 /-- Index of a tape cell used by the rose tree machine's execution model. -/
 abbrev TapeIndex := ℕ
 

@@ -268,6 +268,26 @@ another controller-local proof.
     deferred and optional, not implemented. It is not a dependency of the
     named-tape/effect work; revisit only when a real construction needs recursive
     Data-valued syntax and the bounded slice can meet all promotion gates.
+  - [ ] Compile the `InPlace` (first-order) RTM fragment to Turing machines with
+    resource consumption matching the `ProgSem` cost model up to a constant
+    factor. `Complexitylib.Models.RoseTreeMachine.Compile` lands the first
+    verified slice: the public `inPlace_compilesToTM` theorem statement (single
+    input/output, subroutine-ready), the internal layout-relative contract
+    `CompilesUnder` / `LoadedStart` (one work tape per program argument via
+    `slot : Fin m → Fin k`) with its recursion `compilesUnder_of_inPlace`, the
+    `Data.toBits` balanced-parenthesis tape serialization (length `= Data.size`),
+    the `InPlaceRealizedByTM` correspondence predicate, the linear
+    `Data`-encoding-size bridge (`dataSize_encode_listBool`), and two proven base
+    cases — `empty` (matching time *and* space via `emptyOutputTM`) and
+    `var 0`/identity (matching time via `copyInputToOutputTM`). The two headline
+    statements are `sorry` for now. The inductive constructors (`cons`, `elim`,
+    `ifEq`, `while_`, and the immediately consumed `app`/`fn` let-binding) need
+    concrete `Data`-manipulation subroutines and remain to be composed through
+    the `CompilesUnder` interface. The compiler recursion is fully decomposed:
+    `compilesUnder_of_inPlace` assembles the per-constructor parts
+    (`compiled_var`/`compiled_empty`/`compiled_cons`/`compiled_elim`/
+    `compiled_ifEq`/`compiled_while`/`compiled_app`) by induction with no
+    `sorry`; the parts themselves are the remaining obligations.
 - [x] Audit proof-engineering mechanics across representative machine and circuit
   constructions: inventory repeated state/tape/wire bookkeeping, run or trace
   stitching, semantic transport, and resource accounting, then prototype the
