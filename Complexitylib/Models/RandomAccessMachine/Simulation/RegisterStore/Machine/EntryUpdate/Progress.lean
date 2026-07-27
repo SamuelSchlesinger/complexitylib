@@ -7,6 +7,7 @@ module
 
 public import
   Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Machine.EntryUpdate.Defs
+import Std.Tactic.BVDecide.Normalize.Prop
 
 /-!
 # Bounded encoded sparse-store update — progress invariant internals

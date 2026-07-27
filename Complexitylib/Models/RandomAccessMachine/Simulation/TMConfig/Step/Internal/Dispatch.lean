@@ -7,6 +7,7 @@ module
 
 public import Complexitylib.Models.RandomAccessMachine.Simulation.TMConfig.Step.Internal.Action
 public import Complexitylib.Models.RandomAccessMachine.Structured.Switch
+import Std.Tactic.BVDecide.Normalize.Prop
 
 /-!
 # Nested finite dispatch for one TM transition -- proof internals

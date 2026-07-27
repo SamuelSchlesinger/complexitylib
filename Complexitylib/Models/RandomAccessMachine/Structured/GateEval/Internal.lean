@@ -7,7 +7,8 @@ module
 
 public import Complexitylib.Models.RandomAccessMachine.Structured
 public import Complexitylib.Models.RandomAccessMachine.Structured.GateEval.Defs
-public import Complexitylib.Models.RandomAccessMachine.Structured.Internal.Resources
+import Std.Tactic.BVDecide.Normalize.Bool
+import Std.Tactic.BVDecide.Normalize.Prop
 
 /-!
 # Structured RAM decoded-gate evaluator — proof internals

@@ -8,7 +8,7 @@ module
 public import Complexitylib.Circuits.BarringtonBridge
 public import Complexitylib.Circuits.Formula
 public import Mathlib.Tactic.Linarith
-public import Mathlib.Data.Nat.Log
+import Std.Tactic.BVDecide.Normalize.Bool
 
 /-!
 # Barrington's theorem with a length bound

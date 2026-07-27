@@ -5,15 +5,10 @@ Authors: Samuel Schlesinger
 -/
 module
 
-public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Initialization
-public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Offset
-public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Primitive
 public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Transition.Effect
-public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Transition.Read
 public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Transition.WrittenCell.Defs
 public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Serializer.Transition.WrittenCell
-public import Complexitylib.Models.TuringMachine.Experimental.BinaryRoutine.Arithmetic
-public import Complexitylib.Models.TuringMachine.Experimental.BinaryRoutine.List
+import Std.Tactic.BVDecide.Normalize.Prop
 
 /-!
 # Direct-unrolling written-cell generator -- proof internals

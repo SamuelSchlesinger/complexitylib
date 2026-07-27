@@ -6,7 +6,6 @@ Authors: Samuel Schlesinger
 module
 
 public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Primitive.Defs
-public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Serializer.Transition.Defs
 
 /-!
 # Direct-unrolling read-formula generator -- definitions

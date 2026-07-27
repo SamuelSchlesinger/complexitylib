@@ -7,6 +7,8 @@ module
 
 public import Complexitylib.Models.TuringMachine.UTM.Internal.BodyIteration
 public import Complexitylib.Models.TuringMachine.Registers
+import Std.Tactic.BVDecide.Normalize.BitVec
+import Std.Tactic.BVDecide.Normalize.Prop
 
 /-!
 # `termCheckTM`: deciding `TerminatedRegion` by a single input scan

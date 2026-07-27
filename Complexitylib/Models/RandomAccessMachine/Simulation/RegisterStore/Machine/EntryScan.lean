@@ -11,7 +11,6 @@ public import
   Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Machine.EntryScan.Internal.Sem
 public import
 Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Machine.EntryScan.Internal.Bounds
-public import Complexitylib.Models.TuringMachine.Hoare.Space
 
 /-!
 # Bounded sparse-entry scan

@@ -5,7 +5,6 @@ Authors: Samuel Schlesinger
 -/
 module
 
-public import Complexitylib.Circuits.BarringtonCompiler.Defs
 public import Complexitylib.Circuits.BranchingProgramEncoding.Defs
 public import Complexitylib.Circuits.FormulaEncoding.Defs
 

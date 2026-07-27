@@ -5,9 +5,6 @@ Authors: Samuel Schlesinger
 -/
 module
 
-public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Transition.PackedCopy
-public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Transition.Next
-public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Transition.Step.Defs
 public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Transition.Step.Internal.Effect
 public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Transition.Step.Internal.Emitted
 public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Transition.Step.Internal.Packed
@@ -16,8 +13,7 @@ public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Transition
 public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Transition.Step.Internal.Space
 public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Transition.Step.Internal.Top
 public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Serializer.Transition.Step
-public import Complexitylib.Models.TuringMachine.Experimental.BinaryRoutine.Arithmetic
-public import Complexitylib.Models.TuringMachine.Experimental.BinaryRoutine.List
+import Std.Tactic.BVDecide.Normalize.Prop
 
 /-!
 # Direct-unrolling packed-step generator -- proof internals

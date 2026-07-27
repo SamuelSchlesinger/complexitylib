@@ -7,6 +7,7 @@ module
 
 public import Complexitylib.Models.TuringMachine.Combinators.Internal.Generic
 public import Complexitylib.Models.TuringMachine.Subroutines.BinaryRippleSub.Internal.Pure
+import Std.Tactic.BVDecide.Normalize.Prop
 
 /-!
 # Linear-time canonical binary subtraction -- backward cleanup

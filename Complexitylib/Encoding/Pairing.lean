@@ -8,6 +8,7 @@ module
 public import Mathlib.Data.List.Basic
 public import Mathlib.Data.Nat.Init
 public import Lean.Elab.Tactic.Omega
+import Std.Tactic.BVDecide.Normalize.Prop
 
 /-!
 # Pairing binary strings

@@ -6,19 +6,12 @@ Authors: Samuel Schlesinger
 module
 
 public import
-  Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Machine.Instruction
-public import
-  Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Machine.Instruction.Sim.Defs
-public import
   Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Machine.Instruction.Sim.Control
 public import
   Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Machine.Instruction.Sim.Data
 public import
   Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Machine.Instruction.Sim.Internal
-public import Complexitylib.Models.TuringMachine.Combinators.WorkBranch
-public import Complexitylib.Models.TuringMachine.Hoare.Space
-public import Complexitylib.Models.TuringMachine.Subroutines.BinaryCopy
-public import Complexitylib.Models.TuringMachine.Subroutines.BinaryPred
+import Std.Tactic.BVDecide.Normalize.Prop
 
 /-!
 # Fixed-program sparse RAM dispatch

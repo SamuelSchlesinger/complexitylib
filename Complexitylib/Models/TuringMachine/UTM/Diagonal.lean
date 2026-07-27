@@ -12,6 +12,7 @@ public import Complexitylib.Models.TuringMachine.UTM.Internal.NegOut
 public import Complexitylib.Models.TuringMachine.UTM.HierarchySupport
 public import Complexitylib.Models.TuringMachine.UTM.ClockConstructible
 public import Complexitylib.Models.TuringMachine.Combinators.Internal.Retarget
+import Std.Tactic.BVDecide.Normalize.Prop
 
 /-!
 # The time-hierarchy diagonalizer `diagTM`

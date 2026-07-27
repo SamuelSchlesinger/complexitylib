@@ -11,7 +11,7 @@ public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Transition
 public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Transition.Predecessor
 public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Serializer.Transition.MovedHead
 public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Serializer.Transition.Polynomial
-public import Complexitylib.Models.TuringMachine.Experimental.BinaryRoutine.List
+import Std.Tactic.BVDecide.Normalize.Prop
 
 /-!
 # Direct-unrolling moved-head generator -- proof internals

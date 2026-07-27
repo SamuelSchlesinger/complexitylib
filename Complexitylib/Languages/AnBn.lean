@@ -6,8 +6,7 @@ Authors: Samuel Schlesinger
 module
 
 public import Complexitylib.Languages.Trivial
-public import Complexitylib.Models.TuringMachine.Combinators
-public import Complexitylib.Models.TuringMachine.Combinators.Internal.Complement
+import Std.Tactic.BVDecide.Normalize.Prop
 
 /-!
 # `{0ⁿ 1ⁿ : n ≥ 0}`: the canonical push-down language

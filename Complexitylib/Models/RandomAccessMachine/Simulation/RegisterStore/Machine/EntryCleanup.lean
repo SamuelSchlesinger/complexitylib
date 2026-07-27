@@ -9,7 +9,6 @@ public import
   Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Machine.EntryCleanup.Defs
 public import
   Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Machine.EntryCleanup.Internal
-public import Complexitylib.Models.TuringMachine.Hoare.Space
 
 /-!
 # Sparse-entry miss cleanup

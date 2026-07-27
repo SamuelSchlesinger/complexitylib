@@ -5,13 +5,10 @@ Authors: Samuel Schlesinger
 -/
 module
 
-public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.PolynomialOffset
-public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Primitive
 public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Transition.Next.Defs
-public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Transition.Effect
 public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Transition.MovedHead
 public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Transition.WrittenCell
-public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Serializer.Transition.Polynomial
+import Std.Tactic.BVDecide.Normalize.Prop
 
 /-!
 # Direct-unrolling next-atom generator -- proof internals

@@ -7,6 +7,7 @@ module
 
 public import Complexitylib.Circuits.DecisionTree
 public import Complexitylib.Circuits.Restriction
+import Std.Tactic.BVDecide.Normalize.Prop
 
 /-!
 # Restricting decision trees

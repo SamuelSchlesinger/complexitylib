@@ -6,8 +6,6 @@ Authors: Samuel Schlesinger
 module
 
 public import
-  Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Machine.Program.Init.Defs
-public import
   Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Machine.Program.Init.Internal
 
 /-!

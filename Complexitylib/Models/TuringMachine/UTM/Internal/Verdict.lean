@@ -6,8 +6,8 @@ Authors: Samuel Schlesinger
 module
 
 public import Complexitylib.Models.TuringMachine.UTM.Internal.Interp
-public import Complexitylib.Mathlib.NatBits
 public import Complexitylib.Models.TuringMachine.UTM.Internal.HaltTest
+import Std.Tactic.BVDecide.Normalize.Prop
 
 /-!
 # Halt-test verdict correspondence

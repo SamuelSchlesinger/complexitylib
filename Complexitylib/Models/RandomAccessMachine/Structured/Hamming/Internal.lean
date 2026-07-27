@@ -7,7 +7,7 @@ module
 
 public import Complexitylib.Models.RandomAccessMachine.Structured
 public import Complexitylib.Models.RandomAccessMachine.Structured.Hamming.Defs
-public import Complexitylib.Models.RandomAccessMachine.Structured.Internal.Resources
+import Std.Tactic.BVDecide.Normalize.Prop
 
 /-!
 # Structured RAM Hamming-weight program — proof internals

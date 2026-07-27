@@ -10,13 +10,9 @@ public import
 public import
   Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Machine.Program.Bounds
 public import
-  Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Machine.EntryScan
-public import
-  Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Machine.EntryUpdate
-public import
   Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Machine.DenseInputLookup
 public import Mathlib.Algebra.Order.BigOperators.Group.Finset
-public import Mathlib.Tactic.Linarith
+import Std.Tactic.BVDecide.Normalize.Prop
 
 /-!
 # Dense-overlay RAM decision-machine resource-bound proof internals

@@ -8,6 +8,7 @@ module
 public import Complexitylib.Models.TuringMachine.Repetition.Defs
 public import Complexitylib.Models.TuringMachine.Combinators.Internal.Generic
 public import Complexitylib.Models.TuringMachine.Trace
+import Std.Tactic.BVDecide.Normalize.BitVec
 
 /-!
 # Correctness internals for fixed-time repetition

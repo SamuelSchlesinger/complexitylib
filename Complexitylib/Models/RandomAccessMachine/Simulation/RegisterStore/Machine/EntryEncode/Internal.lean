@@ -9,7 +9,6 @@ public import
   Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Machine.EntryEncode.Defs
 public import
   Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Machine.WordEncode
-public import Complexitylib.Models.TuringMachine.Subroutines.ResetBinary
 
 /-!
 # Sparse entry emission — proof internals

@@ -9,7 +9,6 @@ public import
   Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Machine.WordEncode.Defs
 public import
   Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Machine.WordEncode.Internal
-public import Complexitylib.Models.TuringMachine.Hoare.Space
 
 /-!
 # Self-delimiting word emission

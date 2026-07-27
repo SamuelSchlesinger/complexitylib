@@ -8,6 +8,7 @@ module
 public import Complexitylib.Circuits.Hardwiring
 public import Complexitylib.Circuits.Unrolling.Amplification
 public import Complexitylib.Models.TuringMachine.Repetition.Defs
+import Std.Tactic.BVDecide.Normalize.Prop
 
 /-!
 # Probabilistic semantics of circuit amplification

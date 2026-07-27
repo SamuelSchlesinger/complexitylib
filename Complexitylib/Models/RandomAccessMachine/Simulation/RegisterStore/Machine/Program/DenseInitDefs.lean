@@ -7,7 +7,7 @@ module
 
 public import
   Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Machine.Program.Init.Defs
-public import Complexitylib.Models.TuringMachine.Subroutines
+import Std.Tactic.BVDecide.Normalize.Prop
 
 /-!
 # Dense-overlay public-input initialization -- definitions

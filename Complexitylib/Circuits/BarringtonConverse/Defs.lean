@@ -6,7 +6,6 @@ Authors: Samuel Schlesinger
 module
 
 public import Complexitylib.Circuits.BarringtonFamily
-public import Mathlib.Data.List.OfFn
 
 /-!
 # The converse direction of Barrington's theorem -- definitions

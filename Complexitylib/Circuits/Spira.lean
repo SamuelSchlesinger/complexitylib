@@ -5,7 +5,6 @@ Authors: Samuel Schlesinger
 -/
 module
 
-public import Complexitylib.Circuits.Formula
 public import Complexitylib.Circuits.Internal.Spira
 
 /-!

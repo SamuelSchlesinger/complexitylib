@@ -10,6 +10,8 @@ public import Complexitylib.Circuits.DecisionTree.Block
 public import Complexitylib.Circuits.DecisionTree.Finite
 public import Complexitylib.Circuits.DecisionTree.Path
 public import Complexitylib.Circuits.RandomRestriction.Internal
+import Std.Tactic.BVDecide.Normalize.BitVec
+import Std.Tactic.BVDecide.Normalize.Prop
 
 /-!
 # Switching-lemma substrate -- proof internals

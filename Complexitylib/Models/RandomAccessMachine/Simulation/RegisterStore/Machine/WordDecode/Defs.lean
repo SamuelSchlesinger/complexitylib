@@ -7,7 +7,7 @@ module
 
 public import Complexitylib.Models.TuringMachine.Combinators.ForWorkOnes.Defs
 public import Complexitylib.Models.TuringMachine.Subroutines.BinaryFor.Defs
-public import Complexitylib.Models.TuringMachine.Subroutines.BinarySucc.Defs
+import Std.Tactic.BVDecide.Normalize.Prop
 
 /-!
 # RAM snapshot word-width decoder — definitions

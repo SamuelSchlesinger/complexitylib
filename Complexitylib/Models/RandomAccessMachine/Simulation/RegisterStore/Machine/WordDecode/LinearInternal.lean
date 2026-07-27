@@ -7,7 +7,7 @@ module
 
 public import Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Machine.WordDecode.Defs
 public import Complexitylib.Models.TuringMachine.Internal
-public import Complexitylib.Models.TuringMachine.Tape.Encoding
+import Std.Tactic.BVDecide.Normalize.BitVec
 
 /-!
 # Linear RAM snapshot word decoder — proof internals

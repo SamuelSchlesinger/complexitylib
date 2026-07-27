@@ -5,7 +5,6 @@ Authors: Samuel Schlesinger
 -/
 module
 
-public import Mathlib.Algebra.BigOperators.Expect
 public import Mathlib.Analysis.InnerProductSpace.Basic
 public import Mathlib.Data.ZMod.Basic
 

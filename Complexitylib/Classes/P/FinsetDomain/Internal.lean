@@ -5,9 +5,6 @@ Authors: Bolton Bailey
 -/
 module
 
-public import Mathlib.Data.Fintype.Sets
-public import Mathlib.Data.Fintype.Option
-public import Mathlib.Data.Finset.Lattice.Fold
 public import Complexitylib.Mathlib.FinsetPrefixes
 public import Complexitylib.Classes.P.NormalForm
 public import Complexitylib.Models.TuringMachine.Tape.Encoding

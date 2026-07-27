@@ -5,12 +5,11 @@ Authors: Samuel Schlesinger
 -/
 module
 
-public import Complexitylib.Models.TuringMachine.Hoare.Space
 public import Complexitylib.Models.TuringMachine.Subroutines.BinaryRippleAdd.Internal.Bounds
-public import Complexitylib.Models.TuringMachine.Subroutines.BinaryRippleAdd.Internal.Pure
 public import Complexitylib.Models.TuringMachine.Subroutines.BinaryRippleAdd.Internal.Rewind
 public import Complexitylib.Models.TuringMachine.Subroutines.BinaryRippleAdd.Internal.Scan
 public import Complexitylib.Models.TuringMachine.Subroutines.BinarySucc
+import Std.Tactic.BVDecide.Normalize.Prop
 
 /-!
 # Linear-time canonical binary addition -- composed semantics

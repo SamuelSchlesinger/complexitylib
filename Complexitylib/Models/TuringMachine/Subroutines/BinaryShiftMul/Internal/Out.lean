@@ -8,7 +8,6 @@ module
 public import Complexitylib.Models.TuringMachine.Combinators.ForBinaryWork
 public import Complexitylib.Models.TuringMachine.Combinators.WorkSymbolBranch
 public import Complexitylib.Models.TuringMachine.Subroutines.BinaryCopy
-public import Complexitylib.Models.TuringMachine.Subroutines.BinaryRippleAdd
 public import Complexitylib.Models.TuringMachine.Subroutines.BinaryShiftMul.Defs
 public import Complexitylib.Models.TuringMachine.Subroutines.ResetBinaryMany
 

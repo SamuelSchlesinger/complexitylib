@@ -5,15 +5,8 @@ Authors: Samuel Schlesinger
 -/
 module
 
-public import Mathlib.Analysis.Asymptotics.Defs
 public import Mathlib.Analysis.Asymptotics.SpecificAsymptotics
-public import Mathlib.Analysis.Asymptotics.Lemmas
-public import Mathlib.Algebra.Polynomial.Eval.Defs
-public import Mathlib.Algebra.Polynomial.Eval.Degree
-public import Mathlib.Data.Finset.Lattice.Fold
-public import Mathlib.Data.Nat.Log
 public import Mathlib.Data.Nat.Size
-public import Mathlib.Algebra.Order.Floor.Semiring
 
 /-!
 # Asymptotic notation for natural number functions

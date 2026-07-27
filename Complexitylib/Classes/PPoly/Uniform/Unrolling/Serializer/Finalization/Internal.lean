@@ -8,7 +8,7 @@ module
 public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Serializer.Finalization.Defs
 public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Serializer.Initialization
 public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Stream
-public import Complexitylib.Circuits.Unrolling
+import Std.Tactic.BVDecide.Normalize.Prop
 
 /-!
 # Numeric direct-tableau finalization -- proof internals

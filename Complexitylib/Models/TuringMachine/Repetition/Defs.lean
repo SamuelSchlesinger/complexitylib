@@ -7,7 +7,7 @@ module
 
 public import Complexitylib.Classes.FiniteCounting
 public import Complexitylib.Models.TuringMachine.Combinators
-public import Mathlib.Logic.Equiv.Fin.Basic
+import Std.Tactic.BVDecide.Normalize.Prop
 
 /-!
 # Fixed-time repetition of probabilistic Turing machines

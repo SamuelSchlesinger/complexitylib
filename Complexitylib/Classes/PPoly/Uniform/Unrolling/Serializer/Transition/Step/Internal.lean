@@ -5,10 +5,8 @@ Authors: Samuel Schlesinger
 -/
 module
 
-public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Serializer
 public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Serializer.Transition.Next
 public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Serializer.Transition.Step.Defs
-public import Complexitylib.Circuits.Unrolling.Transition.Fragment
 
 /-!
 # Numeric packed-step schedules -- proof internals

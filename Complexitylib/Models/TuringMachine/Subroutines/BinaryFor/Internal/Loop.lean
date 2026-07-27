@@ -5,8 +5,6 @@ Authors: Samuel Schlesinger
 -/
 module
 
-public import Complexitylib.Models.TuringMachine.Internal
-public import Complexitylib.Models.TuringMachine.SpaceTime.Internal.Reachability
 public import Complexitylib.Models.TuringMachine.Subroutines.BinaryFor.Defs
 public import Complexitylib.Models.TuringMachine.Subroutines.BinarySucc.Internal
 

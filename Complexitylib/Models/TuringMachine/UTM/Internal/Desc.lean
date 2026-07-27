@@ -5,8 +5,8 @@ Authors: Samuel Schlesinger
 -/
 module
 
-public import Complexitylib.Models.TuringMachine
 public import Complexitylib.Models.TuringMachine.UTM.Encoding
+import Std.Tactic.BVDecide.Normalize.Prop
 
 /-!
 # Machine descriptions for the universal Turing machine

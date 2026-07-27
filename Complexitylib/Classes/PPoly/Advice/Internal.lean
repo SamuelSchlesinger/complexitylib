@@ -7,7 +7,6 @@ module
 
 public import Complexitylib.Classes.PPoly
 public import Complexitylib.Classes.PPoly.Advice.Defs
-public import Complexitylib.Models.TuringMachine.Internal
 
 /-!
 # Polynomial advice — proof internals

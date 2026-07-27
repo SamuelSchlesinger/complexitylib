@@ -8,6 +8,7 @@ module
 public import Complexitylib.Models.TuringMachine.Subroutines
 public import Complexitylib.Models.TuringMachine.Tape.Encoding
 public import Mathlib.Data.Nat.Size
+import Std.Tactic.BVDecide.Normalize.Prop
 
 /-!
 # Linear-time canonical binary subtraction -- definitions

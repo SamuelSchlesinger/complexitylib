@@ -7,6 +7,7 @@ module
 
 public import Complexitylib.Models.RandomAccessMachine.Simulation.TMConfig.Sparse.ABI.Defs
 public import Complexitylib.Models.RandomAccessMachine.Structured.Internal
+import Std.Tactic.BVDecide.Normalize.Prop
 
 /-!
 # Capturing raw-input scratch bits in finite control -- proof internals

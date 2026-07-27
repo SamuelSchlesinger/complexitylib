@@ -7,7 +7,6 @@ module
 
 public import Complexitylib.Circuits.Encoding.Machine.NatCode
 public import Complexitylib.Circuits.Encoding.Machine.RawGate.Defs
-public import Complexitylib.Models.TuringMachine.Hoare.Space
 
 /-!
 # Machine emission of raw circuit gates — proof internals

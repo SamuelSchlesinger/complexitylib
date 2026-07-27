@@ -5,8 +5,6 @@ Authors: Samuel Schlesinger
 -/
 module
 
-public import Complexitylib.Models.TuringMachine.Lift
-public import Complexitylib.Models.TuringMachine.Hoare
 public import Complexitylib.Models.TuringMachine.Subroutines.PairValidate.Defs
 public import Complexitylib.Models.TuringMachine.Subroutines.PairValidate.Internal
 

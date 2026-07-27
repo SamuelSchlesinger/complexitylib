@@ -6,8 +6,8 @@ Authors: Samuel Schlesinger
 module
 
 public import Complexitylib.Models.RandomAccessMachine.Structured
-public import Complexitylib.Models.RandomAccessMachine.Structured.Internal.Resources
 public import Complexitylib.Models.RandomAccessMachine.Structured.UnaryDecode.Defs
+import Std.Tactic.BVDecide.Normalize.Prop
 
 /-!
 # Structured RAM terminated-unary decoder — proof internals

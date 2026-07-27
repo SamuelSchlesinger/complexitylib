@@ -8,11 +8,11 @@ module
 public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Initialization.Defs
 public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Serializer.Bounds
 public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Serializer.Initialization
-public import Complexitylib.Models.TuringMachine.Experimental.BinaryRoutine.Arithmetic
 public import Complexitylib.Models.TuringMachine.Experimental.BinaryRoutine.Control
 public import Complexitylib.Models.TuringMachine.Experimental.BinaryRoutine.InputLength
-public import Complexitylib.Models.TuringMachine.Experimental.BinaryRoutine.List
 public import Complexitylib.Models.TuringMachine.Experimental.BinaryRoutine.SpaceBounds
+import Std.Tactic.BVDecide.Normalize.BitVec
+import Std.Tactic.BVDecide.Normalize.Prop
 
 /-!
 # Direct-unrolling initialization generator -- proof internals

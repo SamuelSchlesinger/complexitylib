@@ -8,6 +8,7 @@ module
 public import Complexitylib.Circuits.AC0.NormalForm.Internal
 public import Complexitylib.Circuits.AC0.Normalization.Defs
 public import Mathlib.Tactic
+import Std.Tactic.BVDecide.Normalize.Bool
 
 /-!
 # AC0 circuit normalization -- proof internals

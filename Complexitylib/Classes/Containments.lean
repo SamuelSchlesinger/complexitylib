@@ -10,8 +10,7 @@ public import Complexitylib.Classes.NP
 public import Complexitylib.Classes.Randomized
 public import Complexitylib.Classes.L
 public import Complexitylib.Classes.Exponential
-public import Complexitylib.Models.TuringMachine.Internal
-public import Complexitylib.Models.TuringMachine.Combinators.Internal.Complement
+import Std.Tactic.BVDecide.Normalize.Prop
 
 /-!
 # Containment relations between complexity classes

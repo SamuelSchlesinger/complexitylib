@@ -9,7 +9,6 @@ public import
   Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Machine.EntryReplace.Defs
 public import
   Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Machine.EntryReplace.Internal
-public import Complexitylib.Models.TuringMachine.Hoare.Space
 
 /-!
 # Sparse-entry replacement

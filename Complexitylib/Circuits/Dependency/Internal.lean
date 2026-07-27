@@ -6,6 +6,7 @@ Authors: Samuel Schlesinger
 module
 
 public import Complexitylib.Circuits.Dependency.Defs
+import Std.Tactic.BVDecide.Normalize.Prop
 
 /-!
 # Circuit dependency graphs -- proof internals

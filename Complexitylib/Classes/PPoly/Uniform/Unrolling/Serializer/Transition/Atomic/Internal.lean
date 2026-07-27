@@ -7,7 +7,7 @@ module
 
 public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Serializer.Transition
 public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Serializer.Transition.Atomic.Defs
-public import Complexitylib.Circuits.Encoding.Formula
+import Std.Tactic.BVDecide.Normalize.Prop
 
 /-!
 # Numeric schedules for atomic transition formulas -- proof internals

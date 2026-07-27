@@ -6,7 +6,6 @@ Authors: Samuel Schlesinger
 module
 
 public import Complexitylib.SAT.Tseitin.Machine.Defs
-public import Mathlib.Data.Fintype.Sigma
 
 /-!
 # Streaming controller for the CNF-to-3CNF reduction machine

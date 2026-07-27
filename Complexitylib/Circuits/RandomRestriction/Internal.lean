@@ -7,7 +7,7 @@ module
 
 public import Complexitylib.Circuits.RandomRestriction.Defs
 public import Mathlib.Data.Fintype.BigOperators
-public import Mathlib.Data.Finset.Card
+import Std.Tactic.BVDecide.Normalize.Prop
 
 /-!
 # Finite random restrictions -- proof internals

@@ -6,12 +6,9 @@ Authors: Samuel Schlesinger
 module
 
 public import Complexitylib.SAT.Language
-public import Complexitylib.Asymptotics
 public import Complexitylib.Classes.NP.Internal.PairBuildTM
 public import Complexitylib.Models.TuringMachine.Subroutines.GuessBounded
-public import Complexitylib.Models.TuringMachine.Subroutines.Internal
-public import Complexitylib.Models.TuringMachine.Combinators.Internal.Retarget
-public import Complexitylib.Models.TuringMachine.Trace
+import Std.Tactic.BVDecide.Normalize.Prop
 
 /-!
 # SAT-specialized guess-and-verify NTM

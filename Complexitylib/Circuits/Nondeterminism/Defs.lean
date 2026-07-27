@@ -6,8 +6,9 @@ Authors: Samuel Schlesinger
 module
 
 public import Complexitylib.Circuits.Basic
-public import Mathlib.Data.Fin.Tuple.Basic
 public import Mathlib.Data.Fintype.BigOperators
+import Std.Tactic.BVDecide.Normalize.BitVec
+import Std.Tactic.BVDecide.Normalize.Prop
 
 /-! # Nondeterministic Quantification of Boolean Functions
 

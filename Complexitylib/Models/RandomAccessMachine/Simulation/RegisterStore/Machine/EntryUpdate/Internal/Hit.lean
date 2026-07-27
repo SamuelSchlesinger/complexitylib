@@ -6,22 +6,12 @@ Authors: Samuel Schlesinger
 module
 
 public import
-  Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Machine.EntryCleanup
-public import
-  Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Machine.EntryMatch
-public import
-  Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Machine.EntryReplace
-public import
-Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Machine.EntryUpdate.Internal.Ctrl
-public import
-  Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Machine.EntryUpdate.Internal.Inv
-public import
 Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Machine.EntryUpdate.Internal.Loop
 public import
   Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Machine.EntryUpdate.Internal.Out
 public import
 Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Machine.EntryUpdate.Internal.Time
-public import Complexitylib.Models.TuringMachine.Subroutines.BinaryPred
+import Std.Tactic.BVDecide.Normalize.Prop
 
 /-!
 # Bounded encoded sparse-store update -- matching iterations

@@ -9,7 +9,6 @@ public import
   Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Machine.Instruction.Sim.Defs
 public import
   Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Machine.Instruction
-public import Complexitylib.Models.TuringMachine.Hoare.RetargetOutput
 
 /-!
 # Uniform next-store buffering for data instructions

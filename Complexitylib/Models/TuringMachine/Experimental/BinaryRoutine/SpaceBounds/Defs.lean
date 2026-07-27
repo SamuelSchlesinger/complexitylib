@@ -7,7 +7,6 @@ module
 
 public import Complexitylib.Asymptotics
 public import Complexitylib.Models.TuringMachine.Experimental.BinaryRoutine.Control.Defs
-public import Mathlib.Data.Nat.Pairing
 
 /-!
 # Compositional width bounds for binary routines -- definitions

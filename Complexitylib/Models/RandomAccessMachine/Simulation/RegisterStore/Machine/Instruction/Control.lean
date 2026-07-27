@@ -9,10 +9,6 @@ public import
   Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Machine.Instruction.Defs
 public import
   Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Machine.EntryLookupRestore
-public import Complexitylib.Models.TuringMachine.Combinators.WorkBranch
-public import Complexitylib.Models.TuringMachine.Subroutines.BinaryAddConst
-public import Complexitylib.Models.TuringMachine.Subroutines.BinarySucc
-public import Complexitylib.Models.TuringMachine.Subroutines.ResetBinary
 
 /-!
 # Sparse-store control instructions

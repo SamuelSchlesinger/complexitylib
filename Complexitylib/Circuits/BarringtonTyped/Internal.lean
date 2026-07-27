@@ -8,6 +8,7 @@ module
 public import Complexitylib.Circuits.BarringtonCompiler
 public import Complexitylib.Circuits.BarringtonConverse
 public import Complexitylib.Circuits.BarringtonTyped.Defs
+import Std.Tactic.BVDecide.Normalize.BitVec
 
 /-!
 # Fixed-arity nonuniform Barrington families -- proof internals

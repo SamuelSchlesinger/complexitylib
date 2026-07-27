@@ -8,6 +8,8 @@ module
 public import Complexitylib.Classes.PPoly.Uniform.Unrolling
 public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Serializer.Initialization.Defs
 public import Complexitylib.Circuits.Unrolling
+import Std.Tactic.BVDecide.Normalize.BitVec
+import Std.Tactic.BVDecide.Normalize.Prop
 
 /-!
 # Numeric initialization schedule -- proof internals

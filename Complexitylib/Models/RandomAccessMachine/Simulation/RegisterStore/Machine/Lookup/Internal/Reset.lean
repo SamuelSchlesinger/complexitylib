@@ -9,7 +9,7 @@ public import
   Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Machine.EntryLookup
 public import
   Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Machine.Lookup.Internal.Bounds
-public import Mathlib.Tactic.FinCases
+import Std.Tactic.BVDecide.Normalize.Prop
 
 /-!
 # Reusable sparse-register lookup -- reset certificates

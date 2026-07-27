@@ -8,7 +8,6 @@ module
 public import Complexitylib.Models.TuringMachine.UTM.Diagonal
 public import Complexitylib.Models.TuringMachine.UTM.Universal
 public import Complexitylib.Classes.Containments
-public import Mathlib.Analysis.Asymptotics.SpecificAsymptotics
 
 /-!
 # The deterministic time hierarchy theorem (weak form)

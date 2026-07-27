@@ -6,7 +6,6 @@ Authors: Samuel Schlesinger
 module
 
 public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Padded.Defs
-public import Mathlib.Algebra.Polynomial.Eval.Defs
 
 /-!
 # Polynomial counters for direct tableau serialization -- definitions

@@ -6,9 +6,6 @@ Authors: Samuel Schlesinger
 module
 
 public import Complexitylib.Circuits.Encoding.Machine.NatCode.Defs
-public import Complexitylib.Models.TuringMachine.Combinators.Internal.Seq
-public import Complexitylib.Models.TuringMachine.Hoare.Space
-public import Complexitylib.Models.TuringMachine.Subroutines.BinaryFor.Internal.Control
 public import Complexitylib.Models.TuringMachine.Subroutines.BinarySucc
 public import Complexitylib.Models.TuringMachine.Subroutines.ClearWork
 

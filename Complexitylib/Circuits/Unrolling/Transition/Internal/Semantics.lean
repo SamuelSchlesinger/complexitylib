@@ -7,7 +7,8 @@ module
 
 public import Complexitylib.Circuits.Encoding.Formula.Batch
 public import Complexitylib.Circuits.Unrolling.Transition.Defs
-public import Mathlib.Data.List.OfFn
+import Std.Tactic.BVDecide.Normalize.BitVec
+import Std.Tactic.BVDecide.Normalize.Prop
 
 /-!
 # Semantic correctness of one-step transition formulas

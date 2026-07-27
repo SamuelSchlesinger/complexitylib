@@ -7,6 +7,7 @@ module
 
 public import Complexitylib.Models.TuringMachine.Subroutines
 public import Complexitylib.Models.TuringMachine.Tape.Encoding
+import Std.Tactic.BVDecide.Normalize.Prop
 
 /-!
 # Binary work-tape equality — definitions

@@ -5,7 +5,6 @@ Authors: Samuel Schlesinger
 -/
 module
 
-public import Complexitylib.Circuits.Encoding.Fragment
 public import Complexitylib.Circuits.Unrolling.Trace.Internal.Structure
 public import Complexitylib.Circuits.Unrolling.Transition.Fragment.Internal.Topology
 

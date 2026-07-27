@@ -5,10 +5,6 @@ Authors: Samuel Schlesinger
 -/
 module
 
-public import Complexitylib.Models.TuringMachine.Combinators
-public import Complexitylib.Models.TuringMachine.Combinators.Internal.Generic
-public import Complexitylib.Models.TuringMachine.Internal
-public import Complexitylib.Models.TuringMachine.Hoare.Defs
 public import Complexitylib.Models.TuringMachine.Subroutines.Counter
 public import Complexitylib.Models.TuringMachine.Subroutines.Internal
 

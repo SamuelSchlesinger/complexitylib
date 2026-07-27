@@ -5,7 +5,6 @@ Authors: Samuel Schlesinger
 -/
 module
 
-public import Complexitylib.Models.TuringMachine
 public import Complexitylib.Models.TuringMachine.Internal
 
 /-!

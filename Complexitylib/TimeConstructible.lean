@@ -7,7 +7,6 @@ module
 
 public import Complexitylib.Models.TuringMachine
 public import Complexitylib.Asymptotics
-public import Mathlib.Data.Nat.Bits
 
 /-!
 # Time-constructible functions

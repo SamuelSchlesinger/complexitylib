@@ -7,6 +7,7 @@ module
 
 public import Complexitylib.Models.RandomAccessMachine.Simulation.TMConfig.Sparse.ABI.Internal.Decision
 public import Complexitylib.Models.RandomAccessMachine.Simulation.TMConfig.Sparse.Step.Internal.Resources
+import Std.Tactic.BVDecide.Normalize.Prop
 
 /-!
 # Resource bounds for the public sparse-simulator ABI -- proof internals

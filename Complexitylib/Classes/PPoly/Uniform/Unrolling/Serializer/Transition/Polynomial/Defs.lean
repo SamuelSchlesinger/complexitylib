@@ -6,7 +6,6 @@ Authors: Samuel Schlesinger
 module
 
 public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Serializer.Transition.Next.Defs
-public import Mathlib.Algebra.Polynomial.Eval.Defs
 
 /-!
 # Fixed transition-schedule size polynomials -- definitions

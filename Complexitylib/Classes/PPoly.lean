@@ -7,6 +7,7 @@ module
 
 public import Complexitylib.Classes.PPoly.Defs
 public import Complexitylib.Circuits.Family
+import Std.Tactic.BVDecide.Normalize.Prop
 
 /-!
 # P/poly and circuit-size classes

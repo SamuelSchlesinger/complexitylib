@@ -8,6 +8,7 @@ module
 public import Complexitylib.Models.TuringMachine.Registers.Horner
 public import Complexitylib.SAT.Tseitin.Internal.StateBounds
 public import Complexitylib.SAT.Tseitin.Machine.Internal.ControllerInvariant
+import Std.Tactic.BVDecide.Normalize.Prop
 
 /-!
 # Coarse runtime bounds for the streaming Tseitin controller

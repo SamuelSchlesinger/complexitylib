@@ -8,6 +8,8 @@ module
 public import Complexitylib.Models.TuringMachine.SpaceTime.Internal.Observation
 public import Complexitylib.Models.TuringMachine.SpaceTime.Internal.OutputFrontier
 public import Complexitylib.Models.TuringMachine.Internal
+import Std.Tactic.BVDecide.Normalize.BitVec
+import Std.Tactic.BVDecide.Normalize.Prop
 
 /-!
 # Reduced transducer snapshot dynamics — proof internals

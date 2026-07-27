@@ -7,6 +7,7 @@ module
 
 public import Complexitylib.BooleanAnalysis.FourierExpansion.Internal
 public import Mathlib.Probability.ProbabilityMassFunction.Constructions
+import Std.Tactic.BVDecide.Normalize.Prop
 
 /-!
 # Chapter 1: Boolean functions and the Fourier expansion

@@ -7,6 +7,7 @@ module
 
 public import Complexitylib.Circuits.Encoding.Formula.Batch
 public import Complexitylib.Circuits.Unrolling.Transition.Defs
+import Std.Tactic.BVDecide.Normalize.Prop
 
 /-!
 # Variable support of transition formulas

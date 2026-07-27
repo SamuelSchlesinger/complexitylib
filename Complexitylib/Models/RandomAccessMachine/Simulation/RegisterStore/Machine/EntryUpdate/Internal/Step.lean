@@ -9,6 +9,7 @@ public import
   Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Machine.EntryUpdate.Internal.Hit
 public import
 Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Machine.EntryUpdate.Internal.Miss
+import Std.Tactic.BVDecide.Normalize.Prop
 
 /-!
 # Bounded encoded sparse-store update -- one positive iteration

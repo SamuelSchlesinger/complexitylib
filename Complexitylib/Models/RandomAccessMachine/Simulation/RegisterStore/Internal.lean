@@ -7,6 +7,7 @@ module
 
 public import Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Defs
 public import Complexitylib.Models.RandomAccessMachine.Internal
+import Std.Tactic.BVDecide.Normalize.Prop
 
 /-!
 # Sparse RAM register stores on Turing tapes: proof internals

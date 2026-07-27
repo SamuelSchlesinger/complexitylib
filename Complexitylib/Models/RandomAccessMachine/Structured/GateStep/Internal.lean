@@ -10,6 +10,7 @@ public import Complexitylib.Models.RandomAccessMachine.Structured.GateEval.Inter
 public import Complexitylib.Models.RandomAccessMachine.Structured.GateStep.Defs
 public import Complexitylib.Models.RandomAccessMachine.Structured.UnaryDecode.Internal
 public import Mathlib.Tactic.IntervalCases
+import Std.Tactic.BVDecide.Normalize.Prop
 
 /-!
 # Structured RAM serialized-gate step — proof internals

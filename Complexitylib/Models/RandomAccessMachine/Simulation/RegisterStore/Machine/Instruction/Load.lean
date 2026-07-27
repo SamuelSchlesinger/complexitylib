@@ -9,7 +9,6 @@ public import
   Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Machine.Instruction.Internal
 public import
   Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Machine.EntryLookupRestore
-public import Complexitylib.Models.TuringMachine.Subroutines.BinaryAddConst
 
 /-!
 # Indirect sparse-store load instructions -- proof internals

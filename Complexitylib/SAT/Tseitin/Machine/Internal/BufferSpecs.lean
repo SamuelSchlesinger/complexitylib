@@ -7,7 +7,6 @@ module
 
 public import Complexitylib.Models.TuringMachine.Experimental.EmitSpec
 public import Complexitylib.SAT.Tseitin.Machine.Defs
-public import Mathlib.Tactic.FinCases
 
 /-!
 # Hoare specifications for Tseitin literal buffers and emitters

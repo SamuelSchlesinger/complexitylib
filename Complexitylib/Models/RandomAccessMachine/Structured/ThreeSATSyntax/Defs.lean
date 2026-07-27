@@ -7,6 +7,7 @@ module
 
 public import Complexitylib.Models.RandomAccessMachine.Structured.Scanner.Defs
 public import Complexitylib.SAT.ThreeSAT.Syntax
+import Std.Tactic.BVDecide.Normalize.Prop
 
 /-!
 # Structured RAM exact-3-CNF syntax scanner — definitions

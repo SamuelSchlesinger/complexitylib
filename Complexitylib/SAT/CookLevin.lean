@@ -9,6 +9,8 @@ public import Complexitylib.SAT.Headline
 public import Complexitylib.SAT.Rename
 public import Complexitylib.Classes.NP.Reduction
 public import Complexitylib.Models.TuringMachine.SingleTape
+import Std.Tactic.BVDecide.Normalize.BitVec
+import Std.Tactic.BVDecide.Normalize.Prop
 
 /-!
 # Cook–Levin tableau core

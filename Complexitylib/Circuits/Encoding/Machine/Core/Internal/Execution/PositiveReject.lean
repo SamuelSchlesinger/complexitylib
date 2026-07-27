@@ -5,7 +5,6 @@ Authors: Samuel Schlesinger
 -/
 module
 
-public import Complexitylib.Circuits.Encoding.Internal.Codec
 public import Complexitylib.Circuits.Encoding.Machine.Core.Internal.Execution
 
 /-!

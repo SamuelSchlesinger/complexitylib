@@ -5,7 +5,6 @@ Authors: Samuel Schlesinger
 -/
 module
 
-public import Complexitylib.Models.TuringMachine
 public import Complexitylib.Models.TuringMachine.Combinators
 public import Complexitylib.Models.TuringMachine.UTM.Internal.Desc
 public import Complexitylib.Models.TuringMachine.UTM.Internal.VTape
@@ -14,7 +13,6 @@ public import Mathlib.Tactic.FinCases
 public import Mathlib.Data.Fintype.Sigma
 public import Mathlib.Data.Fintype.Prod
 public import Mathlib.Data.Fintype.Option
-public import Mathlib.Data.Fintype.Sum
 
 /-!
 # The universal machine's loop body

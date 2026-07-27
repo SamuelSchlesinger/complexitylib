@@ -7,6 +7,7 @@ module
 
 public import Complexitylib.Circuits.DecisionTree.Path.Defs
 public import Complexitylib.Circuits.DecisionTree.Finite.Internal
+import Std.Tactic.BVDecide.Normalize.Prop
 
 /-!
 # Canonical deepest paths in finite decision trees -- proof internals

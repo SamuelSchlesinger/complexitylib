@@ -5,15 +5,9 @@ Authors: Samuel Schlesinger
 -/
 module
 
-public import Complexitylib.Circuits.Encoding.Machine.NatCode
-public import Complexitylib.Circuits.Encoding.Machine.RawGate
 public import Complexitylib.Models.TuringMachine.Experimental.BinaryRoutine
 public import Complexitylib.Models.TuringMachine.Experimental.BinaryRoutine.Arithmetic.Defs
-public import Complexitylib.Models.TuringMachine.Subroutines.BinaryAdd
-public import Complexitylib.Models.TuringMachine.Subroutines.BinaryAddConst
-public import Complexitylib.Models.TuringMachine.Subroutines.BinaryMulAdd
 public import Complexitylib.Models.TuringMachine.Subroutines.BinaryPolynomial
-public import Complexitylib.Models.TuringMachine.Subroutines.ClearWork
 
 /-!
 # Arithmetic leaves for proof-carrying binary routines -- proof internals

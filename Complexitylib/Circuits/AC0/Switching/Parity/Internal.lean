@@ -6,7 +6,6 @@ Authors: Samuel Schlesinger
 module
 
 public import Complexitylib.Circuits.AC0.Switching.Internal
-public import Complexitylib.Circuits.RandomRestriction.Internal
 public import Complexitylib.Circuits.XOR.Restriction.Internal
 
 /-!

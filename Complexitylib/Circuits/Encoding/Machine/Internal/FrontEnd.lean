@@ -6,7 +6,6 @@ Authors: Samuel Schlesinger
 module
 
 public import Complexitylib.Circuits.Encoding.Machine.Defs
-public import Complexitylib.Models.TuringMachine.Hoare
 public import Complexitylib.Models.TuringMachine.Subroutines.Internal
 public import Complexitylib.Models.TuringMachine.Subroutines.PairSplit
 public import Complexitylib.Models.TuringMachine.Subroutines.PairValidate

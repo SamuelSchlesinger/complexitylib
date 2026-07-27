@@ -7,7 +7,6 @@ module
 
 public import
   Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Machine.Instruction.Direct
-public import Complexitylib.Models.TuringMachine.Subroutines.BinaryCopy
 
 /-!
 # Indirect sparse-store instructions -- proof internals

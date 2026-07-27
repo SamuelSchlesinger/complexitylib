@@ -6,6 +6,7 @@ Authors: Samuel Schlesinger
 module
 
 public import Complexitylib.Circuits.Encoding.Defs
+import Std.Tactic.BVDecide.Normalize.Prop
 
 /-!
 # Correctness of the machine-facing circuit codec

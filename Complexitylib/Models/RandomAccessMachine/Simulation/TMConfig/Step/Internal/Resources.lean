@@ -6,6 +6,7 @@ Authors: Samuel Schlesinger
 module
 
 public import Complexitylib.Models.RandomAccessMachine.Simulation.TMConfig.Step.Internal.Dispatch
+import Std.Tactic.BVDecide.Normalize.Prop
 
 /-!
 # Resource bounds for one TM-to-RAM transition -- proof internals

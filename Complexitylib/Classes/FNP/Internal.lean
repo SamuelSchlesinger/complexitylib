@@ -6,8 +6,6 @@ Authors: Samuel Schlesinger
 module
 
 public import Complexitylib.Classes.FNP.Defs
-public import Complexitylib.Classes.P
-public import Mathlib.Analysis.Asymptotics.Defs
 
 /-!
 # FNP and TFNP — Internal proofs

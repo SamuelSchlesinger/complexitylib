@@ -6,6 +6,7 @@ Authors: Samuel Schlesinger
 module
 
 public import Complexitylib.SAT.Tseitin.Defs
+import Std.Tactic.BVDecide.Normalize.Prop
 
 /-!
 # Structural properties of Tseitin clause splitting

@@ -6,7 +6,6 @@ Authors: Samuel Schlesinger
 module
 
 public import Complexitylib.Circuits.Restriction
-public import Mathlib.Data.Fintype.Card
 public import Mathlib.Data.Fintype.Pi
 public import Mathlib.Data.Fintype.Prod
 public import Mathlib.Data.Fintype.Sum

@@ -7,7 +7,6 @@ module
 
 public import Complexitylib.Circuits.AndOrNot.Defs
 public import Complexitylib.Circuits.BasisHom.Defs
-public import Batteries.Data.Fin.Lemmas
 
 /-!
 # Threshold circuits -- definitions

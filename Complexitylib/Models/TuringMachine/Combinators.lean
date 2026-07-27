@@ -7,6 +7,7 @@ module
 
 public import Complexitylib.Models.TuringMachine
 public import Mathlib.Data.Fintype.Sum
+import Std.Tactic.BVDecide.Normalize.Prop
 
 /-!
 # TM Combinators

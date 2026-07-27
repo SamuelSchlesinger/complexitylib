@@ -6,6 +6,7 @@ Authors: Samuel Schlesinger
 module
 
 public import Complexitylib.Models.TuringMachine.Repetition.Internal
+import Std.Tactic.BVDecide.Normalize.Prop
 
 /-!
 # Vote bookkeeping for fixed-time repetition

@@ -10,6 +10,7 @@ public import Complexitylib.Models.TuringMachine
 public import Mathlib.Data.Fintype.Sum
 public import Mathlib.Logic.Equiv.Fin.Basic
 public import Mathlib.Tactic.DeriveFintype
+import Std.Tactic.BVDecide.Normalize.Prop
 
 /-!
 # Circuit layouts for bounded Turing-machine traces

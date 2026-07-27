@@ -6,8 +6,6 @@ Authors: Samuel Schlesinger
 module
 
 public import Complexitylib.Models.TuringMachine.SingleTape.Internal
-public import Mathlib.Data.Fintype.Prod
-public import Mathlib.Data.Fintype.Sum
 public import Mathlib.Data.Finite.Prod
 public import Mathlib.Data.Finite.Sum
 

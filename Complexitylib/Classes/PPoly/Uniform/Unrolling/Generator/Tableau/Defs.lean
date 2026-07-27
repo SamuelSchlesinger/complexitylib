@@ -6,8 +6,6 @@ Authors: Samuel Schlesinger
 module
 
 public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Finalization.Defs
-public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Initialization.Defs
-public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Program.Defs
 public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Transition.Step.Defs
 
 /-!

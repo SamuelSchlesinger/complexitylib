@@ -10,7 +10,6 @@ public import Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.
 public import
 Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Machine.WordDecode.LinearInternal
 public import Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Defs
-public import Complexitylib.Models.TuringMachine.Hoare.Space
 
 /-!
 # RAM snapshot word-width decoder

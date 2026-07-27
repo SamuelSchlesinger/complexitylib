@@ -11,6 +11,7 @@ public import Complexitylib.Models.TuringMachine.Subroutines.BinaryFor
 public import Complexitylib.Models.TuringMachine.Subroutines.BinarySucc
 public import Complexitylib.Models.TuringMachine.Subroutines.Internal
 public import Mathlib.Tactic.Linarith
+import Std.Tactic.BVDecide.Normalize.BitVec
 
 /-!
 # RAM snapshot word-width decoder — proof internals

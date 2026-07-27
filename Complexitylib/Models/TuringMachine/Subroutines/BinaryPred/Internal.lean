@@ -6,9 +6,9 @@ Authors: Samuel Schlesinger
 module
 
 public import Complexitylib.Mathlib.NatBits
-public import Complexitylib.Models.TuringMachine.Combinators.Internal.Generic
 public import Complexitylib.Models.TuringMachine.Hoare.Space
 public import Complexitylib.Models.TuringMachine.Subroutines.BinaryPred.Defs
+import Std.Tactic.BVDecide.Normalize.Prop
 
 /-!
 # Little-endian binary predecessor — proof internals

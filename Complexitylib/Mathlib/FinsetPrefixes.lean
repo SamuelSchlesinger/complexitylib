@@ -6,7 +6,6 @@ Authors: Bolton Bailey
 module
 
 public import Mathlib.Data.Finset.Union
-public import Mathlib.Data.List.Infix
 
 /-!
 # Finsets of prefixes and suffixes

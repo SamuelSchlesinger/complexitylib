@@ -9,13 +9,8 @@ public import
   Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Machine.EntryUpdate.Defs
 public import
   Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Machine.Lookup.Defs
-public import Complexitylib.Models.TuringMachine.Combinators.WorkBranch.Defs
-public import Complexitylib.Models.TuringMachine.Subroutines.BinaryAddConst.Defs
-public import Complexitylib.Models.TuringMachine.Subroutines.BinaryRippleAdd.Defs
 public import Complexitylib.Models.TuringMachine.Subroutines.BinaryRippleSub.Defs
 public import Complexitylib.Models.TuringMachine.Subroutines.BinaryShiftMul.Defs
-public import Complexitylib.Models.TuringMachine.Subroutines.ResetBinary.Defs
-public import Mathlib.Tactic.FinCases
 
 /-!
 # Concrete sparse-store arithmetic instruction kernel

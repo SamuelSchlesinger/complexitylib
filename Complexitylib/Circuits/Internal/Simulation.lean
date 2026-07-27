@@ -8,6 +8,7 @@ module
 public import Complexitylib.Circuits.Internal.AndOrNot
 public import Complexitylib.Circuits.Dependency.Defs
 public import Mathlib.Algebra.BigOperators.Fin
+import Std.Tactic.BVDecide.Normalize.BitVec
 
 /-! # Internal: Completeness of fan-in-2 AND/OR
 

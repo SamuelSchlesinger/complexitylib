@@ -11,6 +11,7 @@ public import
   Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Machine.Instruction.DenseSimDefs
 public import
   Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Machine.Instruction.Sim.Control
+import Std.Tactic.BVDecide.Normalize.Prop
 
 /-!
 # Dense-overlay control-instruction simulation

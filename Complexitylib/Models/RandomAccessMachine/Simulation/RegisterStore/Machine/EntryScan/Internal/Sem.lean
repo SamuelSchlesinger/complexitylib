@@ -11,6 +11,7 @@ public import
   Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Machine.EntryScan.Internal.Inv
 public import Complexitylib.Models.TuringMachine.Combinators.WorkBranch
 public import Complexitylib.Models.TuringMachine.Subroutines.BinaryPred
+import Std.Tactic.BVDecide.Normalize.Prop
 
 /-!
 # Bounded sparse-entry scan — semantic internals

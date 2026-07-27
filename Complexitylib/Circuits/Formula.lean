@@ -5,9 +5,6 @@ Authors: Samuel Schlesinger
 -/
 module
 
-public import Mathlib.Data.Nat.Basic
-public import Mathlib.Data.Bool.Basic
-public import Mathlib.Data.Finset.Basic
 public import Mathlib.Data.Finset.Union
 
 /-!

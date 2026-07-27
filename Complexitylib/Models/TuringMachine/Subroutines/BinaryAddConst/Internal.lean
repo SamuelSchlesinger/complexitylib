@@ -5,8 +5,6 @@ Authors: Samuel Schlesinger
 -/
 module
 
-public import Complexitylib.Models.TuringMachine.Combinators.Internal.Seq
-public import Complexitylib.Models.TuringMachine.Hoare.Space
 public import Complexitylib.Models.TuringMachine.Subroutines.BinaryAddConst.Defs
 public import Complexitylib.Models.TuringMachine.Subroutines.BinarySucc
 

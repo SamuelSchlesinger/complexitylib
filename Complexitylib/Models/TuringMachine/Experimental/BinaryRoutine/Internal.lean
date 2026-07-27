@@ -7,10 +7,8 @@ module
 
 public import Complexitylib.Circuits.Encoding.Machine.GateStream
 public import Complexitylib.Models.TuringMachine.Experimental.BinaryRoutine.Defs
-public import Complexitylib.Models.TuringMachine.Hoare.Space
 public import Complexitylib.Models.TuringMachine.Subroutines.BinaryCopy
 public import Complexitylib.Models.TuringMachine.Subroutines.BinaryPred
-public import Complexitylib.Models.TuringMachine.Subroutines.BinarySucc
 
 /-!
 # Proof-carrying binary stream routines -- proof internals

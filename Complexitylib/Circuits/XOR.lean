@@ -6,6 +6,7 @@ Authors: Samuel Schlesinger
 module
 
 public import Complexitylib.Circuits.Basic
+import Std.Tactic.BVDecide.Normalize.Bool
 
 /-! # XOR (Parity) Function
 

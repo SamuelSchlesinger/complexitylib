@@ -6,6 +6,7 @@ Authors: Samuel Schlesinger
 module
 
 public import Complexitylib.SAT.Tseitin.Internal.Streaming
+import Std.Tactic.BVDecide.Normalize.Prop
 
 /-!
 # Register bounds for the streaming Tseitin transformation

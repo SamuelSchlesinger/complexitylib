@@ -6,8 +6,7 @@ Authors: Samuel Schlesinger
 module
 
 public import Complexitylib.Languages.Trivial
-public import Complexitylib.Models.TuringMachine.Combinators
-public import Complexitylib.Models.TuringMachine.Combinators.Internal.Complement
+import Std.Tactic.BVDecide.Normalize.Prop
 
 /-!
 # `{x : #false x = #true x}`: equal-count / "balanced" language

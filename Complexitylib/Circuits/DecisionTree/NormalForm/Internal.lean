@@ -8,6 +8,8 @@ module
 public import Complexitylib.Circuits.DecisionTree.Finite.Internal
 public import Complexitylib.Circuits.DecisionTree.NormalForm.Defs
 public import Complexitylib.Circuits.NormalForm.Operations.Internal
+import Std.Tactic.BVDecide.Normalize.Bool
+import Std.Tactic.BVDecide.Normalize.Prop
 
 /-!
 # Compiling finite decision trees to CNF and DNF -- proof internals

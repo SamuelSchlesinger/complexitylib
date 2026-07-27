@@ -6,8 +6,8 @@ Authors: Samuel Schlesinger
 module
 
 public import Complexitylib.Languages.Trivial
-public import Complexitylib.Models.TuringMachine.Combinators
-public import Complexitylib.Models.TuringMachine.Combinators.Internal.Complement
+import Std.Tactic.BVDecide.Normalize.BitVec
+import Std.Tactic.BVDecide.Normalize.Prop
 
 /-!
 # Languages determined by the first input cell

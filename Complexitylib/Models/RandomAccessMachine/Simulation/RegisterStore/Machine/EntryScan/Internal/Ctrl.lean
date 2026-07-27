@@ -7,7 +7,6 @@ module
 
 public import
   Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Machine.EntryScan.Defs
-public import Complexitylib.Models.TuringMachine.Combinators.Internal.Generic
 
 /-!
 # Bounded sparse-entry scan — controller internals

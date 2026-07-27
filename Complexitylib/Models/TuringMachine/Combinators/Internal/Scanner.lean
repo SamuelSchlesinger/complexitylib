@@ -5,8 +5,9 @@ Authors: Samuel Schlesinger
 -/
 module
 
-public import Complexitylib.Models.TuringMachine.Combinators
 public import Complexitylib.Models.TuringMachine.Combinators.Internal.Generic
+import Std.Tactic.BVDecide.Normalize.BitVec
+import Std.Tactic.BVDecide.Normalize.Prop
 
 /-!
 # Correctness of the generic finite-state scanner

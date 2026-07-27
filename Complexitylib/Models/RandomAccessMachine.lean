@@ -52,10 +52,6 @@ public import
   Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Machine.Program.Decision
 public import Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Machine.WordDecode
 public import Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Machine.WordEncode
-public import Complexitylib.Models.TuringMachine.Subroutines.BinaryEq
-public import Complexitylib.Models.TuringMachine.Subroutines.BinaryRippleAdd
-public import Complexitylib.Models.TuringMachine.Subroutines.BinaryRippleSub
-public import Complexitylib.Models.TuringMachine.Subroutines.BinaryShiftMul
 public import Complexitylib.Models.RandomAccessMachine.Structured
 public import Complexitylib.Models.RandomAccessMachine.Structured.Switch.Compiled
 public import Complexitylib.Models.RandomAccessMachine.Structured.Hamming
@@ -64,12 +60,9 @@ public import Complexitylib.Models.RandomAccessMachine.Structured.GateStep
 public import Complexitylib.Models.RandomAccessMachine.Structured.GateStreamStep
 public import Complexitylib.Models.RandomAccessMachine.Structured.Scanner
 public import Complexitylib.Models.RandomAccessMachine.Structured.PairValidate
-public import Complexitylib.Models.TuringMachine.Subroutines.ResetBinary
 public import Complexitylib.Models.RandomAccessMachine.Structured.LastBit
 public import Complexitylib.Models.RandomAccessMachine.Structured.ThreeSATSyntax
 public import Complexitylib.Models.RandomAccessMachine.Structured.UnaryDecode
-public import Complexitylib.Asymptotics
-public import Complexitylib.Classes.Time
 
 /-!
 # Random access machines (surface)

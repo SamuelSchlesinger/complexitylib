@@ -5,8 +5,6 @@ Authors: Samuel Schlesinger
 -/
 module
 
-public import Complexitylib.Circuits.AndOrNot.Defs
-public import Complexitylib.Circuits.Family.Defs
 public import Complexitylib.Circuits.Threshold.Defs
 public import Mathlib.Data.Nat.Log
 

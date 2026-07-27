@@ -7,6 +7,7 @@ module
 
 public import Complexitylib.SAT.ThreeCNF
 public import Complexitylib.SAT.Verifier
+import Std.Tactic.BVDecide.Normalize.Bool
 
 /-!
 # Encoded CNF-SAT and 3SAT languages

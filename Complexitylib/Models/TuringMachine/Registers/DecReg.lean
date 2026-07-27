@@ -6,6 +6,7 @@ Authors: Samuel Schlesinger
 module
 
 public import Complexitylib.Models.TuringMachine.Registers.MixedRadix
+import Std.Tactic.BVDecide.Normalize.Prop
 
 /-!
 # decRegTM: decrement a register

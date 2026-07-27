@@ -8,6 +8,8 @@ module
 public import Complexitylib.Circuits.NormalForm.Defs
 public import Complexitylib.Circuits.AndOrNot.Defs
 public import Mathlib.Data.Fintype.BigOperators
+import Std.Tactic.BVDecide.Normalize.Bool
+import Std.Tactic.BVDecide.Normalize.Prop
 
 /-! # Internal: Normal Form Proof Machinery
 

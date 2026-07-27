@@ -6,6 +6,7 @@ Authors: Samuel Schlesinger
 module
 
 public import Complexitylib.SAT.Rename
+import Std.Tactic.BVDecide.Normalize.Prop
 
 /-!
 # 3-CNF formulas

@@ -6,6 +6,7 @@ Authors: Samuel Schlesinger
 module
 
 public import Complexitylib.Models.TuringMachine.SpaceTime.Defs
+import Std.Tactic.BVDecide.Normalize.BitVec
 
 /-!
 # Bounded-observation extensionality — proof internals

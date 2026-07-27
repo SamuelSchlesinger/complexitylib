@@ -8,7 +8,6 @@ module
 public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.PolynomialOffset.Defs
 public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Transition.Effect.Defs
 public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Transition.Predecessor.Defs
-public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Serializer.Transition.MovedHead.Defs
 
 /-!
 # Direct-unrolling moved-head generator -- definitions

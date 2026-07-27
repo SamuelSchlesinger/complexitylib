@@ -7,6 +7,8 @@ module
 
 public import Complexitylib.Circuits.BasisHom
 public import Complexitylib.Circuits.Threshold.Defs
+import Std.Tactic.BVDecide.Normalize.BitVec
+import Std.Tactic.BVDecide.Normalize.Prop
 
 /-!
 # Threshold circuits -- proof internals

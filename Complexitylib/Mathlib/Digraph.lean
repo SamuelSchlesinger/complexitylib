@@ -8,6 +8,7 @@ module
 public import Mathlib.Combinatorics.Digraph.Basic
 public import Mathlib.Data.Fintype.Prod
 public import Mathlib.Data.Nat.Lattice
+import Std.Tactic.BVDecide.Normalize.Prop
 
 /-! # Digraph extensions for Mathlib
 

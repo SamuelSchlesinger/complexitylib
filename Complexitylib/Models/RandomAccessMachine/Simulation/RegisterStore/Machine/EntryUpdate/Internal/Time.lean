@@ -14,7 +14,6 @@ public import
 public import
   Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Machine.EntryUpdate.Defs
 public import Complexitylib.Models.TuringMachine.Subroutines.BinaryPred
-public import Complexitylib.Models.TuringMachine.Subroutines.BinarySucc
 
 /-!
 # Bounded encoded sparse-store update — static runtime bounds

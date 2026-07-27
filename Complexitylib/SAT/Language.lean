@@ -5,10 +5,7 @@ Authors: Samuel Schlesinger
 -/
 module
 
-public import Complexitylib.SAT.Semantics
 public import Complexitylib.SAT.Encoding
-public import Complexitylib.Classes.Pairing
-public import Complexitylib.Classes.FNP
 public import Complexitylib.Classes.NP.Witness
 
 /-!

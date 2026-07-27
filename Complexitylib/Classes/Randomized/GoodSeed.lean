@@ -8,6 +8,7 @@ module
 public import Complexitylib.Circuits.BitString
 public import Complexitylib.Classes.Randomized
 public import Complexitylib.Models.TuringMachine.Repetition.Correctness
+import Std.Tactic.BVDecide.Normalize.Prop
 
 /-!
 # Uniform good seeds for bounded-error machines

@@ -5,7 +5,6 @@ Authors: Samuel Schlesinger
 -/
 module
 
-public import Complexitylib.Models.TuringMachine.Subroutines
 public import Complexitylib.Models.TuringMachine.Subroutines.Internal.CopyOutput
 
 /-!

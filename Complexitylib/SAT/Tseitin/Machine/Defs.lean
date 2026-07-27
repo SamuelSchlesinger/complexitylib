@@ -5,7 +5,6 @@ Authors: Samuel Schlesinger
 -/
 module
 
-public import Complexitylib.Models.TuringMachine.Lift
 public import Complexitylib.Models.TuringMachine.Registers.InputLen
 public import Complexitylib.SAT.ThreeSAT
 

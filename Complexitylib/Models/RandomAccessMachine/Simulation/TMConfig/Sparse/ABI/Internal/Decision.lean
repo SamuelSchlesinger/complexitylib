@@ -8,6 +8,7 @@ module
 public import Complexitylib.Models.RandomAccessMachine.Simulation.TMConfig.Sparse.ABI.Internal.Marshal
 public import Complexitylib.Models.RandomAccessMachine.Simulation.TMConfig.Sparse.Step.Internal.Iteration
 public import Complexitylib.Models.RandomAccessMachine.Structured
+import Std.Tactic.BVDecide.Normalize.Prop
 
 /-!
 # End-to-end public-ABI sparse simulation -- proof internals

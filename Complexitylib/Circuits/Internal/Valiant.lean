@@ -6,15 +6,13 @@ Authors: Samuel Schlesinger
 module
 
 public import Complexitylib.Mathlib.Digraph
-public import Mathlib.Algebra.BigOperators.Group.Finset.Basic
 public import Mathlib.Algebra.Order.BigOperators.Group.Finset
-public import Mathlib.Data.Finset.Card
-public import Mathlib.Data.Finset.Max
 public import Mathlib.Data.Fintype.BigOperators
-public import Mathlib.Data.Fintype.Prod
 public import Mathlib.Data.Nat.Bitwise
 public import Mathlib.Data.Nat.Log
 public import Mathlib.Tactic.Ring
+import Std.Tactic.BVDecide.Normalize.Bool
+import Std.Tactic.BVDecide.Normalize.Prop
 
 /-! # Internal helpers for Valiant's Depth Reduction Lemma
 

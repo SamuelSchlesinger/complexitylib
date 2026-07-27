@@ -5,7 +5,6 @@ Authors: Samuel Schlesinger
 -/
 module
 
-public import Complexitylib.Circuits.Encoding.Formula.Batch.Defs
 public import Complexitylib.Circuits.Unrolling.Transition.Defs
 
 /-!

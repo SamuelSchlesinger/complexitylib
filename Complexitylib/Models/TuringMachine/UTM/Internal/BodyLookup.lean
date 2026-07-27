@@ -7,6 +7,8 @@ module
 
 public import Complexitylib.Models.TuringMachine.UTM.Internal.Verdict
 public import Complexitylib.Models.TuringMachine.UTM.Internal.BodyApply
+import Std.Tactic.BVDecide.Normalize.BitVec
+import Std.Tactic.BVDecide.Normalize.Prop
 
 /-!
 # Match-loop ↔ lookup correspondence (pure list level)

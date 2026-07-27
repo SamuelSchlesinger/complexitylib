@@ -7,7 +7,6 @@ module
 
 public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Serializer.Transition.Case
 public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Serializer.Transition.Effect.Defs
-public import Complexitylib.Circuits.Encoding.Formula
 
 /-!
 # Numeric transition-effect schedules -- proof internals

@@ -8,8 +8,7 @@ module
 public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Transition.Next
 public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Transition.PackedCopy
 public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Transition.Step.Defs
-public import Complexitylib.Models.TuringMachine.Experimental.BinaryRoutine.Control
-public import Complexitylib.Models.TuringMachine.Experimental.BinaryRoutine.List
+import Std.Tactic.BVDecide.Normalize.Prop
 
 /-!
 # Packed-step generator domains

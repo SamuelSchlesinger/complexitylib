@@ -9,7 +9,6 @@ public import
   Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Machine.EntryUpdate.TaggedDefs
 public import
   Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Machine.EntryUpdate
-public import Complexitylib.Models.TuringMachine.Subroutines.BinarySucc
 
 /-!
 # Positive-tag sparse updates -- proof internals

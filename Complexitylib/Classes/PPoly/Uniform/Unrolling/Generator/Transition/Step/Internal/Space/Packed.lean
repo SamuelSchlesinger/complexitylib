@@ -5,8 +5,8 @@ Authors: Samuel Schlesinger
 -/
 module
 
-public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Transition.Step.Internal.Emitted
 public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Transition.Step.Internal.Space.Common
+import Std.Tactic.BVDecide.Normalize.Prop
 
 /-!
 # Packed-copy space bound for one direct transition step

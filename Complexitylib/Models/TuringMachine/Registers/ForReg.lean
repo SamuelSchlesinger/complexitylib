@@ -6,6 +6,7 @@ Authors: Samuel Schlesinger
 module
 
 public import Complexitylib.Models.TuringMachine.Registers.RegisterOps
+import Std.Tactic.BVDecide.Normalize.Prop
 
 /-!
 # forRegTM: the register-fueled loop combinator

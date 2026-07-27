@@ -7,6 +7,7 @@ module
 
 public import Complexitylib.BooleanAnalysis.FourierExpansion.Defs
 public import Mathlib.Analysis.InnerProductSpace.PiL2
+import Std.Tactic.BVDecide.Normalize.Prop
 
 /-!
 # Chapter 1: Boolean functions and the Fourier expansion — Internal lemmas

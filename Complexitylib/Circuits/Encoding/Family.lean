@@ -8,6 +8,7 @@ module
 public import Complexitylib.Circuits.Encoding
 public import Complexitylib.Circuits.Family
 public import Complexitylib.Encoding.Pairing
+import Std.Tactic.BVDecide.Normalize.Prop
 
 /-!
 # Encodings of whole circuit families

@@ -6,9 +6,7 @@ Authors: Samuel Schlesinger
 module
 
 public import Complexitylib.Classes.P.Defs
-public import Complexitylib.Models.TuringMachine.Combinators
 public import Complexitylib.Models.TuringMachine.Combinators.Internal
-public import Mathlib.Analysis.Asymptotics.Defs
 
 /-!
 # P closure properties — proof internals

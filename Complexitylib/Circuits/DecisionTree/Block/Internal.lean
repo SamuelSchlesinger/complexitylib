@@ -6,6 +6,7 @@ Authors: Samuel Schlesinger
 module
 
 public import Complexitylib.Circuits.DecisionTree.Block.Defs
+import Std.Tactic.BVDecide.Normalize.Prop
 
 /-!
 # Complete query blocks in finite decision trees -- proof internals

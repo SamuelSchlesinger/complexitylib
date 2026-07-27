@@ -6,8 +6,6 @@ Authors: Samuel Schlesinger
 module
 
 public import
-  Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Machine.Program.DenseInitDefs
-public import
   Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Machine.Program.DenseInitProof
 
 /-!

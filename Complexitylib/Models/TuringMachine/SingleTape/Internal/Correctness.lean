@@ -8,6 +8,8 @@ module
 public import Complexitylib.Models.TuringMachine.SingleTape.Internal.Delta
 public import Complexitylib.Models.TuringMachine.Combinators.Internal.Generic
 public import Complexitylib.Models.TuringMachine.Internal
+import Std.Tactic.BVDecide.Normalize.BitVec
+import Std.Tactic.BVDecide.Normalize.Prop
 
 /-!
 # Single-tape simulation — correctness internals

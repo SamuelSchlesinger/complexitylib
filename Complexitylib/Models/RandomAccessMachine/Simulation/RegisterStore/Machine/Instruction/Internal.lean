@@ -9,7 +9,6 @@ public import
   Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Machine.Instruction.Defs
 public import
   Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Machine.EntryUpdate
-public import Complexitylib.Models.TuringMachine.Subroutines.BinaryRippleAdd
 public import Complexitylib.Models.TuringMachine.Subroutines.BinaryRippleSub
 public import Complexitylib.Models.TuringMachine.Subroutines.BinaryShiftMul
 

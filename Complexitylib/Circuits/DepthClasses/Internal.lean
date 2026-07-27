@@ -6,7 +6,6 @@ Authors: Samuel Schlesinger
 module
 
 public import Complexitylib.Circuits.DepthClasses.Defs
-public import Complexitylib.Circuits.BasisHom
 public import Complexitylib.Circuits.Family
 public import Complexitylib.Circuits.Threshold
 

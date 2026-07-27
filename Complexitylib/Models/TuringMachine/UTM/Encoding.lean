@@ -7,6 +7,7 @@ module
 
 public import Complexitylib.Models.TuringMachine
 public import Complexitylib.Mathlib.NatBits
+import Std.Tactic.BVDecide.Normalize.Prop
 
 /-!
 # TM State Normalization and Binary Encoding

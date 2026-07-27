@@ -7,7 +7,7 @@ module
 
 public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Serializer.Transition
 public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Serializer.Transition.Case.Defs
-public import Complexitylib.Circuits.Unrolling.Transition
+import Std.Tactic.BVDecide.Normalize.Prop
 
 /-!
 # Numeric transition-case schedules -- proof internals

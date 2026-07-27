@@ -6,7 +6,6 @@ Authors: Samuel Schlesinger
 module
 
 public import Complexitylib.SAT.CookLevin
-public import Complexitylib.Models.TuringMachine.Registers.MixedRadix
 public import Complexitylib.Models.TuringMachine.Registers.DecReg
 
 /-!

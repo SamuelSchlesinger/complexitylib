@@ -11,7 +11,6 @@ public import
   Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Machine.EntryUpdate.Internal.Out
 public import
 Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Machine.EntryUpdate.Internal.Time
-public import Complexitylib.Models.TuringMachine.Combinators.WorkBranch
 
 /-!
 # Bounded encoded sparse-store update -- terminal loop case

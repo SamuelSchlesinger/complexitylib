@@ -5,11 +5,8 @@ Authors: Samuel Schlesinger
 -/
 module
 
-public import Complexitylib.Classes.P.NormalForm
-public import Complexitylib.Classes.PPoly.Uniform
 public import Complexitylib.Classes.PPoly.Uniform.Containment
 public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Tableau
-public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Padded
 
 /-!
 # Deterministic unrolling into uniform P/poly -- proof internals

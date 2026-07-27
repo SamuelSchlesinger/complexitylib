@@ -6,7 +6,6 @@ Authors: Samuel Schlesinger
 module
 
 public import Complexitylib.Circuits.AndOrNot.Defs
-public import Complexitylib.Circuits.Internal.AndOrNot
 public import Complexitylib.Circuits.Internal.Simulation
 
 /-! # AND/OR/NOT Basis

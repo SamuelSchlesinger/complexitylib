@@ -6,7 +6,6 @@ Authors: Samuel Schlesinger
 module
 
 public import Complexitylib.Circuits.BarringtonLength
-public import Mathlib.Data.Nat.Log
 
 /-!
 # Barrington at the family level: `NC¹ ⊆` polynomial-size width-`5` branching programs

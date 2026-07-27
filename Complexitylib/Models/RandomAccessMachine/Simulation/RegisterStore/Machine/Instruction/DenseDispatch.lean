@@ -10,10 +10,7 @@ Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Machine.Instru
 public import Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.DenseOverlay
 public import
   Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Machine.Instruction.Sim.Internal
-public import Complexitylib.Models.TuringMachine.Combinators.WorkBranch
-public import Complexitylib.Models.TuringMachine.Subroutines.BinaryCopy
-public import Complexitylib.Models.TuringMachine.Subroutines.BinaryPred
-public import Complexitylib.Models.TuringMachine.Subroutines.ResetBinary
+import Std.Tactic.BVDecide.Normalize.Prop
 
 /-!
 # Fixed-program dense-overlay dispatch

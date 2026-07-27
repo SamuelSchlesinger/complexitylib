@@ -5,10 +5,8 @@ Authors: Samuel Schlesinger
 -/
 module
 
-public import Mathlib.Data.Nat.Basic
-public import Mathlib.Data.Bool.Basic
-public import Mathlib.Logic.Function.Basic
 public import Mathlib.Data.Finset.Basic
+import Std.Tactic.BVDecide.Normalize.Bool
 
 /-!
 # Quantified Boolean formulas

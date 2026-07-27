@@ -5,9 +5,8 @@ Authors: Samuel Schlesinger
 -/
 module
 
-public import Complexitylib.Models.TuringMachine.UTM.Internal.VTape
-public import Complexitylib.Models.TuringMachine.UTM.Internal.Desc
 public import Complexitylib.Models.TuringMachine.UTM.Internal.HaltTest
+import Std.Tactic.BVDecide.Normalize.Prop
 
 /-!
 # Description-tape layout

@@ -7,6 +7,7 @@ module
 
 public import Complexitylib.Circuits.Encoding.Internal.Codec
 public import Complexitylib.Circuits.Encoding.Fragment.Defs
+import Std.Tactic.BVDecide.Normalize.Prop
 
 /-!
 # Internal laws for appendable raw-circuit fragments

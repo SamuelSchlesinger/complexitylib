@@ -19,7 +19,6 @@ public import
   Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Machine.Instruction.Store
 public import
   Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Machine.Instruction.Control
-public import Complexitylib.Models.TuringMachine.Hoare.RetargetOutput
 
 /-!
 # Concrete sparse-store arithmetic instruction kernel

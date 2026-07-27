@@ -10,6 +10,7 @@ public import Complexitylib.Models.TuringMachine.Combinators.Internal.Generic
 public import Complexitylib.Models.TuringMachine.Trace
 public import Complexitylib.Models.TuringMachine.Subroutines.PairSplit.Defs
 public import Mathlib.Tactic.Ring
+import Std.Tactic.BVDecide.Normalize.Prop
 
 /-!
 # Pair-splitting machine — proof internals

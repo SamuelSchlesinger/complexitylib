@@ -7,10 +7,7 @@ module
 
 public import
   Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Machine.Instruction.Sim.Defs
-public import Complexitylib.Models.TuringMachine.Combinators.WorkBranch.Defs
-public import Complexitylib.Models.TuringMachine.Subroutines.BinaryCopy.Defs
-public import Complexitylib.Models.TuringMachine.Subroutines.BinaryPred.Defs
-public import Complexitylib.Models.TuringMachine.Subroutines.ResetBinary.Defs
+import Std.Tactic.BVDecide.Normalize.Prop
 
 /-!
 # Sparse RAM program controller -- definitions

@@ -10,6 +10,7 @@ public import
 public import
   Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Machine.Program.Init.Internal
 public import Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.DenseOverlay
+import Std.Tactic.BVDecide.Normalize.Prop
 
 /-!
 # Dense-overlay public-input initialization -- proofs

@@ -7,7 +7,6 @@ module
 
 public import
   Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Machine.Instruction.DenseDirect
-public import Complexitylib.Models.TuringMachine.Subroutines.BinaryCopy
 
 /-!
 # Dense-overlay indirect store

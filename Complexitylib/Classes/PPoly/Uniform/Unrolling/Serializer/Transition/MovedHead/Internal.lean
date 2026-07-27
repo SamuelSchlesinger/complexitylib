@@ -7,7 +7,6 @@ module
 
 public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Serializer.Transition.Effect
 public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Serializer.Transition.MovedHead.Defs
-public import Complexitylib.Circuits.Unrolling.Transition
 
 /-!
 # Numeric moved-head schedules -- proof internals

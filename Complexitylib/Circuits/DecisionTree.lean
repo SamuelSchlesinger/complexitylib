@@ -5,12 +5,9 @@ Authors: Samuel Schlesinger
 -/
 module
 
-public import Mathlib.Data.Nat.Basic
-public import Mathlib.Data.Bool.Basic
-public import Mathlib.Data.Finset.Basic
-public import Mathlib.Data.Finset.Union
 public import Mathlib.Data.Finset.Card
 public import Complexitylib.Circuits.Formula
+import Std.Tactic.BVDecide.Normalize.Bool
 
 /-!
 # Boolean decision trees

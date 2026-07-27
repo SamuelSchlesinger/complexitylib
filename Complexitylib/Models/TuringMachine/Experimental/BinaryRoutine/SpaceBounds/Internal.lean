@@ -8,7 +8,6 @@ module
 public import Complexitylib.Models.TuringMachine.Experimental.BinaryRoutine.SpaceBounds.Defs
 public import Complexitylib.Models.TuringMachine.Experimental.BinaryRoutine.Arithmetic
 public import Complexitylib.Models.TuringMachine.Experimental.BinaryRoutine.List
-public import Complexitylib.Models.TuringMachine.Subroutines.BinarySucc
 
 /-!
 # Compositional width bounds for binary routines -- proof internals

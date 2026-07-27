@@ -9,7 +9,7 @@ public import
   Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Machine.Lookup.Internal.Static
 public import
 Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Machine.DenseInputLookup.Internal
-public import Complexitylib.Models.TuringMachine.Subroutines.BinaryPred
+import Std.Tactic.BVDecide.Normalize.Prop
 
 /-!
 # Dense overlay lookup -- proof internals

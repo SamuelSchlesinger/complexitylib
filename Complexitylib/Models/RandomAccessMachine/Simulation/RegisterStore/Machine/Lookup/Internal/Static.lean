@@ -8,7 +8,6 @@ module
 public import
   Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Machine.Lookup.Internal.Assemble
 public import Complexitylib.Models.TuringMachine.Subroutines.BinaryAddConst
-public import Complexitylib.Models.TuringMachine.Subroutines.ResetBinary
 
 /-!
 # Fixed-address sparse-register lookup -- proof internals

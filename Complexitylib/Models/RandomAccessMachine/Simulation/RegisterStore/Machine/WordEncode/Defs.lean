@@ -7,10 +7,9 @@ module
 
 public import
   Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Defs
-public import Complexitylib.Models.TuringMachine.Combinators
 public import Complexitylib.Models.TuringMachine.Subroutines.BinarySucc.Defs
 public import Complexitylib.Models.TuringMachine.Subroutines.ResetBinary.Defs
-public import Complexitylib.Models.TuringMachine.Tape.Encoding
+import Std.Tactic.BVDecide.Normalize.Prop
 
 /-!
 # Self-delimiting word emission — definitions

@@ -6,9 +6,6 @@ Authors: Samuel Schlesinger
 module
 
 public import Complexitylib.Languages.Trivial
-public import Complexitylib.Models.TuringMachine.Combinators
-public import Complexitylib.Models.TuringMachine.Combinators.Internal.Scanner
-public import Mathlib.Data.ZMod.Basic
 
 /-!
 # `lengthDivBy k`: length-divisibility language family

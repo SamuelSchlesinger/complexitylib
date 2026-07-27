@@ -6,7 +6,6 @@ Authors: Samuel Schlesinger
 module
 
 public import Complexitylib.Circuits.DecisionTree.Finite.Defs
-public import Complexitylib.Circuits.NormalForm.Defs
 public import Complexitylib.Circuits.NormalForm.Operations.Defs
 
 /-!

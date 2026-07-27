@@ -6,9 +6,7 @@ Authors: Samuel Schlesinger
 module
 
 public import Complexitylib.Circuits.Encoding.Threshold.Defs
-public import Complexitylib.Circuits.BitString
 public import Complexitylib.Circuits.Unrolling.Acceptance.Defs
-public import Mathlib.Data.List.FinRange
 
 /-!
 # Parallel amplification circuits -- definitions

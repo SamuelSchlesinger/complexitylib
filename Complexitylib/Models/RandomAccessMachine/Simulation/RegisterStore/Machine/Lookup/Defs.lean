@@ -11,10 +11,7 @@ public import
   Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Machine.DenseInputLookup.Defs
 public import
   Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.DenseOverlay.Defs
-public import Complexitylib.Models.TuringMachine.Subroutines.BinaryCopy.Defs
 public import Complexitylib.Models.TuringMachine.Subroutines.BinaryAddConst.Defs
-public import Complexitylib.Models.TuringMachine.Subroutines.ResetBinary.Defs
-public import Complexitylib.Models.TuringMachine.Subroutines.ResetBinaryMany.Defs
 public import Mathlib.Tactic.FinCases
 
 /-!

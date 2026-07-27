@@ -7,14 +7,7 @@ module
 
 public import
   Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Machine.Program.Defs
-public import
-  Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Machine.EntryEncode.Defs
-public import Complexitylib.Models.TuringMachine.Combinators.WorkBranch.Defs
-public import Complexitylib.Models.TuringMachine.Subroutines.BinaryCopy.Defs
-public import Complexitylib.Models.TuringMachine.Subroutines.BinaryPred.Defs
-public import Complexitylib.Models.TuringMachine.Subroutines.BinarySucc.Defs
-public import Complexitylib.Models.TuringMachine.Subroutines.ResetBinary.Defs
-public import Complexitylib.Models.TuringMachine.Subroutines.ResetBinaryMany.Defs
+import Std.Tactic.BVDecide.Normalize.Prop
 
 /-!
 # Sparse RAM public-input initialization definitions

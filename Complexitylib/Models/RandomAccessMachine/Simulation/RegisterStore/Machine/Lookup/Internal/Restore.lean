@@ -7,7 +7,6 @@ module
 
 public import
   Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Machine.Lookup.Internal.Value
-public import Complexitylib.Models.TuringMachine.Subroutines.ResetBinaryMany
 
 /-!
 # Reusable sparse-register lookup -- scanner restoration

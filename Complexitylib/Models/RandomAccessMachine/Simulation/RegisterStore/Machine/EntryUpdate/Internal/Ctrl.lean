@@ -7,7 +7,6 @@ module
 
 public import
   Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Machine.EntryUpdate.Defs
-public import Complexitylib.Models.TuringMachine.Combinators.Internal.Generic
 
 /-!
 # Bounded encoded sparse-store update — controller internals

@@ -9,10 +9,6 @@ public import
   Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Machine.Program.Defs
 public import
   Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Machine.Instruction.Dispatch
-public import Complexitylib.Models.TuringMachine.Combinators.WorkBranch
-public import Complexitylib.Models.TuringMachine.Subroutines.BinaryCopy
-public import Complexitylib.Models.TuringMachine.Subroutines.BinaryPred
-public import Complexitylib.Models.TuringMachine.Subroutines.ResetBinary
 
 /-!
 # Sparse RAM program controller -- proof internals

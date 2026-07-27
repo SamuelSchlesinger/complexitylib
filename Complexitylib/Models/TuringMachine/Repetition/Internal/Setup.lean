@@ -7,6 +7,7 @@ module
 
 public import Complexitylib.Models.TuringMachine.Repetition.Internal.Schedule
 public import Complexitylib.Models.TuringMachine.Repetition.Internal.Trial
+import Std.Tactic.BVDecide.Normalize.BitVec
 
 /-!
 # Setup boundary for fixed-time repetition

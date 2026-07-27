@@ -9,8 +9,6 @@ public import
   Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Machine.EntryScan.Defs
 public import
   Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Machine.EntryScanStep
-public import Complexitylib.Models.TuringMachine.Subroutines.ResetBinaryMany
-public import Mathlib.Tactic.FinCases
 
 /-!
 # Bounded sparse-entry scan — invariant internals

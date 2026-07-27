@@ -7,6 +7,7 @@ module
 
 public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Transition.Step.Internal.FormulaSpace
 public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Transition.Step.Internal.Space.Packed
+import Std.Tactic.BVDecide.Normalize.Prop
 
 /-!
 # Whole-step space bound for direct transition generation

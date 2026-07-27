@@ -9,8 +9,8 @@ public import
   Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Machine.EntryUpdate.Defs
 public import
   Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Machine.EntryScan.Defs
-public import Complexitylib.Models.TuringMachine.Combinators.WorkSymbolBranch.Defs
 public import Complexitylib.Models.TuringMachine.WorkReadOnly
+import Std.Tactic.BVDecide.Normalize.BitVec
 
 /-!
 # Sparse-store update source preservation

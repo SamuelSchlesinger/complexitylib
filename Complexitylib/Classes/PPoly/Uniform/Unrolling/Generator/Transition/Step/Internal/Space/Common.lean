@@ -6,7 +6,7 @@ Authors: Samuel Schlesinger
 module
 
 public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Transition.Step.Internal.Emitted
-public import Complexitylib.Models.TuringMachine.Experimental.BinaryRoutine.SpaceBounds
+import Std.Tactic.BVDecide.Normalize.Prop
 
 /-!
 # Common packed-step width helpers

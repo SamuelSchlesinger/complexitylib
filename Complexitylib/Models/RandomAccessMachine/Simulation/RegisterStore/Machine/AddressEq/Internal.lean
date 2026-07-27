@@ -7,8 +7,6 @@ module
 
 public import Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Machine.AddressEq.Defs
 public import Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Machine.WordDecode
-public import Complexitylib.Models.TuringMachine.Combinators.Internal.Seq
-public import Complexitylib.Models.TuringMachine.Internal
 public import Complexitylib.Models.TuringMachine.Subroutines.BinaryEq
 
 /-!

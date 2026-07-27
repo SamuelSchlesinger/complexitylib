@@ -8,6 +8,7 @@ module
 public import Complexitylib.Circuits.BarringtonCompiler
 public import Complexitylib.Circuits.BranchingProgramEncoding.Defs
 public import Complexitylib.Circuits.Encoding
+import Std.Tactic.BVDecide.Normalize.Prop
 
 /-!
 # Width-five branching-program codec internals

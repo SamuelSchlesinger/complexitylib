@@ -8,9 +8,9 @@ module
 public import Complexitylib.Circuits.AC0.Iteration.Defs
 public import Complexitylib.Circuits.AC0.Switching.Internal
 public import Complexitylib.Circuits.DecisionTree.NormalForm.Internal
-public import Complexitylib.Circuits.RandomRestriction.Internal
 public import Mathlib.Algebra.BigOperators.Ring.Finset
 public import Mathlib.Algebra.Order.BigOperators.Group.Finset
+import Std.Tactic.BVDecide.Normalize.Prop
 
 /-!
 # Iterated switching for AC0 formulas -- proof internals

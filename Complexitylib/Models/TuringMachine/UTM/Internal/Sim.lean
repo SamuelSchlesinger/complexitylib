@@ -7,7 +7,7 @@ module
 
 public import Complexitylib.Models.TuringMachine.UTM.Machine
 public import Complexitylib.Models.TuringMachine.UTM.Internal.BodyAssembly
-public import Complexitylib.Models.TuringMachine.UTM.Internal.Init
+import Std.Tactic.BVDecide.Normalize.Prop
 
 /-!
 # Universal machine: simulation bridges

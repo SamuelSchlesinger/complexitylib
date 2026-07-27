@@ -6,7 +6,7 @@ Authors: Samuel Schlesinger
 module
 
 public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Padded.Defs
-public import Complexitylib.Circuits.Encoding.Fragment
+import Std.Tactic.BVDecide.Normalize.Prop
 
 /-!
 # Regularly padded deterministic unrolling families -- proof internals

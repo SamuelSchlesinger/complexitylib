@@ -8,6 +8,7 @@ module
 public import Mathlib.Algebra.Order.BigOperators.Group.Finset
 public import Mathlib.Tactic.Ring
 public import Complexitylib.Models.RandomAccessMachine.Structured.Defs
+import Std.Tactic.BVDecide.Normalize.Prop
 
 /-!
 # Resource-proof infrastructure for structured RAM programs

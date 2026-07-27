@@ -7,6 +7,7 @@ module
 
 public import Complexitylib.SAT.CookLevin.Internal.EmitterFamilies
 public import Complexitylib.Models.TuringMachine.Registers.Probe
+import Std.Tactic.BVDecide.Normalize.Prop
 
 /-!
 # The start-clause family emitter

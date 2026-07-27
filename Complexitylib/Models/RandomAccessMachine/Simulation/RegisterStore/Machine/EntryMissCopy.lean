@@ -9,7 +9,6 @@ public import
   Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Machine.EntryMissCopy.Defs
 public import
   Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Machine.EntryMissCopy.Internal
-public import Complexitylib.Models.TuringMachine.Hoare.Space
 
 /-!
 # Sparse-entry miss copy

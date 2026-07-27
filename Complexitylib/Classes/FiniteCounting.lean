@@ -5,18 +5,13 @@ Authors: Samuel Schlesinger
 -/
 module
 
-public import Mathlib.Data.Fintype.Card
 public import Mathlib.Data.Fintype.Fin
-public import Mathlib.Data.Fintype.Sum
 public import Mathlib.Data.Fintype.BigOperators
-public import Mathlib.Data.Finset.Card
 public import Mathlib.Data.Finset.Powerset
-public import Mathlib.Logic.Equiv.Prod
 public import Mathlib.Logic.Equiv.Fin.Basic
-public import Mathlib.Algebra.BigOperators.Group.Finset.Basic
-public import Mathlib.Algebra.BigOperators.Group.Finset.Piecewise
 public import Mathlib.Algebra.Ring.Parity
-public import Mathlib.Order.Interval.Finset.Nat
+import Std.Tactic.BVDecide.Normalize.BitVec
+import Std.Tactic.BVDecide.Normalize.Prop
 
 /-!
 # Finite counting toolkit

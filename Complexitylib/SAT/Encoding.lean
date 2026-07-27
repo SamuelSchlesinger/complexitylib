@@ -7,7 +7,7 @@ module
 
 public import Complexitylib.SAT.Semantics
 public import Mathlib.Tactic.Ring
-public import Mathlib.Tactic.Linarith
+import Std.Tactic.BVDecide.Normalize.Prop
 
 /-!
 # SAT: Encoding Layer

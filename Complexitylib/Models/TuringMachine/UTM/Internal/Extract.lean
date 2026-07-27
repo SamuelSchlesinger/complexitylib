@@ -8,6 +8,7 @@ module
 public import Complexitylib.Models.TuringMachine.Hoare.Defs
 public import Complexitylib.Models.TuringMachine.UTM.Internal.VTape
 public import Complexitylib.Models.TuringMachine.Combinators.Internal.Generic
+import Std.Tactic.BVDecide.Normalize.Prop
 
 /-!
 # UTM extraction phase: `extractTM`

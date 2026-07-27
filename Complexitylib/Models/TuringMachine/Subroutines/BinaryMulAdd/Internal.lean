@@ -5,15 +5,8 @@ Authors: Samuel Schlesinger
 -/
 module
 
-public import Complexitylib.Models.TuringMachine.Combinators.Internal.Seq
-public import Complexitylib.Models.TuringMachine.Hoare.Space
-public import Complexitylib.Models.TuringMachine.SpaceTime.Internal.Reachability
 public import Complexitylib.Models.TuringMachine.Subroutines.BinaryAdd
-public import Complexitylib.Models.TuringMachine.Subroutines.BinaryFor.Internal.Control
-public import Complexitylib.Models.TuringMachine.Subroutines.BinaryFor
 public import Complexitylib.Models.TuringMachine.Subroutines.BinaryMulAdd.Defs
-public import Complexitylib.Models.TuringMachine.Subroutines.BinarySucc
-public import Complexitylib.Models.TuringMachine.Subroutines.ClearWork
 
 /-!
 # Canonical binary multiply-add — proof internals

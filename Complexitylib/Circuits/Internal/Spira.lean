@@ -6,8 +6,8 @@ Authors: Samuel Schlesinger
 module
 
 public import Complexitylib.Circuits.Formula
-public import Mathlib.Data.Nat.Log
 public import Mathlib.Tactic
+import Std.Tactic.BVDecide.Normalize.Bool
 
 /-!
 # Spira formula balancing -- proof internals

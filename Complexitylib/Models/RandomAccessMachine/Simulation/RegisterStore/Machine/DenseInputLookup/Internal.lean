@@ -9,13 +9,9 @@ public import
   Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Machine.DenseInputLookup.Defs
 public import Complexitylib.Models.TuringMachine.Combinators.WorkBranch
 public import Complexitylib.Models.TuringMachine.Combinators.ForInput.Internal
-public import Complexitylib.Models.TuringMachine.Registers
 public import Complexitylib.Models.TuringMachine.Subroutines.BinaryCopy
 public import Complexitylib.Models.TuringMachine.Subroutines.BinaryPred
 public import Complexitylib.Models.TuringMachine.Subroutines.ResetBinary
-public import Complexitylib.Models.TuringMachine.Subroutines.BinarySucc
-public import Complexitylib.Models.TuringMachine.Subroutines.Internal
-public import Complexitylib.Models.TuringMachine.Tape.Encoding
 
 /-!
 # Dense public-input lookup -- proof internals

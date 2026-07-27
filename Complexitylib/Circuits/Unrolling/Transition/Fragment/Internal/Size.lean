@@ -8,6 +8,7 @@ module
 public import Complexitylib.Circuits.Unrolling.Transition.Fragment.Internal.Structure
 public import Mathlib.Algebra.Order.BigOperators.Group.List
 public import Mathlib.Tactic.Ring
+import Std.Tactic.BVDecide.Normalize.Prop
 
 /-!
 # Size bounds for packed one-step transition fragments

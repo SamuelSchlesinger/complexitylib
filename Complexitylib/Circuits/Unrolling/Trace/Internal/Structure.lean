@@ -5,7 +5,6 @@ Authors: Samuel Schlesinger
 -/
 module
 
-public import Complexitylib.Circuits.Unrolling.Internal.Initialization
 public import Complexitylib.Circuits.Unrolling.Trace.Defs
 public import Complexitylib.Circuits.Unrolling.Transition.Fragment.Internal.Size
 

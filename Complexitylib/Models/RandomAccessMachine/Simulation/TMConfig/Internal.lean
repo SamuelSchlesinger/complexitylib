@@ -6,6 +6,7 @@ Authors: Samuel Schlesinger
 module
 
 public import Complexitylib.Models.RandomAccessMachine.Simulation.TMConfig.Defs
+import Std.Tactic.BVDecide.Normalize.Prop
 
 /-!
 # Bounded Turing-machine configuration encoding -- proof internals

@@ -7,7 +7,6 @@ module
 
 public import Complexitylib.Models.TuringMachine.Composition.Internal.FirstPhase
 public import Complexitylib.Models.TuringMachine.Composition.PairWithInput.Defs
-public import Complexitylib.Models.TuringMachine.Hoare
 public import Complexitylib.Models.TuringMachine.OutputBounds
 public import Complexitylib.Models.TuringMachine.Subroutines.Internal
 public import Complexitylib.Models.TuringMachine.Subroutines.PairEmit

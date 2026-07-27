@@ -6,6 +6,7 @@ Authors: Samuel Schlesinger
 module
 
 public import Complexitylib.Models.RandomAccessMachine.Simulation.TMConfig.Step.Internal.Load
+import Std.Tactic.BVDecide.Normalize.Prop
 
 /-!
 # Selected TM transition actions -- proof internals

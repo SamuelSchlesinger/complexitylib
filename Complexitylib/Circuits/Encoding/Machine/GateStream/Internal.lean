@@ -7,8 +7,6 @@ module
 
 public import Complexitylib.Circuits.Encoding.Machine.GateStream.Defs
 public import Complexitylib.Circuits.Encoding.Machine.RawGate
-public import Complexitylib.Models.TuringMachine.Hoare.Space
-public import Complexitylib.Models.TuringMachine.Subroutines.BinarySucc
 
 /-!
 # One streaming raw-gate step -- proof internals

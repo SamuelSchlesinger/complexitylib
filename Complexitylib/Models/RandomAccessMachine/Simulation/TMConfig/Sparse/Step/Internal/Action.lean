@@ -7,6 +7,7 @@ module
 
 public import Complexitylib.Models.RandomAccessMachine.Simulation.TMConfig.Sparse.Step.Internal.Load
 public import Complexitylib.Models.RandomAccessMachine.Structured.Internal.Resources
+import Std.Tactic.BVDecide.Normalize.Prop
 
 /-!
 # Selected sparse TM transition actions -- proof internals

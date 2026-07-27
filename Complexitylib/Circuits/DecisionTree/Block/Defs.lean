@@ -6,7 +6,6 @@ Authors: Samuel Schlesinger
 module
 
 public import Complexitylib.Circuits.DecisionTree.Path.Defs
-public import Complexitylib.Circuits.Restriction
 
 /-!
 # Complete query blocks in finite decision trees -- definitions

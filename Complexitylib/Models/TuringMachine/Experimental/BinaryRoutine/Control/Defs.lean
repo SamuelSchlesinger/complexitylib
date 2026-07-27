@@ -7,7 +7,6 @@ module
 
 public import Complexitylib.Models.TuringMachine.Combinators.WorkBranch.Defs
 public import Complexitylib.Models.TuringMachine.Experimental.BinaryRoutine.Defs
-public import Complexitylib.Models.TuringMachine.Subroutines.BinaryFor.Defs
 
 /-!
 # Proof-carrying binary routine control -- definitions

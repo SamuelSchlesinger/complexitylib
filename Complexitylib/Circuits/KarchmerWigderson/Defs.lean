@@ -5,7 +5,6 @@ Authors: Samuel Schlesinger
 -/
 module
 
-public import Mathlib.Data.Set.Basic
 public import Complexitylib.Circuits.Monotone.Defs
 
 /-!

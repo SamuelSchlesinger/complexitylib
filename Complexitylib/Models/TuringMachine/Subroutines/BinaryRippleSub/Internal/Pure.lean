@@ -7,6 +7,7 @@ module
 
 public import Complexitylib.Mathlib.NatBits
 public import Complexitylib.Models.TuringMachine.Subroutines.BinaryRippleSub.Defs
+import Std.Tactic.BVDecide.Normalize.Bool
 
 /-!
 # Linear-time canonical binary subtraction -- pure proofs

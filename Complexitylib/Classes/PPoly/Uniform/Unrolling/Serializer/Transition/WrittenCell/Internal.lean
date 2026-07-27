@@ -9,7 +9,7 @@ public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Serializer.Initializ
 public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Serializer.Transition.Atomic
 public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Serializer.Transition.Effect
 public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Serializer.Transition.WrittenCell.Defs
-public import Complexitylib.Circuits.Encoding.Formula
+import Std.Tactic.BVDecide.Normalize.Prop
 
 /-!
 # Numeric written-cell schedules -- proof internals

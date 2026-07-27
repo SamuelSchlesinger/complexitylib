@@ -6,8 +6,9 @@ Authors: Samuel Schlesinger
 module
 
 public import Complexitylib.Models.RandomAccessMachine.Structured
-public import Complexitylib.Models.RandomAccessMachine.Structured.Internal.Resources
 public import Complexitylib.Models.RandomAccessMachine.Structured.Scanner.Defs
+import Std.Tactic.BVDecide.Normalize.BitVec
+import Std.Tactic.BVDecide.Normalize.Prop
 
 /-!
 # Finite-state structured RAM scanners — proof internals

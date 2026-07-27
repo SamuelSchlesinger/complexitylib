@@ -7,8 +7,8 @@ module
 
 public import Complexitylib.Models.TuringMachine.Combinators.RetargetCompute.Defs
 public import Complexitylib.Models.TuringMachine.Combinators.Internal.Retarget
-public import Complexitylib.Models.TuringMachine.Hoare.Defs
 public import Complexitylib.Models.TuringMachine.Placement.Internal
+import Std.Tactic.BVDecide.Normalize.Prop
 
 /-!
 # Retargeted-input computation seam internals

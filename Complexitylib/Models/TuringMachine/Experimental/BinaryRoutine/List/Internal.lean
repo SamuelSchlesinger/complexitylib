@@ -7,6 +7,7 @@ module
 
 public import Complexitylib.Models.TuringMachine.Experimental.BinaryRoutine
 public import Complexitylib.Models.TuringMachine.Experimental.BinaryRoutine.List.Defs
+import Std.Tactic.BVDecide.Normalize.Prop
 
 /-!
 # Finite composition of proof-carrying binary routines -- proof internals

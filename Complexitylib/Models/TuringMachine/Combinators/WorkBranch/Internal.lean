@@ -6,11 +6,10 @@ Authors: Samuel Schlesinger
 module
 
 public import Complexitylib.Mathlib.NatBits
-public import Complexitylib.Models.TuringMachine.Combinators.Internal.Generic
 public import Complexitylib.Models.TuringMachine.Combinators.WorkBranch.Defs
 public import Complexitylib.Models.TuringMachine.Hoare.Space
-public import Complexitylib.Models.TuringMachine.SpaceTime.Internal.Reachability
 public import Complexitylib.Models.TuringMachine.Subroutines.BinarySucc.Defs
+import Std.Tactic.BVDecide.Normalize.Prop
 
 /-!
 # Direct work-symbol branch combinator -- proof internals

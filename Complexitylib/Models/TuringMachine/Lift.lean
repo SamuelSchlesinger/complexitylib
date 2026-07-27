@@ -6,6 +6,7 @@ Authors: Samuel Schlesinger
 module
 
 public import Complexitylib.Models.TuringMachine.Combinators
+import Std.Tactic.BVDecide.Normalize.Prop
 
 /-!
 # Tape-layout combinators: extra work tapes and output retargeting

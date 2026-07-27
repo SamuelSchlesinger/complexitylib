@@ -8,8 +8,6 @@ module
 public import Complexitylib.Models.TuringMachine.Composition.Defs
 public import Complexitylib.Models.TuringMachine.Subroutines.CopyWorkOutput
 public import Complexitylib.Models.TuringMachine.Combinators.RetargetCompute
-public import Complexitylib.Models.TuringMachine.Hoare
-public import Complexitylib.Models.TuringMachine.Tape.Encoding
 
 /-!
 # Sequential-composition tail pipeline

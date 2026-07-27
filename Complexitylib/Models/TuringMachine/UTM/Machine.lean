@@ -5,7 +5,6 @@ Authors: Samuel Schlesinger
 -/
 module
 
-public import Complexitylib.Models.TuringMachine.Combinators
 public import Complexitylib.Models.TuringMachine.UTM.Internal.Init
 public import Complexitylib.Models.TuringMachine.UTM.Internal.Body
 public import Complexitylib.Models.TuringMachine.UTM.Internal.HaltTest

@@ -8,7 +8,6 @@ module
 public import Complexitylib.Circuits.Encoding.Threshold.Internal
 public import Complexitylib.Circuits.Unrolling.Acceptance.Internal.Structure
 public import Complexitylib.Circuits.Unrolling.Amplification.Defs
-public import Mathlib.Tactic.Ring
 
 /-!
 # Structural internals for parallel amplification circuits

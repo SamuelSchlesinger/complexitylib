@@ -6,6 +6,7 @@ Authors: Samuel Schlesinger
 module
 
 public import Complexitylib.Models.TuringMachine.Combinators
+import Std.Tactic.BVDecide.Normalize.Prop
 
 /-!
 # Read-only-input loop combinator — definitions

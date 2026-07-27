@@ -6,18 +6,11 @@ Authors: Samuel Schlesinger
 module
 
 public import
-  Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Machine.EntryMatch
-public import
-  Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Machine.EntryMissCopy
-public import
-Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Machine.EntryUpdate.Internal.Ctrl
-public import
 Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Machine.EntryUpdate.Internal.Loop
 public import
   Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Machine.EntryUpdate.Internal.Out
 public import
 Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Machine.EntryUpdate.Internal.Time
-public import Complexitylib.Models.TuringMachine.Subroutines.BinaryPred
 public import Mathlib.Data.Nat.Bitwise
 
 /-!

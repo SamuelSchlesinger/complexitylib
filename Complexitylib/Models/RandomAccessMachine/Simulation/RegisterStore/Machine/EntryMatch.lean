@@ -9,7 +9,7 @@ public import
   Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Machine.EntryMatch.Defs
 public import
   Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Machine.EntryMatch.Internal
-public import Complexitylib.Models.TuringMachine.Hoare.Space
+import Std.Tactic.BVDecide.Normalize.BitVec
 
 /-!
 # RAM sparse-entry matching

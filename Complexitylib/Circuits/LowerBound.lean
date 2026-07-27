@@ -5,7 +5,6 @@ Authors: Samuel Schlesinger
 -/
 module
 
-public import Complexitylib.Circuits.EssentialInput
 public import Complexitylib.Circuits.Internal.LowerBound
 
 /-! # Gate Elimination Lower Bound

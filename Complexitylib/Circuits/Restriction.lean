@@ -7,6 +7,7 @@ module
 
 public import Complexitylib.Circuits.Basic
 public import Complexitylib.Circuits.Formula
+import Std.Tactic.BVDecide.Normalize.Prop
 
 /-!
 # Restrictions

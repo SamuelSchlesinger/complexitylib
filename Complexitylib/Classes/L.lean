@@ -5,11 +5,8 @@ Authors: Samuel Schlesinger
 -/
 module
 
-public import Complexitylib.Models.TuringMachine
 public import Complexitylib.Classes.Time
 public import Complexitylib.Classes.Pairing
-public import Complexitylib.Asymptotics
-public import Mathlib.Data.Nat.Log
 
 /-!
 # Log-space transducer classes

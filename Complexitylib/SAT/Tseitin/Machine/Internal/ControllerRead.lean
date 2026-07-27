@@ -6,6 +6,8 @@ Authors: Samuel Schlesinger
 module
 
 public import Complexitylib.SAT.Tseitin.Machine.Internal.ControllerLift
+import Std.Tactic.BVDecide.Normalize.BitVec
+import Std.Tactic.BVDecide.Normalize.Prop
 
 /-!
 # Concrete read paths for the Tseitin streaming controller

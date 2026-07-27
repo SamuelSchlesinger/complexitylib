@@ -7,6 +7,7 @@ module
 
 public import Complexitylib.Circuits.Encoding
 public import Complexitylib.Circuits.FormulaEncoding.Defs
+import Std.Tactic.BVDecide.Normalize.Prop
 
 /-!
 # Boolean-formula codec internals

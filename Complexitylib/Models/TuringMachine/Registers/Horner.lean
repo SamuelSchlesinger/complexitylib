@@ -6,8 +6,8 @@ Authors: Samuel Schlesinger
 module
 
 public import Complexitylib.Models.TuringMachine.Registers.EmitSeq
-public import Mathlib.Algebra.Polynomial.Eval.Defs
 public import Mathlib.Algebra.Polynomial.Eval.Degree
+import Std.Tactic.BVDecide.Normalize.Prop
 
 /-!
 # Horner layers: polynomial register evaluation

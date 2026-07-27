@@ -8,7 +8,6 @@ module
 public import Mathlib.Data.Nat.Log
 public import Mathlib.Data.Nat.Size
 public import Mathlib.Tactic.Ring
-public import Mathlib.Tactic.Lemma
 
 /-!
 # Fixed-width binary encodings of natural numbers

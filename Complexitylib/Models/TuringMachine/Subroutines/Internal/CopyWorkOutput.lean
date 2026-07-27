@@ -6,6 +6,7 @@ Authors: Samuel Schlesinger
 module
 
 public import Complexitylib.Models.TuringMachine.Subroutines.Internal
+import Std.Tactic.BVDecide.Normalize.Prop
 
 /-!
 # Copy a raw work-tape output — proof internals

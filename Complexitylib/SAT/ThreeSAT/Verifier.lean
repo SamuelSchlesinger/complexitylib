@@ -6,8 +6,6 @@ Authors: Samuel Schlesinger
 module
 
 public import Complexitylib.SAT.ThreeSAT.Syntax
-public import Complexitylib.Classes.Pairing
-public import Complexitylib.Models.TuringMachine.Combinators.Internal.Scanner
 
 /-!
 # Exact-3 syntax on paired verifier inputs

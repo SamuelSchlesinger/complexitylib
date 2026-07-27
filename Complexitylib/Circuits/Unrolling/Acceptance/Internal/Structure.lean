@@ -5,11 +5,9 @@ Authors: Samuel Schlesinger
 -/
 module
 
-public import Complexitylib.Circuits.Encoding.Fragment
 public import Complexitylib.Circuits.Unrolling.Acceptance.Defs
-public import Complexitylib.Circuits.Unrolling.Trace.Internal.Structure
 public import Complexitylib.Circuits.Unrolling.Trace.Internal.Topology
-public import Mathlib.Tactic.Ring
+import Std.Tactic.BVDecide.Normalize.Prop
 
 /-!
 # Structure of bounded-trace acceptance circuits

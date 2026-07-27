@@ -7,6 +7,7 @@ module
 
 public import Complexitylib.Circuits.Nondeterminism.Defs
 public import Complexitylib.Circuits.Internal.ShannonUpper
+import Std.Tactic.BVDecide.Normalize.Bool
 
 /-! # Internal: Nondeterministic Quantification Circuit Constructions
 

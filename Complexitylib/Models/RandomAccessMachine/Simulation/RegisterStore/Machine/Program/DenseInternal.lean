@@ -9,6 +9,7 @@ public import
   Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Machine.Program.DenseDefs
 public import
   Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Machine.Program
+import Std.Tactic.BVDecide.Normalize.Prop
 
 /-!
 # Dense-overlay RAM program controller -- proof internals

@@ -6,6 +6,8 @@ Authors: Samuel Schlesinger
 module
 
 public import Complexitylib.Models.TuringMachine.Subroutines.BinaryRippleAdd.Defs
+import Std.Tactic.BVDecide.Normalize.Bool
+import Std.Tactic.BVDecide.Normalize.Prop
 
 /-!
 # Linear-time canonical binary addition -- pure proofs

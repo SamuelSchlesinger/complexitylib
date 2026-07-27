@@ -6,7 +6,6 @@ Authors: Samuel Schlesinger
 module
 
 public import Complexitylib.Circuits.Basic
-public import Mathlib.Data.List.OfFn
 
 /-!
 # Fixed-length bit strings and lists

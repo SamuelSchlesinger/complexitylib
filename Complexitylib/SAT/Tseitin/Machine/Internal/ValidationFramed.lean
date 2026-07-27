@@ -6,6 +6,7 @@ Authors: Samuel Schlesinger
 module
 
 public import Complexitylib.SAT.Tseitin.Machine.Defs
+import Std.Tactic.BVDecide.Normalize.BitVec
 
 /-!
 # Framed execution of the Tseitin syntax validator

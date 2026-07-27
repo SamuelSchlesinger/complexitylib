@@ -6,6 +6,7 @@ Authors: Samuel Schlesinger
 module
 
 public import Complexitylib.Models.TuringMachine.UTM.Internal.BodyIteration
+import Std.Tactic.BVDecide.Normalize.Prop
 
 /-!
 # `TerminatedRegion` for encoded descriptions

@@ -7,7 +7,6 @@ module
 
 public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Transition.MovedHead.Defs
 public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Transition.WrittenCell.Defs
-public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Serializer.Transition.Next.Defs
 
 /-!
 # Direct-unrolling next-atom generator -- definitions

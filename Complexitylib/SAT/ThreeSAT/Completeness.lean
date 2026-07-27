@@ -5,7 +5,6 @@ Authors: Samuel Schlesinger
 -/
 module
 
-public import Complexitylib.Classes.NP.Reduction
 public import Complexitylib.SAT.CookLevin.Assembly
 public import Complexitylib.SAT.ThreeSAT.Headline
 public import Complexitylib.SAT.Tseitin.Machine

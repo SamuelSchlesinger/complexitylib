@@ -10,8 +10,7 @@ public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Offset
 public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Transition.Case.Defs
 public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Transition.Read
 public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Serializer.Transition.Case
-public import Complexitylib.Models.TuringMachine.Experimental.BinaryRoutine.Arithmetic
-public import Complexitylib.Models.TuringMachine.Experimental.BinaryRoutine.List
+import Std.Tactic.BVDecide.Normalize.Prop
 
 /-!
 # Direct-unrolling transition-case generator -- proof internals

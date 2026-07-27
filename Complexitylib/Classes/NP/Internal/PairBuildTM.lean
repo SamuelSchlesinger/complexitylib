@@ -6,11 +6,11 @@ Authors: Samuel Schlesinger
 module
 
 public import Mathlib.Tactic.Ring
-public import Complexitylib.Models.TuringMachine.Combinators
 public import Complexitylib.Models.TuringMachine.Combinators.Internal.Generic
 public import Complexitylib.Models.TuringMachine.Hoare.Defs
 public import Complexitylib.Models.TuringMachine.Trace
 public import Complexitylib.Classes.Pairing
+import Std.Tactic.BVDecide.Normalize.Prop
 
 /-!
 # `pairBuildTM`: construct `pair x y` on a work tape

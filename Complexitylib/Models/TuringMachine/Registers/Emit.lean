@@ -8,6 +8,7 @@ module
 public import Complexitylib.Models.TuringMachine.Subroutines
 public import Complexitylib.Models.TuringMachine.Registers
 public import Complexitylib.Models.TuringMachine.Hoare
+import Std.Tactic.BVDecide.Normalize.Prop
 
 /-!
 # Output-emission subroutines

@@ -9,6 +9,7 @@ public import Complexitylib.Models.TuringMachine.Hoare.Defs
 public import Complexitylib.Models.TuringMachine.Combinators.Internal.Generic
 public import Complexitylib.Models.TuringMachine.UTM.Internal.VTape
 public import Complexitylib.Models.TuringMachine.UTM.Internal.Desc
+import Std.Tactic.BVDecide.Normalize.Prop
 
 /-!
 # The UTM halt test machine

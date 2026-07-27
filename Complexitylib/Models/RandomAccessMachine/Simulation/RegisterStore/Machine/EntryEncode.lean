@@ -10,7 +10,6 @@ public import
 public import
   Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Machine.EntryEncode.Internal
 public import Complexitylib.Models.TuringMachine.Hoare.RetargetOutput
-public import Complexitylib.Models.TuringMachine.Hoare.Space
 
 /-!
 # Sparse entry emission

@@ -10,6 +10,7 @@ public import
 public import
   Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Machine.EntryScanStep.Defs
 public import Complexitylib.Models.TuringMachine.Combinators.WorkSymbolBranch
+import Std.Tactic.BVDecide.Normalize.BitVec
 
 /-!
 # One bounded sparse-entry scan iteration — proof internals

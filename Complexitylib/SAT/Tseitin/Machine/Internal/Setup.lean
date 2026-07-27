@@ -5,7 +5,6 @@ Authors: Samuel Schlesinger
 -/
 module
 
-public import Complexitylib.Models.TuringMachine.Subroutines.Internal
 public import Complexitylib.SAT.Tseitin.Machine.Defs
 
 /-!

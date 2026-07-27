@@ -9,6 +9,7 @@ public import Complexitylib.Models.TuringMachine.Combinators.Internal.Scanner
 public import Complexitylib.Models.TuringMachine.Hoare
 public import Complexitylib.Models.TuringMachine.Lift
 public import Complexitylib.Models.TuringMachine.Subroutines.PairValidate.Defs
+import Std.Tactic.BVDecide.Normalize.Prop
 
 /-!
 # Pair-encoding validator — proof internals

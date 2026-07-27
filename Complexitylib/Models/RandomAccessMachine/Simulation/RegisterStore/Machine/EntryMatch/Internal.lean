@@ -11,8 +11,7 @@ public import
   Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Machine.EntryDecode
 public import
   Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Machine.EntryMatch.Defs
-public import Complexitylib.Models.TuringMachine.Combinators.Internal.Seq
-public import Complexitylib.Models.TuringMachine.Internal
+import Std.Tactic.BVDecide.Normalize.Prop
 
 /-!
 # RAM sparse-entry matching — proof internals

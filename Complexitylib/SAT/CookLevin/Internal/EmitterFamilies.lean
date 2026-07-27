@@ -6,6 +6,7 @@ Authors: Samuel Schlesinger
 module
 
 public import Complexitylib.SAT.CookLevin.Internal.EmitterLoop
+import Std.Tactic.BVDecide.Normalize.Prop
 
 /-!
 # The clause-family emitters

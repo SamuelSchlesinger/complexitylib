@@ -6,6 +6,7 @@ Authors: Samuel Schlesinger
 module
 
 public import Complexitylib.Circuits.Encoding.Machine.Core.Internal.Execution
+import Std.Tactic.BVDecide.Normalize.Bool
 
 /-!
 # One-gate execution for the streaming circuit evaluator

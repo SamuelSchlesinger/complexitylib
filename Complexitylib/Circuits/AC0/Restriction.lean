@@ -7,6 +7,8 @@ module
 
 public import Complexitylib.Circuits.AC0.NormalForm
 public import Complexitylib.Circuits.Restriction
+import Std.Tactic.BVDecide.Normalize.Bool
+import Std.Tactic.BVDecide.Normalize.Prop
 
 /-!
 # Restricting negation-normal AC0 formulas

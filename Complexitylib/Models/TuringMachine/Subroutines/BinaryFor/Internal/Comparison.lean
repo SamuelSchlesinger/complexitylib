@@ -7,6 +7,7 @@ module
 
 public import Complexitylib.Models.TuringMachine.Subroutines.BinaryFor.Internal.Control
 public import Complexitylib.Mathlib.NatBits
+import Std.Tactic.BVDecide.Normalize.BitVec
 
 /-!
 # Canonical binary count-up loops — comparison internals

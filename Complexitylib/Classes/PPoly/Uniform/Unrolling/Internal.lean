@@ -7,7 +7,6 @@ module
 
 public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Defs
 public import Complexitylib.Classes.PPoly.Unrolling
-public import Complexitylib.Models.TuringMachine.Internal
 
 /-!
 # Streamable deterministic unrolling families — proof internals

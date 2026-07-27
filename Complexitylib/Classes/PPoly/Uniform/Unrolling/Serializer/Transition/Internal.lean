@@ -8,7 +8,7 @@ module
 public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Serializer
 public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Serializer.Initialization.Internal
 public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Serializer.Transition.Defs
-public import Complexitylib.Circuits.Unrolling.Transition
+import Std.Tactic.BVDecide.Normalize.Prop
 
 /-!
 # Numeric transition-formula schedules -- proof internals

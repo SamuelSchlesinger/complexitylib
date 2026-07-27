@@ -15,8 +15,6 @@ public import
 Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Machine.EntryUpdate.BoundsInternal
 public import
   Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Machine.EntryUpdate.Source
-public import Complexitylib.Models.TuringMachine.Hoare.Space
-public import Complexitylib.Models.TuringMachine.Hoare.RetargetOutput
 
 /-!
 # Bounded encoded sparse-store update

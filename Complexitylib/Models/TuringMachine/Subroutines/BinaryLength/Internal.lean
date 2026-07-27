@@ -7,8 +7,6 @@ module
 
 public import Complexitylib.Asymptotics
 public import Complexitylib.Mathlib.NatBits
-public import Complexitylib.Models.TuringMachine.Combinators.ForInput.Internal
-public import Complexitylib.Models.TuringMachine.Hoare.Space
 public import Complexitylib.Models.TuringMachine.Experimental.Routine.Internal
 public import Complexitylib.Models.TuringMachine.Subroutines.BinaryLength.Defs
 public import Complexitylib.Models.TuringMachine.Subroutines.BinarySucc

@@ -7,6 +7,7 @@ module
 
 public import Complexitylib.Models.RandomAccessMachine.Simulation.TMConfig.Step.Internal.Layout
 public import Complexitylib.Models.RandomAccessMachine.Structured.Internal.Resources
+import Std.Tactic.BVDecide.Normalize.Prop
 
 /-!
 # Loading represented TM states and head symbols -- proof internals

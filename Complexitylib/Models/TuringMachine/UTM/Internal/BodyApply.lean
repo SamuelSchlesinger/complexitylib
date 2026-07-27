@@ -6,7 +6,7 @@ Authors: Samuel Schlesinger
 module
 
 public import Complexitylib.Models.TuringMachine.UTM.Internal.BodyInternal
-public import Complexitylib.Models.TuringMachine.UTM.Internal.VTape
+import Std.Tactic.BVDecide.Normalize.Prop
 
 /-!
 # Body machine: peek, default-move, and apply phases

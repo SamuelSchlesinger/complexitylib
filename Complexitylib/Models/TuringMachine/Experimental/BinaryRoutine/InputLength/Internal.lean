@@ -7,7 +7,6 @@ module
 
 public import Complexitylib.Models.TuringMachine.Experimental.BinaryRoutine
 public import Complexitylib.Models.TuringMachine.Experimental.BinaryRoutine.InputLength.Defs
-public import Complexitylib.Models.TuringMachine.Hoare.Space
 public import Complexitylib.Models.TuringMachine.Subroutines.BinaryLength
 
 /-!

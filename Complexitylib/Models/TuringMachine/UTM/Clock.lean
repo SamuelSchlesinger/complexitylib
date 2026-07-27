@@ -6,9 +6,9 @@ Authors: Samuel Schlesinger
 module
 
 public import Complexitylib.Models.TuringMachine.Lift
-public import Complexitylib.Models.TuringMachine.Hoare.Defs
 public import Complexitylib.Models.TuringMachine.Registers
 public import Complexitylib.Models.TuringMachine.UTM.Internal.VTape
+import Std.Tactic.BVDecide.Normalize.Prop
 
 /-!
 # Clock infrastructure for the time-bounded universal machine

@@ -7,6 +7,7 @@ module
 
 public import Complexitylib.Models.RandomAccessMachine.Structured.Scanner.Defs
 public import Mathlib.Data.FinEnum.Option
+import Std.Tactic.BVDecide.Normalize.Prop
 
 /-!
 # Structured RAM last-bit scanner — definitions

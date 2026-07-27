@@ -8,14 +8,11 @@ module
 public import Complexitylib.Classes.FiniteCounting
 public import Complexitylib.Models.TuringMachine
 public import Mathlib.Algebra.BigOperators.Field
-public import Mathlib.Algebra.Order.Field.Basic
 public import Mathlib.Data.Nat.Choose.Sum
 public import Mathlib.Tactic.FieldSimp
-public import Mathlib.Tactic.GCongr
-public import Mathlib.Tactic.Linarith
-public import Mathlib.Tactic.NormNum
 public import Mathlib.Tactic.Positivity
-public import Mathlib.Tactic.Ring
+import Std.Tactic.BVDecide.Normalize.Bool
+import Std.Tactic.BVDecide.Normalize.Prop
 
 /-!
 # Finite event probability

@@ -8,6 +8,7 @@ module
 public import Complexitylib.Circuits.BitString
 public import Complexitylib.Circuits.Encoding.Internal.Codec
 public import Complexitylib.Circuits.Internal.CircuitToDescriptor
+import Std.Tactic.BVDecide.Normalize.Prop
 
 /-!
 # Internal: semantics of encoded fan-in-two circuits

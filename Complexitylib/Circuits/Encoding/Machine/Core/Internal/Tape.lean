@@ -6,6 +6,7 @@ Authors: Samuel Schlesinger
 module
 
 public import Complexitylib.Circuits.Encoding.Machine.Core.Defs
+import Std.Tactic.BVDecide.Normalize.Prop
 
 /-!
 # Tape cursors for the streaming circuit evaluator

@@ -6,7 +6,6 @@ Authors: Samuel Schlesinger
 module
 
 public import Complexitylib.Circuits.Unrolling.Transition.Fragment.Defs
-public import Mathlib.Data.List.FinRange
 
 /-!
 # Definitions for tiled bounded-trace circuits

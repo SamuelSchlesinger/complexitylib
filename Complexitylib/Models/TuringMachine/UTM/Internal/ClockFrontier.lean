@@ -6,6 +6,7 @@ Authors: Samuel Schlesinger
 module
 
 public import Complexitylib.Models.TuringMachine.UTM.Clock
+import Std.Tactic.BVDecide.Normalize.Prop
 
 /-!
 # Frontier-parked clock machines for the time-bounded universal machine

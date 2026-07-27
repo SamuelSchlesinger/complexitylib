@@ -7,8 +7,8 @@ module
 
 public import Complexitylib.Models.TuringMachine.UTM.Internal.BodyIteration
 public import Complexitylib.Models.TuringMachine.UTM.Internal.Sim
-public import Complexitylib.Models.TuringMachine.Combinators.Internal.Loop
 public import Complexitylib.Models.TuringMachine.Hoare
+import Std.Tactic.BVDecide.Normalize.Prop
 
 /-!
 # Universal machine: the simulate/halt-test loop

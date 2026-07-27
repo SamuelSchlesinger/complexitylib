@@ -6,9 +6,8 @@ Authors: Samuel Schlesinger
 module
 
 public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Primitive.Defs
-public import Complexitylib.Models.TuringMachine.Experimental.BinaryRoutine.Arithmetic
-public import Complexitylib.Models.TuringMachine.Experimental.BinaryRoutine.List
 public import Complexitylib.Models.TuringMachine.Experimental.BinaryRoutine.SpaceBounds
+import Std.Tactic.BVDecide.Normalize.Prop
 
 /-!
 # Direct-unrolling generator primitives -- proof internals

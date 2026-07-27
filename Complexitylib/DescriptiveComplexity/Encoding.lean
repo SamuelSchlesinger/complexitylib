@@ -6,11 +6,9 @@ Authors: Samuel Schlesinger
 module
 
 public import Complexitylib.DescriptiveComplexity.Structure
-public import Mathlib.Data.Fintype.Pi
 public import Mathlib.Data.Fintype.BigOperators
-public import Mathlib.Data.List.FinRange
-public import Mathlib.Data.Fin.Tuple.Basic
 public import Mathlib.Data.List.TakeWhile
+import Std.Tactic.BVDecide.Normalize.Prop
 
 /-!
 # Encoding finite structures as bit strings

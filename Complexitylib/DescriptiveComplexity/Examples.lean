@@ -5,7 +5,6 @@ Authors: Samuel Schlesinger
 -/
 module
 
-public import Complexitylib.DescriptiveComplexity.Query
 public import Complexitylib.DescriptiveComplexity.FirstOrder
 
 /-!

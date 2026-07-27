@@ -6,6 +6,8 @@ Authors: Samuel Schlesinger
 module
 
 public import Complexitylib.SAT.Language
+import Std.Tactic.BVDecide.Normalize.BitVec
+import Std.Tactic.BVDecide.Normalize.Prop
 
 /-!
 # SAT verifier specification

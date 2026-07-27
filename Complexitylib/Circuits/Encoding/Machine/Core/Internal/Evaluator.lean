@@ -5,7 +5,6 @@ Authors: Samuel Schlesinger
 -/
 module
 
-public import Complexitylib.Asymptotics
 public import Complexitylib.Circuits.Encoding.Machine.Internal.FrontEnd
 public import Complexitylib.Circuits.Encoding.Machine.Core.Internal.Hoare
 public import Complexitylib.Circuits.Encoding.Machine.Core.Internal.Stage

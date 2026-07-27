@@ -7,6 +7,7 @@ module
 
 public import Complexitylib.Classes.EventProb
 public import Complexitylib.Models.TuringMachine.Repetition.Internal.Correctness
+import Std.Tactic.BVDecide.Normalize.Prop
 
 /-!
 # Correctness and amplification for fixed-time repetition

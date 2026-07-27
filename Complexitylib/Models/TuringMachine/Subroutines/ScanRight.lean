@@ -5,10 +5,7 @@ Authors: Samuel Schlesinger
 -/
 module
 
-public import Complexitylib.Models.TuringMachine.Hoare.Defs
-public import Complexitylib.Models.TuringMachine.Subroutines
 public import Complexitylib.Models.TuringMachine.Subroutines.Internal.ScanRight
-public import Complexitylib.Models.TuringMachine.Tape.Encoding
 
 /-!
 # Frame-preserving right scan

@@ -7,12 +7,9 @@ module
 
 public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Initialization
 public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Offset
-public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Primitive
 public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Transition.Predecessor.Defs
 public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Serializer.Transition
-public import Complexitylib.Models.TuringMachine.Experimental.BinaryRoutine.Arithmetic
-public import Complexitylib.Models.TuringMachine.Experimental.BinaryRoutine.Control
-public import Complexitylib.Models.TuringMachine.Experimental.BinaryRoutine.List
+import Std.Tactic.BVDecide.Normalize.Prop
 
 /-!
 # Direct predecessor-head formula generation -- proof internals

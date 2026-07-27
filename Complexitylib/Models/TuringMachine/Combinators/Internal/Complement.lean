@@ -5,9 +5,9 @@ Authors: Samuel Schlesinger
 -/
 module
 
-public import Complexitylib.Models.TuringMachine.Combinators
 public import Complexitylib.Models.TuringMachine.Combinators.Internal.Generic
 public import Complexitylib.Models.TuringMachine.Internal
+import Std.Tactic.BVDecide.Normalize.Prop
 
 /-!
 # Complement TM: proof internals

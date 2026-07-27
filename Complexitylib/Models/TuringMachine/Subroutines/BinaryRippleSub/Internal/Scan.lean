@@ -5,9 +5,9 @@ Authors: Samuel Schlesinger
 -/
 module
 
-public import Complexitylib.Models.TuringMachine.Subroutines.BinaryRippleSub.Defs
 public import Complexitylib.Models.TuringMachine.Subroutines.BinaryRippleSub.Internal.Pure
 public import Complexitylib.Models.TuringMachine.Combinators.Internal.Generic
+import Std.Tactic.BVDecide.Normalize.Prop
 
 /-!
 # Linear-time canonical binary subtraction -- forward scan proof

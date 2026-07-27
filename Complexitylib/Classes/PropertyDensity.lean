@@ -6,9 +6,7 @@ Authors: Samuel Schlesinger
 module
 
 public import Complexitylib.Classes.FiniteCounting
-public import Mathlib.Algebra.Order.Field.Basic
 public import Mathlib.Tactic.FieldSimp
-public import Mathlib.Tactic.GCongr
 public import Mathlib.Tactic.Positivity
 
 /-!

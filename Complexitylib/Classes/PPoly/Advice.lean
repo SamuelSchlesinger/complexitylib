@@ -8,6 +8,7 @@ module
 public import Complexitylib.Classes.PPoly.Advice.Defs
 public import Complexitylib.Classes.PPoly.Advice.Internal
 public import Complexitylib.Classes.PPoly.Advice.Reverse
+import Std.Tactic.BVDecide.Normalize.Prop
 
 /-!
 # Polynomial advice and nonuniform circuits

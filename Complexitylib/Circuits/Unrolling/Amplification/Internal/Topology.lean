@@ -6,6 +6,7 @@ Authors: Samuel Schlesinger
 module
 
 public import Complexitylib.Circuits.Unrolling.Amplification.Internal.Structure
+import Std.Tactic.BVDecide.Normalize.Prop
 
 /-!
 # Topology internals for parallel amplification circuits

@@ -11,6 +11,7 @@ public import Complexitylib.Models.TuringMachine.Combinators.ForInput.Defs
 public import Complexitylib.Models.TuringMachine.Subroutines.BinaryCopy.Defs
 public import Complexitylib.Models.TuringMachine.Subroutines.BinaryPred.Defs
 public import Complexitylib.Models.TuringMachine.Subroutines.ResetBinaryMany.Defs
+import Std.Tactic.BVDecide.Normalize.Prop
 
 /-!
 # Dense public-input lookup -- definitions

@@ -7,7 +7,6 @@ module
 
 public import
   Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Machine.Program.Bounds.Defs
-public import Mathlib.Algebra.Polynomial.Eval.Defs
 public import Mathlib.Tactic
 
 /-!

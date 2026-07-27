@@ -7,6 +7,7 @@ module
 
 public import Complexitylib.Models.RandomAccessMachine.Internal
 public import Complexitylib.Models.RandomAccessMachine.Structured.Defs
+import Std.Tactic.BVDecide.Normalize.Prop
 
 /-!
 # Structured logarithmic-cost RAM programs — proof internals

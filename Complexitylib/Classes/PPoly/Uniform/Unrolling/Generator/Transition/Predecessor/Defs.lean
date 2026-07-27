@@ -7,7 +7,6 @@ module
 
 public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Initialization.Defs
 public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Offset.Defs
-public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Primitive.Defs
 public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Serializer.Transition.MovedHead.Defs
 
 /-!

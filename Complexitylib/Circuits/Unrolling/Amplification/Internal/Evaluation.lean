@@ -5,9 +5,9 @@ Authors: Samuel Schlesinger
 -/
 module
 
-public import Complexitylib.Circuits.Encoding.Threshold.Internal
 public import Complexitylib.Circuits.Unrolling.Acceptance.Internal.Evaluation
 public import Complexitylib.Circuits.Unrolling.Amplification.Internal.Structure
+import Std.Tactic.BVDecide.Normalize.Prop
 
 /-!
 # Evaluation internals for parallel amplification circuits

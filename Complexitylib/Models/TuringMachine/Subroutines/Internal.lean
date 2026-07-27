@@ -8,8 +8,7 @@ module
 public import Complexitylib.Models.TuringMachine.Subroutines
 public import Complexitylib.Models.TuringMachine.Tape.Encoding
 public import Complexitylib.Models.TuringMachine.Hoare
-public import Complexitylib.Models.TuringMachine.Hoare.Defs
-public import Complexitylib.Models.TuringMachine.Combinators.Internal.Generic
+import Std.Tactic.BVDecide.Normalize.Prop
 
 /-!
 # TM Subroutines: proof internals

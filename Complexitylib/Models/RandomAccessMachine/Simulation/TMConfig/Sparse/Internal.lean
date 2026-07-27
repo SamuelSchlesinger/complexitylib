@@ -7,6 +7,7 @@ module
 
 public import Complexitylib.Models.RandomAccessMachine.Simulation.TMConfig.Sparse.Defs
 public import Complexitylib.Models.RandomAccessMachine.Simulation.TMConfig.Internal
+import Std.Tactic.BVDecide.Normalize.Prop
 
 /-!
 # Sparse unbounded TM configuration encoding -- proof internals

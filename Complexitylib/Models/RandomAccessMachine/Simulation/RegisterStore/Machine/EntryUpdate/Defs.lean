@@ -10,7 +10,7 @@ public import
 public import
   Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Machine.EntryMissCopy.Defs
 public import Complexitylib.Models.TuringMachine.Subroutines.BinaryPred.Defs
-public import Complexitylib.Models.TuringMachine.Subroutines.BinarySucc.Defs
+import Std.Tactic.BVDecide.Normalize.Prop
 
 /-!
 # Bounded encoded sparse-store update — controller definitions

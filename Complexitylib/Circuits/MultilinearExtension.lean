@@ -5,7 +5,6 @@ Authors: Samuel Schlesinger
 -/
 module
 
-public import Mathlib.Algebra.Ring.Defs
 public import Mathlib.Tactic.Ring
 
 /-!

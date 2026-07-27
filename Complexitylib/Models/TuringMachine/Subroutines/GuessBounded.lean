@@ -8,6 +8,8 @@ module
 public import Complexitylib.Models.TuringMachine.Subroutines.Counter
 public import Complexitylib.Models.TuringMachine.Tape.Encoding
 public import Complexitylib.Models.TuringMachine.Trace
+import Std.Tactic.BVDecide.Normalize.BitVec
+import Std.Tactic.BVDecide.Normalize.Prop
 
 /-!
 # Nondeterministic TM subroutines

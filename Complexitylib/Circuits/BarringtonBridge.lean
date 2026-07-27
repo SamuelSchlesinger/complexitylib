@@ -7,7 +7,6 @@ module
 
 public import Complexitylib.Circuits.Barrington
 public import Complexitylib.Circuits.BarringtonS5
-public import Mathlib.GroupTheory.Perm.Cycle.Type
 
 /-!
 # Barrington: bridging the abstract move-set to the `S₅` cycle algebra

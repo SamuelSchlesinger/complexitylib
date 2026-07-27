@@ -5,9 +5,9 @@ Authors: Samuel Schlesinger
 -/
 module
 
-public import Mathlib.Logic.Relation
 public import Mathlib.Data.Fintype.Pi
 public import Mathlib.Data.Rat.Defs
+import Std.Tactic.BVDecide.Normalize.Prop
 
 /-!
 # Turing machines

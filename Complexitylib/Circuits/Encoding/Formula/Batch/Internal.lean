@@ -7,6 +7,8 @@ module
 
 public import Complexitylib.Circuits.Encoding.Formula.Batch.Defs
 public import Complexitylib.Circuits.Encoding.Formula.Internal
+import Std.Tactic.BVDecide.Normalize.BitVec
+import Std.Tactic.BVDecide.Normalize.Prop
 
 /-!
 # Internals for batch formula compilation

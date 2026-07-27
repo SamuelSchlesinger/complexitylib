@@ -7,6 +7,7 @@ module
 
 public import Complexitylib.Models.TuringMachine.Combinators.Internal.Generic
 public import Complexitylib.Models.TuringMachine.Hoare.Defs
+import Std.Tactic.BVDecide.Normalize.Prop
 
 /-!
 # Counter-building TM subroutines

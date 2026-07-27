@@ -9,7 +9,6 @@ public import
   Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Machine.EntryScanStep.Defs
 public import
   Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Machine.EntryScanStep.Internal
-public import Complexitylib.Models.TuringMachine.Hoare.Space
 
 /-!
 # One bounded sparse-entry scan iteration

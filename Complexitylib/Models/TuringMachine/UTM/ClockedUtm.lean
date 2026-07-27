@@ -8,6 +8,7 @@ module
 public import Complexitylib.Models.TuringMachine.UTM.Internal.SimClocked
 public import Complexitylib.Models.TuringMachine.UTM.Internal.SeekFrontier
 public import Complexitylib.Models.TuringMachine.Subroutines.Internal
+import Std.Tactic.BVDecide.Normalize.Prop
 
 /-!
 # The clocked universal machine

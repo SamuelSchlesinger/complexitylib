@@ -5,7 +5,6 @@ Authors: Samuel Schlesinger
 -/
 module
 
-public import Complexitylib.SAT.Tseitin.Machine.Internal.ControllerInvariant
 public import Complexitylib.SAT.Tseitin.Machine.Internal.RuntimeBounds
 
 /-!

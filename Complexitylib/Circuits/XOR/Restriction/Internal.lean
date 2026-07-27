@@ -7,6 +7,8 @@ module
 
 public import Complexitylib.Circuits.DecisionTree.Finite
 public import Complexitylib.Circuits.XOR.Restriction.Defs
+import Std.Tactic.BVDecide.Normalize.Bool
+import Std.Tactic.BVDecide.Normalize.Prop
 
 /-!
 # Parity on a finite support -- proof internals

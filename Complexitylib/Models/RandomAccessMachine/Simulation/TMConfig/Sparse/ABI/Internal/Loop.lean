@@ -7,6 +7,7 @@ module
 
 public import Complexitylib.Models.RandomAccessMachine.Simulation.TMConfig.Sparse.ABI.Internal.Capture
 public import Complexitylib.Models.RandomAccessMachine.Structured.Internal.Resources
+import Std.Tactic.BVDecide.Normalize.Prop
 
 /-!
 # Backward public-input copy -- proof internals

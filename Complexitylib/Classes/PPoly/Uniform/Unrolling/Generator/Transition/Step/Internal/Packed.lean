@@ -6,6 +6,7 @@ Authors: Samuel Schlesinger
 module
 
 public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Transition.Step.Internal.Emitted
+import Std.Tactic.BVDecide.Normalize.Prop
 
 /-!
 # Exact packed-copy output of the direct step generator

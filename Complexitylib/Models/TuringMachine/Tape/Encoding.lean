@@ -6,6 +6,7 @@ Authors: Samuel Schlesinger
 module
 
 public import Complexitylib.Models.TuringMachine
+import Std.Tactic.BVDecide.Normalize.Prop
 
 /-!
 # Binary string encodings on Turing-machine tapes

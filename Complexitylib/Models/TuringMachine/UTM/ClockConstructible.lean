@@ -7,6 +7,7 @@ module
 
 public import Mathlib.Tactic.Ring
 public import Complexitylib.Models.TuringMachine.Registers.Arith
+import Std.Tactic.BVDecide.Normalize.Prop
 
 /-!
 # Clock constructibility for the time hierarchy theorem

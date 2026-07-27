@@ -5,9 +5,8 @@ Authors: Samuel Schlesinger
 -/
 module
 
-public import Complexitylib.Models.TuringMachine.Combinators
 public import Complexitylib.Models.TuringMachine.Subroutines.BinarySucc.Defs
-public import Mathlib.Data.Nat.Size
+import Std.Tactic.BVDecide.Normalize.Prop
 
 /-!
 # Little-endian binary predecessor — definitions

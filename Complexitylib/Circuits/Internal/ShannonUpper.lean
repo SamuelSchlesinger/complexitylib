@@ -6,8 +6,9 @@ Authors: Samuel Schlesinger
 module
 
 public import Complexitylib.Circuits.AndOrNot.Defs
-public import Mathlib.Data.Nat.Log
 public import Mathlib.Tactic
+import Std.Tactic.BVDecide.Normalize.BitVec
+import Std.Tactic.BVDecide.Normalize.Prop
 
 /-! # Internal: Shannon Upper Bound Construction
 

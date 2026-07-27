@@ -7,6 +7,7 @@ module
 
 public import Complexitylib.Models.RandomAccessMachine.Simulation.TMConfig.Sparse.ABI.Internal.Loop
 public import Complexitylib.Models.RandomAccessMachine.Simulation.TMConfig.Sparse.Internal
+import Std.Tactic.BVDecide.Normalize.Prop
 
 /-!
 # Public-input marshalling correctness -- proof internals

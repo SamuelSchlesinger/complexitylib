@@ -6,11 +6,8 @@ Authors: Samuel Schlesinger
 module
 
 public import Mathlib.GroupTheory.Perm.Fin
-public import Mathlib.GroupTheory.Perm.Cycle.Type
 public import Mathlib.GroupTheory.Perm.Cycle.Concrete
-public import Mathlib.Algebra.Group.Commutator
 public import Mathlib.Tactic.NormNum.Prime
-public import Mathlib.Tactic.Common
 
 /-!
 # The `S₅` five-cycle commutator (Barrington's non-solvability input)

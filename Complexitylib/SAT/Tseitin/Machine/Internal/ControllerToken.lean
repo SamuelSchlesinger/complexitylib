@@ -8,7 +8,6 @@ module
 public import Complexitylib.SAT.Tseitin.Machine.Internal.ControllerCalls
 public import Complexitylib.SAT.Tseitin.Machine.Internal.ControllerRead
 public import Complexitylib.SAT.Tseitin.Machine.Internal.ControllerSemantics
-public import Complexitylib.SAT.Tseitin.Machine.Internal.RuntimeBounds
 
 /-!
 # One-token simulation for the Tseitin streaming controller

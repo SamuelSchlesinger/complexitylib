@@ -6,6 +6,8 @@ Authors: Samuel Schlesinger
 module
 
 public import Complexitylib.Circuits.Basic
+import Std.Tactic.BVDecide.Normalize.Bool
+import Std.Tactic.BVDecide.Normalize.Prop
 
 /-! # Normal Forms — Core Definitions
 

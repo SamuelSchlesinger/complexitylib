@@ -6,8 +6,7 @@ Authors: Samuel Schlesinger
 module
 
 public import Complexitylib.SAT.ThreeSAT
-public import Complexitylib.Classes.P
-public import Complexitylib.Models.TuringMachine.Combinators.Internal.Scanner
+import Std.Tactic.BVDecide.Normalize.Prop
 
 /-!
 # Regular syntax checker for exact 3-CNF encodings

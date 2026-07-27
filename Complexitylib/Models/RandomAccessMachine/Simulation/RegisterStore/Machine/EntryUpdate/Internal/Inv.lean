@@ -10,7 +10,7 @@ Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Machine.EntryU
 public import
   Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Machine.EntryScan.Internal.Inv
 public import Complexitylib.Models.TuringMachine.Subroutines.BinaryPred
-public import Complexitylib.Models.TuringMachine.Subroutines.BinarySucc
+import Std.Tactic.BVDecide.Normalize.Prop
 
 /-!
 # Bounded encoded sparse-store update — invariant internals

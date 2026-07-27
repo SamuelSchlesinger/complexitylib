@@ -7,13 +7,8 @@ module
 
 public import Complexitylib.SAT.Verifier
 public import Complexitylib.Models.TuringMachine.Subroutines.PairSplit
-public import Complexitylib.Models.TuringMachine.Subroutines.Counter
-public import Complexitylib.Models.TuringMachine.Combinators
-public import Complexitylib.Models.TuringMachine.Combinators.Internal.Retarget
-public import Complexitylib.Models.TuringMachine.Combinators.Internal.Generic
-public import Complexitylib.Models.TuringMachine.Hoare
-public import Complexitylib.Models.TuringMachine.Hoare.Defs
-public import Complexitylib.Models.TuringMachine.Tape.Encoding
+import Std.Tactic.BVDecide.Normalize.BitVec
+import Std.Tactic.BVDecide.Normalize.Prop
 
 /-!
 # SAT verifier TMs

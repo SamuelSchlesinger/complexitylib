@@ -8,6 +8,7 @@ module
 public import Complexitylib.Models.TuringMachine.Composition.Defs
 public import Complexitylib.Models.TuringMachine.Combinators.Internal.Generic
 public import Complexitylib.Models.TuringMachine.Placement.Internal
+import Std.Tactic.BVDecide.Normalize.Prop
 
 /-!
 # Function composition: first-phase boundary

@@ -7,6 +7,7 @@ module
 
 public import Complexitylib.Models.RandomAccessMachine.Structured.Scanner.Defs
 public import Complexitylib.Models.TuringMachine.Subroutines.PairValidate.Defs
+import Std.Tactic.BVDecide.Normalize.Prop
 
 /-!
 # Structured RAM pair-encoding validator — definitions

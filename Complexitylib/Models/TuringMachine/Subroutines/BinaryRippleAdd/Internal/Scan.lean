@@ -5,10 +5,10 @@ Authors: Samuel Schlesinger
 -/
 module
 
-public import Complexitylib.Models.TuringMachine.Subroutines.BinaryRippleAdd.Defs
 public import Complexitylib.Models.TuringMachine.Subroutines.BinaryRippleAdd.Internal.Pure
 public import Complexitylib.Models.TuringMachine.Combinators.Internal.Generic
 public import Complexitylib.Models.TuringMachine.Tape.Encoding
+import Std.Tactic.BVDecide.Normalize.Prop
 
 /-!
 # Linear-time canonical binary addition -- scan proof

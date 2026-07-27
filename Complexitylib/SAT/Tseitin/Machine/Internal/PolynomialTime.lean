@@ -5,7 +5,6 @@ Authors: Samuel Schlesinger
 -/
 module
 
-public import Complexitylib.Asymptotics
 public import Complexitylib.SAT.Tseitin
 public import Complexitylib.SAT.Tseitin.Machine.Internal.EmitterSpec
 public import Complexitylib.SAT.Tseitin.Machine.Internal.InvalidBranchSpec

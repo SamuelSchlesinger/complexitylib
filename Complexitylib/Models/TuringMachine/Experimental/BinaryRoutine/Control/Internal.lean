@@ -8,10 +8,7 @@ module
 public import Complexitylib.Models.TuringMachine.Combinators.WorkBranch
 public import Complexitylib.Models.TuringMachine.Experimental.BinaryRoutine
 public import Complexitylib.Models.TuringMachine.Experimental.BinaryRoutine.Control.Defs
-public import Complexitylib.Models.TuringMachine.Hoare.Space
-public import Complexitylib.Models.TuringMachine.Subroutines.BinaryFor
-public import Complexitylib.Models.TuringMachine.Subroutines.BinaryFor.Internal.Control
-public import Complexitylib.Models.TuringMachine.Subroutines.BinarySucc
+import Std.Tactic.BVDecide.Normalize.Prop
 
 /-!
 # Proof-carrying binary routine control -- proof internals

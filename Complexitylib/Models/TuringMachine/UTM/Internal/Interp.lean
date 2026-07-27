@@ -6,7 +6,6 @@ Authors: Samuel Schlesinger
 module
 
 public import Complexitylib.Models.TuringMachine.UTM.Internal.Desc
-public import Complexitylib.Models.TuringMachine.UTM.Encoding
 
 /-!
 # Interpreting machine descriptions

@@ -8,6 +8,7 @@ module
 public import
   Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.DenseOverlay.Defs
 public import Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Internal
+import Std.Tactic.BVDecide.Normalize.Prop
 
 /-!
 # Dense public input with a sparse mutable overlay -- proof internals

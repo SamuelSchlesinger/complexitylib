@@ -8,7 +8,7 @@ module
 public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Offset.Defs
 public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Primitive
 public import Complexitylib.Models.TuringMachine.Experimental.BinaryRoutine.Control
-public import Complexitylib.Models.TuringMachine.Experimental.BinaryRoutine.SpaceBounds
+import Std.Tactic.BVDecide.Normalize.Prop
 
 /-!
 # Dynamic recent-wire offsets -- proof internals

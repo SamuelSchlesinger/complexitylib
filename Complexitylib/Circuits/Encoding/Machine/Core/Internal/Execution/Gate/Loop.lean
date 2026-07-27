@@ -6,6 +6,7 @@ Authors: Samuel Schlesinger
 module
 
 public import Complexitylib.Circuits.Encoding.Machine.Core.Internal.Execution.Gate.Attempt
+import Std.Tactic.BVDecide.Normalize.Prop
 
 /-!
 # Successful gate-stream execution

@@ -7,6 +7,8 @@ module
 
 public import Complexitylib.Circuits.BarringtonCompiler.Defs
 public import Complexitylib.Circuits.BarringtonLength
+import Std.Tactic.BVDecide.Normalize.BitVec
+import Std.Tactic.BVDecide.Normalize.Prop
 
 /-!
 # An executable Barrington compiler -- proof internals

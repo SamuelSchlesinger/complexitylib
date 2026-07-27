@@ -7,6 +7,7 @@ module
 
 public import Complexitylib.Models.TuringMachine.UTM.Internal.BodyAssembly
 public import Complexitylib.Models.TuringMachine.UTM.Internal.BodyLookup
+import Std.Tactic.BVDecide.Normalize.Prop
 
 /-!
 # Body machine: the match-loop induction

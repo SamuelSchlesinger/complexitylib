@@ -10,6 +10,7 @@ public import
 public import
   Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Machine.EntryScan
 public import Mathlib.Data.Nat.Bitwise
+import Std.Tactic.BVDecide.Normalize.Prop
 
 /-!
 # Sparse register lookup — proof internals

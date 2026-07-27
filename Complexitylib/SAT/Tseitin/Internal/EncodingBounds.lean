@@ -7,6 +7,7 @@ module
 
 public import Complexitylib.SAT.Encoding
 public import Complexitylib.SAT.Tseitin.Defs
+import Std.Tactic.BVDecide.Normalize.Prop
 
 /-!
 # Encoding-size support for Tseitin splitting

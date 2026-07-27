@@ -5,9 +5,10 @@ Authors: Samuel Schlesinger
 -/
 module
 
-public import Mathlib.Tactic
 public import Complexitylib.Circuits.XOR
 public import Complexitylib.Circuits.Internal.CircuitDescriptor
+import Std.Tactic.BVDecide.Normalize.Bool
+import Std.Tactic.BVDecide.Normalize.Prop
 
 @[expose] public section
 

@@ -5,7 +5,6 @@ Authors: Samuel Schlesinger
 -/
 module
 
-public import Complexitylib.Models.TuringMachine.Hoare
 public import Complexitylib.Models.TuringMachine.Registers
 public import Complexitylib.Models.TuringMachine.Subroutines.Internal
 public import Complexitylib.Models.TuringMachine.Subroutines.ResetBinary.Defs

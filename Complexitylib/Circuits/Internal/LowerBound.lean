@@ -9,6 +9,7 @@ public import Mathlib.Algebra.Order.BigOperators.Group.Finset
 public import Complexitylib.Circuits.EssentialInput
 public import Complexitylib.Circuits.AndOrNot.Defs
 public import Complexitylib.Circuits.Dependency.Defs
+import Std.Tactic.BVDecide.Normalize.Prop
 
 /-! # Internal: Gate Elimination Lower Bound
 

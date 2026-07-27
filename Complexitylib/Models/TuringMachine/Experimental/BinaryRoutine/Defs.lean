@@ -6,11 +6,8 @@ Authors: Samuel Schlesinger
 module
 
 public import Complexitylib.Circuits.Encoding.Machine.GateStream.Defs
-public import Complexitylib.Models.TuringMachine.Hoare.Space.Defs
-public import Complexitylib.Models.TuringMachine.Registers.Emit
 public import Complexitylib.Models.TuringMachine.Subroutines.BinaryCopy.Defs
 public import Complexitylib.Models.TuringMachine.Subroutines.BinaryPred.Defs
-public import Complexitylib.Models.TuringMachine.Subroutines.BinarySucc.Defs
 
 /-!
 # Proof-carrying binary stream routines -- definitions

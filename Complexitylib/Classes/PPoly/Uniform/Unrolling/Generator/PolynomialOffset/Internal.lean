@@ -7,6 +7,7 @@ module
 
 public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Offset
 public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.PolynomialOffset.Defs
+import Std.Tactic.BVDecide.Normalize.Prop
 
 /-!
 # Polynomial recent-wire offsets -- proof internals

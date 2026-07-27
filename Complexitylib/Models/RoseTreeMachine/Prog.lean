@@ -6,8 +6,8 @@ Authors: Christian Reitwiessner
 
 module
 
-public import Complexitylib.Models.RoseTreeMachine.Data
 public import Complexitylib.Models.RoseTreeMachine.DataEncode
+import Std.Tactic.BVDecide.Normalize.Prop
 
 
 /-!

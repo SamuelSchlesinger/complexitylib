@@ -8,9 +8,9 @@ module
 public import Complexitylib.Models.TuringMachine.Combinators.ForBinaryWork
 public import Complexitylib.Models.TuringMachine.Combinators.WorkSymbolBranch
 public import Complexitylib.Models.TuringMachine.Subroutines.BinaryCopy
-public import Complexitylib.Models.TuringMachine.Subroutines.BinaryRippleAdd
 public import Complexitylib.Models.TuringMachine.Subroutines.BinaryShiftMul.Internal.Pure
 public import Complexitylib.Models.TuringMachine.Subroutines.ResetBinaryMany
+import Std.Tactic.BVDecide.Normalize.Prop
 
 /-!
 # Width-driven binary shift-and-add multiplication -- composed semantics

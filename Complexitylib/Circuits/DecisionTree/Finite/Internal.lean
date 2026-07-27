@@ -6,6 +6,7 @@ Authors: Samuel Schlesinger
 module
 
 public import Complexitylib.Circuits.DecisionTree.Finite.Defs
+import Std.Tactic.BVDecide.Normalize.Prop
 
 /-!
 # Finite-arity decision trees -- proof internals

@@ -5,9 +5,10 @@ Authors: Samuel Schlesinger
 -/
 module
 
-public import Complexitylib.Circuits.Unrolling.Acceptance.Defs
 public import Complexitylib.Circuits.Unrolling.Acceptance.Internal.Structure
 public import Complexitylib.Circuits.Unrolling.Trace.Internal.Evaluation
+import Std.Tactic.BVDecide.Normalize.BitVec
+import Std.Tactic.BVDecide.Normalize.Prop
 
 /-!
 # Evaluation of bounded-trace acceptance circuits

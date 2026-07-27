@@ -5,8 +5,6 @@ Authors: Samuel Schlesinger
 -/
 module
 
-public import Complexitylib.Models.TuringMachine
-public import Complexitylib.Asymptotics
 public import Complexitylib.Classes.Time
 
 /-!

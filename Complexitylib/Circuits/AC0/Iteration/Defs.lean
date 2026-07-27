@@ -8,9 +8,7 @@ module
 public import Complexitylib.Circuits.AC0.Restriction
 public import Complexitylib.Circuits.AC0.Switching.Defs
 public import Complexitylib.Circuits.DecisionTree.NormalForm.Defs
-public import Complexitylib.Circuits.RandomRestriction.Defs
 public import Mathlib.Data.Fintype.BigOperators
-public import Mathlib.Data.Fintype.Card
 
 /-!
 # Iterated switching for AC0 formulas -- definitions

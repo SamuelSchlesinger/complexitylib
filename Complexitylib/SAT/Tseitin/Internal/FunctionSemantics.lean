@@ -6,6 +6,7 @@ Authors: Samuel Schlesinger
 module
 
 public import Complexitylib.SAT.Tseitin.Defs
+import Std.Tactic.BVDecide.Normalize.Bool
 
 /-!
 # Total-function semantics for Tseitin splitting

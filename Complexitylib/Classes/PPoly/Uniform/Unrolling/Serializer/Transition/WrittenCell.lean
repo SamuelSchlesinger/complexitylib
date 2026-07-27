@@ -7,6 +7,7 @@ module
 
 public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Serializer.Transition.WrittenCell.Defs
 public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Serializer.Transition.WrittenCell.Internal
+import Std.Tactic.BVDecide.Normalize.Prop
 
 /-!
 # Numeric schedules for written-cell formulas

@@ -8,6 +8,7 @@ module
 public import
   Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Machine.EntryScanStep.Defs
 public import Complexitylib.Models.TuringMachine.Subroutines.BinaryPred.Defs
+import Std.Tactic.BVDecide.Normalize.Prop
 
 /-!
 # Bounded sparse-entry scan — definitions

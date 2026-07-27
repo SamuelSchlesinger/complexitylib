@@ -7,7 +7,6 @@ module
 
 public import Complexitylib.Circuits.AC0.Switching.Collection.Defs
 public import Complexitylib.Circuits.AC0.Switching.Internal
-public import Complexitylib.Circuits.RandomRestriction.Internal
 public import Mathlib.Algebra.BigOperators.Ring.Finset
 public import Mathlib.Algebra.Order.BigOperators.Group.Finset
 

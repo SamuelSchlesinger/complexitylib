@@ -6,6 +6,7 @@ Authors: Samuel Schlesinger
 module
 
 public import Complexitylib.Models.TuringMachine.Subroutines.BinarySucc.Defs
+import Std.Tactic.BVDecide.Normalize.Prop
 
 /-!
 # Canonical binary count-up loops — definitions

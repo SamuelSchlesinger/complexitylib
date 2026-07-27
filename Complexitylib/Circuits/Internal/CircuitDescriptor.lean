@@ -5,9 +5,9 @@ Authors: Samuel Schlesinger
 -/
 module
 
-public import Mathlib.Data.Fintype.BigOperators
 public import Mathlib.Tactic
 public import Complexitylib.Circuits.Basic
+import Std.Tactic.BVDecide.Normalize.Prop
 
 /-! # Internal: Circuit Descriptors and Shannon Counting Bound
 

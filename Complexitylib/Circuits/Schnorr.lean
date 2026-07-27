@@ -5,7 +5,6 @@ Authors: Samuel Schlesinger
 -/
 module
 
-public import Complexitylib.Circuits.XOR
 public import Complexitylib.Circuits.Internal.SchnorrBridge
 
 /-! # Schnorr's Lower Bound for XOR Circuits

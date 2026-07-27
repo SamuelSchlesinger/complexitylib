@@ -6,7 +6,6 @@ Authors: Samuel Schlesinger
 module
 
 public import Complexitylib.Circuits.DecisionTree.Block.Defs
-public import Complexitylib.Circuits.DecisionTree.Finite.Defs
 public import Complexitylib.Circuits.NormalForm.Restriction
 public import Complexitylib.Circuits.RandomRestriction.Defs
 

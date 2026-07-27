@@ -6,6 +6,8 @@ Authors: Samuel Schlesinger
 module
 
 public import Complexitylib.Circuits.AndOrNot.Defs
+import Std.Tactic.BVDecide.Normalize.BitVec
+import Std.Tactic.BVDecide.Normalize.Prop
 
 /-! # Internal: AND/OR/NOT Completeness Proof
 

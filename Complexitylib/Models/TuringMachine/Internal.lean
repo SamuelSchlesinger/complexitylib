@@ -7,6 +7,7 @@ module
 
 public import Complexitylib.Models.TuringMachine
 public import Mathlib.Data.Finset.Lattice.Fold
+import Std.Tactic.BVDecide.Normalize.Prop
 
 /-!
 # TM–NTM embedding: proof internals

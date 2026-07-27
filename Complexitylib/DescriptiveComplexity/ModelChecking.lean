@@ -5,8 +5,6 @@ Authors: Samuel Schlesinger
 -/
 module
 
-public import Complexitylib.DescriptiveComplexity.Structure
-public import Complexitylib.DescriptiveComplexity.Env
 public import Complexitylib.DescriptiveComplexity.FirstOrder.Semantics
 public import Mathlib.Data.List.FinRange
 

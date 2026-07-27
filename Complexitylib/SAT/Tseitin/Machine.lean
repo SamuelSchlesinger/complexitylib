@@ -5,7 +5,6 @@ Authors: Samuel Schlesinger
 -/
 module
 
-public import Complexitylib.Classes.P.NormalForm
 public import Complexitylib.SAT.Tseitin.Machine.Controller
 public import Complexitylib.SAT.Tseitin.Machine.Internal.PolynomialTime
 

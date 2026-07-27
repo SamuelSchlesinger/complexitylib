@@ -5,12 +5,9 @@ Authors: Samuel Schlesinger
 -/
 module
 
-public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Serializer.Transition.Atomic
-public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Serializer.Transition.Effect
 public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Serializer.Transition.MovedHead
 public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Serializer.Transition.Next.Defs
 public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Serializer.Transition.WrittenCell
-public import Complexitylib.Circuits.Encoding.Formula
 
 /-!
 # Numeric next-atom schedules -- proof internals

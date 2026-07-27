@@ -8,6 +8,8 @@ module
 public import Complexitylib.Circuits.Encoding.Fragment
 public import Complexitylib.Circuits.BitString
 public import Complexitylib.Circuits.Unrolling.Defs
+import Std.Tactic.BVDecide.Normalize.BitVec
+import Std.Tactic.BVDecide.Normalize.Prop
 
 /-!
 # Internal correctness of bounded-trace initialization circuits

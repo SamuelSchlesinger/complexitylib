@@ -11,7 +11,6 @@ public import
   Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Machine.EntryCleanup
 public import
   Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Machine.EntryEncode
-public import Complexitylib.Models.TuringMachine.Subroutines.ResetBinary
 
 /-!
 # Sparse-entry replacement — proof internals

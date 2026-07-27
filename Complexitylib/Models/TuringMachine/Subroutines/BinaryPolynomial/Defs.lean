@@ -8,7 +8,6 @@ module
 public import Mathlib.Algebra.Polynomial.Eval.Degree
 public import Complexitylib.Models.TuringMachine.Subroutines.BinaryAddConst.Defs
 public import Complexitylib.Models.TuringMachine.Subroutines.BinaryMulAdd.Defs
-public import Complexitylib.Models.TuringMachine.Subroutines.ClearWork.Defs
 
 /-!
 # Canonical binary evaluation of a fixed natural polynomial — definitions

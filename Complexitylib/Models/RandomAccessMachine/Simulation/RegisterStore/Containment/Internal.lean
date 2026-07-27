@@ -10,12 +10,10 @@ public import Complexitylib.Models.RandomAccessMachine.Classes
 public import
   Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Containment.Defs
 public import
-  Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Machine.Program.Bounds
-public import
   Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Machine.Program.DenseBounds
 public import
   Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Machine.Program.DenseDecision
-public import Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Machine.Program
+import Std.Tactic.BVDecide.Normalize.Prop
 
 /-!
 # RAM-to-TM time-class containment -- proof internals

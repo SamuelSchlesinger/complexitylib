@@ -7,6 +7,7 @@ module
 
 public import Complexitylib.Models.TuringMachine.Subroutines.ResetBinary
 public import Complexitylib.Models.TuringMachine.Subroutines.ResetBinaryMany.Defs
+import Std.Tactic.BVDecide.Normalize.Prop
 
 /-!
 # Resetting several binary work tapes — proof internals

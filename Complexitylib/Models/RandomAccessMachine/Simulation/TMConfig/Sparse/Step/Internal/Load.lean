@@ -6,6 +6,7 @@ Authors: Samuel Schlesinger
 module
 
 public import Complexitylib.Models.RandomAccessMachine.Simulation.TMConfig.Sparse.Step.Internal.Layout
+import Std.Tactic.BVDecide.Normalize.Prop
 
 /-!
 # Loading sparse TM states and head symbols -- proof internals

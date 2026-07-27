@@ -6,6 +6,7 @@ Authors: Samuel Schlesinger
 module
 
 public import Complexitylib.Circuits.Internal.CircuitToDescriptor
+import Std.Tactic.BVDecide.Normalize.Bool
 
 /-!
 # Internal: Shannon bridge from descriptors to typed circuits

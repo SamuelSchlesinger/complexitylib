@@ -7,6 +7,8 @@ module
 
 public import Complexitylib.SAT.Tseitin.Internal.FunctionSemantics
 public import Complexitylib.SAT.Tseitin.Internal.Shape
+import Std.Tactic.BVDecide.Normalize.Bool
+import Std.Tactic.BVDecide.Normalize.Prop
 
 /-!
 # Correctness of Tseitin clause splitting

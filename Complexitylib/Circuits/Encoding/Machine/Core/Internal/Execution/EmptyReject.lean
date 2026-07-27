@@ -7,6 +7,7 @@ module
 
 public import Complexitylib.Circuits.Encoding.Machine.Core.Internal.Execution
 public import Complexitylib.Circuits.Encoding.Machine.Core.Internal.Pure
+import Std.Tactic.BVDecide.Normalize.Prop
 
 /-!
 # Malformed empty-family execution

@@ -9,6 +9,7 @@ public import Complexitylib.Circuits.Encoding.ToCircuit
 public import Complexitylib.Circuits.Unrolling.Acceptance.Defs
 public import Complexitylib.Circuits.Unrolling.Acceptance.Internal.Evaluation
 public import Complexitylib.Circuits.Unrolling.Acceptance.Internal.Structure
+import Std.Tactic.BVDecide.Normalize.Prop
 
 /-!
 # Acceptance circuits for bounded Turing-machine traces

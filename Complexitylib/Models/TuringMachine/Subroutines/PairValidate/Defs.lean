@@ -7,6 +7,7 @@ module
 
 public import Complexitylib.Encoding.Pairing
 public import Complexitylib.Models.TuringMachine.Combinators
+import Std.Tactic.BVDecide.Normalize.Prop
 
 /-!
 # Pair-encoding validator — definitions

@@ -5,11 +5,11 @@ Authors: Samuel Schlesinger
 -/
 module
 
-public import Complexitylib.Models.TuringMachine.Hoare.Space
 public import Complexitylib.Models.TuringMachine.Subroutines.BinaryRippleSub.Internal.Backward
 public import Complexitylib.Models.TuringMachine.Subroutines.BinaryRippleSub.Internal.Rewind
 public import Complexitylib.Models.TuringMachine.Subroutines.BinaryRippleSub.Internal.Scan
 public import Complexitylib.Models.TuringMachine.Subroutines.BinarySucc
+import Std.Tactic.BVDecide.Normalize.Prop
 
 /-!
 # Linear-time canonical binary subtraction -- composed semantics

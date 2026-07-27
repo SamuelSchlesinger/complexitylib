@@ -7,6 +7,7 @@ module
 
 public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.PolynomialOffset
 public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Transition.PackedCopy.Defs
+import Std.Tactic.BVDecide.Normalize.Prop
 
 /-!
 # Delayed packed-formula copies -- proof internals

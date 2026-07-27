@@ -5,7 +5,6 @@ Authors: Samuel Schlesinger
 -/
 module
 
-public import Complexitylib.Models.TuringMachine.Repetition.Defs
 public import Complexitylib.Models.TuringMachine.Repetition.Internal.Parked
 public import Complexitylib.Models.TuringMachine.Repetition.Internal.ScheduleArithmetic
 public import Complexitylib.Models.TuringMachine.Repetition.Internal.VoteStep

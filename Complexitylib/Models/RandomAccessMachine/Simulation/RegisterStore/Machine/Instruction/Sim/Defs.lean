@@ -7,12 +7,7 @@ module
 
 public import
   Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Machine.Instruction.Defs
-public import Complexitylib.Models.TuringMachine.Combinators.WorkBranch.Defs
 public import Complexitylib.Models.TuringMachine.Lift
-public import Complexitylib.Models.TuringMachine.Subroutines
-public import Complexitylib.Models.TuringMachine.Subroutines.BinaryCopy.Defs
-public import Complexitylib.Models.TuringMachine.Subroutines.BinaryPred.Defs
-public import Complexitylib.Models.TuringMachine.Subroutines.ResetBinaryMany.Defs
 
 /-!
 # Fixed-program sparse RAM instruction dispatch -- definitions

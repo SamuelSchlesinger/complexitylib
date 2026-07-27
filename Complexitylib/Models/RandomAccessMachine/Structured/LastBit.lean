@@ -8,6 +8,7 @@ module
 public import Complexitylib.Models.RandomAccessMachine.Structured.LastBit.Defs
 public import Complexitylib.Models.RandomAccessMachine.Structured.Scanner
 public import Complexitylib.Languages.LastBit
+import Std.Tactic.BVDecide.Normalize.Prop
 
 /-!
 # Verified structured RAM last-bit scanner

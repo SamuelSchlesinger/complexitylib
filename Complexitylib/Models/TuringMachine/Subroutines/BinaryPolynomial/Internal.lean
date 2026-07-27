@@ -6,11 +6,10 @@ Authors: Samuel Schlesinger
 module
 
 public import Complexitylib.Asymptotics
-public import Complexitylib.Models.TuringMachine.Hoare.Space
 public import Complexitylib.Models.TuringMachine.Subroutines.BinaryAddConst
 public import Complexitylib.Models.TuringMachine.Subroutines.BinaryMulAdd
 public import Complexitylib.Models.TuringMachine.Subroutines.BinaryPolynomial.Defs
-public import Complexitylib.Models.TuringMachine.Subroutines.ClearWork
+import Std.Tactic.BVDecide.Normalize.Prop
 
 /-!
 # Canonical binary evaluation of a fixed natural polynomial — proof internals

@@ -8,7 +8,6 @@ module
 public import
   Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Machine.EntryMatch.Defs
 public import Complexitylib.Models.TuringMachine.Subroutines.ResetBinaryMany.Defs
-public import Mathlib.Data.List.FinRange
 
 /-!
 # Sparse-entry miss cleanup — definitions

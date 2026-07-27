@@ -7,7 +7,6 @@ module
 
 public import Complexitylib.Classes.L.PolynomialTime
 public import Complexitylib.Classes.P.Preimage
-public import Complexitylib.Classes.PPoly.Uniform
 public import Complexitylib.Classes.PPoly.Uniform.Preprocessing
 public import Complexitylib.Circuits.Encoding.Machine
 

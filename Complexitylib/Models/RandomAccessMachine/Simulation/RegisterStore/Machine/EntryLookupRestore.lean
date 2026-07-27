@@ -6,10 +6,7 @@ Authors: Samuel Schlesinger
 module
 
 public import
-  Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Machine.Lookup.Internal.Static
-public import
 Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Machine.Lookup.DenseInternal
-public import Complexitylib.Models.TuringMachine.Subroutines.ClearWork
 
 /-!
 # Reusable sparse-register operand lookup

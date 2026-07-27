@@ -6,6 +6,7 @@ Authors: Samuel Schlesinger
 module
 
 public import Complexitylib.Models.TuringMachine.Registers.Emit
+import Std.Tactic.BVDecide.Normalize.Prop
 
 /-!
 # Register operations

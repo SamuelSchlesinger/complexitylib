@@ -7,6 +7,7 @@ module
 
 public import Complexitylib.Models.TuringMachine.UTM.Internal.SimLoop
 public import Complexitylib.Models.TuringMachine.UTM.Internal.ClockFrontier
+import Std.Tactic.BVDecide.Normalize.Prop
 
 /-!
 # Universal machine: the clocked (time-bounded) simulate/halt-test loop

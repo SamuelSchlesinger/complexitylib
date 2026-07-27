@@ -8,6 +8,8 @@ module
 public import Complexitylib.Models.TuringMachine.Repetition.Internal.Finish
 public import Complexitylib.Models.TuringMachine.Repetition.Internal.Frame
 public import Complexitylib.Models.TuringMachine.Repetition.Internal.Votes
+import Std.Tactic.BVDecide.Normalize.BitVec
+import Std.Tactic.BVDecide.Normalize.Prop
 
 /-!
 # Finish-step vote semantics for fixed-time repetition

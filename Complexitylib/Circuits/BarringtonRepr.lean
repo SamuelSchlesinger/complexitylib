@@ -5,12 +5,9 @@ Authors: Samuel Schlesinger
 -/
 module
 
-public import Complexitylib.Circuits.Barrington
-public import Complexitylib.Circuits.BarringtonS5
 public import Complexitylib.Circuits.BarringtonBridge
 public import Complexitylib.Circuits.Formula
-public import Mathlib.GroupTheory.Perm.Cycle.Type
-public import Mathlib.GroupTheory.Perm.Fin
+import Std.Tactic.BVDecide.Normalize.Bool
 
 /-!
 # Barrington's theorem (representation form)

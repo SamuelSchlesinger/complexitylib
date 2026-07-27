@@ -9,11 +9,8 @@ public import
   Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Machine.Instruction.Sim.Defs
 public import Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore
 public import Complexitylib.Models.TuringMachine.Combinators.WorkBranch
-public import Complexitylib.Models.TuringMachine.Hoare.Space
 public import Complexitylib.Models.TuringMachine.Subroutines.BinaryCopy
 public import Complexitylib.Models.TuringMachine.Subroutines.BinaryPred
-public import Complexitylib.Models.TuringMachine.Subroutines.BinarySucc
-public import Complexitylib.Models.TuringMachine.Subroutines.ResetBinary
 public import Complexitylib.Models.TuringMachine.Subroutines.ResetBinaryMany
 
 /-!

@@ -6,8 +6,6 @@ Authors: Samuel Schlesinger
 module
 
 public import Complexitylib.DescriptiveComplexity.SecondOrder.Syntax
-public import Complexitylib.DescriptiveComplexity.Structure
-public import Complexitylib.DescriptiveComplexity.Env
 public import Complexitylib.DescriptiveComplexity.FirstOrder.Semantics
 
 /-!

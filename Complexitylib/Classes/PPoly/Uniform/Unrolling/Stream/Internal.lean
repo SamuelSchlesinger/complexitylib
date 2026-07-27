@@ -6,7 +6,6 @@ Authors: Samuel Schlesinger
 module
 
 public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Stream.Defs
-public import Complexitylib.Circuits.Unrolling.Trace.Internal.Structure
 
 /-!
 # Streamable deterministic unrolling arithmetic — proof internals

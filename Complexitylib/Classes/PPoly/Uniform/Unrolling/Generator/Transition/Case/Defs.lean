@@ -8,7 +8,6 @@ module
 public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Initialization.Defs
 public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Offset.Defs
 public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Transition.Read.Defs
-public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Serializer.Transition.Case.Defs
 
 /-!
 # Direct-unrolling transition-case generator -- definitions

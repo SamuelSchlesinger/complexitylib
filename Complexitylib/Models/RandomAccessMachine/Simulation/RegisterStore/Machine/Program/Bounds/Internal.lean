@@ -9,8 +9,7 @@ public import
   Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Machine.Program.Bounds.Defs
 public import
   Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Machine.Program.Decision
-public import Complexitylib.Models.TuringMachine.Subroutines.ResetBinaryMany
-public import Mathlib.Tactic.Linarith
+import Std.Tactic.BVDecide.Normalize.Prop
 
 /-!
 # Sparse RAM decision-machine resource-bound proof internals

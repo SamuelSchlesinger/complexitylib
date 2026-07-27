@@ -6,7 +6,7 @@ Authors: Samuel Schlesinger
 module
 
 public import Complexitylib.Models.RandomAccessMachine.Simulation.TMConfig.Sparse.Step.Internal.Iteration
-public import Complexitylib.Models.RandomAccessMachine.Structured.Internal.Resources
+import Std.Tactic.BVDecide.Normalize.Prop
 
 /-!
 # Resource envelopes for the fixed sparse TM simulator -- proof internals

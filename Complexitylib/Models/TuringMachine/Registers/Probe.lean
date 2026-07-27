@@ -7,6 +7,7 @@ module
 
 public import Mathlib.Tactic.FinCases
 public import Complexitylib.Models.TuringMachine.Registers.MixedRadix
+import Std.Tactic.BVDecide.Normalize.Prop
 
 /-!
 # symProbeTM: read the input symbol at a register-indexed position

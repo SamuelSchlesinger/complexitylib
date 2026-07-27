@@ -7,6 +7,7 @@ module
 
 public import Complexitylib.Circuits.Encoding.Threshold.Defs
 public import Complexitylib.Circuits.Encoding.Fragment
+import Std.Tactic.BVDecide.Normalize.BitVec
 
 /-!
 # Raw threshold-fragment internals

@@ -7,6 +7,7 @@ module
 
 public import Complexitylib.Models.TuringMachine.Subroutines
 public import Mathlib.Data.Nat.Size
+import Std.Tactic.BVDecide.Normalize.Prop
 
 /-!
 # Linear-time canonical binary addition -- definitions

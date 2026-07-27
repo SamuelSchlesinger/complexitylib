@@ -7,6 +7,8 @@ module
 
 public import Complexitylib.Circuits.NormalForm.Defs
 public import Complexitylib.Circuits.Restriction
+import Std.Tactic.BVDecide.Normalize.BitVec
+import Std.Tactic.BVDecide.Normalize.Prop
 
 /-!
 # Restricting CNF and DNF formulas

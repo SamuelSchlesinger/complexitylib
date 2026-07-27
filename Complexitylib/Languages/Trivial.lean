@@ -5,9 +5,7 @@ Authors: Samuel Schlesinger
 -/
 module
 
-public import Complexitylib.Classes.P
 public import Complexitylib.Classes.Containments
-public import Complexitylib.Models.TuringMachine.Subroutines.Internal
 
 /-!
 # Trivial languages: `∅` and `Set.univ`

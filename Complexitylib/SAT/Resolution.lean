@@ -6,6 +6,7 @@ Authors: Samuel Schlesinger
 module
 
 public import Complexitylib.SAT.Semantics
+import Std.Tactic.BVDecide.Normalize.BitVec
 
 /-!
 # Resolution

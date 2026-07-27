@@ -8,6 +8,8 @@ module
 public import Complexitylib.Circuits.BranchingProgram
 public import Mathlib.Algebra.Group.Commutator
 public import Mathlib.Data.List.ModifyLast
+import Std.Tactic.BVDecide.Normalize.Bool
+import Std.Tactic.BVDecide.Normalize.Prop
 
 /-!
 # Toward Barrington's theorem: the group-theoretic core

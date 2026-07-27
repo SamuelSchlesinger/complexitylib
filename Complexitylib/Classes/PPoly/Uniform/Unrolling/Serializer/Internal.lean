@@ -7,6 +7,7 @@ module
 
 public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Serializer.Defs
 public import Complexitylib.Circuits.Encoding.Formula.Stream
+import Std.Tactic.BVDecide.Normalize.Prop
 
 /-!
 # Numeric schedules for streaming tableau serialization -- proof internals
