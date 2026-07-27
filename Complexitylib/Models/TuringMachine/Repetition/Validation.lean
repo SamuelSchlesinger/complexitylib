@@ -6,6 +6,7 @@ Authors: Samuel Schlesinger
 module
 
 public import Complexitylib.Models.TuringMachine.Repetition
+meta import Complexitylib.Models.TuringMachine.Repetition
 
 /-!
 # Executable validation for fixed-time repetition

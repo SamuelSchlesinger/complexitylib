@@ -6,11 +6,17 @@ Authors: Samuel Schlesinger
 module
 
 public import Complexitylib.SAT.Tseitin
+meta import Complexitylib.SAT.Tseitin
 public import Complexitylib.SAT.Tseitin.Internal.Streaming
+meta import Complexitylib.SAT.Tseitin.Internal.Streaming
 public import Complexitylib.SAT.Tseitin.Machine.Controller
+meta import Complexitylib.SAT.Tseitin.Machine.Controller
 public import Complexitylib.SAT.Tseitin.Machine.Internal.Execution
+meta import Complexitylib.SAT.Tseitin.Machine.Internal.Execution
 public import Complexitylib.SAT.Tseitin.Machine.Internal.PolynomialTime
+meta import Complexitylib.SAT.Tseitin.Machine.Internal.PolynomialTime
 public import Complexitylib.SAT.Tseitin.Machine.Internal.Validation
+meta import Complexitylib.SAT.Tseitin.Machine.Internal.Validation
 
 /-!
 # Executable validation for the Tseitin reduction front end
