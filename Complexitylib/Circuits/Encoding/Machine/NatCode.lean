@@ -3,8 +3,10 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Circuits.Encoding.Machine.NatCode.Defs
-import Complexitylib.Circuits.Encoding.Machine.NatCode.Internal
+module
+
+public import Complexitylib.Circuits.Encoding.Machine.NatCode.Defs
+public import Complexitylib.Circuits.Encoding.Machine.NatCode.Internal
 
 /-!
 # Machine emission of terminated-unary natural codes
@@ -26,6 +28,8 @@ satisfies the one-way-output transducer discipline.
 - `emitNatCodeTM_hoareTimeSpace` adds an all-prefix auxiliary-space bound.
 - `emitNatCodeTM_isTransducer` proves one-way-output safety.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

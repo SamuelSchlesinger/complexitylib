@@ -3,8 +3,10 @@ Copyright (c) 2025 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Mathlib.Data.Fintype.BigOperators
-import Complexitylib.Circuits.Basic
+module
+
+public import Mathlib.Data.Fintype.BigOperators
+public import Complexitylib.Circuits.Basic
 
 /-! # Essential Inputs
 
@@ -16,6 +18,8 @@ for a Boolean function.
 * `IsEssentialInput` — a function depends on a particular input variable
 * `essentialInputs` — the set of essential input variables
 -/
+
+@[expose] public section
 
 namespace Complexity
 

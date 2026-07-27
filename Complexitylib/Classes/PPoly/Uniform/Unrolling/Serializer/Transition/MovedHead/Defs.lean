@@ -3,7 +3,9 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Classes.PPoly.Uniform.Unrolling.Serializer.Transition.Effect.Defs
+module
+
+public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Serializer.Transition.Effect.Defs
 
 /-!
 # Numeric schedules for moved-head formulas -- definitions
@@ -17,6 +19,8 @@ The schedule state is entirely natural-number and Boolean data. Machine cases,
 tape slots, directions, bounded indices, formula trees, and list cursors occur
 only in the compile-time extractor or the proof adapter.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

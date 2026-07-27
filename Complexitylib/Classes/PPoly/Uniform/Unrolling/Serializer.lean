@@ -3,8 +3,10 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Classes.PPoly.Uniform.Unrolling.Serializer.Defs
-import Complexitylib.Classes.PPoly.Uniform.Unrolling.Serializer.Internal
+module
+
+public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Serializer.Defs
+public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Serializer.Internal
 
 /-!
 # Numeric schedules for streaming tableau serialization
@@ -33,6 +35,8 @@ They isolate the exact arithmetic that the later finite controller must realize.
 - `compileRawBatch_eq_indexed` exposes formula compilation followed by that
   numeric copy schedule.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

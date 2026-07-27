@@ -3,8 +3,10 @@ Copyright (c) 2025 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Defs
-import Complexitylib.Models.RandomAccessMachine.Internal
+module
+
+public import Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Defs
+public import Complexitylib.Models.RandomAccessMachine.Internal
 
 /-!
 # Sparse RAM register stores on Turing tapes: proof internals
@@ -12,6 +14,8 @@ import Complexitylib.Models.RandomAccessMachine.Internal
 This module proves the finite-store semantics and codec round trips exposed by
 the surface module. It is not part of the human-audited definitions layer.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

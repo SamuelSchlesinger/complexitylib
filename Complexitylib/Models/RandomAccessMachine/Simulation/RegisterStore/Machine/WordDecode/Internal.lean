@@ -3,12 +3,14 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Machine.WordDecode.Defs
-import Complexitylib.Models.TuringMachine.Combinators.ForWorkOnes.Internal
-import Complexitylib.Models.TuringMachine.Subroutines.BinaryFor
-import Complexitylib.Models.TuringMachine.Subroutines.BinarySucc
-import Complexitylib.Models.TuringMachine.Subroutines.Internal
-import Mathlib.Tactic.Linarith
+module
+
+public import Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Machine.WordDecode.Defs
+public import Complexitylib.Models.TuringMachine.Combinators.ForWorkOnes.Internal
+public import Complexitylib.Models.TuringMachine.Subroutines.BinaryFor
+public import Complexitylib.Models.TuringMachine.Subroutines.BinarySucc
+public import Complexitylib.Models.TuringMachine.Subroutines.Internal
+public import Mathlib.Tactic.Linarith
 
 /-!
 # RAM snapshot word-width decoder — proof internals
@@ -17,6 +19,8 @@ The proof constructs the exact scanner, successor-body, and loopback frames
 needed by `TM.ForWorkOnesLoopSpec`. The only changed tapes are the source
 cursor and the canonical binary width counter.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

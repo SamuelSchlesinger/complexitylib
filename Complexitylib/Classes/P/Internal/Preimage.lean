@@ -3,8 +3,10 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Classes.P.Internal.NormalForm
-import Complexitylib.Models.TuringMachine.Composition
+module
+
+public import Complexitylib.Classes.P.Internal.NormalForm
+public import Complexitylib.Models.TuringMachine.Composition
 
 /-!
 # Closure of P under FP preimages — proof internals
@@ -14,6 +16,8 @@ natural-polynomial time bounds. Their executable sequential composition then
 decides the preimage language within the polynomial obtained by composing
 those bounds.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

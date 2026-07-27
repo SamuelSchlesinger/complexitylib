@@ -3,8 +3,10 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Models.RandomAccessMachine.Structured.Scanner.Defs
-import Complexitylib.Models.TuringMachine.Subroutines.PairValidate.Defs
+module
+
+public import Complexitylib.Models.RandomAccessMachine.Structured.Scanner.Defs
+public import Complexitylib.Models.TuringMachine.Subroutines.PairValidate.Defs
 
 /-!
 # Structured RAM pair-encoding validator — definitions
@@ -13,6 +15,8 @@ The benchmark-specific implementation is just a numeric presentation of the
 same five-state automaton used by `TM.pairValidateTM`. The generic scanner
 compiler supplies the table-driven structured RAM program.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

@@ -3,7 +3,9 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Circuits.Nondeterminism
+module
+
+public import Complexitylib.Circuits.Nondeterminism
 
 /-!
 # Hardwiring Prefixes of Circuit Inputs
@@ -25,6 +27,8 @@ Circuit families represent the zero-input member separately with `emptyOutput`.
 - `Circuit.restrictPrefix_eval`: evaluation agrees with supplying `seed ++ input`.
 - `Circuit.restrictPrefix_size`: hardwiring preserves the exact circuit size.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

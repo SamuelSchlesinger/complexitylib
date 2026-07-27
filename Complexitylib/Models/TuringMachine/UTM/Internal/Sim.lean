@@ -3,9 +3,11 @@ Copyright (c) 2025 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Models.TuringMachine.UTM.Machine
-import Complexitylib.Models.TuringMachine.UTM.Internal.BodyAssembly
-import Complexitylib.Models.TuringMachine.UTM.Internal.Init
+module
+
+public import Complexitylib.Models.TuringMachine.UTM.Machine
+public import Complexitylib.Models.TuringMachine.UTM.Internal.BodyAssembly
+public import Complexitylib.Models.TuringMachine.UTM.Internal.Init
 
 /-!
 # Universal machine: simulation bridges
@@ -23,6 +25,8 @@ standing invariant `SimInv`:
 The completed loop simulation and headline universal-machine theorems are in
 `UTM/SimLoop.lean` and `UTM/Universal.lean`.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

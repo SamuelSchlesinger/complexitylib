@@ -3,7 +3,9 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Models.TuringMachine.Repetition.Defs
+module
+
+public import Complexitylib.Models.TuringMachine.Repetition.Defs
 
 /-!
 # Schedule arithmetic internals for fixed-time repetition
@@ -13,6 +15,8 @@ the public repetition surface and the proof-internal schedule. Keeping these
 proofs below the public surface prevents internal correctness modules from
 depending on `Complexitylib.Models.TuringMachine.Repetition`.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

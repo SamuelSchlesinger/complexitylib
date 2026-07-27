@@ -3,8 +3,10 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Models.TuringMachine.Combinators.RetargetCompute.Defs
-import Complexitylib.Models.TuringMachine.Combinators.RetargetCompute.Internal
+module
+
+public import Complexitylib.Models.TuringMachine.Combinators.RetargetCompute.Defs
+public import Complexitylib.Models.TuringMachine.Combinators.RetargetCompute.Internal
 
 /-!
 # Retargeted-input computation seams
@@ -27,6 +29,8 @@ positive advertised time bound.
 - `TM.placeWorkTM_retargetInputStarted_computesVirtual` — placed stable-frame seam
 - `TM.placeWorkTM_retargetInputStarted_decidesVirtual` — placed decision seam
 -/
+
+@[expose] public section
 
 namespace Complexity
 

@@ -3,10 +3,12 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Asymptotics
-import Complexitylib.Circuits.Encoding.Machine.Internal.FrontEnd
-import Complexitylib.Circuits.Encoding.Machine.Core.Internal.Hoare
-import Complexitylib.Circuits.Encoding.Machine.Core.Internal.Stage
+module
+
+public import Complexitylib.Asymptotics
+public import Complexitylib.Circuits.Encoding.Machine.Internal.FrontEnd
+public import Complexitylib.Circuits.Encoding.Machine.Core.Internal.Hoare
+public import Complexitylib.Circuits.Encoding.Machine.Core.Internal.Stage
 
 /-!
 # End-to-end serialized circuit evaluator
@@ -16,6 +18,8 @@ streaming evaluator core. It proves the raw-tape Hoare contract, packages the
 machine as a decider for `circuitEvalLanguage`, and records the concrete
 quadratic running-time bound.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

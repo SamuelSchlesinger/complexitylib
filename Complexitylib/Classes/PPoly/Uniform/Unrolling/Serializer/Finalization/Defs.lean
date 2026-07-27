@@ -3,9 +3,11 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Classes.PPoly.Uniform.Unrolling.Padded.Defs
-import Complexitylib.Classes.PPoly.Uniform.Unrolling.Serializer.Initialization.Defs
-import Complexitylib.Classes.PPoly.Uniform.Unrolling.Stream.Defs
+module
+
+public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Padded.Defs
+public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Serializer.Initialization.Defs
+public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Stream.Defs
 
 /-!
 # Numeric finalization schedule for direct tableau serialization
@@ -16,6 +18,8 @@ addresses and counts. The machine and its distinguished halt state remain
 fixed compile-time parameters in the bridge theorems; no run-time schedule
 value contains a configuration atom or formula tree.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

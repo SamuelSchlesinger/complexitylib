@@ -3,7 +3,9 @@ Copyright (c) 2026 Bolton Bailey. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Bolton Bailey
 -/
-import Complexitylib.Classes.P.FinsetDomain.Internal
+module
+
+public import Complexitylib.Classes.P.FinsetDomain.Internal
 
 /-!
 # Finite-deviation functions are polynomial-time
@@ -23,6 +25,8 @@ regardless of how the values `g s` are chosen.
 
 - `ite_mem_finset_mem_FP` — `fun s => if s ∈ S then g s else []` belongs to `FP`
 -/
+
+@[expose] public section
 
 namespace Complexity
 

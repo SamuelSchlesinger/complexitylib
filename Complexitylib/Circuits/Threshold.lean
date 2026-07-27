@@ -3,8 +3,10 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Circuits.Threshold.Defs
-import Complexitylib.Circuits.Threshold.Internal
+module
+
+public import Complexitylib.Circuits.Threshold.Defs
+public import Complexitylib.Circuits.Threshold.Internal
 
 /-!
 # Threshold circuits
@@ -17,6 +19,8 @@ The exact basis map `Basis.andOrToThresholdHom` shows that every unbounded
 AND/OR circuit becomes a threshold circuit without changing wiring, size,
 depth, negation flags, or semantics.
 -/
+
+@[expose] public section
 
 namespace Complexity
 namespace ThresholdOp

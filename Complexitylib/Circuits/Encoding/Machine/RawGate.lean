@@ -3,8 +3,10 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Circuits.Encoding.Machine.RawGate.Defs
-import Complexitylib.Circuits.Encoding.Machine.RawGate.Internal
+module
+
+public import Complexitylib.Circuits.Encoding.Machine.RawGate.Defs
+public import Complexitylib.Circuits.Encoding.Machine.RawGate.Internal
 
 /-!
 # Machine emission of raw circuit gates
@@ -20,6 +22,8 @@ and the reusable zero scratch are restored literally.
 - `emitRawGateTM_hoareTimeSpace` adds an all-prefix auxiliary-space bound.
 - `emitRawGateTM_isTransducer` proves one-way-output safety.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

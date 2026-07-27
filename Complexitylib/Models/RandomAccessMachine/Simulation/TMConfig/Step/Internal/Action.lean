@@ -3,11 +3,15 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Models.RandomAccessMachine.Simulation.TMConfig.Step.Internal.Load
+module
+
+public import Complexitylib.Models.RandomAccessMachine.Simulation.TMConfig.Step.Internal.Load
 
 /-!
 # Selected TM transition actions -- proof internals
 -/
+
+@[expose] public section
 
 namespace Complexity
 
@@ -27,7 +31,7 @@ private theorem execList_append (first second : List Structured.Basic)
   | cons op rest ih => simp [Structured.Basic.execList, ih]
 
 /-- Representation restricted to one named tape block. -/
-private def RepresentsTape (bound : ℕ) (slot : Fin (n + 2))
+def RepresentsTape (bound : ℕ) (slot : Fin (n + 2))
     (tape : Tape) (store : Structured.Store) : Prop :=
   store (headReg slot) = tape.head ∧
     ∀ position : Fin (bound + 1),
@@ -387,7 +391,7 @@ theorem writeMoveOps_otherTape_internal (n bound : ℕ)
     rw [writeMoveOps, execList_append, hmoveCell, hwriteCell]
     exact hother.2 position
 
-private theorem RepresentsTape.stateUpdate (bound : ℕ) (slot : Fin (n + 2))
+theorem RepresentsTape.stateUpdate (bound : ℕ) (slot : Fin (n + 2))
     (tape : Tape) (store : Structured.Store) (state : ℕ)
     (hrepresents : RepresentsTape bound slot tape store) :
     RepresentsTape bound slot tape
@@ -836,10 +840,12 @@ theorem actionOps_represents_internal {tm : TM n} {bound : ℕ}
     Structured.Basic.execList, List.append_assoc] using
     hfinalRepresents
 
-private abbrev StepEnvelope (tm : TM n) (bound : ℕ) :=
+@[nolint docBlame]
+abbrev StepEnvelope (tm : TM n) (bound : ℕ) :=
   Structured.Internal.StoreEnvelope (registerLimit n bound) (wordBound tm bound)
 
-private abbrev StepEnvelopeChain (tm : TM n) (bound : ℕ) :=
+@[nolint docBlame]
+abbrev StepEnvelopeChain (tm : TM n) (bound : ℕ) :=
   Structured.Internal.Basic.EnvelopeChain (registerLimit n bound) (wordBound tm bound)
 
 private theorem registerCount_lt_registerLimit' (n bound : ℕ) :

@@ -3,7 +3,9 @@ Copyright (c) 2025 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Circuits.DepthClasses.Defs
+module
+
+public import Complexitylib.Circuits.DepthClasses.Defs
 
 /-!
 # AC0 -- compatibility import
@@ -12,3 +14,5 @@ import Complexitylib.Circuits.DepthClasses.Defs
 `Complexitylib.Circuits.DepthClasses.Defs`. This module preserves the original
 import path.
 -/
+
+@[expose] public section

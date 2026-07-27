@@ -3,12 +3,14 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Models.TuringMachine.Combinators.ForBinaryWork
-import Complexitylib.Models.TuringMachine.Combinators.WorkSymbolBranch
-import Complexitylib.Models.TuringMachine.Subroutines.BinaryCopy
-import Complexitylib.Models.TuringMachine.Subroutines.BinaryRippleAdd
-import Complexitylib.Models.TuringMachine.Subroutines.BinaryShiftMul.Internal.Pure
-import Complexitylib.Models.TuringMachine.Subroutines.ResetBinaryMany
+module
+
+public import Complexitylib.Models.TuringMachine.Combinators.ForBinaryWork
+public import Complexitylib.Models.TuringMachine.Combinators.WorkSymbolBranch
+public import Complexitylib.Models.TuringMachine.Subroutines.BinaryCopy
+public import Complexitylib.Models.TuringMachine.Subroutines.BinaryRippleAdd
+public import Complexitylib.Models.TuringMachine.Subroutines.BinaryShiftMul.Internal.Pure
+public import Complexitylib.Models.TuringMachine.Subroutines.ResetBinaryMany
 
 /-!
 # Width-driven binary shift-and-add multiplication -- composed semantics
@@ -18,22 +20,25 @@ bit-driven work-tape loop. The multiplier cursor is preserved by every body
 phase and advanced only by the loopback seam.
 -/
 
+@[expose] public section
+
 namespace Complexity
 
 namespace TM
 
-private def binaryShiftMulNatTape (value : ℕ) : Tape :=
+@[nolint docBlame]
+def binaryShiftMulNatTape (value : ℕ) : Tape :=
   (Tape.init (value.bits.map Γ.ofBool)).move Dir3.right
 
-private theorem binaryShiftMulNatTape_hasBinaryNat (value : ℕ) :
+theorem binaryShiftMulNatTape_hasBinaryNat (value : ℕ) :
     (binaryShiftMulNatTape value).HasBinaryNat value := by
   simpa [binaryShiftMulNatTape] using Tape.init_move_right_hasBinaryNat value
 
-private theorem hasBinaryNat_parked {t : Tape} {value : ℕ}
+theorem hasBinaryNat_parked {t : Tape} {value : ℕ}
     (h : t.HasBinaryNat value) : Parked t :=
   ⟨by rw [h.2.1], h.2.hasBinaryContent.cells_ne_start⟩
 
-private theorem binaryShiftMulExactFrame_transition {n : ℕ}
+theorem binaryShiftMulExactFrame_transition {n : ℕ}
     (inp₀ : Tape) (work₀ : Fin n → Tape) (out₀ : Tape)
     (hinput : Parked inp₀) (hwork : ∀ i, Parked (work₀ i))
     (houtput : Parked out₀) :
@@ -50,12 +55,14 @@ private theorem binaryShiftMulExactFrame_transition {n : ℕ}
   exact phaseTransition_eq_self_of_reads_ne_start hinput.read_ne_start
     (fun i => (hwork i).read_ne_start) houtput.read_ne_start
 
-private def binaryShiftMulUpdateTime (acc shift : ℕ) : ℕ :=
+@[nolint docBlame]
+def binaryShiftMulUpdateTime (acc shift : ℕ) : ℕ :=
   binaryRippleAddTime acc shift + 1 +
     binaryCopyTime (acc + shift) acc + 1 +
       resetBinaryWorkTime 1 (acc + shift).size
 
-private def binaryShiftMulUpdatePost {n : ℕ} (abi : BinaryShiftMulABI n)
+@[nolint docBlame]
+def binaryShiftMulUpdatePost {n : ℕ} (abi : BinaryShiftMulABI n)
     (acc shift : ℕ) (inp₀ : Tape) (work₀ : Fin n → Tape)
     (out₀ : Tape) : TapePred n :=
   fun inp work out =>
@@ -68,7 +75,7 @@ private def binaryShiftMulUpdatePost {n : ℕ} (abi : BinaryShiftMulABI n)
       work i = work₀ i) ∧
     out = out₀
 
-private theorem binaryShiftMulUpdateTM_hoareTime_frame {n : ℕ}
+theorem binaryShiftMulUpdateTM_hoareTime_frame {n : ℕ}
     (abi : BinaryShiftMulABI n) (acc shift : ℕ)
     (inp₀ : Tape) (work₀ : Fin n → Tape) (out₀ : Tape)
     (hacc : (work₀ abi.acc).HasBinaryNat acc)
@@ -219,14 +226,16 @@ private theorem binaryShiftMulUpdateTM_hoareTime_frame {n : ℕ}
   simpa [binaryShiftMulUpdateTM, binaryShiftMulUpdateTime,
     Nat.add_assoc] using hrun
 
-private def binaryShiftMulDoubleTime (shift : ℕ) : ℕ :=
+@[nolint docBlame]
+def binaryShiftMulDoubleTime (shift : ℕ) : ℕ :=
   binaryCopyTime shift 0 + 1 +
     binaryRippleAddTime shift shift + 1 +
       resetBinaryWorkTime 1 shift.size + 1 +
         binaryCopyTime (shift + shift) shift + 1 +
           resetBinaryWorkTime 1 (shift + shift).size
 
-private def binaryShiftMulDoublePost {n : ℕ} (abi : BinaryShiftMulABI n)
+@[nolint docBlame]
+def binaryShiftMulDoublePost {n : ℕ} (abi : BinaryShiftMulABI n)
     (shift : ℕ) (inp₀ : Tape) (work₀ : Fin n → Tape)
     (out₀ : Tape) : TapePred n :=
   fun inp work out =>
@@ -238,7 +247,7 @@ private def binaryShiftMulDoublePost {n : ℕ} (abi : BinaryShiftMulABI n)
       work i = work₀ i) ∧
     out = out₀
 
-private theorem binaryShiftMulDoubleTM_hoareTime_frame {n : ℕ}
+theorem binaryShiftMulDoubleTM_hoareTime_frame {n : ℕ}
     (abi : BinaryShiftMulABI n) (shift : ℕ)
     (inp₀ : Tape) (work₀ : Fin n → Tape) (out₀ : Tape)
     (hshift : (work₀ abi.shift).HasBinaryNat shift)
@@ -446,10 +455,12 @@ private theorem binaryShiftMulDoubleTM_hoareTime_frame {n : ℕ}
   simpa [binaryShiftMulDoubleTM, binaryShiftMulDoubleTime,
     Nat.add_assoc] using hrun
 
-private def binaryShiftMulOneTime (acc shift : ℕ) : ℕ :=
+@[nolint docBlame]
+def binaryShiftMulOneTime (acc shift : ℕ) : ℕ :=
   binaryShiftMulUpdateTime acc shift + 1 + binaryShiftMulDoubleTime shift
 
-private def binaryShiftMulOnePost {n : ℕ} (abi : BinaryShiftMulABI n)
+@[nolint docBlame]
+def binaryShiftMulOnePost {n : ℕ} (abi : BinaryShiftMulABI n)
     (acc shift : ℕ) (inp₀ : Tape) (work₀ : Fin n → Tape)
     (out₀ : Tape) : TapePred n :=
   fun inp work out =>
@@ -462,7 +473,7 @@ private def binaryShiftMulOnePost {n : ℕ} (abi : BinaryShiftMulABI n)
       work i = work₀ i) ∧
     out = out₀
 
-private theorem binaryShiftMulOneTM_hoareTime_frame {n : ℕ}
+theorem binaryShiftMulOneTM_hoareTime_frame {n : ℕ}
     (abi : BinaryShiftMulABI n) (acc shift : ℕ)
     (inp₀ : Tape) (work₀ : Fin n → Tape) (out₀ : Tape)
     (hacc : (work₀ abi.acc).HasBinaryNat acc)
@@ -548,11 +559,12 @@ private theorem binaryShiftMulOneTM_hoareTime_frame {n : ℕ}
     (binaryShiftMulDoubleTM abi) hupdate htransition hdouble
   simpa [binaryShiftMulOneTM, binaryShiftMulOneTime] using hrun
 
-private def binaryShiftMulBodyTime (bit : Bool) (acc shift : ℕ) : ℕ :=
+@[nolint docBlame]
+def binaryShiftMulBodyTime (bit : Bool) (acc shift : ℕ) : ℕ :=
   (if bit then binaryShiftMulOneTime acc shift
     else binaryShiftMulDoubleTime shift) + 1
 
-private theorem binaryShiftMulUpdateTime_le (acc shift width : ℕ)
+theorem binaryShiftMulUpdateTime_le (acc shift width : ℕ)
     (hacc : acc.size ≤ width) (hshift : shift.size ≤ width) :
     binaryShiftMulUpdateTime acc shift ≤ 13 * width + 50 := by
   have haddSize := binaryRippleAdd_sum_size_le acc shift
@@ -564,7 +576,7 @@ private theorem binaryShiftMulUpdateTime_le (acc shift width : ℕ)
     clearWorkTimeBound]
   omega
 
-private theorem binaryShiftMulDoubleTime_le (shift width : ℕ)
+theorem binaryShiftMulDoubleTime_le (shift width : ℕ)
     (hshift : shift.size ≤ width) :
     binaryShiftMulDoubleTime shift ≤ 20 * width + 110 := by
   have hdoubleSize := binaryRippleAdd_sum_size_le shift shift
@@ -579,7 +591,7 @@ private theorem binaryShiftMulDoubleTime_le (shift width : ℕ)
     clearWorkTimeBound]
   omega
 
-private theorem binaryShiftMulBodyTime_le (bit : Bool) (acc shift width : ℕ)
+theorem binaryShiftMulBodyTime_le (bit : Bool) (acc shift width : ℕ)
     (hacc : acc.size ≤ width) (hshift : shift.size ≤ width) :
     binaryShiftMulBodyTime bit acc shift ≤ 33 * width + 162 := by
   have hupdate := binaryShiftMulUpdateTime_le acc shift width hacc hshift
@@ -589,7 +601,7 @@ private theorem binaryShiftMulBodyTime_le (bit : Bool) (acc shift width : ℕ)
       Bool.false_eq_true, if_false, if_true] <;>
     omega
 
-private theorem forBinaryWorkLoopTime_le
+theorem forBinaryWorkLoopTime_le
     (bodyTime : ℕ → ℕ) (total bound : ℕ)
     (hbody : ∀ i, i < total → bodyTime i ≤ bound) :
     ∀ count value, value + count = total →
@@ -608,7 +620,8 @@ private theorem forBinaryWorkLoopTime_le
       rw [Nat.succ_mul]
       omega
 
-private def binaryShiftMulBodyPost {n : ℕ} (abi : BinaryShiftMulABI n)
+@[nolint docBlame]
+def binaryShiftMulBodyPost {n : ℕ} (abi : BinaryShiftMulABI n)
     (bit : Bool) (acc shift : ℕ) (inp₀ : Tape)
     (work₀ : Fin n → Tape) (out₀ : Tape) : TapePred n :=
   fun inp work out =>
@@ -621,7 +634,7 @@ private def binaryShiftMulBodyPost {n : ℕ} (abi : BinaryShiftMulABI n)
       work i = work₀ i) ∧
     out = out₀
 
-private theorem binaryShiftMulBitBodyTM_hoareTime_frame {n : ℕ}
+theorem binaryShiftMulBitBodyTM_hoareTime_frame {n : ℕ}
     (abi : BinaryShiftMulABI n) (bit : Bool) (acc shift : ℕ)
     (inp₀ : Tape) (work₀ : Fin n → Tape) (out₀ : Tape)
     (hbit : (work₀ abi.rhs).read = Γ.ofBool bit)
@@ -701,19 +714,22 @@ private theorem binaryShiftMulBitBodyTM_hoareTime_frame {n : ℕ}
         · intro i haccIdx hshiftIdx htmpIdx hdblIdx
           rw [hworkEq, hfinalFrame i haccIdx hshiftIdx htmpIdx hdblIdx]
 
-private def binaryShiftMulBitAt (rhs i : ℕ) : Bool :=
+@[nolint docBlame]
+def binaryShiftMulBitAt (rhs i : ℕ) : Bool :=
   (rhs.bits[i]?).getD false
 
-private theorem binaryShiftMulBitAt_eq_get (rhs i : ℕ) (hi : i < rhs.size) :
+theorem binaryShiftMulBitAt_eq_get (rhs i : ℕ) (hi : i < rhs.size) :
     binaryShiftMulBitAt rhs i =
       rhs.bits.get ⟨i, by simpa [Nat.size_eq_bits_len] using hi⟩ := by
   simp [binaryShiftMulBitAt,
     show i < rhs.bits.length by simpa [Nat.size_eq_bits_len] using hi]
 
-private def binaryShiftMulCursorTape (tape : Tape) (index : ℕ) : Tape :=
+@[nolint docBlame]
+def binaryShiftMulCursorTape (tape : Tape) (index : ℕ) : Tape :=
   { head := index + 1, cells := tape.cells }
 
-private def binaryShiftMulLoopWork {n : ℕ} (abi : BinaryShiftMulABI n)
+@[nolint docBlame]
+def binaryShiftMulLoopWork {n : ℕ} (abi : BinaryShiftMulABI n)
     (work₀ : Fin n → Tape) (index acc shift : ℕ) : Fin n → Tape :=
   Function.update
     (Function.update
@@ -726,42 +742,42 @@ private def binaryShiftMulLoopWork {n : ℕ} (abi : BinaryShiftMulABI n)
       abi.tmp (binaryShiftMulNatTape 0))
     abi.dbl (binaryShiftMulNatTape 0)
 
-private theorem binaryShiftMulLoopWork_rhs {n : ℕ}
+theorem binaryShiftMulLoopWork_rhs {n : ℕ}
     (abi : BinaryShiftMulABI n) (work₀ : Fin n → Tape)
     (index acc shift : ℕ) :
     binaryShiftMulLoopWork abi work₀ index acc shift abi.rhs =
       binaryShiftMulCursorTape (work₀ abi.rhs) index := by
   simp [binaryShiftMulLoopWork]
 
-private theorem binaryShiftMulLoopWork_acc {n : ℕ}
+theorem binaryShiftMulLoopWork_acc {n : ℕ}
     (abi : BinaryShiftMulABI n) (work₀ : Fin n → Tape)
     (index acc shift : ℕ) :
     binaryShiftMulLoopWork abi work₀ index acc shift abi.acc =
       binaryShiftMulNatTape acc := by
   simp [binaryShiftMulLoopWork]
 
-private theorem binaryShiftMulLoopWork_shift {n : ℕ}
+theorem binaryShiftMulLoopWork_shift {n : ℕ}
     (abi : BinaryShiftMulABI n) (work₀ : Fin n → Tape)
     (index acc shift : ℕ) :
     binaryShiftMulLoopWork abi work₀ index acc shift abi.shift =
       binaryShiftMulNatTape shift := by
   simp [binaryShiftMulLoopWork]
 
-private theorem binaryShiftMulLoopWork_tmp {n : ℕ}
+theorem binaryShiftMulLoopWork_tmp {n : ℕ}
     (abi : BinaryShiftMulABI n) (work₀ : Fin n → Tape)
     (index acc shift : ℕ) :
     binaryShiftMulLoopWork abi work₀ index acc shift abi.tmp =
       binaryShiftMulNatTape 0 := by
   simp [binaryShiftMulLoopWork]
 
-private theorem binaryShiftMulLoopWork_dbl {n : ℕ}
+theorem binaryShiftMulLoopWork_dbl {n : ℕ}
     (abi : BinaryShiftMulABI n) (work₀ : Fin n → Tape)
     (index acc shift : ℕ) :
     binaryShiftMulLoopWork abi work₀ index acc shift abi.dbl =
       binaryShiftMulNatTape 0 := by
   simp [binaryShiftMulLoopWork]
 
-private theorem binaryShiftMulLoopWork_other {n : ℕ}
+theorem binaryShiftMulLoopWork_other {n : ℕ}
     (abi : BinaryShiftMulABI n) (work₀ : Fin n → Tape)
     (index acc shift : ℕ) (i : Fin n)
     (hrhs : i ≠ abi.rhs) (hacc : i ≠ abi.acc)
@@ -770,13 +786,13 @@ private theorem binaryShiftMulLoopWork_other {n : ℕ}
     binaryShiftMulLoopWork abi work₀ index acc shift i = work₀ i := by
   simp [binaryShiftMulLoopWork, hrhs, hacc, hshift, htmp, hdbl]
 
-private theorem binaryShiftMulCursorTape_parked {tape : Tape}
+theorem binaryShiftMulCursorTape_parked {tape : Tape}
     (h : Parked tape) (index : ℕ) :
     Parked (binaryShiftMulCursorTape tape index) := by
   exact ⟨by simp [binaryShiftMulCursorTape], by
     simpa [binaryShiftMulCursorTape] using h.2⟩
 
-private theorem binaryShiftMulLoopWork_parked {n : ℕ}
+theorem binaryShiftMulLoopWork_parked {n : ℕ}
     (abi : BinaryShiftMulABI n) (work₀ : Fin n → Tape)
     (index acc shift : ℕ) (hwork : ∀ i, Parked (work₀ i)) :
     ∀ i, Parked (binaryShiftMulLoopWork abi work₀ index acc shift i) := by
@@ -805,7 +821,7 @@ private theorem binaryShiftMulLoopWork_parked {n : ℕ}
     hshift htmp hdbl]
   exact hwork i
 
-private theorem binaryShiftMulLoopWork_read_bit {n : ℕ}
+theorem binaryShiftMulLoopWork_read_bit {n : ℕ}
     (abi : BinaryShiftMulABI n) (work₀ : Fin n → Tape)
     (rhs index acc shift : ℕ) (hrhs : (work₀ abi.rhs).HasBinaryNat rhs)
     (hi : index < rhs.size) :
@@ -816,7 +832,7 @@ private theorem binaryShiftMulLoopWork_read_bit {n : ℕ}
   rw [binaryShiftMulBitAt_eq_get rhs index hi]
   exact hrhs.2.2.1 index (by simpa [Nat.size_eq_bits_len] using hi)
 
-private theorem binaryShiftMulLoopWork_read_blank {n : ℕ}
+theorem binaryShiftMulLoopWork_read_blank {n : ℕ}
     (abi : BinaryShiftMulABI n) (work₀ : Fin n → Tape)
     (rhs acc shift : ℕ) (hrhs : (work₀ abi.rhs).HasBinaryNat rhs) :
     (binaryShiftMulLoopWork abi work₀ rhs.size acc shift abi.rhs).read =
@@ -825,7 +841,7 @@ private theorem binaryShiftMulLoopWork_read_blank {n : ℕ}
   simp only [binaryShiftMulCursorTape]
   exact hrhs.2.2.2 rhs.size (by simp [Nat.size_eq_bits_len])
 
-private theorem binaryShiftMulLoopWork_advance {n : ℕ}
+theorem binaryShiftMulLoopWork_advance {n : ℕ}
     (abi : BinaryShiftMulABI n) (work₀ : Fin n → Tape)
     (index acc shift : ℕ) :
     (fun i => if i = abi.rhs then
@@ -855,20 +871,23 @@ private theorem binaryShiftMulLoopWork_advance {n : ℕ}
       binaryShiftMulLoopWork_other abi work₀ (index + 1) acc shift i hrhs
         hacc hshift htmp hdbl]
 
-private def binaryShiftMulPartialWork {n : ℕ} (abi : BinaryShiftMulABI n)
+@[nolint docBlame]
+def binaryShiftMulPartialWork {n : ℕ} (abi : BinaryShiftMulABI n)
     (work₀ : Fin n → Tape) (lhs rhs index : ℕ) : Fin n → Tape :=
   binaryShiftMulLoopWork abi work₀ index
     (BinaryShiftMul.partialAcc lhs rhs index)
     (BinaryShiftMul.partialShift lhs index)
 
-private def binaryShiftMulBodyDoneWork {n : ℕ}
+@[nolint docBlame]
+def binaryShiftMulBodyDoneWork {n : ℕ}
     (abi : BinaryShiftMulABI n) (work₀ : Fin n → Tape)
     (lhs rhs index : ℕ) : Fin n → Tape :=
   binaryShiftMulLoopWork abi work₀ index
     (BinaryShiftMul.partialAcc lhs rhs (index + 1))
     (BinaryShiftMul.partialShift lhs (index + 1))
 
-private def binaryShiftMulScanCfg {n : ℕ} (abi : BinaryShiftMulABI n)
+@[nolint docBlame]
+def binaryShiftMulScanCfg {n : ℕ} (abi : BinaryShiftMulABI n)
     (lhs rhs index : ℕ) (inp₀ : Tape) (work₀ : Fin n → Tape)
     (out₀ : Tape) :
     Cfg n (forBinaryWorkTM abi.rhs (binaryShiftMulBitBodyTM abi)).Q :=
@@ -877,7 +896,8 @@ private def binaryShiftMulScanCfg {n : ℕ} (abi : BinaryShiftMulABI n)
     work := binaryShiftMulPartialWork abi work₀ lhs rhs index
     output := out₀ }
 
-private def binaryShiftMulBodyStartCfg {n : ℕ}
+@[nolint docBlame]
+def binaryShiftMulBodyStartCfg {n : ℕ}
     (abi : BinaryShiftMulABI n) (lhs rhs index : ℕ)
     (inp₀ : Tape) (work₀ : Fin n → Tape) (out₀ : Tape) :
     Cfg n (forBinaryWorkTM abi.rhs (binaryShiftMulBitBodyTM abi)).Q :=
@@ -886,7 +906,8 @@ private def binaryShiftMulBodyStartCfg {n : ℕ}
     work := binaryShiftMulPartialWork abi work₀ lhs rhs index
     output := out₀ }
 
-private def binaryShiftMulBodyDoneCfg {n : ℕ}
+@[nolint docBlame]
+def binaryShiftMulBodyDoneCfg {n : ℕ}
     (abi : BinaryShiftMulABI n) (lhs rhs index : ℕ)
     (inp₀ : Tape) (work₀ : Fin n → Tape) (out₀ : Tape) :
     Cfg n (forBinaryWorkTM abi.rhs (binaryShiftMulBitBodyTM abi)).Q :=
@@ -895,7 +916,8 @@ private def binaryShiftMulBodyDoneCfg {n : ℕ}
     work := binaryShiftMulBodyDoneWork abi work₀ lhs rhs index
     output := out₀ }
 
-private def binaryShiftMulDoneCfg {n : ℕ} (abi : BinaryShiftMulABI n)
+@[nolint docBlame]
+def binaryShiftMulDoneCfg {n : ℕ} (abi : BinaryShiftMulABI n)
     (lhs rhs : ℕ) (inp₀ : Tape) (work₀ : Fin n → Tape)
     (out₀ : Tape) :
     Cfg n (forBinaryWorkTM abi.rhs (binaryShiftMulBitBodyTM abi)).Q :=
@@ -904,7 +926,7 @@ private def binaryShiftMulDoneCfg {n : ℕ} (abi : BinaryShiftMulABI n)
     work := binaryShiftMulPartialWork abi work₀ lhs rhs rhs.size
     output := out₀ }
 
-private theorem binaryShiftMulBody_run {n : ℕ}
+theorem binaryShiftMulBody_run {n : ℕ}
     (abi : BinaryShiftMulABI n) (lhs rhs index : ℕ)
     (inp₀ : Tape) (work₀ : Fin n → Tape) (out₀ : Tape)
     (hrhs : (work₀ abi.rhs).HasBinaryNat rhs)
@@ -993,10 +1015,12 @@ private theorem binaryShiftMulBody_run {n : ℕ}
     exact Cfg.ext hhalt hfinalInput hfinalWork hfinalOutput
   simpa [work, hc] using hreach
 
-private def binaryShiftMulLoopBound (lhs rhs : ℕ) : ℕ :=
+@[nolint docBlame]
+def binaryShiftMulLoopBound (lhs rhs : ℕ) : ℕ :=
   rhs.size * (33 * binaryShiftMulWidth lhs rhs + 164) + 1
 
-private def binaryShiftMulLoopPost {n : ℕ} (abi : BinaryShiftMulABI n)
+@[nolint docBlame]
+def binaryShiftMulLoopPost {n : ℕ} (abi : BinaryShiftMulABI n)
     (lhs rhs : ℕ) (inp₀ : Tape) (work₀ : Fin n → Tape)
     (out₀ : Tape) : TapePred n :=
   fun inp work out =>
@@ -1013,7 +1037,7 @@ private def binaryShiftMulLoopPost {n : ℕ} (abi : BinaryShiftMulABI n)
       i ≠ abi.shift → i ≠ abi.tmp → i ≠ abi.dbl → work i = work₀ i) ∧
     out = out₀
 
-private theorem binaryShiftMulLoopTM_hoareTime_frame {n : ℕ}
+theorem binaryShiftMulLoopTM_hoareTime_frame {n : ℕ}
     (abi : BinaryShiftMulABI n) (lhs rhs : ℕ)
     (inp₀ : Tape) (work₀ : Fin n → Tape) (out₀ : Tape)
     (hlhs : (work₀ abi.lhs).HasBinaryNat lhs)
@@ -1220,21 +1244,25 @@ private theorem binaryShiftMulLoopTM_hoareTime_frame {n : ℕ}
         (BinaryShiftMul.partialShift lhs rhs.size) i hrhsIdx haccIdx
         hshiftIdx htmpIdx hdblIdx]
 
-private def binaryShiftMulCleanupBits {n : ℕ}
+@[nolint docBlame]
+def binaryShiftMulCleanupBits {n : ℕ}
     (abi : BinaryShiftMulABI n) (lhs rhs : ℕ) (i : Fin n) : List Bool :=
   if i = abi.shift then (lhs * 2 ^ rhs.size).bits else []
 
-private def binaryShiftMulCleanupHead {n : ℕ} (_abi : BinaryShiftMulABI n)
+@[nolint docBlame unusedArguments]
+def binaryShiftMulCleanupHead {n : ℕ} (_abi : BinaryShiftMulABI n)
     (_i : Fin n) : ℕ :=
   1
 
-private def binaryShiftMulCleanupTime {n : ℕ}
+@[nolint docBlame]
+def binaryShiftMulCleanupTime {n : ℕ}
     (abi : BinaryShiftMulABI n) (lhs rhs : ℕ) : ℕ :=
   rhs.size + 3 + 1 +
     resetBinaryWorkManyTime (binaryShiftMulCleanupBits abi lhs rhs)
       (binaryShiftMulCleanupHead abi) [abi.shift, abi.tmp, abi.dbl]
 
-private def binaryShiftMulCleanupMid {n : ℕ} (abi : BinaryShiftMulABI n)
+@[nolint docBlame]
+def binaryShiftMulCleanupMid {n : ℕ} (abi : BinaryShiftMulABI n)
     (lhs rhs : ℕ) (inp₀ : Tape) (work₀ : Fin n → Tape)
     (out₀ : Tape) : TapePred n :=
   fun inp work out =>
@@ -1249,7 +1277,8 @@ private def binaryShiftMulCleanupMid {n : ℕ} (abi : BinaryShiftMulABI n)
       i ≠ abi.shift → i ≠ abi.tmp → i ≠ abi.dbl → work i = work₀ i) ∧
     out = out₀
 
-private def binaryShiftMulPost {n : ℕ} (abi : BinaryShiftMulABI n)
+@[nolint docBlame]
+def binaryShiftMulPost {n : ℕ} (abi : BinaryShiftMulABI n)
     (lhs rhs : ℕ) (inp₀ : Tape) (work₀ : Fin n → Tape)
     (out₀ : Tape) : TapePred n :=
   fun inp work out =>
@@ -1264,7 +1293,7 @@ private def binaryShiftMulPost {n : ℕ} (abi : BinaryShiftMulABI n)
       i ≠ abi.shift → i ≠ abi.tmp → i ≠ abi.dbl → work i = work₀ i) ∧
     out = out₀
 
-private theorem binaryShiftMulRewindTM_hoareTime_frame {n : ℕ}
+theorem binaryShiftMulRewindTM_hoareTime_frame {n : ℕ}
     (abi : BinaryShiftMulABI n) (lhs rhs : ℕ)
     (inp₀ : Tape) (work₀ : Fin n → Tape) (out₀ : Tape)
     (hinput : Parked inp₀) (hwork : ∀ i, Parked (work₀ i))
@@ -1324,7 +1353,7 @@ private theorem binaryShiftMulRewindTM_hoareTime_frame {n : ℕ}
     exact (hfinalOther i hrhsIdx).trans
       (hframe i hlhsIdx hrhsIdx haccIdx hshiftIdx htmpIdx hdblIdx)
 
-private theorem binaryShiftMulResetTM_hoareTime_frame {n : ℕ}
+theorem binaryShiftMulResetTM_hoareTime_frame {n : ℕ}
     (abi : BinaryShiftMulABI n) (lhs rhs : ℕ)
     (inp₀ : Tape) (work₀ : Fin n → Tape) (out₀ : Tape)
     (hinput : Parked inp₀) (hwork : ∀ i, Parked (work₀ i))
@@ -1420,7 +1449,7 @@ private theorem binaryShiftMulResetTM_hoareTime_frame {n : ℕ}
     · exact hframe i hlhsIdx hrhsIdx haccIdx hshiftIdx htmpIdx hdblIdx
     · simp [hshiftIdx, htmpIdx, hdblIdx]
 
-private theorem binaryShiftMulCleanupTM_hoareTime_frame {n : ℕ}
+theorem binaryShiftMulCleanupTM_hoareTime_frame {n : ℕ}
     (abi : BinaryShiftMulABI n) (lhs rhs : ℕ)
     (inp₀ : Tape) (work₀ : Fin n → Tape) (out₀ : Tape)
     (hinput : Parked inp₀) (hwork : ∀ i, Parked (work₀ i))
@@ -1473,7 +1502,8 @@ private theorem binaryShiftMulCleanupTM_hoareTime_frame {n : ℕ}
     hrewind htransition hreset
   simpa [binaryShiftMulCleanupTM, binaryShiftMulCleanupTime] using hrun
 
-private def binaryShiftMulInitPost {n : ℕ} (abi : BinaryShiftMulABI n)
+@[nolint docBlame]
+def binaryShiftMulInitPost {n : ℕ} (abi : BinaryShiftMulABI n)
     (lhs rhs : ℕ) (inp₀ : Tape) (work₀ : Fin n → Tape)
     (out₀ : Tape) : TapePred n :=
   fun inp work out =>
@@ -1488,7 +1518,7 @@ private def binaryShiftMulInitPost {n : ℕ} (abi : BinaryShiftMulABI n)
       i ≠ abi.shift → i ≠ abi.tmp → i ≠ abi.dbl → work i = work₀ i) ∧
     out = out₀
 
-private theorem binaryShiftMulInitTM_hoareTime_frame {n : ℕ}
+theorem binaryShiftMulInitTM_hoareTime_frame {n : ℕ}
     (abi : BinaryShiftMulABI n) (lhs rhs : ℕ)
     (inp₀ : Tape) (work₀ : Fin n → Tape) (out₀ : Tape)
     (hlhs : (work₀ abi.lhs).HasBinaryNat lhs)
@@ -1527,7 +1557,7 @@ private theorem binaryShiftMulInitTM_hoareTime_frame {n : ℕ}
   · intro i hlhsIdx hrhsIdx haccIdx hshiftIdx htmpIdx hdblIdx
     rw [hworkEq, Function.update_of_ne hshiftIdx]
 
-private theorem binaryShiftMulLoopTM_hoareTime_from_init {n : ℕ}
+theorem binaryShiftMulLoopTM_hoareTime_from_init {n : ℕ}
     (abi : BinaryShiftMulABI n) (lhs rhs : ℕ)
     (inp₀ : Tape) (work₀ : Fin n → Tape) (out₀ : Tape)
     (hinput : Parked inp₀) (hwork : ∀ i, Parked (work₀ i))
@@ -1577,7 +1607,7 @@ private theorem binaryShiftMulLoopTM_hoareTime_from_init {n : ℕ}
     hdblIdx).trans
       (hframe i hlhsIdx hrhsIdx haccIdx hshiftIdx htmpIdx hdblIdx)
 
-private theorem binaryShiftMulInitPost_transition {n : ℕ}
+theorem binaryShiftMulInitPost_transition {n : ℕ}
     (abi : BinaryShiftMulABI n) (lhs rhs : ℕ)
     (inp₀ : Tape) (work₀ : Fin n → Tape) (out₀ : Tape)
     (hinput : Parked inp₀) (hwork : ∀ i, Parked (work₀ i))
@@ -1618,7 +1648,7 @@ private theorem binaryShiftMulInitPost_transition {n : ℕ}
   rw [hi, hw, ho]
   exact ⟨hinp, hlhs, hrhs, hacc, hshift, htmp, hdbl, hframe, hout⟩
 
-private theorem binaryShiftMulLoopPost_transition {n : ℕ}
+theorem binaryShiftMulLoopPost_transition {n : ℕ}
     (abi : BinaryShiftMulABI n) (lhs rhs : ℕ)
     (inp₀ : Tape) (work₀ : Fin n → Tape) (out₀ : Tape)
     (hinput : Parked inp₀) (hwork : ∀ i, Parked (work₀ i))
@@ -1660,7 +1690,7 @@ private theorem binaryShiftMulLoopPost_transition {n : ℕ}
   exact ⟨hinp, hlhs, hrhsContent, hrhsStart, hrhsHead, hacc, hshift,
     htmp, hdbl, hframe, hout⟩
 
-private theorem binaryShiftMulCleanupTime_le {n : ℕ}
+theorem binaryShiftMulCleanupTime_le {n : ℕ}
     (abi : BinaryShiftMulABI n) (lhs rhs : ℕ) :
     binaryShiftMulCleanupTime abi lhs rhs ≤
       3 * binaryShiftMulWidth lhs rhs + 35 := by

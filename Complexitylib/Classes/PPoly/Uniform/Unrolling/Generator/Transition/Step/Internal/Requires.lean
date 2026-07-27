@@ -3,11 +3,13 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Transition.Next
-import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Transition.PackedCopy
-import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Transition.Step.Defs
-import Complexitylib.Models.TuringMachine.Experimental.BinaryRoutine.Control
-import Complexitylib.Models.TuringMachine.Experimental.BinaryRoutine.List
+module
+
+public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Transition.Next
+public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Transition.PackedCopy
+public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Transition.Step.Defs
+public import Complexitylib.Models.TuringMachine.Experimental.BinaryRoutine.Control
+public import Complexitylib.Models.TuringMachine.Experimental.BinaryRoutine.List
 
 /-!
 # Packed-step generator domains
@@ -15,6 +17,8 @@ import Complexitylib.Models.TuringMachine.Experimental.BinaryRoutine.List
 Reachable-position loop invariants and exact scratch-domain proofs for the
 formula and delayed-copy phases of one packed transition step.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

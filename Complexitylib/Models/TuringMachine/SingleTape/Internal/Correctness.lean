@@ -3,9 +3,11 @@ Copyright (c) 2025 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Models.TuringMachine.SingleTape.Internal.Delta
-import Complexitylib.Models.TuringMachine.Combinators.Internal.Generic
-import Complexitylib.Models.TuringMachine.Internal
+module
+
+public import Complexitylib.Models.TuringMachine.SingleTape.Internal.Delta
+public import Complexitylib.Models.TuringMachine.Combinators.Internal.Generic
+public import Complexitylib.Models.TuringMachine.Internal
 
 /-!
 # Single-tape simulation — correctness internals
@@ -18,6 +20,8 @@ iterating `corr_macroStep` over `N`'s computation and translating acceptance.
 
 See `docs/A4-SingleTapeSimulation.md`. Proof internals only.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

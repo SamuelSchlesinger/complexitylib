@@ -3,12 +3,16 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Circuits.AC0.Iteration.Internal
-import Complexitylib.Circuits.XOR.Restriction.Internal
+module
+
+public import Complexitylib.Circuits.AC0.Iteration.Internal
+public import Complexitylib.Circuits.XOR.Restriction.Internal
 
 /-!
 # Parity versus finite AC0 formulas -- proof internals
 -/
+
+@[expose] public section
 
 namespace Complexity
 namespace AC0Formula

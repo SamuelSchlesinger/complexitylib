@@ -3,9 +3,11 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Circuits.BarringtonConverse.Defs
-import Complexitylib.Circuits.CircuitFormula.Defs
-import Complexitylib.Circuits.Family.Defs
+module
+
+public import Complexitylib.Circuits.BarringtonConverse.Defs
+public import Complexitylib.Circuits.CircuitFormula.Defs
+public import Complexitylib.Circuits.Family.Defs
 
 /-!
 # Circuit-family outputs as formula families -- definitions
@@ -13,6 +15,8 @@ import Complexitylib.Circuits.Family.Defs
 These definitions connect typed, length-indexed `CircuitFamily` semantics to
 the total-assignment convention used by the Barrington development.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

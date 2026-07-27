@@ -3,9 +3,11 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Models.TuringMachine.Combinators.ForInput
-import Complexitylib.Models.TuringMachine.Experimental.Routine.Defs
-import Complexitylib.Models.TuringMachine.Hoare.Space
+module
+
+public import Complexitylib.Models.TuringMachine.Combinators.ForInput
+public import Complexitylib.Models.TuringMachine.Experimental.Routine.Defs
+public import Complexitylib.Models.TuringMachine.Hoare.Space
 
 /-!
 # Experimental first-order Turing-machine routines — proof internals
@@ -13,6 +15,8 @@ import Complexitylib.Models.TuringMachine.Hoare.Space
 This module proves that the structural `Routine.TransducerSafe` certificate is
 preserved by lowering through sequential composition and read-only-input loops.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

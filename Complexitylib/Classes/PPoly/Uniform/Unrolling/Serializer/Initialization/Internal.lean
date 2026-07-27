@@ -3,13 +3,17 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Classes.PPoly.Uniform.Unrolling
-import Complexitylib.Classes.PPoly.Uniform.Unrolling.Serializer.Initialization.Defs
-import Complexitylib.Circuits.Unrolling
+module
+
+public import Complexitylib.Classes.PPoly.Uniform.Unrolling
+public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Serializer.Initialization.Defs
+public import Complexitylib.Circuits.Unrolling
 
 /-!
 # Numeric initialization schedule -- proof internals
 -/
+
+@[expose] public section
 
 namespace Complexity
 

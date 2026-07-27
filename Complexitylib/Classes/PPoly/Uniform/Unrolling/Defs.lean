@@ -3,8 +3,10 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Circuits.Encoding.Family
-import Complexitylib.Circuits.Unrolling.Acceptance
+module
+
+public import Complexitylib.Circuits.Encoding.Family
+public import Complexitylib.Circuits.Unrolling.Acceptance
 
 /-!
 # Streamable deterministic unrolling families — definitions
@@ -20,6 +22,8 @@ all choice positions and leaves the ordinary data wires in place.  The resulting
 typed circuit is reconstructed directly from `acceptanceRawCircuit`, so erasing
 it recovers exactly the raw list that a streaming generator will emit.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

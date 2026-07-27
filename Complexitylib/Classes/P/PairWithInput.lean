@@ -3,7 +3,9 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Classes.P.PairWithInput.Internal
+module
+
+public import Complexitylib.Classes.P.PairWithInput.Internal
 
 /-!
 # Polynomial-time pairing with the original input
@@ -12,6 +14,8 @@ import Complexitylib.Classes.P.PairWithInput.Internal
 
 - `mem_FP_pairWithInput` — if `f ∈ FP`, then `x ↦ pair (f x) x` is in `FP`
 -/
+
+@[expose] public section
 
 namespace Complexity
 

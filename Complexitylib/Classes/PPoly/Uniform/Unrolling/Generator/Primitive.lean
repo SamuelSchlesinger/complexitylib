@@ -3,8 +3,10 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Primitive.Defs
-import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Primitive.Internal
+module
+
+public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Primitive.Defs
+public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Primitive.Internal
 
 /-!
 # Direct-unrolling generator primitives
@@ -12,6 +14,8 @@ import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Primitive.Interna
 Executable fixed-work helpers for recent-wire raw gates and numeric state,
 head, and cell configuration-wire references.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

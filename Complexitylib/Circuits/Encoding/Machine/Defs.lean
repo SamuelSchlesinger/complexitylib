@@ -3,12 +3,14 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Circuits.Encoding.Family
-import Complexitylib.Models.TuringMachine.Lift
-import Complexitylib.Models.TuringMachine.Subroutines
-import Complexitylib.Models.TuringMachine.Subroutines.PairSplit.Defs
-import Complexitylib.Models.TuringMachine.Subroutines.PairValidate.Defs
-import Complexitylib.Models.TuringMachine.Tape.Encoding
+module
+
+public import Complexitylib.Circuits.Encoding.Family
+public import Complexitylib.Models.TuringMachine.Lift
+public import Complexitylib.Models.TuringMachine.Subroutines
+public import Complexitylib.Models.TuringMachine.Subroutines.PairSplit.Defs
+public import Complexitylib.Models.TuringMachine.Subroutines.PairValidate.Defs
+public import Complexitylib.Models.TuringMachine.Tape.Encoding
 
 /-!
 # Serialized circuit-evaluator machine front end
@@ -18,6 +20,8 @@ staging its two components on three work tapes. The higher-order dispatcher
 places an evaluator core inside the valid branch, so malformed outer inputs
 can never fall through into that core.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

@@ -3,8 +3,10 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Transition.Next.Defs
-import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Transition.Next.Internal
+module
+
+public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Transition.Next.Defs
+public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Transition.Next.Internal
 
 /-!
 # Verified direct next-atom generation
@@ -16,6 +18,8 @@ its numeric schedule contract itself remains valid at every in-range position.
 Input cells and writable marker cells share the same copy routine because their
 canonical raw schedules are literally identical.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

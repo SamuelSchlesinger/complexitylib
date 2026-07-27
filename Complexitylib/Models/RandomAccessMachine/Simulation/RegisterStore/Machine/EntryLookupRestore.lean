@@ -3,11 +3,13 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import
+module
+
+public import
   Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Machine.Lookup.Internal.Static
-import
+public import
 Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Machine.Lookup.DenseInternal
-import Complexitylib.Models.TuringMachine.Subroutines.ClearWork
+public import Complexitylib.Models.TuringMachine.Subroutines.ClearWork
 
 /-!
 # Reusable sparse-register operand lookup
@@ -17,6 +19,8 @@ subroutine. It loads a canonical query, scans the encoded store, copies the
 semantic value out, resets every scanner-owned tape, rewinds the read-only
 source, restores the runtime entry count, and returns to the same scanner ABI.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

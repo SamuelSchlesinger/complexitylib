@@ -3,8 +3,10 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Circuits.BitString
-import Complexitylib.Circuits.Formula
+module
+
+public import Complexitylib.Circuits.BitString
+public import Complexitylib.Circuits.Formula
 
 /-!
 # Monotone Boolean formulas -- definitions
@@ -13,6 +15,8 @@ This file defines a typed formula tree containing variables, conjunctions, and
 disjunctions only. Constants and negations are deliberately absent: this is the
 standard syntax used by the Karchmer--Wigderson correspondence.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

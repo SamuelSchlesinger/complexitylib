@@ -3,8 +3,10 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.SAT.Tseitin.Machine.Internal.Setup
-import Complexitylib.SAT.Tseitin.Machine.Internal.ValidationFramed
+module
+
+public import Complexitylib.SAT.Tseitin.Machine.Internal.Setup
+public import Complexitylib.SAT.Tseitin.Machine.Internal.ValidationFramed
 
 /-!
 # Hoare specification for the Tseitin reduction front end
@@ -28,6 +30,8 @@ The resulting postcondition records all state needed by the branch assembly:
 - `reductionFrontEndTM_linear_hoareTime_internal` -- rounded bound
   `13(|z| + 1)`
 -/
+
+@[expose] public section
 
 namespace Complexity
 

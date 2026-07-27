@@ -3,7 +3,9 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Circuits.Unrolling.Transition.Fragment.Internal.Evaluation
+module
+
+public import Complexitylib.Circuits.Unrolling.Transition.Fragment.Internal.Evaluation
 
 /-!
 # Array-level evaluation of packed transition fragments
@@ -13,6 +15,8 @@ compiler directly from the concrete input array. Consequently, clients can
 evaluate a packed transition using an encoded configuration and an actual
 choice wire, without separately constructing a total Boolean assignment.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

@@ -3,8 +3,10 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.SAT.Encoding
-import Complexitylib.SAT.Tseitin.Defs
+module
+
+public import Complexitylib.SAT.Encoding
+public import Complexitylib.SAT.Tseitin.Defs
 
 /-!
 # Encoding-size support for Tseitin splitting
@@ -13,6 +15,8 @@ These internal lemmas relate syntactic clause/literal counts to the existing
 unary-variable SAT bit encoding and bound exact-3 formulas whose variable
 indices share a common upper bound.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

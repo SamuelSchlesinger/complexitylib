@@ -3,8 +3,10 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Circuits.Composition.Defs
-import Complexitylib.Circuits.Composition.Internal
+module
+
+public import Complexitylib.Circuits.Composition.Defs
+public import Complexitylib.Circuits.Composition.Internal
 
 /-!
 # Resource-accounted circuit composition
@@ -19,6 +21,8 @@ size, rather than duplicating the inner circuit once per outer use.
 * `Circuit.size_compose` -- exact additive size.
 * `Circuit.depth_compose_le` -- depth is at most the sum of source depths.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

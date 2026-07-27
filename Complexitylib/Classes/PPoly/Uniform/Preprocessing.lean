@@ -3,8 +3,10 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Classes.PPoly.Uniform.Preprocessing.Defs
-import Complexitylib.Classes.PPoly.Uniform.Preprocessing.Internal
+module
+
+public import Complexitylib.Classes.PPoly.Uniform.Preprocessing.Defs
+public import Complexitylib.Classes.PPoly.Uniform.Preprocessing.Internal
 
 /-!
 # Inputs for uniform circuit-family evaluation
@@ -13,6 +15,8 @@ import Complexitylib.Classes.PPoly.Uniform.Preprocessing.Internal
 
 - `generatorEvalInput_mem_FP` — construct `pair (gen 1^|x|) x` in `FP`
 -/
+
+@[expose] public section
 
 namespace Complexity
 

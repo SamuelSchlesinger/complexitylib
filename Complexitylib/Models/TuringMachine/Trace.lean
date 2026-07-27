@@ -3,8 +3,10 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Models.TuringMachine
-import Complexitylib.Models.TuringMachine.Trace.Internal
+module
+
+public import Complexitylib.Models.TuringMachine
+public import Complexitylib.Models.TuringMachine.Trace.Internal
 
 /-!
 # Nondeterministic trace decomposition
@@ -17,6 +19,8 @@ dependent `Fin` casts into fixed-schedule simulation proofs.
 - `NTM.trace_snoc` -- split the final step off a nonempty trace.
 - `NTM.trace_invariant` -- prove an indexed invariant one trace step at a time.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

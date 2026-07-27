@@ -3,9 +3,11 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import
+module
+
+public import
   Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Machine.Program.Init.Defs
-import Complexitylib.Models.TuringMachine.Subroutines
+public import Complexitylib.Models.TuringMachine.Subroutines
 
 /-!
 # Dense-overlay public-input initialization -- definitions
@@ -14,6 +16,8 @@ The optimized initializer counts the immutable input in binary but emits only
 the tagged `R₀` overlay entry. It then installs the ordinary sparse scanner ABI
 and rewinds the real input for dense fallback reads.
 -/
+
+@[expose] public section
 
 namespace Complexity
 namespace RAM

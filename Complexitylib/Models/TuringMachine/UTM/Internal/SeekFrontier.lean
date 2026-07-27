@@ -3,7 +3,9 @@ Copyright (c) 2025 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Models.TuringMachine.UTM.Clock
+module
+
+public import Complexitylib.Models.TuringMachine.UTM.Clock
 
 /-!
 # Frontier-seeking clock machine for the time-bounded universal machine
@@ -26,6 +28,8 @@ steps, every other tape exactly preserved. Behavior from head 1 on
   reading `1`; at cell `V + 1` read `□` and step **left** onto the
   frontier `V = max V 1`, halting. Total `V + 1` steps.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

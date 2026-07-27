@@ -3,8 +3,10 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Models.TuringMachine.Subroutines.BinaryMulAdd.Defs
-import Complexitylib.Models.TuringMachine.Subroutines.BinaryMulAdd.Internal
+module
+
+public import Complexitylib.Models.TuringMachine.Subroutines.BinaryMulAdd.Defs
+public import Complexitylib.Models.TuringMachine.Subroutines.BinaryMulAdd.Internal
 
 /-!
 # Canonical binary multiply-add
@@ -20,6 +22,8 @@ zero. The resource contract gives a width-based all-prefix space bound.
 - `binaryMulAddIntoTM_hoareTimeSpace_frame` adds the all-prefix space bound.
 - `binaryMulAddIntoTM_isTransducer` proves append-only-output safety.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

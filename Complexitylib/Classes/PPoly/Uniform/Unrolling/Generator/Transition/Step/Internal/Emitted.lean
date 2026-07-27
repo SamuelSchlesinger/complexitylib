@@ -3,7 +3,9 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Transition.Step.Internal.Effect
+module
+
+public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Transition.Step.Internal.Effect
 
 /-!
 # Exact output of the direct packed-step generator
@@ -12,6 +14,8 @@ This file proves that the direct generator emits the canonical numeric step
 schedule byte for byte.  The intermediate results identify each nested
 enumeration with its contiguous slice of the global configuration-atom order.
 -/
+
+@[expose] public section
 
 namespace Complexity
 
@@ -84,7 +88,7 @@ noncomputable def stepPackedCopySpecializedInternal (tm : NTM k)
     available (stepAtomKindAt tm T) (stepAtomEffectSelectedAt tm T)
     (effectCaseChoiceAt tm) atomIndex
 
-private theorem stepConfigAtomAt_configIndex (tm : NTM k) (T : ℕ)
+theorem stepConfigAtomAt_configIndex (tm : NTM k) (T : ℕ)
     (atom : ConfigAtom tm T) :
     stepConfigAtomAt tm T (configIndex tm T atom) = atom := by
   unfold stepConfigAtomAt
@@ -96,7 +100,7 @@ private theorem stepConfigAtomAt_configIndex (tm : NTM k) (T : ℕ)
     exact (configAtomEquiv_apply_val tm T atom).symm
   rw [hindex, Equiv.symm_apply_apply]
 
-private theorem indexedGateBlocks_succ_last
+theorem indexedGateBlocks_succ_last
     (count : ℕ) (blockAt : ℕ → CircuitCode.RawCircuit) :
     indexedGateBlocks (count + 1) blockAt =
       indexedGateBlocks count blockAt ++ blockAt count := by
@@ -111,7 +115,7 @@ private theorem indexedGateBlocks_succ_last
       rw [ih (fun index => blockAt (index + 1))]
       simp [List.append_assoc]
 
-private theorem indexedGateBlocks_add
+theorem indexedGateBlocks_add
     (firstCount secondCount : ℕ)
     (blockAt : ℕ → CircuitCode.RawCircuit) :
     indexedGateBlocks (firstCount + secondCount) blockAt =
@@ -127,7 +131,7 @@ private theorem indexedGateBlocks_add
         indexedGateBlocks_succ_last]
       simp [List.append_assoc]
 
-private theorem indexedGateBlocks_group_four
+theorem indexedGateBlocks_group_four
     (count : ℕ) (blockAt : ℕ → CircuitCode.RawCircuit) :
     indexedGateBlocks (4 * count) blockAt =
       indexedGateBlocks count fun position =>
@@ -178,12 +182,12 @@ theorem indexedGateBlocks_group_internal (width count : ℕ)
                 (fun offset => blockAt (width * count + offset)) := by rw [ih]
         _ = _ := (indexedGateBlocks_succ_last count _).symm
 
-private theorem list_ofFn_four (f : Fin 4 → α) :
+theorem list_ofFn_four (f : Fin 4 → α) :
     List.ofFn f = [f 0, f 1, f 2, f 3] := by
   rw [List.ofFn_succ, List.ofFn_succ, List.ofFn_succ, List.ofFn_succ]
   rfl
 
-private theorem binaryForValues_eq_trajectory
+theorem binaryForValues_eq_trajectory
     (body : BinaryRoutine n) (counter : Fin n)
     (initial : BinaryValues n) (trajectory : ℕ → BinaryValues n)
     (hzero : trajectory 0 = initial)
@@ -199,7 +203,7 @@ private theorem binaryForValues_eq_trajectory
   | succ count ih =>
       rw [BinaryRoutine.binaryForValues, ih, hstep]
 
-private theorem binaryForEmitted_eq_indexedGateBlocks
+theorem binaryForEmitted_eq_indexedGateBlocks
     (body : BinaryRoutine n) (counter : Fin n)
     (initial : BinaryValues n) (trajectory : ℕ → BinaryValues n)
     (blockAt : ℕ → CircuitCode.RawCircuit)
@@ -224,7 +228,7 @@ private theorem binaryForEmitted_eq_indexedGateBlocks
         hemitted, indexedGateBlocks_succ_last]
       simp [List.flatMap_append]
 
-private theorem binaryForValues_eq_trajectory_bounded
+theorem binaryForValues_eq_trajectory_bounded
     (body : BinaryRoutine n) (counter : Fin n)
     (initial : BinaryValues n) (trajectory : ℕ → BinaryValues n)
     (count : ℕ) (hzero : trajectory 0 = initial)
@@ -240,7 +244,7 @@ private theorem binaryForValues_eq_trajectory_bounded
         ih (fun index hindex => hstep index (by omega)),
         hstep count (by omega)]
 
-private theorem binaryForEmitted_eq_indexedGateBlocks_bounded
+theorem binaryForEmitted_eq_indexedGateBlocks_bounded
     (body : BinaryRoutine n) (counter : Fin n)
     (initial : BinaryValues n) (trajectory : ℕ → BinaryValues n)
     (blockAt : ℕ → CircuitCode.RawCircuit) (count : ℕ)
@@ -265,7 +269,7 @@ private theorem binaryForEmitted_eq_indexedGateBlocks_bounded
         hemitted count (by omega), indexedGateBlocks_succ_last]
       simp [List.flatMap_append]
 
-private theorem seqList_ofFn_effect_eq_trajectory
+theorem seqList_ofFn_effect_eq_trajectory
     (count : ℕ) (routineAt : Fin count → BinaryRoutine n)
     (initial : BinaryValues n) (trajectory : ℕ → BinaryValues n)
     (hzero : trajectory 0 = initial)
@@ -292,7 +296,7 @@ private theorem seqList_ofFn_effect_eq_trajectory
       · intro index
         simpa [Nat.add_assoc] using hstep index.succ
 
-private theorem seqList_ofFn_emitted_eq_indexedGateBlocks
+theorem seqList_ofFn_emitted_eq_indexedGateBlocks
     (count : ℕ) (routineAt : Fin count → BinaryRoutine n)
     (initial : BinaryValues n) (trajectory : ℕ → BinaryValues n)
     (blockAt : ℕ → CircuitCode.RawCircuit)
@@ -331,7 +335,7 @@ private theorem seqList_ofFn_emitted_eq_indexedGateBlocks
       · intro index
         simpa using hemitted index.succ
 
-private theorem seqList_ofFn_emitted_congr
+theorem seqList_ofFn_emitted_congr
     (first second : Fin count → BinaryRoutine n)
     (heffect : ∀ index values,
       (first index).effect values = (second index).effect values)
@@ -360,7 +364,7 @@ private theorem seqList_ofFn_emitted_congr
       · intro index current
         exact hemitted index.succ current
 
-private theorem seqList_ofFn_emitted_congr_of_invariant
+theorem seqList_ofFn_emitted_congr_of_invariant
     (first second : Fin count → BinaryRoutine n)
     (invariant : BinaryValues n → Prop) (values : BinaryValues n)
     (hinvariant : invariant values)
@@ -403,7 +407,7 @@ private theorem seqList_ofFn_emitted_congr_of_invariant
               second index.succ)).emitted ((second 0).effect values) := by
               rw [heffect 0 values hinvariant]
 
-private theorem CaseFormulaClean.updateAvailable_emitted_internal
+theorem CaseFormulaClean.updateAvailable_emitted_internal
     {values : BinaryValues WorkCount} (hclean : CaseFormulaClean values)
     (value : ℕ) :
     CaseFormulaClean (Function.update values Work.available value) := by
@@ -481,7 +485,7 @@ theorem MovedHeadFormulaClean.updateAvailable_emitted_internal
     | simpa [Work.available, Work.direction] using hclean.direction
     | simpa [Work.available, Work.atomKind] using hclean.atomKind
 
-private theorem StepClean.movedHeadAtPositionAvailable_emitted
+theorem StepClean.movedHeadAtPositionAvailable_emitted
     {values : BinaryValues WorkCount} (hclean : StepClean values)
     (position available : ℕ) :
     MovedHeadFormulaClean
@@ -490,7 +494,7 @@ private theorem StepClean.movedHeadAtPositionAvailable_emitted
   apply MovedHeadFormulaClean.updateAvailable_emitted_internal
   exact hclean.movedHeadClean_atPosition_internal position
 
-private theorem MovedHeadFormulaClean.atPositionAvailable_emitted
+theorem MovedHeadFormulaClean.atPositionAvailable_emitted
     {values : BinaryValues WorkCount}
     (hclean : MovedHeadFormulaClean values) (position available : ℕ) :
     MovedHeadFormulaClean
@@ -517,14 +521,14 @@ private theorem MovedHeadFormulaClean.atPositionAvailable_emitted
   · simpa [Work.position, Work.direction] using hclean.direction
   · simpa [Work.position, Work.atomKind] using hclean.atomKind
 
-private theorem stateAtom_index (tm : NTM k)
+theorem stateAtom_index (tm : NTM k)
     (index : Fin (Fintype.card tm.Q)) :
     configIndex tm T (.state ((Fintype.equivFin tm.Q).symm index)) =
       index.val := by
   unfold configIndex stateIndex
   exact congrArg Fin.val ((Fintype.equivFin tm.Q).apply_symm_apply index)
 
-private theorem stepFormulaSizeAtSpecialized_internal_state (tm : NTM k) (T : ℕ)
+theorem stepFormulaSizeAtSpecialized_internal_state (tm : NTM k) (T : ℕ)
     (index : Fin (Fintype.card tm.Q)) :
     stepFormulaSizeAtSpecializedInternal tm T index.val =
       nextStateFormulaScheduleSize (transitionCases tm).length k T
@@ -553,7 +557,7 @@ theorem stepFormulaSizeAtSpecialized_state_forSpace_internal (tm : NTM k)
         (effectCaseChoiceAt tm) :=
   stepFormulaSizeAtSpecialized_internal_state tm T index
 
-private theorem stepFormulaBlockSpecialized_internal_state (tm : NTM k)
+theorem stepFormulaBlockSpecialized_internal_state (tm : NTM k)
     (T configBase available : ℕ) (index : Fin (Fintype.card tm.Q)) :
     stepFormulaBlockSpecializedInternal tm T configBase available index.val =
       nextStateFormulaSchedule (transitionCases tm).length
@@ -632,7 +636,7 @@ theorem emitStepStateFormulas_emitted_internal (tm : NTM k)
     rw [hrefTrajectory]
     simp [trajectory, sizeAt, Work.available, Work.horizon, Work.configBase]
 
-private theorem stepFormulaSizeAtSpecialized_internal_head (tm : NTM k) (T : ℕ)
+theorem stepFormulaSizeAtSpecialized_internal_head (tm : NTM k) (T : ℕ)
     (tape : TapeSlot k) (position : Fin (T + 1)) :
     stepFormulaSizeAtSpecializedInternal tm T
         (configIndex tm T (.head tape position)) =
@@ -645,7 +649,7 @@ private theorem stepFormulaSizeAtSpecialized_internal_head (tm : NTM k) (T : ℕ
   rw [stepConfigAtomAt_configIndex]
   rfl
 
-private theorem stepFormulaBlockSpecialized_internal_head (tm : NTM k)
+theorem stepFormulaBlockSpecialized_internal_head (tm : NTM k)
     (T configBase available : ℕ) (tape : TapeSlot k)
     (position : Fin (T + 1)) :
     stepFormulaBlockSpecializedInternal tm T configBase available
@@ -666,7 +670,7 @@ private theorem stepFormulaBlockSpecialized_internal_head (tm : NTM k)
   rw [stepConfigAtomAt_configIndex]
   rfl
 
-private theorem stepFormulaSizeAtSpecialized_internal_cellCopy (tm : NTM k)
+theorem stepFormulaSizeAtSpecialized_internal_cellCopy (tm : NTM k)
     (T : ℕ) (tape : TapeSlot k) (position : Fin (T + 2)) (symbol : Γ)
     (hcopy : tape = .input ∨ position.val = 0) :
     stepFormulaSizeAtSpecializedInternal tm T
@@ -683,7 +687,7 @@ private theorem stepFormulaSizeAtSpecialized_internal_cellCopy (tm : NTM k)
       nextWritableCellAtomKind, nextFormulaScheduleSize,
       nextCellCopyScheduleSize]
 
-private theorem stepFormulaBlockSpecialized_internal_cellCopy (tm : NTM k)
+theorem stepFormulaBlockSpecialized_internal_cellCopy (tm : NTM k)
     (T configBase available : ℕ) (tape : TapeSlot k)
     (position : Fin (T + 2)) (symbol : Γ)
     (hcopy : tape = .input ∨ position.val = 0) :
@@ -703,7 +707,7 @@ private theorem stepFormulaBlockSpecialized_internal_cellCopy (tm : NTM k)
       nextWritableMarkerAtomKind, nextWritableCellAtomKind,
       nextAtomTapeIndex, nextAtomPosition, nextAtomSymbolIndex]
 
-private theorem stepFormulaSizeAtSpecialized_internal_writtenCell (tm : NTM k)
+theorem stepFormulaSizeAtSpecialized_internal_writtenCell (tm : NTM k)
     (T : ℕ) (tape : WritableSlot k) (position : Fin (T + 2))
     (symbol : Γ) (hpositive : 0 < position.val) :
     stepFormulaSizeAtSpecializedInternal tm T
@@ -721,7 +725,7 @@ private theorem stepFormulaSizeAtSpecialized_internal_writtenCell (tm : NTM k)
     nextFormulaScheduleSize, nextWrittenCellFormulaScheduleSize,
     nextAtomEffectSelectedAt, hpositive.ne']
 
-private theorem stepFormulaBlockSpecialized_internal_writtenCell (tm : NTM k)
+theorem stepFormulaBlockSpecialized_internal_writtenCell (tm : NTM k)
     (T configBase available : ℕ) (tape : WritableSlot k)
     (position : Fin (T + 2)) (symbol : Γ)
     (hpositive : 0 < position.val) :
@@ -750,12 +754,13 @@ private theorem stepFormulaBlockSpecialized_internal_writtenCell (tm : NTM k)
     nextWritableCellAtomKind, nextAtomTapeIndex, nextAtomPosition,
     nextAtomSymbolIndex, nextAtomEffectSelectedAt, hpositive.ne']
 
-private def stepCellStart (tm : NTM k) (T : ℕ) (tape : TapeSlot k)
+@[nolint docBlame]
+def stepCellStart (tm : NTM k) (T : ℕ) (tape : TapeSlot k)
     (position : ℕ) : ℕ :=
   Fintype.card tm.Q + (k + 2) * (T + 1) +
     (tape.index.val * (T + 2) + position) * 4
 
-private theorem stepFormulaSizeAtSpecialized_internal_cellCopyIndex (tm : NTM k)
+theorem stepFormulaSizeAtSpecialized_internal_cellCopyIndex (tm : NTM k)
     (T : ℕ) (tape : TapeSlot k) (position : Fin (T + 2))
     (symbolIndex : Fin 4) (hcopy : tape = .input ∨ position.val = 0) :
     stepFormulaSizeAtSpecializedInternal tm T
@@ -773,7 +778,7 @@ private theorem stepFormulaSizeAtSpecialized_internal_cellCopyIndex (tm : NTM k)
   exact stepFormulaSizeAtSpecialized_internal_cellCopy tm T tape position
     (symbolEquiv.symm symbolIndex) hcopy
 
-private theorem stepFormulaSizeAtSpecialized_internal_writtenCellIndex (tm : NTM k)
+theorem stepFormulaSizeAtSpecialized_internal_writtenCellIndex (tm : NTM k)
     (T : ℕ) (tape : WritableSlot k) (position : Fin (T + 2))
     (symbolIndex : Fin 4) (hpositive : 0 < position.val) :
     stepFormulaSizeAtSpecializedInternal tm T
@@ -794,17 +799,19 @@ private theorem stepFormulaSizeAtSpecialized_internal_writtenCellIndex (tm : NTM
   exact stepFormulaSizeAtSpecialized_internal_writtenCell tm T tape position
     (symbolEquiv.symm symbolIndex) hpositive
 
-private def fourSize (sizeAt : ℕ → ℕ) (start : ℕ) : ℕ :=
+@[nolint docBlame]
+def fourSize (sizeAt : ℕ → ℕ) (start : ℕ) : ℕ :=
   sizeAt start + sizeAt (start + 1) + sizeAt (start + 2) +
     sizeAt (start + 3)
 
-private theorem prefixSize_add_four (sizeAt : ℕ → ℕ) (start : ℕ) :
+theorem prefixSize_add_four (sizeAt : ℕ → ℕ) (start : ℕ) :
     prefixSize sizeAt (start + 4) =
       prefixSize sizeAt start + fourSize sizeAt start := by
   simp [fourSize, prefixSize_succ]
   omega
 
-private noncomputable def stepCellPositionSizeEmitted (tm : NTM k)
+@[nolint docBlame]
+noncomputable def stepCellPositionSizeEmitted (tm : NTM k)
     (tape : TapeSlot k) (T position : ℕ) : ℕ :=
   match tape with
   | .input => 4
@@ -823,7 +830,7 @@ private noncomputable def stepCellPositionSizeEmitted (tm : NTM k)
             (writtenCellEffectSelectedAt tm .output symbol)
             (effectCaseChoiceAt tm)).sum
 
-private theorem stepCellPositionEffectSize_eq_fourSize (tm : NTM k)
+theorem stepCellPositionEffectSize_eq_fourSize (tm : NTM k)
     (tape : TapeSlot k) (T position : ℕ) (hposition : position < T + 2) :
     stepCellPositionSizeEmitted tm tape T position =
       fourSize (stepFormulaSizeAtSpecializedInternal tm T)
@@ -1530,7 +1537,7 @@ theorem emitStepStateCopies_emitted_internal (tm : NTM k)
     rw [prefixSize_succ]
     simp [Nat.add_assoc]
 
-private theorem seqListPackedCopies_emitted
+theorem seqListPackedCopies_emitted
     (polynomialAt : Fin count → Polynomial ℕ)
     (values : BinaryValues WorkCount) (sizeAt : ℕ → ℕ)
     (start stepAvailable : ℕ)
@@ -1627,7 +1634,7 @@ theorem emitStepImmutableCellCopies_emitted_internal
   intro index
   simpa using (hsize index).symm
 
-private theorem seqList_writableCopies_emitted_eq_packed
+theorem seqList_writableCopies_emitted_eq_packed
     (tm : NTM k) (tape : WritableSlot k) (symbols : List Γ)
     (values : BinaryValues WorkCount) :
     (BinaryRoutine.seqList (symbols.map fun symbol =>
@@ -2236,7 +2243,7 @@ theorem emitStepCellTapeCopies_emitted_internal (tm : NTM k)
     rw [indexedGateBlocks_group_four] <;>
     simp [start, Nat.add_assoc]
 
-private theorem prefixSize_eq_sum_ofFn (sizeAt : ℕ → ℕ) (count : ℕ) :
+theorem prefixSize_eq_sum_ofFn (sizeAt : ℕ → ℕ) (count : ℕ) :
     prefixSize sizeAt count = (List.ofFn fun index : Fin count =>
       sizeAt index.val).sum := by
   induction count with
@@ -2250,7 +2257,7 @@ theorem tapeSlotEquiv_symm_index_internal (index : Fin (k + 2)) :
   have h := congrArg Fin.val ((tapeSlotEquiv k).apply_symm_apply index)
   exact h
 
-private theorem prefixSize_constBlock (sizeAt : ℕ → ℕ)
+theorem prefixSize_constBlock (sizeAt : ℕ → ℕ)
     (start blockSize count : ℕ)
     (hsize : ∀ index < count, sizeAt (start + index) = blockSize) :
     prefixSize sizeAt (start + count) =
@@ -2263,7 +2270,7 @@ private theorem prefixSize_constBlock (sizeAt : ℕ → ℕ)
         ih (fun index hindex => hsize index (by omega))]
       ring
 
-private theorem prefixSize_fourBlocks (sizeAt blockSize : ℕ → ℕ)
+theorem prefixSize_fourBlocks (sizeAt blockSize : ℕ → ℕ)
     (start count : ℕ)
     (hsize : ∀ index < count,
       blockSize index = fourSize sizeAt (start + 4 * index)) :
@@ -2277,7 +2284,7 @@ private theorem prefixSize_fourBlocks (sizeAt blockSize : ℕ → ℕ)
         ih (fun index hindex => hsize index (by omega))]
       omega
 
-private theorem prefixSize_indexedBlocks (sizeAt blockSize : ℕ → ℕ)
+theorem prefixSize_indexedBlocks (sizeAt blockSize : ℕ → ℕ)
     (start width count : ℕ)
     (hblock : ∀ index < count,
       prefixSize sizeAt (start + index * width + width) =

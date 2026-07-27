@@ -3,7 +3,9 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Models.TuringMachine.Subroutines.BinaryShiftMul.Defs
+module
+
+public import Complexitylib.Models.TuringMachine.Subroutines.BinaryShiftMul.Defs
 
 /-!
 # Width-driven binary shift-and-add multiplication -- pure proofs
@@ -12,6 +14,8 @@ This file proves the generalized arithmetic invariant of the little-endian
 shift-and-add fold, its multiplication specialization, and width bounds for
 every partial accumulator and shifted multiplicand.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

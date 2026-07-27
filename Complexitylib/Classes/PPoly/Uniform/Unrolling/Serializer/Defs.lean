@@ -3,7 +3,9 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Circuits.Encoding.Formula.Stream.Defs
+module
+
+public import Complexitylib.Circuits.Encoding.Formula.Stream.Defs
 
 /-!
 # Numeric schedules for streaming tableau serialization
@@ -18,6 +20,8 @@ The right-fold schedule counts connector ranks upward while visiting source
 members in reverse order. The batch-copy schedule counts source formulas
 forward and reconstructs each delayed output reference from a prefix-size sum.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

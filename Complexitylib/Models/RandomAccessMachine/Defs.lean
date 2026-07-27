@@ -3,9 +3,11 @@ Copyright (c) 2025 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Mathlib.Data.Nat.Size
-import Mathlib.Algebra.BigOperators.Finprod
-import Complexitylib.Models.TuringMachine
+module
+
+public import Mathlib.Data.Nat.Size
+public import Mathlib.Algebra.BigOperators.Finprod
+public import Complexitylib.Models.TuringMachine
 
 /-!
 # Random access machines: model and cost measures
@@ -73,6 +75,8 @@ two-way simulation bounds are recorded in the surface module
 - **Out-of-range `pc` halts**: `curInstr` reads `Instr.halt` when `pc` is past the
   program, so a program need not end in `halt` and jumps may target the end.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

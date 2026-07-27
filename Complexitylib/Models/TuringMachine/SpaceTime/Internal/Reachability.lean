@@ -3,7 +3,9 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Models.TuringMachine
+module
+
+public import Complexitylib.Models.TuringMachine
 
 /-!
 # Exact-run decomposition — proof internals
@@ -12,6 +14,8 @@ These small deterministic-run lemmas expose configurations at chosen time
 indices. They support the finite reduced-configuration argument without adding
 execution choices to the machine model.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

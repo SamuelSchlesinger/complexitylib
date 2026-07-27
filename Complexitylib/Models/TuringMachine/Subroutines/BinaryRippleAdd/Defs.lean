@@ -3,8 +3,10 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Models.TuringMachine.Subroutines
-import Mathlib.Data.Nat.Size
+module
+
+public import Complexitylib.Models.TuringMachine.Subroutines
+public import Mathlib.Data.Nat.Size
 
 /-!
 # Linear-time canonical binary addition -- definitions
@@ -13,6 +15,8 @@ This module defines a finite-state ripple-carry scan over two preserved
 little-endian binary work tapes. Each scan step appends one sum bit to a fresh
 result tape. A composed wrapper then rewinds all three owned tapes.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

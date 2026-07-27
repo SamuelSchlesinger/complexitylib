@@ -3,12 +3,16 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Models.RandomAccessMachine.Simulation.TMConfig.Step.Internal.Action
-import Complexitylib.Models.RandomAccessMachine.Structured.Switch
+module
+
+public import Complexitylib.Models.RandomAccessMachine.Simulation.TMConfig.Step.Internal.Action
+public import Complexitylib.Models.RandomAccessMachine.Structured.Switch
 
 /-!
 # Nested finite dispatch for one TM transition -- proof internals
 -/
+
+@[expose] public section
 
 namespace Complexity
 

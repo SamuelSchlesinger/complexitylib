@@ -3,8 +3,10 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Classes.PPoly.Advice.Reverse.Defs
-import Complexitylib.Classes.PPoly.Advice.Reverse.Internal
+module
+
+public import Complexitylib.Classes.PPoly.Advice.Reverse.Defs
+public import Complexitylib.Classes.PPoly.Advice.Reverse.Internal
 
 /-!
 # Nonuniform circuits as polynomial advice
@@ -23,6 +25,8 @@ length-dependent advice for the verified circuit evaluator.
   family as a polynomial-advice decider.
 - `PPoly_subset_PAdvice`: `P/poly` is contained in polynomial advice.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

@@ -3,8 +3,10 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Circuits.Encoding.Formula.Batch.Defs
-import Complexitylib.Circuits.Encoding.Formula.Internal
+module
+
+public import Complexitylib.Circuits.Encoding.Formula.Batch.Defs
+public import Complexitylib.Circuits.Encoding.Formula.Internal
 
 /-!
 # Internals for batch formula compilation
@@ -13,6 +15,8 @@ This module proves the structural, topological, and iterative-evaluator laws
 for `BoolFormula.compileRawBatch`. Public statements are re-exported by
 `Complexitylib.Circuits.Encoding.Formula.Batch`.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

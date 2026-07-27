@@ -3,11 +3,15 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Circuits.DecisionTree.Finite.Defs
+module
+
+public import Complexitylib.Circuits.DecisionTree.Finite.Defs
 
 /-!
 # Canonical deepest paths in finite decision trees -- definitions
 -/
+
+@[expose] public section
 
 namespace Complexity
 namespace DecisionTree.On

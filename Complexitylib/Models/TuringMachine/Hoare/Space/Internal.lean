@@ -3,9 +3,11 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Models.TuringMachine.Hoare.Space.Defs
-import Complexitylib.Models.TuringMachine.Hoare
-import Complexitylib.Models.TuringMachine.SpaceTime.Internal.Reachability
+module
+
+public import Complexitylib.Models.TuringMachine.Hoare.Space.Defs
+public import Complexitylib.Models.TuringMachine.Hoare
+public import Complexitylib.Models.TuringMachine.SpaceTime.Internal.Reachability
 
 /-!
 # Space-aware Hoare specifications — proof internals
@@ -13,6 +15,8 @@ import Complexitylib.Models.TuringMachine.SpaceTime.Internal.Reachability
 This module supplies structural rules, sequential composition, and the bridge
 from fresh-start contracts to `TM.ComputesInSpace`.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

@@ -3,7 +3,9 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Classes.PPoly.Uniform.Unrolling
+module
+
+public import Complexitylib.Classes.PPoly.Uniform.Unrolling
 
 /-!
 # Regularly padded deterministic unrolling families -- definitions
@@ -14,6 +16,8 @@ to that bound and adding one final output copy makes the gate-count header a
 closed expression of the time horizon while retaining the original acceptance
 wire.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

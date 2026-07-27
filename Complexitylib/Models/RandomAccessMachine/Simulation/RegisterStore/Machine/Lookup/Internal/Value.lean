@@ -3,13 +3,17 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import
+module
+
+public import
   Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Machine.Lookup.Internal.Scan
-import Complexitylib.Models.TuringMachine.Subroutines.BinaryCopy
+public import Complexitylib.Models.TuringMachine.Subroutines.BinaryCopy
 
 /-!
 # Reusable sparse-register lookup -- value rewind and copy
 -/
+
+@[expose] public section
 
 namespace Complexity
 

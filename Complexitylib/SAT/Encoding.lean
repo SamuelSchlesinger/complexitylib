@@ -3,9 +3,11 @@ Copyright (c) 2025 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.SAT.Semantics
-import Mathlib.Tactic.Ring
-import Mathlib.Tactic.Linarith
+module
+
+public import Complexitylib.SAT.Semantics
+public import Mathlib.Tactic.Ring
+public import Mathlib.Tactic.Linarith
 
 /-!
 # SAT: Encoding Layer
@@ -50,6 +52,8 @@ well-defined token stream for any valid encoding.
 The matching executable decoder `CNF.decode?`, its round-trip theorem, and its
 soundness theorem live with the token parser in `Complexitylib.SAT.Verifier`.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

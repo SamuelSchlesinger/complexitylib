@@ -3,7 +3,9 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Models.TuringMachine.Subroutines
+module
+
+public import Complexitylib.Models.TuringMachine.Subroutines
 
 /-!
 # Clearing a binary work tape — definitions
@@ -11,6 +13,8 @@ import Complexitylib.Models.TuringMachine.Subroutines
 This module names the concrete time bound used by the public framed contract
 for `TM.clearWorkTM`.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

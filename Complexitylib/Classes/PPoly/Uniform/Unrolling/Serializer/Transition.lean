@@ -3,8 +3,10 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Classes.PPoly.Uniform.Unrolling.Serializer.Transition.Defs
-import Complexitylib.Classes.PPoly.Uniform.Unrolling.Serializer.Transition.Internal
+module
+
+public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Serializer.Transition.Defs
+public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Serializer.Transition.Internal
 
 /-!
 # Numeric transition-formula schedules
@@ -22,6 +24,8 @@ proof adapters.
   head stream.
 - The length and `getElem` theorems expose their exact numeric phases.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

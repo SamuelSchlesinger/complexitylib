@@ -3,10 +3,12 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Models.TuringMachine.Combinators.Internal.Generic
-import Complexitylib.Models.TuringMachine.Hoare.Defs
-import Complexitylib.Models.TuringMachine.Subroutines
-import Complexitylib.Models.TuringMachine.Tape.Encoding
+module
+
+public import Complexitylib.Models.TuringMachine.Combinators.Internal.Generic
+public import Complexitylib.Models.TuringMachine.Hoare.Defs
+public import Complexitylib.Models.TuringMachine.Subroutines
+public import Complexitylib.Models.TuringMachine.Tape.Encoding
 
 /-!
 # Right-scanner correctness
@@ -19,6 +21,8 @@ are preserved exactly when their heads read a non-`▷` symbol.
 The public compositional theorem is stated in
 `Complexitylib.Models.TuringMachine.Subroutines.ScanRight`.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

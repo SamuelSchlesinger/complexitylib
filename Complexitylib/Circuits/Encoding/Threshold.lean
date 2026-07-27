@@ -3,7 +3,9 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Circuits.Encoding.Threshold.Internal
+module
+
+public import Complexitylib.Circuits.Encoding.Threshold.Internal
 
 /-!
 # Correctness of raw threshold-circuit fragments
@@ -27,6 +29,8 @@ higher layer where both APIs are already available.
 - `Threshold.evalAux?_compileRaw`: exact size, prefix preservation, and semantic
   correctness of iterative evaluation.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

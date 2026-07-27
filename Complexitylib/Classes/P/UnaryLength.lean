@@ -3,7 +3,9 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Classes.P.UnaryLength.Internal
+module
+
+public import Complexitylib.Classes.P.UnaryLength.Internal
 
 /-!
 # Polynomial-time unary input length
@@ -12,6 +14,8 @@ import Complexitylib.Classes.P.UnaryLength.Internal
 
 - `unaryLength_mem_FP` — `x ↦ 1^|x|` is polynomial-time computable
 -/
+
+@[expose] public section
 
 namespace Complexity
 

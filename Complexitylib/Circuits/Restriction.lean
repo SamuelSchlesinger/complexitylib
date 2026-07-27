@@ -3,8 +3,10 @@ Copyright (c) 2025 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Circuits.Basic
-import Complexitylib.Circuits.Formula
+module
+
+public import Complexitylib.Circuits.Basic
+public import Complexitylib.Circuits.Formula
 
 /-!
 # Restrictions
@@ -25,6 +27,8 @@ assignment (evaluation commutes with restriction).
 - `BoolFormula.restrict`, `BoolFormula.eval_restrict`,
   `BoolFormula.restrict_comp` — evaluation and composition laws
 -/
+
+@[expose] public section
 
 namespace Complexity
 

@@ -3,10 +3,12 @@ Copyright (c) 2025 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Models.TuringMachine.Hoare.Defs
-import Complexitylib.Models.TuringMachine.Combinators.Internal.Generic
-import Complexitylib.Models.TuringMachine.UTM.Internal.VTape
-import Complexitylib.Models.TuringMachine.UTM.Internal.Desc
+module
+
+public import Complexitylib.Models.TuringMachine.Hoare.Defs
+public import Complexitylib.Models.TuringMachine.Combinators.Internal.Generic
+public import Complexitylib.Models.TuringMachine.UTM.Internal.VTape
+public import Complexitylib.Models.TuringMachine.UTM.Internal.Desc
 
 /-!
 # The UTM halt test machine
@@ -45,6 +47,8 @@ truncate the machine's comparison at that point while `stSyms` as a list
 extends beyond it (and `takeField` fields are always blank-free). The UTM
 state tape holds bit symbols only, so this is no restriction in use.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

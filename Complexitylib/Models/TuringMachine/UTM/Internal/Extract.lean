@@ -3,9 +3,11 @@ Copyright (c) 2025 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Models.TuringMachine.Hoare.Defs
-import Complexitylib.Models.TuringMachine.UTM.Internal.VTape
-import Complexitylib.Models.TuringMachine.Combinators.Internal.Generic
+module
+
+public import Complexitylib.Models.TuringMachine.Hoare.Defs
+public import Complexitylib.Models.TuringMachine.UTM.Internal.VTape
+public import Complexitylib.Models.TuringMachine.Combinators.Internal.Generic
 
 /-!
 # UTM extraction phase: `extractTM`
@@ -41,6 +43,8 @@ unchanged (only its head moves).
   the machine copies cells `2 .. m+2` of tape 2 onto output cells `1 .. m+1`
   within `B + m + 8` steps, where `B` bounds the initial work-2 head.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

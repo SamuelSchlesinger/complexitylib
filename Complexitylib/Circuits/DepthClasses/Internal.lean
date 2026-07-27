@@ -3,14 +3,18 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Circuits.DepthClasses.Defs
-import Complexitylib.Circuits.BasisHom
-import Complexitylib.Circuits.Family
-import Complexitylib.Circuits.Threshold
+module
+
+public import Complexitylib.Circuits.DepthClasses.Defs
+public import Complexitylib.Circuits.BasisHom
+public import Complexitylib.Circuits.Family
+public import Complexitylib.Circuits.Threshold
 
 /-!
 # Circuit depth classes -- proof internals
 -/
+
+@[expose] public section
 
 namespace Complexity
 

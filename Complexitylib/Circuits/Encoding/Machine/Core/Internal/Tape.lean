@@ -3,7 +3,9 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Circuits.Encoding.Machine.Core.Defs
+module
+
+public import Complexitylib.Circuits.Encoding.Machine.Core.Defs
 
 /-!
 # Tape cursors for the streaming circuit evaluator
@@ -13,6 +15,8 @@ The evaluator repeatedly rewinds, indexes, and extends canonical binary tapes.
 the current zero-based read position. This is intentionally internal: the
 neutral endpoint and suffix predicates remain the public tape API.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

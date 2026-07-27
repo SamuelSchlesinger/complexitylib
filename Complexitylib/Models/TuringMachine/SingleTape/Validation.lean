@@ -3,7 +3,10 @@ Copyright (c) 2025 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Models.TuringMachine.SingleTape.Internal.Delta
+module
+
+public import Complexitylib.Models.TuringMachine.SingleTape.Internal.Delta
+meta import Complexitylib.Models.TuringMachine.SingleTape.Internal.Delta
 
 /-!
 # Single-tape simulation — executable validation (regression suite)
@@ -23,6 +26,8 @@ cell 0 never getting a marker, and a misaligned `scatter1 → scatter2` position
 hand-off. They cover off-0 moves, right/left moves with writes, repeated
 materialization, distant writes read back, and `k = 2` tape interleaving.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

@@ -3,11 +3,13 @@ Copyright (c) 2025 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Models.TuringMachine.UTM.Internal.Desc
-import Complexitylib.Models.TuringMachine.UTM.Internal.VTape
-import Complexitylib.Models.TuringMachine.Hoare.Defs
-import Complexitylib.Models.TuringMachine.Combinators.Internal.Generic
-import Complexitylib.Encoding.Pairing
+module
+
+public import Complexitylib.Models.TuringMachine.UTM.Internal.Desc
+public import Complexitylib.Models.TuringMachine.UTM.Internal.VTape
+public import Complexitylib.Models.TuringMachine.Hoare.Defs
+public import Complexitylib.Models.TuringMachine.Combinators.Internal.Generic
+public import Complexitylib.Encoding.Pairing
 
 /-!
 # UTM initialization machine
@@ -30,6 +32,8 @@ The specification is `initTM_hoareTime`. Malformed inputs (a `10` cell pair
 or a blank in the middle of a 2-cell group in the α-region) make the machine
 halt immediately; the specification only covers well-formed inputs.
 -/
+
+@[expose] public section
 
 namespace Complexity
 
@@ -87,7 +91,7 @@ instance : Fintype InitQ where
 /-- One step of a work-tape rewind: move the head of work tape `idx` left
     until it reads `▷`, then bounce right to cell 1 and enter `qnext`.
     All other tapes idle. -/
-private def rewindStep (idx : Fin 6) (qloop qnext : InitQ)
+def rewindStep (idx : Fin 6) (qloop qnext : InitQ)
     (iHead : Γ) (wHeads : Fin 6 → Γ) (oHead : Γ) :
     InitQ × (Fin 6 → Γw) × Γw × Dir3 × (Fin 6 → Dir3) × Dir3 :=
   if wHeads idx = Γ.start then

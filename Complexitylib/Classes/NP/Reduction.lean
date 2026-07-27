@@ -3,8 +3,10 @@ Copyright (c) 2025 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Classes.NP
-import Complexitylib.Classes.P
+module
+
+public import Complexitylib.Classes.NP
+public import Complexitylib.Classes.P
 
 /-!
 # Polynomial-time many-one reductions and NP-completeness
@@ -20,6 +22,8 @@ reduces to it, and NP-complete when it is additionally a member of `NP`.
 The headline application is `SAT.NPComplete_language` (Cook–Levin), in
 `Complexitylib/SAT/CookLevin.lean`.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

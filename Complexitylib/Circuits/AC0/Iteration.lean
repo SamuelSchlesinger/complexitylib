@@ -3,8 +3,10 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Circuits.AC0.Iteration.Defs
-import Complexitylib.Circuits.AC0.Iteration.Internal
+module
+
+public import Complexitylib.Circuits.AC0.Iteration.Defs
+public import Complexitylib.Circuits.AC0.Iteration.Internal
 
 /-!
 # Iterated switching for finite AC0 formulas
@@ -17,6 +19,8 @@ lemma. The resulting theorem bounds all failures in the formula tree at once.
 Everything here is a statement about one finite formula and a finite product
 of restrictions. No uniformity or circuit-generator assumption is present.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

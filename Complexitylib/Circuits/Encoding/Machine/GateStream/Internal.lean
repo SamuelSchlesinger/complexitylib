@@ -3,10 +3,12 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Circuits.Encoding.Machine.GateStream.Defs
-import Complexitylib.Circuits.Encoding.Machine.RawGate
-import Complexitylib.Models.TuringMachine.Hoare.Space
-import Complexitylib.Models.TuringMachine.Subroutines.BinarySucc
+module
+
+public import Complexitylib.Circuits.Encoding.Machine.GateStream.Defs
+public import Complexitylib.Circuits.Encoding.Machine.RawGate
+public import Complexitylib.Models.TuringMachine.Hoare.Space
+public import Complexitylib.Models.TuringMachine.Subroutines.BinarySucc
 
 /-!
 # One streaming raw-gate step -- proof internals
@@ -16,6 +18,8 @@ adapter for the successor phase keeps the append-only output accumulator as a
 ghost while converting successor's full-frame result into an exact work-tape
 update.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

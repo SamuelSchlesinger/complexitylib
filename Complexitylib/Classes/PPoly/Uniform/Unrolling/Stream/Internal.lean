@@ -3,8 +3,10 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Classes.PPoly.Uniform.Unrolling.Stream.Defs
-import Complexitylib.Circuits.Unrolling.Trace.Internal.Structure
+module
+
+public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Stream.Defs
+public import Complexitylib.Circuits.Unrolling.Trace.Internal.Structure
 
 /-!
 # Streamable deterministic unrolling arithmetic — proof internals
@@ -13,6 +15,8 @@ This module proves that absolute wire bases do not affect transition-formula
 tree sizes, then solves the deterministic trace-prefix recurrences using the
 resulting constant packed-layer size.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

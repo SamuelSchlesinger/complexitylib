@@ -3,7 +3,9 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Classes.PPoly.Uniform.Unrolling.Serializer.Transition.Defs
+module
+
+public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Serializer.Transition.Defs
 
 /-!
 # Numeric schedules for transition-case formulas
@@ -15,6 +17,8 @@ compiled into natural indices and Boolean values before entering this layer.
 No formula tree, configuration atom, tape slot, symbol, or bounded position is
 stored by the schedule.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

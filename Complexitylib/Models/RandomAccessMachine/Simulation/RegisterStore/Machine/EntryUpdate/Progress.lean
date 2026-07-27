@@ -3,7 +3,9 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import
+module
+
+public import
   Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Machine.EntryUpdate.Defs
 
 /-!
@@ -14,6 +16,8 @@ invariant relates the processed and remaining portions of the old store to the
 entries already emitted by the machine, independently of the tape-level
 simulation proof.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

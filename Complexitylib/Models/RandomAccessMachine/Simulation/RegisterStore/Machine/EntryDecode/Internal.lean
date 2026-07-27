@@ -3,14 +3,18 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Machine.EntryDecode.Defs
-import Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Machine.WordDecode
-import Complexitylib.Models.TuringMachine.Combinators.Internal.Seq
-import Complexitylib.Models.TuringMachine.Internal
+module
+
+public import Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Machine.EntryDecode.Defs
+public import Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Machine.WordDecode
+public import Complexitylib.Models.TuringMachine.Combinators.Internal.Seq
+public import Complexitylib.Models.TuringMachine.Internal
 
 /-!
 # RAM sparse-entry decoder — proof internals
 -/
+
+@[expose] public section
 
 namespace Complexity
 

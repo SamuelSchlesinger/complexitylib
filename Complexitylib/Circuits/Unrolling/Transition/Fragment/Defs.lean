@@ -3,8 +3,10 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Circuits.Encoding.Formula.Batch.Defs
-import Complexitylib.Circuits.Unrolling.Transition.Defs
+module
+
+public import Complexitylib.Circuits.Encoding.Formula.Batch.Defs
+public import Complexitylib.Circuits.Unrolling.Transition.Defs
 
 /-!
 # Packed circuit fragments for one Turing-machine transition
@@ -14,6 +16,8 @@ formulas into one appendable raw-circuit fragment. The formula outputs are
 copied into a contiguous block in configuration-atom order, so that block can
 serve directly as the input configuration of a later unrolled step.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

@@ -3,8 +3,10 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Classes.EventProb
-import Complexitylib.Models.TuringMachine.Repetition.Internal.Correctness
+module
+
+public import Complexitylib.Classes.EventProb
+public import Complexitylib.Models.TuringMachine.Repetition.Internal.Correctness
 
 /-!
 # Correctness and amplification for fixed-time repetition
@@ -25,6 +27,8 @@ The source machine need only halt on every `T`-step path for the fixed input.
 - `NTM.repeatAtTime_acceptProb_ge_one_sub_two_pow` — yes-instance amplification
 - `NTM.repeatAtTime_acceptProb_le_two_pow` — no-instance amplification
 -/
+
+@[expose] public section
 
 namespace Complexity
 

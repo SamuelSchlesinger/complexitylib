@@ -3,9 +3,11 @@ Copyright (c) 2025 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Circuits.Barrington
-import Complexitylib.Circuits.BarringtonS5
-import Mathlib.GroupTheory.Perm.Cycle.Type
+module
+
+public import Complexitylib.Circuits.Barrington
+public import Complexitylib.Circuits.BarringtonS5
+public import Mathlib.GroupTheory.Perm.Cycle.Type
 
 /-!
 # Barrington: bridging the abstract move-set to the `S₅` cycle algebra
@@ -30,6 +32,8 @@ actually consumes — where the *target* representing cycle is an arbitrary
   This is Barrington's `AND` gate with full target-cycle freedom, the exact shape
   the formula induction needs.
 -/
+
+@[expose] public section
 
 open scoped commutatorElement
 open Equiv

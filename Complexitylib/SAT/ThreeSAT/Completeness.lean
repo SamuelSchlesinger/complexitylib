@@ -3,10 +3,12 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Classes.NP.Reduction
-import Complexitylib.SAT.CookLevin.Assembly
-import Complexitylib.SAT.ThreeSAT.Headline
-import Complexitylib.SAT.Tseitin.Machine
+module
+
+public import Complexitylib.Classes.NP.Reduction
+public import Complexitylib.SAT.CookLevin.Assembly
+public import Complexitylib.SAT.ThreeSAT.Headline
+public import Complexitylib.SAT.Tseitin.Machine
 
 /-!
 # NP-completeness of 3SAT
@@ -22,6 +24,8 @@ headline NP-completeness theorem.
 - `ThreeSAT.NPHard_language`
 - `ThreeSAT.NPComplete_language`
 -/
+
+@[expose] public section
 
 namespace Complexity
 

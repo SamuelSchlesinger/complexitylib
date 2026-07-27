@@ -3,7 +3,9 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Classes.PPoly.Uniform.Containment.Internal
+module
+
+public import Complexitylib.Classes.PPoly.Uniform.Containment.Internal
 
 /-!
 # Uniform polynomial-size circuits are in P
@@ -17,6 +19,8 @@ polynomial time. A generic fanout combinator then constructs the serialized
 - `circuitEvalLanguage_mem_P` — serialized circuit evaluation is in `P`
 - `UniformPPoly_subset_P` — logspace-uniform polynomial-size circuits are in `P`
 -/
+
+@[expose] public section
 
 namespace Complexity
 

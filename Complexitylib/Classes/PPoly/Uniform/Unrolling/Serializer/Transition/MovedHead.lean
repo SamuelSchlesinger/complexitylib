@@ -3,8 +3,10 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Classes.PPoly.Uniform.Unrolling.Serializer.Transition.MovedHead.Defs
-import Complexitylib.Classes.PPoly.Uniform.Unrolling.Serializer.Transition.MovedHead.Internal
+module
+
+public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Serializer.Transition.MovedHead.Defs
+public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Serializer.Transition.MovedHead.Internal
 
 /-!
 # Numeric moved-head schedules
@@ -20,6 +22,8 @@ reverse disjunction connectors complete the stream.
 - The member and child-phase lookup theorems expose the streaming boundaries.
 - `compileRaw_movedHeadFormula_eq_schedule` proves literal raw-list equality.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

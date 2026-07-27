@@ -3,7 +3,9 @@ Copyright (c) 2025 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Circuits.Basic
+module
+
+public import Complexitylib.Circuits.Basic
 
 /-! # Normal Forms — Core Definitions
 
@@ -28,6 +30,8 @@ complexity measures, and De Morgan negation duality.
 variable count `N` and are used for circuit lower bounds, whereas the `SAT` versions are
 `Nat`-indexed and serve as the language encoding for SAT.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

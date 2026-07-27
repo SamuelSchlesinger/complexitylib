@@ -3,7 +3,9 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Circuits.Encoding.Machine.Core.Internal.Execution
+module
+
+public import Complexitylib.Circuits.Encoding.Machine.Core.Internal.Execution
 
 /-!
 # One-gate execution for the streaming circuit evaluator
@@ -18,6 +20,8 @@ The small named-action lemmas at the start are deliberately phase-generic
 within this controller. They are the reusable proof-engineering seam between
 `CoreAction` and exact named configurations.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

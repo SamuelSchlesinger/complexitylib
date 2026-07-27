@@ -3,8 +3,10 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Models.TuringMachine.SpaceTime.Defs
-import Complexitylib.Models.TuringMachine.SpaceTime.Internal.RunBound
+module
+
+public import Complexitylib.Models.TuringMachine.SpaceTime.Defs
+public import Complexitylib.Models.TuringMachine.SpaceTime.Internal.RunBound
 
 /-!
 # Time bounds from deterministic transducer space bounds
@@ -21,6 +23,8 @@ explicit time bound.
 - `TM.ComputesInSpace.computesInTime_configBound` — space computation gives time
 - `TM.DecidesInSpace.decidesInTime_configBound` — decision-space bound gives time
 -/
+
+@[expose] public section
 
 namespace Complexity
 

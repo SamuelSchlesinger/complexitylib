@@ -3,9 +3,11 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Models.TuringMachine.Combinators
-import Complexitylib.Models.TuringMachine.Subroutines.BinarySucc.Defs
-import Mathlib.Data.Nat.Size
+module
+
+public import Complexitylib.Models.TuringMachine.Combinators
+public import Complexitylib.Models.TuringMachine.Subroutines.BinarySucc.Defs
+public import Mathlib.Data.Nat.Size
 
 /-!
 # Little-endian binary predecessor — definitions
@@ -20,6 +22,8 @@ The controller is total on zero, where it simply rewinds the unchanged empty
 representation. Public correctness theorems intentionally start from
 `value + 1`, so no underflow behavior is claimed.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

@@ -3,9 +3,11 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import
+module
+
+public import
   Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Machine.EntryCleanup.Defs
-import
+public import
   Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Machine.EntryEncode.Defs
 
 /-!
@@ -15,6 +17,8 @@ An update scan must preserve every unmatched sparse entry. This module first
 emits the decoded address/value pair to the output stream and then restores the
 ordinary next-entry scan invariant.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

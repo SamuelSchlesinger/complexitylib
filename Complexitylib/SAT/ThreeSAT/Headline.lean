@@ -3,10 +3,12 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.SAT.Headline
-import Complexitylib.SAT.Internal.LinearGuessVerify
-import Complexitylib.SAT.ThreeSAT.Verifier
-import Complexitylib.Classes.Containments
+module
+
+public import Complexitylib.SAT.Headline
+public import Complexitylib.SAT.Internal.LinearGuessVerify
+public import Complexitylib.SAT.ThreeSAT.Verifier
+public import Complexitylib.Classes.Containments
 
 /-!
 # 3SAT is in NP
@@ -17,6 +19,8 @@ of the existing SAT verifier language and `ThreeSAT.PairSyntax.language`, so it
 is in P. The generic linear-witness guess-and-verify construction then gives
 the headline theorem `ThreeSAT.language_mem_NP`.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

@@ -3,10 +3,12 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import
+module
+
+public import
   Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Machine.EntryMatch.Defs
-import Complexitylib.Models.TuringMachine.Subroutines.ResetBinaryMany.Defs
-import Mathlib.Data.List.FinRange
+public import Complexitylib.Models.TuringMachine.Subroutines.ResetBinaryMany.Defs
+public import Mathlib.Data.List.FinRange
 
 /-!
 # Sparse-entry miss cleanup — definitions
@@ -15,6 +17,8 @@ The miss branch after `entryMatchReadTM` resets the seven decoder/result
 scratch tapes while preserving the consumed source cursor and query address.
 This restores the exact invariant needed to inspect the next encoded entry.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

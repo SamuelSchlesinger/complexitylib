@@ -3,8 +3,10 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Models.RandomAccessMachine.Structured.Scanner.Defs
-import Complexitylib.SAT.ThreeSAT.Syntax
+module
+
+public import Complexitylib.Models.RandomAccessMachine.Structured.Scanner.Defs
+public import Complexitylib.SAT.ThreeSAT.Syntax
 
 /-!
 # Structured RAM exact-3-CNF syntax scanner — definitions
@@ -13,6 +15,8 @@ This is the larger typed-scanner benchmark: the existing 27-state bit-level
 3-CNF syntax automaton is compiled without a handwritten numeric transition
 table or benchmark-specific execution invariant.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

@@ -3,8 +3,10 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Classes.PPoly.Uniform.Unrolling.Serializer.Transition.Effect.Defs
-import Complexitylib.Classes.PPoly.Uniform.Unrolling.Serializer.Transition.Effect.Internal
+module
+
+public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Serializer.Transition.Effect.Defs
+public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Serializer.Transition.Effect.Internal
 
 /-!
 # Numeric schedules for transition-effect formulas
@@ -22,6 +24,8 @@ the disjunction.
   `getElem_effectFormulaSchedule_connector` identify the final fold phases.
 - `compileRaw_effectFormula_eq_schedule` proves literal raw-list equality.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

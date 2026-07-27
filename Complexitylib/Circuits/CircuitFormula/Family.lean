@@ -3,9 +3,11 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Circuits.BarringtonTyped
-import Complexitylib.Circuits.CircuitFormula.Family.Defs
-import Complexitylib.Circuits.CircuitFormula.Family.Internal
+module
+
+public import Complexitylib.Circuits.BarringtonTyped
+public import Complexitylib.Circuits.CircuitFormula.Family.Defs
+public import Complexitylib.Circuits.CircuitFormula.Family.Internal
 
 /-!
 # Circuit-family outputs as formula families
@@ -23,6 +25,8 @@ No formula-size bound is used: shared circuit DAGs may expand exponentially
 when unfolded. Barrington's construction depends on formula depth, which the
 translation controls directly.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

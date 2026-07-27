@@ -3,13 +3,17 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Classes.PPoly.Uniform.Unrolling.Serializer.Transition.Effect
-import Complexitylib.Classes.PPoly.Uniform.Unrolling.Serializer.Transition.MovedHead.Defs
-import Complexitylib.Circuits.Unrolling.Transition
+module
+
+public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Serializer.Transition.Effect
+public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Serializer.Transition.MovedHead.Defs
+public import Complexitylib.Circuits.Unrolling.Transition
 
 /-!
 # Numeric moved-head schedules -- proof internals
 -/
+
+@[expose] public section
 
 namespace Complexity
 

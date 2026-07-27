@@ -3,19 +3,21 @@ Copyright (c) 2025 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.DescriptiveComplexity.Vocabulary
-import Complexitylib.DescriptiveComplexity.Structure
-import Complexitylib.DescriptiveComplexity.Isomorphism
-import Complexitylib.DescriptiveComplexity.Query
-import Complexitylib.DescriptiveComplexity.Env
-import Complexitylib.DescriptiveComplexity.FirstOrder
-import Complexitylib.DescriptiveComplexity.SecondOrder
-import Complexitylib.DescriptiveComplexity.Definable
-import Complexitylib.DescriptiveComplexity.Reduction
-import Complexitylib.DescriptiveComplexity.Encoding
-import Complexitylib.DescriptiveComplexity.ModelChecking
-import Complexitylib.DescriptiveComplexity.Language
-import Complexitylib.DescriptiveComplexity.Examples
+module
+
+public import Complexitylib.DescriptiveComplexity.Vocabulary
+public import Complexitylib.DescriptiveComplexity.Structure
+public import Complexitylib.DescriptiveComplexity.Isomorphism
+public import Complexitylib.DescriptiveComplexity.Query
+public import Complexitylib.DescriptiveComplexity.Env
+public import Complexitylib.DescriptiveComplexity.FirstOrder
+public import Complexitylib.DescriptiveComplexity.SecondOrder
+public import Complexitylib.DescriptiveComplexity.Definable
+public import Complexitylib.DescriptiveComplexity.Reduction
+public import Complexitylib.DescriptiveComplexity.Encoding
+public import Complexitylib.DescriptiveComplexity.ModelChecking
+public import Complexitylib.DescriptiveComplexity.Language
+public import Complexitylib.DescriptiveComplexity.Examples
 
 /-!
 # Descriptive complexity
@@ -32,3 +34,5 @@ queries. This is the substrate for the logic-vs-complexity correspondences
 (Fagin's theorem `NP = ∃SO`, `FO ⊆ AC⁰`, etc.) on roadmap track L (descriptive
 complexity).
 -/
+
+@[expose] public section

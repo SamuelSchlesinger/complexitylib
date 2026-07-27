@@ -3,15 +3,19 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Classes.L.PolynomialTime
-import Complexitylib.Classes.P.Preimage
-import Complexitylib.Classes.PPoly.Uniform
-import Complexitylib.Classes.PPoly.Uniform.Preprocessing
-import Complexitylib.Circuits.Encoding.Machine
+module
+
+public import Complexitylib.Classes.L.PolynomialTime
+public import Complexitylib.Classes.P.Preimage
+public import Complexitylib.Classes.PPoly.Uniform
+public import Complexitylib.Classes.PPoly.Uniform.Preprocessing
+public import Complexitylib.Circuits.Encoding.Machine
 
 /-!
 # Uniform polynomial-size circuits are in P — proof internals
 -/
+
+@[expose] public section
 
 namespace Complexity
 

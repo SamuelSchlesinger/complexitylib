@@ -3,7 +3,10 @@ Copyright (c) 2025 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Models.TuringMachine.Registers.MixedRadix
+module
+
+public import Mathlib.Tactic.FinCases
+public import Complexitylib.Models.TuringMachine.Registers.MixedRadix
 
 /-!
 # symProbeTM: read the input symbol at a register-indexed position
@@ -17,6 +20,8 @@ This is the reduction emitter's only input-reading machine: the start
 clauses of the tableau pin the input cells, so their symbol digits are
 read off the input tape position by position.
 -/
+
+@[expose] public section
 
 namespace Complexity
 
@@ -220,7 +225,7 @@ section Probe
 
 variable {f : Γ → Fin 4} {r q : Fin n}
 
-private theorem symProbeTM_ne_halt {s : ProbePhase} (h : s ≠ .done)
+theorem symProbeTM_ne_halt {s : ProbePhase} (h : s ≠ .done)
     {c : Cfg n (symProbeTM f r q).Q} (hst : c.state = s) :
     ¬ c.state = (symProbeTM f r q).qhalt := by
   rw [hst]
@@ -228,10 +233,10 @@ private theorem symProbeTM_ne_halt {s : ProbePhase} (h : s ≠ .done)
   exact h
 
 /-- Well-formed cells: `▷` exactly at cell 0. -/
-private def StartInvariant (t : Tape) : Prop :=
+def StartInvariant (t : Tape) : Prop :=
   t.cells 0 = Γ.start ∧ ∀ j, 1 ≤ j → t.cells j ≠ Γ.start
 
-private theorem StartInvariant.read_start_iff {t : Tape} (h : StartInvariant t) :
+theorem StartInvariant.read_start_iff {t : Tape} (h : StartInvariant t) :
     t.read = Γ.start ↔ t.head = 0 := by
   constructor
   · intro hr
@@ -242,7 +247,7 @@ private theorem StartInvariant.read_start_iff {t : Tape} (h : StartInvariant t) 
     exact h.1
 
 /-- `pre`: step the input head left off cell 1. -/
-private theorem symProbeTM_step_pre (c : Cfg n (symProbeTM f r q).Q)
+theorem symProbeTM_step_pre (c : Cfg n (symProbeTM f r q).Q)
     (hst : c.state = .pre) (hi : c.input.read ≠ Γ.start)
     (hwork : ∀ i, Parked (c.work i)) (hout : Parked c.output) :
     (symProbeTM f r q).step c = some
@@ -256,7 +261,7 @@ private theorem symProbeTM_step_pre (c : Cfg n (symProbeTM f r q).Q)
   · exact hout.writeAndMove_readBack_idle
 
 /-- `walk` over a mark: both heads advance. -/
-private theorem symProbeTM_step_walk_one (c : Cfg n (symProbeTM f r q).Q)
+theorem symProbeTM_step_walk_one (c : Cfg n (symProbeTM f r q).Q)
     (hst : c.state = .walk) (hone : (c.work r).read = Γ.one)
     (hwork : ∀ i, i ≠ r → Parked (c.work i)) (hout : Parked c.output) :
     (symProbeTM f r q).step c = some
@@ -277,7 +282,7 @@ private theorem symProbeTM_step_walk_one (c : Cfg n (symProbeTM f r q).Q)
 
 /-- `walk` at the first blank: record the input symbol, start rewinding the
     input; the register head stays. -/
-private theorem symProbeTM_step_walk_blank (c : Cfg n (symProbeTM f r q).Q)
+theorem symProbeTM_step_walk_blank (c : Cfg n (symProbeTM f r q).Q)
     (hst : c.state = .walk) (hblank : (c.work r).read = Γ.blank)
     (hwork : ∀ i, i ≠ r → Parked (c.work i)) (hout : Parked c.output) :
     (symProbeTM f r q).step c = some
@@ -298,7 +303,7 @@ private theorem symProbeTM_step_walk_blank (c : Cfg n (symProbeTM f r q).Q)
   · exact hout.writeAndMove_readBack_idle
 
 /-- `backI` off the sentinel: keep rewinding the input. -/
-private theorem symProbeTM_step_backI_left {k : Fin 4}
+theorem symProbeTM_step_backI_left {k : Fin 4}
     (c : Cfg n (symProbeTM f r q).Q)
     (hst : c.state = .backI k) (hi : c.input.read ≠ Γ.start)
     (hwork : ∀ i, Parked (c.work i)) (hout : Parked c.output) :
@@ -313,7 +318,7 @@ private theorem symProbeTM_step_backI_left {k : Fin 4}
   · exact hout.writeAndMove_readBack_idle
 
 /-- `backI` on the sentinel: step the input right to cell 1. -/
-private theorem symProbeTM_step_backI_start {k : Fin 4}
+theorem symProbeTM_step_backI_start {k : Fin 4}
     (c : Cfg n (symProbeTM f r q).Q)
     (hst : c.state = .backI k) (hi : c.input.read = Γ.start)
     (hwork : ∀ i, Parked (c.work i)) (hout : Parked c.output) :
@@ -328,7 +333,7 @@ private theorem symProbeTM_step_backI_start {k : Fin 4}
   · exact hout.writeAndMove_readBack_idle
 
 /-- `backR` off the sentinel: keep rewinding the register. -/
-private theorem symProbeTM_step_backR_left {k : Fin 4}
+theorem symProbeTM_step_backR_left {k : Fin 4}
     (c : Cfg n (symProbeTM f r q).Q)
     (hst : c.state = .backR k) (hns : (c.work r).read ≠ Γ.start)
     (hinp : Parked c.input)
@@ -350,7 +355,7 @@ private theorem symProbeTM_step_backR_left {k : Fin 4}
   · exact hout.writeAndMove_readBack_idle
 
 /-- `backR` on the sentinel: park the register head at cell 1. -/
-private theorem symProbeTM_step_backR_start {k : Fin 4}
+theorem symProbeTM_step_backR_start {k : Fin 4}
     (c : Cfg n (symProbeTM f r q).Q)
     (hst : c.state = .backR k) (hs : (c.work r).read = Γ.start)
     (hcr : ∀ j, 1 ≤ j → (c.work r).cells j ≠ Γ.start)
@@ -379,7 +384,7 @@ private theorem symProbeTM_step_backR_start {k : Fin 4}
   · exact hout.writeAndMove_readBack_idle
 
 /-- `scanQ` over a mark. -/
-private theorem symProbeTM_step_scanQ_one {k : Fin 4}
+theorem symProbeTM_step_scanQ_one {k : Fin 4}
     (c : Cfg n (symProbeTM f r q).Q)
     (hst : c.state = .scanQ k) (hone : (c.work q).read = Γ.one)
     (hinp : Parked c.input)
@@ -402,7 +407,7 @@ private theorem symProbeTM_step_scanQ_one {k : Fin 4}
   · exact hout.writeAndMove_readBack_idle
 
 /-- `scanQ 0` at the first blank: turn onto the last mark. -/
-private theorem symProbeTM_step_scanQ_blank_zero
+theorem symProbeTM_step_scanQ_blank_zero
     (c : Cfg n (symProbeTM f r q).Q)
     (hst : c.state = .scanQ 0) (hblank : (c.work q).read = Γ.blank)
     (hinp : Parked c.input)
@@ -425,7 +430,7 @@ private theorem symProbeTM_step_scanQ_blank_zero
   · exact hout.writeAndMove_readBack_idle
 
 /-- `scanQ (k+1)` at the first blank: write a mark and continue scanning. -/
-private theorem symProbeTM_step_scanQ_blank_succ {k : Fin 4}
+theorem symProbeTM_step_scanQ_blank_succ {k : Fin 4}
     (c : Cfg n (symProbeTM f r q).Q) (hk : k ≠ 0)
     (hst : c.state = .scanQ k) (hblank : (c.work q).read = Γ.blank)
     (hinp : Parked c.input)
@@ -448,7 +453,7 @@ private theorem symProbeTM_step_scanQ_blank_succ {k : Fin 4}
   · exact hout.writeAndMove_readBack_idle
 
 /-- `backQ` off the sentinel. -/
-private theorem symProbeTM_step_backQ_left (c : Cfg n (symProbeTM f r q).Q)
+theorem symProbeTM_step_backQ_left (c : Cfg n (symProbeTM f r q).Q)
     (hst : c.state = .backQ) (hns : (c.work q).read ≠ Γ.start)
     (hinp : Parked c.input)
     (hwork : ∀ i, i ≠ q → Parked (c.work i)) (hout : Parked c.output) :
@@ -469,7 +474,7 @@ private theorem symProbeTM_step_backQ_left (c : Cfg n (symProbeTM f r q).Q)
   · exact hout.writeAndMove_readBack_idle
 
 /-- `backQ` on the sentinel: park. -/
-private theorem symProbeTM_step_backQ_start (c : Cfg n (symProbeTM f r q).Q)
+theorem symProbeTM_step_backQ_start (c : Cfg n (symProbeTM f r q).Q)
     (hst : c.state = .backQ) (hs : (c.work q).read = Γ.start)
     (hcr : ∀ j, 1 ≤ j → (c.work q).cells j ≠ Γ.start)
     (hinp : Parked c.input)
@@ -497,7 +502,7 @@ private theorem symProbeTM_step_backQ_start (c : Cfg n (symProbeTM f r q).Q)
   · exact hout.writeAndMove_readBack_idle
 
 /-- `park`: one idle step into `done`. -/
-private theorem symProbeTM_step_park (c : Cfg n (symProbeTM f r q).Q)
+theorem symProbeTM_step_park (c : Cfg n (symProbeTM f r q).Q)
     (hst : c.state = .park) (hinp : Parked c.input)
     (hwork : ∀ i, Parked (c.work i)) (hout : Parked c.output) :
     (symProbeTM f r q).step c = some
@@ -513,7 +518,7 @@ private theorem symProbeTM_step_park (c : Cfg n (symProbeTM f r q).Q)
 
 
 /-- The lockstep walk: register head and input head advance together. -/
-private theorem symProbeTM_walk_run (pos : ℕ) : ∀ (m k : ℕ), pos = k + m →
+theorem symProbeTM_walk_run (pos : ℕ) : ∀ (m k : ℕ), pos = k + m →
     ∀ c : Cfg n (symProbeTM f r q).Q, c.state = .walk →
     (∀ i, i ≠ r → Parked (c.work i)) → Parked c.output →
     (c.work r).cells = regCells pos → (c.work r).head = k + 1 →
@@ -566,7 +571,7 @@ private theorem symProbeTM_walk_run (pos : ℕ) : ∀ (m k : ℕ), pos = k + m �
       rw [Function.update_of_ne hi]
 
 /-- The input rewind: from head `h` back to cell 1, entering `backR`. -/
-private theorem symProbeTM_backI_run {k : Fin 4} : ∀ (h : ℕ),
+theorem symProbeTM_backI_run {k : Fin 4} : ∀ (h : ℕ),
     ∀ c : Cfg n (symProbeTM f r q).Q, c.state = .backI k →
     StartInvariant c.input → c.input.head = h →
     (∀ i, Parked (c.work i)) → Parked c.output →
@@ -598,7 +603,7 @@ private theorem symProbeTM_backI_run {k : Fin 4} : ∀ (h : ℕ),
       hwork', hout'⟩
 
 /-- The register rewind: from head `h` back to cell 1, entering `scanQ`. -/
-private theorem symProbeTM_backR_run {k : Fin 4} : ∀ (h : ℕ),
+theorem symProbeTM_backR_run {k : Fin 4} : ∀ (h : ℕ),
     ∀ c : Cfg n (symProbeTM f r q).Q, c.state = .backR k →
     Parked c.input → (∀ i, i ≠ r → Parked (c.work i)) → Parked c.output →
     (c.work r).cells 0 = Γ.start →
@@ -661,7 +666,7 @@ private theorem symProbeTM_backR_run {k : Fin 4} : ∀ (h : ℕ),
     · rw [hcells', hupd]
 
 /-- The target scan: walk `q`'s head over its marks. -/
-private theorem symProbeTM_scanQ_run {k : Fin 4} (d : ℕ) :
+theorem symProbeTM_scanQ_run {k : Fin 4} (d : ℕ) :
     ∀ (m j : ℕ), d = j + m →
     ∀ c : Cfg n (symProbeTM f r q).Q, c.state = .scanQ k →
     Parked c.input → (∀ i, i ≠ q → Parked (c.work i)) → Parked c.output →
@@ -708,7 +713,7 @@ private theorem symProbeTM_scanQ_run {k : Fin 4} (d : ℕ) :
     rw [Function.update_of_ne hi]
 
 /-- The write run: append `k.val` marks to `q`, counting the state down. -/
-private theorem symProbeTM_write_run : ∀ (kv : ℕ) (k : Fin 4), k.val = kv →
+theorem symProbeTM_write_run : ∀ (kv : ℕ) (k : Fin 4), k.val = kv →
     ∀ (e : ℕ) (c : Cfg n (symProbeTM f r q).Q), c.state = .scanQ k →
     Parked c.input → (∀ i, i ≠ q → Parked (c.work i)) → Parked c.output →
     (c.work q).cells = regCells e → (c.work q).head = e + 1 →
@@ -777,7 +782,7 @@ private theorem symProbeTM_write_run : ∀ (kv : ℕ) (k : Fin 4), k.val = kv �
     rw [Function.update_of_ne hi]
 
 /-- The final rewind: `q` back to cell 1, park, halt. -/
-private theorem symProbeTM_backQ_run : ∀ (h : ℕ),
+theorem symProbeTM_backQ_run : ∀ (h : ℕ),
     ∀ c : Cfg n (symProbeTM f r q).Q, c.state = .backQ →
     Parked c.input → (∀ i, i ≠ q → Parked (c.work i)) → Parked c.output →
     (c.work q).cells 0 = Γ.start →

@@ -3,9 +3,11 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Circuits.Unrolling.Acceptance.Defs
-import Complexitylib.Circuits.Unrolling.Acceptance.Internal.Structure
-import Complexitylib.Circuits.Unrolling.Trace.Internal.Evaluation
+module
+
+public import Complexitylib.Circuits.Unrolling.Acceptance.Defs
+public import Complexitylib.Circuits.Unrolling.Acceptance.Internal.Structure
+public import Complexitylib.Circuits.Unrolling.Trace.Internal.Evaluation
 
 /-!
 # Evaluation of bounded-trace acceptance circuits
@@ -14,6 +16,8 @@ This internal module composes the complete trace evaluator with the final
 halt-and-output AND gate. The resulting raw circuit's last wire is exactly the
 Boolean acceptance predicate used by `NTM.acceptCount`.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

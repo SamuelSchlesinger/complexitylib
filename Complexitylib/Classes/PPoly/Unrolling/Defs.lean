@@ -3,8 +3,10 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Circuits.Family.Defs
-import Complexitylib.Circuits.Unrolling.Acceptance.Hardwiring
+module
+
+public import Complexitylib.Circuits.Family.Defs
+public import Complexitylib.Circuits.Unrolling.Acceptance.Hardwiring
 
 /-!
 # Deterministic unrolling families — definitions
@@ -17,6 +19,8 @@ The length-zero output is the same bounded trace predicate evaluated directly;
 the construction therefore depends only on the machine and time horizon, not
 on a target language or correctness proof.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

@@ -3,8 +3,10 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Classes.PPoly.Uniform.Unrolling.Serializer.Transition.Atomic.Defs
-import Complexitylib.Classes.PPoly.Uniform.Unrolling.Serializer.Transition.Atomic.Internal
+module
+
+public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Serializer.Transition.Atomic.Defs
+public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Serializer.Transition.Atomic.Internal
 
 /-!
 # Numeric schedules for atomic transition formulas
@@ -12,6 +14,8 @@ import Complexitylib.Classes.PPoly.Uniform.Unrolling.Serializer.Transition.Atomi
 This module exposes the one-gate numeric head-at-cell schedule and the fixed
 postorder halted-or wrapper used by state, head, and writable-cell successors.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

@@ -3,7 +3,9 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Defs
+module
+
+public import Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Defs
 
 /-!
 # Dense public input with a sparse mutable overlay -- definitions
@@ -18,6 +20,8 @@ Because every stored tag is positive, an absent address is distinguishable from
 an explicit write of zero (`tag = 1`). Absent reads fall through to the dense
 public-input ABI `RAM.initRegs input`.
 -/
+
+@[expose] public section
 
 namespace Complexity
 namespace RAM

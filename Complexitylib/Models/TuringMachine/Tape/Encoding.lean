@@ -3,7 +3,9 @@ Copyright (c) 2025 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Models.TuringMachine
+module
+
+public import Complexitylib.Models.TuringMachine
 
 /-!
 # Binary string encodings on Turing-machine tapes
@@ -16,6 +18,8 @@ cursor moves, and `Tape.HasBinarySuffix` describes a read cursor at the
 beginning of a remaining suffix. These shapes are shared by deterministic and
 nondeterministic machine constructions.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

@@ -3,7 +3,9 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Models.RandomAccessMachine.Defs
+module
+
+public import Complexitylib.Models.RandomAccessMachine.Defs
 
 /-!
 # Structured logarithmic-cost RAM programs — definitions
@@ -19,6 +21,8 @@ target RAM.
 The compiler appends no hidden data operations: source and target executions
 therefore have equal register effects, logarithmic cost, and peak register space.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

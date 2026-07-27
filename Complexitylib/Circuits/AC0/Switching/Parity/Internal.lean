@@ -3,13 +3,17 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Circuits.AC0.Switching.Internal
-import Complexitylib.Circuits.RandomRestriction.Internal
-import Complexitylib.Circuits.XOR.Restriction.Internal
+module
+
+public import Complexitylib.Circuits.AC0.Switching.Internal
+public import Complexitylib.Circuits.RandomRestriction.Internal
+public import Complexitylib.Circuits.XOR.Restriction.Internal
 
 /-!
 # Switching lemmas against parity -- proof internals
 -/
+
+@[expose] public section
 
 namespace Complexity
 

@@ -3,8 +3,10 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Circuits.Encoding.Machine.GateStream.Defs
-import Complexitylib.Circuits.Encoding.Machine.GateStream.Internal
+module
+
+public import Complexitylib.Circuits.Encoding.Machine.GateStream.Defs
+public import Complexitylib.Circuits.Encoding.Machine.GateStream.Internal
 
 /-!
 # One streaming raw-gate step
@@ -20,6 +22,8 @@ restored to zero and every other tape is preserved literally.
 - `emitRawGateStepTM_hoareTimeSpace` adds an all-prefix width bound.
 - `emitRawGateStepTM_isTransducer` proves append-only-output safety.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

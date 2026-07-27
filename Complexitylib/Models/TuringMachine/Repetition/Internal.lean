@@ -3,9 +3,11 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Models.TuringMachine.Repetition.Defs
-import Complexitylib.Models.TuringMachine.Combinators.Internal.Generic
-import Complexitylib.Models.TuringMachine.Trace
+module
+
+public import Complexitylib.Models.TuringMachine.Repetition.Defs
+public import Complexitylib.Models.TuringMachine.Combinators.Internal.Generic
+public import Complexitylib.Models.TuringMachine.Trace
 
 /-!
 # Correctness internals for fixed-time repetition
@@ -13,6 +15,8 @@ import Complexitylib.Models.TuringMachine.Trace
 This file proves the local simulation and fixed-rewind invariants used by the
 public correctness theorems for `NTM.repeatAtTime`.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

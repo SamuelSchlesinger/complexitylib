@@ -3,7 +3,9 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Models.RandomAccessMachine.Simulation.TMConfig.Sparse.Containment.Internal
+module
+
+public import Complexitylib.Models.RandomAccessMachine.Simulation.TMConfig.Sparse.Containment.Internal
 
 /-!
 # TM-to-RAM time-class containment
@@ -12,6 +14,8 @@ The fixed sparse simulator transfers deterministic Turing deciders to
 logarithmic-cost RAM deciders through the public input/output ABI. Polynomial
 Turing time is therefore contained in polynomial RAM time.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

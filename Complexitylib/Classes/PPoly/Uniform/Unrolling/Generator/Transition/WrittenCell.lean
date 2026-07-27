@@ -3,8 +3,10 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Transition.WrittenCell.Defs
-import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Transition.WrittenCell.Internal
+module
+
+public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Transition.WrittenCell.Defs
+public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Transition.WrittenCell.Internal
 
 /-!
 # Verified direct written-cell formula generation
@@ -13,6 +15,8 @@ This module exposes the complete positive-cell formula generator together with
 its clean entry domain, restored work-vector effect, and exact encoded numeric
 schedule.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

@@ -3,15 +3,17 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Initialization
-import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Offset
-import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Primitive
-import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Transition.Effect
-import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Transition.Read
-import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Transition.WrittenCell.Defs
-import Complexitylib.Classes.PPoly.Uniform.Unrolling.Serializer.Transition.WrittenCell
-import Complexitylib.Models.TuringMachine.Experimental.BinaryRoutine.Arithmetic
-import Complexitylib.Models.TuringMachine.Experimental.BinaryRoutine.List
+module
+
+public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Initialization
+public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Offset
+public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Primitive
+public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Transition.Effect
+public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Transition.Read
+public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Transition.WrittenCell.Defs
+public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Serializer.Transition.WrittenCell
+public import Complexitylib.Models.TuringMachine.Experimental.BinaryRoutine.Arithmetic
+public import Complexitylib.Models.TuringMachine.Experimental.BinaryRoutine.List
 
 /-!
 # Direct-unrolling written-cell generator -- proof internals
@@ -20,6 +22,8 @@ This dependency-independent layer verifies the bounded numeric head test used
 on both sides of a written-cell formula. The enclosing effect-formula proof is
 intentionally deferred until that generator's public contracts are available.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

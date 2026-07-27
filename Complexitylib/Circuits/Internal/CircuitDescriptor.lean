@@ -3,9 +3,11 @@ Copyright (c) 2025 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Mathlib.Data.Fintype.BigOperators
-import Mathlib.Tactic
-import Complexitylib.Circuits.Basic
+module
+
+public import Mathlib.Data.Fintype.BigOperators
+public import Mathlib.Tactic
+public import Complexitylib.Circuits.Basic
 
 /-! # Internal: Circuit Descriptors and Shannon Counting Bound
 
@@ -14,6 +16,8 @@ arguments, and proves the Shannon lower bound for this model. The public
 theorem `shannon_lower_bound_circuit` (which speaks in terms of `Circuit`)
 is in `Complexitylib.Circuits.Internal.Bridge`.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

@@ -3,11 +3,15 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Circuits.CircuitFormula.Defs
+module
+
+public import Complexitylib.Circuits.CircuitFormula.Defs
 
 /-!
 # Unfolding fan-in-two circuit outputs into Boolean formulas -- proof internals
 -/
+
+@[expose] public section
 
 namespace Complexity
 
@@ -41,7 +45,7 @@ theorem depth_andOr_negateIf_le_internal (op : AndOrOp)
   all_goals
     omega
 
-private theorem vars_negateIf_internal
+theorem vars_negateIf_internal
     (negated : Bool) (formula : BoolFormula) :
     (negateIf negated formula).vars = formula.vars := by
   cases negated <;> simp [negateIf, vars]
@@ -81,7 +85,7 @@ theorem depth_toBoolFormula_le_internal {W : ℕ}
     (wireFormula (gate.inputs ⟨0, by rw [fanIn_andOr2 gate]; omega⟩))
     (wireFormula (gate.inputs ⟨1, by rw [fanIn_andOr2 gate]; omega⟩))
 
-private theorem vars_toBoolFormula_lt_internal {W N : ℕ}
+theorem vars_toBoolFormula_lt_internal {W N : ℕ}
     (gate : Gate Basis.andOr2 W) (wireFormula : Fin W → BoolFormula)
     (hvars : ∀ input : Fin gate.fanIn, ∀ index,
       index ∈ (wireFormula (gate.inputs input)).vars → index < N) :
@@ -120,6 +124,20 @@ theorem wireFormula_of_not_lt_internal
   simp only [hinput, dite_false]
   rfl
 
+/-- Auxiliary: for a fan-in-two gate `g`, the `Fin.foldl` over its inputs
+collapses to the `max` of the two input wire depths. Stated with `g`
+universally quantified so the structure `obtain` avoids the fragile
+`generalize` over a gate that appears in dependent index proofs. -/
+private theorem foldl_fanIn_two_max
+    (circuit : Circuit Basis.andOr2 N M G) (g : Gate Basis.andOr2 (N + G)) :
+    Fin.foldl g.fanIn (fun acc k => max acc (circuit.wireDepth (g.inputs k))) 0 =
+      max (circuit.wireDepth (g.inputs ⟨0, by rw [fanIn_andOr2 g]; omega⟩))
+        (circuit.wireDepth (g.inputs ⟨1, by rw [fanIn_andOr2 g]; omega⟩)) := by
+  obtain ⟨op, fanIn, arityOk, inputs, negated⟩ := g
+  change fanIn = 2 at arityOk
+  subst arityOk
+  simp [Fin.foldl_succ_last, Fin.foldl_zero]
+
 theorem wireDepth_of_not_lt_two_internal
     (circuit : Circuit Basis.andOr2 N M G) (wire : Fin (N + G))
     (hinput : ¬ wire.val < N) :
@@ -133,11 +151,7 @@ theorem wireDepth_of_not_lt_two_internal
         (circuit.wireDepth (gate.inputs input₁)) := by
   rw [Circuit.wireDepth_of_not_lt circuit wire hinput]
   dsimp only
-  generalize circuit.gates ⟨wire.val - N, by omega⟩ = gate
-  obtain ⟨op, fanIn, arityOk, inputs, negated⟩ := gate
-  change fanIn = 2 at arityOk
-  subst arityOk
-  simp [Fin.foldl_succ_last, Fin.foldl_zero]
+  exact congrArg (1 + ·) (foldl_fanIn_two_max circuit (circuit.gates ⟨wire.val - N, by omega⟩))
 
 theorem outputDepth_two_internal
     (circuit : Circuit Basis.andOr2 N M G) (output : Fin M) :
@@ -151,11 +165,7 @@ theorem outputDepth_two_internal
         (circuit.wireDepth (gate.inputs input₁)) := by
   unfold Circuit.outputDepth
   dsimp only
-  generalize circuit.outputs output = gate
-  obtain ⟨op, fanIn, arityOk, inputs, negated⟩ := gate
-  change fanIn = 2 at arityOk
-  subst arityOk
-  simp [Fin.foldl_succ_last, Fin.foldl_zero]
+  exact congrArg (1 + ·) (foldl_fanIn_two_max circuit (circuit.outputs output))
 
 theorem eval_wireFormula_internal
     (circuit : Circuit Basis.andOr2 N M G) (assignment : ℕ → Bool)

@@ -3,9 +3,11 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import
+module
+
+public import
   Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Machine.Program.Init.Defs
-import
+public import
   Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Machine.Program.Init.Internal
 
 /-!
@@ -15,6 +17,8 @@ The concrete initializer streams nonzero public-input bits into a canonical
 sparse store, installs the optional length register, and produces the exact
 clean work-tape image consumed by the reusable RAM program controller.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

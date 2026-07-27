@@ -3,15 +3,19 @@ Copyright (c) 2025 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.DescriptiveComplexity.Structure
-import Complexitylib.DescriptiveComplexity.Env
-import Complexitylib.DescriptiveComplexity.FirstOrder.Syntax
+module
+
+public import Complexitylib.DescriptiveComplexity.Structure
+public import Complexitylib.DescriptiveComplexity.Env
+public import Complexitylib.DescriptiveComplexity.FirstOrder.Syntax
 
 /-!
   First-order logic semantics: term evaluation, formula satisfaction, models.
 
   Follows Immerman Definition 1.11 (semantics part).
 -/
+
+@[expose] public section
 
 namespace Complexity
 

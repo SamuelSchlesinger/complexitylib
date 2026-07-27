@@ -3,12 +3,16 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Classes.PPoly.Uniform.Unrolling.Serializer.Defs
-import Complexitylib.Circuits.Encoding.Formula.Stream
+module
+
+public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Serializer.Defs
+public import Complexitylib.Circuits.Encoding.Formula.Stream
 
 /-!
 # Numeric schedules for streaming tableau serialization -- proof internals
 -/
+
+@[expose] public section
 
 namespace Complexity
 

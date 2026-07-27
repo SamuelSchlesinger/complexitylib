@@ -3,7 +3,9 @@ Copyright (c) 2025 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.DescriptiveComplexity.FirstOrder.Syntax
+module
+
+public import Complexitylib.DescriptiveComplexity.FirstOrder.Syntax
 
 /-!
 # Second-order logic: syntax
@@ -26,6 +28,8 @@ syntax is the one Fagin's theorem characterizes as `NP`.
   logic.
 - `SOFormula.size` — the syntactic size.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

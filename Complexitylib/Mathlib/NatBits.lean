@@ -3,10 +3,12 @@ Copyright (c) 2025 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Mathlib.Data.Nat.Log
-import Mathlib.Data.Nat.Size
-import Mathlib.Tactic.Ring
-import Mathlib.Tactic.Lemma
+module
+
+public import Mathlib.Data.Nat.Log
+public import Mathlib.Data.Nat.Size
+public import Mathlib.Tactic.Ring
+public import Mathlib.Tactic.Lemma
 
 /-!
 # Fixed-width binary encodings of natural numbers
@@ -22,6 +24,8 @@ type in its home (root) namespace — the sanctioned exception to the
 `Complexity` root-namespace rule. Its contents are candidates for
 upstreaming to Mathlib.
 -/
+
+@[expose] public section
 
 /-- Encode a natural number as a big-endian binary list of exactly `w` bits.
     Numbers larger than `2^w - 1` are truncated (mod 2^w). -/

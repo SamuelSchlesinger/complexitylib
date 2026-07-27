@@ -3,7 +3,9 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Circuits.Basic
+module
+
+public import Complexitylib.Circuits.Basic
 
 /-!
 # Circuit composition -- definitions
@@ -14,6 +16,8 @@ Serial composition materializes the `K` output gates of an inner
 internal gates, the composite has exactly `G₁ + K + G₂` internal gates.
 Consequently its library size is the sum of the two source sizes.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

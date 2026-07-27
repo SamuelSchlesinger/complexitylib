@@ -3,10 +3,12 @@ Copyright (c) 2025 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.DescriptiveComplexity.SecondOrder.Syntax
-import Complexitylib.DescriptiveComplexity.Structure
-import Complexitylib.DescriptiveComplexity.Env
-import Complexitylib.DescriptiveComplexity.FirstOrder.Semantics
+module
+
+public import Complexitylib.DescriptiveComplexity.SecondOrder.Syntax
+public import Complexitylib.DescriptiveComplexity.Structure
+public import Complexitylib.DescriptiveComplexity.Env
+public import Complexitylib.DescriptiveComplexity.FirstOrder.Semantics
 
 /-!
 # Second-order logic: semantics
@@ -29,6 +31,8 @@ so first-order truth is a special case of second-order truth
 - `SOFormula.ofFormula_sat`, `SOSentence.models_ofFormula` — the FO embedding is
   truth-preserving.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

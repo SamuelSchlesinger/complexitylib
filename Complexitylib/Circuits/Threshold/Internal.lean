@@ -3,12 +3,16 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Circuits.BasisHom
-import Complexitylib.Circuits.Threshold.Defs
+module
+
+public import Complexitylib.Circuits.BasisHom
+public import Complexitylib.Circuits.Threshold.Defs
 
 /-!
 # Threshold circuits -- proof internals
 -/
+
+@[expose] public section
 
 namespace Complexity
 

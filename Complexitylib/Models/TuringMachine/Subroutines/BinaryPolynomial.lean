@@ -3,8 +3,10 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Models.TuringMachine.Subroutines.BinaryPolynomial.Defs
-import Complexitylib.Models.TuringMachine.Subroutines.BinaryPolynomial.Internal
+module
+
+public import Complexitylib.Models.TuringMachine.Subroutines.BinaryPolynomial.Defs
+public import Complexitylib.Models.TuringMachine.Subroutines.BinaryPolynomial.Internal
 
 /-!
 # Canonical binary evaluation of a fixed natural polynomial
@@ -23,6 +25,8 @@ not runtime, and is logarithmic in the input value for every fixed polynomial.
 - `binaryPolynomialSpace_bigO` proves the fixed-polynomial logarithmic bound.
 - `binaryPolynomialEvalTM_isTransducer` proves append-only-output safety.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

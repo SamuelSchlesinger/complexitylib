@@ -3,8 +3,10 @@ Copyright (c) 2025 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Mathlib.Algebra.Ring.Defs
-import Mathlib.Tactic.Ring
+module
+
+public import Mathlib.Algebra.Ring.Defs
+public import Mathlib.Tactic.Ring
 
 /-!
 # Multilinear extension (one variable)
@@ -22,6 +24,8 @@ arithmetized formulas agree with their Boolean originals on the cube.
 - `mle₁_zero`, `mle₁_one` — it recovers `f false` at `0` and `f true` at `1`
 - `mle₁_bool` — it agrees with `f` at both Boolean points
 -/
+
+@[expose] public section
 
 namespace Complexity
 

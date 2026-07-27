@@ -3,8 +3,10 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Models.RandomAccessMachine.Simulation.TMConfig.Sparse.ABI.Internal.Loop
-import Complexitylib.Models.RandomAccessMachine.Simulation.TMConfig.Sparse.Internal
+module
+
+public import Complexitylib.Models.RandomAccessMachine.Simulation.TMConfig.Sparse.ABI.Internal.Loop
+public import Complexitylib.Models.RandomAccessMachine.Simulation.TMConfig.Sparse.Internal
 
 /-!
 # Public-input marshalling correctness -- proof internals
@@ -13,6 +15,8 @@ This file lifts the pointwise backward-copy facts to a loop invariant, repairs
 the finitely many captured scratch positions, and establishes the complete
 sparse representation of the Turing machine's initial configuration.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

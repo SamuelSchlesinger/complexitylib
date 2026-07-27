@@ -3,8 +3,10 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Classes.PPoly.Uniform.Unrolling.Serializer.Finalization.Defs
-import Complexitylib.Classes.PPoly.Uniform.Unrolling.Serializer.Finalization.Internal
+module
+
+public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Serializer.Finalization.Defs
+public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Serializer.Finalization.Internal
 
 /-!
 # Numeric finalization schedule for direct tableau serialization
@@ -22,6 +24,8 @@ specifies the raw gate stream without run-time configuration atoms or formulas.
 - `paddedDirectUnrollingRawCircuit_eq_numericSchedule` gives the complete raw
   list decomposition.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

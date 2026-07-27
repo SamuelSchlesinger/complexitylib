@@ -3,8 +3,10 @@ Copyright (c) 2025 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.DescriptiveComplexity.Query
-import Complexitylib.DescriptiveComplexity.FirstOrder
+module
+
+public import Complexitylib.DescriptiveComplexity.Query
+public import Complexitylib.DescriptiveComplexity.FirstOrder
 
 /-!
 # First-order reductions and projections
@@ -35,6 +37,8 @@ string-level FO-reduction (an FO map on encodings) is a further step on track L6
   with `FOInterpretation.IsQuantifierFree.comp`, `FOProjReduces.toFOReduces`, and
   reflexivity/transitivity.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

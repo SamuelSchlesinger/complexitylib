@@ -3,8 +3,10 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Models.TuringMachine.Composition.Defs
-import Complexitylib.Models.TuringMachine.Composition.Internal
+module
+
+public import Complexitylib.Models.TuringMachine.Composition.Defs
+public import Complexitylib.Models.TuringMachine.Composition.Internal
 
 /-!
 # Sequential composition after function computation
@@ -20,6 +22,8 @@ first delimiter.
 - `TM.compositionTM_computesInTime` — correctness with a monotone coarse time bound
 - `TM.compositionTM_decidesInTime` — function computation followed by a decider
 -/
+
+@[expose] public section
 
 namespace Complexity
 

@@ -3,7 +3,9 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Models.TuringMachine.Hoare.Defs
+module
+
+public import Complexitylib.Models.TuringMachine.Hoare.Defs
 
 /-!
 # Space-aware Hoare specifications — definitions
@@ -12,6 +14,8 @@ Ordinary `TM.HoareTime` records a bounded terminating run, but logarithmic-space
 computation requires a bound on every reachable configuration.  This module
 pairs those two obligations in one compositional contract.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

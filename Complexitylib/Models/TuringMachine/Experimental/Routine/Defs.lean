@@ -3,7 +3,9 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Models.TuringMachine.Combinators.ForInput.Defs
+module
+
+public import Complexitylib.Models.TuringMachine.Combinators.ForInput.Defs
 
 /-!
 # Experimental first-order Turing-machine routines — definitions
@@ -18,6 +20,8 @@ concrete `TM` remains the semantic and resource-accounting ground truth.
 obeys the one-way-output discipline. Its name deliberately does not suggest
 input preservation, termination, or resource safety.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

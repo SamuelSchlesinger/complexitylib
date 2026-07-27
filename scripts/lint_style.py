@@ -5,7 +5,8 @@ Checks every `.lean` file under `Complexitylib/` for:
 
   copyright   — a Mathlib-style copyright header at the top of the file
   moduleDoc   — a module docstring (`/-! ... -/`)
-  lineLength  — no line longer than 100 characters (lines containing URLs exempt)
+  lineLength  — no line longer than 100 characters (URL lines and `import`
+                lines exempt; module paths cannot be wrapped)
   trailingWs  — no trailing whitespace
   finalNl     — file ends with exactly one newline
   rootEscape  — no `_root_.` escapes; they signal a nested namespace shadowing
@@ -36,6 +37,7 @@ COPYRIGHT_RE = re.compile(
 )
 MODULE_DOC_RE = re.compile(r"^/-!", re.MULTILINE)
 URL_RE = re.compile(r"https?://")
+IMPORT_RE = re.compile(r"^(public )?(meta )?import ")
 
 
 def check_file(path: Path) -> set[str]:
@@ -47,7 +49,10 @@ def check_file(path: Path) -> set[str]:
     if not MODULE_DOC_RE.search(text):
         violations.add("moduleDoc")
     lines = text.split("\n")
-    if any(len(line) > MAX_LINE and not URL_RE.search(line) for line in lines):
+    if any(
+        len(line) > MAX_LINE and not URL_RE.search(line) and not IMPORT_RE.match(line)
+        for line in lines
+    ):
         violations.add("lineLength")
     if any(line != line.rstrip() for line in lines):
         violations.add("trailingWs")

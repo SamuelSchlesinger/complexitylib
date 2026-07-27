@@ -3,8 +3,10 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Classes.PPoly.Uniform.Unrolling.Serializer.Transition.Step.Defs
-import Complexitylib.Classes.PPoly.Uniform.Unrolling.Serializer.Transition.Step.Internal
+module
+
+public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Serializer.Transition.Step.Defs
+public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Serializer.Transition.Step.Internal
 
 /-!
 # Numeric schedules for one packed transition step
@@ -25,6 +27,8 @@ one packed-output copy per atom in that same order.
   `stepScheduleOutputRef_configIndex` connect numeric output references to the
   public successor-configuration layout.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

@@ -3,7 +3,9 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Transition.Step.Internal.Packed
+module
+
+public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Transition.Step.Internal.Packed
 
 /-!
 # Whole-step direct-generator contracts
@@ -11,6 +13,8 @@ import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Transition.Step.I
 This file composes the exact per-region contracts into byte-for-byte contracts
 for the complete formula phase, packed-copy phase, and deterministic step.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

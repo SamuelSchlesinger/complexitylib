@@ -3,9 +3,11 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Circuits.Encoding.Machine.Core.Defs
-import Complexitylib.Circuits.Encoding.Machine.Core.Internal.Evaluator
-import Complexitylib.Circuits.Encoding.Machine.Core.Internal.Hoare
+module
+
+public import Complexitylib.Circuits.Encoding.Machine.Core.Defs
+public import Complexitylib.Circuits.Encoding.Machine.Core.Internal.Evaluator
+public import Complexitylib.Circuits.Encoding.Machine.Core.Internal.Hoare
 
 /-!
 # Verified serialized-circuit evaluator
@@ -25,6 +27,8 @@ concrete quadratic bound.
   `circuitEvalLanguage`.
 - `evalFamilyTime_bigO_quadratic` proves the end-to-end budget is `O(n^2)`.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

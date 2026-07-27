@@ -3,12 +3,14 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Circuits.Encoding.Machine.Defs
-import Complexitylib.Circuits.Encoding.Machine.Core
-import Complexitylib.Circuits.Encoding.Machine.Internal.FrontEnd
-import Complexitylib.Circuits.Encoding.Machine.GateStream
-import Complexitylib.Circuits.Encoding.Machine.NatCode
-import Complexitylib.Circuits.Encoding.Machine.RawGate
+module
+
+public import Complexitylib.Circuits.Encoding.Machine.Defs
+public import Complexitylib.Circuits.Encoding.Machine.Core
+public import Complexitylib.Circuits.Encoding.Machine.Internal.FrontEnd
+public import Complexitylib.Circuits.Encoding.Machine.GateStream
+public import Complexitylib.Circuits.Encoding.Machine.NatCode
+public import Complexitylib.Circuits.Encoding.Machine.RawGate
 
 /-!
 # Serialized circuit-evaluator machine
@@ -36,6 +38,8 @@ its final verdict.
 - `Machine.emitRawGateStepTM_hoareTimeSpace` additionally advances the
   first-unused-wire counter after one emitted gate.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

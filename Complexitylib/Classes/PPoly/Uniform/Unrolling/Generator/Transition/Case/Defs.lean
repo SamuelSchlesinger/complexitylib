@@ -3,10 +3,12 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Initialization.Defs
-import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Offset.Defs
-import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Transition.Read.Defs
-import Complexitylib.Classes.PPoly.Uniform.Unrolling.Serializer.Transition.Case.Defs
+module
+
+public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Initialization.Defs
+public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Offset.Defs
+public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Transition.Read.Defs
+public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Serializer.Transition.Case.Defs
 
 /-!
 # Direct-unrolling transition-case generator -- definitions
@@ -18,6 +20,8 @@ keeps one rolling member-output reference: it steps backward by the common
 read-formula size, then by the final one-gate state member. No formula stack is
 materialized on a work tape.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

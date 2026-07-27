@@ -3,7 +3,9 @@ Copyright (c) 2025 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Circuits.Internal.Valiant
+module
+
+public import Complexitylib.Circuits.Internal.Valiant
 
 /-! # Valiant's Depth Reduction Lemma
 
@@ -26,6 +28,8 @@ The proof machinery — canonical labelings, the edge partition by
 first-differing bit, averaging, and the relabeling-after-removal
 bound — lives in `Complexitylib.Circuits.Internal.Valiant`.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

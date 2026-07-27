@@ -3,8 +3,10 @@ Copyright (c) 2025 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Classes.Time
-import Complexitylib.Classes.Space
+module
+
+public import Complexitylib.Classes.Time
+public import Complexitylib.Classes.Space
 
 /-!
 # P, FP, and PSPACE
@@ -13,6 +15,8 @@ This file defines **P** (polynomial time), **FP** (polynomial-time functions),
 and **PSPACE** (polynomial space) in terms of the base classes `DTIME` and
 `DSPACE`.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

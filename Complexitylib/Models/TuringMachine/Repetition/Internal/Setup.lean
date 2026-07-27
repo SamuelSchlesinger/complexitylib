@@ -3,8 +3,10 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Models.TuringMachine.Repetition.Internal.Schedule
-import Complexitylib.Models.TuringMachine.Repetition.Internal.Trial
+module
+
+public import Complexitylib.Models.TuringMachine.Repetition.Internal.Schedule
+public import Complexitylib.Models.TuringMachine.Repetition.Internal.Trial
 
 /-!
 # Setup boundary for fixed-time repetition
@@ -19,6 +21,8 @@ machine, whose setup immediately halts with the empty majority verdict.
 - `NTM.repeatAtTime_trace_setup_boundary` — the initial `RepeatBoundary`
 - `NTM.repeatAtTime_trace_zero_repetitions` — the `k = 0` endpoint
 -/
+
+@[expose] public section
 
 namespace Complexity
 

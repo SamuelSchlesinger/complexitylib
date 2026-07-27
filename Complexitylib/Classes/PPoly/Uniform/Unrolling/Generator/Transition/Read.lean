@@ -3,8 +3,10 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Transition.Read.Defs
-import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Transition.Read.Internal
+module
+
+public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Transition.Read.Defs
+public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Transition.Read.Internal
 
 /-!
 # Direct-unrolling read-formula generator
@@ -12,6 +14,8 @@ import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Transition.Read.I
 A stack-free proof-carrying routine that emits the exact numeric gate schedule
 for reading one symbol from a bounded encoded configuration.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

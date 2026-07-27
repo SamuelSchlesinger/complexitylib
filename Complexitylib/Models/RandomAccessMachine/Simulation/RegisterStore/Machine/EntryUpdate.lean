@@ -3,18 +3,20 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import
+module
+
+public import
   Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Machine.EntryUpdate.Defs
-import
+public import
   Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Machine.EntryUpdate.Internal.Out
-import
+public import
   Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Machine.EntryUpdate.Internal.Sem
-import
+public import
 Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Machine.EntryUpdate.BoundsInternal
-import
+public import
   Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Machine.EntryUpdate.Source
-import Complexitylib.Models.TuringMachine.Hoare.Space
-import Complexitylib.Models.TuringMachine.Hoare.RetargetOutput
+public import Complexitylib.Models.TuringMachine.Hoare.Space
+public import Complexitylib.Models.TuringMachine.Hoare.RetargetOutput
 
 /-!
 # Bounded encoded sparse-store update
@@ -24,6 +26,8 @@ canonical sparse-store write. The machine scans a runtime-counted old store,
 copies misses, replaces or deletes the unique hit, and appends a fresh nonzero
 entry exactly when the address was absent.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

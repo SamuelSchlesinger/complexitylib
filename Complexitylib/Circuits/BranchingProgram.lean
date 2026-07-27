@@ -3,9 +3,11 @@ Copyright (c) 2025 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Mathlib.GroupTheory.Perm.Basic
-import Mathlib.Algebra.BigOperators.Group.List.Basic
-import Mathlib.Data.Finset.Basic
+module
+
+public import Mathlib.GroupTheory.Perm.Basic
+public import Mathlib.Algebra.BigOperators.Group.List.Basic
+public import Mathlib.Data.Finset.Basic
 
 /-!
 # Permutation branching programs
@@ -23,6 +25,8 @@ theorem).
 - `BP.eval_append`, `BP.eval_cons` — the product (append/cons) semantics that
   Barrington's inductive construction rests on
 -/
+
+@[expose] public section
 
 namespace Complexity
 

@@ -3,9 +3,11 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Circuits.AC0.NormalForm
-import Complexitylib.Circuits.AC0.Normalization.Defs
-import Complexitylib.Circuits.AC0.Normalization.Internal
+module
+
+public import Complexitylib.Circuits.AC0.NormalForm
+public import Complexitylib.Circuits.AC0.Normalization.Defs
+public import Complexitylib.Circuits.AC0.Normalization.Internal
 
 /-!
 # AC0 circuit normalization
@@ -20,6 +22,8 @@ unfolding, so the formula has:
 For constant-depth, polynomial-gate circuit families this bound is polynomial.
 No uniformity assumption is used.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

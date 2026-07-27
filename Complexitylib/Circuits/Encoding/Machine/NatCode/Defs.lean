@@ -3,9 +3,11 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Circuits.Encoding.Defs
-import Complexitylib.Models.TuringMachine.Registers.Emit
-import Complexitylib.Models.TuringMachine.Subroutines.BinaryFor
+module
+
+public import Complexitylib.Circuits.Encoding.Defs
+public import Complexitylib.Models.TuringMachine.Registers.Emit
+public import Complexitylib.Models.TuringMachine.Subroutines.BinaryFor
 
 /-!
 # Machine emission of terminated-unary natural codes — definitions
@@ -20,6 +22,8 @@ The resulting output suffix is exactly `NatCode.encode value`; input, the
 preserved limit, the restored scratch counter, and every unrelated work tape
 are intended to be preserved literally.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

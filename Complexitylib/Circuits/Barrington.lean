@@ -3,9 +3,11 @@ Copyright (c) 2025 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Circuits.BranchingProgram
-import Mathlib.Algebra.Group.Commutator
-import Mathlib.Data.List.ModifyLast
+module
+
+public import Complexitylib.Circuits.BranchingProgram
+public import Mathlib.Algebra.Group.Commutator
+public import Mathlib.Data.List.ModifyLast
 
 /-!
 # Toward Barrington's theorem: the group-theoretic core
@@ -43,6 +45,8 @@ proved here are the moves in Barrington's inductive construction:
 - `BP.Computes`, `BP.Computes_conj`, `BP.Computes_not`,
   `BP.Computes_not_compact`, `BP.Computes_and`.
 -/
+
+@[expose] public section
 
 open scoped commutatorElement
 

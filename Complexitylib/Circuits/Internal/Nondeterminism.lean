@@ -3,8 +3,10 @@ Copyright (c) 2025 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Circuits.Nondeterminism.Defs
-import Complexitylib.Circuits.Internal.ShannonUpper
+module
+
+public import Complexitylib.Circuits.Nondeterminism.Defs
+public import Complexitylib.Circuits.Internal.ShannonUpper
 
 /-! # Internal: Nondeterministic Quantification Circuit Constructions
 
@@ -37,6 +39,8 @@ complexity of the OR of two Boolean functions by the sum of their complexities
 plus one; no OR-specific construction is defined here.
 -/
 
+@[expose] public section
+
 namespace Complexity
 
 variable {k m : Nat}
@@ -45,7 +49,7 @@ variable {k m : Nat}
 
 /-- Decompose the evaluation of a fan-in-2 AND/OR gate into a match on its
     operation applied to the two negation-adjusted input values. -/
-private theorem andOr2_eval_two {W : Nat} (g : Gate Basis.andOr2 W)
+theorem andOr2_eval_two {W : Nat} (g : Gate Basis.andOr2 W)
     (wv : BitString W) :
     g.eval wv =
     let a0 := g.negated ⟨0, by rw [fanIn_andOr2]; omega⟩ ^^
@@ -63,7 +67,7 @@ private theorem andOr2_eval_two {W : Nat} (g : Gate Basis.andOr2 W)
 /-! ## Restriction gate construction -/
 
 /-- A constant-output gate: `OR(x, ¬x) = true` or `AND(x, ¬x) = false`. -/
-private def mkConstGateBounded {G : Nat} [NeZero m] (val : Bool) (bound : Nat) :
+def mkConstGateBounded {G : Nat} [NeZero m] (val : Bool) (bound : Nat) :
     { g : Gate Basis.andOr2 (k + m + G) //
       ∀ j : Fin g.fanIn, (g.inputs j).val < k + m + bound } :=
   have hW : 0 < k + m + G := by have := NeZero.ne m; omega
@@ -80,7 +84,7 @@ private def mkConstGateBounded {G : Nat} [NeZero m] (val : Bool) (bound : Nat) :
      fun _ => by dsimp; exact hB⟩
 
 /-- An identity/passthrough gate: `OP(w, w)` with negation `neg`. -/
-private def mkIdentGateBounded {G : Nat} (op : AndOrOp) (w : Fin (k + m + G)) (neg : Bool)
+def mkIdentGateBounded {G : Nat} (op : AndOrOp) (w : Fin (k + m + G)) (neg : Bool)
     (bound : Nat) (hw : w.val < k + m + bound) :
     { g : Gate Basis.andOr2 (k + m + G) //
       ∀ j : Fin g.fanIn, (g.inputs j).val < k + m + bound } :=
@@ -88,7 +92,7 @@ private def mkIdentGateBounded {G : Nat} (op : AndOrOp) (w : Fin (k + m + G)) (n
      inputs := fun _ => w, negated := fun _ => neg },
    fun _ => by dsimp; exact hw⟩
 
-private theorem mkConstGateP_eval {G : Nat} [NeZero m] (val : Bool) (bound : Nat)
+theorem mkConstGateP_eval {G : Nat} [NeZero m] (val : Bool) (bound : Nat)
     (wv : BitString (k + m + G)) :
     (mkConstGateBounded (k := k) (m := m) (G := G) val bound).val.eval wv = val := by
   unfold mkConstGateBounded
@@ -98,7 +102,7 @@ private theorem mkConstGateP_eval {G : Nat} [NeZero m] (val : Bool) (bound : Nat
   · rename_i hval; rw [andOr2_eval_two]; simp only
     cases wv ⟨0, by have := NeZero.ne m; omega⟩ <;> simp at hval ⊢ <;> exact hval
 
-private theorem mkIdentGateP_eval {G : Nat} (op : AndOrOp) (w : Fin (k + m + G)) (neg : Bool)
+theorem mkIdentGateP_eval {G : Nat} (op : AndOrOp) (w : Fin (k + m + G)) (neg : Bool)
     (bound : Nat) (hw : w.val < k + m + bound)
     (wv : BitString (k + m + G)) :
     (mkIdentGateBounded (k := k) (m := m) (G := G) op w neg bound hw).val.eval wv =
@@ -112,7 +116,7 @@ private theorem mkIdentGateP_eval {G : Nat} (op : AndOrOp) (w : Fin (k + m + G))
     The gate's two inputs are inspected. For each input referencing wire 0,
     the effective constant `b ^^ negated` is computed. The gate is then
     simplified: identity, constant, or shifted, depending on the case. -/
-private def restrictGateBounded {G : Nat} [NeZero m] (b : Bool)
+def restrictGateBounded {G : Nat} [NeZero m] (b : Bool)
     (g : Gate Basis.andOr2 ((k + 1) + m + G))
     (hfanIn : g.fanIn = 2)
     (bound : Nat)
@@ -179,7 +183,7 @@ def restrictCircuit {G : Nat} [NeZero m] (b : Bool)
 
 /-- The restricted gate evaluates identically to the original gate,
     given that wire 0 maps to `b` and all other wires shift down by 1. -/
-private theorem restrictGateP_eval_eq {G : Nat} [NeZero m]
+theorem restrictGateP_eval_eq {G : Nat} [NeZero m]
     (b : Bool) (g : Gate Basis.andOr2 ((k + 1) + m + G))
     (hfanIn : g.fanIn = 2)
     (bound : Nat) (hboundG : bound ≤ G)
@@ -218,11 +222,11 @@ private theorem restrictGateP_eval_eq {G : Nat} [NeZero m]
     cases g.op <;> simp (config := { decide := true })
 
 /-- The input to the old circuit obtained by prepending `b` to `x`. -/
-private def prependInput (b : Bool) (x : BitString (k + m)) :
+def prependInput (b : Bool) (x : BitString (k + m)) :
     BitString ((k + 1) + m) :=
   fun i => if h : i.val = 0 then b else x ⟨i.val - 1, by omega⟩
 
-private theorem wireValue_zero {G : Nat} [NeZero m] (b : Bool)
+theorem wireValue_zero {G : Nat} [NeZero m] (b : Bool)
     (c : Circuit Basis.andOr2 ((k + 1) + m) 1 G)
     (x : BitString (k + m)) :
     c.wireValue (prependInput b x) ⟨0, by omega⟩ = b := by
@@ -231,7 +235,7 @@ private theorem wireValue_zero {G : Nat} [NeZero m] (b : Bool)
 
 /-- Wire value correspondence: for wires > 0, the old circuit's wire value
     with prepended input equals the restricted circuit's shifted wire value. -/
-private theorem wireValue_restrict {G : Nat} [NeZero m] (b : Bool)
+theorem wireValue_restrict {G : Nat} [NeZero m] (b : Bool)
     (c : Circuit Basis.andOr2 ((k + 1) + m) 1 G)
     (x : BitString (k + m))
     (w : Nat) (hwlt : w < (k + 1) + m + G)

@@ -3,7 +3,9 @@ Copyright (c) 2025 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.DescriptiveComplexity.Vocabulary
+module
+
+public import Complexitylib.DescriptiveComplexity.Vocabulary
 
 /-!
   First-order logic syntax: terms, formulas, sentences, derived connectives.
@@ -12,6 +14,8 @@ import Complexitylib.DescriptiveComplexity.Vocabulary
   Terms are variables (de Bruijn indexed) or vocabulary constants.
   Formulas are indexed by the number of free variables.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

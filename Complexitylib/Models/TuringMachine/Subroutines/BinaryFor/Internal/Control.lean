@@ -3,8 +3,10 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Models.TuringMachine.Combinators.Internal.Generic
-import Complexitylib.Models.TuringMachine.Subroutines.BinaryFor.Defs
+module
+
+public import Complexitylib.Models.TuringMachine.Combinators.Internal.Generic
+public import Complexitylib.Models.TuringMachine.Subroutines.BinaryFor.Defs
 
 /-!
 # Canonical binary count-up loops — control proofs
@@ -17,6 +19,8 @@ entering an iteration, and returning from a completed iteration.
 The canonical multi-step comparison run and loop induction are intentionally
 left to later proof layers.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

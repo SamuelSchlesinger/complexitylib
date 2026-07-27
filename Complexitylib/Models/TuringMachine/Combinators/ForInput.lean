@@ -3,8 +3,10 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Models.TuringMachine.Combinators.ForInput.Defs
-import Complexitylib.Models.TuringMachine.Combinators.ForInput.Internal
+module
+
+public import Complexitylib.Models.TuringMachine.Combinators.ForInput.Defs
+public import Complexitylib.Models.TuringMachine.Combinators.ForInput.Internal
 
 /-!
 # Read-only-input loop combinator
@@ -21,6 +23,8 @@ counterpart of the unary-work-register loop `TM.forRegTM`.
 - `TM.ForInputLoopSpaceSpec.prefix_withinAuxSpace` — every prefix of the exact
   loop run respects the certified auxiliary-space budget.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

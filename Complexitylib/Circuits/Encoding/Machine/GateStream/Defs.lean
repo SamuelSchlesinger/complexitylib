@@ -3,8 +3,10 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Circuits.Encoding.Machine.RawGate.Defs
-import Complexitylib.Models.TuringMachine.Subroutines.BinarySucc.Defs
+module
+
+public import Complexitylib.Circuits.Encoding.Machine.RawGate.Defs
+public import Complexitylib.Models.TuringMachine.Subroutines.BinarySucc.Defs
 
 /-!
 # One streaming raw-gate step
@@ -13,6 +15,8 @@ This definitions layer couples raw-gate code emission with incrementing the
 binary counter that records the first unused circuit wire. It is the atomic
 append operation used by circuit serializers.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

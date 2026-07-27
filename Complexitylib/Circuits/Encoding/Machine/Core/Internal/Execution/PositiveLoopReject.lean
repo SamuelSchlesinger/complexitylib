@@ -3,7 +3,9 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Circuits.Encoding.Machine.Core.Internal.Execution.Gate.LoopReject
+module
+
+public import Complexitylib.Circuits.Encoding.Machine.Core.Internal.Execution.Gate.LoopReject
 
 /-!
 # Rejecting decoded positive-family execution
@@ -12,6 +14,8 @@ This file lifts the rejecting counted gate loop through a successfully decoded
 positive-family header. It shares the successful branch's named budgets while
 retaining a well-formed counter remainder and an explicit zero verdict.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

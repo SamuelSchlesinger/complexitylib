@@ -3,8 +3,10 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Models.RandomAccessMachine.Simulation.TMConfig.Sparse.Step.Internal.Iteration
-import Complexitylib.Models.RandomAccessMachine.Structured.Internal.Resources
+module
+
+public import Complexitylib.Models.RandomAccessMachine.Simulation.TMConfig.Sparse.Step.Internal.Iteration
+public import Complexitylib.Models.RandomAccessMachine.Structured.Internal.Resources
 
 /-!
 # Resource envelopes for the fixed sparse TM simulator -- proof internals
@@ -13,6 +15,8 @@ The semantic simulation already records exact source steps, cost, and space.
 This layer supplies the uniform finite-store envelope needed to turn those
 measurements into explicit bounds depending only on input length and TM steps.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

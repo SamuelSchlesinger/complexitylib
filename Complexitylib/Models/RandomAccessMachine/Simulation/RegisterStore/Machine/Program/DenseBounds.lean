@@ -3,9 +3,11 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import
+module
+
+public import
   Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Machine.Program.DenseBoundsDefs
-import
+public import
 Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Machine.Program.DenseBoundsProof
 
 /-!
@@ -15,6 +17,8 @@ This surface exposes the selected-width one-step bound, the amortized
 quadratic loop bound, and the complete quadratic decision bound for the
 optimized dense-input RAM simulator.
 -/
+
+@[expose] public section
 
 namespace Complexity
 namespace RAM

@@ -3,12 +3,16 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Models.RandomAccessMachine.Simulation.TMConfig.Sparse.Step.Internal.Load
-import Complexitylib.Models.RandomAccessMachine.Structured.Internal.Resources
+module
+
+public import Complexitylib.Models.RandomAccessMachine.Simulation.TMConfig.Sparse.Step.Internal.Load
+public import Complexitylib.Models.RandomAccessMachine.Structured.Internal.Resources
 
 /-!
 # Selected sparse TM transition actions -- proof internals
 -/
+
+@[expose] public section
 
 namespace Complexity
 
@@ -28,7 +32,7 @@ private theorem execList_append (first second : List Structured.Basic)
   | cons op rest ih => simp [Structured.Basic.execList, ih]
 
 /-- Representation restricted to one named sparse tape. -/
-private def RepresentsTape (slot : Fin (n + 2))
+def RepresentsTape (slot : Fin (n + 2))
     (tape : Tape) (store : Structured.Store) : Prop :=
   store (headReg slot) = tape.head ∧
     ∀ position, store (cellReg n slot position) =
@@ -332,7 +336,7 @@ theorem writeMoveOps_otherTape_internal {tm : TM n}
       hcellWritten]
     exact hother.2 position
 
-private theorem RepresentsTape.stateUpdate (slot : Fin (n + 2))
+theorem RepresentsTape.stateUpdate (slot : Fin (n + 2))
     (tape : Tape) (store : Structured.Store) (state : ℕ)
     (hrepresents : RepresentsTape slot tape store) :
     RepresentsTape slot tape
@@ -803,11 +807,13 @@ theorem actionOps_represents_internal {tm : TM n}
     initialized, afterInput, afterWork, final, execList_append,
     Structured.Basic.execList, List.append_assoc] using hfinalRepresents
 
-private abbrev ResourceEnvelope (tm : TM n) (bound : ℕ) :=
+@[nolint docBlame]
+abbrev ResourceEnvelope (tm : TM n) (bound : ℕ) :=
   Structured.Internal.StoreEnvelope (registerBound n (bound + 1))
     (wordBound tm bound)
 
-private abbrev ResourceEnvelopeChain (tm : TM n) (bound : ℕ) :=
+@[nolint docBlame]
+abbrev ResourceEnvelopeChain (tm : TM n) (bound : ℕ) :=
   Structured.Internal.Basic.EnvelopeChain (registerBound n (bound + 1))
     (wordBound tm bound)
 

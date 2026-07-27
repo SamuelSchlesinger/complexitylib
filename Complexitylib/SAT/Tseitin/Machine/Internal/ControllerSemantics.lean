@@ -3,8 +3,10 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.SAT.Tseitin.Machine.Internal.ControllerInvariant
-import Complexitylib.SAT.Tseitin.Machine.Internal.RuntimeBounds
+module
+
+public import Complexitylib.SAT.Tseitin.Machine.Internal.ControllerInvariant
+public import Complexitylib.SAT.Tseitin.Machine.Internal.RuntimeBounds
 
 /-!
 # Semantic glue for the streaming Tseitin controller
@@ -25,6 +27,8 @@ The results are definitional seams used by the later controller induction.
 - `bufferValues_closed_eq_closeClause_internal`
 - `pendingBits_eq_closeClause_emitted_internal`
 -/
+
+@[expose] public section
 
 namespace Complexity
 

@@ -3,9 +3,11 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Circuits.Encoding.Formula.Batch
-import Complexitylib.Circuits.Unrolling.Internal.Initialization
-import Complexitylib.Circuits.Unrolling.Transition.Fragment.Defs
+module
+
+public import Complexitylib.Circuits.Encoding.Formula.Batch
+public import Complexitylib.Circuits.Unrolling.Internal.Initialization
+public import Complexitylib.Circuits.Unrolling.Transition.Fragment.Defs
 
 /-!
 # Structural properties of packed one-step circuit fragments
@@ -14,6 +16,8 @@ This internal module connects the canonical configuration-atom ordering to
 the formula batch compiler. It records the exact formula and gate counts,
 formula lookup order, and arithmetic addresses of packed successor atoms.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

@@ -3,7 +3,9 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Classes.PPoly.Uniform.Unrolling.Defs
+module
+
+public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Defs
 
 /-!
 # Streamable deterministic unrolling arithmetic — definitions
@@ -17,6 +19,8 @@ The direct deterministic prefix build fixes the primary-wire layout used by
 `TM.directUnrollingRawCircuit`. It remains a proof-level circuit construction;
 no Turing-machine generator is defined here.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

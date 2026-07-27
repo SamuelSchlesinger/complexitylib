@@ -3,7 +3,9 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Circuits.Internal.CircuitToDescriptor
+module
+
+public import Complexitylib.Circuits.Internal.CircuitToDescriptor
 
 /-!
 # Internal: Shannon bridge from descriptors to typed circuits
@@ -12,6 +14,8 @@ This module pads the descriptor of a typed single-output circuit to the fixed
 size used by the Shannon counting argument and transfers the resulting lower
 bound back to `Circuit`.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

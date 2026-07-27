@@ -3,9 +3,11 @@ Copyright (c) 2025 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Circuits.Nondeterminism.Defs
-import Complexitylib.Circuits.Internal.Nondeterminism
-import Complexitylib.Circuits.Shannon
+module
+
+public import Complexitylib.Circuits.Nondeterminism.Defs
+public import Complexitylib.Circuits.Internal.Nondeterminism
+public import Complexitylib.Circuits.Shannon
 
 /-! # Nondeterministic Circuit Complexity Bounds
 
@@ -46,6 +48,8 @@ circuit that guesses the first `k` input bits.
 The naive bound is tighter when `k` is small and `f` has low complexity;
 the Shannon bound wins when `k` is large, regardless of `f`'s complexity.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

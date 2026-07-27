@@ -3,8 +3,10 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Models.RandomAccessMachine.Defs
-import Complexitylib.Asymptotics
+module
+
+public import Complexitylib.Models.RandomAccessMachine.Defs
+public import Complexitylib.Asymptotics
 
 /-!
 # Random-access-machine complexity classes: definitions
@@ -13,6 +15,8 @@ This definitions layer places the logarithmic-cost RAM classes over the same
 `Language` interface as the Turing-machine classes. It is intentionally
 independent of either simulation direction.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

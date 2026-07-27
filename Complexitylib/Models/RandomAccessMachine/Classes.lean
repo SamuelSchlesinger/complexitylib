@@ -3,7 +3,9 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Models.RandomAccessMachine.Classes.Defs
+module
+
+public import Complexitylib.Models.RandomAccessMachine.Classes.Defs
 
 /-!
 # Random-access-machine complexity classes
@@ -11,6 +13,8 @@ import Complexitylib.Models.RandomAccessMachine.Classes.Defs
 This surface exposes the logarithmic-cost RAM time and space classes and their
 elementary monotonicity properties.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

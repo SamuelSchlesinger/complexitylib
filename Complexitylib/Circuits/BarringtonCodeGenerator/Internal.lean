@@ -3,14 +3,18 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Circuits.BarringtonCodeGenerator.Defs
-import Complexitylib.Circuits.BarringtonCompiler
-import Complexitylib.Circuits.BranchingProgramEncoding
-import Complexitylib.Circuits.FormulaEncoding
+module
+
+public import Complexitylib.Circuits.BarringtonCodeGenerator.Defs
+public import Complexitylib.Circuits.BarringtonCompiler
+public import Complexitylib.Circuits.BranchingProgramEncoding
+public import Complexitylib.Circuits.FormulaEncoding
 
 /-!
 # Pure Barrington code-generator internals
 -/
+
+@[expose] public section
 
 namespace Complexity
 

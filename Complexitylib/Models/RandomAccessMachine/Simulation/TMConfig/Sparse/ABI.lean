@@ -3,8 +3,10 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Models.RandomAccessMachine.Simulation.TMConfig.Sparse.ABI.Defs
-import Complexitylib.Models.RandomAccessMachine.Simulation.TMConfig.Sparse.ABI.Internal.Resources
+module
+
+public import Complexitylib.Models.RandomAccessMachine.Simulation.TMConfig.Sparse.ABI.Defs
+public import Complexitylib.Models.RandomAccessMachine.Simulation.TMConfig.Sparse.ABI.Internal.Resources
 
 /-!
 # Public RAM ABI for the fixed sparse TM simulator
@@ -16,6 +18,8 @@ potentially overlapping the raw input. The complete decision program then runs
 the fixed sparse simulator to a halted TM configuration and returns a public
 Boolean verdict in `R₀`.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

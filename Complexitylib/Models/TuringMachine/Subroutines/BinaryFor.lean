@@ -3,8 +3,10 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Models.TuringMachine.Subroutines.BinaryFor.Defs
-import Complexitylib.Models.TuringMachine.Subroutines.BinaryFor.Internal
+module
+
+public import Complexitylib.Models.TuringMachine.Subroutines.BinaryFor.Defs
+public import Complexitylib.Models.TuringMachine.Subroutines.BinaryFor.Internal
 
 /-!
 # Canonical binary count-up loops
@@ -29,6 +31,8 @@ limit, or tape frames. Clients record those endpoint facts in
 - `BinaryForLoopSpaceSpec.prefix_withinAuxSpace` covers every run prefix.
 - `IsTransducer.binaryForTM` preserves one-way output safety.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

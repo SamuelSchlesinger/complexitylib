@@ -3,9 +3,11 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import
+module
+
+public import
   Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Machine.Program.DenseInitDefs
-import
+public import
   Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Machine.Program.DenseInitProof
 
 /-!
@@ -15,6 +17,8 @@ The optimized initializer retains the public bits on the immutable input tape,
 materializes only the positive-tagged length register, installs the reusable
 program ABI, and rewinds the input for dense fallback reads.
 -/
+
+@[expose] public section
 
 namespace Complexity
 namespace RAM

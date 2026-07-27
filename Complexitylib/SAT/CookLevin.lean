@@ -3,10 +3,12 @@ Copyright (c) 2025 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.SAT.Headline
-import Complexitylib.SAT.Rename
-import Complexitylib.Classes.NP.Reduction
-import Complexitylib.Models.TuringMachine.SingleTape
+module
+
+public import Complexitylib.SAT.Headline
+public import Complexitylib.SAT.Rename
+public import Complexitylib.Classes.NP.Reduction
+public import Complexitylib.Models.TuringMachine.SingleTape
 
 /-!
 # Cook–Levin tableau core
@@ -37,6 +39,8 @@ NP-hardness/NP-completeness assembly live in `SAT/CookLevin/Assembly.lean`;
 the emitter implementation is split across the modules under
 `SAT/CookLevin/`.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

@@ -3,9 +3,11 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Classes.P.NormalForm
-import Complexitylib.Models.RandomAccessMachine.Classes.Defs
-import Complexitylib.Models.RandomAccessMachine.Simulation.TMConfig.Sparse.ABI
+module
+
+public import Complexitylib.Classes.P.NormalForm
+public import Complexitylib.Models.RandomAccessMachine.Classes.Defs
+public import Complexitylib.Models.RandomAccessMachine.Simulation.TMConfig.Sparse.ABI
 
 /-!
 # TM-to-RAM time-class containment -- proof internals
@@ -14,6 +16,8 @@ This module lifts the checked public-ABI sparse simulation from one halting run
 to deciders and then discharges the polynomial-bound arithmetic needed for the
 forward machine-model robustness theorem.
 -/
+
+@[expose] public section
 
 namespace Complexity
 
@@ -58,7 +62,7 @@ theorem mem_DTIME_of_decidesInTime_internal
     compiledDecision_decidesInTime_internal hdecides, BigO.refl _⟩
 
 /-- Pointwise domination by the evaluation of a natural polynomial. -/
-private def PolyBound (f : ℕ → ℕ) : Prop :=
+def PolyBound (f : ℕ → ℕ) : Prop :=
   ∃ p : Polynomial ℕ, ∀ inputLength, f inputLength ≤ p.eval inputLength
 
 namespace PolyBound
@@ -99,7 +103,7 @@ theorem eval (p : Polynomial ℕ) :
     PolyBound (fun inputLength => p.eval inputLength) :=
   ⟨p, fun _ => le_rfl⟩
 
-private theorem size_le_self (value : ℕ) : value.size ≤ value := by
+theorem size_le_self (value : ℕ) : value.size ≤ value := by
   rw [Nat.size_le]
   exact Nat.lt_pow_self (by decide)
 

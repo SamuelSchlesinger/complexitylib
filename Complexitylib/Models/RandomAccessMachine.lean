@@ -3,71 +3,73 @@ Copyright (c) 2025 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Models.RandomAccessMachine.Internal
-import Complexitylib.Models.RandomAccessMachine.Soundness
-import Complexitylib.Models.RandomAccessMachine.Classes
-import Complexitylib.Models.RandomAccessMachine.Simulation.TMConfig
-import Complexitylib.Models.RandomAccessMachine.Simulation.TMConfig.Step
-import Complexitylib.Models.RandomAccessMachine.Simulation.TMConfig.Sparse
-import Complexitylib.Models.RandomAccessMachine.Simulation.TMConfig.Sparse.Step
-import Complexitylib.Models.RandomAccessMachine.Simulation.TMConfig.Sparse.ABI
-import Complexitylib.Models.RandomAccessMachine.Simulation.TMConfig.Sparse.Containment
-import Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore
-import
+module
+
+public import Complexitylib.Models.RandomAccessMachine.Internal
+public import Complexitylib.Models.RandomAccessMachine.Soundness
+public import Complexitylib.Models.RandomAccessMachine.Classes
+public import Complexitylib.Models.RandomAccessMachine.Simulation.TMConfig
+public import Complexitylib.Models.RandomAccessMachine.Simulation.TMConfig.Step
+public import Complexitylib.Models.RandomAccessMachine.Simulation.TMConfig.Sparse
+public import Complexitylib.Models.RandomAccessMachine.Simulation.TMConfig.Sparse.Step
+public import Complexitylib.Models.RandomAccessMachine.Simulation.TMConfig.Sparse.ABI
+public import Complexitylib.Models.RandomAccessMachine.Simulation.TMConfig.Sparse.Containment
+public import Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore
+public import
   Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.DenseOverlay
-import
+public import
   Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Machine.DenseInputLookup
-import Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Containment
-import Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Machine.AddressEq
-import Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Machine.EntryAppend
-import Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Machine.EntryDecode
-import Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Machine.EntryEncode
-import Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Machine.EntryCleanup
-import Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Machine.EntryLookup
-import Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Machine.EntryLookupRestore
-import Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Machine.EntryMissCopy
-import Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Machine.EntryMatch
-import Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Machine.EntryReplace
-import Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Machine.EntryScanStep
-import Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Machine.EntryScan
-import Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Machine.EntryUpdate
-import
+public import Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Containment
+public import Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Machine.AddressEq
+public import Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Machine.EntryAppend
+public import Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Machine.EntryDecode
+public import Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Machine.EntryEncode
+public import Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Machine.EntryCleanup
+public import Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Machine.EntryLookup
+public import Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Machine.EntryLookupRestore
+public import Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Machine.EntryMissCopy
+public import Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Machine.EntryMatch
+public import Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Machine.EntryReplace
+public import Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Machine.EntryScanStep
+public import Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Machine.EntryScan
+public import Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Machine.EntryUpdate
+public import
   Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Machine.Instruction.Dense
-import Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Machine.Instruction
-import
+public import Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Machine.Instruction
+public import
   Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Machine.Instruction.Dispatch
-import
+public import
   Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Machine.Program
-import
+public import
   Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Machine.Program.Initialization
-import
+public import
 Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Machine.Program.DenseInit
-import
+public import
   Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Machine.Program.DenseDecision
-import
+public import
   Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Machine.Program.DenseBounds
-import
+public import
   Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Machine.Program.Decision
-import Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Machine.WordDecode
-import Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Machine.WordEncode
-import Complexitylib.Models.TuringMachine.Subroutines.BinaryEq
-import Complexitylib.Models.TuringMachine.Subroutines.BinaryRippleAdd
-import Complexitylib.Models.TuringMachine.Subroutines.BinaryRippleSub
-import Complexitylib.Models.TuringMachine.Subroutines.BinaryShiftMul
-import Complexitylib.Models.RandomAccessMachine.Structured
-import Complexitylib.Models.RandomAccessMachine.Structured.Switch.Compiled
-import Complexitylib.Models.RandomAccessMachine.Structured.Hamming
-import Complexitylib.Models.RandomAccessMachine.Structured.GateEval
-import Complexitylib.Models.RandomAccessMachine.Structured.GateStep
-import Complexitylib.Models.RandomAccessMachine.Structured.GateStreamStep
-import Complexitylib.Models.RandomAccessMachine.Structured.Scanner
-import Complexitylib.Models.RandomAccessMachine.Structured.PairValidate
-import Complexitylib.Models.TuringMachine.Subroutines.ResetBinary
-import Complexitylib.Models.RandomAccessMachine.Structured.LastBit
-import Complexitylib.Models.RandomAccessMachine.Structured.ThreeSATSyntax
-import Complexitylib.Models.RandomAccessMachine.Structured.UnaryDecode
-import Complexitylib.Asymptotics
-import Complexitylib.Classes.Time
+public import Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Machine.WordDecode
+public import Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Machine.WordEncode
+public import Complexitylib.Models.TuringMachine.Subroutines.BinaryEq
+public import Complexitylib.Models.TuringMachine.Subroutines.BinaryRippleAdd
+public import Complexitylib.Models.TuringMachine.Subroutines.BinaryRippleSub
+public import Complexitylib.Models.TuringMachine.Subroutines.BinaryShiftMul
+public import Complexitylib.Models.RandomAccessMachine.Structured
+public import Complexitylib.Models.RandomAccessMachine.Structured.Switch.Compiled
+public import Complexitylib.Models.RandomAccessMachine.Structured.Hamming
+public import Complexitylib.Models.RandomAccessMachine.Structured.GateEval
+public import Complexitylib.Models.RandomAccessMachine.Structured.GateStep
+public import Complexitylib.Models.RandomAccessMachine.Structured.GateStreamStep
+public import Complexitylib.Models.RandomAccessMachine.Structured.Scanner
+public import Complexitylib.Models.RandomAccessMachine.Structured.PairValidate
+public import Complexitylib.Models.TuringMachine.Subroutines.ResetBinary
+public import Complexitylib.Models.RandomAccessMachine.Structured.LastBit
+public import Complexitylib.Models.RandomAccessMachine.Structured.ThreeSATSyntax
+public import Complexitylib.Models.RandomAccessMachine.Structured.UnaryDecode
+public import Complexitylib.Asymptotics
+public import Complexitylib.Classes.Time
 
 /-!
 # Random access machines (surface)
@@ -305,6 +307,8 @@ the explicit hypothesis `n + 1 = O(T(n))`. Choosing the least halting fuel also
 transfers every `RAM.P` decider to `P`; together with the fixed sparse forward
 simulator this proves `RAM.RegisterStore.Machine.RAM_P_eq_P`.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

@@ -3,8 +3,10 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.SAT.Tseitin.Internal.EncodingBounds
-import Complexitylib.SAT.Tseitin.Internal.Shape
+module
+
+public import Complexitylib.SAT.Tseitin.Internal.EncodingBounds
+public import Complexitylib.SAT.Tseitin.Internal.Shape
 
 /-!
 # Size bounds for Tseitin splitting
@@ -13,6 +15,8 @@ The typed transformation is linear in source clauses and literal occurrences.
 Because the concrete SAT codec writes variable indices in unary, newly allocated
 indices make the honest bit-level bound quadratic in the source encoding length.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

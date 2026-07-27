@@ -3,8 +3,10 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Transition.Step.Internal.Emitted
-import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Transition.Step.Internal.Space.Common
+module
+
+public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Transition.Step.Internal.Emitted
+public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Transition.Step.Internal.Space.Common
 
 /-!
 # Packed-copy space bound for one direct transition step
@@ -14,6 +16,8 @@ been emitted. The proof follows the exact rolling formula cursor through the
 state, head, and cell regions and bounds every loop prefix by the shared step
 width envelope.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

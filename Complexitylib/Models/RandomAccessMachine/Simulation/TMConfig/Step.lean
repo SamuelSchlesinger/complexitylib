@@ -3,9 +3,11 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Models.RandomAccessMachine.Simulation.TMConfig.Step.Defs
-import Complexitylib.Models.RandomAccessMachine.Simulation.TMConfig.Step.Internal
-import Complexitylib.Models.RandomAccessMachine.Structured
+module
+
+public import Complexitylib.Models.RandomAccessMachine.Simulation.TMConfig.Step.Defs
+public import Complexitylib.Models.RandomAccessMachine.Simulation.TMConfig.Step.Internal
+public import Complexitylib.Models.RandomAccessMachine.Structured
 
 /-!
 # Fixed RAM transition blocks for bounded Turing-machine configurations
@@ -15,6 +17,8 @@ phases, and the composed nested state/symbol dispatcher. Thus the fixed
 structured program has exact one-step source semantics; its common resource
 envelope and compiled-RAM transfer are the next M6 layer.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

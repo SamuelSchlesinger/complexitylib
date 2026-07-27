@@ -3,7 +3,9 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.SAT.Tseitin.Internal.Streaming
+module
+
+public import Complexitylib.SAT.Tseitin.Internal.Streaming
 
 /-!
 # Successful streaming endpoints
@@ -13,6 +15,8 @@ typed CNF token stream. The endpoint is recovered from the public
 `transformFrom?_tokens_internal` result, so the token-level execution proof in
 `Internal.Streaming` remains the single source of truth.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

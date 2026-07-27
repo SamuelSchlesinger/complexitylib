@@ -3,8 +3,10 @@ Copyright (c) 2025 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Models.TuringMachine
-import Complexitylib.Models.TuringMachine.UTM.Encoding
+module
+
+public import Complexitylib.Models.TuringMachine
+public import Complexitylib.Models.TuringMachine.UTM.Encoding
 
 /-!
 # Machine descriptions for the universal Turing machine
@@ -48,6 +50,8 @@ string denotes some machine.
 - `decodeDesc_encodeDesc` — roundtrip on well-formed descriptions
 - `decodeDesc_encodeDesc_append` — roundtrip ignores trailing junk
 -/
+
+@[expose] public section
 
 namespace Complexity
 

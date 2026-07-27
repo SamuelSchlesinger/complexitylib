@@ -3,18 +3,22 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import
+module
+
+public import
   Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Machine.Program.Defs
-import
+public import
   Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Machine.Instruction.Dispatch
-import Complexitylib.Models.TuringMachine.Combinators.WorkBranch
-import Complexitylib.Models.TuringMachine.Subroutines.BinaryCopy
-import Complexitylib.Models.TuringMachine.Subroutines.BinaryPred
-import Complexitylib.Models.TuringMachine.Subroutines.ResetBinary
+public import Complexitylib.Models.TuringMachine.Combinators.WorkBranch
+public import Complexitylib.Models.TuringMachine.Subroutines.BinaryCopy
+public import Complexitylib.Models.TuringMachine.Subroutines.BinaryPred
+public import Complexitylib.Models.TuringMachine.Subroutines.ResetBinary
 
 /-!
 # Sparse RAM program controller -- proof internals
 -/
+
+@[expose] public section
 
 namespace Complexity
 

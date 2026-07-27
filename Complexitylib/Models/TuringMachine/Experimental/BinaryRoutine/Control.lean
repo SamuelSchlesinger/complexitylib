@@ -3,8 +3,10 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Models.TuringMachine.Experimental.BinaryRoutine.Control.Defs
-import Complexitylib.Models.TuringMachine.Experimental.BinaryRoutine.Control.Internal
+module
+
+public import Complexitylib.Models.TuringMachine.Experimental.BinaryRoutine.Control.Defs
+public import Complexitylib.Models.TuringMachine.Experimental.BinaryRoutine.Control.Internal
 
 /-!
 # Proof-carrying binary routine control
@@ -25,6 +27,8 @@ Thus many iterations can retain logarithmic auxiliary space.
 - `TM.BinaryForSegmentSpec.reachesIn` composes a bounded reachable segment.
 - `TM.BinaryForSegmentSpaceSpec.prefix_withinAuxSpace` covers all prefixes.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

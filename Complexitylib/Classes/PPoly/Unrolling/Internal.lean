@@ -3,10 +3,12 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Classes.P
-import Complexitylib.Classes.PPoly
-import Complexitylib.Classes.PPoly.Unrolling.Defs
-import Complexitylib.Models.TuringMachine.Internal
+module
+
+public import Complexitylib.Classes.P
+public import Complexitylib.Classes.PPoly
+public import Complexitylib.Classes.PPoly.Unrolling.Defs
+public import Complexitylib.Models.TuringMachine.Internal
 
 /-!
 # Deterministic unrolling families — proof internals
@@ -15,6 +17,8 @@ This module proves exact semantics and polynomial size for the family obtained
 by unrolling a deterministic machine. Public statements are exposed by
 `Complexitylib.Classes.PPoly.Unrolling`.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

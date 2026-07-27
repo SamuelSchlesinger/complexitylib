@@ -3,9 +3,11 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Models.RandomAccessMachine.Defs
-import Mathlib.Data.Fintype.Sum
-import Mathlib.Logic.Equiv.Fin.Basic
+module
+
+public import Complexitylib.Models.RandomAccessMachine.Defs
+public import Mathlib.Data.Fintype.Sum
+public import Mathlib.Logic.Equiv.Fin.Basic
 
 /-!
 # Bounded Turing-machine configurations in RAM registers
@@ -18,6 +20,8 @@ registers store a dense bounded window of every named tape.
 Blank symbols use code zero. Consequently registers outside the representation
 and blank cells inside it agree with the RAM's finite-support convention.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

@@ -3,8 +3,10 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Circuits.Unrolling.Transition.Fragment.Defs
-import Mathlib.Data.List.FinRange
+module
+
+public import Complexitylib.Circuits.Unrolling.Transition.Fragment.Defs
+public import Mathlib.Data.List.FinRange
 
 /-!
 # Definitions for tiled bounded-trace circuits
@@ -19,6 +21,8 @@ first unused wire. This makes the recursive layout available to later proofs
 of topology, evaluation, and polynomial size without introducing dependent
 casts into the circuit construction itself.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

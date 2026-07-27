@@ -3,7 +3,9 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Transition.Step.Internal.Space.Common
+module
+
+public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Transition.Step.Internal.Space.Common
 
 /-!
 # Formula-phase space bound for one direct transition step
@@ -11,6 +13,8 @@ import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Transition.Step.I
 This module follows the exact state, head, and cell formula trajectories and
 certifies every nested routine against the shared packed-step width envelope.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

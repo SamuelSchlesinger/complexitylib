@@ -3,12 +3,16 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Models.RandomAccessMachine.Simulation.TMConfig.Sparse.ABI.Defs
-import Complexitylib.Models.RandomAccessMachine.Structured.Internal
+module
+
+public import Complexitylib.Models.RandomAccessMachine.Simulation.TMConfig.Sparse.ABI.Defs
+public import Complexitylib.Models.RandomAccessMachine.Structured.Internal
 
 /-!
 # Capturing raw-input scratch bits in finite control -- proof internals
 -/
+
+@[expose] public section
 
 namespace Complexity
 

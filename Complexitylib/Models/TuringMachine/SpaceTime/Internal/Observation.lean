@@ -3,7 +3,9 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Models.TuringMachine.SpaceTime.Defs
+module
+
+public import Complexitylib.Models.TuringMachine.SpaceTime.Defs
 
 /-!
 # Bounded-observation extensionality — proof internals
@@ -14,6 +16,8 @@ observations determine the symbols read by the transition function and remain
 equal after applying the same write and move, provided both successor heads
 remain inside the observed window.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

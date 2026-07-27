@@ -3,7 +3,9 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Models.TuringMachine.Combinators
+module
+
+public import Complexitylib.Models.TuringMachine.Combinators
 
 /-!
 # Binary work-tape loop combinator -- definitions
@@ -14,6 +16,8 @@ the current bit; the loopback seam advances the driver by one cell. This is the
 width-driven control needed by bitwise algorithms such as schoolbook
 multiplication, without a numeric-value counter.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

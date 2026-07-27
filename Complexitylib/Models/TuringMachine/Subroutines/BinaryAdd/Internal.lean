@@ -3,13 +3,15 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Models.TuringMachine.Combinators.Internal.Seq
-import Complexitylib.Models.TuringMachine.Hoare.Space
-import Complexitylib.Models.TuringMachine.Subroutines.BinaryAdd.Defs
-import Complexitylib.Models.TuringMachine.Subroutines.BinaryFor.Internal.Control
-import Complexitylib.Models.TuringMachine.Subroutines.BinaryFor
-import Complexitylib.Models.TuringMachine.Subroutines.BinarySucc
-import Complexitylib.Models.TuringMachine.Subroutines.ClearWork
+module
+
+public import Complexitylib.Models.TuringMachine.Combinators.Internal.Seq
+public import Complexitylib.Models.TuringMachine.Hoare.Space
+public import Complexitylib.Models.TuringMachine.Subroutines.BinaryAdd.Defs
+public import Complexitylib.Models.TuringMachine.Subroutines.BinaryFor.Internal.Control
+public import Complexitylib.Models.TuringMachine.Subroutines.BinaryFor
+public import Complexitylib.Models.TuringMachine.Subroutines.BinarySucc
+public import Complexitylib.Models.TuringMachine.Subroutines.ClearWork
 
 /-!
 # Canonical binary addition — proof internals
@@ -21,6 +23,8 @@ about one comparison or one iteration at a time, avoiding any dependence on
 the total number of loop iterations.
 -/
 
+@[expose] public section
+
 namespace Complexity
 
 namespace TM
@@ -28,7 +32,7 @@ namespace TM
 variable {n : ℕ}
 
 /-- The standard parked tape for one canonical binary natural. -/
-private def binaryAddNatTape (value : ℕ) : Tape :=
+def binaryAddNatTape (value : ℕ) : Tape :=
   (Tape.init (value.bits.map Γ.ofBool)).move Dir3.right
 
 private theorem binaryAddNatTape_hasBinaryNat (value : ℕ) :
@@ -45,7 +49,7 @@ private theorem binaryAddNatTape_parked (value : ℕ) :
   binaryAddHasBinaryNat_parked (binaryAddNatTape_hasBinaryNat value)
 
 /-- Work tapes after `current` completed addition iterations. -/
-private def binaryAddWorkAt (work : Fin n → Tape)
+def binaryAddWorkAt (work : Fin n → Tape)
     (dstIdx counterIdx : Fin n) (dstValue current : ℕ) : Fin n → Tape :=
   Function.update
     (Function.update work dstIdx (binaryAddNatTape (dstValue + current)))
@@ -209,7 +213,8 @@ private theorem binaryAddWorkAt_clear_eq
       simp [binaryAddWorkAt, hne]
     · simp [binaryAddWorkAt, hic, hid]
 
-private abbrev binaryAddFramePred
+@[nolint docBlame]
+abbrev binaryAddFramePred
     (inp₀ : Tape) (work₀ : Fin n → Tape) (out₀ : Tape) : TapePred n :=
   fun inp work out => inp = inp₀ ∧ work = work₀ ∧ out = out₀
 

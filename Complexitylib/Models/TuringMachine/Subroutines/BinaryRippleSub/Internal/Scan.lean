@@ -3,9 +3,11 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Models.TuringMachine.Subroutines.BinaryRippleSub.Defs
-import Complexitylib.Models.TuringMachine.Subroutines.BinaryRippleSub.Internal.Pure
-import Complexitylib.Models.TuringMachine.Combinators.Internal.Generic
+module
+
+public import Complexitylib.Models.TuringMachine.Subroutines.BinaryRippleSub.Defs
+public import Complexitylib.Models.TuringMachine.Subroutines.BinaryRippleSub.Internal.Pure
+public import Complexitylib.Models.TuringMachine.Combinators.Internal.Generic
 
 /-!
 # Linear-time canonical binary subtraction -- forward scan proof
@@ -14,6 +16,8 @@ This file proves the exact framed contract for the forward borrow scan,
 including its final turn into backward cleanup. Cleanup itself is proved in a
 separate internal layer.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

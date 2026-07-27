@@ -3,8 +3,10 @@ Copyright (c) 2025 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Models.TuringMachine.UTM.Internal.Desc
-import Complexitylib.Models.TuringMachine.UTM.Encoding
+module
+
+public import Complexitylib.Models.TuringMachine.UTM.Internal.Desc
+public import Complexitylib.Models.TuringMachine.UTM.Encoding
 
 /-!
 # Interpreting machine descriptions
@@ -28,6 +30,8 @@ table lists every `(state, symbols)` combination densely.
   `(descOfTM M).toTM`
 - `descOfTM_decidesInTime` — language and running time carry over exactly
 -/
+
+@[expose] public section
 
 namespace Complexity
 

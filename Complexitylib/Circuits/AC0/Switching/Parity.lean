@@ -3,10 +3,12 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Circuits.AC0.Switching
-import Complexitylib.Circuits.AC0.Switching.Parity.Internal
-import Complexitylib.Circuits.RandomRestriction
-import Complexitylib.Circuits.XOR.Restriction
+module
+
+public import Complexitylib.Circuits.AC0.Switching
+public import Complexitylib.Circuits.AC0.Switching.Parity.Internal
+public import Complexitylib.Circuits.RandomRestriction
+public import Complexitylib.Circuits.XOR.Restriction
 
 /-!
 # Switching lemmas against parity
@@ -20,6 +22,8 @@ The resulting cardinality inequality is division-free and applies to arbitrary
 formulas: contradictory DNF terms and tautological CNF clauses are cleaned
 without changing semantics or increasing width.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

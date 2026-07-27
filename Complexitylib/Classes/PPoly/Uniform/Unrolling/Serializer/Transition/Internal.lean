@@ -3,10 +3,12 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Classes.PPoly.Uniform.Unrolling.Serializer
-import Complexitylib.Classes.PPoly.Uniform.Unrolling.Serializer.Initialization.Internal
-import Complexitylib.Classes.PPoly.Uniform.Unrolling.Serializer.Transition.Defs
-import Complexitylib.Circuits.Unrolling.Transition
+module
+
+public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Serializer
+public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Serializer.Initialization.Internal
+public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Serializer.Transition.Defs
+public import Complexitylib.Circuits.Unrolling.Transition
 
 /-!
 # Numeric transition-formula schedules -- proof internals
@@ -16,6 +18,8 @@ formula compilation, then reuse the numeric right-fold suffix. Formula syntax,
 bounded positions, tape slots, and symbols appear only in the final adapter
 theorems.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

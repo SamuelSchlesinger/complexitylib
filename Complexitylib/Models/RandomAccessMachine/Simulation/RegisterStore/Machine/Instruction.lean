@@ -3,21 +3,23 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import
+module
+
+public import
   Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Machine.Instruction.Defs
-import
+public import
   Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Machine.Instruction.Internal
-import
+public import
   Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Machine.Instruction.Direct
-import
+public import
   Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Machine.Instruction.Load
-import
+public import
   Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Machine.Instruction.Immediate
-import
+public import
   Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Machine.Instruction.Store
-import
+public import
   Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Machine.Instruction.Control
-import Complexitylib.Models.TuringMachine.Hoare.RetargetOutput
+public import Complexitylib.Models.TuringMachine.Hoare.RetargetOutput
 
 /-!
 # Concrete sparse-store arithmetic instruction kernel
@@ -27,6 +29,8 @@ RAM-to-TM direction: two canonical operands are combined by a width-efficient
 binary machine and the result is committed by the fixed encoded-store update
 controller. A redirected form writes the new store to a fresh work buffer.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

@@ -3,7 +3,9 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Models.RandomAccessMachine.Structured.Defs
+module
+
+public import Complexitylib.Models.RandomAccessMachine.Structured.Defs
 
 /-!
 # Finite numeric switches for structured RAM programs
@@ -12,6 +14,8 @@ import Complexitylib.Models.RandomAccessMachine.Structured.Defs
 tree. A valid numeric code in `test` selects the corresponding branch. The
 register `one` must contain one and be distinct from `test`.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

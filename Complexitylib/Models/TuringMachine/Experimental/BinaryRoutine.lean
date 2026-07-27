@@ -3,8 +3,10 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Models.TuringMachine.Experimental.BinaryRoutine.Defs
-import Complexitylib.Models.TuringMachine.Experimental.BinaryRoutine.Internal
+module
+
+public import Complexitylib.Models.TuringMachine.Experimental.BinaryRoutine.Defs
+public import Complexitylib.Models.TuringMachine.Experimental.BinaryRoutine.Internal
 
 /-!
 # Proof-carrying binary stream routines
@@ -31,6 +33,8 @@ this initial layer.
 - `BinaryRoutine.binaryCopy_sound` adapts framed canonical copying.
 - `BinaryRoutine.emitRawGateStep_sound` adapts one streaming raw gate.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

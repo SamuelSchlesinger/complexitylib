@@ -3,9 +3,11 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Models.RandomAccessMachine.Structured.Defs
-import Complexitylib.Models.RandomAccessMachine.Structured.Internal
-import Complexitylib.Models.RandomAccessMachine.Structured.Switch
+module
+
+public import Complexitylib.Models.RandomAccessMachine.Structured.Defs
+public import Complexitylib.Models.RandomAccessMachine.Structured.Internal
+public import Complexitylib.Models.RandomAccessMachine.Structured.Switch
 
 /-!
 # Structured logarithmic-cost RAM programs
@@ -23,6 +25,8 @@ level without weakening the concrete RAM resource statement.
 Turing-machine transition compiler. Its branch selection has exact step
 accounting and preserves explicit logarithmic-cost and space envelopes.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

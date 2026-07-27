@@ -3,10 +3,12 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import
+module
+
+public import
   Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Machine.Program.Bounds.Defs
-import Mathlib.Algebra.Polynomial.Eval.Defs
-import Mathlib.Tactic
+public import Mathlib.Algebra.Polynomial.Eval.Defs
+public import Mathlib.Tactic
 
 /-!
 # RAM-to-TM time-class containment -- definitions
@@ -14,6 +16,8 @@ import Mathlib.Tactic
 This layer fixes the twenty-work-tape concrete simulator and packages its
 fourth-degree resource envelope as a natural polynomial.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

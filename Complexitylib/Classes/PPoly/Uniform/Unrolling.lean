@@ -3,8 +3,10 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Classes.PPoly.Uniform.Unrolling.Defs
-import Complexitylib.Classes.PPoly.Uniform.Unrolling.Internal
+module
+
+public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Defs
+public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Internal
 
 /-!
 # Streamable deterministic unrolling families
@@ -24,6 +26,8 @@ uniformity emitter.
 - `TM.DecidesInTime.directUnrollingCircuitFamily_decides` — language correctness.
 - `TM.directUnrollingCircuitFamily_size_bigO` — cubic-in-time size.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

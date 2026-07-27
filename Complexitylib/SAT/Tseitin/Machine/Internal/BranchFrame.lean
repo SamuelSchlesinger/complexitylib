@@ -3,7 +3,9 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.SAT.Tseitin.Machine.Internal.FrontEndSpec
+module
+
+public import Complexitylib.SAT.Tseitin.Machine.Internal.FrontEndSpec
 
 /-!
 # Shared branch frame for the Tseitin reduction machine
@@ -21,6 +23,8 @@ work registers, validator verdict, tape well-formedness, and the standard
 - `validationFramedPost_allTapesWF_internal`
 - `validationFramedPost_to_branchPre_internal`
 -/
+
+@[expose] public section
 
 namespace Complexity
 

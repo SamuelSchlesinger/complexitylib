@@ -3,8 +3,10 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Circuits.Dependency.Defs
-import Complexitylib.Circuits.Dependency.Internal
+module
+
+public import Complexitylib.Circuits.Dependency.Defs
+public import Complexitylib.Circuits.Dependency.Internal
 
 /-!
 # Circuit dependency graphs
@@ -21,6 +23,8 @@ referenced wire to the gate that reads it.
 * `Circuit.dependencyGraph_edge_card_le_totalFanIn` -- distinct edges are
   bounded by total fan-in.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

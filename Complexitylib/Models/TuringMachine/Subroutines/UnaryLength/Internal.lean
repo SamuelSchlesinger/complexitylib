@@ -3,9 +3,11 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Models.TuringMachine.Combinators.Internal.Generic
-import Complexitylib.Models.TuringMachine.Subroutines.UnaryLength.Defs
-import Complexitylib.Models.TuringMachine.Tape.Encoding
+module
+
+public import Complexitylib.Models.TuringMachine.Combinators.Internal.Generic
+public import Complexitylib.Models.TuringMachine.Subroutines.UnaryLength.Defs
+public import Complexitylib.Models.TuringMachine.Tape.Encoding
 
 /-!
 # Unary input-length transducer — proof internals
@@ -15,6 +17,8 @@ Starting from an initial configuration on `x`, it skips the left-end marker,
 writes one `true` bit per input bit, and halts on the first input blank after
 exactly `|x| + 2` transitions.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

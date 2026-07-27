@@ -3,9 +3,11 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Models.TuringMachine.Combinators.ForWorkOnes.Defs
-import Complexitylib.Models.TuringMachine.Combinators.Internal.Generic
-import Complexitylib.Models.TuringMachine.Internal
+module
+
+public import Complexitylib.Models.TuringMachine.Combinators.ForWorkOnes.Defs
+public import Complexitylib.Models.TuringMachine.Combinators.Internal.Generic
+public import Complexitylib.Models.TuringMachine.Internal
 
 /-!
 # One-prefix work-tape loop combinator — proof internals
@@ -13,6 +15,8 @@ import Complexitylib.Models.TuringMachine.Internal
 This module proves exact body embedding, driver transitions, certified loop
 execution, and one-way-output preservation for `TM.forWorkOnesTM`.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

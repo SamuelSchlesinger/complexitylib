@@ -3,9 +3,11 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Models.TuringMachine.Composition.Defs
-import Complexitylib.Models.TuringMachine.Combinators.Internal.Generic
-import Complexitylib.Models.TuringMachine.Placement.Internal
+module
+
+public import Complexitylib.Models.TuringMachine.Composition.Defs
+public import Complexitylib.Models.TuringMachine.Combinators.Internal.Generic
+public import Complexitylib.Models.TuringMachine.Placement.Internal
 
 /-!
 # Function composition: first-phase boundary
@@ -14,6 +16,8 @@ This module runs the first function machine with its output redirected to the
 raw-output work tape, places that run in the composite layout, and exposes the
 exact tape facts required by the normalization tail.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

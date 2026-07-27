@@ -3,10 +3,12 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Models.TuringMachine.Hoare.Defs
-import Complexitylib.Models.TuringMachine.Subroutines
-import Complexitylib.Models.TuringMachine.Subroutines.Internal.ScanRight
-import Complexitylib.Models.TuringMachine.Tape.Encoding
+module
+
+public import Complexitylib.Models.TuringMachine.Hoare.Defs
+public import Complexitylib.Models.TuringMachine.Subroutines
+public import Complexitylib.Models.TuringMachine.Subroutines.Internal.ScanRight
+public import Complexitylib.Models.TuringMachine.Tape.Encoding
 
 /-!
 # Frame-preserving right scan
@@ -20,6 +22,8 @@ first blank. Every stable tape outside that target is preserved exactly.
 - `TM.scanRightTM_reachesIn_frame` — exact linear-time endpoint with a full frame.
 - `TM.scanRightTM_hoareTime_frame` — bounded compositional form of that endpoint.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

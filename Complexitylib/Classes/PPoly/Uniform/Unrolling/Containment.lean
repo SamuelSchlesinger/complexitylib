@@ -3,7 +3,9 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Classes.PPoly.Uniform.Unrolling.Containment.Internal
+module
+
+public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Containment.Internal
 
 /-!
 # Deterministic unrolling into uniform P/poly
@@ -23,6 +25,8 @@ discharges them unconditionally.
   family whose gate-count header is known before gate emission begins.
 - `P_subset_UniformPPoly` and `UniformPPoly_eq_P` are the completed headline.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

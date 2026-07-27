@@ -3,7 +3,9 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Circuits.Family.Defs
+module
+
+public import Complexitylib.Circuits.Family.Defs
 
 /-!
 # Semantics-preserving maps between circuit bases -- definitions
@@ -15,6 +17,8 @@ The target label may depend on arity: for example, an unbounded AND of fan-in
 labels; fan-in, wiring, negation flags, gate count, and circuit topology are
 preserved exactly.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

@@ -3,10 +3,12 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.PolynomialOffset.Defs
-import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Transition.Effect.Defs
-import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Transition.Predecessor.Defs
-import Complexitylib.Classes.PPoly.Uniform.Unrolling.Serializer.Transition.MovedHead.Defs
+module
+
+public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.PolynomialOffset.Defs
+public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Transition.Effect.Defs
+public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Transition.Predecessor.Defs
+public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Serializer.Transition.MovedHead.Defs
 
 /-!
 # Direct-unrolling moved-head generator -- definitions
@@ -17,6 +19,8 @@ position register. Each completed member output is retained in one otherwise
 unused enclosing register, so the final three-way disjunction needs no dynamic
 size recomputation.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

@@ -3,8 +3,10 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Models.TuringMachine.Subroutines.BinaryRippleAdd.Defs
-import Complexitylib.Models.TuringMachine.Subroutines.ClearWork.Defs
+module
+
+public import Complexitylib.Models.TuringMachine.Subroutines.BinaryRippleAdd.Defs
+public import Complexitylib.Models.TuringMachine.Subroutines.ClearWork.Defs
 
 /-!
 # Copying canonical binary naturals
@@ -13,6 +15,8 @@ This definitions layer composes work-tape clearing with width-linear canonical
 binary addition. The source and zero scratch tapes are preserved, while the
 destination is replaced by an exact copy of the source.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

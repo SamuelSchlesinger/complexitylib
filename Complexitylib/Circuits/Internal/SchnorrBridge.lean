@@ -3,8 +3,10 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Circuits.Internal.CircuitToDescriptor
-import Complexitylib.Circuits.Internal.Schnorr
+module
+
+public import Complexitylib.Circuits.Internal.CircuitToDescriptor
+public import Complexitylib.Circuits.Internal.Schnorr
 
 /-!
 # Internal: Schnorr bridge from descriptors to typed circuits
@@ -12,6 +14,8 @@ import Complexitylib.Circuits.Internal.Schnorr
 This module transports the descriptor-level gate-elimination theorem to the
 typed fan-in-two circuit model.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

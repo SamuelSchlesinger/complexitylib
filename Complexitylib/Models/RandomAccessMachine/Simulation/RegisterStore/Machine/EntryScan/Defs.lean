@@ -3,9 +3,11 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import
+module
+
+public import
   Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Machine.EntryScanStep.Defs
-import Complexitylib.Models.TuringMachine.Subroutines.BinaryPred.Defs
+public import Complexitylib.Models.TuringMachine.Subroutines.BinaryPred.Defs
 
 /-!
 # Bounded sparse-entry scan — definitions
@@ -16,6 +18,8 @@ checked entry step; a hit leaves its readable result at `1` and halts, while a
 miss restores scratch, decrements the count, and loops. Count zero halts with
 the blank miss result.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

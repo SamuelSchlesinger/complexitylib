@@ -3,13 +3,17 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Models.RandomAccessMachine.Structured
-import Complexitylib.Models.RandomAccessMachine.Structured.Internal.Resources
-import Complexitylib.Models.RandomAccessMachine.Structured.UnaryDecode.Defs
+module
+
+public import Complexitylib.Models.RandomAccessMachine.Structured
+public import Complexitylib.Models.RandomAccessMachine.Structured.Internal.Resources
+public import Complexitylib.Models.RandomAccessMachine.Structured.UnaryDecode.Defs
 
 /-!
 # Structured RAM terminated-unary decoder — proof internals
 -/
+
+@[expose] public section
 
 namespace Complexity
 

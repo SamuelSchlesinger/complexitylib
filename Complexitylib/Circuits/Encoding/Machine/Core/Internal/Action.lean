@@ -3,7 +3,9 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Circuits.Encoding.Machine.Core.Defs
+module
+
+public import Complexitylib.Circuits.Encoding.Machine.Core.Defs
 
 /-!
 # Projection lemmas for streaming evaluator actions
@@ -12,6 +14,8 @@ These narrowly oriented rewrites expose the named code, wire, and counter
 actions behind the finite-index projections used by `TM.δ`. They keep later
 one-step proofs independent of the implementation's nested index tests.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

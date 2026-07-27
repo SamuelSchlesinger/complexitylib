@@ -3,8 +3,10 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Models.RandomAccessMachine.Simulation.TMConfig.Defs
-import Complexitylib.Models.RandomAccessMachine.Structured.Defs
+module
+
+public import Complexitylib.Models.RandomAccessMachine.Simulation.TMConfig.Defs
+public import Complexitylib.Models.RandomAccessMachine.Structured.Defs
 
 /-!
 # Sparse unbounded TM configurations in RAM registers
@@ -16,6 +18,8 @@ Tape cells are interleaved after that prefix at
 compute every cell address using multiplication and addition while allocating
 new tape positions on demand.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

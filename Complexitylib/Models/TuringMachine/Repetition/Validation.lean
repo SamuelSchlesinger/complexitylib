@@ -3,7 +3,9 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Models.TuringMachine.Repetition
+module
+
+public import Complexitylib.Models.TuringMachine.Repetition
 
 /-!
 # Executable validation for fixed-time repetition
@@ -13,6 +15,8 @@ regression guard runs a two-step probabilistic machine through the real
 repetition wrapper and checks that the selected simulation bit becomes the
 final majority verdict.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

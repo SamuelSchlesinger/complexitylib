@@ -3,10 +3,12 @@ Copyright (c) 2025 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Models.TuringMachine.Hoare.Defs
-import Complexitylib.Models.TuringMachine.Subroutines.PairSplit.Defs
-import Complexitylib.Models.TuringMachine.Subroutines.PairSplit.Internal
-import Complexitylib.Models.TuringMachine.Tape.Encoding
+module
+
+public import Complexitylib.Models.TuringMachine.Hoare.Defs
+public import Complexitylib.Models.TuringMachine.Subroutines.PairSplit.Defs
+public import Complexitylib.Models.TuringMachine.Subroutines.PairSplit.Internal
+public import Complexitylib.Models.TuringMachine.Tape.Encoding
 
 /-!
 # Split a paired input onto work tapes
@@ -33,6 +35,8 @@ with a distinct failure result.
 - `pairSplitCoreTM_hoareTime_frame` and `pairSplitCoreTM_hoareTime` — compatible
   `HasOutput` specifications.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

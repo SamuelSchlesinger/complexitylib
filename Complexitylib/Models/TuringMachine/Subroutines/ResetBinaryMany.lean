@@ -3,9 +3,11 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Models.TuringMachine.Hoare.Space
-import Complexitylib.Models.TuringMachine.Subroutines.ResetBinaryMany.Defs
-import Complexitylib.Models.TuringMachine.Subroutines.ResetBinaryMany.Internal
+module
+
+public import Complexitylib.Models.TuringMachine.Hoare.Space
+public import Complexitylib.Models.TuringMachine.Subroutines.ResetBinaryMany.Defs
+public import Complexitylib.Models.TuringMachine.Subroutines.ResetBinaryMany.Internal
 
 /-!
 # Resetting several binary work tapes
@@ -13,6 +15,8 @@ import Complexitylib.Models.TuringMachine.Subroutines.ResetBinaryMany.Internal
 This module exposes a framed compositional contract for resetting a fixed list
 of distinct canonical binary work tapes.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

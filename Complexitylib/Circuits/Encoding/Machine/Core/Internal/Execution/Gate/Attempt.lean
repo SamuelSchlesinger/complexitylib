@@ -3,8 +3,10 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Circuits.Encoding.Machine.Core.Internal.Execution.Gate
-import Complexitylib.Circuits.Encoding.Machine.Core.Internal.Pure
+module
+
+public import Complexitylib.Circuits.Encoding.Machine.Core.Internal.Execution.Gate
+public import Complexitylib.Circuits.Encoding.Machine.Core.Internal.Pure
 
 /-!
 # Pure-to-machine gate-attempt bridge
@@ -14,6 +16,8 @@ controller-ordered `gateStep?` interface. The pure result intentionally omits
 the first reference, so the machine runtime is existential but carries a
 uniform linear bound in the current wire-memo length.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

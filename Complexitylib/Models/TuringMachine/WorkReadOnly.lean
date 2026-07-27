@@ -3,8 +3,10 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Models.TuringMachine.Combinators.Internal.Generic
-import Complexitylib.Models.TuringMachine.Internal
+module
+
+public import Complexitylib.Models.TuringMachine.Combinators.Internal.Generic
+public import Complexitylib.Models.TuringMachine.Internal
 
 /-!
 # Read-only work-tape certificates
@@ -13,6 +15,8 @@ import Complexitylib.Models.TuringMachine.Internal
 of `tm` writes the symbol already read on work tape `idx`. The head may move,
 but valid tape contents are preserved through every finite run.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

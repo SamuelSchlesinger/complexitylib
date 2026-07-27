@@ -3,8 +3,10 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Program.Defs
-import Complexitylib.Classes.PPoly.Uniform.Unrolling.Serializer.Finalization.Defs
+module
+
+public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Program.Defs
+public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Serializer.Finalization.Defs
 
 /-!
 # Direct-unrolling finalization generator -- definitions
@@ -14,6 +16,8 @@ until the precomputed closed frontier, and finally copies the saved acceptance
 wire. The binary padding driver uses `available` itself as its counter, so no
 gate-counting pass or unary work fuel is needed.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

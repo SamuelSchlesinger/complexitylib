@@ -3,16 +3,20 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Mathlib.NatBits
-import Complexitylib.Models.TuringMachine.Combinators.Internal.Generic
-import Complexitylib.Models.TuringMachine.Combinators.WorkBranch.Defs
-import Complexitylib.Models.TuringMachine.Hoare.Space
-import Complexitylib.Models.TuringMachine.SpaceTime.Internal.Reachability
-import Complexitylib.Models.TuringMachine.Subroutines.BinarySucc.Defs
+module
+
+public import Complexitylib.Mathlib.NatBits
+public import Complexitylib.Models.TuringMachine.Combinators.Internal.Generic
+public import Complexitylib.Models.TuringMachine.Combinators.WorkBranch.Defs
+public import Complexitylib.Models.TuringMachine.Hoare.Space
+public import Complexitylib.Models.TuringMachine.SpaceTime.Internal.Reachability
+public import Complexitylib.Models.TuringMachine.Subroutines.BinarySucc.Defs
 
 /-!
 # Direct work-symbol branch combinator -- proof internals
 -/
+
+@[expose] public section
 
 namespace Complexity
 

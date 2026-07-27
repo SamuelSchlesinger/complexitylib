@@ -3,7 +3,9 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Circuits.BarringtonConverse.Internal
+module
+
+public import Complexitylib.Circuits.BarringtonConverse.Internal
 
 /-!
 # The converse direction of Barrington's theorem
@@ -25,6 +27,8 @@ equivalence under the library's total-assignment family convention.
 - `barrington_equivalence_onTotalAssignments` -- the explicitly named
   total-assignment equivalence
 -/
+
+@[expose] public section
 
 namespace Complexity
 

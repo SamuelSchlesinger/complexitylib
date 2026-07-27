@@ -3,9 +3,11 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import
+module
+
+public import
   Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Machine.Program.Defs
-import
+public import
   Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Machine.Program.Internal
 
 /-!
@@ -15,6 +17,8 @@ The fixed-program halt test copies the canonical sparse-snapshot PC, walks a
 finite decrementing selector, restores its scratch, and writes `1` exactly when
 the selected instruction is `halt`.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

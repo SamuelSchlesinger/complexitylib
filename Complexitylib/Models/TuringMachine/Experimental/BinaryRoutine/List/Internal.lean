@@ -3,12 +3,16 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Models.TuringMachine.Experimental.BinaryRoutine
-import Complexitylib.Models.TuringMachine.Experimental.BinaryRoutine.List.Defs
+module
+
+public import Complexitylib.Models.TuringMachine.Experimental.BinaryRoutine
+public import Complexitylib.Models.TuringMachine.Experimental.BinaryRoutine.List.Defs
 
 /-!
 # Finite composition of proof-carrying binary routines -- proof internals
 -/
+
+@[expose] public section
 
 namespace Complexity
 

@@ -3,8 +3,10 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Circuits.BarringtonTyped.Defs
-import Complexitylib.Circuits.BarringtonTyped.Internal
+module
+
+public import Complexitylib.Circuits.BarringtonTyped.Defs
+public import Complexitylib.Circuits.BarringtonTyped.Internal
 
 /-!
 # Fixed-arity nonuniform Barrington theorem
@@ -21,6 +23,8 @@ model stores the unique zero-input answer separately.
 * `fixedArityBPFamily_exists_formula` -- balanced formulas give the converse.
 * `barrington_equivalence` -- the typed nonuniform class equivalence.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

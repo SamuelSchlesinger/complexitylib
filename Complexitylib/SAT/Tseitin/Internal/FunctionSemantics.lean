@@ -3,7 +3,9 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.SAT.Tseitin.Defs
+module
+
+public import Complexitylib.SAT.Tseitin.Defs
 
 /-!
 # Total-function semantics for Tseitin splitting
@@ -18,6 +20,8 @@ CNFs. It relates that evaluation to the existing list semantics, proves the two
 satisfiability notions equivalent, and records the congruence and update lemmas used
 by the recursive Tseitin correctness proof.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

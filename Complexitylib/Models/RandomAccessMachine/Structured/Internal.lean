@@ -3,8 +3,10 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Models.RandomAccessMachine.Internal
-import Complexitylib.Models.RandomAccessMachine.Structured.Defs
+module
+
+public import Complexitylib.Models.RandomAccessMachine.Internal
+public import Complexitylib.Models.RandomAccessMachine.Structured.Defs
 
 /-!
 # Structured logarithmic-cost RAM programs — proof internals
@@ -12,6 +14,8 @@ import Complexitylib.Models.RandomAccessMachine.Structured.Defs
 This file proves that absolute-jump lowering preserves the independent source
 semantics exactly: final registers, logarithmic cost, and peak register space.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

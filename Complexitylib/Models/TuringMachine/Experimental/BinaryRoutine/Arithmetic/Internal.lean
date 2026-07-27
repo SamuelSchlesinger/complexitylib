@@ -3,19 +3,23 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Circuits.Encoding.Machine.NatCode
-import Complexitylib.Circuits.Encoding.Machine.RawGate
-import Complexitylib.Models.TuringMachine.Experimental.BinaryRoutine
-import Complexitylib.Models.TuringMachine.Experimental.BinaryRoutine.Arithmetic.Defs
-import Complexitylib.Models.TuringMachine.Subroutines.BinaryAdd
-import Complexitylib.Models.TuringMachine.Subroutines.BinaryAddConst
-import Complexitylib.Models.TuringMachine.Subroutines.BinaryMulAdd
-import Complexitylib.Models.TuringMachine.Subroutines.BinaryPolynomial
-import Complexitylib.Models.TuringMachine.Subroutines.ClearWork
+module
+
+public import Complexitylib.Circuits.Encoding.Machine.NatCode
+public import Complexitylib.Circuits.Encoding.Machine.RawGate
+public import Complexitylib.Models.TuringMachine.Experimental.BinaryRoutine
+public import Complexitylib.Models.TuringMachine.Experimental.BinaryRoutine.Arithmetic.Defs
+public import Complexitylib.Models.TuringMachine.Subroutines.BinaryAdd
+public import Complexitylib.Models.TuringMachine.Subroutines.BinaryAddConst
+public import Complexitylib.Models.TuringMachine.Subroutines.BinaryMulAdd
+public import Complexitylib.Models.TuringMachine.Subroutines.BinaryPolynomial
+public import Complexitylib.Models.TuringMachine.Subroutines.ClearWork
 
 /-!
 # Arithmetic leaves for proof-carrying binary routines -- proof internals
 -/
+
+@[expose] public section
 
 namespace Complexity
 

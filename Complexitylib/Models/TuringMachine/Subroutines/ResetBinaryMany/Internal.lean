@@ -3,12 +3,16 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Models.TuringMachine.Subroutines.ResetBinary
-import Complexitylib.Models.TuringMachine.Subroutines.ResetBinaryMany.Defs
+module
+
+public import Complexitylib.Models.TuringMachine.Subroutines.ResetBinary
+public import Complexitylib.Models.TuringMachine.Subroutines.ResetBinaryMany.Defs
 
 /-!
 # Resetting several binary work tapes — proof internals
 -/
+
+@[expose] public section
 
 namespace Complexity
 

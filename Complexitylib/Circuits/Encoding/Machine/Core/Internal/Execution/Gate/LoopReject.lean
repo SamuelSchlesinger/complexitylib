@@ -3,8 +3,10 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Circuits.Encoding.Machine.Core.Internal.Execution.Gate.Loop
-import Complexitylib.Circuits.Encoding.Machine.Core.Internal.Execution.Gate.Reject
+module
+
+public import Complexitylib.Circuits.Encoding.Machine.Core.Internal.Execution.Gate.Loop
+public import Complexitylib.Circuits.Encoding.Machine.Core.Internal.Execution.Gate.Reject
 
 /-!
 # Rejecting gate-stream execution
@@ -14,6 +16,8 @@ stream. It reuses the successful loop's frontier and counter invariants and
 the same named budget, while preserving a well-formed counter remainder and
 recording the machine's zero verdict.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

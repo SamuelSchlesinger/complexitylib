@@ -3,9 +3,11 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Circuits.BarringtonCompiler.Defs
-import Complexitylib.Circuits.BranchingProgramEncoding.Defs
-import Complexitylib.Circuits.FormulaEncoding.Defs
+module
+
+public import Complexitylib.Circuits.BarringtonCompiler.Defs
+public import Complexitylib.Circuits.BranchingProgramEncoding.Defs
+public import Complexitylib.Circuits.FormulaEncoding.Defs
 
 /-!
 # Pure bitstring target for the uniform Barrington generator
@@ -16,6 +18,8 @@ compiler at the fixed target `5`-cycle, and serializes the resulting width-`5`
 program. Malformed formula codes map to the empty string; valid program codes
 are always nonempty because they start with an instruction-count field.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

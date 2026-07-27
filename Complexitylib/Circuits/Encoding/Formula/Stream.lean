@@ -3,8 +3,10 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Circuits.Encoding.Formula.Stream.Defs
-import Complexitylib.Circuits.Encoding.Formula.Stream.Internal
+module
+
+public import Complexitylib.Circuits.Encoding.Formula.Stream.Defs
+public import Complexitylib.Circuits.Encoding.Formula.Stream.Internal
 
 /-!
 # Stack-free streams for finite Boolean folds
@@ -25,6 +27,8 @@ recomputation; no executable cursor is claimed here.
 - `BoolFormula.compileRaw_disjs_eq_rightFold` gives the exact disjunction stream.
 - `BoolFormula.length_compileRawRightFold` gives its exact gate count.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

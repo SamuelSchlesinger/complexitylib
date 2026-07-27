@@ -3,8 +3,10 @@ Copyright (c) 2025 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Circuits.AndOrNot.Defs
-import Complexitylib.Circuits.Internal.CircuitDescriptor
+module
+
+public import Complexitylib.Circuits.AndOrNot.Defs
+public import Complexitylib.Circuits.Internal.CircuitDescriptor
 
 /-! # Internal: Typed Circuits as Circuit Descriptors
 
@@ -14,6 +16,8 @@ its orderedness proof, and its semantic-correctness proof, so clients that need
 this bridge do not also acquire the lower-bound and padding machinery from
 `Internal.Bridge`.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

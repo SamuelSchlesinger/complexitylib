@@ -3,8 +3,10 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Circuits.Formula
-import Complexitylib.Circuits.Internal.Spira
+module
+
+public import Complexitylib.Circuits.Formula
+public import Complexitylib.Circuits.Internal.Spira
 
 /-!
 # Spira's formula-balancing theorem
@@ -23,6 +25,8 @@ transformation.
 * `BoolFormula.exists_spira_balanced` -- an equivalent logarithmic-depth,
   polynomial-size Boolean formula.
 -/
+
+@[expose] public section
 
 namespace Complexity
 namespace BoolFormula

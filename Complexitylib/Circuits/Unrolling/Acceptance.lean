@@ -3,10 +3,12 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Circuits.Encoding.ToCircuit
-import Complexitylib.Circuits.Unrolling.Acceptance.Defs
-import Complexitylib.Circuits.Unrolling.Acceptance.Internal.Evaluation
-import Complexitylib.Circuits.Unrolling.Acceptance.Internal.Structure
+module
+
+public import Complexitylib.Circuits.Encoding.ToCircuit
+public import Complexitylib.Circuits.Unrolling.Acceptance.Defs
+public import Complexitylib.Circuits.Unrolling.Acceptance.Internal.Evaluation
+public import Complexitylib.Circuits.Unrolling.Acceptance.Internal.Structure
 
 /-!
 # Acceptance circuits for bounded Turing-machine traces
@@ -31,6 +33,8 @@ zero-length case separately.
 - `card_acceptingChoices_eq_acceptCount`: circuit acceptance counts machine
   accepting paths exactly.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

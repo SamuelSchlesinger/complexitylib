@@ -3,8 +3,10 @@ Copyright (c) 2025 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Classes.NP
-import Complexitylib.Classes.FNP
+module
+
+public import Complexitylib.Classes.NP
+public import Complexitylib.Classes.FNP
 
 /-!
 # NP witness characterization
@@ -49,6 +51,8 @@ existing `unionTM`/`seqTM` combinators — and is deferred to a later pass.
 All downstream consequences (including `SAT ∈ NP` conditional on the SAT
 verifier being in P) rest only on that single lemma.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

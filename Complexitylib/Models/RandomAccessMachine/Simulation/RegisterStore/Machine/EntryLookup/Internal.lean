@@ -3,15 +3,19 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import
+module
+
+public import
   Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Machine.EntryLookup.Defs
-import
+public import
   Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Machine.EntryScan
-import Mathlib.Data.Nat.Bitwise
+public import Mathlib.Data.Nat.Bitwise
 
 /-!
 # Sparse register lookup — proof internals
 -/
+
+@[expose] public section
 
 namespace Complexity
 

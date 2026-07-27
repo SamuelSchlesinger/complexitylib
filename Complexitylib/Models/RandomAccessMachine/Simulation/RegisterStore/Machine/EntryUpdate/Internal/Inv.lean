@@ -3,12 +3,14 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import
+module
+
+public import
 Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Machine.EntryUpdate.Internal.Ctrl
-import
+public import
   Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Machine.EntryScan.Internal.Inv
-import Complexitylib.Models.TuringMachine.Subroutines.BinaryPred
-import Complexitylib.Models.TuringMachine.Subroutines.BinarySucc
+public import Complexitylib.Models.TuringMachine.Subroutines.BinaryPred
+public import Complexitylib.Models.TuringMachine.Subroutines.BinarySucc
 
 /-!
 # Bounded encoded sparse-store update — invariant internals
@@ -17,6 +19,8 @@ Tape-layout views and frame lemmas used by the semantic update loop.  In
 particular, this file isolates the only controller-local mutation: changing
 the canonical zero-valued `found` tape to canonical one after a hit.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

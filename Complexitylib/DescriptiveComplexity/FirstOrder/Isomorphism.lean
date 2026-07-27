@@ -3,8 +3,10 @@ Copyright (c) 2025 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.DescriptiveComplexity.Query
-import Complexitylib.DescriptiveComplexity.FirstOrder.Semantics
+module
+
+public import Complexitylib.DescriptiveComplexity.Query
+public import Complexitylib.DescriptiveComplexity.FirstOrder.Semantics
 
 /-!
   Isomorphism preservation for first-order logic.
@@ -14,6 +16,8 @@ import Complexitylib.DescriptiveComplexity.FirstOrder.Semantics
   2. Satisfaction is preserved by isomorphisms
   3. FO sentences are order-independent (Immerman Proposition 1.16)
 -/
+
+@[expose] public section
 
 namespace Complexity
 

@@ -3,7 +3,9 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Circuits.XOR
+module
+
+public import Complexitylib.Circuits.XOR
 
 /-!
 # Parity on a finite support -- definitions
@@ -11,6 +13,8 @@ import Complexitylib.Circuits.XOR
 Random restrictions leave parity on the remaining free coordinates, possibly
 complemented by the fixed coordinates. `xorOn` makes that support explicit.
 -/
+
+@[expose] public section
 
 namespace Complexity
 namespace Schnorr

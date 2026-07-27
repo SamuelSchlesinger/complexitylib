@@ -3,19 +3,23 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import
+module
+
+public import
 Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Machine.Instruction.DenseSim
-import Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.DenseOverlay
-import
+public import Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.DenseOverlay
+public import
   Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Machine.Instruction.Sim.Internal
-import Complexitylib.Models.TuringMachine.Combinators.WorkBranch
-import Complexitylib.Models.TuringMachine.Subroutines.BinaryCopy
-import Complexitylib.Models.TuringMachine.Subroutines.BinaryPred
-import Complexitylib.Models.TuringMachine.Subroutines.ResetBinary
+public import Complexitylib.Models.TuringMachine.Combinators.WorkBranch
+public import Complexitylib.Models.TuringMachine.Subroutines.BinaryCopy
+public import Complexitylib.Models.TuringMachine.Subroutines.BinaryPred
+public import Complexitylib.Models.TuringMachine.Subroutines.ResetBinary
 
 /-!
 # Fixed-program dense-overlay dispatch
 -/
+
+@[expose] public section
 
 namespace Complexity
 namespace RAM

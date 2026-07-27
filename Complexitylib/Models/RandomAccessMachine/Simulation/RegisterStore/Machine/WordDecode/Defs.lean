@@ -3,9 +3,11 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Models.TuringMachine.Combinators.ForWorkOnes.Defs
-import Complexitylib.Models.TuringMachine.Subroutines.BinaryFor.Defs
-import Complexitylib.Models.TuringMachine.Subroutines.BinarySucc.Defs
+module
+
+public import Complexitylib.Models.TuringMachine.Combinators.ForWorkOnes.Defs
+public import Complexitylib.Models.TuringMachine.Subroutines.BinaryFor.Defs
+public import Complexitylib.Models.TuringMachine.Subroutines.BinarySucc.Defs
 
 /-!
 # RAM snapshot word-width decoder — definitions
@@ -16,6 +18,8 @@ self-delimiting snapshot word and increments a canonical binary counter once
 per `1`. The source head stops on the zero separator, ready for the payload
 copy phase.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

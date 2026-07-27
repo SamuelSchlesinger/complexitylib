@@ -3,7 +3,9 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Models.TuringMachine.Subroutines.BinarySucc.Defs
+module
+
+public import Complexitylib.Models.TuringMachine.Subroutines.BinarySucc.Defs
 
 /-!
 # Canonical binary count-up loops — definitions
@@ -24,6 +26,8 @@ behavior during an iteration is entirely delegated to the body.
 The wrapper-free certificate structures at the end of the file separate the
 executable controller from later correctness and all-prefix space proofs.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

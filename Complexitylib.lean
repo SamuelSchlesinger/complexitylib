@@ -3,15 +3,17 @@ Copyright (c) 2025 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Models
-import Complexitylib.Asymptotics
-import Complexitylib.TimeConstructible
-import Complexitylib.Classes
-import Complexitylib.Languages
-import Complexitylib.SAT
-import Complexitylib.Circuits
-import Complexitylib.BooleanAnalysis
-import Complexitylib.DescriptiveComplexity
+module
+
+public import Complexitylib.Models
+public import Complexitylib.Asymptotics
+public import Complexitylib.TimeConstructible
+public import Complexitylib.Classes
+public import Complexitylib.Languages
+public import Complexitylib.SAT
+public import Complexitylib.Circuits
+public import Complexitylib.BooleanAnalysis
+public import Complexitylib.DescriptiveComplexity
 
 /-!
 # Complexitylib
@@ -65,3 +67,5 @@ hardwiring and its advice corollary live in
 logarithmic-depth Boolean formula families with polynomial-length width-`5`
 permutation branching-program families.
 -/
+
+@[expose] public section

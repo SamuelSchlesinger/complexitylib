@@ -3,8 +3,10 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Models.TuringMachine.Hoare.Space.Defs
-import Complexitylib.Models.TuringMachine.Hoare.Space.Internal
+module
+
+public import Complexitylib.Models.TuringMachine.Hoare.Space.Defs
+public import Complexitylib.Models.TuringMachine.Hoare.Space.Internal
 
 /-!
 # Space-aware Hoare specifications
@@ -27,6 +29,8 @@ closure, and a fresh-start computation bridge.
 - `TM.IsTransducer.seqTM` — sequential composition remains append-only.
 - `TM.computesInSpace_of_hoareTimeSpace` — package per-input contracts.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

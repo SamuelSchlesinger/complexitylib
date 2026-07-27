@@ -3,9 +3,11 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Circuits.Unrolling.Trace.Internal.HeadBounds
-import Complexitylib.Circuits.Unrolling.Trace.Internal.Structure
-import Complexitylib.Circuits.Unrolling.Transition.Fragment.Internal.ArrayEvaluation
+module
+
+public import Complexitylib.Circuits.Unrolling.Trace.Internal.HeadBounds
+public import Complexitylib.Circuits.Unrolling.Trace.Internal.Structure
+public import Complexitylib.Circuits.Unrolling.Transition.Fragment.Internal.ArrayEvaluation
 
 /-!
 # Evaluation of tiled bounded-trace circuits
@@ -16,6 +18,8 @@ fragment, appends one array-native transition fragment at a time, and keeps
 the current packed block synchronized with the corresponding NTM trace
 prefix. The complete-trace theorem is the horizon specialization.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

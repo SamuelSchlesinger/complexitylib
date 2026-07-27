@@ -3,7 +3,9 @@ Copyright (c) 2025 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Circuits.Encoding.Defs
+module
+
+public import Complexitylib.Circuits.Encoding.Defs
 
 /-!
 # Reconstructing typed circuits from raw circuit syntax
@@ -13,6 +15,8 @@ This definitions layer packages a nonempty, topologically ordered
 gate becomes the sole output gate; every preceding raw gate becomes an
 internal gate in the same order.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

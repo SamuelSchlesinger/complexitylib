@@ -3,13 +3,15 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore
-import
+module
+
+public import Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore
+public import
   Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Machine.EntryMatch.Internal
-import
+public import
   Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Machine.EntryScan.Defs
-import Complexitylib.Models.TuringMachine.Subroutines.BinaryPred
-import Complexitylib.Models.TuringMachine.Subroutines.ResetBinaryMany
+public import Complexitylib.Models.TuringMachine.Subroutines.BinaryPred
+public import Complexitylib.Models.TuringMachine.Subroutines.ResetBinaryMany
 
 /-!
 # Encoded-length bounds for sparse-entry scans -- proof internals
@@ -18,6 +20,8 @@ The optimized word decoder leaves unary width markers. This makes decoding,
 matching, and cleanup linear in the two words actually traversed. The final
 scan theorem retains only the separate binary remaining-count charge.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

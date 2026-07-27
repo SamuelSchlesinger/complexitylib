@@ -3,7 +3,9 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Classes.PPoly.Uniform.Unrolling.Serializer.Transition.Case.Defs
+module
+
+public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Serializer.Transition.Case.Defs
 
 /-!
 # Numeric schedules for transition-effect formulas
@@ -18,6 +20,8 @@ The machine-dependent case table is inspected only by compile-time numeric
 extractors. The streaming schedule itself carries no transition case, effect,
 formula tree, bounded index, or list traversal state.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

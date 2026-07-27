@@ -3,18 +3,22 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Models.TuringMachine.Combinators.ForBinaryWork
-import Complexitylib.Models.TuringMachine.Combinators.WorkSymbolBranch
-import Complexitylib.Models.TuringMachine.Subroutines.BinaryCopy
-import Complexitylib.Models.TuringMachine.Subroutines.BinaryRippleAdd
-import Complexitylib.Models.TuringMachine.Subroutines.BinaryShiftMul.Defs
-import Complexitylib.Models.TuringMachine.Subroutines.ResetBinaryMany
+module
+
+public import Complexitylib.Models.TuringMachine.Combinators.ForBinaryWork
+public import Complexitylib.Models.TuringMachine.Combinators.WorkSymbolBranch
+public import Complexitylib.Models.TuringMachine.Subroutines.BinaryCopy
+public import Complexitylib.Models.TuringMachine.Subroutines.BinaryRippleAdd
+public import Complexitylib.Models.TuringMachine.Subroutines.BinaryShiftMul.Defs
+public import Complexitylib.Models.TuringMachine.Subroutines.ResetBinaryMany
 
 /-!
 # Width-driven binary shift-and-add multiplication -- output safety
 
 This file composes the transducer certificates of every multiplication phase.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

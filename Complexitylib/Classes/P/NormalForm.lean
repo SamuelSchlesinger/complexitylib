@@ -3,7 +3,9 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Classes.P.Internal.NormalForm
+module
+
+public import Complexitylib.Classes.P.Internal.NormalForm
 
 /-!
 # Polynomial-time normal forms
@@ -18,6 +20,8 @@ normalized bounds are valid on every input length and are monotone.
 - `mem_P_iff_decidesInTime_polynomial` — polynomial-evaluation normal form for `P`
 - `mem_FP_iff_computesInTime_polynomial` — polynomial-evaluation normal form for `FP`
 -/
+
+@[expose] public section
 
 namespace Complexity
 

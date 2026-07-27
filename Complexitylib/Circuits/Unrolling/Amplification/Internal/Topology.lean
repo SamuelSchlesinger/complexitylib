@@ -3,7 +3,9 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Circuits.Unrolling.Amplification.Internal.Structure
+module
+
+public import Complexitylib.Circuits.Unrolling.Amplification.Internal.Structure
 
 /-!
 # Topology internals for parallel amplification circuits
@@ -13,6 +15,8 @@ prefix. Their recorded verdict wires then feed the final strict-majority
 threshold fragment. This file proves that both stages are topologically
 ordered and that the final nonempty raw circuit is well formed.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

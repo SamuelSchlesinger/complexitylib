@@ -3,9 +3,11 @@ Copyright (c) 2025 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Circuits.AndOrNot.Defs
-import Mathlib.Data.Nat.Log
-import Mathlib.Tactic
+module
+
+public import Complexitylib.Circuits.AndOrNot.Defs
+public import Mathlib.Data.Nat.Log
+public import Mathlib.Tactic
 
 /-! # Internal: Shannon Upper Bound Construction
 
@@ -28,6 +30,8 @@ for column functions, AND/OR combining layers. Total ≤ `18 · 2^N / N`
 gates for `N ≥ 16`.
 -/
 
+@[expose] public section
+
 namespace Complexity
 
 namespace ShannonUpper
@@ -43,7 +47,7 @@ def dataBits (N : Nat) : Nat := N - addrBits N
 /-! ## Gate Construction Helpers -/
 
 /-- Build a fan-in-2 gate bundled with an acyclicity proof. -/
-private def mkGate2' (op : AndOrOp) {W : Nat} (w₀ w₁ : Fin W) (n₀ n₁ : Bool)
+def mkGate2' (op : AndOrOp) {W : Nat} (w₀ w₁ : Fin W) (n₀ n₁ : Bool)
     (bound : Nat) (hw₀ : w₀.val < bound) (hw₁ : w₁.val < bound) :
     { g : Gate Basis.andOr2 W // ∀ k : Fin g.fanIn, (g.inputs k).val < bound } :=
   ⟨{ op := op, fanIn := 2, arityOk := rfl,
@@ -52,26 +56,28 @@ private def mkGate2' (op : AndOrOp) {W : Nat} (w₀ w₁ : Fin W) (n₀ n₁ : B
    fun k => by dsimp; split_ifs <;> assumption⟩
 
 /-- Remap a wire from c₂'s space into the combined space. -/
-private def remap₂ (N G₁ G₂ : Nat) (w : Fin (N + G₂)) : Fin (N + (G₁ + G₂ + 2)) :=
+def remap₂ (N G₁ G₂ : Nat) (w : Fin (N + G₂)) : Fin (N + (G₁ + G₂ + 2)) :=
   if h : w.val < N then ⟨w.val, by omega⟩
   else ⟨w.val + G₁ + 1, by have := w.isLt; omega⟩
 
-private lemma remap₂_val_lt (N G₁ G₂ : Nat) (w : Fin (N + G₂))
+lemma remap₂_val_lt (N G₁ G₂ : Nat) (w : Fin (N + G₂))
     (bound : Nat) (hb : G₁ + 1 ≤ bound) (hw : w.val < N + (bound - G₁ - 1)) :
     (remap₂ N G₁ G₂ w).val < N + bound := by
   unfold remap₂; split_ifs <;> dsimp <;> omega
 
-private def gw (idx : Nat) {W : Nat} (g : Gate Basis.andOr2 W)
+@[nolint docBlame]
+def gw (idx : Nat) {W : Nat} (g : Gate Basis.andOr2 W)
     (_ : idx < 2 := by omega) : Fin W :=
   g.inputs ⟨idx, by rw [fanIn_andOr2]; omega⟩
-private def gn (idx : Nat) {W : Nat} (g : Gate Basis.andOr2 W)
+@[nolint docBlame]
+def gn (idx : Nat) {W : Nat} (g : Gate Basis.andOr2 W)
     (_ : idx < 2 := by omega) : Bool :=
   g.negated ⟨idx, by rw [fanIn_andOr2]; omega⟩
 
 /-! ## Binary Circuit Composition -/
 
 /-- Gate + acyclicity proof for the binary composition, bundled as a subtype. -/
-private def binopGWP {N G₁ G₂ : Nat} [NeZero N]
+def binopGWP {N G₁ G₂ : Nat} [NeZero N]
     (c₁ : Circuit Basis.andOr2 N 1 G₁) (c₂ : Circuit Basis.andOr2 N 1 G₂)
     (i : Fin (G₁ + G₂ + 2)) :
     { g : Gate Basis.andOr2 (N + (G₁ + G₂ + 2)) //
@@ -117,7 +123,7 @@ def binopCircuit (op : AndOrOp) {N G₁ G₂ : Nat} [NeZero N]
       negated := fun _ => false }
   acyclic i k := (binopGWP c₁ c₂ i).property k
 
-private theorem mkGate2'_eval (o : AndOrOp) {W : Nat} (w₀ w₁ : Fin W) (n₀ n₁ : Bool)
+theorem mkGate2'_eval (o : AndOrOp) {W : Nat} (w₀ w₁ : Fin W) (n₀ n₁ : Bool)
     (b : Nat) (h₀ : w₀.val < b) (h₁ : w₁.val < b)
     (wv : BitString W) :
     (mkGate2' o w₀ w₁ n₀ n₁ b h₀ h₁).val.eval wv =
@@ -127,7 +133,7 @@ private theorem mkGate2'_eval (o : AndOrOp) {W : Nat} (w₀ w₁ : Fin W) (n₀ 
   simp only [mkGate2', Gate.eval, Basis.andOr2]
   cases o <;> simp [AndOrOp.eval, Fin.foldl_succ_last, Fin.foldl_zero]
 
-private theorem andOr2_gate_eval_two_inputs {W : Nat}
+theorem andOr2_gate_eval_two_inputs {W : Nat}
     (g : Gate Basis.andOr2 W) (wv : BitString W) :
     g.eval wv =
     match g.op with
@@ -137,7 +143,7 @@ private theorem andOr2_gate_eval_two_inputs {W : Nat}
   simp only [Gate.eval, Basis.andOr2, gw, gn]
   cases g.op <;> simp_all [AndOrOp.eval, Fin.foldl_succ_last, Fin.foldl_zero, Fin.cast]
 
-private theorem binop_wireValue_c₁ {N G₁ G₂ : Nat} [NeZero N]
+theorem binop_wireValue_c₁ {N G₁ G₂ : Nat} [NeZero N]
     (op : AndOrOp)
     (c₁ : Circuit Basis.andOr2 N 1 G₁) (c₂ : Circuit Basis.andOr2 N 1 G₂)
     (x : BitString N) (w : Fin (N + G₁))
@@ -176,7 +182,7 @@ private theorem binop_wireValue_c₁ {N G₁ G₂ : Nat} [NeZero N]
   have := key w.val (by omega) hw
   convert this using 2
 
-private theorem binop_wireValue_c₂ {N G₁ G₂ : Nat} [NeZero N]
+theorem binop_wireValue_c₂ {N G₁ G₂ : Nat} [NeZero N]
     (op : AndOrOp)
     (c₁ : Circuit Basis.andOr2 N 1 G₁) (c₂ : Circuit Basis.andOr2 N 1 G₂)
     (x : BitString N) (w : Fin (N + G₂)) :
@@ -289,10 +295,10 @@ theorem binopCircuit_or_correct {N G₁ G₂ : Nat} [NeZero N]
 
 /-! ### Nat.log helpers -/
 
-private theorem log_ge_one (N : Nat) (hN : 16 ≤ N) : 1 ≤ Nat.log 2 N :=
+theorem log_ge_one (N : Nat) (hN : 16 ≤ N) : 1 ≤ Nat.log 2 N :=
   Nat.le_log_of_pow_le (by omega) (by omega)
 
-private theorem log_lt_N (N : Nat) (hN : 16 ≤ N) : Nat.log 2 N < N :=
+theorem log_lt_N (N : Nat) (hN : 16 ≤ N) : Nat.log 2 N < N :=
   Nat.log_lt_of_lt_pow (by omega) (@Nat.lt_pow_self N 2 (by omega))
 
 /-- For `N ≥ 16` there are at least three address variables. -/
@@ -314,18 +320,18 @@ theorem dataBits_ge_two (N : Nat) (hN : 16 ≤ N) : 2 ≤ dataBits N := by
 
 /-! ### Key identities -/
 
-private theorem addr_le_N (N : Nat) (hN : 16 ≤ N) : addrBits N ≤ N := by
+theorem addr_le_N (N : Nat) (hN : 16 ≤ N) : addrBits N ≤ N := by
   unfold addrBits; have := log_lt_N N hN; omega
 
-private theorem addr_data_sum (N : Nat) (hN : 16 ≤ N) :
+theorem addr_data_sum (N : Nat) (hN : 16 ≤ N) :
     dataBits N + addrBits N = N := by
   unfold dataBits; have := addr_le_N N hN; omega
 
-private theorem pow_split (N : Nat) (hN : 16 ≤ N) :
+theorem pow_split (N : Nat) (hN : 16 ≤ N) :
     2 ^ dataBits N * 2 ^ addrBits N = 2 ^ N := by
   rw [← Nat.pow_add]; congr 1; exact addr_data_sum N hN
 
-private theorem two_mul_pow_addr_le (N : Nat) (hN : 16 ≤ N) :
+theorem two_mul_pow_addr_le (N : Nat) (hN : 16 ≤ N) :
     2 * 2 ^ addrBits N ≤ N := by
   unfold addrBits
   have hlog := log_ge_one N hN
@@ -334,7 +340,7 @@ private theorem two_mul_pow_addr_le (N : Nat) (hN : 16 ≤ N) :
     rw [Nat.pow_succ]; ring
   rw [this]; exact Nat.pow_log_le_self 2 (by omega)
 
-private theorem n_lt_four_pow_addr (N : Nat) (hN : 16 ≤ N) :
+theorem n_lt_four_pow_addr (N : Nat) (hN : 16 ≤ N) :
     N < 4 * 2 ^ addrBits N := by
   unfold addrBits
   have hlog := log_ge_one N hN
@@ -345,7 +351,7 @@ private theorem n_lt_four_pow_addr (N : Nat) (hN : 16 ≤ N) :
 
 /-! ### N² ≤ 2^N for N ≥ 16 -/
 
-private theorem two_n_plus_one_le (N : Nat) (hN : 4 ≤ N) : 2 * N + 1 ≤ 2 ^ N := by
+theorem two_n_plus_one_le (N : Nat) (hN : 4 ≤ N) : 2 * N + 1 ≤ 2 ^ N := by
   induction N with
   | zero => omega
   | succ n ih =>
@@ -358,7 +364,7 @@ private theorem two_n_plus_one_le (N : Nat) (hN : 4 ≤ N) : 2 * N + 1 ≤ 2 ^ N
         _ ≤ 2 ^ n + 2 ^ n := by nlinarith [@Nat.lt_pow_self n 2 (by omega)]
         _ = 2 ^ (n + 1) := by ring
 
-private theorem sq_le_pow (N : Nat) (hN : 16 ≤ N) : N * N ≤ 2 ^ N := by
+theorem sq_le_pow (N : Nat) (hN : 16 ≤ N) : N * N ≤ 2 ^ N := by
   induction N with
   | zero => omega
   | succ n ih =>
@@ -374,7 +380,7 @@ private theorem sq_le_pow (N : Nat) (hN : 16 ≤ N) : N * N ≤ 2 ^ N := by
 
 /-! ### Term-by-term bounds -/
 
-private theorem term1 (N : Nat) (hN : 16 ≤ N) :
+theorem term1 (N : Nat) (hN : 16 ≤ N) :
     4 * 2 ^ dataBits N * N ≤ 16 * 2 ^ N := by
   have hlt := n_lt_four_pow_addr N hN
   calc 4 * 2 ^ dataBits N * N
@@ -385,13 +391,13 @@ private theorem term1 (N : Nat) (hN : 16 ≤ N) :
     _ = 16 * (2 ^ dataBits N * 2 ^ addrBits N) := by ring
     _ = 16 * 2 ^ N := by rw [pow_split N hN]
 
-private theorem term2 (N : Nat) (hN : 16 ≤ N) :
+theorem term2 (N : Nat) (hN : 16 ≤ N) :
     2 * 2 ^ addrBits N * N ≤ 2 ^ N := by
   calc 2 * 2 ^ addrBits N * N
       ≤ N * N := by apply Nat.mul_le_mul_right; exact two_mul_pow_addr_le N hN
     _ ≤ 2 ^ N := sq_le_pow N hN
 
-private theorem pow_ge_four_mul (k : Nat) (hk : 4 ≤ k) : 4 * k ≤ 2 ^ k := by
+theorem pow_ge_four_mul (k : Nat) (hk : 4 ≤ k) : 4 * k ≤ 2 ^ k := by
   induction k with
   | zero => omega
   | succ n ih =>
@@ -404,13 +410,13 @@ private theorem pow_ge_four_mul (k : Nat) (hk : 4 ≤ k) : 4 * k ≤ 2 ^ k := by
         _ ≤ 2 ^ n + 2 ^ n := by nlinarith [@Nat.lt_pow_self n 2 (by omega)]
         _ = 2 ^ (n + 1) := by ring
 
-private theorem log_le_quarter (N : Nat) (hN : 16 ≤ N) : 4 * Nat.log 2 N ≤ N := by
+theorem log_le_quarter (N : Nat) (hN : 16 ≤ N) : 4 * Nat.log 2 N ≤ N := by
   have hlog4 : 4 ≤ Nat.log 2 N := Nat.le_log_of_pow_le (by omega) (by omega)
   calc 4 * Nat.log 2 N
       ≤ 2 ^ Nat.log 2 N := pow_ge_four_mul (Nat.log 2 N) hlog4
     _ ≤ N := Nat.pow_log_le_self 2 (by omega)
 
-private theorem pow_addr_plus_addr_le (N : Nat) (hN : 16 ≤ N) :
+theorem pow_addr_plus_addr_le (N : Nat) (hN : 16 ≤ N) :
     2 ^ addrBits N + addrBits N + (Nat.log 2 N + 1) ≤ N := by
   unfold addrBits
   have hlog1 : 1 ≤ Nat.log 2 N := Nat.le_log_of_pow_le (by omega) (by omega)
@@ -422,7 +428,7 @@ private theorem pow_addr_plus_addr_le (N : Nat) (hN : 16 ≤ N) :
   have := log_le_quarter N hN
   omega
 
-private theorem term3 (N : Nat) (hN : 16 ≤ N) :
+theorem term3 (N : Nat) (hN : 16 ≤ N) :
     2 ^ (2 ^ addrBits N + addrBits N) * N ≤ 2 ^ N := by
   have hkey := pow_addr_plus_addr_le N hN
   have hsub : Nat.log 2 N + 1 ≤ N - (2 ^ addrBits N + addrBits N) := by omega
@@ -441,7 +447,7 @@ private theorem term3 (N : Nat) (hN : 16 ≤ N) :
         apply Nat.mul_le_mul_left; omega
     _ = 2 ^ N := hsplit
 
-private theorem n_le_pow (N : Nat) : N ≤ 2 ^ N := by
+theorem n_le_pow (N : Nat) : N ≤ 2 ^ N := by
   have := @Nat.lt_pow_self N 2 (by omega); omega
 
 /-- Core counting bound: the total Shannon gate budget times `N` is at most
@@ -472,7 +478,8 @@ theorem shannon_size_le (N : Nat) (hN : 16 ≤ N) (G : Nat)
 
 /-! ### Gate construction helper -/
 
-private def mkG (W : Nat) (op : AndOrOp) (w0 w1 : Nat) (n0 n1 : Bool)
+@[nolint docBlame]
+def mkG (W : Nat) (op : AndOrOp) (w0 w1 : Nat) (n0 n1 : Bool)
     (hw0 : w0 < W) (hw1 : w1 < W)
     (bound : Nat) (hb0 : w0 < bound) (hb1 : w1 < bound) :
     { g : Gate Basis.andOr2 W // ∀ j : Fin g.fanIn, (g.inputs j).val < bound } :=
@@ -509,11 +516,11 @@ def orChainOffset (kk qq : Nat) : Nat := andLayerOffset kk qq + 2^qq
 
 /-! ### Power-of-2 helpers -/
 
-private lemma pow_ge_4 (n : Nat) (hn : 2 ≤ n) : 4 ≤ 2 ^ n := by
+lemma pow_ge_4 (n : Nat) (hn : 2 ≤ n) : 4 ≤ 2 ^ n := by
   have : (4 : Nat) = 2 ^ 2 := by norm_num
   rw [this]; exact Nat.pow_le_pow_right (by omega) hn
 
-private lemma pow_double (n : Nat) : 2 ^ (n + 1) = 2 * 2 ^ n := by ring
+lemma pow_double (n : Nat) : 2 ^ (n + 1) = 2 * 2 ^ n := by ring
 
 /-! ### Minterm tree level -/
 
@@ -575,7 +582,7 @@ lemma treeParentIndex_lt_j (l m j : Nat) (hl : 2 ≤ l)
   rw [hpow_eq]
   omega
 
-private lemma treeLevel_parent (l m : Nat) (hl : 2 ≤ l) :
+lemma treeLevel_parent (l m : Nat) (hl : 2 ≤ l) :
     treeLevel (treeParentIndex l m) = l - 1 := by
   unfold treeLevel treeParentIndex treeBase
   have h4l : 4 ≤ 2 ^ l := pow_ge_4 l hl
@@ -590,7 +597,7 @@ private lemma treeLevel_parent (l m : Nat) (hl : 2 ≤ l) :
       (show 2 ^ l + m % 2 ^ l < 2 ^ (l + 1) by have := pow_double l; omega))
   · exact Nat.le_log_of_pow_le (by omega) (by omega)
 
-private lemma treePosition_parent (l m : Nat) (_hl : 2 ≤ l) :
+lemma treePosition_parent (l m : Nat) (_hl : 2 ≤ l) :
     treePosition (treeParentIndex l m) (l - 1) = m % 2 ^ l := by
   show treeParentIndex l m - treeBase (l - 1) = m % 2 ^ l
   show treeBase (l - 1) + m % 2 ^ l - treeBase (l - 1) = m % 2 ^ l
@@ -604,7 +611,7 @@ noncomputable def encodeColumn (k : Nat) (col : Fin (2^k) → Bool) : Nat :=
   Finset.sum (Finset.univ : Finset (Fin (2^k)))
     fun j => if col j then 2^j.val else 0
 
-private lemma sum_pow_two_lt (n : Nat) :
+lemma sum_pow_two_lt (n : Nat) :
     Finset.sum Finset.univ (fun j : Fin n => (2 : Nat) ^ j.val) < 2 ^ n := by
   rw [Fin.sum_univ_eq_sum_range]
   induction n with
@@ -651,7 +658,8 @@ theorem columnPatternIndex_lt (N : Nat) (f : BitString N → Bool)
 
 /-! ### Shannon gate array -/
 
-private noncomputable def shannonGateArray (N : Nat) [NeZero N]
+@[nolint docBlame unusedArguments]
+noncomputable def shannonGateArray (N : Nat) [NeZero N]
     (f : BitString N → Bool) (hN : 16 ≤ N) :
     (i : Fin (totalSectionGates (addrBits N) (dataBits N))) →
     { g : Gate Basis.andOr2 (N + totalSectionGates (addrBits N) (dataBits N)) //
@@ -880,7 +888,8 @@ private noncomputable def shannonGateArray (N : Nat) [NeZero N]
       unfold orChainOffset at hiF; omega
     exact mkG W .or w0 w1 false false hw0_lt hw1_lt (N + i.val) hb0 hb1
 
-private noncomputable def shannonCircuit (N : Nat) [NeZero N]
+@[nolint docBlame]
+noncomputable def shannonCircuit (N : Nat) [NeZero N]
     (f : BitString N → Bool) (hN : 16 ≤ N) :
     Circuit Basis.andOr2 N 1 (totalSectionGates (addrBits N) (dataBits N)) where
   gates i := (shannonGateArray N f hN i).val
@@ -898,7 +907,7 @@ private noncomputable def shannonCircuit (N : Nat) [NeZero N]
 
 /-- The sum Σ_{j < k} (if b j then 2^j else 0) has no overlap between
     powers, so it is bounded by 2^k. -/
-private lemma sum_cond_pow_range_lt (k : Nat) (b : Nat → Bool) :
+lemma sum_cond_pow_range_lt (k : Nat) (b : Nat → Bool) :
     Finset.sum (Finset.range k) (fun j => if b j then 2^j else 0) < 2^k := by
   induction k with
   | zero => simp
@@ -909,7 +918,7 @@ private lemma sum_cond_pow_range_lt (k : Nat) (b : Nat → Bool) :
       _ = 2^(n+1) := by ring
 
 /-- testBit of a sum of conditional powers of 2 (range version). -/
-private theorem testBit_sum_cond_pow_range (k : Nat) (b : Nat → Bool)
+theorem testBit_sum_cond_pow_range (k : Nat) (b : Nat → Bool)
     (i : Nat) (hi : i < k) :
     Nat.testBit (Finset.sum (Finset.range k)
       (fun j => if b j then 2^j else 0)) i = b i := by
@@ -930,7 +939,7 @@ private theorem testBit_sum_cond_pow_range (k : Nat) (b : Nat → Bool)
         exact (Bool.eq_false_iff.mpr hbn).symm
 
 /-- Bound on conditional-power sum over Fin. -/
-private lemma sum_cond_pow_fin_lt (k : Nat) (b : BitString k) :
+lemma sum_cond_pow_fin_lt (k : Nat) (b : BitString k) :
     Finset.sum (Finset.univ : Finset (Fin k))
       (fun j => if b j then 2^j.val else 0) < 2^k :=
   calc _ ≤ Finset.sum Finset.univ (fun j : Fin k => 2^j.val) := by
@@ -938,7 +947,7 @@ private lemma sum_cond_pow_fin_lt (k : Nat) (b : BitString k) :
     _ < 2^k := sum_pow_two_lt k
 
 /-- testBit of a conditional-power sum over Fin k recovers the bit. -/
-private theorem testBit_sum_cond_pow_fin (k : Nat) (b : BitString k) (i : Nat) (hi : i < k) :
+theorem testBit_sum_cond_pow_fin (k : Nat) (b : BitString k) (i : Nat) (hi : i < k) :
     Nat.testBit (Finset.sum (Finset.univ : Finset (Fin k))
       (fun j => if b j then 2^j.val else 0)) i = b ⟨i, hi⟩ := by
   -- Prove by induction on k using a helper with ∀ quantifiers
@@ -983,12 +992,12 @@ private theorem testBit_sum_cond_pow_fin (k : Nat) (b : BitString k) (i : Nat) (
 /-! #### columnFunction reconstruction lemma -/
 
 /-- Shift the data bits of x to form a q-bit function. -/
-private def shiftedBits (N k q : Nat) (hkq : k + q = N) (x : BitString N) :
+def shiftedBits (N k q : Nat) (hkq : k + q = N) (x : BitString N) :
     BitString q :=
   fun j => x ⟨k + j.val, by have := j.isLt; omega⟩
 
 /-- columnFunction at the actual bit-vector address/data values equals f(x). -/
-private theorem columnFunction_at_actual_bits (N : Nat) [NeZero N]
+theorem columnFunction_at_actual_bits (N : Nat) [NeZero N]
     (f : BitString N → Bool) (x : BitString N)
     (k q : Nat) (hkq : k + q = N) :
     let addr : BitString k := fun j => x ⟨j.val, by have := j.isLt; omega⟩
@@ -1017,13 +1026,13 @@ private theorem columnFunction_at_actual_bits (N : Nat) [NeZero N]
 
 /-! ##### Key identity -/
 
-private theorem addrDataSum (N : Nat) (hN : 16 ≤ N) :
+theorem addrDataSum (N : Nat) (hN : 16 ≤ N) :
     addrBits N + dataBits N = N := by
   have := addr_data_sum N hN; omega
 
 /-! ##### Connecting the last wire to the OR chain -/
 
-private theorem lastWire_is_orChain_last (N : Nat) (hN : 16 ≤ N) :
+theorem lastWire_is_orChain_last (N : Nat) (hN : 16 ≤ N) :
     N + totalSectionGates (addrBits N) (dataBits N) - 1 =
     N + orChainOffset (addrBits N) (dataBits N) + (2 ^ dataBits N - 2) := by
   have hq2 : 2 ≤ dataBits N := dataBits_ge_two N hN
@@ -1035,7 +1044,7 @@ private theorem lastWire_is_orChain_last (N : Nat) (hN : 16 ≤ N) :
 /-! ##### Semantic decomposition of the circuit -/
 
 /-- The semantic value of each AND-layer wire (Section E). -/
-private noncomputable def andLayerSem (N : Nat)
+noncomputable def andLayerSem (N : Nat)
     (f : BitString N → Bool) (hN : 16 ≤ N) (x : BitString N)
     (y : Nat) (hy : y < 2 ^ dataBits N) : Bool :=
   let k := addrBits N
@@ -1051,7 +1060,7 @@ private noncomputable def andLayerSem (N : Nat)
     ⟨aVal, sum_cond_pow_fin_lt k addr⟩
 
 /-- Foldl of OR over a list where all elements are false gives false. -/
-private theorem foldl_or_all_false {n : Nat} {P : Nat → Bool}
+theorem foldl_or_all_false {n : Nat} {P : Nat → Bool}
     (hP : ∀ y, y < n → P y = false) :
     (List.range n).foldl (fun acc y => acc || P y) false = false := by
   induction n with
@@ -1063,7 +1072,7 @@ private theorem foldl_or_all_false {n : Nat} {P : Nat → Bool}
 
 /-- A list foldl of OR where each non-matching term is false produces the
     value at the matching position. -/
-private theorem foldl_or_unique_true {n : Nat} {P : Nat → Bool}
+theorem foldl_or_unique_true {n : Nat} {P : Nat → Bool}
     (target : Nat) (htarget : target < n)
     (hP : ∀ y, y < n → y ≠ target → P y = false) :
     (List.range n).foldl (fun acc y => acc || P y) false = P target := by
@@ -1084,17 +1093,17 @@ private theorem foldl_or_unique_true {n : Nat} {P : Nat → Bool}
       simp [Bool.false_or]
 
 /-- The data sum: encode the data bits of x as a natural number. -/
-private noncomputable def dataSum (N : Nat) (hN : 16 ≤ N) (x : BitString N) : Nat :=
+noncomputable def dataSum (N : Nat) (hN : 16 ≤ N) (x : BitString N) : Nat :=
   Finset.sum (Finset.univ : Finset (Fin (dataBits N)))
     (fun j => if shiftedBits N (addrBits N) (dataBits N) (addrDataSum N hN) x j
               then 2^j.val else 0)
 
-private theorem dataSum_lt (N : Nat) (hN : 16 ≤ N) (x : BitString N) :
+theorem dataSum_lt (N : Nat) (hN : 16 ≤ N) (x : BitString N) :
     dataSum N hN x < 2 ^ dataBits N :=
   sum_cond_pow_fin_lt (dataBits N) (shiftedBits N (addrBits N) (dataBits N) (addrDataSum N hN) x)
 
 /-- andLayerSem at y is false when y ≠ dataSum. -/
-private theorem andLayerSem_ne (N : Nat) [NeZero N]
+theorem andLayerSem_ne (N : Nat) [NeZero N]
     (f : BitString N → Bool) (hN : 16 ≤ N) (x : BitString N)
     (y : Nat) (hy : y < 2 ^ dataBits N) (hne : y ≠ dataSum N hN x) :
     andLayerSem N f hN x y hy = false := by
@@ -1102,14 +1111,14 @@ private theorem andLayerSem_ne (N : Nat) [NeZero N]
   simp only [beq_eq_false_iff_ne.mpr hne, Bool.false_and]
 
 /-- andLayerSem at dataSum gives columnFunction at actual bits. -/
-private theorem andLayerSem_eq (N : Nat) [NeZero N]
+theorem andLayerSem_eq (N : Nat) [NeZero N]
     (f : BitString N → Bool) (hN : 16 ≤ N) (x : BitString N) :
     andLayerSem N f hN x (dataSum N hN x) (dataSum_lt N hN x) = f x := by
   unfold andLayerSem dataSum
   simp only [beq_self_eq_true, Bool.true_and]
   exact columnFunction_at_actual_bits N f x (addrBits N) (dataBits N) (addrDataSum N hN)
 
-private theorem or_andLayerSem_eq_f (N : Nat) [NeZero N]
+theorem or_andLayerSem_eq_f (N : Nat) [NeZero N]
     (f : BitString N → Bool) (hN : 16 ≤ N) (x : BitString N) :
     (List.range (2 ^ dataBits N)).foldl
       (fun acc y => acc || if h : y < 2 ^ dataBits N
@@ -1142,7 +1151,7 @@ private theorem or_andLayerSem_eq_f (N : Nat) [NeZero N]
     trace wireValue through Sections B and D respectively via
     tree-level induction. -/
 
-private theorem wireValue_dataLeaf (N : Nat) [NeZero N]
+theorem wireValue_dataLeaf (N : Nat) [NeZero N]
     (f : BitString N → Bool) (hN : 16 ≤ N) (x : BitString N)
     (y : Nat) (hy : y < 2 ^ dataBits N)
     (hyW : N + 1 + (2 ^ dataBits N - 4) + y <
@@ -1316,7 +1325,7 @@ private theorem wireValue_dataLeaf (N : Nat) [NeZero N]
 
 -- traces wireValue through the full column library and address tree; genuine elaboration cost
 set_option maxHeartbeats 12800000 in
-private theorem wireValue_colOutput (N : Nat) [NeZero N]
+theorem wireValue_colOutput (N : Nat) [NeZero N]
     (f : BitString N → Bool) (hN : 16 ≤ N) (x : BitString N)
     (y : Nat) (hy : y < 2 ^ dataBits N)
     (hyW : N + columnLibraryOffset (addrBits N) (dataBits N) +
@@ -1671,7 +1680,7 @@ private theorem wireValue_colOutput (N : Nat) [NeZero N]
     The deep wireValue unfolding through all 6 sections (required for
     wireValue_andLayer_sem) and the gate array branch analysis make this
     the most technically challenging part of the formalization. -/
-private theorem wireValue_orChain_sem (N : Nat) [NeZero N]
+theorem wireValue_orChain_sem (N : Nat) [NeZero N]
     (f : BitString N → Bool) (hN : 16 ≤ N) (x : BitString N)
     (r : Nat) (hr : r < 2 ^ dataBits N - 1)
     (hW : N + orChainOffset (addrBits N) (dataBits N) + r <
@@ -1830,7 +1839,7 @@ private theorem wireValue_orChain_sem (N : Nat) [NeZero N]
       dif_pos (show r' + 1 < 2 ^ dataBits N from by omega),
       Bool.or_assoc]
 
-private theorem lastOrChain_eq_f (N : Nat) [NeZero N]
+theorem lastOrChain_eq_f (N : Nat) [NeZero N]
     (f : BitString N → Bool) (hN : 16 ≤ N) (x : BitString N)
     (hW : N + orChainOffset (addrBits N) (dataBits N) + (2 ^ dataBits N - 2) <
           N + totalSectionGates (addrBits N) (dataBits N)) :
@@ -1854,7 +1863,7 @@ private theorem lastOrChain_eq_f (N : Nat) [NeZero N]
 The correctness argument proceeds in two steps:
 1. The last wire index = orChainOffset(k,q) + (2^q - 2)  (lastWire_is_orChain_last)
 2. That wire evaluates to f(x)  (lastOrChain_eq_f) -/
-private theorem shannon_lastWire_correct (N : Nat) [NeZero N]
+theorem shannon_lastWire_correct (N : Nat) [NeZero N]
     (f : BitString N → Bool) (hN : 16 ≤ N) (x : BitString N) :
     (shannonCircuit N f hN).wireValue x
       ⟨N + totalSectionGates (addrBits N) (dataBits N) - 1,
@@ -1878,7 +1887,7 @@ private theorem shannon_lastWire_correct (N : Nat) [NeZero N]
   -- Step 2: that wire = f(x)
   exact lastOrChain_eq_f N f hN x hW_or
 
-private theorem shannonCircuit_correct (N : Nat) [NeZero N]
+theorem shannonCircuit_correct (N : Nat) [NeZero N]
     (f : BitString N → Bool) (hN : 16 ≤ N) (x : BitString N) :
     ((shannonCircuit N f hN).eval x) 0 = f x := by
   -- eval at output 0 = outputs-gate.eval(wireValue)
@@ -1887,7 +1896,7 @@ private theorem shannonCircuit_correct (N : Nat) [NeZero N]
   simp only [Bool.false_xor, Bool.or_self]
   exact shannon_lastWire_correct N f hN x
 
-private theorem totalSectionGates_le_bound (N : Nat) (_hN : 16 ≤ N) :
+theorem totalSectionGates_le_bound (N : Nat) (_hN : 16 ≤ N) :
     totalSectionGates (addrBits N) (dataBits N) + 1 ≤
       4 * 2 ^ dataBits N + 2 * 2 ^ addrBits N + 2 ^ (2 ^ addrBits N + addrBits N) := by
   unfold totalSectionGates

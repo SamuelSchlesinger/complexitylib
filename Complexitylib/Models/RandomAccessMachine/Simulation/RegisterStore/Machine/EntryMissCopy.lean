@@ -3,11 +3,13 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import
+module
+
+public import
   Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Machine.EntryMissCopy.Defs
-import
+public import
   Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Machine.EntryMissCopy.Internal
-import Complexitylib.Models.TuringMachine.Hoare.Space
+public import Complexitylib.Models.TuringMachine.Hoare.Space
 
 /-!
 # Sparse-entry miss copy
@@ -15,6 +17,8 @@ import Complexitylib.Models.TuringMachine.Hoare.Space
 This module exposes the update-scan branch that appends one unmatched entry to
 the new store and restores the exact invariant needed to inspect the next one.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

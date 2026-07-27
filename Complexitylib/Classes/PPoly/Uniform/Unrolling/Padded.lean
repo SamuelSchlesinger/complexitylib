@@ -3,8 +3,10 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Classes.PPoly.Uniform.Unrolling.Padded.Defs
-import Complexitylib.Classes.PPoly.Uniform.Unrolling.Padded.Internal
+module
+
+public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Padded.Defs
+public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Padded.Internal
 
 /-!
 # Regularly padded deterministic unrolling families
@@ -23,6 +25,8 @@ library's explicit answer-bit convention.
 - `TM.DecidesInTime.paddedDirectUnrollingCircuitFamily_decides` proves correctness.
 - `TM.paddedDirectUnrollingCircuitFamily_size_bigO` retains the cubic size bound.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

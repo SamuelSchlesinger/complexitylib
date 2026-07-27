@@ -3,8 +3,10 @@ Copyright (c) 2025 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Models.TuringMachine
-import Mathlib.Data.Finset.Lattice.Fold
+module
+
+public import Complexitylib.Models.TuringMachine
+public import Mathlib.Data.Finset.Lattice.Fold
 
 /-!
 # TM–NTM embedding: proof internals
@@ -12,6 +14,8 @@ import Mathlib.Data.Finset.Lattice.Fold
 Helper lemmas for `TM.toNTM_accepts_iff`, showing that the DTM step function
 and the NTM trace on `toNTM` compute the same thing.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

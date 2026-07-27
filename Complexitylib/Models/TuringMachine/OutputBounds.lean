@@ -3,7 +3,9 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Models.TuringMachine.Internal.OutputBounds
+module
+
+public import Complexitylib.Models.TuringMachine.Internal.OutputBounds
 
 /-!
 # Output-length bounds
@@ -18,6 +20,8 @@ produce at most `t` output bits.
 - `TM.output_length_le_of_reachesIn` — a run bounds its output length
 - `TM.ComputesInTime.output_length_le` — a time bound also bounds output length
 -/
+
+@[expose] public section
 
 namespace Complexity
 

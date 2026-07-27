@@ -3,8 +3,10 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Circuits.DecisionTree.Path.Defs
-import Complexitylib.Circuits.DecisionTree.Path.Internal
+module
+
+public import Complexitylib.Circuits.DecisionTree.Path.Defs
+public import Complexitylib.Circuits.DecisionTree.Path.Internal
 
 /-!
 # Canonical deepest paths in finite decision trees
@@ -13,6 +15,8 @@ Every finite decision tree has a deterministically chosen deepest path whose
 length is exactly the tree depth. For path-read-once trees, every prefix of
 that path is an embedding into the input coordinates.
 -/
+
+@[expose] public section
 
 namespace Complexity
 namespace DecisionTree.On

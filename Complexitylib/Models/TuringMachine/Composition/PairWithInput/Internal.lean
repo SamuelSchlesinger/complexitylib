@@ -3,12 +3,14 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Models.TuringMachine.Composition.Internal.FirstPhase
-import Complexitylib.Models.TuringMachine.Composition.PairWithInput.Defs
-import Complexitylib.Models.TuringMachine.Hoare
-import Complexitylib.Models.TuringMachine.OutputBounds
-import Complexitylib.Models.TuringMachine.Subroutines.Internal
-import Complexitylib.Models.TuringMachine.Subroutines.PairEmit
+module
+
+public import Complexitylib.Models.TuringMachine.Composition.Internal.FirstPhase
+public import Complexitylib.Models.TuringMachine.Composition.PairWithInput.Defs
+public import Complexitylib.Models.TuringMachine.Hoare
+public import Complexitylib.Models.TuringMachine.OutputBounds
+public import Complexitylib.Models.TuringMachine.Subroutines.Internal
+public import Complexitylib.Models.TuringMachine.Subroutines.PairEmit
 
 /-!
 # Pair a computed value with the original input — proof internals
@@ -16,6 +18,8 @@ import Complexitylib.Models.TuringMachine.Subroutines.PairEmit
 This module verifies the generic fanout pipeline defined in
 `Composition.PairWithInput.Defs`.
 -/
+
+@[expose] public section
 
 namespace Complexity
 
@@ -26,7 +30,7 @@ variable {nf : ℕ}
 /-- Boundary contract after the source computation has redirected its output.
 Both source heads remain within `B`, every tape is safely parked away from the
 left marker, and the real output is fresh for pair emission. -/
-private def PairWithInputTailPre (nf : ℕ) (first second : List Bool) (B : ℕ)
+def PairWithInputTailPre (nf : ℕ) (first second : List Bool) (B : ℕ)
     (inp : Tape) (work : Fin (pairWithInputTapeCount nf) → Tape)
     (out : Tape) : Prop :=
   let raw := pairWithInputRawOutputIdx nf

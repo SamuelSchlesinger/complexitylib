@@ -3,7 +3,9 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.SAT.ThreeCNF
+module
+
+public import Complexitylib.SAT.ThreeCNF
 
 /-!
 # Tseitin splitting from CNF to exact 3-CNF
@@ -20,6 +22,8 @@ width at least four is split by the standard chain
 Fresh counters are threaded across clauses, beginning above the largest source
 variable. Correctness and size theorems live in the internal and public layers.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

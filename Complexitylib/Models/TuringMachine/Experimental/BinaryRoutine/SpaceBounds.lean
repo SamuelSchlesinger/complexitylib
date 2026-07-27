@@ -3,8 +3,10 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Models.TuringMachine.Experimental.BinaryRoutine.SpaceBounds.Defs
-import Complexitylib.Models.TuringMachine.Experimental.BinaryRoutine.SpaceBounds.Internal
+module
+
+public import Complexitylib.Models.TuringMachine.Experimental.BinaryRoutine.SpaceBounds.Defs
+public import Complexitylib.Models.TuringMachine.Experimental.BinaryRoutine.SpaceBounds.Internal
 
 /-!
 # Compositional width bounds for binary routines
@@ -16,6 +18,8 @@ obligations, so the number of iterations does not appear additively in the
 resulting auxiliary-space bound. A final polynomial width bound converts the
 composed certificate to logarithmic space.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

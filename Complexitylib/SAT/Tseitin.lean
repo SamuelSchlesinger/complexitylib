@@ -3,10 +3,12 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.SAT.ThreeSAT
-import Complexitylib.SAT.Tseitin.Defs
-import Complexitylib.SAT.Tseitin.Internal.Correctness
-import Complexitylib.SAT.Tseitin.Internal.Size
+module
+
+public import Complexitylib.SAT.ThreeSAT
+public import Complexitylib.SAT.Tseitin.Defs
+public import Complexitylib.SAT.Tseitin.Internal.Correctness
+public import Complexitylib.SAT.Tseitin.Internal.Size
 
 /-!
 # Size-controlled reduction from CNF-SAT to 3SAT
@@ -28,6 +30,8 @@ separate from this semantic layer.
 - `CNF.encode_to3_length_le` — quadratic encoded-size bound
 - `ThreeSAT.reduction_correct` — total encoded membership equivalence
 -/
+
+@[expose] public section
 
 namespace Complexity
 

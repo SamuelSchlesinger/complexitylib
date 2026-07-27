@@ -3,15 +3,17 @@ Copyright (c) 2025 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Mathlib.Analysis.Asymptotics.Defs
-import Mathlib.Analysis.Asymptotics.SpecificAsymptotics
-import Mathlib.Analysis.Asymptotics.Lemmas
-import Mathlib.Algebra.Polynomial.Eval.Defs
-import Mathlib.Algebra.Polynomial.Eval.Degree
-import Mathlib.Data.Finset.Lattice.Fold
-import Mathlib.Data.Nat.Log
-import Mathlib.Data.Nat.Size
-import Mathlib.Algebra.Order.Floor.Semiring
+module
+
+public import Mathlib.Analysis.Asymptotics.Defs
+public import Mathlib.Analysis.Asymptotics.SpecificAsymptotics
+public import Mathlib.Analysis.Asymptotics.Lemmas
+public import Mathlib.Algebra.Polynomial.Eval.Defs
+public import Mathlib.Algebra.Polynomial.Eval.Degree
+public import Mathlib.Data.Finset.Lattice.Fold
+public import Mathlib.Data.Nat.Log
+public import Mathlib.Data.Nat.Size
+public import Mathlib.Algebra.Order.Floor.Semiring
 
 /-!
 # Asymptotic notation for natural number functions
@@ -50,6 +52,8 @@ opened and read like standard complexity-theoretic asymptotic notation.
 - `LittleO.add` — sum of little-o is little-o
 - `LittleO.const_mul_left` — constant multiple preserves little-o
 -/
+
+@[expose] public section
 
 open Asymptotics Filter
 

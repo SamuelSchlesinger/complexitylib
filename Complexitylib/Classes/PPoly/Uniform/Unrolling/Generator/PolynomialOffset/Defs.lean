@@ -3,8 +3,10 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Offset.Defs
-import Complexitylib.Classes.PPoly.Uniform.Unrolling.Serializer.Transition.Polynomial.Defs
+module
+
+public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Offset.Defs
+public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Serializer.Transition.Polynomial.Defs
 
 /-!
 # Polynomial recent-wire offsets -- definitions
@@ -14,6 +16,8 @@ current frontier is a fixed polynomial in the tableau horizon. These helpers
 evaluate that polynomial into one scratch value, use the dynamic-offset gate
 emitter, and restore every owned register.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

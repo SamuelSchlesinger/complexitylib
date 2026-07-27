@@ -3,12 +3,14 @@ Copyright (c) 2025 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Mathlib.GroupTheory.Perm.Fin
-import Mathlib.GroupTheory.Perm.Cycle.Type
-import Mathlib.GroupTheory.Perm.Cycle.Concrete
-import Mathlib.Algebra.Group.Commutator
-import Mathlib.Tactic.NormNum.Prime
-import Mathlib.Tactic.Common
+module
+
+public import Mathlib.GroupTheory.Perm.Fin
+public import Mathlib.GroupTheory.Perm.Cycle.Type
+public import Mathlib.GroupTheory.Perm.Cycle.Concrete
+public import Mathlib.Algebra.Group.Commutator
+public import Mathlib.Tactic.NormNum.Prime
+public import Mathlib.Tactic.Common
 
 /-!
 # The `S₅` five-cycle commutator (Barrington's non-solvability input)
@@ -43,6 +45,8 @@ output cycle.
 - `Complexity.every_fiveCycle_is_commutator` — *every* `5`-cycle of `S₅` is the
   commutator of two `5`-cycles.
 -/
+
+@[expose] public section
 
 open scoped commutatorElement
 open Equiv

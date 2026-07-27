@@ -3,8 +3,10 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Models.TuringMachine.Subroutines.BinaryAdd.Defs
-import Complexitylib.Models.TuringMachine.Subroutines.BinaryAdd.Internal
+module
+
+public import Complexitylib.Models.TuringMachine.Subroutines.BinaryAdd.Defs
+public import Complexitylib.Models.TuringMachine.Subroutines.BinaryAdd.Internal
 
 /-!
 # Canonical binary addition
@@ -25,6 +27,8 @@ width-based rather than derived from total loop runtime.
 - `binaryAddIntoTM_hoareTimeSpace_frame` adds an all-prefix space bound.
 - `binaryAddIntoTM_isTransducer` proves append-only-output safety.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

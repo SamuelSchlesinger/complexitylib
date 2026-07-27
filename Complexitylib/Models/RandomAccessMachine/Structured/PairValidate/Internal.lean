@@ -3,8 +3,10 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Models.RandomAccessMachine.Structured.PairValidate.Defs
-import Complexitylib.Models.RandomAccessMachine.Structured.Scanner.Internal
+module
+
+public import Complexitylib.Models.RandomAccessMachine.Structured.PairValidate.Defs
+public import Complexitylib.Models.RandomAccessMachine.Structured.Scanner.Internal
 
 /-!
 # Structured RAM pair validator — proof internals
@@ -12,6 +14,8 @@ import Complexitylib.Models.RandomAccessMachine.Structured.Scanner.Internal
 The benchmark supplies only its typed scanner specification. State encoding,
 execution, correctness, and resource proofs are all in the generic scanner layer.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

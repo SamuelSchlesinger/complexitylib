@@ -3,8 +3,10 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Models.TuringMachine.Subroutines.BinaryRippleSub.Defs
-import Complexitylib.Models.TuringMachine.Subroutines.ClearWork.Internal
+module
+
+public import Complexitylib.Models.TuringMachine.Subroutines.BinaryRippleSub.Defs
+public import Complexitylib.Models.TuringMachine.Subroutines.ClearWork.Internal
 
 /-!
 # Linear-time canonical binary subtraction -- output discipline
@@ -12,6 +14,8 @@ import Complexitylib.Models.TuringMachine.Subroutines.ClearWork.Internal
 The borrow scan, backward cleanup, and operand rewinds leave the public output
 tape one-way, so the core and complete machines are safe transducers.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

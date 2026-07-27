@@ -3,10 +3,12 @@ Copyright (c) 2025 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Models.TuringMachine.UTM.Diagonal
-import Complexitylib.Models.TuringMachine.UTM.Universal
-import Complexitylib.Classes.Containments
-import Mathlib.Analysis.Asymptotics.SpecificAsymptotics
+module
+
+public import Complexitylib.Models.TuringMachine.UTM.Diagonal
+public import Complexitylib.Models.TuringMachine.UTM.Universal
+public import Complexitylib.Classes.Containments
+public import Mathlib.Analysis.Asymptotics.SpecificAsymptotics
 
 /-!
 # The deterministic time hierarchy theorem (weak form)
@@ -38,6 +40,8 @@ The witness is the diagonal language `diagLang clk` of the diagonalizer
 - `DTIME_pow_ssubset` — concrete polynomial corollary:
   `DTIME((n + 1)^a) ⊂ DTIME((n + 1)^(2a + 5))` for `a ≥ 1`
 -/
+
+@[expose] public section
 
 namespace Complexity
 

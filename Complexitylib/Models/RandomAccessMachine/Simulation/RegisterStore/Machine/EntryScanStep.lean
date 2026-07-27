@@ -3,11 +3,13 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import
+module
+
+public import
   Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Machine.EntryScanStep.Defs
-import
+public import
   Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Machine.EntryScanStep.Internal
-import Complexitylib.Models.TuringMachine.Hoare.Space
+public import Complexitylib.Models.TuringMachine.Hoare.Space
 
 /-!
 # One bounded sparse-entry scan iteration
@@ -15,6 +17,8 @@ import Complexitylib.Models.TuringMachine.Hoare.Space
 This module exposes the compositional hit-or-next-iteration contract for one
 encoded sparse register-store entry.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

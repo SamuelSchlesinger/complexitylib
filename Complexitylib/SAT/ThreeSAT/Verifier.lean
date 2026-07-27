@@ -3,9 +3,11 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.SAT.ThreeSAT.Syntax
-import Complexitylib.Classes.Pairing
-import Complexitylib.Models.TuringMachine.Combinators.Internal.Scanner
+module
+
+public import Complexitylib.SAT.ThreeSAT.Syntax
+public import Complexitylib.Classes.Pairing
+public import Complexitylib.Models.TuringMachine.Combinators.Internal.Scanner
 
 /-!
 # Exact-3 syntax on paired verifier inputs
@@ -21,6 +23,8 @@ exact-3 syntax checker.
 - `ThreeSAT.PairSyntax.pair_mem_language_iff` -- paired-input correctness
 - `ThreeSAT.PairSyntax.language_mem_P` -- the paired syntax language is in P
 -/
+
+@[expose] public section
 
 namespace Complexity
 

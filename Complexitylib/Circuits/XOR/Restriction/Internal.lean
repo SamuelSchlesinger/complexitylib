@@ -3,12 +3,16 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Circuits.DecisionTree.Finite
-import Complexitylib.Circuits.XOR.Restriction.Defs
+module
+
+public import Complexitylib.Circuits.DecisionTree.Finite
+public import Complexitylib.Circuits.XOR.Restriction.Defs
 
 /-!
 # Parity on a finite support -- proof internals
 -/
+
+@[expose] public section
 
 namespace Complexity
 namespace Schnorr

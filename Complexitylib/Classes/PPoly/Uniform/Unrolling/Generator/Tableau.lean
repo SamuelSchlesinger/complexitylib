@@ -3,8 +3,10 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Tableau.Defs
-import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Tableau.Internal
+module
+
+public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Tableau.Defs
+public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Tableau.Internal
 
 /-!
 # Verified direct-tableau generator
@@ -14,6 +16,8 @@ padded direct-unrolling family. Its concrete binary routine is sound, emits
 exactly the family's tagged circuit code (including the separate zero-length
 member), and has a verified logarithmic all-prefix auxiliary-space bound.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

@@ -3,13 +3,17 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Circuits.BarringtonCompiler
-import Complexitylib.Circuits.BarringtonConverse
-import Complexitylib.Circuits.BarringtonTyped.Defs
+module
+
+public import Complexitylib.Circuits.BarringtonCompiler
+public import Complexitylib.Circuits.BarringtonConverse
+public import Complexitylib.Circuits.BarringtonTyped.Defs
 
 /-!
 # Fixed-arity nonuniform Barrington families -- proof internals
 -/
+
+@[expose] public section
 
 namespace Complexity
 

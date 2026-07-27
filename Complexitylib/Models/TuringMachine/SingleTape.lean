@@ -3,13 +3,15 @@ Copyright (c) 2025 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Models.TuringMachine
-import Complexitylib.Models.TuringMachine.SingleTape.Internal.Pad
-import Complexitylib.Models.TuringMachine.SingleTape.Internal
-import Complexitylib.Models.TuringMachine.SingleTape.Internal.Sim
-import Complexitylib.Models.TuringMachine.SingleTape.Internal.Delta
-import Complexitylib.Models.TuringMachine.SingleTape.Internal.Correctness
-import Complexitylib.Asymptotics
+module
+
+public import Complexitylib.Models.TuringMachine
+public import Complexitylib.Models.TuringMachine.SingleTape.Internal.Pad
+public import Complexitylib.Models.TuringMachine.SingleTape.Internal
+public import Complexitylib.Models.TuringMachine.SingleTape.Internal.Sim
+public import Complexitylib.Models.TuringMachine.SingleTape.Internal.Delta
+public import Complexitylib.Models.TuringMachine.SingleTape.Internal.Correctness
+public import Complexitylib.Asymptotics
 
 /-!
 # Multi-tape → single-tape simulation
@@ -39,6 +41,8 @@ This is a reusable robustness lemma:
 
 `singleTapeSim_decidesInTime` and `exists_singleTape_decidesInTime` are assembled from these.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

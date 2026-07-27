@@ -3,9 +3,11 @@ Copyright (c) 2025 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Models.TuringMachine
-import Complexitylib.Asymptotics
-import Complexitylib.Classes.FiniteCounting
+module
+
+public import Complexitylib.Models.TuringMachine
+public import Complexitylib.Asymptotics
+public import Complexitylib.Classes.FiniteCounting
 
 /-!
 # The counting class `#P`
@@ -22,6 +24,8 @@ existing `NTM.acceptCount` path semantics (roadmap track L5).
 - `SharpP.le_two_pow` — every `#P` function is bounded by `2 ^ T(|x|)` for its
   polynomial clock `T`
 -/
+
+@[expose] public section
 
 namespace Complexity
 

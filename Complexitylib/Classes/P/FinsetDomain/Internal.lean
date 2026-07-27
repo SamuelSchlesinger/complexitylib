@@ -3,13 +3,15 @@ Copyright (c) 2026 Bolton Bailey. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Bolton Bailey
 -/
-import Mathlib.Data.Fintype.Sets
-import Mathlib.Data.Fintype.Option
-import Mathlib.Data.Finset.Lattice.Fold
-import Complexitylib.Mathlib.FinsetPrefixes
-import Complexitylib.Classes.P.NormalForm
-import Complexitylib.Models.TuringMachine.Tape.Encoding
-import Complexitylib.Models.TuringMachine.Combinators
+module
+
+public import Mathlib.Data.Fintype.Sets
+public import Mathlib.Data.Fintype.Option
+public import Mathlib.Data.Finset.Lattice.Fold
+public import Complexitylib.Mathlib.FinsetPrefixes
+public import Complexitylib.Classes.P.NormalForm
+public import Complexitylib.Models.TuringMachine.Tape.Encoding
+public import Complexitylib.Models.TuringMachine.Combinators
 
 /-!
 # Finite-domain lookup machine (internal)
@@ -37,6 +39,8 @@ longest possible output, the runtime is linear.
 The public statement (`ite_mem_finset_mem_FP`) lives in
 `Complexitylib.Classes.P.FinsetDomain`.
 -/
+
+@[expose] public section
 
 namespace Complexity
 
@@ -90,7 +94,7 @@ inductive LookupState (g : List Bool → List Bool) (S : Finset (List Bool)) : T
 /-- `LookupState` as a sum of two finite subtypes and two extra states. This
 equivalence supplies the `DecidableEq` and `Fintype` instances, which cannot be
 derived because the `read`/`write` constructors have dependent fields. -/
-private def lookupStateEquiv :
+def lookupStateEquiv :
     LookupState g S ≃
       (Option {p : List Bool // p ∈ S.prefixes} ⊕
         Option {w : List Bool // w ∈ (outputsFinset g S).suffixes}) where

@@ -3,8 +3,10 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Models.TuringMachine.Experimental.BinaryRoutine.Arithmetic.Defs
-import Complexitylib.Models.TuringMachine.Experimental.BinaryRoutine.Arithmetic.Internal
+module
+
+public import Complexitylib.Models.TuringMachine.Experimental.BinaryRoutine.Arithmetic.Defs
+public import Complexitylib.Models.TuringMachine.Experimental.BinaryRoutine.Arithmetic.Internal
 
 /-!
 # Arithmetic leaves for proof-carrying binary routines
@@ -21,6 +23,8 @@ word, time bound, and all-prefix space bound to its concrete Turing machine.
 - `evalPolynomial_sound` covers fixed natural-polynomial evaluation.
 - `emitNatCode_sound` and `emitRawGate_sound` cover the two encoding leaves.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

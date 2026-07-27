@@ -3,8 +3,10 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Circuits.Encoding.Fragment.Defs
-import Complexitylib.Circuits.Formula
+module
+
+public import Complexitylib.Circuits.Encoding.Fragment.Defs
+public import Complexitylib.Circuits.Formula
 
 /-!
 # Compile Boolean formulas to raw circuit fragments
@@ -18,6 +20,8 @@ Variables are copied through a duplicated AND gate. Constants use an arbitrary
 existing wire together with its negation, while formula negation uses the raw
 gate's free edge-negation flags. Binary formulas are emitted in postorder.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

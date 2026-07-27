@@ -3,11 +3,13 @@ Copyright (c) 2025 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Classes.FiniteCounting
-import Mathlib.Algebra.Order.Field.Basic
-import Mathlib.Tactic.FieldSimp
-import Mathlib.Tactic.GCongr
-import Mathlib.Tactic.Positivity
+module
+
+public import Complexitylib.Classes.FiniteCounting
+public import Mathlib.Algebra.Order.Field.Basic
+public import Mathlib.Tactic.FieldSimp
+public import Mathlib.Tactic.GCongr
+public import Mathlib.Tactic.Positivity
 
 /-!
 # Property density
@@ -22,6 +24,8 @@ random-bit `eventProb` layer but over the sample space of all Boolean functions.
 - `density` with `density_nonneg`, `density_le_one`, the complement identity
   `density_compl`, and the union bound `density_union_le`
 -/
+
+@[expose] public section
 
 namespace Complexity
 

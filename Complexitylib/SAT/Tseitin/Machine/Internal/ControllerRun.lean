@@ -3,8 +3,10 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.SAT.Tseitin.Machine.Internal.ControllerInput
-import Complexitylib.SAT.Tseitin.Machine.Internal.ControllerToken
+module
+
+public import Complexitylib.SAT.Tseitin.Machine.Internal.ControllerInput
+public import Complexitylib.SAT.Tseitin.Machine.Internal.ControllerToken
 
 /-!
 # Run simulation for the Tseitin streaming controller
@@ -25,6 +27,8 @@ to the next layer.
 
 - `validEmitterTM_streaming_run_internal`
 -/
+
+@[expose] public section
 
 namespace Complexity
 

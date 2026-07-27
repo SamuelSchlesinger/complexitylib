@@ -3,8 +3,10 @@ Copyright (c) 2026 Bolton Bailey. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Bolton Bailey
 -/
-import Mathlib.Data.Finset.Union
-import Mathlib.Data.List.Infix
+module
+
+public import Mathlib.Data.Finset.Union
+public import Mathlib.Data.List.Infix
 
 /-!
 # Finsets of prefixes and suffixes
@@ -19,6 +21,8 @@ This file lives in `Complexitylib/Mathlib/` because it extends a Mathlib
 type in its home namespace — the sanctioned exception to the `Complexity`
 root-namespace rule. Its contents are candidates for upstreaming to Mathlib.
 -/
+
+@[expose] public section
 
 namespace Finset
 

@@ -3,8 +3,10 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Circuits.BarringtonCodeGenerator.Defs
-import Complexitylib.Circuits.BarringtonCodeGenerator.Internal
+module
+
+public import Complexitylib.Circuits.BarringtonCodeGenerator.Defs
+public import Complexitylib.Circuits.BarringtonCodeGenerator.Internal
 
 /-!
 # Bitstring-level Barrington code generator
@@ -26,6 +28,8 @@ evaluation matches the source formula, and its instruction count is at most
 - `length_barringtonCompileCode_encode_le` -- serialized output-size bound.
 - `barringtonCompileCode_spec` -- decoded semantics and Barrington length bound.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

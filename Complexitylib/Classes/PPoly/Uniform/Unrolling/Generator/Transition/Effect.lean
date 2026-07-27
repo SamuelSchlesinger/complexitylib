@@ -3,8 +3,10 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Transition.Effect.Defs
-import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Transition.Effect.Internal
+module
+
+public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Transition.Effect.Defs
+public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Transition.Effect.Internal
 
 /-!
 # Direct-unrolling transition-effect generator
@@ -12,6 +14,8 @@ import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Transition.Effect
 Exact contracts for the generated disjunction over a machine's finite
 transition table.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

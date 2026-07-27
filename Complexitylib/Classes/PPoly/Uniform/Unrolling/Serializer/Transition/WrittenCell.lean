@@ -3,8 +3,10 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Classes.PPoly.Uniform.Unrolling.Serializer.Transition.WrittenCell.Defs
-import Complexitylib.Classes.PPoly.Uniform.Unrolling.Serializer.Transition.WrittenCell.Internal
+module
+
+public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Serializer.Transition.WrittenCell.Defs
+public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Serializer.Transition.WrittenCell.Internal
 
 /-!
 # Numeric schedules for written-cell formulas
@@ -20,6 +22,8 @@ six-gate suffix combines the selected write with the old cell value.
   `getElem_writtenCellSchedule_suffix` identify the three schedule phases.
 - `compileRaw_writtenCellFormula_eq_schedule` proves literal raw-list equality.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

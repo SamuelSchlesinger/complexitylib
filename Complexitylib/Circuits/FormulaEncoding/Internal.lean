@@ -3,8 +3,10 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Circuits.Encoding
-import Complexitylib.Circuits.FormulaEncoding.Defs
+module
+
+public import Complexitylib.Circuits.Encoding
+public import Complexitylib.Circuits.FormulaEncoding.Defs
 
 /-!
 # Boolean-formula codec internals
@@ -12,6 +14,8 @@ import Complexitylib.Circuits.FormulaEncoding.Defs
 This module proves the stack-machine, round-trip, injectivity, and length
 properties of the canonical postfix formula encoding.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

@@ -3,9 +3,11 @@ Copyright (c) 2025 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Models.TuringMachine.UTM.Internal.SimClocked
-import Complexitylib.Models.TuringMachine.UTM.Internal.SeekFrontier
-import Complexitylib.Models.TuringMachine.Subroutines.Internal
+module
+
+public import Complexitylib.Models.TuringMachine.UTM.Internal.SimClocked
+public import Complexitylib.Models.TuringMachine.UTM.Internal.SeekFrontier
+public import Complexitylib.Models.TuringMachine.Subroutines.Internal
 
 /-!
 # The clocked universal machine
@@ -38,6 +40,8 @@ both within `clockedUtmTime α x V` steps from the started tapes
 `clockedUtmPre α x V` (the shape delivered by the diagonalizer's
 `retargetInput` mid-sequence).
 -/
+
+@[expose] public section
 
 namespace Complexity
 

@@ -3,15 +3,19 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import
+module
+
+public import
   Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Machine.Instruction.Sim.Defs
-import
+public import
   Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Machine.Instruction
-import Complexitylib.Models.TuringMachine.Subroutines.CopyWorkOutput
+public import Complexitylib.Models.TuringMachine.Subroutines.CopyWorkOutput
 
 /-!
 # Uniform next-store buffering for control instructions
 -/
+
+@[expose] public section
 
 namespace Complexity
 

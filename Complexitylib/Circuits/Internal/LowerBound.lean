@@ -3,10 +3,12 @@ Copyright (c) 2025 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Mathlib.Algebra.Order.BigOperators.Group.Finset
-import Complexitylib.Circuits.EssentialInput
-import Complexitylib.Circuits.AndOrNot.Defs
-import Complexitylib.Circuits.Dependency.Defs
+module
+
+public import Mathlib.Algebra.Order.BigOperators.Group.Finset
+public import Complexitylib.Circuits.EssentialInput
+public import Complexitylib.Circuits.AndOrNot.Defs
+public import Complexitylib.Circuits.Dependency.Defs
 
 /-! # Internal: Gate Elimination Lower Bound
 
@@ -20,6 +22,8 @@ The public definitions (`IsEssentialInput`, `essentialInputs`) are in
 are stated in
 `Complexitylib.Circuits.LowerBound`.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

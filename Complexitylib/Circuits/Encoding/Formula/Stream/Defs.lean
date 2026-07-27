@@ -3,7 +3,9 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Circuits.Encoding.Formula.Batch.Defs
+module
+
+public import Complexitylib.Circuits.Encoding.Formula.Batch.Defs
 
 /-!
 # Stack-free streams for finite Boolean folds — definitions
@@ -14,6 +16,8 @@ member from left to right, emit one terminal constant, then emit the binary
 connectors from right to left. This module names the connector suffix used by
 that decomposition.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

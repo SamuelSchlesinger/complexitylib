@@ -3,7 +3,9 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Models.TuringMachine.Subroutines.BinaryRippleAdd.Defs
+module
+
+public import Complexitylib.Models.TuringMachine.Subroutines.BinaryRippleAdd.Defs
 
 /-!
 # Linear binary addition -- resource-bound internals
@@ -11,6 +13,8 @@ import Complexitylib.Models.TuringMachine.Subroutines.BinaryRippleAdd.Defs
 This file relates the concrete scan and composed-machine bounds to the
 standard binary widths of the two operands.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

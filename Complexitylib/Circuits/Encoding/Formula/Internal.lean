@@ -3,8 +3,10 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Circuits.Encoding.Formula.Defs
-import Complexitylib.Circuits.Encoding.Fragment
+module
+
+public import Complexitylib.Circuits.Encoding.Formula.Defs
+public import Complexitylib.Circuits.Encoding.Fragment
 
 /-!
 # Boolean-formula raw compiler internals
@@ -13,6 +15,8 @@ This module proves the structural and semantic invariants of the proof-free
 formula compiler. Public statements are re-exported by
 `Complexitylib.Circuits.Encoding.Formula`.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

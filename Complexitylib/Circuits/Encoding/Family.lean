@@ -3,9 +3,11 @@ Copyright (c) 2025 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Circuits.Encoding
-import Complexitylib.Circuits.Family
-import Complexitylib.Encoding.Pairing
+module
+
+public import Complexitylib.Circuits.Encoding
+public import Complexitylib.Circuits.Family
+public import Complexitylib.Encoding.Pairing
 
 /-!
 # Encodings of whole circuit families
@@ -14,6 +16,8 @@ This module adds the length-zero wrapper around the positive-arity circuit
 codec. A leading tag distinguishes the explicit empty-input answer from an
 ordinary encoded circuit.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

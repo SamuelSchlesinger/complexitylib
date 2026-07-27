@@ -3,8 +3,10 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.PolynomialOffset.Defs
-import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.PolynomialOffset.Internal
+module
+
+public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.PolynomialOffset.Defs
+public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.PolynomialOffset.Internal
 
 /-!
 # Polynomial recent-wire offsets
@@ -12,6 +14,8 @@ import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.PolynomialOffset.
 Proof-carrying evaluation and raw-gate emission for recent-wire offsets that
 are fixed polynomials in the run-time tableau horizon.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

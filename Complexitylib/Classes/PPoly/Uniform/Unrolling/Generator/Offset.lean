@@ -3,8 +3,10 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Offset.Defs
-import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Offset.Internal
+module
+
+public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Offset.Defs
+public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Offset.Internal
 
 /-!
 # Dynamic recent-wire offsets
@@ -12,6 +14,8 @@ import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Offset.Internal
 Proof-carrying helpers for subtracting a run-time wire offset and emitting a
 raw gate with one dynamic and one fixed recent-wire reference.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

@@ -3,9 +3,11 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Transition.Next.Defs
-import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Transition.PackedCopy.Defs
-import Complexitylib.Classes.PPoly.Uniform.Unrolling.Serializer.Transition.Step.Defs
+module
+
+public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Transition.Next.Defs
+public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Transition.PackedCopy.Defs
+public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Serializer.Transition.Step.Defs
 
 /-!
 # Direct-unrolling packed-step generator -- definitions
@@ -17,6 +19,8 @@ copies. `gateBound` temporarily saves the formula-stream base and `gateCount`
 is reused, after its header has already been emitted, as the rolling source
 cursor. Neither requires a new work tape.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

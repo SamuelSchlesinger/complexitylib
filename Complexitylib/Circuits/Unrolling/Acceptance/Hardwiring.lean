@@ -3,8 +3,10 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Circuits.Hardwiring
-import Complexitylib.Circuits.Unrolling.Acceptance
+module
+
+public import Complexitylib.Circuits.Hardwiring
+public import Complexitylib.Circuits.Unrolling.Acceptance
 
 /-!
 # Fixed-choice bounded acceptance circuits
@@ -20,6 +22,8 @@ single-run analogue of amplified-seed hardwiring.
 - `fixedChoicesAcceptanceCircuit_size`: exact size preservation.
 - `fixedChoicesAcceptanceCircuit_size_le`: inherited cubic size bound.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

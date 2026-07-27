@@ -3,8 +3,10 @@ Copyright (c) 2025 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Models.TuringMachine.Combinators.Internal.Generic
-import Complexitylib.Models.TuringMachine.Hoare.Defs
+module
+
+public import Complexitylib.Models.TuringMachine.Combinators.Internal.Generic
+public import Complexitylib.Models.TuringMachine.Hoare.Defs
 
 /-!
 # Counter-building TM subroutines
@@ -15,6 +17,8 @@ The SAT-specific NP construction only needs a linear witness bound:
 `assignment.length ≤ input.length + 1`. This file defines a small machine
 that writes exactly `|input| + 1` unary marks to a designated counter tape.
 -/
+
+@[expose] public section
 
 namespace Complexity
 
@@ -264,10 +268,12 @@ instance : Fintype LinearCounterPhase where
   elems := {.scan, .rewind, .done}
   complete := fun x => by cases x <;> simp
 
-private def counterPreserveWork (wHeads : Fin n → Γ) : Fin n → Γw :=
+@[nolint docBlame]
+def counterPreserveWork (wHeads : Fin n → Γ) : Fin n → Γw :=
   fun i => readBackWrite (wHeads i)
 
-private def counterIdleDirs (wHeads : Fin n → Γ) : Fin n → Dir3 :=
+@[nolint docBlame]
+def counterIdleDirs (wHeads : Fin n → Γ) : Fin n → Dir3 :=
   fun i => idleDir (wHeads i)
 
 private theorem counterIdleDirs_right_of_start (wHeads : Fin n → Γ) :
@@ -275,11 +281,13 @@ private theorem counterIdleDirs_right_of_start (wHeads : Fin n → Γ) :
   intro i hi
   exact idleDir_right_of_start hi
 
-private def counterWriteOneWork (counterIdx : Fin n) (wHeads : Fin n → Γ) :
+@[nolint docBlame]
+def counterWriteOneWork (counterIdx : Fin n) (wHeads : Fin n → Γ) :
     Fin n → Γw :=
   fun i => if i = counterIdx then Γw.one else readBackWrite (wHeads i)
 
-private def counterAdvanceDirs (counterIdx : Fin n) (wHeads : Fin n → Γ) :
+@[nolint docBlame]
+def counterAdvanceDirs (counterIdx : Fin n) (wHeads : Fin n → Γ) :
     Fin n → Dir3 :=
   fun i => if i = counterIdx then Dir3.right else idleDir (wHeads i)
 
@@ -291,7 +299,8 @@ private theorem counterAdvanceDirs_right_of_start (counterIdx : Fin n)
   · simp [counterAdvanceDirs, hidx]
   · simp [counterAdvanceDirs, hidx, idleDir_right_of_start hi]
 
-private def counterRewindDirs (counterIdx : Fin n) (wHeads : Fin n → Γ) :
+@[nolint docBlame]
+def counterRewindDirs (counterIdx : Fin n) (wHeads : Fin n → Γ) :
     Fin n → Dir3 :=
   fun i => if i = counterIdx then moveLeftDir (wHeads i) else idleDir (wHeads i)
 

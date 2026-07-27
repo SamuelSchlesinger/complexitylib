@@ -3,10 +3,12 @@ Copyright (c) 2025 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Mathlib.Data.Nat.Basic
-import Mathlib.Data.Bool.Basic
-import Mathlib.Logic.Function.Basic
-import Mathlib.Data.Finset.Basic
+module
+
+public import Mathlib.Data.Nat.Basic
+public import Mathlib.Data.Bool.Basic
+public import Mathlib.Logic.Function.Basic
+public import Mathlib.Data.Finset.Basic
 
 /-!
 # Quantified Boolean formulas
@@ -27,6 +29,8 @@ ranges over the two Boolean values substituted for `x_i` via `Function.update`.
 - `QBF.eval_ex_iff`, `QBF.eval_all_iff` — the defining substitution semantics of
   the quantifiers, phrased as existence/universality over the substituted value
 -/
+
+@[expose] public section
 
 namespace Complexity
 

@@ -3,10 +3,12 @@ Copyright (c) 2025 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Models.TuringMachine
-import Complexitylib.Classes.Space
-import Complexitylib.Asymptotics
-import Mathlib.Data.Nat.Log
+module
+
+public import Complexitylib.Models.TuringMachine
+public import Complexitylib.Classes.Space
+public import Complexitylib.Asymptotics
+public import Mathlib.Data.Nat.Log
 
 /-!
 # Simultaneous time-space complexity classes
@@ -17,6 +19,8 @@ This file defines the simultaneous time-space class `DTISP(T, S)` and **SC**
 The key distinction from intersecting separate time and space classes is that
 `DTISP` requires a *single* machine satisfying both bounds simultaneously.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

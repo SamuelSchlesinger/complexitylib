@@ -3,9 +3,11 @@ Copyright (c) 2025 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Classes.P
-import Complexitylib.Classes.Containments
-import Complexitylib.Models.TuringMachine.Subroutines.Internal
+module
+
+public import Complexitylib.Classes.P
+public import Complexitylib.Classes.Containments
+public import Complexitylib.Models.TuringMachine.Subroutines.Internal
 
 /-!
 # Trivial languages: `∅` and `Set.univ`
@@ -29,6 +31,8 @@ complexity class.
 - `empty_mem_PSPACE`, `univ_mem_PSPACE`
 - `empty_mem_EXP`, `univ_mem_EXP`
 -/
+
+@[expose] public section
 
 namespace Complexity
 

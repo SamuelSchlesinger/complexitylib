@@ -3,8 +3,10 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Circuits.BarringtonConverse.Defs
-import Complexitylib.Circuits.BitString
+module
+
+public import Complexitylib.Circuits.BarringtonConverse.Defs
+public import Complexitylib.Circuits.BitString
 
 /-!
 # Fixed-arity nonuniform Barrington families -- definitions
@@ -23,6 +25,8 @@ class of typed Boolean-function families:
 Both objects denote `BoolFunFamily`, so the eventual equivalence has the
 correct fixed-arity semantic domain.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

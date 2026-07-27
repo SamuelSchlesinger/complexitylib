@@ -3,8 +3,10 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Models.TuringMachine.Registers.RegisterOps
-import Complexitylib.Models.TuringMachine.Subroutines.ResetBinary.Defs
+module
+
+public import Complexitylib.Models.TuringMachine.Registers.RegisterOps
+public import Complexitylib.Models.TuringMachine.Subroutines.ResetBinary.Defs
 
 /-!
 # Resetting several binary work tapes — definitions
@@ -13,6 +15,8 @@ import Complexitylib.Models.TuringMachine.Subroutines.ResetBinary.Defs
 tape named by `targets`. The executable machine depends only on the tape-index
 list; represented contents and resource bounds occur only in its contracts.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

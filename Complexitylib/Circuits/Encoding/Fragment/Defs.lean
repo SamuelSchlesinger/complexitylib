@@ -3,7 +3,9 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Circuits.Encoding.Defs
+module
+
+public import Complexitylib.Circuits.Encoding.Defs
 
 /-!
 # Primitive raw-circuit fragment gates
@@ -13,6 +15,8 @@ circuit fragment builders. A duplicated-input gate copies or negates an
 existing wire, while a wire paired with its negation supplies either Boolean
 constant.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

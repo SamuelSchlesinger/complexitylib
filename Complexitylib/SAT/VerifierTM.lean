@@ -3,15 +3,17 @@ Copyright (c) 2025 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.SAT.Verifier
-import Complexitylib.Models.TuringMachine.Subroutines.PairSplit
-import Complexitylib.Models.TuringMachine.Subroutines.Counter
-import Complexitylib.Models.TuringMachine.Combinators
-import Complexitylib.Models.TuringMachine.Combinators.Internal.Retarget
-import Complexitylib.Models.TuringMachine.Combinators.Internal.Generic
-import Complexitylib.Models.TuringMachine.Hoare
-import Complexitylib.Models.TuringMachine.Hoare.Defs
-import Complexitylib.Models.TuringMachine.Tape.Encoding
+module
+
+public import Complexitylib.SAT.Verifier
+public import Complexitylib.Models.TuringMachine.Subroutines.PairSplit
+public import Complexitylib.Models.TuringMachine.Subroutines.Counter
+public import Complexitylib.Models.TuringMachine.Combinators
+public import Complexitylib.Models.TuringMachine.Combinators.Internal.Retarget
+public import Complexitylib.Models.TuringMachine.Combinators.Internal.Generic
+public import Complexitylib.Models.TuringMachine.Hoare
+public import Complexitylib.Models.TuringMachine.Hoare.Defs
+public import Complexitylib.Models.TuringMachine.Tape.Encoding
 
 /-!
 # SAT verifier TMs
@@ -36,6 +38,8 @@ paired witness language underlying `SAT.language ∈ NP` — is characterized
 both semantically and at the machine level.
 -/
 
+@[expose] public section
+
 namespace Complexity
 
 namespace SAT
@@ -46,7 +50,7 @@ namespace VerifierTM
 -- Small tape helpers
 -- ════════════════════════════════════════════════════════════════════════
 
-private theorem eq_initTape_move_right_of_cells_head_one {t : Tape} (bits : List Bool)
+theorem eq_initTape_move_right_of_cells_head_one {t : Tape} (bits : List Bool)
     (hcells : t.cells = (Tape.init (bits.map Γ.ofBool)).cells)
     (hhead : t.head = 1) :
     t = (Tape.init (bits.map Γ.ofBool)).move Dir3.right := by
@@ -63,53 +67,54 @@ private theorem eq_initTape_move_right_of_cells_head_one {t : Tape} (bits : List
     simp [Tape.init]
   exact Tape.eq_init_move_right_of_hasBinaryString hbits h0
 
-private theorem cells_eq_initTape_ofBool_cell0 {t : Tape} (bits : List Bool)
+theorem cells_eq_initTape_ofBool_cell0 {t : Tape} (bits : List Bool)
     (hcells : t.cells = (Tape.init (bits.map Γ.ofBool)).cells) :
     t.cells 0 = Γ.start := by
   rw [hcells]
   simp [Tape.init]
 
-private theorem cells_eq_initTape_ofBool_ne_start {t : Tape} (bits : List Bool)
+theorem cells_eq_initTape_ofBool_ne_start {t : Tape} (bits : List Bool)
     (hcells : t.cells = (Tape.init (bits.map Γ.ofBool)).cells) :
     ∀ j, j ≥ 1 → t.cells j ≠ Γ.start := by
   intro j hj
   rw [hcells]
   exact Tape.init_ofBool_cells_ne_start bits j hj
 
-private theorem read_ne_start_of_cells_eq_initTape_ofBool {t : Tape} (bits : List Bool)
+theorem read_ne_start_of_cells_eq_initTape_ofBool {t : Tape} (bits : List Bool)
     (hcells : t.cells = (Tape.init (bits.map Γ.ofBool)).cells)
     (hhead : t.head ≥ 1) :
     t.read ≠ Γ.start := by
   simp [Tape.read]
   exact cells_eq_initTape_ofBool_ne_start bits hcells t.head hhead
 
-private abbrev hasBoolSuffix := Tape.HasBinarySuffix
+@[nolint docBlame]
+abbrev hasBoolSuffix := Tape.HasBinarySuffix
 
-private theorem initTape_move_right_hasBoolSuffix (bits : List Bool) :
+theorem initTape_move_right_hasBoolSuffix (bits : List Bool) :
     hasBoolSuffix ((Tape.init (bits.map Γ.ofBool)).move Dir3.right) bits :=
   Tape.init_move_right_hasBinarySuffix bits
 
-private theorem hasBoolSuffix_read_cons {t : Tape} {b : Bool} {bits : List Bool}
+theorem hasBoolSuffix_read_cons {t : Tape} {b : Bool} {bits : List Bool}
     (h : hasBoolSuffix t (b :: bits)) :
     t.read = Γ.ofBool b :=
   h.read_cons
 
-private theorem hasBoolSuffix_move_right_cons {t : Tape} {b : Bool} {bits : List Bool}
+theorem hasBoolSuffix_move_right_cons {t : Tape} {b : Bool} {bits : List Bool}
     (h : hasBoolSuffix t (b :: bits)) :
     hasBoolSuffix (t.move Dir3.right) bits :=
   h.move_right_cons
 
-private theorem hasBoolSuffix_read_nil {t : Tape}
+theorem hasBoolSuffix_read_nil {t : Tape}
     (h : hasBoolSuffix t []) :
     t.read = Γ.blank :=
   h.read_nil
 
-private theorem hasBoolSuffix_read_ne_start {t : Tape} {bits : List Bool}
+theorem hasBoolSuffix_read_ne_start {t : Tape} {bits : List Bool}
     (h : hasBoolSuffix t bits) :
     t.read ≠ Γ.start :=
   h.read_ne_start
 
-private theorem retargetInput_step_preserves_input_of_read_ne_start {k : ℕ} (M : TM k)
+theorem retargetInput_step_preserves_input_of_read_ne_start {k : ℕ} (M : TM k)
     {c c' : Cfg (k + 1) (TM.retargetInput M).Q}
     (hstep : (TM.retargetInput M).step c = some c')
     (hinp : c.input.read ≠ Γ.start) :
@@ -121,7 +126,7 @@ private theorem retargetInput_step_preserves_input_of_read_ne_start {k : ℕ} (M
     subst hstep
     simp [TM.idleDir, hinp, Tape.move]
 
-private theorem retargetInput_reachesIn_preserves_input_of_read_ne_start {k : ℕ}
+theorem retargetInput_reachesIn_preserves_input_of_read_ne_start {k : ℕ}
     (M : TM k)
     {t : ℕ} {c c' : Cfg (k + 1) (TM.retargetInput M).Q}
     (hreach : (TM.retargetInput M).reachesIn t c c')
@@ -135,12 +140,12 @@ private theorem retargetInput_reachesIn_preserves_input_of_read_ne_start {k : �
       rw [← hmid]
       exact ih (by simpa [hmid] using hinp)
 
-private theorem started_blank_output_read_ne_start :
+theorem started_blank_output_read_ne_start :
     (((Tape.init []).move Dir3.right).read) ≠ Γ.start := by
   rw [Tape.init_nil_move_right_read]
   decide
 
-private theorem unaryCounter_read_ne_start {t : Tape} {B : ℕ}
+theorem unaryCounter_read_ne_start {t : Tape} {B : ℕ}
     (h : t.HasUnaryCounter B) : t.read ≠ Γ.start := by
   by_cases hB : B = 0
   · subst hB
@@ -150,11 +155,11 @@ private theorem unaryCounter_read_ne_start {t : Tape} {B : ℕ}
     rw [Tape.hasUnaryCounter_read_pos h hpos]
     simp
 
-private theorem started_input_read_ne_start (α : List Bool) :
+theorem started_input_read_ne_start (α : List Bool) :
     (((Tape.init (α.map Γ.ofBool)).move Dir3.right).read) ≠ Γ.start := by
   exact Tape.init_ofBool_move_right_read_ne_start α
 
-private theorem fin2_ne_zero_eq_one (i : Fin 2) (h : i ≠ ⟨0, by omega⟩) :
+theorem fin2_ne_zero_eq_one (i : Fin 2) (h : i ≠ ⟨0, by omega⟩) :
     i = ⟨1, by omega⟩ := by
   apply Fin.ext
   have hne0 : (i : ℕ) ≠ 0 := by
@@ -276,7 +281,7 @@ def satLengthCheckTime (n : ℕ) : ℕ :=
 -- Step lemmas
 -- ════════════════════════════════════════════════════════════════════════
 
-private theorem satLengthCheck_init_step (α : List Bool) (B : ℕ)
+theorem satLengthCheck_init_step (α : List Bool) (B : ℕ)
     (c : Cfg 1 satLengthCheckTM.Q)
     (hstate : c.state = .init)
     (hinput : c.input = (Tape.init (α.map Γ.ofBool)).move Dir3.right)
@@ -303,7 +308,7 @@ private theorem satLengthCheck_init_step (α : List Bool) (B : ℕ)
   · change TM.transitionTape c.output = c.output
     exact TM.transitionTape_eq_self hout'
 
-private theorem satLengthCheck_scan_continue_step (α : List Bool) (B k : ℕ)
+theorem satLengthCheck_scan_continue_step (α : List Bool) (B k : ℕ)
     (c : Cfg 1 satLengthCheckTM.Q)
     (hk : k < α.length)
     (hkB : k < B)
@@ -339,7 +344,7 @@ private theorem satLengthCheck_scan_continue_step (α : List Bool) (B k : ℕ)
   · change TM.transitionTape c.output = c.output
     exact TM.transitionTape_eq_self hout'
 
-private theorem satLengthCheck_scan_accept_step (α : List Bool) (B : ℕ)
+theorem satLengthCheck_scan_accept_step (α : List Bool) (B : ℕ)
     (c : Cfg 1 satLengthCheckTM.Q)
     (hstate : c.state = .scan)
     (hinput_cells : c.input.cells = (Tape.init (α.map Γ.ofBool)).cells)
@@ -366,7 +371,7 @@ private theorem satLengthCheck_scan_accept_step (α : List Bool) (B : ℕ)
       simp [Tape.move, Tape.init]
     simp [Tape.writeAndMove, Tape.move, Tape.write, ho_head, TM.idleDir, Γw.toΓ]
 
-private theorem satLengthCheck_scan_reject_step (α : List Bool) (B : ℕ)
+theorem satLengthCheck_scan_reject_step (α : List Bool) (B : ℕ)
     (c : Cfg 1 satLengthCheckTM.Q)
     (hB : B < α.length)
     (hstate : c.state = .scan)
@@ -403,7 +408,7 @@ private theorem satLengthCheck_scan_reject_step (α : List Bool) (B : ℕ)
 -- Prefix scan loop
 -- ════════════════════════════════════════════════════════════════════════
 
-private theorem satLengthCheck_scan_prefix_loop (α : List Bool) (B : ℕ) :
+theorem satLengthCheck_scan_prefix_loop (α : List Bool) (B : ℕ) :
     ∀ (m k : ℕ) (c : Cfg 1 satLengthCheckTM.Q),
       k + m ≤ α.length →
       k + m ≤ B →
@@ -836,7 +841,7 @@ def satLengthCheckPassiveTM : TM 2 where
     | .done =>
         exact TM.rightOfStart_allIdle iHead wHeads oHead
 
-private theorem satLengthCheckPassive_init_step (α β : List Bool) (B : ℕ)
+theorem satLengthCheckPassive_init_step (α β : List Bool) (B : ℕ)
     (c : Cfg 2 satLengthCheckPassiveTM.Q)
     (hstate : c.state = .init)
     (hinput : c.input = (Tape.init (α.map Γ.ofBool)).move Dir3.right)
@@ -870,7 +875,7 @@ private theorem satLengthCheckPassive_init_step (α β : List Bool) (B : ℕ)
   · change TM.transitionTape c.output = c.output
     exact TM.transitionTape_eq_self hout'
 
-private theorem satLengthCheckPassive_scan_continue_step (α β : List Bool) (B k : ℕ)
+theorem satLengthCheckPassive_scan_continue_step (α β : List Bool) (B k : ℕ)
     (c : Cfg 2 satLengthCheckPassiveTM.Q)
     (hk : k < α.length)
     (hkB : k < B)
@@ -913,7 +918,7 @@ private theorem satLengthCheckPassive_scan_continue_step (α β : List Bool) (B 
   · change TM.transitionTape c.output = c.output
     exact TM.transitionTape_eq_self hout'
 
-private theorem satLengthCheckPassive_scan_accept_step (α β : List Bool) (B : ℕ)
+theorem satLengthCheckPassive_scan_accept_step (α β : List Bool) (B : ℕ)
     (c : Cfg 2 satLengthCheckPassiveTM.Q)
     (hstate : c.state = .scan)
     (hinput_cells : c.input.cells = (Tape.init (α.map Γ.ofBool)).cells)
@@ -947,7 +952,7 @@ private theorem satLengthCheckPassive_scan_accept_step (α β : List Bool) (B : 
       simp [Tape.move, Tape.init]
     simp [Tape.writeAndMove, Tape.move, Tape.write, ho_head, TM.idleDir, Γw.toΓ]
 
-private theorem satLengthCheckPassive_scan_reject_step (α β : List Bool) (B : ℕ)
+theorem satLengthCheckPassive_scan_reject_step (α β : List Bool) (B : ℕ)
     (c : Cfg 2 satLengthCheckPassiveTM.Q)
     (hB : B < α.length)
     (hstate : c.state = .scan)
@@ -987,7 +992,7 @@ private theorem satLengthCheckPassive_scan_reject_step (α β : List Bool) (B : 
       simp [Tape.move, Tape.init]
     simp [Tape.writeAndMove, Tape.move, Tape.write, ho_head, TM.idleDir, Γw.toΓ]
 
-private theorem satLengthCheckPassive_scan_prefix_loop (α β : List Bool) (B : ℕ) :
+theorem satLengthCheckPassive_scan_prefix_loop (α β : List Bool) (B : ℕ) :
     ∀ (m k : ℕ) (c : Cfg 2 satLengthCheckPassiveTM.Q),
       k + m ≤ α.length →
       k + m ≤ B →
@@ -1290,21 +1295,25 @@ instance : Fintype SatEvalPhase where
     | rewindAlpha mode =>
         simp
 
-private def boolWrite (b : Bool) : Γw :=
+@[nolint docBlame]
+def boolWrite (b : Bool) : Γw :=
   if b then Γw.one else Γw.zero
 
-private def readBit? : Γ → Option Bool
+@[nolint docBlame]
+def readBit? : Γ → Option Bool
   | Γ.zero => some false
   | Γ.one => some true
   | _ => none
 
-private def assignmentBitAtHead (g : Γ) : Bool :=
+@[nolint docBlame]
+def assignmentBitAtHead (g : Γ) : Bool :=
   g = Γ.one
 
-private def literalValueAtHead (sign : Bool) (g : Γ) : Bool :=
+@[nolint docBlame]
+def literalValueAtHead (sign : Bool) (g : Γ) : Bool :=
   assignmentBitAtHead g == sign
 
-private theorem assignmentBitAtHead_initTape_eq_get (α : Assignment) (var : ℕ) :
+theorem assignmentBitAtHead_initTape_eq_get (α : Assignment) (var : ℕ) :
     assignmentBitAtHead ((Tape.init (α.map Γ.ofBool)).cells (var + 1)) =
       Assignment.get α var := by
   by_cases h : var < α.length
@@ -1315,23 +1324,26 @@ private theorem assignmentBitAtHead_initTape_eq_get (α : Assignment) (var : ℕ
     rw [Tape.init_ofBool_cells_ge α var hge]
     simp [assignmentBitAtHead, Assignment.get, List.getElem?_eq_none hge]
 
-private theorem literalValueAtHead_initTape_eq_litEval
+theorem literalValueAtHead_initTape_eq_litEval
     (α : Assignment) (sign : Bool) (var : ℕ) :
     literalValueAtHead sign ((Tape.init (α.map Γ.ofBool)).cells (var + 1)) =
       (Assignment.get α var == sign) := by
   simp [literalValueAtHead, assignmentBitAtHead_initTape_eq_get]
 
-private def finishEvalMode : SatEvalMode → Γw
+@[nolint docBlame]
+def finishEvalMode : SatEvalMode → Γw
   | .boundary cnf _clause empty => boolWrite (cnf && empty)
   | .inLit .. => Γw.zero
 
-private def satEvalReject {n : ℕ} (state : SatEvalPhase)
+@[nolint docBlame]
+def satEvalReject {n : ℕ} (state : SatEvalPhase)
     (iHead : Γ) (wHeads : Fin n → Γ) (oHead : Γ) :
     SatEvalPhase × (Fin n → Γw) × Γw × Dir3 × (Fin n → Dir3) × Dir3 :=
   (state, fun i => TM.readBackWrite (wHeads i), Γw.zero,
     TM.idleDir iHead, fun i => TM.idleDir (wHeads i), TM.idleDir oHead)
 
-private def satEvalTokenStep (mode : SatEvalMode) (tok : EncToken) (αHead : Γ) :
+@[nolint docBlame]
+def satEvalTokenStep (mode : SatEvalMode) (tok : EncToken) (αHead : Γ) :
     SatEvalPhase × Dir3 × Γw :=
   match mode with
   | .boundary cnf clause empty =>
@@ -1352,14 +1364,16 @@ private def satEvalTokenStep (mode : SatEvalMode) (tok : EncToken) (αHead : Γ)
       | .clauseSep =>
           (.done, Dir3.stay, Γw.zero)
 
-private def tokenOfBits (first second : Bool) : EncToken :=
+@[nolint docBlame]
+def tokenOfBits (first second : Bool) : EncToken :=
   match first, second with
   | false, false => .bit false
   | true, true => .bit true
   | false, true => .litSep
   | true, false => .clauseSep
 
-private def satEvalDelta :
+@[nolint docBlame]
+def satEvalDelta :
     SatEvalPhase → Γ → (Fin 1 → Γ) → Γ →
       SatEvalPhase × (Fin 1 → Γw) × Γw × Dir3 × (Fin 1 → Dir3) × Dir3 :=
   fun state iHead wHeads oHead =>
@@ -1419,7 +1433,7 @@ private def satEvalDelta :
     | .done =>
         TM.allIdle .done iHead wHeads oHead
 
-private theorem satEvalDelta_right_of_start
+theorem satEvalDelta_right_of_start
     (state : SatEvalPhase) (iHead : Γ) (wHeads : Fin 1 → Γ) (oHead : Γ) :
     let tr := satEvalDelta state iHead wHeads oHead
     (iHead = Γ.start → tr.2.2.2.1 = Dir3.right) ∧
@@ -1446,7 +1460,7 @@ def satEvalOnInputTM : TM 1 where
     intro state iHead wHeads oHead
     exact satEvalDelta_right_of_start state iHead wHeads oHead
 
-private theorem satEval_readFirst_bit_step (mode : SatEvalMode) (b : Bool)
+theorem satEval_readFirst_bit_step (mode : SatEvalMode) (b : Bool)
     (c : Cfg 1 satEvalOnInputTM.Q)
     (hstate : c.state = .readFirst mode)
     (hread : c.input.read = Γ.ofBool b)
@@ -1483,7 +1497,7 @@ private theorem satEval_readFirst_bit_step (mode : SatEvalMode) (b : Bool)
     exact TM.transitionTape_eq_self hwork
   · exact TM.transitionTape_eq_self hout_read
 
-private theorem satEval_readFirst_blank_step (mode : SatEvalMode)
+theorem satEval_readFirst_blank_step (mode : SatEvalMode)
     (c : Cfg 1 satEvalOnInputTM.Q)
     (hstate : c.state = .readFirst mode)
     (hread : c.input.read = Γ.blank)
@@ -1520,7 +1534,7 @@ private theorem satEval_readFirst_blank_step (mode : SatEvalMode)
     simp [c', Tape.writeAndMove, Tape.write, Tape.move, TM.idleDir, hout_read,
       ho_head, Γw.toΓ]
 
-private theorem satEval_readSecond_bit_step (mode : SatEvalMode) (first second : Bool)
+theorem satEval_readSecond_bit_step (mode : SatEvalMode) (first second : Bool)
     (c : Cfg 1 satEvalOnInputTM.Q)
     (hstate : c.state = .readSecond mode first)
     (hread : c.input.read = Γ.ofBool second)
@@ -1556,7 +1570,7 @@ private theorem satEval_readSecond_bit_step (mode : SatEvalMode) (first second :
       simpa using hwork
     simp [c', tr, hwork0]
 
-private theorem satEval_readSecond_blank_step (mode : SatEvalMode) (first : Bool)
+theorem satEval_readSecond_blank_step (mode : SatEvalMode) (first : Bool)
     (c : Cfg 1 satEvalOnInputTM.Q)
     (hstate : c.state = .readSecond mode first)
     (hread : c.input.read = Γ.blank)
@@ -1595,7 +1609,7 @@ private theorem satEval_readSecond_blank_step (mode : SatEvalMode) (first : Bool
     simp [c', Tape.writeAndMove, Tape.write, Tape.move, TM.idleDir, hout_read,
       ho_head, Γw.toΓ]
 
-private theorem satEval_rewindAlpha_left_step (mode : SatEvalMode)
+theorem satEval_rewindAlpha_left_step (mode : SatEvalMode)
     (c : Cfg 1 satEvalOnInputTM.Q)
     (hstate : c.state = .rewindAlpha mode)
     (hinp : c.input.read ≠ Γ.start)
@@ -1628,7 +1642,7 @@ private theorem satEval_rewindAlpha_left_step (mode : SatEvalMode)
   · exact TM.tape_readBackWrite_preserves _ _ (Or.inr hread)
   · exact TM.transitionTape_eq_self hout_read
 
-private theorem satEval_rewindAlpha_base_step (mode : SatEvalMode)
+theorem satEval_rewindAlpha_base_step (mode : SatEvalMode)
     (c : Cfg 1 satEvalOnInputTM.Q)
     (hstate : c.state = .rewindAlpha mode)
     (hinp : c.input.read ≠ Γ.start)
@@ -1668,7 +1682,7 @@ private theorem satEval_rewindAlpha_base_step (mode : SatEvalMode)
   · exact TM.tape_readBackWrite_preserves _ _ (Or.inl hhead0)
   · exact TM.transitionTape_eq_self hout_read
 
-private theorem satEval_rewindAlpha_loop (mode : SatEvalMode) :
+theorem satEval_rewindAlpha_loop (mode : SatEvalMode) :
     ∀ (p : ℕ) (c : Cfg 1 satEvalOnInputTM.Q),
       c.state = .rewindAlpha mode →
       c.input.read ≠ Γ.start →
@@ -1725,7 +1739,7 @@ private theorem satEval_rewindAlpha_loop (mode : SatEvalMode) :
       · rw [hcells', hcells1]
       · rw [hout', hout1]
 
-private theorem satEval_two_bit_step (mode : SatEvalMode) (first second : Bool)
+theorem satEval_two_bit_step (mode : SatEvalMode) (first second : Bool)
     (rest : List Bool) (c : Cfg 1 satEvalOnInputTM.Q)
     (hstate : c.state = .readFirst mode)
     (hinput : hasBoolSuffix c.input (first :: second :: rest))
@@ -1764,7 +1778,7 @@ private theorem satEval_two_bit_step (mode : SatEvalMode) (first second : Bool)
   · simpa [tr, hwork1] using hwork2
   · simpa [tr, hout1, hwork1] using hout2
 
-private theorem satEval_output_blank_id (w : Γw) :
+theorem satEval_output_blank_id (w : Γw) :
     w = Γw.blank →
       ((Tape.init []).move Dir3.right).writeAndMove w.toΓ
           (TM.idleDir (((Tape.init []).move Dir3.right).read)) =
@@ -1776,18 +1790,18 @@ private theorem satEval_output_blank_id (w : Γw) :
   · intro j hj
     simp [Tape.move, Tape.init, show j ≠ 0 by omega]
 
-private theorem satEval_work_stay_id {t : Tape}
+theorem satEval_work_stay_id {t : Tape}
     (hread : t.read ≠ Γ.start) :
     t.writeAndMove (TM.readBackWrite t.read).toΓ Dir3.stay = t := by
   simpa [TM.transitionTape, TM.idleDir, hread] using
     (TM.transitionTape_eq_self hread)
 
-private theorem satEval_work_cells_preserved_readBack {t : Tape} (d : Dir3)
+theorem satEval_work_cells_preserved_readBack {t : Tape} (d : Dir3)
     (hread : t.read ≠ Γ.start) :
     (t.writeAndMove (TM.readBackWrite t.read).toΓ d).cells = t.cells := by
   exact TM.tape_readBackWrite_preserves t d (Or.inr hread)
 
-private theorem satEval_reject_output_zero (w : Γw) :
+theorem satEval_reject_output_zero (w : Γw) :
     w = Γw.zero →
       (((Tape.init []).move Dir3.right).writeAndMove w.toΓ
           (TM.idleDir (((Tape.init []).move Dir3.right).read))).cells 1 =
@@ -1824,11 +1838,13 @@ def SatEvalSemState.finish : SatEvalSemState → Bool
   | .boundary cnf _ empty => cnf && empty
   | .inLit .. => false
 
-private def SatEvalMode.toSemState : SatEvalMode → ℕ → SatEvalSemState
+@[nolint docBlame]
+def SatEvalMode.toSemState : SatEvalMode → ℕ → SatEvalSemState
   | .boundary cnf clause empty, _ => .boundary cnf clause empty
   | .inLit cnf clause empty sign, var => .inLit cnf clause empty sign var
 
-private def SatEvalMode.assignmentHead : SatEvalMode → ℕ → ℕ
+@[nolint docBlame]
+def SatEvalMode.assignmentHead : SatEvalMode → ℕ → ℕ
   | .boundary .., _ => 1
   | .inLit .., var => var + 1
 
@@ -1836,7 +1852,7 @@ private def SatEvalMode.varBound : SatEvalMode → ℕ → ℕ → Prop
   | .boundary .., _, _ => True
   | .inLit .., var, k => var ≤ k
 
-private theorem finishEvalMode_toΓ_eq_finish (mode : SatEvalMode) (var : ℕ) :
+theorem finishEvalMode_toΓ_eq_finish (mode : SatEvalMode) (var : ℕ) :
     (finishEvalMode mode).toΓ =
       (if (mode.toSemState var).finish then Γ.one else Γ.zero) := by
   cases mode with
@@ -1870,7 +1886,7 @@ def satEvalSemRun (α : Assignment) : List EncToken → SatEvalSemState → Bool
       | none => false
       | some st' => satEvalSemRun α toks st'
 
-private theorem satEvalOnInputTM_token_loop_correct (α : Assignment) :
+theorem satEvalOnInputTM_token_loop_correct (α : Assignment) :
     ∀ (toks : List EncToken) (mode : SatEvalMode) (var : ℕ)
       (c : Cfg 1 satEvalOnInputTM.Q),
       c.state = .readFirst mode →
@@ -2104,7 +2120,7 @@ private theorem satEvalOnInputTM_token_loop_correct (α : Assignment) :
                 simpa [satEvalSemRun, satEvalSemStep, tokenOfBits, satEvalTokenStep]
                   using satEval_reject_output_zero _ (by rfl)
 
-private theorem satEvalOnInputTM_tokenize_none_reject (α : Assignment) :
+theorem satEvalOnInputTM_tokenize_none_reject (α : Assignment) :
     ∀ (suffix : List Bool) (mode : SatEvalMode) (var : ℕ)
       (c : Cfg 1 satEvalOnInputTM.Q),
       tokenize? suffix = none →
@@ -2349,7 +2365,7 @@ def satEvalSemBits (α z : List Bool) : Bool :=
   | none => false
   | some toks => satEvalSemRun α toks (.boundary true false true)
 
-private theorem encodeTokens_length (toks : List EncToken) :
+theorem encodeTokens_length (toks : List EncToken) :
     (encodeTokens toks).length = 2 * toks.length := by
   induction toks with
   | nil => rfl
@@ -2362,7 +2378,7 @@ private theorem encodeTokens_length (toks : List EncToken) :
       simp only [encodeTokens_cons, List.length_append, htlen, ih, List.length_cons]
       omega
 
-private theorem satEvalOnInputTM_started_correct (α z : List Bool)
+theorem satEvalOnInputTM_started_correct (α z : List Bool)
     (c : Cfg 1 satEvalOnInputTM.Q)
     (hstate : c.state = .readFirst (.boundary true false true))
     (hinput : c.input = (Tape.init (z.map Γ.ofBool)).move Dir3.right)
@@ -2415,26 +2431,28 @@ private def satEvalSemFrom (α suffix : List Bool) (mode : SatEvalMode) (var : �
   | none => false
   | some toks => satEvalSemRun α toks (mode.toSemState var)
 
-private def parseEvalResult (α : Assignment) (toks : List EncToken)
+@[nolint docBlame]
+def parseEvalResult (α : Assignment) (toks : List EncToken)
     (rawRev : List Bool) (clauseRev : Clause) (cnfRev : CNF) : Bool :=
   match parseTokensAux toks rawRev clauseRev cnfRev with
   | none => false
   | some φ => CNF.eval α φ
 
-private def RawInvalid (rawRev : List Bool) : Prop :=
+@[nolint docBlame]
+def RawInvalid (rawRev : List Bool) : Prop :=
   ∃ sign rest, rawRev.reverse = sign :: rest ∧ false ∈ rest
 
-private lemma RawInvalid.cons (b : Bool) {rawRev : List Bool} (h : RawInvalid rawRev) :
+lemma RawInvalid.cons (b : Bool) {rawRev : List Bool} (h : RawInvalid rawRev) :
     RawInvalid (b :: rawRev) := by
   rcases h with ⟨sign, rest, hrev, hmem⟩
   refine ⟨sign, rest ++ [b], ?_, ?_⟩ <;> simp [hrev, hmem]
 
-private lemma RawInvalid.ne_nil {rawRev : List Bool} (h : RawInvalid rawRev) : rawRev ≠ [] := by
+lemma RawInvalid.ne_nil {rawRev : List Bool} (h : RawInvalid rawRev) : rawRev ≠ [] := by
   rintro rfl
   rcases h with ⟨_sign, _rest, hrev, _⟩
   simp at hrev
 
-private lemma RawInvalid.decodeRaw?_eq_none {rawRev : List Bool} (h : RawInvalid rawRev) :
+lemma RawInvalid.decodeRaw?_eq_none {rawRev : List Bool} (h : RawInvalid rawRev) :
     Lit.decodeRaw? rawRev.reverse = none := by
   rcases h with ⟨sign, rest, hrev, hmem⟩
   rw [hrev]
@@ -2444,7 +2462,7 @@ private lemma RawInvalid.decodeRaw?_eq_none {rawRev : List Bool} (h : RawInvalid
     cases hfalse
   · rfl
 
-private lemma parseEvalResult_invalid_raw (α : Assignment) (toks : List EncToken)
+lemma parseEvalResult_invalid_raw (α : Assignment) (toks : List EncToken)
     {rawRev : List Bool} (hbad : RawInvalid rawRev)
     (clauseRev : Clause) (cnfRev : CNF) :
     parseEvalResult α toks rawRev clauseRev cnfRev = false := by
@@ -2464,7 +2482,8 @@ private lemma parseEvalResult_invalid_raw (α : Assignment) (toks : List EncToke
     Clause.eval α [ℓ] = Lit.eval α ℓ := by
   simp [Clause.eval]
 
-private def SatEvalSemRel (α : Assignment) :
+@[nolint docBlame]
+def SatEvalSemRel (α : Assignment) :
     SatEvalSemState → List Bool → Clause → CNF → Prop
   | .boundary cnf clause empty, rawRev, clauseRev, cnfRev =>
       rawRev = [] ∧ cnf = CNF.eval α cnfRev.reverse ∧
@@ -2473,17 +2492,17 @@ private def SatEvalSemRel (α : Assignment) :
       rawRev = List.replicate var true ++ [sign] ∧
       cnf = CNF.eval α cnfRev.reverse ∧ clause = Clause.eval α clauseRev.reverse
 
-private lemma rawInvalid_false_cons_valid (sign : Bool) (var : Nat) :
+lemma rawInvalid_false_cons_valid (sign : Bool) (var : Nat) :
     RawInvalid (false :: (List.replicate var true ++ [sign])) := by
   refine ⟨sign, List.replicate var true ++ [false], ?_, ?_⟩
   · simp [List.reverse_append]
   · simp
 
-private lemma lit_decode_replicate (sign : Bool) (var : Nat) :
+lemma lit_decode_replicate (sign : Bool) (var : Nat) :
     Lit.decodeRaw? (sign :: List.replicate var true) = some { sign := sign, var := var } := by
   simp [Lit.decodeRaw?]
 
-private lemma satEvalSemRun_correct (α : Assignment) (toks : List EncToken) :
+lemma satEvalSemRun_correct (α : Assignment) (toks : List EncToken) :
     ∀ (st : SatEvalSemState) (rawRev : List Bool) (clauseRev : Clause) (cnfRev : CNF),
       SatEvalSemRel α st rawRev clauseRev cnfRev →
       satEvalSemRun α toks st = parseEvalResult α toks rawRev clauseRev cnfRev := by
@@ -2680,41 +2699,48 @@ instance : Fintype VerifyPairPhase where
     intro q
     cases q <;> simp
 
-private def verifyPairReject (iHead : Γ) (wHeads : Fin 3 → Γ) (oHead : Γ) :
+@[nolint docBlame]
+def verifyPairReject (iHead : Γ) (wHeads : Fin 3 → Γ) (oHead : Γ) :
     VerifyPairPhase × (Fin 3 → Γw) × Γw × Dir3 × (Fin 3 → Dir3) × Dir3 :=
   (.done, fun i => TM.readBackWrite (wHeads i), Γw.zero,
     TM.idleDir iHead, fun i => TM.idleDir (wHeads i),
     TM.idleDir oHead)
 
-private def verifyPairPreserveWork (wHeads : Fin 3 → Γ) : Fin 3 → Γw :=
+@[nolint docBlame]
+def verifyPairPreserveWork (wHeads : Fin 3 → Γ) : Fin 3 → Γw :=
   fun i => TM.readBackWrite (wHeads i)
 
-private def verifyPairSplitWrite (zBit : Bool) (wHeads : Fin 3 → Γ) : Fin 3 → Γw :=
+@[nolint docBlame]
+def verifyPairSplitWrite (zBit : Bool) (wHeads : Fin 3 → Γ) : Fin 3 → Γw :=
   fun i =>
     if i = ⟨0, by omega⟩ then boolWrite zBit
     else if i = ⟨2, by omega⟩ then Γw.one
     else TM.readBackWrite (wHeads i)
 
-private def verifyPairSplitDirs (wHeads : Fin 3 → Γ) : Fin 3 → Dir3 :=
+@[nolint docBlame]
+def verifyPairSplitDirs (wHeads : Fin 3 → Γ) : Fin 3 → Dir3 :=
   fun i =>
     if i = ⟨0, by omega⟩ then Dir3.right
     else if i = ⟨2, by omega⟩ then Dir3.right
     else TM.idleDir (wHeads i)
 
-private def verifyPairCopyAlphaWrite (aBit : Bool) (wHeads : Fin 3 → Γ) :
+@[nolint docBlame]
+def verifyPairCopyAlphaWrite (aBit : Bool) (wHeads : Fin 3 → Γ) :
     Fin 3 → Γw :=
   fun i =>
     if i = ⟨1, by omega⟩ then boolWrite aBit
     else if i = ⟨2, by omega⟩ then Γw.blank
     else TM.readBackWrite (wHeads i)
 
-private def verifyPairCopyAlphaDirs (wHeads : Fin 3 → Γ) : Fin 3 → Dir3 :=
+@[nolint docBlame]
+def verifyPairCopyAlphaDirs (wHeads : Fin 3 → Γ) : Fin 3 → Dir3 :=
   fun i =>
     if i = ⟨1, by omega⟩ then Dir3.right
     else if i = ⟨2, by omega⟩ then Dir3.right
     else TM.idleDir (wHeads i)
 
-private def verifyPairEvalDirs (αHead : Γ) (αDir : Dir3) (wHeads : Fin 3 → Γ) :
+@[nolint docBlame]
+def verifyPairEvalDirs (αHead : Γ) (αDir : Dir3) (wHeads : Fin 3 → Γ) :
     Fin 3 → Dir3 :=
   fun i =>
     if i = ⟨0, by omega⟩ then Dir3.right
@@ -2723,7 +2749,8 @@ private def verifyPairEvalDirs (αHead : Γ) (αDir : Dir3) (wHeads : Fin 3 → 
     else
       TM.idleDir (wHeads i)
 
-private def verifyPairDelta :
+@[nolint docBlame]
+def verifyPairDelta :
     VerifyPairPhase → Γ → (Fin 3 → Γ) → Γ →
       VerifyPairPhase × (Fin 3 → Γw) × Γw × Dir3 × (Fin 3 → Dir3) × Dir3 :=
   fun state iHead wHeads oHead =>
@@ -2918,7 +2945,7 @@ private def verifyPairDelta :
     | .done =>
         TM.allIdle .done iHead wHeads oHead
 
-private theorem verifyPairDelta_right_of_start
+theorem verifyPairDelta_right_of_start
     (state : VerifyPairPhase) (iHead : Γ) (wHeads : Fin 3 → Γ) (oHead : Γ) :
     let tr := verifyPairDelta state iHead wHeads oHead
     (iHead = Γ.start → tr.2.2.2.1 = Dir3.right) ∧
@@ -2952,7 +2979,7 @@ def verifyPairTM : TM 3 where
 
 /-- Writing back the symbol just read is a no-op when no interior cell holds the
 left marker (so the head, if `≥ 1`, reads a non-marker). -/
-private theorem writeBack_self (t : Tape) (h : ∀ j, j ≥ 1 → t.cells j ≠ Γ.start) :
+theorem writeBack_self (t : Tape) (h : ∀ j, j ≥ 1 → t.cells j ≠ Γ.start) :
     t.write (TM.readBackWrite t.read).toΓ = t := by
   by_cases hh : t.head = 0
   · simp [Tape.write, hh]
@@ -2961,13 +2988,13 @@ private theorem writeBack_self (t : Tape) (h : ∀ j, j ≥ 1 → t.cells j ≠ 
     simp [Tape.write, hh, Tape.read, Function.update_eq_self]
 
 /-- Hence a write-back-and-move on such a tape is just a move (read-only behavior). -/
-private theorem writeBackMove_eq_move (t : Tape) (d : Dir3)
+theorem writeBackMove_eq_move (t : Tape) (d : Dir3)
     (h : ∀ j, j ≥ 1 → t.cells j ≠ Γ.start) :
     t.writeAndMove (TM.readBackWrite t.read).toΓ d = t.move d := by
   rw [Tape.writeAndMove, writeBack_self t h]
 
 /-- Project a `verifyPairTM` eval-phase state to the single-tape evaluator's. -/
-private def projEvalState : VerifyPairPhase → SatEvalPhase
+def projEvalState : VerifyPairPhase → SatEvalPhase
   | .evalReadFirst m => .readFirst m
   | .evalReadSecond m first => .readSecond m first
   | .evalRewindAlpha m => .rewindAlpha m
@@ -2976,13 +3003,13 @@ private def projEvalState : VerifyPairPhase → SatEvalPhase
 /-- Project a `verifyPairTM` configuration onto a `satEvalOnInputTM`
 configuration: the formula tape `0` becomes the (read-only) input, the
 assignment tape `1` becomes work tape `0`, and the output is shared. -/
-private def projEvalCfg (c : Cfg 3 verifyPairTM.Q) : Cfg 1 satEvalOnInputTM.Q :=
+def projEvalCfg (c : Cfg 3 verifyPairTM.Q) : Cfg 1 satEvalOnInputTM.Q :=
   { state := projEvalState c.state
     input := c.work ⟨0, by omega⟩
     work := fun _ => c.work ⟨1, by omega⟩
     output := c.output }
 
-private theorem verifyPairTM_init_steps (w : List Bool) :
+theorem verifyPairTM_init_steps (w : List Bool) :
     ∃ c',
       verifyPairTM.reachesIn 2 (verifyPairTM.initCfg w) c' ∧
       c'.state = .splitScan ∧
@@ -3045,7 +3072,7 @@ private theorem verifyPairTM_init_steps (w : List Bool) :
 /-- In `.splitScan`, reading the first `false` advances to `.splitAfterFalse`,
 moving the input head right and leaving all work tapes and the output tape
 unchanged. -/
-private theorem verifyPairSplit_scanX_false_step
+theorem verifyPairSplit_scanX_false_step
     (c : Cfg 3 verifyPairTM.Q)
     (hst : c.state = .splitScan) (hiread : c.input.read = Γ.zero)
     (hwst : ∀ i, (c.work i).head ≥ 1 ∧ ∀ j, j ≥ 1 → (c.work i).cells j ≠ Γ.start)
@@ -3077,7 +3104,7 @@ private theorem verifyPairSplit_scanX_false_step
 formula tape `0`, adds a tally to the counter tape `2`, advances back to
 `.splitScan`, and leaves the assignment tape `1` and the output tape
 unchanged. -/
-private theorem verifyPairSplit_afterFalse_zero_step
+theorem verifyPairSplit_afterFalse_zero_step
     (c : Cfg 3 verifyPairTM.Q)
     (hst : c.state = .splitAfterFalse) (hiread : c.input.read = Γ.zero)
     (h0h : (c.work ⟨0, by omega⟩).head ≥ 1)
@@ -3133,7 +3160,7 @@ private theorem verifyPairSplit_afterFalse_zero_step
 /-- In `.splitScan`, reading the first `true` advances to `.splitAfterTrue`,
 moving the input head right and leaving all work tapes and the output tape
 unchanged. -/
-private theorem verifyPairSplit_scanX_true_step
+theorem verifyPairSplit_scanX_true_step
     (c : Cfg 3 verifyPairTM.Q)
     (hst : c.state = .splitScan) (hiread : c.input.read = Γ.one)
     (hwst : ∀ i, (c.work i).head ≥ 1 ∧ ∀ j, j ≥ 1 → (c.work i).cells j ≠ Γ.start)
@@ -3164,7 +3191,7 @@ private theorem verifyPairSplit_scanX_true_step
 /-- In `.splitAfterFalse`, reading `true` recognizes the separator `01` and
 advances to `.rewindCounterForAlpha`, leaving all work tapes and the output
 tape unchanged. -/
-private theorem verifyPairSplit_afterFalse_sep_step
+theorem verifyPairSplit_afterFalse_sep_step
     (c : Cfg 3 verifyPairTM.Q)
     (hst : c.state = .splitAfterFalse) (hiread : c.input.read = Γ.one)
     (hwst : ∀ i, (c.work i).head ≥ 1 ∧ ∀ j, j ≥ 1 → (c.work i).cells j ≠ Γ.start)
@@ -3195,7 +3222,7 @@ private theorem verifyPairSplit_afterFalse_sep_step
 /-- In `.splitAfterTrue`, reading the second `true` writes `true` to the formula
 tape `0`, adds a tally to the counter tape `2`, advances back to `.splitScan`,
 and leaves the assignment tape `1` and the output tape unchanged. -/
-private theorem verifyPairSplit_afterTrue_one_step
+theorem verifyPairSplit_afterTrue_one_step
     (c : Cfg 3 verifyPairTM.Q)
     (hst : c.state = .splitAfterTrue) (hiread : c.input.read = Γ.one)
     (h0h : (c.work ⟨0, by omega⟩).head ≥ 1)
@@ -3250,7 +3277,7 @@ private theorem verifyPairSplit_afterTrue_one_step
 
 /-- Two-step decoding of a doubled `false` bit: writes `false` to the formula
 tape, a tally to the counter tape, and returns to `.splitScan`. -/
-private theorem verifyPairSplit_false_bit_step
+theorem verifyPairSplit_false_bit_step
     (c : Cfg 3 verifyPairTM.Q)
     (hst : c.state = .splitScan)
     (hread0 : c.input.read = Γ.zero)
@@ -3295,7 +3322,7 @@ private theorem verifyPairSplit_false_bit_step
 
 /-- Two-step decoding of a doubled `true` bit: writes `true` to the formula
 tape, a tally to the counter tape, and returns to `.splitScan`. -/
-private theorem verifyPairSplit_true_bit_step
+theorem verifyPairSplit_true_bit_step
     (c : Cfg 3 verifyPairTM.Q)
     (hst : c.state = .splitScan)
     (hread1 : c.input.read = Γ.one)
@@ -3339,7 +3366,7 @@ private theorem verifyPairSplit_true_bit_step
   · rw [hc2_o, hc1_o]
 
 /-- Two-step decoding of a doubled `b` bit, uniform in `b`. -/
-private theorem verifyPairSplit_bit_step (b : Bool)
+theorem verifyPairSplit_bit_step (b : Bool)
     (c : Cfg 3 verifyPairTM.Q)
     (hst : c.state = .splitScan)
     (hread : c.input.read = Γ.ofBool b)
@@ -3371,7 +3398,7 @@ private theorem verifyPairSplit_bit_step (b : Bool)
 /-- Two-step recognition of the separator `01`, transitioning from the split
 loop into `.rewindCounterForAlpha`, leaving all work tapes and the output
 tape unchanged. -/
-private theorem verifyPairSplit_separator_step
+theorem verifyPairSplit_separator_step
     (c : Cfg 3 verifyPairTM.Q)
     (hst : c.state = .splitScan)
     (hread0 : c.input.read = Γ.zero)
@@ -3406,7 +3433,7 @@ doubled bits of `bits`, the machine consumes `2 * |bits|` input cells, writes
 `bits` to the formula tape `0` and `|bits|` tallies to the counter tape `2`,
 and returns to `.splitScan`, leaving the assignment tape `1` and the output
 tape unchanged. -/
-private theorem verifyPairSplit_scanX_loop :
+theorem verifyPairSplit_scanX_loop :
     ∀ (bits : List Bool) (c : Cfg 3 verifyPairTM.Q),
       c.state = .splitScan →
       c.input.head ≥ 1 →
@@ -3581,7 +3608,7 @@ in `rState`, move the tracked tape `rIdx` left while preserving everything else
 (and at head `0` enter `tState` moving `rIdx` to cell `1`), the machine rewinds
 tape `rIdx` from head `p` to head `1` in `p + 1` steps, preserving all cells of
 `rIdx`, every other work tape, the input, and the output. -/
-private theorem verifyPair_rewind_loop (rIdx : Fin 3) (rState tState : VerifyPairPhase)
+theorem verifyPair_rewind_loop (rIdx : Fin 3) (rState tState : VerifyPairPhase)
     (hleft : ∀ c : Cfg 3 verifyPairTM.Q, c.state = rState → (c.work rIdx).read ≠ Γ.start →
       c.input.head ≥ 1 → (∀ j, j ≥ 1 → c.input.cells j ≠ Γ.start) →
       (∀ i, i ≠ rIdx → (c.work i).head ≥ 1 ∧ ∀ j, j ≥ 1 → (c.work i).cells j ≠ Γ.start) →
@@ -3643,7 +3670,7 @@ private theorem verifyPair_rewind_loop (rIdx : Fin 3) (rState tState : VerifyPai
 
 /-- `.rewindCounterForAlpha` left step: with a non-start counter cell under the
 head, move the counter tape left, preserving everything else. -/
-private theorem verifyPairSplit_rewindCounter_left_step
+theorem verifyPairSplit_rewindCounter_left_step
     (c : Cfg 3 verifyPairTM.Q) (hst : c.state = .rewindCounterForAlpha)
     (hread : (c.work ⟨2, by omega⟩).read ≠ Γ.start)
     (hih : c.input.head ≥ 1) (hins : ∀ j, j ≥ 1 → c.input.cells j ≠ Γ.start)
@@ -3687,7 +3714,7 @@ private theorem verifyPairSplit_rewindCounter_left_step
 
 /-- `.rewindCounterForAlpha` base step: with the counter head at the left
 marker, move right into `.copyAlpha`, preserving everything else. -/
-private theorem verifyPairSplit_rewindCounter_base_step
+theorem verifyPairSplit_rewindCounter_base_step
     (c : Cfg 3 verifyPairTM.Q) (hst : c.state = .rewindCounterForAlpha)
     (hread : (c.work ⟨2, by omega⟩).read = Γ.start)
     (hhead0 : (c.work ⟨2, by omega⟩).head = 0)
@@ -3732,7 +3759,7 @@ private theorem verifyPairSplit_rewindCounter_base_step
   · exact TM.tape_writeAndMove_stable c.output hoh hons
 
 /-- `.rewindFormula` left step: move the formula tape left, preserving the rest. -/
-private theorem verifyPairSplit_rewindFormula_left_step
+theorem verifyPairSplit_rewindFormula_left_step
     (c : Cfg 3 verifyPairTM.Q) (hst : c.state = .rewindFormula)
     (hread : (c.work ⟨0, by omega⟩).read ≠ Γ.start)
     (hih : c.input.head ≥ 1) (hins : ∀ j, j ≥ 1 → c.input.cells j ≠ Γ.start)
@@ -3775,7 +3802,7 @@ private theorem verifyPairSplit_rewindFormula_left_step
   · exact TM.tape_writeAndMove_stable c.output hoh hons
 
 /-- `.rewindFormula` base step: move right into `.rewindAssignment`. -/
-private theorem verifyPairSplit_rewindFormula_base_step
+theorem verifyPairSplit_rewindFormula_base_step
     (c : Cfg 3 verifyPairTM.Q) (hst : c.state = .rewindFormula)
     (hread : (c.work ⟨0, by omega⟩).read = Γ.start)
     (hhead0 : (c.work ⟨0, by omega⟩).head = 0)
@@ -3820,7 +3847,7 @@ private theorem verifyPairSplit_rewindFormula_base_step
   · exact TM.tape_writeAndMove_stable c.output hoh hons
 
 /-- `.rewindAssignment` left step: move the assignment tape left. -/
-private theorem verifyPairSplit_rewindAssignment_left_step
+theorem verifyPairSplit_rewindAssignment_left_step
     (c : Cfg 3 verifyPairTM.Q) (hst : c.state = .rewindAssignment)
     (hread : (c.work ⟨1, by omega⟩).read ≠ Γ.start)
     (hih : c.input.head ≥ 1) (hins : ∀ j, j ≥ 1 → c.input.cells j ≠ Γ.start)
@@ -3863,7 +3890,7 @@ private theorem verifyPairSplit_rewindAssignment_left_step
   · exact TM.tape_writeAndMove_stable c.output hoh hons
 
 /-- `.rewindAssignment` base step: move right into the evaluator's first read. -/
-private theorem verifyPairSplit_rewindAssignment_base_step
+theorem verifyPairSplit_rewindAssignment_base_step
     (c : Cfg 3 verifyPairTM.Q) (hst : c.state = .rewindAssignment)
     (hread : (c.work ⟨1, by omega⟩).read = Γ.start)
     (hhead0 : (c.work ⟨1, by omega⟩).head = 0)
@@ -3913,7 +3940,7 @@ live counter tally, copy the bit to the assignment tape `1`, erase one counter
 tally on tape `2`, advance the input, and stay in `.copyAlpha`. This is the
 witness-length check: the counter has `|z| + 1` tallies, so it runs dry exactly
 when `|α| > |z| + 1`. -/
-private theorem verifyPairSplit_copyAlpha_bit_step (b : Bool)
+theorem verifyPairSplit_copyAlpha_bit_step (b : Bool)
     (c : Cfg 3 verifyPairTM.Q) (hst : c.state = .copyAlpha)
     (hib : c.input.read = Γ.ofBool b)
     (hcounter : (c.work ⟨2, by omega⟩).read = Γ.one)
@@ -3972,7 +3999,7 @@ private theorem verifyPairSplit_copyAlpha_bit_step (b : Bool)
 /-- `.copyAlpha` blank step: once the input head reaches the blank after `α`,
 transition to `.rewindFormula`, leaving all work tapes and the output
 unchanged. -/
-private theorem verifyPairSplit_copyAlpha_blank_step
+theorem verifyPairSplit_copyAlpha_blank_step
     (c : Cfg 3 verifyPairTM.Q) (hst : c.state = .copyAlpha)
     (hib : c.input.read = Γ.blank)
     (hwst : ∀ i, (c.work i).head ≥ 1 ∧ ∀ j, j ≥ 1 → (c.work i).cells j ≠ Γ.start)
@@ -4003,7 +4030,7 @@ private theorem verifyPairSplit_copyAlpha_blank_step
 `as` from the input to tape `1`, erasing one counter tally per bit, and returns
 to `.copyAlpha`. Tape `0` and the output are untouched; tape `2` stays stable
 (its exact erased content is irrelevant downstream). -/
-private theorem verifyPairSplit_copyAlpha_loop :
+theorem verifyPairSplit_copyAlpha_loop :
     ∀ (as : List Bool) (c : Cfg 3 verifyPairTM.Q),
       c.state = .copyAlpha →
       c.input.head ≥ 1 → c.input.cells 0 = Γ.start →
@@ -4150,7 +4177,7 @@ private theorem verifyPairSplit_copyAlpha_loop :
 /-- The counter-rewind phase: from `.rewindCounterForAlpha` with the counter
 head at `p`, reach `.copyAlpha` with the counter head back at `1` in `p + 1`
 steps, preserving every tape's contents. -/
-private theorem verifyPairSplit_rewindCounter_phase (p : ℕ) (c : Cfg 3 verifyPairTM.Q)
+theorem verifyPairSplit_rewindCounter_phase (p : ℕ) (c : Cfg 3 verifyPairTM.Q)
     (hst : c.state = .rewindCounterForAlpha)
     (hc0 : (c.work ⟨2, by omega⟩).cells 0 = Γ.start)
     (hns : ∀ j, j ≥ 1 → (c.work ⟨2, by omega⟩).cells j ≠ Γ.start)
@@ -4170,7 +4197,7 @@ private theorem verifyPairSplit_rewindCounter_phase (p : ℕ) (c : Cfg 3 verifyP
 
 /-- The formula-rewind phase: from `.rewindFormula` with the formula head at
 `p`, reach `.rewindAssignment` with the formula head back at `1`. -/
-private theorem verifyPairSplit_rewindFormula_phase (p : ℕ) (c : Cfg 3 verifyPairTM.Q)
+theorem verifyPairSplit_rewindFormula_phase (p : ℕ) (c : Cfg 3 verifyPairTM.Q)
     (hst : c.state = .rewindFormula)
     (hc0 : (c.work ⟨0, by omega⟩).cells 0 = Γ.start)
     (hns : ∀ j, j ≥ 1 → (c.work ⟨0, by omega⟩).cells j ≠ Γ.start)
@@ -4191,7 +4218,7 @@ private theorem verifyPairSplit_rewindFormula_phase (p : ℕ) (c : Cfg 3 verifyP
 /-- The assignment-rewind phase: from `.rewindAssignment` with the assignment
 head at `p`, reach the evaluator's first read with the assignment head back at
 `1`. -/
-private theorem verifyPairSplit_rewindAssignment_phase (p : ℕ) (c : Cfg 3 verifyPairTM.Q)
+theorem verifyPairSplit_rewindAssignment_phase (p : ℕ) (c : Cfg 3 verifyPairTM.Q)
     (hst : c.state = .rewindAssignment)
     (hc0 : (c.work ⟨1, by omega⟩).cells 0 = Γ.start)
     (hns : ∀ j, j ≥ 1 → (c.work ⟨1, by omega⟩).cells j ≠ Γ.start)
@@ -4213,7 +4240,7 @@ private theorem verifyPairSplit_rewindAssignment_phase (p : ℕ) (c : Cfg 3 veri
 
 /-- `.copyAlpha` reject step: an assignment bit with the counter already
 exhausted (`≠ Γ.one`) means `|α| > |z| + 1`; the machine halts with output `0`. -/
-private theorem verifyPairSplit_copyAlpha_reject_step (b : Bool)
+theorem verifyPairSplit_copyAlpha_reject_step (b : Bool)
     (c : Cfg 3 verifyPairTM.Q) (hst : c.state = .copyAlpha)
     (hib : c.input.read = Γ.ofBool b)
     (hcounter : (c.work ⟨2, by omega⟩).read ≠ Γ.one)
@@ -4241,7 +4268,7 @@ private theorem verifyPairSplit_copyAlpha_reject_step (b : Bool)
 
 /-- The input tape after the initial `▷→cell 1` shift exposes the doubled bits
 of `z` at the positions the split loop reads them. -/
-private theorem verifyPair_input_doubled (z α : List Bool) (i : ℕ) (hi : i < z.length) :
+theorem verifyPair_input_doubled (z α : List Bool) (i : ℕ) (hi : i < z.length) :
     ((Tape.init ((pair z α).map Γ.ofBool)).move Dir3.right).cells (1 + 2 * i) =
         Γ.ofBool (z[i]'hi) ∧
     ((Tape.init ((pair z α).map Γ.ofBool)).move Dir3.right).cells (1 + (2 * i + 1)) =
@@ -4259,7 +4286,7 @@ formula-scan, and separator phases, reaching `.rewindCounterForAlpha` with the
 formula `z` staged on tape `0`, the `|z|+1`-tally counter on tape `2`, the
 assignment tape `1` still blank, and the input head positioned at the start of
 `α`'s region. -/
-private theorem verifyPairSplit_setup_through_separator (z α : List Bool) :
+theorem verifyPairSplit_setup_through_separator (z α : List Bool) :
     ∃ c', verifyPairTM.reachesIn (2 * z.length + 4) (verifyPairTM.initCfg (pair z α)) c' ∧
       c'.state = .rewindCounterForAlpha ∧
       c'.input.head = 2 * z.length + 3 ∧
@@ -4404,7 +4431,7 @@ private theorem verifyPairSplit_setup_through_separator (z α : List Bool) :
 /-- A tape pinned down by its cell contents (left marker, `l`'s bits, then
 blanks) with head at cell `1` is exactly `Tape.init (l.map Γ.ofBool)` shifted
 right — the canonical "started binary input" shape consumed by the evaluator. -/
-private theorem tape_eq_initTape_of_cells (t : Tape) (l : List Bool)
+theorem tape_eq_initTape_of_cells (t : Tape) (l : List Bool)
     (hh : t.head = 1) (h0 : t.cells 0 = Γ.start)
     (hdata : ∀ i, (h : i < l.length) → t.cells (1 + i) = Γ.ofBool (l[i]'h))
     (hblank : ∀ j, j ≥ 1 + l.length → t.cells j = Γ.blank) :
@@ -4432,7 +4459,7 @@ private theorem tape_eq_initTape_of_cells (t : Tape) (l : List Bool)
 runs from the initial configuration on `pair z α` to the evaluator's first read,
 leaving the formula `z` staged on tape `0` and the assignment `α` on tape `1`,
 both as left-anchored binary tapes with head at cell `1`. -/
-private theorem verifyPairSplit_setup_success (z α : List Bool)
+theorem verifyPairSplit_setup_success (z α : List Bool)
     (hlen : α.length ≤ z.length + 1) :
     ∃ c', verifyPairTM.reachesIn (4 * z.length + 2 * α.length + 12)
         (verifyPairTM.initCfg (pair z α)) c' ∧
@@ -4606,7 +4633,7 @@ private theorem verifyPairSplit_setup_success (z α : List Bool)
 
 /-- The setup success path, with the staged formula and assignment tapes
 repackaged in the exact `Tape.init`-shifted shape consumed by the evaluator. -/
-private theorem verifyPairSplit_setup_success_initTape (z α : List Bool)
+theorem verifyPairSplit_setup_success_initTape (z α : List Bool)
     (hlen : α.length ≤ z.length + 1) :
     ∃ c', verifyPairTM.reachesIn (4 * z.length + 2 * α.length + 12)
         (verifyPairTM.initCfg (pair z α)) c' ∧
@@ -4650,7 +4677,7 @@ theorem verifyPairTMTime_polynomial :
 -- ════════════════════════════════════════════════════════════════════════
 
 /-- Predicate isolating the three evaluator-phase states of `verifyPairTM`. -/
-private def isEvalState : VerifyPairPhase → Prop
+def isEvalState : VerifyPairPhase → Prop
   | .evalReadFirst _ => True
   | .evalReadSecond _ _ => True
   | .evalRewindAlpha _ => True
@@ -4658,14 +4685,14 @@ private def isEvalState : VerifyPairPhase → Prop
 
 /-- The projection only sends `.done` (among eval-or-done states) to the
 evaluator's halt state, so a halted projection forces a halted verifier. -/
-private theorem state_done_of_isEvalOrDone {s : VerifyPairPhase}
+theorem state_done_of_isEvalOrDone {s : VerifyPairPhase}
     (h : isEvalState s ∨ s = .done) (hd : projEvalState s = .done) : s = .done := by
   cases s <;> simp_all [isEvalState, projEvalState]
 
 /-- **One-step projection.** A verifier step from an eval-phase configuration
 whose formula tape carries no interior left-markers maps onto a single
 `satEvalOnInputTM` step of the projected configuration. -/
-private theorem projEval_step (c c' : Cfg 3 verifyPairTM.Q)
+theorem projEval_step (c c' : Cfg 3 verifyPairTM.Q)
     (heval : isEvalState c.state)
     (hnostart : ∀ j, j ≥ 1 → (c.work ⟨0, by omega⟩).cells j ≠ Γ.start)
     (hstep : verifyPairTM.step c = some c') :
@@ -4730,7 +4757,7 @@ private theorem projEval_step (c c' : Cfg 3 verifyPairTM.Q)
   rw [main, hstep]; rfl
 
 /-- A TM step never modifies its read-only input tape's cells (only its head). -/
-private theorem step_input_cells {m : ℕ} {tm : TM m} {c c' : Cfg m tm.Q}
+theorem step_input_cells {m : ℕ} {tm : TM m} {c c' : Cfg m tm.Q}
     (h : tm.step c = some c') : c'.input.cells = c.input.cells := by
   rw [TM.step] at h
   split at h
@@ -4739,7 +4766,7 @@ private theorem step_input_cells {m : ℕ} {tm : TM m} {c c' : Cfg m tm.Q}
     exact Tape.move_cells _ _
 
 /-- The evaluator phases only transition to evaluator phases or the halt state. -/
-private theorem verify_eval_next_state (c c' : Cfg 3 verifyPairTM.Q)
+theorem verify_eval_next_state (c c' : Cfg 3 verifyPairTM.Q)
     (hev : isEvalState c.state) (hvstep : verifyPairTM.step c = some c') :
     isEvalState c'.state ∨ c'.state = .done := by
   have hcne : c.state ≠ verifyPairTM.qhalt := by
@@ -4787,7 +4814,7 @@ private theorem verify_eval_next_state (c c' : Cfg 3 verifyPairTM.Q)
 configuration lifts back to a verifier trace of the same length, preserving the
 eval-or-done invariant and the no-interior-marker invariant on the formula
 tape. -/
-private theorem projEval_reaches :
+theorem projEval_reaches :
     ∀ (t : ℕ) (c : Cfg 3 verifyPairTM.Q) (d : Cfg 1 satEvalOnInputTM.Q),
       (isEvalState c.state ∨ c.state = .done) →
       (∀ j, j ≥ 1 → (c.work ⟨0, by omega⟩).cells j ≠ Γ.start) →
@@ -4832,7 +4859,7 @@ private theorem projEval_reaches :
 whole split/setup/eval pipeline from `initCfg (pair z α)`, halting within
 `(4·|z| + 2·|α| + 12) + (2·|z| + 1)` steps with output equal to the SAT
 semantics `satEvalSemBits α z`. -/
-private theorem verifyPairSplit_eval_success (z α : List Bool)
+theorem verifyPairSplit_eval_success (z α : List Bool)
     (hlen : α.length ≤ z.length + 1) :
     ∃ c' t,
       t ≤ 4 * z.length + 2 * α.length + 12 + (2 * z.length + 1) ∧
@@ -4872,7 +4899,7 @@ private theorem verifyPairSplit_eval_success (z α : List Bool)
 
 /-- **Reject (witness too long).** When `|z| + 1 < |α|`, the counter is exhausted
 during the copy of `α`, so the verifier halts with output `0`. -/
-private theorem verifyPairSplit_reject_long (z α : List Bool)
+theorem verifyPairSplit_reject_long (z α : List Bool)
     (hlen : z.length + 1 < α.length) :
     ∃ c' t,
       t ≤ 4 * z.length + 10 ∧
@@ -4957,7 +4984,7 @@ private theorem verifyPairSplit_reject_long (z α : List Bool)
       (TM.reachesIn_trans _ hr5 (.step hstep6 .zero)))
 
 /-- A split-phase reject from `.splitScan` reading a blank (end of input). -/
-private theorem verifyPairSplit_splitScan_reject (c : Cfg 3 verifyPairTM.Q)
+theorem verifyPairSplit_splitScan_reject (c : Cfg 3 verifyPairTM.Q)
     (hst : c.state = .splitScan) (hread : c.input.read = Γ.blank)
     (hout : c.output = (Tape.init []).move Dir3.right) :
     ∃ c', verifyPairTM.step c = some c' ∧ verifyPairTM.halted c' ∧
@@ -4979,7 +5006,7 @@ private theorem verifyPairSplit_splitScan_reject (c : Cfg 3 verifyPairTM.Q)
     Tape.init, Γw.toΓ]
 
 /-- A split-phase reject from `.splitAfterFalse` reading a blank. -/
-private theorem verifyPairSplit_afterFalse_reject (c : Cfg 3 verifyPairTM.Q)
+theorem verifyPairSplit_afterFalse_reject (c : Cfg 3 verifyPairTM.Q)
     (hst : c.state = .splitAfterFalse) (hread : c.input.read = Γ.blank)
     (hout : c.output = (Tape.init []).move Dir3.right) :
     ∃ c', verifyPairTM.step c = some c' ∧ verifyPairTM.halted c' ∧
@@ -5002,7 +5029,7 @@ private theorem verifyPairSplit_afterFalse_reject (c : Cfg 3 verifyPairTM.Q)
 
 /-- A split-phase reject from `.splitAfterTrue` reading anything other than a
 second `true` (a blank, or a `0`). -/
-private theorem verifyPairSplit_afterTrue_reject (c : Cfg 3 verifyPairTM.Q)
+theorem verifyPairSplit_afterTrue_reject (c : Cfg 3 verifyPairTM.Q)
     (hst : c.state = .splitAfterTrue)
     (hread : c.input.read = Γ.blank ∨ c.input.read = Γ.zero)
     (hout : c.output = (Tape.init []).move Dir3.right) :
@@ -5027,7 +5054,7 @@ private theorem verifyPairSplit_afterTrue_reject (c : Cfg 3 verifyPairTM.Q)
 
 /-- The split scan rejects every input that is not a valid `pair` encoding,
 mirroring the recursion of `unpair?`. -/
-private theorem verifyPairSplit_scan_reject :
+theorem verifyPairSplit_scan_reject :
     ∀ (suffix : List Bool) (c : Cfg 3 verifyPairTM.Q),
       c.state = .splitScan →
       unpair? suffix = none →
@@ -5176,7 +5203,7 @@ private theorem verifyPairSplit_scan_reject :
 
 /-- **Reject (malformed input).** When `w` is not a valid `pair`, the split scan
 rejects, halting with output `0`. -/
-private theorem verifyPairSplit_reject_malformed (w : List Bool)
+theorem verifyPairSplit_reject_malformed (w : List Bool)
     (hw : unpair? w = none) :
     ∃ c' t,
       t ≤ 2 * w.length + 4 ∧

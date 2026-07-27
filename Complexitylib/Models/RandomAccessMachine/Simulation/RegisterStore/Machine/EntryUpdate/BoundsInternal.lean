@@ -3,13 +3,15 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore
-import
+module
+
+public import Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore
+public import
   Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Machine.EntryMatch.Internal
-import
+public import
   Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Machine.EntryUpdate.Defs
-import Complexitylib.Models.TuringMachine.Subroutines.BinaryPred
-import Complexitylib.Models.TuringMachine.Subroutines.ResetBinaryMany
+public import Complexitylib.Models.TuringMachine.Subroutines.BinaryPred
+public import Complexitylib.Models.TuringMachine.Subroutines.ResetBinaryMany
 
 /-!
 # Encoded-length sparse-update bounds -- proof internals
@@ -18,6 +20,8 @@ The update controller reserves the slower of copy, replacement, and deletion
 at each iteration. With unary-marker decoding, each such reservation is still
 linear in the current entry and the instruction's query/replacement widths.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

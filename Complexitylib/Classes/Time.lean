@@ -3,8 +3,10 @@ Copyright (c) 2025 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Models.TuringMachine
-import Complexitylib.Asymptotics
+module
+
+public import Complexitylib.Models.TuringMachine
+public import Complexitylib.Asymptotics
 
 /-!
 # Base time complexity classes
@@ -16,6 +18,8 @@ randomized time classes are derived.
 Both use `=O` (Mathlib's `IsBigO` lifted to `ℕ → ℕ`) to express asymptotic
 bounds.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

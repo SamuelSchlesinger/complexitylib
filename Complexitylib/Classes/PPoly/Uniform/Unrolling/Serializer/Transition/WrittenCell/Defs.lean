@@ -3,8 +3,10 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Classes.PPoly.Uniform.Unrolling.Serializer.Transition.Atomic.Defs
-import Complexitylib.Classes.PPoly.Uniform.Unrolling.Serializer.Transition.Effect.Defs
+module
+
+public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Serializer.Transition.Atomic.Defs
+public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Serializer.Transition.Effect.Defs
 
 /-!
 # Numeric schedules for written-cell formulas
@@ -19,6 +21,8 @@ The fixed machine, writable tape, and symbol are used only to derive the
 compile-time selection oracle. No run-time schedule value contains a formula,
 bounded index, transition case, tape slot, symbol, or list cursor.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

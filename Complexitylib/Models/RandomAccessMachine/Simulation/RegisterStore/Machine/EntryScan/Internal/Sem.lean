@@ -3,16 +3,20 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import
+module
+
+public import
   Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Machine.EntryScan.Internal.Ctrl
-import
+public import
   Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Machine.EntryScan.Internal.Inv
-import Complexitylib.Models.TuringMachine.Combinators.WorkBranch
-import Complexitylib.Models.TuringMachine.Subroutines.BinaryPred
+public import Complexitylib.Models.TuringMachine.Combinators.WorkBranch
+public import Complexitylib.Models.TuringMachine.Subroutines.BinaryPred
 
 /-!
 # Bounded sparse-entry scan — semantic internals
 -/
+
+@[expose] public section
 
 namespace Complexity
 

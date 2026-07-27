@@ -3,8 +3,10 @@ Copyright (c) 2025 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Circuits.Basic
-import Mathlib.Data.List.OfFn
+module
+
+public import Complexitylib.Circuits.Basic
+public import Mathlib.Data.List.OfFn
 
 /-!
 # Fixed-length bit strings and lists
@@ -16,6 +18,8 @@ canonical serialization and provides round-trip lemmas in both directions.
 The variable-length equivalence is already available from Mathlib as
 `List.equivSigmaTuple : List Bool ≃ Σ n, BitString n`.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

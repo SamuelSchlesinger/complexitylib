@@ -3,8 +3,10 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Models.TuringMachine.Repetition.Internal.Frame
-import Complexitylib.Models.TuringMachine.Repetition.Internal.Rewind
+module
+
+public import Complexitylib.Models.TuringMachine.Repetition.Internal.Frame
+public import Complexitylib.Models.TuringMachine.Repetition.Internal.Rewind
 
 /-!
 # Parked tape banks for fixed-time repetition
@@ -26,6 +28,8 @@ next active bank.
 - `NTM.RepeatOtherParked.trace_rewind` — the fixed rewind preserves it
 - `NTM.RepeatOtherParked.finish` — a nonfinal finish transfers it to the next bank
 -/
+
+@[expose] public section
 
 namespace Complexity
 

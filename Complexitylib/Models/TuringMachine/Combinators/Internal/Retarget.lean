@@ -3,12 +3,14 @@ Copyright (c) 2025 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Models.TuringMachine.Combinators
-import Complexitylib.Models.TuringMachine.Combinators.Internal.Generic
-import Complexitylib.Models.TuringMachine.Internal
-import Complexitylib.Models.TuringMachine.Hoare.Defs
-import Complexitylib.Models.TuringMachine.Subroutines.Counter
-import Complexitylib.Models.TuringMachine.Subroutines.Internal
+module
+
+public import Complexitylib.Models.TuringMachine.Combinators
+public import Complexitylib.Models.TuringMachine.Combinators.Internal.Generic
+public import Complexitylib.Models.TuringMachine.Internal
+public import Complexitylib.Models.TuringMachine.Hoare.Defs
+public import Complexitylib.Models.TuringMachine.Subroutines.Counter
+public import Complexitylib.Models.TuringMachine.Subroutines.Internal
 
 /-!
 # retargetInput simulation — proof internals
@@ -66,6 +68,8 @@ contain `Γ.start`". This is a *structural* invariant of any DTM run
 cell 0 are no-ops) — captured by `Tape.StartInvariant` below and preserved
 across `TM.step` by `Tape.StartInvariant.step`.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

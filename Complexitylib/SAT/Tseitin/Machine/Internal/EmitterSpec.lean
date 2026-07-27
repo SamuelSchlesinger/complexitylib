@@ -3,9 +3,11 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.SAT.Tseitin.Internal.StreamingEndpoint
-import Complexitylib.SAT.Tseitin.Machine.Internal.BranchFrame
-import Complexitylib.SAT.Tseitin.Machine.Internal.ControllerRun
+module
+
+public import Complexitylib.SAT.Tseitin.Internal.StreamingEndpoint
+public import Complexitylib.SAT.Tseitin.Machine.Internal.BranchFrame
+public import Complexitylib.SAT.Tseitin.Machine.Internal.ControllerRun
 
 /-!
 # Typed-input specification for the Tseitin valid emitter
@@ -26,6 +28,8 @@ rounds it to the library's explicit quartic envelope.
 - `validEmitterTM_hoareTime_internal`
 - `validEmitterTM_hoareTime_quartic_internal`
 -/
+
+@[expose] public section
 
 namespace Complexity
 

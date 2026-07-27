@@ -3,7 +3,9 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Models.TuringMachine.Repetition.Internal.Schedule
+module
+
+public import Complexitylib.Models.TuringMachine.Repetition.Internal.Schedule
 
 /-!
 # Exact trial-boundary trace decomposition
@@ -20,6 +22,8 @@ lemmas keep all dependent casts out of the outer correctness induction.
 - `NTM.repeatAdminChoices_trace_split` — split admin into rewind and finish
 - `NTM.repeatStrideChoices_trace_split_three` — complete three-phase split
 -/
+
+@[expose] public section
 
 namespace Complexity
 

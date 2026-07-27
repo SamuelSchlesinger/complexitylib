@@ -3,9 +3,11 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Models.TuringMachine.Combinators.WorkBranch.Defs
-import Complexitylib.Models.TuringMachine.Experimental.BinaryRoutine.Defs
-import Complexitylib.Models.TuringMachine.Subroutines.BinaryFor.Defs
+module
+
+public import Complexitylib.Models.TuringMachine.Combinators.WorkBranch.Defs
+public import Complexitylib.Models.TuringMachine.Experimental.BinaryRoutine.Defs
+public import Complexitylib.Models.TuringMachine.Subroutines.BinaryFor.Defs
 
 /-!
 # Proof-carrying binary routine control -- definitions
@@ -19,6 +21,8 @@ so body obligations are restricted to the reachable segment, and it accepts
 bounded iteration witnesses because `BinaryRoutine.Sound` advertises an upper
 bound rather than an exact runtime. Comparisons and endpoints remain exact.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

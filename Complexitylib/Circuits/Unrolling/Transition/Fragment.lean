@@ -3,12 +3,14 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Circuits.Unrolling.Transition.Fragment.Defs
-import Complexitylib.Circuits.Unrolling.Transition.Fragment.Internal.ArrayEvaluation
-import Complexitylib.Circuits.Unrolling.Transition.Fragment.Internal.Evaluation
-import Complexitylib.Circuits.Unrolling.Transition.Fragment.Internal.Size
-import Complexitylib.Circuits.Unrolling.Transition.Fragment.Internal.Structure
-import Complexitylib.Circuits.Unrolling.Transition.Fragment.Internal.Topology
+module
+
+public import Complexitylib.Circuits.Unrolling.Transition.Fragment.Defs
+public import Complexitylib.Circuits.Unrolling.Transition.Fragment.Internal.ArrayEvaluation
+public import Complexitylib.Circuits.Unrolling.Transition.Fragment.Internal.Evaluation
+public import Complexitylib.Circuits.Unrolling.Transition.Fragment.Internal.Size
+public import Complexitylib.Circuits.Unrolling.Transition.Fragment.Internal.Structure
+public import Complexitylib.Circuits.Unrolling.Transition.Fragment.Internal.Topology
 
 /-!
 # Packed circuit fragments for one Turing-machine transition
@@ -25,6 +27,8 @@ machine-dependent quadratic size in the trace horizon.
 - `evalAux?_stepFragment`: exact packed successor-configuration semantics.
 - `stepFragmentSize_le`: a machine-dependent quadratic size bound.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

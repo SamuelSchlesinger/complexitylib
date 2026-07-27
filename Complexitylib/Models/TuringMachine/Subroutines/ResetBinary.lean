@@ -3,10 +3,12 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Models.TuringMachine.Hoare.Space
-import Complexitylib.Models.TuringMachine.Subroutines.ClearWork
-import Complexitylib.Models.TuringMachine.Subroutines.ResetBinary.Defs
-import Complexitylib.Models.TuringMachine.Subroutines.ResetBinary.Internal
+module
+
+public import Complexitylib.Models.TuringMachine.Hoare.Space
+public import Complexitylib.Models.TuringMachine.Subroutines.ClearWork
+public import Complexitylib.Models.TuringMachine.Subroutines.ResetBinary.Defs
+public import Complexitylib.Models.TuringMachine.Subroutines.ResetBinary.Internal
 
 /-!
 # Resetting a binary work tape
@@ -14,6 +16,8 @@ import Complexitylib.Models.TuringMachine.Subroutines.ResetBinary.Internal
 This module exposes the framed time and space contracts for rewinding an
 arbitrary canonical binary cursor and clearing it to the standard blank tape.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

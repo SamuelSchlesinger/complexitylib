@@ -3,9 +3,11 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Models.TuringMachine.Composition.Internal.FirstPhase
-import Complexitylib.Models.TuringMachine.Composition.Internal.Tail
-import Complexitylib.Models.TuringMachine.OutputBounds
+module
+
+public import Complexitylib.Models.TuringMachine.Composition.Internal.FirstPhase
+public import Complexitylib.Models.TuringMachine.Composition.Internal.Tail
+public import Complexitylib.Models.TuringMachine.OutputBounds
 
 /-!
 # Sequential composition correctness — proof internals
@@ -14,6 +16,8 @@ This module connects the first function computation's placed raw-output
 boundary to the normalization tail. It derives coarse monotone time bounds for
 both function composition and preprocessing followed by a language decider.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

@@ -3,13 +3,15 @@ Copyright (c) 2025 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.SAT.Language
-import Complexitylib.Asymptotics
-import Complexitylib.Classes.NP.Internal.PairBuildTM
-import Complexitylib.Models.TuringMachine.Subroutines.GuessBounded
-import Complexitylib.Models.TuringMachine.Subroutines.Internal
-import Complexitylib.Models.TuringMachine.Combinators.Internal.Retarget
-import Complexitylib.Models.TuringMachine.Trace
+module
+
+public import Complexitylib.SAT.Language
+public import Complexitylib.Asymptotics
+public import Complexitylib.Classes.NP.Internal.PairBuildTM
+public import Complexitylib.Models.TuringMachine.Subroutines.GuessBounded
+public import Complexitylib.Models.TuringMachine.Subroutines.Internal
+public import Complexitylib.Models.TuringMachine.Combinators.Internal.Retarget
+public import Complexitylib.Models.TuringMachine.Trace
 
 /-!
 # SAT-specialized guess-and-verify NTM
@@ -32,6 +34,8 @@ The state space is a direct sequence of the existing subroutine phases:
 counter setup, input rewind, bounded guessing, pair building, and verifier
 simulation.
 -/
+
+@[expose] public section
 
 namespace Complexity
 
@@ -159,14 +163,15 @@ instance {Q : Type} [DecidableEq Q] [Fintype Q] : Fintype (GuessVerifyPhase Q) w
 def verifierStartedState (M : TM k) : M.Q :=
   (M.δ M.qstart Γ.start (fun _ : Fin k => Γ.start) Γ.start).1
 
-private def phaseBoundary {Q : Type} (q : GuessVerifyPhase Q)
+@[nolint docBlame]
+def phaseBoundary {Q : Type} (q : GuessVerifyPhase Q)
     (iHead : Γ) (wHeads : Fin (k + 3) → Γ) (oHead : Γ) :
     GuessVerifyPhase Q × (Fin (k + 3) → Γw) × Γw ×
       Dir3 × (Fin (k + 3) → Dir3) × Dir3 :=
   (q, fun i => readBackWrite (wHeads i), readBackWrite oHead,
     idleDir iHead, fun i => idleDir (wHeads i), idleDir oHead)
 
-private theorem phaseBoundary_right_of_start {Q : Type} (q : GuessVerifyPhase Q)
+theorem phaseBoundary_right_of_start {Q : Type} (q : GuessVerifyPhase Q)
     (iHead : Γ) (wHeads : Fin (k + 3) → Γ) (oHead : Γ) :
     (iHead = Γ.start → (phaseBoundary (k := k) q iHead wHeads oHead).2.2.2.1 = Dir3.right) ∧
     (∀ i, wHeads i = Γ.start →
@@ -174,7 +179,8 @@ private theorem phaseBoundary_right_of_start {Q : Type} (q : GuessVerifyPhase Q)
     (oHead = Γ.start → (phaseBoundary (k := k) q iHead wHeads oHead).2.2.2.2.2 = Dir3.right) :=
   rightOfStart_allIdle iHead wHeads oHead
 
-private def satVerifyTransition (M : TM k) (q : M.Q)
+@[nolint docBlame]
+def satVerifyTransition (M : TM k) (q : M.Q)
     (iHead : Γ) (wHeads : Fin (k + 3) → Γ) (oHead : Γ) :
     GuessVerifyPhase M.Q × (Fin (k + 3) → Γw) × Γw ×
       Dir3 × (Fin (k + 3) → Dir3) × Dir3 :=
@@ -195,7 +201,7 @@ private def satVerifyTransition (M : TM k) (q : M.Q)
       else idleDir (wHeads i),
     outDir)
 
-private theorem satVerifyTransition_right_of_start (M : TM k) (q : M.Q)
+theorem satVerifyTransition_right_of_start (M : TM k) (q : M.Q)
     (iHead : Γ) (wHeads : Fin (k + 3) → Γ) (oHead : Γ) :
     let tr := satVerifyTransition M q iHead wHeads oHead
     (iHead = Γ.start → tr.2.2.2.1 = Dir3.right) ∧
@@ -221,7 +227,8 @@ private theorem satVerifyTransition_right_of_start (M : TM k) (q : M.Q)
         exact hwi)
     · simp [hip, idleDir_right_of_start hwi]
 
-private def satGuessVerifyDelta (M : TM k) :
+@[nolint docBlame]
+def satGuessVerifyDelta (M : TM k) :
     Bool → GuessVerifyPhase M.Q → Γ → (Fin (k + 3) → Γ) → Γ →
       GuessVerifyPhase M.Q × (Fin (k + 3) → Γw) × Γw ×
         Dir3 × (Fin (k + 3) → Dir3) × Dir3 :=
@@ -259,7 +266,7 @@ private def satGuessVerifyDelta (M : TM k) :
     | .verify q =>
         satVerifyTransition M q iHead wHeads oHead
 
-private theorem satGuessVerifyDelta_right_of_start (M : TM k)
+theorem satGuessVerifyDelta_right_of_start (M : TM k)
     (choice : Bool) (state : GuessVerifyPhase M.Q)
     (iHead : Γ) (wHeads : Fin (k + 3) → Γ) (oHead : Γ) :
     let tr := satGuessVerifyDelta M choice state iHead wHeads oHead
@@ -467,7 +474,7 @@ theorem verifier_started_trace_decides_of_decidesInTime (M : TM k)
   rw [htrace]
   exact ⟨hhalt, hyes, hno⟩
 
-private theorem satTape_writeBack_eq_move (t : Tape) (d : Dir3)
+theorem satTape_writeBack_eq_move (t : Tape) (d : Dir3)
     (h : t.head = 0 ∨ t.read ≠ Γ.start) :
     t.writeAndMove (readBackWrite t.read).toΓ d = t.move d := by
   show (t.write (readBackWrite t.read).toΓ).move d = t.move d
@@ -481,7 +488,7 @@ private theorem satTape_writeBack_eq_move (t : Tape) (d : Dir3)
         simp [Tape.read, Function.update_eq_self]
   rw [hwrite]
 
-private theorem tape_write_readBack_move_cells_ne_start (t : Tape) (d : Dir3)
+theorem tape_write_readBack_move_cells_ne_start (t : Tape) (d : Dir3)
     (hclean : ∀ j, j ≥ 1 → t.cells j ≠ Γ.start) :
     ∀ j, j ≥ 1 →
       (t.writeAndMove (readBackWrite t.read).toΓ d).cells j ≠ Γ.start := by
@@ -727,7 +734,7 @@ theorem satPair_cells_ne_start_of_initTape_ofBool_move_right (M : TM k)
   rw [hpair]
   exact Tape.init_ofBool_move_right_cells_ne_start bits
 
-private theorem tape_eq_initTape_ofBool_move_right_of_head_cells
+theorem tape_eq_initTape_ofBool_move_right_of_head_cells
     (t : Tape) (bits : List Bool)
     (hhead : t.head = 1)
     (hcells : t.cells = (Tape.init (bits.map Γ.ofBool)).cells) :
@@ -881,7 +888,7 @@ theorem satGuessVerify_counter_trace_exit (M : TM k) (T : ℕ)
   funext i
   rfl
 
-private theorem satCounter_trace_preserves_started_blank_other_work
+theorem satCounter_trace_preserves_started_blank_other_work
     (T : ℕ) (choices : Fin T → Bool)
     (c : Cfg (k + 3) TM.LinearCounterPhase)
     (i : Fin (k + 3)) (hi : i ≠ satCounterIdx k)
@@ -895,7 +902,7 @@ private theorem satCounter_trace_preserves_started_blank_other_work
   exact TM.inputLengthPlusOneCounterTM_toNTM_trace_one_preserves_started_blank_other_work
     (satCounterIdx k) (choices ⟨time, htime⟩) current i hi hcurrent
 
-private theorem satCounter_trace_succ_initializes_blank_other_work
+theorem satCounter_trace_succ_initializes_blank_other_work
     (T : ℕ) (choices : Fin (T + 1) → Bool)
     (c : Cfg (k + 3) TM.LinearCounterPhase)
     (i : Fin (k + 3)) (hi : i ≠ satCounterIdx k)
@@ -913,7 +920,7 @@ private theorem satCounter_trace_succ_initializes_blank_other_work
   exact satCounter_trace_preserves_started_blank_other_work T
     (fun j => choices ⟨j.val + 1, by omega⟩) c1 i hi h1
 
-private theorem satCounter_trace_preserves_started_blank_output
+theorem satCounter_trace_preserves_started_blank_output
     (T : ℕ) (choices : Fin T → Bool)
     (c : Cfg (k + 3) TM.LinearCounterPhase)
     (houtput : c.output = (Tape.init []).move Dir3.right) :
@@ -926,7 +933,7 @@ private theorem satCounter_trace_preserves_started_blank_output
   exact TM.inputLengthPlusOneCounterTM_toNTM_trace_one_preserves_started_blank_output
     (satCounterIdx k) (choices ⟨time, htime⟩) current hcurrent
 
-private theorem satCounter_trace_succ_initializes_blank_output
+theorem satCounter_trace_succ_initializes_blank_output
     (T : ℕ) (choices : Fin (T + 1) → Bool)
     (c : Cfg (k + 3) TM.LinearCounterPhase)
     (hstate : c.state ≠ TM.LinearCounterPhase.done)
@@ -943,7 +950,7 @@ private theorem satCounter_trace_succ_initializes_blank_output
   exact satCounter_trace_preserves_started_blank_output T
     (fun j => choices ⟨j.val + 1, by omega⟩) c1 h1
 
-private theorem satCounter_init_boundary_started_blank_other_work
+theorem satCounter_init_boundary_started_blank_other_work
     (x : List Bool) (T : ℕ) (choices : Fin T → Bool)
     (i : Fin (k + 3)) (hi : i ≠ satCounterIdx k) :
     let counterNTM := (TM.inputLengthPlusOneCounterTM (satCounterIdx k)).toNTM
@@ -982,7 +989,7 @@ private theorem satCounter_init_boundary_started_blank_other_work
         (counterNTM.trace (T + 1) choices c0).work i hread]
       exact htrace
 
-private theorem satCounter_init_boundary_started_blank_output
+theorem satCounter_init_boundary_started_blank_output
     (x : List Bool) (T : ℕ) (choices : Fin T → Bool) :
     let counterNTM := (TM.inputLengthPlusOneCounterTM (satCounterIdx k)).toNTM
     let c0 : Cfg (k + 3) TM.LinearCounterPhase :=

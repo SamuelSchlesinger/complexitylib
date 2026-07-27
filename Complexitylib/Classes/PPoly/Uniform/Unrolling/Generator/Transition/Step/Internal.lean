@@ -3,23 +3,27 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Transition.PackedCopy
-import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Transition.Next
-import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Transition.Step.Defs
-import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Transition.Step.Internal.Effect
-import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Transition.Step.Internal.Emitted
-import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Transition.Step.Internal.Packed
-import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Transition.Step.Internal.Requires
-import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Transition.Step.Internal.Sound
-import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Transition.Step.Internal.Space
-import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Transition.Step.Internal.Top
-import Complexitylib.Classes.PPoly.Uniform.Unrolling.Serializer.Transition.Step
-import Complexitylib.Models.TuringMachine.Experimental.BinaryRoutine.Arithmetic
-import Complexitylib.Models.TuringMachine.Experimental.BinaryRoutine.List
+module
+
+public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Transition.PackedCopy
+public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Transition.Next
+public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Transition.Step.Defs
+public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Transition.Step.Internal.Effect
+public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Transition.Step.Internal.Emitted
+public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Transition.Step.Internal.Packed
+public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Transition.Step.Internal.Requires
+public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Transition.Step.Internal.Sound
+public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Transition.Step.Internal.Space
+public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Transition.Step.Internal.Top
+public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Serializer.Transition.Step
+public import Complexitylib.Models.TuringMachine.Experimental.BinaryRoutine.Arithmetic
+public import Complexitylib.Models.TuringMachine.Experimental.BinaryRoutine.List
 
 /-!
 # Direct-unrolling packed-step generator -- proof internals
 -/
+
+@[expose] public section
 
 namespace Complexity
 

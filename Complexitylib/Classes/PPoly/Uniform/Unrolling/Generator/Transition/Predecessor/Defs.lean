@@ -3,10 +3,12 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Initialization.Defs
-import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Offset.Defs
-import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Primitive.Defs
-import Complexitylib.Classes.PPoly.Uniform.Unrolling.Serializer.Transition.MovedHead.Defs
+module
+
+public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Initialization.Defs
+public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Offset.Defs
+public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Primitive.Defs
+public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Serializer.Transition.MovedHead.Defs
 
 /-!
 # Direct predecessor-head formula generation -- definitions
@@ -17,6 +19,8 @@ head-wire copies. The right-fold suffix uses a dynamic recent-wire offset
 `2 + 2 * rank`, which directly selects reverse member outputs while the fixed
 offset one selects the preceding identity or connector.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

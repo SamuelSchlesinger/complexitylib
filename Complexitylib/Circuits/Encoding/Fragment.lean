@@ -3,7 +3,9 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Circuits.Encoding.Internal.Fragment
+module
+
+public import Complexitylib.Circuits.Encoding.Internal.Fragment
 
 /-!
 # Appendable raw-circuit fragments
@@ -13,6 +15,8 @@ Primitive copy/constant gates and generic composition laws for building a
 Evaluation passes the memo array from one fragment to the next, and successful
 evaluation preserves every previously available wire.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

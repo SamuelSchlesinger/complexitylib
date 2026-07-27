@@ -3,8 +3,10 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Models.RandomAccessMachine.Structured.Switch.Defs
-import Complexitylib.Models.RandomAccessMachine.Structured.Switch.Internal
+module
+
+public import Complexitylib.Models.RandomAccessMachine.Structured.Switch.Defs
+public import Complexitylib.Models.RandomAccessMachine.Structured.Switch.Internal
 
 /-!
 # Verified finite numeric switches for structured RAM programs
@@ -12,6 +14,8 @@ import Complexitylib.Models.RandomAccessMachine.Structured.Switch.Internal
 The theorem in this module gives exact source step accounting and explicit
 logarithmic-cost and peak-space bounds for a finite numeric switch.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

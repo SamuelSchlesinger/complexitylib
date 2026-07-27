@@ -3,10 +3,12 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Models.TuringMachine.Combinators.Internal.Scanner
-import Complexitylib.Models.TuringMachine.Hoare
-import Complexitylib.Models.TuringMachine.Lift
-import Complexitylib.Models.TuringMachine.Subroutines.PairValidate.Defs
+module
+
+public import Complexitylib.Models.TuringMachine.Combinators.Internal.Scanner
+public import Complexitylib.Models.TuringMachine.Hoare
+public import Complexitylib.Models.TuringMachine.Lift
+public import Complexitylib.Models.TuringMachine.Subroutines.PairValidate.Defs
 
 /-!
 # Pair-encoding validator — proof internals
@@ -14,6 +16,8 @@ import Complexitylib.Models.TuringMachine.Subroutines.PairValidate.Defs
 The finite-state fold is related to `unpair?`, then the generic scanner
 correctness theorem supplies the executable machine proof and exact time bound.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

@@ -3,9 +3,11 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Classes.FiniteCounting
-import Complexitylib.Models.TuringMachine.Combinators
-import Mathlib.Logic.Equiv.Fin.Basic
+module
+
+public import Complexitylib.Classes.FiniteCounting
+public import Complexitylib.Models.TuringMachine.Combinators
+public import Mathlib.Logic.Equiv.Fin.Basic
 
 /-!
 # Fixed-time repetition of probabilistic Turing machines
@@ -38,6 +40,8 @@ zero-step run votes according to the initial configuration of `tm`.
 - `NTM.repeatAcceptEvent` — the source machine's single-run accepting event
 - `NTM.repeatAtTime` — the repeated majority-vote machine
 -/
+
+@[expose] public section
 
 namespace Complexity
 

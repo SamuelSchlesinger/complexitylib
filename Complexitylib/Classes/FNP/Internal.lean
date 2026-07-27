@@ -3,9 +3,11 @@ Copyright (c) 2025 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Classes.FNP.Defs
-import Complexitylib.Classes.P
-import Mathlib.Analysis.Asymptotics.Defs
+module
+
+public import Complexitylib.Classes.FNP.Defs
+public import Complexitylib.Classes.P
+public import Mathlib.Analysis.Asymptotics.Defs
 
 /-!
 # FNP and TFNP — Internal proofs
@@ -13,6 +15,8 @@ import Mathlib.Analysis.Asymptotics.Defs
 Helper lemmas for `OrRelation` used by the surface-layer theorem
 `orRelation_mem_TFNP_of_NP_coNP_witnesses`.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

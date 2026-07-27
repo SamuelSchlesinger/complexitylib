@@ -3,17 +3,21 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Initialization
-import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Offset
-import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Transition.Case.Defs
-import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Transition.Read
-import Complexitylib.Classes.PPoly.Uniform.Unrolling.Serializer.Transition.Case
-import Complexitylib.Models.TuringMachine.Experimental.BinaryRoutine.Arithmetic
-import Complexitylib.Models.TuringMachine.Experimental.BinaryRoutine.List
+module
+
+public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Initialization
+public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Offset
+public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Transition.Case.Defs
+public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Transition.Read
+public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Serializer.Transition.Case
+public import Complexitylib.Models.TuringMachine.Experimental.BinaryRoutine.Arithmetic
+public import Complexitylib.Models.TuringMachine.Experimental.BinaryRoutine.List
 
 /-!
 # Direct-unrolling transition-case generator -- proof internals
 -/
+
+@[expose] public section
 
 namespace Complexity
 
@@ -159,7 +163,8 @@ private theorem emitCopyGate_reference₀_requires
   refine ⟨⟨by decide, by decide, by decide, by decide, by decide⟩, ?_⟩
   simpa [Work.emitCounter] using hemit
 
-private def caseReadStartValues (values : BinaryValues WorkCount)
+@[nolint docBlame]
+def caseReadStartValues (values : BinaryValues WorkCount)
     (tapeIndex symbolIndex : ℕ) : BinaryValues WorkCount :=
   Function.update
     (Function.update values Work.tapeIndex tapeIndex)

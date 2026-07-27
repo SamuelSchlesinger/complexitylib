@@ -3,16 +3,20 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Offset
-import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Transition.Case
-import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Transition.Read
-import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Transition.Effect.Defs
-import Complexitylib.Models.TuringMachine.Experimental.BinaryRoutine.Arithmetic
-import Complexitylib.Models.TuringMachine.Experimental.BinaryRoutine.List
+module
+
+public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Offset
+public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Transition.Case
+public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Transition.Read
+public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Transition.Effect.Defs
+public import Complexitylib.Models.TuringMachine.Experimental.BinaryRoutine.Arithmetic
+public import Complexitylib.Models.TuringMachine.Experimental.BinaryRoutine.List
 
 /-!
 # Direct-unrolling transition-effect generator -- proof internals
 -/
+
+@[expose] public section
 
 namespace Complexity
 
@@ -24,7 +28,7 @@ namespace DirectGenerator
 
 /-- Scratch invariant while a rolling effect-member output reference moves
 backward through the variable-width case stream. -/
-private structure EffectConnectorClean
+structure EffectConnectorClean
     (values : BinaryValues WorkCount) : Prop where
   reference₁ : values Work.reference₁ = 0
   loop₃ : values Work.loop₃ = 0
@@ -35,7 +39,7 @@ private structure EffectConnectorClean
   multiplyCounter : values Work.multiplyCounter = 0
   addCounter : values Work.addCounter = 0
 
-private theorem CaseFormulaClean.updateAvailable
+theorem CaseFormulaClean.updateAvailable
     (values : BinaryValues WorkCount) (hclean : CaseFormulaClean values)
     (available : ℕ) :
     CaseFormulaClean (Function.update values Work.available available) := by
@@ -79,7 +83,7 @@ private theorem CaseFormulaClean.updateAvailable
   · exact hclean.tapeIndex
   · exact hclean.symbolIndex
 
-private theorem CaseFormulaClean.effectConnectorClean
+theorem CaseFormulaClean.effectConnectorClean
     (values : BinaryValues WorkCount) (hclean : CaseFormulaClean values) :
     EffectConnectorClean values :=
   { reference₁ := hclean.reference₁
@@ -91,7 +95,7 @@ private theorem CaseFormulaClean.effectConnectorClean
     multiplyCounter := hclean.multiplyCounter
     addCounter := hclean.addCounter }
 
-private theorem EffectConnectorClean.updateReference₀
+theorem EffectConnectorClean.updateReference₀
     (values : BinaryValues WorkCount) (hclean : EffectConnectorClean values)
     (reference : ℕ) :
     EffectConnectorClean
@@ -115,7 +119,7 @@ private theorem EffectConnectorClean.updateReference₀
       hclean.multiplyCounter
   · simpa [Work.reference₀, Work.addCounter] using hclean.addCounter
 
-private theorem EffectConnectorClean.afterReadConnector
+theorem EffectConnectorClean.afterReadConnector
     (values : BinaryValues WorkCount) (hclean : EffectConnectorClean values) :
     EffectConnectorClean (emitReadConnector.effect values) := by
   rw [emitReadConnector_effect_internal]
@@ -143,7 +147,7 @@ private theorem EffectConnectorClean.afterReadConnector
   · simpa [Work.available, Work.reference₁, Work.addCounter] using
       hclean.addCounter
 
-private theorem emitReadConnector_sound_for_effect :
+theorem emitReadConnector_sound_for_effect :
     emitReadConnector.Sound := by
   apply BinaryRoutine.seqList_sound
   intro member hmember
@@ -236,7 +240,7 @@ theorem emitEffectCaseAt_emitted_internal (tm : NTM k)
       emitConstantGate_emitted_internal false values hclean.reference₀]
     simp [effectFormulaCaseBlock, hselected, directInitConstant]
 
-private theorem emitEffectMembersFrom_sound (tm : NTM k)
+theorem emitEffectMembersFrom_sound (tm : NTM k)
     (selects : TransitionEffect tm → Bool) (start count : ℕ) :
     (emitEffectMembersFrom tm selects start count).Sound := by
   induction count generalizing start with
@@ -250,7 +254,7 @@ theorem emitEffectMembers_sound_internal (tm : NTM k)
     (emitEffectMembers tm selects).Sound :=
   emitEffectMembersFrom_sound tm selects 0 (transitionCases tm).length
 
-private theorem emitEffectMembersFrom_requires (tm : NTM k)
+theorem emitEffectMembersFrom_requires (tm : NTM k)
     (selects : TransitionEffect tm → Bool) (start count : ℕ)
     (values : BinaryValues WorkCount) (hclean : CaseFormulaClean values) :
     (emitEffectMembersFrom tm selects start count).requires values := by
@@ -273,7 +277,7 @@ theorem emitEffectMembers_requires_internal (tm : NTM k)
   emitEffectMembersFrom_requires tm selects 0 (transitionCases tm).length
     values hclean
 
-private theorem emitEffectMembersFrom_effect
+theorem emitEffectMembersFrom_effect
     (tm : NTM k) (selects : TransitionEffect tm → Bool)
     (start count base T : ℕ) (values : BinaryValues WorkCount)
     (hclean : CaseFormulaClean values)
@@ -358,7 +362,7 @@ private theorem emitEffectMembersFrom_effect
       (values Work.available) (values Work.horizon) values hclean (by omega)
       rfl (by simp [prefixSize])
 
-private theorem emitEffectMembersFrom_emitted
+theorem emitEffectMembersFrom_emitted
     (tm : NTM k) (selects : TransitionEffect tm → Bool)
     (start count base T configBase choiceWire : ℕ)
     (values : BinaryValues WorkCount) (hclean : CaseFormulaClean values)
@@ -721,7 +725,7 @@ theorem emitPreviousEffectConnector_requires_internal (workCount : ℕ)
   simp [BinaryRoutine.clear, Work.reference₀, Work.temporary₃,
     Work.temporary₂, Work.loop₃, Work.available]
 
-private theorem EffectConnectorClean.afterPrevious
+theorem EffectConnectorClean.afterPrevious
     (workCount : ℕ) (selected choiceValue : Bool)
     (values : BinaryValues WorkCount) (hclean : EffectConnectorClean values) :
     EffectConnectorClean
@@ -755,7 +759,7 @@ private theorem EffectConnectorClean.afterPrevious
   · simpa [Work.reference₀, Work.addCounter, Work.available] using
       hclean.addCounter
 
-private theorem effectFormulaCaseSize_pos (workCount T : ℕ)
+theorem effectFormulaCaseSize_pos (workCount T : ℕ)
     (selected choiceValue : Bool) :
     1 ≤ effectFormulaCaseSize workCount T selected choiceValue := by
   cases selected
@@ -764,7 +768,7 @@ private theorem effectFormulaCaseSize_pos (workCount T : ℕ)
       caseFormulaMembersSize, caseFormulaMemberCount, caseReadSize]
     omega
 
-private theorem emitPreviousEffectConnectorsCount_requires
+theorem emitPreviousEffectConnectorsCount_requires
     (tm : NTM k) (selects : TransitionEffect tm → Bool) (count base : ℕ)
     (values : BinaryValues WorkCount) (hclean : EffectConnectorClean values)
     (hcount : count + 1 ≤ (transitionCases tm).length) (hbase : 1 ≤ base)
@@ -831,7 +835,7 @@ private theorem emitPreviousEffectConnectorsCount_requires
       rw [hhorizon]
       exact hcurrentReference
 
-private theorem emitPreviousEffectConnectorsCount_effect
+theorem emitPreviousEffectConnectorsCount_effect
     (tm : NTM k) (selects : TransitionEffect tm → Bool) (count base : ℕ)
     (values : BinaryValues WorkCount) (hclean : EffectConnectorClean values)
     (hcount : count + 1 ≤ (transitionCases tm).length) (hbase : 1 ≤ base)
@@ -914,7 +918,7 @@ private theorem emitPreviousEffectConnectorsCount_effect
         simp_all [Work.reference₀, Work.available, Work.horizon]
       all_goals omega
 
-private theorem emitPreviousEffectConnectorsCount_emitted
+theorem emitPreviousEffectConnectorsCount_emitted
     (tm : NTM k) (selects : TransitionEffect tm → Bool)
     (count nextRank base T : ℕ) (values : BinaryValues WorkCount)
     (hclean : EffectConnectorClean values)
@@ -1034,7 +1038,7 @@ private theorem emitPreviousEffectConnectorsCount_emitted
         (indexedRightFoldConnector .or base (transitionCases tm).length
           sizeAt) (by omega)
 
-private theorem emitPreviousEffectConnectorsCount_sound
+theorem emitPreviousEffectConnectorsCount_sound
     (tm : NTM k) (selects : TransitionEffect tm → Bool) (count : ℕ) :
     (emitPreviousEffectConnectorsCount tm selects count).Sound := by
   induction count with
@@ -1521,7 +1525,7 @@ theorem emitEffectFormula_emitted_internal (tm : NTM k)
 
 /-- One global arithmetic envelope for every machine-selected case and every
 bounded read selector used by complete effect-formula emission. -/
-private def EffectFormulaWidthCap (tm : NTM k)
+def EffectFormulaWidthCap (tm : NTM k)
     (selects : TransitionEffect tm → Bool)
     (values : ℕ → BinaryValues WorkCount) (width : ℕ → ℕ) : Prop :=
   ∀ inputLength stateIndex tapeIndex symbolIndex position,
@@ -1546,7 +1550,7 @@ private def EffectFormulaWidthCap (tm : NTM k)
         caseReadSize (values inputLength Work.horizon) +
         values inputLength Work.horizon ≤ width inputLength
 
-private theorem EffectFormulaWidthCap.frontier
+theorem EffectFormulaWidthCap.frontier
     {tm : NTM k} {selects : TransitionEffect tm → Bool}
     {values : ℕ → BinaryValues WorkCount} {width : ℕ → ℕ}
     (hcap : EffectFormulaWidthCap tm selects values width) :
@@ -1563,25 +1567,25 @@ private theorem EffectFormulaWidthCap.frontier
     hstate (by omega) (by omega) (Nat.zero_le _)
   omega
 
-private theorem effectCaseStateIndexAt_lt (tm : NTM k) (caseIndex : ℕ)
+theorem effectCaseStateIndexAt_lt (tm : NTM k) (caseIndex : ℕ)
     (hcase : caseIndex < (transitionCases tm).length) :
     effectCaseStateIndexAt tm caseIndex < Fintype.card tm.Q := by
   rw [effectCaseStateIndexAt, dif_pos hcase]
   exact (Fintype.equivFin tm.Q _).isLt
 
-private theorem effectCaseInputSymbolIndexAt_lt (tm : NTM k)
+theorem effectCaseInputSymbolIndexAt_lt (tm : NTM k)
     (caseIndex : ℕ) (hcase : caseIndex < (transitionCases tm).length) :
     effectCaseInputSymbolIndexAt tm caseIndex < 4 := by
   rw [effectCaseInputSymbolIndexAt, dif_pos hcase]
   exact (symbolIndex _).isLt
 
-private theorem effectCaseOutputSymbolIndexAt_lt (tm : NTM k)
+theorem effectCaseOutputSymbolIndexAt_lt (tm : NTM k)
     (caseIndex : ℕ) (hcase : caseIndex < (transitionCases tm).length) :
     effectCaseOutputSymbolIndexAt tm caseIndex < 4 := by
   rw [effectCaseOutputSymbolIndexAt, dif_pos hcase]
   exact (symbolIndex _).isLt
 
-private theorem effectCaseWorkSymbolIndexAt_lt (tm : NTM k)
+theorem effectCaseWorkSymbolIndexAt_lt (tm : NTM k)
     (caseIndex workIndex : ℕ)
     (hcase : caseIndex < (transitionCases tm).length)
     (hwork : workIndex < k) :
@@ -1589,7 +1593,7 @@ private theorem effectCaseWorkSymbolIndexAt_lt (tm : NTM k)
   rw [effectCaseWorkSymbolIndexAt, dif_pos hcase, dif_pos hwork]
   exact (symbolIndex _).isLt
 
-private theorem prefixSize_mono_effect
+theorem prefixSize_mono_effect
     (sizeAt : ℕ → ℕ) {first second : ℕ} (hle : first ≤ second) :
     prefixSize sizeAt first ≤ prefixSize sizeAt second := by
   induction second with
@@ -1601,7 +1605,7 @@ private theorem prefixSize_mono_effect
       · have hfirst : first ≤ second := by omega
         exact (ih hfirst).trans (by rw [prefixSize_succ]; omega)
 
-private theorem EffectFormulaWidthCap.caseSize
+theorem EffectFormulaWidthCap.caseSize
     {tm : NTM k} {selects : TransitionEffect tm → Bool}
     {values : ℕ → BinaryValues WorkCount} {width : ℕ → ℕ}
     (hcap : EffectFormulaWidthCap tm selects values width)
@@ -1632,7 +1636,7 @@ private theorem EffectFormulaWidthCap.caseSize
   dsimp only [sizeAt] at hprefix
   omega
 
-private theorem emitEffectCaseAt_spaceBoundByWidthAt
+theorem emitEffectCaseAt_spaceBoundByWidthAt
     (tm : NTM k) (selects : TransitionEffect tm → Bool)
     (caseIndex : ℕ) {initialSpace : ℕ → ℕ}
     {values : ℕ → BinaryValues WorkCount} {width : ℕ → ℕ}
@@ -1685,7 +1689,7 @@ private theorem emitEffectCaseAt_spaceBoundByWidthAt
       (fun inputLength => hvalues inputLength Work.available)
       (fun inputLength => hvalues inputLength Work.reference₀)
 
-private theorem emitEffectMembersFrom_spaceBoundByWidthAt
+theorem emitEffectMembersFrom_spaceBoundByWidthAt
     (tm : NTM k) (selects : TransitionEffect tm → Bool)
     (start count : ℕ) {initialSpace : ℕ → ℕ}
     {source values : ℕ → BinaryValues WorkCount}
@@ -1820,7 +1824,7 @@ private theorem emitEffectMembersFrom_spaceBoundByWidthAt
       have hseq := BinaryRoutine.SpaceBoundByWidthAt.seq hhead htail
       simpa [emitEffectMembersFrom, nextValues] using hseq
 
-private theorem emitEffectMembers_spaceBoundByWidthAt
+theorem emitEffectMembers_spaceBoundByWidthAt
     (tm : NTM k) (selects : TransitionEffect tm → Bool)
     {initialSpace : ℕ → ℕ}
     {values : ℕ → BinaryValues WorkCount} {width : ℕ → ℕ}
@@ -1840,7 +1844,7 @@ private theorem emitEffectMembers_spaceBoundByWidthAt
     · simp [prefixSize, hindex]
   · exact hcap
 
-private theorem prepareEffectCaseSize_spaceBoundByWidthAt
+theorem prepareEffectCaseSize_spaceBoundByWidthAt
     (workCount : ℕ) (selected choiceValue : Bool)
     {initialSpace : ℕ → ℕ} {values : ℕ → BinaryValues WorkCount}
     {width : ℕ → ℕ}
@@ -1927,7 +1931,7 @@ private theorem prepareEffectCaseSize_spaceBoundByWidthAt
           Work.temporary₂, Work.temporary₃] using hfactor inputLength
       · trivial
 
-private theorem emitPreviousEffectConnector_spaceBoundByWidthAt
+theorem emitPreviousEffectConnector_spaceBoundByWidthAt
     (workCount : ℕ) (selected choiceValue : Bool)
     {initialSpace : ℕ → ℕ} {values : ℕ → BinaryValues WorkCount}
     {width : ℕ → ℕ}
@@ -2067,7 +2071,7 @@ private theorem emitPreviousEffectConnector_spaceBoundByWidthAt
   simpa [emitPreviousEffectConnector, BinaryRoutine.seqList, prepare,
     decrement, prepared, decremented, connected] using hroutine
 
-private theorem emitPreviousEffectConnectorsCount_spaceBoundByWidthAt
+theorem emitPreviousEffectConnectorsCount_spaceBoundByWidthAt
     (tm : NTM k) (selects : TransitionEffect tm → Bool) (count : ℕ)
     (base horizon : ℕ → ℕ) {initialSpace : ℕ → ℕ}
     {values : ℕ → BinaryValues WorkCount} {width : ℕ → ℕ}
@@ -2275,7 +2279,7 @@ private theorem emitPreviousEffectConnectorsCount_spaceBoundByWidthAt
         simpa [emitPreviousEffectConnectorsCount, BinaryRoutine.seq, current]
           using htailValues inputLength index
 
-private theorem emitEffectConnectors_spaceBoundByWidthAt
+theorem emitEffectConnectors_spaceBoundByWidthAt
     (tm : NTM k) (selects : TransitionEffect tm → Bool)
     {initialSpace : ℕ → ℕ}
     {source values : ℕ → BinaryValues WorkCount}

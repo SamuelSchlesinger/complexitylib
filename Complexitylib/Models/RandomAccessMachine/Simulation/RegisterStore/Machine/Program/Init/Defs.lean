@@ -3,16 +3,18 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import
+module
+
+public import
   Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Machine.Program.Defs
-import
+public import
   Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Machine.EntryEncode.Defs
-import Complexitylib.Models.TuringMachine.Combinators.WorkBranch.Defs
-import Complexitylib.Models.TuringMachine.Subroutines.BinaryCopy.Defs
-import Complexitylib.Models.TuringMachine.Subroutines.BinaryPred.Defs
-import Complexitylib.Models.TuringMachine.Subroutines.BinarySucc.Defs
-import Complexitylib.Models.TuringMachine.Subroutines.ResetBinary.Defs
-import Complexitylib.Models.TuringMachine.Subroutines.ResetBinaryMany.Defs
+public import Complexitylib.Models.TuringMachine.Combinators.WorkBranch.Defs
+public import Complexitylib.Models.TuringMachine.Subroutines.BinaryCopy.Defs
+public import Complexitylib.Models.TuringMachine.Subroutines.BinaryPred.Defs
+public import Complexitylib.Models.TuringMachine.Subroutines.BinarySucc.Defs
+public import Complexitylib.Models.TuringMachine.Subroutines.ResetBinary.Defs
+public import Complexitylib.Models.TuringMachine.Subroutines.ResetBinaryMany.Defs
 
 /-!
 # Sparse RAM public-input initialization definitions
@@ -23,6 +25,8 @@ appends the nonzero length register `R₀`. The resulting order need not equal
 `initialStore`; it is a canonical sparse store representing the same total
 RAM register file.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

@@ -3,9 +3,11 @@ Copyright (c) 2025 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Circuits.BitString
-import Complexitylib.Circuits.Encoding.Internal.Codec
-import Complexitylib.Circuits.Internal.CircuitToDescriptor
+module
+
+public import Complexitylib.Circuits.BitString
+public import Complexitylib.Circuits.Encoding.Internal.Codec
+public import Complexitylib.Circuits.Internal.CircuitToDescriptor
 
 /-!
 # Internal: semantics of encoded fan-in-two circuits
@@ -16,6 +18,8 @@ semantics.  The central argument is a memo invariant: after the first `k`
 ordered gates have run, the evaluator's array contains exactly the values of
 descriptor wires `0, ..., N + k - 1`.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

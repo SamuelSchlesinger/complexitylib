@@ -3,10 +3,12 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Finalization.Defs
-import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Initialization.Defs
-import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Program.Defs
-import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Transition.Step.Defs
+module
+
+public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Finalization.Defs
+public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Initialization.Defs
+public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Program.Defs
+public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Transition.Step.Defs
 
 /-!
 # Complete direct-unrolling generator -- definitions
@@ -17,6 +19,8 @@ fragment. The outer step counter is restored after the loop. Prefixing this
 body with `program` also handles the separately tagged length-zero family
 member.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

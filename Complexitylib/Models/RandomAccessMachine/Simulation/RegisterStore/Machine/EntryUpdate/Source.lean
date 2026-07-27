@@ -3,12 +3,14 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import
+module
+
+public import
   Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Machine.EntryUpdate.Defs
-import
+public import
   Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Machine.EntryScan.Defs
-import Complexitylib.Models.TuringMachine.Combinators.WorkSymbolBranch.Defs
-import Complexitylib.Models.TuringMachine.WorkReadOnly
+public import Complexitylib.Models.TuringMachine.Combinators.WorkSymbolBranch.Defs
+public import Complexitylib.Models.TuringMachine.WorkReadOnly
 
 /-!
 # Sparse-store update source preservation
@@ -17,6 +19,8 @@ The update controller advances its encoded source cursor but never changes the
 source cells. This file packages that local transition fact as a reusable
 read-only certificate.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

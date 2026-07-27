@@ -3,9 +3,11 @@ Copyright (c) 2025 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Mathlib.NatBits
-import Complexitylib.Models.RandomAccessMachine.Defs
-import Mathlib.Data.Finset.Sort
+module
+
+public import Complexitylib.Mathlib.NatBits
+public import Complexitylib.Models.RandomAccessMachine.Defs
+public import Mathlib.Data.Finset.Sort
 
 /-!
 # Sparse RAM register stores on Turing tapes: definitions
@@ -24,6 +26,8 @@ each entry. The corresponding decoders are total `Option`-valued functions.
 Proofs that the store operations implement functional register reads/writes
 and that every codec round-trips live in the internal module.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

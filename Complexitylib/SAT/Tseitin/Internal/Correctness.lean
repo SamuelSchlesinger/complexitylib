@@ -3,8 +3,10 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.SAT.Tseitin.Internal.FunctionSemantics
-import Complexitylib.SAT.Tseitin.Internal.Shape
+module
+
+public import Complexitylib.SAT.Tseitin.Internal.FunctionSemantics
+public import Complexitylib.SAT.Tseitin.Internal.Shape
 
 /-!
 # Correctness of Tseitin clause splitting
@@ -14,6 +16,8 @@ logically implies its source clause. For the forward direction, fresh variables
 are chosen recursively while preserving all earlier variable values. The CNF
 proof threads those extensions across disjoint fresh ranges.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

@@ -3,8 +3,10 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Circuits.Unrolling.Transition.Defs
-import Complexitylib.Models.TuringMachine.Internal
+module
+
+public import Complexitylib.Circuits.Unrolling.Transition.Defs
+public import Complexitylib.Models.TuringMachine.Internal
 
 /-!
 # Head bounds for prefixes of bounded traces
@@ -15,6 +17,8 @@ proper prefix `i < T` of a trace from `initCfg`, all named heads are strictly
 below `T`. It also identifies one `choiceStep` from prefix `i` with prefix
 `i + 1` of the same full choice sequence.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

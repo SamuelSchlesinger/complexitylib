@@ -3,8 +3,10 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Classes.PPoly.Uniform.Unrolling.Serializer.Transition.Case.Defs
-import Complexitylib.Classes.PPoly.Uniform.Unrolling.Serializer.Transition.Case.Internal
+module
+
+public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Serializer.Transition.Case.Defs
+public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Serializer.Transition.Case.Internal
 
 /-!
 # Numeric transition-case schedules
@@ -20,6 +22,8 @@ only in the final compilation adapter.
 - The `getElem_caseFormulaSchedule_*` theorems identify every numeric phase.
 - `compileRaw_caseFormula_eq_schedule` identifies the complete raw stream.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

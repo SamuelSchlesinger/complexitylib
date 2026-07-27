@@ -3,8 +3,10 @@ Copyright (c) 2025 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.SAT.VerifierTM
-import Complexitylib.SAT.Internal.GuessVerify
+module
+
+public import Complexitylib.SAT.VerifierTM
+public import Complexitylib.SAT.Internal.GuessVerify
 
 /-!
 # SAT ∈ NP — the headline theorem
@@ -19,6 +21,8 @@ This file ties together the two halves of the `SAT ∈ NP` proof:
 
 Combining them yields the unconditional theorem `SAT.language_mem_NP : language ∈ NP`.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

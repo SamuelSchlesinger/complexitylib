@@ -3,8 +3,10 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Transition.Effect.Defs
-import Complexitylib.Classes.PPoly.Uniform.Unrolling.Serializer.Transition.WrittenCell.Defs
+module
+
+public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Transition.Effect.Defs
+public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Serializer.Transition.WrittenCell.Defs
 
 /-!
 # Direct-unrolling written-cell generator -- definitions
@@ -15,6 +17,8 @@ one enclosing register; the remaining six gates then stream with only recent
 references. The final represented cell has no head wire, detected by a bounded
 subtraction from `horizon + 1` rather than a general equality routine.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

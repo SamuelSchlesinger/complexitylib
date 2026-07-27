@@ -3,13 +3,15 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import
+module
+
+public import
 Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Machine.EntryUpdate.Internal.Loop
-import
+public import
   Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Machine.EntryUpdate.Internal.Out
-import
+public import
 Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Machine.EntryUpdate.Internal.Time
-import Complexitylib.Models.TuringMachine.Combinators.WorkBranch
+public import Complexitylib.Models.TuringMachine.Combinators.WorkBranch
 
 /-!
 # Bounded encoded sparse-store update -- terminal loop case
@@ -18,6 +20,8 @@ This file closes the update loop once the old-entry counter is exhausted.  A
 previous hit and an absent zero write halt immediately; an absent nonzero write
 runs the checked append and result-count successor subroutines.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

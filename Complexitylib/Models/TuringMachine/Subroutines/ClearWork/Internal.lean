@@ -3,10 +3,12 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Models.TuringMachine.Hoare.Space
-import Complexitylib.Models.TuringMachine.Registers
-import Complexitylib.Models.TuringMachine.Subroutines.ClearWork.Defs
-import Complexitylib.Models.TuringMachine.Subroutines.Internal
+module
+
+public import Complexitylib.Models.TuringMachine.Hoare.Space
+public import Complexitylib.Models.TuringMachine.Registers
+public import Complexitylib.Models.TuringMachine.Subroutines.ClearWork.Defs
+public import Complexitylib.Models.TuringMachine.Subroutines.Internal
 
 /-!
 # Clearing a binary work tape — proof internals
@@ -15,6 +17,8 @@ This module packages the legacy rich clear/rewind proof behind a literal frame
 contract and proves that its component machines never move the output head
 left.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

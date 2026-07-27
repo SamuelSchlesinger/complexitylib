@@ -3,8 +3,10 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Circuits.Encoding.Internal.Codec
-import Complexitylib.Circuits.Encoding.Fragment.Defs
+module
+
+public import Complexitylib.Circuits.Encoding.Internal.Codec
+public import Complexitylib.Circuits.Encoding.Fragment.Defs
 
 /-!
 # Internal laws for appendable raw-circuit fragments
@@ -13,6 +15,8 @@ This module proves generic composition and prefix-preservation facts for the
 iterative raw-circuit evaluator. The statements are exposed by
 `Complexitylib.Circuits.Encoding.Fragment`.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

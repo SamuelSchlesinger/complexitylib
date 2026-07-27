@@ -3,8 +3,10 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Models.TuringMachine.Combinators.ForBinaryWork.Defs
-import Complexitylib.Models.TuringMachine.Combinators.ForBinaryWork.Internal
+module
+
+public import Complexitylib.Models.TuringMachine.Combinators.ForBinaryWork.Defs
+public import Complexitylib.Models.TuringMachine.Combinators.ForBinaryWork.Internal
 
 /-!
 # Binary work-tape loop combinator
@@ -22,6 +24,8 @@ for bitwise algorithms without iterating over the represented numeric value.
   the certified loop run.
 - `TM.IsTransducer.forBinaryWorkTM` preserves one-way output safety.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

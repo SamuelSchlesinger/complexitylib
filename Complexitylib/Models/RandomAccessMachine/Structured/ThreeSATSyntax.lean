@@ -3,8 +3,10 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Models.RandomAccessMachine.Structured.ThreeSATSyntax.Defs
-import Complexitylib.Models.RandomAccessMachine.Structured.Scanner
+module
+
+public import Complexitylib.Models.RandomAccessMachine.Structured.ThreeSATSyntax.Defs
+public import Complexitylib.Models.RandomAccessMachine.Structured.Scanner
 
 /-!
 # Verified structured RAM exact-3-CNF syntax scanner
@@ -12,6 +14,8 @@ import Complexitylib.Models.RandomAccessMachine.Structured.Scanner
 The generic typed-scanner compiler supplies the entire implementation proof and
 resource analysis for the existing 27-state `SAT.ThreeSAT.Syntax` automaton.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

@@ -3,17 +3,19 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import
+module
+
+public import
   Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Machine.EntryUpdate.Defs
-import
+public import
   Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Machine.Lookup.Defs
-import Complexitylib.Models.TuringMachine.Combinators.WorkBranch.Defs
-import Complexitylib.Models.TuringMachine.Subroutines.BinaryAddConst.Defs
-import Complexitylib.Models.TuringMachine.Subroutines.BinaryRippleAdd.Defs
-import Complexitylib.Models.TuringMachine.Subroutines.BinaryRippleSub.Defs
-import Complexitylib.Models.TuringMachine.Subroutines.BinaryShiftMul.Defs
-import Complexitylib.Models.TuringMachine.Subroutines.ResetBinary.Defs
-import Mathlib.Tactic.FinCases
+public import Complexitylib.Models.TuringMachine.Combinators.WorkBranch.Defs
+public import Complexitylib.Models.TuringMachine.Subroutines.BinaryAddConst.Defs
+public import Complexitylib.Models.TuringMachine.Subroutines.BinaryRippleAdd.Defs
+public import Complexitylib.Models.TuringMachine.Subroutines.BinaryRippleSub.Defs
+public import Complexitylib.Models.TuringMachine.Subroutines.BinaryShiftMul.Defs
+public import Complexitylib.Models.TuringMachine.Subroutines.ResetBinary.Defs
+public import Mathlib.Tactic.FinCases
 
 /-!
 # Concrete sparse-store arithmetic instruction kernel
@@ -24,6 +26,8 @@ canonical work tapes; the arithmetic result is written directly to the update
 controller's replacement tape, so no value-sized bridge is hidden between the
 two phases.
 -/
+
+@[expose] public section
 
 namespace Complexity
 
@@ -137,7 +141,7 @@ def lhsLookupSlot (i : Fin 14) : Fin 18 :=
   | 12 => 13
   | _ => 11
 
-private theorem lhsLookupSlot_injective : Function.Injective lhsLookupSlot := by
+theorem lhsLookupSlot_injective : Function.Injective lhsLookupSlot := by
   intro i j h
   fin_cases i <;> fin_cases j <;> simp [lhsLookupSlot] at h ⊢
 
@@ -165,7 +169,7 @@ def rhsLookupSlot (i : Fin 14) : Fin 18 :=
   | 12 => 14
   | _ => 11
 
-private theorem rhsLookupSlot_injective : Function.Injective rhsLookupSlot := by
+theorem rhsLookupSlot_injective : Function.Injective rhsLookupSlot := by
   intro i j h
   fin_cases i <;> fin_cases j <;> simp [rhsLookupSlot] at h ⊢
 
@@ -274,7 +278,7 @@ def indirectLoadLookupSlot (i : Fin 14) : Fin 18 :=
   | 12 => 10
   | _ => 11
 
-private theorem indirectLoadLookupSlot_injective :
+theorem indirectLoadLookupSlot_injective :
     Function.Injective indirectLoadLookupSlot := by
   intro i j h
   fin_cases i <;> fin_cases j <;> simp [indirectLoadLookupSlot] at h ⊢
@@ -316,7 +320,7 @@ def mulSlot (i : Fin 6) : Fin 18 :=
   | 4 => 16
   | _ => 17
 
-private theorem mulSlot_injective : Function.Injective mulSlot := by
+theorem mulSlot_injective : Function.Injective mulSlot := by
   intro i j hij
   fin_cases i <;> fin_cases j <;> simp [mulSlot] at hij ⊢
 

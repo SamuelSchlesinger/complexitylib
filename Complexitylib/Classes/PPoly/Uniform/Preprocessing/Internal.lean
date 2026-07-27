@@ -3,15 +3,19 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Classes.P.Composition
-import Complexitylib.Classes.P.PairWithInput
-import Complexitylib.Classes.P.UnaryLength
-import Complexitylib.Classes.PPoly.Uniform
-import Complexitylib.Classes.PPoly.Uniform.Preprocessing.Defs
+module
+
+public import Complexitylib.Classes.P.Composition
+public import Complexitylib.Classes.P.PairWithInput
+public import Complexitylib.Classes.P.UnaryLength
+public import Complexitylib.Classes.PPoly.Uniform
+public import Complexitylib.Classes.PPoly.Uniform.Preprocessing.Defs
 
 /-!
 # Inputs for uniform circuit-family evaluation — proof internals
 -/
+
+@[expose] public section
 
 namespace Complexity
 

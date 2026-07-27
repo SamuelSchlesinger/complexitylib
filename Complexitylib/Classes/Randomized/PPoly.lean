@@ -3,9 +3,11 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Classes.PPoly.Advice.Reverse
-import Complexitylib.Classes.Randomized.PPoly.Defs
-import Complexitylib.Classes.Randomized.PPoly.Internal
+module
+
+public import Complexitylib.Classes.PPoly.Advice.Reverse
+public import Complexitylib.Classes.Randomized.PPoly.Defs
+public import Complexitylib.Classes.Randomized.PPoly.Internal
 
 /-!
 # Bounded-error probabilistic computation has polynomial-size circuits
@@ -25,6 +27,8 @@ decider.
 - `BPP_subset_PPoly`: every language in `BPP` has polynomial-size circuits.
 - `BPP_subset_PAdvice`: every language in `BPP` has a polynomial-advice decider.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

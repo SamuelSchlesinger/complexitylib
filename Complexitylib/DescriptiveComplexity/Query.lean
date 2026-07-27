@@ -3,7 +3,9 @@ Copyright (c) 2025 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.DescriptiveComplexity.Isomorphism
+module
+
+public import Complexitylib.DescriptiveComplexity.Isomorphism
 
 /-!
   # Boolean Queries
@@ -12,6 +14,8 @@ import Complexitylib.DescriptiveComplexity.Isomorphism
   A query is order-independent if isomorphic structures give the same answer
   (Definition 1.16 in Immerman).
 -/
+
+@[expose] public section
 
 namespace Complexity
 

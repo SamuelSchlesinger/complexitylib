@@ -3,7 +3,9 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Models.TuringMachine.Combinators
+module
+
+public import Complexitylib.Models.TuringMachine.Combinators
 
 /-!
 # Retargeted-input computation seams
@@ -20,6 +22,8 @@ sentinel transition while reading its input from the last work tape.
 - `TM.retargetInputStarted` — virtual-input machine entered with heads at cell `1`
 - `TM.retargetInputStartedCfg` — canonical entry configuration for a virtual input
 -/
+
+@[expose] public section
 
 namespace Complexity
 

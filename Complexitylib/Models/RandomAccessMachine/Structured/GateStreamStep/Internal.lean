@@ -3,15 +3,19 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Circuits.Encoding.Internal.Codec
-import Complexitylib.Models.RandomAccessMachine.Structured.GateEval.Internal
-import Complexitylib.Models.RandomAccessMachine.Structured.GateStreamStep.Defs
-import Complexitylib.Models.RandomAccessMachine.Structured.UnaryDecode.Internal
-import Mathlib.Tactic.IntervalCases
+module
+
+public import Complexitylib.Circuits.Encoding.Internal.Codec
+public import Complexitylib.Models.RandomAccessMachine.Structured.GateEval.Internal
+public import Complexitylib.Models.RandomAccessMachine.Structured.GateStreamStep.Defs
+public import Complexitylib.Models.RandomAccessMachine.Structured.UnaryDecode.Internal
+public import Mathlib.Tactic.IntervalCases
 
 /-!
 # Structured RAM iterable serialized-gate step — proof internals
 -/
+
+@[expose] public section
 
 namespace Complexity
 
@@ -23,10 +27,12 @@ namespace GateStreamStep
 
 open Internal
 
-private def marshalStore (store : Store) : Store :=
+@[nolint docBlame]
+def marshalStore (store : Store) : Store :=
   Basic.execList marshalOps store
 
-private def marshalPrefix (store : Store) : Store :=
+@[nolint docBlame]
+def marshalPrefix (store : Store) : Store :=
   Basic.execList
     [.add GateEval.wireCountReg wireCountMetaReg UnaryDecode.activeReg,
       .imm wireCountMetaReg spillPointerReg,
@@ -39,26 +45,31 @@ private def marshalPrefix (store : Store) : Store :=
       .imm wireCountMetaReg 1]
     store
 
-private def loadedOp (store : Store) : Store :=
+@[nolint docBlame]
+def loadedOp (store : Store) : Store :=
   (Basic.load GateEval.opReg gateStartReg).exec (marshalPrefix store)
 
-private def advanced0 (store : Store) : Store :=
+@[nolint docBlame]
+def advanced0 (store : Store) : Store :=
   (Basic.add gateStartReg gateStartReg wireCountMetaReg).exec (loadedOp store)
 
-private def loadedNegated0 (store : Store) : Store :=
+@[nolint docBlame]
+def loadedNegated0 (store : Store) : Store :=
   (Basic.load GateEval.negated0Reg gateStartReg).exec (advanced0 store)
 
-private def advanced1 (store : Store) : Store :=
+@[nolint docBlame]
+def advanced1 (store : Store) : Store :=
   (Basic.add gateStartReg gateStartReg wireCountMetaReg).exec
     (loadedNegated0 store)
 
-private def loadedNegated1 (store : Store) : Store :=
+@[nolint docBlame]
+def loadedNegated1 (store : Store) : Store :=
   (Basic.load GateEval.negated1Reg gateStartReg).exec (advanced1 store)
 
-private theorem marshalStore_eq (store : Store) :
+theorem marshalStore_eq (store : Store) :
     marshalStore store = loadedNegated1 store := by rfl
 
-private theorem marshalPrefix_high (store : Store) (index : ℕ)
+theorem marshalPrefix_high (store : Store) (index : ℕ)
     (hindex : spillRemainingReg < index) :
     marshalPrefix store index = store index := by
   simp only [spillRemainingReg] at hindex
@@ -67,7 +78,7 @@ private theorem marshalPrefix_high (store : Store) (index : ℕ)
     GateEval.wireCountReg, GateEval.baseReg, memoBaseReg, wireCountMetaReg,
     savedInput0Reg, spillPointerReg, spillRemainingReg]
 
-private theorem marshal_high (store : Store) (index : ℕ)
+theorem marshal_high (store : Store) (index : ℕ)
     (hindex : spillRemainingReg < index) :
     marshalStore store index = store index := by
   simp only [spillRemainingReg] at hindex
@@ -108,7 +119,7 @@ private theorem marshal_high (store : Store) (index : ℕ)
     Function.update_of_ne, h0, h1, h2, h3, h4, h5, h8, h9, h10, h11,
     h12]
 
-private theorem marshal_wireCount {gateStart nextPointer remaining base : ℕ}
+theorem marshal_wireCount {gateStart nextPointer remaining base : ℕ}
     {gate : CircuitCode.RawGate} {wires : List Bool} {store : Store}
     (h : Parsed gateStart nextPointer remaining base gate wires store) :
     marshalStore store GateEval.wireCountReg = wires.length := by
@@ -123,7 +134,7 @@ private theorem marshal_wireCount {gateStart nextPointer remaining base : ℕ}
     savedInput0Reg, spillPointerReg, spillRemainingReg,
     UnaryDecode.activeReg, hcount, hactive]
 
-private theorem marshal_address1 {gateStart nextPointer remaining base : ℕ}
+theorem marshal_address1 {gateStart nextPointer remaining base : ℕ}
     {gate : CircuitCode.RawGate} {wires : List Bool} {store : Store}
     (h : Parsed gateStart nextPointer remaining base gate wires store) :
     marshalStore store GateEval.address1Reg = gate.input₁ := by
@@ -138,7 +149,7 @@ private theorem marshal_address1 {gateStart nextPointer remaining base : ℕ}
     savedInput0Reg, spillPointerReg, spillRemainingReg,
     UnaryDecode.valueReg, UnaryDecode.activeReg, hvalue, hactive]
 
-private theorem marshal_address0 {gateStart nextPointer remaining base : ℕ}
+theorem marshal_address0 {gateStart nextPointer remaining base : ℕ}
     {gate : CircuitCode.RawGate} {wires : List Bool} {store : Store}
     (h : Parsed gateStart nextPointer remaining base gate wires store) :
     marshalStore store GateEval.address0Reg = gate.input₀ := by
@@ -153,7 +164,7 @@ private theorem marshal_address0 {gateStart nextPointer remaining base : ℕ}
     savedInput0Reg, spillPointerReg, spillRemainingReg,
     UnaryDecode.activeReg, hinput0, hactive]
 
-private theorem marshal_base {gateStart nextPointer remaining base : ℕ}
+theorem marshal_base {gateStart nextPointer remaining base : ℕ}
     {gate : CircuitCode.RawGate} {wires : List Bool} {store : Store}
     (h : Parsed gateStart nextPointer remaining base gate wires store) :
     marshalStore store GateEval.baseReg = base := by
@@ -168,7 +179,7 @@ private theorem marshal_base {gateStart nextPointer remaining base : ℕ}
     savedInput0Reg, spillPointerReg, spillRemainingReg,
     UnaryDecode.activeReg, hbase, hactive]
 
-private theorem marshal_spillPointer
+theorem marshal_spillPointer
     {gateStart nextPointer remaining base : ℕ} {gate : CircuitCode.RawGate}
     {wires : List Bool} {store : Store}
     (h : Parsed gateStart nextPointer remaining base gate wires store) :
@@ -182,7 +193,7 @@ private theorem marshal_spillPointer
     savedInput0Reg, spillPointerReg, spillRemainingReg,
     UnaryDecode.pointerReg, hpointer]
 
-private theorem marshal_spillRemaining
+theorem marshal_spillRemaining
     {gateStart nextPointer remaining base : ℕ} {gate : CircuitCode.RawGate}
     {wires : List Bool} {store : Store}
     (h : Parsed gateStart nextPointer remaining base gate wires store) :
@@ -196,7 +207,7 @@ private theorem marshal_spillRemaining
     savedInput0Reg, spillPointerReg, spillRemainingReg,
     UnaryDecode.remainingReg, hremaining]
 
-private theorem marshal_op {gateStart nextPointer remaining base : ℕ}
+theorem marshal_op {gateStart nextPointer remaining base : ℕ}
     {gate : CircuitCode.RawGate} {wires : List Bool} {store : Store}
     (h : Parsed gateStart nextPointer remaining base gate wires store) :
     marshalStore store GateEval.opReg = Input.bitValue gate.opBit := by
@@ -220,7 +231,7 @@ private theorem marshal_op {gateStart nextPointer remaining base : ℕ}
     Function.update_of_ne, GateEval.opReg, GateEval.negated0Reg,
     GateEval.negated1Reg, gateStartReg] using hloaded
 
-private theorem marshal_negated0 {gateStart nextPointer remaining base : ℕ}
+theorem marshal_negated0 {gateStart nextPointer remaining base : ℕ}
     {gate : CircuitCode.RawGate} {wires : List Bool} {store : Store}
     (h : Parsed gateStart nextPointer remaining base gate wires store) :
     marshalStore store GateEval.negated0Reg =
@@ -271,7 +282,7 @@ private theorem marshal_negated0 {gateStart nextPointer remaining base : ℕ}
   simpa [loadedNegated1, advanced1, Basic.exec, Function.update_of_ne,
     GateEval.negated0Reg, GateEval.negated1Reg, gateStartReg] using hloaded
 
-private theorem marshal_negated1 {gateStart nextPointer remaining base : ℕ}
+theorem marshal_negated1 {gateStart nextPointer remaining base : ℕ}
     {gate : CircuitCode.RawGate} {wires : List Bool} {store : Store}
     (h : Parsed gateStart nextPointer remaining base gate wires store) :
     marshalStore store GateEval.negated1Reg =
@@ -361,42 +372,50 @@ theorem marshal_ready_internal {gateStart nextPointer remaining base : ℕ}
     · have hbase := hparsed.base_ge
       omega
 
-private def setupStore (store : Store) : Store :=
+@[nolint docBlame]
+def setupStore (store : Store) : Store :=
   Basic.execList setupOps store
 
-private def headerStore (store : Store) : Store :=
+@[nolint docBlame]
+def headerStore (store : Store) : Store :=
   Basic.execList headerOps (setupStore store)
 
-private def saveRestartStore (store : Store) : Store :=
+@[nolint docBlame]
+def saveRestartStore (store : Store) : Store :=
   Basic.execList saveRestartOps store
 
-private def restoreStore (store : Store) : Store :=
+@[nolint docBlame]
+def restoreStore (store : Store) : Store :=
   Basic.execList restoreOps store
 
-private def firstRemaining (gate : CircuitCode.RawGate)
+@[nolint docBlame]
+def firstRemaining (gate : CircuitCode.RawGate)
     (tail : List Bool) : List Bool :=
   CircuitCode.NatCode.encode gate.input₀ ++
     CircuitCode.NatCode.encode gate.input₁ ++ tail
 
-private def secondRemaining (gate : CircuitCode.RawGate)
+@[nolint docBlame]
+def secondRemaining (gate : CircuitCode.RawGate)
     (tail : List Bool) : List Bool :=
   CircuitCode.NatCode.encode gate.input₁ ++ tail
 
-private def firstOffset (gateStart : ℕ) : ℕ :=
+@[nolint docBlame]
+def firstOffset (gateStart : ℕ) : ℕ :=
   gateStart - UnaryDecode.inputBase + 3
 
-private def secondOffset (gateStart : ℕ)
+@[nolint docBlame]
+def secondOffset (gateStart : ℕ)
     (gate : CircuitCode.RawGate) : ℕ :=
   gateStart - UnaryDecode.inputBase + 4 + gate.input₀
 
-private theorem setup_high (store : Store) (index : ℕ) (hindex : 10 < index) :
+theorem setup_high (store : Store) (index : ℕ) (hindex : 10 < index) :
     setupStore store index = store index := by
   simp (disch := omega) [setupStore, setupOps, Basic.execList, Basic.exec,
     Function.update_of_ne, gateStartReg, UnaryDecode.verdictReg,
     UnaryDecode.valueReg, UnaryDecode.pointerReg, UnaryDecode.oneReg,
     UnaryDecode.activeReg]
 
-private theorem header_high (store : Store) (index : ℕ) (hindex : 10 < index) :
+theorem header_high (store : Store) (index : ℕ) (hindex : 10 < index) :
     headerStore store index = store index := by
   rw [headerStore]
   have hsetup := setup_high store index hindex
@@ -404,7 +423,7 @@ private theorem header_high (store : Store) (index : ℕ) (hindex : 10 < index) 
     Function.update_of_ne, UnaryDecode.pointerReg,
     UnaryDecode.remainingReg] using hsetup
 
-private theorem first_ready {gateStart base : ℕ} {gate : CircuitCode.RawGate}
+theorem first_ready {gateStart base : ℕ} {gate : CircuitCode.RawGate}
     {tail : List Bool} {wires : List Bool} {store : Store}
     (hready : Ready gateStart base gate tail wires store) :
     UnaryDecode.CursorReady (cursorLength gateStart gate tail)
@@ -465,7 +484,7 @@ private theorem first_ready {gateStart base : ℕ} {gate : CircuitCode.RawGate}
       simp only [spillRemainingReg] at hbase
       omega
 
-private theorem header_bound {gateStart base : ℕ}
+theorem header_bound {gateStart base : ℕ}
     {gate : CircuitCode.RawGate} {tail wires : List Bool} {store : Store}
     (hready : Ready gateStart base gate tail wires store)
     (hbound : Internal.StoreEnvelope (codeEnd gateStart gate tail)
@@ -511,14 +530,14 @@ private theorem header_bound {gateStart base : ℕ}
     · rw [header_high store index (by omega)]
       exact hbound.value_le index
 
-private theorem saveRestart_high (store : Store) (index : ℕ)
+theorem saveRestart_high (store : Store) (index : ℕ)
     (hindex : 10 < index) :
     saveRestartStore store index = store index := by
   simp (disch := omega) [saveRestartStore, saveRestartOps, Basic.execList,
     Basic.exec, Function.update_of_ne, savedInput0Reg,
     UnaryDecode.verdictReg, UnaryDecode.valueReg, UnaryDecode.activeReg]
 
-private theorem saveRestart_apply_of_ne (store : Store) (index : ℕ)
+theorem saveRestart_apply_of_ne (store : Store) (index : ℕ)
     (hsaved : index ≠ savedInput0Reg)
     (hverdict : index ≠ UnaryDecode.verdictReg)
     (hvalue : index ≠ UnaryDecode.valueReg)
@@ -527,7 +546,7 @@ private theorem saveRestart_apply_of_ne (store : Store) (index : ℕ)
   simp [saveRestartStore, saveRestartOps, Basic.execList, Basic.exec,
     Function.update_of_ne, hsaved, hverdict, hvalue, hactive]
 
-private theorem saveRestart_bound {bound : ℕ} {store : Store}
+theorem saveRestart_bound {bound : ℕ} {store : Store}
     (hbound : Internal.StoreEnvelope bound bound store)
     (hlarge : 10 < bound) (hactive : store UnaryDecode.activeReg = 0) :
     Internal.StoreEnvelope bound bound (saveRestartStore store) := by
@@ -550,7 +569,7 @@ private theorem saveRestart_bound {bound : ℕ} {store : Store}
     (by simp [Basic.writeValue]; omega)
   simpa [saveRestartStore, saveRestartOps, Basic.execList, saved0] using h3
 
-private theorem header_op {gateStart base : ℕ} {gate : CircuitCode.RawGate}
+theorem header_op {gateStart base : ℕ} {gate : CircuitCode.RawGate}
     {tail wires : List Bool} {store : Store}
     (hready : Ready gateStart base gate tail wires store) :
     headerStore store gateStart = Input.bitValue gate.opBit := by
@@ -563,7 +582,7 @@ private theorem header_op {gateStart base : ℕ} {gate : CircuitCode.RawGate}
   have hcode := hready.code_eq 0
   simpa [codeBits, CircuitCode.RawGate.encode] using hcode
 
-private theorem header_negated0 {gateStart base : ℕ}
+theorem header_negated0 {gateStart base : ℕ}
     {gate : CircuitCode.RawGate} {tail wires : List Bool} {store : Store}
     (hready : Ready gateStart base gate tail wires store) :
     headerStore store (gateStart + 1) =
@@ -576,7 +595,7 @@ private theorem header_negated0 {gateStart base : ℕ}
   rw [header_high store (gateStart + 1) hlarge, hready.code_eq 1]
   simp [codeBits, CircuitCode.RawGate.encode]
 
-private theorem header_negated1 {gateStart base : ℕ}
+theorem header_negated1 {gateStart base : ℕ}
     {gate : CircuitCode.RawGate} {tail wires : List Bool} {store : Store}
     (hready : Ready gateStart base gate tail wires store) :
     headerStore store (gateStart + 2) =
@@ -872,7 +891,7 @@ theorem decoders_internal {gateStart base : ℕ} {gate : CircuitCode.RawGate}
     secondSpace, hfirst, rfl, hsecond, hparsed, hsecondCode, ?_⟩
   simpa [hcursorEnd] using hsecondBound
 
-private theorem restore_high (store : Store) (index : ℕ)
+theorem restore_high (store : Store) (index : ℕ)
     (hindex : spillRemainingReg < index) :
     restoreStore store index = store index := by
   simp only [spillRemainingReg] at hindex

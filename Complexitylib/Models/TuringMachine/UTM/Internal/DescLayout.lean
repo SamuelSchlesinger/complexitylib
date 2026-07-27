@@ -3,9 +3,11 @@ Copyright (c) 2025 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Models.TuringMachine.UTM.Internal.VTape
-import Complexitylib.Models.TuringMachine.UTM.Internal.Desc
-import Complexitylib.Models.TuringMachine.UTM.Internal.HaltTest
+module
+
+public import Complexitylib.Models.TuringMachine.UTM.Internal.VTape
+public import Complexitylib.Models.TuringMachine.UTM.Internal.Desc
+public import Complexitylib.Models.TuringMachine.UTM.Internal.HaltTest
 
 /-!
 # Description-tape layout
@@ -21,6 +23,8 @@ the tape's blank fill).
 These feed the seek phase (two `scanRight_loop` instances land the desc
 head at the entry region) and the match loop (entry-region cells).
 -/
+
+@[expose] public section
 
 namespace Complexity
 

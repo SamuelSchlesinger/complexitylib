@@ -3,11 +3,13 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Circuits.Unrolling.Trace.Defs
-import Complexitylib.Circuits.Unrolling.Trace.Internal.Evaluation
-import Complexitylib.Circuits.Unrolling.Trace.Internal.HeadBounds
-import Complexitylib.Circuits.Unrolling.Trace.Internal.Structure
-import Complexitylib.Circuits.Unrolling.Trace.Internal.Topology
+module
+
+public import Complexitylib.Circuits.Unrolling.Trace.Defs
+public import Complexitylib.Circuits.Unrolling.Trace.Internal.Evaluation
+public import Complexitylib.Circuits.Unrolling.Trace.Internal.HeadBounds
+public import Complexitylib.Circuits.Unrolling.Trace.Internal.Structure
+public import Complexitylib.Circuits.Unrolling.Trace.Internal.Topology
 
 /-!
 # Circuits for bounded Turing-machine traces
@@ -26,6 +28,8 @@ arity and has machine-dependent cubic size in the trace horizon.
 - `evalAux?_traceFragment`: evaluation encodes the complete bounded trace.
 - `traceFragmentSize_le`: a machine-dependent cubic gate-count bound.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

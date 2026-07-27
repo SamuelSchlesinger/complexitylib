@@ -3,12 +3,16 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Models.RandomAccessMachine.Simulation.TMConfig.Sparse
-import Complexitylib.Models.RandomAccessMachine.Simulation.TMConfig.Sparse.Step.Defs
+module
+
+public import Complexitylib.Models.RandomAccessMachine.Simulation.TMConfig.Sparse
+public import Complexitylib.Models.RandomAccessMachine.Simulation.TMConfig.Sparse.Step.Defs
 
 /-!
 # Sparse TM-step address and loading layout -- proof internals
 -/
+
+@[expose] public section
 
 namespace Complexity
 

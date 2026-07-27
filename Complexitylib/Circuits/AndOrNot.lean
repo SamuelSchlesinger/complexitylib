@@ -3,9 +3,11 @@ Copyright (c) 2025 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Circuits.AndOrNot.Defs
-import Complexitylib.Circuits.Internal.AndOrNot
-import Complexitylib.Circuits.Internal.Simulation
+module
+
+public import Complexitylib.Circuits.AndOrNot.Defs
+public import Complexitylib.Circuits.Internal.AndOrNot
+public import Complexitylib.Circuits.Internal.Simulation
 
 /-! # AND/OR/NOT Basis
 
@@ -26,6 +28,8 @@ This module provides the AND/OR basis definitions and completeness results.
 * `CompileAndOr.compileFn_eval` — exact semantics of that simulation
 * `CompileAndOr.compileFn_size_le` — its quantitative size overhead
 -/
+
+@[expose] public section
 
 namespace Complexity
 

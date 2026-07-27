@@ -3,9 +3,11 @@ Copyright (c) 2025 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Classes.PPoly
-import Complexitylib.Classes.L
-import Complexitylib.Circuits.Encoding.Family
+module
+
+public import Complexitylib.Classes.PPoly
+public import Complexitylib.Classes.L
+public import Complexitylib.Circuits.Encoding.Family
 
 /-!
 # Uniform P/poly
@@ -35,6 +37,8 @@ convention and is what lets the same uniformity notion later scale down to `NC`/
 The circuits-to-machines containment is exposed separately as
 `UniformPPoly_subset_P` in `Complexitylib.Classes.PPoly.Uniform.Containment`.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

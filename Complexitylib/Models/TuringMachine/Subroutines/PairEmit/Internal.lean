@@ -3,17 +3,21 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Encoding.Pairing
-import Complexitylib.Models.TuringMachine.Combinators.Internal.Generic
-import Complexitylib.Models.TuringMachine.Hoare.Defs
-import Complexitylib.Models.TuringMachine.Subroutines.PairEmit.Defs
-import Complexitylib.Models.TuringMachine.Tape.Encoding
+module
+
+public import Complexitylib.Encoding.Pairing
+public import Complexitylib.Models.TuringMachine.Combinators.Internal.Generic
+public import Complexitylib.Models.TuringMachine.Hoare.Defs
+public import Complexitylib.Models.TuringMachine.Subroutines.PairEmit.Defs
+public import Complexitylib.Models.TuringMachine.Tape.Encoding
 
 /-!
 # Pair emission from the input and a work tape — proof internals
 
 This module verifies the exact two-pass controller in `PairEmit.Defs`.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

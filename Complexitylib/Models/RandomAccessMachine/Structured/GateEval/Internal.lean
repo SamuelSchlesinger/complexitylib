@@ -3,13 +3,17 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Models.RandomAccessMachine.Structured
-import Complexitylib.Models.RandomAccessMachine.Structured.GateEval.Defs
-import Complexitylib.Models.RandomAccessMachine.Structured.Internal.Resources
+module
+
+public import Complexitylib.Models.RandomAccessMachine.Structured
+public import Complexitylib.Models.RandomAccessMachine.Structured.GateEval.Defs
+public import Complexitylib.Models.RandomAccessMachine.Structured.Internal.Resources
 
 /-!
 # Structured RAM decoded-gate evaluator — proof internals
 -/
+
+@[expose] public section
 
 namespace Complexity
 
@@ -21,20 +25,23 @@ namespace GateEval
 
 open Internal
 
-private abbrev StoreBound (wireCount : ℕ) (store : Store) : Prop :=
+@[nolint docBlame]
+abbrev StoreBound (wireCount : ℕ) (store : Store) : Prop :=
   StoreEnvelope (wireCount + wireBase + 1) (wireCount + wireBase + 1) store
 
-private abbrev width (wireCount : ℕ) : ℕ :=
+@[nolint docBlame]
+abbrev width (wireCount : ℕ) : ℕ :=
   valueWidth (wireCount + wireBase + 1)
 
-private abbrev resourceSpace (wireCount : ℕ) : ℕ :=
+@[nolint docBlame]
+abbrev resourceSpace (wireCount : ℕ) : ℕ :=
   envelopeSpace (wireCount + wireBase + 1) (wireCount + wireBase + 1)
 
-private theorem envelopeSpace_eq_spaceBound (wireCount : ℕ) :
+theorem envelopeSpace_eq_spaceBound (wireCount : ℕ) :
     resourceSpace wireCount = spaceBound wireCount := by
   simp [resourceSpace, envelopeSpace, spaceBound, two_mul]
 
-private theorem inputStore_bound (gate : CircuitCode.RawGate) (wires : List Bool)
+theorem inputStore_bound (gate : CircuitCode.RawGate) (wires : List Bool)
     (hgate : gate.WellFormedAt wires.length) :
     StoreBound wires.length (inputStore gate wires) := by
   have hbits : StoreBound wires.length
@@ -70,13 +77,15 @@ private theorem inputStore_bound (gate : CircuitCode.RawGate) (wires : List Bool
 private def addressed0 (gate : CircuitCode.RawGate) (wires : List Bool) : Store :=
   (Basic.add address0Reg address0Reg baseReg).exec (inputStore gate wires)
 
-private def addressed (gate : CircuitCode.RawGate) (wires : List Bool) : Store :=
+@[nolint docBlame]
+def addressed (gate : CircuitCode.RawGate) (wires : List Bool) : Store :=
   Basic.execList addressOps (inputStore gate wires)
 
 private def loaded0 (gate : CircuitCode.RawGate) (wires : List Bool) : Store :=
   (Basic.load value0Reg address0Reg).exec (addressed gate wires)
 
-private def loaded (gate : CircuitCode.RawGate) (wires : List Bool) : Store :=
+@[nolint docBlame]
+def loaded (gate : CircuitCode.RawGate) (wires : List Bool) : Store :=
   Basic.execList loadOps (addressed gate wires)
 
 private def negated0Sum (gate : CircuitCode.RawGate) (wires : List Bool) : Store :=
@@ -88,7 +97,8 @@ private def negated0Product (gate : CircuitCode.RawGate) (wires : List Bool) : S
 private def negated0Twice (gate : CircuitCode.RawGate) (wires : List Bool) : Store :=
   (Basic.add scratchReg scratchReg scratchReg).exec (negated0Product gate wires)
 
-private def negated0 (gate : CircuitCode.RawGate) (wires : List Bool) : Store :=
+@[nolint docBlame]
+def negated0 (gate : CircuitCode.RawGate) (wires : List Bool) : Store :=
   Basic.execList (xorOps value0Reg negated0Reg) (loaded gate wires)
 
 private def negated1Sum (gate : CircuitCode.RawGate) (wires : List Bool) : Store :=
@@ -100,7 +110,8 @@ private def negated1Product (gate : CircuitCode.RawGate) (wires : List Bool) : S
 private def negated1Twice (gate : CircuitCode.RawGate) (wires : List Bool) : Store :=
   (Basic.add scratchReg scratchReg scratchReg).exec (negated1Product gate wires)
 
-private def negated1 (gate : CircuitCode.RawGate) (wires : List Bool) : Store :=
+@[nolint docBlame]
+def negated1 (gate : CircuitCode.RawGate) (wires : List Bool) : Store :=
   Basic.execList (xorOps value1Reg negated1Reg) (negated0 gate wires)
 
 private def evalProduct (gate : CircuitCode.RawGate) (wires : List Bool) : Store :=
@@ -118,34 +129,43 @@ private def evalDelta (gate : CircuitCode.RawGate) (wires : List Bool) : Store :
 private def evalSelected (gate : CircuitCode.RawGate) (wires : List Bool) : Store :=
   (Basic.mul address0Reg opReg address0Reg).exec (evalDelta gate wires)
 
-private def evaluated (gate : CircuitCode.RawGate) (wires : List Bool) : Store :=
+@[nolint docBlame]
+def evaluated (gate : CircuitCode.RawGate) (wires : List Bool) : Store :=
   Basic.execList evalOps (negated1 gate wires)
 
-private def appendAddressed (gate : CircuitCode.RawGate) (wires : List Bool) : Store :=
+@[nolint docBlame]
+def appendAddressed (gate : CircuitCode.RawGate) (wires : List Bool) : Store :=
   (Basic.add address1Reg baseReg wireCountReg).exec (evaluated gate wires)
 
-private def finalStore (gate : CircuitCode.RawGate) (wires : List Bool) : Store :=
+@[nolint docBlame]
+def finalStore (gate : CircuitCode.RawGate) (wires : List Bool) : Store :=
   (Basic.store address1Reg outputReg).exec (appendAddressed gate wires)
 
-private def routineAddressed (store : Store) : Store :=
+@[nolint docBlame]
+def routineAddressed (store : Store) : Store :=
   Basic.execList addressOps store
 
-private def routineLoaded (store : Store) : Store :=
+@[nolint docBlame]
+def routineLoaded (store : Store) : Store :=
   Basic.execList loadOps (routineAddressed store)
 
-private def routineNegated0 (store : Store) : Store :=
+@[nolint docBlame]
+def routineNegated0 (store : Store) : Store :=
   Basic.execList (xorOps value0Reg negated0Reg) (routineLoaded store)
 
-private def routineNegated1 (store : Store) : Store :=
+@[nolint docBlame]
+def routineNegated1 (store : Store) : Store :=
   Basic.execList (xorOps value1Reg negated1Reg) (routineNegated0 store)
 
-private def routineEvaluated (store : Store) : Store :=
+@[nolint docBlame]
+def routineEvaluated (store : Store) : Store :=
   Basic.execList evalOps (routineNegated1 store)
 
-private def routineFinal (store : Store) : Store :=
+@[nolint docBlame]
+def routineFinal (store : Store) : Store :=
   Basic.execList appendOps (routineEvaluated store)
 
-private theorem inputStore_wire (gate : CircuitCode.RawGate) (wires : List Bool)
+theorem inputStore_wire (gate : CircuitCode.RawGate) (wires : List Bool)
     (index : ℕ) :
     inputStore gate wires (wireBase + index) =
       match wires[index]? with
@@ -162,26 +182,26 @@ private theorem inputStore_wire (gate : CircuitCode.RawGate) (wires : List Bool)
     address1Reg, baseReg]
   rfl
 
-private theorem addressed_address0 (gate : CircuitCode.RawGate)
+theorem addressed_address0 (gate : CircuitCode.RawGate)
     (wires : List Bool) :
     addressed gate wires address0Reg = gate.input₀ + wireBase := by
   simp [addressed, addressOps, Basic.execList, Basic.exec, inputStore,
     address0Reg, address1Reg, baseReg, wireBase]
 
-private theorem addressed_address1 (gate : CircuitCode.RawGate)
+theorem addressed_address1 (gate : CircuitCode.RawGate)
     (wires : List Bool) :
     addressed gate wires address1Reg = gate.input₁ + wireBase := by
   simp [addressed, addressOps, Basic.execList, Basic.exec, inputStore,
     address0Reg, address1Reg, baseReg, wireBase]
 
-private theorem addressed_apply_of_ne (gate : CircuitCode.RawGate)
+theorem addressed_apply_of_ne (gate : CircuitCode.RawGate)
     (wires : List Bool) (index : ℕ) (h0 : index ≠ address0Reg)
     (h1 : index ≠ address1Reg) :
     addressed gate wires index = inputStore gate wires index := by
   simp [addressed, addressOps, Basic.execList, Basic.exec,
     Function.update_of_ne, h0, h1]
 
-private theorem loaded_value0 (gate : CircuitCode.RawGate) (wires : List Bool)
+theorem loaded_value0 (gate : CircuitCode.RawGate) (wires : List Bool)
     (value : Bool) (hvalue : wires[gate.input₀]? = some value) :
     loaded gate wires value0Reg = Input.bitValue value := by
   have hwire := inputStore_wire gate wires gate.input₀
@@ -200,7 +220,7 @@ private theorem loaded_value0 (gate : CircuitCode.RawGate) (wires : List Bool)
   simp [loaded, loadOps, Basic.execList, Basic.exec, value0Reg, value1Reg,
     address0Reg, address1Reg, haddress, hread]
 
-private theorem loaded_value1 (gate : CircuitCode.RawGate) (wires : List Bool)
+theorem loaded_value1 (gate : CircuitCode.RawGate) (wires : List Bool)
     (value : Bool) (hvalue : wires[gate.input₁]? = some value) :
     loaded gate wires value1Reg = Input.bitValue value := by
   have hwire := inputStore_wire gate wires gate.input₁
@@ -219,24 +239,24 @@ private theorem loaded_value1 (gate : CircuitCode.RawGate) (wires : List Bool)
   simp [loaded, loadOps, Basic.execList, Basic.exec, value0Reg, value1Reg,
     address0Reg, address1Reg, haddress, hread]
 
-private theorem inputStore_op (gate : CircuitCode.RawGate) (wires : List Bool) :
+theorem inputStore_op (gate : CircuitCode.RawGate) (wires : List Bool) :
     inputStore gate wires opReg = Input.bitValue gate.opBit := by
   simp [inputStore, opReg, negated0Reg, negated1Reg, address0Reg, address1Reg,
     baseReg, Input.bitValue]
 
-private theorem inputStore_negated0 (gate : CircuitCode.RawGate)
+theorem inputStore_negated0 (gate : CircuitCode.RawGate)
     (wires : List Bool) :
     inputStore gate wires negated0Reg = Input.bitValue gate.negated₀ := by
   simp [inputStore, opReg, negated0Reg, negated1Reg, address0Reg, address1Reg,
     baseReg, Input.bitValue]
 
-private theorem inputStore_negated1 (gate : CircuitCode.RawGate)
+theorem inputStore_negated1 (gate : CircuitCode.RawGate)
     (wires : List Bool) :
     inputStore gate wires negated1Reg = Input.bitValue gate.negated₁ := by
   simp [inputStore, opReg, negated0Reg, negated1Reg, address0Reg, address1Reg,
     baseReg, Input.bitValue]
 
-private theorem address_measured (gate : CircuitCode.RawGate) (wires : List Bool)
+theorem address_measured (gate : CircuitCode.RawGate) (wires : List Bool)
     (hgate : gate.WellFormedAt wires.length) :
     MeasuredRuns (.basics addressOps) (inputStore gate wires)
         (addressed gate wires) 2 (8 * width wires.length)
@@ -272,7 +292,7 @@ private theorem address_measured (gate : CircuitCode.RawGate) (wires : List Bool
   convert hrun using 1
   ring
 
-private theorem load_measured (gate : CircuitCode.RawGate) (wires : List Bool)
+theorem load_measured (gate : CircuitCode.RawGate) (wires : List Bool)
     (hgate : gate.WellFormedAt wires.length) :
     MeasuredRuns (.basics loadOps) (addressed gate wires) (loaded gate wires)
         2 (8 * width wires.length) (resourceSpace wires.length) ∧
@@ -301,7 +321,7 @@ private theorem load_measured (gate : CircuitCode.RawGate) (wires : List Bool)
   convert hrun using 1
   ring
 
-private theorem negated0_measured (gate : CircuitCode.RawGate) (wires : List Bool)
+theorem negated0_measured (gate : CircuitCode.RawGate) (wires : List Bool)
     (value : Bool) (hvalue : wires[gate.input₀]? = some value)
     (hgate : gate.WellFormedAt wires.length) :
     MeasuredRuns (.basics (xorOps value0Reg negated0Reg)) (loaded gate wires)
@@ -368,7 +388,7 @@ private theorem negated0_measured (gate : CircuitCode.RawGate) (wires : List Boo
   convert hrun using 1
   ring
 
-private theorem loaded_apply_of_ne (gate : CircuitCode.RawGate) (wires : List Bool)
+theorem loaded_apply_of_ne (gate : CircuitCode.RawGate) (wires : List Bool)
     (index : ℕ) (h0 : index ≠ value0Reg) (h1 : index ≠ value1Reg)
     (ha0 : index ≠ address0Reg) (ha1 : index ≠ address1Reg) :
     loaded gate wires index = inputStore gate wires index := by
@@ -377,7 +397,7 @@ private theorem loaded_apply_of_ne (gate : CircuitCode.RawGate) (wires : List Bo
       h0, h1]]
   exact addressed_apply_of_ne gate wires index ha0 ha1
 
-private theorem negated0_value (gate : CircuitCode.RawGate) (wires : List Bool)
+theorem negated0_value (gate : CircuitCode.RawGate) (wires : List Bool)
     (value : Bool) (hvalue : wires[gate.input₀]? = some value) :
     negated0 gate wires value0Reg =
       Input.bitValue (gate.negated₀.xor value) := by
@@ -400,14 +420,14 @@ private theorem negated0_value (gate : CircuitCode.RawGate) (wires : List Bool)
       value0Reg, outputReg, scratchReg, negated0Reg, hnegated,
       hloadedValue', hloadedNegated']
 
-private theorem negated0_apply_of_ne (gate : CircuitCode.RawGate)
+theorem negated0_apply_of_ne (gate : CircuitCode.RawGate)
     (wires : List Bool) (index : ℕ) (hvalue : index ≠ value0Reg)
     (houtput : index ≠ outputReg) (hscratch : index ≠ scratchReg) :
     negated0 gate wires index = loaded gate wires index := by
   simp [negated0, xorOps, Basic.execList, Basic.exec, Function.update_of_ne,
     hvalue, houtput, hscratch]
 
-private theorem negated1_value (gate : CircuitCode.RawGate) (wires : List Bool)
+theorem negated1_value (gate : CircuitCode.RawGate) (wires : List Bool)
     (value : Bool) (hvalue : wires[gate.input₁]? = some value) :
     negated1 gate wires value1Reg =
       Input.bitValue (gate.negated₁.xor value) := by
@@ -443,7 +463,7 @@ private theorem negated1_value (gate : CircuitCode.RawGate) (wires : List Bool)
       value1Reg, outputReg, scratchReg, negated1Reg, hnegated,
       hnegated0Value', hnegatedBit']
 
-private theorem negated1_measured (gate : CircuitCode.RawGate) (wires : List Bool)
+theorem negated1_measured (gate : CircuitCode.RawGate) (wires : List Bool)
     (value0 value1 : Bool) (hvalue0 : wires[gate.input₀]? = some value0)
     (hvalue1 : wires[gate.input₁]? = some value1)
     (hgate : gate.WellFormedAt wires.length) :
@@ -523,7 +543,7 @@ private theorem negated1_measured (gate : CircuitCode.RawGate) (wires : List Boo
   convert hrun using 1
   ring
 
-private theorem negated1_value0 (gate : CircuitCode.RawGate) (wires : List Bool)
+theorem negated1_value0 (gate : CircuitCode.RawGate) (wires : List Bool)
     (value : Bool) (hvalue : wires[gate.input₀]? = some value) :
     negated1 gate wires value0Reg =
       Input.bitValue (gate.negated₀.xor value) := by
@@ -532,14 +552,14 @@ private theorem negated1_value0 (gate : CircuitCode.RawGate) (wires : List Bool)
       outputReg, scratchReg]]
   exact negated0_value gate wires value hvalue
 
-private theorem negated1_apply_of_ne (gate : CircuitCode.RawGate)
+theorem negated1_apply_of_ne (gate : CircuitCode.RawGate)
     (wires : List Bool) (index : ℕ) (hvalue : index ≠ value1Reg)
     (houtput : index ≠ outputReg) (hscratch : index ≠ scratchReg) :
     negated1 gate wires index = negated0 gate wires index := by
   simp [negated1, xorOps, Basic.execList, Basic.exec, Function.update_of_ne,
     hvalue, houtput, hscratch]
 
-private theorem negated1_op (gate : CircuitCode.RawGate) (wires : List Bool) :
+theorem negated1_op (gate : CircuitCode.RawGate) (wires : List Bool) :
     negated1 gate wires opReg = Input.bitValue gate.opBit := by
   rw [negated1_apply_of_ne gate wires]
   · rw [negated0_apply_of_ne gate wires]
@@ -556,7 +576,7 @@ private theorem negated1_op (gate : CircuitCode.RawGate) (wires : List Bool) :
   · simp [opReg, outputReg]
   · simp [opReg, scratchReg]
 
-private theorem evaluated_output (gate : CircuitCode.RawGate) (wires : List Bool)
+theorem evaluated_output (gate : CircuitCode.RawGate) (wires : List Bool)
     (value0 value1 : Bool) (hvalue0 : wires[gate.input₀]? = some value0)
     (hvalue1 : wires[gate.input₁]? = some value1) :
     evaluated gate wires outputReg = Input.bitValue (gate.eval value0 value1) := by
@@ -578,7 +598,7 @@ private theorem evaluated_output (gate : CircuitCode.RawGate) (wires : List Bool
       CircuitCode.RawGate.eval, CircuitCode.RawGate.opBit, opReg, value0Reg,
       value1Reg, outputReg, scratchReg, address0Reg, hvalue0'', hvalue1'', hop']
 
-private theorem eval_measured (gate : CircuitCode.RawGate) (wires : List Bool)
+theorem eval_measured (gate : CircuitCode.RawGate) (wires : List Bool)
     (value0 value1 : Bool) (hvalue0 : wires[gate.input₀]? = some value0)
     (hvalue1 : wires[gate.input₁]? = some value1)
     (hgate : gate.WellFormedAt wires.length) :
@@ -669,23 +689,23 @@ private theorem eval_measured (gate : CircuitCode.RawGate) (wires : List Bool)
   convert hrun using 1
   ring
 
-private theorem evaluated_apply_of_ne (gate : CircuitCode.RawGate)
+theorem evaluated_apply_of_ne (gate : CircuitCode.RawGate)
     (wires : List Bool) (index : ℕ) (haddress : index ≠ address0Reg)
     (houtput : index ≠ outputReg) (hscratch : index ≠ scratchReg) :
     evaluated gate wires index = negated1 gate wires index := by
   simp [evaluated, evalOps, Basic.execList, Basic.exec, Function.update_of_ne,
     haddress, houtput, hscratch]
 
-private theorem inputStore_wireCount (gate : CircuitCode.RawGate)
+theorem inputStore_wireCount (gate : CircuitCode.RawGate)
     (wires : List Bool) : inputStore gate wires wireCountReg = wires.length := by
   simp [inputStore, opReg, negated0Reg, negated1Reg, address0Reg, address1Reg,
     wireCountReg, baseReg, wireBase, Input.bitStore]
 
-private theorem inputStore_base (gate : CircuitCode.RawGate) (wires : List Bool) :
+theorem inputStore_base (gate : CircuitCode.RawGate) (wires : List Bool) :
     inputStore gate wires baseReg = wireBase := by
   simp [inputStore, baseReg]
 
-private theorem evaluated_stable (gate : CircuitCode.RawGate) (wires : List Bool)
+theorem evaluated_stable (gate : CircuitCode.RawGate) (wires : List Bool)
     (index : ℕ) (ha0 : index ≠ address0Reg) (ha1 : index ≠ address1Reg)
     (hv0 : index ≠ value0Reg) (hv1 : index ≠ value1Reg)
     (hout : index ≠ outputReg) (hscratch : index ≠ scratchReg) :
@@ -695,7 +715,7 @@ private theorem evaluated_stable (gate : CircuitCode.RawGate) (wires : List Bool
   rw [negated0_apply_of_ne gate wires index hv0 hout hscratch]
   exact loaded_apply_of_ne gate wires index hv0 hv1 ha0 ha1
 
-private theorem evaluated_wireCount (gate : CircuitCode.RawGate)
+theorem evaluated_wireCount (gate : CircuitCode.RawGate)
     (wires : List Bool) : evaluated gate wires wireCountReg = wires.length := by
   rw [evaluated_stable gate wires]
   · exact inputStore_wireCount gate wires
@@ -706,7 +726,7 @@ private theorem evaluated_wireCount (gate : CircuitCode.RawGate)
   · simp [wireCountReg, outputReg]
   · simp [wireCountReg, scratchReg]
 
-private theorem evaluated_base (gate : CircuitCode.RawGate) (wires : List Bool) :
+theorem evaluated_base (gate : CircuitCode.RawGate) (wires : List Bool) :
     evaluated gate wires baseReg = wireBase := by
   rw [evaluated_stable gate wires]
   · exact inputStore_base gate wires
@@ -717,7 +737,7 @@ private theorem evaluated_base (gate : CircuitCode.RawGate) (wires : List Bool) 
   · simp [baseReg, outputReg]
   · simp [baseReg, scratchReg]
 
-private theorem finalStore_output (gate : CircuitCode.RawGate) (wires : List Bool)
+theorem finalStore_output (gate : CircuitCode.RawGate) (wires : List Bool)
     (value0 value1 : Bool) (hvalue0 : wires[gate.input₀]? = some value0)
     (hvalue1 : wires[gate.input₁]? = some value1) :
     finalStore gate wires outputReg = Input.bitValue (gate.eval value0 value1) := by
@@ -743,7 +763,7 @@ private theorem finalStore_output (gate : CircuitCode.RawGate) (wires : List Boo
   rw [Function.update_of_ne (by omega : 8 ≠ 11 + wires.length)]
   exact happendOutput
 
-private theorem finalStore_appended (gate : CircuitCode.RawGate) (wires : List Bool)
+theorem finalStore_appended (gate : CircuitCode.RawGate) (wires : List Bool)
     (value0 value1 : Bool) (hvalue0 : wires[gate.input₀]? = some value0)
     (hvalue1 : wires[gate.input₁]? = some value1) :
     finalStore gate wires (wireBase + wires.length) =
@@ -767,7 +787,7 @@ private theorem finalStore_appended (gate : CircuitCode.RawGate) (wires : List B
       (appendAddressed gate wires outputReg) (wireBase + wires.length) = _
   rw [haddress, hsource, Function.update_self]
 
-private theorem finalStore_wire (gate : CircuitCode.RawGate) (wires : List Bool)
+theorem finalStore_wire (gate : CircuitCode.RawGate) (wires : List Bool)
     (index : ℕ) (hindex : index < wires.length) :
     finalStore gate wires (wireBase + index) = Input.bitValue wires[index] := by
   have hbase' : evaluated gate wires 10 = 11 := by
@@ -799,7 +819,7 @@ private theorem finalStore_wire (gate : CircuitCode.RawGate) (wires : List Bool)
     outputReg, scratchReg]
   all_goals omega
 
-private theorem append_measured (gate : CircuitCode.RawGate) (wires : List Bool)
+theorem append_measured (gate : CircuitCode.RawGate) (wires : List Bool)
     (value0 value1 : Bool) (hvalue0 : wires[gate.input₀]? = some value0)
     (hvalue1 : wires[gate.input₁]? = some value1)
     (hgate : gate.WellFormedAt wires.length) :
@@ -837,25 +857,25 @@ private theorem append_measured (gate : CircuitCode.RawGate) (wires : List Bool)
   convert hrun using 1
   ring
 
-private theorem routineAddressed_address0 {base : ℕ} {gate : CircuitCode.RawGate}
+theorem routineAddressed_address0 {base : ℕ} {gate : CircuitCode.RawGate}
     {wires : List Bool} {store : Store} (hready : ReadyAt base gate wires store) :
     routineAddressed store address0Reg = gate.input₀ + base := by
   change store address0Reg + store baseReg = gate.input₀ + base
   rw [hready.address0_eq, hready.base_eq]
 
-private theorem routineAddressed_address1 {base : ℕ} {gate : CircuitCode.RawGate}
+theorem routineAddressed_address1 {base : ℕ} {gate : CircuitCode.RawGate}
     {wires : List Bool} {store : Store} (hready : ReadyAt base gate wires store) :
     routineAddressed store address1Reg = gate.input₁ + base := by
   change store address1Reg + store baseReg = gate.input₁ + base
   rw [hready.address1_eq, hready.base_eq]
 
-private theorem routineAddressed_apply_of_ne (store : Store) (index : ℕ)
+theorem routineAddressed_apply_of_ne (store : Store) (index : ℕ)
     (h0 : index ≠ address0Reg) (h1 : index ≠ address1Reg) :
     routineAddressed store index = store index := by
   simp [routineAddressed, addressOps, Basic.execList, Basic.exec,
     Function.update_of_ne, h0, h1]
 
-private theorem routineLoaded_value0 {base : ℕ} {gate : CircuitCode.RawGate}
+theorem routineLoaded_value0 {base : ℕ} {gate : CircuitCode.RawGate}
     {wires : List Bool} {store : Store} (hready : ReadyAt base gate wires store)
     (value : Bool) (hvalue : wires[gate.input₀]? = some value) :
     routineLoaded store value0Reg = Input.bitValue value := by
@@ -879,7 +899,7 @@ private theorem routineLoaded_value0 {base : ℕ} {gate : CircuitCode.RawGate}
   simp [routineLoaded, loadOps, Basic.execList, Basic.exec, value0Reg,
     value1Reg, address0Reg, address1Reg, haddress', hphysical']
 
-private theorem routineLoaded_value1 {base : ℕ} {gate : CircuitCode.RawGate}
+theorem routineLoaded_value1 {base : ℕ} {gate : CircuitCode.RawGate}
     {wires : List Bool} {store : Store} (hready : ReadyAt base gate wires store)
     (value : Bool) (hvalue : wires[gate.input₁]? = some value) :
     routineLoaded store value1Reg = Input.bitValue value := by
@@ -912,7 +932,7 @@ private theorem routineLoaded_value1 {base : ℕ} {gate : CircuitCode.RawGate}
     Input.bitValue value
   simp [Basic.exec, hafterAddress, hafterPhysical]
 
-private theorem routineLoaded_apply_of_ne (store : Store) (index : ℕ)
+theorem routineLoaded_apply_of_ne (store : Store) (index : ℕ)
     (h0 : index ≠ value0Reg) (h1 : index ≠ value1Reg)
     (ha0 : index ≠ address0Reg) (ha1 : index ≠ address1Reg) :
     routineLoaded store index = store index := by
@@ -921,7 +941,7 @@ private theorem routineLoaded_apply_of_ne (store : Store) (index : ℕ)
       Function.update_of_ne, h0, h1]]
   exact routineAddressed_apply_of_ne store index ha0 ha1
 
-private theorem xor_measured {bound value negated : ℕ} {store : Store}
+theorem xor_measured {bound value negated : ℕ} {store : Store}
     (hstore : StoreEnvelope bound bound store) (hbound : 2 ≤ bound)
     (hvalue : value < bound) (houtput : outputReg < bound)
     (hscratch : scratchReg < bound)
@@ -980,7 +1000,7 @@ private theorem xor_measured {bound value negated : ℕ} {store : Store}
   convert hrun using 1
   ring
 
-private theorem routineNegated0_value {base : ℕ} {gate : CircuitCode.RawGate}
+theorem routineNegated0_value {base : ℕ} {gate : CircuitCode.RawGate}
     {wires : List Bool} {store : Store} (hready : ReadyAt base gate wires store)
     (value : Bool) (hvalue : wires[gate.input₀]? = some value) :
     routineNegated0 store value0Reg =
@@ -1005,14 +1025,14 @@ private theorem routineNegated0_value {base : ℕ} {gate : CircuitCode.RawGate}
       value0Reg, outputReg, scratchReg, negated0Reg, hnegated,
       hloadedValue', hloadedNegated']
 
-private theorem routineNegated0_apply_of_ne (store : Store) (index : ℕ)
+theorem routineNegated0_apply_of_ne (store : Store) (index : ℕ)
     (hvalue : index ≠ value0Reg) (houtput : index ≠ outputReg)
     (hscratch : index ≠ scratchReg) :
     routineNegated0 store index = routineLoaded store index := by
   simp [routineNegated0, xorOps, Basic.execList, Basic.exec,
     Function.update_of_ne, hvalue, houtput, hscratch]
 
-private theorem routineNegated1_value {base : ℕ} {gate : CircuitCode.RawGate}
+theorem routineNegated1_value {base : ℕ} {gate : CircuitCode.RawGate}
     {wires : List Bool} {store : Store} (hready : ReadyAt base gate wires store)
     (value : Bool) (hvalue : wires[gate.input₁]? = some value) :
     routineNegated1 store value1Reg =
@@ -1049,14 +1069,14 @@ private theorem routineNegated1_value {base : ℕ} {gate : CircuitCode.RawGate}
       value1Reg, outputReg, scratchReg, negated1Reg, hnegatedEq,
       hvalue', hnegated']
 
-private theorem routineNegated1_apply_of_ne (store : Store) (index : ℕ)
+theorem routineNegated1_apply_of_ne (store : Store) (index : ℕ)
     (hvalue : index ≠ value1Reg) (houtput : index ≠ outputReg)
     (hscratch : index ≠ scratchReg) :
     routineNegated1 store index = routineNegated0 store index := by
   simp [routineNegated1, xorOps, Basic.execList, Basic.exec,
     Function.update_of_ne, hvalue, houtput, hscratch]
 
-private theorem routineNegated1_value0 {base : ℕ} {gate : CircuitCode.RawGate}
+theorem routineNegated1_value0 {base : ℕ} {gate : CircuitCode.RawGate}
     {wires : List Bool} {store : Store} (hready : ReadyAt base gate wires store)
     (value : Bool) (hvalue : wires[gate.input₀]? = some value) :
     routineNegated1 store value0Reg =
@@ -1067,7 +1087,7 @@ private theorem routineNegated1_value0 {base : ℕ} {gate : CircuitCode.RawGate}
   · simp [value0Reg, outputReg]
   · simp [value0Reg, scratchReg]
 
-private theorem routineNegated1_op {base : ℕ} {gate : CircuitCode.RawGate}
+theorem routineNegated1_op {base : ℕ} {gate : CircuitCode.RawGate}
     {wires : List Bool} {store : Store} (hready : ReadyAt base gate wires store) :
     routineNegated1 store opReg = Input.bitValue gate.opBit := by
   rw [routineNegated1_apply_of_ne]
@@ -1085,7 +1105,7 @@ private theorem routineNegated1_op {base : ℕ} {gate : CircuitCode.RawGate}
   · simp [opReg, outputReg]
   · simp [opReg, scratchReg]
 
-private theorem routineEvaluated_output {base : ℕ} {gate : CircuitCode.RawGate}
+theorem routineEvaluated_output {base : ℕ} {gate : CircuitCode.RawGate}
     {wires : List Bool} {store : Store} (hready : ReadyAt base gate wires store)
     (value0 value1 : Bool) (hvalue0 : wires[gate.input₀]? = some value0)
     (hvalue1 : wires[gate.input₁]? = some value1) :
@@ -1109,7 +1129,7 @@ private theorem routineEvaluated_output {base : ℕ} {gate : CircuitCode.RawGate
       CircuitCode.RawGate.eval, CircuitCode.RawGate.opBit, opReg, value0Reg,
       value1Reg, outputReg, scratchReg, address0Reg, hvalue0'', hvalue1'', hop']
 
-private theorem routineEvaluated_stable (store : Store) (index : ℕ)
+theorem routineEvaluated_stable (store : Store) (index : ℕ)
     (ha0 : index ≠ address0Reg) (ha1 : index ≠ address1Reg)
     (hv0 : index ≠ value0Reg) (hv1 : index ≠ value1Reg)
     (hout : index ≠ outputReg) (hscratch : index ≠ scratchReg) :
@@ -1121,7 +1141,7 @@ private theorem routineEvaluated_stable (store : Store) (index : ℕ)
   rw [routineNegated0_apply_of_ne store index hv0 hout hscratch]
   exact routineLoaded_apply_of_ne store index hv0 hv1 ha0 ha1
 
-private theorem routineEvaluated_wireCount {base : ℕ}
+theorem routineEvaluated_wireCount {base : ℕ}
     {gate : CircuitCode.RawGate} {wires : List Bool} {store : Store}
     (hready : ReadyAt base gate wires store) :
     routineEvaluated store wireCountReg = wires.length := by
@@ -1130,7 +1150,7 @@ private theorem routineEvaluated_wireCount {base : ℕ}
   all_goals simp [wireCountReg, address0Reg, address1Reg, value0Reg, value1Reg,
     outputReg, scratchReg]
 
-private theorem routineEvaluated_base {base : ℕ} {gate : CircuitCode.RawGate}
+theorem routineEvaluated_base {base : ℕ} {gate : CircuitCode.RawGate}
     {wires : List Bool} {store : Store} (hready : ReadyAt base gate wires store) :
     routineEvaluated store baseReg = base := by
   rw [routineEvaluated_stable]
@@ -1138,7 +1158,7 @@ private theorem routineEvaluated_base {base : ℕ} {gate : CircuitCode.RawGate}
   all_goals simp [baseReg, address0Reg, address1Reg, value0Reg, value1Reg,
     outputReg, scratchReg]
 
-private theorem routineEvaluated_wire {base : ℕ} {gate : CircuitCode.RawGate}
+theorem routineEvaluated_wire {base : ℕ} {gate : CircuitCode.RawGate}
     {wires : List Bool} {store : Store} (hready : ReadyAt base gate wires store)
     (index : ℕ) (hindex : index < wires.length) :
     routineEvaluated store (base + index) =
@@ -1152,7 +1172,7 @@ private theorem routineEvaluated_wire {base : ℕ} {gate : CircuitCode.RawGate}
     outputReg, scratchReg] at hbase ⊢
   all_goals omega
 
-private theorem routineFinal_output {base : ℕ} {gate : CircuitCode.RawGate}
+theorem routineFinal_output {base : ℕ} {gate : CircuitCode.RawGate}
     {wires : List Bool} {store : Store} (hready : ReadyAt base gate wires store)
     (value0 value1 : Bool) (hvalue0 : wires[gate.input₀]? = some value0)
     (hvalue1 : wires[gate.input₁]? = some value1) :
@@ -1181,7 +1201,7 @@ private theorem routineFinal_output {base : ℕ} {gate : CircuitCode.RawGate}
     simp only [outputReg, wireBase] at hbaseGe ⊢
     omega
 
-private theorem routineFinal_appended {base : ℕ} {gate : CircuitCode.RawGate}
+theorem routineFinal_appended {base : ℕ} {gate : CircuitCode.RawGate}
     {wires : List Bool} {store : Store} (hready : ReadyAt base gate wires store)
     (value0 value1 : Bool) (hvalue0 : wires[gate.input₀]? = some value0)
     (hvalue1 : wires[gate.input₁]? = some value1) :
@@ -1207,7 +1227,7 @@ private theorem routineFinal_appended {base : ℕ} {gate : CircuitCode.RawGate}
       (addressed outputReg) (base + wires.length) = _
   rw [haddress, hsource, Function.update_self]
 
-private theorem routineFinal_wire {base : ℕ} {gate : CircuitCode.RawGate}
+theorem routineFinal_wire {base : ℕ} {gate : CircuitCode.RawGate}
     {wires : List Bool} {store : Store} (hready : ReadyAt base gate wires store)
     (index : ℕ) (hindex : index < wires.length) :
     routineFinal store (base + index) = Input.bitValue wires[index] := by
@@ -1237,7 +1257,7 @@ private theorem routineFinal_wire {base : ℕ} {gate : CircuitCode.RawGate}
       (addressed outputReg) (base + index) = _
   rw [haddress, Function.update_of_ne hne, hpreserved, hwire]
 
-private theorem routineFinal_base {base : ℕ} {gate : CircuitCode.RawGate}
+theorem routineFinal_base {base : ℕ} {gate : CircuitCode.RawGate}
     {wires : List Bool} {store : Store} (hready : ReadyAt base gate wires store) :
     routineFinal store baseReg = base := by
   have hbase := routineEvaluated_base hready
@@ -1256,7 +1276,7 @@ private theorem routineFinal_base {base : ℕ} {gate : CircuitCode.RawGate}
   simp only [baseReg, wireBase] at hbaseGe ⊢
   omega
 
-private theorem routineFinal_wireCount {base : ℕ} {gate : CircuitCode.RawGate}
+theorem routineFinal_wireCount {base : ℕ} {gate : CircuitCode.RawGate}
     {wires : List Bool} {store : Store} (hready : ReadyAt base gate wires store) :
     routineFinal store wireCountReg = wires.length := by
   have hbase := routineEvaluated_base hready
@@ -1277,7 +1297,7 @@ private theorem routineFinal_wireCount {base : ℕ} {gate : CircuitCode.RawGate}
   simp only [wireCountReg, wireBase] at hbaseGe ⊢
   omega
 
-private theorem routineFinal_frame {base : ℕ} {gate : CircuitCode.RawGate}
+theorem routineFinal_frame {base : ℕ} {gate : CircuitCode.RawGate}
     {wires : List Bool} {store : Store} (hready : ReadyAt base gate wires store)
     (index : ℕ) (hhigh : wireBase ≤ index)
     (happend : index ≠ base + wires.length) :

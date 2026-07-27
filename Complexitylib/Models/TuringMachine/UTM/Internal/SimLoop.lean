@@ -3,10 +3,12 @@ Copyright (c) 2025 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Models.TuringMachine.UTM.Internal.BodyIteration
-import Complexitylib.Models.TuringMachine.UTM.Internal.Sim
-import Complexitylib.Models.TuringMachine.Combinators.Internal.Loop
-import Complexitylib.Models.TuringMachine.Hoare
+module
+
+public import Complexitylib.Models.TuringMachine.UTM.Internal.BodyIteration
+public import Complexitylib.Models.TuringMachine.UTM.Internal.Sim
+public import Complexitylib.Models.TuringMachine.Combinators.Internal.Loop
+public import Complexitylib.Models.TuringMachine.Hoare
 
 /-!
 # Universal machine: the simulate/halt-test loop
@@ -45,6 +47,8 @@ the interpreted machine. Determinism of `reachesIn` plus the
 halted-configurations-don't-step principle (`TM.reachesIn_le_halt`)
 identify the loop's exit configuration with `mcF`.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

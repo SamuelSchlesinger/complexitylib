@@ -3,7 +3,9 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Circuits.Encoding.Machine.Core.Internal.Execution.Gate.Attempt
+module
+
+public import Complexitylib.Circuits.Encoding.Machine.Core.Internal.Execution.Gate.Attempt
 
 /-!
 # Successful gate-stream execution
@@ -14,6 +16,8 @@ consumed unary counter, last-value/output correspondence, and a fixed maximum
 memo length. The resulting budget is quadratic once the maximum memo length is
 bounded by input length plus gate count.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

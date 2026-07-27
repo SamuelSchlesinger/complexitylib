@@ -3,9 +3,11 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import
+module
+
+public import
   Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Machine.Program.Bounds.Defs
-import
+public import
 Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Machine.Program.DenseDecisionDefs
 
 /-!
@@ -15,6 +17,8 @@ The optimized accounting keeps the live serialized overlay separate from the
 width charged by the instruction actually selected at the current program
 counter. This is the local product that sums quadratically over a run.
 -/
+
+@[expose] public section
 
 namespace Complexity
 namespace RAM

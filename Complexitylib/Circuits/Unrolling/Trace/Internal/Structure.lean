@@ -3,9 +3,11 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Circuits.Unrolling.Internal.Initialization
-import Complexitylib.Circuits.Unrolling.Trace.Defs
-import Complexitylib.Circuits.Unrolling.Transition.Fragment.Internal.Size
+module
+
+public import Complexitylib.Circuits.Unrolling.Internal.Initialization
+public import Complexitylib.Circuits.Unrolling.Trace.Defs
+public import Complexitylib.Circuits.Unrolling.Transition.Fragment.Internal.Size
 
 /-!
 # Structural properties of tiled bounded-trace circuits
@@ -14,6 +16,8 @@ This internal module proves that the recursive trace layout tracks its exact
 gate count and first unused wire. It also identifies the final packed
 configuration block and derives a machine-dependent cubic size bound.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

@@ -3,8 +3,10 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Models.RandomAccessMachine.Structured.GateStep.Defs
-import Complexitylib.Models.RandomAccessMachine.Structured.GateStep.Internal
+module
+
+public import Complexitylib.Models.RandomAccessMachine.Structured.GateStep.Defs
+public import Complexitylib.Models.RandomAccessMachine.Structured.GateStep.Internal
 
 /-!
 # Verified structured RAM serialized-gate step
@@ -14,6 +16,8 @@ and mutable-data APIs. One fixed program consumes a canonical gate encoding,
 invokes the same cursor loop for both unary references, discovers the following
 memo base at runtime, evaluates the decoded gate, and appends its result.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

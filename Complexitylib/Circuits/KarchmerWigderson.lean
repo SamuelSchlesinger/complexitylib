@@ -3,8 +3,10 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Circuits.KarchmerWigderson.Defs
-import Complexitylib.Circuits.KarchmerWigderson.Internal
+module
+
+public import Complexitylib.Circuits.KarchmerWigderson.Defs
+public import Complexitylib.Circuits.KarchmerWigderson.Internal
 
 /-!
 # The monotone Karchmer--Wigderson correspondence
@@ -22,6 +24,8 @@ Consequently a Boolean function has a depth-`d` monotone formula exactly when
 its root Karchmer--Wigderson relation has a depth-`d` protocol in this model.
 No uniformity condition is present.
 -/
+
+@[expose] public section
 
 namespace Complexity
 namespace KarchmerWigderson

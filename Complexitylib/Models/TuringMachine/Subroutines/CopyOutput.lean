@@ -3,8 +3,10 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Models.TuringMachine.Subroutines
-import Complexitylib.Models.TuringMachine.Subroutines.Internal.CopyOutput
+module
+
+public import Complexitylib.Models.TuringMachine.Subroutines
+public import Complexitylib.Models.TuringMachine.Subroutines.Internal.CopyOutput
 
 /-!
 # Input-to-output copy subroutine
@@ -18,6 +20,8 @@ its Boolean input verbatim to its output tape in the exact linear bound
 - `TM.copyInputToOutputTM_computesInTime` — the copy machine computes `id`
   within time `m + 2`
 -/
+
+@[expose] public section
 
 namespace Complexity
 

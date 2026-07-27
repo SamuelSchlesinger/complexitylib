@@ -3,17 +3,19 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import
+module
+
+public import
   Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Machine.EntryLookup.Defs
-import
+public import
   Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Machine.DenseInputLookup.Defs
-import
+public import
   Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.DenseOverlay.Defs
-import Complexitylib.Models.TuringMachine.Subroutines.BinaryCopy.Defs
-import Complexitylib.Models.TuringMachine.Subroutines.BinaryAddConst.Defs
-import Complexitylib.Models.TuringMachine.Subroutines.ResetBinary.Defs
-import Complexitylib.Models.TuringMachine.Subroutines.ResetBinaryMany.Defs
-import Mathlib.Tactic.FinCases
+public import Complexitylib.Models.TuringMachine.Subroutines.BinaryCopy.Defs
+public import Complexitylib.Models.TuringMachine.Subroutines.BinaryAddConst.Defs
+public import Complexitylib.Models.TuringMachine.Subroutines.ResetBinary.Defs
+public import Complexitylib.Models.TuringMachine.Subroutines.ResetBinaryMany.Defs
+public import Mathlib.Tactic.FinCases
 
 /-!
 # Reusable sparse-register operand lookup -- definitions
@@ -23,6 +25,8 @@ module gives lookup a reusable phase boundary: it loads a query from a
 canonical source, scans the encoded store, copies out the decoded value, resets
 all scanner scratch, rewinds the source, and restores the runtime entry count.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

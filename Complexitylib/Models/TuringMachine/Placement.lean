@@ -3,8 +3,10 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Models.TuringMachine.Placement.Defs
-import Complexitylib.Models.TuringMachine.Placement.Internal
+module
+
+public import Complexitylib.Models.TuringMachine.Placement.Defs
+public import Complexitylib.Models.TuringMachine.Placement.Internal
 
 /-!
 # Work-tape placement
@@ -21,6 +23,8 @@ are parked away from the left-end marker.
 - `TM.placeWorkTM_reachesIn_placeWorkParkedCfg` — canonical parked simulation
 - `TM.placeWorkTM_computesInTime` — same-time preservation of computation
 -/
+
+@[expose] public section
 
 namespace Complexity
 

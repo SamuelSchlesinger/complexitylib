@@ -3,9 +3,11 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Models.RandomAccessMachine.Structured.Scanner.Defs
-import Complexitylib.Models.RandomAccessMachine.Structured.Scanner.Internal
-import Complexitylib.Asymptotics
+module
+
+public import Complexitylib.Models.RandomAccessMachine.Structured.Scanner.Defs
+public import Complexitylib.Models.RandomAccessMachine.Structured.Scanner.Internal
+public import Complexitylib.Asymptotics
 
 /-!
 # Verified finite-state structured RAM scanners
@@ -15,6 +17,8 @@ structured RAM frontend. Its correctness theorem includes an exact transition
 count and explicit logarithmic-time and peak-space bounds, all transferred to
 the concrete compiled RAM.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

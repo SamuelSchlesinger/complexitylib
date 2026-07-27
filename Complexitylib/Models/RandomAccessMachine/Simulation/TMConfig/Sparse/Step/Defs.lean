@@ -3,8 +3,10 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Models.RandomAccessMachine.Simulation.TMConfig.Sparse.Defs
-import Complexitylib.Models.RandomAccessMachine.Structured.Switch.Defs
+module
+
+public import Complexitylib.Models.RandomAccessMachine.Simulation.TMConfig.Sparse.Defs
+public import Complexitylib.Models.RandomAccessMachine.Structured.Switch.Defs
 
 /-!
 # A fixed sparse-RAM block for one Turing-machine transition
@@ -14,6 +16,8 @@ It computes an interleaved tape-cell address as
 `cellBase + head * (n + 2) + tape`, so the same finite RAM program can follow
 an unbounded computation.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

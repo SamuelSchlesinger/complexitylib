@@ -3,8 +3,10 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Models.TuringMachine.Subroutines.UnaryLength.Defs
-import Complexitylib.Models.TuringMachine.Subroutines.UnaryLength.Internal
+module
+
+public import Complexitylib.Models.TuringMachine.Subroutines.UnaryLength.Defs
+public import Complexitylib.Models.TuringMachine.Subroutines.UnaryLength.Internal
 
 /-!
 # Unary input-length transducer
@@ -17,6 +19,8 @@ emits `List.replicate x.length true` within the linear bound `|x| + 2`.
 - `TM.unaryLengthTM_computesInTime` — unary input-length computation in
   linear time
 -/
+
+@[expose] public section
 
 namespace Complexity
 

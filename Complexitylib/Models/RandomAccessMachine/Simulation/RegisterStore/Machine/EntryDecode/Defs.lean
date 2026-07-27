@@ -3,8 +3,10 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Defs
-import Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Machine.WordDecode.Defs
+module
+
+public import Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Defs
+public import Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Machine.WordDecode.Defs
 
 /-!
 # RAM sparse-entry decoder — definitions
@@ -13,6 +15,8 @@ One sparse register entry contains two consecutive self-delimiting words: its
 address and value. `entryDecodeTM` gives each word its own target, counter, and
 width tapes so the two checked word decoders compose without a clearing phase.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

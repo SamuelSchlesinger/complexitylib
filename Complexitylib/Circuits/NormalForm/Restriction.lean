@@ -3,8 +3,10 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Circuits.NormalForm.Defs
-import Complexitylib.Circuits.Restriction
+module
+
+public import Complexitylib.Circuits.NormalForm.Defs
+public import Complexitylib.Circuits.Restriction
 
 /-!
 # Restricting CNF and DNF formulas
@@ -24,6 +26,8 @@ The result preserves evaluation and cannot increase clause/term count or width.
 * `CNF.complexity_restrict_le` / `DNF.complexity_restrict_le`.
 * `CNF.width_restrict_le` / `DNF.width_restrict_le`.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

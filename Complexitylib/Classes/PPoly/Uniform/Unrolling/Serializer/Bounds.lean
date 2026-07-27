@@ -3,8 +3,10 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Classes.PPoly.Uniform.Unrolling.Serializer.Bounds.Defs
-import Complexitylib.Classes.PPoly.Uniform.Unrolling.Serializer.Bounds.Internal
+module
+
+public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Serializer.Bounds.Defs
+public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Serializer.Bounds.Internal
 
 /-!
 # Polynomial counters for direct tableau serialization
@@ -22,6 +24,8 @@ padding frontier without first counting the emitted raw gates.
 - `directSerializerGateCountPolynomial_eval` identifies the code header.
 - `DecidesInTime.directSerializerHorizon` safely enlarges a time witness.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

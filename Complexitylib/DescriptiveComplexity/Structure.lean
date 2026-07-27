@@ -3,7 +3,9 @@ Copyright (c) 2025 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.DescriptiveComplexity.Vocabulary
+module
+
+public import Complexitylib.DescriptiveComplexity.Vocabulary
 
 /-!
   # Finite Structures
@@ -18,6 +20,8 @@ import Complexitylib.DescriptiveComplexity.Vocabulary
   Built-in numeric predicates (min, max, ≤, succ) are not stored in the
   structure but computed from the `Fin` ordering (Proviso 1.14).
 -/
+
+@[expose] public section
 
 namespace Complexity
 

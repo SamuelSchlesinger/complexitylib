@@ -3,9 +3,11 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Models.TuringMachine.Combinators
-import Complexitylib.Models.TuringMachine.Tape.Encoding
-import Mathlib.Data.Nat.Size
+module
+
+public import Complexitylib.Models.TuringMachine.Combinators
+public import Complexitylib.Models.TuringMachine.Tape.Encoding
+public import Mathlib.Data.Nat.Size
 
 /-!
 # Little-endian binary successor — definitions
@@ -15,6 +17,8 @@ for ripple-carry successor. Natural numbers use `Nat.bits`, whose least
 significant bit comes first and whose representation of zero is empty.
 Overflow therefore appends one new high bit at the first blank cell.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

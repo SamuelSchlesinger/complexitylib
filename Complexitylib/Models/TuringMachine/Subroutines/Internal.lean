@@ -3,11 +3,13 @@ Copyright (c) 2025 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Models.TuringMachine.Subroutines
-import Complexitylib.Models.TuringMachine.Tape.Encoding
-import Complexitylib.Models.TuringMachine.Hoare
-import Complexitylib.Models.TuringMachine.Hoare.Defs
-import Complexitylib.Models.TuringMachine.Combinators.Internal.Generic
+module
+
+public import Complexitylib.Models.TuringMachine.Subroutines
+public import Complexitylib.Models.TuringMachine.Tape.Encoding
+public import Complexitylib.Models.TuringMachine.Hoare
+public import Complexitylib.Models.TuringMachine.Hoare.Defs
+public import Complexitylib.Models.TuringMachine.Combinators.Internal.Generic
 
 /-!
 # TM Subroutines: proof internals
@@ -36,6 +38,8 @@ an arbitrary predicate `P` on the untouched tapes through the run.
 - `copyWorkToWorkTM_hoareTime_frame_of_binaryString` — frame-preserving
   work-to-work copy
 -/
+
+@[expose] public section
 
 namespace Complexity
 

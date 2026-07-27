@@ -3,8 +3,10 @@ Copyright (c) 2025 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Defs
-import Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Internal
+module
+
+public import Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Defs
+public import Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Internal
 
 /-!
 # Sparse RAM register stores on Turing tapes
@@ -20,6 +22,8 @@ simulation: if the program counter, entry count, addresses, and values all have
 bit-width at most `w`, a snapshot with `m` entries occupies at most
 `(m + 1) * (4 * w + 2)` tape cells.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

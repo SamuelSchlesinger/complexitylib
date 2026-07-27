@@ -3,10 +3,12 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Models.TuringMachine.Combinators.RetargetCompute.Defs
-import Complexitylib.Models.TuringMachine.Lift
-import Complexitylib.Models.TuringMachine.Placement.Defs
-import Complexitylib.Models.TuringMachine.Subroutines
+module
+
+public import Complexitylib.Models.TuringMachine.Combinators.RetargetCompute.Defs
+public import Complexitylib.Models.TuringMachine.Lift
+public import Complexitylib.Models.TuringMachine.Placement.Defs
+public import Complexitylib.Models.TuringMachine.Subroutines
 
 /-!
 # Sequential composition after function computation
@@ -27,6 +29,8 @@ composite has
 The raw output is rewound and copied to the fresh virtual-input tape before
 `tmG` resumes after its compulsory first transition off the left-end markers.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

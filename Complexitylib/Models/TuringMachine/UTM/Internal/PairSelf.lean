@@ -3,8 +3,10 @@ Copyright (c) 2025 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Classes.NP.Internal.PairBuildTM
-import Complexitylib.Models.TuringMachine.Subroutines.Internal
+module
+
+public import Complexitylib.Classes.NP.Internal.PairBuildTM
+public import Complexitylib.Models.TuringMachine.Subroutines.Internal
 
 /-!
 # `pairSelfTM`: build `pair x x` from input `x`
@@ -41,6 +43,8 @@ clearWorkTM 0          erase work tape 0 back to the started blank tape
 - `pairSelfTM_hoareTime` — the Hoare specification described above
 - `pairSelfTime_le` — the clean quadratic bound `pairSelfTime n ≤ 58·(n+1)²`
 -/
+
+@[expose] public section
 
 namespace Complexity
 

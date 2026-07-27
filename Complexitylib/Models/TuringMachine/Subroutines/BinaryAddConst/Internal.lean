@@ -3,10 +3,12 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Models.TuringMachine.Combinators.Internal.Seq
-import Complexitylib.Models.TuringMachine.Hoare.Space
-import Complexitylib.Models.TuringMachine.Subroutines.BinaryAddConst.Defs
-import Complexitylib.Models.TuringMachine.Subroutines.BinarySucc
+module
+
+public import Complexitylib.Models.TuringMachine.Combinators.Internal.Seq
+public import Complexitylib.Models.TuringMachine.Hoare.Space
+public import Complexitylib.Models.TuringMachine.Subroutines.BinaryAddConst.Defs
+public import Complexitylib.Models.TuringMachine.Subroutines.BinarySucc
 
 /-!
 # Addition of a fixed natural to a canonical binary tape — proof internals
@@ -16,13 +18,16 @@ compose through `seqTM`; the all-prefix space induction uses the largest
 destination width rather than the total successor-chain runtime.
 -/
 
+@[expose] public section
+
 namespace Complexity
 
 namespace TM
 
 variable {n : ℕ}
 
-private def binaryAddConstNatTape (value : ℕ) : Tape :=
+@[nolint docBlame]
+def binaryAddConstNatTape (value : ℕ) : Tape :=
   (Tape.init (value.bits.map Γ.ofBool)).move Dir3.right
 
 private theorem binaryAddConstNatTape_hasBinaryNat (value : ℕ) :
@@ -107,7 +112,8 @@ private theorem binaryAddConstInitialWork_parked
     exact binaryAddConstHasBinaryNat_parked hdst
   · exact hother i hi
 
-private abbrev binaryAddConstFramePred
+@[nolint docBlame]
+abbrev binaryAddConstFramePred
     (inp₀ : Tape) (work₀ : Fin n → Tape) (out₀ : Tape) : TapePred n :=
   fun inp work out => inp = inp₀ ∧ work = work₀ ∧ out = out₀
 

@@ -3,9 +3,11 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Circuits.BarringtonCompiler
-import Complexitylib.Circuits.BranchingProgramEncoding.Defs
-import Complexitylib.Circuits.Encoding
+module
+
+public import Complexitylib.Circuits.BarringtonCompiler
+public import Complexitylib.Circuits.BranchingProgramEncoding.Defs
+public import Complexitylib.Circuits.Encoding
 
 /-!
 # Width-five branching-program codec internals
@@ -14,6 +16,8 @@ This module proves round-trip and length properties of the canonical codec.
 Public statements are re-exported by
 `Complexitylib.Circuits.BranchingProgramEncoding`.
 -/
+
+@[expose] public section
 
 set_option maxRecDepth 100000
 

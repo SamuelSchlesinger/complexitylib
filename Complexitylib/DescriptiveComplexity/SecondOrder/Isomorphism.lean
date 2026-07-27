@@ -3,8 +3,10 @@ Copyright (c) 2025 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.DescriptiveComplexity.SecondOrder.Semantics
-import Complexitylib.DescriptiveComplexity.FirstOrder.Isomorphism
+module
+
+public import Complexitylib.DescriptiveComplexity.SecondOrder.Semantics
+public import Complexitylib.DescriptiveComplexity.FirstOrder.Isomorphism
 
 /-!
 # Second-order logic: isomorphism invariance
@@ -29,6 +31,8 @@ witnessing relations through the isomorphism.
 - `SODefinable`, `SODefinable.orderIndependent` — second-order definable queries
   are order-independent.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

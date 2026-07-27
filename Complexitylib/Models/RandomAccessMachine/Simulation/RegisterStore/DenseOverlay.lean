@@ -3,7 +3,9 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import
+module
+
+public import
   Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.DenseOverlay.Internal
 
 /-!
@@ -14,6 +16,8 @@ RAM-to-Turing simulation. The immutable public input is not duplicated in the
 mutable snapshot; positive tags make explicit writes of zero distinguishable
 from an absent overlay entry.
 -/
+
+@[expose] public section
 
 namespace Complexity
 namespace RAM

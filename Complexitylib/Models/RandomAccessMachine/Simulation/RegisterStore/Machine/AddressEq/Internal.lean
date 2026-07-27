@@ -3,15 +3,19 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Machine.AddressEq.Defs
-import Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Machine.WordDecode
-import Complexitylib.Models.TuringMachine.Combinators.Internal.Seq
-import Complexitylib.Models.TuringMachine.Internal
-import Complexitylib.Models.TuringMachine.Subroutines.BinaryEq
+module
+
+public import Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Machine.AddressEq.Defs
+public import Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Machine.WordDecode
+public import Complexitylib.Models.TuringMachine.Combinators.Internal.Seq
+public import Complexitylib.Models.TuringMachine.Internal
+public import Complexitylib.Models.TuringMachine.Subroutines.BinaryEq
 
 /-!
 # Decoded sparse-address equality — proof internals
 -/
+
+@[expose] public section
 
 namespace Complexity
 

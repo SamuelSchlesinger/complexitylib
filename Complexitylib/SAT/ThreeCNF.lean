@@ -3,7 +3,9 @@ Copyright (c) 2025 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.SAT.Rename
+module
+
+public import Complexitylib.SAT.Rename
 
 /-!
 # 3-CNF formulas
@@ -24,6 +26,8 @@ The substantive N3 milestone — a size-controlled clause-padding transformation
 turning an arbitrary CNF into an equisatisfiable 3-CNF — builds on this predicate
 and is tracked separately.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

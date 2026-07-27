@@ -3,7 +3,9 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.SAT.Tseitin.Machine.Defs
+module
+
+public import Complexitylib.SAT.Tseitin.Machine.Defs
 
 /-!
 # Correctness of the pure Tseitin input validator
@@ -14,6 +16,8 @@ argument first characterizes accepted token prefixes as canonical `CNF.tokens`
 streams, then transports that characterization across the concrete two-bit
 tokenization.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

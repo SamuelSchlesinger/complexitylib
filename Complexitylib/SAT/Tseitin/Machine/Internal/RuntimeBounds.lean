@@ -3,9 +3,11 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Models.TuringMachine.Registers.Horner
-import Complexitylib.SAT.Tseitin.Internal.StateBounds
-import Complexitylib.SAT.Tseitin.Machine.Internal.ControllerInvariant
+module
+
+public import Complexitylib.Models.TuringMachine.Registers.Horner
+public import Complexitylib.SAT.Tseitin.Internal.StateBounds
+public import Complexitylib.SAT.Tseitin.Machine.Internal.ControllerInvariant
 
 /-!
 # Coarse runtime bounds for the streaming Tseitin controller
@@ -27,6 +29,8 @@ overhead. The complete token pass is bounded by an explicit quartic.
 - `controllerRunBudget_le_quartic_internal`
 - `typed_controllerRun_le_quartic_internal`
 -/
+
+@[expose] public section
 
 namespace Complexity
 

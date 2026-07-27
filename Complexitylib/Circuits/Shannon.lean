@@ -3,8 +3,10 @@ Copyright (c) 2025 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Circuits.Internal.ShannonBridge
-import Complexitylib.Circuits.Internal.ShannonUpper
+module
+
+public import Complexitylib.Circuits.Internal.ShannonBridge
+public import Complexitylib.Circuits.Internal.ShannonUpper
 
 /-! # Shannon Bounds
 
@@ -36,6 +38,8 @@ When `Basis.andOr2` is known to be complete, this yields a
 
 Together these establish that worst-case circuit complexity is `Θ(2^N / N)`.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

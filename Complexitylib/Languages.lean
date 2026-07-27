@@ -3,17 +3,19 @@ Copyright (c) 2025 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Languages.Trivial
-import Complexitylib.Languages.FirstCell
-import Complexitylib.Languages.LengthParity
-import Complexitylib.Languages.AnBn
-import Complexitylib.Languages.ZeroPrefix
-import Complexitylib.Languages.Balanced
-import Complexitylib.Languages.AllSymbol
-import Complexitylib.Languages.Contains
-import Complexitylib.Languages.LengthDivBy
-import Complexitylib.Languages.LastBit
-import Complexitylib.Languages.Palindromes
+module
+
+public import Complexitylib.Languages.Trivial
+public import Complexitylib.Languages.FirstCell
+public import Complexitylib.Languages.LengthParity
+public import Complexitylib.Languages.AnBn
+public import Complexitylib.Languages.ZeroPrefix
+public import Complexitylib.Languages.Balanced
+public import Complexitylib.Languages.AllSymbol
+public import Complexitylib.Languages.Contains
+public import Complexitylib.Languages.LengthDivBy
+public import Complexitylib.Languages.LastBit
+public import Complexitylib.Languages.Palindromes
 
 /-!
 # Concrete languages and their complexity — aggregation
@@ -54,3 +56,5 @@ worked examples of building TMs from reusable building blocks.
                    by a 1-work-tape TM that copies the input then compares
                    forward against backward.
 -/
+
+@[expose] public section

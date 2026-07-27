@@ -3,12 +3,14 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Machine.WordDecode.Defs
-import Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Machine.WordDecode.Internal
-import
+module
+
+public import Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Machine.WordDecode.Defs
+public import Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Machine.WordDecode.Internal
+public import
 Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Machine.WordDecode.LinearInternal
-import Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Defs
-import Complexitylib.Models.TuringMachine.Hoare.Space
+public import Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Defs
+public import Complexitylib.Models.TuringMachine.Hoare.Space
 
 /-!
 # RAM snapshot word-width decoder
@@ -18,6 +20,8 @@ decoder phase. Starting on a self-delimiting word, `wordWidthTM` stops on its
 zero separator and leaves the unary-prefix length as a canonical binary
 natural on a separate work tape.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

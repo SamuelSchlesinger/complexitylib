@@ -3,10 +3,12 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Models.TuringMachine.Combinators.ForBinaryWork.Defs
-import Complexitylib.Models.TuringMachine.Combinators.Internal.Generic
-import Complexitylib.Models.TuringMachine.Internal
-import Complexitylib.Models.TuringMachine.SpaceTime.Internal.Reachability
+module
+
+public import Complexitylib.Models.TuringMachine.Combinators.ForBinaryWork.Defs
+public import Complexitylib.Models.TuringMachine.Combinators.Internal.Generic
+public import Complexitylib.Models.TuringMachine.Internal
+public import Complexitylib.Models.TuringMachine.SpaceTime.Internal.Reachability
 
 /-!
 # Binary work-tape loop combinator -- proof internals
@@ -14,6 +16,8 @@ import Complexitylib.Models.TuringMachine.SpaceTime.Internal.Reachability
 This module proves exact body embedding, bit/blank scanner transitions, the
 advancing loopback seam, certified finite iteration, and transducer closure.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

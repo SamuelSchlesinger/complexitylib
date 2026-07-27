@@ -3,8 +3,10 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Circuits.DecisionTree.Path.Defs
-import Complexitylib.Circuits.Restriction
+module
+
+public import Complexitylib.Circuits.DecisionTree.Path.Defs
+public import Complexitylib.Circuits.Restriction
 
 /-!
 # Complete query blocks in finite decision trees -- definitions
@@ -14,6 +16,8 @@ every coordinate in `queries`, in order, and then invokes `continuation` with
 the resulting finite restriction. This is the block operation used by the
 canonical switching tree.
 -/
+
+@[expose] public section
 
 namespace Complexity
 namespace DecisionTree.On

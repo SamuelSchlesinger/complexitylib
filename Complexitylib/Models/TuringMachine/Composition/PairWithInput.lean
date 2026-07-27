@@ -3,8 +3,10 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Models.TuringMachine.Composition.PairWithInput.Defs
-import Complexitylib.Models.TuringMachine.Composition.PairWithInput.Internal
+module
+
+public import Complexitylib.Models.TuringMachine.Composition.PairWithInput.Defs
+public import Complexitylib.Models.TuringMachine.Composition.PairWithInput.Internal
 
 /-!
 # Pair a computed value with the original input
@@ -17,6 +19,8 @@ retaining a concrete polynomial-preserving time bound.
 
 - `TM.pairWithInputTM_computesInTime` — computation paired with original input
 -/
+
+@[expose] public section
 
 namespace Complexity
 

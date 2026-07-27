@@ -3,7 +3,9 @@ Copyright (c) 2025 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Circuits.AndOrNot.Defs
+module
+
+public import Complexitylib.Circuits.AndOrNot.Defs
 
 /-!
 # Machine-facing encoding of fan-in-two AND/OR circuits
@@ -25,6 +27,8 @@ decoding rejects truncation and trailing garbage.  Unary references make the
 format polynomially long in the input arity and number of gates; a binary
 format can be added later without changing the raw circuit semantics.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

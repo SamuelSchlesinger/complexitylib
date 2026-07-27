@@ -3,8 +3,10 @@ Copyright (c) 2025 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Models.TuringMachine
-import Mathlib.Data.Fintype.Sum
+module
+
+public import Complexitylib.Models.TuringMachine
+public import Mathlib.Data.Fintype.Sum
 
 /-!
 # TM Combinators
@@ -52,6 +54,8 @@ The union machine has three phases:
 `Q₁ ⊕ UnionPhase ⊕ Q₂` where `UnionPhase` encodes the four transition states
 between Phase 1 and Phase 2.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

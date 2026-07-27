@@ -3,7 +3,9 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Models.TuringMachine.Repetition.Internal
+module
+
+public import Complexitylib.Models.TuringMachine.Repetition.Internal
 
 /-!
 # Fresh-bank frame invariants for fixed-time repetition
@@ -20,6 +22,8 @@ initial configuration.
 - `NTM.RepeatFrame.run`, `.rewind`, `.finish` — one-step frame preservation
 - `NTM.RepeatFrame.finish_next_project` — exact next-trial initialization
 -/
+
+@[expose] public section
 
 namespace Complexity
 

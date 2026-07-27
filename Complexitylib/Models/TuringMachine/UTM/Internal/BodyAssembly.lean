@@ -3,10 +3,12 @@ Copyright (c) 2025 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Models.TuringMachine.UTM.Internal.BodyMatch
-import Complexitylib.Models.TuringMachine.UTM.Internal.BodyApply
-import Complexitylib.Models.TuringMachine.UTM.Internal.DescLayout
-import Complexitylib.Models.TuringMachine.UTM.Internal.Verdict
+module
+
+public import Complexitylib.Models.TuringMachine.UTM.Internal.BodyMatch
+public import Complexitylib.Models.TuringMachine.UTM.Internal.BodyApply
+public import Complexitylib.Models.TuringMachine.UTM.Internal.DescLayout
+public import Complexitylib.Models.TuringMachine.UTM.Internal.Verdict
 
 /-!
 # Body correctness: phase assembly
@@ -18,6 +20,8 @@ configuration) and the halt-check phase: from the body's start state, a
 halted interpreted machine makes the body a bounded-time no-op, and a
 running one brings it to the peek phase with all tapes restored.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

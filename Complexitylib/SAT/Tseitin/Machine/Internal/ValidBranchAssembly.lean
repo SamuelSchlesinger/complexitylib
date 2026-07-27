@@ -3,7 +3,9 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.SAT.Tseitin.Machine.Internal.BranchFrame
+module
+
+public import Complexitylib.SAT.Tseitin.Machine.Internal.BranchFrame
 
 /-!
 # Valid-input assembly for the Tseitin reduction machine
@@ -23,6 +25,8 @@ which is exactly the final transition performed by `ifTM`.
 - `reductionTMWith_valid_emit_hoareTime_internal`
 - `reductionTMWith_valid_emit_reachesIn_internal`
 -/
+
+@[expose] public section
 
 namespace Complexity
 

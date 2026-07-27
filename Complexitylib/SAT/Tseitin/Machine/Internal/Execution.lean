@@ -3,8 +3,10 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Models.TuringMachine.Combinators.Internal.Generic
-import Complexitylib.SAT.Tseitin.Machine.Internal.ValidationFramed
+module
+
+public import Complexitylib.Models.TuringMachine.Combinators.Internal.Generic
+public import Complexitylib.SAT.Tseitin.Machine.Internal.ValidationFramed
 
 /-!
 # Execution of the Tseitin syntax-validation machine
@@ -23,6 +25,8 @@ started execution theorem.
 - `validationTM_reachesIn_internal` — exact execution from `initCfg`
 - `validationTM_hoareTime_internal` — compositional `HoareTime` interface
 -/
+
+@[expose] public section
 
 namespace Complexity
 

@@ -3,8 +3,10 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Circuits.XOR.Restriction.Defs
-import Complexitylib.Circuits.XOR.Restriction.Internal
+module
+
+public import Complexitylib.Circuits.XOR.Restriction.Defs
+public import Complexitylib.Circuits.XOR.Restriction.Internal
 
 /-!
 # Parity under finite restrictions
@@ -17,6 +19,8 @@ The main lower bound says that every finite-arity decision tree computing
 parity on `support` has depth at least `support.card`. This is the parity-side
 contradiction needed after a switching argument leaves many variables free.
 -/
+
+@[expose] public section
 
 namespace Complexity
 namespace Schnorr

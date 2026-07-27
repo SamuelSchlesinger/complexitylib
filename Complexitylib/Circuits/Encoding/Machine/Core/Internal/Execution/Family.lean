@@ -3,9 +3,11 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Circuits.Encoding.Machine.Core.Internal.Execution.EmptyReject
-import Complexitylib.Circuits.Encoding.Machine.Core.Internal.Execution.PositiveLoopReject
-import Complexitylib.Circuits.Encoding.Machine.Core.Internal.Execution.PositiveReject
+module
+
+public import Complexitylib.Circuits.Encoding.Machine.Core.Internal.Execution.EmptyReject
+public import Complexitylib.Circuits.Encoding.Machine.Core.Internal.Execution.PositiveLoopReject
+public import Complexitylib.Circuits.Encoding.Machine.Core.Internal.Execution.PositiveReject
 
 /-!
 # Total tagged-family core execution
@@ -14,6 +16,8 @@ This file assembles the empty-family, positive-family, tag-mismatch, malformed
 count, and counted gate-loop branches. The output is the defaulted pure verdict:
 successful Boolean results are preserved and every malformed stream writes zero.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

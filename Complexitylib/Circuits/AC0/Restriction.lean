@@ -3,8 +3,10 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Circuits.AC0.NormalForm
-import Complexitylib.Circuits.Restriction
+module
+
+public import Complexitylib.Circuits.AC0.NormalForm
+public import Complexitylib.Circuits.Restriction
 
 /-!
 # Restricting negation-normal AC0 formulas
@@ -14,6 +16,8 @@ retaining the unbounded connective tree. Evaluation commutes with this
 operation, tree size and depth are preserved exactly, and variable support is
 filtered to the free variables.
 -/
+
+@[expose] public section
 
 namespace Complexity
 namespace AC0Formula

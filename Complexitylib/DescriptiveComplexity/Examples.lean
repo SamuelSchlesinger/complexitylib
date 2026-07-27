@@ -3,8 +3,10 @@ Copyright (c) 2025 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.DescriptiveComplexity.Query
-import Complexitylib.DescriptiveComplexity.FirstOrder
+module
+
+public import Complexitylib.DescriptiveComplexity.Query
+public import Complexitylib.DescriptiveComplexity.FirstOrder
 
 /-!
   # Examples of Finite Structures
@@ -14,6 +16,8 @@ import Complexitylib.DescriptiveComplexity.FirstOrder
   - A binary string (with built-in ordering)
   - An isomorphism between two concrete graphs
 -/
+
+@[expose] public section
 
 namespace Complexity
 
@@ -51,7 +55,7 @@ def cycle3' : FinStruct graph where
   const := Fin.elim0
 
 /-- The permutation 0↦0, 1↦2, 2↦1 on Fin 3 (an involution). -/
-private def perm3 : Fin 3 → Fin 3
+def perm3 : Fin 3 → Fin 3
   | ⟨0, _⟩ => ⟨0, by omega⟩
   | ⟨1, _⟩ => ⟨2, by omega⟩
   | ⟨2, _⟩ => ⟨1, by omega⟩

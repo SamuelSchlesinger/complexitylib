@@ -3,7 +3,9 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Circuits.Encoding.Formula.Defs
+module
+
+public import Complexitylib.Circuits.Encoding.Formula.Defs
 
 /-!
 # Batch compilation of Boolean formulas
@@ -18,6 +20,8 @@ structured value by many Boolean formulas: later fragments can address the
 result by a base wire and an index without retaining the variable-sized
 offset of every formula tree.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

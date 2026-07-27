@@ -3,8 +3,10 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Models.RandomAccessMachine.Simulation.TMConfig.Sparse.Defs
-import Complexitylib.Models.RandomAccessMachine.Simulation.TMConfig.Sparse.Internal
+module
+
+public import Complexitylib.Models.RandomAccessMachine.Simulation.TMConfig.Sparse.Defs
+public import Complexitylib.Models.RandomAccessMachine.Simulation.TMConfig.Sparse.Internal
 
 /-!
 # Sparse unbounded TM configurations in RAM registers
@@ -13,6 +15,8 @@ This is the fixed-layout representation used for the uniform TM-to-RAM
 simulation. Unlike the bounded dense layout, its addresses do not depend on an
 input length or running-time bound.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

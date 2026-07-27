@@ -3,8 +3,10 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Circuits.DecisionTree.Finite.Defs
-import Complexitylib.Circuits.DecisionTree.Finite.Internal
+module
+
+public import Complexitylib.Circuits.DecisionTree.Finite.Defs
+public import Complexitylib.Circuits.DecisionTree.Finite.Internal
 
 /-!
 # Finite-arity decision trees
@@ -13,6 +15,8 @@ import Complexitylib.Circuits.DecisionTree.Finite.Internal
 decision-tree representation used by finite switching and restriction
 arguments; no query can silently fall outside the sampled variable set.
 -/
+
+@[expose] public section
 
 namespace Complexity
 namespace DecisionTree.On

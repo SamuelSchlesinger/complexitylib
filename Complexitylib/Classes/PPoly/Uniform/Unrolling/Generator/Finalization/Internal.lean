@@ -3,15 +3,19 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Finalization.Defs
-import Complexitylib.Models.TuringMachine.Experimental.BinaryRoutine.Arithmetic
-import Complexitylib.Models.TuringMachine.Experimental.BinaryRoutine.Control
-import Complexitylib.Models.TuringMachine.Experimental.BinaryRoutine.List
-import Complexitylib.Models.TuringMachine.Experimental.BinaryRoutine.SpaceBounds
+module
+
+public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Finalization.Defs
+public import Complexitylib.Models.TuringMachine.Experimental.BinaryRoutine.Arithmetic
+public import Complexitylib.Models.TuringMachine.Experimental.BinaryRoutine.Control
+public import Complexitylib.Models.TuringMachine.Experimental.BinaryRoutine.List
+public import Complexitylib.Models.TuringMachine.Experimental.BinaryRoutine.SpaceBounds
 
 /-!
 # Direct-unrolling finalization generator -- proof internals
 -/
+
+@[expose] public section
 
 namespace Complexity
 

@@ -3,9 +3,11 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Models.TuringMachine.Combinators.WorkSymbolBranch.Defs
-import Complexitylib.Models.TuringMachine.Combinators.WorkSymbolBranch.Internal
-import Complexitylib.Models.TuringMachine.Hoare.Space
+module
+
+public import Complexitylib.Models.TuringMachine.Combinators.WorkSymbolBranch.Defs
+public import Complexitylib.Models.TuringMachine.Combinators.WorkSymbolBranch.Internal
+public import Complexitylib.Models.TuringMachine.Hoare.Space
 
 /-!
 # Direct work-symbol branch combinator
@@ -14,6 +16,8 @@ This module exposes exact framed execution for a one-step branch on an
 arbitrary work-tape symbol. It is the direct controller primitive used to
 branch on the readable sparse-entry equality flag.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

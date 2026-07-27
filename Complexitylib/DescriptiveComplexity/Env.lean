@@ -3,7 +3,9 @@ Copyright (c) 2025 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.DescriptiveComplexity.Vocabulary
+module
+
+public import Complexitylib.DescriptiveComplexity.Vocabulary
 
 /-!
   Variable environments for first-order logic.
@@ -11,6 +13,8 @@ import Complexitylib.DescriptiveComplexity.Vocabulary
   Since `Fin.cons` is absent from Lean 4 core, we define our own
   environment machinery for mapping de Bruijn variables to universe elements.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

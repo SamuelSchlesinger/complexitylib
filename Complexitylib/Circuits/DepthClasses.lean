@@ -3,8 +3,10 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Circuits.DepthClasses.Defs
-import Complexitylib.Circuits.DepthClasses.Internal
+module
+
+public import Complexitylib.Circuits.DepthClasses.Defs
+public import Complexitylib.Circuits.DepthClasses.Internal
 
 /-!
 # Circuit depth classes
@@ -23,6 +25,8 @@ the Barrington formula-family development.
 These definitions are explicitly nonuniform. Generator uniformity is an
 additional predicate and is not implicit in the names `NC`, `AC`, or `TC`.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

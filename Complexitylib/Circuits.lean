@@ -3,59 +3,61 @@ Copyright (c) 2025 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Circuits.Basic
-import Complexitylib.Circuits.BitString
-import Complexitylib.Circuits.Composition
-import Complexitylib.Circuits.Dependency
-import Complexitylib.Circuits.DecisionTree
-import Complexitylib.Circuits.DecisionTree.Finite
-import Complexitylib.Circuits.DecisionTree.NormalForm
-import Complexitylib.Circuits.DecisionTree.Path
-import Complexitylib.Circuits.DecisionTree.Restriction
-import Complexitylib.Circuits.Formula
-import Complexitylib.Circuits.Spira
-import Complexitylib.Circuits.FormulaEncoding
-import Complexitylib.Circuits.CircuitFormula
-import Complexitylib.Circuits.Restriction
-import Complexitylib.Circuits.RandomRestriction
-import Complexitylib.Circuits.BranchingProgram
-import Complexitylib.Circuits.Barrington
-import Complexitylib.Circuits.BarringtonS5
-import Complexitylib.Circuits.BarringtonBridge
-import Complexitylib.Circuits.BarringtonRepr
-import Complexitylib.Circuits.BarringtonLength
-import Complexitylib.Circuits.BarringtonCompiler
-import Complexitylib.Circuits.BranchingProgramEncoding
-import Complexitylib.Circuits.BarringtonCodeGenerator
-import Complexitylib.Circuits.BarringtonFamily
-import Complexitylib.Circuits.BarringtonConverse
-import Complexitylib.Circuits.BarringtonTyped
-import Complexitylib.Circuits.CircuitFormula.Family
-import Complexitylib.Circuits.MultilinearExtension
-import Complexitylib.Circuits.NormalForm
-import Complexitylib.Circuits.NormalForm.Operations
-import Complexitylib.Circuits.NormalForm.Restriction
-import Complexitylib.Circuits.AndOrNot
-import Complexitylib.Circuits.BasisHom
-import Complexitylib.Circuits.Threshold
-import Complexitylib.Circuits.Monotone
-import Complexitylib.Circuits.KarchmerWigderson
-import Complexitylib.Circuits.Encoding
-import Complexitylib.Circuits.Family
-import Complexitylib.Circuits.Encoding.Family
-import Complexitylib.Circuits.Encoding.Machine
-import Complexitylib.Circuits.XOR
-import Complexitylib.Circuits.XOR.Restriction
-import Complexitylib.Circuits.EssentialInput
-import Complexitylib.Circuits.Shannon
-import Complexitylib.Circuits.LowerBound
-import Complexitylib.Circuits.Schnorr
-import Complexitylib.Circuits.DepthClasses
-import Complexitylib.Circuits.AC0
-import Complexitylib.Circuits.Nondeterminism
-import Complexitylib.Circuits.Hardwiring
-import Complexitylib.Circuits.Unrolling
-import Complexitylib.Circuits.Valiant
+module
+
+public import Complexitylib.Circuits.Basic
+public import Complexitylib.Circuits.BitString
+public import Complexitylib.Circuits.Composition
+public import Complexitylib.Circuits.Dependency
+public import Complexitylib.Circuits.DecisionTree
+public import Complexitylib.Circuits.DecisionTree.Finite
+public import Complexitylib.Circuits.DecisionTree.NormalForm
+public import Complexitylib.Circuits.DecisionTree.Path
+public import Complexitylib.Circuits.DecisionTree.Restriction
+public import Complexitylib.Circuits.Formula
+public import Complexitylib.Circuits.Spira
+public import Complexitylib.Circuits.FormulaEncoding
+public import Complexitylib.Circuits.CircuitFormula
+public import Complexitylib.Circuits.Restriction
+public import Complexitylib.Circuits.RandomRestriction
+public import Complexitylib.Circuits.BranchingProgram
+public import Complexitylib.Circuits.Barrington
+public import Complexitylib.Circuits.BarringtonS5
+public import Complexitylib.Circuits.BarringtonBridge
+public import Complexitylib.Circuits.BarringtonRepr
+public import Complexitylib.Circuits.BarringtonLength
+public import Complexitylib.Circuits.BarringtonCompiler
+public import Complexitylib.Circuits.BranchingProgramEncoding
+public import Complexitylib.Circuits.BarringtonCodeGenerator
+public import Complexitylib.Circuits.BarringtonFamily
+public import Complexitylib.Circuits.BarringtonConverse
+public import Complexitylib.Circuits.BarringtonTyped
+public import Complexitylib.Circuits.CircuitFormula.Family
+public import Complexitylib.Circuits.MultilinearExtension
+public import Complexitylib.Circuits.NormalForm
+public import Complexitylib.Circuits.NormalForm.Operations
+public import Complexitylib.Circuits.NormalForm.Restriction
+public import Complexitylib.Circuits.AndOrNot
+public import Complexitylib.Circuits.BasisHom
+public import Complexitylib.Circuits.Threshold
+public import Complexitylib.Circuits.Monotone
+public import Complexitylib.Circuits.KarchmerWigderson
+public import Complexitylib.Circuits.Encoding
+public import Complexitylib.Circuits.Family
+public import Complexitylib.Circuits.Encoding.Family
+public import Complexitylib.Circuits.Encoding.Machine
+public import Complexitylib.Circuits.XOR
+public import Complexitylib.Circuits.XOR.Restriction
+public import Complexitylib.Circuits.EssentialInput
+public import Complexitylib.Circuits.Shannon
+public import Complexitylib.Circuits.LowerBound
+public import Complexitylib.Circuits.Schnorr
+public import Complexitylib.Circuits.DepthClasses
+public import Complexitylib.Circuits.AC0
+public import Complexitylib.Circuits.Nondeterminism
+public import Complexitylib.Circuits.Hardwiring
+public import Complexitylib.Circuits.Unrolling
+public import Complexitylib.Circuits.Valiant
 
 /-! # Circuit Complexity Library
 
@@ -236,3 +238,5 @@ Theorem modules (re-export definitions + main results):
 Internal modules contain proof machinery (CircDesc, DNF construction,
 restriction/elimination arguments) and are not intended for direct use.
 -/
+
+@[expose] public section

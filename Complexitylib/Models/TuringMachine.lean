@@ -3,9 +3,11 @@ Copyright (c) 2025 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Mathlib.Logic.Relation
-import Mathlib.Data.Fintype.Pi
-import Mathlib.Data.Rat.Defs
+module
+
+public import Mathlib.Logic.Relation
+public import Mathlib.Data.Fintype.Pi
+public import Mathlib.Data.Rat.Defs
 
 /-!
 # Turing machines
@@ -54,6 +56,8 @@ Arora–Barak (*Computational Complexity: A Modern Approach*, Definitions
   making the read-only/read-write distinction structural.
 - **NTM execution**: Defined via `trace` (a fixed choice sequence), not a relational step.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

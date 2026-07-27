@@ -3,8 +3,10 @@ Copyright (c) 2025 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Models.TuringMachine.Combinators
-import Complexitylib.Models.TuringMachine.Combinators.Internal.Generic
+module
+
+public import Complexitylib.Models.TuringMachine.Combinators
+public import Complexitylib.Models.TuringMachine.Combinators.Internal.Generic
 
 /-!
 # seqTM simulation — proof internals
@@ -17,6 +19,8 @@ This file contains the simulation lemmas for `seqTM tm₁ tm₂`.
 - `phase2Wrap` — embed a `tm₂` config into the `seqTM` config space
 - Tape transformations use the shared `transitionTape` / `transitionInput`
 -/
+
+@[expose] public section
 
 namespace Complexity
 

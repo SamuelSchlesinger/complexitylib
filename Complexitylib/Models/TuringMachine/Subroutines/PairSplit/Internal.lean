@@ -3,11 +3,13 @@ Copyright (c) 2025 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Encoding.Pairing
-import Complexitylib.Models.TuringMachine.Combinators.Internal.Generic
-import Complexitylib.Models.TuringMachine.Trace
-import Complexitylib.Models.TuringMachine.Subroutines.PairSplit.Defs
-import Mathlib.Tactic.Ring
+module
+
+public import Complexitylib.Encoding.Pairing
+public import Complexitylib.Models.TuringMachine.Combinators.Internal.Generic
+public import Complexitylib.Models.TuringMachine.Trace
+public import Complexitylib.Models.TuringMachine.Subroutines.PairSplit.Defs
+public import Mathlib.Tactic.Ring
 
 /-!
 # Pair-splitting machine — proof internals
@@ -16,6 +18,8 @@ This file proves the stepwise decoding and exact-time correctness facts for
 `pairSplitCoreTM`. Stable statements are re-exposed by
 `Complexitylib.Models.TuringMachine.Subroutines.PairSplit`.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

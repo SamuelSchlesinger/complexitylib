@@ -3,7 +3,9 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Classes.PPoly.Uniform.Unrolling.Serializer.Transition.Next.Defs
+module
+
+public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Serializer.Transition.Next.Defs
 
 /-!
 # Numeric schedules for one packed transition step
@@ -18,6 +20,8 @@ The run-time schedule state consists solely of natural numbers and Booleans:
 numeric atom fields, numeric transition-case fields, prefix sizes, and Boolean
 selection oracles.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

@@ -3,7 +3,9 @@ Copyright (c) 2025 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.SAT.CookLevin.Internal.Emitter
+module
+
+public import Complexitylib.SAT.CookLevin.Internal.Emitter
 
 /-!
 # The emitter loop driver
@@ -20,6 +22,8 @@ Also here: the arithmetic cap lemma `flatCaps` (one bound `4·A·B·C·D ≤ M`
 discharges every `LitDesc.Spec` obligation) and the `encode`/`flatMap`
 distribution lemma.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

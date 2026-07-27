@@ -3,8 +3,10 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Circuits.Encoding.Defs
-import Complexitylib.Circuits.Formula
+module
+
+public import Complexitylib.Circuits.Encoding.Defs
+public import Complexitylib.Circuits.Formula
 
 /-!
 # Machine-facing encoding of Boolean formulas
@@ -19,6 +21,8 @@ stream, then a stack machine reconstructs the formula. This avoids a recursive
 on-tape tree parser and gives the later Barrington generator a simple,
 self-delimiting input language.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

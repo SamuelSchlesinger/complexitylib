@@ -3,8 +3,10 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.SAT.ThreeCNF
-import Complexitylib.SAT.Verifier
+module
+
+public import Complexitylib.SAT.ThreeCNF
+public import Complexitylib.SAT.Verifier
 
 /-!
 # Encoded CNF-SAT and 3SAT languages
@@ -22,6 +24,8 @@ reduction claim is made here.
 - `ThreeSAT.falseFormula` — a fixed unsatisfiable exact 3-CNF
 - `ThreeSAT.fallbackEncoding` — valid no-instance output for malformed inputs
 -/
+
+@[expose] public section
 
 namespace Complexity
 

@@ -3,7 +3,9 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Classes.L.PolynomialTime.Internal
+module
+
+public import Complexitylib.Classes.L.PolynomialTime.Internal
 
 /-!
 # Log-space transducers run in polynomial time
@@ -19,6 +21,8 @@ bound. Consequently `L ⊆ P` and `FL ⊆ FP`.
 - `L_subset_P` — deterministic log-space languages are polynomial-time
 - `FL_subset_FP` — deterministic log-space functions are polynomial-time
 -/
+
+@[expose] public section
 
 namespace Complexity
 

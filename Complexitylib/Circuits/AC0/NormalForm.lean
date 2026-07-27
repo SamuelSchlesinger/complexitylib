@@ -3,8 +3,10 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Circuits.AC0.NormalForm.Defs
-import Complexitylib.Circuits.AC0.NormalForm.Internal
+module
+
+public import Complexitylib.Circuits.AC0.NormalForm.Defs
+public import Complexitylib.Circuits.AC0.NormalForm.Internal
 
 /-!
 # Negation-normal unbounded formulas for AC0
@@ -13,6 +15,8 @@ This public surface provides the semantic and quantitative De Morgan laws for
 `AC0Formula`, the tree representation used by AC0 normalization and
 restriction arguments.
 -/
+
+@[expose] public section
 
 namespace Complexity
 namespace AC0Formula

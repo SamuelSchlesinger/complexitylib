@@ -3,8 +3,10 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Classes.PPoly.Uniform.Unrolling.Padded.Defs
-import Mathlib.Algebra.Polynomial.Eval.Defs
+module
+
+public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Padded.Defs
+public import Mathlib.Algebra.Polynomial.Eval.Defs
 
 /-!
 # Polynomial counters for direct tableau serialization -- definitions
@@ -15,6 +17,8 @@ polynomials: the padded gate bound, the wire frontier after that padding, and
 the positive member's gate-count header. Keeping these values as polynomials
 lets the binary polynomial subroutine compute them in logarithmic workspace.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

@@ -3,7 +3,9 @@ Copyright (c) 2025 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Models.TuringMachine.Subroutines.Counter
+module
+
+public import Complexitylib.Models.TuringMachine.Subroutines.Counter
 
 /-!
 # Unary registers
@@ -28,6 +30,8 @@ actions and stable under the combinator phase transitions.
 - `TM.IsReg.parked`, `TM.IsReg.hasUnaryCounter` — bridges
 - `TM.reg_zero_init_bumped` — a freshly bumped blank tape is `IsReg 0`
 -/
+
+@[expose] public section
 
 namespace Complexity
 

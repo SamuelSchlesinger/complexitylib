@@ -3,7 +3,9 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Circuits.AC0.Switching.Defs
+module
+
+public import Complexitylib.Circuits.AC0.Switching.Defs
 
 /-!
 # Simultaneous switching for finite formula collections -- definitions
@@ -11,6 +13,8 @@ import Complexitylib.Circuits.AC0.Switching.Defs
 These are finite, nonuniform collections indexed by `Fin formulaCount`; they
 are unrelated to uniform circuit-family generators.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

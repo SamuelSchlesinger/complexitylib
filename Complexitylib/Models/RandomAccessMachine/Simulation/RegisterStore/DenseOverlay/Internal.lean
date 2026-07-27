@@ -3,13 +3,17 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import
+module
+
+public import
   Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.DenseOverlay.Defs
-import Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Internal
+public import Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Internal
 
 /-!
 # Dense public input with a sparse mutable overlay -- proof internals
 -/
+
+@[expose] public section
 
 namespace Complexity
 namespace RAM

@@ -3,9 +3,11 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Circuits.AndOrNot.Defs
-import Complexitylib.Circuits.BasisHom.Defs
-import Batteries.Data.Fin.Lemmas
+module
+
+public import Complexitylib.Circuits.AndOrNot.Defs
+public import Complexitylib.Circuits.BasisHom.Defs
+public import Batteries.Data.Fin.Lemmas
 
 /-!
 # Threshold circuits -- definitions
@@ -16,6 +18,8 @@ the rest of the circuit library, per-edge negation remains free; this is the
 standard nonuniform threshold-circuit convention with NOT gates available at
 no asymptotic cost.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

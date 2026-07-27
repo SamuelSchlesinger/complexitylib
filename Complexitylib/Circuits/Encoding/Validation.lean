@@ -3,8 +3,12 @@ Copyright (c) 2025 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Circuits.Encoding.Family
-import Complexitylib.Circuits.Encoding.Machine.Core.Internal
+module
+
+public import Complexitylib.Circuits.Encoding.Family
+meta import Complexitylib.Circuits.Encoding.Family
+public import Complexitylib.Circuits.Encoding.Machine.Core.Internal
+meta import Complexitylib.Circuits.Encoding.Machine.Core.Internal
 
 /-!
 # Encoded-circuit evaluator — executable validation
@@ -17,6 +21,8 @@ also run the streaming core on representative staged inputs.
 This module is not part of the public import graph. Build it explicitly with
 `lake build --wfail Complexitylib.Circuits.Encoding.Validation`.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

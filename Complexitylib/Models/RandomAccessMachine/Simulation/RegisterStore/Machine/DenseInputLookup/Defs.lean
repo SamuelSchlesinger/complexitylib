@@ -3,12 +3,14 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Models.RandomAccessMachine.Defs
-import Complexitylib.Models.TuringMachine.Combinators.WorkBranch.Defs
-import Complexitylib.Models.TuringMachine.Combinators.ForInput.Defs
-import Complexitylib.Models.TuringMachine.Subroutines.BinaryCopy.Defs
-import Complexitylib.Models.TuringMachine.Subroutines.BinaryPred.Defs
-import Complexitylib.Models.TuringMachine.Subroutines.ResetBinaryMany.Defs
+module
+
+public import Complexitylib.Models.RandomAccessMachine.Defs
+public import Complexitylib.Models.TuringMachine.Combinators.WorkBranch.Defs
+public import Complexitylib.Models.TuringMachine.Combinators.ForInput.Defs
+public import Complexitylib.Models.TuringMachine.Subroutines.BinaryCopy.Defs
+public import Complexitylib.Models.TuringMachine.Subroutines.BinaryPred.Defs
+public import Complexitylib.Models.TuringMachine.Subroutines.ResetBinaryMany.Defs
 
 /-!
 # Dense public-input lookup -- definitions
@@ -18,6 +20,8 @@ overlay to the immutable public input on the Turing input tape. The scan keeps
 a binary countdown on a work tape. When that countdown first reaches zero,
 the preceding input symbol is copied to a canonical Boolean result tape.
 -/
+
+@[expose] public section
 
 namespace Complexity
 namespace RAM

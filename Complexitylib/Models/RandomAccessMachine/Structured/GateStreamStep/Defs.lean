@@ -3,8 +3,10 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Models.RandomAccessMachine.Structured.GateEval.Defs
-import Complexitylib.Models.RandomAccessMachine.Structured.UnaryDecode.Defs
+module
+
+public import Complexitylib.Models.RandomAccessMachine.Structured.GateEval.Defs
+public import Complexitylib.Models.RandomAccessMachine.Structured.UnaryDecode.Defs
 
 /-!
 # Structured RAM iterable serialized-gate step — definitions
@@ -16,6 +18,8 @@ region. Two fixed continuation cells lie between the evaluator's control prefix
 and the memo, so cursor state survives gate evaluation without aliasing either
 mutable wires or unread code.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

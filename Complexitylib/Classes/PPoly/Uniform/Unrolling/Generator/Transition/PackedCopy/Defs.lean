@@ -3,7 +3,9 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.PolynomialOffset.Defs
+module
+
+public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.PolynomialOffset.Defs
 
 /-!
 # Delayed packed-formula copies -- definitions
@@ -17,6 +19,8 @@ The explicit domain requires the formula-size polynomial to be positive.
 That deliberately rules out empty formula blocks independently of the old
 cursor value.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

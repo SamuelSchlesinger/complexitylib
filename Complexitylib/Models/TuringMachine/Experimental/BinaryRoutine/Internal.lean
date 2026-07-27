@@ -3,12 +3,14 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Circuits.Encoding.Machine.GateStream
-import Complexitylib.Models.TuringMachine.Experimental.BinaryRoutine.Defs
-import Complexitylib.Models.TuringMachine.Hoare.Space
-import Complexitylib.Models.TuringMachine.Subroutines.BinaryCopy
-import Complexitylib.Models.TuringMachine.Subroutines.BinaryPred
-import Complexitylib.Models.TuringMachine.Subroutines.BinarySucc
+module
+
+public import Complexitylib.Circuits.Encoding.Machine.GateStream
+public import Complexitylib.Models.TuringMachine.Experimental.BinaryRoutine.Defs
+public import Complexitylib.Models.TuringMachine.Hoare.Space
+public import Complexitylib.Models.TuringMachine.Subroutines.BinaryCopy
+public import Complexitylib.Models.TuringMachine.Subroutines.BinaryPred
+public import Complexitylib.Models.TuringMachine.Subroutines.BinarySucc
 
 /-!
 # Proof-carrying binary stream routines -- proof internals
@@ -17,6 +19,8 @@ The common proof layer converts canonical value vectors into literal tape
 frames, lifts frame-oriented arithmetic contracts through an arbitrary output
 accumulator, and composes routines across the parked `seqTM` phase boundary.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

@@ -3,8 +3,10 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.SAT.Tseitin.Machine.Defs
-import Mathlib.Data.Fintype.Sigma
+module
+
+public import Complexitylib.SAT.Tseitin.Machine.Defs
+public import Mathlib.Data.Fintype.Sigma
 
 /-!
 # Streaming controller for the CNF-to-3CNF reduction machine
@@ -29,6 +31,8 @@ This file defines the machine. Its simulation invariant and polynomial-time
 accounting live in proof-only internal modules and are exposed publicly by
 `Complexitylib.SAT.Tseitin.Machine`.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

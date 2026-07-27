@@ -3,8 +3,10 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Program.Defs
-import Complexitylib.Classes.PPoly.Uniform.Unrolling.Serializer.Initialization.Defs
+module
+
+public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Program.Defs
+public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Serializer.Initialization.Defs
 
 /-!
 # Direct-unrolling initialization generator -- definitions
@@ -14,6 +16,8 @@ binary routines. Fixed machine state and tape multiplicities are unrolled at
 definition time; input-dependent head and cell ranges use canonical binary
 loops over natural counters.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

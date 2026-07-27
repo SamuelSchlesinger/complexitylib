@@ -3,11 +3,13 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Models.TuringMachine.Hoare.Space
-import Complexitylib.Models.TuringMachine.Subroutines.BinaryRippleSub.Internal.Backward
-import Complexitylib.Models.TuringMachine.Subroutines.BinaryRippleSub.Internal.Rewind
-import Complexitylib.Models.TuringMachine.Subroutines.BinaryRippleSub.Internal.Scan
-import Complexitylib.Models.TuringMachine.Subroutines.BinarySucc
+module
+
+public import Complexitylib.Models.TuringMachine.Hoare.Space
+public import Complexitylib.Models.TuringMachine.Subroutines.BinaryRippleSub.Internal.Backward
+public import Complexitylib.Models.TuringMachine.Subroutines.BinaryRippleSub.Internal.Rewind
+public import Complexitylib.Models.TuringMachine.Subroutines.BinaryRippleSub.Internal.Scan
+public import Complexitylib.Models.TuringMachine.Subroutines.BinarySucc
 
 /-!
 # Linear-time canonical binary subtraction -- composed semantics
@@ -19,11 +21,14 @@ preserves the external tape frame literally, and carries explicit time and
 all-prefix auxiliary-space bounds.
 -/
 
+@[expose] public section
+
 namespace Complexity
 
 namespace TM
 
-private def binaryRippleSubCorePost {n : ℕ}
+@[nolint docBlame]
+def binaryRippleSubCorePost {n : ℕ}
     (lhsIdx rhsIdx resultIdx : Fin n) (lhs rhs : ℕ)
     (inp₀ : Tape) (work₀ : Fin n → Tape) (out₀ : Tape) : TapePred n :=
   fun inp work out =>
@@ -39,7 +44,8 @@ private def binaryRippleSubCorePost {n : ℕ}
       work i = work₀ i) ∧
     out = out₀
 
-private def binaryRippleSubPost {n : ℕ}
+@[nolint docBlame]
+def binaryRippleSubPost {n : ℕ}
     (lhsIdx rhsIdx resultIdx : Fin n) (lhs rhs : ℕ)
     (inp₀ : Tape) (work₀ : Fin n → Tape) (out₀ : Tape) : TapePred n :=
   fun inp work out =>

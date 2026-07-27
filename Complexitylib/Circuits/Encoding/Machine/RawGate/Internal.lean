@@ -3,9 +3,11 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Circuits.Encoding.Machine.NatCode
-import Complexitylib.Circuits.Encoding.Machine.RawGate.Defs
-import Complexitylib.Models.TuringMachine.Hoare.Space
+module
+
+public import Complexitylib.Circuits.Encoding.Machine.NatCode
+public import Complexitylib.Circuits.Encoding.Machine.RawGate.Defs
+public import Complexitylib.Models.TuringMachine.Hoare.Space
 
 /-!
 # Machine emission of raw circuit gates — proof internals
@@ -14,6 +16,8 @@ This module composes the fixed header emitter with two terminated-unary
 emitters.  Both dynamic reference tapes and the reusable zero scratch are
 restored literally at the endpoint.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

@@ -3,9 +3,11 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Models.TuringMachine.Subroutines.BinaryRippleSub.Defs
-import Complexitylib.Models.TuringMachine.Subroutines.BinaryRippleSub.Internal.Sem
-import Complexitylib.Models.TuringMachine.Subroutines.BinaryRippleSub.Internal.Out
+module
+
+public import Complexitylib.Models.TuringMachine.Subroutines.BinaryRippleSub.Defs
+public import Complexitylib.Models.TuringMachine.Subroutines.BinaryRippleSub.Internal.Sem
+public import Complexitylib.Models.TuringMachine.Subroutines.BinaryRippleSub.Internal.Out
 
 /-!
 # Linear-time canonical binary subtraction
@@ -16,6 +18,8 @@ difference to a fresh zero result tape, restores every owned head to cell one,
 and preserves the complete external tape frame. Its running time is linear in
 the operand bit widths.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

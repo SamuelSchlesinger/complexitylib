@@ -3,7 +3,9 @@ Copyright (c) 2025 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.SAT.Semantics
+module
+
+public import Complexitylib.SAT.Semantics
 
 /-!
 # Resolution
@@ -22,6 +24,8 @@ resolvent — is the semantic core underlying resolution proof systems.
 - `CNF.refutation_sound` — **soundness of resolution**: a derivation of the empty
   clause proves the formula unsatisfiable
 -/
+
+@[expose] public section
 
 namespace Complexity
 

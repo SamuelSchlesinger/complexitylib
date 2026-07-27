@@ -3,7 +3,9 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Classes.PPoly.Uniform.Unrolling.Serializer.Initialization.Defs
+module
+
+public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Serializer.Initialization.Defs
 
 /-!
 # Numeric transition-formula schedules
@@ -19,6 +21,8 @@ then their conjunction. A predecessor-head member occupies one gate: either a
 head-wire copy or false. Both streams finish with the existing numeric
 right-fold disjunction suffix.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

@@ -3,7 +3,9 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.SAT.Tseitin.Machine.Internal.ControllerLift
+module
+
+public import Complexitylib.SAT.Tseitin.Machine.Internal.ControllerLift
 
 /-!
 # Concrete read paths for the Tseitin streaming controller
@@ -24,6 +26,8 @@ semantics remain separate layers.
 - `validEmitterTM_read_blank_step_internal`
 - `validEmitterTM_read_blank_reachesIn_internal`
 -/
+
+@[expose] public section
 
 namespace Complexity
 

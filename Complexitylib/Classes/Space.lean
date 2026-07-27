@@ -3,8 +3,10 @@ Copyright (c) 2025 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Models.TuringMachine
-import Complexitylib.Asymptotics
+module
+
+public import Complexitylib.Models.TuringMachine
+public import Complexitylib.Asymptotics
 
 /-!
 # Base space complexity classes
@@ -18,6 +20,8 @@ first trailing blank are free, while farther input-head travel is charged. The
 output verdict cell is free, while farther two-way output-head travel is also
 charged. This prevents either infinite named tape from becoming hidden workspace.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

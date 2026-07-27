@@ -3,15 +3,17 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Models.TuringMachine.Combinators.Internal.Seq
-import Complexitylib.Models.TuringMachine.Hoare.Space
-import Complexitylib.Models.TuringMachine.SpaceTime.Internal.Reachability
-import Complexitylib.Models.TuringMachine.Subroutines.BinaryAdd
-import Complexitylib.Models.TuringMachine.Subroutines.BinaryFor.Internal.Control
-import Complexitylib.Models.TuringMachine.Subroutines.BinaryFor
-import Complexitylib.Models.TuringMachine.Subroutines.BinaryMulAdd.Defs
-import Complexitylib.Models.TuringMachine.Subroutines.BinarySucc
-import Complexitylib.Models.TuringMachine.Subroutines.ClearWork
+module
+
+public import Complexitylib.Models.TuringMachine.Combinators.Internal.Seq
+public import Complexitylib.Models.TuringMachine.Hoare.Space
+public import Complexitylib.Models.TuringMachine.SpaceTime.Internal.Reachability
+public import Complexitylib.Models.TuringMachine.Subroutines.BinaryAdd
+public import Complexitylib.Models.TuringMachine.Subroutines.BinaryFor.Internal.Control
+public import Complexitylib.Models.TuringMachine.Subroutines.BinaryFor
+public import Complexitylib.Models.TuringMachine.Subroutines.BinaryMulAdd.Defs
+public import Complexitylib.Models.TuringMachine.Subroutines.BinarySucc
+public import Complexitylib.Models.TuringMachine.Subroutines.ClearWork
 
 /-!
 # Canonical binary multiply-add — proof internals
@@ -24,30 +26,33 @@ formula. Space is proved compositionally for each repeated-addition iteration,
 so it depends on binary widths rather than on the number of loop steps.
 -/
 
+@[expose] public section
+
 namespace Complexity
 
 namespace TM
 
 variable {n : ℕ}
 
-private def binaryMulAddNatTape (value : ℕ) : Tape :=
+@[nolint docBlame]
+def binaryMulAddNatTape (value : ℕ) : Tape :=
   (Tape.init (value.bits.map Γ.ofBool)).move Dir3.right
 
-private theorem binaryMulAddNatTape_hasBinaryNat (value : ℕ) :
+theorem binaryMulAddNatTape_hasBinaryNat (value : ℕ) :
     (binaryMulAddNatTape value).HasBinaryNat value :=
   Tape.init_move_right_hasBinaryNat value
 
-private theorem binaryMulAddHasBinaryNat_parked {t : Tape} {value : ℕ}
+theorem binaryMulAddHasBinaryNat_parked {t : Tape} {value : ℕ}
     (h : t.HasBinaryNat value) : Parked t := by
   refine ⟨by rw [h.2.1], ?_⟩
   exact Tape.HasBinaryContent.cells_ne_start h.2.2
 
-private theorem binaryMulAddNatTape_parked (value : ℕ) :
+theorem binaryMulAddNatTape_parked (value : ℕ) :
     Parked (binaryMulAddNatTape value) :=
   binaryMulAddHasBinaryNat_parked (binaryMulAddNatTape_hasBinaryNat value)
 
 /-- Work tapes after `current` completed outer iterations. -/
-private def binaryMulAddWorkAt (work : Fin n → Tape)
+def binaryMulAddWorkAt (work : Fin n → Tape)
     (accIdx mulCounterIdx : Fin n)
     (leftValue accValue current : ℕ) : Fin n → Tape :=
   Function.update
@@ -57,14 +62,14 @@ private def binaryMulAddWorkAt (work : Fin n → Tape)
 
 /-- Work tapes after the addition body but before incrementing the outer
 counter in iteration `current`. -/
-private def binaryMulAddMidWorkAt (work : Fin n → Tape)
+def binaryMulAddMidWorkAt (work : Fin n → Tape)
     (accIdx mulCounterIdx : Fin n)
     (leftValue accValue current : ℕ) : Fin n → Tape :=
   Function.update
     (binaryMulAddWorkAt work accIdx mulCounterIdx leftValue accValue current)
     accIdx (binaryMulAddNatTape (accValue + leftValue * (current + 1)))
 
-private theorem binaryMulAddWorkAt_counter
+theorem binaryMulAddWorkAt_counter
     (work : Fin n → Tape) (accIdx mulCounterIdx : Fin n)
     (leftValue accValue current : ℕ) :
     binaryMulAddWorkAt work accIdx mulCounterIdx leftValue accValue current
@@ -72,7 +77,7 @@ private theorem binaryMulAddWorkAt_counter
       binaryMulAddNatTape current := by
   simp [binaryMulAddWorkAt]
 
-private theorem binaryMulAddWorkAt_acc
+theorem binaryMulAddWorkAt_acc
     (work : Fin n → Tape) {accIdx mulCounterIdx : Fin n}
     (hne : accIdx ≠ mulCounterIdx) (leftValue accValue current : ℕ) :
     binaryMulAddWorkAt work accIdx mulCounterIdx leftValue accValue current
@@ -80,7 +85,7 @@ private theorem binaryMulAddWorkAt_acc
       binaryMulAddNatTape (accValue + leftValue * current) := by
   simp [binaryMulAddWorkAt, hne]
 
-private theorem binaryMulAddWorkAt_other
+theorem binaryMulAddWorkAt_other
     (work : Fin n → Tape) {accIdx mulCounterIdx i : Fin n}
     (hia : i ≠ accIdx) (him : i ≠ mulCounterIdx)
     (leftValue accValue current : ℕ) :
@@ -88,7 +93,7 @@ private theorem binaryMulAddWorkAt_other
       work i := by
   simp [binaryMulAddWorkAt, hia, him]
 
-private theorem binaryMulAddWorkAt_counter_hasBinaryNat
+theorem binaryMulAddWorkAt_counter_hasBinaryNat
     (work : Fin n → Tape) (accIdx mulCounterIdx : Fin n)
     (leftValue accValue current : ℕ) :
     Tape.HasBinaryNat
@@ -97,7 +102,7 @@ private theorem binaryMulAddWorkAt_counter_hasBinaryNat
   rw [binaryMulAddWorkAt_counter]
   exact binaryMulAddNatTape_hasBinaryNat current
 
-private theorem binaryMulAddWorkAt_acc_hasBinaryNat
+theorem binaryMulAddWorkAt_acc_hasBinaryNat
     (work : Fin n → Tape) {accIdx mulCounterIdx : Fin n}
     (hne : accIdx ≠ mulCounterIdx) (leftValue accValue current : ℕ) :
     Tape.HasBinaryNat
@@ -106,7 +111,7 @@ private theorem binaryMulAddWorkAt_acc_hasBinaryNat
   rw [binaryMulAddWorkAt_acc work hne]
   exact binaryMulAddNatTape_hasBinaryNat _
 
-private theorem binaryMulAddWorkAt_parked
+theorem binaryMulAddWorkAt_parked
     (work : Fin n → Tape) (accIdx mulCounterIdx : Fin n)
     (leftValue accValue current : ℕ) (hwork : ∀ i, Parked (work i)) :
     ∀ i, Parked
@@ -125,7 +130,7 @@ private theorem binaryMulAddWorkAt_parked
     · rw [binaryMulAddWorkAt_other work hia him]
       exact hwork i
 
-private theorem binaryMulAddMidWorkAt_parked
+theorem binaryMulAddMidWorkAt_parked
     (work : Fin n → Tape) (accIdx mulCounterIdx : Fin n)
     (leftValue accValue current : ℕ) (hwork : ∀ i, Parked (work i)) :
     ∀ i, Parked
@@ -141,7 +146,7 @@ private theorem binaryMulAddMidWorkAt_parked
     exact binaryMulAddWorkAt_parked work accIdx mulCounterIdx leftValue
       accValue current hwork i
 
-private theorem binaryMulAddMidWorkAt_counter_hasBinaryNat
+theorem binaryMulAddMidWorkAt_counter_hasBinaryNat
     (work : Fin n → Tape) {accIdx mulCounterIdx : Fin n}
     (hne : accIdx ≠ mulCounterIdx) (leftValue accValue current : ℕ) :
     Tape.HasBinaryNat
@@ -151,7 +156,7 @@ private theorem binaryMulAddMidWorkAt_counter_hasBinaryNat
   exact binaryMulAddWorkAt_counter_hasBinaryNat work accIdx mulCounterIdx
     leftValue accValue current
 
-private theorem binaryMulAddBodyUpdate_eq
+theorem binaryMulAddBodyUpdate_eq
     (work : Fin n → Tape) (accIdx mulCounterIdx : Fin n)
     (leftValue accValue current : ℕ) :
     Function.update
@@ -165,7 +170,7 @@ private theorem binaryMulAddBodyUpdate_eq
   congr 2
   simp [Nat.mul_succ, Nat.add_assoc]
 
-private theorem binaryMulAddCounterUpdate_eq
+theorem binaryMulAddCounterUpdate_eq
     (work : Fin n → Tape) {accIdx mulCounterIdx : Fin n}
     (hne : accIdx ≠ mulCounterIdx) (leftValue accValue current : ℕ) :
     Function.update
@@ -183,7 +188,7 @@ private theorem binaryMulAddCounterUpdate_eq
       simp [binaryMulAddMidWorkAt, binaryMulAddWorkAt, hne]
     · simp [binaryMulAddMidWorkAt, binaryMulAddWorkAt, him, hia]
 
-private theorem binaryMulAddInitialWork_parked
+theorem binaryMulAddInitialWork_parked
     (leftIdx rightIdx accIdx mulCounterIdx addCounterIdx : Fin n)
     (work : Fin n → Tape) {leftValue rightValue accValue : ℕ}
     (hleft : (work leftIdx).HasBinaryNat leftValue)
@@ -207,7 +212,7 @@ private theorem binaryMulAddInitialWork_parked
           · subst i; exact binaryMulAddHasBinaryNat_parked haddCounter
           · exact hother i hil hir hia him hic
 
-private theorem binaryMulAddWorkAt_zero_eq
+theorem binaryMulAddWorkAt_zero_eq
     (work : Fin n → Tape) {accIdx mulCounterIdx : Fin n}
     (hne : accIdx ≠ mulCounterIdx) (leftValue accValue : ℕ)
     (hacc : (work accIdx).HasBinaryNat accValue)
@@ -225,7 +230,7 @@ private theorem binaryMulAddWorkAt_zero_eq
       simpa [binaryMulAddNatTape] using hacc.eq_init_move_right.symm
     · exact binaryMulAddWorkAt_other work hia him leftValue accValue 0
 
-private theorem binaryMulAddWorkAt_clear_eq
+theorem binaryMulAddWorkAt_clear_eq
     (work : Fin n → Tape) {accIdx mulCounterIdx : Fin n}
     (hne : accIdx ≠ mulCounterIdx) (leftValue rightValue accValue : ℕ)
     (hcounter : (work mulCounterIdx).HasBinaryNat 0) :
@@ -245,11 +250,13 @@ private theorem binaryMulAddWorkAt_clear_eq
       simp [binaryMulAddWorkAt, hne]
     · simp [binaryMulAddWorkAt, him, hia]
 
-private abbrev binaryMulAddFramePred
+@[nolint docBlame]
+abbrev binaryMulAddFramePred
     (inp₀ : Tape) (work₀ : Fin n → Tape) (out₀ : Tape) : TapePred n :=
   fun inp work out => inp = inp₀ ∧ work = work₀ ∧ out = out₀
 
-private def binaryMulAddScanCfg
+@[nolint docBlame]
+def binaryMulAddScanCfg
     (leftIdx rightIdx accIdx mulCounterIdx addCounterIdx : Fin n)
     (inp : Tape) (work : Fin n → Tape) (out : Tape)
     (leftValue accValue current : ℕ) :
@@ -261,7 +268,8 @@ private def binaryMulAddScanCfg
       current
     output := out }
 
-private def binaryMulAddIterationStartCfg
+@[nolint docBlame]
+def binaryMulAddIterationStartCfg
     (leftIdx rightIdx accIdx mulCounterIdx addCounterIdx : Fin n)
     (inp : Tape) (work : Fin n → Tape) (out : Tape)
     (leftValue accValue current : ℕ) :
@@ -275,7 +283,8 @@ private def binaryMulAddIterationStartCfg
       current
     output := out }
 
-private def binaryMulAddIterationDoneCfg
+@[nolint docBlame]
+def binaryMulAddIterationDoneCfg
     (leftIdx rightIdx accIdx mulCounterIdx addCounterIdx : Fin n)
     (inp : Tape) (work : Fin n → Tape) (out : Tape)
     (leftValue accValue current : ℕ) :
@@ -289,7 +298,8 @@ private def binaryMulAddIterationDoneCfg
       (current + 1)
     output := out }
 
-private def binaryMulAddDoneCfg
+@[nolint docBlame]
+def binaryMulAddDoneCfg
     (leftIdx rightIdx accIdx mulCounterIdx addCounterIdx : Fin n)
     (inp : Tape) (work : Fin n → Tape) (out : Tape)
     (leftValue rightValue accValue : ℕ) :
@@ -301,7 +311,7 @@ private def binaryMulAddDoneCfg
       rightValue
     output := out }
 
-private theorem binaryMulAddBody_exists
+theorem binaryMulAddBody_exists
     (leftIdx rightIdx accIdx mulCounterIdx addCounterIdx : Fin n)
     (hdistinct : BinaryMulAddDistinct leftIdx rightIdx accIdx mulCounterIdx
       addCounterIdx)
@@ -367,7 +377,8 @@ private theorem binaryMulAddBody_exists
     Cfg.ext hhalt hinput hworkEq' houtput
   exact ⟨time, htime, by simpa [hc'] using hreach⟩
 
-private noncomputable def binaryMulAddBodyActualTime
+@[nolint docBlame]
+noncomputable def binaryMulAddBodyActualTime
     (leftIdx rightIdx accIdx mulCounterIdx addCounterIdx : Fin n)
     (hdistinct : BinaryMulAddDistinct leftIdx rightIdx accIdx mulCounterIdx
       addCounterIdx)
@@ -381,7 +392,7 @@ private noncomputable def binaryMulAddBodyActualTime
     mulCounterIdx addCounterIdx hdistinct leftValue accValue current inp work
     out hleft haddCounter hinp hwork hout)
 
-private theorem binaryMulAddBodyActualTime_spec
+theorem binaryMulAddBodyActualTime_spec
     (leftIdx rightIdx accIdx mulCounterIdx addCounterIdx : Fin n)
     (hdistinct : BinaryMulAddDistinct leftIdx rightIdx accIdx mulCounterIdx
       addCounterIdx)
@@ -410,7 +421,8 @@ private theorem binaryMulAddBodyActualTime_spec
     mulCounterIdx addCounterIdx hdistinct leftValue accValue current inp work
     out hleft haddCounter hinp hwork hout)
 
-private noncomputable def binaryMulAddBodyTimeFn
+@[nolint docBlame]
+noncomputable def binaryMulAddBodyTimeFn
     (leftIdx rightIdx accIdx mulCounterIdx addCounterIdx : Fin n)
     (hdistinct : BinaryMulAddDistinct leftIdx rightIdx accIdx mulCounterIdx
       addCounterIdx)
@@ -424,7 +436,7 @@ private noncomputable def binaryMulAddBodyTimeFn
     mulCounterIdx addCounterIdx hdistinct leftValue accValue current inp work
     out hleft haddCounter hinp hwork hout
 
-private theorem binaryMulAddSuccCanonical_reachesIn
+theorem binaryMulAddSuccCanonical_reachesIn
     (idx : Fin n) (value : ℕ)
     (inp : Tape) (work : Fin n → Tape) (out : Tape)
     (hvalue : (work idx).HasBinaryNat value)
@@ -462,7 +474,7 @@ private theorem binaryMulAddSuccCanonical_reachesIn
     Cfg.ext hhalt hinput hworkEq houtput
   simpa [hc'] using hreach
 
-private theorem binaryMulAddOuterCounter_reachesIn
+theorem binaryMulAddOuterCounter_reachesIn
     (accIdx mulCounterIdx : Fin n) (hne : accIdx ≠ mulCounterIdx)
     (leftValue accValue current : ℕ)
     (inp : Tape) (work : Fin n → Tape) (out : Tape)
@@ -491,7 +503,7 @@ private theorem binaryMulAddOuterCounter_reachesIn
   rw [binaryMulAddCounterUpdate_eq work hne leftValue accValue current] at hrun
   exact hrun
 
-private theorem binaryMulAddIteration_reachesIn
+theorem binaryMulAddIteration_reachesIn
     (leftIdx rightIdx accIdx mulCounterIdx addCounterIdx : Fin n)
     (hdistinct : BinaryMulAddDistinct leftIdx rightIdx accIdx mulCounterIdx
       addCounterIdx)
@@ -554,7 +566,7 @@ private theorem binaryMulAddIteration_reachesIn
     binaryForIterationTime, binaryForIterationTM, binaryForIterationWrap,
     phase1Wrap, phase2Wrap] using hlift
 
-private theorem binaryMulAddLoopback_step
+theorem binaryMulAddLoopback_step
     (leftIdx rightIdx accIdx mulCounterIdx addCounterIdx : Fin n)
     (leftValue accValue current : ℕ)
     (inp : Tape) (work : Fin n → Tape) (out : Tape)
@@ -580,7 +592,7 @@ private theorem binaryMulAddLoopback_step
   simpa [body, c, binaryMulAddLoopTM, binaryMulAddIterationDoneCfg,
     binaryMulAddScanCfg, binaryForIterationWrap] using hstep
 
-private theorem binaryMulAddTest_reachesIn
+theorem binaryMulAddTest_reachesIn
     (leftIdx rightIdx accIdx mulCounterIdx addCounterIdx : Fin n)
     (hdistinct : BinaryMulAddDistinct leftIdx rightIdx accIdx mulCounterIdx
       addCounterIdx)
@@ -617,7 +629,7 @@ private theorem binaryMulAddTest_reachesIn
   simpa [binaryMulAddLoopTM, binaryMulAddScanCfg,
     binaryMulAddIterationStartCfg] using hrun
 
-private theorem binaryMulAddDone_reachesIn
+theorem binaryMulAddDone_reachesIn
     (leftIdx rightIdx accIdx mulCounterIdx addCounterIdx : Fin n)
     (hdistinct : BinaryMulAddDistinct leftIdx rightIdx accIdx mulCounterIdx
       addCounterIdx)
@@ -693,7 +705,7 @@ private noncomputable def binaryMulAddLoopSpec
     addCounterIdx hdistinct rightValue leftValue accValue inp work out hright
     hinp hwork hout
 
-private theorem binaryForLoopTime_mono
+theorem binaryForLoopTime_mono
     (bodyTime₁ bodyTime₂ : ℕ → ℕ)
     (limit value count : ℕ)
     (hle : ∀ current, bodyTime₁ current ≤ bodyTime₂ current) :
@@ -708,7 +720,7 @@ private theorem binaryForLoopTime_mono
       simp only [binaryForIterationTime] at ⊢
       omega
 
-private theorem binaryMulAddLoopTM_hoareTime
+theorem binaryMulAddLoopTM_hoareTime
     (leftIdx rightIdx accIdx mulCounterIdx addCounterIdx : Fin n)
     (hdistinct : BinaryMulAddDistinct leftIdx rightIdx accIdx mulCounterIdx
       addCounterIdx)
@@ -781,7 +793,7 @@ private theorem binaryMulAddLoopTM_hoareTime
   simpa [spec, binaryMulAddLoopSpec, binaryMulAddDoneCfg, bodyTime,
     binaryMulAddLoopTM, binaryForTM] using hrun
 
-private theorem binaryMulAddWorkAt_cfg_withinAuxSpace
+theorem binaryMulAddWorkAt_cfg_withinAuxSpace
     {Q : Type} (state : Q) (inp : Tape) (work : Fin n → Tape)
     (out : Tape) (accIdx mulCounterIdx : Fin n)
     (leftValue accValue current inputLength initialSpace : ℕ)
@@ -815,7 +827,7 @@ private theorem binaryMulAddWorkAt_cfg_withinAuxSpace
         exact hworkSpace i
   · exact hinputSpace
 
-private theorem binaryMulAddMidWorkAt_cfg_withinAuxSpace
+theorem binaryMulAddMidWorkAt_cfg_withinAuxSpace
     {Q : Type} (state : Q) (inp : Tape) (work : Fin n → Tape)
     (out : Tape) (accIdx mulCounterIdx : Fin n)
     (leftValue accValue current inputLength initialSpace : ℕ)
@@ -849,7 +861,7 @@ private theorem binaryMulAddMidWorkAt_cfg_withinAuxSpace
         exact hworkSpace i
   · exact hinputSpace
 
-private theorem binaryMulAddBody_hoareTimeSpace
+theorem binaryMulAddBody_hoareTimeSpace
     (leftIdx rightIdx accIdx mulCounterIdx addCounterIdx : Fin n)
     (hdistinct : BinaryMulAddDistinct leftIdx rightIdx accIdx mulCounterIdx
       addCounterIdx)
@@ -910,7 +922,7 @@ private theorem binaryMulAddBody_hoareTimeSpace
   exact binaryMulAddBodyUpdate_eq work accIdx mulCounterIdx leftValue accValue
     current
 
-private theorem binaryMulAddCounter_hoareTimeSpace
+theorem binaryMulAddCounter_hoareTimeSpace
     (accIdx mulCounterIdx : Fin n) (hne : accIdx ≠ mulCounterIdx)
     (leftValue accValue current inputLength initialSpace : ℕ)
     (inp : Tape) (work : Fin n → Tape) (out : Tape)
@@ -972,7 +984,7 @@ private theorem binaryMulAddCounter_hoareTimeSpace
   rw [hworkEq,
     binaryMulAddCounterUpdate_eq work hne leftValue accValue current]
 
-private theorem binaryMulAddIteration_hoareTimeSpace
+theorem binaryMulAddIteration_hoareTimeSpace
     (leftIdx rightIdx accIdx mulCounterIdx addCounterIdx : Fin n)
     (hdistinct : BinaryMulAddDistinct leftIdx rightIdx accIdx mulCounterIdx
       addCounterIdx)
@@ -1023,7 +1035,7 @@ private theorem binaryMulAddIteration_hoareTimeSpace
     (by simp [binaryForIterationTime]) le_rfl ?_
   simp
 
-private theorem binaryMulAddIterationInner_reachesIn
+theorem binaryMulAddIterationInner_reachesIn
     (leftIdx rightIdx accIdx mulCounterIdx addCounterIdx : Fin n)
     (hdistinct : BinaryMulAddDistinct leftIdx rightIdx accIdx mulCounterIdx
       addCounterIdx)
@@ -1093,7 +1105,7 @@ private theorem binaryMulAddIterationInner_reachesIn
   simpa [body, succ, binaryMulAddBodyTimeFn, binaryForIterationTime,
     binaryForIterationTM, phase1Wrap, phase2Wrap] using hseq
 
-private theorem binaryAddSpace_mono_destination
+theorem binaryAddSpace_mono_destination
     (initialSpace leftValue dst₁ dst₂ : ℕ) (hle : dst₁ ≤ dst₂) :
     binaryAddSpace initialSpace leftValue dst₁ ≤
       binaryAddSpace initialSpace leftValue dst₂ := by
@@ -1216,7 +1228,7 @@ private noncomputable def binaryMulAddLoopSpaceSpec
     rw [hc]
     simpa [binaryForIterationWrap] using hd.mono le_rfl hspace
 
-private theorem binaryMulAddLoopTM_hoareSpace
+theorem binaryMulAddLoopTM_hoareSpace
     (leftIdx rightIdx accIdx mulCounterIdx addCounterIdx : Fin n)
     (hdistinct : BinaryMulAddDistinct leftIdx rightIdx accIdx mulCounterIdx
       addCounterIdx)
@@ -1283,7 +1295,7 @@ private theorem binaryMulAddLoopTM_hoareSpace
   exact spaceSpec.prefix_withinAuxSpace rightValue 0 time c (by omega)
     (by simpa [spaceSpec, spec] using hreachSpec) htime
 
-private theorem binaryMulAddLoopTM_hoareTimeSpace
+theorem binaryMulAddLoopTM_hoareTimeSpace
     (leftIdx rightIdx accIdx mulCounterIdx addCounterIdx : Fin n)
     (hdistinct : BinaryMulAddDistinct leftIdx rightIdx accIdx mulCounterIdx
       addCounterIdx)
@@ -1316,7 +1328,7 @@ private theorem binaryMulAddLoopTM_hoareTimeSpace
         initialSpace inp₀ work₀ out₀ hleft hright hacc hmulCounter
         haddCounter hinp hother hout hworkSpace hinputSpace)
 
-private theorem binaryMulAddFrame_transition
+theorem binaryMulAddFrame_transition
     (inp₀ : Tape) (work₀ : Fin n → Tape) (out₀ : Tape)
     (hinp : Parked inp₀) (hwork : ∀ i, Parked (work₀ i))
     (hout : Parked out₀) :
@@ -1329,7 +1341,7 @@ private theorem binaryMulAddFrame_transition
   funext i
   exact (hwork i).transitionTape_eq_self
 
-private theorem clearBinaryMulAddCounter_hoareTime
+theorem clearBinaryMulAddCounter_hoareTime
     (accIdx mulCounterIdx : Fin n) (hne : accIdx ≠ mulCounterIdx)
     (leftValue rightValue accValue : ℕ)
     (inp₀ : Tape) (work₀ : Fin n → Tape) (out₀ : Tape)
@@ -1365,7 +1377,7 @@ private theorem clearBinaryMulAddCounter_hoareTime
       binaryMulAddWorkAt_clear_eq work₀ hne leftValue rightValue accValue
         hmulCounter)
 
-private theorem clearBinaryMulAddCounter_hoareTimeSpace
+theorem clearBinaryMulAddCounter_hoareTimeSpace
     (accIdx mulCounterIdx : Fin n) (hne : accIdx ≠ mulCounterIdx)
     (leftValue rightValue accValue inputLength initialSpace : ℕ)
     (inp₀ : Tape) (work₀ : Fin n → Tape) (out₀ : Tape)

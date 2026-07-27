@@ -3,8 +3,10 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Classes.PPoly
-import Complexitylib.Classes.Randomized.PPoly.Defs
+module
+
+public import Complexitylib.Classes.PPoly
+public import Complexitylib.Classes.Randomized.PPoly.Defs
 
 /-!
 # Nonuniform derandomization — proof internals
@@ -13,6 +15,8 @@ This module proves correctness and polynomial size for the circuit family that
 hardwires a uniformly correct amplified seed at each input length. Public
 statements are exposed by `Complexitylib.Classes.Randomized.PPoly`.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

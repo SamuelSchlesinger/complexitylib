@@ -3,11 +3,13 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Circuits.Restriction
-import Mathlib.Data.Fintype.Card
-import Mathlib.Data.Fintype.Pi
-import Mathlib.Data.Fintype.Prod
-import Mathlib.Data.Fintype.Sum
+module
+
+public import Complexitylib.Circuits.Restriction
+public import Mathlib.Data.Fintype.Card
+public import Mathlib.Data.Fintype.Pi
+public import Mathlib.Data.Fintype.Prod
+public import Mathlib.Data.Fintype.Sum
 
 /-!
 # Finite random restrictions
@@ -24,6 +26,8 @@ probability `q / (2 * q + 1)`. Retaining the copy label makes the distribution
 uniform on an honest finite type; no measure-theoretic or rational-probability
 convention is hidden in later counting arguments.
 -/
+
+@[expose] public section
 
 namespace Complexity
 namespace RandomRestriction

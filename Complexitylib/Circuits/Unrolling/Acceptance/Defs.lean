@@ -3,8 +3,10 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Circuits.BitString
-import Complexitylib.Circuits.Unrolling.Trace.Defs
+module
+
+public import Complexitylib.Circuits.BitString
+public import Complexitylib.Circuits.Unrolling.Trace.Defs
 
 /-!
 # Acceptance gates for bounded Turing-machine traces
@@ -15,6 +17,8 @@ machine is halted and that output cell one contains `1`. The appended gate is
 therefore both the raw circuit's designated output and the acceptance bit used
 when the raw circuit is reconstructed as a typed single-output circuit.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

@@ -3,11 +3,13 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Models.TuringMachine.Combinators.ForBinaryWork.Defs
-import Complexitylib.Models.TuringMachine.Combinators.WorkSymbolBranch.Defs
-import Complexitylib.Models.TuringMachine.Subroutines.BinaryCopy.Defs
-import Complexitylib.Models.TuringMachine.Subroutines.ResetBinaryMany.Defs
-import Complexitylib.Mathlib.NatBits
+module
+
+public import Complexitylib.Models.TuringMachine.Combinators.ForBinaryWork.Defs
+public import Complexitylib.Models.TuringMachine.Combinators.WorkSymbolBranch.Defs
+public import Complexitylib.Models.TuringMachine.Subroutines.BinaryCopy.Defs
+public import Complexitylib.Models.TuringMachine.Subroutines.ResetBinaryMany.Defs
+public import Complexitylib.Mathlib.NatBits
 
 /-!
 # Width-driven binary shift-and-add multiplication -- definitions
@@ -17,6 +19,8 @@ least-significant-bit-first shift-and-add machine. The multiplicands are
 preserved, the accumulator receives their product, and three scratch tapes are
 returned to canonical zero.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

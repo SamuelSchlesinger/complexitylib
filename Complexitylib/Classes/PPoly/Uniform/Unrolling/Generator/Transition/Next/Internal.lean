@@ -3,17 +3,21 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.PolynomialOffset
-import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Primitive
-import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Transition.Next.Defs
-import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Transition.Effect
-import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Transition.MovedHead
-import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Transition.WrittenCell
-import Complexitylib.Classes.PPoly.Uniform.Unrolling.Serializer.Transition.Polynomial
+module
+
+public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.PolynomialOffset
+public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Primitive
+public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Transition.Next.Defs
+public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Transition.Effect
+public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Transition.MovedHead
+public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Transition.WrittenCell
+public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Serializer.Transition.Polynomial
 
 /-!
 # Direct-unrolling next-atom generator -- proof internals
 -/
+
+@[expose] public section
 
 namespace Complexity
 
@@ -23,18 +27,19 @@ namespace Serializer
 
 namespace DirectGenerator
 
-private def advanceAvailableValues (values : BinaryValues WorkCount)
+@[nolint docBlame]
+def advanceAvailableValues (values : BinaryValues WorkCount)
     (amount : ℕ) :
     BinaryValues WorkCount :=
   Function.update values Work.available (values Work.available + amount)
 
-@[simp] private theorem advanceAvailableValues_zero
+@[simp] theorem advanceAvailableValues_zero
     (values : BinaryValues WorkCount) :
     advanceAvailableValues values 0 = values := by
   funext i
   simp [advanceAvailableValues]
 
-private theorem advanceAvailableValues_le
+theorem advanceAvailableValues_le
     {values : ℕ → BinaryValues WorkCount} {width amount : ℕ → ℕ}
     (hvalues : ∀ inputLength index,
       values inputLength index ≤ width inputLength)
@@ -49,7 +54,7 @@ private theorem advanceAvailableValues_le
     (hvalues inputLength)
   exact havailable inputLength
 
-private theorem seqListEight_requires
+theorem seqListEight_requires
     (routine₀ routine₁ routine₂ routine₃ routine₄ routine₅ routine₆
       routine₇ : BinaryRoutine n) (values : BinaryValues n) :
     (BinaryRoutine.seqList
@@ -82,7 +87,7 @@ private theorem seqListEight_requires
                   (routine₁.effect (routine₀.effect values))))))) ∧
       True := Iff.rfl
 
-private theorem HaltedOrFormulaClean.advanceAvailable
+theorem HaltedOrFormulaClean.advanceAvailable
     (values : BinaryValues WorkCount) (hclean : HaltedOrFormulaClean values)
     (amount : ℕ) :
     HaltedOrFormulaClean (advanceAvailableValues values amount) := by
@@ -95,7 +100,7 @@ private theorem HaltedOrFormulaClean.advanceAvailable
       Work.multiplyCounter, Work.addCounter, Work.loop₃, Work.temporary₃,
       Work.polynomialScratch]
 
-private theorem CaseFormulaClean.advanceAvailable
+theorem CaseFormulaClean.advanceAvailable
     (values : BinaryValues WorkCount) (hclean : CaseFormulaClean values)
     (amount : ℕ) :
     CaseFormulaClean (advanceAvailableValues values amount) :=
@@ -134,7 +139,7 @@ private theorem CaseFormulaClean.advanceAvailable
     symbolIndex := by simpa [advanceAvailableValues, Work.available,
       Work.symbolIndex] using hclean.symbolIndex }
 
-private theorem MovedHeadFormulaClean.advanceAvailable
+theorem MovedHeadFormulaClean.advanceAvailable
     (values : BinaryValues WorkCount) (hclean : MovedHeadFormulaClean values)
     (amount : ℕ) :
     MovedHeadFormulaClean (advanceAvailableValues values amount) := by
@@ -166,7 +171,7 @@ private theorem MovedHeadFormulaClean.advanceAvailable
   · simpa [advanceAvailableValues, Work.available, Work.atomKind] using
       hclean.atomKind
 
-private theorem WrittenCellFormulaClean.advanceAvailable
+theorem WrittenCellFormulaClean.advanceAvailable
     (values : BinaryValues WorkCount)
     (hclean : WrittenCellFormulaClean values) (amount : ℕ) :
     WrittenCellFormulaClean (advanceAvailableValues values amount) := by
@@ -186,7 +191,7 @@ private theorem WrittenCellFormulaClean.advanceAvailable
   · simpa [advanceAvailableValues, Work.available, Work.savedOutput] using
       hclean.savedOutput
 
-private theorem CaseFormulaClean.haltedOrClean
+theorem CaseFormulaClean.haltedOrClean
     {values : BinaryValues WorkCount} (hclean : CaseFormulaClean values) :
     HaltedOrFormulaClean values :=
   { reference₀ := hclean.reference₀
@@ -199,7 +204,7 @@ private theorem CaseFormulaClean.haltedOrClean
     temporary₃ := hclean.temporary₃
     polynomialScratch := hclean.polynomialScratch }
 
-private theorem parkedCase_haltedOrClean
+theorem parkedCase_haltedOrClean
     {values : BinaryValues WorkCount}
     (hclean : CaseFormulaClean (Function.update values Work.position 0)) :
     HaltedOrFormulaClean values :=
@@ -221,7 +226,7 @@ private theorem parkedCase_haltedOrClean
     polynomialScratch := by simpa [Work.position, Work.polynomialScratch]
       using hclean.polynomialScratch }
 
-private theorem emitStateReference_effect_advanceAvailable
+theorem emitStateReference_effect_advanceAvailable
     (stateIndex amount : ℕ) (values : BinaryValues WorkCount)
     (hclean : HaltedOrFormulaClean values) :
     (emitStateReference stateIndex).effect
@@ -239,7 +244,7 @@ private theorem emitStateReference_effect_advanceAvailable
       hclean.reference₀.symm
   · simp [advanceAvailableValues, havailable, hreference]
 
-private theorem emitRecentGate_effect_advanceAvailable
+theorem emitRecentGate_effect_advanceAvailable
     (op : AndOrOp) (negated₀ negated₁ : Bool) (offset₀ offset₁ amount : ℕ)
     (values : BinaryValues WorkCount) (hclean : HaltedOrFormulaClean values) :
     (emitRecentGate op negated₀ negated₁ offset₀ offset₁).effect
@@ -261,7 +266,7 @@ private theorem emitRecentGate_effect_advanceAvailable
       Work.reference₁] using hclean.reference₁.symm
   · simp [advanceAvailableValues, havailable, hreference₀, hreference₁]
 
-private theorem emitPolynomialRecentGate_effect_advanceAvailable
+theorem emitPolynomialRecentGate_effect_advanceAvailable
     (polynomial : Polynomial ℕ) (extra : ℕ) (op : AndOrOp)
     (negated₀ negated₁ : Bool) (fixedOffset₁ amount : ℕ)
     (values : BinaryValues WorkCount) (hclean : HaltedOrFormulaClean values) :
@@ -505,7 +510,7 @@ theorem emitOldCellValue_effect_internal
     BinaryRoutine.identity, BinaryRoutine.emitBits, Work.tapeIndex,
     Work.symbolIndex, Work.horizon, Work.configBase, Work.position]
 
-private theorem emitOldStateValue_spaceBoundByWidthAt
+theorem emitOldStateValue_spaceBoundByWidthAt
     (stateIndex : ℕ) {initialSpace : ℕ → ℕ}
     {values : ℕ → BinaryValues WorkCount} {width : ℕ → ℕ}
     (hvalues : ∀ inputLength index,
@@ -518,7 +523,7 @@ private theorem emitOldStateValue_spaceBoundByWidthAt
   simpa [emitOldStateValue] using
     (emitStateReference_spaceBoundByWidth stateIndex false hvalues hcap)
 
-private theorem emitOldHeadValue_spaceBoundByWidthAt
+theorem emitOldHeadValue_spaceBoundByWidthAt
     (stateCount tapeIndex : ℕ) {initialSpace : ℕ → ℕ}
     {values : ℕ → BinaryValues WorkCount} {width : ℕ → ℕ}
     (hvalues : ∀ inputLength index,
@@ -574,7 +579,7 @@ private theorem emitOldHeadValue_spaceBoundByWidthAt
   simp only [BinaryRoutine.SeqListSpaceBoundByWidthAt]
   exact ⟨hset, hhead, hclear, trivial⟩
 
-private theorem emitOldCellValue_spaceBoundByWidthAt
+theorem emitOldCellValue_spaceBoundByWidthAt
     (stateCount tapeCount tapeIndex symbolIndex : ℕ)
     {initialSpace : ℕ → ℕ}
     {values : ℕ → BinaryValues WorkCount} {width : ℕ → ℕ}
@@ -779,7 +784,7 @@ theorem emitNextCellCopy_spaceBoundByWidth_internal
     (emitOldCellValue_spaceBoundByWidthAt stateCount tapeCount tapeIndex
       symbolIndex hvalues htapeIndex hsymbolIndex hcap)
 
-private theorem emitHaltedOrFormula_spaceBoundByWidthAt
+theorem emitHaltedOrFormula_spaceBoundByWidthAt
     (haltStateIndex : ℕ) (childSize : Polynomial ℕ)
     (oldValue nextValue : BinaryRoutine WorkCount)
     {initialSpace : ℕ → ℕ}
@@ -1765,7 +1770,8 @@ theorem emitNextHeadFormula_emitted_internal (tm : NTM k)
   simpa [emitNextHeadFormula, nextHeadFormulaSchedule, nextSchedule,
     nextFormulaChildAvailable] using hresult
 
-private structure NextHeadFormulaWidthCap (tm : NTM k)
+@[nolint docBlame]
+structure NextHeadFormulaWidthCap (tm : NTM k)
     (tape : TapeSlot k) (values : ℕ → BinaryValues WorkCount)
     (width : ℕ → ℕ) : Prop where
   bound : ∀ inputLength stateIndex tapeIndex symbolIndex position,
@@ -1796,7 +1802,7 @@ private structure NextHeadFormulaWidthCap (tm : NTM k)
         2 * TM.binaryPolynomialValueCap (headNextChildPolynomial tm tape)
           (values inputLength Work.horizon) ≤ width inputLength
 
-private theorem emitNextHeadOldValue_spaceAndEffect
+theorem emitNextHeadOldValue_spaceAndEffect
     (tm : NTM k) (tape : TapeSlot k) {initialSpace : ℕ → ℕ}
     {values : ℕ → BinaryValues WorkCount} {width : ℕ → ℕ}
     (hclean : ∀ inputLength,
@@ -1861,7 +1867,7 @@ private theorem emitNextHeadOldValue_spaceAndEffect
         (advanceAvailableValues (values inputLength) 1) htape htemporary
         hreference)
 
-private theorem emitNextHeadChild_spaceAndEffect
+theorem emitNextHeadChild_spaceAndEffect
     (tm : NTM k) (tape : TapeSlot k) {initialSpace : ℕ → ℕ}
     {values : ℕ → BinaryValues WorkCount} {width : ℕ → ℕ}
     (hclean : ∀ inputLength,
@@ -2272,7 +2278,8 @@ theorem emitNextWrittenCellFormula_emitted_internal (tm : NTM k)
   simpa [emitNextWrittenCellFormula, nextWrittenCellFormulaSchedule,
     nextSchedule, nextFormulaChildAvailable] using hresult
 
-private structure NextWrittenCellFormulaWidthCap (tm : NTM k)
+@[nolint docBlame]
+structure NextWrittenCellFormulaWidthCap (tm : NTM k)
     (tape : WritableSlot k) (symbol : Γ)
     (values : ℕ → BinaryValues WorkCount) (width : ℕ → ℕ) : Prop where
   bound : ∀ inputLength stateIndex tapeIndex symbolIndex position,
@@ -2302,7 +2309,7 @@ private structure NextWrittenCellFormulaWidthCap (tm : NTM k)
           (writtenNextChildPolynomial tm tape symbol)
           (values inputLength Work.horizon) ≤ width inputLength
 
-private theorem emitNextWrittenCellOldValue_spaceAndEffect
+theorem emitNextWrittenCellOldValue_spaceAndEffect
     (tm : NTM k) (tape : WritableSlot k) (symbol : Γ)
     {initialSpace : ℕ → ℕ}
     {values : ℕ → BinaryValues WorkCount} {width : ℕ → ℕ}
@@ -2403,7 +2410,7 @@ private theorem emitNextWrittenCellOldValue_spaceAndEffect
           (advanceAvailableValues (values inputLength) 1) htape hsymbol
           htemporary₀ htemporary₁ htemporary₂ hreference)
 
-private theorem emitNextWrittenCellChild_spaceAndEffect
+theorem emitNextWrittenCellChild_spaceAndEffect
     (tm : NTM k) (tape : WritableSlot k) (symbol : Γ)
     {initialSpace : ℕ → ℕ}
     {values : ℕ → BinaryValues WorkCount} {width : ℕ → ℕ}

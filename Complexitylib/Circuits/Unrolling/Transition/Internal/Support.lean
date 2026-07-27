@@ -3,8 +3,10 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Circuits.Encoding.Formula.Batch
-import Complexitylib.Circuits.Unrolling.Transition.Defs
+module
+
+public import Complexitylib.Circuits.Encoding.Formula.Batch
+public import Complexitylib.Circuits.Unrolling.Transition.Defs
 
 /-!
 # Variable support of transition formulas
@@ -14,6 +16,8 @@ its designated choice wire and the atom wires of the incoming configuration.
 The resulting numeric bound is the topological-ordering premise needed by the
 packed Boolean-formula compiler.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

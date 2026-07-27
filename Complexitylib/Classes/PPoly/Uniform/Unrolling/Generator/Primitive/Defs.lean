@@ -3,8 +3,10 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Program.Defs
-import Complexitylib.Classes.PPoly.Uniform.Unrolling.Serializer.Transition.Case.Defs
+module
+
+public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Program.Defs
+public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Serializer.Transition.Case.Defs
 
 /-!
 # Direct-unrolling generator primitives -- definitions
@@ -22,6 +24,8 @@ explicit instead of pretending that an arbitrary previous temporary value is
 preserved. All framed copy, addition, multiplication, and emission counters
 are restored by their underlying leaves.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

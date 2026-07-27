@@ -3,9 +3,11 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Circuits.BitString
-import Complexitylib.Classes.Randomized
-import Complexitylib.Models.TuringMachine.Repetition.Correctness
+module
+
+public import Complexitylib.Circuits.BitString
+public import Complexitylib.Classes.Randomized
+public import Complexitylib.Models.TuringMachine.Repetition.Correctness
 
 /-!
 # Uniform good seeds for bounded-error machines
@@ -17,6 +19,8 @@ seed gives the correct majority verdict simultaneously on every `n`-bit input.
 The result only concerns the fixed-time acceptance event, so it does not need
 an all-paths-halting hypothesis.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

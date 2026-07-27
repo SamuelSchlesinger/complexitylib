@@ -3,13 +3,17 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Circuits.DecisionTree.Finite.Internal
-import Complexitylib.Circuits.DecisionTree.NormalForm.Defs
-import Complexitylib.Circuits.NormalForm.Operations.Internal
+module
+
+public import Complexitylib.Circuits.DecisionTree.Finite.Internal
+public import Complexitylib.Circuits.DecisionTree.NormalForm.Defs
+public import Complexitylib.Circuits.NormalForm.Operations.Internal
 
 /-!
 # Compiling finite decision trees to CNF and DNF -- proof internals
 -/
+
+@[expose] public section
 
 namespace Complexity
 namespace DecisionTree.On

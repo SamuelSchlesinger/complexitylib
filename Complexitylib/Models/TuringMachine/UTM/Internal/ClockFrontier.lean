@@ -3,7 +3,9 @@ Copyright (c) 2025 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Models.TuringMachine.UTM.Clock
+module
+
+public import Complexitylib.Models.TuringMachine.UTM.Clock
 
 /-!
 # Frontier-parked clock machines for the time-bounded universal machine
@@ -32,6 +34,8 @@ Two `TM 7` machines, both with ghost-initial-tapes `HoareTime` specs:
   (`hverdns`): reading `▷` at the output head would force a right move via
   `δ_right_of_start`, making `out.head = 1` unachievable.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

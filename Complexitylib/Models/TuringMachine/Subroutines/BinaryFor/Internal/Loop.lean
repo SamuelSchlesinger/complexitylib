@@ -3,10 +3,12 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Models.TuringMachine.Internal
-import Complexitylib.Models.TuringMachine.SpaceTime.Internal.Reachability
-import Complexitylib.Models.TuringMachine.Subroutines.BinaryFor.Defs
-import Complexitylib.Models.TuringMachine.Subroutines.BinarySucc.Internal
+module
+
+public import Complexitylib.Models.TuringMachine.Internal
+public import Complexitylib.Models.TuringMachine.SpaceTime.Internal.Reachability
+public import Complexitylib.Models.TuringMachine.Subroutines.BinaryFor.Defs
+public import Complexitylib.Models.TuringMachine.Subroutines.BinarySucc.Internal
 
 /-!
 # Canonical binary count-up loops — proof internals
@@ -16,6 +18,8 @@ into exact executions and all-prefix auxiliary-space bounds. It also proves
 that the binary loop driver preserves the one-way-output discipline of its
 body.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

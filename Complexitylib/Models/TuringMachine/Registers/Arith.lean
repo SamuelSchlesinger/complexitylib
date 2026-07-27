@@ -3,7 +3,9 @@ Copyright (c) 2025 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Models.TuringMachine.Registers.ForReg
+module
+
+public import Complexitylib.Models.TuringMachine.Registers.ForReg
 
 /-!
 # Derived register arithmetic
@@ -16,6 +18,8 @@ ghost family, plus `Function.update` bookkeeping.
 Time bounds are deliberately loose (rounded up via `HoareTime.mono_bound`);
 only their polynomial shape matters downstream.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

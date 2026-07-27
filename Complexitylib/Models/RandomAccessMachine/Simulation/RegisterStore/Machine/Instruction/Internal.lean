@@ -3,17 +3,21 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import
+module
+
+public import
   Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Machine.Instruction.Defs
-import
+public import
   Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Machine.EntryUpdate
-import Complexitylib.Models.TuringMachine.Subroutines.BinaryRippleAdd
-import Complexitylib.Models.TuringMachine.Subroutines.BinaryRippleSub
-import Complexitylib.Models.TuringMachine.Subroutines.BinaryShiftMul
+public import Complexitylib.Models.TuringMachine.Subroutines.BinaryRippleAdd
+public import Complexitylib.Models.TuringMachine.Subroutines.BinaryRippleSub
+public import Complexitylib.Models.TuringMachine.Subroutines.BinaryShiftMul
 
 /-!
 # Concrete sparse-store arithmetic instruction kernel -- proof internals
 -/
+
+@[expose] public section
 
 namespace Complexity
 

@@ -3,7 +3,9 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Models.TuringMachine.Subroutines.Internal.CopyWorkOutput
+module
+
+public import Complexitylib.Models.TuringMachine.Subroutines.Internal.CopyWorkOutput
 
 /-!
 # Copy a raw work-tape output
@@ -18,6 +20,8 @@ junk. The fresh destination receives a canonical `Tape.HasBinaryPrefix`.
 - `TM.copyWorkToWorkTM_hoareTime_of_hasOutput` — exact raw-output copy
 - `TM.copyWorkToWorkTM_hoareTime_frame_of_hasOutput` — copy with frame preservation
 -/
+
+@[expose] public section
 
 namespace Complexity
 

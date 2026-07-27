@@ -3,8 +3,10 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.SAT.Tseitin.Machine.Internal.BufferSpecs
-import Complexitylib.SAT.Tseitin.Machine.Internal.ControllerLift
+module
+
+public import Complexitylib.SAT.Tseitin.Machine.Internal.BufferSpecs
+public import Complexitylib.SAT.Tseitin.Machine.Internal.ControllerLift
 
 /-!
 # Completed child calls of the Tseitin streaming controller
@@ -15,6 +17,8 @@ scheduled child call, runs that child to completion, takes the single return
 step, and exposes the resulting first-bit read state together with the exact
 buffer/output postcondition.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

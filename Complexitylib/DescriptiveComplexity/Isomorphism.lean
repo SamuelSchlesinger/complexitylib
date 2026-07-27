@@ -3,7 +3,9 @@ Copyright (c) 2025 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.DescriptiveComplexity.Structure
+module
+
+public import Complexitylib.DescriptiveComplexity.Structure
 
 /-!
   # Isomorphisms, Embeddings, and Substructures
@@ -12,6 +14,8 @@ import Complexitylib.DescriptiveComplexity.Structure
   equivalence relation, and show that isomorphic structures have the same
   cardinality. We also define embeddings and substructures.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

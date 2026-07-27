@@ -3,8 +3,10 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Classes.PPoly.Uniform.Unrolling.Serializer.Transition.Next.Defs
-import Complexitylib.Classes.PPoly.Uniform.Unrolling.Serializer.Transition.Next.Internal
+module
+
+public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Serializer.Transition.Next.Defs
+public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Serializer.Transition.Next.Internal
 
 /-!
 # Numeric schedules for next-configuration atoms
@@ -23,6 +25,8 @@ public transition schedule.
 - `size_nextFormula_eq_scheduleSize` identifies the formula size with that
   common numeric count.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

@@ -3,7 +3,9 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Models.TuringMachine.Subroutines.BinaryAdd.Defs
+module
+
+public import Complexitylib.Models.TuringMachine.Subroutines.BinaryAdd.Defs
 
 /-!
 # Canonical binary multiply-add — definitions
@@ -14,6 +16,8 @@ tapes hold a preserved left operand, a preserved right operand, an updated
 accumulator, an outer multiplication counter, and the addition routine's
 private counter. Both counters are restored to canonical zero.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

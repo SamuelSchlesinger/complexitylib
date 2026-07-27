@@ -44,7 +44,9 @@ Complexitylib/Models/TuringMachine.lean          — Γ, Dir3, TM, NTM, Cfg, ste
 Complexitylib/Models/TuringMachine/Internal.lean — proof internals (e.g. toNTM_accepts_iff)
 ```
 
-Aggregation files (`Complexitylib.lean`, `Models.lean`) contain only `import` statements — no definitions.
+Aggregation files (`Complexitylib.lean`, `Models.lean`) contain only `import`
+statements — no definitions (a leading `module` header and `public import`s, but
+nothing else).
 
 ### Three-Layer Architecture
 
@@ -78,7 +80,53 @@ definitions in their theorem signatures rather than raw expressions.
 For simple modules where Internal proofs don't need to reference surface
 definitions, the two-layer pattern (surface + Internal) is fine — introduce
 `Defs.lean` when the need arises. For trivial proofs, `private` lemmas in the
-same file are acceptable.
+same file are acceptable — but only if no `@[expose] public` declaration
+references them (see the Module System section); otherwise they must be public.
+
+### Module System
+
+Every `.lean` file uses Lean's module system. The layout is:
+
+```lean
+/- copyright header -/
+module
+
+public import Mathlib.…
+public import Complexitylib.…
+
+/-! module docstring -/
+
+@[expose] public section
+
+namespace Complexity
+…
+end Complexity
+```
+
+Conventions (matching Mathlib):
+
+- **`module` header + `public import`**: every file (including aggregation
+  files) begins with `module`, and all imports are `public import` so the
+  public interface is re-exported transitively. A `module` file can only
+  import other `module` files.
+- **`@[expose] public section`**: wraps the whole body so definitions stay
+  exposed (reducible/unfoldable) downstream, preserving pre-module defeq
+  behavior. This is the default the `Modulize` migration script emits.
+- **No `private` under an exposed section**: an `@[expose] public` definition
+  cannot reference a `private` declaration — the exposed body must be
+  reconstructible by importers. Make such helpers public (drop `private`)
+  rather than private. `private` is only safe for helpers used exclusively by
+  other non-exposed / `private` declarations.
+- **Meta imports for tactics**: tactic and macro (meta) code is *not*
+  re-exported transitively through a plain `public import` chain. A file that
+  uses a tactic (e.g. `ring`) reached only transitively must import the tactic
+  module directly (`public import Mathlib.Tactic.Ring`). The same applies to
+  `to_additive`-generated lemmas whose defining module isn't in the direct
+  import closure.
+- To migrate a new un-modulized file, run the Lean `Modulize` script:
+  `lake env lean --run script/Modulize.lean path/to/File.lean` (from the
+  `leanprover/lean4` repo), then resolve any private-exposure and meta-import
+  fallout as above.
 
 ### Key Design Decisions
 
@@ -109,7 +157,7 @@ Follow Mathlib style:
 
 ### Common Pitfalls
 
-- **No `module` keyword** in aggregation files — they import files with definitions, and `module` files can only import other `module` files.
+- **Module system**: every file (including aggregation files) starts with a `module` header and uses `public import`; see the Module System section above for the `private`/`@[expose]` and meta-import rules.
 - **`List.get?` removed**: Use `l[i]?` (GetElem? syntax) instead of `l.get? i` in Lean 4 v4.28.0+.
 - **Lambda expressions in conjunction chains** need explicit parens: `c'.work = (fun i => ...) ∧ ...`
 - **`open` scoping**: Prefer `open Foo in` or `section`/`end` blocks over module-level `open` to avoid namespace pollution.

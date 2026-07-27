@@ -3,8 +3,10 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Models.TuringMachine.Subroutines.BinaryCopy.Defs
-import Complexitylib.Models.TuringMachine.Subroutines.BinaryCopy.Internal
+module
+
+public import Complexitylib.Models.TuringMachine.Subroutines.BinaryCopy.Defs
+public import Complexitylib.Models.TuringMachine.Subroutines.BinaryCopy.Internal
 
 /-!
 # Copying canonical binary naturals
@@ -20,6 +22,8 @@ destination becomes an exact copy, and the zero scratch is restored literally.
 - `TM.binaryCopyTime_le` exposes the linear operand-width envelope.
 - `TM.binaryCopyIntoTM_isTransducer` proves append-only-output safety.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

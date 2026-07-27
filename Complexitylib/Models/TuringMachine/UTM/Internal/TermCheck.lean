@@ -3,8 +3,10 @@ Copyright (c) 2025 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Models.TuringMachine.UTM.Internal.BodyIteration
-import Complexitylib.Models.TuringMachine.Registers
+module
+
+public import Complexitylib.Models.TuringMachine.UTM.Internal.BodyIteration
+public import Complexitylib.Models.TuringMachine.Registers
 
 /-!
 # `termCheckTM`: deciding `TerminatedRegion` by a single input scan
@@ -30,6 +32,8 @@ Contents:
    input head returned to cell 1, work tapes preserved exactly, verdict
    `Γ.one`/`Γ.zero` at output cell 1 (output head parked back at 1).
 -/
+
+@[expose] public section
 
 namespace Complexity
 

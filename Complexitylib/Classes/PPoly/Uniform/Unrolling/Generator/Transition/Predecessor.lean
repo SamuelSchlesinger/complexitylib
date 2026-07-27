@@ -3,8 +3,10 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Transition.Predecessor.Defs
-import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Transition.Predecessor.Internal
+module
+
+public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Transition.Predecessor.Defs
+public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Transition.Predecessor.Internal
 
 /-!
 # Verified direct predecessor-head formula generation
@@ -14,6 +16,8 @@ its exact entry domain, restored work-vector effect, and encoded numeric
 schedule. Direction codes zero and one mean left and right; all other codes
 mean stay, matching `movedHeadPositionCode`.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

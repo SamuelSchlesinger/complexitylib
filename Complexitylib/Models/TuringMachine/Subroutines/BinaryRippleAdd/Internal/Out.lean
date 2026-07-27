@@ -3,8 +3,10 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Models.TuringMachine.Subroutines.BinaryRippleAdd.Defs
-import Complexitylib.Models.TuringMachine.Subroutines.ClearWork.Internal
+module
+
+public import Complexitylib.Models.TuringMachine.Subroutines.BinaryRippleAdd.Defs
+public import Complexitylib.Models.TuringMachine.Subroutines.ClearWork.Internal
 
 /-!
 # Linear-time canonical binary addition -- output discipline
@@ -13,6 +15,8 @@ The scan and its rewind wrapper leave the public output tape one-way, so both
 machines satisfy the transducer discipline required by space-bounded function
 computation.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

@@ -3,8 +3,10 @@ Copyright (c) 2025 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Circuits.XOR
-import Complexitylib.Circuits.Internal.SchnorrBridge
+module
+
+public import Complexitylib.Circuits.XOR
+public import Complexitylib.Circuits.Internal.SchnorrBridge
 
 /-! # Schnorr's Lower Bound for XOR Circuits
 
@@ -37,6 +39,8 @@ The hypothesis allows the circuit to compute either XOR or its complement
 When `Basis.andOr2` is known to be complete, this yields a
 `sizeComplexity` bound via `sizeComplexity_xorBool_ge`.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

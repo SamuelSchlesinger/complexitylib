@@ -3,7 +3,9 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Circuits.Encoding.Machine.NatCode.Defs
+module
+
+public import Complexitylib.Circuits.Encoding.Machine.NatCode.Defs
 
 /-!
 # Machine emission of raw circuit gates — definitions
@@ -13,6 +15,8 @@ terminated-unary wire references.  The header is baked into finite control;
 the references are read from preserved canonical binary work tapes.  One
 reusable zero scratch tape drives both natural-code emitters.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

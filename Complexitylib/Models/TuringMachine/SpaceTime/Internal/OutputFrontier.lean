@@ -3,7 +3,9 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Models.TuringMachine
+module
+
+public import Complexitylib.Models.TuringMachine
 
 /-!
 # Output-frontier invariants — proof internals
@@ -12,6 +14,8 @@ This module records the blank-suffix invariant of a one-way output tape. An
 initial output tape is blank strictly beyond its head, and a transducer step
 preserves that property because its output head never moves left.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

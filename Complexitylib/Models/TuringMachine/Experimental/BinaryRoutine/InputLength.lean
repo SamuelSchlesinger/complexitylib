@@ -3,8 +3,10 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Models.TuringMachine.Experimental.BinaryRoutine.InputLength.Defs
-import Complexitylib.Models.TuringMachine.Experimental.BinaryRoutine.InputLength.Internal
+module
+
+public import Complexitylib.Models.TuringMachine.Experimental.BinaryRoutine.InputLength.Defs
+public import Complexitylib.Models.TuringMachine.Experimental.BinaryRoutine.InputLength.Internal
 
 /-!
 # Fresh-input entry for proof-carrying binary routines
@@ -19,6 +21,8 @@ the resulting routine inherits a total all-prefix `ComputesInSpace` contract.
 - `Sound.afterInputLength_computesInSpace` packages the resulting function
   transducer.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

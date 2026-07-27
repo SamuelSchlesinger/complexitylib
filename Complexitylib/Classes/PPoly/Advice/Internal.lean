@@ -3,9 +3,11 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Classes.PPoly
-import Complexitylib.Classes.PPoly.Advice.Defs
-import Complexitylib.Models.TuringMachine.Internal
+module
+
+public import Complexitylib.Classes.PPoly
+public import Complexitylib.Classes.PPoly.Advice.Defs
+public import Complexitylib.Models.TuringMachine.Internal
 
 /-!
 # Polynomial advice — proof internals
@@ -14,6 +16,8 @@ This module proves representation laws, exact semantics, and polynomial size
 for advised-computation circuit families. Public statements are exposed by
 `Complexitylib.Classes.PPoly.Advice`.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

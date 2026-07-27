@@ -3,9 +3,11 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Models.RandomAccessMachine.Structured.LastBit.Defs
-import Complexitylib.Models.RandomAccessMachine.Structured.Scanner
-import Complexitylib.Languages.LastBit
+module
+
+public import Complexitylib.Models.RandomAccessMachine.Structured.LastBit.Defs
+public import Complexitylib.Models.RandomAccessMachine.Structured.Scanner
+public import Complexitylib.Languages.LastBit
 
 /-!
 # Verified structured RAM last-bit scanner
@@ -14,6 +16,8 @@ The typed scanner compiler supplies the implementation, exact execution proof,
 and resource bounds. This module adds only agreement with the existing
 `Language.lastBitZero` and `Language.lastBitOne` specifications.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

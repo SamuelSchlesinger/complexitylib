@@ -3,9 +3,11 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Circuits.Encoding.Formula.Batch
-import Complexitylib.Circuits.Unrolling.Transition.Defs
-import Mathlib.Data.List.OfFn
+module
+
+public import Complexitylib.Circuits.Encoding.Formula.Batch
+public import Complexitylib.Circuits.Unrolling.Transition.Defs
+public import Mathlib.Data.List.OfFn
 
 /-!
 # Semantic correctness of one-step transition formulas
@@ -15,6 +17,8 @@ evaluate to the halted-or-successor configuration selected by one choice bit.
 The proofs first decode reads and complete local transition cases, then verify
 the head-movement and tape-write formulas atom by atom.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

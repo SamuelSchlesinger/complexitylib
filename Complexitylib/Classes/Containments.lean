@@ -3,13 +3,15 @@ Copyright (c) 2025 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Classes.P
-import Complexitylib.Classes.NP
-import Complexitylib.Classes.Randomized
-import Complexitylib.Classes.L
-import Complexitylib.Classes.Exponential
-import Complexitylib.Models.TuringMachine.Internal
-import Complexitylib.Models.TuringMachine.Combinators.Internal.Complement
+module
+
+public import Complexitylib.Classes.P
+public import Complexitylib.Classes.NP
+public import Complexitylib.Classes.Randomized
+public import Complexitylib.Classes.L
+public import Complexitylib.Classes.Exponential
+public import Complexitylib.Models.TuringMachine.Internal
+public import Complexitylib.Models.TuringMachine.Combinators.Internal.Complement
 
 /-!
 # Containment relations between complexity classes
@@ -47,6 +49,8 @@ This file collects the standard containment results between complexity classes.
 - `P_union` — `L₁ ∈ P → L₂ ∈ P → L₁ ∪ L₂ ∈ P` (P closed under union)
 - `P_inter` — `L₁ ∈ P → L₂ ∈ P → L₁ ∩ L₂ ∈ P` (P closed under intersection)
 -/
+
+@[expose] public section
 
 namespace Complexity
 

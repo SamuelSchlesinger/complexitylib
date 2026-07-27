@@ -3,7 +3,9 @@ Copyright (c) 2025 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Models.TuringMachine.Registers.RegisterOps
+module
+
+public import Complexitylib.Models.TuringMachine.Registers.RegisterOps
 
 /-!
 # forRegTM: the register-fueled loop combinator
@@ -22,6 +24,8 @@ tape, so the output tape remains an append-only accumulator throughout.
 The Hoare rule `forRegTM_hoareTime` threads an iteration-indexed family of
 ghost work-tape functions and output words through the loop.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

@@ -3,8 +3,10 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Circuits.Monotone.Defs
-import Complexitylib.Circuits.Monotone.Internal
+module
+
+public import Complexitylib.Circuits.Monotone.Defs
+public import Complexitylib.Circuits.Monotone.Internal
 
 /-!
 # Monotone Boolean formulas
@@ -17,6 +19,8 @@ The public results prove exact compatibility with `BoolFormula`, semantic
 monotonicity, locality, and two elementary lower bounds: distinct variables
 and essential variables are both bounded by the number of formula leaves.
 -/
+
+@[expose] public section
 
 namespace Complexity
 namespace MonotoneFormula

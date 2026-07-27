@@ -3,15 +3,19 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import
+module
+
+public import
   Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Machine.EntryLookup
-import
+public import
   Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Machine.Lookup.Internal.Bounds
-import Mathlib.Tactic.FinCases
+public import Mathlib.Tactic.FinCases
 
 /-!
 # Reusable sparse-register lookup -- reset certificates
 -/
+
+@[expose] public section
 
 namespace Complexity
 

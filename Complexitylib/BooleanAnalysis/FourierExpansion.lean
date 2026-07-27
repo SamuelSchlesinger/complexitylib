@@ -3,8 +3,10 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.BooleanAnalysis.FourierExpansion.Internal
-import Mathlib.Probability.ProbabilityMassFunction.Constructions
+module
+
+public import Complexitylib.BooleanAnalysis.FourierExpansion.Internal
+public import Mathlib.Probability.ProbabilityMassFunction.Constructions
 
 /-!
 # Chapter 1: Boolean functions and the Fourier expansion
@@ -16,6 +18,8 @@ Functions" by Ryan O'Donnell.
 
 * Ryan O'Donnell, *Analysis of Boolean Functions*, Chapter 1.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

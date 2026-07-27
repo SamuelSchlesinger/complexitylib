@@ -3,9 +3,11 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Circuits.Formula
-import Mathlib.Data.Nat.Log
-import Mathlib.Tactic
+module
+
+public import Complexitylib.Circuits.Formula
+public import Mathlib.Data.Nat.Log
+public import Mathlib.Tactic
 
 /-!
 # Spira formula balancing -- proof internals
@@ -14,6 +16,8 @@ This file implements the separator-subformula argument behind Spira's
 balancing theorem. The construction is kept internal; the public surface
 states only the existence of an equivalent shallow, polynomial-size formula.
 -/
+
+@[expose] public section
 
 namespace Complexity
 namespace BoolFormula

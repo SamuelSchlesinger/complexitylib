@@ -3,9 +3,11 @@ Copyright (c) 2025 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Models.TuringMachine
-import Complexitylib.Asymptotics
-import Mathlib.Data.Nat.Bits
+module
+
+public import Complexitylib.Models.TuringMachine
+public import Complexitylib.Asymptotics
+public import Mathlib.Data.Nat.Bits
 
 /-!
 # Time-constructible functions
@@ -30,6 +32,8 @@ time-constructible.
 - `TimeConstructible.pos` — `T(n) > 0` when `n > 0`
 - `TimeConstructible.computable` — extract the witnessing TM and time bound
 -/
+
+@[expose] public section
 
 namespace Complexity
 

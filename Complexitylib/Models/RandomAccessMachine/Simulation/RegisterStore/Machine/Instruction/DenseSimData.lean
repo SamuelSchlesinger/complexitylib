@@ -3,16 +3,20 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import
+module
+
+public import
   Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Machine.Instruction.Dense
-import
+public import
   Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Machine.Instruction.DenseSimDefs
-import
+public import
   Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Machine.Instruction.Sim.Data
 
 /-!
 # Dense-overlay data-instruction simulation
 -/
+
+@[expose] public section
 
 namespace Complexity
 namespace RAM
@@ -229,7 +233,7 @@ theorem denseExecuteInstructionTM_imm_hoareTime_frame
 
 /-- Instruction constructor corresponding to a dense direct arithmetic
 kernel. -/
-private def denseDirectInstruction (op : BinaryInstrOp)
+def denseDirectInstruction (op : BinaryInstrOp)
     (destination source₀ source₁ : ℕ) : Instr :=
   match op with
   | .add => .add destination source₀ source₁

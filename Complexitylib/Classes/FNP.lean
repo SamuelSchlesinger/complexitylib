@@ -3,8 +3,10 @@ Copyright (c) 2025 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Classes.FNP.Defs
-import Complexitylib.Classes.FNP.Internal
+module
+
+public import Complexitylib.Classes.FNP.Defs
+public import Complexitylib.Classes.FNP.Internal
 
 /-!
 # FNP and TFNP
@@ -14,6 +16,8 @@ This file defines the function/search complexity classes **FNP** and **TFNP**
 NP ∩ coNP: if a language has both NP and coNP witness relations, the combined
 certificate-finding problem is in TFNP (Megiddo–Papadimitriou 1991).
 -/
+
+@[expose] public section
 
 namespace Complexity
 

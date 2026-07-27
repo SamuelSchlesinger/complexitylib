@@ -3,17 +3,19 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Classes.P.NormalForm
-import Complexitylib.Models.RandomAccessMachine.Classes
-import
+module
+
+public import Complexitylib.Classes.P.NormalForm
+public import Complexitylib.Models.RandomAccessMachine.Classes
+public import
   Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Containment.Defs
-import
+public import
   Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Machine.Program.Bounds
-import
+public import
   Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Machine.Program.DenseBounds
-import
+public import
   Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Machine.Program.DenseDecision
-import Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Machine.Program
+public import Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Machine.Program
 
 /-!
 # RAM-to-TM time-class containment -- proof internals
@@ -23,6 +25,8 @@ makes that fuel equal to unit-cost time, hence no larger than logarithmic RAM
 time. This discharges the quantitative side condition of the checked runtime
 envelope and lifts the simulation to deterministic polynomial time.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

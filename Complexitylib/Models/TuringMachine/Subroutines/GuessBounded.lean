@@ -3,9 +3,11 @@ Copyright (c) 2025 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Models.TuringMachine.Subroutines.Counter
-import Complexitylib.Models.TuringMachine.Tape.Encoding
-import Complexitylib.Models.TuringMachine.Trace
+module
+
+public import Complexitylib.Models.TuringMachine.Subroutines.Counter
+public import Complexitylib.Models.TuringMachine.Tape.Encoding
+public import Complexitylib.Models.TuringMachine.Trace
 
 /-!
 # Nondeterministic TM subroutines
@@ -18,6 +20,8 @@ whose length is at most the number of counter marks. The counter gives the
 guess phase a structural all-paths halting bound, which is essential for
 `NTIME`.
 -/
+
+@[expose] public section
 
 namespace Complexity
 
@@ -49,11 +53,11 @@ instance : Fintype GuessBoundedPhase where
 
 /-- Preserve a work tape by writing back the symbol currently under its head
     and using an idle direction. -/
-private def preserveWork (wHeads : Fin n → Γ) : Fin n → Γw :=
+def preserveWork (wHeads : Fin n → Γ) : Fin n → Γw :=
   fun i => TM.readBackWrite (wHeads i)
 
 /-- Idle directions for all work tapes. -/
-private def idleWorkDirs (wHeads : Fin n → Γ) : Fin n → Dir3 :=
+def idleWorkDirs (wHeads : Fin n → Γ) : Fin n → Dir3 :=
   fun i => TM.idleDir (wHeads i)
 
 private theorem idleWorkDirs_right_of_start (wHeads : Fin n → Γ) :
@@ -65,7 +69,7 @@ private theorem idleWorkDirs_right_of_start (wHeads : Fin n → Γ) :
     nondeterministic bit, while the counter tape has its current mark erased.
     The definition is meaningful when `witnessIdx ≠ counterIdx`; later
     correctness lemmas assume that disjointness. -/
-private def guessWriteWork (witnessIdx counterIdx : Fin n)
+def guessWriteWork (witnessIdx counterIdx : Fin n)
     (choice : Bool) (wHeads : Fin n → Γ) : Fin n → Γw :=
   fun i =>
     if i = witnessIdx then Γw.ofBool choice
@@ -74,7 +78,7 @@ private def guessWriteWork (witnessIdx counterIdx : Fin n)
 
 /-- Work directions for the bit-writing step: witness and counter advance
     right, all other tapes idle. -/
-private def guessWriteDirs (witnessIdx counterIdx : Fin n)
+def guessWriteDirs (witnessIdx counterIdx : Fin n)
     (wHeads : Fin n → Γ) : Fin n → Dir3 :=
   fun i =>
     if i = witnessIdx then Dir3.right
@@ -93,7 +97,7 @@ private theorem guessWriteDirs_right_of_start (witnessIdx counterIdx : Fin n)
     · simp [guessWriteDirs, hwi, hci, TM.idleDir_right_of_start hi]
 
 /-- Work directions for rewinding the witness tape to cell 1. -/
-private def rewindWitnessDirs (witnessIdx : Fin n)
+def rewindWitnessDirs (witnessIdx : Fin n)
     (wHeads : Fin n → Γ) : Fin n → Dir3 :=
   fun i =>
     if i = witnessIdx then TM.moveLeftDir (wHeads i)

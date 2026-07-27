@@ -3,12 +3,16 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Models.RandomAccessMachine.Simulation.TMConfig.Sparse.ABI.Internal.Capture
-import Complexitylib.Models.RandomAccessMachine.Structured.Internal.Resources
+module
+
+public import Complexitylib.Models.RandomAccessMachine.Simulation.TMConfig.Sparse.ABI.Internal.Capture
+public import Complexitylib.Models.RandomAccessMachine.Structured.Internal.Resources
 
 /-!
 # Backward public-input copy -- proof internals
 -/
+
+@[expose] public section
 
 namespace Complexity
 

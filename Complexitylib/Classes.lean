@@ -3,68 +3,70 @@ Copyright (c) 2025 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Classes.Time
-import Complexitylib.Classes.Space
-import Complexitylib.Classes.FiniteCounting
-import Complexitylib.Classes.EventProb
-import Complexitylib.Classes.PropertyDensity
-import Complexitylib.Classes.SharpP
-import Complexitylib.Classes.Negligible
-import Complexitylib.Classes.P
-import Complexitylib.Classes.PPoly
-import Complexitylib.Classes.PPoly.Advice
-import Complexitylib.Classes.PPoly.Unrolling
-import Complexitylib.Classes.PPoly.Uniform
-import Complexitylib.Classes.PPoly.Uniform.Unrolling
-import Complexitylib.Classes.PPoly.Uniform.Unrolling.Padded
-import Complexitylib.Classes.PPoly.Uniform.Unrolling.Containment
-import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Finalization
-import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Initialization
-import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Offset
-import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.PolynomialOffset
-import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Primitive
-import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Program
-import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Tableau
-import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Transition.Effect
-import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Transition.MovedHead
-import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Transition.Next
-import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Transition.PackedCopy
-import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Transition.Predecessor
-import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Transition.Read
-import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Transition.Step
-import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Transition.Case
-import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Transition.WrittenCell
-import Complexitylib.Classes.PPoly.Uniform.Unrolling.Stream
-import Complexitylib.Classes.PPoly.Uniform.Unrolling.Serializer
-import Complexitylib.Classes.PPoly.Uniform.Unrolling.Serializer.Bounds
-import Complexitylib.Classes.PPoly.Uniform.Unrolling.Serializer.Finalization
-import Complexitylib.Classes.PPoly.Uniform.Unrolling.Serializer.Initialization
-import Complexitylib.Classes.PPoly.Uniform.Unrolling.Serializer.Transition
-import Complexitylib.Classes.PPoly.Uniform.Unrolling.Serializer.Transition.Atomic
-import Complexitylib.Classes.PPoly.Uniform.Unrolling.Serializer.Transition.Case
-import Complexitylib.Classes.PPoly.Uniform.Unrolling.Serializer.Transition.Effect
-import Complexitylib.Classes.PPoly.Uniform.Unrolling.Serializer.Transition.MovedHead
-import Complexitylib.Classes.PPoly.Uniform.Unrolling.Serializer.Transition.Next
-import Complexitylib.Classes.PPoly.Uniform.Unrolling.Serializer.Transition.Polynomial
-import Complexitylib.Classes.PPoly.Uniform.Unrolling.Serializer.Transition.Step
-import Complexitylib.Classes.PPoly.Uniform.Unrolling.Serializer.Transition.WrittenCell
-import Complexitylib.Classes.PPoly.Uniform.Preprocessing
-import Complexitylib.Classes.PPoly.Uniform.Containment
-import Complexitylib.Classes.NP
-import Complexitylib.Classes.Randomized
-import Complexitylib.Classes.Randomized.GoodSeed
-import Complexitylib.Classes.Randomized.CircuitAmplification
-import Complexitylib.Classes.Randomized.PPoly
-import Complexitylib.Classes.Pairing
-import Complexitylib.Classes.FNP
-import Complexitylib.Classes.NP.Witness
-import Complexitylib.Classes.NP.Reduction
-import Complexitylib.Classes.L
-import Complexitylib.Classes.L.PolynomialTime
-import Complexitylib.Classes.Exponential
-import Complexitylib.Classes.DTISP
-import Complexitylib.Classes.Containments
-import Complexitylib.Classes.Hierarchy
+module
+
+public import Complexitylib.Classes.Time
+public import Complexitylib.Classes.Space
+public import Complexitylib.Classes.FiniteCounting
+public import Complexitylib.Classes.EventProb
+public import Complexitylib.Classes.PropertyDensity
+public import Complexitylib.Classes.SharpP
+public import Complexitylib.Classes.Negligible
+public import Complexitylib.Classes.P
+public import Complexitylib.Classes.PPoly
+public import Complexitylib.Classes.PPoly.Advice
+public import Complexitylib.Classes.PPoly.Unrolling
+public import Complexitylib.Classes.PPoly.Uniform
+public import Complexitylib.Classes.PPoly.Uniform.Unrolling
+public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Padded
+public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Containment
+public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Finalization
+public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Initialization
+public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Offset
+public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.PolynomialOffset
+public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Primitive
+public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Program
+public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Tableau
+public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Transition.Effect
+public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Transition.MovedHead
+public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Transition.Next
+public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Transition.PackedCopy
+public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Transition.Predecessor
+public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Transition.Read
+public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Transition.Step
+public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Transition.Case
+public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Transition.WrittenCell
+public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Stream
+public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Serializer
+public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Serializer.Bounds
+public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Serializer.Finalization
+public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Serializer.Initialization
+public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Serializer.Transition
+public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Serializer.Transition.Atomic
+public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Serializer.Transition.Case
+public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Serializer.Transition.Effect
+public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Serializer.Transition.MovedHead
+public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Serializer.Transition.Next
+public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Serializer.Transition.Polynomial
+public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Serializer.Transition.Step
+public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Serializer.Transition.WrittenCell
+public import Complexitylib.Classes.PPoly.Uniform.Preprocessing
+public import Complexitylib.Classes.PPoly.Uniform.Containment
+public import Complexitylib.Classes.NP
+public import Complexitylib.Classes.Randomized
+public import Complexitylib.Classes.Randomized.GoodSeed
+public import Complexitylib.Classes.Randomized.CircuitAmplification
+public import Complexitylib.Classes.Randomized.PPoly
+public import Complexitylib.Classes.Pairing
+public import Complexitylib.Classes.FNP
+public import Complexitylib.Classes.NP.Witness
+public import Complexitylib.Classes.NP.Reduction
+public import Complexitylib.Classes.L
+public import Complexitylib.Classes.L.PolynomialTime
+public import Complexitylib.Classes.Exponential
+public import Complexitylib.Classes.DTISP
+public import Complexitylib.Classes.Containments
+public import Complexitylib.Classes.Hierarchy
 
 /-!
 # Complexity classes
@@ -74,3 +76,5 @@ time and space classes, `P`, `NP`, randomized and nonuniform classes, the
 logspace-uniform circuit containment in `P`, function classes, reductions,
 containments, and the time hierarchy.
 -/
+
+@[expose] public section

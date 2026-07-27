@@ -3,15 +3,19 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import
+module
+
+public import
   Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Machine.Instruction.Sim.Defs
-import
+public import
   Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Machine.Instruction
-import Complexitylib.Models.TuringMachine.Hoare.RetargetOutput
+public import Complexitylib.Models.TuringMachine.Hoare.RetargetOutput
 
 /-!
 # Uniform next-store buffering for data instructions
 -/
+
+@[expose] public section
 
 namespace Complexity
 
@@ -543,7 +547,7 @@ private theorem retargetDataKernel_hoareTime_frame_internal
     dataTM dataTime Result hready hbase hresult
 
 /-- Instruction constructor corresponding to a direct arithmetic kernel. -/
-private def directInstruction (op : BinaryInstrOp) (destination source₀
+def directInstruction (op : BinaryInstrOp) (destination source₀
     source₁ : ℕ) : Instr :=
   match op with
   | .add => .add destination source₀ source₁

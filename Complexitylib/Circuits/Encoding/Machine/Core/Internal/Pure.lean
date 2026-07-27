@@ -3,7 +3,9 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Circuits.Encoding.Machine.Core.Defs
+module
+
+public import Complexitylib.Circuits.Encoding.Machine.Core.Defs
 
 /-!
 # Pure semantics for the streaming circuit evaluator
@@ -16,6 +18,8 @@ exposes the ref0-before-ref1 dependency order needed by execution proofs while
 retaining `evalFamilyCode` as their external specification; it is not a
 transition-level trace model.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

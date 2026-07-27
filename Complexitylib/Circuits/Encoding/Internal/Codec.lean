@@ -3,7 +3,9 @@ Copyright (c) 2025 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Circuits.Encoding.Defs
+module
+
+public import Complexitylib.Circuits.Encoding.Defs
 
 /-!
 # Correctness of the machine-facing circuit codec
@@ -13,6 +15,8 @@ evaluator in `Encoding.Defs` faithfully enforce their advertised syntactic
 invariants.  Semantic agreement with typed circuit evaluation is deliberately
 kept in a separate proof layer.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

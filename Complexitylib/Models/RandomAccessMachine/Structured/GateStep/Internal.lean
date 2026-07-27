@@ -3,15 +3,19 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Circuits.Encoding.Internal.Codec
-import Complexitylib.Models.RandomAccessMachine.Structured.GateEval.Internal
-import Complexitylib.Models.RandomAccessMachine.Structured.GateStep.Defs
-import Complexitylib.Models.RandomAccessMachine.Structured.UnaryDecode.Internal
-import Mathlib.Tactic.IntervalCases
+module
+
+public import Complexitylib.Circuits.Encoding.Internal.Codec
+public import Complexitylib.Models.RandomAccessMachine.Structured.GateEval.Internal
+public import Complexitylib.Models.RandomAccessMachine.Structured.GateStep.Defs
+public import Complexitylib.Models.RandomAccessMachine.Structured.UnaryDecode.Internal
+public import Mathlib.Tactic.IntervalCases
 
 /-!
 # Structured RAM serialized-gate step — proof internals
 -/
+
+@[expose] public section
 
 namespace Complexity
 

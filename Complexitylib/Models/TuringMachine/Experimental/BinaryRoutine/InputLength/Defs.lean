@@ -3,8 +3,10 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Models.TuringMachine.Experimental.BinaryRoutine.Defs
-import Complexitylib.Models.TuringMachine.Subroutines.BinaryLength.Defs
+module
+
+public import Complexitylib.Models.TuringMachine.Experimental.BinaryRoutine.Defs
+public import Complexitylib.Models.TuringMachine.Subroutines.BinaryLength.Defs
 
 /-!
 # Fresh-input entry for proof-carrying binary routines -- definitions
@@ -13,6 +15,8 @@ This module connects the initial Turing-machine configuration to the canonical
 binary work-vector discipline. It first counts the unary input length into one
 designated work tape, then runs a proof-carrying binary routine.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

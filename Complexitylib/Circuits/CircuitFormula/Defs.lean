@@ -3,8 +3,10 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Circuits.AndOrNot.Defs
-import Complexitylib.Circuits.Formula
+module
+
+public import Complexitylib.Circuits.AndOrNot.Defs
+public import Complexitylib.Circuits.Formula
 
 /-!
 # Unfolding fan-in-two circuit outputs into Boolean formulas -- definitions
@@ -13,6 +15,8 @@ These definitions recursively unfold the DAG below one selected circuit wire or
 output gate. Shared subcircuits are intentionally duplicated in the resulting
 formula tree; no formula-size claim is implicit in this bridge.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

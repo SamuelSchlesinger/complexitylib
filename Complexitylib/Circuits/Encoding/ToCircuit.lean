@@ -3,7 +3,9 @@ Copyright (c) 2025 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Circuits.Encoding.Internal.ToCircuit
+module
+
+public import Complexitylib.Circuits.Encoding.Internal.ToCircuit
 
 /-!
 # Typed circuits reconstructed from raw circuit syntax
@@ -26,6 +28,8 @@ Boolean evaluation, and exact gate count.
 - `RawCircuit.eval?_toCircuit`: iterative raw and typed evaluation agree.
 - `RawCircuit.size_toCircuit`: typed size equals the raw gate count.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

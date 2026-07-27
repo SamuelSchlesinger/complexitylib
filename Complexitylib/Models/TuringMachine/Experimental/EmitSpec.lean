@@ -3,7 +3,9 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Models.TuringMachine.Registers.Emit
+module
+
+public import Complexitylib.Models.TuringMachine.Registers.Emit
 
 /-!
 # Experimental effect contracts for emitter machines
@@ -23,6 +25,8 @@ This contract complements `TM.bigSeqTM_hoareTime`: that theorem handles an
 indexed list fold with one uniform per-stage bound, while `EmitSpec` handles
 short heterogeneous machine trees and retains each stage's structural bound.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

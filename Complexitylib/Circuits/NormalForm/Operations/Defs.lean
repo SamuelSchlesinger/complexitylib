@@ -3,7 +3,9 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Circuits.NormalForm.Defs
+module
+
+public import Complexitylib.Circuits.NormalForm.Defs
 
 /-!
 # Operations on CNF and DNF -- definitions
@@ -13,6 +15,8 @@ concatenates their clause lists. These are the width-preserving operations
 used when one alternating formula layer is assembled from normal forms for
 its children.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

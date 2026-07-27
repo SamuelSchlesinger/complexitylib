@@ -3,7 +3,9 @@ Copyright (c) 2025 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Mathlib.Data.Real.Basic
+module
+
+public import Mathlib.Data.Real.Basic
 
 /-!
 # Negligible functions
@@ -11,6 +13,8 @@ import Mathlib.Data.Real.Basic
 A function `f : ℕ → ℝ` is *negligible* if it vanishes faster than any inverse
 polynomial. This is the standard notion used in cryptographic definitions.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

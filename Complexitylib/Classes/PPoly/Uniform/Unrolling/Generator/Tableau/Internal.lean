@@ -3,16 +3,18 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Finalization
-import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Initialization
-import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Program
-import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Tableau.Defs
-import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Transition.Step
-import Complexitylib.Classes.PPoly.Uniform.Unrolling.Padded
-import Complexitylib.Classes.PPoly.Uniform.Unrolling.Serializer.Finalization
-import Complexitylib.Classes.PPoly.Uniform.Unrolling.Stream
-import Complexitylib.Models.TuringMachine.Experimental.BinaryRoutine.InputLength
-import Complexitylib.Models.TuringMachine.Experimental.BinaryRoutine.SpaceBounds
+module
+
+public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Finalization
+public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Initialization
+public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Program
+public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Tableau.Defs
+public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Transition.Step
+public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Padded
+public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Serializer.Finalization
+public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Stream
+public import Complexitylib.Models.TuringMachine.Experimental.BinaryRoutine.InputLength
+public import Complexitylib.Models.TuringMachine.Experimental.BinaryRoutine.SpaceBounds
 
 /-!
 # Complete direct-unrolling generator -- proof internals
@@ -21,6 +23,8 @@ This file first verifies the outer transition-layer loop. Its pure trajectory
 keeps the step scratch convention reusable, preserves the horizon, and advances
 the dedicated layer counter exactly once per emitted packed step.
 -/
+
+@[expose] public section
 
 namespace Complexity
 
@@ -32,7 +36,7 @@ namespace DirectGenerator
 
 open scoped BigOperators
 
-private theorem stepLoopValues_invariant (tm : TM k)
+theorem stepLoopValues_invariant (tm : TM k)
     (values : BinaryValues WorkCount) (hclean : StepClean values)
     (hhorizon : 0 < values Work.horizon) (count : ℕ) :
     let current := BinaryRoutine.binaryForValues (emitStep tm) Work.loop₂
@@ -75,7 +79,7 @@ private theorem stepLoopValues_invariant (tm : TM k)
               (values Work.loop₂ + count) + 1 := by rw [hcurrentLoop]
           _ = values Work.loop₂ + (count + 1) := by omega
 
-private theorem stepLoopValues_frontier (tm : TM k)
+theorem stepLoopValues_frontier (tm : TM k)
     (values : BinaryValues WorkCount) (hclean : StepClean values)
     (hhorizon : 0 < values Work.horizon) (count : ℕ) :
     BinaryRoutine.binaryForValues (emitStep tm) Work.loop₂ values count
@@ -99,7 +103,7 @@ private theorem stepLoopValues_frontier (tm : TM k)
       simpa [Work.available, Work.configBase, Work.gateBound, Work.gateCount,
         Work.frontier] using ih
 
-private theorem stepScheduleSize_eq_directStepSizeInternal (tm : NTM k)
+theorem stepScheduleSize_eq_directStepSizeInternal (tm : NTM k)
     (T configBase : ℕ) :
     stepScheduleSize (transitionCases tm).length (Fintype.card tm.Q) k T
         (stepAtomKindAt tm T) (stepAtomEffectSelectedAt tm T)
@@ -107,7 +111,7 @@ private theorem stepScheduleSize_eq_directStepSizeInternal (tm : NTM k)
   rw [← stepFragmentSize_eq_stepScheduleSize tm T configBase 0,
     stepFragmentSize_eq_directStepSize]
 
-private theorem initializationEndpoint (tm : TM k) (q : Polynomial ℕ)
+theorem initializationEndpoint (tm : TM k) (q : Polynomial ℕ)
     (n : ℕ) :
     let values := preambleValues tm q
       (BinaryRoutine.inputLengthValues Work.inputLength n)
@@ -183,7 +187,7 @@ private theorem initializationEndpoint (tm : TM k) (q : Polynomial ℕ)
     rw [hcard]
     ring
 
-private theorem stepScheduleOutputBase_eq_nextInternal (tm : TM k)
+theorem stepScheduleOutputBase_eq_nextInternal (tm : TM k)
     (T n count available configBase : ℕ)
     (havailable : available = n + configWidth tm.toNTM T +
       count * directStepSize tm.toNTM T) :
@@ -205,7 +209,7 @@ private theorem stepScheduleOutputBase_eq_nextInternal (tm : TM k)
   rw [hrhs] at hend
   exact Nat.add_right_cancel hend
 
-private theorem stepLoopValues_numeric_invariant (tm : TM k)
+theorem stepLoopValues_numeric_invariant (tm : TM k)
     (values : BinaryValues WorkCount) (hclean : StepClean values)
     (hhorizon : 0 < values Work.horizon) (n count : ℕ)
     (hloop : values Work.loop₂ = 0)
@@ -297,7 +301,8 @@ private theorem stepLoopValues_numeric_invariant (tm : TM k)
   refine ⟨hbasic.1, hbasic.2.1, ?_, hnumeric⟩
   simpa [hloop] using hbasic.2.2
 
-private noncomputable def stepLoopIndexPolynomial
+@[nolint docBlame]
+noncomputable def stepLoopIndexPolynomial
     (tm : NTM k) : Polynomial ℕ :=
   Polynomial.C (Fintype.card tm.Q) +
     Polynomial.C (k + 2) * (Polynomial.X + Polynomial.C 2) +
@@ -307,7 +312,8 @@ private noncomputable def stepLoopIndexPolynomial
     (Polynomial.X + Polynomial.C 2) +
     Polynomial.C (2 * (k + 2) + 8)
 
-private noncomputable def stepLoopEvaluatorPolynomial
+@[nolint docBlame]
+noncomputable def stepLoopEvaluatorPolynomial
     (tm : NTM k) : Polynomial ℕ :=
   TM.binaryPolynomialSpaceWidthPolynomial
       predecessorHeadSchedulePolynomial +
@@ -331,7 +337,8 @@ private noncomputable def stepLoopEvaluatorPolynomial
         (writtenNextFormulaPolynomial tm tape symbol)) +
     TM.binaryPolynomialSpaceWidthPolynomial (Polynomial.C 1)
 
-private noncomputable def stepLoopEndPolynomial
+@[nolint docBlame]
+noncomputable def stepLoopEndPolynomial
     (tm : TM k) (q : Polynomial ℕ) : Polynomial ℕ :=
   let horizon := TM.directSerializerHorizonPolynomial q
   Polynomial.X +
@@ -341,7 +348,8 @@ private noncomputable def stepLoopEndPolynomial
       (Polynomial.C (stepSizeCoeff tm.toNTM) *
         (horizon + Polynomial.C 2) ^ 2)
 
-private noncomputable def stepLoopWidthPolynomial
+@[nolint docBlame]
+noncomputable def stepLoopWidthPolynomial
     (tm : TM k) (q : Polynomial ℕ) : Polynomial ℕ :=
   let horizon := TM.directSerializerHorizonPolynomial q
   let endpoint := stepLoopEndPolynomial tm q
@@ -353,12 +361,12 @@ private noncomputable def stepLoopWidthPolynomial
     Polynomial.C 5 * (stepLoopIndexPolynomial tm.toNTM).comp horizon +
     (stepLoopEvaluatorPolynomial tm.toNTM).comp horizon
 
-private theorem directStepSize_le_stepBound (tm : NTM k) (T : ℕ) :
+theorem directStepSize_le_stepBound (tm : NTM k) (T : ℕ) :
     directStepSize tm T ≤ stepSizeCoeff tm * (T + 2) ^ 2 := by
   rw [← stepFragmentSize_eq_directStepSize tm T 0 0]
   exact stepFragmentSize_le tm T 0 0
 
-private theorem stepLoopEndPolynomial_eval (tm : TM k)
+theorem stepLoopEndPolynomial_eval (tm : TM k)
     (q : Polynomial ℕ) (n : ℕ) :
     (stepLoopEndPolynomial tm q).eval n =
       n + (Fintype.card tm.Q + 5 * (k + 2)) *
@@ -369,7 +377,7 @@ private theorem stepLoopEndPolynomial_eval (tm : TM k)
   simp [stepLoopEndPolynomial, Polynomial.eval_add, Polynomial.eval_mul,
     Polynomial.eval_pow]
 
-private theorem stepLoopWidthPolynomial_eval (tm : TM k)
+theorem stepLoopWidthPolynomial_eval (tm : TM k)
     (q : Polynomial ℕ) (n : ℕ) :
     (stepLoopWidthPolynomial tm q).eval n =
       n + (TM.directSerializerHorizonPolynomial q).eval n +
@@ -383,7 +391,7 @@ private theorem stepLoopWidthPolynomial_eval (tm : TM k)
           ((TM.directSerializerHorizonPolynomial q).eval n) := by
   simp [stepLoopWidthPolynomial, Polynomial.eval_comp]
 
-private theorem stepLoopEnd_final_le (tm : TM k)
+theorem stepLoopEnd_final_le (tm : TM k)
     (q : Polynomial ℕ) (n : ℕ) :
     let T := (TM.directSerializerHorizonPolynomial q).eval n
     n + configWidth tm.toNTM T + T * directStepSize tm.toNTM T ≤
@@ -399,7 +407,7 @@ private theorem stepLoopEnd_final_le (tm : TM k)
   dsimp only [T] at hconfig hstep hmul ⊢
   omega
 
-private theorem stepLoopIndex_bounds
+theorem stepLoopIndex_bounds
     (tm : NTM k) (T base stateIndex tapeIndex symbolIndex position : ℕ)
     (hstate : stateIndex < Fintype.card tm.Q)
     (htape : tapeIndex ≤ k + 1) (hsymbol : symbolIndex < 4)
@@ -429,7 +437,7 @@ private theorem stepLoopIndex_bounds
   unfold transitionStateRef transitionHeadRef transitionCellRef caseReadSize
   omega
 
-private theorem stepLoopEvaluator_caps
+theorem stepLoopEvaluator_caps
     (tm : NTM k) (T : ℕ) (state : tm.Q)
     (headTape : TapeSlot k) (writtenTape : WritableSlot k) (symbol : Γ) :
     2 * TM.binaryPolynomialValueCap predecessorHeadSchedulePolynomial T +
@@ -560,7 +568,7 @@ private theorem stepLoopEvaluator_caps
     TM.binaryPolynomialSpaceWidthPolynomial_eval]
   omega
 
-private theorem stepLoopCap_sum_le
+theorem stepLoopCap_sum_le
     {endpoint index evaluator frontier stateRef headRef cellRef readSize
       horizonArithmetic evaluatorCaps : ℕ}
     (hfrontier : frontier ≤ endpoint)
@@ -575,7 +583,7 @@ private theorem stepLoopCap_sum_le
       4 * endpoint + 5 * index + evaluator := by
   omega
 
-private theorem stepLoopValues_all_le
+theorem stepLoopValues_all_le
     (tm : TM k) (values : BinaryValues WorkCount)
     (hclean : StepClean values) (hhorizon : 0 < values Work.horizon)
     (n width : ℕ) (hloop : values Work.loop₂ = 0)
@@ -703,7 +711,7 @@ private theorem stepLoopValues_all_le
         rw [hcurrentLoop]
         omega
 
-private theorem stepLoopInitialValues_le (tm : TM k)
+theorem stepLoopInitialValues_le (tm : TM k)
     (q : Polynomial ℕ) (n : ℕ) :
     let initial := (initialization tm).effect
       (preambleValues tm q
@@ -781,7 +789,7 @@ private theorem stepLoopInitialValues_le (tm : TM k)
     (BinaryRoutine.values_update_le Work.available hpreamble havailable)
     (Nat.zero_le _)
 
-private theorem stepLoopWidthEnvelope (tm : TM k) (q : Polynomial ℕ)
+theorem stepLoopWidthEnvelope (tm : TM k) (q : Polynomial ℕ)
     (n count : ℕ)
     (hcount : count < (TM.directSerializerHorizonPolynomial q).eval n) :
     let initial := (initialization tm).effect
@@ -1015,7 +1023,7 @@ private theorem stepLoopWidthEnvelope (tm : TM k) (q : Polynomial ℕ)
           (stepLoopEvaluatorPolynomial tm.toNTM).eval T := hcap
     _ ≤ width := hcapWidth
 
-private theorem stepLoopEmitted_eq_prefix (tm : TM k)
+theorem stepLoopEmitted_eq_prefix (tm : TM k)
     (values : BinaryValues WorkCount) (hclean : StepClean values)
     (hhorizon : 0 < values Work.horizon) (n count : ℕ)
     (hcount : count ≤ values Work.horizon)
@@ -1276,7 +1284,7 @@ theorem emitTransitionSteps_effect_internal (tm : TM k)
           (values Work.horizon - values Work.loop₂)) Work.loop₂ 0 := by
   rfl
 
-private theorem transitionFinalValues_le (tm : TM k)
+theorem transitionFinalValues_le (tm : TM k)
     (q : Polynomial ℕ) (n : ℕ) :
     let initial := (initialization tm).effect
       (preambleValues tm q

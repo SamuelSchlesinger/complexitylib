@@ -3,8 +3,10 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Mathlib.NatBits
-import Complexitylib.Models.TuringMachine.Subroutines.BinaryRippleSub.Defs
+module
+
+public import Complexitylib.Mathlib.NatBits
+public import Complexitylib.Models.TuringMachine.Subroutines.BinaryRippleSub.Defs
 
 /-!
 # Linear-time canonical binary subtraction -- pure proofs
@@ -14,11 +16,14 @@ final borrow decides underflow, while trimming is proved to recover the
 canonical `Nat.bits` representation of the raw fixed-width value.
 -/
 
+@[expose] public section
+
 namespace Complexity
 
 namespace BinaryRippleSub
 
-private def boolValue (bit : Bool) : ℕ :=
+@[nolint docBlame]
+def boolValue (bit : Bool) : ℕ :=
   if bit then 1 else 0
 
 private theorem fullSub_value (borrow lhs rhs : Bool) :

@@ -3,9 +3,11 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Classes.Randomized.CircuitAmplification
-import Complexitylib.Classes.Randomized.GoodSeed
-import Complexitylib.Circuits.Family.Defs
+module
+
+public import Complexitylib.Classes.Randomized.CircuitAmplification
+public import Complexitylib.Classes.Randomized.GoodSeed
+public import Complexitylib.Circuits.Family.Defs
 
 /-!
 # Nonuniform derandomization — definitions
@@ -17,6 +19,8 @@ seed and fixes that seed in the canonical choices-first acceptance circuit.
 Correctness, size bounds, and the containment theorem are proved in the
 internal and surface modules.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

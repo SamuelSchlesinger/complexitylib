@@ -3,8 +3,10 @@ Copyright (c) 2025 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Models.TuringMachine
-import Complexitylib.Mathlib.NatBits
+module
+
+public import Complexitylib.Models.TuringMachine
+public import Complexitylib.Mathlib.NatBits
 
 /-!
 # TM State Normalization and Binary Encoding
@@ -39,6 +41,8 @@ Turing machines:
 - `allΓ` — all 4 tape symbols in canonical order
 - `allΓFuncs` — enumerate all `Fin n → Γ` functions
 -/
+
+@[expose] public section
 
 namespace Complexity
 

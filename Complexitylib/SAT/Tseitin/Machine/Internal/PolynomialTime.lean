@@ -3,12 +3,14 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Asymptotics
-import Complexitylib.SAT.Tseitin
-import Complexitylib.SAT.Tseitin.Machine.Internal.EmitterSpec
-import Complexitylib.SAT.Tseitin.Machine.Internal.InvalidBranchSpec
-import Complexitylib.SAT.Tseitin.Machine.Internal.ValidBranchAssembly
-import Complexitylib.SAT.Tseitin.Machine.Internal.Validation
+module
+
+public import Complexitylib.Asymptotics
+public import Complexitylib.SAT.Tseitin
+public import Complexitylib.SAT.Tseitin.Machine.Internal.EmitterSpec
+public import Complexitylib.SAT.Tseitin.Machine.Internal.InvalidBranchSpec
+public import Complexitylib.SAT.Tseitin.Machine.Internal.ValidBranchAssembly
+public import Complexitylib.SAT.Tseitin.Machine.Internal.Validation
 
 /-!
 # Polynomial-time correctness of the Tseitin reduction machine
@@ -25,6 +27,8 @@ bit length.
 - `reductionMachineTime_bigO_quartic_internal`
 - `reductionTM_computesInTime_internal`
 -/
+
+@[expose] public section
 
 namespace Complexity
 

@@ -3,10 +3,12 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Classes.PPoly.Uniform.Unrolling.Serializer.Bounds.Defs
-import Complexitylib.Models.TuringMachine.Experimental.BinaryRoutine.Arithmetic.Defs
-import Complexitylib.Models.TuringMachine.Experimental.BinaryRoutine.Control.Defs
-import Complexitylib.Models.TuringMachine.Experimental.BinaryRoutine.List.Defs
+module
+
+public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Serializer.Bounds.Defs
+public import Complexitylib.Models.TuringMachine.Experimental.BinaryRoutine.Arithmetic.Defs
+public import Complexitylib.Models.TuringMachine.Experimental.BinaryRoutine.Control.Defs
+public import Complexitylib.Models.TuringMachine.Experimental.BinaryRoutine.List.Defs
 
 /-!
 # Direct-unrolling generator program -- definitions
@@ -17,6 +19,8 @@ polynomials of the unary input length. The zero-length family member is a
 hardwired two-bit word; the positive tableau body remains a compositional
 `BinaryRoutine` parameter at this layer.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

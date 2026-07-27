@@ -3,13 +3,17 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Circuits.CircuitFormula
-import Complexitylib.Circuits.CircuitFormula.Family.Defs
-import Complexitylib.Circuits.DepthClasses
+module
+
+public import Complexitylib.Circuits.CircuitFormula
+public import Complexitylib.Circuits.CircuitFormula.Family.Defs
+public import Complexitylib.Circuits.DepthClasses
 
 /-!
 # Circuit-family outputs as formula families -- proof internals
 -/
+
+@[expose] public section
 
 namespace Complexity
 

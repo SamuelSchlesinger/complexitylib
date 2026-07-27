@@ -3,10 +3,12 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Machine.EntryDecode.Defs
-import
+module
+
+public import Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Machine.EntryDecode.Defs
+public import
   Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Machine.EntryDecode.Internal
-import
+public import
 Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Machine.EntryDecode.LinearInternal
 
 /-!
@@ -15,6 +17,8 @@ Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Machine.EntryD
 This module exposes the exact framed semantics of the concrete two-word sparse
 address/value decoder.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

@@ -3,13 +3,17 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Circuits.RandomRestriction.Defs
-import Mathlib.Data.Fintype.BigOperators
-import Mathlib.Data.Finset.Card
+module
+
+public import Complexitylib.Circuits.RandomRestriction.Defs
+public import Mathlib.Data.Fintype.BigOperators
+public import Mathlib.Data.Finset.Card
 
 /-!
 # Finite random restrictions -- proof internals
 -/
+
+@[expose] public section
 
 namespace Complexity
 namespace RandomRestriction

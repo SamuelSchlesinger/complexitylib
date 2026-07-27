@@ -3,8 +3,10 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Models.TuringMachine
-import Mathlib.Data.Fintype.BigOperators
+module
+
+public import Complexitylib.Models.TuringMachine
+public import Mathlib.Data.Fintype.BigOperators
 
 /-!
 # Finite observations of space-bounded transducer configurations
@@ -24,6 +26,8 @@ the symbol currently under the head can affect future execution.
 - `TM.transducerSnapshot` — observe a configuration within auxiliary space
 - `TM.transducerConfigBound` — the number of possible transducer snapshots
 -/
+
+@[expose] public section
 
 namespace Complexity
 

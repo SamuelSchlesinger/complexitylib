@@ -3,9 +3,11 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import
+module
+
+public import
 Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Machine.EntryUpdate.Internal.Step
-import
+public import
   Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Machine.EntryUpdate.Internal.End
 
 /-!
@@ -16,6 +18,8 @@ complete update loop.  The induction is over the runtime-counted remaining
 store, while the loop invariant carries the processed prefix and emitted
 output needed to connect the concrete controller to `RegisterStore.write`.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

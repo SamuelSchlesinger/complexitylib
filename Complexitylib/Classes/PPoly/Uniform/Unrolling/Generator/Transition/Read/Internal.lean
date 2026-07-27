@@ -3,17 +3,21 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Primitive
-import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Transition.Read.Defs
-import Complexitylib.Classes.PPoly.Uniform.Unrolling.Serializer.Transition
-import Complexitylib.Models.TuringMachine.Experimental.BinaryRoutine.Arithmetic
-import Complexitylib.Models.TuringMachine.Experimental.BinaryRoutine.Control
-import Complexitylib.Models.TuringMachine.Experimental.BinaryRoutine.List
-import Mathlib.Data.Nat.Pairing
+module
+
+public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Primitive
+public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Transition.Read.Defs
+public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Serializer.Transition
+public import Complexitylib.Models.TuringMachine.Experimental.BinaryRoutine.Arithmetic
+public import Complexitylib.Models.TuringMachine.Experimental.BinaryRoutine.Control
+public import Complexitylib.Models.TuringMachine.Experimental.BinaryRoutine.List
+public import Mathlib.Data.Nat.Pairing
 
 /-!
 # Direct-unrolling read-formula generator -- proof internals
 -/
+
+@[expose] public section
 
 namespace Complexity
 

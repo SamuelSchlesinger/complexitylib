@@ -3,11 +3,13 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import
+module
+
+public import
   Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Machine.EntryMatch.Defs
-import
+public import
   Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Machine.EntryMatch.Internal
-import Complexitylib.Models.TuringMachine.Hoare.Space
+public import Complexitylib.Models.TuringMachine.Hoare.Space
 
 /-!
 # RAM sparse-entry matching
@@ -15,6 +17,8 @@ import Complexitylib.Models.TuringMachine.Hoare.Space
 This module exposes the exact framed semantics of the concrete decode-and-match
 unit used by a bounded sparse register-store scan.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

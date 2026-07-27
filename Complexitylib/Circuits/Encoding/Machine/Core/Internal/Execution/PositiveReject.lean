@@ -3,8 +3,10 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Circuits.Encoding.Internal.Codec
-import Complexitylib.Circuits.Encoding.Machine.Core.Internal.Execution
+module
+
+public import Complexitylib.Circuits.Encoding.Internal.Codec
+public import Complexitylib.Circuits.Encoding.Machine.Core.Internal.Execution
 
 /-!
 # Rejecting positive-family setup
@@ -14,6 +16,8 @@ loop begins. An unterminated unary gate count is scanned to its first trailing
 blank while the counter prefix is built, then rejected explicitly. The
 frontier-level wrappers also cover a positive tag paired with the empty input.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

@@ -3,13 +3,17 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Models.TuringMachine.Internal
+module
+
+public import Complexitylib.Models.TuringMachine.Internal
 
 /-!
 # Nondeterministic trace API -- proof internals
 
 Proofs for the public finite-trace decomposition rules.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

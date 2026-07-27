@@ -3,9 +3,11 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Models.TuringMachine.Experimental.Routine
-import Complexitylib.Models.TuringMachine.Subroutines.BinaryLength.Defs
-import Complexitylib.Models.TuringMachine.Subroutines.BinaryLength.Internal
+module
+
+public import Complexitylib.Models.TuringMachine.Experimental.Routine
+public import Complexitylib.Models.TuringMachine.Subroutines.BinaryLength.Defs
+public import Complexitylib.Models.TuringMachine.Subroutines.BinaryLength.Internal
 
 /-!
 # Binary input-length counter
@@ -28,6 +30,8 @@ reuses the local successor bound at each iteration and is formally `O(log n)`.
   structurally output-safe.
 - `TM.binaryLengthTM_isTransducer` — the output head never moves left.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

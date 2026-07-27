@@ -3,7 +3,9 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Models.TuringMachine.Combinators
+module
+
+public import Complexitylib.Models.TuringMachine.Combinators
 
 /-!
 # Read-only-input loop combinator — definitions
@@ -13,6 +15,8 @@ import Complexitylib.Models.TuringMachine.Combinators
 invocation per original input bit. The input itself is the loop fuel, so the
 combinator does not materialize a linear-size unary counter on an auxiliary tape.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

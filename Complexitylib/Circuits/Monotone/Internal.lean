@@ -3,12 +3,16 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Circuits.EssentialInput
-import Complexitylib.Circuits.Monotone.Defs
+module
+
+public import Complexitylib.Circuits.EssentialInput
+public import Complexitylib.Circuits.Monotone.Defs
 
 /-!
 # Monotone Boolean formulas -- proof internals
 -/
+
+@[expose] public section
 
 namespace Complexity
 namespace MonotoneFormula

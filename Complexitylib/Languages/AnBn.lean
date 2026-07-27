@@ -3,9 +3,11 @@ Copyright (c) 2025 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Languages.Trivial
-import Complexitylib.Models.TuringMachine.Combinators
-import Complexitylib.Models.TuringMachine.Combinators.Internal.Complement
+module
+
+public import Complexitylib.Languages.Trivial
+public import Complexitylib.Models.TuringMachine.Combinators
+public import Complexitylib.Models.TuringMachine.Combinators.Internal.Complement
 
 /-!
 # `{0ⁿ 1ⁿ : n ≥ 0}`: the canonical push-down language
@@ -29,6 +31,8 @@ via the permanently-`▷` cell 0.
 - `anbnTM_reachesIn` — halts in `|x| + 3` steps on every input.
 - `anbn_in_DTIME`, `anbn_mem_P`.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

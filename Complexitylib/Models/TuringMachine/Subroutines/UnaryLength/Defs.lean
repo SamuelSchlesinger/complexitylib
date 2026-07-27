@@ -3,7 +3,9 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Models.TuringMachine.Combinators
+module
+
+public import Complexitylib.Models.TuringMachine.Combinators
 
 /-!
 # Unary input-length transducer — definitions
@@ -12,6 +14,8 @@ This module defines a deterministic transducer that scans its Boolean input
 once and writes one `true` bit per input bit. Its output is therefore the
 unary representation `List.replicate x.length true` of the input length.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

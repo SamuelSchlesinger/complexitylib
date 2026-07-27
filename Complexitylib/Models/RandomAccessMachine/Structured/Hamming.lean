@@ -3,9 +3,11 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Models.RandomAccessMachine.Structured.Hamming.Defs
-import Complexitylib.Models.RandomAccessMachine.Structured.Hamming.Internal
-import Complexitylib.Asymptotics
+module
+
+public import Complexitylib.Models.RandomAccessMachine.Structured.Hamming.Defs
+public import Complexitylib.Models.RandomAccessMachine.Structured.Hamming.Internal
+public import Complexitylib.Asymptotics
 
 /-!
 # Verified structured RAM Hamming weight
@@ -17,6 +19,8 @@ the generic compiler theorem, carrying the result to the concrete logarithmic-co
 RAM with an exact transition count, explicit length-indexed budgets, and
 quasilinear asymptotic corollaries.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

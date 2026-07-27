@@ -3,9 +3,11 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Circuits.BitString
-import Complexitylib.Circuits.DecisionTree
-import Complexitylib.Circuits.Restriction
+module
+
+public import Complexitylib.Circuits.BitString
+public import Complexitylib.Circuits.DecisionTree
+public import Complexitylib.Circuits.Restriction
 
 /-!
 # Finite-arity decision trees -- definitions
@@ -14,6 +16,8 @@ The original `DecisionTree` syntax uses natural-number query labels. Switching
 arguments, however, count restrictions on exactly `N` variables. `DecisionTree.On
 N` makes that arity part of the type and prevents out-of-range queries.
 -/
+
+@[expose] public section
 
 namespace Complexity
 namespace DecisionTree

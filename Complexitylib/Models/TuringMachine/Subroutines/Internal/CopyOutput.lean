@@ -3,9 +3,11 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Models.TuringMachine.Subroutines
-import Complexitylib.Models.TuringMachine.Tape.Encoding
-import Complexitylib.Models.TuringMachine.Combinators.Internal.Generic
+module
+
+public import Complexitylib.Models.TuringMachine.Subroutines
+public import Complexitylib.Models.TuringMachine.Tape.Encoding
+public import Complexitylib.Models.TuringMachine.Combinators.Internal.Generic
 
 /-!
 # Input-to-output copy correctness
@@ -18,6 +20,8 @@ Boolean symbol per step, and halts at the first input blank after exactly
 The public theorem is stated in
 `Complexitylib.Models.TuringMachine.Subroutines.CopyOutput`.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

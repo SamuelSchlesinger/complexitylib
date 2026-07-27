@@ -3,8 +3,10 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Models.TuringMachine.Subroutines
-import Complexitylib.Models.TuringMachine.Tape.Encoding
+module
+
+public import Complexitylib.Models.TuringMachine.Subroutines
+public import Complexitylib.Models.TuringMachine.Tape.Encoding
 
 /-!
 # Binary work-tape equality — definitions
@@ -13,6 +15,8 @@ import Complexitylib.Models.TuringMachine.Tape.Encoding
 result on a third work tape. Unlike the legacy output-oriented comparator, it
 preserves the public output tape and every unrelated work tape.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

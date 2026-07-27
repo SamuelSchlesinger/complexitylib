@@ -3,7 +3,9 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.SAT.Tseitin.Internal.Streaming
+module
+
+public import Complexitylib.SAT.Tseitin.Internal.Streaming
 
 /-!
 # Register bounds for the streaming Tseitin transformation
@@ -14,6 +16,8 @@ most one, so a run is bounded by its initial state plus the number of tokens
 consumed. The concrete reduction machine uses this invariant to select one
 uniform register-operation budget for its entire input scan.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

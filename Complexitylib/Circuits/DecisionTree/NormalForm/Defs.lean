@@ -3,9 +3,11 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Circuits.DecisionTree.Finite.Defs
-import Complexitylib.Circuits.NormalForm.Defs
-import Complexitylib.Circuits.NormalForm.Operations.Defs
+module
+
+public import Complexitylib.Circuits.DecisionTree.Finite.Defs
+public import Complexitylib.Circuits.NormalForm.Defs
+public import Complexitylib.Circuits.NormalForm.Operations.Defs
 
 /-!
 # Compiling finite decision trees to CNF and DNF -- definitions
@@ -15,6 +17,8 @@ the negative query literal and a true branch records the positive literal.
 The dual CNF is obtained by compiling the leaf-complemented tree and applying
 De Morgan negation.
 -/
+
+@[expose] public section
 
 namespace Complexity
 namespace DecisionTree.On

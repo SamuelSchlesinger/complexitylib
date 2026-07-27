@@ -3,8 +3,10 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Models.TuringMachine.Hoare.Defs
-import Complexitylib.Models.TuringMachine.Lift
+module
+
+public import Complexitylib.Models.TuringMachine.Hoare.Defs
+public import Complexitylib.Models.TuringMachine.Lift
 
 /-!
 # Hoare contracts for output redirection
@@ -13,6 +15,8 @@ This module lifts a framed contract through `TM.retargetOutput`, exposing the
 source output as the fresh last work tape while pinning the real output to the
 standard parked blank tape.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

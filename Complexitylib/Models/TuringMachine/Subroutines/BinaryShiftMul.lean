@@ -3,10 +3,12 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Models.TuringMachine.Subroutines.BinaryShiftMul.Defs
-import Complexitylib.Models.TuringMachine.Subroutines.BinaryShiftMul.Internal.Out
-import Complexitylib.Models.TuringMachine.Subroutines.BinaryShiftMul.Internal.Pure
-import Complexitylib.Models.TuringMachine.Subroutines.BinaryShiftMul.Internal.Sem
+module
+
+public import Complexitylib.Models.TuringMachine.Subroutines.BinaryShiftMul.Defs
+public import Complexitylib.Models.TuringMachine.Subroutines.BinaryShiftMul.Internal.Out
+public import Complexitylib.Models.TuringMachine.Subroutines.BinaryShiftMul.Internal.Pure
+public import Complexitylib.Models.TuringMachine.Subroutines.BinaryShiftMul.Internal.Sem
 
 /-!
 # Width-driven binary shift-and-add multiplication
@@ -17,6 +19,8 @@ accumulator, restores every owned head to cell one, clears three scratch tapes,
 and preserves the complete external tape frame. Its running time is quadratic
 in the combined operand width.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

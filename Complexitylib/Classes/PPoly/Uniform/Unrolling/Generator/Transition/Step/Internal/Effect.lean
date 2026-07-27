@@ -3,12 +3,14 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Transition.Next
-import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Transition.PackedCopy
-import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Transition.Step.Defs
-import Complexitylib.Models.TuringMachine.Experimental.BinaryRoutine.Arithmetic
-import Complexitylib.Models.TuringMachine.Experimental.BinaryRoutine.Control
-import Complexitylib.Models.TuringMachine.Experimental.BinaryRoutine.List
+module
+
+public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Transition.Next
+public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Transition.PackedCopy
+public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Transition.Step.Defs
+public import Complexitylib.Models.TuringMachine.Experimental.BinaryRoutine.Arithmetic
+public import Complexitylib.Models.TuringMachine.Experimental.BinaryRoutine.Control
+public import Complexitylib.Models.TuringMachine.Experimental.BinaryRoutine.List
 
 /-!
 # Exact effects of the direct packed-step generator
@@ -18,6 +20,8 @@ phases.  The statements deliberately retain the exact numeric schedule sizes:
 they do not assume that the saved formula cursor or either gate register is
 initially zero.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

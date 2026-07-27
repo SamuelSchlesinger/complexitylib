@@ -3,8 +3,10 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Models.TuringMachine.Subroutines.BinaryFor.Defs
-import Complexitylib.Models.TuringMachine.Subroutines.ClearWork.Defs
+module
+
+public import Complexitylib.Models.TuringMachine.Subroutines.BinaryFor.Defs
+public import Complexitylib.Models.TuringMachine.Subroutines.ClearWork.Defs
 
 /-!
 # Canonical binary addition — definitions
@@ -14,6 +16,8 @@ The source tape is the preserved loop limit, the destination is incremented
 once per source value, and a distinct scratch counter records loop progress.
 After the loop, the scratch tape is cleared back to canonical zero.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

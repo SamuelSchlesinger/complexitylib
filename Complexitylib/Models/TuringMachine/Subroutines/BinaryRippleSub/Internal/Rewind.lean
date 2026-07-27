@@ -3,8 +3,10 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Models.TuringMachine.Subroutines.BinaryRippleSub.Defs
-import Complexitylib.Models.TuringMachine.Subroutines.ResetBinary.Internal
+module
+
+public import Complexitylib.Models.TuringMachine.Subroutines.BinaryRippleSub.Defs
+public import Complexitylib.Models.TuringMachine.Subroutines.ResetBinary.Internal
 
 /-!
 # Linear-time canonical binary subtraction -- operand rewind internals
@@ -13,11 +15,14 @@ The subtraction core already returns its result to cell one. This module
 packages the two remaining operand rewinds into one exact framed contract.
 -/
 
+@[expose] public section
+
 namespace Complexity
 
 namespace TM
 
-private def binaryRippleSubCanonicalTape (bits : List Bool) : Tape :=
+@[nolint docBlame]
+def binaryRippleSubCanonicalTape (bits : List Bool) : Tape :=
   (Tape.init (bits.map Γ.ofBool)).move Dir3.right
 
 private theorem binaryRippleSubCanonicalTape_parked (bits : List Bool) :

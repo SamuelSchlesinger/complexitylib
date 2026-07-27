@@ -3,10 +3,12 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Circuits.Encoding.Threshold.Defs
-import Complexitylib.Circuits.BitString
-import Complexitylib.Circuits.Unrolling.Acceptance.Defs
-import Mathlib.Data.List.FinRange
+module
+
+public import Complexitylib.Circuits.Encoding.Threshold.Defs
+public import Complexitylib.Circuits.BitString
+public import Complexitylib.Circuits.Unrolling.Acceptance.Defs
+public import Mathlib.Data.List.FinRange
 
 /-!
 # Parallel amplification circuits -- definitions
@@ -21,6 +23,8 @@ After all copies have been emitted, a unary threshold fragment computes their
 strict majority. The construction is proof-free. Later modules establish the
 exact gate count, topological ordering, and evaluation semantics.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

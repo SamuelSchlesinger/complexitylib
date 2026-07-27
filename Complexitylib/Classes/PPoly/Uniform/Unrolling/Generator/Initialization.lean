@@ -3,8 +3,10 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Initialization.Defs
-import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Initialization.Internal
+module
+
+public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Initialization.Defs
+public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Initialization.Internal
 
 /-!
 # Verified direct-unrolling initialization generator
@@ -13,6 +15,8 @@ This module exposes soundness, logarithmic all-prefix space, exact pure
 effects, exact raw-gate emission, and the positive-input entry contract for
 the direct initialization phase.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

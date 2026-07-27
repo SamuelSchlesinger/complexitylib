@@ -3,8 +3,10 @@ Copyright (c) 2025 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Classes.Pairing
-import Complexitylib.Classes.P
+module
+
+public import Complexitylib.Classes.Pairing
+public import Complexitylib.Classes.P
 
 /-!
 # FNP and TFNP — Definitions
@@ -13,6 +15,8 @@ Core definitions for the function/search complexity classes **FNP** and **TFNP**
 and the `OrRelation` combinator used to construct TFNP problems from
 NP ∩ coNP witness pairs.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

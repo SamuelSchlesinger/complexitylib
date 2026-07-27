@@ -3,8 +3,10 @@ Copyright (c) 2025 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Models.TuringMachine.Internal
-import Complexitylib.Models.TuringMachine.SingleTape
+module
+
+public import Complexitylib.Models.TuringMachine.Internal
+public import Complexitylib.Models.TuringMachine.SingleTape
 
 /-!
 # Deterministic NTMs → DTMs
@@ -29,6 +31,8 @@ deterministic machines:
   `k`-work-tape DTM in time `T` is decidable by a single-work-tape DTM within
   `singleTapeSimTime k T = fun n => 16 * (k + 1) * (T n + n + 1) ^ 2`.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

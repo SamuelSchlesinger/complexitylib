@@ -3,8 +3,10 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Transition.Case.Defs
-import Complexitylib.Classes.PPoly.Uniform.Unrolling.Serializer.Transition.Effect.Defs
+module
+
+public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Transition.Case.Defs
+public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Serializer.Transition.Effect.Defs
 
 /-!
 # Direct-unrolling transition-effect generator -- definitions
@@ -14,6 +16,8 @@ Selected cases use the executable case-formula routine; unselected cases emit
 one false gate. The suffix traverses the hardwired case table in reverse and
 rolls one output reference backward by each intervening case size.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

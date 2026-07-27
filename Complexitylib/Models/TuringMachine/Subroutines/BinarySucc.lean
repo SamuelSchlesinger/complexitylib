@@ -3,8 +3,10 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Models.TuringMachine.Subroutines.BinarySucc.Defs
-import Complexitylib.Models.TuringMachine.Subroutines.BinarySucc.Internal
+module
+
+public import Complexitylib.Models.TuringMachine.Subroutines.BinarySucc.Defs
+public import Complexitylib.Models.TuringMachine.Subroutines.BinarySucc.Internal
 
 /-!
 # Little-endian binary successor
@@ -23,6 +25,8 @@ tape to cell one.
   contract.
 - `TM.binarySuccTM_isTransducer` — the output head never moves left.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

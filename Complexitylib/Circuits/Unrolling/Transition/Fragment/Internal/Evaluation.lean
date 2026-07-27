@@ -3,11 +3,13 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Circuits.Encoding.Formula.Batch
-import Complexitylib.Circuits.Unrolling.Transition.Fragment.Defs
-import Complexitylib.Circuits.Unrolling.Transition.Fragment.Internal.Structure
-import Complexitylib.Circuits.Unrolling.Transition.Internal.Semantics
-import Complexitylib.Circuits.Unrolling.Transition.Internal.Support
+module
+
+public import Complexitylib.Circuits.Encoding.Formula.Batch
+public import Complexitylib.Circuits.Unrolling.Transition.Fragment.Defs
+public import Complexitylib.Circuits.Unrolling.Transition.Fragment.Internal.Structure
+public import Complexitylib.Circuits.Unrolling.Transition.Internal.Semantics
+public import Complexitylib.Circuits.Unrolling.Transition.Internal.Support
 
 /-!
 # Evaluation of packed one-step circuit fragments
@@ -16,6 +18,8 @@ This internal module lifts the semantics of individual transition formulas
 through the formula batch compiler. The packed outputs form a fresh encoded
 configuration block for the halted-or-successor machine configuration.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

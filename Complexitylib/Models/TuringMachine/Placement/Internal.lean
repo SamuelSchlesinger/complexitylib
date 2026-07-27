@@ -3,8 +3,10 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Models.TuringMachine.Placement.Defs
-import Complexitylib.Models.TuringMachine.Internal
+module
+
+public import Complexitylib.Models.TuringMachine.Placement.Defs
+public import Complexitylib.Models.TuringMachine.Internal
 
 /-!
 # Work-tape placement correctness internals
@@ -14,6 +16,8 @@ This file proves exact step and bounded-reachability commutation for
 extra-tape frame by its prescribed idle action. Stable frames and the canonical
 parked frame are fixed points of that action.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

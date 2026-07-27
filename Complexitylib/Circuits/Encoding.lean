@@ -3,14 +3,16 @@ Copyright (c) 2025 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Circuits.Encoding.Defs
-import Complexitylib.Circuits.Encoding.Fragment
-import Complexitylib.Circuits.Encoding.Formula
-import Complexitylib.Circuits.Encoding.Formula.Batch
-import Complexitylib.Circuits.Encoding.Formula.Stream
-import Complexitylib.Circuits.Encoding.Internal
-import Complexitylib.Circuits.Encoding.Threshold
-import Complexitylib.Circuits.Encoding.ToCircuit
+module
+
+public import Complexitylib.Circuits.Encoding.Defs
+public import Complexitylib.Circuits.Encoding.Fragment
+public import Complexitylib.Circuits.Encoding.Formula
+public import Complexitylib.Circuits.Encoding.Formula.Batch
+public import Complexitylib.Circuits.Encoding.Formula.Stream
+public import Complexitylib.Circuits.Encoding.Internal
+public import Complexitylib.Circuits.Encoding.Threshold
+public import Complexitylib.Circuits.Encoding.ToCircuit
 
 /-!
 # Encoded fan-in-two circuits
@@ -51,6 +53,8 @@ This module exposes the machine-facing representation of
 - `BoolFormula.evalAux?_compileRawBatch`: exact contiguous batch-output semantics.
 - `Threshold.evalAux?_compileRaw`: exact threshold-fragment evaluation.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

@@ -3,7 +3,9 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Circuits.Encoding.Formula.Internal
+module
+
+public import Complexitylib.Circuits.Encoding.Formula.Internal
 
 /-!
 # Correctness of Boolean-formula raw compilation
@@ -25,6 +27,8 @@ circuits; circuit families handle their zero-input member separately.
 - `BoolFormula.evalAux?_compileRaw_of_agree`: sparse-variable semantic
   correctness; `evalAux?_compileRaw` is the all-existing-wires corollary.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

@@ -3,9 +3,11 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Models.TuringMachine.Subroutines.BinaryEq.Defs
-import Complexitylib.Models.TuringMachine.Subroutines.BinaryEq.Internal
-import Complexitylib.Models.TuringMachine.Hoare.Space
+module
+
+public import Complexitylib.Models.TuringMachine.Subroutines.BinaryEq.Defs
+public import Complexitylib.Models.TuringMachine.Subroutines.BinaryEq.Internal
+public import Complexitylib.Models.TuringMachine.Hoare.Space
 
 /-!
 # Binary work-tape equality
@@ -13,6 +15,8 @@ import Complexitylib.Models.TuringMachine.Hoare.Space
 This module exposes a framed linear-time correctness theorem for the concrete
 binary equality routine used by RAM register-store scans.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

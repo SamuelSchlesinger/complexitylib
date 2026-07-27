@@ -3,17 +3,21 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.PolynomialOffset
-import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Transition.Effect
-import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Transition.MovedHead.Defs
-import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Transition.Predecessor
-import Complexitylib.Classes.PPoly.Uniform.Unrolling.Serializer.Transition.MovedHead
-import Complexitylib.Classes.PPoly.Uniform.Unrolling.Serializer.Transition.Polynomial
-import Complexitylib.Models.TuringMachine.Experimental.BinaryRoutine.List
+module
+
+public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.PolynomialOffset
+public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Transition.Effect
+public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Transition.MovedHead.Defs
+public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Transition.Predecessor
+public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Serializer.Transition.MovedHead
+public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Serializer.Transition.Polynomial
+public import Complexitylib.Models.TuringMachine.Experimental.BinaryRoutine.List
 
 /-!
 # Direct-unrolling moved-head generator -- proof internals
 -/
+
+@[expose] public section
 
 namespace Complexity
 
@@ -24,7 +28,7 @@ namespace Serializer
 namespace DirectGenerator
 
 /-- Numeric direction code used by the canonical moved-head schedule. -/
-private def movedHeadDirectionCode : Dir3 → ℕ
+def movedHeadDirectionCode : Dir3 → ℕ
   | .left => 0
   | .right => 1
   | .stay => 2
@@ -32,7 +36,7 @@ private def movedHeadDirectionCode : Dir3 → ℕ
 /-- Scratch owned by the conjunction between an effect child and a
 predecessor-head child. The run-time target and tape selector are deliberately
 excluded because the predecessor routine preserves them. -/
-private structure MovedHeadConjunctionClean
+structure MovedHeadConjunctionClean
     (values : BinaryValues WorkCount) : Prop where
   temporary₃ : values Work.temporary₃ = 0
   polynomialScratch : values Work.polynomialScratch = 0
@@ -44,7 +48,7 @@ private structure MovedHeadConjunctionClean
   reference₀ : values Work.reference₀ = 0
   reference₁ : values Work.reference₁ = 0
 
-private theorem CaseFormulaClean.movedHeadConjunctionClean
+theorem CaseFormulaClean.movedHeadConjunctionClean
     {values : BinaryValues WorkCount} (hclean : CaseFormulaClean values)
     (available₀ position tapeIndex available₁ : ℕ) :
     MovedHeadConjunctionClean
@@ -68,7 +72,7 @@ private theorem CaseFormulaClean.movedHeadConjunctionClean
   · simpa using hclean.reference₀
   · simpa using hclean.reference₁
 
-private theorem CaseFormulaClean.updateMovedHeadOuter
+theorem CaseFormulaClean.updateMovedHeadOuter
     {values : BinaryValues WorkCount} (hclean : CaseFormulaClean values)
     (index : Fin WorkCount) (value : ℕ)
     (hindex : index = Work.available ∨ index = Work.limit₂ ∨
@@ -263,7 +267,8 @@ theorem saveMovedHeadMemberOutput_sound_internal (save : Fin WorkCount) :
     (saveMovedHeadMemberOutput save).Sound :=
   prepareRecentReference_sound save 1
 
-private def movedHeadMemberResult (values : BinaryValues WorkCount)
+@[nolint docBlame]
+def movedHeadMemberResult (values : BinaryValues WorkCount)
     (save : Fin WorkCount) (effectSize : ℕ) : BinaryValues WorkCount :=
   Function.update
     (Function.update
@@ -275,7 +280,7 @@ private def movedHeadMemberResult (values : BinaryValues WorkCount)
             movedHeadPredecessorSize (values Work.horizon))) Work.position 0)
     Work.tapeIndex 0
 
-private theorem clearMovedHeadSelectors
+theorem clearMovedHeadSelectors
     (values : BinaryValues WorkCount) (save : Fin WorkCount)
     (frontier saved target tapeIndex : ℕ) :
     Function.update
@@ -312,7 +317,7 @@ private theorem clearMovedHeadSelectors
   simp [htapeIndex, hpositionIndex, hsaveIndex,
     havailableIndex]
 
-private theorem movedHeadConjunctionUpdates
+theorem movedHeadConjunctionUpdates
     (values : BinaryValues WorkCount) (effectSize predecessorSize : ℕ)
     (target tapeIndex : ℕ) :
     Function.update
@@ -345,7 +350,7 @@ private theorem movedHeadConjunctionUpdates
     simp [Work.available, Work.position, Work.tapeIndex]
   simp [havailableIndex, hpositionIndex, htapeIndex]
 
-private theorem seqListEight_effect
+theorem seqListEight_effect
     (routine₀ routine₁ routine₂ routine₃ routine₄ routine₅ routine₆
       routine₇ : BinaryRoutine n) (values : BinaryValues n) :
     (BinaryRoutine.seqList
@@ -359,7 +364,7 @@ private theorem seqListEight_effect
                 (routine₂.effect
                   (routine₁.effect (routine₀.effect values))))))) := rfl
 
-private theorem add_sub_add_one (value extra : ℕ) :
+theorem add_sub_add_one (value extra : ℕ) :
     value + extra - (extra + 1) = value - 1 := by
   omega
 
@@ -836,13 +841,14 @@ theorem emitSavedMovedHeadConnector_requires_internal
       BinaryRoutine.emitRawGateStep, BinaryRoutine.clear,
       Work.reference₁, Work.savedOutput, Work.direction, Work.atomKind]
 
-private def movedHeadStartValues (values : BinaryValues WorkCount) :
+@[nolint docBlame]
+def movedHeadStartValues (values : BinaryValues WorkCount) :
     BinaryValues WorkCount :=
   Function.update
     (Function.update values Work.limit₂ (values Work.position))
     Work.position 0
 
-private theorem movedHeadStartValues_caseClean
+theorem movedHeadStartValues_caseClean
     (values : BinaryValues WorkCount) (hclean : MovedHeadFormulaClean values) :
     CaseFormulaClean (movedHeadStartValues values) := by
   have h := hclean.caseClean.updateMovedHeadOuter Work.limit₂
@@ -853,7 +859,7 @@ private theorem movedHeadStartValues_caseClean
   simp only [movedHeadStartValues]
   rw [Function.update_comm (show Work.limit₂ ≠ Work.position by decide)]
 
-private theorem CaseFormulaClean.movedHeadMemberResult
+theorem CaseFormulaClean.movedHeadMemberResult
     {values : BinaryValues WorkCount} (hclean : CaseFormulaClean values)
     (save : Fin WorkCount) (effectSize : ℕ)
     (hsave : save = Work.savedOutput ∨ save = Work.direction ∨
@@ -1483,7 +1489,7 @@ theorem emitMovedHeadFormula_emitted_internal (tm : NTM k)
       simpa [Work.available] using havailable
     first | omega | (congr 1 <;> omega)
 
-private theorem emitSavedMovedHeadConnector_spaceBoundByWidthAt
+theorem emitSavedMovedHeadConnector_spaceBoundByWidthAt
     (save : Fin WorkCount) {initialSpace : ℕ → ℕ}
     {values : ℕ → BinaryValues WorkCount} {width : ℕ → ℕ}
     (hvalues : ∀ inputLength index,
@@ -1534,7 +1540,7 @@ private theorem emitSavedMovedHeadConnector_spaceBoundByWidthAt
   simp only [BinaryRoutine.SeqListSpaceBoundByWidthAt]
   exact ⟨hprepare, hemit, hclear, trivial⟩
 
-private theorem emitMovedHeadConjunction_spaceBoundByWidthAt
+theorem emitMovedHeadConjunction_spaceBoundByWidthAt
     {initialSpace : ℕ → ℕ} {values : ℕ → BinaryValues WorkCount}
     {width : ℕ → ℕ}
     (hvalues : ∀ inputLength index,
@@ -1560,7 +1566,7 @@ private theorem emitMovedHeadConjunction_spaceBoundByWidthAt
     simpa [predecessorHeadSchedulePolynomial_eval] using hoffset inputLength
   · exact havailable
 
-private theorem emitMovedHeadMember_spaceBoundByWidthAt
+theorem emitMovedHeadMember_spaceBoundByWidthAt
     (tm : NTM k) (tape : TapeSlot k) (direction : Dir3)
     (directionCode : ℕ) (save : Fin WorkCount)
     {initialSpace : ℕ → ℕ} {values : ℕ → BinaryValues WorkCount}
@@ -1910,7 +1916,7 @@ private theorem emitMovedHeadMember_spaceBoundByWidthAt
       hpredecessorTrajectory, hconjunctionTrajectory, hsaveTrajectory,
       hclearPositionTrajectory] using hclearTape
 
-private theorem movedHeadMemberResult_values_le
+theorem movedHeadMemberResult_values_le
     {values : ℕ → BinaryValues WorkCount} {effectSize width : ℕ → ℕ}
     (save : Fin WorkCount)
     (hvalues : ∀ inputLength index,
@@ -1935,7 +1941,7 @@ private theorem movedHeadMemberResult_values_le
     · omega
   · omega
 
-private theorem emitMovedHeadFormulaSuffix_seqListSpaceBoundByWidthAt
+theorem emitMovedHeadFormulaSuffix_seqListSpaceBoundByWidthAt
     {initialSpace : ℕ → ℕ} {values : ℕ → BinaryValues WorkCount}
     {width : ℕ → ℕ}
     (hclean : ∀ inputLength, CaseFormulaClean (values inputLength))

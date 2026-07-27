@@ -3,10 +3,12 @@ Copyright (c) 2025 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Languages.Trivial
-import Complexitylib.Models.TuringMachine.Combinators
-import Complexitylib.Models.TuringMachine.Combinators.Internal.Scanner
-import Complexitylib.Models.TuringMachine.Combinators.Internal.Complement
+module
+
+public import Complexitylib.Languages.Trivial
+public import Complexitylib.Models.TuringMachine.Combinators
+public import Complexitylib.Models.TuringMachine.Combinators.Internal.Scanner
+public import Complexitylib.Models.TuringMachine.Combinators.Internal.Complement
 
 /-!
 # `allZeros` and `allOnes`: single-symbol languages
@@ -25,6 +27,8 @@ single `Bool` tracking "every bit so far equals target".
 - `allZeros_in_DTIME`, `allOnes_in_DTIME` — both in `DTIME(n + 2)`.
 - `allZeros_mem_P`, `allOnes_mem_P`.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

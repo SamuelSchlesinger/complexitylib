@@ -3,10 +3,12 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Models.RandomAccessMachine.Structured.PairValidate.Defs
-import Complexitylib.Models.RandomAccessMachine.Structured.PairValidate.Internal
-import Complexitylib.Models.RandomAccessMachine.Structured.Scanner
-import Complexitylib.Models.TuringMachine.Subroutines.PairValidate
+module
+
+public import Complexitylib.Models.RandomAccessMachine.Structured.PairValidate.Defs
+public import Complexitylib.Models.RandomAccessMachine.Structured.PairValidate.Internal
+public import Complexitylib.Models.RandomAccessMachine.Structured.Scanner
+public import Complexitylib.Models.TuringMachine.Subroutines.PairValidate
 
 /-!
 # Verified structured RAM pair validator
@@ -16,6 +18,8 @@ This table-driven RAM program reimplements the same five-state automaton as
 logarithmic-cost time and peak-space budgets, and an end-to-end compiled-RAM
 correctness theorem for the canonical pair-encoding language.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

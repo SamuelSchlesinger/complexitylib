@@ -3,7 +3,9 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Transition.Step.Internal.Emitted
+module
+
+public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Transition.Step.Internal.Emitted
 
 /-!
 # Exact packed-copy output of the direct step generator
@@ -12,6 +14,8 @@ This module composes the per-region delayed-copy contracts into the canonical
 numeric packed-copy suffix. Formula emission and the outer deterministic step
 are intentionally handled by separate modules.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

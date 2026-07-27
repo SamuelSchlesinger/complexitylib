@@ -3,6 +3,7 @@ Copyright (c) 2025 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
+module
 
 /-!
   # Vocabularies (Signatures)
@@ -11,7 +12,7 @@ Authors: Samuel Schlesinger
   signature) is a tuple of relation symbols with arities, plus constant symbols.
   We represent this finitely: `numRels` relation symbols with arities given by
   `relArity`, and `numConsts` constant symbols.
--/
+-/@[expose] public section
 
 namespace Complexity
 

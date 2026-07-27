@@ -3,7 +3,9 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import
+module
+
+public import
   Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Machine.EntryScan.Defs
 
 /-!
@@ -12,6 +14,8 @@ import
 The bounded scanner is already the concrete lookup machine. This module names
 its semantic endpoint in terms of the pure sparse-store `read` operation.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

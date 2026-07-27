@@ -3,11 +3,13 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Classes.P.NormalForm
-import Complexitylib.Classes.PPoly.Uniform
-import Complexitylib.Classes.PPoly.Uniform.Containment
-import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Tableau
-import Complexitylib.Classes.PPoly.Uniform.Unrolling.Padded
+module
+
+public import Complexitylib.Classes.P.NormalForm
+public import Complexitylib.Classes.PPoly.Uniform
+public import Complexitylib.Classes.PPoly.Uniform.Containment
+public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Tableau
+public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Padded
 
 /-!
 # Deterministic unrolling into uniform P/poly -- proof internals
@@ -16,6 +18,8 @@ This module packages the direct deterministic unrolling family first through
 conditional `FL` seams and then through the verified canonical padded
 serializer, yielding the unconditional machines-to-circuits containment.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

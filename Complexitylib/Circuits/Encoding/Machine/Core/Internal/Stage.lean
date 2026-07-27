@@ -3,8 +3,10 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Circuits.Encoding.Machine.Core.Defs
-import Complexitylib.Models.TuringMachine.Hoare
+module
+
+public import Complexitylib.Circuits.Encoding.Machine.Core.Defs
+public import Complexitylib.Models.TuringMachine.Hoare
 
 /-!
 # Circuit-evaluator staging seam
@@ -12,6 +14,8 @@ import Complexitylib.Models.TuringMachine.Hoare
 This file connects the valid outer-pair staging contract to the streaming
 core's precondition across the standard sequential-composition tape transition.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

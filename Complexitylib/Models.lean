@@ -3,71 +3,73 @@ Copyright (c) 2025 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Models.TuringMachine
-import Complexitylib.Models.TuringMachine.Trace
-import Complexitylib.Models.TuringMachine.SingleTape
-import Complexitylib.Models.TuringMachine.Combinators
-import Complexitylib.Models.TuringMachine.Combinators.ForBinaryWork
-import Complexitylib.Models.TuringMachine.Combinators.ForInput
-import Complexitylib.Models.TuringMachine.Combinators.ForWorkOnes
-import Complexitylib.Models.TuringMachine.Combinators.RetargetCompute
-import Complexitylib.Models.TuringMachine.Combinators.WorkBranch
-import Complexitylib.Models.TuringMachine.Combinators.WorkSymbolBranch
-import Complexitylib.Models.TuringMachine.Hoare
-import Complexitylib.Models.TuringMachine.Hoare.Space
-import Complexitylib.Models.TuringMachine.Experimental.Routine
-import Complexitylib.Models.TuringMachine.Experimental.BinaryRoutine
-import Complexitylib.Models.TuringMachine.Experimental.BinaryRoutine.Arithmetic
-import Complexitylib.Models.TuringMachine.Experimental.BinaryRoutine.Control
-import Complexitylib.Models.TuringMachine.Experimental.BinaryRoutine.InputLength
-import Complexitylib.Models.TuringMachine.Experimental.BinaryRoutine.List
-import Complexitylib.Models.TuringMachine.Experimental.BinaryRoutine.SpaceBounds
-import Complexitylib.Models.TuringMachine.Tape.Encoding
-import Complexitylib.Models.TuringMachine.Subroutines
-import Complexitylib.Models.TuringMachine.Subroutines.BinaryAdd
-import Complexitylib.Models.TuringMachine.Subroutines.BinaryAddConst
-import Complexitylib.Models.TuringMachine.Subroutines.BinaryCopy
-import Complexitylib.Models.TuringMachine.Subroutines.BinaryEq
-import Complexitylib.Models.TuringMachine.Subroutines.BinaryRippleAdd
-import Complexitylib.Models.TuringMachine.Subroutines.BinaryRippleSub
-import Complexitylib.Models.TuringMachine.Subroutines.BinaryShiftMul
-import Complexitylib.Models.TuringMachine.Subroutines.BinaryMulAdd
-import Complexitylib.Models.TuringMachine.Subroutines.BinaryPolynomial
-import Complexitylib.Models.TuringMachine.Subroutines.BinaryFor
-import Complexitylib.Models.TuringMachine.Subroutines.BinaryLength
-import Complexitylib.Models.TuringMachine.Subroutines.BinaryPred
-import Complexitylib.Models.TuringMachine.Subroutines.BinarySucc
-import Complexitylib.Models.TuringMachine.Subroutines.ClearWork
-import Complexitylib.Models.TuringMachine.Subroutines.CopyOutput
-import Complexitylib.Models.TuringMachine.Subroutines.CopyWorkOutput
-import Complexitylib.Models.TuringMachine.Subroutines.PairEmit
-import Complexitylib.Models.TuringMachine.Subroutines.PairValidate
-import Complexitylib.Models.TuringMachine.Subroutines.PairSplit
-import Complexitylib.Models.TuringMachine.Subroutines.ScanRight
-import Complexitylib.Models.TuringMachine.Subroutines.ResetBinary
-import Complexitylib.Models.TuringMachine.Subroutines.ResetBinaryMany
-import Complexitylib.Models.TuringMachine.Subroutines.UnaryLength
-import Complexitylib.Models.TuringMachine.OutputBounds
-import Complexitylib.Models.TuringMachine.SpaceTime
-import Complexitylib.Models.TuringMachine.Placement
-import Complexitylib.Models.TuringMachine.Composition
-import Complexitylib.Models.TuringMachine.Composition.PairWithInput
-import Complexitylib.Models.TuringMachine.Deterministic
-import Complexitylib.Models.TuringMachine.Lift
-import Complexitylib.Models.TuringMachine.Repetition
-import Complexitylib.Models.TuringMachine.Repetition.Correctness
-import Complexitylib.Models.TuringMachine.UTM.Encoding
-import Complexitylib.Models.TuringMachine.UTM.Machine
-import Complexitylib.Models.TuringMachine.UTM.Universal
-import Complexitylib.Models.TuringMachine.UTM.Clock
-import Complexitylib.Models.TuringMachine.UTM.ClockConstructible
-import Complexitylib.Models.TuringMachine.UTM.ClockedUtm
-import Complexitylib.Models.TuringMachine.UTM.HierarchySupport
-import Complexitylib.Models.TuringMachine.UTM.Diagonal
-import Complexitylib.Models.RandomAccessMachine
-import Complexitylib.Models.RoseTreeMachine.Data
-import Complexitylib.Models.RoseTreeMachine.DataEncode
-import Complexitylib.Models.RoseTreeMachine.Prog
+module
+
+public import Complexitylib.Models.TuringMachine
+public import Complexitylib.Models.TuringMachine.Trace
+public import Complexitylib.Models.TuringMachine.SingleTape
+public import Complexitylib.Models.TuringMachine.Combinators
+public import Complexitylib.Models.TuringMachine.Combinators.ForBinaryWork
+public import Complexitylib.Models.TuringMachine.Combinators.ForInput
+public import Complexitylib.Models.TuringMachine.Combinators.ForWorkOnes
+public import Complexitylib.Models.TuringMachine.Combinators.RetargetCompute
+public import Complexitylib.Models.TuringMachine.Combinators.WorkBranch
+public import Complexitylib.Models.TuringMachine.Combinators.WorkSymbolBranch
+public import Complexitylib.Models.TuringMachine.Hoare
+public import Complexitylib.Models.TuringMachine.Hoare.Space
+public import Complexitylib.Models.TuringMachine.Experimental.Routine
+public import Complexitylib.Models.TuringMachine.Experimental.BinaryRoutine
+public import Complexitylib.Models.TuringMachine.Experimental.BinaryRoutine.Arithmetic
+public import Complexitylib.Models.TuringMachine.Experimental.BinaryRoutine.Control
+public import Complexitylib.Models.TuringMachine.Experimental.BinaryRoutine.InputLength
+public import Complexitylib.Models.TuringMachine.Experimental.BinaryRoutine.List
+public import Complexitylib.Models.TuringMachine.Experimental.BinaryRoutine.SpaceBounds
+public import Complexitylib.Models.TuringMachine.Tape.Encoding
+public import Complexitylib.Models.TuringMachine.Subroutines
+public import Complexitylib.Models.TuringMachine.Subroutines.BinaryAdd
+public import Complexitylib.Models.TuringMachine.Subroutines.BinaryAddConst
+public import Complexitylib.Models.TuringMachine.Subroutines.BinaryCopy
+public import Complexitylib.Models.TuringMachine.Subroutines.BinaryEq
+public import Complexitylib.Models.TuringMachine.Subroutines.BinaryRippleAdd
+public import Complexitylib.Models.TuringMachine.Subroutines.BinaryRippleSub
+public import Complexitylib.Models.TuringMachine.Subroutines.BinaryShiftMul
+public import Complexitylib.Models.TuringMachine.Subroutines.BinaryMulAdd
+public import Complexitylib.Models.TuringMachine.Subroutines.BinaryPolynomial
+public import Complexitylib.Models.TuringMachine.Subroutines.BinaryFor
+public import Complexitylib.Models.TuringMachine.Subroutines.BinaryLength
+public import Complexitylib.Models.TuringMachine.Subroutines.BinaryPred
+public import Complexitylib.Models.TuringMachine.Subroutines.BinarySucc
+public import Complexitylib.Models.TuringMachine.Subroutines.ClearWork
+public import Complexitylib.Models.TuringMachine.Subroutines.CopyOutput
+public import Complexitylib.Models.TuringMachine.Subroutines.CopyWorkOutput
+public import Complexitylib.Models.TuringMachine.Subroutines.PairEmit
+public import Complexitylib.Models.TuringMachine.Subroutines.PairValidate
+public import Complexitylib.Models.TuringMachine.Subroutines.PairSplit
+public import Complexitylib.Models.TuringMachine.Subroutines.ScanRight
+public import Complexitylib.Models.TuringMachine.Subroutines.ResetBinary
+public import Complexitylib.Models.TuringMachine.Subroutines.ResetBinaryMany
+public import Complexitylib.Models.TuringMachine.Subroutines.UnaryLength
+public import Complexitylib.Models.TuringMachine.OutputBounds
+public import Complexitylib.Models.TuringMachine.SpaceTime
+public import Complexitylib.Models.TuringMachine.Placement
+public import Complexitylib.Models.TuringMachine.Composition
+public import Complexitylib.Models.TuringMachine.Composition.PairWithInput
+public import Complexitylib.Models.TuringMachine.Deterministic
+public import Complexitylib.Models.TuringMachine.Lift
+public import Complexitylib.Models.TuringMachine.Repetition
+public import Complexitylib.Models.TuringMachine.Repetition.Correctness
+public import Complexitylib.Models.TuringMachine.UTM.Encoding
+public import Complexitylib.Models.TuringMachine.UTM.Machine
+public import Complexitylib.Models.TuringMachine.UTM.Universal
+public import Complexitylib.Models.TuringMachine.UTM.Clock
+public import Complexitylib.Models.TuringMachine.UTM.ClockConstructible
+public import Complexitylib.Models.TuringMachine.UTM.ClockedUtm
+public import Complexitylib.Models.TuringMachine.UTM.HierarchySupport
+public import Complexitylib.Models.TuringMachine.UTM.Diagonal
+public import Complexitylib.Models.RandomAccessMachine
+public import Complexitylib.Models.RoseTreeMachine.Data
+public import Complexitylib.Models.RoseTreeMachine.DataEncode
+public import Complexitylib.Models.RoseTreeMachine.Prog
 
 /-!
 # Computation models
@@ -93,3 +95,5 @@ exact-3-CNF syntax instances. Proof-internal modules
 imported here — they stay in the build through the surface modules and theorem
 files that need them.
 -/
+
+@[expose] public section

@@ -3,16 +3,20 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import
+module
+
+public import
   Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Machine.EntryCleanup.Defs
-import
+public import
   Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Machine.EntryMatch
-import Complexitylib.Models.TuringMachine.Subroutines.ResetBinaryMany
-import Mathlib.Tactic.FinCases
+public import Complexitylib.Models.TuringMachine.Subroutines.ResetBinaryMany
+public import Mathlib.Tactic.FinCases
 
 /-!
 # Sparse-entry miss cleanup — proof internals
 -/
+
+@[expose] public section
 
 namespace Complexity
 

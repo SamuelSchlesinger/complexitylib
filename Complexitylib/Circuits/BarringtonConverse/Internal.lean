@@ -3,7 +3,9 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Circuits.BarringtonConverse.Defs
+module
+
+public import Complexitylib.Circuits.BarringtonConverse.Defs
 
 /-!
 # The converse direction of Barrington's theorem -- proof internals
@@ -11,6 +13,8 @@ import Complexitylib.Circuits.BarringtonConverse.Defs
 This file proves correctness and logarithmic depth for balanced branching-program
 evaluation, then lifts that construction to polynomial-length families.
 -/
+
+@[expose] public section
 
 open Equiv
 

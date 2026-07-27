@@ -3,7 +3,9 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Asymptotics
+module
+
+public import Complexitylib.Asymptotics
 
 /-!
 # Polynomial composition bounds
@@ -17,6 +19,8 @@ deterministic function computations are connected sequentially.
 - `BigO.polynomial_eval_comp` — nested polynomial evaluation is polynomially bounded
 - `BigO.polynomial_composition_time` — the coarse sequential runtime is polynomially bounded
 -/
+
+@[expose] public section
 
 namespace Complexity
 

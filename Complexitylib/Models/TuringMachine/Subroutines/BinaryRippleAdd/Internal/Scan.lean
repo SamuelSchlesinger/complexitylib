@@ -3,10 +3,12 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Models.TuringMachine.Subroutines.BinaryRippleAdd.Defs
-import Complexitylib.Models.TuringMachine.Subroutines.BinaryRippleAdd.Internal.Pure
-import Complexitylib.Models.TuringMachine.Combinators.Internal.Generic
-import Complexitylib.Models.TuringMachine.Tape.Encoding
+module
+
+public import Complexitylib.Models.TuringMachine.Subroutines.BinaryRippleAdd.Defs
+public import Complexitylib.Models.TuringMachine.Subroutines.BinaryRippleAdd.Internal.Pure
+public import Complexitylib.Models.TuringMachine.Combinators.Internal.Generic
+public import Complexitylib.Models.TuringMachine.Tape.Encoding
 
 /-!
 # Linear-time canonical binary addition -- scan proof
@@ -15,6 +17,8 @@ This file proves the exact operational contract for the carry-bearing forward
 scan. Rewinding and the complete canonical-natural interface are composed in
 later internal layers.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

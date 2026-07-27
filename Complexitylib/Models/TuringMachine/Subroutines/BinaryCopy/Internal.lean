@@ -3,10 +3,12 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Models.TuringMachine.Hoare.Space
-import Complexitylib.Models.TuringMachine.Subroutines.BinaryRippleAdd
-import Complexitylib.Models.TuringMachine.Subroutines.BinaryCopy.Defs
-import Complexitylib.Models.TuringMachine.Subroutines.ClearWork
+module
+
+public import Complexitylib.Models.TuringMachine.Hoare.Space
+public import Complexitylib.Models.TuringMachine.Subroutines.BinaryRippleAdd
+public import Complexitylib.Models.TuringMachine.Subroutines.BinaryCopy.Defs
+public import Complexitylib.Models.TuringMachine.Subroutines.ClearWork
 
 /-!
 # Copying canonical binary naturals -- proof internals
@@ -17,29 +19,32 @@ proofs compose the public literal-frame and all-prefix contracts of both
 phases, then recover the original literal copy frame from canonicality.
 -/
 
+@[expose] public section
+
 namespace Complexity
 
 namespace TM
 
 variable {n : ℕ}
 
-private def binaryCopyNatTape (value : ℕ) : Tape :=
+@[nolint docBlame]
+def binaryCopyNatTape (value : ℕ) : Tape :=
   (Tape.init (value.bits.map Γ.ofBool)).move Dir3.right
 
-private theorem binaryCopyNatTape_hasBinaryNat (value : ℕ) :
+theorem binaryCopyNatTape_hasBinaryNat (value : ℕ) :
     (binaryCopyNatTape value).HasBinaryNat value :=
   Tape.init_move_right_hasBinaryNat value
 
-private theorem binaryCopyHasBinaryNat_parked {t : Tape} {value : ℕ}
+theorem binaryCopyHasBinaryNat_parked {t : Tape} {value : ℕ}
     (h : t.HasBinaryNat value) : Parked t := by
   refine ⟨by rw [h.2.1], ?_⟩
   exact Tape.HasBinaryContent.cells_ne_start h.2.2
 
-private theorem binaryCopyNatTape_parked (value : ℕ) :
+theorem binaryCopyNatTape_parked (value : ℕ) :
     Parked (binaryCopyNatTape value) :=
   binaryCopyHasBinaryNat_parked (binaryCopyNatTape_hasBinaryNat value)
 
-private theorem binaryCopyInitialWork_parked
+theorem binaryCopyInitialWork_parked
     (srcIdx dstIdx counterIdx : Fin n) (srcValue dstValue : ℕ)
     (work₀ : Fin n → Tape)
     (hsrc : (work₀ srcIdx).HasBinaryNat srcValue)
@@ -60,11 +65,12 @@ private theorem binaryCopyInitialWork_parked
     exact binaryCopyHasBinaryNat_parked hcounter
   exact hother i hsrcIdx hdstIdx hcounterIdx
 
-private def binaryCopyMidWork (work₀ : Fin n → Tape) (dstIdx : Fin n) :
+@[nolint docBlame]
+def binaryCopyMidWork (work₀ : Fin n → Tape) (dstIdx : Fin n) :
     Fin n → Tape :=
   Function.update work₀ dstIdx (binaryCopyNatTape 0)
 
-private theorem binaryCopyMidWork_parked
+theorem binaryCopyMidWork_parked
     (work₀ : Fin n → Tape) (dstIdx : Fin n)
     (hwork : ∀ i, Parked (work₀ i)) :
     ∀ i, Parked (binaryCopyMidWork work₀ dstIdx i) := by
@@ -76,7 +82,7 @@ private theorem binaryCopyMidWork_parked
   · rw [binaryCopyMidWork, Function.update_of_ne hi]
     exact hwork i
 
-private theorem binaryCopyFrame_transition
+theorem binaryCopyFrame_transition
     (inp₀ : Tape) (work₀ : Fin n → Tape) (out₀ : Tape)
     (hinp : Parked inp₀) (hwork : ∀ i, Parked (work₀ i))
     (hout : Parked out₀) :
@@ -90,14 +96,14 @@ private theorem binaryCopyFrame_transition
   funext i
   exact (hwork i).transitionTape_eq_self
 
-private theorem binaryCopyDistinct
+theorem binaryCopyDistinct
     (srcIdx dstIdx counterIdx : Fin n)
     (hsrcDst : srcIdx ≠ dstIdx) (hsrcCounter : srcIdx ≠ counterIdx)
     (hdstCounter : dstIdx ≠ counterIdx) :
     BinaryRippleAddDistinct srcIdx counterIdx dstIdx :=
   ⟨hsrcCounter, hsrcDst, hdstCounter.symm⟩
 
-private theorem binaryCopyRipplePost_eq
+theorem binaryCopyRipplePost_eq
     (srcIdx dstIdx counterIdx : Fin n)
     (hsrcDst : srcIdx ≠ dstIdx) (hdstCounter : dstIdx ≠ counterIdx)
     (srcValue : ℕ) (work₀ work : Fin n → Tape)

@@ -3,14 +3,16 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Circuits.Encoding.Machine.NatCode.Defs
-import Complexitylib.Circuits.Encoding.Machine.RawGate.Defs
-import Complexitylib.Models.TuringMachine.Experimental.BinaryRoutine.Defs
-import Complexitylib.Models.TuringMachine.Subroutines.BinaryAdd.Defs
-import Complexitylib.Models.TuringMachine.Subroutines.BinaryAddConst.Defs
-import Complexitylib.Models.TuringMachine.Subroutines.BinaryMulAdd.Defs
-import Complexitylib.Models.TuringMachine.Subroutines.BinaryPolynomial.Defs
-import Complexitylib.Models.TuringMachine.Subroutines.ClearWork.Defs
+module
+
+public import Complexitylib.Circuits.Encoding.Machine.NatCode.Defs
+public import Complexitylib.Circuits.Encoding.Machine.RawGate.Defs
+public import Complexitylib.Models.TuringMachine.Experimental.BinaryRoutine.Defs
+public import Complexitylib.Models.TuringMachine.Subroutines.BinaryAdd.Defs
+public import Complexitylib.Models.TuringMachine.Subroutines.BinaryAddConst.Defs
+public import Complexitylib.Models.TuringMachine.Subroutines.BinaryMulAdd.Defs
+public import Complexitylib.Models.TuringMachine.Subroutines.BinaryPolynomial.Defs
+public import Complexitylib.Models.TuringMachine.Subroutines.ClearWork.Defs
 
 /-!
 # Arithmetic leaves for proof-carrying binary routines -- definitions
@@ -19,6 +21,8 @@ These adapters expose the remaining framed binary subroutines through the
 pure value-vector interface. Static index separation and reusable-zero
 requirements remain explicit in `BinaryRoutine.requires`.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

@@ -3,7 +3,9 @@ Copyright (c) 2025 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.SAT.CookLevin.Internal.EmitterStart
+module
+
+public import Complexitylib.SAT.CookLevin.Internal.EmitterStart
 
 /-!
 # The active-transition family emitter
@@ -15,6 +17,8 @@ consequence each). States, symbols, and the choice bit are finite data
 unrolled at definition level (`bigSeqTM` over their lists); rows and
 positions are runtime loops.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

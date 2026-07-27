@@ -3,11 +3,13 @@ Copyright (c) 2025 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Models.TuringMachine.Hoare.Defs
-import Complexitylib.Models.TuringMachine.Combinators.Internal.Seq
-import Complexitylib.Models.TuringMachine.Combinators.Internal.If
-import Complexitylib.Models.TuringMachine.Combinators.Internal.Loop
-import Complexitylib.Models.TuringMachine.Combinators.Internal.Complement
+module
+
+public import Complexitylib.Models.TuringMachine.Hoare.Defs
+public import Complexitylib.Models.TuringMachine.Combinators.Internal.Seq
+public import Complexitylib.Models.TuringMachine.Combinators.Internal.If
+public import Complexitylib.Models.TuringMachine.Combinators.Internal.Loop
+public import Complexitylib.Models.TuringMachine.Combinators.Internal.Complement
 
 /-!
 # Hoare-style composition rules for TM combinators
@@ -30,6 +32,8 @@ A current read other than `▷` is exactly what their fixed-point rules require;
 parked tapes, or `AllTapesWF` together with positive-head facts, provide common
 stronger certificates.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

@@ -3,8 +3,10 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Classes.PPoly.Uniform.Unrolling.Serializer.Transition.Next.Defs
-import Mathlib.Algebra.Polynomial.Eval.Defs
+module
+
+public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Serializer.Transition.Next.Defs
+public import Mathlib.Algebra.Polynomial.Eval.Defs
 
 /-!
 # Fixed transition-schedule size polynomials -- definitions
@@ -15,6 +17,8 @@ polynomials let the executable serializer recover dynamic recent-wire offsets
 with the verified binary polynomial evaluator instead of replaying a formula
 tree or counting emitted gates.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

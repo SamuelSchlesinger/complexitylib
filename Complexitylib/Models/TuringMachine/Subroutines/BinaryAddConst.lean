@@ -3,8 +3,10 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Models.TuringMachine.Subroutines.BinaryAddConst.Defs
-import Complexitylib.Models.TuringMachine.Subroutines.BinaryAddConst.Internal
+module
+
+public import Complexitylib.Models.TuringMachine.Subroutines.BinaryAddConst.Defs
+public import Complexitylib.Models.TuringMachine.Subroutines.BinaryAddConst.Internal
 
 /-!
 # Addition of a fixed natural to a canonical binary tape
@@ -19,6 +21,8 @@ sequence of binary successors compiled from a hardwired natural constant.
 - `binaryAddConstTM_hoareTimeSpace_frame` gives a width-based prefix bound.
 - `binaryAddConstTM_isTransducer` proves append-only-output safety.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

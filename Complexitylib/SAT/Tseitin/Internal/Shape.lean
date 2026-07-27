@@ -3,7 +3,9 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.SAT.Tseitin.Defs
+module
+
+public import Complexitylib.SAT.Tseitin.Defs
 
 /-!
 # Structural properties of Tseitin clause splitting
@@ -13,6 +15,8 @@ exact-width-three clauses, accounts exactly for its fresh counter, keeps every
 generated variable below the first unused counter, and has linear structural
 size in the source literal and clause counts.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

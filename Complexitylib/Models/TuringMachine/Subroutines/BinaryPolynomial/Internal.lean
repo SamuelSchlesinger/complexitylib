@@ -3,12 +3,14 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Asymptotics
-import Complexitylib.Models.TuringMachine.Hoare.Space
-import Complexitylib.Models.TuringMachine.Subroutines.BinaryAddConst
-import Complexitylib.Models.TuringMachine.Subroutines.BinaryMulAdd
-import Complexitylib.Models.TuringMachine.Subroutines.BinaryPolynomial.Defs
-import Complexitylib.Models.TuringMachine.Subroutines.ClearWork
+module
+
+public import Complexitylib.Asymptotics
+public import Complexitylib.Models.TuringMachine.Hoare.Space
+public import Complexitylib.Models.TuringMachine.Subroutines.BinaryAddConst
+public import Complexitylib.Models.TuringMachine.Subroutines.BinaryMulAdd
+public import Complexitylib.Models.TuringMachine.Subroutines.BinaryPolynomial.Defs
+public import Complexitylib.Models.TuringMachine.Subroutines.ClearWork
 
 /-!
 # Canonical binary evaluation of a fixed natural polynomial — proof internals
@@ -20,35 +22,39 @@ one width-based space budget independent of their (potentially much larger)
 running time.
 -/
 
+@[expose] public section
+
 namespace Complexity
 
 namespace TM
 
 variable {n : ℕ}
 
-private def binaryPolynomialNatTape (value : ℕ) : Tape :=
+@[nolint docBlame]
+def binaryPolynomialNatTape (value : ℕ) : Tape :=
   (Tape.init (value.bits.map Γ.ofBool)).move Dir3.right
 
-private theorem binaryPolynomialNatTape_hasBinaryNat (value : ℕ) :
+theorem binaryPolynomialNatTape_hasBinaryNat (value : ℕ) :
     (binaryPolynomialNatTape value).HasBinaryNat value :=
   Tape.init_move_right_hasBinaryNat value
 
-private theorem binaryPolynomialHasBinaryNat_parked {t : Tape} {value : ℕ}
+theorem binaryPolynomialHasBinaryNat_parked {t : Tape} {value : ℕ}
     (h : t.HasBinaryNat value) : Parked t := by
   refine ⟨by rw [h.2.1], ?_⟩
   exact Tape.HasBinaryContent.cells_ne_start h.2.2
 
-private theorem binaryPolynomialNatTape_parked (value : ℕ) :
+theorem binaryPolynomialNatTape_parked (value : ℕ) :
     Parked (binaryPolynomialNatTape value) :=
   binaryPolynomialHasBinaryNat_parked
     (binaryPolynomialNatTape_hasBinaryNat value)
 
-private abbrev binaryPolynomialFramePred
+@[nolint docBlame]
+abbrev binaryPolynomialFramePred
     (inp₀ : Tape) (work₀ : Fin n → Tape) (out₀ : Tape) : TapePred n :=
   fun inp work out => inp = inp₀ ∧ work = work₀ ∧ out = out₀
 
 /-- Literal work frame after one Horner layer. -/
-private def binaryHornerLayerWork (work : Fin n → Tape)
+def binaryHornerLayerWork (work : Fin n → Tape)
     (sourceIdx targetIdx : Fin n) (inputValue accValue coeff : ℕ) :
     Fin n → Tape :=
   Function.update
@@ -57,7 +63,7 @@ private def binaryHornerLayerWork (work : Fin n → Tape)
     sourceIdx (binaryPolynomialNatTape 0)
 
 /-- Literal work frame after a list of alternating Horner layers. -/
-private def binaryHornerWork (work : Fin n → Tape)
+def binaryHornerWork (work : Fin n → Tape)
     (sourceIdx targetIdx : Fin n) (inputValue : ℕ) :
     List ℕ → ℕ → Fin n → Tape
   | [], _ => work
@@ -68,7 +74,8 @@ private def binaryHornerWork (work : Fin n → Tape)
         targetIdx sourceIdx inputValue coeffs
         (accValue * inputValue + coeff)
 
-private def swapBinaryMulAddDistinct
+@[nolint defLemma docBlame]
+def swapBinaryMulAddDistinct
     {leftIdx rightIdx accIdx mulCounterIdx addCounterIdx : Fin n}
     (h : BinaryMulAddDistinct leftIdx rightIdx accIdx mulCounterIdx
       addCounterIdx) :
@@ -84,7 +91,8 @@ private def swapBinaryMulAddDistinct
     acc_ne_addCounter := h.left_ne_addCounter
     mulCounter_ne_addCounter := h.mulCounter_ne_addCounter }
 
-private def resultSourceDistinct
+@[nolint defLemma docBlame]
+def resultSourceDistinct
     {inputIdx resultIdx scratchIdx mulCounterIdx addCounterIdx : Fin n}
     (h : BinaryPolynomialDistinct inputIdx resultIdx scratchIdx mulCounterIdx
       addCounterIdx) :
@@ -101,7 +109,8 @@ private def resultSourceDistinct
     acc_ne_addCounter := h.scratch_ne_addCounter
     mulCounter_ne_addCounter := h.mulCounter_ne_addCounter }
 
-private def scratchSourceDistinct
+@[nolint defLemma docBlame]
+def scratchSourceDistinct
     {inputIdx resultIdx scratchIdx mulCounterIdx addCounterIdx : Fin n}
     (h : BinaryPolynomialDistinct inputIdx resultIdx scratchIdx mulCounterIdx
       addCounterIdx) :
@@ -109,7 +118,7 @@ private def scratchSourceDistinct
       addCounterIdx :=
   swapBinaryMulAddDistinct (resultSourceDistinct h)
 
-private theorem binaryHornerLayerWork_parked
+theorem binaryHornerLayerWork_parked
     (work : Fin n → Tape) (sourceIdx targetIdx : Fin n)
     (inputValue accValue coeff : ℕ) (hwork : ∀ i, Parked (work i)) :
     ∀ i, Parked
@@ -128,7 +137,7 @@ private theorem binaryHornerLayerWork_parked
     · simp [binaryHornerLayerWork, his, hit]
       exact hwork i
 
-private theorem updatedWork_heads_le
+theorem updatedWork_heads_le
     (work : Fin n → Tape) (idx : Fin n) (value initialSpace : ℕ)
     (hbase : ∀ i, (work i).head ≤ initialSpace)
     (hone : 1 ≤ initialSpace) :
@@ -143,7 +152,7 @@ private theorem updatedWork_heads_le
   · rw [Function.update_of_ne hi]
     exact hbase i
 
-private theorem binaryHornerLayerWork_heads_le
+theorem binaryHornerLayerWork_heads_le
     (work : Fin n → Tape) (sourceIdx targetIdx : Fin n)
     (inputValue accValue coeff initialSpace : ℕ)
     (hbase : ∀ i, (work i).head ≤ initialSpace)
@@ -155,7 +164,7 @@ private theorem binaryHornerLayerWork_heads_le
       initialSpace hbase hone)
     hone
 
-private theorem binaryPolynomialFrame_transition
+theorem binaryPolynomialFrame_transition
     (inp₀ : Tape) (work₀ : Fin n → Tape) (out₀ : Tape)
     (hinp : Parked inp₀) (hwork : ∀ i, Parked (work₀ i))
     (hout : Parked out₀) :
@@ -168,7 +177,7 @@ private theorem binaryPolynomialFrame_transition
   funext i
   exact (hwork i).transitionTape_eq_self
 
-private theorem binaryHornerLayerTM_hoareTimeSpace
+theorem binaryHornerLayerTM_hoareTimeSpace
     (inputIdx sourceIdx targetIdx mulCounterIdx addCounterIdx : Fin n)
     (hdistinct : BinaryMulAddDistinct sourceIdx inputIdx targetIdx
       mulCounterIdx addCounterIdx)
@@ -306,7 +315,7 @@ theorem binaryHornerFold_cons_internal
     binaryHornerFold x (coeff :: coeffs) acc =
       binaryHornerFold x coeffs (acc * x + coeff) := rfl
 
-private theorem binaryHornerFold_reverse_range (f : ℕ → ℕ) (x : ℕ) :
+theorem binaryHornerFold_reverse_range (f : ℕ → ℕ) (x : ℕ) :
     ∀ (k acc : ℕ),
       binaryHornerFold x ((List.range k).map f).reverse acc =
         acc * x ^ k + ∑ i ∈ Finset.range k, f i * x ^ i := by
@@ -328,7 +337,7 @@ theorem binaryHornerFold_polyCoeffs_internal
     Polynomial.eval_eq_sum_range]
   simp
 
-private theorem binaryHornerFold_le (x : ℕ) :
+theorem binaryHornerFold_le (x : ℕ) :
     ∀ (coeffs : List ℕ) (acc : ℕ),
       binaryHornerFold x coeffs acc ≤
         (acc + coeffs.sum) * (x + 1) ^ coeffs.length := by
@@ -363,7 +372,7 @@ theorem binaryPolynomial_eval_le_valueCap_internal
   have h := binaryHornerFold_le x (binaryPolynomialCoeffs p) 0
   exact le_trans h (Nat.mul_le_mul_right _ (by omega))
 
-private theorem binaryHornerFold_take_le
+theorem binaryHornerFold_take_le
     (x : ℕ) (coeffs : List ℕ) (k : ℕ) :
     binaryHornerFold x (coeffs.take k) 0 ≤
       (coeffs.sum + 1) * (x + 1) ^ coeffs.length := by
@@ -377,7 +386,7 @@ private theorem binaryHornerFold_take_le
     Nat.pow_le_pow_right (by omega) (by rw [List.length_take]; omega)
   exact Nat.mul_le_mul (by omega) hpow
 
-private theorem binaryPolynomial_input_le_cap
+theorem binaryPolynomial_input_le_cap
     (p : Polynomial ℕ) (inputValue : ℕ) :
     inputValue ≤ binaryPolynomialValueCap p inputValue := by
   have hlen : 0 < (binaryPolynomialCoeffs p).length := by
@@ -391,7 +400,7 @@ private theorem binaryPolynomial_input_le_cap
       have : 0 < (binaryPolynomialCoeffs p).sum + 1 := by omega
       exact this))
 
-private theorem binaryHornerLayerSpace_le_polynomialSpace
+theorem binaryHornerLayerSpace_le_polynomialSpace
     (initialSpace inputValue accValue coeff cap : ℕ)
     (hinput : inputValue ≤ cap) (hacc : accValue ≤ cap)
     (hnext : accValue * inputValue + coeff ≤ cap) :
@@ -411,7 +420,7 @@ private theorem binaryHornerLayerSpace_le_polynomialSpace
     binaryAddConstSpace, clearWorkTimeBound] at ⊢
   omega
 
-private theorem binaryHornerLayerWork_source_hasBinaryNat
+theorem binaryHornerLayerWork_source_hasBinaryNat
     (work : Fin n → Tape) (sourceIdx targetIdx : Fin n)
     (inputValue accValue coeff : ℕ) :
     (binaryHornerLayerWork work sourceIdx targetIdx inputValue accValue coeff
@@ -419,7 +428,7 @@ private theorem binaryHornerLayerWork_source_hasBinaryNat
   simp [binaryHornerLayerWork]
   exact binaryPolynomialNatTape_hasBinaryNat 0
 
-private theorem binaryHornerLayerWork_target_hasBinaryNat
+theorem binaryHornerLayerWork_target_hasBinaryNat
     (work : Fin n → Tape) {sourceIdx targetIdx : Fin n}
     (hne : sourceIdx ≠ targetIdx) (inputValue accValue coeff : ℕ) :
     (binaryHornerLayerWork work sourceIdx targetIdx inputValue accValue coeff
@@ -427,7 +436,7 @@ private theorem binaryHornerLayerWork_target_hasBinaryNat
   simp [binaryHornerLayerWork, Ne.symm hne]
   exact binaryPolynomialNatTape_hasBinaryNat _
 
-private theorem binaryHornerLayerWork_other
+theorem binaryHornerLayerWork_other
     (work : Fin n → Tape) {sourceIdx targetIdx i : Fin n}
     (his : i ≠ sourceIdx) (hit : i ≠ targetIdx)
     (inputValue accValue coeff : ℕ) :
@@ -435,7 +444,7 @@ private theorem binaryHornerLayerWork_other
       work i := by
   simp [binaryHornerLayerWork, his, hit]
 
-private theorem binaryHornerLayersTM_hoareTimeSpace
+theorem binaryHornerLayersTM_hoareTimeSpace
     (inputIdx sourceIdx targetIdx mulCounterIdx addCounterIdx : Fin n)
     (hdistinct : BinaryMulAddDistinct sourceIdx inputIdx targetIdx
       mulCounterIdx addCounterIdx)
@@ -571,7 +580,7 @@ private theorem binaryHornerLayersTM_hoareTimeSpace
       simpa [binaryHornerLayersTM, binaryHornerLayersTime,
         binaryHornerWork, work₁] using hrun
 
-private theorem update_binaryZero_eq
+theorem update_binaryZero_eq
     (work : Fin n → Tape) (idx : Fin n)
     (hzero : (work idx).HasBinaryNat 0) :
     Function.update work idx (binaryPolynomialNatTape 0) = work := by
@@ -582,7 +591,7 @@ private theorem update_binaryZero_eq
     simpa [binaryPolynomialNatTape] using hzero.eq_init_move_right.symm
   · rw [Function.update_of_ne hi]
 
-private theorem binaryHornerWork_endpoint
+theorem binaryHornerWork_endpoint
     (work : Fin n → Tape) (sourceIdx targetIdx : Fin n)
     (hne : sourceIdx ≠ targetIdx) (inputValue accValue : ℕ)
     (coeffs : List ℕ)
@@ -656,7 +665,7 @@ private theorem binaryHornerWork_endpoint
               binaryHornerFold_cons_internal]
           · simp [work₁, binaryHornerLayerWork, his, hit]
 
-private theorem binaryHornerLayerTM_isTransducer
+theorem binaryHornerLayerTM_isTransducer
     (inputIdx sourceIdx targetIdx mulCounterIdx addCounterIdx : Fin n)
     (coeff : ℕ) :
     (binaryHornerLayerTM inputIdx sourceIdx targetIdx mulCounterIdx
@@ -667,7 +676,7 @@ private theorem binaryHornerLayerTM_isTransducer
         (binaryAddConstTM_isTransducer targetIdx coeff)).seqTM
       (clearWorkTM_isTransducer sourceIdx)
 
-private theorem binaryHornerLayersTM_isTransducer
+theorem binaryHornerLayersTM_isTransducer
     (inputIdx sourceIdx targetIdx mulCounterIdx addCounterIdx : Fin n)
     (coeffs : List ℕ) :
     (binaryHornerLayersTM inputIdx sourceIdx targetIdx mulCounterIdx
@@ -681,7 +690,7 @@ private theorem binaryHornerLayersTM_isTransducer
         (binaryHornerLayerTM_isTransducer inputIdx sourceIdx targetIdx
           mulCounterIdx addCounterIdx coeff).seqTM (ih targetIdx sourceIdx)
 
-private theorem binaryPolynomialInitialWork_parked
+theorem binaryPolynomialInitialWork_parked
     (inputIdx resultIdx scratchIdx mulCounterIdx addCounterIdx : Fin n)
     (work : Fin n → Tape) {inputValue : ℕ}
     (hinput : (work inputIdx).HasBinaryNat inputValue)

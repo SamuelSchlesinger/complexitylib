@@ -3,8 +3,10 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Circuits.BranchingProgramEncoding.Defs
-import Complexitylib.Circuits.BranchingProgramEncoding.Internal
+module
+
+public import Complexitylib.Circuits.BranchingProgramEncoding.Defs
+public import Complexitylib.Circuits.BranchingProgramEncoding.Internal
 
 /-!
 # Canonical encoding of width-five branching programs
@@ -27,6 +29,8 @@ finite permutation proofs on the machine tape.
 - `BPCode.Program.encode_injective` -- canonical codes are unambiguous.
 - `BPCode.Program.length_encode` -- exact serialization length.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

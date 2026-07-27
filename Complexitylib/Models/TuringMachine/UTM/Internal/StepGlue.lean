@@ -3,8 +3,10 @@ Copyright (c) 2025 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Models.TuringMachine.UTM.Internal.BodyAssembly
-import Complexitylib.Models.TuringMachine.UTM.Internal.BodyLookup
+module
+
+public import Complexitylib.Models.TuringMachine.UTM.Internal.BodyAssembly
+public import Complexitylib.Models.TuringMachine.UTM.Internal.BodyLookup
 
 /-!
 # Glue facts: phase outputs vs the interpreted step
@@ -18,6 +20,8 @@ Small bridges used when matching the body's phase outputs against
 * parsed entries' targets are in range, so the interpreter's `min`-clamp is
   the identity on them.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

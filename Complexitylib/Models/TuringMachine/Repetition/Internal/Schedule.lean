@@ -3,10 +3,12 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Models.TuringMachine.Repetition.Defs
-import Complexitylib.Models.TuringMachine.Repetition.Internal.Parked
-import Complexitylib.Models.TuringMachine.Repetition.Internal.ScheduleArithmetic
-import Complexitylib.Models.TuringMachine.Repetition.Internal.VoteStep
+module
+
+public import Complexitylib.Models.TuringMachine.Repetition.Defs
+public import Complexitylib.Models.TuringMachine.Repetition.Internal.Parked
+public import Complexitylib.Models.TuringMachine.Repetition.Internal.ScheduleArithmetic
+public import Complexitylib.Models.TuringMachine.Repetition.Internal.VoteStep
 
 /-!
 # Outer schedule and boundary assertions for fixed-time repetition
@@ -27,6 +29,8 @@ index algebra, choice slices, vote bookkeeping, and target predicate.
 - `NTM.RepeatCompletedVotes` — completed vote-prefix invariant
 - `NTM.RepeatBoundary`, `RepeatOuterClaim` — outer-induction specification
 -/
+
+@[expose] public section
 
 namespace Complexity
 

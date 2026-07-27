@@ -3,9 +3,11 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Circuits.Hardwiring
-import Complexitylib.Circuits.Unrolling.Amplification
-import Complexitylib.Models.TuringMachine.Repetition.Defs
+module
+
+public import Complexitylib.Circuits.Hardwiring
+public import Complexitylib.Circuits.Unrolling.Amplification
+public import Complexitylib.Models.TuringMachine.Repetition.Defs
 
 /-!
 # Probabilistic semantics of circuit amplification
@@ -17,6 +19,8 @@ choice blocks and hence as `blockEventCount` and `blockMajority`. It also
 provides the fixed-seed wrapper that hardwires every choice input while leaving
 the positive-length data suffix live.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

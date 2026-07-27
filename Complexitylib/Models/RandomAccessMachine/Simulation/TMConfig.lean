@@ -3,8 +3,10 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Models.RandomAccessMachine.Simulation.TMConfig.Defs
-import Complexitylib.Models.RandomAccessMachine.Simulation.TMConfig.Internal
+module
+
+public import Complexitylib.Models.RandomAccessMachine.Simulation.TMConfig.Defs
+public import Complexitylib.Models.RandomAccessMachine.Simulation.TMConfig.Internal
 
 /-!
 # Bounded Turing-machine configurations in RAM registers
@@ -14,6 +16,8 @@ simulation. The register layout is explicit, blank cells use value zero, and
 `decode_encode` states the exact condition under which bounded decoding loses no
 information.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

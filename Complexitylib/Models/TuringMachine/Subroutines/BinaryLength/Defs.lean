@@ -3,8 +3,10 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Models.TuringMachine.Experimental.Routine.Defs
-import Complexitylib.Models.TuringMachine.Subroutines.BinarySucc.Defs
+module
+
+public import Complexitylib.Models.TuringMachine.Experimental.Routine.Defs
+public import Complexitylib.Models.TuringMachine.Subroutines.BinarySucc.Defs
 
 /-!
 # Binary input-length counter — definitions
@@ -13,6 +15,8 @@ This module instantiates the read-only-input loop with little-endian successor.
 The input region supplies unary loop fuel without being copied into auxiliary
 space; the designated work tape holds the growing canonical `Nat.bits` counter.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

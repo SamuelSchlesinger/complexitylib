@@ -3,12 +3,14 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.SAT.Tseitin
-import Complexitylib.SAT.Tseitin.Internal.Streaming
-import Complexitylib.SAT.Tseitin.Machine.Controller
-import Complexitylib.SAT.Tseitin.Machine.Internal.Execution
-import Complexitylib.SAT.Tseitin.Machine.Internal.PolynomialTime
-import Complexitylib.SAT.Tseitin.Machine.Internal.Validation
+module
+
+public import Complexitylib.SAT.Tseitin
+public import Complexitylib.SAT.Tseitin.Internal.Streaming
+public import Complexitylib.SAT.Tseitin.Machine.Controller
+public import Complexitylib.SAT.Tseitin.Machine.Internal.Execution
+public import Complexitylib.SAT.Tseitin.Machine.Internal.PolynomialTime
+public import Complexitylib.SAT.Tseitin.Machine.Internal.Validation
 
 /-!
 # Executable validation for the Tseitin reduction front end
@@ -27,6 +29,8 @@ to the executable guards, its imported proof layer establishes:
 4. `reductionTM_computesInTime_internal`, covering valid and malformed inputs
    within one explicit quartic bound.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

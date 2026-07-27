@@ -3,9 +3,11 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Classes.L
-import Complexitylib.Classes.P.Defs
-import Complexitylib.Models.TuringMachine.SpaceTime
+module
+
+public import Complexitylib.Classes.L
+public import Complexitylib.Classes.P.Defs
+public import Complexitylib.Models.TuringMachine.SpaceTime
 
 /-!
 # Log-space transducers run in polynomial time — proof internals
@@ -14,6 +16,8 @@ This module turns the finite reduced-configuration bound for deterministic
 transducers into a polynomial bound when the auxiliary space is logarithmic.
 The public results are in `Complexitylib.Classes.L.PolynomialTime`.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

@@ -3,16 +3,18 @@ Copyright (c) 2025 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Models.TuringMachine
-import Complexitylib.Models.TuringMachine.Combinators
-import Complexitylib.Models.TuringMachine.UTM.Internal.Desc
-import Complexitylib.Models.TuringMachine.UTM.Internal.VTape
-import Mathlib.Tactic.DeriveFintype
-import Mathlib.Tactic.FinCases
-import Mathlib.Data.Fintype.Sigma
-import Mathlib.Data.Fintype.Prod
-import Mathlib.Data.Fintype.Option
-import Mathlib.Data.Fintype.Sum
+module
+
+public import Complexitylib.Models.TuringMachine
+public import Complexitylib.Models.TuringMachine.Combinators
+public import Complexitylib.Models.TuringMachine.UTM.Internal.Desc
+public import Complexitylib.Models.TuringMachine.UTM.Internal.VTape
+public import Mathlib.Tactic.DeriveFintype
+public import Mathlib.Tactic.FinCases
+public import Mathlib.Data.Fintype.Sigma
+public import Mathlib.Data.Fintype.Prod
+public import Mathlib.Data.Fintype.Option
+public import Mathlib.Data.Fintype.Sum
 
 /-!
 # The universal machine's loop body
@@ -32,6 +34,8 @@ written by the halt-test machine, not the body).
 This file defines the machine only; its `HoareTime` spec and the
 correspondence with `TMDesc.toTM.step` live in `BodyInternal.lean` (M3).
 -/
+
+@[expose] public section
 
 namespace Complexity
 

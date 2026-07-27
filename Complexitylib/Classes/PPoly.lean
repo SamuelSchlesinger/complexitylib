@@ -3,8 +3,10 @@ Copyright (c) 2025 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Classes.PPoly.Defs
-import Complexitylib.Circuits.Family
+module
+
+public import Complexitylib.Classes.PPoly.Defs
+public import Complexitylib.Circuits.Family
 
 /-!
 # P/poly and circuit-size classes
@@ -13,6 +15,8 @@ This module supplies the public API for nonuniform circuit classes. It relates
 the exact pointwise-polynomial definition of `PPoly` to the big-O power
 convention used elsewhere in the library.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

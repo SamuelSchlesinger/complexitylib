@@ -3,9 +3,11 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Circuits.Encoding.Fragment
-import Complexitylib.Circuits.Unrolling.Trace.Internal.Structure
-import Complexitylib.Circuits.Unrolling.Transition.Fragment.Internal.Topology
+module
+
+public import Complexitylib.Circuits.Encoding.Fragment
+public import Complexitylib.Circuits.Unrolling.Trace.Internal.Structure
+public import Complexitylib.Circuits.Unrolling.Transition.Fragment.Internal.Topology
 
 /-!
 # Topology of tiled bounded-trace circuits
@@ -15,6 +17,8 @@ packed transition layers is topologically well formed. The recursive proof
 tracks the exact circuit length, first unused wire, and end of the current
 configuration block supplied by the trace-structure layer.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

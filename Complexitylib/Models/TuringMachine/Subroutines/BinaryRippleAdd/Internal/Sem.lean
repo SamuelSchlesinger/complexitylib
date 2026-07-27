@@ -3,12 +3,14 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Models.TuringMachine.Hoare.Space
-import Complexitylib.Models.TuringMachine.Subroutines.BinaryRippleAdd.Internal.Bounds
-import Complexitylib.Models.TuringMachine.Subroutines.BinaryRippleAdd.Internal.Pure
-import Complexitylib.Models.TuringMachine.Subroutines.BinaryRippleAdd.Internal.Rewind
-import Complexitylib.Models.TuringMachine.Subroutines.BinaryRippleAdd.Internal.Scan
-import Complexitylib.Models.TuringMachine.Subroutines.BinarySucc
+module
+
+public import Complexitylib.Models.TuringMachine.Hoare.Space
+public import Complexitylib.Models.TuringMachine.Subroutines.BinaryRippleAdd.Internal.Bounds
+public import Complexitylib.Models.TuringMachine.Subroutines.BinaryRippleAdd.Internal.Pure
+public import Complexitylib.Models.TuringMachine.Subroutines.BinaryRippleAdd.Internal.Rewind
+public import Complexitylib.Models.TuringMachine.Subroutines.BinaryRippleAdd.Internal.Scan
+public import Complexitylib.Models.TuringMachine.Subroutines.BinarySucc
 
 /-!
 # Linear-time canonical binary addition -- composed semantics
@@ -18,6 +20,8 @@ contracts. The resulting machine restores both operands, returns a canonical
 sum, preserves the complete external tape frame, and carries explicit time and
 all-prefix auxiliary-space bounds.
 -/
+
+@[expose] public section
 
 namespace Complexity
 
@@ -41,7 +45,8 @@ private def binaryRippleAddScanPost {n : ℕ}
       work i = work₀ i) ∧
     out = out₀
 
-private def binaryRippleAddPost {n : ℕ}
+@[nolint docBlame]
+def binaryRippleAddPost {n : ℕ}
     (lhsIdx rhsIdx resultIdx : Fin n) (lhs rhs : ℕ)
     (inp₀ : Tape) (work₀ : Fin n → Tape) (out₀ : Tape) : TapePred n :=
   fun inp work out =>

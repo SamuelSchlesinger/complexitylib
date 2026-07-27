@@ -3,8 +3,10 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Models.TuringMachine.Combinators.ForWorkOnes.Defs
-import Complexitylib.Models.TuringMachine.Combinators.ForWorkOnes.Internal
+module
+
+public import Complexitylib.Models.TuringMachine.Combinators.ForWorkOnes.Defs
+public import Complexitylib.Models.TuringMachine.Combinators.ForWorkOnes.Internal
 
 /-!
 # One-prefix work-tape loop combinator
@@ -20,6 +22,8 @@ the RAM snapshot word decoder.
   certificate for the full loop.
 - `TM.IsTransducer.forWorkOnesTM` preserves one-way output safety.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

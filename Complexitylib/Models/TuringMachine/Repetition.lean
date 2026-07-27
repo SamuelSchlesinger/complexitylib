@@ -3,7 +3,9 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Models.TuringMachine.Repetition.Internal.ScheduleArithmetic
+module
+
+public import Complexitylib.Models.TuringMachine.Repetition.Internal.ScheduleArithmetic
 
 /-!
 # Fixed-time probabilistic-machine repetition
@@ -21,6 +23,8 @@ simulation invariants proved in the internal correctness layer.
 - `NTM.repeatAtTimeSteps_zero`, `NTM.repeatAtTimeSteps_succ` — total-time arithmetic
 - `NTM.repeatRandomSeed_apply_repeatChoiceIdx` — compact and machine schedules align
 -/
+
+@[expose] public section
 
 namespace Complexity
 

@@ -3,9 +3,11 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Circuits.AC0.Switching
-import Complexitylib.Circuits.AC0.Switching.Collection.Defs
-import Complexitylib.Circuits.AC0.Switching.Collection.Internal
+module
+
+public import Complexitylib.Circuits.AC0.Switching
+public import Complexitylib.Circuits.AC0.Switching.Collection.Defs
+public import Complexitylib.Circuits.AC0.Switching.Collection.Internal
 
 /-!
 # Simultaneous switching for finite formula collections
@@ -15,6 +17,8 @@ a simultaneous bound for any `Fin formulaCount`-indexed collection. These
 collections are finite nonuniform objects; no generator or uniformity
 assumption is involved.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

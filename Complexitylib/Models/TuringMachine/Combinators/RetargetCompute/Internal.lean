@@ -3,10 +3,12 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Models.TuringMachine.Combinators.RetargetCompute.Defs
-import Complexitylib.Models.TuringMachine.Combinators.Internal.Retarget
-import Complexitylib.Models.TuringMachine.Hoare.Defs
-import Complexitylib.Models.TuringMachine.Placement.Internal
+module
+
+public import Complexitylib.Models.TuringMachine.Combinators.RetargetCompute.Defs
+public import Complexitylib.Models.TuringMachine.Combinators.Internal.Retarget
+public import Complexitylib.Models.TuringMachine.Hoare.Defs
+public import Complexitylib.Models.TuringMachine.Placement.Internal
 
 /-!
 # Retargeted-input computation seam internals
@@ -16,6 +18,8 @@ after its compulsory sentinel transition. The already-halted case is handled
 separately: such a machine can compute only the empty output, and the wrapper
 therefore halts immediately on its parked blank output tape.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

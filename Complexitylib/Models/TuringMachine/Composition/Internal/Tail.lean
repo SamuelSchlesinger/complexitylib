@@ -3,11 +3,13 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Models.TuringMachine.Composition.Defs
-import Complexitylib.Models.TuringMachine.Subroutines.CopyWorkOutput
-import Complexitylib.Models.TuringMachine.Combinators.RetargetCompute
-import Complexitylib.Models.TuringMachine.Hoare
-import Complexitylib.Models.TuringMachine.Tape.Encoding
+module
+
+public import Complexitylib.Models.TuringMachine.Composition.Defs
+public import Complexitylib.Models.TuringMachine.Subroutines.CopyWorkOutput
+public import Complexitylib.Models.TuringMachine.Combinators.RetargetCompute
+public import Complexitylib.Models.TuringMachine.Hoare
+public import Complexitylib.Models.TuringMachine.Tape.Encoding
 
 /-!
 # Sequential-composition tail pipeline
@@ -23,6 +25,8 @@ The phase-expanded bound is
 `(B + 2) + 1 + (|y| + 1) + 1 + (|y| + 1 + 2) + 1 + G(|y|)`,
 which simplifies to `B + 2 * |y| + 9 + G(|y|)`.
 -/
+
+@[expose] public section
 
 namespace Complexity
 
@@ -43,7 +47,7 @@ private theorem transitionTape_eq_of_startInvariant {t : Tape}
   transitionTape_eq_self (read_ne_start_of_startInvariant hinv hhead)
 
 /-- Boundary contract consumed only by the proof-internal composition tail. -/
-private def CompositionTailPre (nf ng : ℕ) (y : List Bool) (B : ℕ)
+def CompositionTailPre (nf ng : ℕ) (y : List Bool) (B : ℕ)
     (inp : Tape) (work : Fin (compositionTapeCount nf ng) → Tape)
     (out : Tape) : Prop :=
   (work (compositionRawOutputIdx nf ng)).HasOutput y ∧

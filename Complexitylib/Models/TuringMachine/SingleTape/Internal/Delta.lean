@@ -3,8 +3,10 @@ Copyright (c) 2025 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Models.TuringMachine.SingleTape.Internal.Sim
-import Complexitylib.Models.TuringMachine.Combinators
+module
+
+public import Complexitylib.Models.TuringMachine.SingleTape.Internal.Sim
+public import Complexitylib.Models.TuringMachine.Combinators
 
 /-!
 # Single-tape simulation — transition function
@@ -26,6 +28,8 @@ sentinel, phase-membership of each step's successor state, and the
 backward-chaining characterizations of `gather` and `run` predecessors.
 See `docs/A4-SingleTapeSimulation.md`.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

@@ -3,12 +3,16 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Models.RandomAccessMachine.Simulation.TMConfig.Sparse.Step.Internal.Action
-import Complexitylib.Models.RandomAccessMachine.Structured.Switch
+module
+
+public import Complexitylib.Models.RandomAccessMachine.Simulation.TMConfig.Sparse.Step.Internal.Action
+public import Complexitylib.Models.RandomAccessMachine.Structured.Switch
 
 /-!
 # Nested finite dispatch for the fixed sparse TM transition -- proof internals
 -/
+
+@[expose] public section
 
 namespace Complexity
 
@@ -19,7 +23,7 @@ namespace TMConfig
 namespace Sparse
 
 
-private theorem cleared_represents {tm : TM n} {test : ℕ}
+theorem cleared_represents {tm : TM n} {test : ℕ}
     {cfg : Complexity.Cfg n tm.Q} {store : Structured.Store}
     (hrepresents : Represents tm cfg store)
     (hlow : n + 3 ≤ test) (hhigh : test < cellBase n) :
@@ -31,14 +35,14 @@ private theorem cleared_apply_of_ne (store : Structured.Store) {test reg : ℕ}
     Structured.Switch.cleared store test reg = store reg := by
   simp [Structured.Switch.cleared, Function.update_of_ne hne]
 
-private theorem symbolReg_injective (n : ℕ) :
+theorem symbolReg_injective (n : ℕ) :
     Function.Injective (symbolReg n) := by
   intro first second heq
   apply Fin.ext
   simp [symbolReg] at heq
   omega
 
-private theorem symbolReg_ne_one (n : ℕ) (tape : Fin (n + 2)) :
+theorem symbolReg_ne_one (n : ℕ) (tape : Fin (n + 2)) :
     symbolReg n tape ≠ oneReg n := by
   simp [symbolReg, oneReg]
   omega
@@ -47,13 +51,13 @@ private theorem stateScratchReg_ne_one (n : ℕ) :
     stateScratchReg n ≠ oneReg n := by
   simp [stateScratchReg, oneReg]
 
-private theorem stateScratchReg_ne_symbolReg (n : ℕ)
+theorem stateScratchReg_ne_symbolReg (n : ℕ)
     (tape : Fin (n + 2)) :
     symbolReg n tape ≠ stateScratchReg n := by
   simp [symbolReg, stateScratchReg]
   omega
 
-private theorem stateCode_lt_internal (tm : TM n) (state : tm.Q) :
+theorem stateCode_lt_internal (tm : TM n) (state : tm.Q) :
     stateCode tm state < Fintype.card tm.Q := by
   exact (Fintype.equivFin tm.Q state).isLt
 
@@ -245,16 +249,12 @@ theorem program_exec_internal {tm : TM n}
     hfinalRepresents⟩
   simpa [program, stepCount, loaded] using Structured.Exec.seq hloadExec hdispatch
 
-private abbrev ResourceEnvelope (tm : TM n) (bound : ℕ) :=
-  Structured.Internal.StoreEnvelope (registerBound n (bound + 1))
-    (wordBound tm bound)
-
 private theorem control_lt_registerBound (n bound : ℕ) :
     cellBase n < registerBound n (bound + 1) := by
   simp [registerBound, cellReg, outputTape]
   omega
 
-private theorem cleared_envelope {tm : TM n} {bound test : ℕ}
+theorem cleared_envelope {tm : TM n} {bound test : ℕ}
     {store : Structured.Store} (henvelope : ResourceEnvelope tm bound store)
     (htest : test < registerBound n (bound + 1)) :
     ResourceEnvelope tm bound (Structured.Switch.cleared store test) := by

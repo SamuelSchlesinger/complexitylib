@@ -3,8 +3,10 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Circuits.Encoding.Machine.Core.Internal.Execution
-import Complexitylib.Circuits.Encoding.Machine.Core.Internal.Pure
+module
+
+public import Complexitylib.Circuits.Encoding.Machine.Core.Internal.Execution
+public import Complexitylib.Circuits.Encoding.Machine.Core.Internal.Pure
 
 /-!
 # Malformed empty-family execution
@@ -14,6 +16,8 @@ the exact controller runs. A false tag on empty input must carry exactly one
 answer bit: a missing answer rejects in two steps, while trailing data rejects
 in three.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

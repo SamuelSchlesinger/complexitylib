@@ -3,11 +3,13 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Circuits.Encoding.Fragment
-import Complexitylib.Circuits.Unrolling.Acceptance.Defs
-import Complexitylib.Circuits.Unrolling.Trace.Internal.Structure
-import Complexitylib.Circuits.Unrolling.Trace.Internal.Topology
-import Mathlib.Tactic.Ring
+module
+
+public import Complexitylib.Circuits.Encoding.Fragment
+public import Complexitylib.Circuits.Unrolling.Acceptance.Defs
+public import Complexitylib.Circuits.Unrolling.Trace.Internal.Structure
+public import Complexitylib.Circuits.Unrolling.Trace.Internal.Topology
+public import Mathlib.Tactic.Ring
 
 /-!
 # Structure of bounded-trace acceptance circuits
@@ -16,6 +18,8 @@ This internal module proves that appending the final halt-and-output test adds
 exactly one gate, preserves topological well-formedness, and retains a cubic
 machine-dependent size bound.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

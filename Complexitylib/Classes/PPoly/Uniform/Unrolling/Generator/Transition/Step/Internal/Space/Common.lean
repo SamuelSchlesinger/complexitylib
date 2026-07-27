@@ -3,8 +3,10 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Transition.Step.Internal.Emitted
-import Complexitylib.Models.TuringMachine.Experimental.BinaryRoutine.SpaceBounds
+module
+
+public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Transition.Step.Internal.Emitted
+public import Complexitylib.Models.TuringMachine.Experimental.BinaryRoutine.SpaceBounds
 
 /-!
 # Common packed-step width helpers
@@ -12,6 +14,8 @@ import Complexitylib.Models.TuringMachine.Experimental.BinaryRoutine.SpaceBounds
 This module supplies the shared list-trajectory and position-limit certificates
 used to assemble the auxiliary-space proof for direct packed-step generation.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

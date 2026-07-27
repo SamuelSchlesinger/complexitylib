@@ -3,7 +3,9 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Models.RandomAccessMachine.Simulation.TMConfig.Sparse.Step.Defs
+module
+
+public import Complexitylib.Models.RandomAccessMachine.Simulation.TMConfig.Sparse.Step.Defs
 
 /-!
 # Public RAM input/output ABI for the sparse TM simulator
@@ -15,6 +17,8 @@ then copies the raw input backward into the sparse input tape while clearing the
 old prefix, repairs those six statically remembered bits, and initializes the
 state, heads, and left-end markers.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

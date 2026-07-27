@@ -3,10 +3,12 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Models.TuringMachine.Lift
-import Complexitylib.Models.TuringMachine.Hoare
-import Complexitylib.Models.TuringMachine.Subroutines.PairValidate.Defs
-import Complexitylib.Models.TuringMachine.Subroutines.PairValidate.Internal
+module
+
+public import Complexitylib.Models.TuringMachine.Lift
+public import Complexitylib.Models.TuringMachine.Hoare
+public import Complexitylib.Models.TuringMachine.Subroutines.PairValidate.Defs
+public import Complexitylib.Models.TuringMachine.Subroutines.PairValidate.Internal
 
 /-!
 # Validate paired machine inputs
@@ -19,6 +21,8 @@ This complements `pairSplitCoreTM`: validate first when arbitrary input strings
 need rejecting semantics, then rewind and use the canonical splitter to stage
 the two decoded components.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

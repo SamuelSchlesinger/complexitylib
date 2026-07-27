@@ -3,8 +3,10 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Circuits.BarringtonFamily
-import Mathlib.Data.List.OfFn
+module
+
+public import Complexitylib.Circuits.BarringtonFamily
+public import Mathlib.Data.List.OfFn
 
 /-!
 # The converse direction of Barrington's theorem -- definitions
@@ -19,6 +21,8 @@ equivalence. They follow the existing Barrington convention: formulas and
 programs are evaluated on total assignments `ℕ → Bool`, while the family index
 records the input-length parameter controlling depth and program length.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

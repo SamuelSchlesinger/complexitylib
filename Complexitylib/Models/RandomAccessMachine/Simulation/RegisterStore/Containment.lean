@@ -3,9 +3,11 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import
+module
+
+public import
   Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Containment.Internal
-import
+public import
   Complexitylib.Models.RandomAccessMachine.Simulation.TMConfig.Sparse.Containment
 
 /-!
@@ -17,6 +19,8 @@ polynomial envelope; the dense-input overlay gives the sharp quadratic
 parametric containment. Together with the sparse TM-to-RAM compiler, these
 establish machine-model robustness of polynomial time.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

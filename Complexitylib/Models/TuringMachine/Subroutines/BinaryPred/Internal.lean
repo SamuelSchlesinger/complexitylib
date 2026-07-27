@@ -3,10 +3,12 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Mathlib.NatBits
-import Complexitylib.Models.TuringMachine.Combinators.Internal.Generic
-import Complexitylib.Models.TuringMachine.Hoare.Space
-import Complexitylib.Models.TuringMachine.Subroutines.BinaryPred.Defs
+module
+
+public import Complexitylib.Mathlib.NatBits
+public import Complexitylib.Models.TuringMachine.Combinators.Internal.Generic
+public import Complexitylib.Models.TuringMachine.Hoare.Space
+public import Complexitylib.Models.TuringMachine.Subroutines.BinaryPred.Defs
 
 /-!
 # Little-endian binary predecessor — proof internals
@@ -16,6 +18,8 @@ execution of `TM.binaryPredTM`. The machine proof tracks the already-borrowed
 low-order prefix independently of the target head, including the canonical
 high-bit erasure needed when decrementing a power of two.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

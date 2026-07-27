@@ -3,8 +3,10 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Circuits.NormalForm.Operations.Defs
-import Complexitylib.Circuits.NormalForm.Operations.Internal
+module
+
+public import Complexitylib.Circuits.NormalForm.Operations.Defs
+public import Complexitylib.Circuits.NormalForm.Operations.Internal
 
 /-!
 # Operations on CNF and DNF
@@ -14,6 +16,8 @@ width and add component counts. These operations let a layer of bounded-depth
 decision trees be assembled into the matching normal form without a
 distributive expansion.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

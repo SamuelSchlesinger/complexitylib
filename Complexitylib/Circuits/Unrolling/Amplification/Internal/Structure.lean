@@ -3,10 +3,12 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Circuits.Encoding.Threshold.Internal
-import Complexitylib.Circuits.Unrolling.Acceptance.Internal.Structure
-import Complexitylib.Circuits.Unrolling.Amplification.Defs
-import Mathlib.Tactic.Ring
+module
+
+public import Complexitylib.Circuits.Encoding.Threshold.Internal
+public import Complexitylib.Circuits.Unrolling.Acceptance.Internal.Structure
+public import Complexitylib.Circuits.Unrolling.Amplification.Defs
+public import Mathlib.Tactic.Ring
 
 /-!
 # Structural internals for parallel amplification circuits
@@ -16,6 +18,8 @@ builder. Raw-list length is the single source of gate accounting. The main
 results locate completed verdict wires and bound the complete amplified
 circuit by one cubic unrolling per run plus a quadratic majority threshold.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

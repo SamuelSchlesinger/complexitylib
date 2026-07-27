@@ -3,9 +3,11 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Classes.PPoly
-import Complexitylib.Classes.PPoly.Advice.Reverse.Defs
-import Complexitylib.Circuits.Encoding.Machine
+module
+
+public import Complexitylib.Classes.PPoly
+public import Complexitylib.Classes.PPoly.Advice.Reverse.Defs
+public import Complexitylib.Circuits.Encoding.Machine
 
 /-!
 # Nonuniform circuits as polynomial advice — proof internals
@@ -15,6 +17,8 @@ verified serialized evaluator. It proves polynomial advice length, evaluator
 correctness on that advice, and polynomial time measured in the original input
 length.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

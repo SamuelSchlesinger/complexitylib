@@ -3,7 +3,9 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Models.TuringMachine.Repetition.Internal.Parked
+module
+
+public import Complexitylib.Models.TuringMachine.Repetition.Internal.Parked
 
 /-!
 # Complete trials for fixed-time repetition
@@ -20,6 +22,8 @@ zero-time path, and packages the finish-state facts needed by the vote step.
 - `NTM.repeatAtTime_trace_trial_zero` — a complete zero-time trial
 - `NTM.repeatAtTime_trace_trial` — the combined trial theorem for every `T`
 -/
+
+@[expose] public section
 
 namespace Complexity
 

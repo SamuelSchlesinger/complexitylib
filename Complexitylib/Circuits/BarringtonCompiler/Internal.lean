@@ -3,12 +3,16 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Circuits.BarringtonCompiler.Defs
-import Complexitylib.Circuits.BarringtonLength
+module
+
+public import Complexitylib.Circuits.BarringtonCompiler.Defs
+public import Complexitylib.Circuits.BarringtonLength
 
 /-!
 # An executable Barrington compiler -- proof internals
 -/
+
+@[expose] public section
 
 open scoped commutatorElement
 open Equiv

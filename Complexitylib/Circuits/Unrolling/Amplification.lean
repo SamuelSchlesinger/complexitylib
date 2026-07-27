@@ -3,11 +3,13 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Circuits.Encoding.ToCircuit
-import Complexitylib.Circuits.Unrolling.Amplification.Defs
-import Complexitylib.Circuits.Unrolling.Amplification.Internal.Evaluation
-import Complexitylib.Circuits.Unrolling.Amplification.Internal.Structure
-import Complexitylib.Circuits.Unrolling.Amplification.Internal.Topology
+module
+
+public import Complexitylib.Circuits.Encoding.ToCircuit
+public import Complexitylib.Circuits.Unrolling.Amplification.Defs
+public import Complexitylib.Circuits.Unrolling.Amplification.Internal.Evaluation
+public import Complexitylib.Circuits.Unrolling.Amplification.Internal.Structure
+public import Complexitylib.Circuits.Unrolling.Amplification.Internal.Topology
 
 /-!
 # Parallel amplification circuits
@@ -31,6 +33,8 @@ the randomized layer's `blockMajority` is supplied by
 - `amplifiedAcceptanceCircuit_size_le`: one cubic unrolling per run plus a
   quadratic threshold circuit.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

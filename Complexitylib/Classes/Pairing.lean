@@ -3,9 +3,11 @@ Copyright (c) 2025 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Encoding.Pairing
-import Complexitylib.Models.TuringMachine
-import Mathlib.Algebra.Polynomial.Eval.Defs
+module
+
+public import Complexitylib.Encoding.Pairing
+public import Complexitylib.Models.TuringMachine
+public import Mathlib.Algebra.Polynomial.Eval.Defs
 
 /-!
 # Paired relation predicates
@@ -13,6 +15,8 @@ import Mathlib.Algebra.Polynomial.Eval.Defs
 This file adds the complexity-class predicates built on the neutral binary
 pairing codec from `Complexitylib.Encoding.Pairing`.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

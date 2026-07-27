@@ -3,13 +3,17 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Circuits.AC0.NormalForm.Internal
-import Complexitylib.Circuits.AC0.Normalization.Defs
-import Mathlib.Tactic
+module
+
+public import Complexitylib.Circuits.AC0.NormalForm.Internal
+public import Complexitylib.Circuits.AC0.Normalization.Defs
+public import Mathlib.Tactic
 
 /-!
 # AC0 circuit normalization -- proof internals
 -/
+
+@[expose] public section
 
 namespace Complexity
 

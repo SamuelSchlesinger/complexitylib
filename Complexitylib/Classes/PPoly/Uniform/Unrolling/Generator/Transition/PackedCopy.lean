@@ -3,8 +3,10 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Transition.PackedCopy.Defs
-import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Transition.PackedCopy.Internal
+module
+
+public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Transition.PackedCopy.Defs
+public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Transition.PackedCopy.Internal
 
 /-!
 # Delayed packed-formula copies
@@ -12,6 +14,8 @@ import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Transition.Packed
 An executable proof-carrying primitive that advances the rolling formula
 cursor and emits the corresponding packed-output copy gate.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

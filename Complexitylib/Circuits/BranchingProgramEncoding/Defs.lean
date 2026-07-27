@@ -3,9 +3,11 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Circuits.BarringtonCompiler.Defs
-import Complexitylib.Circuits.Encoding.Defs
-import Complexitylib.Mathlib.NatBits
+module
+
+public import Complexitylib.Circuits.BarringtonCompiler.Defs
+public import Complexitylib.Circuits.Encoding.Defs
+public import Complexitylib.Mathlib.NatBits
 
 /-!
 # Machine-facing encoding of width-five branching programs
@@ -20,6 +22,8 @@ An instruction is encoded as its variable field followed by two fixed-width
 permutation fields. A program starts with its instruction count, so exact
 decoding rejects truncation and trailing garbage.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

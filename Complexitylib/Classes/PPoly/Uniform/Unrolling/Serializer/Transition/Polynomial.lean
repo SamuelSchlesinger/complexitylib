@@ -3,8 +3,10 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Classes.PPoly.Uniform.Unrolling.Serializer.Transition.Polynomial.Defs
-import Complexitylib.Classes.PPoly.Uniform.Unrolling.Serializer.Transition.Polynomial.Internal
+module
+
+public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Serializer.Transition.Polynomial.Defs
+public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Serializer.Transition.Polynomial.Internal
 
 /-!
 # Fixed transition-schedule size polynomials
@@ -12,6 +14,8 @@ import Complexitylib.Classes.PPoly.Uniform.Unrolling.Serializer.Transition.Polyn
 This module exposes literal evaluation theorems for the fixed polynomials that
 measure nested transition schedules as functions of the tableau horizon.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

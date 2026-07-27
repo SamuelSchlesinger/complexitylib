@@ -3,8 +3,10 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Transition.Case.Defs
-import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Transition.Case.Internal
+module
+
+public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Transition.Case.Defs
+public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Transition.Case.Internal
 
 /-!
 # Direct-unrolling transition-case generator
@@ -12,6 +14,8 @@ import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Transition.Case.I
 Exact contracts for the forward stream of a fixed transition case, together
 with soundness of the complete case-formula emitter.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

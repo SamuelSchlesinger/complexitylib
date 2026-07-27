@@ -3,7 +3,9 @@ Copyright (c) 2025 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.SAT.Language
+module
+
+public import Complexitylib.SAT.Language
 
 /-!
 # SAT verifier specification
@@ -19,6 +21,8 @@ The deterministic implementation `verifyPairTM` in `SAT/VerifierTM.lean`
 computes this specification and proves `pairLang Witness ∈ P`; this file is
 the small executable/semantic audit surface for that machine proof.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

@@ -3,9 +3,11 @@ Copyright (c) 2025 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Mathlib.Data.List.Basic
-import Mathlib.Data.Fintype.Pi
-import Mathlib.Tactic.Linarith
+module
+
+public import Mathlib.Data.List.Basic
+public import Mathlib.Data.Fintype.Pi
+public import Mathlib.Tactic.Linarith
 
 /-!
 # SAT: Semantic Layer
@@ -38,6 +40,8 @@ the language closed under padding: a short satisfying assignment always
 exists, equal to a prefix of any longer one. This is essential for
 polynomial balance in the NP reduction.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

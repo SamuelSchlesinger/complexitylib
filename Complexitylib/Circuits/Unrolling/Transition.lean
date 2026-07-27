@@ -3,9 +3,11 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Circuits.Unrolling.Transition.Defs
-import Complexitylib.Circuits.Unrolling.Transition.Internal.Semantics
-import Complexitylib.Circuits.Unrolling.Transition.Internal.Support
+module
+
+public import Complexitylib.Circuits.Unrolling.Transition.Defs
+public import Complexitylib.Circuits.Unrolling.Transition.Internal.Semantics
+public import Complexitylib.Circuits.Unrolling.Transition.Internal.Support
 
 /-!
 # Boolean formulas for one Turing-machine transition
@@ -22,6 +24,8 @@ successor machine step.
 - `mem_vars_nextFormula`: exact source family of every referenced variable.
 - `vars_nextFormula_lt`: all references lie in a sufficiently large prefix.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

@@ -3,14 +3,16 @@ Copyright (c) 2025 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Models.TuringMachine.Combinators.Internal.Complement
-import Complexitylib.Models.TuringMachine.Combinators.Internal.Seq
-import Complexitylib.Models.TuringMachine.Combinators.Internal.If
-import Complexitylib.Models.TuringMachine.Combinators.Internal.Loop
-import Complexitylib.Models.TuringMachine.Combinators.Internal.Retarget
-import Complexitylib.Models.TuringMachine.Combinators.Internal.Scanner
-import Complexitylib.Models.TuringMachine.Combinators.Internal.Generic
-import Complexitylib.Models.TuringMachine.Combinators.Internal.Union
+module
+
+public import Complexitylib.Models.TuringMachine.Combinators.Internal.Complement
+public import Complexitylib.Models.TuringMachine.Combinators.Internal.Seq
+public import Complexitylib.Models.TuringMachine.Combinators.Internal.If
+public import Complexitylib.Models.TuringMachine.Combinators.Internal.Loop
+public import Complexitylib.Models.TuringMachine.Combinators.Internal.Retarget
+public import Complexitylib.Models.TuringMachine.Combinators.Internal.Scanner
+public import Complexitylib.Models.TuringMachine.Combinators.Internal.Generic
+public import Complexitylib.Models.TuringMachine.Combinators.Internal.Union
 
 /-!
 # Combinator proof internals (aggregation)
@@ -21,3 +23,5 @@ combinators (`Complement`, `Seq`, `If`, `Loop`, `Retarget`, `Scanner`,
 that the surface module `Combinators.lean` can pull in all combinator
 proof internals with a single import.
 -/
+
+@[expose] public section

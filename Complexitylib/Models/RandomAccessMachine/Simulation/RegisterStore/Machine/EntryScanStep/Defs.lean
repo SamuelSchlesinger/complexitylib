@@ -3,9 +3,11 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import
+module
+
+public import
   Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Machine.EntryCleanup.Defs
-import Complexitylib.Models.TuringMachine.Combinators.WorkSymbolBranch.Defs
+public import Complexitylib.Models.TuringMachine.Combinators.WorkSymbolBranch.Defs
 
 /-!
 # One bounded sparse-entry scan iteration — definitions
@@ -14,6 +16,8 @@ One iteration decodes and compares the next entry, branches directly on the
 readable equality flag, preserves the decoded value on a hit, and restores the
 next-iteration scratch invariant on a miss.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

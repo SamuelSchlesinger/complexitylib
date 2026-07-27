@@ -3,23 +3,25 @@ Copyright (c) 2025 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.SAT.Semantics
-import Complexitylib.SAT.Rename
-import Complexitylib.SAT.ThreeCNF
-import Complexitylib.SAT.ThreeSAT
-import Complexitylib.SAT.ThreeSAT.Completeness
-import Complexitylib.SAT.ThreeSAT.Syntax
-import Complexitylib.SAT.Tseitin
-import Complexitylib.SAT.Tseitin.Machine
-import Complexitylib.SAT.QBF
-import Complexitylib.SAT.Resolution
-import Complexitylib.SAT.Encoding
-import Complexitylib.SAT.Language
-import Complexitylib.SAT.Verifier
-import Complexitylib.SAT.Headline
-import Complexitylib.SAT.ThreeSAT.Headline
-import Complexitylib.SAT.CookLevin
-import Complexitylib.SAT.CookLevin.Assembly
+module
+
+public import Complexitylib.SAT.Semantics
+public import Complexitylib.SAT.Rename
+public import Complexitylib.SAT.ThreeCNF
+public import Complexitylib.SAT.ThreeSAT
+public import Complexitylib.SAT.ThreeSAT.Completeness
+public import Complexitylib.SAT.ThreeSAT.Syntax
+public import Complexitylib.SAT.Tseitin
+public import Complexitylib.SAT.Tseitin.Machine
+public import Complexitylib.SAT.QBF
+public import Complexitylib.SAT.Resolution
+public import Complexitylib.SAT.Encoding
+public import Complexitylib.SAT.Language
+public import Complexitylib.SAT.Verifier
+public import Complexitylib.SAT.Headline
+public import Complexitylib.SAT.ThreeSAT.Headline
+public import Complexitylib.SAT.CookLevin
+public import Complexitylib.SAT.CookLevin.Assembly
 
 /-!
 # SAT: Boolean satisfiability
@@ -47,3 +49,5 @@ infrastructure used by the polynomial-time verifier.
 - `Headline` / `CookLevin.Assembly` — `SAT ∈ NP` and the final
   NP-completeness theorem.
 -/
+
+@[expose] public section

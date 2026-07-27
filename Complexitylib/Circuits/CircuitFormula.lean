@@ -3,8 +3,10 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Circuits.CircuitFormula.Defs
-import Complexitylib.Circuits.CircuitFormula.Internal
+module
+
+public import Complexitylib.Circuits.CircuitFormula.Defs
+public import Complexitylib.Circuits.CircuitFormula.Internal
 
 /-!
 # Unfolding fan-in-two circuit outputs into Boolean formulas
@@ -29,6 +31,8 @@ size claim.
 - `Complexity.Circuit.depth_outputFormula_le_outputDepth` — output-formula depth
   is at most twice the selected output depth.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

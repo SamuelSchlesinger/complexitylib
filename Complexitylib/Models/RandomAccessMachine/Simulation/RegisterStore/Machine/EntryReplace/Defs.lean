@@ -3,11 +3,13 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import
+module
+
+public import
   Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Machine.EntryCleanup.Defs
-import
+public import
   Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Machine.EntryEncode.Defs
-import Complexitylib.Models.TuringMachine.Subroutines.ResetBinary.Defs
+public import Complexitylib.Models.TuringMachine.Subroutines.ResetBinary.Defs
 
 /-!
 # Sparse-entry replacement — definitions
@@ -16,6 +18,8 @@ The replacement branch emits the matched address paired with a distinct
 canonical new-value tape, rewinds that external value source, and restores the
 ordinary next-entry scan invariant.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

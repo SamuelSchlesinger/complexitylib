@@ -3,9 +3,11 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Circuits.Encoding.Formula.Batch.Defs
-import Complexitylib.Circuits.Unrolling.Defs
-import Mathlib.Data.Fintype.Prod
+module
+
+public import Complexitylib.Circuits.Encoding.Formula.Batch.Defs
+public import Complexitylib.Circuits.Unrolling.Defs
+public import Mathlib.Data.Fintype.Prod
 
 /-!
 # Boolean formulas for one Turing-machine transition
@@ -22,6 +24,8 @@ movement uses saturated subtraction at the left boundary. A right move from
 the largest represented head position has no represented target; clients rule
 out that case with `HeadsLt` before applying transition correctness.
 -/
+
+@[expose] public section
 
 namespace Complexity
 
@@ -51,7 +55,7 @@ end WritableSlot
   deriving DecidableEq
 
 /-- Product representation used to enumerate complete local views. -/
-private def transitionCaseEquiv (tm : NTM k) :
+def transitionCaseEquiv (tm : NTM k) :
     TransitionCase tm ≃ Bool × tm.Q × Γ × (Fin k → Γ) × Γ where
   toFun view :=
     (view.choice, view.state, view.inputRead, view.workRead, view.outputRead)

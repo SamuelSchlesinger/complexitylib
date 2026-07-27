@@ -3,8 +3,10 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Models.TuringMachine.Combinators.WorkBranch.Defs
-import Complexitylib.Models.TuringMachine.Combinators.WorkBranch.Internal
+module
+
+public import Complexitylib.Models.TuringMachine.Combinators.WorkBranch.Defs
+public import Complexitylib.Models.TuringMachine.Combinators.WorkBranch.Internal
 
 /-!
 # Direct work-symbol branch combinator
@@ -29,6 +31,8 @@ heads reading `▷` must move right.
   canonical binary zero.
 - `TM.IsTransducer.branchWorkBlankTM` preserves one-way output behavior.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

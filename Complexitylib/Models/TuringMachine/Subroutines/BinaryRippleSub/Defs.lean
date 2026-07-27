@@ -3,9 +3,11 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Models.TuringMachine.Subroutines
-import Complexitylib.Models.TuringMachine.Tape.Encoding
-import Mathlib.Data.Nat.Size
+module
+
+public import Complexitylib.Models.TuringMachine.Subroutines
+public import Complexitylib.Models.TuringMachine.Tape.Encoding
+public import Mathlib.Data.Nat.Size
 
 /-!
 # Linear-time canonical binary subtraction -- definitions
@@ -15,6 +17,8 @@ work tapes. The scan writes a fixed-width difference to a fresh result tape.
 A single backward pass then erases the complete result on underflow or removes
 only its redundant high zeros, while returning the result head to cell one.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

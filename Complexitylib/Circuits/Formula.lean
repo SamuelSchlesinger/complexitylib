@@ -3,10 +3,12 @@ Copyright (c) 2025 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Mathlib.Data.Nat.Basic
-import Mathlib.Data.Bool.Basic
-import Mathlib.Data.Finset.Basic
-import Mathlib.Data.Finset.Union
+module
+
+public import Mathlib.Data.Nat.Basic
+public import Mathlib.Data.Bool.Basic
+public import Mathlib.Data.Finset.Basic
+public import Mathlib.Data.Finset.Union
 
 /-!
 # Boolean formulas and formula size
@@ -30,6 +32,8 @@ measures must not be conflated in lower-bound arguments.
 - `BoolFormula.vars`, `BoolFormula.eval_eq_of_agree` — the variable set and the
   locality property (evaluation depends only on the variables that occur)
 -/
+
+@[expose] public section
 
 namespace Complexity
 

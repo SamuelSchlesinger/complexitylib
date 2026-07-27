@@ -3,8 +3,10 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Models.TuringMachine.Subroutines.BinaryRippleAdd.Defs
-import Complexitylib.Models.TuringMachine.Subroutines.BinaryRippleAdd.Internal
+module
+
+public import Complexitylib.Models.TuringMachine.Subroutines.BinaryRippleAdd.Defs
+public import Complexitylib.Models.TuringMachine.Subroutines.BinaryRippleAdd.Internal
 
 /-!
 # Linear-time canonical binary addition
@@ -18,6 +20,8 @@ The older `TM.binaryAddIntoTM` remains useful as a value-iterating count-up
 routine; complexity-sensitive RAM simulation should use this width-linear
 machine instead.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

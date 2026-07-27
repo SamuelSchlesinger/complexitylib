@@ -3,12 +3,16 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Circuits.DecisionTree.Path.Defs
-import Complexitylib.Circuits.DecisionTree.Finite.Internal
+module
+
+public import Complexitylib.Circuits.DecisionTree.Path.Defs
+public import Complexitylib.Circuits.DecisionTree.Finite.Internal
 
 /-!
 # Canonical deepest paths in finite decision trees -- proof internals
 -/
+
+@[expose] public section
 
 namespace Complexity
 namespace DecisionTree.On

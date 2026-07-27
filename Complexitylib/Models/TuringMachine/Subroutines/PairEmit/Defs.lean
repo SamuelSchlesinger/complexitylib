@@ -3,7 +3,9 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Models.TuringMachine.Combinators
+module
+
+public import Complexitylib.Models.TuringMachine.Combinators
 
 /-!
 # Pair emission from the input and a work tape
@@ -19,6 +21,8 @@ Both sources are consumed only through their first blank delimiter.
 - `TM.pairInputWorkTM` — emit a pair from one work tape and the input
 - `TM.pairInputWorkTime` — the exact running time on canonical sources
 -/
+
+@[expose] public section
 
 namespace Complexity
 

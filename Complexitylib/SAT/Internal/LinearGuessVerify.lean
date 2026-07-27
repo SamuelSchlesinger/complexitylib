@@ -3,7 +3,9 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.SAT.Internal.GuessVerify
+module
+
+public import Complexitylib.SAT.Internal.GuessVerify
 
 /-!
 # Generic linear-witness interface for the SAT guess-and-verify machine
@@ -19,6 +21,8 @@ theorems for any relation with that same linear bound.
   balanced relation with a polynomial-time paired verifier defines an NP
   language
 -/
+
+@[expose] public section
 
 namespace Complexity
 

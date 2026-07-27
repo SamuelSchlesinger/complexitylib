@@ -3,7 +3,9 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.SAT.Tseitin.Machine.Internal.BranchFrame
+module
+
+public import Complexitylib.SAT.Tseitin.Machine.Internal.BranchFrame
 
 /-!
 # Invalid-input branch of the Tseitin reduction machine
@@ -22,6 +24,8 @@ time bound are completely independent of the supplied `validEmitter`.
 - `reductionTMWith_invalid_hoareTime_internal`
 - `reductionTMWith_invalid_reachesIn_internal`
 -/
+
+@[expose] public section
 
 namespace Complexity
 

@@ -3,8 +3,10 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Classes.PPoly.Unrolling.Defs
-import Complexitylib.Classes.PPoly.Unrolling.Internal
+module
+
+public import Complexitylib.Classes.PPoly.Unrolling.Defs
+public import Complexitylib.Classes.PPoly.Unrolling.Internal
 
 /-!
 # Deterministic time has nonuniform circuits
@@ -22,6 +24,8 @@ and concludes `P ⊆ P/poly` directly from the unrolling construction.
 - `TM.DecidesInTime.mem_PPoly`: package one polynomial-time decider.
 - `P_subset_PPoly`: deterministic polynomial time has polynomial-size circuits.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

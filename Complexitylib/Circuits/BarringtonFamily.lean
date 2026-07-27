@@ -3,8 +3,10 @@ Copyright (c) 2025 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Circuits.BarringtonLength
-import Mathlib.Data.Nat.Log
+module
+
+public import Complexitylib.Circuits.BarringtonLength
+public import Mathlib.Data.Nat.Log
 
 /-!
 # Barrington at the family level: `NC¹ ⊆` polynomial-size width-`5` branching programs
@@ -30,6 +32,8 @@ applying the per-formula bound pointwise, together with the arithmetic fact that
   logarithmic depth to a polynomial `4 ^ depth` bound.
 - `FormulaFamily.logDepth_polyLength_bp` — the family-level containment.
 -/
+
+@[expose] public section
 
 open Equiv
 

@@ -3,14 +3,16 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import
+module
+
+public import
   Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Machine.Instruction.Defs
-import Complexitylib.Models.TuringMachine.Combinators.WorkBranch.Defs
-import Complexitylib.Models.TuringMachine.Lift
-import Complexitylib.Models.TuringMachine.Subroutines
-import Complexitylib.Models.TuringMachine.Subroutines.BinaryCopy.Defs
-import Complexitylib.Models.TuringMachine.Subroutines.BinaryPred.Defs
-import Complexitylib.Models.TuringMachine.Subroutines.ResetBinaryMany.Defs
+public import Complexitylib.Models.TuringMachine.Combinators.WorkBranch.Defs
+public import Complexitylib.Models.TuringMachine.Lift
+public import Complexitylib.Models.TuringMachine.Subroutines
+public import Complexitylib.Models.TuringMachine.Subroutines.BinaryCopy.Defs
+public import Complexitylib.Models.TuringMachine.Subroutines.BinaryPred.Defs
+public import Complexitylib.Models.TuringMachine.Subroutines.ResetBinaryMany.Defs
 
 /-!
 # Fixed-program sparse RAM instruction dispatch -- definitions
@@ -20,6 +22,8 @@ their encoded output there; control instructions copy the unchanged read-only
 store there. A binary copy of the program counter is then decremented through a
 fixed finite branch tree, so the resulting TM depends only on the RAM program.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

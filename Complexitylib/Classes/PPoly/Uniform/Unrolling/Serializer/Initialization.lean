@@ -3,8 +3,10 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Classes.PPoly.Uniform.Unrolling.Serializer.Initialization.Defs
-import Complexitylib.Classes.PPoly.Uniform.Unrolling.Serializer.Initialization.Internal
+module
+
+public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Serializer.Initialization.Defs
+public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Serializer.Initialization.Internal
 
 /-!
 # Numeric initialization schedule for direct tableau serialization
@@ -24,6 +26,8 @@ does not yet construct a Turing machine that emits those gates.
 - `directInitSchedule_eq_initFragment` identifies the schedule with the
   existing positive-input initialization fragment.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

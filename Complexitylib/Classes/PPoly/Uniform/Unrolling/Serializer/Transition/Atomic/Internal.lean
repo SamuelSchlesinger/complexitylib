@@ -3,13 +3,17 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Classes.PPoly.Uniform.Unrolling.Serializer.Transition
-import Complexitylib.Classes.PPoly.Uniform.Unrolling.Serializer.Transition.Atomic.Defs
-import Complexitylib.Circuits.Encoding.Formula
+module
+
+public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Serializer.Transition
+public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Serializer.Transition.Atomic.Defs
+public import Complexitylib.Circuits.Encoding.Formula
 
 /-!
 # Numeric schedules for atomic transition formulas -- proof internals
 -/
+
+@[expose] public section
 
 namespace Complexity
 

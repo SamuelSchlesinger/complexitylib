@@ -3,15 +3,17 @@ Copyright (c) 2025 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Classes.P.Defs
-import Complexitylib.Classes.P.Internal
-import Complexitylib.Classes.P.NormalForm
-import Complexitylib.Classes.P.Composition
-import Complexitylib.Classes.P.PairWithInput
-import Complexitylib.Classes.P.Preimage
-import Complexitylib.Classes.P.UnaryLength
-import Complexitylib.Classes.P.FinsetDomain
-import Complexitylib.Models.TuringMachine.Subroutines.CopyOutput
+module
+
+public import Complexitylib.Classes.P.Defs
+public import Complexitylib.Classes.P.Internal
+public import Complexitylib.Classes.P.NormalForm
+public import Complexitylib.Classes.P.Composition
+public import Complexitylib.Classes.P.PairWithInput
+public import Complexitylib.Classes.P.Preimage
+public import Complexitylib.Classes.P.UnaryLength
+public import Complexitylib.Classes.P.FinsetDomain
+public import Complexitylib.Models.TuringMachine.Subroutines.CopyOutput
 
 /-!
 # P — surface layer
@@ -36,6 +38,8 @@ This file aggregates the definitions and theorems for P, FP, and PSPACE.
 - `unaryLength_mem_FP` — materializing the unary input length belongs to `FP`
 - `ite_mem_finset_mem_FP` — functions supported on a finite set belong to `FP`
 -/
+
+@[expose] public section
 
 namespace Complexity
 

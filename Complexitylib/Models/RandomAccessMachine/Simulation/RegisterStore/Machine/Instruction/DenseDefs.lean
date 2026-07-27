@@ -3,9 +3,11 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import
+module
+
+public import
   Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Machine.Instruction.Defs
-import
+public import
   Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Machine.EntryUpdate.TaggedDefs
 
 /-!
@@ -15,6 +17,8 @@ These kernels retain the checked sparse scanner/update ABI while interpreting
 the immutable public input in place. Reads use the dense-overlay lookup and
 writes successor-tag their actual value before sparse update.
 -/
+
+@[expose] public section
 
 namespace Complexity
 namespace RAM

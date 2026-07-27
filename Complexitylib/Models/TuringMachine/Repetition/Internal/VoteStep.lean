@@ -3,9 +3,11 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Models.TuringMachine.Repetition.Internal.Finish
-import Complexitylib.Models.TuringMachine.Repetition.Internal.Frame
-import Complexitylib.Models.TuringMachine.Repetition.Internal.Votes
+module
+
+public import Complexitylib.Models.TuringMachine.Repetition.Internal.Finish
+public import Complexitylib.Models.TuringMachine.Repetition.Internal.Frame
+public import Complexitylib.Models.TuringMachine.Repetition.Internal.Votes
 
 /-!
 # Finish-step vote semantics for fixed-time repetition
@@ -22,6 +24,8 @@ source configuration, and specializes the final finish theorem to `repeatVotes`.
 - `NTM.repeatAtTime_trace_finish_next` — control, projection, and frame handoff
 - `NTM.repeatAtTime_trace_finish_last_votes` — final majority in source-vote form
 -/
+
+@[expose] public section
 
 namespace Complexity
 

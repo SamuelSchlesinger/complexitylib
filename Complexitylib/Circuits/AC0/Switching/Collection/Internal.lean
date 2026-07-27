@@ -3,15 +3,19 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Circuits.AC0.Switching.Collection.Defs
-import Complexitylib.Circuits.AC0.Switching.Internal
-import Complexitylib.Circuits.RandomRestriction.Internal
-import Mathlib.Algebra.BigOperators.Ring.Finset
-import Mathlib.Algebra.Order.BigOperators.Group.Finset
+module
+
+public import Complexitylib.Circuits.AC0.Switching.Collection.Defs
+public import Complexitylib.Circuits.AC0.Switching.Internal
+public import Complexitylib.Circuits.RandomRestriction.Internal
+public import Mathlib.Algebra.BigOperators.Ring.Finset
+public import Mathlib.Algebra.Order.BigOperators.Group.Finset
 
 /-!
 # Simultaneous switching for finite formula collections -- proof internals
 -/
+
+@[expose] public section
 
 namespace Complexity
 

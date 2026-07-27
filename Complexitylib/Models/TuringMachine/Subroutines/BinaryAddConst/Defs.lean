@@ -3,8 +3,10 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Models.TuringMachine.Registers.RegisterOps
-import Complexitylib.Models.TuringMachine.Subroutines.BinarySucc.Defs
+module
+
+public import Complexitylib.Models.TuringMachine.Registers.RegisterOps
+public import Complexitylib.Models.TuringMachine.Subroutines.BinarySucc.Defs
 
 /-!
 # Addition of a fixed natural to a canonical binary tape — definitions
@@ -13,6 +15,8 @@ A fixed constant is compiled into finitely many sequential applications of
 canonical binary successor. No work tape is needed for the hardwired value,
 so the construction preserves every tape except its destination.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

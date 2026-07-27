@@ -3,8 +3,10 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Circuits.AC0.Switching.Defs
-import Complexitylib.Circuits.AC0.Switching.Internal
+module
+
+public import Complexitylib.Circuits.AC0.Switching.Defs
+public import Complexitylib.Circuits.AC0.Switching.Internal
 
 /-!
 # Switching-lemma substrate
@@ -15,6 +17,8 @@ theorems include an elementary arity-dependent bound and a width-only bound for
 consistent DNFs. The latter replays the canonical complete-block path from
 bounded literal positions, branch bits, and phase markers.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

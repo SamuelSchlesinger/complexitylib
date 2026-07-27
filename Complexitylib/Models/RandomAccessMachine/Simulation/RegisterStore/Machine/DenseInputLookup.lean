@@ -3,7 +3,9 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import
+module
+
+public import
 Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Machine.DenseInputLookup.Internal
 
 /-!
@@ -12,6 +14,8 @@ Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Machine.DenseI
 This module exposes the fixed leaves used to look through a sparse tagged
 overlay into the immutable public-input bank.
 -/
+
+@[expose] public section
 
 namespace Complexity
 namespace RAM

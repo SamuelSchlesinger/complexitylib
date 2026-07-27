@@ -3,7 +3,9 @@ Copyright (c) 2025 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Circuits.AndOrNot.Defs
+module
+
+public import Complexitylib.Circuits.AndOrNot.Defs
 
 /-! # Internal: AND/OR/NOT Completeness Proof
 
@@ -12,6 +14,8 @@ via DNF (disjunctive normal form) construction. The basis definitions are
 in `Complexitylib.Circuits.AndOrNot.Defs`; this module is re-exported through
 `Complexitylib.Circuits.AndOrNot`.
 -/
+
+@[expose] public section
 
 namespace Complexity
 
@@ -34,7 +38,7 @@ For each of the `2^N` possible inputs `s` (decoded via `Nat.testBit`),
 internal gate `i` is the indicator AND for `s` when `f s = true`, or a
 trivially-false 0-input OR otherwise. The single output OR gate disjoins
 all internal gates. -/
-private def andOrNotFor.mkGate {N : Nat} (f : BitString N → Bool) (i : Fin (2 ^ N)) :
+def andOrNotFor.mkGate {N : Nat} (f : BitString N → Bool) (i : Fin (2 ^ N)) :
     Gate Basis.unboundedAndOr (N + 2 ^ N) :=
   if f (fun j => i.val.testBit j.val) then
     { op := .and, fanIn := N, arityOk := trivial,
@@ -45,7 +49,7 @@ private def andOrNotFor.mkGate {N : Nat} (f : BitString N → Bool) (i : Fin (2 
       inputs := Fin.elim0,
       negated := Fin.elim0 }
 
-private lemma andOrNotFor.mkGate_acyclic {N : Nat} (f : BitString N → Bool)
+lemma andOrNotFor.mkGate_acyclic {N : Nat} (f : BitString N → Bool)
     (i : Fin (2 ^ N)) (k : Fin (andOrNotFor.mkGate f i).fanIn) :
     ((andOrNotFor.mkGate f i).inputs k).val < N + i.val := by
   revert k; unfold mkGate
@@ -67,7 +71,7 @@ def andOrNotFor {N : Nat} [NeZero N] (f : BitString N → Bool) :
       negated := fun _ => false }
   acyclic := andOrNotFor.mkGate_acyclic f
 
-private lemma AONFor_wireValue_gate {N : Nat} [NeZero N] (f : BitString N → Bool)
+lemma AONFor_wireValue_gate {N : Nat} [NeZero N] (f : BitString N → Bool)
     (x : BitString N) (i : Fin (2 ^ N)) :
     (andOrNotFor f).wireValue x (Fin.natAdd N i) =
       (andOrNotFor.mkGate f i).eval ((andOrNotFor f).wireValue x) := by
@@ -86,7 +90,7 @@ private lemma AONFor_wireValue_gate {N : Nat} [NeZero N] (f : BitString N → Bo
 
 /-! ## Helper lemmas for andOrNotFor correctness -/
 
-private lemma foldl_bor_eq_true (n : Nat) (g : Fin n → Bool) :
+lemma foldl_bor_eq_true (n : Nat) (g : Fin n → Bool) :
     (Fin.foldl n (fun acc i => acc || g i) false = true) ↔ (∃ i : Fin n, g i = true) := by
   induction n with
   | zero => simp [Fin.foldl_zero]
@@ -105,7 +109,7 @@ private lemma foldl_bor_eq_true (n : Nat) (g : Fin n → Bool) :
       · left; rw [ih]; exact ⟨j, hi⟩
       · right; exact hi
 
-private lemma foldl_band_eq_true (n : Nat) (g : Fin n → Bool) :
+lemma foldl_band_eq_true (n : Nat) (g : Fin n → Bool) :
     (Fin.foldl n (fun acc i => acc && g i) true = true) ↔ (∀ i : Fin n, g i = true) := by
   induction n with
   | zero => simp [Fin.foldl_zero]
@@ -116,17 +120,17 @@ private lemma foldl_band_eq_true (n : Nat) (g : Fin n → Bool) :
     · intro h; rw [Bool.and_eq_true]
       exact ⟨(ih _).mpr (fun j => h j.castSucc), h (Fin.last n)⟩
 
-private lemma AONFor_wireValue_input {N : Nat} [NeZero N] (f : BitString N → Bool)
+lemma AONFor_wireValue_input {N : Nat} [NeZero N] (f : BitString N → Bool)
     (x : BitString N) (j : Fin N) :
     (andOrNotFor f).wireValue x (j.castAdd (2 ^ N)) = x j := by
   have h : (j.castAdd (2 ^ N)).val < N := by simp [Fin.val_castAdd]
   rw [Circuit.wireValue_of_lt _ _ _ h]
   congr 1
 
-private lemma xor_not_eq_true_iff (a b : Bool) : ((!b).xor a = true) ↔ (a = b) := by
+lemma xor_not_eq_true_iff (a b : Bool) : ((!b).xor a = true) ↔ (a = b) := by
   cases a <;> cases b <;> simp
 
-private lemma mkGate_true {N : Nat} (f : BitString N → Bool) (i : Fin (2 ^ N))
+lemma mkGate_true {N : Nat} (f : BitString N → Bool) (i : Fin (2 ^ N))
     (hfi : f (fun j => i.val.testBit j.val) = true) :
     andOrNotFor.mkGate f i =
       { op := .and, fanIn := N, arityOk := trivial,
@@ -134,14 +138,14 @@ private lemma mkGate_true {N : Nat} (f : BitString N → Bool) (i : Fin (2 ^ N))
         negated := fun j => !(i.val.testBit j.val) } := by
   unfold andOrNotFor.mkGate; simp [hfi]
 
-private lemma mkGate_eval_false {N : Nat} (f : BitString N → Bool) (i : Fin (2 ^ N))
+lemma mkGate_eval_false {N : Nat} (f : BitString N → Bool) (i : Fin (2 ^ N))
     (wv : BitString (N + 2 ^ N))
     (hfi : f (fun j => i.val.testBit j.val) = false) :
     (andOrNotFor.mkGate f i).eval wv = false := by
   unfold andOrNotFor.mkGate Gate.eval
   simp [hfi, Basis.unboundedAndOr, AndOrOp.eval, Fin.foldl_zero]
 
-private lemma mkGate_eval_true_iff {N : Nat} (f : BitString N → Bool) (i : Fin (2 ^ N))
+lemma mkGate_eval_true_iff {N : Nat} (f : BitString N → Bool) (i : Fin (2 ^ N))
     (wv : BitString (N + 2 ^ N))
     (hfi : f (fun j => i.val.testBit j.val) = true) :
     (andOrNotFor.mkGate f i).eval wv = true ↔
@@ -152,7 +156,7 @@ private lemma mkGate_eval_true_iff {N : Nat} (f : BitString N → Bool) (i : Fin
   exact ⟨fun h j => (xor_not_eq_true_iff _ _).mp (h j),
          fun h j => (xor_not_eq_true_iff _ _).mpr (h j)⟩
 
-private lemma exists_testBit_encode (N : Nat) (x : BitString N) :
+lemma exists_testBit_encode (N : Nat) (x : BitString N) :
     ∃ m : Fin (2 ^ N), ∀ j : Fin N, m.val.testBit j.val = x j := by
   induction N with
   | zero => exact ⟨⟨0, Nat.one_pos⟩, fun j => j.elim0⟩
@@ -225,13 +229,16 @@ theorem andOrNotFor_eval {N : Nat} [NeZero N] (f : BitString N → Bool) :
 /-- Internal gate for the multi-output DNF circuit.
 Gate `idx` encodes output bit `j = idx / 2^N` and indicator index `i = idx % 2^N`.
 If `f(bitstring i)[j] = true`, it's an AND indicator gate; otherwise a trivially-false OR gate. -/
-private def AONForM_j {N M : Nat} (idx : Fin (M * 2 ^ N)) : Fin M :=
+@[nolint defsWithUnderscore]
+def AONForM_j {N M : Nat} (idx : Fin (M * 2 ^ N)) : Fin M :=
   ⟨idx.val / 2 ^ N, Nat.div_lt_of_lt_mul (Nat.mul_comm M (2^N) ▸ idx.isLt)⟩
 
-private def AONForM_i {N : Nat} {M : Nat} (idx : Fin (M * 2 ^ N)) : Fin (2 ^ N) :=
+@[nolint defsWithUnderscore docBlame]
+def AONForM_i {N : Nat} {M : Nat} (idx : Fin (M * 2 ^ N)) : Fin (2 ^ N) :=
   ⟨idx.val % 2 ^ N, Nat.mod_lt _ (Nat.two_pow_pos N)⟩
 
-private def AONForM_mkGate {N M : Nat} (f : BitString N → BitString M) (idx : Fin (M * 2 ^ N)) :
+@[nolint defsWithUnderscore docBlame]
+def AONForM_mkGate {N M : Nat} (f : BitString N → BitString M) (idx : Fin (M * 2 ^ N)) :
     Gate Basis.unboundedAndOr (N + M * 2 ^ N) :=
   if f (fun k => (AONForM_i idx).val.testBit k.val) (AONForM_j idx) then
     { op := .and, fanIn := N, arityOk := trivial,
@@ -242,7 +249,7 @@ private def AONForM_mkGate {N M : Nat} (f : BitString N → BitString M) (idx : 
       inputs := Fin.elim0,
       negated := Fin.elim0 }
 
-private lemma AONForM_mkGate_acyclic {N M : Nat} (f : BitString N → BitString M)
+lemma AONForM_mkGate_acyclic {N M : Nat} (f : BitString N → BitString M)
     (idx : Fin (M * 2 ^ N)) (k : Fin (AONForM_mkGate f idx).fanIn) :
     ((AONForM_mkGate f idx).inputs k).val < N + idx.val := by
   revert k; unfold AONForM_mkGate
@@ -250,7 +257,7 @@ private lemma AONForM_mkGate_acyclic {N M : Nat} (f : BitString N → BitString 
   · intro k; exact Fin.elim0 k
   · intro k; simp; omega
 
-private lemma AONForM_output_bound {N M : Nat} (j : Fin M) (k : Fin (2 ^ N)) :
+lemma AONForM_output_bound {N M : Nat} (j : Fin M) (k : Fin (2 ^ N)) :
     N + j.val * 2 ^ N + k.val < N + M * 2 ^ N := by
   have hk := k.isLt
   suffices h : j.val * 2 ^ N + k.val < M * 2 ^ N by omega
@@ -273,13 +280,13 @@ def andOrNotForM {N M : Nat} [NeZero N] [NeZero M] (f : BitString N → BitStrin
       negated := fun _ => false }
   acyclic := AONForM_mkGate_acyclic f
 
-private lemma AONForM_wireValue_input {N M : Nat} [NeZero N] [NeZero M]
+lemma AONForM_wireValue_input {N M : Nat} [NeZero N] [NeZero M]
     (f : BitString N → BitString M) (x : BitString N) (k : Fin N) :
     (andOrNotForM f).wireValue x ⟨k.val, by omega⟩ = x k := by
   have h : (⟨k.val, by omega⟩ : Fin (N + M * 2 ^ N)).val < N := k.isLt
   rw [Circuit.wireValue_of_lt _ _ _ h]
 
-private lemma AONForM_wireValue_gate {N M : Nat} [NeZero N] [NeZero M]
+lemma AONForM_wireValue_gate {N M : Nat} [NeZero N] [NeZero M]
     (f : BitString N → BitString M) (x : BitString N) (idx : Fin (M * 2 ^ N)) :
     (andOrNotForM f).wireValue x ⟨N + idx.val, by omega⟩ =
       (AONForM_mkGate f idx).eval ((andOrNotForM f).wireValue x) := by
@@ -287,7 +294,7 @@ private lemma AONForM_wireValue_gate {N M : Nat} [NeZero N] [NeZero M]
   rw [Circuit.wireValue_of_not_lt _ _ _ hge]
   congr 1; simp only [andOrNotForM]; congr 1; exact Fin.ext (by simp)
 
-private lemma AONForM_mkGate_eval_false {N M : Nat}
+lemma AONForM_mkGate_eval_false {N M : Nat}
     (f : BitString N → BitString M) (idx : Fin (M * 2 ^ N))
     (wv : BitString (N + M * 2 ^ N))
     (hfi : f (fun k => (AONForM_i idx).val.testBit k.val) (AONForM_j idx) = false) :
@@ -295,7 +302,7 @@ private lemma AONForM_mkGate_eval_false {N M : Nat}
   unfold AONForM_mkGate Gate.eval
   simp [hfi, Basis.unboundedAndOr, AndOrOp.eval, Fin.foldl_zero]
 
-private lemma AONForM_mkGate_eval_true_iff {N M : Nat}
+lemma AONForM_mkGate_eval_true_iff {N M : Nat}
     (f : BitString N → BitString M) (idx : Fin (M * 2 ^ N))
     (wv : BitString (N + M * 2 ^ N))
     (hfi : f (fun k => (AONForM_i idx).val.testBit k.val) (AONForM_j idx) = true) :
@@ -312,12 +319,12 @@ private lemma AONForM_mkGate_eval_true_iff {N M : Nat}
          fun h k => (xor_not_eq_true_iff _ _).mpr (h k)⟩
 
 -- Helper: relate index `j * 2^N + k` to `AONForM_i` and `AONForM_j`
-private lemma AONForM_i_of_add {N M : Nat} (j : Fin M) (k : Fin (2 ^ N))
+lemma AONForM_i_of_add {N M : Nat} (j : Fin M) (k : Fin (2 ^ N))
     (h : j.val * 2 ^ N + k.val < M * 2 ^ N) :
     AONForM_i (⟨j.val * 2 ^ N + k.val, h⟩ : Fin (M * 2 ^ N)) = k := by
   ext; simp [AONForM_i, Nat.mod_eq_of_lt k.isLt]
 
-private lemma AONForM_j_of_add {N M : Nat} (j : Fin M) (k : Fin (2 ^ N))
+lemma AONForM_j_of_add {N M : Nat} (j : Fin M) (k : Fin (2 ^ N))
     (h : j.val * 2 ^ N + k.val < M * 2 ^ N) :
     AONForM_j (⟨j.val * 2 ^ N + k.val, h⟩ : Fin (M * 2 ^ N)) = j := by
   ext; simp only [AONForM_j, Fin.val_mk]
@@ -325,16 +332,17 @@ private lemma AONForM_j_of_add {N M : Nat} (j : Fin M) (k : Fin (2 ^ N))
   rw [Nat.add_mul_div_left _ _ (Nat.two_pow_pos N), Nat.div_eq_of_lt k.isLt]; simp
 
 -- The idx corresponding to output j and indicator k
-private def AONForM_idx {N M : Nat} (j : Fin M) (k : Fin (2 ^ N)) :
+@[nolint defsWithUnderscore docBlame]
+def AONForM_idx {N M : Nat} (j : Fin M) (k : Fin (2 ^ N)) :
     Fin (M * 2 ^ N) :=
   ⟨j.val * 2 ^ N + k.val, by
     have := AONForM_output_bound (N := N) j k; omega⟩
 
-private lemma AONForM_idx_i {N M : Nat} (j : Fin M) (k : Fin (2 ^ N)) :
+lemma AONForM_idx_i {N M : Nat} (j : Fin M) (k : Fin (2 ^ N)) :
     AONForM_i (AONForM_idx j k) = k :=
   AONForM_i_of_add j k _
 
-private lemma AONForM_idx_j {N M : Nat} (j : Fin M) (k : Fin (2 ^ N)) :
+lemma AONForM_idx_j {N M : Nat} (j : Fin M) (k : Fin (2 ^ N)) :
     AONForM_j (AONForM_idx j k) = j :=
   AONForM_j_of_add j k _
 

@@ -3,8 +3,10 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Models.RandomAccessMachine.Structured.Defs
-import Mathlib.Data.FinEnum
+module
+
+public import Complexitylib.Models.RandomAccessMachine.Structured.Defs
+public import Mathlib.Data.FinEnum
 
 /-!
 # Finite-state scanners for the structured RAM frontend
@@ -14,6 +16,8 @@ compiler below realizes it as a table-driven structured RAM program. The state
 bound and transition-closure fields are the complete trusted interface needed by
 the generic correctness and resource proof.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

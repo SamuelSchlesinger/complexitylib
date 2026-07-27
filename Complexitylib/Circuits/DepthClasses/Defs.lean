@@ -3,10 +3,12 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Circuits.AndOrNot.Defs
-import Complexitylib.Circuits.Family.Defs
-import Complexitylib.Circuits.Threshold.Defs
-import Mathlib.Data.Nat.Log
+module
+
+public import Complexitylib.Circuits.AndOrNot.Defs
+public import Complexitylib.Circuits.Family.Defs
+public import Complexitylib.Circuits.Threshold.Defs
+public import Mathlib.Data.Nat.Log
 
 /-!
 # Circuit depth classes -- definitions
@@ -19,6 +21,8 @@ input is represented by `CircuitFamily.emptyOutput` rather than omitted.
 AND/OR circuits. Both require polynomial size and depth
 `O((log n + 1)^i)` in an explicit pointwise form.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

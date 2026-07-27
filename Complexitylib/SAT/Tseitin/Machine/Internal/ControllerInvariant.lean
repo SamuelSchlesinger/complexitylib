@@ -3,9 +3,11 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.SAT.Tseitin.Internal.Streaming
-import Complexitylib.SAT.Tseitin.Machine.Controller
-import Complexitylib.SAT.Tseitin.Machine.Internal.BufferSpecs
+module
+
+public import Complexitylib.SAT.Tseitin.Internal.Streaming
+public import Complexitylib.SAT.Tseitin.Machine.Controller
+public import Complexitylib.SAT.Tseitin.Machine.Internal.BufferSpecs
 
 /-!
 # Register invariant for the Tseitin streaming controller
@@ -34,6 +36,8 @@ register-level Hoare specifications in `Machine.Internal.BufferSpecs`.
 - `BufferValues.ofStreaming`
 - `StreamingStatePred`
 -/
+
+@[expose] public section
 
 namespace Complexity
 

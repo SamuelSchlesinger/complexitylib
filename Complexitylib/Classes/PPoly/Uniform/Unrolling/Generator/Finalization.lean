@@ -3,8 +3,10 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Finalization.Defs
-import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Finalization.Internal
+module
+
+public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Finalization.Defs
+public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Finalization.Internal
 
 /-!
 # Direct-unrolling finalization generator
@@ -14,6 +16,8 @@ phase of the executable direct-unrolling serializer. Padding is driven by the
 binary `available` counter and the precomputed closed frontier, so the routine
 uses logarithmic-width work values and performs no preliminary counting pass.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

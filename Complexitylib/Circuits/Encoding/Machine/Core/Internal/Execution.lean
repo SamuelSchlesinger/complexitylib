@@ -3,9 +3,11 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Circuits.Encoding.Machine.Core.Internal.Action
-import Complexitylib.Circuits.Encoding.Machine.Core.Internal.Tape
-import Complexitylib.Models.TuringMachine.Subroutines.Counter
+module
+
+public import Complexitylib.Circuits.Encoding.Machine.Core.Internal.Action
+public import Complexitylib.Circuits.Encoding.Machine.Core.Internal.Tape
+public import Complexitylib.Models.TuringMachine.Subroutines.Counter
 
 /-!
 # Execution seams for the streaming circuit evaluator
@@ -16,6 +18,8 @@ Later phase proofs can state exact configurations using named tape arguments and
 reduce one machine step to the corresponding named `CoreAction`, without
 reopening the finite-index projection plumbing.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

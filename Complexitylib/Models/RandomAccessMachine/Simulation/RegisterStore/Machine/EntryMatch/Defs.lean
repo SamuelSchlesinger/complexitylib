@@ -3,11 +3,13 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import
+module
+
+public import
   Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Machine.AddressEq.Defs
-import
+public import
   Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Machine.EntryDecode.Defs
-import Complexitylib.Models.TuringMachine.Registers
+public import Complexitylib.Models.TuringMachine.Registers
 
 /-!
 # RAM sparse-entry matching — definitions
@@ -16,6 +18,8 @@ import Complexitylib.Models.TuringMachine.Registers
 It decodes one address/value entry and compares the decoded address with a
 preserved canonical query. The result is appended to a dedicated work tape.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

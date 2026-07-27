@@ -3,7 +3,9 @@ Copyright (c) 2025 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Models.TuringMachine.Combinators
+module
+
+public import Complexitylib.Models.TuringMachine.Combinators
 
 /-!
 # TM Subroutines
@@ -28,6 +30,8 @@ statements are re-exported by focused surface modules when needed.
 - `TM.copyWorkToWorkTM` — copy one work tape's contents to another
 - `TM.compareWorkTapesTM` — compare two work tapes cell by cell
 -/
+
+@[expose] public section
 
 namespace Complexity
 

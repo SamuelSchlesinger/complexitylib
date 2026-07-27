@@ -3,8 +3,10 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Models.TuringMachine.Combinators.Internal.Generic
-import Complexitylib.SAT.Tseitin.Machine.Controller
+module
+
+public import Complexitylib.Models.TuringMachine.Combinators.Internal.Generic
+public import Complexitylib.SAT.Tseitin.Machine.Controller
 
 /-!
 # Child-execution lifting for the Tseitin streaming controller
@@ -31,6 +33,8 @@ No token semantics are proved here.
 - `validEmitterTM_commit_return_step_internal`
 - `validEmitterTM_close_return_step_internal`
 -/
+
+@[expose] public section
 
 namespace Complexity
 

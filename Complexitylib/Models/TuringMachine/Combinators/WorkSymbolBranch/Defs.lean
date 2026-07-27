@@ -3,7 +3,9 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Models.TuringMachine.Combinators.WorkBranch.Defs
+module
+
+public import Complexitylib.Models.TuringMachine.Combinators.WorkBranch.Defs
 
 /-!
 # Direct work-symbol branch combinator — definitions
@@ -12,6 +14,8 @@ import Complexitylib.Models.TuringMachine.Combinators.WorkBranch.Defs
 and runs `onEqual` exactly when the current symbol equals `symbol`. This is the
 generic controller branch used by the sparse RAM lookup scan.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

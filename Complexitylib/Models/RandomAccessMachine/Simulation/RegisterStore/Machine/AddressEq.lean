@@ -3,10 +3,12 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import
+module
+
+public import
   Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Machine.AddressEq.Internal
-import Complexitylib.Models.TuringMachine.Hoare.Space
-import Complexitylib.Models.TuringMachine.Subroutines.ClearWork
+public import Complexitylib.Models.TuringMachine.Hoare.Space
+public import Complexitylib.Models.TuringMachine.Subroutines.ClearWork
 
 /-!
 # Decoded sparse-address equality
@@ -14,6 +16,8 @@ import Complexitylib.Models.TuringMachine.Subroutines.ClearWork
 This module exposes the framed linear-time semantics of address rewind and
 comparison used by the concrete sparse register-store scan.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

@@ -3,9 +3,11 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Mathlib.Algebra.BigOperators.Expect
-import Mathlib.Analysis.InnerProductSpace.Basic
-import Mathlib.Data.ZMod.Basic
+module
+
+public import Mathlib.Algebra.BigOperators.Expect
+public import Mathlib.Analysis.InnerProductSpace.Basic
+public import Mathlib.Data.ZMod.Basic
 
 /-!
 # Chapter 1: Boolean functions and the Fourier expansion — Definitions
@@ -41,6 +43,8 @@ the book's conventions:
 * `Pr[P]` — uniform probability `𝔼[𝟙 P]`
 * `Pr₂[P]` — joint uniform probability over pairs
 -/
+
+@[expose] public section
 
 namespace Complexity
 
@@ -117,26 +121,26 @@ noncomputable instance instInner : Inner ℝ (BooleanFunction n) where
 theorem inner_def (f g : BooleanFunction n) :
     @inner ℝ _ instInner f g = (1 / (2 : ℝ) ^ n) * ∑ x : Cube n, f x * g x := rfl
 
-private theorem inner_comm (f g : BooleanFunction n) :
+theorem inner_comm (f g : BooleanFunction n) :
     @inner ℝ _ instInner f g = @inner ℝ _ instInner g f := by
   simp only [inner_def]; congr 1; apply Finset.sum_congr rfl; intro x _; ring
 
-private theorem inner_add_left (f g h : BooleanFunction n) :
+theorem inner_add_left (f g h : BooleanFunction n) :
     @inner ℝ _ instInner (f + g) h = @inner ℝ _ instInner f h + @inner ℝ _ instInner g h := by
   simp only [inner_def, add_apply, add_mul, Finset.sum_add_distrib, mul_add]
 
-private theorem inner_smul_left (r : ℝ) (f g : BooleanFunction n) :
+theorem inner_smul_left (r : ℝ) (f g : BooleanFunction n) :
     @inner ℝ _ instInner (r • f) g = r * @inner ℝ _ instInner f g := by
   simp only [inner_def, smul_apply, Finset.mul_sum]; ring_nf
 
-private theorem inner_self_nonneg' (f : BooleanFunction n) :
+theorem inner_self_nonneg' (f : BooleanFunction n) :
     0 ≤ @inner ℝ _ instInner f f := by
   simp only [inner_def]
   apply mul_nonneg
   · positivity
   · apply Finset.sum_nonneg; intro x _; exact mul_self_nonneg (f x)
 
-private theorem inner_self_eq_zero {f : BooleanFunction n}
+theorem inner_self_eq_zero {f : BooleanFunction n}
     (h : @inner ℝ _ instInner f f = 0) : f = 0 := by
   simp only [inner_def] at h
   have h2n : (0 : ℝ) < 1 / 2 ^ n := by positivity

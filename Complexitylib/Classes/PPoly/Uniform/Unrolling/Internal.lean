@@ -3,9 +3,11 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Classes.PPoly.Uniform.Unrolling.Defs
-import Complexitylib.Classes.PPoly.Unrolling
-import Complexitylib.Models.TuringMachine.Internal
+module
+
+public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Defs
+public import Complexitylib.Classes.PPoly.Unrolling
+public import Complexitylib.Models.TuringMachine.Internal
 
 /-!
 # Streamable deterministic unrolling families — proof internals
@@ -14,6 +16,8 @@ This module proves that the direct raw family has the same deterministic trace
 semantics and cubic size bound as the fixed-choice family, while exposing an
 exact positive-length serialization theorem.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

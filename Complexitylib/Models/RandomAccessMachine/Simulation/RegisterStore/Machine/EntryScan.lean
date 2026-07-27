@@ -3,13 +3,15 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import
+module
+
+public import
   Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Machine.EntryScan.Defs
-import
+public import
   Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Machine.EntryScan.Internal.Sem
-import
+public import
 Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Machine.EntryScan.Internal.Bounds
-import Complexitylib.Models.TuringMachine.Hoare.Space
+public import Complexitylib.Models.TuringMachine.Hoare.Space
 
 /-!
 # Bounded sparse-entry scan
@@ -18,6 +20,8 @@ This module exposes the complete time-bounded contract for the fixed sparse
 store scanner. The runtime entry count is read from a canonical binary tape;
 it is not hardwired into the finite controller.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

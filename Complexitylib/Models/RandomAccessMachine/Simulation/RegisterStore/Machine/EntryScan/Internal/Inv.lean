@@ -3,16 +3,20 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import
+module
+
+public import
   Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Machine.EntryScan.Defs
-import
+public import
   Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Machine.EntryScanStep
-import Complexitylib.Models.TuringMachine.Subroutines.ResetBinaryMany
-import Mathlib.Tactic.FinCases
+public import Complexitylib.Models.TuringMachine.Subroutines.ResetBinaryMany
+public import Mathlib.Tactic.FinCases
 
 /-!
 # Bounded sparse-entry scan — invariant internals
 -/
+
+@[expose] public section
 
 namespace Complexity
 

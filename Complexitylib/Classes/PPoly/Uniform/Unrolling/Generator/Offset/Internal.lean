@@ -3,14 +3,18 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Offset.Defs
-import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Primitive
-import Complexitylib.Models.TuringMachine.Experimental.BinaryRoutine.Control
-import Complexitylib.Models.TuringMachine.Experimental.BinaryRoutine.SpaceBounds
+module
+
+public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Offset.Defs
+public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Primitive
+public import Complexitylib.Models.TuringMachine.Experimental.BinaryRoutine.Control
+public import Complexitylib.Models.TuringMachine.Experimental.BinaryRoutine.SpaceBounds
 
 /-!
 # Dynamic recent-wire offsets -- proof internals
 -/
+
+@[expose] public section
 
 namespace Complexity
 

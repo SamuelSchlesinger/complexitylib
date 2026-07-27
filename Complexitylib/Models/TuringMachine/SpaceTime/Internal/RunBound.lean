@@ -3,8 +3,10 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Models.TuringMachine.SpaceTime.Internal.Reachability
-import Complexitylib.Models.TuringMachine.SpaceTime.Internal.Snapshot
+module
+
+public import Complexitylib.Models.TuringMachine.SpaceTime.Internal.Reachability
+public import Complexitylib.Models.TuringMachine.SpaceTime.Internal.Snapshot
 
 /-!
 # Finite-configuration run bounds — proof internals
@@ -14,6 +16,8 @@ did, finite snapshot determinism would reproduce the final halt state at an
 earlier time. The run's time indices therefore inject into the finite snapshot
 type.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

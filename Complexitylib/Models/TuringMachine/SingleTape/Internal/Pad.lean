@@ -3,7 +3,9 @@ Copyright (c) 2025 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Models.TuringMachine
+module
+
+public import Complexitylib.Models.TuringMachine
 
 /-!
 # Padding a 0-work-tape NTM with a dummy work tape
@@ -18,6 +20,8 @@ This closes the `k = 0` case of the single-tape reduction
 (`NTM.exists_singleTape_decidesInTime`): the simulation machinery requires at least
 one work tape, while a padded machine *is* already single-work-tape.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

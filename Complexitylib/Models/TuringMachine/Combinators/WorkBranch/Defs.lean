@@ -3,7 +3,9 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Models.TuringMachine.Combinators
+module
+
+public import Complexitylib.Models.TuringMachine.Combinators
 
 /-!
 # Direct work-symbol branch combinator -- definitions
@@ -13,6 +15,8 @@ A blank selects `onBlank`; every other symbol selects `onNonblank`. The
 dispatcher uses the ordinary read-back action on every tape and never uses the
 output tape as control storage.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

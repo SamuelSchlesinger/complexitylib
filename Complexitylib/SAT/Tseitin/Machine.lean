@@ -3,9 +3,11 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Classes.P.NormalForm
-import Complexitylib.SAT.Tseitin.Machine.Controller
-import Complexitylib.SAT.Tseitin.Machine.Internal.PolynomialTime
+module
+
+public import Complexitylib.Classes.P.NormalForm
+public import Complexitylib.SAT.Tseitin.Machine.Controller
+public import Complexitylib.SAT.Tseitin.Machine.Internal.PolynomialTime
 
 /-!
 # Polynomial-time Tseitin reduction machine
@@ -20,6 +22,8 @@ the fixed malformed-input fallback.
 - `ThreeSAT.Machine.reductionTM_computesInTime`
 - `ThreeSAT.reduction_mem_FP`
 -/
+
+@[expose] public section
 
 namespace Complexity
 

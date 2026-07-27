@@ -3,8 +3,10 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Models.TuringMachine.Subroutines.ClearWork.Defs
-import Complexitylib.Models.TuringMachine.Subroutines.ClearWork.Internal
+module
+
+public import Complexitylib.Models.TuringMachine.Subroutines.ClearWork.Defs
+public import Complexitylib.Models.TuringMachine.Subroutines.ClearWork.Internal
 
 /-!
 # Clearing a binary work tape
@@ -19,6 +21,8 @@ discipline of the clearing, rewinding, and composite machines.
 - `clearWorkTM_hoareTimeSpace_frame` — the corresponding all-prefix space contract.
 - `clearWorkTM_isTransducer` — clearing never moves the output head left.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

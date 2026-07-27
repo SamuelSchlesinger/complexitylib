@@ -3,8 +3,10 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Classes.PPoly.Uniform.Unrolling.Padded.Defs
-import Complexitylib.Circuits.Encoding.Fragment
+module
+
+public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Padded.Defs
+public import Complexitylib.Circuits.Encoding.Fragment
 
 /-!
 # Regularly padded deterministic unrolling families -- proof internals
@@ -13,6 +15,8 @@ The padding proof separates three facts: the direct tableau fits its closed
 cubic budget, constant gates remain topological at every later frontier, and
 the terminal copy reads the original acceptance wire through the dead padding.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

@@ -3,7 +3,9 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Models.TuringMachine.Combinators
+module
+
+public import Complexitylib.Models.TuringMachine.Combinators
 
 /-!
 # One-prefix work-tape loop combinator — definitions
@@ -18,6 +20,8 @@ Exact iteration semantics require `body` to preserve the already-advanced
 driver tape and head. The combinator itself is a concrete `TM`; loop
 certificates and proofs live in the adjacent internal and surface modules.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

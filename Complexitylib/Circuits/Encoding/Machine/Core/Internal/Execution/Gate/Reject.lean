@@ -3,8 +3,10 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Circuits.Encoding.Machine.Core.Internal.Execution.Gate
-import Complexitylib.Circuits.Encoding.Machine.Core.Internal.Pure
+module
+
+public import Complexitylib.Circuits.Encoding.Machine.Core.Internal.Execution.Gate
+public import Complexitylib.Circuits.Encoding.Machine.Core.Internal.Pure
 
 /-!
 # Rejecting gate attempts
@@ -14,6 +16,8 @@ truncated headers, unterminated unary references, and decoded references outside
 the current wire memo. Every path first consumes exactly one gate-count mark and
 then halts with an explicit zero write.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

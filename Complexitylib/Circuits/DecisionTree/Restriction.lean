@@ -3,8 +3,10 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Circuits.DecisionTree
-import Complexitylib.Circuits.Restriction
+module
+
+public import Complexitylib.Circuits.DecisionTree
+public import Complexitylib.Circuits.Restriction
 
 /-!
 # Restricting decision trees
@@ -22,6 +24,8 @@ simplification used when switching-lemma arguments measure decision-tree depth.
 * `DecisionTree.restrict_comp` -- sequential restriction agrees with
   left-biased restriction composition.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

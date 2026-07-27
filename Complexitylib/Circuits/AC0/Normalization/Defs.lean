@@ -3,7 +3,9 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Circuits.AC0.NormalForm.Defs
+module
+
+public import Complexitylib.Circuits.AC0.NormalForm.Defs
 
 /-!
 # Normalizing unbounded AND/OR circuits to negation-normal formulas
@@ -14,6 +16,8 @@ idempotent. It also closes an important quantitative loophole: the circuit
 model counts gates rather than wire incidences, so duplicate inputs must not
 inflate the normalized formula.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

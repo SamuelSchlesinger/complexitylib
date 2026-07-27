@@ -3,7 +3,9 @@ Copyright (c) 2025 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.SAT.CookLevin.Internal.EmitterActive
+module
+
+public import Complexitylib.SAT.CookLevin.Internal.EmitterActive
 
 /-!
 # The reduction emitter, assembled
@@ -19,6 +21,8 @@ Cook–Levin reductions `cookLevin_reduction_singleTape` /
 `cookLevin_reduction`, and the headlines `NPHard_language` and
 `NPComplete_language` for the SAT language `language`.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

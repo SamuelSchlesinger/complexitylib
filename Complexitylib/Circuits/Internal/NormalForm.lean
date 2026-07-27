@@ -3,9 +3,11 @@ Copyright (c) 2025 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Circuits.NormalForm.Defs
-import Complexitylib.Circuits.AndOrNot.Defs
-import Mathlib.Data.Fintype.BigOperators
+module
+
+public import Complexitylib.Circuits.NormalForm.Defs
+public import Complexitylib.Circuits.AndOrNot.Defs
+public import Mathlib.Data.Fintype.BigOperators
 
 /-! # Internal: Normal Form Proof Machinery
 
@@ -22,6 +24,8 @@ This internal module contains the proof infrastructure for CNF/DNF:
 
 The public interface re-exports the main theorems from `Complexitylib.Circuits.NormalForm`.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

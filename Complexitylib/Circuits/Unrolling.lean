@@ -3,14 +3,16 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Circuits.Unrolling.Defs
-import Complexitylib.Circuits.Unrolling.Acceptance
-import Complexitylib.Circuits.Unrolling.Acceptance.Hardwiring
-import Complexitylib.Circuits.Unrolling.Amplification
-import Complexitylib.Circuits.Unrolling.Internal.Initialization
-import Complexitylib.Circuits.Unrolling.Trace
-import Complexitylib.Circuits.Unrolling.Transition
-import Complexitylib.Circuits.Unrolling.Transition.Fragment
+module
+
+public import Complexitylib.Circuits.Unrolling.Defs
+public import Complexitylib.Circuits.Unrolling.Acceptance
+public import Complexitylib.Circuits.Unrolling.Acceptance.Hardwiring
+public import Complexitylib.Circuits.Unrolling.Amplification
+public import Complexitylib.Circuits.Unrolling.Internal.Initialization
+public import Complexitylib.Circuits.Unrolling.Trace
+public import Complexitylib.Circuits.Unrolling.Transition
+public import Complexitylib.Circuits.Unrolling.Transition.Fragment
 
 /-!
 # Circuit unrolling for bounded Turing-machine traces
@@ -24,6 +26,8 @@ code reconstructs to a typed single-output circuit. Parallel copies can share
 the data input, consume disjoint choice blocks, and feed a strict-majority
 threshold with an explicit polynomial gate bound.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

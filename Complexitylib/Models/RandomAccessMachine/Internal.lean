@@ -3,7 +3,10 @@ Copyright (c) 2025 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Models.RandomAccessMachine.Defs
+module
+
+public import Mathlib.Tactic.Ring
+public import Complexitylib.Models.RandomAccessMachine.Defs
 
 /-!
 # Random access machines: operational metatheory (proof internals)
@@ -27,6 +30,8 @@ This module proves the structural facts about `RAM.run`, `RAM.logTimeUpto`,
 Not intended for human audit: the definitions in `Defs.lean` and the theorem
 statements in the surface module carry the mathematical content.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

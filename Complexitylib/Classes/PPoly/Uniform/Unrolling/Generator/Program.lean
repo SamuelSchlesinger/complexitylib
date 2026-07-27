@@ -3,8 +3,10 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Program.Defs
-import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Program.Internal
+module
+
+public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Program.Defs
+public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Program.Internal
 
 /-!
 # Direct-unrolling generator program
@@ -13,6 +15,8 @@ This module exposes the fixed work-vector layout and verified tagged/header
 prefix of the direct-unrolling generator. A later module supplies the positive
 tableau body and discharges its value-level entry condition.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

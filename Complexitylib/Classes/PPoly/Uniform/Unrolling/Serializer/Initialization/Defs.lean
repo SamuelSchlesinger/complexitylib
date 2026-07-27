@@ -3,8 +3,10 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Classes.PPoly.Uniform.Unrolling.Defs
-import Complexitylib.Classes.PPoly.Uniform.Unrolling.Serializer.Defs
+module
+
+public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Defs
+public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Serializer.Defs
 
 /-!
 # Numeric initialization schedule for direct tableau serialization
@@ -18,6 +20,8 @@ Input cells are separated into the left marker, data positions `1, ..., n`,
 and the blank tail. Work and output tapes share one blank-tape schedule. No
 run-time schedule value stores a configuration atom or formula tree.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

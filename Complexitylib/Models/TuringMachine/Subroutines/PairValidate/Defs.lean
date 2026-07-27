@@ -3,8 +3,10 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Encoding.Pairing
-import Complexitylib.Models.TuringMachine.Combinators
+module
+
+public import Complexitylib.Encoding.Pairing
+public import Complexitylib.Models.TuringMachine.Combinators
 
 /-!
 # Pair-encoding validator — definitions
@@ -14,6 +16,8 @@ self-delimiting binary `pair` codec. Unlike `pairSplitCoreTM`, the validator
 has total semantics: it writes `1` exactly when `unpair?` succeeds and writes
 `0` on every malformed encoding.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

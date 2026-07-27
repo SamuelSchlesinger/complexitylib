@@ -3,8 +3,10 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Models.TuringMachine.Subroutines.BinaryFor.Internal.Control
-import Complexitylib.Mathlib.NatBits
+module
+
+public import Complexitylib.Models.TuringMachine.Subroutines.BinaryFor.Internal.Control
+public import Complexitylib.Mathlib.NatBits
 
 /-!
 # Canonical binary count-up loops — comparison internals
@@ -16,6 +18,8 @@ the loop invariant `value ≤ limitValue`, the run takes exactly
 `binaryForCompareTime limitValue` steps and branches to the composite
 iteration precisely below the limit, or to `done` precisely at equality.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

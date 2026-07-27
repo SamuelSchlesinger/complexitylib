@@ -3,8 +3,10 @@ Copyright (c) 2025 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Circuits.BitString
-import Mathlib.Algebra.Polynomial.Eval.Defs
+module
+
+public import Complexitylib.Circuits.BitString
+public import Mathlib.Algebra.Polynomial.Eval.Defs
 
 /-!
 # Boolean circuit families — definitions
@@ -17,6 +19,8 @@ The first component of `circuits n` is the number of internal gates. Family
 `size` counts internal and output gates, but not primary-input vertices or the
 free per-edge negation flags.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

@@ -3,8 +3,10 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Models.TuringMachine.Repetition.Internal.Boundary
-import Complexitylib.Models.TuringMachine.Repetition.Internal.Setup
+module
+
+public import Complexitylib.Models.TuringMachine.Repetition.Internal.Boundary
+public import Complexitylib.Models.TuringMachine.Repetition.Internal.Setup
 
 /-!
 # Pathwise correctness of fixed-time repetition
@@ -19,6 +21,8 @@ and the final trial writes their strict majority.
 - `NTM.repeatAtTime_outer_correct` — every exact trial boundary is correct
 - `NTM.repeatAtTime_trace_correct_internal` — final full-trace majority theorem
 -/
+
+@[expose] public section
 
 namespace Complexity
 

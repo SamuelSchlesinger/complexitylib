@@ -3,8 +3,10 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Circuits.BarringtonCompiler.Defs
-import Complexitylib.Circuits.BarringtonCompiler.Internal
+module
+
+public import Complexitylib.Circuits.BarringtonCompiler.Defs
+public import Complexitylib.Circuits.BarringtonCompiler.Internal
 
 /-!
 # An executable Barrington compiler
@@ -32,6 +34,8 @@ proof, not extraction of program data from an existential theorem.
 - `Complexity.barringtonCompile_representation` -- constructive finite
   Barrington theorem for the fixed canonical target cycle.
 -/
+
+@[expose] public section
 
 open scoped commutatorElement
 open Equiv

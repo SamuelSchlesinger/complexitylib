@@ -3,9 +3,11 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Models.TuringMachine.Combinators.Internal.Generic
-import Complexitylib.Models.TuringMachine.Hoare.Space
-import Complexitylib.Models.TuringMachine.Subroutines.BinarySucc.Defs
+module
+
+public import Complexitylib.Models.TuringMachine.Combinators.Internal.Generic
+public import Complexitylib.Models.TuringMachine.Hoare.Space
+public import Complexitylib.Models.TuringMachine.Subroutines.BinarySucc.Defs
 
 /-!
 # Little-endian binary successor — proof internals
@@ -14,6 +16,8 @@ This file proves the pure ripple semantics and the exact full-frame execution
 of `TM.binarySuccTM`. The carry proof uses a private head-independent binary
 content predicate, generalized over the already-zeroed low-order prefix.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

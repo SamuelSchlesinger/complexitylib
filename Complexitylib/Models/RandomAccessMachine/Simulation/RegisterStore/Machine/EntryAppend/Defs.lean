@@ -3,7 +3,9 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import
+module
+
+public import
   Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Machine.EntryReplace.Defs
 
 /-!
@@ -13,6 +15,8 @@ When an update exhausts the old store without a match, a nonzero new value is
 appended using the preserved query and replacement tapes. Both sources are then
 restored exactly so the caller retains its canonical work frame.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

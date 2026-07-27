@@ -3,8 +3,10 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Circuits.BasisHom.Defs
-import Complexitylib.Circuits.BasisHom.Internal
+module
+
+public import Complexitylib.Circuits.BasisHom.Defs
+public import Complexitylib.Circuits.BasisHom.Internal
 
 /-!
 # Semantics-preserving maps between circuit bases
@@ -13,6 +15,8 @@ A `Basis.Hom` relabels operations while preserving their arity and exact
 Boolean semantics. Circuit transport along a homomorphism preserves semantics,
 gate count, wiring, and depth exactly.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

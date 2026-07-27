@@ -3,8 +3,10 @@ Copyright (c) 2025 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Circuits.Family.Defs
-import Complexitylib.Asymptotics
+module
+
+public import Complexitylib.Circuits.Family.Defs
+public import Complexitylib.Asymptotics
 
 /-!
 # Boolean circuit families
@@ -13,6 +15,8 @@ This module provides the public API for circuit-family semantics, concrete
 size/depth bounds, and the equivalence between pointwise polynomial bounds and
 the power big-O convention used by complexity classes.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

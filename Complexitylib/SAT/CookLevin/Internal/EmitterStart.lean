@@ -3,8 +3,10 @@ Copyright (c) 2025 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.SAT.CookLevin.Internal.EmitterFamilies
-import Complexitylib.Models.TuringMachine.Registers.Probe
+module
+
+public import Complexitylib.SAT.CookLevin.Internal.EmitterFamilies
+public import Complexitylib.Models.TuringMachine.Registers.Probe
 
 /-!
 # The start-clause family emitter
@@ -16,6 +18,8 @@ the variable's positional part, `symProbeTM` the input symbol index into
 the scratch, emit. Tapes 1 and 2 are blank beyond `▷`, so their loops are
 ordinary constant-digit clause loops.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

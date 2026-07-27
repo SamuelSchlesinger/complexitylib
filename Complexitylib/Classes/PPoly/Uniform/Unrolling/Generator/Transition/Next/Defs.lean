@@ -3,9 +3,11 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Transition.MovedHead.Defs
-import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Transition.WrittenCell.Defs
-import Complexitylib.Classes.PPoly.Uniform.Unrolling.Serializer.Transition.Next.Defs
+module
+
+public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Transition.MovedHead.Defs
+public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Generator.Transition.WrittenCell.Defs
+public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Serializer.Transition.Next.Defs
 
 /-!
 # Direct-unrolling next-atom generator -- definitions
@@ -15,6 +17,8 @@ wrapper. Its two long-distance references are recovered by evaluating the
 fixed child-size polynomial after child emission. Immutable input cells and
 writable marker cells use a direct old-cell copy.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

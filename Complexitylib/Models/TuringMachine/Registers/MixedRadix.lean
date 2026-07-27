@@ -3,7 +3,9 @@ Copyright (c) 2025 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Models.TuringMachine.Registers.Horner
+module
+
+public import Complexitylib.Models.TuringMachine.Registers.Horner
 
 /-!
 # Mixed-radix variable loading and literal emission
@@ -20,6 +22,8 @@ These two machines are the per-literal unit of every clause-family emitter:
 a clause is a `bigSeqTM` of `emitVarLitTM`s followed by the clause
 separator.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

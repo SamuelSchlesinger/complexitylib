@@ -3,10 +3,12 @@ Copyright (c) 2025 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Models.TuringMachine.Lift
-import Complexitylib.Models.TuringMachine.Hoare.Defs
-import Complexitylib.Models.TuringMachine.Registers
-import Complexitylib.Models.TuringMachine.UTM.Internal.VTape
+module
+
+public import Complexitylib.Models.TuringMachine.Lift
+public import Complexitylib.Models.TuringMachine.Hoare.Defs
+public import Complexitylib.Models.TuringMachine.Registers
+public import Complexitylib.Models.TuringMachine.UTM.Internal.VTape
 
 /-!
 # Clock infrastructure for the time-bounded universal machine
@@ -47,6 +49,8 @@ not `bodyTM` phase states, so they sit beside `liftTM` rather than in
      at cell 1 and every work tape exactly unchanged. Spec:
      `zeroTestTM_hoareTime` (4 steps).
 -/
+
+@[expose] public section
 
 namespace Complexity
 

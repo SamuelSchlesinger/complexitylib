@@ -3,10 +3,12 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.SAT.Tseitin.Machine.Internal.ControllerCalls
-import Complexitylib.SAT.Tseitin.Machine.Internal.ControllerRead
-import Complexitylib.SAT.Tseitin.Machine.Internal.ControllerSemantics
-import Complexitylib.SAT.Tseitin.Machine.Internal.RuntimeBounds
+module
+
+public import Complexitylib.SAT.Tseitin.Machine.Internal.ControllerCalls
+public import Complexitylib.SAT.Tseitin.Machine.Internal.ControllerRead
+public import Complexitylib.SAT.Tseitin.Machine.Internal.ControllerSemantics
+public import Complexitylib.SAT.Tseitin.Machine.Internal.RuntimeBounds
 
 /-!
 # One-token simulation for the Tseitin streaming controller
@@ -25,6 +27,8 @@ later induction over `Streaming.run` can instantiate it directly.
 
 - `validEmitterTM_streaming_step_internal`
 -/
+
+@[expose] public section
 
 namespace Complexity
 

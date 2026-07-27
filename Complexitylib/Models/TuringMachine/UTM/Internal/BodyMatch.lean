@@ -3,7 +3,9 @@ Copyright (c) 2025 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Models.TuringMachine.UTM.Internal.BodyInternal
+module
+
+public import Complexitylib.Models.TuringMachine.UTM.Internal.BodyInternal
 
 /-!
 # Body machine: match-phase loop lemmas
@@ -19,6 +21,8 @@ are given as cell functions with `▷`-freeness hypotheses, every idle tape is
 exactly preserved (`idle_tape_id` frames), and scratch extension is stated
 as an update-on-an-interval of the ghost cells (as in `dfCopy_loop`).
 -/
+
+@[expose] public section
 
 namespace Complexity
 

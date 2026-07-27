@@ -3,8 +3,10 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.BooleanAnalysis.FourierExpansion.Defs
-import Mathlib.Analysis.InnerProductSpace.PiL2
+module
+
+public import Complexitylib.BooleanAnalysis.FourierExpansion.Defs
+public import Mathlib.Analysis.InnerProductSpace.PiL2
 
 /-!
 # Chapter 1: Boolean functions and the Fourier expansion — Internal lemmas
@@ -13,6 +15,8 @@ Technical helper lemmas for the Fourier expansion theory. These support the
 main results in `BooleanAnalysis.FourierExpansion` but are not intended for
 direct use by downstream code.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

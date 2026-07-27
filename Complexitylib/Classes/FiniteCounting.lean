@@ -3,18 +3,20 @@ Copyright (c) 2025 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Mathlib.Data.Fintype.Card
-import Mathlib.Data.Fintype.Fin
-import Mathlib.Data.Fintype.Sum
-import Mathlib.Data.Fintype.BigOperators
-import Mathlib.Data.Finset.Card
-import Mathlib.Data.Finset.Powerset
-import Mathlib.Logic.Equiv.Prod
-import Mathlib.Logic.Equiv.Fin.Basic
-import Mathlib.Algebra.BigOperators.Group.Finset.Basic
-import Mathlib.Algebra.BigOperators.Group.Finset.Piecewise
-import Mathlib.Algebra.Ring.Parity
-import Mathlib.Order.Interval.Finset.Nat
+module
+
+public import Mathlib.Data.Fintype.Card
+public import Mathlib.Data.Fintype.Fin
+public import Mathlib.Data.Fintype.Sum
+public import Mathlib.Data.Fintype.BigOperators
+public import Mathlib.Data.Finset.Card
+public import Mathlib.Data.Finset.Powerset
+public import Mathlib.Logic.Equiv.Prod
+public import Mathlib.Logic.Equiv.Fin.Basic
+public import Mathlib.Algebra.BigOperators.Group.Finset.Basic
+public import Mathlib.Algebra.BigOperators.Group.Finset.Piecewise
+public import Mathlib.Algebra.Ring.Parity
+public import Mathlib.Order.Interval.Finset.Nat
 
 /-!
 # Finite counting toolkit
@@ -54,6 +56,8 @@ and interactive proofs (roadmap track N2).
 - `majority_not_of_odd` — strict majority is antisymmetric under pointwise
   negation at odd length
 -/
+
+@[expose] public section
 
 namespace Complexity
 
@@ -291,7 +295,8 @@ def blocksEquiv (k T : ℕ) :
 
 /-! ### Fixed-time repetition schedules -/
 
-private def repeatStrideIndexEquiv (k T : ℕ) :
+@[nolint docBlame]
+def repeatStrideIndexEquiv (k T : ℕ) :
     Fin (k * T) ⊕ Fin (k * (T + 2)) ≃ Fin (k * (2 * T + 2)) :=
   (Equiv.sumCongr finProdFinEquiv.symm finProdFinEquiv.symm).trans <|
     (Equiv.prodSumDistrib (Fin k) (Fin T) (Fin (T + 2))).symm |>.trans <|
@@ -301,13 +306,15 @@ private def repeatStrideIndexEquiv (k T : ℕ) :
       congr 1
       omega)
 
-private def repeatStrideSeedEquiv (k T : ℕ) :
+@[nolint docBlame]
+def repeatStrideSeedEquiv (k T : ℕ) :
     (Fin (k * (2 * T + 2)) → Bool) ≃
       (Fin (k * T) → Bool) × (Fin (k * (T + 2)) → Bool) :=
   (Equiv.arrowCongr (repeatStrideIndexEquiv k T) (Equiv.refl Bool)).symm.trans
     (Equiv.sumArrowEquivProdArrow (Fin (k * T)) (Fin (k * (T + 2))) Bool)
 
-private def repeatStrideRandomSeed (k T : ℕ)
+@[nolint docBlame]
+def repeatStrideRandomSeed (k T : ℕ)
     (w : Fin (k * (2 * T + 2)) → Bool) : Fin (k * T) → Bool :=
   (repeatStrideSeedEquiv k T w).1
 

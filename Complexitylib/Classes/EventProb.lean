@@ -3,17 +3,19 @@ Copyright (c) 2025 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Classes.FiniteCounting
-import Complexitylib.Models.TuringMachine
-import Mathlib.Algebra.BigOperators.Field
-import Mathlib.Algebra.Order.Field.Basic
-import Mathlib.Data.Nat.Choose.Sum
-import Mathlib.Tactic.FieldSimp
-import Mathlib.Tactic.GCongr
-import Mathlib.Tactic.Linarith
-import Mathlib.Tactic.NormNum
-import Mathlib.Tactic.Positivity
-import Mathlib.Tactic.Ring
+module
+
+public import Complexitylib.Classes.FiniteCounting
+public import Complexitylib.Models.TuringMachine
+public import Mathlib.Algebra.BigOperators.Field
+public import Mathlib.Algebra.Order.Field.Basic
+public import Mathlib.Data.Nat.Choose.Sum
+public import Mathlib.Tactic.FieldSimp
+public import Mathlib.Tactic.GCongr
+public import Mathlib.Tactic.Linarith
+public import Mathlib.Tactic.NormNum
+public import Mathlib.Tactic.Positivity
+public import Mathlib.Tactic.Ring
 
 /-!
 # Finite event probability
@@ -48,6 +50,8 @@ rational PTM acceptance probability `NTM.acceptProb` (roadmap track N2).
 - `NTM.acceptProb_eq_eventProb_repeatRandomSeed` — remove administrative random
   bits when a machine's acceptance factors through the compact repetition seed
 -/
+
+@[expose] public section
 
 namespace Complexity
 

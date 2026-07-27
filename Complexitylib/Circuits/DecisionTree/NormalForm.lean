@@ -3,9 +3,11 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Circuits.DecisionTree.Finite
-import Complexitylib.Circuits.DecisionTree.NormalForm.Defs
-import Complexitylib.Circuits.DecisionTree.NormalForm.Internal
+module
+
+public import Complexitylib.Circuits.DecisionTree.Finite
+public import Complexitylib.Circuits.DecisionTree.NormalForm.Defs
+public import Complexitylib.Circuits.DecisionTree.NormalForm.Internal
 
 /-!
 # Compiling finite decision trees to CNF and DNF
@@ -15,6 +17,8 @@ An accepting path of length at most `d` becomes a DNF term of width at most
 compute exactly the original tree, have at most one component per leaf, and
 therefore have at most `2 ^ d` terms or clauses.
 -/
+
+@[expose] public section
 
 namespace Complexity
 namespace DecisionTree.On

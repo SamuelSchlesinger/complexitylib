@@ -3,9 +3,11 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Circuits.Unrolling.Transition.Fragment.Internal.Structure
-import Mathlib.Algebra.Order.BigOperators.Group.List
-import Mathlib.Tactic.Ring
+module
+
+public import Complexitylib.Circuits.Unrolling.Transition.Fragment.Internal.Structure
+public import Mathlib.Algebra.Order.BigOperators.Group.List
+public import Mathlib.Tactic.Ring
 
 /-!
 # Size bounds for packed one-step transition fragments
@@ -15,23 +17,29 @@ machine-dependent linear function of the trace horizon. Since a configuration
 block itself has linear width, the packed one-step fragment has quadratic size.
 -/
 
+@[expose] public section
+
 namespace Complexity
 
 namespace CircuitUnrolling
 
-private def caseSizeCoeff (k : ℕ) : ℕ :=
+@[nolint docBlame]
+def caseSizeCoeff (k : ℕ) : ℕ :=
   4 * (k + 2) + 6
 
-private noncomputable def effectSizeCoeff (tm : NTM k) : ℕ :=
+@[nolint docBlame]
+noncomputable def effectSizeCoeff (tm : NTM k) : ℕ :=
   1 + (transitionCases tm).length * (caseSizeCoeff k + 1)
 
-private noncomputable def nextSizeCoeff (tm : NTM k) : ℕ :=
+@[nolint docBlame]
+noncomputable def nextSizeCoeff (tm : NTM k) : ℕ :=
   3 * effectSizeCoeff tm + 20
 
-private def widthSizeCoeff (tm : NTM k) : ℕ :=
+@[nolint docBlame]
+def widthSizeCoeff (tm : NTM k) : ℕ :=
   Fintype.card tm.Q + 5 * (k + 2)
 
-private theorem sum_map_le_length_mul {alpha : Type*} (items : List alpha)
+theorem sum_map_le_length_mul {alpha : Type*} (items : List alpha)
     (weight : alpha → ℕ) (bound : ℕ)
     (hbound : ∀ item ∈ items, weight item ≤ bound) :
     (items.map weight).sum ≤ items.length * bound := by
@@ -48,7 +56,7 @@ private theorem sum_map_le_length_mul {alpha : Type*} (items : List alpha)
             bound + items.length * bound := Nat.add_le_add hitem (ih htail)
         _ = (items.length + 1) * bound := by ring
 
-private theorem size_disjs_le_of_succ_le (formulas : List BoolFormula)
+theorem size_disjs_le_of_succ_le (formulas : List BoolFormula)
     (bound : ℕ) (hbound : ∀ formula ∈ formulas, formula.size + 1 ≤ bound) :
     (BoolFormula.disjs formulas).size ≤ 1 + formulas.length * bound := by
   rw [BoolFormula.size_disjs]
@@ -426,7 +434,7 @@ theorem configWidth_le_explicit_internal (tm : NTM k) (T : ℕ) :
       (Fintype.card tm.Q + 5 * (k + 2)) * (T + 2) := by
   simpa [widthSizeCoeff] using configWidth_le_linear_internal tm T
 
-private theorem stepSizeCoeff_eq_internal (tm : NTM k) :
+theorem stepSizeCoeff_eq_internal (tm : NTM k) :
     stepSizeCoeff tm = widthSizeCoeff tm * (nextSizeCoeff tm + 1) := by
   simp only [stepSizeCoeff, widthSizeCoeff, nextSizeCoeff, effectSizeCoeff,
     caseSizeCoeff]

@@ -3,12 +3,16 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Models.TuringMachine.Combinators.Internal.Generic
-import Complexitylib.Models.TuringMachine.Combinators.WorkSymbolBranch.Defs
+module
+
+public import Complexitylib.Models.TuringMachine.Combinators.Internal.Generic
+public import Complexitylib.Models.TuringMachine.Combinators.WorkSymbolBranch.Defs
 
 /-!
 # Direct work-symbol branch combinator — proof internals
 -/
+
+@[expose] public section
 
 namespace Complexity
 

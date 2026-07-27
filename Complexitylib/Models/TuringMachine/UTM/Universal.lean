@@ -3,9 +3,11 @@ Copyright (c) 2025 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Models.TuringMachine.UTM.Internal.SimLoop
-import Complexitylib.Models.TuringMachine.UTM.Internal.Terminated
-import Complexitylib.Models.TuringMachine.Deterministic
+module
+
+public import Complexitylib.Models.TuringMachine.UTM.Internal.SimLoop
+public import Complexitylib.Models.TuringMachine.UTM.Internal.Terminated
+public import Complexitylib.Models.TuringMachine.Deterministic
 
 /-!
 # The universal machine: headline theorems
@@ -24,6 +26,8 @@ import Complexitylib.Models.TuringMachine.Deterministic
   from paired inputs within `utmTime α (singleTapeSimTime k T ·) ·` — the
   quadratic factor coming solely from the single-tape reduction.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

@@ -3,8 +3,10 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Models.TuringMachine.Experimental.Routine.Defs
-import Complexitylib.Models.TuringMachine.Experimental.Routine.Internal
+module
+
+public import Complexitylib.Models.TuringMachine.Experimental.Routine.Defs
+public import Complexitylib.Models.TuringMachine.Experimental.Routine.Internal
 
 /-!
 # Experimental first-order Turing-machine routines
@@ -26,6 +28,8 @@ experimental until a second independent construction validates the interface.
 - `TM.Experimental.Routine.TransducerSafe.lower_isTransducer` — certified routines
   lower to transducers.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

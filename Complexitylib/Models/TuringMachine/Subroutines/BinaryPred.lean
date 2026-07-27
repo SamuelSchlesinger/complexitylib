@@ -3,8 +3,10 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Models.TuringMachine.Subroutines.BinaryPred.Defs
-import Complexitylib.Models.TuringMachine.Subroutines.BinaryPred.Internal
+module
+
+public import Complexitylib.Models.TuringMachine.Subroutines.BinaryPred.Defs
+public import Complexitylib.Models.TuringMachine.Subroutines.BinaryPred.Internal
 
 /-!
 # Little-endian binary predecessor
@@ -26,6 +28,8 @@ represent `value + 1`; they make no underflow claim.
   width-based space contract.
 - `TM.binaryPredTM_isTransducer` — the output head never moves left.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

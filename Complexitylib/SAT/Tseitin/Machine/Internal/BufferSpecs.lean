@@ -3,9 +3,11 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Models.TuringMachine.Experimental.EmitSpec
-import Complexitylib.SAT.Tseitin.Machine.Defs
-import Mathlib.Tactic.FinCases
+module
+
+public import Complexitylib.Models.TuringMachine.Experimental.EmitSpec
+public import Complexitylib.SAT.Tseitin.Machine.Defs
+public import Mathlib.Tactic.FinCases
 
 /-!
 # Hoare specifications for Tseitin literal buffers and emitters
@@ -30,6 +32,8 @@ stable under later polynomial rounding.
 - `commitLiteralTM_hoareTime_internal`
 - `closeClauseTM_hoareTime_internal`
 -/
+
+@[expose] public section
 
 namespace Complexity
 

@@ -3,9 +3,11 @@ Copyright (c) 2025 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Models.TuringMachine.Combinators
-import Complexitylib.Models.TuringMachine.Combinators.Internal.Generic
-import Complexitylib.Models.TuringMachine.Internal
+module
+
+public import Complexitylib.Models.TuringMachine.Combinators
+public import Complexitylib.Models.TuringMachine.Combinators.Internal.Generic
+public import Complexitylib.Models.TuringMachine.Internal
 
 /-!
 # Complement TM: proof internals
@@ -13,6 +15,8 @@ import Complexitylib.Models.TuringMachine.Internal
 This file provides the simulation lemmas for `TM.complementTM`, showing that
 the complement machine correctly flips the output of the original TM.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

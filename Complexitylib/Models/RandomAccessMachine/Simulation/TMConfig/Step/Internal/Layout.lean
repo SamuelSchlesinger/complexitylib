@@ -3,12 +3,16 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Models.RandomAccessMachine.Simulation.TMConfig
-import Complexitylib.Models.RandomAccessMachine.Simulation.TMConfig.Step.Defs
+module
+
+public import Complexitylib.Models.RandomAccessMachine.Simulation.TMConfig
+public import Complexitylib.Models.RandomAccessMachine.Simulation.TMConfig.Step.Defs
 
 /-!
 # TM-to-RAM step layout -- proof internals
 -/
+
+@[expose] public section
 
 namespace Complexity
 

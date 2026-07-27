@@ -3,8 +3,10 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.SAT.Tseitin.Defs
-import Complexitylib.SAT.Verifier
+module
+
+public import Complexitylib.SAT.Tseitin.Defs
+public import Complexitylib.SAT.Verifier
 
 /-!
 # Streaming specification for the CNF-to-3CNF transformation
@@ -22,6 +24,8 @@ than `CNF.maxVar`, and `CNF.maxVar_le_encode_length` ensures that the resulting
 variables are fresh. On a valid `CNF.tokens` stream, the emitted tokens and
 bits are exactly the encoding produced by `CNF.to3Aux` at that start value.
 -/
+
+@[expose] public section
 
 namespace Complexity
 
@@ -72,7 +76,7 @@ def initial (next : ℕ) : State :=
   { next, pending := .zero, scan := .boundary, emitted := [] }
 
 /-- The token encoding of one completed output clause. -/
-private def clauseTokens (c : Clause) : List EncToken :=
+def clauseTokens (c : Clause) : List EncToken :=
   CNF.tokens [c]
 
 /-- Incorporate a decoded source literal. The first three literals are kept;

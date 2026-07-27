@@ -3,9 +3,13 @@ Copyright (c) 2025 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Mathlib.Tactic
-import Complexitylib.Circuits.XOR
-import Complexitylib.Circuits.Internal.CircuitDescriptor
+module
+
+public import Mathlib.Tactic
+public import Complexitylib.Circuits.XOR
+public import Complexitylib.Circuits.Internal.CircuitDescriptor
+
+@[expose] public section
 
 namespace Complexity
 

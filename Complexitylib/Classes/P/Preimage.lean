@@ -3,7 +3,9 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Classes.P.Internal.Preimage
+module
+
+public import Complexitylib.Classes.P.Internal.Preimage
 
 /-!
 # Closure of P under FP preimages
@@ -12,6 +14,8 @@ import Complexitylib.Classes.P.Internal.Preimage
 
 - `mem_P_preimage` — polynomial-time preprocessing preserves membership in `P`
 -/
+
+@[expose] public section
 
 namespace Complexity
 

@@ -3,10 +3,12 @@ Copyright (c) 2025 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Circuits.BarringtonBridge
-import Complexitylib.Circuits.Formula
-import Mathlib.Tactic.Linarith
-import Mathlib.Data.Nat.Log
+module
+
+public import Complexitylib.Circuits.BarringtonBridge
+public import Complexitylib.Circuits.Formula
+public import Mathlib.Tactic.Linarith
+public import Mathlib.Data.Nat.Log
 
 /-!
 # Barrington's theorem with a length bound
@@ -36,6 +38,8 @@ the classical `4 ^ depth` bound.
 - `Complexity.barrington_representation_depth_four` — Barrington's theorem with
   the textbook `4 ^ depth` length bound.
 -/
+
+@[expose] public section
 
 open scoped commutatorElement
 open Equiv

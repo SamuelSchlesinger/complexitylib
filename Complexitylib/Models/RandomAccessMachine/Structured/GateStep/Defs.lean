@@ -3,8 +3,10 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Models.RandomAccessMachine.Structured.GateEval.Defs
-import Complexitylib.Models.RandomAccessMachine.Structured.UnaryDecode.Defs
+module
+
+public import Complexitylib.Models.RandomAccessMachine.Structured.GateEval.Defs
+public import Complexitylib.Models.RandomAccessMachine.Structured.UnaryDecode.Defs
 
 /-!
 # Structured RAM serialized-gate step — definitions
@@ -15,6 +17,8 @@ current Boolean wire memo. The fixed three-bit header is consumed directly,
 the two references are decoded by two calls to the same loop, and the resulting
 gate is evaluated and appended without specializing the program to the input.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

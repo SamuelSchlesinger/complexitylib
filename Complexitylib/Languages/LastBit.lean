@@ -3,9 +3,11 @@ Copyright (c) 2025 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Languages.Trivial
-import Complexitylib.Models.TuringMachine.Combinators
-import Complexitylib.Models.TuringMachine.Combinators.Internal.Scanner
+module
+
+public import Complexitylib.Languages.Trivial
+public import Complexitylib.Models.TuringMachine.Combinators
+public import Complexitylib.Models.TuringMachine.Combinators.Internal.Scanner
 
 /-!
 # `lastBitOne` and `lastBitZero`: final-symbol languages
@@ -24,6 +26,8 @@ is the last bit seen so far, or `none` if no bit has been read.
 - `lastBitOne_in_DTIME`, `lastBitZero_in_DTIME` — both in `DTIME(n + 2)`.
 - `lastBitOne_mem_P`, `lastBitZero_mem_P`.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

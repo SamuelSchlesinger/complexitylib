@@ -3,8 +3,10 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Mathlib.Data.Set.Basic
-import Complexitylib.Circuits.Monotone.Defs
+module
+
+public import Mathlib.Data.Set.Basic
+public import Complexitylib.Circuits.Monotone.Defs
 
 /-!
 # Karchmer--Wigderson protocols -- definitions
@@ -14,6 +16,8 @@ Alice partitions the one-input side and Bob partitions the zero-input side.
 At a leaf, one coordinate separates every zero input from every one input in
 the current rectangle.
 -/
+
+@[expose] public section
 
 namespace Complexity
 namespace KarchmerWigderson

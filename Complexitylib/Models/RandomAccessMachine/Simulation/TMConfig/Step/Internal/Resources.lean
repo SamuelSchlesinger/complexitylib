@@ -3,11 +3,15 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Models.RandomAccessMachine.Simulation.TMConfig.Step.Internal.Dispatch
+module
+
+public import Complexitylib.Models.RandomAccessMachine.Simulation.TMConfig.Step.Internal.Dispatch
 
 /-!
 # Resource bounds for one TM-to-RAM transition -- proof internals
 -/
+
+@[expose] public section
 
 namespace Complexity
 
@@ -18,37 +22,34 @@ namespace TMConfig
 namespace Step
 
 
-private abbrev StepEnvelope (tm : TM n) (bound : ℕ) :=
-  Structured.Internal.StoreEnvelope (registerLimit n bound) (wordBound tm bound)
-
-private theorem cleared_envelope {tm : TM n} {bound test : ℕ}
+theorem cleared_envelope {tm : TM n} {bound test : ℕ}
     {store : Structured.Store} (henvelope : StepEnvelope tm bound store)
     (htest : test < registerLimit n bound) :
     StepEnvelope tm bound (Structured.Switch.cleared store test) := by
   exact henvelope.update htest (by simp)
 
-private theorem cleared_apply_of_ne' (store : Structured.Store) {test reg : ℕ}
+theorem cleared_apply_of_ne' (store : Structured.Store) {test reg : ℕ}
     (hne : reg ≠ test) :
     Structured.Switch.cleared store test reg = store reg := by
   simp [Structured.Switch.cleared, Function.update_of_ne hne]
 
-private theorem symbolReg_injective' (n bound : ℕ) :
+theorem symbolReg_injective' (n bound : ℕ) :
     Function.Injective (symbolReg n bound) := by
   intro first second heq
   apply Fin.ext
   simp [symbolReg] at heq
   omega
 
-private theorem symbolReg_ne_one' (n bound : ℕ) (tape : Fin (n + 2)) :
+theorem symbolReg_ne_one' (n bound : ℕ) (tape : Fin (n + 2)) :
     symbolReg n bound tape ≠ oneReg n bound := by
   simp [symbolReg, oneReg]
   omega
 
-private theorem stateScratchReg_ne_one' (n bound : ℕ) :
+theorem stateScratchReg_ne_one' (n bound : ℕ) :
     stateScratchReg n bound ≠ oneReg n bound := by
   simp [stateScratchReg, oneReg]
 
-private theorem stateScratchReg_ne_symbolReg' (n bound : ℕ)
+theorem stateScratchReg_ne_symbolReg' (n bound : ℕ)
     (tape : Fin (n + 2)) :
     symbolReg n bound tape ≠ stateScratchReg n bound := by
   simp [symbolReg, stateScratchReg]

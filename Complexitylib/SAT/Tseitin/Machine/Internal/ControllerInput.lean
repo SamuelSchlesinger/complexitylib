@@ -3,8 +3,10 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.SAT.Tseitin.Machine.Internal.ControllerRead
-import Complexitylib.SAT.Tseitin.Machine.Internal.RuntimeBounds
+module
+
+public import Complexitylib.SAT.Tseitin.Machine.Internal.ControllerRead
+public import Complexitylib.SAT.Tseitin.Machine.Internal.RuntimeBounds
 
 /-!
 # Input framing for the Tseitin streaming controller
@@ -15,6 +17,8 @@ places the head immediately after the encoded prefix. These lemmas identify
 the next two cells with the next token and normalize the frame after those two
 cells have been consumed.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

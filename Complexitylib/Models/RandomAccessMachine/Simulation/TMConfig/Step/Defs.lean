@@ -3,8 +3,10 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Models.RandomAccessMachine.Simulation.TMConfig.Defs
-import Complexitylib.Models.RandomAccessMachine.Structured.Switch.Defs
+module
+
+public import Complexitylib.Models.RandomAccessMachine.Simulation.TMConfig.Defs
+public import Complexitylib.Models.RandomAccessMachine.Structured.Switch.Defs
 
 /-!
 # A fixed structured-RAM block for one Turing-machine transition
@@ -17,6 +19,8 @@ using indirect stores into the bounded tape blocks.
 The construction is fixed once `tm` and the cell-window bound are fixed. It
 does not install or consult an untrusted transition-table oracle.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

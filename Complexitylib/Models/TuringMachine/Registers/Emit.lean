@@ -3,9 +3,11 @@ Copyright (c) 2025 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Models.TuringMachine.Subroutines
-import Complexitylib.Models.TuringMachine.Registers
-import Complexitylib.Models.TuringMachine.Hoare
+module
+
+public import Complexitylib.Models.TuringMachine.Subroutines
+public import Complexitylib.Models.TuringMachine.Registers
+public import Complexitylib.Models.TuringMachine.Hoare
 
 /-!
 # Output-emission subroutines
@@ -42,6 +44,8 @@ This layer is the foundation for the Cook–Levin reduction emitter
   preserving the input and work tapes
 - `TM.emitBitsTM_isTransducer` — fixed-word emission never moves output left
 -/
+
+@[expose] public section
 
 namespace Complexity
 

@@ -3,12 +3,14 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Circuits.Encoding.Machine.GateStream.Defs
-import Complexitylib.Models.TuringMachine.Hoare.Space.Defs
-import Complexitylib.Models.TuringMachine.Registers.Emit
-import Complexitylib.Models.TuringMachine.Subroutines.BinaryCopy.Defs
-import Complexitylib.Models.TuringMachine.Subroutines.BinaryPred.Defs
-import Complexitylib.Models.TuringMachine.Subroutines.BinarySucc.Defs
+module
+
+public import Complexitylib.Circuits.Encoding.Machine.GateStream.Defs
+public import Complexitylib.Models.TuringMachine.Hoare.Space.Defs
+public import Complexitylib.Models.TuringMachine.Registers.Emit
+public import Complexitylib.Models.TuringMachine.Subroutines.BinaryCopy.Defs
+public import Complexitylib.Models.TuringMachine.Subroutines.BinaryPred.Defs
+public import Complexitylib.Models.TuringMachine.Subroutines.BinarySucc.Defs
 
 /-!
 # Proof-carrying binary stream routines -- definitions
@@ -19,6 +21,8 @@ value-dependent word to an output accumulator. A value-level precondition
 supports honest partial leaves such as positive predecessor and zero-scratch
 copying without weakening the canonical state model.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

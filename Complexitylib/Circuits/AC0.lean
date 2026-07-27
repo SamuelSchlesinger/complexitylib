@@ -3,16 +3,18 @@ Copyright (c) 2025 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Circuits.AC0.Defs
-import Complexitylib.Circuits.AC0.NormalForm
-import Complexitylib.Circuits.AC0.Normalization
-import Complexitylib.Circuits.AC0.Restriction
-import Complexitylib.Circuits.AC0.Switching
-import Complexitylib.Circuits.AC0.Switching.Collection
-import Complexitylib.Circuits.AC0.Switching.Parity
-import Complexitylib.Circuits.AC0.Iteration
-import Complexitylib.Circuits.AC0.Parity
-import Complexitylib.Circuits.DepthClasses
+module
+
+public import Complexitylib.Circuits.AC0.Defs
+public import Complexitylib.Circuits.AC0.NormalForm
+public import Complexitylib.Circuits.AC0.Normalization
+public import Complexitylib.Circuits.AC0.Restriction
+public import Complexitylib.Circuits.AC0.Switching
+public import Complexitylib.Circuits.AC0.Switching.Collection
+public import Complexitylib.Circuits.AC0.Switching.Parity
+public import Complexitylib.Circuits.AC0.Iteration
+public import Complexitylib.Circuits.AC0.Parity
+public import Complexitylib.Circuits.DepthClasses
 
 /-!
 # The class AC⁰
@@ -41,3 +43,5 @@ obstruction for every finite formula computing parity. The remaining separation
 step is the family-level arithmetic specialization proving nonuniform parity is
 not in `AC0`.
 -/
+
+@[expose] public section

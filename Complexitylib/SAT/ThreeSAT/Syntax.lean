@@ -3,9 +3,11 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.SAT.ThreeSAT
-import Complexitylib.Classes.P
-import Complexitylib.Models.TuringMachine.Combinators.Internal.Scanner
+module
+
+public import Complexitylib.SAT.ThreeSAT
+public import Complexitylib.Classes.P
+public import Complexitylib.Models.TuringMachine.Combinators.Internal.Scanner
 
 /-!
 # Regular syntax checker for exact 3-CNF encodings
@@ -23,6 +25,8 @@ and makes the intended 3SAT decomposition explicit.
 - `ThreeSAT.Syntax.language_mem_P` -- exact-3 syntax is decidable in linear time
 - `ThreeSAT.language_eq_cnfsat_inter_syntax` -- semantic decomposition of 3SAT
 -/
+
+@[expose] public section
 
 namespace Complexity
 

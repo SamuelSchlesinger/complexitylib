@@ -3,8 +3,10 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Models.TuringMachine.Composition.Defs
-import Complexitylib.Models.TuringMachine.Subroutines.PairEmit.Defs
+module
+
+public import Complexitylib.Models.TuringMachine.Composition.Defs
+public import Complexitylib.Models.TuringMachine.Subroutines.PairEmit.Defs
 
 /-!
 # Pair a computed value with the original input
@@ -15,6 +17,8 @@ that tape and the immutable original input, then emits both components
 directly to the real output. Only the first raw-output delimiter is semantic;
 later cells may contain arbitrary non-`▷` junk.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

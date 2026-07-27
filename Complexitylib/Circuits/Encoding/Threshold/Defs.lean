@@ -3,7 +3,9 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Circuits.Encoding.Fragment.Defs
+module
+
+public import Complexitylib.Circuits.Encoding.Fragment.Defs
 
 /-!
 # Raw threshold-circuit fragments
@@ -21,6 +23,8 @@ The fragment starts with reusable false and true wires, emits the table in
 row-major order, and ends with a copy of the requested final state. Thus it has
 exactly `3 + 2 * k * threshold` gates for `k` referenced inputs.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

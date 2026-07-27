@@ -3,7 +3,9 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Models.RandomAccessMachine.Structured.Defs
+module
+
+public import Complexitylib.Models.RandomAccessMachine.Structured.Defs
 
 /-!
 # Structured RAM Hamming-weight program — definitions
@@ -12,6 +14,8 @@ The benchmark uses a small reserved-register ABI: registers `R₀` through `R₄
 hold loop state and input bits start at `R₅`. This avoids the existing raw RAM
 input convention's overlap between an unbounded input and fixed scratch registers.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

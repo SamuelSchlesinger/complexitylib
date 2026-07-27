@@ -3,7 +3,9 @@ Copyright (c) 2025 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Models.TuringMachine.Combinators
+module
+
+public import Complexitylib.Models.TuringMachine.Combinators
 
 /-!
 # Pair-splitting machine — definitions
@@ -13,6 +15,8 @@ self-delimiting binary pair from the input tape onto two work tapes. Proofs
 and the public compositional specification live in the adjacent internal and
 surface modules.
 -/
+
+@[expose] public section
 
 namespace Complexity
 

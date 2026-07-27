@@ -3,8 +3,10 @@ Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
-import Complexitylib.Classes.PPoly.Uniform.Unrolling.Stream.Defs
-import Complexitylib.Classes.PPoly.Uniform.Unrolling.Stream.Internal
+module
+
+public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Stream.Defs
+public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Stream.Internal
 
 /-!
 # Streamable deterministic unrolling arithmetic
@@ -29,6 +31,8 @@ that serializer reproduce the recursive `TraceBuild` arithmetic at run time.
 - `TM.directUnrollingRawCircuit_eq_init_append_steps` — the complete direct raw
   circuit is initialization, a flat canonical layer list, and acceptance.
 -/
+
+@[expose] public section
 
 namespace Complexity
 
