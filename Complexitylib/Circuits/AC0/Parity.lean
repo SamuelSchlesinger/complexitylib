@@ -15,12 +15,12 @@ negation-normal unbounded AND/OR formula computing parity. It combines:
 
 * exact semantics of iterated restrictions;
 * the width switching lemma at every connective level;
-* a union bound over all nodes in the finite formula tree;
+* a union bound over the AND/OR gates of the finite formula tree;
 * the exact first moment of variables surviving all stages; and
 * the decision-tree depth lower bound for restricted parity.
 
 No uniformity assumption occurs. The remaining family-level step is purely
-arithmetic: instantiate the parameters against a polynomial formula-size
+arithmetic: instantiate the parameters against a polynomial gate-count
 bound and a fixed depth.
 -/
 
@@ -49,7 +49,7 @@ theorem parity_counting_obstruction
           q ^ queryCount ≤
       (((2 * q + 1) ^ N) ^ stageCount * queryCount) *
           q ^ queryCount +
-        formula.size *
+        formula.gateCount *
           ((2 * q + 1) ^ N) ^ stageCount *
           (4 * (queryCount + 1)) ^ queryCount * N :=
   parity_counting_obstruction_internal

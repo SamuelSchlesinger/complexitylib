@@ -138,6 +138,47 @@ end
 
 mutual
 
+/-- Number of unbounded gates. Leaves are free and every AND/OR node costs
+one. Only gates incur switching failures, so this is the sharp union-bound
+measure for iterated switching; `gateCount_le_size` recovers any bound
+previously stated with `size`. -/
+def gateCount : AC0Formula N → ℕ
+  | .const _ => 0
+  | .lit _ => 0
+  | .and children => 1 + forestGateCount children
+  | .or children => 1 + forestGateCount children
+
+/-- Sum of the gate counts of every formula in a forest. -/
+def forestGateCount : AC0Forest N → ℕ
+  | .nil => 0
+  | .cons formula formulas => gateCount formula + forestGateCount formulas
+
+end
+
+mutual
+
+/-- Gate count never exceeds tree size. -/
+theorem gateCount_le_size : (formula : AC0Formula N) →
+    formula.gateCount ≤ formula.size
+  | .const _ => Nat.zero_le _
+  | .lit _ => Nat.zero_le _
+  | .and children =>
+      Nat.add_le_add_left (forestGateCount_le_forestSize children) 1
+  | .or children =>
+      Nat.add_le_add_left (forestGateCount_le_forestSize children) 1
+
+/-- Forest gate count never exceeds forest size. -/
+theorem forestGateCount_le_forestSize : (formulas : AC0Forest N) →
+    forestGateCount formulas ≤ forestSize formulas
+  | .nil => Nat.le_refl 0
+  | .cons formula formulas =>
+      Nat.add_le_add (gateCount_le_size formula)
+        (forestGateCount_le_forestSize formulas)
+
+end
+
+mutual
+
 /-- Formula depth. Leaves have depth zero and every unbounded gate adds one. -/
 def depth : AC0Formula N → ℕ
   | .const _ => 0

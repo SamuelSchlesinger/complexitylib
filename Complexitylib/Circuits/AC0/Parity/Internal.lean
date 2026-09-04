@@ -30,7 +30,7 @@ theorem parity_counting_obstruction_internal
           q ^ queryCount ≤
       (((2 * q + 1) ^ N) ^ stageCount * queryCount) *
           q ^ queryCount +
-        formula.size *
+        formula.gateCount *
           ((2 * q + 1) ^ N) ^ stageCount *
           (4 * (queryCount + 1)) ^ queryCount * N := by
   apply Nat.le_of_not_gt

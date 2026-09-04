@@ -65,10 +65,13 @@ theorem eval_stagedDecisionTree
 formula.
 
 For `queryCount ≥ 2`, the bad staged seeds, amplified by
-`q ^ queryCount`, are bounded by the formula tree size, the full staged sample
-space, and the width-switching advice factor. The formula may have arbitrary
-unbounded fan-in: width at each stage comes from the depth of the child
-decision trees, not from the original gate arity. -/
+`q ^ queryCount`, are bounded by the formula gate count, the full staged
+sample space, and the width-switching advice factor. Only AND/OR nodes can
+fail to switch, so the union bound is over `formula.gateCount`, not the
+(strictly larger) syntax-tree `size`; `gateCount_le_size` recovers the
+size-based form. The formula may have arbitrary unbounded fan-in: width at
+each stage comes from the depth of the child decision trees, not from the
+original gate arity. -/
 theorem stageEventCount_stagedBad_mul_pow_le
     (formula : AC0Formula N)
     (stageCount queryCount q : ℕ)
@@ -78,7 +81,7 @@ theorem stageEventCount_stagedBad_mul_pow_le
           (stagedBad (stageCount := stageCount)
             formula queryCount) *
         q ^ queryCount ≤
-      formula.size *
+      formula.gateCount *
         ((2 * q + 1) ^ N) ^ stageCount *
         (4 * (queryCount + 1)) ^ queryCount :=
   stageEventCount_stagedBad_mul_pow_le_internal
@@ -99,7 +102,7 @@ theorem exists_shallow_stagedDecisionTree_of_counting
     (hnumeric :
       (((2 * q + 1) ^ N) ^ stageCount * queryCount) *
             q ^ queryCount +
-          formula.size *
+          formula.gateCount *
               ((2 * q + 1) ^ N) ^ stageCount *
               (4 * (queryCount + 1)) ^ queryCount * N <
         (N * ((2 * q + 1) ^ (N - 1)) ^ stageCount) *

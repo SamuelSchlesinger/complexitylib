@@ -118,6 +118,14 @@ theorem forestSize_ofList_internal (formulas : List (AC0Formula N)) :
       simp only [AC0Forest.ofList, forestSize, List.map_cons,
         List.sum_cons, ih]
 
+theorem forestGateCount_ofList_internal (formulas : List (AC0Formula N)) :
+    forestGateCount (.ofList formulas) = (formulas.map gateCount).sum := by
+  induction formulas with
+  | nil => rfl
+  | cons formula formulas ih =>
+      simp only [AC0Forest.ofList, forestGateCount, List.map_cons,
+        List.sum_cons, ih]
+
 theorem forestDepth_ofList_internal (formulas : List (AC0Formula N)) :
     forestDepth (.ofList formulas) =
       formulas.foldr (fun formula rest => max formula.depth rest) 0 := by

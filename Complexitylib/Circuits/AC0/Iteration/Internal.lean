@@ -512,7 +512,7 @@ theorem stageEventCount_stagedBad_mul_pow_le_internal
           (stagedBad (stageCount := stageCount)
             formula queryCount) *
         q ^ queryCount ≤
-      formula.size *
+      formula.gateCount *
         ((2 * q + 1) ^ N) ^ stageCount *
         (4 * (queryCount + 1)) ^ queryCount := by
   classical
@@ -598,7 +598,7 @@ theorem stageEventCount_stagedBad_mul_pow_le_internal
           have hchild :
               Switching.finiteEventCount childBad *
                     q ^ queryCount ≤
-                forestSize children *
+                forestGateCount children *
                   ((2 * q + 1) ^ N) ^ stageCount *
                   (4 * (queryCount + 1)) ^ queryCount := by
             calc
@@ -615,7 +615,7 @@ theorem stageEventCount_stagedBad_mul_pow_le_internal
                       q ^ queryCount).sum := by
                 rw [List.sum_map_mul_right]
               _ ≤ (children.toList.map fun child =>
-                    child.size *
+                    child.gateCount *
                       ((2 * q + 1) ^ N) ^ stageCount *
                       (4 * (queryCount + 1)) ^
                         queryCount).sum := by
@@ -629,25 +629,25 @@ theorem stageEventCount_stagedBad_mul_pow_le_internal
                   RandomRestriction.stageEventCount,
                   Switching.finiteEventCount] using
                     ih child hchildDepth
-              _ = forestSize children *
+              _ = forestGateCount children *
                     ((2 * q + 1) ^ N) ^ stageCount *
                     (4 * (queryCount + 1)) ^
                       queryCount := by
                 rw [show (children.toList.map fun child =>
-                      child.size *
+                      child.gateCount *
                         ((2 * q + 1) ^ N) ^ stageCount *
                         (4 * (queryCount + 1)) ^
                           queryCount).sum =
-                    (children.toList.map size).sum *
+                    (children.toList.map gateCount).sum *
                       (((2 * q + 1) ^ N) ^ stageCount *
                         (4 * (queryCount + 1)) ^
                           queryCount) by
                     simpa [Nat.mul_assoc] using
-                      List.sum_map_mul_right children.toList size
+                      List.sum_map_mul_right children.toList gateCount
                         (((2 * q + 1) ^ N) ^ stageCount *
                           (4 * (queryCount + 1)) ^
                             queryCount)]
-                rw [← forestSize_ofList_internal,
+                rw [← forestGateCount_ofList_internal,
                   AC0Forest.ofList_toList]
                 simp [Nat.mul_assoc]
           let trees :
@@ -740,7 +740,7 @@ theorem stageEventCount_stagedBad_mul_pow_le_internal
           have hprefix :
               Switching.finiteEventCount prefixPair *
                     q ^ queryCount ≤
-                forestSize children *
+                forestGateCount children *
                   ((2 * q + 1) ^ N) ^ (stageCount + 1) *
                   (4 * (queryCount + 1)) ^
                     queryCount := by
@@ -796,7 +796,7 @@ theorem stageEventCount_stagedBad_mul_pow_le_internal
                     switchGood pair.1 pair.2)
           change Switching.finiteEventCount rootEvent *
                 q ^ queryCount ≤
-              (1 + forestSize children) *
+              (1 + forestGateCount children) *
                 ((2 * q + 1) ^ N) ^ (stageCount + 1) *
                 (4 * (queryCount + 1)) ^ queryCount
           calc
@@ -819,13 +819,13 @@ theorem stageEventCount_stagedBad_mul_pow_le_internal
                       switchGood pair.1 pair.2) *
                   q ^ queryCount := by
               rw [Nat.add_mul]
-            _ ≤ forestSize children *
+            _ ≤ forestGateCount children *
                     ((2 * q + 1) ^ N) ^ (stageCount + 1) *
                     (4 * (queryCount + 1)) ^ queryCount +
                   ((2 * q + 1) ^ N) ^ (stageCount + 1) *
                     (4 * (queryCount + 1)) ^ queryCount :=
               Nat.add_le_add hprefix hswitch
-            _ = (1 + forestSize children) *
+            _ = (1 + forestGateCount children) *
                   ((2 * q + 1) ^ N) ^ (stageCount + 1) *
                   (4 * (queryCount + 1)) ^ queryCount := by
               simp [Nat.add_mul, Nat.mul_assoc, Nat.add_comm]
@@ -854,7 +854,7 @@ theorem stageEventCount_stagedBad_mul_pow_le_internal
           have hchild :
               Switching.finiteEventCount childBad *
                     q ^ queryCount ≤
-                forestSize children *
+                forestGateCount children *
                   ((2 * q + 1) ^ N) ^ stageCount *
                   (4 * (queryCount + 1)) ^ queryCount := by
             calc
@@ -871,7 +871,7 @@ theorem stageEventCount_stagedBad_mul_pow_le_internal
                       q ^ queryCount).sum := by
                 rw [List.sum_map_mul_right]
               _ ≤ (children.toList.map fun child =>
-                    child.size *
+                    child.gateCount *
                       ((2 * q + 1) ^ N) ^ stageCount *
                       (4 * (queryCount + 1)) ^
                         queryCount).sum := by
@@ -885,25 +885,25 @@ theorem stageEventCount_stagedBad_mul_pow_le_internal
                   RandomRestriction.stageEventCount,
                   Switching.finiteEventCount] using
                     ih child hchildDepth
-              _ = forestSize children *
+              _ = forestGateCount children *
                     ((2 * q + 1) ^ N) ^ stageCount *
                     (4 * (queryCount + 1)) ^
                       queryCount := by
                 rw [show (children.toList.map fun child =>
-                      child.size *
+                      child.gateCount *
                         ((2 * q + 1) ^ N) ^ stageCount *
                         (4 * (queryCount + 1)) ^
                           queryCount).sum =
-                    (children.toList.map size).sum *
+                    (children.toList.map gateCount).sum *
                       (((2 * q + 1) ^ N) ^ stageCount *
                         (4 * (queryCount + 1)) ^
                           queryCount) by
                     simpa [Nat.mul_assoc] using
-                      List.sum_map_mul_right children.toList size
+                      List.sum_map_mul_right children.toList gateCount
                         (((2 * q + 1) ^ N) ^ stageCount *
                           (4 * (queryCount + 1)) ^
                             queryCount)]
-                rw [← forestSize_ofList_internal,
+                rw [← forestGateCount_ofList_internal,
                   AC0Forest.ofList_toList]
                 simp [Nat.mul_assoc]
           let trees :
@@ -996,7 +996,7 @@ theorem stageEventCount_stagedBad_mul_pow_le_internal
           have hprefix :
               Switching.finiteEventCount prefixPair *
                     q ^ queryCount ≤
-                forestSize children *
+                forestGateCount children *
                   ((2 * q + 1) ^ N) ^ (stageCount + 1) *
                   (4 * (queryCount + 1)) ^
                     queryCount := by
@@ -1052,7 +1052,7 @@ theorem stageEventCount_stagedBad_mul_pow_le_internal
                     switchGood pair.1 pair.2)
           change Switching.finiteEventCount rootEvent *
                 q ^ queryCount ≤
-              (1 + forestSize children) *
+              (1 + forestGateCount children) *
                 ((2 * q + 1) ^ N) ^ (stageCount + 1) *
                 (4 * (queryCount + 1)) ^ queryCount
           calc
@@ -1075,13 +1075,13 @@ theorem stageEventCount_stagedBad_mul_pow_le_internal
                       switchGood pair.1 pair.2) *
                   q ^ queryCount := by
               rw [Nat.add_mul]
-            _ ≤ forestSize children *
+            _ ≤ forestGateCount children *
                     ((2 * q + 1) ^ N) ^ (stageCount + 1) *
                     (4 * (queryCount + 1)) ^ queryCount +
                   ((2 * q + 1) ^ N) ^ (stageCount + 1) *
                     (4 * (queryCount + 1)) ^ queryCount :=
               Nat.add_le_add hprefix hswitch
-            _ = (1 + forestSize children) *
+            _ = (1 + forestGateCount children) *
                   ((2 * q + 1) ^ N) ^ (stageCount + 1) *
                   (4 * (queryCount + 1)) ^ queryCount := by
               simp [Nat.add_mul, Nat.mul_assoc, Nat.add_comm]
@@ -1139,7 +1139,7 @@ theorem exists_shallow_stagedDecisionTree_of_counting_internal
     (hnumeric :
       (((2 * q + 1) ^ N) ^ stageCount * queryCount) *
             q ^ queryCount +
-          formula.size *
+          formula.gateCount *
               ((2 * q + 1) ^ N) ^ stageCount *
               (4 * (queryCount + 1)) ^ queryCount * N <
         (N * ((2 * q + 1) ^ (N - 1)) ^ stageCount) *
