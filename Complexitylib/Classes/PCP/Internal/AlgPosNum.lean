@@ -137,7 +137,7 @@ theorem val_head_toGraph_compose (k : Fin (Fintype.card (R.compose enc).Edge)) :
         (R.blockNum ((R.compose enc).edgeOf k).1 ((R.compose enc).edgeOf k).2.2)
         (R.cubeNum enc ((R.compose enc).edgeOf k).1 ((R.compose enc).edgeOf k).2.1
           ((R.compose enc).edgeOf k).2.2) := by
-  rw [MultiTest.val_head_toGraph, enc_pos_compose]
+  erw [MultiTest.val_head_toGraph, enc_pos_compose]
 
 /-- The test's verdict, from the satisfying set alone. -/
 noncomputable def checkOfSet (S : Finset (Cube (kOf B))) (z : Cube (ROf B))
@@ -172,7 +172,7 @@ theorem edge_facts (e : ℕ) (he : e < (R.compose enc).toGraph.numEdges) :
             = MultiTest.relOfCheck ((R.compose enc).check p z) i := by
   obtain ⟨p, z, i, hp, hz, hi, hsplit⟩ := R.edge_data B enc e he
   refine ⟨p, z, i, hsplit, (MultiTest.tailNum_eq _ ⟨e, he⟩).symm, ?_, ?_⟩
-  · rw [hp, hz, hi, MultiTest.val_head_toGraph, enc_pos_compose]
+  · erw [hp, hz, hi, MultiTest.val_head_toGraph, enc_pos_compose]
     rfl
   · rw [hp, hz, hi]
     exact MultiTest.rel_toGraph_eq _ _
@@ -191,6 +191,9 @@ theorem satSet_congr (p : R.Dart) (p' : R'.Dart)
 
 omit [DecidableEq β] [Nonempty β] [NumEnc R.graph.V] [NumEnc R.graph.D] in
 /-- **So does the cube a read names**, even across two different systems. -/
+-- The signature mirrors the family this belongs to; the argument is part of
+-- that shape even where this member does not consult it.
+@[nolint unusedArguments]
 theorem cubeNum_congr {β' : Type} [Fintype β'] [DecidableEq β'] [Nonempty β']
     {R' : RegCSP β'} [NumEnc R'.graph.V] [NumEnc R'.graph.D] {enc' : β' → Cube B}
     (p : R.Dart) (p' : R'.Dart) (z : Cube (ROf B)) (i : ReadIdx)
@@ -200,6 +203,9 @@ theorem cubeNum_congr {β' : Type} [Fintype β'] [DecidableEq β'] [Nonempty β'
 
 omit [DecidableEq β] [Nonempty β] [NumEnc R.graph.V] [NumEnc R.graph.D] in
 /-- **And so does the test's verdict.** -/
+-- The signature mirrors the family this belongs to; the argument is part of
+-- that shape even where this member does not consult it.
+@[nolint unusedArguments]
 theorem check_congr {β' : Type} [Fintype β'] [DecidableEq β'] [Nonempty β']
     {R' : RegCSP β'} [NumEnc R'.graph.V] [NumEnc R'.graph.D] {enc' : β' → Cube B}
     (p : R.Dart) (p' : R'.Dart) (z : Cube (ROf B))

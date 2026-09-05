@@ -154,46 +154,41 @@ private theorem storeUpdate_ready
       tapes.update.ne (by decide)
     refine
       { source := by
-          simpa only [updateWork, queryWork,
-            Function.update_of_ne hsourceReplacement,
-            Function.update_of_ne hsourceQuery] using hrhs.scanner.source
+          simp only [updateWork, queryWork, Function.update_of_ne hsourceReplacement,
+            Function.update_of_ne hsourceQuery]
+          exact hrhs.scanner.source
         address := by
-          simpa only [updateWork, queryWork,
-            Function.update_of_ne haddressReplacement,
-            Function.update_of_ne haddressQuery] using hrhs.scanner.address
+          simp only [updateWork, queryWork, Function.update_of_ne haddressReplacement,
+            Function.update_of_ne haddressQuery]
+          exact hrhs.scanner.address
         addressStart := by
-          simpa only [updateWork, queryWork,
-            Function.update_of_ne haddressReplacement,
-            Function.update_of_ne haddressQuery] using
-            hrhs.scanner.addressStart
+          simp only [updateWork, queryWork, Function.update_of_ne haddressReplacement,
+            Function.update_of_ne haddressQuery]
+          exact hrhs.scanner.addressStart
         value := by
-          simpa only [updateWork, queryWork,
-            Function.update_of_ne hvalueReplacement,
-            Function.update_of_ne hvalueQuery] using hrhs.scanner.value
+          simp only [updateWork, queryWork, Function.update_of_ne hvalueReplacement,
+            Function.update_of_ne hvalueQuery]
+          exact hrhs.scanner.value
         valueStart := by
-          simpa only [updateWork, queryWork,
-            Function.update_of_ne hvalueReplacement,
-            Function.update_of_ne hvalueQuery] using hrhs.scanner.valueStart
+          simp only [updateWork, queryWork, Function.update_of_ne hvalueReplacement,
+            Function.update_of_ne hvalueQuery]
+          exact hrhs.scanner.valueStart
         addressCounter := by
-          simpa only [updateWork, queryWork,
-            Function.update_of_ne haddressCounterReplacement,
-            Function.update_of_ne haddressCounterQuery] using
-            hrhs.scanner.addressCounter
+          simp only [updateWork, queryWork, Function.update_of_ne haddressCounterReplacement,
+            Function.update_of_ne haddressCounterQuery]
+          exact hrhs.scanner.addressCounter
         addressWidth := by
-          simpa only [updateWork, queryWork,
-            Function.update_of_ne haddressWidthReplacement,
-            Function.update_of_ne haddressWidthQuery] using
-            hrhs.scanner.addressWidth
+          simp only [updateWork, queryWork, Function.update_of_ne haddressWidthReplacement,
+            Function.update_of_ne haddressWidthQuery]
+          exact hrhs.scanner.addressWidth
         valueCounter := by
-          simpa only [updateWork, queryWork,
-            Function.update_of_ne hvalueCounterReplacement,
-            Function.update_of_ne hvalueCounterQuery] using
-            hrhs.scanner.valueCounter
+          simp only [updateWork, queryWork, Function.update_of_ne hvalueCounterReplacement,
+            Function.update_of_ne hvalueCounterQuery]
+          exact hrhs.scanner.valueCounter
         valueWidth := by
-          simpa only [updateWork, queryWork,
-            Function.update_of_ne hvalueWidthReplacement,
-            Function.update_of_ne hvalueWidthQuery] using
-            hrhs.scanner.valueWidth
+          simp only [updateWork, queryWork, Function.update_of_ne hvalueWidthReplacement,
+            Function.update_of_ne hvalueWidthQuery]
+          exact hrhs.scanner.valueWidth
         query := by
           simpa only [updateWork,
             Function.update_of_ne hqueryReplacement, queryWork,
@@ -203,14 +198,13 @@ private theorem storeUpdate_ready
             Function.update_of_ne hqueryReplacement, queryWork,
             Function.update_self, queryTape] using hqueryNat.1
         result := by
-          simpa only [updateWork, queryWork,
-            Function.update_of_ne hresultReplacement,
-            Function.update_of_ne hresultQuery] using hrhs.scanner.result
+          simp only [updateWork, queryWork, Function.update_of_ne hresultReplacement,
+            Function.update_of_ne hresultQuery]
+          exact hrhs.scanner.result
         resultStart := by
-          simpa only [updateWork, queryWork,
-            Function.update_of_ne hresultReplacement,
-            Function.update_of_ne hresultQuery] using
-            hrhs.scanner.resultStart
+          simp only [updateWork, queryWork, Function.update_of_ne hresultReplacement,
+            Function.update_of_ne hresultQuery]
+          exact hrhs.scanner.resultStart
         parked := ?_
         frame := by intro i _ _ _ _ _ _ _ _ _; rfl }
     intro i
@@ -257,13 +251,10 @@ private theorem storeUpdate_ready
     tapes.update.ne (by decide)
   refine ⟨hscanner, ?_, ?_, ?_, ?_, hscanner.parked⟩
   · simpa only [updateWork, Function.update_self, valueTape] using hvalueNat
-  · simpa only [updateWork,
-      Function.update_of_ne hremainingReplacement, queryWork,
-      Function.update_of_ne hremainingQuery] using hrhs.count
-  · simpa only [updateWork,
-      Function.update_of_ne hfoundReplacement, queryWork,
-      Function.update_of_ne hfoundQuery] using
-      hrhs.copyScratch
+  · simp only [Function.update_of_ne hremainingReplacement, Function.update_of_ne hremainingQuery]
+    exact hrhs.count
+  · simp only [Function.update_of_ne hfoundReplacement, Function.update_of_ne hfoundQuery]
+    exact hrhs.copyScratch
   · simpa only [updateWork,
       Function.update_of_ne hresultCountReplacement, queryWork,
       Function.update_of_ne hresultCountQuery] using hresultCount
@@ -323,7 +314,7 @@ theorem indirectStoreInstructionTM_hoareTime_frame_internal
       out (by simpa [address] using hvalues.1)
       ⟨(by rcases hops with ⟨_, _, hrhs⟩; exact hrhs.scanner.queryStart),
         (by rcases hops with ⟨_, _, hrhs⟩;
-            simpa using hrhs.scanner.query)⟩
+            exact hrhs.scanner.query)⟩
       hvalues.2.2.1 (by simpa [hinp] using hinput)
       (fun i _ _ _ => hvalues.2.2.2 i)
       (by simpa [hout] using houtputParked)

@@ -81,7 +81,7 @@ def segGlue {ℓ i : ℕ} (p : Fin i → G.D) (d : G.D) (s : Fin (ℓ - (i + 1))
   have hk := k.isLt
   have h1 : ¬ (i + 1 + k.val < i) := by omega
   have h2 : ¬ (i + 1 + k.val = i) := by omega
-  simp only [segSuf, segGlue, dif_neg h1, dif_neg h2]
+  simp only [segSuf, segGlue, dite_eq_right h1, dite_eq_right h2]
   congr 1
   have : i + 1 + k.val - (i + 1) = k.val := by omega
   exact Fin.ext this
@@ -97,7 +97,7 @@ theorem segGlue_split {ℓ i : ℕ} (hi : i < ℓ) (W : Fin ℓ → G.D) :
     simp
   · have h1 : ¬ (k.val < i) := by omega
     have h2 : ¬ (k.val = i) := by omega
-    simp only [segGlue, dif_neg h1, dif_neg h2, segSuf]
+    simp only [segGlue, dite_eq_right h1, dite_eq_right h2, segSuf]
     congr 1
     have : i + 1 + (k.val - (i + 1)) = k.val := by omega
     exact Fin.ext this
@@ -117,7 +117,7 @@ theorem walkAt_segSuf {ℓ : ℕ} (v : G.V) (W : Fin ℓ → G.D) (i : ℕ) :
       have hmlt : m < ℓ - (i + 1) := by omega
       have hilt : i + 1 + m < ℓ := by omega
       have hidx : i + 1 + (m + 1) = (i + 1 + m) + 1 := by omega
-      rw [walkAt, dif_pos hmlt, ih hm', hidx, G.walkAt_succ_of_lt v W hilt]
+      rw [walkAt, dite_eq_left hmlt, ih hm', hidx, G.walkAt_succ_of_lt v W hilt]
       exact congrArg (G.nbr (G.walkAt ℓ v W (i + 1 + m))) rfl
 
 /-- **Reversal commutes with splitting.** Reversing the suffix of a walk gives
@@ -316,7 +316,7 @@ theorem walkAt_preWalk {T ℓ : ℕ} (h : ℓ ≤ T) (x : G.V) (s : Fin T → G.
       intro hk
       have hkl : k < ℓ := by omega
       have hkT : k < T := by omega
-      rw [walkAt, dif_pos hkl, ih (by omega), walkAt, dif_pos hkT]
+      rw [walkAt, dite_eq_left hkl, ih (by omega), walkAt, dite_eq_left hkT]
       congr 1
 
 end RegGraph

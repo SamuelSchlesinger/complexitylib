@@ -7,7 +7,7 @@ Authors: Samuel Schlesinger
 module
 public import Complexitylib.Models.TuringMachine.Oracle.OutputSemantics.Defs
 public import Mathlib.Data.Nat.Cast.WithTop
-public import Mathlib.Data.Nat.Lattice
+public import Mathlib.Order.Lattice.Nat
 
 /-!
 # Oracle-relative Kolmogorov complexity -- definitions

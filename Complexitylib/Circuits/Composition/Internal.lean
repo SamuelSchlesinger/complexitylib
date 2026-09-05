@@ -690,7 +690,6 @@ theorem wireDepth_compose_outer_le_internal
                 outer.acyclic ⟨wire.val - K, by omega⟩ gateInput
               change source.val < K + (wire.val - K) at hacyclic
               omega) source rfl)
-        dsimp only at hfold
         omega
 
 theorem depth_compose_le_internal
@@ -721,7 +720,6 @@ theorem depth_compose_le_internal
       (fun gateInput =>
         wireDepth_compose_outer_le_internal outer inner
           ((outer.outputs output).inputs gateInput))
-    dsimp only at hfold
     omega
   unfold Circuit.depth
   exact fold_max_le_add_fold_max inner.depth

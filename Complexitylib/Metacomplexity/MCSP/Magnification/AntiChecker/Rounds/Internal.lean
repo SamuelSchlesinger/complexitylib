@@ -201,7 +201,7 @@ theorem eventually_padInputsTo_isFor_of_isEstimateSelectionTrace_internal
         eventually_requiredRoundCount_le_sampleCount_internal beta]
       with arity hgood hbudget
   intro harity target estimator inputs hhard hestimate hlength hselection
-  letI : NeZero arity := ⟨harity⟩
+  let : NeZero arity := ⟨harity⟩
   have hshrink' :=
     hselection.isShrinkTrace_of_length_le_internal
       (rounds := requiredRoundCount beta arity)
@@ -249,7 +249,7 @@ theorem eventually_exists_isFor_length_eq_sampleCount_of_isHardAt_internal
         eventually_requiredRoundCount_le_sampleCount_internal beta]
       with arity htrace hbudget
   intro harity target estimator hhard hestimate
-  letI : NeZero arity := ⟨harity⟩
+  let : NeZero arity := ⟨harity⟩
   obtain ⟨inputs, hlength, hshrink⟩ :=
     htrace target estimator hhard hestimate
   have hanti :

@@ -92,7 +92,7 @@ theorem basisVec_injective (n : ℕ) : Function.Injective (basisVec (n := n)) :=
   intro i j hij
   have h := congrFun hij i
   by_contra hne
-  simp only [basisVec, if_true, if_neg hne] at h
+  simp only [basisVec, ite_true, ite_eq_right hne] at h
   exact absurd h (by decide)
 
 /-- The encoding of a powered label: the basis vector at its index. -/

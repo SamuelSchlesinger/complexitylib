@@ -572,7 +572,7 @@ theorem cleanupPhase (c : Cfg 6 bodyTM.Q) (E S W : ℕ → Γ) (p sp dp : ℕ)
     · show E' 0 = Γ.start
       rw [hE']
       dsimp only
-      rw [if_neg (by omega)]
+      rw [ite_eq_right (by omega)]
       exact hE0
     · intro i
       show E' (i + 1) = Γ.blank
@@ -679,7 +679,7 @@ theorem defaultTail (c : Cfg 6 bodyTM.Q) (E : ℕ → Γ) (SL : List Γw)
     if 1 ≤ j ∧ j < 1 + SL.length then Γ.blank else (c.work stT).cells j with hB
   have hB0 : B 0 = Γ.start := by
     rw [hB]; dsimp only
-    rw [if_neg (by omega)]
+    rw [ite_eq_right (by omega)]
     exact hSL_hold.1
   have hBns : ∀ j, 1 ≤ j → B j ≠ Γ.start := by
     intro j hj
@@ -796,7 +796,7 @@ theorem defaultTail (c : Cfg 6 bodyTM.Q) (E : ℕ → Γ) (SL : List Γw)
     · exact hBns j hj
   have hC0 : C 0 = Γ.start := by
     rw [hC]; dsimp only
-    rw [if_neg (by omega)]
+    rw [ite_eq_right (by omega)]
     exact hB0
   -- dfStRew3: rewind the state head
   obtain ⟨c₈, hr₈, hst₈, hwtS₈, hin₈, hout₈, hoth₈⟩ :=
@@ -867,11 +867,11 @@ theorem defaultTail (c : Cfg 6 bodyTM.Q) (E : ℕ → Γ) (SL : List Γw)
     rw [hC]
     dsimp only
     by_cases hi : i < (qhaltField (groupPairs α)).length
-    · rw [if_pos (by omega), dif_pos hi,
+    · rw [ite_eq_left (by omega), dite_eq_left hi,
         show (takeField (groupPairs α)).1.length + 2 + (i + 1 - 1)
           = (takeField (groupPairs α)).1.length + 2 + i by omega]
       exact descLayout_field2_val hdesc i hi
-    · rw [if_neg (by omega), dif_neg hi]
+    · rw [ite_eq_right (by omega), dite_eq_right hi]
       exact hBblank (i + 1) (by omega)
   · rw [hoth₉ stT (by decide), hwtS₈]
   · -- scratch cleared
@@ -883,7 +883,7 @@ theorem defaultTail (c : Cfg 6 bodyTM.Q) (E : ℕ → Γ) (SL : List Γw)
     · show E' 0 = Γ.start
       rw [hE']
       dsimp only
-      rw [if_neg (by omega)]
+      rw [ite_eq_right (by omega)]
       exact hE0
     · intro i
       show E' (i + 1) = Γ.blank
@@ -1010,7 +1010,7 @@ theorem applyPhase (c : Cfg 6 bodyTM.Q) {f : VFlags} {sim0 sim1 sim2 : Tape}
       (by rw [hwtSc₂]) (by rw [hwtSc₂]) (by omega) hE_wns
       (by rw [hwtS₂]
           dsimp only [Tape.read]
-          rw [if_neg (by omega)]
+          rw [ite_eq_right (by omega)]
           exact hS_wns (1 + SL.length) (by omega))
       (by rw [hoth₂ dsT (by decide) (by decide), hoth₁ dsT (by decide)]
           exact hds_read)
@@ -1020,7 +1020,7 @@ theorem applyPhase (c : Cfg 6 bodyTM.Q) {f : VFlags} {sim0 sim1 sim2 : Tape}
       (c.work scT).cells (1 + (j - 1)) else (c.work stT).cells j with hU
   have hU0 : U 0 = Γ.start := by
     rw [hU]; dsimp only
-    rw [if_neg (by omega)]
+    rw [ite_eq_right (by omega)]
     exact hSL_hold.1
   have hUns : ∀ j, 1 ≤ j → U j ≠ Γ.start := by
     intro j hj
@@ -1088,14 +1088,14 @@ theorem applyPhase (c : Cfg 6 bodyTM.Q) {f : VFlags} {sim0 sim1 sim2 : Tape}
     rw [hU]
     dsimp only
     by_cases hi : i < SL.length
-    · rw [if_pos (by omega), dif_pos (by
+    · rw [ite_eq_left (by omega), dite_eq_left (by
         rw [List.length_take]
         omega),
         show 1 + (i + 1 - 1) = i + 1 by omega,
         Tape.HoldsExact.cells_lt hEL_hold (by omega)]
       congr 1
       exact (List.getElem_take ..).symm
-    · rw [if_neg (by omega), dif_neg (by rw [List.length_take]; omega),
+    · rw [ite_eq_right (by omega), dite_eq_right (by rw [List.length_take]; omega),
         show i + 1 = i + 1 by rfl]
       exact Tape.HoldsExact.cells_ge hSL_hold (by omega)
   · rw [hwtS₄]

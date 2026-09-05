@@ -116,26 +116,25 @@ theorem probability_product_internal (D : DyadicEnsemble α)
     [DecidablePred P] [DecidablePred Q] :
     (D.product E).probability n (fun xy => P xy.1 ∧ Q xy.2) =
       D.probability n P * E.probability n Q := by
-  simpa [product, probability, event] using
-    (eventProb_block
-      (fun seed : Fin (D.seedLength n) → Bool => P (D.sample n seed))
-      (fun seed : Fin (E.seedLength n) → Bool => Q (E.sample n seed)))
+  exact eventProb_block
+    (fun seed : Fin (D.seedLength n) → Bool => P (D.sample n seed))
+    (fun seed : Fin (E.seedLength n) → Bool => Q (E.sample n seed))
 
 theorem probability_dirac_internal (x : ℕ → α) (n : ℕ)
     (P : α → Prop) [DecidablePred P] :
     (dirac x).probability n P = if P (x n) then 1 else 0 := by
   by_cases hP : P (x n)
-  · rw [if_pos hP]
+  · rw [ite_eq_left hP]
     unfold probability
     rw [show (dirac x).event n P = Finset.univ by
       ext seed
       simp [event, dirac, hP]]
     exact eventProb_univ
-  · rw [if_neg hP]
+  · rw [ite_eq_right hP]
     unfold probability
     rw [show (dirac x).event n P = ∅ by
-      ext seed
-      simp [event, dirac, hP]]
+      refine Finset.eq_empty_of_forall_notMem fun seed hseed => hP ?_
+      exact (Finset.mem_filter.mp hseed).2]
     exact eventProb_empty
 
 theorem probability_uniformBits_internal (n : ℕ)

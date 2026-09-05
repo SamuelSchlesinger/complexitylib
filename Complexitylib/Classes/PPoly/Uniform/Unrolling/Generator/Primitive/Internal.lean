@@ -1117,17 +1117,15 @@ private theorem finishCellReference_spaceBoundByWidth
   constructor
   · apply BinaryRoutine.SpaceBoundByWidthAt.mulAdd
     · intro inputLength
-      simpa [prepareCellPositionOffset_effect,
-        prepareCellReferenceBase_effect, BinaryRoutine.set, Work.reference₀,
-        Work.temporary₀, Work.temporary₁, Work.temporary₂,
-        Work.tapeIndex, Work.position] using
-          (hbounds inputLength).offset_le
+      simp [prepareCellPositionOffset_effect, prepareCellReferenceBase_effect, BinaryRoutine.set,
+        Work.reference₀, Work.temporary₀, Work.temporary₁, Work.temporary₂, Work.tapeIndex,
+        Work.position]
+      exact (hbounds inputLength).offset_le
     · intro inputLength
-      simpa [prepareCellPositionOffset_effect,
-        prepareCellReferenceBase_effect, BinaryRoutine.set, Work.reference₀,
-        Work.temporary₀, Work.temporary₁, Work.temporary₂,
-        Work.tapeIndex, Work.position] using
-          (hbounds inputLength).four_le
+      simp [prepareCellPositionOffset_effect, prepareCellReferenceBase_effect, BinaryRoutine.set,
+        Work.reference₀, Work.temporary₀, Work.temporary₁, Work.temporary₂, Work.tapeIndex,
+        Work.position]
+      exact (hbounds inputLength).four_le
     · intro inputLength
       simpa [prepareCellPositionOffset_effect,
         prepareCellReferenceBase_effect, BinaryRoutine.set,
@@ -1139,12 +1137,10 @@ private theorem finishCellReference_spaceBoundByWidth
   constructor
   · apply BinaryRoutine.SpaceBoundByWidthAt.add
     · intro inputLength
-      simpa [prepareCellPositionOffset_effect,
-        prepareCellReferenceBase_effect, BinaryRoutine.set,
-        BinaryRoutine.mulAdd, Work.reference₀, Work.temporary₀,
-        Work.temporary₁, Work.temporary₂, Work.tapeIndex,
-        Work.position, Work.symbolIndex] using
-          hvalues inputLength Work.symbolIndex
+      simp [prepareCellPositionOffset_effect, prepareCellReferenceBase_effect, BinaryRoutine.set,
+        BinaryRoutine.mulAdd, Work.reference₀, Work.temporary₀, Work.temporary₁, Work.temporary₂,
+        Work.tapeIndex, Work.position, Work.symbolIndex]
+      exact hvalues inputLength Work.symbolIndex
     · intro inputLength
       simpa [prepareCellPositionOffset_effect,
         prepareCellReferenceBase_effect, BinaryRoutine.set,
@@ -1157,30 +1153,26 @@ private theorem finishCellReference_spaceBoundByWidth
   constructor
   · apply BinaryRoutine.SpaceBoundByWidthAt.clear
     intro inputLength
-    simpa [prepareCellPositionOffset_effect,
-      prepareCellReferenceBase_effect, BinaryRoutine.set,
-      BinaryRoutine.mulAdd, BinaryRoutine.add, Work.reference₀,
-      Work.temporary₀, Work.temporary₁, Work.temporary₂,
-      Work.tapeIndex, Work.position, Work.symbolIndex, Nat.add_assoc] using
-        (hbounds inputLength).horizonTwo_le
+    simp [prepareCellPositionOffset_effect, prepareCellReferenceBase_effect, BinaryRoutine.set,
+      BinaryRoutine.mulAdd, BinaryRoutine.add, Work.reference₀, Work.temporary₀, Work.temporary₁,
+      Work.temporary₂, Work.tapeIndex, Work.position, Work.symbolIndex, Nat.add_assoc]
+    exact (hbounds inputLength).horizonTwo_le
   constructor
   · apply BinaryRoutine.SpaceBoundByWidthAt.clear
     intro inputLength
-    simpa [prepareCellPositionOffset_effect,
-      prepareCellReferenceBase_effect, BinaryRoutine.set,
-      BinaryRoutine.mulAdd, BinaryRoutine.add, BinaryRoutine.clear,
-      Work.reference₀, Work.temporary₀, Work.temporary₁,
-      Work.temporary₂, Work.tapeIndex, Work.position,
-      Work.symbolIndex] using (hbounds inputLength).four_le
+    simp [prepareCellPositionOffset_effect, prepareCellReferenceBase_effect, BinaryRoutine.set,
+      BinaryRoutine.mulAdd, BinaryRoutine.add, BinaryRoutine.clear, Work.reference₀,
+      Work.temporary₀, Work.temporary₁, Work.temporary₂, Work.tapeIndex, Work.position,
+      Work.symbolIndex]
+    exact (hbounds inputLength).four_le
   constructor
   · apply BinaryRoutine.SpaceBoundByWidthAt.clear
     intro inputLength
-    simpa [prepareCellPositionOffset_effect,
-      prepareCellReferenceBase_effect, BinaryRoutine.set,
-      BinaryRoutine.mulAdd, BinaryRoutine.add, BinaryRoutine.clear,
-      Work.reference₀, Work.temporary₀, Work.temporary₁,
-      Work.temporary₂, Work.tapeIndex, Work.position,
-      Work.symbolIndex] using (hbounds inputLength).offset_le
+    simp [prepareCellPositionOffset_effect, prepareCellReferenceBase_effect, BinaryRoutine.set,
+      BinaryRoutine.mulAdd, BinaryRoutine.add, BinaryRoutine.clear, Work.reference₀,
+      Work.temporary₀, Work.temporary₁, Work.temporary₂, Work.tapeIndex, Work.position,
+      Work.symbolIndex]
+    exact (hbounds inputLength).offset_le
   · trivial
 
 theorem prepareCellReference_requires_internal (stateCount tapeCount : ℕ)

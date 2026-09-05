@@ -53,13 +53,13 @@ private theorem entryMissCopiedWork_eq
   funext i
   by_cases hia : i = tapes.address
   · subst i
-    simp only [entryMissCopiedWork, if_pos]
+    simp only [entryMissCopiedWork, ite_eq_left]
     exact Tape.ext haddressHead haddressCells
   · by_cases hiv : i = tapes.value
     · subst i
-      simp only [entryMissCopiedWork, hia, if_false, if_pos]
+      simp only [entryMissCopiedWork, hia, ite_false, ite_eq_left]
       exact Tape.ext hvalueHead hvalueCells
-    · simp only [entryMissCopiedWork, hia, hiv, if_false]
+    · simp only [entryMissCopiedWork, hia, hiv, ite_false]
       exact hframe i hia hiv
 
 private theorem readableEntryMatch_rebase_after_copy
@@ -234,9 +234,9 @@ theorem entryMissCopyTM_hoareTime_frame_internal
           (entryMissHeadBound entry queryBits initialWork tapes.value) +
         1 + entryMissCleanupTime tapes entry queryBits copiedWork
     omega
-  · change (entryMissCopyTM tapes).halted finalCfg
-    unfold entryMissCopyTM
-    rw [TM.phase2Wrap_halted_iff]
+  · unfold entryMissCopyTM
+    simp only [finalCfg]
+    erw [TM.phase2Wrap_halted_iff]
     exact hcleanupHalt
   · have hreadyGlobal :
         EntryScanReady tapes rest queryBits initialWork cleaned.work := by
@@ -255,7 +255,8 @@ theorem entryMissCopyTM_hoareTime_frame_internal
           haddressCounter haddressWidth hvalueCounter hvalueWidth hquery
           hresult))
     refine ⟨?_, hreadyGlobal, ?_⟩
-    · simpa [finalCfg] using hcleanedInput.trans hencodedInput
+    · simp [finalCfg]
+      exact hcleanedInput.trans hencodedInput
     · change cleaned.output.HasBinaryPrefix (emitted ++ Entry.encode entry)
       rw [hcleanedOutput]
       exact hencodedOutput

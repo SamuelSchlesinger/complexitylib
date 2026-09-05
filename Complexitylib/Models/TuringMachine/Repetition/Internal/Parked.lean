@@ -167,7 +167,7 @@ theorem RepeatOtherParked.trace_run_prefix (tm : NTM n) (hT : 0 < T)
         (tm.trace m (fun i => choices ⟨i.val, by omega⟩) c₀).state votes := by
       rw [hg] at hprefix
       simpa [C] using hprefix.1
-    rw [(repeatAtTime tm k T).trace_add m 1]
+    erw [(repeatAtTime tm k T).trace_add m 1]
     apply RepeatOtherParked.run tm
     · exact ih (by omega)
     · exact hCstate

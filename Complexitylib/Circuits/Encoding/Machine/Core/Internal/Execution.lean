@@ -180,7 +180,8 @@ theorem coreCfg_step (phase : CorePhase) (input code wires counter output : Tape
       omega
     subst i
     simp
-  · simpa [coreCfg] using hphase
+  · simp [coreCfg]
+    exact hphase
 
 /-- Any controller branch selecting `CoreAction.reject` halts in one step,
 writes zero at the current output head, and preserves the named work tapes. -/
@@ -214,7 +215,7 @@ theorem rewindCode_step_cursor {bits : List Bool} {position : ℕ}
         (coreCfg .rewindCode input code wires counter output) =
       some (coreCfg .rewindCode input (code.move Dir3.left) wires counter output) := by
   rw [coreCfg_step .rewindCode input code wires counter output (by decide)]
-  simp only [coreAction, coreHeads_codeIdx, hcode.read_ne_start, if_false,
+  simp only [coreAction, coreHeads_codeIdx, hcode.read_ne_start, ite_false,
     coreHeads_wiresIdx, coreHeads_counterIdx, TapeAction.moveLeft,
     CoreAction.preserve, TapeAction.preserve]
   rw [hcode.applyMoveLeft]
@@ -235,7 +236,7 @@ theorem rewindCode_step_marker {bits : List Bool}
       some (coreCfg .rewindWires input (code.move Dir3.right)
         wires counter output) := by
   rw [coreCfg_step .rewindCode input code wires counter output (by decide)]
-  simp only [coreAction, coreHeads_codeIdx, hcode.read_start, if_true,
+  simp only [coreAction, coreHeads_codeIdx, hcode.read_start, ite_true,
     coreHeads_wiresIdx, coreHeads_counterIdx, CoreAction.preserve,
     TapeAction.preserve, TapeAction.moveRight]
   have hcodeMove :
@@ -295,7 +296,7 @@ theorem rewindWires_step_cursor {bits : List Bool} {position : ℕ}
       some (coreCfg .rewindWires input code (wires.move Dir3.left)
         counter output) := by
   rw [coreCfg_step .rewindWires input code wires counter output (by decide)]
-  simp only [coreAction, coreHeads_wiresIdx, hwires.read_ne_start, if_false,
+  simp only [coreAction, coreHeads_wiresIdx, hwires.read_ne_start, ite_false,
     coreHeads_codeIdx, coreHeads_counterIdx, TapeAction.moveLeft,
     CoreAction.preserve, TapeAction.preserve]
   rw [hwires.applyMoveLeft]
@@ -316,7 +317,7 @@ theorem rewindWires_step_marker {bits : List Bool}
       some (coreCfg .familyTag input code (wires.move Dir3.right)
         counter output) := by
   rw [coreCfg_step .rewindWires input code wires counter output (by decide)]
-  simp only [coreAction, coreHeads_wiresIdx, hwires.read_start, if_true,
+  simp only [coreAction, coreHeads_wiresIdx, hwires.read_start, ite_true,
     CoreAction.moveWiresRight, coreHeads_codeIdx, coreHeads_counterIdx,
     CoreAction.preserve, TapeAction.preserve, TapeAction.moveRight]
   have hwiresMove :
@@ -402,7 +403,7 @@ theorem familyTag_step_empty (rest : List Bool)
       some (coreCfg .emptyAnswer input (code.move Dir3.right)
         wires counter output) := by
   have hcodeRead : code.read = Γ.zero := by
-    simpa [Γ.ofBool] using hcode.read_of_lt (by simp)
+    exact hcode.read_of_lt (by simp)
   have hwiresRead : wires.read = Γ.blank := hwires.read_frontier
   rw [coreCfg_step .familyTag input code wires counter output (by decide)]
   simp only [coreAction, coreHeads_codeIdx, coreHeads_wiresIdx, hcodeRead,
@@ -438,9 +439,9 @@ theorem familyTag_step_positive (circuitCode inputRest : List Bool)
       some (coreCfg .count input (code.move Dir3.right)
         wires counter output) := by
   have hcodeRead : code.read = Γ.one := by
-    simpa [Γ.ofBool] using hcode.read_of_lt (by simp)
+    exact hcode.read_of_lt (by simp)
   have hwiresRead : wires.read = Γ.ofBool bit := by
-    simpa using hwires.read_of_lt (by simp)
+    exact hwires.read_of_lt (by simp)
   have hwiresKeep :
       wires.writeAndMove (TM.readBackWrite (Γ.ofBool bit))
           (TM.idleDir (Γ.ofBool bit)) = wires := by
@@ -597,7 +598,7 @@ theorem rewindCounter_step_cursor {bits : List Bool} {position : ℕ}
         (counter.move Dir3.left) output) := by
   rw [coreCfg_step .rewindCounter input code wires counter output (by decide)]
   simp only [coreAction, coreHeads_counterIdx, hcounter.read_ne_start,
-    if_false, coreHeads_codeIdx, coreHeads_wiresIdx, TapeAction.moveLeft,
+    ite_false, coreHeads_codeIdx, coreHeads_wiresIdx, TapeAction.moveLeft,
     CoreAction.preserve, TapeAction.preserve]
   rw [hcounter.applyMoveLeft]
   rw [Tape.writeAndMove_readBack_idle_of_ne_start code hcode]
@@ -617,7 +618,7 @@ theorem rewindCounter_step_marker {bits : List Bool}
       some (coreCfg (.gateCheck false) input code wires
         (counter.move Dir3.right) output) := by
   rw [coreCfg_step .rewindCounter input code wires counter output (by decide)]
-  simp only [coreAction, coreHeads_counterIdx, hcounter.read_start, if_true,
+  simp only [coreAction, coreHeads_counterIdx, hcounter.read_start, ite_true,
     coreHeads_codeIdx, coreHeads_wiresIdx, CoreAction.preserve,
     TapeAction.preserve, TapeAction.moveRight]
   have hcounterMove :
@@ -741,7 +742,7 @@ theorem familyTag_step_reject_positive_empty (rest : List Bool)
         (coreCfg .familyTag input code wires counter output) =
       some (coreCfg .done input code wires counter (output.write Γ.zero)) := by
   have hcodeRead : code.read = Γ.one := by
-    simpa [Γ.ofBool] using hcode.read_of_lt (by simp)
+    exact hcode.read_of_lt (by simp)
   have hwiresRead : wires.read = Γ.blank := hwires.read_frontier
   apply coreCfg_step_reject .familyTag input code wires counter output
     (by decide)
@@ -764,9 +765,9 @@ theorem familyTag_step_reject_empty_nonempty (rest inputRest : List Bool)
         (coreCfg .familyTag input code wires counter output) =
       some (coreCfg .done input code wires counter (output.write Γ.zero)) := by
   have hcodeRead : code.read = Γ.zero := by
-    simpa [Γ.ofBool] using hcode.read_of_lt (by simp)
+    exact hcode.read_of_lt (by simp)
   have hwiresRead : wires.read = Γ.ofBool bit := by
-    simpa using hwires.read_of_lt (by simp)
+    exact hwires.read_of_lt (by simp)
   apply coreCfg_step_reject .familyTag input code wires counter output
     (by decide)
   · cases bit <;> simp [coreAction, hcodeRead, hwiresRead, Γ.ofBool]
@@ -795,7 +796,7 @@ theorem familyTag_step_reject_missing (inputBits : List Bool)
         simp [coreAction, hcodeRead, hwiresRead]
     | cons bit rest =>
         have hwiresRead : wires.read = Γ.ofBool bit := by
-          simpa using hwires.read_of_lt (by simp)
+          exact hwires.read_of_lt (by simp)
         cases bit <;> simp [coreAction, hcodeRead, hwiresRead, Γ.ofBool]
   · exact hinput
   · exact hcode.read_ne_start
@@ -816,7 +817,7 @@ theorem emptyAnswer_step (answer : Bool) (rest : List Bool)
       some (coreCfg (.emptyEnd answer) input (code.move Dir3.right)
         wires counter output) := by
   have hcodeRead : code.read = Γ.ofBool answer := by
-    simpa using hcode.read_of_lt (by simp)
+    exact hcode.read_of_lt (by simp)
   have hcodeMove :
       code.writeAndMove (TM.readBackWrite (Γ.ofBool answer)) Dir3.right =
         code.move Dir3.right := by
@@ -852,7 +853,7 @@ theorem emptyEnd_step (answer : Bool)
   have hcodeRead : code.read = Γ.blank := hcode.read_frontier
   rw [coreCfg_step (.emptyEnd answer) input code wires counter output
     (by cases answer <;> decide)]
-  simp only [coreAction, coreHeads_codeIdx, hcodeRead, if_true,
+  simp only [coreAction, coreHeads_codeIdx, hcodeRead, ite_true,
     CoreAction.finish,
     coreHeads_wiresIdx, coreHeads_counterIdx, CoreAction.preserve,
     TapeAction.preserve, TapeAction.writeStay, Γw.ofBool_toΓ]

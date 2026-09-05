@@ -72,8 +72,8 @@ theorem branchTM_step (tm : NTM k) (b : Bool) {c : Cfg k tm.Q} (h : c.state ≠ 
 /-- A halted configuration has no successor on either branch. -/
 theorem branchTM_step_of_halted (tm : NTM k) (b : Bool) {c : Cfg k tm.Q}
     (h : c.state = tm.qhalt) : (tm.branchTM b).step c = none := by
-  rw [TM.step]
-  exact if_pos (show c.state = (tm.branchTM b).qhalt from h)
+  simp only [TM.step]
+  exact ite_eq_left (show c.state = (tm.branchTM b).qhalt from h)
 
 end NTM
 

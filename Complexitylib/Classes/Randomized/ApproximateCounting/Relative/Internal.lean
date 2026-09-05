@@ -73,11 +73,12 @@ private theorem factorApproximationEvent_subset_successEvent
   intro seed hseed
   simp only [Weak.factorApproximationEvent, Finset.mem_filter,
     Finset.mem_univ, true_and] at hseed
-  unfold successEvent
-  apply Finset.mem_filter.mpr
-  refine ⟨Finset.mem_univ _, ?_⟩
-  exact boostedEstimate_cartesianPower_isRelativeApproximation
-    set hprecision hseed
+  have hgood : IsRelativeApproximation precision set.card
+      (hashingEstimate precision failureBits set seed) :=
+    boostedEstimate_cartesianPower_isRelativeApproximation set hprecision hseed
+  exact (Finset.mem_filter_univ (p := fun seed =>
+    IsRelativeApproximation precision set.card
+      (hashingEstimate precision failureBits set seed)) seed).mpr hgood
 
 private theorem add_four_le_two_pow_add_two (n : ℕ) :
     n + 4 ≤ 2 ^ (n + 2) := by

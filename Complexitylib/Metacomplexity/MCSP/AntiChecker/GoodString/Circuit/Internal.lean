@@ -151,7 +151,7 @@ theorem everySurvivorTupleCaught_of_circuitHardness_internal
       (MCSP.Instance.ofFunction arity hardnessThreshold target).arity ≠ 0 := by
     simpa [MCSP.Instance.ofFunction] using NeZero.ne arity
   unfold MCSP.Instance.HasCircuitAtMost
-  rw [dif_neg harity]
+  rw [dite_eq_right harity]
   refine ⟨internalGates, circuit, hsize.trans hfits, ?_⟩
   unfold Circuit.Computes
   rw [MCSP.Instance.function_ofFunction_internal]

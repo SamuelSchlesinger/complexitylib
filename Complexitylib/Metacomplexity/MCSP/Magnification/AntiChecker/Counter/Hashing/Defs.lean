@@ -29,7 +29,7 @@ namespace AntiCheckerLemma
 
 /-- Width of the packed labeled-sample input for the counter extending a
 prefix of length `prefixLength`. -/
-def counterInputWidth (arity prefixLength : ℕ) : ℕ :=
+@[reducible] def counterInputWidth (arity prefixLength : ℕ) : ℕ :=
   (prefixLength + 1) * (arity + 1)
 
 instance (arity prefixLength : ℕ) :

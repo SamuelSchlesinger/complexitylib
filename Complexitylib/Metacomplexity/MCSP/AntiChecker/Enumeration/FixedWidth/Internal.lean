@@ -161,7 +161,8 @@ theorem card_validDescription_eq_candidateCodes_internal
       Fintype.card_congr
         (candidateCodeFixedWidthEquivInternal arity threshold).symm
     _ = (candidateCodes arity threshold).card := by
-      simp [CandidateCode]
+      simp only [CandidateCode]
+      exact Fintype.card_coe _
 
 theorem fixedWidth_codeWidth_le_codeLengthBound_internal
     (arity threshold : Nat) :

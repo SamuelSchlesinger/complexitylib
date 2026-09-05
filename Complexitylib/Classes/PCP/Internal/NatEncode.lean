@@ -171,11 +171,11 @@ theorem natEncodeFn_mem_FP : natEncodeFn ∈ FP := by
   have hw : (fun z : List Bool =>
       List.replicate (pairFst z).length true) ∈ FP := by
     have := mem_FP_comp Cobham.fstBlock_mem_FP unaryLength_mem_FP
-    simpa using this
+    exact this
   have hv : (fun z : List Bool =>
       List.replicate (pairSnd z).length true) ∈ FP := by
     have := mem_FP_comp Cobham.sndBlock_mem_FP unaryLength_mem_FP
-    simpa using this
+    exact this
   have hcoin := coinStr_mem_FP hw hv
   have h1 : (fun z => pair [] (coinStr (pairFst z).length
       (pairSnd z).length)) ∈ FP :=
@@ -184,9 +184,9 @@ theorem natEncodeFn_mem_FP : natEncodeFn ∈ FP := by
   have h3 : (fun z => pair [] (stripFn (pair []
       (coinStr (pairFst z).length (pairSnd z).length)))) ∈ FP := by
     refine Cobham.pairFn_mem_FP (constFn_mem_FP []) ?_
-    simpa using h2
+    exact h2
   have := mem_FP_comp h3 encodeListFn_mem_FP
-  simpa using this
+  exact this
 
 /-- **It really is the number's encoding**, whenever the width holds the
 value. -/

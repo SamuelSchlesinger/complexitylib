@@ -39,7 +39,7 @@ theorem selectedLevel_mem_trueLevels_internal {domainWidth : ℕ}
     {responses : Level domainWidth → Bool}
     (hnonempty : (trueLevels responses).Nonempty) :
     selectedLevel responses ∈ trueLevels responses := by
-  simp only [selectedLevel, dif_pos hnonempty]
+  simp only [selectedLevel, dite_eq_left hnonempty]
   exact Finset.max'_mem _ _
 
 theorem le_selectedLevel_of_mem_internal {domainWidth : ℕ}
@@ -47,7 +47,7 @@ theorem le_selectedLevel_of_mem_internal {domainWidth : ℕ}
     (hlevel : level ∈ trueLevels responses) :
     level ≤ selectedLevel responses := by
   have hnonempty : (trueLevels responses).Nonempty := ⟨level, hlevel⟩
-  simp only [selectedLevel, dif_pos hnonempty]
+  simp only [selectedLevel, dite_eq_left hnonempty]
   exact Finset.le_max' _ _ hlevel
 
 theorem response_selectedLevel_eq_true_of_nonempty_internal {domainWidth : ℕ}
@@ -146,7 +146,7 @@ theorem cardinality_le_sixteen_mul_estimate_internal
         le_selectedLevel_of_mem_internal hlevelMem
       have hpowLe : 2 ^ logarithm ≤ 2 ^ (selectedLevel responses).val := by
         apply Nat.pow_le_pow_right (by omega)
-        simpa [level] using hlevelLe
+        exact Fin.le_def.mp hlevelLe
       have hquotientLt : cardinality / 8 < 2 ^ logarithm.succ := by
         simpa [logarithm] using
           Nat.lt_pow_succ_log_self (by omega) (cardinality / 8)

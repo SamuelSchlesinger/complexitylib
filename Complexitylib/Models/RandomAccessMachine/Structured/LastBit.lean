@@ -41,8 +41,9 @@ theorem program_performance (target : Bool) (bits : List Bool) :
       cost ≤ timeBound target bits.length ∧
       space ≤ spaceBound target bits.length ∧
       final verdictReg = Input.bitValue (decide (bits.getLast? = some target)) := by
-  simpa [spec, lastBit_fold_eq_getLast?] using
-    Scanner.typed_program_performance (spec target) bits
+  have h := Scanner.typed_program_performance (spec target) bits
+  simp only [spec, lastBit_fold_eq_getLast?] at h ⊢
+  exact h
 
 /-- End-to-end compiled performance and language correctness. -/
 theorem compiled_performance (target : Bool) (bits : List Bool) :
@@ -68,7 +69,8 @@ theorem compiled_performance (target : Bool) (bits : List Bool) :
   rw [show (run (compiled target) (stepCount target bits.length)
       { pc := 0, regs := inputStore target bits }).regs verdictReg =
         Input.bitValue (decide (bits.getLast? = some target)) by
-      simpa [spec, lastBit_fold_eq_getLast?] using hresult]
+      simp only [spec, lastBit_fold_eq_getLast?] at hresult ⊢
+      exact hresult]
   simp [Input.bitValue]
 
 /-- The explicit time budget is quasilinear. -/

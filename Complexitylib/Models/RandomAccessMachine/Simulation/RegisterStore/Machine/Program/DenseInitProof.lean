@@ -52,10 +52,10 @@ private theorem denseInitialLengthLoopTM_body_step
   have hne : c.state ≠ (initialZeroBitTM tapes).qhalt :=
     TM.state_ne_qhalt_of_step hstep
   rw [TM.step,
-    if_neg (by simp [denseInitialLengthWrap, denseInitialLengthLoopTM])]
+    ite_eq_right (by simp [denseInitialLengthWrap, denseInitialLengthLoopTM])]
   simp only [denseInitialLengthWrap, denseInitialLengthLoopTM, hne,
     ↓reduceIte]
-  rw [TM.step, if_neg hne] at hstep
+  rw [TM.step, ite_eq_right hne] at hstep
   revert hstep
   generalize (initialZeroBitTM tapes).δ c.state c.input.read
     (fun i => (c.work i).read) c.output.read = action
@@ -87,7 +87,7 @@ private theorem denseInitialLengthLoopTM_step_scan_data
         work := c.work
         output := c.output } := by
   rw [TM.step,
-    if_neg (by rw [hstate]; simp [denseInitialLengthLoopTM])]
+    ite_eq_right (by rw [hstate]; simp [denseInitialLengthLoopTM])]
   simp only [denseInitialLengthLoopTM, hstate, hblank, TM.allReadBack,
     ↓reduceIte]
   refine congrArg some ((Complexity.Cfg.mk.injEq ..).mpr
@@ -95,9 +95,9 @@ private theorem denseInitialLengthLoopTM_step_scan_data
   · simp [TM.idleDir, hstart, Tape.move]
   · funext i
     rw [TM.writeAndMove_readBack _ (hwork i), TM.idleDir,
-      if_neg (hwork i)]
+      ite_eq_right (hwork i)]
     rfl
-  · rw [TM.writeAndMove_readBack _ houtput, TM.idleDir, if_neg houtput]
+  · rw [TM.writeAndMove_readBack _ houtput, TM.idleDir, ite_eq_right houtput]
     rfl
 
 private theorem denseInitialLengthLoopTM_step_scan_blank
@@ -112,7 +112,7 @@ private theorem denseInitialLengthLoopTM_step_scan_blank
         work := c.work
         output := c.output } := by
   rw [TM.step,
-    if_neg (by rw [hstate]; simp [denseInitialLengthLoopTM])]
+    ite_eq_right (by rw [hstate]; simp [denseInitialLengthLoopTM])]
   simp only [denseInitialLengthLoopTM, hstate, hblank, TM.allReadBack,
     ↓reduceIte]
   refine congrArg some ((Complexity.Cfg.mk.injEq ..).mpr
@@ -120,9 +120,9 @@ private theorem denseInitialLengthLoopTM_step_scan_blank
   · simp [TM.idleDir, Tape.move]
   · funext i
     rw [TM.writeAndMove_readBack _ (hwork i), TM.idleDir,
-      if_neg (hwork i)]
+      ite_eq_right (hwork i)]
     rfl
-  · rw [TM.writeAndMove_readBack _ houtput, TM.idleDir, if_neg houtput]
+  · rw [TM.writeAndMove_readBack _ houtput, TM.idleDir, ite_eq_right houtput]
     rfl
 
 private theorem denseInitialLengthLoopTM_step_body_halt
@@ -138,16 +138,16 @@ private theorem denseInitialLengthLoopTM_step_body_halt
         work := c.work
         output := c.output } := by
   rw [TM.step,
-    if_neg (by simp [denseInitialLengthWrap, denseInitialLengthLoopTM])]
+    ite_eq_right (by simp [denseInitialLengthWrap, denseInitialLengthLoopTM])]
   simp only [denseInitialLengthWrap, denseInitialLengthLoopTM, hhalt,
     ↓reduceIte]
   refine congrArg some ((Complexity.Cfg.mk.injEq ..).mpr
     ⟨rfl, rfl, ?_, ?_⟩)
   · funext i
     rw [TM.writeAndMove_readBack _ (hwork i), TM.idleDir,
-      if_neg (hwork i)]
+      ite_eq_right (hwork i)]
     rfl
-  · rw [TM.writeAndMove_readBack _ houtput, TM.idleDir, if_neg houtput]
+  · rw [TM.writeAndMove_readBack _ houtput, TM.idleDir, ite_eq_right houtput]
     rfl
 
 theorem denseInitialLengthLoopTM_hoareTime_internal
@@ -423,7 +423,8 @@ theorem denseProgramInitTM_hoareTime_internal
         habiWork
       rw [hworkEq]
       exact ⟨hiParked.read_ne_start, hiParked.1⟩
-    · simpa [denseProgramSnapshotWork, sparseInitial] using habiWork
+    · simp [denseProgramSnapshotWork]
+      exact habiWork
     · exact habiOutput.trans hemitOutputBlank
   obtain ⟨rewindDone, rewindTime, hrewindTime, hrewindReach,
       hrewindHalt, hrewindHead, hrewindCells, hrewindWork,
@@ -476,8 +477,8 @@ theorem denseProgramInitTM_hoareTime_internal
           work := fun i => TM.transitionTape (emitDone.work i)
           output := TM.transitionTape emitDone.output }
         abiRewindDone := by
-    simpa only [hemitInputTransition, hemitWorkTransition,
-      hemitOutputTransition] using habiRewindReach
+    simp only [hemitInputTransition, hemitWorkTransition, hemitOutputTransition]
+    exact habiRewindReach
   have emitTailReach := TM.seqTM_reachesIn_of_reachesIn
     (initialLengthEmitTM tapes)
     (TM.seqTM (initialAbiInstallTM tapes) TM.rewindInputTM)
@@ -489,7 +490,7 @@ theorem denseProgramInitTM_hoareTime_internal
       (TM.seqTM (initialLengthEmitTM tapes)
         (TM.seqTM (initialAbiInstallTM tapes) TM.rewindInputTM)).halted
         emitTailDone := by
-    rw [TM.phase2Wrap_halted_iff]
+    erw [TM.phase2Wrap_halted_iff]
     exact habiRewindHalt
   obtain ⟨hloopInputTransition, hloopWorkTransition,
       hloopOutputTransition⟩ :=
@@ -509,8 +510,8 @@ theorem denseProgramInitTM_hoareTime_internal
           work := fun i => TM.transitionTape (loopDone.work i)
           output := TM.transitionTape loopDone.output }
         emitTailDone := by
-    simpa only [hloopInputTransition, hloopWorkTransition,
-      hloopOutputTransition] using emitTailReach
+    simp only [hloopInputTransition, hloopWorkTransition, hloopOutputTransition]
+    exact emitTailReach
   have loopTailReach := TM.seqTM_reachesIn_of_reachesIn
     (denseInitialLengthLoopTM tapes)
     (TM.seqTM (initialLengthEmitTM tapes)
@@ -525,7 +526,7 @@ theorem denseProgramInitTM_hoareTime_internal
         (TM.seqTM (initialLengthEmitTM tapes)
           (TM.seqTM (initialAbiInstallTM tapes) TM.rewindInputTM))).halted
         loopTailDone := by
-    rw [TM.phase2Wrap_halted_iff]
+    erw [TM.phase2Wrap_halted_iff]
     exact emitTailHalt
   obtain ⟨hsetupInputTransition, hsetupWorkTransition,
       hsetupOutputTransition⟩ :=
@@ -548,8 +549,8 @@ theorem denseProgramInitTM_hoareTime_internal
           work := fun i => TM.transitionTape (setupDone.work i)
           output := TM.transitionTape setupDone.output }
         loopTailDone := by
-    simpa only [hsetupInputTransition, hsetupWorkTransition,
-      hsetupOutputTransition] using loopTailReach
+    simp only [hsetupInputTransition, hsetupWorkTransition, hsetupOutputTransition]
+    exact loopTailReach
   have hreach := TM.seqTM_reachesIn_of_reachesIn
     (initialSetupTM tapes)
     (TM.seqTM (denseInitialLengthLoopTM tapes)
@@ -567,9 +568,8 @@ theorem denseProgramInitTM_hoareTime_internal
     ?_, hreach, ?_, ?_⟩
   · unfold denseProgramInitTime
     omega
-  · change (denseProgramInitTM tapes).halted finalCfg
-    unfold denseProgramInitTM
-    rw [TM.phase2Wrap_halted_iff]
+  · unfold denseProgramInitTM
+    erw [TM.phase2Wrap_halted_iff]
     exact loopTailHalt
   · refine ⟨?_, hrewindWork, hrewindOutput⟩
     change rewindDone.input =

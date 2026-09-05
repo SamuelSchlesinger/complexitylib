@@ -31,7 +31,7 @@ namespace Magnification
 namespace AntiCheckerLemma
 
 /-- Width of the powered survivor tuple quantified by one occupancy query. -/
-def counterSurvivorPowerWidth (beta : PositiveRationalScale) (arity : ℕ) : ℕ :=
+@[reducible] def counterSurvivorPowerWidth (beta : PositiveRationalScale) (arity : ℕ) : ℕ :=
   survivorPowerWidth arity (smallThreshold beta arity) (roundPrecision arity)
 
 /-- Width of the public labeled-sample and affine-seed prefix for one hash-cell

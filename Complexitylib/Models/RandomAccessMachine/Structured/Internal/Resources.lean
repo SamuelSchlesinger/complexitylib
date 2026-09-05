@@ -73,9 +73,9 @@ theorem Input.bitStoreEnvelope {lengthReg inputBase indexBound valueBound : ℕ}
   · intro index
     by_cases hlengthRegEq : index = lengthReg
     · simpa [Input.bitStore, hlengthRegEq] using hlength
-    · rw [Input.bitStore, if_neg hlengthRegEq]
+    · rw [Input.bitStore, ite_eq_right hlengthRegEq]
       by_cases hbase : inputBase ≤ index
-      · rw [if_pos hbase]
+      · rw [ite_eq_left hbase]
         cases hlookup : bits[index - inputBase]? with
         | none => simp
         | some bit =>
@@ -319,15 +319,16 @@ theorem exec_basics_exists (ops : List Basic) (initial : Store) :
       | nil =>
           exact ⟨op.logCost initial,
             max initial.space (op.exec initial).space, by
-              simpa [Cmd.basics, Basic.execList] using Exec.basic op initial⟩
+              simpa [Cmd.basics, Basic.execList, Cmd.seqList] using Exec.basic op initial⟩
       | cons next tail =>
           obtain ⟨cost, space, hrest⟩ := ih (initial := op.exec initial)
           refine ⟨op.logCost initial + cost,
             max (max initial.space (op.exec initial).space) space, ?_⟩
           have hrun := Exec.seq (Exec.basic op initial) hrest
           convert hrun using 1
-          all_goals simp
-          all_goals omega
+          · rfl
+          · rfl
+          · simp only [List.length_cons]; omega
 
 namespace MeasuredRuns
 
@@ -369,14 +370,14 @@ theorem basicsEnvelope {indexBound valueBound : ℕ} (ops : List Basic)
     StoreEnvelope indexBound valueBound (Basic.execList ops initial) := by
   induction ops generalizing initial with
   | nil =>
-      exact ⟨by simpa [Cmd.basics, Basic.execList] using skipEnvelope hinitial,
+      exact ⟨by simpa [Cmd.basics, Basic.execList, Cmd.seqList] using skipEnvelope hinitial,
         hinitial⟩
   | cons op rest ih =>
       have hnext := hpreserve op (by simp) initial hinitial
       have hfirst := basicEnvelope op initial hinitial hnext
       cases rest with
       | nil =>
-          exact ⟨by simpa [Cmd.basics, Basic.execList] using hfirst, hnext⟩
+          exact ⟨by simpa [Cmd.basics, Basic.execList, Cmd.seqList] using hfirst, hnext⟩
       | cons next tail =>
           obtain ⟨hrest, hfinal⟩ := ih (initial := op.exec initial) hnext (by
             intro candidate hcandidate store hstore
@@ -401,7 +402,7 @@ theorem basicsEnvelopeChain {indexBound valueBound : ℕ} (ops : List Basic)
     StoreEnvelope indexBound valueBound (Basic.execList ops initial) := by
   induction ops generalizing initial with
   | nil =>
-      exact ⟨by simpa [Cmd.basics, Basic.execList] using skipEnvelope hchain,
+      exact ⟨by simpa [Cmd.basics, Basic.execList, Cmd.seqList] using skipEnvelope hchain,
         hchain⟩
   | cons op rest ih =>
       have hinitial := hchain.1
@@ -413,7 +414,7 @@ theorem basicsEnvelopeChain {indexBound valueBound : ℕ} (ops : List Basic)
       have hfirst := basicEnvelope op initial hinitial hnext
       cases rest with
       | nil =>
-          exact ⟨by simpa [Cmd.basics, Basic.execList] using hfirst, hnext⟩
+          exact ⟨by simpa [Cmd.basics, Basic.execList, Cmd.seqList] using hfirst, hnext⟩
       | cons next tail =>
           obtain ⟨hrest, hfinal⟩ :=
             ih (initial := op.exec initial) htail

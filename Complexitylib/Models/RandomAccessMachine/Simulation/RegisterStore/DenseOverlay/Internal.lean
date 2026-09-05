@@ -54,7 +54,7 @@ theorem write_coversZero_internal (overlay : Store)
   by_cases haddress : address = 0
   · subst address
     simp
-  · simpa [Function.update, haddress, Ne.symm haddress] using hcovers
+  · simpa [CoversZero, Function.update, haddress, Ne.symm haddress] using hcovers
 
 theorem Snapshot.initial_decode_internal (input : List Bool) :
     (Snapshot.initial input).decode input = RAM.initCfg input := by
@@ -185,8 +185,8 @@ theorem Snapshot.decode_run_internal (program : Program) (input : List Bool)
         unfold Snapshot.Halted RAM.Halted Snapshot.curInstr RAM.curInstr
         rfl
       by_cases hhalt : snapshot.Halted program
-      · rw [if_pos hhalt, if_pos (hhalted.mp hhalt)]
-      · rw [if_neg hhalt, if_neg (fun h => hhalt (hhalted.mpr h))]
+      · rw [ite_eq_left hhalt, ite_eq_left (hhalted.mp hhalt)]
+      · rw [ite_eq_right hhalt, ite_eq_right (fun h => hhalt (hhalted.mpr h))]
         rw [ih (snapshot.step program input)
           (Snapshot.step_canonical_internal program input snapshot hcanonical)]
         rw [Snapshot.decode_step_internal program input snapshot hcanonical]
@@ -237,7 +237,7 @@ theorem write_length_le_internal (overlay : Store) (address value : ℕ) :
       · have ih' : (RegisterStore.write rest address (value + 1)).length ≤
             rest.length + 1 := by
           simpa only [write] using ih
-        simp only [write, RegisterStore.write, haddress, if_false,
+        simp only [write, RegisterStore.write, haddress, ite_false,
           List.length_cons]
         omega
 
@@ -277,9 +277,9 @@ theorem Snapshot.length_run_le_internal (program : Program)
       have hhalted : snapshot.Halted program ↔
           RAM.Halted program (snapshot.decode input) := Iff.rfl
       by_cases hhalt : snapshot.Halted program
-      · rw [if_pos hhalt, if_pos (hhalted.mp hhalt)]
+      · rw [ite_eq_left hhalt, ite_eq_left (hhalted.mp hhalt)]
         omega
-      · rw [if_neg hhalt, if_neg (fun h => hhalt (hhalted.mpr h))]
+      · rw [ite_eq_right hhalt, ite_eq_right (fun h => hhalt (hhalted.mpr h))]
         have hstep := Snapshot.length_stepInstr_le_internal input
           (snapshot.curInstr program) snapshot
         have hstep' : (snapshot.step program input).overlay.length ≤
@@ -422,14 +422,14 @@ theorem Snapshot.encodedStoreLength_run_le_internal (program : Program)
           RAM.Halted program (snapshot.decode input) := Iff.rfl
       by_cases hhalt : snapshot.Halted program
       · have hramHalted := hhalted.mp hhalt
-        simp only [hhalt, hramHalted, if_true, RAM.unitTimeUpto,
+        simp only [hhalt, hramHalted, ite_true, RAM.unitTimeUpto,
           RAM.logTimeUpto]
         simp
       · have hramNotHalted : ¬RAM.Halted program (snapshot.decode input) :=
           fun h => hhalt (hhalted.mpr h)
-        rw [if_neg hhalt]
+        rw [ite_eq_right hhalt]
         simp only [RAM.unitTimeUpto, RAM.logTimeUpto, hramNotHalted,
-          if_false]
+          ite_false]
         have hstep := Snapshot.encodedStoreLength_step_le_internal
           program input snapshot
         have hnextCanonical := Snapshot.step_canonical_internal

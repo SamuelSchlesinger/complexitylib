@@ -59,7 +59,8 @@ theorem index_lt_two_pow_internal (permutation : Equiv.Perm (Fin 5)) :
   have hindex : index permutation < table.length :=
     List.idxOf_lt_length_of_mem (mem_table_internal permutation)
   rw [table_length_internal] at hindex
-  simpa only [bitWidth] using (show index permutation < 128 by omega)
+  rw [show (2 : ℕ) ^ bitWidth = 128 from rfl]
+  omega
 
 /-- Internal exact length of a permutation field. -/
 theorem length_encode_internal (permutation : Equiv.Perm (Fin 5)) :

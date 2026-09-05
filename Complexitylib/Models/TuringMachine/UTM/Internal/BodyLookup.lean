@@ -186,8 +186,8 @@ private theorem parseEntry_eq (w : ℕ) (seg : List Γw) :
       else none := by
   rw [parseEntry]
   by_cases hlen : (seg.filterMap symBit?).length < 2 * w + 16
-  · rw [if_pos hlen, if_neg (by omega)]
-  · rw [if_neg hlen, if_pos (by omega)]
+  · rw [ite_eq_left hlen, ite_eq_right (by omega)]
+  · rw [ite_eq_right hlen, ite_eq_left (by omega)]
     dsimp only
     rw [drop_add _ (rfl : w + 2 = w + 2),
         drop_add _ (by omega : w + 2 + 2 = w + 4),
@@ -219,7 +219,7 @@ theorem machMatch_iff_parse {w q : ℕ} (hq : q < 2 ^ w) (f : VFlags)
   rw [MachMatch, parseEntry_eq]
   constructor
   · rintro ⟨h1, h2, h3⟩
-    rw [if_pos (by omega)]
+    rw [ite_eq_left (by omega)]
     have hkey : ((seg.filterMap symBit?).drop w).take 6
         = (simRead f.1 v0).encode ++ (simRead f.2.1 v1).encode ++
           (simRead f.2.2 v2).encode := by
@@ -263,7 +263,7 @@ theorem machMatch_iff_parse {w q : ℕ} (hq : q < 2 ^ w) (f : VFlags)
       rw [this, decΓ_encode]
   · rintro ⟨e, hpe, hq', hsi, hsw, hso⟩
     by_cases hc : 2 * w + 16 ≤ (seg.filterMap symBit?).length
-    · rw [if_pos hc] at hpe
+    · rw [ite_eq_left hc] at hpe
       injection hpe with hpe
       subst hpe
       dsimp only at hq' hsi hsw hso
@@ -295,7 +295,7 @@ theorem machMatch_iff_parse {w q : ℕ} (hq : q < 2 ^ w) (f : VFlags)
               drop_add _ (by omega : w + 2 + 2 = w + 4), hso']
         rw [← hseg, ← bitsToSyms_drop, ← bitsToSyms_take, hkey, keyCells,
             List.append_assoc]
-    · rw [if_neg hc] at hpe
+    · rw [ite_eq_right hc] at hpe
       exact absurd hpe (by simp)
 
 -- ════════════════════════════════════════════════════════════════════════
@@ -341,11 +341,11 @@ theorem machFind_matches (w : ℕ) (stSyms keyCs : List Γw) :
       simp [machFind] at h
     · rw [machFind_cons_of_ne_blank hs] at h
       by_cases hm : MachMatch w stSyms keyCs (takeField (s :: rest)).1
-      · rw [if_pos hm] at h
+      · rw [ite_eq_left hm] at h
         injection h with h
         subst h
         exact ⟨hm, takeField_fst_ne_blank _⟩
-      · rw [if_neg hm] at h
+      · rw [ite_eq_right hm] at h
         exact machFind_matches w stSyms keyCs (takeField (s :: rest)).2 seg h
   termination_by R => R.length
   decreasing_by
@@ -383,13 +383,13 @@ theorem find?_parseEntries_eq_machFind (w q : ℕ) (hq : q < 2 ^ w)
         takeField_fst_ne_blank _
       by_cases hm : MachMatch w (bitsToSyms (Nat.toBits w q))
         (keyCells f v0 v1 v2) (takeField (s :: rest)).1
-      · rw [if_pos hm]
+      · rw [ite_eq_left hm]
         obtain ⟨e, hpe, hq', hsi, hsw, hso⟩ :=
           (machMatch_iff_parse hq f v0 v1 v2 hnb).mp hm
         simp only [hpe, Option.bind_some]
         exact List.find?_cons_of_pos
           (by simp [keyMatch, hq', hsi, hsw, hso])
-      · rw [if_neg hm]
+      · rw [ite_eq_right hm]
         cases hpe : parseEntry w (takeField (s :: rest)).1 with
         | none =>
           exact find?_parseEntries_eq_machFind w q hq f v0 v1 v2
@@ -508,9 +508,9 @@ theorem value_slices {w : ℕ} {seg : List Γw} {e : DescEntry}
   rw [parseEntry_eq] at hp
   by_cases hc : 2 * w + 16 ≤ (seg.filterMap symBit?).length
   swap
-  · rw [if_neg hc] at hp
+  · rw [ite_eq_right hc] at hp
     exact absurd hp (by simp)
-  rw [if_pos hc] at hp
+  rw [ite_eq_left hc] at hp
   injection hp with hp
   subst hp
   have hgrp : ∀ i j : ℕ, i + 1 = j → j < (seg.filterMap symBit?).length →

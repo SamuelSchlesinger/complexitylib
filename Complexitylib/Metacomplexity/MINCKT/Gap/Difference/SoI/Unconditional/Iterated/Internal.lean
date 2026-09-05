@@ -188,17 +188,14 @@ theorem IsRegularClock.compatible_internal
     rfl
   · exact hpair
   · intro inst
-    simpa [Plan.accountingSchedule, Plan.conditionInput,
-      GapMINKT.Logarithmic.Parameters.logarithmicSlack,
-      GapMINKT.Logarithmic.Parameters.transformedTime, ordinaryParameters,
-      plan] using hloss.upper inst
+    simp [Plan.conditionInput, GapMINKT.Logarithmic.Parameters.logarithmicSlack,
+      GapMINKT.Logarithmic.Parameters.transformedTime, ordinaryParameters, plan]
+    exact hloss.upper inst
   · intro inst
-    simpa [Plan.accountingSchedule, Plan.pairInput,
-      GapMINKT.Logarithmic.Parameters.logarithmicSlack,
-      GapMINKT.Logarithmic.Parameters.transformedTime,
-      GapMINCKT.Parameters.logarithmicSlack,
-      GapMINCKT.Parameters.transformedTime, ordinaryParameters,
-      conditionalParameters, plan] using hloss.lower inst
+    simp [Plan.pairInput, GapMINKT.Logarithmic.Parameters.logarithmicSlack,
+      GapMINKT.Logarithmic.Parameters.transformedTime, GapMINCKT.Parameters.logarithmicSlack,
+      GapMINCKT.Parameters.transformedTime, ordinaryParameters, conditionalParameters, plan]
+    exact hloss.lower inst
 
 theorem IsRegularClock.compatible_of_pairComposition_internal
     {ordinaryTapes conditionalTapes : ℕ}

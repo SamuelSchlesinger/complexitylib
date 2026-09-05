@@ -109,8 +109,8 @@ def product (D : FiniteEnsemble α) (E : FiniteEnsemble β) :
     letI := E.seedDecidableEq n
     infer_instance
   seedNonempty n := by
-    letI := D.seedNonempty n
-    letI := E.seedNonempty n
+    have := D.seedNonempty n
+    have := E.seedNonempty n
     infer_instance
   sample n seed := (D.sample n seed.1, E.sample n seed.2)
 

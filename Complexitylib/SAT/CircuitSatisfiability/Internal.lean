@@ -62,14 +62,12 @@ private theorem validPairEncoding_mem_P : validPairEncoding ∈ P := by
 
 private theorem verifierRepack_mem_FP : verifierRepack ∈ FP := by
   have hcode : (fun input => pairFst (pairFst input)) ∈ FP := by
-    simpa only [Function.comp_apply] using
-      mem_FP_comp pairFst_mem_FP pairFst_mem_FP
+    exact mem_FP_comp pairFst_mem_FP pairFst_mem_FP
   exact mem_FP_pair hcode pairSnd_mem_FP
 
 private theorem verifierLengthFlag_mem_FP : verifierLengthFlag ∈ FP := by
   have hleft : (fun input => pairSnd (pairFst input)) ∈ FP := by
-    simpa only [Function.comp_apply] using
-      mem_FP_comp pairFst_mem_FP pairSnd_mem_FP
+    exact mem_FP_comp pairFst_mem_FP pairSnd_mem_FP
   have hright : (fun input => pairSnd input) ∈ FP := pairSnd_mem_FP
   have hleftCobham :
       Cobham (fun v : Fin 1 → List Bool => pairSnd (pairFst (v 0))) := by
@@ -83,7 +81,7 @@ private theorem verifierLengthFlag_mem_FP : verifierLengthFlag ∈ FP := by
 private theorem verifierLengthLanguage_mem_P : verifierLengthLanguage ∈ P := by
   apply mem_P_of_decisionFn verifierLengthFlag_mem_FP
   intro input
-  simp only [verifierLengthLanguage, Set.mem_setOf_eq, verifierLengthFlag]
+  simp only [verifierLengthLanguage, Set.mem_ofPred_eq, verifierLengthFlag]
   constructor
   · intro h
     refine ⟨true, ?_, rfl⟩
@@ -171,15 +169,12 @@ private def extensionVerifierLengthLanguage : Language :=
 private theorem extensionVerifierRepack_mem_FP : extensionVerifierRepack ∈ FP := by
   have hquery : (fun input => pairFst input) ∈ FP := pairFst_mem_FP
   have hcode : (fun input => pairFst (pairFst input)) ∈ FP := by
-    simpa only [Function.comp_apply] using
-      mem_FP_comp hquery pairFst_mem_FP
+    exact mem_FP_comp hquery pairFst_mem_FP
   have hpayload : (fun input => pairSnd (pairFst input)) ∈ FP := by
-    simpa only [Function.comp_apply] using
-      mem_FP_comp hquery pairSnd_mem_FP
+    exact mem_FP_comp hquery pairSnd_mem_FP
   have hprefix :
       (fun input => pairFst (pairSnd (pairFst input))) ∈ FP := by
-    simpa only [Function.comp_apply] using
-      mem_FP_comp hpayload pairFst_mem_FP
+    exact mem_FP_comp hpayload pairFst_mem_FP
   have hwitness : (fun input => pairSnd input) ∈ FP := pairSnd_mem_FP
   have hprefixCobham :
       Cobham (fun v : Fin 1 → List Bool =>
@@ -198,12 +193,10 @@ private theorem extensionVerifierLengthFlag_mem_FP :
     extensionVerifierLengthFlag ∈ FP := by
   have hquery : (fun input => pairFst input) ∈ FP := pairFst_mem_FP
   have hpayload : (fun input => pairSnd (pairFst input)) ∈ FP := by
-    simpa only [Function.comp_apply] using
-      mem_FP_comp hquery pairSnd_mem_FP
+    exact mem_FP_comp hquery pairSnd_mem_FP
   have hruler :
       (fun input => pairSnd (pairSnd (pairFst input))) ∈ FP := by
-    simpa only [Function.comp_apply] using
-      mem_FP_comp hpayload pairSnd_mem_FP
+    exact mem_FP_comp hpayload pairSnd_mem_FP
   have hwitness : (fun input => pairSnd input) ∈ FP := pairSnd_mem_FP
   have hrulerCobham :
       Cobham (fun v : Fin 1 → List Bool =>
@@ -219,7 +212,7 @@ private theorem extensionVerifierLengthLanguage_mem_P :
     extensionVerifierLengthLanguage ∈ P := by
   apply mem_P_of_decisionFn extensionVerifierLengthFlag_mem_FP
   intro input
-  simp only [extensionVerifierLengthLanguage, Set.mem_setOf_eq,
+  simp only [extensionVerifierLengthLanguage, Set.mem_ofPred_eq,
     extensionVerifierLengthFlag]
   constructor
   · intro h

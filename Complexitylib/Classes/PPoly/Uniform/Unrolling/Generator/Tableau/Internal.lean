@@ -1488,7 +1488,7 @@ theorem positiveTableauBody_requires_internal (tm : TM k)
           afterInit Work.horizon *
             directStepSize tm.toNTM (afterInit Work.horizon) := by
     simpa only [afterSteps] using hstepsRaw
-  haveI : NeZero n := ⟨Nat.ne_of_gt hn⟩
+  have : NeZero n := ⟨Nat.ne_of_gt hn⟩
   have hrawBound := tm.directUnrollingRawCircuit_length_le_gateBound f n
   rw [directUnrollingRawCircuit_length_eq_original] at hrawBound
   have hfinalBound : afterSteps Work.available + 1 ≤

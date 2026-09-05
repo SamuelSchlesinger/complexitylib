@@ -112,9 +112,9 @@ theorem candidateAcceptanceProbability_eq_hybrid_internal
   have htransport := uniformProbability_equiv (candidateEquiv step)
     (fun randomness => generator.hybridOutput step.val randomness ∈ test)
   rw [uniformProbability_finArrowBool] at htransport
-  simpa [NextBitPrediction.candidateAcceptanceProbability,
-    testAtCandidate, hybridAcceptanceProbability,
-    hybridAcceptedRandomness] using htransport
+  simp [NextBitPrediction.candidateAcceptanceProbability, testAtCandidate,
+    hybridAcceptanceProbability, hybridAcceptedRandomness]
+  exact htransport
 
 theorem targetAcceptanceProbability_eq_nextHybrid_internal
     {seedLength outputLength : ℕ}
@@ -139,8 +139,10 @@ theorem targetAcceptanceProbability_eq_nextHybrid_internal
         uniformProbability (Finset.univ.filter fun sample :
           CandidateBackground seedLength outputLength step × Bool =>
             P sample.1 ∧ True) := by
-    simpa only [and_true, Finset.filter_true, uniformProbability_univ,
-      mul_one] using hproduct.symm
+    have h := hproduct.symm
+    simp only [and_true, Finset.filter_true, uniformProbability_univ,
+      mul_one] at h ⊢
+    exact h
   rw [hduplicate]
   have htransport := uniformProbability_equiv (candidateEquiv step)
     (fun randomness =>

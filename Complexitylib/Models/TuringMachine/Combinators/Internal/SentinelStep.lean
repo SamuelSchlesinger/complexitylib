@@ -64,7 +64,7 @@ theorem step_of_heads_zero (M : TM k) (c : Cfg k M.Q)
     intro i; rw [Tape.read, hwork i]; exact hwork0 i
   have hro : c.output.read = Γ.start := by rw [Tape.read, hout]; exact hout0
   have hdirs := M.δ_right_of_start M.qstart Γ.start (fun _ => Γ.start) Γ.start
-  simp only [TM.step, hstate, if_neg hne, hri, hro, funext hrw]
+  simp only [TM.step, hstate, ite_eq_right hne, hri, hro, funext hrw]
   refine congrArg some (Cfg.ext rfl ?_ ?_ ?_)
   · show (c.input.move _) = _
     rw [hdirs.1 rfl]
@@ -124,7 +124,7 @@ theorem reachesIn_succ_of_startedTM (M : TM k) (c : Cfg k M.Q)
     M.reachesIn (t + 1) c c' := by
   have hq : (startedTM M).qstart = retargetInputStartState M := by
     show (if M.qstart = M.qhalt then M.qhalt else retargetInputStartState M) = _
-    rw [if_neg hne]
+    rw [ite_eq_right hne]
   have hstep : M.step c = some ⟨(startedTM M).qstart, c.input.move Dir3.right,
       fun i => (c.work i).move Dir3.right, c.output.move Dir3.right⟩ := by
     rw [hq]

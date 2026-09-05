@@ -121,7 +121,7 @@ private theorem finishControlInstructionTM_hoareTime_frame_internal
       intro slot
       fin_cases slot
       · exact ⟨hcontrolResult.ready.lookup.scanner.queryStart,
-          by simpa [instructionCleanupTape, instructionCleanupParentSlot] using
+          by simp [instructionCleanupTape, instructionCleanupParentSlot]; exact
             hcontrolResult.ready.lookup.scanner.query⟩
       · change (work tapes.lifted.data.update.replacement).HasBinaryNat 0
         rw [show work tapes.lifted.data.update.replacement =
@@ -130,10 +130,10 @@ private theorem finishControlInstructionTM_hoareTime_frame_internal
             (fun role =>
               (tapes.lifted.data.lhsLookup_ne_replacement role).symm)]
         exact hready.replacement
-      · simpa [instructionCleanupTape, instructionCleanupParentSlot] using
-          hcontrolResult.ready.lookup.copyScratch
-      · simpa [instructionCleanupTape, instructionCleanupParentSlot] using
-          hcontrolResult.ready.lookup.destination
+      · simp [instructionCleanupTape, instructionCleanupParentSlot]
+        exact hcontrolResult.ready.lookup.copyScratch
+      · simp [instructionCleanupTape, instructionCleanupParentSlot]
+        exact hcontrolResult.ready.lookup.destination
       · change (work tapes.lifted.data.rhs).HasBinaryNat 0
         rw [show work tapes.lifted.data.rhs = initialWork tapes.lifted.data.rhs
             from hcontrolResult.frame _ (tapes.lifted.data_ne_pc 14)
@@ -332,7 +332,8 @@ private theorem finishControlInstructionTM_hoareTime_frame_internal
       rw [hi, hw, ho]
       exact ⟨hinp, hcontrolResult, hout⟩)
     hcopy
-  simpa only [finishControlInstructionTM, bits, source, buffer] using hseq
+  simp only [finishControlInstructionTM]
+  exact hseq
 
 /-- Representation-independent form of the control-instruction finisher.
 Control instructions preserve the encoded store, leave zero on every cleanup

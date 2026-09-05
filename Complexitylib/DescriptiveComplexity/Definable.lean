@@ -91,7 +91,7 @@ theorem FODefinable.of_reduces {W : Vocabulary} {Q₁ : BooleanQuery V}
   obtain ⟨φ, hφ⟩ := hQ₂
   refine ⟨I.translate φ, fun A => ?_⟩
   rw [hI A, hφ (I.apply A)]
-  simpa only [Sentence.Models] using I.translate_sat A (emptyEnv A.card) φ
+  exact I.translate_sat A (emptyEnv A.card) φ
 
 /-- FO-definability is closed under first-order projections. -/
 theorem FODefinable.of_projReduces {W : Vocabulary} {Q₁ : BooleanQuery V}

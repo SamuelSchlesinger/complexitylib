@@ -67,8 +67,8 @@ theorem compositionTM_computesInTime_internal
     omega
   · have hreach := seqTM_reachesIn_of_reachesIn first tail
       hreachF hhaltF hreachTail
-    simpa [compositionTM, first, tail, final, boundaryInput, boundaryWork,
-      boundaryOutput] using hreach
+    simp [compositionTM, first, tail, final]
+    exact hreach
   · show (compositionTM tmF tmG).halted final
     simpa [compositionTM, first, tail, final] using
       (phase2Wrap_halted_iff first tail D).2 hhaltTail
@@ -115,8 +115,8 @@ theorem compositionTM_decidesInTime_preimage_internal
     omega
   · have hreach := seqTM_reachesIn_of_reachesIn first tail
       hreachF hhaltF hreachTail
-    simpa [compositionTM, first, tail, final, boundaryInput, boundaryWork,
-      boundaryOutput] using hreach
+    simp [compositionTM, first, tail, final]
+    exact hreach
   · show (compositionTM tmF tmG).halted final
     simpa [compositionTM, first, tail, final] using
       (phase2Wrap_halted_iff first tail D).2 hhaltTail

@@ -84,9 +84,9 @@ theorem length_cloudMark (Gz u j : List Bool) :
   rw [cloudMark, pairFst_pair, pairSnd_pair, pairFst_pair,
     pairSnd_pair]
   by_cases h : (ownerFn (pair Gz j)).length = u.length
-  · rw [ifEqLen_pos h, if_pos h]
+  · rw [ifEqLen_pos h, ite_eq_left h]
     rfl
-  · rw [ifEqLen_neg h, if_neg h]
+  · rw [ifEqLen_neg h, ite_eq_right h]
     rfl
 
 /-- How many half-edges hang from the vertex asked for, on
@@ -194,13 +194,13 @@ theorem length_eltMark (Gz u k c : List Bool) :
   rw [eltMark, pairFst_pair, pairSnd_pair, pairFst_pair,
     pairSnd_pair, pairFst_pair, pairSnd_pair]
   by_cases h1 : (ownerFn (pair Gz c)).length = u.length
-  · rw [ifEqLen_pos h1, if_pos h1]
+  · rw [ifEqLen_pos h1, ite_eq_left h1]
     by_cases h2 : (cloudIdxFn (pair Gz c)).length = k.length
-    · rw [ifEqLen_pos h2, if_pos h2]
+    · rw [ifEqLen_pos h2, ite_eq_left h2]
       rfl
-    · rw [ifEqLen_neg h2, if_neg h2]
+    · rw [ifEqLen_neg h2, ite_eq_right h2]
       rfl
-  · rw [ifEqLen_neg h1, if_neg h1]
+  · rw [ifEqLen_neg h1, ite_eq_right h1]
     rfl
 
 /-- The `k`-th half-edge of the cloud of `u`, on
@@ -235,13 +235,13 @@ theorem ownerFn_eq (G : ConstraintGraph α) (p : ℕ) (hp : p / 2 < G.numEdges) 
   have hmod : (modC 2 (List.replicate p true)) = List.replicate (p % 2) true := by
     rw [modC_eq (by norm_num), List.length_replicate]
   rw [ownerFn, pairSnd_pair, pairFst_pair, hdiv, hmod,
-    List.length_replicate, ConstraintGraph.ownerNum, dif_pos hp]
+    List.length_replicate, ConstraintGraph.ownerNum, dite_eq_left hp]
   by_cases h : p % 2 = 0
-  · rw [if_pos h, ifEqLen_pos (by rw [h]; rfl)]
+  · rw [ite_eq_left h, ifEqLen_pos (by rw [h]; rfl)]
     rw [encGraph, pairSnd_pair,
       recSnd_eq (l3 := edgeRecs G) (by rw [length_edgeRecs]; exact hp)
         (getElem_edgeRecs G _ hp)]
-  · rw [if_neg h, ifEqLen_neg (by
+  · rw [ite_eq_right h, ifEqLen_neg (by
       rw [List.length_replicate, List.length_nil]
       exact h)]
     rw [encGraph, pairSnd_pair,
@@ -350,7 +350,7 @@ theorem length_cloudIdxFn_eq (m : ℕ) (hm : m < 2 * G.numEdges) :
     (cloudIdxFn (pair (encGraph G) (List.replicate m true))).length
       = countBelow (G.cloudCodes ⟨G.ownerNum m, by
           have hme : m / 2 < G.numEdges := by omega
-          rw [ConstraintGraph.ownerNum, dif_pos hme]
+          rw [ConstraintGraph.ownerNum, dite_eq_left hme]
           split <;> exact Fin.isLt _⟩) m := by
   classical
   have hme : m / 2 < G.numEdges := by omega
@@ -366,9 +366,9 @@ omit [Fintype α] [DecidableEq α] in
 theorem halfCode_lt (p : G.HalfEdge) : G.halfCode p < 2 * G.numEdges := by
   rw [ConstraintGraph.halfCode]
   by_cases hb : p.2 = true
-  · rw [if_pos hb]
+  · rw [ite_eq_left hb]
     omega
-  · rw [if_neg hb]
+  · rw [ite_eq_right hb]
     omega
 
 /-- **The search finds the `k`-th half-edge of the cloud.** -/
@@ -400,16 +400,16 @@ theorem length_cloudEltFn_eq (v : Fin G.numVerts) (k : ℕ)
       rw [length_cloudIdxFn_eq G _ hclt, List.length_replicate]
       have hv : (⟨G.ownerNum (G.halfCode q), by
           have hme : G.halfCode q / 2 < G.numEdges := by omega
-          rw [ConstraintGraph.ownerNum, dif_pos hme]
+          rw [ConstraintGraph.ownerNum, dite_eq_left hme]
           split <;> exact Fin.isLt _⟩ : Fin G.numVerts) = v := Fin.ext howner'
       rw [hv, hcount]
-    rw [length_eltMark, if_pos hown1, if_pos hidx1]
+    rw [length_eltMark, ite_eq_left hown1, ite_eq_left hidx1]
     omega
   · intro j hj
     rw [length_eltMark]
     by_cases h1 : (ownerFn (pair (encGraph G) (List.replicate j true))).length
         = (List.replicate v.val true).length
-    · rw [if_pos h1, if_neg ?_]
+    · rw [ite_eq_left h1, ite_eq_right ?_]
       have hjlt : j < 2 * G.numEdges := by omega
       have hjown : G.ownerNum j = v.val := by
         rw [ownerFn_eq G j (by omega), List.length_replicate, List.length_replicate] at h1
@@ -429,11 +429,11 @@ theorem length_cloudEltFn_eq (v : Fin G.numVerts) (k : ℕ)
       rw [length_cloudIdxFn_eq G _ hjlt, List.length_replicate]
       have hjv : (⟨G.ownerNum j, by
           have hme : j / 2 < G.numEdges := by omega
-          rw [ConstraintGraph.ownerNum, dif_pos hme]
+          rw [ConstraintGraph.ownerNum, dite_eq_left hme]
           split <;> exact Fin.isLt _⟩ : Fin G.numVerts) = v := Fin.ext hjown
       rw [hjv]
       omega
-    · rw [if_neg h1]
+    · rw [ite_eq_right h1]
 
 /-! ### The two moves that need the expander -/
 
@@ -553,7 +553,7 @@ theorem cloudStepFn_eq (hd : 1 < F.deg) (v : Fin G.numVerts) (c j : ℕ)
     conv_lhs => rw [cloudSizeFn, countOver_eq_replicate]
     rw [← cloudSizeFn, hsizelen]
   have hvfin : (⟨G.ownerNum c, by
-      rw [ConstraintGraph.ownerNum, dif_pos hce]
+      rw [ConstraintGraph.ownerNum, dite_eq_left hce]
       split <;> exact Fin.isLt _⟩ : Fin G.numVerts) = v := Fin.ext hown
   have hidxlen : (cloudIdxFn (pair (encGraph G) (List.replicate c true))).length
       = countBelow (G.cloudCodes v) c := by
@@ -587,7 +587,7 @@ theorem cloudStepFn_eq (hd : 1 < F.deg) (v : Fin G.numVerts) (c j : ℕ)
   simp only [pairFst_pair, pairSnd_pair]
   rw [hsize, hidx, hrot]
   simp only [pairFst_pair, pairSnd_pair]
-  rw [helt, ConstraintGraph.cloudStepNum, dif_pos hidxlt]
+  rw [helt, ConstraintGraph.cloudStepNum, dite_eq_left hidxlt]
   dsimp only
   rw [← G.halfCode_getElem_cloudList v _ (Fin.isLt _)]
 
@@ -623,7 +623,7 @@ theorem flipFn_eq (v : ℕ) :
       ifEqLen_pos (by simp)]
     simp [List.replicate_succ']
   · rw [flipFn, modC_eq (by norm_num), List.length_replicate,
-      ifEqLen_neg (by simp [h]), if_neg h, dropOne]
+      ifEqLen_neg (by simp [h]), ite_eq_right h, dropOne]
     simp
 
 /-- **The preprocessed graph's rotation map**, on
@@ -724,30 +724,30 @@ theorem preRotFn_eq (hd : 1 < F.deg) (v d : ℕ) (hv : v < 2 * G.numEdges)
   have hne : 0 < 2 * G.numEdges := Nat.lt_of_le_of_lt (Nat.zero_le _) hv
   have hvd : v / 2 < G.numEdges := by omega
   have hulr : G.ownerNum v < G.numVerts := by
-    rw [ConstraintGraph.ownerNum, dif_pos hvd]
+    rw [ConstraintGraph.ownerNum, dite_eq_left hvd]
     split <;> exact Fin.isLt _
   rw [preRotFn]
   simp only [pairFst_pair, pairSnd_pair]
   rw [ConstraintGraph.preRotNum]
   by_cases h0 : d = 0
   · subst h0
-    rw [ifEqLen_pos (by simp), if_pos rfl]
+    rw [ifEqLen_pos (by simp), ite_eq_left rfl]
     rfl
-  rw [ifEqLen_neg (by simpa using h0), if_neg h0]
+  rw [ifEqLen_neg (by simpa using h0), ite_eq_right h0]
   by_cases h1 : d = 1
   · subst h1
-    rw [ifEqLen_pos (by simp), if_pos rfl, flipFn_eq]
+    rw [ifEqLen_pos (by simp), ite_eq_left rfl, flipFn_eq]
     rfl
-  rw [ifEqLen_neg (by simpa using h1), if_neg h1]
+  rw [ifEqLen_neg (by simpa using h1), ite_eq_right h1]
   have hdrop2 : (List.replicate d true).drop 2 = List.replicate (d - 2) true := by simp
   by_cases h2 : d < 2 + (F.toFamily hd).degree
   · -- the cloud's move
     have hjlt : d - 2 < (F.toFamily hd).degree := by omega
-    rw [ifLtLen_pos (by simpa using h2), if_pos h2, hdrop2,
+    rw [ifLtLen_pos (by simpa using h2), ite_eq_left h2, hdrop2,
       ownerFn_eq G v hvd,
       cloudStepFn_eq G F pol hd ⟨G.ownerNum v, hulr⟩ v (d - 2) hv rfl hjlt
         (hpc ⟨G.ownerNum v, hulr⟩)]
-    rw [ConstraintGraph.cloudStepN, dif_pos hulr, dif_pos hjlt]
+    rw [ConstraintGraph.cloudStepN, dite_eq_left hulr, dite_eq_left hjlt]
     simp only [pairFst_pair, pairSnd_pair]
     have happ : ∀ n : ℕ, List.replicate n true ++ [true, true]
         = List.replicate (n + 2) true := by
@@ -771,9 +771,9 @@ theorem preRotFn_eq (hd : 1 < F.deg) (v d : ℕ) (hv : v < 2 * G.numEdges)
       exact (F.famRotVal_eq hd hne ⟨v, hvn⟩ ⟨_, hjn⟩).symm
     have hdropk : (List.replicate d true).drop (2 + (F.toFamily hd).degree)
         = List.replicate (d - (2 + (F.toFamily hd).degree)) true := by simp
-    rw [ifLtLen_neg (by simpa using h2), if_neg h2, hdropk,
+    rw [ifLtLen_neg (by simpa using h2), ite_eq_right h2, hdropk,
       expStepFn_eq G F pol hd v (d - (2 + (F.toFamily hd).degree)) hne hpe]
-    rw [ConstraintGraph.expStepN, dif_pos hvlt, dif_pos hjlt]
+    rw [ConstraintGraph.expStepN, dite_eq_left hvlt, dite_eq_left hjlt]
     simp only [pairFst_pair, pairSnd_pair]
     have hk := key _ horder hvlt hjlt
     have hk1 := congrArg Prod.fst hk

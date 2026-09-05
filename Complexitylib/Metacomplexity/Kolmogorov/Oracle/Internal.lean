@@ -157,7 +157,7 @@ theorem toOracleTM_timeBoundedKolmogorovComplexity_eq_internal
   congr 2
   ext size
   simp only [OracleTM.timeBoundedProducingProgramSizes,
-    TM.timeBoundedProducingProgramSizes, Set.mem_setOf_eq]
+    TM.timeBoundedProducingProgramSizes, Set.mem_ofPred_eq]
   constructor
   · rintro ⟨program, hlength, hproduce⟩
     exact ⟨program, hlength,

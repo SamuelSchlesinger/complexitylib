@@ -69,7 +69,7 @@ theorem toOracleTM_producesInTime_iff_internal
   · rintro ⟨cfg, steps, hsteps, hreach, hhalt, houtput⟩
     have hreach' : machine.reachesIn steps
         (machine.toOracleTM.initCfg program).erase cfg := by
-      simpa using hreach
+      exact hreach
     obtain ⟨oracleCfg, horacleReach, herase⟩ :=
       machine.exists_toOracleTM_reachesIn_of_reachesIn_erase oracle
         (machine.toOracleTM.initCfg program) hreach'

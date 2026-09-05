@@ -327,7 +327,7 @@ private theorem termCheck_step_readFst_bit (c : Cfg 8 termCheckTM.Q)
     termCheckTM.step c = some
       { state := .readSnd ctrl b, input := c.input.move .right,
         work := c.work, output := c.output } := by
-  rw [TM.step, if_neg (termCheck_ne_halt hst nofun)]
+  rw [TM.step, ite_eq_right (termCheck_ne_halt hst nofun)]
   cases b <;>
   · simp only [Γ.ofBool] at hread
     simp only [termCheckTM, hst, hread]
@@ -345,7 +345,7 @@ private theorem termCheck_step_readFst_blank (c : Cfg 8 termCheckTM.Q)
     termCheckTM.step c = some
       { state := .rewind (ctrlVerdict ctrl), input := c.input.move .left,
         work := c.work, output := c.output } := by
-  rw [TM.step, if_neg (termCheck_ne_halt hst nofun)]
+  rw [TM.step, ite_eq_right (termCheck_ne_halt hst nofun)]
   simp only [termCheckTM, hst, hread]
   refine congrArg some ((Cfg.mk.injEq ..).mpr ⟨rfl, rfl, ?_, ?_⟩)
   · funext i
@@ -361,7 +361,7 @@ private theorem termCheck_step_readSnd_bit (c : Cfg 8 termCheckTM.Q)
     termCheckTM.step c = some
       { state := .readFst (scanStep ctrl (symOfPair b₀ b₁)),
         input := c.input.move .right, work := c.work, output := c.output } := by
-  rw [TM.step, if_neg (termCheck_ne_halt hst nofun)]
+  rw [TM.step, ite_eq_right (termCheck_ne_halt hst nofun)]
   cases b₁ <;>
   · simp only [Γ.ofBool] at hread
     simp only [termCheckTM, hst, hread]
@@ -379,7 +379,7 @@ private theorem termCheck_step_readSnd_blank (c : Cfg 8 termCheckTM.Q)
     termCheckTM.step c = some
       { state := .rewind (ctrlVerdict ctrl), input := c.input.move .left,
         work := c.work, output := c.output } := by
-  rw [TM.step, if_neg (termCheck_ne_halt hst nofun)]
+  rw [TM.step, ite_eq_right (termCheck_ne_halt hst nofun)]
   simp only [termCheckTM, hst, hread]
   refine congrArg some ((Cfg.mk.injEq ..).mpr ⟨rfl, rfl, ?_, ?_⟩)
   · funext i
@@ -393,7 +393,7 @@ private theorem termCheck_step_rewind_left (c : Cfg 8 termCheckTM.Q) (v : Bool)
     termCheckTM.step c = some
       { state := .rewind v, input := c.input.move .left,
         work := c.work, output := c.output } := by
-  rw [TM.step, if_neg (termCheck_ne_halt hst nofun)]
+  rw [TM.step, ite_eq_right (termCheck_ne_halt hst nofun)]
   simp only [termCheckTM, hst, hread, ↓reduceIte]
   refine congrArg some ((Cfg.mk.injEq ..).mpr ⟨rfl, rfl, ?_, ?_⟩)
   · funext i
@@ -407,7 +407,7 @@ private theorem termCheck_step_rewind_start (c : Cfg 8 termCheckTM.Q) (v : Bool)
     termCheckTM.step c = some
       { state := .emit v, input := c.input.move .right,
         work := c.work, output := c.output } := by
-  rw [TM.step, if_neg (termCheck_ne_halt hst nofun)]
+  rw [TM.step, ite_eq_right (termCheck_ne_halt hst nofun)]
   simp only [termCheckTM, hst, hread, ↓reduceIte]
   refine congrArg some ((Cfg.mk.injEq ..).mpr ⟨rfl, rfl, ?_, ?_⟩)
   · funext i
@@ -421,7 +421,7 @@ private theorem termCheck_step_emit (c : Cfg 8 termCheckTM.Q) (v : Bool)
     termCheckTM.step c = some
       { state := .done, input := c.input, work := c.work,
         output := c.output.write (if v then Γ.one else Γ.zero) } := by
-  rw [TM.step, if_neg (termCheck_ne_halt hst nofun)]
+  rw [TM.step, ite_eq_right (termCheck_ne_halt hst nofun)]
   simp only [termCheckTM, hst]
   refine congrArg some ((Cfg.mk.injEq ..).mpr ⟨rfl, ?_, ?_, ?_⟩)
   · exact transitionInput_eq_self hinp
@@ -643,7 +643,7 @@ theorem termCheckTM_hoareTime (x : List Bool) (work₀ : Fin 8 → Tape) (out₀
   · show c₂.work = work
     rw [hw₂, hw₁']
   · show (c₂.output.write _).cells = _
-    rw [hv, ho₂, ho₁', Tape.write, if_neg (by rw [houth]; omega)]
+    rw [hv, ho₂, ho₁', Tape.write, ite_eq_right (by rw [houth]; omega)]
     show Function.update out.cells out.head _ = _
     rw [houth]
   · show (c₂.output.write _).head = 1

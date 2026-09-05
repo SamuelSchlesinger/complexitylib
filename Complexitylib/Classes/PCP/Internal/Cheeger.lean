@@ -220,8 +220,8 @@ theorem coarea {h : ℝ} (hexp : G.EdgeExpansion h) :
       have hsum : ∑ v : G.V, ψ v = ∑ v : G.V, ψ' v + μ * S.card := by
         have : ∀ v, ψ v = ψ' v + (if v ∈ S then μ else 0) := fun v => by
           by_cases hv : v ∈ S
-          · rw [hψ'in v hv, if_pos hv]; ring
-          · rw [hψ'out v hv, if_neg hv, hz v hv]; ring
+          · rw [hψ'in v hv, ite_eq_left hv]; ring
+          · rw [hψ'out v hv, ite_eq_right hv, hz v hv]; ring
         rw [Finset.sum_congr rfl fun v _ => this v, Finset.sum_add_distrib]
         congr 1
         rw [Finset.sum_ite_mem, Finset.univ_inter, Finset.sum_const, nsmul_eq_mul, mul_comm]
@@ -231,18 +231,21 @@ theorem coarea {h : ℝ} (hexp : G.EdgeExpansion h) :
               + (if p.1 ∉ S ∧ G.nbr p.1 p.2 ∈ S then (1 : ℝ) else 0)) := by
         intro p
         by_cases hu : p.1 ∈ S <;> by_cases hw : G.nbr p.1 p.2 ∈ S
-        · rw [hψ'in _ hu, hψ'in _ hw, if_neg (by tauto), if_neg (by tauto)]
+        · rw [hψ'in _ hu, hψ'in _ hw, ite_eq_right (by tauto), ite_eq_right (by tauto)]
           have : ψ p.1 - μ - (ψ (G.nbr p.1 p.2) - μ) = ψ p.1 - ψ (G.nbr p.1 p.2) := by ring
           rw [this]
           ring
-        · rw [hψ'in _ hu, hψ'out _ hw, hz _ hw, if_pos ⟨hu, hw⟩, if_neg (by tauto), sub_zero,
+        · rw [hψ'in _ hu, hψ'out _ hw, hz _ hw, ite_eq_left ⟨hu, hw⟩, ite_eq_right (by tauto),
+          sub_zero,
             sub_zero, abs_of_nonneg (hpos _), abs_of_nonneg (by linarith [hμle _ hu])]
           ring
-        · rw [hψ'out _ hu, hψ'in _ hw, hz _ hu, if_neg (by tauto), if_pos ⟨hu, hw⟩, zero_sub,
+        · rw [hψ'out _ hu, hψ'in _ hw, hz _ hu, ite_eq_right (by tauto), ite_eq_left ⟨hu, hw⟩,
+          zero_sub,
             zero_sub, abs_neg, abs_neg, abs_of_nonneg (hpos _),
             abs_of_nonneg (by linarith [hμle _ hw])]
           ring
-        · rw [hψ'out _ hu, hψ'out _ hw, hz _ hu, hz _ hw, if_neg (by tauto), if_neg (by tauto)]
+        · rw [hψ'out _ hu, hψ'out _ hw, hz _ hu, hz _ hw, ite_eq_right (by tauto),
+          ite_eq_right (by tauto)]
           simp
       rw [Finset.sum_congr rfl fun p _ => hdart p, Finset.sum_add_distrib, ← Finset.mul_sum,
         Finset.sum_add_distrib, G.sum_darts_boundary S, hsum]
@@ -322,7 +325,7 @@ theorem exists_median (f : G.V → ℝ) :
   classical
   rcases isEmpty_or_nonempty G.V with hV | hV
   · exact ⟨0, by simp, by simp⟩
-  haveI : Nonempty G.V := hV
+  have : Nonempty G.V := hV
   set T : Finset ℝ := (Finset.univ.image f).filter
     fun t => 2 * (Finset.univ.filter fun v => t < f v).card ≤ G.order with hT
   have hTne : T.Nonempty := by
@@ -535,7 +538,7 @@ theorem spectralBound_padLoops_of_edgeExpansion {h : ℝ} (hexp : G.EdgeExpansio
   intro f hf
   have hd : (0 : ℝ) < G.deg := by exact_mod_cast G.deg_pos
   set B : G.V → ℝ := (G.padLoops G.deg).step f with hB
-  have hBmean : ∑ v : G.V, B v = 0 := by rw [hB, sum_lazy_step]; exact hf
+  have hBmean : ∑ v : G.V, B v = 0 := by rw [hB]; erw [sum_lazy_step]; exact hf
   -- the Rayleigh bound, on `f` and on `B f`
   have hray : ∀ g : G.V → ℝ, ∑ v : G.V, g v = 0 →
       G.lazyQ g g ≤ (4 * (G.deg : ℝ) * (1 - h ^ 2 / 4)) * ∑ v : G.V, (g v) ^ 2 := by
@@ -547,7 +550,7 @@ theorem spectralBound_padLoops_of_edgeExpansion {h : ℝ} (hexp : G.EdgeExpansio
   have hB' := hray B hBmean
   -- `‖B f‖²` through the lazy form
   have hBB : ∑ v : G.V, (B v) ^ 2 = G.lazyQ f B / (4 * (G.deg : ℝ)) := by
-    rw [← sum_lazy_mul, hB]
+    erw [← sum_lazy_mul, hB]
     exact Finset.sum_congr rfl fun v _ => by ring
   have hcs := G.lazyQ_sq_le f B
   have hQf := G.lazyQ_nonneg f

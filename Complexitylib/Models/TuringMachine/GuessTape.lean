@@ -179,7 +179,7 @@ theorem reachesIn_ofGuess_iff (M : TM (k + 1)) (hM : TM.GuessDiscipline M) :
   induction t with
   | zero =>
       intro c c' _
-      rw [TM.reachesIn_zero_iff, TM.reachesIn_zero_iff]
+      erw [TM.reachesIn_zero_iff, TM.reachesIn_zero_iff]
       exact Iff.rfl
   | succ t ih =>
       intro c c' hbool
@@ -189,12 +189,12 @@ theorem reachesIn_ofGuess_iff (M : TM (k + 1)) (hM : TM.GuessDiscipline M) :
           simp [hhalt]
         constructor
         · intro h
-          rw [TM.reachesIn_succ_iff] at h
+          erw [TM.reachesIn_succ_iff] at h
           obtain ⟨c₁, hs, -⟩ := h
           rw [step_ofGuess M hM hbool.read, h1] at hs
           exact absurd hs (by simp)
         · intro h
-          rw [TM.reachesIn_succ_iff] at h
+          erw [TM.reachesIn_succ_iff] at h
           obtain ⟨c₁, hs, -⟩ := h
           rw [h1] at hs
           exact absurd hs (by simp)
@@ -204,14 +204,14 @@ theorem reachesIn_ofGuess_iff (M : TM (k + 1)) (hM : TM.GuessDiscipline M) :
           exact hbool.move_right
         constructor
         · intro h
-          rw [TM.reachesIn_succ_iff] at h
+          erw [TM.reachesIn_succ_iff] at h
           obtain ⟨c₁, hs, hr⟩ := h
           rw [step_ofGuess M hM hbool.read, hstep] at hs
           have hs' : M.stepCfg c = c₁ := Option.some.inj hs
           subst hs'
           exact TM.reachesIn.step hstep ((ih _ c' hbool₁).mp hr)
         · intro h
-          rw [TM.reachesIn_succ_iff] at h
+          erw [TM.reachesIn_succ_iff] at h
           obtain ⟨c₁, hs, hr⟩ := h
           rw [hstep] at hs
           have hs' : M.stepCfg c = c₁ := Option.some.inj hs

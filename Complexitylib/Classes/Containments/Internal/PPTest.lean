@@ -104,7 +104,7 @@ theorem testTailTM_hoareTime (cIdx nIdx resIdx : Fin n)
   set Wr := rewoundBank cIdx nIdx resIdx W with hWr
   have hWrP : ∀ j, Parked (Wr j) := rewoundBank_parked hW
   have hWrRes : Wr resIdx = ⟨1, (W resIdx).cells⟩ := by
-    simp only [hWr, rewoundBank, if_pos hresMem]
+    simp only [hWr, rewoundBank, ite_eq_left hresMem]
   have hofb : Γ.ofBool b ≠ Γ.start := by cases b <;> simp [Γ.ofBool]
   have hread : (Wr resIdx).read = Γ.ofBool b := by
     rw [hWrRes]; show (W resIdx).cells 1 = _; exact hres
@@ -118,7 +118,7 @@ theorem testTailTM_hoareTime (cIdx nIdx resIdx : Fin n)
       refine ⟨le_refl 1, fun i hi => ?_⟩
       rw [Tape.move_cells]
       show (if i = 0 then Γ.start else Γ.blank) ≠ Γ.start
-      rw [if_neg (by omega)]
+      rw [ite_eq_right (by omega)]
       simp
     · rw [hWf, Function.update_of_ne hj]; exact hWrP j
   set bnd := max (3 * (B + 3) + 1) (resetBinaryWorkTime B 1) with hbnd
@@ -129,14 +129,12 @@ theorem testTailTM_hoareTime (cIdx nIdx resIdx : Fin n)
     (fun k => if k ≤ 1 then O else Ow) bnd hI ?_ ?_ ?_).consequence
     (fun _ _ _ h => h) (fun _ _ _ h => h) (le_refl _)
   · intro k i
-    dsimp only
     split
     · exact hW i
     · split
       · exact hWrP i
       · exact hWfP i
   · intro k
-    dsimp only
     split
     · exact hO
     · exact hOwP
@@ -149,8 +147,8 @@ theorem testTailTM_hoareTime (cIdx nIdx resIdx : Fin n)
       · rintro inp work out ⟨rfl, rfl, hin, hout⟩
         refine ⟨rfl, funext fun j => ?_, rfl⟩
         by_cases hj : j ∈ testTargets cIdx nIdx resIdx
-        · rw [hin j hj]; show _ = Wr j; rw [hWr, rewoundBank, if_pos hj]
-        · rw [hout j hj]; show _ = Wr j; rw [hWr, rewoundBank, if_neg hj]
+        · rw [hin j hj]; show _ = Wr j; rw [hWr, rewoundBank, ite_eq_left hj]
+        · rw [hout j hj]; show _ = Wr j; rw [hWr, rewoundBank, ite_eq_right hj]
       · show 3 * (B + 3) + 1 ≤ bnd
         rw [hbnd]
         exact le_max_left _ _
@@ -231,7 +229,7 @@ theorem tallyTestTM_hoareTime (cIdx nIdx resIdx : Fin n)
       refine ⟨by rw [hres]; rfl, nofun, fun i _ => ?_⟩
       rw [hres, Tape.move_cells]
       show (if i + 1 = 0 then Γ.start else Γ.blank) = Γ.blank
-      rw [if_neg (by omega)]
+      rw [ite_eq_right (by omega)]
     obtain ⟨c', t, ht, hreach, hhalt, hinp', hres', hlhs', hlhsh, hrhs', hrhsh, hother',
       hout'⟩ :=
       binaryEqTM_reachesIn_frame cIdx nIdx resIdx hd v.bits N.bits I W O hlhs hrhs hprefix
@@ -303,19 +301,19 @@ theorem tallyTestTM_hoareTime (cIdx nIdx resIdx : Fin n)
     by_cases hj1 : j = cIdx
     · subst hj1
       have hmem : j ∈ testTargets j nIdx resIdx := by simp [testTargets]
-      rw [rewoundBank, if_pos hmem, hc]
+      rw [rewoundBank, ite_eq_left hmem, hc]
       have hbn : (⟨1, (work j).cells⟩ : Tape).HasBinaryNat v := ⟨hz j, rfl, h1.1, h1.2⟩
       simpa [natTape] using hbn.eq_init_move_right
     by_cases hj2 : j = nIdx
     · subst hj2
       have hmem : j ∈ testTargets cIdx j resIdx := by simp [testTargets]
-      rw [rewoundBank, if_pos hmem, hnn]
+      rw [rewoundBank, ite_eq_left hmem, hnn]
       have hbn : (⟨1, (work j).cells⟩ : Tape).HasBinaryNat N := ⟨hz j, rfl, h2.1, h2.2⟩
       simpa [natTape] using hbn.eq_init_move_right
     have hmem : j ∉ testTargets cIdx nIdx resIdx := by
       simp only [testTargets, List.mem_cons, List.not_mem_nil, or_false]
       exact fun h => h.elim hj1 (fun h => h.elim hj2 hj)
-    rw [rewoundBank, if_neg hmem]
+    rw [rewoundBank, ite_eq_right hmem]
     exact h5 j hj1 hj2 hj
   exact seqTM_hoareTime _ _ hstep1 htrans hstep2
 
@@ -332,7 +330,7 @@ theorem outSlot_write (s s' : Γw) : (outSlot s).write s'.toΓ = outSlot s' := b
   · rw [Tape.write_head]
     rfl
   · funext j
-    rw [Tape.write, if_neg (show ¬ ((outSlot s).head = 0) from by
+    rw [Tape.write, ite_eq_right (show ¬ ((outSlot s).head = 0) from by
       show ¬ ((1 : ℕ) = 0); omega)]
     show Function.update (outSlot s).cells 1 s'.toΓ j = _
     by_cases hj : j = 1
@@ -357,8 +355,8 @@ theorem outSlot_blank_eq_blankTape : outSlot Γw.blank = TM.blankTape := by
     = ((Tape.init ([] : List Γ)).move Dir3.right).cells j
   rw [Tape.move_cells]
   by_cases hj : j = 0
-  · rw [hj, if_pos rfl, Tape.init_cells_zero]
-  · rw [if_neg hj, show j = (j - 1) + 1 from by omega, Tape.init_nil_cells_succ]
+  · rw [hj, ite_eq_left rfl, Tape.init_cells_zero]
+  · rw [ite_eq_right hj, show j = (j - 1) + 1 from by omega, Tape.init_nil_cells_succ]
     split <;> rfl
 
 /-- Reading a cell back as a writable symbol turns it into `1` exactly when it was `1`. -/
@@ -414,11 +412,11 @@ theorem tallyTestTM_hoareTime_tallyPost (cIdx aIdx rIdx nIdx resIdx : Fin n)
   have hWc : W cIdx = natTape w := by rw [hW]; simp [tallyWork]
   have hWn : W nIdx = natTape N := by
     rw [hW]
-    simp only [tallyWork, if_neg hnc, if_neg hna, if_neg hnr]
+    simp only [tallyWork, ite_eq_right hnc, ite_eq_right hna, ite_eq_right hnr]
     exact hn
   have hWr : W resIdx = (Tape.init ([] : List Γ)).move Dir3.right := by
     rw [hW]
-    simp only [tallyWork, if_neg hsc, if_neg hsa, if_neg hsr]
+    simp only [tallyWork, ite_eq_right hsc, ite_eq_right hsa, ite_eq_right hsr]
     exact hr
   have hcases : ∀ j, W j = natTape w ∨ W j = natTape (tally P w) ∨
       W j = natTape (tally (fun u => !P u) w) ∨ W j = rest j := by

@@ -53,8 +53,6 @@ private theorem get_inputWires_code {inputWidth gateBound : Nat}
   rw [Array.getElem?_eq_getElem hbound]
   simp only [EvaluationSequence.inputWires, Array.getElem_ofFn]
   congr 1
-  change EvaluationSequence.combinedInput description input
-    ⟨coordinate.val, _⟩ = _
   rw [show (⟨coordinate.val, _⟩ :
       Fin (baseWireCount inputWidth gateBound)) =
         Fin.castAdd inputWidth coordinate by
@@ -155,7 +153,7 @@ theorem eval_formula_of_code_internal
     rw [GateSlot.toList_referenceBits,
       Nat.fromBitsLE_toBitsLE hcountFits]
   rw [formula, LookupFormula.eval_select _ _ assignment htable,
-    hword, hunsigned, dif_pos hcountRange]
+    hword, hunsigned, dite_eq_left hcountRange]
   have hindex :
       (⟨description.gateCountNat, hcountRange⟩ : Fin (gateBound + 1)) =
         Fin.succ (lastActiveSlot description hpositive) := by
@@ -289,7 +287,7 @@ theorem topologicallyWellFormed_compileRaw_internal
       (fullAvailable inputWidth gateBound) := by
   have hcode : codeWidth inputWidth gateBound ≠ 0 :=
     NeZero.ne (codeWidth inputWidth gateBound)
-  letI : NeZero (fullAvailable inputWidth gateBound) := ⟨by
+  let : NeZero (fullAvailable inputWidth gateBound) := ⟨by
     unfold fullAvailable baseWireCount
     omega⟩
   unfold compileRaw

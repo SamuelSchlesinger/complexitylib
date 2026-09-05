@@ -106,9 +106,9 @@ theorem regTape_zero : TM.regTape 0 = TM.blankTape := by
   by_cases hj : j = 0
   · rw [hj]
     show (if (0 : ℕ) = 0 then Γ.start else _) = _
-    rw [if_pos rfl, Tape.init_cells_zero]
+    rw [ite_eq_left rfl, Tape.init_cells_zero]
   · show (if j = 0 then Γ.start else if j ≤ 0 then Γ.one else Γ.blank) = _
-    rw [if_neg hj, if_neg (by omega), show j = (j - 1) + 1 from by omega,
+    rw [ite_eq_right hj, ite_eq_right (by omega), show j = (j - 1) + 1 from by omega,
       Tape.init_nil_cells_succ]
 
 
@@ -136,16 +136,16 @@ theorem regTape_eq_natTape (T : ℕ) : TM.regTape T = natTape (2 ^ T - 1) := by
   by_cases hj : j = 0
   · rw [hj]
     show (if (0 : ℕ) = 0 then Γ.start else _) = _
-    rw [if_pos rfl, Tape.init_cells_zero]
+    rw [ite_eq_left rfl, Tape.init_cells_zero]
   · obtain ⟨i, rfl⟩ : ∃ i, j = i + 1 := ⟨j - 1, by omega⟩
     rw [Tape.init_cells_succ]
     show (if i + 1 = 0 then Γ.start else if i + 1 ≤ T then Γ.one else Γ.blank)
       = (((2 ^ T - 1).bits.map Γ.ofBool)[i]?).getD Γ.blank
-    rw [if_neg (by omega), hbits]
+    rw [ite_eq_right (by omega), hbits]
     by_cases hi : i < T
-    · rw [if_pos (by omega)]
+    · rw [ite_eq_left (by omega)]
       simp [hi, Γ.ofBool]
-    · rw [if_neg (by omega)]
+    · rw [ite_eq_right (by omega)]
       simp [hi]
 
 /-- **The registers are pairwise distinct**, and none of them is one of the simulation's tapes. -/
@@ -182,12 +182,12 @@ theorem bodyRest_regIdx (k N H : ℕ) : bodyRest k N H (regIdx k) = TM.regTape H
     have := congrArg Fin.val h
     simp only [regIdx, nIdx] at this
     omega
-  simp only [bodyRest, if_neg h]
+  simp only [bodyRest, ite_eq_right h]
   simp
 
 theorem bodyRest_other (k N H : ℕ) (j : Fin (bodyTapes k))
     (hn : j ≠ nIdx k) (hr : j ≠ regIdx k) : bodyRest k N H j = TM.blankTape := by
-  simp only [bodyRest, if_neg hn, if_neg hr]
+  simp only [bodyRest, ite_eq_right hn, ite_eq_right hr]
 
 theorem bodyRest_parked (k N H : ℕ) : ∀ j, TM.Parked (bodyRest k N H j) := by
   intro j

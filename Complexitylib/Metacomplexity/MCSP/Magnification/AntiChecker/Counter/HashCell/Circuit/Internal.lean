@@ -62,7 +62,7 @@ theorem evalFamilyCode_code_internal
       (hashCellPublicInput beta input seed).toList ++ witness.toList ≠ [] := by
     intro hempty
     have hzero := congrArg List.length hempty
-    simp [hashCellPublicWidth, counterInputWidth] at hzero
+    simp [hashCellPublicWidth, counterInputWidth, hashCellPublicInput] at hzero
   simpa [code, CircuitCode.evalFamilyCode, hnonempty, hlength] using heval
 
 theorem query_mem_extensionLanguage_iff_internal

@@ -105,7 +105,7 @@ private theorem binaryBumpTM_step_one (c : Cfg n (binaryBumpTM idx).Q)
         work := Function.update c.work idx
           (((c.work idx).write Γ.zero).move Dir3.right)
         output := c.output } := by
-  rw [TM.step, if_neg (binaryBumpTM_ne_halt (by decide) hstate)]
+  rw [TM.step, ite_eq_right (binaryBumpTM_ne_halt (by decide) hstate)]
   simp only [binaryBumpTM, hstate, hread]
   refine congrArg some ((Cfg.mk.injEq ..).mpr ⟨rfl, ?_, ?_, ?_⟩)
   · exact transitionInput_eq_self hinput
@@ -115,7 +115,8 @@ private theorem binaryBumpTM_step_one (c : Cfg n (binaryBumpTM idx).Q)
       simp only [↓reduceIte, Function.update_self]
       rfl
     · rw [Function.update_of_ne hi]
-      simpa only [if_neg hi] using transitionTape_eq_self (hother i hi)
+      simpa only [transitionTape, TM.idleDir, TM.readBackWrite, Γw.toΓ, ite_eq_right hi]
+        using transitionTape_eq_self (hother i hi)
   · exact transitionTape_eq_self houtput
 
 /-- Resolve a carry on zero: write one and turn left. -/
@@ -130,7 +131,7 @@ private theorem binaryBumpTM_step_zero (c : Cfg n (binaryBumpTM idx).Q)
         work := Function.update c.work idx
           (((c.work idx).write Γ.one).move Dir3.left)
         output := c.output } := by
-  rw [TM.step, if_neg (binaryBumpTM_ne_halt (by decide) hstate)]
+  rw [TM.step, ite_eq_right (binaryBumpTM_ne_halt (by decide) hstate)]
   simp only [binaryBumpTM, hstate, hread]
   refine congrArg some ((Cfg.mk.injEq ..).mpr ⟨rfl, ?_, ?_, ?_⟩)
   · exact transitionInput_eq_self hinput
@@ -140,7 +141,8 @@ private theorem binaryBumpTM_step_zero (c : Cfg n (binaryBumpTM idx).Q)
       simp only [↓reduceIte, Function.update_self]
       rfl
     · rw [Function.update_of_ne hi]
-      simpa only [if_neg hi] using transitionTape_eq_self (hother i hi)
+      simpa only [transitionTape, TM.idleDir, TM.readBackWrite, Γw.toΓ, ite_eq_right hi]
+        using transitionTape_eq_self (hother i hi)
   · exact transitionTape_eq_self houtput
 
 /-- Resolve overflow on the terminating blank: append a zero — widening the string — and turn
@@ -156,7 +158,7 @@ private theorem binaryBumpTM_step_blank (c : Cfg n (binaryBumpTM idx).Q)
         work := Function.update c.work idx
           (((c.work idx).write Γ.zero).move Dir3.left)
         output := c.output } := by
-  rw [TM.step, if_neg (binaryBumpTM_ne_halt (by decide) hstate)]
+  rw [TM.step, ite_eq_right (binaryBumpTM_ne_halt (by decide) hstate)]
   simp only [binaryBumpTM, hstate, hread]
   refine congrArg some ((Cfg.mk.injEq ..).mpr ⟨rfl, ?_, ?_, ?_⟩)
   · exact transitionInput_eq_self hinput
@@ -166,7 +168,8 @@ private theorem binaryBumpTM_step_blank (c : Cfg n (binaryBumpTM idx).Q)
       simp only [↓reduceIte, Function.update_self]
       rfl
     · rw [Function.update_of_ne hi]
-      simpa only [if_neg hi] using transitionTape_eq_self (hother i hi)
+      simpa only [transitionTape, TM.idleDir, TM.readBackWrite, Γw.toΓ, Γ.ofBool, ite_eq_right hi]
+        using transitionTape_eq_self (hother i hi)
   · exact transitionTape_eq_self houtput
 
 /-- Rewind one ordinary target cell to the left. -/
@@ -180,16 +183,16 @@ private theorem binaryBumpTM_step_rewind (c : Cfg n (binaryBumpTM idx).Q)
         input := c.input
         work := Function.update c.work idx ((c.work idx).move Dir3.left)
         output := c.output } := by
-  rw [TM.step, if_neg (binaryBumpTM_ne_halt (by decide) hstate)]
+  rw [TM.step, ite_eq_right (binaryBumpTM_ne_halt (by decide) hstate)]
   simp only [binaryBumpTM, hstate, hread, ↓reduceIte]
   refine congrArg some ((Cfg.mk.injEq ..).mpr ⟨rfl, ?_, ?_, ?_⟩)
   · exact transitionInput_eq_self hinput
   · funext i
     by_cases hi : i = idx
     · subst i
-      rw [if_pos rfl, Function.update_self,
+      rw [ite_eq_left rfl, Function.update_self,
         writeAndMove_readBack _ hread]
-    · rw [if_neg hi, Function.update_of_ne hi]
+    · rw [ite_eq_right hi, Function.update_of_ne hi]
       exact transitionTape_eq_self (hother i hi)
   · exact transitionTape_eq_self houtput
 
@@ -205,7 +208,7 @@ private theorem binaryBumpTM_step_start (c : Cfg n (binaryBumpTM idx).Q)
         input := c.input
         work := Function.update c.work idx ((c.work idx).move Dir3.right)
         output := c.output } := by
-  rw [TM.step, if_neg (binaryBumpTM_ne_halt (by decide) hstate)]
+  rw [TM.step, ite_eq_right (binaryBumpTM_ne_halt (by decide) hstate)]
   simp only [binaryBumpTM, hstate, hread, ↓reduceIte]
   refine congrArg some ((Cfg.mk.injEq ..).mpr ⟨rfl, ?_, ?_, ?_⟩)
   · exact transitionInput_eq_self hinput
@@ -215,8 +218,8 @@ private theorem binaryBumpTM_step_start (c : Cfg n (binaryBumpTM idx).Q)
       simp only [↓reduceIte, Function.update_self]
       show (((c.work idx).write _).move Dir3.right) =
         (c.work idx).move Dir3.right
-      rw [Tape.write, if_pos hhead]
-    · rw [if_neg hi, Function.update_of_ne hi]
+      rw [Tape.write, ite_eq_left hhead]
+    · rw [ite_eq_right hi, Function.update_of_ne hi]
       exact transitionTape_eq_self (hother i hi)
   · exact transitionTape_eq_self houtput
 
@@ -349,7 +352,7 @@ private theorem binaryBumpTM_carry_run
       have htargetContent : target.HasBinaryContent
           (List.replicate done false ++ [false]) := by
         have hwrite := hcontent'.write_append false (by simpa using hhead)
-        simpa only [target, Tape.HasBinaryContent, Tape.move_cells] using hwrite
+        simpa only [Γ.ofBool, target, Tape.HasBinaryContent, Tape.move_cells] using hwrite
       have htargetCell0 : target.cells 0 = Γ.start := by
         exact Tape.write_move_cell0 Γ.zero Dir3.left hcell0
       have htargetHead : target.head = done := by
@@ -399,7 +402,7 @@ private theorem binaryBumpTM_carry_run
               (List.replicate done false ++ true :: rest) := by
             have hwrite := hcontent.write_set true hhead (by simp)
             rw [BinaryBump.set_false_to_true] at hwrite
-            simpa only [target, Tape.HasBinaryContent, Tape.move_cells] using hwrite
+            simpa only [Γ.ofBool, target, Tape.HasBinaryContent, Tape.move_cells] using hwrite
           have htargetCell0 : target.cells 0 = Γ.start := by
             exact Tape.write_move_cell0 Γ.one Dir3.left hcell0
           have htargetHead : target.head = done := by
@@ -447,7 +450,7 @@ private theorem binaryBumpTM_carry_run
               (List.replicate (done + 1) false ++ rest) := by
             have hwrite := hcontent.write_set false hhead (by simp)
             rw [BinaryBump.set_true_to_false] at hwrite
-            simpa only [target, Tape.HasBinaryContent, Tape.move_cells] using hwrite
+            simpa only [Γ.ofBool, target, Tape.HasBinaryContent, Tape.move_cells] using hwrite
           have htargetCell0 : target.cells 0 = Γ.start := by
             exact Tape.write_move_cell0 Γ.zero Dir3.right hcell0
           have htargetHead : target.head = (done + 1) + 1 := by

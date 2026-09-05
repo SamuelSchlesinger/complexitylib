@@ -61,7 +61,7 @@ theorem stopAtNum_eq {T q : ℕ} (hq : 0 < q) (c : Fin T → Fin q) :
       (fun i hi => encAt_lt c hi)
     rw [hcard] at h
     rw [show (enc c : ℕ) = ∑ i ∈ Finset.range T, encAt c i * q ^ i from rfl, h, encAt,
-      dif_pos j.isLt]
+      dite_eq_left j.isLt]
   rw [hdig]
   rfl
 
@@ -86,7 +86,7 @@ theorem digit_enc {T : ℕ} (s : Fin T → (G.preprocess E).graph.D) (hpos : 0 <
     (fun i hi => encAt_lt s hi)
   rw [show (enc s : ℕ)
     = ∑ i ∈ Finset.range T, encAt s i * card (G.preprocess E).graph.D ^ i from rfl,
-    preDeg, h, encAt, dif_pos hk]
+    preDeg, h, encAt, dite_eq_left hk]
 
 /-- **Following the digits walks the graph.** The steps are read from any number
 whose digits are the tuple's entries, so a prefix of a longer walk may be run
@@ -129,7 +129,7 @@ theorem killedRevNum_eq {T q : ℕ} (hq : 0 < q) (hpos : 0 < G.preDeg E) (v : G.
       (fun i hi => encAt_lt s hi)
     rw [show (enc s : ℕ)
       = ∑ i ∈ Finset.range T, encAt s i * card (G.preprocess E).graph.D ^ i from rfl,
-      preDeg, h, encAt, dif_pos hk]
+      preDeg, h, encAt, dite_eq_left hk]
   have hstop : stopAtNum T q (enc c) = stopAt c := stopAtNum_eq hq c
   have hle : stopAt c ≤ T := stopAt_le c
   rw [killedRevNum, hstop,
@@ -139,16 +139,18 @@ theorem killedRevNum_eq {T q : ℕ} (hq : 0 < q) (hpos : 0 < G.preDeg E) (v : G.
   refine Finset.sum_congr rfl fun j hj => ?_
   rw [Finset.mem_range] at hj
   congr 1
-  rw [encAt, dif_pos hj]
+  rw [encAt, dite_eq_left hj]
   by_cases hjlt : j < stopAt c
-  · rw [if_pos hjlt]
+  · rw [ite_eq_left hjlt]
     have hk : stopAt c - 1 - j < T := by omega
     rw [hdig _ hk]
     have hrev : ((G.preprocess E).graph.killedRev v s c) ⟨j, hj⟩
         = (G.preprocess E).graph.backLabel v
             ((G.preprocess E).graph.preWalk s hle) (Fin.rev ⟨j, hjlt⟩) := by
-      rw [RegGraph.killedRev, RegGraph.extWalk, dif_pos hjlt, RegGraph.revWalk]
-    rw [hrev, RegGraph.backLabel]
+      simp only [RegGraph.killedRev, RegGraph.extWalk, dite_eq_left hjlt,
+        RegGraph.revWalk]
+    rw [hrev]
+    simp only [RegGraph.backLabel]
     have hidx : (Fin.rev (⟨j, hjlt⟩ : Fin (stopAt c))).val = stopAt c - 1 - j := by
       rw [Fin.val_rev]
       show stopAt c - (j + 1) = stopAt c - 1 - j
@@ -167,9 +169,9 @@ theorem killedRevNum_eq {T q : ℕ} (hq : 0 < q) (hpos : 0 < G.preDeg E) (v : G.
       rw [G.digit_enc E s hpos k (lt_of_lt_of_le hk hle), RegGraph.preWalk]
     rw [G.walkNum_eq E v ((G.preprocess E).graph.preWalk s hle) (enc s) hpre (by omega)]
     exact congrArg Prod.snd (G.preRotNum_eq E _ _)
-  · rw [if_neg hjlt, hdig _ hj]
+  · rw [ite_eq_right hjlt, hdig _ hj]
     congr 1
-    rw [RegGraph.killedRev, RegGraph.extWalk, dif_neg hjlt]
+    simp only [RegGraph.killedRev, RegGraph.extWalk, dite_eq_right hjlt]
 
 /-! ### The powered graph's rotation map -/
 
@@ -197,7 +199,9 @@ theorem killedRotNum_eq {T q : ℕ} (hq : 0 < q) (hpos : 0 < G.preDeg E) (v : G.
       intro k hk
       rw [G.digit_enc E x.1 hpos k (lt_of_lt_of_le hk hle), RegGraph.preWalk]
     rw [G.walkNum_eq E v ((G.preprocess E).graph.preWalk x.1 hle) (enc x.1) hpre le_rfl]
-    rw [← hw1, RegGraph.killedEnd, ← RegGraph.walkAt_self_eq_walkEnd]
+    rw [← hw1]
+    simp only [RegGraph.killedEnd]
+    erw [← RegGraph.walkAt_self_eq_walkEnd]
     rfl
   · show G.killedRevNum E T q (enc v) (enc x.1) (enc x.2) * q ^ T + enc x.2 = _
     rw [G.killedRevNum_eq E hq hpos v x.1 x.2, ← hw2]

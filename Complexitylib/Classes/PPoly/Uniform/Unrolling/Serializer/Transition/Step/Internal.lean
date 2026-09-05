@@ -108,6 +108,7 @@ private theorem stepFormulas_eq_ofFn_source
           stepSourceFormulaAt tm T configBase choiceWire index.val := by
   simp [stepFormulas, configAtoms, stepSourceFormulaAt, stepConfigAtomAt,
     stepAtomCount, configWidth, Function.comp_def]
+  and_intros <;> rfl
 
 private theorem size_stepSourceFormulaAt
     (tm : NTM k) (T configBase choiceWire index : ℕ)
@@ -118,7 +119,7 @@ private theorem size_stepSourceFormulaAt
         (effectCaseChoiceAt tm) index := by
   unfold stepSourceFormulaAt
   rw [size_nextFormula_eq_scheduleSize]
-  simp only [stepFormulaSizeAt, if_pos hindex]
+  simp only [stepFormulaSizeAt, ite_eq_left hindex]
   unfold stepAtomKindAt stepAtomEffectSelectedAt
   rfl
 

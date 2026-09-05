@@ -50,7 +50,6 @@ private theorem get_inputWires_code {inputWidth gateBound : Nat}
   rw [Array.getElem?_eq_getElem hbound]
   simp only [inputWires, Array.getElem_ofFn]
   congr 1
-  change combinedInput description input ⟨coordinate.val, _⟩ = _
   rw [show (⟨coordinate.val, _⟩ :
       Fin (baseWireCount inputWidth gateBound)) =
         Fin.castAdd inputWidth coordinate by
@@ -72,8 +71,6 @@ private theorem get_inputWires_input {inputWidth gateBound : Nat}
   rw [Array.getElem?_eq_getElem hbound]
   simp only [inputWires, Array.getElem_ofFn]
   congr 1
-  change combinedInput description input
-    ⟨codeWidth inputWidth gateBound + index.val, _⟩ = _
   rw [show (⟨codeWidth inputWidth gateBound + index.val, _⟩ :
       Fin (baseWireCount inputWidth gateBound)) =
         Fin.natAdd (codeWidth inputWidth gateBound) index by
@@ -101,8 +98,9 @@ noncomputable def prefixResultInternal {inputWidth gateBound : Nat}
           circuitEval := rfl
           rawEval := by simp [rawPrefix, RawCircuit.evalAux?]
           circuitSize := by
-            simp [inputWires, prefixSize, baseWireCount]
-          rawSize := by simp
+            rw [inputWires, Array.size_ofFn]
+            simp [prefixSize, baseWireCount]
+          rawSize := Array.size_ofFn
           inputPreserved := by
             intro wire hwire
             rfl
@@ -197,9 +195,7 @@ noncomputable def prefixResultInternal {inputWidth gateBound : Nat}
           have hrawBound : inputWidth + earlier.val <
               previous.rawWires.size := by
             rw [hrawSize]
-            have hearlier : earlier.val < count := by
-              change earlier.val < count
-              exact earlier.isLt
+            have hearlier : earlier.val < count := earlier.isLt
             omega
           rw [Array.getElem?_eq_getElem hcircuitBound,
             Array.getElem?_eq_getElem hrawBound] at hcorrespond
@@ -276,7 +272,7 @@ noncomputable def prefixResultInternal {inputWidth gateBound : Nat}
               (inputWires description input) =
             some circuitNext := by
         rw [prefixCircuit, RawCircuit.evalAux?_append,
-          previous.circuitEval, stepCircuitAt, dif_pos hindex]
+          previous.circuitEval, stepCircuitAt, dite_eq_left hindex]
         exact hcircuitStep
       have hrawPrefix :
           rawPrefix description (count + 1) =
@@ -366,7 +362,7 @@ noncomputable def prefixResultInternal {inputWidth gateBound : Nat}
                 _ = rawNext[inputWidth + earlier.val]? := by
                   unfold rawNext
                   rw [Array.getElem?_push,
-                    if_neg (Nat.ne_of_lt hrawBound)] }
+                    ite_eq_right (Nat.ne_of_lt hrawBound)] }
 
 end EvaluationSequence
 

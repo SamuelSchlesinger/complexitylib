@@ -36,7 +36,7 @@ private theorem codeMatchesLabeledSamples_fixedWidth_iff
   intro sample
   unfold CodeMatchesLabeledSample DescriptionMatchesLabeledSample
   unfold CircuitCode.evalCode
-  rw [if_pos (BitString.length_toList (samples sample).input)]
+  rw [ite_eq_left (BitString.length_toList (samples sample).input)]
   rw [AntiChecker.decode_candidateCodeFixedWidthEquiv]
   rfl
 

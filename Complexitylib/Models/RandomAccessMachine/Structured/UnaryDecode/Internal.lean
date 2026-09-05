@@ -339,7 +339,8 @@ private theorem false_body_measured {rest : List Bool}
     hremaining hinv.store_bound (by
       simpa [consume, Cmd.seqList] using hconsume)
   refine ⟨?_, hsuccess⟩
-  apply MeasuredRuns.weakenCost (by simpa [body] using hrun)
+  apply MeasuredRuns.weakenCost (by simpa [body, width, consume, Cmd.seqList, resourceSpace]
+    using hrun)
   change 3 * width inputLength +
       (4 * width inputLength +
         (4 * width inputLength +
@@ -382,7 +383,8 @@ private theorem true_body_measured {rest : List Bool}
     hremaining hinv.store_bound (by
       simpa [consume, Cmd.seqList] using hconsume)
   constructor
-  · apply MeasuredRuns.weakenCost (by simpa [body] using hrun)
+  · apply MeasuredRuns.weakenCost (by simpa [body, width, consume, Cmd.seqList, resourceSpace,
+    continuedStore] using hrun)
     change 3 * width inputLength +
         (4 * width inputLength +
           (4 * width inputLength +
@@ -508,7 +510,9 @@ private theorem loop_measured {remaining : List Bool}
       have hrun := MeasuredRuns.whileNonzeroEnvelope hactive hinv.store_bound
         (by simpa [body] using hbodyRun) hstop
       refine ⟨truncatedStore store, ?_, ?_, ?_, ?_, ?_, htruncatedBound⟩
-      · apply MeasuredRuns.weakenCost (by simpa [mainLoop] using hrun)
+      · apply MeasuredRuns.weakenCost (by simpa [mainLoop, width, resourceSpace,
+        CircuitCode.NatCode.decodePrefix?,
+            CircuitCode.NatCode.decodeAux?] using hrun)
         change 3 * width inputLength +
             (width inputLength + 8 * width inputLength) +
             width inputLength ≤
@@ -548,10 +552,9 @@ private theorem loop_measured {remaining : List Bool}
           have hrun := MeasuredRuns.whileNonzeroEnvelope hactive hinv.store_bound
             hbody hstop
           refine ⟨successStore store, ?_, ?_, ?_, ?_, ?_, hsuccessBound⟩
-          · apply MeasuredRuns.weakenCost (by simpa [mainLoop] using hrun)
-            change 3 * width inputLength + 32 * width inputLength +
-                width inputLength ≤
-              64 * ((false :: rest).length + 1) * width inputLength
+          · apply MeasuredRuns.weakenCost (by simpa [mainLoop, width, resourceSpace,
+            CircuitCode.NatCode.decodePrefix?,
+            CircuitCode.NatCode.decodeAux?] using hrun)
             calc
               _ = 36 * width inputLength := by ring
               _ ≤ (64 * (rest.length + 2)) * width inputLength :=
@@ -604,9 +607,6 @@ private theorem loop_measured {remaining : List Bool}
                   convert hrun using 1
                   all_goals omega
                 apply MeasuredRuns.weakenCost hrun'
-                change 3 * width inputLength + 32 * width inputLength +
-                    (64 * (rest.length + 1) * width inputLength) ≤
-                  64 * ((true :: rest).length + 1) * width inputLength
                 calc
                   _ = (64 * (rest.length + 1) + 35) * width inputLength := by ring
                   _ ≤ (64 * (rest.length + 2)) * width inputLength :=
@@ -625,9 +625,6 @@ private theorem loop_measured {remaining : List Bool}
                   convert hrun using 1
                   all_goals omega
                 apply MeasuredRuns.weakenCost hrun'
-                change 3 * width inputLength + 32 * width inputLength +
-                    (64 * (rest.length + 1) * width inputLength) ≤
-                  64 * ((true :: rest).length + 1) * width inputLength
                 calc
                   _ = (64 * (rest.length + 1) + 35) * width inputLength := by ring
                   _ ≤ (64 * (rest.length + 2)) * width inputLength :=
@@ -688,7 +685,7 @@ theorem mainLoop_measured_internal {remaining : List Bool}
     exact hspace
   refine ⟨final, cost, space, ?_, le_trans hcost hcostBound, hspaceBound,
     hresult, hactive, hone, hframe, hfinalBound⟩
-  simpa [loopStepCount] using hexec
+  exact hexec
 
 theorem program_measured_internal (bits : List Bool) :
     ∃ final cost space,

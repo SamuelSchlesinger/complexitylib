@@ -68,7 +68,7 @@ theorem restrict_extend [Nonempty α] (G : ConstraintGraph α) {N : ℕ} (h : G.
     (a : G.Assignment) : G.restrict h (G.extend h a) = a := by
   funext v
   rw [restrict, extend]
-  simp only [Fin.val_castLE, dif_pos v.isLt]
+  exact dite_eq_left v.isLt
 
 theorem satisfies_pad_iff (G : ConstraintGraph α) {N : ℕ} (h : G.numVerts ≤ N)
     (a : (G.pad N h).Assignment) (e : Fin (G.pad N h).numEdges) :
@@ -83,6 +83,9 @@ theorem unsatFrac_pad (G : ConstraintGraph α) {N : ℕ} (h : G.numVerts ≤ N)
     (G.pad N h).unsatFrac a = G.unsatFrac (G.restrict h a) := rfl
 
 /-- **Padding does not change the value.** -/
+-- The signature mirrors the family this belongs to; the argument is part of
+-- that shape even where this member does not consult it.
+@[nolint unusedArguments]
 theorem unsatVal_pad [Fintype α] [Nonempty α] [DecidableEq α] (G : ConstraintGraph α)
     (N : ℕ) (h : G.numVerts ≤ N) :
     (G.pad N h).unsatVal = G.unsatVal := by

@@ -63,7 +63,8 @@ theorem retargetInputStarted_hoareTime_decide (M : TM k) {L : Language} {T : ℕ
         retargetInputStartedCfg M y inp :=
     Cfg.ext rfl rfl hpre.1 hpre.2
   refine ⟨c', t, ht, ?_, hhalt, hone, hzero⟩
-  convert hreach using 1
+  erw [hstart]
+  exact hreach
 
 /-- **The work-to-work evaluator, for a decider.** The verdict lands in cell one of the fresh
 last work tape, and the real output stays the parked blank tape a wipe needs. -/
@@ -135,7 +136,7 @@ theorem applyTM_entry_eq (M : TM k) (y : List Bool) (realInput : Tape) :
     show applyPre M y realInput i
       = (if h : i.val < k + 1 then (retargetInputStartedCfg M y realInput).work ⟨i.val, h⟩
         else (retargetInputStartedCfg M y realInput).output)
-    rw [dif_pos hi, ← congrFun (applyPre_spec M y realInput).1 ⟨i.val, hi⟩, hidx]
+    rw [dite_eq_left hi, ← congrFun (applyPre_spec M y realInput).1 ⟨i.val, hi⟩, hidx]
   · have hlast : i = Fin.last (k + 1) := Fin.ext (by
       have h1 := i.isLt
       have h2 : (Fin.last (k + 1)).val = k + 1 := rfl
@@ -143,7 +144,7 @@ theorem applyTM_entry_eq (M : TM k) (y : List Bool) (realInput : Tape) :
     show applyPre M y realInput i
       = (if h : i.val < k + 1 then (retargetInputStartedCfg M y realInput).work ⟨i.val, h⟩
         else (retargetInputStartedCfg M y realInput).output)
-    rw [dif_neg hi, hlast, (applyPre_spec M y realInput).2]
+    rw [dite_eq_right hi, hlast, (applyPre_spec M y realInput).2]
     rfl
 
 /-- **The decider's evaluator, framed by its space bound.** The disturbance is bounded by the

@@ -97,7 +97,7 @@ theorem Nat.toBits_fromBits : ∀ bits : List Bool,
         Nat.fromBits rest + (if bit then 1 else 0) * 2 ^ rest.length := by
       simp only [Nat.fromBits]
       exact Nat.add_comm _ _
-    simp only [Nat.toBits, List.cons.injEq]
+    simp only [List.length_cons, Nat.toBits, List.cons.injEq]
     constructor
     · rw [hval, Nat.add_mul_div_right _ _ (Nat.two_pow_pos _), Nat.div_eq_of_lt hlt]
       cases bit <;> simp
@@ -249,7 +249,7 @@ width. -/
     lt_of_lt_of_le index.isLt
       (Nat.le_pow_clog Nat.one_lt_two size)
   unfold Fin.fromBits?
-  rw [Fin.length_toBits, dif_pos rfl]
+  rw [Fin.length_toBits, dite_eq_left rfl]
   simp only [Fin.toBits]
   simp [Nat.fromBits_toBits hfits, index.isLt]
 

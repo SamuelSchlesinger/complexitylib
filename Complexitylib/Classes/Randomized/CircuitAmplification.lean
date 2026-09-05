@@ -56,7 +56,7 @@ theorem canonicalThresholdValue_eq_blockMajority
         blockMajority (NTM.repeatAcceptEvent tm x.toList T) seed := by
   rw [finCountP_canonicalAcceptanceBits_eq_blockEventCount]
   simp only [strictMajorityThreshold, blockMajority]
-  rw [Bool.eq_iff_iff, decide_eq_true_eq, decide_eq_true_eq]
+  erw [Bool.eq_iff_iff, decide_eq_true_eq, decide_eq_true_eq]
   omega
 
 /-- The canonical typed amplification circuit computes exactly the compact

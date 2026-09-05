@@ -38,7 +38,7 @@ noncomputable def posEntryFn (P : List Bool → List Bool) (w : List Bool) : Lis
 theorem posEntryFn_mem_FP {P : List Bool → List Bool} (hP : P ∈ FP) :
     posEntryFn P ∈ FP := by
   have := mem_FP_comp (Cobham.pairFn_mem_FP hP hP) natEncodeFn_mem_FP
-  simpa using this
+  exact this
 
 theorem posEntryFn_eq {P : List Bool → List Bool} (w : List Bool) :
     posEntryFn P w = DataEncode.bitstringEncode ((P w).length) := by
@@ -100,7 +100,7 @@ theorem positions_mem_of_unary {pos : List Bool → ℕ → ℕ} {cnt : List Boo
   · have hpair : (fun z : List Bool => pair (List.replicate (cnt z) true) z) ∈ FP :=
       mem_FP_pairWithInput hcnt
     have := mem_FP_comp hpair (listEncFn_mem_FP hEfp p hbound)
-    simpa using this
+    exact this
   · intro z
     refine listEncFn_eq_bitstringEncode _ ?_ ?_
     · rw [pairFst_pair, List.length_replicate, List.length_map, List.length_range]

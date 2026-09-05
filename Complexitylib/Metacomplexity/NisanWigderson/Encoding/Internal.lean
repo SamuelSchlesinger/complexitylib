@@ -72,8 +72,8 @@ theorem decode?_encode_internal
     rw [hfirst, hsecond] at heq
     exact (design.coordinates output).injective heq
   unfold decode?
-  rw [dif_pos (length_encode_internal design), dif_pos hvalid,
-    dif_pos hinjective]
+  rw [dite_eq_left (length_encode_internal design), dite_eq_left hvalid,
+    dite_eq_left hinjective]
   congr 1
   cases design with
   | mk coordinates =>
@@ -119,11 +119,11 @@ theorem encode_eq_of_decode?_eq_some_internal
                 some ((decodeCoordinate? outputLength inputLength seedLength bits
                   index.1.1 index.1.2).get (hvalid index.1.1 index.1.2)) :=
             (Option.some_get (hvalid index.1.1 index.1.2)).symm
-          simp only [decodeCoordinate?, dif_pos hlength] at hcoordinate
+          simp only [decodeCoordinate?, dite_eq_left hlength] at hcoordinate
           have hcoordinateBits :=
             Fin.toBits_eq_of_fromBits?_eq_some hcoordinate
           simp [encode, coordinateBitTable, decodedCoordinates]
-          simp only [decodeCoordinate?, dif_pos hlength]
+          simp only [decodeCoordinate?, dite_eq_left hlength]
           have hbit := congrArg (fun coordinateBits : List Bool =>
             coordinateBits[index.2.val]?) hcoordinateBits
           simp [index, flatPosition] at hbit

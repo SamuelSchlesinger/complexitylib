@@ -444,7 +444,7 @@ theorem eventually_size_paddedSelectionCircuit_le_generatorSizeBound_internal
         counterOverhead beta]
       with arity hbound
   intro harity
-  letI : NeZero arity := ⟨harity⟩
+  let : NeZero arity := ⟨harity⟩
   intro family hbudget
   exact
     (size_paddedSelectionCircuit_le_paddedSelectionSizeBound_internal

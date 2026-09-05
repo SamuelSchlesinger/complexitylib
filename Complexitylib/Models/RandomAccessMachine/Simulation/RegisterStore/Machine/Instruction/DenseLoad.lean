@@ -239,7 +239,7 @@ theorem denseIndirectLoadInstructionTM_hoareTime_frame
       hloadedResult⟩, hout⟩
     have hqueryZero : (work tapes.update.entry.query).HasBinaryNat 0 :=
       ⟨hloadedResult.scanner.queryStart, by
-        simpa using hloadedResult.scanner.query⟩
+        exact hloadedResult.scanner.query⟩
     have hrun := TM.binaryAddConstTM_hoareTime_frame
       tapes.update.entry.query destination 0 inp work out hqueryZero
       (by simpa [hinp] using hinput)
@@ -307,12 +307,9 @@ theorem denseIndirectLoadInstructionTM_hoareTime_frame
       (DenseOverlay.read input overlay
         (DenseOverlay.read input overlay addressRegister))
       emittedBits updateWork inp₀ out₀ hvalid.1 hscanner
-      (by simpa only [updateWork, Function.update_of_ne hreplacementNe] using
-        hloadedResult.value)
-      (by simpa only [updateWork, Function.update_of_ne hremainingNe] using
-        hloadedResult.count)
-      (by simpa only [updateWork, Function.update_of_ne hfoundNe] using
-        hloadedResult.copyScratch)
+      (by simp only [updateWork, Function.update_of_ne hreplacementNe]; exact hloadedResult.value)
+      (by simp only [updateWork, Function.update_of_ne hremainingNe]; exact hloadedResult.count)
+      (by simp only [updateWork, Function.update_of_ne hfoundNe]; exact hloadedResult.copyScratch)
       (by simpa only [updateWork, Function.update_of_ne hresultCountNe] using
         hresultCount)
       hinput houtput

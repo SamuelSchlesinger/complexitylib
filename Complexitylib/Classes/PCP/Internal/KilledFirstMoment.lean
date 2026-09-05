@@ -287,7 +287,7 @@ theorem card_good_crossing (A : (R.killedPow q T hq).Assignment) (a : R.graph.V)
       (fun p => R.opinionOf q T hq A a hiT p = R.kPlurality q T hq A a)
       (fun s => R.opinionOf q T hq A (R.graph.nbr a d) hjT s
         = R.kPlurality q T hq A (R.graph.nbr a d)),
-    truthCount, dif_pos hiT, truthCount, dif_pos hjT]
+    truthCount, dite_eq_left hiT, truthCount, dite_eq_left hjT]
 
 /-! ### Every counted crossing breaks its constraint -/
 
@@ -714,7 +714,7 @@ theorem card_both_good_le (A : (R.killedPow q T hq).Assignment) {k l : ℕ}
     refine le_trans (Finset.card_le_card_of_injOn (fun z => z.2.2)
       (fun _ _ => Finset.mem_univ _) ?_) ?_
     · intro z hz z' hz' hzz
-      simp only [Finset.coe_filter, Set.mem_setOf_eq] at hz hz'
+      simp only [Finset.coe_filter, Set.mem_ofPred_eq] at hz hz'
       have hz1 : z.1 = w.1 := congrArg Prod.fst hz.2
       have hz2 : z.2.1 = w.2 := congrArg Prod.snd hz.2
       have hz1' : z'.1 = w.1 := congrArg Prod.fst hz'.2
@@ -1071,7 +1071,7 @@ noncomputable def crossCount (A : (R.killedPow q T hq).Assignment) (p : R.Dart)
 theorem crossCount_eq_card (A : (R.killedPow q T hq).Assignment) (p : R.Dart)
     {i j : ℕ} (hij : i + j + 1 < T) (hiT : i ≤ T) (hjT : (i + j + 1) - (i + 1) ≤ T) :
     R.crossCount q T hq A p i j = (R.crossingSet q T hq A p.1 p.2 hij hiT hjT).card := by
-  rw [crossCount, dif_pos hij]
+  rw [crossCount, dite_eq_left hij]
 
 theorem crossCount_eq_prod (A : (R.killedPow q T hq).Assignment) (p : R.Dart)
     {i j : ℕ} (hij : i + j + 1 < T) :
@@ -1215,7 +1215,8 @@ theorem unsatFrac_killedPow_ge (A : (R.killedPow q T hq).Assignment) {LB : ℝ}
         / ((R.graph.order * (R.graph.deg ^ T * q ^ T) : ℕ) : ℝ) := by
     rw [RegCSP.unsatFrac, R.card_dart_killedPow q T hq]
     push_cast
-    ring
+    field_simp
+    norm_cast
   rw [hfrac]
   gcongr
 

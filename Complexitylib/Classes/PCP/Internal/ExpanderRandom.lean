@@ -54,7 +54,8 @@ theorem ten_mul_tOf_le (S : Finset (Fin n)) : 10 * tOf S ≤ S.card := by
 
 theorem mem_escLE_iff {S : Finset (Fin n)} {σ : Equiv.Perm (Fin n)} (hS : 1 ≤ S.card) :
     σ ∈ escLE S (tOf S) ↔ ¬ S.card ≤ 10 * escape σ S := by
-  simp only [escLE, Finset.mem_filter, Finset.mem_univ, true_and, tOf]
+  simp only [escLE, Finset.mem_filter, Finset.mem_univ, true_and]
+  unfold tOf
   omega
 
 /-- The bound on how many permutations fail to expand a set of size `s`. -/

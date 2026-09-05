@@ -7,6 +7,7 @@ Authors: Samuel Schlesinger
 module
 public import Complexitylib.Models.RandomAccessMachine.Simulation.TMConfig.Sparse.Defs
 public import Complexitylib.Models.RandomAccessMachine.Structured.Switch.Defs
+public import Mathlib.Data.Finset.Lattice.Fold
 
 /-!
 # A fixed sparse-RAM block for one Turing-machine transition

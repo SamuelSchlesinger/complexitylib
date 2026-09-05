@@ -92,7 +92,7 @@ private theorem branched_bound {bit : Bool} {rest : List Bool}
   cases bit with
   | false => simpa [branched] using loaded_bound hinv.store_bound
   | true =>
-      rw [branched, if_pos rfl]
+      rw [branched, ite_eq_left rfl]
       apply (loaded_bound hinv.store_bound).execBasic
         (.add countReg countReg oneReg)
       · simp [countReg]
@@ -212,7 +212,7 @@ private theorem body_measured {bit : Bool} {rest : List Bool}
       (resourceSpace inputLength) :=
     MeasuredRuns.basicEnvelope _ _ hadvancedBound hiteratedBound
   have hrun := hload.seq (hbranch.seq (hadvance.seq hdecrement))
-  rw [body, Cmd.seqList]
+  simp only [body, Cmd.seqList]
   convert hrun using 1
   · cases bit <;> simp [bitValue]
   · ring
@@ -421,7 +421,7 @@ private theorem finalize_measured {inputLength : ℕ} {store : Store}
       (finalStore store) 1 (4 * width inputLength) (resourceSpace inputLength) :=
     MeasuredRuns.basicEnvelope _ _ hzeroed hfinal
   have hrun := hzero.seq hadd
-  rw [finalize, Cmd.seqList]
+  simp only [finalize, Cmd.seqList]
   convert hrun using 1
   all_goals ring
 

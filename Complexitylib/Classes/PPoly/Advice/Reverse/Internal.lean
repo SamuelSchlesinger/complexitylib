@@ -114,10 +114,7 @@ theorem adviceEvalTime_bigO_internal
     dsimp [e]
     omega
   rw [hexponent] at htime
-  simpa only [adviceEvalTime, pairedLength,
-    CircuitCode.Machine.evalFamilyTime,
-    CircuitCode.Machine.evalFamilyTMWithTime,
-    CircuitCode.Machine.evalFamilyCoreTime, Nat.add_zero] using htime
+  exact htime
 
 /-- Internal packaging of one polynomial-size deciding circuit family as a
 polynomial-time advised evaluator. -/

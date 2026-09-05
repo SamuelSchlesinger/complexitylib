@@ -197,7 +197,7 @@ theorem eventually_eval_paddedSelectionCircuit_isFor_of_correctCounterFamily_int
       [eventually_padInputsTo_isFor_of_isEstimateSelectionTrace_internal beta]
       with arity hanti
   intro harity
-  letI : NeZero arity := ⟨harity⟩
+  let : NeZero arity := ⟨harity⟩
   intro overhead family hbudget hcorrect target hhard
   obtain ⟨inputs, heval, htrace⟩ :=
     exists_eval_paddedSelectionCircuit_isEstimateSelectionTrace_internal

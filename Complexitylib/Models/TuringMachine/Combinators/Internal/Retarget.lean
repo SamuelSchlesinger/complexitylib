@@ -162,9 +162,9 @@ theorem retargetInput_step_commute (M : TM k) {c c' : Cfg k M.Q}
         = (fun i => (c.work i).read) := by
     funext i
     show (if h : i.val < k then c.work ⟨i.val, h⟩ else c.input).read = (c.work i).read
-    rw [dif_pos i.isLt]
+    rw [dite_eq_left i.isLt]
   -- Unfold step on the LHS. `split` reduces the halting ite (the stored
-  -- decidability instance blocks `simp`/`if_neg` post-v4.30).
+  -- decidability instance blocks `simp`/`ite_eq_right` post-v4.30).
   simp only [step, show (retargetWrap M realInput c).state = c.state from rfl,
              show (retargetInput M).qhalt = M.qhalt from rfl,
              retargetWrap_input, retargetWrap_output]
@@ -184,12 +184,12 @@ theorem retargetInput_step_commute (M : TM k) {c c' : Cfg k M.Q}
     -- RHS: (retargetWrap... c').work i where c'.work ⟨i.val, _⟩ is the updated tape.
     rw [retargetWrap_work_lt _ _ _ _ hik]
     show (_ : Tape).writeAndMove _ _ = (if h : i.val < k then _ else _)
-    rw [dif_pos hik, dif_pos hik, dif_pos hik]
+    rw [dite_eq_left hik, dite_eq_left hik, dite_eq_left hik]
   · -- i.val = k: virtual input case.
     have hik_eq : i.val = k := by have := i.isLt; omega
     have hwork_k : (retargetWrap M realInput c).work i = c.input := by
       show (if h : i.val < k then c.work ⟨i.val, h⟩ else c.input) = c.input
-      rw [dif_neg hik]
+      rw [dite_eq_right hik]
     have hcond : c.input.head = 0 ∨ c.input.read ≠ Γ.start := by
       by_cases hh : c.input.head = 0
       · left; exact hh
@@ -199,7 +199,7 @@ theorem retargetInput_step_commute (M : TM k) {c c' : Cfg k M.Q}
     -- Rewrite LHS via hwork_k, then use tape_writeBack_eq_move.
     rw [hwork_k]
     show _ = (if h : i.val < k then _ else _)
-    rw [dif_neg hik, dif_neg hik, dif_neg hik]
+    rw [dite_eq_right hik, dite_eq_right hik, dite_eq_right hik]
     exact tape_writeBack_eq_move c.input _ hcond
 
 -- ════════════════════════════════════════════════════════════════════════
@@ -502,7 +502,7 @@ theorem retargetInput_hoareTime (M : TM k)
         ({ state := (retargetInput M).qstart, input := realInput, work := work, output := out } :
           Cfg (k + 1) (retargetInput M).Q) := by
     refine Cfg.mk.injEq _ _ _ _ _ _ _ _ |>.mpr ⟨rfl, rfl, ?_, rfl⟩
-    simpa [retargetInput] using hworkField
+    exact hworkField
   refine ⟨retargetWrap M finalReal c', t, ht, ?_, ?_, ?_⟩
   · rw [← hstart]
     exact hreachSim

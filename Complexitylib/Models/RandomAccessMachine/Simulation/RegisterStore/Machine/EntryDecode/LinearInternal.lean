@@ -154,8 +154,9 @@ theorem entryDecodeLinearTM_reachesIn_frame_internal {n : ℕ}
   refine ⟨finalCfg, ?_, ?_, hvalueInput.trans haddressInput, hvalueSource,
     ?_, ?_, hvalueTarget, hvalueStartFinal, ?_, hvalueMarkerFinal, ?_,
     hvalueOutput.trans haddressOutput⟩
-  · simpa [entryDecodeLinearTM, entryDecodeLinearTime, addressTM, valueTM,
-      finalCfg] using hfullReach
+  · simp only [entryDecodeLinearTM, entryDecodeLinearTime, addressTM, valueTM,
+      finalCfg]
+    exact hfullReach
   · exact (TM.phase2Wrap_halted_iff addressTM valueTM valueDone).2 hvalueHalt
   · change (valueDone.work tapes.address).HasBinaryPrefix entry.1.bits
     rw [hvalueFrame tapes.address (tapes.ne (by decide))

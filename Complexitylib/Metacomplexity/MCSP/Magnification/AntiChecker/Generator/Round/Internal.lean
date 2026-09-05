@@ -35,7 +35,8 @@ private theorem selectionRoundSuccessorInputMap_table
       Fin.castAdd (counterOutputWidth beta arity + (arity + 1))
         (Fin.castAdd (prefixLength * (arity + 1)) tableCoordinate) := by
   apply Fin.ext
-  simp only [selectionRoundSuccessorInputMap, Fin.addCases_left]
+  simp only [selectionRoundSuccessorInputMap]
+  erw [Fin.addCases_left]
   rfl
 
 private theorem selectionRoundSuccessorInputMap_head
@@ -47,9 +48,9 @@ private theorem selectionRoundSuccessorInputMap_head
       Fin.natAdd (selectionRoundInputWidth arity prefixLength)
         (Fin.natAdd (counterOutputWidth beta arity) coordinate) := by
   apply Fin.ext
-  simp only [selectionRoundSuccessorInputMap, Fin.addCases_right,
-    Equiv.symm_apply_apply, Fin.cases_zero]
-  simp [selectionRoundInputWidth]
+  simp only [selectionRoundSuccessorInputMap]
+  erw [Fin.addCases_right]
+  simp [selectionRoundInputWidth, Equiv.symm_apply_apply]
   omega
 
 private theorem selectionRoundSuccessorInputMap_tail
@@ -62,9 +63,9 @@ private theorem selectionRoundSuccessorInputMap_tail
         (Fin.natAdd (2 ^ arity)
           (finProdFinEquiv (prefixRow, coordinate))) := by
   apply Fin.ext
-  simp only [selectionRoundSuccessorInputMap, Fin.addCases_right,
-    Equiv.symm_apply_apply, Fin.cases_succ]
-  rfl
+  simp only [selectionRoundSuccessorInputMap]
+  erw [Fin.addCases_right]
+  simp [Equiv.symm_apply_apply]
 
 private theorem selectionRoundCombinedInput_payload
     {arity prefixLength keyWidth payloadWidth : ℕ}

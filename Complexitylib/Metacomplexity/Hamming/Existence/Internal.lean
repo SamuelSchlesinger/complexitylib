@@ -27,15 +27,16 @@ private theorem isSeparated_insert
     IsSeparated (insert word code) minimumDistance := by
   unfold IsSeparated
   rw [Finset.coe_insert]
-  apply (Set.pairwise_insert_of_symmetric_of_notMem
+  have hsymm : Std.Symm (fun left right : Word length =>
+      minimumDistance ≤ distance left right) := by
+    refine ⟨fun {left right} hdistance => ?_⟩
+    rw [distance_comm_internal]
+    exact hdistance
+  exact (Set.pairwise_insert_of_symm_of_notMem
     (r := fun left right : Word length =>
       minimumDistance ≤ distance left right)
     (a := word) (s := (code : Set (Word length)))
-    ?_ (by simpa using hword)).2
-  · exact ⟨hcode, hfar⟩
-  · intro left right hdistance
-    rw [distance_comm_internal]
-    exact hdistance
+    (by simpa using hword)).2 ⟨hcode, hfar⟩
 
 theorem exists_isSeparated_and_covering_internal
     (length minimumDistance : ℕ) :
@@ -49,7 +50,8 @@ theorem exists_isSeparated_and_covering_internal
     Finset.univ.filter fun code => IsSeparated code minimumDistance
   have hfamily : family.Nonempty := by
     refine ⟨∅, ?_⟩
-    simp [family, IsSeparated]
+    refine Finset.mem_filter.mpr ⟨Finset.mem_univ _, ?_⟩
+    simp [IsSeparated]
   obtain ⟨code, hcodeFamily, hmaximum⟩ :=
     Finset.exists_max_image family Finset.card hfamily
   have hcode : IsSeparated code minimumDistance := by

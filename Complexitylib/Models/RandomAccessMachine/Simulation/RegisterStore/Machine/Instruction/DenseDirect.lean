@@ -462,7 +462,7 @@ theorem denseDirectBinaryInstructionTM_hoareTime_frame
     rintro inp work out ⟨hinp, operands, hout⟩
     rcases operands with ⟨lhsWork, hlhsResult, hrhsResult⟩
     have hquery : (work tapes.update.entry.query).HasBinaryNat 0 :=
-      ⟨hrhsResult.scanner.queryStart, by simpa using hrhsResult.scanner.query⟩
+      ⟨hrhsResult.scanner.queryStart, by exact hrhsResult.scanner.query⟩
     have hrun := TM.binaryAddConstTM_hoareTime_frame
       tapes.update.entry.query destination 0 inp work out hquery
       (by simpa [hinp] using hinput)

@@ -120,10 +120,10 @@ run_cmd do
     unless env.contains headline do
       throwError "axiom guard: unknown headline `{headline}` — was it renamed?"
 
-  let mut moduleCount := 0
-  let mut declarationCount := 0
-  let mut theoremCount := 0
-  let mut axiomCount := 0
+  let mut moduleCount : Nat := 0
+  let mut declarationCount : Nat := 0
+  let mut theoremCount : Nat := 0
+  let mut axiomCount : Nat := 0
   let mut failures : Array AuditFailure := #[]
   for h : moduleIdx in *...env.header.moduleData.size do
     let moduleName := env.header.moduleNames[moduleIdx]!

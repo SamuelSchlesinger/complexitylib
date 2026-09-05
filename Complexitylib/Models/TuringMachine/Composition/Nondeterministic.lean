@@ -118,7 +118,7 @@ theorem compositionNTM_branchesAgreeAt_rewindVirtual
     (compositionNTM tmF N).BranchesAgreeAt c := by
   refine branchesAgreeAt_of_state_eq tmF N hq ?_
   dsimp only [compositionNTM, TM.compositionTM, TM.compositionTailTM, TM.seqTM]
-  rw [if_neg hne, if_neg hne]
+  rw [ite_eq_right hne, ite_eq_right hne]
   rfl
 
 end BranchAgreement

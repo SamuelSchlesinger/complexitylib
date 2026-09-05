@@ -72,7 +72,7 @@ instance : Fintype BalancedPhase where
 /-- Push-down TM deciding the balanced language. One work tape is used
     as a unary counter. The sign (which bit is in excess) is encoded in
     the control state; the stack height is the absolute difference. -/
-def balancedTM : TM 1 where
+@[expose] def balancedTM : TM 1 where
   Q := BalancedPhase
   qstart := .start
   qhalt := .done
@@ -386,7 +386,7 @@ private theorem balancedTM_step_scanExcess0_halt_empty
       c'.output.cells 1 = Γ.one := by
   have hir : c.input.read = Γ.blank := inv.read_blank
   have hwr : (c.work 0).read = Γ.start := inv.work_read_start_iff.mpr rfl
-  simp only [TM.step, hst, balancedTM, reduceCtorEq, ↓reduceIte, if_pos hir, if_pos hwr]
+  simp only [TM.step, hst, balancedTM, reduceCtorEq, ↓reduceIte, ite_eq_left hir, ite_eq_left hwr]
   refine ⟨_, rfl, rfl, ?_⟩
   have hstay := inv.output_stay
   show (c.output.writeAndMove Γw.one.toΓ (idleDir c.output.read)).cells 1 = Γ.one
@@ -402,7 +402,7 @@ private theorem balancedTM_step_scanExcess0_halt_nonempty
   have hir : c.input.read = Γ.blank := inv.read_blank
   have hwr : (c.work 0).read ≠ Γ.start := by
     simp only [ne_eq, inv.work_read_start_iff]; omega
-  simp only [TM.step, hst, balancedTM, reduceCtorEq, ↓reduceIte, if_pos hir, if_neg hwr]
+  simp only [TM.step, hst, balancedTM, reduceCtorEq, ↓reduceIte, ite_eq_left hir, ite_eq_right hwr]
   refine ⟨_, rfl, rfl, ?_⟩
   have hstay := inv.output_stay
   show (c.output.writeAndMove Γw.zero.toΓ (idleDir c.output.read)).cells 1 = Γ.zero
@@ -417,7 +417,7 @@ private theorem balancedTM_step_scanExcess1_halt_empty
       c'.output.cells 1 = Γ.one := by
   have hir : c.input.read = Γ.blank := inv.read_blank
   have hwr : (c.work 0).read = Γ.start := inv.work_read_start_iff.mpr rfl
-  simp only [TM.step, hst, balancedTM, reduceCtorEq, ↓reduceIte, if_pos hir, if_pos hwr]
+  simp only [TM.step, hst, balancedTM, reduceCtorEq, ↓reduceIte, ite_eq_left hir, ite_eq_left hwr]
   refine ⟨_, rfl, rfl, ?_⟩
   have hstay := inv.output_stay
   show (c.output.writeAndMove Γw.one.toΓ _).cells 1 = Γ.one
@@ -433,7 +433,7 @@ private theorem balancedTM_step_scanExcess1_halt_nonempty
   have hir : c.input.read = Γ.blank := inv.read_blank
   have hwr : (c.work 0).read ≠ Γ.start := by
     simp only [ne_eq, inv.work_read_start_iff]; omega
-  simp only [TM.step, hst, balancedTM, reduceCtorEq, ↓reduceIte, if_pos hir, if_neg hwr]
+  simp only [TM.step, hst, balancedTM, reduceCtorEq, ↓reduceIte, ite_eq_left hir, ite_eq_right hwr]
   refine ⟨_, rfl, rfl, ?_⟩
   have hstay := inv.output_stay
   show (c.output.writeAndMove Γw.zero.toΓ _).cells 1 = Γ.zero
@@ -450,8 +450,8 @@ private theorem balancedTM_step_scanExcess0_push
   have hir : c.input.read = Γ.zero := by rw [inv.read_bit hk, hbit]; rfl
   have hir_ne_blank : c.input.read ≠ Γ.blank := by rw [hir]; decide
   have hir_ne_one : c.input.read ≠ Γ.one := by rw [hir]; decide
-  simp only [TM.step, hst, balancedTM, reduceCtorEq, ↓reduceIte, if_neg hir_ne_blank,
-             if_pos hir, if_neg hir_ne_one]
+  simp only [TM.step, hst, balancedTM, reduceCtorEq, ↓reduceIte, ite_eq_right hir_ne_blank,
+             ite_eq_left hir, ite_eq_right hir_ne_one]
   refine ⟨_, rfl, rfl, ?_⟩
   refine ⟨?_, ?_, ?_, ?_, ?_, ?_, ?_⟩
   · show (c.input.move Dir3.right).cells = _; rw [Tape.move_cells]; exact inv.ic
@@ -488,8 +488,8 @@ private theorem balancedTM_step_scanExcess0_switch
   have hir_ne_blank : c.input.read ≠ Γ.blank := by rw [hir]; decide
   have hir_ne_zero : c.input.read ≠ Γ.zero := by rw [hir]; decide
   have hwr : (c.work 0).read = Γ.start := inv.work_read_start_iff.mpr rfl
-  simp only [TM.step, hst, balancedTM, reduceCtorEq, ↓reduceIte, if_neg hir_ne_blank,
-             if_neg hir_ne_zero, if_pos hir, if_pos hwr]
+  simp only [TM.step, hst, balancedTM, reduceCtorEq, ↓reduceIte, ite_eq_right hir_ne_blank,
+             ite_eq_right hir_ne_zero, ite_eq_left hir, ite_eq_left hwr]
   refine ⟨_, rfl, rfl, ?_⟩
   refine ⟨?_, ?_, ?_, ?_, ?_, ?_, ?_⟩
   · show (c.input.move Dir3.right).cells = _; rw [Tape.move_cells]; exact inv.ic
@@ -527,8 +527,8 @@ private theorem balancedTM_step_scanExcess0_pop
   have hir_ne_zero : c.input.read ≠ Γ.zero := by rw [hir]; decide
   have hwr_ne : (c.work 0).read ≠ Γ.start := by
     simp only [ne_eq, inv.work_read_start_iff]; omega
-  simp only [TM.step, hst, balancedTM, reduceCtorEq, ↓reduceIte, if_neg hir_ne_blank,
-             if_neg hir_ne_zero, if_pos hir, if_neg hwr_ne]
+  simp only [TM.step, hst, balancedTM, reduceCtorEq, ↓reduceIte, ite_eq_right hir_ne_blank,
+             ite_eq_right hir_ne_zero, ite_eq_left hir, ite_eq_right hwr_ne]
   refine ⟨_, rfl, rfl, ?_⟩
   refine ⟨?_, ?_, ?_, ?_, ?_, ?_, ?_⟩
   · show (c.input.move Dir3.right).cells = _; rw [Tape.move_cells]; exact inv.ic
@@ -567,8 +567,8 @@ private theorem balancedTM_step_scanExcess1_push
   have hir : c.input.read = Γ.one := by rw [inv.read_bit hk, hbit]; rfl
   have hir_ne_blank : c.input.read ≠ Γ.blank := by rw [hir]; decide
   have hir_ne_zero : c.input.read ≠ Γ.zero := by rw [hir]; decide
-  simp only [TM.step, hst, balancedTM, reduceCtorEq, ↓reduceIte, if_neg hir_ne_blank,
-             if_neg hir_ne_zero, if_pos hir]
+  simp only [TM.step, hst, balancedTM, reduceCtorEq, ↓reduceIte, ite_eq_right hir_ne_blank,
+             ite_eq_right hir_ne_zero, ite_eq_left hir]
   refine ⟨_, rfl, rfl, ?_⟩
   refine ⟨?_, ?_, ?_, ?_, ?_, ?_, ?_⟩
   · show (c.input.move Dir3.right).cells = _; rw [Tape.move_cells]; exact inv.ic
@@ -605,8 +605,8 @@ private theorem balancedTM_step_scanExcess1_switch
   have hir_ne_blank : c.input.read ≠ Γ.blank := by rw [hir]; decide
   have hir_ne_one : c.input.read ≠ Γ.one := by rw [hir]; decide
   have hwr : (c.work 0).read = Γ.start := inv.work_read_start_iff.mpr rfl
-  simp only [TM.step, hst, balancedTM, reduceCtorEq, ↓reduceIte, if_neg hir_ne_blank,
-             if_neg hir_ne_one, if_pos hir, if_pos hwr]
+  simp only [TM.step, hst, balancedTM, reduceCtorEq, ↓reduceIte, ite_eq_right hir_ne_blank,
+             ite_eq_right hir_ne_one, ite_eq_left hir, ite_eq_left hwr]
   refine ⟨_, rfl, rfl, ?_⟩
   refine ⟨?_, ?_, ?_, ?_, ?_, ?_, ?_⟩
   · show (c.input.move Dir3.right).cells = _; rw [Tape.move_cells]; exact inv.ic
@@ -644,8 +644,8 @@ private theorem balancedTM_step_scanExcess1_pop
   have hir_ne_one : c.input.read ≠ Γ.one := by rw [hir]; decide
   have hwr_ne : (c.work 0).read ≠ Γ.start := by
     simp only [ne_eq, inv.work_read_start_iff]; omega
-  simp only [TM.step, hst, balancedTM, reduceCtorEq, ↓reduceIte, if_neg hir_ne_blank,
-             if_neg hir_ne_one, if_pos hir, if_neg hwr_ne]
+  simp only [TM.step, hst, balancedTM, reduceCtorEq, ↓reduceIte, ite_eq_right hir_ne_blank,
+             ite_eq_right hir_ne_one, ite_eq_left hir, ite_eq_right hwr_ne]
   refine ⟨_, rfl, rfl, ?_⟩
   refine ⟨?_, ?_, ?_, ?_, ?_, ?_, ?_⟩
   · show (c.input.move Dir3.right).cells = _; rw [Tape.move_cells]; exact inv.ic
@@ -887,7 +887,7 @@ private theorem balancedExpected_scan_eq_one_iff :
   induction rest with
   | nil =>
     intro s h hs
-    rcases hs with hs | hs <;> subst hs <;> simp only [if_true, if_false, reduceCtorEq]
+    rcases hs with hs | hs <;> subst hs <;> simp only [ite_true, ite_false, reduceCtorEq]
     · cases h with
       | zero => simp [balancedExpected, boolDiff_nil]
       | succ h' =>
@@ -904,50 +904,50 @@ private theorem balancedExpected_scan_eq_one_iff :
     intro s h hs
     rcases hs with hs | hs <;> subst hs <;> cases b
     · -- scanExcess0 + false → scanExcess0 (h+1)
-      simp only [balancedExpected, boolDiff_cons_false, if_true]
+      simp only [balancedExpected, boolDiff_cons_false, ite_true]
       rw [ih .scanExcess0 (h + 1) (Or.inl rfl)]
-      simp only [if_true]
+      simp only [ite_true]
       constructor
       · intro hh; push_cast at hh ⊢; linarith
       · intro hh; push_cast at hh ⊢; linarith
     · -- scanExcess0 + true: h=0 switches to scanExcess1 1; h+1 pops to scanExcess0 h
       cases h with
       | zero =>
-        simp only [balancedExpected, boolDiff_cons_true, if_true]
+        simp only [balancedExpected, boolDiff_cons_true, ite_true]
         rw [ih .scanExcess1 1 (Or.inr rfl)]
-        simp only [reduceCtorEq, if_false]
+        simp only [reduceCtorEq, ite_false]
         push_cast
         constructor
         · intro hh; linarith
         · intro hh; linarith
       | succ h' =>
-        simp only [balancedExpected, boolDiff_cons_true, if_true]
+        simp only [balancedExpected, boolDiff_cons_true, ite_true]
         rw [ih .scanExcess0 h' (Or.inl rfl)]
-        simp only [if_true]
+        simp only [ite_true]
         constructor
         · intro hh; push_cast at hh ⊢; linarith
         · intro hh; push_cast at hh ⊢; linarith
     · -- scanExcess1 + false: h=0 switches to scanExcess0 1; h+1 pops to scanExcess1 h
       cases h with
       | zero =>
-        simp only [balancedExpected, boolDiff_cons_false, reduceCtorEq, if_false]
+        simp only [balancedExpected, boolDiff_cons_false, reduceCtorEq, ite_false]
         rw [ih .scanExcess0 1 (Or.inl rfl)]
-        simp only [if_true]
+        simp only [ite_true]
         push_cast
         constructor
         · intro hh; linarith
         · intro hh; linarith
       | succ h' =>
-        simp only [balancedExpected, boolDiff_cons_false, reduceCtorEq, if_false]
+        simp only [balancedExpected, boolDiff_cons_false, reduceCtorEq, ite_false]
         rw [ih .scanExcess1 h' (Or.inr rfl)]
-        simp only [reduceCtorEq, if_false]
+        simp only [reduceCtorEq, ite_false]
         constructor
         · intro hh; push_cast at hh ⊢; linarith
         · intro hh; push_cast at hh ⊢; linarith
     · -- scanExcess1 + true → scanExcess1 (h+1)
-      simp only [balancedExpected, boolDiff_cons_true, reduceCtorEq, if_false]
+      simp only [balancedExpected, boolDiff_cons_true, reduceCtorEq, ite_false]
       rw [ih .scanExcess1 (h + 1) (Or.inr rfl)]
-      simp only [reduceCtorEq, if_false]
+      simp only [reduceCtorEq, ite_false]
       constructor
       · intro hh; push_cast at hh ⊢; linarith
       · intro hh; push_cast at hh ⊢; linarith
@@ -961,8 +961,8 @@ private theorem boolDiff_eq_zero_iff (x : List Bool) :
 private theorem balancedExpected_zero_iff_mem (x : List Bool) :
     balancedExpected .scanExcess0 0 x = .one ↔ x ∈ Language.balanced := by
   rw [balancedExpected_scan_eq_one_iff x .scanExcess0 0 (Or.inl rfl)]
-  simp only [if_true, Nat.cast_zero, neg_zero, Language.balanced,
-             Set.mem_setOf_eq]
+  simp only [ite_true, Nat.cast_zero, neg_zero, Language.balanced,
+             Set.mem_ofPred_eq]
   exact boolDiff_eq_zero_iff x
 
 /-- The output of `balancedExpected` from any scan state is always `.zero`

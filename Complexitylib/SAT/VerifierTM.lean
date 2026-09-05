@@ -116,7 +116,7 @@ private theorem retargetInput_step_preserves_input_of_read_ne_start {k : ℕ} (M
   simp only [TM.step, TM.retargetInput] at hstep
   split at hstep
   · simp at hstep
-  · simp only [Option.some.injEq] at hstep
+  · injection hstep with hstep
     subst hstep
     simp [TM.idleDir, hinp, Tape.move]
 
@@ -685,7 +685,7 @@ theorem satCounter3TM_started_hoareTime (z α : List Bool) :
           (∀ i : Fin 2, work ⟨i.val, by omega⟩ = innerWork i) ∧
           work ⟨2, by omega⟩ = vin)
       (TM.inputLengthPlusOneCounterTime z.length) := by
-    simpa [satCounter3TM] using hret
+    exact hret
   refine hret'.strengthen_post ?_
   intro _inp work out hpost
   rcases hpost with ⟨vin, innerWork, hinner, hmap, hvin⟩
@@ -727,7 +727,7 @@ theorem satCounter3TM_started_stableInput_hoareTime (z α : List Bool) :
       c'.input = inp :=
     retargetInput_reachesIn_preserves_input_of_read_ne_start
       (TM.inputLengthPlusOneCounterTM (n := 2) counterIdx)
-      (by simpa [satCounter3TM] using hreach)
+      (by simp only [satCounter3TM] at hreach; exact hreach)
       hpre.1
   refine ⟨c', t, ht, hreach, hhalt, ?_⟩
   rw [hinput_keep]
@@ -1630,7 +1630,6 @@ private theorem satEval_rewindAlpha_left_step (mode : SatEvalMode)
   · have hread0 : (c.work (0 : Fin 1)).read ≠ Γ.start := by
       simpa using hread
     simp [c', satEvalOnInputTM, TM.step, satEvalDelta, hstate, hread0]
-    rfl
   · exact TM.transitionInput_eq_self hinp
   · simp [c', Tape.writeAndMove, Tape.move, Tape.write_head]
   · exact TM.tape_readBackWrite_preserves _ _ (Or.inr hread)
@@ -1668,7 +1667,6 @@ private theorem satEval_rewindAlpha_base_step (mode : SatEvalMode)
   · have hread0 : (c.work (0 : Fin 1)).read = Γ.start := by
       simpa using hread
     simp [c', satEvalOnInputTM, TM.step, satEvalDelta, hstate, hread0]
-    rfl
   · exact TM.transitionInput_eq_self hinp
   · have hhead00 : (c.work (0 : Fin 1)).head = 0 := by
       simpa using hhead0
@@ -1907,6 +1905,7 @@ private theorem satEvalOnInputTM_token_loop_correct (α : Assignment) :
       refine ⟨c', 1, by simp only [List.length_nil]; omega, .step hstep .zero, hhalt, ?_⟩
       rw [hout', finishEvalMode_toΓ_eq_finish mode var]
       simp [satEvalSemRun]
+      rfl
   | cons tok toks ih =>
       intro mode var c hstate hinput hcells hhead hout
       have hwork_read : (c.work ⟨0, by omega⟩).read ≠ Γ.start := by
@@ -1944,13 +1943,15 @@ private theorem satEvalOnInputTM_token_loop_correct (α : Assignment) :
                       hstate2 hinput2 hcells2 hhead2 hout2_started
                   refine ⟨c', 2 + t, by simp only [List.length_cons]; omega,
                     TM.reachesIn_trans _ hreach2 hreach, hhalt, ?_⟩
-                  simpa [satEvalSemRun, satEvalSemStep] using hout'
+                  simp [satEvalSemRun, satEvalSemStep]
+                  exact hout'
               | inLit cnf clause empty sign =>
                   refine ⟨c2, 2, by simp only [List.length_cons]; omega, hreach2, ?_, ?_⟩
-                  · simpa [satEvalOnInputTM] using hstate2
+                  · simp [satEvalOnInputTM]
+                    exact hstate2
                   · rw [hout2, hout]
-                    simpa [satEvalSemRun, satEvalSemStep, tokenOfBits, satEvalTokenStep]
-                      using satEval_reject_output_zero _ (by rfl)
+                    simp [satEvalSemRun, satEvalSemStep, tokenOfBits, satEvalTokenStep]
+                    exact satEval_reject_output_zero _ (by rfl)
           | true =>
               have hinput_bits : hasBoolSuffix c.input (true :: true :: encodeTokens toks) := by
                 simpa [encodeTokens_cons, EncToken.encode] using hinput
@@ -1979,7 +1980,8 @@ private theorem satEvalOnInputTM_token_loop_correct (α : Assignment) :
                       hstate2 hinput2 hcells2 hhead2 hout2_started
                   refine ⟨c', 2 + t, by simp only [List.length_cons]; omega,
                     TM.reachesIn_trans _ hreach2 hreach, hhalt, ?_⟩
-                  simpa [satEvalSemRun, satEvalSemStep] using hout'
+                  simp [satEvalSemRun, satEvalSemStep]
+                  exact hout'
               | inLit cnf clause empty sign =>
                   have hcells2 : (c2.work ⟨0, by omega⟩).cells =
                       (Tape.init (α.map Γ.ofBool)).cells := by
@@ -1999,7 +2001,8 @@ private theorem satEvalOnInputTM_token_loop_correct (α : Assignment) :
                       hstate2 hinput2 hcells2 hhead2 hout2_started
                   refine ⟨c', 2 + t, by simp only [List.length_cons]; omega,
                     TM.reachesIn_trans _ hreach2 hreach, hhalt, ?_⟩
-                  simpa [satEvalSemRun, satEvalSemStep] using hout'
+                  simp [satEvalSemRun, satEvalSemStep]
+                  exact hout'
       | litSep =>
           have hinput_bits : hasBoolSuffix c.input (false :: true :: encodeTokens toks) := by
             simpa [encodeTokens_cons, EncToken.encode] using hinput
@@ -2009,10 +2012,11 @@ private theorem satEvalOnInputTM_token_loop_correct (α : Assignment) :
           cases mode with
           | boundary cnf clause empty =>
               refine ⟨c2, 2, by simp only [List.length_cons]; omega, hreach2, ?_, ?_⟩
-              · simpa [satEvalOnInputTM] using hstate2
+              · simp [satEvalOnInputTM]
+                exact hstate2
               · rw [hout2, hout]
-                simpa [satEvalSemRun, satEvalSemStep, tokenOfBits, satEvalTokenStep]
-                  using satEval_reject_output_zero _ (by rfl)
+                simp [satEvalSemRun, satEvalSemStep, tokenOfBits, satEvalTokenStep]
+                exact satEval_reject_output_zero _ (by rfl)
           | inLit cnf clause empty sign =>
               have hread_alpha :
                   (c.work ⟨0, by omega⟩).read =
@@ -2075,7 +2079,8 @@ private theorem satEvalOnInputTM_token_loop_correct (α : Assignment) :
                 TM.reachesIn_trans _
                   (TM.reachesIn_trans _ hreach2 hrewind) hreach,
                 hhalt, ?_⟩
-              simpa [satEvalSemRun, satEvalSemStep] using hout'
+              simp [satEvalSemRun, satEvalSemStep]
+              exact hout'
       | clauseSep =>
           have hinput_bits : hasBoolSuffix c.input (true :: false :: encodeTokens toks) := by
             simpa [encodeTokens_cons, EncToken.encode] using hinput
@@ -2104,13 +2109,15 @@ private theorem satEvalOnInputTM_token_loop_correct (α : Assignment) :
                   hstate2 hinput2 hcells2 hhead2 hout2_started
               refine ⟨c', 2 + t, by simp only [List.length_cons]; omega,
                 TM.reachesIn_trans _ hreach2 hreach, hhalt, ?_⟩
-              simpa [satEvalSemRun, satEvalSemStep] using hout'
+              simp [satEvalSemRun, satEvalSemStep]
+              exact hout'
           | inLit cnf clause empty sign =>
               refine ⟨c2, 2, by simp only [List.length_cons]; omega, hreach2, ?_, ?_⟩
-              · simpa [satEvalOnInputTM] using hstate2
+              · simp [satEvalOnInputTM]
+                exact hstate2
               · rw [hout2, hout]
-                simpa [satEvalSemRun, satEvalSemStep, tokenOfBits, satEvalTokenStep]
-                  using satEval_reject_output_zero _ (by rfl)
+                simp [satEvalSemRun, satEvalSemStep, tokenOfBits, satEvalTokenStep]
+                exact satEval_reject_output_zero _ (by rfl)
 
 private theorem satEvalOnInputTM_tokenize_none_reject (α : Assignment) :
     ∀ (suffix : List Bool) (mode : SatEvalMode) (var : ℕ)
@@ -2200,7 +2207,8 @@ private theorem satEvalOnInputTM_tokenize_none_reject (α : Assignment) :
                   TM.reachesIn_trans _ hreach2 hreach, hhalt, hout'⟩
             | inLit cnf clause empty sign =>
                 refine ⟨c2, 2, by simp only [List.length_cons] at hlen; omega, hreach2, ?_, ?_⟩
-                · simpa [satEvalOnInputTM] using hstate2
+                · simp [satEvalOnInputTM]
+                  exact hstate2
                 · rw [hout2, hout]
                   simpa [tokenOfBits, satEvalTokenStep] using
                     satEval_reject_output_zero _ (by rfl)
@@ -2208,7 +2216,8 @@ private theorem satEvalOnInputTM_tokenize_none_reject (α : Assignment) :
             cases mode with
             | boundary cnf clause empty =>
                 refine ⟨c2, 2, by simp only [List.length_cons] at hlen; omega, hreach2, ?_, ?_⟩
-                · simpa [satEvalOnInputTM] using hstate2
+                · simp [satEvalOnInputTM]
+                  exact hstate2
                 · rw [hout2, hout]
                   simpa [tokenOfBits, satEvalTokenStep] using
                     satEval_reject_output_zero _ (by rfl)
@@ -2301,7 +2310,8 @@ private theorem satEvalOnInputTM_tokenize_none_reject (α : Assignment) :
                   TM.reachesIn_trans _ hreach2 hreach, hhalt, hout'⟩
             | inLit cnf clause empty sign =>
                 refine ⟨c2, 2, by simp only [List.length_cons] at hlen; omega, hreach2, ?_, ?_⟩
-                · simpa [satEvalOnInputTM] using hstate2
+                · simp [satEvalOnInputTM]
+                  exact hstate2
                 · rw [hout2, hout]
                   simpa [tokenOfBits, satEvalTokenStep] using
                     satEval_reject_output_zero _ (by rfl)
@@ -2410,7 +2420,8 @@ private theorem satEvalOnInputTM_started_correct (α z : List Bool)
       refine ⟨c', t, ?_, hreach, hhalt, ?_⟩
       · have hzlen : z.length = 2 * toks.length := by rw [hz, encodeTokens_length]
         rw [hzlen]; omega
-      · simpa [satEvalSemBits, htok] using hout'
+      · simp [satEvalSemBits, htok]
+        exact hout'
 
 /-- Coarse polynomial budget for the split-input evaluator. Rewinding the
 assignment after each completed literal gives a quadratic upper bound once
@@ -2531,7 +2542,7 @@ private lemma satEvalSemRun_correct (α : Assignment) (toks : List EncToken) :
                   false true)
                 [] [] (clauseRev.reverse :: cnfRev)
                 ⟨rfl, ?_, ?_, ?_⟩
-              · simpa [Bool.and_assoc] using h
+              · exact h
               · simp [CNF.eval, List.reverse_cons]
               · simp [Clause.eval]
               · simp
@@ -2560,7 +2571,7 @@ private lemma satEvalSemRun_correct (α : Assignment) (toks : List EncToken) :
                   (Clause.eval α clauseRev.reverse || (Assignment.get α var == sign)) false)
                 [] ({ sign := sign, var := var } :: clauseRev) cnfRev
                 ⟨rfl, rfl, ?_, ?_⟩
-              · simpa [Lit.eval, Bool.or_assoc] using h
+              · exact h
               · simp [Clause.eval, Lit.eval]
               · simp
           | clauseSep =>
@@ -2582,7 +2593,7 @@ theorem satEvalSemBits_eq_decode_eval (α z : List Bool) :
       simp
       have h := satEvalSemRun_correct α toks (.boundary true false true) [] [] []
         ⟨rfl, by simp [CNF.eval], by simp [Clause.eval], by simp⟩
-      simpa [parseEvalResult] using h
+      exact h
 
 /-- Pure semantic model of the paired SAT verifier: unpair `w` into `(z, α)`,
 check the witness-length bound `|α| ≤ |z| + 1`, and evaluate the encoded CNF
@@ -3130,7 +3141,7 @@ private theorem verifyPairSplit_afterFalse_zero_step
     simp [verifyPairSplitDirs, Tape.writeAndMove, Tape.move, Tape.write_head]
   · show (((c.work ⟨0, by omega⟩).writeAndMove _ _)).cells = _
     have hne0 : (c.work ⟨0, by omega⟩).head ≠ 0 := by omega
-    simp only [Tape.writeAndMove, Tape.move_cells, Tape.write, if_neg hne0]
+    simp only [Tape.writeAndMove, Tape.move_cells, Tape.write, ite_eq_right hne0]
     simp [verifyPairSplitWrite, boolWrite, Γw.toΓ]
   · show ((c.work ⟨1, by omega⟩).writeAndMove _ _) = _
     rw [show verifyPairSplitWrite false (fun j => (c.work j).read) ⟨1, by omega⟩ =
@@ -3142,7 +3153,7 @@ private theorem verifyPairSplit_afterFalse_zero_step
     simp [verifyPairSplitDirs, Tape.writeAndMove, Tape.move, Tape.write_head]
   · show (((c.work ⟨2, by omega⟩).writeAndMove _ _)).cells = _
     have hne2 : (c.work ⟨2, by omega⟩).head ≠ 0 := by omega
-    simp only [Tape.writeAndMove, Tape.move_cells, Tape.write, if_neg hne2]
+    simp only [Tape.writeAndMove, Tape.move_cells, Tape.write, ite_eq_right hne2]
     simp [verifyPairSplitWrite, Γw.toΓ]
   · exact TM.tape_writeAndMove_stable c.output hoh hons
 
@@ -3248,7 +3259,7 @@ private theorem verifyPairSplit_afterTrue_one_step
     simp [verifyPairSplitDirs, Tape.writeAndMove, Tape.move, Tape.write_head]
   · show (((c.work ⟨0, by omega⟩).writeAndMove _ _)).cells = _
     have hne0 : (c.work ⟨0, by omega⟩).head ≠ 0 := by omega
-    simp only [Tape.writeAndMove, Tape.move_cells, Tape.write, if_neg hne0]
+    simp only [Tape.writeAndMove, Tape.move_cells, Tape.write, ite_eq_right hne0]
     simp [verifyPairSplitWrite, boolWrite, Γw.toΓ]
   · show ((c.work ⟨1, by omega⟩).writeAndMove _ _) = _
     rw [show verifyPairSplitWrite true (fun j => (c.work j).read) ⟨1, by omega⟩ =
@@ -3260,7 +3271,7 @@ private theorem verifyPairSplit_afterTrue_one_step
     simp [verifyPairSplitDirs, Tape.writeAndMove, Tape.move, Tape.write_head]
   · show (((c.work ⟨2, by omega⟩).writeAndMove _ _)).cells = _
     have hne2 : (c.work ⟨2, by omega⟩).head ≠ 0 := by omega
-    simp only [Tape.writeAndMove, Tape.move_cells, Tape.write, if_neg hne2]
+    simp only [Tape.writeAndMove, Tape.move_cells, Tape.write, ite_eq_right hne2]
     simp [verifyPairSplitWrite, Γw.toΓ]
   · exact TM.tape_writeAndMove_stable c.output hoh hons
 
@@ -3685,7 +3696,6 @@ private theorem verifyPairSplit_rewindCounter_left_step
   have hstep : verifyPairTM.step c = some c' := by
     simp [c', verifyPairTM, TM.step, verifyPairDelta, hst, hread2,
       verifyPairPreserveWork]
-    rfl
   refine ⟨c', hstep, rfl, ?_, ?_, ?_, ?_, ?_⟩
   · show ((c.work ⟨2, by omega⟩).writeAndMove (TM.readBackWrite
       (c.work ⟨2, by omega⟩).read).toΓ Dir3.left).head = _
@@ -3696,7 +3706,7 @@ private theorem verifyPairSplit_rewindCounter_left_step
     simp [Tape.write, Tape.read, Function.update_eq_self]
   · intro i hi
     show (c.work i).writeAndMove _ _ = c.work i
-    rw [if_neg hi]
+    rw [ite_eq_right hi]
     exact TM.tape_writeAndMove_stable (c.work i) (hframe i hi).1 (hframe i hi).2
   · exact TM.transitionInput_eq_self hinp_read
   · exact TM.tape_writeAndMove_stable c.output hoh hons
@@ -3731,7 +3741,6 @@ private theorem verifyPairSplit_rewindCounter_base_step
   have hstep : verifyPairTM.step c = some c' := by
     simp [c', verifyPairTM, TM.step, verifyPairDelta, hst, hread2,
       verifyPairPreserveWork]
-    rfl
   refine ⟨c', hstep, rfl, ?_, ?_, ?_, ?_, ?_⟩
   · show ((c.work ⟨2, by omega⟩).writeAndMove (TM.readBackWrite
       (c.work ⟨2, by omega⟩).read).toΓ Dir3.right).head = _
@@ -3742,7 +3751,7 @@ private theorem verifyPairSplit_rewindCounter_base_step
     simp [Tape.write, hhead2]
   · intro i hi
     show (c.work i).writeAndMove _ _ = c.work i
-    rw [if_neg hi]
+    rw [ite_eq_right hi]
     exact TM.tape_writeAndMove_stable (c.work i) (hframe i hi).1 (hframe i hi).2
   · exact TM.transitionInput_eq_self hinp_read
   · exact TM.tape_writeAndMove_stable c.output hoh hons
@@ -3774,7 +3783,6 @@ private theorem verifyPairSplit_rewindFormula_left_step
   have hstep : verifyPairTM.step c = some c' := by
     simp [c', verifyPairTM, TM.step, verifyPairDelta, hst, hread2,
       verifyPairPreserveWork]
-    rfl
   refine ⟨c', hstep, rfl, ?_, ?_, ?_, ?_, ?_⟩
   · show ((c.work ⟨0, by omega⟩).writeAndMove (TM.readBackWrite
       (c.work ⟨0, by omega⟩).read).toΓ Dir3.left).head = _
@@ -3785,7 +3793,7 @@ private theorem verifyPairSplit_rewindFormula_left_step
     simp [Tape.write, Tape.read, Function.update_eq_self]
   · intro i hi
     show (c.work i).writeAndMove _ _ = c.work i
-    rw [if_neg hi]
+    rw [ite_eq_right hi]
     exact TM.tape_writeAndMove_stable (c.work i) (hframe i hi).1 (hframe i hi).2
   · exact TM.transitionInput_eq_self hinp_read
   · exact TM.tape_writeAndMove_stable c.output hoh hons
@@ -3819,7 +3827,6 @@ private theorem verifyPairSplit_rewindFormula_base_step
   have hstep : verifyPairTM.step c = some c' := by
     simp [c', verifyPairTM, TM.step, verifyPairDelta, hst, hread2,
       verifyPairPreserveWork]
-    rfl
   refine ⟨c', hstep, rfl, ?_, ?_, ?_, ?_, ?_⟩
   · show ((c.work ⟨0, by omega⟩).writeAndMove (TM.readBackWrite
       (c.work ⟨0, by omega⟩).read).toΓ Dir3.right).head = _
@@ -3830,7 +3837,7 @@ private theorem verifyPairSplit_rewindFormula_base_step
     simp [Tape.write, hhead2]
   · intro i hi
     show (c.work i).writeAndMove _ _ = c.work i
-    rw [if_neg hi]
+    rw [ite_eq_right hi]
     exact TM.tape_writeAndMove_stable (c.work i) (hframe i hi).1 (hframe i hi).2
   · exact TM.transitionInput_eq_self hinp_read
   · exact TM.tape_writeAndMove_stable c.output hoh hons
@@ -3862,7 +3869,6 @@ private theorem verifyPairSplit_rewindAssignment_left_step
   have hstep : verifyPairTM.step c = some c' := by
     simp [c', verifyPairTM, TM.step, verifyPairDelta, hst, hread2,
       verifyPairPreserveWork]
-    rfl
   refine ⟨c', hstep, rfl, ?_, ?_, ?_, ?_, ?_⟩
   · show ((c.work ⟨1, by omega⟩).writeAndMove (TM.readBackWrite
       (c.work ⟨1, by omega⟩).read).toΓ Dir3.left).head = _
@@ -3873,7 +3879,7 @@ private theorem verifyPairSplit_rewindAssignment_left_step
     simp [Tape.write, Tape.read, Function.update_eq_self]
   · intro i hi
     show (c.work i).writeAndMove _ _ = c.work i
-    rw [if_neg hi]
+    rw [ite_eq_right hi]
     exact TM.tape_writeAndMove_stable (c.work i) (hframe i hi).1 (hframe i hi).2
   · exact TM.transitionInput_eq_self hinp_read
   · exact TM.tape_writeAndMove_stable c.output hoh hons
@@ -3908,7 +3914,6 @@ private theorem verifyPairSplit_rewindAssignment_base_step
   have hstep : verifyPairTM.step c = some c' := by
     simp [c', verifyPairTM, TM.step, verifyPairDelta, hst, hread2,
       verifyPairPreserveWork]
-    rfl
   refine ⟨c', hstep, rfl, ?_, ?_, ?_, ?_, ?_⟩
   · show ((c.work ⟨1, by omega⟩).writeAndMove (TM.readBackWrite
       (c.work ⟨1, by omega⟩).read).toΓ Dir3.right).head = _
@@ -3919,7 +3924,7 @@ private theorem verifyPairSplit_rewindAssignment_base_step
     simp [Tape.write, hhead2]
   · intro i hi
     show (c.work i).writeAndMove _ _ = c.work i
-    rw [if_neg hi]
+    rw [ite_eq_right hi]
     exact TM.tape_writeAndMove_stable (c.work i) (hframe i hi).1 (hframe i hi).2
   · exact TM.transitionInput_eq_self hinp_read
   · exact TM.tape_writeAndMove_stable c.output hoh hons
@@ -3975,13 +3980,13 @@ private theorem verifyPairSplit_copyAlpha_bit_step (b : Bool)
     simp [verifyPairCopyAlphaDirs, Tape.writeAndMove, Tape.move, Tape.write_head]
   · show ((c.work ⟨1, by omega⟩).writeAndMove _ _).cells = _
     have hne1 : (c.work ⟨1, by omega⟩).head ≠ 0 := by omega
-    simp only [Tape.writeAndMove, Tape.move_cells, Tape.write, if_neg hne1]
+    simp only [Tape.writeAndMove, Tape.move_cells, Tape.write, ite_eq_right hne1]
     cases b <;> simp [verifyPairCopyAlphaWrite, boolWrite, Γw.toΓ, Γ.ofBool]
   · show ((c.work ⟨2, by omega⟩).writeAndMove _ _).head = _
     simp [verifyPairCopyAlphaDirs, Tape.writeAndMove, Tape.move, Tape.write_head]
   · show ((c.work ⟨2, by omega⟩).writeAndMove _ _).cells = _
     have hne2 : (c.work ⟨2, by omega⟩).head ≠ 0 := by omega
-    simp only [Tape.writeAndMove, Tape.move_cells, Tape.write, if_neg hne2]
+    simp only [Tape.writeAndMove, Tape.move_cells, Tape.write, ite_eq_right hne2]
     simp [verifyPairCopyAlphaWrite, Γw.toΓ]
   · exact TM.tape_writeAndMove_stable c.output hoh hons
 
@@ -4072,9 +4077,13 @@ private theorem verifyPairSplit_copyAlpha_loop :
   | cons a as ih =>
       intro c hst hih hic0 hins hdata h0h h0ns h1h h1c0 h1ns h2h h2c0 h2ns hcnt hoh hons
       have hib : c.input.read = Γ.ofBool a := by
-        have := hdata 0 (by simp); simpa using this
+        have := hdata 0 (by simp)
+        simp only [Nat.add_zero] at this
+        exact this
       have hcounter : (c.work ⟨2, by omega⟩).read = Γ.one := by
-        have := hcnt 0 (by simp); simpa using this
+        have := hcnt 0 (by simp)
+        simp only [Nat.add_zero] at this
+        exact this
       obtain ⟨c1, hstep, hst1, hc1_ih, hc1_ic, hc1_0w, hc1_1h, hc1_1c, hc1_2h, hc1_2c, hc1_o⟩ :=
         verifyPairSplit_copyAlpha_bit_step a c hst hib hcounter ⟨h0h, h0ns⟩ h1h h2h hoh hons
       -- transfer input invariants to c1
@@ -4694,24 +4703,24 @@ private theorem projEval_step (c c' : Cfg 3 verifyPairTM.Q)
     cases hcst : c.state with
     | evalReadFirst mode =>
         by_cases hb : (c.work (0 : Fin 3)).read = Γ.blank
-        · simp [TM.step, hcst, verifyPairTM, satEvalOnInputTM, projEvalCfg,
+        · simp [Option.map, TM.step, hcst, verifyPairTM, satEvalOnInputTM, projEvalCfg,
             projEvalState, verifyPairDelta, satEvalDelta, verifyPairPreserveWork, hb]
           have hh := hwbm (TM.idleDir Γ.blank)
           rw [hb] at hh; exact hh.symm
         · cases hr : readBit? (c.work (0 : Fin 3)).read with
           | some b =>
-              simp [TM.step, hcst, verifyPairTM, satEvalOnInputTM, projEvalCfg,
+              simp [Option.map, TM.step, hcst, verifyPairTM, satEvalOnInputTM, projEvalCfg,
                 projEvalState, verifyPairDelta, satEvalDelta, verifyPairPreserveWork, hb, hr]
               exact (hwbm _).symm
           | none =>
-              simp [TM.step, hcst, verifyPairTM, satEvalOnInputTM, projEvalCfg,
+              simp [Option.map, TM.step, hcst, verifyPairTM, satEvalOnInputTM, projEvalCfg,
                 projEvalState, verifyPairDelta, satEvalDelta,
                 verifyPairReject, satEvalReject, hb, hr]
               exact (hwbm _).symm
     | evalReadSecond mode first =>
         cases hr : readBit? (c.work (0 : Fin 3)).read with
         | some second =>
-            simp [TM.step, hcst, verifyPairTM, satEvalOnInputTM, projEvalCfg,
+            simp [Option.map, TM.step, hcst, verifyPairTM, satEvalOnInputTM, projEvalCfg,
               projEvalState, verifyPairDelta, satEvalDelta, verifyPairPreserveWork,
               verifyPairEvalDirs, hr]
             refine ⟨?_, (hwbm _).symm, ?_⟩
@@ -4720,16 +4729,16 @@ private theorem projEval_step (c c' : Cfg 3 verifyPairTM.Q)
               obtain rfl : i = 0 := Subsingleton.elim i 0
               simp
         | none =>
-            simp [TM.step, hcst, verifyPairTM, satEvalOnInputTM, projEvalCfg,
+            simp [Option.map, TM.step, hcst, verifyPairTM, satEvalOnInputTM, projEvalCfg,
               projEvalState, verifyPairDelta, satEvalDelta, verifyPairReject, satEvalReject, hr]
             exact (hwbm _).symm
     | evalRewindAlpha mode =>
         by_cases ha : (c.work (1 : Fin 3)).read = Γ.start
-        · simp [TM.step, hcst, verifyPairTM, satEvalOnInputTM, projEvalCfg,
+        · simp [Option.map, TM.step, hcst, verifyPairTM, satEvalOnInputTM, projEvalCfg,
             projEvalState, verifyPairDelta, satEvalDelta, verifyPairPreserveWork, ha]
           refine ⟨(hwbm _).symm, ?_⟩
           funext i; obtain rfl : i = 0 := Subsingleton.elim i 0; simp
-        · simp [TM.step, hcst, verifyPairTM, satEvalOnInputTM, projEvalCfg,
+        · simp [Option.map, TM.step, hcst, verifyPairTM, satEvalOnInputTM, projEvalCfg,
             projEvalState, verifyPairDelta, satEvalDelta, verifyPairPreserveWork, ha]
           refine ⟨(hwbm _).symm, ?_⟩
           funext i; obtain rfl : i = 0 := Subsingleton.elim i 0; simp
@@ -4763,7 +4772,7 @@ private theorem verify_eval_next_state (c c' : Cfg 3 verifyPairTM.Q)
   have hmap : c'.state = (verifyPairDelta c.state c.input.read
       (fun i => (c.work i).read) c.output.read).1 := by
     have h := hvstep
-    rw [TM.step, if_neg hcne] at h
+    rw [TM.step, ite_eq_right hcne] at h
     exact congrArg Cfg.state (Option.some.inj h).symm
   cases hcst : c.state with
   | evalReadFirst mode =>
@@ -4780,7 +4789,8 @@ private theorem verify_eval_next_state (c c' : Cfg 3 verifyPairTM.Q)
       split at hmap
       · rw [hmap]
         cases (satEvalTokenStep mode (tokenOfBits first _)
-          ((fun i => (c.work i).read) ⟨1, by omega⟩)).1 <;> simp [isEvalState]
+          ((fun i => (c.work i).read) ⟨1, by omega⟩)).1 <;>
+          (simp [isEvalState]; try rfl)
       · right; exact hmap
   | evalRewindAlpha mode =>
       rw [hcst] at hmap
@@ -4825,7 +4835,7 @@ private theorem projEval_reaches :
           · obtain ⟨c', hvstep⟩ : ∃ c', verifyPairTM.step c = some c' := by
               have hcne : c.state ≠ verifyPairTM.qhalt := by
                 intro h; rw [h] at hev; simp [isEvalState, verifyPairTM] at hev
-              rw [TM.step, if_neg hcne]; exact ⟨_, rfl⟩
+              rw [TM.step, ite_eq_right hcne]; exact ⟨_, rfl⟩
             have hps := projEval_step c c' hev hns hvstep
             rw [hps] at hstep_sat
             obtain rfl := Option.some.inj hstep_sat
@@ -4859,6 +4869,7 @@ private theorem verifyPairSplit_eval_success (z α : List Bool)
   -- `projEvalCfg c0` is exactly the evaluator's started configuration.
   have hproj0_state : (projEvalCfg c0).state = .readFirst (.boundary true false true) := by
     simp only [projEvalCfg, hs0, projEvalState]
+    rfl
   have hproj0_input : (projEvalCfg c0).input =
       (Tape.init (z.map Γ.ofBool)).move Dir3.right := hw0
   have hproj0_work : (projEvalCfg c0).work ⟨0, by omega⟩ =
@@ -5093,7 +5104,7 @@ private theorem verifyPairSplit_scan_reject :
       | cons b2 rest2 =>
           have hread1 : c.input.read = Γ.ofBool b1 := hasBoolSuffix_read_cons hsuf
           have hnext : c.input.cells (c.input.head + 1) = Γ.ofBool b2 := by
-            simpa using hsuf.2.1 1 (by simp)
+            exact hsuf.2.1 1 (by simp)
           cases b1 <;> cases b2
           · -- false false: consume `00`, recurse on rest2
             have hnone2 : unpair? rest2 = none := by
@@ -5143,7 +5154,7 @@ private theorem verifyPairSplit_scan_reject :
               verifyPairSplit_scanX_true_step c hst hread1 hwst hoh hons
             have hc1read : c1.input.read = Γ.zero := by
               show c1.input.cells c1.input.head = _
-              rw [hc1ic, hc1ih]; simpa using hnext
+              rw [hc1ic, hc1ih]; exact hnext
             obtain ⟨c', hstep2, hhalt, hz⟩ :=
               verifyPairSplit_afterTrue_reject c1 hst1 (Or.inr hc1read) (by rw [hc1o]; exact hout)
             exact ⟨c', 2, by omega,

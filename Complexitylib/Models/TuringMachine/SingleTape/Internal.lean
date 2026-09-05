@@ -222,7 +222,7 @@ theorem simInvAt_init (k : ℕ) :
   wfStart := fun _ => by simp [Tape.init]
   noStart := fun _ p hp => by
     simp only [Tape.init]
-    rw [if_neg (by omega : ¬ p = 0)]
+    rw [ite_eq_right (by omega : ¬ p = 0)]
     simp
   heads_le := fun _ => by simp [Tape.init]
   headBit := fun p hp1 hp0 _ => by omega
@@ -230,7 +230,7 @@ theorem simInvAt_init (k : ℕ) :
   sentinel := fun c hc => by
     rw [blockStart_one] at hc
     simp only [Tape.init]
-    rw [if_neg (by omega : ¬ c = 0)]
+    rw [ite_eq_right (by omega : ¬ c = 0)]
     simp
 
 /-- `SimInvAt` depends on the encoding tape only through its cells (never its

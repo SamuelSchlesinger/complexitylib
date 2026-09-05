@@ -68,7 +68,7 @@ theorem RepeatFrame.trace_run_prefix (tm : NTM n) (hT : 0 < T)
     have hCstate : C.state = .run j ⟨m, hm'⟩
         (tm.trace m (fun i => g i.val) c₀).state votes := by
       simpa [C] using hprefix.1
-    rw [(repeatAtTime tm k T).trace_add m 1]
+    erw [(repeatAtTime tm k T).trace_add m 1]
     apply RepeatFrame.run tm
     · exact ih hm'
     · exact hCstate
@@ -266,8 +266,9 @@ theorem repeatAtTime_trace_trial (tm : NTM n) (x : List Bool)
       simpa using hstate
     have hhalt' : tm.qstart = tm.qhalt := by
       simpa [trace] using hhalt
-    simpa [trace] using repeatAtTime_trace_trial_zero tm x j votes rewindChoices C₀
-      hstate' hproject hinp hwork hout hinputHead hactiveHead hframe hparked hhalt'
+    simp [trace]
+    exact repeatAtTime_trace_trial_zero tm x j votes rewindChoices C₀ hstate' hproject hinp hwork
+      hout hinputHead hactiveHead hframe hparked hhalt'
 
 end NTM
 

@@ -83,7 +83,7 @@ theorem spectralBound_cliqueLoops {n : ℕ} (hn : 0 < n) :
   have hstep : ∀ v : (cliqueLoops n hn).V, (cliqueLoops n hn).step f v = 0 := by
     intro v
     rw [step_cliqueLoops hn f v, hf, zero_div]
-  simp [hstep]
+  simp only [hstep, zero_pow two_ne_zero, Finset.sum_const_zero, zero_mul, le_refl]
 
 end RegGraph
 

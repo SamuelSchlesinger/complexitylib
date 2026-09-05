@@ -49,7 +49,11 @@ private def sampleVec : Fin 2 → List Bool := ![[false], [true, false]]
 private inductive Q where
   | go
   | halt
-  deriving DecidableEq, Fintype
+  deriving DecidableEq
+
+private instance : Fintype Q where
+  elems := ⟨↑([Q.go, Q.halt] : List Q), by decide⟩
+  complete := fun x => by cases x <;> decide
 
 private def guardedDir (read : Γ) (otherwise : Dir3) : Dir3 :=
   if read = Γ.start then .right else otherwise
@@ -117,7 +121,11 @@ example :
 
 private inductive HaltQ where
   | halt
-  deriving DecidableEq, Fintype
+  deriving DecidableEq
+
+private instance : Fintype HaltQ where
+  elems := ⟨↑([HaltQ.halt] : List HaltQ), by decide⟩
+  complete := fun x => by cases x; decide
 
 private def haltedTM : TM 0 where
   Q := HaltQ

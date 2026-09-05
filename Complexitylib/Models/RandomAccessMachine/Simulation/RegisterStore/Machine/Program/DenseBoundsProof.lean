@@ -374,11 +374,9 @@ private theorem denseOverlayLookupTime_le_volume {m : ℕ}
       (TM.binaryPredTime (RegisterStore.read overlay address - 1)) ≤
       90000 * denseLookupVolume inputLength overlay address := by
     apply max_le
-    · dsimp only at hvolume hfallback ⊢
-      unfold denseLookupVolume at hvolume ⊢
+    · unfold denseLookupVolume at hvolume ⊢
       omega
-    · dsimp only at hvolume hpred' ⊢
-      unfold denseLookupVolume at hvolume ⊢
+    · unfold denseLookupVolume at hvolume ⊢
       omega
   unfold denseOverlayLookupTime TM.branchWorkBlankTime
   omega
@@ -1185,6 +1183,11 @@ private theorem bufferedCleanupTime_le_linear {m : ℕ}
   dsimp only [nextBits] at hnextBits hresetNext ⊢
   omega
 
+-- The per-slot cleanup values are covered by a fixed menu of bounds; the
+-- `first` alternatives below are each needed by some instruction case, so
+-- the unused-tactic linter's per-site view is too narrow here.
+set_option linter.unusedTactic false in
+set_option linter.unreachableTactic false in
 private theorem denseInstructionCleanupValue_bits_le
     (input : List Bool) (instruction : Instr) (pcValue : ℕ)
     (overlay : Store) (width : ℕ)
@@ -1208,7 +1211,15 @@ private theorem denseInstructionCleanupValue_bits_le
       · exact hbits destination hdestination
       · exact hbits (value + 1) htag
       · simp only [denseInstructionCleanupValue]
-        split <;> simp
+        split <;> first
+          | (rw [Nat.size_eq_bits_len]; exact hdestination)
+          | (rw [Nat.size_eq_bits_len]; exact htag)
+          | (split_ifs <;> simp [Nat.zero_bits] <;> omega)
+          | (rw [Nat.size_eq_bits_len]; exact hlhs)
+          | (rw [Nat.size_eq_bits_len]; exact hrhs)
+          | (rw [Nat.size_eq_bits_len]; assumption)
+          | simp [Nat.zero_bits]
+          | (rw [Nat.size_eq_bits_len]; exact Nat.le_succ_of_le (by assumption))
       · simp [denseInstructionCleanupValue]
       · simp [denseInstructionCleanupValue]
   | add destination source₀ source₁ =>
@@ -1231,11 +1242,22 @@ private theorem denseInstructionCleanupValue_bits_le
       intro slot
       fin_cases slot
       · exact hbits destination hdestination
-      · simpa only [lhs, rhs] using hbits (lhs + rhs + 1) htag
       · simp only [denseInstructionCleanupValue]
-        split <;> simp
-      · simpa only [lhs] using hbits lhs hlhs
-      · simpa only [rhs] using hbits rhs hrhs
+        exact hbits (lhs + rhs + 1) htag
+      · simp only [denseInstructionCleanupValue]
+        split <;> first
+          | (rw [Nat.size_eq_bits_len]; exact hdestination)
+          | (rw [Nat.size_eq_bits_len]; exact htag)
+          | (split_ifs <;> simp [Nat.zero_bits] <;> omega)
+          | (rw [Nat.size_eq_bits_len]; exact hlhs)
+          | (rw [Nat.size_eq_bits_len]; exact hrhs)
+          | (rw [Nat.size_eq_bits_len]; assumption)
+          | simp [Nat.zero_bits]
+          | (rw [Nat.size_eq_bits_len]; exact Nat.le_succ_of_le (by assumption))
+      · simp only [denseInstructionCleanupValue]
+        exact hbits lhs hlhs
+      · simp only [denseInstructionCleanupValue]
+        exact hbits rhs hrhs
   | sub destination source₀ source₁ =>
       simp only [RegisterStore.Instr.staticWidth] at hstatic
       simp only [Instr.logCost, DenseOverlay.Snapshot.decode,
@@ -1262,9 +1284,18 @@ private theorem denseInstructionCleanupValue_bits_le
       intro slot
       fin_cases slot
       · exact hbits destination hdestination
-      · simpa only [lhs, rhs] using hbits (lhs - rhs + 1) htag
       · simp only [denseInstructionCleanupValue]
-        split <;> simp
+        exact hbits (lhs - rhs + 1) htag
+      · simp only [denseInstructionCleanupValue]
+        split <;> first
+          | (rw [Nat.size_eq_bits_len]; exact hdestination)
+          | (rw [Nat.size_eq_bits_len]; exact htag)
+          | (split_ifs <;> simp [Nat.zero_bits] <;> omega)
+          | (rw [Nat.size_eq_bits_len]; exact hlhs)
+          | (rw [Nat.size_eq_bits_len]; exact hrhs)
+          | (rw [Nat.size_eq_bits_len]; assumption)
+          | simp [Nat.zero_bits]
+          | (rw [Nat.size_eq_bits_len]; exact Nat.le_succ_of_le (by assumption))
       · exact hbits lhs (by omega)
       · exact hbits rhs (by omega)
   | mul destination source₀ source₁ =>
@@ -1287,11 +1318,22 @@ private theorem denseInstructionCleanupValue_bits_le
       intro slot
       fin_cases slot
       · exact hbits destination hdestination
-      · simpa only [lhs, rhs] using hbits (lhs * rhs + 1) htag
       · simp only [denseInstructionCleanupValue]
-        split <;> simp
-      · simpa only [lhs] using hbits lhs hlhs
-      · simpa only [rhs] using hbits rhs hrhs
+        exact hbits (lhs * rhs + 1) htag
+      · simp only [denseInstructionCleanupValue]
+        split <;> first
+          | (rw [Nat.size_eq_bits_len]; exact hdestination)
+          | (rw [Nat.size_eq_bits_len]; exact htag)
+          | (split_ifs <;> simp [Nat.zero_bits] <;> omega)
+          | (rw [Nat.size_eq_bits_len]; exact hlhs)
+          | (rw [Nat.size_eq_bits_len]; exact hrhs)
+          | (rw [Nat.size_eq_bits_len]; assumption)
+          | simp [Nat.zero_bits]
+          | (rw [Nat.size_eq_bits_len]; exact Nat.le_succ_of_le (by assumption))
+      · simp only [denseInstructionCleanupValue]
+        exact hbits lhs hlhs
+      · simp only [denseInstructionCleanupValue]
+        exact hbits rhs hrhs
   | load destination addressRegister =>
       simp only [RegisterStore.Instr.staticWidth] at hstatic
       simp only [Instr.logCost, DenseOverlay.Snapshot.decode,
@@ -1309,10 +1351,20 @@ private theorem denseInstructionCleanupValue_bits_le
       intro slot
       fin_cases slot
       · exact hbits destination hdestination
-      · simpa only [address, value] using hbits (value + 1) htag
       · simp only [denseInstructionCleanupValue]
-        split <;> simp
-      · simpa only [address] using hbits address haddress
+        exact hbits (value + 1) htag
+      · simp only [denseInstructionCleanupValue]
+        split <;> first
+          | (rw [Nat.size_eq_bits_len]; exact hdestination)
+          | (rw [Nat.size_eq_bits_len]; exact htag)
+          | (split_ifs <;> simp [Nat.zero_bits] <;> omega)
+          | (rw [Nat.size_eq_bits_len]; exact hlhs)
+          | (rw [Nat.size_eq_bits_len]; exact hrhs)
+          | (rw [Nat.size_eq_bits_len]; assumption)
+          | simp [Nat.zero_bits]
+          | (rw [Nat.size_eq_bits_len]; exact Nat.le_succ_of_le (by assumption))
+      · simp only [denseInstructionCleanupValue]
+        exact hbits address haddress
       · simp [denseInstructionCleanupValue]
   | store addressRegister source =>
       simp only [RegisterStore.Instr.staticWidth] at hstatic
@@ -1330,12 +1382,24 @@ private theorem denseInstructionCleanupValue_bits_le
         le_trans (bitlen_succ_le value) (by omega)
       intro slot
       fin_cases slot
-      · simpa only [address] using hbits address haddress
-      · simpa only [value] using hbits (value + 1) htag
       · simp only [denseInstructionCleanupValue]
-        split <;> simp
-      · simpa only [address] using hbits address haddress
-      · simpa only [value] using hbits value (by omega)
+        exact hbits address haddress
+      · simp only [denseInstructionCleanupValue]
+        exact hbits (value + 1) htag
+      · simp only [denseInstructionCleanupValue]
+        split <;> first
+          | (rw [Nat.size_eq_bits_len]; exact hdestination)
+          | (rw [Nat.size_eq_bits_len]; exact htag)
+          | (split_ifs <;> simp [Nat.zero_bits] <;> omega)
+          | (rw [Nat.size_eq_bits_len]; exact hlhs)
+          | (rw [Nat.size_eq_bits_len]; exact hrhs)
+          | (rw [Nat.size_eq_bits_len]; assumption)
+          | simp [Nat.zero_bits]
+          | (rw [Nat.size_eq_bits_len]; exact Nat.le_succ_of_le (by assumption))
+      · simp only [denseInstructionCleanupValue]
+        exact hbits address haddress
+      · simp only [denseInstructionCleanupValue]
+        exact hbits value (by omega)
   | jz source target =>
       intro slot
       fin_cases slot <;> simp [denseInstructionCleanupValue]
@@ -1510,15 +1574,15 @@ private theorem denseStepVolume_le_runScale_succ
       rw [hhalt]
       rfl
     unfold denseStepVolume denseStepWidth denseRunScale
-    rw [RAM.unitTimeUpto_succ, if_pos hramHalt,
-      RAM.logTimeUpto_succ, if_pos hramHalt]
+    rw [RAM.unitTimeUpto_succ, ite_eq_left hramHalt,
+      RAM.logTimeUpto_succ, ite_eq_left hramHalt]
     rw [hcost]
     nlinarith
   · have hramNotHalt : ¬RAM.Halted program (snapshot.decode input) :=
       fun h => hhalt (hhalted.mpr h)
     unfold denseStepVolume denseStepWidth denseRunScale
-    rw [RAM.unitTimeUpto_succ, if_neg hramNotHalt,
-      RAM.logTimeUpto_succ, if_neg hramNotHalt]
+    rw [RAM.unitTimeUpto_succ, ite_eq_right hramNotHalt,
+      RAM.logTimeUpto_succ, ite_eq_right hramNotHalt]
     nlinarith
 
 private theorem denseRunScale_step_add_width_le
@@ -1554,8 +1618,8 @@ private theorem denseRunScale_step_add_width_le
     have hdecode := DenseOverlay.Snapshot.decode_step program input snapshot
       hvalid.1
     unfold denseRunScale denseStepWidth
-    rw [RAM.unitTimeUpto_succ, if_neg hramNotHalt,
-      RAM.logTimeUpto_succ, if_neg hramNotHalt, hdecode]
+    rw [RAM.unitTimeUpto_succ, ite_eq_right hramNotHalt,
+      RAM.logTimeUpto_succ, ite_eq_right hramNotHalt, hdecode]
     nlinarith
 
 private theorem denseDispatchHaltTime_le_width {m : ℕ}

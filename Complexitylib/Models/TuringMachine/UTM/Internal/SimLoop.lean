@@ -216,7 +216,7 @@ private theorem loopTM_rewind_check {n : ℕ} (tmBody tmTest : TM n)
       · rw [← hread3]
         exact transitionTape_eq_self (by rw [hread3]; simp)
     refine ⟨c₃, .step hs1 (.step hs2 (.step hs3 .zero)), ?_, ?_, ?_, ?_⟩
-    · rw [hst3, if_pos hone]
+    · rw [hst3, ite_eq_left hone]
     · rw [hin3, hin2, hin1]
     · rw [hwk3, hwk2, hwk1]
     · rw [hout3, hout_eq]
@@ -236,7 +236,7 @@ private theorem loopTM_rewind_check {n : ℕ} (tmBody tmTest : TM n)
         exact hwk i
       · exact transitionTape_eq_self hread3s
     refine ⟨c₃, .step hs1 (.step hs2 (.step hs3 .zero)), ?_, ?_, ?_, ?_⟩
-    · rw [hst3, if_neg hone]
+    · rw [hst3, ite_eq_right hone]
     · rw [hin3, hin2, hin1]
     · rw [hwk3, hwk2, hwk1]
     · rw [hout3, hout_eq]
@@ -330,9 +330,9 @@ private theorem loop_iteration (α : List Bool) (hterm : TerminatedRegion α)
         then Γ.one else Γ.zero)
       = (if mc₂.state = (decodeDesc α).toTM.qhalt then Γ.one else Γ.zero) := by
     by_cases h : mc₂.state = (decodeDesc α).toTM.qhalt
-    · rw [if_pos h, if_pos
+    · rw [ite_eq_left h, ite_eq_left
         (show S = (takeField (takeField (groupPairs α)).2).1 from hSiff.mpr h)]
-    · rw [if_neg h, if_neg
+    · rw [ite_eq_right h, ite_eq_right
         (show ¬S = (takeField (takeField (groupPairs α)).2).1 from
           fun hc => h (hSiff.mp hc))]
   have hcell1 : ct.output.cells 1
@@ -423,15 +423,15 @@ private theorem loop_iteration (α : List Bool) (hterm : TerminatedRegion α)
   -- branch on the verdict
   by_cases hq : mc₂.state = (decodeDesc α).toTM.qhalt
   · have hone : ct.output.cells 1 = Γ.one := by
-      rw [hcell1, if_pos hq]
-    rw [if_pos hone] at hr_all
+      rw [hcell1, ite_eq_left hq]
+    rw [ite_eq_left hone] at hr_all
     exact ⟨mc₂, cb.work, ct.output, t_body + 1 + t_test + 1 + 3, htime, hstepd,
       hinv', hctoc0, hctons, htoh, Or.inl ⟨hq, hone, hr_all⟩⟩
   · have hzero : ct.output.cells 1 = Γ.zero := by
-      rw [hcell1, if_neg hq]
+      rw [hcell1, ite_eq_right hq]
     have hone_ne : ct.output.cells 1 ≠ Γ.one := by
       rw [hzero]; simp
-    rw [if_neg hone_ne] at hr_all
+    rw [ite_eq_right hone_ne] at hr_all
     exact ⟨mc₂, cb.work, ct.output, t_body + 1 + t_test + 1 + 3, htime, hstepd,
       hinv', hctoc0, hctons, htoh, Or.inr ⟨hq, hr_all⟩⟩
 
@@ -647,7 +647,7 @@ theorem utm_loop_extract_hoareTime (α x : List Bool) (hterm : TerminatedRegion 
       intro k
       rw [hvout.1]
       simp only [show ¬(k + 2 = 0) by omega, show ¬(k + 2 = 1) by omega,
-        if_false, show k + 2 - 1 = k + 1 by omega]
+        ite_false, show k + 2 - 1 = k + 1 by omega]
     have hblank2 : (work 2).cells (m + 2) = Γ.blank := by
       rw [hcells2 m]
       exact hmb

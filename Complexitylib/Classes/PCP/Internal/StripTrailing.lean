@@ -70,14 +70,14 @@ theorem stripTrailing_eq_bits (l : List Bool) : stripTrailing l = (binValLE l).b
       cases b
       · rw [stripTrailing_false, ih, binValLE_cons_false]
         by_cases h : (binValLE t).bits = []
-        · rw [if_pos h]
+        · rw [ite_eq_left h]
           have h0 : binValLE t = 0 := by
             have hb := binValLE_bits (binValLE t)
             rw [h] at hb
-            simpa using hb.symm
+            exact hb.symm
           rw [h0]
           simp
-        · rw [if_neg h]
+        · rw [ite_eq_right h]
           have hne : binValLE t ≠ 0 := by
             intro h0
             rw [h0, Nat.zero_bits] at h
@@ -132,10 +132,10 @@ theorem recFoldClamp_stripTrailing (bound : ℕ) (W : List Bool) :
         rw [stripZero, hstate, stripTrailing_false]
         cases hs : stripTrailing t with
         | nil =>
-            rw [emptyFlag_nil, selectHead_cons_true, if_pos rfl]
+            rw [emptyFlag_nil, selectHead_cons_true, ite_eq_left rfl]
             simp
         | cons c s =>
-            rw [emptyFlag_cons, selectHead_cons_false, if_neg (by simp)]
+            rw [emptyFlag_cons, selectHead_cons_false, ite_eq_right (by simp)]
             refine List.take_of_length_le ?_
             simp only [List.length_cons]
             rw [hs] at hlt

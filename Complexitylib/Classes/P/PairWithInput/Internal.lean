@@ -26,7 +26,11 @@ theorem mem_FP_pairWithInput_internal {f : List Bool → List Bool}
     Polynomial.C 5 * p + Polynomial.X + Polynomial.C 12
   apply mem_FP_iff_computesInTime_polynomial_internal.mpr
   refine ⟨TM.pairWithInputTapeCount k, TM.pairWithInputTM tm, q, ?_⟩
-  simpa [q, TM.pairWithInputTime] using
-    TM.pairWithInputTM_computesInTime hcomp
+  have h := TM.pairWithInputTM_computesInTime hcomp
+  have hfun : TM.pairWithInputTime p.eval = q.eval := by
+    funext x
+    simp [q, TM.pairWithInputTime]
+  rw [hfun] at h
+  exact h
 
 end Complexity

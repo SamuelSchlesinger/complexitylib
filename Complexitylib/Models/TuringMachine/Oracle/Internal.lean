@@ -217,7 +217,7 @@ theorem toOracleTM_decidesInTime_iff_internal
     obtain ⟨cfg, time, htime, hreach, hhalt, hyes, hno⟩ := hdecides input
     have hreach' : machine.reachesIn time
         (machine.toOracleTM.initCfg input).erase cfg := by
-      simpa using hreach
+      exact hreach
     obtain ⟨oracleCfg, horacleReach, herase⟩ :=
       exists_toOracleTM_reachesIn_of_reachesIn_erase_internal
         machine oracle (machine.toOracleTM.initCfg input) hreach'

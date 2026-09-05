@@ -79,7 +79,7 @@ instance : Inhabited (BooleanFunction n) := inferInstanceAs (Inhabited (Cube n �
 
 instance : FunLike (BooleanFunction n) (Cube n) ℝ where
   coe f := f
-  coe_injective' f g h := show (f : Cube n → ℝ) = g from h
+  coe_injective f g h := show (f : Cube n → ℝ) = g from h
 
 @[ext]
 theorem ext {f g : BooleanFunction n} (h : ∀ x, f x = g x) : f = g :=
@@ -242,13 +242,14 @@ scoped notation "𝓕" => fourierCoeff
 /-- Unfold `𝔼[f]` to the explicit sum form `1/2^n · ∑_x f(x)`. -/
 theorem expect_unfold (f : BooleanFunction n) :
     𝔼[f] = 1 / 2 ^ n * ∑ x : Cube n, f x := by
-  simp [expect, Finset.expect_eq_sum_div_card, Finset.card_univ, ZMod.card]; ring
+  rw [expect, Finset.expect_eq_sum_div_card (f := (f : Cube n → ℝ))]
+  simp [Finset.card_univ, ZMod.card]; ring
 
 /-- The inner product equals the expectation of the product.
     This is the book's Definition 1.3: `⟪f, g⟫ = 𝔼[f·g]`. -/
 theorem inner_eq_expect (f g : BooleanFunction n) :
     ⟪f, g⟫ = 𝔼[fun x => f x * g x] := by
-  simp [inner_def, expect_unfold]
+  simp [inner_def, expect, Finset.expect_eq_sum_div_card, div_eq_inv_mul]
 
 /-! ### §1.4 Mean, variance, covariance -/
 

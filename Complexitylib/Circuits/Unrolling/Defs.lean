@@ -218,12 +218,15 @@ private theorem configIndex_eq_equivVal (tm : NTM k) (T : ℕ)
   cases atom with
   | state q => rfl
   | head tape position =>
+      have htape : (tapeSlotEquiv k tape).val = tape.index.val := rfl
       simp [configIndex, configAtomEquiv, configAtomSumEquiv, headAtomEquiv,
-        finProdFinEquiv, tapeSlotEquiv, Nat.mul_comm]
+        finProdFinEquiv, htape, Nat.mul_comm]
       omega
   | cell tape position symbol =>
+      have htape : (tapeSlotEquiv k tape).val = tape.index.val := rfl
+      have hsymbol : (symbolEquiv symbol).val = (symbolIndex symbol).val := rfl
       simp [configIndex, configAtomEquiv, configAtomSumEquiv, cellAtomEquiv,
-        finProdFinEquiv, tapeSlotEquiv, symbolEquiv, Nat.mul_comm]
+        finProdFinEquiv, htape, hsymbol, Nat.mul_comm]
       omega
 
 /-- The explicit arithmetic index agrees with the atom-layout equivalence. -/

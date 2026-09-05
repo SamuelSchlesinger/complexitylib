@@ -226,8 +226,9 @@ theorem entryAppendRestoreTM_hoareTime_frame_internal
           work := fun i => TM.transitionTape (encoded.work i)
           output := TM.transitionTape encoded.output }
         tailFinal := by
-    simpa only [hencodedInputTransition, hencodedWorkTransition,
-      hencodedOutputTransition] using htailReach
+    simp only [hencodedInputTransition, hencodedWorkTransition,
+      hencodedOutputTransition]
+    exact htailReach
   have hreach := TM.seqTM_reachesIn_of_reachesIn
     (rewindEntryEncodeTM tapes.appendEncodeTapes)
     (TM.seqTM (TM.rewindWorkTM tapes.entry.query)
@@ -241,9 +242,9 @@ theorem entryAppendRestoreTM_hoareTime_frame_internal
     ?_, hreach, ?_, ?_⟩
   · unfold entryAppendRestoreTime
     omega
-  · change (entryAppendRestoreTM tapes).halted finalCfg
-    unfold entryAppendRestoreTM
-    rw [TM.phase2Wrap_halted_iff]
+  · unfold entryAppendRestoreTM
+    simp only [finalCfg]
+    erw [TM.phase2Wrap_halted_iff]
     exact htailHalt
   · refine ⟨?_, ?_, ?_⟩
     · change restored.input = inp₀

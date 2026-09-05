@@ -60,13 +60,13 @@ def traceD (M : TM n) : ℕ → Cfg n M.Q → Cfg n M.Q
 
 theorem traceD_succ_of_not_halted (M : TM n) (T : ℕ) {c : Cfg n M.Q}
     (h : c.state ≠ M.qhalt) : M.traceD (T + 1) c = M.traceD T (M.stepCfg c) := by
-  rw [traceD, if_neg h]
+  rw [traceD, ite_eq_right h]
 
 theorem traceD_of_halted (M : TM n) (T : ℕ) {c : Cfg n M.Q} (h : c.state = M.qhalt) :
     M.traceD T c = c := by
   cases T with
   | zero => rfl
-  | succ T => rw [traceD, if_pos h]
+  | succ T => rw [traceD, ite_eq_left h]
 
 /-- A run of `T + 1` steps is a run of `T` steps followed by one more. -/
 theorem traceD_succ_back (M : TM n) : ∀ (T : ℕ) (c : Cfg n M.Q),
@@ -77,12 +77,12 @@ theorem traceD_succ_back (M : TM n) : ∀ (T : ℕ) (c : Cfg n M.Q),
   | zero =>
       intro c
       by_cases h : c.state = M.qhalt
-      · rw [traceD_of_halted M _ h, traceD_zero, if_pos h]
-      · rw [traceD_succ_of_not_halted M 0 h, traceD_zero, traceD_zero, if_neg h]
+      · rw [traceD_of_halted M _ h, traceD_zero, ite_eq_left h]
+      · rw [traceD_succ_of_not_halted M 0 h, traceD_zero, traceD_zero, ite_eq_right h]
   | succ T ih =>
       intro c
       by_cases h : c.state = M.qhalt
-      · rw [traceD_of_halted M _ h, traceD_of_halted M _ h, if_pos h]
+      · rw [traceD_of_halted M _ h, traceD_of_halted M _ h, ite_eq_left h]
       · rw [traceD_succ_of_not_halted M (T + 1) h, traceD_succ_of_not_halted M T h, ih]
 
 /-- A fixed-length run is a `reachesIn` run, stopped early exactly when the machine halts. -/
@@ -217,7 +217,7 @@ theorem nrunAt_of_halted (N : NTM k) (choices : ℕ → Bool) {c : Cfg k N.Q}
     (h : c.state = N.qhalt) (i : ℕ) : nrunAt N choices c i = c := by
   induction i with
   | zero => rfl
-  | succ i ih => rw [nrunAt_succ, ih, if_pos h]
+  | succ i ih => erw [nrunAt_succ, ih, ite_eq_left h]
 
 theorem nrunAt_succ_front (N : NTM k) (choices : ℕ → Bool) {c : Cfg k N.Q}
     (h : c.state ≠ N.qhalt) (i : ℕ) :
@@ -225,10 +225,10 @@ theorem nrunAt_succ_front (N : NTM k) (choices : ℕ → Bool) {c : Cfg k N.Q}
       = nrunAt N (fun j => choices (j + 1)) (stepCfg N (choices 0) c) i := by
   induction i with
   | zero =>
-      rw [nrunAt_succ]
+      erw [nrunAt_succ]
       simp only [nrunAt_zero]
-      rw [if_neg h]
-  | succ i ih => rw [nrunAt_succ, ih, nrunAt_succ]
+      erw [ite_eq_right h]
+  | succ i ih => erw [nrunAt_succ, ih, nrunAt_succ]
 
 /-- The absolutely-indexed run is `NTM.trace`. -/
 theorem trace_eq_nrunAt (N : NTM k) (choices : ℕ → Bool) :
@@ -240,7 +240,7 @@ theorem trace_eq_nrunAt (N : NTM k) (choices : ℕ → Bool) :
   | succ T ih =>
       intro c
       by_cases h : c.state = N.qhalt
-      · rw [trace, if_pos h, nrunAt_of_halted N choices h]
+      · rw [trace, ite_eq_left h, nrunAt_of_halted N choices h]
       · rw [trace_succ_of_not_halted N T _ h, nrunAt_succ_front N choices h]
         exact ih (fun j => choices (j + 1)) _
 
@@ -352,9 +352,9 @@ theorem searchIdx_eq {P : ℕ → Bool} {T i : ℕ} (hi : i < T) (hP : P i = tru
   | succ T ih =>
       rw [searchIdx]
       by_cases h : P T = true
-      · rw [if_pos h]
+      · rw [ite_eq_left h]
         exact huniq T h
-      · rw [if_neg h]
+      · rw [ite_eq_right h]
         refine ih ?_
         rcases Nat.lt_or_ge i T with h' | h'
         · exact h'
@@ -366,7 +366,7 @@ variable {k : ℕ} (M : TM (k + 1)) (Adv : M.Q → Bool) (choices : ℕ → Bool
 
 /-- Whether the nondeterministic run consumes a guess at step `i`. -/
 def consumes (i : ℕ) : Bool :=
-  !decide ((nrunAt (ofGuess M) choices d i).state = M.qhalt) &&
+  !(@decide ((nrunAt (ofGuess M) choices d i).state = M.qhalt) (M.decEq _ _)) &&
     Adv (nrunAt (ofGuess M) choices d i).state
 
 /-- Where the guess head sits after `i` steps: one cell on for every guess consumed. -/
@@ -399,7 +399,7 @@ theorem cursor_mono : ∀ {i j : ℕ}, i ≤ j →
 theorem cursor_lt_of_consumes {i j : ℕ} (hij : i < j) (hi : consumes M Adv choices d i = true) :
     cursor M Adv choices d i < cursor M Adv choices d j := by
   refine lt_of_lt_of_le ?_ (cursor_mono M Adv choices d hij)
-  rw [cursor, if_pos hi]
+  rw [cursor, ite_eq_left hi]
   omega
 
 theorem cursor_inj_of_consumes {i j : ℕ} (hi : consumes M Adv choices d i = true)
@@ -454,7 +454,7 @@ theorem traceD_guessOf {Adv : M.Q → Bool} (hP : TM.GuessProtocol M Adv) (T : �
   induction i with
   | zero =>
       intro _
-      refine ⟨by simp, ?_⟩
+      refine ⟨by erw [nrunAt_zero, TM.traceD_zero, dropChoice_attach], ?_⟩
       show (attach d (loadTape (guessOf M Adv choices d T))).work (Fin.last k) = _
       rw [attach_work_last]
       rfl
@@ -473,8 +473,8 @@ theorem traceD_guessOf {Adv : M.Q → Bool} (hP : TM.GuessProtocol M Adv) (T : �
         have hnhalt : (nrunAt (ofGuess M) choices d i).state = (ofGuess M).qhalt := by
           rw [← hstate]; exact hhalt
         refine ⟨?_, ?_⟩
-        · rw [TM.traceD_succ_back, if_pos hhalt, ihd, nrunAt_succ, if_pos hnhalt]
-        · rw [TM.traceD_succ_back, if_pos hhalt, ihw, cursor, hcons]
+        · erw [TM.traceD_succ_back, ite_eq_left hhalt, ihd, nrunAt_succ, ite_eq_left hnhalt]
+        · erw [TM.traceD_succ_back, ite_eq_left hhalt, ihw, cursor, hcons]
           simp
       · have hcells : (cᵢ.work (Fin.last k)).read
             = Γ.ofBool (g (cursor M Adv choices d i - 1)) := by
@@ -486,10 +486,10 @@ theorem traceD_guessOf {Adv : M.Q → Bool} (hP : TM.GuessProtocol M Adv) (T : �
         have hne : (cᵢ.work (Fin.last k)).read ≠ Γ.start := by
           rw [hcells]; exact Γ.ofBool_ne_start _
         have hstep : M.traceD (i + 1) c₀ = M.stepCfg cᵢ := by
-          rw [TM.traceD_succ_back, if_neg hhalt]
+          erw [TM.traceD_succ_back, ite_eq_right hhalt]
         have hnstep : nrunAt (ofGuess M) choices d (i + 1)
             = stepCfg (ofGuess M) (choices i) (nrunAt (ofGuess M) choices d i) := by
-          rw [nrunAt_succ, if_neg (by rw [← hstate]; exact hhalt)]
+          erw [nrunAt_succ, ite_eq_right (by rw [← hstate]; exact hhalt)]
         by_cases hadv : Adv cᵢ.state
         · have hcons : consumes M Adv choices d i = true := by
             simp [consumes, ← hstate, hhalt, hadv]
@@ -498,7 +498,7 @@ theorem traceD_guessOf {Adv : M.Q → Bool} (hP : TM.GuessProtocol M Adv) (T : �
           refine ⟨?_, ?_⟩
           · rw [hstep, hnstep, ← ihd]
             exact dropChoice_stepCfg M (by rw [hcells, hbit])
-          · rw [hstep, work_last_stepCfg' M hP cᵢ hhalt hne, if_pos hadv, ihw, cursor, hcons]
+          · rw [hstep, work_last_stepCfg' M hP cᵢ hhalt hne, ite_eq_left hadv, ihw, cursor, hcons]
             rfl
         · have hcons : consumes M Adv choices d i = false := by
             simp [consumes, ← hstate, hadv]
@@ -506,7 +506,7 @@ theorem traceD_guessOf {Adv : M.Q → Bool} (hP : TM.GuessProtocol M Adv) (T : �
           · rw [hstep, hnstep, ← ihd]
             rw [dropChoice_stepCfg M hcells]
             exact stepCfg_indep M hP hhalt hadv _ _
-          · rw [hstep, work_last_stepCfg' M hP cᵢ hhalt hne, if_neg hadv, ihw, cursor, hcons]
+          · rw [hstep, work_last_stepCfg' M hP cᵢ hhalt hne, ite_eq_right hadv, ihw, cursor, hcons]
             rfl
 
 end Cursor

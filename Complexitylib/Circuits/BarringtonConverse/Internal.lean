@@ -105,7 +105,7 @@ theorem eval_reachesFormula_internal {w : ℕ} (α : ℕ → Bool) :
       have htail : tail = [] := by
         cases tail <;> simp_all
       subst tail
-      simpa [reachesFormula] using BPInstr.eval_reachesFormula_internal α ins x y
+      simpa [reachesFormula, BP.eval] using BPInstr.eval_reachesFormula_internal α ins x y
   | succ d ih =>
     intro p x y hp
     have htake : (p.take (2 ^ d)).length ≤ 2 ^ d := List.length_take_le ..

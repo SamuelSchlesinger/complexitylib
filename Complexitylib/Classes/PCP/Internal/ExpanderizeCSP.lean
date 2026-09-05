@@ -62,9 +62,7 @@ theorem card_unsatDarts_addTrivial (a : R.Assignment) :
   classical
   refine (Finset.card_bij (fun q _ => ((q.1, Sum.inl q.2) : (R.addTrivial H e).Dart)) ?_ ?_ ?_).symm
   · intro q hq
-    rw [mem_unsatDarts] at hq ⊢
-    intro hcon
-    exact hq hcon
+    exact (mem_unsatDarts (R := R.addTrivial H e)).mpr ((mem_unsatDarts (R := R)).mp hq)
   · intro q _ q' _ heq
     have h1 : q.1 = q'.1 := congrArg (fun r => (r.1 : R.graph.V)) heq
     have h2 : Sum.inl q.2 = (Sum.inl q'.2 : R.graph.D ⊕ H.D) :=
@@ -72,12 +70,8 @@ theorem card_unsatDarts_addTrivial (a : R.Assignment) :
     exact Prod.ext h1 (Sum.inl.inj h2)
   · rintro ⟨v, i | j⟩ hq
     · refine ⟨(v, i), ?_, rfl⟩
-      rw [mem_unsatDarts] at hq ⊢
-      intro hcon
-      exact hq hcon
-    · exfalso
-      rw [mem_unsatDarts] at hq
-      exact hq rfl
+      exact (mem_unsatDarts (R := R)).mpr ((mem_unsatDarts (R := R.addTrivial H e)).mp hq)
+    · exact absurd rfl ((mem_unsatDarts (R := R.addTrivial H e)).mp hq)
 
 /-- Superposing trivial constraints scales the value by `deg / (deg + deg')`. -/
 theorem unsatFrac_addTrivial (a : R.Assignment) :
@@ -93,10 +87,12 @@ theorem unsatFrac_addTrivial (a : R.Assignment) :
       rw [hz] at hle
       omega
     have hempty' : ((R.addTrivial H e).unsatDarts a).card = 0 := by rw [hcards, hempty]
-    rw [unsatFrac, unsatFrac, hempty, hempty']
+    unfold unsatFrac
+    rw [hempty, hempty']
     simp
   · have hzq : (0 : ℚ) < (R.graph.order : ℚ) := by exact_mod_cast hz
-    rw [unsatFrac, unsatFrac, hcards]
+    unfold unsatFrac
+    rw [hcards]
     have hden : (((R.addTrivial H e).graph.order * (R.addTrivial H e).graph.deg : ℕ) : ℚ)
         = (R.graph.order : ℚ) * ((R.graph.deg : ℚ) + (H.deg : ℚ)) := by
       rw [graph_addTrivial, RegGraph.order_union, RegGraph.deg_union]
@@ -129,16 +125,13 @@ theorem satisfiable_addTrivial_iff : (R.addTrivial H e).Satisfiable ↔ R.Satisf
   · rintro ⟨a, ha⟩
     refine ⟨a, fun p => ?_⟩
     have h := ha (p.1, Sum.inl p.2)
-    rw [Satisfies, satisfies] at h ⊢
     exact h
   · rintro ⟨a, ha⟩
     refine ⟨a, ?_⟩
     rintro ⟨v, i | j⟩
     · have h := ha (v, i)
-      rw [Satisfies, satisfies] at h ⊢
       exact h
-    · rw [Satisfies, satisfies]
-      rfl
+    · rfl
 
 /-- `R` with a family expander superposed. -/
 noncomputable def expanderize (R : RegCSP α) [NumEnc R.graph.V] (E : ExpanderFamily) :

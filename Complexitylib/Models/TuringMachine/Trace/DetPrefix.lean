@@ -169,6 +169,7 @@ theorem det_step_congr {N : NTM n} {c : Cfg n N.Q}
   · simp only [TM.step, det]
     rw [show N.δ true c.state c.input.read (fun i => (c.work i).read)
       c.output.read = _ from h]
+    rfl
 
 /-- One non-halted trace step applies the `det`-projection selected by the
     current choice bit. -/

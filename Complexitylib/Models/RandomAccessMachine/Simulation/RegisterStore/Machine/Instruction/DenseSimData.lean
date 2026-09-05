@@ -141,13 +141,13 @@ theorem denseExecuteInstructionTM_imm_hoareTime_frame
       intro slot
       fin_cases slot
       · exact ⟨houtcome.ready.queryStart, by
-          simpa [cleanupValues, denseInstructionCleanupValue,
-            instructionCleanupParentSlot] using houtcome.ready.query⟩
+          simp [cleanupValues, denseInstructionCleanupValue, instructionCleanupParentSlot]
+          exact houtcome.ready.query⟩
       · change (work tapes.data.update.replacement).HasBinaryNat (value + 1)
         rw [houtcome.replacement]
         exact htagValue
-      · simpa [cleanupValues, denseInstructionCleanupValue,
-          instructionCleanupParentSlot] using houtcome.found
+      · simp [cleanupValues, denseInstructionCleanupValue, instructionCleanupParentSlot]
+        exact houtcome.found
       · change (work tapes.data.lhs).HasBinaryNat 0
         rw [houtcome.frame tapes.data.lhs (fun role =>
             (tapes.data.update_ne_lhs role).symm),
@@ -217,7 +217,8 @@ theorem denseExecuteInstructionTM_imm_hoareTime_frame
       exact hready.dbl
     refine ⟨hpc, ?_, hsourceContent, hcleanup, ?_, ?_, hshift, htmp,
       hdbl, houtcome.ready.parked⟩
-    · simpa [nextStore] using houtcome.resultCount
+    · simp [nextStore]
+      exact houtcome.resultCount
     · simpa using houtcome.remaining
     · simpa [cleanupValues, denseInstructionCleanupValue] using
         houtcome.ready
@@ -231,10 +232,9 @@ theorem denseExecuteInstructionTM_imm_hoareTime_frame
     (denseImmediateInstructionTM tapes.data destination value)
     (denseImmediateInstructionTime tapes.data overlay destination value)
     rfl hinput hdata
-  simpa [denseExecuteInstructionTM, denseExecuteInstructionTime,
-    DenseInstructionExecutionResult, denseInstructionStore,
-    denseInstructionPC, DenseOverlay.Snapshot.stepInstr, nextStore,
-    cleanupValues] using hall
+  simp [denseExecuteInstructionTM, denseExecuteInstructionTime, DenseInstructionExecutionResult,
+    denseInstructionStore, denseInstructionPC, DenseOverlay.Snapshot.stepInstr]
+  exact hall
 
 /-- Instruction constructor corresponding to a dense direct arithmetic
 kernel. -/
@@ -389,9 +389,8 @@ theorem denseExecuteInstructionTM_direct_hoareTime_frame
       fin_cases slot
       · exact ⟨houtcome.ready.queryStart, by
           cases op <;>
-            simpa [instruction, denseDirectInstruction, cleanupValues,
-              denseInstructionCleanupValue, instructionCleanupParentSlot]
-              using houtcome.ready.query⟩
+            (simp [instruction, denseDirectInstruction, cleanupValues, denseInstructionCleanupValue,
+              instructionCleanupParentSlot]; exact houtcome.ready.query)⟩
       · change (work tapes.data.update.replacement).HasBinaryNat _
         rw [houtcome.replacement]
         cases op <;>
@@ -399,9 +398,8 @@ theorem denseExecuteInstructionTM_direct_hoareTime_frame
             denseInstructionCleanupValue, lhs, rhs, BinaryInstrOp.eval]
             using htagValue
       · cases op <;>
-          simpa [instruction, denseDirectInstruction, cleanupValues,
-            denseInstructionCleanupValue, instructionCleanupParentSlot]
-            using houtcome.found
+          (simp [instruction, denseDirectInstruction, cleanupValues, denseInstructionCleanupValue,
+            instructionCleanupParentSlot]; exact houtcome.found)
       · change (work tapes.data.lhs).HasBinaryNat _
         rw [houtcome.frame tapes.data.lhs (fun role =>
             (tapes.data.update_ne_lhs role).symm),
@@ -452,11 +450,9 @@ theorem denseExecuteInstructionTM_direct_hoareTime_frame
     (denseDirectBinaryInstructionTime tapes.data op input overlay destination
       source₀ source₁) rfl hinput hdata
   cases op <;>
-    simpa [instruction, denseDirectInstruction, denseExecuteInstructionTM,
-      denseExecuteInstructionTime, DenseInstructionExecutionResult,
-      denseInstructionStore, denseInstructionPC,
-      DenseOverlay.Snapshot.stepInstr, nextStore, cleanupValues, lhs, rhs,
-      BinaryInstrOp.eval] using hall
+    (simp [denseDirectInstruction, denseExecuteInstructionTM, denseExecuteInstructionTime,
+      DenseInstructionExecutionResult, denseInstructionStore, denseInstructionPC,
+      DenseOverlay.Snapshot.stepInstr] ; exact hall)
 
 /-- Dense direct addition has the common buffered instruction contract. -/
 theorem denseExecuteInstructionTM_add_hoareTime_frame
@@ -646,14 +642,16 @@ theorem denseExecuteInstructionTM_load_hoareTime_frame
       intro slot
       fin_cases slot
       · exact ⟨houtcome.ready.queryStart, by
-          simpa [instruction, cleanupValues, denseInstructionCleanupValue,
-            instructionCleanupParentSlot] using houtcome.ready.query⟩
+          simp [instruction, cleanupValues, denseInstructionCleanupValue,
+            instructionCleanupParentSlot]
+          exact houtcome.ready.query⟩
       · change (work tapes.data.update.replacement).HasBinaryNat _
         rw [houtcome.replacement]
         simpa [instruction, cleanupValues, denseInstructionCleanupValue,
           address, value] using htagValue
-      · simpa [instruction, cleanupValues, denseInstructionCleanupValue,
-          instructionCleanupParentSlot] using houtcome.found
+      · simp [instruction, cleanupValues, denseInstructionCleanupValue,
+        instructionCleanupParentSlot]
+        exact houtcome.found
       · change (work tapes.data.lhs).HasBinaryNat _
         rw [houtcome.frame tapes.data.lhs (fun role =>
             (tapes.data.update_ne_lhs role).symm),
@@ -739,11 +737,9 @@ theorem denseExecuteInstructionTM_load_hoareTime_frame
     (denseIndirectLoadInstructionTM tapes.data destination addressRegister)
     (denseIndirectLoadInstructionTime tapes.data input overlay destination
       addressRegister) rfl hinput hdata
-  simpa [instruction, denseExecuteInstructionTM,
-    denseExecuteInstructionTime, DenseInstructionExecutionResult,
-    denseInstructionStore, denseInstructionPC,
-    DenseOverlay.Snapshot.stepInstr, nextStore, cleanupValues, address,
-    value] using hall
+  simp [denseExecuteInstructionTM, denseExecuteInstructionTime, DenseInstructionExecutionResult,
+    denseInstructionStore, denseInstructionPC, DenseOverlay.Snapshot.stepInstr]
+  exact hall
 
 /-- A dense indirect store produces the generic buffered endpoint and advances
 the program counter. -/
@@ -874,15 +870,16 @@ theorem denseExecuteInstructionTM_store_hoareTime_frame
       intro slot
       fin_cases slot
       · exact ⟨houtcome.ready.queryStart, by
-          simpa [instruction, cleanupValues, denseInstructionCleanupValue,
-            instructionCleanupParentSlot, address] using
-            houtcome.ready.query⟩
+          simp [instruction, cleanupValues, denseInstructionCleanupValue,
+            instructionCleanupParentSlot]
+          exact houtcome.ready.query⟩
       · change (work tapes.data.update.replacement).HasBinaryNat _
         rw [houtcome.replacement]
         simpa [instruction, cleanupValues, denseInstructionCleanupValue,
           value] using htagValue
-      · simpa [instruction, cleanupValues, denseInstructionCleanupValue,
-          instructionCleanupParentSlot, address] using houtcome.found
+      · simp [instruction, cleanupValues, denseInstructionCleanupValue,
+        instructionCleanupParentSlot]
+        exact houtcome.found
       · change (work tapes.data.lhs).HasBinaryNat _
         rw [houtcome.frame tapes.data.lhs (fun role =>
             (tapes.data.update_ne_lhs role).symm),
@@ -979,11 +976,9 @@ theorem denseExecuteInstructionTM_store_hoareTime_frame
     (denseIndirectStoreInstructionTM tapes.data addressRegister source)
     (denseIndirectStoreInstructionTime tapes.data input overlay
       addressRegister source) rfl hinput hdata
-  simpa [instruction, denseExecuteInstructionTM,
-    denseExecuteInstructionTime, DenseInstructionExecutionResult,
-    denseInstructionStore, denseInstructionPC,
-    DenseOverlay.Snapshot.stepInstr, nextStore, cleanupValues, address,
-    value] using hall
+  simp [denseExecuteInstructionTM, denseExecuteInstructionTime, DenseInstructionExecutionResult,
+    denseInstructionStore, denseInstructionPC, DenseOverlay.Snapshot.stepInstr]
+  exact hall
 
 end Machine
 end RegisterStore

@@ -157,7 +157,7 @@ private theorem decideFirstCellTM_step_decide (yesOn : Γ → Bool)
     simp [idleDir, ho_ns]
   have h1 : (1 : ℕ) ≠ 0 := by omega
   simp only [Tape.writeAndMove, ho_move, Tape.move, Tape.write, ho_head,
-             if_neg h1, Function.update_self, Γw.toΓ]
+             ite_eq_right h1, Function.update_self, Γw.toΓ]
   split_ifs <;> rfl
 
 -- ════════════════════════════════════════════════════════════════════════
@@ -200,14 +200,14 @@ theorem decideFirstCellTM_decidesInTime {yesOn : Γ → Bool} {L : Language}
   obtain ⟨c', hreach, hhalt, hout⟩ := decideFirstCellTM_reachesIn (n := 0) yesOn x
   refine ⟨c', 2, le_refl _, hreach, hhalt, ?_, ?_⟩
   · intro hxL
-    rw [hout, if_pos ((hL x).mp hxL)]
+    rw [hout, ite_eq_left ((hL x).mp hxL)]
   · intro hxnL
     rw [hout]
     have hy : yesOn (firstCell x) = false := by
       rcases h : yesOn (firstCell x) with _ | _
       · rfl
       · exact absurd ((hL x).mpr h) hxnL
-    rw [if_neg (by simp [hy])]
+    rw [ite_eq_right (by simp [hy])]
 
 end TM
 

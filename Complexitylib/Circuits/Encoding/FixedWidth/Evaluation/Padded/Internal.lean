@@ -83,6 +83,7 @@ theorem get_toPaddedRawCircuit_internal
       (description.slots
         ⟨slot.val, by simpa [length_toPaddedRawCircuit_internal]
           using slot.isLt⟩).toRawGate := by
+  simp only [List.get_eq_getElem]
   simp [toPaddedRawCircuit]
 
 theorem topologicallyWellFormed_toPaddedRawCircuit_internal

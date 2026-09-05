@@ -204,11 +204,11 @@ theorem famRotFn_eq (hd : 1 < F.deg) (n v i : ℕ) (hn : 0 < n)
   rw [famRotFn, famRotVal]
   simp only [pairFst_pair, pairSnd_pair]
   by_cases h1 : i < F.wid hd n * F.fitD
-  · rw [if_pos h1, ifLtLen_pos (by
+  · rw [ite_eq_left h1, ifLtLen_pos (by
       rw [List.length_replicate, length_mulLen, hm, List.length_replicate]
       exact h1)]
     by_cases h2 : v + i / F.fitD * n < F.fitN hd n
-    · rw [if_pos h2, ifLtLen_pos (by rw [hlift, hN]; exact h2)]
+    · rw [ite_eq_left h2, ifLtLen_pos (by rw [hlift, hN]; exact h2)]
       have hidx : (mulLen (List.replicate v true
             ++ mulLen (divC F.fitD (List.replicate i true)) (List.replicate n true))
           (List.replicate F.fitD true) ++ modC F.fitD (List.replicate i true)).length
@@ -237,11 +237,11 @@ theorem famRotFn_eq (hd : 1 < F.deg) (n v i : ℕ) (hn : 0 < n)
           length_mulC, divFn2_eq (by rw [hrep]; exact hn), List.length_replicate, hrep,
           List.length_replicate]
         exact congrArg (List.replicate · true) (by ring)
-    · rw [if_neg h2, ifLtLen_neg (by rw [hlift, hN]; exact h2)]
+    · rw [ite_eq_right h2, ifLtLen_neg (by rw [hlift, hN]; exact h2)]
       refine congrArg₂ pair ?_ ?_
       · rw [marks_eq, List.length_replicate]
       · rw [marks_eq, List.length_replicate]
-  · rw [if_neg h1, ifLtLen_neg (by
+  · rw [ite_eq_right h1, ifLtLen_neg (by
       rw [List.length_replicate, length_mulLen, hm, List.length_replicate]
       exact h1)]
     refine congrArg₂ pair ?_ ?_

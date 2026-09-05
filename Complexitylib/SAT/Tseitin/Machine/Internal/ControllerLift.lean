@@ -118,7 +118,7 @@ theorem validEmitterTM_increment_step_internal (mode : StreamMode)
     simp [controllerIncrementCfg, validEmitterTM, controllerIncrement, controllerDone]
   simp only [TM.step, hne, ↓reduceIte, Option.some.injEq] at hstep
   subst hstep
-  rw [TM.step, if_neg hnotDone]
+  rw [TM.step, ite_eq_right hnotDone]
   simp only [controllerIncrementCfg, validEmitterTM, controllerIncrement,
     controllerDone, hne, ↓reduceIte]
 
@@ -170,7 +170,7 @@ theorem validEmitterTM_commit_step_internal (pending : PendingSigns) (sign : Boo
     simp [controllerCommitCfg, validEmitterTM, controllerCommit, controllerDone]
   simp only [TM.step, hne, ↓reduceIte, Option.some.injEq] at hstep
   subst hstep
-  rw [TM.step, if_neg hnotDone]
+  rw [TM.step, ite_eq_right hnotDone]
   simp only [controllerCommitCfg, validEmitterTM, controllerCommit,
     controllerDone, hne, ↓reduceIte]
 
@@ -223,7 +223,7 @@ theorem validEmitterTM_close_step_internal (pending : PendingSigns)
     simp [controllerCloseCfg, validEmitterTM, controllerClose, controllerDone]
   simp only [TM.step, hne, ↓reduceIte, Option.some.injEq] at hstep
   subst hstep
-  rw [TM.step, if_neg hnotDone]
+  rw [TM.step, ite_eq_right hnotDone]
   simp only [controllerCloseCfg, validEmitterTM, controllerClose,
     controllerDone, hne, ↓reduceIte]
 

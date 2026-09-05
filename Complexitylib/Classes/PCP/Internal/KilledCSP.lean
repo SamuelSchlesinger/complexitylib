@@ -171,7 +171,7 @@ theorem satisfies_killedPow_truthful {σ : R.Assignment} (hσ : ∀ p, R.Satisfi
   rw [Satisfies, satisfies]
   dsimp only
   rw [show (R.killedPow q T hq).graph.nbr v y = R.graph.killedEnd v y.1 y.2 from rfl]
-  rw [rel_killedPow_iff]
+  erw [rel_killedPow_iff]
   intro i
   have hstart : R.kTruthful q T hq σ v
       (R.graph.startIdx (R.graph.kLen_le y) (R.graph.kWalk y) i)
@@ -181,7 +181,8 @@ theorem satisfies_killedPow_truthful {σ : R.Assignment} (hσ : ∀ p, R.Satisfi
   have hend : R.kTruthful q T hq σ (R.graph.killedEnd v y.1 y.2)
       (R.graph.endIdx (R.graph.kLen_le y) v (R.graph.kWalk y) i)
       = σ (R.graph.walkAt (R.graph.kLen y) v (R.graph.kWalk y) (i.val + 1)) := by
-    rw [kTruthful, R.graph.killedEnd_eq]
+    simp only [kTruthful]
+    erw [R.graph.killedEnd_eq]
     exact congrArg σ (R.graph.walkEnd_endIdx (R.graph.kLen_le y) v (R.graph.kWalk y) i)
   rw [hstart, hend]
   have hdart := hσ (R.graph.walkAt (R.graph.kLen y) v (R.graph.kWalk y) i.val,

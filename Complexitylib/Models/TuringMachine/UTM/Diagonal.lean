@@ -369,7 +369,7 @@ private theorem initTM_δ_split (q : InitQ) (hq : q ≠ .done) (i : Γ)
              idleDir i, fun j => idleDir (w j), idleDir o) :=
       fun o => rfl
     rcases h4 : w 4 with _ | _ | _ | _ <;>
-      exact ⟨_, _, _, _, fun o => by rw [harm o, h4]⟩
+      exact ⟨_, _, _, _, fun o => by rw [harm o, h4]; rfl⟩
   | .rewindDesc =>
     have harm : ∀ o : Γ, initTM.δ .rewindDesc i w o =
         if w 4 = Γ.start then
@@ -382,8 +382,8 @@ private theorem initTM_δ_split (q : InitQ) (hq : q ≠ .done) (i : Γ)
            fun j => if j = 4 then Dir3.left else idleDir (w j), idleDir o) :=
       fun o => rfl
     by_cases hs : w 4 = Γ.start
-    · exact ⟨_, _, _, _, fun o => by rw [harm o, if_pos hs]; exact rfl⟩
-    · exact ⟨_, _, _, _, fun o => by rw [harm o, if_neg hs]; exact rfl⟩
+    · exact ⟨_, _, _, _, fun o => by rw [harm o, ite_eq_left hs]; exact rfl⟩
+    · exact ⟨_, _, _, _, fun o => by rw [harm o, ite_eq_right hs]; exact rfl⟩
   | .rewindDesc2 =>
     have harm : ∀ o : Γ, initTM.δ .rewindDesc2 i w o =
         if w 4 = Γ.start then
@@ -396,8 +396,8 @@ private theorem initTM_δ_split (q : InitQ) (hq : q ≠ .done) (i : Γ)
            fun j => if j = 4 then Dir3.left else idleDir (w j), idleDir o) :=
       fun o => rfl
     by_cases hs : w 4 = Γ.start
-    · exact ⟨_, _, _, _, fun o => by rw [harm o, if_pos hs]; exact rfl⟩
-    · exact ⟨_, _, _, _, fun o => by rw [harm o, if_neg hs]; exact rfl⟩
+    · exact ⟨_, _, _, _, fun o => by rw [harm o, ite_eq_left hs]; exact rfl⟩
+    · exact ⟨_, _, _, _, fun o => by rw [harm o, ite_eq_right hs]; exact rfl⟩
   | .rewindState =>
     have harm : ∀ o : Γ, initTM.δ .rewindState i w o =
         if w 3 = Γ.start then
@@ -410,8 +410,8 @@ private theorem initTM_δ_split (q : InitQ) (hq : q ≠ .done) (i : Γ)
            fun j => if j = 3 then Dir3.left else idleDir (w j), idleDir o) :=
       fun o => rfl
     by_cases hs : w 3 = Γ.start
-    · exact ⟨_, _, _, _, fun o => by rw [harm o, if_pos hs]; exact rfl⟩
-    · exact ⟨_, _, _, _, fun o => by rw [harm o, if_neg hs]; exact rfl⟩
+    · exact ⟨_, _, _, _, fun o => by rw [harm o, ite_eq_left hs]; exact rfl⟩
+    · exact ⟨_, _, _, _, fun o => by rw [harm o, ite_eq_right hs]; exact rfl⟩
   | .rewindV0 =>
     have harm : ∀ o : Γ, initTM.δ .rewindV0 i w o =
         if w 0 = Γ.start then
@@ -424,8 +424,8 @@ private theorem initTM_δ_split (q : InitQ) (hq : q ≠ .done) (i : Γ)
            fun j => if j = 0 then Dir3.left else idleDir (w j), idleDir o) :=
       fun o => rfl
     by_cases hs : w 0 = Γ.start
-    · exact ⟨_, _, _, _, fun o => by rw [harm o, if_pos hs]; exact rfl⟩
-    · exact ⟨_, _, _, _, fun o => by rw [harm o, if_neg hs]; exact rfl⟩
+    · exact ⟨_, _, _, _, fun o => by rw [harm o, ite_eq_left hs]; exact rfl⟩
+    · exact ⟨_, _, _, _, fun o => by rw [harm o, ite_eq_right hs]; exact rfl⟩
 
 /-- One `initTM` step commutes with replacing the output tape by any other
     tape parked off `▷`; the original output tape is preserved exactly. -/
@@ -437,13 +437,13 @@ private theorem initTM_step_swap {c c' : Cfg 6 initTM.Q}
   have hq := state_ne_qhalt_of_step h
   obtain ⟨q', ww, inD, wD, hδ⟩ :=
     initTM_δ_split c.state hq c.input.read (fun i => (c.work i).read)
-  rw [TM.step, if_neg hq, hδ c.output.read] at h
+  rw [TM.step, ite_eq_right hq, hδ c.output.read] at h
   dsimp only [] at h
   rw [Option.some.injEq] at h
   subst h
   refine ⟨?_, Tape.writeAndMove_readBack_idle_of_ne_start _ hc⟩
   have hq' : ¬ ({ c with output := O } : Cfg 6 initTM.Q).state = initTM.qhalt := hq
-  rw [TM.step, if_neg hq', hδ O.read]
+  rw [TM.step, ite_eq_right hq', hδ O.read]
   dsimp only []
   refine congrArg some ((Cfg.mk.injEq ..).mpr ⟨rfl, rfl, rfl, ?_⟩)
   exact Tape.writeAndMove_readBack_idle_of_ne_start _ hO
@@ -1039,9 +1039,9 @@ private theorem testPhaseD (α x : List Bool) (mc : Cfg 1 (decodeDesc α).toTM.Q
         then Γ.one else Γ.zero)
       = (if mc.state = (decodeDesc α).toTM.qhalt then Γ.one else Γ.zero) := by
     by_cases hq : mc.state = (decodeDesc α).toTM.qhalt
-    · rw [if_pos hq, if_pos
+    · rw [ite_eq_left hq, ite_eq_left
         (show S = (takeField (takeField (groupPairs α)).2).1 from hSiff.mpr hq)]
-    · rw [if_neg hq, if_neg
+    · rw [ite_eq_right hq, ite_eq_right
         (show ¬S = (takeField (takeField (groupPairs α)).2).1 from
           fun hc => hq (hSiff.mp hc))]
   have hoc1' : c'.output.cells 1
@@ -1135,7 +1135,7 @@ private theorem extractPhaseD (α x : List Bool) (V T m v : ℕ)
     intro k
     rw [hvout.1]
     simp only [show ¬(k + 2 = 0) by omega, show ¬(k + 2 = 1) by omega,
-      if_false, show k + 2 - 1 = k + 1 by omega]
+      ite_false, show k + 2 - 1 = k + 1 by omega]
   have hblank2 : (work (Fin.castAdd 1 2)).cells (m + 2) = Γ.blank := by
     rw [hcells2 m]
     exact hmb
@@ -1208,7 +1208,7 @@ private theorem cleanUtm_halt (α x : List Bool)
     · rintro inp work out htest -
       exact testExit_to_branchD α x mcF (V - max T 1) inp work out htest
     · rintro inp work out ⟨-, -, -, -, -, -, -, hcell1⟩ hne
-      rw [if_pos hhalt] at hcell1
+      rw [ite_eq_left hhalt] at hcell1
       exact absurd hcell1 hne
     · rintro inp work out ⟨hcopy, h0, hns⟩
       refine ⟨m, hmT, hmb, hmnb, ?_⟩
@@ -1258,7 +1258,7 @@ private theorem cleanUtm_timeout (α x : List Bool)
         (testExit_headD α x mcV 0) ?_ ?_ h_then h_else ?_ ?_)
       (le_of_eq (by rw [Nat.max_self]))
     · rintro inp work out ⟨-, -, -, -, -, -, -, hcell1⟩ hone
-      rw [hcell1, if_neg hnh] at hone
+      rw [hcell1, ite_eq_right hnh] at hone
       exact absurd hone (by decide)
     · rintro inp work out htest -
       exact testExit_to_branchD α x mcV 0 inp work out htest
@@ -1332,7 +1332,7 @@ section RunUnique
 private theorem step_none_of_halted {n : ℕ} {tm : TM n} {c : Cfg n tm.Q}
     (h : tm.halted c) : tm.step c = none := by
   unfold TM.step
-  rw [if_pos h]
+  rw [ite_eq_left h]
 
 /-- A halted endpoint absorbs longer runs: any run at least as long as a
     halting run ends at the same configuration. -/
@@ -1409,7 +1409,7 @@ private theorem workX_7 (x : List Bool) :
 private theorem workX_ne7 (x : List Bool) {i : Fin 8} (h : i ≠ 7) :
     workX x i = (Tape.init []).move Dir3.right := by
   simp only [workX]
-  rw [if_neg h]
+  rw [ite_eq_right h]
 
 private theorem workX_park (x : List Bool) :
     ∀ i, 1 ≤ (workX x i).head ∧ (workX x i).read ≠ Γ.start := by
@@ -1485,12 +1485,12 @@ private theorem retargetInput_step_input {k : ℕ} {M : TM k}
     (h : (retargetInput M).step c = some c') (hread : c.input.read ≠ Γ.start) :
     c'.input = c.input := by
   have hq := state_ne_qhalt_of_step h
-  rw [TM.step, if_neg hq] at h
+  rw [TM.step, ite_eq_right hq] at h
   dsimp only [] at h
   rw [Option.some.injEq] at h
   subst h
   show c.input.move (idleDir c.input.read) = c.input
-  rw [idleDir, if_neg hread]
+  rw [idleDir, ite_eq_right hread]
   rfl
 
 private theorem retargetInput_run_input {k : ℕ} {M : TM k} :
@@ -1867,7 +1867,7 @@ private theorem thenChain_timeout (clk : TM 8) (C : ℕ) (g : ℕ → ℕ)
       out.cells 0 = Γ.start ∧ (∀ j, 1 ≤ j → out.cells j ≠ Γ.start))
     (by rintro inp work out ⟨h1, h0, hns⟩
         refine ⟨?_, h0, hns⟩
-        rw [h1, if_pos rfl])
+        rw [h1, ite_eq_left rfl])
   exact seqTM_hoareTime blankOutTM _ hA1
     (by intro inp work out h; exact seamA12 x inp work out h)
     (seqTM_hoareTime clk _ hA2
@@ -1969,7 +1969,7 @@ private theorem toThen_good (x : List Bool) (hb : terminatedRegionB x = true) :
     exact transitionTape_eq_self (workX_park x i).2
   · refine Tape.ext rfl ?_
     show out.cells = outVX.cells
-    rw [hoc, hb, if_pos rfl]
+    rw [hoc, hb, ite_eq_left rfl]
     rfl
 
 /-- **Case triple, malformed input**: `terminatedRegionB x = false` routes
@@ -2009,7 +2009,7 @@ private theorem diag_triple_bad (clk : TM 8) (C : ℕ) (g : ℕ → ℕ)
       ?_ ?_ h_then h_else ?_ ?_
     · rintro inp work out ⟨-, -, -, hoc, -⟩ hone
       rw [hoc, Function.update_self, hb] at hone
-      rw [if_neg (by decide)] at hone
+      rw [ite_eq_right (by decide)] at hone
       exact absurd hone (by decide)
     · rintro inp work out ⟨-, -, -, hoc, -⟩ -
       refine ⟨?_, ?_, ?_⟩
@@ -2077,7 +2077,7 @@ private theorem diag_triple_halt (clk : TM 8) (C : ℕ) (g : ℕ → ℕ)
       exact toThen_good x hb inp work out h hone
     · rintro inp work out ⟨-, -, -, hoc, -⟩ hne
       refine absurd ?_ hne
-      rw [hoc, Function.update_self, if_pos hb]
+      rw [hoc, Function.update_self, ite_eq_left hb]
     · rintro inp work out ⟨h1, h0, hns⟩
       show (transitionTape out).cells 1 = _
       rw [transitionTape_cells out hns]
@@ -2127,7 +2127,7 @@ private theorem diag_triple_timeout (clk : TM 8) (C : ℕ) (g : ℕ → ℕ)
       exact toThen_good x hb inp work out h hone
     · rintro inp work out ⟨-, -, -, hoc, -⟩ hne
       refine absurd ?_ hne
-      rw [hoc, Function.update_self, if_pos hb]
+      rw [hoc, Function.update_self, ite_eq_left hb]
     · rintro inp work out ⟨h1, h0, hns⟩
       show (transitionTape out).cells 1 = Γ.zero
       rw [transitionTape_cells out hns]
@@ -2173,8 +2173,8 @@ theorem diagTM_decidesInTime (clk : TM 8) (C : ℕ) (g : ℕ → ℕ)
         fun hin => hmem.mp hin, ?_⟩
       intro hnot
       by_cases hm : mcF.output.cells 1 = Γ.one
-      · rw [hcell, if_pos hm]
-      · exact absurd (hmem.mpr (by rw [hcell, if_neg hm])) hnot
+      · rw [hcell, ite_eq_left hm]
+      · exact absurd (hmem.mpr (by rw [hcell, ite_eq_right hm])) hnot
     · obtain ⟨c, t, ht, hreach, hhalt, hcell⟩ :=
         diag_triple_timeout clk C g hclk x hb (hg1 x.length) mcV hrunV hnh
           (Tape.init (x.map Γ.ofBool)) (fun _ => Tape.init []) (Tape.init [])
@@ -2211,15 +2211,18 @@ theorem diagTM_flips_of_halts (clk : TM 8) (C : ℕ) (g : ℕ → ℕ)
       ⟨rfl, fun _ => rfl, rfl⟩
   rw [diag_mem_iff clk hreach hhalt', hcell]
   by_cases hm : mcF.output.cells 1 = Γ.one
-  · rw [if_pos hm]
+  · rw [ite_eq_left hm]
     simp [hm]
-  · rw [if_neg hm]
+  · rw [ite_eq_right hm]
     simp [hm]
 
 set_option linter.unusedVariables false in
 /-- Compatibility form of `diagTM_flips_of_halts`. The positivity hypothesis
     is not needed for the flip itself, but remains in this public signature for
     callers of the original theorem. -/
+-- The signature mirrors the family this belongs to; the argument is part of
+-- that shape even where this member does not consult it.
+@[nolint unusedArguments]
 theorem diagTM_flips (clk : TM 8) (C : ℕ) (g : ℕ → ℕ)
     (hclk : ClockWitness clk C g) (hg1 : ∀ n, 1 ≤ g n)
     (x : List Bool) (hterm : TerminatedRegion x)

@@ -246,7 +246,7 @@ theorem rewindRef0_step_cursor (op negated0 negated1 : Bool)
   rw [coreCfg_step (.rewindRef0 op negated0 negated1)
     input code wires counter output
     (by cases op <;> cases negated0 <;> cases negated1 <;> decide)]
-  simp only [coreAction, coreHeads_wiresIdx, hwires.read_ne_start, if_false,
+  simp only [coreAction, coreHeads_wiresIdx, hwires.read_ne_start, ite_false,
     coreHeads_codeIdx, coreHeads_counterIdx, CoreAction.preserve,
     TapeAction.preserve, TapeAction.moveLeft]
   rw [hwires.applyMoveLeft]
@@ -271,7 +271,7 @@ theorem rewindRef0_step_marker (op negated0 negated1 : Bool)
   rw [coreCfg_step (.rewindRef0 op negated0 negated1)
     input code wires counter output
     (by cases op <;> cases negated0 <;> cases negated1 <;> decide)]
-  simp only [coreAction, coreHeads_wiresIdx, hwires.read_start, if_true,
+  simp only [coreAction, coreHeads_wiresIdx, hwires.read_start, ite_true,
     coreHeads_codeIdx, coreHeads_counterIdx, CoreAction.preserve,
     TapeAction.preserve, TapeAction.moveRight]
   have hwiresMove :
@@ -338,7 +338,7 @@ theorem rewindRef1_step_cursor (op negated1 value0 : Bool)
   rw [coreCfg_step (.rewindRef1 op negated1 value0)
     input code wires counter output
     (by cases op <;> cases negated1 <;> cases value0 <;> decide)]
-  simp only [coreAction, coreHeads_wiresIdx, hwires.read_ne_start, if_false,
+  simp only [coreAction, coreHeads_wiresIdx, hwires.read_ne_start, ite_false,
     coreHeads_codeIdx, coreHeads_counterIdx, CoreAction.preserve,
     TapeAction.preserve, TapeAction.moveLeft]
   rw [hwires.applyMoveLeft]
@@ -363,7 +363,7 @@ theorem rewindRef1_step_marker (op negated1 value0 : Bool)
   rw [coreCfg_step (.rewindRef1 op negated1 value0)
     input code wires counter output
     (by cases op <;> cases negated1 <;> cases value0 <;> decide)]
-  simp only [coreAction, coreHeads_wiresIdx, hwires.read_start, if_true,
+  simp only [coreAction, coreHeads_wiresIdx, hwires.read_start, ite_true,
     coreHeads_codeIdx, coreHeads_counterIdx, CoreAction.preserve,
     TapeAction.preserve, TapeAction.moveRight]
   have hwiresMove :

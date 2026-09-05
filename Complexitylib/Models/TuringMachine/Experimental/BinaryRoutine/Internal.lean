@@ -142,7 +142,8 @@ theorem emitBits_sound_internal (word : List Bool) :
       subst work
       exact canonicalWithinAuxSpace (TM.emitBitsTM word) values inp₀ out
         inputLength initialSpace hinitialSpace hinputSpace)
-    simpa [emitBits, CanonicalPred] using hrun
+    simp [emitBits, CanonicalPred]
+    exact hrun
   · exact TM.emitBitsTM_isTransducer word
 
 theorem identity_sound_internal : (identity (n := n)).Sound := by

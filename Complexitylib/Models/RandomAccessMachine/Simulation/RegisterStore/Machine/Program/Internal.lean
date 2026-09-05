@@ -698,7 +698,7 @@ theorem programLoop_rewind_check_internal (tmBody tmTest : TM n)
         exact TM.transitionTape_eq_self (by rw [hread₃]; simp)
     refine ⟨c₃, .step hstep₁ (.step hstep₂ (.step hstep₃ .zero)),
       ?_, ?_, ?_, ?_⟩
-    · rw [hstate₃, if_pos hone]
+    · rw [hstate₃, ite_eq_left hone]
     · rw [hinput₃, hinput₂, hinput₁]
     · rw [hwork₃, hwork₂, hwork₁]
     · rw [houtput₃, houtput₂]
@@ -723,7 +723,7 @@ theorem programLoop_rewind_check_internal (tmBody tmTest : TM n)
       · exact TM.transitionTape_eq_self hread₃Start
     refine ⟨c₃, .step hstep₁ (.step hstep₂ (.step hstep₃ .zero)),
       ?_, ?_, ?_, ?_⟩
-    · rw [hstate₃, if_neg hone]
+    · rw [hstate₃, ite_eq_right hone]
     · rw [hinput₃, hinput₂, hinput₁]
     · rw [hwork₃, hwork₂, hwork₁]
     · rw [houtput₃, houtput₂]
@@ -798,8 +798,8 @@ theorem dispatchHaltTM_hoareTime_frame_internal
       have hcleanLhs : cleanWork tapes.liftedLhs = blankTape := by
         have hzero := hready.1.control.lookup.destination
         change (cleanWork tapes.liftedLhs).HasBinaryNat 0 at hzero
-        simpa only [blankTape] using
-          Tape.HasBinaryNat.eq_init_move_right hzero
+        simp only [blankTape]
+        exact Tape.HasBinaryNat.eq_init_move_right hzero
       have hwork₀Parked : ∀ i, TM.Parked (work₀ i) := by
         intro i
         rw [hready.2]
@@ -1213,11 +1213,11 @@ theorem programLoopTM_iteration_internal
           input := inp₀
           work := cbody.work
           output := instructionHaltOutput (next.curInstr program) } := by
-      cases ctail
-      simp only [Complexity.Cfg.mk.injEq]
-      exact ⟨htailDone, htailInput, htailWork,
-        htailOutput.trans htestOutput'⟩
-    simpa only [programLoopTM, body, test, blank, hcTail] using hreach
+      exact Complexity.Cfg.ext htailDone htailInput htailWork
+        (htailOutput.trans htestOutput')
+    simp only [programLoopTM]
+    rw [hcTail] at hreach
+    exact hreach
   · right
     refine ⟨hhalted, ?_⟩
     have hcur : next.curInstr program ≠ .halt := hhalted
@@ -1236,11 +1236,11 @@ theorem programLoopTM_iteration_internal
           input := inp₀
           work := cbody.work
           output := blank } := by
-      cases ctail
-      simp only [Complexity.Cfg.mk.injEq]
-      exact ⟨htailStart, htailInput, htailWork,
-        htailOutput.trans hblankOutput⟩
-    simpa only [programLoopTM, body, test, blank, hcTail] using hreach
+      exact Complexity.Cfg.ext htailStart htailInput htailWork
+        (htailOutput.trans hblankOutput)
+    simp only [programLoopTM]
+    rw [hcTail] at hreach
+    exact hreach
 
 theorem snapshot_step_eq_self_of_halted_internal
     (program : Program) (snapshot : Snapshot)
@@ -1256,7 +1256,7 @@ theorem snapshot_run_halted_internal
     ∀ fuel, snapshot.run program fuel = snapshot
   | 0 => rfl
   | fuel + 1 => by
-      rw [Snapshot.run, if_pos hhalted]
+      rw [Snapshot.run, ite_eq_left hhalted]
 
 /-- A halted fuel-bounded sparse run is realized by the fixed controller loop.
 The extra iteration handles a snapshot that is already halted at fuel zero. -/

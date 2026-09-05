@@ -97,7 +97,9 @@ theorem descriptionDifference_eq_top_iff_internal
   | coe upper =>
       induction lower using WithTop.recTopCoe with
       | top => simp at horder
-      | coe lower => simp [descriptionDifference]
+      | coe lower =>
+          simp only [descriptionDifference, WithTop.recTopCoe_coe]
+          exact iff_of_false WithTop.coe_ne_top WithTop.coe_ne_top
 
 theorem descriptionDifference_eq_zero_iff_internal
     {upper lower : WithTop ℕ} (horder : lower ≤ upper)
@@ -124,7 +126,7 @@ theorem descriptionDifference_eq_zero_iff_internal
   · intro heq
     apply WithTop.coe_eq_coe.mpr
     have hvalues : upperValue = lowerValue := by
-      exact_mod_cast heq
+      exact WithTop.coe_injective heq
     simp [hvalues]
 
 theorem descriptionDifference_add_internal
@@ -151,10 +153,8 @@ theorem descriptionDifference_add_internal
               have hidentity :
                   (upper - middle) + (middle - lower) = upper - lower := by
                 omega
-              exact_mod_cast hidentity
-
+              exact congrArg (Nat.cast (R := WithTop ℕ)) hidentity
 namespace TM
-
 variable {n : ℕ}
 
 theorem computationalDepthBetween_add_later_internal

@@ -371,8 +371,7 @@ theorem pairStageTM_hoareTime_internal (bits : List Bool) :
       (pairStageTime bits.length) := by
   have htest : (TM.pairValidateTM.liftTM workTapeCount).HoareTime
       (PairStagePre bits) (ValidatorPost bits) (bits.length + 2) := by
-    simpa [PairStagePre, ValidatorPost] using
-      TM.pairValidateTM_lift_hoareTime workTapeCount bits
+    exact TM.pairValidateTM_lift_hoareTime workTapeCount bits
   have hwf : ∀ inp work out, ValidatorPost bits inp work out →
       TM.AllTapesWF inp work out := by
     intro inp work out hpost

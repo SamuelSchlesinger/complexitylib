@@ -38,12 +38,12 @@ private def paddedBinarySymbol (bits : List Bool) (i : ℕ) : Γ :=
 private theorem paddedBinarySymbol_of_lt {bits : List Bool} {i : ℕ}
     (h : i < bits.length) :
     paddedBinarySymbol bits i = Γ.ofBool bits[i] := by
-  simp only [paddedBinarySymbol, dif_pos h]
+  simp only [paddedBinarySymbol, dite_eq_left h]
 
 private theorem paddedBinarySymbol_of_ge {bits : List Bool} {i : ℕ}
     (h : bits.length ≤ i) :
     paddedBinarySymbol bits i = Γ.blank := by
-  simp only [paddedBinarySymbol, dif_neg (Nat.not_lt.mpr h)]
+  simp only [paddedBinarySymbol, dite_eq_right (Nat.not_lt.mpr h)]
 
 /-- Boolean equality accumulated through the first `width` padded symbols. -/
 private def paddedBinaryPrefixEq (left right : List Bool) : ℕ → Bool
@@ -406,7 +406,7 @@ private theorem binaryForCompareCfg_step_scan_blank
     limitIdx hne equalSoFar c rfl hcounterRead hlimitRead hinp hwork hout
   dsimp only [c, binaryForCompareCfg] at hstep
   rw [binaryForWorkAt_move_left work hne] at hstep
-  simpa using hstep
+  simpa [binaryForCompareCfg] using hstep
 
 private theorem binaryForCompareCfg_step_rewind
     (body : TM n) (work : Fin n → Tape)
@@ -434,7 +434,7 @@ private theorem binaryForCompareCfg_step_rewind
     hne equalSoFar c rfl hinp hwork hout
   dsimp only [c, binaryForCompareCfg] at hstep
   rw [binaryForWorkAt_move_left work hne] at hstep
-  simpa using hstep
+  simpa [binaryForCompareCfg] using hstep
 
 private theorem binaryForCompareCfg_rewind_reachesIn
     (body : TM n) (work : Fin n → Tape)
@@ -709,12 +709,14 @@ theorem binaryForTM_compare_reachesIn_frame_internal
     refine ⟨_, hrun, rfl, rfl, rfl, ?_, ?_⟩
     · simp
     · simp
+      rfl
   · have hlt : value < limitValue := by omega
     have hrun := binaryForTM_compare_reachesIn_frame_of_lt_internal
       body counterIdx limitIdx hne value limitValue hlt inp₀ work₀ out₀
       hcounter hlimit hinp hother hout
     refine ⟨_, hrun, rfl, rfl, rfl, ?_, ?_⟩
     · simp [hlt]
+      rfl
     · simp [heq]
 
 end TM

@@ -155,7 +155,7 @@ private theorem stepConfigAtomAt_configIndex_packed (tm : NTM k) (T : ℕ)
     (atom : ConfigAtom tm T) :
     stepConfigAtomAt tm T (configIndex tm T atom) = atom := by
   unfold stepConfigAtomAt
-  rw [dif_pos (configIndex_lt tm T atom)]
+  rw [dite_eq_left (configIndex_lt tm T atom)]
   have hindex :
       (⟨configIndex tm T atom, configIndex_lt tm T atom⟩ :
         Fin (configWidth tm T)) = configAtomEquiv tm T atom := by
@@ -179,7 +179,7 @@ private theorem stepFormulaSizeAtSpecialized_state_packed (tm : NTM k)
             (Fintype.equivFin tm.Q).symm index))
         (effectCaseChoiceAt tm) := by
   unfold stepFormulaSizeAtSpecializedInternal stepFormulaSizeAt
-  rw [if_pos]
+  rw [ite_eq_left]
   · unfold stepAtomKindAt stepAtomEffectSelectedAt
     rw [← stateAtom_index_packed tm index,
       stepConfigAtomAt_configIndex_packed tm T]

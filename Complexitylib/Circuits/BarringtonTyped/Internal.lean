@@ -62,7 +62,7 @@ private theorem formulaToBP_function
       | true =>
           have heval := hsemantics input.toTotal
           simp only [hvalue] at heval
-          simpa only [heval] using
+          simpa only [heval, ite_true] using
             (show
               decide (barringtonTargetBase (0 : Fin 5) ≠ 0) = true by
               decide)

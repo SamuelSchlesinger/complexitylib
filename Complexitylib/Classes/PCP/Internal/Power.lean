@@ -172,7 +172,7 @@ theorem step_power (t : ℕ) (f : G.V → ℝ) (v : G.V) :
   have hd : ((G.deg : ℝ)) ^ t ≠ 0 := pow_ne_zero _ G.deg_ne_zero
   calc (G.power t).step f v
       = (∑ s : Fin t → G.D, f (G.walkEnd t v s)) / ((G.deg ^ t : ℕ) : ℝ) := by
-        rw [step, deg_power]
+        simp only [step, deg_power]
         rfl
     _ = ((G.deg : ℝ) ^ t * G.stepIter t f v) / ((G.deg : ℝ) ^ t) := by
         rw [G.sum_walkEnd f t v]

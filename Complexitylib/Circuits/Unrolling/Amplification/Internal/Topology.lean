@@ -42,7 +42,7 @@ theorem acceptanceCopiesBuildStep_topologicallyWellFormed_internal
       ).TopologicallyWellFormed primaryAvailable := by
   let available := build.available primaryAvailable
   let runLayout := (layout.run j).weaken build.circuit.length
-  haveI : NeZero available := ⟨by
+  have : NeZero available := ⟨by
     simp [available, AcceptanceCopiesBuild.available,
       NeZero.ne primaryAvailable]⟩
   change (build.circuit ++ acceptanceRawCircuit tm T n available
@@ -114,7 +114,7 @@ theorem amplifiedAcceptanceRawCircuit_topologicallyWellFormed_internal
   · simpa [built] using
       acceptanceCopiesBuild_topologicallyWellFormed_internal tm runs T n
         primaryAvailable layout
-  · haveI : NeZero (primaryAvailable + built.circuit.length) := ⟨by
+  · have : NeZero (primaryAvailable + built.circuit.length) := ⟨by
       simp [NeZero.ne primaryAvailable]⟩
     have hrefs : ∀ j, built.verdictWires j <
         primaryAvailable + built.circuit.length := by

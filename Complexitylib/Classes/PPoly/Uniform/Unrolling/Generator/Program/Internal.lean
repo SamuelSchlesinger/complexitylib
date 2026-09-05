@@ -235,7 +235,7 @@ theorem program_requires_inputLengthValues_internal
       BinaryRoutine.emitBits, BinaryRoutine.inputLengthValues,
       Work.inputLength]
   · simp only [program, BinaryRoutine.branchZero]
-    rw [if_neg (by
+    rw [ite_eq_right (by
       simpa [BinaryRoutine.inputLengthValues, Work.inputLength] using hzero)]
     change
       (positivePreamble tm q).requires

@@ -92,7 +92,9 @@ private theorem validation_to_valid_else (z : List Bool)
       out.cells 1 ≠ Γ.one → False := by
   rintro inp work out hpost hne
   have hone : out.cells 1 = Γ.one := by
-    simpa [hvalid] using hpost.2.2.2.2.2.1
+    have h := hpost.2.2.2.2.2.1
+    rw [hvalid] at h
+    exact h
   exact hne hone
 
 /-! ## Full valid path -/

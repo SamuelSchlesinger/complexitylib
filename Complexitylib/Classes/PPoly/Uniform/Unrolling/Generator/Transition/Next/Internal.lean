@@ -1423,7 +1423,7 @@ theorem emitNextStateFormula_emitted_internal (tm : NTM k)
     nextSchedule values hclean.haltedOrClean holdEffect hnextEffect
     holdEmitted hnextEmitted hsize
   simpa [emitNextStateFormula, nextStateFormulaSchedule,
-    nextSchedule, nextFormulaChildAvailable] using hresult
+    nextSchedule, nextFormulaChildAvailable] using! hresult
 
 theorem emitNextStateFormula_spaceBoundByWidth_internal (tm : NTM k)
     (state : tm.Q) {initialSpace : ℕ → ℕ}
@@ -1505,8 +1505,7 @@ theorem emitNextStateFormula_spaceBoundByWidth_internal (tm : NTM k)
         width inputLength := by
     intro inputLength
     simpa [childSize, stateNextChildPolynomial,
-      nextStateFormulaScheduleSize, nextHaltedOrScheduleSize] using
-      hcapBase inputLength
+      nextStateFormulaScheduleSize, nextHaltedOrScheduleSize] using! hcapBase inputLength
   have hhaltCap : ∀ inputLength,
       transitionStateRef (values inputLength Work.configBase)
           (stateIndex tm tm.qhalt) ≤ width inputLength := by
@@ -1767,7 +1766,7 @@ theorem emitNextHeadFormula_emitted_internal (tm : NTM k)
     nextSchedule values (parkedCase_haltedOrClean hcase) holdEffect
     hnextEffect holdEmitted hnextEmitted hsize
   simpa [emitNextHeadFormula, nextHeadFormulaSchedule, nextSchedule,
-    nextFormulaChildAvailable] using hresult
+    nextFormulaChildAvailable] using! hresult
 
 private structure NextHeadFormulaWidthCap (tm : NTM k)
     (tape : TapeSlot k) (values : ℕ → BinaryValues WorkCount)
@@ -2020,8 +2019,7 @@ theorem emitNextHeadFormula_spaceBoundByWidth_internal (tm : NTM k)
         width inputLength := by
     intro inputLength
     simpa [childSize, headNextChildPolynomial,
-      nextHeadFormulaScheduleSize, nextHaltedOrScheduleSize] using
-      hcapBase inputLength
+      nextHeadFormulaScheduleSize, nextHaltedOrScheduleSize] using! hcapBase inputLength
   have hhaltCap : ∀ inputLength,
       transitionStateRef (values inputLength Work.configBase)
           (stateIndex tm tm.qhalt) ≤ width inputLength := by
@@ -2274,7 +2272,7 @@ theorem emitNextWrittenCellFormula_emitted_internal (tm : NTM k)
     nextSchedule values (parkedCase_haltedOrClean hcase) holdEffect
     hnextEffect holdEmitted hnextEmitted hsize
   simpa [emitNextWrittenCellFormula, nextWrittenCellFormulaSchedule,
-    nextSchedule, nextFormulaChildAvailable] using hresult
+    nextSchedule, nextFormulaChildAvailable] using! hresult
 
 private structure NextWrittenCellFormulaWidthCap (tm : NTM k)
     (tape : WritableSlot k) (symbol : Γ)
@@ -2562,8 +2560,7 @@ theorem emitNextWrittenCellFormula_spaceBoundByWidth_internal (tm : NTM k)
         width inputLength := by
     intro inputLength
     simpa [childSize, writtenNextChildPolynomial,
-      nextWrittenCellFormulaScheduleSize, nextHaltedOrScheduleSize] using
-      hcapBase inputLength
+      nextWrittenCellFormulaScheduleSize, nextHaltedOrScheduleSize] using! hcapBase inputLength
   have hhaltCap : ∀ inputLength,
       transitionStateRef (values inputLength Work.configBase)
           (stateIndex tm tm.qhalt) ≤ width inputLength := by

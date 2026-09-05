@@ -237,7 +237,7 @@ theorem searchStepPair_ok (tm : NTM k) {L : Language} {S : ℕ → ℕ}
   rw [searchStepPair]
   by_cases hg : (guardRuler (codeBlocks k) (blockRuler W) r).length
       ≤ (codesOf W cs).flatten.length
-  · rw [if_pos hg]
+  · rw [ite_eq_left hg]
     have hj : r.length < cs.length := by
       rw [hguard, hlen] at hg
       by_contra hcon
@@ -296,7 +296,7 @@ theorem searchStepPair_ok (tm : NTM k) {L : Language} {S : ℕ → ℕ}
           exact hcsub₁ _ hmem₁
         · rw [hstep₁]
           exact hmem₂
-  · rw [if_neg hg]
+  · rw [ite_eq_right hg]
     refine ⟨cs, rfl, hnd, hreach, hinit, ?_⟩
     intro i hi hi' β
     have hi2 : i < r.length + 1 := hi

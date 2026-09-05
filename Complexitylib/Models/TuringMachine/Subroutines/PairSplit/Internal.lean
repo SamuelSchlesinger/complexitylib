@@ -46,7 +46,7 @@ private theorem pairSplit_scanX_false_step {k : ℕ} (xIdx yIdx : Fin k)
       c'.input.cells = c.input.cells ∧
       c'.work xIdx = c.work xIdx ∧
       c'.work yIdx = c.work yIdx := by
-  simp only [TM.step, hst, pairSplitCoreTM, if_pos hiread]
+  simp only [TM.step, hst, pairSplitCoreTM, ite_eq_left hiread]
   refine ⟨_, rfl, rfl, ?_, ?_, ?_, ?_⟩
   · simp [Tape.move]
   · simpa using (Tape.move_cells c.input Dir3.right)
@@ -71,7 +71,7 @@ private theorem pairSplit_scanX_true_step {k : ℕ} (xIdx yIdx : Fin k)
   have hne_zero : c.input.read ≠ Γ.zero := by
     rw [hiread]
     decide
-  simp only [TM.step, hst, pairSplitCoreTM, if_neg hne_zero, if_pos hiread]
+  simp only [TM.step, hst, pairSplitCoreTM, ite_eq_right hne_zero, ite_eq_left hiread]
   refine ⟨_, rfl, rfl, ?_, ?_, ?_, ?_⟩
   · simp [Tape.move]
   · simpa using (Tape.move_cells c.input Dir3.right)
@@ -95,7 +95,7 @@ private theorem pairSplit_afterFalse_zero_step {k : ℕ} (xIdx yIdx : Fin k)
       (c'.work xIdx).cells =
         Function.update (c.work xIdx).cells (c.work xIdx).head Γ.zero ∧
       c'.work yIdx = c.work yIdx := by
-  simp only [TM.step, hst, pairSplitCoreTM, if_pos hiread]
+  simp only [TM.step, hst, pairSplitCoreTM, ite_eq_left hiread]
   refine ⟨_, rfl, rfl, ?_, ?_, ?_, ?_, ?_⟩
   · simp [Tape.move]
   · simpa using (Tape.move_cells c.input Dir3.right)
@@ -106,7 +106,7 @@ private theorem pairSplit_afterFalse_zero_step {k : ℕ} (xIdx yIdx : Fin k)
     simp [Tape.writeAndMove, Tape.move_cells, Tape.write,
       show (c.work xIdx).head ≠ 0 from by omega]
   · dsimp only []
-    simp only [if_neg (Ne.symm hne)]
+    simp only [ite_eq_right (Ne.symm hne)]
     exact tape_writeAndMove_stable (c.work yIdx) hyh hyns
 
 /-- In `.afterFalse`, reading `true` recognizes the separator and enters
@@ -127,7 +127,7 @@ private theorem pairSplit_afterFalse_sep_step {k : ℕ} (xIdx yIdx : Fin k)
   have hne_zero : c.input.read ≠ Γ.zero := by
     rw [hiread]
     decide
-  simp only [TM.step, hst, pairSplitCoreTM, if_neg hne_zero, if_pos hiread]
+  simp only [TM.step, hst, pairSplitCoreTM, ite_eq_right hne_zero, ite_eq_left hiread]
   refine ⟨_, rfl, rfl, ?_, ?_, ?_, ?_⟩
   · simp [Tape.move]
   · simpa using (Tape.move_cells c.input Dir3.right)
@@ -151,7 +151,7 @@ private theorem pairSplit_writeTrue_step {k : ℕ} (xIdx yIdx : Fin k)
       (c'.work xIdx).cells =
         Function.update (c.work xIdx).cells (c.work xIdx).head Γ.one ∧
       c'.work yIdx = c.work yIdx := by
-  simp only [TM.step, hst, pairSplitCoreTM, if_pos hiread]
+  simp only [TM.step, hst, pairSplitCoreTM, ite_eq_left hiread]
   refine ⟨_, rfl, rfl, ?_, ?_, ?_, ?_, ?_⟩
   · simp [Tape.move]
   · simpa using (Tape.move_cells c.input Dir3.right)
@@ -162,7 +162,7 @@ private theorem pairSplit_writeTrue_step {k : ℕ} (xIdx yIdx : Fin k)
     simp [Tape.writeAndMove, Tape.move_cells, Tape.write,
       show (c.work xIdx).head ≠ 0 from by omega]
   · dsimp only []
-    simp only [if_neg (Ne.symm hne)]
+    simp only [ite_eq_right (Ne.symm hne)]
     exact tape_writeAndMove_stable (c.work yIdx) hyh hyns
 
 /-- Two-step decoding of a doubled `false` bit. -/
@@ -339,9 +339,9 @@ private theorem pairSplit_scanX_loop {k : ℕ} (xIdx yIdx : Fin k)
       | false =>
           have hread0 : c.input.read = Γ.zero := by
             show c.input.cells c.input.head = Γ.zero
-            simpa using hbits0.1
+            simpa [Γ.ofBool] using hbits0.1
           have hnext0 : c.input.cells (c.input.head + 1) = Γ.zero := by
-            simpa using hbits0.2
+            simpa [Γ.ofBool] using hbits0.2
           obtain ⟨c1, hreach1, hst1, hc1_ih, hc1_ic, hc1_xh, hc1_xc, hc1_yw⟩ :=
             pairSplit_false_bit_step xIdx yIdx hne c hst hread0 hnext0 hxh hxns hyh hyns
           have hc1_ih_ge : c1.input.head ≥ 1 := by rw [hc1_ih]; omega
@@ -430,9 +430,9 @@ private theorem pairSplit_scanX_loop {k : ℕ} (xIdx yIdx : Fin k)
       | true =>
           have hread1 : c.input.read = Γ.one := by
             show c.input.cells c.input.head = Γ.one
-            simpa using hbits0.1
+            simpa [Γ.ofBool] using hbits0.1
           have hnext1 : c.input.cells (c.input.head + 1) = Γ.one := by
-            simpa using hbits0.2
+            simpa [Γ.ofBool] using hbits0.2
           obtain ⟨c1, hreach1, hst1, hc1_ih, hc1_ic, hc1_xh, hc1_xc, hc1_yw⟩ :=
             pairSplit_true_bit_step xIdx yIdx hne c hst hread1 hnext1 hxh hxns hyh hyns
           have hc1_ih_ge : c1.input.head ≥ 1 := by rw [hc1_ih]; omega
@@ -531,7 +531,7 @@ private theorem pairSplit_copyY_halt_step {k : ℕ} (xIdx yIdx : Fin k)
       c'.input = c.input ∧
       c'.work xIdx = c.work xIdx ∧
       c'.work yIdx = c.work yIdx := by
-  simp only [TM.step, hst, pairSplitCoreTM, if_pos hiread, pairSplitIdle]
+  simp only [TM.step, hst, pairSplitCoreTM, ite_eq_left hiread, pairSplitIdle]
   refine ⟨_, rfl, rfl, ?_, ?_, ?_⟩
   · simp [hiread, idleDir, Tape.move]
   · have hxread_ns : (c.work xIdx).read ≠ Γ.start := by simp [hxread]
@@ -559,12 +559,12 @@ private theorem pairSplit_copyY_cont_step {k : ℕ} (xIdx yIdx : Fin k)
       (c'.work yIdx).head = (c.work yIdx).head + 1 ∧
       (c'.work yIdx).cells =
         Function.update (c.work yIdx).cells (c.work yIdx).head c.input.read := by
-  simp only [TM.step, hst, pairSplitCoreTM, if_neg hiread_nb]
+  simp only [TM.step, hst, pairSplitCoreTM, ite_eq_right hiread_nb]
   refine ⟨_, rfl, rfl, ?_, ?_, ?_, ?_, ?_⟩
   · simp [Tape.move]
   ·
     simpa using (Tape.move_cells c.input Dir3.right)
-  · simp only [if_neg hne]
+  · simp only [ite_eq_right hne]
     exact tape_writeAndMove_stable (c.work xIdx) hxh hxns
   · dsimp only []
     simp only [↓reduceIte]
@@ -585,7 +585,7 @@ private theorem pairSplit_copyY_cont_step {k : ℕ} (xIdx yIdx : Fin k)
     unfold Tape.writeAndMove
     rw [Tape.move_cells]
     unfold Tape.write
-    rw [if_neg (show (c.work yIdx).head ≠ 0 from by omega)]
+    rw [ite_eq_right (show (c.work yIdx).head ≠ 0 from by omega)]
     change Function.update (c.work yIdx).cells (c.work yIdx).head _ =
       Function.update (c.work yIdx).cells (c.work yIdx).head _
     exact congrArg (Function.update (c.work yIdx).cells (c.work yIdx).head) hwrite

@@ -103,7 +103,7 @@ theorem TM.halt_or_run_dichotomy {k : ℕ} (tm : TM k) (c₀ : Cfg k tm.Q) (V : 
     · exact Or.inl ⟨0, c₀, Nat.zero_le _, .zero, hh⟩
     · obtain ⟨c₁, hs⟩ : ∃ c₁, tm.step c₀ = some c₁ := by
         unfold TM.step
-        rw [if_neg hh]
+        rw [ite_eq_right hh]
         exact ⟨_, rfl⟩
       rcases ih c₁ with ⟨T, c, hT, hr, hhalt⟩ | ⟨c, hr, hnh⟩
       · exact Or.inl ⟨T + 1, c, by omega, .step hs hr, hhalt⟩

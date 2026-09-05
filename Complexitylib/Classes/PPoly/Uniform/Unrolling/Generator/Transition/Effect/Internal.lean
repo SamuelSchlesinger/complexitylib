@@ -61,7 +61,7 @@ private theorem CaseFormulaClean.updateAvailable
       symbolIndex := ?_ }
   all_goals
     simp only [Function.update_apply]
-    rw [if_neg (by decide)]
+    rw [ite_eq_right (by decide)]
   · exact hclean.position
   · exact hclean.loop₀
   · exact hclean.limit₀
@@ -197,7 +197,7 @@ theorem emitEffectCaseAt_requires_internal (tm : NTM k)
             (effectCaseChoiceAt tm caseIndex)) := by
   rw [emitEffectCaseAt]
   by_cases hselected : effectCaseSelectedAt tm selects caseIndex
-  · rw [if_pos hselected]
+  · rw [ite_eq_left hselected]
     rw [emitCaseFormula_effect_internal (Fintype.card tm.Q) k
       (effectCaseStateIndexAt tm caseIndex)
       (effectCaseInputSymbolIndexAt tm caseIndex)
@@ -205,7 +205,7 @@ theorem emitEffectCaseAt_requires_internal (tm : NTM k)
       (effectCaseChoiceAt tm caseIndex)
       (effectCaseWorkSymbolIndexAt tm caseIndex) values hclean]
     simp [effectFormulaCaseSize, hselected]
-  · rw [if_neg hselected, emitConstantGate_effect_internal]
+  · rw [ite_eq_right hselected, emitConstantGate_effect_internal]
     simp [effectFormulaCaseSize, hselected]
 
 theorem emitEffectCaseAt_emitted_internal (tm : NTM k)
@@ -225,7 +225,7 @@ theorem emitEffectCaseAt_emitted_internal (tm : NTM k)
         caseIndex).flatMap CircuitCode.RawGate.encode := by
   rw [emitEffectCaseAt]
   by_cases hselected : effectCaseSelectedAt tm selects caseIndex
-  · rw [if_pos hselected]
+  · rw [ite_eq_left hselected]
     rw [emitCaseFormula_emitted_internal (Fintype.card tm.Q) k
       (effectCaseStateIndexAt tm caseIndex)
       (effectCaseInputSymbolIndexAt tm caseIndex)
@@ -233,7 +233,7 @@ theorem emitEffectCaseAt_emitted_internal (tm : NTM k)
       (effectCaseChoiceAt tm caseIndex)
       (effectCaseWorkSymbolIndexAt tm caseIndex) values hclean]
     simp [effectFormulaCaseBlock, hselected, havailable]
-  · rw [if_neg hselected,
+  · rw [ite_eq_right hselected,
       emitConstantGate_emitted_internal false values hclean.reference₀]
     simp [effectFormulaCaseBlock, hselected, directInitConstant]
 
@@ -324,7 +324,7 @@ private theorem emitEffectMembersFrom_effect
         dsimp [current]
         rw [hcurrent]
         simp only [Function.update_apply, Work.available]
-        rw [if_pos True.intro]
+        rw [ite_eq_left True.intro]
         change values Work.available + _ = _
         rw [havailable, hhorizon, ← hsizeAt]
         simp [prefixSize]
@@ -422,7 +422,7 @@ private theorem emitEffectMembersFrom_emitted
         dsimp [current]
         rw [hcurrent]
         simp only [Function.update_apply, Work.available]
-        rw [if_pos True.intro]
+        rw [ite_eq_left True.intro]
         change values Work.available + _ = _
         rw [havailable, hhorizon, ← hsizeAt]
         simp [prefixSize]
@@ -816,7 +816,7 @@ private theorem emitPreviousEffectConnectorsCount_requires
         dsimp [current]
         rw [hcurrent]
         simp only [Function.update_apply, Work.reference₀, Work.available]
-        rw [if_neg (by decide), if_pos True.intro]
+        rw [ite_eq_right (by decide), ite_eq_left True.intro]
         change values Work.reference₀ - _ = _
         rw [hreference]
         change (base + prefixSize sizeAt (count + 2) - 1) - _ = _
@@ -893,7 +893,7 @@ private theorem emitPreviousEffectConnectorsCount_effect
         dsimp [current]
         rw [hcurrent]
         simp only [Function.update_apply, Work.reference₀, Work.available]
-        rw [if_neg (by decide), if_pos True.intro]
+        rw [ite_eq_right (by decide), ite_eq_left True.intro]
         change values Work.reference₀ - _ = _
         rw [hreference]
         change (base + prefixSize sizeAt (count + 2) - 1) - _ = _
@@ -969,7 +969,7 @@ private theorem emitPreviousEffectConnectorsCount_emitted
         dsimp [current]
         rw [hcurrent]
         simp only [Function.update_apply, Work.reference₀, Work.available]
-        rw [if_pos True.intro]
+        rw [ite_eq_left True.intro]
         change values Work.available + 1 = _
         rw [havailable]
         dsimp [sizeAt]
@@ -979,7 +979,7 @@ private theorem emitPreviousEffectConnectorsCount_emitted
         dsimp [current]
         rw [hcurrent]
         simp only [Function.update_apply, Work.reference₀, Work.available]
-        rw [if_neg (by decide), if_pos True.intro]
+        rw [ite_eq_right (by decide), ite_eq_left True.intro]
         change values Work.reference₀ - _ = _
         rw [hreference, hhorizon]
         change (base + prefixSize sizeAt (count + 2) - 1) - _ = _
@@ -1128,7 +1128,7 @@ theorem emitEffectConnectors_requires_internal
       rw [emitReadConnector_effect_internal, hprepared]
       simp only [Function.update_apply, Work.available, Work.reference₀,
         Work.reference₁]
-      rw [if_neg (by decide), if_neg (by decide), if_pos True.intro]
+      rw [ite_eq_right (by decide), ite_eq_right (by decide), ite_eq_left True.intro]
       change values Work.available - 2 = _
       rw [havailable]
       dsimp [sizeAt]
@@ -1198,7 +1198,7 @@ theorem emitEffectConnectors_effect_internal
       rw [emitReadConnector_effect_internal, hprepared]
       simp only [Function.update_apply, Work.available, Work.reference₀,
         Work.reference₁]
-      rw [if_neg (by decide), if_neg (by decide), if_pos True.intro]
+      rw [ite_eq_right (by decide), ite_eq_right (by decide), ite_eq_left True.intro]
       change values Work.available - 2 = _
       rw [havailable]
       dsimp [sizeAt]
@@ -1277,7 +1277,7 @@ theorem emitEffectConnectors_emitted_internal
       dsimp [current]
       rw [emitReadConnector_effect_internal, hprepared]
       simp only [Function.update_apply, Work.available]
-      rw [if_pos True.intro]
+      rw [ite_eq_left True.intro]
       change values Work.available + 1 = _
       rw [havailable]
     have hcurrentReference : current Work.reference₀ =
@@ -1286,7 +1286,7 @@ theorem emitEffectConnectors_emitted_internal
       rw [emitReadConnector_effect_internal, hprepared]
       simp only [Function.update_apply, Work.available, Work.reference₀,
         Work.reference₁]
-      rw [if_neg (by decide), if_neg (by decide), if_pos True.intro]
+      rw [ite_eq_right (by decide), ite_eq_right (by decide), ite_eq_left True.intro]
       change values Work.available - 2 = _
       rw [havailable]
       dsimp [sizeAt]
@@ -1311,7 +1311,7 @@ theorem emitEffectConnectors_emitted_internal
           base + prefixSize sizeAt (transitionCases tm).length - 1 := by
         rw [hprepared]
         simp only [Function.update_apply, Work.reference₀]
-        rw [if_pos True.intro]
+        rw [ite_eq_left True.intro]
         rw [havailable]
         dsimp [sizeAt]
         omega
@@ -1319,7 +1319,7 @@ theorem emitEffectConnectors_emitted_internal
           base + prefixSize sizeAt (transitionCases tm).length := by
         rw [hprepared]
         simp only [Function.update_apply, Work.reference₀, Work.available]
-        rw [if_neg (by decide)]
+        rw [ite_eq_right (by decide)]
         change values Work.available - 1 = _
         rw [havailable]
         dsimp [sizeAt]
@@ -1567,19 +1567,19 @@ private theorem EffectFormulaWidthCap.frontier
 private theorem effectCaseStateIndexAt_lt (tm : NTM k) (caseIndex : ℕ)
     (hcase : caseIndex < (transitionCases tm).length) :
     effectCaseStateIndexAt tm caseIndex < Fintype.card tm.Q := by
-  rw [effectCaseStateIndexAt, dif_pos hcase]
+  rw [effectCaseStateIndexAt, dite_eq_left hcase]
   exact (Fintype.equivFin tm.Q _).isLt
 
 private theorem effectCaseInputSymbolIndexAt_lt (tm : NTM k)
     (caseIndex : ℕ) (hcase : caseIndex < (transitionCases tm).length) :
     effectCaseInputSymbolIndexAt tm caseIndex < 4 := by
-  rw [effectCaseInputSymbolIndexAt, dif_pos hcase]
+  rw [effectCaseInputSymbolIndexAt, dite_eq_left hcase]
   exact (symbolIndex _).isLt
 
 private theorem effectCaseOutputSymbolIndexAt_lt (tm : NTM k)
     (caseIndex : ℕ) (hcase : caseIndex < (transitionCases tm).length) :
     effectCaseOutputSymbolIndexAt tm caseIndex < 4 := by
-  rw [effectCaseOutputSymbolIndexAt, dif_pos hcase]
+  rw [effectCaseOutputSymbolIndexAt, dite_eq_left hcase]
   exact (symbolIndex _).isLt
 
 private theorem effectCaseWorkSymbolIndexAt_lt (tm : NTM k)
@@ -1587,7 +1587,7 @@ private theorem effectCaseWorkSymbolIndexAt_lt (tm : NTM k)
     (hcase : caseIndex < (transitionCases tm).length)
     (hwork : workIndex < k) :
     effectCaseWorkSymbolIndexAt tm caseIndex workIndex < 4 := by
-  rw [effectCaseWorkSymbolIndexAt, dif_pos hcase, dif_pos hwork]
+  rw [effectCaseWorkSymbolIndexAt, dite_eq_left hcase, dite_eq_left hwork]
   exact (symbolIndex _).isLt
 
 private theorem prefixSize_mono_effect
@@ -1668,7 +1668,7 @@ private theorem emitEffectCaseAt_spaceBoundByWidthAt
       initialSpace values width := by
   rw [emitEffectCaseAt]
   by_cases hselected : effectCaseSelectedAt tm selects caseIndex
-  · rw [if_pos hselected]
+  · rw [ite_eq_left hselected]
     apply emitCaseFormula_spaceBoundByWidth
     · exact hclean
     · exact hvalues
@@ -1681,7 +1681,7 @@ private theorem emitEffectCaseAt_spaceBoundByWidthAt
       have hbound := hcap inputLength tapeIndex symbolIndex position htape
         hsymbol hposition
       simpa [effectFormulaCaseSize, hselected] using hbound
-  · rw [if_neg hselected]
+  · rw [ite_eq_right hselected]
     exact emitConstantGate_spaceBoundByWidth false
       (fun inputLength => hvalues inputLength Work.available)
       (fun inputLength => hvalues inputLength Work.reference₀)
@@ -2113,8 +2113,8 @@ private theorem emitPreviousEffectConnectorsCount_spaceBoundByWidthAt
             (initialSpace := initialSpace) (values := values)
             (width := width))
       · intro inputLength index
-        simpa [emitPreviousEffectConnectorsCount, BinaryRoutine.identity]
-          using hvalues inputLength index
+        simp [emitPreviousEffectConnectorsCount, BinaryRoutine.identity]
+        exact hvalues inputLength index
   | succ count ih =>
       let selected := effectCaseSelectedAt tm selects (count + 1)
       let choiceValue := effectCaseChoiceAt tm (count + 1)
@@ -2241,7 +2241,7 @@ private theorem emitPreviousEffectConnectorsCount_spaceBoundByWidthAt
               prefixSize_mono_effect sizeAt (by omega)
         rw [hcurrentEffect inputLength]
         simp only [Function.update_apply, Work.reference₀, Work.available]
-        rw [if_neg (by decide), if_pos True.intro]
+        rw [ite_eq_right (by decide), ite_eq_left True.intro]
         change values inputLength Work.reference₀ - _ = _
         rw [hreference inputLength, hhorizon inputLength]
         change (base inputLength + prefixSize sizeAt (count + 2) - 1) -
@@ -2321,7 +2321,8 @@ private theorem emitEffectConnectors_spaceBoundByWidthAt
   · constructor
     · exact BinaryRoutine.SpaceBoundByWidthAt.identity
     · intro inputLength index
-      simpa [BinaryRoutine.identity] using hvalues inputLength index
+      simp [BinaryRoutine.identity]
+      exact hvalues inputLength index
   · have hlength : (transitionCases tm).length ≠ 0 := by
       intro hzero
       exact hempty (List.isEmpty_iff_length_eq_zero.mpr hzero)
@@ -2503,8 +2504,9 @@ private theorem emitEffectConnectors_spaceBoundByWidthAt
       simp only [BinaryRoutine.SeqListSpaceBoundByWidthAt]
       exact ⟨hprepare, hinitial, hprevious, hclear, trivial⟩
     · intro inputLength index
-      simpa [BinaryRoutine.seqList, BinaryRoutine.seq, prepare, prepared,
-        connected, afterPrevious] using hfinalValues inputLength index
+      simp only [BinaryRoutine.seqList, BinaryRoutine.seq,
+        BinaryRoutine.identity]
+      exact hfinalValues inputLength index
 
 theorem emitEffectFormula_spaceBoundByWidth_internal
     (tm : NTM k) (selects : TransitionEffect tm → Bool)

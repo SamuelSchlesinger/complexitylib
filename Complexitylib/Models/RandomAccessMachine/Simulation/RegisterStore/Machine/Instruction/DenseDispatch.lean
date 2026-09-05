@@ -86,8 +86,8 @@ theorem denseDispatchProgramTM_hoareTime_frame
       have hcleanLhs : cleanWork tapes.liftedLhs = blankTape := by
         have hzero := hready.1.control.lookup.destination
         change (cleanWork tapes.liftedLhs).HasBinaryNat 0 at hzero
-        simpa only [blankTape] using
-          Tape.HasBinaryNat.eq_init_move_right hzero
+        simp only [blankTape]
+        exact Tape.HasBinaryNat.eq_init_move_right hzero
       have hwork₀Parked : ∀ i, TM.Parked (work₀ i) := by
         intro i
         rw [hready.2]
@@ -453,7 +453,8 @@ theorem denseProgramStepTM_hoareTime_frame
       hprogram inp work out (by simpa [inp₀, blank] using hpre)
     have hsourceStart₀ :
         (work tapes.liftedSource).cells 0 = Γ.start := by
-      simpa [hpre.2.1] using hready.control.lookup.sourceStart
+      simp [hpre.2.1]
+      exact hready.control.lookup.sourceStart
     have hsourceStart := TM.work_cells_zero_eq_start_of_reachesIn
       tapes.liftedSource hreach hsourceStart₀
     have hbufferStart₀ :
@@ -478,7 +479,8 @@ theorem denseProgramStepTM_hoareTime_frame
     · simpa only [instruction, nextStore, nextPC, cleanupValues,
         remainingValue] using hresult
     · have hsourceHead₀ : (work tapes.liftedSource).head = 1 := by
-        simpa [hpre.2.1] using hready.control.lookup.sourceHead
+        simp [hpre.2.1]
+        exact hready.control.lookup.sourceHead
       rw [hsourceHead₀] at hsourceHead
       simp only [sourceBound, denseProgramStepSourceHeadBound]
       omega

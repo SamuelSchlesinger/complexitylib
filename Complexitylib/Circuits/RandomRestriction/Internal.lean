@@ -31,6 +31,7 @@ theorem card_decodeSymbol_none_internal (q : ℕ) :
       Finset.univ.filter (fun symbol : Symbol q =>
         decodeSymbol symbol = none) = {Sum.inl ()} := by
     ext symbol
+    simp only [Finset.mem_filter, Finset.mem_univ, true_and, Finset.mem_singleton]
     cases symbol with
     | inl freeValue =>
         cases freeValue
@@ -115,6 +116,7 @@ theorem card_decodeSymbol_some_internal (q : ℕ) (value : Bool) :
         decodeSymbol symbol = some value) =
         Finset.univ.image embed := by
     ext symbol
+    simp only [Finset.mem_filter, Finset.mem_univ, true_and, Finset.mem_image]
     cases symbol with
     | inl freeValue =>
         cases freeValue

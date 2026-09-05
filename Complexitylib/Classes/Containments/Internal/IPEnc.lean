@@ -167,9 +167,9 @@ theorem step_encOk (P : Params) (D : ℕ) {s : Sst} (h : EncOk P D s) :
               simp only [Option.some.injEq] at hw
               rw [← hw]
               by_cases hokb : P.ok (roundsOf fs) f.a
-              · rw [if_pos hokb, bumpBits_length]
+              · rw [ite_eq_left hokb, bumpBits_length]
                 exact hfl.1
-              · rw [if_neg hokb]
+              · rw [ite_eq_right hokb]
                 exact hfl.1
             · rw [step_leaf_next P a f fs hl (by simpa using hov)]
               refine { stkOk := fun hc => by simp at hc
@@ -181,9 +181,9 @@ theorem step_encOk (P : Params) (D : ℕ) {s : Sst} (h : EncOk P D s) :
               · refine ⟨?_, hfl.2⟩
                 show (if P.ok (roundsOf fs) f.a then bumpBits f.sum else f.sum).length = P.t + 1
                 by_cases hokb : P.ok (roundsOf fs) f.a
-                · rw [if_pos hokb, bumpBits_length]
+                · rw [ite_eq_left hokb, bumpBits_length]
                   exact hfl.1
-                · rw [if_neg hokb]
+                · rw [ite_eq_right hokb]
                   exact hfl.1
               · exact hrest g hg
           · rw [step_push P a f fs hl]

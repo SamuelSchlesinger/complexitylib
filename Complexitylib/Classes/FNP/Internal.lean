@@ -43,7 +43,7 @@ theorem pairLang_orRelation_mem_P {R₁ R₂ : List Bool → List Bool → Prop}
     pairLang (OrRelation R₁ R₂) ∈ P := by
   -- pairLang (OrRelation R₁ R₂) = pairLang R₁ ∪ pairLang R₂
   have heq : pairLang (OrRelation R₁ R₂) = pairLang R₁ ∪ pairLang R₂ := by
-    ext z; simp only [pairLang, OrRelation, Set.mem_setOf_eq, Set.mem_union]; aesop
+    ext z; simp only [pairLang, OrRelation, Set.mem_ofPred_eq, Set.mem_union]; aesop
   rw [heq]
   -- Extract polynomial degrees from P = ⋃ k, DTIME(· ^ k)
   obtain ⟨d₁, hd₁⟩ := Set.mem_iUnion.mp h₁

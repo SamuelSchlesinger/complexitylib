@@ -94,7 +94,7 @@ theorem encMsg_length_le (v : List Bool) : (encMsg v).length ≤ 4 * v.length + 
     obtain ⟨y, hy, rfl⟩ := List.mem_map.mp hl
     obtain ⟨b, _, rfl⟩ := List.mem_map.mp hy
     exact encBit_length_le b
-  have := List.sum_le_card_nsmul _ 4 h
+  have := List.sum_le_length_nsmul _ 4 h
   rw [List.length_map, List.length_map] at this
   simp only [smul_eq_mul] at this
   simp only [List.length_nil]
@@ -231,14 +231,15 @@ theorem encFlatFn_mem_FP {a : List Bool → List Bool} (ha : a ∈ FP) :
     omega
   have h := Cobham.iterate_mem_FP encStepP_mem_FP hinit ha hwidth hbound
   have h1 := mem_FP_comp h Cobham.fstBlock_mem_FP
-  simpa [Function.comp, encFlat] using h1
+  simp [encFlat]
+  exact h1
 
 theorem encMsgFn_mem_FP {a : List Bool → List Bool} (ha : a ∈ FP) :
     (fun z => encMsg (a z)) ∈ FP := by
   have h : (fun z => false :: (encFlat (a z) ++ [true])) ∈ FP := by
     have hcat := Cobham.appendFn_mem_FP (encFlatFn_mem_FP ha) (constFn_mem_FP [true])
     have := mem_FP_comp hcat (Cobham.cons_mem_FP false)
-    simpa [Function.comp] using this
+    exact this
   exact mem_FP_of_eq h fun z => (encMsg_eq_encFlat (a z)).symm
 
 /-! ## Transcripts given as rounds -/

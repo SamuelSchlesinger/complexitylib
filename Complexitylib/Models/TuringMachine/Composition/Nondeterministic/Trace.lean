@@ -100,7 +100,7 @@ theorem compositionNTM_trace_run (tmF : TM nf) (N : NTM ng)
   -- The remaining steps follow `N` bit for bit.
   have hread_ns : ∀ tp : Tape, tp.StartInvariant → 1 ≤ tp.head →
       tp.read ≠ Γ.start := fun tp hinv hh => hinv.2 tp.head hh
-  rw [placedCfg_trace tmF N (hread_ns _ hinpInv hinpHead)
+  erw [placedCfg_trace tmF N (hread_ns _ hinpInv hinpHead)
     (fun i hi => hread_ns _ (hstable i).1 (hstable i).2) s _ _
     (by
       rw [TM.startedCfg_input_eq]

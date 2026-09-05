@@ -200,7 +200,7 @@ theorem gatherStep_right_of_start {k : ℕ} (N : NTM k) (b : Bool)
   · simp only [gatherStep]; split_ifs <;> exact TM.idleDir_right_of_start h
   · subst h
     simp only [gatherStep]
-    rw [if_neg (by decide : ¬ (Γ.start = Γ.blank))]
+    rw [ite_eq_right (by decide : ¬ (Γ.start = Γ.blank))]
     split_ifs <;> rfl
   · simp only [gatherStep]; split_ifs <;> exact TM.idleDir_right_of_start h
 
@@ -337,7 +337,7 @@ theorem scatter2Step_right_of_start {k : ℕ} {Q : Type} (d : Scatter2Data k Q)
   obtain ⟨q', oWoD, iD, iSym, oSym, pos, isLeftMover, leftCarry⟩ := d
   refine ⟨fun h => ?_, fun _ h => ?_, fun h => ?_⟩
   · exact TM.idleDir_right_of_start h
-  · simp only [scatter2Step]; rw [if_pos h]
+  · simp only [scatter2Step]; rw [ite_eq_left h]
   · exact TM.idleDir_right_of_start h
 
 /-- The assembled single-tape transition function: dispatch on the phase. The
@@ -402,7 +402,7 @@ theorem simDelta_right_of_start {k : ℕ} (N : NTM k) (b : Bool) (q : SimQ k N.Q
 theorem gatherStep_eq_of_ne_blank {k : ℕ} (N : NTM k) (b b' : Bool) (d : GatherData k N.Q)
     (iHead wH oHead : Γ) (h : wH ≠ Γ.blank) :
     gatherStep N b d iHead wH oHead = gatherStep N b' d iHead wH oHead := by
-  simp only [gatherStep, if_neg h]
+  simp only [gatherStep, ite_eq_right h]
 
 /-- **GATHER stays in GATHER off the sentinel.** As long as the work head is not
     on the `□` sentinel, the GATHER step's next state is again a GATHER state (the
@@ -411,7 +411,7 @@ theorem gatherStep_eq_of_ne_blank {k : ℕ} (N : NTM k) (b b' : Bool) (d : Gathe
 theorem gatherStep_fst_eq_gather_of_ne_blank {k : ℕ} (N : NTM k) (b : Bool) (d : GatherData k N.Q)
     (iHead wH oHead : Γ) (h : wH ≠ Γ.blank) :
     ∃ d', (gatherStep N b d iHead wH oHead).1 = SimQ.gather d' := by
-  simp only [gatherStep, if_neg h]
+  simp only [gatherStep, ite_eq_right h]
   split
   · exact ⟨_, rfl⟩
   · split <;> exact ⟨_, rfl⟩
@@ -427,7 +427,7 @@ theorem gatherStep_snd_eq_of_ne_blank {k : ℕ} (N : NTM k) (b : Bool) (d : Gath
     (gatherStep N b d iHead wH oHead).2.2.2.1 = TM.idleDir iHead ∧
     (gatherStep N b d iHead wH oHead).2.2.2.2.1 = (fun _ => Dir3.right) ∧
     (gatherStep N b d iHead wH oHead).2.2.2.2.2 = TM.idleDir oHead := by
-  simp only [gatherStep, if_neg h]
+  simp only [gatherStep, ite_eq_right h]
   split
   · exact ⟨rfl, rfl, rfl, rfl, rfl⟩
   · split <;> exact ⟨rfl, rfl, rfl, rfl, rfl⟩

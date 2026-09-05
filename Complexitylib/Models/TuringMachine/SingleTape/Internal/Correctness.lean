@@ -71,11 +71,11 @@ theorem corr_init {k : ℕ} (N : NTM k) (x : List Bool) :
   wbeyond := fun _ p hp => by
     show (Tape.init []).cells p = Γ.blank
     simp only [Tape.init]
-    rw [if_neg (by omega : ¬ p = 0)]
+    rw [ite_eq_right (by omega : ¬ p = 0)]
     simp
   inputWf := fun p hp => by
     show (Tape.init (x.map Γ.ofBool)).cells p ≠ Γ.start
-    simp only [Tape.init, if_neg (show ¬ p = 0 by omega)]
+    simp only [Tape.init, ite_eq_right (show ¬ p = 0 by omega)]
     cases h : (List.map Γ.ofBool x)[p - 1]? with
     | none => decide
     | some g =>
@@ -84,7 +84,7 @@ theorem corr_init {k : ℕ} (N : NTM k) (x : List Bool) :
   outputWf := fun p hp => by
     show (Tape.init []).cells p ≠ Γ.start
     simp only [Tape.init]
-    rw [if_neg (by omega : ¬ p = 0)]
+    rw [ite_eq_right (by omega : ¬ p = 0)]
     simp
 
 /-- Writing back the read symbol preserves whether a cell holds the accept bit
@@ -105,11 +105,11 @@ theorem accept_bit_preserved (t : Tape) (d : Dir3) :
   rw [hcells, Tape.write]
   by_cases hh0 : t.head = 0
   · simp [hh0]
-  · rw [if_neg hh0]
+  · rw [ite_eq_right hh0]
     simp only [Function.update_apply]
     by_cases h1 : (1 : ℕ) = t.head
-    · rw [if_pos h1, Tape.read, ← h1, readBackWrite_one_iff]
-    · rw [if_neg h1]
+    · rw [ite_eq_left h1, Tape.read, ← h1, readBackWrite_one_iff]
+    · rw [ite_eq_right h1]
 
 /-- **Halt correspondence.** When `N` has halted, the simulator (parked at
     `run N.qhalt`) takes one step to `SimQ.halt`, preserving the accept bit. -/
@@ -161,7 +161,6 @@ theorem run_step {k : ℕ} (N : NTM k) (q : N.Q) (hq : q ≠ N.qhalt) (b : Bool)
           ((TM.readBackWrite ((c1.work 0).read) : Γw) : Γ) (TM.idleDir ((c1.work 0).read)),
         output := c1.output.writeAndMove
           ((TM.readBackWrite c1.output.read : Γw) : Γ) (TM.idleDir c1.output.read) } := by
-  rw [NTM.trace]
   simp only [hst, singleTapeSim, simDelta, runStep, SimQ.run, SimQ.halt, SimQ.gather,
     hq, reduceCtorEq, ↓reduceIte, NTM.trace]
 
@@ -181,7 +180,6 @@ theorem commit_step {k : ℕ} (N : NTM k) (q' : N.Q) (oW : Γw) (oD iD : Dir3)
         output := c1.output.writeAndMove
           ((if oSym = Γ.start then TM.readBackWrite c1.output.read else oW : Γw) : Γ)
           (if oSym = Γ.start then TM.idleDir c1.output.read else safeDir c1.output.read oD) } := by
-  rw [NTM.trace]
   simp only [hst, singleTapeSim, simDelta, commitStep, SimQ.commit, SimQ.run, SimQ.halt,
     Sum.inr.injEq, reduceCtorEq, ↓reduceIte, NTM.trace]
 
@@ -195,7 +193,6 @@ theorem gather_trace1 {k : ℕ} (N : NTM k) (d : GatherData k N.Q) (b : Bool)
        { state := r.1, input := c1.input.move r.2.2.2.1,
          work := fun i => (c1.work i).writeAndMove (r.2.1 i) (r.2.2.2.2.1 i),
          output := c1.output.writeAndMove r.2.2.1 r.2.2.2.2.2 } : Cfg 1 (SimQ k N.Q)) := by
-  rw [NTM.trace]
   simp only [hst, singleTapeSim, simDelta, SimQ.gather, SimQ.halt, Sum.inr.injEq,
     reduceCtorEq, ↓reduceIte, NTM.trace]
 
@@ -316,9 +313,9 @@ private theorem commit_input_eq (t : Tape) (iD : Dir3)
          else safeDir (t.move (TM.idleDir t.read)).read iD)
       = t.move iD := by
   by_cases hr : t.read = Γ.start
-  · rw [if_pos hr, tape_idle_stay _ (move_idle_read_ne t hwf), hright hr,
+  · rw [ite_eq_left hr, tape_idle_stay _ (move_idle_read_ne t hwf), hright hr,
       TM.idleDir_right_of_start hr]
-  · rw [if_neg hr, tape_idle_stay t hr,
+  · rw [ite_eq_right hr, tape_idle_stay t hr,
       show safeDir t.read iD = iD from by simp only [safeDir, hr, ↓reduceIte]]
 
 /-- **COMMIT output reconciliation.** Same as `commit_input_eq` but for the output
@@ -341,15 +338,15 @@ private theorem commit_output_eq (t : Tape) (oW : Γw) (oD : Dir3)
         = { t with head := 1 } := by
       rw [hr, TM.idleDir_start]
       show (t.write (TM.readBackWrite Γ.start).toΓ).move Dir3.right = { t with head := 1 }
-      rw [Tape.write, if_pos h0]; simp [Tape.move, h0]
+      rw [Tape.write, ite_eq_left h0]; simp [Tape.move, h0]
     have hr1ne : ({ t with head := 1 } : Tape).read ≠ Γ.start := by
       rw [Tape.read]; exact hwf 1 (le_refl 1)
     rw [hpr]
-    simp only [if_pos hr]
+    simp only [ite_eq_left hr]
     rw [tape_idle_writeMove _ hr1ne, hright hr]
     show ({ t with head := 1 } : Tape) = (t.write oW.toΓ).move Dir3.right
-    rw [Tape.write, if_pos h0]; simp [Tape.move, h0]
-  · simp only [if_neg hr]
+    rw [Tape.write, ite_eq_left h0]; simp [Tape.move, h0]
+  · simp only [ite_eq_right hr]
     rw [tape_idle_writeMove t hr,
       show safeDir t.read oD = oD from by simp only [safeDir, hr, ↓reduceIte]]
 
@@ -361,6 +358,14 @@ private theorem trace_three {n : ℕ} (M : NTM n) (bb : Bool) (c : Cfg n M.Q) :
   have h2 := M.trace_add_fun 1 1 (fun _ => bb) (M.trace 1 (fun _ => bb) c)
   simp only [] at h1 h2
   rw [show (3 : ℕ) = 1 + 2 from rfl, h1, show (2 : ℕ) = 1 + 1 from rfl, h2]
+
+/-- `trace_three'` specialised to `singleTapeSim`: the state type is stated as
+    `SimQ k N.Q` so that `rw` can build a type-correct motive. -/
+private theorem trace_three' {k : ℕ} (N : NTM k) (bb : Bool) (c : Cfg 1 (SimQ k N.Q)) :
+    (singleTapeSim N).trace 3 (fun _ => bb) c
+      = (singleTapeSim N).trace 1 (fun _ => bb) ((singleTapeSim N).trace 1 (fun _ => bb)
+          ((singleTapeSim N).trace 1 (fun _ => bb) c)) :=
+  trace_three _ _ _
 
 /-- GATHER slot-`0` step (head-bit): records whether this tape's head marker is
     present (`rf := wH = one`), advances to slot `1`, leaves contents/heads put. -/
@@ -437,6 +442,14 @@ private theorem trace_const_add {n : ℕ} (M : NTM n) (a a' : ℕ) (bb : Bool) (
   have h := M.trace_add_fun a a' (fun _ => bb) c
   simpa using h
 
+/-- `trace_const_add'` specialised to `singleTapeSim`: the state type is stated as
+    `SimQ k N.Q` so that `rw` can build a type-correct motive. -/
+private theorem trace_const_add' {k : ℕ} (N : NTM k) (a a' : ℕ) (bb : Bool)
+    (c : Cfg 1 (SimQ k N.Q)) :
+    (singleTapeSim N).trace (a + a') (fun _ => bb) c
+      = (singleTapeSim N).trace a' (fun _ => bb) ((singleTapeSim N).trace a (fun _ => bb) c) :=
+  trace_const_add _ _ _ _ _
+
 /-- One gather **triple** (`trace 3`): starting at slot `0` of tape `j`'s triple
     in the encoded region (work head at `h`), three GATHER steps read the head-bit
     (`cells h`), sym-hi (`cells (h+1)`), and sym-lo (`cells (h+2)`) cells, advance
@@ -483,8 +496,9 @@ theorem gather_triple {k : ℕ} (N : NTM k) (bb : Bool)
       ((singleTapeSim N).trace 1 (fun _ => bb) ((singleTapeSim N).trace 1 (fun _ => bb) c1))
       (by rw [e1]) (by rw [e1, e0]; exact hb2) (by rw [e1, e0]; exact hs2)
       (by rw [e1, e0]; exact his) (by rw [e1, e0]; exact hos)
-  rw [trace_three, e2, e1, e0]
-  simp only [Tape.read, decide_eq_true_eq, dif_pos hj]; rfl
+  rw [trace_three', e2, e1, e0]
+  simp only [Tape.read, dite_eq_left hj]
+  by_cases hone : (c1.work 0).cells (c1.work 0).head = Γ.one <;> simp [hone]
 
 /-- **GATHER one block (`trace (3*m)`).** Sweeping the `k`-tape block `b` (`1 ≤ b
     ≤ M`) starting at tape `0`, slot `0` (work head at `blockStart k b`): after
@@ -542,12 +556,12 @@ private theorem gather_block_aux {k : ℕ} (N : NTM k) (bb : Bool) (c : Cfg k N.
       exact hsym.2
     refine ⟨decide ((c1.work 0).cells (blockStart k b + 3 * m) = Γ.one),
             (c1.work 0).cells (blockStart k b + 3 * m + 1), ?_⟩
-    rw [show 3 * (m + 1) = 3 * m + 3 from by omega, trace_const_add,
+    erw [show 3 * (m + 1) = 3 * m + 3 from by omega, trace_const_add',
         gather_triple N bb q
           (fun j => if ↑j < m ∧ (c.work j).head = b then (c.work j).read else acc₀ j)
           iSym oSym rfm pendingm m hmk
           ((singleTapeSim N).trace (3 * m) (fun _ => bb) c1)
-          (by rw [hmeq]; simp only [if_pos hmk])
+          (by rw [hmeq]; simp only [ite_eq_left hmk])
           (by rw [hmeq]; exact his)
           (by rw [hmeq]; exact hos)
           (by
@@ -590,7 +604,7 @@ private theorem gather_block_aux {k : ℕ} (N : NTM k) (bb : Bool) (c : Cfg k N.
     · subst hjm
       by_cases hb : (c.work ⟨m, hmk⟩).head = b
       · simp only [hb, ↓reduceIte, Function.update_self, and_true]
-        rw [if_pos (Nat.lt_succ_self m), Tape.read, hb]
+        rw [ite_eq_left (Nat.lt_succ_self m), Tape.read, hb]
       · simp only [hb, ↓reduceIte, reduceCtorEq, Nat.lt_irrefl, and_false]
     · have hjv : (j : ℕ) ≠ m := fun h => hjm (Fin.ext h)
       by_cases hjb : (c.work j).head = b
@@ -636,7 +650,7 @@ private theorem gather_sweep_aux {k : ℕ} (N : NTM k) (bb : Bool) (c : Cfg k N.
     refine (Cfg.mk.injEq ..).mpr ⟨?_, rfl, ?_, rfl⟩
     · congr 3
       funext j
-      rw [if_neg (by omega)]
+      rw [ite_eq_right (by omega)]
     · funext x
       obtain rfl : x = 0 := Subsingleton.elim x 0
       show cwk 0 = { cwk 0 with head := blockStart k 1 }
@@ -649,8 +663,8 @@ private theorem gather_sweep_aux {k : ℕ} (N : NTM k) (bb : Bool) (c : Cfg k N.
       (by rw [hBeq]) (by rw [hBeq]) (by rw [hBeq]; exact hinv.cells_congr rfl)
       (by rw [hBeq]; exact his) (by rw [hBeq]; exact hos) k (le_refl k)
     refine ⟨rf', pending', ?_⟩
-    rw [show 3 * k * (B + 1) = 3 * k * B + 3 * k from Nat.mul_succ (3 * k) B,
-        trace_const_add, hstep, hBeq]
+    erw [show 3 * k * (B + 1) = 3 * k * B + 3 * k from Nat.mul_succ (3 * k) B,
+        trace_const_add', hstep, hBeq]
     dsimp only
     simp only [lt_self_iff_false, ↓reduceIte]
     rw [blockStart_succ k (B + 1) (by omega), blockWidth]
@@ -660,11 +674,11 @@ private theorem gather_sweep_aux {k : ℕ} (N : NTM k) (bb : Bool) (c : Cfg k N.
     simp only [j.isLt, true_and]
     by_cases hjb : (c.work j).head = B + 1
     · simp only [hjb, ↓reduceIte, le_refl, and_true]
-      rw [if_pos (by omega)]
-    · rw [if_neg hjb]
+      rw [ite_eq_left (by omega)]
+    · rw [ite_eq_right hjb]
       by_cases hr : 1 ≤ (c.work j).head ∧ (c.work j).head ≤ B
-      · rw [if_pos hr, if_pos (by omega)]
-      · rw [if_neg hr, if_neg (by omega)]
+      · rw [ite_eq_left hr, ite_eq_left (by omega)]
+      · rw [ite_eq_right hr, ite_eq_right (by omega)]
 
 /-- One **GATHER sentinel** step (`trace 1`): reading the `□` that ends the used
     region fires `N.δ` (the one meaningful use of the choice `bb`) and hands the
@@ -781,8 +795,8 @@ theorem gather_acc_eq {k : ℕ} {t : Tape} {w : Fin k → Tape} {M : ℕ}
       = (fun j : Fin k => (w j).read) := by
   funext j
   by_cases h1 : 1 ≤ (w j).head
-  · rw [if_pos ⟨h1, hinv.heads_le j⟩]
-  · rw [if_neg (fun h => h1 h.1), hinv.read_eq_start_of_head_eq_zero j (by omega)]
+  · rw [ite_eq_left ⟨h1, hinv.heads_le j⟩]
+  · rw [ite_eq_right (fun h => h1 h.1), hinv.read_eq_start_of_head_eq_zero j (by omega)]
 
 /-- One **rewind** step (`trace 1`): from a `rewind d` config, the result is the
     configuration built from `rewindStep`'s output. Basis of the rewind sweep. -/
@@ -793,7 +807,6 @@ theorem rewind_trace1 {k : ℕ} (N : NTM k) (d : RewindData k N.Q) (b : Bool)
        { state := r.1, input := c1.input.move r.2.2.2.1,
          work := fun i => (c1.work i).writeAndMove (r.2.1 i) (r.2.2.2.2.1 i),
          output := c1.output.writeAndMove r.2.2.1 r.2.2.2.2.2 } : Cfg 1 (SimQ k N.Q)) := by
-  rw [NTM.trace]
   simp only [hst, singleTapeSim, simDelta, SimQ.rewind, SimQ.halt, Sum.inr.injEq,
     reduceCtorEq, ↓reduceIte, NTM.trace]
 
@@ -840,7 +853,7 @@ theorem rewind_sweep {k : ℕ} (N : NTM k) (bb : Bool)
       congr 1
       funext x; obtain rfl : x = 0 := Subsingleton.elim x 0
       exact work_rewind_step (c1.work 0) hread
-    rw [show p + 1 + 1 = 1 + (p + 1) from by omega, trace_const_add, e1]
+    erw [show p + 1 + 1 = 1 + (p + 1) from by omega, trace_const_add', e1]
     exact ih _ rfl (by simp [hhead]) hcell0
       (fun p' hp1 hp2 => hne p' hp1 (by omega)) his hos
 
@@ -935,7 +948,7 @@ theorem scatterInterWork_cells_ne_start (ct : Tape) (wd : Γw × Dir3) {p : ℕ}
   · rw [hph]
     show (ct.write wd.1.toΓ).cells ct.head ≠ Γ.start
     unfold Tape.write
-    rw [if_neg (show ¬ ct.head = 0 by omega)]
+    rw [ite_eq_right (show ¬ ct.head = 0 by omega)]
     show Function.update ct.cells ct.head wd.1.toΓ ct.head ≠ Γ.start
     rw [Function.update_self]
     cases wd.1 <;> decide
@@ -963,7 +976,7 @@ theorem scatterInterWork_cells_at_head (ct : Tape) (wd : Γw × Dir3)
     (hh : 1 ≤ ct.head) : (scatterInterWork ct wd).cells ct.head = wd.1.toΓ := by
   show (ct.write wd.1.toΓ).cells ct.head = wd.1.toΓ
   unfold Tape.write
-  rw [if_neg (show ¬ ct.head = 0 by omega)]
+  rw [ite_eq_right (show ¬ ct.head = 0 by omega)]
   show Function.update ct.cells ct.head wd.1.toΓ ct.head = wd.1.toΓ
   rw [Function.update_self]
 
@@ -1519,7 +1532,6 @@ theorem scatter1_trace1 {k : ℕ} (N : NTM k) (d : Scatter1Data k N.Q) (b : Bool
        { state := r.1, input := c1.input.move r.2.2.2.1,
          work := fun i => (c1.work i).writeAndMove (r.2.1 i) (r.2.2.2.2.1 i),
          output := c1.output.writeAndMove r.2.2.1 r.2.2.2.2.2 } : Cfg 1 (SimQ k N.Q)) := by
-  rw [NTM.trace]
   simp only [hst, singleTapeSim, simDelta, SimQ.scatter1, SimQ.halt, Sum.inr.injEq,
     reduceCtorEq, ↓reduceIte, NTM.trace]
 
@@ -1543,7 +1555,7 @@ theorem scatter1_step_right {k : ℕ} (N : NTM k) (d : Scatter1Data k N.Q) (b : 
       = fun _ => Dir3.right := by
     funext i
     show (if (c1.work 0).read = Γ.blank ∧ _ then Dir3.left else Dir3.right) = Dir3.right
-    rw [if_neg (fun h => hwb h.1)]
+    rw [ite_eq_right (fun h => hwb h.1)]
   simp only [show (scatter1Step d c1.input.read ((c1.work 0).read) c1.output.read).2.2.2.1
       = TM.idleDir c1.input.read from rfl,
     show (scatter1Step d c1.input.read ((c1.work 0).read) c1.output.read).2.2.1
@@ -1581,7 +1593,7 @@ theorem scatter1_materialize {k : ℕ} (N : NTM k) (b : Bool) (q' : N.Q)
     funext i
     show (if (c1.work 0).read = Γ.blank ∧ mat = true ∧ pos = (0, 0) then Dir3.left
           else Dir3.right) = Dir3.right
-    rw [if_neg (fun h => hnt h.2)]
+    rw [ite_eq_right (fun h => hnt h.2)]
   simp only [show (scatter1Step
         (q', wact, oWoD, iD, iSym, oSym, pos, rightCarry, isLeftMover, writeFlag, mat)
         c1.input.read ((c1.work 0).read) c1.output.read).2.2.2.1
@@ -1595,6 +1607,7 @@ theorem scatter1_materialize {k : ℕ} (N : NTM k) (b : Bool) (q' : N.Q)
         c1.input.read ((c1.work 0).read) c1.output.read).2.2.2.2.2
       = TM.idleDir c1.output.read from rfl,
     hwd, tape_idle_stay c1.input his, tape_idle_writeMove c1.output hos]
+  rfl
 
 /-- SCATTER sweep-1 **materialize slot-0** step: at the `□` sentinel, slot `0` of
     a fresh block-tape, deposit the head-bit (`one` if `rightCarry t`, else `zero`),
@@ -1617,7 +1630,8 @@ theorem scatter1_mat_slot0 {k : ℕ} (N : NTM k) (bb : Bool) (q' : N.Q)
         output := c1.output } := by
   rw [scatter1_materialize N bb q' wact oWoD iD iSym oSym (⟨t, by omega⟩, 0) rc ilm false mat c1 hst
     hnt his hos]
-  simp only [scatter1Step, hblank, ↓reduceIte, if_neg hnt, dif_pos ht, advanceSweep, Fin.reduceEq,
+  simp only [scatter1Step, hblank, ↓reduceIte, ite_eq_right hnt, dite_eq_left ht, advanceSweep,
+    Fin.reduceEq,
     Fin.isValue]
   congr 1
   funext i
@@ -1696,7 +1710,7 @@ theorem scatter1_mat_triple {k : ℕ} (N : NTM k) (bb : Bool) (q' : N.Q)
         rw [Function.update_of_ne (by omega), Function.update_of_ne (by omega)]; exact hb2)
     (by rw [e1, e0]; show 1 ≤ (c1.work 0).head + 1 + 1; omega)
     (by rw [e1, e0]; exact his) (by rw [e1, e0]; exact hos)
-  rw [trace_three, e2, e1, e0]
+  rw [trace_three', e2, e1, e0]
   simp only [advanceSweep, Fin.isValue, ↓reduceIte]
 
 /-- SCATTER sweep-1 **materialize sweep** (`trace (3*m)`): materialize the first
@@ -1755,7 +1769,7 @@ private theorem scatter1_mat_aux {k : ℕ} (N : NTM k) (bb : Bool) (M : ℕ) (q'
         = SimQ.scatter1 (q', wact, oWoD, iD, iSym, oSym, (⟨m, by omega⟩, 0),
             (fun j => if (j : ℕ) < m then false else rc j), ilm, false,
             if m = 0 then false else true) := by
-      rw [htm]; simp only [if_pos hmk]
+      rw [htm]; simp only [ite_eq_left hmk]; rfl
     have hcw : ((singleTapeSim N).trace (3 * m) (fun _ => bb) c1).work 0 = wtm := by rw [htm]
     have hcis : ((singleTapeSim N).trace (3 * m) (fun _ => bb) c1).input.read ≠ Γ.start := by
       rw [show ((singleTapeSim N).trace (3 * m) (fun _ => bb) c1).input = c1.input from by rw [htm]]
@@ -1766,37 +1780,38 @@ private theorem scatter1_mat_aux {k : ℕ} (N : NTM k) (bb : Bool) (M : ℕ) (q'
       exact hos
     have hrcm : (fun (j : Fin k) => if (j : ℕ) < m then false else rc j) ⟨m, hmk⟩
         = rc ⟨m, hmk⟩ := by
-      simp only [lt_irrefl, if_false]
+      simp only [lt_irrefl, ite_false]
     have hnt : ¬((if m = 0 then false else true) = true ∧
         ((⟨m, by omega⟩, 0) : SweepPos k) = (0, 0)) := by
       rintro ⟨hmat', hpos⟩
       have : m = 0 := by
-        by_contra h; rw [if_neg h] at hmat'
+        by_contra h; rw [ite_eq_right h] at hmat'
         exact absurd (congrArg (fun p => (Prod.fst p).val) hpos) (by simp [h])
       simp [this] at hmat'
     have htr := scatter1_mat_triple N bb q' wact oWoD iD iSym oSym m hmk
       (fun j => if (j : ℕ) < m then false else rc j) ilm (if m = 0 then false else true)
       ((singleTapeSim N).trace (3 * m) (fun _ => bb) c1) hcs (by rw [hcw]; exact hh)
       (by rw [hcw]; exact hb0) (by rw [hcw]; exact hb1) (by rw [hcw]; exact hb2) hnt hcis hcos
-    rw [hcw, hrcm] at htr
+    erw [hcw] at htr
+    simp only [hrcm] at htr
     refine ⟨⟨wtm.head + 3, Function.update (Function.update (Function.update wtm.cells wtm.head
         (if rc ⟨m, hmk⟩ then Γw.one else Γw.zero).toΓ) (wtm.head + 1) Γw.zero.toΓ)
         (wtm.head + 2) Γw.zero.toΓ⟩, ?_, ?_, ?_, ?_, ?_⟩
-    · rw [show 3 * (m + 1) = 3 * m + 3 from Nat.mul_succ 3 m, trace_const_add, htr,
+    · erw [show 3 * (m + 1) = 3 * m + 3 from Nat.mul_succ 3 m, trace_const_add', htr,
         show ((singleTapeSim N).trace (3 * m) (fun _ => bb) c1).input = c1.input from by rw [htm],
         show ((singleTapeSim N).trace (3 * m) (fun _ => bb) c1).output = c1.output from by rw [htm]]
       refine (Cfg.mk.injEq ..).mpr ⟨?_, rfl, rfl, rfl⟩
-      rw [show (if m + 1 = 0 then false else true) = true from if_neg (by omega),
+      rw [show (if m + 1 = 0 then false else true) = true from ite_eq_right (by omega),
         show Function.update (fun (j : Fin k) => if (j : ℕ) < m then false else rc j) ⟨m, hmk⟩ false
             = (fun (j : Fin k) => if (j : ℕ) < m + 1 then false else rc j) from by
           funext j
           by_cases hj : j = ⟨m, hmk⟩
-          · subst hj; rw [Function.update_self]; simp only [Nat.lt_succ_self, if_true]
+          · subst hj; rw [Function.update_self]; simp only [Nat.lt_succ_self, ite_true]
           · rw [Function.update_of_ne hj]
             have hjm : (j : ℕ) ≠ m := fun h => hj (Fin.ext h)
             by_cases hlt : (j : ℕ) < m
-            · simp only [if_pos hlt, if_pos (show (j : ℕ) < m + 1 by omega)]
-            · simp only [if_neg hlt, if_neg (show ¬ (j : ℕ) < m + 1 by omega)]]
+            · simp only [ite_eq_left hlt, ite_eq_left (show (j : ℕ) < m + 1 by omega)]
+            · simp only [ite_eq_right hlt, ite_eq_right (show ¬ (j : ℕ) < m + 1 by omega)]]
     · show wtm.head + 3 = blockStart k (M + 1) + 3 * (m + 1)
       rw [hwhm]; omega
     · intro cc hcc
@@ -1877,7 +1892,7 @@ theorem scatter1_nohead_slot0 {k : ℕ} (N : NTM k) (bb : Bool) (q' : N.Q)
   rw [scatter1_trace1 N
     (q', wact, oWoD, iD, iSym, oSym, (⟨j, by omega⟩, 0), rc, ilm, false, mat) bb c1 hst]
   simp only [scatter1Step, hz, reduceCtorEq, ↓reduceIte, advanceSweep, Fin.reduceEq, Fin.reduceAdd,
-    dif_pos hj, hrc, Bool.false_eq_true, false_and, tape_idle_stay c1.input his,
+    dite_eq_left hj, hrc, Bool.false_eq_true, false_and, tape_idle_stay c1.input his,
     tape_idle_writeMove c1.output hos]
   congr 1
   funext x
@@ -1942,7 +1957,7 @@ theorem scatter1_nohead_triple {k : ℕ} (N : NTM k) (bb : Bool) (q' : N.Q)
     (by rw [e1]; simp only [advanceSweep, Fin.reduceEq, Fin.reduceAdd, ↓reduceIte])
     (by rw [e1, e0]; exact hb2) (by rw [e1, e0]; exact hs2)
     (by rw [e1, e0]; exact his) (by rw [e1, e0]; exact hos)
-  rw [trace_three, e2, e1, e0]
+  rw [trace_three', e2, e1, e0]
   simp only [advanceSweep, ↓reduceIte]
 
 /-- SCATTER sweep-1 **head slot-0, stay** step: at a head-bit cell with a head
@@ -1964,7 +1979,7 @@ theorem scatter1_head_slot0_stay {k : ℕ} (N : NTM k) (bb : Bool) (q' : N.Q)
   rw [scatter1_trace1 N
     (q', wact, oWoD, iD, iSym, oSym, (⟨j, by omega⟩, 0), rc, ilm, wf, mat) bb c1 hst]
   simp only [scatter1Step, hone, reduceCtorEq, ↓reduceIte, advanceSweep, Fin.reduceEq,
-    Fin.reduceAdd, dif_pos hj, hstay, tape_idle_stay c1.input his,
+    Fin.reduceAdd, dite_eq_left hj, hstay, tape_idle_stay c1.input his,
     tape_idle_writeMove c1.output hos]
   congr 1
   funext x
@@ -1990,7 +2005,7 @@ theorem scatter1_head_slot0_left {k : ℕ} (N : NTM k) (bb : Bool) (q' : N.Q)
   rw [scatter1_trace1 N
     (q', wact, oWoD, iD, iSym, oSym, (⟨j, by omega⟩, 0), rc, ilm, wf, mat) bb c1 hst]
   simp only [scatter1Step, hone, reduceCtorEq, ↓reduceIte, advanceSweep, Fin.reduceEq,
-    Fin.reduceAdd, dif_pos hj, hleft, tape_idle_stay c1.input his,
+    Fin.reduceAdd, dite_eq_left hj, hleft, tape_idle_stay c1.input his,
     tape_idle_writeMove c1.output hos]
   congr 1
   funext x
@@ -2018,7 +2033,7 @@ theorem scatter1_head_slot0_right {k : ℕ} (N : NTM k) (bb : Bool) (q' : N.Q)
   rw [scatter1_trace1 N
     (q', wact, oWoD, iD, iSym, oSym, (⟨j, by omega⟩, 0), rc, ilm, wf, mat) bb c1 hst]
   simp only [scatter1Step, hone, reduceCtorEq, ↓reduceIte, advanceSweep, Fin.reduceEq,
-    Fin.reduceAdd, dif_pos hj, hright, tape_idle_stay c1.input his,
+    Fin.reduceAdd, dite_eq_left hj, hright, tape_idle_stay c1.input his,
     tape_idle_writeMove c1.output hos]
   congr 1
   funext x
@@ -2044,7 +2059,7 @@ theorem scatter1_head_sym1 {k : ℕ} (N : NTM k) (bb : Bool) (q' : N.Q)
   rw [scatter1_trace1 N
     (q', wact, oWoD, iD, iSym, oSym, (⟨j, by omega⟩, 1), rc, ilm, true, mat) bb c1 hst]
   simp only [scatter1Step, hwb, ↓reduceIte, advanceSweep, Fin.reduceEq, Fin.reduceAdd,
-    dif_pos hj, tape_idle_stay c1.input his, tape_idle_writeMove c1.output hos]
+    dite_eq_left hj, tape_idle_stay c1.input his, tape_idle_writeMove c1.output hos]
   congr 1
   funext x
   obtain rfl : x = 0 := Subsingleton.elim x 0
@@ -2070,7 +2085,7 @@ theorem scatter1_head_sym2 {k : ℕ} (N : NTM k) (bb : Bool) (q' : N.Q)
   rw [scatter1_trace1 N
     (q', wact, oWoD, iD, iSym, oSym, (⟨j, by omega⟩, 2), rc, ilm, true, mat) bb c1 hst]
   simp only [scatter1Step, hwb, ↓reduceIte, advanceSweep, Fin.reduceEq,
-    dif_pos hj, tape_idle_stay c1.input his, tape_idle_writeMove c1.output hos]
+    dite_eq_left hj, tape_idle_stay c1.input his, tape_idle_writeMove c1.output hos]
   congr 1
   funext x
   obtain rfl : x = 0 := Subsingleton.elim x 0
@@ -2110,7 +2125,7 @@ theorem scatter1_head_stay_triple {k : ℕ} (N : NTM k) (bb : Bool) (q' : N.Q)
     (by rw [e1, e0]; simp only [Tape.read]; rw [Function.update_of_ne (by omega)]; exact hb2)
     (by rw [e1, e0]; show 1 ≤ (c1.work 0).head + 1 + 1; omega)
     (by rw [e1, e0]; exact his) (by rw [e1, e0]; exact hos)
-  rw [trace_three, e2, e1, e0]
+  rw [trace_three', e2, e1, e0]
 
 /-- SCATTER sweep-1 **head left triple** (`trace 3`): like the stay triple (writes
     the new symbol, keeps the head-bit here), but records the tape in `isLeftMover`
@@ -2148,7 +2163,7 @@ theorem scatter1_head_left_triple {k : ℕ} (N : NTM k) (bb : Bool) (q' : N.Q)
     (by rw [e1, e0]; simp only [Tape.read]; rw [Function.update_of_ne (by omega)]; exact hb2)
     (by rw [e1, e0]; show 1 ≤ (c1.work 0).head + 1 + 1; omega)
     (by rw [e1, e0]; exact his) (by rw [e1, e0]; exact hos)
-  rw [trace_three, e2, e1, e0]
+  rw [trace_three', e2, e1, e0]
 
 /-- SCATTER sweep-1 **head right triple** (`trace 3`): a head moving right clears its
     head-bit here (`zero`), writes its new symbol into the two symbol cells, and
@@ -2190,7 +2205,7 @@ theorem scatter1_head_right_triple {k : ℕ} (N : NTM k) (bb : Bool) (q' : N.Q)
         rw [Function.update_of_ne (by omega), Function.update_of_ne (by omega)]; exact hb2)
     (by rw [e1, e0]; show 1 ≤ (c1.work 0).head + 1 + 1; omega)
     (by rw [e1, e0]; exact his) (by rw [e1, e0]; exact hos)
-  rw [trace_three, e2, e1, e0]
+  rw [trace_three', e2, e1, e0]
 
 /-- SCATTER sweep-1 **deposit slot-0** step: at a head-bit cell with no head
     (`wH = zero`) but an incoming carry (`rc t = true` — a head moved right into
@@ -2213,7 +2228,7 @@ theorem scatter1_deposit_slot0 {k : ℕ} (N : NTM k) (bb : Bool) (q' : N.Q)
   rw [scatter1_trace1 N
     (q', wact, oWoD, iD, iSym, oSym, (⟨j, by omega⟩, 0), rc, ilm, false, mat) bb c1 hst]
   simp only [scatter1Step, hz, reduceCtorEq, ↓reduceIte, advanceSweep, Fin.reduceEq,
-    Fin.reduceAdd, dif_pos hj, hrc, tape_idle_stay c1.input his,
+    Fin.reduceAdd, dite_eq_left hj, hrc, tape_idle_stay c1.input his,
     tape_idle_writeMove c1.output hos]
   congr 1
   funext x
@@ -2258,7 +2273,7 @@ theorem scatter1_deposit_triple {k : ℕ} (N : NTM k) (bb : Bool) (q' : N.Q)
     (by rw [e1, e0]; simp only [Tape.read]; rw [Function.update_of_ne (by omega)]; exact hb2)
     (by rw [e1, e0]; simp only [Tape.read]; rw [Function.update_of_ne (by omega)]; exact hs2)
     (by rw [e1, e0]; exact his) (by rw [e1, e0]; exact hos)
-  rw [trace_three, e2, e1, e0]
+  rw [trace_three', e2, e1, e0]
   simp only [advanceSweep, ↓reduceIte]
 
 /-- The **SCATTER sweep-1 → sweep-2 turn-around** (`trace 1`): once the freshly
@@ -2322,7 +2337,7 @@ theorem scatter1_tape_nohead {k : ℕ} (N : NTM k) (bb : Bool) (c : Cfg k N.Q) (
     scatterInterWork_cells_of_ne (c.work ⟨m, hmk⟩) (wact ⟨m, hmk⟩) (Ne.symm hhd)
   have htriple := scatter1_nohead_triple N bb q' wact oWoD iD iSym oSym m hmk rc ilm false c1 hst
     hrcf
-    (by rw [hhead]; exact hot.1.trans (if_neg hhd))
+    (by rw [hhead]; exact hot.1.trans (ite_eq_right hhd))
     (by rw [hhead, ← hsym, hot.2.1]; exact (encSymΓ_ne_blank _).1)
     (by rw [hhead, ← hsym2, hot.2.2]; exact (encSymΓ_ne_blank _).2)
     (by rw [hhead, ← hsym, hot.2.1]; exact (encSymΓ_ne_start _).1)
@@ -2333,7 +2348,7 @@ theorem scatter1_tape_nohead {k : ℕ} (N : NTM k) (bb : Bool) (c : Cfg k N.Q) (
     rw [hhead]
   · apply scatter1_blockinv_step hb1 hbM hmk hbm
     · show (c1.work 0).cells (headBitCell k b ⟨m, hmk⟩) = _
-      rw [hot.1, if_neg hhd, if_neg hscat]
+      rw [hot.1, ite_eq_right hhd, ite_eq_right hscat]
     · show (c1.work 0).cells (symCell k b ⟨m, hmk⟩) = _
       rw [hcb]; exact hot.2.1
     · show (c1.work 0).cells (symCell k b ⟨m, hmk⟩ + 1) = _
@@ -2376,12 +2391,12 @@ theorem scatter1_tape_deposit {k : ℕ} (N : NTM k) (bb : Bool) (c : Cfg k N.Q) 
   have hh1 : 1 ≤ (c1.work 0).head := by
     rw [hhead]; simp only [headBitCell]; have := one_le_blockStart k b; omega
   have hscat : (scatterInterWork (c.work ⟨m, hmk⟩) (wact ⟨m, hmk⟩)).head = b := by
-    rw [scatterInterWork_head, if_pos hdr]; omega
+    rw [scatterInterWork_head, ite_eq_left hdr]; omega
   have hcb : (scatterInterWork (c.work ⟨m, hmk⟩) (wact ⟨m, hmk⟩)).cells b
       = (c.work ⟨m, hmk⟩).cells b :=
     scatterInterWork_cells_of_ne (c.work ⟨m, hmk⟩) (wact ⟨m, hmk⟩) (Ne.symm hhd)
   have htriple := scatter1_deposit_triple N bb q' wact oWoD iD iSym oSym m hmk rc ilm false c1 hst
-    (by rw [hhead]; exact hot.1.trans (if_neg hhd))
+    (by rw [hhead]; exact hot.1.trans (ite_eq_right hhd))
     hrc hh1
     (by rw [hhead, ← hsym, hot.2.1]; exact (encSymΓ_ne_blank _).1)
     (by rw [hhead, ← hsym2, hot.2.2]; exact (encSymΓ_ne_blank _).2)
@@ -2395,7 +2410,7 @@ theorem scatter1_tape_deposit {k : ℕ} (N : NTM k) (bb : Bool) (c : Cfg k N.Q) 
   · apply scatter1_blockinv_step hb1 hbM hmk hbm
     · show Function.update (c1.work 0).cells (c1.work 0).head Γw.one.toΓ
         (headBitCell k b ⟨m, hmk⟩) = _
-      rw [← hhead, Function.update_self, if_pos hscat]; rfl
+      rw [← hhead, Function.update_self, ite_eq_left hscat]; rfl
     · show Function.update (c1.work 0).cells (c1.work 0).head Γw.one.toΓ
         (symCell k b ⟨m, hmk⟩) = _
       rw [Function.update_of_ne (by rw [hhead]; simp only [symCell, headBitCell]; omega), hcb]
@@ -2440,13 +2455,14 @@ theorem scatter1_tape_head_stay {k : ℕ} (N : NTM k) (bb : Bool) (c : Cfg k N.Q
   have hh1 : 1 ≤ (c1.work 0).head := by
     rw [hhead]; simp only [headBitCell]; have := one_le_blockStart k b; omega
   have hscat : (scatterInterWork (c.work ⟨m, hmk⟩) (wact ⟨m, hmk⟩)).head = b := by
-    rw [scatterInterWork_head, if_neg (show ¬ (wact ⟨m, hmk⟩).2 = Dir3.right by rw [hstay]; decide)]
+    rw [scatterInterWork_head,
+      ite_eq_right (show ¬ (wact ⟨m, hmk⟩).2 = Dir3.right by rw [hstay]; decide)]
     exact hhdb
   have hcbh : (scatterInterWork (c.work ⟨m, hmk⟩) (wact ⟨m, hmk⟩)).cells b
       = (wact ⟨m, hmk⟩).1.toΓ := by
     rw [← hhdb]; exact scatterInterWork_cells_at_head (c.work ⟨m, hmk⟩) (wact ⟨m, hmk⟩) (by omega)
   have htriple := scatter1_head_stay_triple N bb q' wact oWoD iD iSym oSym m hmk rc ilm false c1 hst
-    (by rw [hhead]; exact hot.1.trans (if_pos hhdb))
+    (by rw [hhead]; exact hot.1.trans (ite_eq_left hhdb))
     hstay hh1
     (by rw [hhead, ← hsym, hot.2.1]; exact (encSymΓ_ne_blank _).1)
     (by rw [hhead, ← hsym2, hot.2.2]; exact (encSymΓ_ne_blank _).2)
@@ -2462,7 +2478,7 @@ theorem scatter1_tape_head_stay {k : ℕ} (N : NTM k) (bb : Bool) (c : Cfg k N.Q
         (headBitCell k b ⟨m, hmk⟩) = _
       rw [Function.update_of_ne (by rw [hhead]; omega),
           Function.update_of_ne (by rw [hhead]; omega),
-          hot.1, if_pos hhdb, if_pos hscat]
+          hot.1, ite_eq_left hhdb, ite_eq_left hscat]
     · show Function.update (Function.update (c1.work 0).cells _ _) _ _ (symCell k b ⟨m, hmk⟩) = _
       rw [show symCell k b ⟨m, hmk⟩ = (c1.work 0).head + 1 by rw [hsym, hhead],
           Function.update_of_ne (by omega), Function.update_self, hcbh]
@@ -2508,13 +2524,14 @@ theorem scatter1_tape_head_left {k : ℕ} (N : NTM k) (bb : Bool) (c : Cfg k N.Q
   have hh1 : 1 ≤ (c1.work 0).head := by
     rw [hhead]; simp only [headBitCell]; have := one_le_blockStart k b; omega
   have hscat : (scatterInterWork (c.work ⟨m, hmk⟩) (wact ⟨m, hmk⟩)).head = b := by
-    rw [scatterInterWork_head, if_neg (show ¬ (wact ⟨m, hmk⟩).2 = Dir3.right by rw [hleft]; decide)]
+    rw [scatterInterWork_head,
+      ite_eq_right (show ¬ (wact ⟨m, hmk⟩).2 = Dir3.right by rw [hleft]; decide)]
     exact hhdb
   have hcbh : (scatterInterWork (c.work ⟨m, hmk⟩) (wact ⟨m, hmk⟩)).cells b
       = (wact ⟨m, hmk⟩).1.toΓ := by
     rw [← hhdb]; exact scatterInterWork_cells_at_head (c.work ⟨m, hmk⟩) (wact ⟨m, hmk⟩) (by omega)
   have htriple := scatter1_head_left_triple N bb q' wact oWoD iD iSym oSym m hmk rc ilm false c1 hst
-    (by rw [hhead]; exact hot.1.trans (if_pos hhdb))
+    (by rw [hhead]; exact hot.1.trans (ite_eq_left hhdb))
     hleft hh1
     (by rw [hhead, ← hsym, hot.2.1]; exact (encSymΓ_ne_blank _).1)
     (by rw [hhead, ← hsym2, hot.2.2]; exact (encSymΓ_ne_blank _).2)
@@ -2530,7 +2547,7 @@ theorem scatter1_tape_head_left {k : ℕ} (N : NTM k) (bb : Bool) (c : Cfg k N.Q
         (headBitCell k b ⟨m, hmk⟩) = _
       rw [Function.update_of_ne (by rw [hhead]; omega),
           Function.update_of_ne (by rw [hhead]; omega),
-          hot.1, if_pos hhdb, if_pos hscat]
+          hot.1, ite_eq_left hhdb, ite_eq_left hscat]
     · show Function.update (Function.update (c1.work 0).cells _ _) _ _ (symCell k b ⟨m, hmk⟩) = _
       rw [show symCell k b ⟨m, hmk⟩ = (c1.work 0).head + 1 by rw [hsym, hhead],
           Function.update_of_ne (by omega), Function.update_self, hcbh]
@@ -2577,13 +2594,13 @@ theorem scatter1_tape_head_right {k : ℕ} (N : NTM k) (bb : Bool) (c : Cfg k N.
   have hh1 : 1 ≤ (c1.work 0).head := by
     rw [hhead]; simp only [headBitCell]; have := one_le_blockStart k b; omega
   have hscat : (scatterInterWork (c.work ⟨m, hmk⟩) (wact ⟨m, hmk⟩)).head ≠ b := by
-    rw [scatterInterWork_head, if_pos hright]; omega
+    rw [scatterInterWork_head, ite_eq_left hright]; omega
   have hcbh : (scatterInterWork (c.work ⟨m, hmk⟩) (wact ⟨m, hmk⟩)).cells b
       = (wact ⟨m, hmk⟩).1.toΓ := by
     rw [← hhdb]; exact scatterInterWork_cells_at_head (c.work ⟨m, hmk⟩) (wact ⟨m, hmk⟩) (by omega)
   have htriple := scatter1_head_right_triple N bb q' wact oWoD iD iSym oSym
     m hmk rc ilm false c1 hst
-    (by rw [hhead]; exact hot.1.trans (if_pos hhdb))
+    (by rw [hhead]; exact hot.1.trans (ite_eq_left hhdb))
     hright hh1
     (by rw [hhead, ← hsym, hot.2.1]; exact (encSymΓ_ne_blank _).1)
     (by rw [hhead, ← hsym2, hot.2.2]; exact (encSymΓ_ne_blank _).2)
@@ -2600,7 +2617,7 @@ theorem scatter1_tape_head_right {k : ℕ} (N : NTM k) (bb : Bool) (c : Cfg k N.
         (headBitCell k b ⟨m, hmk⟩) = _
       rw [Function.update_of_ne (by rw [hhead]; omega),
           Function.update_of_ne (by rw [hhead]; omega),
-          ← hhead, Function.update_self, if_neg hscat]; rfl
+          ← hhead, Function.update_self, ite_eq_right hscat]; rfl
     · show Function.update (Function.update (Function.update (c1.work 0).cells _ _) _ _) _ _
         (symCell k b ⟨m, hmk⟩) = _
       rw [show symCell k b ⟨m, hmk⟩ = (c1.work 0).head + 1 by rw [hsym, hhead],
@@ -2682,12 +2699,12 @@ private theorem scatter1_block_aux {k : ℕ} (N : NTM k) (bb : Bool) (c : Cfg k 
             (decide ((c.work ⟨m, hmk⟩).head = b ∧ (wact ⟨m, hmk⟩).2 = Dir3.right)) := by
       funext j
       by_cases hj : j = ⟨m, hmk⟩
-      · subst hj; rw [Function.update_self]; simp only [Nat.lt_succ_self, if_true]
+      · subst hj; rw [Function.update_self]; simp only [Nat.lt_succ_self, ite_true]
       · rw [Function.update_of_ne hj, hRCm]
         have hjm : (j : ℕ) ≠ m := fun h => hj (Fin.ext h)
         by_cases hlt : (j : ℕ) < m
-        · simp only [if_pos hlt, if_pos (show (j : ℕ) < m + 1 by omega)]
-        · simp only [if_neg hlt, if_neg (show ¬ (j : ℕ) < m + 1 by omega)]
+        · simp only [ite_eq_left hlt, ite_eq_left (show (j : ℕ) < m + 1 by omega)]
+        · simp only [ite_eq_right hlt, ite_eq_right (show ¬ (j : ℕ) < m + 1 by omega)]
     have hstep_ilm : (fun (j : Fin k) =>
         if (j : ℕ) < m + 1 ∧ (c.work j).head = b ∧ (wact j).2 = Dir3.left then
           true else ilm_in j)
@@ -2705,14 +2722,14 @@ private theorem scatter1_block_aux {k : ℕ} (N : NTM k) (bb : Bool) (c : Cfg k 
         simp only [hiff]
     -- ILMm at slot m collapses to the incoming ilm_in
     have hILMm_at : ILMm ⟨m, hmk⟩ = ilm_in ⟨m, hmk⟩ := by
-      rw [hILMm]; simp only [lt_irrefl, false_and, if_false]
+      rw [hILMm]; simp only [lt_irrefl, false_and, ite_false]
     have hRCm_at : RCm ⟨m, hmk⟩ = rc_in ⟨m, hmk⟩ := by
-      rw [hRCm]; simp only [lt_irrefl, if_false]
+      rw [hRCm]; simp only [lt_irrefl, ite_false]
     -- facts about the IH config cM = trace (3*m) c1
     have hcs : ((singleTapeSim N).trace (3 * m) (fun _ => bb) c1).state
         = SimQ.scatter1
             (q', wact, oWoD, iD, iSym, oSym, (⟨m, by omega⟩, 0), RCm, ILMm, false, false) := by
-      rw [htm]; simp only [if_pos hmk]
+      rw [htm]; simp only [ite_eq_left hmk]; rfl
     have hch : (((singleTapeSim N).trace (3 * m) (fun _ => bb) c1).work 0).head
         = headBitCell k b ⟨m, hmk⟩ := by
       rw [show ((singleTapeSim N).trace (3 * m) (fun _ => bb) c1).work 0 = wtm
@@ -2729,7 +2746,7 @@ private theorem scatter1_block_aux {k : ℕ} (N : NTM k) (bb : Bool) (c : Cfg k 
       rw [show ((singleTapeSim N).trace (3 * m) (fun _ => bb) c1).output = c1.output
             from by rw [htm]]
       exact hos
-    -- assembly closure (the trace_const_add + input/output reconciliation, done once)
+    -- assembly closure (the trace_const_add' + input/output reconciliation, done once)
     have key : ∀ (wt : Tape) (rc' ilm' : Fin k → Bool),
         (singleTapeSim N).trace 3 (fun _ => bb)
             ((singleTapeSim N).trace (3 * m) (fun _ => bb) c1)
@@ -2759,7 +2776,7 @@ private theorem scatter1_block_aux {k : ℕ} (N : NTM k) (bb : Bool) (c : Cfg k 
           ∧ Scatter1BlockInv wt' c.work wact M b (m + 1) := by
       intro wt rc' ilm' htr hrc hilm hwh hbi
       refine ⟨wt, ?_, ?_, hbi⟩
-      · rw [show 3 * (m + 1) = 3 * m + 3 from by omega, trace_const_add, htr, hrc, hilm,
+      · erw [show 3 * (m + 1) = 3 * m + 3 from by omega, trace_const_add', htr, hrc, hilm,
           show ((singleTapeSim N).trace (3 * m) (fun _ => bb) c1).input = c1.input from by rw [htm],
           show ((singleTapeSim N).trace (3 * m) (fun _ => bb) c1).output = c1.output
             from by rw [htm]]
@@ -2780,13 +2797,14 @@ private theorem scatter1_block_aux {k : ℕ} (N : NTM k) (bb : Bool) (c : Cfg k 
             rw [hRCm_at, hrc_in, decide_eq_false
                 (fun h => by rw [h3] at h; exact absurd h.2 (by decide)),
               decide_eq_false (hndep_of_eq hhd)], Function.update_eq_self]
-        · rw [hstep_ilm, if_pos ⟨hhd, h3⟩]
+        · rw [hstep_ilm, ite_eq_left ⟨hhd, h3⟩]
       · -- right
         obtain ⟨wt, htr, hwh, hbi⟩ := scatter1_tape_head_right N bb c b M hb1 hbM m hmk
           q' wact oWoD iD iSym oSym RCm ILMm _ hcs hch hcbi hhd h3 hcis hcos
         refine key wt (Function.update RCm ⟨m, hmk⟩ true) ILMm htr ?_ ?_ hwh hbi
         · rw [hstep_rc, decide_eq_true ⟨hhd, h3⟩]
-        · rw [hstep_ilm, if_neg (show ¬((c.work ⟨m, hmk⟩).head = b ∧ (wact ⟨m, hmk⟩).2 = Dir3.left)
+        · rw [hstep_ilm,
+          ite_eq_right (show ¬((c.work ⟨m, hmk⟩).head = b ∧ (wact ⟨m, hmk⟩).2 = Dir3.left)
               from fun h => by rw [h3] at h; exact absurd h.2 (by decide)), ← hILMm_at,
             Function.update_eq_self]
       · -- stay
@@ -2798,7 +2816,8 @@ private theorem scatter1_block_aux {k : ℕ} (N : NTM k) (bb : Bool) (c : Cfg k 
             rw [hRCm_at, hrc_in, decide_eq_false
                 (fun h => by rw [h3] at h; exact absurd h.2 (by decide)),
               decide_eq_false (hndep_of_eq hhd)], Function.update_eq_self]
-        · rw [hstep_ilm, if_neg (show ¬((c.work ⟨m, hmk⟩).head = b ∧ (wact ⟨m, hmk⟩).2 = Dir3.left)
+        · rw [hstep_ilm,
+          ite_eq_right (show ¬((c.work ⟨m, hmk⟩).head = b ∧ (wact ⟨m, hmk⟩).2 = Dir3.left)
               from fun h => by rw [h3] at h; exact absurd h.2 (by decide)), ← hILMm_at,
             Function.update_eq_self]
     · by_cases hdep : (c.work ⟨m, hmk⟩).head = b - 1 ∧ (wact ⟨m, hmk⟩).2 = Dir3.right
@@ -2809,7 +2828,8 @@ private theorem scatter1_block_aux {k : ℕ} (N : NTM k) (bb : Bool) (c : Cfg k 
         refine key wt (Function.update RCm ⟨m, hmk⟩ false) ILMm htr ?_ ?_ hwh hbi
         · rw [hstep_rc, decide_eq_false (show ¬((c.work ⟨m, hmk⟩).head = b ∧ _)
               from fun h => hhd h.1)]
-        · rw [hstep_ilm, if_neg (show ¬((c.work ⟨m, hmk⟩).head = b ∧ _) from fun h => hhd h.1),
+        · rw [hstep_ilm,
+          ite_eq_right (show ¬((c.work ⟨m, hmk⟩).head = b ∧ _) from fun h => hhd h.1),
             ← hILMm_at, Function.update_eq_self]
       · -- nohead
         obtain ⟨wt, htr, hwh, hbi⟩ := scatter1_tape_nohead N bb c b M hb1 hbM m hmk
@@ -2820,7 +2840,8 @@ private theorem scatter1_block_aux {k : ℕ} (N : NTM k) (bb : Bool) (c : Cfg k 
               = RCm ⟨m, hmk⟩ from by
             rw [hRCm_at, hrc_in, decide_eq_false (fun h => hhd h.1), decide_eq_false hdep],
             Function.update_eq_self]
-        · rw [hstep_ilm, if_neg (show ¬((c.work ⟨m, hmk⟩).head = b ∧ _) from fun h => hhd h.1),
+        · rw [hstep_ilm,
+          ite_eq_right (show ¬((c.work ⟨m, hmk⟩).head = b ∧ _) from fun h => hhd h.1),
             ← hILMm_at, Function.update_eq_self]
 
 /-- **SCATTER one full block (`trace (3*k)`).** Sweeping all `k` tapes of block `b`
@@ -2856,14 +2877,14 @@ theorem scatter1_block_step {k : ℕ} (N : NTM k) (bb : Bool) (c : Cfg k N.Q) (b
     have hrc_k : (fun (j : Fin k) => if (j : ℕ) < k then
           decide ((c.work j).head = b ∧ (wact j).2 = Dir3.right) else rc_in j)
         = (fun j => decide ((c.work j).head = b ∧ (wact j).2 = Dir3.right)) := by
-      funext j; rw [if_pos j.isLt]
+      funext j; rw [ite_eq_left j.isLt]
     have hilm_k : (fun (j : Fin k) =>
         if (j : ℕ) < k ∧ (c.work j).head = b ∧ (wact j).2 = Dir3.left then
           true else ilm_in j)
         = (fun j => if (c.work j).head = b ∧ (wact j).2 = Dir3.left then true else ilm_in j) := by
       funext j; simp only [j.isLt, true_and]
     rw [hrc_k, hilm_k]
-    simp only [lt_irrefl, if_false]
+    simp only [lt_irrefl, ite_false]
   · rw [hwh, blockStart_succ k b hb1, blockWidth]
 
 /-- **SCATTER full block sweep (`trace (3*k*B)`).** Sweeping the first `B ≤ M`
@@ -2903,7 +2924,7 @@ private theorem scatter1_sweep_aux {k : ℕ} (N : NTM k) (bb : Bool) (c : Cfg k 
       refine (Cfg.mk.injEq ..).mpr ⟨?_, rfl, ?_, rfl⟩
       · rw [show (fun (j : Fin k) => if 1 ≤ (c.work j).head ∧ (c.work j).head ≤ 0 ∧
               (wact j).2 = Dir3.left then true else ilm_in j) = ilm_in from by
-          funext j; rw [if_neg (by rintro ⟨h1, h2, _⟩; omega)]]
+          funext j; rw [ite_eq_right (by rintro ⟨h1, h2, _⟩; omega)]]
       · funext x
         obtain rfl : x = 0 := Subsingleton.elim x 0
         rfl
@@ -2925,8 +2946,8 @@ private theorem scatter1_sweep_aux {k : ℕ} (N : NTM k) (bb : Bool) (c : Cfg k 
       (by rw [hcw]; exact hwhB) (by rw [hcw]; exact hmidB)
       (by rw [hci]; exact his) (by rw [hco]; exact hos)
     refine ⟨wt, ?_, ?_, hmid'⟩
-    · rw [show 3 * k * (B + 1) = 3 * k * B + 3 * k from Nat.mul_succ (3 * k) B,
-        trace_const_add, htr, hci, hco]
+    · erw [show 3 * k * (B + 1) = 3 * k * B + 3 * k from Nat.mul_succ (3 * k) B,
+        trace_const_add', htr, hci, hco]
       refine (Cfg.mk.injEq ..).mpr ⟨?_, rfl, rfl, rfl⟩
       rw [show (fun (j : Fin k) => if (c.work j).head = B + 1 ∧ (wact j).2 = Dir3.left then true
             else if 1 ≤ (c.work j).head ∧ (c.work j).head ≤ B ∧ (wact j).2 = Dir3.left then
@@ -2937,7 +2958,7 @@ private theorem scatter1_sweep_aux {k : ℕ} (N : NTM k) (bb : Bool) (c : Cfg k 
         by_cases hL : (wact j).2 = Dir3.left
         · simp only [hL, and_true]
           split_ifs with h1 h2 h3 <;> first | rfl | omega
-        · simp only [hL, and_false, if_false]]
+        · simp only [hL, and_false, ite_false]]
     · rw [hwh]
 
 /-- **One non-turnaround SCATTER sweep-1 step stays in `scatter1`.** As long as the
@@ -2957,9 +2978,9 @@ theorem scatter1_step_stays {k : ℕ} (N : NTM k) (b : Bool) (d : Scatter1Data k
   simp only at hnt ⊢
   simp only [scatter1Step]
   by_cases hwH : (c1.work 0).read = Γ.blank
-  · rw [if_pos hwH, if_neg (by rintro ⟨hm, hp⟩; exact hnt ⟨hm, hp⟩)]
+  · rw [ite_eq_left hwH, ite_eq_right (by rintro ⟨hm, hp⟩; exact hnt ⟨hm, hp⟩)]
     exact ⟨_, rfl, rfl⟩
-  · rw [if_neg hwH]
+  · rw [ite_eq_right hwH]
     (repeat' split) <;> exact ⟨_, rfl, rfl⟩
 
 /-- **SCATTER block sweep stays in `scatter1` (per step).** Within one block of the
@@ -3006,7 +3027,7 @@ theorem scatter1_block_states {k : ℕ} (N : NTM k) (bb : Bool) (c : Cfg k N.Q) 
     rc_in ilm_in hrc_in c1 hst hhead (Scatter1BlockInv.ofMid hbM hmid) his hos (s / 3) (by omega)
   -- the boundary config is scatter1 with slot `0`, `mat = false`
   have hsplit : s = 3 * (s / 3) + s % 3 := by omega
-  rw [hsplit, trace_const_add]
+  erw [hsplit, trace_const_add']
   set c0 := (singleTapeSim N).trace (3 * (s / 3)) (fun _ => bb) c1 with hc0
   -- the boundary config's state (slot `0`, `mat = false`)
   have hc0st : c0.state = SimQ.scatter1 (q', wact, oWoD, iD, iSym, oSym,
@@ -3023,7 +3044,7 @@ theorem scatter1_block_states {k : ℕ} (N : NTM k) (bb : Bool) (c : Cfg k N.Q) 
   · obtain ⟨d', hd', _⟩ := step_from_matFalse c0 _ hc0st rfl
     exact ⟨d', hd'⟩
   · -- two steps: first lands at slot 1 (`pos ≠ (0,0)`), second stays scatter1
-    rw [show (2 : ℕ) = 1 + 1 from rfl, trace_const_add]
+    erw [show (2 : ℕ) = 1 + 1 from rfl, trace_const_add']
     obtain ⟨d', hd', hpos'⟩ := step_from_matFalse c0 _ hc0st rfl
     obtain ⟨d'', hd'', _⟩ := step_from_posNe _ d' hd'
       (by rw [hpos']; simp [advanceSweep])
@@ -3055,7 +3076,7 @@ theorem scatter1_mat_states {k : ℕ} (N : NTM k) (bb : Bool) (M : ℕ) (q' : N.
   obtain ⟨wt, htr, _, _, _, _⟩ := scatter1_mat_aux N bb M q' wact oWoD iD iSym oSym rc ilm
     c1 hst hhead hsent his hos (s / 3) (by omega)
   have hsplit : s = 3 * (s / 3) + s % 3 := by omega
-  rw [hsplit, trace_const_add]
+  erw [hsplit, trace_const_add']
   set c0 := (singleTapeSim N).trace (3 * (s / 3)) (fun _ => bb) c1 with hc0
   have hc0st : c0.state = SimQ.scatter1 (q', wact, oWoD, iD, iSym, oSym,
       (⟨if s / 3 < k then s / 3 else 0, by split <;> omega⟩, 0),
@@ -3071,15 +3092,15 @@ theorem scatter1_mat_states {k : ℕ} (N : NTM k) (bb : Bool) (M : ℕ) (q' : N.
     have hval : (if s / 3 < k then s / 3 else 0) = 0 := by
       have := congrArg (fun p => (Prod.fst p).val) hp
       simpa using this
-    rw [if_pos hsk] at hval
-    rw [if_pos hval] at hm
+    rw [ite_eq_left hsk] at hval
+    rw [ite_eq_left hval] at hm
     exact absurd hm (by simp)
   have hr3 : s % 3 = 0 ∨ s % 3 = 1 ∨ s % 3 = 2 := by omega
   rcases hr3 with hr | hr | hr <;> rw [hr]
   · exact ⟨_, hc0st⟩
   · obtain ⟨d', hd', _⟩ := step_stays' c0 _ hc0st hnt0
     exact ⟨d', hd'⟩
-  · rw [show (2 : ℕ) = 1 + 1 from rfl, trace_const_add]
+  · erw [show (2 : ℕ) = 1 + 1 from rfl, trace_const_add']
     obtain ⟨d', hd', hpos'⟩ := step_stays' c0 _ hc0st hnt0
     obtain ⟨d'', hd'', _⟩ := step_stays' _ d' hd'
       (by rw [hpos']; rintro ⟨_, h⟩; exact absurd h (by simp [advanceSweep]))
@@ -3143,7 +3164,7 @@ theorem scatter1_sweep_states {k : ℕ} (N : NTM k) (bb : Bool) (c : Cfg k N.Q) 
       have hs : i - 3 * k * B ≤ 3 * k := by omega
       have hB1M : B + 1 ≤ M := hBlt
       have hbridge : i = 3 * k * B + (i - 3 * k * B) := by omega
-      rw [hbridge, trace_const_add]
+      erw [hbridge, trace_const_add']
       obtain ⟨d, hd⟩ := scatter1_block_states N bb c (B + 1) M (Nat.le_add_left 1 B) hB1M
         q' wact oWoD iD iSym oSym
         (fun j => decide ((c.work j).head = B ∧ (wact j).2 = Dir3.right))
@@ -3173,7 +3194,7 @@ theorem scatter1_sweep_states {k : ℕ} (N : NTM k) (bb : Bool) (c : Cfg k N.Q) 
     have hbridge : i = 3 * k * M + (i - 3 * k * M) := by omega
     have hs : i - 3 * k * M ≤ 3 * k := by
       rw [Nat.mul_succ] at hi; omega
-    rw [hbridge, trace_const_add, ← hcE]
+    erw [hbridge, trace_const_add', ← hcE]
     rcases Nat.lt_or_ge (i - 3 * k * M) (3 * k) with hslt | hsge
     · -- interior of materialize: `scatter1_mat_states`
       exact scatter1_mat_states N bb M q' wact oWoD iD iSym oSym _ _ cE hcEst hcEhead hcEsent
@@ -3220,9 +3241,9 @@ theorem scatter1_sweep {k : ℕ} (N : NTM k) (bb : Bool) (c : Cfg k N.Q) (M : �
     rw [decide_eq_decide, scatterInterWork_head]
     have hle := hinv.heads_le j
     by_cases hr : (wact j).2 = Dir3.right
-    · rw [if_pos hr]
+    · rw [ite_eq_left hr]
       exact ⟨fun h => by obtain ⟨h1, _⟩ := h; omega, fun h => ⟨by omega, hr⟩⟩
-    · rw [if_neg hr]
+    · rw [ite_eq_right hr]
       exact ⟨fun h => absurd h.2 hr, fun h => absurd h (by omega)⟩
   -- bridge: the REWIND carry `initRC` is the block-1 carry
   have hrc : (fun j => decide ((c.work j).read = Γ.start))
@@ -3267,8 +3288,8 @@ theorem scatter1_sweep {k : ℕ} (N : NTM k) (bb : Bool) (c : Cfg k N.Q) (M : �
         true else (fun _ => false) j) false
     ((singleTapeSim N).trace (3 * k) (fun _ => bb)
       ((singleTapeSim N).trace (3 * k * M) (fun _ => bb) c1))
-    (by rw [hMat]; simp only [if_neg (show ¬ k < k from Nat.lt_irrefl k),
-        if_neg (show ¬ k = 0 from by omega), Fin.mk_zero])
+    (by rw [hMat]; simp only [ite_eq_right (show ¬ k < k from Nat.lt_irrefl k),
+        ite_eq_right (show ¬ k = 0 from by omega), Fin.mk_zero])
     (by rw [hcwMat]; exact hmatBlank)
   have hMatin : ((singleTapeSim N).trace (3 * k) (fun _ => bb)
       ((singleTapeSim N).trace (3 * k * M) (fun _ => bb) c1)).input = c1.input := by
@@ -3279,8 +3300,8 @@ theorem scatter1_sweep {k : ℕ} (N : NTM k) (bb : Bool) (c : Cfg k N.Q) (M : �
   refine ⟨fun i => (((singleTapeSim N).trace (3 * k) (fun _ => bb)
       ((singleTapeSim N).trace (3 * k * M) (fun _ => bb) c1)).work i).writeAndMove
       Γw.blank.toΓ Dir3.left, ?_, ?_, ?_⟩
-  · rw [show 3 * k * (M + 1) + 1 = 3 * k * M + (3 * k + 1) from by rw [Nat.mul_succ]; omega,
-      trace_const_add, trace_const_add, hTurn, hMatin, hMatout]
+  · erw [show 3 * k * (M + 1) + 1 = 3 * k * M + (3 * k + 1) from by rw [Nat.mul_succ]; omega,
+      trace_const_add', trace_const_add', hTurn, hMatin, hMatout]
     refine (Cfg.mk.injEq ..).mpr ⟨?_, tape_idle_stay c1.input his, rfl,
       tape_idle_writeMove c1.output hos⟩
     rw [show (fun (j : Fin k) => if 1 ≤ (c.work j).head ∧ (c.work j).head ≤ M ∧
@@ -3292,8 +3313,8 @@ theorem scatter1_sweep {k : ℕ} (N : NTM k) (bb : Bool) (c : Cfg k N.Q) (M : �
           rcases Nat.eq_zero_or_pos (c.work j).head with h0 | hp
           · have hrr := hr0 j h0; rw [hL] at hrr; exact absurd hrr (by decide)
           · exact hp
-        rw [if_pos ⟨h1, hinv.heads_le j, hL⟩]; simp [hL]
-      · rw [if_neg (fun h => hL h.2.2)]; simp [hL]]
+        rw [ite_eq_left ⟨h1, hinv.heads_le j, hL⟩]; simp [hL]
+      · rw [ite_eq_right (fun h => hL h.2.2)]; simp [hL]]
   · -- SimInvAt (M+1) for the intermediate config
     have hhead0 : ¬ wtMat.head = 0 := by rw [hmatHead]; have := one_le_blockStart k (M + 2); omega
     have hfc : ((((singleTapeSim N).trace (3 * k) (fun _ => bb)
@@ -3302,7 +3323,7 @@ theorem scatter1_sweep {k : ℕ} (N : NTM k) (bb : Bool) (c : Cfg k N.Q) (M : �
       rw [hcwMat]
       show (wtMat.write Γw.blank.toΓ).cells = wtMat.cells
       unfold Tape.write
-      rw [if_neg hhead0]
+      rw [ite_eq_right hhead0]
       show Function.update wtMat.cells wtMat.head Γw.blank.toΓ = wtMat.cells
       rw [show (Γw.blank.toΓ : Γ) = wtMat.cells wtMat.head
             from hmatBlank.symm, Function.update_eq_self]
@@ -3375,7 +3396,6 @@ theorem scatter2_trace1 {k : ℕ} (N : NTM k) (d : Scatter2Data k N.Q) (b : Bool
        { state := r.1, input := c1.input.move r.2.2.2.1,
          work := fun i => (c1.work i).writeAndMove (r.2.1 i) (r.2.2.2.2.1 i),
          output := c1.output.writeAndMove r.2.2.1 r.2.2.2.2.2 } : Cfg 1 (SimQ k N.Q)) := by
-  rw [NTM.trace]
   simp only [hst, singleTapeSim, simDelta, SimQ.scatter2, SimQ.halt, Sum.inr.injEq,
     reduceCtorEq, ↓reduceIte, NTM.trace]
 
@@ -3441,7 +3461,7 @@ theorem scatter2_clear_slot0 {k : ℕ} (N : NTM k) (bb : Bool) (q' : N.Q) (oWoD 
         output := c1.output } := by
   rw [scatter2_trace1 N (q', oWoD, iD, iSym, oSym, (⟨t, by omega⟩, 0), isLeftMover, leftCarry)
       bb c1 hst]
-  simp only [scatter2Step, hone, ↓reduceIte, hlm, dif_pos ht, and_self,
+  simp only [scatter2Step, hone, ↓reduceIte, hlm, dite_eq_left ht, and_self,
     tape_idle_stay c1.input his, tape_idle_writeMove c1.output hos]
   congr 1
   funext x
@@ -3469,7 +3489,7 @@ theorem scatter2_deposit_slot0 {k : ℕ} (N : NTM k) (bb : Bool) (q' : N.Q) (oWo
         output := c1.output } := by
   rw [scatter2_trace1 N (q', oWoD, iD, iSym, oSym, (⟨t, by omega⟩, 0), isLeftMover, leftCarry)
       bb c1 hst]
-  simp only [scatter2Step, hns, ↓reduceIte, hnc, hlc, dif_pos ht,
+  simp only [scatter2Step, hns, ↓reduceIte, hnc, hlc, dite_eq_left ht,
     tape_idle_stay c1.input his, tape_idle_writeMove c1.output hos]
   congr 1
   funext x
@@ -3495,7 +3515,7 @@ theorem scatter2_keep_slot0 {k : ℕ} (N : NTM k) (bb : Bool) (q' : N.Q) (oWoD :
         output := c1.output } := by
   rw [scatter2_trace1 N (q', oWoD, iD, iSym, oSym, (⟨t, by omega⟩, 0), isLeftMover, leftCarry)
       bb c1 hst]
-  simp only [scatter2Step, hns, ↓reduceIte, hnc, hnl, dif_pos ht,
+  simp only [scatter2Step, hns, ↓reduceIte, hnc, hnl, dite_eq_left ht,
     tape_idle_stay c1.input his, tape_idle_writeMove c1.output hos]
   congr 1
   funext x
@@ -3537,7 +3557,7 @@ theorem scatter2_clear_triple {k : ℕ} (N : NTM k) (bb : Bool) (q' : N.Q) (oWoD
         rw [show (c1.work 0).head - 1 - 1 = (c1.work 0).head - 2 from by omega]; exact hone)
     hlm (by rw [e1, e0]; show 1 ≤ (c1.work 0).head - 1 - 1; omega)
     (by rw [e1, e0]; exact his) (by rw [e1, e0]; exact hos)
-  rw [trace_three, e2, e1, e0]
+  rw [trace_three', e2, e1, e0]
   rfl
 
 /-- **SCATTER sweep-2 deposit triple** (`trace 3`): three leftward steps over a tape with
@@ -3579,7 +3599,7 @@ theorem scatter2_deposit_triple {k : ℕ} (N : NTM k) (bb : Bool) (q' : N.Q) (oW
         rw [show (c1.work 0).head - 1 - 1 = (c1.work 0).head - 2 from by omega]; exact hnc)
     hlc (by rw [e1, e0]; show 1 ≤ (c1.work 0).head - 1 - 1; omega)
     (by rw [e1, e0]; exact his) (by rw [e1, e0]; exact hos)
-  rw [trace_three, e2, e1, e0]
+  rw [trace_three', e2, e1, e0]
   rfl
 
 /-- **SCATTER sweep-2 keep triple** (`trace 3`): three leftward steps over a tape that is
@@ -3619,7 +3639,7 @@ theorem scatter2_keep_triple {k : ℕ} (N : NTM k) (bb : Bool) (q' : N.Q) (oWoD 
           isLeftMover ⟨t, ht⟩ = true);
         rw [show (c1.work 0).head - 1 - 1 = (c1.work 0).head - 2 from by omega]; exact hnc)
     hnl (by rw [e1, e0]; exact his) (by rw [e1, e0]; exact hos)
-  rw [trace_three, e2, e1, e0]
+  rw [trace_three', e2, e1, e0]
   rfl
 
 /-- **SCATTER sweep-2 per-tape — keep.** Tape `k-1-m` of block `p` is neither a
@@ -3670,7 +3690,7 @@ theorem scatter2_tape_keep {k : ℕ} (N : NTM k) (bb : Bool) (c : Cfg k N.Q) (p 
         by_cases hb : (scatterInterWork (c.work ⟨k - 1 - m, by omega⟩)
             (wact ⟨k - 1 - m, by omega⟩)).head = p
         · exact hb
-        · rw [if_neg hb] at h1; exact absurd h1 (by decide))
+        · rw [ite_eq_right hb] at h1; exact absurd h1 (by decide))
     hnl his hos
   refine ⟨{ c1.work 0 with head := (c1.work 0).head - 3 }, htriple, ?_, ?_⟩
   · show (c1.work 0).head - 3 = headBitCell k p ⟨k - 1 - m, by omega⟩ - 1
@@ -3721,7 +3741,7 @@ theorem scatter2_tape_clear {k : ℕ} (N : NTM k) (bb : Bool) (c : Cfg k N.Q) (p
     (by rw [hhead, show headBitCell k p ⟨k - 1 - m, by omega⟩ + 2 - 1
           = headBitCell k p ⟨k - 1 - m, by omega⟩ + 1 from by omega, ← hsym1, hot.2.1]
         exact (encSymΓ_ne_start _).1)
-    (by rw [heq2, hot.1, if_pos hheadp])
+    (by rw [heq2, hot.1, ite_eq_left hheadp])
     hlm his hos
   refine ⟨⟨(c1.work 0).head - 3,
       Function.update (c1.work 0).cells ((c1.work 0).head - 2) Γw.zero.toΓ⟩, htriple, ?_, ?_⟩
@@ -3730,7 +3750,7 @@ theorem scatter2_tape_clear {k : ℕ} (N : NTM k) (bb : Bool) (c : Cfg k N.Q) (p
   · apply scatter2_blockinv_step hp1 hpM hmk hbm
     · show Function.update (c1.work 0).cells ((c1.work 0).head - 2) Γw.zero.toΓ
         (headBitCell k p ⟨k - 1 - m, by omega⟩) = _
-      rw [← heq2, Function.update_self, if_neg hfinne]; rfl
+      rw [← heq2, Function.update_self, ite_eq_right hfinne]; rfl
     · intro cc hcc
       exact Function.update_of_ne (fun h => hcc (h.trans heq2)) _ _
 
@@ -3777,7 +3797,7 @@ theorem scatter2_tape_deposit {k : ℕ} (N : NTM k) (bb : Bool) (c : Cfg k N.Q) 
           = headBitCell k p ⟨k - 1 - m, by omega⟩ + 1 from by omega, ← hsym1, hot.2.1]
         exact (encSymΓ_ne_start _).1)
     (by rw [heq2, hot.1]; split_ifs <;> decide)
-    (by rw [heq2, hot.1, if_neg hninter]; rintro ⟨h1, _⟩; exact absurd h1 (by decide))
+    (by rw [heq2, hot.1, ite_eq_right hninter]; rintro ⟨h1, _⟩; exact absurd h1 (by decide))
     hlc his hos
   refine ⟨⟨(c1.work 0).head - 3,
       Function.update (c1.work 0).cells ((c1.work 0).head - 2) Γw.one.toΓ⟩, htriple, ?_, ?_⟩
@@ -3786,7 +3806,7 @@ theorem scatter2_tape_deposit {k : ℕ} (N : NTM k) (bb : Bool) (c : Cfg k N.Q) 
   · apply scatter2_blockinv_step hp1 hpM hmk hbm
     · show Function.update (c1.work 0).cells ((c1.work 0).head - 2) Γw.one.toΓ
         (headBitCell k p ⟨k - 1 - m, by omega⟩) = _
-      rw [← heq2, Function.update_self, if_pos hfineq]; rfl
+      rw [← heq2, Function.update_self, ite_eq_left hfineq]; rfl
     · intro cc hcc
       exact Function.update_of_ne (fun h => hcc (h.trans heq2)) _ _
 
@@ -3856,13 +3876,13 @@ private theorem scatter2_block_aux {k : ℕ} (N : NTM k) (bb : Bool) (c : Cfg k 
               ∧ (c.work ⟨k - 1 - m, by omega⟩).head = p)) := by
       funext j
       by_cases hj : j = ⟨k - 1 - m, by omega⟩
-      · subst hj; rw [Function.update_self, if_pos (by rw [hjval]; omega)]
+      · subst hj; rw [Function.update_self, ite_eq_left (by rw [hjval]; omega)]
       · rw [Function.update_of_ne hj, hLCm]
         have hjm : (j : ℕ) ≠ k - 1 - m := fun h => hj (Fin.ext h)
         have hjlt := j.isLt
         by_cases hlt : k - 1 - (j : ℕ) < m
-        · simp only [if_pos hlt, if_pos (show k - 1 - (j : ℕ) < m + 1 by omega)]
-        · simp only [if_neg hlt, if_neg (show ¬ k - 1 - (j : ℕ) < m + 1 by omega)]
+        · simp only [ite_eq_left hlt, ite_eq_left (show k - 1 - (j : ℕ) < m + 1 by omega)]
+        · simp only [ite_eq_right hlt, ite_eq_right (show ¬ k - 1 - (j : ℕ) < m + 1 by omega)]
     have hstep_ilm : (fun (j : Fin k) =>
           if k - 1 - (j : ℕ) < m + 1 ∧ (wact j).2 = Dir3.left ∧ (c.work j).head = p + 1 then
             false else isLeftMover_in j)
@@ -3881,13 +3901,13 @@ private theorem scatter2_block_aux {k : ℕ} (N : NTM k) (bb : Bool) (c : Cfg k 
           ⟨fun h => ⟨by omega, h.2⟩, fun h => ⟨by omega, h.2⟩⟩
         simp only [hiff]
     have hLCm_at : LCm ⟨k - 1 - m, by omega⟩ = leftCarry_in ⟨k - 1 - m, by omega⟩ := by
-      rw [hLCm]; simp only [hjval, lt_irrefl, if_false]
+      rw [hLCm]; simp only [hjval, lt_irrefl, ite_false]
     have hILMm_at : ILMm ⟨k - 1 - m, by omega⟩ = isLeftMover_in ⟨k - 1 - m, by omega⟩ := by
-      rw [hILMm]; simp only [hjval, lt_irrefl, false_and, if_false]
+      rw [hILMm]; simp only [hjval, lt_irrefl, false_and, ite_false]
     -- facts about the IH config cM = trace (3*m) c1
     have hcs : ((singleTapeSim N).trace (3 * m) (fun _ => bb) c1).state
         = SimQ.scatter2 (q', oWoD, iD, iSym, oSym, (⟨k - 1 - m, by omega⟩, 2), ILMm, LCm) := by
-      rw [htm]; simp only [if_pos hmk]
+      rw [htm]; simp only [ite_eq_left hmk]; rfl
     have hch : (((singleTapeSim N).trace (3 * m) (fun _ => bb) c1).work 0).head
         = headBitCell k p ⟨k - 1 - m, by omega⟩ + 2 := by
       rw [show ((singleTapeSim N).trace (3 * m) (fun _ => bb) c1).work 0 = wtm
@@ -3912,7 +3932,7 @@ private theorem scatter2_block_aux {k : ℕ} (N : NTM k) (bb : Bool) (c : Cfg k 
       apply Prod.ext
       · apply Fin.ext; simp only; split <;> split <;> omega
       · rfl
-    -- assembly closure (trace_const_add + input/output reconciliation, done once)
+    -- assembly closure (trace_const_add' + input/output reconciliation, done once)
     have key : ∀ (wt : Tape) (ilm' lc' : Fin k → Bool),
         (singleTapeSim N).trace 3 (fun _ => bb)
             ((singleTapeSim N).trace (3 * m) (fun _ => bb) c1)
@@ -3941,7 +3961,7 @@ private theorem scatter2_block_aux {k : ℕ} (N : NTM k) (bb : Bool) (c : Cfg k 
           ∧ Scatter2BlockInv wt' c.work wact M p (m + 1) := by
       intro wt ilm' lc' htr hilm hlc hwh hbi
       refine ⟨wt, ?_, ?_, hbi⟩
-      · rw [show 3 * (m + 1) = 3 * m + 3 from by omega, trace_const_add, htr, hilm, hlc,
+      · erw [show 3 * (m + 1) = 3 * m + 3 from by omega, trace_const_add', htr, hilm, hlc,
           show ((singleTapeSim N).trace (3 * m) (fun _ => bb) c1).input = c1.input from by rw [htm],
           show ((singleTapeSim N).trace (3 * m) (fun _ => bb) c1).output = c1.output
             from by rw [htm]]
@@ -3961,10 +3981,10 @@ private theorem scatter2_block_aux {k : ℕ} (N : NTM k) (bb : Bool) (c : Cfg k 
     · have hihl : (scatterInterWork (c.work ⟨k - 1 - m, by omega⟩)
           (wact ⟨k - 1 - m, by omega⟩)).head
           = (c.work ⟨k - 1 - m, by omega⟩).head := by
-        rw [hih, if_neg (by rw [hleft]; decide)]
+        rw [hih, ite_eq_right (by rw [hleft]; decide)]
       have hfhl : (scatterFinalWork (c.work ⟨k - 1 - m, by omega⟩)
           (wact ⟨k - 1 - m, by omega⟩)).head
-          = (c.work ⟨k - 1 - m, by omega⟩).head - 1 := by rw [hfh, if_pos hleft]
+          = (c.work ⟨k - 1 - m, by omega⟩).head - 1 := by rw [hfh, ite_eq_left hleft]
       by_cases hcp : (c.work ⟨k - 1 - m, by omega⟩).head = p
       · -- clear
         obtain ⟨wt, htr, hwh, hbi⟩ := scatter2_tape_clear N bb c p M hp1 hpM m hmk
@@ -3974,7 +3994,8 @@ private theorem scatter2_block_aux {k : ℕ} (N : NTM k) (bb : Bool) (c : Cfg k 
           (by rw [hfhl]; omega) hcis hcos
         rw [hpos_eq] at htr
         refine key wt ILMm (Function.update LCm ⟨k - 1 - m, by omega⟩ true) htr ?_ ?_ hwh hbi
-        · rw [hstep_ilm, if_neg (by rintro ⟨_, h2⟩; omega), ← hILMm_at, Function.update_eq_self]
+        · rw [hstep_ilm, ite_eq_right (by rintro ⟨_, h2⟩; omega), ← hILMm_at,
+          Function.update_eq_self]
         · rw [hstep_lc, decide_eq_true ⟨hleft, hcp⟩]
       · by_cases hcp1 : (c.work ⟨k - 1 - m, by omega⟩).head = p + 1
         · -- deposit
@@ -3986,7 +4007,7 @@ private theorem scatter2_block_aux {k : ℕ} (N : NTM k) (bb : Bool) (c : Cfg k 
           rw [hpos_eq] at htr
           refine key wt (Function.update ILMm ⟨k - 1 - m, by omega⟩ false)
             (Function.update LCm ⟨k - 1 - m, by omega⟩ false) htr ?_ ?_ hwh hbi
-          · rw [hstep_ilm, if_pos ⟨hleft, hcp1⟩]
+          · rw [hstep_ilm, ite_eq_left ⟨hleft, hcp1⟩]
           · rw [hstep_lc, decide_eq_false (by rintro ⟨_, h2⟩; omega)]
         · -- keep (left-mover, head not p or p+1)
           obtain ⟨wt, htr, hwh, hbi⟩ := scatter2_tape_keep N bb c p M hp1 hpM m hmk
@@ -3997,7 +4018,8 @@ private theorem scatter2_block_aux {k : ℕ} (N : NTM k) (bb : Bool) (c : Cfg k 
             (by rw [hihl, hfhl]; constructor <;> intro h <;> omega) hcis hcos
           rw [hpos_eq] at htr
           refine key wt ILMm LCm htr ?_ ?_ hwh hbi
-          · rw [hstep_ilm, if_neg (by rintro ⟨_, h3⟩; omega), ← hILMm_at, Function.update_eq_self]
+          · rw [hstep_ilm, ite_eq_right (by rintro ⟨_, h3⟩; omega), ← hILMm_at,
+            Function.update_eq_self]
           · rw [hstep_lc,
               show (decide ((wact ⟨k - 1 - m, by omega⟩).2 = Dir3.left
                   ∧ (c.work ⟨k - 1 - m, by omega⟩).head = p)) = LCm ⟨k - 1 - m, by omega⟩ from by
@@ -4013,7 +4035,7 @@ private theorem scatter2_block_aux {k : ℕ} (N : NTM k) (bb : Bool) (c : Cfg k 
           (wact ⟨k - 1 - m, by omega⟩)).head
           = (scatterInterWork (c.work ⟨k - 1 - m, by omega⟩)
               (wact ⟨k - 1 - m, by omega⟩)).head := by
-        rw [hfh, if_neg hleft]
+        rw [hfh, ite_eq_right hleft]
       obtain ⟨wt, htr, hwh, hbi⟩ := scatter2_tape_keep N bb c p M hp1 hpM m hmk
         q' wact oWoD iD iSym oSym ILMm LCm _ hcs hch hcbi
         (by rw [hILMm_at, hilmf]; rintro ⟨_, h2⟩; exact absurd h2 (by decide))
@@ -4021,7 +4043,7 @@ private theorem scatter2_block_aux {k : ℕ} (N : NTM k) (bb : Bool) (c : Cfg k 
         (by rw [hfhnl]) hcis hcos
       rw [hpos_eq] at htr
       refine key wt ILMm LCm htr ?_ ?_ hwh hbi
-      · rw [hstep_ilm, if_neg (by rintro ⟨h2, _⟩; exact hleft h2), ← hILMm_at,
+      · rw [hstep_ilm, ite_eq_right (by rintro ⟨h2, _⟩; exact hleft h2), ← hILMm_at,
           Function.update_eq_self]
       · rw [hstep_lc,
           show (decide ((wact ⟨k - 1 - m, by omega⟩).2 = Dir3.left
@@ -4071,9 +4093,9 @@ theorem scatter2_block_step {k : ℕ} (N : NTM k) (bb : Bool) (c : Cfg k N.Q) (p
     have hlc_k : (fun (j : Fin k) => if k - 1 - (j : ℕ) < k then
           decide ((wact j).2 = Dir3.left ∧ (c.work j).head = p) else leftCarry_in j)
         = (fun j => decide ((wact j).2 = Dir3.left ∧ (c.work j).head = p)) := by
-      funext j; rw [if_pos (by have := j.isLt; omega)]
+      funext j; rw [ite_eq_left (by have := j.isLt; omega)]
     rw [hilm_k, hlc_k]
-    simp only [lt_irrefl, if_false]
+    simp only [lt_irrefl, ite_false]
   · rw [hwh]; omega
 
 /-- **SCATTER sweep-2 full block sweep (`trace (3*k*B)`).** Sweeping the first `B ≤ M+1`
@@ -4141,8 +4163,8 @@ private theorem scatter2_sweep_aux {k : ℕ} (N : NTM k) (bb : Bool) (c : Cfg k 
           exact hmidB)
       (by rw [hci]; exact his) (by rw [hco]; exact hos)
     refine ⟨wt, ?_, ?_, ?_⟩
-    · rw [show 3 * k * (B + 1) = 3 * k * B + 3 * k from Nat.mul_succ (3 * k) B,
-        trace_const_add, htr, hci, hco]
+    · erw [show 3 * k * (B + 1) = 3 * k * B + 3 * k from Nat.mul_succ (3 * k) B,
+        trace_const_add', htr, hci, hco]
       refine (Cfg.mk.injEq ..).mpr ⟨?_, rfl, rfl, rfl⟩
       rw [show (fun j : Fin k =>
               if (wact j).2 = Dir3.left ∧ (c.work j).head = M + 1 - B + 1 then false
@@ -4151,12 +4173,12 @@ private theorem scatter2_sweep_aux {k : ℕ} (N : NTM k) (bb : Bool) (c : Cfg k 
           funext j
           by_cases hL : (wact j).2 = Dir3.left
           · by_cases hh : (c.work j).head = M + 1 - B + 1
-            · rw [if_pos ⟨hL, hh⟩]; symm; exact decide_eq_false (by rintro ⟨_, h2⟩; omega)
-            · rw [if_neg (fun h => hh h.2), decide_eq_decide]
+            · rw [ite_eq_left ⟨hL, hh⟩]; symm; exact decide_eq_false (by rintro ⟨_, h2⟩; omega)
+            · rw [ite_eq_right (fun h => hh h.2), decide_eq_decide]
               constructor
               · rintro ⟨hl, _⟩; exact ⟨hl, by omega⟩
               · rintro ⟨hl, _⟩; exact ⟨hl, by omega⟩
-          · rw [if_neg (fun h => hL h.1), decide_eq_false (fun h => hL h.1),
+          · rw [ite_eq_right (fun h => hL h.1), decide_eq_false (fun h => hL h.1),
               decide_eq_false (fun h => hL h.1)],
         show (fun j : Fin k => decide ((wact j).2 = Dir3.left ∧ (c.work j).head = M + 1 - B))
             = (fun j => decide ((c.work j).head = M + 2 - (B + 1) ∧ (wact j).2 = Dir3.left)) from by
@@ -4186,7 +4208,7 @@ theorem scatter2_step_stays {k : ℕ} (N : NTM k) (b : Bool) (d : Scatter2Data k
   -- the move direction `r.2.2.2.2.1 0` is `left` (off `▷`)
   have hdir : r.2.2.2.2.1 0 = Dir3.left := by
     rw [hr]; obtain ⟨q', oWoD, iD, iSym, oSym, pos, isLeftMover, leftCarry⟩ := d
-    simp only [scatter2Step, if_neg hnsr]
+    simp only [scatter2Step, ite_eq_right hnsr]
   have hwork : ((c1.work 0).writeAndMove (r.2.1 0).toΓ (r.2.2.2.2.1 0))
       = ⟨(c1.work 0).head - 1,
         Function.update (c1.work 0).cells (c1.work 0).head (r.2.1 0).toΓ⟩ := by
@@ -4194,7 +4216,7 @@ theorem scatter2_step_stays {k : ℕ} (N : NTM k) (b : Bool) (d : Scatter2Data k
   -- the state is `r.1`; off `▷` every branch yields `scatter2`
   obtain ⟨d', hd'⟩ : ∃ d', r.1 = SimQ.scatter2 d' := by
     rw [hr]; obtain ⟨q', oWoD, iD, iSym, oSym, pos, isLeftMover, leftCarry⟩ := d
-    simp only [scatter2Step, if_neg hnsr]
+    simp only [scatter2Step, ite_eq_right hnsr]
     (repeat' split) <;> exact ⟨_, rfl⟩
   refine ⟨d', hd', ?_, ?_⟩
   · show (((c1.work (0 : Fin 1)).writeAndMove (r.2.1 0).toΓ (r.2.2.2.2.1 0))).head
@@ -4236,7 +4258,7 @@ theorem scatter2_block_states {k : ℕ} (N : NTM k) (bb : Bool) (c : Cfg k N.Q) 
     isLeftMover_in leftCarry_in hilm_in hlc_in c1 hst hhead
     (Scatter2BlockInv.ofMid hp1 hmid) his hos (s / 3) (by omega)
   have hsplit : s = 3 * (s / 3) + s % 3 := by omega
-  rw [hsplit, trace_const_add]
+  erw [hsplit, trace_const_add']
   set c0 := (singleTapeSim N).trace (3 * (s / 3)) (fun _ => bb) c1 with hc0
   -- the boundary config: scatter2 with datum `d0`, tape `wt`, `Scatter2BlockInv … p (s/3)`
   obtain ⟨d0, hc0st⟩ : ∃ d, c0.state = SimQ.scatter2 d := ⟨_, by rw [htr]⟩
@@ -4263,7 +4285,7 @@ theorem scatter2_block_states {k : ℕ} (N : NTM k) (bb : Bool) (c : Cfg k N.Q) 
       hc0bi.cells_ne_start hp1 hpM (by omega)
     have hread1 : (c0.work 0).cells ((c0.work 0).head - 1) ≠ Γ.start :=
       hc0bi.cells_ne_start hp1 hpM (by omega)
-    rw [show (2 : ℕ) = 1 + 1 from rfl, trace_const_add]
+    erw [show (2 : ℕ) = 1 + 1 from rfl, trace_const_add']
     obtain ⟨d', hd', hh', hcells'⟩ := scatter2_step_stays N bb d0 c0 hc0st (by omega) hread0
     set c0' := (singleTapeSim N).trace 1 (fun _ => bb) c0 with hc0'
     have hread' : (c0'.work 0).cells ((c0'.work 0).head) ≠ Γ.start := by
@@ -4336,7 +4358,7 @@ theorem scatter2_sweep_states {k : ℕ} (N : NTM k) (bb : Bool) (c : Cfg k N.Q) 
     -- residual `r = i - 3*k*B ≤ 3*k`
     have hbridge : i = 3 * k * B + (i - 3 * k * B) := by omega
     have hres : i - 3 * k * B ≤ 3 * k := by omega
-    rw [hbridge, trace_const_add]
+    erw [hbridge, trace_const_add']
     set cE := (singleTapeSim N).trace (3 * k * B) (fun _ => bb) c1 with hcE
     -- the block-`p` entry: scatter2 at slot 2 tape `k-1`, head `headBitCell p (k-1) + 2`,
     -- the `B`-boundary carries are the `p`-block-states carries, `Scatter2MidInv … (p+1)`
@@ -4409,14 +4431,14 @@ theorem scatter2_sweep {k : ℕ} (N : NTM k) (bb : Bool) (c : Cfg k N.Q) (M : �
   refine ⟨fun i =>
       (((singleTapeSim N).trace (3 * k * (M + 1)) (fun _ => bb) c1).work i).writeAndMove
       Γw.blank.toΓ Dir3.right, ?_, ?_, ?_⟩
-  · rw [trace_const_add, hstart, hSin, hSout]
+  · erw [trace_const_add', hstart, hSin, hSout]
   · apply hsimFinal.cells_congr
     show ((((singleTapeSim N).trace (3 * k * (M + 1)) (fun _ => bb) c1).work 0).writeAndMove
         Γw.blank.toΓ Dir3.right).cells = wtS.cells
     rw [hcwS]
     show (wtS.write Γw.blank.toΓ).cells = wtS.cells
     unfold Tape.write
-    rw [if_pos hh0]
+    rw [ite_eq_left hh0]
   · show ((((singleTapeSim N).trace (3 * k * (M + 1)) (fun _ => bb) c1).work 0).writeAndMove
         Γw.blank.toΓ Dir3.right).head = 1
     rw [hcwS, work_blank_right_at0 wtS hh0]
@@ -4556,7 +4578,9 @@ theorem run_to_scatter1 {k : ℕ} (N : NTM k) {M : ℕ}
         output := c1.output.writeAndMove (TM.readBackWrite c1.output.read).toΓ
           (TM.idleDir c1.output.read) } := by
     rw [gather_sentinel N bit c.state (fun j => (c.work j).read) c1.input.read c1.output.read
-        (⟨0, by omega⟩, 0) rf' pending' _ (by rw [hgather])
+        (⟨0, by omega⟩, 0) rf' pending'
+        ((singleTapeSim N).trace (3 * k * M) (fun _ => bit)
+          ((singleTapeSim N).trace 1 (fun _ => bit) c1)) (by rw [hgather])
         (by rw [hcgw]; exact hinv.sentinel (blockStart k (M + 1)) (le_refl _))]
     refine (Cfg.mk.injEq ..).mpr ⟨rfl, ?_, ?_, ?_⟩
     · rw [hcgi]; exact tape_idle_stay _ hisR
@@ -4565,10 +4589,10 @@ theorem run_to_scatter1 {k : ℕ} (N : NTM k) {M : ℕ}
         show Γw.blank.toΓ = (c1.work 0).cells (blockStart k (M + 1)) from
           (hinv.sentinel (blockStart k (M + 1)) (le_refl _)).symm, Function.update_eq_self]
     · rw [hcgo]; exact tape_idle_writeMove _ hosR
-  -- Phase 3: rewind sweep + trace_const_add chaining
+  -- Phase 3: rewind sweep + trace_const_add' chaining
   have hbs1 : blockStart k (M + 1) = blockStart k (M + 1) - 1 + 1 := by
     have := one_le_blockStart k (M + 1); omega
-  rw [trace_const_add, trace_const_add, trace_const_add, hbs1,
+  rw [trace_const_add', trace_const_add', trace_const_add', hbs1,
       rewind_sweep N bit _ _ _ _ c1.input.read c1.output.read
         (fun j => decide ((c.work j).read = Γ.start))
         ((singleTapeSim N).trace 1 (fun _ => bit)
@@ -4673,7 +4697,9 @@ theorem macroStep_decision_point_iff {k : ℕ} (N : NTM k) (hk : 1 ≤ k) {M : �
         output := c1.output.writeAndMove (TM.readBackWrite c1.output.read).toΓ
           (TM.idleDir c1.output.read) } := by
     rw [gather_sentinel N b c.state (fun j => (c.work j).read) c1.input.read c1.output.read
-        (⟨0, by omega⟩, 0) rf' pending' _ (by rw [hgather])
+        (⟨0, by omega⟩, 0) rf' pending'
+        ((singleTapeSim N).trace (3 * k * M) (fun _ => b)
+          ((singleTapeSim N).trace 1 (fun _ => b) c1)) (by rw [hgather])
         (by rw [hcgw]; exact hinv.sentinel (blockStart k (M + 1)) (le_refl _))]
     refine (Cfg.mk.injEq ..).mpr ⟨rfl, ?_, ?_, ?_⟩
     · rw [hcgi]; exact tape_idle_stay _ hisR
@@ -4731,7 +4757,7 @@ theorem macroStep_decision_point_iff {k : ℕ} (N : NTM k) (hk : 1 ≤ k) {M : �
     have hBc1 : (singleTapeSim N).trace B (fun _ => b) c1
         = (singleTapeSim N).trace (3 * k * (M + 1) + 1) (fun _ => b)
             ((singleTapeSim N).trace A (fun _ => b) c1) := by
-      rw [hBdef, trace_const_add]
+      erw [hBdef, trace_const_add']
     rw [hBc1]
     apply scatter2_sweep_states N b c M hk
       dr.1 (dr.2.2.1, dr.2.2.2.2.2) dr.2.2.2.1 c.input.read c.output.read
@@ -4767,13 +4793,13 @@ theorem macroStep_decision_point_iff {k : ℕ} (N : NTM k) (hk : 1 ≤ k) {M : �
       = (singleTapeSim N).trace 1 (fun _ => b)
           ((singleTapeSim N).trace (3 * k * M) (fun _ => b)
             ((singleTapeSim N).trace 1 (fun _ => b) c1)) := by
-    rw [show 1 + 3 * k * M + 1 = 1 + (3 * k * M + 1) from by omega, trace_const_add,
-      trace_const_add]
+    erw [show 1 + 3 * k * M + 1 = 1 + (3 * k * M + 1) from by omega, trace_const_add',
+      trace_const_add']
   -- the SCATTER-2 entry config `trace B c1 = trace (3*k*(M+1)+1) (trace A c1)`
   have hBc1 : (singleTapeSim N).trace B (fun _ => b) c1
       = (singleTapeSim N).trace (3 * k * (M + 1) + 1) (fun _ => b)
           ((singleTapeSim N).trace A (fun _ => b) c1) := by
-    rw [hBdef, trace_const_add]
+    erw [hBdef, trace_const_add']
   -- helper: off the sentinel position, no step is a `gather`-on-`□` decision point
   have key : ∀ i, i < B + (3 * k * (M + 1) + 1) + 1 → i ≠ 1 + 3 * k * M →
       ¬ ((∃ d, ((singleTapeSim N).trace i (fun _ => b) c1).state = SimQ.gather d) ∧
@@ -4790,7 +4816,7 @@ theorem macroStep_decision_point_iff {k : ℕ} (N : NTM k) (hk : 1 ≤ k) {M : �
       · -- `i ∈ [1, p0)`: the GATHER sweep, where the read is non-blank
         obtain ⟨j, rfl⟩ : ∃ j, i = 1 + j := ⟨i - 1, by omega⟩
         have hj : j < 3 * k * M := by omega
-        rw [trace_const_add] at hbl
+        erw [trace_const_add'] at hbl
         exact (hgsweep j hj).2 hbl
     · exact hip0 heq
     · -- after the sentinel: rewind / scatter1 / scatter2 / commit — never `gather`
@@ -4799,26 +4825,26 @@ theorem macroStep_decision_point_iff {k : ℕ} (N : NTM k) (hk : 1 ≤ k) {M : �
         obtain ⟨j, rfl⟩ : ∃ j, i = (1 + 3 * k * M + 1) + j := ⟨i - (1 + 3 * k * M + 1), by omega⟩
         have hj : j ≤ blockStart k (M + 1) - 1 := by
           have := one_le_blockStart k (M + 1); rw [hA] at hiA; omega
-        rw [trace_const_add, hRewEntry, hrewind j hj] at hg
+        erw [trace_const_add', hRewEntry, hrewind j hj] at hg
         exact absurd (Sum.inr.inj hg) (by simp [reduceCtorEq])
       · -- SCATTER-1 / SCATTER-2 / COMMIT
         rcases Nat.lt_or_ge i B with hiB | hiB
         · -- SCATTER-1: `i ∈ [A, B)`
           obtain ⟨j, rfl⟩ : ∃ j, i = A + j := ⟨i - A, by omega⟩
           have hj : j < 3 * k * (M + 1) + 1 := by rw [hBdef] at hiB; omega
-          rw [trace_const_add] at hg
+          erw [trace_const_add'] at hg
           exact hsc1 j hj ⟨dg, hg⟩
         · -- SCATTER-2 / COMMIT
           rcases Nat.lt_or_ge i (B + (3 * k * (M + 1) + 1)) with hiC | hiC
           · -- SCATTER-2: `i ∈ [B, B + (3*k*(M+1)+1))`
             obtain ⟨j, rfl⟩ : ∃ j, i = B + j := ⟨i - B, by omega⟩
             have hj : j < 3 * k * (M + 1) + 1 := by omega
-            rw [trace_const_add] at hg
+            erw [trace_const_add'] at hg
             exact hsc2 j hj ⟨dg, hg⟩
           · -- COMMIT: `i = B + (3*k*(M+1)+1)`
             have hiCommit : i = B + (3 * k * (M + 1) + 1) := by omega
             subst hiCommit
-            rw [trace_const_add, hBc1, hs2] at hg
+            erw [trace_const_add', hBc1, hs2] at hg
             exact absurd (Sum.inr.inj hg) (by simp [reduceCtorEq])
   intro i hi
   by_cases hip0 : i = 1 + 3 * k * M
@@ -4883,11 +4909,11 @@ theorem corr_macroStep_explicit {k : ℕ} (N : NTM k) (hk : 1 ≤ k) {M : ℕ}
         work := fun t => scatterFinalWork (c.work t) (dr.2.1 t, dr.2.2.2.2.1 t),
         output := c.output.writeAndMove dr.2.2.1 dr.2.2.2.2.2 } := by
     rw [trace_one_scatterFinal N (fun _ => b) c hne]
-  rw [show 1 + 3 * k * M + 1 + blockStart k (M + 1) + (3 * k * (M + 1) + 1)
+  erw [show 1 + 3 * k * M + 1 + blockStart k (M + 1) + (3 * k * (M + 1) + 1)
             + (3 * k * (M + 1) + 1) + 1
           = 1 + 3 * k * M + 1 + blockStart k (M + 1)
             + ((3 * k * (M + 1) + 1) + ((3 * k * (M + 1) + 1) + 1)) from by omega,
-      trace_const_add, trace_const_add, trace_const_add, hcommit, htr1]
+      trace_const_add', trace_const_add', trace_const_add', hcommit, htr1]
   -- abbreviate the COMMIT-config (input/output/work after the two scatter sweeps)
   set cc := (singleTapeSim N).trace (3 * k * (M + 1) + 1) (fun _ => b)
     ((singleTapeSim N).trace (3 * k * (M + 1) + 1) (fun _ => b)
@@ -5031,7 +5057,7 @@ theorem trace_congr_choices {k : ℕ} (N : NTM k) :
         · apply simDelta_eq_of_forall_ne_blank
           intro d hd_eq hbad
           exact hgather ⟨⟨d, hd_eq⟩, hbad⟩
-      simp only [NTM.trace, if_neg hcmhalt, Nat.add_zero]
+      simp only [NTM.trace, ite_eq_right hcmhalt, Nat.add_zero]
       exact congrArg
         (fun r => ({ state := r.1, input := cm0.input.move r.2.2.2.1,
                      work := fun i => (cm0.work i).writeAndMove (r.2.1 i).toΓ (r.2.2.2.2.1 i),
@@ -5080,10 +5106,10 @@ theorem corr_iterate {k : ℕ} (N : NTM k) (hk : 1 ≤ k) {M : ℕ}
       refine ⟨m + m', M' + 1, F, ?_, by omega, ?_⟩
       · rw [hNsplit, (singleTapeSim N).trace_add_fun m m' F c1]
         have hpre : (fun i : Fin m => F i.val) = (fun i : Fin m => f i.val) := by
-          funext i; rw [hF]; simp only []; rw [if_pos i.isLt]
+          funext i; rw [hF]; simp only []; rw [ite_eq_left i.isLt]
         have hsuf : (fun i : Fin m' => F (m + i.val)) = choices' := by
           funext i; rw [hF]; simp only []
-          rw [if_neg (by omega), dif_pos (by omega)]
+          rw [ite_eq_right (by omega), dite_eq_left (by omega)]
           have hsub : m + i.val - m = i.val := by omega
           simp only [hsub, Fin.eta]
         rw [hpre, ← hs_t, hsuf]
@@ -5109,7 +5135,7 @@ theorem acceptsInTime_singleTapeSim_of_acceptsInTime {k : ℕ} (N : NTM k) (hk :
   set g : ℕ → Bool := fun i => if hi : i < Tn then chN ⟨i, hi⟩ else false with hg
   obtain ⟨m, M', F, hcorr, _hM', hm⟩ := corr_iterate N hk (corr_init N x) g Tn
   have hgN : (fun i : Fin Tn => g i.val) = chN := by
-    funext i; rw [hg]; simp only []; rw [dif_pos i.isLt]
+    funext i; rw [hg]; simp only []; rw [dite_eq_left i.isLt]
   rw [hgN] at hcorr
   -- one halt step lands in a halted, accepting simulator config
   obtain ⟨hhalted, hbit⟩ := halted_of_corr N hcorr hhalt
@@ -5120,9 +5146,9 @@ theorem acceptsInTime_singleTapeSim_of_acceptsInTime {k : ℕ} (N : NTM k) (hk :
       = (singleTapeSim N).trace 1 (fun _ => false) sCfg := by
     rw [(singleTapeSim N).trace_add_fun m 1 F']
     have e1 : (fun i : Fin m => F' i.val) = (fun i : Fin m => F i.val) := by
-      funext i; rw [hF']; simp only [i.isLt, if_true]
+      funext i; rw [hF']; simp only [i.isLt, ite_true]
     have e2 : (fun i : Fin 1 => F' (m + i.val)) = (fun _ => false) := by
-      funext i; rw [hF']; simp only []; rw [if_neg (by omega)]
+      funext i; rw [hF']; simp only []; rw [ite_eq_right (by omega)]
     rw [e1, e2, ← hsCfg]
   have key : (singleTapeSim N).AcceptsInTime x (m + 1) := by
     refine ⟨fun i => F' i.val, ?_, ?_⟩

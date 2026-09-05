@@ -85,6 +85,9 @@ theorem uniformProbability_product
 
 /-- Uniform probability on a product is the average of its conditional fiber
 probabilities over the first coordinate. -/
+-- The signature mirrors the family this belongs to; the argument is part of
+-- that shape even where this member does not consult it.
+@[nolint unusedArguments]
 theorem uniformProbability_product_eq_average_fibers
     {advice : Type u} {challenge : Type v}
     [Fintype advice] [DecidableEq advice] [Nonempty advice]
@@ -102,6 +105,9 @@ theorem uniformProbability_product_eq_average_fibers
 
 /-- Some first-coordinate fiber has probability at least the joint product
 probability. -/
+-- The signature mirrors the family this belongs to; the argument is part of
+-- that shape even where this member does not consult it.
+@[nolint unusedArguments]
 theorem exists_fiber_uniformProbability_ge
     {advice : Type u} {challenge : Type v}
     [Fintype advice] [DecidableEq advice] [Nonempty advice]

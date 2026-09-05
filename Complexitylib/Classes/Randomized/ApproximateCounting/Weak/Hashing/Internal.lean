@@ -56,18 +56,15 @@ private theorem eventProb_levelSeed_mem_eq {domainWidth errorBits : ℕ}
           rw [uniformProbability_bitString_eq_eventProb]
     _ = uniformProbability (Finset.univ.filter fun seeds : bundle =>
           seeds level ∈ event) := by
-        simpa only [bundle, levelSeed] using
-          uniformProbability_equiv
-            (hashingSeedEquiv domainWidth errorBits)
-            (fun seeds => seeds level ∈ event)
+        simp only [bundle, levelSeed]
+        exact uniformProbability_equiv (hashingSeedEquiv domainWidth errorBits) (fun seeds => seeds
+          level ∈ event)
     _ = uniformProbability (Finset.univ.filter fun seeds :
           BitString (levelSeedWidth domainWidth errorBits level) × rest =>
             seeds.1 ∈ event) := by
-        simpa only [bundle, rest] using
-          uniformProbability_equiv
-            (Equiv.piSplitAt level fun current : Level domainWidth =>
-              BitString (levelSeedWidth domainWidth errorBits current))
-            (fun seeds => seeds.1 ∈ event)
+        simp only [bundle, rest]
+        exact uniformProbability_equiv (Equiv.piSplitAt level fun current : Level domainWidth =>
+          BitString (levelSeedWidth domainWidth errorBits current)) (fun seeds => seeds.1 ∈ event)
     _ = uniformProbability event := by
       rw [show (Finset.univ.filter fun seeds :
           BitString (levelSeedWidth domainWidth errorBits level) × rest =>
@@ -139,7 +136,8 @@ theorem eventProb_badLevelEvent_le_internal
         omega
       let hash := PairwiseIndependentHash.affine domainWidth level.val
       let target : BitString level.val := fun _ => false
-      let failure := hash.majorityEmptyEvent set target errorBits
+      let failure : Finset (BitString (levelSeedWidth domainWidth errorBits level)) :=
+        hash.majorityEmptyEvent set target errorBits
       have hevent : badLevelEvent (errorBits := errorBits) set level =
           Finset.univ.filter fun seed :
             BitString (hashingSeedWidth domainWidth errorBits) =>
@@ -163,7 +161,8 @@ theorem eventProb_badLevelEvent_le_internal
     · by_cases hsmall : 8 * set.card ≤ 2 ^ level.val
       · let hash := PairwiseIndependentHash.affine domainWidth level.val
         let target : BitString level.val := fun _ => false
-        let success := hash.majorityNonemptyEvent set target errorBits
+        let success : Finset (BitString (levelSeedWidth domainWidth errorBits level)) :=
+          hash.majorityNonemptyEvent set target errorBits
         have hevent : badLevelEvent (errorBits := errorBits) set level =
             Finset.univ.filter fun seed :
               BitString (hashingSeedWidth domainWidth errorBits) =>
@@ -268,9 +267,9 @@ private theorem goodHashingEvent_subset_factorApproximationEvent
   have hcardinality : set.card ≤ 2 ^ domainWidth := by
     simpa [card_finArrowBool] using Finset.card_le_univ set
   simp only [goodHashingEvent, Finset.mem_filter, Finset.mem_univ, true_and] at hseed
-  simp only [factorApproximationEvent, Finset.mem_filter, Finset.mem_univ, true_and,
-    hashingEstimate]
-  exact estimate_isFactorApproximation hcardinality hseed
+  simp only [factorApproximationEvent, hashingEstimate]
+  exact Finset.mem_filter.mpr ⟨Finset.mem_univ _,
+    estimate_isFactorApproximation hcardinality hseed⟩
 
 theorem one_sub_error_le_eventProb_factorApproximationEvent_internal
     {domainWidth errorBits : ℕ} (set : Finset (BitString domainWidth)) :

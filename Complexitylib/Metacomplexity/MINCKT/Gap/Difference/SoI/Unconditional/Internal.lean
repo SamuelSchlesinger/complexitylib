@@ -86,13 +86,14 @@ theorem Compatible.satisfiesSoIInputsOnQueries_internal
       ordinaryMachine.timeBoundedKolmogorovComplexity inst.condition
         (plan.conditionInputTime inst) at hupper
     rw [hcompatible.conditionInputTime_eq inst] at hupper
-    simpa [Plan.components, Plan.conditionInput] using hupper
+    simp [Plan.components, Plan.conditionInput]
+    exact hupper
   · intro inst
     have hpair := hestimate (plan.pairInput inst) ⟨inst, Or.inl rfl⟩
     have hlower := hpair.2
     rw [hcompatible.pairTransformedTime_eq inst] at hlower
-    simpa [Plan.components, Plan.pairInput, Plan.accountingSchedule] using
-      hlower
+    simp [Plan.components, Plan.pairInput, Plan.accountingSchedule]
+    exact hlower
   · exact hcompatible.upperLoss_budget
   · exact hcompatible.lowerLoss_budget
 

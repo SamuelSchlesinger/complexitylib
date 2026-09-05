@@ -147,9 +147,9 @@ theorem atMostOne_unique {α : Assignment} {vars : List ℕ} {v w : ℕ}
     (h : vars.Pairwise (fun a b => ¬(α.get a = true ∧ α.get b = true)))
     (hv : v ∈ vars) (hw : w ∈ vars) (hvt : α.get v = true) (hwt : α.get w = true) : v = w := by
   by_contra hne
-  have hsymm : Symmetric (fun a b => ¬(α.get a = true ∧ α.get b = true)) :=
-    fun a b hab hba => hab ⟨hba.2, hba.1⟩
-  exact (h.forall hsymm hv hw hne) ⟨hvt, hwt⟩
+  have hsymm : Std.Symm (fun a b => ¬(α.get a = true ∧ α.get b = true)) :=
+    ⟨fun _ _ hab hba => hab ⟨hba.2, hba.1⟩⟩
+  exact (h.forall hv hw hne) ⟨hvt, hwt⟩
 
 /-- An implication clause `cond ++ [conseq]` whose `cond` literals are all false is
     satisfied only if its consequent literal is true. (Each active-transition clause
@@ -652,8 +652,8 @@ theorem represents_step (N : NTM 1) (α : Assignment) (steps P : ℕ)
         (fun _ => (c.work 0).read) c.output.read).2.1 0).toΓ := by
     unfold traceStep; rw [hout]; split_ifs with hq h0
     · rfl
-    · rw [tape_writeAndMove_cells_self, if_pos h0]; rfl
-    · rw [tape_writeAndMove_cells_self, if_neg h0]
+    · rw [tape_writeAndMove_cells_self, ite_eq_left h0]; rfl
+    · rw [tape_writeAndMove_cells_self, ite_eq_right h0]
   have hWorkNe : ∀ pos, pos ≠ (c.work 0).head →
       ((traceStep N c (α.get (vChoice t))).work 0).cells pos = (c.work 0).cells pos := by
     intro pos hpos; unfold traceStep; split_ifs with hq
@@ -666,8 +666,8 @@ theorem represents_step (N : NTM 1) (α : Assignment) (steps P : ℕ)
         (fun _ => (c.work 0).read) c.output.read).2.2.1.toΓ := by
     unfold traceStep; rw [hout]; split_ifs with hq h0
     · rfl
-    · rw [tape_writeAndMove_cells_self, if_pos h0]; rfl
-    · rw [tape_writeAndMove_cells_self, if_neg h0]
+    · rw [tape_writeAndMove_cells_self, ite_eq_left h0]; rfl
+    · rw [tape_writeAndMove_cells_self, ite_eq_right h0]
   have hOutNe : ∀ pos, pos ≠ c.output.head →
       (traceStep N c (α.get (vChoice t))).output.cells pos = c.output.cells pos := by
     intro pos hpos; unfold traceStep; split_ifs with hq
@@ -886,7 +886,7 @@ theorem vChoice_mem_ftraceVars (N : NTM 1) (x : List Bool) (g : ℕ → Bool) (s
     · exact absurd (enc_inj heq).1 (by decide)
     · exact absurd (enc_inj heq).1 (by decide)
   · rintro ⟨ht, hg⟩
-    exact Or.inl (Or.inl (Or.inr ⟨t, ht, by rw [if_pos hg]⟩))
+    exact Or.inl (Or.inl (Or.inr ⟨t, ht, by rw [ite_eq_left hg]⟩))
 
 open Tableau in
 /-- A cell variable is in `ftraceVars` iff it names the run's symbol at an in-range cell. -/
@@ -1126,8 +1126,8 @@ theorem traceStep_work_cells_self : ((traceStep N c b).work 0).cells (c.work 0).
     else ((N.δ b c.state c.input.read (fun _ => (c.work 0).read) c.output.read).2.1 0).toΓ := by
   unfold traceStep; rw [ts_hout]; split_ifs with hq h0
   · rfl
-  · rw [tape_writeAndMove_cells_self, if_pos h0]; rfl
-  · rw [tape_writeAndMove_cells_self, if_neg h0]
+  · rw [tape_writeAndMove_cells_self, ite_eq_left h0]; rfl
+  · rw [tape_writeAndMove_cells_self, ite_eq_right h0]
 
 /-- The output cell under the head after `traceStep`: unchanged when halted or at cell `0`
     (writes there are no-ops), otherwise the symbol `N.δ` writes. -/
@@ -1137,8 +1137,8 @@ theorem traceStep_output_cells_self : (traceStep N c b).output.cells c.output.he
     else (N.δ b c.state c.input.read (fun _ => (c.work 0).read) c.output.read).2.2.1.toΓ := by
   unfold traceStep; rw [ts_hout]; split_ifs with hq h0
   · rfl
-  · rw [tape_writeAndMove_cells_self, if_pos h0]; rfl
-  · rw [tape_writeAndMove_cells_self, if_neg h0]
+  · rw [tape_writeAndMove_cells_self, ite_eq_left h0]; rfl
+  · rw [tape_writeAndMove_cells_self, ite_eq_right h0]
 
 end traceStepFields
 
@@ -1166,7 +1166,7 @@ theorem fassign_acceptClauses (N : NTM 1) (x : List Bool) (g : ℕ → Bool) (st
     refine ⟨le_refl _, by norm_num, hP, ?_⟩
     congr 1
     unfold fcellSym
-    rw [if_neg (by decide : ¬(2:ℕ) = 0), if_neg (by decide : ¬(2:ℕ) = 1)]
+    rw [ite_eq_right (by decide : ¬(2:ℕ) = 0), ite_eq_right (by decide : ¬(2:ℕ) = 1)]
     exact hout.symm
 
 open Tableau in
@@ -1227,14 +1227,14 @@ theorem fassign_activeClausesAt (N : NTM 1) (x : List Bool) (g : ℕ → Bool) (
     have hpo : po = (fcfg N x g t).output.head := ((fassign_get_vHead N x g steps P).mp hho).2.2
     have hsi : si = (fcfg N x g t).input.read := by
       rw [symIdx_inj ((fassign_get_vCell N x g steps P).mp hcvi).2.2.2]
-      unfold fcellSym Tape.read; rw [if_pos rfl, hpi]
+      unfold fcellSym Tape.read; rw [ite_eq_left rfl, hpi]
     have hsw : sw = ((fcfg N x g t).work 0).read := by
       rw [symIdx_inj ((fassign_get_vCell N x g steps P).mp hcvw).2.2.2]
-      unfold fcellSym Tape.read; rw [if_neg (by decide : (1:ℕ) ≠ 0), if_pos rfl, hpw]
+      unfold fcellSym Tape.read; rw [ite_eq_right (by decide : (1:ℕ) ≠ 0), ite_eq_left rfl, hpw]
     have hso : so = (fcfg N x g t).output.read := by
       rw [symIdx_inj ((fassign_get_vCell N x g steps P).mp hcvo).2.2.2]
       unfold fcellSym Tape.read
-      rw [if_neg (by decide : (2:ℕ) ≠ 0), if_neg (by decide : (2:ℕ) ≠ 1), hpo]
+      rw [ite_eq_right (by decide : (2:ℕ) ≠ 0), ite_eq_right (by decide : (2:ℕ) ≠ 1), hpo]
     have hb : b = g t := by
       have hbv' : (fassign N x g steps P).get (vChoice t) = b := by
         cases hgc : (fassign N x g steps P).get (vChoice t) <;> cases b <;> simp_all
@@ -1246,22 +1246,23 @@ theorem fassign_activeClausesAt (N : NTM 1) (x : List Bool) (g : ℕ → Bool) (
     refine ⟨?_, ?_, ?_, ?_, ?_, ?_, ?_⟩
     · exact (fassign_get_vState N x g steps P).mpr ⟨by omega, by rw [fcfg_succ, traceStep_state]⟩
     · refine (fassign_get_vCell N x g steps P).mpr ⟨by omega, by omega, hpi, ?_⟩
-      congr 1; unfold fcellSym Tape.read; rw [if_pos rfl, fcfg_succ, traceStep_input_cells]
+      congr 1; unfold fcellSym Tape.read; rw [ite_eq_left rfl, fcfg_succ, traceStep_input_cells]
     · refine (fassign_get_vCell N x g steps P).mpr ⟨by omega, by omega, hpw, ?_⟩
       congr 1; unfold fcellSym
-      rw [if_neg (by decide : (1:ℕ) ≠ 0), if_pos rfl, fcfg_succ, traceStep_work_cells_self]
+      rw [ite_eq_right (by decide : (1:ℕ) ≠ 0), ite_eq_left rfl, fcfg_succ,
+        traceStep_work_cells_self]
     · refine (fassign_get_vCell N x g steps P).mpr ⟨by omega, by omega, hpo, ?_⟩
       congr 1; unfold fcellSym
-      rw [if_neg (by decide : (2:ℕ) ≠ 0), if_neg (by decide : (2:ℕ) ≠ 1), fcfg_succ,
+      rw [ite_eq_right (by decide : (2:ℕ) ≠ 0), ite_eq_right (by decide : (2:ℕ) ≠ 1), fcfg_succ,
         traceStep_output_cells_self]
     · refine (fassign_get_vHead N x g steps P).mpr ⟨by omega, by omega, ?_⟩
-      unfold fheadPos; rw [if_pos rfl, fcfg_succ, traceStep_input_head]
+      unfold fheadPos; rw [ite_eq_left rfl, fcfg_succ, traceStep_input_head]
     · refine (fassign_get_vHead N x g steps P).mpr ⟨by omega, by omega, ?_⟩
       unfold fheadPos
-      rw [if_neg (by decide : (1:ℕ) ≠ 0), if_pos rfl, fcfg_succ, traceStep_work_head]
+      rw [ite_eq_right (by decide : (1:ℕ) ≠ 0), ite_eq_left rfl, fcfg_succ, traceStep_work_head]
     · refine (fassign_get_vHead N x g steps P).mpr ⟨by omega, by omega, ?_⟩
       unfold fheadPos
-      rw [if_neg (by decide : (2:ℕ) ≠ 0), if_neg (by decide : (2:ℕ) ≠ 1), fcfg_succ,
+      rw [ite_eq_right (by decide : (2:ℕ) ≠ 0), ite_eq_right (by decide : (2:ℕ) ≠ 1), fcfg_succ,
         traceStep_output_head]
 
 open Tableau in
@@ -1281,7 +1282,7 @@ theorem accepts_to_tableau_sat (N : NTM 1) (steps : ℕ) (x : List Bool)
   set g : ℕ → Bool := fun i => if hi : i < steps then choices ⟨i, hi⟩ else false with hg
   have hcfg : fcfg N x g steps = N.trace steps choices (N.initCfg x) := by
     unfold fcfg
-    congr 1; funext i; simp only [hg]; exact dif_pos i.isLt
+    congr 1; funext i; simp only [hg]; exact dite_eq_left i.isLt
   refine ⟨fassign N x g steps (steps + x.length + 1), ?_⟩
   rw [tableauCNF_eval_split]
   exact ⟨fassign_oneHotStates N x g steps _, fassign_oneHotCells N x g steps _,
@@ -1408,7 +1409,7 @@ theorem flatToEnc_vStateF {t q : ℕ} (ht : t ≤ steps) (hq : q < Qc) :
   obtain ⟨h0, h1, h2, h3, h4⟩ := flatVar_decode (A := steps + 1) (B := max Qc 3)
     (C := P + 2) (D := 4) (tag := 0) (a := t) (b := q) (c := 0) (d := 0)
     (by omega) (lt_of_lt_of_le hq (le_max_left _ _)) (by omega) (by omega)
-  rw [vStateF, flatToEnc, if_neg (by rw [h4]; omega), h4, h3, h2, h1, h0, vState]
+  rw [vStateF, flatToEnc, ite_eq_right (by rw [h4]; omega), h4, h3, h2, h1, h0, vState]
 
 @[inherit_doc flatToEnc_vStateF]
 theorem flatToEnc_vChoiceF {t : ℕ} (ht : t ≤ steps) :
@@ -1416,7 +1417,7 @@ theorem flatToEnc_vChoiceF {t : ℕ} (ht : t ≤ steps) :
   obtain ⟨h0, h1, h2, h3, h4⟩ := flatVar_decode (A := steps + 1) (B := max Qc 3)
     (C := P + 2) (D := 4) (tag := 1) (a := t) (b := 0) (c := 0) (d := 0)
     (by omega) (by omega) (by omega) (by omega)
-  rw [vChoiceF, flatToEnc, if_neg (by rw [h4]; omega), h4, h3, h2, h1, h0, vChoice]
+  rw [vChoiceF, flatToEnc, ite_eq_right (by rw [h4]; omega), h4, h3, h2, h1, h0, vChoice]
 
 @[inherit_doc flatToEnc_vStateF]
 theorem flatToEnc_vCellF {t tp pos s : ℕ} (ht : t ≤ steps) (htp : tp < 3)
@@ -1426,7 +1427,7 @@ theorem flatToEnc_vCellF {t tp pos s : ℕ} (ht : t ≤ steps) (htp : tp < 3)
   obtain ⟨h0, h1, h2, h3, h4⟩ := flatVar_decode (A := steps + 1) (B := max Qc 3)
     (C := P + 2) (D := 4) (tag := 2) (a := t) (b := tp) (c := pos) (d := s)
     (by omega) (lt_of_lt_of_le htp (le_max_right _ _)) hpos hs
-  rw [vCellF, flatToEnc, if_pos h4, h3, h2, h1, h0, vCell]
+  rw [vCellF, flatToEnc, ite_eq_left h4, h3, h2, h1, h0, vCell]
 
 @[inherit_doc flatToEnc_vStateF]
 theorem flatToEnc_vHeadF {t tp pos : ℕ} (ht : t ≤ steps) (htp : tp < 3)
@@ -1436,7 +1437,7 @@ theorem flatToEnc_vHeadF {t tp pos : ℕ} (ht : t ≤ steps) (htp : tp < 3)
   obtain ⟨h0, h1, h2, h3, h4⟩ := flatVar_decode (A := steps + 1) (B := max Qc 3)
     (C := P + 2) (D := 4) (tag := 3) (a := t) (b := tp) (c := pos) (d := 0)
     (by omega) (lt_of_lt_of_le htp (le_max_right _ _)) hpos (by omega)
-  rw [vHeadF, flatToEnc, if_neg (by rw [h4]; omega), h4, h3, h2, h1, h0, vHead]
+  rw [vHeadF, flatToEnc, ite_eq_right (by rw [h4]; omega), h4, h3, h2, h1, h0, vHead]
 
 end FlatVars
 

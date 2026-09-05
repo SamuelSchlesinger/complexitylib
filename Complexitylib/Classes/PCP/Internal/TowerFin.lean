@@ -278,8 +278,7 @@ theorem data_zero_apply (v : Fin (F.size 0)) (i : Fin (F.deg ^ 2))
     {p₁ : Fin (F.deg ^ 4) × Fin F.deg} (h1 : p₁ = F.rot (p₀.1, s 1)) :
     (F.data 0).1 (v, i) = (F.zeroVertName p₁.1, F.zeroDartName ![p₁.2, p₀.2]) := by
   subst hs h0 h1
-  simp only [data, RegGraph.relabel, RegGraph.relabelV, RegGraph.rot_power_two, graph,
-    RegGraph.ofRot]
+  simp only [data, RegGraph.relabel, RegGraph.relabelV, graph, RegGraph.ofRot]
   rfl
 
 /-- **The step in full**, with the two walks of the level below spelled out. -/
@@ -296,7 +295,7 @@ theorem data_succ_apply' (k : ℕ) (v : Fin (F.size (k + 1))) (i : Fin (F.deg ^ 
     (F.data (k + 1)).1 (v, i)
       = (F.vertName k (q₁.1, F.baseName r.1), F.dartName (r.2, p.2)) := by
   refine F.data_succ_apply k v i hus hab hp (q := (q₁.1, ![q₁.2, q₀.2])) ?_ hr
-  rw [RegGraph.rot_power_two, rot_graphAt, hq₁, hq₀]
+  erw [RegGraph.rot_power_two, rot_graphAt, hq₁, hq₀]
   rfl
 
 /-! ### The recursion, in numbers -/
@@ -309,7 +308,7 @@ noncomputable def baseVal (x a : ℕ) : ℕ × ℕ :=
 
 @[simp] theorem baseVal_apply (x : Fin (F.deg ^ 4)) (a : Fin F.deg) :
     F.baseVal x.val a.val = ((F.rot (x, a)).1.val, (F.rot (x, a)).2.val) := by
-  rw [baseVal, dif_pos ⟨x.isLt, a.isLt⟩]
+  rw [baseVal, dite_eq_left ⟨x.isLt, a.isLt⟩]
 
 /-- **The tower's rotation map, on raw numbers.** A level-`(k+1)` vertex `v`
 splits as `v / deg^4` (the level below) and `v % deg^4` (the base); a dart `i`
@@ -387,7 +386,7 @@ theorem rotVal_eq (k : ℕ) (v : Fin (F.size k)) (i : Fin (F.deg ^ 2)) :
 
 theorem baseVal_lt {x a : ℕ} (hx : x < F.deg ^ 4) (ha : a < F.deg) :
     (F.baseVal x a).1 < F.deg ^ 4 ∧ (F.baseVal x a).2 < F.deg := by
-  rw [baseVal, dif_pos ⟨hx, ha⟩]
+  rw [baseVal, dite_eq_left ⟨hx, ha⟩]
   exact ⟨Fin.isLt _, Fin.isLt _⟩
 
 theorem rotVal_lt (k : ℕ) {v i : ℕ} (hv : v < F.size k) (hi : i < F.deg ^ 2) :

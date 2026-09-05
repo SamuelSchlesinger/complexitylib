@@ -52,7 +52,7 @@ def stepCfg (tm : TM k) (c : Cfg k tm.Q) : Cfg k tm.Q :=
 theorem step_of_not_halted (tm : TM k) {c : Cfg k tm.Q} (h : c.state ≠ tm.qhalt) :
     tm.step c = some (tm.stepCfg c) := by
   unfold TM.step
-  rw [if_neg h]
+  rw [ite_eq_right h]
   rfl
 
 end TM

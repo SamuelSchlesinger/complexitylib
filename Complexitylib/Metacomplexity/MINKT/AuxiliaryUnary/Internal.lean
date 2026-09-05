@@ -98,8 +98,8 @@ theorem probability_auxiliaryUnary_minkt_eq_average_internal
         eventProb (machine.timeBoundedStrictlyCompressibleStrings
           n.val (m - n.val) (threshold n.val)) := by
   classical
-  letI := auxiliaryUnary.seedFintype m
-  letI := auxiliaryUnary.seedDecidableEq m
+  let := auxiliaryUnary.seedFintype m
+  let := auxiliaryUnary.seedDecidableEq m
   unfold auxiliaryUnaryMINKTProbability
   change uniformProbability
     (Finset.univ.filter fun seed : AuxiliaryUnarySeed m =>

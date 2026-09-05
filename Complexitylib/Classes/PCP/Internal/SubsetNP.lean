@@ -127,9 +127,9 @@ theorem tableFun_eq {t : ℕ} {x : List Bool} {tbl : (Fin t → Bool) → List B
   classical
   cases b with
   | true =>
-      rw [tableFun, if_pos ⟨ρ, i, hpos, hans⟩]
+      rw [tableFun, ite_eq_left ⟨ρ, i, hpos, hans⟩]
   | false =>
-      rw [tableFun, if_neg]
+      rw [tableFun, ite_eq_right]
       rintro ⟨ρ', i', hpos', hans'⟩
       have := hcons ρ ρ' i i' p hpos hpos'
       rw [hans, hans'] at this
@@ -315,12 +315,12 @@ theorem tableOf_witnessOf {t Q : ℕ} (x π : List Bool) (hQ0 : 0 < Q)
         exact hkey
       rw [← List.getElem_eq_getD (h := hlen)]
       show ((List.range (2 ^ t * Q)).map _)[coinIndex ρ * Q + i] = _
-      rw [List.getElem_map, List.getElem_range, dif_pos hdivlt, hrho hdivlt, hmod]
+      erw [List.getElem_map, List.getElem_range, dite_eq_left hdivlt, hrho hdivlt, hmod]
     show ((List.range (V.positions x (BitString.toList ρ)).length).map
       fun i => (V.witnessOf t Q x π).getD (coinIndex ρ * Q + i) false)[i] = _
-    rw [List.getElem_map, List.getElem_range, hwit]
+    erw [List.getElem_map, List.getElem_range, hwit]
     show _ = (List.map (fun i => π.getD i false) _)[i]
-    rw [List.getElem_map]
+    erw [List.getElem_map]
     congr 1
     rw [← List.getElem_eq_getD (h := hilt)]
 

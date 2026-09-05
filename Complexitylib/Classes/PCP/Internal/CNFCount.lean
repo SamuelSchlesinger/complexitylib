@@ -84,11 +84,11 @@ theorem ccStep_cons₂ (c : List Bool) (b0 b1 : Bool) (r : List Bool) :
     simp [dropOne]
   · cases b1
     · rw [selectHead_cons]
-      simp only [dropOne, List.drop_succ_cons, List.drop_zero, if_pos]
+      simp only [dropOne, List.drop_succ_cons, List.drop_zero, ite_eq_left]
       rw [selectHead_cons]
       simp
     · rw [selectHead_cons]
-      simp only [dropOne, List.drop_succ_cons, List.drop_zero, if_pos]
+      simp only [dropOne, List.drop_succ_cons, List.drop_zero, ite_eq_left]
       rw [selectHead_cons]
       simp
 
@@ -125,9 +125,9 @@ theorem ccStep_iterate : ∀ (k : ℕ) (c s : List Bool), s.length ≤ 2 * k →
             exact ⟨m - 1, by omega⟩
           rw [ih _ r hr hrev, sepCount_cons₂]
           by_cases hcase : b0 = true ∧ b1 = false
-          · rw [if_pos hcase, if_pos hcase, List.replicate_succ,
+          · rw [ite_eq_left hcase, ite_eq_left hcase, List.replicate_succ,
               List.cons_append, ← replicate_true_append_cons]
-          · rw [if_neg hcase, if_neg hcase]
+          · rw [ite_eq_right hcase, ite_eq_right hcase]
 
 /-! ### The scan as one function -/
 
@@ -183,7 +183,7 @@ theorem clauseCountFn_mem_FP : clauseCountFn ∈ FP := by
     omega
   have hiter := Cobham.iterate_mem_FP ccStep_mem_FP hinit id_mem_FP hwidth hbound
   have := mem_FP_comp hiter Cobham.fstBlock_mem_FP
-  simpa using this
+  exact this
 
 theorem clauseCountFn_eq {z : List Bool} (h : Even z.length) :
     clauseCountFn z = List.replicate (sepCount z) true := by

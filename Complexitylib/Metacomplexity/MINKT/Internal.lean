@@ -51,7 +51,7 @@ theorem decode?_eq_some_iff_internal (bits : List Bool) (inst : Instance) :
           change (if clock = List.replicate clock.length true then
               some { output := output, time := clock.length } else none) =
             some inst at hdecode
-          rw [if_pos hclock] at hdecode
+          rw [ite_eq_left hclock] at hdecode
           cases hdecode
           calc
             bits = pair output clock := hbits
@@ -62,7 +62,7 @@ theorem decode?_eq_some_iff_internal (bits : List Bool) (inst : Instance) :
           change (if clock = List.replicate clock.length true then
               some { output := output, time := clock.length } else none) =
             some inst at hdecode
-          rw [if_neg hclock] at hdecode
+          rw [ite_eq_right hclock] at hdecode
           contradiction
   · rintro rfl
     exact decode?_encode_internal inst

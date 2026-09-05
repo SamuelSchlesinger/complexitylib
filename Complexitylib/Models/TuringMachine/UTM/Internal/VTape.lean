@@ -72,12 +72,12 @@ theorem startInvariant {t : Tape} {syms : List Γw} (h : t.HoldsExact syms) : t.
 /-- Cells within the contents. -/
 theorem cells_lt {t : Tape} {syms : List Γw} (h : t.HoldsExact syms)
     {i : ℕ} (hi : i < syms.length) : t.cells (i + 1) = (syms[i]).toΓ := by
-  rw [h.2 i, dif_pos hi]
+  rw [h.2 i, dite_eq_left hi]
 
 /-- Cells beyond the contents are blank. -/
 theorem cells_ge {t : Tape} {syms : List Γw} (h : t.HoldsExact syms)
     {i : ℕ} (hi : syms.length ≤ i) : t.cells (i + 1) = Γ.blank := by
-  rw [h.2 i, dif_neg (by omega)]
+  rw [h.2 i, dite_eq_right (by omega)]
 
 /-- The all-blank (cleared) tape characterization. -/
 theorem nil_iff {t : Tape} :
@@ -114,8 +114,8 @@ theorem head_pos {sim utm : Tape} (h : VShift sim utm) : 1 ≤ utm.head := by
 theorem read_eq {sim utm : Tape} (h : VShift sim utm) (hp : 1 ≤ sim.head) :
     utm.read = sim.read := by
   rw [Tape.read, Tape.read, h.1, h.2]
-  simp only [show sim.head + 1 ≠ 0 by omega, if_false,
-    show sim.head + 1 ≠ 1 by omega, if_false, Nat.add_sub_cancel]
+  simp only [show sim.head + 1 ≠ 0 by omega, ite_false,
+    show sim.head + 1 ≠ 1 by omega, ite_false, Nat.add_sub_cancel]
 
 /-- At the simulated origin, the shadow reads the permanent `□`. -/
 theorem read_blank {sim utm : Tape} (h : VShift sim utm) (hp : sim.head = 0) :
@@ -139,10 +139,10 @@ theorem startInvariant {sim utm : Tape} (h : VShift sim utm) (hsim : sim.StartIn
   · rw [h.1]; simp
   · intro j hj
     rw [h.1]
-    simp only [show j ≠ 0 by omega, if_false]
+    simp only [show j ≠ 0 by omega, ite_false]
     by_cases hj1 : j = 1
     · simp [hj1]
-    · simp only [hj1, if_false]
+    · simp only [hj1, ite_false]
       exact hsim.2 (j - 1) (by omega)
 
 /-- Moves correspond, provided a left move never happens at the simulated
@@ -167,7 +167,7 @@ theorem write {sim utm : Tape} (h : VShift sim utm) (s : Γw) (hp : 1 ≤ sim.he
   have hh : utm.head = sim.head + 1 := h.2
   refine ⟨?_, by rw [Tape.write_head, Tape.write_head]; exact hh⟩
   unfold Tape.write
-  rw [if_neg (by omega), if_neg (by omega)]
+  rw [ite_eq_right (by omega), ite_eq_right (by omega)]
   funext k
   show Function.update utm.cells utm.head s.toΓ k
     = if k = 0 then Γ.start else if k = 1 then Γ.blank
@@ -175,15 +175,15 @@ theorem write {sim utm : Tape} (h : VShift sim utm) (s : Γw) (hp : 1 ≤ sim.he
   by_cases hk : k = utm.head
   · subst hk
     rw [Function.update_self, hh]
-    simp only [show sim.head + 1 ≠ 0 by omega, if_false,
-      show sim.head + 1 ≠ 1 by omega, if_false]
+    simp only [show sim.head + 1 ≠ 0 by omega, ite_false,
+      show sim.head + 1 ≠ 1 by omega, ite_false]
     rw [Nat.add_sub_cancel, Function.update_self]
   · rw [Function.update_of_ne hk, h.1]
     by_cases hk0 : k = 0
     · simp [hk0]
     · by_cases hk1 : k = 1
       · simp [hk1]
-      · simp only [hk0, hk1, if_false]
+      · simp only [hk0, hk1, ite_false]
         rw [Function.update_of_ne (by rw [hh] at hk; omega)]
 
 /-- A simulated write at the origin is a no-op; the shadow writes `□` over
@@ -193,7 +193,7 @@ theorem write_origin {sim utm : Tape} (h : VShift sim utm) (hp : sim.head = 0) :
   have hh : utm.head = sim.head + 1 := h.2
   refine ⟨?_, by rw [Tape.write_head]; exact hh⟩
   unfold Tape.write
-  rw [if_neg (by omega)]
+  rw [ite_eq_right (by omega)]
   funext k
   show Function.update utm.cells utm.head Γ.blank k
     = if k = 0 then Γ.start else if k = 1 then Γ.blank else sim.cells (k - 1)
@@ -212,12 +212,12 @@ theorem writeAndMove {sim utm : Tape} (h : VShift sim utm) (s : Γw) (d : Dir3)
     VShift (sim.writeAndMove s.toΓ d)
       (utm.writeAndMove (if sim.head = 0 then Γ.blank else s.toΓ) d) := by
   rcases Nat.eq_zero_or_pos sim.head with hp | hp
-  · rw [if_pos hp]
-    have hw : sim.write s.toΓ = sim := by unfold Tape.write; rw [if_pos hp]
+  · rw [ite_eq_left hp]
+    have hw : sim.write s.toΓ = sim := by unfold Tape.write; rw [ite_eq_left hp]
     show VShift ((sim.write s.toΓ).move d) ((utm.write Γ.blank).move d)
     rw [hw]
     exact (h.write_origin hp).move d hd
-  · rw [if_neg (by omega)]
+  · rw [ite_eq_right (by omega)]
     exact (h.write s hp).move d
       (fun h0 => absurd (by rwa [Tape.write_head] at h0) (by omega))
 
@@ -233,7 +233,7 @@ theorem init (l : List Γ) :
   · simp [hk0]
   · by_cases hk1 : k = 1
     · simp [hk1]
-    · simp only [hk0, hk1, if_false, Tape.init,
+    · simp only [hk0, hk1, ite_false, Tape.init,
         show k - 1 ≠ 0 by omega, show k - 1 - 1 = k - 2 by omega]
 
 end VShift

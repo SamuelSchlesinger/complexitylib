@@ -108,7 +108,7 @@ theorem placedCfg_step (tmF : TM nf) (N : NTM ng) (b : Bool)
   have h1 := TM.retargetInput_step_commute (N.det b) hstep realInput hvin
   have hidle : realInput.move (TM.idleDir realInput.read) = realInput := by
     unfold TM.idleDir
-    rw [if_neg hri]
+    rw [ite_eq_right hri]
     rfl
   rw [hidle] at h1
   have h3 := TM.placeWorkTM_step_placeWorkCfg_stable
@@ -143,7 +143,7 @@ theorem placedCfg_trace (tmF : TM nf) (N : NTM ng)
     intro b c c' h hinv
     have hne := TM.state_ne_qhalt_of_step h
     simp only [TM.step, det] at h
-    rw [if_neg (show ¬(c.state = N.qhalt) from hne)] at h
+    erw [ite_eq_right (show ¬(c.state = N.qhalt) from hne)] at h
     have h' := Option.some_injective _ h
     subst h'
     exact hinv.move _
@@ -201,7 +201,7 @@ theorem compositionNTM_seam_step (tmF : TM nf) (N : NTM ng) (b : Bool)
       (TM.startedCfg (N.det b) y hne).state := by
     show (if (N.det b).qstart = (N.det b).qhalt then (N.det b).qhalt
         else TM.retargetInputStartState (N.det b)) = _
-    rw [if_neg hne]
+    rw [ite_eq_right hne]
     simp [TM.retargetInputStartState, TM.startedCfg, TM.step, hne,
       Tape.read, Tape.init]
   -- Tape transitions at the seam are identities on the stable boundary tapes.
@@ -285,9 +285,9 @@ theorem compositionNTM_seam_step (tmF : TM nf) (N : NTM ng) (b : Bool)
             (TM.startedCfg (N.det b) y hne)).work
               (TM.placeWorkCoord (0 + (nf + 1)) (ng + 1) (post := 0) i h)
         else E.work i
-      rw [dif_pos hmid]
+      rw [dite_eq_left hmid]
       by_cases hlt : (TM.placeWorkCoord (0 + (nf + 1)) (ng + 1) (post := 0) i hmid).val < ng
-      · rw [TM.retargetWrap_work_lt _ _ _ _ hlt,
+      · erw [TM.retargetWrap_work_lt _ _ _ _ hlt,
           TM.startedCfg_work_eq_init_move_right]
         have hidx : TM.compositionSecondWorkIdx nf ng
             ⟨(TM.placeWorkCoord (0 + (nf + 1)) (ng + 1) (post := 0) i hmid).val, hlt⟩ = i := by
@@ -305,7 +305,7 @@ theorem compositionNTM_seam_step (tmF : TM nf) (N : NTM ng) (b : Bool)
           (TM.startedCfg (N.det b) y hne).input by
             show (if h : (TM.placeWorkCoord (0 + (nf + 1)) (ng + 1) (post := 0) i hmid).val < ng
               then _ else _) = _
-            rw [dif_neg hlt],
+            rw [dite_eq_right hlt],
           TM.startedCfg_input_eq]
         have hidx : i = TM.compositionVirtualInputIdx nf ng := by
           apply Fin.ext
@@ -322,7 +322,7 @@ theorem compositionNTM_seam_step (tmF : TM nf) (N : NTM ng) (b : Bool)
             (TM.startedCfg (N.det b) y hne)).work
               (TM.placeWorkCoord (0 + (nf + 1)) (ng + 1) (post := 0) i h)
         else E.work i
-      rw [dif_neg hmid]
+      rw [dite_eq_right hmid]
   · -- Output: parked blank on both sides.
     show TM.transitionTape E.output = (TM.startedCfg (N.det b) y hne).output
     rw [houtTr, houtE, TM.startedCfg_output_eq_init_move_right]

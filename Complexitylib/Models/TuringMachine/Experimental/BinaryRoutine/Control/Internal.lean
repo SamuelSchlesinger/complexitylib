@@ -557,12 +557,10 @@ private theorem binaryForIteration_reachesIn (body : BinaryRoutine n)
       simpa [binaryForBodyTime, current, count] using hbodyTime
     rw [TM.binaryForIterationTime]
     omega
-  · simpa [count, current, next, currentOut, nextOut,
-      TM.binaryForIterationTM, TM.phase1Wrap, TM.phase2Wrap] using hseq
-  · simpa [count, current, next, currentOut, nextOut,
-      binaryForIterationStartCfg, binaryForIterationDoneCfg,
-      TM.binaryForIterationTM, TM.binaryForIterationWrap,
-      TM.phase1Wrap, TM.phase2Wrap] using hlift
+  · simp [TM.binaryForIterationTM]
+    exact hseq
+  · simp [binaryForIterationStartCfg, binaryForIterationDoneCfg, TM.binaryForIterationTM]
+    exact hlift
 
 private theorem binaryForIterationWitnessOfRequires
     (body : BinaryRoutine n) (hbodySound : body.Sound)
@@ -661,7 +659,7 @@ private theorem binaryForActualIterationTime_spec
           (binaryForIterationDoneCfg body counterIdx limitIdx initial inp out
             (initial counterIdx) value) := by
   dsimp only [binaryForActualIterationTime]
-  rw [dif_pos ⟨hstart, hlt⟩]
+  rw [dite_eq_left ⟨hstart, hlt⟩]
   exact Classical.choose_spec
     (binaryForIterationWitnessOfRequires body hbodySound counterIdx limitIdx
       initial inp out ys inputLength initialSpace hrequires hinp hout
@@ -757,7 +755,7 @@ private noncomputable def binaryForSegmentSpecOfSound (body : BinaryRoutine n)
       out ys (initial counterIdx) (initial limitIdx) hinp hout hcounter hlimit
   · rfl
 
-private noncomputable def binaryForSegmentSpaceSpecOfSound
+private theorem binaryForSegmentSpaceSpecOfSound
     (body : BinaryRoutine n) (hbodySound : body.Sound)
     (counterIdx limitIdx : Fin n) (initial : BinaryValues n)
     (inp out : Tape) (ys : List Bool) (inputLength initialSpace : ℕ)
@@ -858,7 +856,8 @@ private noncomputable def binaryForSegmentSpaceSpecOfSound
         (binaryForIterationSpace_le_max body counterIdx initialSpace initial
           count total hcount) (le_max_right _ _)
     rw [hcfg]
-    simpa [TM.binaryForIterationWrap] using hd.mono le_rfl hspaceLe
+    simp [TM.binaryForIterationWrap]
+    exact hd.mono le_rfl hspaceLe
 
 theorem Sound.branchZero_internal {onZero onPositive : BinaryRoutine n}
     (hzeroSound : onZero.Sound) (hpositiveSound : onPositive.Sound)
@@ -963,8 +962,8 @@ theorem Sound.binaryFor_internal {body : BinaryRoutine n}
         · simp [spec, binaryForSegmentSpecOfSound, binaryForDoneCfg]
         · simp [spec, binaryForSegmentSpecOfSound, binaryForDoneCfg,
             binaryFor, binaryForCount]
-        · simpa [spec, binaryForSegmentSpecOfSound, binaryForDoneCfg,
-            binaryFor, total, List.append_assoc] using houtFinal
+        · simp [spec, binaryForSegmentSpecOfSound, binaryForDoneCfg, binaryFor]
+          exact houtFinal
     · intro inp work out hpre cfg hreach
       rcases hpre with ⟨rfl, rfl, hout⟩
       let total := binaryForCount counterIdx limitIdx initial

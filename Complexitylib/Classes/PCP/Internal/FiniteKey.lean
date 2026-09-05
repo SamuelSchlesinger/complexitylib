@@ -73,9 +73,9 @@ theorem mem_P_of_bounded_key {key : List Bool → List Bool} (hkey : key ∈ FP)
   refine mem_P_of_decisionFn hcomp fun z => ?_
   show Q (key z) ↔ _
   by_cases h : Q (key z)
-  · rw [if_pos (mem_keySet.mpr ⟨hL z, h⟩)]
+  · rw [ite_eq_left (mem_keySet.mpr ⟨hL z, h⟩)]
     exact ⟨fun _ => ⟨true, by simp, rfl⟩, fun _ => h⟩
-  · rw [if_neg (fun hcon => h (mem_keySet.mp hcon).2)]
+  · rw [ite_eq_right (fun hcon => h (mem_keySet.mp hcon).2)]
     simp [h]
 
 /-- **A bounded-key value is in `FP`.** The rule computing the value from the
@@ -88,7 +88,7 @@ theorem mem_FP_of_bounded_key {key : List Bool → List Bool} (hkey : key ∈ FP
     ite_mem_finset_mem_FP g (keySet L (fun _ => True))
   have hcomp := mem_FP_comp hkey hite
   refine mem_FP_of_eq hcomp fun z => ?_
-  rw [Function.comp_apply, if_pos (mem_keySet.mpr ⟨hL z, trivial⟩)]
+  rw [Function.comp_apply, ite_eq_left (mem_keySet.mpr ⟨hL z, trivial⟩)]
 
 /-- **A value that depends on its input only through a bounded key is in `FP`.**
 No rule computing the value from the key need be exhibited: agreeing wherever
@@ -100,7 +100,7 @@ theorem mem_FP_of_key_congr {key : List Bool → List Bool} (hkey : key ∈ FP)
   refine mem_FP_of_eq (mem_FP_of_bounded_key hkey hL
     (fun s => if h : ∃ z, key z = s then val (Classical.choose h) else [])) fun z => ?_
   have hex : ∃ w, key w = key z := ⟨z, rfl⟩
-  rw [dif_pos hex]
+  rw [dite_eq_left hex]
   exact hcongr _ z (Classical.choose_spec hex)
 
 end Complexity

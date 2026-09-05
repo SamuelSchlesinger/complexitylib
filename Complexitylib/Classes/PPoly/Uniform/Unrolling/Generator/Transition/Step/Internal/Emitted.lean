@@ -94,7 +94,7 @@ private theorem stepConfigAtomAt_configIndex (tm : NTM k) (T : ℕ)
     (atom : ConfigAtom tm T) :
     stepConfigAtomAt tm T (configIndex tm T atom) = atom := by
   unfold stepConfigAtomAt
-  rw [dif_pos (configIndex_lt tm T atom)]
+  rw [dite_eq_left (configIndex_lt tm T atom)]
   have hindex :
       (⟨configIndex tm T atom, configIndex_lt tm T atom⟩ :
         Fin (configWidth tm T)) = configAtomEquiv tm T atom := by
@@ -539,7 +539,7 @@ private theorem stepFormulaSizeAtSpecialized_internal_state (tm : NTM k) (T : �
             (Fintype.equivFin tm.Q).symm index))
         (effectCaseChoiceAt tm) := by
   unfold stepFormulaSizeAtSpecializedInternal stepFormulaSizeAt
-  rw [if_pos]
+  rw [ite_eq_left]
   · unfold stepAtomKindAt stepAtomEffectSelectedAt
     rw [← stateAtom_index tm index,
       stepConfigAtomAt_configIndex tm T]
@@ -645,8 +645,8 @@ private theorem stepFormulaSizeAtSpecialized_internal_head (tm : NTM k) (T : ℕ
       nextHeadFormulaScheduleSize (transitionCases tm).length k T
         (movedHeadCaseSelectedAt tm tape) (effectCaseChoiceAt tm) := by
   unfold stepFormulaSizeAtSpecializedInternal stepFormulaSizeAt
-  rw [if_pos (by simpa [stepAtomCount, configWidth] using
-    configIndex_lt tm T (.head tape position))]
+  rw [ite_eq_left (by simpa [stepAtomCount, configWidth]
+    using! configIndex_lt tm T (.head tape position))]
   unfold stepAtomKindAt stepAtomEffectSelectedAt
   rw [stepConfigAtomAt_configIndex]
   rfl
@@ -678,8 +678,8 @@ private theorem stepFormulaSizeAtSpecialized_internal_cellCopy (tm : NTM k)
     stepFormulaSizeAtSpecializedInternal tm T
         (configIndex tm T (.cell tape position symbol)) = 1 := by
   unfold stepFormulaSizeAtSpecializedInternal stepFormulaSizeAt
-  rw [if_pos (by simpa [stepAtomCount, configWidth] using
-    configIndex_lt tm T (.cell tape position symbol))]
+  rw [ite_eq_left (by simpa [stepAtomCount, configWidth]
+    using! configIndex_lt tm T (.cell tape position symbol))]
   unfold stepAtomKindAt stepAtomEffectSelectedAt
   rw [stepConfigAtomAt_configIndex]
   rcases hcopy with rfl | hzero
@@ -718,8 +718,8 @@ private theorem stepFormulaSizeAtSpecialized_internal_writtenCell (tm : NTM k)
         (writtenCellEffectSelectedAt tm tape symbol)
         (effectCaseChoiceAt tm) := by
   unfold stepFormulaSizeAtSpecializedInternal stepFormulaSizeAt
-  rw [if_pos (by simpa [stepAtomCount, configWidth] using
-    configIndex_lt tm T (.cell tape.toTapeSlot position symbol))]
+  rw [ite_eq_left (by simpa [stepAtomCount, configWidth]
+    using! configIndex_lt tm T (.cell tape.toTapeSlot position symbol))]
   unfold stepAtomKindAt stepAtomEffectSelectedAt
   rw [stepConfigAtomAt_configIndex]
   cases tape <;> simp [WritableSlot.toTapeSlot, nextAtomKind,
@@ -899,7 +899,7 @@ private theorem stepCellPositionEffectSize_eq_fourSize (tm : NTM k)
           (stepCellStart tm T (.work index) position + 3) = _ at h₃
         simp only [Nat.add_zero] at h₀
         unfold stepCellPositionSizeEmitted fourSize
-        simp only [if_neg hzero]
+        simp only [ite_eq_right hzero]
         change (List.ofFn fun symbolIndex : Fin 4 =>
             nextWrittenCellFormulaScheduleSize
               (transitionCases tm).length k T
@@ -959,7 +959,7 @@ private theorem stepCellPositionEffectSize_eq_fourSize (tm : NTM k)
           (stepCellStart tm T .output position + 3) = _ at h₃
         simp only [Nat.add_zero] at h₀
         unfold stepCellPositionSizeEmitted fourSize
-        simp only [if_neg hzero]
+        simp only [ite_eq_right hzero]
         change (List.ofFn fun symbolIndex : Fin 4 =>
             nextWrittenCellFormulaScheduleSize
               (transitionCases tm).length k T
@@ -1802,13 +1802,11 @@ theorem emitStepCellTapeFormulas_emitted_internal (tm : NTM k)
               (trajectory index) hmoved
       | work tapeIndex =>
           simpa [body, trajectory, Work.position, Work.available,
-            Work.horizon] using
-            emitStepWritableCellPosition_effect_internal tm (.work tapeIndex)
+            Work.horizon] using! emitStepWritableCellPosition_effect_internal tm (.work tapeIndex)
               (trajectory index) hmoved
       | output =>
           simpa [body, trajectory, Work.position, Work.available,
-            Work.horizon] using
-            emitStepWritableCellPosition_effect_internal tm .output
+            Work.horizon] using! emitStepWritableCellPosition_effect_internal tm .output
               (trajectory index) hmoved
     rw [heffect]
     have hsize := stepCellPositionEffectSize_eq_fourSize tm tape
@@ -1851,21 +1849,18 @@ theorem emitStepCellTapeFormulas_emitted_internal (tm : NTM k)
     cases tape with
     | input =>
         simpa [body, trajectory, stepCellStart, Work.position, Work.horizon,
-          Work.configBase] using
-          emitStepImmutableCellPosition_emitted_internal tm .input
+          Work.configBase] using! emitStepImmutableCellPosition_emitted_internal tm .input
             (trajectory index) hmoved (by simpa [trajectory, Work.position,
               Work.available, Work.horizon]) (Or.inl rfl) stepAvailable
             havailableAt
     | work tapeIndex =>
         simpa [body, trajectory, stepCellStart, Work.position, Work.horizon,
-          Work.configBase] using
-          emitStepWritableCellPosition_emitted_internal tm (.work tapeIndex)
+          Work.configBase] using! emitStepWritableCellPosition_emitted_internal tm (.work tapeIndex)
             (trajectory index) hmoved (by simpa [trajectory, Work.position,
               Work.available, Work.horizon]) stepAvailable havailableAt
     | output =>
         simpa [body, trajectory, stepCellStart, Work.position, Work.horizon,
-          Work.configBase] using
-          emitStepWritableCellPosition_emitted_internal tm .output
+          Work.configBase] using! emitStepWritableCellPosition_emitted_internal tm .output
             (trajectory index) hmoved (by simpa [trajectory, Work.position,
               Work.available, Work.horizon]) stepAvailable havailableAt
   have hemittedGlobal : ∀ index < values Work.horizon + 2,
@@ -2002,8 +1997,7 @@ theorem emitStepHeadTapeCopies_emitted_internal (tm : NTM k)
   · funext i
     by_cases hpositionIdx : i = Work.position
     · subst i
-      simpa [trajectory, Work.position, Work.gateCount, Work.available] using
-        hposition.symm
+      simpa [trajectory, Work.position, Work.gateCount, Work.available] using! hposition.symm
     · by_cases hgateIdx : i = Work.gateCount
       · subst i
         simpa [trajectory, sizeAt, start, Work.position, Work.gateCount,
@@ -2098,14 +2092,12 @@ theorem emitStepCellTapeCopies_emitted_internal (tm : NTM k)
       | work tapeIndex =>
           simpa [body, trajectory, Work.position, Work.gateCount,
             Work.available, Work.reference₀, Work.temporary₃,
-            Work.horizon] using
-            emitStepWritableCellCopies_effect_internal tm (.work tapeIndex)
+            Work.horizon] using! emitStepWritableCellCopies_effect_internal tm (.work tapeIndex)
               (trajectory index)
       | output =>
           simpa [body, trajectory, Work.position, Work.gateCount,
             Work.available, Work.reference₀, Work.temporary₃,
-            Work.horizon] using
-            emitStepWritableCellCopies_effect_internal tm .output
+            Work.horizon] using! emitStepWritableCellCopies_effect_internal tm .output
               (trajectory index)
     rw [heffect]
     have heffectSize : stepCellPositionEffectSizeInternal tm tape
@@ -2170,8 +2162,8 @@ theorem emitStepCellTapeCopies_emitted_internal (tm : NTM k)
     cases tape with
     | input =>
         simpa [body, stepPackedCopySpecializedInternal, stepPackedCopyGate,
-          stepFormulaOutputRef, sizeAt, Work.horizon, Work.position] using
-          emitStepImmutableCellCopies_emitted_internal (trajectory index)
+          stepFormulaOutputRef, sizeAt, Work.horizon, Work.position]
+            using! emitStepImmutableCellCopies_emitted_internal (trajectory index)
             sizeAt (stepCellStart tm (values Work.horizon) .input index)
             stepAvailable hgateAt hrefAt htempAt (fun symbolIndex =>
               stepFormulaSizeAtSpecialized_internal_cellCopyIndex tm
@@ -2179,16 +2171,16 @@ theorem emitStepCellTapeCopies_emitted_internal (tm : NTM k)
                 (Or.inl rfl))
     | work tapeIndex =>
         simpa [body, Work.horizon, Work.position, Work.gateCount,
-          Work.available, Work.reference₀, Work.temporary₃] using
-          emitStepWritableCellCopies_emitted_internal tm (.work tapeIndex)
+          Work.available, Work.reference₀, Work.temporary₃]
+            using! emitStepWritableCellCopies_emitted_internal tm (.work tapeIndex)
             (trajectory index) (by simpa [trajectory, Work.position,
               Work.gateCount, Work.available, Work.reference₀,
               Work.temporary₃, Work.horizon]) stepAvailable hgateAt hrefAt
             htempAt
     | output =>
         simpa [body, Work.horizon, Work.position, Work.gateCount,
-          Work.available, Work.reference₀, Work.temporary₃] using
-          emitStepWritableCellCopies_emitted_internal tm .output
+          Work.available, Work.reference₀, Work.temporary₃]
+            using! emitStepWritableCellCopies_emitted_internal tm .output
             (trajectory index) (by simpa [trajectory, Work.position,
               Work.gateCount, Work.available, Work.reference₀,
               Work.temporary₃, Work.horizon]) stepAvailable hgateAt hrefAt
@@ -2408,7 +2400,7 @@ theorem stepFormulasEffectSize_eq_prefixSize_internal (tm : NTM k) (T : ℕ) :
       simp [tapeAt, tapeCount]
     · intro index hindex
       dsimp [tapeAt]
-      rw [dif_pos hindex]
+      rw [dite_eq_left hindex]
       have hprefix := headPrefixBlock_internal tm T
         ((tapeSlotEquiv k).symm ⟨index, hindex⟩)
       have hidx := tapeSlotEquiv_symm_index_internal (⟨index, hindex⟩ :
@@ -2433,7 +2425,7 @@ theorem stepFormulasEffectSize_eq_prefixSize_internal (tm : NTM k) (T : ℕ) :
       simp [tapeAt, tapeCount]
     · intro index hindex
       dsimp [tapeAt]
-      rw [dif_pos hindex]
+      rw [dite_eq_left hindex]
       have hprefix := cellPrefixBlock_internal tm T
         ((tapeSlotEquiv k).symm ⟨index, hindex⟩)
       have hidx := tapeSlotEquiv_symm_index_internal (⟨index, hindex⟩ :

@@ -201,8 +201,8 @@ theorem encodeRegs_head_internal (tm : TM n) (cfg : Complexity.Cfg n tm.Q)
     encodeRegs tm cfg (headReg tape) = (tapeAt cfg tape).head := by
   have hstate : headReg tape ≠ stateReg := by
     simp [headReg, stateReg]
-  rw [encodeRegs, dif_neg hstate,
-    dif_pos (headReg_lt_control_internal tape)]
+  rw [encodeRegs, dite_eq_right hstate,
+    dite_eq_left (headReg_lt_control_internal tape)]
   congr 2
   apply Fin.ext
   simp [headReg]
@@ -217,7 +217,7 @@ theorem encodeRegs_cell_internal (tm : TM n) (cfg : Complexity.Cfg n tm.Q)
     simp [stateReg]
     omega
   have hnotHead : ¬ cellReg n tape position < n + 3 := by omega
-  rw [encodeRegs, dif_neg hnotState, dif_neg hnotHead, if_pos hbase,
+  rw [encodeRegs, dite_eq_right hnotState, dite_eq_right hnotHead, ite_eq_left hbase,
     decodeCellTape_cellReg_internal, decodeCellPosition_cellReg_internal]
 
 theorem encodeRegs_represents_internal (tm : TM n)
@@ -242,7 +242,7 @@ theorem decode_of_represents_internal (tm : TM n)
     rw [hstate]
     exact stateDecode_code_internal tm cfg.state
   · apply Tape.ext
-    · simpa [decode, decodeTape, tapeAt_input_internal] using
+    · simpa [decode, decodeTape, tapeAt, fieldReg, fieldValue] using
         hrepresents (Sum.inr (Sum.inl ⟨0, by omega⟩))
     · funext position
       simp only [decode, decodeTape]

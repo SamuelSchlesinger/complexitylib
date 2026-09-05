@@ -176,7 +176,7 @@ private theorem eval_selected0_internal {inputWidth gateBound : Nat}
       (decodedSlot inputWidth gateBound slot assignment).input0.unsignedValue <
         inputWidth + slot.val := by
     simpa [GateSlot.input0Value, BitString.unsignedValue] using hinput
-  rw [dif_pos hvalue]
+  rw [dite_eq_left hvalue]
   rfl
 
 private theorem eval_selected1_internal {inputWidth gateBound : Nat}
@@ -195,7 +195,7 @@ private theorem eval_selected1_internal {inputWidth gateBound : Nat}
       (decodedSlot inputWidth gateBound slot assignment).input1.unsignedValue <
         inputWidth + slot.val := by
     simpa [GateSlot.input1Value, BitString.unsignedValue] using hinput
-  rw [dif_pos hvalue]
+  rw [dite_eq_left hvalue]
   rfl
 
 theorem eval_gate_internal {inputWidth gateBound : Nat}

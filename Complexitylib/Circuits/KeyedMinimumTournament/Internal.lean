@@ -96,12 +96,14 @@ theorem eval_unsignedKeyedMinTournament_internal
       Fin.append winner.1 winner.2 := by
   induction count with
   | zero =>
-      simp [unsignedKeyedMinTournament, BitString.packKeyedRecords,
-        BitString.unsignedMinimumKeyedRecord, Function.comp_def]
+      simp only [unsignedKeyedMinTournament, BitString.packKeyedRecords,
+        BitString.unsignedMinimumKeyedRecord]
+      erw [Circuit.eval_projectInputs_internal]
+      rfl
   | succ count ih =>
       simp only [unsignedKeyedMinTournament, BitString.packKeyedRecords,
         BitString.unsignedMinimumKeyedRecord]
-      rw [Circuit.eval_compose]
+      erw [Circuit.eval_compose]
       have hparallel := Circuit.eval_parallel
         ((unsignedKeyedMinTournament keyWidth payloadWidth count).2.reindexInputs
           (Fin.castAdd (keyWidth + payloadWidth)))
@@ -186,10 +188,12 @@ theorem size_unsignedKeyedMinTournament_internal
         count * (20 * keyWidth + 5 * payloadWidth + 1) := by
   induction count with
   | zero =>
-      simp [unsignedKeyedMinTournament]
+      simp only [unsignedKeyedMinTournament]
+      erw [Circuit.size_projectInputs]
+      omega
   | succ count ih =>
       simp only [unsignedKeyedMinTournament]
-      rw [Circuit.size_compose]
+      erw [Circuit.size_compose]
       have hparallel := Circuit.size_parallel
         ((unsignedKeyedMinTournament keyWidth payloadWidth count).2.reindexInputs
           (Fin.castAdd (keyWidth + payloadWidth)))

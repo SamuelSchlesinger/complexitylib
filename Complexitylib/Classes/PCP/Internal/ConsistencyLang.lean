@@ -85,20 +85,20 @@ theorem conW_mem_FP : conW ∈ FP :=
 
 theorem unary_conC1_mem_FP : (fun y => List.replicate (conC1 y) true) ∈ FP := by
   have := mem_FP_comp (mem_FP_comp conY1_mem_FP Cobham.sndBlock_mem_FP) unaryLength_mem_FP
-  simpa using this
+  exact this
 
 theorem unary_conC2_mem_FP : (fun y => List.replicate (conC2 y) true) ∈ FP := by
   have := mem_FP_comp (mem_FP_comp conY2_mem_FP Cobham.sndBlock_mem_FP) unaryLength_mem_FP
-  simpa using this
+  exact this
 
 theorem unary_conC3_mem_FP : (fun y => List.replicate (conC3 y) true) ∈ FP := by
   have := mem_FP_comp
     (mem_FP_comp Cobham.fstBlock_mem_FP Cobham.sndBlock_mem_FP) unaryLength_mem_FP
-  simpa using this
+  exact this
 
 theorem unary_conC4_mem_FP : (fun y => List.replicate (conC4 y) true) ∈ FP := by
   have := mem_FP_comp Cobham.sndBlock_mem_FP unaryLength_mem_FP
-  simpa using this
+  exact this
 
 /-! ### The check -/
 
@@ -143,21 +143,21 @@ include hr in
 theorem conRho_mem_FP : conRho r ∈ FP := by
   have ht : (fun y : List Bool => List.replicate (r (conX y).length) true) ∈ FP := by
     have := mem_FP_comp conX_mem_FP hr
-    simpa using this
+    exact this
   exact coinStr_mem_FP ht unary_conC1_mem_FP
 
 include hr in
 theorem conRho'_mem_FP : conRho' r ∈ FP := by
   have ht : (fun y : List Bool => List.replicate (r (conX y).length) true) ∈ FP := by
     have := mem_FP_comp conX_mem_FP hr
-    simpa using this
+    exact this
   exact coinStr_mem_FP ht unary_conC2_mem_FP
 
 include hf hr in
 theorem conP_mem_FP : conP f r ∈ FP := by
   have hb : (fun y => f (pair (conX y) (conRho r y))) ∈ FP := by
     have := mem_FP_comp (Cobham.pairFn_mem_FP conX_mem_FP (conRho_mem_FP r hr)) hf
-    simpa using this
+    exact this
   have := posAt_mem_FP unary_conC3_mem_FP hb
   refine mem_FP_of_eq this fun y => ?_
   rw [conP, List.length_replicate]
@@ -166,7 +166,7 @@ include hf hr in
 theorem conP'_mem_FP : conP' f r ∈ FP := by
   have hb : (fun y => f (pair (conX y) (conRho' r y))) ∈ FP := by
     have := mem_FP_comp (Cobham.pairFn_mem_FP conX_mem_FP (conRho'_mem_FP r hr)) hf
-    simpa using this
+    exact this
   have := posAt_mem_FP unary_conC4_mem_FP hb
   refine mem_FP_of_eq this fun y => ?_
   rw [conP', List.length_replicate]
@@ -250,11 +250,11 @@ theorem consLang_mem_P (hrlog : r =O fun n => Nat.log 2 n) : consLang f r Q ∈ 
   have hexp : (fun z : List Bool =>
       List.replicate (2 ^ r (pairFst z).length) true) ∈ FP := by
     have := mem_FP_comp Cobham.fstBlock_mem_FP (unaryExp_mem_FP_of_bigO_log hr hrlog)
-    simpa using this
+    exact this
   have hexp2 : (fun y : List Bool =>
       List.replicate (2 ^ r (pairFst (pairFst y)).length) true) ∈ FP := by
     have := mem_FP_comp Cobham.fstBlock_mem_FP hexp
-    simpa using this
+    exact this
   have h1 : consL1 f r Q ∈ P := forall_unary_mem_P h2 hexp2
   exact forall_unary_mem_P h1 hexp
 
@@ -275,7 +275,7 @@ theorem exists_eqFlag_iff (a b : List Bool) :
 theorem mem_consInner_iff (y : List Bool) :
     y ∈ consInner f r Q
       ↔ (conP f r y = conP' f r y ∧ conP f r y ≠ [] → conB Q y = conB' Q y) := by
-  rw [consInner, Set.mem_setOf_eq, conChk]
+  rw [consInner, Set.mem_ofPred_eq, conChk]
   by_cases hcase : conP f r y = conP' f r y ∧ conP f r y ≠ []
   · obtain ⟨heq, hne⟩ := hcase
     have h1 : Cobham.eqFlag (conP f r y) (conP' f r y) = [true] :=
@@ -285,7 +285,7 @@ theorem mem_consInner_iff (y : List Bool) :
       | nil => exact absurd hp hne
       | cons b t => rw [emptyFlag_cons]
     rw [h1, h2]
-    simp only [notBit, andBit, caseBit₀_cons, cond_false, cond_true]
+    simp only [notBit, andBit, caseBit₀_cons, Bool.cond_false, Bool.cond_true]
     rw [selectHead_cons_true, exists_eqFlag_iff]
     exact ⟨fun h _ => h, fun h => h ⟨heq, hne⟩⟩
   · have hflag : andBit (Cobham.eqFlag (conP f r y) (conP' f r y))
@@ -389,13 +389,13 @@ theorem mem_consLang_iff_forall (x w : List Bool) :
     pair x w ∈ consLang f r Q
       ↔ ∀ c < 2 ^ r x.length, ∀ c' < 2 ^ r x.length, ∀ i < Q, ∀ i' < Q,
           conArg x w c c' i i' ∈ consInner f r Q := by
-  rw [consLang, Set.mem_setOf_eq, pairFst_pair]
+  rw [consLang, Set.mem_ofPred_eq, pairFst_pair]
   refine forall_congr' fun c => forall_congr' fun _ => ?_
-  rw [consL1, Set.mem_setOf_eq, pairFst_pair, pairFst_pair]
+  rw [consL1, Set.mem_ofPred_eq, pairFst_pair, pairFst_pair]
   refine forall_congr' fun c' => forall_congr' fun _ => ?_
-  rw [consL2, Set.mem_setOf_eq]
+  rw [consL2, Set.mem_ofPred_eq]
   refine forall_congr' fun i => forall_congr' fun _ => ?_
-  rw [consL3, Set.mem_setOf_eq]
+  rw [consL3, Set.mem_ofPred_eq]
   rfl
 
 /-! ### The check is consistency -/

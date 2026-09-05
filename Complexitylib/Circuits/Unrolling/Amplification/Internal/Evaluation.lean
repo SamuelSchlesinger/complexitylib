@@ -87,7 +87,7 @@ theorem evalAux?_prefixAcceptanceCopiesBuild_internal
         have hprimaryNonzero := NeZero.ne primaryAvailable
         change primaryAvailable + previous.circuit.length ≠ 0
         omega
-      letI : NeZero (previous.available primaryAvailable) :=
+      let : NeZero (previous.available primaryAvailable) :=
         ⟨hpreviousNonzero⟩
       have hdataMiddle : ∀ j,
           middle[(runLayout.data j).val]? = some (x j) := by
@@ -279,7 +279,7 @@ theorem evalAux?_amplifiedAcceptanceRawCircuit_internal
     have hprimaryNonzero := NeZero.ne primaryAvailable
     change primaryAvailable + built.circuit.length ≠ 0
     omega
-  letI : NeZero thresholdAvailable := ⟨hthresholdAvailableNonzero⟩
+  let : NeZero thresholdAvailable := ⟨hthresholdAvailableNonzero⟩
   obtain ⟨result, hevalThreshold, hresultSize, hmiddlePreserved,
       houtput⟩ :=
     CircuitCode.Threshold.evalAux?_compileRaw_internal thresholdAvailable
@@ -360,7 +360,7 @@ theorem eval?_amplifiedAcceptanceRawCircuit_internal
         layout).isEmpty = false := by
     simp [amplifiedAcceptanceRawCircuit, CircuitCode.Threshold.compileRaw]
   rw [CircuitCode.RawCircuit.eval?]
-  simp only [hnonempty, Bool.false_eq_true, if_false, wires, heval]
+  simp only [hnonempty, Bool.false_eq_true, ite_false, wires, heval]
   rw [houtputIndex]
   exact houtput
 

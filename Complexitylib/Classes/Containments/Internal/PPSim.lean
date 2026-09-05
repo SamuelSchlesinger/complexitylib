@@ -132,7 +132,7 @@ def simEntry (tm : NTM k) (x : List Bool) (v : ℕ) : Cfg (k + 1) (simCore tm).Q
 theorem simEntry_counter (tm : NTM k) (x : List Bool) (v : ℕ) :
     (simEntry tm x v).work (Fin.last k) = natTape v := by
   show (if (Fin.last k).val < k then TM.blankTape else natTape v) = _
-  rw [if_neg (by simp)]
+  rw [ite_eq_right (by simp)]
 
 theorem simEntry_counter_hasBinaryNat (tm : NTM k) (x : List Bool) (v : ℕ) :
     ((simEntry tm x v).work (Fin.last k)).HasBinaryNat v := by
@@ -158,7 +158,7 @@ theorem simEntry_dropChoice (tm : NTM k) (x : List Bool) (v : ℕ) :
   · funext i
     show (if (i.castSucc : Fin (k + 1)).val < k then TM.blankTape else natTape v)
       = ((Tape.init ([] : List Γ))).move Dir3.right
-    rw [show (i.castSucc : Fin (k + 1)).val = (i : ℕ) from rfl, if_pos i.isLt]
+    rw [show (i.castSucc : Fin (k + 1)).val = (i : ℕ) from rfl, ite_eq_left i.isLt]
     rfl
 
 

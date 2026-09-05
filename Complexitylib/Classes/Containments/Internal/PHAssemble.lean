@@ -138,11 +138,11 @@ theorem rewindX_hoareTime (k : ℕ) (x : List Bool) (B : ℕ) (hB : x.length + 1
     · rw [hj]
       show (if xIdx k ∈ [xIdx k] then (⟨1, (work (xIdx k)).cells⟩ : Tape) else _)
         = copiedBank k x (xIdx k)
-      rw [if_pos (List.mem_singleton.mpr rfl), copiedBank, Function.update_self]
+      rw [ite_eq_left (List.mem_singleton.mpr rfl), copiedBank, Function.update_self]
       exact Tape.eq_init_move_right_of_hasBinaryString
         (Tape.hasBinaryString_of_hasBinaryPrefix hx rfl rfl) hx0
     · show (if j ∈ [xIdx k] then _ else TM.parkTape (work j)) = copiedBank k x j
-      rw [if_neg (fun hmem => hj (List.mem_singleton.mp hmem)), copiedBank_of_ne k x j hj,
+      rw [ite_eq_right (fun hmem => hj (List.mem_singleton.mp hmem)), copiedBank_of_ne k x j hj,
         hother j hj, TM.parkTape]
       exact Tape.ext rfl rfl
   · rw [hpo, ho, TM.parkTape]
@@ -200,7 +200,7 @@ theorem enumTM_hoareTime (M : TM k) {L' : Language} {T S : ℕ → ℕ}
       (N * (bBody + bTest + 5)) := by
     refine hloop.strengthen_post ?_
     rintro inp work out ⟨hi, hw, ho⟩
-    exact ⟨hi, hw, by rw [ho, if_pos rfl]⟩
+    exact ⟨hi, hw, by rw [ho, ite_eq_left rfl]⟩
   have h56 := TM.seqTM_hoareTime _ _ hloop'
     (hpinned _ _ (enumBank_parked k x N H N _ _) (NTM.outSlot_parked _)) hepi
   have hprol : (prologueTM k p q).HoareTime

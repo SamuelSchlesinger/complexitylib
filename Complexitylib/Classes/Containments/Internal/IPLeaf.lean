@@ -301,20 +301,20 @@ theorem chkOnePFn_mem_FP {vf : List Bool → List Bool} (hvf : vf ∈ FP)
   have hfst : ∀ {a : List Bool → List Bool}, a ∈ FP → (fun z => pairFst (a z)) ∈ FP := by
     intro a ha
     have := mem_FP_comp ha Cobham.fstBlock_mem_FP
-    simpa [Function.comp] using this
+    exact this
   have hsnd : ∀ {a : List Bool → List Bool}, a ∈ FP → (fun z => pairSnd (a z)) ∈ FP := by
     intro a ha
     have := mem_FP_comp ha Cobham.sndBlock_mem_FP
-    simpa [Function.comp] using this
+    exact this
   have hV : (fun z => IPM.fV (Y z)) ∈ FP := hfst (hsnd hy)
   have hBody : (fun z => IPM.fBody (Y z)) ∈ FP := hsnd (hsnd (hsnd (hsnd (hsnd hy))))
   have hcons : (fun z => false :: (IPM.fBody (Y z) ++ [true])) ∈ FP := by
     have hcat := Cobham.appendFn_mem_FP hBody (constFn_mem_FP [true])
     have := mem_FP_comp hcat (Cobham.cons_mem_FP false)
-    simpa [Function.comp] using this
+    exact this
   have harg : (fun z => vf (pair (XU z) (false :: (IPM.fBody (Y z) ++ [true])))) ∈ FP := by
     have := mem_FP_comp (Cobham.pairFn_mem_FP hxu hcons) hvf
-    simpa [Function.comp] using this
+    exact this
   exact eqFlagFn_mem_FP hV harg
 
 theorem chkStepPFn_mem_FP {vf : List Bool → List Bool} (hvf : vf ∈ FP) : chkStepP vf ∈ FP := by
@@ -322,11 +322,11 @@ theorem chkStepPFn_mem_FP {vf : List Bool → List Bool} (hvf : vf ∈ FP) : chk
   have hfst : ∀ {a : List Bool → List Bool}, a ∈ FP → (fun z => pairFst (a z)) ∈ FP := by
     intro a ha
     have := mem_FP_comp ha Cobham.fstBlock_mem_FP
-    simpa [Function.comp] using this
+    exact this
   have hsnd : ∀ {a : List Bool → List Bool}, a ∈ FP → (fun z => pairSnd (a z)) ∈ FP := by
     intro a ha
     have := mem_FP_comp ha Cobham.sndBlock_mem_FP
-    simpa [Function.comp] using this
+    exact this
   have hxu := hfst hid
   have hw := hsnd hid
   have hacc := hfst hw
@@ -357,7 +357,8 @@ theorem chkFlagFn_mem_FP {vf : List Bool → List Bool} (hvf : vf ∈ FP)
   have h := Cobham.iterate_mem_FP (chkStepPFn_mem_FP hvf) hinit hR hwidth hbound
   have h1 := mem_FP_comp h Cobham.sndBlock_mem_FP
   have h2 := mem_FP_comp h1 Cobham.fstBlock_mem_FP
-  simpa [Function.comp, chkFlag] using h2
+  simp [chkFlag]
+  exact h2
 
 theorem okFnFn_mem_FP {vf vd : List Bool → List Bool} (hvf : vf ∈ FP) (hvd : vd ∈ FP)
     {R X S U : List Bool → List Bool} (hR : R ∈ FP) (hX : X ∈ FP) (hS : S ∈ FP)
@@ -365,22 +366,22 @@ theorem okFnFn_mem_FP {vf vd : List Bool → List Bool} (hvf : vf ∈ FP) (hvd :
   have hsnd : ∀ {a : List Bool → List Bool}, a ∈ FP → (fun z => pairSnd (a z)) ∈ FP := by
     intro a ha
     have := mem_FP_comp ha Cobham.sndBlock_mem_FP
-    simpa [Function.comp] using this
+    exact this
   have hfst : ∀ {a : List Bool → List Bool}, a ∈ FP → (fun z => pairFst (a z)) ∈ FP := by
     intro a ha
     have := mem_FP_comp ha Cobham.fstBlock_mem_FP
-    simpa [Function.comp] using this
+    exact this
   have hxu : (fun z => pair (X z) (U z)) ∈ FP := Cobham.pairFn_mem_FP hX hU
   have hBody : (fun z => IPM.fBody (pairFst (S z))) ∈ FP :=
     hsnd (hsnd (hsnd (hsnd (hsnd (hfst hS)))))
   have hcons : (fun z => false :: (IPM.fBody (pairFst (S z)) ++ [true])) ∈ FP := by
     have hcat := Cobham.appendFn_mem_FP hBody (constFn_mem_FP [true])
     have := mem_FP_comp hcat (Cobham.cons_mem_FP false)
-    simpa [Function.comp] using this
+    exact this
   have hverd : (fun z => vd (pair (pair (X z) (U z))
       (false :: (IPM.fBody (pairFst (S z)) ++ [true])))) ∈ FP := by
     have := mem_FP_comp (Cobham.pairFn_mem_FP hxu hcons) hvd
-    simpa [Function.comp] using this
+    exact this
   exact andBitFn_mem_FP (chkFlagFn_mem_FP hvf hR hxu (hsnd hS)) hverd
 
 /-! ## The leaf test discharges the walk's hypothesis -/

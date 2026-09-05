@@ -163,13 +163,13 @@ theorem eval_consClauses_iff (t Q : ℕ) (x w : List Bool) :
       rw [consClauses]
       simp only [List.mem_flatMap]
       exact ⟨ρ, mem_coinList t ρ, ρ', mem_coinList t ρ', i, List.mem_range.2 hi,
-        i', List.mem_range.2 hi', by rw [if_pos hpos]; simp⟩
+        i', List.mem_range.2 hi', by rw [ite_eq_left hpos]; simp⟩
     have hmem2 : ([⟨true, varIdx t Q ρ i⟩, ⟨false, varIdx t Q ρ' i'⟩] : Clause)
         ∈ V.consClauses t Q x := by
       rw [consClauses]
       simp only [List.mem_flatMap]
       exact ⟨ρ, mem_coinList t ρ, ρ', mem_coinList t ρ', i, List.mem_range.2 hi,
-        i', List.mem_range.2 hi', by rw [if_pos hpos]; simp⟩
+        i', List.mem_range.2 hi', by rw [ite_eq_left hpos]; simp⟩
     have h1 := h _ hmem
     have h2 := h _ hmem2
     simp only [Clause.eval, List.any_cons, List.any_nil, Lit.eval, Bool.or_false,
@@ -182,7 +182,7 @@ theorem eval_consClauses_iff (t Q : ℕ) (x w : List Bool) :
     rw [List.mem_range] at hi hi'
     by_cases hpos : (V.positions x (BitString.toList ρ))[i]?
         = (V.positions x (BitString.toList ρ'))[i']?
-    · rw [if_pos hpos] at hc
+    · rw [ite_eq_left hpos] at hc
       have heq := h ρ ρ' i i' hi hi' hpos
       simp only [List.mem_cons] at hc
       rcases hc with rfl | rfl | hc
@@ -195,7 +195,7 @@ theorem eval_consClauses_iff (t Q : ℕ) (x w : List Bool) :
         rw [heq]
         cases Assignment.get w (varIdx t Q ρ' i') <;> simp
       · exact absurd hc (by simp)
-    · rw [if_neg hpos] at hc
+    · rw [ite_eq_right hpos] at hc
       exact absurd hc (by simp)
 
 /-! ### Semantics of the acceptance clauses -/

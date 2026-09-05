@@ -48,12 +48,12 @@ theorem blankTape_idle :
   have hread : TM.blankTape.read = Γ.blank := Tape.init_nil_move_right_read
   rw [hread]
   show (TM.blankTape.write Γ.blank).move (TM.idleDir Γ.blank) = TM.blankTape
-  rw [TM.idleDir, if_neg (by decide)]
+  rw [TM.idleDir, ite_eq_right (by decide)]
   refine Tape.ext ?_ ?_
   · show (TM.blankTape.write Γ.blank).head = TM.blankTape.head
     rw [Tape.write_head]
   · show (TM.blankTape.write Γ.blank).cells = TM.blankTape.cells
-    rw [Tape.write, if_neg (by show ¬ ((1 : ℕ) = 0); omega)]
+    rw [Tape.write, ite_eq_right (by show ¬ ((1 : ℕ) = 0); omega)]
     funext j
     show Function.update TM.blankTape.cells TM.blankTape.head Γ.blank j = TM.blankTape.cells j
     by_cases hj : j = TM.blankTape.head
@@ -83,9 +83,11 @@ theorem copyStep_blank (idx : Fin n) {c c' : Cfg n (TM.copyInputToWorkTM idx).Q}
       | copying =>
           show (if iH = Γ.blank then TM.allIdle _ iH wH oH else _).2.1 i = _ ∧
             (if iH = Γ.blank then TM.allIdle _ iH wH oH else _).2.2.2.2.1 i = _
-          split
-          · exact ⟨rfl, rfl⟩
-          · exact ⟨if_neg hi, if_neg hi⟩
+          by_cases hb : iH = Γ.blank
+          · subst hb
+            exact ⟨rfl, rfl⟩
+          · erw [ite_eq_right hb]
+            exact ⟨ite_eq_right hi, ite_eq_right hi⟩
       | done => exact ⟨rfl, rfl⟩
     obtain ⟨hw, hd⟩ := hwrite c.state c.input.read (fun j => (c.work j).read) c.output.read
     rw [hw, hd, h]
@@ -129,9 +131,11 @@ theorem copyStep_blank_out (idx : Fin n) {c c' : Cfg n (TM.copyInputToWorkTM idx
       | copying =>
           show (if iH = Γ.blank then TM.allIdle _ iH wH oH else _).2.2.1 = _ ∧
             (if iH = Γ.blank then TM.allIdle _ iH wH oH else _).2.2.2.2.2 = _
-          split
-          · exact ⟨rfl, rfl⟩
-          · exact ⟨rfl, rfl⟩
+          by_cases hb : iH = Γ.blank
+          · subst hb
+            exact ⟨rfl, rfl⟩
+          · erw [ite_eq_right hb]
+            exact ⟨rfl, rfl⟩
       | done => exact ⟨rfl, rfl⟩
     obtain ⟨hw, hd⟩ := hwrite c.state c.input.read (fun j => (c.work j).read) c.output.read
     rw [hw, hd, h]
@@ -224,16 +228,16 @@ theorem regTape_eq_natTape' (T : ℕ) : TM.regTape T = natTape (2 ^ T - 1) := by
   by_cases hj : j = 0
   · rw [hj]
     show (if (0 : ℕ) = 0 then Γ.start else _) = _
-    rw [if_pos rfl, Tape.init_cells_zero]
+    rw [ite_eq_left rfl, Tape.init_cells_zero]
   · obtain ⟨i, rfl⟩ : ∃ i, j = i + 1 := ⟨j - 1, by omega⟩
     rw [Tape.init_cells_succ]
     show (if i + 1 = 0 then Γ.start else if i + 1 ≤ T then Γ.one else Γ.blank)
       = (((2 ^ T - 1).bits.map Γ.ofBool)[i]?).getD Γ.blank
-    rw [if_neg (by omega), hbits]
+    rw [ite_eq_right (by omega), hbits]
     by_cases hi : i < T
-    · rw [if_pos (by omega)]
+    · rw [ite_eq_left (by omega)]
       simp [hi, Γ.ofBool]
-    · rw [if_neg (by omega)]
+    · rw [ite_eq_right (by omega)]
       simp [hi]
 
 
@@ -245,9 +249,9 @@ theorem regTape_zero' : TM.regTape 0 = TM.blankTape := by
   by_cases hj : j = 0
   · rw [hj]
     show (if (0 : ℕ) = 0 then Γ.start else _) = _
-    rw [if_pos rfl, Tape.init_cells_zero]
+    rw [ite_eq_left rfl, Tape.init_cells_zero]
   · show (if j = 0 then Γ.start else if j ≤ 0 then Γ.one else Γ.blank) = _
-    rw [if_neg hj, if_neg (by omega), show j = (j - 1) + 1 from by omega,
+    rw [ite_eq_right hj, ite_eq_right (by omega), show j = (j - 1) + 1 from by omega,
       Tape.init_nil_cells_succ]
 
 /-- And so is a counter tape holding zero. -/
@@ -414,7 +418,6 @@ theorem prologueTM_hoareTime (k : ℕ) (p q : Polynomial ℕ) (x : List Bool) :
       else if j = 6 then V6 else V7)
     (fun _ => []) (prologueBnd p q lx) hIp ?_ ?_).consequence ?_ ?_ (le_refl _)
   · intro j i
-    dsimp only
     split
     · exact hV0P i
     · split
@@ -525,16 +528,16 @@ theorem prologueTM_hoareTime (k : ℕ) (p q : Polynomial ℕ) (x : List Bool) :
           · rw [hg, hV4, Function.update_self,
               enumBank_of_ne k x (2 ^ (m + 1) - 1) Hq 0 0 0 _ (reg_ne_regs k).1
                 (reg_ne_regs k).2.1 (reg_ne_regs k).2.2, enumRest,
-              if_neg (hne _ _ (by show 3 + k + 7 ≠ 0; omega)),
-              if_neg (hne _ _ (by show 3 + k + 7 ≠ 1; omega)),
-              if_neg (hne _ _ (by show 3 + k + 7 ≠ 3 + k + 3; omega)), if_pos rfl]
+              ite_eq_right (hne _ _ (by show 3 + k + 7 ≠ 0; omega)),
+              ite_eq_right (hne _ _ (by show 3 + k + 7 ≠ 1; omega)),
+              ite_eq_right (hne _ _ (by show 3 + k + 7 ≠ 3 + k + 3; omega)), ite_eq_left rfl]
           · rw [hV4, Function.update_of_ne hg, Function.update_of_ne hy]
             by_cases hn : j = nIdx k
             · rw [hn, hV3, Function.update_self, regTape_eq_natTape',
                 enumBank_of_ne k x (2 ^ (m + 1) - 1) Hq 0 0 0 _ (n_ne_regs k).1
                   (n_ne_regs k).2.1 (n_ne_regs k).2.2, enumRest,
-                if_neg (hne _ _ (by show 3 + k + 3 ≠ 0; omega)),
-                if_neg (hne _ _ (by show 3 + k + 3 ≠ 1; omega)), if_pos rfl]
+                ite_eq_right (hne _ _ (by show 3 + k + 3 ≠ 0; omega)),
+                ite_eq_right (hne _ _ (by show 3 + k + 3 ≠ 1; omega)), ite_eq_left rfl]
             · rw [hV3, Function.update_of_ne hn, hV2, Function.update_of_ne hn,
                 Function.update_of_ne hy1, hV1, Function.update_of_ne hs, hV0]
               by_cases hx : j = xIdx k

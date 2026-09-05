@@ -224,11 +224,9 @@ theorem ip_mem_PSPACE (prot : Protocol) {L : Language} (rp cp mp r w : Polynomia
         rw [polyRuler_length] at hlen
         omega
   · intro x
-    rw [hN x]
     omega
   · -- the step count
     intro x
-    rw [hN x]
     obtain ⟨hT, _, _, _⟩ := ipT_spec prot L rp hex x
     have hle := IPM.runBound_le (prot.walkParams x) (prot.rounds x.length)
     have ht : (prot.walkParams x).t = cp.eval x.length := by
@@ -245,7 +243,6 @@ theorem ip_mem_PSPACE (prot : Protocol) {L : Language} (rp cp mp r w : Polynomia
   · -- the flag stays down
     intro x i hi hlt
     obtain ⟨_, hdown, _, _⟩ := ipT_spec prot L rp hex x
-    rw [hN x] at hlt
     cases i with
     | zero => omega
     | succ j =>
@@ -254,11 +251,11 @@ theorem ip_mem_PSPACE (prot : Protocol) {L : Language} (rp cp mp r w : Polynomia
   · -- the flag goes up
     intro x
     obtain ⟨_, _, hup, _⟩ := ipT_spec prot L rp hex x
-    rw [hN x, show ipT prot L rp hex x + 2 = (ipT prot L rp hex x + 1) + 1 from rfl,
+    erw [show ipT prot L rp hex x + 2 = (ipT prot L rp hex x + 1) + 1 from rfl,
       horb x (ipT prot L rp hex x + 1), IPM.headD_pair_encSst]
     exact hup
   · intro x
-    rw [hN x, horb x (ipT prot L rp hex x + 2)]
+    erw [horb x (ipT prot L rp hex x + 2)]
     intro hc
     have := congrArg List.length hc
     rw [pair_length] at this
@@ -266,7 +263,7 @@ theorem ip_mem_PSPACE (prot : Protocol) {L : Language} (rp cp mp r w : Polynomia
   · -- the answer
     intro x
     obtain ⟨_, _, _, hans⟩ := ipT_spec prot L rp hex x
-    rw [hN x, horb x (ipT prot L rp hex x + 2), IPM.headD_pair_encSst]
+    erw [horb x (ipT prot L rp hex x + 2), IPM.headD_pair_encSst]
     exact hans.symm
 
 /-- The polynomial bounding the length of the state the walk carries. -/

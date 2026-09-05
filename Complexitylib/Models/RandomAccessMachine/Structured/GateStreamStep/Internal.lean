@@ -676,7 +676,7 @@ private theorem decoders_internal {gateStart base : ℕ} {gate : CircuitCode.Raw
     · simp [saved, saveRestartStore, saveRestartOps, Basic.execList,
         Basic.exec, UnaryDecode.verdictReg, UnaryDecode.valueReg,
         UnaryDecode.activeReg]
-    · change saved UnaryDecode.pointerReg = _
+    ·
       rw [show saved UnaryDecode.pointerReg =
           first UnaryDecode.pointerReg by
         apply saveRestart_apply_of_ne <;>
@@ -686,8 +686,7 @@ private theorem decoders_internal {gateStart base : ℕ} {gate : CircuitCode.Raw
       rw [hfirstPointer]
       simp [secondOffset]
       omega
-    · change saved UnaryDecode.remainingReg =
-        (secondRemaining gate tail).length
+    ·
       rw [show saved UnaryDecode.remainingReg =
           first UnaryDecode.remainingReg by
         apply saveRestart_apply_of_ne <;>
@@ -695,7 +694,7 @@ private theorem decoders_internal {gateStart base : ℕ} {gate : CircuitCode.Raw
             UnaryDecode.valueReg, UnaryDecode.remainingReg,
             UnaryDecode.activeReg]]
       exact hfirstRemaining
-    · change saved UnaryDecode.oneReg = 1
+    ·
       rw [show saved UnaryDecode.oneReg = first UnaryDecode.oneReg by
         apply saveRestart_apply_of_ne <;>
           simp [savedInput0Reg, UnaryDecode.verdictReg,
@@ -1053,7 +1052,8 @@ theorem routine_exec_internal {gateStart base : ℕ}
         (max saveSpace (max secondSpace
           (max marshalSpace (max gateSpace restoreSpace)))))), ?_⟩
     rw [← hsteps]
-    simpa [routine, setupStore, headerStore, saveRestartStore, marshaled,
+    simpa [Structured.Basic.execList, Cmd.seqList, setupOps, headerOps, saveRestartOps,
+      marshalOps, restoreOps, routine, setupStore, headerStore, saveRestartStore, marshaled,
       final, restoreStore] using hrun
   obtain ⟨cost, space, hexec⟩ := hexec
   exact ⟨final, cost, space, hexec, hfinalPointer, hfinalRemaining,

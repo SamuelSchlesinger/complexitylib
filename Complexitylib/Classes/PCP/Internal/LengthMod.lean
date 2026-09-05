@@ -62,15 +62,15 @@ theorem ctrStep_iterate (n : ℕ) : ctrStep^[n] [] = List.replicate (n % 4) true
   | zero => rfl
   | succ m ih =>
       rw [Function.iterate_succ_apply', ih, ctrStep,
-        if_pos (replicate_mem_ctrVals (Nat.mod_lt _ (by norm_num)))]
+        ite_eq_left (replicate_mem_ctrVals (Nat.mod_lt _ (by norm_num)))]
       have hlen : (List.replicate (m % 4) true).length = m % 4 := List.length_replicate
       rw [hlen]
       by_cases h3 : m % 4 = 3
-      · rw [if_pos h3]
+      · rw [ite_eq_left h3]
         have : (m + 1) % 4 = 0 := by omega
         rw [this]
         rfl
-      · rw [if_neg h3]
+      · rw [ite_eq_right h3]
         have hm : (m + 1) % 4 = m % 4 + 1 := by
           have := Nat.mod_lt m (show 0 < 4 by norm_num)
           omega
@@ -110,11 +110,11 @@ theorem lenMod4_mem_P : lenMod4 ∈ P := by
   · refine mem_FP_of_eq (mem_FP_comp lenCtr_mem_FP ctrIsZero_mem_FP) fun z => ?_
     show ctrIsZero (lenCtr z) = _
     rw [lenCtr, ctrStep_iterate, ctrIsZero,
-      if_pos (replicate_mem_ctrVals (Nat.mod_lt _ (by norm_num)))]
+      ite_eq_left (replicate_mem_ctrVals (Nat.mod_lt _ (by norm_num)))]
     by_cases h : z.length % 4 = 0
     · rw [h]
-      simp [h]
-    · rw [if_neg (by
+      rfl
+    · rw [ite_eq_right (by
         intro hnil
         exact h (by
           have := congrArg List.length hnil

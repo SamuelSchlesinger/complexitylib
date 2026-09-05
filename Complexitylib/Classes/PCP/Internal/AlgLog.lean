@@ -75,9 +75,9 @@ theorem two_pow_rulerLen_le (n : ℕ) : 2 ^ rulerLen n ≤ 2 * n + 1 := by
   | succ n ih =>
       rw [rulerLen]
       by_cases h : n + 1 < 2 ^ rulerLen n
-      · rw [if_pos h]
+      · rw [ite_eq_left h]
         omega
-      · rw [if_neg h, pow_succ]
+      · rw [ite_eq_right h, pow_succ]
         omega
 
 theorem lt_two_pow_rulerLen (n : ℕ) : n < 2 ^ rulerLen n := by
@@ -86,9 +86,9 @@ theorem lt_two_pow_rulerLen (n : ℕ) : n < 2 ^ rulerLen n := by
   | succ n ih =>
       rw [rulerLen]
       by_cases h : n + 1 < 2 ^ rulerLen n
-      · rw [if_pos h]
+      · rw [ite_eq_left h]
         exact h
-      · rw [if_neg h, pow_succ]
+      · rw [ite_eq_right h, pow_succ]
         omega
 
 /-- **The ruler is at least the binary logarithm.** -/
@@ -184,7 +184,7 @@ theorem logFold_eq (bound : ℕ) : ∀ z : List Bool, 4 * z.length + 4 ≤ bound
       · rw [ifLtLen_pos (by simpa using h), List.length_cons,
           show rulerLen (t.length + 1) = rulerLen t.length from by
             rw [rulerLen]
-            exact if_pos (by omega)]
+            exact ite_eq_left (by omega)]
         refine List.take_of_length_le ?_
         rw [pair_length, List.length_replicate, List.length_replicate]
         have h1 := rulerLen_le t.length
@@ -193,7 +193,7 @@ theorem logFold_eq (bound : ℕ) : ∀ z : List Bool, 4 * z.length + 4 ≤ bound
       · rw [ifLtLen_neg (by simpa using h), List.length_cons,
           show rulerLen (t.length + 1) = rulerLen t.length + 1 from by
             rw [rulerLen]
-            exact if_neg (by omega),
+            exact ite_eq_right (by omega),
           ← List.replicate_add, ← two_mul, ← pow_succ', ← List.replicate_succ']
         refine List.take_of_length_le ?_
         rw [pair_length, List.length_replicate, List.length_replicate]
@@ -201,7 +201,7 @@ theorem logFold_eq (bound : ℕ) : ∀ z : List Bool, 4 * z.length + 4 ≤ bound
         have h2 := two_pow_rulerLen_le (t.length + 1)
         rw [show rulerLen (t.length + 1) = rulerLen t.length + 1 from by
           rw [rulerLen]
-          exact if_neg (by omega)] at h1 h2
+          exact ite_eq_right (by omega)] at h1 h2
         omega
 
 /-- The fold itself, on `pair W z`. -/

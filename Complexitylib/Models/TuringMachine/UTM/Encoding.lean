@@ -96,7 +96,7 @@ theorem normalize_step_comm (tm : TM n) (c : Cfg n tm.Q) :
       (tm.step c).map tm.normalizeCfg := by
   simp only [step, normalize, normalizeCfg]
   by_cases h : c.state = tm.qhalt
-  · simp [h, stateEquiv]
+  · simp [h, stateEquiv]; rfl
   · have hne : tm.stateEquiv c.state ≠ tm.stateEquiv tm.qhalt := by
       intro heq; exact h (tm.stateEquiv.injective heq)
     simp only [h, hne, ↓reduceIte, Option.map, Equiv.symm_apply_apply, normalizeCfg]

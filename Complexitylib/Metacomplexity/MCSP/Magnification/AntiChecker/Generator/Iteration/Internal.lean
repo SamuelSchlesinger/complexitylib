@@ -165,7 +165,7 @@ theorem counterRoundEstimate_eq_extensionEstimator_internal
         (truthTable target) (packTargetSamples target inputs) =
       family.extensionEstimator target (List.ofFn inputs) := by
   funext input
-  rw [counterRoundEstimate_truthTable_packTargetSamples_internal]
+  erw [counterRoundEstimate_truthTable_packTargetSamples_internal]
   unfold ApproximateCounterFamily.extensionEstimator
   split_ifs with hlength
   · let ExtensionData :=
@@ -231,8 +231,7 @@ theorem exists_eval_selectionPrefixCircuit_isEstimateSelectionTrace_internal
                 ((selectionPrefixCircuit family rounds
                   (selectionPrefixPriorBound hrounds)).2.eval
                     (truthTable target)) := by
-              simpa [counter] using
-                eval_selectionPrefixCircuit_succ_internal
+              simpa [counter] using! eval_selectionPrefixCircuit_succ_internal
                   family hrounds (truthTable target)
           _ = (selectionRoundStateCircuit counter).2.eval
                   (selectionTraceState target inputs) :=
@@ -252,8 +251,7 @@ theorem exists_eval_selectionPrefixCircuit_isEstimateSelectionTrace_internal
             counterRoundEstimate counter (truthTable target)
                 (packTargetSamples target inputs) =
               family.extensionEstimator target (List.ofFn inputs) := by
-          simpa [counter] using
-            counterRoundEstimate_eq_extensionEstimator_internal
+          simpa [counter] using! counterRoundEstimate_eq_extensionEstimator_internal
               family target inputs hrounds
         have hminimum' :
             AntiChecker.IsEstimateMinimizer
@@ -284,8 +282,10 @@ theorem unpackSample_selectionTraceState_projection_internal
           selectionSampleOutputMap arity rounds) sample =
       inputs sample := by
   funext coordinate
-  simp [unpackSample, selectionTraceState, selectionSampleOutputMap,
-    selectionRoundInput]
+  show Fin.append (truthTable target) (packTargetSamples target inputs)
+      (selectionSampleOutputMap arity rounds
+        (finProdFinEquiv (sample, coordinate))) = _
+  simp [selectionSampleOutputMap, Equiv.symm_apply_apply, Fin.append_right]
 
 theorem eval_fullSelectionSamplesCircuit_internal
     {overhead arity : ℕ} {beta : PositiveRationalScale} [NeZero arity]

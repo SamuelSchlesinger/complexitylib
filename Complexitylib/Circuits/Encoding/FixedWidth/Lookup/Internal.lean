@@ -76,7 +76,7 @@ theorem eval_select_internal {width count : Nat}
   rw [select, BoolFormula.eval_disjs]
   by_cases hvalue :
       (evaluatedWord word assignment).unsignedValue < count
-  · rw [dif_pos hvalue]
+  · rw [dite_eq_left hvalue]
     apply Bool.eq_iff_iff.mpr
     constructor
     · intro hselected
@@ -105,11 +105,9 @@ theorem eval_select_internal {width count : Nat}
       · simp only [candidate, BoolFormula.eval, Bool.and_eq_true,
           eval_wordEqual_internal, decide_eq_true_eq]
         constructor
-        · simpa [BitString.unsignedValue] using
-            (GateSlot.referenceBits_fromBitsLE_internal
-              (evaluatedWord word assignment)).symm
+        · exact (GateSlot.referenceBits_fromBitsLE_internal (evaluatedWord word assignment)).symm
         · exact hselected
-  · rw [dif_neg hvalue]
+  · rw [dite_eq_right hvalue]
     apply Bool.eq_false_of_not_eq_true
     intro hselected
     rw [List.any_eq_true] at hselected

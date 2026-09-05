@@ -71,13 +71,13 @@ theorem Formula.evalB_eq_sat (A : DecFinStruct V) :
   | disj φ ψ ihφ ihψ => intro σ; simp only [Formula.evalB, Formula.Sat, Bool.or_eq_true, ihφ, ihψ]
   | exist φ ih =>
     intro σ
-    rw [Formula.evalB, Formula.Sat, List.any_eq_true]
+    simp only [Formula.evalB, Formula.Sat, List.any_eq_true]
     constructor
     · rintro ⟨a, _, ha⟩; exact ⟨a, (ih _).mp ha⟩
     · rintro ⟨a, ha⟩; exact ⟨a, List.mem_finRange a, (ih _).mpr ha⟩
   | all φ ih =>
     intro σ
-    rw [Formula.evalB, Formula.Sat, List.all_eq_true]
+    simp only [Formula.evalB, Formula.Sat, List.all_eq_true]
     constructor
     · intro h a; exact (ih _).mp (h a (List.mem_finRange a))
     · intro h a _; exact (ih _).mpr (h a)

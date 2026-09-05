@@ -86,7 +86,7 @@ theorem acceptStep_pack (k : ℕ) (qcode R ruler flag rest : List Bool) :
   by_cases hle : (wideRuler (codeBlocks k) R).length ≤ rest.length
   · rw [acceptPairStep, anyStepPair_pos _ (acceptFlag qcode R ruler) (flag, rest) hle,
       Cobham.selectHead,
-      if_pos (by
+      ite_eq_left (by
         rw [(Cobham.lenLeFlag_eq_true_iff rest (wideRuler (codeBlocks k) R)).mpr hle]
         rfl)]
     rfl
@@ -97,7 +97,7 @@ theorem acceptStep_pack (k : ℕ) (qcode R ruler flag rest : List Bool) :
       · rw [Cobham.lenLeFlag_eq_true_iff] at h
         omega
       · exact h
-    rw [if_neg (by rw [hflag]; simp), if_pos (by rw [hflag]; rfl)]
+    rw [ite_eq_right (by rw [hflag]; simp), ite_eq_left (by rw [hflag]; rfl)]
     rfl
 
 /-- **The packed iteration is the unpacked one.** -/
@@ -160,12 +160,12 @@ theorem acceptStep_mem_FP (k : ℕ) (qcode : List Bool) : acceptStep k qcode ∈
       (fun z => pairFst (a z)) ∈ FP := by
     intro a ha
     have := mem_FP_comp ha Cobham.fstBlock_mem_FP
-    simpa [Function.comp] using this
+    exact this
   have hsnd : ∀ {a : List Bool → List Bool}, a ∈ FP →
       (fun z => pairSnd (a z)) ∈ FP := by
     intro a ha
     have := mem_FP_comp ha Cobham.sndBlock_mem_FP
-    simpa [Function.comp] using this
+    exact this
   have hhead := hfst hid
   have hR := hfst hhead
   have hruler := hsnd hhead

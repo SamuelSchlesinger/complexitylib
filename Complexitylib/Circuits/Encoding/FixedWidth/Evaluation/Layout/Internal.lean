@@ -30,7 +30,7 @@ theorem sizeAt_eq_internal {inputWidth gateBound : Nat}
     sizeAt inputWidth gateBound slot.val =
       GateFormula.gateSize inputWidth gateBound slot := by
   unfold sizeAt
-  rw [dif_pos slot.isLt]
+  rw [dite_eq_left slot.isLt]
 
 theorem prefixSize_succ_internal (inputWidth gateBound count : Nat) :
     prefixSize inputWidth gateBound (count + 1) =

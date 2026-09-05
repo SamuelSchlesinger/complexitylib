@@ -130,7 +130,8 @@ theorem programDecisionTM_hoareTime_run_internal
       hinitInputParked.read_ne_start
       (fun i => (hinitWorkParked i).read_ne_start)
       hinitOutputParked.read_ne_start
-    simpa only [hi, hw, ho] using htailReach
+    simp only [hi, hw, ho]
+    exact htailReach
   have hreach := TM.seqTM_reachesIn_of_reachesIn
     (programInitTM tapes)
     (TM.seqTM (programLoopTM tapes program) (programOutputTM tapes))
@@ -142,9 +143,8 @@ theorem programDecisionTM_hoareTime_run_internal
   · unfold programDecisionTime
     dsimp only [initial, final] at hloopTime houtputTime ⊢
     omega
-  · change (programDecisionTM tapes program).halted done
-    unfold programDecisionTM
-    rw [TM.phase2Wrap_halted_iff]
+  · unfold programDecisionTM
+    erw [TM.phase2Wrap_halted_iff]
     exact htailHalt
   · change outputDone.output = registerVerdictOutput
         (RegisterStore.read final.store 0)

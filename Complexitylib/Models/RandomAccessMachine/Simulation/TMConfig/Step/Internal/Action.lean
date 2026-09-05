@@ -177,7 +177,7 @@ private theorem writeOps_cells (n bound : ℕ) (slot : Fin (n + 2))
     (configReg_ne_address hreg) (configReg_ne_value hreg)]
   rw [hstoreHead]
   by_cases hheadZero : tape.head = 0
-  · rw [Tape.write, if_pos hheadZero]
+  · rw [Tape.write, ite_eq_left hheadZero]
     by_cases hpositionZero : position.val = 0
     · rw [hheadZero, hpositionZero, Nat.add_zero, Function.update_self, hstart]
     · have htarget :
@@ -187,7 +187,7 @@ private theorem writeOps_cells (n bound : ℕ) (slot : Fin (n + 2))
           cellBase n bound slot + position.val ≠ cellBase n bound slot := by
         omega
       rw [Function.update_of_ne hbase, Function.update_of_ne htarget, hstoreCell]
-  · rw [Tape.write, if_neg hheadZero]
+  · rw [Tape.write, ite_eq_right hheadZero]
     change Function.update
         (Function.update store (cellBase n bound slot + tape.head) (writeCode write))
           (cellBase n bound slot) (symbolCode Γ.start)
@@ -500,7 +500,7 @@ private theorem represents_of_named_tapes {tm : TM n} {bound : ℕ}
   · rcases state with ⟨state, hstateFin⟩
     have hzero : state = 0 := by omega
     subst state
-    simpa [fieldReg_state_internal, fieldValue] using hstate
+    exact hstate
   · rcases headOrCell with head | cell
     · change store (headReg head) = (tapeAt cfg head).head
       by_cases hinputSlot : head = inputTape n
@@ -622,7 +622,7 @@ private theorem actionPrelude_workPrefix {tm : TM n} {bound : ℕ}
       Function.update_of_ne honeReg] using hone
   have hinputStore : RepresentsTape bound (inputTape n) cfg.input store := by
     have htape := Represents.tape hrepresents (inputTape n)
-    simpa [inputTape] using htape
+    simpa [tapeAt, inputTape] using htape
   have hinputInitialized :
       RepresentsTape bound (inputTape n) cfg.input initialized :=
     hinputStore.stateUpdate bound (inputTape n) cfg.input store
@@ -718,7 +718,7 @@ private theorem workPrefix_list {tm : TM n} {bound : ℕ}
         (items.flatMap (fun i => writeMoveOps n bound (workTape i)
           (workWrites i) (workDirections i))) store) := by
   induction items generalizing processed store with
-  | nil => simpa using hprefix
+  | nil => simpa [Structured.Basic.execList] using hprefix
   | cons i rest ih =>
       have hinot : i ∉ processed := hfresh i (by simp)
       have hnext := workPrefix_step hprefix i hinot (hheads i) (hstarts i)
@@ -749,7 +749,7 @@ theorem actionOps_represents_internal {tm : TM n} {bound : ℕ}
       (fun i => (cfg.work i).read) cfg.output.read with
     ⟨nextState, workWrites, outputWrite, inputDirection,
       workDirections, outputDirection⟩
-  rw [TM.step, if_neg hnotHalted, hdelta] at hstep
+  rw [TM.step, ite_eq_right hnotHalted, hdelta] at hstep
   dsimp only at hstep
   injection hstep with hnext
   subst next
@@ -988,7 +988,8 @@ private theorem writeOps_envelopeChain (tm : TM n) (bound : ℕ)
     apply hstored.execBasic
     · exact hbaseLt
     · simpa [Structured.Internal.Basic.writeValue] using hstartBound
-  simpa [writeOps, first, addressed, valued, stored, final] using
+  simpa [StepEnvelopeChain, Structured.Internal.Basic.EnvelopeChain, writeOps, first, addressed,
+    valued, stored, final] using
     And.intro henvelope (And.intro hfirst
       (And.intro haddressed (And.intro hvalued (And.intro hstored hfinal))))
 
@@ -1030,7 +1031,7 @@ private theorem workPrefix_list_envelope {tm : TM n} {bound : ℕ}
         (items.reverse ++ processed) (Structured.Basic.execList ops store) ∧
       StepEnvelopeChain tm bound ops store := by
   induction items generalizing processed store with
-  | nil => exact ⟨by simpa using hprefix, henvelope⟩
+  | nil => exact ⟨by simpa [Structured.Basic.execList] using hprefix, henvelope⟩
   | cons i rest ih =>
       have hinot : i ∉ processed := hfresh i (by simp)
       have hselected : RepresentsTape bound (workTape i) (cfg.work i) store := by
@@ -1091,7 +1092,7 @@ private theorem actionOps_envelopeChain_internal {tm : TM n} {bound : ℕ}
       [.imm 0 (stateCode tm nextState)] store := ⟨henvelope, hinitialized⟩
   have hinputStore : RepresentsTape bound (inputTape n) cfg.input store := by
     have htape := Represents.tape hrepresents (inputTape n)
-    simpa [inputTape] using htape
+    exact htape
   have hinputHead : initialized (headReg (inputTape n)) ≤ bound := by
     have hhead := hheads (inputTape n)
     rw [show tapeAt cfg (inputTape n) = cfg.input by

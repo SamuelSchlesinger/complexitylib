@@ -65,8 +65,13 @@ theorem initFragment_topologicallyWellFormed_internal (tm : NTM k)
   intro i
   have hgate :
       ((initFragment tm T n available layout).get i).WellFormedAt available := by
-    simp only [initFragment, List.get_eq_getElem, List.getElem_map]
-    exact InitSource.gate_wellFormedAt _
+    have hi : (i : ℕ) < (configAtoms tm T).length := by
+      simpa [initFragment] using i.isLt
+    have hmap : (initFragment tm T n available layout).get i
+        = (initSource tm T n available layout ((configAtoms tm T)[(i : ℕ)]'hi)).gate := by
+      simp only [List.get_eq_getElem]; exact List.getElem_map _
+    rw [hmap]
+    exact InitSource.gate_wellFormedAt (available := available) _
   unfold RawGate.WellFormedAt at hgate ⊢
   omega
 
@@ -181,7 +186,7 @@ theorem evalAux?_sourceGates_internal (available : ℕ) [NeZero available]
           rw [hresultSize]
           omega
         have hine : i ≠ result.size := by omega
-        simp only [final, Array.getElem?_push, if_neg hine]
+        simp only [final, Array.getElem?_push, ite_eq_right hine]
         exact hprefix i hi
       · intro j hj
         have hjbound : j < sources.length + 1 := by simpa using hj
@@ -189,7 +194,7 @@ theorem evalAux?_sourceGates_internal (available : ℕ) [NeZero available]
         · have hjresult : available + j < result.size := by omega
           rw [show (sources ++ [source])[j]'hj = sources[j]'hbefore by
             exact List.getElem_append_left hbefore]
-          simp only [final, Array.getElem?_push, if_neg (Nat.ne_of_lt hjresult)]
+          simp only [final, Array.getElem?_push, ite_eq_right (Nat.ne_of_lt hjresult)]
           exact houtputs j hbefore
         · have hjlast : j = sources.length := by omega
           subst j

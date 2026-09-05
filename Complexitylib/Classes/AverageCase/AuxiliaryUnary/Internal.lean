@@ -234,7 +234,8 @@ theorem sample_eq_pair_iff_internal {m n : ℕ} (hn : n < m)
     apply congrArg₂ pair
     · unfold binary
       apply List.ofFn_inj.mpr
-      simpa only [binaryBits] using hbits
+      simp only [binaryBits]
+      exact hbits
     · rfl
 
 end AuxiliaryUnarySeed
@@ -246,8 +247,8 @@ theorem mass_auxiliaryUnary_pair_internal {m n : ℕ} (hn : n < m)
     auxiliaryUnary.mass m
         (pair (List.ofFn x) (List.replicate (m - n) true)) =
       1 / ((m : ℚ) * (2 : ℚ) ^ n) := by
-  letI := auxiliaryUnary.seedFintype m
-  letI := auxiliaryUnary.seedDecidableEq m
+  let := auxiliaryUnary.seedFintype m
+  let := auxiliaryUnary.seedDecidableEq m
   change
     uniformProbability
         (Finset.univ.filter fun seed : AuxiliaryUnarySeed m =>

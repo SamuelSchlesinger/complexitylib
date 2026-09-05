@@ -211,10 +211,10 @@ private theorem denseStoreUpdate_ready
     tapes.update.ne (by decide)
   refine ⟨hscanner, ?_, ?_, ?_, ?_, hscanner.parked⟩
   · simpa only [updateWork, Function.update_self] using hvalueNat
-  · simpa only [updateWork, Function.update_of_ne hremainingReplacement,
-      queryWork, Function.update_of_ne hremainingQuery] using hrhs.count
-  · simpa only [updateWork, Function.update_of_ne hfoundReplacement,
-      queryWork, Function.update_of_ne hfoundQuery] using hrhs.copyScratch
+  · simp only [Function.update_of_ne hremainingReplacement, Function.update_of_ne hremainingQuery]
+    exact hrhs.count
+  · simp only [Function.update_of_ne hfoundReplacement, Function.update_of_ne hfoundQuery]
+    exact hrhs.copyScratch
   · simpa only [updateWork, Function.update_of_ne hresultCountReplacement,
       queryWork, Function.update_of_ne hresultCountQuery] using hresultCount
 
@@ -277,8 +277,8 @@ theorem denseIndirectStoreInstructionTM_hoareTime_frame
       out (by simpa [address] using hvalues.1)
       ⟨(by rcases hops with ⟨_, _, hrhs⟩; exact hrhs.scanner.queryStart),
         (by rcases hops with ⟨_, _, hrhs⟩;
-            simpa using hrhs.scanner.query)⟩
-      hvalues.2.2.1 (by simpa [hinp] using hinput)
+            exact hrhs.scanner.query)⟩
+      hvalues.2.2.1 (by simp [hinp]; exact hinput)
       (fun i _ _ _ => hvalues.2.2.2 i)
       (by simpa [hout] using houtputParked)
     obtain ⟨final, time, htime, hreach, hhalt, hfinalInput,

@@ -144,7 +144,8 @@ private theorem binaryLengthTM_scan_bit_step (x : List Bool)
       exact Γ.ofBool_ne_blank _)
     (fun i => binaryLengthWork_read_ne_start counterIdx value i)
     binaryLengthStartedBlank_read_ne_start
-  simpa [binaryLengthTM, binaryLengthScanCfg, binaryLengthBodyStartCfg,
+  simpa [binaryLengthTM, Experimental.binaryLengthRoutine, Experimental.Routine.lower,
+    Cfg.WithinAuxSpace, binaryLengthScanCfg, binaryLengthBodyStartCfg,
     forInputBodyWrap, binaryLengthInput, Tape.move] using hstep
 
 private theorem binaryLengthTM_scan_blank_step (x : List Bool)
@@ -159,7 +160,8 @@ private theorem binaryLengthTM_scan_blank_step (x : List Bool)
       exact binaryLengthInput_read_blank x)
     (fun i => binaryLengthWork_read_ne_start counterIdx x.length i)
     binaryLengthStartedBlank_read_ne_start
-  simpa [binaryLengthTM, binaryLengthScanCfg, binaryLengthDoneCfg] using hstep
+  simpa [binaryLengthTM, Experimental.binaryLengthRoutine, Experimental.Routine.lower,
+    Cfg.WithinAuxSpace, binaryLengthScanCfg, binaryLengthDoneCfg] using hstep
 
 private theorem binaryLengthTM_body_run (x : List Bool)
     (counterIdx : Fin n) (value : ℕ) :
@@ -201,7 +203,8 @@ private theorem binaryLengthTM_loopback_step (x : List Bool)
     (binaryLengthInput_read_ne_start x (value + 2) (by omega))
     (fun i => binaryLengthWork_read_ne_start counterIdx (value + 1) i)
     binaryLengthStartedBlank_read_ne_start
-  simpa [binaryLengthTM, binaryLengthBodyDoneCfg, binaryLengthScanCfg,
+  simpa [binaryLengthTM, Experimental.binaryLengthRoutine, Experimental.Routine.lower,
+    Cfg.WithinAuxSpace, binaryLengthBodyDoneCfg, binaryLengthScanCfg,
     forInputBodyWrap, Nat.add_assoc, Nat.add_comm, Nat.add_left_comm] using hstep
 
 private def binaryLengthLoopSpec (x : List Bool) (counterIdx : Fin n) :
@@ -217,7 +220,8 @@ private def binaryLengthLoopSpec (x : List Bool) (counterIdx : Fin n) :
   scanStep := fun value hvalue =>
     binaryLengthTM_scan_bit_step x counterIdx value hvalue
   bodyRun := fun value _ => by
-    simpa [binaryLengthTM, Experimental.binaryLengthRoutine,
+    simpa [binaryLengthTM, Experimental.binaryLengthRoutine, Experimental.Routine.lower,
+      Cfg.WithinAuxSpace, Experimental.binaryLengthRoutine,
       Experimental.Routine.lower] using
       forInputTM_body_reachesIn_internal (binarySuccTM counterIdx)
         (binaryLengthTM_body_run x counterIdx value)
@@ -253,7 +257,8 @@ private theorem binaryLengthDoneCfg_withinAuxSpace (x : List Bool)
     (counterIdx : Fin n) :
     (binaryLengthDoneCfg x counterIdx).WithinAuxSpace x.length
       (binaryLengthSpace x.length) := by
-  simpa [binaryLengthDoneCfg, binaryLengthScanCfg] using
+  simpa [binaryLengthTM, Experimental.binaryLengthRoutine, Experimental.Routine.lower,
+    Cfg.WithinAuxSpace, binaryLengthDoneCfg, binaryLengthScanCfg] using
     binaryLengthScanCfg_withinAuxSpace x counterIdx x.length le_rfl
 
 private theorem binaryLengthBodyStartCfg_withinAuxSpace (x : List Bool)
@@ -298,7 +303,7 @@ private theorem binaryLengthBodyPrefix_withinAuxSpace (x : List Bool)
     _ = binaryLengthSpace x.length := by
       simp [binaryLengthSpace]
 
-private def binaryLengthLoopSpaceSpec (x : List Bool) (counterIdx : Fin n) :
+private theorem binaryLengthLoopSpaceSpec (x : List Bool) (counterIdx : Fin n) :
     ForInputLoopSpaceSpec (binaryLengthLoopSpec x counterIdx) x.length
       (binaryLengthSpace x.length) where
   scanWithin := fun value hvalue =>
@@ -316,7 +321,8 @@ private def binaryLengthLoopSpaceSpec (x : List Bool) (counterIdx : Fin n) :
     have hc := (forInputTM (binarySuccTM counterIdx)).reachesIn_right_unique
       hreach hcanonical
     rw [hc]
-    simpa [forInputBodyWrap] using
+    simpa [binaryLengthTM, Experimental.binaryLengthRoutine, Experimental.Routine.lower,
+      Cfg.WithinAuxSpace, forInputBodyWrap] using
       binaryLengthBodyPrefix_withinAuxSpace x counterIdx value t d
         hvalue hprefix
 
@@ -327,7 +333,8 @@ private theorem binaryLengthTM_loop (x : List Bool) (counterIdx : Fin n) :
         (binaryLengthScanCfg x counterIdx value)
         (binaryLengthDoneCfg x counterIdx) := by
   intro count value hlength
-  simpa [binaryLengthTM, Experimental.binaryLengthRoutine,
+  simpa [binaryLengthTM, Experimental.binaryLengthRoutine, Experimental.Routine.lower,
+    Cfg.WithinAuxSpace, Experimental.binaryLengthRoutine,
     Experimental.Routine.lower,
     binaryLengthLoopTime, binaryLengthLoopSpec] using
     (binaryLengthLoopSpec x counterIdx).reachesIn_internal
@@ -344,7 +351,8 @@ private theorem binaryLengthTM_loop_withinAuxSpace (x : List Bool)
   intro count value t c hlength hreach htime
   have hreach' : (forInputTM (binarySuccTM counterIdx)).reachesIn t
       ((binaryLengthLoopSpec x counterIdx).scanCfg value) c := by
-    simpa [binaryLengthTM, Experimental.binaryLengthRoutine,
+    simpa [binaryLengthTM, Experimental.binaryLengthRoutine, Experimental.Routine.lower,
+      Cfg.WithinAuxSpace, Experimental.binaryLengthRoutine,
       Experimental.Routine.lower,
       binaryLengthLoopSpec] using hreach
   exact (binaryLengthLoopSpaceSpec x counterIdx).prefix_withinAuxSpace_internal
@@ -430,7 +438,8 @@ theorem binaryLengthTM_reachesIn_frame_internal (counterIdx : Fin n)
     rw [binaryLengthWork_counter]
     exact binaryLengthCounterTape_hasBinaryNat x.length
   · intro i hi
-    simpa [binaryLengthStartedBlank] using
+    simpa [binaryLengthTM, Experimental.binaryLengthRoutine, Experimental.Routine.lower,
+      Cfg.WithinAuxSpace, binaryLengthDoneCfg, binaryLengthStartedBlank] using
       binaryLengthWork_other counterIdx x.length i hi
 
 theorem binaryLengthTM_hoareTime_internal (counterIdx : Fin n)
@@ -456,7 +465,8 @@ theorem binaryLengthTM_hoareTime_internal (counterIdx : Fin n)
     rw [binaryLengthWork_counter]
     exact binaryLengthCounterTape_hasBinaryNat x.length
   · intro i hi
-    simpa [binaryLengthStartedBlank] using
+    simpa [binaryLengthTM, Experimental.binaryLengthRoutine, Experimental.Routine.lower,
+      Cfg.WithinAuxSpace, binaryLengthDoneCfg, binaryLengthStartedBlank] using
       binaryLengthWork_other counterIdx x.length i hi
 
 theorem binaryLengthTM_hoareTimeSpace_internal (counterIdx : Fin n)

@@ -47,7 +47,8 @@ theorem getElem_writtenCellSuffixGates_internal
       [writtenCellSuffixGate stateCount tapeCount T configBase available
         tapeIndex position symbolIndex effectSize phase]) (by simp)
       phase.val 0 phase.isLt (by omega)
-  simpa using hget
+  simp only [Nat.mul_one, Nat.add_zero, List.getElem_cons_zero] at hget
+  exact hget
 
 theorem length_writtenCellSchedule_internal
     (caseCount stateCount workCount T configBase choiceWire available tapeIndex
@@ -100,7 +101,7 @@ theorem getElem_writtenCellSchedule_effect_internal
           rw [length_effectFormulaSchedule]
           exact offset.isLt) := by
   unfold writtenCellSchedule
-  rw [List.getElem_append_right]
+  erw [List.getElem_append_right]
   · simp only [List.length_singleton]
     have hindex : offset.val + 1 - 1 = offset.val := by omega
     simp only [hindex]
@@ -135,7 +136,7 @@ theorem getElem_writtenCellSchedule_suffix_internal
       configBase choiceWire (available + 1) selectedAt choiceAt stateIndexAt
       inputSymbolIndexAt outputSymbolIndexAt workSymbolIndexAt
   unfold writtenCellSchedule
-  rw [List.getElem_append_right]
+  erw [List.getElem_append_right]
   · simp only [List.length_singleton]
     rw [List.getElem_append_right]
     · simp only [heffectLength]
@@ -174,8 +175,8 @@ private theorem size_writtenCellEffectFormula_eq_effectSize
     decide ((effect.write tape).toΓ = symbol)
   have hlength := congrArg List.length
     (compileRaw_effectFormula_eq_schedule tm T configBase choiceWire 0 selects)
-  simpa only [BoolFormula.length_compileRaw, length_effectFormulaSchedule] using
-    hlength
+  simp only [BoolFormula.length_compileRaw, length_effectFormulaSchedule] at hlength ⊢
+  exact hlength
 
 theorem compileRaw_writtenCellFormula_eq_schedule_internal
     (tm : NTM k) (T configBase choiceWire available : ℕ)

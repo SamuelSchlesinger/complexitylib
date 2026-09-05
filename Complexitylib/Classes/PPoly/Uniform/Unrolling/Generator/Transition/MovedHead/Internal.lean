@@ -61,15 +61,15 @@ private theorem CaseFormulaClean.movedHeadConjunctionClean
     { temporary₃ := ?_, polynomialScratch := ?_, multiplyCounter := ?_,
       addCounter := ?_, copyCounter := ?_, loop₃ := ?_, emitCounter := ?_,
       reference₀ := ?_, reference₁ := ?_ }
-  · simpa using hclean.temporary₃
-  · simpa using hclean.polynomialScratch
-  · simpa using hclean.multiplyCounter
-  · simpa using hclean.addCounter
-  · simpa using hclean.copyCounter
-  · simpa using hclean.loop₃
-  · simpa using hclean.emitCounter
-  · simpa using hclean.reference₀
-  · simpa using hclean.reference₁
+  · simpa using! hclean.temporary₃
+  · simpa using! hclean.polynomialScratch
+  · simpa using! hclean.multiplyCounter
+  · simpa using! hclean.addCounter
+  · simpa using! hclean.copyCounter
+  · simpa using! hclean.loop₃
+  · simpa using! hclean.emitCounter
+  · simpa using! hclean.reference₀
+  · simpa using! hclean.reference₁
 
 private theorem CaseFormulaClean.updateMovedHeadOuter
     {values : BinaryValues WorkCount} (hclean : CaseFormulaClean values)
@@ -101,7 +101,7 @@ private theorem CaseFormulaClean.updateMovedHeadOuter
         symbolIndex := ?_ }
   all_goals
     simp only [Function.update_apply]
-    rw [if_neg (by decide)]
+    rw [ite_eq_right (by decide)]
     first
     | exact hclean.position
     | exact hclean.loop₀
@@ -868,34 +868,34 @@ private theorem CaseFormulaClean.movedHeadMemberResult
     refine
       { toReadFormulaClean :=
           { position := rfl,
-            loop₀ := by simpa [movedHeadMemberResult] using hclean.loop₀,
-            limit₀ := by simpa [movedHeadMemberResult] using hclean.limit₀,
+            loop₀ := by simpa [movedHeadMemberResult] using! hclean.loop₀,
+            limit₀ := by simpa [movedHeadMemberResult] using! hclean.limit₀,
             reference₀ := by
-              simpa [movedHeadMemberResult] using hclean.reference₀,
+              simpa [movedHeadMemberResult] using! hclean.reference₀,
             reference₁ := by
-              simpa [movedHeadMemberResult] using hclean.reference₁,
+              simpa [movedHeadMemberResult] using! hclean.reference₁,
             emitCounter := by
-              simpa [movedHeadMemberResult] using hclean.emitCounter,
+              simpa [movedHeadMemberResult] using! hclean.emitCounter,
             copyCounter := by
-              simpa [movedHeadMemberResult] using hclean.copyCounter,
+              simpa [movedHeadMemberResult] using! hclean.copyCounter,
             multiplyCounter := by
-              simpa [movedHeadMemberResult] using hclean.multiplyCounter,
+              simpa [movedHeadMemberResult] using! hclean.multiplyCounter,
             addCounter := by
-              simpa [movedHeadMemberResult] using hclean.addCounter,
+              simpa [movedHeadMemberResult] using! hclean.addCounter,
             temporary₀ := by
-              simpa [movedHeadMemberResult] using hclean.temporary₀,
+              simpa [movedHeadMemberResult] using! hclean.temporary₀,
             temporary₁ := by
-              simpa [movedHeadMemberResult] using hclean.temporary₁,
+              simpa [movedHeadMemberResult] using! hclean.temporary₁,
             temporary₂ := by
-              simpa [movedHeadMemberResult] using hclean.temporary₂ },
-        loop₃ := by simpa [movedHeadMemberResult] using hclean.loop₃,
+              simpa [movedHeadMemberResult] using! hclean.temporary₂ },
+        loop₃ := by simpa [movedHeadMemberResult] using! hclean.loop₃,
         temporary₃ := by
-          simpa [movedHeadMemberResult] using hclean.temporary₃,
+          simpa [movedHeadMemberResult] using! hclean.temporary₃,
         polynomialScratch := by
-          simpa [movedHeadMemberResult] using hclean.polynomialScratch,
+          simpa [movedHeadMemberResult] using! hclean.polynomialScratch,
         tapeIndex := rfl,
         symbolIndex := by
-          simpa [movedHeadMemberResult] using hclean.symbolIndex }
+          simpa [movedHeadMemberResult] using! hclean.symbolIndex }
 
 theorem emitMovedHeadFormula_sound_internal (tm : NTM k)
     (tape : TapeSlot k) :
@@ -979,21 +979,20 @@ theorem emitMovedHeadFormula_requires_internal (tm : NTM k)
       (emitMovedHeadMember tm tape .left 0 Work.savedOutput).effect start =
         left := by
     simpa [left, effect₀, selected, choice, start, movedHeadStartValues,
-      Work.horizon] using
-        emitMovedHeadMember_effect_internal tm tape .left 0 Work.savedOutput
+      Work.horizon] using! emitMovedHeadMember_effect_internal tm tape .left 0 Work.savedOutput
           start hstartClean (by
-            simpa [start, movedHeadStartValues, Work.loop₁] using hclean.loop₁)
-          (by simpa [start, movedHeadStartValues, Work.horizon] using hhorizon)
+            simpa [start, movedHeadStartValues, Work.loop₁] using! hclean.loop₁)
+          (by simpa [start, movedHeadStartValues, Work.horizon] using! hhorizon)
           (by simpa [start, movedHeadStartValues, Work.limit₂, Work.position,
               Work.horizon] using htarget)
-          (by simpa [start, movedHeadStartValues, Work.available] using havailable)
+          (by simpa [start, movedHeadStartValues, Work.available] using! havailable)
   have hrightEffect :
       (emitMovedHeadMember tm tape .right 1 Work.direction).effect left =
         right := by
     simpa [right, effect₁, selected, choice, left, start,
       movedHeadMemberResult, movedHeadStartValues, Work.horizon,
-      Work.available, Work.position, Work.tapeIndex, Work.limit₂] using
-        emitMovedHeadMember_effect_internal tm tape .right 1 Work.direction
+      Work.available, Work.position, Work.tapeIndex, Work.limit₂]
+        using! emitMovedHeadMember_effect_internal tm tape .right 1 Work.direction
           left hleftClean (by
             simpa [left, start, movedHeadMemberResult, movedHeadStartValues,
               Work.loop₁, Work.available, Work.savedOutput, Work.position,
@@ -1012,8 +1011,8 @@ theorem emitMovedHeadFormula_requires_internal (tm : NTM k)
         stay := by
     simpa [stay, effect₂, selected, choice, right, left, start,
       movedHeadMemberResult, movedHeadStartValues, Work.horizon,
-      Work.available, Work.position, Work.tapeIndex, Work.limit₂] using
-        emitMovedHeadMember_effect_internal tm tape .stay 2 Work.atomKind
+      Work.available, Work.position, Work.tapeIndex, Work.limit₂]
+        using! emitMovedHeadMember_effect_internal tm tape .stay 2 Work.atomKind
           right hrightClean (by
             simpa [right, left, start, movedHeadMemberResult,
               movedHeadStartValues, Work.loop₁, Work.available,
@@ -1037,24 +1036,22 @@ theorem emitMovedHeadFormula_requires_internal (tm : NTM k)
         connector₀ := by
     simpa [connector₀] using emitSavedMovedHeadConnector_effect_internal
       Work.atomKind identity
-        (by simpa [identity] using hstayClean.reference₁)
-        (by simpa [identity] using hstayClean.emitCounter)
+        (by simpa [identity] using! hstayClean.reference₁)
+        (by simpa [identity] using! hstayClean.emitCounter)
   have hconnector₁Effect :
       (emitSavedMovedHeadConnector Work.direction).effect connector₀ =
         connector₁ := by
     simpa [connector₁] using emitSavedMovedHeadConnector_effect_internal
       Work.direction connector₀
-        (by simpa [connector₀, identity] using hstayClean.reference₁)
-        (by simpa [connector₀, identity] using hstayClean.emitCounter)
+        (by simpa [connector₀, identity] using! hstayClean.reference₁)
+        (by simpa [connector₀, identity] using! hstayClean.emitCounter)
   have hconnector₂Effect :
       (emitSavedMovedHeadConnector Work.savedOutput).effect connector₁ =
         connector₂ := by
     simpa [connector₂] using emitSavedMovedHeadConnector_effect_internal
       Work.savedOutput connector₁
-        (by simpa [connector₁, connector₀, identity] using
-          hstayClean.reference₁)
-        (by simpa [connector₁, connector₀, identity] using
-          hstayClean.emitCounter)
+        (by simpa [connector₁, connector₀, identity] using! hstayClean.reference₁)
+        (by simpa [connector₁, connector₀, identity] using! hstayClean.emitCounter)
   have hcopyStart :
       (BinaryRoutine.binaryCopy Work.position Work.limit₂
         Work.copyCounter).requires values := by
@@ -1062,11 +1059,11 @@ theorem emitMovedHeadFormula_requires_internal (tm : NTM k)
     simpa [Work.position, Work.copyCounter] using hclean.caseClean.copyCounter
   have hleftRequires := emitMovedHeadMember_requires_internal tm tape .left 0
     Work.savedOutput start hstartClean (by
-      simpa [start, movedHeadStartValues, Work.loop₁] using hclean.loop₁)
-    (by simpa [start, movedHeadStartValues, Work.horizon] using hhorizon)
+      simpa [start, movedHeadStartValues, Work.loop₁] using! hclean.loop₁)
+    (by simpa [start, movedHeadStartValues, Work.horizon] using! hhorizon)
     (by simpa [start, movedHeadStartValues, Work.limit₂, Work.position,
         Work.horizon] using htarget)
-    (by simpa [start, movedHeadStartValues, Work.available] using havailable)
+    (by simpa [start, movedHeadStartValues, Work.available] using! havailable)
     (Or.inl rfl)
   have hrightRequires := emitMovedHeadMember_requires_internal tm tape .right 1
     Work.direction left hleftClean (by
@@ -1099,23 +1096,21 @@ theorem emitMovedHeadFormula_requires_internal (tm : NTM k)
   have hidentityRequires := emitConstantGate_requires_internal false stay
     hstayClean.emitCounter
   have hconnector₀Requires := emitSavedMovedHeadConnector_requires_internal
-    Work.atomKind identity (by simpa [identity] using hstayClean.copyCounter)
-    (by simpa [identity] using hstayClean.emitCounter)
+    Work.atomKind identity (by simpa [identity] using! hstayClean.copyCounter)
+    (by simpa [identity] using! hstayClean.emitCounter)
     (by simp [identity, stay, right, left, start, movedHeadMemberResult,
         movedHeadStartValues, Work.available]) (Or.inr (Or.inr rfl))
   have hconnector₁Requires := emitSavedMovedHeadConnector_requires_internal
     Work.direction connector₀
-    (by simpa [connector₀, identity] using hstayClean.copyCounter)
-    (by simpa [connector₀, identity] using hstayClean.emitCounter)
+    (by simpa [connector₀, identity] using! hstayClean.copyCounter)
+    (by simpa [connector₀, identity] using! hstayClean.emitCounter)
     (by simp [connector₀, identity, stay, right, left, start,
         movedHeadMemberResult, movedHeadStartValues, Work.available])
     (Or.inr (Or.inl rfl))
   have hconnector₂Requires := emitSavedMovedHeadConnector_requires_internal
     Work.savedOutput connector₁
-    (by simpa [connector₁, connector₀, identity] using
-      hstayClean.copyCounter)
-    (by simpa [connector₁, connector₀, identity] using
-      hstayClean.emitCounter)
+    (by simpa [connector₁, connector₀, identity] using! hstayClean.copyCounter)
+    (by simpa [connector₁, connector₀, identity] using! hstayClean.emitCounter)
     (by
       simp [connector₁, connector₀, identity, stay, right, left,
         start, movedHeadMemberResult, movedHeadStartValues, Work.available])
@@ -1132,8 +1127,7 @@ theorem emitMovedHeadFormula_requires_internal (tm : NTM k)
     hidentityRequires, hconnector₀Requires, hconnector₁Requires,
     hconnector₂Requires, trivial, trivial, trivial,
     ⟨by decide, by decide, by decide, by
-      simpa [connector₂, connector₁, connector₀, identity] using
-        hstayClean.copyCounter⟩,
+      simpa [connector₂, connector₁, connector₀, identity] using! hstayClean.copyCounter⟩,
     trivial, trivial⟩
 
 set_option maxHeartbeats 1200000 in
@@ -1183,21 +1177,20 @@ theorem emitMovedHeadFormula_effect_internal (tm : NTM k)
       (emitMovedHeadMember tm tape .left 0 Work.savedOutput).effect start =
         left := by
     simpa [left, effect₀, selected, choice, start, movedHeadStartValues,
-      Work.horizon] using
-        emitMovedHeadMember_effect_internal tm tape .left 0 Work.savedOutput
+      Work.horizon] using! emitMovedHeadMember_effect_internal tm tape .left 0 Work.savedOutput
           start hstartClean (by
-            simpa [start, movedHeadStartValues, Work.loop₁] using hclean.loop₁)
-          (by simpa [start, movedHeadStartValues, Work.horizon] using hhorizon)
+            simpa [start, movedHeadStartValues, Work.loop₁] using! hclean.loop₁)
+          (by simpa [start, movedHeadStartValues, Work.horizon] using! hhorizon)
           (by simpa [start, movedHeadStartValues, Work.limit₂, Work.position,
               Work.horizon] using htarget)
-          (by simpa [start, movedHeadStartValues, Work.available] using havailable)
+          (by simpa [start, movedHeadStartValues, Work.available] using! havailable)
   have hrightEffect :
       (emitMovedHeadMember tm tape .right 1 Work.direction).effect left =
         right := by
     simpa [right, effect₁, selected, choice, left, start,
       movedHeadMemberResult, movedHeadStartValues, Work.horizon,
-      Work.available, Work.position, Work.tapeIndex, Work.limit₂] using
-        emitMovedHeadMember_effect_internal tm tape .right 1 Work.direction
+      Work.available, Work.position, Work.tapeIndex, Work.limit₂]
+        using! emitMovedHeadMember_effect_internal tm tape .right 1 Work.direction
           left hleftClean (by
             simpa [left, start, movedHeadMemberResult, movedHeadStartValues,
               Work.loop₁, Work.available, Work.savedOutput, Work.position,
@@ -1216,8 +1209,8 @@ theorem emitMovedHeadFormula_effect_internal (tm : NTM k)
         stay := by
     simpa [stay, effect₂, selected, choice, right, left, start,
       movedHeadMemberResult, movedHeadStartValues, Work.horizon,
-      Work.available, Work.position, Work.tapeIndex, Work.limit₂] using
-        emitMovedHeadMember_effect_internal tm tape .stay 2 Work.atomKind
+      Work.available, Work.position, Work.tapeIndex, Work.limit₂]
+        using! emitMovedHeadMember_effect_internal tm tape .stay 2 Work.atomKind
           right hrightClean (by
             simpa [right, left, start, movedHeadMemberResult,
               movedHeadStartValues, Work.loop₁, Work.available,
@@ -1241,24 +1234,22 @@ theorem emitMovedHeadFormula_effect_internal (tm : NTM k)
         connector₀ := by
     simpa [connector₀] using emitSavedMovedHeadConnector_effect_internal
       Work.atomKind identity
-        (by simpa [identity] using hstayClean.reference₁)
-        (by simpa [identity] using hstayClean.emitCounter)
+        (by simpa [identity] using! hstayClean.reference₁)
+        (by simpa [identity] using! hstayClean.emitCounter)
   have hconnector₁Effect :
       (emitSavedMovedHeadConnector Work.direction).effect connector₀ =
         connector₁ := by
     simpa [connector₁] using emitSavedMovedHeadConnector_effect_internal
       Work.direction connector₀
-        (by simpa [connector₀, identity] using hstayClean.reference₁)
-        (by simpa [connector₀, identity] using hstayClean.emitCounter)
+        (by simpa [connector₀, identity] using! hstayClean.reference₁)
+        (by simpa [connector₀, identity] using! hstayClean.emitCounter)
   have hconnector₂Effect :
       (emitSavedMovedHeadConnector Work.savedOutput).effect connector₁ =
         connector₂ := by
     simpa [connector₂] using emitSavedMovedHeadConnector_effect_internal
       Work.savedOutput connector₁
-        (by simpa [connector₁, connector₀, identity] using
-          hstayClean.reference₁)
-        (by simpa [connector₁, connector₀, identity] using
-          hstayClean.emitCounter)
+        (by simpa [connector₁, connector₀, identity] using! hstayClean.reference₁)
+        (by simpa [connector₁, connector₀, identity] using! hstayClean.emitCounter)
   simp only [emitMovedHeadFormula, BinaryRoutine.seqList, BinaryRoutine.seq,
     BinaryRoutine.identity, BinaryRoutine.emitBits]
   rw [show (BinaryRoutine.clear Work.position).effect
@@ -1341,21 +1332,20 @@ theorem emitMovedHeadFormula_emitted_internal (tm : NTM k)
       (emitMovedHeadMember tm tape .left 0 Work.savedOutput).effect start =
         left := by
     simpa [left, effect₀, selected, choice, start, movedHeadStartValues,
-      Work.horizon] using
-        emitMovedHeadMember_effect_internal tm tape .left 0 Work.savedOutput
+      Work.horizon] using! emitMovedHeadMember_effect_internal tm tape .left 0 Work.savedOutput
           start hstartClean (by
-            simpa [start, movedHeadStartValues, Work.loop₁] using hclean.loop₁)
-          (by simpa [start, movedHeadStartValues, Work.horizon] using hhorizon)
+            simpa [start, movedHeadStartValues, Work.loop₁] using! hclean.loop₁)
+          (by simpa [start, movedHeadStartValues, Work.horizon] using! hhorizon)
           (by simpa [start, movedHeadStartValues, Work.limit₂, Work.position,
               Work.horizon] using htarget)
-          (by simpa [start, movedHeadStartValues, Work.available] using havailable)
+          (by simpa [start, movedHeadStartValues, Work.available] using! havailable)
   have hrightEffect :
       (emitMovedHeadMember tm tape .right 1 Work.direction).effect left =
         right := by
     simpa [right, effect₁, selected, choice, left, start,
       movedHeadMemberResult, movedHeadStartValues, Work.horizon,
-      Work.available, Work.position, Work.tapeIndex, Work.limit₂] using
-        emitMovedHeadMember_effect_internal tm tape .right 1 Work.direction
+      Work.available, Work.position, Work.tapeIndex, Work.limit₂]
+        using! emitMovedHeadMember_effect_internal tm tape .right 1 Work.direction
           left hleftClean (by
             simpa [left, start, movedHeadMemberResult, movedHeadStartValues,
               Work.loop₁, Work.available, Work.savedOutput, Work.position,
@@ -1374,8 +1364,8 @@ theorem emitMovedHeadFormula_emitted_internal (tm : NTM k)
         stay := by
     simpa [stay, effect₂, selected, choice, right, left, start,
       movedHeadMemberResult, movedHeadStartValues, Work.horizon,
-      Work.available, Work.position, Work.tapeIndex, Work.limit₂] using
-        emitMovedHeadMember_effect_internal tm tape .stay 2 Work.atomKind
+      Work.available, Work.position, Work.tapeIndex, Work.limit₂]
+        using! emitMovedHeadMember_effect_internal tm tape .stay 2 Work.atomKind
           right hrightClean (by
             simpa [right, left, start, movedHeadMemberResult,
               movedHeadStartValues, Work.loop₁, Work.available,
@@ -1394,11 +1384,11 @@ theorem emitMovedHeadFormula_emitted_internal (tm : NTM k)
               Work.direction, Work.position, Work.tapeIndex])
   have hleftEmitted := emitMovedHeadMember_emitted_internal tm tape .left 0
     (values Work.available) Work.savedOutput start hstartClean (by
-      simpa [start, movedHeadStartValues, Work.loop₁] using hclean.loop₁)
-    (by simpa [start, movedHeadStartValues, Work.horizon] using hhorizon)
+      simpa [start, movedHeadStartValues, Work.loop₁] using! hclean.loop₁)
+    (by simpa [start, movedHeadStartValues, Work.horizon] using! hhorizon)
     (by simpa [start, movedHeadStartValues, Work.limit₂, Work.position,
         Work.horizon] using htarget)
-    (by simpa [start, movedHeadStartValues, Work.available] using havailable)
+    (by simpa [start, movedHeadStartValues, Work.available] using! havailable)
     rfl (by simp [start, movedHeadStartValues, movedHeadMemberAvailable,
       prefixSize, Work.available, Work.position, Work.limit₂])
   have hrightEmitted := emitMovedHeadMember_emitted_internal tm tape .right 1
@@ -1448,15 +1438,15 @@ theorem emitMovedHeadFormula_emitted_internal (tm : NTM k)
         connector₀ := by
     simpa [connector₀] using emitSavedMovedHeadConnector_effect_internal
       Work.atomKind identity
-        (by simpa [identity] using hstayClean.reference₁)
-        (by simpa [identity] using hstayClean.emitCounter)
+        (by simpa [identity] using! hstayClean.reference₁)
+        (by simpa [identity] using! hstayClean.emitCounter)
   have hconnector₁Effect :
       (emitSavedMovedHeadConnector Work.direction).effect connector₀ =
         connector₁ := by
     simpa [connector₁] using emitSavedMovedHeadConnector_effect_internal
       Work.direction connector₀
-        (by simpa [connector₀, identity] using hstayClean.reference₁)
-        (by simpa [connector₀, identity] using hstayClean.emitCounter)
+        (by simpa [connector₀, identity] using! hstayClean.reference₁)
+        (by simpa [connector₀, identity] using! hstayClean.emitCounter)
   simp only [emitMovedHeadFormula, BinaryRoutine.seqList, BinaryRoutine.seq,
     BinaryRoutine.identity, BinaryRoutine.emitBits]
   rw [show (BinaryRoutine.clear Work.position).effect
@@ -1767,8 +1757,7 @@ private theorem emitMovedHeadMember_spaceBoundByWidthAt
       omega
     · intro inputLength
       simpa [afterTape, afterPosition, afterEffect, Work.available,
-        Work.position, Work.tapeIndex, Work.horizon] using
-          hpredecessorCap inputLength
+        Work.position, Work.tapeIndex, Work.horizon] using! hpredecessorCap inputLength
   have hpredecessorTrajectory : ∀ inputLength,
       (emitPredecessorHeadFormula (Fintype.card tm.Q) directionCode).effect
           (afterTape inputLength) = afterPredecessor inputLength := by
@@ -1790,8 +1779,7 @@ private theorem emitMovedHeadMember_spaceBoundByWidthAt
       afterPredecessor inputLength Work.loop₃ = 0 := by
     intro inputLength
     simpa [afterPredecessor, afterTape, afterPosition, afterEffect,
-      Work.available, Work.position, Work.tapeIndex] using
-        (hclean inputLength).loop₃
+      Work.available, Work.position, Work.tapeIndex] using! (hclean inputLength).loop₃
   have hafterPredecessorAvailable : ∀ inputLength,
       afterPredecessor inputLength Work.available =
         afterTape inputLength Work.available +
@@ -2078,36 +2066,34 @@ private theorem emitMovedHeadFormulaSuffix_seqListSpaceBoundByWidthAt
     intro inputLength
     simpa [v₂] using emitSavedMovedHeadConnector_effect_internal
       Work.atomKind (v₁ inputLength)
-        (by simpa [v₁] using (hclean inputLength).reference₁)
-        (by simpa [v₁] using (hclean inputLength).emitCounter)
+        (by simpa [v₁] using! (hclean inputLength).reference₁)
+        (by simpa [v₁] using! (hclean inputLength).emitCounter)
   have he₃ : ∀ inputLength,
       (emitSavedMovedHeadConnector Work.direction).effect (v₂ inputLength) =
         v₃ inputLength := by
     intro inputLength
     simpa [v₃] using emitSavedMovedHeadConnector_effect_internal
       Work.direction (v₂ inputLength)
-        (by simpa [v₂, v₁] using (hclean inputLength).reference₁)
-        (by simpa [v₂, v₁] using (hclean inputLength).emitCounter)
+        (by simpa [v₂, v₁] using! (hclean inputLength).reference₁)
+        (by simpa [v₂, v₁] using! (hclean inputLength).emitCounter)
   have he₄ : ∀ inputLength,
       (emitSavedMovedHeadConnector Work.savedOutput).effect (v₃ inputLength) =
         v₄ inputLength := by
     intro inputLength
     simpa [v₄] using emitSavedMovedHeadConnector_effect_internal
       Work.savedOutput (v₃ inputLength)
-        (by simpa [v₃, v₂, v₁] using
-          (hclean inputLength).reference₁)
-        (by simpa [v₃, v₂, v₁] using
-          (hclean inputLength).emitCounter)
+        (by simpa [v₃, v₂, v₁] using! (hclean inputLength).reference₁)
+        (by simpa [v₃, v₂, v₁] using! (hclean inputLength).emitCounter)
   simp only [BinaryRoutine.SeqListSpaceBoundByWidthAt]
   refine ⟨hs₁, ?_, ?_, ?_, ?_, ?_, ?_, ?_, ?_, trivial⟩
   · simpa only [he₁] using hs₂
   · simpa only [he₁, he₂] using hs₃
   · simpa only [he₁, he₂, he₃] using hs₄
   · simpa only [he₁, he₂, he₃, he₄] using hs₅
-  · simpa only [he₁, he₂, he₃, he₄] using hs₆
-  · simpa only [he₁, he₂, he₃, he₄] using hs₇
-  · simpa only [he₁, he₂, he₃, he₄] using hs₈
-  · simpa only [he₁, he₂, he₃, he₄] using hs₉
+  · simpa only [he₁, he₂, he₃, he₄] using! hs₆
+  · simpa only [he₁, he₂, he₃, he₄] using! hs₇
+  · simpa only [he₁, he₂, he₃, he₄] using! hs₈
+  · simpa only [he₁, he₂, he₃, he₄] using! hs₉
 
 theorem emitMovedHeadFormula_spaceBoundByWidth_internal
     (tm : NTM k) (tape : TapeSlot k) {initialSpace : ℕ → ℕ}
@@ -2270,13 +2256,11 @@ theorem emitMovedHeadFormula_spaceBoundByWidth_internal
   have hstartLoop₁ : ∀ inputLength,
       start inputLength Work.loop₁ = 0 := by
     intro inputLength
-    simpa [start, movedHeadStartValues, Work.loop₁] using
-      (hclean inputLength).loop₁
+    simpa [start, movedHeadStartValues, Work.loop₁] using! (hclean inputLength).loop₁
   have hstartHorizon : ∀ inputLength,
       0 < start inputLength Work.horizon := by
     intro inputLength
-    simpa [start, movedHeadStartValues, Work.horizon] using
-      hhorizon inputLength
+    simpa [start, movedHeadStartValues, Work.horizon] using! hhorizon inputLength
   have hstartTarget : ∀ inputLength,
       start inputLength Work.limit₂ ≤ start inputLength Work.horizon := by
     intro inputLength
@@ -2285,8 +2269,7 @@ theorem emitMovedHeadFormula_spaceBoundByWidth_internal
   have hstartAvailable : ∀ inputLength,
       1 ≤ start inputLength Work.available := by
     intro inputLength
-    simpa [start, movedHeadStartValues, Work.available] using
-      havailable inputLength
+    simpa [start, movedHeadStartValues, Work.available] using! havailable inputLength
   have hleftFrontier : ∀ inputLength,
       start inputLength Work.available + effect₀ inputLength +
           movedHeadPredecessorSize (start inputLength Work.horizon) + 1 ≤
@@ -2322,8 +2305,8 @@ theorem emitMovedHeadFormula_spaceBoundByWidth_internal
       hsymbol hposition
     have hc := hcap inputLength stateIndex tapeIndex symbolIndex position
       hstate htape hsymbol (by
-        simpa [start, movedHeadStartValues, Work.horizon] using
-          hposition.trans (Nat.le_add_right _ 1))
+        simpa [start, movedHeadStartValues, Work.horizon]
+          using! hposition.trans (Nat.le_add_right _ 1))
     simp [start, movedHeadStartValues, movedHeadFormulaScheduleSize,
       movedHeadMemberSizeAt, movedHeadDirectionCount, prefixSize, selected,
       choice, Work.available, Work.horizon, Work.configBase, Work.limit₂,
@@ -2336,11 +2319,10 @@ theorem emitMovedHeadFormula_spaceBoundByWidth_internal
       Work.savedOutput hstartClean hstartLoop₁ hstartHorizon hstartTarget
       hstartAvailable hstartValues hleftFrontier hleftEffectCap
     · intro inputLength
-      simpa [start, movedHeadStartValues, Work.horizon, Work.configBase] using
-        hpredecessorCap inputLength
+      simpa [start, movedHeadStartValues, Work.horizon, Work.configBase]
+        using! hpredecessorCap inputLength
     · intro inputLength
-      simpa [start, movedHeadStartValues, Work.horizon] using
-        hpolynomialCap inputLength
+      simpa [start, movedHeadStartValues, Work.horizon] using! hpolynomialCap inputLength
   have hleftValues : ∀ inputLength index,
       left inputLength index ≤ width inputLength := by
     exact movedHeadMemberResult_values_le Work.savedOutput hstartValues
@@ -2355,7 +2337,7 @@ theorem emitMovedHeadFormula_spaceBoundByWidth_internal
           (start inputLength) = left inputLength := by
     intro inputLength
     simpa [left, effect₀, selected, choice, start, movedHeadStartValues,
-      Work.horizon] using emitMovedHeadMember_effect_internal tm tape .left 0
+      Work.horizon] using! emitMovedHeadMember_effect_internal tm tape .left 0
         Work.savedOutput (start inputLength) (hstartClean inputLength)
         (hstartLoop₁ inputLength) (hstartHorizon inputLength)
         (hstartTarget inputLength) (hstartAvailable inputLength)
@@ -2460,7 +2442,7 @@ theorem emitMovedHeadFormula_spaceBoundByWidth_internal
     simpa [right, effect₁, selected, choice, left, start,
       movedHeadMemberResult, movedHeadStartValues, Work.horizon,
       Work.available, Work.savedOutput, Work.position, Work.tapeIndex,
-      Work.limit₂] using emitMovedHeadMember_effect_internal tm tape .right
+      Work.limit₂] using! emitMovedHeadMember_effect_internal tm tape .right
         1 Work.direction (left inputLength) (hleftClean inputLength)
         (hleftLoop₁ inputLength) (hleftHorizon inputLength)
         (hleftTarget inputLength) (hleftAvailable inputLength)
@@ -2568,8 +2550,8 @@ theorem emitMovedHeadFormula_spaceBoundByWidth_internal
     simpa [stay, effect₂, selected, choice, right, left, start,
       movedHeadMemberResult, movedHeadStartValues, Work.horizon,
       Work.available, Work.savedOutput, Work.direction, Work.position,
-      Work.tapeIndex, Work.limit₂] using
-        emitMovedHeadMember_effect_internal tm tape .stay 2 Work.atomKind
+      Work.tapeIndex, Work.limit₂]
+        using! emitMovedHeadMember_effect_internal tm tape .stay 2 Work.atomKind
           (right inputLength) (hrightClean inputLength)
           (hrightLoop₁ inputLength) (hrightHorizon inputLength)
           (hrightTarget inputLength) (hrightAvailable inputLength)
@@ -2607,7 +2589,7 @@ theorem emitMovedHeadFormula_spaceBoundByWidth_internal
   · simpa only [hparkedTrajectory, hstartTrajectory, hleftTrajectory,
       hrightTrajectory] using hstay
   · simpa only [hparkedTrajectory, hstartTrajectory, hleftTrajectory,
-      hrightTrajectory, hstayTrajectory] using hsuffix
+      hrightTrajectory, hstayTrajectory] using! hsuffix
 
 end DirectGenerator
 

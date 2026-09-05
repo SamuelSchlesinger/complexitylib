@@ -41,7 +41,7 @@ theorem hashCellWitness_iff_blocks_internal
         seed witness = fun _ => false := by
   unfold HashCellWitness survivorPowerWidth
     ApproximateCounting.Relative.poweredWidth
-  rw [ApproximateCounting.mem_cartesianPower_iff]
+  erw [ApproximateCounting.mem_cartesianPower_iff]
 
 theorem hashCellNonempty_iff_cellNonempty_internal
     {count arity threshold precision rangeWidth : ℕ}

@@ -23,6 +23,11 @@ namespace Complexity
 
 namespace Switching
 
+attribute [local instance] Classical.propDecidable
+
+-- The signature mirrors the family this belongs to; the argument is part of
+-- that shape even where this member does not consult it.
+@[nolint unusedArguments]
 private def finiteEventCount {α : Type} [Fintype α]
     [DecidableEq α] (event : α → Prop)
     [DecidablePred event] : ℕ :=
@@ -128,6 +133,9 @@ private theorem finiteEventCount_prod_left
     _ = finiteEventCount event * Fintype.card β := by
           simp [finiteEventCount]
 
+-- The signature mirrors the family this belongs to; the argument is part of
+-- that shape even where this member does not consult it.
+@[nolint unusedArguments]
 private theorem finiteEventCount_exists_mem_le_sum
     {α β : Type} [Fintype α] [DecidableEq α]
     [DecidableEq β] (values : List β)
@@ -249,7 +257,7 @@ private theorem sum_comp_freeVariables_internal
           intro index _
           by_cases hprior : prior index = none
           · simp only [Restriction.On.comp, hprior,
-              Option.none_or, if_pos]
+              Option.none_or, ite_eq_left]
             calc
               (∑ seed : Seed N q,
                   if decode seed index = none then 1 else 0) =
@@ -297,6 +305,7 @@ theorem stageFreeSum_internal (N q stageCount : ℕ) :
       simp [stageFreeSum, StageSeed, finalRestriction,
         Switching.RestrictionStages.cumulative,
         Restriction.On.freeVariables]
+      erw [Finset.card_univ, Fintype.card_unit, one_mul]
   | succ stageCount ih =>
       rw [stageFreeSum_succ_internal, ih, pow_succ]
       simp [Nat.mul_assoc]
@@ -794,8 +803,13 @@ theorem stageEventCount_stagedBad_mul_pow_le_internal
                       RandomRestriction.StageSeed N q stageCount ×
                         RandomRestriction.Seed N q =>
                     switchGood pair.1 pair.2)
-          change Switching.finiteEventCount rootEvent *
-                q ^ queryCount ≤
+          have hEq : RandomRestriction.stageEventCount (N := N) (stageCount := stageCount + 1) q
+              ((and children).stagedBad queryCount) = Switching.finiteEventCount rootEvent := by
+            unfold RandomRestriction.stageEventCount Switching.finiteEventCount
+            congr 1
+            congr 1
+          rw [hEq]
+          show _ ≤
               (1 + forestSize children) *
                 ((2 * q + 1) ^ N) ^ (stageCount + 1) *
                 (4 * (queryCount + 1)) ^ queryCount
@@ -1050,8 +1064,13 @@ theorem stageEventCount_stagedBad_mul_pow_le_internal
                       RandomRestriction.StageSeed N q stageCount ×
                         RandomRestriction.Seed N q =>
                     switchGood pair.1 pair.2)
-          change Switching.finiteEventCount rootEvent *
-                q ^ queryCount ≤
+          have hEq : RandomRestriction.stageEventCount (N := N) (stageCount := stageCount + 1) q
+              ((or children).stagedBad queryCount) = Switching.finiteEventCount rootEvent := by
+            unfold RandomRestriction.stageEventCount Switching.finiteEventCount
+            congr 1
+            congr 1
+          rw [hEq]
+          show _ ≤
               (1 + forestSize children) *
                 ((2 * q + 1) ^ N) ^ (stageCount + 1) *
                 (4 * (queryCount + 1)) ^ queryCount

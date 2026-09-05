@@ -95,7 +95,8 @@ theorem sum_sq_step_lift_le (hn : 0 < n) (hd : 0 < d) (rot : Fin N × Fin d → 
   have hFsq := G.sum_sq_center hordpos F
   rw [hord] at hFsq
   have hmean : (N : ℝ) * (G.mean F) ^ 2 = (∑ u, F u) ^ 2 / (N : ℝ) := by
-    rw [mean, hord]
+    unfold mean
+    rw [hord]
     field_simp
     rfl
   show ∑ u, G.step F u ^ 2 ≤ lam ^ 2 * ∑ u, F u ^ 2 + (1 - lam ^ 2) * ((∑ u, F u) ^ 2 / (N : ℝ))
@@ -129,7 +130,7 @@ theorem liftN_isSome {N n m : ℕ} (hm : (m - 1) * n ≤ N) (v : Fin n) {i : ℕ
     calc v.val + i * n < n + i * n := by omega
       _ = (i + 1) * n := by ring
       _ ≤ (m - 1) * n := Nat.mul_le_mul_right _ h1
-  rw [dif_pos (lt_of_lt_of_le hle hm)]
+  rw [dite_eq_left (lt_of_lt_of_le hle hm)]
   rfl
 
 /-- **So at most one slot is empty.** -/

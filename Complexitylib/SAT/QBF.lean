@@ -190,7 +190,7 @@ theorem eval_update_not_mem (α : ℕ → Bool) (i : ℕ) (b : Bool) (φ : QBF)
   apply eval_eq_of_agree
   intro j hj
   have hji : j ≠ i := fun h => hi (h ▸ hj)
-  simp only [Function.update_apply, if_neg hji]
+  simp only [Function.update_apply, ite_eq_right hji]
 
 /-- **Vacuous existential quantification.** Quantifying `∃` over a variable that
     does not occur free is a no-op: `eval α (∃ x_i, φ) = eval α φ`. -/

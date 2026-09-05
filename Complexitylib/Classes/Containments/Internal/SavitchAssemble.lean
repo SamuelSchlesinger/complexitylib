@@ -103,7 +103,7 @@ theorem frameVal_savRoot (x : List Bool)
     rw [savRoot, hR, initRecord_eq tm _ x hxW]
   have hl : (savRoot tm qp lp x).lvl.length = lp.eval x.length := by
     rw [savRoot, polyRuler_length]
-  rw [hkind, if_pos rfl, hu, hl, hR]
+  rw [hkind, ite_eq_left rfl, hu, hl, hR]
   rw [accB_cfgCode tm hdec x (qp.eval x.length) (hcardq x.length) hW _ _
     (NTM.reachesCfg_refl tm _), hmem]
 

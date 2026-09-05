@@ -227,7 +227,8 @@ theorem inner_eq_one_sub_two_dist (f g : BooleanFunction n)
     `𝔼[f] = 𝓕 f ∅`. -/
 theorem expect_eq_fourierCoeff_empty (f : BooleanFunction n) :
     𝔼[f] = 𝓕 f ∅ := by
-  simp [fourierCoeff, inner_eq_expect]
+  rw [fourierCoeff_eq_inner (f := f) (S := ∅), inner_eq_expect (f := f) (g := χ ∅)]
+  simp [Internal.parityFun_empty]
 
 /-- **Proposition 1.13**: The variance of `f` in terms of Fourier coefficients:
     `Var[f] = ∑_{S ≠ ∅} (𝓕 f S)²`. -/
@@ -250,7 +251,7 @@ theorem variance_boolean (f : BooleanFunction n) (hf : IsBooleanValued f) :
     Var[f] = 1 - (𝔼[f]) ^ 2 := by
   unfold variance
   have h1 : 𝔼[fun x => f x ^ 2] = 1 := by
-    simp only [expect_unfold]
+    rw [expect_unfold (f := fun x : Cube n => f x ^ 2)]
     have : ∀ x : Cube n, f x ^ 2 = 1 := by
       intro x; rcases hf x with h | h <;> simp [h]
     rw [Finset.sum_congr rfl (fun x _ => this x)]
@@ -345,8 +346,10 @@ noncomputable def IsDensity.toPMF {φ : BooleanFunction n} (hφ : IsDensity φ) 
     PMF (Cube n) :=
   PMF.ofFintype (fun x => ENNReal.ofReal (φ x / 2 ^ n)) (by
     have hsum : ∑ x : Cube n, φ x / 2 ^ n = 1 := by
-      simp_rw [div_eq_mul_inv, ← Finset.sum_mul]
-      have h := hφ.expect_one; simp only [expect_unfold] at h
+      simp_rw [div_eq_mul_inv]
+      rw [← Finset.sum_mul (s := Finset.univ) (f := fun x : Cube n => φ x)
+        (a := ((2 : ℝ) ^ n)⁻¹)]
+      have h := hφ.expect_one; rw [expect_unfold (f := φ)] at h
       have h2n : (0 : ℝ) < 2 ^ n := pow_pos two_pos n
       rw [show (∑ x : Cube n, φ x) * (2 ^ n)⁻¹ = 1 / 2 ^ n * ∑ x, φ x from by ring]
       linarith
@@ -499,7 +502,10 @@ theorem fourierCoeff_parityFun (S T : Finset (Fin n)) :
 theorem fourierCoeff_parityFun_mul (S : Finset (Fin n)) (g : BooleanFunction n)
     (T : Finset (Fin n)) :
     𝓕 (fun x => (χ S) x * g x) T = 𝓕 g (symmDiff S T) := by
-  rw [fourierCoeff_eq_inner, inner_eq_expect, fourierCoeff_eq_inner, inner_eq_expect]
+  rw [fourierCoeff_eq_inner (f := fun x : Cube n => (χ S) x * g x) (S := T),
+    inner_eq_expect (f := fun x : Cube n => (χ S) x * g x) (g := χ T),
+    fourierCoeff_eq_inner (f := g) (S := symmDiff S T),
+    inner_eq_expect (f := g) (g := χ (symmDiff S T))]
   refine Finset.expect_congr rfl fun x _ => ?_
   rw [← parityFun_mul]; ring
 
@@ -548,8 +554,8 @@ theorem degreePart_inner_eq_zero (f g : BooleanFunction n) {j k : ℕ} (hjk : j 
   intro S _
   rw [fourierCoeff_degreePart, fourierCoeff_degreePart]
   by_cases hj : S.card = j
-  · rw [if_neg (show ¬ S.card = k by omega), mul_zero]
-  · rw [if_neg hj, zero_mul]
+  · rw [ite_eq_right (show ¬ S.card = k by omega), mul_zero]
+  · rw [ite_eq_right hj, zero_mul]
 
 /-- **The degree-`k` weight is the squared length of the degree-`k` part.**
     `⟪f^{=k}, f^{=k}⟫ = 𝐖 f k = ∑_{|S|=k} (𝓕 f S)²` — Parseval restricted to level
@@ -811,8 +817,8 @@ theorem fourierCoeff_noiseOp (ρ : ℝ) (f : BooleanFunction n) (T : Finset (Fin
   rw [noiseOp, fourierCoeff_eq_inner, sum_inner]
   simp only [real_inner_smul_left, ← fourierCoeff_eq_inner, fourierCoeff_parityFun]
   rw [Finset.sum_eq_single T]
-  · rw [if_pos rfl, mul_one]
-  · intro S _ hST; rw [if_neg hST, mul_zero]
+  · rw [ite_eq_left rfl, mul_one]
+  · intro S _ hST; rw [ite_eq_right hST, mul_zero]
   · intro h; exact absurd (Finset.mem_univ T) h
 
 /-- **Noise stability is the correlation of `f` with its noised copy**:
@@ -837,8 +843,8 @@ theorem noiseOp_zero (f : BooleanFunction n) :
   fourierCoeff_ext fun S => by
     rw [fourierCoeff_noiseOp, fourierCoeff_smul, fourierCoeff_parityFun]
     by_cases hS : S = ∅
-    · subst hS; rw [if_pos rfl, expect_eq_fourierCoeff_empty]; simp
-    · rw [if_neg (Ne.symm hS)]
+    · subst hS; rw [ite_eq_left rfl, expect_eq_fourierCoeff_empty]; simp
+    · rw [ite_eq_right (Ne.symm hS)]
       have hc : S.card ≠ 0 := by simp [Finset.card_eq_zero, hS]
       rw [zero_pow hc]; ring
 
@@ -1020,7 +1026,7 @@ theorem totalInfluence_parityFun (S : Finset (Fin n)) :
   simp only [totalInfluence, fourierCoeff_parityFun]
   rw [Finset.sum_eq_single S]
   · simp
-  · intro T _ hT; rw [if_neg (Ne.symm hT)]; simp
+  · intro T _ hT; rw [ite_eq_right (Ne.symm hT)]; simp
   · intro h; exact absurd (Finset.mem_univ S) h
 
 /-- **Coordinate influence of a parity.** Coordinate `i` influences `χ_S` fully
@@ -1099,12 +1105,12 @@ theorem parityFun_flipCoord (i : Fin n) (S : Finset (Fin n)) (x : Cube n) :
     (χ S) (flipCoord i x) = (if i ∈ S then -1 else 1) * (χ S) x := by
   simp only [parityFun, flipCoord]
   by_cases hi : i ∈ S
-  · rw [if_pos hi, ← Finset.prod_erase_mul S _ hi, ← Finset.prod_erase_mul S _ hi,
+  · rw [ite_eq_left hi, ← Finset.prod_erase_mul S _ hi, ← Finset.prod_erase_mul S _ hi,
       Function.update_self]
     have hrest : ∀ j ∈ S.erase i, chi (Function.update x i (x i + 1) j) = chi (x j) := by
       intro j hj; rw [Function.update_of_ne (Finset.ne_of_mem_erase hj)]
     rw [Finset.prod_congr rfl hrest, chi_add_one]; ring
-  · rw [if_neg hi, one_mul]
+  · rw [ite_eq_right hi, one_mul]
     apply Finset.prod_congr rfl
     intro j hj; rw [Function.update_of_ne (ne_of_mem_of_not_mem hj hi)]
 
@@ -1129,7 +1135,8 @@ theorem expect_flipCoord (i : Fin n) (g : Cube n → ℝ) :
     `𝓕(f ∘ flipᵢ, T) = (−1)^[i∈T] · 𝓕(f, T)`. -/
 theorem fourierCoeff_comp_flipCoord (i : Fin n) (f : BooleanFunction n) (T : Finset (Fin n)) :
     𝓕 (fun x => f (flipCoord i x)) T = (if i ∈ T then -1 else 1) * 𝓕 f T := by
-  rw [fourierCoeff_eq_inner, inner_eq_expect,
+  rw [fourierCoeff_eq_inner (f := fun x : Cube n => f (flipCoord i x)) (S := T),
+    inner_eq_expect (f := fun x : Cube n => f (flipCoord i x)) (g := χ T),
     ← expect_flipCoord i (fun x => f (flipCoord i x) * (χ T) x)]
   simp only [flipCoord_flipCoord, parityFun_flipCoord]
   rw [fourierCoeff_eq_inner, inner_eq_expect]
@@ -1150,18 +1157,18 @@ theorem fourierCoeff_derivative (i : Fin n) (f : BooleanFunction n) (T : Finset 
   rw [derivative, fourierCoeff_eq_inner, sum_inner]
   simp only [real_inner_smul_left, ← fourierCoeff_eq_inner, fourierCoeff_parityFun]
   by_cases hiT : i ∈ T
-  · rw [if_pos hiT]
+  · rw [ite_eq_left hiT]
     apply Finset.sum_eq_zero
     intro S hS
     rw [Finset.mem_filter] at hS
     have hne : S.erase i ≠ T := fun h => (Finset.mem_erase.mp (h ▸ hiT)).1 rfl
-    rw [if_neg hne, mul_zero]
-  · rw [if_neg hiT, Finset.sum_eq_single (insert i T)]
-    · rw [Finset.erase_insert hiT, if_pos rfl, mul_one]
+    rw [ite_eq_right hne, mul_zero]
+  · rw [ite_eq_right hiT, Finset.sum_eq_single (insert i T)]
+    · rw [Finset.erase_insert hiT, ite_eq_left rfl, mul_one]
     · intro S hS hSne
       rw [Finset.mem_filter] at hS
       have hne : S.erase i ≠ T := fun h => hSne (by rw [← h, Finset.insert_erase hS.2])
-      rw [if_neg hne, mul_zero]
+      rw [ite_eq_right hne, mul_zero]
     · intro h
       exact absurd (Finset.mem_filter.mpr
         ⟨Finset.mem_univ (insert i T), Finset.mem_insert_self i T⟩) h
@@ -1177,7 +1184,7 @@ theorem influence_eq_norm_sq_derivative (i : Fin n) (f : BooleanFunction n) :
     apply Finset.sum_eq_zero
     intro T hT
     rw [Finset.mem_filter] at hT
-    rw [fourierCoeff_derivative, if_pos hT.2]; simp
+    rw [fourierCoeff_derivative, ite_eq_left hT.2]; simp
   rw [h1, zero_add]
   apply Finset.sum_nbij' (fun S => S.erase i) (fun T => insert i T)
   · intro S hS; rw [Finset.mem_filter] at hS ⊢; exact ⟨Finset.mem_univ _, by simp⟩
@@ -1187,7 +1194,7 @@ theorem influence_eq_norm_sq_derivative (i : Fin n) (f : BooleanFunction n) :
   · intro T hT; rw [Finset.mem_filter] at hT; rw [Finset.erase_insert hT.2]
   · intro S hS
     rw [Finset.mem_filter] at hS
-    rw [fourierCoeff_derivative, if_neg (by simp : i ∉ S.erase i), Finset.insert_erase hS.2]
+    rw [fourierCoeff_derivative, ite_eq_right (by simp : i ∉ S.erase i), Finset.insert_erase hS.2]
 
 /-- The **sensitivity operator** `Lᵢ f` at coordinate `i`, the point-value analogue of
     the derivative: `(Lᵢ f)(x) = (f(x) − f(x ⊕ eᵢ)) / 2`. It vanishes exactly where `f`
@@ -1202,15 +1209,18 @@ theorem fourierCoeff_sensitivityOp (i : Fin n) (f : BooleanFunction n) (T : Fins
     𝓕 (sensitivityOp i f) T = if i ∈ T then 𝓕 f T else 0 := by
   have key : 𝓕 (sensitivityOp i f) T
       = (1 / 2) * 𝓕 f T - (1 / 2) * 𝓕 (fun x => f (flipCoord i x)) T := by
-    rw [fourierCoeff_eq_inner, inner_eq_expect, fourierCoeff_eq_inner f, inner_eq_expect,
-      fourierCoeff_eq_inner (fun x => f (flipCoord i x)), inner_eq_expect]
+    rw [fourierCoeff_eq_inner (f := sensitivityOp i f) (S := T),
+      inner_eq_expect (f := sensitivityOp i f) (g := χ T),
+      fourierCoeff_eq_inner (f := f) (S := T), inner_eq_expect (f := f) (g := χ T),
+      fourierCoeff_eq_inner (f := fun x : Cube n => f (flipCoord i x)) (S := T),
+      inner_eq_expect (f := fun x : Cube n => f (flipCoord i x)) (g := χ T)]
     simp only [expect, sensitivityOp]
     rw [Finset.mul_expect, Finset.mul_expect, ← Finset.expect_sub_distrib]
     exact Finset.expect_congr rfl (fun x _ => by ring)
   rw [key, fourierCoeff_comp_flipCoord]
   by_cases h : i ∈ T
-  · rw [if_pos h, if_pos h]; ring
-  · rw [if_neg h, if_neg h]; ring
+  · rw [ite_eq_left h, ite_eq_left h]; ring
+  · rw [ite_eq_right h, ite_eq_right h]; ring
 
 /-- **Influence is the squared norm of the sensitivity operator**: `Infᵢ[f] = ‖Lᵢ f‖²`.
     A second analytic form of coordinate influence, complementing
@@ -1221,8 +1231,8 @@ theorem influence_eq_norm_sq_sensitivityOp (i : Fin n) (f : BooleanFunction n) :
   refine Finset.sum_congr rfl fun S _ => ?_
   rw [fourierCoeff_sensitivityOp]
   by_cases h : i ∈ S
-  · rw [if_pos h, if_pos h]
-  · rw [if_neg h, if_neg h]; ring
+  · rw [ite_eq_left h, ite_eq_left h]
+  · rw [ite_eq_right h, ite_eq_right h]; ring
 
 /-- **The sensitivity operator is the parity-twisted derivative**: `Lᵢ f = χ_{i} · Dᵢ f`.
     Both strip coordinate `i` from the surviving frequencies, but `Lᵢ` twists each back
@@ -1246,12 +1256,12 @@ theorem sensitivityOp_eq_parityFun_mul_derivative (i : Fin n) (f : BooleanFuncti
   intro T
   rw [fourierCoeff_sensitivityOp, fourierCoeff_parityFun_mul, fourierCoeff_derivative]
   by_cases hiT : i ∈ T
-  · rw [if_pos hiT]
+  · rw [ite_eq_left hiT]
     have h1 : i ∉ symmDiff ({i} : Finset (Fin n)) T := by simp [Finset.mem_symmDiff, hiT]
-    rw [if_neg h1, hins T hiT]
-  · rw [if_neg hiT]
+    rw [ite_eq_right h1, hins T hiT]
+  · rw [ite_eq_right hiT]
     have h2 : i ∈ symmDiff ({i} : Finset (Fin n)) T := by simp [Finset.mem_symmDiff, hiT]
-    rw [if_pos h2]
+    rw [ite_eq_left h2]
 
 /-- **Average sensitivity as a probability.** For a Boolean-valued `f`, the influence of
     coordinate `i` is the probability that flipping `i` flips the output:

@@ -59,8 +59,8 @@ theorem repeatPrefixChoices_succ_suffix
       repeatStrideChoices choices ⟨m, hm⟩ s := by
   apply congrArg choices
   apply Fin.ext
-  simp only [repeatPrefixIdx, Fin.val_cast,
-    Fin.val_natAdd, repeatAtTimeSteps, repeatStrideChoiceIdx_val]
+  simp only [repeatPrefixIdx, repeatAtTimeSteps, repeatStrideChoiceIdx_val]
+  rfl
 
 /-- Advancing one trial boundary is exactly tracing one complete stride from
 the preceding boundary configuration. -/
@@ -142,12 +142,11 @@ theorem repeatStrideChoices_trace_split (tm : NTM n)
         (repeatStrideChoices choices j) C =
       (repeatAtTime tm k T).trace (T + 2) (repeatAdminChoices choices j)
         ((repeatAtTime tm k T).trace T (repeatSimulationChoices choices j) C) := by
-  let M := repeatAtTime tm k T
   have hlen : repeatAtTimeStride T = T + (T + 2) := by
     simp [repeatAtTimeStride]
     omega
-  rw [M.trace_cast hlen]
-  rw [M.trace_add]
+  refine ((repeatAtTime tm k T).trace_cast hlen _ C).trans ?_
+  refine ((repeatAtTime tm k T).trace_add T (T + 2) _ C).trans ?_
   congr 2
 
 /-- The administrative trace splits into `T + 1` fixed-rewind choices and one
@@ -158,7 +157,7 @@ theorem repeatAdminChoices_trace_split (tm : NTM n)
     (repeatAtTime tm k T).trace (T + 2) (repeatAdminChoices choices j) C =
       (repeatAtTime tm k T).trace 1 (fun _ => repeatFinishChoice choices j)
         ((repeatAtTime tm k T).trace (T + 1) (repeatRewindChoices choices j) C) := by
-  rw [(repeatAtTime tm k T).trace_add (T + 1) 1]
+  refine ((repeatAtTime tm k T).trace_add (T + 1) 1 _ C).trans ?_
   congr 2
   · funext a
     apply congrArg (repeatAdminChoices choices j)
@@ -175,8 +174,8 @@ theorem repeatStrideChoices_trace_split_three (tm : NTM n)
       (repeatAtTime tm k T).trace 1 (fun _ => repeatFinishChoice choices j)
         ((repeatAtTime tm k T).trace (T + 1) (repeatRewindChoices choices j)
           ((repeatAtTime tm k T).trace T (repeatSimulationChoices choices j) C)) := by
-  rw [repeatStrideChoices_trace_split]
-  rw [repeatAdminChoices_trace_split]
+  refine (repeatStrideChoices_trace_split tm choices j C).trans ?_
+  exact repeatAdminChoices_trace_split tm choices j _
 
 end NTM
 

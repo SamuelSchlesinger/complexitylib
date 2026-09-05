@@ -135,7 +135,7 @@ theorem epiloguePostTM_hoareTime (k : ℕ) (b : Bool) (I : Tape) (B : ℕ) (hI :
       ?_
     rintro inp' work' out' ⟨-, -, hout'⟩
     rw [hout', ho, show (W' (yIdx k)).read = Γ.ofBool b from by
-      simp only [hW', if_pos rfl]
+      simp only [hW', ite_eq_left rfl]
       show (work (yIdx k)).cells 1 = _
       exact hcell]
     exact NTM.outSlot_write Γw.one (TM.readBackWrite (Γ.ofBool b))
@@ -310,7 +310,6 @@ theorem epiloguePreTM_hoareTime (k : ℕ) (x : List Bool) (N H A R : ℕ) (I : T
     (fun j => if j = 0 then B0 else if j = 1 then B1 else epilogueBank k x N H A R)
     (fun _ => NTM.outSlot Γw.one) (max (TM.binarySuccTime 0) (TM.binaryRippleSubTime 1 A))
     hI (fun j i => by
-      dsimp only
       split
       · exact enumBank_parked k x N H N A R i
       · split

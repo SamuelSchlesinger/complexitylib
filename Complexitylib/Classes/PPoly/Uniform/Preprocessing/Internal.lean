@@ -26,7 +26,7 @@ theorem generatorEvalInput_mem_FP_internal {gen : List Bool → List Bool}
   have hunary : (fun x : List Bool => unaryList x.length) ∈ FP := by
     simpa only [unaryList] using unaryLength_mem_FP
   have hcode : (fun x : List Bool => gen (unaryList x.length)) ∈ FP := by
-    simpa only [Function.comp_apply] using mem_FP_comp hunary hgen
-  simpa only [generatorEvalInput, unaryList] using mem_FP_pairWithInput hcode
+    exact mem_FP_comp hunary hgen
+  exact mem_FP_pairWithInput hcode
 
 end Complexity

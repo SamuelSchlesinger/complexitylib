@@ -53,6 +53,8 @@ namespace ConstraintGraph
 variable {α : Type} [Fintype α] [DecidableEq α] [Nonempty α]
 variable (G : ConstraintGraph α) (E : ExpanderFamily)
 
+attribute [local instance] Classical.propDecidable
+
 /-! ### Plurality decoding -/
 
 /-- The plurality label of `v`'s cloud: a label at least a `1 / card α`
@@ -178,7 +180,7 @@ theorem card_dartsBetween_le_card_cloudUnsat (A : (G.reduce E).Assignment)
     (fun x => ((G.cloudList v)[x.1.val], some x.2)) ?_ ?_
   · intro x hx
     simp only [Finset.mem_coe] at hx ⊢
-    rw [RegGraph.dartsBetween, Finset.mem_filter] at hx
+    simp only [RegGraph.dartsBetween, Finset.mem_filter] at hx
     obtain ⟨-, hx1, hx2⟩ := hx
     have hnbr : (E.graph (G.cloudList v).length).nbr x.1 x.2
         = (E.rot (G.cloudList v).length (x.1, x.2)).1 := rfl
@@ -189,7 +191,7 @@ theorem card_dartsBetween_le_card_cloudUnsat (A : (G.reduce E).Assignment)
     have howner : G.owner (G.cloudList v)[x.1.val] = v :=
       (G.mem_cloud).mp ((G.mem_cloudList).mp (List.getElem_mem x.1.isLt))
     rw [cloudUnsat, Finset.mem_filter]
-    refine ⟨?_, howner, by simp⟩
+    refine ⟨?_, howner, by exact Option.some_ne_none _⟩
     rw [RegCSP.mem_unsatDarts]
     show ¬ ((A (G.cloudList v)[x.1.val]
       == A ((G.reduce E).graph.nbr (G.cloudList v)[x.1.val] (some x.2))) = true)

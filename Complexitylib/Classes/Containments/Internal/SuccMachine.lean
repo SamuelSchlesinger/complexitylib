@@ -259,23 +259,23 @@ noncomputable def codeBlock {kk : ℕ} (tm : NTM kk) (x : List Bool) (S : ℕ)
 
 @[simp] theorem codeBlock_st {kk : ℕ} (tm : NTM kk) (x : List Bool) (S : ℕ)
     (a : Code tm.Q kk x.length S) : codeBlock tm x S a 0 = (qCodec tm.Q).enc a.1 := by
-  rw [codeBlock, dif_pos rfl]
+  rw [codeBlock, dite_eq_left rfl]
 
 @[simp] theorem codeBlock_hd {kk : ℕ} (tm : NTM kk) (x : List Bool) (S : ℕ)
     (a : Code tm.Q kk x.length S) :
     codeBlock tm x S a 1 = (finCodec (x.length + S + 2)).enc a.2.1 := by
-  rw [codeBlock, dif_neg (by omega), dif_pos rfl]
+  rw [codeBlock, dite_eq_right (by omega), dite_eq_left rfl]
 
 @[simp] theorem codeBlock_wk {kk : ℕ} (tm : NTM kk) (x : List Bool) (S : ℕ)
     (a : Code tm.Q kk x.length S) (i : Fin kk) :
     codeBlock tm x S a (i.val + 2) = (tapeCodec (S + 1)).enc (a.2.2.1 i) := by
-  rw [codeBlock, dif_neg (by omega), dif_neg (by omega), dif_pos (by omega),
+  rw [codeBlock, dite_eq_right (by omega), dite_eq_right (by omega), dite_eq_left (by omega),
     show (⟨i.val + 2 - 2, by omega⟩ : Fin kk) = i from Fin.ext (by simp)]
 
 @[simp] theorem codeBlock_ot {kk : ℕ} (tm : NTM kk) (x : List Bool) (S : ℕ)
     (a : Code tm.Q kk x.length S) :
     codeBlock tm x S a (kk + 2) = (tapeCodec (S + 2)).enc a.2.2.2 := by
-  rw [codeBlock, dif_neg (by omega), dif_neg (by omega), dif_neg (by omega)]
+  rw [codeBlock, dite_eq_right (by omega), dite_eq_right (by omega), dite_eq_right (by omega)]
 
 theorem codeBlock_length {kk : ℕ} (tm : NTM kk) (x : List Bool) (S : ℕ)
     (a : Code tm.Q kk x.length S) (p : ℕ) :
@@ -351,15 +351,16 @@ theorem holdsCode_of_blocks {kk jj : ℕ} (tm : NTM kk) (x : List Bool) (S : ℕ
     HoldsCode tm x S cols 0 (codeRegsOf j) a := by
   refine ⟨?_, ?_, fun i => ?_, ?_⟩
   · have := h 0 (by omega)
-    rwa [codeBlock, dif_pos rfl] at this
+    rwa [codeBlock, dite_eq_left rfl] at this
   · have := h 1 (by omega)
-    rwa [codeBlock, dif_neg (by omega), dif_pos rfl] at this
+    rwa [codeBlock, dite_eq_right (by omega), dite_eq_left rfl] at this
   · have hb := h (i.val + 2) (by omega)
-    rw [codeBlock, dif_neg (by omega), dif_neg (by omega), dif_pos (by omega),
+    rw [codeBlock, dite_eq_right (by omega), dite_eq_right (by omega), dite_eq_left (by omega),
       show (⟨i.val + 2 - 2, by omega⟩ : Fin kk) = i from Fin.ext (by simp)] at hb
     exact HoldsWindow.of_bits hb
   · have hb := h (kk + 2) (by omega)
-    rw [codeBlock, dif_neg (by omega), dif_neg (by omega), dif_neg (by omega)] at hb
+    rw [codeBlock, dite_eq_right (by omega), dite_eq_right (by omega),
+      dite_eq_right (by omega)] at hb
     exact HoldsWindow.of_bits hb
 
 /-- **A guess stage can lay down any code.** Given a guess tape whose bits, block by block, are
@@ -479,7 +480,7 @@ theorem markOf_end {kk jj : ℕ} (tm : NTM kk) (x : List Bool) (S : ℕ)
   set pw := (succParamsCodec tm.Q kk).width with hpw
   have hblk : codeBlockScan tm x S a p
       = List.replicate pw false ++ (codeBlock tm x S a p ++ [false]) := by
-    rw [codeBlockScan, if_neg hp]
+    rw [codeBlockScan, ite_eq_right hp]
   have hlast : (codeBlockScan tm x S a p)[pw + 3 * m]?  = some false := by
     rw [hblk, List.getElem?_append_right (by rw [List.length_replicate]; omega),
       List.length_replicate, show pw + 3 * m - pw = 3 * m by omega,
@@ -507,22 +508,23 @@ theorem holdsCodeScan_of_blocks {kk jj : ℕ} (tm : NTM kk) (x : List Bool) (S :
       HoldsBits cols (succParamsCodec tm.Q kk).width (j p) (codeBlock tm x S a p) := by
     intro p hp hp0
     have hb := h p hp
-    rw [codeBlockScan, if_neg hp0] at hb
+    rw [codeBlockScan, ite_eq_right hp0] at hb
     have hdrop := hb.drop_prefix
     rw [List.length_replicate] at hdrop
     exact hdrop.of_isPrefix ⟨[false], rfl⟩
   refine ⟨?_, ?_, fun i => ?_, ?_⟩
   · have hb := h 0 (by omega)
-    rw [codeBlockScan, if_pos rfl, codeBlock, dif_pos rfl] at hb
+    rw [codeBlockScan, ite_eq_left rfl, codeBlock, dite_eq_left rfl] at hb
     exact hb
   · have hb := hpad 1 (by omega) (by omega)
-    rwa [codeBlock, dif_neg (by omega), dif_pos rfl] at hb
+    rwa [codeBlock, dite_eq_right (by omega), dite_eq_left rfl] at hb
   · have hb := hpad (i.val + 2) (by omega) (by omega)
-    rw [codeBlock, dif_neg (by omega), dif_neg (by omega), dif_pos (by omega),
+    rw [codeBlock, dite_eq_right (by omega), dite_eq_right (by omega), dite_eq_left (by omega),
       show (⟨i.val + 2 - 2, by omega⟩ : Fin kk) = i from Fin.ext (by simp)] at hb
     exact HoldsWindow.of_bits hb
   · have hb := hpad (kk + 2) (by omega) (by omega)
-    rw [codeBlock, dif_neg (by omega), dif_neg (by omega), dif_neg (by omega)] at hb
+    rw [codeBlock, dite_eq_right (by omega), dite_eq_right (by omega),
+      dite_eq_right (by omega)] at hb
     exact HoldsWindow.of_bits hb
 
 /-! ## What each scan says about the code the registers hold -/
@@ -905,7 +907,7 @@ theorem bitsOfLenLE_all_false_iff (ℓ v : ℕ) (hv : v < 2 ^ ℓ) :
           rfl
     have : (bitsOfLenLE ℓ 0)[q]? = some false := by
       rw [hrep ℓ, List.getElem?_replicate]
-      rw [if_pos hq]
+      rw [ite_eq_left hq]
     exact Option.some_injective _
       (by rw [← List.getElem?_eq_getElem (by rw [bitsOfLenLE_length]; exact hq), this])
 
@@ -1048,10 +1050,11 @@ theorem dirRead_snd (tm : NTM kk) (cols : ℕ → Fin 2 → Γ) (g₀ : Γ)
         · show (dirRead tm ((⟨0, Nat.zero_lt_succ _⟩, x₀), g₀) (cols (0 + 1))).2 = cols 1 1
           rw [dirRead]
           show (if (0 : ℕ) = 0 then cols (0 + 1) 1 else g₀) = cols 1 1
-          rw [if_pos rfl]
+          rw [ite_eq_left rfl]
         · show (Scanner.bitsStep 1 (succParamsCodec tm.Q kk).width (fun _ => 0)
             (⟨0, Nat.zero_lt_succ _⟩, x₀) (cols (0 + 1))).1.val ≠ 0
-          rw [Scanner.bitsStep, dif_pos (show (0 : ℕ) < (succParamsCodec tm.Q kk).width by omega)]
+          rw [Scanner.bitsStep,
+            dite_eq_left (show (0 : ℕ) < (succParamsCodec tm.Q kk).width by omega)]
           exact Nat.succ_ne_zero _
       · obtain ⟨ihcap, ihcnt⟩ := ih hp
         constructor
@@ -1060,7 +1063,7 @@ theorem dirRead_snd (tm : NTM kk) (cols : ℕ → Fin 2 → Γ) (g₀ : Γ)
           rw [dirRead]
           show (if (Scanner.auxRun ((⟨0, Nat.zero_lt_succ _⟩, x₀), g₀) (dirRead tm)
             cols p).1.1.val = 0 then _ else _) = cols 1 1
-          rw [if_neg ihcnt]
+          rw [ite_eq_right ihcnt]
           exact ihcap
         · show (Scanner.bitsStep 1 (succParamsCodec tm.Q kk).width (fun _ => 0)
             (Scanner.auxRun ((⟨0, Nat.zero_lt_succ _⟩, x₀), g₀) (dirRead tm) cols p).1
@@ -1436,8 +1439,8 @@ theorem eqScanner_decides {kk jj : ℕ} (tm : NTM kk) (x : List Bool) (S : ℕ)
     rw [codeBlockScan, codeBlockScan] at h
     by_cases h0 : p = 0
     · subst h0
-      rwa [if_pos rfl, if_pos rfl] at h
-    · rw [if_neg h0, if_neg h0] at h
+      rwa [ite_eq_left rfl, ite_eq_left rfl] at h
+    · rw [ite_eq_right h0, ite_eq_right h0] at h
       exact List.append_cancel_right (List.append_cancel_left h)
   have hst : a.1 = b.1 := by
     have h := hfield 0 (by omega)
@@ -1490,8 +1493,8 @@ theorem inSymScanner_decides {kk jj : ℕ} (tm : NTM kk) (x : List Bool) (S : �
   · rw [Scanner.all_emit_run] at h
     have h0 := h ⟨0, by omega⟩
     have h1 := h ⟨1, by omega⟩
-    rw [if_pos (rfl : (0 : ℕ) = 0)] at h0
-    rw [if_neg (by exact (by omega : (1 : ℕ) ≠ 0))] at h1
+    rw [ite_eq_left (rfl : (0 : ℕ) = 0)] at h0
+    rw [ite_eq_right (by exact (by omega : (1 : ℕ) ≠ 0))] at h1
     have hzero : a.2.1.val = 0 :=
       (headZeroScanner_decides tm x.length S hd cols (walkScanLen tm x.length S)
         (headField_le_walkScanLen tm x.length S) a.2.1 hhd).mp h0
@@ -1504,8 +1507,8 @@ theorem inSymScanner_decides {kk jj : ℕ} (tm : NTM kk) (x : List Bool) (S : �
   · rw [Scanner.all_emit_run] at h
     have h0 := h ⟨0, by omega⟩
     have h1 := h ⟨1, by omega⟩
-    rw [if_pos (rfl : (0 : ℕ) = 0)] at h0
-    rw [if_neg (by exact (by omega : (1 : ℕ) ≠ 0))] at h1
+    rw [ite_eq_left (rfl : (0 : ℕ) = 0)] at h0
+    rw [ite_eq_right (by exact (by omega : (1 : ℕ) ≠ 0))] at h1
     have hne : a.2.1.val ≠ 0 :=
       (headNonZeroScanner_decides tm x.length S hd cols (walkScanLen tm x.length S)
         (headField_le_walkScanLen tm x.length S) a.2.1 hhd).mp h0
@@ -1537,10 +1540,10 @@ theorem inSymScanner_accepts {kk jj : ℕ} (tm : NTM kk) (x : List Bool) (S : �
     rw [Scanner.all_emit_run]
     intro p
     by_cases hp : p.val = 0
-    · rw [if_pos hp]
+    · rw [ite_eq_left hp]
       exact (headZeroScanner_decides tm x.length S hd cols (walkScanLen tm x.length S)
         (headField_le_walkScanLen tm x.length S) a.2.1 hhd).mpr hz
-    · rw [if_neg hp]
+    · rw [ite_eq_right hp]
       refine (Scanner.isConst_upTo_run jj par Γ.one cols 2 (walkScanLen tm x.length S)
         (two_le_walkScanLen tm x.length S)).mpr ?_
       refine (parStart_iff tm cols par P hpar).mpr ?_
@@ -1550,10 +1553,10 @@ theorem inSymScanner_accepts {kk jj : ℕ} (tm : NTM kk) (x : List Bool) (S : �
     rw [Scanner.all_emit_run]
     intro p
     by_cases hp : p.val = 0
-    · rw [if_pos hp]
+    · rw [ite_eq_left hp]
       exact (headNonZeroScanner_decides tm x.length S hd cols (walkScanLen tm x.length S)
         (headField_le_walkScanLen tm x.length S) a.2.1 hhd).mpr hz
-    · rw [if_neg hp]
+    · rw [ite_eq_right hp]
       exact (Scanner.isConst_cell jj res Γ.one cols (walkScanLen tm x.length S)
         (one_le_walkScanLen tm x.length S)).mpr (hres hz)
 
@@ -1642,26 +1645,26 @@ theorem succScanner_verdicts {kk jj : ℕ} (tm : NTM kk) (nn S : ℕ) (par : Fin
     exact h
   refine ⟨fun i => ?_, ?_, ?_, ?_, ?_⟩
   · have h := hv ⟨i.val, by omega⟩
-    rw [dif_pos i.isLt, show (⟨i.val, i.isLt⟩ : Fin kk) = i from Fin.ext rfl] at h
+    rw [dite_eq_left i.isLt, show (⟨i.val, i.isLt⟩ : Fin kk) = i from Fin.ext rfl] at h
     exact hcomp _ _ _ (fun _ _ => rfl) (by rw [walkScanLen]; omega) h
   · have h := hv ⟨kk, by omega⟩
-    rw [dif_neg (by exact Nat.lt_irrefl kk), if_pos (rfl : kk = kk)] at h
+    rw [dite_eq_right (by exact Nat.lt_irrefl kk), ite_eq_left (rfl : kk = kk)] at h
     exact hcomp _ _ _ (fun _ _ => rfl) (by rw [walkScanLen]; omega) h
   · have h := hv ⟨kk + 1, by omega⟩
-    rw [dif_neg (by exact Nat.not_lt.mpr (Nat.le_succ kk)),
-      if_neg (by exact Nat.succ_ne_self kk), if_pos (rfl : kk + 1 = kk + 1)] at h
+    rw [dite_eq_right (by exact Nat.not_lt.mpr (Nat.le_succ kk)),
+      ite_eq_right (by exact Nat.succ_ne_self kk), ite_eq_left (rfl : kk + 1 = kk + 1)] at h
     exact hcomp _ _ _ (fun _ _ => rfl) (by rw [walkScanLen]; omega) h
   · have h := hv ⟨kk + 2, by omega⟩
-    rw [dif_neg (by exact Nat.not_lt.mpr (Nat.le_add_right kk 2)),
-      if_neg (by exact (by omega : kk + 2 ≠ kk)),
-      if_neg (by exact (by omega : kk + 2 ≠ kk + 1)),
-      if_pos (rfl : kk + 2 = kk + 2)] at h
+    rw [dite_eq_right (by exact Nat.not_lt.mpr (Nat.le_add_right kk 2)),
+      ite_eq_right (by exact (by omega : kk + 2 ≠ kk)),
+      ite_eq_right (by exact (by omega : kk + 2 ≠ kk + 1)),
+      ite_eq_left (rfl : kk + 2 = kk + 2)] at h
     exact hcomp _ _ _ (fun _ _ => rfl) (by rw [walkScanLen]; omega) h
   · have h := hv ⟨kk + 3, by omega⟩
-    rw [dif_neg (by exact Nat.not_lt.mpr (Nat.le_add_right kk 3)),
-      if_neg (by exact (by omega : kk + 3 ≠ kk)),
-      if_neg (by exact (by omega : kk + 3 ≠ kk + 1)),
-      if_neg (by exact (by omega : kk + 3 ≠ kk + 2))] at h
+    rw [dite_eq_right (by exact Nat.not_lt.mpr (Nat.le_add_right kk 3)),
+      ite_eq_right (by exact (by omega : kk + 3 ≠ kk)),
+      ite_eq_right (by exact (by omega : kk + 3 ≠ kk + 1)),
+      ite_eq_right (by exact (by omega : kk + 3 ≠ kk + 2))] at h
     exact hcomp _ _ _ (fun _ _ => rfl) (by rw [walkScanLen]; omega) h
 
 /-- **The successor scan accepts a genuine successor.** The converse of
@@ -1725,24 +1728,24 @@ theorem succScanner_accepts {kk jj : ℕ} (tm : NTM kk) (x : List Bool) (S : ℕ
       Scanner.comap_emit, Scanner.comap_run]
     exact h
   by_cases hpk : p.val < kk
-  · rw [dif_pos hpk]
+  · rw [dite_eq_left hpk]
     refine hcomp _ _ _ (fun _ _ => rfl) (by rw [walkScanLen]; omega) ?_
     refine (windowScanner_decides tm ⟨p.val, hpk⟩ _ S (a.2.2.1 ⟨p.val, hpk⟩).1
       (b.2.2.1 ⟨p.val, hpk⟩).1 (a.2.2.1 ⟨p.val, hpk⟩).2 (b.2.2.1 ⟨p.val, hpk⟩).2
       (hawk ⟨p.val, hpk⟩) (hbwk ⟨p.val, hpk⟩) (hendW ⟨p.val, hpk⟩)).mpr ?_
     rw [hPw ⟨p.val, hpk⟩]
     exact ⟨hwsym _, (hwork _).2, (hwork _).1⟩
-  · rw [dif_neg hpk]
+  · rw [dite_eq_right hpk]
     by_cases hpo : p.val = kk
-    · rw [if_pos hpo]
+    · rw [ite_eq_left hpo]
       refine hcomp _ _ _ (fun _ _ => rfl) (by rw [walkScanLen]; omega) ?_
       refine (outputScanner_decides tm _ S a.2.2.2.1 b.2.2.2.1 a.2.2.2.2 b.2.2.2.2
         haot hbot hendO).mpr ?_
       rw [hPo]
       exact ⟨hosym, hout.2, hout.1⟩
-    · rw [if_neg hpo]
+    · rw [ite_eq_right hpo]
       by_cases hph : p.val = kk + 1
-      · rw [if_pos hph]
+      · rw [ite_eq_left hph]
         refine hcomp _ _ _ (fun _ _ => rfl) (by rw [walkScanLen]; omega) ?_
         refine (headScanner_decides tm _ (bitWidth (x.length + S + 2)) a.2.1.val b.2.1.val
           (lt_of_lt_of_le a.2.1.isLt (le_two_pow_bitWidth _))
@@ -1750,17 +1753,17 @@ theorem succScanner_accepts {kk jj : ℕ} (tm : NTM kk) (x : List Bool) (S : ℕ
           hahd.shift hbhd.shift (by rw [hPh]; exact hleft)).mpr ?_
         rw [hPh]
         exact hhead
-      · rw [if_neg hph]
+      · rw [ite_eq_right hph]
         by_cases hps : p.val = kk + 2
-        · rw [if_pos hps]
+        · rw [ite_eq_left hps]
           refine hcomp _ _ _ (fun _ _ => rfl) (by rw [walkScanLen]; omega) ?_
           refine (stateScanner_decides tm false _ a.1 hast).mpr ?_
-          rw [hPsa, if_neg (by simp)]
+          rw [hPsa, ite_eq_right (by simp)]
           exact hq
-        · rw [if_neg hps]
+        · rw [ite_eq_right hps]
           refine hcomp _ _ _ (fun _ _ => rfl) (by rw [walkScanLen]; omega) ?_
           refine (stateScanner_decides tm true _ b.1 hbst).mpr ?_
-          rw [hPsb, if_pos rfl]
+          rw [hPsb, ite_eq_left rfl]
           exact hstate
 
 /-- **The successor scan decides a successor step.** Given that the parameter register holds a
@@ -1813,11 +1816,11 @@ theorem succScanner_decides {kk jj : ℕ} (tm : NTM kk) (x : List Bool) (S : ℕ
   have hq : a.1 = P.q := by
     have h := (stateScanner_decides tm false (fun q c => cols q (stateCols par Ra c)) a.1
       hast).mp vsta
-    rwa [hPsa, if_neg (by simp)] at h
+    rwa [hPsa, ite_eq_right (by simp)] at h
   have hstate : b.1 = succState tm P := by
     have h := (stateScanner_decides tm true (fun q c => cols q (stateCols par Rb c)) b.1
       hbst).mp vstb
-    rwa [hPsb, if_pos rfl] at h
+    rwa [hPsb, ite_eq_left rfl] at h
   have hwork : ∀ i, ((a.2.2.1 i).2 (a.2.2.1 i).1 = P.wSym i) ∧
       (∀ p, (b.2.2.1 i).2 p = if p = (a.2.2.1 i).1 ∧ 0 < p.val then succWrite tm P i
         else (a.2.2.1 i).2 p) ∧
@@ -1887,11 +1890,12 @@ theorem counterStepScanner_decides {jj : ℕ} (cntOld cntNew : Fin (jj + 1)) (wc
   rw [counterStepScanner] at hverdict
   cases advance with
   | true =>
-      rw [if_pos rfl, Scanner.upTo_emit_run _ (rightOnly_plusOne jj cntOld cntNew) wc len hw]
+      rw [ite_eq_left rfl, Scanner.upTo_emit_run _ (rightOnly_plusOne jj cntOld cntNew) wc len hw]
         at hverdict
       exact (plusOne_of_holds cols cntOld cntNew wc u v hu hv hold hnew).mp hverdict
   | false =>
-      rw [if_neg (by simp), Scanner.upTo_emit_run _ (Scanner.rightOnly_eq jj cntOld cntNew) wc len
+      rw [ite_eq_right (by simp),
+        Scanner.upTo_emit_run _ (Scanner.rightOnly_eq jj cntOld cntNew) wc len
         hw] at hverdict
       show u = v
       have hbits := (eq_run_of_holds cols cntOld cntNew (bitsOfLenLE wc u) (bitsOfLenLE wc v)
@@ -1987,17 +1991,17 @@ theorem dirCheckScanner_decides {kk jj : ℕ} (tm : NTM kk) (x : List Bool) (S :
     have h0 := h ⟨0, by omega⟩
     have h1 := h ⟨1, by omega⟩
     have h2 := h ⟨2, by omega⟩
-    rw [if_pos (rfl : (0 : ℕ) = 0), Scanner.or_emit_run] at h0
-    rw [if_neg (by exact (by omega : (1 : ℕ) ≠ 0)), if_pos (rfl : (1 : ℕ) = 1)] at h1
-    rw [if_neg (by exact (by omega : (2 : ℕ) ≠ 0)),
-      if_neg (by exact (by omega : (2 : ℕ) ≠ 1))] at h2
+    rw [ite_eq_left (rfl : (0 : ℕ) = 0), Scanner.or_emit_run] at h0
+    rw [ite_eq_right (by exact (by omega : (1 : ℕ) ≠ 0)), ite_eq_left (rfl : (1 : ℕ) = 1)] at h1
+    rw [ite_eq_right (by exact (by omega : (2 : ℕ) ≠ 0)),
+      ite_eq_right (by exact (by omega : (2 : ℕ) ≠ 1))] at h2
     have hstay : adjustedDir (succTrans tm P).2.2.2.1 a.2.1.val = Dir3.stay := by
       rw [adjustedDir]
       rcases h0 with hz | hz
-      · rw [if_pos (hzO.mp hz)]
+      · rw [ite_eq_left (hzO.mp hz)]
       · by_cases ha : a.2.1.val = 0
-        · rw [if_pos ha]
-        · rw [if_neg ha, if_pos (by rw [← hmove]; exact hzN.mp hz)]
+        · rw [ite_eq_left ha]
+        · rw [ite_eq_right ha, ite_eq_left (by rw [← hmove]; exact hzN.mp hz)]
     rw [hstay]
     exact ⟨(Scanner.isConst_cell jj mv (dc.encMove Dir3.stay) cols
         (walkScanLen tm x.length S) hlen2).mp h1,
@@ -2008,21 +2012,21 @@ theorem dirCheckScanner_decides {kk jj : ℕ} (tm : NTM kk) (x : List Bool) (S :
     have h1 := h ⟨1, by omega⟩
     have h2 := h ⟨2, by omega⟩
     have h3 := h ⟨3, by omega⟩
-    rw [if_pos (rfl : (0 : ℕ) = 0)] at h0
-    rw [if_neg (by exact (by omega : (1 : ℕ) ≠ 0)), if_pos (rfl : (1 : ℕ) = 1)] at h1
-    rw [if_neg (by exact (by omega : (2 : ℕ) ≠ 0)),
-      if_neg (by exact (by omega : (2 : ℕ) ≠ 1)), if_pos (rfl : (2 : ℕ) = 2),
+    rw [ite_eq_left (rfl : (0 : ℕ) = 0)] at h0
+    rw [ite_eq_right (by exact (by omega : (1 : ℕ) ≠ 0)), ite_eq_left (rfl : (1 : ℕ) = 1)] at h1
+    rw [ite_eq_right (by exact (by omega : (2 : ℕ) ≠ 0)),
+      ite_eq_right (by exact (by omega : (2 : ℕ) ≠ 1)), ite_eq_left (rfl : (2 : ℕ) = 2),
       Scanner.upTo_emit_run _ (Scanner.rightOnly_comap (fun _ _ => rfl) (dirCols par mv))
         _ _ (succParamsCodec_width_le_walkScanLen tm x.length S),
       Scanner.comap_emit, Scanner.comap_run] at h2
-    rw [if_neg (by exact (by omega : (3 : ℕ) ≠ 0)),
-      if_neg (by exact (by omega : (3 : ℕ) ≠ 1)),
-      if_neg (by exact (by omega : (3 : ℕ) ≠ 2)),
+    rw [ite_eq_right (by exact (by omega : (3 : ℕ) ≠ 0)),
+      ite_eq_right (by exact (by omega : (3 : ℕ) ≠ 1)),
+      ite_eq_right (by exact (by omega : (3 : ℕ) ≠ 2)),
       Scanner.upTo_emit_run _ (Scanner.rightOnly_comap (fun _ _ => rfl) (dirCols par dr))
         _ _ (succParamsCodec_width_le_walkScanLen tm x.length S),
       Scanner.comap_emit, Scanner.comap_run] at h3
     have hdir : adjustedDir (succTrans tm P).2.2.2.1 a.2.1.val = (succTrans tm P).2.2.2.1 := by
-      rw [adjustedDir, if_neg (hnO.mp h0), if_neg (by rw [← hmove]; exact hnN.mp h1)]
+      rw [adjustedDir, ite_eq_right (hnO.mp h0), ite_eq_right (by rw [← hmove]; exact hnN.mp h1)]
     rw [hdir]
     exact ⟨(dirScanner_decides tm dc.encMove (fun q c => cols q (dirCols par mv c)) P hpar).mp h2,
       (dirScanner_decides tm dc.enc (fun q c => cols q (dirCols par dr c)) P hpar).mp h3⟩
@@ -2056,43 +2060,43 @@ theorem dirCheckScanner_accepts {kk jj : ℕ} (tm : NTM kk) (x : List Bool) (S :
   · have hstay : adjustedDir (succTrans tm P).2.2.2.1 a.2.1.val = Dir3.stay := by
       rw [adjustedDir]
       rcases hz with hz | hz
-      · rw [if_pos hz]
+      · rw [ite_eq_left hz]
       · by_cases ha : a.2.1.val = 0
-        · rw [if_pos ha]
-        · rw [if_neg ha, if_pos (by rw [← hmove]; exact hz)]
+        · rw [ite_eq_left ha]
+        · rw [ite_eq_right ha, ite_eq_left (by rw [← hmove]; exact hz)]
     refine Or.inl ?_
     rw [Scanner.all_emit_run]
     intro p
     by_cases hp0 : p.val = 0
-    · rw [if_pos hp0, Scanner.or_emit_run]
+    · rw [ite_eq_left hp0, Scanner.or_emit_run]
       rcases hz with hz | hz
       · exact Or.inl (hzO.mpr hz)
       · exact Or.inr (hzN.mpr hz)
-    · rw [if_neg hp0]
+    · rw [ite_eq_right hp0]
       by_cases hp1 : p.val = 1
-      · rw [if_pos hp1]
+      · rw [ite_eq_left hp1]
         exact (Scanner.isConst_cell jj mv (dc.encMove Dir3.stay) cols
           (walkScanLen tm x.length S) hlen1).mpr (by rw [hmv, hstay])
-      · rw [if_neg hp1]
+      · rw [ite_eq_right hp1]
         exact (Scanner.isConst_cell jj dr (dc.enc Dir3.stay) cols
           (walkScanLen tm x.length S) hlen1).mpr (by rw [hdr, hstay])
   · have hzA : a.2.1.val ≠ 0 := fun hc => hz (Or.inl hc)
     have hzB : b.2.1.val ≠ 0 := fun hc => hz (Or.inr hc)
     have hdir : adjustedDir (succTrans tm P).2.2.2.1 a.2.1.val = (succTrans tm P).2.2.2.1 := by
-      rw [adjustedDir, if_neg hzA, if_neg (by rw [← hmove]; exact hzB)]
+      rw [adjustedDir, ite_eq_right hzA, ite_eq_right (by rw [← hmove]; exact hzB)]
     refine Or.inr ?_
     rw [Scanner.all_emit_run]
     intro p
     by_cases hp0 : p.val = 0
-    · rw [if_pos hp0]
+    · rw [ite_eq_left hp0]
       exact hnO.mpr hzA
-    · rw [if_neg hp0]
+    · rw [ite_eq_right hp0]
       by_cases hp1 : p.val = 1
-      · rw [if_pos hp1]
+      · rw [ite_eq_left hp1]
         exact hnN.mpr hzB
-      · rw [if_neg hp1]
+      · rw [ite_eq_right hp1]
         by_cases hp2 : p.val = 2
-        · rw [if_pos hp2, Scanner.upTo_emit_run _
+        · rw [ite_eq_left hp2, Scanner.upTo_emit_run _
             (Scanner.rightOnly_comap (fun _ _ => rfl) (dirCols par mv))
             _ _ (succParamsCodec_width_le_walkScanLen tm x.length S),
             Scanner.comap_emit, Scanner.comap_run]
@@ -2100,7 +2104,7 @@ theorem dirCheckScanner_accepts {kk jj : ℕ} (tm : NTM kk) (x : List Bool) (S :
             hpar).mpr ?_
           show cols 1 mv = _
           rw [hmv, hdir]
-        · rw [if_neg hp2, Scanner.upTo_emit_run _
+        · rw [ite_eq_right hp2, Scanner.upTo_emit_run _
             (Scanner.rightOnly_comap (fun _ _ => rfl) (dirCols par dr))
             _ _ (succParamsCodec_width_le_walkScanLen tm x.length S),
             Scanner.comap_emit, Scanner.comap_run]
@@ -2136,11 +2140,12 @@ theorem counterStepScanner_accepts {jj : ℕ} (cntOld cntNew : Fin (jj + 1)) (wc
   rw [counterStepScanner]
   cases advance with
   | true =>
-      rw [if_pos rfl, Scanner.upTo_emit_run _ (rightOnly_plusOne jj cntOld cntNew) wc len hw]
+      rw [ite_eq_left rfl, Scanner.upTo_emit_run _ (rightOnly_plusOne jj cntOld cntNew) wc len hw]
       exact (plusOne_of_holds cols cntOld cntNew wc u v hu hv hold hnew).mpr (by
         simpa using hmove)
   | false =>
-      rw [if_neg (by simp), Scanner.upTo_emit_run _ (Scanner.rightOnly_eq jj cntOld cntNew) wc len
+      rw [ite_eq_right (by simp),
+        Scanner.upTo_emit_run _ (Scanner.rightOnly_eq jj cntOld cntNew) wc len
         hw]
       have huv : u = v := by simpa using hmove
       subst huv
@@ -2195,10 +2200,10 @@ theorem walkCodeScanner_decides {kk jj : ℕ} (tm : NTM kk) (x : List Bool) (S :
     have h0 := h ⟨0, by omega⟩
     have h1 := h ⟨1, by omega⟩
     have h2 := h ⟨2, by omega⟩
-    rw [if_pos (rfl : (0 : ℕ) = 0)] at h0
-    rw [if_neg (by exact (by omega : (1 : ℕ) ≠ 0)), if_pos (rfl : (1 : ℕ) = 1)] at h1
-    rw [if_neg (by exact (by omega : (2 : ℕ) ≠ 0)),
-      if_neg (by exact (by omega : (2 : ℕ) ≠ 1))] at h2
+    rw [ite_eq_left (rfl : (0 : ℕ) = 0)] at h0
+    rw [ite_eq_right (by exact (by omega : (1 : ℕ) ≠ 0)), ite_eq_left (rfl : (1 : ℕ) = 1)] at h1
+    rw [ite_eq_right (by exact (by omega : (2 : ℕ) ≠ 0)),
+      ite_eq_right (by exact (by omega : (2 : ℕ) ≠ 1))] at h2
     exact Or.inl ⟨(eqScanner_decides tm x S cols j j' a b ha hb h0).symm,
       (Scanner.isConst_cell jj mv (dc.encMove Dir3.stay) cols (walkScanLen tm x.length S)
         (one_le_walkScanLen tm x.length S)).mp h1,
@@ -2208,10 +2213,10 @@ theorem walkCodeScanner_decides {kk jj : ℕ} (tm : NTM kk) (x : List Bool) (S :
     have h0 := h ⟨0, by omega⟩
     have h1 := h ⟨1, by omega⟩
     have h2 := h ⟨2, by omega⟩
-    rw [if_pos (rfl : (0 : ℕ) = 0)] at h0
-    rw [if_neg (by exact (by omega : (1 : ℕ) ≠ 0)), if_pos (rfl : (1 : ℕ) = 1)] at h1
-    rw [if_neg (by exact (by omega : (2 : ℕ) ≠ 0)),
-      if_neg (by exact (by omega : (2 : ℕ) ≠ 1))] at h2
+    rw [ite_eq_left (rfl : (0 : ℕ) = 0)] at h0
+    rw [ite_eq_right (by exact (by omega : (1 : ℕ) ≠ 0)), ite_eq_left (rfl : (1 : ℕ) = 1)] at h1
+    rw [ite_eq_right (by exact (by omega : (2 : ℕ) ≠ 0)),
+      ite_eq_right (by exact (by omega : (2 : ℕ) ≠ 1))] at h2
     have hin : P.inSym = inSymOf tm x S a :=
       inSymScanner_decides tm x S cols par (codeRegsOf j).hd res P a g hpar
         (holdsCodeScan_of_blocks tm x S cols j a ha).2.1 hres hg h2
@@ -2238,14 +2243,14 @@ theorem walkCodeScanner_accepts_stay {kk jj : ℕ} (tm : NTM kk) (x : List Bool)
   rw [Scanner.all_emit_run]
   intro p
   by_cases hp : p.val = 0
-  · rw [if_pos hp]
+  · rw [ite_eq_left hp]
     exact eqScanner_accepts tm x S cols j j' a ha hb
-  · rw [if_neg hp]
+  · rw [ite_eq_right hp]
     by_cases hp1 : p.val = 1
-    · rw [if_pos hp1]
+    · rw [ite_eq_left hp1]
       exact (Scanner.isConst_cell jj mv (dc.encMove Dir3.stay) cols (walkScanLen tm x.length S)
         (one_le_walkScanLen tm x.length S)).mpr hmv
-    · rw [if_neg hp1]
+    · rw [ite_eq_right hp1]
       exact (Scanner.isConst_cell jj dr (dc.enc Dir3.stay) cols (walkScanLen tm x.length S)
         (one_le_walkScanLen tm x.length S)).mpr hdr
 
@@ -2300,15 +2305,15 @@ theorem walkCodeScanner_accepts_succ {kk jj : ℕ} (tm : NTM kk) (x : List Bool)
   rw [Scanner.all_emit_run]
   intro p
   by_cases hp0 : p.val = 0
-  · rw [if_pos hp0]
+  · rw [ite_eq_left hp0]
     exact succScanner_accepts tm x S cols par (codeRegsOf j) (codeRegsOf j') a b P hpar
       (holdsCodeScan_of_blocks tm x S cols j a ha) (holdsCodeScan_of_blocks tm x S cols j' b hb)
       hendW hendO hq hstate hwsym hosym hhead hwork hout hleft
-  · rw [if_neg hp0]
+  · rw [ite_eq_right hp0]
     by_cases hp1 : p.val = 1
-    · rw [if_pos hp1]
+    · rw [ite_eq_left hp1]
       exact hdr
-    · rw [if_neg hp1]
+    · rw [ite_eq_right hp1]
       exact hres
 
 /-- **One walk step, as a single scan.** Either the guessed code repeats the old one and the
@@ -2348,8 +2353,8 @@ theorem walkStepScanner_decides {kk jj : ℕ} (tm : NTM kk) (x : List Bool) (S :
   rw [walkStepScanner, Scanner.all_emit_run] at hverdict
   have h0 := hverdict ⟨0, by omega⟩
   have h1 := hverdict ⟨1, by omega⟩
-  rw [if_pos (rfl : (0 : ℕ) = 0)] at h0
-  rw [if_neg (by exact (by omega : (1 : ℕ) ≠ 0))] at h1
+  rw [ite_eq_left (rfl : (0 : ℕ) = 0)] at h0
+  rw [ite_eq_right (by exact (by omega : (1 : ℕ) ≠ 0))] at h1
   exact ⟨walkCodeScanner_decides tm x S cols par mv dr res dc j j' a b P g hpar ha hb hne hres hg
       h0,
     counterStepScanner_decides cntOld cntNew wc (walkScanLen tm x.length S) advance hwc cols u v
@@ -2372,9 +2377,9 @@ theorem walkStepScanner_accepts {kk jj : ℕ} (tm : NTM kk) (x : List Bool) (S :
   rw [walkStepScanner, Scanner.all_emit_run]
   intro p
   by_cases hp : p.val = 0
-  · rw [if_pos hp]
+  · rw [ite_eq_left hp]
     exact hcode
-  · rw [if_neg hp]
+  · rw [ite_eq_right hp]
     exact counterStepScanner_accepts cntOld cntNew wc (walkScanLen tm x.length S) advance hwc
       cols u v hu hv hold hnew hmove
 
@@ -2849,7 +2854,7 @@ theorem walkStepTM_hoareTime {kk jj : ℕ} (r : ℕ) (tm : NTM kk) (nn S : ℕ)
     have hsrcRead : (work (Fin.castAdd r (Fin.last (jj + 1))).castSucc).read = Γ.ofBool v := by
       rw [hregs (Fin.last (jj + 1)), hW₁, Fin.snoc_last]
       show (resT.write (Γ.ofBool v)).read = _
-      rw [Tape.write, if_neg (show resT.head ≠ 0 by rw [hresT]; exact one_ne_zero)]
+      rw [Tape.write, ite_eq_right (show resT.head ≠ 0 by rw [hresT]; exact one_ne_zero)]
       show Function.update resT.cells resT.head (Γ.ofBool v) resT.head = _
       rw [Function.update_self]
     refine ⟨c', tt, htt, hreach, hhalt, ?_, ?_, hin', hout', ?_, ?_⟩
@@ -2878,7 +2883,7 @@ theorem walkStepTM_hoareTime {kk jj : ℕ} (r : ℕ) (tm : NTM kk) (nn S : ℕ)
       have hc : work (Fin.natAdd (jj + 2) c).castSucc
           = TM.parkTape (G (Fin.natAdd (jj + 2) c).castSucc) := by
         have := congrFun hwork (Fin.natAdd (jj + 2) c)
-        rw [this, if_neg (haux c)]
+        rw [this, ite_eq_right (haux c)]
       rw [hc, hGaux c, TM.parkTape_eq_self (hhW _)]
       exact TM.transitionTape_eq_self ((hinvW _).read_ne_start (hhW _))
     · rw [hinpP]
@@ -2890,7 +2895,7 @@ theorem walkStepTM_hoareTime {kk jj : ℕ} (r : ℕ) (tm : NTM kk) (nn S : ℕ)
       have hi : work (Fin.castAdd r i).castSucc
           = (⟨1, (G (Fin.castAdd r i).castSucc).cells⟩ : Tape) := by
         have := congrFun hwork (Fin.castAdd r i)
-        rw [this, if_pos (hall i)]
+        rw [this, ite_eq_left (hall i)]
       rw [hi, TM.transitionTape_eq_self (by
         show (⟨1, (G (Fin.castAdd r i).castSucc).cells⟩ : Tape).read ≠ Γ.start
         exact fun hc => (ginv (Fin.castAdd r i).castSucc).2 1 le_rfl hc)]
@@ -3079,7 +3084,7 @@ theorem publishTestTM_hoareTime {jj : ℕ} (Sc : Scanner jj) (len : ℕ)
       rw [hW₁cast q]
       exact ⟨le_rfl, fun p hp => ht.ne_start q p hp⟩
   have hread : (W₁ (Fin.last (jj + 1))).read = Γ.ofBool v := by
-    rw [hW₁last, Tape.read, Tape.write_head, hresH, Tape.write, if_neg (by rw [hresH]; omega),
+    rw [hW₁last, Tape.read, Tape.write_head, hresH, Tape.write, ite_eq_right (by rw [hresH]; omega),
       hresH]
     show Function.update resT.cells 1 (Γ.ofBool v) 1 = _
     rw [Function.update_self]
@@ -3341,13 +3346,13 @@ theorem move_adjusted (t : Tape) (d : Dir3) (h : ℕ) (ht : t.head = max h 1) :
     (t.move (adjustedDir d h)).head = max (movedIdx d h) 1 := by
   rw [move_head_eq_movedIdx, ht, adjustedDir]
   by_cases h0 : h = 0
-  · rw [if_pos h0, h0]
+  · rw [ite_eq_left h0, h0]
     cases d <;> simp [movedIdx]
-  · rw [if_neg h0]
+  · rw [ite_eq_right h0]
     by_cases h1 : movedIdx d h = 0
-    · rw [if_pos h1, h1]
+    · rw [ite_eq_left h1, h1]
       cases d <;> simp only [movedIdx] at h1 ⊢ <;> omega
-    · rw [if_neg h1]
+    · rw [ite_eq_right h1]
       cases d <;> simp only [movedIdx] at h1 ⊢ <;> omega
 
 /-- **One walk step carries the input head to where the next code says.** Whichever branch the
@@ -3622,26 +3627,26 @@ theorem stepIdx_inj (second : Bool) : ∀ p q, p < L.stepBlocks → q < L.stepBl
 /-- The second step of a pair guesses the old code's blocks. -/
 theorem stepIdx_codeA (p : ℕ) (hp : p < kk + 3) :
     L.stepIdx true (L.scratch + p) = L.codeAIdx p := by
-  rw [stepIdx, if_neg (by omega), if_pos rfl, L.codeA_eq p hp]
+  rw [stepIdx, ite_eq_right (by omega), ite_eq_left rfl, L.codeA_eq p hp]
 
 /-- The first step guesses the new code's. -/
 theorem stepIdx_codeB (p : ℕ) (hp : p < kk + 3) :
     L.stepIdx false (L.scratch + p) = L.codeBIdx p := by
-  rw [stepIdx, if_neg (by omega), if_neg (by simp), L.codeB_eq p hp]
+  rw [stepIdx, ite_eq_right (by omega), ite_eq_right (by simp), L.codeB_eq p hp]
   omega
 
 /-- The first step guesses none of the old code's blocks. -/
 theorem stepIdx_ne_codeA (p q : ℕ) (_hp : p < L.stepBlocks) (hq : q < kk + 3) :
     L.stepIdx false p ≠ L.codeAIdx q := by
   rw [stepIdx, L.codeA_eq q hq]
-  split <;> [omega; (rw [if_neg (by simp)]; omega)]
+  split <;> [omega; (rw [ite_eq_right (by simp)]; omega)]
 
 /-- The second guesses none of the new code's. -/
 theorem stepIdx_ne_codeB (p q : ℕ) (hp : p < L.stepBlocks) (hq : q < kk + 3) :
     L.stepIdx true p ≠ L.codeBIdx q := by
   rw [stepIdx, L.codeB_eq q hq]
   rw [stepBlocks] at hp
-  split <;> [omega; (rw [if_pos rfl]; omega)]
+  split <;> [omega; (rw [ite_eq_left rfl]; omega)]
 
 /-- The parameter register. -/
 def par : Fin (jj + 1) := L.reg L.parIdx
@@ -3762,7 +3767,7 @@ def stepWidth {kk jj : ℕ} {tm : NTM kk} {nn S wc : ℕ} (L : WalkWidths kk jj 
 theorem stepWidth_scratch {kk jj : ℕ} {tm : NTM kk} {nn S wc : ℕ}
     (L : WalkWidths kk jj tm nn S wc) (p : ℕ) (hp : p < L.toWalkLayout.scratch) :
     stepWidth L p = L.width p := by
-  rw [stepWidth, WalkLayout.stepIdx, if_pos hp]
+  rw [stepWidth, WalkLayout.stepIdx, ite_eq_left hp]
 
 /-- A code block is guessed at the code's width. -/
 theorem stepWidth_code {kk jj : ℕ} {tm : NTM kk} {nn S wc : ℕ}
@@ -3775,7 +3780,7 @@ theorem width_stepIdx_false {kk jj : ℕ} {tm : NTM kk} {nn S wc : ℕ}
     (L : WalkWidths kk jj tm nn S wc) (p : ℕ) (hp : p < L.toWalkLayout.stepBlocks) :
     L.width (L.toWalkLayout.stepIdx false p) = stepWidth L p := by
   by_cases hs : p < L.toWalkLayout.scratch
-  · rw [stepWidth, WalkLayout.stepIdx, WalkLayout.stepIdx, if_pos hs, if_pos hs]
+  · rw [stepWidth, WalkLayout.stepIdx, WalkLayout.stepIdx, ite_eq_left hs, ite_eq_left hs]
   · have hp' : p - L.toWalkLayout.scratch < kk + 3 := by
       rw [WalkLayout.stepBlocks] at hp
       omega
@@ -4256,7 +4261,7 @@ theorem stepReg_scratch {kk jj r : ℕ} {tm : NTM kk} {nn S wc : ℕ}
     (L : WalkWidths kk jj tm nn S wc) (second : Bool) (p : ℕ)
     (hp : p < L.toWalkLayout.scratch) :
     (stepReg L second p : Fin (jj + 2 + r + 1)) = walkReg (L.toWalkLayout.reg p) := by
-  rw [stepReg, WalkLayout.stepIdx, if_pos hp]
+  rw [stepReg, WalkLayout.stepIdx, ite_eq_left hp]
 
 /-- And so does its certificate. -/
 theorem stepCert_scratch {kk jj : ℕ} {tm : NTM kk} {nn S wc : ℕ}
@@ -4266,7 +4271,7 @@ theorem stepCert_scratch {kk jj : ℕ} {tm : NTM kk} {nn S wc : ℕ}
     (hp : p < L.toWalkLayout.scratch) :
     stepCert L x dc Ps ds cOlds cNews tgt aOld aNew second s p
       = stageBits L x dc (Ps s) (ds s) (cOlds s) (cNews s) tgt true (aOld s) (aNew s) p := by
-  rw [stepCert, WalkLayout.stepIdx, if_pos hp]
+  rw [stepCert, WalkLayout.stepIdx, ite_eq_left hp]
 
 /-- **A register no block of the step is guessed into keeps what it held.** -/
 theorem stepCells_retained {kk jj r : ℕ} {tm : NTM kk} {nn S wc : ℕ}

@@ -117,7 +117,7 @@ theorem floorMul_add_le_internal (scale : PositiveRationalScale)
       scale.floorMul (first + second) := by
   unfold floorMul
   rw [Nat.mul_add]
-  exact Nat.add_div_le_add_div _ _ _
+  exact Nat.div_add_div_le_add_div
 
 theorem tendsto_floorMul_atTop_internal (scale : PositiveRationalScale) :
     Filter.Tendsto scale.floorMul Filter.atTop Filter.atTop := by

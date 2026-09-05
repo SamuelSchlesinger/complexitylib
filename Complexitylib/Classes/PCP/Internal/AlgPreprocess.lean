@@ -118,7 +118,7 @@ theorem enc_vertexEquiv (x : Fin (G.reduce E).graph.order) :
   have h : NumEnc.enc ((NumEnc.equivFinCard (G.reduce E).graph.V).symm x)
       = (NumEnc.equivFinCard (G.reduce E).graph.V
           ((NumEnc.equivFinCard (G.reduce E).graph.V).symm x)).val := rfl
-  rw [h, Equiv.apply_symm_apply]
+  erw [h, Equiv.apply_symm_apply]
 
 theorem val_vertexEquiv_symm (v : (G.reduce E).graph.V) :
     ((E.vertexEquiv (G.reduce E).graph).symm v).val = enc v := rfl
@@ -147,7 +147,7 @@ theorem cloudStepNum_eq (p : G.HalfEdge) (j : Fin E.degree) :
     rw [G.idxOf_cloudList rfl, enc_halfEdge]
   have hlt' : countBelow (G.cloudCodes (G.owner p)) (enc p)
       < (G.cloudList (G.owner p)).length := by rw [← hidx]; exact hlt
-  rw [cloudStepNum, dif_pos hlt', cloudRot, cloudRotAux, dif_pos hlt]
+  rw [cloudStepNum, dite_eq_left hlt', cloudRot, cloudRotAux, dite_eq_left hlt]
   simp only [← hidx]
   refine Prod.ext ?_ rfl
   dsimp only
@@ -181,7 +181,7 @@ theorem ownerNum_enc (p : G.HalfEdge) : G.ownerNum (enc p) = (G.owner p).val := 
     cases p.2 <;> simp
   have hlt : enc p / 2 < G.numEdges := by rw [hdiv]; exact p.1.isLt
   have hfin : (⟨enc p / 2, hlt⟩ : Fin G.numEdges) = p.1 := Fin.ext hdiv
-  rw [ownerNum, dif_pos hlt, hmod, owner, hfin]
+  rw [ownerNum, dite_eq_left hlt, hmod, owner, hfin]
   cases p.2 <;> simp
 
 /-- The cloud step, on numbers throughout. -/
@@ -218,19 +218,18 @@ theorem preRotNum_eq (v : G.HalfEdge) (d : (G.preprocess E).graph.D) :
       = (enc (((G.preprocess E).graph.rot (v, d)).1 : G.HalfEdge),
         enc ((G.preprocess E).graph.rot (v, d)).2) := by
   rcases G.preDart_cases E d with rfl | rfl | ⟨j, rfl⟩ | ⟨j, rfl⟩
-  · rw [G.enc_preLoop E, preRotNum, if_pos rfl, G.rot_preLoop E, G.enc_preLoop E]
+  · erw [G.enc_preLoop E, preRotNum, ite_eq_left rfl, G.rot_preLoop E]
     rfl
-  · rw [G.enc_preEdge E, preRotNum, if_neg one_ne_zero, if_pos rfl, G.rot_preEdge E,
-      G.enc_preEdge E]
+  · erw [G.enc_preEdge E, preRotNum, ite_eq_right one_ne_zero, ite_eq_left rfl, G.rot_preEdge E]
     dsimp only
     exact Prod.ext (G.enc_flipHalf v).symm rfl
   · have hj := j.isLt
-    rw [G.enc_preCloud E j, preRotNum, if_neg (by omega), if_neg (by omega),
-      if_pos (by omega), G.rot_preCloud E, G.enc_preCloud E]
+    erw [G.enc_preCloud E j, preRotNum, ite_eq_right (by omega), ite_eq_right (by omega),
+      ite_eq_left (by omega), G.rot_preCloud E, G.enc_preCloud E]
     dsimp only
     rw [G.ownerNum_enc]
     have harg : (2 + j.val) - 2 = j.val := by omega
-    rw [harg, cloudStepN, dif_pos (G.owner v).isLt, dif_pos hj]
+    rw [harg, cloudStepN, dite_eq_left (G.owner v).isLt, dite_eq_left hj]
     have hv : (⟨(G.owner v).val, (G.owner v).isLt⟩ : Fin G.numVerts) = G.owner v := rfl
     have hjj : (⟨j.val, hj⟩ : Fin E.degree) = j := rfl
     rw [hv, hjj, G.cloudStepNum_eq E v j]
@@ -239,11 +238,11 @@ theorem preRotNum_eq (v : G.HalfEdge) (d : (G.preprocess E).graph.D) :
     have hvlt : enc v < (G.reduce E).graph.order := by
       have := NumEnc.enc_lt v
       rwa [NumEnc.card_eq_fintype_card] at this
-    rw [G.enc_preExp E j, preRotNum, if_neg (by omega), if_neg (by omega),
-      if_neg (by omega), G.rot_preExp E, G.enc_preExp E]
+    erw [G.enc_preExp E j, preRotNum, ite_eq_right (by omega), ite_eq_right (by omega),
+      ite_eq_right (by omega), G.rot_preExp E, G.enc_preExp E]
     dsimp only
     have harg : 2 + E.degree + j.val - (2 + E.degree) = j.val := by omega
-    rw [harg, expStepN, dif_pos hvlt, dif_pos hj]
+    rw [harg, expStepN, dite_eq_left hvlt, dite_eq_left hj]
     have hv : (⟨enc v, hvlt⟩ : Fin (G.reduce E).graph.order)
         = (E.vertexEquiv (G.reduce E).graph).symm v :=
       Fin.ext (G.val_vertexEquiv_symm E v).symm

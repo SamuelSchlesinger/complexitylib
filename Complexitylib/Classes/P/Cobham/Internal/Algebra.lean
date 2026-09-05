@@ -466,13 +466,13 @@ theorem foldr_table_eq (g d val : List Bool) :
       rintro ⟨p, hp, hpre⟩ hall
       rcases Decidable.em (a.1 <+: g) with hm | hm
       · rw [List.foldr_cons, (matchPrefix_eq_true_iff a.1 g).mpr hm, caseBit₀_cons,
-          cond_true]
+          Bool.cond_true]
         exact hall a (by simp) hm
       · have hmf : matchPrefix a.1 g = [false] := by
           rcases matchPrefix_flag a.1 g with h | h
           · exact absurd ((matchPrefix_eq_true_iff a.1 g).mp h) hm
           · exact h
-        rw [List.foldr_cons, hmf, caseBit₀_cons, cond_false]
+        rw [List.foldr_cons, hmf, caseBit₀_cons, Bool.cond_false]
         refine ih ⟨p, ?_, hpre⟩ fun q hq => hall q (by simp [hq])
         rcases List.mem_cons.mp hp with rfl | hp'
         · exact absurd hpre hm

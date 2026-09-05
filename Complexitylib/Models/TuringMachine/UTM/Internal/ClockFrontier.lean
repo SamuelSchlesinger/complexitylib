@@ -111,7 +111,7 @@ def decFrontierTM : TM 7 where
         dsimp only []
         by_cases hir : i = clkT
         · subst hir; rw [hone] at hi; exact absurd hi (by decide)
-        · rw [if_neg hir]; exact idleDir_right_of_start hi
+        · rw [ite_eq_right hir]; exact idleDir_right_of_start hi
       · exact ⟨idleDir_right_of_start, fun _ => idleDir_right_of_start,
           idleDir_right_of_start⟩
     | .settle =>
@@ -139,7 +139,7 @@ private theorem decFrontier_step_dec_one (c : Cfg 7 decFrontierTM.Q)
         work := Function.update c.work clkT
           (((c.work clkT).write Γw.blank).move .left),
         output := c.output } := by
-  rw [TM.step, if_neg (decFrontier_ne_halt (by decide) hst)]
+  rw [TM.step, ite_eq_right (decFrontier_ne_halt (by decide) hst)]
   simp only [decFrontierTM, hst, hone, ↓reduceIte]
   refine congrArg some ((Cfg.mk.injEq ..).mpr ⟨rfl, ?_, ?_, ?_⟩)
   · exact transitionInput_eq_self hinp
@@ -147,7 +147,7 @@ private theorem decFrontier_step_dec_one (c : Cfg 7 decFrontierTM.Q)
     by_cases hir : i = clkT
     · subst hir
       simp only [↓reduceIte, Function.update_self]
-    · rw [if_neg hir, if_neg hir, Function.update_of_ne hir]
+    · rw [ite_eq_right hir, ite_eq_right hir, Function.update_of_ne hir]
       exact Tape.writeAndMove_readBack_idle_of_ne_start _ (hoth i hir)
   · exact Tape.writeAndMove_readBack_idle_of_ne_start _ hout
 
@@ -160,7 +160,7 @@ private theorem decFrontier_step_dec_blank (c : Cfg 7 decFrontierTM.Q)
     decFrontierTM.step c = some
       { state := .done, input := c.input, work := c.work,
         output := c.output } := by
-  rw [TM.step, if_neg (decFrontier_ne_halt (by decide) hst)]
+  rw [TM.step, ite_eq_right (decFrontier_ne_halt (by decide) hst)]
   simp only [decFrontierTM, hst, hblank, reduceCtorEq, ↓reduceIte]
   refine congrArg some ((Cfg.mk.injEq ..).mpr ⟨rfl, ?_, ?_, ?_⟩)
   · exact transitionInput_eq_self hinp
@@ -180,7 +180,7 @@ private theorem decFrontier_step_settle_stay (c : Cfg 7 decFrontierTM.Q)
     decFrontierTM.step c = some
       { state := .done, input := c.input, work := c.work,
         output := c.output } := by
-  rw [TM.step, if_neg (decFrontier_ne_halt (by decide) hst)]
+  rw [TM.step, ite_eq_right (decFrontier_ne_halt (by decide) hst)]
   simp only [decFrontierTM, hst]
   refine congrArg some ((Cfg.mk.injEq ..).mpr ⟨rfl, ?_, ?_, ?_⟩)
   · exact transitionInput_eq_self hinp
@@ -202,7 +202,7 @@ private theorem decFrontier_step_settle_start (c : Cfg 7 decFrontierTM.Q)
   have h0 : (c.work clkT).head = 0 := by
     by_contra hc
     exact hcr _ (by omega) hs
-  rw [TM.step, if_neg (decFrontier_ne_halt (by decide) hst)]
+  rw [TM.step, ite_eq_right (decFrontier_ne_halt (by decide) hst)]
   simp only [decFrontierTM, hst]
   refine congrArg some ((Cfg.mk.injEq ..).mpr ⟨rfl, ?_, ?_, ?_⟩)
   · exact transitionInput_eq_self hinp
@@ -216,7 +216,7 @@ private theorem decFrontier_step_settle_start (c : Cfg 7 decFrontierTM.Q)
       show ((c.work clkT).write Γw.blank).move Dir3.right
         = (c.work clkT).move .right
       congr 1
-      rw [Tape.write, if_pos h0]
+      rw [Tape.write, ite_eq_left h0]
     · rw [Function.update_of_ne hir]
       exact Tape.writeAndMove_readBack_idle_of_ne_start _ (hoth i hir)
   · exact Tape.writeAndMove_readBack_idle_of_ne_start _ hout
@@ -266,7 +266,7 @@ theorem decFrontierTM_hoareTime (v : ℕ) (inp₀ : Tape) (work₀ : Fin 7 → T
     set t₁ : Tape := ((work clkT).write Γw.blank).move .left
     have ht₁cells : t₁.cells = regCells (v - 1) := by
       show ((work clkT).write Γw.blank).cells = _
-      rw [Tape.write, if_neg (show ¬ (work clkT).head = 0 by rw [hhead]; omega)]
+      rw [Tape.write, ite_eq_right (show ¬ (work clkT).head = 0 by rw [hhead]; omega)]
       show Function.update (work clkT).cells (work clkT).head Γw.blank.toΓ = _
       rw [hclk, hhead]
       exact regCells_update hv
@@ -390,16 +390,16 @@ private theorem orZero_step (c : Cfg 7 orZeroTM.Q)
                     cells := Function.update c.output.cells c.output.head
                       ((if c.output.read = Γ.one ∨ (c.work clkT).read = Γ.blank
                         then Γw.one else Γw.zero) : Γw).toΓ } } := by
-  rw [TM.step, if_neg (orZero_ne_halt hst)]
+  rw [TM.step, ite_eq_right (orZero_ne_halt hst)]
   simp only [orZeroTM, hst]
   refine congrArg some ((Cfg.mk.injEq ..).mpr ⟨rfl, ?_, ?_, ?_⟩)
   · exact transitionInput_eq_self hinp
   · funext i
     exact Tape.writeAndMove_readBack_idle_of_ne_start _ (hall i)
   · show c.output.writeAndMove _ (idleDir c.output.read) = _
-    rw [idleDir, if_neg hor]
+    rw [idleDir, ite_eq_right hor]
     show c.output.write _ = _
-    rw [Tape.write, if_neg hh0]
+    rw [Tape.write, ite_eq_right hh0]
 
 /-- **`orZeroTM` specification** (ghost-initial-tapes style). Starting from
     `qstart` with the clock tape (`clkT` = work tape 6) holding `regCells v`
@@ -431,9 +431,9 @@ theorem orZeroTM_hoareTime (v : ℕ) (verdict : Γ) (inp₀ : Tape)
   have hclkread : (work clkT).read = (if v = 0 then Γ.blank else Γ.one) := by
     rw [Tape.read, hclkh, hclk]
     rcases Nat.eq_zero_or_pos v with rfl | hv
-    · rw [if_pos rfl]
+    · rw [ite_eq_left rfl]
       exact regCells_blank (le_max_right 0 1)
-    · rw [if_neg (by omega), max_eq_left hv]
+    · rw [ite_eq_right (by omega), max_eq_left hv]
       exact regCells_one hv le_rfl
   have hclkns : (work clkT).read ≠ Γ.start := by
     rw [hclkread]; split <;> decide

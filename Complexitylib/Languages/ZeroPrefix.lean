@@ -72,7 +72,7 @@ instance : Fintype ZeroPrefixPhase where
     detected by reading `▷` at cell 0). End-of-input is accepted in both
     scan states — reaching a blank means we consumed the input without a
     mismatch, so `n ≥ m`. -/
-def zeroPrefixTM : TM 1 where
+@[expose] def zeroPrefixTM : TM 1 where
   Q := ZeroPrefixPhase
   qstart := .start
   qhalt := .done
@@ -383,8 +383,8 @@ private theorem zeroPrefixTM_step_scanZeros_push
   have hir : c.input.read = Γ.zero := by rw [inv.read_bit hk, hbit]; rfl
   have hir_ne_blank : c.input.read ≠ Γ.blank := by rw [hir]; decide
   have hir_ne_one : c.input.read ≠ Γ.one := by rw [hir]; decide
-  simp only [TM.step, hst, zeroPrefixTM, reduceCtorEq, ↓reduceIte, if_neg hir_ne_blank,
-             if_pos hir, if_neg hir_ne_one]
+  simp only [TM.step, hst, zeroPrefixTM, reduceCtorEq, ↓reduceIte, ite_eq_right hir_ne_blank,
+             ite_eq_left hir, ite_eq_right hir_ne_one]
   refine ⟨_, rfl, rfl, ?_⟩
   refine ⟨?_, ?_, ?_, ?_, ?_, ?_, ?_⟩
   · show (c.input.move Dir3.right).cells = _; rw [Tape.move_cells]; exact inv.ic
@@ -451,7 +451,7 @@ private theorem zeroPrefixTM_step_scanZeros_halt
     ∃ c', zeroPrefixTM.step c = some c' ∧ zeroPrefixTM.halted c' ∧
       c'.output.cells 1 = Γ.one := by
   have hir : c.input.read = Γ.blank := inv.read_blank
-  simp only [TM.step, hst, zeroPrefixTM, reduceCtorEq, ↓reduceIte, if_pos hir]
+  simp only [TM.step, hst, zeroPrefixTM, reduceCtorEq, ↓reduceIte, ite_eq_left hir]
   refine ⟨_, rfl, rfl, ?_⟩
   have hstay := inv.output_stay
   show (c.output.writeAndMove Γw.one.toΓ (idleDir c.output.read)).cells 1 = Γ.one
@@ -468,8 +468,8 @@ private theorem zeroPrefixTM_step_scanZeros_reject_at_empty
   have hir_ne_blank : c.input.read ≠ Γ.blank := by rw [hir]; decide
   have hir_ne_zero : c.input.read ≠ Γ.zero := by rw [hir]; decide
   have hwr : (c.work 0).read = Γ.start := inv.work_read_start_iff.mpr rfl
-  simp only [TM.step, hst, zeroPrefixTM, reduceCtorEq, ↓reduceIte, if_neg hir_ne_blank,
-             if_neg hir_ne_zero, if_pos hir, if_pos hwr]
+  simp only [TM.step, hst, zeroPrefixTM, reduceCtorEq, ↓reduceIte, ite_eq_right hir_ne_blank,
+             ite_eq_right hir_ne_zero, ite_eq_left hir, ite_eq_left hwr]
   refine ⟨_, rfl, ?_, ?_, ?_, ?_, ?_⟩
   · rfl
   · show (c.input.move Dir3.right).cells = _; rw [Tape.move_cells]; exact inv.ic
@@ -494,8 +494,8 @@ private theorem zeroPrefixTM_step_scanZeros_pop
   have hir_ne_zero : c.input.read ≠ Γ.zero := by rw [hir]; decide
   have hwr_ne : (c.work 0).read ≠ Γ.start := by
     simp only [ne_eq, inv.work_read_start_iff]; omega
-  simp only [TM.step, hst, zeroPrefixTM, reduceCtorEq, ↓reduceIte, if_neg hir_ne_blank,
-             if_neg hir_ne_zero, if_pos hir, if_neg hwr_ne]
+  simp only [TM.step, hst, zeroPrefixTM, reduceCtorEq, ↓reduceIte, ite_eq_right hir_ne_blank,
+             ite_eq_right hir_ne_zero, ite_eq_left hir, ite_eq_right hwr_ne]
   refine ⟨_, rfl, rfl, ?_, ?_, ?_, ?_, ?_, ?_, ?_⟩
   · show (c.input.move Dir3.right).cells = _; rw [Tape.move_cells]; exact inv.ic
   · show (c.input.move Dir3.right).head = k + 1 + 1
@@ -530,7 +530,7 @@ private theorem zeroPrefixTM_step_scanOnes_halt
     ∃ c', zeroPrefixTM.step c = some c' ∧ zeroPrefixTM.halted c' ∧
       c'.output.cells 1 = Γ.one := by
   have hir : c.input.read = Γ.blank := inv.read_blank
-  simp only [TM.step, hst, zeroPrefixTM, reduceCtorEq, ↓reduceIte, if_pos hir]
+  simp only [TM.step, hst, zeroPrefixTM, reduceCtorEq, ↓reduceIte, ite_eq_left hir]
   refine ⟨_, rfl, rfl, ?_⟩
   have hstay := inv.output_stay
   show (c.output.writeAndMove Γw.one.toΓ _).cells 1 = Γ.one
@@ -545,8 +545,8 @@ private theorem zeroPrefixTM_step_scanOnes_reject_zero
     ∃ c', zeroPrefixTM.step c = some c' ∧ RejectInv c' x (k + 1) := by
   have hir : c.input.read = Γ.zero := by rw [inv.read_bit hk, hbit]; rfl
   have hir_ne_blank : c.input.read ≠ Γ.blank := by rw [hir]; decide
-  simp only [TM.step, hst, zeroPrefixTM, reduceCtorEq, ↓reduceIte, if_neg hir_ne_blank,
-             if_pos hir]
+  simp only [TM.step, hst, zeroPrefixTM, reduceCtorEq, ↓reduceIte, ite_eq_right hir_ne_blank,
+             ite_eq_left hir]
   refine ⟨_, rfl, ?_, ?_, ?_, ?_, ?_⟩
   · rfl
   · show (c.input.move Dir3.right).cells = _; rw [Tape.move_cells]; exact inv.ic
@@ -569,8 +569,8 @@ private theorem zeroPrefixTM_step_scanOnes_reject_at_empty
   have hir_ne_blank : c.input.read ≠ Γ.blank := by rw [hir]; decide
   have hir_ne_zero : c.input.read ≠ Γ.zero := by rw [hir]; decide
   have hwr : (c.work 0).read = Γ.start := inv.work_read_start_iff.mpr rfl
-  simp only [TM.step, hst, zeroPrefixTM, reduceCtorEq, ↓reduceIte, if_neg hir_ne_blank,
-             if_neg hir_ne_zero, if_pos hir, if_pos hwr]
+  simp only [TM.step, hst, zeroPrefixTM, reduceCtorEq, ↓reduceIte, ite_eq_right hir_ne_blank,
+             ite_eq_right hir_ne_zero, ite_eq_left hir, ite_eq_left hwr]
   refine ⟨_, rfl, ?_, ?_, ?_, ?_, ?_⟩
   · rfl
   · show (c.input.move Dir3.right).cells = _; rw [Tape.move_cells]; exact inv.ic
@@ -595,8 +595,8 @@ private theorem zeroPrefixTM_step_scanOnes_pop
   have hir_ne_zero : c.input.read ≠ Γ.zero := by rw [hir]; decide
   have hwr_ne : (c.work 0).read ≠ Γ.start := by
     simp only [ne_eq, inv.work_read_start_iff]; omega
-  simp only [TM.step, hst, zeroPrefixTM, reduceCtorEq, ↓reduceIte, if_neg hir_ne_blank,
-             if_neg hir_ne_zero, if_pos hir, if_neg hwr_ne]
+  simp only [TM.step, hst, zeroPrefixTM, reduceCtorEq, ↓reduceIte, ite_eq_right hir_ne_blank,
+             ite_eq_right hir_ne_zero, ite_eq_left hir, ite_eq_right hwr_ne]
   refine ⟨_, rfl, rfl, ?_, ?_, ?_, ?_, ?_, ?_, ?_⟩
   · show (c.input.move Dir3.right).cells = _; rw [Tape.move_cells]; exact inv.ic
   · show (c.input.move Dir3.right).head = k + 1 + 1
@@ -630,7 +630,7 @@ private theorem zeroPrefixTM_step_reject_halt
     ∃ c', zeroPrefixTM.step c = some c' ∧ zeroPrefixTM.halted c' ∧
       c'.output.cells 1 = Γ.zero := by
   have hir : c.input.read = Γ.blank := inv.read_blank
-  simp only [TM.step, inv.st, zeroPrefixTM, reduceCtorEq, ↓reduceIte, if_pos hir]
+  simp only [TM.step, inv.st, zeroPrefixTM, reduceCtorEq, ↓reduceIte, ite_eq_left hir]
   refine ⟨_, rfl, rfl, ?_⟩
   have hstay := inv.output_stay
   show (c.output.writeAndMove Γw.zero.toΓ _).cells 1 = Γ.zero
@@ -645,7 +645,7 @@ private theorem zeroPrefixTM_step_reject_consume
   have hir_bit : c.input.read = Γ.ofBool (x[k]'hk) := inv.read_bit hk
   have hir_ne_blank : c.input.read ≠ Γ.blank := by
     rw [hir_bit]; cases x[k] <;> decide
-  simp only [TM.step, inv.st, zeroPrefixTM, reduceCtorEq, ↓reduceIte, if_neg hir_ne_blank]
+  simp only [TM.step, inv.st, zeroPrefixTM, reduceCtorEq, ↓reduceIte, ite_eq_right hir_ne_blank]
   refine ⟨_, rfl, ?_, ?_, ?_, ?_, ?_⟩
   · rfl
   · show (c.input.move Dir3.right).cells = _; rw [Tape.move_cells]; exact inv.ic

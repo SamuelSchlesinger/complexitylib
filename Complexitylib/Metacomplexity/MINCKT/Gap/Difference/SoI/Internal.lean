@@ -201,7 +201,7 @@ theorem SatisfiesSoIInputs.satisfiesAccounting_internal
       exact WithTop.coe_le_coe.mpr hbudgetValue
     have hresult := hconditionCorrection.trans <|
       hchainCorrection.trans <| hpairLossCorrection.trans hbudget
-    simpa only [add_assoc] using hresult
+    simpa only [add_assoc, Nat.cast_add] using hresult
 
 end DifferenceEstimator
 

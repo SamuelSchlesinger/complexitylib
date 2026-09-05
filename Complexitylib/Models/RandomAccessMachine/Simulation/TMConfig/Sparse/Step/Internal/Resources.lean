@@ -81,7 +81,7 @@ private theorem initRegs_index_le_length {x : List Bool} {reg : ℕ}
     (hnonzero : initRegs x reg ≠ 0) : reg ≤ x.length := by
   by_cases hreg : reg = 0
   · omega
-  rw [initRegs, if_neg hreg] at hnonzero
+  rw [initRegs, ite_eq_right hreg] at hnonzero
   cases hbit : x[reg - 1]? with
   | none => simp [hbit] at hnonzero
   | some bit =>
@@ -225,9 +225,8 @@ private theorem setupOps_envelopeChain {tm : TM n} {bound : ℕ}
     · simp only [Structured.Internal.Basic.writeValue]
       rw [hthirdState, hthirdZero, hstoreState, Nat.add_zero]
       exact hstateBound
-  simpa [setupOps, first, second, third, final] using
-    And.intro henvelope
-      (And.intro hfirst (And.intro hsecond (And.intro hthird hfinal)))
+  simp [setupOps]
+  exact And.intro henvelope (And.intro hfirst (And.intro hsecond (And.intro hthird hfinal)))
 
 private theorem setupOps_represents {tm : TM n}
     {cfg : Complexity.Cfg n tm.Q} {store : Structured.Store}
@@ -337,9 +336,8 @@ private theorem loadTapeOps_envelopeChain {tm : TM n} {bound : ℕ}
     · exact lt_trans (hrange.2.2.2.2.2.2 tape).2
         (control_lt_registerBound_internal n bound)
     · exact haddressed.value_le (addressed (addressReg n))
-  simpa [loadTapeOps, addressOps, first, multiplied, addressed, final] using
-    And.intro henvelope
-      (And.intro hfirst (And.intro hmultiplied (And.intro haddressed hfinal)))
+  simp [loadTapeOps, addressOps]
+  exact And.intro henvelope (And.intro hfirst (And.intro hmultiplied (And.intro haddressed hfinal)))
 
 private theorem loadTapes_envelopeChain {tm : TM n} {bound : ℕ}
     {cfg : Complexity.Cfg n tm.Q} (tapes : List (Fin (n + 2)))
@@ -469,8 +467,8 @@ theorem continueCheck_measured_internal {tm : TM n} {bound : ℕ}
           (runningFlag tm ((Fintype.equivFin tm.Q).symm code))])
         ⟨stateCode tm cfg.state, by simp [stateCode]⟩)
       cleared final 1 (4 * wordWidth tm bound) (spaceBound tm bound) := by
-    simpa [hbranchState, final, wordWidth, Structured.Internal.valueWidth,
-      spaceBound, Structured.Internal.envelopeSpace] using hbranch
+    simp [hbranchState, final, wordWidth, spaceBound]
+    exact hbranch
   have hdispatch := Structured.Switch.select_measured
     (fun code : Fin (Fintype.card tm.Q) => .basics
       [.imm (valueReg n)
@@ -506,7 +504,7 @@ theorem headsBounded_step_internal {tm : TM n} {bound : ℕ}
       (fun i => (cfg.work i).read) cfg.output.read with
     ⟨nextState, workWrites, outputWrite, inputDirection,
       workDirections, outputDirection⟩
-  rw [TM.step, if_neg hnotHalted, hdelta] at hstep
+  rw [TM.step, ite_eq_right hnotHalted, hdelta] at hstep
   dsimp only at hstep
   injection hstep with hnext
   subst next
@@ -699,7 +697,7 @@ theorem loop_measured_internal {tm : TM n} {steps base : ℕ}
           (spaceBound tm bound) := by
         simpa [loopBody] using hbody
       have hrun := Structured.Internal.MeasuredRuns.whileNonzeroEnvelope
-        hnonzero (by simpa [bound, Nat.add_assoc] using henvelope) hbody' hloop'
+        hnonzero (by simp [bound, Nat.add_assoc]; exact henvelope) hbody' hloop'
       refine ⟨final, ?_, hfinalRepresents, ?_⟩
       · simpa [loopSteps, loopTimeBound, hstep, bound, wordWidth,
           Structured.Internal.valueWidth, spaceBound,

@@ -190,8 +190,8 @@ private theorem binop_wireValue_c₁ {N G₁ G₂ : Nat} [NeZero N]
         -- Change goal to use binopGWP
         change (binopGWP c₁ c₂ ⟨n - N, _⟩).val.eval _ = _
         -- Unfold binopGWP for the first branch
-        simp only [binopGWP, dif_pos hg]
-        rw [mkGate2'_eval, andOr2_gate_eval_two_inputs]
+        simp only [binopGWP, dite_eq_left hg]
+        erw [mkGate2'_eval, andOr2_gate_eval_two_inputs]
         have hacyc0 : (gw 0 (c₁.gates ⟨n - N, hg⟩)).val < n := by
           have := c₁.acyclic ⟨_, hg⟩ ⟨0, by rw [fanIn_andOr2]; omega⟩
           simp [gw] at this ⊢; omega
@@ -220,10 +220,10 @@ private theorem binop_wireValue_c₂ {N G₁ G₂ : Nat} [NeZero N]
       intro hn
       by_cases hlt : n < N
       · -- Input wire: remap₂ preserves it
-        simp only [remap₂, dif_pos hlt]
+        simp only [remap₂, dite_eq_left hlt]
         rw [Circuit.wireValue_of_lt _ _ _ hlt, Circuit.wireValue_of_lt _ _ _ hlt]
       · -- Gate wire: remap₂ shifts by G₁ + 1
-        simp only [remap₂, dif_neg hlt]
+        simp only [remap₂, dite_eq_right hlt]
         have hge : ¬(n + G₁ + 1 < N) := by omega
         rw [Circuit.wireValue_of_not_lt _ _ _ hge, Circuit.wireValue_of_not_lt _ _ _ hlt]
         have hg₂ : n - N < G₂ := by omega
@@ -234,8 +234,8 @@ private theorem binop_wireValue_c₂ {N G₁ G₂ : Nat} [NeZero N]
         have hb1 : ¬(n + G₁ + 1 - N < G₁) := by omega
         have hb2 : ¬(n + G₁ + 1 - N = G₁) := by omega
         have hb3 : n + G₁ + 1 - N < G₁ + 1 + G₂ := by omega
-        simp only [binopGWP, dif_neg hb1, dif_neg hb2, dif_pos hb3]
-        rw [mkGate2'_eval, andOr2_gate_eval_two_inputs]
+        simp only [binopGWP, dite_eq_right hb1, dite_eq_right hb2, dite_eq_left hb3]
+        erw [mkGate2'_eval, andOr2_gate_eval_two_inputs]
         -- Simplify gate index
         have : (⟨n + G₁ + 1 - N - G₁ - 1, by omega⟩ : Fin G₂) = ⟨n - N, hg₂⟩ := by
           ext; simp; omega
@@ -280,7 +280,7 @@ theorem binopCircuit_or_correct {N G₁ G₂ : Nat} [NeZero N]
         ⟨G₁, by omega⟩ := Fin.ext (show N + G₁ - N = G₁ by omega)
     rw [hfin]
     simp only [binopGWP, show ¬(G₁ < G₁) from Nat.lt_irrefl G₁, dite_false, dite_true]
-    rw [mkGate2'_eval, andOr2_gate_eval_two_inputs]
+    erw [mkGate2'_eval, andOr2_gate_eval_two_inputs]
     cases (c₁.outputs 0).op <;> simp only <;> congr 1 <;> congr 1
     all_goals (apply binop_wireValue_c₁; exact (gw _ (c₁.outputs 0)).isLt)
   -- Wire N + G₁ + G₂ + 1 corresponds to c₂'s output gate
@@ -298,7 +298,7 @@ theorem binopCircuit_or_correct {N G₁ G₂ : Nat} [NeZero N]
       show ¬(G₁ + G₂ + 1 = G₁) by omega,
       show ¬(G₁ + G₂ + 1 < G₁ + 1 + G₂) by omega,
       dite_false]
-    rw [mkGate2'_eval, andOr2_gate_eval_two_inputs]
+    erw [mkGate2'_eval, andOr2_gate_eval_two_inputs]
     cases (c₂.outputs 0).op <;> simp only <;> congr 1 <;> congr 1
     all_goals (apply binop_wireValue_c₂)
   -- The output gate of cb applies OR to these two wires
@@ -681,6 +681,9 @@ theorem columnPatternIndex_lt (N : Nat) (f : BitString N → Bool)
 
 /-! ### Shannon gate array -/
 
+-- The signature mirrors the family this belongs to; the argument is part of
+-- that shape even where this member does not consult it.
+@[nolint unusedArguments]
 private noncomputable def shannonGateArray (N : Nat) [NeZero N]
     (f : BitString N → Bool) (hN : 16 ≤ N) :
     (i : Fin (totalSectionGates (addrBits N) (dataBits N))) →
@@ -1018,6 +1021,9 @@ private def shiftedBits (N k q : Nat) (hkq : k + q = N) (x : BitString N) :
   fun j => x ⟨k + j.val, by have := j.isLt; omega⟩
 
 /-- columnFunction at the actual bit-vector address/data values equals f(x). -/
+-- The signature mirrors the family this belongs to; the argument is part of
+-- that shape even where this member does not consult it.
+@[nolint unusedArguments]
 private theorem columnFunction_at_actual_bits (N : Nat) [NeZero N]
     (f : BitString N → Bool) (x : BitString N)
     (k q : Nat) (hkq : k + q = N) :
@@ -1124,6 +1130,9 @@ private theorem dataSum_lt (N : Nat) (hN : 16 ≤ N) (x : BitString N) :
   sum_cond_pow_fin_lt (dataBits N) (shiftedBits N (addrBits N) (dataBits N) (addrDataSum N hN) x)
 
 /-- andLayerSem at y is false when y ≠ dataSum. -/
+-- The signature mirrors the family this belongs to; the argument is part of
+-- that shape even where this member does not consult it.
+@[nolint unusedArguments]
 private theorem andLayerSem_ne (N : Nat) [NeZero N]
     (f : BitString N → Bool) (hN : 16 ≤ N) (x : BitString N)
     (y : Nat) (hy : y < 2 ^ dataBits N) (hne : y ≠ dataSum N hN x) :
@@ -1149,9 +1158,9 @@ private theorem or_andLayerSem_eq_f (N : Nat) [NeZero N]
   have hP_ne : ∀ y, y < 2 ^ dataBits N → y ≠ dataSum N hN x →
     (if h : y < 2 ^ dataBits N then andLayerSem N f hN x y h else false) = false := by
     intro y hy hne
-    rw [dif_pos hy, andLayerSem_ne N f hN x y hy hne]
+    rw [dite_eq_left hy, andLayerSem_ne N f hN x y hy hne]
   have hfoldl := foldl_or_unique_true (dataSum N hN x) hds_lt hP_ne
-  rw [hfoldl, dif_pos hds_lt, andLayerSem_eq N f hN x]
+  rw [hfoldl, dite_eq_left hds_lt, andLayerSem_eq N f hN x]
 
 /-! The OR chain accumulates AND-layer semantic values.
 
@@ -1203,19 +1212,19 @@ private theorem wireValue_dataLeaf (N : Nat) [NeZero N]
       change (shannonGateArray N f hN ⟨_, _⟩).val.eval _ = _
       unfold shannonGateArray
       simp only [show N + 1 + j - N = 1 + j from by omega]
-      rw [dif_neg (by omega : ¬(1 + j = 0))]
-      rw [dif_pos (by unfold addrTreeOffset; omega : 1 + j < addrTreeOffset (dataBits N))]
+      rw [dite_eq_right (by omega : ¬(1 + j = 0))]
+      rw [dite_eq_left (by unfold addrTreeOffset; omega : 1 + j < addrTreeOffset (dataBits N))]
       simp only [show 1 + j - 1 = j from by omega]
       by_cases hjL1 : j < 4
       ·
-        rw [dif_pos hjL1]
+        rw [dite_eq_left hjL1]
         simp only [mkG, Gate.eval, Basis.andOr2, AndOrOp.eval,
           Fin.foldl_succ_last, Fin.foldl_zero, Bool.true_and]
         simp only [Fin.val_last, Fin.val_castSucc, ite_true, ite_false,
           show ¬((1 : Nat) = 0) from by omega]
-        rw [Circuit.wireValue_of_lt _ _ _ (show (⟨addrBits N, _⟩ : Fin _).val < N from by
+        erw [Circuit.wireValue_of_lt _ _ _ (show (⟨addrBits N, _⟩ : Fin _).val < N from by
           show addrBits N < N; have := addr_le_N N hN; omega)]
-        rw [Circuit.wireValue_of_lt _ _ _ (show (⟨addrBits N + 1, _⟩ : Fin _).val < N from by
+        erw [Circuit.wireValue_of_lt _ _ _ (show (⟨addrBits N + 1, _⟩ : Fin _).val < N from by
           show addrBits N + 1 < N; have := addr_le_N N hN; omega)]
         have htl : treeLevel j = 1 := by
           unfold treeLevel
@@ -1247,7 +1256,7 @@ private theorem wireValue_dataLeaf (N : Nat) [NeZero N]
         cases x ⟨addrBits N, by omega⟩ <;> cases x ⟨addrBits N + 1, by omega⟩ <;>
           cases j.testBit 1 <;> cases (decide (j % 2 = 1)) <;> simp_all
       ·
-        rw [dif_neg hjL1]
+        rw [dite_eq_right hjL1]
         simp only [mkG, Gate.eval, Basis.andOr2, AndOrOp.eval,
           Fin.foldl_succ_last, Fin.foldl_zero, Bool.true_and]
         simp only [Fin.val_last, Fin.val_castSucc, ite_true, ite_false,
@@ -1257,7 +1266,7 @@ private theorem wireValue_dataLeaf (N : Nat) [NeZero N]
         have hbase : treeBase (treeLevel j) ≤ j := treeBase_le_of_level j (by omega)
         have hpi_lt : treeParentIndex (treeLevel j) (treePosition j (treeLevel j)) < j :=
           treeParentIndex_lt_j _ _ j hl2 rfl hbase
-        rw [Circuit.wireValue_of_lt _ _ _ (show (⟨addrBits N + treeLevel j, _⟩ : Fin _).val < N
+        erw [Circuit.wireValue_of_lt _ _ _ (show (⟨addrBits N + treeLevel j, _⟩ : Fin _).val < N
           from by show addrBits N + treeLevel j < N; omega)]
         have hpar := ih (treeParentIndex (treeLevel j) (treePosition j (treeLevel j)))
           hpi_lt (by omega) (by omega)
@@ -1395,21 +1404,22 @@ private theorem wireValue_colOutput (N : Nat) [NeZero N]
         change (shannonGateArray N f hN ⟨_, _⟩).val.eval _ = _
         unfold shannonGateArray
         simp only [show N + addrTreeOffset q + j - N = addrTreeOffset q + j from by omega]
-        rw [dif_neg (by unfold addrTreeOffset; omega : ¬(addrTreeOffset q + j = 0))]
-        rw [dif_neg (by unfold addrTreeOffset; omega : ¬(addrTreeOffset q + j < addrTreeOffset q))]
-        rw [dif_pos (by unfold columnLibraryOffset addrTreeOffset; omega :
+        rw [dite_eq_right (by unfold addrTreeOffset; omega : ¬(addrTreeOffset q + j = 0))]
+        rw [dite_eq_right
+          (by unfold addrTreeOffset; omega : ¬(addrTreeOffset q + j < addrTreeOffset q))]
+        rw [dite_eq_left (by unfold columnLibraryOffset addrTreeOffset; omega :
           addrTreeOffset q + j < columnLibraryOffset k q)]
         simp_rw [show addrTreeOffset q + j - addrTreeOffset (dataBits N) = j from by
           show addrTreeOffset q + j - addrTreeOffset q = j; omega]
         by_cases hjL1 : j < 4
-        · rw [dif_pos hjL1]
+        · rw [dite_eq_left hjL1]
           simp only [mkG, Gate.eval, Basis.andOr2, AndOrOp.eval,
             Fin.foldl_succ_last, Fin.foldl_zero, Bool.true_and]
           simp only [Fin.val_last, Fin.val_castSucc, ite_true, ite_false,
             show ¬((1 : Nat) = 0) from by omega]
-          rw [Circuit.wireValue_of_lt _ _ _ (show (⟨0, _⟩ : Fin _).val < N from by
+          erw [Circuit.wireValue_of_lt _ _ _ (show (⟨0, _⟩ : Fin _).val < N from by
             show 0 < N; linarith [hkq, hk3])]
-          rw [Circuit.wireValue_of_lt _ _ _ (show (⟨1, _⟩ : Fin _).val < N from by
+          erw [Circuit.wireValue_of_lt _ _ _ (show (⟨1, _⟩ : Fin _).val < N from by
             show 1 < N; linarith [hkq, hk3])]
           have htl : treeLevel j = 1 := by
             unfold treeLevel
@@ -1432,7 +1442,7 @@ private theorem wireValue_colOutput (N : Nat) [NeZero N]
           simp only [Fin.forall_fin_two, Fin.val_zero, Fin.val_one, Nat.testBit_zero]
           cases x ⟨0, hN2 0 (by omega)⟩ <;> cases x ⟨1, hN2 1 (by omega)⟩ <;>
             cases j.testBit 1 <;> cases (decide (j % 2 = 1)) <;> simp_all
-        · rw [dif_neg hjL1]
+        · rw [dite_eq_right hjL1]
           simp only [mkG, Gate.eval, Basis.andOr2, AndOrOp.eval,
             Fin.foldl_succ_last, Fin.foldl_zero, Bool.true_and]
           simp only [Fin.val_last, Fin.val_castSucc, ite_true, ite_false,
@@ -1443,7 +1453,7 @@ private theorem wireValue_colOutput (N : Nat) [NeZero N]
           have hpi_lt : treeParentIndex (treeLevel j) (treePosition j (treeLevel j)) < j :=
             treeParentIndex_lt_j _ _ j hl2 rfl hbase
           simp only [Bool.false_xor]
-          rw [Circuit.wireValue_of_lt _ _ _ (show (⟨treeLevel j, _⟩ : Fin _).val < N from by
+          erw [Circuit.wireValue_of_lt _ _ _ (show (⟨treeLevel j, _⟩ : Fin _).val < N from by
             show treeLevel j < N; linarith [hkq, hlk])]
           have hpar := ih (treeParentIndex (treeLevel j) (treePosition j (treeLevel j)))
             hpi_lt (by omega) (by omega)
@@ -1536,12 +1546,12 @@ private theorem wireValue_colOutput (N : Nat) [NeZero N]
     change (shannonGateArray N f hN ⟨N - N, by omega⟩).val.eval
       ((shannonCircuit N f hN).wireValue x) = false
     unfold shannonGateArray
-    rw [dif_pos (show N - N = 0 from by omega)]
+    rw [dite_eq_left (show N - N = 0 from by omega)]
     simp only [mkG, Gate.eval, Basis.andOr2, AndOrOp.eval,
       Fin.foldl_succ_last, Fin.foldl_zero, Bool.true_and]
     simp only [Fin.val_last, Fin.val_castSucc, ite_true, ite_false,
       show ¬((1 : Nat) = 0) from by omega, Bool.false_xor, Bool.true_xor]
-    rw [Circuit.wireValue_of_lt _ _ _ (show (⟨0, _⟩ : Fin _).val < N from h0N)]
+    erw [Circuit.wireValue_of_lt _ _ _ (show (⟨0, _⟩ : Fin _).val < N from h0N)]
     cases x ⟨0, h0N⟩ <;> rfl
   have colChain : ∀ (r : Nat) (hr : r < 2 ^ k - 1)
       (hrW : N + columnLibraryOffset k q + p * (2 ^ k - 1) + r < N + totalSectionGates k q),
@@ -1615,7 +1625,7 @@ private theorem wireValue_colOutput (N : Nat) [NeZero N]
       unfold shannonGateArray
       simp only [show N + columnLibraryOffset k q + p * (2 ^ k - 1) + 0 - N =
         columnLibraryOffset k q + p * (2 ^ k - 1) from by omega]
-      rw [dif_neg h_ne0, dif_neg h_ge_oC, dif_neg h_ge_oD, dif_pos h_lt_oE]
+      rw [dite_eq_right h_ne0, dite_eq_right h_ge_oC, dite_eq_right h_ge_oD, dite_eq_left h_lt_oE]
       simp only [show addrBits N = k from rfl, show dataBits N = q from rfl]
       simp only [show columnLibraryOffset k q + p * (2 ^ k - 1) - columnLibraryOffset k q =
         p * (2 ^ k - 1) from by omega]
@@ -1658,7 +1668,8 @@ private theorem wireValue_colOutput (N : Nat) [NeZero N]
       unfold shannonGateArray
       simp only [show N + columnLibraryOffset k q + p * (2 ^ k - 1) + (r' + 1) - N =
         columnLibraryOffset k q + p * (2 ^ k - 1) + (r' + 1) from by omega]
-      rw [dif_neg h_ne0', dif_neg h_ge_oC', dif_neg h_ge_oD', dif_pos h_lt_oE']
+      rw [dite_eq_right h_ne0', dite_eq_right h_ge_oC', dite_eq_right h_ge_oD',
+        dite_eq_left h_lt_oE']
       simp only [show addrBits N = k from rfl, show dataBits N = q from rfl]
       simp_rw [show
         (columnLibraryOffset k q + p * (2 ^ k - 1) + (r' + 1) - columnLibraryOffset k q) =
@@ -1726,18 +1737,18 @@ private theorem wireValue_orChain_sem (N : Nat) [NeZero N]
     unfold shannonGateArray
     simp only [show N + andLayerOffset (addrBits N) (dataBits N) + y - N =
       andLayerOffset (addrBits N) (dataBits N) + y from by omega]
-    rw [dif_neg (by
+    rw [dite_eq_right (by
       unfold andLayerOffset columnLibraryOffset
         addrTreeOffset; have := pow_ge_4 (dataBits N) (dataBits_ge_two N hN); omega :
       ¬(andLayerOffset (addrBits N) (dataBits N) + y = 0))]
-    rw [dif_neg (by unfold andLayerOffset columnLibraryOffset addrTreeOffset; omega :
+    rw [dite_eq_right (by unfold andLayerOffset columnLibraryOffset addrTreeOffset; omega :
       ¬(andLayerOffset (addrBits N) (dataBits N) + y < addrTreeOffset (dataBits N)))]
-    rw [dif_neg (by unfold andLayerOffset columnLibraryOffset; omega :
+    rw [dite_eq_right (by unfold andLayerOffset columnLibraryOffset; omega :
       ¬(andLayerOffset (addrBits N) (dataBits N) + y <
         columnLibraryOffset (addrBits N) (dataBits N)))]
-    rw [dif_neg (by unfold andLayerOffset; omega :
+    rw [dite_eq_right (by unfold andLayerOffset; omega :
       ¬(andLayerOffset (addrBits N) (dataBits N) + y < andLayerOffset (addrBits N) (dataBits N)))]
-    rw [dif_pos (by unfold orChainOffset; omega :
+    rw [dite_eq_left (by unfold orChainOffset; omega :
       andLayerOffset (addrBits N) (dataBits N) + y < orChainOffset (addrBits N) (dataBits N))]
     simp only [mkG, Gate.eval, Basis.andOr2, AndOrOp.eval,
       Fin.foldl_succ_last, Fin.foldl_zero, Bool.true_and, ite_self, Bool.false_xor]
@@ -1769,17 +1780,18 @@ private theorem wireValue_orChain_sem (N : Nat) [NeZero N]
     unfold shannonGateArray
     simp only [show N + orChainOffset (addrBits N) (dataBits N) + 0 - N =
       orChainOffset (addrBits N) (dataBits N) + 0 from by omega]
-    rw [dif_neg (by
+    rw [dite_eq_right (by
       unfold orChainOffset andLayerOffset columnLibraryOffset addrTreeOffset; omega :
       ¬(orChainOffset (addrBits N) (dataBits N) + 0 = 0))]
-    rw [dif_neg (by unfold orChainOffset andLayerOffset columnLibraryOffset addrTreeOffset; omega :
+    rw [dite_eq_right
+      (by unfold orChainOffset andLayerOffset columnLibraryOffset addrTreeOffset; omega :
       ¬(orChainOffset (addrBits N) (dataBits N) + 0 < addrTreeOffset (dataBits N)))]
-    rw [dif_neg (by unfold orChainOffset andLayerOffset columnLibraryOffset; omega :
+    rw [dite_eq_right (by unfold orChainOffset andLayerOffset columnLibraryOffset; omega :
       ¬(orChainOffset (addrBits N) (dataBits N) + 0 <
         columnLibraryOffset (addrBits N) (dataBits N)))]
-    rw [dif_neg (by unfold orChainOffset andLayerOffset; omega :
+    rw [dite_eq_right (by unfold orChainOffset andLayerOffset; omega :
       ¬(orChainOffset (addrBits N) (dataBits N) + 0 < andLayerOffset (addrBits N) (dataBits N)))]
-    rw [dif_neg (by omega :
+    rw [dite_eq_right (by omega :
       ¬(orChainOffset (addrBits N) (dataBits N) + 0 < orChainOffset (addrBits N) (dataBits N)))]
     simp only [mkG, Gate.eval, Basis.andOr2, AndOrOp.eval,
       Fin.foldl_succ_last, Fin.foldl_zero, Bool.false_or, ite_self, Bool.false_xor]
@@ -1799,8 +1811,8 @@ private theorem wireValue_orChain_sem (N : Nat) [NeZero N]
         andLayer_sem 1 (by omega) (by linarith)]
     simp only [show List.range (0 + 2) = [0, 1] from by decide,
       List.foldl_cons, List.foldl_nil,
-      Bool.false_or, dif_pos (show 0 < 2 ^ dataBits N from by omega),
-      dif_pos (show 1 < 2 ^ dataBits N from by omega)]
+      Bool.false_or, dite_eq_left (show 0 < 2 ^ dataBits N from by omega),
+      dite_eq_left (show 1 < 2 ^ dataBits N from by omega)]
   | succ r' ih =>
     -- unfolds shannonGateArray through all five section guards; genuine elaboration cost
     set_option maxHeartbeats 3200000 in
@@ -1812,17 +1824,19 @@ private theorem wireValue_orChain_sem (N : Nat) [NeZero N]
     unfold shannonGateArray
     simp only [show N + orChainOffset (addrBits N) (dataBits N) + (r' + 1) - N =
       orChainOffset (addrBits N) (dataBits N) + (r' + 1) from by omega]
-    rw [dif_neg (by unfold orChainOffset andLayerOffset columnLibraryOffset addrTreeOffset; omega :
+    rw [dite_eq_right
+      (by unfold orChainOffset andLayerOffset columnLibraryOffset addrTreeOffset; omega :
       ¬(orChainOffset (addrBits N) (dataBits N) + (r' + 1) = 0))]
-    rw [dif_neg (by unfold orChainOffset andLayerOffset columnLibraryOffset addrTreeOffset; omega :
+    rw [dite_eq_right
+      (by unfold orChainOffset andLayerOffset columnLibraryOffset addrTreeOffset; omega :
       ¬(orChainOffset (addrBits N) (dataBits N) + (r' + 1) < addrTreeOffset (dataBits N)))]
-    rw [dif_neg (by unfold orChainOffset andLayerOffset columnLibraryOffset; omega :
+    rw [dite_eq_right (by unfold orChainOffset andLayerOffset columnLibraryOffset; omega :
       ¬(orChainOffset (addrBits N) (dataBits N) + (r' + 1) <
         columnLibraryOffset (addrBits N) (dataBits N)))]
-    rw [dif_neg (by unfold orChainOffset andLayerOffset; omega :
+    rw [dite_eq_right (by unfold orChainOffset andLayerOffset; omega :
       ¬(orChainOffset (addrBits N) (dataBits N) + (r' + 1) <
         andLayerOffset (addrBits N) (dataBits N)))]
-    rw [dif_neg (by omega :
+    rw [dite_eq_right (by omega :
       ¬(orChainOffset (addrBits N) (dataBits N) + (r' + 1) <
         orChainOffset (addrBits N) (dataBits N)))]
     simp only [mkG, Gate.eval, Basis.andOr2, AndOrOp.eval,
@@ -1851,13 +1865,13 @@ private theorem wireValue_orChain_sem (N : Nat) [NeZero N]
     have hr2 : r' + 2 < 2 ^ dataBits N := by omega
     rw [show andLayerSem N f hN x (r' + 2) hr2 =
       (if h : r' + 2 < 2 ^ dataBits N then andLayerSem N f hN x (r' + 2) h else false) from
-      by rw [dif_pos hr2]]
+      by rw [dite_eq_left hr2]]
     rw [Bool.or_assoc]
     simp only [show r' + 1 + 2 = r' + 2 + 1 from by omega,
       show r' + 2 = r' + 1 + 1 from by omega,
       List.range_succ, List.foldl_append, List.foldl_cons, List.foldl_nil,
-      dif_pos (show r' + 2 < 2 ^ dataBits N from by omega),
-      dif_pos (show r' + 1 < 2 ^ dataBits N from by omega),
+      dite_eq_left (show r' + 2 < 2 ^ dataBits N from by omega),
+      dite_eq_left (show r' + 1 < 2 ^ dataBits N from by omega),
       Bool.or_assoc]
 
 private theorem lastOrChain_eq_f (N : Nat) [NeZero N]

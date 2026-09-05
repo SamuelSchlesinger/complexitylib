@@ -202,7 +202,7 @@ theorem pairWithInputTailTM_hoareTime_internal (nf : ℕ)
         apply transitionTape_eq_self
         rw [hout]
         decide
-      simpa only [hinputStable, hworkStableAt, houtStable] using
+      simpa only [PairWithInputEmitterPre, hinputStable, hworkStableAt, houtStable] using
         (show PairWithInputEmitterPre nf first second inp work out from
           ⟨hinput, hrawHead, hrawOutput, hworkInv, hout⟩))
     hemitter
@@ -224,7 +224,7 @@ theorem pairWithInputTailTM_hoareTime_internal (nf : ℕ)
         apply transitionTape_eq_self
         rw [hout]
         decide
-      simpa only [hinputStable, hworkStableAt, houtStable] using
+      simpa only [PairWithInputEmitterPre, hinputStable, hworkStableAt, houtStable] using
         (show PairWithInputAfterRaw nf first second B inp work out from
           ⟨hrawHead, hrawOutput, hinputCells, hinputInv, hinputHead,
             hinputBound, hworkInv, hout⟩))
@@ -280,8 +280,7 @@ theorem pairWithInputTM_computesInTime_internal
     omega
   · have hreach := seqTM_reachesIn_of_reachesIn first tail
       hreachF hhaltF hreachTail
-    simpa [pairWithInputTM, pairWithInputFirstTM, first, tail, final,
-      boundaryInput, boundaryWork, boundaryOutput] using hreach
+    exact hreach
   · show (pairWithInputTM tmF).halted final
     simpa [pairWithInputTM, first, tail, final] using
       (phase2Wrap_halted_iff first tail D).2 hhaltTail

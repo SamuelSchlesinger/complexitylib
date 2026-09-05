@@ -304,11 +304,10 @@ private theorem roundMatch (f : VFlags) (v0 v1 v2 : Γ) (stSyms seg : List Γw)
         else (c.work scT).cells j)
       (by
         intro i hi
-        dsimp only
         by_cases hcase : 1 ≤ i ∧ i < 1 + stSyms.length
-        · rw [if_pos hcase]
+        · rw [ite_eq_left hcase]
           exact hWns _ (by omega)
-        · rw [if_neg hcase]
+        · rw [ite_eq_right hcase]
           exact hE_wns i hi)
       (pos + stSyms.length + 6 + stSyms.length) (1 + stSyms.length)
       (by omega) (by omega)
@@ -350,12 +349,12 @@ private theorem roundMatch (f : VFlags) (v0 v1 v2 : Γ) (stSyms seg : List Γw)
     reachesIn_trans _ (reachesIn_trans _ (reachesIn_trans _ hr₁ hr₂) hr₃) hr₄,
     hst₄, ⟨?_, fun i => ?_⟩, ?_, ?_, ?_, ?_, ?_, ?_, ?_, ?_, ?_⟩
   · -- scratch cell 0
-    rw [hE₂ 0, if_neg (by omega), if_neg (by omega)]
+    rw [hE₂ 0, ite_eq_right (by omega), ite_eq_right (by omega)]
     exact hSc.1
   · -- scratch cells: the value slice
     rw [hE₂ (i + 1)]
     by_cases hi : i < stSyms.length + 10
-    · rw [dif_pos (by rw [hslice_len]; omega)]
+    · rw [dite_eq_left (by rw [hslice_len]; omega)]
       have hcell : (c.work dsT).cells (pos + (stSyms.length + 6 + i))
           = (seg[stSyms.length + 6 + i]'(by omega)).toΓ := hview _ (by omega)
       have hsliceval :
@@ -364,18 +363,18 @@ private theorem roundMatch (f : VFlags) (v0 v1 v2 : Γ) (stSyms seg : List Γw)
             = seg[stSyms.length + 6 + i]'(by omega) := by
         rw [List.getElem_take, List.getElem_drop]
       by_cases hiw : stSyms.length ≤ i
-      · rw [if_pos (by omega),
+      · rw [ite_eq_left (by omega),
           show pos + stSyms.length + 6 + stSyms.length + (i + 1 - (1 + stSyms.length))
             = pos + (stSyms.length + 6 + i) by omega,
           hcell]
         exact (congrArg Γw.toΓ hsliceval).symm
-      · rw [if_neg (by omega), if_pos (by omega),
+      · rw [ite_eq_right (by omega), ite_eq_left (by omega),
           show pos + stSyms.length + 6 + (i + 1 - 1)
             = pos + (stSyms.length + 6 + i) by omega,
           hcell]
         exact (congrArg Γw.toΓ hsliceval).symm
-    · rw [dif_neg (by rw [hslice_len]; omega), if_neg (by omega),
-        if_neg (by omega)]
+    · rw [dite_eq_right (by rw [hslice_len]; omega), ite_eq_right (by omega),
+        ite_eq_right (by omega)]
       exact Tape.HoldsExact.cells_ge hSc (Nat.zero_le _)
   · -- scratch head
     rw [hwtE₄]
@@ -847,14 +846,14 @@ private theorem roundMismatch (f : VFlags) (v0 v1 v2 : Γ) (stSyms seg : List Γ
         · rw [hwtD₃]
           show pos + stSyms.length + 6 + (seg.length - (stSyms.length + 6)) = _
           omega
-        · rw [hE₁ 0, if_neg (by omega)]
+        · rw [hE₁ 0, ite_eq_right (by omega)]
           exact hSc.1
         · intro j hj
           rw [hE₁ j]
           by_cases hcase : 1 ≤ j ∧ j < 1 + (seg.length - (stSyms.length + 6))
-          · rw [if_pos hcase]
+          · rw [ite_eq_left hcase]
             exact hWns _ (by omega)
-          · rw [if_neg hcase]
+          · rw [ite_eq_right hcase]
             exact hE_wns j hj
         · rw [hwtE₃]
           show 1 ≤ 1 + (seg.length - (stSyms.length + 6)); omega
@@ -864,7 +863,7 @@ private theorem roundMismatch (f : VFlags) (v0 v1 v2 : Γ) (stSyms seg : List Γ
           have hj' : 1 + (seg.length - (stSyms.length + 6)) ≤ j := by
             rw [hwtE₃] at hj
             exact hj
-          rw [hE₁ j, if_neg (by omega)]
+          rw [hE₁ j, ite_eq_right (by omega)]
           exact hsc_blank j (by omega)
         · rw [hoth₃ vIn (by decide) (by decide) (by decide),
             hoth₂ vIn (by decide) (by decide),
@@ -909,11 +908,10 @@ private theorem roundMismatch (f : VFlags) (v0 v1 v2 : Γ) (stSyms seg : List Γ
               else (c.work scT).cells j)
             (by
               intro i hi
-              dsimp only
               by_cases hcase : 1 ≤ i ∧ i < 1 + stSyms.length
-              · rw [if_pos hcase]
+              · rw [ite_eq_left hcase]
                 exact hWns _ (by omega)
-              · rw [if_neg hcase]
+              · rw [ite_eq_right hcase]
                 exact hE_wns i hi)
             (pos + stSyms.length + 6 + stSyms.length) (1 + stSyms.length)
             (by omega) (by omega)
@@ -966,19 +964,19 @@ private theorem roundMismatch (f : VFlags) (v0 v1 v2 : Γ) (stSyms seg : List Γ
           show pos + stSyms.length + 6 + stSyms.length
               + (seg.length - (2 * stSyms.length + 6)) = _
           omega
-        · rw [hE₂ 0, if_neg (by omega), if_neg (by omega)]
+        · rw [hE₂ 0, ite_eq_right (by omega), ite_eq_right (by omega)]
           exact hSc.1
         · intro j hj
           rw [hE₂ j]
           by_cases hcase : 1 + stSyms.length ≤ j ∧
               j < 1 + stSyms.length + (seg.length - (2 * stSyms.length + 6))
-          · rw [if_pos hcase]
+          · rw [ite_eq_left hcase]
             exact hWns _ (by omega)
-          · rw [if_neg hcase]
+          · rw [ite_eq_right hcase]
             by_cases hcase' : 1 ≤ j ∧ j < 1 + stSyms.length
-            · rw [if_pos hcase']
+            · rw [ite_eq_left hcase']
               exact hWns _ (by omega)
-            · rw [if_neg hcase']
+            · rw [ite_eq_right hcase']
               exact hE_wns j hj
         · rw [hwtE₄]
           show 1 ≤ 1 + stSyms.length + (seg.length - (2 * stSyms.length + 6))
@@ -991,7 +989,7 @@ private theorem roundMismatch (f : VFlags) (v0 v1 v2 : Γ) (stSyms seg : List Γ
               ≤ j := by
             rw [hwtE₄] at hj
             exact hj
-          rw [hE₂ j, if_neg (by omega), if_neg (by omega)]
+          rw [hE₂ j, ite_eq_right (by omega), ite_eq_right (by omega)]
           exact hsc_blank j (by omega)
         · rw [hoth₄ vIn (by decide) (by decide),
             hoth₃ vIn (by decide) (by decide) (by decide),
@@ -1039,7 +1037,7 @@ private theorem segCheck_blank_step {c : Cfg 6 bodyTM.Q} {f : VFlags}
     rw [hdc]; exact fun h => nomatch h
   have harm := arm_segCheck c.input.read (fun i => (c.work i).read)
     c.output.read f
-  rw [if_pos hdc] at harm
+  rw [ite_eq_left hdc] at harm
   have hstep := step_act3 (by rw [hst]; exact fun h => nomatch h)
     (by rw [hst]; exact harm)
   refine ⟨_, .step hstep .zero, rfl, ?_, ?_, ?_, ?_,
@@ -1047,19 +1045,19 @@ private theorem segCheck_blank_step {c : Cfg 6 bodyTM.Q} {f : VFlags}
   · show (c.work vIn).writeAndMove (readBackWrite ((c.work vIn).read)).toΓ
       (if (c.work vIn).read = Γ.start then Dir3.right
         else if f.1 then Dir3.right else Dir3.stay) = _
-    rw [if_neg hv0s]
+    rw [ite_eq_right hv0s]
   · show (c.work vWk).writeAndMove (readBackWrite ((c.work vWk).read)).toΓ
       (if (c.work vWk).read = Γ.start then Dir3.right
         else if f.2.1 then Dir3.right else Dir3.stay) = _
-    rw [if_neg hv1s]
+    rw [ite_eq_right hv1s]
   · show (c.work vOut).writeAndMove (readBackWrite ((c.work vOut).read)).toΓ
       (if (c.work vOut).read = Γ.start then Dir3.right
         else if f.2.2 then Dir3.right else Dir3.stay) = _
-    rw [if_neg hv2s]
+    rw [ite_eq_right hv2s]
   · intro i hi0 hi1 hi2
     show (if i = vIn then _ else if i = vWk then _ else if i = vOut then _
       else _) = _
-    rw [if_neg hi0, if_neg hi1, if_neg hi2]
+    rw [ite_eq_right hi0, ite_eq_right hi1, ite_eq_right hi2]
     refine idle_tape_id ?_
     rcases i with ⟨iv, hv⟩
     rcases iv with _ | _ | _ | _ | _ | _ | n
@@ -1211,7 +1209,7 @@ private theorem matchLoop_go (f : VFlags) (v0 v1 v2 : Γ) (stSyms : List Γw)
         simp [takeField] at h22
     have hfindR : machFind stSyms.length stSyms (keyCells f v0 v1 v2)
         (s :: rest) = some (takeField (s :: rest)).1 := by
-      rw [machFind_cons_of_ne_blank hs, if_pos hMM]
+      rw [machFind_cons_of_ne_blank hs, ite_eq_left hMM]
     obtain ⟨hMM1, hMM2, h22⟩ := hMM
     constructor
     · intro seg hfind'
@@ -1273,7 +1271,7 @@ private theorem matchLoop_go (f : VFlags) (v0 v1 v2 : Γ) (stSyms : List Γw)
           by_cases hs : s = Γw.blank
           · subst hs
             simp [machFind]
-          · rw [machFind_cons_of_ne_blank hs, if_neg hMM]
+          · rw [machFind_cons_of_ne_blank hs, ite_eq_right hMM]
             exact machFind_none_of_head_blank hrest0
       refine ⟨?_, ?_⟩
       · intro seg hfind'
@@ -1366,7 +1364,7 @@ private theorem matchLoop_go (f : VFlags) (v0 v1 v2 : Γ) (stSyms : List Γw)
         rw [hwtSc₃]
         show (if 1 ≤ 1 ∧ 1 ≤ (c₁.work scT).head then Γ.blank
           else (c₁.work scT).cells 1) ≠ Γ.start
-        rw [if_pos ⟨Nat.le_refl _, hsch1⟩]
+        rw [ite_eq_left ⟨Nat.le_refl _, hsch1⟩]
         exact fun h => nomatch h
       -- rewindSt: rewind the state head
       obtain ⟨c₄, hr₄, hst₄, hwtS₄, hin₄, hout₄, hoth₄⟩ :=
@@ -1400,14 +1398,14 @@ private theorem matchLoop_go (f : VFlags) (v0 v1 v2 : Γ) (stSyms : List Γw)
         refine Tape.HoldsExact.nil_iff.mpr ⟨?_, ?_⟩
         · show (if 1 ≤ 0 ∧ 0 ≤ (c₁.work scT).head then Γ.blank
             else (c₁.work scT).cells 0) = Γ.start
-          rw [if_neg (by omega)]
+          rw [ite_eq_right (by omega)]
           exact hsc0₁
         · intro i
           show (if 1 ≤ i + 1 ∧ i + 1 ≤ (c₁.work scT).head then Γ.blank
             else (c₁.work scT).cells (i + 1)) = Γ.blank
           by_cases hcase : 1 ≤ i + 1 ∧ i + 1 ≤ (c₁.work scT).head
-          · rw [if_pos hcase]
-          · rw [if_neg hcase]
+          · rw [ite_eq_left hcase]
+          · rw [ite_eq_right hcase]
             exact hscbl₁ (i + 1) (by omega)
       have hschead₄ : (c₄.work scT).head = 1 := by
         rw [hoth₄ scT (by decide), hwtSc₃]
@@ -1451,7 +1449,7 @@ private theorem matchLoop_go (f : VFlags) (v0 v1 v2 : Γ) (stSyms : List Γw)
           (s :: rest)
           = machFind stSyms.length stSyms (keyCells f v0 v1 v2)
               (takeField (s :: rest)).2 := by
-        rw [machFind_cons_of_ne_blank hs, if_neg hMM]
+        rw [machFind_cons_of_ne_blank hs, ite_eq_right hMM]
       have hpre_le : t₁ + 1 + ((c₁.work scT).head + 1)
           + ((c₁.work stT).head + 1)
           ≤ 4 * stSyms.length + (takeField (s :: rest)).1.length + 34 := by

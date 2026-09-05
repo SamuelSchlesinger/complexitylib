@@ -62,7 +62,14 @@ inductive ReadIdx
   | k4qG | k4tG | k4cF | k4lF
   | i5r | i5c | i5b
   | i6r | i6c | i6b
-  deriving DecidableEq, Fintype
+  deriving DecidableEq
+
+open ReadIdx in
+/-- All twenty-two reads, in declaration order. -/
+instance : Fintype ReadIdx where
+  elems := ⟨↑([f1x, f1y, f1s, g2x, g2y, g2s, c3cQ, c3tQ, c3cX, c3xX, c3cY, c3yY,
+      k4qG, k4tG, k4cF, k4lF, i5r, i5c, i5b, i6r, i6c, i6b] : List ReadIdx), by decide⟩
+  complete := fun x => by cases x <;> decide
 
 theorem card_readIdx : Fintype.card ReadIdx = 22 := rfl
 
@@ -393,7 +400,7 @@ omit [DecidableEq β] [Nonempty β] in
 theorem satisfiable_compose (h : R.Satisfiable) : (R.compose enc).toGraph.Satisfiable := by
   obtain ⟨σ, hσ⟩ := h
   refine (R.compose enc).satisfiable_toGraph (R.honestTable enc σ) fun p z => ?_
-  rw [accepts_compose_iff]
+  erw [accepts_compose_iff]
   set a := oneHotExtend (inputVec enc (σ p.1) (σ (R.graph.nbr p.1 p.2))) with ha
   have hleft : leftBlock a = inputVec enc (σ p.1) (σ (R.graph.nbr p.1 p.2)) :=
     leftBlock_oneHotExtend _

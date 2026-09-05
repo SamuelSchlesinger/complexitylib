@@ -122,13 +122,13 @@ def liftCfgWith (tm : TM n) (m : ℕ) (extras : Fin m → Tape) (c : Cfg n tm.Q)
 /-- `liftCfgWith` maps the first `n` work tapes to `c`'s work tapes. -/
 theorem liftCfgWith_work_lt (tm : TM n) (m : ℕ) (extras : Fin m → Tape)
     (c : Cfg n tm.Q) (i : Fin (n + m)) (h : i.val < n) :
-    (liftCfgWith tm m extras c).work i = c.work ⟨i.val, h⟩ := dif_pos h
+    (liftCfgWith tm m extras c).work i = c.work ⟨i.val, h⟩ := dite_eq_left h
 
 /-- `liftCfgWith` maps the extra work tapes to the pinned tapes. -/
 theorem liftCfgWith_work_ge (tm : TM n) (m : ℕ) (extras : Fin m → Tape)
     (c : Cfg n tm.Q) (i : Fin (n + m)) (h : n ≤ i.val) :
     (liftCfgWith tm m extras c).work i = extras (extraIdx i h) :=
-  dif_neg (Nat.not_lt.mpr h)
+  dite_eq_right (Nat.not_lt.mpr h)
 
 /-- **Unified step commutation** for `liftTM` with arbitrary parked extras.
     Mirror of `Lift.lean`'s (private) blank-extras step lemma: the extras'
@@ -144,8 +144,8 @@ private theorem liftTM_step_of_parked (tm : TM n) (m : ℕ) {extras : Fin m → 
   by_cases hh : c.state = tm.qhalt
   · -- both machines are halted
     have h1 : (tm.liftTM m).step C = none := by
-      simp only [step, hs, hh, show (tm.liftTM m).qhalt = tm.qhalt from rfl,
-        ↓reduceIte]
+      simp only [step]
+      exact ite_eq_left (show C.state = (tm.liftTM m).qhalt from by rw [hs, hh]; rfl)
     have h2 : tm.step c = none := by
       simp only [step, hh, ↓reduceIte]
     rw [h1, h2]; rfl
@@ -160,13 +160,14 @@ private theorem liftTM_step_of_parked (tm : TM n) (m : ℕ) {extras : Fin m → 
         funext fun i => by rw [hw (Fin.castAdd m i) i.isLt]; rfl
       simp only [step, Option.map_some]
       dsimp only [liftTM, liftCfgWith]
-      rw [hs, hi, ho, hinner, if_neg hh]
+      rw [hs, hi, ho, hinner]
+      erw [ite_eq_right hh]
       refine congrArg some (Cfg.mk.injEq _ _ _ _ _ _ _ _ |>.mpr ⟨rfl, rfl, ?_, rfl⟩)
       funext i
       by_cases hik : i.val < n
-      · rw [hw i hik, dif_pos hik, dif_pos hik, dif_pos hik]
+      · rw [hw i hik, dite_eq_left hik, dite_eq_left hik, dite_eq_left hik]
       · have hge := Nat.le_of_not_lt hik
-        rw [dif_neg hik, dif_neg hik, dif_neg hik, hd i hge]
+        rw [dite_eq_right hik, dite_eq_right hik, dite_eq_right hik, hd i hge]
         exact transitionTape_eq_self (hex _)
 
 /-- **Step commutation** on embedded configurations with arbitrary parked
@@ -176,7 +177,7 @@ private theorem liftTM_step_liftCfgWith (tm : TM n) (m : ℕ) {extras : Fin m �
     (tm.liftTM m).step (liftCfgWith tm m extras c)
       = (tm.step c).map (liftCfgWith tm m extras) :=
   liftTM_step_of_parked tm m hex rfl rfl rfl
-    (fun _ h => dif_pos h) (fun _ h => dif_neg (Nat.not_lt.mpr h))
+    (fun _ h => dite_eq_left h) (fun _ h => dite_eq_right (Nat.not_lt.mpr h))
 
 -- ════════════════════════════════════════════════════════════════════════
 -- HoareTime lifting
@@ -264,9 +265,9 @@ private theorem holdsExact_replicate_of_cells {t : Tape} {v : ℕ}
   refine ⟨by rw [h]; rfl, fun i => ?_⟩
   rw [h]
   by_cases hi : i < v
-  · rw [dif_pos (by rwa [List.length_replicate]), List.getElem_replicate]
+  · rw [dite_eq_left (by rwa [List.length_replicate]), List.getElem_replicate]
     exact regCells_one (by omega) (by omega)
-  · rw [dif_neg (by rw [List.length_replicate]; omega)]
+  · rw [dite_eq_right (by rw [List.length_replicate]; omega)]
     exact regCells_blank (by omega)
 
 /-- A tape holding exactly `v` unary marks has cells `regCells v`. -/
@@ -358,12 +359,12 @@ def decClockTM : TM 7 where
         dsimp only []
         by_cases hir : i = clkT
         · subst hir; rw [hone] at hi; exact absurd hi (by decide)
-        · rw [if_neg hir]; exact idleDir_right_of_start hi
+        · rw [ite_eq_right hir]; exact idleDir_right_of_start hi
       · refine ⟨idleDir_right_of_start, fun i hi => ?_, idleDir_right_of_start⟩
         dsimp only []
         by_cases hir : i = clkT
-        · subst hir; rw [if_pos rfl, if_pos hi]
-        · rw [if_neg hir]; exact idleDir_right_of_start hi
+        · subst hir; rw [ite_eq_left rfl, ite_eq_left hi]
+        · rw [ite_eq_right hir]; exact idleDir_right_of_start hi
     | .erase =>
       dsimp only []
       split
@@ -372,26 +373,26 @@ def decClockTM : TM 7 where
         dsimp only []
         by_cases hir : i = clkT
         · subst hir; rw [hone] at hi; exact absurd hi (by decide)
-        · rw [if_neg hir]; exact idleDir_right_of_start hi
+        · rw [ite_eq_right hir]; exact idleDir_right_of_start hi
       · refine ⟨idleDir_right_of_start, fun i hi => ?_, idleDir_right_of_start⟩
         dsimp only []
         by_cases hir : i = clkT
-        · subst hir; rw [if_pos rfl, if_pos hi]
-        · rw [if_neg hir]; exact idleDir_right_of_start hi
+        · subst hir; rw [ite_eq_left rfl, ite_eq_left hi]
+        · rw [ite_eq_right hir]; exact idleDir_right_of_start hi
     | .back =>
       dsimp only []
       split
       · refine ⟨idleDir_right_of_start, fun i hi => ?_, idleDir_right_of_start⟩
         dsimp only []
         by_cases hir : i = clkT
-        · rw [if_pos hir]
-        · rw [if_neg hir]; exact idleDir_right_of_start hi
+        · rw [ite_eq_left hir]
+        · rw [ite_eq_right hir]; exact idleDir_right_of_start hi
       · next hns =>
         refine ⟨idleDir_right_of_start, fun i hi => ?_, idleDir_right_of_start⟩
         dsimp only []
         by_cases hir : i = clkT
         · subst hir; exact absurd hi hns
-        · rw [if_neg hir]; exact idleDir_right_of_start hi
+        · rw [ite_eq_right hir]; exact idleDir_right_of_start hi
     | .park =>
       exact ⟨idleDir_right_of_start, fun _ => idleDir_right_of_start,
         idleDir_right_of_start⟩
@@ -416,16 +417,16 @@ private theorem decClock_step_scan_one (c : Cfg 7 decClockTM.Q)
       { state := .scan, input := c.input,
         work := Function.update c.work clkT ((c.work clkT).move .right),
         output := c.output } := by
-  rw [TM.step, if_neg (decClock_ne_halt (by decide) hst)]
+  rw [TM.step, ite_eq_right (decClock_ne_halt (by decide) hst)]
   simp only [decClockTM, hst, hone, ↓reduceIte]
   refine congrArg some ((Cfg.mk.injEq ..).mpr ⟨rfl, ?_, ?_, ?_⟩)
   · exact transitionInput_eq_self hinp
   · funext i
     by_cases hir : i = clkT
     · subst hir
-      rw [if_pos rfl, Function.update_self,
+      rw [ite_eq_left rfl, Function.update_self,
         writeAndMove_readBack _ (by rw [hone]; decide)]
-    · rw [if_neg hir, Function.update_of_ne hir]
+    · rw [ite_eq_right hir, Function.update_of_ne hir]
       exact Tape.writeAndMove_readBack_idle_of_ne_start _ (hoth i hir)
   · exact Tape.writeAndMove_readBack_idle_of_ne_start _ hout
 
@@ -439,16 +440,16 @@ private theorem decClock_step_scan_blank (c : Cfg 7 decClockTM.Q)
       { state := .erase, input := c.input,
         work := Function.update c.work clkT ((c.work clkT).move .left),
         output := c.output } := by
-  rw [TM.step, if_neg (decClock_ne_halt (by decide) hst)]
+  rw [TM.step, ite_eq_right (decClock_ne_halt (by decide) hst)]
   simp only [decClockTM, hst, hblank, reduceCtorEq, ↓reduceIte]
   refine congrArg some ((Cfg.mk.injEq ..).mpr ⟨rfl, ?_, ?_, ?_⟩)
   · exact transitionInput_eq_self hinp
   · funext i
     by_cases hir : i = clkT
     · subst hir
-      rw [if_pos rfl, Function.update_self,
+      rw [ite_eq_left rfl, Function.update_self,
         writeAndMove_readBack _ (by rw [hblank]; decide)]
-    · rw [if_neg hir, Function.update_of_ne hir]
+    · rw [ite_eq_right hir, Function.update_of_ne hir]
       exact Tape.writeAndMove_readBack_idle_of_ne_start _ (hoth i hir)
   · exact Tape.writeAndMove_readBack_idle_of_ne_start _ hout
 
@@ -463,7 +464,7 @@ private theorem decClock_step_erase_one (c : Cfg 7 decClockTM.Q)
         work := Function.update c.work clkT
           (((c.work clkT).write Γw.blank).move .left),
         output := c.output } := by
-  rw [TM.step, if_neg (decClock_ne_halt (by decide) hst)]
+  rw [TM.step, ite_eq_right (decClock_ne_halt (by decide) hst)]
   simp only [decClockTM, hst, hone, ↓reduceIte]
   refine congrArg some ((Cfg.mk.injEq ..).mpr ⟨rfl, ?_, ?_, ?_⟩)
   · exact transitionInput_eq_self hinp
@@ -471,7 +472,7 @@ private theorem decClock_step_erase_one (c : Cfg 7 decClockTM.Q)
     by_cases hir : i = clkT
     · subst hir
       simp only [↓reduceIte, Function.update_self]
-    · rw [if_neg hir, if_neg hir, Function.update_of_ne hir]
+    · rw [ite_eq_right hir, ite_eq_right hir, Function.update_of_ne hir]
       exact Tape.writeAndMove_readBack_idle_of_ne_start _ (hoth i hir)
   · exact Tape.writeAndMove_readBack_idle_of_ne_start _ hout
 
@@ -489,18 +490,18 @@ private theorem decClock_step_erase_start (c : Cfg 7 decClockTM.Q)
   have h0 : (c.work clkT).head = 0 := by
     by_contra hc
     exact hcr _ (by omega) hs
-  rw [TM.step, if_neg (decClock_ne_halt (by decide) hst)]
+  rw [TM.step, ite_eq_right (decClock_ne_halt (by decide) hst)]
   simp only [decClockTM, hst, hs, reduceCtorEq, ↓reduceIte]
   refine congrArg some ((Cfg.mk.injEq ..).mpr ⟨rfl, ?_, ?_, ?_⟩)
   · exact transitionInput_eq_self hinp
   · funext i
     by_cases hir : i = clkT
     · subst hir
-      rw [if_pos rfl, Function.update_self]
+      rw [ite_eq_left rfl, Function.update_self]
       show ((c.work clkT).write _).move Dir3.right = (c.work clkT).move .right
       congr 1
-      rw [Tape.write, if_pos h0]
-    · rw [if_neg hir, Function.update_of_ne hir]
+      rw [Tape.write, ite_eq_left h0]
+    · rw [ite_eq_right hir, Function.update_of_ne hir]
       exact Tape.writeAndMove_readBack_idle_of_ne_start _ (hoth i hir)
   · exact Tape.writeAndMove_readBack_idle_of_ne_start _ hout
 
@@ -514,15 +515,15 @@ private theorem decClock_step_back_left (c : Cfg 7 decClockTM.Q)
       { state := .back, input := c.input,
         work := Function.update c.work clkT ((c.work clkT).move .left),
         output := c.output } := by
-  rw [TM.step, if_neg (decClock_ne_halt (by decide) hst)]
+  rw [TM.step, ite_eq_right (decClock_ne_halt (by decide) hst)]
   simp only [decClockTM, hst, hns, ↓reduceIte]
   refine congrArg some ((Cfg.mk.injEq ..).mpr ⟨rfl, ?_, ?_, ?_⟩)
   · exact transitionInput_eq_self hinp
   · funext i
     by_cases hir : i = clkT
     · subst hir
-      rw [if_pos rfl, Function.update_self, writeAndMove_readBack _ hns]
-    · rw [if_neg hir, Function.update_of_ne hir]
+      rw [ite_eq_left rfl, Function.update_self, writeAndMove_readBack _ hns]
+    · rw [ite_eq_right hir, Function.update_of_ne hir]
       exact Tape.writeAndMove_readBack_idle_of_ne_start _ (hoth i hir)
   · exact Tape.writeAndMove_readBack_idle_of_ne_start _ hout
 
@@ -540,18 +541,18 @@ private theorem decClock_step_back_start (c : Cfg 7 decClockTM.Q)
   have h0 : (c.work clkT).head = 0 := by
     by_contra hc
     exact hcr _ (by omega) hs
-  rw [TM.step, if_neg (decClock_ne_halt (by decide) hst)]
+  rw [TM.step, ite_eq_right (decClock_ne_halt (by decide) hst)]
   simp only [decClockTM, hst, hs, ↓reduceIte]
   refine congrArg some ((Cfg.mk.injEq ..).mpr ⟨rfl, ?_, ?_, ?_⟩)
   · exact transitionInput_eq_self hinp
   · funext i
     by_cases hir : i = clkT
     · subst hir
-      rw [if_pos rfl, Function.update_self]
+      rw [ite_eq_left rfl, Function.update_self]
       show ((c.work clkT).write _).move Dir3.right = (c.work clkT).move .right
       congr 1
-      rw [Tape.write, if_pos h0]
-    · rw [if_neg hir, Function.update_of_ne hir]
+      rw [Tape.write, ite_eq_left h0]
+    · rw [ite_eq_right hir, Function.update_of_ne hir]
       exact Tape.writeAndMove_readBack_idle_of_ne_start _ (hoth i hir)
   · exact Tape.writeAndMove_readBack_idle_of_ne_start _ hout
 
@@ -564,7 +565,7 @@ private theorem decClock_step_park (c : Cfg 7 decClockTM.Q)
     decClockTM.step c = some
       { state := .done, input := c.input, work := c.work,
         output := c.output } := by
-  rw [TM.step, if_neg (decClock_ne_halt (by decide) hst)]
+  rw [TM.step, ite_eq_right (decClock_ne_halt (by decide) hst)]
   simp only [decClockTM, hst]
   refine congrArg some ((Cfg.mk.injEq ..).mpr ⟨rfl, ?_, ?_, ?_⟩)
   · exact transitionInput_eq_self hinp
@@ -837,7 +838,7 @@ theorem decClockTM_hoareTime (v : ℕ) (inp₀ : Tape) (work₀ : Fin 7 → Tape
       rw [Function.update_self]
       show (((c₂.work clkT).write Γw.blank).move .left).cells = _
       show ((c₂.work clkT).write Γw.blank).cells = _
-      rw [Tape.write, if_neg (by rw [hc₂head]; omega)]
+      rw [Tape.write, ite_eq_right (by rw [hc₂head]; omega)]
       show Function.update (c₂.work clkT).cells (c₂.work clkT).head Γw.blank.toΓ = _
       rw [hc₂cells, hc₂head]
       exact regCells_update_blank_succ e
@@ -927,16 +928,16 @@ private theorem zeroTest_step (c : Cfg 7 zeroTestTM.Q)
                     cells := Function.update c.output.cells c.output.head
                       ((if (c.work clkT).read = Γ.blank then Γw.one
                         else Γw.zero) : Γw).toΓ } } := by
-  rw [TM.step, if_neg (zeroTest_ne_halt hst)]
+  rw [TM.step, ite_eq_right (zeroTest_ne_halt hst)]
   simp only [zeroTestTM, hst]
   refine congrArg some ((Cfg.mk.injEq ..).mpr ⟨rfl, ?_, ?_, ?_⟩)
   · exact transitionInput_eq_self hinp
   · funext i
     exact Tape.writeAndMove_readBack_idle_of_ne_start _ (hall i)
   · show c.output.writeAndMove _ (idleDir c.output.read) = _
-    rw [idleDir, if_neg hor]
+    rw [idleDir, ite_eq_right hor]
     show c.output.write _ = _
-    rw [Tape.write, if_neg hh0]
+    rw [Tape.write, ite_eq_right hh0]
 
 /-- **`zeroTestTM` specification** (ghost-initial-tapes style). Starting
     from `qstart` with the clock tape (`clkT` = work tape 6) holding `v`
@@ -967,9 +968,9 @@ theorem zeroTestTM_hoareTime (v : ℕ) (inp₀ : Tape) (work₀ : Fin 7 → Tape
   have hclkread : (work clkT).read = (if v = 0 then Γ.blank else Γ.one) := by
     rw [Tape.read, hclkh]
     rcases Nat.eq_zero_or_pos v with rfl | hv
-    · rw [if_pos rfl]
+    · rw [ite_eq_left rfl]
       exact Tape.HoldsExact.cells_ge hclk (by simp)
-    · rw [if_neg (by omega)]
+    · rw [ite_eq_right (by omega)]
       have h1 := Tape.HoldsExact.cells_lt hclk (i := 0)
         (by rwa [List.length_replicate])
       rw [List.getElem_replicate] at h1

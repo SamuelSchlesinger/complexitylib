@@ -110,7 +110,7 @@ theorem xorOn_applyTo_internal
         xorOn_insert_internal support index hindex]
       cases hρ : restriction index with
       | none =>
-          rw [Finset.filter_insert, if_pos hρ,
+          rw [Finset.filter_insert, ite_eq_left hρ,
             xorOn_insert_internal _ index (by simp [hindex])]
           simp only [Restriction.On.applyTo,
             hρ, Option.getD_none, ih]
@@ -121,7 +121,7 @@ theorem xorOn_applyTo_internal
             cases input index <;> rfl
       | some value =>
           rw [Finset.filter_insert,
-            if_neg (by simp [hρ])]
+            ite_eq_right (by simp [hρ])]
           simp only [Restriction.On.applyTo,
             hρ, Option.getD_some, ih]
           cases value <;>

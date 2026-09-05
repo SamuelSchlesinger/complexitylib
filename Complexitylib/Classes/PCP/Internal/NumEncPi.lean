@@ -124,7 +124,7 @@ def encAt {n : ℕ} [NumEnc α] (f : Fin n → α) (i : ℕ) : ℕ :=
 
 theorem encAt_lt {n : ℕ} [NumEnc α] (f : Fin n → α) {i : ℕ} (hi : i < n) :
     encAt f i < card α := by
-  rw [encAt, dif_pos hi]
+  rw [encAt, dite_eq_left hi]
   exact enc_lt _
 
 /-- **A tuple is numbered like a numeral.** -/
@@ -148,27 +148,27 @@ instance instPi (n : ℕ) [NumEnc α] : NumEnc (Fin n → α) where
   dec_enc f := by
     have hlt : (∑ i ∈ Finset.range n, encAt f i * card α ^ i) < card α ^ n :=
       sum_lt_pow _ fun i hi => encAt_lt f hi
-    rw [dif_pos hlt]
+    rw [dite_eq_left hlt]
     congr 1
     funext j
     have hc : 0 < card α := Nat.lt_of_le_of_lt (Nat.zero_le _) (enc_lt (f j))
     have hdig := digit_sum (c := card α) hc (encAt f) j.isLt
       (fun i hi => encAt_lt f hi)
     have hval : encAt f j.val = enc (f j) := by
-      rw [encAt, dif_pos j.isLt]
+      rw [encAt, dite_eq_left j.isLt]
     exact get_eq _ (hdig.trans hval)
   enc_dec i f h := by
     by_cases hi : i < card α ^ n
-    · rw [dif_pos hi] at h
+    · rw [dite_eq_left hi] at h
       have hf := Option.some_injective _ h
       subst hf
       show ∑ j ∈ Finset.range n, encAt _ j * card α ^ j = i
       refine Eq.trans (Finset.sum_congr rfl fun j hj => ?_) (sum_digits hi)
-      rw [encAt, dif_pos (Finset.mem_range.mp hj), enc_get]
-    · rw [dif_neg hi] at h
+      rw [encAt, dite_eq_left (Finset.mem_range.mp hj), enc_get]
+    · rw [dite_eq_right hi] at h
       exact absurd h (by simp)
   dec_isSome i hi := by
-    rw [dif_pos hi]
+    rw [dite_eq_left hi]
     rfl
 
 end NumEnc

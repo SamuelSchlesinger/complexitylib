@@ -116,7 +116,7 @@ existential class is the bounded universal class over the complement class. -/
 theorem complClass_polyExistsClass (C : Set Language) :
     complClass (polyExistsClass C) = polyForallClass (complClass C) := by
   ext L
-  simp only [mem_complClass, polyExistsClass, polyForallClass, Set.mem_setOf_eq]
+  simp only [mem_complClass, polyExistsClass, polyForallClass, Set.mem_ofPred_eq]
   constructor
   · rintro ⟨p, L', hL', hEq⟩
     refine ⟨p, L'ᶜ, by simpa [mem_complClass, compl_compl] using hL', ?_⟩
@@ -129,7 +129,7 @@ class is the bounded existential class over the complement class. -/
 theorem complClass_polyForallClass (C : Set Language) :
     complClass (polyForallClass C) = polyExistsClass (complClass C) := by
   ext L
-  simp only [mem_complClass, polyExistsClass, polyForallClass, Set.mem_setOf_eq]
+  simp only [mem_complClass, polyExistsClass, polyForallClass, Set.mem_ofPred_eq]
   constructor
   · rintro ⟨p, L', hL', hEq⟩
     refine ⟨p, L'ᶜ, by simpa [mem_complClass, compl_compl] using hL', ?_⟩

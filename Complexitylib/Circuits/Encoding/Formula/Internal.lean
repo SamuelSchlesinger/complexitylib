@@ -70,7 +70,7 @@ theorem evalAux?_compileRaw_of_agree_internal (available : ℕ) [NeZero availabl
       · simp [compileRaw, RawCircuit.evalAux?, CircuitCode.RawGate.copy,
           hvalue, CircuitCode.RawGate.eval]
       · intro j hj
-        rw [Array.getElem?_push, if_neg (by omega)]
+        rw [Array.getElem?_push, ite_eq_right (by omega)]
       · have hwire : rawOutputWire available (.var i) = wires.size := by
           simp [rawOutputWire, size, hsize]
         rw [hwire]
@@ -85,7 +85,7 @@ theorem evalAux?_compileRaw_of_agree_internal (available : ℕ) [NeZero availabl
       · simp [compileRaw, RawCircuit.evalAux?, CircuitCode.RawGate.constant,
           hvalue, CircuitCode.RawGate.eval]
       · intro j hj
-        rw [Array.getElem?_push, if_neg (by omega)]
+        rw [Array.getElem?_push, ite_eq_right (by omega)]
       · have hwire : rawOutputWire available .tru = wires.size := by
           simp [rawOutputWire, size, hsize]
         rw [hwire]
@@ -100,7 +100,7 @@ theorem evalAux?_compileRaw_of_agree_internal (available : ℕ) [NeZero availabl
       · simp [compileRaw, RawCircuit.evalAux?, CircuitCode.RawGate.constant,
           hvalue, CircuitCode.RawGate.eval]
       · intro j hj
-        rw [Array.getElem?_push, if_neg (by omega)]
+        rw [Array.getElem?_push, ite_eq_right (by omega)]
       · have hwire : rawOutputWire available .fls = wires.size := by
           simp [rawOutputWire, size, hsize]
         rw [hwire]
@@ -117,7 +117,7 @@ theorem evalAux?_compileRaw_of_agree_internal (available : ℕ) [NeZero availabl
       · simp only [Array.size_push, hresultSize, size]
         omega
       · intro i hi
-        rw [Array.getElem?_push, if_neg (by omega)]
+        rw [Array.getElem?_push, ite_eq_right (by omega)]
         exact hpreserved i hi
       · have hwire : rawOutputWire available (.neg formula) = formulaResult.size := by
           simp only [rawOutputWire, size, hresultSize, hsize]
@@ -135,7 +135,7 @@ theorem evalAux?_compileRaw_of_agree_internal (available : ℕ) [NeZero availabl
         ihLeft available wires hsize hvarsLeft hagreeLeft
       have hleftSize' : leftResult.size = available + left.size := by
         omega
-      letI : NeZero (available + left.size) := ⟨by
+      let : NeZero (available + left.size) := ⟨by
         have := NeZero.ne available
         omega⟩
       have hvarsRight : ∀ i ∈ right.vars, i < available + left.size := by
@@ -168,7 +168,7 @@ theorem evalAux?_compileRaw_of_agree_internal (available : ℕ) [NeZero availabl
       · simp only [Array.size_push, hrightSize, hleftSize, size]
         omega
       · intro i hi
-        rw [Array.getElem?_push, if_neg (by omega)]
+        rw [Array.getElem?_push, ite_eq_right (by omega)]
         rw [hrightPreserved i (by omega)]
         exact hleftPreserved i hi
       · have hwire : rawOutputWire available (.conj left right) = rightResult.size := by
@@ -187,7 +187,7 @@ theorem evalAux?_compileRaw_of_agree_internal (available : ℕ) [NeZero availabl
         ihLeft available wires hsize hvarsLeft hagreeLeft
       have hleftSize' : leftResult.size = available + left.size := by
         omega
-      letI : NeZero (available + left.size) := ⟨by
+      let : NeZero (available + left.size) := ⟨by
         have := NeZero.ne available
         omega⟩
       have hvarsRight : ∀ i ∈ right.vars, i < available + left.size := by
@@ -220,7 +220,7 @@ theorem evalAux?_compileRaw_of_agree_internal (available : ℕ) [NeZero availabl
       · simp only [Array.size_push, hrightSize, hleftSize, size]
         omega
       · intro i hi
-        rw [Array.getElem?_push, if_neg (by omega)]
+        rw [Array.getElem?_push, ite_eq_right (by omega)]
         rw [hrightPreserved i (by omega)]
         exact hleftPreserved i hi
       · have hwire : rawOutputWire available (.disj left right) = rightResult.size := by

@@ -315,7 +315,7 @@ private theorem extractTM_copy_loop
         rw [hw i hne]; exact transitionTape_eq_self (hothers i hne)
       · dsimp only []
         simp only [Tape.writeAndMove, Tape.move_cells, Tape.write, hohead]
-        rw [if_neg (show ¬(j + 1 = 0) by omega)]
+        rw [ite_eq_right (show ¬(j + 1 = 0) by omega)]
         dsimp only []
         simp [readBackWrite]
     obtain ⟨c₁, hstep', hst1, hc1, hin1, hw1, hout1⟩ := hstep
@@ -361,7 +361,7 @@ private theorem extractTM_copy_loop
         omega
       · dsimp only []
         simp only [Tape.writeAndMove, Tape.move_cells, Tape.write, hohead]
-        rw [if_neg (show ¬(j + 1 = 0) by omega)]
+        rw [ite_eq_right (show ¬(j + 1 = 0) by omega)]
         dsimp only []
         rw [hread, toΓ_readBackWrite_of_ne_start (hWns (j + 2) (by omega))]
     obtain ⟨c₁, hstep', hst1, hc1, hh1, hin1, hw1, hoh1, hoc1⟩ := hstep

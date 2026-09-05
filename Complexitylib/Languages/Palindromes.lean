@@ -513,7 +513,7 @@ private theorem palindromesTM_step_copy_push
   have hir_ne_start : c.input.read ≠ Γ.start := by
     rw [hib]; cases x[k] <;> decide
   simp only [TM.step, hst, palindromesTM, reduceCtorEq, ↓reduceIte,
-             if_neg hir_ne_blank, if_neg hir_ne_start]
+             ite_eq_right hir_ne_blank, ite_eq_right hir_ne_start]
   refine ⟨_, rfl, rfl, ?_⟩
   refine ⟨by omega, ?_, ?_, ?_, ?_, ?_, ?_, ?_, ?_⟩
   · show (c.input.move Dir3.right).cells = _
@@ -584,7 +584,7 @@ private theorem palindromesTM_step_copy_end
     ∃ c', palindromesTM.step c = some c' ∧
       c'.state = PalindromePhase.rewindInput ∧ RewindInv c' x x.length := by
   have hir : c.input.read = Γ.blank := inv.read_blank
-  simp only [TM.step, hst, palindromesTM, reduceCtorEq, ↓reduceIte, if_pos hir]
+  simp only [TM.step, hst, palindromesTM, reduceCtorEq, ↓reduceIte, ite_eq_left hir]
   refine ⟨_, rfl, rfl, ?_⟩
   have hstay := inv.output_stay
   have hwread : (c.work 0).read = Γ.blank := inv.work_read
@@ -636,7 +636,7 @@ private theorem palindromesTM_step_rewindInput_consume
     have : c.input.cells j ≠ Γ.start := inv.input_ns j hj
     exact this
   simp only [TM.step, hst, palindromesTM, reduceCtorEq, ↓reduceIte,
-             if_neg hir_ne_start]
+             ite_eq_right hir_ne_start]
   refine ⟨_, rfl, rfl, ?_⟩
   have hml : moveLeftDir c.input.read = Dir3.left := by
     simp [moveLeftDir, hir_ne_start]
@@ -678,7 +678,7 @@ private theorem palindromesTM_step_rewindInput_finish
   have hir : c.input.read = Γ.start := by
     simp only [Tape.read, inv.ih, inv.ic]
     simp [Tape.init]
-  simp only [TM.step, hst, palindromesTM, reduceCtorEq, ↓reduceIte, if_pos hir]
+  simp only [TM.step, hst, palindromesTM, reduceCtorEq, ↓reduceIte, ite_eq_left hir]
   refine ⟨_, rfl, rfl, ?_⟩
   have hwread : (c.work 0).read = Γ.blank := inv.work_read
   have hwread_ne : (c.work 0).read ≠ Γ.start := by rw [hwread]; decide
@@ -731,7 +731,7 @@ private theorem palindromesTM_step_compare_match
     show c.input.read = (c.work 0).read
     exact hir_eq_wr
   simp only [TM.step, hst, palindromesTM, reduceCtorEq, ↓reduceIte,
-             if_neg hir_ne_blank, if_neg hir_ne_start, if_pos hir_eq]
+             ite_eq_right hir_ne_blank, ite_eq_right hir_ne_start, ite_eq_left hir_eq]
   refine ⟨_, rfl, rfl, ?_⟩
   have hwr_ne_start : (c.work 0).read ≠ Γ.start := by
     rw [hwr]; cases x[x.length-k-1] <;> decide
@@ -785,7 +785,7 @@ private theorem palindromesTM_step_compare_mismatch
       simp [hb1, hb2, Γ.ofBool] at h ⊢
   have hir_ne : c.input.read ≠ (fun i : Fin 1 => (c.work i).read) 0 := hir_ne_wr
   simp only [TM.step, hst, palindromesTM, reduceCtorEq, ↓reduceIte,
-             if_neg hir_ne_blank, if_neg hir_ne_start, if_neg hir_ne]
+             ite_eq_right hir_ne_blank, ite_eq_right hir_ne_start, ite_eq_right hir_ne]
   refine ⟨_, rfl, ?_, ?_, ?_, ?_, ?_⟩
   · rfl
   · show (c.input.move Dir3.right).cells = _; rw [Tape.move_cells]; exact inv.ic
@@ -805,7 +805,7 @@ private theorem palindromesTM_step_compare_halt
     ∃ c', palindromesTM.step c = some c' ∧ palindromesTM.halted c' ∧
       c'.output.cells 1 = Γ.one := by
   have hir : c.input.read = Γ.blank := inv.read_input_blank
-  simp only [TM.step, hst, palindromesTM, reduceCtorEq, ↓reduceIte, if_pos hir]
+  simp only [TM.step, hst, palindromesTM, reduceCtorEq, ↓reduceIte, ite_eq_left hir]
   refine ⟨_, rfl, rfl, ?_⟩
   have hostay := inv.output_stay
   show (c.output.writeAndMove Γw.one.toΓ _).cells 1 = Γ.one
@@ -821,7 +821,7 @@ private theorem palindromesTM_step_reject_consume
   have hir_ne_blank : c.input.read ≠ Γ.blank := by
     rw [hir_bit]; cases x[j] <;> decide
   simp only [TM.step, inv.st, palindromesTM, reduceCtorEq, ↓reduceIte,
-             if_neg hir_ne_blank]
+             ite_eq_right hir_ne_blank]
   refine ⟨_, rfl, ?_, ?_, ?_, ?_, ?_⟩
   · rfl
   · show (c.input.move Dir3.right).cells = _; rw [Tape.move_cells]; exact inv.ic
@@ -840,7 +840,7 @@ private theorem palindromesTM_step_reject_halt
     ∃ c', palindromesTM.step c = some c' ∧ palindromesTM.halted c' ∧
       c'.output.cells 1 = Γ.zero := by
   have hir : c.input.read = Γ.blank := inv.read_blank
-  simp only [TM.step, inv.st, palindromesTM, reduceCtorEq, ↓reduceIte, if_pos hir]
+  simp only [TM.step, inv.st, palindromesTM, reduceCtorEq, ↓reduceIte, ite_eq_left hir]
   refine ⟨_, rfl, rfl, ?_⟩
   have hostay := inv.output_stay
   show (c.output.writeAndMove Γw.zero.toΓ _).cells 1 = Γ.zero
@@ -901,7 +901,7 @@ private theorem palindromesTM_compare_to_halt (x : List Bool) :
     have htriv : ∀ i, (hi : i < x.length) → x.length ≤ i →
         (x[i]'hi) = (x[x.length - 1 - i]'(by omega)) := by
       intro i hi hle; exfalso; omega
-    rw [if_pos htriv]
+    rw [ite_eq_left htriv]
   | succ m' ih =>
     intro k c hst inv hlen
     have hk : k < x.length := by omega
@@ -927,13 +927,13 @@ private theorem palindromesTM_compare_to_halt (x : List Bool) :
           by_cases hik : i = k
           · subst hik; exact hmatch'
           · exact hP i hi (by omega)
-        rw [if_pos hP, if_pos hPk]
+        rw [ite_eq_left hP, ite_eq_left hPk]
       · -- Neither
         have hPk : ¬ ∀ i, (hi : i < x.length) → k ≤ i →
                    (x[i]'hi) = (x[x.length - 1 - i]'(by omega)) := by
           intro hP'; apply hP
           intro i hi hle; exact hP' i hi (by omega)
-        rw [if_neg hP, if_neg hPk]
+        rw [ite_eq_right hP, ite_eq_right hPk]
     · -- Mismatch: transition to reject, then reject-to-halt
       have hmis : (x[k]'hk) ≠ (x[x.length - k - 1]'(by omega)) := hmatch
       obtain ⟨c₁, hstep, inv₁⟩ :=
@@ -951,7 +951,7 @@ private theorem palindromesTM_compare_to_halt (x : List Bool) :
                    (x[i]'hi) = (x[x.length - 1 - i]'(by omega)) := by
         intro hP
         exact hmis' (hP k hk le_rfl)
-      rw [if_neg hPk]
+      rw [ite_eq_right hPk]
 
 /-- Rewind input phase: from `RewindInv c x j`, reach `CompareInv c' x 0` in
     `j + 1` steps. -/
@@ -1121,12 +1121,12 @@ theorem palindromesTM_decidesInTime :
     rw [hout]
     have hpal : IsPalindrome x :=
       (isPalindrome_iff_reverse_eq x).mpr hxL
-    exact if_pos hpal
+    exact ite_eq_left hpal
   · intro hxnL
     rw [hout]
     have hnot : ¬ IsPalindrome x := fun h =>
       hxnL ((isPalindrome_iff_reverse_eq x).mp h)
-    exact if_neg hnot
+    exact ite_eq_right hnot
 
 end TM
 

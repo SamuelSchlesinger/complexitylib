@@ -124,7 +124,7 @@ theorem clearValidationOutputTM_hoareTime_internal
         out₀.write Γw.blank := by
     change (out₀.write Γw.blank).move (TM.idleDir out₀.read) =
       out₀.write Γw.blank
-    rw [TM.idleDir, if_neg hout₀.read_ne_start]
+    rw [TM.idleDir, ite_eq_right hout₀.read_ne_start]
     rfl
   have hstep : clearValidationOutputTM.step
       { state := TM.BumpPhase.go, input := inp₀, work := work₀, output := out₀ } =
@@ -241,8 +241,7 @@ theorem fallbackEmitter_hoareTime_internal
       (TM.EmitPred inp₀ work₀ fallbackEncoding)
       28 := by
   have hlength : fallbackEncoding.length = 28 := by decide
-  simpa only [List.nil_append, hlength] using
-    TM.emitBitsTM_hoareTime fallbackEncoding inp₀ work₀ [] hinp₀ hwork₀
+  exact TM.emitBitsTM_hoareTime fallbackEncoding inp₀ work₀ [] hinp₀ hwork₀
 
 end Machine
 

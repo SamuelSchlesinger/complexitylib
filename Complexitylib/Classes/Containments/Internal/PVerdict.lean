@@ -55,7 +55,7 @@ def stepOrStay (tm : TM k) (c : Cfg k tm.Q) : Cfg k tm.Q := (tm.step c).getD c
 
 theorem stepOrStay_of_halted (tm : TM k) {c : Cfg k tm.Q} (h : c.state = tm.qhalt) :
     tm.stepOrStay c = c := by
-  rw [stepOrStay, TM.step, if_pos h]
+  rw [stepOrStay, TM.step, ite_eq_left h]
   rfl
 
 theorem stepOrStay_of_step (tm : TM k) {c c' : Cfg k tm.Q} (h : tm.step c = some c') :
@@ -335,7 +335,7 @@ theorem pVerdict_mem_FP (tm : TM k) (wp tp : Polynomial ℕ)
       (pair (polyRuler (2 * wp + 2) x)
         (Cobham.initFn tm (polyRuler (2 * wp + 2) x) x)))) ∈ FP := by
     have := mem_FP_comp hiter Cobham.sndBlock_mem_FP
-    simpa [Function.comp] using this
+    exact this
   exact acceptFlagFn_mem_FP _ hRf (wideRulerFn_mem_FP hRf (codeBlocks k)) hcode
 
 /-! ## The bridge -/

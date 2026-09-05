@@ -66,7 +66,7 @@ theorem isHardAt_iff_sizeComplexity_gt_internal {arity : ℕ}
     IsHardAt beta target ↔
       hardThreshold beta arity <
         Circuit.sizeComplexity Basis.andOr2 target := by
-  letI : NeZero
+  let : NeZero
       (MCSP.Instance.ofFunction arity
         (hardThreshold beta arity) target).arity :=
     ⟨by simpa using NeZero.ne arity⟩

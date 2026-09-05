@@ -56,8 +56,8 @@ theorem evalAux?_acceptanceRawCircuit_internal
       traceResult[configWire tm T (traceOutputBase tm T n available layout)
         (.cell .output ⟨1, by omega⟩ Γ.one)]? =
         some (decide (c.output.cells 1 = Γ.one)) := by
-    simpa [c, ConfigAtom.value, TapeSlot.get] using
-      hencodes (.cell .output ⟨1, by omega⟩ Γ.one)
+    simp only [c]
+    exact hencodes (.cell .output ⟨1, by omega⟩ Γ.one)
   have hacceptance :
       (decide (c.state = tm.qhalt) && decide (c.output.cells 1 = Γ.one)) =
         decide (c.state = tm.qhalt ∧ c.output.cells 1 = Γ.one) := by
@@ -124,7 +124,7 @@ theorem eval?_acceptanceRawCircuit_internal
       (acceptanceRawCircuit tm T n available layout).isEmpty = false := by
     simp [acceptanceRawCircuit]
   rw [CircuitCode.RawCircuit.eval?]
-  simp only [hnonempty, Bool.false_eq_true, if_false, wires, heval]
+  simp only [hnonempty, Bool.false_eq_true, ite_false, wires, heval]
   rw [houtputIndex]
   exact Array.getElem?_push_size
 

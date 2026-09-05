@@ -142,7 +142,7 @@ theorem mem_PPoly_iff {L : Language} :
     L ∈ PPoly ↔
       ∃ (F : CircuitFamily Basis.andOr2) (k : ℕ),
         F.Decides L ∧ F.size =O ((· ^ k) : ℕ → ℕ) := by
-  simp only [PPoly, SIZE, SIZEWithBasis, Set.mem_iUnion, Set.mem_setOf_eq]
+  simp only [PPoly, SIZE, SIZEWithBasis, Set.mem_iUnion, Set.mem_ofPred_eq]
   constructor
   · rintro ⟨p, F, hL, hp⟩
     exact ⟨F, p.natDegree, hL, Complexity.BigO.of_polynomial_bound p hp⟩

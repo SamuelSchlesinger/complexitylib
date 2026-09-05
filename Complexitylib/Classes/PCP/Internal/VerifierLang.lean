@@ -93,7 +93,7 @@ theorem tableOf_eq_wBlock (V : PCPVerifier) (t Q : ℕ) (x w : List Bool)
       rwa [V.length_tableOf t Q x w ρ] at h1
     rw [getElem_wBlock h hi]
     show (List.map _ (List.range _))[i] = _
-    rw [List.getElem_map, List.getElem_range]
+    erw [List.getElem_map, List.getElem_range]
 
 /-- A one-bit block is the bit it holds. -/
 theorem wBlock_one {w : List Bool} {k : ℕ} (h : k < w.length) :
@@ -150,10 +150,10 @@ theorem accCoin_mem_FP
     accCoin r ∈ FP := by
   have ht : (fun y : List Bool => List.replicate (r (accX y).length) true) ∈ FP := by
     have := mem_FP_comp accX_mem_FP hr
-    simpa using this
+    exact this
   have hc : (fun y : List Bool => List.replicate (pairSnd y).length true) ∈ FP := by
     have := mem_FP_comp Cobham.sndBlock_mem_FP unaryLength_mem_FP
-    simpa using this
+    exact this
   exact coinStr_mem_FP ht hc
 
 theorem accView_mem_FP (hf : f ∈ FP)
@@ -164,7 +164,7 @@ theorem accView_mem_FP (hf : f ∈ FP)
     Cobham.pairFn_mem_FP accX_mem_FP hcoin
   have hfv : (fun y => f (pair (accX y) (accCoin r y))) ∈ FP := by
     have := mem_FP_comp hview hf
-    simpa using this
+    exact this
   have hcount : (fun y => posCount (f (pair (accX y) (accCoin r y)))) ∈ FP :=
     posCount_mem_FP hfv
   have hoff : (fun y : List Bool =>
@@ -202,7 +202,7 @@ theorem accLang_mem_P (hf : f ∈ FP)
   have hlen : (fun z : List Bool =>
       List.replicate (2 ^ r (pairFst z).length) true) ∈ FP := by
     have := mem_FP_comp Cobham.fstBlock_mem_FP (unaryExp_mem_FP_of_bigO_log hr hrlog)
-    simpa using this
+    exact this
   exact forall_unary_mem_P (accInner_mem_P V f r Q hf hr) hlen
 
 /-- What one iteration looks at, on a well-formed input. -/

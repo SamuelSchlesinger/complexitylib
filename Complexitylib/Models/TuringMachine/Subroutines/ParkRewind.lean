@@ -112,12 +112,10 @@ theorem parkRewindTM_hoareTime (targets : List (Fin n)) (hnodup : targets.Nodup)
       (fun _ => O1) b ?_ ?_ (fun _ => hO1P) ?_).consequence
       (fun _ _ _ h => h) (fun _ _ _ h => h) (le_refl _)
     · intro k
-      dsimp only
       split
       · exact hI1P
       · exact hI2P
     · intro k i
-      dsimp only
       split
       · exact hW1P i
       · exact hW3P i
@@ -152,11 +150,11 @@ theorem parkRewindTM_hoareTime (targets : List (Fin n)) (hnodup : targets.Nodup)
           by_cases hj : j ∈ targets
           · rw [hin j hj]
             show (⟨1, (W1 j).cells⟩ : Tape) = W3 j
-            simp only [hW3def, if_pos hj]
+            simp only [hW3def, ite_eq_left hj]
             rfl
           · rw [hout j hj]
             show W1 j = W3 j
-            simp only [hW3def, if_neg hj]
+            simp only [hW3def, ite_eq_right hj]
             rfl
   exact seqTM_hoareTime skipTM _ hpark htrans hrest
 
@@ -214,10 +212,10 @@ theorem parkRewindWorkTM_hoareTime (targets : List (Fin n)) (hnodup : targets.No
       by_cases hj : j ∈ targets
       · rw [hin j hj]
         show (⟨1, (W1 j).cells⟩ : Tape) = W3 j
-        simp only [hW3def, if_pos hj]
+        simp only [hW3def, ite_eq_left hj]
         rfl
       · rw [hout j hj, hW3def, hW1def]
-        simp only [if_neg hj]
+        simp only [ite_eq_right hj]
   exact seqTM_hoareTime skipTM _ hpark htrans hrest
 
 end TM

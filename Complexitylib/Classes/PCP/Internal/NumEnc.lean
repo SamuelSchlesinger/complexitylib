@@ -126,14 +126,14 @@ instance instFin (n : ℕ) : NumEnc (Fin n) where
   enc i := i.val
   dec i := if h : i < n then some ⟨i, h⟩ else none
   enc_lt i := i.isLt
-  dec_enc i := by rw [dif_pos i.isLt]
+  dec_enc i := by rw [dite_eq_left i.isLt]
   enc_dec i a h := by
     by_cases hi : i < n
-    · rw [dif_pos hi] at h
+    · rw [dite_eq_left hi] at h
       exact congrArg Fin.val (Option.some_injective _ h).symm
-    · rw [dif_neg hi] at h
+    · rw [dite_eq_right hi] at h
       exact absurd h (by simp)
-  dec_isSome i hi := by rw [dif_pos hi]; rfl
+  dec_isSome i hi := by rw [dite_eq_left hi]; rfl
 
 instance instBool : NumEnc Bool where
   card := 2
@@ -152,7 +152,7 @@ instance instBool : NumEnc Bool where
         simp at h
         subst h
         norm_num
-      · rw [if_neg h0, if_neg h1] at h
+      · rw [ite_eq_right h0, ite_eq_right h1] at h
         exact absurd h (by simp)
   dec_isSome i hi := by
     by_cases h0 : i = 0
@@ -169,7 +169,7 @@ instance instUnit : NumEnc Unit where
   enc_dec i a h := by
     by_cases h0 : i = 0
     · subst h0; rfl
-    · rw [if_neg h0] at h
+    · rw [ite_eq_right h0] at h
       exact absurd h (by simp)
   dec_isSome i hi := by
     have h0 : i = 0 := by omega
@@ -206,11 +206,11 @@ instance instProd [NumEnc α] [NumEnc β] : NumEnc (α × β) where
     else none
   enc_lt p := prod_lt p.1 p.2
   dec_enc p := by
-    rw [if_pos (prod_lt p.1 p.2), prod_div, prod_mod, dec_enc, dec_enc]
+    rw [ite_eq_left (prod_lt p.1 p.2), prod_div, prod_mod, dec_enc, dec_enc]
     rfl
   enc_dec i p h := by
     by_cases hlt : i < card α * card β
-    · rw [if_pos hlt] at h
+    · rw [ite_eq_left hlt] at h
       rw [Option.bind_eq_some_iff] at h
       obtain ⟨a, ha, hb⟩ := h
       rw [Option.map_eq_some_iff] at hb
@@ -222,7 +222,7 @@ instance instProd [NumEnc α] [NumEnc β] : NumEnc (α × β) where
       show enc a * card β + enc b = i
       rw [hea, heb, Nat.mul_comm]
       exact Nat.div_add_mod i (card β)
-    · rw [if_neg hlt] at h
+    · rw [ite_eq_right hlt] at h
       exact absurd h (by simp)
 
   dec_isSome i hi := by
@@ -234,7 +234,7 @@ instance instProd [NumEnc α] [NumEnc β] : NumEnc (α × β) where
     have him : i % card β < card β := Nat.mod_lt _ hb
     obtain ⟨a, ha⟩ := Option.isSome_iff_exists.mp (dec_isSome _ hia)
     obtain ⟨b, hbb⟩ := Option.isSome_iff_exists.mp (dec_isSome _ him)
-    rw [if_pos hi, ha, hbb]
+    rw [ite_eq_left hi, ha, hbb]
     rfl
 
 instance instSum [NumEnc α] [NumEnc β] : NumEnc (α ⊕ β) where
@@ -251,23 +251,23 @@ instance instSum [NumEnc α] [NumEnc β] : NumEnc (α ⊕ β) where
         have ha := enc_lt a
         show (if enc a < card α then _ else _) = _
         simp only [Sum.elim_inl]
-        rw [if_pos ha, dec_enc]
+        rw [ite_eq_left ha, dec_enc]
         rfl
     | inr b =>
         have hb : ¬ card α + enc b < card α := by omega
         show (if card α + enc b < card α then _ else _) = _
         simp only [Sum.elim_inr]
-        rw [if_neg hb, Nat.add_sub_cancel_left, dec_enc]
+        rw [ite_eq_right hb, Nat.add_sub_cancel_left, dec_enc]
         rfl
   enc_dec i x h := by
     by_cases hi : i < card α
-    · rw [if_pos hi, Option.map_eq_some_iff] at h
+    · rw [ite_eq_left hi, Option.map_eq_some_iff] at h
       obtain ⟨a, ha, hx⟩ := h
       have := enc_dec _ a ha
       rw [← hx]
       show enc a = i
       exact this
-    · rw [if_neg hi, Option.map_eq_some_iff] at h
+    · rw [ite_eq_right hi, Option.map_eq_some_iff] at h
       obtain ⟨b, hb, hx⟩ := h
       have := enc_dec _ b hb
       rw [← hx]
@@ -277,11 +277,11 @@ instance instSum [NumEnc α] [NumEnc β] : NumEnc (α ⊕ β) where
   dec_isSome i hi := by
     by_cases h : i < card α
     · obtain ⟨a, ha⟩ := Option.isSome_iff_exists.mp (dec_isSome (α := α) _ h)
-      rw [if_pos h, ha]
+      rw [ite_eq_left h, ha]
       rfl
     · have hb : i - card α < card β := by omega
       obtain ⟨b, hbb⟩ := Option.isSome_iff_exists.mp (dec_isSome (α := β) _ hb)
-      rw [if_neg h, hbb]
+      rw [ite_eq_right h, hbb]
       rfl
 
 instance instOption [NumEnc α] : NumEnc (Option α) where
@@ -294,18 +294,18 @@ instance instOption [NumEnc α] : NumEnc (Option α) where
     | some a => have := enc_lt a; show 1 + enc a < _; omega
   dec_enc o := by
     cases o with
-    | none => show (if (0 : ℕ) = 0 then _ else _) = _; rw [if_pos rfl]
+    | none => show (if (0 : ℕ) = 0 then _ else _) = _; rw [ite_eq_left rfl]
     | some a =>
         show (if 1 + enc a = 0 then _ else _) = _
-        rw [if_neg (by omega), show 1 + enc a - 1 = enc a by omega, dec_enc]
+        rw [ite_eq_right (by omega), show 1 + enc a - 1 = enc a by omega, dec_enc]
         rfl
   enc_dec i o h := by
     by_cases h0 : i = 0
-    · rw [if_pos h0] at h
+    · rw [ite_eq_left h0] at h
       rw [← Option.some_injective _ h]
       show 0 = i
       omega
-    · rw [if_neg h0, Option.map_eq_some_iff] at h
+    · rw [ite_eq_right h0, Option.map_eq_some_iff] at h
       obtain ⟨a, ha, ho⟩ := h
       have := enc_dec _ a ha
       rw [← ho]
@@ -313,11 +313,11 @@ instance instOption [NumEnc α] : NumEnc (Option α) where
       omega
   dec_isSome i hi := by
     by_cases h0 : i = 0
-    · rw [if_pos h0]
+    · rw [ite_eq_left h0]
       rfl
     · have hb : i - 1 < card α := by omega
       obtain ⟨a, ha⟩ := Option.isSome_iff_exists.mp (dec_isSome (α := α) _ hb)
-      rw [if_neg h0, ha]
+      rw [ite_eq_right h0, ha]
       rfl
 
 /-- Any finite type is numbered by its own enumeration. For a type whose size
@@ -329,17 +329,17 @@ bounded key. -/
   dec i := if h : i < Fintype.card α then some ((Fintype.equivFin α).symm ⟨i, h⟩) else none
   enc_lt a := (Fintype.equivFin α a).isLt
   dec_enc a := by
-    rw [dif_pos (Fintype.equivFin α a).isLt]
+    rw [dite_eq_left (Fintype.equivFin α a).isLt]
     simp
   enc_dec i a h := by
     by_cases hi : i < Fintype.card α
-    · rw [dif_pos hi] at h
+    · rw [dite_eq_left hi] at h
       rw [← Option.some_injective _ h]
       simp
-    · rw [dif_neg hi] at h
+    · rw [dite_eq_right hi] at h
       exact absurd h (by simp)
   dec_isSome i hi := by
-    rw [dif_pos hi]
+    rw [dite_eq_left hi]
     rfl
 
 end NumEnc

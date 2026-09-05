@@ -180,11 +180,11 @@ theorem descOfTM_halted (c : Cfg 1 M.Q) :
   have hlt : (M.stateEquiv M.qhalt).val ≤ 2 ^ Fintype.card M.Q :=
     Nat.le_of_lt (lt_of_lt_of_le (M.stateEquiv M.qhalt).isLt
       (Nat.le_of_lt Nat.lt_two_pow_self))
-  simp only [halted, Cfg.isHalted, descCfg, TMDesc.toTM, descOfTM, Fin.mk.injEq,
+  simp only [halted, Cfg.isHalted, descCfg, TMDesc.toTM, descOfTM,
     Nat.min_eq_left hlt]
   constructor
-  · intro h; exact M.stateEquiv.injective (Fin.val_injective h)
-  · intro h; rw [h]
+  · intro h; exact M.stateEquiv.injective (Fin.val_injective (Fin.mk.injEq .. ▸ h))
+  · intro h; simp [h]
 
 /-- The initial configuration embeds correctly. -/
 theorem descOfTM_initCfg (x : List Bool) :
@@ -203,7 +203,7 @@ theorem descOfTM_step_comm (c : Cfg 1 M.Q) :
     simp [step, h, hh]
   · have hne : (M.descCfg c).state ≠ M.descOfTM.toTM.qhalt :=
       fun hh => h ((M.descOfTM_halted c).mp hh)
-    simp only [step, if_neg h, if_neg hne, Option.map_some]
+    simp only [step, ite_eq_right h, ite_eq_right hne, Option.map_some]
     have hro := M.δ_right_of_start c.state c.input.read
       (fun i => (c.work i).read) c.output.read
     have hwork : (fun _ : Fin 1 => (c.work 0).read) = (fun i => (c.work i).read) :=
@@ -219,16 +219,16 @@ theorem descOfTM_step_comm (c : Cfg 1 M.Q) :
         exact Nat.le_of_lt (lt_of_lt_of_le (M.stateEquiv _).isLt
           (Nat.le_of_lt Nat.lt_two_pow_self)))
     · by_cases hi : c.input.read = Γ.start
-      · rw [if_pos hi, hro.1 hi]
-      · rw [if_neg hi]
+      · rw [ite_eq_left hi, hro.1 hi]
+      · rw [ite_eq_right hi]
     · funext i
       obtain rfl : i = 0 := Subsingleton.elim i 0
       by_cases hw : (c.work 0).read = Γ.start
-      · rw [if_pos hw, hro.2.1 0 hw]
-      · rw [if_neg hw]
+      · rw [ite_eq_left hw, hro.2.1 0 hw]
+      · rw [ite_eq_right hw]
     · by_cases ho : c.output.read = Γ.start
-      · rw [if_pos ho, hro.2.2 ho]
-      · rw [if_neg ho]
+      · rw [ite_eq_left ho, hro.2.2 ho]
+      · rw [ite_eq_right ho]
 
 /-- Multi-step correspondence. -/
 theorem descOfTM_reachesIn {t : ℕ} {c c' : Cfg 1 M.Q}

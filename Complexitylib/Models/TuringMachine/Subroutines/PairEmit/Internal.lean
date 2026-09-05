@@ -63,13 +63,13 @@ private theorem pairInputWorkTM_first_loop {n : ℕ} (firstIdx : Fin n) :
         simp [TM.step, hstate, pairInputWorkTM, hsourceRead, c₁, transitionInput,
           transitionTape]
       have hinputKeep₁ : c₁.input = c.input := by
-        simpa [c₁] using transitionInput_eq_self hinput
+        simpa [transitionTape, c₁] using transitionInput_eq_self hinput
       have hsourceKeep₁ : c₁.work firstIdx = c.work firstIdx := by
         simpa [c₁] using transitionTape_eq_self (by rw [hsourceRead]; decide)
       have hotherKeep₁ (i) (hi : i ≠ firstIdx) : c₁.work i = c.work i := by
-        simpa [c₁] using transitionTape_eq_self (hother i hi)
+        simpa [Γ.ofBool, c₁] using transitionTape_eq_self (hother i hi)
       have houtput₁ : c₁.output.HasBinaryPrefix (emitted ++ [false]) := by
-        simpa [c₁] using Tape.hasBinaryPrefix_write_bit false houtput
+        simpa [Γ.ofBool, c₁] using Tape.hasBinaryPrefix_write_bit false houtput
       let c₂ : Cfg n (pairInputWorkTM firstIdx).Q :=
         { state := PairInputWorkPhase.second
           input := transitionInput c₁.input
@@ -94,7 +94,7 @@ private theorem pairInputWorkTM_first_loop {n : ℕ} (firstIdx : Fin n) :
           hstable, hotherKeep₁ i hi]
       have houtput₂ : c₂.output.HasBinaryPrefix (emitted ++ [false, true]) := by
         have hwrite := Tape.hasBinaryPrefix_write_bit true houtput₁
-        simpa [c₂, List.append_assoc] using hwrite
+        simpa [c₂, Γ.ofBool, List.append_assoc] using hwrite
       refine ⟨c₂, ?_, rfl, hinputKeep₂, ?_, ?_, hotherKeep₂, ?_⟩
       · simpa using TM.reachesIn.step hstep₁ (TM.reachesIn.step hstep₂ .zero)
       · rw [hsourceKeep₂]
@@ -115,13 +115,13 @@ private theorem pairInputWorkTM_first_loop {n : ℕ} (firstIdx : Fin n) :
           simp [TM.step, hstate, pairInputWorkTM, hsourceRead, c₁, transitionInput,
             transitionTape, Γ.ofBool, Γw.toΓ, readBackWrite]
       have hinputKeep₁ : c₁.input = c.input := by
-        simpa [c₁] using transitionInput_eq_self hinput
+        simpa [transitionTape, c₁] using transitionInput_eq_self hinput
       have hsourceKeep₁ : c₁.work firstIdx = c.work firstIdx := by
         simpa [c₁] using transitionTape_eq_self hsource.read_ne_start
       have hotherKeep₁ (i) (hi : i ≠ firstIdx) : c₁.work i = c.work i := by
-        simpa [c₁] using transitionTape_eq_self (hother i hi)
+        simpa [Γ.ofBool, c₁] using transitionTape_eq_self (hother i hi)
       have houtput₁ : c₁.output.HasBinaryPrefix (emitted ++ [bit]) := by
-        simpa [c₁] using Tape.hasBinaryPrefix_write_bit bit houtput
+        simpa [Γ.ofBool, c₁] using Tape.hasBinaryPrefix_write_bit bit houtput
       let c₂ : Cfg n (pairInputWorkTM firstIdx).Q :=
         { state := PairInputWorkPhase.first
           input := transitionInput c₁.input
@@ -165,7 +165,8 @@ private theorem pairInputWorkTM_first_loop {n : ℕ} (firstIdx : Fin n) :
               exact hother i hi)
           houtput₂
       refine ⟨c', ?_, hstate', ?_, hsource', ?_, ?_, ?_⟩
-      · simpa using TM.reachesIn.step hstep₁ (TM.reachesIn.step hstep₂ hreach)
+      · show TM.reachesIn _ (2 * bits.length + 2 + 1 + 1) _ _
+        exact TM.reachesIn.step hstep₁ (TM.reachesIn.step hstep₂ hreach)
       · exact hinput'.trans hinputKeep₂
       · rw [hsourceCells', hsourceMove, Tape.move_cells]
       · intro i hi
@@ -234,7 +235,7 @@ private theorem pairInputWorkTM_second_loop {n : ℕ} (firstIdx : Fin n) :
         rw [hworkKeep]
         exact hwork i
       have houtput₁ : c₁.output.HasBinaryPrefix (emitted ++ [bit]) := by
-        simpa [c₁] using Tape.hasBinaryPrefix_write_bit bit houtput
+        simpa [Γ.ofBool, c₁] using Tape.hasBinaryPrefix_write_bit bit houtput
       obtain ⟨c', hreach, hhalt, hinput', hinputCells', hwork', houtput'⟩ :=
         ih (emitted ++ [bit]) c₁ rfl hinput₁ hwork₁ houtput₁
       refine ⟨c', ?_, hhalt, hinput', ?_, ?_, ?_⟩

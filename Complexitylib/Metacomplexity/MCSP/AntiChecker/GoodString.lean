@@ -155,7 +155,7 @@ theorem hasShrinkExtension_two_mul_arity_of_circuitHardness
     (hhard :
       ¬ (MCSP.Instance.ofFunction arity hardnessThreshold target).HasCircuitAtMost) :
     HasShrinkExtension (2 * arity) target threshold inputs := by
-  letI : NeZero arity := ⟨by omega⟩
+  let : NeZero arity := ⟨by omega⟩
   apply hasShrinkExtension_two_mul_arity harity
   exact everySurvivorTupleCaught_of_circuitHardness
     target inputs hfits hhard

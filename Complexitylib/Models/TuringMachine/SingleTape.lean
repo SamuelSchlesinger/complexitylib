@@ -100,7 +100,7 @@ theorem singleTapeSim_allPathsHaltIn {k : ℕ} (N : NTM k) (hk : 1 ≤ k) {T : �
   have hagree : ∀ i : Fin m, choices ⟨i.val, lt_of_lt_of_le i.isLt hle⟩ = ch i.val := by
     intro i
     simp only [hch]
-    rw [dif_pos (lt_of_lt_of_le i.isLt hle)]
+    rw [dite_eq_left (lt_of_lt_of_le i.isLt hle)]
   rw [(singleTapeSim N).trace_mono hle hagree hhalted]
   exact hhalted
 
@@ -130,7 +130,7 @@ theorem singleTapeSim_acceptsInTime_iff {k : ℕ} (N : NTM k) (hk : 1 ≤ k) (T 
     have hagree : ∀ i : Fin m, choices ⟨i.val, lt_of_lt_of_le i.isLt hle⟩ = ch i.val := by
       intro i
       simp only [hch]
-      rw [dif_pos (lt_of_lt_of_le i.isLt hle)]
+      rw [dite_eq_left (lt_of_lt_of_le i.isLt hle)]
     rw [(singleTapeSim N).trace_mono hle hagree hhalted] at hout
     exact ⟨fun i => SingleTape.inducedChoices k ch i.val, hhaltN, hbit.mp hout⟩
   · -- forward flow: simulate the accepting `N`-run, then pad the time bound

@@ -60,7 +60,7 @@ theorem maxStep_mem_FP {f : List Bool → List Bool} (hf : f ∈ FP) : maxStep f
   have hv : (fun st : List Bool =>
       f (pair (pairSnd st) (pairSnd (pairFst st)))) ∈ FP := by
     have := mem_FP_comp (Cobham.pairFn_mem_FP hz hi) hf
-    simpa using this
+    exact this
   exact Cobham.pairFn_mem_FP
     (Cobham.pairFn_mem_FP
       (Cobham.selectHeadFn_mem_FP (lenLeFlagFn_mem_FP hm hv) hm hv)
@@ -177,7 +177,7 @@ theorem maxFn_mem_FP {f : List Bool → List Bool} (hf : f ∈ FP) : maxFn f ∈
   have hiter := Cobham.iterate_mem_FP (maxStep_mem_FP hf) hinit
     Cobham.fstBlock_mem_FP hwidth hbound
   have := mem_FP_comp (mem_FP_comp hiter Cobham.fstBlock_mem_FP) Cobham.fstBlock_mem_FP
-  simpa using this
+  exact this
 
 theorem maxFn_eq (f : List Bool → List Bool) {n : ℕ} {z : List Bool} :
     (maxFn f (pair (List.replicate n true) z)).length = maxOver f z n := by

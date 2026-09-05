@@ -518,7 +518,7 @@ private theorem compositionTailTM_hoareTime_of_virtualRun_internal
     hreachFinal, ?_, ?_⟩
   · omega
   · change (seqTM tm₁ tm₂₃₄).halted cFinal
-    rw [phase2Wrap_halted_iff, phase2Wrap_halted_iff, phase2Wrap_halted_iff]
+    erw [phase2Wrap_halted_iff, phase2Wrap_halted_iff, phase2Wrap_halted_iff]
     exact hhalt₄
   · show P C₄.output
     exact hout₄

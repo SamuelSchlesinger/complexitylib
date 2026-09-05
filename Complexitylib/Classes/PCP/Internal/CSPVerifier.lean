@@ -84,7 +84,7 @@ theorem inRange_mem_FP : A.inRange p ∈ FP := by
   have hn : (fun z : List Bool =>
       List.replicate (A.numEdges (pairFst z)) true) ∈ FP := by
     have := mem_FP_comp Cobham.fstBlock_mem_FP A.numEdges_mem
-    simpa using this
+    exact this
   exact lenLeFlagFn_mem_FP hn (mem_FP_comp (edgeU_mem_FP p) (Cobham.cons_mem_FP true))
 
 theorem inRange_eq_true_iff {z : List Bool}
@@ -168,7 +168,7 @@ theorem posU_mem_FP : A.posU p ∈ FP := by
     rw [Function.comp_apply, List.length_replicate, List.length_replicate]
   have hoff : (fun w => List.replicate (A.offU w).length true) ∈ FP := by
     have := mem_FP_comp A.offU_mem_FP unaryLength_mem_FP
-    simpa using this
+    exact this
   exact Cobham.appendFn_mem_FP hmul hoff
 
 theorem cntU_eq_replicate (z : List Bool) :
@@ -215,10 +215,10 @@ theorem verdictLang_mem_P : A.verdictLang p ∈ P := by
   obtain ⟨g, hgFP, hg⟩ := exists_decisionFn_of_mem_P A.ok_mem
   have hin : (fun z : List Bool => A.inRange p (pairFst z)) ∈ FP := by
     have := mem_FP_comp Cobham.fstBlock_mem_FP (A.inRange_mem_FP p)
-    simpa using this
+    exact this
   have hok : (fun z : List Bool => [g (okArg p z)]) ∈ FP := by
     have := mem_FP_comp (okArg_mem_FP p) hgFP
-    simpa using this
+    exact this
   have hflag : (fun z : List Bool =>
       Cobham.selectHead (A.inRange p (pairFst z)) [g (okArg p z)] [true]) ∈ FP :=
     Cobham.selectHeadFn_mem_FP hin hok (constFn_mem_FP [true])
@@ -290,10 +290,10 @@ theorem pos_eq {x ρ : List Bool} (h : 2 ^ ρ.length ≤ p.eval (pair x ρ).leng
   have hlow : A.lowFlag w = if i < A.width then [true] else [false] := by
     rcases Cobham.lenLeFlag_flag (List.replicate A.width true)
       (true :: pairSnd w) with hf | hf
-    · rw [lowFlag, hf, if_pos]
+    · rw [lowFlag, hf, ite_eq_left]
       rw [← lowFlag, A.lowFlag_eq_true_iff w, hsnd, List.length_replicate] at hf
       exact hf
-    · rw [lowFlag, hf, if_neg]
+    · rw [lowFlag, hf, ite_eq_right]
       intro hcon
       have := (A.lowFlag_eq_true_iff w).mpr (by rw [hsnd, List.length_replicate]; exact hcon)
       rw [lowFlag, hf] at this
@@ -305,18 +305,18 @@ theorem pos_eq {x ρ : List Bool} (h : 2 ^ ρ.length ≤ p.eval (pair x ρ).leng
   have hoff : (A.offU w).length = if i < A.width then i else i - A.width := by
     rw [offU, hlow, hsnd]
     by_cases hi : i < A.width
-    · rw [if_pos hi, selectHead_cons_true, List.length_replicate, if_pos hi]
-    · rw [if_neg hi, selectHead_cons_false, List.length_drop, List.length_replicate,
-        if_neg hi]
+    · rw [ite_eq_left hi, selectHead_cons_true, List.length_replicate, ite_eq_left hi]
+    · rw [ite_eq_right hi, selectHead_cons_false, List.length_drop, List.length_replicate,
+        ite_eq_right hi]
   show (A.posU p w).length = _
   rw [posU, List.length_append, List.length_replicate, List.length_replicate, hoff,
     posVal]
   congr 2
   rw [hlow]
   by_cases hi : i < A.width
-  · rw [if_pos hi, selectHead_cons_true, hv]
+  · rw [ite_eq_left hi, selectHead_cons_true, hv]
     simp [hi]
-  · rw [if_neg hi, selectHead_cons_false, hv]
+  · rw [ite_eq_right hi, selectHead_cons_false, hv]
     simp [hi]
 
 /-- Edge `e` is satisfied by the proof `π`. -/

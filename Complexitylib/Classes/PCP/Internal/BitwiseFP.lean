@@ -59,11 +59,11 @@ theorem bitStep_mem_FP {G : List Bool → List Bool} (hG : G ∈ FP) : bitStep G
   have hsnd : (fun z : List Bool => pairSnd z) ∈ FP := sndBlock_mem_FP
   have hcnt : (fun z : List Bool => List.replicate (pairFst z).length true) ∈ FP := by
     have := mem_FP_comp hfst unaryLength_mem_FP
-    simpa using this
+    exact this
   have hquery : (fun z : List Bool =>
       G (pair (pairSnd z) (List.replicate (pairFst z).length true))) ∈ FP := by
     have := mem_FP_comp (pairFn_mem_FP hsnd hcnt) hG
-    simpa using this
+    exact this
   exact pairFn_mem_FP (appendFn_mem_FP hfst hquery) hsnd
 
 /-- Running the step from the empty output builds the first `n` bits. -/

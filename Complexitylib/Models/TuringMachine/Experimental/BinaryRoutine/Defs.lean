@@ -114,8 +114,8 @@ def seq (first second : BinaryRoutine n) : BinaryRoutine n where
 machine, effect, emitted word, and resource bounds exactly. Soundness requires
 the replacement precondition to imply the original one. -/
 def restrict (routine : BinaryRoutine n)
-    (requires : BinaryValues n → Prop) : BinaryRoutine n :=
-  { routine with requires := requires }
+    (newRequires : BinaryValues n → Prop) : BinaryRoutine n :=
+  { routine with requires := newRequires }
 
 /-- Increment one canonical binary work value. -/
 def binarySucc (idx : Fin n) : BinaryRoutine n where

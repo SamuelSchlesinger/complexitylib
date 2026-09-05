@@ -145,8 +145,7 @@ theorem evalFamilyTM_hoareTime_internal (bits : List Bool) :
       (evalFamilyTime bits.length) := by
   have htest : (TM.pairValidateTM.liftTM workTapeCount).HoareTime
       (PairStagePre bits) (ValidatorPost bits) (bits.length + 2) := by
-    simpa [PairStagePre, ValidatorPost] using
-      TM.pairValidateTM_lift_hoareTime workTapeCount bits
+    exact TM.pairValidateTM_lift_hoareTime workTapeCount bits
   have hwf : ∀ inp work out, ValidatorPost bits inp work out →
       TM.AllTapesWF inp work out := by
     intro inp work out hpost
@@ -252,7 +251,7 @@ theorem evalFamilyTime_bigO_quadratic_internal :
       (Complexity.BigO.const_mul_left 4 hnQuadratic)
       (Complexity.BigO.const_mul_left 20 hshiftQuadratic))
     (Complexity.BigO.const_le_pow 17 2)
-  simpa [evalFamilyTime, evalFamilyTMWithTime, evalFamilyCoreTime] using hbound
+  exact hbound
 
 end Internal
 

@@ -114,7 +114,7 @@ private theorem evalAux?_cellGates (available threshold inputRow thresholdColumn
   have hcurrentPush :
       (wires.push (bit && lower))[stateWire available threshold inputRow
         (thresholdColumn + 1)]? = some current := by
-    rw [Array.getElem?_push, if_neg hstateNe]
+    rw [Array.getElem?_push, ite_eq_right hstateNe]
     exact hcurrent
   have hand : (wires.push (bit && lower))[andWire available threshold inputRow
       thresholdColumn]? = some (bit && lower) := by
@@ -201,8 +201,8 @@ private theorem evalAux?_rowPrefix (available threshold inputRow input columnCou
           omega
         simp only [result]
         rw [Array.getElem?_push,
-          if_neg (by simp only [Array.size_push]; omega)]
-        rw [Array.getElem?_push, if_neg (by omega)]
+          ite_eq_right (by simp only [Array.size_push]; omega)]
+        rw [Array.getElem?_push, ite_eq_right (by omega)]
         exact hmiddlePreserved i hi
       · intro required hrequired
         by_cases hlast : required = columnCount + 1
@@ -220,8 +220,8 @@ private theorem evalAux?_rowPrefix (available threshold inputRow input columnCou
               stateWire available threshold (inputRow + 1) required < middle.size :=
             (Array.getElem?_eq_some_iff.mp hprevious).choose
           simp only [result]
-          rw [Array.getElem?_push, if_neg (by simp only [Array.size_push]; omega)]
-          rw [Array.getElem?_push, if_neg (by omega)]
+          rw [Array.getElem?_push, ite_eq_right (by simp only [Array.size_push]; omega)]
+          rw [Array.getElem?_push, ite_eq_right (by omega)]
           exact hprevious
 
 /-- Internal multi-row invariant, with an accumulated count supplied by the
@@ -326,8 +326,8 @@ theorem evalAux?_compileRaw_internal (available threshold : ℕ) [NeZero availab
       exact hrefs i
     simp only [base]
     rw [Array.getElem?_push,
-      if_neg (by simp only [Array.size_push]; omega)]
-    rw [Array.getElem?_push, if_neg (by omega)]
+      ite_eq_right (by simp only [Array.size_push]; omega)]
+    rw [Array.getElem?_push, ite_eq_right (by omega)]
     exact hinputs i
   have hbaseStates : ∀ required ≤ threshold,
       base[stateWire available threshold 0 required]? =
@@ -347,7 +347,7 @@ theorem evalAux?_compileRaw_internal (available threshold : ℕ) [NeZero availab
         have hfalse : (wires.push false)[wires.size]? = some false :=
           Array.getElem?_push_size
         simp only [base]
-        rw [Array.getElem?_push, if_neg (by simp)]
+        rw [Array.getElem?_push, ite_eq_right (by simp)]
         exact hfalse
   obtain ⟨table, hevalRows, htableSize, htablePreserved, htableStates⟩ :=
     evalAux?_rows available threshold 0 inputCount 0 refs bits base

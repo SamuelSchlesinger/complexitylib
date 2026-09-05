@@ -49,7 +49,7 @@ theorem exists_circuit_size_le_trivialCircuitSizeBound_internal (inst : Instance
   let source := andOrNotFor inst.function
   let circuit := CompileAndOr.compileFn source
   refine ⟨_, circuit, ?_, ?_⟩
-  · rw [trivialCircuitSizeBound, if_neg (NeZero.ne inst.arity)]
+  · rw [trivialCircuitSizeBound, ite_eq_right (NeZero.ne inst.arity)]
     have hcompile := CompileAndOr.compileFn_size_le source
     have hfanIn := andOrNotFor_totalFanIn_le inst.function
     have hsourceSize : source.size = 2 ^ inst.arity + 1 := rfl
@@ -77,8 +77,9 @@ theorem hasCircuitAtMost_trivialCircuitSizeBound_internal (inst : Instance) :
     (inst.withThreshold inst.trivialCircuitSizeBound).HasCircuitAtMost := by
   by_cases harity : inst.arity = 0
   · simp [withThreshold, HasCircuitAtMost, harity]
-  · letI : NeZero inst.arity := ⟨harity⟩
-    simp only [withThreshold, HasCircuitAtMost, harity, dite_false]
+  · let : NeZero inst.arity := ⟨harity⟩
+    unfold HasCircuitAtMost withThreshold
+    rw [dite_eq_right harity]
     exact exists_circuit_size_le_trivialCircuitSizeBound_internal inst
 
 theorem effectiveThreshold_le_threshold_internal (inst : Instance) :
@@ -98,7 +99,8 @@ theorem hasCircuitAtMost_normalizeThreshold_iff_internal (inst : Instance) :
     simpa [normalizeThreshold] using hnormalized
   · intro hsmall
     by_cases hthreshold : inst.threshold ≤ inst.trivialCircuitSizeBound
-    · simpa [normalizeThreshold, effectiveThreshold, min_eq_left hthreshold] using hsmall
+    · simp [normalizeThreshold, effectiveThreshold, min_eq_left hthreshold]
+      exact hsmall
     · have hbound : inst.trivialCircuitSizeBound ≤ inst.threshold := by omega
       have htrivial := hasCircuitAtMost_trivialCircuitSizeBound_internal inst
       simpa [normalizeThreshold, effectiveThreshold, min_eq_right hbound] using htrivial
@@ -107,7 +109,7 @@ theorem trivialCircuitSizeBound_le_encodeLength_internal (inst : Instance) :
     inst.trivialCircuitSizeBound ≤ (inst.encode.length + 2) ^ 2 := by
   by_cases harity : inst.arity = 0
   · simp [trivialCircuitSizeBound, harity]
-  · rw [trivialCircuitSizeBound, if_neg harity]
+  · rw [trivialCircuitSizeBound, ite_eq_right harity]
     have htable : 2 ^ inst.arity ≤ inst.encode.length := by
       rw [length_encode_internal]
       omega
@@ -146,7 +148,7 @@ theorem rawWitnessLengthPolynomial_polyBound_internal :
     ((PolyBound.const 2).mul (PolyBound.id.add hsizeBound)).add
       (PolyBound.const 6)
   have htotal := (PolyBound.const 1).add (hsizeBound.mul hfactor)
-  simpa [rawWitnessLengthPolynomial, sizeBound] using htotal
+  exact htotal
 
 end Instance
 
@@ -171,7 +173,7 @@ theorem mem_MCSP_iff_exists_rawWitnessRelation_internal (bits : List Bool) :
   cases hdecode : Instance.decode? bits with
   | none => simp [MCSP, RawWitnessRelation, hdecode]
   | some inst =>
-      simp only [MCSP, RawWitnessRelation, hdecode, Set.mem_setOf_eq]
+      simp only [MCSP, RawWitnessRelation, hdecode, Set.mem_ofPred_eq]
       rw [Instance.exists_isRawCircuitWitness_iff_internal,
         Instance.hasCircuitAtMost_normalizeThreshold_iff_internal]
 

@@ -67,14 +67,14 @@ theorem posAt_mem_FP {a b : List Bool → List Bool} (ha : a ∈ FP) (hb : b ∈
   have harg : (fun z => DataScan.scanArg (a z).length (posInner (b z))) ∈ FP :=
     DataScan.scanArg_mem_FP ha (posInner_mem_FP hb)
   have := mem_FP_comp harg (DataScan.childOf_mem_FP DataScan.scanPoly)
-  simpa using this
+  exact this
 
 theorem posCount_mem_FP {b : List Bool → List Bool} (hb : b ∈ FP) :
     (fun z => posCount (b z)) ∈ FP := by
   have harg : (fun z => DataScan.scanArg (([] : List Bool)).length (posInner (b z))) ∈ FP :=
     DataScan.scanArg_mem_FP (constFn_mem_FP []) (posInner_mem_FP hb)
   have := mem_FP_comp harg (DataScan.childCount_mem_FP DataScan.scanPoly)
-  simpa using this
+  exact this
 
 /-! ### What the scan reads -/
 

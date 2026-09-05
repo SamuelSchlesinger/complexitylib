@@ -69,13 +69,13 @@ def ofList (xs : List Bool) {n : ℕ} (h : xs.length = n) : BitString n :=
 @[simp] theorem toList_ofList (xs : List Bool) {n : ℕ} (h : xs.length = n) :
     toList (ofList xs h) = xs := by
   subst n
-  simpa only [toList, ofList, Fin.cast_refl] using List.ofFn_get xs
+  exact List.ofFn_get xs
 
 /-- Round trip, bit-string side: deserializing `toList x` recovers the original bit string `x`. -/
 @[simp] theorem ofList_toList (x : BitString n) :
     ofList (toList x) (length_toList x) = x := by
   funext i
-  simp [ofList, toList]
+  exact List.get_ofFn x _
 
 /-- Serialization is injective: two bit strings have equal `toList` iff they are equal. -/
 @[simp] theorem toList_inj {x y : BitString n} : x.toList = y.toList ↔ x = y :=

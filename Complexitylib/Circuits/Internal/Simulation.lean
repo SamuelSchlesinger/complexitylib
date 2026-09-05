@@ -692,7 +692,8 @@ private lemma compileGate_eval_at_iOffset (c : Circuit Basis.unboundedAndOr N M 
   -- and close subgoals with Fin.ext + iSegLookup_eq.
   unfold compileGates
   simp only [compileGateOp, compileGateInputs, compileGateNeg, Fin.val_mk,
-             dif_pos hInternal, mkChainGate]
+             dite_eq_left hInternal, mkChainGate]
+  simp only [hSeg1]
   convert rfl using 8
   all_goals first
     | rfl
@@ -742,7 +743,7 @@ private theorem lastChainValue_eq (c : Circuit Basis.unboundedAndOr N M G) (inpu
     · -- LHS = identity: unfold and use dual_const
       simp only [hk0, chainLen_zero, Nat.sub_self,
                  mkChainGate, mkChainOp, mkChainInputs, mkChainNeg,
-                 dite_true, ite_true,
+                 dite_true,
                  Gate.eval, Basis.andOr2, fin2]
       exact AndOrOp.dual_const _ _
     · -- RHS = identity: unfold Gate.eval, use AndOrOp.eval_eq_foldl, then simplify
@@ -784,20 +785,20 @@ private theorem lastChainValue_eq (c : Circuit Basis.unboundedAndOr N M G) (inpu
         intro j hj
         induction j with
         | zero =>
-          rw [mkChainGate_eval_ge2_zero _ (by omega : 2 ≤ _)]
+          erw [mkChainGate_eval_ge2_zero _ (by omega : 2 ≤ _)]
           rw [hv_remap ⟨0, by omega⟩, hv_remap ⟨1, by omega⟩]
-          rw [partialFold_two _ v (by omega)]
-          rw [AndOrOp.identity_binOp]
+          erw [partialFold_two _ v (by omega)]
+          erw [AndOrOp.identity_binOp]
         | succ j' ih =>
-          rw [mkChainGate_eval_ge2_succ _ (by omega : 2 ≤ _) _ _
+          erw [mkChainGate_eval_ge2_succ _ (by omega : 2 ≤ _) _ _
             (by unfold G'; omega) hj (by unfold G'; omega)]
           rw [hv_remap ⟨j' + 2, by rw [hcl] at hj; omega⟩]
           rw [chain_wire j' (by rw [hcl] at hj ⊢; omega),
               ih (by rw [hcl] at hj ⊢; omega)]
-          rw [partialFold_succ _ v (j' + 2) (by rw [hcl] at hj; omega)]
+          erw [partialFold_succ _ v (j' + 2) (by rw [hcl] at hj; omega)]
       rw [h_fold _ (by omega)]
       have hk_eq : chainLen (c.gates ⟨i, hi⟩).fanIn - 1 + 2 = (c.gates ⟨i, hi⟩).fanIn := by omega
-      rw [hk_eq, partialFold_full]
+      rw [hk_eq]; erw [partialFold_full]
       simp only [Gate.eval, Basis.unboundedAndOr, AndOrOp.eval_eq_foldl]
       rfl
 
@@ -857,7 +858,11 @@ private lemma compileGate_eval_at_oOffset (c : Circuit Basis.unboundedAndOr N M 
   have hSeg := oSegLookup_eq c j' hj' p hp hoff_lt
   unfold compileGates
   simp only [compileGateOp, compileGateInputs, compileGateNeg, Fin.val_mk,
-             dif_neg hNotInternal, mkChainGate]
+             dite_eq_right hNotInternal, mkChainGate]
+  simp only [hoff]
+  have hSeg1 : (segLookup M (oChainF c) (prefixSum (oChainF c) j' + p) hoff_lt).1 = j' := by
+    rw [hSeg]
+  simp only [hSeg1]
   convert rfl using 8
   all_goals first
     | rfl
@@ -908,7 +913,7 @@ private theorem lastOutputChainValue_eq (c : Circuit Basis.unboundedAndOr N M G)
     trans (c.outputs ⟨j', hj'⟩).op.identity
     · simp only [hk0, chainLen_zero, Nat.sub_self,
                  mkChainGate, mkChainOp, mkChainInputs, mkChainNeg,
-                 dite_true, ite_true,
+                 dite_true,
                  Gate.eval, Basis.andOr2, fin2]
       exact AndOrOp.dual_const _ _
     · simp only [Gate.eval, Basis.unboundedAndOr, AndOrOp.eval_eq_foldl, hk0, Fin.foldl_zero]
@@ -947,21 +952,21 @@ private theorem lastOutputChainValue_eq (c : Circuit Basis.unboundedAndOr N M G)
         intro p hp
         induction p with
         | zero =>
-          rw [mkChainGate_eval_ge2_zero _ (by omega : 2 ≤ _)]
+          erw [mkChainGate_eval_ge2_zero _ (by omega : 2 ≤ _)]
           rw [hv_remap ⟨0, by omega⟩, hv_remap ⟨1, by omega⟩]
-          rw [partialFold_two _ v (by omega)]
-          rw [AndOrOp.identity_binOp]
+          erw [partialFold_two _ v (by omega)]
+          erw [AndOrOp.identity_binOp]
         | succ p' ih =>
-          rw [mkChainGate_eval_ge2_succ _ (by omega : 2 ≤ _) _ _
+          erw [mkChainGate_eval_ge2_succ _ (by omega : 2 ≤ _) _ _
             (by omega) hp (by omega)]
           rw [hv_remap ⟨p' + 2, by rw [hcl] at hp; omega⟩]
           rw [chain_wire p' (by rw [hcl] at hp ⊢; omega),
               ih (by rw [hcl] at hp ⊢; omega)]
-          rw [partialFold_succ _ v (p' + 2) (by rw [hcl] at hp; omega)]
+          erw [partialFold_succ _ v (p' + 2) (by rw [hcl] at hp; omega)]
       rw [h_fold _ (by omega)]
       have hk_eq : chainLen (c.outputs ⟨j', hj'⟩).fanIn - 1 + 2 =
           (c.outputs ⟨j', hj'⟩).fanIn := by omega
-      rw [hk_eq, partialFold_full]
+      rw [hk_eq]; erw [partialFold_full]
       simp only [Gate.eval, Basis.unboundedAndOr, AndOrOp.eval_eq_foldl]
       rfl
 

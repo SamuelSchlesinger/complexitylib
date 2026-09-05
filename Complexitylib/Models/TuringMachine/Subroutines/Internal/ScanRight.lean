@@ -49,7 +49,7 @@ private theorem scanRightTM_step_bit {n : ℕ} (idx : Fin n)
   have hnotBlank : (c.work idx).read ≠ Γ.blank := by
     rw [hread]
     cases bit <;> decide
-  rw [TM.step, if_neg hstate]
+  rw [TM.step, ite_eq_right hstate]
   simp only [scanRightTM, hst, hnotBlank, ↓reduceIte]
   refine congrArg some ((Cfg.mk.injEq ..).mpr ⟨rfl, ?_, ?_, ?_⟩)
   · exact transitionInput_eq_self hinp
@@ -60,7 +60,7 @@ private theorem scanRightTM_step_bit {n : ℕ} (idx : Fin n)
       apply writeAndMove_readBack
       rw [hread]
       cases bit <;> decide
-    · rw [if_neg hi, Function.update_of_ne hi]
+    · rw [ite_eq_right hi, Function.update_of_ne hi]
       exact transitionTape_eq_self (hother i hi)
   · exact transitionTape_eq_self hout
 
@@ -79,7 +79,7 @@ private theorem scanRightTM_step_blank {n : ℕ} (idx : Fin n)
         output := c.output } := by
   have hstate : c.state ≠ (scanRightTM idx).qhalt := by
     simp [scanRightTM, hst]
-  rw [TM.step, if_neg hstate]
+  rw [TM.step, ite_eq_right hstate]
   simp only [scanRightTM, hst, hread, ↓reduceIte]
   refine congrArg some ((Cfg.mk.injEq ..).mpr ⟨rfl, ?_, ?_, ?_⟩)
   · exact transitionInput_eq_self hinp

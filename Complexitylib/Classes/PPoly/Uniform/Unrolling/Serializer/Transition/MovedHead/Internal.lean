@@ -223,7 +223,7 @@ theorem getElem_movedHeadMemberBlock_effect_internal
   change offset < effectFormulaScheduleSize caseCount workCount T
     (selectedAt directionCode) choiceAt at hoffset
   unfold movedHeadMemberBlock
-  rw [List.getElem_append_left (by
+  erw [List.getElem_append_left (by
     simp
     omega)]
   rw [List.getElem_append_left (by
@@ -256,7 +256,7 @@ theorem getElem_movedHeadMemberBlock_predecessor_internal
           exact hoffset) := by
   change offset < 2 * (T + 1) + 1 at hoffset
   unfold movedHeadMemberBlock
-  rw [List.getElem_append_left (by
+  erw [List.getElem_append_left (by
     simp [movedHeadEffectSizeAt]
     omega)]
   rw [List.getElem_append_right (by
@@ -282,7 +282,7 @@ theorem getElem_movedHeadMemberBlock_conjunction_internal
       movedHeadConjunctionGate caseCount workCount T available selectedAt
         choiceAt directionCode := by
   unfold movedHeadMemberBlock
-  rw [List.getElem_append_right (by
+  erw [List.getElem_append_right (by
     simp [movedHeadEffectSizeAt, movedHeadPredecessorSize])]
   simp [movedHeadEffectSizeAt, movedHeadPredecessorSize]
 
@@ -317,7 +317,7 @@ theorem getElem_movedHeadFormulaSchedule_identity_internal
             simp [movedHeadFormulaScheduleSize]
             omega) = CircuitCode.RawGate.constant 0 false := by
   unfold movedHeadFormulaSchedule
-  rw [List.getElem_append_left]
+  erw [List.getElem_append_left]
   · rw [List.getElem_append_right]
     all_goals simp [length_movedHeadMemberGates_internal]
   · simp [length_movedHeadMemberGates_internal]
@@ -342,7 +342,7 @@ theorem getElem_movedHeadFormulaSchedule_connector_internal
         (movedHeadMemberSizeAt caseCount workCount T selectedAt choiceAt)
         rank.val := by
   unfold movedHeadFormulaSchedule
-  rw [List.getElem_append_right]
+  erw [List.getElem_append_right]
   · have hoffset :
         prefixSize
               (movedHeadMemberSizeAt caseCount workCount T selectedAt choiceAt)
@@ -441,7 +441,7 @@ private theorem size_movedHeadMemberFormulaAt
   rw [BoolFormula.size]
   rw [size_effectFormula_eq_scheduleSize_movedHead]
   rw [size_predecessorHeadFormula_eq_movedHeadPredecessorSize]
-  rw [movedHeadMemberSizeAt, if_pos hdirection, movedHeadEffectSizeAt]
+  rw [movedHeadMemberSizeAt, ite_eq_left hdirection, movedHeadEffectSizeAt]
   rw [movedHeadCaseSelectedAt_eq tm tape directionCode hdirection]
 
 private theorem compileRaw_movedHeadMemberFormulaAt
@@ -532,8 +532,8 @@ private theorem compileRaw_movedHeadMemberFormulaAt
           | .left => 0
           | .right => 1
           | .stay => 2) := by
-            simpa [memberAvailable, predecessorChild,
-              movedHeadPredecessorAvailable] using hcompile
+            simp [memberAvailable, predecessorChild, movedHeadPredecessorAvailable]
+            exact hcompile
       _ = _ := congrArg (fun code =>
         predecessorHeadFormulaSchedule (Fintype.card tm.Q) T configBase
           (movedHeadPredecessorAvailable (transitionCases tm).length k T

@@ -235,7 +235,7 @@ private theorem recNotation_xor (a b : List Bool) :
   | cons β x ih =>
       cases β <;>
         · rw [recNotation_cons, xorSuffix]
-          simp only [cond_false, cond_true, xorStep, Fin.cons_zero, Fin.cons_one, id]
+          simp only [Bool.cond_false, Bool.cond_true, xorStep, Fin.cons_zero, Fin.cons_one, id]
           rw [ih]
           rfl
 

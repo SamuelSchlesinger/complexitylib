@@ -75,16 +75,16 @@ theorem decodeCfg_cfgCode {x : List Bool} {S : ℕ} {c : Cfg k Q}
     · simpa [decodeCfg, cfgCode] using by omega
     · funext p
       by_cases hp : p < S + 1
-      · simp only [decodeCfg, cfgCode, dif_pos hp]
-      · simp only [decodeCfg, cfgCode, dif_neg hp]
+      · simp only [decodeCfg, cfgCode, dite_eq_left hp]
+      · simp only [decodeCfg, cfgCode, dite_eq_right hp]
         exact (hw.work i p (by omega)).symm
   · have hh : c.output.head ≤ S + 1 := hs.2
     refine Tape.ext ?_ ?_
     · simpa [decodeCfg, cfgCode] using by omega
     · funext p
       by_cases hp : p < S + 2
-      · simp only [decodeCfg, cfgCode, dif_pos hp]
-      · simp only [decodeCfg, cfgCode, dif_neg hp]
+      · simp only [decodeCfg, cfgCode, dite_eq_left hp]
+      · simp only [decodeCfg, cfgCode, dite_eq_right hp]
         exact (hw.output p (by omega)).symm
 
 namespace NTM
@@ -126,7 +126,7 @@ theorem mem_reachCodes_iff {x : List Bool} {S : ℕ} {c₀ : Cfg k tm.Q}
   | succ t ih =>
       intro a
       simp only [reachCodes, codeRound, Finset.mem_union, Finset.mem_biUnion, reachSet_succ,
-        Set.mem_union, Set.mem_setOf_eq]
+        Set.mem_union, Set.mem_ofPred_eq]
       constructor
       · rintro (h | ⟨b, hb, hab⟩)
         · obtain ⟨c, hc, hca⟩ := (ih a).mp h
@@ -135,8 +135,8 @@ theorem mem_reachCodes_iff {x : List Bool} {S : ℕ} {c₀ : Cfg k tm.Q}
           have hreach := reachesCfg_of_mem_reachSet tm c₀ t hc
           rw [codeSucc, decodeCfg_cfgCode (hw c hreach) (hs c hreach)] at hab
           by_cases hhalt : c.state = tm.qhalt
-          · rw [if_pos hhalt] at hab; exact absurd hab (Finset.notMem_empty a)
-          · rw [if_neg hhalt, Finset.mem_insert, Finset.mem_singleton] at hab
+          · rw [ite_eq_left hhalt] at hab; exact absurd hab (Finset.notMem_empty a)
+          · rw [ite_eq_right hhalt, Finset.mem_insert, Finset.mem_singleton] at hab
             rcases hab with rfl | rfl
             · exact ⟨tm.stepCfg false c, Or.inr ⟨c, hc, hhalt, false, rfl⟩, rfl⟩
             · exact ⟨tm.stepCfg true c, Or.inr ⟨c, hc, hhalt, true, rfl⟩, rfl⟩
@@ -144,7 +144,7 @@ theorem mem_reachCodes_iff {x : List Bool} {S : ℕ} {c₀ : Cfg k tm.Q}
         · exact Or.inl ((ih _).mpr ⟨c, hc, rfl⟩)
         · refine Or.inr ⟨cfgCode x.length S c', (ih _).mpr ⟨c', hc', rfl⟩, ?_⟩
           have hreach := reachesCfg_of_mem_reachSet tm c₀ t hc'
-          rw [codeSucc, decodeCfg_cfgCode (hw c' hreach) (hs c' hreach), if_neg hhalt]
+          rw [codeSucc, decodeCfg_cfgCode (hw c' hreach) (hs c' hreach), ite_eq_right hhalt]
           cases b
           · exact Finset.mem_insert_self _ _
           · exact Finset.mem_insert_of_mem (Finset.mem_singleton_self _)

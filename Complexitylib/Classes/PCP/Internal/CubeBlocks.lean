@@ -100,7 +100,8 @@ theorem prob_leftBlock (P : Cube a → Prop) :
       rw [Fintype.card_fun, ZMod.card, Fintype.card_fin]
     rw [hcard]
     norm_num
-  rw [Finset.sum_congr rfl fun x _ => hinner x, ← Finset.mul_sum]
+  rw [Finset.sum_congr rfl fun x _ => hinner x,
+    ← Finset.mul_sum (s := Finset.univ) (a := (2 : ℝ) ^ b) (f := fun x : Cube a => 𝟙P x)]
   rw [pow_add]
   field_simp
 
@@ -127,7 +128,8 @@ theorem prob_rightBlock (P : Cube b → Prop) :
       rw [Fintype.card_fun, ZMod.card, Fintype.card_fin]
     rw [hcard]
     norm_num
-  rw [Finset.sum_congr rfl fun y _ => hinner y, ← Finset.mul_sum]
+  rw [Finset.sum_congr rfl fun y _ => hinner y,
+    ← Finset.mul_sum (s := Finset.univ) (a := (2 : ℝ) ^ a) (f := fun y : Cube b => 𝟙P y)]
   rw [pow_add]
   field_simp
 
@@ -217,7 +219,8 @@ theorem prob₂_eq_prob_blocks {n : ℕ} (P : Cube n → Cube n → Prop) :
   classical
   have hL : Pr₂[P]
       = 1 / 2 ^ n * ∑ x : Cube n, (1 / 2 ^ n * ∑ y : Cube n, indicator (P x) y) := by
-    rw [BooleanAnalysis.prob₂, expect_unfold]
+    rw [BooleanAnalysis.prob₂,
+      expect_unfold (f := fun x : Cube n => 𝔼[𝟙(P x)])]
     exact congrArg _ (Finset.sum_congr rfl fun x _ => expect_unfold _)
   have hR : Pr[fun z : Cube (n + n) => P (leftBlock z) (rightBlock z)]
       = 1 / 2 ^ (n + n) * ∑ p : Cube n × Cube n, indicator (P p.1) p.2 := by
@@ -289,7 +292,7 @@ theorem prob_blocks {a b : ℕ} (Q : Cube a → Cube b → Prop) :
     simp only [indicator, h1, h2]
   have hR : 𝔼[fun u : Cube a => Pr[Q u]]
       = 1 / 2 ^ a * ∑ u : Cube a, (1 / 2 ^ b * ∑ v : Cube b, indicator (Q u) v) := by
-    rw [expect_unfold]
+    rw [expect_unfold (f := fun u : Cube a => Pr[Q u])]
     exact congrArg _ (Finset.sum_congr rfl fun u _ => expect_unfold _)
   rw [hL, hR, Fintype.sum_prod_type, ← Finset.mul_sum, pow_add]
   field_simp
@@ -299,7 +302,7 @@ theorem prob_blocks_ge {a b : ℕ} (Q : Cube a → Cube b → Prop) (c : ℝ)
     (h : ∀ u, c ≤ Pr[Q u]) :
     c ≤ Pr[fun z : Cube (a + b) => Q (leftBlock z) (rightBlock z)] := by
   classical
-  rw [prob_blocks, expect_unfold]
+  rw [prob_blocks, expect_unfold (f := fun u : Cube a => Pr[Q u])]
   have hcard : (Finset.univ : Finset (Cube a)).card = 2 ^ a := by
     rw [Finset.card_univ]
     show Fintype.card (Fin a → ZMod 2) = 2 ^ a

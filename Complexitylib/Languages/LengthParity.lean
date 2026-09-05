@@ -133,7 +133,7 @@ private theorem evenLengthTM_step_scan
       c'.input.head = c.input.head + 1 ∧ c'.input.cells = c.input.cells ∧
       c'.output.head = 1 ∧ c'.output.cells = c.output.cells := by
   rcases hP with hP | hP <;> subst hP <;>
-    simp only [TM.step, hst, evenLengthTM, reduceCtorEq, ↓reduceIte, if_neg hi_nb]
+    simp only [TM.step, hst, evenLengthTM, reduceCtorEq, ↓reduceIte, ite_eq_right hi_nb]
   all_goals
     have ho_move : idleDir c.output.read = Dir3.stay := by
       simp [idleDir, Tape.read, ho_head, show c.output.cells 1 ≠ Γ.start from
@@ -155,13 +155,13 @@ private theorem evenLengthTM_step_halt_even
     ∃ c', (evenLengthTM (n := n)).step c = some c' ∧
       (evenLengthTM (n := n)).halted c' ∧
       c'.output.cells 1 = Γ.one := by
-  simp only [TM.step, hst, evenLengthTM, reduceCtorEq, ↓reduceIte, if_pos hi_blank]
+  simp only [TM.step, hst, evenLengthTM, reduceCtorEq, ↓reduceIte, ite_eq_left hi_blank]
   refine ⟨_, rfl, rfl, ?_⟩
   have ho_move : idleDir c.output.read = Dir3.stay := by
     simp [idleDir, Tape.read, ho_head, show c.output.cells 1 ≠ Γ.start from ho_cell1_nb]
   have h1 : (1 : ℕ) ≠ 0 := by omega
   simp only [Tape.writeAndMove, ho_move, Tape.move, Tape.write, ho_head,
-             if_neg h1, Function.update_self, Γw.toΓ]
+             ite_eq_right h1, Function.update_self, Γw.toΓ]
 
 /-- Halt step: from `.odd` on blank input, writes `Γ.zero` at output cell 1. -/
 private theorem evenLengthTM_step_halt_odd
@@ -172,13 +172,13 @@ private theorem evenLengthTM_step_halt_odd
     ∃ c', (evenLengthTM (n := n)).step c = some c' ∧
       (evenLengthTM (n := n)).halted c' ∧
       c'.output.cells 1 = Γ.zero := by
-  simp only [TM.step, hst, evenLengthTM, reduceCtorEq, ↓reduceIte, if_pos hi_blank]
+  simp only [TM.step, hst, evenLengthTM, reduceCtorEq, ↓reduceIte, ite_eq_left hi_blank]
   refine ⟨_, rfl, rfl, ?_⟩
   have ho_move : idleDir c.output.read = Dir3.stay := by
     simp [idleDir, Tape.read, ho_head, show c.output.cells 1 ≠ Γ.start from ho_cell1_nb]
   have h1 : (1 : ℕ) ≠ 0 := by omega
   simp only [Tape.writeAndMove, ho_move, Tape.move, Tape.write, ho_head,
-             if_neg h1, Function.update_self, Γw.toΓ]
+             ite_eq_right h1, Function.update_self, Γw.toΓ]
 
 -- ════════════════════════════════════════════════════════════════════════
 -- Main scan lemma
@@ -210,13 +210,13 @@ private theorem evenLengthTM_scan (x : List Bool) (m k : ℕ)
       show (Tape.init (x.map Γ.ofBool)).cells (k + 1) = Γ.blank
       simp [Tape.init, hk]
     by_cases hpar : k % 2 = 0
-    · have hst_even : c.state = LengthParityPhase.even := by rw [hst, if_pos hpar]
+    · have hst_even : c.state = LengthParityPhase.even := by rw [hst, ite_eq_left hpar]
       obtain ⟨c', hstep, hhalt, hout⟩ :=
         evenLengthTM_step_halt_even c hst_even hi_blank hoh hoc
       refine ⟨c', .step hstep .zero, hhalt, ?_⟩
       rw [hout, hk] at *
       simp [hpar]
-    · have hst_odd : c.state = LengthParityPhase.odd := by rw [hst, if_neg hpar]
+    · have hst_odd : c.state = LengthParityPhase.odd := by rw [hst, ite_eq_right hpar]
       obtain ⟨c', hstep, hhalt, hout⟩ :=
         evenLengthTM_step_halt_odd c hst_odd hi_blank hoh hoc
       refine ⟨c', .step hstep .zero, hhalt, ?_⟩
@@ -239,13 +239,13 @@ private theorem evenLengthTM_scan (x : List Bool) (m k : ℕ)
     have hlen' : x.length = (k + 1) + m := by omega
     by_cases hpar : k % 2 = 0
     · -- state = .even, after scan = .odd
-      have hst_eo : c.state = LengthParityPhase.even := by rw [hst, if_pos hpar]
+      have hst_eo : c.state = LengthParityPhase.even := by rw [hst, ite_eq_left hpar]
       obtain ⟨c₁, hstep, hst₁, hih₁, hic₁, hoh₁, hoc₁⟩ :=
         evenLengthTM_step_scan c LengthParityPhase.even (Or.inl rfl) hst_eo hi_nb hoh hoc
       have hst₁' : c₁.state =
           if (k + 1) % 2 = 0 then LengthParityPhase.even else LengthParityPhase.odd := by
         have h1 : (k + 1) % 2 ≠ 0 := by omega
-        rw [hst₁, if_pos rfl]; simp [h1]
+        rw [hst₁, ite_eq_left rfl]; simp [h1]; rfl
       have hic₁' : c₁.input.cells = (Tape.init (x.map Γ.ofBool)).cells := by rw [hic₁, hic]
       have hih₁' : c₁.input.head = (k + 1) + 1 := by rw [hih₁, hih]
       have hoc₁' : c₁.output.cells 1 ≠ Γ.start := by rw [hoc₁]; exact hoc
@@ -253,14 +253,15 @@ private theorem evenLengthTM_scan (x : List Bool) (m k : ℕ)
         ih (k + 1) hlen' c₁ hst₁' hic₁' hih₁' hoh₁ hoc₁'
       exact ⟨c', .step hstep hreach', hhalt', hout'⟩
     · -- state = .odd, after scan = .even
-      have hst_eo : c.state = LengthParityPhase.odd := by rw [hst, if_neg hpar]
+      have hst_eo : c.state = LengthParityPhase.odd := by rw [hst, ite_eq_right hpar]
       obtain ⟨c₁, hstep, hst₁, hih₁, hic₁, hoh₁, hoc₁⟩ :=
         evenLengthTM_step_scan c LengthParityPhase.odd (Or.inr rfl) hst_eo hi_nb hoh hoc
       have hst₁' : c₁.state =
           if (k + 1) % 2 = 0 then LengthParityPhase.even else LengthParityPhase.odd := by
         have h1 : (k + 1) % 2 = 0 := by omega
-        rw [hst₁, if_neg (by decide : LengthParityPhase.odd ≠ LengthParityPhase.even)]
+        rw [hst₁, ite_eq_right (by decide : LengthParityPhase.odd ≠ LengthParityPhase.even)]
         simp [h1]
+        rfl
       have hic₁' : c₁.input.cells = (Tape.init (x.map Γ.ofBool)).cells := by rw [hic₁, hic]
       have hih₁' : c₁.input.head = (k + 1) + 1 := by rw [hih₁, hih]
       have hoc₁' : c₁.output.cells 1 ≠ Γ.start := by rw [hoc₁]; exact hoc
@@ -314,7 +315,7 @@ end Language
 theorem oddLength_eq_compl_evenLength :
     Language.oddLength = Language.evenLengthᶜ := by
   ext x
-  simp only [Language.evenLength, Language.oddLength, Set.mem_setOf_eq,
+  simp only [Language.evenLength, Language.oddLength, Set.mem_ofPred_eq,
              Set.mem_compl_iff]
   omega
 
@@ -330,10 +331,10 @@ theorem evenLengthTM_decidesInTime :
   refine ⟨c', x.length + 2, le_refl _, hreach, hhalt, ?_, ?_⟩
   · intro hxL
     have : x.length % 2 = 0 := hxL
-    rw [hout, if_pos this]
+    rw [hout, ite_eq_left this]
   · intro hxnL
     have : x.length % 2 ≠ 0 := hxnL
-    rw [hout, if_neg this]
+    rw [hout, ite_eq_right this]
 
 -- ════════════════════════════════════════════════════════════════════════
 -- DTIME memberships

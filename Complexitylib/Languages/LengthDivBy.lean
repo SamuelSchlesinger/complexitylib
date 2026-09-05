@@ -60,6 +60,9 @@ end Language
 
 /-- The "count bits mod k" fold: starting from `seed`, scanning `x` yields
     `seed + x.length` in `ZMod k`. -/
+-- The signature mirrors the family this belongs to; the argument is part of
+-- that shape even where this member does not consult it.
+@[nolint unusedArguments]
 private theorem lengthDivBy_fold (k : ℕ) [NeZero k] :
     ∀ (x : List Bool) (seed : ZMod k),
       x.foldl (fun (s : ZMod k) (_ : Bool) => s + 1) seed =

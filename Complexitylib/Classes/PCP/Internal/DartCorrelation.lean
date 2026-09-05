@@ -237,7 +237,7 @@ theorem headCount_le (F : Finset (G.V × G.D)) (z : G.V) : G.headCount F z ≤ G
   have hinj : Set.InjOn (fun p : G.V × G.D => (G.rot p).2)
       (F.filter fun p => G.nbr p.1 p.2 = z) := by
     intro p hp p' hp' hval
-    simp only [Finset.coe_filter, Set.mem_setOf_eq] at hp hp'
+    simp only [Finset.coe_filter, Set.mem_ofPred_eq] at hp hp'
     have hp1 : (G.rot p).1 = z := hp.2
     have hp'1 : (G.rot p').1 = z := hp'.2
     have hpair : G.rot p = G.rot p' := Prod.ext (hp1.trans hp'1.symm) hval

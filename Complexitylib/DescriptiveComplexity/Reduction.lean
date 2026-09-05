@@ -125,12 +125,10 @@ theorem FOInterpretation.translate_sat (I : FOInterpretation V W) (A : FinStruct
   | relApp i ts =>
     simp only [FOInterpretation.translate]
     rw [Formula.subst_sat]
-    show (I.apply A).rel i _ ↔ _
-    rw [FOInterpretation.apply_rel]
     have henv : (fun j => Term.eval (I.apply A) σ (ts j))
         = (fun k => Term.eval A σ (I.translateTerm (ts k))) := by
       funext k; rw [I.translateTerm_eval]
-    rw [henv]
+    exact Iff.of_eq (congrArg (fun e => Formula.Sat A e (I.relFormula i)) henv)
   | eq t₁ t₂ =>
     simp only [FOInterpretation.translate, Formula.Sat]
     constructor
@@ -200,7 +198,8 @@ theorem FOInterpretation.IsQuantifierFree.quantifierRank_translate
     (I.translate φ).quantifierRank = φ.quantifierRank := by
   induction φ with
   | relApp i ts =>
-    simpa [FOInterpretation.translate, Formula.quantifierRank_subst] using hI i
+    simpa [FOInterpretation.translate, Formula.quantifierRank_subst,
+      Formula.quantifierRank] using hI i
   | eq t₁ t₂ => rfl
   | neg φ ih =>
     simpa [FOInterpretation.translate, Formula.quantifierRank] using ih

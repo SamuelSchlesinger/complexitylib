@@ -242,10 +242,10 @@ theorem length_findFirst (E : List Bool → List Bool) (x : List Bool) (n : ℕ)
   rw [pairSnd_pair, pairFst_pair, ← List.replicate_succ',
     length_isEmptyMark]
   by_cases h : (∑ k ∈ Finset.range (j + 1), (E (pair x (List.replicate k true))).length) = 0
-  · rw [if_pos h, if_pos]
+  · rw [ite_eq_left h, ite_eq_left]
     have := length_countOver E x (j + 1)
     exact List.eq_nil_of_length_eq_zero (by rw [this, h])
-  · rw [if_neg h, if_neg]
+  · rw [ite_eq_right h, ite_eq_right]
     intro hnil
     exact h (by rw [← length_countOver E x (j + 1), hnil, List.length_nil])
 
@@ -262,11 +262,11 @@ theorem length_findFirst_eq {E : List Bool → List Bool} {x : List Bool} {n c :
         = (if j < c then 1 else 0) := by
     intro j _
     by_cases hj : j < c
-    · rw [if_pos hj, if_pos]
+    · rw [ite_eq_left hj, ite_eq_left]
       refine Finset.sum_eq_zero fun k hk => ?_
       rw [Finset.mem_range] at hk
       exact hmin k (by omega)
-    · rw [if_neg hj, if_neg]
+    · rw [ite_eq_right hj, ite_eq_right]
       intro hzero
       refine hhit ?_
       have hcm : c ∈ Finset.range (j + 1) := Finset.mem_range.mpr (by omega)

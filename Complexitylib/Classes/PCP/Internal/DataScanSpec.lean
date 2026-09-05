@@ -132,7 +132,7 @@ theorem runSpec_toBits (i : ℕ) (y : Data) :
         simpa using this
       -- Now the value at hand.
       rw [hsplit, runSpec_cons, hstep0, runSpec_append, ihx (d + 1) c acc₁,
-        if_neg (Nat.succ_ne_zero d)]
+        ite_eq_right (Nat.succ_ne_zero d)]
       set acc₂ := if c = i then acc₁ ++ x.toBits else acc₁ with hacc₂
       rw [huni acc₂, hD, hC]
       refine Prod.ext rfl (Prod.ext rfl ?_)
@@ -140,12 +140,12 @@ theorem runSpec_toBits (i : ℕ) (y : Data) :
       · have hR' : R = F := by
           simp only [hc, hacc₁] at hacc
           simpa using hacc.symm
-        rw [hacc₂, hacc₁, if_pos hc, if_pos hc, if_pos hc, hR']
+        rw [hacc₂, hacc₁, ite_eq_left hc, ite_eq_left hc, ite_eq_left hc, hR']
         simp
       · have hR' : R = [] := by
-          simp only [if_neg hc, hacc₁] at hacc
+          simp only [ite_eq_right hc, hacc₁] at hacc
           simpa using hacc.symm
-        rw [hacc₂, hacc₁, if_neg hc, if_neg hc, if_neg hc, hR']
+        rw [hacc₂, hacc₁, ite_eq_right hc, ite_eq_right hc, ite_eq_right hc, hR']
         simp
 
 /-! ### A run of children -/
@@ -170,36 +170,36 @@ theorem runSpec_flatten (i : ℕ) :
   | nil => intro c acc; simp
   | cons x xs ih =>
       intro c acc
-      rw [List.map_cons, List.flatten_cons, runSpec_append, runSpec_toBits, if_pos rfl, ih]
+      rw [List.map_cons, List.flatten_cons, runSpec_append, runSpec_toBits, ite_eq_left rfl, ih]
       refine Prod.ext rfl (Prod.ext (by simp [List.length_cons]; omega) ?_)
       simp only
       by_cases hlt : c < i
       · have h : c < i := hlt
         have h1 : selFrom (x :: xs) i c = selFrom xs i (c + 1) := by
-          rw [selFrom, selFrom, if_pos (by omega : c ≤ i), if_pos (by omega)]
+          rw [selFrom, selFrom, ite_eq_left (by omega : c ≤ i), ite_eq_left (by omega)]
           have : i - c = (i - (c + 1)) + 1 := by omega
           rw [this]
           simp
-        rw [if_neg (by omega), h1]
+        rw [ite_eq_right (by omega), h1]
       by_cases heq : c = i
       · subst heq
         have h1 : selFrom (x :: xs) c c = x.toBits := by
-          rw [selFrom, if_pos (by omega : c ≤ c)]
+          rw [selFrom, ite_eq_left (by omega : c ≤ c)]
           simp
         have h2 : selFrom xs c (c + 1) = [] := by
-          rw [selFrom, if_neg (by omega)]
-        rw [if_pos rfl, h1, h2, List.append_assoc, List.append_nil]
+          rw [selFrom, ite_eq_right (by omega)]
+        rw [ite_eq_left rfl, h1, h2, List.append_assoc, List.append_nil]
       · have h : i < c := by omega
-        have h1 : selFrom (x :: xs) i c = [] := by rw [selFrom, if_neg (by omega)]
-        have h2 : selFrom xs i (c + 1) = [] := by rw [selFrom, if_neg (by omega)]
-        rw [if_neg (by omega), h1, h2]
+        have h1 : selFrom (x :: xs) i c = [] := by rw [selFrom, ite_eq_right (by omega)]
+        have h2 : selFrom xs i (c + 1) = [] := by rw [selFrom, ite_eq_right (by omega)]
+        rw [ite_eq_right (by omega), h1, h2]
 
 /-- **The pass over a serialized list.** Reading the bits strictly between the
 outer brackets returns the requested child's own serialization. -/
 theorem runSpec_inner (i : ℕ) (xs : List Data) :
     runSpec i (0, 0, []) ((xs.map Data.toBits).flatten)
       = (0, xs.length, ((xs[i]?).map Data.toBits).getD []) := by
-  rw [runSpec_flatten, selFrom, if_pos (Nat.zero_le i)]
+  rw [runSpec_flatten, selFrom, ite_eq_left (Nat.zero_le i)]
   simp
 
 end DataScan

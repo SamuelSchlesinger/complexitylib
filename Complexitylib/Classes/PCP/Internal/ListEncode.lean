@@ -48,7 +48,7 @@ theorem listStep_mem_FP {E : List Bool → List Bool} (hE : E ∈ FP) : listStep
   have hE' : (fun st : List Bool =>
       E (pair (pairSnd st) (pairSnd (pairFst st)))) ∈ FP := by
     have := mem_FP_comp (Cobham.pairFn_mem_FP hx hctr) hE
-    simpa using this
+    exact this
   exact Cobham.pairFn_mem_FP
     (Cobham.pairFn_mem_FP (Cobham.appendFn_mem_FP hacc hE')
       (mem_FP_comp hctr (Cobham.cons_mem_FP true))) hx

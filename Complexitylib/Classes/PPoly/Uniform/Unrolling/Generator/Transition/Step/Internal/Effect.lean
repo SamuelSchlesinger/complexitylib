@@ -234,23 +234,23 @@ private theorem update_available_preserves_caseClean
       symbolIndex := ?_ }
   all_goals
     first
-    | simpa [updated, Function.update_apply, Work.available] using hclean.position
-    | simpa [updated, Function.update_apply, Work.available] using hclean.loop₀
-    | simpa [updated, Function.update_apply, Work.available] using hclean.limit₀
-    | simpa [updated, Function.update_apply, Work.available] using hclean.reference₀
-    | simpa [updated, Function.update_apply, Work.available] using hclean.reference₁
-    | simpa [updated, Function.update_apply, Work.available] using hclean.emitCounter
-    | simpa [updated, Function.update_apply, Work.available] using hclean.copyCounter
-    | simpa [updated, Function.update_apply, Work.available] using hclean.multiplyCounter
-    | simpa [updated, Function.update_apply, Work.available] using hclean.addCounter
-    | simpa [updated, Function.update_apply, Work.available] using hclean.temporary₀
-    | simpa [updated, Function.update_apply, Work.available] using hclean.temporary₁
-    | simpa [updated, Function.update_apply, Work.available] using hclean.temporary₂
-    | simpa [updated, Function.update_apply, Work.available] using hclean.loop₃
-    | simpa [updated, Function.update_apply, Work.available] using hclean.temporary₃
-    | simpa [updated, Function.update_apply, Work.available] using hclean.polynomialScratch
-    | simpa [updated, Function.update_apply, Work.available] using hclean.tapeIndex
-    | simpa [updated, Function.update_apply, Work.available] using hclean.symbolIndex
+    | simpa [updated, Function.update_apply, Work.available] using! hclean.position
+    | simpa [updated, Function.update_apply, Work.available] using! hclean.loop₀
+    | simpa [updated, Function.update_apply, Work.available] using! hclean.limit₀
+    | simpa [updated, Function.update_apply, Work.available] using! hclean.reference₀
+    | simpa [updated, Function.update_apply, Work.available] using! hclean.reference₁
+    | simpa [updated, Function.update_apply, Work.available] using! hclean.emitCounter
+    | simpa [updated, Function.update_apply, Work.available] using! hclean.copyCounter
+    | simpa [updated, Function.update_apply, Work.available] using! hclean.multiplyCounter
+    | simpa [updated, Function.update_apply, Work.available] using! hclean.addCounter
+    | simpa [updated, Function.update_apply, Work.available] using! hclean.temporary₀
+    | simpa [updated, Function.update_apply, Work.available] using! hclean.temporary₁
+    | simpa [updated, Function.update_apply, Work.available] using! hclean.temporary₂
+    | simpa [updated, Function.update_apply, Work.available] using! hclean.loop₃
+    | simpa [updated, Function.update_apply, Work.available] using! hclean.temporary₃
+    | simpa [updated, Function.update_apply, Work.available] using! hclean.polynomialScratch
+    | simpa [updated, Function.update_apply, Work.available] using! hclean.tapeIndex
+    | simpa [updated, Function.update_apply, Work.available] using! hclean.symbolIndex
 
 private theorem update_available_preserves_movedClean
     {values : BinaryValues WorkCount}
@@ -269,11 +269,11 @@ private theorem update_available_preserves_movedClean
     exact update_available_preserves_caseClean hclean.caseClean value
   all_goals
     first
-    | simpa [Work.available, Work.limit₂] using hclean.limit₂
-    | simpa [Work.available, Work.loop₁] using hclean.loop₁
-    | simpa [Work.available, Work.savedOutput] using hclean.savedOutput
-    | simpa [Work.available, Work.direction] using hclean.direction
-    | simpa [Work.available, Work.atomKind] using hclean.atomKind
+    | simpa [Work.available, Work.limit₂] using! hclean.limit₂
+    | simpa [Work.available, Work.loop₁] using! hclean.loop₁
+    | simpa [Work.available, Work.savedOutput] using! hclean.savedOutput
+    | simpa [Work.available, Work.direction] using! hclean.direction
+    | simpa [Work.available, Work.atomKind] using! hclean.atomKind
 
 theorem update_available_preserves_stepClean_internal
     {values : BinaryValues WorkCount} (hclean : StepClean values) (value : ℕ) :
@@ -360,23 +360,23 @@ private theorem update_limit₁_preserves_caseClean
       symbolIndex := ?_ }
   all_goals
     first
-    | simpa [Work.limit₁] using hclean.position
-    | simpa [Work.limit₁] using hclean.loop₀
-    | simpa [Work.limit₁] using hclean.limit₀
-    | simpa [Work.limit₁] using hclean.reference₀
-    | simpa [Work.limit₁] using hclean.reference₁
-    | simpa [Work.limit₁] using hclean.emitCounter
-    | simpa [Work.limit₁] using hclean.copyCounter
-    | simpa [Work.limit₁] using hclean.multiplyCounter
-    | simpa [Work.limit₁] using hclean.addCounter
-    | simpa [Work.limit₁] using hclean.temporary₀
-    | simpa [Work.limit₁] using hclean.temporary₁
-    | simpa [Work.limit₁] using hclean.temporary₂
-    | simpa [Work.limit₁] using hclean.loop₃
-    | simpa [Work.limit₁] using hclean.temporary₃
-    | simpa [Work.limit₁] using hclean.polynomialScratch
-    | simpa [Work.limit₁] using hclean.tapeIndex
-    | simpa [Work.limit₁] using hclean.symbolIndex
+    | simpa [Work.limit₁] using! hclean.position
+    | simpa [Work.limit₁] using! hclean.loop₀
+    | simpa [Work.limit₁] using! hclean.limit₀
+    | simpa [Work.limit₁] using! hclean.reference₀
+    | simpa [Work.limit₁] using! hclean.reference₁
+    | simpa [Work.limit₁] using! hclean.emitCounter
+    | simpa [Work.limit₁] using! hclean.copyCounter
+    | simpa [Work.limit₁] using! hclean.multiplyCounter
+    | simpa [Work.limit₁] using! hclean.addCounter
+    | simpa [Work.limit₁] using! hclean.temporary₀
+    | simpa [Work.limit₁] using! hclean.temporary₁
+    | simpa [Work.limit₁] using! hclean.temporary₂
+    | simpa [Work.limit₁] using! hclean.loop₃
+    | simpa [Work.limit₁] using! hclean.temporary₃
+    | simpa [Work.limit₁] using! hclean.polynomialScratch
+    | simpa [Work.limit₁] using! hclean.tapeIndex
+    | simpa [Work.limit₁] using! hclean.symbolIndex
 
 theorem update_limit₁_preserves_phaseClean_internal
     {values : BinaryValues WorkCount} (hclean : StepPhaseCleanInternal values)
@@ -399,11 +399,11 @@ theorem update_limit₁_preserves_phaseClean_internal
         value
     all_goals
       first
-      | simpa [Work.limit₁] using hclean.movedHeadClean.limit₂
-      | simpa [Work.limit₁] using hclean.movedHeadClean.loop₁
-      | simpa [Work.limit₁] using hclean.movedHeadClean.savedOutput
-      | simpa [Work.limit₁] using hclean.movedHeadClean.direction
-      | simpa [Work.limit₁] using hclean.movedHeadClean.atomKind
+      | simpa [Work.limit₁] using! hclean.movedHeadClean.limit₂
+      | simpa [Work.limit₁] using! hclean.movedHeadClean.loop₁
+      | simpa [Work.limit₁] using! hclean.movedHeadClean.savedOutput
+      | simpa [Work.limit₁] using! hclean.movedHeadClean.direction
+      | simpa [Work.limit₁] using! hclean.movedHeadClean.atomKind
   · simpa [Work.limit₁, Work.position] using hclean.position
 
 private theorem seqList_stateFormulas_effect
@@ -424,7 +424,7 @@ private theorem seqList_stateFormulas_effect
       funext i
       by_cases hi : i = Work.available <;>
         simp [BinaryRoutine.seqList, BinaryRoutine.identity,
-          BinaryRoutine.emitBits, Function.update_apply, hi]
+          BinaryRoutine.emitBits, hi]
   | cons state states ih =>
       rw [List.map_cons, BinaryRoutine.seqList, BinaryRoutine.seq]
       change (BinaryRoutine.seqList (states.map (emitNextStateFormula tm))).effect
@@ -463,7 +463,7 @@ theorem emitStepStateFormulas_effect_internal (tm : NTM k)
         · simp
         · intro i hleft hright
           simp]
-  simpa using seqList_stateFormulas_effect tm
+  simpa using! seqList_stateFormulas_effect tm
       (List.ofFn fun stateIndex : Fin (Fintype.card tm.Q) =>
       (Fintype.equivFin tm.Q).symm stateIndex) values
       hclean.caseFormulaClean_forEffect
@@ -1746,10 +1746,10 @@ private theorem cellCopyBody_effect (tm : NTM k) (tape : TapeSlot k)
       simpa [stepCellPositionEffectSizeInternal] using
         emitStepImmutableCellCopies_effect_internal values
   | work index =>
-      simpa using emitStepWritableCellCopies_effect_internal tm (.work index)
+      simpa using! emitStepWritableCellCopies_effect_internal tm (.work index)
         values
   | output =>
-      simpa using emitStepWritableCellCopies_effect_internal tm .output values
+      simpa using! emitStepWritableCellCopies_effect_internal tm .output values
 
 private theorem clearPosition_after_copyUpdates
     (values : BinaryValues WorkCount)

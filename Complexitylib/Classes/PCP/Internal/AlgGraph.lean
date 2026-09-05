@@ -58,7 +58,7 @@ theorem codeOfRel_lt (f : α → α → Bool) :
     codeOfRel f < Fintype.card (α → α → Bool) := Fin.isLt _
 
 @[simp] theorem relOfCode_codeOfRel (f : α → α → Bool) : relOfCode α (codeOfRel f) = f := by
-  rw [relOfCode, dif_pos (codeOfRel_lt f)]
+  rw [relOfCode, dite_eq_left (codeOfRel_lt f)]
   simp only [codeOfRel, Fin.eta, Equiv.symm_apply_apply]
 
 /-! ### The encoding -/
@@ -142,7 +142,7 @@ theorem length_encGraph_le (G : ConstraintGraph α) :
         + G.numEdges * (8 * G.numVerts + 4 * Fintype.card (α → α → Bool) + 10) := by
   have hsum : ((edgeRecs G).map fun a => (DataEncode.bitstringEncode a).length).sum
       ≤ G.numEdges * (8 * G.numVerts + 4 * Fintype.card (α → α → Bool) + 10) := by
-    refine le_trans (List.sum_le_card_nsmul _
+    refine le_trans (List.sum_le_length_nsmul _
       (8 * G.numVerts + 4 * Fintype.card (α → α → Bool) + 10) ?_) ?_
     · intro x hx
       obtain ⟨e, he, rfl⟩ := List.mem_map.mp hx

@@ -60,12 +60,12 @@ theorem grpDir_eq_decDir (b₀ b₁ : Bool) : grpDir b₀ b₁ = decDir [b₀, b
 private theorem write_readBack_id {t : Tape} (h : t.head = 0 ∨ t.read ≠ Γ.start) :
     t.write (readBackWrite t.read).toΓ = t := by
   rcases h with h0 | hne
-  · unfold Tape.write; rw [if_pos h0]
+  · unfold Tape.write; rw [ite_eq_left h0]
   · rw [toΓ_readBackWrite_of_ne_start hne]
     unfold Tape.write
     by_cases h0 : t.head = 0
-    · rw [if_pos h0]
-    · rw [if_neg h0]
+    · rw [ite_eq_left h0]
+    · rw [ite_eq_right h0]
       have hupd : Function.update t.cells t.head t.read = t.cells :=
         Function.update_eq_self t.head t.cells
       rw [hupd]
@@ -113,7 +113,7 @@ private theorem peek_leftstep {sim utm : Tape} (h : VShift sim utm)
       (if utm.read = Γ.start then Dir3.right else Dir3.left)
       = ⟨sim.head, utm.cells⟩ := by
   have hr := h.read_ne_start hwf
-  rw [if_neg hr, writeAndMove_readBack_left hr, h.2, Nat.add_sub_cancel]
+  rw [ite_eq_right hr, writeAndMove_readBack_left hr, h.2, Nat.add_sub_cancel]
 
 /-- The peek-right (return) step: from head `sim.head` the write-back is a
     no-op (also at the `▷` bounce) and the right move restores the shadow. -/
@@ -214,7 +214,7 @@ theorem peek_correct {c : Cfg 6 bodyTM.Q} {sim0 sim1 sim2 : Tape}
     · exact peek_leftstep h2 hwf2
     · intro i hi0 hi1 hi2
       show (if i = vIn then _ else _) = _
-      rw [if_neg hi0, if_neg hi1, if_neg hi2]
+      rw [ite_eq_right hi0, ite_eq_right hi1, ite_eq_right hi2]
       exact idle_tape_id (hoth i)
   -- step 2: read the flags, all three virtual heads right
   obtain ⟨c₂, hc2, hs₂, hi₂, ho₂, hv₂0, hv₂1, hv₂2, hrest₂⟩ :
@@ -241,7 +241,7 @@ theorem peek_correct {c : Cfg 6 bodyTM.Q} {sim0 sim1 sim2 : Tape}
     · exact peek_return' h2 hwf2 hv₁2
     · intro i hi0 hi1 hi2
       show (if i = vIn then _ else _) = _
-      rw [if_neg hi0, if_neg hi1, if_neg hi2]
+      rw [ite_eq_right hi0, ite_eq_right hi1, ite_eq_right hi2]
       exact idle_tape_id (by rw [hrest₁ i hi0 hi1 hi2]; exact hoth i)
   refine ⟨c₂, .step hc1 (.step hc2 .zero), hs₂, hv₂0, hv₂1, hv₂2, ?_, ?_, ?_,
     hi₂, ho₂⟩
@@ -287,7 +287,7 @@ theorem segCheck_default_step {c : Cfg 6 bodyTM.Q} {f : VFlags}
     rw [hdc]; exact fun h => nomatch h
   have hoth := read_ne_start_all (w := c.work) hr0 hr1 hr2 hstT hdsT hscT
   have harm := arm_segCheck c.input.read (fun i => (c.work i).read) c.output.read f
-  rw [if_pos hdc] at harm
+  rw [ite_eq_left hdc] at harm
   obtain ⟨c', hstep, hs, hi, ho, hv0, hv1, hv2, hrest⟩ :
       ∃ c', bodyTM.step c = some c' ∧ c'.state = dfScr ∧
         c'.input = c.input ∧ c'.output = c.output ∧
@@ -301,32 +301,32 @@ theorem segCheck_default_step {c : Cfg 6 bodyTM.Q} {f : VFlags}
     · show (c.work vIn).writeAndMove (readBackWrite ((c.work vIn).read)).toΓ
         (if (c.work vIn).read = Γ.start then Dir3.right
           else if f.1 then Dir3.right else Dir3.stay) = _
-      rw [if_neg hr0]
+      rw [ite_eq_right hr0]
       exact writeAndMove_readBack_move hr0 _
     · show (c.work vWk).writeAndMove (readBackWrite ((c.work vWk).read)).toΓ
         (if (c.work vWk).read = Γ.start then Dir3.right
           else if f.2.1 then Dir3.right else Dir3.stay) = _
-      rw [if_neg hr1]
+      rw [ite_eq_right hr1]
       exact writeAndMove_readBack_move hr1 _
     · show (c.work vOut).writeAndMove (readBackWrite ((c.work vOut).read)).toΓ
         (if (c.work vOut).read = Γ.start then Dir3.right
           else if f.2.2 then Dir3.right else Dir3.stay) = _
-      rw [if_neg hr2]
+      rw [ite_eq_right hr2]
       exact writeAndMove_readBack_move hr2 _
     · intro i hi0 hi1 hi2
       show (if i = vIn then _ else _) = _
-      rw [if_neg hi0, if_neg hi1, if_neg hi2]
+      rw [ite_eq_right hi0, ite_eq_right hi1, ite_eq_right hi2]
       exact idle_tape_id (hoth i)
   refine ⟨c', .step hstep .zero, hs, ?_, ?_, ?_,
     hrest stT (by decide) (by decide) (by decide),
     hrest dsT (by decide) (by decide) (by decide),
     hrest scT (by decide) (by decide) (by decide), hi, ho⟩
   · rw [hv0]
-    exact h0.move _ fun hz => by rw [hf0, decide_eq_true hz, if_pos rfl]
+    exact h0.move _ fun hz => by rw [hf0, decide_eq_true hz, ite_eq_left rfl]
   · rw [hv1]
-    exact h1.move _ fun hz => by rw [hf1, decide_eq_true hz, if_pos rfl]
+    exact h1.move _ fun hz => by rw [hf1, decide_eq_true hz, ite_eq_left rfl]
   · rw [hv2]
-    exact h2.move _ fun hz => by rw [hf2, decide_eq_true hz, if_pos rfl]
+    exact h2.move _ fun hz => by rw [hf2, decide_eq_true hz, ite_eq_left rfl]
 
 /-- **The segCheck continue step** (`segCheck f` reading non-`□` → `mmScr f`):
     a pure control-state change — every tape is preserved exactly. -/
@@ -338,7 +338,7 @@ theorem segCheck_continue_step {c : Cfg 6 bodyTM.Q} {f : VFlags}
     ∃ c', bodyTM.reachesIn 1 c c' ∧ c'.state = mmScr f ∧
       (∀ i, c'.work i = c.work i) ∧ c'.input = c.input ∧ c'.output = c.output := by
   have harm := arm_segCheck c.input.read (fun i => (c.work i).read) c.output.read f
-  rw [if_neg hdc] at harm
+  rw [ite_eq_right hdc] at harm
   refine ⟨_, .step (step_mkAct (by rw [hst]; exact fun h => nomatch h)
       (by rw [hst]; exact harm)) .zero, rfl, ?_, idle_input_id hin,
     idle_tape_id hout⟩
@@ -379,7 +379,7 @@ theorem appQ'_loop {f : VFlags} (E : ℕ → Γ) (hEns : ∀ j, 1 ≤ j → E j 
       simp only [Tape.read, hheadS, hcS]
       simpa using hbl
     have harm := arm_appQ' c.input.read (fun i => (c.work i).read) c.output.read f
-    rw [if_pos hreads] at harm
+    rw [ite_eq_left hreads] at harm
     have hstep := step_mkAct (c := c)
       (by rw [hst]; exact fun hcon => nomatch hcon)
       (by rw [hst]; exact harm)
@@ -389,7 +389,7 @@ theorem appQ'_loop {f : VFlags} (E : ℕ → Γ) (hEns : ∀ j, 1 ≤ j → E j 
       rw [idle_tape_id (by rw [hreads]; exact fun h => nomatch h)]
       have hS : (fun j => if a ≤ j ∧ j < a + 0 then E (e + (j - a)) else S j) = S := by
         funext j
-        rw [if_neg (by omega)]
+        rw [ite_eq_right (by omega)]
       rw [hS, ← hcS, show a + 0 = (c.work stT).head from by rw [hheadS]; omega]
     · show (c.work scT).writeAndMove _ _ = _
       rw [idle_tape_id (by
@@ -410,7 +410,7 @@ theorem appQ'_loop {f : VFlags} (E : ℕ → Γ) (hEns : ∀ j, 1 ≤ j → E j 
     have hreadsc' : (c.work scT).read ≠ Γ.start := by
       rw [hreadsc]; exact hEns e he
     have harm := arm_appQ' c.input.read (fun i => (c.work i).read) c.output.read f
-    rw [if_neg hreadnb] at harm
+    rw [ite_eq_right hreadnb] at harm
     have hstep := step_act2 (c := c)
       (by rw [hst]; exact fun hcon => nomatch hcon)
       (by rw [hst]; exact harm)
@@ -447,34 +447,34 @@ theorem appQ'_loop {f : VFlags} (E : ℕ → Γ) (hEns : ∀ j, 1 ≤ j → E j 
         rfl
         (by
           dsimp only
-          rw [if_pos rfl, if_neg hreads']
+          rw [ite_eq_left rfl, ite_eq_right hreads']
           show (((c.work stT).write _).move Dir3.right).cells = _
           have hw : (c.work stT).write (readBackWrite ((c.work scT).read)).toΓ
               = { c.work stT with
                   cells := Function.update (c.work stT).cells (c.work stT).head
                     (readBackWrite ((c.work scT).read)).toΓ } := by
             unfold Tape.write
-            rw [if_neg (by omega)]
+            rw [ite_eq_right (by omega)]
           rw [hw]
           show Function.update (c.work stT).cells (c.work stT).head _ = _
           rw [hcS, hheadS, hEe])
         (by
           dsimp only
-          rw [if_pos rfl, if_neg hreads']
+          rw [ite_eq_left rfl, ite_eq_right hreads']
           simp only [Tape.writeAndMove, Tape.move, Tape.write_head, hheadS])
         (by
           dsimp only
-          rw [if_neg (by decide : scT ≠ stT), if_pos rfl, if_neg hreadsc',
+          rw [ite_eq_right (by decide : scT ≠ stT), ite_eq_left rfl, ite_eq_right hreadsc',
             tape_readBackWrite_preserves _ _ (Or.inr hreadsc'), hcE])
         (by
           dsimp only
-          rw [if_neg (by decide : scT ≠ stT), if_pos rfl, if_neg hreadsc']
+          rw [ite_eq_right (by decide : scT ≠ stT), ite_eq_left rfl, ite_eq_right hreadsc']
           simp only [Tape.writeAndMove, Tape.move, Tape.write_head, hheadE])
         (by dsimp only; rw [idle_input_id hin]; exact hin)
         (by dsimp only; rw [idle_tape_id hout]; exact hout)
         (fun i hi hi' => by
           dsimp only
-          rw [if_neg hi, if_neg hi', idle_tape_id (hoth i hi hi')]
+          rw [ite_eq_right hi, ite_eq_right hi', idle_tape_id (hoth i hi hi')]
           exact hoth i hi hi')
     refine ⟨c', .step hstep hreach, hst', ?_, ?_, ?_, ?_, ?_⟩
     · rw [hwtS']
@@ -482,14 +482,14 @@ theorem appQ'_loop {f : VFlags} (E : ℕ → Γ) (hEns : ∀ j, 1 ≤ j → E j 
       refine ⟨by omega, ?_⟩
       funext j
       by_cases hj1 : a + 1 ≤ j ∧ j < a + 1 + n
-      · rw [if_pos hj1, if_pos (by omega)]
+      · rw [ite_eq_left hj1, ite_eq_left (by omega)]
         exact congrArg E (by omega)
-      · rw [if_neg hj1]
+      · rw [ite_eq_right hj1]
         by_cases hje : j = a
         · subst hje
-          rw [Function.update_self, if_pos (by omega)]
+          rw [Function.update_self, ite_eq_left (by omega)]
           exact congrArg E (by omega)
-        · rw [Function.update_of_ne hje, if_neg (by omega)]
+        · rw [Function.update_of_ne hje, ite_eq_right (by omega)]
     · rw [hwtE']
       exact congrArg (fun m => (⟨m, E⟩ : Tape)) (by omega)
     · rw [hin']; exact idle_input_id hin
@@ -497,7 +497,7 @@ theorem appQ'_loop {f : VFlags} (E : ℕ → Γ) (hEns : ∀ j, 1 ≤ j → E j 
     · intro i hi hi'
       rw [hoth' i hi hi']
       show (if i = stT then _ else if i = scT then _ else _) = _
-      rw [if_neg hi, if_neg hi']
+      rw [ite_eq_right hi, ite_eq_right hi']
       exact idle_tape_id (hoth i hi hi')
 
 -- ════════════════════════════════════════════════════════════════════════
@@ -549,7 +549,7 @@ private theorem appAct_writeGroup {c : Cfg 6 bodyTM.Q} {f : VFlags} {g : Fin 5}
       exact writeAndMove_readBack_right (Or.inr hsc0)
     · intro i hi
       show (if i = scT then _ else _) = _
-      rw [if_neg hi]
+      rw [ite_eq_right hi]
       refine idle_tape_id ?_
       by_cases hit : i = t
       · subst hit; exact htr
@@ -573,7 +573,7 @@ private theorem appAct_writeGroup {c : Cfg 6 bodyTM.Q} {f : VFlags} {g : Fin 5}
     · rw [hi₁]; exact idle_input_id hin
     · rw [ho₁]; exact idle_tape_id hout
     · show (if t = scT then _ else if t = t then _ else _) = _
-      rw [if_neg ht, if_pos rfl, ht₁, hsc₁, if_neg htr]
+      rw [ite_eq_right ht, ite_eq_left rfl, ht₁, hsc₁, ite_eq_right htr]
       rfl
     · show (c₁.work scT).writeAndMove (readBackWrite ((c₁.work scT).read)).toΓ
         (if (c₁.work scT).read = Γ.start then Dir3.right else Dir3.right) = _
@@ -581,7 +581,7 @@ private theorem appAct_writeGroup {c : Cfg 6 bodyTM.Q} {f : VFlags} {g : Fin 5}
       exact writeAndMove_readBack_right (Or.inr hsc1)
     · intro i hi hit
       show (if i = scT then _ else if i = t then _ else _) = _
-      rw [if_neg hi, if_neg hit]
+      rw [ite_eq_right hi, ite_eq_right hit]
       exact idle_tape_id (by rw [hoth₁ i hi]; exact hoth i hi hit)
   exact ⟨c₂, .step hc1 (.step hc2 .zero), hs₂, htp₂, hsc₂, hi₂, ho₂,
     fun i hi hit => (hoth₂ i hi hit).trans (hoth₁ i hi)⟩
@@ -632,7 +632,7 @@ private theorem appAct_moveGroup {c : Cfg 6 bodyTM.Q} {f : VFlags} {g : Fin 5}
       exact writeAndMove_readBack_right (Or.inr hsc0)
     · intro i hi
       show (if i = scT then _ else _) = _
-      rw [if_neg hi]
+      rw [ite_eq_right hi]
       refine idle_tape_id ?_
       by_cases hit : i = t
       · subst hit; exact htr
@@ -656,7 +656,7 @@ private theorem appAct_moveGroup {c : Cfg 6 bodyTM.Q} {f : VFlags} {g : Fin 5}
     · rw [hi₁]; exact idle_input_id hin
     · rw [ho₁]; exact idle_tape_id hout
     · show (if t = scT then _ else if t = t then _ else _) = _
-      rw [if_neg ht, if_pos rfl, ht₁, hsc₁, if_neg htr]
+      rw [ite_eq_right ht, ite_eq_left rfl, ht₁, hsc₁, ite_eq_right htr]
       exact writeAndMove_readBack_move htr _
     · show (c₁.work scT).writeAndMove (readBackWrite ((c₁.work scT).read)).toΓ
         (if (c₁.work scT).read = Γ.start then Dir3.right else Dir3.right) = _
@@ -664,7 +664,7 @@ private theorem appAct_moveGroup {c : Cfg 6 bodyTM.Q} {f : VFlags} {g : Fin 5}
       exact writeAndMove_readBack_right (Or.inr hsc1)
     · intro i hi hit
       show (if i = scT then _ else if i = t then _ else _) = _
-      rw [if_neg hi, if_neg hit]
+      rw [ite_eq_right hi, ite_eq_right hit]
       exact idle_tape_id (by rw [hoth₁ i hi]; exact hoth i hi hit)
   exact ⟨c₂, .step hc1 (.step hc2 .zero), hs₂, htp₂, hsc₂, hi₂, ho₂,
     fun i hi hit => (hoth₂ i hi hit).trans (hoth₁ i hi)⟩
@@ -739,10 +739,10 @@ theorem appAct_all {c : Cfg 6 bodyTM.Q} {f : VFlags} {sim0 sim1 sim2 : Tape}
     · have hno : sim1.write (grpΓw (cellBit (E e)) (cellBit (E (e + 1)))).toΓ
           = sim1 := by
         unfold Tape.write
-        rw [if_pos hz]
-      rw [hno, hf1, decide_eq_true hz, if_pos rfl]
+        rw [ite_eq_left hz]
+      rw [hno, hf1, decide_eq_true hz, ite_eq_left rfl]
       exact h1.write_origin hz
-    · rw [hf1, decide_eq_false hz, if_neg Bool.false_ne_true]
+    · rw [hf1, decide_eq_false hz, ite_eq_right Bool.false_ne_true]
       exact h1.write _ (by omega)
   have hwf1w : (sim1.write (grpΓw (cellBit (E e)) (cellBit (E (e + 1)))).toΓ).StartInvariant :=
     hwf1.write _
@@ -779,10 +779,10 @@ theorem appAct_all {c : Cfg 6 bodyTM.Q} {f : VFlags} {sim0 sim1 sim2 : Tape}
     · have hno : sim2.write (grpΓw (cellBit (E (e + 2))) (cellBit (E (e + 3)))).toΓ
           = sim2 := by
         unfold Tape.write
-        rw [if_pos hz]
-      rw [hno, hf2, decide_eq_true hz, if_pos rfl]
+        rw [ite_eq_left hz]
+      rw [hno, hf2, decide_eq_true hz, ite_eq_left rfl]
       exact h2.write_origin hz
-    · rw [hf2, decide_eq_false hz, if_neg Bool.false_ne_true]
+    · rw [hf2, decide_eq_false hz, ite_eq_right Bool.false_ne_true]
       exact h2.write _ (by omega)
   have hwf2w :
       (sim2.write (grpΓw (cellBit (E (e + 2))) (cellBit (E (e + 3)))).toΓ).StartInvariant :=
@@ -819,7 +819,7 @@ theorem appAct_all {c : Cfg 6 bodyTM.Q} {f : VFlags} {sim0 sim1 sim2 : Tape}
         else grpDir (cellBit (E (e + 4))) (cellBit (E (e + 5)))))
       (c₃.work vIn) := by
     rw [hv₃']
-    exact h0.move _ fun hz => by rw [hf0, decide_eq_true hz, if_pos rfl]
+    exact h0.move _ fun hz => by rw [hf0, decide_eq_true hz, ite_eq_left rfl]
   have hwf0m : (sim0.move
       (if f.1 then Dir3.right
         else grpDir (cellBit (E (e + 4))) (cellBit (E (e + 5))))).StartInvariant :=
@@ -861,7 +861,7 @@ theorem appAct_all {c : Cfg 6 bodyTM.Q} {f : VFlags} {sim0 sim1 sim2 : Tape}
     rw [hv₄', ← hv₁']
     exact h1w.move _ fun hz => by
       rw [Tape.write_head] at hz
-      rw [hf1, decide_eq_true hz, if_pos rfl]
+      rw [hf1, decide_eq_true hz, ite_eq_left rfl]
   have hwf1m : ((sim1.write (grpΓw (cellBit (E e)) (cellBit (E (e + 1)))).toΓ).move
       (if f.2.1 then Dir3.right
         else grpDir (cellBit (E (e + 6))) (cellBit (E (e + 7))))).StartInvariant :=
@@ -903,7 +903,7 @@ theorem appAct_all {c : Cfg 6 bodyTM.Q} {f : VFlags} {sim0 sim1 sim2 : Tape}
     rw [hv₅', ← hv₂']
     exact h2w.move _ fun hz => by
       rw [Tape.write_head] at hz
-      rw [hf2, decide_eq_true hz, if_pos rfl]
+      rw [hf2, decide_eq_true hz, ite_eq_left rfl]
   -- ── assembly ──
   refine ⟨c₅, ?_, hs₅, ?_, ?_, h2m, ?_, ?_, hsc₅',
     hi₅.trans hi₄', ho₅.trans ho₄'⟩

@@ -134,7 +134,7 @@ theorem condBumpTM_hoareTime (aIdx rIdx : Fin n) (a r : ℕ) (b : Bool) (s : Γw
     exact ⟨c', t, ht, hreach, hhalt, hb, hpost⟩
   · rintro inp work out ⟨hb, rfl, rfl, rfl⟩
     refine ⟨hIdI, ?_, hIdO⟩
-    rw [if_pos hb]
+    rw [ite_eq_left hb]
     funext i
     exact transitionTape_eq_self (by
       by_cases hi : i = aIdx
@@ -144,7 +144,7 @@ theorem condBumpTM_hoareTime (aIdx rIdx : Fin n) (a r : ℕ) (b : Bool) (s : Γw
       · rw [Function.update_of_ne hi]; exact (hW i).read_ne_start)
   · rintro inp work out ⟨hb, rfl, rfl, rfl⟩
     refine ⟨hIdI, ?_, hIdO⟩
-    rw [if_neg (by simp [hb])]
+    rw [ite_eq_right (by simp [hb])]
     funext i
     exact transitionTape_eq_self (by
       by_cases hi : i = rIdx
@@ -230,14 +230,12 @@ theorem tallyBumpTM_hoareTime (cIdx aIdx rIdx zIdx : Fin n)
     (max (1 + 1 + max (binarySuccTime a) (binarySuccTime r) + 5) (binarySuccTime v))
     hI ?_ ?_ ?_).consequence (fun _ _ _ h => h) (fun _ _ _ h => h) (le_refl _)
   · intro k i
-    dsimp only
     split
     · exact hW i
     · split
       · exact hW₁P i
       · exact hW₂P i
   · intro k
-    dsimp only
     split
     · exact hOP
     · exact hObP

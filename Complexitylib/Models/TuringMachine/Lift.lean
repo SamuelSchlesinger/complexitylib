@@ -72,7 +72,7 @@ private theorem dummy_writeAndMove (w : Tape)
     have hr : w.read = Γ.blank := by rw [hread, h1]; rfl
     rw [hr]
     show w.write (readBackWrite Γ.blank).toΓ = (Tape.init []).move Dir3.right
-    rw [Tape.write, if_neg (show ¬ w.head = 0 by omega), h1, hc]
+    rw [Tape.write, ite_eq_right (show ¬ w.head = 0 by omega), h1, hc]
     rw [show (readBackWrite Γ.blank).toΓ = (Tape.init []).cells 1 from rfl,
       Function.update_eq_self]
     rfl
@@ -134,13 +134,13 @@ def liftCfg (tm : TM n) (m : ℕ) (c : Cfg n tm.Q) : Cfg (n + m) tm.Q where
 /-- `liftCfg` maps the first `n` work tapes to `c`'s work tapes. -/
 theorem liftCfg_work_lt (tm : TM n) (m : ℕ) (c : Cfg n tm.Q)
     (i : Fin (n + m)) (h : i.val < n) :
-    (tm.liftCfg m c).work i = c.work ⟨i.val, h⟩ := dif_pos h
+    (tm.liftCfg m c).work i = c.work ⟨i.val, h⟩ := dite_eq_left h
 
 /-- `liftCfg` maps the extra work tapes to the parked blank tape. -/
 theorem liftCfg_work_ge (tm : TM n) (m : ℕ) (c : Cfg n tm.Q)
     (i : Fin (n + m)) (h : n ≤ i.val) :
     (tm.liftCfg m c).work i = (Tape.init []).move Dir3.right :=
-  dif_neg (Nat.not_lt.mpr h)
+  dite_eq_right (Nat.not_lt.mpr h)
 
 /-- **Unified step commutation** for `liftTM`. If the extra work tapes of
     `C` are blank with head at cell 0 or 1 and the rest of `C` matches `c`,
@@ -156,9 +156,9 @@ private theorem liftTM_step_of_extras (tm : TM n) (m : ℕ) {c : Cfg n tm.Q}
     (tm.liftTM m).step C = (tm.step c).map (tm.liftCfg m) := by
   by_cases hh : c.state = tm.qhalt
   · -- both machines are halted
+    have hC : C.state = (tm.liftTM m).qhalt := hs.trans hh
     have h1 : (tm.liftTM m).step C = none := by
-      simp only [step, hs, hh, show (tm.liftTM m).qhalt = tm.qhalt from rfl,
-        ↓reduceIte]
+      simp only [step, hC, ↓reduceIte]
     have h2 : tm.step c = none := by
       simp only [step, hh, ↓reduceIte]
     rw [h1, h2]; rfl
@@ -173,13 +173,14 @@ private theorem liftTM_step_of_extras (tm : TM n) (m : ℕ) {c : Cfg n tm.Q}
         funext fun i => by rw [hw (Fin.castAdd m i) i.isLt]; rfl
       simp only [step, Option.map_some]
       dsimp only [liftTM, liftCfg]
-      rw [hs, hi, ho, hinner, if_neg hh]
+      rw [hs, hi, ho, hinner]
+      simp only [hh, ↓reduceIte]
       refine congrArg some (Cfg.mk.injEq _ _ _ _ _ _ _ _ |>.mpr ⟨rfl, rfl, ?_, rfl⟩)
       funext i
       by_cases hik : i.val < n
-      · rw [hw i hik, dif_pos hik, dif_pos hik, dif_pos hik]
+      · rw [hw i hik, dite_eq_left hik, dite_eq_left hik, dite_eq_left hik]
       · have hdi := hd i (Nat.le_of_not_lt hik)
-        rw [dif_neg hik, dif_neg hik, dif_neg hik]
+        rw [dite_eq_right hik, dite_eq_right hik, dite_eq_right hik]
         exact dummy_writeAndMove (C.work i) hdi.1 hdi.2
 
 /-- **Step commutation** on embedded configurations: once the extra tapes
@@ -187,7 +188,7 @@ private theorem liftTM_step_of_extras (tm : TM n) (m : ℕ) {c : Cfg n tm.Q}
     `liftCfg`. -/
 theorem liftTM_step_liftCfg (tm : TM n) (m : ℕ) (c : Cfg n tm.Q) :
     (tm.liftTM m).step (tm.liftCfg m c) = (tm.step c).map (tm.liftCfg m) :=
-  liftTM_step_of_extras tm m rfl rfl rfl (fun _ h => dif_pos h)
+  liftTM_step_of_extras tm m rfl rfl rfl (fun _ h => dite_eq_left h)
     (fun i h => by
       rw [liftCfg_work_ge tm m c i h]
       exact ⟨rfl, Nat.le_refl 1⟩)
@@ -414,11 +415,11 @@ def retargetCfg (tm : TM n) (c : Cfg n tm.Q) : Cfg (n + 1) tm.Q where
 /-- `retargetCfg` maps the first `n` work tapes to `c`'s work tapes. -/
 theorem retargetCfg_work_lt (tm : TM n) (c : Cfg n tm.Q)
     (i : Fin (n + 1)) (h : i.val < n) :
-    (tm.retargetCfg c).work i = c.work ⟨i.val, h⟩ := dif_pos h
+    (tm.retargetCfg c).work i = c.work ⟨i.val, h⟩ := dite_eq_left h
 
 /-- `retargetCfg` maps the last work tape to `c`'s output tape. -/
 theorem retargetCfg_work_last (tm : TM n) (c : Cfg n tm.Q) :
-    (tm.retargetCfg c).work (Fin.last n) = c.output := dif_neg (Nat.lt_irrefl n)
+    (tm.retargetCfg c).work (Fin.last n) = c.output := dite_eq_right (Nat.lt_irrefl n)
 
 /-- **Unified step commutation** for `retargetOutput`: if `C`'s real
     output tape is blank with head at cell 0 or 1, work tape `n` matches
@@ -434,9 +435,9 @@ private theorem retargetOutput_step_of_extras (tm : TM n) {c : Cfg n tm.Q}
     (tm.retargetOutput).step C = (tm.step c).map tm.retargetCfg := by
   by_cases hh : c.state = tm.qhalt
   · -- both machines are halted
+    have hC : C.state = (tm.retargetOutput).qhalt := hs.trans hh
     have h1 : (tm.retargetOutput).step C = none := by
-      simp only [step, hs, hh, show (tm.retargetOutput).qhalt = tm.qhalt from rfl,
-        ↓reduceIte]
+      simp only [step, hC, ↓reduceIte]
     have h2 : tm.step c = none := by
       simp only [step, hh, ↓reduceIte]
     rw [h1, h2]; rfl
@@ -452,17 +453,18 @@ private theorem retargetOutput_step_of_extras (tm : TM n) {c : Cfg n tm.Q}
       have hvirt : (C.work (Fin.last n)).read = c.output.read := by rw [hlast]
       simp only [step, Option.map_some]
       dsimp only [retargetOutput, retargetCfg]
-      rw [hs, hi, hinner, hvirt, if_neg hh]
+      rw [hs, hi, hinner, hvirt]
+      simp only [hh, ↓reduceIte]
       refine congrArg some (Cfg.mk.injEq _ _ _ _ _ _ _ _ |>.mpr ⟨rfl, rfl, ?_, ?_⟩)
       · funext i
         by_cases hik : i.val < n
-        · rw [hw i hik, dif_pos hik, dif_pos hik, dif_pos hik]
+        · rw [hw i hik, dite_eq_left hik, dite_eq_left hik, dite_eq_left hik]
         · have hi_last : i = Fin.last n := by
             apply Fin.ext
             have := i.isLt
             simp only [Fin.val_last]
             omega
-          rw [dif_neg hik, dif_neg hik, dif_neg hik, hi_last, hlast]
+          rw [dite_eq_right hik, dite_eq_right hik, dite_eq_right hik, hi_last, hlast]
       · exact dummy_writeAndMove C.output ho.1 ho.2
 
 /-- **Step commutation** on embedded configurations: once the real output
@@ -470,7 +472,7 @@ private theorem retargetOutput_step_of_extras (tm : TM n) {c : Cfg n tm.Q}
     `retargetCfg`. -/
 theorem retargetOutput_step_retargetCfg (tm : TM n) (c : Cfg n tm.Q) :
     (tm.retargetOutput).step (tm.retargetCfg c) = (tm.step c).map tm.retargetCfg :=
-  retargetOutput_step_of_extras tm rfl rfl (fun _ h => dif_pos h)
+  retargetOutput_step_of_extras tm rfl rfl (fun _ h => dite_eq_left h)
     (retargetCfg_work_last tm c)
     ⟨rfl, Nat.le_refl 1⟩
 
@@ -577,8 +579,7 @@ theorem retargetOutput_computesInTime_boundary (tm : TM n)
 theorem IsTransducer.liftTM {tm : TM n} (h : tm.IsTransducer) (m : ℕ) :
     (tm.liftTM m).IsTransducer := by
   intro q iHead wHeads oHead
-  simpa only [liftTM] using h q iHead
-    (fun i => wHeads (Fin.castAdd m i)) oHead
+  exact h q iHead (fun i => wHeads (Fin.castAdd m i)) oHead
 
 /-- Redirecting output to a work tape leaves the real output direction idle,
 so the resulting machine is always a one-way-output transducer. -/

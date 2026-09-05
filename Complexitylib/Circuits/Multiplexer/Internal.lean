@@ -18,6 +18,12 @@ namespace Complexity
 
 namespace Circuit
 
+/-- Evaluation over `Basis.andOr2` is `AndOrOp.eval`; stated as an equation so it can be
+rewritten without unfolding the basis inside the circuit's type. -/
+private theorem andOr2_eval_eq (op : AndOrOp) (n : ℕ)
+    (h : (Basis.andOr2.arity op).satisfiedBy n) (inputs : BitString n) :
+    Basis.andOr2.eval op n h inputs = AndOrOp.eval op n inputs := rfl
+
 theorem wireValue_multiplexer_left_internal (width : ℕ) [NeZero width]
     (input : BitString (1 + (width + width))) (coordinate : Fin width) :
     (multiplexer width).wireValue input
@@ -41,14 +47,13 @@ theorem wireValue_multiplexer_left_internal (width : ℕ) [NeZero width]
         ((multiplexer width).wireValue input) = _
   unfold multiplexerInternalGate
   have hleft : (Fin.castAdd width coordinate).val < width := coordinate.isLt
-  rw [dif_pos hleft]
+  rw [dite_eq_left hleft]
   unfold Gate.eval
-  change AndOrOp.eval .and 2 _ = _
+  simp only [andOr2_eval_eq]
   rw [AndOrOp.eval_two_and]
-  dsimp only
   simp only [Bool.false_xor]
-  rw [if_pos (by omega : (0 : Fin 2).val = 0)]
-  rw [if_neg (by omega : ¬(1 : Fin 2).val = 0)]
+  rw [ite_eq_left (by omega : (0 : Fin 2).val = 0)]
+  rw [ite_eq_right (by omega : ¬(1 : Fin 2).val = 0)]
   rw [Circuit.wireValue_of_lt _ _ _ (by simp; omega)]
   rw [Circuit.wireValue_of_lt _ _ _ (by simp; omega)]
   simp
@@ -80,13 +85,12 @@ theorem wireValue_multiplexer_right_internal (width : ℕ) [NeZero width]
   unfold multiplexerInternalGate
   have hright : ¬(Fin.natAdd width coordinate).val < width := by
     simp
-  rw [dif_neg hright]
+  rw [dite_eq_right hright]
   unfold Gate.eval
-  change AndOrOp.eval .and 2 _ = _
+  simp only [andOr2_eval_eq]
   rw [AndOrOp.eval_two_and]
-  dsimp only
-  rw [if_pos (by omega : (0 : Fin 2).val = 0)]
-  rw [if_neg (by omega : ¬(1 : Fin 2).val = 0)]
+  rw [ite_eq_left (by omega : (0 : Fin 2).val = 0)]
+  rw [ite_eq_right (by omega : ¬(1 : Fin 2).val = 0)]
   rw [Circuit.wireValue_of_lt _ _ _ (by simp; omega)]
   rw [Circuit.wireValue_of_lt _ _ _ (by simp; omega)]
   simp
@@ -102,12 +106,11 @@ theorem eval_multiplexer_packed_internal (width : ℕ) [NeZero width]
   change (multiplexerOutputGate width coordinate).eval
       ((multiplexer width).wireValue input) = _
   unfold Gate.eval multiplexerOutputGate
-  change AndOrOp.eval .or 2 _ = _
+  simp only [andOr2_eval_eq]
   rw [AndOrOp.eval_two_or]
-  dsimp only
   simp only [Bool.false_xor]
-  rw [if_pos (by omega : (0 : Fin 2).val = 0)]
-  rw [if_neg (by omega : ¬(1 : Fin 2).val = 0)]
+  rw [ite_eq_left (by omega : (0 : Fin 2).val = 0)]
+  rw [ite_eq_right (by omega : ¬(1 : Fin 2).val = 0)]
   rw [wireValue_multiplexer_left_internal]
   rw [wireValue_multiplexer_right_internal]
   cases input ⟨0, by omega⟩ <;> simp
@@ -121,7 +124,7 @@ theorem eval_multiplexer_internal (width : ℕ) [NeZero width]
   rw [eval_multiplexer_packed_internal]
   cases control <;>
     simp [BitString.multiplexerInput, Fin.append, Fin.addCases]
-  rw [dif_neg (by omega)]
+  rw [dite_eq_right (by omega)]
   apply congrArg right
   apply Fin.ext
   simp

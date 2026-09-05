@@ -129,7 +129,7 @@ theorem seqTM_respectsWindow (tm₁ tm₂ : TM n) {inputLength space : ℕ} (hs 
         Cfg.ext hstate rfl rfl rfl
       obtain ⟨c₀', hstep0⟩ :
           ∃ c₀', tm₁.step ⟨q, c.input, c.work, c.output⟩ = some c₀' := by
-        rw [TM.step, if_neg hq]
+        rw [TM.step, ite_eq_right hq]
         exact ⟨_, rfl⟩
       have hsimstep := seqTM_phase1_step tm₁ tm₂ hstep0
       rw [hc] at hstep
@@ -144,7 +144,7 @@ theorem seqTM_respectsWindow (tm₁ tm₂ : TM n) {inputLength space : ℕ} (hs 
       Cfg.ext hstate rfl rfl rfl
     obtain ⟨c₀', hstep0⟩ :
         ∃ c₀', tm₂.step ⟨q, c.input, c.work, c.output⟩ = some c₀' := by
-      rw [TM.step, if_neg hq]
+      rw [TM.step, ite_eq_right hq]
       exact ⟨_, rfl⟩
     have hsimstep := seqTM_phase2_step tm₁ tm₂ hstep0
     rw [hc] at hstep
@@ -179,7 +179,7 @@ theorem loopTM_respectsWindow (tmBody tmTest : TM n) {inputLength space : ℕ} (
         Cfg.ext hstate rfl rfl rfl
       obtain ⟨c₀', hstep0⟩ :
           ∃ c₀', tmTest.step ⟨q, c.input, c.work, c.output⟩ = some c₀' := by
-        rw [TM.step, if_neg hq]
+        rw [TM.step, ite_eq_right hq]
         exact ⟨_, rfl⟩
       have hsimstep := loopTM_test_step tmBody tmTest hstep0
       rw [hc] at hstep
@@ -193,7 +193,7 @@ theorem loopTM_respectsWindow (tmBody tmTest : TM n) {inputLength space : ℕ} (
       Cfg.ext hstate rfl rfl rfl
     obtain ⟨c₀', hstep0⟩ :
         ∃ c₀', tmBody.step ⟨q, c.input, c.work, c.output⟩ = some c₀' := by
-      rw [TM.step, if_neg hq]
+      rw [TM.step, ite_eq_right hq]
       exact ⟨_, rfl⟩
     have hsimstep := loopTM_body_step tmBody tmTest hstep0
     rw [hc] at hstep
@@ -219,7 +219,7 @@ theorem reachesIn_halted_unique {tm : TM n} :
       cases hb with
       | zero => rfl
       | step hstep _ =>
-          rw [TM.step, if_pos hha] at hstep
+          rw [TM.step, ite_eq_left hha] at hstep
           exact absurd hstep (by nofun)
   | succ s ih =>
       intro t c a b ha hb hha hhb
@@ -227,7 +227,7 @@ theorem reachesIn_halted_unique {tm : TM n} :
       | step hstepa hresta =>
           cases hb with
           | zero =>
-              rw [TM.step, if_pos hhb] at hstepa
+              rw [TM.step, ite_eq_left hhb] at hstepa
               exact absurd hstepa (by nofun)
           | step hstepb hrestb =>
               rw [Option.some_inj.mp (hstepa.symm.trans hstepb)] at hresta
@@ -317,7 +317,7 @@ theorem seqTM_keepsWindow (tm₁ tm₂ : TM n) {inputLength space : ℕ} (hs : 1
           Cfg.ext hstate rfl rfl rfl
         obtain ⟨e', hstep0⟩ :
             ∃ e', tm₁.step ⟨q, c.input, c.work, c.output⟩ = some e' := by
-          rw [TM.step, if_neg hq]; exact ⟨_, rfl⟩
+          rw [TM.step, ite_eq_right hq]; exact ⟨_, rfl⟩
         have hsim := seqTM_phase1_step tm₁ tm₂ hstep0
         rw [hc] at hst
         have hc'eq : c' = phase1Wrap tm₁ tm₂ e' := Option.some_inj.mp (hst.symm.trans hsim)
@@ -336,7 +336,7 @@ theorem seqTM_keepsWindow (tm₁ tm₂ : TM n) {inputLength space : ℕ} (hs : 1
         Cfg.ext hstate rfl rfl rfl
       obtain ⟨e', hstep0⟩ :
           ∃ e', tm₂.step ⟨q, c.input, c.work, c.output⟩ = some e' := by
-        rw [TM.step, if_neg hq]; exact ⟨_, rfl⟩
+        rw [TM.step, ite_eq_right hq]; exact ⟨_, rfl⟩
       have hsim := seqTM_phase2_step tm₁ tm₂ hstep0
       rw [hc] at hst
       have hc'eq : c' = phase2Wrap tm₁ tm₂ e' := Option.some_inj.mp (hst.symm.trans hsim)
@@ -410,7 +410,7 @@ theorem loopTM_keepsWindow (tmBody tmTest : TM n) {inputLength space : ℕ} (hs 
           Cfg.ext hstate rfl rfl rfl
         obtain ⟨e', hstep0⟩ :
             ∃ e', tmTest.step ⟨q, c.input, c.work, c.output⟩ = some e' := by
-          rw [TM.step, if_neg hq]; exact ⟨_, rfl⟩
+          rw [TM.step, ite_eq_right hq]; exact ⟨_, rfl⟩
         have hsim := loopTM_test_step tmBody tmTest hstep0
         rw [hc] at hst
         have hc'eq : c' = loopTestWrap tmBody tmTest e' :=
@@ -432,7 +432,7 @@ theorem loopTM_keepsWindow (tmBody tmTest : TM n) {inputLength space : ℕ} (hs 
         Cfg.ext hstate rfl rfl rfl
       obtain ⟨e', hstep0⟩ :
           ∃ e', tmBody.step ⟨q, c.input, c.work, c.output⟩ = some e' := by
-        rw [TM.step, if_neg hq]; exact ⟨_, rfl⟩
+        rw [TM.step, ite_eq_right hq]; exact ⟨_, rfl⟩
       have hsim := loopTM_body_step tmBody tmTest hstep0
       rw [hc] at hst
       have hc'eq : c' = loopBodyWrap tmBody tmTest e' :=
@@ -540,7 +540,7 @@ theorem ifTM_keepsWindow (tmTest tmThen tmElse : TM n) {inputLength space : ℕ}
             Cfg.ext hstate rfl rfl rfl
           obtain ⟨e', hstep0⟩ :
               ∃ e', tmElse.step ⟨q, c.input, c.work, c.output⟩ = some e' := by
-            rw [TM.step, if_neg hq]
+            rw [TM.step, ite_eq_right hq]
             exact ⟨_, rfl⟩
           have hsim := ifTM_else_step tmTest tmThen tmElse hstep0
           rw [hc] at hst
@@ -567,7 +567,7 @@ theorem ifTM_keepsWindow (tmTest tmThen tmElse : TM n) {inputLength space : ℕ}
           Cfg.ext hstate rfl rfl rfl
         obtain ⟨e', hstep0⟩ :
             ∃ e', tmThen.step ⟨q, c.input, c.work, c.output⟩ = some e' := by
-          rw [TM.step, if_neg hq]
+          rw [TM.step, ite_eq_right hq]
           exact ⟨_, rfl⟩
         have hsim := ifTM_then_step tmTest tmThen tmElse hstep0
         rw [hc] at hst
@@ -594,7 +594,7 @@ theorem ifTM_keepsWindow (tmTest tmThen tmElse : TM n) {inputLength space : ℕ}
         Cfg.ext hstate rfl rfl rfl
       obtain ⟨e', hstep0⟩ :
           ∃ e', tmTest.step ⟨q, c.input, c.work, c.output⟩ = some e' := by
-        rw [TM.step, if_neg hq]
+        rw [TM.step, ite_eq_right hq]
         exact ⟨_, rfl⟩
       have hsim := ifTM_test_step tmTest tmThen tmElse hstep0
       rw [hc] at hst
@@ -720,7 +720,7 @@ theorem seqTM_keepsWindowOn (tm₁ tm₂ : TM n) {inputLength space : ℕ} (hs :
           Cfg.ext hstate rfl rfl rfl
         obtain ⟨e', hstep0⟩ :
             ∃ e', tm₁.step ⟨q, c.input, c.work, c.output⟩ = some e' := by
-          rw [TM.step, if_neg hq]
+          rw [TM.step, ite_eq_right hq]
           exact ⟨_, rfl⟩
         have hsim := seqTM_phase1_step tm₁ tm₂ hstep0
         rw [hc] at hst
@@ -741,7 +741,7 @@ theorem seqTM_keepsWindowOn (tm₁ tm₂ : TM n) {inputLength space : ℕ} (hs :
         Cfg.ext hstate rfl rfl rfl
       obtain ⟨e', hstep0⟩ :
           ∃ e', tm₂.step ⟨q, c.input, c.work, c.output⟩ = some e' := by
-        rw [TM.step, if_neg hq]
+        rw [TM.step, ite_eq_right hq]
         exact ⟨_, rfl⟩
       have hsim := seqTM_phase2_step tm₁ tm₂ hstep0
       rw [hc] at hst
@@ -1155,7 +1155,7 @@ theorem loopTM_keepsWindowOn_phases (tmBody tmTest : TM n) {inputLength space : 
           Cfg.ext hstate rfl rfl rfl
         obtain ⟨e', hstep0⟩ :
             ∃ e', tmBody.step ⟨q, c.input, c.work, c.output⟩ = some e' := by
-          rw [TM.step, if_neg hq]; exact ⟨_, rfl⟩
+          rw [TM.step, ite_eq_right hq]; exact ⟨_, rfl⟩
         have hsim := loopTM_body_step tmBody tmTest hstep0
         rw [hc] at hst
         have hc'eq : c' = loopBodyWrap tmBody tmTest e' :=
@@ -1203,7 +1203,7 @@ theorem loopTM_keepsWindowOn_phases (tmBody tmTest : TM n) {inputLength space : 
           Cfg.ext hstate rfl rfl rfl
         obtain ⟨e', hstep0⟩ :
             ∃ e', tmTest.step ⟨q, c.input, c.work, c.output⟩ = some e' := by
-          rw [TM.step, if_neg hq]; exact ⟨_, rfl⟩
+          rw [TM.step, ite_eq_right hq]; exact ⟨_, rfl⟩
         have hsim := loopTM_test_step tmBody tmTest hstep0
         rw [hc] at hst
         have hc'eq : c' = loopTestWrap tmBody tmTest e' :=
@@ -1255,7 +1255,7 @@ theorem loop_phase_step_tapes (tmBody tmTest : TM n) {c c' : Cfg n (loopTM tmBod
     rw [hstate]
     intro hcon
     exact hph (by injection hcon with h; injection h)
-  rw [TM.step, if_neg hne] at hstep
+  rw [TM.step, ite_eq_right hne] at hstep
   rw [← Option.some_inj.mp hstep, hstate]
   have hcells : ∀ (d : Dir3), d ≠ Dir3.right → c.output.read ≠ Γ.start →
       (c.output.writeAndMove (readBackWrite c.output.read).toΓ d).cells = c.output.cells ∧
@@ -1283,41 +1283,41 @@ theorem loop_phase_step_tapes (tmBody tmTest : TM n) {c c' : Cfg n (loopTM tmBod
   | rewindOut =>
       simp only [loopTM]
       by_cases hread : c.output.read = Γ.start
-      · rw [if_pos hread]
+      · rw [ite_eq_left hread]
         refine ⟨rfl, fun i => rfl, ?_, ?_⟩
         · show ((c.output.write Γw.blank.toΓ).move Dir3.right).cells = _
-          rw [Tape.move_cells, Tape.write, if_pos (hstart hread)]
+          rw [Tape.move_cells, Tape.write, ite_eq_left (hstart hread)]
         · show ((c.output.write Γw.blank.toΓ).move Dir3.right).head ≤ _
           show (c.output.write Γw.blank.toΓ).head + 1 ≤ _
           rw [Tape.write_head, hstart hread]
           omega
-      · rw [if_neg hread]
+      · rw [ite_eq_right hread]
         exact ⟨rfl, fun i => rfl, (hcells Dir3.left (by nofun) hread).1,
           (hcells Dir3.left (by nofun) hread).2⟩
   | check =>
       simp only [loopTM]
       by_cases hone : c.output.read = Γ.one
-      · rw [if_pos hone]
+      · rw [ite_eq_left hone]
         have hread : c.output.read ≠ Γ.start := by rw [hone]; nofun
         have hd : idleDir c.output.read ≠ Dir3.right := by
-          rw [idleDir, if_neg hread]
+          rw [idleDir, ite_eq_right hread]
           nofun
         exact ⟨rfl, fun i => rfl, (hcells (idleDir c.output.read) hd hread).1,
           (hcells (idleDir c.output.read) hd hread).2⟩
-      · rw [if_neg hone]
+      · rw [ite_eq_right hone]
         by_cases hread : c.output.read = Γ.start
         · refine ⟨rfl, fun i => rfl, ?_, ?_⟩
           · show ((c.output.write (readBackWrite c.output.read).toΓ).move
               (idleDir c.output.read)).cells = _
-            rw [Tape.move_cells, Tape.write, if_pos (hstart hread)]
+            rw [Tape.move_cells, Tape.write, ite_eq_left (hstart hread)]
           · show ((c.output.write (readBackWrite c.output.read).toΓ).move
               (idleDir c.output.read)).head ≤ _
-            rw [idleDir, if_pos hread]
+            rw [idleDir, ite_eq_left hread]
             show (c.output.write (readBackWrite c.output.read).toΓ).head + 1 ≤ _
             rw [Tape.write_head, hstart hread]
             omega
         · have hd : idleDir c.output.read ≠ Dir3.right := by
-            rw [idleDir, if_neg hread]
+            rw [idleDir, ite_eq_right hread]
             nofun
           exact ⟨rfl, fun i => rfl, (hcells (idleDir c.output.read) hd hread).1,
             (hcells (idleDir c.output.read) hd hread).2⟩
@@ -1333,18 +1333,18 @@ theorem loop_rewind_step_state (tmBody tmTest : TM n) {c c' : Cfg n (loopTM tmBo
   have hne : c.state ≠ (loopTM tmBody tmTest).qhalt := by
     rw [hstate]
     nofun
-  rw [TM.step, if_neg hne] at hstep
+  rw [TM.step, ite_eq_right hne] at hstep
   rw [← Option.some_inj.mp hstep, hstate]
   simp only [loopTM]
   constructor
   · intro hread
-    rw [if_pos hread]
+    rw [ite_eq_left hread]
     refine ⟨rfl, ?_⟩
     show ((c.output.write Γw.blank.toΓ).move Dir3.right).head = _
     show (c.output.write Γw.blank.toΓ).head + 1 = _
     rw [Tape.write_head]
   · intro hread
-    rw [if_neg hread]
+    rw [ite_eq_right hread]
 
 /-- **A check step leaves every tape exactly as it found it**, when the output head is off the
 marker — which it is, since the rewind has just put it at cell one. -/
@@ -1356,12 +1356,12 @@ theorem loop_check_step_tapes (tmBody tmTest : TM n) {c c' : Cfg n (loopTM tmBod
   have hne : c.state ≠ (loopTM tmBody tmTest).qhalt := by
     rw [hstate]
     nofun
-  rw [TM.step, if_neg hne] at hstep
+  rw [TM.step, ite_eq_right hne] at hstep
   rw [← Option.some_inj.mp hstep, hstate]
   simp only [loopTM]
   have hout : c.output.writeAndMove (readBackWrite c.output.read).toΓ
       (idleDir c.output.read) = c.output := by
-    rw [idleDir, if_neg hread]
+    rw [idleDir, ite_eq_right hread]
     show (c.output.write (readBackWrite c.output.read).toΓ).move Dir3.stay = c.output
     rw [write_readBack c.output hread]
     rfl

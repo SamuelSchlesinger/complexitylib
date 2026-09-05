@@ -52,7 +52,7 @@ private theorem sameExceptInputCells_next {tm : TM n} {first second : Cfg n tm.Q
       rw [hwork]
     have houtputRead : first.output.read = second.output.read := by
       rw [houtput]
-    simp only [TM.step, hhalt, hhalt', if_false, Option.getD_some]
+    simp only [TM.step, hhalt, hhalt', ite_false, Option.getD_some]
     rw [hstate, hread, hworkRead, houtputRead, hwork, houtput]
     refine ⟨rfl, ?_, rfl, rfl⟩
     cases (tm.δ second.state second.input.read
@@ -71,7 +71,7 @@ theorem runCfg_of_halted_internal (tm : TM n) {c : Cfg n tm.Q}
     (hhalt : tm.halted c) (steps : ℕ) : tm.runCfg c steps = c := by
   induction steps with
   | zero => rfl
-  | succ steps ih => rw [runCfg, ih, TM.step, if_pos hhalt, Option.getD_none]
+  | succ steps ih => rw [runCfg, ih, TM.step, ite_eq_left hhalt, Option.getD_none]
 
 theorem runCfg_of_reachesIn_internal (tm : TM n) {c c' : Cfg n tm.Q} {steps : ℕ}
     (hreach : tm.reachesIn steps c c') : tm.runCfg c steps = c' := by

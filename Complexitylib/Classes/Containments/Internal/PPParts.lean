@@ -193,23 +193,23 @@ theorem tallyState_iff {n : ℕ} (cIdx aIdx rIdx : Fin n)
       simpa [natTape] using hc.eq_init_move_right
     · by_cases hia : i = aIdx
       · subst hia
-        simp only [if_neg hic]
+        simp only [ite_eq_right hic]
         simpa [natTape] using ha.eq_init_move_right
       · by_cases hir : i = rIdx
         · subst hir
-          simp only [if_neg hic, if_neg hia]
+          simp only [ite_eq_right hic, ite_eq_right hia]
           simpa [natTape] using hr.eq_init_move_right
-        · simp only [if_neg hic, if_neg hia, if_neg hir]
+        · simp only [ite_eq_right hic, ite_eq_right hia, ite_eq_right hir]
           exact hother i hic hia hir
   · rintro ⟨hi, rfl, ho⟩
     refine ⟨hi, ho, ?_, ?_, ?_, ?_⟩
     · simpa [tallyWork, natTape] using Tape.init_move_right_hasBinaryNat st.1
-    · simp only [tallyWork, if_neg hca.symm]
+    · simp only [tallyWork, ite_eq_right hca.symm]
       exact Tape.init_move_right_hasBinaryNat st.2.1
-    · simp only [tallyWork, if_neg hcr.symm, if_neg har.symm]
+    · simp only [tallyWork, ite_eq_right hcr.symm, ite_eq_right har.symm]
       exact Tape.init_move_right_hasBinaryNat st.2.2
     · intro i hic hia hir
-      simp only [tallyWork, if_neg hic, if_neg hia, if_neg hir]
+      simp only [tallyWork, ite_eq_right hic, ite_eq_right hia, ite_eq_right hir]
 
 
 /-- Canonical number tapes read a digit or a blank, never the left marker. -/
@@ -264,7 +264,7 @@ theorem binarySucc_tallyState {n : ℕ} (cIdx aIdx rIdx : Fin n)
   rw [tallyState_iff cIdx aIdx rIdx hca hcr har] at hpre
   obtain ⟨hinp, hwork, hore⟩ := hpre
   have hval : (tallyWork cIdx aIdx rIdx rest (v, a, r) aIdx).HasBinaryNat a := by
-    simp only [tallyWork, if_neg hca.symm]
+    simp only [tallyWork, ite_eq_right hca.symm]
     exact Tape.init_move_right_hasBinaryNat a
   obtain ⟨c', t, ht, hreach, hhalt, hi, hother, hidx, ho⟩ :=
     TM.binarySuccTM_hoareTime_frame aIdx a I (tallyWork cIdx aIdx rIdx rest (v, a, r)) out
@@ -274,11 +274,11 @@ theorem binarySucc_tallyState {n : ℕ} (cIdx aIdx rIdx : Fin n)
   · rw [hother cIdx hca]
     simpa [tallyWork, natTape] using Tape.init_move_right_hasBinaryNat v
   · rw [hother rIdx har.symm]
-    simp only [tallyWork, if_neg hcr.symm, if_neg har.symm]
+    simp only [tallyWork, ite_eq_right hcr.symm, ite_eq_right har.symm]
     exact Tape.init_move_right_hasBinaryNat r
   · intro i hic hia hir
     rw [hother i hia]
-    simp only [tallyWork, if_neg hic, if_neg hia, if_neg hir]
+    simp only [tallyWork, ite_eq_right hic, ite_eq_right hia, ite_eq_right hir]
 
 /-- The counter-increment stage. -/
 theorem binarySucc_tallyState_counter {n : ℕ} (cIdx aIdx rIdx : Fin n)
@@ -300,14 +300,14 @@ theorem binarySucc_tallyState_counter {n : ℕ} (cIdx aIdx rIdx : Fin n)
       inp work out ⟨hinp, hwork, rfl⟩
   refine ⟨c', t, ht, hreach, hhalt, hi, by rw [ho]; exact hore, hidx, ?_, ?_, ?_⟩
   · rw [hother aIdx hca.symm]
-    simp only [tallyWork, if_neg hca.symm]
+    simp only [tallyWork, ite_eq_right hca.symm]
     exact Tape.init_move_right_hasBinaryNat a
   · rw [hother rIdx hcr.symm]
-    simp only [tallyWork, if_neg hcr.symm, if_neg har.symm]
+    simp only [tallyWork, ite_eq_right hcr.symm, ite_eq_right har.symm]
     exact Tape.init_move_right_hasBinaryNat r
   · intro i hic hia hir
     rw [hother i hic]
-    simp only [tallyWork, if_neg hic, if_neg hia, if_neg hir]
+    simp only [tallyWork, ite_eq_right hic, ite_eq_right hia, ite_eq_right hir]
 
 /-- The rejecting-tally-increment stage. -/
 theorem binarySucc_tallyState_rej {n : ℕ} (cIdx aIdx rIdx : Fin n)
@@ -322,7 +322,7 @@ theorem binarySucc_tallyState_rej {n : ℕ} (cIdx aIdx rIdx : Fin n)
   rw [tallyState_iff cIdx aIdx rIdx hca hcr har] at hpre
   obtain ⟨hinp, hwork, hore⟩ := hpre
   have hval : (tallyWork cIdx aIdx rIdx rest (v, a, r) rIdx).HasBinaryNat r := by
-    simp only [tallyWork, if_neg hcr.symm, if_neg har.symm]
+    simp only [tallyWork, ite_eq_right hcr.symm, ite_eq_right har.symm]
     exact Tape.init_move_right_hasBinaryNat r
   obtain ⟨c', t, ht, hreach, hhalt, hi, hother, hidx, ho⟩ :=
     TM.binarySuccTM_hoareTime_frame rIdx r I (tallyWork cIdx aIdx rIdx rest (v, a, r)) out
@@ -332,11 +332,11 @@ theorem binarySucc_tallyState_rej {n : ℕ} (cIdx aIdx rIdx : Fin n)
   · rw [hother cIdx hcr]
     simpa [tallyWork, natTape] using Tape.init_move_right_hasBinaryNat v
   · rw [hother aIdx har]
-    simp only [tallyWork, if_neg hca.symm]
+    simp only [tallyWork, ite_eq_right hca.symm]
     exact Tape.init_move_right_hasBinaryNat a
   · intro i hic hia hir
     rw [hother i hir]
-    simp only [tallyWork, if_neg hic, if_neg hia, if_neg hir]
+    simp only [tallyWork, ite_eq_right hic, ite_eq_right hia, ite_eq_right hir]
 
 namespace NTM
 
@@ -774,7 +774,7 @@ def outSlot (s : Γw) : Tape where
 theorem outSlot_parked (s : Γw) : TM.Parked (outSlot s) := by
   refine ⟨le_refl 1, fun j hj => ?_⟩
   show (if j = 0 then Γ.start else if j = 1 then s.toΓ else Γ.blank) ≠ Γ.start
-  rw [if_neg (by omega)]
+  rw [ite_eq_right (by omega)]
   split
   · cases s <;> simp [Γw.toΓ]
   · simp
@@ -881,14 +881,14 @@ theorem tallyLoop_hoareTime_of_hoare {n : ℕ} (tmBody tmTest : TM n) (cIdx aIdx
       intro a b c hp
       refine ⟨tallyPost_loopParked cIdx aIdx rIdx I rest P hI hrest N (j + 1) hp, ?_⟩
       obtain ⟨-, -, rfl⟩ := hp
-      rw [if_neg (show ¬ (j + 1 = N) by omega)]
+      rw [ite_eq_right (show ¬ (j + 1 = N) by omega)]
       exact fun hcon => absurd (outSlot_cells_one_eq_one_iff Γw.zero |>.mp hcon) (by decide)
     obtain ⟨inp', work', out', t, -, ht, hreach, hp'⟩ :=
       TM.loopTM_continue_of_hoare tmBody tmTest (hbody j hjN) (htest j hjN)
         (fun a b c hm => hmid j a b c hm) hne inp work out h
     obtain ⟨hi', hw', ho'⟩ := hp'
     exact ⟨inp', work', out', t, ht, hreach, hi', hw', Γw.zero, by decide,
-      by rw [ho', if_neg (by omega)]⟩
+      by rw [ho', ite_eq_right (by omega)]⟩
   · intro inp work out h
     have hjN : N - 1 < N := by omega
     have hhalt : ∀ a b c, tallyPost cIdx aIdx rIdx I rest P N (N - 1 + 1) a b c →
@@ -896,7 +896,7 @@ theorem tallyLoop_hoareTime_of_hoare {n : ℕ} (tmBody tmTest : TM n) (cIdx aIdx
       intro a b c hp
       refine ⟨tallyPost_loopParked cIdx aIdx rIdx I rest P hI hrest N _ hp, ?_⟩
       obtain ⟨-, -, rfl⟩ := hp
-      rw [if_pos hsucc]
+      rw [ite_eq_left hsucc]
       exact (outSlot_cells_one_eq_one_iff Γw.one).mpr rfl
     obtain ⟨c', t, ht, hreach, hstate, hpost⟩ :=
       TM.loopTM_halt_of_hoare tmBody tmTest (hbody (N - 1) hjN) (htest (N - 1) hjN)
@@ -932,14 +932,14 @@ theorem tallyLoop_keepsWindow_of_hoare {n : ℕ} (tmBody tmTest : TM n) (cIdx aI
       intro a b c hp
       refine ⟨tallyPost_loopParked cIdx aIdx rIdx I rest P hI hrest N (j + 1) hp, ?_⟩
       obtain ⟨-, -, rfl⟩ := hp
-      rw [if_neg (show ¬ (j + 1 = N) by omega)]
+      rw [ite_eq_right (show ¬ (j + 1 = N) by omega)]
       exact fun hcon => absurd (outSlot_cells_one_eq_one_iff Γw.zero |>.mp hcon) (by decide)
     obtain ⟨inp', work', out', t, ht1, ht, hreach, hp'⟩ :=
       TM.loopTM_continue_of_hoare tmBody tmTest (hbody j hjN) (htest j hjN)
         (fun a b c hm => hmid j a b c hm) hne inp work out h
     obtain ⟨hi', hw', ho'⟩ := hp'
     exact ⟨inp', work', out', t, ht1, ht, hreach, hi', hw', Γw.zero, by decide,
-      by rw [ho', if_neg (by omega)]⟩
+      by rw [ho', ite_eq_right (by omega)]⟩
   · intro inp work out h
     have hjN : N - 1 < N := by omega
     have hhalt : ∀ a b c, tallyPost cIdx aIdx rIdx I rest P N (N - 1 + 1) a b c →
@@ -947,7 +947,7 @@ theorem tallyLoop_keepsWindow_of_hoare {n : ℕ} (tmBody tmTest : TM n) (cIdx aI
       intro a b c hp
       refine ⟨tallyPost_loopParked cIdx aIdx rIdx I rest P hI hrest N _ hp, ?_⟩
       obtain ⟨-, -, rfl⟩ := hp
-      rw [if_pos hsucc]
+      rw [ite_eq_left hsucc]
       exact (outSlot_cells_one_eq_one_iff Γw.one).mpr rfl
     obtain ⟨c', t, ht, hreach, hstate, -⟩ :=
       TM.loopTM_halt_of_hoare tmBody tmTest (hbody (N - 1) hjN) (htest (N - 1) hjN)

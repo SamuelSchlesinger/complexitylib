@@ -170,7 +170,7 @@ See CONTRIBUTING.md. Use `<type>(<scope>): <summary>` format with imperative moo
 
 ## Dependencies
 
-- **Lean**: `leanprover/lean4:v4.30.0` (see `lean-toolchain`)
-- **Mathlib**: `v4.30.0` (see `lakefile.toml`)
+- **Lean**: `leanprover/lean4:v4.34.0-rc2` (see `lean-toolchain`)
+- **Mathlib**: commit `e06eff5f` (see `lakefile.toml`) — pinned to match [cslib](https://github.com/leanprover/cslib)'s `lake-manifest.json` so the foundations can be rebased onto it
 
 When updating either, both must be updated in lockstep.

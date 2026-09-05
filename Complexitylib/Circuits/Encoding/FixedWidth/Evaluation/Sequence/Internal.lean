@@ -64,7 +64,7 @@ theorem topologicallyWellFormed_stepCircuit_internal
       (stepAvailable inputWidth gateBound slot) := by
   have hcode : codeWidth inputWidth gateBound ≠ 0 :=
     NeZero.ne (codeWidth inputWidth gateBound)
-  letI : NeZero (stepAvailable inputWidth gateBound slot) := ⟨by
+  let : NeZero (stepAvailable inputWidth gateBound slot) := ⟨by
     unfold stepAvailable baseWireCount
     omega⟩
   unfold stepCircuit
@@ -83,7 +83,7 @@ theorem topologicallyWellFormed_prefixCircuit_internal
       rw [prefixCircuit, RawCircuit.topologicallyWellFormed_append]
       constructor
       · exact ih (by omega)
-      · rw [stepCircuitAt, dif_pos hindex]
+      · rw [stepCircuitAt, dite_eq_left hindex]
         have havailable :
             baseWireCount inputWidth gateBound +
                 (prefixCircuit inputWidth gateBound count).length =

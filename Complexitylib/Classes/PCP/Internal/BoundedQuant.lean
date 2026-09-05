@@ -41,7 +41,7 @@ theorem forall_unary_mem_P {L : Language} (hL : L ∈ P) {len : List Bool → �
       (fun i => g (pair x (List.replicate i true)))) ∈ FP :=
     bitwise_mem_FP hlen hgFP fun _ _ => rfl
   refine mem_P_of_decisionFn (eqFlagFn_mem_FP hmap hlen) fun x => ?_
-  simp only [Set.mem_setOf_eq]
+  simp only [Set.mem_ofPred_eq]
   set a := (List.range (len x)).map (fun i => g (pair x (List.replicate i true))) with ha
   set b := List.replicate (len x) true with hb
   have hiff : a = b ↔ ∀ i < len x, pair x (List.replicate i true) ∈ L := by

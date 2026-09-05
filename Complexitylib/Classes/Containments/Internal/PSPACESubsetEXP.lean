@@ -35,7 +35,7 @@ theorem Windowed.step {x : List Bool} {S : ℕ} {c c' : Cfg k tm.Q}
     (hw : Windowed x S c) (hstep : tm.step c = some c')
     (hspace : c.WithinDecisionSpace x.length S) :
     Windowed x S c' := by
-  rw [TM.step, if_neg (TM.state_ne_qhalt_of_step hstep)] at hstep
+  rw [TM.step, ite_eq_right (TM.state_ne_qhalt_of_step hstep)] at hstep
   injection hstep with hstep
   subst hstep
   refine ⟨?_, ?_, ?_⟩

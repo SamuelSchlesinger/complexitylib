@@ -380,15 +380,15 @@ theorem ipStepFn_mem_FP {A B C : List Bool → List Bool}
   have hfst : ∀ {a : List Bool → List Bool}, a ∈ FP → (fun z => pairFst (a z)) ∈ FP := by
     intro a ha
     have := mem_FP_comp ha Cobham.fstBlock_mem_FP
-    simpa [Function.comp] using this
+    exact this
   have hsnd : ∀ {a : List Bool → List Bool}, a ∈ FP → (fun z => pairSnd (a z)) ∈ FP := by
     intro a ha
     have := mem_FP_comp ha Cobham.sndBlock_mem_FP
-    simpa [Function.comp] using this
+    exact this
   have hcons : ∀ {a : List Bool → List Bool}, a ∈ FP → (fun z => false :: a z) ∈ FP := by
     intro a ha
     have := mem_FP_comp ha (Cobham.cons_mem_FP false)
-    simpa [Function.comp] using this
+    exact this
   -- the state's fields
   have hD : (fun z => sDone (C z)) ∈ FP := hfst hC
   have hAns : (fun z => sAns (C z)) ∈ FP := hfst (hsnd hC)

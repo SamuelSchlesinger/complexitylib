@@ -101,24 +101,24 @@ def slotOf (s : Γ) : Tape := parkedBlank.write s
   rfl
 
 @[simp] theorem slotOf_cells_one (s : Γ) : (slotOf s).cells 1 = s := by
-  rw [slotOf, Tape.write, if_neg (by show ¬ (1 : ℕ) = 0; omega)]
+  rw [slotOf, Tape.write, ite_eq_right (by show ¬ (1 : ℕ) = 0; omega)]
   show Function.update parkedBlank.cells parkedBlank.head s 1 = s
   rw [show parkedBlank.head = 1 from rfl]
   exact Function.update_self (β := fun _ => Γ) 1 s parkedBlank.cells
 
 theorem slotOf_cells_of_ne (s : Γ) {c : ℕ} (hc : c ≠ 1) :
     (slotOf s).cells c = parkedBlank.cells c := by
-  rw [slotOf, Tape.write, if_neg (by show ¬ (1 : ℕ) = 0; omega)]
+  rw [slotOf, Tape.write, ite_eq_right (by show ¬ (1 : ℕ) = 0; omega)]
   exact Function.update_of_ne (by simpa using hc) _ _
 
 @[simp] theorem slotOf_write (s t : Γ) : (slotOf s).write t = slotOf t := by
   refine Tape.ext (by rw [Tape.write_head, slotOf_head, slotOf_head]) (funext fun c => ?_)
   by_cases hc : c = 1
   · subst hc
-    rw [Tape.write, if_neg (by show ¬ (slotOf s).head = 0; rw [slotOf_head]; omega)]
+    rw [Tape.write, ite_eq_right (by show ¬ (slotOf s).head = 0; rw [slotOf_head]; omega)]
     show Function.update (slotOf s).cells (slotOf s).head t 1 = _
     rw [slotOf_head, Function.update_self, slotOf_cells_one]
-  · rw [Tape.write, if_neg (by show ¬ (slotOf s).head = 0; rw [slotOf_head]; omega)]
+  · rw [Tape.write, ite_eq_right (by show ¬ (slotOf s).head = 0; rw [slotOf_head]; omega)]
     show Function.update (slotOf s).cells (slotOf s).head t c = _
     rw [slotOf_head, Function.update_of_ne (by simpa using hc),
       slotOf_cells_of_ne s hc, slotOf_cells_of_ne t hc]
@@ -191,7 +191,7 @@ noncomputable def ctrValue (t : Tape) : ℕ :=
 @[simp] theorem ctrValue_natTape (v : ℕ) : ctrValue (natTape v) = v := by
   classical
   have hex : ∃ w, natTape v = natTape w := ⟨v, rfl⟩
-  rw [ctrValue, dif_pos hex]
+  rw [ctrValue, dite_eq_left hex]
   generalize hgen : hex.choose = w
   have hc : natTape v = natTape w := hgen ▸ hex.choose_spec
   refine hasBinaryNat_value_unique (t := natTape v) ?_ (Tape.init_move_right_hasBinaryNat v)
@@ -219,14 +219,14 @@ noncomputable def iterBank (M : TM k) (y : List Bool) (inp₀ junkT : Tape)
 @[simp] theorem iterBank_app (M : TM k) (y : List Bool) (inp₀ junkT : Tape) (H c : ℕ)
     (j : Fin (k + 2)) :
     iterBank M y inp₀ junkT H c (appIdx j) = TM.applyPre M y inp₀ j := by
-  rw [iterBank, dif_pos (appIdx_middle j)]
+  rw [iterBank, dite_eq_left (appIdx_middle j)]
   congr 1
   exact placeWorkCoord_placeWorkIdx 3 0 j
 
 theorem iterBank_book (M : TM k) (y : List Bool) (inp₀ junkT : Tape) (H c : ℕ)
     (i : Fin (3 + (k + 2) + 0)) (hi : ¬ placeWorkInMiddle 3 (k + 2) i) :
     iterBank M y inp₀ junkT H c i = bookTapes (natTape c) junkT H i := by
-  rw [iterBank, dif_neg hi]
+  rw [iterBank, dite_eq_right hi]
 
 @[simp] theorem iterBank_rf (M : TM k) (y : List Bool) (inp₀ junkT : Tape) (H c : ℕ) :
     iterBank M y inp₀ junkT H c rfIdx = natTape c := by
@@ -301,8 +301,8 @@ theorem iterBank_succ (M : TM k) (y : List Bool) (inp₀ junkT : Tape) (H c : �
   · rw [hi, Function.update_self, iterBank_rf]
   · rw [Function.update_of_ne hi, iterBank, iterBank]
     by_cases hm : placeWorkInMiddle 3 (k + 2) i
-    · rw [dif_pos hm, dif_pos hm]
-    · rw [dif_neg hm, dif_neg hm]
+    · rw [dite_eq_left hm, dite_eq_left hm]
+    · rw [dite_eq_right hm, dite_eq_right hm]
       rcases Complexity.layout_cases i with h | h | h | ⟨j, h⟩
       · exact absurd h hi
       · rw [h, bookTapes_wf, bookTapes_wf]
@@ -541,7 +541,7 @@ theorem test_pass (M : TM k) (Y : ℕ → List Bool) (inp₀ junkT : Tape)
     (start + (j + 1))).strengthen_post ?_
   rintro inp work out ⟨hi, hw, ho⟩
   refine ⟨hi, hw, ?_⟩
-  rw [ho, slotSym, if_neg (by omega)]
+  rw [ho, slotSym, ite_eq_right (by omega)]
 
 /-- **One pass of the loop.** The body applies the function once, and the test finds the
 state not yet done, so the loop comes back to its start state one iteration on. -/
@@ -573,7 +573,7 @@ theorem loop_pass (M : TM k) {G : List Bool → List Bool} {T : ℕ → ℕ}
   refine ⟨loopState_parked M Y inp₀ junkT hinpP hjunkP H start (j + 1) inp' work' out' hE',
     ?_⟩
   obtain ⟨-, -, ho⟩ := hE'
-  rw [ho, slotOf_cells_one, slotSym, if_neg (by omega)]
+  rw [ho, slotOf_cells_one, slotSym, ite_eq_right (by omega)]
   intro hcon
   have hhd := (headSym_eq_one_iff (Y (j + 1))).mp hcon
   rw [hcont (j + 1) (by omega) (by omega)] at hhd
@@ -613,7 +613,7 @@ theorem loop_final (M : TM k) {G : List Bool → List Bool} {T : ℕ → ℕ}
   refine ⟨loopState_parked M Y inp₀ junkT hinpP hjunkP H start (N - 1 + 1) inp' work'
     out' hE', ?_⟩
   obtain ⟨-, -, ho⟩ := hE'
-  rw [ho, slotOf_cells_one, slotSym, if_neg (by omega), hlast]
+  rw [ho, slotOf_cells_one, slotSym, ite_eq_right (by omega), hlast]
   exact (headSym_eq_one_iff (Y N)).mpr hdone
 
 /-- **The loop's contract.** The loop runs until the state says it is done: `N`
@@ -898,7 +898,7 @@ theorem spaceIterTM_hoareTime (M : TM k) {G : List Bool → List Bool} {T : ℕ 
         (fun i hi => hHy i (by omega)) (fun i hi => hHT i (by omega)) hcont hdone b
         (fun j hj => hb j (by omega)) inp work out
         ⟨rfl, by rw [hw, show start + 0 = start from rfl],
-          by rw [ho, slotSym, if_pos rfl, slotOf_blank]⟩
+          by rw [ho, slotSym, ite_eq_left rfl, slotOf_blank]⟩
     exact ⟨c', t, ht, hreach, hhalt, by rw [hi']; exact hP, by rw [hi']; exact hSI,
       by rw [hw', hi'], ho'⟩
   -- the epilogue, likewise
@@ -1023,7 +1023,7 @@ theorem spaceIterTM_keepsWindow (M : TM k) {G : List Bool → List Bool} {T : �
         (fun i hi => hHy i (by omega)) (fun i hi => hHT i (by omega)) hcont hdone b
         (fun j hj => hb j (by omega)) inp work out
         ⟨rfl, by rw [hw, show st + 0 = st from rfl],
-          by rw [ho, slotSym, if_pos rfl, slotOf_blank]⟩
+          by rw [ho, slotSym, ite_eq_left rfl, slotOf_blank]⟩
     exact ⟨c', t, ht, hreach, hhalt, by rw [hi']; exact hP, by rw [hi']; exact hSI,
       by rw [hi']; exact hhead, by rw [hw', hi'], ho'⟩
   -- the prologue and the loop, as one contract
@@ -1063,7 +1063,7 @@ theorem spaceIterTM_keepsWindow (M : TM k) {G : List Bool → List Bool} {T : �
       (fun j hj => hb j (by omega)) x.length (proBound k p H x.length + 1) (by omega) (by omega)
       hjunkh).mono_space (by omega) c ⟨hst, rfl, ?_, ?_⟩ c' hreach
     · rw [hw, show st + 0 = st from rfl]
-    · rw [ho, slotSym, if_pos rfl, slotOf_blank]
+    · rw [ho, slotSym, ite_eq_left rfl, slotOf_blank]
   have w3 : (epilogueTM M).KeepsWindowOn
       (fun c => c.state = (epilogueTM M).qstart ∧ Parked c.input ∧
         Tape.StartInvariant c.input ∧ c.input.head ≤ proBound k p H x.length ∧

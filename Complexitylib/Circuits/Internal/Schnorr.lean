@@ -219,9 +219,16 @@ private theorem wireVal_restrictD {N s : Nat} (d : CircDesc (N + 1) s)
     have hgi : w.val + 1 - (N + 1) = w.val - N := by omega
     simp only [restrictD, hgi]
     -- Both sides branch on isAnd; congr reduces to per-wire-input goals
-    split <;> (congr 1 <;> [skip; skip]) <;>
-      exact remapWireR_effective d a b x w hw _ _
-        (fun w' hw' => wireVal_restrictD d a b x w')
+    split <;> rename_i hAnd
+    · simp only [hAnd, ite_true]
+      congr 1 <;>
+        exact remapWireR_effective d a b x w hw _ _
+          (fun w' hw' => wireVal_restrictD d a b x w')
+    · simp only [Bool.not_eq_true] at hAnd
+      simp only [hAnd, Bool.false_eq_true, ite_false]
+      congr 1 <;>
+        exact remapWireR_effective d a b x w hw _ _
+          (fun w' hw' => wireVal_restrictD d a b x w')
 termination_by w.val
 
 /-- Evaluating the restricted circuit on `x` agrees with evaluating the original circuit
@@ -461,7 +468,7 @@ private theorem xor_needs_three_gates {N s : Nat} (hN : 2 ≤ N) (hs : 0 < s) (h
       · subst N
         -- The two possible gate counts are finite truth-table checks. `+kernel`
         -- makes the kernel reduce and verify the resulting proof term.
-        interval_cases s <;> (decide +revert +kernel)
+        interval_cases s <;> (set_option maxRecDepth 10000 in decide +revert +kernel)
       · have hN' : 2 ≤ N := by omega
         intro d comp heval
         apply ih hN' hs hs2 (restrictD d ⟨0, by omega⟩ false) comp

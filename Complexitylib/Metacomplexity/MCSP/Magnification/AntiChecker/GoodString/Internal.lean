@@ -38,7 +38,7 @@ theorem eventually_survivorTupleMajoritySizeBound_le_hardThreshold_internal
       beta 50 2
   filter_upwards [hpolynomial, Filter.eventually_ge_atTop 1]
       with arity hpolynomial harity
-  letI : NeZero arity := ⟨by omega⟩
+  let : NeZero arity := ⟨by omega⟩
   have hsmallScaled :
       fixedConstant * (arity * smallThreshold beta arity) ≤
         hardThreshold beta arity := by

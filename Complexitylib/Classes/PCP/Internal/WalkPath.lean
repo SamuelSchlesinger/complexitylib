@@ -170,12 +170,12 @@ def padWalk {t : ℕ} (v : G.V) (s : Fin t → G.D) (k h : ℕ) : Fin h → G.D 
 theorem padWalk_of_lt {t : ℕ} (v : G.V) (s : Fin t → G.D) {k h : ℕ} (j : Fin h)
     (hj : j.val < min k t) :
     L.padWalk v s k h j = s ⟨j.val, lt_of_lt_of_le hj (min_le_right k t)⟩ :=
-  dif_pos hj
+  dite_eq_left hj
 
 theorem padWalk_of_ge {t : ℕ} (v : G.V) (s : Fin t → G.D) {k h : ℕ} (j : Fin h)
     (hj : ¬ j.val < min k t) :
     L.padWalk v s k h j = L.loop (G.walkAt t v s k) :=
-  dif_neg hj
+  dite_eq_right hj
 
 /-- Below `k` the padded walk follows the original. -/
 theorem walkAt_padWalk_of_le {t : ℕ} (v : G.V) (s : Fin t → G.D) {k h : ℕ}

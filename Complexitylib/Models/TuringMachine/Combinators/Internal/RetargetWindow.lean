@@ -97,7 +97,7 @@ theorem retargetInput_keepsWindow_of_reaches (M : TM k) (r₀ : Tape) (c₀ : Cf
           state_ne_qhalt_of_step hstep'
         have hne : cM.state ≠ M.qhalt := hne0
         obtain ⟨cM', hstep0⟩ : ∃ cM', M.step cM = some cM' := by
-          rw [TM.step, if_neg hne]
+          rw [TM.step, ite_eq_right hne]
           exact ⟨_, rfl⟩
         have hcomm := retargetInput_step_commute M hstep0 r hinp
         have hd'eq := Option.some_inj.mp (hstep'.symm.trans hcomm)

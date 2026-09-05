@@ -36,8 +36,8 @@ theorem eval_parallelKeyedRecordFamily_internal
       BitString.packKeyedRecords count keys payloads := by
   induction count with
   | zero =>
-      simpa [parallelKeyedRecordFamily, BitString.packKeyedRecords] using
-        heval 0
+      simp only [parallelKeyedRecordFamily, BitString.packKeyedRecords]
+      exact heval 0
   | succ count ih =>
       simp only [parallelKeyedRecordFamily, BitString.packKeyedRecords]
       have hparallel := Circuit.eval_parallel

@@ -404,10 +404,12 @@ theorem emitInitialStates_effect_internal (tm : TM k)
     (emitInitialStates tm).effect values =
       Function.update values Work.available
         (values Work.available + Fintype.card tm.Q) := by
-  simpa [emitInitialStates] using
-    seqList_emitConstantGate_effect
-      (List.ofFn fun index : Fin (Fintype.card tm.Q) =>
-        decide (tm.qstart = (Fintype.equivFin tm.Q).symm index)) values
+  have h := seqList_emitConstantGate_effect
+    (List.ofFn fun index : Fin (Fintype.card tm.Q) =>
+      decide (tm.qstart = (Fintype.equivFin tm.Q).symm index)) values
+  simp only [emitInitialStates, List.map_ofFn, Function.comp_def,
+    List.length_ofFn] at h ⊢
+  exact h
 
 theorem emitInitialStates_emitted_internal (tm : TM k)
     (values : BinaryValues WorkCount)
@@ -1320,8 +1322,8 @@ private theorem emitBlankCell_space_le
     (hreference : values Work.reference₀ ≤ width) :
     emitBlankCell.spaceBound initialSpace values ≤
       initialSpace + 32 * width.size + 32 := by
-  simpa [emitBlankCell, emitStartCell, emitConstantGate] using
-    emitStartCell_space_le initialSpace width values havailable hreference
+  simp [emitBlankCell, emitConstantGate]
+  exact emitStartCell_space_le initialSpace width values havailable hreference
 
 private theorem emitInputDataCell_space_le
     (initialSpace width : ℕ) (values : BinaryValues WorkCount)
@@ -1628,11 +1630,12 @@ private theorem emitInitialStates_spaceBoundByWidthAt
         width inputLength := by
     intro inputLength
     simpa using havailable inputLength
-  simpa [emitInitialStates] using
-    seqList_emitConstantGate_spaceBoundByWidthAt
-      (List.ofFn fun index : Fin (Fintype.card tm.Q) =>
-        decide (tm.qstart = (Fintype.equivFin tm.Q).symm index))
-      havailable' hreference
+  have h := seqList_emitConstantGate_spaceBoundByWidthAt
+    (initialSpace := initialSpace)
+    (List.ofFn fun index : Fin (Fintype.card tm.Q) =>
+      decide (tm.qstart = (Fintype.equivFin tm.Q).symm index)) havailable' hreference
+  simp only [emitInitialStates, List.map_ofFn, Function.comp_def] at h ⊢
+  exact h
 
 private theorem setHorizonLimit_spaceBoundByWidthAt
     {initialSpace : ℕ → ℕ} {values : ℕ → BinaryValues WorkCount}

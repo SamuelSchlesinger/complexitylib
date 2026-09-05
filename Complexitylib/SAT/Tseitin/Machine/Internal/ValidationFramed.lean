@@ -82,7 +82,7 @@ private theorem validationTM_step_halt_framed
       c'.input = c.input ∧ c'.work = c.work ∧
       c'.output = c.output.write (Γw.ofBool state.accepts) := by
   simp only [TM.step, hst, validationTM, reduceCtorEq, ↓reduceIte, hiStart,
-    if_pos hiBlank]
+    ite_eq_left hiBlank]
   have hoMove : TM.idleDir c.output.read = Dir3.stay := by
     simp [TM.idleDir, hout.read_ne_start]
   refine ⟨_, rfl, rfl, ?_, ?_, ?_⟩

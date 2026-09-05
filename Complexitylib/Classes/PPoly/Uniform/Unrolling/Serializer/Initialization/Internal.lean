@@ -454,7 +454,7 @@ theorem getElem_directInitSchedule_configIndex_internal
       rw [List.getElem_append_left]
       · rw [List.getElem_append_left]
         · rw [List.getElem_append_left]
-          · rw [getElem_directInitStateGates_internal]
+          · erw [getElem_directInitStateGates_internal]
             rfl
           · rw [length_directInitStateGates_internal]
             exact hq

@@ -78,9 +78,9 @@ theorem matrixVerdictOn_eq_true_iff (tm : NTM k) (f : ℕ → ℕ) (b : Bool) (x
     matrixVerdictOn tm f b x w r = true ↔ matrixPred tm f b x w r := by
   rw [matrixVerdictOn, matrixPred]
   by_cases h : r.length = ampRuns f x.length * f x.length
-  · rw [if_pos h]
+  · rw [ite_eq_left h]
     simp [h]
-  · rw [if_neg h]
+  · rw [ite_eq_right h]
     simp [h]
 
 /-- The innermost predicate of the Lautemann characterization, as a language of

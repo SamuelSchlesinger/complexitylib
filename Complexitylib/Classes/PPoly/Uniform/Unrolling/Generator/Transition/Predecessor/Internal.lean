@@ -442,7 +442,7 @@ private theorem emitHeadReference_effect_of_clean
   split_ifs
   all_goals simp_all
 
-set_option maxHeartbeats 800000 in
+set_option maxHeartbeats 2400000 in
 theorem emitStayPredecessorMembers_effect_internal
     (stateCount : ℕ) (values : BinaryValues WorkCount)
     (hclean : PredecessorHeadClean values)
@@ -589,7 +589,7 @@ private theorem emitConstantFalse_binaryForTemporaryEffect
     (values Work.temporary₃ - values Work.loop₀)
 
 set_option maxRecDepth 10000 in
-set_option maxHeartbeats 800000 in
+set_option maxHeartbeats 2400000 in
 theorem emitLeftPositivePredecessorTail_effect_internal
     (stateCount : ℕ) (values : BinaryValues WorkCount)
     (hloop : values Work.loop₀ = 0)
@@ -680,7 +680,7 @@ theorem emitLeftPositivePredecessorTail_effect_internal
           · simp [htemp, hloopIdx, havailable, hposition]
 
 set_option maxRecDepth 10000 in
-set_option maxHeartbeats 800000 in
+set_option maxHeartbeats 2400000 in
 theorem emitRightPositivePredecessorMembers_effect_internal
     (stateCount : ℕ) (values : BinaryValues WorkCount)
     (hclean : PredecessorHeadClean values)
@@ -718,7 +718,7 @@ theorem emitRightPositivePredecessorMembers_effect_internal
   all_goals omega
 
 set_option maxRecDepth 10000 in
-set_option maxHeartbeats 800000 in
+set_option maxHeartbeats 2400000 in
 theorem emitLeftZeroPredecessorMembers_effect_internal
     (stateCount : ℕ) (values : BinaryValues WorkCount)
     (hclean : PredecessorHeadClean values)
@@ -751,7 +751,7 @@ theorem emitLeftZeroPredecessorMembers_effect_internal
   all_goals omega
 
 set_option maxRecDepth 10000 in
-set_option maxHeartbeats 3000000 in
+set_option maxHeartbeats 9000000 in
 theorem emitLeftPositivePredecessorMembers_effect_internal
     (stateCount : ℕ) (values : BinaryValues WorkCount)
     (hclean : PredecessorHeadClean values)
@@ -891,7 +891,7 @@ theorem emitPredecessorHeadMembers_effect_internal
         hclean htarget
 
 set_option maxRecDepth 10000 in
-set_option maxHeartbeats 1200000 in
+set_option maxHeartbeats 3600000 in
 theorem emitStayPredecessorMembers_emitted_internal
     (stateCount : ℕ) (values : BinaryValues WorkCount)
     (hclean : PredecessorHeadClean values)
@@ -969,7 +969,7 @@ theorem emitStayPredecessorMembers_emitted_internal
     Work.position, Work.loop₀, Work.limit₀, Work.temporary₀,
     Work.reference₀, Function.update_apply]
   split_ifs
-  all_goals simp_all [List.flatMap_append]
+  all_goals simp_all
   all_goals simp_all [Work.horizon, Work.position]
   all_goals simp [emitPredecessorFalseRange_effect_internal,
     BinaryRoutine.binaryCopy, directInitConstant, Work.available,
@@ -999,7 +999,7 @@ theorem emitRightZeroPredecessorMembers_emitted_internal
   simp [hloop', directInitConstant, Work.horizon, Work.loop₀, Work.limit₀]
 
 set_option maxRecDepth 10000 in
-set_option maxHeartbeats 1200000 in
+set_option maxHeartbeats 3600000 in
 theorem emitRightPositivePredecessorMembers_emitted_internal
     (stateCount : ℕ) (values : BinaryValues WorkCount)
     (hclean : PredecessorHeadClean values)
@@ -1100,7 +1100,7 @@ theorem emitRightPositivePredecessorMembers_emitted_internal
   simp [hgap, htargetValue]
 
 set_option maxRecDepth 10000 in
-set_option maxHeartbeats 1200000 in
+set_option maxHeartbeats 3600000 in
 theorem emitLeftZeroPredecessorMembers_emitted_internal
     (stateCount : ℕ) (values : BinaryValues WorkCount)
     (_hclean : PredecessorHeadClean values)
@@ -1181,7 +1181,7 @@ theorem emitLeftZeroPredecessorMembers_emitted_internal
   simp [hT, hposition]
 
 set_option maxRecDepth 10000 in
-set_option maxHeartbeats 1200000 in
+set_option maxHeartbeats 3600000 in
 theorem emitLeftPositivePredecessorTail_emitted_internal
     (stateCount : ℕ) (values : BinaryValues WorkCount)
     (hloop : values Work.loop₀ = 0) :
@@ -1251,7 +1251,7 @@ theorem emitLeftPositivePredecessorTail_emitted_internal
     simp [hgapValue, hloop']
 
 set_option maxRecDepth 10000 in
-set_option maxHeartbeats 1800000 in
+set_option maxHeartbeats 5400000 in
 theorem emitLeftPositivePredecessorMembers_emitted_internal
     (stateCount : ℕ) (values : BinaryValues WorkCount)
     (hclean : PredecessorHeadClean values)
@@ -1972,7 +1972,7 @@ theorem emitPredecessorHeadConnectors_emitted_internal
   simp only [hblocks]
 
 set_option maxRecDepth 10000 in
-set_option maxHeartbeats 1800000 in
+set_option maxHeartbeats 5400000 in
 theorem emitPredecessorHeadFormula_effect_internal
     (stateCount directionCode : ℕ) (values : BinaryValues WorkCount)
     (hclean : PredecessorHeadClean values)
@@ -2070,7 +2070,7 @@ theorem emitPredecessorHeadFormula_effect_internal
   all_goals omega
 
 set_option maxRecDepth 10000 in
-set_option maxHeartbeats 1800000 in
+set_option maxHeartbeats 5400000 in
 theorem emitPredecessorHeadFormula_emitted_internal
     (stateCount directionCode : ℕ) (values : BinaryValues WorkCount)
     (hclean : PredecessorHeadClean values)
@@ -2276,7 +2276,7 @@ private theorem emitPredecessorHeadConnectors_requires_internal
       rfl
 
 set_option maxRecDepth 10000 in
-set_option maxHeartbeats 1800000 in
+set_option maxHeartbeats 5400000 in
 theorem emitStayPredecessorMembers_requires_internal
     (stateCount : ℕ) (values : BinaryValues WorkCount)
     (hclean : PredecessorHeadClean values)
@@ -2400,7 +2400,7 @@ theorem emitRightZeroPredecessorMembers_requires_internal
     emitPredecessorFalseRange_requires_internal afterHorizon hle hemit⟩
 
 set_option maxRecDepth 10000 in
-set_option maxHeartbeats 2400000 in
+set_option maxHeartbeats 7200000 in
 theorem emitRightPositivePredecessorMembers_requires_internal
     (stateCount : ℕ) (values : BinaryValues WorkCount)
     (hclean : PredecessorHeadClean values)
@@ -2568,7 +2568,7 @@ theorem preparePredecessorHorizonGap_requires_internal
     simpa [Work.horizon, Work.position, Work.temporary₃] using htarget
 
 set_option maxRecDepth 10000 in
-set_option maxHeartbeats 1800000 in
+set_option maxHeartbeats 5400000 in
 theorem emitLeftZeroPredecessorMembers_requires_internal
     (stateCount : ℕ) (values : BinaryValues WorkCount)
     (hclean : PredecessorHeadClean values)
@@ -2697,7 +2697,7 @@ private theorem emitConstantFalseTemporaryFor_requires
     constructor <;> simp [Work.available, Work.loop₀, Work.temporary₃]
 
 set_option maxRecDepth 10000 in
-set_option maxHeartbeats 1800000 in
+set_option maxHeartbeats 5400000 in
 theorem emitLeftPositivePredecessorTail_requires_internal
     (stateCount : ℕ) (values : BinaryValues WorkCount)
     (hloop : values Work.loop₀ = 0)
@@ -2780,7 +2780,7 @@ theorem emitLeftPositivePredecessorTail_requires_internal
         trivial, trivial, trivial⟩
 
 set_option maxRecDepth 10000 in
-set_option maxHeartbeats 3000000 in
+set_option maxHeartbeats 9000000 in
 theorem emitLeftPositivePredecessorMembers_requires_internal
     (stateCount : ℕ) (values : BinaryValues WorkCount)
     (hclean : PredecessorHeadClean values)
@@ -2920,7 +2920,7 @@ theorem emitPredecessorHeadMembers_requires_internal
         hclean htarget
 
 set_option maxRecDepth 10000 in
-set_option maxHeartbeats 2400000 in
+set_option maxHeartbeats 7200000 in
 private theorem predecessorHeadRoutine_requires
     (stateCount directionCode : ℕ) (values : BinaryValues WorkCount)
     (hclean : PredecessorHeadClean values)
@@ -3629,7 +3629,6 @@ private theorem emitLeftZeroPredecessorMembers_spaceBoundByWidthAt
     intro n
     apply BinaryRoutine.values_update_le Work.position
       (hafterHead₀Values n)
-    change afterHead₀ n Work.position + 1 ≤ width n
     rw [show afterHead₀ n Work.position = values n Work.position by
       simp [afterHead₀, head, emitHeadReference_effect, Work.available,
         Work.position, Work.temporary₀, Work.reference₀]]
@@ -5011,8 +5010,8 @@ theorem emitPredecessorHeadFormula_spaceBoundByWidth_internal
     apply BinaryRoutine.SpaceBoundByWidthAt.seqList
     exact ⟨hs₁, hs₂, hs₃, hs₄, hs₅, hs₆, hs₇, hs₈,
       trivial⟩
-  simpa [emitPredecessorHeadFormula, members, identityGate, setOffset,
-    connectors, clearLoop, clearLimit] using hroutine.restrict
+  simp [emitPredecessorHeadFormula]
+  exact hroutine.restrict
 
 private theorem predecessor_sound_with_stronger_requires
     (routine : BinaryRoutine WorkCount)

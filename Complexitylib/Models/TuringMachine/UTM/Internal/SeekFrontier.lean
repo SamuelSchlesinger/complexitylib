@@ -112,22 +112,22 @@ def seekFrontierTM : TM 7 where
       · refine ⟨idleDir_right_of_start, fun i hi => ?_, idleDir_right_of_start⟩
         dsimp only []
         by_cases hir : i = clkT
-        · rw [if_pos hir]
-        · rw [if_neg hir]; exact idleDir_right_of_start hi
+        · rw [ite_eq_left hir]
+        · rw [ite_eq_right hir]; exact idleDir_right_of_start hi
     | .walk =>
       dsimp only []
       split
       · refine ⟨idleDir_right_of_start, fun i hi => ?_, idleDir_right_of_start⟩
         dsimp only []
         by_cases hir : i = clkT
-        · rw [if_pos hir]
-        · rw [if_neg hir]; exact idleDir_right_of_start hi
+        · rw [ite_eq_left hir]
+        · rw [ite_eq_right hir]; exact idleDir_right_of_start hi
       · refine ⟨idleDir_right_of_start, fun i hi => ?_, idleDir_right_of_start⟩
         dsimp only []
         by_cases hir : i = clkT
         · subst hir
-          rw [if_pos rfl, if_pos hi]
-        · rw [if_neg hir]; exact idleDir_right_of_start hi
+          rw [ite_eq_left rfl, ite_eq_left hi]
+        · rw [ite_eq_right hir]; exact idleDir_right_of_start hi
     | .done => exact rightOfStart_allIdle iHead wHeads oHead
 
 -- ── step lemmas ──
@@ -148,7 +148,7 @@ private theorem seekFrontier_step_first_blank (c : Cfg 7 seekFrontierTM.Q)
     seekFrontierTM.step c = some
       { state := .done, input := c.input, work := c.work,
         output := c.output } := by
-  rw [TM.step, if_neg (seekFrontier_ne_halt (by decide) hst)]
+  rw [TM.step, ite_eq_right (seekFrontier_ne_halt (by decide) hst)]
   simp only [seekFrontierTM, hst, hblank, ↓reduceIte]
   refine congrArg some ((Cfg.mk.injEq ..).mpr ⟨rfl, ?_, ?_, ?_⟩)
   · exact transitionInput_eq_self hinp
@@ -169,7 +169,7 @@ private theorem seekFrontier_step_first_one (c : Cfg 7 seekFrontierTM.Q)
       { state := .walk, input := c.input,
         work := Function.update c.work clkT ((c.work clkT).move .right),
         output := c.output } := by
-  rw [TM.step, if_neg (seekFrontier_ne_halt (by decide) hst)]
+  rw [TM.step, ite_eq_right (seekFrontier_ne_halt (by decide) hst)]
   simp only [seekFrontierTM, hst, hone, reduceCtorEq, ↓reduceIte]
   refine congrArg some ((Cfg.mk.injEq ..).mpr ⟨rfl, ?_, ?_, ?_⟩)
   · exact transitionInput_eq_self hinp
@@ -178,7 +178,7 @@ private theorem seekFrontier_step_first_one (c : Cfg 7 seekFrontierTM.Q)
     · subst hir
       simp only [↓reduceIte, Function.update_self]
       exact writeAndMove_readBack_move _ (by rw [hone]; decide) _
-    · rw [if_neg hir, Function.update_of_ne hir]
+    · rw [ite_eq_right hir, Function.update_of_ne hir]
       exact Tape.writeAndMove_readBack_idle_of_ne_start _ (hoth i hir)
   · exact Tape.writeAndMove_readBack_idle_of_ne_start _ hout
 
@@ -192,7 +192,7 @@ private theorem seekFrontier_step_walk_one (c : Cfg 7 seekFrontierTM.Q)
       { state := .walk, input := c.input,
         work := Function.update c.work clkT ((c.work clkT).move .right),
         output := c.output } := by
-  rw [TM.step, if_neg (seekFrontier_ne_halt (by decide) hst)]
+  rw [TM.step, ite_eq_right (seekFrontier_ne_halt (by decide) hst)]
   simp only [seekFrontierTM, hst, hone, ↓reduceIte]
   refine congrArg some ((Cfg.mk.injEq ..).mpr ⟨rfl, ?_, ?_, ?_⟩)
   · exact transitionInput_eq_self hinp
@@ -201,7 +201,7 @@ private theorem seekFrontier_step_walk_one (c : Cfg 7 seekFrontierTM.Q)
     · subst hir
       simp only [↓reduceIte, Function.update_self]
       exact writeAndMove_readBack_move _ (by rw [hone]; decide) _
-    · rw [if_neg hir, Function.update_of_ne hir]
+    · rw [ite_eq_right hir, Function.update_of_ne hir]
       exact Tape.writeAndMove_readBack_idle_of_ne_start _ (hoth i hir)
   · exact Tape.writeAndMove_readBack_idle_of_ne_start _ hout
 
@@ -216,7 +216,7 @@ private theorem seekFrontier_step_walk_blank (c : Cfg 7 seekFrontierTM.Q)
       { state := .done, input := c.input,
         work := Function.update c.work clkT ((c.work clkT).move .left),
         output := c.output } := by
-  rw [TM.step, if_neg (seekFrontier_ne_halt (by decide) hst)]
+  rw [TM.step, ite_eq_right (seekFrontier_ne_halt (by decide) hst)]
   simp only [seekFrontierTM, hst, hblank, reduceCtorEq, ↓reduceIte]
   refine congrArg some ((Cfg.mk.injEq ..).mpr ⟨rfl, ?_, ?_, ?_⟩)
   · exact transitionInput_eq_self hinp
@@ -225,7 +225,7 @@ private theorem seekFrontier_step_walk_blank (c : Cfg 7 seekFrontierTM.Q)
     · subst hir
       simp only [↓reduceIte, Function.update_self]
       exact writeAndMove_readBack_move _ (by rw [hblank]; decide) _
-    · rw [if_neg hir, Function.update_of_ne hir]
+    · rw [ite_eq_right hir, Function.update_of_ne hir]
       exact Tape.writeAndMove_readBack_idle_of_ne_start _ (hoth i hir)
   · exact Tape.writeAndMove_readBack_idle_of_ne_start _ hout
 

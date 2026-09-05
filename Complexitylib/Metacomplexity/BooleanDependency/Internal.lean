@@ -42,7 +42,7 @@ theorem uniformProbability_restrict_internal {coordinate : Type*}
         event sample.1) =
         uniformProbability (Finset.univ.filter event) := by
     simpa [uniformProbability_univ_internal] using hproduct
-  simpa [assignmentSplitEquiv] using htransport.trans hproduct'
+  exact htransport.trans hproduct'
 
 theorem extendByFalse_restrict_apply_internal {coordinate : Type*}
     [DecidableEq coordinate] (coordinates : Finset coordinate)

@@ -415,7 +415,7 @@ theorem Tape.inits_update_tFuel (n steps P Qc tf tf' : ℕ) :
   · rw [Function.update_of_ne hi]
     show regTape (initVals n steps P Qc tf i) = regTape (initVals n steps P Qc tf' i)
     congr 1
-    rw [initVals, initVals, if_neg hi, if_neg hi]
+    rw [initVals, initVals, ite_eq_right hi, ite_eq_right hi]
 
 /-- Zeroing the scratch registers `tmp`/`tmp2` of an initialized register
     file is a no-op: they already hold `0`. -/

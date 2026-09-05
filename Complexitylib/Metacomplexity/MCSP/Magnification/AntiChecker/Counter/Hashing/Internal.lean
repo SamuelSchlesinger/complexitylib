@@ -80,9 +80,10 @@ theorem exists_correct_counter_of_hashingCircuit_internal
     have haccurate := hfixed input
     unfold ApproximateCounting.Relative.OutputIsAccurate at haccurate
     rw [card_encodedSurvivorSet] at haccurate
-    simpa only [ApproximateCounterCircuit.estimate, counterValue,
-      BitString.unsignedValue, counter] using haccurate
-  · simpa only [counter] using hfixedSize
+    simp only [ApproximateCounterCircuit.estimate, counterValue, counter]
+    exact haccurate
+  · simp only [counter]
+    exact hfixedSize
 
 theorem exists_correct_counter_of_oracleProgram_internal
     {language : Language}

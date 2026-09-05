@@ -71,7 +71,7 @@ theorem verdict_running (α : List Bool) {q : ℕ}
   by_cases hlen : (qhaltField (groupPairs α)).length = d.w
   · -- well-formed width: symbol-wise equality ⟺ decoded values agree
     have hqh : d.qhalt = fieldNat (qhaltField (groupPairs α)) := by
-      rw [hd, decodeDesc_qhalt, if_pos hlen]
+      rw [hd, decodeDesc_qhalt, ite_eq_left hlen]
     have hlt : fieldNat (qhaltField (groupPairs α)) < 2 ^ d.w := by
       rw [fieldNat, ← hlen]
       calc Nat.fromBits ((qhaltField (groupPairs α)).filterMap symBit?)
@@ -98,7 +98,7 @@ theorem verdict_running (α : List Bool) {q : ℕ}
         from hlenb.symm, Nat.toBits_fromBits, hbits]
   · -- malformed width: lengths differ on the left; the sentinel on the right
     have hqh : d.qhalt = 2 ^ d.w := by
-      rw [hd, decodeDesc_qhalt, if_neg hlen]
+      rw [hd, decodeDesc_qhalt, ite_eq_right hlen]
     rw [hqh, Nat.min_self]
     constructor
     · intro h

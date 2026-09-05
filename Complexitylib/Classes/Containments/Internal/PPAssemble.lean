@@ -70,18 +70,18 @@ theorem bodyBank_cIdx (k N H v a r : ℕ) : bodyBank k N H v a r (cIdx k) = natT
 
 theorem bodyBank_aIdx (k N H v a r : ℕ) : bodyBank k N H v a r (aIdx k) = natTape a := by
   obtain ⟨hca, -⟩ := bodyIdx_distinct k
-  simp only [bodyBank, tallyWork, if_neg (Ne.symm hca)]
+  simp only [bodyBank, tallyWork, ite_eq_right (Ne.symm hca)]
   simp
 
 theorem bodyBank_rIdx (k N H v a r : ℕ) : bodyBank k N H v a r (rIdx k) = natTape r := by
   obtain ⟨-, hcr, har, -⟩ := bodyIdx_distinct k
-  simp only [bodyBank, tallyWork, if_neg (Ne.symm hcr), if_neg (Ne.symm har)]
+  simp only [bodyBank, tallyWork, ite_eq_right (Ne.symm hcr), ite_eq_right (Ne.symm har)]
   simp
 
 theorem bodyBank_rest (k N H v a r : ℕ) (j : Fin (bodyTapes k))
     (hc : j ≠ cIdx k) (ha : j ≠ aIdx k) (hr : j ≠ rIdx k) :
     bodyBank k N H v a r j = bodyRest k N H j := by
-  simp only [bodyBank, tallyWork, if_neg hc, if_neg ha, if_neg hr]
+  simp only [bodyBank, tallyWork, ite_eq_right hc, ite_eq_right ha, ite_eq_right hr]
 
 theorem bodyBank_parked (k N H v a r : ℕ) : ∀ j, TM.Parked (bodyBank k N H v a r j) := by
   intro j
@@ -188,8 +188,8 @@ theorem bodyBank_eq_of (k N H v a r : ℕ) (W : Fin (bodyTapes k) → Tape)
   funext j
   by_cases hj : j ∈ wipeTargets k
   · obtain ⟨h1, h2, h3, h4, h5⟩ := hsim j hj
-    rw [if_pos hj, bodyBank_rest k N H v a r j h1 h2 h3, bodyRest_other k N H j h4 h5]
-  · rw [if_neg hj]
+    rw [ite_eq_left hj, bodyBank_rest k N H v a r j h1 h2 h3, bodyRest_other k N H j h4 h5]
+  · rw [ite_eq_right hj]
     by_cases hjc : j = cIdx k
     · rw [hjc, hc, bodyBank_cIdx]
     by_cases hja : j = aIdx k
@@ -240,7 +240,7 @@ theorem simCfg_entry (tm : NTM k) (x : List Bool) (N H v a r : ℕ)
         Fin.ext (by show j.val = 0 + j.val; omega), TM.placeWorkCfg_work_middle]
       show (if j.val < k then TM.blankTape else natTape v) = _
       by_cases hjk : j.val < k
-      · rw [if_pos hjk,
+      · rw [ite_eq_left hjk,
           bodyBank_rest k N H v a r j
             (hne j (cIdx k) (by simp only [cIdx]; omega))
             (hne j (aIdx k) (by simp only [aIdx]; omega))
@@ -248,7 +248,8 @@ theorem simCfg_entry (tm : NTM k) (x : List Bool) (N H v a r : ℕ)
           bodyRest_other k N H j
             (hne j (nIdx k) (by simp only [nIdx]; omega))
             (hne j (regIdx k) (by simp only [regIdx]; omega))]
-      · rw [if_neg hjk, show j = cIdx k from Fin.ext (by show j.val = k; omega), bodyBank_cIdx]
+      · rw [ite_eq_right hjk, show j = cIdx k from Fin.ext (by show j.val = k; omega),
+        bodyBank_cIdx]
     · rw [TM.placeWorkCfg_work_extra _ _ _ _ _ _ (fun hcon => hmid hcon.2), hex]
       congr 1
   · have hlast : j = vIdx k := Fin.ext (by
@@ -447,13 +448,13 @@ theorem parkStage_hoareTime (k N H v a r T : ℕ) (I : Tape) (b : Bool)
     · show max (work j).head 1 ≤ 1 + T
       have := hheadW j
       omega
-  · rw [hw'' (cIdx k), if_pos (by simp)]
+  · rw [hw'' (cIdx k), ite_eq_left (by simp)]
     exact Tape.ext (by rw [(show (natTape v).head = 1 from rfl)]) hcnt
-  · rw [hw'' (vIdx k), if_pos (by simp)]
-  · rw [hw'' (vIdx k), if_pos (by simp)]
+  · rw [hw'' (vIdx k), ite_eq_left (by simp)]
+  · rw [hw'' (vIdx k), ite_eq_left (by simp)]
     exact hverdict
   · intro j h1 h2 h3
-    rw [hw'' j, if_neg (by simp [h2, h3]), hreg j h1 h2 h3]
+    rw [hw'' j, ite_eq_right (by simp [h2, h3]), hreg j h1 h2 h3]
     refine Tape.ext ?_ rfl
     show max (bodyBank k N H v a r j).head 1 = (bodyBank k N H v a r j).head
     rw [bodyBank_head]
@@ -557,25 +558,25 @@ theorem bumpStage_hoareTime (k N H v a r T : ℕ) (I : Tape) (b : Bool)
     intro j h1 h2 h3
     rw [hw', Function.update_of_ne h1]
     cases b
-    · simp only [Bool.false_eq_true, if_false]
+    · simp only [Bool.false_eq_true, ite_false]
       rw [Function.update_of_ne h3]
-    · simp only [if_true]
+    · simp only [ite_true]
       rw [Function.update_of_ne h2]
   have hwc : c'.work (cIdx k) = natTape (v + 1) := by rw [hw', Function.update_self]
   have hwa : c'.work (aIdx k) = natTape (a + if b then 1 else 0) := by
     rw [hw', Function.update_of_ne (Ne.symm hca)]
     cases b
-    · simp only [Bool.false_eq_true, if_false]
+    · simp only [Bool.false_eq_true, ite_false]
       rw [Function.update_of_ne har, hav]
       rfl
-    · simp only [if_true]
+    · simp only [ite_true]
       rw [Function.update_self]
   have hwr : c'.work (rIdx k) = natTape (r + if b then 0 else 1) := by
     rw [hw', Function.update_of_ne (Ne.symm hcr)]
     cases b
-    · simp only [Bool.false_eq_true, if_false]
+    · simp only [Bool.false_eq_true, ite_false]
       rw [Function.update_self]
-    · simp only [if_true]
+    · simp only [ite_true]
       rw [Function.update_of_ne (Ne.symm har), hrv]
       rfl
   have hInv' : ∀ j, Tape.StartInvariant (c'.work j) := by
@@ -1144,7 +1145,6 @@ theorem epiloguePreTM_hoareTime (k N H a r : ℕ) (I O : Tape)
     (fun _ => O) bnd hI ?_ (fun _ => hO) ?_).consequence
     (fun _ _ _ h => h) (fun _ _ _ h => h) (le_refl _)
   · intro j i
-    dsimp only
     split
     · exact hW0P i
     · split
@@ -1236,7 +1236,7 @@ theorem epiloguePostTM_hoareTime (k : ℕ) (b : Bool) (I : Tape) (B : ℕ) (hI :
       ?_
     rintro inp' work' out' ⟨-, -, hout'⟩
     rw [hout', ho, show (W' (cIdx k)).read = Γ.ofBool b from by
-      simp only [hW', if_pos rfl]
+      simp only [hW', ite_eq_left rfl]
       show (work (cIdx k)).cells 1 = _
       exact hcell]
     exact outSlot_write Γw.one (TM.readBackWrite (Γ.ofBool b))
@@ -1617,7 +1617,6 @@ theorem prologueTM_hoareTime (k : ℕ) (p : Polynomial ℕ) (x : List Bool) :
       else Function.update V4 (resIdx k) (TM.regTape 0))
     (fun _ => []) bnd hIp ?_ ?_).consequence ?_ ?_ (le_refl _)
   · intro j i
-    dsimp only
     split
     · exact hV0P i
     · split
@@ -1789,7 +1788,7 @@ theorem ppMachine_hoareTime (k : ℕ) (tm : NTM k) (x : List Bool)
     refine (epilogueTM_hoareTime k N (1 + T) (tally P N) (tally (fun u => !P u) N)
       (bodyInput x) hIp hIsi).weaken_pre ?_
     rintro inp work out ⟨hi, hw, ho⟩
-    exact ⟨hi, hw, by rw [ho, if_pos rfl]⟩
+    exact ⟨hi, hw, by rw [ho, ite_eq_left rfl]⟩
   exact TM.seqTM_hoareTime _ _ p0
     (htr (fun _ => TM.blankTape) TM.blankTape (fun _ => TM.blankTape_parked)
       TM.blankTape_parked)
@@ -1898,7 +1897,7 @@ theorem loopEpilogue_keepsWindowOn (tm : NTM k) (x : List Bool) (hne : tm.qstart
     · rw [hw]
       exact funext fun i => TM.transitionTape_eq_self
         (bodyBank_parked k N (1 + T) N (tally P N) (tally (fun u => !P u) N) i).read_ne_start
-    · rw [ho, if_pos rfl]
+    · rw [ho, ite_eq_left rfl]
       exact TM.transitionTape_eq_self (outSlot_parked Γw.one).read_ne_start
 
 
@@ -2334,14 +2333,12 @@ theorem zeroTM_hoareTime (k : ℕ) (x : List Bool) :
       (fun j => if j ≤ 2 then TM.blankTape else outSlot Γw.zero) b hIp ?_ ?_ ?_).consequence
       (fun _ _ _ h => h) (fun _ _ _ h => h) (le_refl _)
     · intro j i
-      dsimp only
       split
       · exact hV0P i
       · split
         · exact hV1P i
         · exact hV2P i
     · intro j
-      dsimp only
       split
       · exact TM.blankTape_parked
       · exact outSlot_parked _

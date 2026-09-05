@@ -709,26 +709,26 @@ theorem activeBLevelTM_hoareTime (q : N.Q) (si sw so : Γ)
     refine activeLeafTM_hoareTime N q si sw so b _ _ _ _ _ hQc hB haux2
       ?_ ?_ ?_ ?_ ?_ inp₀ ys' hinp₀
     · by_cases hq : q = N.qhalt
-      · rw [if_pos hq, if_pos hq]
-      · rw [if_neg hq, if_neg hq]
+      · rw [ite_eq_left hq, ite_eq_left hq]
+      · rw [ite_eq_right hq, ite_eq_right hq]
         cases hz : pwZero with
-        | true => rw [if_pos rfl, if_pos (hpwZ hz)]
-        | false => rw [if_neg (by simp), if_neg (hpwZ' hz)]
+        | true => rw [ite_eq_left rfl, ite_eq_left (hpwZ hz)]
+        | false => rw [ite_eq_right (by simp), ite_eq_right (hpwZ' hz)]
     · by_cases hq : q = N.qhalt
-      · rw [if_pos hq, if_pos hq]
-      · rw [if_neg hq, if_neg hq]
+      · rw [ite_eq_left hq, ite_eq_left hq]
+      · rw [ite_eq_right hq, ite_eq_right hq]
         cases hz : poZero with
-        | true => rw [if_pos rfl, if_pos (hpoZ hz)]
-        | false => rw [if_neg (by simp), if_neg (hpoZ' hz)]
+        | true => rw [ite_eq_left rfl, ite_eq_left (hpoZ hz)]
+        | false => rw [ite_eq_right (by simp), ite_eq_right (hpoZ' hz)]
     · by_cases hq : q = N.qhalt
-      · rw [if_pos hq, if_pos hq]; rfl
-      · rw [if_neg hq, if_neg hq]; rfl
+      · rw [ite_eq_left hq, ite_eq_left hq]; rfl
+      · rw [ite_eq_right hq, ite_eq_right hq]; rfl
     · by_cases hq : q = N.qhalt
-      · rw [if_pos hq, if_pos hq]; rfl
-      · rw [if_neg hq, if_neg hq]; rfl
+      · rw [ite_eq_left hq, ite_eq_left hq]; rfl
+      · rw [ite_eq_right hq, ite_eq_right hq]; rfl
     · by_cases hq : q = N.qhalt
-      · rw [if_pos hq, if_pos hq]; rfl
-      · rw [if_neg hq, if_neg hq]; rfl
+      · rw [ite_eq_left hq, ite_eq_left hq]; rfl
+      · rw [ite_eq_right hq, ite_eq_right hq]; rfl
   have h := bigSeq_emit_hoareTime
     (fun b => activeLeafTM N q si sw so b
       (if q = N.qhalt then sw else if pwZero then sw

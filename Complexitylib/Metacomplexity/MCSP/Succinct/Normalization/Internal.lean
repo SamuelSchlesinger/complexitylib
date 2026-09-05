@@ -222,8 +222,10 @@ theorem hasCircuitAtMost_trivialCircuitSizeBound_internal (inst : Instance)
     (hsmall : inst.HasCircuitAtMost) :
     ({ inst with threshold := inst.trivialCircuitSizeBound } : Instance).HasCircuitAtMost := by
   by_cases harity : inst.arity = 0
-  · simpa [HasCircuitAtMost, harity] using hsmall
-  · letI : NeZero inst.arity := ⟨harity⟩
+  · unfold HasCircuitAtMost at hsmall ⊢
+    rw [dite_eq_left harity] at hsmall ⊢
+    exact hsmall
+  · let : NeZero inst.arity := ⟨harity⟩
     obtain ⟨_, circuit, _, hsamples⟩ :=
       (hasCircuitAtMost_iff_exists_circuit_internal inst).mp hsmall
     apply (exists_isRawCircuitWitness_iff_internal
@@ -231,7 +233,7 @@ theorem hasCircuitAtMost_trivialCircuitSizeBound_internal (inst : Instance)
     let formula := inst.interpolatingFormula
     let rawCircuit := BoolFormula.compileRaw inst.arity formula
     refine ⟨rawCircuit.encode, ?_⟩
-    simp only [IsRawCircuitWitness, harity, if_false]
+    simp only [IsRawCircuitWitness, harity, ite_false]
     change
       match CircuitCode.RawCircuit.decode? rawCircuit.encode with
       | none => False
@@ -312,7 +314,7 @@ theorem rawWitnessLengthPolynomial_polyBound_internal :
       PolyBound (fun inputLength => 4 * inputLength + 6) :=
     ((PolyBound.const 4).mul PolyBound.id).add (PolyBound.const 6)
   have htotal := (PolyBound.const 1).add (PolyBound.id.mul hfactor)
-  simpa [rawWitnessLengthPolynomial] using htotal
+  exact htotal
 
 theorem exists_normalizedRawWitness_length_le_encode_internal
     (inst : Instance) (hsmall : inst.HasCircuitAtMost) :
@@ -324,7 +326,7 @@ theorem exists_normalizedRawWitness_length_le_encode_internal
     · refine ⟨[false], ?_, ?_⟩
       · simp [normalizeThreshold, IsRawCircuitWitness, harity, hsamples]
       · simp [rawWitnessLengthPolynomial]
-    · letI : NeZero inst.arity := ⟨harity⟩
+    · let : NeZero inst.arity := ⟨harity⟩
       obtain ⟨_, circuit, hsize, _⟩ :=
         (hasCircuitAtMost_iff_exists_circuit_internal inst).mp hsmall
       have hthreshold : 1 ≤ inst.threshold := by
@@ -337,7 +339,7 @@ theorem exists_normalizedRawWitness_length_le_encode_internal
         [CircuitCode.RawGate.constant 0 false]
       refine ⟨rawCircuit.encode, ?_, ?_⟩
       · simp only [IsRawCircuitWitness, normalizeThreshold, harity,
-          if_false]
+          ite_false]
         change
           match CircuitCode.RawCircuit.decode? rawCircuit.encode with
           | none => False
@@ -420,7 +422,7 @@ theorem mem_iff_exists_rawWitnessRelation_internal (bits : List Bool) :
   | none => simp [Complexity.SuccinctMCSP, RawWitnessRelation, hdecode]
   | some inst =>
       simp only [Complexity.SuccinctMCSP, RawWitnessRelation, hdecode,
-      Set.mem_setOf_eq]
+      Set.mem_ofPred_eq]
       constructor
       · intro hsmall
         have hcanonical :=

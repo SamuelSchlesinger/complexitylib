@@ -142,13 +142,13 @@ def ofRight {j : ℕ} (τ : Type) [DecidableEq τ] [Fintype τ] (start : τ)
     (p : ℕ) (s : τ) : (ofRight τ start step emit).runL cols p s = s := by
   induction p generalizing s with
   | zero => rfl
-  | succ p ih => rw [runL]; exact ih _
+  | succ p ih => simp only [runL]; exact ih _
 
 theorem ofRight_run {j : ℕ} (τ : Type) [DecidableEq τ] [Fintype τ] (start : τ)
     (step : τ → (Fin (j + 1) → Γ) → τ) (emit : τ → Bool) (cols : ℕ → Fin (j + 1) → Γ)
     (len : ℕ) :
     (ofRight τ start step emit).run cols len = (ofRight τ start step emit).runR cols len := by
-  rw [run, ofRight_runL]
+  rw [run]; apply ofRight_runL
 
 /-! ## Running a scanner on a wider tape set
 
@@ -181,7 +181,7 @@ theorem comap_runL {j jj : ℕ} (S : Scanner j) (f : Fin (j + 1) → Fin (jj + 1
     (S.comap f).runL cols p s = S.runL (fun q i => cols q (f i)) p s := by
   induction p generalizing s with
   | zero => rfl
-  | succ p ih => rw [runL, runL, ih]; rfl
+  | succ p ih => simp only [runL]; exact ih _
 
 /-- **A scanner run through a map reads exactly the columns the map names.** -/
 theorem comap_run {j jj : ℕ} (S : Scanner j) (f : Fin (j + 1) → Fin (jj + 1))
@@ -212,7 +212,7 @@ theorem runL_of_rightOnly {j : ℕ} {S : Scanner j} (hS : RightOnly S)
   intro p
   induction p with
   | zero => intro s; rfl
-  | succ p ih => intro s; rw [runL, hS, ih]
+  | succ p ih => intro s; simp only [runL]; rw [hS]; exact ih _
 
 /-- The saturating position counter a frozen check carries. -/
 def upToIdx (w p : ℕ) : Fin (w + 1) := ⟨min p w, by omega⟩
@@ -246,7 +246,7 @@ theorem upTo_runR {j : ℕ} (S : Scanner j) (w : ℕ) (cols : ℕ → Fin (j + 1
             (S.stepR (S.runR cols (min p w)) (cols (p + 1)),
               (⟨((upToIdx w p : Fin (w + 1)) : ℕ) + 1, by omega⟩ : Fin (w + 1)))
           else (S.runR cols (min p w), upToIdx w p)) = _
-        rw [dif_pos hlt]
+        rw [dite_eq_left hlt]
         refine Prod.ext ?_ (Fin.ext ?_)
         · show S.stepR (S.runR cols (min p w)) (cols (p + 1)) = S.runR cols (min (p + 1) w)
           rw [hmin, hmin']
@@ -261,7 +261,7 @@ theorem upTo_runR {j : ℕ} (S : Scanner j) (w : ℕ) (cols : ℕ → Fin (j + 1
             (S.stepR (S.runR cols (min p w)) (cols (p + 1)),
               (⟨((upToIdx w p : Fin (w + 1)) : ℕ) + 1, by omega⟩ : Fin (w + 1)))
           else (S.runR cols (min p w), upToIdx w p)) = _
-        rw [dif_neg hge]
+        rw [dite_eq_right hge]
         refine Prod.ext ?_ (Fin.ext ?_)
         · show S.runR cols (min p w) = S.runR cols (min (p + 1) w)
           rw [show min (p + 1) w = min p w by omega]
@@ -272,7 +272,7 @@ theorem upTo_runL {j : ℕ} (S : Scanner j) (w : ℕ) (cols : ℕ → Fin (j + 1
     (s : (S.upTo w).σ) : (S.upTo w).runL cols p s = (S.runL cols p s.1, s.2) := by
   induction p generalizing s with
   | zero => rfl
-  | succ p ih => rw [runL, ih]; rfl
+  | succ p ih => simp only [runL, ih]; rfl
 
 /-- **A frozen check gives the verdict it would have given on its own cells.** -/
 theorem upTo_emit_run {j : ℕ} (S : Scanner j) (hS : RightOnly S) (w len : ℕ) (hw : w ≤ len)
@@ -315,7 +315,7 @@ theorem after_runR {j : ℕ} (S : Scanner j) (w : ℕ) (cols : ℕ → Fin (j + 
               (⟨((upToIdx w p : Fin (w + 1)) : ℕ) + 1, by omega⟩ : Fin (w + 1)))
           else (S.stepR (S.runR (fun q => cols (w + q)) (p - w)) (cols (p + 1)),
             upToIdx w p)) = _
-        rw [dif_pos hlt]
+        rw [dite_eq_left hlt]
         refine Prod.ext ?_ (Fin.ext ?_)
         · show S.runR (fun q => cols (w + q)) (p - w)
             = S.runR (fun q => cols (w + q)) (p + 1 - w)
@@ -331,7 +331,7 @@ theorem after_runR {j : ℕ} (S : Scanner j) (w : ℕ) (cols : ℕ → Fin (j + 
               (⟨((upToIdx w p : Fin (w + 1)) : ℕ) + 1, by omega⟩ : Fin (w + 1)))
           else (S.stepR (S.runR (fun q => cols (w + q)) (p - w)) (cols (p + 1)),
             upToIdx w p)) = _
-        rw [dif_neg hge]
+        rw [dite_eq_right hge]
         refine Prod.ext ?_ (Fin.ext ?_)
         · show S.stepR (S.runR (fun q => cols (w + q)) (p - w)) (cols (p + 1))
             = S.runR (fun q => cols (w + q)) (p + 1 - w)
@@ -345,7 +345,7 @@ theorem after_runL {j : ℕ} (S : Scanner j) (w : ℕ) (cols : ℕ → Fin (j + 
     (s : (S.after w).σ) : (S.after w).runL cols p s = (S.runL cols p s.1, s.2) := by
   induction p generalizing s with
   | zero => rfl
-  | succ p ih => rw [runL, ih]; rfl
+  | succ p ih => simp only [runL, ih]; rfl
 
 /-- **A check that skips a prefix reads the cells after it.** -/
 theorem after_emit_run {j : ℕ} (S : Scanner j) (hS : RightOnly S) (w len : ℕ)
@@ -391,7 +391,7 @@ theorem all_runL {jj : ℕ} (n : ℕ) (S : Fin n → Scanner jj) (cols : ℕ →
     (all n S).runL cols p s i = (S i).runL cols p (s i) := by
   induction p generalizing s with
   | zero => rfl
-  | succ p ih => rw [runL, runL, ih]; rfl
+  | succ p ih => simp only [runL, runL, ih]; rfl
 
 /-- **Each component of a joint scan runs its own scan.** -/
 theorem all_run {jj : ℕ} (n : ℕ) (S : Fin n → Scanner jj) (cols : ℕ → Fin (jj + 1) → Γ)
@@ -427,14 +427,14 @@ theorem or_runL {jj : ℕ} (S T : Scanner jj) (cols : ℕ → Fin (jj + 1) → �
     (s : S.σ × T.σ) : (S.or T).runL cols p s = (S.runL cols p s.1, T.runL cols p s.2) := by
   induction p generalizing s with
   | zero => rfl
-  | succ p ih => rw [runL, ih]; rfl
+  | succ p ih => simp only [runL]; exact ih _
 
 /-- **A disjunctive scan accepts exactly when one of its halves does.** -/
 theorem or_emit_run {jj : ℕ} (S T : Scanner jj) (cols : ℕ → Fin (jj + 1) → Γ) (len : ℕ) :
     (S.or T).emit ((S.or T).run cols len) = true ↔
       S.emit (S.run cols len) = true ∨ T.emit (T.run cols len) = true := by
   show (S.emit _ || T.emit _) = true ↔ _
-  rw [run, or_runL, or_runR]
+  rw [run]; erw [or_runL, or_runR]
   simp [run]
 
 /-! ## Reading parameters before checking
@@ -499,9 +499,9 @@ theorem prefixed_runR_le (c : ℕ) (a₀ : α) (readStep : α → (Fin (j + 1) �
       have hlt : ((prefixed c α τ a₀ readStep t₀ mainStep emit).runR cols p).1.val < c := by
         rw [h1]; omega
       constructor
-      · rw [runR, prefixed_stepR, dif_pos hlt]
+      · rw [runR]; erw [prefixed_stepR, dite_eq_left hlt]
         simpa using h1
-      · rw [runR, prefixed_stepR, dif_pos hlt, auxRun, h2]
+      · rw [runR]; erw [prefixed_stepR, dite_eq_left hlt]; rw [auxRun, h2]
 
 end Scanner
 
@@ -525,18 +525,18 @@ theorem prefixed_runR (c : ℕ) (a₀ : α) (readStep : α → (Fin (j + 1) → 
       obtain ⟨h1, h2⟩ := prefixed_runR_le (c' + 1) a₀ readStep t₀ mainStep emit cols c' (by omega)
       have hlt : ((prefixed (c' + 1) α τ a₀ readStep t₀ mainStep emit).runR cols c').1.val
           < c' + 1 := by rw [h1]; omega
-      rw [Nat.add_zero, runR, prefixed_stepR, dif_pos hlt, h2, mainRun]
+      rw [Nat.add_zero, runR]; erw [prefixed_stepR, dite_eq_left hlt, h2, mainRun]
       refine Prod.ext ?_ (Prod.ext ?_ ?_)
       · exact Fin.ext (by simpa using h1)
       · rw [auxRun]
-      · rw [if_pos (by omega), auxRun]
+      · rw [ite_eq_left (by omega), auxRun]
   | succ q ih =>
       have hnot : ¬ ((prefixed c α τ a₀ readStep t₀ mainStep emit).runR cols (c + q)).1.val
           < c := by
         rw [ih]
         exact Nat.lt_irrefl c
-      rw [show c + (q + 1) = (c + q) + 1 by omega, runR, prefixed_stepR, dif_neg hnot, ih,
-        mainRun]
+      rw [show c + (q + 1) = (c + q) + 1 by omega, runR]
+      erw [prefixed_stepR, dite_eq_right hnot, ih]; rfl
 
 /-- **What a parameterized scan reports**: the check the parameters chose, run on the data after
 them. -/
@@ -551,7 +551,7 @@ theorem prefixed_run (c : ℕ) (a₀ : α) (readStep : α → (Fin (j + 1) → �
   have hrunL : ∀ s : Fin (c + 1) × α × τ,
       (prefixed c α τ a₀ readStep t₀ mainStep emit).runL cols (c + q) s = s := fun s =>
     ofRight_runL (Fin (c + 1) × α × τ) _ _ _ cols (c + q) s
-  rw [run, hrunL, prefixed_runR c a₀ readStep t₀ mainStep emit cols hc q]
+  rw [run]; erw [hrunL, prefixed_runR c a₀ readStep t₀ mainStep emit cols hc q]
   rfl
 
 /-! ## Reading fixed-width fields into the control
@@ -605,7 +605,7 @@ theorem bitsStep_run {j : ℕ} (s w : ℕ) (regs : Fin s → Fin (j + 1))
       obtain ⟨h1, h2⟩ := ih (by omega)
       have hlt : (auxRun (⟨0, Nat.zero_lt_succ w⟩, x₀) (bitsStep s w regs) cols p).1.val < w := by
         rw [h1]; omega
-      rw [auxRun, bitsStep, dif_pos hlt]
+      rw [auxRun, bitsStep, dite_eq_left hlt]
       refine ⟨by simpa using h1, fun t i hi => ?_⟩
       dsimp only
       rcases Nat.lt_or_ge i.val p with h | h
@@ -702,7 +702,7 @@ theorem cellFold_chunk {j : ℕ} {χ : Type}
           = (1, cols (off + 3 * p + 1),
             (cellFold (chunkStepCell f) cols off (0, u, v, x₀) (3 * p)).2.2.1,
             chunkRun f cols off x₀ p) := by
-        rw [chunkStepCell, if_pos h0, hx]
+        rw [chunkStepCell, ite_eq_left h0, hx]
       rw [e0]
       have e1 : chunkStepCell f
           (1, cols (off + 3 * p + 1),
@@ -735,7 +735,7 @@ theorem rightOnly_eq (j : ℕ) (a b : Fin (j + 1)) : RightOnly (eq j a b) := fun
     (s : Bool) : (eq j a b).runL cols p s = s := by
   induction p generalizing s with
   | zero => rfl
-  | succ p ih => rw [runL]; exact ih _
+  | succ p ih => simp only [runL]; exact ih _
 
 theorem eq_runR (j : ℕ) (a b : Fin (j + 1)) (cols : ℕ → Fin (j + 1) → Γ) :
     ∀ p : ℕ, (eq j a b).runR cols p = true ↔ ∀ q, 1 ≤ q → q ≤ p → cols q a = cols q b := by
@@ -745,7 +745,7 @@ theorem eq_runR (j : ℕ) (a b : Fin (j + 1)) (cols : ℕ → Fin (j + 1) → Γ
   | succ p ih =>
       rw [runR]
       show ((eq j a b).runR cols p && decide (cols (p + 1) a = cols (p + 1) b)) = true ↔ _
-      rw [Bool.and_eq_true, decide_eq_true_eq]
+      erw [Bool.and_eq_true, decide_eq_true_eq]
       constructor
       · rintro ⟨hall, hlast⟩ q h1 h2
         rcases Nat.lt_or_ge q (p + 1) with hlt | hge
@@ -758,7 +758,7 @@ theorem eq_runR (j : ℕ) (a b : Fin (j + 1)) (cols : ℕ → Fin (j + 1) → Γ
 /-- **What the equality scanner reports.** -/
 theorem eq_run (j : ℕ) (a b : Fin (j + 1)) (cols : ℕ → Fin (j + 1) → Γ) (len : ℕ) :
     (eq j a b).run cols len = true ↔ ∀ q, 1 ≤ q → q ≤ len → cols q a = cols q b := by
-  rw [run, eq_runL, eq_runR]
+  rw [run]; erw [eq_runL, eq_runR]
 
 /-- **A comparison restricted to a range of cells decides equality there.** This is how a small
 guessed register is pinned against a field sitting anywhere inside a bigger one. -/
@@ -790,7 +790,7 @@ theorem isConst_runR (j : ℕ) (a : Fin (j + 1)) (g : Γ) (cols : ℕ → Fin (j
   | succ p ih =>
       rw [runR]
       show ((isConst j a g).runR cols p && decide (cols (p + 1) a = g)) = true ↔ _
-      rw [Bool.and_eq_true, decide_eq_true_eq]
+      erw [Bool.and_eq_true, decide_eq_true_eq]
       constructor
       · rintro ⟨hall, hlast⟩ q h1 h2
         rcases Nat.lt_or_ge q (p + 1) with hlt | hge
@@ -804,11 +804,11 @@ theorem isConst_runL (j : ℕ) (a : Fin (j + 1)) (g : Γ) (cols : ℕ → Fin (j
     (s : Bool) : (isConst j a g).runL cols p s = s := by
   induction p generalizing s with
   | zero => rfl
-  | succ p ih => rw [runL]; exact ih _
+  | succ p ih => simp only [runL]; exact ih _
 
 theorem isConst_run (j : ℕ) (a : Fin (j + 1)) (g : Γ) (cols : ℕ → Fin (j + 1) → Γ) (len : ℕ) :
     (isConst j a g).run cols len = true ↔ ∀ q, 1 ≤ q → q ≤ len → cols q a = g := by
-  rw [run, isConst_runL, isConst_runR]
+  rw [run]; erw [isConst_runL, isConst_runR]
 
 theorem rightOnly_isConst (j : ℕ) (a : Fin (j + 1)) (g : Γ) : RightOnly (isConst j a g) :=
   fun _ _ => rfl
@@ -844,7 +844,7 @@ theorem isNotConst_runR (j : ℕ) (a : Fin (j + 1)) (g : Γ) (cols : ℕ → Fin
   | succ p ih =>
       rw [runR]
       show ((isNotConst j a g).runR cols p || decide (cols (p + 1) a ≠ g)) = true ↔ _
-      rw [Bool.or_eq_true, decide_eq_true_eq]
+      erw [Bool.or_eq_true, decide_eq_true_eq]
       constructor
       · rintro (hall | hlast)
         · obtain ⟨q, h1, h2, h3⟩ := ih.mp hall
@@ -859,7 +859,7 @@ theorem isNotConst_runL (j : ℕ) (a : Fin (j + 1)) (g : Γ) (cols : ℕ → Fin
     (s : Bool) : (isNotConst j a g).runL cols p s = s := by
   induction p generalizing s with
   | zero => rfl
-  | succ p ih => rw [runL]; exact ih _
+  | succ p ih => simp only [runL]; exact ih _
 
 theorem rightOnly_isNotConst (j : ℕ) (a : Fin (j + 1)) (g : Γ) :
     RightOnly (isNotConst j a g) := fun _ _ => rfl
@@ -871,7 +871,7 @@ theorem isNotConst_cell (j : ℕ) (a : Fin (j + 1)) (g : Γ) (cols : ℕ → Fin
       cols 1 a ≠ g := by
   rw [upTo_emit_run _ (rightOnly_isNotConst j a g) 1 len hlen]
   show (isNotConst j a g).run cols 1 = true ↔ _
-  rw [run, isNotConst_runL, isNotConst_runR]
+  rw [run]; erw [isNotConst_runL, isNotConst_runR]
   exact ⟨fun ⟨q, h1, h2, h3⟩ => by rwa [show q = 1 by omega] at h3,
     fun h => ⟨1, le_rfl, le_rfl, h⟩⟩
 
@@ -899,7 +899,7 @@ theorem isNotConst_range_run (j : ℕ) (a : Fin (j + 1)) (g : Γ) (cols : ℕ �
       ∃ q, w₁ < q ∧ q ≤ w₂ ∧ cols q a ≠ g := by
   rw [range_emit_run _ (rightOnly_isNotConst j a g) w₁ w₂ len hw]
   show (isNotConst j a g).run (fun q => cols (w₁ + q)) (w₂ - w₁) = true ↔ _
-  rw [run, isNotConst_runL, isNotConst_runR]
+  rw [run]; erw [isNotConst_runL, isNotConst_runR]
   constructor
   · rintro ⟨q, h1, h2, h3⟩
     exact ⟨w₁ + q, by omega, by omega, h3⟩
@@ -928,7 +928,7 @@ theorem andAll_runR (j : ℕ) (cols : ℕ → Fin (j + 1) → Γ) :
   | succ p ih =>
       rw [runR]
       show ((andAll j).runR cols p && decide (∀ i, cols (p + 1) i = Γ.one)) = true ↔ _
-      rw [Bool.and_eq_true, decide_eq_true_eq]
+      erw [Bool.and_eq_true, decide_eq_true_eq]
       constructor
       · rintro ⟨hall, hlast⟩ q h1 h2
         rcases Nat.lt_or_ge q (p + 1) with h | h
@@ -944,7 +944,7 @@ theorem andAll_run (j : ℕ) (cols : ℕ → Fin (j + 1) → Γ) (p : ℕ) :
     (andAll j).run cols p = true ↔ ∀ q, 1 ≤ q → q ≤ p → ∀ i, cols q i = Γ.one := by
   have hrunL : ∀ s : Bool, (andAll j).runL cols p s = s := fun s =>
     ofRight_runL Bool _ _ _ cols p s
-  rw [run, hrunL, andAll_runR]
+  rw [run]; erw [hrunL, andAll_runR]
 
 /-- Report whether the *designated* tapes all carry `Γ.one`. The verdict registers of a
 composite check are scattered — each check owns a contiguous block, so their result tapes are
@@ -967,7 +967,7 @@ theorem andSome_runR (j : ℕ) (P : Fin (j + 1) → Bool) (cols : ℕ → Fin (j
       rw [runR]
       show ((andSome j P).runR cols p &&
         decide (∀ i, P i = true → cols (p + 1) i = Γ.one)) = true ↔ _
-      rw [Bool.and_eq_true, decide_eq_true_eq]
+      erw [Bool.and_eq_true, decide_eq_true_eq]
       constructor
       · rintro ⟨hall, hlast⟩ q h1 h2
         rcases Nat.lt_or_ge q (p + 1) with h | h
@@ -984,7 +984,7 @@ theorem andSome_run (j : ℕ) (P : Fin (j + 1) → Bool) (cols : ℕ → Fin (j 
       ∀ q, 1 ≤ q → q ≤ p → ∀ i, P i = true → cols q i = Γ.one := by
   have hrunL : ∀ s : Bool, (andSome j P).runL cols p s = s := fun s =>
     ofRight_runL Bool _ _ _ cols p s
-  rw [run, hrunL, andSome_runR]
+  rw [run]; erw [hrunL, andSome_runR]
 
 /-- Report whether the designated tapes carry `Γ.one` in their **first** cell. A verdict register
 holds a single bit and blanks after it, so a scan whose length is set by some longer register must
@@ -1008,7 +1008,7 @@ theorem andFirst_runR (j : ℕ) (P : Fin (j + 1) → Bool) (cols : ℕ → Fin (
       rcases Nat.eq_zero_or_pos p with hp | hp
       · subst hp
         simp
-      · rw [if_pos (by simpa using hp)]
+      · rw [ite_eq_left (by simpa using hp)]
         simp [Nat.ne_of_gt hp]
 
 /-- **What the first-cell conjunction scanner reports.** -/
@@ -1018,9 +1018,9 @@ theorem andFirst_run (j : ℕ) (P : Fin (j + 1) → Bool) (cols : ℕ → Fin (j
       ∀ i, P i = true → cols 1 i = Γ.one := by
   have hrunL : ∀ s : Bool × Bool, (andFirst j P).runL cols p s = s := fun s =>
     ofRight_runL (Bool × Bool) _ _ _ cols p s
-  rw [run, hrunL, andFirst_runR]
+  rw [run]; erw [hrunL, andFirst_runR]
   show (if p = 0 then true else decide (∀ i, P i = true → cols 1 i = Γ.one)) = true ↔ _
-  rw [if_neg (by omega), decide_eq_true_eq]
+  rw [ite_eq_right (by omega), decide_eq_true_eq]
 
 /-- Report an arbitrary function of the **first** column. Verdict registers hold a single bit
 each, so a composite decision — "these checks all passed, *or* those did" — is a function of one
@@ -1041,7 +1041,7 @@ theorem firstCol_runR (j : ℕ) (f : (Fin (j + 1) → Γ) → Bool) (cols : ℕ 
       rcases Nat.eq_zero_or_pos p with hp | hp
       · subst hp
         simp
-      · rw [if_pos (by simpa using hp)]
+      · rw [ite_eq_left (by simpa using hp)]
         simp [Nat.ne_of_gt hp]
 
 /-- **What the first-column scanner reports.** -/
@@ -1050,9 +1050,9 @@ theorem firstCol_run (j : ℕ) (f : (Fin (j + 1) → Γ) → Bool) (cols : ℕ �
     (firstCol j f).emit ((firstCol j f).run cols p) = f (cols 1) := by
   have hrunL : ∀ s : Bool × Bool, (firstCol j f).runL cols p s = s := fun s =>
     ofRight_runL (Bool × Bool) _ _ _ cols p s
-  rw [run, hrunL, firstCol_runR]
+  rw [run]; erw [hrunL, firstCol_runR]
   show (if p = 0 then true else f (cols 1)) = _
-  rw [if_neg (by omega)]
+  rw [ite_eq_right (by omega)]
 
 /-! ## A scanner that checks an increment
 
@@ -1107,7 +1107,7 @@ theorem plusOne_runR (j : ℕ) (a b : Fin (j + 1)) (cols : ℕ → Fin (j + 1) �
           simp_all [valUpTo] <;> omega
       · simp only [valUpTo, Bool.and_eq_true, decide_eq_true_eq]
         cases c <;> cases v <;>
-          simp only [Bool.false_eq_true, if_true, if_false, Bool.xor_false, Bool.xor_true,
+          simp only [Bool.false_eq_true, ite_true, ite_false, Bool.xor_false, Bool.xor_true,
             true_iff, false_iff] at hinv hcar ⊢ <;>
           cases hA : bitAt cols a (p + 1) <;> cases hB : bitAt cols b (p + 1) <;>
           simp_all <;>
@@ -1121,14 +1121,14 @@ theorem plusOne_run (j : ℕ) (a b : Fin (j + 1)) (cols : ℕ → Fin (j + 1) �
   have hrunL : ∀ (s : Bool × Bool), (plusOne j a b).runL cols len s = s := fun s =>
     ofRight_runL (Bool × Bool) _ _ _ cols len s
   have hrun' : (plusOne j a b).run cols len = (c, v) := by
-    rw [run, hrunL, hrun]
+    rw [run]; erw [hrunL, hrun]
   rw [hrun']
   have hlB : valUpTo (bitAt cols b) len < 2 ^ len := valUpTo_lt _ len
   clear hrun hrun' hrunL
   show (!c && v) = true ↔ _
   cases c <;> cases v <;>
     simp only [Bool.not_true, Bool.not_false, Bool.false_and, Bool.true_and,
-      Bool.false_eq_true, if_true, if_false, true_iff, false_iff] at hcar hinv ⊢ <;>
+      Bool.false_eq_true, ite_true, ite_false, true_iff, false_iff] at hcar hinv ⊢ <;>
     omega
 
 end Scanner
@@ -1236,12 +1236,12 @@ def twoPassTM (S : Scanner j) : TM (j + 2) :=
 /-! ## What one step does -/
 
 private theorem move_idle {t : Tape} (h : t.read ≠ Γ.start) : t.move (idleDir t.read) = t := by
-  rw [idleDir, if_neg h]
+  rw [idleDir, ite_eq_right h]
   rfl
 
 private theorem tape_keep {t : Tape} (h : t.read ≠ Γ.start) :
     t.writeAndMove (readBackWrite t.read) (idleDir t.read) = t := by
-  rw [writeAndMove_readBack _ h, idleDir, if_neg h]
+  rw [writeAndMove_readBack _ h, idleDir, ite_eq_right h]
   rfl
 
 private theorem tape_right {t : Tape} (h : t.read ≠ Γ.start) :
@@ -1251,7 +1251,7 @@ private theorem tape_right {t : Tape} (h : t.read ≠ Γ.start) :
 
 private theorem tape_left {t : Tape} (h : t.read ≠ Γ.start) :
     t.writeAndMove (readBackWrite t.read) (moveLeftDir t.read) = ⟨t.head - 1, t.cells⟩ := by
-  rw [writeAndMove_readBack _ h, moveLeftDir, if_neg h]
+  rw [writeAndMove_readBack _ h, moveLeftDir, ite_eq_right h]
   rfl
 
 /-- The column of symbols under the scanned heads when they are all at cell `h`. -/
@@ -1295,26 +1295,26 @@ theorem twoPassCfg_step_right (S : Scanner j) (s : S.σ) (inp : Tape)
       = twoPassCfg S (TwoPassPhase.right, S.stepR s (scanCol cells h)) inp cells (h + 1)
           res out := by
   refine Cfg.ext ?_ ?_ ?_ ?_
-  · simp only [TM.stepCfg, twoPassCfg, twoPassTM, work_read, hne, if_false]
+  · simp only [TM.stepCfg, twoPassCfg, twoPassTM, work_read, hne, ite_false]
     rfl
-  · simp only [TM.stepCfg, twoPassCfg, twoPassTM, work_read, hne, if_false]
+  · simp only [TM.stepCfg, twoPassCfg, twoPassTM, work_read, hne, ite_false]
     exact move_idle hok.inp
   · funext i
     refine Fin.lastCases ?_ ?_ i
-    · simp only [TM.stepCfg, twoPassCfg, twoPassTM, work_read, hne, if_false]
+    · simp only [TM.stepCfg, twoPassCfg, twoPassTM, work_read, hne, ite_false]
       simp only [Fin.snoc_last]
       exact tape_keep hok.res
     · intro i'
-      simp only [TM.stepCfg, twoPassCfg, twoPassTM, work_read, hne, if_false]
+      simp only [TM.stepCfg, twoPassCfg, twoPassTM, work_read, hne, ite_false]
       simp only [Fin.snoc_castSucc]
       exact tape_right (show (⟨h, cells i'⟩ : Tape).read ≠ Γ.start from hc i')
-  · simp only [TM.stepCfg, twoPassCfg, twoPassTM, work_read, hne, if_false]
+  · simp only [TM.stepCfg, twoPassCfg, twoPassTM, work_read, hne, ite_false]
     exact tape_keep hok.out
 
 private theorem tape_start_right {t : Tape} (hh : t.head = 0) (g : Γ) :
     t.writeAndMove g Dir3.right = ⟨1, t.cells⟩ := by
   show (t.write g).move Dir3.right = _
-  rw [Tape.write, if_pos hh]
+  rw [Tape.write, ite_eq_left hh]
   show (⟨t.head + 1, t.cells⟩ : Tape) = _
   rw [hh]
 
@@ -1325,19 +1325,19 @@ theorem twoPassCfg_step_turn (S : Scanner j) (s : S.σ) (inp : Tape)
     (twoPassTM S).stepCfg (twoPassCfg S (TwoPassPhase.right, s) inp cells h res out)
       = twoPassCfg S (TwoPassPhase.left, s) inp cells (h - 1) res out := by
   refine Cfg.ext ?_ ?_ ?_ ?_
-  · simp only [TM.stepCfg, twoPassCfg, twoPassTM, work_read, hb, if_true]
-  · simp only [TM.stepCfg, twoPassCfg, twoPassTM, work_read, hb, if_true]
+  · simp only [TM.stepCfg, twoPassCfg, twoPassTM, work_read, hb, ite_true]
+  · simp only [TM.stepCfg, twoPassCfg, twoPassTM, work_read, hb, ite_true]
     exact move_idle hok.inp
   · funext i
     refine Fin.lastCases ?_ ?_ i
-    · simp only [TM.stepCfg, twoPassCfg, twoPassTM, work_read, hb, if_true]
+    · simp only [TM.stepCfg, twoPassCfg, twoPassTM, work_read, hb, ite_true]
       simp only [Fin.snoc_last]
       exact tape_keep hok.res
     · intro i'
-      simp only [TM.stepCfg, twoPassCfg, twoPassTM, work_read, hb, if_true]
+      simp only [TM.stepCfg, twoPassCfg, twoPassTM, work_read, hb, ite_true]
       simp only [Fin.snoc_castSucc]
       exact tape_left (show (⟨h, cells i'⟩ : Tape).read ≠ Γ.start from hc i')
-  · simp only [TM.stepCfg, twoPassCfg, twoPassTM, work_read, hb, if_true]
+  · simp only [TM.stepCfg, twoPassCfg, twoPassTM, work_read, hb, ite_true]
     exact tape_keep hok.out
 
 /-- The leftward pass, while the left marker is not yet in sight. -/
@@ -1349,20 +1349,20 @@ theorem twoPassCfg_step_left (S : Scanner j) (s : S.σ) (inp : Tape)
           res out := by
   have hns : ¬ (cells 0 h = Γ.start) := hc 0
   refine Cfg.ext ?_ ?_ ?_ ?_
-  · simp only [TM.stepCfg, twoPassCfg, twoPassTM, work_read, hns, if_false]
+  · simp only [TM.stepCfg, twoPassCfg, twoPassTM, work_read, hns, ite_false]
     rfl
-  · simp only [TM.stepCfg, twoPassCfg, twoPassTM, work_read, hns, if_false]
+  · simp only [TM.stepCfg, twoPassCfg, twoPassTM, work_read, hns, ite_false]
     exact move_idle hok.inp
   · funext i
     refine Fin.lastCases ?_ ?_ i
-    · simp only [TM.stepCfg, twoPassCfg, twoPassTM, work_read, hns, if_false]
+    · simp only [TM.stepCfg, twoPassCfg, twoPassTM, work_read, hns, ite_false]
       simp only [Fin.snoc_last]
       exact tape_keep hok.res
     · intro i'
-      simp only [TM.stepCfg, twoPassCfg, twoPassTM, work_read, hns, if_false]
+      simp only [TM.stepCfg, twoPassCfg, twoPassTM, work_read, hns, ite_false]
       simp only [Fin.snoc_castSucc]
       exact tape_left (show (⟨h, cells i'⟩ : Tape).read ≠ Γ.start from hc i')
-  · simp only [TM.stepCfg, twoPassCfg, twoPassTM, work_read, hns, if_false]
+  · simp only [TM.stepCfg, twoPassCfg, twoPassTM, work_read, hns, ite_false]
     exact tape_keep hok.out
 
 /-- The leftward pass reaches the marker and the scan turns to publishing. -/
@@ -1373,19 +1373,19 @@ theorem twoPassCfg_step_stop (S : Scanner j) (s : S.σ) (inp : Tape)
       = twoPassCfg S (TwoPassPhase.emit, s) inp cells 1 res out := by
   have hst : cells 0 0 = Γ.start := hs 0
   refine Cfg.ext ?_ ?_ ?_ ?_
-  · simp only [TM.stepCfg, twoPassCfg, twoPassTM, work_read, hst, if_true]
-  · simp only [TM.stepCfg, twoPassCfg, twoPassTM, work_read, hst, if_true]
+  · simp only [TM.stepCfg, twoPassCfg, twoPassTM, work_read, hst, ite_true]
+  · simp only [TM.stepCfg, twoPassCfg, twoPassTM, work_read, hst, ite_true]
     exact move_idle hok.inp
   · funext i
     refine Fin.lastCases ?_ ?_ i
-    · simp only [TM.stepCfg, twoPassCfg, twoPassTM, work_read, hst, if_true]
+    · simp only [TM.stepCfg, twoPassCfg, twoPassTM, work_read, hst, ite_true]
       simp only [Fin.snoc_last]
       exact tape_keep hok.res
     · intro i'
-      simp only [TM.stepCfg, twoPassCfg, twoPassTM, work_read, hst, if_true]
+      simp only [TM.stepCfg, twoPassCfg, twoPassTM, work_read, hst, ite_true]
       simp only [Fin.snoc_castSucc]
       exact tape_start_right (show (⟨0, cells i'⟩ : Tape).head = 0 from rfl) _
-  · simp only [TM.stepCfg, twoPassCfg, twoPassTM, work_read, hst, if_true]
+  · simp only [TM.stepCfg, twoPassCfg, twoPassTM, work_read, hst, ite_true]
     exact tape_keep hok.out
 
 /-- Publishing the verdict: one bit onto the result tape, then halt. -/
@@ -1404,7 +1404,7 @@ theorem twoPassCfg_step_emit (S : Scanner j) (s : S.σ) (inp : Tape)
     · simp only [TM.stepCfg, twoPassCfg, twoPassTM, work_read_last]
       simp only [Fin.snoc_last]
       show res.writeAndMove _ (idleDir res.read) = _
-      rw [idleDir, if_neg hok.res]
+      rw [idleDir, ite_eq_right hok.res]
       cases hb : S.emit s <;> rfl
     · intro i'
       simp only [TM.stepCfg, twoPassCfg, twoPassTM, work_read]
@@ -1568,7 +1568,7 @@ theorem checkTM_hoareTime {jd jj : ℕ} (S : Scanner jd) (f : Fin (jd + 1) → F
           (res₀.write (Γ.ofBool (S.emit (S.run (fun q i => cells (f i) q) len)))))
       (2 * len + 3) := by
   have h := twoPassTM_hoareTime (S.comap f) cells len inp₀ out₀ res₀ hok ht
-  simpa only [Scanner.comap_run, Scanner.comap_emit, scanCol] using h
+  simpa only [checkTM, Scanner.comap_run, Scanner.comap_emit, scanCol] using h
 
 end TM
 

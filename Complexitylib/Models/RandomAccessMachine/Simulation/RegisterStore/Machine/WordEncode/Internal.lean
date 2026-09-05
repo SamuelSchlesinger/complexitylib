@@ -98,7 +98,7 @@ theorem workEmitTM_reachesIn_frame_internal
             simpa [c'] using TM.transitionTape_eq_self (hother i hi).read_ne_start
           have houtput' :
               c'.output.HasBinaryPrefix (emitted ++ [false]) := by
-            simpa [c'] using Tape.hasBinaryPrefix_write_bit false houtput
+            simpa [Γ.ofBool, c'] using Tape.hasBinaryPrefix_write_bit false houtput
           refine ⟨c', .step hstep .zero, rfl, hinputKeep, ?_, ?_, ?_,
             hotherKeep, ?_⟩
           · rw [hsourceKeep]
@@ -170,7 +170,7 @@ theorem workEmitTM_reachesIn_frame_internal
         exact hsource.move_right_cons
       have houtput₁ : c₁.output.HasBinaryPrefix
           (emitted ++ [workEmitBit mode bit]) := by
-        simpa [c₁] using Tape.hasBinaryPrefix_write_bit
+        simpa [Γ.ofBool, c₁] using Tape.hasBinaryPrefix_write_bit
           (workEmitBit mode bit) houtput
       obtain ⟨c', hreach, hhalt, hinput', hsource', hsourceCells,
           hsourceHead, hother', houtput'⟩ :=
@@ -350,7 +350,7 @@ theorem wordEncodeTM_hoareTime_frame_internal
           output := TM.transitionTape widthDone.output }
         (TM.phase2Wrap (TM.rewindWorkTM idx)
           (workEmitTM idx .payload) payloadDone) := by
-    simpa [hwidthInputTransition, hwidthWorkTransition,
+    simpa [TM.phase2Wrap, TM.phase1Wrap, TM.seqTM, hwidthInputTransition, hwidthWorkTransition,
       hwidthOutputTransition] using hrestReach
   have hfullReach := TM.seqTM_reachesIn_of_reachesIn
     (workEmitTM idx .width)
@@ -369,10 +369,11 @@ theorem wordEncodeTM_hoareTime_frame_internal
       (TM.seqTM (workEmitTM idx .width)
         (TM.seqTM (TM.rewindWorkTM idx)
           (workEmitTM idx .payload))).halted finalCfg
-    rw [TM.phase2Wrap_halted_iff, TM.phase2Wrap_halted_iff]
+    simp only [finalCfg]
+    erw [TM.phase2Wrap_halted_iff, TM.phase2Wrap_halted_iff]
     exact hpayloadHalt
   · refine ⟨?_, hpayloadSuffix, ?_, ?_, ?_, ?_⟩
-    · simpa [finalCfg] using
+    · simpa [finalCfg, TM.phase2Wrap] using
         hpayloadInput.trans (hrewindInput.trans hwidthInput)
     · have hcanonical :=
         Tape.eq_init_move_right_of_hasBinaryString hvalue.2 hvalue.1
@@ -382,12 +383,12 @@ theorem wordEncodeTM_hoareTime_frame_internal
     · have hrewindHead : (rewindDone.work idx).head = 1 := by
         rw [hrewindTarget]
         simp [Tape.move]
-      simpa [finalCfg, hrewindHead, Nat.add_comm] using hpayloadHead
+      simpa [finalCfg, TM.phase2Wrap, hrewindHead, Nat.add_comm] using hpayloadHead
     · intro i hi
-      simpa [finalCfg] using
+      simpa [finalCfg, TM.phase2Wrap] using
         (hpayloadFrame i hi).trans
           ((hrewindFrame i hi).trans (hwidthFrame i hi))
-    · simpa [finalCfg, WordCode.encode, workEmitBits, bitlen,
+    · simpa [finalCfg, TM.phase2Wrap, WordCode.encode, workEmitBits, bitlen,
         Nat.toBitsLE_size, Nat.size_eq_bits_len, List.append_assoc] using
         hpayloadOutput
 
@@ -471,20 +472,19 @@ theorem rewindWordEncodeTM_hoareTime_frame_internal
   refine ⟨finalCfg, rewindTime + 1 + encodeTime, ?_, hreach, ?_, ?_⟩
   · unfold rewindWordEncodeTime
     omega
-  · change (rewindWordEncodeTM idx).halted finalCfg
-    unfold rewindWordEncodeTM
+  · unfold rewindWordEncodeTM
     rw [TM.phase2Wrap_halted_iff]
     exact hencodeHalt
   · refine ⟨?_, hencodeSuffix, ?_, ?_, ?_, ?_⟩
-    · simpa [finalCfg] using hencodeInput.trans hrewindInput
+    · simpa [finalCfg, TM.phase2Wrap] using hencodeInput.trans hrewindInput
     · change (encodeDone.work idx).cells = (work₀ idx).cells
       rw [hencodeCells, hrewindTarget]
       exact (cells_eq_init_of_binaryContent hcontent hstart).symm
-    · simpa [finalCfg] using hencodeHead
+    · simpa [finalCfg, TM.phase2Wrap] using hencodeHead
     · intro i hi
       change encodeDone.work i = work₀ i
       exact (hencodeFrame i hi).trans (hrewindFrame i hi)
-    · simpa [finalCfg] using hencodeOutput
+    · simpa [finalCfg, TM.phase2Wrap] using hencodeOutput
 
 end Machine
 

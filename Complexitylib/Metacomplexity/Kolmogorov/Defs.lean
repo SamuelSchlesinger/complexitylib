@@ -8,7 +8,7 @@ module
 public import Complexitylib.Models.TuringMachine.Universality.Defs
 public import Mathlib.Data.List.Infix
 public import Mathlib.Data.Nat.Cast.WithTop
-public import Mathlib.Data.Nat.Lattice
+public import Mathlib.Order.Lattice.Nat
 
 /-!
 # Machine-relative Kolmogorov complexity

@@ -81,7 +81,7 @@ theorem enumBank_of_ne (k : ℕ) (x : List Bool) (N H v a r : ℕ) (i : Fin (enu
     enumBank k x N H v a r i = enumRest k x N H (v + 1) i := by
   rw [enumBank, tallyWork]
   dsimp only
-  rw [if_neg hc, if_neg ha, if_neg hr]
+  rw [ite_eq_right hc, ite_eq_right ha, ite_eq_right hr]
 
 theorem ne_tallyRegs {k : ℕ} (i : Fin (enumTapes k))
     (h2 : i.val ≠ 3 + k + 2) (h5 : i.val ≠ 3 + k + 5) (h8 : i.val ≠ 3 + k + 8) :
@@ -138,7 +138,7 @@ theorem reg_ne_regs (k : ℕ) : regIdx k ≠ cIdx k ∧ regIdx k ≠ aIdx k ∧ 
 theorem enumRest_blank (k : ℕ) (x : List Bool) (N H v : ℕ) (i : Fin (enumTapes k))
     (hx : i ≠ xIdx k) (hw : i ≠ wIdx k) (hn : i ≠ nIdx k) (hreg : i ≠ regIdx k) :
     enumRest k x N H v i = TM.blankTape := by
-  rw [enumRest, if_neg hx, if_neg hw, if_neg hn, if_neg hreg]
+  rw [enumRest, ite_eq_right hx, ite_eq_right hw, ite_eq_right hn, ite_eq_right hreg]
 
 theorem enumBank_blank (k : ℕ) (x : List Bool) (N H v a r : ℕ) (i : Fin (enumTapes k))
     (hc : i ≠ cIdx k) (ha : i ≠ aIdx k) (hr : i ≠ rIdx k)
@@ -349,7 +349,7 @@ theorem parkPair_hoareTime (k : ℕ) (x : List Bool) (N H v a r : ℕ) (I : Tape
   · rw [hpw]
     funext j
     by_cases hj : j ∈ ([xIdx k, wIdx k, y1Idx k] : List (Fin (enumTapes k)))
-    · rw [if_pos hj]
+    · rw [ite_eq_left hj]
       rcases List.mem_cons.mp hj with h | h
       · rw [h, afterPair, Function.update_of_ne
           (Fin.ne_of_val_ne (by show (0 : ℕ) ≠ 2; omega)), enumBank_x]
@@ -363,7 +363,7 @@ theorem parkPair_hoareTime (k : ℕ) (x : List Bool) (N H v a r : ℕ) (I : Tape
             exact Tape.eq_init_move_right_of_hasBinaryString
               (Tape.hasBinaryString_of_hasBinaryPrefix hy1 rfl rfl) (hSI (y1Idx k)).1
           · exact absurd h (List.not_mem_nil)
-    · rw [if_neg hj]
+    · rw [ite_eq_right hj]
       have hout : ¬ TM.placeWorkInMiddle (post := k + 9) 0 3 j :=
         fun hm => hj ((mem_pairTargets_iff k j).mpr hm)
       have hwj : work j = enumBank k x N H v a r j := hframe j hout
@@ -465,7 +465,7 @@ theorem matrixEntry_afterCopy (M : TM k) (x : List Bool) (N H v a r : ℕ) (I : 
   funext i
   rw [matrixEntry]
   by_cases hi : TM.placeWorkInMiddle 3 (k + 2) i
-  · rw [dif_pos hi]
+  · rw [dite_eq_left hi]
     set j := TM.placeWorkCoord 3 (k + 2) i hi with hjdef
     have hival : i.val = 3 + j.val := by
       rw [hjdef]
@@ -493,7 +493,7 @@ theorem matrixEntry_afterCopy (M : TM k) (x : List Bool) (N H v a r : ℕ) (I : 
         rw [TM.applyPre, Fin.snoc_castSucc]
         show (if j'.val < k then (Tape.init ([] : List Γ)).move Dir3.right
           else (Tape.init ((pair x (dropTop (v + 1))).map Γ.ofBool)).move Dir3.right) = _
-        rw [if_pos hjk, afterCopy,
+        rw [ite_eq_left hjk, afterCopy,
           Function.update_of_ne (Fin.ne_of_val_ne (by rw [hival, hj]; show 3 + j'.val ≠ 2; omega)),
           Function.update_of_ne
             (Fin.ne_of_val_ne (by rw [hival, hj]; show 3 + j'.val ≠ 3 + k; omega)),
@@ -510,11 +510,11 @@ theorem matrixEntry_afterCopy (M : TM k) (x : List Bool) (N H v a r : ℕ) (I : 
         rw [TM.applyPre, Fin.snoc_castSucc]
         show (if j'.val < k then (Tape.init ([] : List Γ)).move Dir3.right
           else (Tape.init ((pair x (dropTop (v + 1))).map Γ.ofBool)).move Dir3.right) = _
-        rw [if_neg hjk, hi', afterCopy,
+        rw [ite_eq_right hjk, hi', afterCopy,
           Function.update_of_ne (Fin.ne_of_val_ne (by show 3 + k ≠ 2; omega)),
           Function.update_self]
         rfl
-  · rw [dif_neg hi]
+  · rw [dite_eq_right hi]
 
 theorem afterCopy_startInvariant (k : ℕ) (x : List Bool) (N H v a r : ℕ)
     (i : Fin (enumTapes k)) : Tape.StartInvariant (afterCopy k x N H v a r i) := by
@@ -640,12 +640,12 @@ theorem parkVerdict_hoareTime (k : ℕ) (x : List Bool) (N H v a r : ℕ) (I : T
   have hvw : c'.work (vIdx k) = (⟨1, (work (vIdx k)).cells⟩ : Tape) := by
     rw [hpw]
     show (if vIdx k ∈ [vIdx k] then (⟨1, (work (vIdx k)).cells⟩ : Tape) else _) = _
-    rw [if_pos (List.mem_singleton.mpr rfl)]
+    rw [ite_eq_left (List.mem_singleton.mpr rfl)]
   have hother : ∀ j, j ≠ vIdx k → c'.work j = TM.parkTape (work j) := by
     intro j hj
     rw [hpw]
     show (if j ∈ [vIdx k] then _ else TM.parkTape (work j)) = _
-    rw [if_neg (fun hmem => hj (List.mem_singleton.mp hmem))]
+    rw [ite_eq_right (fun hmem => hj (List.mem_singleton.mp hmem))]
   refine ⟨c', t, ht, hreach, hhalt, ?_, ?_, ?_, ?_, ?_, ?_⟩
   · rw [hpi, hi]
     exact Tape.ext hIhead.symm rfl
@@ -727,20 +727,20 @@ theorem publishVerdict_hoareTime (k : ℕ) (x : List Bool) (N H v a r : ℕ) (I 
     enumBank k x N H v a r (cIdx k) = natTape v := by
   rw [enumBank, tallyWork]
   dsimp only
-  rw [if_pos rfl]
+  rw [ite_eq_left rfl]
 
 @[simp] theorem enumBank_a (k : ℕ) (x : List Bool) (N H v a r : ℕ) :
     enumBank k x N H v a r (aIdx k) = natTape a := by
   rw [enumBank, tallyWork]
   dsimp only
-  rw [if_neg (Fin.ne_of_val_ne (by show 3 + k + 5 ≠ 3 + k + 2; omega)), if_pos rfl]
+  rw [ite_eq_right (Fin.ne_of_val_ne (by show 3 + k + 5 ≠ 3 + k + 2; omega)), ite_eq_left rfl]
 
 @[simp] theorem enumBank_r (k : ℕ) (x : List Bool) (N H v a r : ℕ) :
     enumBank k x N H v a r (rIdx k) = natTape r := by
   rw [enumBank, tallyWork]
   dsimp only
-  rw [if_neg (Fin.ne_of_val_ne (by show 3 + k + 8 ≠ 3 + k + 2; omega)),
-    if_neg (Fin.ne_of_val_ne (by show 3 + k + 8 ≠ 3 + k + 5; omega)), if_pos rfl]
+  rw [ite_eq_right (Fin.ne_of_val_ne (by show 3 + k + 8 ≠ 3 + k + 2; omega)),
+    ite_eq_right (Fin.ne_of_val_ne (by show 3 + k + 8 ≠ 3 + k + 5; omega)), ite_eq_left rfl]
 
 theorem afterCopy_of_ne (k : ℕ) (x : List Bool) (N H v a r : ℕ) (i : Fin (enumTapes k))
     (h1 : i ≠ y1Idx k) (h2 : i ≠ yIdx k) :
@@ -831,16 +831,16 @@ theorem tallyBump_hoareTime (k : ℕ) (x : List Bool) (N H v a r : ℕ) (I : Tap
   · rw [hpw, Function.update_self]
   · rw [hpw, Function.update_of_ne (Fin.ne_of_val_ne (by show 3 + k + 5 ≠ 3 + k + 2; omega))]
     by_cases hb : b
-    · rw [if_pos hb, Function.update_self, if_pos hb]
-    · rw [if_neg hb, Function.update_of_ne
-        (Fin.ne_of_val_ne (by show 3 + k + 5 ≠ 3 + k + 8; omega)), ha, if_neg hb]
+    · rw [ite_eq_left hb, Function.update_self, ite_eq_left hb]
+    · rw [ite_eq_right hb, Function.update_of_ne
+        (Fin.ne_of_val_ne (by show 3 + k + 5 ≠ 3 + k + 8; omega)), ha, ite_eq_right hb]
       rfl
   · rw [hpw, Function.update_of_ne (Fin.ne_of_val_ne (by show 3 + k + 8 ≠ 3 + k + 2; omega))]
     by_cases hb : b
-    · rw [if_pos hb, Function.update_of_ne
-        (Fin.ne_of_val_ne (by show 3 + k + 8 ≠ 3 + k + 5; omega)), hr, if_pos hb]
+    · rw [ite_eq_left hb, Function.update_of_ne
+        (Fin.ne_of_val_ne (by show 3 + k + 8 ≠ 3 + k + 5; omega)), hr, ite_eq_left hb]
       rfl
-    · rw [if_neg hb, Function.update_self, if_neg hb]
+    · rw [ite_eq_right hb, Function.update_self, ite_eq_right hb]
   · intro i hm h1 h2 h3
     rw [hupd i h1 h2 h3]
     exact hframe i hm
@@ -976,8 +976,8 @@ theorem enumRest_eq_of_ne_w (k : ℕ) (x : List Bool) (N H v v' : ℕ) (i : Fin 
     (hw : i ≠ wIdx k) : enumRest k x N H v i = enumRest k x N H v' i := by
   rw [enumRest, enumRest]
   by_cases hx : i = xIdx k
-  · rw [if_pos hx, if_pos hx]
-  · rw [if_neg hx, if_neg hx, if_neg hw, if_neg hw]
+  · rw [ite_eq_left hx, ite_eq_left hx]
+  · rw [ite_eq_right hx, ite_eq_right hx, ite_eq_right hw, ite_eq_right hw]
 
 /-- **The wipe, and the bridge back to the loop invariant.** Blanking everything the pass dirtied
 turns the bank into the one the loop's state names at the next count. -/
@@ -1006,10 +1006,10 @@ theorem wipe_hoareTime (k : ℕ) (x : List Bool) (N H v a r : ℕ) (I : Tape)
       enumBank_of_ne k x N H v a r _
         (Fin.ne_of_val_ne (by show 3 + k + 7 ≠ 3 + k + 2; omega))
         (Fin.ne_of_val_ne (by show 3 + k + 7 ≠ 3 + k + 5; omega))
-        (Fin.ne_of_val_ne (by show 3 + k + 7 ≠ 3 + k + 8; omega)), enumRest, if_neg
-        (Fin.ne_of_val_ne (by show 3 + k + 7 ≠ 0; omega)), if_neg
-        (Fin.ne_of_val_ne (by show 3 + k + 7 ≠ 1; omega)), if_neg
-        (Fin.ne_of_val_ne (by show 3 + k + 7 ≠ 3 + k + 3; omega)), if_pos rfl]
+        (Fin.ne_of_val_ne (by show 3 + k + 7 ≠ 3 + k + 8; omega)), enumRest, ite_eq_right
+        (Fin.ne_of_val_ne (by show 3 + k + 7 ≠ 0; omega)), ite_eq_right
+        (Fin.ne_of_val_ne (by show 3 + k + 7 ≠ 1; omega)), ite_eq_right
+        (Fin.ne_of_val_ne (by show 3 + k + 7 ≠ 3 + k + 3; omega)), ite_eq_left rfl]
   have hy1 : work (y1Idx k) =
       (⟨(pair x (dropTop (v + 1))).length + 1, (strTape (pair x (dropTop (v + 1)))).cells⟩ :
         Tape) := by
@@ -1053,11 +1053,11 @@ theorem wipe_hoareTime (k : ℕ) (x : List Bool) (N H v a r : ℕ) (I : Tape)
   rw [hpw]
   funext j
   by_cases hj : j ∈ scratchTargets k
-  · rw [if_pos hj]
+  · rw [ite_eq_left hj]
     have hv := scratchTargets_val k j hj
     exact (enumBank_blank_of_val k x N H (v + 1) (a + if b then 1 else 0)
       (r + if b then 0 else 1) j hv.1 hv.2).symm
-  · rw [if_neg hj]
+  · rw [ite_eq_right hj]
     by_cases h1 : j = cIdx k
     · rw [h1, hc, enumBank_c]
     · by_cases h2 : j = aIdx k

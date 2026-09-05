@@ -317,12 +317,11 @@ theorem denseProgramLoopTM_iteration_internal
           input := inp₀
           work := cbody.work
           output := instructionHaltOutput (next.curInstr program) } := by
-      cases ctail
-      simp only [Complexity.Cfg.mk.injEq]
-      exact ⟨htailDone, htailInput, htailWork,
-        htailOutput.trans htestOutput'⟩
-    simpa only [denseProgramLoopTM, body, test, inp₀, blank, hcTail] using
-      hreach
+      exact Complexity.Cfg.ext htailDone htailInput htailWork
+        (htailOutput.trans htestOutput')
+    simp only [denseProgramLoopTM]
+    rw [hcTail] at hreach
+    exact hreach
   · right
     refine ⟨hhalted, ?_⟩
     have hcur : next.curInstr program ≠ .halt := hhalted
@@ -341,12 +340,11 @@ theorem denseProgramLoopTM_iteration_internal
           input := inp₀
           work := cbody.work
           output := blank } := by
-      cases ctail
-      simp only [Complexity.Cfg.mk.injEq]
-      exact ⟨htailStart, htailInput, htailWork,
-        htailOutput.trans hblankOutput⟩
-    simpa only [denseProgramLoopTM, body, test, inp₀, blank, hcTail] using
-      hreach
+      exact Complexity.Cfg.ext htailStart htailInput htailWork
+        (htailOutput.trans hblankOutput)
+    simp only [denseProgramLoopTM]
+    rw [hcTail] at hreach
+    exact hreach
 
 /-- A halted dense snapshot is stationary under one selected step. -/
 theorem denseSnapshot_step_eq_self_of_halted_internal
@@ -366,7 +364,7 @@ theorem denseSnapshot_run_halted_internal
     ∀ fuel, snapshot.run program input fuel = snapshot
   | 0 => rfl
   | fuel + 1 => by
-      rw [DenseOverlay.Snapshot.run, if_pos hhalted]
+      rw [DenseOverlay.Snapshot.run, ite_eq_left hhalted]
 
 /-- A halted fuel-bounded dense run is realized by the fixed controller loop.
 The extra iteration handles a snapshot already halted at fuel zero. -/

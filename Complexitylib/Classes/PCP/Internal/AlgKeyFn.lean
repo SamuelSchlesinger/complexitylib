@@ -273,8 +273,8 @@ theorem walkFn_enc (hd : 1 < F.deg) (G : ConstraintGraph α) {T q : ℕ}
       (NumEnc.enc x.1 / G.preDeg (F.toFamily hd) ^ k) % G.preDeg (F.toFamily hd)
         = NumEnc.enc ((G.preprocess (F.toFamily hd)).graph.kWalk x ⟨k, hk⟩) := by
     intro k hk
-    rw [G.digit_enc (F.toFamily hd) x.1 hpos k (lt_of_lt_of_le hk hle), RegGraph.kWalk,
-      RegGraph.preWalk]
+    rw [G.digit_enc (F.toFamily hd) x.1 hpos k (lt_of_lt_of_le hk hle)]
+    simp only [RegGraph.kWalk, RegGraph.preWalk]
   refine (walkFn_eq F pol hd G _ _ hv hpc hpe j).trans ?_
   exact congrArg (fun n => List.replicate n true)
     (G.walkNum_eq (F.toFamily hd) v ((G.preprocess (F.toFamily hd)).graph.kWalk x)
@@ -327,13 +327,13 @@ theorem parBlk_eq (hd : 1 < F.deg) (G : ConstraintGraph α) (hq : 0 < r.q)
     show _ = NumEnc.enc (StepKey.par _ _)
     rw [stepKeyOf]
     simp only [StepKey.par]
-    rw [dif_pos hjk]
+    rw [dite_eq_left hjk]
     rfl
   · rw [ifLtLen_neg (by simpa using hjk), List.length_nil]
     show _ = NumEnc.enc (StepKey.par _ _)
     rw [stepKeyOf]
     simp only [StepKey.par]
-    rw [dif_neg hjk]
+    rw [dite_eq_right hjk]
     rfl
 
 omit [Fintype α] [DecidableEq α] in
@@ -343,9 +343,9 @@ theorem enc_halfEdge_div_two (G : ConstraintGraph α) (p : G.HalfEdge) :
     rw [ConstraintGraph.enc_halfEdge, ConstraintGraph.halfCode]
   rw [hcode]
   by_cases h : p.2 = true
-  · rw [if_pos h]
+  · rw [ite_eq_left h]
     omega
-  · rw [if_neg h]
+  · rw [ite_eq_right h]
     omega
 
 variable {F pol} in
@@ -402,7 +402,7 @@ theorem codeBlk_eq (hd : 1 < F.deg) (G : ConstraintGraph α) (hq : 0 < r.q)
     show _ = NumEnc.enc (StepKey.code _ _)
     rw [stepKeyOf]
     simp only [StepKey.code]
-    rw [dif_pos hjk]
+    rw [dite_eq_left hjk]
     have hfin : (⟨NumEnc.enc ((G.preprocess (F.toFamily hd)).graph.walkAt
         ((G.preprocess (F.toFamily hd)).graph.kLen x) v
         ((G.preprocess (F.toFamily hd)).graph.kWalk x) j) / 2, hidx⟩ : Fin G.numEdges)
@@ -416,7 +416,7 @@ theorem codeBlk_eq (hd : 1 < F.deg) (G : ConstraintGraph α) (hq : 0 < r.q)
     show _ = NumEnc.enc (StepKey.code _ _)
     rw [stepKeyOf]
     simp only [StepKey.code]
-    rw [dif_neg hjk]
+    rw [dite_eq_right hjk]
     rfl
 
 variable {F pol} in

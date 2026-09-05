@@ -385,7 +385,7 @@ private theorem pairBuild_copyX1_halt_step {k : ℕ} (yIdx pIdx : Fin k)
       c'.input = c.input ∧
       c'.work yIdx = c.work yIdx ∧
       c'.work pIdx = c.work pIdx := by
-  simp only [TM.step, hst, pairBuildTM, if_pos hread]
+  simp only [TM.step, hst, pairBuildTM, ite_eq_left hread]
   refine ⟨_, rfl, rfl, ?_, ?_, ?_⟩
   · exact tape_move_idleDir_stable c.input hih hins
   · exact tape_writeAndMove_stable (c.work yIdx) hyh hyns
@@ -411,10 +411,10 @@ private theorem pairBuild_copyX1_cont_step {k : ℕ} (yIdx pIdx : Fin k)
       (c'.work pIdx).head = (c.work pIdx).head + 1 ∧
       (c'.work pIdx).cells =
         Function.update (c.work pIdx).cells (c.work pIdx).head c.input.read := by
-  simp only [TM.step, hst, pairBuildTM, if_neg hread_nb]
+  simp only [TM.step, hst, pairBuildTM, ite_eq_right hread_nb]
   refine ⟨_, rfl, rfl, ?_, ?_, ?_, ?_⟩
   · exact tape_move_idleDir_stable c.input hih hins
-  · simp only [if_neg hne]
+  · simp only [ite_eq_right hne]
     exact tape_writeAndMove_stable (c.work yIdx) hyh hyns
   · simp only [↓reduceIte]
     simp [Tape.writeAndMove, Tape.write, Tape.move,
@@ -448,7 +448,7 @@ private theorem pairBuild_copyX2_step {k : ℕ} (yIdx pIdx : Fin k)
   · show (c.input.move .right).head = c.input.head + 1
     simp [Tape.move]
   · exact Tape.move_cells _ _
-  · simp only [if_neg hne]
+  · simp only [ite_eq_right hne]
     exact tape_writeAndMove_stable (c.work yIdx) hyh hyns
   · simp only [↓reduceIte]
     simp [Tape.writeAndMove, Tape.write, Tape.move,
@@ -478,7 +478,7 @@ private theorem pairBuild_writeSep1_step {k : ℕ} (yIdx pIdx : Fin k)
   simp only [TM.step, hst, pairBuildTM]
   refine ⟨_, rfl, rfl, ?_, ?_, ?_, ?_⟩
   · exact tape_move_idleDir_stable c.input hih hins
-  · simp only [if_neg hne]
+  · simp only [ite_eq_right hne]
     exact tape_writeAndMove_stable (c.work yIdx) hyh hyns
   · simp only [↓reduceIte]
     simp [Tape.writeAndMove, Tape.write, Tape.move,
@@ -507,7 +507,7 @@ private theorem pairBuild_writeSep2_step {k : ℕ} (yIdx pIdx : Fin k)
   simp only [TM.step, hst, pairBuildTM]
   refine ⟨_, rfl, rfl, ?_, ?_, ?_, ?_⟩
   · exact tape_move_idleDir_stable c.input hih hins
-  · simp only [if_neg hne]
+  · simp only [ite_eq_right hne]
     exact tape_writeAndMove_stable (c.work yIdx) hyh hyns
   · simp only [↓reduceIte]
     simp [Tape.writeAndMove, Tape.write, Tape.move,
@@ -531,7 +531,7 @@ private theorem pairBuild_copyY_halt_step {k : ℕ} (yIdx pIdx : Fin k)
       c'.input = c.input ∧
       c'.work yIdx = c.work yIdx ∧
       c'.work pIdx = c.work pIdx := by
-  simp only [TM.step, hst, pairBuildTM, if_pos hyread]
+  simp only [TM.step, hst, pairBuildTM, ite_eq_left hyread]
   refine ⟨_, rfl, rfl, ?_, ?_, ?_⟩
   · exact tape_move_idleDir_stable c.input hih hins
   · exact tape_writeAndMove_stable (c.work yIdx) hyh hyns
@@ -556,17 +556,17 @@ private theorem pairBuild_copyY_cont_step {k : ℕ} (yIdx pIdx : Fin k)
       (c'.work pIdx).head = (c.work pIdx).head + 1 ∧
       (c'.work pIdx).cells =
         Function.update (c.work pIdx).cells (c.work pIdx).head (c.work yIdx).read := by
-  simp only [TM.step, hst, pairBuildTM, if_neg hyread_nb]
+  simp only [TM.step, hst, pairBuildTM, ite_eq_right hyread_nb]
   refine ⟨_, rfl, rfl, ?_, ?_, ?_, ?_, ?_⟩
   · exact tape_move_idleDir_stable c.input hih hins
   · -- yIdx head advances (yIdx ≠ pIdx, condition picks the else branch, which is Dir3.right)
-    simp only [if_neg hne]
+    simp only [ite_eq_right hne]
     show ((c.work yIdx).writeAndMove (readBackWrite (c.work yIdx).read).toΓ Dir3.right).head
          = (c.work yIdx).head + 1
     simp [Tape.writeAndMove, Tape.write, Tape.move,
           show (c.work yIdx).head ≠ 0 from by omega]
   · -- yIdx cells unchanged (readBackWrite preserves non-▷ symbols)
-    simp only [if_neg hne]
+    simp only [ite_eq_right hne]
     show ((c.work yIdx).writeAndMove (readBackWrite (c.work yIdx).read).toΓ Dir3.right).cells
          = (c.work yIdx).cells
     rw [toΓ_readBackWrite_of_ne_start hyread_ns]
@@ -598,11 +598,11 @@ private theorem pairBuild_rewindP1_step_cont {k : ℕ} (yIdx pIdx : Fin k)
       c'.work yIdx = c.work yIdx ∧
       (c'.work pIdx).head = (c.work pIdx).head - 1 ∧
       (c'.work pIdx).cells = (c.work pIdx).cells := by
-  simp only [TM.step, hst, pairBuildTM, if_neg hpread_ns]
+  simp only [TM.step, hst, pairBuildTM, ite_eq_right hpread_ns]
   refine ⟨_, rfl, rfl, ?_, ?_, ?_, ?_⟩
   · exact tape_move_idleDir_stable c.input hih hins
   · -- yIdx stable (yIdx ≠ pIdx picks else branch; readBackWrite + idle)
-    simp only [if_neg hne]
+    simp only [ite_eq_right hne]
     exact tape_writeAndMove_stable (c.work yIdx) hyh hyns
   · -- pIdx head = head - 1
     simp only [↓reduceIte]
@@ -630,11 +630,11 @@ private theorem pairBuild_rewindP1_step_base {k : ℕ} (yIdx pIdx : Fin k)
       c'.work yIdx = c.work yIdx ∧
       (c'.work pIdx).head = 1 ∧
       (c'.work pIdx).cells = (c.work pIdx).cells := by
-  simp only [TM.step, hst, pairBuildTM, if_pos hpread]
+  simp only [TM.step, hst, pairBuildTM, ite_eq_left hpread]
   refine ⟨_, rfl, rfl, ?_, ?_, ?_, ?_⟩
   · exact tape_move_idleDir_stable c.input hih hins
   · -- yIdx stable (yIdx ≠ pIdx picks else branch)
-    simp only [if_neg hne]
+    simp only [ite_eq_right hne]
     exact tape_writeAndMove_stable (c.work yIdx) hyh hyns
   · -- pIdx head = 1
     simp only [↓reduceIte]
@@ -1247,7 +1247,7 @@ private theorem pairBuildTM_from_copyX1_initTape_move_right
     rw [hc1_pc]
     show (Tape.init []).cells j ≠ Γ.start
     show (if j = 0 then Γ.start else ([][j - 1]?).getD Γ.blank) ≠ Γ.start
-    rw [if_neg (by omega)]
+    rw [ite_eq_right (by omega)]
     simp
   have hc1_input_data : ∀ i, i < x.length →
       c1.input.cells (c1.input.head + i) ≠ Γ.blank ∧
@@ -2044,7 +2044,7 @@ theorem pairBuildTM_hoareTime
     rw [hc2_above _ hi_c2]
     -- c1.cells = c0.cells. Initial tape is Tape.init [], cells at j ≥ 1 = blank.
     rw [hc1_pc, hc0_pw_cells]
-    rw [if_neg (by omega : i + 1 ≠ 0)]
+    rw [ite_eq_right (by omega : i + 1 ≠ 0)]
 
 /-- A compact corollary of `pairBuildTM_hoareTime`: the pair tape satisfies
     exact equality with the standard initialized pair tape, moved to cell 1. -/

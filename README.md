@@ -74,7 +74,7 @@ indexed in the root module `Complexitylib.lean` and mechanically guarded in `scr
 ## Building
 
 Install [elan](https://github.com/leanprover/elan); Lean and Mathlib versions
-are pinned (currently v4.30.0).
+are pinned (currently Lean v4.34.0-rc2, tracking the [cslib](https://github.com/leanprover/cslib) toolchain).
 
 ```bash
 lake build --wfail

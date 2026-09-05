@@ -63,7 +63,7 @@ theorem size_compile_internal
   unfold compile
   rw [Circuit.size_compose]
   unfold queryCircuit queryWidth
-  rw [Circuit.size_pairInputSources, oracle.circuit_size_eq_family_size]
+  erw [Circuit.size_pairInputSources, oracle.circuit_size_eq_family_size]
 
 end EvaluationOracleCircuit
 

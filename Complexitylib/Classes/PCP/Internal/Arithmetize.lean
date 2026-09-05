@@ -229,7 +229,7 @@ theorem sat_oneHot_pair_iff {k : ℕ} (S : Finset (Cube k)) (a : Cube (k + 2 ^ k
     (m m' : Fin (2 ^ k)) (hne : m ≠ m') :
     (oneHotOf S (Sum.inr (Sum.inl (m, m')))).Sat a ↔ rightBlock a m * rightBlock a m' = 0 := by
   unfold QuadConstraint.Sat QuadConstraint.eval
-  simp only [oneHotOf, if_neg hne]
+  simp only [oneHotOf, ite_eq_right hne]
   rw [hadamard_tensorAssign_basisVec, hadamard_zero_arg, add_zero, add_zero]
   rfl
 
@@ -237,7 +237,7 @@ theorem sat_oneHot_allowed_iff {k : ℕ} (S : Finset (Cube k)) (a : Cube (k + 2 
     (m : Fin (2 ^ k)) (hm : (candIdx k).symm m ∉ S) :
     (oneHotOf S (Sum.inr (Sum.inr (Sum.inl m)))).Sat a ↔ rightBlock a m = 0 := by
   unfold QuadConstraint.Sat QuadConstraint.eval
-  simp only [oneHotOf, if_neg hm]
+  simp only [oneHotOf, ite_eq_right hm]
   rw [hadamard_zero_arg, hadamard_basisVec, zero_add, add_zero]
   rfl
 
@@ -320,28 +320,28 @@ theorem sat_oneHotSystem_extend {k : ℕ} (S : Finset (Cube k)) (w : Cube k) (hw
   rcases x with _ | ⟨⟨m, m'⟩ | m | i⟩
   · rw [sat_oneHot_sum_iff]
     rw [Finset.sum_eq_single (candIdx k w)
-      (fun m _ hm => by rw [rightBlock_oneHotExtend, if_neg hm])
-      (fun hn => absurd (Finset.mem_univ _) hn), rightBlock_oneHotExtend, if_pos rfl]
+      (fun m _ hm => by rw [rightBlock_oneHotExtend, ite_eq_right hm])
+      (fun hn => absurd (Finset.mem_univ _) hn), rightBlock_oneHotExtend, ite_eq_left rfl]
   · by_cases hne : m = m'
-    · simp only [oneHotOf, if_pos hne]
+    · simp only [oneHotOf, ite_eq_left hne]
       exact QuadConstraint.sat_trivial _
     · rw [sat_oneHot_pair_iff S _ m m' hne, rightBlock_oneHotExtend, rightBlock_oneHotExtend]
       by_cases hm : m = candIdx k w
       · have hm' : m' ≠ candIdx k w := fun h => hne (hm.trans h.symm)
-        rw [if_neg hm', mul_zero]
-      · rw [if_neg hm, zero_mul]
+        rw [ite_eq_right hm', mul_zero]
+      · rw [ite_eq_right hm, zero_mul]
   · by_cases hm : (candIdx k).symm m ∈ S
-    · simp only [oneHotOf, if_pos hm]
+    · simp only [oneHotOf, ite_eq_left hm]
       exact QuadConstraint.sat_trivial _
-    · rw [sat_oneHot_allowed_iff S _ m hm, rightBlock_oneHotExtend, if_neg]
+    · rw [sat_oneHot_allowed_iff S _ m hm, rightBlock_oneHotExtend, ite_eq_right]
       intro hmw
       apply hm
       rw [hmw, Equiv.symm_apply_apply]
       exact hw
   · rw [sat_oneHot_coord_iff, leftBlock_oneHotExtend]
     rw [Finset.sum_eq_single (candIdx k w)
-      (fun m _ hm => by rw [rightBlock_oneHotExtend, if_neg hm, zero_mul])
-      (fun hn => absurd (Finset.mem_univ _) hn), rightBlock_oneHotExtend, if_pos rfl,
+      (fun m _ hm => by rw [rightBlock_oneHotExtend, ite_eq_right hm, zero_mul])
+      (fun hn => absurd (Finset.mem_univ _) hn), rightBlock_oneHotExtend, ite_eq_left rfl,
       one_mul, Equiv.symm_apply_apply]
     rcases (by decide : ∀ u : ZMod 2, u + u = 0) (w i) with h'
     exact h'

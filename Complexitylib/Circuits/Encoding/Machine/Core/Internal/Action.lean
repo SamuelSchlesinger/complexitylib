@@ -75,9 +75,7 @@ theorem evalFamilyCoreTM_step (c : Cfg workTapeCount evalFamilyCoreTM.Q)
           output := c.output.writeAndMove action.output.write action.output.dir } := by
   rw [TM.step]
   simp only [evalFamilyCoreTM]
-  split
-  · next h => exact (hstate h).elim
-  · rfl
+  erw [ite_eq_right hstate]
 
 end Internal
 

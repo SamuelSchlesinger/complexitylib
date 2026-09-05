@@ -63,14 +63,14 @@ theorem tallyLoop_hoareTime_of_hoare_indexed {n : ℕ} (tmBody tmTest : TM n)
       refine ⟨tallyPost_loopParked cIdx aIdx rIdx I (rest (j + 1)) P hI (hrest (j + 1)) N
         (j + 1) hp, ?_⟩
       obtain ⟨-, -, rfl⟩ := hp
-      rw [if_neg (show ¬ (j + 1 = N) by omega)]
+      rw [ite_eq_right (show ¬ (j + 1 = N) by omega)]
       exact fun hcon => absurd (outSlot_cells_one_eq_one_iff Γw.zero |>.mp hcon) (by decide)
     obtain ⟨inp', work', out', t, -, ht, hreach, hp'⟩ :=
       TM.loopTM_continue_of_hoare tmBody tmTest (hbody j hjN) (htest j hjN)
         (fun a b c hm => hmid j a b c hm) hne inp work out h
     obtain ⟨hi', hw', ho'⟩ := hp'
     exact ⟨inp', work', out', t, ht, hreach, hi', hw', Γw.zero, by decide,
-      by rw [ho', if_neg (by omega)]⟩
+      by rw [ho', ite_eq_right (by omega)]⟩
   · intro inp work out h
     have hjN : N - 1 < N := by omega
     have hhalt : ∀ a b c, tallyPost cIdx aIdx rIdx I (rest (N - 1 + 1)) P N (N - 1 + 1) a b c →
@@ -79,7 +79,7 @@ theorem tallyLoop_hoareTime_of_hoare_indexed {n : ℕ} (tmBody tmTest : TM n)
       refine ⟨tallyPost_loopParked cIdx aIdx rIdx I (rest (N - 1 + 1)) P hI (hrest _) N _ hp,
         ?_⟩
       obtain ⟨-, -, rfl⟩ := hp
-      rw [if_pos hsucc]
+      rw [ite_eq_left hsucc]
       exact (outSlot_cells_one_eq_one_iff Γw.one).mpr rfl
     obtain ⟨c', t, ht, hreach, hstate, hpost⟩ :=
       TM.loopTM_halt_of_hoare tmBody tmTest (hbody (N - 1) hjN) (htest (N - 1) hjN)
@@ -117,14 +117,14 @@ theorem tallyLoop_keepsWindow_of_hoare_indexed {n : ℕ} (tmBody tmTest : TM n)
       refine ⟨tallyPost_loopParked cIdx aIdx rIdx I (rest (j + 1)) P hI (hrest (j + 1)) N
         (j + 1) hp, ?_⟩
       obtain ⟨-, -, rfl⟩ := hp
-      rw [if_neg (show ¬ (j + 1 = N) by omega)]
+      rw [ite_eq_right (show ¬ (j + 1 = N) by omega)]
       exact fun hcon => absurd (outSlot_cells_one_eq_one_iff Γw.zero |>.mp hcon) (by decide)
     obtain ⟨inp', work', out', t, ht1, ht, hreach, hp'⟩ :=
       TM.loopTM_continue_of_hoare tmBody tmTest (hbody j hjN) (htest j hjN)
         (fun a b c hm => hmid j a b c hm) hne inp work out h
     obtain ⟨hi', hw', ho'⟩ := hp'
     exact ⟨inp', work', out', t, ht1, ht, hreach, hi', hw', Γw.zero, by decide,
-      by rw [ho', if_neg (by omega)]⟩
+      by rw [ho', ite_eq_right (by omega)]⟩
   · intro inp work out h
     have hjN : N - 1 < N := by omega
     have hhalt : ∀ a b c, tallyPost cIdx aIdx rIdx I (rest (N - 1 + 1)) P N (N - 1 + 1) a b c →
@@ -133,7 +133,7 @@ theorem tallyLoop_keepsWindow_of_hoare_indexed {n : ℕ} (tmBody tmTest : TM n)
       refine ⟨tallyPost_loopParked cIdx aIdx rIdx I (rest (N - 1 + 1)) P hI (hrest _) N _ hp,
         ?_⟩
       obtain ⟨-, -, rfl⟩ := hp
-      rw [if_pos hsucc]
+      rw [ite_eq_left hsucc]
       exact (outSlot_cells_one_eq_one_iff Γw.one).mpr rfl
     obtain ⟨c', t, ht, hreach, hstate, -⟩ :=
       TM.loopTM_halt_of_hoare tmBody tmTest (hbody (N - 1) hjN) (htest (N - 1) hjN)

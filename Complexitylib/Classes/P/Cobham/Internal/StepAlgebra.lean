@@ -287,13 +287,13 @@ noncomputable def stepBranch {k : ℕ} (tm : TM k) (R : List Bool)
 
 theorem stepBranch_halt {k : ℕ} (tm : TM k) (R : List Bool)
     {p : tm.Q × (Fin (k + 2) → Γ)} (h : p.1 = tm.qhalt) (z : List Bool) :
-    stepBranch tm R p z = z := if_pos h
+    stepBranch tm R p z = z := ite_eq_left h
 
 theorem stepBranch_step {k : ℕ} (tm : TM k) (R : List Bool)
     {p : tm.Q × (Fin (k + 2) → Γ)} (h : p.1 ≠ tm.qhalt) (z : List Bool) :
     stepBranch tm R p z
       = branchFn R (stateCode (stepStateOf tm p.1 p.2)) (stepActsOf tm p.1 p.2) z :=
-  if_neg h
+  ite_eq_right h
 
 /-- **One machine step, on encodings.** The table dispatches on the key read out
 of the encoding and applies that key's branch. -/
@@ -537,7 +537,7 @@ theorem rewindFn_eq {W : ℕ} (t : Tape) (hinv : t.StartInvariant) (hW : t.head 
   by_cases h0 : t.head = 0
   · have hread : t.read = Γ.start := by rw [Tape.read, h0]; exact hinv.1
     have hmove : t.move Dir3.left = t := move_left_of_head_zero h0
-    rw [rewindFn, matchPrefix_symCode t hW, if_pos hread.symm, caseBit₀_cons, cond_true,
+    rw [rewindFn, matchPrefix_symCode t hW, ite_eq_left hread.symm, caseBit₀_cons, Bool.cond_true,
       hmove]
   · have hread : t.read ≠ Γ.start := hinv.read_ne_start (by omega)
     have hstep : ∀ s : Γ, s = t.read →
@@ -615,7 +615,7 @@ theorem encodeBitsFn {n : ℕ} {g : (Fin n → List Bool) → List Bool} (h : Co
     | cons b x ih =>
         cases b <;>
           · rw [recNotation_cons]
-            simp only [cond_true, cond_false]
+            simp only [Bool.cond_true, Bool.cond_false]
             rw [encStep_cons, ih, encodeBits_cons]
   have hs : ∀ b : Bool, Cobham (encStep b) := fun b =>
     (appendFn (Cobham.const (symCode (Γ.ofBool b))) (Cobham.proj 1)).of_eq fun _ => rfl
@@ -677,7 +677,7 @@ private theorem cellsCode_of_bits (x : List Bool) :
   | cons b x ih =>
       intro t i hcells
       rw [List.length_cons, cellsCode_succ_left, encodeBits_cons,
-        show t.cells i = Γ.ofBool b from by simpa using hcells 0 (by simp)]
+        show t.cells i = Γ.ofBool b from hcells 0 (by simp)]
       congr 1
       exact ih t (i + 1) fun j hj => by
         have := hcells (j + 1) (by rw [List.length_cons]; omega)

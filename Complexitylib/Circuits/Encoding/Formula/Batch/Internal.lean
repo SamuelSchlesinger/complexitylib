@@ -136,7 +136,7 @@ private theorem evalAux?_compileRawOutputs
           hsize hformulaVars hformulaInput
       have hnextSize : formulaResult.size = available + formula.size := by
         omega
-      letI : NeZero (available + formula.size) := ⟨by
+      let : NeZero (available + formula.size) := ⟨by
         have havailable := NeZero.ne available
         have hpositive := formula.one_le_size
         omega⟩
@@ -231,7 +231,7 @@ private theorem evalAux?_copyOutputs
               Array.getElem?_eq_none (by omega)
             rw [htailOutput] at hnone
             simp at hnone
-          rw [Array.getElem?_push, if_neg (by omega)]
+          rw [Array.getElem?_push, ite_eq_right (by omega)]
           exact htailOutput
         obtain ⟨result, hevalTail, hresultSize, hresultPrefix, hresultOutputs⟩ :=
           ih values (wires.push value) htailPush
@@ -244,7 +244,7 @@ private theorem evalAux?_copyOutputs
           omega
         · intro i hi
           rw [hresultPrefix i (by simp; omega)]
-          rw [Array.getElem?_push, if_neg (by omega)]
+          rw [Array.getElem?_push, ite_eq_right (by omega)]
         · intro j hj
           cases j with
           | zero =>

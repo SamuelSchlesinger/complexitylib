@@ -68,7 +68,7 @@ theorem length_effectFormulaCaseBlock_internal
         effectFormulaSizeAt caseCount workCount T selectedAt choiceAt
           caseIndex := by
   unfold effectFormulaCaseBlock effectFormulaSizeAt effectFormulaCaseSize
-  rw [if_pos hcase]
+  rw [ite_eq_left hcase]
   by_cases hselected : selectedAt caseIndex
   · simp [hselected, length_caseFormulaSchedule]
   · simp [hselected]
@@ -119,7 +119,7 @@ theorem getElem_effectFormulaSchedule_identity_internal
             simp [effectFormulaScheduleSize]
             omega) = CircuitCode.RawGate.constant 0 false := by
   unfold effectFormulaSchedule
-  rw [List.getElem_append_left]
+  erw [List.getElem_append_left]
   · rw [List.getElem_append_right]
     all_goals simp [length_effectFormulaCaseGates_internal]
   · simp [length_effectFormulaCaseGates_internal]
@@ -143,7 +143,7 @@ theorem getElem_effectFormulaSchedule_connector_internal
         (effectFormulaSizeAt caseCount workCount T selectedAt choiceAt)
         rank.val := by
   unfold effectFormulaSchedule
-  rw [List.getElem_append_right]
+  erw [List.getElem_append_right]
   · have hindex :
         prefixSize
               (effectFormulaSizeAt caseCount workCount T selectedAt choiceAt)
@@ -277,8 +277,8 @@ private theorem compileRaw_effectFormulaAt
           effectCaseWorkSymbolIndexAt tm caseIndex := by
       funext workIndex
       by_cases hworkIndex : workIndex < k
-      · simp only [effectCaseWorkSymbolIndexAt, dif_pos hcase,
-          dif_pos hworkIndex]
+      · simp only [effectCaseWorkSymbolIndexAt, dite_eq_left hcase,
+          dite_eq_left hworkIndex]
         dsimp only [view]
       · simp [effectCaseWorkSymbolIndexAt, hcase, hworkIndex]
     rw [hwork] at hcompile

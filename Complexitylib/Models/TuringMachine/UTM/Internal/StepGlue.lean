@@ -44,9 +44,9 @@ theorem simRead_flag_eq {sim utm : Tape} (h : VShift sim utm)
     (hwf : sim.StartInvariant) :
     simRead (decide (sim.head = 0)) utm.read = sim.read := by
   by_cases hz : sim.head = 0
-  · rw [simRead, decide_eq_true hz, if_pos rfl, Tape.read, hz]
+  · rw [simRead, decide_eq_true hz, ite_eq_left rfl, Tape.read, hz]
     exact hwf.1.symm
-  · rw [simRead, decide_eq_false hz, if_neg Bool.false_ne_true]
+  · rw [simRead, decide_eq_false hz, ite_eq_right Bool.false_ne_true]
     exact h.read_eq (by omega)
 
 /-- Every entry produced by `parseEntry` has an in-range target, so the
@@ -56,9 +56,9 @@ theorem parseEntry_q'_lt {w : ℕ} {seg : List Γw} {e : DescEntry}
   unfold parseEntry at hp
   dsimp only at hp
   by_cases hlen : (seg.filterMap symBit?).length < 2 * w + 16
-  · rw [if_pos hlen] at hp
+  · rw [ite_eq_left hlen] at hp
     exact absurd hp (by simp)
-  · rw [if_neg hlen] at hp
+  · rw [ite_eq_right hlen] at hp
     simp only [Option.some.injEq] at hp
     subst hp
     dsimp only

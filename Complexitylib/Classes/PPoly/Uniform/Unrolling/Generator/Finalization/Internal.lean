@@ -636,8 +636,8 @@ private theorem prepareAcceptanceReferences_spaceBoundByWidth
           width inputLength := by
         have htotal := (hbounds inputLength).cellPrefixMul_le
         omega
-      simpa [Work.reference₀, Work.reference₁, Work.configBase,
-        Work.temporary₀, Work.temporary₁] using hprefix
+      simp [Work.reference₀, Work.reference₁, Work.configBase, Work.temporary₀, Work.temporary₁]
+      exact hprefix
     by_cases hreference₀ : index = Work.reference₀
     · subst index
       simpa [Work.reference₀, Work.reference₁, Work.configBase,
@@ -742,25 +742,24 @@ private theorem emitAcceptance_spaceBoundByWidth
   constructor
   · apply BinaryRoutine.SpaceBoundByWidthAt.emitRawGateStep_internal
     · intro inputLength
-      simpa [BinaryRoutine.binaryCopy] using
-        hpreparedValues inputLength Work.available
+      simp [BinaryRoutine.binaryCopy]
+      exact hpreparedValues inputLength Work.available
     · intro inputLength
-      simpa [BinaryRoutine.binaryCopy] using
-        hpreparedValues inputLength Work.reference₀
+      simp [BinaryRoutine.binaryCopy]
+      exact hpreparedValues inputLength Work.reference₀
     · intro inputLength
-      simpa [BinaryRoutine.binaryCopy] using
-        hpreparedValues inputLength Work.reference₁
+      simp [BinaryRoutine.binaryCopy]
+      exact hpreparedValues inputLength Work.reference₁
   constructor
   · apply BinaryRoutine.SpaceBoundByWidthAt.clear_internal
     intro inputLength
-    simpa [BinaryRoutine.binaryCopy, BinaryRoutine.emitRawGateStep] using
-      hpreparedValues inputLength Work.reference₀
+    simp [BinaryRoutine.binaryCopy, BinaryRoutine.emitRawGateStep]
+    exact hpreparedValues inputLength Work.reference₀
   constructor
   · apply BinaryRoutine.SpaceBoundByWidthAt.clear_internal
     intro inputLength
-    simpa [BinaryRoutine.binaryCopy, BinaryRoutine.emitRawGateStep,
-      BinaryRoutine.clear] using
-        hpreparedValues inputLength Work.reference₁
+    simp [BinaryRoutine.binaryCopy, BinaryRoutine.emitRawGateStep, BinaryRoutine.clear]
+    exact hpreparedValues inputLength Work.reference₁
   · trivial
 
 theorem prepareAcceptanceReferences_requires_internal (tm : TM k)
@@ -802,6 +801,7 @@ private theorem prepareAcceptanceCellPrefix_emitted (tm : TM k)
     BinaryRoutine.set, BinaryRoutine.clear, BinaryRoutine.addConst,
     BinaryRoutine.add, BinaryRoutine.mulAdd]
 
+set_option maxHeartbeats 1000000 in
 private theorem prepareAcceptanceCellOffset_emitted (k : ℕ)
     (values : BinaryValues WorkCount) :
     (prepareAcceptanceCellOffset k).emitted values = [] := by

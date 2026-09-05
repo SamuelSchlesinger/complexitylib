@@ -172,7 +172,7 @@ theorem startBlankPartTM_hoareTime (tp : ℕ) (htp1 : 1 ≤ tp) (htp : tp < 3)
       (symIdx (initCellSym x tp (j + 1)))⟩] : Clause)
       = [⟨true, vCellF Qc steps P 0 tp (1 + j) 2⟩]
     rw [show initCellSym x tp (j + 1) = Γ.blank from by
-        rw [initCellSym, if_neg (by omega), if_neg (by omega)],
+        rw [initCellSym, ite_eq_right (by omega), ite_eq_right (by omega)],
       show (1 : ℕ) + j = j + 1 from by omega]
     rfl
   -- Stage 1: the position-0 clause.

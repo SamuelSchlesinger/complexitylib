@@ -5,7 +5,7 @@ Authors: Bolton Bailey
 -/
 module
 public import Complexitylib.Classes.PCP.Internal.ExpanderMerge
-public import Mathlib.Data.Real.Sqrt
+public import Mathlib.Analysis.Real.Sqrt
 
 /-!
 # Merging at an arbitrary width
@@ -67,7 +67,7 @@ theorem liftN_projN_slotN (hn : 0 < n) (hN : N ≤ m * n) (u : Fin N) :
   have h : u.val % n + u.val / n * n = u.val := by
     rw [mul_comm]
     exact Nat.mod_add_div u.val n
-  rw [dif_pos (by rw [h]; exact u.isLt)]
+  rw [dite_eq_left (by rw [h]; exact u.isLt)]
   congr 1
   exact Fin.ext h
 
@@ -175,7 +175,7 @@ theorem step_mergedN (hn : 0 < n) (hd : 0 < d) (hm : 0 < m) (hN : N ≤ m * n)
       = ∑ i : Fin m, ∑ s : Fin d, f ((mergeRotN hn hN rot (v, (i, s))).1) :=
     Fintype.sum_prod_type
       (f := fun x : Fin m × Fin d => f ((mergeRotN hn hN rot (v, x)).1))
-  rw [RegGraph.step, hdeg, hsum]
+  simp only [RegGraph.step]; rw [hdeg, hsum]
   have hinner : ∀ i : Fin m, ∑ s : Fin d, f ((mergeRotN hn hN rot (v, (i, s))).1)
       = (d : ℝ) * termN hn hd rot hrot f v i.val := by
     intro i
@@ -186,7 +186,7 @@ theorem step_mergedN (hn : 0 < n) (hd : 0 < d) (hm : 0 < m) (hN : N ≤ m * n)
         simp only [Finset.sum_const, Finset.card_univ, Fintype.card_fin, nsmul_eq_mul]
     | some u =>
         simp only
-        rw [RegGraph.step, deg_ofRot]
+        simp only [RegGraph.step]; rw [deg_ofRot]
         show _ = (d : ℝ) * ((∑ j : Fin d, f (projN n hn (rot (u, j)).1)) / (d : ℝ))
         field_simp
   rw [Finset.sum_congr rfl fun i _ => hinner i, ← Finset.mul_sum]

@@ -59,17 +59,19 @@ theorem RepeatFrame.begin (tm : NTM n) (x : List Bool)
     have hp := repeatParked_parkedBlank
     have hstable := hp.writeAndMove_idle
     by_cases hT : 0 < T
-    · simpa [C, j, trace, repeatAtTime, repeatParkedCfg, repeatGuardTransition,
-        repeatPositionBankDirs, hk, hT, hlj] using hstable
-    · simpa [C, j, trace, repeatAtTime, repeatParkedCfg, repeatGuardTransition,
-        repeatPositionBankDirs, hk, hT, hlj] using hstable
+    · simp [j, trace, repeatAtTime, repeatParkedCfg, repeatGuardTransition, repeatPositionBankDirs,
+      hk, hT, hlj]
+      exact hstable
+    · simp [j, trace, repeatAtTime, repeatParkedCfg, repeatGuardTransition, repeatPositionBankDirs,
+      hk, hT, hlj]
+      exact hstable
   · have hp := repeatParked_parkedBlank
     have hstable := hp.writeAndMove_idle
     by_cases hT : 0 < T
-    · simpa [C, trace, repeatAtTime, repeatParkedCfg, repeatGuardTransition,
-        hk, hT] using hstable
-    · simpa [C, trace, repeatAtTime, repeatParkedCfg, repeatGuardTransition,
-        hk, hT] using hstable
+    · simp [trace, repeatAtTime, repeatParkedCfg, repeatGuardTransition, hk, hT]
+      exact hstable
+    · simp [trace, repeatAtTime, repeatParkedCfg, repeatGuardTransition, hk, hT]
+      exact hstable
 
 /-- With at least one trial, the full two-step setup establishes every fact
 needed to start the first trial and its outer-induction boundary. -/
@@ -143,7 +145,7 @@ theorem repeatAtTime_trace_setup_boundary (tm : NTM n) (x : List Bool)
   have h := repeatAtTime_trace_setup_ready tm x hk seed choices
   dsimp only at h
   rcases h with ⟨hvotes, hstate, hproject, _, _, _, _, _, hframe, hparked⟩
-  rw [RepeatBoundary, dif_pos hk]
+  simp only [RepeatBoundary, dite_eq_left hk]
   refine ⟨fun _ => false, hvotes, hstate, hproject, ?_, ?_⟩
   · exact hframe
   · exact hparked

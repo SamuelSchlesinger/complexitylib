@@ -45,7 +45,7 @@ theorem eventually_exists_generatorOfCounterFamily_isCorrect_internal
           beta]
       with arity hbudget hsize hsemantic
   intro harity
-  letI : NeZero arity := ⟨harity⟩
+  let : NeZero arity := ⟨harity⟩
   intro family hcorrect
   let generator := generatorOfCounterFamily family hbudget
     (hsize harity family hbudget)
@@ -71,7 +71,7 @@ theorem eventually_existsCorrectGeneratorAt_of_existsCorrectCounterFamilyAt_inte
       with arity hgenerator harity
   intro hfamily
   have harity' : arity ≠ 0 := by omega
-  letI : NeZero arity := ⟨harity'⟩
+  let : NeZero arity := ⟨harity'⟩
   obtain ⟨family, hcorrect⟩ := hfamily
   obtain ⟨generator, hgeneratorCorrect⟩ :=
     hgenerator harity' family hcorrect

@@ -124,7 +124,7 @@ theorem lengthLang_mem_iUnion_PCP (A : Set ℕ) :
     have hxA : x.length ∈ A := hx
     have hr : indicatorBound A x.length = 1 := by
       rw [indicatorBound]
-      exact if_pos hxA
+      exact ite_eq_left hxA
     rw [hr]
     have huniv : coinLenVerifier.acceptEvent 1 x [] = Finset.univ := by
       refine Finset.eq_univ_iff_forall.2 fun ρ => ?_
@@ -136,7 +136,7 @@ theorem lengthLang_mem_iUnion_PCP (A : Set ℕ) :
     have hxA : x.length ∉ A := hx
     have hr : indicatorBound A x.length = 0 := by
       rw [indicatorBound]
-      exact if_neg hxA
+      exact ite_eq_right hxA
     rw [hr]
     have hempty : coinLenVerifier.acceptEvent 0 x π = ∅ := by
       refine Finset.eq_empty_iff_forall_notMem.2 fun ρ hρ => ?_

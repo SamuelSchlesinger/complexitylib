@@ -114,7 +114,7 @@ theorem mem_rawAtThreshold_tableBits_iff_internal
     (threshold : ℕ → ℕ) (inst : Instance) :
     inst.tableBits ∈ rawAtThreshold threshold ↔
       inst.minimumSize ≤ threshold inst.arity := by
-  simp only [rawAtThreshold, Set.mem_setOf_eq,
+  simp only [rawAtThreshold, Set.mem_ofPred_eq,
     rawDecode?_tableBits_internal]
   rw [Instance.hasCircuitAtMost_iff_minimumSize_le_internal,
     Instance.minimumSize_withThreshold_internal]
@@ -157,7 +157,7 @@ theorem mem_rawSliceNoLanguage_tableBits_iff_internal
     (parameters : SliceParameters) (inst : MCSP.Instance) :
     inst.tableBits ∈ rawSliceNoLanguage parameters ↔
       parameters.noThreshold inst.arity < inst.minimumSize := by
-  simp only [rawSliceNoLanguage, Set.mem_setOf_eq,
+  simp only [rawSliceNoLanguage, Set.mem_ofPred_eq,
     MCSP.rawDecode?_tableBits_internal]
   rw [MCSP.Instance.minimumSize_withThreshold_internal]
   rfl

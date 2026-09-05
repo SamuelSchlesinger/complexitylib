@@ -213,7 +213,7 @@ theorem loop_hLL (M : TM k) {L' : Language} (x : List Bool) (N H : ℕ) (I : Tap
           (TM.tallyTestTM (cIdx k) (nIdx k) (resIdx k))).qhalt from hstate, ↓reduceIte]
         nofun)
   | rewindOut =>
-      rw [if_neg (by nofun : ¬ (TM.LoopPhase.rewindOut = TM.LoopPhase.check))] at hhead
+      rw [ite_eq_right (by nofun : ¬ (TM.LoopPhase.rewindOut = TM.LoopPhase.check))] at hhead
       obtain ⟨hin', hwork', hcells', hhead'⟩ :=
         TM.loop_phase_step_tapes (bodyTM M) (TM.tallyTestTM (cIdx k) (nIdx k) (resIdx k))
           hstate (by nofun) hoSI hstep
@@ -263,7 +263,7 @@ theorem loop_hLL (M : TM k) {L' : Language} (x : List Bool) (N H : ℕ) (I : Tap
           have := hhead'
           omega
   | check =>
-      rw [if_pos rfl] at hhead
+      rw [ite_eq_left rfl] at hhead
       have hhead1 : c.output.head = 1 := hhead
       have hread : c.output.read ≠ Γ.start := by
         show c.output.cells c.output.head ≠ Γ.start
@@ -302,10 +302,10 @@ theorem loop_hLL (M : TM k) {L' : Language} (x : List Bool) (N H : ℕ) (I : Tap
         have hc'eq : c' = d := Option.some_inj.mp hstep.symm
         have hjN' : j ≠ N := by
           intro hjeq
-          rw [hjeq, if_pos rfl] at hcells
+          rw [hjeq, ite_eq_left rfl] at hcells
           exact hone (by rw [hcells]; rfl)
         refine ⟨fun _ => ⟨j, by omega, hbase.1, hbase.2.1,
-            ⟨if j = N then Γw.one else Γw.zero, by rw [if_neg hjN']; nofun, ?_⟩⟩,
+            ⟨if j = N then Γw.one else Γw.zero, by rw [ite_eq_right hjN']; nofun, ?_⟩⟩,
           fun hcon => absurd (hc'eq ▸ hcon) (by rw [hdstate]; nofun),
           fun ph' hph' => absurd (hc'eq ▸ hph') (by rw [hdstate]; nofun)⟩
         rw [hbase.2.2]

@@ -285,7 +285,7 @@ theorem eval_slotWellFormed_internal {inputWidth gateBound : Nat}
       (inputWidth + slot.val) code havailable,
     eval_referenceBelow_internal slot false
       (inputWidth + slot.val) code havailable]
-  simp [GateSlot.WellFormedAt]
+  simp [GateSlot.WellFormedAt, ← Bool.decide_and]
 
 theorem eval_slotValid_internal {inputWidth gateBound : Nat}
     (slot : Fin gateBound)
@@ -347,7 +347,7 @@ theorem eval_wellFormed_internal (inputWidth gateBound : Nat)
   unfold EncodedWellFormed
   unfold decode?
   by_cases hcount : countValue code < gateBound + 1
-  · rw [dif_pos hcount]
+  · rw [dite_eq_left hcount]
     let description : Description inputWidth gateBound :=
       { gateCount := ⟨countValue code, hcount⟩
         slots := fun slot => GateSlot.decode (slotBits code slot) }
@@ -363,8 +363,9 @@ theorem eval_wellFormed_internal (inputWidth gateBound : Nat)
         description.WellFormed
     constructor
     · rintro ⟨hpositive, hcountBound, hslotsValid⟩
-      refine ⟨by simpa [Description.Positive, Description.gateCountNat,
-          description] using hpositive, ?_, ?_⟩
+      refine ⟨by
+        simp only [Description.Positive, Description.gateCountNat, description]
+        omega, ?_, ?_⟩
       · intro index
         let slot : Fin gateBound :=
           ⟨index.val, lt_of_lt_of_le index.isLt hcountBound⟩
@@ -376,8 +377,7 @@ theorem eval_wellFormed_internal (inputWidth gateBound : Nat)
         exact (hslotsValid slot).2 hinactive
     · rintro ⟨hpositive, htopological, hpadded⟩
       refine ⟨by
-        simpa [Description.Positive, Description.gateCountNat,
-          description] using hpositive, Nat.le_of_lt_succ hcount, ?_⟩
+        exact hpositive, Nat.le_of_lt_succ hcount, ?_⟩
       intro slot
       constructor
       · intro hactive
@@ -388,7 +388,7 @@ theorem eval_wellFormed_internal (inputWidth gateBound : Nat)
           description, index] using hvalid
       · intro hinactive
         exact hpadded slot hinactive
-  · rw [dif_neg hcount]
+  · rw [dite_eq_right hcount]
     constructor
     · rintro ⟨_, hcountBound, _⟩
       omega
@@ -688,7 +688,7 @@ theorem eval?_compileRaw_internal (inputWidth gateBound : Nat)
     simp [BoolFormula.rawOutputWire, length_compileRaw_internal,
       size_wellFormed_internal]
   rw [RawCircuit.eval?]
-  simp only [hnonempty, Bool.false_eq_true, if_false, heval']
+  simp only [hnonempty, Bool.false_eq_true, ite_false, heval']
   rw [houtputIndex]
   change result[BoolFormula.rawOutputWire
       (codeWidth inputWidth gateBound)

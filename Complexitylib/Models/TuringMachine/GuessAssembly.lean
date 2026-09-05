@@ -119,7 +119,7 @@ theorem liftLast_stepCfg (D : TM m) (c : Cfg m D.Q) (τ : Tape) (hτ : τ.read �
   · funext i
     refine Fin.lastCases ?_ ?_ i
     · simp only [TM.stepCfg, liftLast, NTM.attach, Fin.snoc_last]
-      rw [writeAndMove_readBack _ hτ, idleDir, if_neg hτ]
+      rw [writeAndMove_readBack _ hτ, idleDir, ite_eq_right hτ]
       rfl
     · intro j
       simp [TM.stepCfg, liftLast, NTM.attach]
@@ -143,7 +143,7 @@ theorem liftLast_reachesIn (D : TM m) (τ : Tape) (hτ : τ.read ≠ Γ.start) :
       have hne : c.state ≠ D.qhalt := by
         intro hq
         unfold TM.step at hstep
-        rw [if_pos hq] at hstep
+        rw [ite_eq_left hq] at hstep
         exact absurd hstep (by simp)
       have hb : D.stepCfg c = c₁ := by
         rw [step_of_not_halted D hne] at hstep
@@ -336,6 +336,7 @@ theorem guessProtocol_seqTM {A B : TM (k + 1)} {AdvA : A.Q → Bool} {AdvB : B.Q
           = (B.δ q iHead wHeads oHead).2.2.2.2.1 := by simp [seqTM, h]
       rw [hred, hB.dir q h iHead wHeads oHead hs]
       simp [seqAdv]
+      rfl
   · rintro (q | q) hq hadv iHead ww oHead g g'
     · by_cases h : q = A.qhalt
       · subst h
@@ -457,6 +458,11 @@ instance : Fintype GuessPhase where
   elems := {.read, .done}
   complete := fun x => by cases x <;> simp
 
+/-- The advancing state of the guess primitives: only `read` consumes a guess bit.
+Stated on `GuessPhase` itself so instance search never has to see through a
+machine's `Q` projection. -/
+@[simp] def guessPhaseAdv (q : GuessPhase) : Bool := decide (q = GuessPhase.read)
+
 /-- **The guess-reading primitive.** In one step it copies the symbol under the guess head onto
 work tape `j`, advances the guess head, and halts. This is the only place a machine assembled
 with `TM.liftLast` ever consults the guess tape. -/
@@ -493,7 +499,7 @@ def guessReadTM (j : Fin (k + 1)) : TM (k + 1) where
 
 /-- The guess-reading primitive advances exactly in its one working state. -/
 theorem guessProtocol_guessReadTM (j : Fin (k + 1)) :
-    GuessProtocol (guessReadTM j) (fun q => decide (q = GuessPhase.read)) := by
+    GuessProtocol (guessReadTM j) guessPhaseAdv := by
   refine ⟨?_, ?_, ?_⟩
   · rintro (_ | _) hq iHead wHeads oHead
     · simp only [guessReadTM]
@@ -566,7 +572,7 @@ def guessWriteTM (j : Fin (k + 1)) : TM (k + 1) where
 
 /-- The guess-writing primitive advances exactly in its one working state. -/
 theorem guessProtocol_guessWriteTM (j : Fin (k + 1)) :
-    GuessProtocol (guessWriteTM j) (fun q => decide (q = GuessPhase.read)) := by
+    GuessProtocol (guessWriteTM j) guessPhaseAdv := by
   refine ⟨?_, ?_, ?_⟩
   · rintro (_ | _) hq iHead wHeads oHead
     · simp only [guessWriteTM]
@@ -630,13 +636,13 @@ theorem guessWriteTM_hoareTime (j : Fin (k + 1)) (hj : j ≠ Fin.last k)
     funext i
     rw [guessWriteTapes]
     by_cases hij : i = j
-    · rw [if_pos hij, hij]
+    · rw [ite_eq_left hij, hij]
       exact h1
-    · rw [if_neg hij]
+    · rw [ite_eq_right hij]
       by_cases hil : i = Fin.last k
-      · rw [if_pos hil, hil]
+      · rw [ite_eq_left hil, hil]
         exact h2
-      · rw [if_neg hil]
+      · rw [ite_eq_right hil]
         exact h3 i hij hil
 
 /-! ## Writing a block of guesses
@@ -652,8 +658,8 @@ def guessBlockTM (j : Fin (k + 1)) : ℕ → TM (k + 1)
 
 /-- Its advancing states: every state of every stage. -/
 def guessBlockAdv (j : Fin (k + 1)) : (n : ℕ) → (guessBlockTM j n).Q → Bool
-  | 0 => fun q => decide (q = GuessPhase.read)
-  | n + 1 => seqAdv (fun q => decide (q = GuessPhase.read)) (guessBlockAdv j n)
+  | 0 => guessPhaseAdv
+  | n + 1 => seqAdv guessPhaseAdv (guessBlockAdv j n)
 
 /-- The tapes a block of guess-writes leaves behind. Each stage writes, then the composition's
 own handoff step passes every tape through `TM.transitionTape`. -/
@@ -722,17 +728,17 @@ theorem guessBlockOutput_eq_self {t : Tape} (h : t.read ≠ Γ.start) :
 theorem guessWriteTapes_last (j : Fin (k + 1)) (hj : j ≠ Fin.last k) (W : Fin (k + 1) → Tape)
     (hg : (W (Fin.last k)).read ≠ Γ.start) :
     guessWriteTapes j W (Fin.last k) = (W (Fin.last k)).move Dir3.right := by
-  rw [guessWriteTapes, if_neg (Ne.symm hj), if_pos rfl, writeAndMove_readBack _ hg]
+  rw [guessWriteTapes, ite_eq_right (Ne.symm hj), ite_eq_left rfl, writeAndMove_readBack _ hg]
 
 theorem guessWriteTapes_target (j : Fin (k + 1)) (W : Fin (k + 1) → Tape)
     (hg : (W (Fin.last k)).read ≠ Γ.start) :
     guessWriteTapes j W j = ((W j).write (W (Fin.last k)).read).move Dir3.right := by
-  rw [guessWriteTapes, if_pos rfl, toΓ_readBackWrite_of_ne_start hg]
+  rw [guessWriteTapes, ite_eq_left rfl, toΓ_readBackWrite_of_ne_start hg]
 
 theorem guessWriteTapes_other (j : Fin (k + 1)) (W : Fin (k + 1) → Tape) (i : Fin (k + 1))
     (hij : i ≠ j) (hil : i ≠ Fin.last k) (h : (W i).read ≠ Γ.start) :
     guessWriteTapes j W i = W i := by
-  rw [guessWriteTapes, if_neg hij, if_neg hil, transitionTape_eq_self h]
+  rw [guessWriteTapes, ite_eq_right hij, ite_eq_right hil, transitionTape_eq_self h]
 
 theorem guessWriteTapes_target_head (j : Fin (k + 1)) (W : Fin (k + 1) → Tape)
     (hg : (W (Fin.last k)).read ≠ Γ.start) :
@@ -746,7 +752,7 @@ theorem guessWriteTapes_target_cells (j : Fin (k + 1)) (W : Fin (k + 1) → Tape
     (guessWriteTapes j W j).cells ((W j).head) = (W (Fin.last k)).read := by
   rw [guessWriteTapes_target j W hg]
   show ((W j).write (W (Fin.last k)).read).cells ((W j).head) = _
-  rw [Tape.write, if_neg (by omega)]
+  rw [Tape.write, ite_eq_right (by omega)]
   exact Function.update_self _ _ _
 
 theorem guessWriteTapes_target_cells_ne (j : Fin (k + 1)) (W : Fin (k + 1) → Tape)
@@ -899,7 +905,7 @@ theorem guessProtocol_skipTM : GuessProtocol (skipTM (n := k + 1)) (fun _ => fal
   refine ⟨fun q _ iHead wHeads oHead => rfl, fun q _ iHead wHeads oHead h => ?_,
     fun q _ _ iHead ww oHead g g' => ?_⟩
   · show idleDir (wHeads (Fin.last k)) = _
-    rw [idleDir, if_neg h]
+    rw [idleDir, ite_eq_right h]
     simp
   · simp [visible, skipTM]
 
@@ -1182,7 +1188,7 @@ theorem guessBlocksTM_hoareTime (j : ℕ → Fin (k + 1)) (hj : ∀ t, j t ≠ F
   induction t with
   | zero =>
       intro inp₀ out₀ W₀
-      simpa using skipTM_hoareTime' inp₀ out₀ W₀
+      exact skipTM_hoareTime' inp₀ out₀ W₀
   | succ t ih =>
       intro inp₀ out₀ W₀
       have hcomp := seqTM_hoareTime (guessBlocksTM j w t) (guessBlockTM (j t) (w t))

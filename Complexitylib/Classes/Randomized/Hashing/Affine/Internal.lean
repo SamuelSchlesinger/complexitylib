@@ -53,7 +53,12 @@ def affineEvalHom {domainWidth rangeWidth : ℕ}
     exact mul_zero _
   map_add' first second := by
     funext row
-    simp [affineEval, affineRows, Finset.sum_add_distrib, add_mul]
+    simp only [affineEval, affineRows, Pi.add_apply]
+    rw [← Finset.sum_add_distrib]
+    refine Finset.sum_congr rfl fun column _ => ?_
+    show (first (finProdFinEquiv (row, column)) + second (finProdFinEquiv (row, column))) *
+        affineAugment input column = _
+    ring
 
 /-- The joint outputs on two inputs form an additive map of the seed. -/
 def affinePairEvalHom {domainWidth rangeWidth : ℕ}
@@ -191,7 +196,9 @@ theorem affine_uniform_internal {domainWidth rangeWidth : ℕ}
     (affineEvalHom (rangeWidth := rangeWidth) input)
     (affineEvalHom_surjective_internal (rangeWidth := rangeWidth) input)
     output
-  simpa only [affineEvalHom, card_finArrowBool, Nat.cast_pow, Nat.cast_ofNat] using h
+  simp only [affineEvalHom, AddMonoidHom.coe_mk, ZeroHom.coe_mk, card_finArrowBool,
+    Nat.cast_pow, Nat.cast_ofNat] at h
+  exact h
 
 theorem affine_pairwise_internal {domainWidth rangeWidth : ℕ}
     {first second : BitString domainWidth} (hne : first ≠ second)

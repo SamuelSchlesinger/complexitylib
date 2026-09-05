@@ -566,8 +566,9 @@ private theorem marshalLoop_measured_aux (n : ℕ) (x : List Bool)
         hnonzero hinitialGlobal hbody hloop
       refine ⟨final, ?_, hfinalInvariant, ?_⟩
       · convert hrun using 1
-        all_goals simp [marshalLoopSteps, marshalWidth,
-          Structured.Internal.valueWidth, Nat.succ_mul]
+        all_goals try rfl
+        all_goals simp only [marshalLoopSteps, marshalWidth,
+          Structured.Internal.valueWidth]
         all_goals ring
       · convert hfinalEnvelope using 1
         omega
@@ -587,7 +588,7 @@ theorem marshalLoop_measured_internal {tm : TM n} (x : List Bool) :
     marshalLoop_measured_aux n x (processed := 0) (store := marshalStart n x)
       (by simp) hinvariant hmarshal.storeEnvelope
   refine ⟨final, ?_, hfinalInvariant, ?_⟩
-  · simpa using hrun
+  · exact hrun
   · apply hfinalEnvelope.mono le_rfl
       (show marshalBaseBound n x.length + 0 + x.length ≤
           wordBound tm (marshalBound n x.length) by
@@ -637,9 +638,8 @@ theorem extractVerdict_measured_internal {tm : TM n} {bound : ℕ}
   have hchain : Structured.Internal.Basic.EnvelopeChain
       (registerBound n (bound + 1)) (wordBound tm bound)
       (extractVerdictOps n) store := by
-    simpa [extractVerdictOps, addressed, loaded, oned, final] using
-      And.intro henvelope
-        (And.intro haddressed (And.intro hloaded (And.intro honed hfinal)))
+    simp [extractVerdictOps]
+    exact And.intro henvelope (And.intro haddressed (And.intro hloaded (And.intro honed hfinal)))
   have hmeasured := Structured.Internal.MeasuredRuns.basicsEnvelopeChain
     (extractVerdictOps n) store hchain
   have hverdict := extractVerdict_exec_internal hrepresents
@@ -739,7 +739,7 @@ private theorem repairBit_measured_internal {tm : TM n} {bound valueLimit : ℕ}
     have hrepairStore : repairBitStore n entry store = loaded := by
       unfold repairBitStore
       change (if loaded (valueReg n) = 0 then loaded else _) = loaded
-      rw [if_pos hzero]
+      rw [ite_eq_left hzero]
     refine ⟨3, ?_, ?_⟩
     · rw [hrepairStore]
       simpa [repairBit] using hrun'
@@ -792,11 +792,12 @@ private theorem repairBit_measured_internal {tm : TM n} {bound valueLimit : ℕ}
         Structured.Basic.execList
           [.imm (valueReg n) (entry.2 + 1),
             .store (addressReg n) (valueReg n)] loaded) = final
-      rw [if_neg hzero]
+      rw [ite_eq_right hzero]
       rfl
     refine ⟨6, ?_, ?_⟩
     · rw [hrepairStore]
-      simpa [repairBit] using hrun'
+      simp [repairBit]
+      exact hrun'
     · rw [hrepairStore]
       exact hfinal
 
@@ -833,8 +834,9 @@ private theorem repairCaptured_fromStep_measured {tm : TM n}
       have hrun := hfirst.seq hrest
       refine ⟨final, firstSteps + restSteps, ?_, ?_, hfinalEnvelope⟩
       · convert hrun using 1
-        simp only [List.length_cons]
-        ring
+        all_goals try rfl
+        all_goals simp only [List.length_cons]
+        all_goals ring
       · simp [repairStore] at hrestStore ⊢
         exact hrestStore
 
@@ -864,8 +866,9 @@ theorem repairCaptured_measured_internal {tm : TM n} {bound valueLimit : ℕ}
   have hrun := hfirst.seq hrest
   refine ⟨final, firstSteps + restSteps, ?_, ?_, hfinalEnvelope⟩
   · convert hrun using 1
-    simp only [List.length_cons]
-    ring
+    all_goals try rfl
+    all_goals simp only [List.length_cons]
+    all_goals ring
   · simp [repairStore] at hrestStore ⊢
     exact hrestStore
 
@@ -1051,10 +1054,10 @@ theorem marshalLeaf_measured_internal (tm : TM n) (x : List Bool) :
       (marshalLoopSteps n x.length +
         (repairSteps + (initializeConfigOps tm).length)), ?_, ?_, ?_⟩
   · convert hrun using 1
-    simp [marshalLeafTimeBound, marshalBaseWidth,
-      Structured.Internal.valueWidth, capturedInput,
-      captureValues_eq_reverse_append]
-    ring
+    all_goals try rfl
+    all_goals simp [capturedInput, captureValues_eq_reverse_append,
+      marshalLeafTimeBound, marshalBaseWidth, Structured.Internal.valueWidth]
+    all_goals ring
   · simpa [final, initializeStore] using hrepresents
   · simpa [final] using hinitializeEnvelope
 
@@ -1116,8 +1119,9 @@ private theorem captureInput_measured_of_leaf {tm : TM n} (x : List Bool)
           hnonzero henvelope hrest
         refine ⟨restSteps + 2, ?_⟩
         convert hbranch using 1
-        all_goals simp [captureInput, hone, wordWidth,
-          Structured.Internal.valueWidth]
+        all_goals try rfl
+        all_goals simp only [captureInput, hone, wordWidth,
+          Structured.Internal.valueWidth, List.length_cons]
         all_goals ring
 
 /-- The full public-input marshaller has a concrete resource certificate and
@@ -1189,8 +1193,9 @@ theorem decisionProgram_measured_internal {tm : TM n} {steps : ℕ}
       (runSteps tm steps (tm.initCfg x) + (extractVerdictOps n).length),
     ?_, hverdict⟩
   convert hrun using 1
-  simp [decisionTimeBound]
-  ring
+  all_goals try rfl
+  all_goals simp [decisionTimeBound]
+  all_goals ring
 
 /-- Concrete compiled-RAM transfer of the end-to-end resource certificate. -/
 theorem compiledDecision_resourceBound_internal {tm : TM n} {steps : ℕ}

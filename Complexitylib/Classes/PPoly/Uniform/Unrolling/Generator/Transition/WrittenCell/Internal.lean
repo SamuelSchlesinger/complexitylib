@@ -69,10 +69,10 @@ theorem emitHeadAtCurrentCellGate_requires_internal (stateCount : ℕ)
     (emitHeadAtCurrentCellGate stateCount).requires values := by
   by_cases hzero : values Work.temporary₃ = 0
   · simp only [emitHeadAtCurrentCellGate, BinaryRoutine.branchZero, hzero,
-      if_true]
+      ite_true]
     exact emitConstantGate_requires_internal false values hemit
   · simp only [emitHeadAtCurrentCellGate, BinaryRoutine.branchZero, hzero,
-      if_false]
+      ite_false]
     exact emitHeadReference_requires stateCount false values hadd hmultiply
       hemit
 
@@ -86,7 +86,7 @@ theorem emitHeadAtCurrentCellGate_requires_internal (stateCount : ℕ)
   · simp [emitHeadAtCurrentCellGate, BinaryRoutine.branchZero, hzero,
       emitConstantGate, BinaryRoutine.emitRawGateStep]
   · rw [emitHeadAtCurrentCellGate, BinaryRoutine.branchZero]
-    simp only [hzero, if_false, emitHeadReference_effect]
+    simp only [hzero, ite_false, emitHeadReference_effect]
     funext i
     simp only [Function.update_apply]
     split_ifs <;>
@@ -784,22 +784,14 @@ private theorem HeadAtCurrentCellClean.writtenCellSelectedValues
       multiplyCounter := ?_
       addCounter := ?_
       temporary₀ := ?_ }
-  · simpa [writtenCellSelectedValues, Work.tapeIndex, Work.symbolIndex] using
-      hclean.loop₃
-  · simpa [writtenCellSelectedValues, Work.tapeIndex, Work.symbolIndex] using
-      hclean.temporary₃
-  · simpa [writtenCellSelectedValues, Work.tapeIndex, Work.symbolIndex] using
-      hclean.reference₀
-  · simpa [writtenCellSelectedValues, Work.tapeIndex, Work.symbolIndex] using
-      hclean.emitCounter
-  · simpa [writtenCellSelectedValues, Work.tapeIndex, Work.symbolIndex] using
-      hclean.copyCounter
-  · simpa [writtenCellSelectedValues, Work.tapeIndex, Work.symbolIndex] using
-      hclean.multiplyCounter
-  · simpa [writtenCellSelectedValues, Work.tapeIndex, Work.symbolIndex] using
-      hclean.addCounter
-  · simpa [writtenCellSelectedValues, Work.tapeIndex, Work.symbolIndex] using
-      hclean.temporary₀
+  · exact hclean.loop₃
+  · exact hclean.temporary₃
+  · exact hclean.reference₀
+  · exact hclean.emitCounter
+  · exact hclean.copyCounter
+  · exact hclean.multiplyCounter
+  · exact hclean.addCounter
+  · exact hclean.temporary₀
 
 private def writtenCellEffectStartValues (values : BinaryValues WorkCount) :
     BinaryValues WorkCount :=
@@ -1025,7 +1017,7 @@ private theorem CaseFormulaClean.updateAvailable_for_writtenCell
       symbolIndex := ?_ }
   all_goals
     simp only [Function.update_apply]
-    rw [if_neg (by decide)]
+    rw [ite_eq_right (by decide)]
   · exact hclean.position
   · exact hclean.loop₀
   · exact hclean.limit₀
@@ -1446,10 +1438,12 @@ private theorem emitWrittenCellFinish_requires
       (emitRecentGate .and true true 1 1).requires afterHead := by
     apply (emitRecentGate_requires .and true true 1 1 afterHead).2
     refine ⟨?_, ?_, ?_, ?_⟩
-    · simpa [afterHead, afterLeft, Work.available] using hcopySelected
+    · simp [afterHead, afterLeft, Work.available]
+      exact hcopySelected
     · simp [afterHead, afterLeft, selected, restored, Work.available]
     · simp [afterHead, afterLeft, selected, restored, Work.available]
-    · simpa [afterHead, afterLeft, Work.available] using hemitSelected
+    · simp [afterHead, afterLeft, Work.available]
+      exact hemitSelected
   let afterNegated :=
     (emitRecentGate .and true true 1 1).effect afterHead
   have hcell :
@@ -1524,10 +1518,9 @@ theorem emitWrittenCellFormula_requires_internal (tm : NTM k)
       hstartAvailable
   have heffectEffect :
       (emitWrittenCellEffect tm tape symbol).effect start = afterEffect := by
-    simpa [afterEffect, effectSize, start, writtenCellEffectStartValues,
-      Work.available, Work.horizon] using
-        emitWrittenCellEffect_effect_internal tm tape symbol start hstartClean
-          hstartAvailable
+    simp [afterEffect, effectSize, start, writtenCellEffectStartValues, Work.available,
+      Work.horizon]
+    exact emitWrittenCellEffect_effect_internal tm tape symbol start hstartClean hstartAvailable
   have hafterEffectClean : CaseFormulaClean afterEffect :=
     CaseFormulaClean.updateAvailable_for_writtenCell start hstartClean _
   have hfinishPosition :
@@ -1594,10 +1587,9 @@ theorem emitWrittenCellFormula_effect_internal (tm : NTM k)
       Work.symbolIndex]
   have heffectEffect :
       (emitWrittenCellEffect tm tape symbol).effect start = afterEffect := by
-    simpa [afterEffect, effectSize, start, writtenCellEffectStartValues,
-      Work.available, Work.horizon] using
-        emitWrittenCellEffect_effect_internal tm tape symbol start hstartClean
-          hstartAvailable
+    simp [afterEffect, effectSize, start, writtenCellEffectStartValues, Work.available,
+      Work.horizon]
+    exact emitWrittenCellEffect_effect_internal tm tape symbol start hstartClean hstartAvailable
   have hafterEffectClean : CaseFormulaClean afterEffect :=
     CaseFormulaClean.updateAvailable_for_writtenCell start hstartClean _
   have hsavedOutputValue : values 26 = 0 := by
@@ -1704,10 +1696,9 @@ theorem emitWrittenCellFormula_emitted_internal (tm : NTM k)
       Work.symbolIndex]
   have heffectEffect :
       (emitWrittenCellEffect tm tape symbol).effect start = afterEffect := by
-    simpa [afterEffect, effectSize, start, writtenCellEffectStartValues,
-      Work.available, Work.horizon] using
-        emitWrittenCellEffect_effect_internal tm tape symbol start hstartClean
-          hstartAvailable
+    simp [afterEffect, effectSize, start, writtenCellEffectStartValues, Work.available,
+      Work.horizon]
+    exact emitWrittenCellEffect_effect_internal tm tape symbol start hstartClean hstartAvailable
   have heffectEmitted :
       (emitWrittenCellEffect tm tape symbol).emitted start =
         (effectFormulaSchedule (transitionCases tm).length
@@ -2924,7 +2915,7 @@ private theorem writtenCellFinishRoutines_spaceBoundByWidthAt
     (fun inputLength => by
       rw [hleftEffect inputLength]
       simpa [Work.available, Work.position, Work.tapeIndex, Work.symbolIndex]
-        using hposition inputLength)
+        using! hposition inputLength)
     (fun inputLength => by
       rw [hleftEffect inputLength]
       simp [Work.available])

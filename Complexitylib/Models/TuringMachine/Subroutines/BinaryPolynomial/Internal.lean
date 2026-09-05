@@ -73,7 +73,7 @@ private def binaryHornerWork (work : Fin n → Tape)
         targetIdx sourceIdx inputValue coeffs
         (accValue * inputValue + coeff)
 
-private def swapBinaryMulAddDistinct
+private theorem swapBinaryMulAddDistinct
     {leftIdx rightIdx accIdx mulCounterIdx addCounterIdx : Fin n}
     (h : BinaryMulAddDistinct leftIdx rightIdx accIdx mulCounterIdx
       addCounterIdx) :
@@ -89,7 +89,7 @@ private def swapBinaryMulAddDistinct
     acc_ne_addCounter := h.left_ne_addCounter
     mulCounter_ne_addCounter := h.mulCounter_ne_addCounter }
 
-private def resultSourceDistinct
+private theorem resultSourceDistinct
     {inputIdx resultIdx scratchIdx mulCounterIdx addCounterIdx : Fin n}
     (h : BinaryPolynomialDistinct inputIdx resultIdx scratchIdx mulCounterIdx
       addCounterIdx) :
@@ -106,7 +106,7 @@ private def resultSourceDistinct
     acc_ne_addCounter := h.scratch_ne_addCounter
     mulCounter_ne_addCounter := h.mulCounter_ne_addCounter }
 
-private def scratchSourceDistinct
+private theorem scratchSourceDistinct
     {inputIdx resultIdx scratchIdx mulCounterIdx addCounterIdx : Fin n}
     (h : BinaryPolynomialDistinct inputIdx resultIdx scratchIdx mulCounterIdx
       addCounterIdx) :
@@ -481,7 +481,7 @@ private theorem binaryHornerLayersTM_hoareTimeSpace
           simpa [binaryPolynomialNatTape] using hsource.eq_init_move_right.symm
         · rw [Function.update_of_ne hi]
       have hacc : accValue ≤ cap := by
-        simpa using hcap 0 (by simp)
+        exact hcap 0 (by simp)
       have haccSize := Nat.size_le_size (show accValue ≤ 2 * cap by omega)
       refine hbase.consequence (fun _ _ _ h => h) (fun inp work out h => ?_)
         (by simp [binaryHornerLayersTime, binaryAddConstTime]) le_rfl ?_
@@ -494,10 +494,10 @@ private theorem binaryHornerLayersTM_hoareTimeSpace
         omega
   | cons coeff coeffs ih =>
       have hacc : accValue ≤ cap := by
-        simpa using hcap 0 (by simp)
+        exact hcap 0 (by simp)
       have hnext : accValue * inputValue + coeff ≤ cap := by
         have h := hcap 1 (by simp)
-        simpa [List.take_succ_cons, binaryHornerFold_cons_internal] using h
+        exact h
       have hlayer := binaryHornerLayerTM_hoareTimeSpace inputIdx sourceIdx
         targetIdx mulCounterIdx addCounterIdx hdistinct inputValue accValue
         coeff inputLength initialSpace inp₀ work₀ out₀ hinput hsource
@@ -609,7 +609,7 @@ private theorem binaryHornerWork_endpoint
   induction coeffs generalizing sourceIdx targetIdx accValue work with
   | nil =>
       simp only [binaryHornerWork, binaryHornerFold, List.length_nil]
-      rw [if_pos Even.zero]
+      rw [ite_eq_left Even.zero]
       rw [update_binaryZero_eq work targetIdx htarget]
       funext i
       by_cases hi : i = sourceIdx
@@ -631,11 +631,11 @@ private theorem binaryHornerWork_endpoint
         hsource₁ htarget₁
       rw [binaryHornerWork, hih]
       by_cases heven : Even coeffs.length
-      · rw [if_pos heven]
+      · rw [ite_eq_left heven]
         have hoddCons : ¬Even (coeff :: coeffs).length := by
           rw [List.length_cons, Nat.even_add_one]
           exact not_not_intro heven
-        rw [if_neg hoddCons]
+        rw [ite_eq_right hoddCons]
         funext i
         by_cases his : i = sourceIdx
         · subst i
@@ -645,11 +645,11 @@ private theorem binaryHornerWork_endpoint
             simp [work₁, binaryHornerLayerWork, nextValue,
               binaryHornerFold_cons_internal]
           · simp [work₁, binaryHornerLayerWork, his, hit]
-      · rw [if_neg heven]
+      · rw [ite_eq_right heven]
         have hevenCons : Even (coeff :: coeffs).length := by
           rw [List.length_cons, Nat.even_add_one]
           exact heven
-        rw [if_pos hevenCons]
+        rw [ite_eq_left hevenCons]
         funext i
         by_cases his : i = sourceIdx
         · subst i
@@ -753,14 +753,14 @@ theorem binaryPolynomialEvalTM_hoareTimeSpace_frame_internal
       inputValue 0 inputLength initialSpace cap coeffs inp₀ work₀ out₀
       hinput hresult hscratch hmulCounter haddCounter hinp hwork hout
       hworkSpace hinputSpace hinputCap hcap
-    rw [binaryPolynomialEvalTM, if_pos (by simpa [coeffs] using heven)]
+    rw [binaryPolynomialEvalTM, ite_eq_left (by simpa [coeffs] using heven)]
     refine hrun.consequence (fun _ _ _ h => h) (fun inp work out h => ?_)
       (by simp [binaryPolynomialTime, coeffs]) le_rfl
       (by simp [binaryPolynomialSpace, cap])
     refine ⟨h.1, h.2.1.trans ?_, h.2.2⟩
     have hend := binaryHornerWork_endpoint work₀ resultIdx scratchIdx
       hdistinct.result_ne_scratch inputValue 0 coeffs hresult hscratch
-    rw [if_pos heven] at hend
+    rw [ite_eq_left heven] at hend
     rw [hend, update_binaryZero_eq work₀ scratchIdx hscratch,
       binaryHornerFold_polyCoeffs_internal p inputValue]
   · have hrun := binaryHornerLayersTM_hoareTimeSpace inputIdx scratchIdx
@@ -768,14 +768,14 @@ theorem binaryPolynomialEvalTM_hoareTimeSpace_frame_internal
       inputValue 0 inputLength initialSpace cap coeffs inp₀ work₀ out₀
       hinput hscratch hresult hmulCounter haddCounter hinp hwork hout
       hworkSpace hinputSpace hinputCap hcap
-    rw [binaryPolynomialEvalTM, if_neg (by simpa [coeffs] using heven)]
+    rw [binaryPolynomialEvalTM, ite_eq_right (by simpa [coeffs] using heven)]
     refine hrun.consequence (fun _ _ _ h => h) (fun inp work out h => ?_)
       (by simp [binaryPolynomialTime, coeffs]) le_rfl
       (by simp [binaryPolynomialSpace, cap])
     refine ⟨h.1, h.2.1.trans ?_, h.2.2⟩
     have hend := binaryHornerWork_endpoint work₀ scratchIdx resultIdx
       hdistinct.result_ne_scratch.symm inputValue 0 coeffs hscratch hresult
-    rw [if_neg heven] at hend
+    rw [ite_eq_right heven] at hend
     rw [hend, update_binaryZero_eq work₀ scratchIdx hscratch,
       binaryHornerFold_polyCoeffs_internal p inputValue]
 

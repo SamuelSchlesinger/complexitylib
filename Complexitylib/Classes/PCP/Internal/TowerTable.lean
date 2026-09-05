@@ -114,7 +114,7 @@ theorem baseRec_eq {x a : ℕ} (hx : x < F.deg ^ 4) (ha : a < F.deg) :
       ≤ F.baseKeyBound := by
     rw [pair_length, List.length_replicate, List.length_replicate, baseKeyBound]
     omega
-  rw [baseRec, if_pos (mem_keySet.mpr ⟨hlen, trivial⟩), baseRaw,
+  rw [baseRec, ite_eq_left (mem_keySet.mpr ⟨hlen, trivial⟩), baseRaw,
     pairFst_pair, pairSnd_pair, List.length_replicate,
     List.length_replicate]
 
@@ -298,7 +298,7 @@ theorem length_table_le (l : ℕ) :
     have hlt := F.rotVal_lt l hv hi
     rw [← encPair_eq, length_encPair]
     omega
-  have hsum := List.sum_le_card_nsmul _ _ hbound
+  have hsum := List.sum_le_length_nsmul _ _ hbound
   rw [List.length_map, length_tableList] at hsum
   simp only [smul_eq_mul] at hsum
   omega

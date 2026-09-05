@@ -71,35 +71,35 @@ private theorem binaryEq_terminal_step {n : ℕ}
   simp only [TM.step, binaryEqTM]
   cases result with
   | false =>
-      simp only [Bool.false_eq_true, if_false] at hterminal
+      simp only [Bool.false_eq_true, ite_false] at hterminal
       have hnotBlank : ¬((work lhsIdx).read = Γ.blank ∧
           (work rhsIdx).read = Γ.blank) := by
         intro hblank
         exact hterminal (hblank.1.trans hblank.2.symm)
-      rw [if_neg hnotBlank, if_neg hterminal]
+      rw [ite_eq_right hnotBlank, ite_eq_right hterminal]
       simp only [show BinaryEqPhase.scan ≠ BinaryEqPhase.done by decide,
-        if_false]
+        ite_false]
       refine congrArg some (Cfg.ext rfl (transitionInput_eq_self hinput) ?_
         (transitionTape_eq_self houtput))
       funext i
       by_cases hi : i = resultIdx
       · subst i
         simp [binaryEqResultCfg, binaryEqResultWork, Γw.ofBool]
-      · simpa [binaryEqResultCfg, binaryEqResultWork, hi] using
+      · simpa [transitionTape, binaryEqResultCfg, binaryEqResultWork, hi] using
           transitionTape_eq_self (hwork i hi)
 
   | true =>
-      simp only [if_true] at hterminal
-      rw [if_pos hterminal]
+      simp only [ite_true] at hterminal
+      rw [ite_eq_left hterminal]
       simp only [show BinaryEqPhase.scan ≠ BinaryEqPhase.done by decide,
-        if_false]
+        ite_false]
       refine congrArg some (Cfg.ext rfl (transitionInput_eq_self hinput) ?_
         (transitionTape_eq_self houtput))
       funext i
       by_cases hi : i = resultIdx
       · subst i
         simp [binaryEqResultCfg, binaryEqResultWork, Γw.ofBool]
-      · simpa [binaryEqResultCfg, binaryEqResultWork, hi] using
+      · simpa [transitionTape, binaryEqResultCfg, binaryEqResultWork, hi] using
           transitionTape_eq_self (hwork i hi)
 
 private theorem binaryEq_scan_step {n : ℕ}
@@ -115,20 +115,20 @@ private theorem binaryEq_scan_step {n : ℕ}
       { state := .scan, input := inp, work := work, output := out } =
     some (binaryEqAdvanceCfg lhsIdx rhsIdx inp work out) := by
   simp only [TM.step, binaryEqTM]
-  rw [if_neg hnotBlank, if_pos hreadEq]
-  simp only [show BinaryEqPhase.scan ≠ BinaryEqPhase.done by decide, if_false]
+  rw [ite_eq_right hnotBlank, ite_eq_left hreadEq]
+  simp only [show BinaryEqPhase.scan ≠ BinaryEqPhase.done by decide, ite_false]
   refine congrArg some (Cfg.ext rfl (transitionInput_eq_self hinput) ?_
     (transitionTape_eq_self houtput))
   funext i
   by_cases hil : i = lhsIdx
   · subst i
-    simp only [binaryEqAdvanceCfg, binaryEqAdvanceWork, if_pos]
+    simp only [binaryEqAdvanceCfg, binaryEqAdvanceWork, ite_eq_left]
     exact writeAndMove_readBack_right (hwork lhsIdx)
   · by_cases hir : i = rhsIdx
     · subst i
-      simp only [binaryEqAdvanceCfg, binaryEqAdvanceWork, if_neg hil, if_pos]
+      simp only [binaryEqAdvanceCfg, binaryEqAdvanceWork, ite_eq_right hil, ite_eq_left]
       exact writeAndMove_readBack_right (hwork rhsIdx)
-    · simpa [binaryEqAdvanceCfg, binaryEqAdvanceWork, hil, hir] using
+    · simpa [transitionTape, binaryEqAdvanceCfg, binaryEqAdvanceWork, hil, hir] using
         transitionTape_eq_self (hwork i)
 
 private theorem binaryEq_terminal_reachesIn {n : ℕ}
@@ -181,10 +181,10 @@ private theorem binaryEq_terminal_reachesIn {n : ℕ}
   · rw [hdecision]
     cases result with
     | false =>
-        simpa [c', binaryEqResultCfg, binaryEqResultWork, Γw.ofBool] using
+        simpa [Γ.ofBool, c', binaryEqResultCfg, binaryEqResultWork, Γw.ofBool] using
           Tape.hasBinaryPrefix_write_bit false hresult
     | true =>
-        simpa [c', binaryEqResultCfg, binaryEqResultWork, Γw.ofBool] using
+        simpa [Γ.ofBool, c', binaryEqResultCfg, binaryEqResultWork, Γw.ofBool] using
           Tape.hasBinaryPrefix_write_bit true hresult
   · change (Function.update work₀ resultIdx _ lhsIdx).cells = _
     rw [Function.update_of_ne hdistinct.lhs_result]
@@ -288,7 +288,7 @@ private theorem binaryEq_suffix_reachesIn {n : ℕ}
               simpa [work₁, binaryEqAdvanceWork] using hlhs.move_right_cons
             have hrhs₁ : (work₁ rhsIdx).HasBinarySuffix rhsTail := by
               simp only [work₁, binaryEqAdvanceWork,
-                if_neg (Ne.symm hdistinct.lhs_rhs), if_pos]
+                ite_eq_right (Ne.symm hdistinct.lhs_rhs), ite_eq_left]
               exact hrhs.move_right_cons
             have hresult₁ : (work₁ resultIdx).HasBinaryPrefix [] := by
               simpa [work₁, binaryEqAdvanceWork,
@@ -310,7 +310,7 @@ private theorem binaryEq_suffix_reachesIn {n : ℕ}
                   work := work₀
                   output := out₀ } c' := by
               exact .step hstep (by
-                simpa [work₁, binaryEqAdvanceCfg] using hreach)
+                simpa [work₁, binaryEqAdvanceCfg, binaryEqAdvanceWork, binaryEqTM] using hreach)
             refine ⟨c', t + 1, ?_, hreach', hhalt, hfinalInput, ?_, ?_, ?_,
               hfinalLhsHead, hfinalRhsHead, ?_, hfinalOutput⟩
             · simp only [binaryEqTime, List.length_cons] at htime ⊢

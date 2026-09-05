@@ -51,7 +51,7 @@ theorem traceBuildStep_topologicallyWellFormed_internal
   have hbuildAvailable : 0 < build.available := by
     rw [havailable]
     omega
-  letI : NeZero build.available := ⟨Nat.ne_of_gt hbuildAvailable⟩
+  let : NeZero build.available := ⟨Nat.ne_of_gt hbuildAvailable⟩
   have hchoice : (layout.choice i).val < build.available := by
     exact (layout.choice i).isLt.trans_le (by rw [havailable]; omega)
   have hconfig : build.configBase + configWidth tm T ≤ build.available :=

@@ -251,10 +251,10 @@ theorem guessProtocol_binaryForTM_internal {k : ℕ} {body : TM (k + 1)} {Adv : 
     match q with
     | .inl (.scan e) =>
       dsimp only [binaryForTM, binaryForAdv]
-      split <;> simp [hc, hl, idleDir, hg]
+      split <;> simp [hc, hl, idleDir, hg] <;> rfl
     | .inl (.rewind e) =>
       dsimp only [binaryForTM, binaryForAdv]
-      split <;> simp [hc, hl, idleDir, hg]
+      split <;> simp [hc, hl, idleDir, hg] <;> rfl
     | .inl .done => exact absurd rfl hq
     | .inr q =>
       by_cases hqh : q = (binaryForIterationTM body counterIdx).qhalt
@@ -262,7 +262,8 @@ theorem guessProtocol_binaryForTM_internal {k : ℕ} {body : TM (k + 1)} {Adv : 
         simp [binaryForTM, binaryForAdv, seqAdv, allReadBack, idleDir, hg,
           binaryForIterationTM, seqTM]
       · have h := hiter.dir q hqh iHead wHeads oHead hg
-        simpa [binaryForTM, binaryForAdv, hqh] using h
+        simp [binaryForTM, binaryForAdv, hqh]
+        exact h
   · intro q hq hadv iHead ww oHead g g'
     obtain ⟨jc, hjc⟩ := Fin.exists_castSucc_eq.mpr hcounter
     obtain ⟨jl, hjl⟩ := Fin.exists_castSucc_eq.mpr hlimit
@@ -282,7 +283,10 @@ theorem guessProtocol_binaryForTM_internal {k : ℕ} {body : TM (k + 1)} {Adv : 
       by_cases hqh : q = (binaryForIterationTM body counterIdx).qhalt
       · subst hqh
         simp [binaryForTM, visible, allReadBack, Fin.snoc_castSucc]
-      · have h := hiter.indep q hqh (by simpa [binaryForAdv] using hadv) iHead ww
+      · have hadv' : ¬seqAdv Adv (fun _ => false) q = true := by
+          simp only [binaryForAdv, Bool.not_eq_true] at hadv ⊢
+          exact hadv
+        have h := hiter.indep q hqh hadv' iHead ww
           oHead g g'
         simpa [binaryForTM, visible, hqh] using h
 

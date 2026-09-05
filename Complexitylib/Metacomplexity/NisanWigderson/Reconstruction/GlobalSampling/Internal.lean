@@ -111,7 +111,7 @@ theorem goodReconstructionTrialProbability_eq_average_internal
       (∑ current : Fin outputLength,
         design.goodReconstructionAdviceProbability hardFunction test current
           agreementThreshold) / outputLength := by
-  letI : Nonempty (Fin outputLength) := ⟨⟨0, houtputLength⟩⟩
+  let : Nonempty (Fin outputLength) := ⟨⟨0, houtputLength⟩⟩
   let event := fun current (raw :
       RawReconstructionAdvice outputLength seedLength) =>
     agreementThreshold ≤
@@ -125,9 +125,10 @@ theorem goodReconstructionTrialProbability_eq_average_internal
     intro current
     exact goodRawAdviceProbability_eq_internal
       design hardFunction test current agreementThreshold
-  simpa [goodReconstructionTrialProbability, goodReconstructionTrialEvent,
+  simp only [goodReconstructionTrialProbability, goodReconstructionTrialEvent,
     reconstructionTrialAgreementProbability, reconstructionAdviceOfTrial,
-    event, hconditional, Fintype.card_fin] using haverage
+    event, hconditional, Fintype.card_fin] at haverage ⊢
+  exact haverage
 
 theorem exists_orientation_sum_averageReconstructionAgreement_ge_internal
     {outputLength inputLength seedLength : ℕ}
@@ -296,7 +297,7 @@ theorem repeatedGoodReconstructionTrialProbability_eq_one_sub_pow_internal
         agreementThreshold trials =
       1 - (1 - design.goodReconstructionTrialProbability hardFunction test
         agreementThreshold) ^ trials := by
-  letI : Nonempty (ReconstructionTrial outputLength seedLength) :=
+  let : Nonempty (ReconstructionTrial outputLength seedLength) :=
     ⟨(⟨0, houtputLength⟩, (fun _ => false), (fun _ => false), false)⟩
   exact uniformAtLeastOneProbability_eq_one_sub_pow_internal
     (design.goodReconstructionTrialEvent hardFunction test agreementThreshold)
@@ -361,7 +362,7 @@ theorem exists_half_le_canonicalRepeatedGoodTrial_of_randomTest_internal
   obtain ⟨complement, hsingle, hdata⟩ :=
     exists_goodReconstructionTrialProbability_ge_of_randomTest_internal
       houtputLength hdensity.le hlow hrandom hdense hbudget
-  letI : Nonempty (ReconstructionTrial outputLength seedLength) :=
+  let : Nonempty (ReconstructionTrial outputLength seedLength) :=
     ⟨(⟨0, houtputLength⟩, (fun _ => false), (fun _ => false), false)⟩
   exact ⟨complement,
     half_le_uniformAtLeastOneProbability_of_singleDrawLower_internal

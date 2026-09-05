@@ -126,6 +126,6 @@ theorem idxOf_eq_countP {β : Type} [BEq β] [LawfulBEq β] {key : β → ℕ} :
         have hih := idxOf_eq_countP hpair.2
           (fun p hp q hq => hinj p (List.mem_cons_of_mem _ hp) q (List.mem_cons_of_mem _ hq)) hxt
         rw [List.idxOf_cons_ne _ (Ne.symm hxa), hih, List.countP_cons]
-        simp only [decide_eq_true_eq, if_pos hlt]
+        simp only [decide_eq_true_eq, ite_eq_left hlt]
 
 end Complexity

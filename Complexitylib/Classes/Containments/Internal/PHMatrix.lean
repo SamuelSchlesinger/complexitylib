@@ -121,22 +121,22 @@ theorem matrixTM_hoareTime (M : TM k) {L : Language} {T S : ℕ → ℕ} (hdec :
   · intro hy
     show (if h : TM.placeWorkInMiddle 3 (k + 2) (vIdx k) then
       c'.work (TM.placeWorkCoord 3 (k + 2) (vIdx k) h) else extras (vIdx k)).cells 1 = Γ.one
-    rw [dif_pos (vIdx_inMiddle k), placeWorkCoord_vIdx k (vIdx_inMiddle k)]
+    rw [dite_eq_left (vIdx_inMiddle k), placeWorkCoord_vIdx k (vIdx_inMiddle k)]
     exact hverdict.1 hy
   · intro hy
     show (if h : TM.placeWorkInMiddle 3 (k + 2) (vIdx k) then
       c'.work (TM.placeWorkCoord 3 (k + 2) (vIdx k) h) else extras (vIdx k)).cells 1 = Γ.zero
-    rw [dif_pos (vIdx_inMiddle k), placeWorkCoord_vIdx k (vIdx_inMiddle k)]
+    rw [dite_eq_left (vIdx_inMiddle k), placeWorkCoord_vIdx k (vIdx_inMiddle k)]
     exact hverdict.2 hy
   · intro j hj
     show (if h : TM.placeWorkInMiddle 3 (k + 2) j then _ else extras j) = extras j
-    rw [dif_neg hj]
+    rw [dite_eq_right hj]
   · intro j hj
     have heq : (TM.placeWorkCfg (TM.applyTM M) 3 7 extras c').work j
         = c'.work (TM.placeWorkCoord 3 (k + 2) j hj) := by
       show (if h : TM.placeWorkInMiddle 3 (k + 2) j then
         c'.work (TM.placeWorkCoord 3 (k + 2) j h) else extras j) = _
-      rw [dif_pos hj]
+      rw [dite_eq_left hj]
     rw [heq]
     exact hframe _
 

@@ -78,7 +78,7 @@ theorem vshift_initTape_nil {t : Tape} (h : t.HoldsExact []) (hh : t.head = 1) :
     · have := (Tape.HoldsExact.nil_iff.mp h).2 (k - 1)
       rw [show k - 1 + 1 = k by omega] at this
       rw [this]
-      simp only [hk0, hk1, if_false]
+      simp only [hk0, hk1, ite_false]
       show Γ.blank = (Tape.init []).cells (k - 1)
       simp [Tape.init, show k - 1 ≠ 0 by omega]
 
@@ -96,9 +96,9 @@ theorem vshift_initTape_x {t : Tape} (x : List Bool)
   · simp [hk0]
   · by_cases hk1 : k = 1
     · simp [hk1]
-    · simp only [hk0, hk1, if_false]
+    · simp only [hk0, hk1, ite_false]
       show _ = (Tape.init (x.map Γ.ofBool)).cells (k - 1)
-      simp only [Tape.init, show k - 1 ≠ 0 by omega, if_false,
+      simp only [Tape.init, show k - 1 ≠ 0 by omega, ite_false,
         show k - 1 - 1 = k - 2 by omega]
 
 /-- **Initialization realizes the invariant**: the tape shape guaranteed by

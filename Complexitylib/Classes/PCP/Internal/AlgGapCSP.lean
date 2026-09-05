@@ -118,11 +118,11 @@ noncomputable def gapAlg (hgap : gapAll F hd E padU ∈ FP) : AlgCSP where
     cases b
     · refine mem_FP_of_eq (marks_mem_FP (gTailFn_mem_FP Cobham.sndBlock_mem_FP hg))
         fun w => ?_
-      simp only [cond_false]
+      simp only [Bool.cond_false]
       rw [marks_eq, length_recFst_sndBlock]
     · refine mem_FP_of_eq (marks_mem_FP (gHeadFn_mem_FP Cobham.sndBlock_mem_FP hg))
         fun w => ?_
-      simp only [cond_true]
+      simp only [Bool.cond_true]
       rw [marks_eq, length_recSnd_sndBlock]
   ok := gapOk F hd E padU
   ok_mem := gapOk_mem_P F hd E padU hgap
@@ -135,11 +135,11 @@ noncomputable def gapAlg (hgap : gapAll F hd E padU ∈ FP) : AlgCSP where
 
 theorem vert_gapAlg_false (hgap : gapAll F hd E padU ∈ FP) (x : List Bool) (e : ℕ) :
     (gapAlg F hd E padU hgap).vert false x e = gTail (gapAll F hd E padU x) e := by
-  simp only [gapAlg, cond_false]
+  simp only [gapAlg, Bool.cond_false]
 
 theorem vert_gapAlg_true (hgap : gapAll F hd E padU ∈ FP) (x : List Bool) (e : ℕ) :
     (gapAlg F hd E padU hgap).vert true x e = gHead (gapAll F hd E padU x) e := by
-  simp only [gapAlg, cond_true]
+  simp only [gapAlg, Bool.cond_true]
 
 @[simp] theorem ok_gapAlg (hgap : gapAll F hd E padU ∈ FP) :
     (gapAlg F hd E padU hgap).ok = gapOk F hd E padU := rfl

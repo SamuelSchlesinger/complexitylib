@@ -79,7 +79,7 @@ theorem decode?_eq_some_iff_internal (bits : List Bool) (inst : Instance) :
                         time := baseInst.time
                         threshold := thresholdBits.length }
                   else none) = some inst at hdecode
-              rw [if_pos hthreshold] at hdecode
+              rw [ite_eq_left hthreshold] at hdecode
               cases hdecode
               have hbaseBits :=
                 (MINKT.Instance.decode?_eq_some_iff_internal
@@ -110,7 +110,7 @@ theorem decode?_eq_some_iff_internal (bits : List Bool) (inst : Instance) :
                         time := baseInst.time
                         threshold := thresholdBits.length }
                   else none) = some inst at hdecode
-              rw [if_neg hthreshold] at hdecode
+              rw [ite_eq_right hthreshold] at hdecode
               contradiction
   · rintro rfl
     exact decode?_encode_internal inst

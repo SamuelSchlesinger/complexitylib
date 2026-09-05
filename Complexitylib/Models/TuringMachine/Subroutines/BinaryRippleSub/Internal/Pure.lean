@@ -84,7 +84,8 @@ theorem scan_value_internal (borrow : Bool) (lhs rhs : List Bool) :
           have hstep := scan_value_step borrow false rhsBit tail.borrow 0
             (Nat.fromBitsLE rhsTail) (Nat.fromBitsLE tail.bits)
             rhsTail.length htail
-          simpa [scan, tail, nextBorrow, Nat.fromBitsLE_cons] using hstep
+          simpa [boolValue, show Nat.fromBitsLE ([] : List Bool) = 0 from rfl, scan, tail,
+            nextBorrow, Nat.fromBitsLE_cons] using hstep
   | cons lhsBit lhsTail ih =>
       cases rhs with
       | nil =>
@@ -98,7 +99,8 @@ theorem scan_value_internal (borrow : Bool) (lhs rhs : List Bool) :
           have hstep := scan_value_step borrow lhsBit false tail.borrow
             (Nat.fromBitsLE lhsTail) 0 (Nat.fromBitsLE tail.bits)
             lhsTail.length htail
-          simpa [scan, tail, nextBorrow, Nat.fromBitsLE_cons] using hstep
+          simpa [boolValue, show Nat.fromBitsLE ([] : List Bool) = 0 from rfl, scan, tail,
+            nextBorrow, Nat.fromBitsLE_cons] using hstep
       | cons rhsBit rhsTail =>
           let nextBorrow := borrowBit borrow lhsBit rhsBit
           let tail := scan nextBorrow lhsTail rhsTail
@@ -111,7 +113,8 @@ theorem scan_value_internal (borrow : Bool) (lhs rhs : List Bool) :
           have hstep := scan_value_step borrow lhsBit rhsBit tail.borrow
             (Nat.fromBitsLE lhsTail) (Nat.fromBitsLE rhsTail)
             (Nat.fromBitsLE tail.bits) (max lhsTail.length rhsTail.length) htail
-          simpa [scan, tail, nextBorrow, Nat.fromBitsLE_cons] using hstep
+          simpa [boolValue, show Nat.fromBitsLE ([] : List Bool) = 0 from rfl, scan, tail,
+            nextBorrow, Nat.fromBitsLE_cons] using hstep
 
 /-- Appending a redundant high zero does not change canonical trimming. -/
 theorem trimHighZeros_append_false_internal (bits : List Bool) :
@@ -171,21 +174,21 @@ theorem subtract_natBits_internal (lhs rhs : ℕ) :
   have hinvariant' : lhs +
         (if raw.borrow then 2 ^ max lhs.size rhs.size else 0) =
       rhs + Nat.fromBitsLE raw.bits := by
-    simpa [raw, Nat.fromBitsLE_bits, Nat.size_eq_bits_len] using hinvariant
+    simpa [raw, boolValue, Nat.fromBitsLE_bits, Nat.size_eq_bits_len] using hinvariant
   have hrawBound' : Nat.fromBitsLE raw.bits < 2 ^ max lhs.size rhs.size := by
     rw [hlength'] at hrawBound
     exact hrawBound
   change (if raw.borrow then [] else trimHighZeros raw.bits) = (lhs - rhs).bits
   cases hborrow : raw.borrow with
   | false =>
-      simp only [Bool.false_eq_true, if_false]
+      simp only [Bool.false_eq_true, ite_false]
       rw [trimHighZeros_eq_natBits_internal]
       have hvalue : Nat.fromBitsLE raw.bits = lhs - rhs := by
         simp [hborrow] at hinvariant'
         omega
       rw [hvalue]
   | true =>
-      simp only [if_true]
+      simp only [ite_true]
       have hlt : lhs < rhs := by
         simp [hborrow] at hinvariant'
         omega

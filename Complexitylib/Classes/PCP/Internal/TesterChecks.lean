@@ -225,7 +225,7 @@ theorem decodeLabel_eq {m : ℕ} {β : Type} [Nonempty β] (enc : β → Cube m)
     (h : bitDist t (hadamard (enc σ)) < 1 / 4) : decodeLabel enc t = σ := by
   classical
   have hex : ∃ σ : β, bitDist t (hadamard (enc σ)) < 1 / 4 := ⟨σ, h⟩
-  rw [decodeLabel, dif_pos hex]
+  rw [decodeLabel, dite_eq_left hex]
   have hspec := Classical.choose_spec hex
   by_contra hne
   have hne' : enc (Classical.choose hex) ≠ enc σ := fun heq => hne (henc heq)

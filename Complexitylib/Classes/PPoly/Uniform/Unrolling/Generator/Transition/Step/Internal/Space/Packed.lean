@@ -936,13 +936,13 @@ private theorem cellCopyBody_effect_packed (tm : NTM k)
           Work.reference₀ 0) Work.temporary₃ 0 := by
   cases tape with
   | input =>
-      simpa [stepCellPositionEffectSizeInternal] using
-        emitStepImmutableCellCopies_effect_internal values
+      simpa [stepCellPositionEffectSizeInternal]
+        using! emitStepImmutableCellCopies_effect_internal values
   | work index =>
-      simpa using emitStepWritableCellCopies_effect_internal tm (.work index)
+      simpa using! emitStepWritableCellCopies_effect_internal tm (.work index)
         values
   | output =>
-      simpa using emitStepWritableCellCopies_effect_internal tm .output values
+      simpa using! emitStepWritableCellCopies_effect_internal tm .output values
 
 private theorem emitStepCellTapeCopies_spaceBoundByWidthAt_packed
     (tm : NTM k) (tape : TapeSlot k) {initialSpace : ℕ → ℕ}

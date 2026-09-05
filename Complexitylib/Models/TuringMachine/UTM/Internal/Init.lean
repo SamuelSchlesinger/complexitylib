@@ -342,7 +342,7 @@ private theorem holdsExact_push {t : Tape} {l : List Γw} (h : t.HoldsExact l)
     ((t.write s.toΓ).move .right).HoldsExact (l ++ [s]) ∧
     ((t.write s.toΓ).move .right).head = (l ++ [s]).length + 1 := by
   have hw : t.write s.toΓ = { t with cells := Function.update t.cells t.head s.toΓ } := by
-    rw [Tape.write, if_neg (by omega)]
+    rw [Tape.write, ite_eq_right (by omega)]
   refine ⟨⟨?_, fun i => ?_⟩, ?_⟩
   · show (Tape.move _ .right).cells 0 = Γ.start
     rw [Tape.move_cells, hw]
@@ -355,14 +355,14 @@ private theorem holdsExact_push {t : Tape} {l : List Γw} (h : t.HoldsExact l)
     by_cases hi : i = l.length
     · subst hi
       rw [show l.length + 1 = t.head from hh.symm, Function.update_self]
-      rw [dif_pos (by simp)]
+      rw [dite_eq_left (by simp)]
       simp
     · rw [Function.update_of_ne (by omega)]
       rw [h.2 i]
       by_cases hlt : i < l.length
-      · rw [dif_pos hlt, dif_pos (by simp; omega)]
+      · rw [dite_eq_left hlt, dite_eq_left (by simp; omega)]
         rw [List.getElem_append_left hlt]
-      · rw [dif_neg hlt, dif_neg (by simp; omega)]
+      · rw [dite_eq_right hlt, dite_eq_right (by simp; omega)]
   · simp [Tape.move, Tape.write_head, hh]
 
 private theorem bitSym_toΓ (b : Bool) : (bitSym b).toΓ = Γ.ofBool b := by
@@ -420,7 +420,7 @@ private theorem inpSfx_initTape (l : List Bool) :
     InpSfx (Tape.init (l.map Γ.ofBool)) 1 l := by
   intro j
   show (if 1 + j = 0 then Γ.start else ((l.map Γ.ofBool)[1 + j - 1]?).getD Γ.blank) = _
-  rw [if_neg (by omega), show 1 + j - 1 = j by omega, List.getElem?_map]
+  rw [ite_eq_right (by omega), show 1 + j - 1 = j by omega, List.getElem?_map]
 
 -- ════════════════════════════════════════════════════════════════════════
 -- Single-step lemmas
@@ -686,7 +686,7 @@ private theorem rewind_loop {idx : Fin 6} {qloop qnext : InitQ}
           (∀ i, i ≠ idx → c₁.work i = c.work i) ∧
           c₁.input = c.input ∧ c₁.output = c.output := by
       simp only [TM.step, hst, hδ, rewindStep, hread, ↓reduceIte]
-      rw [if_neg hne']
+      rw [ite_eq_right hne']
       refine ⟨_, rfl, rfl, ?_, ?_, ?_, by simp [Tape.move, idleDir, hi],
         tape_idle_preserve _ ho hoh⟩
       · simp only [↓reduceIte, Tape.writeAndMove, Tape.move, Tape.write_head, hh]
@@ -707,7 +707,7 @@ private theorem rewind_loop {idx : Fin 6} {qloop qnext : InitQ}
           (∀ i, i ≠ idx → c₁.work i = c.work i) ∧
           c₁.input = c.input ∧ c₁.output = c.output := by
       simp only [TM.step, hst, hδ, rewindStep, hread, ↓reduceIte]
-      rw [if_neg hne']
+      rw [ite_eq_right hne']
       refine ⟨_, rfl, rfl, ?_, ?_, ?_, by simp [Tape.move, idleDir, hi],
         tape_idle_preserve _ ho hoh⟩
       · simp only [↓reduceIte, Tape.writeAndMove, Tape.move, Tape.write_head, hh]
@@ -1115,9 +1115,9 @@ private theorem copyField_loop :
       simp only [List.length_cons] at h
       rw [h]
       by_cases hj : j < r.length
-      · rw [dif_pos (by omega), dif_pos hj]
+      · rw [dite_eq_left (by omega), dite_eq_left hj]
         simp
-      · rw [dif_neg (by omega), dif_neg hj]
+      · rw [dite_eq_right (by omega), dite_eq_right hj]
     obtain ⟨c', hreach, hst', hin', hw4c', hw4h', hh3', hd3', hfr', hout'⟩ :=
       copyField_loop r (facc ++ [Γw.zero]) (p + 1) c₁ hst₁ hhd4₁ hcells₁ hh3₁ hd3₁
         (by rw [hin₁]; exact hi)
@@ -1174,9 +1174,9 @@ private theorem copyField_loop :
       simp only [List.length_cons] at h
       rw [h]
       by_cases hj : j < r.length
-      · rw [dif_pos (by omega), dif_pos hj]
+      · rw [dite_eq_left (by omega), dite_eq_left hj]
         simp
-      · rw [dif_neg (by omega), dif_neg hj]
+      · rw [dite_eq_right (by omega), dite_eq_right hj]
     obtain ⟨c', hreach, hst', hin', hw4c', hw4h', hh3', hd3', hfr', hout'⟩ :=
       copyField_loop r (facc ++ [Γw.one]) (p + 1) c₁ hst₁ hhd4₁ hcells₁ hh3₁ hd3₁
         (by rw [hin₁]; exact hi)
@@ -1210,10 +1210,10 @@ private theorem holdsExact_blank_singleton {t : Tape} (h : t.HoldsExact []) :
   refine ⟨h.1, fun i => ?_⟩
   rw [Tape.HoldsExact.cells_ge h (Nat.zero_le i)]
   by_cases hi : i < 1
-  · rw [dif_pos (show i < [Γw.blank].length by simpa using hi)]
+  · rw [dite_eq_left (show i < [Γw.blank].length by simpa using hi)]
     obtain rfl : i = 0 := by omega
     rfl
-  · rw [dif_neg (show ¬i < [Γw.blank].length by simpa using hi)]
+  · rw [dite_eq_right (show ¬i < [Γw.blank].length by simpa using hi)]
 
 /-- The exact-contents view of the shifted `x` tape is the `VShift` shadow of
     `Tape.init (x.map Γ.ofBool)` (see `VShift.init`). -/
@@ -1230,16 +1230,16 @@ private theorem holdsExact_shift_cells {t : Tape} {x : List Bool}
       have := Tape.HoldsExact.cells_lt h (i := 0) (by simp)
       simpa using this
     · obtain ⟨m, rfl⟩ : ∃ m, k = m + 2 := ⟨k - 2, by omega⟩
-      simp only [show m + 2 ≠ 0 by omega, if_false, show m + 2 ≠ 1 by omega,
+      simp only [show m + 2 ≠ 0 by omega, ite_false, show m + 2 ≠ 1 by omega,
         show m + 2 - 2 = m by omega]
       rw [show m + 2 = m + 1 + 1 by omega, h.2 (m + 1)]
       simp only [List.length_cons, bitsToSyms_length]
       by_cases hm : m < x.length
-      · rw [dif_pos (by omega), List.getElem_cons_succ, List.getElem?_map,
+      · rw [dite_eq_left (by omega), List.getElem_cons_succ, List.getElem?_map,
           List.getElem?_eq_getElem hm]
         simp only [bitsToSyms, List.getElem_map, Option.map_some, Option.getD_some]
         exact bitSym_toΓ _
-      · rw [dif_neg (by omega), List.getElem?_map,
+      · rw [dite_eq_right (by omega), List.getElem?_map,
           List.getElem?_eq_none (by omega)]
         rfl
 
@@ -1344,7 +1344,7 @@ private theorem initTM_hoareTime_core (α x : List Bool) {c₁ : Cfg 6 initTM.Q}
   -- ── rewind the desc tape ──
   obtain ⟨c₅, hreach₅, hst₅, hd4₅, hcl4₅, hfr₅, hin₅, hout₅⟩ :=
     rewind_loop (idx := 4) (qloop := .rewindDesc) (qnext := .copyField)
-      (fun _ _ _ => rfl) (by decide)
+      (fun _ _ _ => rfl) nofun
       ((groupPairs α).length + 1) c₄ hst₄ hd4₄
       (Tape.HoldsExact.startInvariant hh4₄).1
       (fun j hj => (Tape.HoldsExact.startInvariant hh4₄).2 j hj)
@@ -1385,7 +1385,7 @@ private theorem initTM_hoareTime_core (α x : List Bool) {c₁ : Cfg 6 initTM.Q}
       exact hwo₅ i h3 h4
   obtain ⟨c₇, hreach₇, hst₇, hd4₇, hcl4₇, hfr₇, hin₇, hout₇⟩ :=
     rewind_loop (idx := 4) (qloop := .rewindDesc2) (qnext := .rewindState)
-      (fun _ _ _ => rfl) (by decide)
+      (fun _ _ _ => rfl) nofun
       ((takeField (groupPairs α)).1.length + 1) c₆ hst₆ hd4₆'
       (Tape.HoldsExact.startInvariant hh4₆).1
       (fun j hj => (Tape.HoldsExact.startInvariant hh4₆).2 j hj)
@@ -1410,7 +1410,7 @@ private theorem initTM_hoareTime_core (α x : List Bool) {c₁ : Cfg 6 initTM.Q}
       exact hwo₆ i h4
   obtain ⟨c₈, hreach₈, hst₈, hd3₈, hcl3₈, hfr₈, hin₈, hout₈⟩ :=
     rewind_loop (idx := 3) (qloop := .rewindState) (qnext := .rewindV0)
-      (fun _ _ _ => rfl) (by decide)
+      (fun _ _ _ => rfl) nofun
       ((takeField (groupPairs α)).1.length + 1) c₇ hst₇ hd3₇
       (Tape.HoldsExact.startInvariant hh3₇).1
       (fun j hj => (Tape.HoldsExact.startInvariant hh3₇).2 j hj)
@@ -1438,7 +1438,7 @@ private theorem initTM_hoareTime_core (α x : List Bool) {c₁ : Cfg 6 initTM.Q}
       exact hwo₇ i h3
   obtain ⟨c₉, hreach₉, hst₉, hd0₉, hcl0₉, hfr₉, hin₉, hout₉⟩ :=
     rewind_loop (idx := 0) (qloop := .rewindV0) (qnext := .done)
-      (fun _ _ _ => rfl) (by decide)
+      (fun _ _ _ => rfl) nofun
       (x.length + 2) c₈ hst₈ hd0₈
       (Tape.HoldsExact.startInvariant hh0₈).1
       (fun j hj => (Tape.HoldsExact.startInvariant hh0₈).2 j hj)

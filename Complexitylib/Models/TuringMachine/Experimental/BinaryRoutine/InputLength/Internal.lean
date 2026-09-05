@@ -111,7 +111,7 @@ theorem Sound.afterInputLength_hoareTimeSpace_internal
         exact ⟨hinput, hwork, houtAcc⟩
       exact TM.emitPred_transition hinp₁ (workTapes_parked values) []
         inp work out hcanonical
-    · simpa [List.nil_append] using hright
+    · exact hright
   apply hseq.consequence
   · exact fun _ _ _ hpre => hpre
   · intro _inp _work out hpost

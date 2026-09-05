@@ -157,7 +157,7 @@ theorem validEmitterTM_streaming_step_internal {Q : Type}
               refine ⟨c', 2 + t, by omega, htotal, ?_⟩
               rcases hpost with ⟨hstate, hpost⟩
               refine ⟨?_, ?_⟩
-              · simpa [old] using hstate
+              · exact hstate
               · change BufferPred input'
                   (BufferValues.ofStreaming
                     { next, pending, scan := .literal sign (var + 1), emitted })
@@ -188,7 +188,8 @@ theorem validEmitterTM_streaming_step_internal {Q : Type}
           refine ⟨c', 2 + t, by omega, htotal, ?_⟩
           rcases hpost with ⟨hstate, hpost⟩
           refine ⟨?_, ?_⟩
-          · simpa [old] using hstate
+          · simp
+            exact hstate
           · change BufferPred input'
               (BufferValues.ofStreaming
                 (Streaming.pushLiteral old { sign, var }))

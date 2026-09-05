@@ -89,7 +89,7 @@ theorem width_consistentPart_le_internal
   | cons term terms ih =>
       by_cases hconsistent : TermConsistent term
       · simp only [consistentPart, List.filter_cons,
-          hconsistent, decide_true, if_true,
+          hconsistent, decide_true, ite_true,
           width, List.foldr_cons]
         exact max_le_max (le_refl _) ih
       · simp only [consistentPart, List.filter_cons,
@@ -213,7 +213,6 @@ theorem switchingDecisionTreeUnderAux_eq_internal
                 (DecisionTree.On.queryAll
                   (Literal.vars (literal :: tail)).toList)
               funext branch
-              dsimp only
               split
               · rfl
               · rw [ih, ← hrestricted,
@@ -345,13 +344,13 @@ private theorem recoverable_switchingPhasesAux
               by_cases hterm : term.all (fun found =>
                   found.eval
                     (branch.applyTo fun _ => false)) = true
-              · rw [if_pos hterm]
+              · rw [ite_eq_left hterm]
                 apply RecoverablePhases.cons restriction
                   original (literal :: tail) block []
                     hfirst (by simp) hqueries
                 rw [hassignment]
                 exact RecoverablePhases.nil _
-              · rw [if_neg hterm]
+              · rw [ite_eq_right hterm]
                 apply RecoverablePhases.cons restriction
                   original (literal :: tail) block
                     (switchingPhasesAux fuel formula
@@ -423,13 +422,13 @@ private theorem deepPath_switchingDecisionTreeUnderAux
               by_cases hterm : term.all (fun found =>
                   found.eval
                     (branch.applyTo fun _ => false)) = true
-              · rw [if_pos hterm]
+              · rw [ite_eq_left hterm]
                 dsimp only [continuation]
-                rw [hcanonical, if_pos hterm]
+                rw [hcanonical, ite_eq_left hterm]
                 rfl
-              · rw [if_neg hterm]
+              · rw [ite_eq_right hterm]
                 dsimp only [continuation]
-                rw [hcanonical, if_neg hterm]
+                rw [hcanonical, ite_eq_right hterm]
                 simp only [List.flatMap_cons]
                 rw [ih]
 
@@ -647,8 +646,9 @@ private theorem original_eq_of_mem_annotateBlock
     List.get_of_mem hentry
   have hproject :=
     congrArg PhaseEntry.original hposition
-  simpa [annotateBlock, List.get_eq_getElem,
-    List.getElem_mapIdx] using hproject.symm
+  simp only [annotateBlock] at hproject
+  erw [List.get_eq_getElem, List.getElem_mapIdx] at hproject
+  exact hproject.symm
 
 private theorem map_query_annotatedSwitchingPhases
     (fuel : ℕ) (formula : DNF N)
@@ -742,11 +742,11 @@ private theorem switchingPhasesAux_valid
               by_cases hterm : term.all (fun found =>
                   found.eval
                     (branch.applyTo fun _ => false)) = true
-              · rw [if_pos hterm] at hphase
+              · rw [ite_eq_left hterm] at hphase
                 simp only [List.mem_singleton] at hphase
                 subst phase
                 exact ⟨horiginal, hblock⟩
-              · rw [if_neg hterm] at hphase
+              · rw [ite_eq_right hterm] at hphase
                 simp only [List.mem_cons] at hphase
                 rcases hphase with hhead | htailPhase
                 · subst phase
@@ -772,8 +772,9 @@ private theorem phaseEntry_valid
       List.get_of_mem hentry
     have hproject :=
       congrArg PhaseEntry.original hposition
-    simpa [annotateBlock, List.get_eq_getElem,
-      List.getElem_mapIdx] using hproject.symm
+    simp only [annotateBlock] at hproject
+    erw [List.get_eq_getElem, List.getElem_mapIdx] at hproject
+    exact hproject.symm
   have hquery : entry.query ∈ block := by
     rw [← map_query_annotateBlock original block]
     exact List.mem_map_of_mem hentry
@@ -820,7 +821,7 @@ private theorem satisfyingValue_eq_polarity
   have hindex : literal.var ∈ Literal.vars term := by
     rw [Literal.mem_vars_iff]
     exact ⟨literal, hliteral, rfl⟩
-  rw [satisfyingValue, dif_pos hindex]
+  rw [satisfyingValue, dite_eq_left hindex]
   apply hconsistent
     (term.get (literalPosition term literal.var hindex))
       (List.get_mem _ _) literal hliteral
@@ -1899,7 +1900,7 @@ private theorem widthTargetRestriction_eq_transcript
               widthTranscript, List.map_append,
               DecisionTree.On.assignmentOfPath_append_internal]
             rw [ih, hgamma]
-            simpa only [Restriction.On.comp_assoc] using
+            simpa only [phaseGamma, Restriction.On.comp_assoc] using
               assignmentFor_overwrites_path block
                 (satisfyingValue original)
                 (DecisionTree.On.assignmentOfPath
@@ -3171,7 +3172,6 @@ private theorem badWidthTranscript_eq_ofFn
       simpa [length_badWidthTranscript] using hleft
     have hpair := congrArg (fun items => items[index]?)
       (badWidthTranscript_queries formula bad)
-    dsimp only at hpair
     simp [hindex, hleft] at hpair
     simp [badWidthGammaValues, List.getElem_ofFn]
     apply Prod.ext

@@ -60,25 +60,25 @@ private theorem MovedHeadFormulaClean.updateAvailable_forStep
         tapeIndex := ?_
         symbolIndex := ?_ }
     · simp [Work.available, Work.position]
-    · simpa [Work.available, Work.position] using hcase.loop₀
-    · simpa [Work.available, Work.position] using hcase.limit₀
-    · simpa [Work.available, Work.position] using hcase.reference₀
-    · simpa [Work.available, Work.position] using hcase.reference₁
-    · simpa [Work.available, Work.position] using hcase.emitCounter
-    · simpa [Work.available, Work.position] using hcase.copyCounter
-    · simpa [Work.available, Work.position] using hcase.multiplyCounter
-    · simpa [Work.available, Work.position] using hcase.addCounter
-    · simpa [Work.available, Work.position] using hcase.temporary₀
-    · simpa [Work.available, Work.position] using hcase.temporary₁
-    · simpa [Work.available, Work.position] using hcase.temporary₂
-    · simpa [Work.available, Work.position] using hcase.loop₃
-    · simpa [Work.available, Work.position] using hcase.temporary₃
-    · simpa [Work.available, Work.position] using hcase.polynomialScratch
-    · simpa [Work.available, Work.position] using hcase.tapeIndex
-    · simpa [Work.available, Work.position] using hcase.symbolIndex
+    · simpa [Work.available, Work.position] using! hcase.loop₀
+    · simpa [Work.available, Work.position] using! hcase.limit₀
+    · simpa [Work.available, Work.position] using! hcase.reference₀
+    · simpa [Work.available, Work.position] using! hcase.reference₁
+    · simpa [Work.available, Work.position] using! hcase.emitCounter
+    · simpa [Work.available, Work.position] using! hcase.copyCounter
+    · simpa [Work.available, Work.position] using! hcase.multiplyCounter
+    · simpa [Work.available, Work.position] using! hcase.addCounter
+    · simpa [Work.available, Work.position] using! hcase.temporary₀
+    · simpa [Work.available, Work.position] using! hcase.temporary₁
+    · simpa [Work.available, Work.position] using! hcase.temporary₂
+    · simpa [Work.available, Work.position] using! hcase.loop₃
+    · simpa [Work.available, Work.position] using! hcase.temporary₃
+    · simpa [Work.available, Work.position] using! hcase.polynomialScratch
+    · simpa [Work.available, Work.position] using! hcase.tapeIndex
+    · simpa [Work.available, Work.position] using! hcase.symbolIndex
   all_goals
     simp only [Function.update_apply]
-    rw [if_neg (by decide)]
+    rw [ite_eq_right (by decide)]
   · exact hclean.limit₂
   · exact hclean.loop₁
   · exact hclean.savedOutput
@@ -125,35 +125,24 @@ private theorem MovedHeadFormulaClean.updateLimit₁_forStep
     refine
       { toReadFormulaClean :=
           { position := by simp [Work.limit₁, Work.position]
-            loop₀ := by simpa [Work.limit₁, Work.loop₀] using hcase.loop₀
-            limit₀ := by simpa [Work.limit₁, Work.limit₀] using hcase.limit₀
-            reference₀ := by simpa [Work.limit₁, Work.reference₀] using
-              hcase.reference₀
-            reference₁ := by simpa [Work.limit₁, Work.reference₁] using
-              hcase.reference₁
-            emitCounter := by simpa [Work.limit₁, Work.emitCounter] using
-              hcase.emitCounter
-            copyCounter := by simpa [Work.limit₁, Work.copyCounter] using
-              hcase.copyCounter
+            loop₀ := by simpa [Work.limit₁, Work.loop₀] using! hcase.loop₀
+            limit₀ := by simpa [Work.limit₁, Work.limit₀] using! hcase.limit₀
+            reference₀ := by simpa [Work.limit₁, Work.reference₀] using! hcase.reference₀
+            reference₁ := by simpa [Work.limit₁, Work.reference₁] using! hcase.reference₁
+            emitCounter := by simpa [Work.limit₁, Work.emitCounter] using! hcase.emitCounter
+            copyCounter := by simpa [Work.limit₁, Work.copyCounter] using! hcase.copyCounter
             multiplyCounter := by simpa [Work.limit₁, Work.multiplyCounter]
-              using hcase.multiplyCounter
-            addCounter := by simpa [Work.limit₁, Work.addCounter] using
-              hcase.addCounter
-            temporary₀ := by simpa [Work.limit₁, Work.temporary₀] using
-              hcase.temporary₀
-            temporary₁ := by simpa [Work.limit₁, Work.temporary₁] using
-              hcase.temporary₁
-            temporary₂ := by simpa [Work.limit₁, Work.temporary₂] using
-              hcase.temporary₂ }
-        loop₃ := by simpa [Work.limit₁, Work.loop₃] using hcase.loop₃
-        temporary₃ := by simpa [Work.limit₁, Work.temporary₃] using
-          hcase.temporary₃
+              using! hcase.multiplyCounter
+            addCounter := by simpa [Work.limit₁, Work.addCounter] using! hcase.addCounter
+            temporary₀ := by simpa [Work.limit₁, Work.temporary₀] using! hcase.temporary₀
+            temporary₁ := by simpa [Work.limit₁, Work.temporary₁] using! hcase.temporary₁
+            temporary₂ := by simpa [Work.limit₁, Work.temporary₂] using! hcase.temporary₂ }
+        loop₃ := by simpa [Work.limit₁, Work.loop₃] using! hcase.loop₃
+        temporary₃ := by simpa [Work.limit₁, Work.temporary₃] using! hcase.temporary₃
         polynomialScratch := by simpa [Work.limit₁, Work.polynomialScratch]
-          using hcase.polynomialScratch
-        tapeIndex := by simpa [Work.limit₁, Work.tapeIndex] using
-          hcase.tapeIndex
-        symbolIndex := by simpa [Work.limit₁, Work.symbolIndex] using
-          hcase.symbolIndex }
+          using! hcase.polynomialScratch
+        tapeIndex := by simpa [Work.limit₁, Work.tapeIndex] using! hcase.tapeIndex
+        symbolIndex := by simpa [Work.limit₁, Work.symbolIndex] using! hcase.symbolIndex }
   · simpa [Work.limit₁, Work.limit₂] using hclean.limit₂
   · simpa [Work.limit₁, Work.loop₁] using hclean.loop₁
   · simpa [Work.limit₁, Work.savedOutput] using hclean.savedOutput
@@ -234,53 +223,48 @@ private theorem MovedHeadFormulaClean.afterPackedCopy_forStep
       { toReadFormulaClean :=
           { position := by simp [Work.position]
             loop₀ := by simpa [final, Work.gateCount, Work.available,
-              Work.reference₀, Work.temporary₃, Work.position] using
-                havailable.caseClean.loop₀
+              Work.reference₀, Work.temporary₃, Work.position] using! havailable.caseClean.loop₀
             limit₀ := by simpa [final, Work.gateCount, Work.available,
-              Work.reference₀, Work.temporary₃, Work.position] using
-                havailable.caseClean.limit₀
+              Work.reference₀, Work.temporary₃, Work.position] using! havailable.caseClean.limit₀
             reference₀ := by simp [Work.reference₀, Work.temporary₃,
               Work.position]
             reference₁ := by simpa [final, Work.gateCount, Work.available,
-              Work.reference₀, Work.temporary₃, Work.position] using
-                havailable.caseClean.reference₁
+              Work.reference₀, Work.temporary₃, Work.position]
+                using! havailable.caseClean.reference₁
             emitCounter := by simpa [final, Work.gateCount, Work.available,
-              Work.reference₀, Work.temporary₃, Work.position] using
-                havailable.caseClean.emitCounter
+              Work.reference₀, Work.temporary₃, Work.position]
+                using! havailable.caseClean.emitCounter
             copyCounter := by simpa [final, Work.gateCount, Work.available,
-              Work.reference₀, Work.temporary₃, Work.position] using
-                havailable.caseClean.copyCounter
+              Work.reference₀, Work.temporary₃, Work.position]
+                using! havailable.caseClean.copyCounter
             multiplyCounter := by simpa [final, Work.gateCount, Work.available,
-              Work.reference₀, Work.temporary₃, Work.position] using
-                havailable.caseClean.multiplyCounter
+              Work.reference₀, Work.temporary₃, Work.position]
+                using! havailable.caseClean.multiplyCounter
             addCounter := by simpa [final, Work.gateCount, Work.available,
-              Work.reference₀, Work.temporary₃, Work.position] using
-                havailable.caseClean.addCounter
+              Work.reference₀, Work.temporary₃, Work.position]
+                using! havailable.caseClean.addCounter
             temporary₀ := by simpa [final, Work.gateCount, Work.available,
-              Work.reference₀, Work.temporary₃, Work.position] using
-                havailable.caseClean.temporary₀
+              Work.reference₀, Work.temporary₃, Work.position]
+                using! havailable.caseClean.temporary₀
             temporary₁ := by simpa [final, Work.gateCount, Work.available,
-              Work.reference₀, Work.temporary₃, Work.position] using
-                havailable.caseClean.temporary₁
+              Work.reference₀, Work.temporary₃, Work.position]
+                using! havailable.caseClean.temporary₁
             temporary₂ := by simpa [final, Work.gateCount, Work.available,
-              Work.reference₀, Work.temporary₃, Work.position] using
-                havailable.caseClean.temporary₂ }
+              Work.reference₀, Work.temporary₃, Work.position]
+                using! havailable.caseClean.temporary₂ }
         loop₃ := by simpa [final, Work.gateCount, Work.available,
-          Work.reference₀, Work.temporary₃, Work.position] using
-            havailable.caseClean.loop₃
+          Work.reference₀, Work.temporary₃, Work.position] using! havailable.caseClean.loop₃
         temporary₃ := by simp [Work.temporary₃, Work.position]
         polynomialScratch := by simpa [final, Work.gateCount, Work.available,
-          Work.reference₀, Work.temporary₃, Work.position] using
-            havailable.caseClean.polynomialScratch
+          Work.reference₀, Work.temporary₃, Work.position]
+            using! havailable.caseClean.polynomialScratch
         tapeIndex := by simpa [final, Work.gateCount, Work.available,
-          Work.reference₀, Work.temporary₃, Work.position] using
-            havailable.caseClean.tapeIndex
+          Work.reference₀, Work.temporary₃, Work.position] using! havailable.caseClean.tapeIndex
         symbolIndex := by simpa [final, Work.gateCount, Work.available,
-          Work.reference₀, Work.temporary₃, Work.position] using
-            havailable.caseClean.symbolIndex }
+          Work.reference₀, Work.temporary₃, Work.position] using! havailable.caseClean.symbolIndex }
   all_goals
     simp only [Function.update_apply]
-    repeat' rw [if_neg (by decide)]
+    repeat' rw [ite_eq_right (by decide)]
   · exact hclean.limit₂
   · exact hclean.loop₁
   · exact hclean.savedOutput
@@ -594,9 +578,9 @@ private theorem emitStepWritableCellPosition_requires_preserves_forStep
         rw [hcurrent.2.1, hcurrent.2.2.1]
         exact hposition
       by_cases hzero : current Work.position = 0
-      · simp only [BinaryRoutine.branchZero, hzero, if_true]
+      · simp only [BinaryRoutine.branchZero, hzero, ite_true]
         exact hcurrent.1.nextCellCopy_requires_forStep _ _ _ _
-      · simp only [BinaryRoutine.branchZero, hzero, if_false]
+      · simp only [BinaryRoutine.branchZero, hzero, ite_false]
         exact emitNextWrittenCellFormula_requires tm tape
           (symbolEquiv.symm symbolIndex) current
           hcurrent.1.writtenClean_forStep hcurrentPosition)
@@ -604,7 +588,7 @@ private theorem emitStepWritableCellPosition_requires_preserves_forStep
       simp only [List.mem_ofFn] at hroutine
       obtain ⟨symbolIndex, rfl⟩ := hroutine
       by_cases hzero : current Work.position = 0
-      · simp only [BinaryRoutine.branchZero, hzero, if_true]
+      · simp only [BinaryRoutine.branchZero, hzero, ite_true]
         have hcase := hcurrent.1.caseClean
         have heffect := emitNextCellCopy_effect (Fintype.card tm.Q) (k + 2)
           tape.toTapeSlot.index
@@ -621,7 +605,7 @@ private theorem emitStepWritableCellPosition_requires_preserves_forStep
             hcurrent.2.1, by simpa [Work.available, Work.horizon] using
             hcurrent.2.2.1, by simpa [Work.available, Work.limit₁] using
             hcurrent.2.2.2⟩
-      · simp only [BinaryRoutine.branchZero, hzero, if_false]
+      · simp only [BinaryRoutine.branchZero, hzero, ite_false]
         rw [emitNextWrittenCellFormula_effect tm tape
           (symbolEquiv.symm symbolIndex) current hcurrent.1.writtenClean_forStep]
         refine ⟨MovedHeadFormulaClean.updateAvailable_forStep current
@@ -676,8 +660,8 @@ private theorem emitStepWritableTapeCellFormulas_requires_preserves_forStep
             hbody.2.1 _
           limit := ?_ }
       simp only [BinaryRoutine.binaryForStep, Function.update_apply]
-      rw [if_neg (by decide), hbody.2.2.2.2,
-        if_neg (by decide), hbody.2.2.2.1]
+      rw [ite_eq_right (by decide), hbody.2.2.2.2,
+        ite_eq_right (by decide), hbody.2.2.2.1]
       exact hcurrent.limit)
   simp only [BinaryRoutine.seq]
   exact ⟨⟨hloop.1, trivial⟩,
@@ -707,8 +691,8 @@ private theorem emitStepCellTapeFormulas_requires_preserves_forStep
                   hbody.2.1 _
                 limit := ?_ }
             simp only [BinaryRoutine.binaryForStep, Function.update_apply]
-            rw [if_neg (by decide), hbody.2.2.2.2,
-              if_neg (by decide), hbody.2.2.2.1]
+            rw [ite_eq_right (by decide), hbody.2.2.2.2,
+              ite_eq_right (by decide), hbody.2.2.2.1]
             exact hcurrent.limit)
       simp only [emitStepCellTapeFormulas, BinaryRoutine.seq]
       refine ⟨⟨hloop.1, trivial⟩,
@@ -1006,8 +990,8 @@ private theorem emitStepHeadTapeCopies_requires_preserves_forStep
             hbody.2.1 _
           limit := ?_ }
       simp only [BinaryRoutine.binaryForStep, Function.update_apply]
-      rw [if_neg (by decide), hbody.2.2.2.2,
-        if_neg (by decide), hbody.2.2.2.1]
+      rw [ite_eq_right (by decide), hbody.2.2.2.2,
+        ite_eq_right (by decide), hbody.2.2.2.1]
       exact hcurrent.limit)
   simp only [emitStepHeadTapeCopies, BinaryRoutine.seq]
   refine ⟨⟨hloop.1, trivial⟩, ?_⟩
@@ -1114,25 +1098,25 @@ private theorem emitStepWritableCellCopies_requires_preserves_forStep
       simp only [List.mem_ofFn] at hroutine
       obtain ⟨symbolIndex, rfl⟩ := hroutine
       by_cases hzero : current Work.position = 0
-      · simp only [BinaryRoutine.branchZero, hzero, if_true]
+      · simp only [BinaryRoutine.branchZero, hzero, ite_true]
         exact (emitPackedFormulaCopy_requires_preserves_forStep
           (Polynomial.C 1) current hcurrent.1
           (by simpa only [Polynomial.eval_C] using Nat.zero_lt_one)).1
-      · simp only [BinaryRoutine.branchZero, hzero, if_false]
+      · simp only [BinaryRoutine.branchZero, hzero, ite_false]
         exact (emitPackedFormulaCopy_requires_preserves_forStep _ current
           hcurrent.1 (writtenNextFormulaPolynomial_eval_pos tm tape _ _)).1)
     (fun routine hroutine current hcurrent => by
       simp only [List.mem_ofFn] at hroutine
       obtain ⟨symbolIndex, rfl⟩ := hroutine
       by_cases hzero : current Work.position = 0
-      · simp only [BinaryRoutine.branchZero, hzero, if_true]
+      · simp only [BinaryRoutine.branchZero, hzero, ite_true]
         have hbody := emitPackedFormulaCopy_requires_preserves_forStep
           (Polynomial.C 1) current hcurrent.1
           (by simpa only [Polynomial.eval_C] using Nat.zero_lt_one)
         exact ⟨hbody.2.1, hbody.2.2.1.trans hcurrent.2.1,
           hbody.2.2.2.1.trans hcurrent.2.2.1,
           hbody.2.2.2.2.trans hcurrent.2.2.2⟩
-      · simp only [BinaryRoutine.branchZero, hzero, if_false]
+      · simp only [BinaryRoutine.branchZero, hzero, ite_false]
         have hbody := emitPackedFormulaCopy_requires_preserves_forStep
           (writtenNextFormulaPolynomial tm tape
             (symbolEquiv.symm symbolIndex)) current hcurrent.1
@@ -1177,8 +1161,8 @@ private theorem emitStepWritableTapeCellCopies_requires_preserves_forStep
             hbody.2.1 _
           limit := ?_ }
       simp only [BinaryRoutine.binaryForStep, Function.update_apply]
-      rw [if_neg (by decide), hbody.2.2.2.2,
-        if_neg (by decide), hbody.2.2.2.1]
+      rw [ite_eq_right (by decide), hbody.2.2.2.2,
+        ite_eq_right (by decide), hbody.2.2.2.1]
       exact hcurrent.limit)
   simp only [BinaryRoutine.seq]
   refine ⟨⟨hloop.1, trivial⟩, ?_⟩
@@ -1212,8 +1196,8 @@ private theorem emitStepCellTapeCopies_requires_preserves_forStep
                 hbody.2.1 _
               limit := ?_ }
           simp only [BinaryRoutine.binaryForStep, Function.update_apply]
-          rw [if_neg (by decide), hbody.2.2.2.2,
-            if_neg (by decide), hbody.2.2.2.1]
+          rw [ite_eq_right (by decide), hbody.2.2.2.2,
+            ite_eq_right (by decide), hbody.2.2.2.1]
           exact hcurrent.limit)
       simp only [emitStepCellTapeCopies, BinaryRoutine.seq]
       refine ⟨⟨hloop.1, trivial⟩, ?_⟩

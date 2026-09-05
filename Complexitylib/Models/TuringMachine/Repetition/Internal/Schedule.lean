@@ -113,6 +113,7 @@ theorem repeatSetupChoiceIdx_ne_stride (k T : ℕ) (a : Fin 2) (j : Fin k)
 theorem repeatStrideChoiceIdx_sim (T : ℕ) (j : Fin k) (t : Fin T) :
     repeatStrideChoiceIdx T j (repeatSimulationOffset T t) = repeatChoiceIdx T j t := by
   apply Fin.ext
+  rw [repeatStrideChoiceIdx_val]
   simp [repeatSimulationOffset, repeatAtTimeStride, repeatChoiceIdx]
 
 /-- No simulation choice is an administrative choice, even across trials. -/
@@ -260,7 +261,7 @@ theorem RepeatOuterClaim.next {tm : NTM n} {x : List Bool}
         RepeatOtherParked j
           (repeatBoundaryCfg tm x choices m (Nat.le_of_lt hm)) := by
   have hb := h m (Nat.le_of_lt hm)
-  rw [RepeatBoundary, dif_pos hm] at hb
+  rw [RepeatBoundary, dite_eq_left hm] at hb
   simpa only using hb
 
 /-- Extract the final halted majority assertion from the outer claim. -/

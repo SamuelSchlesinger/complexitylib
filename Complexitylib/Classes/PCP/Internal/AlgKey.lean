@@ -153,7 +153,7 @@ theorem length_digitSum_eq_enc {X : Type} [NumEnc X] {T : ℕ} (s : Fin T → X)
   show _ = ∑ j ∈ Finset.range T, NumEnc.encAt s j * NumEnc.card X ^ j
   refine Finset.sum_congr rfl fun j hj => ?_
   rw [Finset.mem_range] at hj
-  rw [h j hj, NumEnc.encAt, dif_pos hj]
+  rw [h j hj, NumEnc.encAt, dite_eq_left hj]
 
 /-- The data a killed walk actually shows. -/
 noncomputable def stepKeyOf (G : ConstraintGraph α) (E : ExpanderFamily) {q T : ℕ}
@@ -182,14 +182,20 @@ theorem relOfKey_stepKeyOf (G : ConstraintGraph α) (E : ExpanderFamily) {q T : 
       = ((G.preprocess E).killedPow q T hq).rel v x := by
   rw [rel_killedPow_eq_preRelOfSteps, relOfKey]
   simp only [stepKeyOf, StepKey.dart, StepKey.par, StepKey.code, StepKey.rev, StepKey.coins,
-    StepKey.len, RegGraph.kLen, RegGraph.kWalk, Fin.is_lt, dif_pos]
-  congr 1
-  funext i
-  congr 1
-  funext j
-  rw [RegGraph.killedRev, RegGraph.extWalk]
-  dsimp only
-  rw [dif_pos (by have := j.isLt; omega)]
+    StepKey.len, RegGraph.kLen, RegGraph.kWalk]
+  congr 1 <;> funext i <;>
+    first
+      | (congr 1
+         funext j
+         rw [RegGraph.killedRev, RegGraph.extWalk]
+         dsimp only
+         rw [dite_eq_left (by have := j.isLt; omega)])
+      | (congr 1
+         have hi : (i : ℕ) < stopAt x.2 := by have := i.isLt; omega
+         simp [hi]
+         exact Fin.ext rfl)
+      | (have hi : (i : ℕ) < stopAt x.2 := by have := i.isLt; omega
+         simp [hi])
 
 set_option synthInstance.maxSize 400 in
 omit [Nonempty α] in
@@ -224,8 +230,8 @@ theorem cubeOfKey_eq (G : ConstraintGraph α) (E : ExpanderFamily) {q T : ℕ}
     {B : ℕ} (z : Cube (ROf B)) (i : ReadIdx) (encβ : (PreWalk E T → α) → Cube B) :
     cubeOfKey encβ (stepKeyOf G E v x B z i)
       = ((G.preprocess E).killedPow q T hq).cubeNum encβ (v, x) z i := by
-  rw [cubeOfKey, satSetOfKey_stepKeyOf G E hq v x z i encβ,
-    RegCSP.cubeNum_eq_cubeOfSet]
+  rw [cubeOfKey, satSetOfKey_stepKeyOf G E hq v x z i encβ]
+  erw [RegCSP.cubeNum_eq_cubeOfSet]
   rfl
 
 omit [Nonempty α] in
@@ -237,8 +243,8 @@ theorem codeOfKey_eq (G : ConstraintGraph α) (E : ExpanderFamily) {q T : ℕ}
     codeOfKey encβ (stepKeyOf G E v x B z i)
       = codeOfRel (MultiTest.relOfCheck
           ((((G.preprocess E).killedPow q T hq).compose encβ).check (v, x) z) i) := by
-  rw [codeOfKey, satSetOfKey_stepKeyOf G E hq v x z i encβ,
-    RegCSP.check_eq_checkOfSet]
+  rw [codeOfKey, satSetOfKey_stepKeyOf G E hq v x z i encβ]
+  erw [RegCSP.check_eq_checkOfSet]
   rfl
 
 end Complexity

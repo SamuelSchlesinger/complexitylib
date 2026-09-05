@@ -75,7 +75,8 @@ def addLoops : RegGraph := union (loopGraph G.V) G (Equiv.refl G.V)
 @[simp] theorem order_addLoops : G.addLoops.order = G.order := rfl
 
 @[simp] theorem deg_addLoops : G.addLoops.deg = 1 + G.deg := by
-  rw [addLoops, deg_union, deg_loopGraph]
+  rw [addLoops, deg_union (G := loopGraph G.V) (H := G) (e := Equiv.refl G.V),
+    deg_loopGraph]
 
 /-- The canonical self-loop at each vertex of `G.addLoops`. -/
 def addLoopsLoops : G.addLoops.Loops where
@@ -87,7 +88,7 @@ theorem spectralBound_addLoops {lam : ℝ} (hlam : 0 ≤ lam) (h : G.SpectralBou
     G.addLoops.SpectralBound ((1 + (G.deg : ℝ) * lam) / (1 + (G.deg : ℝ))) := by
   have hu := spectralBound_union (loopGraph G.V) G (Equiv.refl G.V) hlam h
   rw [deg_loopGraph] at hu
-  simpa using hu
+  exact_mod_cast hu
 
 theorem addLoops_bound_lt_one {lam : ℝ} (hlam1 : lam < 1) :
     (1 + (G.deg : ℝ) * lam) / (1 + (G.deg : ℝ)) < 1 := by
@@ -117,22 +118,16 @@ theorem card_unsatDarts_addLoops (a : R.Assignment) :
   classical
   refine (Finset.card_bij (fun q _ => ((q.1, Sum.inr q.2) : R.addLoops.Dart)) ?_ ?_ ?_).symm
   · intro q hq
-    rw [mem_unsatDarts] at hq ⊢
-    intro hcon
-    exact hq hcon
+    exact (mem_unsatDarts (R := R.addLoops)).mpr ((mem_unsatDarts (R := R)).mp hq)
   · intro q _ q' _ heq
     have h1 : q.1 = q'.1 := congrArg (fun r => (r.1 : R.graph.V)) heq
     have h2 : Sum.inr q.2 = (Sum.inr q'.2 : Unit ⊕ R.graph.D) :=
       congrArg (fun r => (r.2 : Unit ⊕ R.graph.D)) heq
     exact Prod.ext h1 (Sum.inr.inj h2)
   · rintro ⟨v, _ | i⟩ hq
-    · exfalso
-      rw [mem_unsatDarts] at hq
-      exact hq rfl
+    · exact absurd rfl ((mem_unsatDarts (R := R.addLoops)).mp hq)
     · refine ⟨(v, i), ?_, rfl⟩
-      rw [mem_unsatDarts] at hq ⊢
-      intro hcon
-      exact hq hcon
+      exact (mem_unsatDarts (R := R)).mpr ((mem_unsatDarts (R := R.addLoops)).mp hq)
 
 /-- Adding loops scales the value by `deg / (deg + 1)`. -/
 theorem unsatFrac_addLoops (a : R.Assignment) :
@@ -150,10 +145,12 @@ theorem unsatFrac_addLoops (a : R.Assignment) :
       rw [hz] at hle
       omega
     have hempty' : (R.addLoops.unsatDarts a).card = 0 := by rw [hcards, hempty]
-    rw [unsatFrac, unsatFrac, hempty, hempty']
+    unfold unsatFrac
+    rw [hempty, hempty']
     simp
   · have hzq : (0 : ℚ) < (R.graph.order : ℚ) := by exact_mod_cast hz
-    rw [unsatFrac, unsatFrac, hcards]
+    unfold unsatFrac
+    rw [hcards]
     have hden : ((R.addLoops.graph.order * R.addLoops.graph.deg : ℕ) : ℚ)
         = (R.graph.order : ℚ) * ((R.graph.deg : ℚ) + 1) := by
       rw [graph_addLoops, RegGraph.order_addLoops, RegGraph.deg_addLoops]
@@ -182,15 +179,12 @@ theorem satisfiable_addLoops_iff : R.addLoops.Satisfiable ↔ R.Satisfiable := b
   · rintro ⟨a, ha⟩
     refine ⟨a, fun p => ?_⟩
     have h := ha (p.1, Sum.inr p.2)
-    rw [Satisfies, satisfies] at h ⊢
     exact h
   · rintro ⟨a, ha⟩
     refine ⟨a, ?_⟩
     rintro ⟨v, _ | i⟩
-    · rw [Satisfies, satisfies]
-      rfl
+    · rfl
     · have h := ha (v, i)
-      rw [Satisfies, satisfies] at h ⊢
       exact h
 
 end RegCSP

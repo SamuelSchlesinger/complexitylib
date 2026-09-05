@@ -95,7 +95,7 @@ theorem getElem_readFormulaSchedule_member_internal
           rw [length_readFormulaMemberBlock_internal]
           exact offset.isLt) := by
   unfold readFormulaSchedule
-  rw [List.getElem_append_left]
+  erw [List.getElem_append_left]
   · rw [List.getElem_append_left]
     exact getElem_readFormulaMemberGates_internal stateCount tapeCount T
       configBase available tapeIndex symbolIndex position offset
@@ -110,7 +110,7 @@ theorem getElem_readFormulaSchedule_identity_internal
         rw [length_readFormulaSchedule_internal]
         omega) = CircuitCode.RawGate.constant 0 false := by
   unfold readFormulaSchedule
-  rw [List.getElem_append_left]
+  erw [List.getElem_append_left]
   · rw [List.getElem_append_right]
     all_goals simp [length_readFormulaMemberGates_internal]
   · simp [length_readFormulaMemberGates_internal]
@@ -125,7 +125,7 @@ theorem getElem_readFormulaSchedule_connector_internal
       indexedRightFoldConnector .or available (T + 1)
         (fixedWidthSizeAt (T + 1) 3) rank.val := by
   unfold readFormulaSchedule
-  rw [List.getElem_append_right]
+  erw [List.getElem_append_right]
   · simp only [List.length_append,
       length_readFormulaMemberGates_internal, List.length_singleton]
     have hindex :
@@ -161,7 +161,8 @@ theorem getElem_predecessorHeadMemberGates_internal
     (fun index => [predecessorHeadMemberGate stateCount T configBase
       tapeIndex target directionCode index]) (by simp) source.val 0
       source.isLt (by omega)
-  simpa using hget
+  simp only [Nat.mul_one, Nat.add_zero, List.getElem_cons_zero] at hget
+  exact hget
 
 theorem length_predecessorHeadFormulaSchedule_internal
     (stateCount T configBase available tapeIndex target directionCode : ℕ) :
@@ -181,7 +182,7 @@ theorem getElem_predecessorHeadFormulaSchedule_member_internal
       predecessorHeadMemberGate stateCount T configBase tapeIndex target
         directionCode source.val := by
   unfold predecessorHeadFormulaSchedule
-  rw [List.getElem_append_left]
+  erw [List.getElem_append_left]
   · rw [List.getElem_append_left]
     exact getElem_predecessorHeadMemberGates_internal stateCount T configBase
       tapeIndex target directionCode source
@@ -196,7 +197,7 @@ theorem getElem_predecessorHeadFormulaSchedule_identity_internal
         rw [length_predecessorHeadFormulaSchedule_internal]
         omega) = CircuitCode.RawGate.constant 0 false := by
   unfold predecessorHeadFormulaSchedule
-  rw [List.getElem_append_left]
+  erw [List.getElem_append_left]
   · rw [List.getElem_append_right]
     all_goals simp [length_predecessorHeadMemberGates_internal]
   · simp [length_predecessorHeadMemberGates_internal]
@@ -211,7 +212,7 @@ theorem getElem_predecessorHeadFormulaSchedule_connector_internal
       indexedRightFoldConnector .or available (T + 1)
         (fixedWidthSizeAt (T + 1) 1) rank.val := by
   unfold predecessorHeadFormulaSchedule
-  rw [List.getElem_append_right]
+  erw [List.getElem_append_right]
   · simp only [List.length_append,
       length_predecessorHeadMemberGates_internal, List.length_singleton]
     have hindex :

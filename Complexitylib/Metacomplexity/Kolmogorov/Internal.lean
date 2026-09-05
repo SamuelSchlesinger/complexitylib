@@ -199,7 +199,7 @@ theorem simulates_plainKolmogorovComplexity_le_add_internal
     have hcompiled := plainKolmogorovComplexity_le_internal
       ((hsim.produces_iff program output).mpr hproduce)
     rw [← hprogramLength]
-    simpa using hcompiled.trans (WithTop.coe_le_coe.mpr (hlength program))
+    exact hcompiled.trans (WithTop.coe_le_coe.mpr (hlength program))
 
 theorem polynomialTimeOverhead_kolmogorov_transfer_internal
     {simulator : TM simulatorTapes} {source : TM sourceTapes}
@@ -236,7 +236,7 @@ theorem IsUniversal.plainKolmogorovComplexity_ne_top_internal
     huniversal 0 (copyInputToOutputTM (n := 0))
   have hsource : (copyInputToOutputTM (n := 0)).ProducesInTime output output
       (output.length + 2) := by
-    simpa using (copyInputToOutputTM_computesInTime 0 output)
+    simpa [TM.ProducesInTime] using (copyInputToOutputTM_computesInTime 0 output)
   have hcompiled : simulator.Produces (compile output) output :=
     (hsimulates.produces_iff output output).mpr
       (produces_of_producesInTime hsource)
@@ -252,7 +252,7 @@ theorem IsUniversal.exists_timeBoundedKolmogorovComplexity_ne_top_internal
     huniversal 0 (copyInputToOutputTM (n := 0))
   have hsource : (copyInputToOutputTM (n := 0)).ProducesInTime output output
       (output.length + 2) := by
-    simpa using (copyInputToOutputTM_computesInTime 0 output)
+    simpa [TM.ProducesInTime] using (copyInputToOutputTM_computesInTime 0 output)
   have hcompiled : simulator.Produces (compile output) output :=
     (hsimulates.produces_iff output output).mpr
       (produces_of_producesInTime hsource)
@@ -278,7 +278,7 @@ theorem IsEfficientlyUniversal.timeBoundedKolmogorovComplexity_printer_internal
   intro output time htime
   have hsource : (copyInputToOutputTM (n := 0)).ProducesInTime output output
       (output.length + 2) := by
-    simpa using (copyInputToOutputTM_computesInTime 0 output)
+    simpa [TM.ProducesInTime] using (copyInputToOutputTM_computesInTime 0 output)
   have hcompiled := htimed.produces output output (output.length + 2) hsource
   have hclockBound := hclock output (output.length + 2)
   have harg : output.length + (output.length + 2) + 1 =

@@ -282,7 +282,7 @@ theorem hasCircuitAtMost_threshold_mono_internal (inst : Instance)
     (hsmall : ({ inst with threshold := first } : Instance).HasCircuitAtMost) :
     ({ inst with threshold := second } : Instance).HasCircuitAtMost := by
   by_cases harity : inst.arity = 0
-  · simpa [HasCircuitAtMost, harity] using hsmall
+  · simpa [HasCircuitAtMost, harity, Instance.SamplesFunction] using hsmall
   · simp only [HasCircuitAtMost, harity, dite_false] at hsmall ⊢
     obtain ⟨internalGates, circuit, hsize, hsamples⟩ := hsmall
     exact ⟨internalGates, circuit, hsize.trans hthreshold, hsamples⟩

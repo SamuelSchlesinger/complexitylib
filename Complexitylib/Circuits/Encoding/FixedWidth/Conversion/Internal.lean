@@ -134,7 +134,7 @@ theorem toRawCircuit_ofRawCircuit_internal
         GateSlot.ofRawGate (referenceWidth inputWidth gateBound)
           circuit[index]
       else GateSlot.zero _).toRawGate = circuit[index]
-    rw [dif_pos hright]
+    rw [dite_eq_left hright]
     exact GateSlot.toRawGate_ofRawGate_internal hfit.1 hfit.2
 
 theorem ofRawCircuit_wellFormed_internal
@@ -146,7 +146,7 @@ theorem ofRawCircuit_wellFormed_internal
   · have hnonempty := hcircuit.1
     have hpositive : 0 < circuit.length :=
       List.length_pos_iff.mpr hnonempty
-    simpa using hpositive
+    exact hpositive
   · rw [← topologicallyWellFormed_toRawCircuit_iff]
     rw [toRawCircuit_ofRawCircuit_internal hcircuit.2 hbound]
     exact hcircuit.2

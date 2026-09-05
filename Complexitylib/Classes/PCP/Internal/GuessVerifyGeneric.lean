@@ -109,7 +109,7 @@ theorem padVerifier_mem_P {p : Polynomial ℕ} {L₀ : Language} (hL₀ : L₀ �
       (polyRuler p (pairFst (pairFst w))).length
         ≤ (pairSnd (pairFst w)).length} ∈ P := by
     refine mem_P_of_decisionFn (lenLeFlagFn_mem_FP hsf hruler) fun w => ?_
-    simp only [Set.mem_setOf_eq]
+    simp only [Set.mem_ofPred_eq]
     set a := pairSnd (pairFst w) with ha
     set b := polyRuler p (pairFst (pairFst w)) with hb
     constructor

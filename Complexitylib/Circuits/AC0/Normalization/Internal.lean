@@ -195,7 +195,7 @@ private theorem signedSupport_eval
   | false =>
     cases hop : gate.op with
     | and =>
-      simp only [AndOrOp.dualIf, Bool.false_eq_true, if_false,
+      simp only [AndOrOp.dualIf, Bool.false_eq_true, ite_false,
         Gate.signedSupport]
       have hsupport := image_attach_all
         (fun input : Fin gate.fanIn =>
@@ -207,7 +207,7 @@ private theorem signedSupport_eval
         Basis.unboundedAndOr, hop]
       rfl
     | or =>
-      simp only [AndOrOp.dualIf, Bool.false_eq_true, if_false,
+      simp only [AndOrOp.dualIf, Bool.false_eq_true, ite_false,
         Gate.signedSupport]
       have hsupport := image_attach_any
         (fun input : Fin gate.fanIn =>
@@ -228,7 +228,7 @@ private theorem signedSupport_eval
         cases wireValue (gate.inputs input) <;> rfl
     cases hop : gate.op with
     | and =>
-      simp only [AndOrOp.dualIf, if_true, AndOrOp.dual,
+      simp only [AndOrOp.dualIf, ite_true, AndOrOp.dual,
         Gate.signedSupport]
       have hsupport := image_attach_any
         (fun input : Fin gate.fanIn =>
@@ -242,7 +242,7 @@ private theorem signedSupport_eval
       rw [foldl_or_not]
       rfl
     | or =>
-      simp only [AndOrOp.dualIf, if_true, AndOrOp.dual,
+      simp only [AndOrOp.dualIf, ite_true, AndOrOp.dual,
         Gate.signedSupport]
       have hsupport := image_attach_all
         (fun input : Fin gate.fanIn =>
@@ -369,7 +369,7 @@ theorem eval_outputAC0Formula_internal
   have hsupport := signedSupport_eval gate false
     (circuit.wireValue input)
   simp only [Bool.false_xor, AndOrOp.dualIf,
-    Bool.false_eq_true, if_false] at hsupport
+    Bool.false_eq_true, ↓reduceIte] at hsupport
   rw [← hsupport]
   cases gate.op <;>
     simp only [AC0Formula.ofOp, AC0Formula.eval,

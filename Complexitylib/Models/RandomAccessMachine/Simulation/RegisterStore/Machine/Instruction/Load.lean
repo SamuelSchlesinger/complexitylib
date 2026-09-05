@@ -121,42 +121,42 @@ theorem scanner_updateQuery_of_indirect_internal
   have hnat := Tape.init_move_right_hasBinaryNat destination
   refine
     { source := by
-        simpa only [finalWork, Function.update_of_ne hsource] using
-          hscanner.source
+        simp only [Function.update_of_ne hsource]
+        exact hscanner.source
       address := by
-        simpa only [finalWork, Function.update_of_ne haddress] using
-          hscanner.address
+        simp only [Function.update_of_ne haddress]
+        exact hscanner.address
       addressStart := by
-        simpa only [finalWork, Function.update_of_ne haddress] using
-          hscanner.addressStart
+        simp only [Function.update_of_ne haddress]
+        exact hscanner.addressStart
       value := by
-        simpa only [finalWork, Function.update_of_ne hvalue] using
-          hscanner.value
+        simp only [Function.update_of_ne hvalue]
+        exact hscanner.value
       valueStart := by
-        simpa only [finalWork, Function.update_of_ne hvalue] using
-          hscanner.valueStart
+        simp only [Function.update_of_ne hvalue]
+        exact hscanner.valueStart
       addressCounter := by
-        simpa only [finalWork, Function.update_of_ne haddressCounter] using
-          hscanner.addressCounter
+        simp only [Function.update_of_ne haddressCounter]
+        exact hscanner.addressCounter
       addressWidth := by
-        simpa only [finalWork, Function.update_of_ne haddressWidth] using
-          hscanner.addressWidth
+        simp only [Function.update_of_ne haddressWidth]
+        exact hscanner.addressWidth
       valueCounter := by
-        simpa only [finalWork, Function.update_of_ne hvalueCounter] using
-          hscanner.valueCounter
+        simp only [Function.update_of_ne hvalueCounter]
+        exact hscanner.valueCounter
       valueWidth := by
-        simpa only [finalWork, Function.update_of_ne hvalueWidth] using
-          hscanner.valueWidth
+        simp only [Function.update_of_ne hvalueWidth]
+        exact hscanner.valueWidth
       query := by
         simpa only [finalWork, Function.update_self] using hnat.2
       queryStart := by
         simpa only [finalWork, Function.update_self] using hnat.1
       result := by
-        simpa only [finalWork, Function.update_of_ne hresult] using
-          hscanner.result
+        simp only [Function.update_of_ne hresult]
+        exact hscanner.result
       resultStart := by
-        simpa only [finalWork, Function.update_of_ne hresult] using
-          hscanner.resultStart
+        simp only [Function.update_of_ne hresult]
+        exact hscanner.resultStart
       parked := ?_
       frame := by intro i _ _ _ _ _ _ _ _ _; rfl }
   intro i
@@ -267,7 +267,7 @@ theorem indirectLoadInstructionTM_hoareTime_frame_internal
       hloadedResult⟩, hout⟩
     have hqueryZero : (work tapes.update.entry.query).HasBinaryNat 0 :=
       ⟨hloadedResult.scanner.queryStart, by
-        simpa using hloadedResult.scanner.query⟩
+        exact hloadedResult.scanner.query⟩
     have hrun := TM.binaryAddConstTM_hoareTime_frame
       tapes.update.entry.query destination 0 inp work out hqueryZero
       (by simpa [hinp] using hinput)
@@ -334,12 +334,9 @@ theorem indirectLoadInstructionTM_hoareTime_frame_internal
     have hrun := entryUpdateTM_hoareTime_frame tapes.update store destination
       (RegisterStore.read store (RegisterStore.read store addressRegister))
       emittedBits updateWork inp₀ out₀ hcanonical hscanner
-      (by simpa only [updateWork, Function.update_of_ne hreplacementNe] using
-        hloadedResult.value)
-      (by simpa only [updateWork, Function.update_of_ne hremainingNe] using
-        hloadedResult.count)
-      (by simpa only [updateWork, Function.update_of_ne hfoundNe] using
-        hloadedResult.copyScratch)
+      (by simp only [updateWork, Function.update_of_ne hreplacementNe]; exact hloadedResult.value)
+      (by simp only [updateWork, Function.update_of_ne hremainingNe]; exact hloadedResult.count)
+      (by simp only [updateWork, Function.update_of_ne hfoundNe]; exact hloadedResult.copyScratch)
       (by simpa only [updateWork, Function.update_of_ne hresultCountNe] using
         hresultCount)
       hinput houtput

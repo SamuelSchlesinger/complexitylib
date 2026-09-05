@@ -58,7 +58,7 @@ theorem repeatAtTime_outer_correct (tm : NTM n) (x : List Bool)
         let j : Fin k := ⟨m, hm⟩
         let C₀ := repeatBoundaryCfg tm x choices m (Nat.le_of_lt hm)
         have hboundary := ih (Nat.le_of_lt hm)
-        rw [RepeatBoundary, dif_pos hm] at hboundary
+        rw [RepeatBoundary, dite_eq_left hm] at hboundary
         obtain ⟨votes, hvotes, hstate, hproject, hframe, hparked⟩ := hboundary
         have hinv := (repeatAtTime tm k T).trace_initCfg_startInvariant x
           (repeatAtTimeSteps m T) (repeatPrefixChoices choices m (Nat.le_of_lt hm))
@@ -95,7 +95,7 @@ theorem repeatAtTime_outer_correct (tm : NTM n) (x : List Bool)
           rw [repeatStrideChoices_trace_split_three]
         rw [hstride]
         by_cases hnext : m + 1 < k
-        · rw [RepeatBoundary, dif_pos hnext]
+        · simp only [RepeatBoundary, dite_eq_left hnext]
           let votes' := Function.update votes j (repeatVotes tm x k T seed j)
           have hfinish := repeatAtTime_trace_finish_next tm x seed j c.state votes Cfinish
             finishChoices htrial.1 hnext htrial.2.1 hactiveOutput htrial.2.2.2.2.1
@@ -122,15 +122,17 @@ theorem repeatAtTime_outer_correct (tm : NTM n) (x : List Bool)
               repeatVotes tm x k T seed := by
             apply RepeatCompletedVotes.eq_expected tm x seed
             simpa [j, heq] using hvotes'
-          rw [RepeatBoundary, dif_neg]
-          · simpa [hvotesFull] using hfinish
+          simp only [RepeatBoundary]
+          rw [dite_eq_right]
+          · simp only [hvotesFull] at hfinish
+            exact hfinish
           · omega
   · have hk0 : k = 0 := Nat.eq_zero_of_not_pos hk
     subst k
     intro m hm
     have hm0 : m = 0 := by omega
     subst m
-    rw [RepeatBoundary, dif_neg (by omega)]
+    rw [RepeatBoundary, dite_eq_right (by omega)]
     have hzero := repeatAtTime_trace_zero_repetitions tm x seed choices
     simpa [repeatBoundaryCfg, repeatPrefixChoices_self] using
       ⟨hzero.1, hzero.2.1, hzero.2.2.2⟩
@@ -149,7 +151,9 @@ theorem repeatAtTime_trace_correct_internal (tm : NTM n) (x : List Bool)
         (blockMajority (repeatAcceptEvent tm x T) (repeatRandomSeed k T choices)) := by
   have houter := repeatAtTime_outer_correct tm x choices hhalt
   have hfinal := houter.final
-  simpa [repeatBoundaryCfg, repeatPrefixChoices_self, majority_repeatVotes] using hfinal
+  simp only [repeatBoundaryCfg, repeatPrefixChoices_self, majority_repeatVotes]
+    at hfinal
+  exact hfinal
 
 end NTM
 

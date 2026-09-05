@@ -655,9 +655,9 @@ private theorem testPhase (α x : List Bool) (mc : Cfg 1 (decodeDesc α).toTM.Q)
         then Γ.one else Γ.zero)
       = (if mc.state = (decodeDesc α).toTM.qhalt then Γ.one else Γ.zero) := by
     by_cases hq : mc.state = (decodeDesc α).toTM.qhalt
-    · rw [if_pos hq, if_pos
+    · rw [ite_eq_left hq, ite_eq_left
         (show S = (takeField (takeField (groupPairs α)).2).1 from hSiff.mpr hq)]
-    · rw [if_neg hq, if_neg
+    · rw [ite_eq_right hq, ite_eq_right
         (show ¬S = (takeField (takeField (groupPairs α)).2).1 from
           fun hc => hq (hSiff.mp hc))]
   have hoc1' : c'.output.cells 1
@@ -766,7 +766,7 @@ private theorem extractPhase (α x : List Bool) (V T m v : ℕ)
     intro k
     rw [hvout.1]
     simp only [show ¬(k + 2 = 0) by omega, show ¬(k + 2 = 1) by omega,
-      if_false, show k + 2 - 1 = k + 1 by omega]
+      ite_false, show k + 2 - 1 = k + 1 by omega]
   have hblank2 : (work (Fin.castAdd 1 2)).cells (m + 2) = Γ.blank := by
     rw [hcells2 m]
     exact hmb
@@ -852,7 +852,7 @@ theorem clockedUtmTM_hoareTime_halt (α x : List Bool)
       exact testExit_to_branch α x mcF (V - max T 1) inp work out htest
     · -- test → else routing: vacuous (the verdict is `Γ.one`)
       rintro inp work out ⟨-, -, -, -, -, -, -, hcell1⟩ hne
-      rw [if_pos hhalt] at hcell1
+      rw [ite_eq_left hhalt] at hcell1
       exact absurd hcell1 hne
     · -- then-branch post survives the final transition (output WF)
       rintro inp work out ⟨hcopy, h0, hns⟩
@@ -913,7 +913,7 @@ theorem clockedUtmTM_hoareTime_timeout (α x : List Bool)
       (le_of_eq (by rw [Nat.max_self]))
     · -- test → then routing: vacuous (the verdict is `Γ.zero`)
       rintro inp work out ⟨-, -, -, -, -, -, -, hcell1⟩ hone
-      rw [hcell1, if_neg hnh] at hone
+      rw [hcell1, ite_eq_right hnh] at hone
       exact absurd hone (by decide)
     · -- test → else routing
       rintro inp work out htest -

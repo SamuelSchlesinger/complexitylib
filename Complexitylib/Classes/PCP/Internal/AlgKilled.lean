@@ -221,9 +221,9 @@ theorem stopFromNum_eq_findIdx (q c : ℕ) : ∀ (n i : ℕ), stopFromNum q c i 
       intro i
       rw [stopFromNum, List.finRange_succ, List.findIdx_cons, findIdx_map]
       by_cases h : (c / q ^ i) % q = 0
-      · rw [if_pos h]
+      · rw [ite_eq_left h]
         simp [h]
-      · rw [if_neg h, ih (i + 1)]
+      · rw [ite_eq_right h, ih (i + 1)]
         have hcond : ((c / q ^ (i + (0 : Fin (n + 1)).val)) % q == 0) = false := by
           simpa using h
         rw [hcond]
@@ -234,7 +234,7 @@ theorem stopFromNum_eq_findIdx (q c : ℕ) : ∀ (n i : ℕ), stopFromNum q c i 
           refine findIdx_congr fun x _ => ?_
           rw [Fin.val_succ, show i + (x.val + 1) = i + 1 + x.val by omega]
         rw [hbody]
-        simp only [cond_false]
+        simp only [Bool.false_eq_true, ite_false]
         omega
 
 theorem stopAtNum_eq_stopFromNum (T q c : ℕ) : stopAtNum T q c = stopFromNum q c 0 T := by
@@ -274,8 +274,8 @@ theorem stopFn_eq {q : ℕ} (hq : 0 < q) {co : List Bool → List Bool} {z : Lis
           List.length_replicate]
       rw [stopFn, hdig, stopFromNum]
       by_cases h : (c / q ^ i) % q = 0
-      · rw [if_pos h, ifEqLen_pos (by simp [h])]
-      · rw [if_neg h, ifEqLen_neg (by simpa using h), ih (i + 1)]
+      · rw [ite_eq_left h, ifEqLen_pos (by simp [h])]
+      · rw [ite_eq_right h, ifEqLen_neg (by simpa using h), ih (i + 1)]
 
 /-! ### The dart the walk comes back by -/
 
@@ -373,9 +373,9 @@ theorem length_revSum (hd : 1 < F.deg) (G : ConstraintGraph α) (v s k : ℕ)
       congr 1
       congr 1
       by_cases h : n < k
-      · rw [if_pos h, if_pos h, backFn_eq hd G v s (k - 1 - n) hv hpc hpe,
+      · rw [ite_eq_left h, ite_eq_left h, backFn_eq hd G v s (k - 1 - n) hv hpc hpe,
           List.length_replicate]
-      · rw [if_neg h, if_neg h, pairSnd_pair, pairSnd_pair,
+      · rw [ite_eq_right h, ite_eq_right h, pairSnd_pair, pairSnd_pair,
           divC_eq (Nat.pow_pos hPpos), List.length_replicate, modC_eq hPpos]
         simp
 

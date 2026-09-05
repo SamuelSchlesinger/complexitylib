@@ -291,7 +291,7 @@ theorem savG_mem_FP (tm : NTM k) (qp lp : Polynomial ℕ) : savG tm qp lp ∈ FP
   have hsnd := sndBlockOf_mem_FP hid
   have hstep : (fun z => savStep tm (pairFst z)) ∈ FP := by
     have := mem_FP_comp hfst (savStep_mem_FP tm)
-    simpa [Function.comp] using this
+    exact this
   exact Cobham.pairFn_mem_FP
     (Cobham.selectHeadFn_mem_FP (emptyFlagFn_mem_FP hfst)
       (savInitFn_mem_FP tm qp lp hsnd) hstep) hsnd

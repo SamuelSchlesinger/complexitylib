@@ -413,13 +413,13 @@ theorem tally_pos_iff (P : ℕ → Bool) : ∀ N, 0 < NTM.tally P N ↔ ∃ j, j
       · intro h
         by_cases hPN : P N
         · exact ⟨N, by omega, hPN⟩
-        · rw [if_neg (by simp [hPN])] at h
+        · rw [ite_eq_right (by simp [hPN])] at h
           obtain ⟨j, hj, hPj⟩ := ih.mp (by omega)
           exact ⟨j, by omega, hPj⟩
       · rintro ⟨j, hj, hPj⟩
         by_cases hjN : j = N
         · rw [hjN] at hPj
-          rw [if_pos (by simp [hPj])]
+          rw [ite_eq_left (by simp [hPj])]
           omega
         · have := ih.mpr ⟨j, by omega, hPj⟩
           split <;> omega
@@ -646,7 +646,7 @@ theorem enumTM_space (M : TM k) {L' : Language} {f : ℕ → ℕ} (s : Polynomia
         cases c; subst hst; rfl
       rw [hce]
       exact hreach)
-    (hloopC.strengthen_post (fun inp work out h => ⟨h.1, h.2.1, by rw [h.2.2, if_pos rfl]⟩))
+    (hloopC.strengthen_post (fun inp work out h => ⟨h.1, h.2.1, by rw [h.2.2, ite_eq_left rfl]⟩))
     (by
       have := prologueTM_hoareTime k p (bHPoly p s) x
       rw [← hNdef, show (bHPoly p s).eval x.length = H from by rw [hHdef, bHPoly_eval]] at this

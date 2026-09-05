@@ -193,16 +193,16 @@ private theorem writeAndMove_readBack_cell1 (t : Tape) (d : Dir3)
   rw [hcells, Tape.write]
   by_cases hh0 : t.head = 0
   · simp [hh0]
-  · rw [if_neg hh0]
+  · rw [ite_eq_right hh0]
     simp only [Function.update_apply]
     by_cases h1 : (1 : ℕ) = t.head
-    · rw [if_pos h1, Tape.read, ← h1]
+    · rw [ite_eq_left h1, Tape.read, ← h1]
       cases hg : t.cells 1
       · rfl
       · rfl
       · rfl
       · exact absurd hg hns
-    · rw [if_neg h1]
+    · rw [ite_eq_right h1]
 
 /-- Halt-step correspondence, cells version: when `N` has halted, the
     simulator's one halt step lands with output cell 1 exactly equal to `N`'s
@@ -306,7 +306,7 @@ theorem singleTapeSim_rejectsWithZero {k : ℕ} {N : NTM k} (hk : 1 ≤ k)
   have hagree : ∀ i : Fin m, choices ⟨i.val, lt_of_lt_of_le i.isLt hle⟩ = ch i.val := by
     intro i
     simp only [hch]
-    rw [dif_pos (lt_of_lt_of_le i.isLt hle)]
+    rw [dite_eq_left (lt_of_lt_of_le i.isLt hle)]
   rw [(singleTapeSim N).trace_mono hle hagree hhalted, hcell]
   exact hrej x hx _
 

@@ -153,7 +153,7 @@ theorem binaryInstructionArithmeticTM_hoareTime_frame_internal
           refine ⟨hinp, ⟨?_, ?_, ?_, ?_, ?_, ?_, ?_, ?_⟩, hout⟩
           · simpa using hlhs'
           · simpa using hrhs'
-          · simpa using hresult'
+          · exact hresult'
           · simpa using hshift'
           · simpa using htmp'
           · simpa using hdbl'

@@ -264,7 +264,7 @@ theorem emitPolynomialRecentGate_effect_internal
   · funext i
     simp only [Function.update_apply]
     split_ifs <;> simp_all
-  · simpa using hloop
+  · exact hloop
 
 theorem emitPolynomialRecentGate_emitted_internal
     (polynomial : Polynomial ℕ) (extra : ℕ) (op : AndOrOp)
@@ -287,7 +287,7 @@ theorem emitPolynomialRecentGate_emitted_internal
   rw [emitDynamicRecentGate_emitted op negated₀ negated₁ Work.temporary₃
     Work.loop₃ fixedOffset₁ _ polynomialOffsetDistinct]
   · simp [Work.temporary₃, Work.available]
-  · simpa using hloop
+  · exact hloop
 
 end DirectGenerator
 

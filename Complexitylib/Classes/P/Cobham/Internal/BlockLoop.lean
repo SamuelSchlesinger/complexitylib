@@ -78,11 +78,11 @@ theorem acceptCountAux_length (tm : NTM k) (u x τ s ρ : List Bool) :
       rw [acceptCountAux, List.length_cons, Finset.sum_range_succ, ← ih]
       rcases hflag with hf | hf
       · rw [hf]
-        simp only [caseBit₀_cons, cond_true, List.length_cons]
-        rw [if_pos (by rw [← blockOf_eq]; exact hf)]
+        simp only [caseBit₀_cons, Bool.cond_true, List.length_cons]
+        rw [ite_eq_left (by rw [← blockOf_eq]; exact hf)]
       · rw [hf]
-        simp only [caseBit₀_cons, cond_false]
-        rw [if_neg (by rw [← blockOf_eq, hf]; simp)]
+        simp only [caseBit₀_cons, Bool.cond_false]
+        rw [ite_eq_right (by rw [← blockOf_eq, hf]; simp)]
         omega
 
 /-- The step of the counting recursion. -/
@@ -107,7 +107,7 @@ private theorem recNotation_count (tm : NTM k) (u x τ s ρ : List Bool) :
   | cons β y ih =>
       rw [recNotation_cons, acceptCountAux]
       cases β <;>
-        · simp only [cond_false, cond_true, countStep, Fin.cons_zero, Fin.cons_one]
+        · simp only [Bool.cond_false, Bool.cond_true, countStep, Fin.cons_zero, Fin.cons_one]
           rw [show (Fin.cons y (Fin.cons (recNotation
               (fun _ : Fin 4 → List Bool => ([] : List Bool)) (countStep tm)
               (countStep tm) y ![u, x, τ, s]) ![u, x, τ, s]) : Fin 6 → List Bool) 2 = u from rfl,
@@ -142,7 +142,7 @@ private theorem recNotation_count_length (tm : NTM k) (ρ : List Bool)
         · simp
         · cases d <;> simp
       cases β <;>
-        · simp only [cond_false, cond_true]
+        · simp only [Bool.cond_false, Bool.cond_true]
           have := hstep y (recNotation
             (fun _ : Fin 4 → List Bool => ([] : List Bool)) (countStep tm)
             (countStep tm) y v) v

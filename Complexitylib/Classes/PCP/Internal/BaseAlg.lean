@@ -281,11 +281,11 @@ noncomputable def baseAlg (hE : E ∈ FP) : AlgCSP where
     · have := mem_FP_comp (mem_FP_comp harg (baseTailU_mem_FP E hE)) unaryLength_mem_FP
       refine mem_FP_of_eq this fun w => ?_
       rw [Function.comp_apply, Function.comp_apply]
-      simp only [cond_false]
+      simp only [Bool.cond_false]
     · have := mem_FP_comp (mem_FP_comp harg (baseHeadU_mem_FP E hE)) unaryLength_mem_FP
       refine mem_FP_of_eq this fun w => ?_
       rw [Function.comp_apply, Function.comp_apply]
-      simp only [cond_true]
+      simp only [Bool.cond_true]
   ok := baseOk E 23
   ok_mem := baseOk_mem_P E hE 23
 
@@ -297,12 +297,12 @@ noncomputable def baseAlg (hE : E ∈ FP) : AlgCSP where
 theorem vert_baseAlg_false (hE : E ∈ FP) (x : List Bool) (e : ℕ) :
     (baseAlg E hE).vert false x e
       = (baseTailU E (pair x (List.replicate e true))).length := by
-  simp only [baseAlg, cond_false]
+  simp only [baseAlg, Bool.cond_false]
 
 theorem vert_baseAlg_true (hE : E ∈ FP) (x : List Bool) (e : ℕ) :
     (baseAlg E hE).vert true x e
       = (baseHeadU E (pair x (List.replicate e true))).length := by
-  simp only [baseAlg, cond_true]
+  simp only [baseAlg, Bool.cond_true]
 
 @[simp] theorem ok_baseAlg (hE : E ∈ FP) : (baseAlg E hE).ok = baseOk E 23 := rfl
 
@@ -360,7 +360,7 @@ theorem baseAlg_tail_eq (hE' : E ∈ FP) (hE : ∀ x, E x = (Φ x).encode)
   rw [numEdges_baseCSP] at he
   rw [vert_baseAlg_false, baseTailU_eq E hE h3]
   show _ = (clauseVertex (Φ x) (edgeClause e)).val
-  rw [clauseVertex, edgeClause, dif_pos (by rw [numVerts]; omega)]
+  rw [clauseVertex, edgeClause, dite_eq_left (by rw [numVerts]; omega)]
 
 theorem baseAlg_head_eq (hE' : E ∈ FP) (hE : ∀ x, E x = (Φ x).encode)
     (h3 : ∀ x, CNF.Is3CNF (Φ x)) (x : List Bool) (e : ℕ)
@@ -382,7 +382,7 @@ theorem baseAlg_head_eq (hE' : E ∈ FP) (hE : ∀ x, E x = (Φ x).encode)
     exact var_le_maxVar (Φ x) hj hp
   rw [vert_baseAlg_true, baseHeadU_eq E hE h3 x he]
   show _ = (varVertex (Φ x) (litOf (Φ x) (edgeClause e) (edgePos e)).var).val
-  rw [varVertex, edgeClause, edgePos, dif_pos (by rw [numVerts]; omega)]
+  rw [varVertex, edgeClause, edgePos, dite_eq_left (by rw [numVerts]; omega)]
 
 /-! ### The key on a well-formed argument -/
 

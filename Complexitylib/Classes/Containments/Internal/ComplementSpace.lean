@@ -166,7 +166,7 @@ theorem CompInv.step {tm : TM n} {L : Language} {S : ℕ → ℕ} (hdec : tm.Dec
     have hqc : q = c₀.state := (Sum.inl.injEq _ _ ▸ hstate).symm
     have hq0 : c₀.state ≠ tm.qhalt := by rw [← hqc]; exact hq
     obtain ⟨c₀', hstep0⟩ : ∃ c₀', tm.step c₀ = some c₀' := by
-      rw [TM.step, if_neg hq0]; exact ⟨_, rfl⟩
+      rw [TM.step, ite_eq_right hq0]; exact ⟨_, rfl⟩
     have hsimstep : tm.complementTM.step (complementCfg tm c₀) = some (complementCfg tm c₀') := by
       have h := complementTM_simulation tm (TM.reachesIn.step hstep0 TM.reachesIn.zero)
       cases h with

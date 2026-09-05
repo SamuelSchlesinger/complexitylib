@@ -473,9 +473,8 @@ theorem retargetBufferedDataKernel_hoareTime_frame_internal
         (fun j => hparkedBase j) i
     exact ⟨hinp, hbuffer, hpc, hcount, hsourceContent, hcleanup,
       hremaining, by
-        simpa [ControlInstructionTapes.lifted] using
-          entryScanReady_lifted tapes.data.update.entry _ _ work hscanner
-            hparked,
+        simp [ControlInstructionTapes.lifted]
+        exact entryScanReady_lifted tapes.data.update.entry _ _ work hscanner hparked,
       hshift, htmp, hdbl, hparked, hout⟩
   · exact le_rfl
 
@@ -663,8 +662,8 @@ theorem executeInstructionTM_imm_hoareTime_frame
         intro slot
         fin_cases slot
         · exact ⟨houtcome.ready.queryStart, by
-            simpa [instructionCleanupValue, instructionCleanupTape,
-              instructionCleanupParentSlot] using houtcome.ready.query⟩
+            simp [instructionCleanupValue, instructionCleanupTape, instructionCleanupParentSlot]
+            exact houtcome.ready.query⟩
         · change ((fun i => work (Fin.castSucc i))
               tapes.data.update.replacement).HasBinaryNat value
           rw [show (fun i => work (Fin.castSucc i))
@@ -681,8 +680,8 @@ theorem executeInstructionTM_imm_hoareTime_frame
             rw [hvalueWork]
             exact Function.update_self _ _ _]
           exact Tape.init_move_right_hasBinaryNat value
-        · simpa [instructionCleanupValue, instructionCleanupTape,
-            instructionCleanupParentSlot] using houtcome.found
+        · simp [instructionCleanupValue, instructionCleanupTape, instructionCleanupParentSlot]
+          exact houtcome.found
         · change ((fun i => work (Fin.castSucc i)) tapes.data.lhs).HasBinaryNat 0
           rw [show (fun i => work (Fin.castSucc i)) tapes.data.lhs =
               updateWork tapes.data.lhs from
@@ -755,12 +754,13 @@ theorem executeInstructionTM_imm_hoareTime_frame
         exact hready.dbl
       refine ⟨hinp, ?_, hpc, ?_, hsourceContent, hcleanup, ?_, ?_, hshift,
         htmp', hdbl', hparked, hout⟩
-      · simpa [instructionStore, Snapshot.stepInstr] using hbuffer'
+      · simp [instructionStore, Snapshot.stepInstr]
+        exact hbuffer'
       · simpa [instructionStore, Snapshot.stepInstr] using hcount
-      · simpa [instructionRemainingValue] using houtcome.remaining
-      · simpa [ControlInstructionTapes.lifted] using
-          entryScanReady_lifted tapes.data.update.entry _ _ work
-            houtcome.ready hparked
+      · simp [instructionRemainingValue]
+        exact houtcome.remaining
+      · simp [ControlInstructionTapes.lifted]
+        exact entryScanReady_lifted tapes.data.update.entry _ _ work houtcome.ready hparked
     · exact le_rfl
   simpa only [executeInstructionTM, executeInstructionTime] using
     finishDataInstructionTM_hoareTime_frame_internal tapes
@@ -897,8 +897,8 @@ theorem executeInstructionTM_direct_hoareTime_frame
       fin_cases slot
       · exact ⟨houtcome.ready.queryStart, by
           cases op <;>
-            simpa [directInstruction, instructionCleanupValue,
-              instructionCleanupParentSlot] using houtcome.ready.query⟩
+            (simp [directInstruction, instructionCleanupValue, instructionCleanupParentSlot]; exact
+              houtcome.ready.query)⟩
       · change (work tapes.data.update.replacement).HasBinaryNat _
         rw [show work tapes.data.update.replacement =
             arithmeticWork tapes.data.update.replacement from
@@ -907,8 +907,8 @@ theorem executeInstructionTM_direct_hoareTime_frame
           simpa [directInstruction, instructionCleanupValue,
             BinaryInstrOp.eval] using harithmetic.result
       · cases op <;>
-          simpa [directInstruction, instructionCleanupValue,
-            instructionCleanupParentSlot] using houtcome.found
+          (simp [directInstruction, instructionCleanupValue, instructionCleanupParentSlot]; exact
+            houtcome.found)
       · change (work tapes.data.lhs).HasBinaryNat _
         rw [houtcome.frame tapes.data.lhs (fun role =>
             (tapes.data.update_ne_lhs role).symm)]
@@ -1120,8 +1120,8 @@ theorem executeInstructionTM_load_hoareTime_frame
       intro slot
       fin_cases slot
       · exact ⟨houtcome.ready.queryStart, by
-          simpa [instruction, instructionCleanupValue,
-            instructionCleanupParentSlot] using houtcome.ready.query⟩
+          simp [instruction, instructionCleanupValue, instructionCleanupParentSlot]
+          exact houtcome.ready.query⟩
       · change (work tapes.data.update.replacement).HasBinaryNat _
         rw [show work tapes.data.update.replacement =
             updateWork tapes.data.update.replacement from houtcome.replacement,
@@ -1131,8 +1131,8 @@ theorem executeInstructionTM_load_hoareTime_frame
             exact Function.update_of_ne
               (tapes.data.update.ne (by decide)) _ _]
         exact hloaded.value
-      · simpa [instruction, instructionCleanupValue,
-          instructionCleanupParentSlot] using houtcome.found
+      · simp [instruction, instructionCleanupValue, instructionCleanupParentSlot]
+        exact houtcome.found
       · change (work tapes.data.lhs).HasBinaryNat _
         rw [show work tapes.data.lhs = updateWork tapes.data.lhs from
             houtcome.frame tapes.data.lhs (fun role =>
@@ -1312,16 +1312,16 @@ theorem executeInstructionTM_store_hoareTime_frame
       intro slot
       fin_cases slot
       · exact ⟨houtcome.ready.queryStart, by
-          simpa [instruction, instructionCleanupValue,
-            instructionCleanupParentSlot] using houtcome.ready.query⟩
+          simp [instruction, instructionCleanupValue, instructionCleanupParentSlot]
+          exact houtcome.ready.query⟩
       · change (work tapes.data.update.replacement).HasBinaryNat _
         rw [show work tapes.data.update.replacement =
             updateWork tapes.data.update.replacement from houtcome.replacement,
           hupdateWork, Function.update_self]
         exact Tape.init_move_right_hasBinaryNat
           (RegisterStore.read store source)
-      · simpa [instruction, instructionCleanupValue,
-          instructionCleanupParentSlot] using houtcome.found
+      · simp [instruction, instructionCleanupValue, instructionCleanupParentSlot]
+        exact houtcome.found
       · change (work tapes.data.lhs).HasBinaryNat _
         rw [show work tapes.data.lhs = updateWork tapes.data.lhs from
             houtcome.frame tapes.data.lhs (fun role =>

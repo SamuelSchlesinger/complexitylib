@@ -120,7 +120,7 @@ theorem decode?_encode_internal {inputWidth gateBound : Nat}
   rw [countValue_encode_internal]
   have hcount : description.gateCountNat < gateBound + 1 :=
     description.gateCount.isLt
-  rw [dif_pos hcount]
+  rw [dite_eq_left hcount]
   congr 1
   rw [Description.mk.injEq]
   constructor
@@ -159,7 +159,7 @@ private theorem encode_decoded_of_countValue_lt
     change GateSlot.encode
       (GateSlot.decode (slotBits code position.1)) position.2 =
         blocks.2 flatCoordinate
-    rw [GateSlot.encode_decode_internal]
+    erw [GateSlot.encode_decode_internal]
     unfold slotBits
     change blocks.2 (finProdFinEquiv (position.1, position.2)) =
       blocks.2 flatCoordinate

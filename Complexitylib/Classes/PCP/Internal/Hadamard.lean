@@ -96,24 +96,24 @@ theorem parityFun_basis (S : Finset (Fin n)) (i : Fin n) :
   classical
   rw [parityFun]
   by_cases hi : i ∈ S
-  · rw [if_pos hi]
+  · rw [ite_eq_left hi]
     rw [Finset.prod_eq_single i]
     · show chi (if i = i then (1 : ZMod 2) else 0) = -1
-      rw [if_pos rfl]
+      rw [ite_eq_left rfl]
       show chi 1 = -1
       simp
     · intro j _ hj
       show chi (if j = i then (1 : ZMod 2) else 0) = 1
-      rw [if_neg hj]
+      rw [ite_eq_right hj]
       show chi 0 = 1
       simp
     · intro hni
       exact absurd hi hni
-  · rw [if_neg hi]
+  · rw [ite_eq_right hi]
     refine Finset.prod_eq_one fun j hj => ?_
     have hji : j ≠ i := fun h => hi (h ▸ hj)
     show chi (if j = i then (1 : ZMod 2) else 0) = 1
-    rw [if_neg hji]
+    rw [ite_eq_right hji]
     show chi 0 = 1
     simp
 
@@ -214,7 +214,7 @@ theorem parity_eq_signOf_hadamard (S : Finset (Fin n)) :
   rw [signOf_hadamard]
   congr 1
   ext i
-  simp only [Finset.mem_filter, Finset.mem_univ, true_and, indicatorAssign]
+  simp only [indicatorAssign]
   by_cases hi : i ∈ S
   · simp [hi]
   · simp [hi]
@@ -237,10 +237,10 @@ theorem hadamard_basisVec (a : Cube n) (i : Fin n) : hadamard a (basisVec i) = a
   show ∑ j, a j * (basisVec i) j = a i
   rw [Finset.sum_eq_single i]
   · show a i * (if i = i then (1 : ZMod 2) else 0) = a i
-    rw [if_pos rfl, mul_one]
+    rw [ite_eq_left rfl, mul_one]
   · intro j _ hj
     show a j * (if j = i then (1 : ZMod 2) else 0) = 0
-    rw [if_neg hj, mul_zero]
+    rw [ite_eq_right hj, mul_zero]
   · intro hni
     exact absurd (Finset.mem_univ i) hni
 
@@ -254,10 +254,10 @@ theorem tensor_basisVec (i j : Fin n) :
     = if k = finProdFinEquiv (i, j) then (1 : ZMod 2) else 0
   by_cases hk : k = finProdFinEquiv (i, j)
   · subst hk
-    rw [if_pos rfl, Equiv.symm_apply_apply]
+    rw [ite_eq_left rfl, Equiv.symm_apply_apply]
     show (if i = i then (1 : ZMod 2) else 0) * (if j = j then (1 : ZMod 2) else 0) = 1
-    rw [if_pos rfl, if_pos rfl, mul_one]
-  · rw [if_neg hk]
+    rw [ite_eq_left rfl, ite_eq_left rfl, mul_one]
+  · rw [ite_eq_right hk]
     by_cases h1 : (finProdFinEquiv.symm k).1 = i
     · by_cases h2 : (finProdFinEquiv.symm k).2 = j
       · exfalso
@@ -266,10 +266,10 @@ theorem tensor_basisVec (i j : Fin n) :
         rw [← hpair, Equiv.apply_symm_apply]
       · show (if (finProdFinEquiv.symm k).1 = i then (1 : ZMod 2) else 0)
           * (if (finProdFinEquiv.symm k).2 = j then (1 : ZMod 2) else 0) = 0
-        rw [if_neg h2, mul_zero]
+        rw [ite_eq_right h2, mul_zero]
     · show (if (finProdFinEquiv.symm k).1 = i then (1 : ZMod 2) else 0)
         * (if (finProdFinEquiv.symm k).2 = j then (1 : ZMod 2) else 0) = 0
-      rw [if_neg h1, zero_mul]
+      rw [ite_eq_right h1, zero_mul]
 
 /-- **Consistency forces the tensor.** A quadratic table that agrees with the
 product of the linear readings on every outer product *is* the tensor square of
@@ -365,7 +365,7 @@ theorem eq_of_hammingDist_lt_half {S T : Finset (Fin n)}
   by_contra hne
   have h1 : ⟪χ S, χ T⟫ = 0 := by
     rw [parityFun_orthonormal]
-    exact if_neg hne
+    exact ite_eq_right hne
   have h2 : ⟪χ S, χ T⟫ = 1 - 2 * hammingDist (χ S) (χ T) :=
     inner_eq_one_sub_two_dist _ _ (isBooleanValued_parityFun S)
       (isBooleanValued_parityFun T)
@@ -410,7 +410,7 @@ theorem chi_eq_one_sub_two (v : ZMod 2) :
   by_cases h : v = 0
   · rw [h]
     norm_num [chi]
-  · rw [if_pos h]
+  · rw [ite_eq_left h]
     have hchi : chi v = -1 := by simp [chi, h]
     rw [hchi]
     norm_num
@@ -453,7 +453,7 @@ theorem prob_hadamard_ne_zero (a : Cube n) (ha : a ≠ 0) :
     · exact h
     · exact absurd h hi
   have hexp : 𝔼[signOf (hadamard a)] = 0 := by
-    rw [signOf_hadamard, expect_parityFun, if_neg hne]
+    rw [signOf_hadamard, expect_parityFun, ite_eq_right hne]
   rw [expect_signOf] at hexp
   linarith
 
@@ -504,8 +504,8 @@ theorem prob_mono {P Q : Cube n → Prop} (h : ∀ x, P x → Q x) : Pr[P] ≤ P
   simp only [BooleanAnalysis.prob, expect_unfold, BooleanAnalysis.indicator]
   refine mul_le_mul_of_nonneg_left (Finset.sum_le_sum fun x _ => ?_) (by positivity)
   by_cases hp : P x
-  · rw [if_pos hp, if_pos (h x hp)]
-  · rw [if_neg hp]
+  · rw [ite_eq_left hp, ite_eq_left (h x hp)]
+  · rw [ite_eq_right hp]
     split_ifs <;> norm_num
 
 /-- **The bilinear form is nonzero on many rows.** If the quadratic table's
@@ -545,7 +545,8 @@ theorem expect_mono {f g : BooleanFunction n} (h : ∀ x, f x ≤ g x) : 𝔼[f]
 
 theorem expect_const_mul (c : ℝ) (f : BooleanFunction n) :
     𝔼[fun x => c * f x] = c * 𝔼[f] := by
-  rw [expect_unfold, expect_unfold, ← Finset.mul_sum]
+  rw [expect_unfold (f := fun x : Cube n => c * f x), expect_unfold (f := f),
+    ← Finset.mul_sum (s := Finset.univ) (a := c) (f := fun x : Cube n => f x)]
   ring
 
 /-- **A nonzero bilinear form is nonzero on a quarter of all pairs.** For at
@@ -568,15 +569,16 @@ theorem prob₂_tensor_ne_zero (c : Cube (n * n)) (hc : c ≠ 0) :
       funext x
       rw [hadamard_tensor_row]
     by_cases hy : tensorRow c y ≠ 0
-    · rw [if_pos hy, mul_one, hcond]
+    · rw [ite_eq_left hy, mul_one, hcond]
       exact le_of_eq (prob_hadamard_ne_zero _ hy).symm
-    · rw [if_neg hy, mul_zero]
+    · rw [ite_eq_right hy, mul_zero]
       exact BooleanAnalysis.Internal.prob_nonneg _
   have hhalf := prob_tensorRow_ne_zero c hc
   calc (1 : ℝ) / 4 = (1 / 2) * (1 / 2) := by norm_num
     _ ≤ (1 / 2) * Pr[fun y => tensorRow c y ≠ 0] := by linarith
     _ = 𝔼[fun y => (1 / 2 : ℝ) * (if tensorRow c y ≠ 0 then (1 : ℝ) else 0)] := by
-        rw [expect_const_mul]
+        rw [expect_const_mul (n := n) (c := (1 / 2 : ℝ))
+          (f := fun y : Cube n => if tensorRow c y ≠ 0 then (1 : ℝ) else 0)]
         congr 1
         rw [BooleanAnalysis.prob]
         congr 1
@@ -594,17 +596,21 @@ theorem hadamard_add {m : ℕ} (b c z : Cube m) :
 
 theorem expect_add (f g : BooleanFunction n) :
     𝔼[fun x => f x + g x] = 𝔼[f] + 𝔼[g] := by
-  rw [expect_unfold, expect_unfold, expect_unfold, ← mul_add, ← Finset.sum_add_distrib]
+  rw [expect_unfold (f := fun x : Cube n => f x + g x), expect_unfold (f := f),
+    expect_unfold (f := g), ← mul_add,
+    ← Finset.sum_add_distrib (f := fun x : Cube n => f x) (g := fun x : Cube n => g x)]
 
 theorem expect_one : 𝔼[fun _ : Cube n => (1 : ℝ)] = 1 := by
-  rw [expect_unfold, Finset.sum_const, Finset.card_univ, card_cube, nsmul_eq_mul, mul_one]
+  rw [expect_unfold (f := fun _ : Cube n => (1 : ℝ)), Finset.sum_const, Finset.card_univ,
+    card_cube, nsmul_eq_mul, mul_one]
   push_cast
   field_simp
 
 theorem prob₂_compl (P : Cube n → Cube n → Prop) :
     Pr₂[P] + Pr₂[fun x y => ¬ P x y] = 1 := by
   classical
-  rw [BooleanAnalysis.prob₂, BooleanAnalysis.prob₂, ← expect_add, ← expect_one (n := n)]
+  rw [BooleanAnalysis.prob₂, BooleanAnalysis.prob₂, ← expect_add (f := fun x : Cube n => 𝔼[𝟙(P x)])
+      (g := fun x : Cube n => 𝔼[𝟙fun y => ¬P x y]), ← expect_one (n := n)]
   congr 1
   funext x
   exact BooleanAnalysis.Internal.prob_compl (P x)

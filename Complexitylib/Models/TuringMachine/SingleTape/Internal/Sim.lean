@@ -5,8 +5,8 @@ Authors: Samuel Schlesinger
 -/
 
 module
-public import Mathlib.Data.Finite.Prod
-public import Mathlib.Data.Finite.Sum
+public import Mathlib.Basic.Finite.Prod
+public import Mathlib.Basic.Finite.Sum
 public import Complexitylib.Models.TuringMachine
 
 /-!

@@ -171,17 +171,17 @@ theorem dmRun_mem_FP (b : List Bool) : dmRun b ∈ FP := by
       Polynomial.eval_X, id, List.length_nil, Nat.zero_add] at *
     omega
   have hiter := Cobham.iterate_mem_FP dmStep_mem_FP hinit id_mem_FP hwidth hbound
-  simpa using hiter
+  exact hiter
 
 theorem divFn_mem_FP (b : List Bool) : divFn b ∈ FP := by
   have := mem_FP_comp (mem_FP_comp (dmRun_mem_FP b) Cobham.fstBlock_mem_FP)
     Cobham.fstBlock_mem_FP
-  simpa using this
+  exact this
 
 theorem modFn_mem_FP (b : List Bool) : modFn b ∈ FP := by
   have := mem_FP_comp (mem_FP_comp (dmRun_mem_FP b) Cobham.fstBlock_mem_FP)
     Cobham.sndBlock_mem_FP
-  simpa using this
+  exact this
 
 theorem divFn_eq {b : List Bool} (hb : 0 < b.length) (s : List Bool) :
     divFn b s = List.replicate (s.length / b.length) true := by
@@ -233,17 +233,17 @@ theorem dmRun2_mem_FP : dmRun2 ∈ FP := by
       Polynomial.eval_X, id, List.length_nil, Nat.zero_add] at *
     omega
   have hiter := Cobham.iterate_mem_FP dmStep_mem_FP hinit Cobham.sndBlock_mem_FP hwidth hbound
-  simpa using hiter
+  exact hiter
 
 theorem divFn2_mem_FP : divFn2 ∈ FP := by
   have := mem_FP_comp (mem_FP_comp dmRun2_mem_FP Cobham.fstBlock_mem_FP)
     Cobham.fstBlock_mem_FP
-  simpa using this
+  exact this
 
 theorem modFn2_mem_FP : modFn2 ∈ FP := by
   have := mem_FP_comp (mem_FP_comp dmRun2_mem_FP Cobham.fstBlock_mem_FP)
     Cobham.sndBlock_mem_FP
-  simpa using this
+  exact this
 
 theorem divFn2_eq {b : List Bool} (hb : 0 < b.length) (s : List Bool) :
     divFn2 (pair b s) = List.replicate (s.length / b.length) true := by

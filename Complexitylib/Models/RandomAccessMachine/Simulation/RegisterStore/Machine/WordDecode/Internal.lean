@@ -465,7 +465,7 @@ private theorem payloadBitTM_step (sourceIdx targetIdx : Fin n)
           work := payloadBitWork sourceIdx targetIdx work₀ bit
           output := out₀ } := by
   have hread := hsource.read_cons
-  rw [TM.step, if_neg (by simp [payloadBitTM])]
+  rw [TM.step, ite_eq_right (by simp [payloadBitTM])]
   cases bit <;>
     simp only [payloadBitTM, hread, Γ.ofBool, reduceCtorEq]
   all_goals
@@ -578,7 +578,7 @@ private theorem wordSeparatorTM_step (sourceIdx : Fin n)
   have hread := hsource.read_cons
   have hzero : (work₀ sourceIdx).read = Γ.zero := by
     simpa [Γ.ofBool] using hread
-  rw [TM.step, if_neg (by simp [wordSeparatorTM])]
+  rw [TM.step, ite_eq_right (by simp [wordSeparatorTM])]
   simp only [wordSeparatorTM, hzero, ↓reduceIte]
   refine congrArg some (Cfg.ext rfl ?_ ?_ ?_)
   · dsimp only
@@ -1060,7 +1060,7 @@ private theorem payloadIterationRun
     (TM.binarySuccTM counterIdx) hbodyReach rfl hsuccReach'
   have hlift := TM.binaryForTM_iteration_reachesIn_internal body counterIdx
     widthIdx hseq
-  simpa [body, wordPayloadTM, payloadIterationStartCfg,
+  simpa [body, TM.seqTM, wordPayloadTM, payloadIterationStartCfg,
     payloadIterationDoneCfg, TM.binaryForIterationTime,
     TM.binaryForIterationTM, TM.binaryForIterationWrap, TM.phase1Wrap,
     TM.phase2Wrap, beforeWork, afterWork] using hlift
@@ -1194,8 +1194,8 @@ theorem wordPayloadTM_reachesIn_frame_internal {n : ℕ}
     hdistinct payload width work₀ hcounter hwidth
   refine ⟨payloadDoneCfg sourceIdx targetIdx counterIdx widthIdx payload width
       inp₀ work₀ out₀, ?_, rfl, rfl, ?_, ?_, ?_, ?_, ?_, rfl⟩
-  · simpa [spec, payloadLoopSpec, wordPayloadTime, wordPayloadTM,
-      payloadScanCfg, hinitial] using hreach
+  · simpa [spec, payloadLoopSpec, wordPayloadTime, wordPayloadTM, TM.binaryForTM,
+      payloadScanCfg, payloadDoneCfg, hinitial] using hreach
   · change (payloadLoopWork sourceIdx targetIdx counterIdx widthIdx payload width
       work₀ width width sourceIdx).HasBinarySuffix rest
     rw [payloadLoopWork_source sourceIdx targetIdx counterIdx widthIdx]
@@ -1247,7 +1247,8 @@ theorem wordWidthTM_reachesIn_frame_internal {n : ℕ}
   have hreach := spec.reachesIn_internal width 0 (by omega)
   have hinit := initial_work sourceIdx widthIdx hindices work₀ hwidth
   refine ⟨doneCfg sourceIdx widthIdx width inp₀ work₀ out₀, ?_, rfl, rfl, ?_, ?_, ?_, rfl⟩
-  · simpa [spec, loopSpec, wordWidthTime, scanCfg, hinit] using hreach
+  · simpa [spec, loopSpec, wordWidthTime, wordWidthTM, TM.forWorkOnesTM, scanCfg, hinit]
+    using hreach
   · change
       (wordWidthWork sourceIdx widthIdx work₀ width width sourceIdx).HasBinarySuffix
         (false :: payload)
@@ -1403,7 +1404,7 @@ theorem wordDecodeTM_reachesIn_frame_internal {n : ℕ}
         output := TM.transitionTape widthDone.output }
       (TM.phase2Wrap separatorTM payloadTM payloadDone) := by
     rw [hwidthTransitionInput, hwidthTransitionWork, hwidthTransitionOutput]
-    simpa [tailTM, separatorTM, payloadTM, TM.phase1Wrap] using htailReach
+    simpa [tailTM, separatorTM, payloadTM, TM.phase1Wrap, TM.seqTM] using htailReach
   have hfull := TM.seqTM_reachesIn_of_reachesIn widthTM tailTM
     (by simpa [widthTM] using hwidthReach) hwidthHalt htailReach'
   let finalCfg := TM.phase2Wrap widthTM tailTM
@@ -1411,8 +1412,7 @@ theorem wordDecodeTM_reachesIn_frame_internal {n : ℕ}
   refine ⟨finalCfg, ?_, ?_, hpayloadInput.trans (hseparatorInput.trans hwidthInput),
     hpayloadSource, hpayloadTarget, hpayloadCounter, hpayloadWidth, ?_,
     hpayloadOutput.trans (hseparatorOutput.trans hwidthOutput)⟩
-  · simpa [finalCfg, wordDecodeTM, wordDecodeTime, widthTM, tailTM,
-      separatorTM, payloadTM] using hfull
+  · exact hfull
   · change finalCfg.state =
       (wordDecodeTM sourceIdx targetIdx counterIdx widthIdx).qhalt
     change Sum.inr (Sum.inr payloadDone.state) =

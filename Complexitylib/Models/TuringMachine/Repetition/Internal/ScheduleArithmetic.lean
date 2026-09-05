@@ -56,7 +56,7 @@ theorem repeatRandomSeed_apply_repeatChoiceIdx_internal (k T : ℕ)
     (choices : Fin (repeatAtTimeSteps k T) → Bool) (j : Fin k) (t : Fin T) :
     repeatRandomSeed k T choices (finProdFinEquiv (j, t)) =
       choices (repeatChoiceIdx T j t) := by
-  rw [repeatRandomSeed_apply]
+  erw [repeatRandomSeed_apply]
   congr 1
   apply Fin.ext
   change 2 + (t.val + (2 * T + 2) * j.val) =

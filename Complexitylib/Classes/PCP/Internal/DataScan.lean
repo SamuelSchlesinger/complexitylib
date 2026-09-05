@@ -154,9 +154,9 @@ theorem eqFlag_replicate (c i : ℕ) :
     Cobham.eqFlag (List.replicate c true) (List.replicate i true)
       = if c = i then [true] else [false] := by
   by_cases h : c = i
-  · rw [if_pos h, h]
+  · rw [ite_eq_left h, h]
     exact (Cobham.eqFlag_eq_true_iff _ _).mpr rfl
-  · rw [if_neg h]
+  · rw [ite_eq_right h]
     rcases Cobham.eqFlag_flag (List.replicate c true) (List.replicate i true) with hf | hf
     · rw [Cobham.eqFlag_eq_true_iff] at hf
       exact absurd (by simpa using congrArg List.length hf) h
@@ -294,10 +294,10 @@ theorem scanArg_mem_FP {a b : List Bool → List Bool} (ha : a ∈ FP) (hb : b �
     (fun z => scanArg (a z).length (b z)) ∈ FP := by
   have hrep : (fun z => List.replicate (a z).length true) ∈ FP := by
     have := mem_FP_comp ha unaryLength_mem_FP
-    simpa using this
+    exact this
   have hrev : (fun z => (b z).reverse) ∈ FP := by
     have := mem_FP_comp hb reverse_mem_FP
-    simpa using this
+    exact this
   exact Cobham.pairFn_mem_FP hrep hrev
 
 /-- **The scan extracts the child.** Reading the concatenated serializations of

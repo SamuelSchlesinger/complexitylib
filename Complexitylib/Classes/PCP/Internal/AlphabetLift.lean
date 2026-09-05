@@ -87,7 +87,7 @@ theorem satisfiable_lift_iff (G : ConstraintGraph α) {f : α → β} (hf : Func
     have hc₂ : hex₂.choose = a₂ := hf (hex₂.choose_spec.trans h₂.symm)
     show G.rel e _ _ = true
     dsimp only
-    rw [dif_pos hex₁, dif_pos hex₂, hc₁, hc₂]
+    rw [dite_eq_left hex₁, dite_eq_left hex₂, hc₁, hc₂]
     exact hrel
   · rintro ⟨a, ha⟩
     refine ⟨fun v => f (a v), fun e => ?_⟩

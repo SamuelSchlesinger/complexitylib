@@ -80,12 +80,12 @@ private theorem evalAux?_xorGates (available step input : ℕ)
       first[accumulatorWire available step]? =
         some accumulator := by
     dsimp only [first]
-    rw [Array.getElem?_push, if_neg haccumulatorNe]
+    rw [Array.getElem?_push, ite_eq_right haccumulatorNe]
     exact haccumulator
   have hinputFirst :
       first[input]? = some bit := by
     dsimp only [first]
-    rw [Array.getElem?_push, if_neg hinputNe]
+    rw [Array.getElem?_push, ite_eq_right hinputNe]
     exact hinput
   have hor :
       first[orWire available step]? = some (accumulator || bit) := by
@@ -112,7 +112,7 @@ private theorem evalAux?_xorGates (available step input : ℕ)
       simp only [first, Array.size_push, hsize]
       omega
     dsimp only [second]
-    rw [Array.getElem?_push, if_neg hne]
+    rw [Array.getElem?_push, ite_eq_right hne]
     exact hor
   have horSecond' :
       ((wires.push (accumulator || bit)).push
@@ -234,7 +234,7 @@ theorem evalAux?_compileRaw_internal (available : ℕ) [NeZero available]
     simp [base, orWire, hsize]
   have hbaseInputs : ∀ i, base[refs i]? = some (bits i) := by
     intro i
-    rw [Array.getElem?_push, if_neg (by rw [hsize]; exact ne_of_lt (hrefs i))]
+    rw [Array.getElem?_push, ite_eq_right (by rw [hsize]; exact ne_of_lt (hrefs i))]
     exact hinputs i
   have hbaseAccumulator :
       base[accumulatorWire available 0]? = some false := by
@@ -254,7 +254,7 @@ theorem evalAux?_compileRaw_internal (available : ℕ) [NeZero available]
     omega
   · intro i hi
     rw [hresultPreserved i (by simp [base]; omega)]
-    rw [Array.getElem?_push, if_neg (by omega)]
+    rw [Array.getElem?_push, ite_eq_right (by omega)]
   · simpa [outputWire, Bool.false_xor] using hresultOutput
 
 theorem topologicallyWellFormed_compileRaw_internal (available : ℕ)
@@ -305,7 +305,7 @@ theorem eval?_compileRaw_internal (available : ℕ) [NeZero available]
         outputWire available inputCount := by
     rw [BitString.length_toList, outputWire_eq_internal]
   rw [RawCircuit.eval?]
-  simp only [hnonempty, Bool.false_eq_true, if_false]
+  simp only [hnonempty, Bool.false_eq_true, ite_false]
   rw [show input.toList.toArray = wires by rfl, heval]
   rw [houtputIndex]
   exact houtput

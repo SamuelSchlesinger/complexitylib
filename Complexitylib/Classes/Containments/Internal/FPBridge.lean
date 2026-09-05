@@ -70,7 +70,7 @@ theorem unFn_mem_FP {g : List Bool → List Bool}
     {a : List Bool → List Bool} (ha : a ∈ FP) : (fun z => g (a z)) ∈ FP := by
   have hg' : g ∈ FP := CobhamFP_subset_FP hg
   have h := mem_FP_comp ha hg'
-  simpa [Function.comp] using h
+  exact h
 
 /-- **A two-argument member of the algebra is an `FP` closure rule.** The two
 levels differ only in how arguments are presented: the algebra takes a vector,

@@ -45,25 +45,26 @@ theorem topologicallyWellFormed_shift_iff_internal
       circuit.TopologicallyWellFormed available := by
   constructor
   · intro h index
-    let shiftedIndex : Fin (circuit.shift offset).length :=
-      ⟨index.val, by
-        rw [length_shift_internal]
-        exact index.isLt⟩
-    simpa [shift, TopologicallyWellFormed, RawGate.shift,
-      RawGate.WellFormedAt, Nat.add_assoc] using h shiftedIndex
+    have hshifted := h ⟨index.val, by
+      rw [length_shift_internal]
+      exact index.isLt⟩
+    simp only [List.get_eq_getElem] at hshifted ⊢
+    simpa [shift, RawGate.shift, RawGate.WellFormedAt, Nat.add_assoc]
+      using hshifted
   · intro h index
     have hlength := length_shift_internal offset circuit
     have hindex : index.val < circuit.length := by
       have := index.isLt
       omega
-    let localIndex : Fin circuit.length := ⟨index.val, hindex⟩
-    simpa [shift, TopologicallyWellFormed, RawGate.shift,
-      RawGate.WellFormedAt, Nat.add_assoc] using h localIndex
+    have hlocal := h ⟨index.val, hindex⟩
+    simp only [List.get_eq_getElem] at hlocal ⊢
+    simpa [shift, RawGate.shift, RawGate.WellFormedAt, Nat.add_assoc]
+      using hlocal
 
 private theorem getElem?_append_offset {offset index : Nat}
     (leading wires : Array Bool) (hleading : leading.size = offset) :
     (leading ++ wires)[offset + index]? = wires[index]? := by
-  rw [Array.getElem?_append, if_neg]
+  rw [Array.getElem?_append, ite_eq_right]
   · rw [hleading, Nat.add_sub_cancel_left]
   · rw [hleading]
     omega

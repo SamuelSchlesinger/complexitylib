@@ -140,6 +140,7 @@ theorem wireValue_eq_wireVal {N G : Nat} [NeZero N]
       rw [this]; clear this
       -- Now both sides use encodeGate gate; unfold and simplify
       simp [encodeGate]
+      rfl
     intro h' j
     exact (show ∀ (g : Gate Basis.andOr2 (N + G)) (heq : g = c.gates ⟨↑w - N, h'⟩)
         (hfanIn : (c.gates ⟨↑w - N, h'⟩).fanIn = g.fanIn)
@@ -169,5 +170,6 @@ theorem circuit_eval_eq_eval {N G : Nat} [NeZero N]
       exact Nat.lt_of_lt_of_le ((c.outputs 0).inputs ⟨1, by omega⟩).isLt (by omega),
     ite_true]
   simp only [show ¬(N + G.succ - 1 < N) from by omega, dite_false]
+  rfl
 
 end Complexity

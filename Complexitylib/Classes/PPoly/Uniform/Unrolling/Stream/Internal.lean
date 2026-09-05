@@ -96,7 +96,7 @@ private theorem eraseFormulaVars_effectFormula (tm : NTM k)
   apply List.map_congr_left
   intro view _
   by_cases hselects : selects view.effect = true
-  · simp only [Function.comp_apply, if_pos hselects]
+  · simp only [Function.comp_apply, ite_eq_left hselects]
     exact eraseFormulaVars_caseFormula tm T base base' choiceWire choiceWire' view
   · simp [Function.comp_apply, hselects, eraseFormulaVars]
 

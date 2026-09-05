@@ -56,6 +56,8 @@ noncomputable def reduceConst (E : ExpanderFamily) (α : Type) [Fintype α] : �
 variable {α : Type} [Fintype α] [DecidableEq α] [Nonempty α]
 variable (G : ConstraintGraph α) (E : ExpanderFamily)
 
+attribute [local instance] Classical.propDecidable
+
 /-! ### Splitting the unsatisfied darts -/
 
 /-- The unsatisfied cloud-links. -/
@@ -150,7 +152,7 @@ theorem card_goodEdges_le (A : (G.reduce E).Assignment) :
       show G.flipHalf (e, false) = (e, true)
       simp [flipHalf]
     rw [hnbr]
-    simp only [if_neg (by simp : ¬ (((e, false) : G.HalfEdge).2 = true))]
+    simp only [ite_eq_right (by simp : ¬ (((e, false) : G.HalfEdge).2 = true))]
     rw [hA0, hA1]
     rw [mem_unsatEdges] at hfail
     rw [Satisfies, satisfies] at hfail

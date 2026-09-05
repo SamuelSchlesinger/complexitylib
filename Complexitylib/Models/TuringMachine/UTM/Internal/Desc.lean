@@ -411,7 +411,7 @@ theorem parseEntry_syms {w : ℕ} {e : DescEntry}
   have hq_len : (Nat.toBits w e.q).length = w := Nat.length_toBits ..
   have hq'_len : (Nat.toBits w e.act.q').length = w := Nat.length_toBits ..
   simp only [parseEntry, hbits]
-  rw [if_neg (by
+  rw [ite_eq_right (by
     simp [Nat.length_toBits, Γ.length_encode, Γw.length_encode, Dir3.length_encode]
     omega)]
   rw [List.take_left' hq_len, List.drop_left' hq_len,
@@ -496,7 +496,7 @@ theorem decodeDesc_encodeDesc_append {d : TMDesc} (hd : d.WF) (junk : List Bool)
       takeField_append (fun s hs => bitsToSyms_ne_blank hs)]
   dsimp only
   rw [takeField_append (fun s hs => bitsToSyms_ne_blank hs)]
-  simp only [hlen_s, hlen_h, if_true,
+  simp only [hlen_s, hlen_h, ite_true,
       fieldNat_bitsToSyms_toBits hd.qstart_lt,
       fieldNat_bitsToSyms_toBits hd.qhalt_lt,
       parseEntries_syms hd.entries_q_lt hd.entries_q'_lt]

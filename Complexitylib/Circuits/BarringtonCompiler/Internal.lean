@@ -155,7 +155,7 @@ private theorem BP.forall_var_postMul_internal {w bound : ℕ}
   | append_singleton program last ih =>
       intro instruction hinstruction
       have hnonempty : program ++ [last] ≠ [] := by simp
-      simp only [BP.postMul, if_neg hnonempty,
+      simp only [BP.postMul, ite_eq_right hnonempty,
         List.modifyLast_concat, List.mem_append,
         List.mem_singleton] at hinstruction
       rcases hinstruction with hprefix | rfl
@@ -267,7 +267,7 @@ theorem barringtonCompile_computes_internal (formula : BoolFormula) :
         funext assignment
         simp [BoolFormula.eval, Bool.not_and, Bool.not_not]
       rw [hfun] at hfinal
-      simpa only [barringtonCompile, innerTarget, leftTarget, rightTarget,
+      simpa only [BP.commutatorProgram, barringtonCompile, innerTarget, leftTarget, rightTarget,
         leftProgram, rightProgram, inv_inv] using hfinal
 
 theorem barringtonCompile_length_le_internal

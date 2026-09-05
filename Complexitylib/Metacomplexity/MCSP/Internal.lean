@@ -35,7 +35,8 @@ theorem inputIndex_inputOfIndex_internal {arity : ℕ} (index : Fin (2 ^ arity))
 theorem inputOfIndex_inputIndex_internal {arity : ℕ} (input : BitString arity) :
     inputOfIndex (inputIndex input) = input := by
   rw [← BitString.toList_inj]
-  simp only [inputOfIndex, inputIndex, BitString.toList_ofList]
+  simp only [inputOfIndex, inputIndex]
+  erw [BitString.toList_ofList]
   calc
     Nat.toBitsLE arity (Nat.fromBitsLE input.toList) =
         Nat.toBitsLE input.toList.length (Nat.fromBitsLE input.toList) :=
@@ -52,7 +53,8 @@ theorem function_ofFunction_internal (arity threshold : ℕ)
     (f : BitString arity → Bool) :
     (ofFunction arity threshold f).function = f := by
   funext input
-  simp [function, ofFunction, inputOfIndex_inputIndex_internal]
+  simp only [function, ofFunction]
+  exact congrArg f (inputOfIndex_inputIndex_internal input)
 
 theorem function_withThreshold_internal (inst : Instance) (threshold : ℕ) :
     (inst.withThreshold threshold).function = inst.function := by
@@ -168,7 +170,7 @@ theorem hasCircuitAtMost_iff_minimumSize_le_internal (inst : Instance) :
     inst.HasCircuitAtMost ↔ inst.minimumSize ≤ inst.threshold := by
   by_cases harity : inst.arity = 0
   · simp [HasCircuitAtMost, minimumSize, harity]
-  · letI : NeZero inst.arity := ⟨harity⟩
+  · let _ : NeZero inst.arity := ⟨harity⟩
     rw [hasCircuitAtMost_iff_sizeComplexity_le_internal,
       minimumSize_eq_sizeComplexity_internal]
 
@@ -178,7 +180,8 @@ theorem hasCircuitAtMost_withThreshold_mono_internal (inst : Instance)
     (inst.withThreshold second).HasCircuitAtMost := by
   by_cases harity : inst.arity = 0
   · simp [withThreshold, HasCircuitAtMost, harity]
-  · simp only [withThreshold, HasCircuitAtMost, harity, dite_false] at hsmall ⊢
+  · unfold HasCircuitAtMost withThreshold at hsmall ⊢
+    rw [dite_eq_right harity] at hsmall ⊢
     obtain ⟨internalGates, circuit, hsize, hcomputes⟩ := hsmall
     exact ⟨internalGates, circuit, hsize.trans hthreshold, hcomputes⟩
 

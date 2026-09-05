@@ -106,8 +106,8 @@ theorem acceptCountAux_length_eq (tm : NTM k) (u x τ s ρ : List Bool) (runs : 
     rw [Cobham.acceptChoiceFn_eq_true_iff tm u x (Cobham.blockAtIdx τ.length s j)
       (by rw [hblen]; omega), pathAccepts_iff, hblen]
   by_cases h : Cobham.acceptChoiceFn tm u x (Cobham.blockAtIdx τ.length s j) = [true]
-  · rw [if_pos h, if_pos (hacc.mp h)]
-  · rw [if_neg h, if_neg (fun hmem => h (hacc.mpr hmem))]
+  · rw [ite_eq_left h, ite_eq_left (hacc.mp h)]
+  · rw [ite_eq_right h, ite_eq_right (fun hmem => h (hacc.mpr hmem))]
 
 /-- **The algebra's majority flag is the amplified majority verdict.** -/
 theorem majorityFlag_eq_true_iff' (tm : NTM k) (u x τ s ρ : List Bool) (runs : ℕ)
@@ -131,7 +131,7 @@ theorem getD_padTo (σ b : List Bool) (j : ℕ) (hj : j < σ.length) :
   · have h1 : (padTo σ b)[j]? = some false := by
       rw [padTo, List.getElem?_take_of_lt hj,
         List.getElem?_append_right hb, List.getElem?_replicate]
-      rw [if_pos (by omega)]
+      rw [ite_eq_left (by omega)]
     rw [List.getD, h1, List.getD, List.getElem?_eq_none hb]
     rfl
 
@@ -290,7 +290,7 @@ private theorem matrixFn_aux (tm : NTM k) (pt : Polynomial ℕ) (b : Bool) (x w 
   · have hflag : Cobham.lenEqFlag r (seedStr pt x) = [true] := by
       rw [Cobham.lenEqFlag_eq_true_iff, seedStr_length]
       exact hlen
-    rw [hflag, if_pos hlen, caseBit₀_cons, cond_true]
+    rw [hflag, ite_eq_left hlen, caseBit₀_cons, Bool.cond_true]
     have hiff : Cobham.anyShiftAux tm b (clockStr pt (Fintype.card tm.Q) x) x
         (Cobham.polyLen pt x) (runsStr pt x) (seedStr pt x) r w (shiftStr pt x) = [true]
         ↔ ∃ i : Fin (ampShifts pt.eval x.length),
@@ -316,7 +316,7 @@ private theorem matrixFn_aux (tm : NTM k) (pt : Polynomial ℕ) (b : Bool) (x w 
       · rw [Cobham.lenEqFlag_eq_true_iff, seedStr_length] at h
         exact absurd h hlen
       · exact h
-    rw [hflag, if_neg hlen, caseBit₀_cons, cond_false]
+    rw [hflag, ite_eq_right hlen, caseBit₀_cons, Bool.cond_false]
 
 /-- **The algebra function computes the matrix verdict.** -/
 theorem matrixFn_eq (tm : NTM k) (pt : Polynomial ℕ) (b : Bool) (z : List Bool) :

@@ -307,12 +307,12 @@ private theorem emitStepHeadTapeFormulas_spaceBoundByWidthAt_formula
         change 0 < bodyValues code Work.horizon
         rw [htrajectory code]
         simpa [Work.position, Work.available, Work.horizon,
-          hentryHorizon (inputAt code)] using hhorizon (inputAt code)
+          hentryHorizon (inputAt code)] using! hhorizon (inputAt code)
       · intro code
         change bodyValues code Work.position ≤ bodyValues code Work.horizon
         rw [htrajectory code]
         simp [Work.position, Work.available, Work.horizon]
-        simpa [Work.horizon, hentryHorizon (inputAt code)] using hcountAt code
+        simpa [Work.horizon, hentryHorizon (inputAt code)] using! hcountAt code
       · intro code index
         change bodyValues code index ≤ width (inputAt code)
         rw [htrajectory code]
@@ -412,7 +412,7 @@ private theorem emitStepHeadTapeFormulas_spaceBoundByWidthAt_formula
           rw [htrajectory code] at hposition
           simp [Work.position, Work.available, Work.horizon] at hposition
           simpa [inputLength, Work.horizon,
-            hentryHorizon (inputAt code)] using hposition
+            hentryHorizon (inputAt code)] using! hposition
         have hcap := (henvelope inputLength).cap tm.qstart tape .output .zero
           stateIndex tapeIndex symbolIndex position hstate htape hsymbol
           hposition'
@@ -945,7 +945,7 @@ private theorem emitStepCellPosition_spaceBoundByWidthAt_formula
             · simp [trajectory, hindex]
   have hresult := BinaryRoutine.SpaceBoundByWidthAt.seqList _ hseq
   cases tape <;> simpa [routineAt, emitStepImmutableCellPosition,
-    emitStepWritableCellPosition] using hresult
+    emitStepWritableCellPosition] using! hresult
 
 private noncomputable def stepCellFormulaBodyFormula (tm : NTM k) :
     TapeSlot k → BinaryRoutine WorkCount
@@ -1086,7 +1086,7 @@ private theorem emitStepCellTapeFormulas_spaceBoundByWidthAt_formula
           (entry inputLength Work.available +
             prefixSize (stepCellPositionEffectSizeInternal tm tape
               (entry inputLength Work.horizon)) count) by
-        simpa [body, stepCellFormulaBodyFormula] using htrajectory]
+        simpa [body, stepCellFormulaBodyFormula] using! htrajectory]
       simp [Work.position, Work.available]
       exact le_trans (Nat.le_of_lt hcount')
         (henvelope inputLength).horizon_add_two_le_internal
@@ -1128,7 +1128,7 @@ private theorem emitStepCellTapeFormulas_spaceBoundByWidthAt_formula
           tm tape (entry (inputAt code)) (hentryPhase (inputAt code))
           (countAt code)
         simpa [body, stepCellFormulaBodyFormula, localSize,
-          hentryHorizon (inputAt code)] using heffect
+          hentryHorizon (inputAt code)] using! heffect
       suffices hbodySpace : BinaryRoutine.SpaceBoundByWidthAt
           (match tape with
             | .input => emitStepImmutableCellPosition tm .input
@@ -1136,7 +1136,7 @@ private theorem emitStepCellTapeFormulas_spaceBoundByWidthAt_formula
             | .output => emitStepWritableCellPosition tm .output)
           (fun code => initialSpace (Nat.unpair code).1) bodyValues
           (fun code => width (Nat.unpair code).1) by
-        simpa [body, stepCellFormulaBodyFormula] using hbodySpace
+        simpa [body, stepCellFormulaBodyFormula] using! hbodySpace
       apply emitStepCellPosition_spaceBoundByWidthAt_formula tm tape
           (baseValues := fun code => baseValues (inputAt code))
       · intro code
@@ -1312,7 +1312,7 @@ private theorem emitStepCellTapeFormulas_spaceBoundByWidthAt_formula
               (entry inputLength Work.horizon))
               (BinaryRoutine.binaryForCount Work.position Work.limit₁
                 (entry inputLength))) by
-      simpa [body, stepCellFormulaBodyFormula] using htrajectory]
+      simpa [body, stepCellFormulaBodyFormula] using! htrajectory]
     simp [Work.position, Work.available]
     have htotal' : BinaryRoutine.binaryForCount 30 Work.limit₁
         (entry inputLength) = entry inputLength Work.horizon + 2 := by
@@ -1493,7 +1493,7 @@ private theorem emitStepHeadTapeList_spaceBoundByWidthAt_formula
     simp [trajectory, startAt]
   rw [hzero] at hseq
   rw [List.map_ofFn]
-  simpa only [tapeAt, tapeCount] using hseq
+  simpa only [tapeAt, tapeCount] using! hseq
 
 private theorem emitStepCellTapeList_spaceBoundByWidthAt_formula
     (tm : NTM k) {initialSpace : ℕ → ℕ}
@@ -1670,7 +1670,7 @@ private theorem emitStepCellTapeList_spaceBoundByWidthAt_formula
     simp [trajectory, startAt, tapeCount]
   rw [hzero] at hseq
   rw [List.map_ofFn]
-  simpa only [tapeAt, tapeCount] using hseq
+  simpa only [tapeAt, tapeCount] using! hseq
 
 private theorem emitStepHeadTapeList_effect_formula (tm : NTM k)
     (values : BinaryValues WorkCount) (hclean : StepClean values)
@@ -1797,7 +1797,7 @@ private theorem emitStepHeadTapeList_effect_formula (tm : NTM k)
     funext index
     simp [trajectory, startAt]
   rw [hstart, ← hfinish]
-  simpa only [tapeAt] using hend
+  simpa only [tapeAt] using! hend
 
 private theorem emitStepCellTapeList_effect_formula (tm : NTM k)
     (values : BinaryValues WorkCount) (hclean : StepClean values) :
@@ -2048,10 +2048,6 @@ theorem emitStepFormulas_spaceBoundByWidth_internal (tm : NTM k)
         initialSpace values width := by
     simp only [BinaryRoutine.SeqListSpaceBoundByWidthAt]
     refine ⟨hstateSpace, ?_⟩
-    change BinaryRoutine.SpaceBoundByWidthAt (setStepPositionLimit 1)
-        initialSpace
-          (fun inputLength =>
-            (emitStepStateFormulas tm).effect (values inputLength)) width ∧ True
     exact ⟨by simpa only [hstateEffectFamily] using hlimit₁Space, trivial⟩
   have hfirstTwoEffect :
       (fun inputLength =>
@@ -2061,7 +2057,7 @@ theorem emitStepFormulas_spaceBoundByWidth_internal (tm : NTM k)
     funext inputLength
     simpa only [BinaryRoutine.seqList, BinaryRoutine.seq,
       BinaryRoutine.identity, BinaryRoutine.emitBits,
-      hstateEffect inputLength] using hlimit₁Effect inputLength
+      hstateEffect inputLength] using! hlimit₁Effect inputLength
   have hheadSeq : BinaryRoutine.SeqListSpaceBoundByWidthAt
       (tapes.map (emitStepHeadTapeFormulas tm)) initialSpace afterLimit₁
         width := by

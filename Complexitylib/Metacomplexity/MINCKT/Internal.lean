@@ -53,7 +53,7 @@ theorem decode?_eq_some_iff_internal (bits : List Bool) (inst : Instance) :
             by_cases hclock : clock = List.replicate clock.length true
             · have hbits := eq_pair_of_unpair?_eq_some houter
               have hremaining := eq_pair_of_unpair?_eq_some hinner
-              rw [if_pos hclock] at hdecode
+              rw [ite_eq_left hclock] at hdecode
               cases hdecode
               calc
                 bits = pair output remaining := hbits
@@ -65,7 +65,7 @@ theorem decode?_eq_some_iff_internal (bits : List Bool) (inst : Instance) :
                     hclock
                 _ = encode
                     { output, condition, time := clock.length } := rfl
-            · rw [if_neg hclock] at hdecode
+            · rw [ite_eq_right hclock] at hdecode
               contradiction
   · rintro rfl
     exact decode?_encode_internal inst

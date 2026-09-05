@@ -163,22 +163,22 @@ theorem segStep_cons₂ (tgt cnt coll : List Bool) (b0 b1 : Bool) (r : List Bool
       = if cnt.length = tgt.length then [true] else [false] := by
     rw [segHere, hc, ht]
     by_cases h : cnt.length = tgt.length
-    · rw [if_pos h, Cobham.lenEqFlag_eq_true_iff]
+    · rw [ite_eq_left h, Cobham.lenEqFlag_eq_true_iff]
       exact h
-    · rw [if_neg h]
+    · rw [ite_eq_right h]
       rcases Cobham.lenEqFlag_flag cnt tgt with hf | hf
       · rw [Cobham.lenEqFlag_eq_true_iff] at hf
         exact absurd hf h
       · exact hf
   rw [segStep, hr, hsep, hhere, ht, hc, hl, emptyFlag_cons, selectHead_cons_false]
   by_cases hcase : b0 = s0 ∧ b1 = s1
-  · rw [if_pos hcase, if_pos hcase, selectHead_cons_true, selectHead_cons_true]
+  · rw [ite_eq_left hcase, ite_eq_left hcase, selectHead_cons_true, selectHead_cons_true]
     simp [dropOne]
-  · rw [if_neg hcase, if_neg hcase, selectHead_cons_false, selectHead_cons_false]
+  · rw [ite_eq_right hcase, ite_eq_right hcase, selectHead_cons_false, selectHead_cons_false]
     by_cases hh : cnt.length = tgt.length
-    · rw [if_pos hh, if_pos hh, selectHead_cons_true]
+    · rw [ite_eq_left hh, ite_eq_left hh, selectHead_cons_true]
       simp [dropOne]
-    · rw [if_neg hh, if_neg hh, selectHead_cons_false]
+    · rw [ite_eq_right hh, ite_eq_right hh, selectHead_cons_false]
       simp [dropOne]
 
 /-- **The scan collects the segment.** -/
@@ -210,13 +210,13 @@ theorem segStep_iterate : ∀ (k : ℕ) (tgt cnt coll s : List Bool),
             exact ⟨m - 1, by omega⟩
           rw [segStep_cons₂, segFrom_cons₂]
           by_cases hcase : b0 = s0 ∧ b1 = s1
-          · rw [if_pos hcase, if_pos hcase, ih tgt (true :: cnt) coll r hr hrev]
+          · rw [ite_eq_left hcase, ite_eq_left hcase, ih tgt (true :: cnt) coll r hr hrev]
             simp
-          · rw [if_neg hcase, if_neg hcase]
+          · rw [ite_eq_right hcase, ite_eq_right hcase]
             by_cases hh : cnt.length = tgt.length
-            · rw [if_pos hh, if_pos hh, ih tgt cnt _ r hr hrev]
+            · rw [ite_eq_left hh, ite_eq_left hh, ih tgt cnt _ r hr hrev]
               simp
-            · rw [if_neg hh, if_neg hh, ih tgt cnt coll r hr hrev]
+            · rw [ite_eq_right hh, ite_eq_right hh, ih tgt cnt coll r hr hrev]
 
 theorem even_length_segFrom (s0 s1 : Bool) (t : ℕ) :
     ∀ (n : ℕ) (s : List Bool) (c : ℕ), s.length ≤ n → Even s.length →
@@ -243,15 +243,15 @@ theorem even_length_segFrom (s0 s1 : Bool) (t : ℕ) :
             rcases hev with ⟨m, hm⟩
             exact ⟨m - 1, by omega⟩
           by_cases hcase : b0 = s0 ∧ b1 = s1
-          · rw [if_pos hcase]
+          · rw [ite_eq_left hcase]
             exact ih r (c + 1) hr hrev
-          · rw [if_neg hcase]
+          · rw [ite_eq_right hcase]
             by_cases hh : c = t
-            · rw [if_pos hh]
+            · rw [ite_eq_left hh]
               simp only [List.length_cons]
               rcases ih r c hr hrev with ⟨m, hm⟩
               exact ⟨m + 1, by omega⟩
-            · rw [if_neg hh]
+            · rw [ite_eq_right hh]
               exact ih r c hr hrev
 
 /-! ### The scan as one function -/
@@ -336,7 +336,7 @@ theorem segAtFn_mem_FP : segAtFn s0 s1 ∈ FP := by
     omega
   have hiter := Cobham.iterate_mem_FP (segStep_mem_FP s0 s1) hinit hs hwidth hbound
   have := mem_FP_comp hiter segColl_mem_FP
-  simpa only using this
+  exact this
 
 theorem segAtFn_eq {j : ℕ} {e : List Bool} (h : Even e.length) :
     segAtFn s0 s1 (pair (List.replicate j true) e) = segFrom s0 s1 j 0 e := by
@@ -363,9 +363,9 @@ theorem litSegFn_mem_FP : litSegFn ∈ FP := by
   have hcl : (fun z : List Bool => segAtFn true false
       (pair (pairFst (pairFst z)) (pairSnd z))) ∈ FP := by
     have := mem_FP_comp (Cobham.pairFn_mem_FP hj he) (segAtFn_mem_FP true false)
-    simpa only using this
+    exact this
   have := mem_FP_comp (Cobham.pairFn_mem_FP hp hcl) (segAtFn_mem_FP false true)
-  simpa only using this
+  exact this
 
 theorem litSegFn_eq {j p : ℕ} {e : List Bool} (h : Even e.length) :
     litSegFn (pair (pair (List.replicate j true) (List.replicate p true)) e)
@@ -383,7 +383,7 @@ theorem litVarFn_mem_FP : litVarFn ∈ FP := by
     refine mem_FP_of_eq this fun z => ?_
     rfl
   have := mem_FP_comp hdrop halfFn_mem_FP
-  simpa only using this
+  exact this
 
 theorem litVarFn_eq {j p : ℕ} {e : List Bool} (h : Even e.length) :
     litVarFn (pair (pair (List.replicate j true) (List.replicate p true)) e)

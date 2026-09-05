@@ -66,7 +66,7 @@ def BPInstr.inverse {w : ℕ} (ins : BPInstr w) : BPInstr w :=
 @[simp] theorem BPInstr.eval_inverse {w : ℕ} (α : ℕ → Bool) (ins : BPInstr w) :
     BPInstr.eval α (BPInstr.inverse ins) = (BPInstr.eval α ins)⁻¹ := by
   simp only [BPInstr.eval, BPInstr.inverse]
-  cases α ins.var <;> rfl
+  by_cases h : α ins.var = true <;> simp [h]
 
 /-- A constant instruction applies the permutation `c` regardless of the input. -/
 def BPInstr.const {w : ℕ} (c : Equiv.Perm (Fin w)) : BPInstr w :=
@@ -76,7 +76,7 @@ def BPInstr.const {w : ℕ} (c : Equiv.Perm (Fin w)) : BPInstr w :=
 @[simp] theorem BPInstr.eval_const {w : ℕ} (α : ℕ → Bool) (c : Equiv.Perm (Fin w)) :
     BPInstr.eval α (BPInstr.const c) = c := by
   simp only [BPInstr.eval, BPInstr.const]
-  cases α 0 <;> rfl
+  by_cases h : α 0 = true <;> simp [h]
 
 /-- Conjugate both branches of an instruction by the same permutation. -/
 def BPInstr.conjugate {w : ℕ} (τ : Equiv.Perm (Fin w))
@@ -91,7 +91,7 @@ def BPInstr.conjugate {w : ℕ} (τ : Equiv.Perm (Fin w))
     BPInstr.eval α (BPInstr.conjugate τ ins) =
       τ * BPInstr.eval α ins * τ⁻¹ := by
   simp only [BPInstr.eval, BPInstr.conjugate]
-  cases α ins.var <;> rfl
+  by_cases h : α ins.var = true <;> simp [h]
 
 /-- Right-multiply both branches of an instruction by a fixed permutation. -/
 def BPInstr.postMul {w : ℕ} (ins : BPInstr w)
@@ -103,7 +103,7 @@ def BPInstr.postMul {w : ℕ} (ins : BPInstr w)
     (ins : BPInstr w) (c : Equiv.Perm (Fin w)) :
     BPInstr.eval α (BPInstr.postMul ins c) = BPInstr.eval α ins * c := by
   simp only [BPInstr.eval, BPInstr.postMul]
-  cases α ins.var <;> rfl
+  by_cases h : α ins.var = true <;> simp [h]
 
 /-- Conjugate every instruction of a branching program. Unlike wrapping with
 constant instructions, this operation preserves length exactly. -/

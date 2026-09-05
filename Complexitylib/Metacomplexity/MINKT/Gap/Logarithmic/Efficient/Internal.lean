@@ -144,14 +144,12 @@ private theorem sweepStep_mem_FP (decide : List Bool → Bool)
     Cobham.pairFn_mem_FP hfst hcounter
   have haccepted : (fun state =>
       [decide (pair (pairFst state) (pairFst (pairSnd state)))]) ∈ FP := by
-    simpa [Function.comp] using mem_FP_comp hquery hdecide
+    exact mem_FP_comp hquery hdecide
   have hnextCounter :
       (fun state => true :: pairFst (pairSnd state)) ∈ FP := by
-    simpa [Function.comp] using
-      mem_FP_comp hcounter (Cobham.cons_mem_FP true)
+    exact mem_FP_comp hcounter (Cobham.cons_mem_FP true)
   have htrue : (fun _ : List Bool => [true]) ∈ FP := by
-    simpa [Function.comp] using
-      mem_FP_comp Cobham.const_nil_mem_FP (Cobham.cons_mem_FP true)
+    exact mem_FP_comp Cobham.const_nil_mem_FP (Cobham.cons_mem_FP true)
   have hfirstChoice : (fun state => chooseHead
       [decide (pair (pairFst state) (pairFst (pairSnd state)))]
       (pairFst (pairSnd state))
@@ -175,38 +173,35 @@ private theorem sweepStep_mem_FP (decide : List Bool → Bool)
   have hpacked := Cobham.pairFn_mem_FP hfst
     (Cobham.pairFn_mem_FP hnextCounter
       (Cobham.pairFn_mem_FP hnextFound hnextBest))
-  simpa [sweepStep] using hpacked
+  exact hpacked
 
 private theorem sweepInit_mem_FP : sweepInit ∈ FP := by
   have hnil : (fun _ : List Bool => ([] : List Bool)) ∈ FP :=
     Cobham.const_nil_mem_FP
   have hfalse : (fun _ : List Bool => [false]) ∈ FP := by
-    simpa [Function.comp] using
-      mem_FP_comp hnil (Cobham.cons_mem_FP false)
+    exact mem_FP_comp hnil (Cobham.cons_mem_FP false)
   have hpacked := Cobham.pairFn_mem_FP id_mem_FP
     (Cobham.pairFn_mem_FP hnil
       (Cobham.pairFn_mem_FP hfalse Cobham.sndBlock_mem_FP))
-  simpa [sweepInit] using hpacked
+  exact hpacked
 
 private theorem sweepRuler_mem_FP : sweepRuler ∈ FP := by
   have h := mem_FP_comp Cobham.sndBlock_mem_FP
     (Cobham.cons_mem_FP false)
-  simpa [Function.comp, sweepRuler] using h
+  exact h
 
 private theorem sweepWidth_mem_FP : sweepWidth ∈ FP := by
   have hbaseOne : (fun base : List Bool => true :: base) ∈ FP := by
     simpa [Function.comp] using mem_FP_comp id_mem_FP
       (Cobham.cons_mem_FP true)
   have hbaseTwo : (fun base : List Bool => true :: true :: base) ∈ FP := by
-    simpa [Function.comp] using mem_FP_comp hbaseOne
-      (Cobham.cons_mem_FP true)
+    exact mem_FP_comp hbaseOne (Cobham.cons_mem_FP true)
   have hclockOne :
       (fun base : List Bool => true :: pairSnd base) ∈ FP := by
-    simpa [Function.comp] using mem_FP_comp Cobham.sndBlock_mem_FP
-      (Cobham.cons_mem_FP true)
+    exact mem_FP_comp Cobham.sndBlock_mem_FP (Cobham.cons_mem_FP true)
   have hpacked := Cobham.pairFn_mem_FP hbaseTwo
     (Cobham.pairFn_mem_FP hclockOne hclockOne)
-  simpa [sweepWidth] using hpacked
+  exact hpacked
 
 private theorem sweep_iterate_length_le_width (decide : List Bool → Bool)
     (base : List Bool) (iterations : ℕ)
@@ -238,7 +233,7 @@ theorem encodedTimeSearchEstimator_mem_FP_internal
       (fun state => pairSnd (pairSnd (pairSnd state))) ∈ FP :=
     mem_FP_comp hsndSnd Cobham.sndBlock_mem_FP
   have hout := mem_FP_comp hiter hbest
-  simpa [encodedTimeSearchEstimator, Function.comp] using hout
+  exact hout
 
 theorem encodedTimeSearchEstimator_encode_internal
     (decide : List Bool → Bool) (inst : MINKT.Instance) :

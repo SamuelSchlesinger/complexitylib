@@ -161,43 +161,43 @@ theorem immediateUpdate_ready_internal
         resultStart := ?_
         parked := ?_
         frame := by intro i _ _ _ _ _ _ _ _ _; rfl }
-    · simpa only [updateWork, valueWork, Function.update_of_ne hsourceQuery,
-        Function.update_of_ne hsourceReplacement] using hinitial.scanner.source
-    · simpa only [updateWork, valueWork, Function.update_of_ne haddressQuery,
-        Function.update_of_ne haddressReplacement] using hinitial.scanner.address
-    · simpa only [updateWork, valueWork, Function.update_of_ne haddressQuery,
-        Function.update_of_ne haddressReplacement] using
-        hinitial.scanner.addressStart
-    · simpa only [updateWork, valueWork, Function.update_of_ne hvalueQuery,
-        Function.update_of_ne hvalueReplacement] using hinitial.scanner.value
-    · simpa only [updateWork, valueWork, Function.update_of_ne hvalueQuery,
-        Function.update_of_ne hvalueReplacement] using
-        hinitial.scanner.valueStart
-    · simpa only [updateWork, valueWork,
-        Function.update_of_ne haddressCounterQuery,
-        Function.update_of_ne haddressCounterReplacement] using
-        hinitial.scanner.addressCounter
-    · simpa only [updateWork, valueWork,
-        Function.update_of_ne haddressWidthQuery,
-        Function.update_of_ne haddressWidthReplacement] using
-        hinitial.scanner.addressWidth
-    · simpa only [updateWork, valueWork,
-        Function.update_of_ne hvalueCounterQuery,
-        Function.update_of_ne hvalueCounterReplacement] using
-        hinitial.scanner.valueCounter
-    · simpa only [updateWork, valueWork,
-        Function.update_of_ne hvalueWidthQuery,
-        Function.update_of_ne hvalueWidthReplacement] using
-        hinitial.scanner.valueWidth
+    · simp only [updateWork, valueWork, Function.update_of_ne hsourceQuery,
+      Function.update_of_ne hsourceReplacement]
+      exact hinitial.scanner.source
+    · simp only [updateWork, valueWork, Function.update_of_ne haddressQuery,
+      Function.update_of_ne haddressReplacement]
+      exact hinitial.scanner.address
+    · simp only [updateWork, valueWork, Function.update_of_ne haddressQuery,
+      Function.update_of_ne haddressReplacement]
+      exact hinitial.scanner.addressStart
+    · simp only [updateWork, valueWork, Function.update_of_ne hvalueQuery,
+      Function.update_of_ne hvalueReplacement]
+      exact hinitial.scanner.value
+    · simp only [updateWork, valueWork, Function.update_of_ne hvalueQuery,
+      Function.update_of_ne hvalueReplacement]
+      exact hinitial.scanner.valueStart
+    · simp only [updateWork, valueWork, Function.update_of_ne haddressCounterQuery,
+      Function.update_of_ne haddressCounterReplacement]
+      exact hinitial.scanner.addressCounter
+    · simp only [updateWork, valueWork, Function.update_of_ne haddressWidthQuery,
+      Function.update_of_ne haddressWidthReplacement]
+      exact hinitial.scanner.addressWidth
+    · simp only [updateWork, valueWork, Function.update_of_ne hvalueCounterQuery,
+      Function.update_of_ne hvalueCounterReplacement]
+      exact hinitial.scanner.valueCounter
+    · simp only [updateWork, valueWork, Function.update_of_ne hvalueWidthQuery,
+      Function.update_of_ne hvalueWidthReplacement]
+      exact hinitial.scanner.valueWidth
     · simpa only [updateWork, Function.update_self, queryTape] using
         hqueryNat.2
     · simpa only [updateWork, Function.update_self, queryTape] using
         hqueryNat.1
-    · simpa only [updateWork, valueWork, Function.update_of_ne hresultQuery,
-        Function.update_of_ne hresultReplacement] using hinitial.scanner.result
-    · simpa only [updateWork, valueWork, Function.update_of_ne hresultQuery,
-        Function.update_of_ne hresultReplacement] using
-        hinitial.scanner.resultStart
+    · simp only [updateWork, valueWork, Function.update_of_ne hresultQuery,
+      Function.update_of_ne hresultReplacement]
+      exact hinitial.scanner.result
+    · simp only [updateWork, valueWork, Function.update_of_ne hresultQuery,
+      Function.update_of_ne hresultReplacement]
+      exact hinitial.scanner.resultStart
     · intro i
       by_cases hiQuery : i = tapes.update.entry.query
       · subst i
@@ -219,14 +219,13 @@ theorem immediateUpdate_ready_internal
   refine ⟨hscanner, ?_, ?_, ?_, ?_, hscanner.parked⟩
   · simpa only [updateWork, Function.update_of_ne hreplacementQuery,
       valueWork, Function.update_self, valueTape] using hvalueNat
-  · simpa only [updateWork, Function.update_of_ne hremainingQuery,
-      valueWork, Function.update_of_ne hremainingReplacement] using
-      hinitial.count
-  · simpa only [updateWork, Function.update_of_ne hfoundQuery, valueWork,
-      Function.update_of_ne hfoundReplacement] using hinitial.copyScratch
-  · simpa only [updateWork, Function.update_of_ne hresultCountQuery,
-      valueWork, Function.update_of_ne hresultCountReplacement] using
-      hinitial.countSource
+  · simp only [Function.update_of_ne hremainingQuery, Function.update_of_ne hremainingReplacement]
+    exact hinitial.count
+  · simp only [Function.update_of_ne hfoundQuery, Function.update_of_ne hfoundReplacement]
+    exact hinitial.copyScratch
+  · simp only [Function.update_of_ne hresultCountQuery,
+    Function.update_of_ne hresultCountReplacement]
+    exact hinitial.countSource
 
 /-- Exact semantic and time contract for one immediate sparse assignment. -/
 theorem immediateInstructionTM_hoareTime_frame_internal
@@ -274,7 +273,7 @@ theorem immediateInstructionTM_hoareTime_frame_internal
           initialWork tapes.update.entry.query :=
         Function.update_of_ne hqueryReplacement _ initialWork
       rw [heq]
-      exact ⟨hinitial.scanner.queryStart, by simpa using hinitial.scanner.query⟩
+      exact ⟨hinitial.scanner.queryStart, by exact hinitial.scanner.query⟩
     have hrun := TM.binaryAddConstTM_hoareTime_frame
       tapes.update.entry.query destination 0 inp₀ valueWork out₀ hqueryZero
       hinput

@@ -45,7 +45,7 @@ private theorem placeWorkFrameStep_blank (t : Tape)
   · have hr : t.read = Γ.blank := by rw [hread, h1]; rfl
     rw [hr]
     show t.write (readBackWrite Γ.blank) = (Tape.init []).move Dir3.right
-    rw [Tape.write, if_neg (show ¬t.head = 0 by omega), h1, hcells]
+    rw [Tape.write, ite_eq_right (show ¬t.head = 0 by omega), h1, hcells]
     rw [show (readBackWrite Γ.blank).toΓ = (Tape.init []).cells 1 from rfl,
       Function.update_eq_self]
     rfl
@@ -58,7 +58,7 @@ theorem placeWorkTM_step_placeWorkCfg_internal (tm : TM n) (pre post : ℕ)
       (tm.step c).map
         (placeWorkCfg tm pre post (placeWorkFrameStep extras)) := by
   by_cases hhalt : c.state = tm.qhalt
-  · simp [TM.step, placeWorkCfg, placeWorkTM, hhalt]
+  · simp [TM.step, placeWorkCfg, placeWorkTM, hhalt]; rfl
   · cases hstep : tm.step c with
     | none => exact absurd hstep (by simp [TM.step, hhalt])
     | some c' =>

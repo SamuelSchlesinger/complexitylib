@@ -72,6 +72,9 @@ theorem uniformProbability_union_le_internal {Ω : Type u}
   gcongr
   exact_mod_cast Finset.card_union_le event₁ event₂
 
+-- The signature mirrors the family this belongs to; the argument is part of
+-- that shape even where this member does not consult it.
+@[nolint unusedArguments]
 theorem uniformProbability_eq_sum_fiberwise_internal
     {Ω : Type u} {ι : Type v} [Fintype Ω] [DecidableEq Ω]
     [DecidableEq ι] (event : Finset Ω) (indices : Finset ι) (f : Ω → ι)
@@ -84,6 +87,9 @@ theorem uniformProbability_eq_sum_fiberwise_internal
   push_cast
   rw [Finset.sum_div]
 
+-- The signature mirrors the family this belongs to; the argument is part of
+-- that shape even where this member does not consult it.
+@[nolint unusedArguments]
 theorem uniformProbability_product_internal
     {Ω : Type u} {Ξ : Type v} [Fintype Ω] [DecidableEq Ω]
     [Fintype Ξ] [DecidableEq Ξ] (P : Ω → Prop) (Q : Ξ → Prop)
@@ -109,6 +115,9 @@ theorem uniformProbability_product_internal
     ((Finset.univ.filter P).card : ℚ) (Fintype.card Ω : ℚ)
     ((Finset.univ.filter Q).card : ℚ) (Fintype.card Ξ : ℚ)).symm
 
+-- The signature mirrors the family this belongs to; the argument is part of
+-- that shape even where this member does not consult it.
+@[nolint unusedArguments]
 theorem uniformProbability_product_eq_average_fibers_internal
     {advice : Type u} {challenge : Type v}
     [Fintype advice] [DecidableEq advice] [Nonempty advice]
@@ -154,6 +163,9 @@ theorem uniformProbability_product_eq_average_fibers_internal
   intro fixed _hfixed
   field_simp [hadvice, hchallenge]
 
+-- The signature mirrors the family this belongs to; the argument is part of
+-- that shape even where this member does not consult it.
+@[nolint unusedArguments]
 theorem exists_fiber_uniformProbability_ge_internal
     {advice : Type u} {challenge : Type v}
     [Fintype advice] [DecidableEq advice] [Nonempty advice]
@@ -185,6 +197,9 @@ theorem exists_fiber_uniformProbability_ge_internal
     (Finset.univ_nonempty : (Finset.univ : Finset advice).Nonempty) hsum
   exact ⟨fixed, hle⟩
 
+-- The signature mirrors the family this belongs to; the argument is part of
+-- that shape even where this member does not consult it.
+@[nolint unusedArguments]
 theorem uniformMean_le_threshold_add_probability_internal
     {sample : Type u} [Fintype sample] [DecidableEq sample]
     [Nonempty sample] (value : sample → ℚ) (threshold : ℚ)
@@ -391,6 +406,9 @@ theorem half_le_uniformAtLeastOneProbability_of_singleDrawLower_internal
     htrials.trans <| mul_le_mul_of_nonneg_left hlower (by positivity)
   nlinarith
 
+-- The signature mirrors the family this belongs to; the argument is part of
+-- that shape even where this member does not consult it.
+@[nolint unusedArguments]
 theorem uniformProbability_equiv_internal
     {Ω : Type u} {Ξ : Type v} [Fintype Ω] [DecidableEq Ω]
     [Fintype Ξ] [DecidableEq Ξ] (e : Ω ≃ Ξ) (P : Ξ → Prop)
@@ -430,35 +448,35 @@ variable {α : Type u} {β : Type w}
 theorem probability_nonneg_internal (D : FiniteEnsemble α) (n : ℕ)
     (P : α → Prop) [DecidablePred P] :
     0 ≤ D.probability n P := by
-  letI := D.seedFintype n
+  let := D.seedFintype n
   exact uniformProbability_nonneg_internal _
 
 theorem probability_le_one_internal (D : FiniteEnsemble α) (n : ℕ)
     (P : α → Prop) [DecidablePred P] :
     D.probability n P ≤ 1 := by
-  letI := D.seedFintype n
-  letI := D.seedNonempty n
+  let := D.seedFintype n
+  let := D.seedNonempty n
   exact uniformProbability_le_one_internal _
 
 theorem probability_false_internal (D : FiniteEnsemble α) (n : ℕ) :
     D.probability n (fun _ => False) = 0 := by
-  letI := D.seedFintype n
-  letI := D.seedDecidableEq n
+  let := D.seedFintype n
+  let := D.seedDecidableEq n
   simp [probability, event, uniformProbability_empty_internal]
 
 theorem probability_true_internal (D : FiniteEnsemble α) (n : ℕ) :
     D.probability n (fun _ => True) = 1 := by
-  letI := D.seedFintype n
-  letI := D.seedDecidableEq n
-  letI := D.seedNonempty n
+  let := D.seedFintype n
+  let := D.seedDecidableEq n
+  let := D.seedNonempty n
   simp [probability, event, uniformProbability_univ_internal]
 
 theorem probability_not_internal (D : FiniteEnsemble α) (n : ℕ)
     (P : α → Prop) [DecidablePred P] :
     D.probability n (fun x => ¬ P x) = 1 - D.probability n P := by
-  letI := D.seedFintype n
-  letI := D.seedDecidableEq n
-  letI := D.seedNonempty n
+  let := D.seedFintype n
+  let := D.seedDecidableEq n
+  let := D.seedNonempty n
   have hevent : D.event n (fun x => ¬ P x) = (D.event n P)ᶜ := by
     ext seed
     simp [event]
@@ -469,8 +487,8 @@ theorem probability_or_le_internal (D : FiniteEnsemble α) (n : ℕ)
     (P Q : α → Prop) [DecidablePred P] [DecidablePred Q] :
     D.probability n (fun x => P x ∨ Q x) ≤
       D.probability n P + D.probability n Q := by
-  letI := D.seedFintype n
-  letI := D.seedDecidableEq n
+  let := D.seedFintype n
+  let := D.seedDecidableEq n
   have hevent : D.event n (fun x => P x ∨ Q x) = D.event n P ∪ D.event n Q := by
     ext seed
     simp [event]
@@ -481,8 +499,8 @@ theorem probability_mono_internal (D : FiniteEnsemble α) (n : ℕ)
     (P Q : α → Prop) [DecidablePred P] [DecidablePred Q]
     (hPQ : ∀ x, P x → Q x) :
     D.probability n P ≤ D.probability n Q := by
-  letI := D.seedFintype n
-  letI := D.seedDecidableEq n
+  let := D.seedFintype n
+  let := D.seedDecidableEq n
   unfold probability uniformProbability
   gcongr
   intro seed hseed
@@ -497,8 +515,8 @@ theorem probability_congr_internal (D : FiniteEnsemble α) (n : ℕ)
     (P Q : α → Prop) [DecidablePred P] [DecidablePred Q]
     (hPQ : ∀ x, P x ↔ Q x) :
     D.probability n P = D.probability n Q := by
-  letI := D.seedFintype n
-  letI := D.seedDecidableEq n
+  let := D.seedFintype n
+  let := D.seedDecidableEq n
   unfold probability
   apply congrArg uniformProbability
   ext seed
@@ -517,9 +535,9 @@ theorem probability_map_internal (D : FiniteEnsemble α) (f : α → β)
 theorem sum_mass_eq_one_internal [DecidableEq α]
     (D : FiniteEnsemble α) (n : ℕ) :
     ∑ x ∈ D.support n, D.mass n x = 1 := by
-  letI := D.seedFintype n
-  letI := D.seedDecidableEq n
-  letI := D.seedNonempty n
+  let := D.seedFintype n
+  let := D.seedDecidableEq n
+  let := D.seedNonempty n
   have hmaps :
       ((Finset.univ : Finset (D.Seed n)) : Set (D.Seed n)).MapsTo
         (D.sample n) (D.support n) := by
@@ -535,33 +553,34 @@ theorem probability_product_internal (D : FiniteEnsemble α)
     [DecidablePred P] [DecidablePred Q] :
     (D.product E).probability n (fun xy => P xy.1 ∧ Q xy.2) =
       D.probability n P * E.probability n Q := by
-  letI := D.seedFintype n
-  letI := D.seedDecidableEq n
-  letI := E.seedFintype n
-  letI := E.seedDecidableEq n
-  simpa [product, probability, event] using
-    (uniformProbability_product_internal
-      (fun seed : D.Seed n => P (D.sample n seed))
-      (fun seed : E.Seed n => Q (E.sample n seed)))
+  let := D.seedFintype n
+  let := D.seedDecidableEq n
+  let := E.seedFintype n
+  let := E.seedDecidableEq n
+  simp only [product, probability, event]
+  exact uniformProbability_product_internal
+    (fun seed : D.Seed n => P (D.sample n seed))
+    (fun seed : E.Seed n => Q (E.sample n seed))
 
 theorem probability_dirac_internal (x : ℕ → α) (n : ℕ)
     (P : α → Prop) [DecidablePred P] :
     (dirac x).probability n P = if P (x n) then 1 else 0 := by
-  letI := (dirac x).seedFintype n
-  letI := (dirac x).seedDecidableEq n
-  letI := (dirac x).seedNonempty n
+  let := (dirac x).seedFintype n
+  let := (dirac x).seedDecidableEq n
+  let := (dirac x).seedNonempty n
   by_cases hP : P (x n)
-  · rw [if_pos hP]
+  · rw [ite_eq_left hP]
     unfold probability
     rw [show (dirac x).event n P = Finset.univ by
       ext seed
       simp [event, dirac, hP]]
     exact uniformProbability_univ_internal
-  · rw [if_neg hP]
+  · rw [ite_eq_right hP]
     unfold probability
     rw [show (dirac x).event n P = ∅ by
       ext seed
-      simp [event, dirac, hP]]
+      simp [event, dirac, hP]
+      rfl]
     exact uniformProbability_empty_internal
 
 end FiniteEnsemble

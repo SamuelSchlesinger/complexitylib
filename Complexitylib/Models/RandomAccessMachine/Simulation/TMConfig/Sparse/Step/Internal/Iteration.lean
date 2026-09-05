@@ -92,7 +92,8 @@ theorem continueCheck_exec_internal {tm : TM n}
             ⟨stateCode tm cfg.state, stateCode_lt tm cfg.state⟩)
           cleared final 1 cost space := by
     refine ⟨branchCost, branchSpace, ?_⟩
-    simpa [hbranchState, final] using hbranchExec
+    simp [hbranchState, final]
+    exact hbranchExec
   obtain ⟨dispatchCost, dispatchSpace, hdispatch⟩ :=
     Structured.Switch.select_exec
       (fun code : Fin (Fintype.card tm.Q) => .basics
@@ -102,8 +103,8 @@ theorem continueCheck_exec_internal {tm : TM n}
       hloaded.2.2.1 (stateScratchReg_ne_one n) hselectedBranch
   refine ⟨final, loadCost + dispatchCost, max loadSpace dispatchSpace,
     ?_, hfinalRepresents, hfinalValue, hfinalOne, hfinalCount⟩
-  simpa [continueCheck, continueDispatch, continueSteps, loaded] using
-    Structured.Exec.seq hloadExec hdispatch
+  simp [continueCheck, continueDispatch, continueSteps]
+  exact Structured.Exec.seq hloadExec hdispatch
 
 theorem starts_of_step_internal {tm : TM n}
     {cfg next : Complexity.Cfg n tm.Q} (hstep : tm.step cfg = some next)
@@ -116,7 +117,7 @@ theorem starts_of_step_internal {tm : TM n}
       (fun i => (cfg.work i).read) cfg.output.read with
     ⟨nextState, workWrites, outputWrite, inputDirection,
       workDirections, outputDirection⟩
-  rw [TM.step, if_neg hnotHalted, hdelta] at hstep
+  rw [TM.step, ite_eq_right hnotHalted, hdelta] at hstep
   dsimp only at hstep
   injection hstep with hnext
   subst next

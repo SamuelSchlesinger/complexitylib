@@ -84,7 +84,7 @@ private theorem setup_measured (gate : CircuitCode.RawGate) (wires : List Bool) 
     · apply hstore.execBasic (.imm UnaryDecode.activeReg 1) <;>
         simp [cursorBound, inputBits, UnaryDecode.activeReg,
           UnaryDecode.inputBase]
-  simpa [UnaryDecode.setup, setupStore] using
+  simpa [Structured.Basic.execList, UnaryDecode.setupOps, UnaryDecode.setup, setupStore] using
     MeasuredRuns.basicsEnvelope UnaryDecode.setupOps (inputStore gate wires)
       hinitial hpreserve
 
@@ -298,7 +298,7 @@ private theorem header_measured (gate : CircuitCode.RawGate) (wires : List Bool)
   have hrun := r1.seq (r2.seq (r3.seq (r4.seq (r5.seq
     (r6.seq (r7.seq (r8.seq r9)))))))
   convert hrun using 1
-  ring
+  all_goals first | rfl | ring
 
 private theorem header_cursorReady (gate : CircuitCode.RawGate) (wires : List Bool) :
     UnaryDecode.CursorReady (inputBits gate wires).length
@@ -366,7 +366,7 @@ private theorem header_cursorReady (gate : CircuitCode.RawGate) (wires : List Bo
     rw [hpreserved]
     simp only [inputStore, Input.bitStore, UnaryDecode.remainingReg,
       UnaryDecode.inputBase]
-    rw [if_neg (by omega : 10 + delta ≠ 3), if_pos (by omega : 7 ≤ 10 + delta)]
+    erw [ite_eq_right (by omega : 10 + delta ≠ 3), ite_eq_left (by omega : 7 ≤ 10 + delta)]
     have hoffset : 10 + delta - 7 = 3 + delta := by omega
     rw [hoffset]
     change
@@ -588,7 +588,7 @@ private theorem saveRestart_measured {bound : ℕ} {store : Store}
   refine ⟨?_, h4⟩
   have hrun := h1.1.seq (r2.seq (r3.seq r4))
   convert hrun using 1
-  ring
+  all_goals first | rfl | ring
 
 private theorem marshal_measured {bound : ℕ} {store : Store}
     (hstore : StoreEnvelope bound bound store) (hsmall : 10 < bound)
@@ -640,8 +640,8 @@ private theorem marshal_measured {bound : ℕ} {store : Store}
   · have hrun := r1.1.seq (r2.1.seq (r3.1.seq
       (r4.1.seq (r5.1.seq (r6.1.seq r7.1)))))
     convert hrun using 1
-    ring
-  · simpa [marshalStore, marshalOps, s1, s2, s3, s4, s5, s6] using r7.2.1
+    all_goals first | rfl | ring
+  · simpa [Structured.Basic.execList, marshalStore, marshalOps, s1, s2, s3, s4, s5, s6] using r7.2.1
 
 private theorem input_wire (gate : CircuitCode.RawGate) (wires : List Bool)
     (index : ℕ) :
@@ -656,7 +656,7 @@ private theorem input_wire (gate : CircuitCode.RawGate) (wires : List Bool)
     simp only [memoBase, UnaryDecode.inputBase, UnaryDecode.remainingReg]
     omega
   simp only [inputStore, Input.bitStore]
-  rw [if_neg hlength, if_pos hbase]
+  rw [ite_eq_right hlength, ite_eq_left hbase]
   have hoffset : memoBase gate + index - UnaryDecode.inputBase =
       gate.encode.length + index := by
     simp [memoBase]
@@ -710,7 +710,7 @@ theorem program_measured_internal (gate : CircuitCode.RawGate) (wires : List Boo
       ((Basic.add savedInput0Reg UnaryDecode.valueReg
         UnaryDecode.activeReg).exec first) := by
     apply hfirstBound.execBasic
-    · simpa [savedInput0Reg, UnaryDecode.inputBase] using hlarge
+    · simpa [cursorBound, savedInput0Reg, UnaryDecode.inputBase] using hlarge
     · change first UnaryDecode.valueReg + first UnaryDecode.activeReg ≤
         cursorBound gate wires
       rw [hfirstValue, hfirstActive]
@@ -741,7 +741,7 @@ theorem program_measured_internal (gate : CircuitCode.RawGate) (wires : List Boo
         UnaryDecode.verdictReg, UnaryDecode.valueReg, UnaryDecode.activeReg]
     · simp [saved, saveRestartStore, saveRestartOps, Basic.execList, Basic.exec,
         UnaryDecode.verdictReg, UnaryDecode.valueReg, UnaryDecode.activeReg]
-    · change saved UnaryDecode.pointerReg = _
+    ·
       rw [show saved UnaryDecode.pointerReg = first UnaryDecode.pointerReg by
         apply saveRestart_apply_of_ne <;>
           simp [savedInput0Reg, UnaryDecode.verdictReg, UnaryDecode.valueReg,
@@ -749,14 +749,14 @@ theorem program_measured_internal (gate : CircuitCode.RawGate) (wires : List Boo
             UnaryDecode.inputBase]]
       rw [hfirstPointer]
       omega
-    · change saved UnaryDecode.remainingReg = secondRemaining.length
+    ·
       rw [show saved UnaryDecode.remainingReg = first UnaryDecode.remainingReg by
         apply saveRestart_apply_of_ne <;>
           simp [savedInput0Reg, UnaryDecode.verdictReg, UnaryDecode.valueReg,
             UnaryDecode.remainingReg, UnaryDecode.activeReg,
             UnaryDecode.inputBase]]
       exact hfirstRemaining
-    · change saved UnaryDecode.oneReg = 1
+    ·
       rw [show saved UnaryDecode.oneReg = first UnaryDecode.oneReg by
         apply saveRestart_apply_of_ne <;>
           simp [savedInput0Reg, UnaryDecode.verdictReg, UnaryDecode.valueReg,
@@ -984,7 +984,8 @@ theorem program_measured_internal (gate : CircuitCode.RawGate) (wires : List Boo
                 (28 * valueWidth (storeBound gate wires) +
                   80 * valueWidth (storeBound gate wires)))))))
       (envelopeSpace (storeBound gate wires) (storeBound gate wires)) := by
-    simpa [program, UnaryDecode.setup, setupStore, saved, marshaled,
+    simpa [program, Cmd.seqList, UnaryDecode.setupOps, headerOps, saveRestartOps, marshalOps,
+      UnaryDecode.setup, setupStore, saved, marshaled,
       saveRestartStore, marshalStore] using hrun
   have hcostLe :
       20 * valueWidth (storeBound gate wires) +

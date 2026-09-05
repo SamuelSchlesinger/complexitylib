@@ -73,8 +73,8 @@ theorem margRot_involutive (m : ℕ) : Function.Involutive (margRot m) := by
   intro p
   by_cases h : m = 0
   · simp [margRot, h]
-  · haveI : NeZero m := ⟨h⟩
-    simp only [margRot, dif_neg h, Equiv.apply_symm_apply, margGen_pair, margPair_pair,
+  · have : NeZero m := ⟨h⟩
+    simp only [margRot, dite_eq_right h, Equiv.apply_symm_apply, margGen_pair, margPair_pair,
       Equiv.symm_apply_apply]
 
 end Complexity

@@ -88,13 +88,13 @@ theorem levelStep_apply (d k s : ℕ) (Z : List Bool) :
     simp only [List.length_append]
     omega
   by_cases h : s < 2 * n
-  · rw [if_pos h, ifLtLen_pos (by rw [List.length_replicate, hlen]; exact h),
+  · rw [ite_eq_left h, ifLtLen_pos (by rw [List.length_replicate, hlen]; exact h),
       marks_eq, length_mulC, List.length_replicate, ← List.replicate_succ']
     congr 2
     refine List.take_of_length_le ?_
     rw [List.length_replicate, List.length_append, List.length_replicate, length_mulC, ← hn]
     nlinarith [h]
-  · rw [if_neg h, ifLtLen_neg (by rw [List.length_replicate, hlen]; exact h)]
+  · rw [ite_eq_right h, ifLtLen_neg (by rw [List.length_replicate, hlen]; exact h)]
 
 /-- **The loop's model runs the loop.** -/
 theorem levelStep_iterate (d : ℕ) (Z : List Bool) :
@@ -109,8 +109,8 @@ theorem levelStep_iterate (d : ℕ) (Z : List Bool) :
       intro k s
       rw [Function.iterate_succ_apply', ih k s, levelStep_apply, levelAfter]
       by_cases h : (levelAfter d Z.length j (k, s)).2 < 2 * Z.length
-      · rw [if_pos h, if_pos h]
-      · rw [if_neg h, if_neg h]
+      · rw [ite_eq_left h, ite_eq_left h]
+      · rw [ite_eq_right h, ite_eq_right h]
 
 /-! ### What the loop settles on -/
 
@@ -127,7 +127,7 @@ theorem levelAfter_of_lt (d n : ℕ) :
       have hlt : d ^ (j + 1) < 2 * n := by
         have := h j (by omega)
         omega
-      rw [if_pos hlt]
+      rw [ite_eq_left hlt]
       refine Prod.ext rfl ?_
       show d ^ j * d * d = d ^ (j + 1 + 1)
       rw [pow_succ, pow_succ]
@@ -140,7 +140,7 @@ theorem levelAfter_stable (d n : ℕ) (p : ℕ × ℕ) (j : ℕ) (h : 2 * n ≤ 
   | zero => rfl
   | succ i ih =>
       have hji : j + (i + 1) = (j + i) + 1 := by omega
-      rw [hji, levelAfter, ih, if_neg (by omega)]
+      rw [hji, levelAfter, ih, ite_eq_right (by omega)]
 
 /-- The loop never overshoots by more than a factor of `d`. -/
 theorem levelAfter_snd_le (d n : ℕ) :
@@ -151,10 +151,10 @@ theorem levelAfter_snd_le (d n : ℕ) :
   | succ j ih =>
       rw [levelAfter]
       by_cases h : (levelAfter d n j (0, d)).2 < 2 * n
-      · rw [if_pos h]
+      · rw [ite_eq_left h]
         have : (levelAfter d n j (0, d)).2 * d ≤ 2 * n * d := Nat.mul_le_mul_right _ (by omega)
         simpa using by omega
-      · rw [if_neg h]
+      · rw [ite_eq_right h]
         exact ih
 
 /-- The size the loop carries is always the power the level names. -/
@@ -166,11 +166,11 @@ theorem levelAfter_pow (d n : ℕ) :
   | succ j ih =>
       rw [levelAfter]
       by_cases h : (levelAfter d n j (0, d)).2 < 2 * n
-      · rw [if_pos h]
+      · rw [ite_eq_left h]
         show (levelAfter d n j (0, d)).2 * d = d ^ ((levelAfter d n j (0, d)).1 + 1 + 1)
         rw [ih]
         ring
-      · rw [if_neg h]
+      · rw [ite_eq_right h]
         exact ih
 
 /-- **The level the loop reaches names a size below `d + 2 n d`.** -/

@@ -62,15 +62,15 @@ theorem placeWorkTM_hoareTime (tm : TM n) {pre post : TapePred n} {b : ℕ}
       show work i = if hi : placeWorkInMiddle pre₀ n i then
         work (placeWorkIdx pre₀ post₀ (placeWorkCoord pre₀ n i hi)) else extras i
       by_cases hi : placeWorkInMiddle pre₀ n i
-      · rw [dif_pos hi, placeWorkIdx_placeWorkCoord i hi]
-      · rw [dif_neg hi]
+      · rw [dite_eq_left hi, placeWorkIdx_placeWorkCoord i hi]
+      · rw [dite_eq_right hi]
         exact hframe i hi
     rw [hstart]
     exact placeWorkTM_reachesIn_placeWorkCfg_of_startInvariant tm pre₀ post₀ extras hreach
       hinv hhead
   · intro i hi
     show (if h : placeWorkInMiddle pre₀ n i then _ else extras i) = extras i
-    rw [dif_neg hi]
+    rw [dite_eq_right hi]
   · show post c'.input (fun j => (placeWorkCfg tm pre₀ post₀ extras c').work
       (placeWorkIdx pre₀ post₀ j)) c'.output
     have hw : (fun j => (placeWorkCfg tm pre₀ post₀ extras c').work
@@ -79,7 +79,7 @@ theorem placeWorkTM_hoareTime (tm : TM n) {pre post : TapePred n} {b : ℕ}
       show (if hi : placeWorkInMiddle pre₀ n (placeWorkIdx pre₀ post₀ j) then
         c'.work (placeWorkCoord pre₀ n (placeWorkIdx pre₀ post₀ j) hi)
         else extras (placeWorkIdx pre₀ post₀ j)) = c'.work j
-      rw [dif_pos (placeWorkInMiddle_placeWorkIdx pre₀ post₀ j),
+      rw [dite_eq_left (placeWorkInMiddle_placeWorkIdx pre₀ post₀ j),
         placeWorkCoord_placeWorkIdx pre₀ post₀ j]
     rw [hw]
     exact hpost

@@ -115,7 +115,7 @@ private theorem evalAux?_productGates (available width : ℕ)
           rw [hsize]
           exact ne_of_lt (hcoefficientRefs i.succ)
         dsimp only [middle]
-        rw [Array.getElem?_push, if_neg hne]
+        rw [Array.getElem?_push, ite_eq_right hne]
         exact hcoefficients i.succ
       have hinputTail : ∀ i : Fin width,
           middle[inputRefs i.succ]? = some (input i.succ) := by
@@ -124,7 +124,7 @@ private theorem evalAux?_productGates (available width : ℕ)
           rw [hsize]
           exact ne_of_lt (hinputRefs i.succ)
         dsimp only [middle]
-        rw [Array.getElem?_push, if_neg hne]
+        rw [Array.getElem?_push, ite_eq_right hne]
         exact hinputs i.succ
       obtain ⟨result, hevalTail, hresultSize, hresultPreserved,
           hresultProducts⟩ :=
@@ -146,7 +146,7 @@ private theorem evalAux?_productGates (available width : ℕ)
           omega
         rw [hresultPreserved i hiMiddle]
         dsimp only [middle]
-        rw [Array.getElem?_push, if_neg (ne_of_lt hi)]
+        rw [Array.getElem?_push, ite_eq_right (ne_of_lt hi)]
       · intro coordinate
         refine Fin.cases ?_ (fun i => ?_) coordinate
         · have hwire : productWire available (0 : Fin (width + 1)) =
@@ -229,7 +229,7 @@ theorem evalAux?_compileLinearRaw_internal (available : ℕ) [NeZero available]
     · simp only [parityRefs, Fin.lastCases_castSucc, bits,
         Fin.lastCases_castSucc]
       exact hmiddleProducts coordinate
-  letI : NeZero (available + width) := ⟨by
+  let : NeZero (available + width) := ⟨by
     have := NeZero.ne available
     omega⟩
   obtain ⟨result, hevalParity, hresultSize, hresultPreserved,
@@ -328,7 +328,7 @@ theorem evalAux?_compileRowsRaw_internal
           rw [hsize]
           exact hinputRefs coordinate)]
         exact hinputs coordinate
-      letI : NeZero (available + linearGateCount width) := ⟨by
+      let : NeZero (available + linearGateCount width) := ⟨by
         have := NeZero.ne available
         omega⟩
       have havailableLt :
@@ -454,7 +454,7 @@ theorem evalAux?_compileZeroRaw_internal
       middle[outputs row]? = some (values row) := by
     intro row
     exact hmiddleOutputs row
-  letI : NeZero afterRows := ⟨by
+  let : NeZero afterRows := ⟨by
     have := NeZero.ne available
     simp only [afterRows, rowsAvailable]
     omega⟩
@@ -481,7 +481,7 @@ theorem evalAux?_compileZeroRaw_internal
           (rowsAvailable available width rowCount) 1
           (rowOutputWire available width)) middle = some almost by
       simpa only [afterRows, outputs] using hevalThreshold]
-    simpa only [afterRows, outputs] using hevalCopy
+    simpa only [Option.bind_some, afterRows, outputs] using hevalCopy
   · simp only [result, Array.size_push, halmostSize, hafterRows,
       afterRows, rowsAvailable, hsize, zeroGateCount]
     omega
@@ -647,9 +647,9 @@ theorem eval?_compileZeroRaw_internal
     rw [BitString.length_toList,
       zeroOutputWire_eq_internal available width rowCount coefficientRefs inputRefs]
   rw [CircuitCode.RawCircuit.eval?]
-  simp only [hnonempty, Bool.false_eq_true, if_false]
+  simp only [hnonempty, Bool.false_eq_true, ite_false]
   rw [show input.toList.toArray = wires by rfl, heval, houtputIndex]
-  simpa only [coefficients, selectedInput] using houtput
+  exact houtput
 
 theorem linearValue_affineRow_internal {domainWidth rangeWidth : ℕ}
     (seed : BitString (affineSeedWidth domainWidth rangeWidth))

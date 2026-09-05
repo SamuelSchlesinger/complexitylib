@@ -62,13 +62,13 @@ theorem strTape_startInvariant (l : List Bool) : Tape.StartInvariant (strTape l)
 theorem regTape_parked (v : ℕ) : TM.Parked (TM.regTape v) := by
   refine ⟨le_of_eq rfl, fun j hj => ?_⟩
   show (if j = 0 then Γ.start else if j ≤ v then Γ.one else Γ.blank) ≠ Γ.start
-  rw [if_neg (by omega)]
+  rw [ite_eq_right (by omega)]
   split <;> decide
 
 theorem regTape_startInvariant (v : ℕ) : Tape.StartInvariant (TM.regTape v) := by
   refine ⟨rfl, fun j hj => ?_⟩
   show (if j = 0 then Γ.start else if j ≤ v then Γ.one else Γ.blank) ≠ Γ.start
-  rw [if_neg (by omega)]
+  rw [ite_eq_right (by omega)]
   split <;> decide
 
 /-- **The resting bank at a given count.** The input copy and the horizon are where the prologue
@@ -83,12 +83,12 @@ def enumRest (k : ℕ) (x : List Bool) (N H : ℕ) (v : ℕ) : Fin (enumTapes k)
 
 @[simp] theorem enumRest_x (k : ℕ) (x : List Bool) (N H v : ℕ) :
     enumRest k x N H v (xIdx k) = strTape x := by
-  rw [enumRest, if_pos rfl]
+  rw [enumRest, ite_eq_left rfl]
 
 @[simp] theorem enumRest_w (k : ℕ) (x : List Bool) (N H v : ℕ) :
     enumRest k x N H v (wIdx k) = strTape (dropTop v) := by
   obtain ⟨hxw, -⟩ := enumIdx_distinct k
-  rw [enumRest, if_neg (fun h => hxw h.symm), if_pos rfl]
+  rw [enumRest, ite_eq_right (fun h => hxw h.symm), ite_eq_left rfl]
 
 @[simp] theorem enumRest_n (k : ℕ) (x : List Bool) (N H v : ℕ) :
     enumRest k x N H v (nIdx k) = natTape N := by
@@ -100,7 +100,7 @@ def enumRest (k : ℕ) (x : List Bool) (N H : ℕ) (v : ℕ) : Fin (enumTapes k)
     have h' := congrArg Fin.val h
     simp only [nIdx, wIdx] at h'
     omega
-  rw [enumRest, if_neg hxn, if_neg hwn, if_pos rfl]
+  rw [enumRest, ite_eq_right hxn, ite_eq_right hwn, ite_eq_left rfl]
 
 /-- **The bank is parked at every index**, which is what the loop rule asks of the tapes its
 state does not name. -/

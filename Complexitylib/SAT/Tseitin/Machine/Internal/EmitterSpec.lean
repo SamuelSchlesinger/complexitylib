@@ -136,7 +136,8 @@ theorem validEmitterTM_hoareTime_internal (phi : CNF) :
   refine ⟨controllerDoneCfg cRun, tRun + 1, htime, ?_, ?_, ?_⟩
   · simpa only [c₀] using hreach
   · rfl
-  · simpa only [controllerDoneCfg] using hpredRun
+  · simp only [controllerDoneCfg]
+    exact hpredRun
 
 /-- Quartic-rounded typed-input specification for the concrete valid
 emitter. -/

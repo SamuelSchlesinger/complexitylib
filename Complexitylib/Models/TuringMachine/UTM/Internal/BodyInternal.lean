@@ -46,15 +46,15 @@ theorem step_mkAct {c : Cfg 6 bodyTM.Q} (hne : c.state ≠ bodyDone)
         output := c.output.writeAndMove (readBackWrite c.output.read).toΓ
           (idleDir c.output.read) } := by
   have hne' : c.state ≠ bodyTM.qhalt := hne
-  simp only [step, if_neg hne', Option.some.injEq]
+  simp only [step, ite_eq_right hne', Option.some.injEq]
   show (let (q'', wW, oW, iD, wD, oD) :=
       bodyδ c.state c.input.read (fun i => (c.work i).read) c.output.read
     ({ state := q'', input := c.input.move iD,
        work := fun i => (c.work i).writeAndMove (wW i).toΓ (wD i),
        output := c.output.writeAndMove oW.toΓ oD } : Cfg 6 bodyTM.Q)) = _
   rw [h]
-  simp only [mkAct, Cfg.mk.injEq]
-  refine ⟨trivial, trivial, ?_, trivial⟩
+  simp only [mkAct]
+  congr 1
   funext i
   cases acts i with
   | none => rfl
@@ -93,8 +93,8 @@ theorem step_act1 {c : Cfg 6 bodyTM.Q} (hne : c.state ≠ bodyDone)
           (idleDir c.output.read) } := by
   rw [step_mkAct hne h]
   refine congrArg some ?_
-  simp only [Cfg.mk.injEq]
-  refine ⟨trivial, trivial, funext fun i => ?_, trivial⟩
+  congr 1
+  funext i
   by_cases hi : i = t <;> simp [hi]
 
 /-- Closed form of a step whose arm is `act2` (two active tapes). -/
@@ -119,8 +119,8 @@ theorem step_act2 {c : Cfg 6 bodyTM.Q} (hne : c.state ≠ bodyDone)
           (idleDir c.output.read) } := by
   rw [step_mkAct hne h]
   refine congrArg some ?_
-  simp only [Cfg.mk.injEq]
-  refine ⟨trivial, trivial, funext fun i => ?_, trivial⟩
+  congr 1
+  funext i
   by_cases h1 : i = t₁
   · simp [h1]
   · by_cases h2 : i = t₂
@@ -152,8 +152,8 @@ theorem step_act3 {c : Cfg 6 bodyTM.Q} (hne : c.state ≠ bodyDone)
           (idleDir c.output.read) } := by
   rw [step_mkAct hne h]
   refine congrArg some ?_
-  simp only [Cfg.mk.injEq]
-  refine ⟨trivial, trivial, funext fun i => ?_, trivial⟩
+  congr 1
+  funext i
   by_cases h1 : i = t₁
   · simp [h1]
   · by_cases h2 : i = t₂
@@ -187,21 +187,21 @@ theorem rewStep_loop {cur next : BodyQ} {t : Fin 6}
     have hread : (c.work t).read = Γ.start := by
       simp [Tape.read, hhead, hcW, hW0]
     have harm := hδ c.input.read (fun i => (c.work i).read) c.output.read
-    rw [rewStep, if_pos hread] at harm
+    rw [rewStep, ite_eq_left hread] at harm
     have hstep := step_act1 (by rw [hst]; exact hcur) (by rw [hst]; exact harm)
     refine ⟨_, .step hstep .zero, rfl, ?_, idle_input_id hin, idle_tape_id hout, ?_⟩
     · show (if t = t then _ else _) = _
-      rw [if_pos rfl, if_pos hread]
+      rw [ite_eq_left rfl, ite_eq_left hread]
       have hwr : (c.work t).write (readBackWrite ((c.work t).read)).toΓ = c.work t := by
         unfold Tape.write
-        rw [if_pos hhead]
+        rw [ite_eq_left hhead]
       show ((c.work t).write _).move .right = _
       rw [hwr]
       simp only [Tape.move, Tape.mk.injEq]
       exact ⟨by rw [hhead], hcW⟩
     · intro i hi
       show (if i = t then _ else _) = _
-      rw [if_neg hi]
+      rw [ite_eq_right hi]
       exact idle_tape_id (hoth i hi)
   | succ p ih =>
     intro c hst hcW hhead hin hout hoth
@@ -209,7 +209,7 @@ theorem rewStep_loop {cur next : BodyQ} {t : Fin 6}
       simp only [Tape.read, hhead, hcW]
       exact hWns (p + 1) (by omega)
     have harm := hδ c.input.read (fun i => (c.work i).read) c.output.read
-    rw [rewStep, if_neg hread] at harm
+    rw [rewStep, ite_eq_right hread] at harm
     have hstep := step_act1 (by rw [hst]; exact hcur) (by rw [hst]; exact harm)
     obtain ⟨c', hreach, hst', hwt', hin', hout', hoth'⟩ :=
       ih { state := cur
@@ -225,18 +225,18 @@ theorem rewStep_loop {cur next : BodyQ} {t : Fin 6}
         rfl
         (by
           dsimp only
-          rw [if_pos rfl, if_neg hread,
+          rw [ite_eq_left rfl, ite_eq_right hread,
             tape_readBackWrite_preserves _ _ (Or.inr hread), hcW])
         (by
           dsimp only
-          rw [if_pos rfl, if_neg hread]
+          rw [ite_eq_left rfl, ite_eq_right hread]
           simp only [Tape.writeAndMove, Tape.move, Tape.write_head, hhead]
           omega)
         (by dsimp only; rw [idle_input_id hin]; exact hin)
         (by dsimp only; rw [idle_tape_id hout]; exact hout)
         (fun i hi => by
           dsimp only
-          rw [if_neg hi, idle_tape_id (hoth i hi)]
+          rw [ite_eq_right hi, idle_tape_id (hoth i hi)]
           exact hoth i hi)
     refine ⟨c', .step hstep hreach, hst', hwt', ?_, ?_, ?_⟩
     · rw [hin']; exact idle_input_id hin
@@ -244,7 +244,7 @@ theorem rewStep_loop {cur next : BodyQ} {t : Fin 6}
     · intro i hi
       rw [hoth' i hi]
       show (if i = t then _ else _) = _
-      rw [if_neg hi]
+      rw [ite_eq_right hi]
       exact idle_tape_id (hoth i hi)
 
 -- ════════════════════════════════════════════════════════════════════════
@@ -276,24 +276,24 @@ theorem blankRewStep_loop {cur next : BodyQ} {t : Fin 6}
     have hread : (c.work t).read = Γ.start := by
       simp [Tape.read, hhead, hcW, hW0]
     have harm := hδ c.input.read (fun i => (c.work i).read) c.output.read
-    rw [blankRewStep, if_pos hread] at harm
+    rw [blankRewStep, ite_eq_left hread] at harm
     have hstep := step_act1 (by rw [hst]; exact hcur) (by rw [hst]; exact harm)
     refine ⟨_, .step hstep .zero, rfl, ?_, idle_input_id hin, idle_tape_id hout, ?_⟩
     · show (if t = t then _ else _) = (⟨1, _⟩ : Tape)
-      rw [if_pos rfl, if_pos hread]
+      rw [ite_eq_left rfl, ite_eq_left hread]
       have hwr : (c.work t).write (readBackWrite ((c.work t).read)).toΓ = c.work t := by
         unfold Tape.write
-        rw [if_pos hhead]
+        rw [ite_eq_left hhead]
       show ((c.work t).write _).move .right = _
       rw [hwr]
       simp only [Tape.move, Tape.mk.injEq]
       refine ⟨by rw [hhead], ?_⟩
       rw [hcW]
       funext j
-      rw [if_neg (by omega)]
+      rw [ite_eq_right (by omega)]
     · intro i hi
       show (if i = t then _ else _) = _
-      rw [if_neg hi]
+      rw [ite_eq_right hi]
       exact idle_tape_id (hoth i hi)
   | succ p ih =>
     intro W hW0 hWns c hst hcW hhead hin hout hoth
@@ -301,7 +301,7 @@ theorem blankRewStep_loop {cur next : BodyQ} {t : Fin 6}
       simp only [Tape.read, hhead, hcW]
       exact hWns (p + 1) (by omega)
     have harm := hδ c.input.read (fun i => (c.work i).read) c.output.read
-    rw [blankRewStep, if_neg hread] at harm
+    rw [blankRewStep, ite_eq_right hread] at harm
     have hstep := step_act1 (by rw [hst]; exact hcur) (by rw [hst]; exact harm)
     -- cells after blanking cell p+1
     have hupd0 : Function.update W (p + 1) Γ.blank 0 = Γ.start := by
@@ -326,45 +326,45 @@ theorem blankRewStep_loop {cur next : BodyQ} {t : Fin 6}
         rfl
         (by
           dsimp only
-          rw [if_pos rfl, if_neg hread]
+          rw [ite_eq_left rfl, ite_eq_right hread]
           show (((c.work t).write _).move Dir3.left).cells = _
           have : (c.work t).write Γw.blank.toΓ
               = { c.work t with cells :=
                     Function.update (c.work t).cells (c.work t).head Γw.blank.toΓ } := by
             unfold Tape.write
-            rw [if_neg (by omega)]
+            rw [ite_eq_right (by omega)]
           rw [this]
           show Function.update (c.work t).cells (c.work t).head Γw.blank.toΓ = _
           rw [hcW, hhead]
           rfl)
         (by
           dsimp only
-          rw [if_pos rfl, if_neg hread]
+          rw [ite_eq_left rfl, ite_eq_right hread]
           simp only [Tape.writeAndMove, Tape.move, Tape.write_head, hhead]
           omega)
         (by dsimp only; rw [idle_input_id hin]; exact hin)
         (by dsimp only; rw [idle_tape_id hout]; exact hout)
         (fun i hi => by
           dsimp only
-          rw [if_neg hi, idle_tape_id (hoth i hi)]
+          rw [ite_eq_right hi, idle_tape_id (hoth i hi)]
           exact hoth i hi)
     refine ⟨c', .step hstep hreach, hst', ?_, ?_, ?_, ?_⟩
     · rw [hwt']
       refine congrArg _ ?_
       funext j
       by_cases hj1 : 1 ≤ j ∧ j ≤ p
-      · rw [if_pos hj1, if_pos (by omega)]
-      · rw [if_neg hj1]
+      · rw [ite_eq_left hj1, ite_eq_left (by omega)]
+      · rw [ite_eq_right hj1]
         by_cases hje : j = p + 1
         · subst hje
-          rw [Function.update_self, if_pos (by omega)]
-        · rw [Function.update_of_ne hje, if_neg (by omega)]
+          rw [Function.update_self, ite_eq_left (by omega)]
+        · rw [Function.update_of_ne hje, ite_eq_right (by omega)]
     · rw [hin']; exact idle_input_id hin
     · rw [hout']; exact idle_tape_id hout
     · intro i hi
       rw [hoth' i hi]
       show (if i = t then _ else _) = _
-      rw [if_neg hi]
+      rw [ite_eq_right hi]
       exact idle_tape_id (hoth i hi)
 
 -- ════════════════════════════════════════════════════════════════════════
@@ -402,11 +402,11 @@ theorem scanRight_loop {cur next : BodyQ} {t : Fin 6}
       simpa using hbl
     have hread' : (c.work t).read ≠ Γ.start := by rw [hread]; simp
     have harm := hδ c.input.read (fun i => (c.work i).read) c.output.read
-    rw [if_pos hread] at harm
+    rw [ite_eq_left hread] at harm
     have hstep := step_act1 (by rw [hst]; exact hcur) (by rw [hst]; exact harm)
     refine ⟨_, .step hstep .zero, rfl, ?_, idle_input_id hin, idle_tape_id hout, ?_⟩
     · show (if t = t then _ else _) = (⟨h + 0 + 1, W⟩ : Tape)
-      rw [if_pos rfl, if_neg hread']
+      rw [ite_eq_left rfl, ite_eq_right hread']
       show ((c.work t).write _).move .right = _
       have hcells := tape_readBackWrite_preserves (c.work t) Dir3.right (Or.inr hread')
       simp only [Tape.writeAndMove] at hcells
@@ -419,7 +419,7 @@ theorem scanRight_loop {cur next : BodyQ} {t : Fin 6}
       rw [this, hcW]
     · intro i hi
       show (if i = t then _ else _) = _
-      rw [if_neg hi]
+      rw [ite_eq_right hi]
       exact idle_tape_id (hoth i hi)
   | succ k ih =>
     intro h hh hnb hbl c hst hcW hhead hin hout hoth
@@ -431,7 +431,7 @@ theorem scanRight_loop {cur next : BodyQ} {t : Fin 6}
     have hread' : (c.work t).read ≠ Γ.start := by
       rw [hread]; exact hWns h hh
     have harm := hδ c.input.read (fun i => (c.work i).read) c.output.read
-    rw [if_neg hreadnb] at harm
+    rw [ite_eq_right hreadnb] at harm
     have hstep := step_act1 (by rw [hst]; exact hcur) (by rw [hst]; exact harm)
     obtain ⟨c', hreach, hst', hwt', hin', hout', hoth'⟩ :=
       ih (h + 1) (by omega)
@@ -454,17 +454,17 @@ theorem scanRight_loop {cur next : BodyQ} {t : Fin 6}
         rfl
         (by
           dsimp only
-          rw [if_pos rfl,
+          rw [ite_eq_left rfl,
             tape_readBackWrite_preserves _ _ (Or.inr hread'), hcW])
         (by
           dsimp only
-          rw [if_pos rfl, if_neg hread']
+          rw [ite_eq_left rfl, ite_eq_right hread']
           simp only [Tape.writeAndMove, Tape.move, Tape.write_head, hhead])
         (by dsimp only; rw [idle_input_id hin]; exact hin)
         (by dsimp only; rw [idle_tape_id hout]; exact hout)
         (fun i hi => by
           dsimp only
-          rw [if_neg hi, idle_tape_id (hoth i hi)]
+          rw [ite_eq_right hi, idle_tape_id (hoth i hi)]
           exact hoth i hi)
     refine ⟨c', .step hstep hreach, hst', ?_, ?_, ?_, ?_⟩
     · rw [hwt']
@@ -474,7 +474,7 @@ theorem scanRight_loop {cur next : BodyQ} {t : Fin 6}
     · intro i hi
       rw [hoth' i hi]
       show (if i = t then _ else _) = _
-      rw [if_neg hi]
+      rw [ite_eq_right hi]
       exact idle_tape_id (hoth i hi)
 
 -- ════════════════════════════════════════════════════════════════════════
@@ -665,7 +665,7 @@ theorem dfBlank_loop :
       simp only [Tape.read, hhead, hcW]
       simpa using hbl
     have harm := arm_dfBlank c.input.read (fun i => (c.work i).read) c.output.read
-    rw [if_pos hread] at harm
+    rw [ite_eq_left hread] at harm
     have hstep := step_mkAct (c := c)
       (by rw [hst]; exact fun hcon => nomatch hcon)
       (by rw [hst]; exact harm)
@@ -675,7 +675,7 @@ theorem dfBlank_loop :
     rw [idle_tape_id (by rw [hread]; simp)]
     have : (fun j => if h ≤ j ∧ j < h + 0 then Γ.blank else W j) = W := by
       funext j
-      rw [if_neg (by omega)]
+      rw [ite_eq_right (by omega)]
     rw [this, ← hcW, show h + 0 = (c.work stT).head from by rw [hhead]; omega]
   | succ k ih =>
     intro W hWns h hh hnb hbl c hst hcW hhead hin hout hoth
@@ -685,7 +685,7 @@ theorem dfBlank_loop :
       rw [hread]
       simpa using hnb 0 (by omega)
     have harm := arm_dfBlank c.input.read (fun i => (c.work i).read) c.output.read
-    rw [if_neg hreadnb] at harm
+    rw [ite_eq_right hreadnb] at harm
     have hread' : (c.work stT).read ≠ Γ.start := by
       rw [hread]; exact hWns h hh
     have hstep := step_act1 (c := c)
@@ -720,26 +720,26 @@ theorem dfBlank_loop :
         rfl
         (by
           dsimp only
-          rw [if_pos rfl, if_neg hread']
+          rw [ite_eq_left rfl, ite_eq_right hread']
           show (((c.work stT).write Γw.blank.toΓ).move Dir3.right).cells = _
           have hw : (c.work stT).write Γw.blank.toΓ
               = { c.work stT with
                   cells := Function.update (c.work stT).cells (c.work stT).head Γw.blank.toΓ } := by
             unfold Tape.write
-            rw [if_neg (by omega)]
+            rw [ite_eq_right (by omega)]
           rw [hw]
           show Function.update (c.work stT).cells (c.work stT).head Γw.blank.toΓ = _
           rw [hcW, hhead]
           rfl)
         (by
           dsimp only
-          rw [if_pos rfl, if_neg hread']
+          rw [ite_eq_left rfl, ite_eq_right hread']
           simp only [Tape.writeAndMove, Tape.move, Tape.write_head, hhead])
         (by dsimp only; rw [idle_input_id hin]; exact hin)
         (by dsimp only; rw [idle_tape_id hout]; exact hout)
         (fun i hi => by
           dsimp only
-          rw [if_neg hi, idle_tape_id (hoth i hi)]
+          rw [ite_eq_right hi, idle_tape_id (hoth i hi)]
           exact hoth i hi)
     refine ⟨c', .step hstep hreach, hst', ?_, ?_, ?_, ?_⟩
     · rw [hwt']
@@ -747,18 +747,18 @@ theorem dfBlank_loop :
       refine ⟨by omega, ?_⟩
       funext j
       by_cases hj1 : h + 1 ≤ j ∧ j < h + 1 + k
-      · rw [if_pos hj1, if_pos (by omega)]
-      · rw [if_neg hj1]
+      · rw [ite_eq_left hj1, ite_eq_left (by omega)]
+      · rw [ite_eq_right hj1]
         by_cases hje : j = h
         · subst hje
-          rw [Function.update_self, if_pos (by omega)]
-        · rw [Function.update_of_ne hje, if_neg (by omega)]
+          rw [Function.update_self, ite_eq_left (by omega)]
+        · rw [Function.update_of_ne hje, ite_eq_right (by omega)]
     · rw [hin']; exact idle_input_id hin
     · rw [hout']; exact idle_tape_id hout
     · intro i hi
       rw [hoth' i hi]
       show (if i = stT then _ else _) = _
-      rw [if_neg hi]
+      rw [ite_eq_right hi]
       exact idle_tape_id (hoth i hi)
 
 -- ════════════════════════════════════════════════════════════════════════
@@ -797,7 +797,7 @@ theorem dfCopy_loop (W : ℕ → Γ) (hWns : ∀ j, 1 ≤ j → W j ≠ Γ.start
       simp only [Tape.read, hheadV, hcV]
       exact hVns a ha
     have harm := arm_dfCopy c.input.read (fun i => (c.work i).read) c.output.read
-    rw [if_pos hreadd] at harm
+    rw [ite_eq_left hreadd] at harm
     have hstep := step_mkAct (c := c)
       (by rw [hst]; exact fun hcon => nomatch hcon)
       (by rw [hst]; exact harm)
@@ -807,7 +807,7 @@ theorem dfCopy_loop (W : ℕ → Γ) (hWns : ∀ j, 1 ≤ j → W j ≠ Γ.start
       rw [idle_tape_id hreads]
       have hV : (fun j => if a ≤ j ∧ j < a + 0 then W (b + (j - a)) else V j) = V := by
         funext j
-        rw [if_neg (by omega)]
+        rw [ite_eq_right (by omega)]
       rw [hV, ← hcV, show a + 0 = (c.work stT).head from by rw [hheadV]; omega]
     · show (c.work dsT).writeAndMove _ _ = _
       rw [idle_tape_id (by rw [hreadd]; simp)]
@@ -825,7 +825,7 @@ theorem dfCopy_loop (W : ℕ → Γ) (hWns : ∀ j, 1 ≤ j → W j ≠ Γ.start
       simp only [Tape.read, hheadV, hcV]
       exact hVns a ha
     have harm := arm_dfCopy c.input.read (fun i => (c.work i).read) c.output.read
-    rw [if_neg hreadnb] at harm
+    rw [ite_eq_right hreadnb] at harm
     have hstep := step_act2 (c := c)
       (by rw [hst]; exact fun hcon => nomatch hcon)
       (by rw [hst]; exact harm)
@@ -860,34 +860,34 @@ theorem dfCopy_loop (W : ℕ → Γ) (hWns : ∀ j, 1 ≤ j → W j ≠ Γ.start
         rfl
         (by
           dsimp only
-          rw [if_pos rfl, if_neg hreads]
+          rw [ite_eq_left rfl, ite_eq_right hreads]
           show (((c.work stT).write _).move Dir3.right).cells = _
           have hw : (c.work stT).write (readBackWrite ((c.work dsT).read)).toΓ
               = { c.work stT with
                   cells := Function.update (c.work stT).cells (c.work stT).head
                     (readBackWrite ((c.work dsT).read)).toΓ } := by
             unfold Tape.write
-            rw [if_neg (by omega)]
+            rw [ite_eq_right (by omega)]
           rw [hw]
           show Function.update (c.work stT).cells (c.work stT).head _ = _
           rw [hcV, hheadV, hWb])
         (by
           dsimp only
-          rw [if_pos rfl, if_neg hreads]
+          rw [ite_eq_left rfl, ite_eq_right hreads]
           simp only [Tape.writeAndMove, Tape.move, Tape.write_head, hheadV])
         (by
           dsimp only
-          rw [if_neg (by decide : dsT ≠ stT), if_pos rfl, if_neg hreadd',
+          rw [ite_eq_right (by decide : dsT ≠ stT), ite_eq_left rfl, ite_eq_right hreadd',
             tape_readBackWrite_preserves _ _ (Or.inr hreadd'), hcW])
         (by
           dsimp only
-          rw [if_neg (by decide : dsT ≠ stT), if_pos rfl, if_neg hreadd']
+          rw [ite_eq_right (by decide : dsT ≠ stT), ite_eq_left rfl, ite_eq_right hreadd']
           simp only [Tape.writeAndMove, Tape.move, Tape.write_head, hheadW])
         (by dsimp only; rw [idle_input_id hin]; exact hin)
         (by dsimp only; rw [idle_tape_id hout]; exact hout)
         (fun i hi hi' => by
           dsimp only
-          rw [if_neg hi, if_neg hi', idle_tape_id (hoth i hi hi')]
+          rw [ite_eq_right hi, ite_eq_right hi', idle_tape_id (hoth i hi hi')]
           exact hoth i hi hi')
     refine ⟨c', .step hstep hreach, hst', ?_, ?_, ?_, ?_, ?_⟩
     · rw [hwtS']
@@ -895,14 +895,14 @@ theorem dfCopy_loop (W : ℕ → Γ) (hWns : ∀ j, 1 ≤ j → W j ≠ Γ.start
       refine ⟨by omega, ?_⟩
       funext j
       by_cases hj1 : a + 1 ≤ j ∧ j < a + 1 + k
-      · rw [if_pos hj1, if_pos (by omega)]
+      · rw [ite_eq_left hj1, ite_eq_left (by omega)]
         exact congrArg W (by omega)
-      · rw [if_neg hj1]
+      · rw [ite_eq_right hj1]
         by_cases hje : j = a
         · subst hje
-          rw [Function.update_self, if_pos (by omega)]
+          rw [Function.update_self, ite_eq_left (by omega)]
           exact congrArg W (by omega)
-        · rw [Function.update_of_ne hje, if_neg (by omega)]
+        · rw [Function.update_of_ne hje, ite_eq_right (by omega)]
     · rw [hwtD']
       exact congrArg (fun n => (⟨n, W⟩ : Tape)) (by omega)
     · rw [hin']; exact idle_input_id hin
@@ -910,7 +910,7 @@ theorem dfCopy_loop (W : ℕ → Γ) (hWns : ∀ j, 1 ≤ j → W j ≠ Γ.start
     · intro i hi hi'
       rw [hoth' i hi hi']
       show (if i = stT then _ else if i = dsT then _ else _) = _
-      rw [if_neg hi, if_neg hi']
+      rw [ite_eq_right hi, ite_eq_right hi']
       exact idle_tape_id (hoth i hi hi')
 
 end TM.UTMBody

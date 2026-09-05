@@ -6,7 +6,7 @@ Authors: Bolton Bailey
 module
 public import Complexitylib.Classes.PCP.Internal.Expander
 public import Complexitylib.Classes.PCP.Internal.Mixing
-public import Mathlib.Data.Real.Sqrt
+public import Mathlib.Analysis.Real.Sqrt
 
 /-!
 # Relabelling darts and padding with loops
@@ -87,7 +87,8 @@ theorem spectralBound_relabel {D' : Type} [DecidableEq D'] [Fintype D'] (e : G.D
     {lam : ℝ} (h : G.SpectralBound lam) : (G.relabel e).SpectralBound lam := by
   intro f hf
   have := h f hf
-  simp only [step_relabel]
+  have hs : ∀ v, (G.relabel e).step f v = G.step f v := fun v => step_relabel G e f v
+  simp only [hs]
   exact this
 
 /-! ### Padding with loops -/
@@ -125,7 +126,7 @@ theorem step_padLoops (k : ℕ) (f : G.V → ℝ) (v : G.V) :
     (G.padLoops k).step f v
       = ((G.deg : ℝ) * G.step f v + (k : ℝ) * f v) / ((G.deg : ℝ) + k) := by
   have hd : (G.deg : ℝ) ≠ 0 := G.deg_ne_zero
-  rw [step, deg_padLoops]
+  unfold step; erw [deg_padLoops]
   show (∑ i : G.D ⊕ Fin k, f ((G.padLoops k).nbr v i)) / ((G.deg + k : ℕ) : ℝ) = _
   rw [Fintype.sum_sum_type]
   have h1 : ∀ i : G.D, (G.padLoops k).nbr v (Sum.inl i) = G.nbr v i := fun i => rfl
@@ -133,7 +134,7 @@ theorem step_padLoops (k : ℕ) (f : G.V → ℝ) (v : G.V) :
   simp only [h1, h2, Finset.sum_const, Finset.card_univ, Fintype.card_fin, nsmul_eq_mul]
   push_cast
   congr 1
-  rw [step, mul_div_cancel₀ _ hd]
+  rw [mul_div_cancel₀ _ hd]
 
 /-- **Padding keeps the bound**, with `μ² = α λ² + (1 - α)` for `α` the fraction of
 real darts. -/
@@ -153,7 +154,7 @@ theorem spectralBound_padLoops (k : ℕ) {lam : ℝ} (h : G.SpectralBound lam) :
   -- Jensen for two terms
   have hpt : ∀ v, ((G.padLoops k).step f v) ^ 2 ≤ a * (G.step f v) ^ 2 + (1 - a) * (f v) ^ 2 := by
     intro v
-    rw [step_padLoops]
+    erw [step_padLoops]
     have hrw : ((G.deg : ℝ) * G.step f v + (k : ℝ) * f v) / ((G.deg : ℝ) + k)
         = a * G.step f v + (1 - a) * f v := by
       rw [← hb, ha]; field_simp
@@ -215,8 +216,8 @@ theorem spectralBound_relabelV {V' : Type} [DecidableEq V'] [Fintype V'] (e : G.
       = ∑ w : G.V, (G.step (fun w => f (e w)) w) ^ 2 :=
         (Fintype.sum_equiv e (fun w => (G.step (fun w => f (e w)) w) ^ 2)
           (fun v => ((G.relabelV e).step f v) ^ 2) fun w => by
-            dsimp only
-            rw [step_relabelV, Equiv.symm_apply_apply]).symm
+            show (G.step (fun w => f (e w)) w) ^ 2 = ((G.relabelV e).step f (e w)) ^ 2
+            rw [step_relabelV (G := G) (e := e) (f := f) (v := e w), Equiv.symm_apply_apply]).symm
     _ ≤ lam ^ 2 * ∑ w : G.V, (f (e w)) ^ 2 := hb
     _ = lam ^ 2 * ∑ v : V', (f v) ^ 2 := by
         congr 1
@@ -231,10 +232,10 @@ noncomputable def toFinForm : RegGraph :=
   (G.relabelV (Fintype.equivFin G.V)).relabel (Fintype.equivFin G.D)
 
 @[simp] theorem order_toFinForm : G.toFinForm.order = G.order := by
-  rw [toFinForm, order_relabel, order_relabelV]
+  unfold toFinForm; erw [ order_relabel, order_relabelV]
 
 @[simp] theorem deg_toFinForm : G.toFinForm.deg = G.deg := by
-  rw [toFinForm, deg_relabel, deg_relabelV]
+  unfold toFinForm; erw [ deg_relabel, deg_relabelV]
 
 theorem spectralBound_toFinForm {lam : ℝ} (h : G.SpectralBound lam) :
     G.toFinForm.SpectralBound lam :=

@@ -526,7 +526,7 @@ private theorem body_measured {spec : Spec} {bit : Bool} {rest : List Bool}
   constructor
   · simp only [body, Cmd.basics, bodyOps, List.map_cons, List.map_nil, Cmd.seqList]
     convert hrun using 1
-    ring
+    all_goals first | rfl | ring
   · exact hiterated
 
 private theorem addressed_address_of_inv {spec : Spec} {bit : Bool}
@@ -755,7 +755,7 @@ private theorem finalize_measured {spec : Spec} {inputLength state : ℕ}
   · simp only [finalize, Cmd.basics, finalizeOps, List.map_cons, List.map_nil,
       Cmd.seqList]
     convert hrun using 1
-    ring
+    all_goals first | rfl | ring
   · change ((Basic.load lengthReg addressReg).exec indexed) lengthReg = _
     simp [Basic.exec, haddress, htable]
 

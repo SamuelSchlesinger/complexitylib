@@ -210,7 +210,7 @@ theorem card_fibre_truth (A : (R.killedPow q T hq).Assignment) (v : R.graph.V)
         stopAt x.2 = m ∧ R.kOpinionAbout q T hq A v x = R.kPlurality q T hq A v).card
       = R.truthCount q T hq A v m
         * (R.graph.deg ^ (T - m) * ((q - 1) ^ m * q ^ (T - m - 1))) := by
-  rw [R.card_fibre_opinion q T hq A v _ hm, truthCount, dif_pos (le_of_lt hm)]
+  rw [R.card_fibre_opinion q T hq A v _ hm, truthCount, dite_eq_left (le_of_lt hm)]
 
 omit [Fintype α] [DecidableEq α] [Nonempty α] in
 theorem card_KLabels : Fintype.card (R.KLabels q T) = R.graph.deg ^ T * q ^ T := by

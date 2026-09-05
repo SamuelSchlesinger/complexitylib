@@ -191,9 +191,16 @@ theorem emitClauseTM_hoareTime_internal
   have hC := TM.emitLitTM_hoareTime cSign cReg c inp work
     ((ys ++ literalBits aSign a) ++ literalBits bSign b) hinp
     (fun i _ => hwork i) (by rw [hc]; exact TM.reg_regT c)
-  have hSep := TM.emitBitsTM_hoareTime [true, false] inp work
-    (((ys ++ literalBits aSign a) ++ literalBits bSign b) ++ literalBits cSign c)
-    hinp hwork
+  have hSep : (TM.emitBitsTM (n := workTapeCount) [true, false]).HoareTime
+      (TM.EmitPred inp work
+        (((ys ++ literalBits aSign a) ++ literalBits bSign b) ++ literalBits cSign c))
+      (TM.EmitPred inp work
+        ((((ys ++ literalBits aSign a) ++ literalBits bSign b) ++ literalBits cSign c) ++
+          [true, false]))
+      2 :=
+    TM.emitBitsTM_hoareTime [true, false] inp work
+      (((ys ++ literalBits aSign a) ++ literalBits bSign b) ++ literalBits cSign c)
+      hinp hwork
   have hA' := TM.Experimental.EmitSpec.ofHoareTime hinp hwork
     (by simpa [literalBits] using hA)
   have hB' := TM.Experimental.EmitSpec.ofHoareTime hinp hwork

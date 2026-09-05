@@ -225,7 +225,7 @@ theorem applyMoveRight {t : Tape} {bits : List Bool}
     t.writeAndMove (TM.readBackWrite t.read) Dir3.right =
       t.move Dir3.right := by
   show (t.write (TM.readBackWrite t.read)).move Dir3.right = _
-  rw [Tape.write, if_pos h.1]
+  rw [Tape.write, ite_eq_left h.1]
 
 /-- The controller's marker bounce returns to the position-zero cursor. -/
 theorem returnToFirstBit {t : Tape} {bits : List Bool}

@@ -55,7 +55,7 @@ instance {count : ℕ} (arity threshold precision rangeWidth : ℕ)
     Decidable (HashCellWitness arity threshold precision rangeWidth
       input seed witness) := by
   unfold HashCellWitness
-  infer_instance
+  exact @instDecidableAnd _ _ (Finset.decidableMem _ _) inferInstance
 
 /-- The selected affine zero cell contains at least one powered survivor
 witness. -/

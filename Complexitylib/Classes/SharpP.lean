@@ -69,12 +69,12 @@ theorem acceptLeafCountFrom_le (tm : NTM n) (c : Cfg n tm.Q) (T : ℕ) :
       split <;> omega
   | succ T ih =>
       by_cases hhalt : tm.halted c
-      · rw [acceptLeafCountFrom, if_pos hhalt, Nat.pow_succ]
+      · rw [acceptLeafCountFrom, ite_eq_left hhalt, Nat.pow_succ]
         split
         · have hpow : 0 < 2 ^ T := by positivity
           omega
         · omega
-      · rw [acceptLeafCountFrom, if_neg hhalt, Nat.pow_succ]
+      · rw [acceptLeafCountFrom, ite_eq_right hhalt, Nat.pow_succ]
         have hfalse := ih (tm.trace 1 (fun _ => false) c)
         have htrue := ih (tm.trace 1 (fun _ => true) c)
         omega
@@ -97,12 +97,12 @@ private theorem acceptLeafCountFrom_add_eq (tm : NTM n) (c : Cfg n tm.Q)
       cases d with
       | zero => rfl
       | succ d =>
-          rw [Nat.zero_add, acceptLeafCountFrom, acceptLeafCountFrom, if_pos hc]
+          rw [Nat.zero_add, acceptLeafCountFrom, acceptLeafCountFrom, ite_eq_left hc]
           by_cases hout : c.output.cells 1 = Γ.one <;> simp [hc, hout]
   | succ T ih =>
       by_cases hc : tm.halted c
       · rw [show T + 1 + d = (T + d) + 1 by omega]
-        rw [acceptLeafCountFrom, acceptLeafCountFrom, if_pos hc, if_pos hc]
+        rw [acceptLeafCountFrom, acceptLeafCountFrom, ite_eq_left hc, ite_eq_left hc]
       · have hbranch (b : Bool) :
             ∀ choices : Fin T → Bool,
               tm.halted
@@ -111,7 +111,7 @@ private theorem acceptLeafCountFrom_add_eq (tm : NTM n) (c : Cfg n tm.Q)
           let choices' : Fin (T + 1) → Bool := Fin.cases b choices
           simpa [choices', NTM.trace, hc] using hhalt choices'
         rw [Nat.succ_add]
-        simp only [acceptLeafCountFrom, hc, if_false]
+        simp only [acceptLeafCountFrom, hc, ite_false]
         rw [ih _ (hbranch false), ih _ (hbranch true)]
 
 /-- Once every path has halted by `T`, extending the observation clock to any

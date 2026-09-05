@@ -39,8 +39,7 @@ reduction within an explicit quartic time bound. -/
 theorem reductionTM_computesInTime :
     reductionTM.ComputesInTime reduction
       (fun n => 6 * n + 16384 * (n + 2) ^ 4 + 49) := by
-  simpa only [reductionMachineTime] using
-    reductionTM_computesInTime_internal
+  exact reductionTM_computesInTime_internal
 
 end Machine
 

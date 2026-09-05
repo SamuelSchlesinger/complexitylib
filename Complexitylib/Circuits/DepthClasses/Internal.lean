@@ -91,7 +91,7 @@ theorem mem_NC1_iff_internal {f : BoolFunFamily} :
       ∃ (F : CircuitFamily Basis.andOr2) (c : ℕ),
         F.Computes f ∧ F.PolynomialSize ∧
           F.DepthBoundedBy (fun n => c * Nat.log 2 n + c) := by
-  simp only [NC1, NC, Set.mem_setOf_eq]
+  simp only [NC1, NC, Set.mem_ofPred_eq]
   constructor
   · rintro ⟨F, c, hcomputes, hsize, hdepth⟩
     exact ⟨F, c, hcomputes, hsize, fun n => by
@@ -105,7 +105,7 @@ theorem mem_AC0_iff_internal {f : BoolFunFamily} :
       ∃ (F : CircuitFamily Basis.unboundedAndOr) (c : ℕ),
         F.Computes f ∧ F.PolynomialSize ∧
           F.DepthBoundedBy (fun _ => c) := by
-  simp only [AC0, AC, Set.mem_setOf_eq]
+  simp only [AC0, AC, Set.mem_ofPred_eq]
   constructor
   · rintro ⟨F, c, hcomputes, hsize, hdepth⟩
     exact ⟨F, c, hcomputes, hsize, fun n => by
@@ -119,7 +119,7 @@ theorem mem_TC0_iff_internal {f : BoolFunFamily} :
       ∃ (F : CircuitFamily Basis.threshold) (c : ℕ),
         F.Computes f ∧ F.PolynomialSize ∧
           F.DepthBoundedBy (fun _ => c) := by
-  simp only [TC0, TC, Set.mem_setOf_eq]
+  simp only [TC0, TC, Set.mem_ofPred_eq]
   constructor
   · rintro ⟨F, c, hcomputes, hsize, hdepth⟩
     exact ⟨F, c, hcomputes, hsize, fun n => by

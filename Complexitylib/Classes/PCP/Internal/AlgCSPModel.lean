@@ -118,13 +118,13 @@ theorem answers_posVal (A : AlgCSP) (x π : List Bool) (e : ℕ)
     rw [List.getElem_map, List.getElem_map, List.getElem_range]
     by_cases hlow : j < A.width
     · rw [List.getElem_append_left (by rw [hb0]; exact hlow), getElem_blockOf h0 hlow,
-        AlgCSP.posVal, if_pos hlow]
+        AlgCSP.posVal, ite_eq_left hlow]
       simp [hlow]
     · have hge : (blockOf A.width π (A.vert false x e)).length ≤ j := by
         rw [hb0]; omega
       rw [List.getElem_append_right hge]
       simp only [hb0]
-      rw [getElem_blockOf h1 (by omega), AlgCSP.posVal, if_neg hlow]
+      rw [getElem_blockOf h1 (by omega), AlgCSP.posVal, ite_eq_right hlow]
       simp [hlow]
 
 /-! ### Padding a proof -/
@@ -178,7 +178,7 @@ variable {A : AlgCSP} {α : Type} [Inhabited α] {G : List Bool → ConstraintGr
   {enc : α → List Bool} {dec : List Bool → α}
 
 /-- The proof an assignment writes. -/
-def assignProof (enc : α → List Bool) [Inhabited α]
+def assignProof (enc : α → List Bool)
     (n : ℕ) (a : Fin n → α) : List Bool :=
   proofOf n (fun v => if h : v < n then enc (a ⟨v, h⟩) else enc default)
 
@@ -194,8 +194,7 @@ theorem blockOf_assignProof (hM : A.Models G enc dec) {n : ℕ} (a : Fin n → �
     (f := fun v => if h : v < n then enc (a ⟨v, h⟩) else enc default)
     (fun i => by by_cases h : i < n <;> simp [h, hM.length_enc]) n v hv
   rw [assignProof, this]
-  simp only
-  rw [dif_pos hv]
+  rw [dite_eq_left hv]
 
 /-- **Completeness transfers.** A satisfying assignment writes a proof the
 verifier accepts on every edge. -/

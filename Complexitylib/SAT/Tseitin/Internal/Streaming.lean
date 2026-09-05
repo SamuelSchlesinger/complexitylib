@@ -178,7 +178,9 @@ private theorem run_raw_literal_internal (st : State) (hscan : st.scan = .bounda
   simp only [Lit.rawTokens, Lit.encodeRaw, Unary.encode, List.map_cons, run]
   rw [show step st (.bit sign) = some { st with scan := .literal sign 0 } by
     simp only [step, hscan]]
-  simpa only [Nat.zero_add] using run_true_body_internal st sign 0 var
+  have h := run_true_body_internal st sign 0 var
+  rw [Nat.zero_add] at h
+  exact h
 
 private theorem run_literal_internal (st : State) (hscan : st.scan = .boundary)
     (lit : Lit) :

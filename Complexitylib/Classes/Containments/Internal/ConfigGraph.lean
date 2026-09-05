@@ -66,9 +66,9 @@ theorem reachesCfg_trace (tm : NTM k) :
   | T + 1, choices, c => by
       rw [NTM.trace]
       by_cases h : c.state = tm.qhalt
-      · simp only [h, if_pos]
+      · simp only [h, ite_eq_left]
         exact reachesCfg_refl tm c
-      · simp only [h, if_neg, not_false_iff]
+      · simp only [h, ite_eq_right, not_false_iff]
         refine reachesCfg_head ⟨h, choices ⟨0, Nat.zero_lt_succ T⟩, rfl⟩ ?_
         exact reachesCfg_trace tm T _ _
 
@@ -81,8 +81,12 @@ theorem exists_trace_of_reachesCfg {c c' : Cfg k tm.Q} (h : tm.ReachesCfg c c') 
       obtain ⟨hne, b, rfl⟩ := hstep
       obtain ⟨t, choices, hchoices⟩ := ih
       refine ⟨t + 1, Fin.cons b choices, ?_⟩
-      rw [NTM.trace, if_neg hne]
-      simpa using hchoices
+      have hcons : (fun i : Fin t => Fin.cons (α := fun _ => Bool) b choices
+          ⟨i.val + 1, Nat.succ_lt_succ i.isLt⟩) = choices := by
+        funext i
+        exact Fin.cons_succ (α := fun _ => Bool) b choices i
+      rw [NTM.trace, ite_eq_right hne, hcons]
+      exact hchoices
 
 end NTM
 

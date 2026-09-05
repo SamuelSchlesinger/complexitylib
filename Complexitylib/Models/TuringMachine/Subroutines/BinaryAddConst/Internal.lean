@@ -232,8 +232,8 @@ theorem binaryAddConstTM_reachesIn_frame_internal
           funext fun i => (hprevWork i).transitionTape_eq_self] using hnext
       have hseq := seqTM_reachesIn_of_reachesIn
         (binaryAddConstTM idx constant) (binarySuccTM idx) hprev rfl hnext'
-      simpa [binaryAddConstTM, binaryAddConstTime, binaryAddConstNatTape,
-        binaryAddConstWorkAt] using hseq
+      simp only [binaryAddConstTM, binaryAddConstTime, binaryAddConstNatTape]
+      exact hseq
 
 theorem binaryAddConstTM_hoareTime_frame_internal
     (idx : Fin n) (constant dstValue : ℕ)

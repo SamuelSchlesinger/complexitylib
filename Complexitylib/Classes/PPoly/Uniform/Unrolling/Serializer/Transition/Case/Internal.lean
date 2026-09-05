@@ -348,7 +348,7 @@ theorem getElem_caseFormulaSchedule_identity_internal
           simp [caseFormulaScheduleSize, caseFormulaMemberCount]
           omega) = CircuitCode.RawGate.constant 0 true := by
   unfold caseFormulaSchedule
-  rw [List.getElem_append_left (by
+  erw [List.getElem_append_left (by
     simp [length_caseFormulaMemberGates_internal])]
   rw [List.getElem_append_right (by
     rw [length_caseFormulaMemberGates_internal])]
@@ -368,7 +368,7 @@ theorem getElem_caseFormulaSchedule_connector_internal
         (caseFormulaMemberCount workCount)
         (caseFormulaSizeAt workCount T choiceValue) rank.val := by
   unfold caseFormulaSchedule
-  rw [List.getElem_append_right (by
+  erw [List.getElem_append_right (by
     simp [length_caseFormulaMemberGates_internal])]
   have hindex : caseFormulaMembersSize workCount T choiceValue + 1 + rank.val -
       (caseFormulaMembersSize workCount T choiceValue + 1) = rank.val := by

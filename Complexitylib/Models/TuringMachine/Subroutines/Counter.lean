@@ -430,7 +430,7 @@ theorem inputLengthPlusOneCounterTM_scan_start_initializes_counter
         (by simp [TM.step, inputLengthPlusOneCounterTM])).work counterIdx).HasUnaryPrefix 0 := by
   simp [TM.step, inputLengthPlusOneCounterTM, hinp, counterPreserveWork,
     counterIdleDirs, hcounter]
-  simpa [Tape.writeAndMove, Tape.write] using
+  simpa [Tape.writeAndMove, Tape.write, idleDir, Tape.read, Tape.init] using
     Tape.init_nil_move_right_hasUnaryPrefix_zero
 
 /-- In the `scan` phase, reading blank on the input moves the machine to the
@@ -671,7 +671,7 @@ private theorem inputLengthPlusOneCounterTM_start_step
       rw [hcounter]
       simp [Tape.read, Tape.init]
     simpa [counterPreserveWork, counterIdleDirs, hcounter, hcounter_read,
-      Tape.writeAndMove, Tape.write] using
+      Tape.writeAndMove, Tape.write, idleDir, Tape.read, Tape.init] using
       Tape.init_nil_move_right_hasUnaryPrefix_zero
   · simp [counterIdleDirs, hcounter, Tape.writeAndMove, Tape.move_cells,
       Tape.write, Tape.init]
@@ -939,7 +939,7 @@ theorem inputLengthPlusOneCounterTM_hoareTime
   refine ⟨c4, 1 + x.length + 1 + (x.length + 2 + 1), ?_, ?_, hhalt4, hpost⟩
   · simp [inputLengthPlusOneCounterTime]
     omega
-  · simpa [c0] using hreach_04
+  · simpa [c0, inputLengthPlusOneCounterTM] using hreach_04
 
 /-- Started-tape variant of `inputLengthPlusOneCounterTM_hoareTime`: if the
 input is already positioned at cell `1` and the counter tape is the started
@@ -1020,7 +1020,7 @@ theorem inputLengthPlusOneCounterTM_started_hoareTime
     ⟨hcounter4, hcell04, hnostart4⟩⟩
   · simp [inputLengthPlusOneCounterTime]
     omega
-  · simpa [c0] using hreach_04
+  · simpa [c0, inputLengthPlusOneCounterTM] using hreach_04
 
 /-- Started-tape variant of the unary counter builder that also records the
 final input position. The input cells are unchanged, and the input head ends at
@@ -1107,7 +1107,7 @@ theorem inputLengthPlusOneCounterTM_started_tracksInput_hoareTime
     ⟨hinput4_cells, hinput4_head, hcounter4, hcell04, hnostart4⟩⟩
   · simp [inputLengthPlusOneCounterTime]
     omega
-  · simpa [c0] using hreach_04
+  · simpa [c0, inputLengthPlusOneCounterTM] using hreach_04
 
 /-- One-step preservation of a passive started Boolean work tape distinct from
 the active counter tape. -/
@@ -1128,17 +1128,20 @@ private theorem inputLengthPlusOneCounterTM_step_preserves_started_other_work
       | scan =>
           by_cases hstart : input.read = Γ.start
           · simp [TM.step, inputLengthPlusOneCounterTM, hstart] at hstep
+            injection hstep with hstep
             subst hstep
             simpa [counterPreserveWork, counterIdleDirs] using
               Tape.writeAndMove_readBack_idle_of_ne_start (work passiveIdx)
                 (by simpa [hpassive] using hpassive_read)
           · by_cases hblank : input.read = Γ.blank
             · simp [TM.step, inputLengthPlusOneCounterTM, hblank] at hstep
+              injection hstep with hstep
               subst hstep
               simpa [counterWriteOneWork, counterAdvanceDirs, hne] using
                 Tape.writeAndMove_readBack_idle_of_ne_start (work passiveIdx)
                   (by simpa [hpassive] using hpassive_read)
             · simp [TM.step, inputLengthPlusOneCounterTM, hstart, hblank] at hstep
+              injection hstep with hstep
               subst hstep
               simpa [counterWriteOneWork, counterAdvanceDirs, hne] using
                 Tape.writeAndMove_readBack_idle_of_ne_start (work passiveIdx)
@@ -1146,11 +1149,13 @@ private theorem inputLengthPlusOneCounterTM_step_preserves_started_other_work
       | rewind =>
           by_cases hcounter : (work counterIdx).read = Γ.start
           · simp [TM.step, inputLengthPlusOneCounterTM, hcounter] at hstep
+            injection hstep with hstep
             subst hstep
             simpa [counterPreserveWork, counterAdvanceDirs, hne] using
               Tape.writeAndMove_readBack_idle_of_ne_start (work passiveIdx)
                 (by simpa [hpassive] using hpassive_read)
           · simp [TM.step, inputLengthPlusOneCounterTM, hcounter] at hstep
+            injection hstep with hstep
             subst hstep
             simpa [counterPreserveWork, counterRewindDirs, hne] using
               Tape.writeAndMove_readBack_idle_of_ne_start (work passiveIdx)
@@ -1193,17 +1198,20 @@ private theorem inputLengthPlusOneCounterTM_step_preserves_started_blank_output
       | scan =>
           by_cases hstart : input.read = Γ.start
           · simp [TM.step, inputLengthPlusOneCounterTM, hstart] at hstep
+            injection hstep with hstep
             subst hstep
             simpa [hout] using
               Tape.writeAndMove_readBack_idle_of_ne_start output
                 hout_read
           · by_cases hblank : input.read = Γ.blank
             · simp [TM.step, inputLengthPlusOneCounterTM, hblank] at hstep
+              injection hstep with hstep
               subst hstep
               simpa [hout] using
                 Tape.writeAndMove_readBack_idle_of_ne_start output
                   hout_read
             · simp [TM.step, inputLengthPlusOneCounterTM, hstart, hblank] at hstep
+              injection hstep with hstep
               subst hstep
               simpa [hout] using
                 Tape.writeAndMove_readBack_idle_of_ne_start output
@@ -1211,11 +1219,13 @@ private theorem inputLengthPlusOneCounterTM_step_preserves_started_blank_output
       | rewind =>
           by_cases hcounter : (work counterIdx).read = Γ.start
           · simp [TM.step, inputLengthPlusOneCounterTM, hcounter] at hstep
+            injection hstep with hstep
             subst hstep
             simpa [hout] using
               Tape.writeAndMove_readBack_idle_of_ne_start output
                 hout_read
           · simp [TM.step, inputLengthPlusOneCounterTM, hcounter] at hstep
+            injection hstep with hstep
             subst hstep
             simpa [hout] using
               Tape.writeAndMove_readBack_idle_of_ne_start output

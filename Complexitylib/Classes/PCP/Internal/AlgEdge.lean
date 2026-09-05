@@ -61,12 +61,12 @@ theorem posBlk_eq (cardB cardN cardNN cardD k b c : ℕ) (cardV kind block cube 
       = List.replicate (m + n) true := fun m n => (List.replicate_add m n true).symm
   rw [posBlk, RegCSP.posNum]
   by_cases h0 : k = 0
-  · rw [ifEqLen_pos (by simp [hk, h0]), if_pos h0, marks_eq, length_mulC, hb, hc, happ]
-  rw [ifEqLen_neg (by simp [hk, h0]), if_neg h0]
+  · rw [ifEqLen_pos (by simp [hk, h0]), ite_eq_left h0, marks_eq, length_mulC, hb, hc, happ]
+  rw [ifEqLen_neg (by simp [hk, h0]), ite_eq_right h0]
   by_cases h1 : k = 1
-  · rw [ifEqLen_pos (by simp [hk, h1]), if_pos h1, marks_eq, marks_eq, length_mulC,
+  · rw [ifEqLen_pos (by simp [hk, h1]), ite_eq_left h1, marks_eq, marks_eq, length_mulC,
       length_mulC, hb, hc, happ, happ]
-  rw [ifEqLen_neg (by simp [hk, h1]), if_neg h1, marks_eq, marks_eq, marks_eq,
+  rw [ifEqLen_neg (by simp [hk, h1]), ite_eq_right h1, marks_eq, marks_eq, marks_eq,
     length_mulC, length_mulC, length_mulC, hb, hc, happ, happ, happ]
   congr 2
   ring
@@ -154,6 +154,9 @@ theorem blockBlk_mem_FP (F : FinBase) (pol : Polynomial ℕ) (r : Round) :
     (ifEqLen_mem_FP readFn_mem_FP (constFn_mem_FP _) hrot (testFn_mem_FP r))
 
 /-- **The block is the one the read asks for.** -/
+-- The signature mirrors the family this belongs to; the argument is part of
+-- that shape even where this member does not consult it.
+@[nolint unusedArguments]
 theorem blockBlk_eq {β : Type} [Fintype β] [DecidableEq β] [Nonempty β] {R : RegCSP β}
     [NumEnc R.graph.V] [NumEnc R.graph.D] (F : FinBase) (pol : Polynomial ℕ) (r : Round)
     {w : List Bool} (p : R.Dart) (i : ReadIdx)
@@ -398,7 +401,8 @@ theorem stepFn_eq (F : FinBase) (pol : Polynomial ℕ) (hd : 1 < F.deg)
     obtain ⟨htest, hvert, hdart, hrand, hread⟩ :=
       blocks_eq r hDpos (by omega) (encGraph G)
         (NumEnc.enc p.1) (NumEnc.enc p.2) (NumEnc.enc z) (NumEnc.enc i) hblt hclt hilt
-    rw [edgeRule, tailBlk_eq posF r G (pairFst_pair _ _) htest hrand,
+    simp only [edgeRule]
+    rw [tailBlk_eq posF r G (pairFst_pair _ _) htest hrand,
       RegCSP.tailNum_split' (cZ := r.cZ) _ _ _ _ _ _ hrZ hclt hilt, hposF]
     rw [codeFn_eq' (B := Dinur.bits (F.toFamily hd) r.T) r hd G hq hdeg hP hC (by omega) p z i
       (by rw [hrZ, NumEnc.card_eq_fintype_card, card_cube]) hpc hpe dflt

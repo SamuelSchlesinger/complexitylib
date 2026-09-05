@@ -92,7 +92,7 @@ theorem denseImmediateInstructionTM_hoareTime_frame
       rw [show valueWork tapes.update.entry.query =
           initialWork tapes.update.entry.query by
         exact Function.update_of_ne hqueryReplacement _ initialWork]
-      exact ⟨hinitial.scanner.queryStart, by simpa using hinitial.scanner.query⟩
+      exact ⟨hinitial.scanner.queryStart, by exact hinitial.scanner.query⟩
     have hrun := TM.binaryAddConstTM_hoareTime_frame
       tapes.update.entry.query destination 0 inp₀ valueWork out₀ hqueryZero
       hinput

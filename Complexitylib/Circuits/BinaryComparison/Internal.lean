@@ -62,11 +62,13 @@ theorem unsignedLE_eq_decide_internal {width : ℕ}
       cases hleft : left (Fin.last width) <;>
         cases hright : right (Fin.last width)
       · simp [BitString.unsignedValue]
+        rfl
       · simp [BitString.unsignedValue]
         omega
       · simp [BitString.unsignedValue]
         omega
       · simp [BitString.unsignedValue]
+        rfl
 
 end BitString
 
@@ -342,7 +344,7 @@ theorem unsignedLERawCircuit_wellFormed_internal (width : ℕ)
     [NeZero width] :
     (unsignedLERawCircuit width).WellFormed (width + width) := by
   have hwidth := NeZero.ne width
-  letI : NeZero (width + width) := ⟨by omega⟩
+  let : NeZero (width + width) := ⟨by omega⟩
   constructor
   · intro hempty
     have hlength := length_unsignedLERawCircuit_internal width
@@ -357,7 +359,7 @@ theorem eval?_unsignedLERawCircuit_internal (width : ℕ) [NeZero width]
         (BitString.toList (Fin.append left right)) =
       some (decide (left.unsignedValue ≤ right.unsignedValue)) := by
   have hwidth := NeZero.ne width
-  letI : NeZero (width + width) := ⟨by omega⟩
+  let : NeZero (width + width) := ⟨by omega⟩
   let input := Fin.append left right
   let wires := (BitString.toList input).toArray
   have hwiresSize : wires.size = width + width := by
@@ -387,7 +389,7 @@ theorem eval?_unsignedLERawCircuit_internal (width : ℕ) [NeZero width]
     simp [BoolFormula.rawOutputWire, length_unsignedLERawCircuit_internal,
       BoolFormula.size_unsignedLE_internal]
   rw [RawCircuit.eval?]
-  simp only [hnonempty, Bool.false_eq_true, if_false, heval']
+  simp only [hnonempty, Bool.false_eq_true, ite_false, heval']
   rw [houtputIndex]
   change result[BoolFormula.rawOutputWire (width + width)
       (BoolFormula.unsignedLE width)]? =

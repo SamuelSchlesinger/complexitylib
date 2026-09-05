@@ -85,11 +85,11 @@ theorem mem_reachCodes_iff_walk (tm : NTM k) (x : List Bool) (S : ℕ)
         refine ⟨fun j => if j ≤ i then f j else a, by simp [h0], by simp, fun j hj => ?_⟩
         dsimp only
         rcases Nat.lt_or_ge j i with hlt | hge
-        · rw [if_pos (by omega), if_pos (by omega)]
+        · rw [ite_eq_left (by omega), ite_eq_left (by omega)]
           exact hf j hlt
         · have hji : j = i := by omega
           subst hji
-          rw [if_neg (by omega), if_pos (by omega), hfi]
+          rw [ite_eq_right (by omega), ite_eq_left (by omega), hfi]
           exact hstep
       · rintro ⟨f, h0, hfi, hf⟩
         have hmem : f i ∈ reachCodes tm x S a₀ i :=

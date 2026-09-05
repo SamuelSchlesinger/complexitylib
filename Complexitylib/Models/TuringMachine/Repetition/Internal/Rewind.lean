@@ -177,8 +177,7 @@ theorem repeatRewindSnapshotIter_input (j : Fin k) (m : ℕ)
   induction m generalizing S with
   | zero => rfl
   | succ m ih =>
-    simpa [repeatRewindSnapshotIter, repeatRewindSnapshotStep] using
-      ih (repeatRewindSnapshotStep j S)
+    exact ih (repeatRewindSnapshotStep j S)
 
 /-- Each active bank tape and flag project to the pure one-tape iterator. -/
 theorem repeatRewindSnapshotIter_active (j : Fin k) (m : ℕ)
@@ -189,8 +188,12 @@ theorem repeatRewindSnapshotIter_active (j : Fin k) (m : ℕ)
   induction m generalizing S with
   | zero => rfl
   | succ m ih =>
-    simpa [repeatRewindSnapshotIter, repeatRewindSnapshotStep] using
-      ih (repeatRewindSnapshotStep j S)
+    have hstep : ((repeatRewindSnapshotStep j S).work (repeatTapeIdx j i),
+        (repeatRewindSnapshotStep j S).bankDone i)
+        = repeatFixedRewindTapeStep (S.work (repeatTapeIdx j i), S.bankDone i) := by
+      simp [repeatRewindSnapshotStep]
+    rw [repeatFixedRewindTapeIter, ← hstep]
+    exact ih (repeatRewindSnapshotStep j S)
 
 /-- Snapshot iteration preserves every inactive physical work tape exactly. -/
 theorem repeatRewindSnapshotIter_inactive (j : Fin k) (m : ℕ)
@@ -274,13 +277,13 @@ theorem repeatAtTime_trace_rewind_prefix (tm : NTM n)
   induction m with
   | zero => rfl
   | succ m ih =>
-    rw [(repeatAtTime tm k T).trace_snoc m choices]
+    erw [(repeatAtTime tm k T).trace_snoc m choices]
     rw [ih (by omega) (fun i => choices i.castSucc)]
     rw [repeatAtTime_trace_one_rewind tm j ⟨m, by omega⟩ q votes
       (repeatRewindSnapshotIter j m S)
       (repeatRewindSnapshotIter_wellFormed j m S hS)
       (fun _ => choices (Fin.last m))]
-    simp only [dif_pos hm]
+    simp only [dite_eq_left hm]
     rw [repeatRewindSnapshotIter_succ_snoc]
 
 /-- Exactly `T + 1` wrapper rewind transitions produce the finish configuration
@@ -293,14 +296,14 @@ theorem repeatAtTime_trace_rewind_snapshot (tm : NTM n)
         (repeatRewindCfg tm j ⟨0, by omega⟩ q votes S) =
       repeatFinishCfg tm j q votes
         (repeatRewindSnapshotIter j (T + 1) S) := by
-  rw [(repeatAtTime tm k T).trace_snoc T choices]
+  erw [(repeatAtTime tm k T).trace_snoc T choices]
   rw [repeatAtTime_trace_rewind_prefix tm j q votes S hS T (by omega)
     (fun i => choices i.castSucc)]
   rw [repeatAtTime_trace_one_rewind tm j ⟨T, by omega⟩ q votes
     (repeatRewindSnapshotIter j T S)
     (repeatRewindSnapshotIter_wellFormed j T S hS)
     (fun _ => choices (Fin.last T))]
-  rw [dif_neg (by omega : ¬(T + 1 < T + 1))]
+  rw [dite_eq_right (by omega : ¬(T + 1 < T + 1))]
   rw [repeatRewindSnapshotIter_succ_snoc]
 
 /-- **Fixed rewind correctness.** Starting from rewind counter zero with all

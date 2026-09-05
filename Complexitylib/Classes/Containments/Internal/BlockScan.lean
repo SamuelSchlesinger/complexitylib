@@ -119,7 +119,7 @@ theorem markStep_run (r : Fin (j + 1)) (cols : ℕ → Fin (j + 1) → Γ) (off 
       rw [Scanner.chunkRun, ih, markStep, markCount]
       by_cases h : cols (off + 3 * m + 1) r = Γ.one
       · have hm : markOf cols off r m = true := by simp [markOf, h]
-        rw [if_pos h, hm]
+        rw [ite_eq_left h, hm]
         refine Prod.ext ?_ ?_
         · simp
         · show (decide (0 < markCount cols off r m) || decide (1 < markCount cols off r m))
@@ -129,7 +129,7 @@ theorem markStep_run (r : Fin (j + 1)) (cols : ℕ → Fin (j + 1) → Γ) (off 
           · have h1 : 0 < markCount cols off r m := h0
             simp [h1]
       · have hm : markOf cols off r m = false := by simp [markOf, h]
-        rw [if_neg h, hm]
+        rw [ite_eq_right h, hm]
         simp
 
 /-! ## The symbols -/
@@ -313,24 +313,24 @@ theorem leftStep_state (a b : Fin (j + 1)) (cols : ℕ → Fin (j + 1) → Γ) (
         refine ⟨rfl, rfl, rfl, ?_⟩
         by_cases hA : markOf cols off a 0 = true
         · have hA' : cols (off + 3 * 0 + 1) a = Γ.one := by simpa [markOf] using hA
-          rw [if_pos hA]
-          simp only [hA', if_true, decide_true]
+          rw [ite_eq_left hA]
+          simp only [hA', ite_true, decide_true]
           constructor
           · intro h
             exact ⟨by simpa [markOf] using h, by omega⟩
           · rintro ⟨h, -⟩
             simpa [markOf] using h
         · have hA' : ¬ (cols (off + 3 * 0 + 1) a = Γ.one) := by simpa [markOf] using hA
-          rw [if_neg hA]
+          rw [ite_eq_right hA]
           simp only [hA', decide_false]
           exact ⟨fun _ p h1 h2 => absurd h2 (by omega), fun _ => rfl⟩
       · obtain ⟨h1, h2, h3, h4⟩ := ih hm0
         rw [Scanner.chunkRun, leftStep]
-        simp only [h1, if_true, h2, h3]
+        simp only [h1, ite_true, h2, h3]
         refine ⟨by simp, by simp, by simp [markOf], ?_⟩
         by_cases hA : markOf cols off a 0 = true
-        · rw [if_pos hA] at h4 ⊢
-          rw [if_pos hA]
+        · rw [ite_eq_left hA] at h4 ⊢
+          rw [ite_eq_left hA]
           rw [Bool.and_eq_true, h4]
           constructor
           · rintro ⟨⟨hb0, hall⟩, hlast⟩
@@ -345,8 +345,8 @@ theorem leftStep_state (a b : Fin (j + 1)) (cols : ℕ → Fin (j + 1) → Γ) (
             have := hall m hm0 (by omega)
             rw [markOf] at this
             simp [this]
-        · rw [if_neg hA] at h4 ⊢
-          rw [if_neg hA, Bool.and_eq_true, h4]
+        · rw [ite_eq_right hA] at h4 ⊢
+          rw [ite_eq_right hA, Bool.and_eq_true, h4]
           constructor
           · rintro ⟨hall, hlast⟩ p hp1 hp2
             rcases Nat.lt_or_ge p m with h | h
@@ -447,8 +447,8 @@ theorem dirEmit_run (a b : Fin (j + 1)) (cols : ℕ → Fin (j + 1) → Γ) (off
       obtain ⟨-, h2, h3, h4⟩ := leftStep_state a b cols off m hm
       rw [h2, h3]
       by_cases hA : markOf cols off a 0 = true
-      · rw [if_pos hA, h4, if_pos hA]
-        simp only [movedMark, hA, if_true]
+      · rw [ite_eq_left hA, h4, ite_eq_left hA]
+        simp only [movedMark, hA, ite_true]
         constructor
         · rintro ⟨hb0, hall⟩ p hp
           rcases Nat.eq_zero_or_pos p with h0 | h0
@@ -460,9 +460,9 @@ theorem dirEmit_run (a b : Fin (j + 1)) (cols : ℕ → Fin (j + 1) → Γ) (off
           rw [this]
           simp
           omega
-      · rw [if_neg hA, Bool.and_eq_true, h4, if_neg hA]
+      · rw [ite_eq_right hA, Bool.and_eq_true, h4, ite_eq_right hA]
         have hA' : markOf cols off a 0 = false := by simpa using hA
-        simp only [movedMark, hA', Bool.not_eq_true', Bool.false_eq_true, if_false]
+        simp only [movedMark, hA', Bool.not_eq_true', Bool.false_eq_true, ite_false]
         constructor
         · rintro ⟨hall, hlast⟩ p hp
           rcases Nat.lt_or_ge p (m - 1) with h | h
@@ -589,17 +589,17 @@ theorem moved_of_holds {m : ℕ} (cols : ℕ → Fin (j + 1) → Γ) (off : ℕ)
         rw [hb hd' hdm'] at hh
         simp only [decide_true] at hh
         by_cases h0 : hd' = 0
-        · rw [h0, if_pos rfl] at hh
+        · rw [h0, ite_eq_left rfl] at hh
           exact absurd hh.symm (by simp)
-        · rw [if_neg h0, hmark (hd' - 1) (by omega)] at hh
+        · rw [ite_eq_right h0, hmark (hd' - 1) (by omega)] at hh
           have : hd' - 1 = hd := by simpa using hh.symm
           omega
       · intro h p hp
         rw [hb p hp, h]
         by_cases h0 : p = 0
-        · rw [h0, if_pos rfl]
+        · rw [h0, ite_eq_left rfl]
           simp
-        · rw [if_neg h0, hmark (p - 1) (by omega)]
+        · rw [ite_eq_right h0, hmark (p - 1) (by omega)]
           congr 1
           simp only [eq_iff_iff]
           omega
@@ -608,7 +608,7 @@ theorem moved_of_holds {m : ℕ} (cols : ℕ → Fin (j + 1) → Γ) (off : ℕ)
       rw [ha 0 (by omega)]
       by_cases h0 : hd = 0
       · rw [h0]
-        simp only [decide_true, if_true]
+        simp only [decide_true, ite_true]
         constructor
         · intro h
           have hh := h hd' hdm'
@@ -647,9 +647,9 @@ theorem sym_of_holds {m : ℕ} (cols : ℕ → Fin (j + 1) → Γ) (off : ℕ) (
     have hiff : ((decide (p = hd) && decide (0 < p.val)) = true) ↔ (p = hd ∧ 0 < p.val) := by
       simp only [Bool.and_eq_true, decide_eq_true_eq]
     by_cases hc : p = hd ∧ 0 < p.val
-    · rw [if_pos hc, if_pos (hiff.mpr hc)]
+    · rw [ite_eq_left hc, ite_eq_left (hiff.mpr hc)]
       exact ⟨fun h => gammaBits_injective h, fun h => by rw [h]⟩
-    · rw [if_neg hc, if_neg (fun h => hc (hiff.mp h))]
+    · rw [ite_eq_right hc, ite_eq_right (fun h => hc (hiff.mp h))]
       exact ⟨fun h => gammaBits_injective h, fun h => by rw [h]⟩
   constructor
   · intro h
@@ -909,7 +909,8 @@ theorem inHeadStep_stay_fst (r r' : Fin (j + 1)) (cols : ℕ → Fin (j + 1) →
   induction p with
   | zero => rfl
   | succ p ih =>
-      rw [Scanner.cellFold, Scanner.cellFold, ← ih]
+      simp only [Scanner.cellFold]
+      rw [← ih]
       rfl
 
 theorem bitsOfLenLE_inj {w u v : ℕ} (hu : u < 2 ^ w) (hv : v < 2 ^ w)
@@ -933,9 +934,9 @@ theorem inHeadEmit_of_holds (cols : ℕ → Fin (j + 1) → Γ) (off : ℕ) (r r
         Scanner.runR_eq_cellFold (Scanner.eq j r r') _ w
       have hrun : (Scanner.eq j r r').run (fun t => cols (off + t)) w
           = (Scanner.eq j r r').runR (fun t => cols (off + t)) w := by
-        rw [Scanner.run, Scanner.eq_runL]
+        erw [Scanner.run, Scanner.eq_runL]
       show (Scanner.cellFold (inHeadStep r r' Dir3.stay) cols off (true, true) w).1 = true ↔ _
-      rw [inHeadStep_stay_fst, Scanner.cellFold_shift, ← hcf, ← hrun,
+      erw [inHeadStep_stay_fst, Scanner.cellFold_shift, ← hcf, ← hrun,
         show w = (bitsOfLenLE w u).length from hlu.symm]
       refine Iff.trans (eq_run_of_holds (fun t => cols (off + t)) r r' _ _ (by rw [hlu, hlv]) h h')
         ?_
@@ -952,7 +953,7 @@ theorem inHeadEmit_of_holds (cols : ℕ → Fin (j + 1) → Γ) (off : ℕ) (r r
         exact Scanner.ofRight_runL (Bool × Bool) _ _ _ _ w _
       show (Scanner.plusOne j r r').emit
         (Scanner.cellFold (inHeadStep r r' Dir3.right) cols off (true, true) w) = true ↔ _
-      rw [inHeadStep_right_eq, Scanner.cellFold_shift, ← hcf, ← hrun,
+      erw [inHeadStep_right_eq, Scanner.cellFold_shift, ← hcf, ← hrun,
         plusOne_of_holds (fun t => cols (off + t)) r r' w u v hu hv h h']
       rfl
   | left =>
@@ -966,7 +967,7 @@ theorem inHeadEmit_of_holds (cols : ℕ → Fin (j + 1) → Γ) (off : ℕ) (r r
         exact Scanner.ofRight_runL (Bool × Bool) _ _ _ _ w _
       show (Scanner.plusOne j r' r).emit
         (Scanner.cellFold (inHeadStep r r' Dir3.left) cols off (true, true) w) = true ↔ _
-      rw [inHeadStep_left_eq, Scanner.cellFold_shift, ← hcf, ← hrun,
+      erw [inHeadStep_left_eq, Scanner.cellFold_shift, ← hcf, ← hrun,
         plusOne_of_holds (fun t => cols (off + t)) r' r w v u hv hu h' h]
       show u = v + 1 ↔ v = movedIdx Dir3.left u
       show u = v + 1 ↔ v = u - 1
@@ -1048,7 +1049,7 @@ theorem blockEmit_holds {m : ℕ} [NeZero m] (cols : ℕ → Fin (j + 1) → Γ)
     simp [Fin.ext_iff]
   rw [blockEmit_run a b (gammaBits sym) (gammaBits wr) d cols off m hm hend,
     markCount_eq cols off a hd.val m hA, markCount_eq cols off b hd'.val m hB,
-    if_pos hd.isLt, if_pos hd'.isLt,
+    ite_eq_left hd.isLt, ite_eq_left hd'.isLt,
     sym_of_holds cols off a b hd cl cl' sym wr (markOf_of_holds ha) (symOf_of_holds ha)
       (symOf_of_holds hb),
     moved_of_holds cols off a b hd.val hd'.val hd.isLt hd'.isLt d hA hB hend]
@@ -1152,13 +1153,13 @@ theorem decodeCfg_input_read (a : Code tm.Q k x.length S) :
 theorem decodeCfg_work_read (a : Code tm.Q k x.length S) (i : Fin k) :
     ((decodeCfg x S a).work i).read = wSymOf tm x S a i := by
   show (if h : (a.2.2.1 i).1.val < S + 1 then (a.2.2.1 i).2 ⟨_, h⟩ else Γ.blank) = _
-  rw [dif_pos (a.2.2.1 i).1.isLt]
+  rw [dite_eq_left (a.2.2.1 i).1.isLt]
   rfl
 
 theorem decodeCfg_output_read (a : Code tm.Q k x.length S) :
     (decodeCfg x S a).output.read = oSymOf tm x S a := by
   show (if h : a.2.2.2.1.val < S + 2 then a.2.2.2.2 ⟨_, h⟩ else Γ.blank) = _
-  rw [dif_pos a.2.2.2.1.isLt]
+  rw [dite_eq_left a.2.2.2.1.isLt]
   rfl
 
 /-- The transition a code and a choice bit determine. -/
@@ -1180,9 +1181,9 @@ theorem mem_codeSucc_iff (a a' : Code tm.Q k x.length S) :
     a' ∈ NTM.codeSucc tm x S a ↔ a.1 ≠ tm.qhalt ∧ ∃ β : Bool, a' = succCode tm x S β a := by
   rw [NTM.codeSucc, decodeCfg_state]
   by_cases h : a.1 = tm.qhalt
-  · rw [if_pos h]
+  · rw [ite_eq_left h]
     simp [h]
-  · rw [if_neg h]
+  · rw [ite_eq_right h]
     simp only [Finset.mem_insert, Finset.mem_singleton, h, ne_eq, not_false_eq_true, true_and]
     constructor
     · rintro (h1 | h1)
@@ -1252,22 +1253,22 @@ theorem succCode_work_cells (a : Code tm.Q k x.length S) (β : Bool) (i : Fin k)
   have hbase : ∀ q : Fin (S + 1), ((decodeCfg x S a).work i).cells q.val = (a.2.2.1 i).2 q := by
     intro q
     show (if h : q.val < S + 1 then (a.2.2.1 i).2 ⟨q.val, h⟩ else Γ.blank) = _
-    rw [dif_pos q.isLt]
+    rw [dite_eq_left q.isLt]
   have hhead : ((decodeCfg x S a).work i).head = (a.2.2.1 i).1.val := rfl
   by_cases h0 : (a.2.2.1 i).1.val = 0
-  · rw [if_pos (by rw [hhead, h0])]
-    rw [hbase p, if_neg]
+  · rw [ite_eq_left (by rw [hhead, h0])]
+    rw [hbase p, ite_eq_right]
     rintro ⟨hp, hpos⟩
     rw [hp, h0] at hpos
     omega
-  · rw [if_neg (by rw [hhead]; exact h0)]
+  · rw [ite_eq_right (by rw [hhead]; exact h0)]
     show Function.update ((decodeCfg x S a).work i).cells
       ((decodeCfg x S a).work i).head _ p.val = _
     rw [hhead]
     by_cases hp : p.val = (a.2.2.1 i).1.val
-    · rw [hp, Function.update_self, if_pos ⟨Fin.ext hp, by omega⟩]
+    · rw [hp, Function.update_self, ite_eq_left ⟨Fin.ext hp, by omega⟩]
       rfl
-    · rw [Function.update_of_ne hp, hbase p, if_neg]
+    · rw [Function.update_of_ne hp, hbase p, ite_eq_right]
       rintro ⟨hq, -⟩
       exact hp (by rw [hq])
 
@@ -1307,21 +1308,21 @@ theorem succCode_output_cells (a : Code tm.Q k x.length S) (β : Bool) (p : Fin 
   have hbase : ∀ q : Fin (S + 2), (decodeCfg x S a).output.cells q.val = a.2.2.2.2 q := by
     intro q
     show (if h : q.val < S + 2 then a.2.2.2.2 ⟨q.val, h⟩ else Γ.blank) = _
-    rw [dif_pos q.isLt]
+    rw [dite_eq_left q.isLt]
   have hhead : (decodeCfg x S a).output.head = a.2.2.2.1.val := rfl
   by_cases h0 : a.2.2.2.1.val = 0
-  · rw [if_pos (by rw [hhead, h0])]
-    rw [hbase p, if_neg]
+  · rw [ite_eq_left (by rw [hhead, h0])]
+    rw [hbase p, ite_eq_right]
     rintro ⟨hp, hpos⟩
     rw [hp, h0] at hpos
     omega
-  · rw [if_neg (by rw [hhead]; exact h0)]
+  · rw [ite_eq_right (by rw [hhead]; exact h0)]
     show Function.update (decodeCfg x S a).output.cells
       (decodeCfg x S a).output.head _ p.val = _
     rw [hhead]
     by_cases hp : p.val = a.2.2.2.1.val
-    · rw [hp, Function.update_self, if_pos ⟨Fin.ext hp, by omega⟩]
-    · rw [Function.update_of_ne hp, hbase p, if_neg]
+    · rw [hp, Function.update_self, ite_eq_left ⟨Fin.ext hp, by omega⟩]
+    · rw [Function.update_of_ne hp, hbase p, ite_eq_right]
       rintro ⟨hq, -⟩
       exact hp (by rw [hq])
 

@@ -195,30 +195,18 @@ private theorem ReadFormulaClean.caseReadStartValues
       temporary₀ := ?_
       temporary₁ := ?_
       temporary₂ := ?_ }
-  · simpa [caseReadStartValues, Work.tapeIndex, Work.symbolIndex] using
-      hclean.position
-  · simpa [caseReadStartValues, Work.tapeIndex, Work.symbolIndex] using
-      hclean.loop₀
-  · simpa [caseReadStartValues, Work.tapeIndex, Work.symbolIndex] using
-      hclean.limit₀
-  · simpa [caseReadStartValues, Work.tapeIndex, Work.symbolIndex] using
-      hclean.reference₀
-  · simpa [caseReadStartValues, Work.tapeIndex, Work.symbolIndex] using
-      hclean.reference₁
-  · simpa [caseReadStartValues, Work.tapeIndex, Work.symbolIndex] using
-      hclean.emitCounter
-  · simpa [caseReadStartValues, Work.tapeIndex, Work.symbolIndex] using
-      hclean.copyCounter
-  · simpa [caseReadStartValues, Work.tapeIndex, Work.symbolIndex] using
-      hclean.multiplyCounter
-  · simpa [caseReadStartValues, Work.tapeIndex, Work.symbolIndex] using
-      hclean.addCounter
-  · simpa [caseReadStartValues, Work.tapeIndex, Work.symbolIndex] using
-      hclean.temporary₀
-  · simpa [caseReadStartValues, Work.tapeIndex, Work.symbolIndex] using
-      hclean.temporary₁
-  · simpa [caseReadStartValues, Work.tapeIndex, Work.symbolIndex] using
-      hclean.temporary₂
+  · exact hclean.position
+  · exact hclean.loop₀
+  · exact hclean.limit₀
+  · exact hclean.reference₀
+  · exact hclean.reference₁
+  · exact hclean.emitCounter
+  · exact hclean.copyCounter
+  · exact hclean.multiplyCounter
+  · exact hclean.addCounter
+  · exact hclean.temporary₀
+  · exact hclean.temporary₁
+  · exact hclean.temporary₂
 
 private theorem ReadFormulaClean.updateAvailable
     (values : BinaryValues WorkCount) (amount : ℕ)
@@ -411,8 +399,10 @@ theorem prepareCaseReadSize_requires_internal
           Work.temporary₂ 0) Work.temporary₂ 4) 13 = 0
   refine ⟨⟨by decide, by decide, by decide, by decide, by decide,
     by decide, by decide, by decide, by decide, by decide⟩, ?_, ?_⟩
-  · simpa [Work.temporary₂, Work.multiplyCounter] using hmultiply
-  · simpa [Work.temporary₂, Work.addCounter] using hadd
+  · simp [Work.temporary₂]
+    exact hmultiply
+  · simp [Work.temporary₂]
+    exact hadd
 
 theorem emitCaseConnector_effect_internal
     (values : BinaryValues WorkCount) :
@@ -1155,22 +1145,22 @@ theorem emitCaseFormula_requires_internal
     rw [emitCaseMembers_effect_internal stateCount workCount stateIndex
       inputSymbolIndex outputSymbolIndex choiceValue workSymbolIndexAt values
       hclean]
-    simpa [Work.tapeIndex, Work.symbolIndex, Work.available,
-      Work.emitCounter] using hclean.emitCounter
+    simp [Work.available, Work.emitCounter]
+    exact hclean.emitCounter
   refine ⟨?_, ?_⟩
   · apply prepareCaseReadSize_requires_internal
     · rw [emitConstantGate_effect_internal,
         emitCaseMembers_effect_internal stateCount workCount stateIndex
           inputSymbolIndex outputSymbolIndex choiceValue workSymbolIndexAt
           values hclean]
-      simpa [Work.tapeIndex, Work.symbolIndex, Work.available,
-        Work.multiplyCounter] using hclean.multiplyCounter
+      simp [Work.available, Work.multiplyCounter]
+      exact hclean.multiplyCounter
     · rw [emitConstantGate_effect_internal,
         emitCaseMembers_effect_internal stateCount workCount stateIndex
           inputSymbolIndex outputSymbolIndex choiceValue workSymbolIndexAt
           values hclean]
-      simpa [Work.tapeIndex, Work.symbolIndex, Work.available,
-        Work.addCounter] using hclean.addCounter
+      simp [Work.available, Work.addCounter]
+      exact hclean.addCounter
   refine ⟨?_, ?_⟩
   · apply (prepareRecentReference_requires Work.reference₀ 2 _
       (by decide) (by decide) (by decide)).2
@@ -1180,9 +1170,8 @@ theorem emitCaseFormula_requires_internal
         emitCaseMembers_effect_internal stateCount workCount stateIndex
           inputSymbolIndex outputSymbolIndex choiceValue workSymbolIndexAt
           values hclean]
-      simpa [Work.temporary₂, Work.temporary₃, Work.tapeIndex,
-        Work.symbolIndex, Work.available, Work.copyCounter] using
-        hclean.copyCounter
+      simp [Work.temporary₂, Work.temporary₃, Work.available, Work.copyCounter]
+      exact hclean.copyCounter
     · rw [prepareCaseReadSize_effect_internal,
         emitConstantGate_effect_internal,
         emitCaseMembers_effect_internal stateCount workCount stateIndex
@@ -1199,9 +1188,8 @@ theorem emitCaseFormula_requires_internal
         emitCaseMembers_effect_internal stateCount workCount stateIndex
           inputSymbolIndex outputSymbolIndex choiceValue workSymbolIndexAt
           values hclean]
-      simpa [Work.reference₀, Work.temporary₂, Work.temporary₃,
-        Work.tapeIndex, Work.symbolIndex, Work.available,
-        Work.copyCounter] using hclean.copyCounter
+      simp [Work.reference₀, Work.temporary₂, Work.temporary₃, Work.available, Work.copyCounter]
+      exact hclean.copyCounter
     · rw [prepareRecentReference_effect,
         prepareCaseReadSize_effect_internal,
         emitConstantGate_effect_internal,
@@ -1218,9 +1206,8 @@ theorem emitCaseFormula_requires_internal
         emitCaseMembers_effect_internal stateCount workCount stateIndex
           inputSymbolIndex outputSymbolIndex choiceValue workSymbolIndexAt
           values hclean]
-      simpa [Work.reference₀, Work.temporary₂, Work.temporary₃,
-        Work.tapeIndex, Work.symbolIndex, Work.available,
-        Work.emitCounter] using hclean.emitCounter
+      simp [Work.reference₀, Work.temporary₂, Work.temporary₃, Work.available, Work.emitCounter]
+      exact hclean.emitCounter
   rw [caseFormulaConnectorStart_effect stateCount workCount stateIndex
     inputSymbolIndex outputSymbolIndex choiceValue workSymbolIndexAt values
     hclean]
@@ -2235,11 +2222,11 @@ private theorem emitCaseMembers_spaceBoundByWidthAt
     intro inputLength
     rw [hafterInputEffect inputLength]
     simp only [Function.update_apply]
-    rw [if_neg (by decide : Work.horizon ≠ Work.available)]
+    rw [ite_eq_right (by decide : Work.horizon ≠ Work.available)]
     unfold caseReadStartValues
     simp only [Function.update_apply]
-    rw [if_neg (by decide : Work.horizon ≠ Work.symbolIndex),
-      if_neg (by decide : Work.horizon ≠ Work.tapeIndex)]
+    rw [ite_eq_right (by decide : Work.horizon ≠ Work.symbolIndex),
+      ite_eq_right (by decide : Work.horizon ≠ Work.tapeIndex)]
     exact hafterStateHorizon inputLength
   have hafterInputConfig : ∀ inputLength,
       afterInput inputLength Work.configBase =
@@ -2247,11 +2234,11 @@ private theorem emitCaseMembers_spaceBoundByWidthAt
     intro inputLength
     rw [hafterInputEffect inputLength]
     simp only [Function.update_apply]
-    rw [if_neg (by decide : Work.configBase ≠ Work.available)]
+    rw [ite_eq_right (by decide : Work.configBase ≠ Work.available)]
     unfold caseReadStartValues
     simp only [Function.update_apply]
-    rw [if_neg (by decide : Work.configBase ≠ Work.symbolIndex),
-      if_neg (by decide : Work.configBase ≠ Work.tapeIndex)]
+    rw [ite_eq_right (by decide : Work.configBase ≠ Work.symbolIndex),
+      ite_eq_right (by decide : Work.configBase ≠ Work.tapeIndex)]
     exact hafterStateConfig inputLength
   have hworkFrontier : ∀ inputLength,
       afterInput inputLength Work.available +
@@ -2643,7 +2630,7 @@ private theorem emitPreviousCaseReadConnector_spaceBoundByWidthAt
           Work.loop₃ (values inputLength)
             ⟨by decide, by decide, by decide⟩ (hloop inputLength)]
       simp only [Function.update_apply]
-      rw [if_neg (by decide : Work.reference₀ ≠ Work.loop₃), if_true]
+      rw [ite_eq_right (by decide : Work.reference₀ ≠ Work.loop₃), ite_true]
       exact (Nat.sub_le _ _).trans (hreference₀ inputLength)
     · intro inputLength
       rw [show decremented inputLength =
@@ -3248,7 +3235,7 @@ theorem emitCaseFormula_spaceBoundByWidth_internal
     intro inputLength
     rw [hvalues₆Effect inputLength]
     simp only [Function.update_apply]
-    rw [if_neg (by decide : Work.available ≠ Work.reference₁), if_true]
+    rw [ite_eq_right (by decide : Work.available ≠ Work.reference₁), ite_true]
     rw [hvalues₅Available inputLength]
   have hvalues₆Values : ∀ inputLength index,
       values₆ inputLength index ≤ width inputLength := by
@@ -3272,8 +3259,8 @@ theorem emitCaseFormula_spaceBoundByWidth_internal
     intro inputLength
     rw [hvalues₆Effect inputLength]
     simp only [Function.update_apply]
-    rw [if_neg (by decide : Work.reference₀ ≠ Work.reference₁),
-      if_neg (by decide : Work.reference₀ ≠ Work.available), if_true]
+    rw [ite_eq_right (by decide : Work.reference₀ ≠ Work.reference₁),
+      ite_eq_right (by decide : Work.reference₀ ≠ Work.available), ite_true]
     rw [hvalues₅Reference₀ inputLength, hvalues₅Offset inputLength,
       caseFormulaMembersSize, Nat.mul_comm
         (caseReadSize (values inputLength Work.horizon)) (workCount + 2)]

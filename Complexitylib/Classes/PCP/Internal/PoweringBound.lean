@@ -160,9 +160,10 @@ theorem unsatFrac_killedPow_clean (A : (R.killedPow q T hq).Assignment) {H : ℕ
   have hfrac : (((R.killedPow q T hq).unsatFrac A : ℚ) : ℝ)
       = (((R.killedPow q T hq).unsatDarts A).card : ℝ)
         / ((R.graph.order : ℝ) * ((R.graph.deg : ℝ) ^ T * (q : ℝ) ^ T)) := by
-    rw [RegCSP.unsatFrac, R.card_dart_killedPow q T hq]
+    rw [RegCSP.unsatFrac, R.card_dart_killedPow q T hq, Rat.cast_div,
+      Rat.cast_natCast, Rat.cast_natCast]
     push_cast
-    rfl
+    ring
   rw [hu, hfrac, powConst]
   -- the case of no violated darts is trivial
   by_cases hU0 : ((R.unsatDarts (R.kDecode q T hq A)).card : ℝ) = 0

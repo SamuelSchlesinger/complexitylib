@@ -145,26 +145,30 @@ theorem scanner_updateQuery_internal
       resultStart := ?_
       parked := ?_
       frame := by intro i _ _ _ _ _ _ _ _ _; rfl }
-  · simpa only [finalWork, Function.update_of_ne hsource] using hscanner.source
-  · simpa only [finalWork, Function.update_of_ne haddress] using hscanner.address
-  · simpa only [finalWork, Function.update_of_ne haddress] using
-      hscanner.addressStart
-  · simpa only [finalWork, Function.update_of_ne hvalue] using hscanner.value
-  · simpa only [finalWork, Function.update_of_ne hvalue] using
-      hscanner.valueStart
-  · simpa only [finalWork, Function.update_of_ne haddressCounter] using
-      hscanner.addressCounter
-  · simpa only [finalWork, Function.update_of_ne haddressWidth] using
-      hscanner.addressWidth
-  · simpa only [finalWork, Function.update_of_ne hvalueCounter] using
-      hscanner.valueCounter
-  · simpa only [finalWork, Function.update_of_ne hvalueWidth] using
-      hscanner.valueWidth
+  · simp only [Function.update_of_ne hsource]
+    exact hscanner.source
+  · simp only [Function.update_of_ne haddress]
+    exact hscanner.address
+  · simp only [Function.update_of_ne haddress]
+    exact hscanner.addressStart
+  · simp only [Function.update_of_ne hvalue]
+    exact hscanner.value
+  · simp only [Function.update_of_ne hvalue]
+    exact hscanner.valueStart
+  · simp only [Function.update_of_ne haddressCounter]
+    exact hscanner.addressCounter
+  · simp only [Function.update_of_ne haddressWidth]
+    exact hscanner.addressWidth
+  · simp only [Function.update_of_ne hvalueCounter]
+    exact hscanner.valueCounter
+  · simp only [Function.update_of_ne hvalueWidth]
+    exact hscanner.valueWidth
   · simpa only [finalWork, Function.update_self] using hnat.2
   · simpa only [finalWork, Function.update_self] using hnat.1
-  · simpa only [finalWork, Function.update_of_ne hresult] using hscanner.result
-  · simpa only [finalWork, Function.update_of_ne hresult] using
-      hscanner.resultStart
+  · simp only [Function.update_of_ne hresult]
+    exact hscanner.result
+  · simp only [Function.update_of_ne hresult]
+    exact hscanner.resultStart
   · intro i
     by_cases hi : i = tapes.update.entry.query
     · subst i
@@ -254,14 +258,18 @@ private theorem directAddress_ready
       resultCount := ?_
       parked := ?_ }
   · simpa only [Function.update_of_ne hqueryNeLhs] using hlhsValue
-  · simpa only [Function.update_of_ne hqueryNeRhs] using hrhs.destination
+  · simp only [Function.update_of_ne hqueryNeRhs]
+    exact hrhs.destination
   · simpa only [Function.update_of_ne hqueryNeReplacement, hreplacementEq]
       using hreplacement
-  · simpa only [Function.update_of_ne hqueryNeShift] using hrhs.querySource
+  · simp only [Function.update_of_ne hqueryNeShift]
+    exact hrhs.querySource
   · simpa only [Function.update_of_ne hqueryNeTmp, htmpEq] using htmp
   · simpa only [Function.update_of_ne hqueryNeDbl, hdblEq] using hdbl
-  · simpa only [Function.update_of_ne hqueryNeRemaining] using hrhs.count
-  · simpa only [Function.update_of_ne hqueryNeFound] using hrhs.copyScratch
+  · simp only [Function.update_of_ne hqueryNeRemaining]
+    exact hrhs.count
+  · simp only [Function.update_of_ne hqueryNeFound]
+    exact hrhs.copyScratch
   · simpa only [Function.update_of_ne hqueryNeResultCount] using hresultCount
   · exact (scanner_updateQuery_internal tapes store destination operandsWork
       hrhs.scanner).parked
@@ -414,7 +422,7 @@ theorem directBinaryInstructionTM_hoareTime_frame_internal
     have hquery : (work tapes.update.entry.query).HasBinaryNat 0 := by
       refine ⟨?_, ?_⟩
       · exact hrhsResult.scanner.queryStart
-      · simpa using hrhsResult.scanner.query
+      · exact hrhsResult.scanner.query
     have hrun := TM.binaryAddConstTM_hoareTime_frame
       tapes.update.entry.query destination 0 inp work out hquery
       (by simpa [hinp] using hinput)

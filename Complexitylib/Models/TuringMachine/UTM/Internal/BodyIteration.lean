@@ -78,9 +78,9 @@ private theorem sanitize_dir_eq {sim : Tape} (hwf : sim.StartInvariant) (flag : 
       = (if sim.read = Γ.start then Dir3.right else d) := by
   subst hflag
   by_cases h0 : sim.head = 0
-  · rw [decide_eq_true h0, if_pos rfl, if_pos ((read_start_iff hwf).mpr h0)]
-  · rw [decide_eq_false h0, if_neg Bool.false_ne_true,
-      if_neg (fun hc => h0 ((read_start_iff hwf).mp hc))]
+  · rw [decide_eq_true h0, ite_eq_left rfl, ite_eq_left ((read_start_iff hwf).mpr h0)]
+  · rw [decide_eq_false h0, ite_eq_right Bool.false_ne_true,
+      ite_eq_right (fun hc => h0 ((read_start_iff hwf).mp hc))]
 
 /-- **The default-move correspondence** (the crux of the no-match branch):
     the UTM's readback-write plus flag-sanitized move on the shadow tape
@@ -93,7 +93,7 @@ private theorem vshift_default_move {sim utm : Tape} (h : VShift sim utm)
   rw [readBackWrite_eq_readback,
     writeAndMove_readback_eq_move (h.startInvariant hwf),
     sanitize_dir_eq hwf flag hflag Dir3.stay]
-  exact h.move _ (fun h0 => by rw [if_pos ((read_start_iff hwf).mpr h0)])
+  exact h.move _ (fun h0 => by rw [ite_eq_left ((read_start_iff hwf).mpr h0)])
 
 /-- The interpreted step in closed form, on a running configuration whose
     looked-up action is `a`. -/
@@ -110,7 +110,7 @@ private theorem toTM_step_running {d : TMDesc} {mc : Cfg 1 d.toTM.Q}
         output := mc.output.writeAndMove a.wo.toΓ
           (if mc.output.read = Γ.start then Dir3.right else a.dOut) } := by
   subst ha
-  simp only [TM.step, if_neg hh]
+  simp only [TM.step, ite_eq_right hh]
   rfl
 
 -- ════════════════════════════════════════════════════════════════════════

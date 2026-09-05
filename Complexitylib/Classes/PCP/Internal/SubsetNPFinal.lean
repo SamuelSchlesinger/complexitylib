@@ -47,7 +47,7 @@ theorem lenLang_mem_P
   have hexp : (fun z : List Bool =>
       List.replicate (2 ^ r (pairFst z).length) true) ∈ FP := by
     have := mem_FP_comp Cobham.fstBlock_mem_FP (unaryExp_mem_FP_of_bigO_log hr hrlog)
-    simpa using this
+    exact this
   have hQ : (fun _ : List Bool => List.replicate Q false) ∈ FP :=
     Cobham.const_replicate_mem_FP Q
   have hb : (fun z : List Bool =>
@@ -59,7 +59,7 @@ theorem lenLang_mem_P
   rw [exists_eqFlag_iff]
   constructor
   · intro h
-    rw [lenLang, Set.mem_setOf_eq] at h
+    rw [lenLang, Set.mem_ofPred_eq] at h
     rw [h]
   · intro h
     have := congrArg List.length h
@@ -89,14 +89,14 @@ theorem mem_witLang_iff
   constructor
   · rintro ⟨hlen, hcons, hacc⟩
     have hlen' : w.length = 2 ^ r x.length * Q := by
-      rw [lenLang, Set.mem_setOf_eq, pairFst_pair, pairSnd_pair] at hlen
+      rw [lenLang, Set.mem_ofPred_eq, pairFst_pair, pairSnd_pair] at hlen
       exact hlen
     refine ⟨hlen', ?_, ?_⟩
     · exact (mem_consLang_iff V f r Q hfspec hlen' (hQ x)).mp hcons
     · exact (mem_accLang_iff V f r Q hfspec hlen' (hQ x)).mp hacc
   · rintro ⟨hlen, hcons, hacc⟩
     refine ⟨?_, ?_, ?_⟩
-    · rw [lenLang, Set.mem_setOf_eq, pairFst_pair, pairSnd_pair]
+    · rw [lenLang, Set.mem_ofPred_eq, pairFst_pair, pairSnd_pair]
       exact hlen
     · exact (mem_consLang_iff V f r Q hfspec hlen (hQ x)).mpr hcons
     · exact (mem_accLang_iff V f r Q hfspec hlen (hQ x)).mpr hacc

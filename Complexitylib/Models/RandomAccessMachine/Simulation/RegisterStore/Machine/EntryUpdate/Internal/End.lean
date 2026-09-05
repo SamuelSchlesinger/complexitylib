@@ -89,11 +89,14 @@ theorem entryUpdateTerminal_internal
             { ready := hinv.ready
               replacement := hinv.replacement_eq
               remaining := hinv.remainingCount
-              found := by simpa [hnotmemStore] using hfoundZero
+              found := by simp [hnotmemStore]; exact hfoundZero
               resultCount := by
-                simpa [hcountEq] using hinv.resultCountTape
+                have h := hinv.resultCountTape
+                simp only [hcountEq] at h
+                exact h
               frame := hinv.frame }
-        · simpa [houtputEq] using houtput
+        · simp only [houtputEq] at houtput
+          exact houtput
       · have hreplacementRead :
             (work tapes.replacement).read ≠ Γ.blank := by
           intro hblank
@@ -214,7 +217,10 @@ theorem entryUpdateTerminal_internal
                   (if address ∈ store.map Prod.fst then 1 else 0)
                 rw [hotherWork tapes.found tapes.found_ne_resultCount]
                 simpa [hnotmemStore] using hfoundZero
-              resultCount := by simpa [hcountEq] using hsuccCount
+              resultCount := by
+                have h := hsuccCount
+                simp only [hcountEq] at h
+                exact h
               frame := hfinalFrame }
         · simpa [entryUpdateDoneCfg] using hfinalOutput
   | true =>
@@ -239,10 +245,14 @@ theorem entryUpdateTerminal_internal
           { ready := hinv.ready
             replacement := hinv.replacement_eq
             remaining := hinv.remainingCount
-            found := by simpa [hmemStore] using hfoundOne
-            resultCount := by simpa [hcountEq] using hinv.resultCountTape
+            found := by simp [hmemStore]; exact hfoundOne
+            resultCount := by
+              have h := hinv.resultCountTape
+              simp only [hcountEq] at h
+              exact h
             frame := hinv.frame }
-      · simpa [houtputEq] using houtput
+      · simp only [houtputEq] at houtput
+        exact houtput
 
 end Machine
 

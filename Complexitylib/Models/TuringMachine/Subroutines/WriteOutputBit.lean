@@ -66,7 +66,7 @@ theorem writeOutputBitTM_hoareTime_frame (vIdx : Fin n)
     exact (hwork i).writeAndMove_readBack_idle
   · show (out.write (readBackWrite ((work vIdx).read)).toΓ).move (idleDir out.read) = _
     have hne : out.read ≠ Γ.start := hout.2 out.head hout.1
-    rw [idleDir, if_neg hne]
+    rw [idleDir, ite_eq_right hne]
     rfl
 
 
@@ -94,7 +94,7 @@ theorem writeOutputBitTM_clears (vIdx : Fin n)
     rfl
   · funext j
     rw [Tape.move_cells]
-    simp only [Tape.write, if_neg hne0]
+    simp only [Tape.write, ite_eq_right hne0]
     rw [show Function.update out₀.cells out₀.head (readBackWrite Γ.blank).toΓ
         = Function.update out₀.cells 1 (readBackWrite Γ.blank).toΓ from by rw [hhead]]
     by_cases hj : j = 1

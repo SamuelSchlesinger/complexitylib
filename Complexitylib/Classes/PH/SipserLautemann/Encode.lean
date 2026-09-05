@@ -83,7 +83,7 @@ def shiftsOfList (t m : ℕ) (w : List Bool) : Fin t → Fin m → Bool :=
     rw [Nat.mul_comm, Nat.mul_add_mod, Nat.mod_eq_of_lt j.isLt]
   simp only [shiftsOfList, listOfShifts]
   rw [getD_listOfSeed _ _ hidx]
-  simp only [flattenShifts, dif_pos hm]
+  simp only [flattenShifts, dite_eq_left hm]
   congr 1 <;> [exact Fin.ext hdiv; exact Fin.ext hmod]
 
 end Lautemann

@@ -113,9 +113,9 @@ theorem isFor_iff_not_hasCircuitAtMost_internal {arity threshold : ℕ}
     (inputs : List (BitString arity)) :
     IsFor target threshold inputs ↔
       ¬ (SuccinctMCSP.Instance.ofInputs threshold target inputs).HasCircuitAtMost := by
-  letI : NeZero
+  let : NeZero
       (SuccinctMCSP.Instance.ofInputs threshold target inputs).arity :=
-    ⟨by simpa using NeZero.ne arity⟩
+    ⟨by exact NeZero.ne arity⟩
   rw [isFor_iff_forall_not_agreesOn_internal,
     SuccinctMCSP.Instance.hasCircuitAtMost_iff_exists_circuit_internal]
   constructor

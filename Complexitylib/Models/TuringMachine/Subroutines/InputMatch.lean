@@ -133,12 +133,12 @@ theorem inMatchTM_hoareTime (expect : Γ → Bool × Bool) (sym res : Fin n) (hs
       t.writeAndMove s.toΓ (idleDir t.read) = ⟨1, Function.update t.cells 1 s.toΓ⟩ := by
     intro t s hinvt ht
     have hns : t.read ≠ Γ.start := hinvt.read_ne_start (by omega)
-    rw [idleDir, if_neg hns]
+    rw [idleDir, ite_eq_right hns]
     refine Tape.ext ?_ ?_
     · show (t.write s.toΓ).head = 1
       rw [Tape.write_head, ht]
     · show (t.write s.toΓ).cells = _
-      rw [Tape.write, if_neg (by omega), ht]
+      rw [Tape.write, ite_eq_right (by omega), ht]
   have hright : ∀ (t : Tape), t.StartInvariant → t.head = 1 →
       t.writeAndMove (readBackWrite t.read).toΓ Dir3.right = ⟨2, t.cells⟩ := by
     intro t hinvt ht
@@ -150,7 +150,7 @@ theorem inMatchTM_hoareTime (expect : Γ → Bool × Bool) (sym res : Fin n) (hs
       t.writeAndMove (readBackWrite t.read).toΓ (moveLeftDir t.read) = ⟨1, t.cells⟩ := by
     intro t hinvt ht
     have hns : t.read ≠ Γ.start := hinvt.read_ne_start (by omega)
-    rw [writeAndMove_readBack_of_startInvariant t hinvt, moveLeftDir, if_neg hns]
+    rw [writeAndMove_readBack_of_startInvariant t hinvt, moveLeftDir, ite_eq_right hns]
     refine Tape.ext ?_ (Tape.move_cells t Dir3.left)
     show t.head - 1 = 1
     omega
@@ -158,7 +158,7 @@ theorem inMatchTM_hoareTime (expect : Γ → Bool × Bool) (sym res : Fin n) (hs
       t.writeAndMove (readBackWrite t.read).toΓ (idleDir t.read) = t := by
     intro t hinvt ht
     have hns : t.read ≠ Γ.start := hinvt.read_ne_start ht
-    rw [writeAndMove_readBack_of_startInvariant t hinvt, idleDir, if_neg hns]
+    rw [writeAndMove_readBack_of_startInvariant t hinvt, idleDir, ite_eq_right hns]
     rfl
   set v₁ : Bool := decide ((work sym).cells 1 = Γ.ofBool (expect inp.read).1) with hv1
   set W1 : Fin n → Tape := fun i =>
@@ -181,35 +181,35 @@ theorem inMatchTM_hoareTime (expect : Γ → Bool × Bool) (sym res : Fin n) (hs
       simp only []
       by_cases hir : i = res
       · have hisym : ¬ (i = sym) := fun hc => hsr (hc.symm.trans hir)
-        rw [if_pos hir, if_neg hisym, if_pos hir,
+        rw [ite_eq_left hir, ite_eq_right hisym, ite_eq_left hir,
           hstay (work i) _ (hinv i) (by rw [hir]; exact hres), hir]
         refine Tape.ext rfl ?_
         show Function.update (work res).cells 1 _ = Function.update (work res).cells 1 _
         rw [hv1, hsymread]
         by_cases hc : (work sym).cells 1 = Γ.ofBool (expect inp.read).1
-        · rw [if_pos hc, decide_eq_true hc]
+        · rw [ite_eq_left hc, decide_eq_true hc]
           rfl
-        · rw [if_neg hc, decide_eq_false hc]
+        · rw [ite_eq_right hc, decide_eq_false hc]
           rfl
-      · rw [if_neg hir, if_neg hir]
+      · rw [ite_eq_right hir, ite_eq_right hir]
         by_cases his : i = sym
-        · rw [if_pos his, if_pos his, his, hright (work sym) (hinv sym) hsym]
-        · rw [if_neg his, if_neg his, hidle (work i) (hinv i) (hh i)]
+        · rw [ite_eq_left his, ite_eq_left his, his, hright (work sym) (hinv sym) hsym]
+        · rw [ite_eq_right his, ite_eq_right his, hidle (work i) (hinv i) (hh i)]
     · exact transitionTape_eq_self hout
   -- The tapes after the first step are still well formed.
   have hW1res : W1 res = ⟨1, Function.update (work res).cells 1 (Γ.ofBool v₁)⟩ := by
     rw [hW1]
     show (if res = res then _ else _) = _
-    rw [if_pos rfl]
+    rw [ite_eq_left rfl]
   have hW1sym : W1 sym = ⟨2, (work sym).cells⟩ := by
     rw [hW1]
     show (if sym = res then _ else if sym = sym then _ else _) = _
-    rw [if_neg hsr, if_pos rfl]
+    rw [ite_eq_right hsr, ite_eq_left rfl]
   have hW1other : ∀ i, i ≠ res → i ≠ sym → W1 i = work i := by
     intro i h1 h2
     rw [hW1]
     show (if i = res then _ else if i = sym then _ else _) = _
-    rw [if_neg h1, if_neg h2]
+    rw [ite_eq_right h1, ite_eq_right h2]
   have hinv1 : ∀ i, (W1 i).StartInvariant := by
     intro i
     by_cases hir : i = res
@@ -269,7 +269,7 @@ theorem inMatchTM_hoareTime (expect : Γ → Bool × Bool) (sym res : Fin n) (hs
       simp only []
       by_cases hir : i = res
       · have hisym : ¬ (i = sym) := fun hc => hsr (hc.symm.trans hir)
-        rw [if_pos hir, if_neg hisym, if_pos hir, hir,
+        rw [ite_eq_left hir, ite_eq_right hisym, ite_eq_left hir, hir,
           hstay (W1 res) _ (hinv1 res) (by rw [hW1res])]
         refine Tape.ext rfl ?_
         show Function.update (W1 res).cells 1 _ = Function.update (work res).cells 1 _
@@ -280,7 +280,7 @@ theorem inMatchTM_hoareTime (expect : Γ → Bool × Bool) (sym res : Fin n) (hs
         refine congrArg _ ?_
         rw [hv2, inMatchVerdict, hv1]
         by_cases hc : Γ.ofBool v₁ = Γ.one ∧ (work sym).cells 2 = Γ.ofBool (expect inp.read).2
-        · rw [if_pos hc]
+        · rw [ite_eq_left hc]
           have h1 : v₁ = true := by
             rcases hc with ⟨hc1, -⟩
             by_contra hne
@@ -290,7 +290,7 @@ theorem inMatchTM_hoareTime (expect : Γ → Bool × Bool) (sym res : Fin n) (hs
           rw [hv1] at h1
           rw [h1, decide_eq_true hc.2]
           rfl
-        · rw [if_neg hc]
+        · rw [ite_eq_right hc]
           have h2 : ¬ (decide ((work sym).cells 1 = Γ.ofBool (expect inp.read).1) &&
               decide ((work sym).cells 2 = Γ.ofBool (expect inp.read).2)) = true := by
             intro hall
@@ -301,12 +301,12 @@ theorem inMatchTM_hoareTime (expect : Γ → Bool × Bool) (sym res : Fin n) (hs
           rw [Bool.not_eq_true] at h2
           rw [h2]
           rfl
-      · rw [if_neg hir, if_neg hir]
+      · rw [ite_eq_right hir, ite_eq_right hir]
         by_cases his : i = sym
-        · rw [if_pos his, his, hleft2 (W1 sym) (hinv1 sym) (by rw [hW1sym])]
+        · rw [ite_eq_left his, his, hleft2 (W1 sym) (hinv1 sym) (by rw [hW1sym])]
           rw [hW1sym]
           exact Tape.ext hsym.symm rfl
-        · rw [if_neg his, hidle (W1 i) (hinv1 i) (hh1 i)]
+        · rw [ite_eq_right his, hidle (W1 i) (hinv1 i) (hh1 i)]
           exact hW1other i hir his
     · exact transitionTape_eq_self hout
   refine ⟨⟨InMatchPhase.done, inp, W2, out⟩, 2, le_rfl,
@@ -314,10 +314,10 @@ theorem inMatchTM_hoareTime (expect : Γ → Bool × Bool) (sym res : Fin n) (hs
     fun i hi => ?_, ?_⟩
   · rw [hW2]
     show (if i = res then _ else _) = _
-    rw [if_neg hi]
+    rw [ite_eq_right hi]
   · rw [hW2]
     show (if res = res then _ else _) = _
-    rw [if_pos rfl]
+    rw [ite_eq_left rfl]
     rfl
 
 /-! ## Moving the input head with the simulated one -/
@@ -350,7 +350,7 @@ def inMoveTM (decode : Γ → Γ → Dir3) (mv dir : Fin n) : TM n where
     intro state iHead wHeads oHead
     match state with
     | .go =>
-      exact ⟨fun h => if_pos h, fun _ => idleDir_right_of_start, idleDir_right_of_start⟩
+      exact ⟨fun h => ite_eq_left h, fun _ => idleDir_right_of_start, idleDir_right_of_start⟩
     | .done => exact rightOfStart_allIdle iHead wHeads oHead
 
 /-- **The contract of the input-head move.** One step; the input head moves as the register says,
@@ -369,7 +369,7 @@ theorem inMoveTM_hoareTime (decode : Γ → Γ → Dir3) (mv dir : Fin n)
       t.writeAndMove (readBackWrite t.read).toΓ (idleDir t.read) = t := by
     intro t hinvt ht
     rw [writeAndMove_readBack_of_startInvariant t hinvt, idleDir,
-      if_neg (hinvt.read_ne_start ht)]
+      ite_eq_right (hinvt.read_ne_start ht)]
     rfl
   have hstep : (inMoveTM decode mv dir).step ⟨InMovePhase.go, inp, work, out⟩
       = some ⟨InMovePhase.done, inp.move (decode (work mv).read (work dir).read), work, out⟩ := by
@@ -377,7 +377,7 @@ theorem inMoveTM_hoareTime (decode : Γ → Γ → Dir3) (mv dir : Fin n)
     refine congrArg some (Cfg.ext rfl ?_ ?_ (transitionTape_eq_self hout))
     · show inp.move (if inp.read = Γ.start then Dir3.right
         else decode (work mv).read (work dir).read) = _
-      rw [if_neg hinp]
+      rw [ite_eq_right hinp]
     · show (fun i => (work i).writeAndMove _ _) = work
       funext i
       exact hidle (work i) (hinv i) (hh i)
@@ -423,18 +423,18 @@ theorem copyCellTM_hoareTime (src dst : Fin n) (inp₀ out₀ : Tape) (W₀ : Fi
       t.writeAndMove (readBackWrite t.read).toΓ (idleDir t.read) = t := by
     intro t hinvt ht
     rw [writeAndMove_readBack_of_startInvariant t hinvt, idleDir,
-      if_neg (hinvt.read_ne_start ht)]
+      ite_eq_right (hinvt.read_ne_start ht)]
     rfl
   have hwrite : ∀ (t : Tape) (s : Γ), t.StartInvariant → 1 ≤ t.head →
       t.writeAndMove s (idleDir t.read)
         = ⟨t.head, Function.update t.cells t.head s⟩ := by
     intro t s hinvt ht
-    rw [idleDir, if_neg (hinvt.read_ne_start ht)]
+    rw [idleDir, ite_eq_right (hinvt.read_ne_start ht)]
     refine Tape.ext ?_ ?_
     · show (t.write s).head = t.head
       rw [Tape.write_head]
     · show (t.write s).cells = _
-      rw [Tape.write, if_neg (by omega)]
+      rw [Tape.write, ite_eq_right (by omega)]
   have hstep : (copyCellTM src dst).step ⟨InMovePhase.go, inp, work, out⟩
       = some ⟨InMovePhase.done, inp,
         fun i => if i = dst then (⟨(work dst).head,
@@ -449,14 +449,14 @@ theorem copyCellTM_hoareTime (src dst : Fin n) (inp₀ out₀ : Tape) (W₀ : Fi
       ((if i = dst then readBackWrite (work src).read else readBackWrite (work i).read) : Γw).toΓ
       (idleDir (work i).read) = (if i = dst then _ else _)
     by_cases hi : i = dst
-    · rw [if_pos hi, if_pos hi, hi, hwrite (work dst) _ (hinv dst) (hh dst)]
-    · rw [if_neg hi, if_neg hi, hidle (work i) (hinv i) (hh i)]
+    · rw [ite_eq_left hi, ite_eq_left hi, hi, hwrite (work dst) _ (hinv dst) (hh dst)]
+    · rw [ite_eq_right hi, ite_eq_right hi, hidle (work i) (hinv i) (hh i)]
   refine ⟨_, 1, le_rfl, TM.reachesIn.step hstep TM.reachesIn.zero, rfl, rfl, rfl,
     fun i hi => ?_, ?_⟩
   · show (if i = dst then _ else _) = work i
-    rw [if_neg hi]
+    rw [ite_eq_right hi]
   · show (if dst = dst then _ else _) = _
-    rw [if_pos rfl]
+    rw [ite_eq_left rfl]
 
 /-- **Conjoin one register's cell into another.** The destination's cell under its head becomes
 `1` exactly when both it and the source's cell held `1`. A loop driver with no early exit — such
@@ -500,17 +500,17 @@ theorem andCellTM_hoareTime (src dst : Fin n) (inp₀ out₀ : Tape) (W₀ : Fin
       t.writeAndMove s (idleDir t.read)
         = ⟨t.head, Function.update t.cells t.head s⟩ := by
     intro t s hinvt ht
-    rw [idleDir, if_neg (hinvt.read_ne_start ht)]
+    rw [idleDir, ite_eq_right (hinvt.read_ne_start ht)]
     refine Tape.ext ?_ ?_
     · show (t.write s).head = t.head
       rw [Tape.write_head]
     · show (t.write s).cells = _
-      rw [Tape.write, if_neg (by omega)]
+      rw [Tape.write, ite_eq_right (by omega)]
   have hidle : ∀ (t : Tape), t.StartInvariant → 1 ≤ t.head →
       t.writeAndMove (readBackWrite t.read).toΓ (idleDir t.read) = t := by
     intro t hinvt ht
     rw [writeAndMove_readBack_of_startInvariant t hinvt, idleDir,
-      if_neg (hinvt.read_ne_start ht)]
+      ite_eq_right (hinvt.read_ne_start ht)]
     rfl
   have hstep : (andCellTM src dst).step ⟨InMovePhase.go, inp, work, out⟩
       = some ⟨InMovePhase.done, inp,
@@ -530,19 +530,19 @@ theorem andCellTM_hoareTime (src dst : Fin n) (inp₀ out₀ : Tape) (W₀ : Fin
       (idleDir (work i).read) = (if i = dst then _ else _)
     by_cases hi : i = dst
     · subst hi
-      rw [if_pos rfl, if_pos rfl, hwrite (work i) _ (hinv i) (hh i)]
+      rw [ite_eq_left rfl, ite_eq_left rfl, hwrite (work i) _ (hinv i) (hh i)]
       by_cases hc : (work src).read = Γ.one ∧ (work i).read = Γ.one
-      · rw [if_pos hc, if_pos hc]
+      · rw [ite_eq_left hc, ite_eq_left hc]
         rfl
-      · rw [if_neg hc, if_neg hc]
+      · rw [ite_eq_right hc, ite_eq_right hc]
         rfl
-    · rw [if_neg hi, if_neg hi, hidle (work i) (hinv i) (hh i)]
+    · rw [ite_eq_right hi, ite_eq_right hi, hidle (work i) (hinv i) (hh i)]
   refine ⟨_, 1, le_rfl, TM.reachesIn.step hstep TM.reachesIn.zero, rfl, rfl, rfl,
     fun i hi => ?_, ?_⟩
   · show (if i = dst then _ else _) = work i
-    rw [if_neg hi]
+    rw [ite_eq_right hi]
   · show (if dst = dst then _ else _) = _
-    rw [if_pos rfl]
+    rw [ite_eq_left rfl]
 
 /-- **The cell conjunction never consults the guess tape**, so it may sit inside a
 nondeterministic assembly. -/

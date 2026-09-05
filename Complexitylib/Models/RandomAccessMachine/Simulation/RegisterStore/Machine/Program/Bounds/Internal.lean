@@ -271,8 +271,7 @@ private theorem entryMissCleanupTime_canonical_le {m : ℕ}
           (fun _ => 1 + entryMatchReadTime entry queryBits)
           (entryMissTargets tapes) ≤
         7 * (1 + entryMatchReadTime entry queryBits + 2 * bound + 9) + 1 := by
-    simpa [entryMissHeadBound, entryScanCanonicalWork,
-      TM.resetBinaryBlank, Tape.move, Tape.init] using hreset
+    exact hreset
   unfold entryMissCleanupTime entryMissHeadBound entryScanCanonicalWork
   simp only [Function.const_apply]
   simp only [TM.resetBinaryBlank, Tape.move, Tape.init]

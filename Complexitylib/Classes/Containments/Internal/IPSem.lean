@@ -352,9 +352,9 @@ theorem leaf_split (P : Params) (ps : List (List Bool × List Bool)) (k : ℕ) (
   classical
   rw [Ico_eq_insert h, Finset.filter_insert]
   by_cases hk : P.ok ps (coinOf P k)
-  · rw [if_pos hk, if_pos hk, Finset.card_insert_of_notMem (by simp)]
+  · rw [ite_eq_left hk, ite_eq_left hk, Finset.card_insert_of_notMem (by simp)]
     omega
-  · rw [if_neg hk, if_neg hk]
+  · rw [ite_eq_right hk, ite_eq_right hk]
     omega
 
 open Classical in
@@ -595,23 +595,23 @@ theorem run_leaf (P : Params) :
     have hsum : binValLE (if P.ok (roundsOf fs) f.a then bumpBits f.sum else f.sum)
         = binValLE f.sum + (if P.ok (roundsOf fs) f.a then 1 else 0) := by
       by_cases hokb : P.ok (roundsOf fs) f.a
-      · rw [if_pos hokb, if_pos hokb]
+      · rw [ite_eq_left hokb, ite_eq_left hokb]
         have h1 : binValLE f.sum + 1 ≤ 2 ^ P.t := by
           rw [hfv] at hbnd
-          rw [hsplit, if_pos hokb] at hbnd
+          rw [hsplit, ite_eq_left hokb] at hbnd
           omega
         have h2 : binValLE f.sum + 1 < 2 ^ f.sum.length := by
           rw [hok.sumLen, pow_succ]
           have : 0 < 2 ^ P.t := Nat.two_pow_pos _
           omega
         rw [binValLE_bumpBits_of_not_over _ (bumpOver_eq_false_of_lt h2)]
-      · rw [if_neg hokb, if_neg hokb]
+      · rw [ite_eq_right hokb, ite_eq_right hokb]
         omega
     have hsumLen : (if P.ok (roundsOf fs) f.a then bumpBits f.sum else f.sum).length
         = P.t + 1 := by
       by_cases hokb : P.ok (roundsOf fs) f.a
-      · rw [if_pos hokb, bumpBits_length, hok.sumLen]
-      · rw [if_neg hokb, hok.sumLen]
+      · rw [ite_eq_left hokb, bumpBits_length, hok.sumLen]
+      · rw [ite_eq_right hokb, hok.sumLen]
     by_cases hov : bumpOver f.a = true
     · -- the last coin string: pop with the tally
       have hka : binValLE f.a = 2 ^ P.t - 1 := by
@@ -726,7 +726,7 @@ theorem run_branch (P : Params) (hval : ∀ (n : ℕ) (ps : List (List Bool × L
         coinLen := fun hc => by
           have hc' : f.lvl.drop 1 = [] := hc
           show (if f.lvl.drop 1 = [] then zeroCoin P else []).length = P.t
-          rw [if_pos hc', zeroCoin, List.length_replicate]
+          rw [ite_eq_left hc', zeroCoin, List.length_replicate]
         vIdx := fun _ => by
           show strIdx [] < msgCount P
           rw [strIdx_nil]
@@ -734,7 +734,7 @@ theorem run_branch (P : Params) (hval : ∀ (n : ℕ) (ps : List (List Bool × L
         aIdx := fun hc => by
           have hc' : ¬ (f.lvl.drop 1 = []) := hc
           show strIdx (if f.lvl.drop 1 = [] then zeroCoin P else []) < msgCount P
-          rw [if_neg hc', strIdx_nil]
+          rw [ite_eq_right hc', strIdx_nil]
           exact msgCount_pos P
         bnd := by
           rw [childFrm, frameVal_fresh]
@@ -895,7 +895,7 @@ theorem frmOk_fresh (P : Params) (hval : ∀ (n : ℕ) (ps : List (List Bool × 
     coinLen := fun hc => by
       have hc' : lvl = [] := hc
       show (if lvl = [] then zeroCoin P else []).length = P.t
-      rw [if_pos hc', zeroCoin, List.length_replicate]
+      rw [ite_eq_left hc', zeroCoin, List.length_replicate]
     vIdx := fun _ => by
       show strIdx [] < msgCount P
       rw [strIdx_nil]
@@ -903,7 +903,7 @@ theorem frmOk_fresh (P : Params) (hval : ∀ (n : ℕ) (ps : List (List Bool × 
     aIdx := fun hc => by
       have hc' : ¬ (lvl = []) := hc
       show strIdx (if lvl = [] then zeroCoin P else []) < msgCount P
-      rw [if_neg hc', strIdx_nil]
+      rw [ite_eq_right hc', strIdx_nil]
       exact msgCount_pos P
     bnd := by rw [frameVal_fresh P ps body lvl]; exact hval _ _ }
 

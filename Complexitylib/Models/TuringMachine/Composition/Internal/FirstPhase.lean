@@ -120,7 +120,7 @@ theorem compositionFirstTM_boundary_internal (tmF : TM nf) (ng : ℕ)
       cases hreachR
       cases hreachC
       simpa [compositionFirstTM, compositionRawOutputIdx, Cfg.init] using hrawR
-    · rw [hC, compositionRawOutputIdx_eq_firstPlacedLast,
+    · erw [hC, compositionRawOutputIdx_eq_firstPlacedLast,
         placeWorkParkedCfg, placeWorkCfg_work_middle]
       exact hrawR
   have hvirtual : transitionTape (C.work (compositionVirtualInputIdx nf ng)) =
@@ -137,7 +137,7 @@ theorem compositionFirstTM_boundary_internal (tmF : TM nf) (ng : ℕ)
         ((placeWorkCfg tmF.retargetOutput 0 (ng + 1)
           (fun _ => (Tape.init []).move Dir3.right) cR).work
             (compositionVirtualInputIdx nf ng)) = _
-      rw [placeWorkCfg_work_extra _ _ _ _ _ _ hnot]
+      erw [placeWorkCfg_work_extra _ _ _ _ _ _ hnot]
       exact transitionTape_eq_self
         (t := (Tape.init []).move Dir3.right) (by decide)
   have hscratch : ∀ j : Fin ng,
@@ -156,7 +156,7 @@ theorem compositionFirstTM_boundary_internal (tmF : TM nf) (ng : ℕ)
       change transitionTape
         ((placeWorkCfg tmF.retargetOutput 0 (ng + 1)
           (fun _ => (Tape.init []).move Dir3.right) cR).work idx) = _
-      rw [placeWorkCfg_work_extra _ _ _ _ _ _ hnot]
+      erw [placeWorkCfg_work_extra _ _ _ _ _ _ hnot]
       exact transitionTape_eq_self
         (t := (Tape.init []).move Dir3.right) (by decide)
   have hinvariants := reachesIn_startInvariant hreachFirst

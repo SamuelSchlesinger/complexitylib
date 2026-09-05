@@ -305,12 +305,12 @@ theorem addStepP_mem_FP : addStepP ∈ FP := by
       (fun z => pairFst (a z)) ∈ FP := by
     intro a ha
     have := mem_FP_comp ha Cobham.fstBlock_mem_FP
-    simpa [Function.comp] using this
+    exact this
   have hsnd : ∀ {a : List Bool → List Bool}, a ∈ FP →
       (fun z => pairSnd (a z)) ∈ FP := by
     intro a ha
     have := mem_FP_comp ha Cobham.sndBlock_mem_FP
-    simpa [Function.comp] using this
+    exact this
   have hc := hfst hid
   have hw := hsnd hid
   have hacc := hfst hw
@@ -369,13 +369,13 @@ theorem addBitsFn_mem_FP {a b : List Bool → List Bool} (ha : a ∈ FP) (hb : b
     (fun z => addBits (a z) (b z)) ∈ FP := by
   have h1 := mem_FP_comp (addRunFn_mem_FP ha hb) Cobham.sndBlock_mem_FP
   have h2 := mem_FP_comp h1 Cobham.fstBlock_mem_FP
-  simpa [Function.comp, addBits] using h2
-
+  simp [addBits]
+  exact h2
 theorem addCarryFn_mem_FP {a b : List Bool → List Bool} (ha : a ∈ FP) (hb : b ∈ FP) :
     (fun z => addCarry (a z) (b z)) ∈ FP := by
   have h := mem_FP_comp (addRunFn_mem_FP ha hb) Cobham.fstBlock_mem_FP
-  simpa [Function.comp, addCarry] using h
-
+  simp [addCarry]
+  exact h
 /-! ## Comparison as a recursion -/
 
 /-- Scan two little-endian bitstrings from the bottom, keeping the verdict of the highest
@@ -412,10 +412,11 @@ theorem ltBitsLE_spec (f : Bool) (u v : List Bool) (h : v.length = u.length) :
       have hb : b.toNat ≤ 1 := by cases b <;> simp
       have hd : d.toNat ≤ 1 := by cases d <;> simp
       rcases lt_trichotomy (binValLE tu) (binValLE tv) with hlt | heq | hgt
-      · rw [if_pos hlt, if_pos (by omega)]
-      · rw [if_neg (by omega), if_neg (by omega), heq]
+      · rw [ite_eq_left hlt, ite_eq_left (by omega)]
+      · rw [ite_eq_right (by omega), ite_eq_right (by omega), heq]
         cases b <;> cases d <;> simp
-      · rw [if_neg (by omega), if_pos hgt, if_neg (by omega), if_pos (by omega)]
+      · rw [ite_eq_right (by omega), ite_eq_left hgt, ite_eq_right (by omega),
+        ite_eq_left (by omega)]
 
 /-! ## Comparison as a scan -/
 
@@ -431,12 +432,12 @@ theorem ltStep_flag (f b : Bool) (tu v : List Bool) :
       = ([if b = v.headD false then f else v.headD false], tu, v.drop 1) := by
   rw [ltStep, bit1_eq]
   by_cases hb : b = v.headD false
-  · rw [if_pos hb, hb]
+  · rw [ite_eq_left hb, hb]
     have : eqFlag [v.headD false] [v.headD false] = [true] :=
       (eqFlag_eq_true_iff _ _).mpr rfl
     rw [this]
     rfl
-  · rw [if_neg hb]
+  · rw [ite_eq_right hb]
     have : eqFlag [b] [v.headD false] = [false] := by
       rcases eqFlag_flag [b] [v.headD false] with hh | hh
       · exact absurd (by simpa using (eqFlag_eq_true_iff [b] [v.headD false]).mp hh) hb
@@ -461,7 +462,7 @@ theorem ltStep_iterate_run (f : Bool) (u v : List Bool) (h : v.length = u.length
       rw [List.length_cons, Function.iterate_succ_apply, ltStep_flag]
       simp only [List.headD_cons, List.drop_succ_cons, List.drop_zero]
       rw [ih _ tv htv, ltBitsLE_cons]
-      simp
+      rfl
 
 theorem ltStep_iterate_length (f : Bool) (u v : List Bool) (n : ℕ) :
     (ltStep^[n] ([f], u, v)).1.length = 1 ∧
@@ -546,12 +547,12 @@ theorem ltFlag_eq_true_iff (u v : List Bool) (h : v.length = u.length) :
     ltFlag u v = [true] ↔ binValLE u < binValLE v := by
   rw [ltFlag_eq u v h, ltBitsLE_spec false u v h]
   rcases lt_trichotomy (binValLE u) (binValLE v) with hlt | heq | hgt
-  · rw [if_pos hlt]
+  · rw [ite_eq_left hlt]
     simp [hlt]
-  · rw [if_neg (by omega), if_neg (by omega)]
+  · rw [ite_eq_right (by omega), ite_eq_right (by omega)]
     simp
     omega
-  · rw [if_neg (by omega), if_pos hgt]
+  · rw [ite_eq_right (by omega), ite_eq_left hgt]
     simp
     omega
 
@@ -570,12 +571,12 @@ theorem ltStepP_mem_FP : ltStepP ∈ FP := by
       (fun z => pairFst (a z)) ∈ FP := by
     intro a ha
     have := mem_FP_comp ha Cobham.fstBlock_mem_FP
-    simpa [Function.comp] using this
+    exact this
   have hsnd : ∀ {a : List Bool → List Bool}, a ∈ FP →
       (fun z => pairSnd (a z)) ∈ FP := by
     intro a ha
     have := mem_FP_comp ha Cobham.sndBlock_mem_FP
-    simpa [Function.comp] using this
+    exact this
   have hf := hfst hid
   have hw := hsnd hid
   have hru := hfst hw
@@ -614,10 +615,10 @@ theorem ltFlagFn_mem_FP {a b : List Bool → List Bool} (ha : a ∈ FP) (hb : b 
     omega
   have h := Cobham.iterate_mem_FP ltStepP_mem_FP hinit ha hwidth hbound
   have h1 := mem_FP_comp h Cobham.fstBlock_mem_FP
-  simpa [Function.comp, ltFlag, ltRun] using h1
+  simp [ltFlag, ltRun]
+  exact h1
 
 /-! ## The larger of two numbers -/
-
 /-- The larger of two equal-width numbers. -/
 def maxBits (u v : List Bool) : List Bool := selectHead (ltFlag u v) v u
 
@@ -625,9 +626,9 @@ theorem maxBits_eq (u v : List Bool) (h : v.length = u.length) :
     maxBits u v = if binValLE u < binValLE v then v else u := by
   rw [maxBits]
   by_cases hlt : binValLE u < binValLE v
-  · rw [if_pos hlt, (ltFlag_eq_true_iff u v h).mpr hlt]
+  · rw [ite_eq_left hlt, (ltFlag_eq_true_iff u v h).mpr hlt]
     rfl
-  · rw [if_neg hlt]
+  · rw [ite_eq_right hlt]
     rcases ltFlag_flag u v h with hf | hf
     · exact absurd ((ltFlag_eq_true_iff u v h).mp hf) hlt
     · rw [hf]
@@ -659,8 +660,8 @@ theorem binValLE_maxBits (u v : List Bool) (h : v.length = u.length) :
     binValLE (maxBits u v) = max (binValLE u) (binValLE v) := by
   rw [maxBits_eq u v h]
   by_cases hlt : binValLE u < binValLE v
-  · rw [if_pos hlt]; omega
-  · rw [if_neg hlt]; omega
+  · rw [ite_eq_left hlt]; omega
+  · rw [ite_eq_right hlt]; omega
 
 theorem maxBits_length (u v : List Bool) (h : v.length = u.length) :
     (maxBits u v).length = u.length := by
@@ -821,12 +822,12 @@ theorem strIdx_upper (w : List Bool) : strIdx w + 2 ≤ 2 ^ (w.length + 1) := by
 theorem strIdx_nextStr (w : List Bool) : strIdx (nextStr w) = strIdx w + 1 := by
   rw [nextStr]
   by_cases hov : bumpOver w
-  · rw [if_pos hov, strIdx, strIdx, List.length_replicate, binValLE_replicate_false,
+  · rw [ite_eq_left hov, strIdx, strIdx, List.length_replicate, binValLE_replicate_false,
       (bumpOver_iff w).mp hov]
     have hpos : 0 < 2 ^ w.length := Nat.two_pow_pos _
     have : 2 ^ (w.length + 1) = 2 ^ w.length * 2 := by rw [pow_succ]
     omega
-  · rw [if_neg hov, strIdx, strIdx, bumpBits_length,
+  · rw [ite_eq_right hov, strIdx, strIdx, bumpBits_length,
       binValLE_bumpBits_of_not_over w (by simpa using hov)]
     omega
 
@@ -922,9 +923,9 @@ theorem nextStrFn_mem_FP {a : List Bool → List Bool} (ha : a ∈ FP) :
     funext z
     rw [nextStr, bumpFlag_eq, bumpCode_eq]
     by_cases hov : bumpOver (a z)
-    · rw [if_pos hov, hov, selectHead, padTo_nil]
+    · rw [ite_eq_left hov, hov, selectHead, padTo_nil]
       simp
-    · rw [if_neg hov, selectHead]
+    · rw [ite_eq_right hov, selectHead]
       simp only [Bool.not_eq_true] at hov
       rw [hov]
       simp

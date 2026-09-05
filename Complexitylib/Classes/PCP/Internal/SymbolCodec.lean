@@ -55,7 +55,7 @@ theorem symDec_symEnc {w : ℕ} (h : Fintype.card α ≤ 2 ^ w) (s : α) :
     lt_of_lt_of_le (Fintype.equivFin α s).isLt h
   have hval : binValLE (symEnc α w s) = (Fintype.equivFin α s).val := by
     rw [symEnc, binValLE_bitsOfLenLE _ _ hlt]
-  rw [symDec, hval, dif_pos (Fintype.equivFin α s).isLt]
+  rw [symDec, hval, dite_eq_left (Fintype.equivFin α s).isLt]
   simp
 
 end Complexity

@@ -83,8 +83,7 @@ theorem bitsOfLen_binVal (w : List Bool) : bitsOfLen w.length (binVal w) = w := 
       have hmod : binVal (b :: w) % 2 ^ w.length = binVal w := by
         simp only [binVal]
         cases b <;> simp [Nat.mod_eq_of_lt hlt]
-      simp only [bitsOfLen, hdiv, hmod, ih]
-      cases b <;> simp
+      cases b <;> simp [bitsOfLen, hdiv, hmod, ih]
 
 /-- **The other half of the round trip.** The value of the bitstring of length `ℓ` and value `v`
 is `v` again, provided `v` fits. Together with `bitsOfLen_binVal` this makes the correspondence a
@@ -170,8 +169,7 @@ theorem bitsOfLenLE_binValLE (w : List Bool) : bitsOfLenLE w.length (binValLE w)
       have hdiv : binValLE (b :: w) / 2 = binValLE w := by
         simp only [binValLE]
         cases b <;> simp [Nat.add_mul_div_left]
-      simp only [bitsOfLenLE, hmod, hdiv, ih]
-      cases b <;> simp
+      cases b <;> simp [bitsOfLenLE, hdiv, hmod, ih]
 
 /-- The round trip, the other way. -/
 theorem binValLE_bitsOfLenLE : ∀ (ℓ v : ℕ), v < 2 ^ ℓ → binValLE (bitsOfLenLE ℓ v) = v := by

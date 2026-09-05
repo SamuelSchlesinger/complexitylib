@@ -1028,9 +1028,7 @@ private theorem emitReadMembers_spaceBoundByWidthAt
     simp only [BinaryRoutine.binaryForCount] at hcount
     simp only [Work.limit₀, Work.position] at hcount hlimit hstart
     omega
-  · simpa [pairedInitialSpace, pairedWidth, pairedValues, pairedInput,
-      pairedCount, loopCount, body,
-      BinaryRoutine.binaryForClampedValues] using hbody
+  · exact hbody
 
 private theorem emitReadMembers_effect_of_invariant
     (stateCount tapeCount : ℕ) (values : BinaryValues WorkCount)
@@ -1371,9 +1369,7 @@ private theorem emitReadNextConnectors_spaceBoundByWidthAt
     simp only [BinaryRoutine.binaryForCount] at hcount
     simp only [Work.limit₀, Work.loop₀] at hcount hlimit hstart
     omega
-  · simpa [pairedInitialSpace, pairedWidth, pairedValues, pairedInput,
-      pairedCount, loopCount, BinaryRoutine.binaryForClampedValues] using
-      hbody
+  · exact hbody
 
 private theorem emitReadNextConnector_preserves_loop₀
     (values : BinaryValues WorkCount)

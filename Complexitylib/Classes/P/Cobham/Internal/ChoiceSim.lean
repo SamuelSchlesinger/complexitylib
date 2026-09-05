@@ -109,7 +109,7 @@ private theorem cellsCode_of_bits' (x : List Bool) :
   | cons b x ih =>
       intro t i hcells
       rw [List.length_cons, cellsCode_succ_left, encodeBits_cons,
-        show t.cells i = Γ.ofBool b from by simpa using hcells 0 (by simp)]
+        show t.cells i = Γ.ofBool b from by have h0 := hcells 0 (by simp); simpa using h0]
       congr 1
       exact ih t (i + 1) fun j hj => by
         have := hcells (j + 1) (by rw [List.length_cons]; omega)
@@ -218,9 +218,9 @@ theorem initChoiceFn_eq (tm : NTM k) (W : ℕ) (x c : List Bool)
           (if i.castSucc = Fin.last k then choiceTape c else (Tape.init [] : Tape)))
           = fun _ : Fin k => (Tape.init [] : Tape) from by
         funext i
-        rw [if_neg (Fin.castSucc_lt_last i).ne]]
+        rw [ite_eq_right (Fin.castSucc_lt_last i).ne]]
       rw [List.ofFn_const]
-    rw [hcast, if_pos rfl, List.replicate_succ]
+    rw [hcast, ite_eq_left rfl, List.replicate_succ]
     simp
   rw [cfgCode, cfgBlocks_eq, List.flatten_cons, flatten_tapesBlocks', hct]
   simp only [List.map_cons, List.map_nil, List.map_append, List.map_replicate,
@@ -247,7 +247,7 @@ theorem runCfg_choiceCfg_startInvariant (tm : NTM k) (x c : List Bool) (n : ℕ)
       · exact Tape.StartInvariant.init_ofBool c
       · exact Tape.StartInvariant.init_nil
   | succ n ih =>
-      rw [TM.runCfg_succ]
+      erw [TM.runCfg_succ]
       cases hs : (NTM.choiceTM tm).step (TM.runCfg (NTM.choiceTM tm) (choiceCfg tm x c) n) with
       | none => rw [Option.getD_none]; exact ih
       | some c' =>
@@ -262,11 +262,12 @@ theorem runCfg_choiceCfg_head_le (tm : NTM k) (x c : List Bool) (n : ℕ) :
       (TM.runCfg (NTM.choiceTM tm) (choiceCfg tm x c) n).output.head ≤ n + 1 := by
   induction n with
   | zero =>
-      refine ⟨by simp [choiceCfg], fun i => ?_, by simp [choiceCfg]⟩
+      refine ⟨by erw [TM.runCfg_zero]; simp [choiceCfg], fun i => ?_,
+        by erw [TM.runCfg_zero]; simp [choiceCfg]⟩
       show (if i = Fin.last k then choiceTape c else Tape.init []).head ≤ 0 + 1
       split <;> simp
   | succ n ih =>
-      rw [TM.runCfg_succ]
+      erw [TM.runCfg_succ]
       cases hs : (NTM.choiceTM tm).step (TM.runCfg (NTM.choiceTM tm) (choiceCfg tm x c) n) with
       | none =>
           rw [Option.getD_none]
@@ -302,7 +303,7 @@ theorem iterate_stepFn_choice (tm : NTM k) (W : ℕ) (x c : List Bool)
   | succ n ih =>
       intro hn
       obtain ⟨hinv, hW⟩ := cfgTapes_runCfg_choiceCfg_inv tm x c n W (by omega)
-      rw [Function.iterate_succ_apply', ih (by omega), TM.runCfg_succ]
+      rw [Function.iterate_succ_apply', ih (by omega)]; erw [TM.runCfg_succ]
       cases hs : (NTM.choiceTM tm).step (TM.runCfg (NTM.choiceTM tm) (choiceCfg tm x c) n) with
       | none =>
           rw [Option.getD_none]
@@ -364,7 +365,7 @@ theorem runChoiceFn_mem {n : ℕ} (tm : NTM k)
         intro c v
         have hlen := iterate_stepFn_choice_length_le tm (clockRuler (v 1)) (v 2) (v 0) c.length
         simp only [List.length_flatten, List.map_replicate, List.sum_replicate]
-        simpa using hlen)
+        exact hlen)
   have hg : ∀ i : Fin 4, Cobham (![gc, gc, gu, gx] i) := by
     intro i
     match i with
@@ -478,12 +479,12 @@ theorem dropChoice_runCfg_choiceCfg (tm : NTM k) (T : ℕ) (x c : List Bool) :
       TM.runCfg_of_reachesIn _ hreach
     rcases Nat.lt_or_ge t T with hlt | hge
     · have hhalt := hstop hlt
-      rw [show T = t + (T - t) from by omega, TM.runCfg_add, hpart,
+      erw [show T = t + (T - t) from by omega, TM.runCfg_add, hpart,
         TM.runCfg_of_halted _ hhalt]
     · have : t = T := by omega
       rw [← this, hpart]
   rw [hrun]
-  simpa using heq
+  rw [dropChoice_choiceCfg] at heq; exact heq
 
 /-! ## The verdict is the path's verdict -/
 

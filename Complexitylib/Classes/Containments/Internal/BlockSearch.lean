@@ -100,11 +100,11 @@ def addBlock (R b V : List Bool) : List Bool := selectHead (memFlag R b V) V (V 
 
 theorem addBlock_eq_self (R b V : List Bool) (h : memFlag R b V = [true]) :
     addBlock R b V = V := by
-  rw [addBlock, selectHead, if_pos (by rw [h]; rfl)]
+  rw [addBlock, selectHead, ite_eq_left (by rw [h]; rfl)]
 
 theorem addBlock_eq_append (R b V : List Bool) (h : memFlag R b V = [false]) :
     addBlock R b V = V ++ b := by
-  rw [addBlock, selectHead, if_neg (by rw [h]; simp), if_pos (by rw [h]; rfl)]
+  rw [addBlock, selectHead, ite_eq_right (by rw [h]; simp), ite_eq_left (by rw [h]; rfl)]
 
 theorem addBlockFn_mem_FP {a b c : List Bool → List Bool} (ha : a ∈ FP) (hb : b ∈ FP)
     (hc : c ∈ FP) : (fun z => addBlock (a z) (b z) (c z)) ∈ FP :=
@@ -131,7 +131,7 @@ theorem guardRulerFn_mem_FP {a b : List Bool → List Bool} (ha : a ∈ FP) (hb 
     (m : ℕ) : (fun z => guardRuler m (a z) (b z)) ∈ FP := by
   have hcons : (fun z => false :: b z) ∈ FP := by
     have := mem_FP_comp hb (Cobham.cons_mem_FP false)
-    simpa [Function.comp] using this
+    exact this
   exact Cobham.mulLenFn_mem_FP hcons (wideRulerFn_mem_FP ha m)
 
 @[simp] theorem guardRuler_length (m : ℕ) (R r : List Bool) :
@@ -186,15 +186,16 @@ theorem searchStep_pack (tm : NTM k) (m : ℕ) (R r V : List Bool) :
   rw [searchStep, searchPack, searchStepPair]
   simp only [pairFst_pair, pairSnd_pair]
   by_cases hle : (guardRuler m R r).length ≤ V.length
-  · rw [if_pos hle, selectHead,
-      if_pos (by rw [(Cobham.lenLeFlag_eq_true_iff V (guardRuler m R r)).mpr hle]; rfl)]
+  · rw [ite_eq_left hle, selectHead,
+      ite_eq_left (by rw [(Cobham.lenLeFlag_eq_true_iff V (guardRuler m R r)).mpr hle]; rfl)]
     rfl
   · have hflag : lenLeFlag V (guardRuler m R r) = [false] := by
       rcases Cobham.lenLeFlag_flag V (guardRuler m R r) with h | h
       · rw [Cobham.lenLeFlag_eq_true_iff V (guardRuler m R r)] at h
         omega
       · exact h
-    rw [if_neg hle, selectHead, if_neg (by rw [hflag]; simp), if_pos (by rw [hflag]; rfl)]
+    rw [ite_eq_right hle, selectHead, ite_eq_right (by rw [hflag]; simp),
+      ite_eq_left (by rw [hflag]; rfl)]
     rfl
 
 /-- **The packed iteration is the unpacked one.** -/
@@ -215,19 +216,19 @@ theorem searchStep_mem_FP (tm : NTM k) (m : ℕ) : searchStep tm m ∈ FP := by
       (fun z => pairFst (a z)) ∈ FP := by
     intro a ha
     have := mem_FP_comp ha Cobham.fstBlock_mem_FP
-    simpa [Function.comp] using this
+    exact this
   have hsnd : ∀ {a : List Bool → List Bool}, a ∈ FP →
       (fun z => pairSnd (a z)) ∈ FP := by
     intro a ha
     have := mem_FP_comp ha Cobham.sndBlock_mem_FP
-    simpa [Function.comp] using this
+    exact this
   have hR := hfst hid
   have hw := hsnd hid
   have hr := hfst hw
   have hV := hsnd hw
   have hcons : (fun z => false :: pairFst (pairSnd z)) ∈ FP := by
     have := mem_FP_comp hr (Cobham.cons_mem_FP false)
-    simpa [Function.comp] using this
+    exact this
   exact Cobham.pairFn_mem_FP hR (Cobham.pairFn_mem_FP hcons
     (Cobham.selectHeadFn_mem_FP (lenLeFlagFn_mem_FP hV (guardRulerFn_mem_FP hR hr m))
       (searchBodyFn_mem_FP tm m hR hr hV) hV))

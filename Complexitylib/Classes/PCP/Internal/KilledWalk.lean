@@ -70,7 +70,7 @@ def stopAt {T q : ℕ} (c : Fin T → Fin q) : ℕ :=
 theorem stopAt_le {T q : ℕ} (c : Fin T → Fin q) : stopAt c ≤ T := by
   have h := List.findIdx_le_length (p := fun i : Fin T => (c i).val == 0)
     (xs := List.finRange T)
-  simpa using h
+  simpa [stopAt] using h
 
 /-- Before the stopping index every signal is nonzero. -/
 theorem signal_ne_zero_of_lt {T q : ℕ} (c : Fin T → Fin q) {j : ℕ} (hj : j < stopAt c) :
@@ -86,8 +86,8 @@ theorem signal_eq_zero_of_stopAt_lt {T q : ℕ} (c : Fin T → Fin q) (h : stopA
   have hlen : stopAt c < (List.finRange T).length := by simpa using h
   have hg := List.findIdx_getElem (p := fun i : Fin T => (c i).val == 0)
     (xs := List.finRange T) (w := hlen)
-  rw [List.getElem_finRange] at hg
-  simpa using hg
+  erw [List.getElem_finRange] at hg
+  simpa [stopAt, Fin.cast] using hg
 
 /-- The stopping index is pinned down by the two properties above. -/
 theorem stopAt_eq_of {T q : ℕ} (c : Fin T → Fin q) {m : ℕ} (hm : m ≤ T)
@@ -133,12 +133,12 @@ theorem card_lt_stopAt {T q : ℕ} {i : ℕ} (hi : i < T) :
     constructor
     · intro h j
       by_cases hj : j.val ≤ i
-      · simp only [hj, if_true, Finset.mem_filter, Finset.mem_univ, true_and]
+      · simp only [hj, ite_true, Finset.mem_filter, Finset.mem_univ, true_and]
         simpa using h j.val hj
       · simp [hj]
     · intro h j hj
       have hmem := h ⟨j, lt_of_le_of_lt hj hi⟩
-      simp only [hj, if_true, Finset.mem_filter, Finset.mem_univ, true_and] at hmem
+      simp only [hj, ite_true, Finset.mem_filter, Finset.mem_univ, true_and] at hmem
       exact hmem
   have hnz : (Finset.univ.filter (fun x : Fin q => x.val ≠ 0)).card = q - 1 := by
     rcases Nat.eq_zero_or_pos q with hq0 | hq0
@@ -279,15 +279,15 @@ theorem card_preWalk_eq {T m : ℕ} (hm : m ≤ T) (w : Fin m → G.D) :
     constructor
     · intro h j
       by_cases hj : j.val < m
-      · simp only [hj, dif_pos, Finset.mem_singleton]
+      · simp only [hj, dite_eq_left, Finset.mem_singleton]
         have hval := congrFun h ⟨j.val, hj⟩
-        simpa using hval
+        simpa [RegGraph.preWalk] using hval
       · simp [hj]
     · intro h
       funext j
       have hmem := h ⟨j.val, lt_of_lt_of_le j.isLt hm⟩
-      simp only [j.isLt, dif_pos, Finset.mem_singleton] at hmem
-      simpa using hmem
+      simp only [j.isLt, dite_eq_left, Finset.mem_singleton] at hmem
+      simpa [RegGraph.preWalk] using hmem
   have hlt : (Finset.univ.filter fun j : Fin T => j.val < m).card = m := by
     have himg : (Finset.univ.filter fun j : Fin T => j.val < m).image Fin.val
         = Finset.range m := by
@@ -371,8 +371,8 @@ def killedPower (G : RegGraph) (q T : ℕ) (hq : 0 < q) : RegGraph where
     haveI := G.decEqD
     infer_instance
   nonemptyD := by
-    haveI := G.nonemptyD
-    haveI : Nonempty (Fin q) := ⟨⟨0, hq⟩⟩
+    have := G.nonemptyD
+    have : Nonempty (Fin q) := ⟨⟨0, hq⟩⟩
     infer_instance
   rot x := (G.killedEnd x.1 x.2.1 x.2.2, (G.killedRev x.1 x.2.1 x.2.2, x.2.2))
   rot_involutive := by

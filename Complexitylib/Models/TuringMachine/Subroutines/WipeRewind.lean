@@ -104,10 +104,10 @@ theorem wipeRewindTM_hoareTime (targets : List (Fin n)) (hnodup : targets.Nodup)
     refine ⟨rfl, funext fun j => ?_, rfl⟩
     simp only [hW1def]
     by_cases hj : j ∈ targets
-    · rw [if_pos hj, hin j hj]
+    · rw [ite_eq_left hj, hin j hj]
       exact wipedTape_eq_blank H rfl (hworkSI j (fun hjr => hr (hjr ▸ hj))).1
         (fun i hi => htargetFar j hj i hi)
-    · rw [if_neg hj]
+    · rw [ite_eq_right hj]
       by_cases hjr : j = r
       · rw [hjr, hreg, hworkR]
       · exact hout j hjr hj
@@ -129,16 +129,16 @@ theorem wipeRewindTM_hoareTime (targets : List (Fin n)) (hnodup : targets.Nodup)
         have : targets.length * (H + 1 + 3) = targets.length * (H + 4) := by ring
         omega)
     · intro j hj
-      simp only [hW1def, if_pos hj]
+      simp only [hW1def, ite_eq_left hj]
       exact ⟨Tape.init_cells_zero [], le_refl _⟩
     · rintro inp work out ⟨rfl, hout, hin, hkeep⟩
       refine ⟨rfl, funext fun j => ?_, hout⟩
       by_cases hj : j ∈ targets
       · rw [hin j hj]
-        simp only [hW1def, if_pos hj]
+        simp only [hW1def, ite_eq_left hj]
         exact Tape.ext rfl (by rw [blankTape, Tape.move_cells])
       · rw [hkeep j hj]
-        simp only [hW1def, if_neg hj]
+        simp only [hW1def, ite_eq_right hj]
   exact seqTM_hoareTime _ _ hwipe htrans hrew
 
 end TM

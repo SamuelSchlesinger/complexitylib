@@ -156,7 +156,7 @@ private theorem eval?_append_dead_padding_copy
         simp
       rw [CircuitCode.RawCircuit.eval?]
       rw [hfullNonempty]
-      simp only [Bool.false_eq_true, if_false]
+      simp only [Bool.false_eq_true, ite_false]
       rw [hfullEval]
       have hlast :
           input.length +
@@ -187,7 +187,6 @@ theorem paddedDirectUnrollingRawCircuit_eval?_internal
       (tm.directUnrollingRawCircuit f n).eval? x.toList =
         some (CircuitUnrolling.boundedAcceptanceBit tm.toNTM (f n) x
           (fun _ => false)) := by
-    unfold directUnrollingRawCircuit at hrawEval
     unfold CircuitUnrolling.boundedAcceptanceBit
     rw [hirrel] at hrawEval
     exact hrawEval

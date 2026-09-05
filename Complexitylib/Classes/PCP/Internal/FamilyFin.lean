@@ -242,13 +242,15 @@ noncomputable def famRot (n : ℕ) : Fin n × Fin F.famDeg → Fin n × Fin F.fa
   if hn : 0 < n then (F.famGraph hd hn).rot else id
 
 theorem famRot_involutive (n : ℕ) : Function.Involutive (F.famRot hd n) := by
-  rw [famRot]
-  split
-  · exact (F.famGraph hd ‹_›).rot_involutive
-  · exact fun x => rfl
+  unfold famRot
+  by_cases hn : 0 < n
+  · erw [dite_eq_left hn]
+    exact (F.famGraph hd hn).rot_involutive
+  · erw [dite_eq_right hn]
+    exact fun x => rfl
 
 theorem famRot_eq {n : ℕ} (hn : 0 < n) : F.famRot hd n = (F.famGraph hd hn).rot := by
-  rw [famRot, dif_pos hn]
+  erw [famRot, dite_eq_left hn]
 
 theorem spectral_famRot (n : ℕ) :
     (RegGraph.ofRot F.famDeg F.famDeg_pos n (F.famRot hd n)
@@ -280,7 +282,7 @@ theorem famDartName_symm_of_lt {n : ℕ} (hn : 0 < n) (i : Fin F.famDeg)
       = Sum.inl (⟨i.val / F.fitD, by
           exact (Nat.div_lt_iff_lt_mul F.fitD_pos).mpr h⟩,
         ⟨i.val % F.fitD, Nat.mod_lt _ F.fitD_pos⟩) := by
-  rw [Equiv.symm_apply_eq]
+  erw [Equiv.symm_apply_eq]
   refine Fin.ext ?_
   show i.val = i.val % F.fitD + F.fitD * (i.val / F.fitD)
   exact (Nat.mod_add_div i.val F.fitD).symm
@@ -291,7 +293,7 @@ theorem famDartName_symm_of_ge {n : ℕ} (hn : 0 < n) (i : Fin F.famDeg)
       = (Sum.inr ⟨i.val - F.wid hd n * F.fitD, by
           have := i.isLt
           omega⟩ : (F.paddedG hd hn).D) := by
-  rw [Equiv.symm_apply_eq]
+  erw [Equiv.symm_apply_eq]
   refine Fin.ext ?_
   show i.val = F.wid hd n * F.fitD + (i.val - F.wid hd n * F.fitD)
   omega
@@ -318,10 +320,10 @@ theorem famRotVal_eq {n : ℕ} (hn : 0 < n) (v : Fin n) (i : Fin F.famDeg) :
         i = F.famDartName hd hn (Sum.inl (s, c)) := by
       refine ⟨⟨i.val / F.fitD, (Nat.div_lt_iff_lt_mul F.fitD_pos).mpr hi⟩,
         ⟨i.val % F.fitD, Nat.mod_lt _ F.fitD_pos⟩, ?_⟩
-      rw [← Equiv.symm_apply_eq]
+      erw [← Equiv.symm_apply_eq]
       exact F.famDartName_symm_of_lt hd hn i hi
     simp only [famGraph, RegGraph.relabel, val_famDartName_inl]
-    rw [Equiv.symm_apply_apply]
+    erw [Equiv.symm_apply_apply]
     show F.famRotVal hd n (v.val, c.val + F.fitD * s.val)
         = (((F.mergedG hd hn).rot (v, (s, c))).1.val,
            ((F.famDartName hd hn)
@@ -329,7 +331,7 @@ theorem famRotVal_eq {n : ℕ} (hn : 0 < n) (v : Fin n) (i : Fin F.famDeg) :
     by_cases hu : v.val + s.val * n < F.fitN hd n
     · have hlift : RegGraph.liftN (F.fitN hd n) n v s.val
           = some (⟨v.val + s.val * n, hu⟩ : Fin (F.fitN hd n)) := by
-        rw [RegGraph.liftN, dif_pos hu]
+        rw [RegGraph.liftN, dite_eq_left hu]
       simp only [mergedG, RegGraph.mergedN, RegGraph.mergeRotN, hlift]
       have hlt : c.val + F.fitD * s.val < F.wid hd n * F.fitD := by
         have h1 : c.val < F.fitD := c.isLt
@@ -341,12 +343,12 @@ theorem famRotVal_eq {n : ℕ} (hn : 0 < n) (v : Fin n) (i : Fin F.famDeg) :
         rw [Nat.add_mul_mod_self_left, Nat.mod_eq_of_lt c.isLt]
       have hrot := F.rotVal_eq (F.fitLevel hd n)
         (⟨v.val + s.val * n, hu⟩ : Fin (F.size (F.fitLevel hd n))) c
-      rw [famRotVal, if_pos hlt]
+      rw [famRotVal, ite_eq_left hlt]
       dsimp only
-      rw [hs, hc, if_pos hu, hrot]
+      rw [hs, hc, ite_eq_left hu, hrot]
       rfl
     · have hlift : RegGraph.liftN (F.fitN hd n) n v s.val = none := by
-        rw [RegGraph.liftN, dif_neg hu]
+        rw [RegGraph.liftN, dite_eq_right hu]
       simp only [mergedG, RegGraph.mergedN, RegGraph.mergeRotN, hlift]
       have hlt : c.val + F.fitD * s.val < F.wid hd n * F.fitD := by
         have h1 : c.val < F.fitD := c.isLt
@@ -354,20 +356,20 @@ theorem famRotVal_eq {n : ℕ} (hn : 0 < n) (v : Fin n) (i : Fin F.famDeg) :
         nlinarith
       have hs : (c.val + F.fitD * s.val) / F.fitD = s.val := by
         rw [Nat.add_mul_div_left _ _ F.fitD_pos, Nat.div_eq_of_lt c.isLt, Nat.zero_add]
-      rw [famRotVal, if_pos hlt]
+      rw [famRotVal, ite_eq_left hlt]
       dsimp only
-      rw [hs, if_neg hu]
+      rw [hs, ite_eq_right hu]
       rfl
   · obtain ⟨j, rfl⟩ : ∃ j : Fin (F.famDeg - F.wid hd n * F.fitD),
         i = F.famDartName hd hn (Sum.inr j : (F.paddedG hd hn).D) := by
       refine ⟨⟨i.val - F.wid hd n * F.fitD, by have := i.isLt; omega⟩, ?_⟩
-      rw [← Equiv.symm_apply_eq]
+      erw [← Equiv.symm_apply_eq]
       exact F.famDartName_symm_of_ge hd hn i (by omega)
     simp only [famGraph, RegGraph.relabel]
-    rw [Equiv.symm_apply_apply]
+    erw [Equiv.symm_apply_apply]
     have hge : ¬ (F.wid hd n * F.fitD + j.val < F.wid hd n * F.fitD) := by omega
     show F.famRotVal hd n (v.val, F.wid hd n * F.fitD + j.val) = _
-    rw [famRotVal, if_neg hge]
+    rw [famRotVal, ite_eq_right hge]
     rfl
 
 /-- **The expander family the numbered tower generates**: one member at every

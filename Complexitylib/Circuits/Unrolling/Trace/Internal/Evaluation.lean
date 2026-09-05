@@ -67,7 +67,7 @@ theorem evalAux?_prefixTraceBuild_internal
       have hbuildNonzero : build.available ≠ 0 := by
         have havailable := NeZero.ne available
         omega
-      letI : NeZero build.available := ⟨hbuildNonzero⟩
+      let : NeZero build.available := ⟨hbuildNonzero⟩
       let index : Fin T := ⟨i, hiT⟩
       have hchoiceMiddle :
           middle[(layout.choice index).val]? = some (choices index) := by

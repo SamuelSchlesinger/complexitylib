@@ -325,20 +325,20 @@ def unionTM (tm₁ : TM n₁) (tm₂ : TM n₂) : TM (n₁ + 1 + n₂) :=
         match m with
         | .rewindOut =>
           dsimp only [fakeOutIdx]
-          split
+          by_cases hw : wHeads ⟨n₁, by omega⟩ = Γ.start <;> simp only [hw, ↓reduceIte]
           · refine ⟨idleDir_right_of_start, ?_, idleDir_right_of_start⟩
-            intro i hwi; simp only []; split
+            intro i hwi; split
             · rfl
             · exact idleDir_right_of_start hwi
           · refine ⟨idleDir_right_of_start, ?_, idleDir_right_of_start⟩
-            intro i hwi; simp only []; split
-            · next hn heq =>
-              exfalso; apply hn
+            intro i hwi; split
+            · next heq =>
+              exfalso; apply hw
               rwa [show wHeads ⟨n₁, by omega⟩ = wHeads i from by congr 1; ext; simp [heq]]
             · exact idleDir_right_of_start hwi
         | .checkResult =>
           dsimp only [fakeOutIdx]
-          split
+          by_cases hw : wHeads ⟨n₁, by omega⟩ = Γ.one <;> simp only [hw, ↓reduceIte]
           · exact ⟨idleDir_right_of_start, fun _ => idleDir_right_of_start, idleDir_right_of_start⟩
           · exact rightOfStart_allIdle iHead wHeads oHead
         | .rewindIn =>

@@ -54,21 +54,21 @@ theorem sepCount_encodeTokens : ∀ toks : List EncToken,
         cases b
         · show sepCount ([false, false] ++ encodeTokens ts) = _
           rw [show ([false, false] ++ encodeTokens ts)
-            = false :: false :: encodeTokens ts from rfl, sepCount_cons₂, if_neg (by simp)]
+            = false :: false :: encodeTokens ts from rfl, sepCount_cons₂, ite_eq_right (by simp)]
           simp [ih]
         · show sepCount ([true, true] ++ encodeTokens ts) = _
           rw [show ([true, true] ++ encodeTokens ts)
-            = true :: true :: encodeTokens ts from rfl, sepCount_cons₂, if_neg (by simp)]
+            = true :: true :: encodeTokens ts from rfl, sepCount_cons₂, ite_eq_right (by simp)]
           simp [ih]
       case litSep =>
         show sepCount ([false, true] ++ encodeTokens ts) = _
         rw [show ([false, true] ++ encodeTokens ts)
-          = false :: true :: encodeTokens ts from rfl, sepCount_cons₂, if_neg (by simp)]
+          = false :: true :: encodeTokens ts from rfl, sepCount_cons₂, ite_eq_right (by simp)]
         simp [ih]
       case clauseSep =>
         show sepCount ([true, false] ++ encodeTokens ts) = _
         rw [show ([true, false] ++ encodeTokens ts)
-          = true :: false :: encodeTokens ts from rfl, sepCount_cons₂, if_pos (by simp)]
+          = true :: false :: encodeTokens ts from rfl, sepCount_cons₂, ite_eq_left (by simp)]
         simp [ih]
 
 theorem clause_tokens_no_sep (c : Clause) :
@@ -133,11 +133,11 @@ theorem segFrom_encodeTokens_noSep {sep : EncToken} {b0 b1 : Bool}
       obtain ⟨c0, c1, henc, hnec⟩ := hne tk (hall tk (by simp))
       rw [encodeTokens_cons, henc, List.append_assoc,
         show ([c0, c1] ++ (encodeTokens ts ++ v)) = c0 :: c1 :: (encodeTokens ts ++ v) from rfl,
-        segFrom_cons₂, if_neg hnec, ih (fun t' ht' => hall t' (by simp [ht'])) v t c]
+        segFrom_cons₂, ite_eq_right hnec, ih (fun t' ht' => hall t' (by simp [ht'])) v t c]
       by_cases h : c = t
-      · rw [if_pos h, if_pos h, if_pos h]
+      · rw [ite_eq_left h, ite_eq_left h, ite_eq_left h]
         rfl
-      · rw [if_neg h, if_neg h, if_neg h]
+      · rw [ite_eq_right h, ite_eq_right h, ite_eq_right h]
 
 theorem segFrom_of_gt (s0 s1 : Bool) : ∀ (n : ℕ) (s : List Bool) (t c : ℕ),
     s.length ≤ n → t < c → segFrom s0 s1 t c s = [] := by
@@ -159,9 +159,9 @@ theorem segFrom_of_gt (s0 s1 : Bool) : ∀ (n : ℕ) (s : List Bool) (t c : ℕ)
             omega
           rw [segFrom_cons₂]
           by_cases hcase : b0 = s0 ∧ b1 = s1
-          · rw [if_pos hcase]
+          · rw [ite_eq_left hcase]
             exact ih r t (c + 1) hr (by omega)
-          · rw [if_neg hcase, if_neg (by omega : ¬ c = t)]
+          · rw [ite_eq_right hcase, ite_eq_right (by omega : ¬ c = t)]
             exact ih r t c hr hlt
 
 /-- Token segments joined by a separator. -/
@@ -207,14 +207,14 @@ theorem segFrom_tokenJoin {sep : EncToken} {b0 b1 : Bool} (hsep : sep.encode = [
         rw [encodeTokens_append,
           show encodeTokens [sep] = sep.encode from by simp, hsep]
         rfl
-      rw [hs, segFrom_cons₂, if_pos (by simp : (b0 = b0 ∧ b1 = b1))]
+      rw [hs, segFrom_cons₂, ite_eq_left (by simp : (b0 = b0 ∧ b1 = b1))]
       rcases Nat.eq_or_lt_of_le hle with heq | hlt2
-      · rw [if_pos heq, segFrom_of_gt b0 b1
+      · rw [ite_eq_left heq, segFrom_of_gt b0 b1
           (encodeTokens (tokenJoin sep gs)).length _ t (c + 1) (le_refl _) (by omega)]
         have hzero : t - c = 0 := by omega
         simp only [hzero]
         simp
-      · rw [if_neg (by omega : ¬ c = t)]
+      · rw [ite_eq_right (by omega : ¬ c = t)]
         have hidx : t - c = (t - (c + 1)) + 1 := by omega
         have hlt' : t - (c + 1) < gs.length := by
           rw [hidx] at hlt

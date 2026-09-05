@@ -100,7 +100,7 @@ theorem IsEstimateSelectionTrace.isShrinkTrace_of_length_le_internal
   | nil => exact isShrinkTrace_nil_internal target
   | cons input inputs ih =>
       have htailLt : inputs.length < rounds := by
-        simpa only [List.length_cons] using hlength
+        exact hlength
       refine (isShrinkTrace_cons_iff_internal
         target input inputs).mpr ⟨ih htrace.1 htailLt.le, ?_⟩
       exact htrace.2.isShrinkExtension_double_internal

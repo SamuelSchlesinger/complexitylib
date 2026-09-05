@@ -210,12 +210,12 @@ theorem mkSt_ne_nil (d a R ret stk : List Bool) : mkSt d a R ret stk ≠ [] := b
 theorem fstBlockOf_mem_FP {a : List Bool → List Bool} (ha : a ∈ FP) :
     (fun z => pairFst (a z)) ∈ FP := by
   have := mem_FP_comp ha Cobham.fstBlock_mem_FP
-  simpa [Function.comp] using this
+  exact this
 
 theorem sndBlockOf_mem_FP {a : List Bool → List Bool} (ha : a ∈ FP) :
     (fun z => pairSnd (a z)) ∈ FP := by
   have := mem_FP_comp ha Cobham.sndBlock_mem_FP
-  simpa [Function.comp] using this
+  exact this
 
 theorem frKindFn_mem_FP {a : List Bool → List Bool} (ha : a ∈ FP) :
     (fun z => frKind (a z)) ∈ FP := fstBlockOf_mem_FP ha

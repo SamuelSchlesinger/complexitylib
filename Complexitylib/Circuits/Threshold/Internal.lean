@@ -150,9 +150,8 @@ theorem eval_conjunction_internal (n : ℕ)
     (ThresholdOp.conjunction n).eval n inputs =
       AndOrOp.eval .and n inputs := by
   rw [Bool.eq_iff_iff]
-  simp only [ThresholdOp.eval, ThresholdOp.conjunction,
-    ThresholdOp.trueCount, decide_eq_true_eq,
-    and_eval_eq_true_iff]
+  unfold ThresholdOp.eval ThresholdOp.conjunction ThresholdOp.trueCount
+  simp only [decide_eq_true_eq, and_eval_eq_true_iff]
   have hcount := Fin.countP_le inputs
   rw [show n ≤ Fin.countP inputs ↔
       Fin.countP inputs = n by omega]
@@ -163,9 +162,8 @@ theorem eval_disjunction_internal (n : ℕ)
     ThresholdOp.disjunction.eval n inputs =
       AndOrOp.eval .or n inputs := by
   rw [Bool.eq_iff_iff]
-  simp only [ThresholdOp.eval, ThresholdOp.disjunction,
-    ThresholdOp.trueCount, decide_eq_true_eq,
-    or_eval_eq_true_iff]
+  unfold ThresholdOp.eval ThresholdOp.disjunction ThresholdOp.trueCount
+  simp only [decide_eq_true_eq, or_eval_eq_true_iff]
   rw [show 1 ≤ Fin.countP inputs ↔
       0 < Fin.countP inputs by omega]
   exact countP_pos_iff n inputs
@@ -175,8 +173,8 @@ theorem eval_majority_internal (n : ℕ)
     (ThresholdOp.majority n).eval n inputs =
       decide (n / 2 < Fin.countP inputs) := by
   rw [Bool.eq_iff_iff]
-  simp only [ThresholdOp.eval, ThresholdOp.majority,
-    ThresholdOp.trueCount, decide_eq_true_eq]
+  unfold ThresholdOp.eval ThresholdOp.majority ThresholdOp.trueCount
+  simp only [decide_eq_true_eq]
   omega
 
 theorem eval_zero_internal (n : ℕ) (inputs : BitString n) :
@@ -186,8 +184,8 @@ theorem eval_zero_internal (n : ℕ) (inputs : BitString n) :
 theorem eval_of_arity_lt_internal {cutoff n : ℕ}
     (hcutoff : n < cutoff) (inputs : BitString n) :
     (ThresholdOp.mk cutoff).eval n inputs = false := by
-  simp only [ThresholdOp.eval, ThresholdOp.trueCount,
-    decide_eq_false_iff_not]
+  unfold ThresholdOp.eval ThresholdOp.trueCount
+  simp only [decide_eq_false_iff_not]
   have hcount := Fin.countP_le inputs
   omega
 

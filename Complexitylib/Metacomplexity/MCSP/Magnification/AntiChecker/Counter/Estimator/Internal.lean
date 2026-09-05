@@ -49,9 +49,10 @@ theorem isAccurateRequiredRoundEstimator_internal
     family target inputs input hlength]
   have happrox := hcorrect ⟨inputs.length, hlength⟩
     (packTargetSamples target (input :: inputs).get)
-  simpa only [
-      candidateLabeledSurvivorCount_unpack_packTargetSamples_internal,
-      List.ofFn_get] using happrox
+  unfold AntiChecker.ApproximatesCandidateSurvivorCount
+  simp only [candidateLabeledSurvivorCount_unpack_packTargetSamples_internal,
+    List.ofFn_get] at happrox
+  exact happrox
 
 end ApproximateCounterFamily
 
@@ -73,7 +74,7 @@ theorem eventually_exists_isFor_length_eq_sampleCount_of_correctCounterFamily_in
       [eventually_exists_isFor_length_eq_sampleCount_of_isHardAt_internal beta]
       with arity hanti
   intro harity
-  letI : NeZero arity := ⟨harity⟩
+  let : NeZero arity := ⟨harity⟩
   intro overhead family hcorrect target hhard
   exact hanti harity target (family.extensionEstimator target) hhard
     (ApproximateCounterFamily.isAccurateRequiredRoundEstimator_internal

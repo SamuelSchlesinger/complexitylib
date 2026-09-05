@@ -59,7 +59,7 @@ theorem getElem_directFinalizationSuffix_padding_internal
       rw [length_directFinalizationSuffix_internal]
       omega) = CircuitCode.RawGate.constant 0 false := by
   unfold directFinalizationSuffix
-  rw [List.getElem_append_left]
+  erw [List.getElem_append_left]
   exact getElem_directPaddingSchedule_internal originalRawGateCount closedBound index
 
 theorem getElem_directFinalizationSuffix_terminal_internal
@@ -69,7 +69,7 @@ theorem getElem_directFinalizationSuffix_terminal_internal
           rw [length_directFinalizationSuffix_internal]
           omega) = directTerminalCopyGate n originalRawGateCount := by
   unfold directFinalizationSuffix
-  rw [List.getElem_append_right]
+  erw [List.getElem_append_right]
   · simp [length_directPaddingSchedule_internal]
   · rw [length_directPaddingSchedule_internal]
 

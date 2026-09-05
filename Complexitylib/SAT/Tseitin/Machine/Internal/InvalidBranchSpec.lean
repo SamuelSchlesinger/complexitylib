@@ -61,7 +61,7 @@ private theorem invalidBranch_hoareTime (z : List Bool) :
   have hseq := TM.seqTM_hoareTime clearValidationOutputTM
     (TM.emitBitsTM fallbackEncoding) hclear
     (TM.emitPred_transition hinp hwork []) hemit
-  simpa only [validationBranchPre, invalidReductionPost] using hseq
+  exact hseq
 
 /-! ## Validation branch routing -/
 
@@ -74,7 +74,9 @@ private theorem validation_to_invalid_then (z : List Bool)
       out.cells 1 = Γ.one → False := by
   rintro inp work out hpost hone
   have hzero : out.cells 1 = Γ.zero := by
-    simpa [hvalid] using hpost.2.2.2.2.2.1
+    have h := hpost.2.2.2.2.2.1
+    rw [hvalid] at h
+    exact h
   rw [hzero] at hone
   contradiction
 
@@ -137,7 +139,7 @@ theorem reductionTMWith_invalid_hoareTime_internal
     hseedTransition hifBound
   have hallBound := hall.mono_bound (by omega :
     (4 * z.length + 11) + 1 + (z.length + 37) ≤ 5 * z.length + 49)
-  simpa only [reductionTMWith, validBranch, invalidBranch] using hallBound
+  exact hallBound
 
 /-- Execution-level corollary from the standard initial configuration. -/
 theorem reductionTMWith_invalid_reachesIn_internal

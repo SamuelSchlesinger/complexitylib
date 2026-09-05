@@ -52,7 +52,9 @@ private theorem natCodeOutputAt_outAcc (out : Tape) (ys : List Bool)
   | zero => simpa [natCodeOutputAt] using hout
   | succ count ih =>
       have hnext := outAcc_append_bit ih true
-      simpa [natCodeOutputAt, List.replicate_add, List.append_assoc] using hnext
+      simp only [natCodeOutputAt, List.replicate_add, List.replicate_one]
+      rw [← List.append_assoc]
+      exact hnext
 
 private theorem HasBinaryNat.parked {t : Tape} {value : ℕ}
     (h : t.HasBinaryNat value) : Parked t := by
@@ -245,9 +247,9 @@ private theorem natCodeIteration_reachesIn
   have hseq := seqTM_reachesIn_of_reachesIn emit succ hemit rfl hsucc'
   have hlift := binaryForTM_iteration_reachesIn_internal
     (emitBitsTM (n := n) [true]) counterIdx limitIdx hseq
-  simpa [emit, succ, emitNatCodeLoopTM, natCodeIterationStartCfg,
-    natCodeIterationDoneCfg, binaryForIterationTime, binaryForIterationTM,
-    binaryForIterationWrap, phase1Wrap, phase2Wrap] using hlift
+  simp [emitNatCodeLoopTM, natCodeIterationStartCfg, natCodeIterationDoneCfg,
+    binaryForIterationTime, binaryForIterationTM]
+  exact hlift
 
 private theorem natCodeLoopback_step
     (counterIdx limitIdx : Fin n)
@@ -500,7 +502,7 @@ private theorem natCodeWorkAt_cfg_withinAuxSpace
 /-- Explicit all-prefix certificate for the binary emission loop. The output is
 uncharged; comparison and successor cursors stay within a linear function of
 the preserved limit's binary width. -/
-private def natCodeLoopSpaceSpec
+private theorem natCodeLoopSpaceSpec
     (counterIdx limitIdx : Fin n) (hne : counterIdx ≠ limitIdx)
     (inp₀ : Tape) (work₀ : Fin n → Tape) (out₀ : Tape)
     (ys : List Bool) (value inputLength initialSpace : ℕ)
@@ -527,7 +529,7 @@ private def natCodeLoopSpaceSpec
     have hreach' : (emitNatCodeLoopTM counterIdx limitIdx).reachesIn time
         (natCodeScanCfg counterIdx limitIdx inp₀ work₀ out₀ current)
         cfg := by
-      simpa [natCodeLoopSpec] using hreach
+      exact hreach
     exact (hstart.reachesIn hreach').mono le_rfl (by
       simp [binaryForCompareTime] at htime
       omega)
@@ -543,7 +545,7 @@ private def natCodeLoopSpaceSpec
     have hreach' : (emitNatCodeLoopTM counterIdx limitIdx).reachesIn time
         (natCodeIterationStartCfg counterIdx limitIdx inp₀ work₀ out₀
           current) cfg := by
-      simpa [natCodeLoopSpec] using hreach
+      exact hreach
     have hsucc := binarySuccTime_le current
     have hsize := Nat.size_le_size (Nat.le_of_lt hcurrent)
     exact (hstart.reachesIn hreach').mono le_rfl (by
@@ -596,7 +598,7 @@ private theorem emitNatCodeLoopTM_hoareSpace
   exact (natCodeLoopSpaceSpec counterIdx limitIdx hne inp₀ work₀ out
     ys value inputLength initialSpace hinp hcounter hlimit hother hout
     hworkSpace hinputSpace).prefix_withinAuxSpace value 0 t c
-      (by omega) (by simpa [spec] using hreachSpec) htime
+      (by omega) (by exact hreachSpec) htime
 
 /-- Time-and-all-prefix-space contract for the unary-body loop. -/
 theorem emitNatCodeLoopTM_hoareTimeSpace_internal

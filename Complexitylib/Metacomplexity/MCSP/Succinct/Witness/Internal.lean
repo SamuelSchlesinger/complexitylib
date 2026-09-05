@@ -36,7 +36,7 @@ theorem isRawCircuitWitness_encodeCircuit_internal (inst : Instance)
     (hsize : circuit.size ≤ inst.threshold)
     (hsamples : inst.SamplesFunction (fun input => circuit.eval input 0)) :
     inst.IsRawCircuitWitness (CircuitCode.encodeCircuit circuit) := by
-  simp only [IsRawCircuitWitness, NeZero.ne inst.arity, if_false]
+  simp only [IsRawCircuitWitness, NeZero.ne inst.arity, ite_false]
   change
     match CircuitCode.RawCircuit.decode?
         (CircuitCode.RawCircuit.ofCircuit circuit).encode with
@@ -57,7 +57,7 @@ theorem isRawCircuitWitness_encodeCircuit_internal (inst : Instance)
 theorem hasCircuitAtMost_of_isRawCircuitWitness_internal (inst : Instance)
     [NeZero inst.arity] {code : List Bool}
     (hwitness : inst.IsRawCircuitWitness code) : inst.HasCircuitAtMost := by
-  simp only [IsRawCircuitWitness, NeZero.ne inst.arity, if_false] at hwitness
+  simp only [IsRawCircuitWitness, NeZero.ne inst.arity, ite_false] at hwitness
   cases hdecode : CircuitCode.RawCircuit.decode? code with
   | none => simp [hdecode] at hwitness
   | some rawCircuit =>
@@ -81,7 +81,7 @@ theorem exists_isRawCircuitWitness_iff_internal (inst : Instance) :
   by_cases harity : inst.arity = 0
   · constructor
     · rintro ⟨code, hwitness⟩
-      simp only [IsRawCircuitWitness, harity, if_true] at hwitness
+      simp only [IsRawCircuitWitness, harity, ite_true] at hwitness
       cases code with
       | nil => simp at hwitness
       | cons output rest =>
@@ -98,10 +98,10 @@ theorem exists_isRawCircuitWitness_iff_internal (inst : Instance) :
       obtain ⟨output, hsamples⟩ :=
         (hasCircuitAtMost_of_arity_eq_zero_iff_internal inst harity).mp hsmall
       refine ⟨[output], ?_⟩
-      simp only [IsRawCircuitWitness, harity, if_true]
+      simp only [IsRawCircuitWitness, harity, ite_true]
       simpa [SamplesFunction, Sample.MatchesFunction,
         List.forall_iff_forall_mem] using hsamples
-  · letI : NeZero inst.arity := ⟨harity⟩
+  · let : NeZero inst.arity := ⟨harity⟩
     constructor
     · rintro ⟨code, hwitness⟩
       exact hasCircuitAtMost_of_isRawCircuitWitness_internal inst hwitness
@@ -119,7 +119,7 @@ theorem isRawCircuitWitness_threshold_mono_internal (inst : Instance)
     ({ inst with threshold := second } : Instance).IsRawCircuitWitness code := by
   by_cases harity : inst.arity = 0
   · simpa [IsRawCircuitWitness, harity] using hwitness
-  · simp only [IsRawCircuitWitness, harity, if_false] at hwitness ⊢
+  · simp only [IsRawCircuitWitness, harity, ite_false] at hwitness ⊢
     cases hdecode : CircuitCode.RawCircuit.decode? code with
     | none => simp [hdecode] at hwitness
     | some circuit =>
@@ -130,14 +130,14 @@ theorem isRawCircuitWitness_length_le_internal (inst : Instance)
     {code : List Bool} (hwitness : inst.IsRawCircuitWitness code) :
     code.length ≤ inst.rawWitnessCodeLengthBound := by
   by_cases harity : inst.arity = 0
-  · simp only [IsRawCircuitWitness, harity, if_true] at hwitness
+  · simp only [IsRawCircuitWitness, harity, ite_true] at hwitness
     cases code with
     | nil => simp at hwitness
     | cons output rest =>
         cases rest with
         | nil => simp [rawWitnessCodeLengthBound]
         | cons next rest => simp at hwitness
-  · simp only [IsRawCircuitWitness, harity, if_false] at hwitness
+  · simp only [IsRawCircuitWitness, harity, ite_false] at hwitness
     cases hdecode : CircuitCode.RawCircuit.decode? code with
     | none => simp [hdecode] at hwitness
     | some circuit =>

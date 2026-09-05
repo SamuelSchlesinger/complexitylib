@@ -59,16 +59,19 @@ theorem preRel_eq (G : ConstraintGraph α) (E : ExpanderFamily) (p : G.HalfEdge)
     rw [ConstraintGraph.enc_halfEdge, ConstraintGraph.halfCode]
     cases p.2 <;> simp
   rcases G.preDart_cases E d with rfl | rfl | ⟨j, rfl⟩ | ⟨j, rfl⟩
-  · rw [G.enc_preLoop E, preRelCode, if_pos rfl]
+  · rw [G.enc_preLoop E, preRelCode, ite_eq_left rfl]
     rfl
-  · rw [G.enc_preEdge E, preRelCode, if_neg one_ne_zero, if_pos rfl, relOfCode_codeOfRel, hmod]
+  · rw [G.enc_preEdge E, preRelCode, ite_eq_right one_ne_zero, ite_eq_left rfl, relOfCode_codeOfRel,
+    hmod]
     show (if p.2 then G.rel p.1 b a else G.rel p.1 a b) = _
     cases hb : p.2 <;> simp
   · have hj := j.isLt
-    rw [G.enc_preCloud E j, preRelCode, if_neg (by omega), if_neg (by omega), if_pos (by omega)]
+    rw [G.enc_preCloud E j, preRelCode, ite_eq_right (by omega), ite_eq_right (by omega),
+      ite_eq_left (by omega)]
     rfl
   · have hj := j.isLt
-    rw [G.enc_preExp E j, preRelCode, if_neg (by omega), if_neg (by omega), if_neg (by omega)]
+    rw [G.enc_preExp E j, preRelCode, ite_eq_right (by omega), ite_eq_right (by omega),
+      ite_eq_right (by omega)]
     rfl
 
 /-- Only the parity of a half-edge's number matters. -/
@@ -96,8 +99,8 @@ theorem rel_killedPow_preprocess (G : ConstraintGraph α) (E : ExpanderFamily) {
               (b ((G.preprocess E).graph.endIdx ((G.preprocess E).graph.kLen_le x) v
                 ((G.preprocess E).graph.kWalk x) i)) = true) := by
   show decide (∀ i : Fin ((G.preprocess E).graph.kLen x), _ = true) = _
-  simp only [preRel_eq]
-  rfl
+  rw [decide_eq_decide]
+  exact forall_congr' fun i => by erw [preRel_eq]; rfl
 
 /-- What a killed dart's constraint runs: at each step, the dart it takes, the
 parity of the vertex it stands on, the code of the constraint there, and where
@@ -198,7 +201,7 @@ theorem rel_eq_of_data (G G' : ConstraintGraph α) (E : ExpanderFamily) {q T : �
           ((G'.preprocess E).graph.kWalk x)) :
     ((G.preprocess E).killedPow q T hq).rel v x
       = ((G'.preprocess E).killedPow q T hq).rel v' x := by
-  rw [rel_killedPow_eq_preRelOfSteps, rel_killedPow_eq_preRelOfSteps, hpar, hcode, hend]
+  erw [rel_killedPow_eq_preRelOfSteps, rel_killedPow_eq_preRelOfSteps, hpar, hcode, hend]
   rfl
 
 end Complexity

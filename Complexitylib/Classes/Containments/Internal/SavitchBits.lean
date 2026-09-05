@@ -286,12 +286,12 @@ theorem bumpStepP_mem_FP : bumpStepP ∈ FP := by
       (fun z => pairFst (a z)) ∈ FP := by
     intro a ha
     have := mem_FP_comp ha Cobham.fstBlock_mem_FP
-    simpa [Function.comp] using this
+    exact this
   have hsnd : ∀ {a : List Bool → List Bool}, a ∈ FP →
       (fun z => pairSnd (a z)) ∈ FP := by
     intro a ha
     have := mem_FP_comp ha Cobham.sndBlock_mem_FP
-    simpa [Function.comp] using this
+    exact this
   have hc := hfst hid
   have hw := hsnd hid
   have hrest := hsnd hw
@@ -334,11 +334,12 @@ theorem bumpCodeFn_mem_FP {a : List Bool → List Bool} (ha : a ∈ FP) :
     (fun z => bumpCode (a z)) ∈ FP := by
   have h1 := mem_FP_comp (bumpRunFn_mem_FP ha) Cobham.sndBlock_mem_FP
   have h2 := mem_FP_comp h1 Cobham.fstBlock_mem_FP
-  simpa [Function.comp, bumpCode] using h2
-
+  simp [bumpCode]
+  exact h2
 theorem bumpFlagFn_mem_FP {a : List Bool → List Bool} (ha : a ∈ FP) :
     (fun z => bumpFlag (a z)) ∈ FP := by
   have h := mem_FP_comp (bumpRunFn_mem_FP ha) Cobham.fstBlock_mem_FP
-  simpa [Function.comp, bumpFlag] using h
+  simp [bumpFlag]
+  exact h
 
 end Complexity

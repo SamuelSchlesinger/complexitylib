@@ -203,9 +203,9 @@ private theorem initialInputLoopTM_one_step
       some (initialInputOneWrap tapes c') := by
   have hne : c.state ≠ (initialOneBitTM tapes).qhalt :=
     TM.state_ne_qhalt_of_step hstep
-  rw [TM.step, if_neg (by simp [initialInputOneWrap, initialInputLoopTM])]
+  rw [TM.step, ite_eq_right (by simp [initialInputOneWrap, initialInputLoopTM])]
   simp only [initialInputOneWrap, initialInputLoopTM, hne, ↓reduceIte]
-  rw [TM.step, if_neg hne] at hstep
+  rw [TM.step, ite_eq_right hne] at hstep
   revert hstep
   generalize (initialOneBitTM tapes).δ c.state c.input.read
     (fun i => (c.work i).read) c.output.read = action
@@ -223,9 +223,9 @@ private theorem initialInputLoopTM_zero_step
       some (initialInputZeroWrap tapes c') := by
   have hne : c.state ≠ (initialZeroBitTM tapes).qhalt :=
     TM.state_ne_qhalt_of_step hstep
-  rw [TM.step, if_neg (by simp [initialInputZeroWrap, initialInputLoopTM])]
+  rw [TM.step, ite_eq_right (by simp [initialInputZeroWrap, initialInputLoopTM])]
   simp only [initialInputZeroWrap, initialInputLoopTM, hne, ↓reduceIte]
-  rw [TM.step, if_neg hne] at hstep
+  rw [TM.step, ite_eq_right hne] at hstep
   revert hstep
   generalize (initialZeroBitTM tapes).δ c.state c.input.read
     (fun i => (c.work i).read) c.output.read = action
@@ -264,7 +264,7 @@ private theorem initialInputLoopTM_step_scan_one
         input := c.input
         work := c.work
         output := c.output } := by
-  rw [TM.step, if_neg (by rw [hstate]; simp [initialInputLoopTM])]
+  rw [TM.step, ite_eq_right (by rw [hstate]; simp [initialInputLoopTM])]
   simp only [initialInputLoopTM, hstate, hone, TM.allReadBack,
     reduceCtorEq, ↓reduceIte]
   refine congrArg some ((Complexity.Cfg.mk.injEq ..).mpr
@@ -272,10 +272,10 @@ private theorem initialInputLoopTM_step_scan_one
   · simp [TM.idleDir, Tape.move]
   · funext i
     rw [TM.writeAndMove_readBack _ (hwork i), TM.idleDir,
-      if_neg (hwork i)]
+      ite_eq_right (hwork i)]
     rfl
   · rw [TM.writeAndMove_readBack _ houtput, TM.idleDir,
-      if_neg houtput]
+      ite_eq_right houtput]
     rfl
 
 private theorem initialInputLoopTM_step_scan_zero
@@ -292,7 +292,7 @@ private theorem initialInputLoopTM_step_scan_zero
   have hstart : c.input.read ≠ Γ.start := by rw [hzero]; decide
   have hblank : c.input.read ≠ Γ.blank := by rw [hzero]; decide
   have hone : c.input.read ≠ Γ.one := by rw [hzero]; decide
-  rw [TM.step, if_neg (by rw [hstate]; simp [initialInputLoopTM])]
+  rw [TM.step, ite_eq_right (by rw [hstate]; simp [initialInputLoopTM])]
   simp only [initialInputLoopTM, hstate, hblank, hone, TM.allReadBack,
     ↓reduceIte]
   refine congrArg some ((Complexity.Cfg.mk.injEq ..).mpr
@@ -300,10 +300,10 @@ private theorem initialInputLoopTM_step_scan_zero
   · simp [TM.idleDir, hstart, Tape.move]
   · funext i
     rw [TM.writeAndMove_readBack _ (hwork i), TM.idleDir,
-      if_neg (hwork i)]
+      ite_eq_right (hwork i)]
     rfl
   · rw [TM.writeAndMove_readBack _ houtput, TM.idleDir,
-      if_neg houtput]
+      ite_eq_right houtput]
     rfl
 
 private theorem initialInputLoopTM_step_scan_blank
@@ -317,7 +317,7 @@ private theorem initialInputLoopTM_step_scan_blank
         input := c.input
         work := c.work
         output := c.output } := by
-  rw [TM.step, if_neg (by rw [hstate]; simp [initialInputLoopTM])]
+  rw [TM.step, ite_eq_right (by rw [hstate]; simp [initialInputLoopTM])]
   simp only [initialInputLoopTM, hstate, hblank, TM.allReadBack,
     ↓reduceIte]
   refine congrArg some ((Complexity.Cfg.mk.injEq ..).mpr
@@ -325,10 +325,10 @@ private theorem initialInputLoopTM_step_scan_blank
   · simp [TM.idleDir, Tape.move]
   · funext i
     rw [TM.writeAndMove_readBack _ (hwork i), TM.idleDir,
-      if_neg (hwork i)]
+      ite_eq_right (hwork i)]
     rfl
   · rw [TM.writeAndMove_readBack _ houtput, TM.idleDir,
-      if_neg houtput]
+      ite_eq_right houtput]
     rfl
 
 private theorem initialInputLoopTM_step_one_halt
@@ -343,17 +343,17 @@ private theorem initialInputLoopTM_step_one_halt
         work := c.work
         output := c.output } := by
   rw [TM.step,
-    if_neg (by simp [initialInputOneWrap, initialInputLoopTM])]
+    ite_eq_right (by simp [initialInputOneWrap, initialInputLoopTM])]
   simp only [initialInputOneWrap, initialInputLoopTM, hhalt, ↓reduceIte]
   refine congrArg some ((Complexity.Cfg.mk.injEq ..).mpr
     ⟨rfl, ?_, ?_, ?_⟩)
   · rfl
   · funext i
     rw [TM.writeAndMove_readBack _ (hwork i), TM.idleDir,
-      if_neg (hwork i)]
+      ite_eq_right (hwork i)]
     rfl
   · rw [TM.writeAndMove_readBack _ houtput, TM.idleDir,
-      if_neg houtput]
+      ite_eq_right houtput]
     rfl
 
 private theorem initialInputLoopTM_step_zero_halt
@@ -368,17 +368,17 @@ private theorem initialInputLoopTM_step_zero_halt
         work := c.work
         output := c.output } := by
   rw [TM.step,
-    if_neg (by simp [initialInputZeroWrap, initialInputLoopTM])]
+    ite_eq_right (by simp [initialInputZeroWrap, initialInputLoopTM])]
   simp only [initialInputZeroWrap, initialInputLoopTM, hhalt, ↓reduceIte]
   refine congrArg some ((Complexity.Cfg.mk.injEq ..).mpr
     ⟨rfl, ?_, ?_, ?_⟩)
   · rfl
   · funext i
     rw [TM.writeAndMove_readBack _ (hwork i), TM.idleDir,
-      if_neg (hwork i)]
+      ite_eq_right (hwork i)]
     rfl
   · rw [TM.writeAndMove_readBack _ houtput, TM.idleDir,
-      if_neg houtput]
+      ite_eq_right houtput]
     rfl
 
 private theorem copyWorkToWorkTM_exact_hoareTime
@@ -882,8 +882,9 @@ theorem initialOneBitTM_hoareTime_internal
           work := fun i => TM.transitionTape (emitted.work i)
           output := TM.transitionTape emitted.output }
         tailFinal := by
-    simpa only [hemitInputTransition, hemitWorkTransition,
-      hemitOutputTransition] using htailReach
+    simp only [hemitInputTransition, hemitWorkTransition,
+      hemitOutputTransition]
+    exact htailReach
   have hreach := TM.seqTM_reachesIn_of_reachesIn
     (rewindEntryEncodeRestoreTM (initialBitEntryTapes tapes)).retargetOutput
     (TM.seqTM (TM.binarySuccTM tapes.lifted.data.update.remaining)
@@ -896,9 +897,9 @@ theorem initialOneBitTM_hoareTime_internal
   refine ⟨finalCfg, emitTime + 1 + (countTime + 1 + addressTime),
     ?_, hreach, ?_, ?_⟩
   · omega
-  · change (initialOneBitTM tapes).halted finalCfg
-    unfold initialOneBitTM
-    rw [TM.phase2Wrap_halted_iff]
+  · unfold initialOneBitTM
+    simp only [finalCfg]
+    erw [TM.phase2Wrap_halted_iff]
     exact htailHalt
   · refine ⟨?_, ?_, ?_⟩
     · change advanced.input = inp₀
@@ -924,7 +925,8 @@ theorem initialOneBitTM_hoareTime_internal
           ((entries ++ [(address, 1)]).flatMap Entry.encode)
         rw [haddressFrame _ hlhsBuffer.symm,
           hcountFrame _ hremainingBuffer.symm]
-        simpa [List.flatMap_append] using hemitBuffer
+        simp [List.flatMap_append]
+        exact hemitBuffer
       · intro i
         change TM.Parked (advanced.work i)
         by_cases hi : i = tapes.liftedLhs
@@ -1061,7 +1063,7 @@ theorem initialInputLoopTM_hoareTime_internal
           refine ⟨tailDone, 1 + bodyTime + 1 + tailTime, ?_, ?_,
             htailHalt, ?_⟩
           · simp only [initialInputLoopTime, Bool.false_eq_true,
-              if_false, Nat.add_zero]
+              ite_false, Nat.add_zero]
             omega
           · simpa [Nat.add_assoc] using hreach
           · refine ⟨htailInput, ?_, htailOutput.trans hbodyOutput⟩
@@ -1120,7 +1122,7 @@ theorem initialInputLoopTM_hoareTime_internal
                 hseamReach htailReach))
           refine ⟨tailDone, 1 + bodyTime + 1 + tailTime, ?_, ?_,
             htailHalt, ?_⟩
-          · simp only [initialInputLoopTime, if_true]
+          · simp only [initialInputLoopTime, ite_true]
             omega
           · simpa [Nat.add_assoc] using hreach
           · refine ⟨htailInput, ?_, htailOutput.trans hbodyOutput⟩
@@ -1158,7 +1160,7 @@ theorem initialSetupTM_hoareTime_internal
         input := Tape.init (input.map Γ.ofBool)
         work := fun _ => Tape.init []
         output := Tape.init [] } = some skipped := by
-    rw [TM.step, if_neg (by simp [TM.skipTM])]
+    rw [TM.step, ite_eq_right (by simp [TM.skipTM])]
     simp only [TM.skipTM]
     refine congrArg some (Complexity.Cfg.ext rfl ?_ ?_ ?_)
     · simp [skipped, parkedInput, TM.idleDir, Tape.read, Tape.move]
@@ -1267,8 +1269,8 @@ theorem initialSetupTM_hoareTime_internal
           work := fun i => TM.transitionTape (skipped.work i)
           output := TM.transitionTape skipped.output }
         tailDone := by
-    simpa only [hskipInputTransition', hskipWorkTransition',
-      hskipOutputTransition'] using htailReach
+    simp only [hskipInputTransition', hskipWorkTransition', hskipOutputTransition']
+    exact htailReach
   have hreach := TM.seqTM_reachesIn_of_reachesIn
     (TM.skipTM (n := n + 1))
     (TM.seqTM (TM.binarySuccTM tapes.liftedLhs)
@@ -1296,9 +1298,9 @@ theorem initialSetupTM_hoareTime_internal
   refine ⟨finalCfg, 1 + 1 + (lhsTime + 1 + rhsTime), ?_, hreach,
     ?_, ?_⟩
   · omega
-  · change (initialSetupTM tapes).halted finalCfg
-    unfold initialSetupTM
-    rw [TM.phase2Wrap_halted_iff]
+  · unfold initialSetupTM
+    simp only [finalCfg]
+    erw [TM.phase2Wrap_halted_iff]
     exact htailHalt
   · refine ⟨?_, ?_, ?_, ?_⟩
     · change rhsDone.input.HasBinarySuffix input
@@ -1462,8 +1464,7 @@ theorem initialLengthEmitTM_hoareTime_internal
   have hrhsBuffer : tapes.lifted.data.rhs ≠ tapes.buffer :=
     tapes.liftedData_ne_buffer 14
   refine ⟨finalCfg, emitTime + 1 + countTime, by omega, hreach, ?_, ?_⟩
-  · change (initialLengthEmitTM tapes).halted finalCfg
-    unfold initialLengthEmitTM
+  · unfold initialLengthEmitTM
     rw [TM.phase2Wrap_halted_iff]
     exact hcountHalt
   · refine ⟨?_, ?_, ?_⟩
@@ -1485,7 +1486,8 @@ theorem initialLengthEmitTM_hoareTime_internal
       · change (counted.work tapes.buffer).HasBinaryPrefix
           ((entries ++ [(0, length)]).flatMap Entry.encode)
         rw [hcountFrame _ hcountBuffer.symm]
-        simpa [List.flatMap_append] using hemitBuffer
+        simp [List.flatMap_append]
+        exact hemitBuffer
       · intro i
         change TM.Parked (counted.work i)
         exact hcountWorkParked i
@@ -1672,8 +1674,7 @@ theorem initialLengthInstallTM_hoareTime_internal
   let finalCfg := TM.phase2Wrap (TM.binaryPredTM tapes.liftedLhs)
     (initialLengthTM tapes) lengthDone
   refine ⟨finalCfg, predTime + 1 + lengthTime, by omega, hreach, ?_, ?_⟩
-  · change (initialLengthInstallTM tapes).halted finalCfg
-    unfold initialLengthInstallTM
+  · unfold initialLengthInstallTM
     rw [TM.phase2Wrap_halted_iff]
     exact hlengthHalt
   · refine ⟨?_, ?_, ?_⟩
@@ -1793,7 +1794,8 @@ theorem initialAbiInstallTM_hoareTime_internal
         (fun inp work out => inp = inp₀ ∧ work = work₀ ∧ out = out₀)
         (fun inp work out => inp = inp₀ ∧ work = W₁ ∧ out = out₀)
         (TM.binaryCopyTime store.length 0) := by
-    simpa only [W₁, initialAbiCountWork] using hcopy
+    simp only [W₁, initialAbiCountWork]
+    exact hcopy
   have hW₁Parked : ∀ i, TM.Parked (W₁ i) := by
     exact parked_update hready.parked (binaryTape_parked store.length.bits)
   have hW₁Buffer : W₁ tapes.buffer = programBinaryPrefixTape storeBits := by
@@ -1975,7 +1977,7 @@ private theorem inputBitStoreFrom_address_lower
   | nil => simp [inputBitStoreFrom] at hentry
   | cons bit rest ih =>
       by_cases hbit : bit
-      · simp only [inputBitStoreFrom, hbit, if_true, List.singleton_append,
+      · simp only [inputBitStoreFrom, hbit, ite_true, List.singleton_append,
           List.mem_cons] at hentry
         rcases hentry with rfl | hentry
         · simp
@@ -1990,7 +1992,7 @@ private theorem inputBitStoreFrom_addressesNodup
   | nil => simp [inputBitStoreFrom, AddressesNodup]
   | cons bit rest ih =>
       by_cases hbit : bit
-      · simp only [inputBitStoreFrom, hbit, if_true, List.singleton_append]
+      · simp only [inputBitStoreFrom, hbit, ite_true, List.singleton_append]
         change (start :: (inputBitStoreFrom (start + 1) rest).map Prod.fst).Nodup
         rw [List.nodup_cons]
         refine ⟨?_, ih (start + 1)⟩
@@ -2008,7 +2010,7 @@ private theorem inputBitStoreFrom_valuesNonzero
   | nil => simp [inputBitStoreFrom, ValuesNonzero]
   | cons bit rest ih =>
       by_cases hbit : bit
-      · simp only [inputBitStoreFrom, hbit, if_true, List.singleton_append]
+      · simp only [inputBitStoreFrom, hbit, ite_true, List.singleton_append]
         intro entry hentry
         simp only [List.mem_cons] at hentry
         rcases hentry with rfl | hentry
@@ -2085,7 +2087,7 @@ private theorem read_inputBitStoreFrom (start target : ℕ)
   | nil => simp [inputBitStoreFrom, read]
   | cons bit rest ih =>
       cases bit
-      · simp only [inputBitStoreFrom, Bool.false_eq_true, if_false,
+      · simp only [inputBitStoreFrom, Bool.false_eq_true, ite_false,
           List.nil_append]
         by_cases htarget : target = start
         · subst target
@@ -2093,26 +2095,26 @@ private theorem read_inputBitStoreFrom (start target : ℕ)
           simp
         · by_cases hlt : target < start
           · rw [ih]
-            simp only [if_neg (by omega : ¬start + 1 ≤ target),
-              if_neg (by omega : ¬start ≤ target)]
+            simp only [ite_eq_right (by omega : ¬start + 1 ≤ target),
+              ite_eq_right (by omega : ¬start ≤ target)]
           · have hge : start + 1 ≤ target := by omega
             have hsub : target - start = (target - (start + 1)) + 1 := by
               omega
-            rw [ih, if_pos hge, if_pos (by omega : start ≤ target)]
+            rw [ih, ite_eq_left hge, ite_eq_left (by omega : start ≤ target)]
             simp [hsub]
-      · simp only [inputBitStoreFrom, if_true, List.singleton_append]
+      · simp only [inputBitStoreFrom, ite_true, List.singleton_append]
         by_cases htarget : target = start
         · subst target
           simp [read]
         · by_cases hlt : target < start
-          · rw [read, if_neg htarget, ih]
-            simp only [if_neg (by omega : ¬start + 1 ≤ target),
-              if_neg (by omega : ¬start ≤ target)]
+          · rw [read, ite_eq_right htarget, ih]
+            simp only [ite_eq_right (by omega : ¬start + 1 ≤ target),
+              ite_eq_right (by omega : ¬start ≤ target)]
           · have hge : start + 1 ≤ target := by omega
             have hsub : target - start = (target - (start + 1)) + 1 := by
               omega
-            rw [read, if_neg htarget, ih, if_pos hge,
-              if_pos (by omega : start ≤ target)]
+            rw [read, ite_eq_right htarget, ih, ite_eq_left hge,
+              ite_eq_left (by omega : start ≤ target)]
             simp [hsub]
 
 private theorem read_inputBitStoreFrom_zero (input : List Bool) :
@@ -2267,8 +2269,8 @@ theorem programInitTM_hoareTime_internal
         work := fun i => TM.transitionTape (loopDone.work i)
         output := TM.transitionTape loopDone.output }
       finalizeDone := by
-    simpa only [hloopInputTransition, hloopWorkTransition,
-      hloopOutputTransition] using hfinalizeReach
+    simp only [hloopInputTransition, hloopWorkTransition, hloopOutputTransition]
+    exact hfinalizeReach
   have hloopTailReach := TM.seqTM_reachesIn_of_reachesIn
     (initialInputLoopTM tapes) (initialFinalizeTM tapes)
     hloopReach hloopHalt hfinalizeReach'
@@ -2277,7 +2279,8 @@ theorem programInitTM_hoareTime_internal
   have hloopTailHalt :
       (TM.seqTM (initialInputLoopTM tapes)
         (initialFinalizeTM tapes)).halted loopTailDone := by
-    rw [TM.phase2Wrap_halted_iff]
+    simp only [loopTailDone]
+    erw [TM.phase2Wrap_halted_iff]
     exact hfinalizeHalt
   have hsetupInputTransition :
       TM.transitionInput setupDone.input = setupDone.input :=
@@ -2299,8 +2302,8 @@ theorem programInitTM_hoareTime_internal
           work := fun i => TM.transitionTape (setupDone.work i)
           output := TM.transitionTape setupDone.output }
         loopTailDone := by
-    simpa only [hsetupInputTransition, hsetupWorkTransition,
-      hsetupOutputTransition] using hloopTailReach
+    simp only [hsetupInputTransition, hsetupWorkTransition, hsetupOutputTransition]
+    exact hloopTailReach
   have hreach := TM.seqTM_reachesIn_of_reachesIn
     (initialSetupTM tapes)
     (TM.seqTM (initialInputLoopTM tapes) (initialFinalizeTM tapes))
@@ -2313,9 +2316,9 @@ theorem programInitTM_hoareTime_internal
     ?_, hreach, ?_, ?_⟩
   · unfold programInitTime
     omega
-  · change (programInitTM tapes).halted finalCfg
-    unfold programInitTM
-    rw [TM.phase2Wrap_halted_iff]
+  · unfold programInitTM
+    simp only [finalCfg]
+    erw [TM.phase2Wrap_halted_iff]
     exact hloopTailHalt
   · refine ⟨?_, ?_, ?_⟩
     · change abiDone.input.HasBinarySuffix []

@@ -240,10 +240,9 @@ theorem exists_minimumCounterRecord_candidate_isEstimateMinimizer_internal
   have hminimum := minimumCounterRecord_key_le_candidate_internal
     counter table packedPrefix (MCSP.Instance.inputIndex input)
   rw [hrecord] at hminimum
-  simpa only [counterRoundEstimate,
-      ApproximateCounterCircuit.estimate, candidateCounterKey,
-      BitString.unsignedValue, counterValue,
-      MCSP.Instance.inputIndex_inputOfIndex] using hminimum
+  simp only [counterRoundEstimate, ApproximateCounterCircuit.estimate, counterValue,
+    MCSP.Instance.inputIndex_inputOfIndex]
+  exact hminimum
 
 theorem exists_eval_minimumCounterRecordCircuit_eq_candidate_internal
     {overhead arity prefixLength : ℕ} {beta : PositiveRationalScale}

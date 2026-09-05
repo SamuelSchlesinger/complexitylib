@@ -934,7 +934,12 @@ private theorem guessBoundedNTM_rewind_loop (witnessIdx counterIdx : Fin n) :
         (choices ⟨0, by omega⟩) c hstate hread hnostart
     have hstep_choices :
         (guessBoundedNTM witnessIdx counterIdx).trace 1 choices c = c' := by
-      simpa using hstep
+      have hfun : (fun _ : Fin 1 => choices ⟨0, by omega⟩) = choices := by
+        funext x
+        congr 1
+        exact Fin.ext (by omega)
+      rw [← hfun]
+      exact hstep
     rw [hstep_choices]
     exact ⟨hhalt, hhead', hcells'⟩
   | succ p ih =>

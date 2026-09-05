@@ -58,15 +58,15 @@ private theorem pad0_dummy_step (w : Tape) (hc : w.cells = (Tape.init []).cells)
   rcases Nat.le_one_iff_eq_zero_or_eq_one.mp hh with h0 | h1
   · -- head at cell 0: reading `▷`, write is a no-op, move right to cell 1
     have hr : w.read = Γ.start := by rw [hread, h0]; rfl
-    rw [hr, if_pos rfl]
+    rw [hr, ite_eq_left rfl]
     show ((w.write _).move .right).cells = _ ∧ ((w.write _).move .right).head ≤ 1
-    rw [Tape.write, if_pos h0]
+    rw [Tape.write, ite_eq_left h0]
     exact ⟨hc, by rw [Tape.move, h0]⟩
   · -- head at cell 1: reading `□`, write `□` over `□`, stay
     have hr : w.read = Γ.blank := by rw [hread, h1]; rfl
-    rw [hr, if_neg (by decide : ¬ Γ.blank = Γ.start)]
+    rw [hr, ite_eq_right (by decide : ¬ Γ.blank = Γ.start)]
     show ((w.write _).move .stay).cells = _ ∧ ((w.write _).move .stay).head ≤ 1
-    rw [Tape.move, Tape.write, if_neg (by rw [h1]; decide : ¬ w.head = 0)]
+    rw [Tape.move, Tape.write, ite_eq_right (by rw [h1]; decide : ¬ w.head = 0)]
     constructor
     · show Function.update w.cells w.head (Γw.blank : Γ) = (Tape.init []).cells
       have hv : (Γw.blank : Γ) = w.cells w.head := by
@@ -109,12 +109,13 @@ theorem pad0_trace (N : NTM 0) :
     · -- one step, then the inductive hypothesis
       have hvec : (fun i : Fin 0 => (c.work i).read) = (fun i => i.elim0) :=
         funext fun i => i.elim0
-      simp only [NTM.trace, hh, if_false, pad0_δ_apply]
-      rw [hs, hi, ho, hvec]
+      dsimp only [NTM.trace, pad0]
+      simp only [hh, ite_false]
       split
       · -- the `pad0` halt test cannot fire: `c.state ≠ qhalt`
-        next hcontra => exact absurd hcontra hh
-      · refine ih _ _ _ ?_ ?_ ?_ ?_ ?_
+        next hcontra => exact absurd (hs.symm.trans hcontra) hh
+      · rw [hs, hi, ho, hvec]
+        refine ih _ _ _ ?_ ?_ ?_ ?_ ?_
         · rfl
         · rfl
         · rfl

@@ -66,7 +66,7 @@ private theorem eval_list_sum (polynomials : List (Polynomial ℕ)) (T : ℕ) :
     intro caseIndex hcaseIndex
     simp only [Function.comp_apply, effectCasePolynomial_eval_internal,
       effectFormulaSizeAt]
-    rw [if_pos (List.mem_range.mp hcaseIndex)]
+    rw [ite_eq_left (List.mem_range.mp hcaseIndex)]
   rw [hmap]
   omega
 

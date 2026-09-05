@@ -84,7 +84,7 @@ theorem liftSubst_eval {m n : Nat} (A : FinStruct V) (a : Fin A.card) (σ : Env 
   | zero => simp [liftSubst, Term.eval, envCons]
   | succ j =>
     have hne : (Fin.succ j).val ≠ 0 := by simp [Fin.val_succ]
-    simp only [liftSubst, dif_neg hne, Term.shift_eval]
+    simp only [liftSubst, dite_eq_right hne, Term.shift_eval]
     simp [envCons, Fin.val_succ]
 
 /-- Simultaneous substitution of terms for the free variables of a formula. Under a

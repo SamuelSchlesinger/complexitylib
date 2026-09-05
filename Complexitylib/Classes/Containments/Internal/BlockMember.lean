@@ -50,11 +50,11 @@ def anyStepPair (R : List Bool) (f : List Bool → List Bool)
 theorem anyStepPair_pos (R : List Bool) (f : List Bool → List Bool)
     (s : List Bool × List Bool) (h : R.length ≤ s.2.length) :
     anyStepPair R f s = (orBit s.1 (f (s.2.take R.length)), s.2.drop R.length) :=
-  if_pos h
+  ite_eq_left h
 
 theorem anyStepPair_neg (R : List Bool) (f : List Bool → List Bool)
     (s : List Bool × List Bool) (h : ¬ R.length ≤ s.2.length) : anyStepPair R f s = s :=
-  if_neg h
+  ite_eq_right h
 
 /-- The flag component of a scan is a flag. -/
 theorem anyStepPair_flag (R : List Bool) {f : List Bool → List Bool}
@@ -109,9 +109,9 @@ theorem anyStepPair_flag_eq_true_iff (R : List Bool) {f : List Bool → List Boo
       rw [Function.iterate_succ_apply, ih (anyStepPair R f s) hstep]
       by_cases hle : R.length ≤ s.2.length
       · have hfst : (anyStepPair R f s).1 = orBit s.1 (f (s.2.take R.length)) := by
-          rw [anyStepPair, if_pos hle]
+          rw [anyStepPair, ite_eq_left hle]
         have hsnd : (anyStepPair R f s).2 = s.2.drop R.length := by
-          rw [anyStepPair, if_pos hle]
+          rw [anyStepPair, ite_eq_left hle]
         rw [hfst, hsnd, orBit_eq_true_iff hs (hf _)]
         constructor
         · rintro ((h | h) | ⟨i, hi, hlen, hblk⟩)
@@ -137,7 +137,7 @@ theorem anyStepPair_flag_eq_true_iff (R : List Bool) {f : List Bool → List Boo
                 omega
               · rw [blockAt_drop]
                 exact hblk
-      · have hfix : anyStepPair R f s = s := by rw [anyStepPair, if_neg hle]
+      · have hfix : anyStepPair R f s = s := by rw [anyStepPair, ite_eq_right hle]
         rw [hfix]
         constructor
         · rintro (h | ⟨i, hi, hlen, hblk⟩)
@@ -210,7 +210,7 @@ theorem memStep_pack (R u f rest : List Bool) :
   simp only [pairFst_pair, pairSnd_pair]
   by_cases hle : R.length ≤ rest.length
   · rw [scanStep, anyStepPair_pos R (eqFlag u) (f, rest) hle, Cobham.selectHead,
-      if_pos (by rw [(Cobham.lenLeFlag_eq_true_iff rest R).mpr hle]; rfl)]
+      ite_eq_left (by rw [(Cobham.lenLeFlag_eq_true_iff rest R).mpr hle]; rfl)]
     rfl
   · rw [scanStep, anyStepPair_neg R (eqFlag u) (f, rest) hle, Cobham.selectHead]
     have hflag : Cobham.lenLeFlag rest R = [false] := by
@@ -218,7 +218,7 @@ theorem memStep_pack (R u f rest : List Bool) :
       · rw [Cobham.lenLeFlag_eq_true_iff rest R] at h
         omega
       · exact h
-    rw [if_neg (by rw [hflag]; simp), if_pos (by rw [hflag]; rfl)]
+    rw [ite_eq_right (by rw [hflag]; simp), ite_eq_left (by rw [hflag]; rfl)]
     rfl
 
 /-- **The packed iteration is the unpacked one.** -/
@@ -272,12 +272,12 @@ theorem memStep_mem_FP : memStep ∈ FP := by
       (fun z => pairFst (a z)) ∈ FP := by
     intro a ha
     have := mem_FP_comp ha Cobham.fstBlock_mem_FP
-    simpa [Function.comp] using this
+    exact this
   have hsnd : ∀ {a : List Bool → List Bool}, a ∈ FP →
       (fun z => pairSnd (a z)) ∈ FP := by
     intro a ha
     have := mem_FP_comp ha Cobham.sndBlock_mem_FP
-    simpa [Function.comp] using this
+    exact this
   have hR := hfst hid
   have hw := hsnd hid
   have hrest := hsnd hw
@@ -325,7 +325,7 @@ theorem memFlagFn_mem_FP {Rf uf Vf : List Bool → List Bool}
     have h1 := mem_FP_comp h Cobham.sndBlock_mem_FP
     have h2 := mem_FP_comp h1 Cobham.fstBlock_mem_FP
     have h3 := mem_FP_comp h2 Cobham.sndBlock_mem_FP
-    simpa [Function.comp] using h3
+    exact h3
   exact hcomp
 
 end Complexity

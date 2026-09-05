@@ -117,9 +117,9 @@ theorem candidateCodes_allFailSomewhere_internal {arity threshold : ℕ}
       obtain ⟨hwell, hsize⟩ := hsmall
       by_contra hmissing
       apply hhard
-      letI : NeZero
+      let : NeZero
           (MCSP.Instance.ofFunction arity threshold target).arity :=
-        ⟨by simpa using NeZero.ne arity⟩
+        ⟨by exact NeZero.ne arity⟩
       apply (MCSP.Instance.hasCircuitAtMost_iff_sizeComplexity_le_internal
         (MCSP.Instance.ofFunction arity threshold target)).mpr
       have hcomputes :

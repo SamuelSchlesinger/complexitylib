@@ -70,9 +70,9 @@ theorem placeWorkTM_keepsWindow_of_reaches (tm : TM n) (pre post : ℕ)
         else extras j := rfl
   rw [hval]
   by_cases hj : placeWorkInMiddle pre n j
-  · rw [dif_pos hj]
+  · rw [dite_eq_left hj]
     exact hw _
-  · rw [dif_neg hj]
+  · rw [dite_eq_right hj]
     exact hextraW j hj
 
 end TM

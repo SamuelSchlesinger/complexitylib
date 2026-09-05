@@ -329,8 +329,9 @@ private theorem binaryShiftMulDoubleTM_hoareTime_frame {n : ℕ}
         (fun inp' work' out' => inp' = inp ∧ work' = work ∧ out' = out)
         (fun inp' work' out' => inp' = inp ∧ work' = work₂ ∧ out' = out)
         (resetBinaryWorkTime 1 shift.size) := by
-      simpa only [work₂, binaryShiftMulNatTape,
-        Nat.size_eq_bits_len] using hresetTmp
+      simp only [work₂, binaryShiftMulNatTape, ← Nat.size_eq_bits_len,
+        Nat.zero_bits, List.map_nil]
+      exact hresetTmp
     have hwork₂ : ∀ i, Parked (work₂ i) := by
       intro i
       by_cases hi : i = abi.tmp
@@ -590,7 +591,7 @@ private theorem binaryShiftMulBodyTime_le (bit : Bool) (acc shift width : ℕ)
   have hdouble := binaryShiftMulDoubleTime_le shift width hshift
   cases bit <;>
     simp only [binaryShiftMulBodyTime, binaryShiftMulOneTime,
-      Bool.false_eq_true, if_false, if_true] <;>
+      Bool.false_eq_true, ite_false, ite_true] <;>
     omega
 
 private theorem forBinaryWorkLoopTime_le
@@ -683,7 +684,7 @@ private theorem binaryShiftMulBitBodyTM_hoareTime_frame {n : ℕ}
           hfinalShift, hfinalTmp, hfinalDbl, hfinalFrame,
           hfinalOutput⟩ := hrun
       have heq : (work₀ abi.rhs).read = Γ.one := by
-        simpa using hbit
+        exact hbit
       obtain ⟨C, hbranch, hbranchHalt, hinputEq, hworkEq, houtputEq⟩ :=
         branchWorkSymbolTM_reachesIn_equal_frame abi.rhs Γ.one
           (binaryShiftMulOneTM abi) (binaryShiftMulDoubleTM abi)
@@ -839,9 +840,9 @@ private theorem binaryShiftMulLoopWork_advance {n : ℕ}
   funext i
   by_cases hrhs : i = abi.rhs
   · subst i
-    simp only [if_pos, binaryShiftMulLoopWork_rhs]
+    simp only [ite_eq_left, binaryShiftMulLoopWork_rhs]
     simp [binaryShiftMulCursorTape, Tape.move]
-  · rw [if_neg hrhs]
+  · rw [ite_eq_right hrhs]
     by_cases hacc : i = abi.acc
     · subst i
       rw [binaryShiftMulLoopWork_acc, binaryShiftMulLoopWork_acc]
@@ -1095,9 +1096,10 @@ private theorem binaryShiftMulLoopTM_hoareTime_frame {n : ℕ}
           (fun i => (hworkParked i).read_ne_start) houtput.read_ne_start
         have hadvance := binaryShiftMulLoopWork_advance abi work₀ index
           acc shift
-        simpa [binaryShiftMulBodyDoneCfg, binaryShiftMulScanCfg,
+        simp only [binaryShiftMulBodyDoneCfg, binaryShiftMulScanCfg,
           binaryShiftMulPartialWork, work, acc, shift,
-          binaryShiftMulBodyDoneWork, body, hadvance] using hstep
+          binaryShiftMulBodyDoneWork, body, hadvance] at hstep ⊢
+        exact hstep
       stopStep := by
         apply forBinaryWorkTM_step_scan_blank_internal abi.rhs body
         · rfl
@@ -1133,11 +1135,13 @@ private theorem binaryShiftMulLoopTM_hoareTime_frame {n : ℕ}
     by_cases haccIdx : i = abi.acc
     · subst i
       rw [binaryShiftMulPartialWork, binaryShiftMulLoopWork_acc]
-      simpa [BinaryShiftMul.partialAcc] using hacc.eq_init_move_right.symm
+      simp [BinaryShiftMul.partialAcc]
+      exact hacc.eq_init_move_right.symm
     by_cases hshiftIdx : i = abi.shift
     · subst i
       rw [binaryShiftMulPartialWork, binaryShiftMulLoopWork_shift]
-      simpa [BinaryShiftMul.partialShift] using hshift.eq_init_move_right.symm
+      simp [BinaryShiftMul.partialShift]
+      exact hshift.eq_init_move_right.symm
     by_cases htmpIdx : i = abi.tmp
     · subst i
       rw [binaryShiftMulPartialWork, binaryShiftMulLoopWork_tmp]
@@ -1163,8 +1167,9 @@ private theorem binaryShiftMulLoopTM_hoareTime_frame {n : ℕ}
         input := inp₀
         work := work₀
         output := out₀ } doneCfg := by
-    simpa [binaryShiftMulLoopTM, spec, binaryShiftMulScanCfg,
-      hinitialWork, doneCfg, body] using hloop
+    simp only [binaryShiftMulLoopTM, spec, binaryShiftMulScanCfg,
+      hinitialWork, doneCfg, body] at hloop ⊢
+    exact hloop
   refine ⟨doneCfg, forBinaryWorkLoopTime bodyTime 0 rhs.size,
     (by simpa [binaryShiftMulLoopBound] using hloopTime), hreach, rfl, ?_⟩
   refine ⟨rfl, ?_, ?_, ?_, ?_, ?_, ?_, ?_, ?_, ?_, rfl⟩
@@ -1679,9 +1684,9 @@ private theorem binaryShiftMulCleanupTime_le {n : ℕ}
     simp [binaryShiftMulWidth]
   simp only [binaryShiftMulCleanupTime, resetBinaryWorkManyTime,
     binaryShiftMulCleanupBits, binaryShiftMulCleanupHead,
-    resetBinaryWorkTime, clearWorkTimeBound, if_pos]
-  simp only [if_neg (Ne.symm abi.shift_ne_tmp),
-    if_neg (Ne.symm abi.shift_ne_dbl), List.length_nil]
+    resetBinaryWorkTime, clearWorkTimeBound, ite_eq_left]
+  simp only [ite_eq_right (Ne.symm abi.shift_ne_tmp),
+    ite_eq_right (Ne.symm abi.shift_ne_dbl), List.length_nil]
   omega
 
 /-- The concrete shift-and-add multiplier preserves both operands, writes

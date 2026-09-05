@@ -162,8 +162,8 @@ theorem decrementReferenceBy_spaceBoundByWidth_internal
         omega
       simp only [BinaryRoutine.binaryPred, Function.update_apply,
         TM.binaryPredSpace]
-      rw [if_neg hdistinct.reference_ne_counter]
-      simp only [if_true]
+      rw [ite_eq_right hdistinct.reference_ne_counter]
+      simp only [ite_true]
       rw [hpred]
       omega
     · intro count hcount
@@ -195,7 +195,8 @@ theorem decrementReferenceBy_spaceBoundByWidth_internal
     exact hoffset inputLength
   have hroutine := BinaryRoutine.SpaceBoundByWidthAt.seq hloop
     (BinaryRoutine.SpaceBoundByWidthAt.clear counter hcounterAfter)
-  simpa [decrementReferenceBy, loop] using hroutine
+  simp [decrementReferenceBy]
+  exact hroutine
 
 theorem prepareDynamicRecentReference_spaceBoundByWidth_internal
     (reference offset counter : Fin WorkCount)
@@ -249,8 +250,8 @@ theorem prepareDynamicRecentReference_spaceBoundByWidth_internal
     BinaryRoutine.SpaceBoundByWidthAt.identity
   have hroutine := BinaryRoutine.SpaceBoundByWidthAt.seq hcopy
     (BinaryRoutine.SpaceBoundByWidthAt.seq hdecrement hid)
-  simpa [prepareDynamicRecentReference, BinaryRoutine.seqList, copy, copied]
-    using hroutine
+  simp [prepareDynamicRecentReference, BinaryRoutine.seqList]
+  exact hroutine
 
 theorem decrementReferenceBy_requires_internal
     (reference offset counter : Fin WorkCount)
@@ -344,8 +345,8 @@ theorem prepareDynamicRecentReference_effect_internal
   rw [decrementReferenceBy_effect_internal reference offset counter
     (Function.update values reference (values Work.available))
     hdistinct.toDecrementReferenceDistinct]
-  · simp only [Function.update_apply, if_pos]
-    simp only [if_neg (Ne.symm hdistinct.reference_ne_offset)]
+  · simp only [Function.update_apply, ite_eq_left]
+    simp only [ite_eq_right (Ne.symm hdistinct.reference_ne_offset)]
     rw [Function.update_idem]
   · simp [Ne.symm hdistinct.reference_ne_counter, hcounter]
 
@@ -431,13 +432,13 @@ theorem emitDynamicRecentGate_spaceBoundByWidth_internal
     intro inputLength
     simp only [values₂, prepare₁, prepareRecentReference_effect,
       Function.update_apply]
-    rw [if_neg hdistinct.reference₀_ne_reference₁]
+    rw [ite_eq_right hdistinct.reference₀_ne_reference₁]
     simp only [values₁, prepare₀]
     rw [prepareDynamicRecentReference_effect_internal Work.reference₀ offset
       counter (values inputLength) hdistinct.toDynamicRecentDistinct
       (hcounter inputLength)]
-    simp only [Function.update_apply, if_true]
-    rw [if_neg hdistinct.reference_ne_counter]
+    simp only [Function.update_apply, ite_true]
+    rw [ite_eq_right hdistinct.reference_ne_counter]
     exact (Nat.sub_le _ _).trans (havailable inputLength)
   have hvalues₂Reference₁ : ∀ inputLength,
       values₂ inputLength Work.reference₁ ≤ width inputLength := by
@@ -464,7 +465,7 @@ theorem emitDynamicRecentGate_spaceBoundByWidth_internal
       values₄ inputLength Work.reference₁ ≤ width inputLength := by
     intro inputLength
     simp only [values₄, BinaryRoutine.clear, Function.update_apply]
-    rw [if_neg (Ne.symm hdistinct.reference₀_ne_reference₁)]
+    rw [ite_eq_right (Ne.symm hdistinct.reference₀_ne_reference₁)]
     simpa [values₃, emit, BinaryRoutine.emitRawGateStep,
       Ne.symm hdistinct.available_ne_reference₁] using
         hvalues₂Reference₁ inputLength
@@ -482,8 +483,8 @@ theorem emitDynamicRecentGate_spaceBoundByWidth_internal
       (BinaryRoutine.SpaceBoundByWidthAt.seq hemit
         (BinaryRoutine.SpaceBoundByWidthAt.seq hclear₀
           (BinaryRoutine.SpaceBoundByWidthAt.seq hclear₁ hid))))
-  simpa [emitDynamicRecentGate, BinaryRoutine.seqList, prepare₀, prepare₁,
-    emit, values₁, values₂, values₃, values₄] using hroutine
+  simp [emitDynamicRecentGate, BinaryRoutine.seqList]
+  exact hroutine
 
 theorem prepareDynamicRecentReference_emitted_internal
     (reference offset counter : Fin WorkCount)

@@ -199,7 +199,7 @@ theorem eval_compile_gateStream_internal
   have hnotEmpty : input.toList.isEmpty ≠ true := by
     simpa using hinput
   unfold evalFamilyCode
-  rw [if_neg hnotEmpty, BitString.length_toList]
+  rw [ite_eq_right hnotEmpty, BitString.length_toList]
   change
     decide
         (evalCode inputWidth

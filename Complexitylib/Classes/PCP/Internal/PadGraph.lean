@@ -54,35 +54,35 @@ theorem tail_padGraph_of_lt {e : ℕ} (he : e < (G.padGraph hv n).numEdges)
     (h : e < G.numEdges) :
     ((G.padGraph hv n).tail ⟨e, he⟩).val = (G.tail ⟨e, h⟩).val := by
   show (dite _ _ _ : Fin G.numVerts).val = _
-  rw [dif_pos h]
+  rw [dite_eq_left h]
 
 theorem head_padGraph_of_lt {e : ℕ} (he : e < (G.padGraph hv n).numEdges)
     (h : e < G.numEdges) :
     ((G.padGraph hv n).head ⟨e, he⟩).val = (G.head ⟨e, h⟩).val := by
   show (dite _ _ _ : Fin G.numVerts).val = _
-  rw [dif_pos h]
+  rw [dite_eq_left h]
 
 theorem rel_padGraph_of_lt {e : ℕ} (he : e < (G.padGraph hv n).numEdges)
     (h : e < G.numEdges) :
     (G.padGraph hv n).rel ⟨e, he⟩ = G.rel ⟨e, h⟩ := by
   show (dite _ _ _ : α → α → Bool) = _
-  rw [dif_pos h]
+  rw [dite_eq_left h]
 
 theorem tail_padGraph_of_ge {e : ℕ} (he : e < (G.padGraph hv n).numEdges)
     (h : ¬ e < G.numEdges) : ((G.padGraph hv n).tail ⟨e, he⟩).val = 0 := by
   show (dite _ _ _ : Fin G.numVerts).val = _
-  rw [dif_neg h]
+  rw [dite_eq_right h]
 
 theorem head_padGraph_of_ge {e : ℕ} (he : e < (G.padGraph hv n).numEdges)
     (h : ¬ e < G.numEdges) : ((G.padGraph hv n).head ⟨e, he⟩).val = 0 := by
   show (dite _ _ _ : Fin G.numVerts).val = _
-  rw [dif_neg h]
+  rw [dite_eq_right h]
 
 theorem rel_padGraph_of_ge {e : ℕ} (he : e < (G.padGraph hv n).numEdges)
     (h : ¬ e < G.numEdges) :
     (G.padGraph hv n).rel ⟨e, he⟩ = fun _ _ => true := by
   show (dite _ _ _ : α → α → Bool) = _
-  rw [dif_neg h]
+  rw [dite_eq_right h]
 
 /-- The padded graph has the same assignments. -/
 theorem assignment_padGraph : (G.padGraph hv n).Assignment = G.Assignment := rfl
@@ -95,7 +95,7 @@ theorem satisfiable_padGraph_iff : (G.padGraph hv n).Satisfiable ↔ G.Satisfiab
     have hlt : e.val < (G.padGraph hv n).numEdges :=
       lt_of_lt_of_le e.isLt (le_max_right _ _)
     have h := ha ⟨e.val, hlt⟩
-    rw [Satisfies, satisfies] at h ⊢
+    unfold Satisfies satisfies at h ⊢
     rw [rel_padGraph_of_lt hlt e.isLt] at h
     rw [show (⟨e.val, e.isLt⟩ : Fin G.numEdges) = e from rfl] at h
     rw [← h]
@@ -104,10 +104,10 @@ theorem satisfiable_padGraph_iff : (G.padGraph hv n).Satisfiable ↔ G.Satisfiab
     · exact congrArg a (Fin.ext (head_padGraph_of_lt hlt e.isLt)).symm
   · rintro ⟨a, ha⟩
     refine ⟨a, fun e => ?_⟩
-    rw [Satisfies, satisfies]
+    unfold Satisfies satisfies
     by_cases h : e.val < G.numEdges
     · have hb := ha ⟨e.val, h⟩
-      rw [Satisfies, satisfies] at hb
+      unfold Satisfies satisfies at hb
       rw [rel_padGraph_of_lt e.isLt h]
       rw [show a ((G.padGraph hv n).tail e) = a (G.tail ⟨e.val, h⟩) from
         congrArg a (Fin.ext (tail_padGraph_of_lt e.isLt h)),

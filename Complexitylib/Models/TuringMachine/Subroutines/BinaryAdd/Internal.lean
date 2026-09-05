@@ -382,10 +382,9 @@ private theorem binaryAddIteration_reachesIn
   have hseq := seqTM_reachesIn_of_reachesIn body succ hbody rfl hcounter'
   have hlift := binaryForTM_iteration_reachesIn_internal
     (binarySuccTM dstIdx) counterIdx srcIdx hseq
-  simpa [body, succ, binaryAddLoopTM, binaryAddIterationStartCfg,
-    binaryAddIterationDoneCfg, binaryForIterationTime,
-    binaryForIterationTM, binaryForIterationWrap, phase1Wrap, phase2Wrap]
-    using hlift
+  simp [binaryAddLoopTM, binaryAddIterationStartCfg, binaryAddIterationDoneCfg,
+    binaryForIterationTime, binaryForIterationTM]
+  exact hlift
 
 private theorem binaryAddLoopback_step
     (srcIdx dstIdx counterIdx : Fin n)
@@ -614,7 +613,7 @@ private theorem binaryAddWorkAt_cfg_withinAuxSpace
         exact hworkSpace i
   · exact hinputSpace
 
-private def binaryAddLoopSpaceSpec
+private theorem binaryAddLoopSpaceSpec
     (srcIdx dstIdx counterIdx : Fin n)
     (hsrcDst : srcIdx ≠ dstIdx) (hsrcCounter : srcIdx ≠ counterIdx)
     (hdstCounter : dstIdx ≠ counterIdx)
@@ -642,7 +641,7 @@ private def binaryAddLoopSpaceSpec
     have hreach' : (binaryAddLoopTM srcIdx dstIdx counterIdx).reachesIn time
         (binaryAddScanCfg srcIdx dstIdx counterIdx inp₀ work₀ out₀
           dstValue current) cfg := by
-      simpa [binaryAddLoopSpec] using hreach
+      exact hreach
     exact (hstart.reachesIn hreach').mono le_rfl (by
       simp [binaryForCompareTime, binaryAddLoopSpace] at htime ⊢
       omega)
@@ -660,7 +659,7 @@ private def binaryAddLoopSpaceSpec
     have hreach' : (binaryAddLoopTM srcIdx dstIdx counterIdx).reachesIn time
         (binaryAddIterationStartCfg srcIdx dstIdx counterIdx inp₀ work₀
           out₀ dstValue current) cfg := by
-      simpa [binaryAddLoopSpec] using hreach
+      exact hreach
     have hcounterTime := binarySuccTime_le current
     have hdstTime := binarySuccTime_le (dstValue + current)
     have hcounterSize := Nat.size_le_size (Nat.le_of_lt hcurrent)
@@ -727,7 +726,7 @@ private theorem binaryAddLoopTM_hoareSpace
     hsrcCounter hdstCounter srcValue dstValue inputLength initialSpace inp₀
     work₀ out₀ hsrc hcounter hinp hwork hout hworkSpace hinputSpace
   exact spaceSpec.prefix_withinAuxSpace srcValue 0 time c (by omega)
-    (by simpa [spaceSpec, spec] using hreachSpec) htime
+    (by exact hreachSpec) htime
 
 private theorem binaryAddLoopTM_hoareTimeSpace
     (srcIdx dstIdx counterIdx : Fin n)

@@ -173,9 +173,9 @@ theorem witnessEdge_mem [Nonempty Q] (A : M.toGraph.Assignment) (x : E × Cube M
     (hx : x.2 ∈ M.rejects (M.tableOf A) x.1) :
     M.witnessEdge A x ∈ M.toGraph.unsatEdges A := by
   classical
-  rw [witnessEdge, dif_pos hx]
-  exact Finset.mem_filter.2
-    ⟨Finset.mem_univ _, Classical.choose_spec (M.exists_unsat_of_rejects A x.1 x.2 hx)⟩
+  rw [witnessEdge, dite_eq_left hx]
+  erw [ConstraintGraph.mem_unsatEdges]
+  exact Classical.choose_spec (M.exists_unsat_of_rejects A x.1 x.2 hx)
 
 theorem witnessEdge_injective [Nonempty Q] (A : M.toGraph.Assignment) :
     Function.Injective (M.witnessEdge A) := by
@@ -260,7 +260,7 @@ theorem satisfiable_toGraph (T : Table Pos) (h : ∀ e z, M.accepts T e z = true
     M.toGraph.Satisfiable := by
   classical
   refine ⟨M.honest T, fun k => ?_⟩
-  rw [satisfies_toGraph_iff]
+  erw [satisfies_toGraph_iff]
   refine ⟨?_, ?_⟩
   · rw [honest_inr]
     exact h _ _

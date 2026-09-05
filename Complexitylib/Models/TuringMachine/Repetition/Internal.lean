@@ -323,7 +323,7 @@ theorem repeatAtTime_run_project (tm : NTM n)
   have hδ : tm.δ b q C.input.read (fun i => (C.work (repeatWorkIdx j i)).read)
       (C.work (repeatOutputIdx j)).read =
         (q', workWrites, outputWrite, inputDir, workDirs, outputDir) := by
-    simpa [r, repeatWorkReads] using hr
+    exact hr
   have hright := tm.δ_right_of_start b q C.input.read
     (repeatWorkReads (fun i => (C.work i).read) j)
     (C.work (repeatOutputIdx j)).read
@@ -393,7 +393,7 @@ theorem repeatAtTime_run_padding_simulates (tm : NTM n)
               by_cases hzero : (C.work (repeatWorkIdx j i)).head = 0
               · exact Or.inl hzero
               · exact Or.inr ((hinv _).read_ne_start (by omega)))
-          simpa only [Tape.move_cells] using hpres
+          simpa only [TM.readBackWrite, Γw.toΓ, Tape.move_cells] using hpres
         _ = (c.work i).cells := hsim.2.2.1 i
     · simp [NTM.trace, repeatAtTime, hstate, hq, repeatGuardTransition,
         repeatPaddingDirs, Tape.move_cells]
@@ -404,7 +404,7 @@ theorem repeatAtTime_run_padding_simulates (tm : NTM n)
               by_cases hzero : (C.work (repeatOutputIdx j)).head = 0
               · exact Or.inl hzero
               · exact Or.inr ((hinv _).read_ne_start (by omega)))
-          simpa only [Tape.move_cells] using hpres
+          simpa only [TM.readBackWrite, Γw.toΓ, Tape.move_cells] using hpres
         _ = c.output.cells := hsim.2.2.2.1
     · intro hc
       exact (hc (hsim.1 ▸ hq)).elim
@@ -429,7 +429,7 @@ theorem repeatAtTime_trace_run_prefix (tm : NTM n) (hT : 0 < T)
       C.output.StartInvariant := by
   induction m with
   | zero =>
-      simpa [NTM.trace] using And.intro hstate
+      exact And.intro hstate
         (And.intro hsim (And.intro hinp (And.intro hwork hout)))
   | succ m ih =>
       have hm' : m < T := by omega
@@ -462,6 +462,7 @@ theorem repeatAtTime_trace_run_prefix (tm : NTM n) (hT : 0 < T)
         refine ⟨?_, hstep.2, hinv'.1, hinv'.2.1, hinv'.2.2⟩
         rw [hstep.1]
         simp [repeatAfterRunState, hm]
+        rfl
       · have hproj := hprefix.2.1.2.2.2.2 hhalt
         have hstep := repeatAtTime_run_project_trace tm j ⟨m, hm'⟩
           c.state votes C (g m) hprefix.1 hhalt
@@ -472,6 +473,7 @@ theorem repeatAtTime_trace_run_prefix (tm : NTM n) (hT : 0 < T)
           hinv'.1, hinv'.2.1, hinv'.2.2⟩
         rw [hstep.1]
         simp [repeatAfterRunState, hm, c']
+        rfl
 
 /-- Exactly `T` simulation slots advance trial `j` from its initial `.run`
 state to rewind counter zero. The active bank agrees with the source `T`-step
@@ -528,6 +530,7 @@ theorem repeatAtTime_trace_run (tm : NTM n) (hT : 0 < T)
     refine ⟨?_, hstep.2, hinv'.1, hinv'.2.1, hinv'.2.2⟩
     rw [hstep.1]
     simp [repeatAfterRunState, hlast]
+    rfl
   · have hproj := hprefix.2.1.2.2.2.2 hhalt
     have hstep := repeatAtTime_run_project_trace tm j ⟨m, hm⟩
       c.state votes C (g m) hprefix.1 hhalt

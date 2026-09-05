@@ -148,14 +148,14 @@ theorem card_filter_block {a b : ℕ}
   rw [← Finset.card_product]
   apply Finset.card_bij' (fun w _ => blockEquiv a b w) (fun p _ => (blockEquiv a b).symm p)
   · intro w hw
-    simp only [Finset.mem_filter, Finset.mem_univ, true_and, blockFst, blockSnd] at hw ⊢
+    simp only [Finset.mem_filter, Finset.mem_univ, true_and] at hw
     exact Finset.mem_product.mpr
       ⟨Finset.mem_filter.mpr ⟨Finset.mem_univ _, hw.1⟩,
         Finset.mem_filter.mpr ⟨Finset.mem_univ _, hw.2⟩⟩
   · intro p hp
     simp only [Finset.mem_product, Finset.mem_filter, Finset.mem_univ, true_and] at hp
-    simp only [Finset.mem_filter, Finset.mem_univ, true_and, blockFst, blockSnd,
-      Equiv.apply_symm_apply]
+    simp only [Finset.mem_filter, Finset.mem_univ, true_and]
+    simp only [blockFst, blockSnd, Equiv.apply_symm_apply]
     exact ⟨hp.1, hp.2⟩
   · intro w _; simp [Equiv.symm_apply_apply]
   · intro p _; simp [Equiv.apply_symm_apply]
@@ -402,7 +402,9 @@ theorem card_repeatRandomSeed_fiber (k T : ℕ) (seed : Fin (k * T) → Bool) :
     (fun _ : Fin 2 → Bool => True)
     (fun w => repeatStrideRandomSeed k T w = seed)
   rw [card_repeatStrideRandomSeed_fiber] at h
-  simpa [repeatRandomSeed, card_finArrowBool, pow_add] using h
+  simp [repeatRandomSeed, pow_add] at h ⊢
+  convert h using 3
+  rfl
 
 /-- If a finite Boolean-seed projection has constant fibers, then every event
     that factors through the projection gains exactly that common fiber factor. -/
@@ -422,7 +424,7 @@ theorem card_filter_of_constant_fibers
   have hmaps : (fullEvent : Set (Fin total → Bool)).MapsTo randomSeed compactEvent := by
     intro w hw
     simp only [fullEvent, compactEvent, Finset.coe_filter, Finset.mem_univ,
-      Set.mem_setOf_eq, true_and] at hw ⊢
+      Set.mem_ofPred_eq, true_and] at hw ⊢
     exact (hfactor w).mp hw
   rw [Finset.card_eq_sum_card_fiberwise hmaps]
   calc
@@ -481,19 +483,26 @@ private theorem card_filter_blockEventCount_eq_iff (k T j : ℕ)
       (fun w _ => blocksEquiv k T w)
       (fun f _ => (blocksEquiv k T).symm f)
   · intro w hw
-    simpa only [Finset.mem_filter, Finset.mem_univ, true_and, blockEventCount] using hw
+    simp only [Finset.mem_filter, Finset.mem_univ, true_and] at hw ⊢
+    simpa only [blockEventCount] using hw
   · intro f hf
-    simpa only [Finset.mem_filter, Finset.mem_univ, true_and, blockEventCount,
-      Equiv.apply_symm_apply] using hf
+    simp only [Finset.mem_filter, Finset.mem_univ, true_and] at hf ⊢
+    simpa only [blockEventCount, Equiv.apply_symm_apply] using hf
   · intro w _
     exact Equiv.symm_apply_apply _ _
   · intro f _
     exact Equiv.apply_symm_apply _ _
 
+-- The signature mirrors the family this belongs to; the argument is part of
+-- that shape even where this member does not consult it.
+@[nolint unusedArguments]
 private def eventBits {k : ℕ} {α : Type*} [Fintype α] [DecidableEq α]
     (E : Finset α) (f : Fin k → α) : Fin k → Bool :=
   fun i => decide (f i ∈ E)
 
+-- The signature mirrors the family this belongs to; the argument is part of
+-- that shape even where this member does not consult it.
+@[nolint unusedArguments]
 private def eventCount {k : ℕ} {α : Type*} [Fintype α] [DecidableEq α]
     (E : Finset α) (f : Fin k → α) : ℕ :=
   (Finset.univ.filter (fun i : Fin k => f i ∈ E)).card
@@ -546,8 +555,8 @@ private theorem card_eventCount_eq {k : ℕ} {α : Type*}
           Finset.univ.filter (fun b : Fin k → Bool => popCount b = j)) := by
     apply Finset.filter_congr
     intro f _
-    simp only [Finset.mem_filter, Finset.mem_univ, true_and, eventCount, popCount,
-      eventBits, decide_eq_true_eq]
+    simp only [Finset.mem_filter, Finset.mem_univ, true_and]
+    simp only [eventCount, popCount, eventBits, decide_eq_true_eq]
   rw [hfilter, ← Finset.sum_card_fiberwise_eq_card_filter
     (Finset.univ : Finset (Fin k → α))
     (Finset.univ.filter (fun b : Fin k → Bool => popCount b = j)) (eventBits E)]
@@ -580,8 +589,7 @@ theorem card_tupleEventCount_eq {k : ℕ} {α : Type*}
       (fun f : Fin k → α => tupleEventCount E f = j)).card =
         k.choose j * E.card ^ j *
           (Fintype.card α - E.card) ^ (k - j) := by
-  simpa only [tupleEventCount, eventCount] using
-    card_eventCount_eq (k := k) E j
+  exact card_eventCount_eq (k := k) E j
 
 /-- The number of tuples whose event count lies in a finite set is the
 corresponding weighted binomial sum. -/

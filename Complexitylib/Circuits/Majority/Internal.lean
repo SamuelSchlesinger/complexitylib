@@ -80,7 +80,7 @@ theorem eval?_strictMajorityRawCircuit_internal (inputCount : ℕ)
       (strictMajorityThreshold inputCount)
       (fun i : Fin inputCount => i.val)
   rw [RawCircuit.eval?]
-  simp only [hnonempty, Bool.false_eq_true, if_false, heval']
+  simp only [hnonempty, Bool.false_eq_true, ite_false, heval']
   rw [houtputIndex]
   exact houtput
 

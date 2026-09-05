@@ -179,7 +179,7 @@ theorem baseTailU_val (hE : ∀ x, E x = (Φ x).encode) (h3 : ∀ x, CNF.Is3CNF 
   rw [numEdges_baseCSP] at he
   rw [baseTailU_eq E hE h3]
   show _ = (clauseVertex (Φ x) (edgeClause e)).val
-  rw [clauseVertex, edgeClause, dif_pos (by rw [numVerts]; omega)]
+  rw [clauseVertex, edgeClause, dite_eq_left (by rw [numVerts]; omega)]
 
 theorem baseHeadU_val (hE : ∀ x, E x = (Φ x).encode) (h3 : ∀ x, CNF.Is3CNF (Φ x))
     (x : List Bool) (e : ℕ) (he : e < (baseCSP (Φ x)).numEdges) :
@@ -196,7 +196,7 @@ theorem baseHeadU_val (hE : ∀ x, E x = (Φ x).encode) (h3 : ∀ x, CNF.Is3CNF 
     exact var_le_maxVar (Φ x) hj hp
   rw [baseHeadU_eq E hE h3 x he]
   show _ = (varVertex (Φ x) (litOf (Φ x) (edgeClause e) (edgePos e)).var).val
-  rw [varVertex, edgeClause, edgePos, dif_pos (by rw [numVerts]; omega)]
+  rw [varVertex, edgeClause, edgePos, dite_eq_left (by rw [numVerts]; omega)]
 
 /-! ### The graph -/
 

@@ -74,7 +74,7 @@ theorem head_writeAndMove_idleDir_le_max (t : Tape) (w : Γw) (h : t.StartInvari
     (t.writeAndMove w (idleDir t.read)).head ≤ max t.head 1 := by
   refine head_writeAndMove_le_max t w _ fun hd => ?_
   by_contra hne
-  exact absurd hd (by rw [idleDir, if_neg (h.read_ne_start (by omega))]; nofun)
+  exact absurd hd (by rw [idleDir, ite_eq_right (h.read_ne_start (by omega))]; nofun)
 
 /-- **The single step `seqTM` interposes between its two simulations idles every tape.** -/
 theorem seq_head_bound (tm₁ tm₂ : TM n) {c c' : Cfg n (seqTM tm₁ tm₂).Q}

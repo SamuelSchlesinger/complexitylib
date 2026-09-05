@@ -52,7 +52,7 @@ theorem tapeAt_input_internal (cfg : Complexity.Cfg n Q) :
 theorem tapeAt_work_internal (cfg : Complexity.Cfg n Q) (i : Fin n) :
     tapeAt cfg ⟨i.val + 1, by omega⟩ = cfg.work i := by
   simp only [tapeAt]
-  rw [dif_neg (by omega), dif_neg (by omega)]
+  rw [dite_eq_right (by omega), dite_eq_right (by omega)]
   congr 1
 
 theorem tapeAt_output_internal (cfg : Complexity.Cfg n Q) :
@@ -65,7 +65,7 @@ theorem encodeRegs_field_internal (tm : TM n) (bound : ℕ)
   have hreg : fieldReg field < registerCount n bound :=
     (fieldEquiv n bound field).isLt
   unfold encodeRegs
-  rw [dif_pos hreg]
+  rw [dite_eq_left hreg]
   have hfield :
       (⟨fieldReg field, hreg⟩ : Fin (registerCount n bound)) =
         fieldEquiv n bound field := by
@@ -109,7 +109,7 @@ private theorem decodeTape_of_represents (tm : TM n) (bound : ℕ)
     rfl
   · funext position
     by_cases hposition : position < bound + 1
-    · simp only [decodeTape, hposition, dif_pos]
+    · simp only [decodeTape, hposition, dite_eq_left]
       rw [hrepresents (cellField tape ⟨position, hposition⟩)]
       exact symbolDecode_code_internal _
     · simp only [decodeTape, hposition]
@@ -123,7 +123,8 @@ theorem decode_of_represents_internal (tm : TM n) (bound : ℕ)
   · simp only [decode]
     rw [hrepresents (stateField (n := n) (bound := bound))]
     exact stateDecode_code_internal tm cfg.state
-  · simpa [decode, tapeAt_input_internal] using
+  · rw [← tapeAt_input_internal cfg]
+    simpa [decode] using
       decodeTape_of_represents tm bound cfg regs hrepresents hbounded
         ⟨0, by omega⟩
   · funext i

@@ -101,8 +101,10 @@ theorem sum_escape_le_dartsBetween (hD : 0 < D) (σ : Fin D → Equiv.Perm (Fin 
   refine Finset.card_le_card_of_injOn (fun p => (p.2, (p.1, false))) (fun p hp => ?_) ?_
   · have hp' : p.2 ∈ S ∧ σ p.1 p.2 ∉ S := by simpa [hE] using hp
     have hmem : ((p.2, (p.1, false)) : (permsGraph hD σ).V × (permsGraph hD σ).D)
-        ∈ (permsGraph hD σ).dartsBetween S Sᶜ :=
-      Finset.mem_filter.2 ⟨Finset.mem_univ _, hp'.1, Finset.mem_compl.2 hp'.2⟩
+        ∈ (permsGraph hD σ).dartsBetween S Sᶜ := by
+      simp only [RegGraph.dartsBetween, Finset.mem_filter, Finset.mem_univ,
+        true_and]
+      exact ⟨hp'.1, Finset.mem_compl.2 hp'.2⟩
     simpa using hmem
   · intro p _ q _ h
     have h1 : p.2 = q.2 := congrArg Prod.fst h

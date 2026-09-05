@@ -62,7 +62,7 @@ theorem emptyEnd_step_reject_trailing (answer bit : Bool) (rest : List Bool)
         (coreCfg (.emptyEnd answer) input code wires counter output) =
       some (coreCfg .done input code wires counter (output.write Γ.zero)) := by
   have hcodeRead : code.read = Γ.ofBool bit := by
-    simpa using hcode.read_of_lt (by simp)
+    exact hcode.read_of_lt (by simp)
   apply coreCfg_step_reject (.emptyEnd answer) input code wires counter output
     (by cases answer <;> decide)
   · cases bit <;> simp [coreAction, hcodeRead, Γ.ofBool]

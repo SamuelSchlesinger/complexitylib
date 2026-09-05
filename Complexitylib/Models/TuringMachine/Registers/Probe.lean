@@ -142,7 +142,7 @@ def symProbeTM (f : Γ → Fin 4) (r q : Fin n) : TM n where
     intro s iHead wHeads oHead
     match s with
     | .pre =>
-      refine ⟨fun h => by rw [if_pos h], fun i hi => idleDir_right_of_start hi,
+      refine ⟨fun h => by rw [ite_eq_left h], fun i hi => idleDir_right_of_start hi,
         idleDir_right_of_start⟩
     | .walk =>
       dsimp only []
@@ -152,13 +152,13 @@ def symProbeTM (f : Γ → Fin 4) (r q : Fin n) : TM n where
         dsimp only []
         by_cases hir : i = r
         · subst hir; rw [hone] at hi; exact absurd hi (by decide)
-        · rw [if_neg hir]; exact idleDir_right_of_start hi
-      · refine ⟨fun h => by rw [if_pos h], fun i hi => ?_,
+        · rw [ite_eq_right hir]; exact idleDir_right_of_start hi
+      · refine ⟨fun h => by rw [ite_eq_left h], fun i hi => ?_,
           idleDir_right_of_start⟩
         dsimp only []
         by_cases hir : i = r
-        · subst hir; rw [if_pos rfl, if_pos hi]
-        · rw [if_neg hir]; exact idleDir_right_of_start hi
+        · subst hir; rw [ite_eq_left rfl, ite_eq_left hi]
+        · rw [ite_eq_right hir]; exact idleDir_right_of_start hi
     | .backI k =>
       dsimp only []
       split
@@ -174,15 +174,15 @@ def symProbeTM (f : Γ → Fin 4) (r q : Fin n) : TM n where
           idleDir_right_of_start⟩
         dsimp only []
         by_cases hir : i = r
-        · rw [if_pos hir]
-        · rw [if_neg hir]; exact idleDir_right_of_start hi
+        · rw [ite_eq_left hir]
+        · rw [ite_eq_right hir]; exact idleDir_right_of_start hi
       · next hns =>
         refine ⟨idleDir_right_of_start, fun i hi => ?_,
           idleDir_right_of_start⟩
         dsimp only []
         by_cases hir : i = r
         · subst hir; exact absurd hi hns
-        · rw [if_neg hir]; exact idleDir_right_of_start hi
+        · rw [ite_eq_right hir]; exact idleDir_right_of_start hi
     | .scanQ k =>
       dsimp only []
       split
@@ -192,20 +192,20 @@ def symProbeTM (f : Γ → Fin 4) (r q : Fin n) : TM n where
         dsimp only []
         by_cases hiq : i = q
         · subst hiq; rw [hone] at hi; exact absurd hi (by decide)
-        · rw [if_neg hiq]; exact idleDir_right_of_start hi
+        · rw [ite_eq_right hiq]; exact idleDir_right_of_start hi
       · split
         · refine ⟨idleDir_right_of_start, fun i hi => ?_,
             idleDir_right_of_start⟩
           dsimp only []
           by_cases hiq : i = q
-          · subst hiq; rw [if_pos rfl, if_pos hi]
-          · rw [if_neg hiq]; exact idleDir_right_of_start hi
+          · subst hiq; rw [ite_eq_left rfl, ite_eq_left hi]
+          · rw [ite_eq_right hiq]; exact idleDir_right_of_start hi
         · refine ⟨idleDir_right_of_start, fun i hi => ?_,
             idleDir_right_of_start⟩
           dsimp only []
           by_cases hiq : i = q
-          · rw [if_pos hiq]
-          · rw [if_neg hiq]; exact idleDir_right_of_start hi
+          · rw [ite_eq_left hiq]
+          · rw [ite_eq_right hiq]; exact idleDir_right_of_start hi
     | .backQ =>
       dsimp only []
       split
@@ -213,15 +213,15 @@ def symProbeTM (f : Γ → Fin 4) (r q : Fin n) : TM n where
           idleDir_right_of_start⟩
         dsimp only []
         by_cases hiq : i = q
-        · rw [if_pos hiq]
-        · rw [if_neg hiq]; exact idleDir_right_of_start hi
+        · rw [ite_eq_left hiq]
+        · rw [ite_eq_right hiq]; exact idleDir_right_of_start hi
       · next hns =>
         refine ⟨idleDir_right_of_start, fun i hi => ?_,
           idleDir_right_of_start⟩
         dsimp only []
         by_cases hiq : i = q
         · subst hiq; exact absurd hi hns
-        · rw [if_neg hiq]; exact idleDir_right_of_start hi
+        · rw [ite_eq_right hiq]; exact idleDir_right_of_start hi
     | .park =>
       exact ⟨idleDir_right_of_start, fun _ => idleDir_right_of_start,
         idleDir_right_of_start⟩
@@ -259,7 +259,7 @@ private theorem symProbeTM_step_pre (c : Cfg n (symProbeTM f r q).Q)
     (symProbeTM f r q).step c = some
       { state := .walk, input := c.input.move .left, work := c.work,
         output := c.output } := by
-  rw [TM.step, if_neg (symProbeTM_ne_halt (by simp) hst)]
+  rw [TM.step, ite_eq_right (symProbeTM_ne_halt (by simp) hst)]
   simp only [symProbeTM, hst, hi, ↓reduceIte]
   refine congrArg some ((Cfg.mk.injEq ..).mpr ⟨rfl, rfl, ?_, ?_⟩)
   · funext i
@@ -274,15 +274,15 @@ private theorem symProbeTM_step_walk_one (c : Cfg n (symProbeTM f r q).Q)
       { state := .walk, input := c.input.move .right,
         work := Function.update c.work r ((c.work r).move .right),
         output := c.output } := by
-  rw [TM.step, if_neg (symProbeTM_ne_halt (by simp) hst)]
+  rw [TM.step, ite_eq_right (symProbeTM_ne_halt (by simp) hst)]
   simp only [symProbeTM, hst, hone, ↓reduceIte]
   refine congrArg some ((Cfg.mk.injEq ..).mpr ⟨rfl, rfl, ?_, ?_⟩)
   · funext i
     by_cases hir : i = r
     · subst hir
-      rw [if_pos rfl, Function.update_self,
+      rw [ite_eq_left rfl, Function.update_self,
         writeAndMove_readBack _ (by rw [hone]; decide)]
-    · rw [if_neg hir, Function.update_of_ne hir]
+    · rw [ite_eq_right hir, Function.update_of_ne hir]
       exact (hwork i hir).writeAndMove_readBack_idle
   · exact hout.writeAndMove_readBack_idle
 
@@ -296,15 +296,15 @@ private theorem symProbeTM_step_walk_blank (c : Cfg n (symProbeTM f r q).Q)
         input := c.input.move
           (if c.input.read = Γ.start then .right else .left),
         work := c.work, output := c.output } := by
-  rw [TM.step, if_neg (symProbeTM_ne_halt (by simp) hst)]
+  rw [TM.step, ite_eq_right (symProbeTM_ne_halt (by simp) hst)]
   simp only [symProbeTM, hst, hblank, reduceCtorEq, ↓reduceIte]
   refine congrArg some ((Cfg.mk.injEq ..).mpr ⟨rfl, rfl, ?_, ?_⟩)
   · funext i
     by_cases hir : i = r
     · subst hir
-      rw [writeAndMove_readBack _ (by rw [hblank]; decide), if_pos rfl]
+      rw [writeAndMove_readBack _ (by rw [hblank]; decide), ite_eq_left rfl]
       rfl
-    · rw [if_neg hir]
+    · rw [ite_eq_right hir]
       exact (hwork i hir).writeAndMove_readBack_idle
   · exact hout.writeAndMove_readBack_idle
 
@@ -316,7 +316,7 @@ private theorem symProbeTM_step_backI_left {k : Fin 4}
     (symProbeTM f r q).step c = some
       { state := .backI k, input := c.input.move .left, work := c.work,
         output := c.output } := by
-  rw [TM.step, if_neg (symProbeTM_ne_halt (by simp) hst)]
+  rw [TM.step, ite_eq_right (symProbeTM_ne_halt (by simp) hst)]
   simp only [symProbeTM, hst, hi, ↓reduceIte]
   refine congrArg some ((Cfg.mk.injEq ..).mpr ⟨rfl, rfl, ?_, ?_⟩)
   · funext i
@@ -331,7 +331,7 @@ private theorem symProbeTM_step_backI_start {k : Fin 4}
     (symProbeTM f r q).step c = some
       { state := .backR k, input := c.input.move .right, work := c.work,
         output := c.output } := by
-  rw [TM.step, if_neg (symProbeTM_ne_halt (by simp) hst)]
+  rw [TM.step, ite_eq_right (symProbeTM_ne_halt (by simp) hst)]
   simp only [symProbeTM, hst, hi, ↓reduceIte]
   refine congrArg some ((Cfg.mk.injEq ..).mpr ⟨rfl, rfl, ?_, ?_⟩)
   · funext i
@@ -348,15 +348,15 @@ private theorem symProbeTM_step_backR_left {k : Fin 4}
       { state := .backR k, input := c.input,
         work := Function.update c.work r ((c.work r).move .left),
         output := c.output } := by
-  rw [TM.step, if_neg (symProbeTM_ne_halt (by simp) hst)]
+  rw [TM.step, ite_eq_right (symProbeTM_ne_halt (by simp) hst)]
   simp only [symProbeTM, hst, hns, ↓reduceIte]
   refine congrArg some ((Cfg.mk.injEq ..).mpr ⟨rfl, ?_, ?_, ?_⟩)
   · exact hinp.move_idle
   · funext i
     by_cases hir : i = r
     · subst hir
-      rw [if_pos rfl, Function.update_self, writeAndMove_readBack _ hns]
-    · rw [if_neg hir, Function.update_of_ne hir]
+      rw [ite_eq_left rfl, Function.update_self, writeAndMove_readBack _ hns]
+    · rw [ite_eq_right hir, Function.update_of_ne hir]
       exact (hwork i hir).writeAndMove_readBack_idle
   · exact hout.writeAndMove_readBack_idle
 
@@ -374,18 +374,18 @@ private theorem symProbeTM_step_backR_start {k : Fin 4}
   have h0 : (c.work r).head = 0 := by
     by_contra hc
     exact hcr _ (by omega) hs
-  rw [TM.step, if_neg (symProbeTM_ne_halt (by simp) hst)]
+  rw [TM.step, ite_eq_right (symProbeTM_ne_halt (by simp) hst)]
   simp only [symProbeTM, hst, hs, ↓reduceIte]
   refine congrArg some ((Cfg.mk.injEq ..).mpr ⟨rfl, ?_, ?_, ?_⟩)
   · exact hinp.move_idle
   · funext i
     by_cases hir : i = r
     · subst hir
-      rw [if_pos rfl, Function.update_self]
+      rw [ite_eq_left rfl, Function.update_self]
       show ((c.work i).write _).move Dir3.right = (c.work i).move .right
       congr 1
-      rw [Tape.write, if_pos h0]
-    · rw [if_neg hir, Function.update_of_ne hir]
+      rw [Tape.write, ite_eq_left h0]
+    · rw [ite_eq_right hir, Function.update_of_ne hir]
       exact (hwork i hir).writeAndMove_readBack_idle
   · exact hout.writeAndMove_readBack_idle
 
@@ -399,16 +399,16 @@ private theorem symProbeTM_step_scanQ_one {k : Fin 4}
       { state := .scanQ k, input := c.input,
         work := Function.update c.work q ((c.work q).move .right),
         output := c.output } := by
-  rw [TM.step, if_neg (symProbeTM_ne_halt (by simp) hst)]
+  rw [TM.step, ite_eq_right (symProbeTM_ne_halt (by simp) hst)]
   simp only [symProbeTM, hst, hone, ↓reduceIte]
   refine congrArg some ((Cfg.mk.injEq ..).mpr ⟨rfl, ?_, ?_, ?_⟩)
   · exact hinp.move_idle
   · funext i
     by_cases hiq : i = q
     · subst hiq
-      rw [if_pos rfl, Function.update_self,
+      rw [ite_eq_left rfl, Function.update_self,
         writeAndMove_readBack _ (by rw [hone]; decide)]
-    · rw [if_neg hiq, Function.update_of_ne hiq]
+    · rw [ite_eq_right hiq, Function.update_of_ne hiq]
       exact (hwork i hiq).writeAndMove_readBack_idle
   · exact hout.writeAndMove_readBack_idle
 
@@ -422,7 +422,7 @@ private theorem symProbeTM_step_scanQ_blank_zero
       { state := .backQ, input := c.input,
         work := Function.update c.work q ((c.work q).move .left),
         output := c.output } := by
-  rw [TM.step, if_neg (symProbeTM_ne_halt (by simp) hst)]
+  rw [TM.step, ite_eq_right (symProbeTM_ne_halt (by simp) hst)]
   simp only [symProbeTM, hst, hblank, reduceCtorEq, ↓reduceIte]
   refine congrArg some ((Cfg.mk.injEq ..).mpr ⟨rfl, ?_, ?_, ?_⟩)
   · exact hinp.move_idle
@@ -430,8 +430,8 @@ private theorem symProbeTM_step_scanQ_blank_zero
     by_cases hiq : i = q
     · subst hiq
       rw [Function.update_self,
-        writeAndMove_readBack _ (by rw [hblank]; decide), if_pos rfl]
-    · rw [if_neg hiq, Function.update_of_ne hiq]
+        writeAndMove_readBack _ (by rw [hblank]; decide), ite_eq_left rfl]
+    · rw [ite_eq_right hiq, Function.update_of_ne hiq]
       exact (hwork i hiq).writeAndMove_readBack_idle
   · exact hout.writeAndMove_readBack_idle
 
@@ -446,7 +446,7 @@ private theorem symProbeTM_step_scanQ_blank_succ {k : Fin 4}
         work := Function.update c.work q
           (((c.work q).write Γw.one).move .right),
         output := c.output } := by
-  rw [TM.step, if_neg (symProbeTM_ne_halt (by simp) hst)]
+  rw [TM.step, ite_eq_right (symProbeTM_ne_halt (by simp) hst)]
   simp only [symProbeTM, hst, hblank, reduceCtorEq, ↓reduceIte, hk]
   refine congrArg some ((Cfg.mk.injEq ..).mpr ⟨rfl, ?_, ?_, ?_⟩)
   · exact hinp.move_idle
@@ -454,7 +454,7 @@ private theorem symProbeTM_step_scanQ_blank_succ {k : Fin 4}
     by_cases hiq : i = q
     · subst hiq
       simp only [↓reduceIte, Function.update_self]
-    · rw [if_neg hiq, if_neg hiq, Function.update_of_ne hiq]
+    · rw [ite_eq_right hiq, ite_eq_right hiq, Function.update_of_ne hiq]
       exact (hwork i hiq).writeAndMove_readBack_idle
   · exact hout.writeAndMove_readBack_idle
 
@@ -467,15 +467,15 @@ private theorem symProbeTM_step_backQ_left (c : Cfg n (symProbeTM f r q).Q)
       { state := .backQ, input := c.input,
         work := Function.update c.work q ((c.work q).move .left),
         output := c.output } := by
-  rw [TM.step, if_neg (symProbeTM_ne_halt (by simp) hst)]
+  rw [TM.step, ite_eq_right (symProbeTM_ne_halt (by simp) hst)]
   simp only [symProbeTM, hst, hns, ↓reduceIte]
   refine congrArg some ((Cfg.mk.injEq ..).mpr ⟨rfl, ?_, ?_, ?_⟩)
   · exact hinp.move_idle
   · funext i
     by_cases hiq : i = q
     · subst hiq
-      rw [if_pos rfl, Function.update_self, writeAndMove_readBack _ hns]
-    · rw [if_neg hiq, Function.update_of_ne hiq]
+      rw [ite_eq_left rfl, Function.update_self, writeAndMove_readBack _ hns]
+    · rw [ite_eq_right hiq, Function.update_of_ne hiq]
       exact (hwork i hiq).writeAndMove_readBack_idle
   · exact hout.writeAndMove_readBack_idle
 
@@ -492,18 +492,18 @@ private theorem symProbeTM_step_backQ_start (c : Cfg n (symProbeTM f r q).Q)
   have h0 : (c.work q).head = 0 := by
     by_contra hc
     exact hcr _ (by omega) hs
-  rw [TM.step, if_neg (symProbeTM_ne_halt (by simp) hst)]
+  rw [TM.step, ite_eq_right (symProbeTM_ne_halt (by simp) hst)]
   simp only [symProbeTM, hst, hs, ↓reduceIte]
   refine congrArg some ((Cfg.mk.injEq ..).mpr ⟨rfl, ?_, ?_, ?_⟩)
   · exact hinp.move_idle
   · funext i
     by_cases hiq : i = q
     · subst hiq
-      rw [if_pos rfl, Function.update_self]
+      rw [ite_eq_left rfl, Function.update_self]
       show ((c.work i).write _).move Dir3.right = (c.work i).move .right
       congr 1
-      rw [Tape.write, if_pos h0]
-    · rw [if_neg hiq, Function.update_of_ne hiq]
+      rw [Tape.write, ite_eq_left h0]
+    · rw [ite_eq_right hiq, Function.update_of_ne hiq]
       exact (hwork i hiq).writeAndMove_readBack_idle
   · exact hout.writeAndMove_readBack_idle
 
@@ -514,7 +514,7 @@ private theorem symProbeTM_step_park (c : Cfg n (symProbeTM f r q).Q)
     (symProbeTM f r q).step c = some
       { state := .done, input := c.input, work := c.work,
         output := c.output } := by
-  rw [TM.step, if_neg (symProbeTM_ne_halt (by simp) hst)]
+  rw [TM.step, ite_eq_right (symProbeTM_ne_halt (by simp) hst)]
   simp only [symProbeTM, hst]
   refine congrArg some ((Cfg.mk.injEq ..).mpr ⟨rfl, ?_, ?_, ?_⟩)
   · exact hinp.move_idle
@@ -750,7 +750,7 @@ private theorem symProbeTM_write_run : ∀ (kv : ℕ) (k : Fin 4), k.val = kv �
     have hwcells : ((((c.work q).write Γw.one)).move .right).cells
         = regCells (e + 1) := by
       show ((c.work q).write Γw.one).cells = _
-      rw [Tape.write, if_neg (by rw [hhead]; omega)]
+      rw [Tape.write, ite_eq_right (by rw [hhead]; omega)]
       show Function.update (c.work q).cells (c.work q).head Γw.one.toΓ = _
       rw [hcells, hhead]
       exact regCells_update_succ e
@@ -931,7 +931,7 @@ theorem symProbeTM_hoareTime (f : Γ → Fin 4) (r q : Fin n) (hrq : r ≠ q)
     ⟨by rw [hhead₂]; omega, fun j hj => by
       rw [hcells₂]
       show regCells pos j ≠ Γ.start
-      rw [regCells, if_neg (by omega)]
+      rw [regCells, ite_eq_right (by omega)]
       split <;> decide⟩
   have hc₃workP : ∀ i, Parked (c₃.work i) := by
     intro i
@@ -965,7 +965,7 @@ theorem symProbeTM_hoareTime (f : Γ → Fin 4) (r q : Fin n) (hrq : r ≠ q)
       (fun j hj => by
         rw [hc₄r]
         show regCells pos j ≠ Γ.start
-        rw [regCells, if_neg (by omega)]
+        rw [regCells, ite_eq_right (by omega)]
         split <;> decide)
       rfl
   have hc₅q : c₅.work q = work q := by
@@ -980,7 +980,7 @@ theorem symProbeTM_hoareTime (f : Γ → Fin 4) (r q : Fin n) (hrq : r ≠ q)
       refine ⟨by rw [hhead₅], fun j hj => ?_⟩
       rw [hcells₅, hc₄r]
       show regCells pos j ≠ Γ.start
-      rw [regCells, if_neg (by omega)]
+      rw [regCells, ite_eq_right (by omega)]
       split <;> decide
     · rw [hwork₅ i hir, hwork₄]
       exact hc₃workP i
@@ -1038,7 +1038,7 @@ theorem symProbeTM_hoareTime (f : Γ → Fin 4) (r q : Fin n) (hrq : r ≠ q)
       (fun j hj => by
         rw [hc₈qcells]
         show regCells (d + kv) j ≠ Γ.start
-        rw [regCells, if_neg (by omega)]
+        rw [regCells, ite_eq_right (by omega)]
         split <;> decide)
       hc₈qhead
   refine ⟨c₉, _, ?_,

@@ -117,7 +117,7 @@ def zigzag : RegGraph where
     haveI := H.fintypeD
     exact inferInstance
   nonemptyD := by
-    haveI := H.nonemptyD
+    have := H.nonemptyD
     exact inferInstance
   rot := zigzagRot G H e
   rot_involutive := zigzagRot_involutive G H e
@@ -152,16 +152,16 @@ theorem step_zigzag (f : (zigzag G H e).V → ℝ) (x : (zigzag G H e).V) :
   have hsum : (∑ d : (zigzag G H e).D, f ((zigzag G H e).nbr x d))
       = ∑ a : H.D, ∑ b : H.D, f ((zigzagRot G H e (x, (a, b))).1) :=
     Fintype.sum_prod_type (f := fun d : H.D × H.D => f ((zigzagRot G H e (x, d)).1))
-  rw [RegGraph.step, hdeg, hsum, cloudStep]
+  erw [RegGraph.step, hdeg, hsum, cloudStep]
   have hinner : ∀ a : H.D,
       ∑ b : H.D, f ((zigzagRot G H e (x, (a, b))).1)
         = (H.deg : ℝ) * cloudStep G H e f
             (G.rot (x.1, e (H.rot (e.symm x.2, a)).1)) := by
     intro a
-    rw [cloudStep]
+    erw [cloudStep]
     field_simp
     rfl
-  rw [Finset.sum_congr rfl fun a _ => hinner a, ← Finset.mul_sum]
+  erw [Finset.sum_congr rfl fun a _ => hinner a, ← Finset.mul_sum]
   show _ = (∑ b : H.D, cloudStep G H e f (G.rot (x.1, e (H.rot (e.symm x.2, b)).1)))
       / (H.deg : ℝ)
   field_simp
@@ -211,7 +211,6 @@ theorem sum_cloudStep (f : G.V × G.D → ℝ) (v : G.V) :
       = ∑ u : H.V, H.step (cloudFun G H e f v) u :=
     (Fintype.sum_equiv e (fun u => H.step (cloudFun G H e f v) u)
       (fun i => cloudStep G H e f (v, i)) fun u => by
-        dsimp only
         rw [cloudStep_apply, Equiv.symm_apply_apply]).symm
   rw [h, H.sum_step, sum_cloudFun]
 
@@ -228,7 +227,6 @@ theorem sum_sq_cloudStep_le {lam : ℝ} (hH : H.SpectralBound lam)
       = ∑ u : H.V, (H.step (cloudFun G H e f v) u) ^ 2 :=
     (Fintype.sum_equiv e (fun u => (H.step (cloudFun G H e f v) u) ^ 2)
       (fun i => (cloudStep G H e f (v, i)) ^ 2) fun u => by
-        dsimp only
         rw [cloudStep_apply, Equiv.symm_apply_apply]).symm
   rw [h, ← sum_sq_cloudFun]
   exact hbound
@@ -249,7 +247,7 @@ noncomputable def cloudPerp (f : G.V × G.D → ℝ) : G.V × G.D → ℝ :=
 
 theorem cloudPar_add_cloudPerp (f : G.V × G.D → ℝ) (x : G.V × G.D) :
     cloudPar G f x + cloudPerp G f x = f x := by
-  rw [cloudPerp]
+  erw [cloudPerp]
   ring
 
 /-- **The cloud move fixes the constant part.** -/
@@ -266,9 +264,9 @@ theorem sum_cloudPerp (f : G.V × G.D → ℝ) (v : G.V) :
     ∑ i : G.D, cloudPerp G f (v, i) = 0 := by
   have hdeg : (G.deg : ℝ) ≠ 0 := G.deg_ne_zero
   have hcard : (Finset.univ : Finset G.D).card = G.deg := Finset.card_univ
-  rw [show (fun i : G.D => cloudPerp G f (v, i))
+  erw [show (fun i : G.D => cloudPerp G f (v, i))
       = fun i : G.D => f (v, i) - cloudMean G f v from rfl]
-  rw [Finset.sum_sub_distrib, Finset.sum_const, hcard, nsmul_eq_mul, cloudMean]
+  erw [Finset.sum_sub_distrib, Finset.sum_const, hcard, nsmul_eq_mul, cloudMean]
   field_simp
   ring
 
@@ -295,13 +293,13 @@ theorem sum_mul_step_comm (K : RegGraph) (f g : K.V → ℝ) :
 noncomputable def ip (f g : G.V × G.D → ℝ) : ℝ := ∑ x : G.V × G.D, f x * g x
 
 theorem ip_comm (f g : G.V × G.D → ℝ) : ip G f g = ip G g f := by
-  rw [ip, ip]
+  erw [ip, ip]
   exact Finset.sum_congr rfl fun x _ => mul_comm _ _
 
 /-- Summing over the product is summing cloud by cloud. -/
 theorem ip_eq_sum_clouds (f g : G.V × G.D → ℝ) :
     ip G f g = ∑ v : G.V, ∑ i : G.D, f (v, i) * g (v, i) := by
-  rw [ip, Fintype.sum_prod_type]
+  erw [ip, Fintype.sum_prod_type]
 
 /-- **The cloud move is self-adjoint**, because `H`'s walk is. -/
 theorem ip_cloudStep (f g : G.V × G.D → ℝ) :
@@ -313,7 +311,6 @@ theorem ip_cloudStep (f g : G.V × G.D → ℝ) :
     (Fintype.sum_equiv e
       (fun u => H.step (cloudFun G H e f v) u * cloudFun G H e g v u)
       (fun i => cloudStep G H e f (v, i) * g (v, i)) fun u => by
-        dsimp only
         rw [cloudStep_apply, Equiv.symm_apply_apply]
         rfl).symm
   have hr : ∑ i : G.D, f (v, i) * cloudStep G H e g (v, i)
@@ -321,7 +318,6 @@ theorem ip_cloudStep (f g : G.V × G.D → ℝ) :
     (Fintype.sum_equiv e
       (fun u => cloudFun G H e f v u * H.step (cloudFun G H e g v) u)
       (fun i => f (v, i) * cloudStep G H e g (v, i)) fun u => by
-        dsimp only
         rw [cloudStep_apply, Equiv.symm_apply_apply]
         rfl).symm
   rw [hl, hr, ← sum_mul_step_comm]
@@ -329,7 +325,7 @@ theorem ip_cloudStep (f g : G.V × G.D → ℝ) :
 /-- **The crossing move is self-adjoint**, because `G.rot` is an involution. -/
 theorem ip_crossStep (f g : G.V × G.D → ℝ) :
     ip G (crossStep G f) g = ip G f (crossStep G g) := by
-  rw [ip, ip]
+  erw [ip, ip]
   refine Fintype.sum_equiv (G.rot_involutive.toPerm)
     (fun x => crossStep G f x * g x) (fun x => f x * crossStep G g x) fun x => ?_
   show f (G.rot x) * g x = f (G.rot x) * g (G.rot (G.rot x))
@@ -338,7 +334,7 @@ theorem ip_crossStep (f g : G.V × G.D → ℝ) :
 /-- Cauchy–Schwarz for this inner product. -/
 theorem ip_sq_le (f g : G.V × G.D → ℝ) : (ip G f g) ^ 2 ≤ ip G f f * ip G g g := by
   have h := Finset.sum_mul_sq_le_sq_mul_sq (Finset.univ : Finset (G.V × G.D)) f g
-  rw [ip, ip, ip]
+  erw [ip, ip, ip]
   calc (∑ x : G.V × G.D, f x * g x) ^ 2
       ≤ (∑ x : G.V × G.D, f x ^ 2) * ∑ x : G.V × G.D, g x ^ 2 := h
     _ = (∑ x : G.V × G.D, f x * f x) * ∑ x : G.V × G.D, g x * g x := by
@@ -359,7 +355,7 @@ product of the functions they come from. -/
 theorem ip_cloudPar (f g : G.V × G.D → ℝ) :
     ip G (cloudPar G f) (cloudPar G g)
       = (G.deg : ℝ) * ∑ v : G.V, cloudMean G f v * cloudMean G g v := by
-  rw [ip_eq_sum_clouds, Finset.mul_sum]
+  erw [ip_eq_sum_clouds, Finset.mul_sum]
   refine Finset.sum_congr rfl fun v _ => ?_
   have hconst : ∀ i : G.D, cloudPar G f (v, i) * cloudPar G g (v, i)
       = cloudMean G f v * cloudMean G g v := fun _ => rfl
@@ -391,18 +387,18 @@ theorem ip_cloudPar_crossStep (f : G.V × G.D → ℝ) :
     ip G (cloudPar G f) (crossStep G (cloudPar G f))
       = (G.deg : ℝ) * ∑ v : G.V, cloudMean G f v * G.step (cloudMean G f) v := by
   have hdeg : (G.deg : ℝ) ≠ 0 := G.deg_ne_zero
-  rw [ip_eq_sum_clouds, Finset.mul_sum]
+  erw [ip_eq_sum_clouds, Finset.mul_sum]
   refine Finset.sum_congr rfl fun v _ => ?_
   have h : ∀ i : G.D, cloudPar G f (v, i) * crossStep G (cloudPar G f) (v, i)
       = cloudMean G f v * cloudMean G f (G.nbr v i) := fun _ => rfl
-  rw [Finset.sum_congr rfl fun i _ => h i, ← Finset.mul_sum, RegGraph.step]
+  erw [Finset.sum_congr rfl fun i _ => h i, ← Finset.mul_sum, RegGraph.step]
   field_simp
 
 /-! ### Linearity -/
 
 theorem cloudStep_add (f g : G.V × G.D → ℝ) (x : G.V × G.D) :
     cloudStep G H e (fun y => f y + g y) x = cloudStep G H e f x + cloudStep G H e g x := by
-  rw [cloudStep, cloudStep, cloudStep, ← add_div]
+  erw [cloudStep, cloudStep, cloudStep, ← add_div]
   congr 1
   exact Finset.sum_add_distrib
 
@@ -411,12 +407,12 @@ theorem crossStep_add (f g : G.V × G.D → ℝ) (x : G.V × G.D) :
 
 theorem ip_add_left (f g h : G.V × G.D → ℝ) :
     ip G (fun x => f x + g x) h = ip G f h + ip G g h := by
-  rw [ip, ip, ip, ← Finset.sum_add_distrib]
+  erw [ip, ip, ip, ← Finset.sum_add_distrib]
   exact Finset.sum_congr rfl fun x _ => by ring
 
 theorem ip_add_right (f g h : G.V × G.D → ℝ) :
     ip G f (fun x => g x + h x) = ip G f g + ip G f h := by
-  rw [ip, ip, ip, ← Finset.sum_add_distrib]
+  erw [ip, ip, ip, ← Finset.sum_add_distrib]
   exact Finset.sum_congr rfl fun x _ => by ring
 
 /-- **One cloud move splits into the constant part and a contracted
@@ -439,7 +435,7 @@ theorem step_zigzag_decomp (f : (zigzag G H e).V → ℝ) :
   have hz : (zigzag G H e).step f = cloudStep G H e (crossStep G (cloudStep G H e f)) := by
     funext x
     exact hstep x
-  rw [hz, ← ip_cloudStep]
+  erw [hz, ← ip_cloudStep]
   have hdec : cloudStep G H e f
       = fun x => cloudPar G f x + cloudStep G H e (cloudPerp G f) x := by
     funext x
@@ -455,7 +451,7 @@ theorem ip_crossStep_expand (p q : G.V × G.D → ℝ) :
       = fun x => crossStep G p x + crossStep G q x := by
     funext x
     exact crossStep_add G p q x
-  rw [hc, ip_add_left, ip_add_right, ip_add_right]
+  erw [hc, ip_add_left, ip_add_right, ip_add_right]
   ring
 
 /-- **The zig-zag quadratic form, expanded.** The first summand is `G`'s own
@@ -491,7 +487,7 @@ theorem ip_cloudStep_cloudPerp_le {lam : ℝ} (hH : H.SpectralBound lam)
     (f : G.V × G.D → ℝ) :
     ip G (cloudStep G H e (cloudPerp G f)) (cloudStep G H e (cloudPerp G f))
       ≤ lam ^ 2 * ip G (cloudPerp G f) (cloudPerp G f) := by
-  rw [ip_eq_sum_clouds, ip_eq_sum_clouds, Finset.mul_sum]
+  erw [ip_eq_sum_clouds, ip_eq_sum_clouds, Finset.mul_sum]
   refine Finset.sum_le_sum fun v _ => ?_
   have hb := sum_sq_cloudStep_cloudPerp_le G H e hH f v
   have hl : ∑ i : G.D, cloudStep G H e (cloudPerp G f) (v, i)
@@ -532,7 +528,7 @@ theorem ip_cloudPar_cloudPerp (f : G.V × G.D → ℝ) :
   refine Finset.sum_eq_zero fun v _ => ?_
   have h : ∀ i : G.D, cloudPar G f (v, i) * cloudPerp G f (v, i)
       = cloudMean G f v * cloudPerp G f (v, i) := fun _ => rfl
-  rw [Finset.sum_congr rfl fun i _ => h i, ← Finset.mul_sum, sum_cloudPerp, mul_zero]
+  erw [Finset.sum_congr rfl fun i _ => h i, ← Finset.mul_sum, sum_cloudPerp, mul_zero]
 
 /-- **Pythagoras** for the splitting. -/
 theorem ip_self_split (f : G.V × G.D → ℝ) :
@@ -553,7 +549,7 @@ theorem ip_two_mul_le (u w : G.V × G.D → ℝ) {t : ℝ} (ht : 0 < t) :
     Finset.sum_nonneg fun _ _ => sq_nonneg _
   have hexp : ∑ x : G.V × G.D, (t * u x - w x) ^ 2
       = t ^ 2 * ip G u u - 2 * t * ip G u w + ip G w w := by
-    rw [ip, ip, ip, Finset.mul_sum, Finset.mul_sum, ← Finset.sum_sub_distrib,
+    erw [ip, ip, ip, Finset.mul_sum, Finset.mul_sum, ← Finset.sum_sub_distrib,
       ← Finset.sum_add_distrib]
     exact Finset.sum_congr rfl fun x _ => by ring
   rw [hexp] at hnn
@@ -566,7 +562,7 @@ theorem ip_two_mul_le (u w : G.V × G.D → ℝ) {t : ℝ} (ht : 0 < t) :
 /-- The crossing move preserves the inner product with itself, in `ip` form. -/
 theorem ip_crossStep_self (g : G.V × G.D → ℝ) :
     ip G (crossStep G g) (crossStep G g) = ip G g g := by
-  rw [ip, ip]
+  erw [ip, ip]
   exact sum_sq_crossStep_aux G g
 
 /-! ### The Reingold–Vadhan–Wigderson estimate -/
@@ -596,13 +592,13 @@ theorem ip_step_zigzag_le {lamG lamH : ℝ} (hG : G.SpectralBound lamG)
   have hsplit : ip G f f = a + b := ip_self_split G f
   have hterm1 : ip G p (crossStep G p) ≤ lamG * a := ip_cloudPar_crossStep_le G hG hlamG hf
   have hsym : ip G q (crossStep G p) = ip G p (crossStep G q) := by
-    rw [← ip_crossStep, ip_comm]
+    erw [← ip_crossStep, ip_comm]
   have hcross : 2 * ip G p (crossStep G q) ≤ lamH * a + lamH * b := by
     rcases eq_or_lt_of_le hlamH with h0 | hpos
     · have hz : ip G q q = 0 := le_antisymm (by rw [← h0] at hqq; simpa using hqq) hq0
       have hqzero : ∀ x, q x = 0 := fun x => eq_zero_of_ip_self_eq_zero G hz x
       have : ip G p (crossStep G q) = 0 := by
-        rw [ip]
+        erw [ip]
         refine Finset.sum_eq_zero fun x _ => ?_
         show p x * q (G.rot x) = 0
         rw [hqzero, mul_zero]
@@ -635,12 +631,10 @@ theorem ip_cloudStep_le (g : G.V × G.D → ℝ) :
       = ∑ u : H.V, (H.step (cloudFun G H e g v) u) ^ 2 :=
     (Fintype.sum_equiv e (fun u => (H.step (cloudFun G H e g v) u) ^ 2)
       (fun i => cloudStep G H e g (v, i) * cloudStep G H e g (v, i)) fun u => by
-        dsimp only
         rw [cloudStep_apply, Equiv.symm_apply_apply, sq]).symm
   have hr : ∑ i : G.D, g (v, i) * g (v, i) = ∑ u : H.V, (cloudFun G H e g v u) ^ 2 :=
     (Fintype.sum_equiv e (fun u => (cloudFun G H e g v u) ^ 2)
       (fun i => g (v, i) * g (v, i)) fun u => by
-        dsimp only
         rw [sq]
         rfl).symm
   rw [hl, hr]
@@ -650,12 +644,12 @@ theorem ip_cloudStep_le (g : G.V × G.D → ℝ) :
 
 theorem ip_neg_left (u w : G.V × G.D → ℝ) :
     ip G (fun x => -u x) w = -ip G u w := by
-  rw [ip, ip, ← Finset.sum_neg_distrib]
+  erw [ip, ip, ← Finset.sum_neg_distrib]
   exact Finset.sum_congr rfl fun x _ => by ring
 
 theorem ip_neg_self (u : G.V × G.D → ℝ) :
     ip G (fun x => -u x) (fun x => -u x) = ip G u u := by
-  rw [ip, ip]
+  erw [ip, ip]
   exact Finset.sum_congr rfl fun x _ => by ring
 
 /-- The weighted bound, two-sided. -/
@@ -716,13 +710,13 @@ theorem abs_ip_step_zigzag_le {lamG lamH : ℝ} (hG : G.SpectralBound lamG)
   have hterm1 : |ip G p (crossStep G p)| ≤ lamG * a :=
     abs_ip_cloudPar_crossStep_le G hG hlamG hf
   have hsym : ip G q (crossStep G p) = ip G p (crossStep G q) := by
-    rw [← ip_crossStep, ip_comm]
+    erw [← ip_crossStep, ip_comm]
   have hcross : 2 * |ip G p (crossStep G q)| ≤ lamH * a + lamH * b := by
     rcases eq_or_lt_of_le hlamH with h0 | hpos
     · have hz : ip G q q = 0 := le_antisymm (by rw [← h0] at hqq; simpa using hqq) hq0
       have hqzero : ∀ x, q x = 0 := fun x => eq_zero_of_ip_self_eq_zero G hz x
       have hzero2 : ip G p (crossStep G q) = 0 := by
-        rw [ip]
+        erw [ip]
         refine Finset.sum_eq_zero fun x _ => ?_
         show p x * q (G.rot x) = 0
         rw [hqzero, mul_zero]
@@ -760,24 +754,24 @@ theorem step_sub (K : RegGraph) (f g : K.V → ℝ) (v : K.V) :
 
 theorem ip_sub_left (f g h : G.V × G.D → ℝ) :
     ip G (fun x => f x - g x) h = ip G f h - ip G g h := by
-  rw [ip, ip, ip, ← Finset.sum_sub_distrib]
+  erw [ip, ip, ip, ← Finset.sum_sub_distrib]
   exact Finset.sum_congr rfl fun x _ => by ring
 
 theorem ip_sub_right (f g h : G.V × G.D → ℝ) :
     ip G f (fun x => g x - h x) = ip G f g - ip G f h := by
-  rw [ip, ip, ip, ← Finset.sum_sub_distrib]
+  erw [ip, ip, ip, ← Finset.sum_sub_distrib]
   exact Finset.sum_congr rfl fun x _ => by ring
 
 /-- The walk of the product is self-adjoint — it is a walk, like any other. -/
 theorem ip_step_zigzag_comm (f g : G.V × G.D → ℝ) :
     ip G ((zigzag G H e).step f) g = ip G f ((zigzag G H e).step g) := by
-  rw [ip, ip]
+  erw [ip, ip]
   exact (sum_mul_step_comm (zigzag G H e) f g).symm
 
 /-- The sum of squares over the product's vertices, as an inner product. -/
 theorem sum_sq_eq_ip (g : (zigzag G H e).V → ℝ) :
     ∑ v : (zigzag G H e).V, (g v) ^ 2 = ip G g g := by
-  rw [ip]
+  erw [ip]
   exact Finset.sum_congr rfl fun x _ => sq _
 
 /-- **Polarisation.** -/
@@ -794,11 +788,11 @@ theorem ip_polarise (f g : G.V × G.D → ℝ) :
     funext x
     exact step_sub (zigzag G H e) f g x
   have hcross : ip G ((zigzag G H e).step g) f = ip G ((zigzag G H e).step f) g := by
-    rw [ip_step_zigzag_comm, ip_comm]
+    erw [ip_step_zigzag_comm, ip_comm]
   have key : ip G ((zigzag G H e).step (fun x => f x + g x)) (fun x => f x + g x)
       - ip G ((zigzag G H e).step (fun x => f x - g x)) (fun x => f x - g x)
       = 2 * ip G ((zigzag G H e).step f) g + 2 * ip G ((zigzag G H e).step g) f := by
-    rw [hadd, hsub, ip, ip, ip, ip, ← Finset.sum_sub_distrib, Finset.mul_sum,
+    erw [hadd, hsub, ip, ip, ip, ip, ← Finset.sum_sub_distrib, Finset.mul_sum,
       Finset.mul_sum, ← Finset.sum_add_distrib]
     exact Finset.sum_congr rfl fun x _ => by ring
   rw [key, hcross]
@@ -823,24 +817,24 @@ theorem spectralBound_zigzag {lamG lamH : ℝ} (hG : G.SpectralBound lamG)
     intro c hc
     set g : G.V × G.D → ℝ := fun x => c * (zigzag G H e).step f x with hg
     have hg0 : ∑ x : G.V × G.D, g x = 0 := by
-      rw [hg, ← Finset.mul_sum, hTf0, mul_zero]
+      erw [hg, ← Finset.mul_sum, hTf0, mul_zero]
     have hgg : ip G g g
         = c ^ 2 * ip G ((zigzag G H e).step f) ((zigzag G H e).step f) := by
-      rw [hg, ip, ip, Finset.mul_sum]
+      erw [hg, ip, ip, Finset.mul_sum]
       exact Finset.sum_congr rfl fun x _ => by ring
     have hTfg : ip G ((zigzag G H e).step f) g
         = c * ip G ((zigzag G H e).step f) ((zigzag G H e).step f) := by
-      rw [hg, ip, ip, Finset.mul_sum]
+      erw [hg, ip, ip, Finset.mul_sum]
       exact Finset.sum_congr rfl fun x _ => by ring
     have hpol := ip_polarise G H e f g
     have h1 := abs_ip_step_zigzag_le G H e hG hH hlamG hlamH
-      (fun x => f x + g x) (by rw [Finset.sum_add_distrib, hf', hg0]; ring)
+      (fun x => f x + g x) (by erw [Finset.sum_add_distrib, hf', hg0]; ring)
     have h2 := abs_ip_step_zigzag_le G H e hG hH hlamG hlamH
-      (fun x => f x - g x) (by rw [Finset.sum_sub_distrib, hf', hg0]; ring)
+      (fun x => f x - g x) (by erw [Finset.sum_sub_distrib, hf', hg0]; ring)
     have hpar : ip G (fun x => f x + g x) (fun x => f x + g x)
         + ip G (fun x => f x - g x) (fun x => f x - g x)
         = 2 * ip G f f + 2 * ip G g g := by
-      rw [ip_add_left, ip_add_right, ip_add_right, ip_sub_left, ip_sub_right,
+      erw [ip_add_left, ip_add_right, ip_add_right, ip_sub_left, ip_sub_right,
         ip_sub_right, ip_comm G g f]
       ring
     have hb1 := abs_le.1 h1

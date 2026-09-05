@@ -98,7 +98,7 @@ theorem eval?_append_copy_internal (circuit : RawCircuit)
         rw [hsize]
         simp
       rw [Array.getElem?_push]
-      rw [if_pos houtputIndex, hget]
+      rw [ite_eq_left houtputIndex, hget]
       simp [RawGate.eval]
 
 /-- Exact serialization of an output-match extension. -/
@@ -135,7 +135,7 @@ theorem evalCode_appendOutputMatch_encode_iff_of_length_internal
         some true ↔
       circuit.eval? input = some expected := by
   unfold evalCode
-  rw [if_pos hwidth, decode?_encode]
+  rw [ite_eq_left hwidth, decode?_encode]
   rw [appendOutputMatch]
   have happly := eval?_append_copy_internal circuit input (!expected) hnonempty
   rw [hwidth] at happly
@@ -199,7 +199,7 @@ theorem evalCode_appendOutputMatchBit_encode_iff_of_length_internal
         some true ↔
       circuit.eval? input = some expected := by
   unfold evalCode
-  rw [if_pos hwidth, decode?_encode]
+  rw [ite_eq_left hwidth, decode?_encode]
   change
     (appendOutputMatchBit inputWidth circuit expected).eval? input = some true ↔
       circuit.eval? input = some expected
@@ -245,7 +245,7 @@ theorem evalAux?_preserves_prefix_internal {circuit : RawCircuit}
           | some value₁ =>
               simp only [evalAux?, hvalue₀, hvalue₁] at heval
               have hpreserved := ih heval (by simp only [Array.size_push]; omega)
-              rw [Array.getElem?_push, if_neg (by omega)] at hpreserved
+              rw [Array.getElem?_push, ite_eq_right (by omega)] at hpreserved
               exact hpreserved
 
 end RawCircuit

@@ -320,7 +320,7 @@ private theorem spiraBalance_eval (formula : BoolFormula)
       balancedFalse ihSubformula ihTrue ihFalse =>
     simp only [balancedSubformula, balancedTrue, balancedFalse, split,
       eval, ihSubformula, ihTrue, ihFalse]
-    simpa only [spiraSplit_plug] using
+    simpa only [spiraSplit_plug, eval] using
       (Context.eval_plug_shannon (spiraSplit formula).1
         (spiraSplit formula).2 assignment).symm
   | case2 formula hsmall =>

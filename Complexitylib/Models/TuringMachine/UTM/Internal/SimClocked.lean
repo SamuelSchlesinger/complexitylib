@@ -302,7 +302,7 @@ private theorem clocked_rewind_check {n : ℕ} (tmBody tmTest : TM n)
       · rw [← hread3]
         exact transitionTape_eq_self (by rw [hread3]; simp)
     refine ⟨c₃, .step hs1 (.step hs2 (.step hs3 .zero)), ?_, ?_, ?_, ?_⟩
-    · rw [hst3, if_pos hone]
+    · rw [hst3, ite_eq_left hone]
     · rw [hin3, hin2, hin1]
     · rw [hwk3, hwk2, hwk1]
     · rw [hout3, hout_eq]
@@ -322,7 +322,7 @@ private theorem clocked_rewind_check {n : ℕ} (tmBody tmTest : TM n)
         exact hwk i
       · exact transitionTape_eq_self hread3s
     refine ⟨c₃, .step hs1 (.step hs2 (.step hs3 .zero)), ?_, ?_, ?_, ?_⟩
-    · rw [hst3, if_neg hone]
+    · rw [hst3, ite_eq_right hone]
     · rw [hin3, hin2, hin1]
     · rw [hwk3, hwk2, hwk1]
     · rw [hout3, hout_eq]
@@ -482,9 +482,9 @@ private theorem clockedTest_hoareTime (α : List Bool)
           then Γ.one else Γ.zero)
         = (if mc₂.state = (decodeDesc α).toTM.qhalt then Γ.one else Γ.zero) := by
       by_cases hq : mc₂.state = (decodeDesc α).toTM.qhalt
-      · rw [if_pos hq, if_pos
+      · rw [ite_eq_left hq, ite_eq_left
           (show S = (takeField (takeField (groupPairs α)).2).1 from hSiff.mpr hq)]
-      · rw [if_neg hq, if_neg
+      · rw [ite_eq_right hq, ite_eq_right
           (show ¬S = (takeField (takeField (groupPairs α)).2).1 from
             fun hc => hq (hSiff.mp hc))]
     have hoc1' : c'.output.cells 1
@@ -682,15 +682,15 @@ private theorem clocked_iteration (α : List Bool) (hterm : TerminatedRegion α)
   -- ── branch on the combined verdict ──
   by_cases hcond : mc₂.state = (decodeDesc α).toTM.qhalt ∨ v - 1 = 0
   · have hone : ct.output.cells 1 = Γ.one := by
-      rw [ht_oc1, if_pos hcond]
-    rw [if_pos hone] at hr_all
+      rw [ht_oc1, ite_eq_left hcond]
+    rw [ite_eq_left hone] at hr_all
     exact ⟨mc₂, ct.work, ct.output, t_body + 1 + t_test + 1 + 3, htime, hstepd,
       ht_si', ht_ckc, ht_ckh, ht_oc0, ht_ons, ht_oh, Or.inl ⟨hcond, hone, hr_all⟩⟩
   · have hzero : ct.output.cells 1 = Γ.zero := by
-      rw [ht_oc1, if_neg hcond]
+      rw [ht_oc1, ite_eq_right hcond]
     have hone_ne : ct.output.cells 1 ≠ Γ.one := by
       rw [hzero]; simp
-    rw [if_neg hone_ne] at hr_all
+    rw [ite_eq_right hone_ne] at hr_all
     exact ⟨mc₂, ct.work, ct.output, t_body + 1 + t_test + 1 + 3, htime, hstepd,
       ht_si', ht_ckc, ht_ckh, ht_oc0, ht_ons, ht_oh, Or.inr ⟨hcond, hr_all⟩⟩
 

@@ -162,12 +162,12 @@ theorem effectFormula_eval_internal (tm : NTM k) (T base choiceWire : ℕ)
     rw [List.mem_map] at hformula
     obtain ⟨view, _, rfl⟩ := hformula
     by_cases hselects : selects view.effect = true
-    · rw [if_pos hselects] at hvalue
+    · rw [ite_eq_left hselects] at hvalue
       rw [caseFormula_eval_internal tm T base choiceWire view choice assignment c
         hchoice hconfig hheads, decide_eq_true_eq] at hvalue
       subst view
       exact hselects
-    · rw [if_neg hselects] at hvalue
+    · rw [ite_eq_right hselects] at hvalue
       simp [BoolFormula.eval] at hvalue
   · intro hselects
     refine ⟨caseFormula tm T base choiceWire (currentCase tm choice c), ?_, ?_⟩
@@ -238,11 +238,11 @@ theorem predecessorHeadFormula_eval_internal
     obtain ⟨source, rfl⟩ := hformula
     dsimp only at hvalue
     by_cases hmove : movedHeadPosition source.val direction = target.val
-    · rw [if_pos hmove,
+    · rw [ite_eq_left hmove,
         configVar_eval_internal tm T base (.head tape source) assignment c hconfig,
         ConfigAtom.value, decide_eq_true_eq] at hvalue
       simpa [hvalue] using hmove
-    · rw [if_neg hmove] at hvalue
+    · rw [ite_eq_right hmove] at hvalue
       simp [BoolFormula.eval] at hvalue
   · intro hmove
     let source : Fin (T + 1) := ⟨(tape.get c).head, hhead⟩
@@ -250,7 +250,7 @@ theorem predecessorHeadFormula_eval_internal
       simpa [source] using hmove
     refine ⟨_, (List.mem_ofFn' _ _).2 ⟨source, rfl⟩, ?_⟩
     dsimp only
-    rw [if_pos hsourceMove,
+    rw [ite_eq_left hsourceMove,
       configVar_eval_internal tm T base (.head tape source) assignment c hconfig]
     simp [ConfigAtom.value, source]
 
@@ -285,14 +285,14 @@ theorem headAtCellFormula_eval_internal
     (headAtCellFormula tm T base tape position).eval assignment =
       decide ((tape.get c).head = position.val) := by
   by_cases hposition : position.val < T + 1
-  · rw [headAtCellFormula, dif_pos hposition,
+  · rw [headAtCellFormula, dite_eq_left hposition,
       configVar_eval_internal tm T base (.head tape ⟨position.val, hposition⟩)
         assignment c hconfig]
     rfl
   · have hne : (tape.get c).head ≠ position.val := by
       have hhead := hheads tape
       omega
-    rw [headAtCellFormula, dif_neg hposition]
+    rw [headAtCellFormula, dite_eq_right hposition]
     simp [BoolFormula.eval, hne]
 
 theorem writtenCellFormula_eval_internal
@@ -427,7 +427,9 @@ private theorem writtenCellFormula_eval_successor_internal
     ConfigAtom.value,
     successorConfig_writable_cells_internal tm choice c tape position.val,
     write_cells_of_ne_zero_internal _ _ position.val hposition]
-  by_cases hhead : (tape.toTapeSlot.get c).head = position.val <;> simp [hhead]
+  by_cases hhead : (tape.toTapeSlot.get c).head = position.val
+  · simp [hhead]; rfl
+  · simp [hhead]
 
 private theorem nextFormula_eval_of_halted_internal
     (tm : NTM k) (T base choiceWire : ℕ) (atom : ConfigAtom tm T)
@@ -440,12 +442,12 @@ private theorem nextFormula_eval_of_halted_internal
   | state state =>
       rw [nextFormula,
         haltedOrFormula_eval_internal tm T base _ _ assignment c hconfig,
-        if_pos hhalt,
+        ite_eq_left hhalt,
         configVar_eval_internal tm T base (.state state) assignment c hconfig]
   | head tape position =>
       rw [nextFormula,
         haltedOrFormula_eval_internal tm T base _ _ assignment c hconfig,
-        if_pos hhalt,
+        ite_eq_left hhalt,
         configVar_eval_internal tm T base (.head tape position) assignment c hconfig]
   | cell tape position symbol =>
       cases tape with
@@ -454,22 +456,22 @@ private theorem nextFormula_eval_of_halted_internal
             assignment c hconfig
       | work i =>
           by_cases hposition : position.val = 0
-          · rw [nextFormula, if_pos hposition,
+          · rw [nextFormula, ite_eq_left hposition,
               configVar_eval_internal tm T base
                 (.cell (.work i) position symbol) assignment c hconfig]
-          · rw [nextFormula, if_neg hposition,
+          · rw [nextFormula, ite_eq_right hposition,
               haltedOrFormula_eval_internal tm T base _ _ assignment c hconfig,
-              if_pos hhalt,
+              ite_eq_left hhalt,
               configVar_eval_internal tm T base
                 (.cell (.work i) position symbol) assignment c hconfig]
       | output =>
           by_cases hposition : position.val = 0
-          · rw [nextFormula, if_pos hposition,
+          · rw [nextFormula, ite_eq_left hposition,
               configVar_eval_internal tm T base
                 (.cell .output position symbol) assignment c hconfig]
-          · rw [nextFormula, if_neg hposition,
+          · rw [nextFormula, ite_eq_right hposition,
               haltedOrFormula_eval_internal tm T base _ _ assignment c hconfig,
-              if_pos hhalt,
+              ite_eq_left hhalt,
               configVar_eval_internal tm T base
                 (.cell .output position symbol) assignment c hconfig]
 
@@ -486,14 +488,14 @@ private theorem nextFormula_eval_of_not_halted_internal
   | state state =>
       rw [nextFormula,
         haltedOrFormula_eval_internal tm T base _ _ assignment c hconfig,
-        if_neg hhalt,
+        ite_eq_right hhalt,
         selectedStateFormula_eval_internal tm T base choiceWire state
           choice assignment c hchoice hconfig hheads]
       rfl
   | head tape position =>
       rw [nextFormula,
         haltedOrFormula_eval_internal tm T base _ _ assignment c hconfig,
-        if_neg hhalt,
+        ite_eq_right hhalt,
         movedHeadFormula_eval_internal tm T base choiceWire tape position
           choice assignment c hchoice hconfig hheads,
         ConfigAtom.value,
@@ -507,11 +509,11 @@ private theorem nextFormula_eval_of_not_halted_internal
           simp only [ConfigAtom.value, TapeSlot.get]
           have hcells := successorConfig_input_cells_internal tm choice c position.val
           simp only [TapeSlot.get] at hcells
-          rw [Bool.eq_iff_iff, decide_eq_true_eq, decide_eq_true_eq]
+          erw [Bool.eq_iff_iff, decide_eq_true_eq, decide_eq_true_eq]
           simp [hcells]
       | work i =>
           by_cases hposition : position.val = 0
-          · rw [nextFormula, if_pos hposition,
+          · rw [nextFormula, ite_eq_left hposition,
               configVar_eval_internal tm T base
                 (.cell (.work i) position symbol) assignment c hconfig]
             simp only [ConfigAtom.value, TapeSlot.get]
@@ -519,17 +521,17 @@ private theorem nextFormula_eval_of_not_halted_internal
               (.work i) position.val
             simp only [WritableSlot.toTapeSlot, TapeSlot.get] at hcells
             rw [hposition, write_cells_zero_internal] at hcells
-            rw [Bool.eq_iff_iff, decide_eq_true_eq, decide_eq_true_eq]
+            erw [Bool.eq_iff_iff, decide_eq_true_eq, decide_eq_true_eq]
             simp [hposition, hcells]
-          · rw [nextFormula, if_neg hposition,
+          · rw [nextFormula, ite_eq_right hposition,
               haltedOrFormula_eval_internal tm T base _ _ assignment c hconfig,
-              if_neg hhalt]
+              ite_eq_right hhalt]
             simpa [WritableSlot.toTapeSlot] using
               writtenCellFormula_eval_successor_internal tm T base choiceWire
                 (.work i) position symbol choice assignment c hchoice hconfig hheads hposition
       | output =>
           by_cases hposition : position.val = 0
-          · rw [nextFormula, if_pos hposition,
+          · rw [nextFormula, ite_eq_left hposition,
               configVar_eval_internal tm T base
                 (.cell .output position symbol) assignment c hconfig]
             simp only [ConfigAtom.value, TapeSlot.get]
@@ -537,11 +539,11 @@ private theorem nextFormula_eval_of_not_halted_internal
               .output position.val
             simp only [WritableSlot.toTapeSlot, TapeSlot.get] at hcells
             rw [hposition, write_cells_zero_internal] at hcells
-            rw [Bool.eq_iff_iff, decide_eq_true_eq, decide_eq_true_eq]
+            erw [Bool.eq_iff_iff, decide_eq_true_eq, decide_eq_true_eq]
             simp [hposition, hcells]
-          · rw [nextFormula, if_neg hposition,
+          · rw [nextFormula, ite_eq_right hposition,
               haltedOrFormula_eval_internal tm T base _ _ assignment c hconfig,
-              if_neg hhalt]
+              ite_eq_right hhalt]
             simpa [WritableSlot.toTapeSlot] using
               writtenCellFormula_eval_successor_internal tm T base choiceWire
                 .output position symbol choice assignment c hchoice hconfig hheads hposition

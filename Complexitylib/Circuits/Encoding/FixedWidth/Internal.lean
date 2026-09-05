@@ -115,7 +115,7 @@ theorem topologicallyWellFormed_toRawCircuit_iff_internal
         simpa only [length_toRawCircuit_internal] using index.isLt⟩
     have hgate := h rawIndex
     simp only [List.get_eq_getElem, getElem_toRawCircuit_internal] at hgate
-    simpa only [rawIndex] using hgate
+    exact hgate
   · intro h index
     let active : Fin description.gateCountNat :=
       ⟨index.val, by
@@ -123,7 +123,7 @@ theorem topologicallyWellFormed_toRawCircuit_iff_internal
         simpa only [length_toRawCircuit_internal] using hindex⟩
     have hslot := h active
     simp only [List.get_eq_getElem, getElem_toRawCircuit_internal]
-    simpa only [active] using hslot
+    exact hslot
 
 theorem wellFormed_toRawCircuit_internal
     {inputWidth gateBound : Nat}

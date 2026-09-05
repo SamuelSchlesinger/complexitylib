@@ -609,7 +609,7 @@ theorem write_correctWrite {t : Tape} (s : Γ) (h : t.StartInvariant) :
       have hh : t.head = 0 := by
         by_contra hne
         exact h.read_ne_start (by omega) hr
-      rw [Tape.write, if_pos hh, Tape.write, if_pos hh]
+      rw [Tape.write, ite_eq_left hh, Tape.write, ite_eq_left hh]
   · rfl
 
 /-- Under the invariant, the corrected write agrees with cell `0` when the head
@@ -617,7 +617,7 @@ is there — the hypothesis `tapeStepBlocks_eq` needs. -/
 theorem correctWrite_at_zero {t : Tape} (s : Γ) (h : t.StartInvariant)
     (hh : t.head = 0) : correctWrite t s = t.cells t.head := by
   have hr : t.read = Γ.start := by rw [Tape.read, hh]; exact h.1
-  rw [correctWrite, correctWriteSym, if_pos hr]
+  rw [correctWrite, correctWriteSym, ite_eq_left hr]
   show Γ.start = t.cells t.head
   rw [hh]
   exact h.1.symm
@@ -724,7 +724,7 @@ theorem stepActs_eq_stepActsOf {k : ℕ} (tm : TM k) (c : Cfg k tm.Q) :
 theorem step_state_eq {k : ℕ} (tm : TM k) {c c' : Cfg k tm.Q}
     (h : tm.step c = some c') : c'.state = stepStateOf tm c.state (cfgReads c) := by
   have hne : ¬ c.state = tm.qhalt := fun hq => by simp [TM.step, hq] at h
-  rw [TM.step, if_neg hne] at h
+  rw [TM.step, ite_eq_right hne] at h
   injection h with h
   subst h
   rfl
@@ -736,7 +736,7 @@ theorem cfgTapes_step {k : ℕ} (tm : TM k) {c c' : Cfg k tm.Q}
     (hwork : ∀ i, (c.work i).StartInvariant) :
     cfgTapes c' = tapesStep (stepActs tm c) (cfgTapes c) := by
   have hne : ¬ c.state = tm.qhalt := fun hq => by simp [TM.step, hq] at h
-  rw [TM.step, if_neg hne] at h
+  rw [TM.step, ite_eq_right hne] at h
   injection h with h
   subst h
   rw [cfgTapes, cfgTapes, stepActs, tapesStep]

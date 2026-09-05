@@ -192,7 +192,7 @@ theorem compileRaw_nextWrittenCellFormula_eq_schedule_internal
         (effectCaseInputSymbolIndexAt tm) (effectCaseOutputSymbolIndexAt tm)
         (effectCaseWorkSymbolIndexAt tm) := by
   cases tape <;>
-    simp only [WritableSlot.toTapeSlot, nextFormula, hposition, if_false]
+    simp only [WritableSlot.toTapeSlot, nextFormula, hposition, ite_false]
   all_goals rw [compileRaw_haltedOrFormula_eq_schedule]
   all_goals simp only [configVar, BoolFormula.size, BoolFormula.compileRaw]
   all_goals rw [compileRaw_writtenCellFormula_eq_schedule]

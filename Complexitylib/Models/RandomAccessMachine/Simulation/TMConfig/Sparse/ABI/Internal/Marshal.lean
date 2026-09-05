@@ -86,7 +86,7 @@ private theorem marshalStart_of_not_captured (n : ℕ) (x : List Bool)
 
 private theorem initRegs_eq_zero_of_length_lt (x : List Bool) {reg : ℕ}
     (hreg : x.length < reg) : initRegs x reg = 0 := by
-  rw [initRegs, if_neg (by omega)]
+  rw [initRegs, ite_eq_right (by omega)]
   rw [List.getElem?_eq_none (by omega)]
 
 /-- Installing loop constants establishes the invariant before any input
@@ -328,8 +328,7 @@ theorem marshalLoop_invariant_exec_internal (n : ℕ) (x : List Bool)
         max bodySpace loopSpace, ?_, hfinalInvariant⟩
       have hexec := Structured.Exec.whileNonzero hstoreNonzero hbody hloop
       convert hexec using 1
-      simp [marshalLoopSteps, Nat.succ_mul]
-      omega
+      all_goals first | rfl | (simp only [marshalLoopSteps, Nat.succ_mul]; omega)
 
 /-- Exact store selected by one captured-position repair command. -/
 def repairBitStore (n : ℕ) (entry : ℕ × ℕ)
@@ -460,7 +459,7 @@ theorem repairBitStore_data_internal (n : ℕ) (entry : ℕ × ℕ)
   rw [hloadedValue]
   by_cases hzero : store (cellReg n (inputTape n) entry.1) = 0
   · simp [hzero, hloadedData]
-  · simp only [hzero, if_false]
+  · simp only [hzero, ite_false]
     let valued :=
       (Structured.Basic.imm (valueReg n) (entry.2 + 1)).exec loaded
     have hvaluedAddress : valued (addressReg n) =
@@ -634,7 +633,7 @@ private theorem initRegs_add_one_eq_input_symbol (x : List Bool)
     ⟨position - 1, by omega⟩
   have hindex : index < x.length := by omega
   rw [Tape.init_ofBool_cells_lt x index hindex]
-  simp only [initRegs, show index + 1 ≠ 0 by omega, if_false]
+  simp only [initRegs, show index + 1 ≠ 0 by omega, ite_false]
   rw [show index + 1 - 1 = index by omega,
     List.getElem?_eq_getElem hindex]
   cases x[index] <;> simp [Γ.ofBool, symbolCode]

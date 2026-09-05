@@ -28,11 +28,11 @@ theorem exists_minimumSize_gt_shannonLower_internal
       inst.arity = arity ∧
         inst.threshold = 2 ^ arity / (5 * arity) ∧
           inst.minimumSize > 2 ^ arity / (5 * arity) := by
-  letI : NeZero arity := ⟨by omega⟩
+  let : NeZero arity := ⟨by omega⟩
   obtain ⟨f, hf⟩ := shannon_sizeComplexity arity harity
   let inst := Instance.ofFunction arity (2 ^ arity / (5 * arity)) f
   refine ⟨inst, rfl, rfl, ?_⟩
-  letI : NeZero inst.arity :=
+  let : NeZero inst.arity :=
     ⟨by simpa [inst] using (NeZero.ne arity)⟩
   rw [Instance.minimumSize_eq_sizeComplexity]
   simpa [inst] using hf
@@ -54,10 +54,10 @@ theorem exists_ofFunction_not_mem_at_shannonLower_internal
     ∃ f : BitString arity → Bool,
       (Instance.ofFunction arity (2 ^ arity / (5 * arity)) f).encode ∉
         Complexity.MCSP := by
-  letI : NeZero arity := ⟨by omega⟩
+  let : NeZero arity := ⟨by omega⟩
   obtain ⟨f, hf⟩ := shannon_sizeComplexity arity harity
   refine ⟨f, ?_⟩
-  letI : NeZero
+  let : NeZero
       (Instance.ofFunction arity (2 ^ arity / (5 * arity)) f).arity :=
     ⟨by simpa using (NeZero.ne arity)⟩
   rw [Complexity.MCSP.mem_encode_iff_sizeComplexity_le]
@@ -67,7 +67,7 @@ theorem mem_encode_of_shannonUpper_le_threshold_internal
     (inst : Instance) (harity : 16 ≤ inst.arity)
     (hthreshold : 18 * 2 ^ inst.arity / inst.arity ≤ inst.threshold) :
     inst.encode ∈ Complexity.MCSP := by
-  letI : NeZero inst.arity := ⟨by omega⟩
+  let : NeZero inst.arity := ⟨by omega⟩
   rw [Complexity.MCSP.mem_encode_iff_sizeComplexity_le]
   exact (shannon_upper_bound inst.arity harity inst.function).trans hthreshold
 

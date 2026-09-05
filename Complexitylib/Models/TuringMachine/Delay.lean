@@ -94,9 +94,9 @@ theorem delayNTM_trace_one_embed (tm : NTM n) (b : Bool) (c : Cfg n tm.Q) :
     (delayNTM tm).trace 1 (fun _ => b) (delayEmbed tm c)
       = delayEmbed tm (tm.trace 1 (fun _ => b) c) := by
   by_cases hc : c.state = tm.qhalt
-  · rw [NTM.trace, NTM.trace, if_pos ((delayEmbed_halted_iff tm c).mpr hc), if_pos hc]
-  · rw [NTM.trace, NTM.trace, if_neg (fun h => hc ((delayEmbed_halted_iff tm c).mp h)),
-      if_neg hc]
+  · rw [NTM.trace, NTM.trace, ite_eq_left ((delayEmbed_halted_iff tm c).mpr hc), ite_eq_left hc]
+  · rw [NTM.trace, NTM.trace, ite_eq_right (fun h => hc ((delayEmbed_halted_iff tm c).mp h)),
+      ite_eq_right hc]
     rcases hr : tm.δ b c.state c.input.read (fun i => (c.work i).read) c.output.read with
       ⟨q', ww, ow, iD, wD, oD⟩
     have hd : (delayNTM tm).δ b (delayEmbed tm c).state (delayEmbed tm c).input.read
@@ -144,7 +144,7 @@ theorem trace_one_of_heads_zero (tm : NTM n) (b : Bool) (c : Cfg n tm.Q)
     intro i; rw [Tape.read, hwork i]; exact hwork0 i
   have hro : c.output.read = Γ.start := by rw [Tape.read, hout]; exact hout0
   have hdirs := tm.δ_right_of_start b c.state Γ.start (fun _ => Γ.start) Γ.start
-  rw [NTM.trace, if_neg hne]
+  rw [NTM.trace, ite_eq_right hne]
   simp only [hri, hro, funext hrw]
   rcases hr : tm.δ b c.state Γ.start (fun _ => Γ.start) Γ.start with ⟨q', ww, ow, iD, wD, oD⟩
   rw [hr] at hdirs
@@ -168,7 +168,7 @@ theorem delayNTM_trace_one_pending (tm : NTM n) (b : Bool) (c : Cfg n (delayNTM 
       ⟨Sum.inr (tm.δ b tm.qstart Γ.start (fun _ => Γ.start) Γ.start).1,
         c.input, c.work, c.output⟩ := by
   have hnh : c.state ≠ (delayNTM tm).qhalt := by rw [hstate]; nofun
-  rw [NTM.trace, if_neg hnh]
+  rw [NTM.trace, ite_eq_right hnh]
   have hd : (delayNTM tm).δ b c.state c.input.read (fun i => (c.work i).read) c.output.read
       = (Sum.inr (tm.δ b tm.qstart Γ.start (fun _ => Γ.start) Γ.start).1,
         fun i => TM.readBackWrite ((c.work i).read), TM.readBackWrite c.output.read,
@@ -177,7 +177,7 @@ theorem delayNTM_trace_one_pending (tm : NTM n) (b : Bool) (c : Cfg n (delayNTM 
     rw [hstate]
     show (if c.input.read = Γ.start then (Sum.inl () : Unit ⊕ tm.Q)
       else Sum.inr (tm.δ b tm.qstart Γ.start (fun _ => Γ.start) Γ.start).1, _, _, _, _, _) = _
-    rw [if_neg hin]
+    rw [ite_eq_right hin]
   simp only [hd, NTM.trace]
   refine Cfg.ext rfl ?_ ?_ ?_
   · exact TM.transitionInput_eq_self hin
@@ -201,7 +201,7 @@ theorem delayNTM_trace_two_initCfg (tm : NTM n) (x : List Bool)
     show (if (Γ.start : Γ) = Γ.start then (Sum.inl () : Unit ⊕ tm.Q)
       else Sum.inr (tm.δ (choices ⟨0, by omega⟩) tm.qstart Γ.start
         (fun _ => Γ.start) Γ.start).1) = Sum.inl ()
-    rw [if_pos rfl]
+    rw [ite_eq_left rfl]
   rw [NTM.trace_two, hstep1, hδ1]
   have hinr : ((Tape.init (x.map Γ.ofBool)).move Dir3.right).read ≠ Γ.start :=
     Tape.init_ofBool_move_right_read_ne_start x
@@ -249,8 +249,8 @@ theorem delayNTM_acceptCount (tm : NTM n) (x : List Bool)
   set P : (Fin (T + 1) → Bool) → Prop := fun g =>
     (tm.trace (T + 1) g (tm.initCfg x)).state = tm.qhalt ∧
     (tm.trace (T + 1) g (tm.initCfg x)).output.cells 1 = Γ.one with hP
-  letI : DecidableEq tm.Q := tm.decEq
-  letI : DecidablePred P := fun _ => inferInstanceAs (Decidable (_ ∧ _))
+  let : DecidableEq tm.Q := tm.decEq
+  let : DecidablePred P := fun _ => inferInstanceAs (Decidable (_ ∧ _))
   have hkey := delayNTM_trace_initCfg tm x hne T
   have hfilter : ∀ ch : Fin (T + 2) → Bool,
       (((delayNTM tm).trace (T + 2) ch ((delayNTM tm).initCfg x)).state
@@ -264,9 +264,9 @@ theorem delayNTM_acceptCount (tm : NTM n) (x : List Bool)
       (Finset.univ.filter fun ch : Fin (T + 2) → Bool => Q (Fin.tail ch)).card
         = 2 * (Finset.univ.filter Q).card := by
     intro Q hQ
-    haveI : DecidablePred Q := hQ
-    haveI hf1 : Fintype {g : Fin (T + 1) → Bool // Q g} := Subtype.fintype _
-    haveI hf2 : Fintype {ch : Fin (T + 2) → Bool // Q (Fin.tail ch)} := Subtype.fintype _
+    have : DecidablePred Q := hQ
+    have hf1 : Fintype {g : Fin (T + 1) → Bool // Q g} := Subtype.fintype _
+    have hf2 : Fintype {ch : Fin (T + 2) → Bool // Q (Fin.tail ch)} := Subtype.fintype _
     rw [← Fintype.card_subtype, ← Fintype.card_subtype]
     rw [Fintype.card_congr (Equiv.mk
       (fun ch : {ch : Fin (T + 2) → Bool // Q (Fin.tail ch)} =>

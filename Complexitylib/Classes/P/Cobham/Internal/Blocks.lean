@@ -268,7 +268,7 @@ theorem andBit_flag (x y : List Bool) :
   | cons a x =>
       cases a
       · exact Or.inr rfl
-      · rw [caseBit₀_cons, cond_true]
+      · rw [caseBit₀_cons, Bool.cond_true]
         cases y with
         | nil => exact Or.inr rfl
         | cons d y => cases d <;> simp
@@ -291,7 +291,7 @@ theorem matchPrefix_eq_true_iff (c x : List Bool) :
       cases x with
       | nil => simp [andBit]
       | cons a x =>
-          rw [matchPrefix_cons, nonemptyFlag_cons, andBit, caseBit₀_cons, cond_true,
+          rw [matchPrefix_cons, nonemptyFlag_cons, andBit, caseBit₀_cons, Bool.cond_true,
             andBit]
           have hbit : (bif b then bitAt [] (a :: x) else notBit (bitAt [] (a :: x)))
               = [decide (a = b)] := by

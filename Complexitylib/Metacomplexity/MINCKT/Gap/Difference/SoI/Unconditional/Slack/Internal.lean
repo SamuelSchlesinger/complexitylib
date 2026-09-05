@@ -137,10 +137,11 @@ theorem lowerLoss_budget_internal
   have hloss := losses_le_slackExponent_internal hclock additive compilerLoss inst
   have hslack := slackExponent_le_log_finalClock_internal clock additive
     compilerLoss inst.output.length inst.condition.length inst.time
-  exact (by
-    simpa [plan, Iterated.plan, Plan.pairInput, ordinaryParameters,
-      GapMINKT.Logarithmic.Parameters.logarithmicSlack,
-      GapMINKT.Logarithmic.Parameters.transformedTime] using hloss.trans hslack)
+  have h := hloss.trans hslack
+  simp only [plan, Iterated.plan, Plan.pairInput, ordinaryParameters,
+    GapMINKT.Logarithmic.Parameters.logarithmicSlack,
+    GapMINKT.Logarithmic.Parameters.transformedTime] at h ⊢
+  exact h
 
 theorem IsRegularClock.compatible_internal
     {ordinaryTapes conditionalTapes : ℕ}

@@ -112,9 +112,9 @@ theorem step_union (f : G.V → ℝ) (v : G.V) :
     show ∑ i : G.D ⊕ H.D, f ((union G H e).nbr v i) = _
     rw [Fintype.sum_sum_type]
     rfl
-  rw [step, hsum, deg_union]
+  unfold step
+  rw [hsum, deg_union]
   push_cast
-  rw [step, step]
   field_simp
 
 /-! ### The combined contraction bound -/

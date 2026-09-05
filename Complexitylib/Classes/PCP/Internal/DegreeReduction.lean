@@ -149,12 +149,12 @@ theorem cloudRotAux_involutive {l : List G.HalfEdge} (hnd : l.Nodup) {p : G.Half
   set q := E.rot l.length (⟨l.idxOf p, hlt⟩, j) with hq
   have hq1 : q.1.val < l.length := q.1.isLt
   have hstep : G.cloudRotAux E l p j = (l.getD q.1.val p, q.2) := by
-    rw [cloudRotAux, dif_pos hlt]
+    rw [cloudRotAux, dite_eq_left hlt]
   have hget : l.getD q.1.val p = l[q.1.val] := (List.getElem_eq_getD p).symm
   have hidx' : l.idxOf l[q.1.val] = q.1.val := hnd.idxOf_getElem _ hq1
   have hlt' : l.idxOf (l.getD q.1.val p) < l.length := by
     rw [hget, hidx']; exact hq1
-  rw [hstep, cloudRotAux, dif_pos hlt']
+  rw [hstep, cloudRotAux, dite_eq_left hlt']
   have hval : l.idxOf (l.getD q.1.val p) = q.1.val := by rw [hget, hidx']
   have hfin : (⟨l.idxOf (l.getD q.1.val p), hlt'⟩ : Fin l.length) = q.1 := Fin.ext hval
   rw [hfin]
@@ -176,7 +176,7 @@ theorem cloudRotAux_mem {l : List G.HalfEdge} {p : G.HalfEdge} (hp : p ∈ l)
   have hlt : l.idxOf p < l.length := List.idxOf_lt_length_iff.mpr hp
   have hq1 : (E.rot l.length (⟨l.idxOf p, hlt⟩, j)).1.val < l.length :=
     (E.rot l.length (⟨l.idxOf p, hlt⟩, j)).1.isLt
-  rw [cloudRotAux, dif_pos hlt]
+  rw [cloudRotAux, dite_eq_left hlt]
   dsimp only
   rw [← List.getElem_eq_getD (h := hq1)]
   exact List.getElem_mem hq1
@@ -202,7 +202,7 @@ theorem cloudRot_getElem (v : Fin G.numVerts) (i : Fin (G.cloudList v).length)
     (G.nodup_cloudList v).idxOf_getElem _ i.isLt
   have hlt : (G.cloudList v).idxOf ((G.cloudList v)[i.val]) < (G.cloudList v).length := by
     rw [hidx]; exact i.isLt
-  rw [cloudRot, howner, cloudRotAux, dif_pos hlt]
+  rw [cloudRot, howner, cloudRotAux, dite_eq_left hlt]
   have hfin : (⟨(G.cloudList v).idxOf ((G.cloudList v)[i.val]), hlt⟩ :
       Fin (G.cloudList v).length) = i := Fin.ext hidx
   rw [hfin]
@@ -288,24 +288,24 @@ theorem satisfiable_reduce_of_satisfiable (h : G.Satisfiable) : (G.reduce E).Sat
     dsimp only
     show (if p.2 then G.rel p.1 (σ (G.owner ((G.reduceGraph E).nbr p none))) (σ (G.owner p))
       else G.rel p.1 (σ (G.owner p)) (σ (G.owner ((G.reduceGraph E).nbr p none)))) = true
-    rw [nbr_reduceGraph_none]
+    rw [nbr_reduceGraph_none G E p]
     have hedge := hσ p.1
     rw [Satisfies, satisfies] at hedge
     by_cases hb : p.2 = true
     · have h1 : G.owner p = G.head p.1 := by simp [owner, hb]
       have h2 : G.owner (G.flipHalf p) = G.tail p.1 := by simp [owner, flipHalf, hb]
-      rw [if_pos hb, h1, h2]
+      rw [ite_eq_left hb, h1, h2]
       exact hedge
     · have hb' : p.2 = false := by simpa using hb
       have h1 : G.owner p = G.tail p.1 := by simp [owner, hb']
       have h2 : G.owner (G.flipHalf p) = G.head p.1 := by simp [owner, flipHalf, hb']
-      rw [if_neg hb, h1, h2]
+      rw [ite_eq_right hb, h1, h2]
       exact hedge
   · -- a cloud-link joins half-edges with the same endpoint
     rw [RegCSP.Satisfies, RegCSP.satisfies]
     dsimp only
     show ((σ (G.owner p) == σ (G.owner ((G.reduceGraph E).nbr p (some j)))) = true)
-    rw [nbr_reduceGraph_some, G.owner_cloudRot E p j]
+    rw [nbr_reduceGraph_some G E p j, G.owner_cloudRot E p j]
     simp
 
 end ConstraintGraph
