@@ -172,5 +172,9 @@ See CONTRIBUTING.md. Use `<type>(<scope>): <summary>` format with imperative moo
 
 - **Lean**: `leanprover/lean4:v4.34.0-rc2` (see `lean-toolchain`)
 - **Mathlib**: commit `e06eff5f` (see `lakefile.toml`) — pinned to match [cslib](https://github.com/leanprover/cslib)'s `lake-manifest.json` so the foundations can be rebased onto it
+- **cslib**: commit `d9be6419` (see `lakefile.toml`) — pinned by commit `rev`, never `main`. Its
+  Mathlib pin must equal ours, so a cslib bump dictates the Mathlib and toolchain bump. cslib ships
+  no olean cache; Lake compiles only the cslib modules we import.
 
-When updating either, both must be updated in lockstep.
+When updating any of the three, all must be updated in lockstep: pick the cslib commit first, then
+take its `lean-toolchain` and Mathlib `rev`.
