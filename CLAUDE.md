@@ -177,4 +177,8 @@ See CONTRIBUTING.md. Use `<type>(<scope>): <summary>` format with imperative moo
   no olean cache; Lake compiles only the cslib modules we import.
 
 When updating any of the three, all must be updated in lockstep: pick the cslib commit first, then
-take its `lean-toolchain` and Mathlib `rev`.
+take its `lean-toolchain` and Mathlib `rev`. The `docbuild/` subproject pins the same toolchain
+separately: bump `docbuild/lean-toolchain` and the `doc-gen4` `rev` (tagged per Lean release) in
+`docbuild/lakefile.toml`, then regenerate its manifest with
+`cd docbuild && MATHLIB_NO_CACHE_ON_UPDATE=1 lake update`. Any new root dependency also needs this
+regeneration or the docs workflow fails with "not in manifest".
