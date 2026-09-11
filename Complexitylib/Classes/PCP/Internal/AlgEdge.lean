@@ -154,10 +154,7 @@ theorem blockBlk_mem_FP (F : FinBase) (pol : Polynomial ℕ) (r : Round) :
     (ifEqLen_mem_FP readFn_mem_FP (constFn_mem_FP _) hrot (testFn_mem_FP r))
 
 /-- **The block is the one the read asks for.** -/
--- The signature mirrors the family this belongs to; the argument is part of
--- that shape even where this member does not consult it.
-@[nolint unusedArguments]
-theorem blockBlk_eq {β : Type} [Fintype β] [DecidableEq β] [Nonempty β] {R : RegCSP β}
+theorem blockBlk_eq {β : Type} {R : RegCSP β}
     [NumEnc R.graph.V] [NumEnc R.graph.D] (F : FinBase) (pol : Polynomial ℕ) (r : Round)
     {w : List Bool} (p : R.Dart) (i : ReadIdx)
     (hread : readFn w = List.replicate (NumEnc.enc i) true)

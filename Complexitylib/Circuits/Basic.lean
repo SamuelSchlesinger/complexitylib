@@ -207,9 +207,6 @@ Primary input vertices are not counted, and the negation flags on gate inputs
 have zero cost. Some texts instead count input vertices and explicit NOT gates;
 those conventions agree only up to additive/linear overhead, not on exact size
 bounds. -/
--- The circuit argument is unused by design: `size` is determined by the
--- indices, and the argument exists purely to enable `c.size` dot notation.
-@[nolint unusedArguments]
 def size (_ : Circuit B N M G) : Nat := G + M
 
 end Circuit
@@ -258,16 +255,14 @@ noncomputable def sizeComplexityWithTop
     (B : Basis) (f : BitString N → Bool) : WithTop Nat :=
   sInf ((fun s : Nat => (s : WithTop Nat)) '' realizationSizes B f)
 
-/-- The minimum circuit size over a complete basis `B` computing `f`.
+/-- The minimum circuit size over a basis `B` computing `f`.
 
-This natural-valued interface requires completeness so that the set of
-realizing circuits is nonempty. Use `sizeComplexityWithTop` when the basis may
-be incomplete. -/
--- Completeness is an intentional API precondition. The infimum expression
--- itself does not inspect the selected witness.
-@[nolint unusedArguments]
+The results that identify this with an achieved size take `[CompleteBasis B]`,
+which makes the set of realizing circuits nonempty. Over an incomplete basis
+the infimum of the empty set is `0`, so an unrealizable function would be
+indistinguishable from a zero-size one; use `sizeComplexityWithTop` there. -/
 noncomputable def sizeComplexity
-    (B : Basis) [CompleteBasis B] (f : BitString N → Bool) : Nat :=
+    (B : Basis) (f : BitString N → Bool) : Nat :=
   sInf (realizationSizes B f)
 
 private theorem realizationSizes_nonempty [CompleteBasis B]
@@ -350,7 +345,7 @@ theorem sizeComplexity_pos [CompleteBasis B]
   omega
 
 /-- Any circuit computing `f` has size at least `sizeComplexity B f`. -/
-theorem sizeComplexity_le [CompleteBasis B] {G : Nat}
+theorem sizeComplexity_le {G : Nat}
     (c : Circuit B N 1 G) (f : BitString N → Bool)
     (hf : (fun x => (c.eval x) 0) = f) :
     sizeComplexity B f ≤ c.size :=

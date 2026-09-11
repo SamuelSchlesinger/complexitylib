@@ -493,17 +493,11 @@ private theorem card_filter_blockEventCount_eq_iff (k T j : ℕ)
   · intro f _
     exact Equiv.apply_symm_apply _ _
 
--- The signature mirrors the family this belongs to; the argument is part of
--- that shape even where this member does not consult it.
-@[nolint unusedArguments]
-private def eventBits {k : ℕ} {α : Type*} [Fintype α] [DecidableEq α]
+private def eventBits {k : ℕ} {α : Type*} [DecidableEq α]
     (E : Finset α) (f : Fin k → α) : Fin k → Bool :=
   fun i => decide (f i ∈ E)
 
--- The signature mirrors the family this belongs to; the argument is part of
--- that shape even where this member does not consult it.
-@[nolint unusedArguments]
-private def eventCount {k : ℕ} {α : Type*} [Fintype α] [DecidableEq α]
+private def eventCount {k : ℕ} {α : Type*} [DecidableEq α]
     (E : Finset α) (f : Fin k → α) : ℕ :=
   (Finset.univ.filter (fun i : Fin k => f i ∈ E)).card
 

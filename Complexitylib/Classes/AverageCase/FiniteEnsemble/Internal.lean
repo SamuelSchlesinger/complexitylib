@@ -72,11 +72,8 @@ theorem uniformProbability_union_le_internal {Ω : Type u}
   gcongr
   exact_mod_cast Finset.card_union_le event₁ event₂
 
--- The signature mirrors the family this belongs to; the argument is part of
--- that shape even where this member does not consult it.
-@[nolint unusedArguments]
 theorem uniformProbability_eq_sum_fiberwise_internal
-    {Ω : Type u} {ι : Type v} [Fintype Ω] [DecidableEq Ω]
+    {Ω : Type u} {ι : Type v} [Fintype Ω]
     [DecidableEq ι] (event : Finset Ω) (indices : Finset ι) (f : Ω → ι)
     (hmaps : (event : Set Ω).MapsTo f indices) :
     uniformProbability event =
@@ -87,12 +84,9 @@ theorem uniformProbability_eq_sum_fiberwise_internal
   push_cast
   rw [Finset.sum_div]
 
--- The signature mirrors the family this belongs to; the argument is part of
--- that shape even where this member does not consult it.
-@[nolint unusedArguments]
 theorem uniformProbability_product_internal
-    {Ω : Type u} {Ξ : Type v} [Fintype Ω] [DecidableEq Ω]
-    [Fintype Ξ] [DecidableEq Ξ] (P : Ω → Prop) (Q : Ξ → Prop)
+    {Ω : Type u} {Ξ : Type v} [Fintype Ω]
+    [Fintype Ξ] (P : Ω → Prop) (Q : Ξ → Prop)
     [DecidablePred P] [DecidablePred Q] :
     uniformProbability
         (Finset.univ.filter fun seed : Ω × Ξ => P seed.1 ∧ Q seed.2) =
@@ -115,16 +109,11 @@ theorem uniformProbability_product_internal
     ((Finset.univ.filter P).card : ℚ) (Fintype.card Ω : ℚ)
     ((Finset.univ.filter Q).card : ℚ) (Fintype.card Ξ : ℚ)).symm
 
--- The signature mirrors the family this belongs to; the argument is part of
--- that shape even where this member does not consult it.
-@[nolint unusedArguments]
 theorem uniformProbability_product_eq_average_fibers_internal
     {advice : Type u} {challenge : Type v}
-    [Fintype advice] [DecidableEq advice] [Nonempty advice]
-    [Fintype challenge] [DecidableEq challenge] [Nonempty challenge]
+    [Fintype advice] [Nonempty advice]
+    [Fintype challenge] [Nonempty challenge]
     (event : advice → challenge → Prop)
-    [DecidablePred fun sample : advice × challenge =>
-      event sample.1 sample.2]
     [∀ fixed, DecidablePred (event fixed)] :
     uniformProbability (Finset.univ.filter fun sample : advice × challenge =>
         event sample.1 sample.2) =
@@ -163,16 +152,11 @@ theorem uniformProbability_product_eq_average_fibers_internal
   intro fixed _hfixed
   field_simp [hadvice, hchallenge]
 
--- The signature mirrors the family this belongs to; the argument is part of
--- that shape even where this member does not consult it.
-@[nolint unusedArguments]
 theorem exists_fiber_uniformProbability_ge_internal
     {advice : Type u} {challenge : Type v}
-    [Fintype advice] [DecidableEq advice] [Nonempty advice]
-    [Fintype challenge] [DecidableEq challenge] [Nonempty challenge]
+    [Fintype advice] [Nonempty advice]
+    [Fintype challenge] [Nonempty challenge]
     (event : advice → challenge → Prop)
-    [DecidablePred fun sample : advice × challenge =>
-      event sample.1 sample.2]
     [∀ fixed, DecidablePred (event fixed)] :
     ∃ fixed : advice,
       uniformProbability (Finset.univ.filter fun sample : advice × challenge =>
@@ -197,11 +181,8 @@ theorem exists_fiber_uniformProbability_ge_internal
     (Finset.univ_nonempty : (Finset.univ : Finset advice).Nonempty) hsum
   exact ⟨fixed, hle⟩
 
--- The signature mirrors the family this belongs to; the argument is part of
--- that shape even where this member does not consult it.
-@[nolint unusedArguments]
 theorem uniformMean_le_threshold_add_probability_internal
-    {sample : Type u} [Fintype sample] [DecidableEq sample]
+    {sample : Type u} [Fintype sample]
     [Nonempty sample] (value : sample → ℚ) (threshold : ℚ)
     (hupper : ∀ input, value input ≤ 1) :
     uniformMean value ≤ threshold +
@@ -252,7 +233,7 @@ theorem uniformMean_le_threshold_add_probability_internal
       ring
 
 theorem uniformMean_sub_div_le_probability_ge_internal
-    {sample : Type u} [Fintype sample] [DecidableEq sample]
+    {sample : Type u} [Fintype sample]
     [Nonempty sample] (value : sample → ℚ) (lower threshold : ℚ)
     (hupper : ∀ input, value input ≤ 1)
     (hlower : lower ≤ uniformMean value) (hthreshold : threshold < 1) :
@@ -267,7 +248,7 @@ theorem uniformMean_sub_div_le_probability_ge_internal
   linarith
 
 theorem half_epsilon_le_probability_ge_of_le_uniformMean_internal
-    {sample : Type u} [Fintype sample] [DecidableEq sample]
+    {sample : Type u} [Fintype sample]
     [Nonempty sample] (value : sample → ℚ) (epsilon : ℚ)
     (hepsilon : 0 ≤ epsilon) (hupper : ∀ input, value input ≤ 1)
     (hmean : 1 / 2 + epsilon ≤ uniformMean value) :
@@ -406,12 +387,9 @@ theorem half_le_uniformAtLeastOneProbability_of_singleDrawLower_internal
     htrials.trans <| mul_le_mul_of_nonneg_left hlower (by positivity)
   nlinarith
 
--- The signature mirrors the family this belongs to; the argument is part of
--- that shape even where this member does not consult it.
-@[nolint unusedArguments]
 theorem uniformProbability_equiv_internal
-    {Ω : Type u} {Ξ : Type v} [Fintype Ω] [DecidableEq Ω]
-    [Fintype Ξ] [DecidableEq Ξ] (e : Ω ≃ Ξ) (P : Ξ → Prop)
+    {Ω : Type u} {Ξ : Type v} [Fintype Ω]
+    [Fintype Ξ] (e : Ω ≃ Ξ) (P : Ξ → Prop)
     [DecidablePred P] :
     uniformProbability (Finset.univ.filter fun x : Ω => P (e x)) =
       uniformProbability (Finset.univ.filter P) := by

@@ -58,7 +58,7 @@ theorem Computes.sizeComplexityWithTop_le {c : Circuit B N 1 G}
 
 /-- Over a complete basis, any circuit computing `f` witnesses a natural-valued
 upper bound on its size complexity. -/
-theorem Computes.sizeComplexity_le [CompleteBasis B] {c : Circuit B N 1 G}
+theorem Computes.sizeComplexity_le {c : Circuit B N 1 G}
     {f : BitString N → Bool} (h : c.Computes f) :
     sizeComplexity B f ≤ c.size :=
   Circuit.sizeComplexity_le c f h

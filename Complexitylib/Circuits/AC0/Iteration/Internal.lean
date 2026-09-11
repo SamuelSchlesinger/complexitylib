@@ -25,16 +25,12 @@ namespace Switching
 
 attribute [local instance] Classical.propDecidable
 
--- The signature mirrors the family this belongs to; the argument is part of
--- that shape even where this member does not consult it.
-@[nolint unusedArguments]
-private def finiteEventCount {α : Type} [Fintype α]
-    [DecidableEq α] (event : α → Prop)
+private def finiteEventCount {α : Type} [Fintype α] (event : α → Prop)
     [DecidablePred event] : ℕ :=
   (Finset.univ.filter event).card
 
 private theorem finiteEventCount_mono
-    {α : Type} [Fintype α] [DecidableEq α]
+    {α : Type} [Fintype α]
     (left right : α → Prop)
     [DecidablePred left] [DecidablePred right]
     (himp : ∀ value, left value → right value) :
@@ -62,7 +58,6 @@ private theorem finiteEventCount_or_le_add
 
 private theorem finiteEventCount_prod
     {α β : Type} [Fintype α] [Fintype β]
-    [DecidableEq α] [DecidableEq β]
     (event : α → β → Prop)
     [∀ first, DecidablePred (event first)] :
     finiteEventCount
@@ -89,7 +84,6 @@ private theorem finiteEventCount_prod
 
 private theorem finiteEventCount_prod_mul_le
     {α β : Type} [Fintype α] [Fintype β]
-    [DecidableEq α] [DecidableEq β]
     (event : α → β → Prop)
     [∀ first, DecidablePred (event first)]
     (multiplier bound : ℕ)
@@ -110,7 +104,6 @@ private theorem finiteEventCount_prod_mul_le
 
 private theorem finiteEventCount_prod_left
     {α β : Type} [Fintype α] [Fintype β]
-    [DecidableEq α] [DecidableEq β]
     (event : α → Prop) [DecidablePred event] :
     finiteEventCount
         (fun pair : α × β => event pair.1) =
@@ -133,12 +126,8 @@ private theorem finiteEventCount_prod_left
     _ = finiteEventCount event * Fintype.card β := by
           simp [finiteEventCount]
 
--- The signature mirrors the family this belongs to; the argument is part of
--- that shape even where this member does not consult it.
-@[nolint unusedArguments]
 private theorem finiteEventCount_exists_mem_le_sum
-    {α β : Type} [Fintype α] [DecidableEq α]
-    [DecidableEq β] (values : List β)
+    {α β : Type} [Fintype α] (values : List β)
     (event : β → α → Prop)
     [∀ value, DecidablePred (event value)] :
     finiteEventCount (fun sample =>
@@ -170,7 +159,7 @@ private theorem finiteEventCount_exists_mem_le_sum
           simp
 
 private theorem exists_not_event_of_weight_sum
-    {α : Type} [Fintype α] [DecidableEq α]
+    {α : Type} [Fintype α]
     (event : α → Prop) [DecidablePred event]
     (weight : α → ℕ) (cap threshold : ℕ)
     (hcap : ∀ value, weight value ≤ cap)

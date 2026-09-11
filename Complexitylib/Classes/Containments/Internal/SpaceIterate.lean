@@ -201,7 +201,6 @@ noncomputable def ctrValue (t : Tape) : ℕ :=
 /-- The loop's index function: how far the counter has advanced past `start`.
 The input and output tapes are ignored, but `TM.loopTM_hoareTime_indexed` takes
 the index as a function of the whole configuration, so they have to be there. -/
-@[nolint unusedArguments]
 noncomputable def loopIdx (k start : ℕ) :
     Tape → (Fin (3 + (k + 2) + 0) → Tape) → Tape → ℕ :=
   fun _ work _ => ctrValue (work rfIdx) - start

@@ -156,10 +156,7 @@ omit [Fintype V] in
 /-- **Extending a simple path by an edge.** In an acyclic digraph, a
 simple path `p` ending at `u` followed by an edge `u → v` yields a
 simple path ending at `v` that is one longer. -/
--- The signature mirrors the family this belongs to; the argument is part of
--- that shape even where this member does not consult it.
-@[nolint unusedArguments]
-private lemma extend_simple_path [DecidableEq V] (G : Digraph V) (hac : IsAcyclic G)
+private lemma extend_simple_path (G : Digraph V) (hac : IsAcyclic G)
     {u v : V} (huv : G.Adj u v) {n : ℕ} {p : Fin (n + 1) → V}
     (hsp : G.IsPath p) (hpu : p (Fin.last n) = u) :
     ∃ p' : Fin (n + 2) → V, G.IsPath p' ∧ p' (Fin.last (n + 1)) = v := by
@@ -190,7 +187,7 @@ private lemma extend_simple_path [DecidableEq V] (G : Digraph V) (hac : IsAcycli
 ending at `u` followed by the edge `(u,v)` is a strictly longer simple
 path ending at `v` (using acyclicity to ensure `v` does not already
 appear in the path). -/
-lemma canonicalLabel_isLegal [DecidableEq V] (G : Digraph V) (hac : IsAcyclic G) :
+lemma canonicalLabel_isLegal (G : Digraph V) (hac : IsAcyclic G) :
     IsLegalLabeling G G.canonicalLabel := by
   intro u v huv
   obtain ⟨p, hsp, hpu⟩ :=
@@ -362,6 +359,7 @@ noncomputable def levelEdges
   G.edgeFinset.filter (fun e =>
     firstDifferBit k (G.canonicalLabel e.1 - 1) (G.canonicalLabel e.2 - 1) = i)
 
+omit [DecidableEq V] in
 /-- For any edge `(u,v)` of an acyclic `G` with `depth ≤ 2 ^ k`, the first
 MSB-disagreement of the `k`-bit canonical labels is in `{1,...,k}`. -/
 private lemma firstDifferBit_mem_Ioc
@@ -380,6 +378,7 @@ private lemma firstDifferBit_mem_Ioc
     (canonicalLabel_sub_one_lt_two_pow G hd _)
   exact Finset.mem_Ioc.mpr ⟨hpos, hle⟩
 
+omit [DecidableEq V] in
 /-- **Partition.** When `G` is acyclic and `G.depth ≤ 2 ^ k`, every
 edge lies in exactly one level `E_i` for `i ∈ {1,...,k}`. -/
 lemma sum_card_levelEdges_eq
@@ -435,6 +434,7 @@ private lemma exists_r_subset_sum_le
       have hih_step : n' * (∑ i ∈ I, a i) ≤ r * (∑ i ∈ s', a i) := hI_le
       omega
 
+omit [DecidableEq V] in
 /-- **Averaging.** There is a choice of `r` levels whose total edge
 count is at most `r * S / k` (equivalently, `k * total ≤ r * S`). -/
 lemma exists_r_levels_small

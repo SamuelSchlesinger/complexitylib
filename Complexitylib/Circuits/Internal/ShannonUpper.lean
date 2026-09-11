@@ -657,10 +657,6 @@ theorem encodeColumn_lt (k : Nat) (col : Fin (2^k) → Bool) :
 /-- The column function of `f` at data row `y`: maps an address `a` to
     `f(a, y)`, reading the first `k` input bits from `a` and the remaining
     `q` bits from `y`. -/
--- `_hkq : k + q = N` is a documented precondition tying the address width
--- `k` and data width `q` to `N`; it is threaded by every caller but not
--- needed in the body, which is polymorphic in `k`, `q`.
-@[nolint unusedArguments]
 noncomputable def columnFunction (N : Nat) (f : BitString N → Bool)
     (k q : Nat) (_hkq : k + q = N) (y : Fin (2^q)) : Fin (2^k) → Bool :=
   fun a => f (fun idx =>
@@ -681,10 +677,7 @@ theorem columnPatternIndex_lt (N : Nat) (f : BitString N → Bool)
 
 /-! ### Shannon gate array -/
 
--- The signature mirrors the family this belongs to; the argument is part of
--- that shape even where this member does not consult it.
-@[nolint unusedArguments]
-private noncomputable def shannonGateArray (N : Nat) [NeZero N]
+private noncomputable def shannonGateArray (N : Nat)
     (f : BitString N → Bool) (hN : 16 ≤ N) :
     (i : Fin (totalSectionGates (addrBits N) (dataBits N))) →
     { g : Gate Basis.andOr2 (N + totalSectionGates (addrBits N) (dataBits N)) //
@@ -1021,10 +1014,7 @@ private def shiftedBits (N k q : Nat) (hkq : k + q = N) (x : BitString N) :
   fun j => x ⟨k + j.val, by have := j.isLt; omega⟩
 
 /-- columnFunction at the actual bit-vector address/data values equals f(x). -/
--- The signature mirrors the family this belongs to; the argument is part of
--- that shape even where this member does not consult it.
-@[nolint unusedArguments]
-private theorem columnFunction_at_actual_bits (N : Nat) [NeZero N]
+private theorem columnFunction_at_actual_bits (N : Nat)
     (f : BitString N → Bool) (x : BitString N)
     (k q : Nat) (hkq : k + q = N) :
     let addr : BitString k := fun j => x ⟨j.val, by have := j.isLt; omega⟩
@@ -1130,10 +1120,7 @@ private theorem dataSum_lt (N : Nat) (hN : 16 ≤ N) (x : BitString N) :
   sum_cond_pow_fin_lt (dataBits N) (shiftedBits N (addrBits N) (dataBits N) (addrDataSum N hN) x)
 
 /-- andLayerSem at y is false when y ≠ dataSum. -/
--- The signature mirrors the family this belongs to; the argument is part of
--- that shape even where this member does not consult it.
-@[nolint unusedArguments]
-private theorem andLayerSem_ne (N : Nat) [NeZero N]
+private theorem andLayerSem_ne (N : Nat)
     (f : BitString N → Bool) (hN : 16 ≤ N) (x : BitString N)
     (y : Nat) (hy : y < 2 ^ dataBits N) (hne : y ≠ dataSum N hN x) :
     andLayerSem N f hN x y hy = false := by
@@ -1141,14 +1128,14 @@ private theorem andLayerSem_ne (N : Nat) [NeZero N]
   simp only [beq_eq_false_iff_ne.mpr hne, Bool.false_and]
 
 /-- andLayerSem at dataSum gives columnFunction at actual bits. -/
-private theorem andLayerSem_eq (N : Nat) [NeZero N]
+private theorem andLayerSem_eq (N : Nat)
     (f : BitString N → Bool) (hN : 16 ≤ N) (x : BitString N) :
     andLayerSem N f hN x (dataSum N hN x) (dataSum_lt N hN x) = f x := by
   unfold andLayerSem dataSum
   simp only [beq_self_eq_true, Bool.true_and]
   exact columnFunction_at_actual_bits N f x (addrBits N) (dataBits N) (addrDataSum N hN)
 
-private theorem or_andLayerSem_eq_f (N : Nat) [NeZero N]
+private theorem or_andLayerSem_eq_f (N : Nat)
     (f : BitString N → Bool) (hN : 16 ≤ N) (x : BitString N) :
     (List.range (2 ^ dataBits N)).foldl
       (fun acc y => acc || if h : y < 2 ^ dataBits N

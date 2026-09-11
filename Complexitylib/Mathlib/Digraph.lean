@@ -59,14 +59,13 @@ lemma pathLength_bddAbove [Fintype V] (G : Digraph V) :
   rintro m ⟨p, _, hp⟩
   simpa only [Fintype.card_fin] using Fintype.card_le_of_injective p hp
 
-/-- The **depth** of a finite digraph is the maximum length — number of
-vertices — of a simple directed path. Using simple paths makes `depth` a
-total, honest finite measure even when the graph contains a cycle. Results
-whose proofs require a DAG state `IsAcyclic` explicitly. -/
--- The instance restricts the definition's domain to finite graphs; the
--- supremum expression itself does not inspect the chosen enumeration.
-@[nolint unusedArguments]
-noncomputable def depth [Fintype V] (G : Digraph V) : Nat :=
+/-- The **depth** of a digraph is the maximum length — number of vertices — of
+a simple directed path. Using simple paths makes `depth` a total, honest
+finite measure even when the graph contains a cycle. The supremum is only
+meaningful when the path lengths are bounded, so every result about `depth`
+takes `[Fintype V]`; those whose proofs additionally need a DAG state
+`IsAcyclic` explicitly. -/
+noncomputable def depth (G : Digraph V) : Nat :=
   sSup {m | ∃ p : Fin m → V, G.IsPath p}
 
 /-- A finite digraph's simple-path depth is at most its number of vertices. -/
@@ -111,7 +110,7 @@ def IsAcyclic (G : Digraph V) : Prop :=
 
 /-- The simple-path set of `G.deleteEdges ∅` agrees with that of `G`,
 so the two graphs have the same depth. -/
-lemma depth_deleteEdges_empty [Fintype V] (G : Digraph V) :
+lemma depth_deleteEdges_empty (G : Digraph V) :
     (G.deleteEdges ∅).depth = G.depth := by
   unfold Digraph.depth
   congr 1

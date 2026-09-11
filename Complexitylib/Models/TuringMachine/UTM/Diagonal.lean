@@ -2216,15 +2216,9 @@ theorem diagTM_flips_of_halts (clk : TM 8) (C : ℕ) (g : ℕ → ℕ)
   · rw [ite_eq_right hm]
     simp [hm]
 
-set_option linter.unusedVariables false in
-/-- Compatibility form of `diagTM_flips_of_halts`. The positivity hypothesis
-    is not needed for the flip itself, but remains in this public signature for
-    callers of the original theorem. -/
--- The signature mirrors the family this belongs to; the argument is part of
--- that shape even where this member does not consult it.
-@[nolint unusedArguments]
+/-- Short name for `diagTM_flips_of_halts`. -/
 theorem diagTM_flips (clk : TM 8) (C : ℕ) (g : ℕ → ℕ)
-    (hclk : ClockWitness clk C g) (hg1 : ∀ n, 1 ≤ g n)
+    (hclk : ClockWitness clk C g)
     (x : List Bool) (hterm : TerminatedRegion x)
     (T : ℕ) (mcF : Cfg 1 (decodeDesc x).toTM.Q) (hT : T ≤ g x.length)
     (hrun : (decodeDesc x).toTM.reachesIn T ((decodeDesc x).toTM.initCfg x) mcF)
