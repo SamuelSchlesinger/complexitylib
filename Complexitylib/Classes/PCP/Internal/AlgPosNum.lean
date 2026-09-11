@@ -191,11 +191,8 @@ theorem satSet_congr (p : R.Dart) (p' : R'.Dart)
 
 omit [DecidableEq β] [Nonempty β] [NumEnc R.graph.V] [NumEnc R.graph.D] in
 /-- **So does the cube a read names**, even across two different systems. -/
--- The signature mirrors the family this belongs to; the argument is part of
--- that shape even where this member does not consult it.
-@[nolint unusedArguments]
-theorem cubeNum_congr {β' : Type} [Fintype β'] [DecidableEq β'] [Nonempty β']
-    {R' : RegCSP β'} [NumEnc R'.graph.V] [NumEnc R'.graph.D] {enc' : β' → Cube B}
+theorem cubeNum_congr {β' : Type} [Fintype β']
+    {R' : RegCSP β'} {enc' : β' → Cube B}
     (p : R.Dart) (p' : R'.Dart) (z : Cube (ROf B)) (i : ReadIdx)
     (h : R.satSet enc p = R'.satSet enc' p') :
     R.cubeNum enc p z i = R'.cubeNum enc' p' z i := by
@@ -203,11 +200,8 @@ theorem cubeNum_congr {β' : Type} [Fintype β'] [DecidableEq β'] [Nonempty β'
 
 omit [DecidableEq β] [Nonempty β] [NumEnc R.graph.V] [NumEnc R.graph.D] in
 /-- **And so does the test's verdict.** -/
--- The signature mirrors the family this belongs to; the argument is part of
--- that shape even where this member does not consult it.
-@[nolint unusedArguments]
-theorem check_congr {β' : Type} [Fintype β'] [DecidableEq β'] [Nonempty β']
-    {R' : RegCSP β'} [NumEnc R'.graph.V] [NumEnc R'.graph.D] {enc' : β' → Cube B}
+theorem check_congr {β' : Type} [Fintype β']
+    {R' : RegCSP β'} {enc' : β' → Cube B}
     (p : R.Dart) (p' : R'.Dart) (z : Cube (ROf B))
     (h : R.satSet enc p = R'.satSet enc' p') :
     (R.compose enc).check p z = (R'.compose enc').check p' z := by
@@ -255,6 +249,7 @@ theorem satSet_eq_of_data (G G' : ConstraintGraph α) (E : ExpanderFamily) {q T 
   rw [h]
   rfl
 
+omit [Nonempty α] in
 /-- **The cube a read names is the same across two such graphs.** -/
 theorem cubeNum_eq_of_data (G G' : ConstraintGraph α) (E : ExpanderFamily) {q T B : ℕ}
     (hq : 0 < q) (v : (G.preprocess E).graph.V) (v' : (G'.preprocess E).graph.V)
@@ -268,6 +263,7 @@ theorem cubeNum_eq_of_data (G G' : ConstraintGraph α) (E : ExpanderFamily) {q T
   RegCSP.cubeNum_congr (R := (G.preprocess E).killedPow q T hq) (enc := encβ)
     (R' := (G'.preprocess E).killedPow q T hq) (enc' := encβ) (v, x) (v', x) z i h
 
+omit [Nonempty α] in
 /-- **And so is the test's verdict.** -/
 theorem check_eq_of_data (G G' : ConstraintGraph α) (E : ExpanderFamily) {q T B : ℕ}
     (hq : 0 < q) (v : (G.preprocess E).graph.V) (v' : (G'.preprocess E).graph.V)

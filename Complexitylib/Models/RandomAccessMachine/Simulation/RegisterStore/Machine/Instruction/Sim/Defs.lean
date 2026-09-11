@@ -63,7 +63,6 @@ def liftedSource {n : ℕ} (tapes : ControlInstructionTapes n) : Fin (n + 1) :=
   tapes.lifted.data.update.entry.source
 
 /-- Fresh last work tape receiving the next encoded store. -/
-@[nolint unusedArguments]
 def buffer {n : ℕ} (_tapes : ControlInstructionTapes n) : Fin (n + 1) :=
   Fin.last n
 

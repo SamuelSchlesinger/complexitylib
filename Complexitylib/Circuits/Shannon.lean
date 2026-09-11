@@ -79,8 +79,7 @@ theorem shannon_sizeComplexity (N : Nat) [NeZero N] (hN : 6 ≤ N)
     This is the full-column-library variant (C = 18). The tighter
     `(1 + o(1)) · 2^N / N` bound due to Lupanov (1958) uses column
     grouping and is not yet formalized. -/
-theorem shannon_upper_bound [CompleteBasis Basis.andOr2]
-    (N : Nat) (hN : 16 ≤ N) [NeZero N]
+theorem shannon_upper_bound (N : Nat) (hN : 16 ≤ N) [NeZero N]
     (f : BitString N → Bool) :
     Circuit.sizeComplexity Basis.andOr2 f ≤ 18 * 2 ^ N / N := by
   obtain ⟨G, c, heval, hsize⟩ := ShannonUpper.shannon_construction N hN f

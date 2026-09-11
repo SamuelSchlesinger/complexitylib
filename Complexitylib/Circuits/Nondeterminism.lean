@@ -106,7 +106,7 @@ theorem sizeComplexity_or_le [CompleteBasis Basis.andOr2] [NeZero N]
 
 /-- Circuit complexity is invariant under propositional equality of input
     dimension. -/
-private theorem sizeComplexity_cast [CompleteBasis B] [NeZero n] [NeZero n']
+private theorem sizeComplexity_cast [NeZero n] [NeZero n']
     (h : n = n') (f : BitString n → Bool) :
     Circuit.sizeComplexity B (h ▸ f : BitString n' → Bool) =
       Circuit.sizeComplexity B f := by
@@ -200,7 +200,7 @@ theorem sizeComplexity_existsQuantify_le [CompleteBasis Basis.andOr2]
     exponential circuit complexity,
     `existsQuantify f` has complexity at most `O(2^m / m)`, which decreases
     exponentially as more variables are quantified away. -/
-theorem sizeComplexity_existsQuantify_le_shannon [CompleteBasis Basis.andOr2]
+theorem sizeComplexity_existsQuantify_le_shannon
     (f : BitString (k + m) → Bool) [NeZero m] (hm : 16 ≤ m) :
     Circuit.sizeComplexity Basis.andOr2 (existsQuantify f) ≤ 18 * 2 ^ m / m :=
   shannon_upper_bound m hm (existsQuantify f)

@@ -380,7 +380,6 @@ def FamilyCorePre (codeBits inputBits : List Bool) (initialInput : Tape)
 core. Malformed codes and successful false evaluations both write zero. The
 terminal work tapes are intentionally unconstrained because rejecting parses
 halt at different code, memo, and counter cursor positions. -/
-@[nolint unusedArguments]
 def FamilyCorePost (codeBits inputBits : List Bool) (initialInput : Tape)
     (inp : Tape) (_work : Fin workTapeCount → Tape) (out : Tape) : Prop :=
   inp = initialInput ∧
@@ -402,7 +401,6 @@ def evalFamilyTime (n : ℕ) : ℕ :=
 cells retain the original encoding and the output carries the defaulted paired
 evaluation verdict with its canonical head and left-marker invariant. Terminal
 work tapes are intentionally unconstrained across valid and rejecting branches. -/
-@[nolint unusedArguments]
 def EvalFamilyPost (bits : List Bool) (inp : Tape)
     (_work : Fin workTapeCount → Tape) (out : Tape) : Prop :=
   inp.cells = (Tape.init (bits.map Γ.ofBool)).cells ∧
