@@ -65,6 +65,9 @@ def headlineTheorems : List Name := [
   -- Universal machine
   `Complexity.TM.UTMBody.utmTM_universal,
   `Complexity.TM.UTMBody.utmTM_universal_padded,
+  `Complexity.TM.utmTM_simulates_pair,
+  `Complexity.TM.utmTM_isEfficientlyUniversal,
+  `Complexity.TM.utmTM_isUniversal,
   -- Time hierarchy
   `Complexity.time_hierarchy_weak,
   `Complexity.time_hierarchy_weak_ssubset,

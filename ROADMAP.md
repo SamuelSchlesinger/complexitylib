@@ -1959,8 +1959,9 @@ A `PromiseNPHard` target in `PromiseP` collapses `P` and `NP`, so under
 `P ≠ NP` every such hard target is outside `PromiseP`. An FNP relation that
 characterizes the yes-instances also yields `PromiseNP` membership.
 
-What remains missing is an instance connecting the fixed UTM to the generic
-interface, executable finite minimization for the bounded measure, an executable
+The fixed UTM now instantiates the generic interface
+(`TM.utmTM_isEfficientlyUniversal`). What remains missing is executable finite
+minimization for the bounded measure, an executable
 normalized MCSP verifier and its NP packaging, and gap-specific randomized and
 hardness reduction infrastructure for minimum-description problems.
 
@@ -2014,7 +2015,10 @@ the mathematics and must not be hidden behind notation.
 - [x] Define output-preserving `TM.Simulates`, `TM.IsUniversal`, and
   `TM.IsEfficientlyUniversal` interfaces over arbitrary work-tape counts. Split
   semantic simulation, additive program-length overhead, and time overhead into
-  reusable fields or mixins rather than one theorem-shaped structure.
+  reusable fields or mixins rather than one theorem-shaped structure. *The
+  universality predicates (ordinary and oracle) require a `TM.IsComputable`
+  compiler; without it a trivial print-or-diverge machine qualified, through a
+  compiler that consults the source's halting behavior.*
 - [x] Add the generic `PromiseProblem` layer with disjoint sides, promised-input
   semantics, complement and total-language embedding, and composable explicit
   and polynomial-time side-preserving many-one reductions.
@@ -2026,10 +2030,16 @@ the mathematics and must not be hidden behind notation.
   prove total-source and all-promise-source formulations equivalent, recover
   ordinary `NPComplete` exactly on total embeddings, and derive the hard-target
   collapse criterion `PromiseNPHard Π → Π ∈ PromiseP → P = NP`.
-- [ ] Promote the fixed UTM's full-output theorem to the public surface and
+- [x] Promote the fixed UTM's full-output theorem to the public surface and
   instantiate the generic efficient-universality interface. The compiler should
   expose the exact paired-program length `2 * |description| + 2 + |p|` and the
-  existing single-tape and UTM clock transformations.
+  existing single-tape and UTM clock transformations. *`TM.utmTM_simulates_pair`
+  gives, for every machine, a description `α` under which `utmTM` simulates it
+  exactly through the compiler `pair α`, preserving and reflecting halting and
+  exact output, within `utmTime α (16(k+1)(t+|p|+1)²) |p|`;
+  `TM.utmTM_isEfficientlyUniversal` and `TM.utmTM_isUniversal` follow. Reflection
+  (divergence of `utmTM` on divergent sources) uses the per-step loop and
+  macro-step correspondences, which hold on non-halting runs.*
 - [x] Define plain `C_U`, bounded `C^t_U`, and prefix-free `K_U`; prove clock
   monotonicity, witness/threshold characterizations, additive invariance under
   the appropriate compiler, and the corresponding resource-aware comparison

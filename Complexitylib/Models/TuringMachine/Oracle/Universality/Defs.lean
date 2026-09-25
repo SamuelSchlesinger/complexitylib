@@ -53,20 +53,23 @@ structure SimulatesInTime (simulator : OracleTM simulatorTapes)
       simulator.ProducesInTime oracle (compile program) output
         (clock program sourceTime)
 
-/-- Oracle universality uses one compiler per source machine, uniformly over
-all Boolean oracles. -/
+/-- Oracle universality uses one computable compiler per source machine,
+uniformly over all Boolean oracles. As for `TM.IsUniversal`, computability of
+the compiler keeps undecidable information out of the compiled program. -/
 def IsUniversal (simulator : OracleTM simulatorTapes) : Prop :=
   ∀ (sourceTapes : ℕ) (source : OracleTM sourceTapes),
-    ∃ compile : List Bool → List Bool, simulator.Simulates source compile
+    ∃ compile : List Bool → List Bool,
+      TM.IsComputable compile ∧ simulator.Simulates source compile
 
-/-- Oracle universality relative to an admissible clock policy. The compiler,
-additive length constant, and clock are all selected before the oracle. -/
+/-- Oracle universality relative to an admissible clock policy. The computable
+compiler, additive length constant, and clock are all selected before the
+oracle. -/
 def IsEfficientlyUniversalFor (simulator : OracleTM simulatorTapes)
     (admissible : TM.TimeOverhead → Prop) : Prop :=
   ∀ (sourceTapes : ℕ) (source : OracleTM sourceTapes),
     ∃ (compile : List Bool → List Bool) (constant : ℕ)
       (clock : TM.TimeOverhead),
-      simulator.Simulates source compile ∧
+      TM.IsComputable compile ∧ simulator.Simulates source compile ∧
       TM.HasAdditiveProgramOverhead compile constant ∧
       simulator.SimulatesInTime source compile clock ∧ admissible clock
 

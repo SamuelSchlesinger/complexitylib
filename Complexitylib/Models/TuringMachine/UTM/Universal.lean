@@ -37,6 +37,7 @@ namespace TM.UTMBody
 /-- Total running time of the universal machine on `pair α x` when the
     simulated machine halts within `T` steps (`n = |x|`). Linear in `T`;
     all other dependence is on the description alone. -/
+@[expose]
 def utmTime (α : List Bool) (T n : ℕ) : ℕ :=
   4 * (2 * α.length + 2 + n) + 4 * (groupPairs α).length + 25 +
     ((T + 1) * utmStepTime α + 1 + (2 * T + 9))

@@ -14,7 +14,7 @@ This module gives machine-independent definitions of semantic and efficient
 universality. A simulation compiler acts on arbitrary binary programs; its
 correctness does not mention a concrete description codec. Additive description
 overhead and an explicit program-sensitive clock are separate reusable
-hypotheses.
+hypotheses. Universality requires the compiler to be computable.
 
 The default `IsEfficientlyUniversal` policy asks for a polynomial in source
 running time and source-program length. `IsEfficientlyUniversalFor` remains
@@ -22,6 +22,7 @@ available for sharper policies.
 
 ## Main results
 
+- `TM.IsComputable.comp` -- computable string functions compose
 - `TM.Simulates.refl`, `TM.Simulates.comp` -- semantic simulation is compositional
 - `TM.HasAdditiveProgramOverhead.comp` -- additive compiler costs compose
 - `TM.SimulatesInTime.comp` -- exact simulation clocks compose
@@ -38,6 +39,12 @@ namespace Complexity
 namespace TM
 
 variable {firstTapes secondTapes thirdTapes : ℕ}
+
+/-- Computable string functions are closed under composition. -/
+theorem IsComputable.comp {first second : List Bool → List Bool}
+    (hsecond : IsComputable second) (hfirst : IsComputable first) :
+    IsComputable (second ∘ first) :=
+  isComputable_comp_internal hfirst hsecond
 
 /-- Every machine simulates itself under the identity compiler. -/
 theorem Simulates.refl (machine : TM firstTapes) : machine.Simulates machine id :=
@@ -131,11 +138,13 @@ theorem IsEfficientlyUniversalFor.mono {simulator : TM firstTapes}
     simulator.IsEfficientlyUniversalFor secondPolicy :=
   efficientlyUniversalFor_mono_internal hpolicy h
 
-/-- A simulator of a universal machine is itself universal. -/
+/-- A simulator of a universal machine under a computable compiler is itself
+universal. -/
 theorem Simulates.isUniversal {first : TM firstTapes} {second : TM secondTapes}
     {compile : List Bool → List Bool} (hsim : first.Simulates second compile)
-    (huniversal : second.IsUniversal) : first.IsUniversal :=
-  simulates_isUniversal_internal hsim huniversal
+    (hcompile : IsComputable compile) (huniversal : second.IsUniversal) :
+    first.IsUniversal :=
+  simulates_isUniversal_internal hcompile hsim huniversal
 
 end TM
 

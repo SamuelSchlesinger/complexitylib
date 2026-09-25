@@ -14,10 +14,13 @@ These definitions describe universal simulation independently of any concrete
 machine encoding, pairing function, work-tape count, or overhead formula.
 Semantic simulation, compiler length, and simulation time are separate
 predicates so later invariance theorems can request exactly the hypotheses they
-need.
+need. The universality predicates require the compiler to be computable, so a
+compiled program cannot carry undecidable information such as whether the
+source halts.
 
 ## Main definitions
 
+- `TM.IsComputable` -- a string function computed by some deterministic machine
 - `TM.Simulates` -- preservation of halting and exact string output
 - `TM.HasAdditiveProgramOverhead` -- an additive compiler-length bound
 - `TM.SimulatesInTime` -- forward simulation under an explicit clock transform
@@ -40,6 +43,12 @@ variable {simulatorTapes sourceTapes : ℕ}
 time budget. Keeping the complete program available makes clock composition
 exact; asymptotic policies below constrain this dependence through its length. -/
 abbrev TimeOverhead := List Bool → ℕ → ℕ
+
+/-- A string function is computable when some deterministic machine, with any
+number of work tapes, halts on every input with exactly the function's value on
+its output tape. -/
+def IsComputable (function : List Bool → List Bool) : Prop :=
+  ∃ (tapes : ℕ) (machine : TM tapes), machine.Computes function
 
 /-- `simulator` semantically simulates `source` under `compile` when compilation
 preserves both raw halting and every exact binary-string output. This is a
@@ -79,19 +88,26 @@ def PolynomialTimeOverhead (clock : TimeOverhead) : Prop :=
       coefficient * (program.length + sourceTime + 1) ^ exponent
 
 /-- A machine is semantically universal when it simulates every deterministic
-machine, with any finite number of work tapes, under some program compiler. -/
+machine, with any finite number of work tapes, under some computable program
+compiler.
+
+Computability of the compiler is essential. Without it the predicate is
+trivial: a machine that prints the rest of its input after a leading `0` and
+diverges after a leading `1` would qualify, with a compiler that consults the
+source machine's halting behavior and output. -/
 def IsUniversal (simulator : TM simulatorTapes) : Prop :=
   ∀ (sourceTapes : ℕ) (source : TM sourceTapes),
-    ∃ compile : List Bool → List Bool, simulator.Simulates source compile
+    ∃ compile : List Bool → List Bool,
+      IsComputable compile ∧ simulator.Simulates source compile
 
 /-- Universality relative to a chosen admissibility policy for time overhead.
-Every source machine receives a semantic compiler, an additive program-length
-constant, and an explicit clock satisfying `admissible`. -/
+Every source machine receives a computable semantic compiler, an additive
+program-length constant, and an explicit clock satisfying `admissible`. -/
 def IsEfficientlyUniversalFor (simulator : TM simulatorTapes)
     (admissible : TimeOverhead → Prop) : Prop :=
   ∀ (sourceTapes : ℕ) (source : TM sourceTapes),
     ∃ (compile : List Bool → List Bool) (constant : ℕ) (clock : TimeOverhead),
-      simulator.Simulates source compile ∧
+      IsComputable compile ∧ simulator.Simulates source compile ∧
       HasAdditiveProgramOverhead compile constant ∧
       simulator.SimulatesInTime source compile clock ∧ admissible clock
 

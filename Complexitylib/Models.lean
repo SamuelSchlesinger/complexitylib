@@ -77,6 +77,7 @@ public import Complexitylib.Models.TuringMachine.Repetition.Correctness
 public import Complexitylib.Models.TuringMachine.UTM.Encoding
 public import Complexitylib.Models.TuringMachine.UTM.Machine
 public import Complexitylib.Models.TuringMachine.UTM.Universal
+public import Complexitylib.Models.TuringMachine.UTM.Universality
 public import Complexitylib.Models.TuringMachine.UTM.Clock
 public import Complexitylib.Models.TuringMachine.UTM.ClockConstructible
 public import Complexitylib.Models.TuringMachine.UTM.ClockedUtm

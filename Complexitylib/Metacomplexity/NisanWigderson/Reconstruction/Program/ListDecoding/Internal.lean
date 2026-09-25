@@ -144,7 +144,7 @@ theorem efficientlyUniversal_transfer_internal
               (coefficient *
                 (bound + realization.time bound + 1) ^ exponent) ≤
             (bound + constant : ℕ) := by
-  obtain ⟨compile, constant, clock, _hsim, hlength, htimed, hclock⟩ :=
+  obtain ⟨compile, constant, clock, -, _hsim, hlength, htimed, hclock⟩ :=
     huniversal realization.tapes realization.machine
   obtain ⟨coefficient, exponent, htransfer⟩ :=
     OracleTM.polynomialTimeOverhead_kolmogorov_transfer_internal
@@ -174,7 +174,7 @@ theorem EncodedMessageDecoderRealization.efficientlyUniversal_transfer_internal
               (coefficient *
                 (bound + realization.time bound + 1) ^ exponent) ≤
             (bound + constant : ℕ) := by
-  obtain ⟨compile, constant, clock, _hsim, hlength, htimed, hclock⟩ :=
+  obtain ⟨compile, constant, clock, -, _hsim, hlength, htimed, hclock⟩ :=
     huniversal realization.tapes realization.machine
   obtain ⟨coefficient, exponent, htransfer⟩ :=
     TM.polynomialTimeOverhead_kolmogorov_transfer_internal

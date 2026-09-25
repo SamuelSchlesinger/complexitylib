@@ -232,7 +232,7 @@ theorem IsUniversal.plainKolmogorovComplexity_ne_top_internal
     {simulator : TM simulatorTapes} (huniversal : simulator.IsUniversal)
     (output : List Bool) :
     simulator.plainKolmogorovComplexity output ≠ ⊤ := by
-  obtain ⟨compile, hsimulates⟩ :=
+  obtain ⟨compile, -, hsimulates⟩ :=
     huniversal 0 (copyInputToOutputTM (n := 0))
   have hsource : (copyInputToOutputTM (n := 0)).ProducesInTime output output
       (output.length + 2) := by
@@ -248,7 +248,7 @@ theorem IsUniversal.exists_timeBoundedKolmogorovComplexity_ne_top_internal
     {simulator : TM simulatorTapes} (huniversal : simulator.IsUniversal)
     (output : List Bool) :
     ∃ time, simulator.timeBoundedKolmogorovComplexity output time ≠ ⊤ := by
-  obtain ⟨compile, hsimulates⟩ :=
+  obtain ⟨compile, -, hsimulates⟩ :=
     huniversal 0 (copyInputToOutputTM (n := 0))
   have hsource : (copyInputToOutputTM (n := 0)).ProducesInTime output output
       (output.length + 2) := by
@@ -271,7 +271,7 @@ theorem IsEfficientlyUniversal.timeBoundedKolmogorovComplexity_printer_internal
       coefficient * (2 * output.length + 3) ^ exponent ≤ time →
         simulator.timeBoundedKolmogorovComplexity output time ≤
           (output.length + constant : ℕ) := by
-  obtain ⟨compile, constant, clock, _hsimulates, hlength, htimed, hclock⟩ :=
+  obtain ⟨compile, constant, clock, -, _hsimulates, hlength, htimed, hclock⟩ :=
     huniversal 0 (copyInputToOutputTM (n := 0))
   obtain ⟨coefficient, exponent, hclock⟩ := hclock
   refine ⟨constant, coefficient, exponent, ?_⟩

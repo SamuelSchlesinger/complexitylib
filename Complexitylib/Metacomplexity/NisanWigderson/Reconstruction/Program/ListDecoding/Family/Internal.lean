@@ -158,7 +158,7 @@ theorem efficientlyUniversal_transfer_internal
                     exponent) ≤
             (realization.framedDescriptionBound design test bound +
               constant : ℕ) := by
-  obtain ⟨compile, constant, clock, _hsim, hlength, htimed, hclock⟩ :=
+  obtain ⟨compile, constant, clock, -, _hsim, hlength, htimed, hclock⟩ :=
     huniversal realization.tapes realization.machine
   obtain ⟨coefficient, exponent, htransfer⟩ :=
     TM.polynomialTimeOverhead_kolmogorov_transfer_internal
@@ -198,7 +198,7 @@ theorem efficientlyUniversal_transfer_internal
                     (framedDescriptionBound design bound) + 1) ^
                     exponent) ≤
             (framedDescriptionBound design bound + constant : ℕ) := by
-  obtain ⟨compile, constant, clock, _hsim, hlength, htimed, hclock⟩ :=
+  obtain ⟨compile, constant, clock, -, _hsim, hlength, htimed, hclock⟩ :=
     huniversal realization.tapes realization.machine
   obtain ⟨coefficient, exponent, htransfer⟩ :=
     OracleTM.polynomialTimeOverhead_kolmogorov_transfer_internal

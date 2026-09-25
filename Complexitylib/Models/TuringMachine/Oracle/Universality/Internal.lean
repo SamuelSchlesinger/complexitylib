@@ -64,9 +64,9 @@ theorem efficientlyUniversalFor_isUniversal_internal
     (h : simulator.IsEfficientlyUniversalFor admissible) :
     simulator.IsUniversal := by
   intro sourceTapes source
-  obtain ⟨compile, _constant, _clock, hsim, _hlength, _htimed, _hpolicy⟩ :=
+  obtain ⟨compile, _constant, _clock, hcompile, hsim, _hlength, _htimed, _hpolicy⟩ :=
     h sourceTapes source
-  exact ⟨compile, hsim⟩
+  exact ⟨compile, hcompile, hsim⟩
 
 theorem efficientlyUniversalFor_mono_internal
     {simulator : OracleTM firstTapes}
@@ -75,9 +75,9 @@ theorem efficientlyUniversalFor_mono_internal
     (h : simulator.IsEfficientlyUniversalFor firstPolicy) :
     simulator.IsEfficientlyUniversalFor secondPolicy := by
   intro sourceTapes source
-  obtain ⟨compile, constant, clock, hsim, hlength, htimed, hclock⟩ :=
+  obtain ⟨compile, constant, clock, hcompile, hsim, hlength, htimed, hclock⟩ :=
     h sourceTapes source
-  exact ⟨compile, constant, clock, hsim, hlength, htimed,
+  exact ⟨compile, constant, clock, hcompile, hsim, hlength, htimed,
     hpolicy clock hclock⟩
 
 end OracleTM

@@ -261,8 +261,9 @@ def utmStepTime (α : List Bool) : ℕ :=
       output tape again parked,
 
     where `mc₂` is `(decodeDesc α).toTM.step mc` when defined and `mc`
-    itself otherwise. The input tape is untouched throughout. -/
-private theorem loop_iteration (α : List Bool) (hterm : TerminatedRegion α)
+    itself otherwise. The input tape is untouched throughout, and every
+    iteration takes at least one step. -/
+theorem loop_iteration (α : List Bool) (hterm : TerminatedRegion α)
     (mc : Cfg 1 (decodeDesc α).toTM.Q)
     (inp : Tape) (work : Fin 6 → Tape) (out : Tape)
     (hinv : SimInv α mc inp work out)
@@ -271,7 +272,7 @@ private theorem loop_iteration (α : List Bool) (hterm : TerminatedRegion α)
     (houth : out.head = 1) :
     ∃ (mc₂ : Cfg 1 (decodeDesc α).toTM.Q) (work' : Fin 6 → Tape) (out' : Tape)
       (t : ℕ),
-      t ≤ utmStepTime α ∧
+      t ≤ utmStepTime α ∧ 1 ≤ t ∧
       ((decodeDesc α).toTM.step mc = some mc₂ ∨
         ((decodeDesc α).toTM.step mc = none ∧ mc₂ = mc)) ∧
       SimInv α mc₂ inp work' out' ∧
@@ -425,15 +426,15 @@ private theorem loop_iteration (α : List Bool) (hterm : TerminatedRegion α)
   · have hone : ct.output.cells 1 = Γ.one := by
       rw [hcell1, ite_eq_left hq]
     rw [ite_eq_left hone] at hr_all
-    exact ⟨mc₂, cb.work, ct.output, t_body + 1 + t_test + 1 + 3, htime, hstepd,
-      hinv', hctoc0, hctons, htoh, Or.inl ⟨hq, hone, hr_all⟩⟩
+    exact ⟨mc₂, cb.work, ct.output, t_body + 1 + t_test + 1 + 3, htime, by omega,
+      hstepd, hinv', hctoc0, hctons, htoh, Or.inl ⟨hq, hone, hr_all⟩⟩
   · have hzero : ct.output.cells 1 = Γ.zero := by
       rw [hcell1, ite_eq_right hq]
     have hone_ne : ct.output.cells 1 ≠ Γ.one := by
       rw [hzero]; simp
     rw [ite_eq_right hone_ne] at hr_all
-    exact ⟨mc₂, cb.work, ct.output, t_body + 1 + t_test + 1 + 3, htime, hstepd,
-      hinv', hctoc0, hctons, htoh, Or.inr ⟨hq, hr_all⟩⟩
+    exact ⟨mc₂, cb.work, ct.output, t_body + 1 + t_test + 1 + 3, htime, by omega,
+      hstepd, hinv', hctoc0, hctons, htoh, Or.inr ⟨hq, hr_all⟩⟩
 
 -- ════════════════════════════════════════════════════════════════════════
 -- The loop simulation, by induction on the remaining fuel
@@ -468,7 +469,7 @@ private theorem loop_sim_aux (α x : List Bool) (hterm : TerminatedRegion α)
     have ht'T : t' = T := by omega
     subst ht'T
     obtain rfl : mc = mcF := TM.reachesIn_right_unique hreach hrun
-    obtain ⟨mc₂, work', out', t, ht, hstepd, hinv', hoc0', hons', hoh', hbranch⟩ :=
+    obtain ⟨mc₂, work', out', t, ht, -, hstepd, hinv', hoc0', hons', hoh', hbranch⟩ :=
       loop_iteration α hterm mc inp work out hinv hout0 houtns houth
     rcases hstepd with hsome | ⟨-, rfl⟩
     · exact absurd hsome (by
@@ -480,7 +481,7 @@ private theorem loop_sim_aux (α x : List Bool) (hterm : TerminatedRegion α)
       · exact absurd hhaltF hq
   | succ fuel ih =>
     intro t' mc inp work out hT hreach hinv hout0 houtns houth
-    obtain ⟨mc₂, work', out', t, ht, hstepd, hinv', hoc0', hons', hoh', hbranch⟩ :=
+    obtain ⟨mc₂, work', out', t, ht, -, hstepd, hinv', hoc0', hons', hoh', hbranch⟩ :=
       loop_iteration α hterm mc inp work out hinv hout0 houtns houth
     rcases hbranch with ⟨hq, hone, hr⟩ | ⟨hq, hr⟩
     · -- the loop exits: identify the exit configuration with `mcF`
@@ -670,39 +671,28 @@ theorem utm_loop_extract_hoareTime (α x : List Bool) (hterm : TerminatedRegion 
     intro j hj
     rw [hpout j hj, hcells2 j]
 
-/-- **The universal machine's end-to-end specification.** On the standard
-    initial tapes for input `pair α x`, if the interpreted machine
-    `(decodeDesc α).toTM` halts on `x` at `mcF` within `T` steps, then
-    `utmTM` halts within
-    `4·|pair α x| + 4·|groupPairs α| + 26 + (T + 1)·utmStepTime α + 2T + 9`
-    steps with its real output tape agreeing with the simulated machine's
-    final output tape through the latter's first blank — i.e. the UTM
-    computes exactly the simulated machine's output. -/
-theorem utmTM_hoareTime (α x : List Bool) (hterm : TerminatedRegion α)
-    (T : ℕ) (mcF : Cfg 1 (decodeDesc α).toTM.Q)
-    (hrun : (decodeDesc α).toTM.reachesIn T ((decodeDesc α).toTM.initCfg x) mcF)
-    (hhalt : (decodeDesc α).toTM.halted mcF) :
-    utmTM.HoareTime
-      (fun inp work out =>
-        inp = Tape.init ((pair α x).map Γ.ofBool) ∧
-        (∀ i : Fin 6, work i = Tape.init []) ∧
-        out = Tape.init [])
-      (fun _ _ out => ∃ m, m ≤ T ∧
-        mcF.output.cells (m + 1) = Γ.blank ∧
-        (∀ j, j < m → mcF.output.cells (j + 1) ≠ Γ.blank) ∧
-        (∀ j, j ≤ m → out.cells (j + 1) = mcF.output.cells (j + 1)))
-      (4 * (pair α x).length + 4 * (groupPairs α).length + 24 + 1 +
-        ((T + 1) * utmStepTime α + 1 + (2 * T + 9))) := by
-  refine seqTM_hoareTime initTM (seqTM (loopTM bodyTM haltTestTM) extractTM)
-    (mid' := fun inp work out =>
-      SimInv α ((decodeDesc α).toTM.initCfg x) inp work out ∧
-      out.cells 0 = Γ.start ∧
-      (∀ j, 1 ≤ j → out.cells j ≠ Γ.start) ∧
-      out.head = 1)
-    (initTM_hoareTime α x) ?_
-    (utm_loop_extract_hoareTime α x hterm T mcF hrun hhalt)
-  rintro inp work out ⟨hinp, hw0c, hw0h, hw1, hw1h, hw2, hw2h, hw3, hw3h,
-    hw4, hw4h, hw5, hw5h, houtc, houth⟩
+/-- **The init/loop seam.** Every tape configuration satisfying the init
+    phase's postcondition passes through the `seqTM` phase transition to the
+    loop's standing invariant at the interpreted machine's initial
+    configuration, with the output tape parked at cell 1. -/
+theorem utm_init_trans (α x : List Bool) (inp : Tape) (work : Fin 6 → Tape)
+    (out : Tape)
+    (hpost : inp.cells = (Tape.init ((pair α x).map Γ.ofBool)).cells ∧
+      (work 0).cells = (fun k => if k = 0 then Γ.start else if k = 1 then Γ.blank
+        else (((x.map Γ.ofBool))[k - 2]?).getD Γ.blank) ∧ (work 0).head = 1 ∧
+      (work 1).HoldsExact [] ∧ (work 1).head = 1 ∧
+      (work 2).HoldsExact [] ∧ (work 2).head = 1 ∧
+      (work 3).HoldsExact (takeField (groupPairs α)).1 ∧ (work 3).head = 1 ∧
+      (work 4).HoldsExact (groupPairs α) ∧ (work 4).head = 1 ∧
+      (work 5).HoldsExact [] ∧ (work 5).head = 1 ∧
+      out.cells = (Tape.init []).cells ∧ out.head = 1) :
+    SimInv α ((decodeDesc α).toTM.initCfg x) (transitionInput inp)
+        (fun i => transitionTape (work i)) (transitionTape out) ∧
+      (transitionTape out).cells 0 = Γ.start ∧
+      (∀ j, 1 ≤ j → (transitionTape out).cells j ≠ Γ.start) ∧
+      (transitionTape out).head = 1 := by
+  obtain ⟨hinp, hw0c, hw0h, hw1, hw1h, hw2, hw2h, hw3, hw3h,
+    hw4, hw4h, hw5, hw5h, houtc, houth⟩ := hpost
   -- parked reads on the work and output tapes
   have hr0 : (work 0).read ≠ Γ.start := by
     rw [Tape.read, hw0h, hw0c]
@@ -747,6 +737,38 @@ theorem utmTM_hoareTime (α x : List Bool) (hterm : TerminatedRegion α)
   · intro j hj
     rw [houtc]
     simp [Tape.init, show j ≠ 0 by omega]
+
+/-- **The universal machine's end-to-end specification.** On the standard
+    initial tapes for input `pair α x`, if the interpreted machine
+    `(decodeDesc α).toTM` halts on `x` at `mcF` within `T` steps, then
+    `utmTM` halts within
+    `4·|pair α x| + 4·|groupPairs α| + 26 + (T + 1)·utmStepTime α + 2T + 9`
+    steps with its real output tape agreeing with the simulated machine's
+    final output tape through the latter's first blank — i.e. the UTM
+    computes exactly the simulated machine's output. -/
+theorem utmTM_hoareTime (α x : List Bool) (hterm : TerminatedRegion α)
+    (T : ℕ) (mcF : Cfg 1 (decodeDesc α).toTM.Q)
+    (hrun : (decodeDesc α).toTM.reachesIn T ((decodeDesc α).toTM.initCfg x) mcF)
+    (hhalt : (decodeDesc α).toTM.halted mcF) :
+    utmTM.HoareTime
+      (fun inp work out =>
+        inp = Tape.init ((pair α x).map Γ.ofBool) ∧
+        (∀ i : Fin 6, work i = Tape.init []) ∧
+        out = Tape.init [])
+      (fun _ _ out => ∃ m, m ≤ T ∧
+        mcF.output.cells (m + 1) = Γ.blank ∧
+        (∀ j, j < m → mcF.output.cells (j + 1) ≠ Γ.blank) ∧
+        (∀ j, j ≤ m → out.cells (j + 1) = mcF.output.cells (j + 1)))
+      (4 * (pair α x).length + 4 * (groupPairs α).length + 24 + 1 +
+        ((T + 1) * utmStepTime α + 1 + (2 * T + 9))) := by
+  refine seqTM_hoareTime initTM (seqTM (loopTM bodyTM haltTestTM) extractTM)
+    (mid' := fun inp work out =>
+      SimInv α ((decodeDesc α).toTM.initCfg x) inp work out ∧
+      out.cells 0 = Γ.start ∧
+      (∀ j, 1 ≤ j → out.cells j ≠ Γ.start) ∧
+      out.head = 1)
+    (initTM_hoareTime α x) (utm_init_trans α x)
+    (utm_loop_extract_hoareTime α x hterm T mcF hrun hhalt)
 
 end TM.UTMBody
 

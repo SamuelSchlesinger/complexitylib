@@ -6,6 +6,7 @@ Authors: Samuel Schlesinger
 
 module
 public import Complexitylib.Models.TuringMachine.SingleTape
+import Complexitylib.Models.TuringMachine.Combinators.Internal.Generic
 
 /-!
 # Deterministic NTMs → DTMs
@@ -181,51 +182,33 @@ end NTM
 
 namespace NTM.SingleTape
 
-/-- Writing back the read symbol (the halt step's output action) preserves
-    cell 1 outright, provided the cell does not hold `▷`. Strengthens
-    `accept_bit_preserved` from the accept bit to the exact cell value. -/
-private theorem writeAndMove_readBack_cell1 (t : Tape) (d : Dir3)
-    (hns : t.cells 1 ≠ Γ.start) :
-    (t.writeAndMove ((TM.readBackWrite t.read : Γw) : Γ) d).cells 1 = t.cells 1 := by
-  have hcells : (t.writeAndMove ((TM.readBackWrite t.read : Γw) : Γ) d).cells
-      = (t.write ((TM.readBackWrite t.read : Γw) : Γ)).cells := by
-    cases d <;> rfl
-  rw [hcells, Tape.write]
-  by_cases hh0 : t.head = 0
-  · simp [hh0]
-  · rw [ite_eq_right hh0]
-    simp only [Function.update_apply]
-    by_cases h1 : (1 : ℕ) = t.head
-    · rw [ite_eq_left h1, Tape.read, ← h1]
-      cases hg : t.cells 1
-      · rfl
-      · rfl
-      · rfl
-      · exact absurd hg hns
-    · rw [ite_eq_right h1]
-
 /-- Halt-step correspondence, cells version: when `N` has halted, the
-    simulator's one halt step lands with output cell 1 exactly equal to `N`'s
+    simulator's one halt step lands with exactly `N`'s output cells
     (via `Corr.outputEq`; strengthens `halted_of_corr`'s accept-bit `↔`). -/
-private theorem haltCorr_cell1 {k : ℕ} (N : NTM k) {M : ℕ}
+theorem haltCorr_output_cells {k : ℕ} (N : NTM k) {M : ℕ}
     {c1 : Cfg 1 (SimQ k N.Q)} {c : Cfg k N.Q}
     (hcorr : Corr N M c1 c) (hh : c.state = N.qhalt) :
-    ((singleTapeSim N).trace 1 (fun _ => false) c1).output.cells 1
-      = c.output.cells 1 := by
+    ((singleTapeSim N).trace 1 (fun _ => false) c1).output.cells
+      = c.output.cells := by
   have hst : c1.state = SimQ.run N.qhalt := by rw [hcorr.state, hh]
   have hout : ((singleTapeSim N).trace 1 (fun _ => false) c1).output
       = c1.output.writeAndMove ((TM.readBackWrite c1.output.read : Γw) : Γ)
           (TM.idleDir c1.output.read) := by
     simp only [NTM.trace, singleTapeSim, simDelta, hst, SimQ.run, SimQ.halt,
       reduceCtorEq, ↓reduceIte]
-  rw [hout, writeAndMove_readBack_cell1 _ _
-    (hcorr.outputEq ▸ hcorr.outputWf 1 le_rfl), hcorr.outputEq]
+  have hsafe : c1.output.head = 0 ∨ c1.output.read ≠ Γ.start := by
+    by_cases h0 : c1.output.head = 0
+    · exact Or.inl h0
+    · refine Or.inr ?_
+      rw [Tape.read, hcorr.outputEq]
+      exact hcorr.outputWf _ (by rw [← hcorr.outputEq]; omega)
+  rw [hout, TM.tape_readBackWrite_preserves _ _ hsafe, hcorr.outputEq]
 
 /-- Reverse halting, cells version (mirrors `halted_singleTapeSim_of_trace_qhalt`, strengthening the
-    accept-bit `↔` to equality of output cell 1 via `Corr.outputEq`): if the
+    accept-bit `↔` to equality of the output cells via `Corr.outputEq`): if the
     `N`-run induced by an arbitrary simulator stream halts within `Tn` steps,
-    the simulator halts within the budget with the same output cell 1. -/
-private theorem halts_rev_cell1 {k : ℕ} (N : NTM k) (hk : 1 ≤ k) (ch : ℕ → Bool)
+    the simulator halts within the budget with the same output cells. -/
+theorem halts_rev_output_cells {k : ℕ} (N : NTM k) (hk : 1 ≤ k) (ch : ℕ → Bool)
     (x : List Bool) (Tn : ℕ)
     (hhalt : (N.trace Tn (fun i => inducedChoices k ch i.val) (N.initCfg x)).state
       = N.qhalt) :
@@ -233,9 +216,9 @@ private theorem halts_rev_cell1 {k : ℕ} (N : NTM k) (hk : 1 ≤ k) (ch : ℕ �
       (singleTapeSim N).halted
         ((singleTapeSim N).trace m (fun i => ch i.val) ((singleTapeSim N).initCfg x)) ∧
       ((singleTapeSim N).trace m (fun i => ch i.val)
-          ((singleTapeSim N).initCfg x)).output.cells 1
+          ((singleTapeSim N).initCfg x)).output.cells
         = (N.trace Tn (fun i => inducedChoices k ch i.val)
-            (N.initCfg x)).output.cells 1 := by
+            (N.initCfg x)).output.cells := by
   classical
   -- the first time `N`'s induced run halts
   have hex : ∃ t, (N.trace t (fun i => inducedChoices k ch i.val) (N.initCfg x)).state
@@ -248,7 +231,7 @@ private theorem halts_rev_cell1 {k : ℕ} (N : NTM k) (hk : 1 ≤ k) (ch : ℕ �
   have hcorr := corr_trace_macroPos N hk ch x (Nat.find hex) hrun
   -- one halt step lands the simulator in `SimQ.halt`, output cell preserved
   have hhalted := (halted_of_corr N hcorr hth).1
-  have hcell := haltCorr_cell1 N hcorr hth
+  have hcell := haltCorr_output_cells N hcorr hth
   have hstep : (singleTapeSim N).trace 1 (fun j : Fin 1 => ch (macroPos k (Nat.find hex) + j.val))
       ((singleTapeSim N).trace (macroPos k (Nat.find hex)) (fun i => ch i.val)
         ((singleTapeSim N).initCfg x))
@@ -299,8 +282,9 @@ theorem singleTapeSim_rejectsWithZero {k : ℕ} {N : NTM k} (hk : 1 ≤ k)
   have hhaltN : (N.trace (T x.length)
       (fun i => SingleTape.inducedChoices k ch i.val) (N.initCfg x)).state = N.qhalt :=
     hN x _
-  obtain ⟨m, hm, hhalted, hcell⟩ :=
-    SingleTape.halts_rev_cell1 N hk ch x (T x.length) hhaltN
+  obtain ⟨m, hm, hhalted, hcells⟩ :=
+    SingleTape.halts_rev_output_cells N hk ch x (T x.length) hhaltN
+  have hcell := congrFun hcells 1
   have hle : m ≤ singleTapeSimTime k T x.length :=
     le_trans hm (SingleTape.mul_macroBound_succ_le k (T x.length) x.length)
   have hagree : ∀ i : Fin m, choices ⟨i.val, lt_of_lt_of_le i.isLt hle⟩ = ch i.val := by

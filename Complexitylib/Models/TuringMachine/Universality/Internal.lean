@@ -7,6 +7,7 @@ Authors: Samuel Schlesinger
 module
 public import Complexitylib.Models.TuringMachine.OutputSemantics
 public import Complexitylib.Models.TuringMachine.Universality.Defs
+import Complexitylib.Models.TuringMachine.Composition
 
 /-!
 # Generic universal-machine interfaces -- proof internals
@@ -23,6 +24,20 @@ namespace Complexity
 namespace TM
 
 variable {firstTapes secondTapes thirdTapes : ℕ}
+
+theorem isComputable_comp_internal {first second : List Bool → List Bool}
+    (hfirst : IsComputable first) (hsecond : IsComputable second) :
+    IsComputable (second ∘ first) := by
+  obtain ⟨firstTapes, firstMachine, firstTime, hfirstTime⟩ := hfirst
+  obtain ⟨secondTapes, secondMachine, secondTime, hsecondTime⟩ := hsecond
+  -- The composition theorem needs a monotone second clock; take running maxima.
+  let envelope : ℕ → ℕ := fun n => (Finset.range (n + 1)).sup secondTime
+  have hmono : Monotone envelope := fun first second hle =>
+    Finset.sup_mono (Finset.range_subset_range.mpr (by omega))
+  have hle : ∀ n, secondTime n ≤ envelope n := fun n =>
+    Finset.le_sup (Finset.self_mem_range_succ n)
+  exact ⟨_, compositionTM firstMachine secondMachine, _,
+    compositionTM_computesInTime hfirstTime (hsecondTime.mono hle) hmono⟩
 
 theorem simulates_refl_internal (machine : TM firstTapes) :
     machine.Simulates machine id where
@@ -164,9 +179,9 @@ theorem efficientlyUniversalFor_isUniversal_internal {simulator : TM firstTapes}
     {admissible : TimeOverhead → Prop}
     (h : simulator.IsEfficientlyUniversalFor admissible) : simulator.IsUniversal := by
   intro sourceTapes source
-  obtain ⟨compile, _constant, _clock, hsim, _hlength, _htime, _hadmissible⟩ :=
+  obtain ⟨compile, _constant, _clock, hcompile, hsim, _hlength, _htime, _hadmissible⟩ :=
     h sourceTapes source
-  exact ⟨compile, hsim⟩
+  exact ⟨compile, hcompile, hsim⟩
 
 theorem efficientlyUniversalFor_mono_internal {simulator : TM firstTapes}
     {firstPolicy secondPolicy : TimeOverhead → Prop}
@@ -174,16 +189,19 @@ theorem efficientlyUniversalFor_mono_internal {simulator : TM firstTapes}
     (h : simulator.IsEfficientlyUniversalFor firstPolicy) :
     simulator.IsEfficientlyUniversalFor secondPolicy := by
   intro sourceTapes source
-  obtain ⟨compile, constant, clock, hsim, hlength, htime, hadmissible⟩ :=
+  obtain ⟨compile, constant, clock, hcompile, hsim, hlength, htime, hadmissible⟩ :=
     h sourceTapes source
-  exact ⟨compile, constant, clock, hsim, hlength, htime, hpolicy clock hadmissible⟩
+  exact ⟨compile, constant, clock, hcompile, hsim, hlength, htime,
+    hpolicy clock hadmissible⟩
 
 theorem simulates_isUniversal_internal {first : TM firstTapes} {second : TM secondTapes}
-    {compile : List Bool → List Bool} (hsim : first.Simulates second compile)
+    {compile : List Bool → List Bool} (hcompile : IsComputable compile)
+    (hsim : first.Simulates second compile)
     (huniversal : second.IsUniversal) : first.IsUniversal := by
   intro thirdTapes third
-  obtain ⟨compileThird, hthird⟩ := huniversal thirdTapes third
-  exact ⟨compile ∘ compileThird, simulates_comp_internal hsim hthird⟩
+  obtain ⟨compileThird, hcompileThird, hthird⟩ := huniversal thirdTapes third
+  exact ⟨compile ∘ compileThird, isComputable_comp_internal hcompileThird hcompile,
+    simulates_comp_internal hsim hthird⟩
 
 end TM
 
