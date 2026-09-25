@@ -104,7 +104,55 @@ In order. Each item says why it matters and roughly how large it is.
    exist in about 8 versions. One codec interface, one probability
    convention, and one formula type with substitution would absorb most of
    them.
-7. **A friendlier machine-authoring layer.** For work that must stay at the
+7. **Consolidate the circuit developments on CSLib's model.** Three circuit
+   developments now coexist: our typed `Circuit` (free negations, output
+   gates, `size = G + M`), the machine-facing `RawCircuit` serialization, and
+   the [algebraic-circuits](https://github.com/SamuelSchlesinger/algebraic-circuits)
+   library on CSLib's generic model (straight-line programs over a signature,
+   every gate counted). `Interop/Cslib/Circuit*` already translates between
+   ours and CSLib's in both directions, preserving size up to `N + 2G + M` and
+   depth up to one level. The target is one semantic circuit type, CSLib's,
+   with `RawCircuit` kept as the serialization that machines read and write.
+   Phases, each landing with unchanged public statements:
+   - **Import algebraic-circuits wholesale** as `Complexitylib/Algebraic`,
+     keeping its `Algebraic` namespace. Renaming it under `Complexity` would
+     collide with `Complexity.Circuit`, `Basis`, `Restriction`, and others. The
+     import needs the module-system conversion (`module`, `public import`,
+     `@[expose] public section`), copyright headers, and a documented style
+     exemption for its `_root_` escapes and long lines until cleanup.
+   - **Replace and strengthen results through the bridge.** Where
+     algebraic-circuits proves more, derive our statement from it and delete
+     our proof:
+     - parity in the De Morgan basis (`3(n - 1)` against Schnorr's `2n - 1`);
+     - parity ∉ AC⁰ via the full Håstad switching development;
+     - Karchmer–Wigderson and the monotone results.
+
+     Gain what we lack: Nechiporuk's `Ω(n² / log n)` formula bound, the
+     `SIZE(nᵃ) ⊊ SIZE(nᵇ)` hierarchy, monotone CLIQUE, the cutwidth `(4 - ε)n`
+     bound, and conditional complexity. The key bridge is between
+     `sizeComplexity` and its `DeMorgan.complexity` under the cost model that
+     makes negation free (`binaryCost`).
+   - **Retire superseded internals.** The Shannon and Schnorr counting cores
+     (`CircDesc`, about 3.5k lines) and the `18 · 2ⁿ / n` construction give way
+     to CSLib's counting and Lupanov bounds once their explicit-constant
+     statements are rederived.
+   - **Rebuild the typed builders** (composition, hardwiring, projections,
+     multiplexer, majority) with CSLib's synthesis calculus, then retire our
+     typed `Circuit`. That removes the `Fin (N + G)` offset arithmetic behind
+     about 12.7k lines, and CSLib's zero-input circuits make
+     `CircuitFamily.emptyOutput` unnecessary. The roughly 60k lines behind
+     `P ⊆ P/poly`, `BPP ⊆ P/poly`, uniform `P/poly`, and circuit satisfiability
+     stay on `RawCircuit` behind its `toCircuit`/`ofCircuit` round trip.
+   - **One formula type.** Unify `BoolFormula`, `AC0Formula`,
+     `MonotoneFormula`, and the formula and expression types of
+     algebraic-circuits (Karchmer–Wigderson, `Binary.Formula`,
+     `DeMorgan.Expression`) behind one type with substitution, as item 6 asks.
+   - **Upstream and converge style.** Move reusable generic pieces (families,
+     costs, depth, synthesis extensions, the space and input-head lemmas of
+     `Interop/Cslib`) into CSLib, gather the declarations that extend CSLib
+     types into one `Complexitylib/Cslib` directory like `Complexitylib/Mathlib`,
+     and retire the style exemption.
+8. **A friendlier machine-authoring layer.** For work that must stay at the
    Turing-machine level (hierarchies, universal simulation, single-tape
    simulation), several model conventions cost proof effort on every step:
    sequential composition spends a real step at each seam, branches read their
@@ -113,7 +161,7 @@ In order. Each item says why it matters and roughly how large it is.
    execution duplicate their theory. An authoring layer without these costs,
    compiled once into the canonical machine, would remove them without
    changing any class definition. Evaluate it on one real consumer first.
-8. **Decide the fate of the RAM development.** `RAM.P = P` is proved, but
+9. **Decide the fate of the RAM development.** `RAM.P = P` is proved, but
    nothing outside the RAM tree uses it. Either give it consumers or archive
    the parts that duplicate other routes.
 

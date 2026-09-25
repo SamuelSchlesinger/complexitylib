@@ -69,4 +69,11 @@ hardwiring and its advice corollary live in
 **Barrington's theorem.** `Complexity.barrington_equivalence` identifies
 logarithmic-depth Boolean formula families with polynomial-length width-`5`
 permutation branching-program families.
+
+**CSLib interoperability.** `Complexity.mem_P_iff_decidableInTimeAndSpace`
+identifies `P` with polynomial time on CSLib's multi-tape machines, and
+`Complexity.mem_L_of_isRegular` places CSLib's regular languages in `L`.
+`Complexity.mem_PPoly_iff_cslib` characterizes `P/poly` by CSLib's De Morgan
+circuits, and `Complexity.lupanov_sizeComplexity` transfers Lupanov's
+`(1 + ε) 2ⁿ / n` upper bound from CSLib.
 -/

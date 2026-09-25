@@ -197,6 +197,24 @@ constant factor.
   the converse direction.
 \end{proof}
 
+\begin{theorem}[Regular languages are in $\cc{L}$]
+  \label{thm:space-regular-in-L}
+  \lean{Complexity.mem_DSPACE_zero_of_isRegular, Complexity.mem_L_of_isRegular,
+    Complexity.mem_L_of_nfa, Complexity.mem_L_of_twoWayNA,
+    Complexity.mem_L_of_finite_monoid, Complexity.mem_L_of_regex}
+  \leanok
+  \uses{def:dspace, def:L, thm:polytime-regular-in-P}
+  Every regular binary language is in $\cc{DSPACE}(0)$ and hence in $\cc{L}$.
+  So are the languages of CSLib's finite automata, one-way or two-way, of
+  regular expressions, and of finite monoids.
+\end{theorem}
+\begin{proof}
+  \leanok
+  The finite-state scanner has no work tapes, never moves its input head past
+  the first blank after the input, and never moves its output head past the
+  verdict cell, so it uses no charged space.
+\end{proof}
+
 \section{Configuration graphs and space-to-time}
 
 \begin{definition}[Configuration graph]

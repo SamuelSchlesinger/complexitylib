@@ -145,20 +145,88 @@ machines be re-proved as short programs through Cobham's theorem.
 
 \begin{theorem}[Regular languages are in $\cc{P}$]
   \label{thm:polytime-regular-in-P}
-  \lean{Complexity.mem_DTIME_of_isRegular, Complexity.mem_P_of_isRegular, Complexity.mem_P_of_nfa}
+  \lean{Complexity.mem_DTIME_of_isRegular, Complexity.mem_P_of_isRegular, Complexity.mem_P_of_nfa,
+    Complexity.mem_P_of_twoWayNA, Complexity.mem_P_of_finite_monoid}
   \leanok
   \uses{def:dtime, def:P}
   Every regular binary language, in the sense shared by Mathlib and CSLib, is in
-  $\cc{DTIME}(n + 2)$ and hence in $\cc{P}$. In particular, the language of any
-  finite nondeterministic automaton from CSLib's automata library is in $\cc{P}$.
+  $\cc{DTIME}(n + 2)$ and hence in $\cc{P}$. In particular, the languages of
+  CSLib's finite nondeterministic automata, one-way or two-way, and the
+  preimages of subsets of finite monoids under monoid homomorphisms from binary
+  strings are in $\cc{P}$.
 \end{theorem}
 \begin{proof}
   \leanok
   A finite-state scanner machine runs the deterministic automaton over the
-  input in one pass and writes whether the final state accepts. For a
-  nondeterministic automaton, CSLib's subset construction first shows that its
-  language is regular. CSLib's closure properties of regular languages therefore
+  input in one pass and writes whether the final state accepts. For the other
+  models, CSLib's subset construction, its two-way-to-one-way theorem, and its
+  finite-monoid characterization first show that the language is regular. CSLib's closure properties of regular languages therefore
   give $\cc{P}$-membership of the resulting languages at no further cost.
+\end{proof}
+
+\begin{theorem}[Time classes on CSLib's multi-tape machines]
+  \label{thm:polytime-cslib-multitape}
+  \lean{Complexity.TM.DecidesInTime.decidableInTimeAndSpace,
+    Complexity.decidableInTimeAndSpace_of_mem_DTIME, Complexity.decidableInTimeAndSpace_of_mem_P,
+    Complexity.TM.DecidesInTimeSpace.decidableInTimeAndSpace,
+    Complexity.decidableInTimeAndSpace_of_mem_DTISP,
+    Complexity.TM.ComputesInTime.computableInTimeAndSpace,
+    Complexity.computableInTimeAndSpace_of_mem_FP}
+  \leanok
+  \uses{def:dtime, def:P, def:FP}
+  If a machine with $k$ work tapes decides $L$ within time $f$, then a
+  multi-tape machine in CSLib's model decides $L$ within time and space
+  $(2k + 3)(2f + 5)$. CSLib's model has a binary alphabet, a read-only input
+  tape clamped to the input, two-way work tapes that start blank, and emitted
+  output, and it counts the work cells visited as space. Consequently every
+  language in $\cc{DTIME}(T)$ is decided there within time and space $O(T)$,
+  and every language in $\cc{P}$ within polynomial time and space. The
+  simulation is also space-faithful: a machine deciding $L$ within time $T$
+  and space $S$ yields a CSLib decider within time $2T + 4$ and space
+  $(2k + 3)(S + 2)$, so $\cc{DTISP}(T, S)$ transfers with time $O(T)$ and space
+  $O(S + 1)$. Functions computed within time $T$ are computed there within time
+  $3T + 4$, so every $\cc{FP}$ function is CSLib-computable in polynomial time.
+\end{theorem}
+\begin{proof}
+  \leanok
+  Each of the original machine's work tapes and its output tape is simulated
+  by a data tape and a marker tape whose heads move together; the simulator's
+  first step writes a $1$ at position $0$ of every marker tape, standing in
+  for $\triangleright$. It then executes one step of the original machine per
+  step of its own. A further work tape counts how far the input head has run
+  past the input, and a flag in the state distinguishes the blank before the
+  input from the blank after it. When the original machine halts, the
+  simulator rewinds its copy of the output tape, reads the verdict in cell
+  $1$, and emits it as one bit. Rewinding costs at most the original running
+  time, and each work head visits at most one cell per step. Under a space
+  bound, every simulated head stays within the original machine's head
+  bounds. To compute a function, the simulator instead copies output cells
+  $1, 2, \ldots$ to CSLib's output until the first blank; only visited cells
+  can be nonblank, so the output has length at most $T$.
+\end{proof}
+
+\begin{theorem}[CSLib's polynomial time is $\cc{P}$]
+  \label{thm:polytime-cslib-P-eq}
+  \lean{Complexity.decidesInTime_of_decidableInTimeAndSpace,
+    Complexity.mem_DTIME_of_decidableInTimeAndSpace,
+    Complexity.mem_P_iff_decidableInTimeAndSpace}
+  \leanok
+  \uses{thm:polytime-cslib-multitape}
+  A CSLib multi-tape machine deciding $L$ within time $t$ yields one of our
+  machines deciding $L$ within time $3t$. Consequently a language is in
+  $\cc{P}$ if and only if some multi-tape machine in CSLib's model decides it
+  within polynomial time.
+\end{theorem}
+\begin{proof}
+  \leanok
+  \uses{thm:polytime-cslib-multitape}
+  Theorem~\ref{thm:polytime-cslib-multitape} gives one direction. For the
+  converse, CSLib's machines are binary, so their tape symbols (blank, $0$,
+  $1$) are already ours. Fold each two-way work tape onto a one-sided tape,
+  sending CSLib cell $z \ge 0$ to cell $2z + 1$ and $z < 0$ to cell $-2z$, and
+  detect a crossing of the fold by bumping into $\triangleright$. Track the
+  clamped input head directly and write emitted bits from output cell $1$.
+  Each CSLib step takes three of our steps.
 \end{proof}
 
 \section{Closure properties of P and FP}

@@ -77,8 +77,9 @@ theorem shannon_sizeComplexity (N : Nat) [NeZero N] (hN : 6 ≤ N)
     Combined with `shannon_sizeComplexity`, this gives `Θ(2^N / N)`.
 
     This is the full-column-library variant (C = 18). The tighter
-    `(1 + o(1)) · 2^N / N` bound due to Lupanov (1958) uses column
-    grouping and is not yet formalized. -/
+    `(1 + o(1)) · 2^N / N` bound due to Lupanov (1958) is
+    `Complexity.lupanov_sizeComplexity` in `Complexitylib.Interop.Cslib.Circuit`,
+    transferred from CSLib. -/
 theorem shannon_upper_bound [CompleteBasis Basis.andOr2]
     (N : Nat) (hN : 16 ≤ N) [NeZero N]
     (f : BitString N → Bool) :

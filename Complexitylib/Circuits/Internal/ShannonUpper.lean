@@ -34,8 +34,8 @@ can be computed by a fan-in-2 AND/OR circuit of size at most `C * 2^N / N`,
 for a fixed constant `C` and all sufficiently large `N`.
 
 This is the full-column-library variant (C = 18). The tighter
-`(1 + o(1)) · 2^N / N` bound due to Lupanov (1958) uses column grouping
-and is not yet formalized.
+`(1 + o(1)) · 2^N / N` bound due to Lupanov (1958), which uses column
+grouping, is transferred from CSLib as `Complexity.lupanov_sizeComplexity`.
 
 ## Construction
 

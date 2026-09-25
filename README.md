@@ -36,6 +36,13 @@ Turing-machine model:
   permutation branching programs decide the same families).
 - **Machine robustness:** the logarithmic-cost RAM and Turing machines define
   the same `P`.
+- **CSLib interoperability:** our machines and CSLib's multi-tape machines
+  simulate each other with constant-factor overhead, so `P` is exactly CSLib's
+  polynomial time, and `DTIME`, `DTISP`, and `FP` transfer to CSLib's time and
+  space measures; CSLib's regular languages are in `L`. Our circuits and
+  CSLib's De Morgan circuits translate into each other with linear overhead,
+  which characterizes `P/poly` in CSLib's model and brings Lupanov's
+  `(1 + ε) 2ⁿ / n` upper bound into this library.
 
 The blueprint links each result to its Lean statement and lists the
 conditional results (for example, `NL = coNL` from `NL ⊆ coNL`) separately

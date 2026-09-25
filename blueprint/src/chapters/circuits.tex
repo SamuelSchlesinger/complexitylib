@@ -155,6 +155,52 @@ says otherwise.
   Convert between polynomial bounds and big-O power bounds.
 \end{proof}
 
+\begin{theorem}[CSLib circuits]
+  \label{thm:circuits-cslib}
+  \lean{Complexity.Circuit.eval_ofCslib, Complexity.Circuit.exists_cslib,
+    Complexity.mem_PPoly_iff_cslib}
+  \leanok
+  \uses{def:circuit, def:circuits-bases, def:PPoly}
+  A De Morgan circuit in CSLib's model (constants, negation, and binary
+  conjunction and disjunction, every gate counted) with $g$ gates and $M$
+  outputs is a fan-in-two AND/OR circuit of size $g + M$. Conversely, a
+  fan-in-two AND/OR circuit with $N$ inputs, $G$ internal gates, and $M$ outputs
+  is a CSLib circuit with at most $N + 2G + M$ gates. Consequently $L \in
+  \cc{P/poly}$ if and only if, for some polynomial $p$, every length-$n$ slice
+  of $L$ is decided by a CSLib circuit with at most $p(n)$ gates.
+\end{theorem}
+\begin{proof}
+  \leanok
+  The two models share their wire layout, so the first translation maps each
+  CSLib gate to one of ours: $\neg w$ becomes $\neg w \wedge \neg w$ and a
+  constant becomes $x_0 \wedge \neg x_0$ or $x_0 \vee \neg x_0$. For the second,
+  keep every wire and its negation available, at a cost of $N$ gates for the
+  negated inputs, two gates per internal gate, and one gate per output. The
+  length-zero slice, which our families answer separately, is a single
+  constant gate in CSLib's model.
+\end{proof}
+
+\begin{theorem}[Depth in CSLib's circuit model]
+  \label{thm:circuits-cslib-depth}
+  \lean{Complexity.Circuit.depth_ofCslib, Complexity.Circuit.exists_cslib_depth_le,
+    Complexity.exists_cslib_of_mem_DEPTH, Complexity.mem_DEPTH_of_cslib}
+  \leanok
+  \uses{thm:circuits-cslib}
+  The translation of a CSLib De Morgan circuit has exactly one more level of
+  depth, for its output gates. Conversely, a fan-in-two AND/OR circuit with $N$
+  inputs, $G$ internal gates, and $M$ outputs has a CSLib circuit with exactly
+  $N + 2G + M$ gates and at most one more level of depth. So depth in the two
+  models agrees up to an additive constant.
+\end{theorem}
+\begin{proof}
+  \leanok
+  \uses{thm:circuits-cslib}
+  The first translation replaces each CSLib gate by one gate of ours. For the
+  second, keep both rails of every wire: negate the inputs once, compute each
+  gate's positive rail directly and its negative rail by De Morgan from the
+  complementary rails, so each gate costs two gates and no extra depth.
+\end{proof}
+
 \begin{theorem}
   \label{thm:circuits-p-subset-ppoly}
   \lean{Complexity.P_subset_PPoly}

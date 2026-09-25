@@ -53,15 +53,62 @@ proof systems (roadmap track L5).
 
 \begin{theorem}[Lupanov]
   \label{thm:lowerbounds-lupanov}
-  \uses{def:circuits-size-complexity}
+  \lean{Complexity.lupanov_sizeComplexity}
+  \leanok
+  \uses{def:circuits-size-complexity, thm:circuits-cslib}
   For every $\varepsilon > 0$ and all sufficiently large $N$, every
   $f : \{0,1\}^N \to \{0,1\}$ satisfies
   $\mathrm{size}(f) \le (1 + \varepsilon)\, 2^N / N$.
 \end{theorem}
 \begin{proof}
-  \uses{thm:lowerbounds-shannon-upper}
-  Refine the column library by grouping the rows of the truth table into
-  strips and sharing the computation of each strip's column patterns.
+  \leanok
+  \uses{thm:circuits-cslib}
+  CSLib proves the bound for its De Morgan circuits by refining the column
+  library: the rows of the truth table are grouped into strips, and each
+  strip's column patterns are computed once and shared. A CSLib circuit with
+  $g$ gates is a fan-in-two AND/OR circuit of size $g + 1$, and the extra gate
+  is absorbed by the slack in $\varepsilon$.
+\end{proof}
+
+\begin{theorem}[Shannon lower bound via CSLib]
+  \label{thm:lowerbounds-shannon-cslib}
+  \lean{Complexity.exists_sizeComplexity_gt_cslib}
+  \leanok
+  \uses{def:circuits-size-complexity, thm:circuits-cslib}
+  For all sufficiently large $N$, some $f : \{0,1\}^N \to \{0,1\}$ satisfies
+  $\mathrm{size}(f) > (2^N / N - N) / 2$.
+\end{theorem}
+\begin{proof}
+  \leanok
+  \uses{thm:circuits-cslib}
+  CSLib's counting argument gives a function that no De Morgan circuit with at
+  most $2^N / N$ gates computes, and a fan-in-two AND/OR circuit of size $s$ is
+  a CSLib circuit with at most $N + 2s$ gates.
+\end{proof}
+
+\begin{theorem}[Circuit size of languages]
+  \label{thm:lowerbounds-size-classes}
+  \lean{Complexity.mem_SIZE_iff_sliceSizeComplexity_le,
+    Complexity.exists_cslib_of_mem_SIZE, Complexity.mem_SIZE_of_cslib,
+    Complexity.lupanov_sliceSizeComplexity, Complexity.exists_mem_SIZE_bigO_two_pow_div,
+    Complexity.exists_language_not_mem_SIZE,
+    Complexity.exists_language_not_mem_SIZE_littleO}
+  \leanok
+  \uses{def:SIZE, thm:lowerbounds-lupanov, thm:lowerbounds-shannon-cslib, thm:circuits-cslib}
+  A language is in $\cc{SIZE}(s)$ exactly when the size complexity of each of
+  its length slices is at most $s$, and $\cc{SIZE}$ transfers to CSLib's De
+  Morgan circuits with the overheads of Theorem~\ref{thm:circuits-cslib}. Every
+  language is in $\cc{SIZE}(s)$ for some $s = O(2^n / n)$, indeed with
+  $s(n) \le (1 + \varepsilon) 2^n / n$ for large $n$. Conversely, some language
+  lies outside $\cc{SIZE}(s)$ whenever $n + 2s(n) \le 2^n / n$ for large $n$,
+  in particular whenever $s = o(2^n / n)$.
+\end{theorem}
+\begin{proof}
+  \leanok
+  \uses{thm:lowerbounds-lupanov, thm:lowerbounds-shannon-cslib}
+  Apply Lupanov's bound to every slice, with finitely many small lengths
+  absorbed into the big-O constant. For the lower bound, take a hard function
+  at every large length and let the language consist of its accepted strings.
 \end{proof}
 
 \section{Essential inputs and gate elimination}
