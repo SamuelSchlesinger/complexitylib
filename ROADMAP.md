@@ -1842,9 +1842,9 @@ the public layer also proves clock and pointwise-threshold monotonicity and
 packages the raw program-witness relation. Whenever the threshold has a
 pointwise polynomial bound, every accepted program is bounded by the same
 polynomial in the canonical input length, so the relation is `PolyBalanced`.
-Together with a `P` decider for the paired relation, this yields conditional
-`MINKT ∈ NP` packaging under the explicit generic guess-and-verify construction
-hypothesis. The machine and threshold remain explicit parameters, so later
+Together with a `P` decider for the paired relation, this yields
+`MINKT ∈ NP` through the proved generic guess-and-verify construction
+`NP.witnessNTMConstruction`. The machine and threshold remain explicit parameters, so later
 theorems can request exactly the required notion of efficient universality.
 `GapMINKT.Parameters` now keeps description loss
 `sigma(n,s)` and clock blow-up `tau(n,t)` separate. Its canonical
@@ -1866,9 +1866,9 @@ induces a semantic GapMINKT promise solver when `sigma(n,-)` is monotone. On
 promised no-instances the checker rejects independently of the search
 algorithm's behavior. The canonical yes-witness relation is linearly balanced:
 every source program is no longer than the unary-threshold instance code. Its
-conditional `PromiseNP` packaging is complete: membership follows from the
-generic guess-and-verify construction plus a `P` decider for the paired witness
-language. Thus polynomial balance has been discharged and the remaining
+conditional `PromiseNP` packaging is complete: membership follows from a `P`
+decider for the paired witness language, via the proved generic
+guess-and-verify construction. Thus polynomial balance has been discharged and the remaining
 GapMINKT-specific membership obligation is isolated as machine verification. The
 fixed `TM.utmTM` has a total description decoder, an interpreter for
 single-work-tape machines, a compiler from arbitrary multitape machines through
@@ -1957,8 +1957,7 @@ overhead, and relabelings in both directions give equality of the corresponding
 promise classes.
 A `PromiseNPHard` target in `PromiseP` collapses `P` and `NP`, so under
 `P ≠ NP` every such hard target is outside `PromiseP`. An FNP relation that
-characterizes the yes-instances also yields `PromiseNP` membership under the
-library's explicit generic guess-and-verify construction hypothesis.
+characterizes the yes-instances also yields `PromiseNP` membership.
 
 What remains missing is an instance connecting the fixed UTM to the generic
 interface, executable finite minimization for the bounded measure, an executable
@@ -3388,9 +3387,8 @@ meta-computational notation hides several incompatible choices; expose them.
   and the semantic search-to-decision implication are also done. The canonical
   yes-witness relation is linearly `PolyBalanced`, and its conditional
   `PromiseNP` theorem reduces the problem-specific FNP obligation exactly to
-  polynomial-time machine verification of the paired relation. That verifier,
-  the generic guess-and-verify NTM construction, and construction of the
-  randomized search algorithm remain. The encoded optimization relation,
+  polynomial-time machine verification of the paired relation. That verifier
+  and construction of the randomized search algorithm remain. The encoded optimization relation,
   input-locality proof of `SourceComplexityPolyBound`, and its
   parameter-sensitive `PolyBalanced` theorem under polynomial description loss
   are done. The exact 2022 Definition 3.3 logarithmic variant is now complete as

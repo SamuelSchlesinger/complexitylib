@@ -10,6 +10,7 @@ public import Complexitylib.Metacomplexity.MINKT.Gap
 public import Complexitylib.Metacomplexity.MINKT.Gap.Logarithmic
 public import Complexitylib.Metacomplexity.MINKT.Gap.Logarithmic.Efficient
 public import Complexitylib.Metacomplexity.MINKT.Internal
+import Complexitylib.Classes.NP.WitnessConstruction
 
 /-!
 # The Minimum Time-Bounded Kolmogorov Complexity problem
@@ -186,17 +187,15 @@ theorem MINKT.programWitnessRelation_mem_FNP_of_pairLang_mem_P
   MINKT.programWitnessRelation_mem_FNP_of_pairLang_mem_P_internal
     machine threshold hthreshold hverifier
 
-/-- Conditional NP packaging for MINKT: polynomial threshold growth and a
-polynomial-time paired verifier suffice, modulo the generic guess-and-verify
-NTM construction. -/
+/-- NP packaging for MINKT: polynomial threshold growth and a polynomial-time
+paired verifier suffice. -/
 theorem MINKT.mem_NP_of_pairLang_mem_P
     {tapes : ℕ} (machine : TM tapes) (threshold : ℕ → ℕ)
     (hthreshold : PolyBound threshold)
-    (hwitness : NP.WitnessNTMConstruction)
     (hverifier : pairLang
       (MINKT.ProgramWitnessRelation machine threshold) ∈ P) :
     MINKT machine threshold ∈ NP := by
-  apply NP.mem_NP_of_FNP_witness hwitness
+  apply NP.mem_NP_of_FNP
     (MINKT.programWitnessRelation_mem_FNP_of_pairLang_mem_P
       machine threshold hthreshold hverifier)
   intro bits

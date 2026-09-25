@@ -298,15 +298,14 @@ theorem GapMINKT_solvedBy_decisionOfSearch
     exact GapMINKT.decisionOfSearch_eq_false_of_mem_noLanguage search hno
 
 /-- An FNP implementation of the direct yes-witness relation places GapMINKT
-in `PromiseNP`, conditional on the generic guess-and-verify NTM construction. -/
+in `PromiseNP`. -/
 theorem GapMINKT_mem_PromiseNP_of_yesWitnessRelation_mem_FNP
     {tapes : ℕ} {machine : TM tapes} {parameters : GapMINKT.Parameters}
     (hwidening : parameters.IsWidening)
-    (hwitness : NP.WitnessNTMConstruction)
     (hrelation : GapMINKT.YesWitnessRelation machine ∈ FNP) :
     GapMINKT machine parameters hwidening ∈ PromiseNP := by
   apply PromiseProblem.mem_PromiseNP_of_FNP_witness
-    (GapMINKT machine parameters hwidening) hwitness hrelation
+    (GapMINKT machine parameters hwidening) hrelation
   intro bits
   exact GapMINKT.mem_yesLanguage_iff_exists_program machine bits
 
@@ -315,11 +314,10 @@ polynomial-time verifier for the paired direct-witness language. -/
 theorem GapMINKT_mem_PromiseNP_of_pairLang_mem_P
     {tapes : ℕ} {machine : TM tapes} {parameters : GapMINKT.Parameters}
     (hwidening : parameters.IsWidening)
-    (hwitness : NP.WitnessNTMConstruction)
     (hverifier : pairLang (GapMINKT.YesWitnessRelation machine) ∈ P) :
     GapMINKT machine parameters hwidening ∈ PromiseNP :=
   GapMINKT_mem_PromiseNP_of_yesWitnessRelation_mem_FNP
-    hwidening hwitness
+    hwidening
       (GapMINKT.yesWitnessRelation_mem_FNP_of_pairLang_mem_P machine hverifier)
 
 end Complexity

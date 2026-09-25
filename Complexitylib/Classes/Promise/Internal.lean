@@ -10,6 +10,7 @@ public import Complexitylib.Classes.NP.Reduction
 public import Complexitylib.Classes.NP.Witness
 import Complexitylib.Classes.P
 import Complexitylib.Classes.NP.Closure
+import Complexitylib.Classes.NP.WitnessConstruction
 import Complexitylib.Classes.Containments
 
 /-!
@@ -178,12 +179,12 @@ theorem mem_PromiseNP_of_yesInstances_mem_NP_internal
   ⟨problem.yesInstances, hyes, fun _ hx => hx, problem.disjoint⟩
 
 theorem mem_PromiseNP_of_FNP_witness_internal
-    (problem : PromiseProblem) (hwitness : NP.WitnessNTMConstruction)
+    (problem : PromiseProblem)
     {R : List Bool → List Bool → Prop} (hR : R ∈ FNP)
     (hchar : ∀ x, x ∈ problem.yesInstances ↔ ∃ y, R x y) :
     problem ∈ PromiseNP :=
   mem_PromiseNP_of_yesInstances_mem_NP_internal problem
-    (NP.mem_NP_of_FNP_witness hwitness hR hchar)
+    (NP.mem_NP_of_FNP hR hchar)
 
 end PromiseProblem
 

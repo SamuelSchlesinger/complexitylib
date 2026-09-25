@@ -109,9 +109,10 @@ theorem polyBalanced_witness : PolyBalanced Witness := by
 -- parses `z` as a CNF and evaluates it at `α`.
 --
 -- `SAT/VerifierTM.lean` now discharges that verifier obligation. The generic
--- theorem below remains parameterized by `WitnessNTMConstruction`; the
--- unconditional SAT headline instead uses the specialized construction from
--- `SAT/Internal/GuessVerify.lean`.
+-- theorem below remains parameterized by `WitnessNTMConstruction` because this
+-- module sits upstream of the construction's proof,
+-- `NP.witnessNTMConstruction`; the unconditional SAT headline instead uses the
+-- specialized construction from `SAT/Internal/GuessVerify.lean`.
 
 /-- **SAT is in FNP modulo the verifier.** If the verifier's pair language
     is in P, then `Witness` is an FNP relation — and hence a candidate NP

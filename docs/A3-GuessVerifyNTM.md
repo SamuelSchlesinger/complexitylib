@@ -5,8 +5,10 @@
 > analysis, and headline theorem `SAT.L_SAT_mem_NP` are now proved in
 > `Complexitylib/SAT/VerifierTM.lean`, `Complexitylib/SAT/GuessVerify.lean`, and
 > `Complexitylib/SAT/Headline.lean`. The generic
-> `NP.WitnessNTMConstruction` stated below remains open. Other status and
-> remaining-work notes describe the project when this design was written.
+> `NP.WitnessNTMConstruction` stated below is now proved as
+> `NP.witnessNTMConstruction` in `Complexitylib/Classes/NP/WitnessConstruction.lean`.
+> Other status and remaining-work notes describe the project when this design
+> was written.
 
 **Status:** SAT-specialized composed machine, full setup/pair/verify
 correctness spine, uniform `DecidesInTime` theorem for `L_SAT`,

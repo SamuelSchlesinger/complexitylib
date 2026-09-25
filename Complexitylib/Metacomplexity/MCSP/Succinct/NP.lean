@@ -13,11 +13,12 @@ public import Complexitylib.Metacomplexity.MCSP.Succinct.NP.Internal
 
 The complete normalized witness relation has an executable Boolean checker and
 is already polynomially balanced. Consequently, a polynomial-time machine for
-its paired language makes the relation an FNP relation; the repository's generic
-guess-and-verify NTM construction then places `SuccinctMCSP` in `NP`.
+its paired language makes the relation an FNP relation; the generic
+guess-and-verify NTM construction `NP.witnessNTMConstruction` then places
+`SuccinctMCSP` in `NP`.
 
-Both machine-level premises remain explicit. This module does not identify
-ordinary program execution with a proved polynomial-time Turing machine.
+The verifier premise remains explicit. This module does not identify ordinary
+program execution with a proved polynomial-time Turing machine.
 -/
 
 
@@ -41,14 +42,12 @@ theorem rawWitnessRelation_mem_FNP_of_pairLang_mem_P
 
 /-- Conditional NP packaging for SuccinctMCSP.
 
-The premises isolate the two remaining machine-level obligations: the generic
-FNP witness NTM construction and a `P` implementation of the paired executable
-checker. -/
+The premise isolates the one remaining machine-level obligation: a `P`
+implementation of the paired executable checker. -/
 theorem mem_NP_of_pairLang_mem_P
-    (hwitness : NP.WitnessNTMConstruction)
     (hverifier : pairLang RawWitnessRelation ∈ P) :
     Complexity.SuccinctMCSP ∈ NP :=
-  mem_NP_of_pairLang_mem_P_internal hwitness hverifier
+  mem_NP_of_pairLang_mem_P_internal hverifier
 
 end SuccinctMCSP
 

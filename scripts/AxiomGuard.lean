@@ -58,6 +58,9 @@ def headlineTheorems : List Name := [
   -- Closure under polynomial-time reductions
   `Complexity.MapReducesPoly.mem_NP,
   `Complexity.MapReducesPoly.mem_coNP,
+  -- FNP witness characterization (guess and verify)
+  `Complexity.NP.witnessNTMConstruction,
+  `Complexity.NP.mem_NP_of_FNP,
   `Complexity.NTM.compositionNTM_decidesInTime,
   -- Universal machine
   `Complexity.TM.UTMBody.utmTM_universal,

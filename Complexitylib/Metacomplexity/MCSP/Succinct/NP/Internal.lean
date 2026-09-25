@@ -6,6 +6,7 @@ Authors: Samuel Schlesinger
 
 module
 public import Complexitylib.Metacomplexity.MCSP.Succinct.NP.Defs
+import Complexitylib.Classes.NP.WitnessConstruction
 import Complexitylib.Metacomplexity.MCSP.Succinct.Normalization.Internal
 import Complexitylib.Metacomplexity.MCSP.Succinct.Witness.Internal
 
@@ -34,10 +35,9 @@ theorem rawWitnessRelation_mem_FNP_of_pairLang_mem_P_internal
   ⟨rawWitnessRelation_polyBalanced_internal, hverifier⟩
 
 theorem mem_NP_of_pairLang_mem_P_internal
-    (hwitness : NP.WitnessNTMConstruction)
     (hverifier : pairLang RawWitnessRelation ∈ P) :
     Complexity.SuccinctMCSP ∈ NP := by
-  apply NP.mem_NP_of_FNP_witness hwitness
+  apply NP.mem_NP_of_FNP
     (rawWitnessRelation_mem_FNP_of_pairLang_mem_P_internal hverifier)
   intro bits
   exact mem_iff_exists_rawWitnessRelation_internal bits

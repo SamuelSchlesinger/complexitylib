@@ -21,10 +21,11 @@ most `|x| + 1`, pairs it with the input and runs `M` on the result. Every
 structural theorem about it in `SAT/Internal/GuessVerify` is already stated for
 an arbitrary language `L`; only the final assembly mentions SAT.
 
-This module performs that assembly generically. The result is the
-guess-and-verify bridge `NP.WitnessNTMConstruction` was meant to provide,
-restricted to witnesses of linear length — which costs nothing, since padding
-the input makes any polynomial witness bound linear.
+This module performs that assembly generically, first for witnesses of linear
+length and then for any polynomial witness bound, by padding the input until the
+bound is linear. `Complexitylib.Classes.NP.WitnessConstruction` repackages the
+result as the proof `NP.witnessNTMConstruction` of the guess-and-verify
+interface `NP.WitnessNTMConstruction`.
 
 ## Main results
 

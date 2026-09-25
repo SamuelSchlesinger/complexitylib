@@ -11,8 +11,8 @@ public import Complexitylib.Classes.FNP.Defs
 /-!
 # NP witness characterization
 
-This file states and (up to a single TM-engineering lemma) proves the
-textbook characterization of `NP` via FNP witness relations:
+This file states the textbook characterization of `NP` via FNP witness
+relations:
 
 > A language `L` is in `NP` iff there is an FNP relation `R` such that
 > `x ∈ L ↔ ∃ y, R x y`.
@@ -20,13 +20,18 @@ textbook characterization of `NP` via FNP witness relations:
 The forward direction (`NP ⊆ witness form`) is a *computation-path* witness
 argument and is left for a later pass.
 
-The reverse direction — **the FNP ⇒ NP bridge** used by SAT ∈ NP — is
-captured here by `mem_NP_of_FNP_witness`, parameterized by the single
-TM-engineering construction interface `WitnessNTMConstruction`: build the
-nondeterministic "guess-and-verify" machine from a deterministic verifier
-of `pairLang R`. Everything above that construction — unpacking FNP,
-computing polynomial bounds, and packaging the result as membership in
-`NP` — is proved here unconditionally.
+The reverse direction — **the FNP ⇒ NP bridge** — is captured here by
+`mem_NP_of_FNP_witness`, parameterized by the single TM-engineering
+construction interface `WitnessNTMConstruction`: build the nondeterministic
+"guess-and-verify" machine from a deterministic verifier of `pairLang R`.
+Everything above that construction — unpacking FNP, computing polynomial
+bounds, and packaging the result as membership in `NP` — is proved here.
+
+The construction itself is proved as `NP.witnessNTMConstruction` in
+`Complexitylib.Classes.NP.WitnessConstruction`, which also states the
+unconditional forms `NP.mem_NP_of_FNP` and `NP.witnessLang_mem_NP`. It lives
+downstream because the guess-and-verify machine is built from modules that
+import this one.
 
 ## Proof strategy for `WitnessNTMConstruction`
 
@@ -46,10 +51,9 @@ construct an NTM `N` that, on input `x`:
 The total running time is polynomial: `O(p(n) + n + T(2n + p(n) + 2))`
 where `T(n) = n^c` bounds `M`.
 
-The construction is mechanical but substantial — analogous in size to the
-existing `unionTM`/`seqTM` combinators — and is deferred to a later pass.
-All downstream consequences (including `SAT ∈ NP` conditional on the SAT
-verifier being in P) rest only on that single lemma.
+The proved construction (`mem_NP_of_poly_witness`) follows this outline for
+witnesses of length at most `|x| + 1`, and reduces the general polynomial
+bound to that case by padding the input.
 -/
 
 
@@ -84,21 +88,11 @@ def witnessLang (R : List Bool → List Bool → Prop) : Language :=
     nondeterministically write a witness of length `≤ p(|x|)` onto a work
     tape, build `pair(x, y)` on another work tape, then simulate `M`.
 
-    This is isolated as a named proposition so results can state precisely
-    when they rely on the still-to-be-built machine construction, instead of
-    importing an unproved theorem.
-
-    ## Supporting utilities
-    When implementing this construction, the following lemmas from
-    `Complexitylib.Asymptotics` will be useful for packaging the running-time
-    bound of the constructed NTM:
-    - `BigO.pow_polynomial_bound` — turn the hypothesis `f =O (·^c)` into
-      an explicit `Polynomial ℕ` bound on `f`.
-    - `BigO.of_polynomial_bound` — turn the computed polynomial bound on
-      the constructed NTM's running time back into `g =O (·^d)`.
-    The `pair_length` simp lemma in `Complexitylib.Classes.Pairing` gives
-    `|pair x y| = 2·|x| + 2 + |y|`, needed when substituting the simulated
-    verifier's input length. -/
+    This is isolated as a named proposition so that this file's results can
+    be stated before the machine is available in the import graph. It is
+    proved as `NP.witnessNTMConstruction` in
+    `Complexitylib.Classes.NP.WitnessConstruction`. -/
+@[expose]
 def WitnessNTMConstruction : Prop :=
   ∀ {R : List Bool → List Bool → Prop}
     {p : Polynomial ℕ} {c k : ℕ}
