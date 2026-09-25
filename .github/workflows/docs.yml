@@ -32,23 +32,35 @@ jobs:
           curl https://elan.lean-lang.org/elan-init.sh -sSf | sh -s -- -y \
             --default-toolchain "$(cat lean-toolchain)"
           echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      # plasTeX resolves `\input{chapters/...}` through TeX's `kpsewhich`;
+      # without it every chapter is silently dropped, so install TeX's
+      # binaries. The blueprint is built before the slow API docs so that a
+      # broken blueprint fails the run within minutes.
+      - name: Install blueprint toolchain
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y graphviz libgraphviz-dev texlive-base
+          pip install leanblueprint
+      - name: Build blueprint
+        run: |
+          set -o pipefail
+          leanblueprint web 2>&1 | tee blueprint-build.log
+          if grep -q "File not found" blueprint-build.log; then
+            echo "::error::the blueprint build could not find some of its inputs"
+            exit 1
+          fi
+          test -f blueprint/web/chap-intro.html
+          test -f blueprint/web/dep_graph_document.html
       - name: Fetch Mathlib build cache
         run: lake exe cache get
       - name: Build documentation
         working-directory: docbuild
         run: lake build Complexitylib:docs
-      - uses: actions/setup-python@v5
-        with:
-          python-version: "3.12"
-      - name: Install blueprint toolchain
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y graphviz libgraphviz-dev
-          pip install leanblueprint
-      - name: Build blueprint and publish it under /blueprint
-        run: |
-          cd blueprint && leanblueprint web && cd ..
-          cp -r blueprint/web docbuild/.lake/build/doc/blueprint
+      - name: Publish the blueprint under /blueprint
+        run: cp -r blueprint/web docbuild/.lake/build/doc/blueprint
       - name: Upload documentation artifact
         uses: actions/upload-pages-artifact@v3
         with:
