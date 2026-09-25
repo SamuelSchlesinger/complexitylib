@@ -5,7 +5,7 @@ Authors: Samuel Schlesinger
 -/
 
 module
-public import Cslib.Foundations.Data.RelatesInSteps
+public import Cslib.Foundations.Relation.RelatesInSteps
 public import Cslib.Computability.Languages.RegularLanguage
 public import Mathlib.Computability.DFA
 public import Complexitylib.Classes.Containments

@@ -58,7 +58,7 @@ theorem descFactorial_mul_pow_le {s n : ℕ} (hsn : s ≤ n) (k : ℕ) :
   have hs : s ^ k = ∏ _i ∈ range k, s := by simp
   rw [Nat.descFactorial_eq_prod_range, Nat.descFactorial_eq_prod_range, hn, hs,
     ← Finset.prod_mul_distrib, ← Finset.prod_mul_distrib]
-  refine Finset.prod_le_prod' fun i _ => ?_
+  refine Finset.prod_le_prod fun i _ => ?_
   have h : (s - i) * n ≤ s * (n - i) := by
     rcases le_or_gt i s with hi | hi
     · have h1 : (s - i) * n = s * n - i * n := by

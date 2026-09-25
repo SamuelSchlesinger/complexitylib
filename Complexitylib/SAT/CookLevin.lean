@@ -107,8 +107,6 @@ theorem atLeastOne_eval (α : Assignment) (vars : List ℕ) :
     Clause.eval α (atLeastOne vars) = vars.any (fun v => α.get v) := by
   simp only [atLeastOne, Clause.eval, List.any_map]
   congr 1
-  funext v
-  simp [Lit.eval]
 
 
 /-- The at-least-one clause is satisfied iff some listed variable is true (Prop form). -/

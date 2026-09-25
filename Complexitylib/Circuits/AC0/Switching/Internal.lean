@@ -955,7 +955,6 @@ private theorem phaseAdvice_cons
         simp only [phaseAdvice, List.getElem_mapIdx,
           List.getElem_cons_succ]
         congr 2
-        simp
 
 /-- Deterministic replay of width advice against the encoded restriction. The
 current term is cached within a phase; an end marker causes the next term to be

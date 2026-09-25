@@ -47,8 +47,6 @@ theorem popCount_repeatVotes (tm : NTM n) (x : List Bool)
       blockEventCount (repeatAcceptEvent tm x T) seed := by
   unfold popCount blockEventCount
   congr 1
-  ext i
-  simp [repeatVotes, repeatTrialVote]
 
 /-- The strict majority of the machine's vote vector is exactly the generic
 block majority of the source accepting event. -/

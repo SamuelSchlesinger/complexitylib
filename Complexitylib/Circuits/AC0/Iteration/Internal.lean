@@ -305,7 +305,6 @@ theorem stageFreeSum_internal (N q stageCount : ℕ) :
       simp [stageFreeSum, StageSeed, finalRestriction,
         Switching.RestrictionStages.cumulative,
         Restriction.On.freeVariables]
-      erw [Finset.card_univ, Fintype.card_unit, one_mul]
   | succ stageCount ih =>
       rw [stageFreeSum_succ_internal, ih, pow_succ]
       simp [Nat.mul_assoc]

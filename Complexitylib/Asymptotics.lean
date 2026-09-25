@@ -105,8 +105,7 @@ theorem BigO.add {f₁ f₂ g : ℕ → ℕ} (h₁ : f₁ =O g) (h₂ : f₂ =O 
   show (fun n => ((f₁ n + f₂ n : ℕ) : ℝ)) =O[atTop] _
   have key := IsBigO.add h₁ h₂
   convert key using 1
-  · rfl
-  ext n; push_cast; ring
+  all_goals first | rfl | (ext n; push_cast; ring)
 
 /-- Product of two big-O bounds: `f₁ = O(g₁) → f₂ = O(g₂) → (f₁·f₂) = O(g₁·g₂)`. -/
 theorem BigO.mul {f₁ f₂ g₁ g₂ : ℕ → ℕ} (h₁ : f₁ =O g₁) (h₂ : f₂ =O g₂) :
@@ -114,10 +113,7 @@ theorem BigO.mul {f₁ f₂ g₁ g₂ : ℕ → ℕ} (h₁ : f₁ =O g₁) (h₂
   show (fun n => ((f₁ n * f₂ n : ℕ) : ℝ)) =O[atTop] (fun n => ((g₁ n * g₂ n : ℕ) : ℝ))
   have key := IsBigO.mul h₁ h₂
   convert key using 1
-  · rfl
-  · rfl
-  · ext n; push_cast; ring
-  · ext n; push_cast; ring
+  all_goals first | rfl | (ext n; push_cast; ring)
 
 /-- Raising both sides of a big-O bound to a fixed natural power preserves
 big-O. -/
@@ -164,8 +160,7 @@ theorem LittleO.add {f₁ f₂ g : ℕ → ℕ} (h₁ : f₁ =o g) (h₂ : f₂ 
   show (fun n => ((f₁ n + f₂ n : ℕ) : ℝ)) =o[atTop] _
   have key := IsLittleO.add h₁ h₂
   convert key using 1
-  · rfl
-  ext n; push_cast; ring
+  all_goals first | rfl | (ext n; push_cast; ring)
 
 /-- Constant multiple preserves little-o. -/
 theorem LittleO.const_mul_left (c : ℕ) {f g : ℕ → ℕ} (h : f =o g) :
@@ -220,8 +215,7 @@ theorem BigO.const_mul_add (c : ℕ) {f₁ f₂ T₁ T₂ : ℕ → ℕ}
       (fun n => ((T₁ n + T₂ n : ℕ) : ℝ)) := IsBigO.trans ho₂ (le_add_right T₁ T₂)
   have := IsBigO.add hcf₁ hf₂
   convert this using 1
-  · rfl
-  ext n; push_cast; ring
+  all_goals first | rfl | (ext n; push_cast; ring)
 
 -- ════════════════════════════════════════════════════════════════════════
 -- BigO max and power bounds

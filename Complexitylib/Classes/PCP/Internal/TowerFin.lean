@@ -64,7 +64,6 @@ theorem rot_power_two (G : RegGraph) (v : G.V) (s : Fin 2 → G.D) :
     · show G.backLabel v s (Fin.rev 0) = _
       show (G.rot (G.walkAt 2 v s (Fin.rev (0 : Fin 2)).val, s (Fin.rev 0))).2 = _
       norm_num [hw1]
-      rfl
     · show G.backLabel v s (Fin.rev 1) = _
       show (G.rot (G.walkAt 2 v s (Fin.rev (1 : Fin 2)).val, s (Fin.rev 1))).2 = _
       rfl

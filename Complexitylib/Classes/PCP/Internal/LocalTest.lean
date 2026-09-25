@@ -281,8 +281,6 @@ theorem prob_accepts_eq (T : Table Pos) (e : E) :
   have hrej : (M.rejects T e).card
       = (Finset.univ.filter fun z => ¬ (M.accepts T e z = true)).card := by
     congr 1
-    ext z
-    simp [rejects]
   rw [hrej]
   have hcard : (Finset.univ : Finset (Cube M.R)).card = 2 ^ M.R := by
     rw [Finset.card_univ]
