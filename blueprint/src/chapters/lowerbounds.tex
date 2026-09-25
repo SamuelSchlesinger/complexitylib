@@ -16,6 +16,11 @@ of the finite obstruction (roadmap track L4). Beyond it, the plan covers
 monotone circuit lower bounds, pseudorandom restrictions, and resolution size
 and width lower bounds leading to the pigeonhole principle and to Cook--Reckhow
 proof systems (roadmap track L5).
+Section~\ref{sec:lowerbounds-algebraic} collects the results of the imported
+algebraic-circuits library, stated for CSLib's circuit model: parity bounds in
+the De Morgan basis and in $\cc{AC}^0$, monotone CLIQUE, Nechiporuk's formula
+bound, Karchmer--Wigderson, a circuit-size hierarchy, conditional complexity,
+algebraic lower bounds, and mass production.
 
 \section{Counting bounds}
 \label{sec:lowerbounds-counting}
@@ -110,6 +115,221 @@ proof systems (roadmap track L5).
   absorbed into the big-O constant. For the lower bound, take a hard function
   at every large length and let the language consist of its accepted strings.
 \end{proof}
+
+\section{Results from the algebraic-circuits library}
+\label{sec:lowerbounds-algebraic}
+
+These results come from the algebraic-circuits library, imported wholesale
+under \texttt{Complexitylib/Algebraic}. They are stated for CSLib's circuit
+model and keep the \texttt{Algebraic} namespace; the consolidation plan in
+\texttt{ROADMAP.md} relates them to the statements elsewhere in this chapter.
+
+\begin{theorem}[Parity in the De Morgan basis]
+  \label{thm:lowerbounds-algebraic-xor}
+  \lean{Algebraic.DeMorgan.xor_lowerBound}
+  \leanok
+  Every De Morgan circuit computing $n$-input parity has at least $3(n - 1)$
+  AND and OR gates; constants and negations are free.
+\end{theorem}
+\begin{proof}
+  \leanok
+  Gate elimination: fixing a well-chosen input removes at least three AND or
+  OR gates while leaving a parity function on one fewer input.
+\end{proof}
+
+\begin{theorem}[Parity is not in $\cc{AC}^0$]
+  \label{thm:lowerbounds-algebraic-parity-ac0}
+  \lean{Algebraic.AC0.parity_not_computable}
+  \leanok
+  No family of constant-depth, polynomial-size, unbounded fan-in AND/OR
+  circuits with negations at the inputs computes parity. This is stated for
+  the imported library's own $\cc{AC}^0$ model; deriving
+  Theorem~\ref{thm:lowerbounds-parity-not-ac0} for $\cc{AC}^0$ as defined here
+  from it is part of the consolidation plan.
+\end{theorem}
+\begin{proof}
+  \leanok
+  Håstad's switching lemma: random restrictions collapse each bottom layer
+  of such a circuit to a shallow decision tree, reducing the depth, while
+  parity restricts to parity on the remaining inputs.
+\end{proof}
+
+\begin{theorem}[Monotone CLIQUE]
+  \label{thm:lowerbounds-algebraic-clique}
+  \lean{Algebraic.Monotone.Clique.Exponential.twoPow_lt_circuitSize}
+  \leanok
+  On $N = 2^{20t}$ vertices with $t \ge 4$, every monotone circuit computing
+  $2^{4t}$-CLIQUE has more than $2^{t \cdot 2^t}$ gates.
+\end{theorem}
+\begin{proof}
+  \leanok
+  Razborov's method of approximations, with the sunflower lemma bounding the
+  error introduced at each gate.
+\end{proof}
+
+\begin{theorem}[Nechiporuk]
+  \label{thm:lowerbounds-algebraic-nechiporuk}
+  \lean{Algebraic.Nechiporuk.eventually_sq_le_leaves}
+  \leanok
+  If a family of Boolean functions is $K(n)$-rectangle-free with
+  $K(n) \le n^c$ and has at least $2^{n - 2}$ accepting inputs, then for all
+  large $n$ every formula over the full binary basis computing its length-$n$
+  member has at least $n^2 / (64(c + 3)\log_2 n)$ leaves.
+\end{theorem}
+\begin{proof}
+  \leanok
+  Count subfunctions on each block of a partition of the inputs;
+  rectangle-freeness forces the maximal number on every block at once.
+\end{proof}
+
+\begin{theorem}[Karchmer--Wigderson]
+  \label{thm:lowerbounds-algebraic-kw}
+  \lean{Algebraic.KW.formulaDepth_eq_protocolDepth, Algebraic.KW.formulaSize_eq_protocolSize}
+  \leanok
+  The minimum depth and size of a De Morgan formula for $f$ equal the minimum
+  depth and number of leaves of a protocol for the Karchmer--Wigderson game of
+  $f$.
+\end{theorem}
+\begin{proof}
+  \leanok
+  Formulas and protocols translate into each other gate for move: an AND gate
+  is a move of the player holding a rejected input, an OR gate a move of the
+  player holding an accepted input.
+\end{proof}
+
+\begin{theorem}[Polynomial circuit size hierarchy]
+  \label{thm:lowerbounds-algebraic-hierarchy}
+  \lean{Algebraic.DeMorgan.polynomialSize_ssubset}
+  \leanok
+  For real exponents $1 \le a < b$, the class of function families with De
+  Morgan circuits of size $O(n^a)$ is strictly contained in the class with
+  size $O(n^b)$.
+\end{theorem}
+\begin{proof}
+  \leanok
+  Change a function of size at most $n^a$ at a few points at a time: each
+  point update changes size by $O(n)$, so some intermediate function has size
+  between $n^a$ and $n^b$, while Shannon's bound supplies hard functions.
+\end{proof}
+
+\begin{lemma}[Hamming-Lipschitz circuit complexity]
+  \label{lem:lowerbounds-algebraic-lipschitz}
+  \lean{Algebraic.DeMorgan.complexity_dist_le, Algebraic.DeMorgan.exists_complexity_between}
+  \leanok
+  The De Morgan circuit complexity of $n$-input Boolean functions changes by
+  at most $2n$ per changed truth-table entry. Consequently every threshold
+  $t \ge 1$ below the complexity of some function is crossed with overshoot at
+  most $2n$: some function has complexity in $(t, t + 2n]$.
+\end{lemma}
+\begin{proof}
+  \leanok
+  Patching one truth-table entry costs at most $2n$ gates, by combining the old
+  circuit with an indicator of the changed point. Walk from a constant function
+  to a hard one entry by entry.
+\end{proof}
+
+\begin{definition}[Conditional circuit complexity]
+  \label{def:lowerbounds-algebraic-conditional}
+  \lean{Cslib.Circuits.Circuit.conditionalGateComplexity}
+  \leanok
+  The conditional complexity of a target given supplied functions is the
+  minimum number of gates computing the target from the original inputs and
+  the supplied values as free extra inputs, and $\infty$ when no circuit
+  computes it.
+\end{definition}
+
+\begin{theorem}[Laws of conditional complexity]
+  \label{thm:lowerbounds-algebraic-conditional}
+  \lean{Cslib.Circuits.Circuit.conditionalGateComplexity_triangle,
+    Algebraic.ConditionalComplexity.Linear.conditionalGateComplexity_eq_min_weight}
+  \leanok
+  \uses{def:lowerbounds-algebraic-conditional}
+  Conditional complexity obeys the triangle inequality: computing $h$ given
+  $f$ costs at most computing $h$ given $g$ plus computing $g$ given $f$. Over
+  $\mathbb{F}_2$, with gates of fan-in at most two, the conditional complexity
+  of a nonzero linear form given linear helpers is exactly a minimum weight,
+  whatever other operations the basis contains.
+\end{theorem}
+\begin{proof}
+  \leanok
+  Compose the two circuits for the triangle inequality. For linear forms, a
+  circuit computing the form must combine at least the minimum number of
+  input and helper terms, and such a combination is realized directly.
+\end{proof}
+
+\begin{theorem}[Hessian rank bounds multiplications]
+  \label{thm:lowerbounds-algebraic-hessian}
+  \lean{Algebraic.Applications.hessianRank_lowerBound}
+  \leanok
+  Every arithmetic circuit computing a polynomial $p$ over a field uses at least
+  $\lceil \operatorname{rank} H_p(a) / 2 \rceil$ multiplications, where $H_p(a)$ is
+  the Hessian of $p$ at any point $a$.
+\end{theorem}
+\begin{proof}
+  \leanok
+  Each multiplication gate raises the rank of the second-order part of the
+  computed polynomials by at most two, while additions and scalars do not.
+\end{proof}
+
+\begin{theorem}[Waring bound for the squarefree monomial]
+  \label{thm:lowerbounds-algebraic-waring}
+  \lean{Algebraic.Applications.waringSum_lowerBound}
+  \leanok
+  Over a field of characteristic zero, any expression of $x_1 x_2 \cdots x_{2n}$
+  as a sum of scaled $2n$-th powers of linear forms has at least
+  $\binom{2n}{n}$ terms.
+\end{theorem}
+\begin{proof}
+  \leanok
+  Compare the dimension of the space of partial derivatives of order $n$ of
+  each side.
+\end{proof}
+
+\begin{theorem}[Sharp mass production]
+  \label{thm:lowerbounds-algebraic-mass-production}
+  \lean{Algebraic.MassProduction.BlockInduction.exponentialMassProduction,
+    Algebraic.MassProduction.Nonuniform.realSharpMassProduction}
+  \leanok
+  For every rate $0 \le \gamma < 1$ and $\varepsilon > 0$, for all sufficiently
+  large $n$, every Boolean function on $n$ inputs can be evaluated on up to
+  $2^{\gamma n}$ independent input blocks by a single De Morgan circuit of cost
+  at most $(1/(1 - \gamma) + \varepsilon)\, 2^n / n$.
+\end{theorem}
+\begin{proof}
+  \leanok
+  A nonuniform construction that routes all copies through shared table
+  lookups: sorting networks gather the requests, and each table entry is
+  computed once and broadcast to every copy that needs it.
+\end{proof}
+
+\begin{theorem}[Cutwidth bound, conditional]
+  \label{thm:lowerbounds-algebraic-cutwidth}
+  \lean{Algebraic.Cutwidth.eventually_lt_size_of_pathwidthBound}
+  \leanok
+  Assume that for every $\xi > 0$ all sufficiently large simple 3-regular
+  graphs on $h$ vertices have pathwidth at most $(1/6 + \xi)h$. Then every
+  rectangle-free Boolean function family with polynomial rectangle threshold
+  and at least $2^{n-2}$ accepting inputs needs more than $(4 - \varepsilon)n$
+  gates over the full binary basis, for every $\varepsilon > 0$ and all large
+  $n$. The pathwidth bound is an explicit hypothesis of the theorem.
+\end{theorem}
+\begin{proof}
+  \leanok
+  Order the gates by a path decomposition of the circuit's wiring graph and
+  count the rectangles cut at each position.
+\end{proof}
+
+\begin{definition}[The KRW conjecture]
+  \label{def:lowerbounds-algebraic-krw}
+  \lean{Algebraic.KW.KRWDepth, Algebraic.KW.KRWSize}
+  \leanok
+  \uses{thm:lowerbounds-algebraic-kw}
+  The Karchmer--Raz--Wigderson conjecture, stated with explicit slack: the
+  formula depth of a block composition $f \diamond g$ is at least the sum of the
+  depths of $f$ and $g$ up to an additive slack, and its formula size is at
+  least the product of their sizes up to a multiplicative slack. The
+  conjecture is open; it is formalized as a statement only.
+\end{definition}
 
 \section{Essential inputs and gate elimination}
 \label{sec:lowerbounds-gate-elimination}

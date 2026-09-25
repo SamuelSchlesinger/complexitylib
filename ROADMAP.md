@@ -104,54 +104,53 @@ In order. Each item says why it matters and roughly how large it is.
    exist in about 8 versions. One codec interface, one probability
    convention, and one formula type with substitution would absorb most of
    them.
-7. **Consolidate the circuit developments on CSLib's model.** Three circuit
-   developments now coexist: our typed `Circuit` (free negations, output
-   gates, `size = G + M`), the machine-facing `RawCircuit` serialization, and
-   the [algebraic-circuits](https://github.com/SamuelSchlesinger/algebraic-circuits)
-   library on CSLib's generic model (straight-line programs over a signature,
-   every gate counted). `Interop/Cslib/Circuit*` already translates between
-   ours and CSLib's in both directions, preserving size up to `N + 2G + M` and
-   depth up to one level. The target is one semantic circuit type, CSLib's,
-   with `RawCircuit` kept as the serialization that machines read and write.
-   Phases, each landing with unchanged public statements:
-   - **Import algebraic-circuits wholesale** as `Complexitylib/Algebraic`,
-     keeping its `Algebraic` namespace. Renaming it under `Complexity` would
-     collide with `Complexity.Circuit`, `Basis`, `Restriction`, and others. The
-     import needs the module-system conversion (`module`, `public import`,
-     `@[expose] public section`), copyright headers, and a documented style
-     exemption for its `_root_` escapes and long lines until cleanup.
-   - **Replace and strengthen results through the bridge.** Where
-     algebraic-circuits proves more, derive our statement from it and delete
-     our proof:
-     - parity in the De Morgan basis (`3(n - 1)` against Schnorr's `2n - 1`);
-     - parity ∉ AC⁰ via the full Håstad switching development;
-     - Karchmer–Wigderson and the monotone results.
-
-     Gain what we lack: Nechiporuk's `Ω(n² / log n)` formula bound, the
-     `SIZE(nᵃ) ⊊ SIZE(nᵇ)` hierarchy, monotone CLIQUE, the cutwidth `(4 - ε)n`
-     bound, and conditional complexity. The key bridge is between
-     `sizeComplexity` and its `DeMorgan.complexity` under the cost model that
-     makes negation free (`binaryCost`).
-   - **Retire superseded internals.** The Shannon and Schnorr counting cores
-     (`CircDesc`, about 3.5k lines) and the `18 · 2ⁿ / n` construction give way
-     to CSLib's counting and Lupanov bounds once their explicit-constant
-     statements are rederived.
-   - **Rebuild the typed builders** (composition, hardwiring, projections,
-     multiplexer, majority) with CSLib's synthesis calculus, then retire our
-     typed `Circuit`. That removes the `Fin (N + G)` offset arithmetic behind
-     about 12.7k lines, and CSLib's zero-input circuits make
-     `CircuitFamily.emptyOutput` unnecessary. The roughly 60k lines behind
-     `P ⊆ P/poly`, `BPP ⊆ P/poly`, uniform `P/poly`, and circuit satisfiability
-     stay on `RawCircuit` behind its `toCircuit`/`ofCircuit` round trip.
-   - **One formula type.** Unify `BoolFormula`, `AC0Formula`,
-     `MonotoneFormula`, and the formula and expression types of
-     algebraic-circuits (Karchmer–Wigderson, `Binary.Formula`,
-     `DeMorgan.Expression`) behind one type with substitution, as item 6 asks.
-   - **Upstream and converge style.** Move reusable generic pieces (families,
-     costs, depth, synthesis extensions, the space and input-head lemmas of
-     `Interop/Cslib`) into CSLib, gather the declarations that extend CSLib
-     types into one `Complexitylib/Cslib` directory like `Complexitylib/Mathlib`,
-     and retire the style exemption.
+7. **Move every circuit development to CSLib's circuit model.** CSLib's
+   straight-line programs over a signature (`Cslib.Circuits`) become the only
+   semantic circuit type, and our typed `Circuit` is retired. Nothing depends
+   on the typed representation mathematically. Each of our bases is one CSLib
+   signature whose operation symbols are our gates: an operation, a fan-in,
+   and a negation pattern. Unbounded fan-in and threshold bases are signatures
+   with infinitely many operations. Our free negations and counted output
+   gates are therefore reproduced exactly, and CSLib's zero-input circuits
+   remove `NeZero N` and `CircuitFamily.emptyOutput`. The algebraic-circuits
+   library, imported wholesale as `Complexitylib/Algebraic` (done, September
+   2026), already works in this model. Each phase lands with public statements
+   unchanged:
+   1. **Signatures and the exact correspondence.** `Basis.signature` and
+      `Basis.interpretation` for every basis, and a size-preserving translation
+      of typed circuits into straight-line programs over them.
+   2. **Redefine the measures and classes** (`sizeComplexity`, `SIZE`, `PPoly`,
+      `CircuitFamily`, `DEPTH`, `NC`, `AC`, `TC`) over CSLib circuits, keeping
+      their names, and re-prove the old statements through the correspondence.
+   3. **Port the consumers by area**, replacing or retiring proofs:
+      - Counting and gate elimination: Shannon's and Schnorr's bounds follow
+        from CSLib's counting and algebraic-circuits' `3(n - 1)` parity bound,
+        and the essential-input bound from `Circuit.essential_le_size`. The
+        internal counting model (`CircDesc`) is deleted.
+      - Builders (composition, hardwiring, projections, reindexing,
+        multiplexer, majority, about 12.7k lines of `Fin (N + G)` offset
+        arithmetic) become algebraic-circuits' substitution, restriction, and
+        translation, plus CSLib's synthesis calculus.
+      - AC⁰: derive parity ∉ AC⁰ for our classes from algebraic-circuits'
+        Håstad development and retire the superseded normalization and
+        switching internals.
+      - NC¹: port the circuit-to-formula unfolding used by
+        `NC1_subset_Width5BP`.
+      - MCSP and the other consumers of `sizeComplexity` and composition.
+      - `RawCircuit` stays as the serialization format that machines read and
+        write. It is already a straight-line program, so only its round trip
+        is retargeted, and the roughly 60k lines behind `P ⊆ P/poly`,
+        `BPP ⊆ P/poly`, uniform `P/poly`, and circuit satisfiability keep their
+        machine proofs.
+   4. **Delete the typed `Circuit`** and every superseded internal, and unify
+      the formula types (`BoolFormula`, `AC0Formula`, `MonotoneFormula`, and
+      algebraic-circuits' formula and expression types) behind one type with
+      substitution, as item 6 asks.
+   5. **Converge and upstream.** Gather the declarations that extend CSLib
+      types into `Complexitylib/Cslib` like `Complexitylib/Mathlib`, retire
+      the algebraic-circuits style exemption, and upstream reusable pieces
+      (families, costs, depth, synthesis extensions, the `Interop/Cslib`
+      lemmas) to CSLib.
 8. **A friendlier machine-authoring layer.** For work that must stay at the
    Turing-machine level (hierarchies, universal simulation, single-tape
    simulation), several model conventions cost proof effort on every step:
