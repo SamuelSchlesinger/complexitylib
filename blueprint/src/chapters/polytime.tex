@@ -143,6 +143,24 @@ machines be re-proved as short programs through Cobham's theorem.
   (\texttt{Complexity.PSPACE\_subset\_EXP}) gives the second claim.
 \end{proof}
 
+\begin{theorem}[Regular languages are in $\cc{P}$]
+  \label{thm:polytime-regular-in-P}
+  \lean{Complexity.mem_DTIME_of_isRegular, Complexity.mem_P_of_isRegular, Complexity.mem_P_of_nfa}
+  \leanok
+  \uses{def:dtime, def:P}
+  Every regular binary language, in the sense shared by Mathlib and CSLib, is in
+  $\cc{DTIME}(n + 2)$ and hence in $\cc{P}$. In particular, the language of any
+  finite nondeterministic automaton from CSLib's automata library is in $\cc{P}$.
+\end{theorem}
+\begin{proof}
+  \leanok
+  A finite-state scanner machine runs the deterministic automaton over the
+  input in one pass and writes whether the final state accepts. For a
+  nondeterministic automaton, CSLib's subset construction first shows that its
+  language is regular. CSLib's closure properties of regular languages therefore
+  give $\cc{P}$-membership of the resulting languages at no further cost.
+\end{proof}
+
 \section{Closure properties of P and FP}
 
 The projections of the pairing codec, and the pairing of two $\cc{FP}$

@@ -16,6 +16,7 @@ public import Complexitylib.SAT
 public import Complexitylib.Circuits
 public import Complexitylib.BooleanAnalysis
 public import Complexitylib.DescriptiveComplexity
+public import Complexitylib.Interop
 
 /-!
 # Complexitylib
