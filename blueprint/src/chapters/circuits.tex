@@ -1,0 +1,813 @@
+\chapter{Circuits, advice, and uniformity}
+\label{chap:circuits}
+
+This chapter covers Boolean circuits over explicit bases, nonuniform circuit
+families and the class $\cc{P/poly}$, its characterization by polynomial
+advice, logspace-uniform circuit families, the containment
+$\cc{BPP} \subseteq \cc{P/poly}$, the small-depth classes $\cc{NC}$, $\cc{AC}$
+and $\cc{TC}$, Boolean formulas, and Barrington's theorem. Roadmap tracks M1--M3
+are essentially complete: the library proves that polynomial advice and
+polynomial-size circuits give the same class, that logspace-uniform
+polynomial-size circuit families decide exactly $\cc{P}$ (Arora--Barak
+Theorem~6.7), that $\cc{BPP} \subseteq \cc{P/poly}$, and the nonuniform
+Barrington theorem for logarithmic-depth formulas. The main open mathematical
+item is a uniform Barrington theorem. The main open infrastructure items are a
+circuit encoding designed for log-space generation and a consolidation of the
+library's parallel circuit and formula representations
+(Section~\ref{sec:circuits-open}).
+
+Two conventions hold throughout. The size of a circuit counts internal and
+output gates but not input wires, and negations on gate inputs are free; this
+differs from Arora--Barak, who count input vertices and NOT gates, but the
+difference does not affect polynomial size bounds. A circuit family stores an
+explicit answer for the empty input, because the circuit model requires at
+least one input wire. Every class in this chapter is nonuniform unless its name
+says otherwise.
+
+\section{The circuit model}
+\label{sec:circuits-model}
+
+\begin{definition}[Boolean circuit]
+  \label{def:circuit}
+  \lean{Complexity.Basis, Complexity.Circuit, Complexity.Circuit.eval,
+    Complexity.Circuit.size, Complexity.Circuit.depth}
+  \leanok
+  \uses{def:bitstring}
+  A \emph{basis} is a type of operations, each with an arity constraint and an
+  evaluation map on bit strings of admissible length. A circuit over a basis
+  $B$ with $N \ge 1$ inputs, $M \ge 1$ outputs and $G$ internal gates consists
+  of $G$ internal gates and $M$ output gates. A gate applies an operation of $B$
+  to a list of wires, and each gate input carries its own negation flag. The
+  wires are the $N$ inputs followed by the $G$ internal gates, and internal
+  gate $i$ may read only wires $0, \dots, N + i - 1$, so the circuit is acyclic
+  by construction. Evaluation $C : \{0,1\}^N \to \{0,1\}^M$ computes the wire
+  values in index order. The \emph{size} of $C$ is $G + M$. The \emph{depth} is
+  the largest number of gates on a path from an input to an output, the output
+  gate included.
+\end{definition}
+
+\begin{definition}[AND/OR bases]
+  \label{def:circuits-bases}
+  \lean{Complexity.Basis.andOr2, Complexity.Basis.boundedAndOr,
+    Complexity.Basis.unboundedAndOr}
+  \leanok
+  \uses{def:circuit}
+  The bases whose operations are AND and OR with fan-in exactly $2$, with
+  fan-in at most $k$, and with unbounded fan-in. Negation is available only
+  through the free per-input flags. Unless stated otherwise, a circuit is a
+  circuit over the fan-in-two basis.
+\end{definition}
+
+\begin{definition}[Circuit size complexity]
+  \label{def:circuits-size-complexity}
+  \lean{Complexity.CompleteBasis, Complexity.Circuit.sizeComplexityWithTop,
+    Complexity.Circuit.sizeComplexityWithTop_eq_top_iff,
+    Complexity.Circuit.sizeComplexity, Complexity.Circuit.sizeComplexityWithTop_eq_coe}
+  \leanok
+  \uses{def:circuit}
+  For $f : \{0,1\}^N \to \{0,1\}$ and a basis $B$, $\mathrm{size}_B(f)$ is the
+  least size of a single-output circuit over $B$ computing $f$. The general
+  version takes values in $\mathbb{N} \cup \{\infty\}$ and equals $\infty$
+  exactly when no circuit over $B$ computes $f$. For a complete basis, such as
+  the fan-in-two AND/OR basis, a natural-number-valued version is provided and
+  agrees with it.
+\end{definition}
+
+\begin{lemma}[Dependency graph]
+  \label{lem:circuits-dependency-graph}
+  \lean{Complexity.Circuit.dependencyGraph,
+    Complexity.Circuit.dependencyGraph_isAcyclic,
+    Complexity.Circuit.dependencyGraph_edge_card_le_totalFanIn}
+  \leanok
+  \uses{def:circuit}
+  The wiring digraph of a circuit, on its $N + G + M$ input, internal and
+  output vertices, is acyclic, and its number of edges is at most the total
+  fan-in of the circuit (the number of gate-input occurrences).
+\end{lemma}
+\begin{proof}
+  \leanok
+  Every edge goes from a smaller vertex index to a larger one.
+\end{proof}
+
+\begin{lemma}[Hardwiring an input prefix]
+  \label{lem:circuits-hardwiring}
+  \lean{Complexity.Circuit.restrictPrefix, Complexity.Circuit.restrictPrefix_eval,
+    Complexity.Circuit.restrictPrefix_size}
+  \leanok
+  \uses{def:circuit}
+  Let $C$ be a fan-in-two circuit on $k + m$ inputs with $m \ge 1$, and let
+  $s \in \{0,1\}^k$. There is a circuit $C_s$ on $m$ inputs of the same size as
+  $C$ such that $C_s(y) = C(s\,y)$ for every $y \in \{0,1\}^m$.
+\end{lemma}
+\begin{proof}
+  \leanok
+  Fix the inputs one at a time; each step removes one input wire and keeps the
+  gates.
+\end{proof}
+
+\section{Circuit families and $\cc{P/poly}$}
+\label{sec:circuits-families}
+
+\begin{definition}[Circuit family]
+  \label{def:circuits-family}
+  \lean{Complexity.CircuitFamily, Complexity.CircuitFamily.function,
+    Complexity.CircuitFamily.size, Complexity.CircuitFamily.PolynomialSize,
+    Complexity.CircuitFamily.Decides}
+  \leanok
+  \uses{def:circuit, def:language}
+  A circuit family over $B$ consists of a single-output circuit $C_n$ over $B$
+  on $n$ inputs for every $n \ge 1$, together with an output bit for the empty
+  input. It computes the Boolean function family given by $C_n$ at length
+  $n \ge 1$ and by the stored bit at length $0$, and it decides the language of
+  strings on which it outputs $1$. Its size at $n \ge 1$ is the size of $C_n$,
+  and its size at $0$ is $0$. It has polynomial size if a single polynomial
+  $p \in \mathbb{N}[X]$ satisfies $\mathrm{size}(n) \le p(n)$ for every $n$.
+\end{definition}
+
+\begin{definition}[$\cc{SIZE}$]
+  \label{def:SIZE}
+  \lean{Complexity.SIZEWithBasis, Complexity.SIZE}
+  \leanok
+  \uses{def:circuits-family, def:circuits-bases}
+  For $s : \mathbb{N} \to \mathbb{N}$, $\cc{SIZE}(s)$ is the class of languages
+  decided by a fan-in-two AND/OR circuit family whose size at every length $n$
+  is at most $s(n)$. The same definition is available over any basis.
+\end{definition}
+
+\begin{definition}[$\cc{P/poly}$]
+  \label{def:PPoly}
+  \lean{Complexity.PPoly}
+  \leanok
+  \uses{def:SIZE}
+  $\cc{P/poly} = \bigcup_{p \in \mathbb{N}[X]} \cc{SIZE}(n \mapsto p(n))$.
+\end{definition}
+
+\begin{proposition}[Big-O form of $\cc{P/poly}$]
+  \label{prop:circuits-ppoly-bigo}
+  \lean{Complexity.mem_PPoly_iff}
+  \leanok
+  \uses{def:PPoly}
+  $L \in \cc{P/poly}$ if and only if some fan-in-two circuit family decides $L$
+  and has size $O(n^k)$ for some $k$.
+\end{proposition}
+\begin{proof}
+  \leanok
+  Convert between polynomial bounds and big-O power bounds.
+\end{proof}
+
+\begin{theorem}
+  \label{thm:circuits-p-subset-ppoly}
+  \lean{Complexity.P_subset_PPoly}
+  \leanok
+  \uses{def:P, def:PPoly}
+  $\cc{P} \subseteq \cc{P/poly}$.
+\end{theorem}
+\begin{proof}
+  \leanok
+  \uses{thm:circuits-unrolling-family, prop:circuits-ppoly-bigo}
+  Unroll a polynomial-time decider into its circuit family.
+\end{proof}
+
+\section{Advice}
+\label{sec:circuits-advice}
+
+\begin{definition}[Polynomial advice]
+  \label{def:PAdvice}
+  \lean{Complexity.Advice, Complexity.PolynomialAdvice,
+    Complexity.TM.DecidesWithAdviceInTime, Complexity.PAdvice}
+  \leanok
+  \uses{def:tm, def:pair, def:language}
+  An advice function $a : \mathbb{N} \to \{0,1\}^*$ has polynomial length if
+  $|a(n)| \le p(n)$ for a polynomial $p$. A deterministic machine $M$ decides
+  $L$ with advice $a$ in time $T$ if on input $\langle a(|x|), x \rangle$ (the
+  library's self-delimiting pairing) it halts within $T(|x|)$ steps with output
+  $1$ when $x \in L$ and $0$ otherwise. The time bound is measured in $|x|$,
+  not in the length of the paired input. $\cc{PAdvice}$ is the class of
+  languages decided with polynomial-length advice in time $O(n^d)$ for some
+  $d$.
+\end{definition}
+
+\begin{theorem}
+  \label{thm:circuits-padvice-subset-ppoly}
+  \lean{Complexity.PAdvice_subset_PPoly}
+  \leanok
+  \uses{def:PAdvice, def:PPoly}
+  $\cc{PAdvice} \subseteq \cc{P/poly}$.
+\end{theorem}
+\begin{proof}
+  \leanok
+  \uses{thm:circuits-acceptance-circuit, lem:circuits-hardwiring}
+  At each length, unroll the advised machine and hardwire the fixed advice
+  prefix of its input.
+\end{proof}
+
+\begin{theorem}
+  \label{thm:circuits-ppoly-subset-padvice}
+  \lean{Complexity.PPoly_subset_PAdvice}
+  \leanok
+  \uses{def:PAdvice, def:PPoly}
+  $\cc{P/poly} \subseteq \cc{PAdvice}$.
+\end{theorem}
+\begin{proof}
+  \leanok
+  \uses{lem:circuits-codec, thm:circuits-evaluator}
+  The advice at length $n$ is the canonical code of the length-$n$ circuit,
+  which has polynomial length, and the machine is the serialized circuit
+  evaluator. A family of size $O(n^d)$ is evaluated in time $O(n^{4(d+1)})$.
+\end{proof}
+
+\begin{corollary}
+  \label{cor:circuits-padvice-eq-ppoly}
+  \lean{Complexity.PAdvice_eq_PPoly}
+  \leanok
+  \uses{def:PAdvice, def:PPoly}
+  $\cc{PAdvice} = \cc{P/poly}$.
+\end{corollary}
+\begin{proof}
+  \leanok
+  \uses{thm:circuits-padvice-subset-ppoly, thm:circuits-ppoly-subset-padvice}
+  Combine the two containments.
+\end{proof}
+
+\section{Serialized circuits and their evaluation}
+\label{sec:circuits-codes}
+
+\begin{definition}[Circuit and family codes]
+  \label{def:circuits-code}
+  \lean{Complexity.CircuitCode.RawCircuit, Complexity.CircuitCode.encodeCircuit,
+    Complexity.CircuitCode.evalCode, Complexity.CircuitFamily.encodeAt,
+    Complexity.CircuitCode.circuitEvalLanguage}
+  \leanok
+  \uses{def:circuits-family, def:pair}
+  A fan-in-two single-output circuit is serialized as its gate count in
+  terminated unary followed by its gates in index order, the output gate last.
+  A gate is written as an operation bit, two negation flags, and two absolute
+  wire references in terminated unary. The partial evaluator
+  $\mathrm{evalCode}(N, c, x)$ decodes $c$, rejects inputs of the wrong length
+  and codes that are malformed, have trailing bits, are empty, or reference a
+  wire that is not yet computed, and evaluates the gates in order with a memo
+  array. The code of a family at length $0$ is the bit
+  $0$ followed by the stored answer; at length $n \ge 1$ it is the bit $1$
+  followed by the code of $C_n$. The evaluation language is the set of pairs
+  $\langle c, x \rangle$ such that the family code $c$ evaluates to $1$ on $x$.
+\end{definition}
+
+\begin{lemma}[Codec correctness]
+  \label{lem:circuits-codec}
+  \lean{Complexity.CircuitCode.evalCode_encodeCircuit,
+    Complexity.CircuitCode.encodeCircuit_length_le_size}
+  \leanok
+  \uses{def:circuits-code}
+  For a fan-in-two single-output circuit $C$ with $N$ inputs and size $s$,
+  $\mathrm{evalCode}(N, \mathrm{code}(C), x) = C(x)$ for every
+  $x \in \{0,1\}^N$, and $|\mathrm{code}(C)| \le 1 + s\,(2(N + s) + 6)$.
+\end{lemma}
+\begin{proof}
+  \leanok
+  The iterative evaluator agrees gate by gate with typed evaluation.
+\end{proof}
+
+\begin{theorem}[Serialized evaluator]
+  \label{thm:circuits-evaluator}
+  \lean{Complexity.CircuitCode.Machine.evalFamilyTM,
+    Complexity.CircuitCode.Machine.evalFamilyTM_decidesInTime,
+    Complexity.CircuitCode.Machine.evalFamilyTime_bigO_quadratic,
+    Complexity.circuitEvalLanguage_mem_P}
+  \leanok
+  \uses{def:circuits-code, def:tm-decides, def:P}
+  A fixed deterministic machine with three work tapes decides the evaluation
+  language in time $O(n^2)$, where $n$ is the length of its input
+  $\langle c, x \rangle$; malformed pairs and malformed codes are rejected.
+  In particular the evaluation language is in $\cc{P}$.
+\end{theorem}
+\begin{proof}
+  \leanok
+  Validate the outer pair and copy the code and the input onto work tapes in
+  linear time. Then stream the gates once, appending each gate value to a memo
+  tape and reading the two referenced values by unary lookup; each gate costs
+  $O(|\mathrm{memo}|)$ steps, for a total of $20(|c| + |x| + 1)^2$ steps in
+  the core.
+\end{proof}
+
+\section{Functional unrolling}
+\label{sec:circuits-unrolling}
+
+The circuits below compute the output bit of a bounded run. They are not the
+Cook--Levin CNF, which expresses the existence of an accepting tableau rather
+than computing the output of a deterministic run.
+
+\begin{theorem}[Acceptance circuit of a bounded run]
+  \label{thm:circuits-acceptance-circuit}
+  \lean{Complexity.CircuitUnrolling.acceptanceCircuit,
+    Complexity.CircuitUnrolling.acceptanceCircuit_eval,
+    Complexity.CircuitUnrolling.acceptanceCircuit_size_le,
+    Complexity.CircuitUnrolling.card_acceptingChoices_eq_acceptCount}
+  \leanok
+  \uses{def:ntm, def:circuit}
+  Let $M$ be a nondeterministic machine and $T, n \in \mathbb{N}$. For every
+  placement of $n$ data wires and $T$ choice wires among the inputs, there is a
+  fan-in-two circuit that outputs $1$ on data $x \in \{0,1\}^n$ and choices
+  $c \in \{0,1\}^T$ exactly when the $T$-step trace of $M$ on $x$ under $c$ is
+  halted with output $1$. Its size is at most $\kappa_M (T + 2)^3$ for a
+  constant $\kappa_M$ depending only on $M$. With the choices placed first, the
+  number of choice strings accepted on $x$ equals the number of accepting
+  choice sequences of $M$ on $x$ at horizon $T$.
+\end{theorem}
+\begin{proof}
+  \leanok
+  Encode bounded configurations one-hot, compile the initial configuration and
+  one transition layer as Boolean formula fragments, tile $T$ layers, and
+  append a final halt-and-output gate.
+\end{proof}
+
+\begin{theorem}[Unrolling family]
+  \label{thm:circuits-unrolling-family}
+  \lean{Complexity.TM.unrollingCircuitFamily,
+    Complexity.TM.DecidesInTime.unrollingCircuitFamily_decides,
+    Complexity.TM.unrollingCircuitFamily_size_bigO}
+  \leanok
+  \uses{def:tm-decides, def:circuits-family}
+  If a deterministic machine decides $L$ in time $f$, the family of its
+  acceptance circuits at horizon $f(n)$, with the unused choice inputs
+  hardwired, decides $L$. If $f = O(n^d)$, the family has size $O(n^{3d})$.
+\end{theorem}
+\begin{proof}
+  \leanok
+  \uses{thm:circuits-acceptance-circuit, lem:circuits-hardwiring}
+  A deterministic machine ignores its choices, so any fixed choice string
+  gives the output bit.
+\end{proof}
+
+\section{Logspace uniformity}
+\label{sec:circuits-uniform}
+
+\begin{definition}[Logspace-uniform $\cc{P/poly}$]
+  \label{def:UniformPPoly}
+  \lean{Complexity.unaryList, Complexity.CircuitFamily.Uniform,
+    Complexity.UniformPPoly}
+  \leanok
+  \uses{def:PPoly, def:circuits-code, def:FL}
+  A fan-in-two circuit family is logspace-uniform if some function in
+  $\cc{FL}$ maps $1^n$ to the family code at length $n$, for every $n$
+  (Arora--Barak Definition~6.5). The generator reads $n$ in unary, and its
+  output at $n = 0$ carries the stored empty-input answer. The class
+  $\cc{UniformPPoly}$ consists of the languages decided by a logspace-uniform
+  circuit family of polynomial size. P-uniformity is not used.
+\end{definition}
+
+\begin{proposition}
+  \label{prop:circuits-uniform-subset-ppoly}
+  \lean{Complexity.UniformPPoly_subset_PPoly}
+  \leanok
+  \uses{def:UniformPPoly}
+  $\cc{UniformPPoly} \subseteq \cc{P/poly}$.
+\end{proposition}
+\begin{proof}
+  \leanok
+  Forget the generator.
+\end{proof}
+
+\begin{theorem}
+  \label{thm:circuits-uniform-subset-p}
+  \lean{Complexity.UniformPPoly_subset_P}
+  \leanok
+  \uses{def:UniformPPoly, def:P}
+  $\cc{UniformPPoly} \subseteq \cc{P}$.
+\end{theorem}
+\begin{proof}
+  \leanok
+  \uses{thm:circuits-evaluator, def:FP}
+  Since $\cc{FL} \subseteq \cc{FP}$, the map
+  $x \mapsto \langle \mathrm{gen}(1^{|x|}), x \rangle$ is in $\cc{FP}$. The
+  language is the preimage of the evaluation language under this map, and
+  $\cc{P}$ is closed under preimages by $\cc{FP}$ functions.
+\end{proof}
+
+\begin{lemma}[The tableau code map is in $\cc{FL}$]
+  \label{lem:circuits-padded-code-fl}
+  \lean{Complexity.TM.directUnrollingCircuitFamily,
+    Complexity.TM.paddedDirectUnrollingCode,
+    Complexity.TM.paddedDirectUnrollingCode_mem_FL}
+  \leanok
+  \uses{def:tm, def:circuits-code, def:FL}
+  For a deterministic machine $M$ and a horizon $h$, let $D_{M,h}(n)$ be the
+  family code at length $n$ of the direct unrolling of $M$ at horizon $h(n)$,
+  padded with semantically dead constant gates to a closed-form cubic gate
+  count. For every polynomial $q$ and $h(n) = q(n) + n + 1$, the map
+  $x \mapsto D_{M,h}(|x|)$ is in $\cc{FL}$.
+\end{lemma}
+\begin{proof}
+  \leanok
+  The direct unrolling is an initialization fragment, a stream of fixed-size
+  transition fragments whose wire offsets have closed forms, and a final gate.
+  A streaming transducer computes the offsets with binary counters, addition,
+  multiply-add and fixed-polynomial evaluation, and writes each reference in
+  terminated unary. One polynomial bounds every counter value, so the
+  auxiliary space is logarithmic.
+\end{proof}
+
+\begin{theorem}
+  \label{thm:circuits-p-subset-uniform}
+  \lean{Complexity.P_subset_UniformPPoly, Complexity.TM.DecidesInTime.mem_UniformPPoly}
+  \leanok
+  \uses{def:P, def:UniformPPoly}
+  $\cc{P} \subseteq \cc{UniformPPoly}$.
+\end{theorem}
+\begin{proof}
+  \leanok
+  \uses{lem:circuits-padded-code-fl, thm:circuits-acceptance-circuit}
+  The padded direct unrolling of a polynomial-time decider decides its
+  language, has polynomial size, and has a code map in $\cc{FL}$.
+\end{proof}
+
+\begin{theorem}[Arora--Barak Theorem~6.7]
+  \label{thm:circuits-uniform-eq-p}
+  \lean{Complexity.UniformPPoly_eq_P}
+  \leanok
+  \uses{def:P, def:UniformPPoly}
+  $\cc{UniformPPoly} = \cc{P}$.
+\end{theorem}
+\begin{proof}
+  \leanok
+  \uses{thm:circuits-uniform-subset-p, thm:circuits-p-subset-uniform}
+  Combine the two containments.
+\end{proof}
+
+\section{$\cc{BPP}$ is contained in $\cc{P/poly}$}
+\label{sec:circuits-bpp}
+
+\begin{lemma}[One seed for all inputs of a length]
+  \label{lem:circuits-uniform-seed}
+  \lean{Complexity.NTM.exists_uniform_correct_seed}
+  \leanok
+  \uses{def:ntm}
+  Let $M$ be a probabilistic machine with time horizon $f$ that accepts every
+  $x \in L$ with probability at least $2/3$ and every $x \notin L$ with
+  probability at most $1/3$. For every $n$ there is a single string of
+  $r(n) f(n)$ random bits, where $r(n) = 12(n + 1) + 1$, on which the majority
+  vote of $r(n)$ runs of $M$, each on its own block of $f(n)$ bits, is correct
+  for every $x \in \{0,1\}^n$.
+\end{lemma}
+\begin{proof}
+  \leanok
+  Amplification makes the error on each input less than $2^{-(n+1)}$, and a
+  union bound over the $2^n$ inputs leaves a good seed.
+\end{proof}
+
+\begin{theorem}[Hardwired amplification]
+  \label{thm:circuits-hardwired-amplification}
+  \lean{Complexity.NTM.hardwiredAmplificationFamily,
+    Complexity.NTM.hardwiredAmplificationFamily_decides,
+    Complexity.NTM.hardwiredAmplificationFamily_size_bigO}
+  \leanok
+  \uses{def:ntm, def:circuits-family}
+  Under the hypotheses of Lemma~\ref{lem:circuits-uniform-seed}, hardwiring
+  the selected seed into $r(n)$ parallel copies of the acceptance circuit at
+  horizon $f(n)$, followed by a strict-majority fragment, gives a fan-in-two
+  circuit family deciding $L$. If $f = O(n^d)$, its size is $O(n^{3d+4})$.
+\end{theorem}
+\begin{proof}
+  \leanok
+  \uses{lem:circuits-uniform-seed, thm:circuits-acceptance-circuit,
+    lem:circuits-hardwiring}
+  Compose copies of the original acceptance circuit rather than unrolling the
+  repeated machine, whose control state would store the whole vote vector.
+\end{proof}
+
+\begin{theorem}[Adleman]
+  \label{thm:circuits-bpp-subset-ppoly}
+  \lean{Complexity.BPP_subset_PPoly}
+  \leanok
+  \uses{def:BPP, def:PPoly}
+  $\cc{BPP} \subseteq \cc{P/poly}$.
+\end{theorem}
+\begin{proof}
+  \leanok
+  \uses{thm:circuits-hardwired-amplification, prop:circuits-ppoly-bigo}
+  Apply the hardwired amplification family to a $\cc{BPP}$ machine.
+\end{proof}
+
+\begin{corollary}
+  \label{cor:circuits-bpp-subset-padvice}
+  \lean{Complexity.BPP_subset_PAdvice}
+  \leanok
+  \uses{def:BPP, def:PAdvice}
+  $\cc{BPP} \subseteq \cc{PAdvice}$.
+\end{corollary}
+\begin{proof}
+  \leanok
+  \uses{thm:circuits-bpp-subset-ppoly, thm:circuits-ppoly-subset-padvice}
+  Compose the two containments.
+\end{proof}
+
+\section{Small-depth classes}
+\label{sec:circuits-depth}
+
+\begin{definition}[$\cc{NC}^i$ and $\cc{AC}^i$]
+  \label{def:NC-AC}
+  \lean{Complexity.polylogDepth, Complexity.NC, Complexity.AC, Complexity.NC1,
+    Complexity.AC0}
+  \leanok
+  \uses{def:circuits-family, def:circuits-bases}
+  These are classes of Boolean function families, one function
+  $\{0,1\}^n \to \{0,1\}$ for each $n$, not of languages. A family is in
+  $\cc{NC}^i$ if a fan-in-two AND/OR circuit family of polynomial size and
+  depth at most $c\,(\lfloor \log_2 n \rfloor + 1)^i$, for some constant $c$,
+  computes it. $\cc{AC}^i$ is defined the same way with unbounded fan-in.
+  $\cc{NC}^0$, $\cc{NC}^1$ and $\cc{AC}^0$ are the special cases. These classes
+  are nonuniform.
+\end{definition}
+
+\begin{definition}[$\cc{TC}^i$]
+  \label{def:circuits-TC}
+  \lean{Complexity.ThresholdOp, Complexity.Basis.threshold, Complexity.TC,
+    Complexity.TC0}
+  \leanok
+  \uses{def:NC-AC}
+  A threshold gate with cutoff $t$ outputs $1$ when at least $t$ of its
+  inputs are $1$; the threshold basis has unweighted threshold gates of
+  unbounded fan-in. $\cc{TC}^i$ is defined like $\cc{AC}^i$ over this basis.
+\end{definition}
+
+\begin{proposition}[Depth hierarchies]
+  \label{prop:circuits-depth-classes}
+  \lean{Complexity.NC_mono, Complexity.AC_mono, Complexity.TC_mono,
+    Complexity.AC_subset_TC, Complexity.AC0_subset_TC0}
+  \leanok
+  \uses{def:NC-AC, def:circuits-TC}
+  For $i \le j$, $\cc{NC}^i \subseteq \cc{NC}^j$, $\cc{AC}^i \subseteq \cc{AC}^j$
+  and $\cc{TC}^i \subseteq \cc{TC}^j$. For every $i$,
+  $\cc{AC}^i \subseteq \cc{TC}^i$.
+\end{proposition}
+\begin{proof}
+  \leanok
+  Monotonicity is monotonicity of the depth envelope. For
+  $\cc{AC}^i \subseteq \cc{TC}^i$, transport circuits along the embedding of
+  AND and OR gates as threshold gates, which preserves semantics, size and
+  depth exactly.
+\end{proof}
+
+\begin{proposition}[Interleaving]
+  \label{prop:circuits-nc-ac-interleave}
+  \uses{def:NC-AC}
+  For every $i$, $\cc{NC}^i \subseteq \cc{AC}^i \subseteq \cc{NC}^{i+1}$.
+\end{proposition}
+\begin{proof}
+  A fan-in-two gate is an unbounded gate. Conversely, replace each unbounded
+  gate, whose fan-in is polynomial, by a balanced fan-in-two tree of depth
+  $O(\log n)$.
+\end{proof}
+
+\section{Formulas and Barrington's theorem}
+\label{sec:circuits-barrington}
+
+\begin{definition}[Boolean formula]
+  \label{def:circuits-formula}
+  \lean{Complexity.BoolFormula, Complexity.BoolFormula.eval,
+    Complexity.BoolFormula.size, Complexity.BoolFormula.depth}
+  \leanok
+  A Boolean formula is a tree built from variables $x_i$ ($i \in \mathbb{N}$),
+  the two constants, negation, and binary conjunction and disjunction. It is
+  evaluated under a total assignment $\mathbb{N} \to \{0,1\}$. Its size is its
+  number of nodes, and its depth is the length of a longest root-to-leaf path,
+  with each negation counted as one level.
+\end{definition}
+
+\begin{lemma}[Unfolding a circuit output]
+  \label{lem:circuits-output-formula}
+  \lean{Complexity.Circuit.outputFormula, Complexity.Circuit.eval_outputFormula,
+    Complexity.Circuit.depth_outputFormula_le_outputDepth}
+  \leanok
+  \uses{def:circuit, def:circuits-formula}
+  Unfolding one output of a fan-in-two circuit gives a formula over the
+  circuit's inputs that computes that output and has depth at most twice the
+  output's depth. No size bound is claimed, since shared subcircuits are
+  duplicated.
+\end{lemma}
+\begin{proof}
+  \leanok
+  Structural recursion on wire indices; an edge negation followed by its gate
+  costs two formula levels.
+\end{proof}
+
+\begin{definition}[Permutation branching program]
+  \label{def:circuits-bp}
+  \lean{Complexity.BPInstr, Complexity.BP, Complexity.BP.eval,
+    Complexity.BP.Computes}
+  \leanok
+  A width-$w$ permutation branching program is a list of instructions
+  $(i, \pi_0, \pi_1)$ with $\pi_0, \pi_1 \in S_w$. Under an assignment
+  $\alpha$, an instruction selects $\pi_{\alpha(i)}$, and the program evaluates
+  to the product $\pi^{(1)} \pi^{(2)} \cdots \pi^{(k)}$ of the selected
+  permutations in $S_w$, where multiplication is composition. A program
+  computes $f$ through $\sigma$ if it evaluates to $\sigma$ when $f(\alpha) = 1$
+  and to the identity otherwise.
+\end{definition}
+
+\begin{lemma}[Five-cycles are commutators]
+  \label{lem:circuits-five-cycles}
+  \lean{Complexity.exists_fiveCycle_commutator,
+    Complexity.every_fiveCycle_is_commutator}
+  \leanok
+  Every $5$-cycle in $S_5$ is the commutator $[a, b]$ of two $5$-cycles $a$
+  and $b$.
+\end{lemma}
+\begin{proof}
+  \leanok
+  One explicit pair is checked by kernel computation, and the $5$-cycles form
+  a single conjugacy class.
+\end{proof}
+
+\begin{theorem}[Barrington, finite form]
+  \label{thm:circuits-barrington-finite}
+  \lean{Complexity.barrington_representation_depth_four,
+    Complexity.barrington_quadratic_of_log_depth}
+  \leanok
+  \uses{def:circuits-formula, def:circuits-bp}
+  Every Boolean formula of depth $d$ is computed, through some
+  $\sigma \neq 1$ in $S_5$, by a width-$5$ permutation branching program of
+  length at most $4^d$. In particular, a formula of depth at most $\log_2 n$,
+  with $n \ge 1$, has such a program of length at most $n^2$.
+\end{theorem}
+\begin{proof}
+  \leanok
+  \uses{lem:circuits-five-cycles}
+  Literals and constants are direct. Negation retargets to $\sigma^{-1}$ and
+  appends a constant instruction. Conjunction realizes a target $5$-cycle as
+  the commutator of two $5$-cycles and concatenates four subprograms.
+\end{proof}
+
+\begin{theorem}[Constructive Barrington compiler]
+  \label{thm:circuits-barrington-compiler}
+  \lean{Complexity.barringtonCompile, Complexity.barringtonCompile_representation}
+  \leanok
+  \uses{def:circuits-formula, def:circuits-bp}
+  An explicit computable compiler maps every formula $\varphi$ to a width-$5$
+  program that evaluates to one fixed $5$-cycle $\sigma_0$ when $\varphi$ is
+  true and to the identity otherwise, of length at most $4^{\mathrm{depth}(\varphi)}$.
+\end{theorem}
+\begin{proof}
+  \leanok
+  \uses{thm:circuits-barrington-finite}
+  Replace each choice of conjugating permutation by a search through an
+  explicit enumeration of $S_5$.
+\end{proof}
+
+\begin{lemma}[Programs to balanced formulas]
+  \label{lem:circuits-bp-to-formula}
+  \lean{Complexity.BP.decisionFormula, Complexity.BP.eval_decisionFormula_eq_true,
+    Complexity.BP.depth_decisionFormula_le}
+  \leanok
+  \uses{def:circuits-formula, def:circuits-bp}
+  For a width-$w$ program $P$ of length $\ell$ and a point $x$, there is a
+  formula that is true exactly when the value of $P$ moves $x$, has depth at
+  most $(w + 1) \lceil \log_2 \ell \rceil + 2$, and reads only variables read
+  by $P$.
+\end{lemma}
+\begin{proof}
+  \leanok
+  Split the program in half and compose the two halves through the $w$
+  possible intermediate points.
+\end{proof}
+
+\begin{definition}[Formula and program families]
+  \label{def:circuits-formula-nc1}
+  \lean{Complexity.FixedArityFormulaFamily, Complexity.FixedArityBPFamily,
+    Complexity.FormulaNC1, Complexity.Width5BP}
+  \leanok
+  \uses{def:circuits-formula, def:circuits-bp}
+  $\cc{FormulaNC1}$ is the class of Boolean function families computed by a
+  family of formulas $(\varphi_n)$ in which $\varphi_n$ reads only variables
+  below $n$ and has depth at most $c \log_2 n + c$ for a constant $c$.
+  $\cc{Width5BP}$ is the class of Boolean function families decided by a
+  family of width-$5$ programs $P_n$ for $n \ge 1$, each reading only
+  variables below $n$ and with a designated point $x_n$, together with an
+  explicit answer at $n = 0$; the output is $1$ exactly when the value of $P_n$
+  moves $x_n$, and the length of $P_n$ is at most $C (n + 1)^k$ for constants
+  $C, k$.
+\end{definition}
+
+\begin{theorem}[Barrington]
+  \label{thm:circuits-barrington}
+  \lean{Complexity.fixedArityFormulaFamily_exists_bp,
+    Complexity.fixedArityBPFamily_exists_formula, Complexity.barrington_equivalence}
+  \leanok
+  \uses{def:circuits-formula-nc1}
+  $\cc{FormulaNC1} = \cc{Width5BP}$.
+\end{theorem}
+\begin{proof}
+  \leanok
+  \uses{thm:circuits-barrington-finite, lem:circuits-bp-to-formula}
+  Depth $c \log_2 n + c$ gives length $4^{c \log_2 n + c}$, which is
+  polynomial. Conversely, a program of polynomial length has a balanced
+  decision formula of logarithmic depth.
+\end{proof}
+
+\begin{theorem}
+  \label{thm:circuits-nc1-subset-width5bp}
+  \lean{Complexity.NC1_subset_FormulaNC1, Complexity.NC1_subset_Width5BP}
+  \leanok
+  \uses{def:NC-AC, def:circuits-formula-nc1}
+  $\cc{NC}^1 \subseteq \cc{FormulaNC1}$, and hence
+  $\cc{NC}^1 \subseteq \cc{Width5BP}$.
+\end{theorem}
+\begin{proof}
+  \leanok
+  \uses{lem:circuits-output-formula, thm:circuits-barrington}
+  Unfold the output of each circuit; the depth at most doubles and the
+  variables stay below the arity.
+\end{proof}
+
+\begin{theorem}
+  \label{thm:circuits-formula-nc1-subset-nc1}
+  \uses{def:NC-AC, def:circuits-formula-nc1}
+  $\cc{FormulaNC1} \subseteq \cc{NC}^1$. Consequently
+  $\cc{NC}^1 = \cc{FormulaNC1} = \cc{Width5BP}$.
+\end{theorem}
+\begin{proof}
+  \uses{thm:circuits-nc1-subset-width5bp, thm:circuits-barrington}
+  A formula of depth $d$ has at most $2^{d+1}$ nodes, so logarithmic depth
+  gives polynomial size. Compile each node to a gate, moving negations into
+  input flags and building constants from an input and its negation.
+\end{proof}
+
+\begin{lemma}[Bit-level Barrington generator]
+  \label{lem:circuits-barrington-codegen}
+  \lean{Complexity.FormulaCode.encode, Complexity.FormulaCode.encode_injective,
+    Complexity.BPCode.Program.encode, Complexity.BPCode.Program.encode_injective,
+    Complexity.barringtonCompileCode, Complexity.barringtonCompileCode_spec,
+    Complexity.length_barringtonCompileCode_encode_le}
+  \leanok
+  \uses{thm:circuits-barrington-compiler}
+  There are injective codes for formulas (postfix token
+  streams) and for width-$5$ programs (fixed seven-bit permutation ranks and
+  unary variable indices), and a total function $g$ on bit strings such that,
+  for every formula $\varphi$ of depth $d$, $g(\mathrm{code}(\varphi))$ decodes
+  to the compiled program of Theorem~\ref{thm:circuits-barrington-compiler} and
+  $|g(\mathrm{code}(\varphi))| \le 4^d + 1 + 4^d (|\mathrm{code}(\varphi)| + 15)$.
+\end{lemma}
+\begin{proof}
+  \leanok
+  Run the compiler on the decoded formula and bound each serialized
+  instruction by the code length of the formula.
+\end{proof}
+
+\begin{lemma}[The Barrington generator in small space]
+  \label{lem:circuits-barrington-codegen-space}
+  \uses{lem:circuits-barrington-codegen}
+  A deterministic transducer computes $g(\mathrm{code}(\varphi))$ from
+  $\mathrm{code}(\varphi)$ using
+  $O(\mathrm{depth}(\varphi) + \log |\mathrm{code}(\varphi)|)$ work-tape
+  cells.
+\end{lemma}
+\begin{proof}
+  Emit the compiled program instruction by instruction: an instruction index
+  is a path of length $\mathrm{depth}(\varphi)$ in the recursion tree, with a
+  constant amount of permutation data per level, and the formula node at the
+  current position is located by counting in the input code.
+\end{proof}
+
+\begin{theorem}[Uniform Barrington]
+  \label{thm:circuits-uniform-barrington}
+  \uses{def:circuits-formula-nc1, def:FL}
+  \notready
+  Call a formula family logspace-uniform if some function in $\cc{FL}$ maps
+  $1^n$ to $\mathrm{code}(\varphi_n)$, and a program family logspace-uniform if
+  some function in $\cc{FL}$ maps $1^n$ to the code of $(P_n, x_n)$. A Boolean
+  function family has a logspace-uniform $\cc{FormulaNC1}$ witness if and only
+  if it has a logspace-uniform $\cc{Width5BP}$ witness.
+\end{theorem}
+\begin{proof}
+  \uses{thm:circuits-barrington, lem:circuits-barrington-codegen-space,
+    lem:circuits-bp-to-formula}
+  Forward: compose the formula generator with the small-space Barrington
+  generator; the depth is $O(\log n)$, so the space is $O(\log n)$.
+  Backward: generate the balanced decision formula of each program in
+  logarithmic space.
+\end{proof}
+
+\section{Open directions}
+\label{sec:circuits-open}
+
+The following items are infrastructure rather than theorems.
+
+\begin{itemize}
+  \item \textbf{A circuit encoding designed for generation.} The current code
+    format has a gate-count header, absolute wire references into subformulas
+    of varying size, and no sharing. The log-space generator behind
+    Lemma~\ref{lem:circuits-padded-code-fl} must therefore compute closed-form
+    wire offsets for every fragment, and the uniform unrolling development is
+    about 59,000 lines. A layered grid encoding, in which every wire reference
+    is an affine function of the loop counters, would make future uniformity
+    proofs (uniform $\cc{NC}$ and $\cc{AC}$, Theorem~\ref{thm:circuits-uniform-barrington},
+    finer notions such as DLOGTIME uniformity) much shorter. It should come
+    with an $\cc{FL}$ translation into the existing codec, so that
+    $\cc{UniformPPoly}$ does not change.
+  \item \textbf{One representation of circuits and formulas.} The library has
+    about fourteen parallel representations: typed circuits, raw gate lists,
+    general, monotone and negation-normal unbounded formulas, two CNF/DNF
+    types, two decision-tree types, branching programs, and several family
+    wrappers. A single formula type with a substitution operation (a monadic
+    bind), and circuits built so that acyclicity holds by typing, would let
+    restriction, unfolding and normalization lemmas be proved once.
+\end{itemize}

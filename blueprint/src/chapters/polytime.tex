@@ -1,0 +1,734 @@
+\chapter{Polynomial time, reductions, and NP}
+\label{chap:polytime}
+
+This chapter covers deterministic and nondeterministic time classes, the
+polynomial-time function class $\cc{FP}$, polynomial-time many-one (Karp)
+reductions, and the theory of $\cc{NP}$-completeness built on satisfiability.
+All class definitions are formalized, together with the closure of $\cc{P}$ and
+$\cc{FP}$ under the usual operations, Cobham's machine-independent
+characterization of $\cc{FP}$ in both directions, the direction ``polynomial-time
+verifier implies $\cc{NP}$'' of the witness characterization, and the
+Cook--Levin theorem with its corollaries for $3\mathrm{SAT}$ and for the
+complement of $\mathrm{SAT}$. The main open directions are the converse witness
+direction (every $\cc{NP}$ language has a polynomial-time verifier, hence
+$\cc{NP} = \Sigma^p_1$), a catalog of further $\cc{NP}$-complete problems with
+explicit codecs, and $\cc{FP}$ combinators that would let the existing bespoke
+machines be re-proved as short programs through Cobham's theorem.
+
+\section{Time classes}
+
+\begin{definition}[$\cc{DTIME}$]
+  \label{def:dtime}
+  \lean{Complexity.DTIME}
+  \leanok
+  \uses{def:language, def:tm-decides}
+  For $T \colon \mathbb{N} \to \mathbb{N}$, $\cc{DTIME}(T)$ is the set of
+  languages $L$ for which there are a deterministic machine with some number
+  $k$ of work tapes and a function $f$ with $f = O(T)$ such that the machine
+  decides $L$ within time $f$: on every input $x$ it halts within $f(|x|)$
+  steps with $1$ in the first output cell if $x \in L$ and $0$ otherwise. Here
+  $f = O(T)$ means that $f(n) \le C \cdot T(n)$ for some constant $C$ and all
+  sufficiently large $n$.
+\end{definition}
+
+\begin{definition}[$\cc{NTIME}$]
+  \label{def:ntime}
+  \lean{Complexity.NTIME}
+  \leanok
+  \uses{def:language, def:ntm-decides}
+  $\cc{NTIME}(T)$ is the set of languages $L$ for which some nondeterministic
+  machine (two transition functions selected by a choice bit) and some
+  $f = O(T)$ satisfy: every computation path on input $x$ halts within
+  $f(|x|)$ steps, and $x \in L$ if and only if some choice sequence of length
+  $f(|x|)$ ends in the halting state with output $1$.
+\end{definition}
+
+\begin{definition}[$\cc{P}$]
+  \label{def:P}
+  \lean{Complexity.P}
+  \leanok
+  \uses{def:dtime}
+  $\cc{P} = \bigcup_{k} \cc{DTIME}(n^k)$.
+\end{definition}
+
+\begin{definition}[$\cc{NP}$]
+  \label{def:NP}
+  \lean{Complexity.NP}
+  \leanok
+  \uses{def:ntime}
+  $\cc{NP} = \bigcup_{k} \cc{NTIME}(n^k)$. This is the machine definition;
+  the certificate form is Theorem~\ref{thm:polytime-fnp-np} (one direction,
+  formalized) and Theorem~\ref{thm:polytime-np-verifier} (the other, planned).
+\end{definition}
+
+\begin{definition}[$\cc{coNP}$]
+  \label{def:coNP}
+  \lean{Complexity.coNP}
+  \leanok
+  \uses{def:NP}
+  $\cc{coNP} = \{L : \overline{L} \in \cc{NP}\}$, where $\overline{L}$ is the
+  complement of $L$ in the set of all bit strings. The library forms every
+  complement class with the same constructor
+  (\texttt{Complexity.complClass}).
+\end{definition}
+
+\begin{definition}[$\cc{FP}$]
+  \label{def:FP}
+  \lean{Complexity.FP}
+  \leanok
+  \uses{def:tm-computes}
+  $\cc{FP}$ is the set of functions $f \colon \{0,1\}^* \to \{0,1\}^*$ for which
+  some deterministic machine computes $f$ within time $T$ with
+  $T = O(n^d)$ for some $d$: on every input $x$ it halts within $T(|x|)$ steps
+  with $f(x)$ written on the output tape.
+\end{definition}
+
+\begin{definition}[$\cc{EXP}$ and $\cc{NEXP}$]
+  \label{def:EXP}
+  \lean{Complexity.EXP, Complexity.NEXP}
+  \leanok
+  \uses{def:dtime, def:ntime}
+  $\cc{EXP} = \bigcup_{k} \cc{DTIME}(2^{n^k})$ and
+  $\cc{NEXP} = \bigcup_{k} \cc{NTIME}(2^{n^k})$.
+\end{definition}
+
+\begin{theorem}[Deterministic inside nondeterministic time]
+  \label{thm:polytime-P-subset-NP}
+  \lean{Complexity.DTIME_subset_NTIME, Complexity.P_subset_NP, Complexity.P_subset_EXP, Complexity.NP_subset_NEXP, Complexity.EXP_subset_NEXP}
+  \leanok
+  \uses{def:dtime, def:ntime, def:P, def:NP, def:EXP}
+  For every $T$, $\cc{DTIME}(T) \subseteq \cc{NTIME}(T)$. Consequently
+  $\cc{P} \subseteq \cc{NP}$, $\cc{P} \subseteq \cc{EXP}$,
+  $\cc{NP} \subseteq \cc{NEXP}$, and $\cc{EXP} \subseteq \cc{NEXP}$.
+\end{theorem}
+\begin{proof}
+  \leanok
+  A deterministic machine is a nondeterministic machine whose two transition
+  functions coincide, and it decides the same language in the same time. The
+  exponential inclusions follow from $n^k \le 2^{n^k}$ and monotonicity of
+  $\cc{DTIME}$ and $\cc{NTIME}$ under $O(\cdot)$.
+\end{proof}
+
+\begin{theorem}[$\cc{P}$, $\cc{NP}$, and $\cc{coNP}$]
+  \label{thm:polytime-coNP-structure}
+  \lean{Complexity.P_subset_NP_inter_coNP, Complexity.NP_eq_coNP_of_P_eq_NP, Complexity.P_ne_NP_of_NP_ne_coNP}
+  \leanok
+  \uses{def:P, def:NP, def:coNP}
+  $\cc{P} \subseteq \cc{NP} \cap \cc{coNP}$. If $\cc{P} = \cc{NP}$ then
+  $\cc{NP} = \cc{coNP}$; equivalently, $\cc{NP} \neq \cc{coNP}$ implies
+  $\cc{P} \neq \cc{NP}$.
+\end{theorem}
+\begin{proof}
+  \leanok
+  \uses{thm:polytime-P-subset-NP, prop:polytime-P-boolean}
+  $\cc{P}$ is closed under complement, so $\cc{P} \subseteq \cc{coNP}$. Under
+  $\cc{P} = \cc{NP}$ the class $\cc{NP}$ inherits closure under complement, and
+  a class closed under complement equals its complement class.
+\end{proof}
+
+\begin{theorem}[$\cc{NP} \subseteq \cc{PSPACE}$]
+  \label{thm:polytime-np-subset-pspace}
+  \uses{def:NP, def:PSPACE, def:EXP}
+  $\cc{NP} \subseteq \cc{PSPACE}$, and hence $\cc{NP} \subseteq \cc{EXP}$.
+\end{theorem}
+\begin{proof}
+  \uses{thm:polytime-np-sigma1, thm:randomness-ph-subset-pspace}
+  Two routes are available. Directly: prove
+  $\cc{NTIME}(T) \subseteq \cc{NSPACE}(T)$ exactly as
+  $\cc{DTIME}(T) \subseteq \cc{DSPACE}(T)$ is proved (a head moves at most one
+  cell per step), then apply $\cc{NPSPACE} \subseteq \cc{PSPACE}$
+  (\texttt{Complexity.NPSPACE\_subset\_PSPACE}, formalized in the space
+  chapter). Alternatively, $\cc{NP} \subseteq \Sigma^p_1 \subseteq \cc{PH}
+  \subseteq \cc{PSPACE}$. In both cases $\cc{PSPACE} \subseteq \cc{EXP}$
+  (\texttt{Complexity.PSPACE\_subset\_EXP}) gives the second claim.
+\end{proof}
+
+\section{Closure properties of P and FP}
+
+The projections of the pairing codec, and the pairing of two $\cc{FP}$
+functions, are in $\cc{FP}$; these facts are stated in the chapter on
+encodings. Pairing a value with the unchanged input is
+\texttt{Complexity.mem\_FP\_pairWithInput}.
+
+\begin{proposition}[$\cc{P}$ is a Boolean algebra]
+  \label{prop:polytime-P-boolean}
+  \lean{Complexity.P_compl, Complexity.P_union, Complexity.P_inter, Complexity.P_diff, Complexity.complClass_P}
+  \leanok
+  \uses{def:P}
+  $\cc{P}$ is closed under complement, union, intersection, and set difference.
+  In particular $\{L : \overline{L} \in \cc{P}\} = \cc{P}$.
+\end{proposition}
+\begin{proof}
+  \leanok
+  Complement runs the decider and flips the output bit, in $2f(n) + 4$ steps.
+  Union runs both deciders in sequence, giving
+  $\cc{DTIME}(T_1) \cup \cc{DTIME}(T_2) \subseteq \cc{DTIME}(T_1 + T_2)$ in the
+  sense of \texttt{Complexity.DTIME\_union}. Intersection and difference follow
+  by De Morgan.
+\end{proof}
+
+\begin{lemma}[Identity and composition in $\cc{FP}$]
+  \label{lem:polytime-FP-comp}
+  \lean{Complexity.id_mem_FP, Complexity.mem_FP_comp}
+  \leanok
+  \uses{def:FP}
+  The identity function is in $\cc{FP}$, and if $f, g \in \cc{FP}$ then
+  $g \circ f \in \cc{FP}$.
+\end{lemma}
+\begin{proof}
+  \leanok
+  The identity is computed by copying the input to the output in $n + 2$
+  steps. For composition, the two machines run as a pipeline on disjoint tapes,
+  the output of the first becoming the input of the second; since
+  $|f(x)| \le T_f(|x|)$, the total time is polynomial.
+\end{proof}
+
+\begin{theorem}[Closure under polynomial-time preimages]
+  \label{thm:polytime-preimage}
+  \lean{Complexity.mem_P_preimage, Complexity.mem_NP_preimage}
+  \leanok
+  \uses{def:P, def:NP, def:FP}
+  If $f \in \cc{FP}$ and $L \in \cc{P}$, then
+  $f^{-1}(L) = \{x : f(x) \in L\} \in \cc{P}$. The same holds with $\cc{NP}$ in
+  place of $\cc{P}$.
+\end{theorem}
+\begin{proof}
+  \leanok
+  Run the transducer for $f$ and then the decider for $L$ on its output, in a
+  pipeline of disjoint tapes, deterministically or nondeterministically. The
+  output of $f$ has polynomial length, so the second stage runs in polynomial
+  time in $|x|$.
+\end{proof}
+
+\begin{lemma}[Deciding by a verdict function]
+  \label{lem:polytime-decision-fn}
+  \lean{Complexity.mem_P_of_decisionFn, Complexity.mem_P_of_decisionFn_bool}
+  \leanok
+  \uses{def:P, def:FP}
+  If $f \in \cc{FP}$ and, for all $x$, $x \in L$ exactly when $f(x)$ contains
+  a $1$, then $L \in \cc{P}$. In particular, if $g$ is Boolean-valued,
+  $x \mapsto [g(x)]$ is in $\cc{FP}$, and $x \in L \iff g(x) = 1$, then
+  $L \in \cc{P}$.
+\end{lemma}
+\begin{proof}
+  \leanok
+  \uses{thm:polytime-preimage}
+  $L$ is the preimage under $f$ of the polynomial-time language of strings
+  containing a $1$. Together with Cobham's theorem this lets membership in
+  $\cc{P}$ be established by writing a function rather than a machine.
+\end{proof}
+
+\section{Cobham's theorem: FP as a programming language}
+
+\begin{definition}[Cobham's function algebra]
+  \label{def:polytime-cobham}
+  \lean{Complexity.Cobham, Complexity.CobhamFP, Complexity.smash, Complexity.recNotation}
+  \leanok
+  Bit strings are read least-significant bit first. Cobham's algebra is the
+  smallest class of functions $(\{0,1\}^*)^n \to \{0,1\}^*$, over all arities
+  $n$, that contains the projections, the empty-string constant, the bit
+  successors $x \mapsto b\,x$ (prepend $b$), and
+  $\mathrm{smash}(x, y) = 1^{|x| \cdot |y|}$, and is closed under composition
+  and limited recursion on notation: if $g, h_0, h_1, j$ are in the class and
+  the function $f$ defined by $f(\varepsilon, v) = g(v)$ and
+  $f(b\,x, v) = h_b(x, f(x, v), v)$ satisfies $|f(x, v)| \le |j(x, v)|$ for
+  all $x, v$, then $f$ is in the class. The
+  unary fragment is $\cc{CobhamFP}$.
+\end{definition}
+
+\begin{theorem}[Cobham]
+  \label{thm:cobham}
+  \lean{Complexity.CobhamFP_eq_FP, Complexity.CobhamFP_subset_FP, Complexity.FP_subset_CobhamFP}
+  \leanok
+  \uses{def:polytime-cobham, def:FP}
+  $\cc{CobhamFP} = \cc{FP}$.
+\end{theorem}
+\begin{proof}
+  \leanok
+  \uses{lem:polytime-iterate, lem:polytime-FP-comp}
+  Soundness is an induction over the constructors of the algebra; limited
+  recursion on notation is a fold whose width clamp is vacuous under Cobham's
+  side condition, run by Lemma~\ref{lem:polytime-iterate}. Completeness
+  simulates a polynomial-time machine inside the algebra: a configuration is
+  one block-aligned string with each tape split at its head, the transition
+  function is a finite table, the run is iterated under a clock built from
+  $\mathrm{smash}$, and the output is read after a rewind.
+\end{proof}
+
+\begin{theorem}[Cobham's theorem at every arity]
+  \label{thm:polytime-cobham-arity}
+  \lean{Complexity.Cobham.cobham_iff_FPn}
+  \leanok
+  \uses{def:polytime-cobham, def:FP}
+  For every $n$ and $f \colon (\{0,1\}^*)^n \to \{0,1\}^*$, $f$ is in Cobham's
+  algebra if and only if there is $g \in \cc{FP}$ with
+  $g(\mathrm{enc}(v)) = f(v)$ for all $v$, where $\mathrm{enc}$ is the
+  canonical fixed-arity tuple encoding (\texttt{Cobham.encodeVec}).
+\end{theorem}
+\begin{proof}
+  \leanok
+  \uses{thm:cobham}
+  The soundness induction is carried out at every arity; completeness
+  composes the unary simulation with the tuple encoding, which is itself in
+  the algebra.
+\end{proof}
+
+\begin{lemma}[Iteration in $\cc{FP}$]
+  \label{lem:polytime-iterate}
+  \lean{Complexity.Cobham.iterate_mem_FP}
+  \leanok
+  \uses{def:FP}
+  Let $F, \mathit{init}, \mathit{ruler}, \mathit{width} \in \cc{FP}$, and
+  suppose $|F^m(\mathit{init}(z))| \le |\mathit{width}(z)|$ for every $z$ and
+  every $m \le |\mathit{ruler}(z)|$. Then
+  $z \mapsto F^{|\mathit{ruler}(z)|}(\mathit{init}(z))$ is in $\cc{FP}$.
+\end{lemma}
+\begin{proof}
+  \leanok
+  One machine iterates a truncated step once per bit of its own input, with a
+  unary counter that stops applying $F$ after $|\mathit{ruler}(z)|$ rounds;
+  the width bound keeps every intermediate state polynomially long. The
+  declaration lives in the proof-internal
+  module \texttt{Classes/P/Cobham/Internal.lean}; it is the main lever for
+  writing polynomial-time loops and is a candidate for promotion to a surface
+  module.
+\end{proof}
+
+\begin{lemma}[Range concatenation and streaming folds in $\cc{FP}$]
+  \label{lem:polytime-fp-combinators}
+  \uses{def:FP}
+  The following combinators preserve $\cc{FP}$.
+  \begin{enumerate}
+    \item Bounded concatenation over a range: if
+      $(z, i) \mapsto f(z, i)$ is in $\cc{FP}$ (on paired inputs, with $i$ in
+      unary) and $m \in \cc{FP}$, then
+      $z \mapsto f(z, 0) \, f(z, 1) \cdots f(z, |m(z)| - 1)$ is in $\cc{FP}$.
+    \item Streaming finite-state fold: for a finite state set $Q$, a transition
+      $\delta \colon Q \times \{0,1\} \to Q$, an initial state, and an output
+      map $o \colon Q \times \{0,1\} \to \{0,1\}^*$, the transducer that scans
+      $z$ from left to right and emits $o(q_i, z_i)$ at each position is in
+      $\cc{FP}$; more generally the state may be a polynomially bounded string
+      updated by an $\cc{FP}$ step.
+  \end{enumerate}
+\end{lemma}
+\begin{proof}
+  \uses{thm:cobham, lem:polytime-iterate}
+  Both are instances of Lemma~\ref{lem:polytime-iterate}, with the state
+  carrying the output produced so far, or can be written directly by limited
+  recursion on notation. These two combinators describe the Cook--Levin
+  emitter (clause families are concatenations over index ranges), the Tseitin
+  transducer (one streaming pass over a CNF encoding), and the $\mathrm{SAT}$
+  verifier (a streaming evaluation); see the open directions at the end of this
+  chapter.
+\end{proof}
+
+\section{Witnesses, FNP, and TFNP}
+
+\begin{definition}[Pair language and balanced relations]
+  \label{def:pairlang}
+  \lean{Complexity.pairLang, Complexity.PolyBalanced}
+  \leanok
+  \uses{def:pair, def:language}
+  For a relation $R \subseteq \{0,1\}^* \times \{0,1\}^*$,
+  $\mathrm{pairLang}(R) = \{\langle x, y \rangle : R(x, y)\}$ using the
+  library's pairing codec. $R$ is polynomially balanced if there is a
+  polynomial $p$ with $R(x, y) \Rightarrow |y| \le p(|x|)$.
+\end{definition}
+
+\begin{definition}[$\cc{FNP}$ and $\cc{TFNP}$]
+  \label{def:FNP}
+  \lean{Complexity.FNP, Complexity.TFNP}
+  \leanok
+  \uses{def:pairlang, def:P}
+  $\cc{FNP}$ is the set of polynomially balanced relations $R$ with
+  $\mathrm{pairLang}(R) \in \cc{P}$. $\cc{TFNP}$ is the set of $R \in \cc{FNP}$
+  such that every $x$ has some $y$ with $R(x, y)$.
+\end{definition}
+
+\begin{lemma}[Guess and verify]
+  \label{lem:polytime-guess-verify}
+  \lean{Complexity.mem_NP_of_poly_witness}
+  \leanok
+  \uses{def:NP, def:P, def:pair}
+  Let $p$ be a polynomial and $L_0 \in \cc{P}$ with
+  $\langle x, y \rangle \in L_0 \Rightarrow |y| \le p(|x|)$. If, for all $x$,
+  $x \in L \iff \exists y\, \langle x, y \rangle \in L_0$, then
+  $L \in \cc{NP}$.
+\end{lemma}
+\begin{proof}
+  \leanok
+  \uses{thm:polytime-preimage}
+  The guess-and-verify machine built for $\mathrm{SAT}$ is generic: it guesses
+  a string of length at most $|x| + 1$, pairs it with the input, and runs the
+  deterministic verifier, which handles linearly bounded witnesses. A general
+  polynomial bound is reduced to the linear case by padding the input with a
+  polynomial-length ruler and pulling back along the padding map. This lemma
+  currently lives in \texttt{Classes/PCP/Internal/GuessVerifyGeneric.lean}.
+\end{proof}
+
+\begin{theorem}[$\cc{FNP}$ witnesses give $\cc{NP}$]
+  \label{thm:polytime-fnp-np}
+  \lean{Complexity.NP.mem_NP_of_FNP, Complexity.NP.witnessLang_mem_NP, Complexity.NP.witnessNTMConstruction}
+  \leanok
+  \uses{def:FNP, def:NP}
+  If $R \in \cc{FNP}$ and $x \in L \iff \exists y\, R(x, y)$ for all $x$, then
+  $L \in \cc{NP}$. In particular $\{x : \exists y\, R(x, y)\} \in \cc{NP}$ for
+  every $R \in \cc{FNP}$.
+\end{theorem}
+\begin{proof}
+  \leanok
+  \uses{lem:polytime-guess-verify}
+  The decider of $\mathrm{pairLang}(R)$ is the verifier and the balance
+  polynomial bounds the witnesses, so Lemma~\ref{lem:polytime-guess-verify}
+  applies. The construction is packaged as the named interface
+  \texttt{NP.WitnessNTMConstruction} and discharged unconditionally.
+\end{proof}
+
+\begin{theorem}[$\cc{NP}$ languages have polynomial-time verifiers]
+  \label{thm:polytime-np-verifier}
+  \uses{def:NP, def:FNP}
+  For every $L \in \cc{NP}$ there is $R \in \cc{FNP}$ with
+  $x \in L \iff \exists y\, R(x, y)$ for all $x$. Together with
+  Theorem~\ref{thm:polytime-fnp-np},
+  $\cc{NP} = \{L : \exists R \in \cc{FNP}\ \forall x\ (x \in L \iff \exists y\,
+  R(x, y))\}$.
+\end{theorem}
+\begin{proof}
+  \uses{thm:cobham, lem:polytime-decision-fn}
+  Take as witness the choice sequence of an accepting path, of length
+  $f(|x|)$. The verifier runs the machine deterministically along the given
+  choices; \texttt{NTM.choiceTM} already does this, and the same run is
+  simulated inside Cobham's algebra for the Sipser--Lautemann theorem, so the
+  verdict can be written as a Cobham function and converted to $\cc{P}$ with
+  Lemma~\ref{lem:polytime-decision-fn}.
+\end{proof}
+
+\begin{theorem}[$\cc{NP} = \Sigma^p_1$]
+  \label{thm:polytime-np-sigma1}
+  \uses{def:NP, def:coNP, def:PH}
+  $\cc{NP} = \Sigma^p_1$ and $\cc{coNP} = \Pi^p_1$, for the
+  certificate-quantifier levels of Definition~\ref{def:PH}.
+\end{theorem}
+\begin{proof}
+  \uses{lem:polytime-guess-verify, thm:polytime-np-verifier, prop:randomness-ph-levels, prop:polytime-P-boolean}
+  $\Sigma^p_1$ is the bounded existential closure of $\cc{P}$ (formalized as
+  \texttt{Complexity.SigmaP\_one}). For $\Sigma^p_1 \subseteq \cc{NP}$, apply
+  Lemma~\ref{lem:polytime-guess-verify} to $L' \cap \{\langle x, w \rangle :
+  |w| \le p(|x|)\}$, whose length test is polynomial-time. For
+  $\cc{NP} \subseteq \Sigma^p_1$, use Theorem~\ref{thm:polytime-np-verifier}.
+  The $\Pi^p_1$ statement follows by complementation.
+\end{proof}
+
+\begin{theorem}[$\cc{NP} \cap \cc{coNP}$ search is total]
+  \label{thm:polytime-tfnp}
+  \lean{Complexity.orRelation_mem_TFNP_of_NP_coNP_witnesses}
+  \leanok
+  \uses{def:FNP}
+  Let $R_1, R_2 \in \cc{FNP}$ and $L$ satisfy
+  $x \in L \iff \exists y\, R_1(x, y)$ and
+  $x \notin L \iff \exists y\, R_2(x, y)$ for all $x$. Then the relation
+  $R_1 \vee R_2$ is in $\cc{TFNP}$ (Megiddo--Papadimitriou).
+\end{theorem}
+\begin{proof}
+  \leanok
+  $\cc{FNP}$ is closed under disjunction of relations, and every $x$ has a
+  witness for one side. With Theorem~\ref{thm:polytime-np-verifier}, every
+  language in $\cc{NP} \cap \cc{coNP}$ supplies such a pair.
+\end{proof}
+
+\section{Reductions and completeness}
+
+\begin{definition}[Polynomial-time many-one reduction]
+  \label{def:reduction}
+  \lean{Complexity.MapReducesPoly}
+  \leanok
+  \uses{def:FP, def:language}
+  $L \le_p L'$ if there is $f \in \cc{FP}$ with $x \in L \iff f(x) \in L'$ for
+  all $x$.
+\end{definition}
+
+\begin{lemma}[$\le_p$ is a preorder]
+  \label{lem:polytime-reduction-preorder}
+  \lean{Complexity.MapReducesPoly.refl, Complexity.MapReducesPoly.trans}
+  \leanok
+  \uses{def:reduction}
+  $L \le_p L$, and $L_1 \le_p L_2 \le_p L_3$ implies $L_1 \le_p L_3$.
+\end{lemma}
+\begin{proof}
+  \leanok
+  \uses{lem:polytime-FP-comp}
+  The identity and composition are in $\cc{FP}$.
+\end{proof}
+
+\begin{lemma}[Transport along reductions]
+  \label{lem:polytime-reduction-transport}
+  \lean{Complexity.MapReducesPoly.compl, Complexity.MapReducesPoly.mem_P, Complexity.MapReducesPoly.mem_NP, Complexity.MapReducesPoly.mem_coNP}
+  \leanok
+  \uses{def:reduction, def:P, def:NP, def:coNP}
+  If $L_1 \le_p L_2$ then $\overline{L_1} \le_p \overline{L_2}$, and for each
+  $\mathcal{C} \in \{\cc{P}, \cc{NP}, \cc{coNP}\}$, $L_2 \in \mathcal{C}$
+  implies $L_1 \in \mathcal{C}$.
+\end{lemma}
+\begin{proof}
+  \leanok
+  \uses{thm:polytime-preimage}
+  The same function reduces the complements, and $L_1 = f^{-1}(L_2)$.
+\end{proof}
+
+\begin{definition}[$\cc{NP}$-hard and $\cc{NP}$-complete]
+  \label{def:np-complete}
+  \lean{Complexity.NPHard, Complexity.NPComplete}
+  \leanok
+  \uses{def:reduction, def:NP}
+  $L$ is $\cc{NP}$-hard if $L' \le_p L$ for every $L' \in \cc{NP}$, and
+  $\cc{NP}$-complete if moreover $L \in \cc{NP}$.
+\end{definition}
+
+\begin{lemma}[Hardness transfers along reductions]
+  \label{lem:polytime-np-hard-transfer}
+  \lean{Complexity.NPHard.of_reduction, Complexity.NPComplete.transfer}
+  \leanok
+  \uses{def:np-complete}
+  If $L_1$ is $\cc{NP}$-hard and $L_1 \le_p L_2$, then $L_2$ is
+  $\cc{NP}$-hard; if moreover $L_2 \in \cc{NP}$, then $L_2$ is
+  $\cc{NP}$-complete.
+\end{lemma}
+\begin{proof}
+  \leanok
+  \uses{lem:polytime-reduction-preorder}
+  Transitivity of $\le_p$.
+\end{proof}
+
+\begin{theorem}[An $\cc{NP}$-complete language decides the questions]
+  \label{thm:polytime-np-complete-collapse}
+  \lean{Complexity.NPComplete.mem_P_iff_P_eq_NP, Complexity.NPComplete.mem_coNP_iff_NP_eq_coNP}
+  \leanok
+  \uses{def:np-complete, def:P, def:coNP}
+  If $L$ is $\cc{NP}$-complete, then $L \in \cc{P} \iff \cc{P} = \cc{NP}$ and
+  $L \in \cc{coNP} \iff \cc{NP} = \cc{coNP}$.
+\end{theorem}
+\begin{proof}
+  \leanok
+  \uses{lem:polytime-reduction-transport, thm:polytime-P-subset-NP}
+  Every $\cc{NP}$ language pulls back into $\cc{P}$ (respectively
+  $\cc{coNP}$) along its reduction to $L$.
+\end{proof}
+
+\begin{definition}[$\cc{coNP}$-hard and $\cc{coNP}$-complete]
+  \label{def:polytime-conp-complete}
+  \lean{Complexity.coNPHard, Complexity.coNPComplete}
+  \leanok
+  \uses{def:reduction, def:coNP}
+  $L$ is $\cc{coNP}$-hard if $L' \le_p L$ for every $L' \in \cc{coNP}$, and
+  $\cc{coNP}$-complete if moreover $L \in \cc{coNP}$. The complement of an
+  $\cc{NP}$-complete language is $\cc{coNP}$-complete and conversely
+  (\texttt{Complexity.NPComplete.compl}, \texttt{Complexity.coNPComplete.compl}).
+\end{definition}
+
+\section{Satisfiability and the Cook--Levin theorem}
+
+\begin{definition}[$\mathrm{SAT}$]
+  \label{def:polytime-sat}
+  \lean{Complexity.SAT.language, Complexity.SAT.Witness}
+  \leanok
+  \uses{def:language}
+  A CNF formula is a list of clauses, a clause a list of literals, and a
+  literal a sign with a variable index in $\mathbb{N}$; an assignment is a bit
+  string, with out-of-range variables read as false. Formulas are encoded as
+  bit strings with variable indices in unary, data bits doubled, and the
+  undoubled pairs $01$ and $10$ separating literals and clauses.
+  $\mathrm{SAT}$ is the set of encodings of satisfiable formulas. The witness
+  relation holds of $(z, \alpha)$ when $z$ encodes some $\varphi$,
+  $|\alpha| \le |z| + 1$, and $\alpha$ satisfies $\varphi$.
+\end{definition}
+
+\begin{theorem}[$\mathrm{SAT} \in \cc{NP}$]
+  \label{thm:polytime-sat-np}
+  \lean{Complexity.SAT.pairLang_witness_mem_P, Complexity.SAT.language_mem_NP}
+  \leanok
+  \uses{def:polytime-sat, def:pairlang, def:NP}
+  The pair language of the $\mathrm{SAT}$ witness relation is in $\cc{P}$
+  (decided in quadratic time), and $\mathrm{SAT} \in \cc{NP}$.
+\end{theorem}
+\begin{proof}
+  \leanok
+  A three-work-tape deterministic verifier parses the formula and evaluates it
+  at the witness; a $\mathrm{SAT}$-specialized guess-and-verify machine turns
+  it into a nondeterministic decider. Unary variable indices make
+  $x \in \mathrm{SAT}$ equivalent to the existence of a witness of length at
+  most $|x| + 1$.
+\end{proof}
+
+\begin{theorem}[Cook--Levin]
+  \label{thm:cook-levin}
+  \lean{Complexity.SAT.NPComplete_language, Complexity.SAT.NPHard_language, Complexity.SAT.cookLevin_reduction}
+  \leanok
+  \uses{def:polytime-sat, def:np-complete, def:ntm-decides}
+  $\mathrm{SAT}$ is $\cc{NP}$-complete. More precisely, if a
+  nondeterministic machine with any number of work tapes decides $L$ within
+  time $T$ with $T = O(n^c)$, then $L \le_p \mathrm{SAT}$.
+\end{theorem}
+\begin{proof}
+  \leanok
+  \uses{thm:polytime-sat-np}
+  The machine is first converted to one with a single work tape, and $T$ is
+  replaced by a dominating explicit polynomial $p$. The reduction maps $x$ to
+  the tableau formula for $p(|x|)$ steps, which is satisfiable exactly when
+  some path accepts. An emitter machine writes the seven encoded clause
+  families of the tableau in polynomial time.
+\end{proof}
+
+\begin{corollary}[Consequences of Cook--Levin]
+  \label{cor:polytime-sat-consequences}
+  \lean{Complexity.SAT.coNPComplete_compl_language, Complexity.SAT.language_mem_P_iff_P_eq_NP, Complexity.SAT.language_mem_coNP_iff_NP_eq_coNP}
+  \leanok
+  \uses{def:polytime-sat, def:polytime-conp-complete}
+  The complement of $\mathrm{SAT}$ (as a set of bit strings, so including all
+  malformed strings) is $\cc{coNP}$-complete. $\mathrm{SAT} \in \cc{P} \iff
+  \cc{P} = \cc{NP}$, and $\mathrm{SAT} \in \cc{coNP} \iff \cc{NP} = \cc{coNP}$.
+\end{corollary}
+\begin{proof}
+  \leanok
+  \uses{thm:cook-levin, thm:polytime-np-complete-collapse}
+  Completeness dualizes under complement, and
+  Theorem~\ref{thm:polytime-np-complete-collapse} applies to
+  $\mathrm{SAT}$.
+\end{proof}
+
+\begin{definition}[$3\mathrm{SAT}$]
+  \label{def:polytime-3sat}
+  \lean{Complexity.SAT.ThreeSAT.language}
+  \leanok
+  \uses{def:polytime-sat}
+  $3\mathrm{SAT}$ is the set of encodings, in the $\mathrm{SAT}$ codec, of
+  satisfiable CNF formulas in which every clause has exactly three literals.
+\end{definition}
+
+\begin{lemma}[Tseitin splitting]
+  \label{lem:polytime-tseitin}
+  \lean{Complexity.SAT.ThreeSAT.reduction_mem_FP, Complexity.SAT.ThreeSAT.cnfsat_le_language}
+  \leanok
+  \uses{def:polytime-sat, def:polytime-3sat, def:reduction}
+  There is a total function in $\cc{FP}$ witnessing
+  $\mathrm{SAT} \le_p 3\mathrm{SAT}$. On the encoding of a formula it outputs
+  an equisatisfiable exact-3 formula: short clauses are padded by repeating
+  literals, the empty clause becomes a contradictory pair of clauses, and long
+  clauses are split by a chain of fresh variables numbered above $|z|$. On a
+  malformed string it outputs a fixed unsatisfiable exact-3 formula.
+\end{lemma}
+\begin{proof}
+  \leanok
+  Equisatisfiability is proved clause by clause with a threaded
+  fresh-variable counter; polynomial time is a bespoke streaming transducer.
+\end{proof}
+
+\begin{theorem}[$3\mathrm{SAT}$ is $\cc{NP}$-complete]
+  \label{thm:polytime-3sat-complete}
+  \lean{Complexity.SAT.ThreeSAT.NPComplete_language, Complexity.SAT.ThreeSAT.language_mem_NP}
+  \leanok
+  \uses{def:polytime-3sat, def:np-complete}
+  $3\mathrm{SAT}$ is $\cc{NP}$-complete.
+\end{theorem}
+\begin{proof}
+  \leanok
+  \uses{thm:polytime-sat-np, lem:polytime-tseitin, thm:cook-levin, lem:polytime-np-hard-transfer}
+  Membership: a witness is a $\mathrm{SAT}$ witness whose formula also passes
+  the exact-3 syntax check, a regular language decided by a finite-state
+  machine. Hardness: compose Cook--Levin with Tseitin splitting.
+\end{proof}
+
+\begin{theorem}[Padded circuit satisfiability is in $\cc{NP}$]
+  \label{thm:polytime-circuit-sat-np}
+  \lean{Complexity.CircuitSAT.language, Complexity.CircuitSAT.language_mem_NP, Complexity.CircuitSAT.extensionLanguage_mem_NP}
+  \leanok
+  \uses{def:NP, def:circuit, def:pair}
+  A query is a pair $\langle c, r \rangle$ of a tagged circuit-family code
+  $c$ and a ruler $r$ whose length fixes the assignment width; it is accepted
+  when some $w$ with $|w| = |r|$ makes the serialized circuit evaluator return
+  true on $c$ and $w$. This language is in $\cc{NP}$, and so is the extension
+  variant with queries $\langle c, \langle u, r \rangle \rangle$, accepted when
+  some $w$ with $|w| = |r|$ makes $c$ accept $u\,w$.
+\end{theorem}
+\begin{proof}
+  \leanok
+  \uses{lem:polytime-guess-verify}
+  The verified serialized circuit evaluator decides the paired witness
+  language in polynomial time, and witnesses are linearly bounded by the query.
+  $\cc{NP}$-hardness of this language is not yet stated.
+\end{proof}
+
+\section{More NP-complete problems}
+
+\begin{theorem}[Formula satisfiability]
+  \label{thm:polytime-formula-sat}
+  \uses{def:polytime-sat, def:np-complete, def:reduction}
+  Fix a concrete prefix codec for Boolean formulas over $\wedge$, $\vee$,
+  $\neg$ and variables, and let $\mathrm{FSAT}$ be the set of encodings of
+  satisfiable formulas, malformed strings excluded. Then
+  $\mathrm{SAT} \le_p \mathrm{FSAT}$ (a CNF is a formula) and
+  $\mathrm{FSAT} \le_p \mathrm{SAT}$ (Tseitin encoding with one fresh variable
+  per gate), so $\mathrm{FSAT}$ is $\cc{NP}$-complete.
+\end{theorem}
+\begin{proof}
+  \uses{thm:cook-levin, lem:polytime-np-hard-transfer, lem:polytime-guess-verify, lem:polytime-fp-combinators}
+  Membership by guess and verify with a formula evaluator; both reductions are
+  streaming transducers, most easily written through
+  Lemma~\ref{lem:polytime-fp-combinators}.
+\end{proof}
+
+\begin{definition}[Graph problems]
+  \label{def:polytime-graph-problems}
+  \uses{def:pair, def:language}
+  Fix a codec for pairs $\langle G, k \rangle$ of a finite simple graph
+  (vertex count in unary and a row-major adjacency matrix) and a threshold $k$
+  in unary, with malformed strings as no-instances.
+  $\mathrm{INDSET}$, $\mathrm{CLIQUE}$, and $\mathrm{VC}$ are the sets of
+  $\langle G, k \rangle$ such that $G$ has an independent set of size at least
+  $k$, a clique of size at least $k$, and a vertex cover of size at most $k$,
+  respectively.
+\end{definition}
+
+\begin{theorem}[$\mathrm{INDSET}$ is $\cc{NP}$-complete]
+  \label{thm:polytime-indset-complete}
+  \uses{def:polytime-graph-problems, def:np-complete}
+  $\mathrm{INDSET}$ is $\cc{NP}$-complete.
+\end{theorem}
+\begin{proof}
+  \uses{thm:polytime-3sat-complete, lem:polytime-guess-verify, lem:polytime-np-hard-transfer, lem:polytime-fp-combinators}
+  Membership by guess and verify on a vertex subset. Hardness by
+  $3\mathrm{SAT} \le_p \mathrm{INDSET}$: one triangle per clause, edges between
+  complementary literals, and $k$ the number of clauses.
+\end{proof}
+
+\begin{theorem}[$\mathrm{CLIQUE}$ and $\mathrm{VC}$ are $\cc{NP}$-complete]
+  \label{thm:polytime-clique-vc-complete}
+  \uses{def:polytime-graph-problems, def:np-complete}
+  $\mathrm{CLIQUE}$ and $\mathrm{VC}$ are $\cc{NP}$-complete.
+\end{theorem}
+\begin{proof}
+  \uses{thm:polytime-indset-complete, lem:polytime-np-hard-transfer, lem:polytime-guess-verify}
+  $\mathrm{INDSET} \le_p \mathrm{CLIQUE}$ by complementing the edge set, and
+  $\mathrm{INDSET} \le_p \mathrm{VC}$ by $\langle G, k \rangle \mapsto
+  \langle G, n - k \rangle$, since $S$ is independent exactly when its
+  complement is a cover.
+\end{proof}
+
+\section{Open directions}
+
+Two refactors do not fit as nodes.
+
+\begin{itemize}
+  \item \textbf{Re-proving bespoke machines through Cobham.} The
+    $\mathrm{SAT}$ verifier and guess-and-verify machine behind
+    Theorem~\ref{thm:polytime-sat-np} take roughly 11--12 thousand lines, the
+    Cook--Levin emitter about 6.7 thousand, and the Tseitin transducer of
+    Lemma~\ref{lem:polytime-tseitin} about 6 thousand. With the combinators
+    of Lemma~\ref{lem:polytime-fp-combinators}, each should become a short
+    Cobham program plus a correctness proof about ordinary Lean functions, as
+    already done for the Sipser--Lautemann matrix.
+  \item \textbf{Surface placement.} Lemma~\ref{lem:polytime-guess-verify}
+    (\texttt{mem\_NP\_of\_poly\_witness}) lives in
+    \texttt{Classes/PCP/Internal} and Lemma~\ref{lem:polytime-iterate} in
+    \texttt{Classes/P/Cobham/Internal}; both are general tools and belong in
+    surface modules under \texttt{Classes/NP} and \texttt{Classes/P}.
+\end{itemize}

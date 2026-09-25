@@ -1,0 +1,383 @@
+\chapter{Relativization and natural proofs}
+\label{chap:barriers}
+
+This chapter covers the two classical barriers to separating complexity
+classes. Relativization needs oracle machines and oracle worlds; the meaningful
+formal endpoints are oracle existence theorems such as ``there is an oracle $A$
+with $\cc{P}^A = \cc{NP}^A$'', not the meta-mathematical claim that a proof
+technique relativizes. Natural proofs need Boolean-function properties measured
+on truth tables, largeness as an explicit density, and pseudorandom function
+security with explicit parameters. Formalized so far: deterministic
+Boolean-oracle Turing machines with a dedicated query tape and one-step lookups,
+the conservative embedding of ordinary machines, oracle universality
+interfaces (with no concrete universal oracle machine yet), and the finite
+counting layer of property density and negligible functions. Nondeterministic
+oracle machines, relativized classes, the Baker--Gill--Solovay worlds, natural
+properties and the Razborov--Rudich theorem are planned.
+
+\section{Oracle machines}
+
+\begin{definition}[Deterministic oracle Turing machines]
+  \label{def:barriers-oracle-tm}
+  \lean{Complexity.BooleanOracle, Complexity.BooleanOracle.Decides,
+    Complexity.Tape.oracleQuery, Complexity.OracleCfg, Complexity.OracleTM,
+    Complexity.OracleTM.step, Complexity.OracleTM.reachesIn}
+  \leanok
+  \uses{def:tm, def:language}
+  A Boolean oracle is a function $\{0,1\}^* \to \{0,1\}$; it decides $A$ if it
+  is the characteristic function of $A$. An oracle TM has the input, work and
+  output tapes of an ordinary TM plus a dedicated read-write query tape, and a
+  map sending each query state to a pair of successor states. In a query state
+  the machine looks up the query word, formed by the cells strictly between the
+  left marker and the query head (a cell reads $1$ only if it holds $1$), and
+  enters the yes- or no-successor. The lookup costs exactly one step and
+  changes nothing but the state; in particular the query tape is not erased.
+  All other states apply an ordinary local transition.
+\end{definition}
+
+\begin{definition}[Oracle acceptance, deciding and output]
+  \label{def:barriers-oracle-decides}
+  \lean{Complexity.OracleTM.Accepts, Complexity.OracleTM.AcceptsInTime,
+    Complexity.OracleTM.DecidesInTime, Complexity.OracleTM.HaltsInTime,
+    Complexity.OracleTM.Halts, Complexity.OracleTM.ProducesInTime,
+    Complexity.OracleTM.Produces}
+  \leanok
+  \uses{def:barriers-oracle-tm}
+  Relative to an oracle $O$, an oracle TM decides $L$ in time $T$ if on every
+  input $x$ it halts within $T(|x|)$ steps with verdict $1$ if $x \in L$ and $0$
+  otherwise. Acceptance, halting and exact output production are defined with
+  and without a step budget, in the same shape as for ordinary machines.
+\end{definition}
+
+\begin{lemma}[Oracle execution is deterministic]
+  \label{lem:barriers-oracle-deterministic}
+  \lean{Complexity.OracleTM.step_eq_none_iff_halted,
+    Complexity.OracleTM.stepRel_functional,
+    Complexity.OracleTM.reachesIn_functional,
+    Complexity.OracleTM.step_query_true, Complexity.OracleTM.step_query_false,
+    Complexity.OracleTM.reachesIn_one_query_true,
+    Complexity.OracleTM.reachesIn_one_query_false}
+  \leanok
+  \uses{def:barriers-oracle-tm}
+  A step is undefined exactly at the halt state; each configuration has at
+  most one successor and each exact-time run has a unique final configuration.
+  In a non-halted query state, a true answer is one step to the yes-successor
+  and a false answer is one step to the no-successor, with all tapes
+  unchanged.
+\end{lemma}
+\begin{proof}
+  \leanok
+  Unfold the step function.
+\end{proof}
+
+\begin{definition}[Ordinary machines as oracle machines]
+  \label{def:barriers-to-oracle}
+  \lean{Complexity.TM.toOracleTM, Complexity.OracleCfg.erase}
+  \leanok
+  \uses{def:tm, def:barriers-oracle-tm}
+  Every TM is an oracle TM with no query states whose query tape is inert.
+  Erasing the query tape maps oracle configurations to ordinary ones.
+\end{definition}
+
+\begin{theorem}[The embedding is conservative for every oracle]
+  \label{thm:barriers-to-oracle-conservative}
+  \lean{Complexity.TM.toOracleTM_queryTransition,
+    Complexity.TM.toOracleTM_step_oracle_independent,
+    Complexity.TM.erase_toOracleTM_reachesIn,
+    Complexity.TM.exists_toOracleTM_reachesIn_of_reachesIn_erase,
+    Complexity.TM.toOracleTM_decidesInTime_iff,
+    Complexity.TM.toOracleTM_producesInTime_iff}
+  \leanok
+  \uses{def:barriers-to-oracle, def:barriers-oracle-decides, def:tm-decides,
+    def:produces}
+  The embedded machine has no query states and its steps do not depend on the
+  oracle. Its exact-time runs erase to runs of the source machine with the same
+  number of steps, and every source run lifts. Consequently, for every oracle
+  $O$, the embedded machine decides $L$ in time $T$ relative to $O$ if and only
+  if the source decides $L$ in time $T$, and likewise for bounded output
+  production.
+\end{theorem}
+\begin{proof}
+  \leanok
+  Step-by-step correspondence under erasure, in both directions.
+\end{proof}
+
+\begin{definition}[Oracle universality]
+  \label{def:barriers-oracle-universal}
+  \lean{Complexity.OracleTM.Simulates, Complexity.OracleTM.SimulatesInTime,
+    Complexity.OracleTM.IsUniversal,
+    Complexity.OracleTM.IsEfficientlyUniversalFor,
+    Complexity.OracleTM.IsEfficientlyUniversal}
+  \leanok
+  \uses{def:barriers-oracle-decides, def:computable, def:universal}
+  An oracle machine $U$ simulates $M$ under a compiler $c$ if, for every oracle
+  and program, $U$ halts on $c(p)$ exactly when $M$ halts on $p$ and produces
+  the same outputs; the timed version transfers bounded production under an
+  explicit clock. $U$ is universal if every oracle machine has a computable
+  compiler, chosen independently of the oracle; it is efficiently universal if
+  the compiler also has additive description overhead and a polynomial clock,
+  all fixed before the oracle.
+\end{definition}
+
+\begin{lemma}[Basic facts about oracle simulation]
+  \label{lem:barriers-oracle-universal-basic}
+  \lean{Complexity.OracleTM.Simulates.refl, Complexity.OracleTM.Simulates.comp,
+    Complexity.OracleTM.SimulatesInTime.refl,
+    Complexity.OracleTM.SimulatesInTime.comp,
+    Complexity.OracleTM.IsEfficientlyUniversal.isUniversal}
+  \leanok
+  \uses{def:barriers-oracle-universal}
+  Simulation is reflexive under the identity compiler and composes, with timed
+  simulations nesting their clocks; efficient oracle universality implies
+  oracle universality.
+\end{lemma}
+\begin{proof}
+  \leanok
+  Compose the compilers and unfold the definitions.
+\end{proof}
+
+\begin{theorem}[A universal oracle machine]
+  \label{thm:barriers-universal-oracle-machine}
+  \uses{def:barriers-oracle-universal}
+  There is an oracle TM that is efficiently universal. At present oracle
+  simulation and universality are only interfaces, taken as hypotheses by the
+  oracle Kolmogorov-complexity transfer theorems and the Nisan--Wigderson
+  reconstruction.
+\end{theorem}
+\begin{proof}
+  \uses{thm:utm}
+  Extend the ordinary universal machine with a query tape that it maintains on
+  behalf of the simulated machine, forwarding each simulated lookup as one real
+  lookup.
+\end{proof}
+
+\section{Relativized classes and the Baker--Gill--Solovay worlds}
+
+\begin{definition}[Nondeterministic oracle machines]
+  \label{def:barriers-oracle-ntm}
+  \uses{def:barriers-oracle-tm, def:ntm}
+  An oracle NTM has two local transition functions selected by a choice bit and
+  the same query mechanism and cost as an oracle TM, with execution along a
+  fixed choice sequence and existential acceptance within a time bound.
+\end{definition}
+
+\begin{definition}[Relativized classes]
+  \label{def:barriers-relativized-classes}
+  \uses{def:barriers-oracle-decides, def:barriers-oracle-ntm, def:P, def:NP}
+  \notready
+  For a language $A$, $\cc{P}^A$ is the class of languages decided in
+  polynomial time by an oracle TM relative to an oracle deciding $A$, and
+  $\cc{NP}^A$ is the nondeterministic analogue. Query length is charged through
+  the time needed to write the query.
+\end{definition}
+
+\begin{proposition}[Relativizing basics]
+  \label{prop:barriers-relativizing-basics}
+  \uses{def:barriers-relativized-classes}
+  \notready
+  For every $A$: $\cc{P} \subseteq \cc{P}^A \subseteq \cc{NP}^A$ and
+  $\cc{NP} \subseteq \cc{NP}^A$; if $A \in \cc{P}$ then $\cc{P}^A = \cc{P}$.
+\end{proposition}
+\begin{proof}
+  \uses{thm:barriers-to-oracle-conservative}
+  The first inclusion is the conservative embedding. The collapse for
+  $A \in \cc{P}$ replaces each lookup by a call to a decider, which needs
+  machine-level subroutine inlining.
+\end{proof}
+
+\begin{definition}[Clocked enumeration of oracle machines]
+  \label{def:barriers-clocked-enumeration}
+  \uses{def:barriers-oracle-universal}
+  \notready
+  An enumeration $i \mapsto (M_i, p_i)$ of oracle TMs paired with polynomial
+  clocks such that every polynomial-time oracle language, relative to every
+  oracle, is decided by some clocked $M_i$, and the clocked machines are
+  simulated uniformly in the oracle.
+\end{definition}
+
+\begin{lemma}[The unary test language is in $\cc{NP}^B$]
+  \label{lem:barriers-unary-test-language}
+  \uses{def:barriers-relativized-classes}
+  \notready
+  For every $B$, the language $U_B = \{1^n : B \text{ contains a string of
+  length } n\}$ is in $\cc{NP}^B$.
+\end{lemma}
+\begin{proof}
+  Guess a string of length $n$, write it on the query tape and query it.
+\end{proof}
+
+\begin{theorem}[A separating oracle]
+  \label{thm:barriers-separating-oracle}
+  \uses{def:barriers-relativized-classes}
+  \notready
+  There is an oracle $B$ with $\cc{P}^B \neq \cc{NP}^B$.
+\end{theorem}
+\begin{proof}
+  \uses{lem:barriers-unary-test-language, def:barriers-clocked-enumeration,
+    thm:time-hierarchy}
+  Build $B$ in stages so that the $i$-th clocked machine errs on $U_B$ at a
+  fresh length; a clocked machine queries fewer than $2^n$ strings of length
+  $n$, and later stages must not change answers earlier stages relied on.
+\end{proof}
+
+\begin{lemma}[A PSPACE-complete oracle collapses both classes]
+  \label{lem:barriers-pspace-oracle-collapse}
+  \uses{def:barriers-relativized-classes, def:PSPACE}
+  \notready
+  If $A$ is PSPACE-complete then $\cc{P}^A = \cc{NP}^A = \cc{PSPACE}$.
+\end{lemma}
+\begin{proof}
+  \uses{thm:space-tqbf-complete, thm:space-savitch}
+  $\cc{PSPACE} \subseteq \cc{P}^A$ by reduction to $A$. $\cc{NP}^A \subseteq
+  \cc{NPSPACE} = \cc{PSPACE}$ needs the closure theorem that a polynomial-space
+  machine can answer the queries itself; this closure is the part that does
+  not follow from completeness alone.
+\end{proof}
+
+\begin{theorem}[An equalizing oracle]
+  \label{thm:barriers-equality-oracle}
+  \uses{def:barriers-relativized-classes}
+  \notready
+  There is an oracle $A$ with $\cc{P}^A = \cc{NP}^A$.
+\end{theorem}
+\begin{proof}
+  \uses{lem:barriers-pspace-oracle-collapse, thm:space-tqbf-complete}
+  Take $A = \cc{TQBF}$.
+\end{proof}
+
+\begin{corollary}[Baker--Gill--Solovay]
+  \label{cor:barriers-bgs}
+  \uses{def:barriers-relativized-classes}
+  \notready
+  There are oracles $A$ and $B$ with $\cc{P}^A = \cc{NP}^A$ and
+  $\cc{P}^B \neq \cc{NP}^B$.
+\end{corollary}
+\begin{proof}
+  \uses{thm:barriers-equality-oracle, thm:barriers-separating-oracle}
+  Combine the two worlds.
+\end{proof}
+
+\section{Natural proofs}
+
+\begin{lemma}[Counting Boolean functions]
+  \label{lem:barriers-card-boolfunc}
+  \lean{Complexity.card_boolFunc}
+  \leanok
+  There are exactly $2^{2^n}$ Boolean functions on $n$ bits, that is,
+  $2^{2^n}$ truth tables of length $2^n$.
+\end{lemma}
+\begin{proof}
+  \leanok
+  Cardinality of a function type.
+\end{proof}
+
+\begin{definition}[Property density]
+  \label{def:barriers-density}
+  \lean{Complexity.density}
+  \leanok
+  \uses{lem:barriers-card-boolfunc}
+  For a finite set $P$ of Boolean functions on $n$ bits, its density is the
+  exact rational $|P| / 2^{2^n}$.
+\end{definition}
+
+\begin{lemma}[Density laws]
+  \label{lem:barriers-density-laws}
+  \lean{Complexity.density_nonneg, Complexity.density_le_one,
+    Complexity.density_compl, Complexity.density_union_le}
+  \leanok
+  \uses{def:barriers-density}
+  $0 \le \mathrm{density}(P) \le 1$,
+  $\mathrm{density}(P^c) = 1 - \mathrm{density}(P)$, and
+  $\mathrm{density}(P \cup Q) \le \mathrm{density}(P) + \mathrm{density}(Q)$.
+\end{lemma}
+\begin{proof}
+  \leanok
+  Finite cardinality arithmetic.
+\end{proof}
+
+\begin{definition}[Negligible functions]
+  \label{def:barriers-negligible}
+  \lean{Complexity.Negligible}
+  \leanok
+  $f : \mathbb{N} \to \mathbb{R}$ is negligible if for every $c$ there is
+  $N > 0$ with $|f(n)| < 1 / n^c$ for all $n \ge N$.
+\end{definition}
+
+\begin{lemma}[Closure of negligible functions]
+  \label{lem:barriers-negligible-closure}
+  \uses{def:barriers-negligible}
+  Sums of negligible functions and products of a negligible function with a
+  polynomial are negligible; a function bounded in absolute value by a
+  negligible function is negligible.
+\end{lemma}
+
+\begin{definition}[Natural properties]
+  \label{def:barriers-natural-property}
+  \uses{def:barriers-density, def:SIZE, def:PPoly}
+  A family of properties $P_n$ of $n$-bit Boolean functions is large with
+  density $\delta(n)$ if $\mathrm{density}(P_n) \ge \delta(n)$; constructive if
+  membership of a truth table of length $N = 2^n$ is decidable in time
+  polynomial in $N$ (or by circuits of size polynomial in $N$); and useful
+  against $\cc{SIZE}(s)$ if, for all sufficiently large $n$, no function in
+  $P_n$ has circuits of size $s(n)$. The quantifier over lengths and the scale
+  of constructivity are part of the definition.
+\end{definition}
+
+\begin{definition}[Pseudorandom function families]
+  \label{def:barriers-prf}
+  \uses{def:barriers-negligible, def:PPoly}
+  A keyed family $f_k : \{0,1\}^n \to \{0,1\}$ computable in polynomial time,
+  and its security game against a nonuniform class of distinguishers with oracle
+  access (or with the full truth table): the advantage in telling $f_k$ for a
+  random key from a uniformly random function, required to be negligible, or
+  bounded by an explicit function of the distinguisher's size.
+\end{definition}
+
+\begin{lemma}[A large property excluding a range is a distinguisher]
+  \label{lem:barriers-range-distinguisher}
+  \uses{def:barriers-density}
+  Let $P$ be a set of Boolean functions on $n$ bits with density at least
+  $\delta$, and let a family $\{f_k\}$ have no member in $P$. Then the test
+  ``the truth table lies in $P$'' accepts a uniformly random function with
+  probability at least $\delta$ and accepts $f_k$ with probability $0$, so its
+  distinguishing advantage is at least $\delta$. No circuit assumption is used.
+\end{lemma}
+\begin{proof}
+  Count. The finite statistical-test layer of the metacomplexity development
+  already proves the analogous statement for dense sets of high-complexity
+  strings against short-seed generators.
+\end{proof}
+
+\begin{theorem}[Razborov--Rudich, parameterized conditional form]
+  \label{thm:barriers-razborov-rudich}
+  \uses{def:barriers-natural-property, def:barriers-prf}
+  \notready
+  Suppose a pseudorandom function family computable by circuits of size
+  $s(n)$ has advantage less than $\delta(n)$ against every truth-table
+  distinguisher of size polynomial in $2^n$. Then no property that is large
+  with density $\delta$ and constructive at that size is useful against
+  $\cc{SIZE}(s)$.
+\end{theorem}
+\begin{proof}
+  \uses{lem:barriers-range-distinguisher}
+  Usefulness puts every $f_k$ outside the property; largeness and
+  constructivity turn membership into a distinguisher whose advantage is the
+  density, contradicting security.
+\end{proof}
+
+\begin{corollary}[The natural-proofs barrier]
+  \label{cor:barriers-natural-proofs}
+  \uses{def:barriers-natural-property, def:barriers-prf, def:PPoly}
+  \notready
+  If there is a pseudorandom function family in $\cc{P/poly}$ secure against
+  distinguishers of size $2^{n^{\varepsilon}}$ for some $\varepsilon > 0$, then
+  no $\cc{P/poly}$-constructive property of inverse-exponential density is
+  useful against $\cc{P/poly}$. The pseudorandomness hypothesis is an explicit
+  assumption, not a proved fact.
+\end{corollary}
+\begin{proof}
+  \uses{thm:barriers-razborov-rudich, lem:barriers-negligible-closure}
+  Instantiate the parameters: a truth table of length $N = 2^n$ is tested by
+  circuits of size $\mathrm{poly}(N)$, which the strong security hypothesis
+  covers after rescaling $n$.
+\end{proof}

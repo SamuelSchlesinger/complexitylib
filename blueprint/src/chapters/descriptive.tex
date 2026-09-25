@@ -1,0 +1,629 @@
+\chapter{Descriptive complexity}
+\label{chap:descriptive}
+
+Descriptive complexity characterizes complexity classes by the logics that
+define their problems, after Immerman and Fagin. Once a class is captured by a
+logic, a lower bound becomes a question of what the logic can express. The
+development lives in \texttt{Complexitylib.DescriptiveComplexity}. The following
+are formalized:
+\begin{itemize}
+  \item finite structures over finite vocabularies and their isomorphisms;
+  \item first-order logic with de Bruijn variables, substitution, and invariance
+    under isomorphism;
+  \item Boolean queries and first-order definability;
+  \item second-order logic with its $\exists\cc{SO}$ fragment;
+  \item a bit-string encoding of structures and the language a query induces;
+  \item a computable, verified first-order model checker;
+  \item universe-preserving first-order reductions and projections, which form
+    preorders.
+\end{itemize}
+The main open direction is Fagin's theorem $\cc{NP} = \exists\cc{SO}$. Later
+capture results are $\cc{FO} \subseteq \cc{AC^0}$ and Immerman--Vardi.
+
+\paragraph{Conventions.} A structure has universe $\mathrm{Fin}(n)$ with
+$n \ge 2$ (Immerman's Proviso~1.15). The canonical order on $\mathrm{Fin}(n)$ is
+available as meta-level helpers, but the first-order syntax is unordered, so
+formulas cannot mention it. Order independence is therefore a theorem about the
+existing logics rather than a restriction imposed on them.
+
+\section{Vocabularies and finite structures}
+
+\begin{definition}[Vocabulary]
+  \label{def:desc-vocabulary}
+  \lean{Complexity.DescriptiveComplexity.Vocabulary, Complexity.DescriptiveComplexity.Vocabulary.IsRelational, Complexity.DescriptiveComplexity.Vocabulary.graph}
+  \leanok
+  A vocabulary has finitely many relation symbols, each with an arity, and
+  finitely many constant symbols. It is relational if it has no constants. The
+  graph vocabulary has one binary relation.
+\end{definition}
+
+\begin{definition}[Finite structure]
+  \label{def:desc-structure}
+  \lean{Complexity.DescriptiveComplexity.FinStruct, Complexity.DescriptiveComplexity.DecFinStruct, Complexity.DescriptiveComplexity.DecFinStruct.toFinStruct, Complexity.DescriptiveComplexity.FinStruct.leRel, Complexity.DescriptiveComplexity.FinStruct.sucRel, Complexity.DescriptiveComplexity.FinStruct.minElem, Complexity.DescriptiveComplexity.FinStruct.maxElem}
+  \leanok
+  \uses{def:desc-vocabulary}
+  A finite structure $\mathcal{A}$ over $V$ consists of:
+  \begin{itemize}
+    \item a size $n \ge 2$ and the universe $\mathrm{Fin}(n)$;
+    \item for each relation symbol, a $\mathrm{Prop}$-valued relation of its
+      arity;
+    \item for each constant symbol, an element.
+  \end{itemize}
+  A decidable structure has $\mathrm{Bool}$-valued relations, and it coerces to a
+  structure. Every structure also carries the canonical meta-level order $\le$,
+  successor, minimum, and maximum of $\mathrm{Fin}(n)$.
+\end{definition}
+
+\begin{definition}[Isomorphisms, embeddings, substructures]
+  \label{def:desc-iso}
+  \lean{Complexity.DescriptiveComplexity.Iso, Complexity.DescriptiveComplexity.Iso.refl, Complexity.DescriptiveComplexity.Iso.symm, Complexity.DescriptiveComplexity.Iso.trans, Complexity.DescriptiveComplexity.Embedding, Complexity.DescriptiveComplexity.IsSubstructure}
+  \leanok
+  \uses{def:desc-structure}
+  An isomorphism $\mathcal{A} \cong \mathcal{B}$ is a pair of mutually inverse
+  maps between the universes that preserves and reflects every relation and
+  preserves constants. Isomorphisms have identities, inverses, and composites.
+  Embeddings (injective, relation-preserving) and substructure inclusions
+  (injective, relation-preserving and -reflecting) are defined alongside them.
+\end{definition}
+
+\begin{theorem}[Isomorphic structures have equal size]
+  \label{thm:desc-iso-card}
+  \lean{Complexity.DescriptiveComplexity.Iso.card_eq}
+  \leanok
+  \uses{def:desc-iso}
+  If $\mathcal{A} \cong \mathcal{B}$, then $|\mathcal{A}| = |\mathcal{B}|$.
+\end{theorem}
+\begin{proof}
+  \leanok
+  Both maps are injections between $\mathrm{Fin}$ types, so the pigeonhole
+  principle applies in each direction.
+\end{proof}
+
+\section{First-order logic}
+
+\begin{definition}[First-order syntax]
+  \label{def:desc-fo-syntax}
+  \lean{Complexity.DescriptiveComplexity.Term, Complexity.DescriptiveComplexity.Formula, Complexity.DescriptiveComplexity.Sentence, Complexity.DescriptiveComplexity.Formula.quantifierRank, Complexity.DescriptiveComplexity.Formula.size}
+  \leanok
+  \uses{def:desc-vocabulary}
+  Terms with $k$ free variables are de Bruijn variables $x_i$ ($i < k$) or
+  constant symbols. Formulas are built from relation atoms, equality, $\neg$,
+  $\wedge$, $\vee$, $\exists$, and $\forall$. A quantifier binds variable $0$ and
+  shifts the others. Sentences are formulas with no free variables. Quantifier
+  rank and size are defined by structural recursion.
+\end{definition}
+
+\begin{definition}[First-order semantics]
+  \label{def:desc-fo-semantics}
+  \lean{Complexity.DescriptiveComplexity.Env, Complexity.DescriptiveComplexity.envCons, Complexity.DescriptiveComplexity.Term.eval, Complexity.DescriptiveComplexity.Formula.Sat, Complexity.DescriptiveComplexity.Sentence.Models}
+  \leanok
+  \uses{def:desc-fo-syntax, def:desc-structure}
+  An environment assigns an element of the universe to each free variable.
+  Satisfaction $\mathcal{A}, \sigma \models \varphi$ is Tarskian, and quantifiers
+  range over $\mathrm{Fin}(|\mathcal{A}|)$. $\mathcal{A} \models \varphi$ means
+  satisfaction of a sentence under the empty environment.
+\end{definition}
+
+\begin{theorem}[Isomorphism invariance of first-order logic]
+  \label{thm:desc-fo-iso-invariance}
+  \lean{Complexity.DescriptiveComplexity.Term.eval_iso, Complexity.DescriptiveComplexity.Formula.sat_iso}
+  \leanok
+  \uses{def:desc-fo-semantics, def:desc-iso}
+  If $f : \mathcal{A} \cong \mathcal{B}$, then
+  $\mathcal{A}, \sigma \models \varphi$ iff
+  $\mathcal{B}, f \circ \sigma \models \varphi$, for every formula $\varphi$ and
+  environment $\sigma$.
+\end{theorem}
+\begin{proof}
+  \leanok
+  Induct on $\varphi$. Quantifier cases move witnesses along $f$ and $f^{-1}$.
+\end{proof}
+
+\begin{definition}[Substitution]
+  \label{def:desc-substitution}
+  \lean{Complexity.DescriptiveComplexity.Term.shift, Complexity.DescriptiveComplexity.Formula.subst}
+  \leanok
+  \uses{def:desc-fo-syntax}
+  Simultaneous substitution $\varphi[\rho]$ of terms for the free variables of a
+  formula. Under a binder, the substitution is lifted by shifting de Bruijn
+  indices.
+\end{definition}
+
+\begin{theorem}[Substitution lemma]
+  \label{thm:desc-substitution}
+  \lean{Complexity.DescriptiveComplexity.Formula.subst_sat, Complexity.DescriptiveComplexity.Formula.quantifierRank_subst}
+  \leanok
+  \uses{def:desc-substitution, def:desc-fo-semantics}
+  $\mathcal{A}, \sigma \models \varphi[\rho]$ iff
+  $\mathcal{A}, (k \mapsto \rho(k)^{\mathcal{A},\sigma}) \models \varphi$.
+  Substitution preserves quantifier rank exactly.
+\end{theorem}
+\begin{proof}
+  \leanok
+  Induct on $\varphi$, generalizing over the number of free variables, and use a
+  lemma evaluating lifted substitutions.
+\end{proof}
+
+\section{Boolean queries and definability}
+
+\begin{definition}[Boolean query]
+  \label{def:desc-query}
+  \lean{Complexity.DescriptiveComplexity.BooleanQuery, Complexity.DescriptiveComplexity.BooleanQuery.IsOrderIndependent, Complexity.DescriptiveComplexity.BooleanQuery.complement, Complexity.DescriptiveComplexity.BooleanQuery.inter, Complexity.DescriptiveComplexity.BooleanQuery.union}
+  \leanok
+  \uses{def:desc-structure, def:desc-iso}
+  A Boolean query over $V$ is a property of finite $V$-structures. It is
+  \emph{order-independent} if isomorphic structures agree on it. Complement,
+  intersection, and union are defined pointwise.
+\end{definition}
+
+\begin{proposition}[Closure of order independence]
+  \label{prop:desc-order-independent-closure}
+  \lean{Complexity.DescriptiveComplexity.BooleanQuery.complement_orderIndependent, Complexity.DescriptiveComplexity.BooleanQuery.inter_orderIndependent, Complexity.DescriptiveComplexity.BooleanQuery.union_orderIndependent}
+  \leanok
+  \uses{def:desc-query}
+  Order-independent queries are closed under complement, intersection, and union.
+\end{proposition}
+\begin{proof}
+  \leanok
+  Immediate from the definitions.
+\end{proof}
+
+\begin{theorem}[First-order sentences are order-independent]
+  \label{thm:desc-fo-order-independent}
+  \lean{Complexity.DescriptiveComplexity.Sentence.orderIndependent}
+  \leanok
+  \uses{def:desc-query, def:desc-fo-semantics}
+  For every sentence $\varphi$, the query $\mathcal{A} \mapsto (\mathcal{A} \models \varphi)$
+  is order-independent (Immerman, Proposition~1.16).
+\end{theorem}
+\begin{proof}
+  \leanok
+  \uses{thm:desc-fo-iso-invariance}
+  Specialize isomorphism invariance to the empty environment.
+\end{proof}
+
+\begin{definition}[First-order definable query]
+  \label{def:desc-fo-definable}
+  \lean{Complexity.DescriptiveComplexity.FODefinable}
+  \leanok
+  \uses{def:desc-query, def:desc-fo-semantics}
+  $Q$ is first-order definable if some sentence $\varphi$ satisfies
+  $Q(\mathcal{A}) \iff \mathcal{A} \models \varphi$ for every $\mathcal{A}$.
+\end{definition}
+
+\begin{theorem}[First-order definable queries]
+  \label{thm:desc-fo-definable}
+  \lean{Complexity.DescriptiveComplexity.FODefinable.orderIndependent, Complexity.DescriptiveComplexity.FODefinable.complement, Complexity.DescriptiveComplexity.FODefinable.inter, Complexity.DescriptiveComplexity.FODefinable.union}
+  \leanok
+  \uses{def:desc-fo-definable}
+  Every first-order definable query is order-independent. First-order definable
+  queries are closed under complement, intersection, and union.
+\end{theorem}
+\begin{proof}
+  \leanok
+  \uses{thm:desc-fo-order-independent}
+  Use the defining sentence, and $\neg$, $\wedge$, $\vee$ for the closure
+  properties. As a worked check, \texttt{cycle3\_fo\_indistinguishable} shows
+  that two explicitly isomorphic directed 3-cycles satisfy the same sentences.
+\end{proof}
+
+\section{Second-order logic}
+
+\begin{definition}[Second-order syntax]
+  \label{def:desc-so-syntax}
+  \lean{Complexity.DescriptiveComplexity.SOFormula, Complexity.DescriptiveComplexity.SOSentence, Complexity.DescriptiveComplexity.SOFormula.ofFormula, Complexity.DescriptiveComplexity.SOFormula.size}
+  \leanok
+  \uses{def:desc-fo-syntax}
+  Second-order formulas extend first-order formulas with two constructs:
+  applications of relation variables, and second-order quantifiers $\exists R$,
+  $\forall R$ over a fresh relation of a given arity. Relation variables are
+  de Bruijn-indexed by a context listing their arities. First-order formulas
+  embed into second-order formulas over any relation context.
+\end{definition}
+
+\begin{definition}[Second-order semantics]
+  \label{def:desc-so-semantics}
+  \lean{Complexity.DescriptiveComplexity.REnv, Complexity.DescriptiveComplexity.rCons, Complexity.DescriptiveComplexity.SOFormula.Sat, Complexity.DescriptiveComplexity.SOSentence.Models}
+  \leanok
+  \uses{def:desc-so-syntax, def:desc-fo-semantics}
+  Satisfaction under an element environment and a relation environment.
+  Second-order quantifiers range over all $\mathrm{Prop}$-valued relations of the
+  quantified arity on the universe.
+\end{definition}
+
+\begin{definition}[The $\exists\cc{SO}$ fragment]
+  \label{def:desc-existential-so}
+  \lean{Complexity.DescriptiveComplexity.SOFormula.IsFOMatrix, Complexity.DescriptiveComplexity.SOFormula.IsExistSO}
+  \leanok
+  \uses{def:desc-so-syntax}
+  A formula is an \emph{FO matrix} if it has no second-order quantifiers, though
+  it may apply relation variables. It is in $\exists\cc{SO}$ form if it is a block
+  of second-order existential quantifiers followed by an FO matrix.
+\end{definition}
+
+\begin{definition}[Second-order definable query]
+  \label{def:desc-so-definable}
+  \lean{Complexity.DescriptiveComplexity.SODefinable}
+  \leanok
+  \uses{def:desc-query, def:desc-so-semantics}
+  $Q$ is second-order definable if some second-order sentence defines it.
+\end{definition}
+
+\begin{theorem}[First-order logic inside second-order logic]
+  \label{thm:desc-fo-in-so}
+  \lean{Complexity.DescriptiveComplexity.SOFormula.ofFormula_sat, Complexity.DescriptiveComplexity.SOSentence.models_ofFormula, Complexity.DescriptiveComplexity.SOFormula.ofFormula_isExistSO, Complexity.DescriptiveComplexity.FODefinable.toSODefinable}
+  \leanok
+  \uses{def:desc-so-semantics, def:desc-existential-so, def:desc-so-definable, def:desc-fo-definable}
+  The embedding of a first-order formula is satisfied exactly when the original
+  is, whatever the relation environment. It is in $\exists\cc{SO}$ form. Hence
+  every first-order definable query is second-order definable.
+\end{theorem}
+\begin{proof}
+  \leanok
+  Induct on the first-order formula.
+\end{proof}
+
+\begin{theorem}[Isomorphism invariance of second-order logic]
+  \label{thm:desc-so-iso-invariance}
+  \lean{Complexity.DescriptiveComplexity.REnv.map, Complexity.DescriptiveComplexity.SOFormula.sat_iso, Complexity.DescriptiveComplexity.SOSentence.models_iso}
+  \leanok
+  \uses{def:desc-so-semantics, def:desc-iso}
+  Along $f : \mathcal{A} \cong \mathcal{B}$, a second-order formula holds at
+  $(\sigma, \rho)$ iff it holds at $(f \circ \sigma, f_*\rho)$, where $f_*\rho$
+  transports each relation along $f$. In particular, isomorphic structures satisfy
+  the same second-order sentences.
+\end{theorem}
+\begin{proof}
+  \leanok
+  \uses{thm:desc-fo-iso-invariance}
+  Induct on the formula. For second-order quantifiers, push relations forward
+  along $f$ and pull them back along $f^{-1}$.
+\end{proof}
+
+\begin{theorem}[Second-order definable queries]
+  \label{thm:desc-so-definable}
+  \lean{Complexity.DescriptiveComplexity.SODefinable.orderIndependent, Complexity.DescriptiveComplexity.SODefinable.complement, Complexity.DescriptiveComplexity.SODefinable.inter, Complexity.DescriptiveComplexity.SODefinable.union}
+  \leanok
+  \uses{def:desc-so-definable}
+  Every second-order definable query, and in particular every
+  $\exists\cc{SO}$-definable one, is order-independent. Second-order definable
+  queries are closed under complement, intersection, and union.
+\end{theorem}
+\begin{proof}
+  \leanok
+  \uses{thm:desc-so-iso-invariance}
+  Specialize to the empty environments.
+\end{proof}
+
+\section{Encodings and model checking}
+
+\begin{definition}[Encoding structures as bit strings]
+  \label{def:desc-encoding}
+  \lean{Complexity.DescriptiveComplexity.allTuples, Complexity.DescriptiveComplexity.encodeRelC, Complexity.DescriptiveComplexity.encodeRelsC, Complexity.DescriptiveComplexity.encodeConstC, Complexity.DescriptiveComplexity.encodeConstsC, Complexity.DescriptiveComplexity.encodeStruct}
+  \leanok
+  \uses{def:desc-structure}
+  A decidable structure of size $n$ is encoded, computably, as the concatenation
+  of three blocks:
+  \begin{itemize}
+    \item the size in unary, $1^n 0$;
+    \item the truth table of each relation, listed over a computable enumeration
+      of all tuples;
+    \item a one-hot block of length $n$ for each constant.
+  \end{itemize}
+  The encoding depends on the canonical order of $\mathrm{Fin}(n)$.
+\end{definition}
+
+\begin{proposition}[Encoding lengths]
+  \label{prop:desc-encoding-length}
+  \lean{Complexity.DescriptiveComplexity.allTuples_length, Complexity.DescriptiveComplexity.mem_allTuples, Complexity.DescriptiveComplexity.encodeStruct_length, Complexity.DescriptiveComplexity.encodeStruct_card, Complexity.DescriptiveComplexity.encodeConstC_injective}
+  \leanok
+  \uses{def:desc-encoding}
+  The tuple enumeration lists all $n^k$ tuples of arity $k$. The encoding has
+  length $n + 1 + \sum_R n^{\mathrm{ar}(R)} + c \cdot n$, where $c$ is the number
+  of constants. The size $n$ is recoverable as the length of the leading block of
+  ones, and a one-hot constant block determines its element.
+\end{proposition}
+\begin{proof}
+  \leanok
+  Induct on the arity, then sum block lengths.
+\end{proof}
+
+\begin{definition}[Language of a query]
+  \label{def:desc-query-language}
+  \lean{Complexity.DescriptiveComplexity.queryLanguage, Complexity.DescriptiveComplexity.mem_queryLanguage}
+  \leanok
+  \uses{def:desc-query, def:desc-encoding, def:language}
+  The language of $Q$ is
+  $\{\mathrm{enc}(\mathcal{A}) : \mathcal{A} \text{ decidable}, Q(\mathcal{A})\}$.
+  This is the bridge from queries to the machine-model languages.
+\end{definition}
+
+\begin{definition}[Structure decoder]
+  \label{def:desc-decoder}
+  \uses{def:desc-encoding}
+  A computable parser $\mathrm{dec} : \{0,1\}^* \to V\text{-structures} \cup \{\bot\}$.
+  It reads the unary size and then the fixed-length relation and constant blocks,
+  and returns $\bot$ on malformed input, including a constant block that is not
+  one-hot.
+\end{definition}
+
+\begin{theorem}[Encoding round trip]
+  \label{thm:desc-encoding-roundtrip}
+  \uses{def:desc-decoder, def:desc-encoding}
+  \notready
+  $\mathrm{dec}(\mathrm{enc}(\mathcal{A})) = \mathcal{A}$, up to extensional
+  equality of relations. Hence $\mathrm{enc}$ is injective, and
+  $x \in \mathrm{queryLanguage}(Q)$ iff $\mathrm{dec}(x) = \mathcal{A} \neq \bot$
+  and $Q(\mathcal{A})$.
+\end{theorem}
+\begin{proof}
+  \uses{prop:desc-encoding-length}
+  Recover the size with \texttt{encodeStruct\_card}, then split the remainder by
+  the known block lengths.
+\end{proof}
+
+\begin{definition}[Boolean model checker]
+  \label{def:desc-model-checking}
+  \lean{Complexity.DescriptiveComplexity.Formula.evalB, Complexity.DescriptiveComplexity.Sentence.evalB}
+  \leanok
+  \uses{def:desc-fo-syntax, def:desc-structure}
+  A computable $\mathrm{Bool}$-valued evaluator for first-order formulas on
+  decidable structures. Quantifiers become \texttt{any} and \texttt{all} over the
+  list of universe elements.
+\end{definition}
+
+\begin{theorem}[Model checking is correct]
+  \label{thm:desc-model-checking}
+  \lean{Complexity.DescriptiveComplexity.Formula.evalB_eq_sat, Complexity.DescriptiveComplexity.Sentence.evalB_eq_models, Complexity.DescriptiveComplexity.decidableModels}
+  \leanok
+  \uses{def:desc-model-checking, def:desc-fo-semantics}
+  $\mathrm{evalB}(\mathcal{A}, \sigma, \varphi) = \mathrm{true}$ iff
+  $\mathcal{A}, \sigma \models \varphi$. Hence first-order truth in a finite
+  decidable structure is decidable.
+\end{theorem}
+\begin{proof}
+  \leanok
+  Induct on $\varphi$.
+\end{proof}
+
+\begin{theorem}[First-order queries are in polynomial time]
+  \label{thm:desc-fo-in-P}
+  \uses{def:desc-query-language, def:desc-fo-semantics, def:P}
+  For every first-order sentence $\varphi$, the language of the query
+  $\mathcal{A} \mapsto (\mathcal{A} \models \varphi)$ is in $\cc{P}$.
+\end{theorem}
+\begin{proof}
+  \uses{thm:desc-model-checking, thm:desc-encoding-roundtrip}
+  Parse the input, then run the model checker. With $\varphi$ fixed, it makes
+  $O(n^{\mathrm{qr}(\varphi)})$ recursive calls, each reading a truth-table bit
+  at a computable offset. The stronger bound $\cc{FO} \subseteq \cc{L}$ follows
+  from the same recursion with one logarithmic-size counter per quantifier.
+\end{proof}
+
+\section{First-order reductions}
+
+\begin{definition}[First-order interpretation]
+  \label{def:desc-interpretation}
+  \lean{Complexity.DescriptiveComplexity.FOInterpretation, Complexity.DescriptiveComplexity.FOInterpretation.apply, Complexity.DescriptiveComplexity.FOInterpretation.idInterp, Complexity.DescriptiveComplexity.FOInterpretation.translate, Complexity.DescriptiveComplexity.FOInterpretation.comp}
+  \leanok
+  \uses{def:desc-fo-syntax, def:desc-structure}
+  A dimension-1 interpretation $I : V \to W$ consists of a $V$-formula with
+  $\mathrm{ar}(R)$ free variables for each relation symbol $R$ of $W$, and a
+  source constant for each constant of $W$. Applying $I$ to a $V$-structure gives
+  a $W$-structure on the \emph{same} universe. Formulas translate backwards along
+  $I$, and interpretations compose.
+\end{definition}
+
+\begin{theorem}[Transport theorem]
+  \label{thm:desc-transport}
+  \lean{Complexity.DescriptiveComplexity.FOInterpretation.translate_sat, Complexity.DescriptiveComplexity.FOInterpretation.apply_comp, Complexity.DescriptiveComplexity.FOInterpretation.apply_idInterp}
+  \leanok
+  \uses{def:desc-interpretation, def:desc-fo-semantics}
+  $I(\mathcal{A}), \sigma \models \varphi$ iff
+  $\mathcal{A}, \sigma \models I^*\varphi$. Composition of interpretations acts as
+  composition of the structure maps, and the identity interpretation acts as the
+  identity.
+\end{theorem}
+\begin{proof}
+  \leanok
+  \uses{thm:desc-substitution}
+  Induct on $\varphi$. At a relation atom, substitute the translated argument
+  terms into the defining formula.
+\end{proof}
+
+\begin{definition}[First-order reductions and projections]
+  \label{def:desc-fo-reduction}
+  \lean{Complexity.DescriptiveComplexity.FOReduces, Complexity.DescriptiveComplexity.FOInterpretation.IsQuantifierFree, Complexity.DescriptiveComplexity.FOProjReduces}
+  \leanok
+  \uses{def:desc-interpretation, def:desc-query}
+  $Q_1 \le_{\cc{FO}} Q_2$ if some interpretation $I$ has
+  $Q_1(\mathcal{A}) \iff Q_2(I(\mathcal{A}))$ for all $\mathcal{A}$. It is a
+  \emph{first-order projection} if every defining formula of $I$ is
+  quantifier-free. This is weaker than Immerman's projective form, in which each
+  target bit depends on a single source bit.
+\end{definition}
+
+\begin{theorem}[Reductions are preorders]
+  \label{thm:desc-fo-reduction-preorder}
+  \lean{Complexity.DescriptiveComplexity.FOReduces.refl, Complexity.DescriptiveComplexity.FOReduces.trans, Complexity.DescriptiveComplexity.FOReduces.complement, Complexity.DescriptiveComplexity.FOProjReduces.refl, Complexity.DescriptiveComplexity.FOProjReduces.trans, Complexity.DescriptiveComplexity.FOProjReduces.toFOReduces}
+  \leanok
+  \uses{def:desc-fo-reduction}
+  First-order reducibility and first-order projection reducibility are reflexive
+  and transitive. Every projection is a reduction, and a reduction from $Q_1$ to
+  $Q_2$ is also a reduction from $\overline{Q_1}$ to $\overline{Q_2}$.
+\end{theorem}
+\begin{proof}
+  \leanok
+  \uses{thm:desc-transport}
+  Use the identity interpretation and composition. Translating a quantifier-free
+  formula through a quantifier-free interpretation stays quantifier-free.
+\end{proof}
+
+\begin{theorem}[Definability is closed under reductions]
+  \label{thm:desc-definable-reduction-closure}
+  \lean{Complexity.DescriptiveComplexity.FODefinable.of_reduces, Complexity.DescriptiveComplexity.FODefinable.of_projReduces}
+  \leanok
+  \uses{def:desc-fo-reduction, def:desc-fo-definable}
+  If $Q_1 \le_{\cc{FO}} Q_2$ and $Q_2$ is first-order definable, then so is $Q_1$.
+\end{theorem}
+\begin{proof}
+  \leanok
+  \uses{thm:desc-transport}
+  Translate the sentence defining $Q_2$ backwards along the interpretation.
+\end{proof}
+
+\begin{definition}[Dimension-$k$ interpretation]
+  \label{def:desc-dim-k}
+  \uses{def:desc-interpretation}
+  A dimension-$k$ interpretation defines the target universe as a definable subset
+  of $\mathrm{dom}^k$. Each target relation of arity $a$ is defined by a formula
+  with $a k$ free variables. This requires a codec
+  $\mathrm{Fin}(n^k) \simeq (\mathrm{Fin}(k) \to \mathrm{Fin}(n))$ and a way to
+  assemble environments for the $a k$ variables.
+\end{definition}
+
+\begin{theorem}[Transport for dimension-$k$ interpretations]
+  \label{thm:desc-dim-k-transport}
+  \uses{def:desc-dim-k, def:desc-fo-semantics}
+  \notready
+  The transport theorem holds for dimension-$k$ interpretations. They compose
+  (dimensions multiply), so dimension-$k$ reducibility is a preorder that
+  contains dimension-1 reducibility.
+\end{theorem}
+\begin{proof}
+  \uses{thm:desc-transport, thm:desc-substitution}
+  Replace each target variable by a block of $k$ source variables and relativize
+  quantifiers to the definable universe.
+\end{proof}
+
+\begin{theorem}[String-level reductions]
+  \label{thm:desc-string-reduction}
+  \uses{def:desc-fo-reduction, def:desc-query-language, def:reduction}
+  If $Q_1 \le_{\cc{FO}} Q_2$, then the language of $Q_1$ polynomial-time
+  many-one reduces to the language of $Q_2$.
+\end{theorem}
+\begin{proof}
+  \uses{thm:desc-encoding-roundtrip, thm:desc-model-checking, thm:desc-transport}
+  Decode the input. Compute each target truth table by model-checking the defining
+  formulas, and re-encode. Send malformed inputs to a fixed non-encoding, such as
+  the empty string.
+\end{proof}
+
+\section{Capturing complexity classes}
+
+\begin{definition}[Ordered first-order logic]
+  \label{def:desc-ordered-fo}
+  \uses{def:desc-fo-syntax, def:desc-structure}
+  First-order logic extended with atoms for the canonical order $\le$, successor,
+  minimum, and maximum of $\mathrm{Fin}(n)$. These atoms are interpreted by the
+  existing meta-level helpers. The existing unordered syntax and its unrestricted
+  invariance theorem stay unchanged. Ordered sentences are preserved only by maps
+  that respect the canonical order, and they need not define order-independent
+  queries.
+\end{definition}
+
+\begin{theorem}[Fagin, $\exists\cc{SO} \subseteq \cc{NP}$]
+  \label{thm:desc-fagin-upper}
+  \uses{def:desc-existential-so, def:desc-so-semantics, def:desc-query-language, def:NP}
+  Let $\varphi$ be a second-order sentence in $\exists\cc{SO}$ form that defines
+  $Q$. Then the language of $Q$ is in $\cc{NP}$.
+\end{theorem}
+\begin{proof}
+  \uses{thm:desc-model-checking, thm:desc-fo-in-P, thm:desc-encoding-roundtrip}
+  The certificate is the truth tables of the quantified relations, of polynomial
+  total length $\sum_j n^{k_j}$. The verifier model-checks the FO matrix under
+  the resulting relation environment, extending \texttt{evalB} to relation
+  variables.
+\end{proof}
+
+\begin{theorem}[Fagin, $\cc{NP} \subseteq \exists\cc{SO}$]
+  \label{thm:desc-fagin-lower}
+  \uses{def:desc-existential-so, def:desc-so-semantics, def:desc-query-language, def:NP}
+  Let $Q$ be order-independent with language in $\cc{NP}$. Then some second-order
+  sentence in $\exists\cc{SO}$ form defines $Q$.
+\end{theorem}
+\begin{proof}
+  \uses{thm:desc-so-definable, thm:desc-encoding-roundtrip}
+  Existentially quantify a linear order together with a computation tableau of an
+  $n^k$-time verifier, indexed by $k$-tuples. First-order-check the tableau's
+  initial row (the encoding of the structure under the guessed order), its local
+  transition windows, and acceptance. Order independence makes the guessed order
+  harmless.
+\end{proof}
+
+\begin{theorem}[Fagin's theorem]
+  \label{thm:desc-fagin}
+  \uses{def:desc-existential-so, def:desc-query-language, def:NP}
+  An order-independent query has its language in $\cc{NP}$ if and only if it is
+  definable by an $\exists\cc{SO}$ sentence.
+\end{theorem}
+\begin{proof}
+  \uses{thm:desc-fagin-upper, thm:desc-fagin-lower}
+  Combine the two inclusions. Order independence of $\exists\cc{SO}$-definable
+  queries is already formalized.
+\end{proof}
+
+\begin{theorem}[$\cc{FO} \subseteq \cc{AC^0}$, nonuniform]
+  \label{thm:desc-fo-ac0}
+  \uses{def:desc-query-language, def:desc-fo-semantics, def:NC-AC, def:bitstring}
+  For every first-order sentence $\varphi$, consider the characteristic family of
+  the language of $\mathcal{A} \mapsto (\mathcal{A} \models \varphi)$: the Boolean
+  function at input length $N$ is the indicator of the language restricted to
+  $\{0,1\}^N$. This family lies in $\cc{AC^0}$.
+\end{theorem}
+\begin{proof}
+  \uses{prop:desc-encoding-length, thm:desc-model-checking}
+  At most one universe size $n$ has encodings of length $N$. Build a circuit
+  that checks the unary prefix. Replace each quantifier by an unbounded fan-in
+  gate of fan-in $n$, and each atom by an input bit. The depth is
+  $O(\lvert\varphi\rvert)$, a constant, and the size is
+  $O(\lvert\varphi\rvert \cdot n^{\mathrm{qr}(\varphi)})$ plus the prefix check.
+\end{proof}
+
+\begin{theorem}[Barrington--Immerman--Straubing]
+  \label{thm:desc-ac0-fo}
+  \uses{def:desc-ordered-fo, def:NC-AC}
+  \notready
+  On ordered structures with a BIT predicate, the first-order definable queries
+  are exactly those whose languages have $\mathsf{DLOGTIME}$-uniform $\cc{AC^0}$
+  circuit families. This is the uniform converse of the previous theorem.
+\end{theorem}
+\begin{proof}
+  \uses{thm:desc-fo-ac0}
+  One direction refines the circuit construction to a uniform one. For the other,
+  describe the uniform circuit's gates by first-order formulas over tuples and
+  evaluate the circuit by a first-order formula of depth proportional to the
+  circuit's depth. Neither uniform $\cc{AC^0}$ nor BIT is defined yet.
+\end{proof}
+
+\begin{definition}[Least fixed-point logic]
+  \label{def:desc-lfp}
+  \uses{def:desc-fo-syntax, def:desc-fo-semantics}
+  $\cc{FO}(\mathrm{LFP})$ extends first-order logic with
+  $[\mathrm{lfp}_{R,\bar x}\, \varphi](\bar t)$ for $\varphi$ positive in $R$. It
+  is interpreted as the least fixed point of the monotone operator that
+  $\varphi$ induces on relations of the arity of $R$. That fixed point is reached
+  after at most $n^{\mathrm{ar}(R)}$ iterations.
+\end{definition}
+
+\begin{theorem}[Immerman--Vardi]
+  \label{thm:desc-immerman-vardi}
+  \uses{def:desc-lfp, def:desc-ordered-fo, def:desc-query-language, def:P}
+  \notready
+  On ordered structures, a query is $\cc{FO}(\mathrm{LFP})$-definable if and only
+  if its language is in $\cc{P}$.
+\end{theorem}
+\begin{proof}
+  \uses{thm:desc-fo-in-P, thm:desc-encoding-roundtrip}
+  $\subseteq$: iterate each fixed point at most polynomially many times. $\supseteq$:
+  use the ordering to define the computation tableau of a polynomial-time machine
+  by a least fixed point, as in the proof of Fagin's theorem but without guessing.
+\end{proof}
+
+\section{Open directions}
+
+Immerman's exact projective reductions (each target bit determined by one source
+bit under a quantifier-free guard) are not yet defined. Neither is a worked
+completeness result under first-order projections. Both are prerequisites for
+treating first-order projections as the reductions under which the standard
+$\cc{AC^0}$-, $\cc{L}$-, and $\cc{NL}$-complete problems are complete.

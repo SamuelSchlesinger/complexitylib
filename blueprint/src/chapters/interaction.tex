@@ -1,0 +1,571 @@
+\chapter{Interactive proofs and PCPs}
+\label{chap:interaction}
+
+This chapter covers interactive proof systems ($\cc{IP}$, $\cc{MA}$,
+$\cc{AM}$) and probabilistically checkable proofs. Verifiers are machine-free:
+a verifier is a polynomial-time function or a language in $\cc{P}$ applied to
+an encoded view, and its coins are a uniformly random point of
+$\{0,1\}^t$. Formalized so far: the three interactive classes with
+completeness $2/3$ and soundness $1/3$, $\cc{P} \subseteq \cc{MA}$ and
+$\cc{P} \subseteq \cc{AM}$, $\cc{IP} \subseteq \cc{PSPACE}$ by evaluating the
+protocol's game tree, and the PCP theorem
+$\cc{NP} = \cc{PCP}(O(\log n), O(1))$ with a constructible randomness bound,
+proved along Dinur's gap-amplification route. The main open direction is
+$\cc{PSPACE} \subseteq \cc{IP}$ (hence $\cc{IP} = \cc{PSPACE}$) through
+sum-check and arithmetization, followed by hardness of approximation built on
+the PCP theorem.
+
+\section{Interactive protocols}
+
+\begin{definition}[Protocols, strategies and transcripts]
+  \label{def:interaction-protocol}
+  \lean{Complexity.Transcript, Complexity.ProverStrategy,
+    Complexity.ProverStrategy.Bounded, Complexity.Protocol,
+    Complexity.Protocol.transcript, Complexity.Protocol.Accepts,
+    Complexity.Protocol.acceptEvent}
+  \leanok
+  \uses{def:FP, def:P, def:pair}
+  A transcript is a list of messages; the verifier speaks at even positions and
+  the prover at odd ones. A prover strategy maps the visible transcript to the
+  next message; it never sees the verifier's coins, and it is bounded by $m$
+  if all its messages have length at most $m$. A protocol consists of a round
+  count, a coin count and a message-length bound (functions of the input
+  length), a next-message function in $\cc{FP}$ applied to the encoded view
+  $\mathrm{pair}(\mathrm{pair}(x, r), \langle \tau \rangle)$ of the input,
+  the private coins $r$ and the transcript $\tau$, a proof that the verifier's
+  messages respect the length bound, and a verdict language in $\cc{P}$ on the
+  final view. Each round appends the verifier's message and then the prover's
+  reply; the accept event is the set of coin strings on which the verdict
+  accepts the completed interaction.
+\end{definition}
+
+\begin{definition}[IP]
+  \label{def:IP}
+  \lean{Complexity.IP}
+  \leanok
+  \uses{def:interaction-protocol}
+  $L \in \cc{IP}$ if some protocol whose round count, coin count and message
+  bound are given by polynomials satisfies: for $x \in L$ some strategy bounded
+  by the message bound is accepted with probability at least $2/3$, and for
+  $x \notin L$ every bounded strategy is accepted with probability at most
+  $1/3$. The counts are required to be polynomials, not merely polynomially
+  bounded, so that the verifier can compute them.
+\end{definition}
+
+\begin{definition}[MA and AM]
+  \label{def:MA-AM}
+  \lean{Complexity.MA, Complexity.AM}
+  \leanok
+  \uses{def:P, def:pair}
+  $L \in \cc{MA}$ if there are a polynomial $p$ and $V \in \cc{P}$ such that
+  for $x \in L$ some proof $w$ with $|w| \le p(|x|)$ makes
+  $\mathrm{pair}(\mathrm{pair}(x, w), r) \in V$ for at least $2/3$ of the
+  $r \in \{0,1\}^{p(|x|)}$, and for $x \notin L$ every such proof does so for at
+  most $1/3$ of them. $L \in \cc{AM}$ if the coins $r$ come first and are
+  public: the fraction of $r$ admitting some reply $w$ with $|w| \le p(|x|)$
+  and $\mathrm{pair}(\mathrm{pair}(x, r), w) \in V$ is at least $2/3$ for
+  members and at most $1/3$ for non-members.
+\end{definition}
+
+\begin{proposition}[$\cc{P} \subseteq \cc{MA}$ and $\cc{P} \subseteq \cc{AM}$]
+  \label{prop:interaction-P-subset-MA-AM}
+  \lean{Complexity.P_subset_MA, Complexity.P_subset_AM}
+  \leanok
+  \uses{def:P, def:MA-AM}
+  $\cc{P} \subseteq \cc{MA}$ and $\cc{P} \subseteq \cc{AM}$.
+\end{proposition}
+\begin{proof}
+  \leanok
+  The verifier ignores the proof and the coins and decides the input it
+  recovers from the encoded view.
+\end{proof}
+
+\begin{lemma}[Strategy extensionality]
+  \label{lem:interaction-strategy-ext}
+  \lean{Complexity.Protocol.transcript_congr, Complexity.Protocol.accepts_congr,
+    Complexity.Protocol.acceptEvent_congr}
+  \leanok
+  \uses{def:interaction-protocol}
+  If two strategies agree on all transcripts of length at most $2n$, the
+  transcripts after $n$ rounds coincide. Hence acceptance and the accept event
+  depend on the strategy only through its values on transcripts of length at
+  most twice the round count.
+\end{lemma}
+\begin{proof}
+  \leanok
+  Induction on the number of rounds; the transcript after $n$ rounds has
+  length exactly $2n$.
+\end{proof}
+
+\begin{lemma}[The game value and an optimal prover]
+  \label{lem:interaction-game-value}
+  \lean{Complexity.Protocol.gval, Complexity.Protocol.card_acceptEvent_le_gval,
+    Complexity.Protocol.gval_eq_card_acceptEvent,
+    Complexity.Protocol.optStrategy_bounded}
+  \leanok
+  \uses{def:interaction-protocol}
+  For a protocol and an input $x$, define $\mathrm{gval}$ by recursion down the
+  transcript tree: at a leaf it counts the coin strings consistent with the
+  transcript that the verdict accepts, and at an internal node it sums, over
+  the verifier messages still possible, the maximum over replies of length at
+  most the message bound of the value below. Then the number of accepting coin
+  strings of every bounded strategy is at most $\mathrm{gval}$ at the root, and
+  a bounded deterministic strategy attains it.
+\end{lemma}
+\begin{proof}
+  \leanok
+  Induction on the remaining rounds; the maximizing reply is chosen
+  node by node.
+\end{proof}
+
+\begin{theorem}[IP membership is a game-value comparison]
+  \label{thm:interaction-ip-game-value}
+  \lean{Complexity.IP_membership_is_game_value}
+  \leanok
+  \uses{def:IP, lem:interaction-game-value}
+  For every $L \in \cc{IP}$ there is a protocol such that, for every $x$,
+  $x \in L$ if and only if $2^{c(|x|)} < 2\,\mathrm{gval}(x)$, where $c$ is the
+  coin count and $\mathrm{gval}(x)$ is the root value.
+\end{theorem}
+\begin{proof}
+  \leanok
+  \uses{lem:interaction-game-value}
+  Completeness puts the optimum above two thirds of the coin space and
+  soundness puts it below one third.
+\end{proof}
+
+\begin{theorem}[$\cc{IP} \subseteq \cc{PSPACE}$]
+  \label{thm:interaction-ip-subset-pspace}
+  \lean{Complexity.IP_subset_PSPACE}
+  \leanok
+  \uses{def:IP, def:PSPACE}
+  $\cc{IP} \subseteq \cc{PSPACE}$.
+\end{theorem}
+\begin{proof}
+  \leanok
+  \uses{thm:interaction-ip-game-value, lem:space-iterate}
+  The game value is written as nested counter loops and walked depth-first on
+  a stack with one frame per round; one step of the walk is a polynomial-time
+  function, and Lemma~\ref{lem:space-iterate} turns the iteration into a
+  polynomial-space machine.
+\end{proof}
+
+\begin{proposition}[IP = PSPACE, given the hard half]
+  \label{prop:interaction-ip-eq-pspace-of}
+  \lean{Complexity.IP_eq_PSPACE_of_pspace_subset_ip, Complexity.IP_eq_PSPACE_of}
+  \leanok
+  \uses{def:IP, def:PSPACE}
+  If $\cc{PSPACE} \subseteq \cc{IP}$, then $\cc{IP} = \cc{PSPACE}$.
+\end{proposition}
+\begin{proof}
+  \leanok
+  \uses{thm:interaction-ip-subset-pspace}
+  Antisymmetry with Theorem~\ref{thm:interaction-ip-subset-pspace}. The
+  hypothesis is recorded as the proposition \texttt{PSPACESubsetIP}.
+\end{proof}
+
+\begin{definition}[Completeness and soundness parameters]
+  \label{def:interaction-ip-params}
+  \uses{def:IP, def:MA-AM}
+  $\cc{IP}(c, s)$, $\cc{MA}(c, s)$ and $\cc{AM}(c, s)$: the classes with
+  completeness $c$ and soundness $s$ as parameters, together with monotonicity
+  in both thresholds and the identification of the hard-wired classes with
+  $c = 2/3$, $s = 1/3$.
+\end{definition}
+
+\begin{theorem}[Sequential repetition]
+  \label{thm:interaction-sequential-repetition}
+  \uses{def:interaction-ip-params}
+  For constants $0 \le s < c \le 1$ and every polynomial $q$,
+  $\cc{IP}(c, s) = \cc{IP}(1 - 2^{-q(n)}, 2^{-q(n)})$: run the protocol
+  sequentially polynomially many times and accept by a threshold vote.
+\end{theorem}
+\begin{proof}
+  \uses{lem:interaction-strategy-ext}
+  Soundness against an adaptive prover needs the conditional per-run bound
+  across rounds, not only independence of the coins; strategy extensionality
+  lets each run's strategy be read off the combined one.
+\end{proof}
+
+\begin{proposition}[$\cc{NP} \subseteq \cc{MA}$]
+  \label{prop:interaction-np-subset-ma}
+  \uses{def:NP, def:MA-AM}
+  $\cc{NP} \subseteq \cc{MA}$.
+\end{proposition}
+\begin{proof}
+  Merlin sends the NP witness and Arthur ignores his coins.
+\end{proof}
+
+\begin{proposition}[$\cc{MA} \subseteq \cc{IP}$]
+  \label{prop:interaction-ma-subset-ip}
+  \uses{def:MA-AM, def:IP}
+  $\cc{MA} \subseteq \cc{IP}$.
+\end{proposition}
+\begin{proof}
+  A one-round protocol with an empty verifier message; the prover's reply is
+  Merlin's proof, which cannot depend on the private coins.
+\end{proof}
+
+\begin{corollary}[$\cc{NP} \subseteq \cc{IP}$]
+  \label{cor:interaction-np-subset-ip}
+  \uses{def:NP, def:IP}
+  $\cc{NP} \subseteq \cc{IP}$.
+\end{corollary}
+\begin{proof}
+  \uses{prop:interaction-np-subset-ma, prop:interaction-ma-subset-ip}
+  Compose the two inclusions.
+\end{proof}
+
+\section{Algebraic tools and IP = PSPACE}
+
+\begin{lemma}[One-variable multilinear extension]
+  \label{lem:interaction-mle1}
+  \lean{Complexity.mle₁, Complexity.mle₁_zero, Complexity.mle₁_one,
+    Complexity.mle₁_bool}
+  \leanok
+  For $f : \{0,1\} \to R$ with $R$ a commutative ring, let
+  $\widetilde{f}(x) = f(0)(1 - x) + f(1)\,x$. Then $\widetilde{f}(0) = f(0)$ and
+  $\widetilde{f}(1) = f(1)$, so $\widetilde{f}$ agrees with $f$ at both Boolean
+  points.
+\end{lemma}
+\begin{proof}
+  \leanok
+  Direct computation.
+\end{proof}
+
+\begin{definition}[Multilinear extension]
+  \label{def:interaction-mle}
+  \uses{lem:interaction-mle1}
+  For $f : \{0,1\}^m \to \mathbb{F}$, the multilinear extension
+  $\widetilde{f}(x) = \sum_{b \in \{0,1\}^m} f(b) \prod_i
+  (b_i x_i + (1 - b_i)(1 - x_i))$, with the facts that it agrees with $f$ on the
+  cube and is the unique multilinear polynomial doing so.
+\end{definition}
+
+\begin{lemma}[Schwartz--Zippel over coin strings]
+  \label{lem:interaction-schwartz-zippel}
+  If $p$ is a nonzero polynomial over a finite field $\mathbb{F}$ of total
+  degree at most $d$ in $m$ variables, a uniformly random point of
+  $\mathbb{F}^m$ is a root with probability at most $d / |\mathbb{F}|$; in
+  particular a nonzero univariate polynomial of degree $d$ has at most $d$
+  roots. Mathlib provides the counting statement for
+  \texttt{MvPolynomial}; what remains is the bridge to the library's
+  finite probability over encoded coin strings.
+\end{lemma}
+
+\begin{definition}[The sum-check protocol]
+  \label{def:interaction-sumcheck}
+  \uses{def:interaction-protocol}
+  For a polynomial $g$ in $m$ variables over $\mathbb{F}$ with individual
+  degree at most $d$, given by an evaluation oracle, and a claimed value $v$ of
+  $\sum_{b \in \{0,1\}^m} g(b)$: in round $i$ the prover sends a univariate
+  polynomial $h_i$ of degree at most $d$, the verifier checks
+  $h_i(0) + h_i(1)$ against the current claim, and replaces the claim by
+  $h_i(r_i)$ for a random $r_i \in \mathbb{F}$; at the end it checks
+  $g(r_1, \dots, r_m)$ against the last claim.
+\end{definition}
+
+\begin{theorem}[Sum-check completeness and soundness]
+  \label{thm:interaction-sumcheck}
+  \uses{def:interaction-sumcheck, lem:interaction-schwartz-zippel}
+  \notready
+  If the claim is correct, the honest prover is accepted with probability $1$.
+  If it is incorrect, every prover is accepted with probability at most
+  $m d / |\mathbb{F}|$.
+\end{theorem}
+\begin{proof}
+  \uses{lem:interaction-schwartz-zippel}
+  Round-by-round invariant: a false claim stays false unless the verifier hits
+  a root of the difference between the prover's polynomial and the true one.
+\end{proof}
+
+\begin{definition}[Arithmetization of QBF with degree reduction]
+  \label{def:interaction-arithmetization}
+  \uses{def:space-qbf, def:interaction-mle}
+  Map a QBF to an expression over $\mathbb{F}$: $\neg a \mapsto 1 - a$,
+  $a \wedge b \mapsto ab$, $\forall x\, \varphi \mapsto \varphi|_{x=0} \cdot
+  \varphi|_{x=1}$, $\exists x\, \varphi \mapsto 1 - (1 - \varphi|_{x=0})(1 -
+  \varphi|_{x=1})$, interleaved with linearization operators
+  $L_{x}\, p = (1 - x)\, p|_{x=0} + x\, p|_{x=1}$ that keep every intermediate
+  polynomial of individual degree at most $2$.
+\end{definition}
+
+\begin{lemma}[Arithmetization is faithful and degree-controlled]
+  \label{lem:interaction-degree-reduction}
+  \uses{def:interaction-arithmetization, lem:space-qbf-semantics}
+  \notready
+  On Boolean points the arithmetized expression takes the value $1$ exactly on
+  true formulas and $0$ otherwise, linearization does not change values on
+  Boolean points, and with linearization every polynomial the protocol handles
+  has individual degree at most $2$ and total size polynomial in the formula.
+\end{lemma}
+
+\begin{theorem}[An interactive proof for TQBF]
+  \label{thm:interaction-tqbf-protocol}
+  \uses{def:space-tqbf, def:IP}
+  \notready
+  $\cc{TQBF} \in \cc{IP}$, with polynomial verifier time, polynomial
+  communication, perfect completeness and soundness error bounded away from
+  $1$, over a field whose size dominates the degree and soundness parameters
+  and admits a polynomial-size encoding.
+\end{theorem}
+\begin{proof}
+  \uses{thm:interaction-sumcheck, lem:interaction-degree-reduction,
+    thm:interaction-sequential-repetition}
+  Run a sum-check-style round for each quantifier and linearization operator,
+  from the outside in. Naive arithmetization without degree reduction has
+  exponential degree, which is why the degree-control lemma is a separate
+  node.
+\end{proof}
+
+\begin{theorem}[$\cc{PSPACE} \subseteq \cc{IP}$ (Shamir)]
+  \label{thm:interaction-pspace-subset-ip}
+  \uses{def:PSPACE, def:IP}
+  $\cc{PSPACE} \subseteq \cc{IP}$.
+\end{theorem}
+\begin{proof}
+  \uses{thm:interaction-tqbf-protocol, thm:space-tqbf-complete}
+  Compose a polynomial-time reduction to TQBF with the TQBF protocol; $\cc{IP}$
+  is closed under polynomial-time many-one reductions.
+\end{proof}
+
+\begin{theorem}[$\cc{IP} = \cc{PSPACE}$]
+  \label{thm:interaction-ip-eq-pspace}
+  \uses{def:IP, def:PSPACE}
+  $\cc{IP} = \cc{PSPACE}$.
+\end{theorem}
+\begin{proof}
+  \uses{thm:interaction-pspace-subset-ip, prop:interaction-ip-eq-pspace-of}
+  Apply Proposition~\ref{prop:interaction-ip-eq-pspace-of}.
+\end{proof}
+
+\section{Probabilistically checkable proofs}
+
+\begin{definition}[PCP verifiers]
+  \label{def:interaction-pcp-verifier}
+  \lean{Complexity.PCPVerifier, Complexity.PCPVerifier.answers,
+    Complexity.PCPVerifier.Accepts, Complexity.PCPVerifier.acceptEvent,
+    Complexity.PCPVerifier.QueryBounded}
+  \leanok
+  \uses{def:FP, def:P, def:pair}
+  A PCP verifier is non-adaptive: an $\cc{FP}$ function computes, from the input
+  $x$ and the coins $r$, the list of proof positions it reads, and a verdict
+  language in $\cc{P}$ decides $\mathrm{pair}(\mathrm{pair}(x, r), a)$, where $a$
+  lists the proof bits found there. A position past the end of the proof reads
+  as $0$. The verifier is query-bounded by $q$ if it reads at most $q(|x|)$
+  positions for every $x$ and $r$.
+\end{definition}
+
+\begin{definition}[PCP classes]
+  \label{def:PCP}
+  \lean{Complexity.PCP}
+  \leanok
+  \uses{def:interaction-pcp-verifier}
+  $L \in \cc{PCP}(r, q)$ if some verifier query-bounded by $q$, using exactly
+  $r(|x|)$ coins, accepts some proof of each $x \in L$ with probability $1$,
+  and accepts every proof of each $x \notin L$ with probability at most $1/2$.
+\end{definition}
+
+\begin{definition}[Constructible bounds]
+  \label{def:interaction-constructible}
+  \lean{Complexity.Constructible}
+  \leanok
+  \uses{def:FP}
+  A function $r$ is constructible if $x \mapsto 1^{r(|x|)}$ is in $\cc{FP}$.
+\end{definition}
+
+\begin{proposition}[Elementary PCP facts]
+  \label{prop:interaction-P-subset-PCP}
+  \lean{Complexity.P_subset_PCP, Complexity.PCP_mono_queries}
+  \leanok
+  \uses{def:P, def:PCP}
+  $\cc{P} \subseteq \cc{PCP}(r, q)$ for all $r$ and $q$, and
+  $\cc{PCP}(r, q) \subseteq \cc{PCP}(r, q')$ whenever $q \le q'$ pointwise.
+\end{proposition}
+\begin{proof}
+  \leanok
+  A verifier that reads nothing and ignores its coins; raising the query bound
+  weakens a hypothesis.
+\end{proof}
+
+\begin{proposition}[The randomness bound must be constructible]
+  \label{prop:interaction-constructible-needed}
+  \lean{Complexity.lengthLang_mem_iUnion_PCP}
+  \leanok
+  \uses{def:PCP}
+  For every set $A \subseteq \mathbb{N}$, computable or not, the language
+  $\{x : |x| \in A\}$ lies in $\bigcup \cc{PCP}(r, q)$ over all
+  $r = O(\log n)$ and $q = O(1)$, with no constructibility requirement on $r$.
+\end{proposition}
+\begin{proof}
+  \leanok
+  Use the indicator of $A$ as the coin count and a verifier that accepts
+  exactly when it received one coin. Since there are uncountably many sets $A$
+  and $\cc{NP}$ is countable, the unrestricted union is not $\cc{NP}$; this
+  consequence is argued in the documentation, not stated in Lean.
+\end{proof}
+
+\begin{lemma}[PCP soundness amplification]
+  \label{lem:interaction-pcp-amplification}
+  \lean{Complexity.PCPWith, Complexity.mem_PCP_of_PCPWith}
+  \leanok
+  \uses{def:PCP, def:interaction-constructible}
+  Let $\cc{PCP}_s(r, q)$ be the class with soundness error $s$ in place of
+  $1/2$. If $r$ is constructible and $0 \le s < 1$, every language in
+  $\cc{PCP}_s(r, q)$ is in $\cc{PCP}(2^j r, 2^j q)$ for some constant $j$.
+\end{lemma}
+\begin{proof}
+  \leanok
+  Running the verifier twice on independent coins squares the error; split the
+  coin string at the constructible per-run count.
+\end{proof}
+
+\begin{definition}[Constraint graphs]
+  \label{def:interaction-constraint-graph}
+  \lean{Complexity.ConstraintGraph, Complexity.ConstraintGraph.Satisfiable,
+    Complexity.ConstraintGraph.unsatVal}
+  \leanok
+  A constraint graph over a finite alphabet $\Sigma$ is a finite multigraph
+  whose edges carry binary constraints on the labels of their endpoints. It is
+  satisfiable if some labelling satisfies every edge, and its unsatisfiability
+  value is the least fraction of edges left unsatisfied by any labelling.
+\end{definition}
+
+\begin{theorem}[Dinur's gap theorem for 3SAT]
+  \label{thm:interaction-dinur-gap}
+  \lean{Complexity.gapGraph, Complexity.satisfiable_gapGraph,
+    Complexity.gap_le_unsatVal_gapGraph, Complexity.numEdges_gapGraph_le,
+    Complexity.dinurAmp_gap_pos}
+  \leanok
+  \uses{def:interaction-constraint-graph}
+  There are a fixed finite alphabet, a constant $\gamma > 0$ and a map
+  $\varphi \mapsto G_\varphi$ from CNF formulas to constraint graphs such that,
+  for every 3CNF $\varphi$: $G_\varphi$ has polynomially many edges in the
+  number of clauses of $\varphi$, $G_\varphi$ is satisfiable if $\varphi$ is,
+  and the unsatisfiability value of $G_\varphi$ is at least $\gamma$ if
+  $\varphi$ is unsatisfiable. The map is defined as a noncomputable mathematical
+  reduction; the polynomial-time counterpart used for the PCP theorem is built
+  from the same amplifier inside the proof of
+  Theorem~\ref{thm:interaction-np-subset-pcp}.
+\end{theorem}
+\begin{proof}
+  \leanok
+  Logarithmically many rounds of Dinur's amplifier (expander preprocessing,
+  graph powering, and alphabet reduction through a Hadamard-code assignment
+  tester) applied to the constraint graph of the formula; each round at least
+  doubles a small unsatisfiability value at a constant-factor cost in size.
+\end{proof}
+
+\begin{theorem}[$\cc{NP} \subseteq \cc{PCP}(O(\log n), O(1))$]
+  \label{thm:interaction-np-subset-pcp}
+  \lean{Complexity.exists_pcp_of_mem_NP}
+  \leanok
+  \uses{def:NP, def:PCP, def:interaction-constructible}
+  For every $L \in \cc{NP}$ there are a constructible $r = O(\log n)$ and
+  $q = O(1)$ with $L \in \cc{PCP}(r, q)$.
+\end{theorem}
+\begin{proof}
+  \leanok
+  \uses{thm:cook-levin, def:interaction-constraint-graph,
+    lem:interaction-pcp-amplification}
+  Reduce to 3CNF satisfiability, compute the gap constraint graph by a
+  polynomial-time implementation of every round of Dinur's amplifier (the
+  amplifier of Theorem~\ref{thm:interaction-dinur-gap}) with an explicit
+  expander family, and let the verifier read one random edge;
+  amplification brings the constant gap below $1/2$.
+\end{proof}
+
+\begin{theorem}[$\cc{PCP}(O(\log n), O(1)) \subseteq \cc{NP}$]
+  \label{thm:interaction-pcp-subset-np}
+  \lean{Complexity.PCP_subset_NP}
+  \leanok
+  \uses{def:PCP, def:NP, def:interaction-constructible}
+  If $r$ is constructible, $r = O(\log n)$ and $q = O(1)$, then
+  $\cc{PCP}(r, q) \subseteq \cc{NP}$.
+\end{theorem}
+\begin{proof}
+  \leanok
+  The verifier's behaviour on all $2^{r(n)} = \mathrm{poly}(n)$ coin strings
+  is determined by a polynomial-size table of answers; guess the table and
+  check it deterministically.
+\end{proof}
+
+\begin{theorem}[PCP theorem]
+  \label{thm:interaction-pcp-theorem}
+  \lean{Complexity.PCP_theorem}
+  \leanok
+  \uses{def:NP, def:PCP, def:interaction-constructible}
+  $\cc{NP} = \bigcup \cc{PCP}(r, q)$, the union over all constructible
+  $r = O(\log n)$ and all $q = O(1)$.
+\end{theorem}
+\begin{proof}
+  \leanok
+  \uses{thm:interaction-np-subset-pcp, thm:interaction-pcp-subset-np,
+    prop:interaction-constructible-needed}
+  The two inclusions. The constructibility requirement cannot be dropped, by
+  Proposition~\ref{prop:interaction-constructible-needed}.
+\end{proof}
+
+\section{Hardness of approximation}
+
+\begin{definition}[Gap constraint satisfaction problems]
+  \label{def:interaction-gap-csp}
+  \uses{def:promise, def:interaction-constraint-graph}
+  For $0 \le s < c \le 1$ and fixed arity and alphabet, $\mathrm{Gap}_{c,s}$-CSP
+  is the promise problem whose yes-instances are encoded constraint systems
+  with value at least $c$ and whose no-instances have value less than $s$.
+  $\mathrm{Gap}$-MAX-3SAT$_{1,s}$ separates satisfiable 3CNFs from those in
+  which every assignment satisfies fewer than an $s$ fraction of the clauses.
+\end{definition}
+
+\begin{theorem}[Gap MAX-3SAT is NP-hard]
+  \label{thm:interaction-gap-max3sat}
+  \uses{def:interaction-gap-csp, def:NP}
+  \notready
+  There is $\varepsilon > 0$ such that $\mathrm{Gap}$-MAX-3SAT$_{1, 1 -
+  \varepsilon}$ is NP-hard under polynomial-time reductions to the promise
+  problem.
+\end{theorem}
+\begin{proof}
+  \uses{thm:interaction-pcp-theorem, thm:interaction-np-subset-pcp}
+  Turn each random string of the PCP verifier into a constant-size CNF over the
+  proof bits, then convert to 3CNF; the constant soundness gap becomes a
+  constant fraction of violated clauses. The equivalence between PCP
+  characterizations and gap-CSP hardness is the reusable statement.
+\end{proof}
+
+\begin{definition}[Label cover]
+  \label{def:interaction-label-cover}
+  \uses{def:interaction-constraint-graph}
+  A label-cover instance is a bipartite constraint graph with label sets
+  $\Sigma_A$, $\Sigma_B$ whose constraints are projections
+  $\pi_e : \Sigma_A \to \Sigma_B$; its value is the largest fraction of edges
+  satisfied by a labelling.
+\end{definition}
+
+\begin{theorem}[Gap label cover is NP-hard]
+  \label{thm:interaction-label-cover-hard}
+  \uses{def:interaction-label-cover, def:interaction-gap-csp}
+  \notready
+  For some constant $\delta < 1$ and constant-size label sets, distinguishing
+  label-cover instances of value $1$ from those of value at most $\delta$ is
+  NP-hard.
+\end{theorem}
+\begin{proof}
+  \uses{thm:interaction-gap-max3sat}
+  The clause--variable game on a gap-3SAT instance.
+\end{proof}
+
+\begin{theorem}[Parallel repetition]
+  \label{thm:interaction-parallel-repetition}
+  \uses{def:interaction-label-cover}
+  \notready
+  For every label-cover instance of value at most $\delta < 1$, its $k$-fold
+  parallel repetition has value at most $\delta'^{\,k}$ for a constant
+  $\delta' < 1$ depending only on $\delta$ and the label-set sizes. Hence
+  gap label cover with arbitrarily small constant soundness is NP-hard.
+\end{theorem}
+\begin{proof}
+  \uses{thm:interaction-label-cover-hard}
+  Raz's theorem, or a simpler projection-game variant with a weaker exponent.
+\end{proof}

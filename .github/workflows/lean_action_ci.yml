@@ -39,3 +39,5 @@ jobs:
             Complexitylib.SAT.Tseitin.Machine.Validation
       - name: Axiom guard for headline theorems
         run: lake env lean scripts/AxiomGuard.lean
+      - name: Blueprint declarations exist
+        run: lake env lean scripts/BlueprintCheck.lean

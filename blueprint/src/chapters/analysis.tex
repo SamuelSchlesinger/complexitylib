@@ -1,0 +1,683 @@
+\chapter{Analysis of Boolean functions}
+\label{chap:analysis}
+
+This chapter covers the Fourier analysis of Boolean functions, following
+O'Donnell's \emph{Analysis of Boolean Functions}. It supplies analytic tools for
+small-depth circuit lower bounds and for property testing. Everything lives in
+\texttt{Complexitylib.BooleanAnalysis} (the \texttt{FourierExpansion} surface,
+with \texttt{FourierExpansion.Defs} and \texttt{FourierExpansion.Internal}).
+The following are formalized: the parity basis, Fourier expansion, Plancherel
+and Parseval, the degree decomposition, the BLR linearity test with soundness,
+the spectral theory of noise and influence (O'Donnell, Chapters~1--2), and the
+one-bit base case of the Bonami inequality. The BLR soundness theorem is also
+used by the Hadamard tester in the PCP development. The main open direction is
+hypercontractivity: its tensorization step is what the level-1 inequality, FKN,
+KKL, Friedgut's junta theorem, and the Linial--Mansour--Nisan concentration
+bound for $\cc{AC^0}$ all need.
+
+\paragraph{Conventions.} The cube is $\mathbb{F}_2^n$, written
+\texttt{Cube n = Fin n -> ZMod 2}. The encoding is $\chi(0) = 1$, $\chi(1) = -1$, so
+bit $0$ is the value $+1$ in O'Donnell's $\{-1,1\}^n$ picture. ``Boolean-valued''
+always means $\{-1,1\}$-valued. Noise stability, the noise operator, the
+derivative, and the influences are all \emph{defined} spectrally. Their
+combinatorial readings are theorems (or, for the correlated-input readings,
+planned theorems).
+
+\section{The cube and the Fourier basis}
+
+\begin{definition}[Boolean functions on the cube]
+  \label{def:analysis-cube}
+  \lean{Complexity.BooleanAnalysis.Cube, Complexity.BooleanAnalysis.BooleanFunction, Complexity.BooleanAnalysis.BooleanFunction.innerProductSpace, Complexity.BooleanAnalysis.inner_def, Complexity.BooleanAnalysis.expect}
+  \leanok
+  $\mathrm{BooleanFunction}(n)$ is the real vector space of functions
+  $f : \mathbb{F}_2^n \to \mathbb{R}$. Its inner product space structure comes
+  from the uniform-measure inner product
+  $\langle f, g \rangle = 2^{-n} \sum_x f(x) g(x) = \mathbb{E}_x[f(x) g(x)]$, and
+  $\mathbb{E}[f] = 2^{-n} \sum_x f(x)$ is the uniform expectation. The type is a
+  \texttt{def} rather than an \texttt{abbrev}, so the $L^2$ norm does not clash
+  with Mathlib's sup norm on function types.
+\end{definition}
+
+\begin{definition}[Parity functions]
+  \label{def:analysis-parity}
+  \lean{Complexity.BooleanAnalysis.chi, Complexity.BooleanAnalysis.parityFun, Complexity.BooleanAnalysis.IsBooleanValued}
+  \leanok
+  \uses{def:analysis-cube}
+  $\chi : \mathbb{F}_2 \to \mathbb{R}$ sends $b \mapsto (-1)^b$. For
+  $S \subseteq [n]$, the parity function is
+  $\chi_S(x) = \prod_{i \in S} \chi(x_i)$. A function is \emph{Boolean-valued} if
+  every value is $1$ or $-1$.
+\end{definition}
+
+\begin{theorem}[Orthonormality of parities]
+  \label{thm:analysis-parity-orthonormal}
+  \lean{Complexity.BooleanAnalysis.parityFun_orthonormal, Complexity.BooleanAnalysis.expect_parityFun, Complexity.BooleanAnalysis.parityFun_mul, Complexity.BooleanAnalysis.parityFun_add, Complexity.BooleanAnalysis.isBooleanValued_parityFun}
+  \leanok
+  \uses{def:analysis-parity}
+  $\langle \chi_S, \chi_T \rangle = [S = T]$ and $\mathbb{E}[\chi_S] = [S = \emptyset]$.
+  Moreover, $\chi_S \chi_T = \chi_{S \triangle T}$,
+  $\chi_S(x + y) = \chi_S(x) \chi_S(y)$, and every $\chi_S$ is Boolean-valued.
+\end{theorem}
+\begin{proof}
+  \leanok
+  $\mathbb{E}[\chi_S] = \prod_{i \in S} \mathbb{E}[\chi(x_i)]$ vanishes as soon
+  as $S$ is nonempty. Orthonormality then follows from
+  $\chi_S \chi_T = \chi_{S \triangle T}$.
+\end{proof}
+
+\begin{definition}[Fourier coefficients and weights]
+  \label{def:analysis-fourier-coeff}
+  \lean{Complexity.BooleanAnalysis.fourierCoeff, Complexity.BooleanAnalysis.fourierWeight, Complexity.BooleanAnalysis.fourierWeightAtDegree}
+  \leanok
+  \uses{def:analysis-parity}
+  The Fourier coefficient of $f$ on $S$ is
+  $\widehat{f}(S) = \langle f, \chi_S \rangle$, and its Fourier weight is
+  $\widehat{f}(S)^2$. The weight at degree $k$ is
+  $W^k[f] = \sum_{|S| = k} \widehat{f}(S)^2$.
+\end{definition}
+
+\begin{theorem}[Fourier expansion]
+  \label{thm:analysis-fourier-expansion}
+  \lean{Complexity.BooleanAnalysis.fourier_expansion, Complexity.BooleanAnalysis.fourier_uniqueness, Complexity.BooleanAnalysis.fourierCoeff_ext, Complexity.BooleanAnalysis.eq_iff_fourierCoeff}
+  \leanok
+  \uses{def:analysis-fourier-coeff}
+  Every $f : \mathbb{F}_2^n \to \mathbb{R}$ satisfies
+  $f(x) = \sum_S \widehat{f}(S) \chi_S(x)$. The coefficients are unique: if
+  $f = \sum_S c_S \chi_S$ pointwise, then $c_S = \widehat{f}(S)$ for all $S$. In
+  particular, two functions are equal iff all their Fourier coefficients agree.
+\end{theorem}
+\begin{proof}
+  \leanok
+  \uses{thm:analysis-parity-orthonormal}
+  The $2^n$ orthonormal parities span a $2^n$-dimensional space. Uniqueness comes
+  from taking inner products with each $\chi_T$.
+\end{proof}
+
+\begin{theorem}[Plancherel and Parseval]
+  \label{thm:analysis-plancherel}
+  \lean{Complexity.BooleanAnalysis.plancherel, Complexity.BooleanAnalysis.parseval, Complexity.BooleanAnalysis.parseval_boolean, Complexity.BooleanAnalysis.norm_sq_eq_sum_fourierCoeff_sq}
+  \leanok
+  \uses{def:analysis-fourier-coeff}
+  $\langle f, g \rangle = \sum_S \widehat{f}(S) \widehat{g}(S)$ and
+  $\lVert f \rVert_2^2 = \langle f, f \rangle = \sum_S \widehat{f}(S)^2$. If $f$ is
+  Boolean-valued, then $\sum_S \widehat{f}(S)^2 = 1$.
+\end{theorem}
+\begin{proof}
+  \leanok
+  \uses{thm:analysis-fourier-expansion}
+  Expand both functions and use orthonormality.
+\end{proof}
+
+\begin{definition}[Variance, covariance, probability, distance]
+  \label{def:analysis-moments}
+  \lean{Complexity.BooleanAnalysis.variance, Complexity.BooleanAnalysis.covariance, Complexity.BooleanAnalysis.prob, Complexity.BooleanAnalysis.hammingDist}
+  \leanok
+  \uses{def:analysis-cube}
+  $\mathrm{Var}[f] = \mathbb{E}[f^2] - \mathbb{E}[f]^2$ and
+  $\mathrm{Cov}[f,g] = \mathbb{E}[fg] - \mathbb{E}[f]\mathbb{E}[g]$. The uniform
+  probability of a predicate $P$ is $\Pr[P] = \mathbb{E}[1_P]$, and the relative
+  Hamming distance is $\mathrm{dist}(f,g) = \Pr_x[f(x) \neq g(x)]$.
+\end{definition}
+
+\begin{proposition}[Moments in Fourier form]
+  \label{prop:analysis-moments-fourier}
+  \lean{Complexity.BooleanAnalysis.expect_eq_fourierCoeff_empty, Complexity.BooleanAnalysis.variance_eq_sum_fourierCoeff_sq, Complexity.BooleanAnalysis.covariance_eq_sum_fourierCoeff, Complexity.BooleanAnalysis.variance_boolean, Complexity.BooleanAnalysis.inner_eq_one_sub_two_dist}
+  \leanok
+  \uses{def:analysis-moments, def:analysis-fourier-coeff}
+  $\mathbb{E}[f] = \widehat{f}(\emptyset)$,
+  $\mathrm{Var}[f] = \sum_{S \neq \emptyset} \widehat{f}(S)^2$, and
+  $\mathrm{Cov}[f,g] = \sum_{S \neq \emptyset} \widehat{f}(S)\widehat{g}(S)$.
+  For Boolean-valued $f$ and $g$, $\mathrm{Var}[f] = 1 - \mathbb{E}[f]^2$ and
+  $\langle f, g \rangle = 1 - 2\,\mathrm{dist}(f,g)$.
+\end{proposition}
+\begin{proof}
+  \leanok
+  \uses{thm:analysis-plancherel}
+  Take $\chi_\emptyset = 1$ in the definition of $\widehat{f}(\emptyset)$, then
+  apply Plancherel and split off the empty set.
+\end{proof}
+
+\begin{definition}[Densities and convolution]
+  \label{def:analysis-convolution}
+  \lean{Complexity.BooleanAnalysis.convolution, Complexity.BooleanAnalysis.IsDensity, Complexity.BooleanAnalysis.setDensity}
+  \leanok
+  \uses{def:analysis-cube}
+  The convolution is $(f * g)(x) = \mathbb{E}_y[f(y)\,g(x + y)]$. A density is a
+  nonnegative $\varphi$ with $\mathbb{E}[\varphi] = 1$. The density of a nonempty
+  set $A$ is $\varphi_A = 1_A / \mathbb{E}[1_A]$. For $A = \emptyset$ the Lean
+  definition returns a junk value, so theorems about $\varphi_A$ assume $A$ is
+  nonempty.
+\end{definition}
+
+\begin{theorem}[Convolution theorem]
+  \label{thm:analysis-convolution}
+  \lean{Complexity.BooleanAnalysis.fourierCoeff_convolution, Complexity.BooleanAnalysis.convolution_density_isDensity, Complexity.BooleanAnalysis.fourierCoeff_setDensity}
+  \leanok
+  \uses{def:analysis-convolution, def:analysis-fourier-coeff}
+  $\widehat{f * g}(S) = \widehat{f}(S)\,\widehat{g}(S)$. The convolution of two
+  densities is a density. For nonempty $A$,
+  $\widehat{\varphi_A}(S) = |A|^{-1} \sum_{x \in A} \chi_S(x)$.
+\end{theorem}
+\begin{proof}
+  \leanok
+  \uses{thm:analysis-parity-orthonormal}
+  Substitute $x = y + z$ and use $\chi_S(y + z) = \chi_S(y)\chi_S(z)$.
+\end{proof}
+
+\section{Degree structure}
+
+\begin{definition}[Degree parts and degree]
+  \label{def:analysis-degree-part}
+  \lean{Complexity.BooleanAnalysis.degreePart, Complexity.BooleanAnalysis.lowDegreePart, Complexity.BooleanAnalysis.fourierWeightAbove, Complexity.BooleanAnalysis.degree, Complexity.BooleanAnalysis.spectralSample}
+  \leanok
+  \uses{def:analysis-fourier-coeff}
+  The degree-$k$ part of $f$ is $f^{=k} = \sum_{|S| = k} \widehat{f}(S) \chi_S$,
+  and $f^{\le k} = \sum_{|S| \le k} \widehat{f}(S) \chi_S$. The weight above
+  degree $k$ is $W^{>k}[f] = \sum_{|S| > k} \widehat{f}(S)^2$. The degree of $f$ is
+  $\max\{|S| : \widehat{f}(S) \neq 0\}$, valued in $\mathbb{N} \cup \{\bot\}$ with
+  $\bot$ for $f = 0$. For Boolean-valued $f$, the spectral sample is the
+  probability distribution $S \mapsto \widehat{f}(S)^2$ on subsets of $[n]$.
+\end{definition}
+
+\begin{theorem}[Degree decomposition]
+  \label{thm:analysis-degree-decomposition}
+  \lean{Complexity.BooleanAnalysis.sum_degreePart, Complexity.BooleanAnalysis.degreePart_inner_eq_zero, Complexity.BooleanAnalysis.norm_sq_degreePart, Complexity.BooleanAnalysis.sum_fourierWeightAtDegree, Complexity.BooleanAnalysis.lowDegreePart_eq_sum, Complexity.BooleanAnalysis.lowDegreePart_self_inner, Complexity.BooleanAnalysis.fourierCoeff_degreePart}
+  \leanok
+  \uses{def:analysis-degree-part}
+  $f = \sum_{k=0}^{n} f^{=k}$ and
+  $\widehat{f^{=k}}(T) = [|T| = k]\,\widehat{f}(T)$. For $j \neq k$ the parts
+  $f^{=j}$ and $g^{=k}$ are orthogonal. Also $\lVert f^{=k} \rVert_2^2 = W^k[f]$,
+  $\sum_{k=0}^n W^k[f] = \langle f, f \rangle$,
+  $f^{\le k} = \sum_{j \le k} f^{=j}$, and
+  $\langle f^{\le k}, f^{\le k} \rangle = \sum_{j \le k} W^j[f]$.
+\end{theorem}
+\begin{proof}
+  \leanok
+  \uses{thm:analysis-fourier-expansion, thm:analysis-plancherel}
+  Regroup the Fourier expansion and Parseval's sum by $|S|$. The projection $f^{=k}$
+  keeps exactly the coefficients with $|S| = k$.
+\end{proof}
+
+\section{Linearity testing}
+
+\begin{definition}[Linear functions and the BLR test]
+  \label{def:analysis-linear}
+  \lean{Complexity.BooleanAnalysis.IsLinear, Complexity.BooleanAnalysis.IsMultiplicative, Complexity.BooleanAnalysis.IsClose, Complexity.BooleanAnalysis.IsCloseToProperty, Complexity.BooleanAnalysis.blrAcceptProb}
+  \leanok
+  \uses{def:analysis-parity, def:analysis-moments}
+  $f$ is \emph{linear} if $f = \chi_S$ for some $S$. It is \emph{multiplicative}
+  if $f(x + y) = f(x) f(y)$ for all $x, y$. It is $\varepsilon$-close to a property
+  $P$ if some $g$ satisfying $P$ has $\mathrm{dist}(f, g) \le \varepsilon$. The BLR
+  acceptance probability is $\Pr_{x,y}[f(x) f(y) = f(x + y)]$.
+\end{definition}
+
+\begin{theorem}[Linear iff multiplicative]
+  \label{thm:analysis-linear-iff-multiplicative}
+  \lean{Complexity.BooleanAnalysis.isLinear_iff_isMultiplicative}
+  \leanok
+  \uses{def:analysis-linear}
+  A Boolean-valued $f$ is linear if and only if it is multiplicative.
+\end{theorem}
+\begin{proof}
+  \leanok
+  A multiplicative $\pm 1$-valued function is a character of $\mathbb{F}_2^n$.
+  Read off $S$ from its values on the unit vectors.
+\end{proof}
+
+\begin{proposition}[BLR acceptance in Fourier form]
+  \label{prop:analysis-blr-accept}
+  \lean{Complexity.BooleanAnalysis.blrAcceptProb_eq, Complexity.BooleanAnalysis.blr_completeness}
+  \leanok
+  \uses{def:analysis-linear, def:analysis-fourier-coeff}
+  For Boolean-valued $f$, the BLR test accepts with probability
+  $\frac{1}{2} + \frac{1}{2} \sum_S \widehat{f}(S)^3$. A linear $f$ is accepted with
+  probability $1$.
+\end{proposition}
+\begin{proof}
+  \leanok
+  \uses{thm:analysis-convolution, thm:analysis-plancherel}
+  The acceptance probability is $\frac{1}{2} + \frac{1}{2} \langle f, f * f \rangle$.
+  Then apply the convolution theorem.
+\end{proof}
+
+\begin{theorem}[BLR soundness]
+  \label{thm:analysis-blr-soundness}
+  \lean{Complexity.BooleanAnalysis.blr_soundness}
+  \leanok
+  \uses{def:analysis-linear}
+  If a Boolean-valued $f$ passes the BLR test with probability at least
+  $1 - \varepsilon$, then $f$ is $\varepsilon$-close to linear.
+\end{theorem}
+\begin{proof}
+  \leanok
+  \uses{prop:analysis-blr-accept, thm:analysis-plancherel, prop:analysis-moments-fourier}
+  Bound $\sum_S \widehat{f}(S)^3 \le \max_S \widehat{f}(S)$ using Parseval, and
+  convert the largest coefficient to a distance with
+  $\langle f, \chi_S \rangle = 1 - 2\,\mathrm{dist}(f, \chi_S)$.
+\end{proof}
+
+\begin{proposition}[Local correction]
+  \label{prop:analysis-local-correction}
+  \lean{Complexity.BooleanAnalysis.local_correctability}
+  \leanok
+  \uses{def:analysis-linear}
+  If a Boolean-valued $f$ is $\varepsilon$-close to $\chi_S$, then for every $x$,
+  $\Pr_y[f(y) f(x + y) = \chi_S(x)] \ge 1 - 2\varepsilon$.
+\end{proposition}
+\begin{proof}
+  \leanok
+  $y$ and $x + y$ are each uniform. Apply a union bound to the two events where
+  $f$ disagrees with $\chi_S$.
+\end{proof}
+
+\section{Noise}
+
+\begin{definition}[Noise stability, noise operator, noise sensitivity]
+  \label{def:analysis-noise}
+  \lean{Complexity.BooleanAnalysis.noiseStability, Complexity.BooleanAnalysis.noiseStabilityBilin, Complexity.BooleanAnalysis.noiseOp, Complexity.BooleanAnalysis.noiseSensitivity}
+  \leanok
+  \uses{def:analysis-fourier-coeff}
+  All four are defined spectrally, for $\rho \in \mathbb{R}$:
+  \begin{itemize}
+    \item $\mathrm{Stab}_\rho[f] = \sum_S \rho^{|S|} \widehat{f}(S)^2$;
+    \item $\mathrm{Stab}_\rho[f,g] = \sum_S \rho^{|S|} \widehat{f}(S)\widehat{g}(S)$;
+    \item the noise (Bonami--Beckner) operator
+      $T_\rho f = \sum_S \rho^{|S|} \widehat{f}(S) \chi_S$;
+    \item $\mathrm{NS}_\rho[f] = (\langle f, f \rangle - \mathrm{Stab}_\rho[f])/2$.
+  \end{itemize}
+\end{definition}
+
+\begin{theorem}[The noise operator]
+  \label{thm:analysis-noise-op}
+  \lean{Complexity.BooleanAnalysis.fourierCoeff_noiseOp, Complexity.BooleanAnalysis.noiseOp_one, Complexity.BooleanAnalysis.noiseOp_zero, Complexity.BooleanAnalysis.noiseStability_eq_inner, Complexity.BooleanAnalysis.noiseStabilityBilin_eq_inner, Complexity.BooleanAnalysis.noiseStabilityBilin_symm}
+  \leanok
+  \uses{def:analysis-noise}
+  $\widehat{T_\rho f}(S) = \rho^{|S|} \widehat{f}(S)$, $T_1 f = f$, and
+  $T_0 f = \mathbb{E}[f] \cdot 1$. Also
+  $\mathrm{Stab}_\rho[f] = \langle f, T_\rho f \rangle$ and
+  $\mathrm{Stab}_\rho[f,g] = \langle f, T_\rho g \rangle$. Since the bilinear form
+  is symmetric, $T_\rho$ is self-adjoint.
+\end{theorem}
+\begin{proof}
+  \leanok
+  \uses{thm:analysis-parity-orthonormal, thm:analysis-plancherel}
+  Read off coefficients using orthonormality, then apply Plancherel.
+\end{proof}
+
+\begin{proposition}[Basic properties of noise stability]
+  \label{prop:analysis-noise-stability}
+  \lean{Complexity.BooleanAnalysis.noiseStability_eq_sum_weight, Complexity.BooleanAnalysis.noiseStability_one, Complexity.BooleanAnalysis.noiseStability_zero_eq_expect_sq, Complexity.BooleanAnalysis.noiseStability_mono, Complexity.BooleanAnalysis.noiseStability_le_self_inner, Complexity.BooleanAnalysis.noiseStability_add_two_noiseSensitivity, Complexity.BooleanAnalysis.noiseSensitivity_antitone}
+  \leanok
+  \uses{def:analysis-noise, def:analysis-degree-part}
+  $\mathrm{Stab}_\rho[f] = \sum_k \rho^k W^k[f]$. Moreover
+  $\mathrm{Stab}_1[f] = \langle f, f \rangle$ and
+  $\mathrm{Stab}_0[f] = \mathbb{E}[f]^2$. On $0 \le \rho_1 \le \rho_2$,
+  $\mathrm{Stab}_{\rho_1}[f] \le \mathrm{Stab}_{\rho_2}[f]$ and
+  $\mathrm{NS}_{\rho_2}[f] \le \mathrm{NS}_{\rho_1}[f]$. For
+  $\rho \in [0,1]$, $\mathrm{Stab}_\rho[f] \le \langle f, f \rangle$. Always,
+  $\mathrm{Stab}_\rho[f] + 2\,\mathrm{NS}_\rho[f] = \langle f, f \rangle$.
+\end{proposition}
+\begin{proof}
+  \leanok
+  \uses{thm:analysis-plancherel}
+  Term-by-term comparison of the spectral sums.
+\end{proof}
+
+\begin{proposition}[Correlated-input form of noise]
+  \label{prop:analysis-noise-correlated}
+  \uses{def:analysis-noise}
+  \notready
+  Let $y \sim N_\rho(x)$ mean that each $\chi(y_i)$ independently equals
+  $\chi(x_i)$ with probability $\frac{1+\rho}{2}$ and is flipped otherwise, for
+  $\rho \in [-1,1]$. Then $T_\rho f(x) = \mathbb{E}_{y \sim N_\rho(x)}[f(y)]$
+  and $\mathrm{Stab}_\rho[f] = \mathbb{E}_{x,\, y \sim N_\rho(x)}[f(x) f(y)]$.
+  In particular, for Boolean-valued $f$ and $\delta \in [0,1]$,
+  $\mathrm{NS}_{1-2\delta}[f] = \Pr[f(x) \neq f(y)]$ when each bit is flipped
+  independently with probability $\delta$.
+\end{proposition}
+\begin{proof}
+  \uses{thm:analysis-noise-op, thm:analysis-fourier-expansion}
+  Compute $\mathbb{E}_{y \sim N_\rho(x)}[\chi_S(y)] = \rho^{|S|}\chi_S(x)$ and
+  extend by linearity. The first step is to define the product distribution
+  $N_\rho(x)$ as a finite weighted average.
+\end{proof}
+
+\section{Influence and derivatives}
+
+\begin{definition}[Influence and total influence]
+  \label{def:analysis-influence}
+  \lean{Complexity.BooleanAnalysis.influence, Complexity.BooleanAnalysis.totalInfluence}
+  \leanok
+  \uses{def:analysis-fourier-coeff}
+  Spectrally, $\mathrm{Inf}_i[f] = \sum_{S \ni i} \widehat{f}(S)^2$ and
+  $\mathbf{I}[f] = \sum_S |S|\,\widehat{f}(S)^2$.
+\end{definition}
+
+\begin{proposition}[Basic properties of influence]
+  \label{prop:analysis-influence-basic}
+  \lean{Complexity.BooleanAnalysis.totalInfluence_eq_sum_influence, Complexity.BooleanAnalysis.totalInfluence_eq_sum_weight, Complexity.BooleanAnalysis.totalInfluence_le, Complexity.BooleanAnalysis.totalInfluence_boolean_le, Complexity.BooleanAnalysis.totalInfluence_le_of_degree, Complexity.BooleanAnalysis.totalInfluence_parityFun, Complexity.BooleanAnalysis.influence_parityFun}
+  \leanok
+  \uses{def:analysis-influence, def:analysis-degree-part}
+  $\mathbf{I}[f] = \sum_i \mathrm{Inf}_i[f] = \sum_k k\,W^k[f]$, and
+  $\mathbf{I}[f] \le n \langle f, f \rangle$, which is at most $n$ for
+  Boolean-valued $f$. If every coefficient on sets of size greater than $d$
+  vanishes, then $\mathbf{I}[f] \le d \langle f, f\rangle$. For parities,
+  $\mathbf{I}[\chi_S] = |S|$ and $\mathrm{Inf}_i[\chi_S] = [i \in S]$.
+\end{proposition}
+\begin{proof}
+  \leanok
+  \uses{thm:analysis-plancherel}
+  Exchange the sums over $i$ and $S$, and bound $|S|$ by $n$ or $d$.
+\end{proof}
+
+\begin{definition}[Coordinate flip, derivative, sensitivity operator]
+  \label{def:analysis-derivative}
+  \lean{Complexity.BooleanAnalysis.flipCoord, Complexity.BooleanAnalysis.flipEquiv, Complexity.BooleanAnalysis.derivative, Complexity.BooleanAnalysis.sensitivityOp}
+  \leanok
+  \uses{def:analysis-fourier-coeff}
+  $x^{\oplus i}$ flips coordinate $i$ of $x$. This is an involutive equivalence of
+  the cube. The derivative is defined spectrally:
+  $D_i f = \sum_{S \ni i} \widehat{f}(S)\, \chi_{S \setminus \{i\}}$. The
+  sensitivity operator is $L_i f(x) = (f(x) - f(x^{\oplus i}))/2$. These are
+  different operators: $D_i$ removes $i$ from each frequency, while $L_i$ keeps
+  only the frequencies that contain $i$.
+\end{definition}
+
+\begin{theorem}[Influence as a squared norm]
+  \label{thm:analysis-influence-derivative}
+  \lean{Complexity.BooleanAnalysis.fourierCoeff_derivative, Complexity.BooleanAnalysis.influence_eq_norm_sq_derivative, Complexity.BooleanAnalysis.fourierCoeff_sensitivityOp, Complexity.BooleanAnalysis.influence_eq_norm_sq_sensitivityOp, Complexity.BooleanAnalysis.sensitivityOp_eq_parityFun_mul_derivative, Complexity.BooleanAnalysis.fourierCoeff_comp_flipCoord}
+  \leanok
+  \uses{def:analysis-derivative, def:analysis-influence}
+  $\widehat{D_i f}(T) = [i \notin T]\,\widehat{f}(T \cup \{i\})$ and
+  $\widehat{L_i f}(T) = [i \in T]\,\widehat{f}(T)$. Hence
+  $\mathrm{Inf}_i[f] = \lVert D_i f \rVert_2^2 = \lVert L_i f \rVert_2^2$ and
+  $L_i f = \chi_{\{i\}} \cdot D_i f$. Precomposing with the flip gives
+  $\widehat{f \circ \oplus_i}(T) = (-1)^{[i \in T]} \widehat{f}(T)$.
+\end{theorem}
+\begin{proof}
+  \leanok
+  \uses{thm:analysis-plancherel, thm:analysis-parity-orthonormal}
+  The flip is measure-preserving and negates exactly the parities containing $i$.
+  Then apply Parseval.
+\end{proof}
+
+\begin{theorem}[Influence as pivotality]
+  \label{thm:analysis-influence-pivotal}
+  \lean{Complexity.BooleanAnalysis.influence_boolean_eq_expect_sensitive, Complexity.BooleanAnalysis.totalInfluence_boolean_eq_expect_sensitive}
+  \leanok
+  \uses{def:analysis-influence, def:analysis-derivative}
+  For Boolean-valued $f$,
+  $\mathrm{Inf}_i[f] = \Pr_x[f(x) \neq f(x^{\oplus i})]$ and
+  $\mathbf{I}[f] = \mathbb{E}_x\bigl[\#\{i : f(x) \neq f(x^{\oplus i})\}\bigr]$.
+\end{theorem}
+\begin{proof}
+  \leanok
+  \uses{thm:analysis-influence-derivative}
+  For Boolean-valued $f$, $(L_i f)^2$ is the indicator that $i$ is pivotal at $x$.
+\end{proof}
+
+\begin{theorem}[Poincar\'e inequality]
+  \label{thm:analysis-poincare}
+  \lean{Complexity.BooleanAnalysis.variance_le_totalInfluence}
+  \leanok
+  \uses{def:analysis-influence, def:analysis-moments}
+  $\mathrm{Var}[f] \le \mathbf{I}[f]$ for every $f : \mathbb{F}_2^n \to \mathbb{R}$.
+\end{theorem}
+\begin{proof}
+  \leanok
+  \uses{prop:analysis-moments-fourier}
+  Every nonempty $S$ has $|S| \ge 1$.
+\end{proof}
+
+\begin{proposition}[Noise sensitivity is bounded by influence]
+  \label{prop:analysis-noise-sensitivity-influence}
+  \lean{Complexity.BooleanAnalysis.noiseStability_one_sub_le, Complexity.BooleanAnalysis.noiseSensitivity_le_influence}
+  \leanok
+  \uses{def:analysis-noise, def:analysis-influence}
+  For $\rho \in [0,1]$,
+  $\langle f, f \rangle - \mathrm{Stab}_\rho[f] \le (1 - \rho)\,\mathbf{I}[f]$.
+  Equivalently, $\mathrm{NS}_\rho[f] \le \frac{1-\rho}{2}\,\mathbf{I}[f]$.
+\end{proposition}
+\begin{proof}
+  \leanok
+  \uses{thm:analysis-plancherel}
+  Use $1 - \rho^k \le (1 - \rho) k$ term by term.
+\end{proof}
+
+\begin{proposition}[Elementary level-1 bounds]
+  \label{prop:analysis-level1-elementary}
+  \lean{Complexity.BooleanAnalysis.fourierCoeff_singleton_sq_le_influence, Complexity.BooleanAnalysis.fourierWeightAtDegree_one_le_totalInfluence, Complexity.BooleanAnalysis.sum_fourierCoeff_singleton_sq_le_totalInfluence, Complexity.BooleanAnalysis.sum_fourierCoeff_singleton_sq_eq_fourierWeightAtDegree_one}
+  \leanok
+  \uses{def:analysis-influence, def:analysis-fourier-coeff}
+  $\widehat{f}(\{i\})^2 \le \mathrm{Inf}_i[f]$ and
+  $\sum_i \widehat{f}(\{i\})^2 = W^1[f] \le \mathbf{I}[f]$.
+\end{proposition}
+\begin{proof}
+  \leanok
+  Each inequality drops nonnegative terms from a spectral sum.
+\end{proof}
+
+\section{Monotone functions}
+
+\begin{definition}[Monotone functions]
+  \label{def:analysis-monotone}
+  \uses{def:analysis-parity}
+  Order the cube coordinatewise by the values $\chi(x_i) \in \{-1, 1\}$. So
+  $x \le y$ iff $y$ is obtained from $x$ by changing some coordinates from $1$ to
+  $0$. A function $f$ is \emph{monotone} if $x \le y$ implies $f(x) \le f(y)$.
+  This is O'Donnell's order on $\{-1,1\}^n$. It is the reverse of the bitwise
+  order on $\mathbb{F}_2^n$, and the Lean definition must record the choice
+  explicitly.
+\end{definition}
+
+\begin{theorem}[Influences of monotone functions]
+  \label{thm:analysis-monotone-influence}
+  \uses{def:analysis-monotone, def:analysis-influence}
+  \notready
+  If $f$ is Boolean-valued and monotone, then
+  $\mathrm{Inf}_i[f] = \widehat{f}(\{i\})$ for every $i$, and
+  $\mathbf{I}[f] \le \sqrt{n}$.
+\end{theorem}
+\begin{proof}
+  \uses{thm:analysis-influence-pivotal, thm:analysis-plancherel}
+  $\widehat{f}(\{i\}) = \mathbb{E}[f(x)\chi(x_i)]$. By monotonicity this equals
+  the probability that $i$ is pivotal. For the second claim, apply Cauchy--Schwarz
+  to $\sum_i \widehat{f}(\{i\})$ and use $W^1[f] \le 1$.
+\end{proof}
+
+\begin{theorem}[Margulis--Russo formula]
+  \label{thm:analysis-margulis-russo}
+  \uses{def:analysis-monotone, def:analysis-influence}
+  \notready
+  Let $\mu_p$ be the product measure on the cube in which each coordinate
+  independently has $\chi(x_i) = 1$ with probability $p$. For monotone
+  Boolean-valued $f$,
+  $\frac{d}{dp} \mu_p(f = 1) = \sum_i \Pr_{x \sim \mu_p}[f(x) \neq f(x^{\oplus i})]$.
+\end{theorem}
+\begin{proof}
+  \uses{thm:analysis-influence-pivotal}
+  Differentiate the multilinear polynomial $p \mapsto \mu_p(f = 1)$ one coordinate
+  at a time. The first step is a $p$-biased expectation, which the library does
+  not yet have (it has only the uniform measure).
+\end{proof}
+
+\section{Hypercontractivity}
+
+\begin{lemma}[Bonami base case]
+  \label{lem:analysis-bonami-base}
+  \lean{Complexity.BooleanAnalysis.two_point_hypercontractive}
+  \leanok
+  For all real $a, b$,
+  $\frac{1}{2}\bigl((a + b/\sqrt{3})^4 + (a - b/\sqrt{3})^4\bigr) \le (a^2 + b^2)^2$.
+  That is, on one bit, $\lVert T_{1/\sqrt{3}} f \rVert_4^4 \le \lVert f \rVert_2^4$
+  for $f(x) = a + bx$.
+\end{lemma}
+\begin{proof}
+  \leanok
+  Expand. The slack is $8b^4/9 \ge 0$.
+\end{proof}
+
+\begin{definition}[$L^p$ norms]
+  \label{def:analysis-lp-norm}
+  \uses{def:analysis-cube}
+  For real $p \ge 1$, $\lVert f \rVert_p = \mathbb{E}[|f|^p]^{1/p}$ under the
+  uniform measure. It should agree with the existing $L^2$ norm at $p = 2$ and
+  satisfy H\"older's inequality.
+\end{definition}
+
+\begin{theorem}[$(2,4)$-hypercontractivity]
+  \label{thm:analysis-hypercontractivity}
+  \uses{def:analysis-lp-norm, def:analysis-noise}
+  \notready
+  For every $n$ and every $f : \mathbb{F}_2^n \to \mathbb{R}$,
+  $\lVert T_{1/\sqrt{3}} f \rVert_4 \le \lVert f \rVert_2$.
+\end{theorem}
+\begin{proof}
+  \uses{lem:analysis-bonami-base, thm:analysis-noise-op}
+  Induct on $n$. Write $f = g + x_n h$, where $g$ and $h$ do not depend on
+  $x_n$. Apply the base case pointwise, then the induction hypothesis to $g$ and
+  $h$, with Cauchy--Schwarz. The noise operator factors as a product of one-bit
+  operators, so a coordinate-restriction API for $T_\rho$ is needed first.
+\end{proof}
+
+\begin{corollary}[Bonami lemma]
+  \label{cor:analysis-bonami-lemma}
+  \uses{def:analysis-lp-norm, def:analysis-degree-part}
+  \notready
+  If $f$ has degree at most $k$, then
+  $\lVert f \rVert_4 \le \sqrt{3}^{\,k}\, \lVert f \rVert_2$.
+\end{corollary}
+\begin{proof}
+  \uses{thm:analysis-hypercontractivity, thm:analysis-noise-op}
+  Apply the theorem to $T_{\sqrt{3}} f$, whose coefficients are at most
+  $\sqrt{3}^{\,k}$ times those of $f$.
+\end{proof}
+
+\begin{corollary}[Dual $(4/3, 2)$-hypercontractivity]
+  \label{cor:analysis-hypercontractivity-dual}
+  \uses{def:analysis-lp-norm, def:analysis-noise}
+  \notready
+  $\lVert T_{1/\sqrt{3}} f \rVert_2 \le \lVert f \rVert_{4/3}$ for every $f$.
+\end{corollary}
+\begin{proof}
+  \uses{thm:analysis-hypercontractivity, thm:analysis-noise-op}
+  $T_{1/\sqrt{3}}$ is self-adjoint, and $4/3$ and $4$ are H\"older conjugates.
+\end{proof}
+
+\section{Consequences of hypercontractivity}
+
+\begin{theorem}[Level-1 inequality]
+  \label{thm:analysis-level1-inequality}
+  \uses{def:analysis-fourier-coeff, def:analysis-cube}
+  If $f : \mathbb{F}_2^n \to \{0, 1\}$ has mean $\alpha \le 1/2$, then
+  $W^1[f] \le O(\alpha^2 \log(1/\alpha))$.
+\end{theorem}
+\begin{proof}
+  \uses{thm:analysis-hypercontractivity, prop:analysis-level1-elementary}
+  Let $\ell = f^{=1}$. Bound $W^1[f] = \langle f, \ell \rangle$ by splitting on
+  whether $|\ell|$ exceeds a threshold. The tail is controlled by
+  hypercontractive concentration of the linear form $\ell$.
+\end{proof}
+
+\begin{theorem}[Friedgut--Kalai--Naor]
+  \label{thm:analysis-fkn}
+  \uses{def:analysis-linear, def:analysis-fourier-coeff}
+  If $f$ is Boolean-valued and $W^1[f] \ge 1 - \delta$, then $f$ is
+  $O(\delta)$-close to $\chi_{\{i\}}$ or to $-\chi_{\{i\}}$ for some $i$.
+\end{theorem}
+\begin{proof}
+  \uses{cor:analysis-bonami-lemma, thm:analysis-plancherel}
+  $\ell = f^{=1}$ has $\ell^2$ close to $1$ in $L^2$. The Bonami lemma applied to
+  the degree-2 polynomial $\ell^2 - 1$ forces one coefficient of $\ell$ to
+  dominate.
+\end{proof}
+
+\begin{theorem}[Kahn--Kalai--Linial]
+  \label{thm:analysis-kkl}
+  \uses{def:analysis-influence, def:analysis-moments}
+  There is an absolute constant $c > 0$ such that every Boolean-valued
+  $f : \mathbb{F}_2^n \to \mathbb{R}$ has a coordinate $i$ with
+  $\mathrm{Inf}_i[f] \ge c \cdot \mathrm{Var}[f] \cdot \frac{\log n}{n}$.
+\end{theorem}
+\begin{proof}
+  \uses{cor:analysis-hypercontractivity-dual, thm:analysis-influence-derivative, thm:analysis-poincare}
+  Apply the $(4/3, 2)$ bound to each $D_i f$. For Boolean-valued $f$,
+  $\lVert D_i f \rVert_{4/3}^{4/3} = \mathrm{Inf}_i[f]$, which gives
+  $\sum_i \mathrm{Stab}_{1/3}[D_i f] \le \sum_i \mathrm{Inf}_i[f]^{3/2}$. Compare
+  with the low-degree part of $\mathbf{I}[f]$.
+\end{proof}
+
+\begin{theorem}[Friedgut's junta theorem]
+  \label{thm:analysis-friedgut}
+  \uses{def:analysis-influence, def:analysis-linear}
+  \notready
+  Call $g$ a $k$-junta if it depends on at most $k$ coordinates. For every
+  Boolean-valued $f$ and $0 < \varepsilon \le 1$, $f$ is $\varepsilon$-close to a
+  Boolean-valued $2^{O(\mathbf{I}[f]/\varepsilon)}$-junta.
+\end{theorem}
+\begin{proof}
+  \uses{cor:analysis-hypercontractivity-dual, thm:analysis-influence-derivative}
+  Let $J$ be the coordinates with influence above
+  $2^{-O(\mathbf{I}[f]/\varepsilon)}$. Hypercontractivity bounds the Fourier
+  weight outside $J$ and above degree $O(\mathbf{I}[f]/\varepsilon)$. Round the
+  restriction of $f$ to $J$ to $\pm 1$. The junta predicate has to be defined
+  first.
+\end{proof}
+
+\section{Fourier concentration of constant-depth circuits}
+
+These nodes connect this chapter to the circuit lower-bound chapter. The
+Linial--Mansour--Nisan argument consumes the switching lemma formalized there
+(random restrictions collapse small-depth circuits to shallow decision trees),
+together with the fact that a shallow decision tree has low Fourier degree.
+
+\begin{definition}[Real-valued view of a Boolean function on bit strings]
+  \label{def:analysis-bridge}
+  \uses{def:bitstring, def:analysis-parity}
+  Every $F : \{0,1\}^n \to \{0,1\}$ on bit strings determines the Boolean-valued
+  function $x \mapsto \chi(F(x))$ on the cube. This must be a public bridge. The
+  PCP development has only a private, PCP-specific version of it.
+\end{definition}
+
+\begin{theorem}[Decision trees have low degree]
+  \label{thm:analysis-decision-tree-degree}
+  \uses{def:analysis-bridge, def:analysis-degree-part}
+  \notready
+  If $F$ is computed by a decision tree of depth $t$, then the real-valued view of
+  $F$ has degree at most $t$.
+\end{theorem}
+\begin{proof}
+  \uses{thm:analysis-fourier-expansion}
+  $F$ is a sum over leaves of the leaf label times the indicator of the path. The
+  indicator of a depth-$t$ path is a product of $t$ functions $(1 \pm \chi(x_i))/2$.
+\end{proof}
+
+\begin{theorem}[Linial--Mansour--Nisan]
+  \label{thm:analysis-lmn}
+  \uses{def:analysis-bridge, def:analysis-degree-part, def:circuit, def:NC-AC}
+  \notready
+  Suppose $F$ is computed by an unbounded fan-in AND/OR circuit with negations of
+  size $s$ and depth $d$. Then its real-valued view satisfies
+  $W^{>k}[F] \le s \cdot 2^{-\Omega(k^{1/d})}$ for every $k$.
+\end{theorem}
+\begin{proof}
+  \uses{thm:analysis-decision-tree-degree, thm:analysis-degree-decomposition, thm:lowerbounds-switching}
+  Relate $W^{>k}[F]$ to the expected high-degree weight of a random restriction
+  of $F$. The restriction formula is
+  $\widehat{F_{J \mid z}}(S) = \sum_{T \subseteq \bar J} \widehat{F}(S \cup T)\chi_T(z)$.
+  By the switching lemma, the restricted circuit is a shallow decision tree with
+  high probability. A Fourier-side restriction API on the cube is needed first.
+\end{proof}
+
+\begin{corollary}[Parity is not in $\cc{AC^0}$, via LMN]
+  \label{cor:analysis-lmn-parity}
+  \uses{def:analysis-bridge, def:circuit}
+  \notready
+  Every unbounded fan-in circuit of depth $d$ computing the parity of $n$ bits
+  has size $2^{\Omega(n^{1/d})}$.
+\end{corollary}
+\begin{proof}
+  \uses{thm:analysis-lmn, prop:analysis-influence-basic}
+  The real-valued view of parity is $\chi_{[n]}$, whose entire Fourier weight
+  sits at degree $n$.
+\end{proof}

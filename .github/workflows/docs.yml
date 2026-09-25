@@ -1,10 +1,11 @@
-name: API Documentation
+name: API Documentation and Blueprint
 
 # Building doc-gen4 documentation also generates pages for Mathlib, which is
 # slow. It runs on every push to the default branch (dev) so the published API
 # docs track the code, plus weekly and on demand. The `pages` concurrency
 # group below cancels a superseded in-progress run, so rapid merges don't pile
-# up.
+# up. The blueprint (blueprint/) is built alongside and published under
+# /blueprint.
 on:
   push:
     branches: [dev]
@@ -36,6 +37,18 @@ jobs:
       - name: Build documentation
         working-directory: docbuild
         run: lake build Complexitylib:docs
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install blueprint toolchain
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y graphviz libgraphviz-dev
+          pip install leanblueprint
+      - name: Build blueprint and publish it under /blueprint
+        run: |
+          cd blueprint && leanblueprint web && cd ..
+          cp -r blueprint/web docbuild/.lake/build/doc/blueprint
       - name: Upload documentation artifact
         uses: actions/upload-pages-artifact@v3
         with:

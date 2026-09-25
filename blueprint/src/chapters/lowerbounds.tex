@@ -1,0 +1,704 @@
+\chapter{Circuit lower bounds and proof complexity}
+\label{chap:lowerbounds}
+
+This chapter collects unconditional lower bounds for concrete computational
+models, together with the proof-complexity side of the same program. The
+library proves Shannon's counting bounds, which determine the maximum circuit
+complexity of an $N$-bit function up to a constant factor, the essential-input
+bound and Schnorr's $2N - 1$ bound for parity, Valiant's depth-reduction lemma,
+Spira's formula balancing, the monotone Karchmer--Wigderson correspondence, and
+the soundness of resolution. For $\cc{AC}^0$ it proves a finite, width-sensitive
+switching lemma, iterates it through arbitrary depth-bounded formulas, and
+derives a finite counting obstruction for every formula computing parity. All
+of these results are finite or nonuniform. The next target is the family-level
+theorem that parity is not in $\cc{AC}^0$, which needs only arithmetic on top
+of the finite obstruction (roadmap track L4). Beyond it, the plan covers
+monotone circuit lower bounds, pseudorandom restrictions, and resolution size
+and width lower bounds leading to the pigeonhole principle and to Cook--Reckhow
+proof systems (roadmap track L5).
+
+\section{Counting bounds}
+\label{sec:lowerbounds-counting}
+
+\begin{theorem}[Shannon lower bound]
+  \label{thm:lowerbounds-shannon-lower}
+  \lean{Complexity.shannon_lower_bound_circuit, Complexity.shannon_sizeComplexity}
+  \leanok
+  \uses{def:circuit, def:circuits-bases, def:circuits-size-complexity}
+  For every $N \ge 6$ there is a function $f : \{0,1\}^N \to \{0,1\}$ that no
+  fan-in-two AND/OR circuit of size at most $\lfloor 2^N / (5N) \rfloor$
+  computes. Equivalently, $\mathrm{size}(f) > \lfloor 2^N / (5N) \rfloor$.
+\end{theorem}
+\begin{proof}
+  \leanok
+  Encode circuits of a given size by short descriptors and compare their
+  number with the $2^{2^N}$ functions.
+\end{proof}
+
+\begin{theorem}[Shannon upper bound]
+  \label{thm:lowerbounds-shannon-upper}
+  \lean{Complexity.shannon_upper_bound}
+  \leanok
+  \uses{def:circuits-size-complexity}
+  For every $N \ge 16$, every $f : \{0,1\}^N \to \{0,1\}$ satisfies
+  $\mathrm{size}(f) \le \lfloor 18 \cdot 2^N / N \rfloor$ over the fan-in-two
+  AND/OR basis.
+\end{theorem}
+\begin{proof}
+  \leanok
+  Select among the columns of the truth table with a multiplexer, reading each
+  column from a library that contains every function of the remaining
+  variables.
+\end{proof}
+
+\begin{theorem}[Lupanov]
+  \label{thm:lowerbounds-lupanov}
+  \uses{def:circuits-size-complexity}
+  For every $\varepsilon > 0$ and all sufficiently large $N$, every
+  $f : \{0,1\}^N \to \{0,1\}$ satisfies
+  $\mathrm{size}(f) \le (1 + \varepsilon)\, 2^N / N$.
+\end{theorem}
+\begin{proof}
+  \uses{thm:lowerbounds-shannon-upper}
+  Refine the column library by grouping the rows of the truth table into
+  strips and sharing the computation of each strip's column patterns.
+\end{proof}
+
+\section{Essential inputs and gate elimination}
+\label{sec:lowerbounds-gate-elimination}
+
+\begin{definition}[Essential input]
+  \label{def:lowerbounds-essential}
+  \lean{Complexity.IsEssentialInput, Complexity.essentialInputs}
+  \leanok
+  \uses{def:bitstring}
+  Input $i$ is essential for $f : \{0,1\}^N \to \{0,1\}^M$ if flipping bit $i$
+  changes $f(x)$ for some $x$.
+\end{definition}
+
+\begin{theorem}[Essential-input bound]
+  \label{thm:lowerbounds-essential}
+  \lean{Complexity.Circuit.card_essentialInputs_le_totalFanIn,
+    Complexity.Circuit.card_essentialInputs_le_mul_size}
+  \leanok
+  \uses{def:lowerbounds-essential, def:circuit, def:circuits-bases}
+  Over any basis, the number of essential inputs of the function computed by a
+  circuit is at most the circuit's total fan-in. For circuits over the
+  AND/OR basis of fan-in at most $k$, it is at most $k$ times the size.
+\end{theorem}
+\begin{proof}
+  \leanok
+  Every essential input is read by some gate input occurrence.
+\end{proof}
+
+\begin{definition}[Parity]
+  \label{def:lowerbounds-parity}
+  \lean{Complexity.Schnorr.xorBool}
+  \leanok
+  \uses{def:bitstring}
+  The parity family $\oplus$ maps $x \in \{0,1\}^N$ to
+  $x_0 \oplus \cdots \oplus x_{N-1}$, with value $0$ on the empty string.
+\end{definition}
+
+\begin{theorem}[Schnorr]
+  \label{thm:lowerbounds-schnorr}
+  \lean{Complexity.schnorr_lower_bound_circuit, Complexity.sizeComplexity_xorBool_ge}
+  \leanok
+  \uses{def:lowerbounds-parity, def:circuits-size-complexity}
+  Every fan-in-two AND/OR circuit computing $N$-bit parity or its complement,
+  $N \ge 1$, has size at least $2N - 1$. Hence
+  $\mathrm{size}(\oplus_N) \ge 2N - 1$.
+\end{theorem}
+\begin{proof}
+  \leanok
+  Gate elimination: fixing a well-chosen input removes at least two gates and
+  leaves parity or its complement on one fewer input.
+\end{proof}
+
+\section{Depth, formulas, and communication}
+\label{sec:lowerbounds-depth}
+
+\begin{theorem}[Valiant's depth reduction]
+  \label{thm:lowerbounds-valiant}
+  \lean{Complexity.Valiant.depth_reduction}
+  \leanok
+  Let $G$ be a finite acyclic digraph with $S$ edges whose longest path has at
+  most $2^k$ vertices, and let $r \le k$. There is a set $F$ of edges with
+  $k\,|F| \le r S$ whose removal leaves a digraph whose longest path has at
+  most $2^k / 2^r$ vertices.
+\end{theorem}
+\begin{proof}
+  \leanok
+  Label vertices by longest-path depth, partition the edges by the first bit
+  in which the labels of their endpoints differ, and remove the $r$ smallest
+  classes.
+\end{proof}
+
+\begin{corollary}[Depth reduction for circuits]
+  \label{cor:lowerbounds-valiant-circuit}
+  \uses{def:circuit}
+  Let $C$ be a circuit whose dependency graph has longest paths of at most
+  $2^k$ vertices, and let $r \le k$. Removing a set $F$ of wires with
+  $k\,|F| \le r \cdot \mathrm{totalFanIn}(C)$ leaves a dependency graph whose
+  longest paths have at most $2^{k-r}$ vertices.
+\end{corollary}
+\begin{proof}
+  \uses{thm:lowerbounds-valiant, lem:circuits-dependency-graph}
+  The dependency graph is acyclic and has at most $\mathrm{totalFanIn}(C)$
+  edges.
+\end{proof}
+
+\begin{theorem}[Spira]
+  \label{thm:lowerbounds-spira}
+  \lean{Complexity.BoolFormula.exists_spira_balanced}
+  \leanok
+  \uses{def:circuits-formula}
+  Every Boolean formula $\varphi$ of size $s$ has an equivalent formula of
+  depth at most $15 + 12 \lceil \log_2 s \rceil$ and size at most
+  $80 s^8 - 4$.
+\end{theorem}
+\begin{proof}
+  \leanok
+  Find a subformula of between one third and two thirds of the size, and
+  recombine the two cases for its value; recurse on both parts.
+\end{proof}
+
+\begin{definition}[Monotone formula]
+  \label{def:lowerbounds-monotone-formula}
+  \lean{Complexity.MonotoneFormula, Complexity.MonotoneFormula.eval,
+    Complexity.MonotoneFormula.depth, Complexity.MonotoneFormula.leaves,
+    Complexity.IsMonotoneBoolFun}
+  \leanok
+  \uses{def:bitstring}
+  A monotone formula over $N$ variables is a tree built from variables
+  $x_0, \dots, x_{N-1}$ and binary conjunction and disjunction, without
+  constants or negation. Its leaves are its variable occurrences. A function
+  $f$ is monotone if $x \le y$ pointwise and $f(x) = 1$ imply $f(y) = 1$.
+\end{definition}
+
+\begin{lemma}[Monotone formulas]
+  \label{lem:lowerbounds-monotone-formula}
+  \lean{Complexity.MonotoneFormula.eval_monotone,
+    Complexity.MonotoneFormula.card_essentialInputs_le_leaves_of_computes}
+  \leanok
+  \uses{def:lowerbounds-monotone-formula, def:lowerbounds-essential}
+  Every monotone formula computes a monotone function, and a monotone formula
+  computing $f$ has at least as many leaves as $f$ has essential inputs.
+\end{lemma}
+\begin{proof}
+  \leanok
+  Induction on the formula; an essential input must occur as a leaf.
+\end{proof}
+
+\begin{definition}[Karchmer--Wigderson protocol]
+  \label{def:lowerbounds-kw}
+  \lean{Complexity.KarchmerWigderson.Protocol,
+    Complexity.KarchmerWigderson.RootProtocol,
+    Complexity.KarchmerWigderson.Protocol.depth}
+  \leanok
+  \uses{def:bitstring}
+  A protocol for the monotone Karchmer--Wigderson game of
+  $f : \{0,1\}^N \to \{0,1\}$ is a tree indexed by rectangles $X \times Y$ with
+  $X \subseteq f^{-1}(1)$ and $Y \subseteq f^{-1}(0)$, starting from
+  $f^{-1}(1) \times f^{-1}(0)$. At an internal node, Alice splits $X$ or Bob
+  splits $Y$ by an arbitrary predicate. A leaf names a coordinate $i$ with
+  $x_i = 1$ for all $x \in X$ and $y_i = 0$ for all $y \in Y$. The depth is the
+  height of the tree.
+\end{definition}
+
+\begin{theorem}[Monotone Karchmer--Wigderson]
+  \label{thm:lowerbounds-kw}
+  \lean{Complexity.KarchmerWigderson.Protocol.exists_protocol_of_formula,
+    Complexity.KarchmerWigderson.Protocol.exists_formula_of_protocol,
+    Complexity.KarchmerWigderson.Protocol.exists_protocol_depth_iff_formula_depth}
+  \leanok
+  \uses{def:lowerbounds-kw, def:lowerbounds-monotone-formula}
+  For every $f : \{0,1\}^N \to \{0,1\}$ and $d \in \mathbb{N}$, the monotone
+  Karchmer--Wigderson game of $f$ has a protocol of depth at most $d$ if and
+  only if some monotone formula of depth at most $d$ computes $f$.
+\end{theorem}
+\begin{proof}
+  \leanok
+  An OR node is an Alice split and an AND node is a Bob split; both
+  translations preserve depth exactly.
+\end{proof}
+
+\section{Restrictions, normal forms, and decision trees}
+\label{sec:lowerbounds-restrictions}
+
+\begin{definition}[Restriction]
+  \label{def:lowerbounds-restriction}
+  \lean{Complexity.Restriction, Complexity.Restriction.On,
+    Complexity.Restriction.applyTo, Complexity.Restriction.comp,
+    Complexity.BoolFormula.restrict}
+  \leanok
+  \uses{def:circuits-formula}
+  A restriction assigns each variable either a fixed bit or ``free''; the
+  finite-arity version does this for exactly $N$ variables. Restrictions
+  compose, the earlier one taking precedence, and act on assignments and on
+  formulas by substituting constants for fixed variables.
+\end{definition}
+
+\begin{lemma}[Restriction and evaluation]
+  \label{lem:lowerbounds-restrict}
+  \lean{Complexity.BoolFormula.eval_restrict, Complexity.BoolFormula.restrict_comp,
+    Complexity.BoolFormula.restrict_size, Complexity.BoolFormula.restrict_depth}
+  \leanok
+  \uses{def:lowerbounds-restriction}
+  Evaluating $\varphi|_\rho$ at $\alpha$ equals evaluating $\varphi$ at
+  $\rho$ applied to $\alpha$. Restricting by $\rho_1$ and then $\rho_2$ equals
+  restricting by their composition, and restriction preserves formula size and
+  depth.
+\end{lemma}
+\begin{proof}
+  \leanok
+  Induction on the formula.
+\end{proof}
+
+\begin{definition}[CNF and DNF]
+  \label{def:lowerbounds-normal-forms}
+  \lean{Complexity.CNF, Complexity.DNF, Complexity.CNF.width, Complexity.DNF.width,
+    Complexity.CNF.complexity, Complexity.DNF.complexity}
+  \leanok
+  \uses{def:bitstring}
+  A CNF (resp.\ DNF) over $N$ variables is a list of clauses (resp.\ terms),
+  each a list of literals. Its width is the largest number of literals in a
+  clause (term), and its complexity is the number of clauses (terms). These
+  finite-arity normal forms are distinct from the CNF formulas used for
+  satisfiability and resolution.
+\end{definition}
+
+\begin{lemma}[Restricting normal forms]
+  \label{lem:lowerbounds-normal-form-restrict}
+  \lean{Complexity.CNF.restrict, Complexity.CNF.eval_restrict,
+    Complexity.CNF.width_restrict_le, Complexity.DNF.restrict,
+    Complexity.DNF.eval_restrict, Complexity.DNF.width_restrict_le}
+  \leanok
+  \uses{def:lowerbounds-normal-forms, def:lowerbounds-restriction}
+  Every CNF and DNF has a simplified restriction that computes it under the
+  restriction and whose width does not exceed the original width.
+\end{lemma}
+\begin{proof}
+  \leanok
+  Delete falsified literals, and delete satisfied clauses (falsified terms).
+\end{proof}
+
+\begin{definition}[Decision tree]
+  \label{def:lowerbounds-decision-tree}
+  \lean{Complexity.DecisionTree, Complexity.DecisionTree.On,
+    Complexity.DecisionTree.On.eval, Complexity.DecisionTree.On.depth}
+  \leanok
+  \uses{def:bitstring}
+  A decision tree queries a variable at each internal node and outputs a bit
+  at each leaf. The finite-arity version queries only variables below $N$.
+  Its depth is the length of a longest root-to-leaf path.
+\end{definition}
+
+\begin{lemma}[Decision trees to normal forms]
+  \label{lem:lowerbounds-dt-normal-form}
+  \lean{Complexity.DecisionTree.On.eval_toDNF, Complexity.DecisionTree.On.eval_toCNF,
+    Complexity.DecisionTree.On.width_toDNF_le_depth,
+    Complexity.DecisionTree.On.width_toCNF_le_depth}
+  \leanok
+  \uses{def:lowerbounds-decision-tree, def:lowerbounds-normal-forms}
+  A decision tree of depth $s$ is computed by a DNF of width at most $s$ and
+  by a CNF of width at most $s$.
+\end{lemma}
+\begin{proof}
+  \leanok
+  Take one term per accepting path, and dually one clause per rejecting path.
+\end{proof}
+
+\begin{theorem}[Parity at depth two]
+  \label{thm:lowerbounds-parity-depth-two}
+  \lean{Complexity.DNF.two_pow_le_complexity_of_xorBool,
+    Complexity.CNF.two_pow_le_complexity_of_xorBool}
+  \leanok
+  \uses{def:lowerbounds-normal-forms, def:lowerbounds-parity}
+  For $N \ge 1$, every DNF and every CNF computing $N$-bit parity has at
+  least $2^{N-1}$ terms, respectively clauses.
+\end{theorem}
+\begin{proof}
+  \leanok
+  A satisfiable term that omits a variable accepts two inputs of different
+  parity, so every satisfiable term accepts exactly one input, while parity
+  accepts $2^{N-1}$ inputs. CNFs follow by negation.
+\end{proof}
+
+\section{The switching lemma and $\cc{AC}^0$}
+\label{sec:lowerbounds-ac0}
+
+\begin{definition}[Sparse random restriction]
+  \label{def:lowerbounds-random-restriction}
+  \lean{Complexity.RandomRestriction.Seed, Complexity.RandomRestriction.decode,
+    Complexity.RandomRestriction.eventCount}
+  \leanok
+  \uses{def:lowerbounds-restriction}
+  For $q \in \mathbb{N}$, a seed assigns to each of $N$ coordinates one of
+  $2q + 1$ symbols: one free symbol and $q$ labelled copies of each fixed bit.
+  A seed decodes to a restriction, so a uniform seed leaves each coordinate
+  free with probability $1/(2q+1)$ and fixes it to each bit with probability
+  $q/(2q+1)$, independently. Events are measured by exact counts of seeds
+  among the $(2q + 1)^N$.
+\end{definition}
+
+\begin{theorem}[Switching lemma, counting form]
+  \label{thm:lowerbounds-switching}
+  \lean{Complexity.DNF.switchingBad,
+    Complexity.DNF.switchingBad_width_encoding_bound,
+    Complexity.DNF.switchingBad_consistentPart_width_encoding_bound,
+    Complexity.CNF.switchingBad_width_encoding_bound,
+    Complexity.CNF.switchingBad_consistentPart_width_encoding_bound,
+    Complexity.DNF.eval_consistentPart, Complexity.CNF.eval_consistentPart}
+  \leanok
+  \uses{def:lowerbounds-random-restriction, def:lowerbounds-normal-forms,
+    def:lowerbounds-decision-tree}
+  Let $\varphi$ be a DNF of width $w$ over $N$ variables, no term of which
+  contains a complementary pair of literals, and let $q, s \in \mathbb{N}$.
+  Call a restriction bad if the canonical decision tree of the restricted
+  formula has depth at least $s$. Then
+  \[ \#\{\text{bad seeds}\} \cdot q^s \le (2q + 1)^N \, (4(w + 1))^s . \]
+  Every DNF agrees with such a sub-DNF of no larger width, and the same bounds
+  hold for CNFs. Dividing by $(2q+1)^N q^s$: a uniform seed, which leaves each
+  coordinate free with probability $1/(2q+1)$, is bad with probability at most
+  $(4(w+1)/q)^s$ when $q \ge 1$.
+\end{theorem}
+\begin{proof}
+  \leanok
+  Encode each bad restriction, together with the labels of its first $s$
+  queried coordinates, injectively as a seed plus $s$ advice symbols from an
+  alphabet of size $4(w + 1)$ (Razborov's encoding). CNFs follow by De Morgan
+  duality.
+\end{proof}
+
+\begin{definition}[$\cc{AC}^0$ formula]
+  \label{def:lowerbounds-ac0-formula}
+  \lean{Complexity.AC0Formula, Complexity.AC0Formula.eval, Complexity.AC0Formula.size,
+    Complexity.AC0Formula.depth}
+  \leanok
+  \uses{def:bitstring}
+  A negation-normal unbounded formula over $N$ variables is a tree built from
+  constants, literals, and AND and OR gates of any fan-in. Its size counts all
+  nodes, and its depth counts gates on a longest root-to-leaf path.
+\end{definition}
+
+\begin{theorem}[Normalization of $\cc{AC}^0$ circuits]
+  \label{thm:lowerbounds-ac0-normalization}
+  \lean{Complexity.Circuit.outputAC0Formula, Complexity.Circuit.outputAC0Formula_spec}
+  \leanok
+  \uses{def:lowerbounds-ac0-formula, def:circuits-bases}
+  Let $C$ be an unbounded-fan-in AND/OR circuit with $N$ inputs and $G$
+  internal gates, and let output $j$ have depth $D$. Some negation-normal
+  unbounded formula computes output $j$, has depth at most $D$, and has size at
+  most $(2(N + G) + 1)^{D+1}$.
+\end{theorem}
+\begin{proof}
+  \leanok
+  Push negations to the literals by De Morgan duality, remove duplicate signed
+  inputs of each gate, and unfold the circuit into a tree.
+\end{proof}
+
+\begin{theorem}[Iterated switching]
+  \label{thm:lowerbounds-staged-switching}
+  \lean{Complexity.AC0Formula.stagedDecisionTree,
+    Complexity.AC0Formula.eval_stagedDecisionTree,
+    Complexity.AC0Formula.stageEventCount_stagedBad_mul_pow_le,
+    Complexity.AC0Formula.exists_shallow_stagedDecisionTree_of_counting}
+  \leanok
+  \uses{def:lowerbounds-ac0-formula, def:lowerbounds-random-restriction,
+    def:lowerbounds-decision-tree}
+  Let $\varphi$ be a negation-normal unbounded formula over $N$ variables with
+  depth at most $d$, and let $s \ge 2$ and $q \in \mathbb{N}$. Applying $d$
+  independent sparse restrictions, one per level, turns $\varphi$ into a
+  decision tree that computes $\varphi$ under the composed restriction. The
+  number of $d$-tuples of seeds for which this decision tree has depth at least
+  $s$, multiplied by $q^s$, is at most
+  $\mathrm{size}(\varphi)\,((2q+1)^N)^d\,(4(s + 1))^s$. Consequently, if $q > 0$
+  and
+  \[ ((2q+1)^N)^d\, s\, q^s + \mathrm{size}(\varphi)\,((2q+1)^N)^d\,(4(s+1))^s N
+     < N\, ((2q+1)^{N-1})^d\, q^s , \]
+  then some tuple of seeds leaves at least $s$ variables free and reduces
+  $\varphi$ to a decision tree of depth less than $s$.
+\end{theorem}
+\begin{proof}
+  \leanok
+  \uses{thm:lowerbounds-switching, lem:lowerbounds-dt-normal-form,
+    lem:lowerbounds-normal-form-restrict}
+  At each level the children are already decision trees of depth below $s$,
+  hence CNFs or DNFs of width below $s$, so the switching lemma applies at
+  every node; a union bound over the nodes and the exact first moment of the
+  number of surviving variables give the criterion.
+\end{proof}
+
+\begin{theorem}[Finite parity obstruction]
+  \label{thm:lowerbounds-parity-obstruction}
+  \lean{Complexity.AC0Formula.parity_counting_obstruction}
+  \leanok
+  \uses{def:lowerbounds-ac0-formula, def:lowerbounds-parity}
+  Let $\varphi$ be a negation-normal unbounded formula over $N$ variables
+  that computes parity, and let $d \ge \mathrm{depth}(\varphi)$, $s \ge 2$ and
+  $q \ge 1$. Then
+  \[ N\, ((2q+1)^{N-1})^d\, q^s \le ((2q+1)^N)^d\, s\, q^s
+     + \mathrm{size}(\varphi)\,((2q+1)^N)^d\,(4(s+1))^s N . \]
+\end{theorem}
+\begin{proof}
+  \leanok
+  \uses{thm:lowerbounds-staged-switching}
+  Parity restricted to a set of free variables needs a decision tree querying
+  all of them, so the conclusion of Theorem~\ref{thm:lowerbounds-staged-switching}
+  is impossible and its numeric hypothesis must fail.
+\end{proof}
+
+\begin{theorem}[Parity is not in $\cc{AC}^0$]
+  \label{thm:lowerbounds-parity-not-ac0}
+  \uses{def:NC-AC, def:lowerbounds-parity}
+  The parity family is not in $\cc{AC}^0$.
+\end{theorem}
+\begin{proof}
+  \uses{thm:lowerbounds-ac0-normalization, thm:lowerbounds-parity-obstruction}
+  Normalize a constant-depth polynomial-size family into formulas of constant
+  depth $d$ and polynomial size, then choose $q$ and $s$ as powers of $N$ so
+  that the inequality of Theorem~\ref{thm:lowerbounds-parity-obstruction}
+  fails for large $N$.
+\end{proof}
+
+\begin{theorem}[Håstad's size bound]
+  \label{thm:lowerbounds-hastad-size}
+  \uses{def:lowerbounds-parity, def:circuits-bases}
+  For every $d \ge 2$ there is $\varepsilon_d > 0$ such that, for all
+  sufficiently large $N$, every unbounded-fan-in AND/OR circuit of depth $d$
+  computing $N$-bit parity has size at least $2^{\varepsilon_d N^{1/(d-1)}}$.
+\end{theorem}
+\begin{proof}
+  \uses{thm:lowerbounds-ac0-normalization, thm:lowerbounds-staged-switching}
+  The same argument with the restriction parameters optimized, keeping the
+  bottom fan-in bound separate from the size.
+\end{proof}
+
+\begin{lemma}[Parity in $\cc{TC}^0$]
+  \label{lem:lowerbounds-parity-tc0}
+  \uses{def:circuits-TC, def:lowerbounds-parity}
+  The parity family is in $\cc{TC}^0$.
+\end{lemma}
+\begin{proof}
+  For each odd $k \le N$, the conjunction of the threshold gates
+  ``at least $k$ ones'' and ``not at least $k + 1$ ones'' detects exactly $k$
+  ones; parity is the disjunction of these, a depth-three circuit of linear
+  size.
+\end{proof}
+
+\begin{corollary}
+  \label{cor:lowerbounds-ac0-ne-tc0}
+  \uses{def:NC-AC, def:circuits-TC}
+  $\cc{AC}^0 \subsetneq \cc{TC}^0$.
+\end{corollary}
+\begin{proof}
+  \uses{prop:circuits-depth-classes, thm:lowerbounds-parity-not-ac0,
+    lem:lowerbounds-parity-tc0}
+  $\cc{AC}^0 \subseteq \cc{TC}^0$ is formalized, and parity separates them.
+\end{proof}
+
+\begin{theorem}[Pseudorandom switching lemma]
+  \label{thm:lowerbounds-pseudorandom-restrictions}
+  \uses{thm:lowerbounds-switching}
+  \notready
+  The bound of Theorem~\ref{thm:lowerbounds-switching} holds, up to an additive
+  error $\varepsilon$, when the free/fixed pattern and the fixed values are
+  drawn from a distribution that $\varepsilon$-fools CNFs of size
+  polynomial in $N$ instead of the uniform product distribution
+  (Trevisan--Xue). With an explicit generator fooling CNFs, such restrictions
+  can be sampled from $\mathrm{polylog}(N / \varepsilon)$ random bits.
+\end{theorem}
+\begin{proof}
+  The bad event of the switching lemma is itself decided by a small CNF-like
+  test on the restriction, so fooling that test preserves its probability.
+  This requires a formal notion of pseudorandom distributions and of fooling a
+  class of tests, which the library does not yet state; pseudorandom
+  generators for $\cc{AC}^0$ would build on it.
+\end{proof}
+
+\section{Monotone circuits}
+\label{sec:lowerbounds-monotone}
+
+\begin{definition}[Monotone circuit]
+  \label{def:lowerbounds-monotone-circuit}
+  \uses{def:circuit, def:circuits-bases}
+  A monotone circuit is an AND/OR circuit all of whose negation flags are
+  false. Every monotone circuit computes a monotone function.
+\end{definition}
+
+\begin{theorem}[Monotone Boolean matrix product]
+  \label{thm:lowerbounds-monotone-matrix}
+  \uses{def:lowerbounds-monotone-circuit}
+  \notready
+  Every monotone fan-in-two circuit computing the product of two
+  $n \times n$ Boolean matrices has at least $n^3$ AND gates.
+\end{theorem}
+\begin{proof}
+  Each product $x_{ik} y_{kj}$ is a prime implicant of output $(i, j)$, and a
+  monotone circuit must realize each of the $n^3$ of them at a distinct AND
+  gate (Pratt; Paterson; Mehlhorn--Galil). The bound is monotone-specific:
+  circuits with negation compute the product with $O(n^{\log_2 7})$ gates
+  through integer matrix multiplication.
+\end{proof}
+
+\begin{lemma}[Sunflower lemma]
+  \label{lem:lowerbounds-sunflower}
+  Every family of more than $\ell!\,(p-1)^\ell$ sets, each of size $\ell$,
+  contains $p$ sets whose pairwise intersections all equal their common
+  intersection.
+\end{lemma}
+\begin{proof}
+  Induction on $\ell$: either a maximal pairwise-disjoint subfamily has $p$
+  members, or some element lies in many sets and the lemma applies to them
+  with that element removed (Erd\H{o}s--Rado).
+\end{proof}
+
+\begin{theorem}[Monotone clique lower bound]
+  \label{thm:lowerbounds-monotone-clique}
+  \uses{def:lowerbounds-monotone-circuit}
+  \notready
+  There is $\varepsilon > 0$ such that for all $k \le n^{1/4}$, every monotone
+  circuit deciding whether an $n$-vertex graph, given by its adjacency bits,
+  contains a $k$-clique has size at least $2^{\varepsilon \sqrt{k}}$
+  (Razborov; Alon--Boppana; Arora--Barak Theorem~14.7).
+\end{theorem}
+\begin{proof}
+  \uses{lem:lowerbounds-sunflower}
+  Razborov's method of approximations: replace each gate by an approximator
+  that is a small union of clique indicators, use the sunflower lemma to keep
+  approximators small, and show that each replacement errs on few positive or
+  negative test graphs.
+\end{proof}
+
+\section{Proof complexity}
+\label{sec:lowerbounds-proof-complexity}
+
+\begin{definition}[Resolution]
+  \label{def:lowerbounds-resolution}
+  \lean{Complexity.SAT.Clause.resolvent, Complexity.SAT.CNF.Derives}
+  \leanok
+  Clauses are lists of literals over variables in $\mathbb{N}$, and a CNF is a
+  list of clauses. The resolvent of clauses $C_1$ and $C_2$ on a variable $v$
+  deletes every occurrence of $x_v$ from $C_1$ and of $\neg x_v$ from $C_2$
+  and concatenates the rest. A clause is derivable from $\varphi$ if it is a
+  clause of $\varphi$ or a resolvent of two derivable clauses. There is no
+  weakening rule, and the pivot need not occur in the parents.
+\end{definition}
+
+\begin{lemma}[Resolution step]
+  \label{lem:lowerbounds-resolvent}
+  \lean{Complexity.SAT.Clause.resolvent_sound, Complexity.SAT.Clause.resolvent_length_le}
+  \leanok
+  \uses{def:lowerbounds-resolution}
+  Every assignment satisfying $C_1$ and $C_2$ satisfies their resolvent on any
+  variable, and the resolvent has at most $|C_1| + |C_2|$ literals.
+\end{lemma}
+\begin{proof}
+  \leanok
+  Case on the value of $x_v$: the parent whose pivot literal is false keeps a
+  true literal in the resolvent.
+\end{proof}
+
+\begin{theorem}[Soundness of resolution]
+  \label{thm:lowerbounds-resolution-sound}
+  \lean{Complexity.SAT.CNF.entails_of_derives, Complexity.SAT.CNF.refutation_sound}
+  \leanok
+  \uses{def:lowerbounds-resolution}
+  Every clause derivable from $\varphi$ is satisfied by every assignment
+  satisfying $\varphi$. In particular, if the empty clause is derivable from
+  $\varphi$, then $\varphi$ is unsatisfiable.
+\end{theorem}
+\begin{proof}
+  \leanok
+  \uses{lem:lowerbounds-resolvent}
+  Induction on the derivation.
+\end{proof}
+
+\begin{theorem}[Completeness of resolution]
+  \label{thm:lowerbounds-resolution-complete}
+  \uses{def:lowerbounds-resolution}
+  If $\varphi$ is unsatisfiable, then the empty clause is derivable from
+  $\varphi$.
+\end{theorem}
+\begin{proof}
+  Induction on the number of variables, eliminating one variable by resolving
+  all pairs of clauses on it (Davis--Putnam).
+\end{proof}
+
+\begin{definition}[Resolution refutations and their measures]
+  \label{def:lowerbounds-resolution-proof}
+  \uses{def:lowerbounds-resolution}
+  A resolution refutation of $\varphi$ is a sequence of clauses ending in the
+  empty clause, each a clause of $\varphi$ or a resolvent of two earlier ones.
+  Its size is its length and its width is the largest number of literals in
+  one of its clauses. A clause is derivable exactly when it ends such a
+  sequence.
+\end{definition}
+
+\begin{theorem}[Ben-Sasson--Wigderson size--width relation]
+  \label{thm:lowerbounds-size-width}
+  \uses{def:lowerbounds-resolution-proof}
+  \notready
+  If an unsatisfiable CNF over $n$ variables whose clauses have at most $k$
+  literals has a resolution refutation of size $S$, then it has one of width at
+  most $k + O(\sqrt{n \log S})$.
+\end{theorem}
+\begin{proof}
+  Repeatedly restrict a variable occurring in many wide clauses, and combine
+  the refutations of the two restrictions.
+\end{proof}
+
+\begin{theorem}[Haken]
+  \label{thm:lowerbounds-php}
+  \uses{def:lowerbounds-resolution-proof}
+  \notready
+  Let $\mathrm{PHP}^{n+1}_n$ be the CNF over variables $p_{ij}$
+  ($i \le n + 1$, $j \le n$) stating that every pigeon $i$ sits in some hole
+  and no hole holds two pigeons. Every resolution refutation of
+  $\mathrm{PHP}^{n+1}_n$ has size $2^{\Omega(n)}$.
+\end{theorem}
+\begin{proof}
+  \uses{thm:lowerbounds-resolution-sound}
+  Restrict the refutation so that every wide clause disappears, then show that
+  any refutation of the remaining pigeonhole instance contains a wide clause
+  (Beame--Pitassi), or use Haken's bottleneck counting.
+\end{proof}
+
+\begin{definition}[Cook--Reckhow proof system]
+  \label{def:lowerbounds-proof-system}
+  \uses{def:P}
+  A propositional proof system for unsatisfiable CNFs is a polynomial-time
+  decidable relation $V(\varphi, \pi)$ that is sound ($V(\varphi, \pi)$
+  implies that $\varphi$ is unsatisfiable) and complete (every unsatisfiable
+  $\varphi$ has some $\pi$ with $V(\varphi, \pi)$). It is polynomially bounded
+  if every unsatisfiable $\varphi$ has such a $\pi$ with
+  $|\pi| \le p(|\varphi|)$ for a fixed polynomial $p$.
+\end{definition}
+
+\begin{proposition}[Resolution is a proof system]
+  \label{prop:lowerbounds-resolution-proof-system}
+  \uses{def:lowerbounds-proof-system, def:lowerbounds-resolution-proof}
+  \notready
+  Checking a resolution refutation, encoded as a clause sequence, is a
+  Cook--Reckhow proof system.
+\end{proposition}
+\begin{proof}
+  \uses{thm:lowerbounds-resolution-sound, thm:lowerbounds-resolution-complete}
+  Checking each step takes polynomial time; soundness and completeness are the
+  two theorems above.
+\end{proof}
+
+\begin{theorem}[Cook--Reckhow]
+  \label{thm:lowerbounds-cook-reckhow}
+  \uses{def:lowerbounds-proof-system, def:NP, def:coNP}
+  \notready
+  A polynomially bounded propositional proof system exists if and only if
+  $\cc{NP} = \cc{coNP}$.
+\end{theorem}
+\begin{proof}
+  \uses{thm:cook-levin}
+  Unsatisfiability of CNFs is $\cc{coNP}$-complete. A polynomially bounded
+  proof system puts it in $\cc{NP}$; conversely an $\cc{NP}$ verifier for it is
+  a polynomially bounded proof system.
+\end{proof}

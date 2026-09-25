@@ -1,0 +1,321 @@
+\chapter{Frontiers: directions beyond the current tracks}
+\label{chap:frontiers}
+
+This chapter records areas the library does not yet cover. For each it names one
+precise target, what the target would build on, and a first step. None of the
+nodes below is formalized, and most are not yet ready: stating them in Lean
+needs a definition the library does not have. Where related infrastructure
+exists elsewhere, it is named as a starting point, not as progress toward the
+target.
+
+\section{Hardness of approximation}
+
+The PCP theorem $\cc{NP} = \cc{PCP}[O(\log n), O(1)]$ is formalized in the
+interaction chapter, with perfect completeness and soundness $1/2$. Optimal
+inapproximability is a far target beyond it.
+
+\begin{theorem}[Håstad's 3-bit PCP]
+  \label{thm:frontiers-hastad}
+  \uses{def:PCP, def:NP}
+  \notready
+  Write $\cc{PCP}_{c,s}[r, q]$ for the variant of $\cc{PCP}[r,q]$ with
+  completeness $c$ and soundness $s$. For every $\varepsilon > 0$,
+  $\cc{NP} = \cc{PCP}_{1-\varepsilon,\, 1/2+\varepsilon}[O(\log n), 3]$ with a
+  verifier that accepts iff the XOR of the three bits it reads equals a bit
+  determined by its coins. Consequently, approximating MAX-3SAT within a factor
+  $7/8 + \varepsilon$ is $\cc{NP}$-hard.
+\end{theorem}
+\begin{proof}
+  \uses{def:analysis-fourier-coeff, def:analysis-noise, thm:interaction-pcp-theorem, thm:interaction-parallel-repetition}
+  Compose the PCP theorem with parallel repetition (Label Cover) and a long-code
+  test. Its soundness analysis is Fourier analysis with noise, extending the BLR
+  argument. First step: define $\cc{PCP}_{c,s}$ with explicit rational $c$ and
+  $s$, show it agrees with the existing $\cc{PCP}$ at $c = 1$, $s = 1/2$, and
+  define gap-preserving reductions between constraint satisfaction problems.
+\end{proof}
+
+\section{Derandomization}
+
+The metacomplexity chapter already formalizes finite pseudorandomness
+infrastructure:
+\begin{itemize}
+  \item fixed-length generators \texttt{Complexity.BitGenerator} with their
+    distinguishing advantage;
+  \item Yao's hybrid and next-bit-prediction identities;
+  \item Nisan--Wigderson designs \texttt{Complexity.NWDesign} and the associated
+    generator \texttt{Complexity.NWDesign.generator};
+  \item a finite reconstruction step against time-bounded Kolmogorov tests.
+\end{itemize}
+What is missing is the circuit-based statement of pseudorandomness, and the
+hardness-versus-randomness theorems built on it.
+
+\begin{definition}[Pseudorandom generator against circuits]
+  \label{def:frontiers-prg}
+  \uses{def:circuit, def:SIZE}
+  A family $G_m : \{0,1\}^{\ell(m)} \to \{0,1\}^m$ is a \emph{pseudorandom
+  generator with seed length $\ell$} if two conditions hold:
+  \begin{itemize}
+    \item for every $m$ and every circuit $C$ of size at most $m$ on $m$ inputs,
+      $\lvert \Pr_s[C(G_m(s)) = 1] - \Pr_u[C(u) = 1] \rvert < 1/10$;
+    \item $G_m$ is computable in time $2^{O(\ell(m))}$.
+  \end{itemize}
+\end{definition}
+
+\begin{theorem}[Nisan--Wigderson]
+  \label{thm:frontiers-nw}
+  \uses{def:dtime, def:circuit, def:BPP, def:P}
+  Suppose there are $L \in \bigcup_c \cc{DTIME}(2^{cn})$ and $\varepsilon > 0$
+  such that, for all sufficiently large $n$, no circuit of size $2^{\varepsilon n}$
+  agrees with $L$ on more than a $1/2 + 2^{-\varepsilon n}$ fraction of inputs of
+  length $n$. Then $\cc{BPP} = \cc{P}$.
+\end{theorem}
+\begin{proof}
+  \uses{def:frontiers-prg, def:avg-nw-design, thm:avg-nw-reconstruction}
+  The NW generator built from $L$ on a design with logarithmic seed is a
+  pseudorandom generator by the hybrid and reconstruction argument. Enumerate its
+  $\mathrm{poly}(n)$ seeds. First step: prove that designs with the required
+  parameters exist, then restate the existing finite reconstruction against
+  circuit tests instead of Kolmogorov tests.
+\end{proof}
+
+\begin{theorem}[Impagliazzo--Wigderson]
+  \label{thm:frontiers-iw}
+  \uses{def:dtime, def:circuit, def:BPP, def:P}
+  Suppose there are $L \in \bigcup_c \cc{DTIME}(2^{cn})$ and $\varepsilon > 0$
+  such that, for all sufficiently large $n$, no circuit of size $2^{\varepsilon n}$
+  decides $L$ on all inputs of length $n$. Then $\cc{BPP} = \cc{P}$. This
+  almost-everywhere hypothesis is stronger than
+  $L \notin \cc{SIZE}(2^{\varepsilon n})$, which gives only infinitely-often
+  hardness.
+\end{theorem}
+\begin{proof}
+  \uses{thm:frontiers-nw, def:meta-list-code-family}
+  Amplify worst-case hardness to the average-case hardness required by
+  Nisan--Wigderson, via local list decoding of a concatenated code or the XOR
+  lemma. First step: instantiate the abstract list-decodable code interface
+  \texttt{Complexity.BooleanListCode} with a concrete locally list-decodable code.
+\end{proof}
+
+\begin{theorem}[Braverman: polylogarithmic independence fools $\cc{AC^0}$]
+  \label{thm:frontiers-braverman}
+  \uses{def:NC-AC, def:circuit}
+  \notready
+  Every $(\log(s/\varepsilon))^{O(d^2)}$-wise independent distribution on
+  $\{0,1\}^n$ $\varepsilon$-fools every unbounded fan-in circuit of size $s$ and
+  depth $d$.
+\end{theorem}
+\begin{proof}
+  \uses{thm:analysis-lmn}
+  Approximate the circuit by a low-degree polynomial in two ways: in $L^2$ via
+  Linial--Mansour--Nisan, and pointwise off a small error set via
+  Razborov--Smolensky. Then sandwich it. First step: define $k$-wise independent
+  distributions and $\varepsilon$-fooling for a finite family of tests.
+\end{proof}
+
+\section{Space-bounded derandomization}
+
+\begin{theorem}[Nisan's generator for space-bounded computation]
+  \label{thm:frontiers-nisan}
+  \uses{def:dspace, def:L}
+  \notready
+  For all $R$, $w$, and $\varepsilon$ there is a generator
+  $G : \{0,1\}^{O(\log R \cdot \log(Rw/\varepsilon))} \to \{0,1\}^R$ that
+  $\varepsilon$-fools every read-once oblivious branching program of length $R$
+  and width $w$. The generator is computable in space linear in its seed.
+  Consequently, randomized logspace with two-sided error ($\cc{BPL}$) is contained
+  in $\cc{DSPACE}(\log^2 n)$.
+\end{theorem}
+\begin{proof}
+  Recursively apply pairwise-independent hash functions, halving the program at
+  each level. First step: define read-once branching programs and $\cc{BPL}$ as
+  logspace probabilistic machines that halt in polynomial time. The library's
+  branching programs are the width-$5$ permutation programs used for Barrington's
+  theorem, which are not read-once.
+\end{proof}
+
+\begin{theorem}[Reingold: $\cc{SL} = \cc{L}$]
+  \label{thm:frontiers-reingold}
+  \uses{def:L}
+  \notready
+  Undirected $s$--$t$ connectivity is in $\cc{L}$.
+\end{theorem}
+\begin{proof}
+  Make the graph regular, then alternate powering with zig-zag products against a
+  constant-size expander until the graph is an expander of logarithmic diameter.
+  The resulting rotation maps are computable in logspace. The PCP development's
+  internal modules contain regular graphs with rotation maps, the zig-zag product
+  with its Reingold--Vadhan--Wigderson spectral bound, and a zig-zag tower of
+  expanders, all of which may be reusable. First step: fix a graph encoding and state the undirected
+  connectivity language.
+\end{proof}
+
+\section{Cryptographic foundations}
+
+\begin{definition}[One-way function]
+  \label{def:frontiers-owf}
+  \uses{def:barriers-negligible, def:FP, def:circuit}
+  $f \in \cc{FP}$ is \emph{one-way} (against nonuniform adversaries) if for every
+  family of polynomial-size circuits $(A_n)$, the function
+  $n \mapsto \Pr_{x \in \{0,1\}^n}[f(A_n(f(x))) = f(x)]$ is negligible.
+\end{definition}
+
+\begin{theorem}[Goldreich--Levin]
+  \label{thm:frontiers-goldreich-levin}
+  \uses{def:frontiers-owf}
+  \notready
+  Let $f$ be one-way and $g(x, r) = (f(x), r)$ with $|r| = |x|$. Then
+  $\langle x, r \rangle \bmod 2$ is a hard-core predicate for $g$: every family of
+  polynomial-size circuits predicts it from $g(x,r)$ with probability at most
+  $1/2 + \mathrm{negl}(n)$.
+\end{theorem}
+\begin{proof}
+  \uses{def:analysis-fourier-coeff, thm:analysis-plancherel}
+  A good predictor is a noisy oracle for the Hadamard encoding of $x$. Local list
+  decoding, which finds every large Fourier coefficient of the predictor,
+  recovers a short list containing $x$. First step: define hard-core predicates,
+  and prove the finite list-decoding statement for the Hadamard code in Fourier
+  language.
+\end{proof}
+
+\begin{theorem}[Goldreich--Goldwasser--Micali]
+  \label{thm:frontiers-ggm}
+  \uses{def:barriers-negligible, def:circuit}
+  \notready
+  If a length-doubling pseudorandom generator secure against polynomial-size
+  circuits exists, then so does a pseudorandom function family secure against
+  polynomial-size oracle circuits.
+\end{theorem}
+\begin{proof}
+  Evaluate the tree of generator applications along the input bits. A hybrid
+  argument over tree levels, restricted to the nodes the adversary queries,
+  bounds the advantage. First step: define cryptographic PRGs and a PRF oracle
+  game with negligible advantage, compatible with the natural-proofs barrier.
+  Also prove that one-way permutations yield PRGs via Goldreich--Levin and the
+  existing Yao hybrid lemma.
+\end{proof}
+
+\section{Communication complexity}
+
+The library formalizes the monotone Karchmer--Wigderson correspondence. Its
+rectangle-indexed protocols (\texttt{Complexity.KarchmerWigderson.Protocol})
+translate to and from monotone formulas with exactly equal depth. General
+two-party communication complexity is not formalized.
+
+\begin{definition}[Deterministic protocols]
+  \label{def:frontiers-protocol}
+  A deterministic protocol for $f : X \times Y \to Z$ is a binary tree. Each
+  internal node is owned by Alice, who branches on a function of $x$, or by Bob,
+  who branches on a function of $y$. Each leaf is labelled by an output. The
+  cost is the depth, and $D(f)$ is the minimum cost of a protocol computing $f$.
+\end{definition}
+
+\begin{theorem}[Discrepancy bound for inner product]
+  \label{thm:frontiers-ip-discrepancy}
+  \uses{def:frontiers-protocol}
+  \notready
+  For every distribution $\mu$ on $X \times Y$ and every error
+  $\varepsilon < 1/2$, public-coin randomized protocols satisfy
+  $R_\varepsilon(f) \ge \log_2\bigl((1 - 2\varepsilon)/\mathrm{disc}_\mu(f)\bigr)$.
+  The inner product $\mathrm{IP}_n(x,y) = \sum_i x_i y_i \bmod 2$ has uniform
+  discrepancy at most $2^{-n/2}$. Hence $R_{1/3}(\mathrm{IP}_n) \ge n/2 - O(1)$.
+\end{theorem}
+\begin{proof}
+  \uses{thm:analysis-parity-orthonormal}
+  A $c$-bit protocol partitions $X \times Y$ into at most $2^c$ rectangles.
+  Lindsey's lemma bounds each rectangle's bias using orthogonality of the
+  Hadamard matrix, that is, of the parities. First step: prove the rectangle
+  partition lemma and the fooling-set bound $D(\mathrm{EQ}_n) \ge n$.
+\end{proof}
+
+\begin{theorem}[Karchmer--Wigderson, general form]
+  \label{thm:frontiers-kw-general}
+  \uses{def:frontiers-protocol, def:bitstring}
+  \notready
+  For every non-constant $f : \{0,1\}^n \to \{0,1\}$, the minimum depth of a
+  De~Morgan formula computing $f$ equals $D(\mathrm{KW}_f)$. Here $\mathrm{KW}_f$
+  is the relation in which Alice holds $x \in f^{-1}(1)$, Bob holds
+  $y \in f^{-1}(0)$, and they must output some $i$ with $x_i \neq y_i$.
+\end{theorem}
+\begin{proof}
+  Adapt the existing depth-exact monotone translation. Leaves may now output any
+  differing coordinate, not only one where the one-input has a $1$, and correspond
+  to literals of either sign. First step: generalize the protocol type to relations.
+\end{proof}
+
+\section{Algebraic complexity}
+
+\begin{definition}[$\cc{VP}$ and $\cc{VNP}$]
+  \label{def:frontiers-vp-vnp}
+  Fix a field $\mathbb{F}$. An arithmetic circuit is a DAG with $+$ and $\times$
+  gates over variables and field constants. $\cc{VP}$ is the class of polynomial
+  families $(f_n)$ with $\mathrm{poly}(n)$ variables and degree, computed by
+  $\mathrm{poly}(n)$-size arithmetic circuits. $\cc{VNP}$ is the class of families
+  $f_n(x) = \sum_{e \in \{0,1\}^{m(n)}} g_n(x, e)$ with $(g_n) \in \cc{VP}$ and
+  $m$ polynomial.
+\end{definition}
+
+\begin{theorem}[Valiant: completeness of the permanent]
+  \label{thm:frontiers-permanent}
+  \uses{def:frontiers-vp-vnp}
+  \notready
+  Over any field of characteristic other than $2$, the permanent family
+  $(\mathrm{perm}_n)$ is $\cc{VNP}$-complete under polynomial-size projections.
+\end{theorem}
+\begin{proof}
+  Show the permanent is in $\cc{VNP}$ via Ryser's formula. For hardness, convert
+  formulas to weighted graphs whose cycle covers compute the polynomial. First
+  step: define arithmetic circuits over Mathlib's \texttt{MvPolynomial} and
+  $p$-projections. The Boolean counterpart, $\#\cc{P}$-completeness of the
+  $0/1$ permanent, would connect to the existing class $\#\cc{P}$.
+\end{proof}
+
+\section{Fine-grained and parameterized complexity}
+
+\begin{theorem}[SETH implies quadratic hardness of Orthogonal Vectors]
+  \label{thm:frontiers-seth-ov}
+  \uses{def:dtime}
+  \notready
+  Suppose that for every $\delta > 0$ there is $k$ such that $k$-SAT on $n$
+  variables has no algorithm running in time $2^{(1-\delta)n}\,\mathrm{poly}(n)$
+  (SETH). Then for every $\delta > 0$ there is $c$ such that Orthogonal Vectors on
+  $N$ vectors of dimension $c \log N$ has no algorithm running in time
+  $N^{2-\delta}$.
+\end{theorem}
+\begin{proof}
+  Split the variables into two halves and enumerate partial assignments. Map each
+  to a vector over the clauses, after sparsification. First step: running times
+  are measured in a parameter (the number of variables $n$) rather than input
+  length, so fine-grained reductions need explicit time bounds in named
+  parameters, beyond the existing $\cc{DTIME}$.
+\end{proof}
+
+\begin{definition}[$\cc{FPT}$ and parameterized reductions]
+  \label{def:frontiers-fpt}
+  \uses{def:language, def:dtime}
+  A parameterized problem is a language $L$ with a polynomial-time parameter
+  $\kappa$. It is in $\cc{FPT}$ if it is decidable in time
+  $g(\kappa(x)) \cdot |x|^{O(1)}$ for some computable $g$. An fpt-reduction
+  preserves membership, runs in fpt time, and bounds the target parameter by a
+  function of the source parameter. $\cc{W[1]}$ is the closure of $k$-Clique
+  under fpt-reductions. First targets: Vertex Cover is in $\cc{FPT}$ by a
+  $2^k$-branching algorithm, and $k$-Clique is $\cc{W[1]}$-complete by
+  definition, with $k$-Independent Set equivalent to it.
+\end{definition}
+
+\section{Quantum computation}
+
+\begin{theorem}[Adleman--DeMarrais--Huang: $\cc{BQP} \subseteq \cc{PP}$]
+  \label{thm:frontiers-bqp-pp}
+  \uses{def:PP}
+  \notready
+  Define $\cc{BQP}$ by polynomial-time uniform families of quantum circuits over
+  the gate set $\{\mathrm{Hadamard}, \mathrm{Toffoli}\}$, with error $1/3$. Then
+  $\cc{BQP} \subseteq \cc{PP}$.
+\end{theorem}
+\begin{proof}
+  With Hadamard and Toffoli gates all amplitudes are real. The acceptance
+  probability is $(\#\text{positive} - \#\text{negative paths})/2^h$ over
+  polynomially checkable computation paths, which a $\cc{PP}$ machine can compare
+  with a threshold. First step: define the path-sum semantics of such circuits
+  and prove it agrees with the matrix semantics on small examples.
+\end{proof}

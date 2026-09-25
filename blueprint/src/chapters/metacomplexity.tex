@@ -1,0 +1,738 @@
+\chapter{Metacomplexity}
+\label{chap:metacomplexity}
+
+Metacomplexity studies problems whose instances describe strings or Boolean
+functions and ask how hard they are to describe or compute: time-bounded
+Kolmogorov complexity, the minimum time-bounded Kolmogorov complexity problem
+$\cc{MINKT}$, the minimum circuit size problem $\cc{MCSP}$, and their gap,
+sampled, and search variants. The library measures every description length
+relative to an explicit machine and proves universality separately; for
+ordinary (non-oracle) machines the fixed universal machine of
+Theorem~\ref{thm:utm} discharges those universality hypotheses. Formalized so
+far: promise problems and their classes, machine-relative plain and
+time-bounded complexity with invariance and finite incompressibility,
+canonical codecs and witness relations for $\cc{MINKT}$, $\cc{GapMINKT}$,
+$\cc{MCSP}$ and $\cc{SuccinctMCSP}$, the Shannon threshold window, finite
+anti-checkers, and the circuit-assembly half of the Oliveira--Pich--Santhanam
+Anti-Checker Lemma. The $\cc{NP}$ upper bounds are proved only conditionally
+on a polynomial-time verifier for the paired witness language, and the main
+open direction is the hardness-magnification headline together with its
+approximate-counting step. Conditional complexity, computational depth and the
+average-case theory built on these definitions are in the next chapter.
+
+% ---------------------------------------------------------------------------
+\section{Promise problems}
+
+\begin{definition}[Promise problems and promise classes]
+  \label{def:promise}
+  \lean{Complexity.PromiseProblem, Complexity.PromiseP, Complexity.PromiseNP}
+  \leanok
+  \uses{def:language, def:P, def:NP}
+  A promise problem $\Pi = (\Pi_{\mathrm{yes}}, \Pi_{\mathrm{no}})$ is a pair
+  of disjoint languages; inputs outside $\Pi_{\mathrm{yes}} \cup
+  \Pi_{\mathrm{no}}$ are unconstrained. For a language class $\mathcal{C}$,
+  $\Pi$ lies in the lifted class $\mathrm{Promise}\,\mathcal{C}$ when some
+  completion $L \in \mathcal{C}$ satisfies $\Pi_{\mathrm{yes}} \subseteq L$
+  and $L \cap \Pi_{\mathrm{no}} = \emptyset$. $\cc{PromiseP}$ and
+  $\cc{PromiseNP}$ (and $\cc{PromiseCoNP}$) are the lifts of $\cc{P}$ and
+  $\cc{NP}$ (and $\cc{coNP}$). An ordinary language $L$ embeds as the total
+  promise problem $(L, \overline{L})$.
+\end{definition}
+
+\begin{definition}[Promise reductions and hardness]
+  \label{def:meta-promise-reduction}
+  \lean{Complexity.PromiseProblem.MapReducesPoly, Complexity.PromiseHardFor,
+    Complexity.PromiseNPHard, Complexity.PromiseNPComplete}
+  \leanok
+  \uses{def:promise, def:FP, def:reduction}
+  A polynomial-time promise reduction from $\Pi$ to $\Pi'$ is a map
+  $f \in \cc{FP}$ sending $\Pi_{\mathrm{yes}}$ into $\Pi'_{\mathrm{yes}}$ and
+  $\Pi_{\mathrm{no}}$ into $\Pi'_{\mathrm{no}}$. A promise problem is
+  $\mathcal{C}$-hard when every total language of $\mathcal{C}$ reduces to it
+  in this sense, and $\cc{NP}$-complete when in addition it lies in
+  $\cc{PromiseNP}$.
+\end{definition}
+
+\begin{theorem}[Basic promise-class facts]
+  \label{thm:meta-promise-basics}
+  \lean{Complexity.PromiseProblem.ofLanguage_mem_PromiseP_iff,
+    Complexity.PromiseProblem.ofLanguage_mem_PromiseNP_iff,
+    Complexity.PromiseProblem.ofLanguage_promiseNPComplete_iff,
+    Complexity.PromiseProblem.MapReducesPoly.mem_PromiseP,
+    Complexity.PromiseProblem.MapReducesPoly.mem_PromiseNP,
+    Complexity.PromiseP_subset_PromiseNP, Complexity.PromiseP.complement}
+  \leanok
+  \uses{def:promise, def:meta-promise-reduction, def:np-complete}
+  (a) A total embedded language lies in $\cc{PromiseP}$ (resp.\
+  $\cc{PromiseNP}$) exactly when it lies in $\cc{P}$ (resp.\ $\cc{NP}$), and
+  it is promise-$\cc{NP}$-complete exactly when it is $\cc{NP}$-complete.
+  (b) $\cc{PromiseP}$ and $\cc{PromiseNP}$ are closed backward under
+  polynomial-time promise reductions. (c) $\cc{PromiseP} \subseteq
+  \cc{PromiseNP}$, and $\cc{PromiseP}$ is closed under swapping the yes and no
+  sides.
+\end{theorem}
+\begin{proof}
+  \leanok
+  Unfold the completion lift; reduction closure uses closure of $\cc{P}$ and
+  $\cc{NP}$ under polynomial-time preimages.
+\end{proof}
+
+\begin{theorem}[Hard promise targets collapse $\cc{P}$ and $\cc{NP}$]
+  \label{thm:meta-promise-collapse}
+  \lean{Complexity.PromiseNPHard.P_eq_NP_of_mem_PromiseP,
+    Complexity.promiseP_eq_promiseNP_iff}
+  \leanok
+  \uses{def:meta-promise-reduction}
+  If a promise-$\cc{NP}$-hard problem lies in $\cc{PromiseP}$, then
+  $\cc{P} = \cc{NP}$. Moreover $\cc{PromiseP} = \cc{PromiseNP}$ if and only if
+  $\cc{P} = \cc{NP}$.
+\end{theorem}
+\begin{proof}
+  \leanok
+  \uses{thm:meta-promise-basics}
+  Pull a $\cc{P}$ completion back along the reduction from each $\cc{NP}$
+  language and use the total-embedding equivalences.
+\end{proof}
+
+\begin{definition}[Promise circuit size]
+  \label{def:meta-promise-size}
+  \lean{Complexity.PromiseSIZE, Complexity.PromisePPoly,
+    Complexity.PromiseEventuallySIZE}
+  \leanok
+  \uses{def:promise, def:SIZE, def:PPoly, def:circuit}
+  $\cc{PromiseSIZE}(s)$ and $\cc{PromisePPoly}$ are the completion lifts of
+  $\cc{SIZE}(s)$ (fan-in-two $\{\wedge,\vee\}$ gates with free negation
+  flags on gate inputs) and $\cc{P/poly}$; $\cc{PromiseSIZE}(s)$ is
+  equivalently the class of promise problems solved on both sides by one
+  circuit family of pointwise size at most $s$.
+  $\cc{PromiseEventuallySIZE}(s)$ asks for a
+  family solving both sides whose size is at most $s(n)$ for all sufficiently
+  large $n$. The library proves that an eventual polynomial bound already
+  gives $\cc{PromisePPoly}$
+  (\texttt{PromiseEventuallySIZE\_polynomial\_subset\_PromisePPoly}).
+\end{definition}
+
+% ---------------------------------------------------------------------------
+\section{Machine-relative Kolmogorov complexity}
+
+\begin{definition}[Plain and time-bounded Kolmogorov complexity]
+  \label{def:kolmogorov}
+  \lean{Complexity.TM.plainKolmogorovComplexity,
+    Complexity.TM.timeBoundedKolmogorovComplexity}
+  \leanok
+  \uses{def:tm, def:produces}
+  For a deterministic machine $U$ (with any number of work tapes), a string
+  $x$ and a clock $t$,
+  \[
+    C_U(x) = \min\{|p| : U \text{ produces } x \text{ on } p\},\qquad
+    C^t_U(x) = \min\{|p| : U \text{ produces } x \text{ on } p
+      \text{ within } t \text{ steps}\},
+  \]
+  with values in $\mathbb{N} \cup \{\infty\}$ and value $\infty$ when no
+  program exists. Here ``produces'' means halting with exact output $x$
+  (Definition~\ref{def:produces}). No universality is assumed. A
+  prefix-free variant $K_U$ is defined only for machines carrying a proof
+  that their halting domain is prefix-free
+  (\texttt{TM.prefixKolmogorovComplexity}).
+\end{definition}
+
+\begin{lemma}[Elementary laws]
+  \label{lem:meta-kolmogorov-basic}
+  \lean{Complexity.TM.timeBoundedKolmogorovComplexity_le_coe_iff,
+    Complexity.TM.timeBoundedKolmogorovComplexity_mono,
+    Complexity.TM.plainKolmogorovComplexity_le_timeBounded,
+    Complexity.TM.timeBoundedKolmogorovComplexity_le_time}
+  \leanok
+  \uses{def:kolmogorov}
+  For every machine $U$, string $x$, clocks $t \le t'$ and bound $s$:
+  (a) $C^t_U(x) \le s$ iff some program of length at most $s$ produces $x$
+  within $t$ steps; (b) $C^{t'}_U(x) \le C^t_U(x)$; (c) $C_U(x) \le
+  C^t_U(x)$; (d) if $C^t_U(x) < \infty$ then $C^t_U(x) \le t$.
+\end{lemma}
+\begin{proof}
+  \leanok
+  Parts (a)--(c) unfold the minimum. Part (d) is input locality: a run of at
+  most $t$ steps reads at most the first $t$ program bits, so the program can
+  be truncated.
+\end{proof}
+
+\begin{theorem}[Invariance under simulation]
+  \label{thm:meta-kolmogorov-invariance}
+  \lean{Complexity.TM.Simulates.plainKolmogorovComplexity_le_add,
+    Complexity.TM.PolynomialTimeOverhead.kolmogorov_transfer}
+  \leanok
+  \uses{def:kolmogorov, def:simulates}
+  Suppose $U$ simulates $M$ through a compiler $\gamma$ with
+  $|\gamma(p)| \le |p| + c$. Then (a) $C_U(x) \le C_M(x) + c$ for all $x$;
+  and (b) if the simulation also runs within a polynomially bounded clock
+  transformation, there are constants $a, k$ such that
+  $C^t_M(x) \le s$ implies $C^{a(s+t+1)^k}_U(x) \le s + c$.
+\end{theorem}
+\begin{proof}
+  \leanok
+  Compile a witnessing program and apply the simulation's output
+  preservation, and in (b) its clock bound.
+\end{proof}
+
+\begin{theorem}[Consequences of universality]
+  \label{thm:meta-universal-kolmogorov}
+  \lean{Complexity.TM.IsUniversal.plainKolmogorovComplexity_ne_top,
+    Complexity.TM.IsEfficientlyUniversal.timeBoundedKolmogorovComplexity_printer}
+  \leanok
+  \uses{def:kolmogorov, def:universal}
+  (a) If $U$ is universal, then $C_U(x) < \infty$ for every $x$. (b) If $U$
+  is efficiently universal, there are constants $c, a, k$ such that for every
+  $x$ and every $t \ge a(2|x|+3)^k$, $C^t_U(x) \le |x| + c$.
+\end{theorem}
+\begin{proof}
+  \leanok
+  \uses{thm:meta-kolmogorov-invariance}
+  Apply universality to the fixed linear-time machine copying its input to
+  its output.
+\end{proof}
+
+\begin{corollary}[Kolmogorov complexity relative to the fixed UTM]
+  \label{cor:meta-utm-kolmogorov}
+  \uses{def:kolmogorov, thm:utm}
+  For the concrete universal machine $\mathtt{utmTM}$: every string has finite
+  plain complexity, and there are constants $c, a, k$ with
+  $C^t_{\mathtt{utmTM}}(x) \le |x| + c$ whenever $t \ge a(2|x|+3)^k$.
+\end{corollary}
+\begin{proof}
+  \uses{thm:meta-universal-kolmogorov, thm:utm}
+  Instantiate Theorem~\ref{thm:meta-universal-kolmogorov} with
+  \texttt{utmTM\_isUniversal} and \texttt{utmTM\_isEfficientlyUniversal}. This
+  is a one-line application that has not yet been stated as a named
+  declaration.
+\end{proof}
+
+\begin{theorem}[Finite incompressibility]
+  \label{thm:meta-incompressibility}
+  \lean{Complexity.TM.card_timeBoundedStrictlyCompressibleStrings_le,
+    Complexity.TM.eventProb_timeBoundedStrictlyCompressibleStrings_le,
+    Complexity.TM.exists_timeBoundedKolmogorovComplexity_ge}
+  \leanok
+  \uses{def:kolmogorov}
+  For every machine $U$, length $n$, clock $t$ and threshold $r$: at most
+  $2^r - 1$ strings $x \in \{0,1\}^n$ satisfy $C^t_U(x) < r$, so their
+  uniform probability is at most $(2^r - 1)/2^n$; and if $r \le n$, some
+  $x \in \{0,1\}^n$ has $C^t_U(x) \ge r$.
+\end{theorem}
+\begin{proof}
+  \leanok
+  Deterministic output uniqueness injects the compressible strings into the
+  $2^r - 1$ programs of length below $r$.
+\end{proof}
+
+\begin{theorem}[Noncomputability of plain complexity]
+  \label{thm:meta-kolmogorov-noncomputable}
+  \uses{def:kolmogorov, def:universal, def:computable}
+  \notready
+  For a universal machine $U$, the map $x \mapsto C_U(x)$ is not computable,
+  and $\{x : C_U(x) \ge |x|\}$ contains no infinite computably enumerable
+  subset. (The bounded measures $C^t_U$ are decidable and are unaffected.)
+\end{theorem}
+\begin{proof}
+  The Berry-paradox argument. It needs a formal halting or partial-computation
+  interface, which the library does not yet state.
+\end{proof}
+
+\begin{definition}[Random-access descriptions, $\mathrm{Kt}$ and $\mathrm{KT}$]
+  \label{def:meta-kt}
+  \uses{def:kolmogorov, def:universal}
+  \notready
+  Levin's $\mathrm{Kt}_U(x) = \min\{|p| + \lceil \log_2 t \rceil : U
+  \text{ produces } x \text{ on } p \text{ within } t \text{ steps}\}$, and
+  the random-access measure $\mathrm{KT}_U(x) = \min\{|d| + t\}$ over
+  descriptions $d$ from which an indexed-bit evaluator answers every query
+  ``what is bit $i$ of $x$?'' (including a fixed end-marker convention) within
+  $t$ steps. This requires an explicit random-access evaluator model and an
+  efficient universal evaluator for it. The associated problems are $\cc{MKtP}$
+  and $\cc{MKTP}$ with a threshold, their search versions, and gap promise
+  problems.
+\end{definition}
+
+\begin{theorem}[Upper bounds for $\cc{MKTP}$ and $\cc{MKtP}$]
+  \label{thm:meta-kt-upper}
+  \uses{def:meta-kt, def:NP, def:EXP}
+  \notready
+  $\cc{MKTP} \in \cc{NP}$ and $\cc{MKtP} \in \cc{EXP}$, with verifiers that run
+  the bounded universal evaluator (never a noncomputable minimization), and
+  the corresponding total upper bounds and counting bounds for $\mathrm{Kt}$
+  and $\mathrm{KT}$.
+\end{theorem}
+
+\begin{theorem}[Circuit/description bridge]
+  \label{thm:meta-circuit-description}
+  \uses{def:meta-kt, def:meta-mcsp, def:circuit}
+  \notready
+  A size-$s$ circuit for a truth table $T$ yields a $\mathrm{KT}$ description of
+  $T$ of cost polynomial in $s$; conversely a bounded description of $T$ can be
+  unrolled into a circuit with an explicit size bound. Only the gap reductions
+  supported by these explicit inequalities are derived.
+\end{theorem}
+
+% ---------------------------------------------------------------------------
+\section{Minimum time-bounded Kolmogorov complexity}
+
+\begin{definition}[$\cc{MINKT}$]
+  \label{def:meta-minkt}
+  \lean{Complexity.MINKT, Complexity.MINKT.Instance}
+  \leanok
+  \uses{def:kolmogorov, def:pair, def:language}
+  Fix a machine $U$ and a threshold $r \colon \mathbb{N} \to \mathbb{N}$. An
+  instance $(x, 1^t)$ is encoded as $\mathrm{pair}(x, 1^t)$, and
+  $\cc{MINKT}(U, r)$ is the language of canonical codes with the strict
+  inequality $C^t_U(x) < r(|x|)$. Malformed strings are no-instances.
+\end{definition}
+
+\begin{definition}[$\cc{GapMINKT}$]
+  \label{def:meta-gapminkt}
+  \lean{Complexity.GapMINKT, Complexity.GapMINKT.Parameters}
+  \leanok
+  \uses{def:kolmogorov, def:promise, def:meta-minkt}
+  Parameters are a description loss $\sigma(n, s)$ and a clock blow-up
+  $\tau(n, t)$, required to be widening ($\sigma(n,s) \ge s$ and
+  $\tau(n,t) \ge t$). On canonical instances $(x, 1^t, 1^s)$ the promise
+  $\cc{GapMINKT}(U, \sigma, \tau)$ has yes side $C^t_U(x) \le s$ and no side
+  $C^{\tau(|x|,t)}_U(x) > \sigma(|x|, s)$; malformed strings lie outside the
+  promise. The exact logarithmic variant of Hirahara 2022 is
+  Definition~\ref{def:avg-gapminkt-log}.
+\end{definition}
+
+\begin{theorem}[Conditional $\cc{NP}$ membership]
+  \label{thm:meta-minkt-np-conditional}
+  \lean{Complexity.MINKT.mem_NP_of_pairLang_mem_P,
+    Complexity.GapMINKT_mem_PromiseNP_of_pairLang_mem_P}
+  \leanok
+  \uses{def:meta-minkt, def:meta-gapminkt, def:pairlang, def:P, def:NP,
+    def:promise}
+  (a) Let $R_{U,r}(\mathrm{pair}(x,1^t), p)$ hold when $|p| < r(|x|)$ and $U$
+  produces $x$ on $p$ within $t$ steps. If $r$ is polynomially bounded and
+  $\mathrm{pairLang}(R_{U,r}) \in \cc{P}$, then $\cc{MINKT}(U, r) \in
+  \cc{NP}$. (b) Let $Y_U(\mathrm{pair}(\mathrm{pair}(x,1^t),1^s), p)$ hold
+  when $|p| \le s$ and $U$ produces $x$ on $p$ within $t$ steps. For widening
+  parameters, if $\mathrm{pairLang}(Y_U) \in \cc{P}$, then
+  $\cc{GapMINKT}(U, \sigma, \tau) \in \cc{PromiseNP}$.
+\end{theorem}
+\begin{proof}
+  \leanok
+  Both witness relations characterize the yes-instances and are polynomially
+  balanced (\texttt{MINKT.programWitnessRelation\_polyBalanced}; the
+  $\cc{GapMINKT}$ relation is linearly balanced because $s$ is in unary), so the
+  generic guess-and-verify construction \texttt{NP.mem\_NP\_of\_FNP} applies.
+  The only remaining premise is the polynomial-time verifier.
+\end{proof}
+
+\begin{lemma}[Search to decision for $\cc{GapMINKT}$]
+  \label{lem:meta-gapminkt-search}
+  \lean{Complexity.GapMINKT_solvedBy_decisionOfSearch}
+  \leanok
+  \uses{def:meta-gapminkt}
+  Let the parameters be widening with $\sigma(n, \cdot)$ monotone. If a search
+  map $A$ returns, on every $(x, 1^t)$ with $C^t_U(x) < \infty$, a program of
+  length at most $\sigma(|x|, C^t_U(x))$ that produces $x$ within
+  $\tau(|x|, t)$ steps, then the decision rule ``accept $(x,1^t,1^s)$ iff
+  $A(x,1^t)$ has length at most $\sigma(|x|,s)$ and produces $x$ within
+  $\tau(|x|,t)$ steps'' solves $\cc{GapMINKT}(U, \sigma, \tau)$.
+\end{lemma}
+\begin{proof}
+  \leanok
+  On yes-instances monotonicity of $\sigma$ bounds the returned length; on
+  no-instances no program meets the relaxed resources at all.
+\end{proof}
+
+\begin{theorem}[$\cc{MINKT} \in \cc{NP}$ and $\cc{GapMINKT} \in \cc{PromiseNP}$]
+  \label{thm:meta-minkt-in-np}
+  \uses{def:meta-minkt, def:meta-gapminkt, def:NP, def:promise}
+  For every fixed machine $U$ (in particular $\mathtt{utmTM}$) and every
+  polynomially bounded threshold $r$ computable in polynomial time,
+  $\cc{MINKT}(U, r) \in \cc{NP}$; and $\cc{GapMINKT}(U, \sigma, \tau) \in
+  \cc{PromiseNP}$ for all widening parameters.
+\end{theorem}
+\begin{proof}
+  \uses{thm:meta-minkt-np-conditional}
+  Build the verifier: decode the instance, compare lengths, and simulate $U$ on
+  $p$ for $t$ steps (the clock is given in unary). Then apply
+  Theorem~\ref{thm:meta-minkt-np-conditional}.
+\end{proof}
+
+% ---------------------------------------------------------------------------
+\section{The minimum circuit size problem}
+
+\begin{definition}[$\cc{MCSP}$]
+  \label{def:meta-mcsp}
+  \lean{Complexity.MCSP, Complexity.MCSP.Instance}
+  \leanok
+  \uses{def:circuit, def:bitstring, def:pair, def:language}
+  An instance consists of an arity $n$, a truth table $T \in \{0,1\}^{2^n}$
+  and a threshold $s$, encoded canonically as
+  $\mathrm{pair}(\mathrm{bin}(n), \mathrm{pair}(\mathrm{bin}(s), T))$ with
+  minimal binary naturals; strings that are not canonical codes (including
+  tables of the wrong length) are no-instances. For $n > 0$ the instance is a
+  yes-instance iff some circuit of fan-in-two $\{\wedge,\vee\}$ gates with
+  free negation flags on gate inputs and at most $s$ gates (input vertices
+  free, the output gate counted) computes the
+  function with truth table $T$. Arity-zero instances are accepted at every
+  threshold (the size-zero convention of circuit families).
+\end{definition}
+
+\begin{theorem}[$\cc{MCSP}$ semantics and short witnesses]
+  \label{thm:meta-mcsp-witness}
+  \lean{Complexity.MCSP.mem_encode_iff_minimumSize_le,
+    Complexity.MCSP.mem_encode_iff_sizeComplexity_le,
+    Complexity.MCSP.mem_MCSP_iff_exists_rawWitnessRelation,
+    Complexity.MCSP.rawWitnessRelation_polyBalanced}
+  \leanok
+  \uses{def:meta-mcsp}
+  (a) A canonical code lies in $\cc{MCSP}$ iff the minimum circuit size of its
+  table is at most its threshold; at positive arity this is the library's
+  circuit size complexity over the fan-in-two $\{\wedge,\vee\}$ basis. (b) There
+  is a relation $R$ (a canonical serialized circuit, accepted by an executable
+  decoder and evaluator that checks topology, size and every truth-table row,
+  after capping the threshold at $(2^n+2)^2$) such that $x \in \cc{MCSP}$ iff
+  $\exists w\, R(x, w)$, and $R$ is polynomially balanced in the encoded input
+  length.
+\end{theorem}
+\begin{proof}
+  \leanok
+  Serialize a minimum circuit; the cap is an unconditional circuit-size bound
+  for every $n$-ary function, so capping preserves membership and keeps
+  witnesses polynomial in $|x| \ge 2^n$.
+\end{proof}
+
+\begin{theorem}[Shannon threshold window]
+  \label{thm:meta-mcsp-shannon}
+  \lean{Complexity.MCSP.shannon_threshold_window}
+  \leanok
+  \uses{def:meta-mcsp}
+  For every $n \ge 16$: some $f \colon \{0,1\}^n \to \{0,1\}$ has its canonical
+  instance at threshold $\lfloor 2^n/(5n) \rfloor$ outside $\cc{MCSP}$, while
+  for every $f$ the canonical instance at threshold $\lfloor 18 \cdot 2^n / n
+  \rfloor$ lies in $\cc{MCSP}$.
+\end{theorem}
+\begin{proof}
+  \leanok
+  Transport the library's Shannon counting lower bound and its explicit
+  $18 \cdot 2^n/n$ upper bound through the canonical truth-table constructor.
+  This locates hard truth tables; it is not a lower bound for deciding
+  $\cc{MCSP}$.
+\end{proof}
+
+\begin{theorem}[$\cc{MCSP} \in \cc{NP}$]
+  \label{thm:meta-mcsp-np}
+  \uses{def:meta-mcsp, def:NP}
+  $\cc{MCSP} \in \cc{NP}$.
+\end{theorem}
+\begin{proof}
+  \uses{thm:meta-mcsp-witness}
+  Implement the circuit decoder and evaluator of
+  Theorem~\ref{thm:meta-mcsp-witness}(b) as a machine running in time
+  polynomial in the truth-table length $N = 2^n$, so that
+  $\mathrm{pairLang}(R) \in \cc{P}$; then apply the guess-and-verify
+  construction.
+\end{proof}
+
+\begin{definition}[$\cc{GapMCSP}$]
+  \label{def:meta-gapmcsp}
+  \lean{Complexity.GapMCSP.problem, Complexity.GapMCSP.sliceProblem,
+    Complexity.GapMCSP.rawSliceProblem}
+  \leanok
+  \uses{def:meta-mcsp, def:promise}
+  Three promise formulations, all with yes side ``minimum size at most the yes
+  threshold'' and no side ``minimum size strictly above the no threshold'':
+  (a) canonical instances with a widening relaxation $\rho(n, s) \ge s$ of the
+  encoded threshold; (b) slices $\cc{GapMCSP}[s_{\mathrm{yes}},
+  s_{\mathrm{no}}]$ with arity-indexed thresholds $s_{\mathrm{yes}} \le
+  s_{\mathrm{no}}$, the encoded threshold being forced to
+  $s_{\mathrm{yes}}(n)$; (c) the raw slice on bare truth tables of length
+  exactly $N = 2^n$, as in the magnification literature. Adding and erasing the
+  canonical metadata are proved to be side-preserving maps between (b) and (c)
+  in both directions
+  (\texttt{GapMCSP.rawSliceProblem\_mapReducesVia\_rawToCanonical},
+  \texttt{GapMCSP.sliceProblem\_mapReducesVia\_canonicalToRaw}); that these
+  maps are in $\cc{FP}$ is not yet proved.
+\end{definition}
+
+\begin{definition}[$\cc{SuccinctMCSP}$]
+  \label{def:meta-succinct-mcsp}
+  \lean{Complexity.SuccinctMCSP, Complexity.SuccinctMCSP.Instance}
+  \leanok
+  \uses{def:circuit, def:pair, def:language}
+  An instance is an arity $n$, a finite list of samples $(z_i, b_i) \in
+  \{0,1\}^n \times \{0,1\}$ (repetitions and contradictions allowed) and a
+  threshold $s$, with a canonical total codec. It is a yes-instance iff some
+  fan-in-two $\{\wedge,\vee\}$ circuit with at most $s$ gates satisfies
+  $C(z_i) = b_i$ for every sample (for $n = 0$: some constant is consistent
+  with every sample).
+\end{definition}
+
+\begin{theorem}[Conditional $\cc{NP}$ membership of $\cc{SuccinctMCSP}$]
+  \label{thm:meta-succinct-np-conditional}
+  \lean{Complexity.SuccinctMCSP.mem_NP_of_pairLang_mem_P}
+  \leanok
+  \uses{def:meta-succinct-mcsp, def:pairlang, def:P, def:NP}
+  Let $R$ be the normalized raw-circuit witness relation of $\cc{SuccinctMCSP}$
+  (decided by the executable checker \texttt{SuccinctMCSP.verifyRawWitness}). If
+  $\mathrm{pairLang}(R) \in \cc{P}$, then $\cc{SuccinctMCSP} \in \cc{NP}$.
+\end{theorem}
+\begin{proof}
+  \leanok
+  After a linear sampled-DNF normalization of the threshold, $R$ characterizes
+  membership and is polynomially balanced; apply
+  \texttt{NP.mem\_NP\_of\_FNP}.
+\end{proof}
+
+\begin{theorem}[$\cc{SuccinctMCSP} \in \cc{NP}$]
+  \label{thm:meta-succinct-np}
+  \uses{def:meta-succinct-mcsp, def:NP}
+  $\cc{SuccinctMCSP} \in \cc{NP}$.
+\end{theorem}
+\begin{proof}
+  \uses{thm:meta-succinct-np-conditional}
+  Realize \texttt{SuccinctMCSP.verifyRawWitness} by a polynomial-time machine.
+\end{proof}
+
+\begin{definition}[Further $\cc{MCSP}$ variants]
+  \label{def:meta-mcsp-variants}
+  \uses{def:meta-mcsp, def:meta-gapmcsp}
+  Search-$\cc{MCSP}$; linear-overhead transport of minimum size to other gate
+  conventions; partial-function $\cc{MCSP}$ (truth tables with don't-care
+  entries); formula, branching-program and oracle-circuit size versions; and
+  implicit variants whose truth table is given by a circuit. Each keeps its
+  qualifiers in its name, and results about a variant are never surfaced as
+  statements about total $\cc{MCSP}$, whose $\cc{NP}$-hardness is open.
+\end{definition}
+
+% ---------------------------------------------------------------------------
+\section{Anti-checkers and hardness magnification}
+
+The selected headline is Oliveira--Pich--Santhanam, \emph{Hardness
+Magnification Near State-of-the-Art Lower Bounds}, Theory of Computing 2021,
+Theorem~1.4 (CCC 2019, Theorem~4), stated over the raw $N = 2^n$-bit
+$\cc{GapMCSP}$ convention.
+
+\begin{definition}[Anti-checker]
+  \label{def:meta-antichecker}
+  \lean{Complexity.AntiChecker.IsFor}
+  \leanok
+  \uses{def:circuit}
+  For $f \colon \{0,1\}^n \to \{0,1\}$ with $n > 0$ and a threshold $s$, a
+  finite list $L \subseteq \{0,1\}^n$ is an anti-checker for $(f, s)$ if every
+  fan-in-two $\{\wedge,\vee\}$ circuit with at most $s$ gates disagrees with $f$
+  on some input of $L$.
+\end{definition}
+
+\begin{theorem}[Anti-checkers are rejected $\cc{SuccinctMCSP}$ instances]
+  \label{thm:meta-antichecker-succinct}
+  \lean{Complexity.AntiChecker.encode_not_mem_iff_isFor}
+  \leanok
+  \uses{def:meta-antichecker, def:meta-succinct-mcsp}
+  $L$ is an anti-checker for $(f, s)$ iff the canonical $\cc{SuccinctMCSP}$
+  instance with samples $\{(z, f(z)) : z \in L\}$ and threshold $s$ is not in
+  $\cc{SuccinctMCSP}$.
+\end{theorem}
+\begin{proof}
+  \leanok
+  Both sides say that no small circuit agrees with $f$ on every listed input.
+\end{proof}
+
+\begin{definition}[Magnification parameters and lower-bound hypothesis]
+  \label{def:meta-magnification-params}
+  \lean{Complexity.PositiveRationalScale,
+    Complexity.GapMCSP.Magnification.Parameters.rawProblem,
+    Complexity.GapMCSP.Magnification.circuitBound,
+    Complexity.GapMCSP.Magnification.DenominatorConstant.HasMagnificationLowerBoundHypothesis}
+  \leanok
+  \uses{def:meta-gapmcsp, def:meta-promise-size}
+  For a positive rational $\beta$ and an integer $c \ge 1$, the raw problem is
+  the raw $\cc{GapMCSP}$ slice with yes threshold $\lfloor 2^{\lfloor \beta n
+  \rfloor}/(cn) \rfloor$ and no threshold $2^{\lfloor \beta n \rfloor}$. For a
+  positive rational $\varepsilon$, the size bound is $2^{n + \lceil
+  \varepsilon n \rceil}$ at input length $N = 2^n$ (the rounded
+  $N^{1+\varepsilon}$). The hypothesis $\mathrm{LB}(c)$ asserts: there is
+  $\varepsilon > 0$ such that for every sufficiently small positive $\beta$,
+  the raw problem at $(\beta, c)$ is not in
+  $\cc{PromiseEventuallySIZE}(N^{1+\varepsilon})$. The quantifier over small
+  $\beta$ is a filter at zero from above, kept separate from the eventual
+  quantifier over input lengths.
+\end{definition}
+
+\begin{theorem}[Approximate counters assemble into anti-checker generators]
+  \label{thm:meta-counters-to-generators}
+  \lean{Complexity.GapMCSP.Magnification.AntiCheckerLemma.hasGenerators_of_hasApproximateCounterFamilies}
+  \leanok
+  \uses{def:meta-antichecker, def:meta-magnification-params, def:circuit}
+  Let \emph{counter families} mean: there is $k$ such that for every positive
+  rational $\beta$ and all large $n$ there are circuits of size at most
+  $2^{\lceil k \beta n \rceil}$, one per round of the construction, that
+  approximate within relative precision $8n$ the number of small-circuit
+  descriptions (size at most $\lfloor 2^{\lfloor \beta n
+  \rfloor}/(10n)\rfloor$) consistent with a labeled sample prefix. Let
+  \emph{generators} mean: there is $k'$ such that for every sufficiently small
+  positive $\beta$ and all large $n$ there is a circuit of size at most $2^n
+  \cdot 2^{\lceil k' \beta n \rceil}$ mapping a $2^n$-bit truth table to
+  $2^{\lfloor 10 \beta n \rfloor}$ inputs that form an anti-checker for $(f,
+  \lfloor 2^{\lfloor \beta n \rfloor}/(10n)\rfloor)$ whenever $f$ has minimum
+  circuit size above $2^{\lfloor \beta n \rfloor}$. Then counter families
+  imply generators.
+\end{theorem}
+\begin{proof}
+  \leanok
+  Evaluate every candidate counter in parallel, select a minimizing extension
+  by a keyed tournament, iterate the rounds, and zero-pad; each round shrinks
+  the surviving description set by a certified factor, so the published sample
+  budget eliminates every small circuit. Exact gate accounting gives $k' = k +
+  32$. No complexity-class assumption is used.
+\end{proof}
+
+\begin{theorem}[Oliveira--Pich--Santhanam Anti-Checker Lemma]
+  \label{thm:meta-antichecker-lemma}
+  \uses{def:meta-antichecker, def:meta-magnification-params, def:NP,
+    def:PPoly}
+  If $\cc{NP} \subseteq \cc{P/poly}$, then anti-checker generators exist in
+  the sense of Theorem~\ref{thm:meta-counters-to-generators} (revised journal
+  Lemma~4.1).
+\end{theorem}
+\begin{proof}
+  \uses{thm:meta-counters-to-generators}
+  The missing step is to derive counter families from $\cc{NP} \subseteq
+  \cc{P/poly}$: circuitize Stockmeyer-style relative counting with a SAT oracle
+  and prove the $2^{O(\beta n)}$ size bound. Formalized ingredients include
+  affine hashing with exact pairwise uniformity, the occupancy gap and
+  majority amplification, Cartesian-power accuracy boosting, seed hardwiring,
+  and inlining of a polynomial-size SAT circuit oracle under $\cc{NP} \subseteq
+  \cc{P/poly}$ (\texttt{SAT.exists\_inlinedCircuitOracle\_of\_NP\_subset\_PPoly}).
+  The concrete occupancy-query program and its quantitative bound remain.
+\end{proof}
+
+\begin{theorem}[Small promise solvers under $\cc{NP} \subseteq \cc{P/poly}$]
+  \label{thm:meta-magnification-solver}
+  \uses{def:meta-magnification-params, def:NP, def:PPoly}
+  There is an integer $c \ge 1$ such that if $\cc{NP} \subseteq \cc{P/poly}$,
+  then for every positive rational $\varepsilon$ and every positive rational
+  $\beta_0$ there is a positive rational $\beta < \beta_0$ for which the raw
+  problem at $(\beta, c)$ lies in
+  $\cc{PromiseEventuallySIZE}(N^{1+\varepsilon})$.
+\end{theorem}
+\begin{proof}
+  \uses{thm:meta-antichecker-lemma, thm:meta-antichecker-succinct,
+    thm:meta-succinct-np}
+  Compose the generator, truth-table lookups at the sampled inputs, and a small
+  circuit for $\cc{SuccinctMCSP}$ (available from $\cc{NP} \subseteq
+  \cc{P/poly}$ once $\cc{SuccinctMCSP} \in \cc{NP}$), tracking the sample
+  encoding, fan-out, threshold transformation, and all three size terms.
+\end{proof}
+
+\begin{theorem}[Hardness magnification for $\cc{GapMCSP}$]
+  \label{thm:meta-magnification}
+  \uses{def:meta-magnification-params, def:NP, def:PPoly}
+  There is an integer $c \ge 1$ such that $\mathrm{LB}(c)$ implies
+  $\cc{NP} \not\subseteq \cc{P/poly}$.
+\end{theorem}
+\begin{proof}
+  \uses{thm:meta-magnification-solver}
+  Contrapositive of Theorem~\ref{thm:meta-magnification-solver}. Matching the
+  paper's statement also needs a constant-overhead transport from its
+  arbitrary fan-in-two basis to the library's basis; exact basis relabelings
+  are already proved to preserve promise size classes.
+\end{proof}
+
+\begin{theorem}[Frontier comparison]
+  \label{thm:meta-magnification-comparison}
+  \uses{def:meta-magnification-params, def:meta-gapmcsp}
+  A single statement placing the strongest known unconditional lower bound for
+  the raw $\cc{GapMCSP}$ family next to the antecedent of
+  Theorem~\ref{thm:meta-magnification}, with the remaining exponent and gap
+  computed explicitly; followed by further published frontiers (formula and
+  probabilistic-formula magnification for $\cc{GapMCSP}$ and $\cc{GapMKtP}$,
+  and streaming magnification for $\cc{MCSP}[s]$).
+\end{theorem}
+\begin{proof}
+  \uses{thm:meta-magnification}
+  Requires the matching lower bounds from the circuit lower-bound chapter and,
+  for $\cc{GapMKtP}$, Definition~\ref{def:meta-kt}.
+\end{proof}
+
+\begin{theorem}[Locality barrier]
+  \label{thm:meta-locality-barrier}
+  \uses{def:meta-magnification-params, def:circuit}
+  \notready
+  For a selected magnification frontier: the known lower-bound technique for
+  the neighbouring problem extends to circuits with small-fan-in local oracle
+  gates, while the magnifying problem has such local-oracle circuits of the
+  size required by the antecedent; hence that technique cannot establish the
+  antecedent. Locality is a mathematical property of circuits and reductions,
+  not of proofs. Local oracle circuits are not yet defined.
+\end{theorem}
+
+% ---------------------------------------------------------------------------
+\section{Codes}
+
+\begin{definition}[Hamming geometry and block codes]
+  \label{def:meta-hamming}
+  \lean{Complexity.BooleanHamming.distance, Complexity.BooleanHamming.ball,
+    Complexity.BooleanCode, Complexity.BooleanCode.HasMinimumDistance,
+    Complexity.BooleanCode.repetitionCode}
+  \leanok
+  Hamming distance and balls on $\{0,1\}^n$; a block code is an injective
+  encoding $\{0,1\}^k \to \{0,1\}^m$, with rate $k/m$ and a minimum-distance
+  contract. The repetition code is the first concrete $\mathrm{GF}(2)$-linear
+  instance, with exact rate and distance.
+\end{definition}
+
+\begin{theorem}[Packing and Gilbert--Varshamov bounds]
+  \label{thm:meta-hamming-bounds}
+  \lean{Complexity.BooleanHamming.packing_bound,
+    Complexity.BooleanHamming.gilbertVarshamov_bound}
+  \leanok
+  \uses{def:meta-hamming}
+  If $C \subseteq \{0,1\}^n$ has pairwise distances at least $d$ and $2r < d$,
+  then $|C| \cdot |B(r)| \le 2^n$. For every $n, d$ there is such a $C$ with
+  $2^n \le |C| \cdot |B(d-1)|$, where $|B(r)| = \sum_{i \le r}\binom{n}{i}$.
+\end{theorem}
+\begin{proof}
+  \leanok
+  Balls of radius $r$ are disjoint; a maximum-cardinality separated code covers
+  the cube by radius-$(d-1)$ balls.
+\end{proof}
+
+\begin{theorem}[List-decoding bridge]
+  \label{thm:meta-list-decoding}
+  \lean{Complexity.BooleanListCode.mem_candidates_and_card_le_of_half_add_margin}
+  \leanok
+  \uses{def:meta-hamming}
+  Let a code with an $L$-element decoder be list-decodable up to relative
+  distance $1/2 - \varepsilon$. If a word $w$ agrees with the encoding of $m$ on
+  at least a $1/2 + \varepsilon$ fraction of coordinates, then $m$ belongs to the
+  decoder's candidate set for $w$, which has at most $L$ elements.
+\end{theorem}
+\begin{proof}
+  \leanok
+  Agreement and relative distance are complementary.
+\end{proof}
+
+\begin{definition}[Efficiently list-decodable code families]
+  \label{def:meta-list-code-family}
+  \lean{Complexity.BooleanListCodeFamily,
+    Complexity.BooleanListCodeFamily.IsListDecodableAtInverseAccuracy,
+    Complexity.BooleanListCodeFamily.PolynomialParameterBounds,
+    Complexity.BooleanListCodeFamily.UniformPolynomialTimeRealization}
+  \leanok
+  \uses{def:meta-hamming, def:tm, def:produces}
+  A family of list codes indexed by message length $k$ and inverse accuracy
+  $q$, with codeword coordinates in $\{0,1\}^{\ell(k,q)}$. It is list-decodable
+  if each code is list-decodable up to relative distance $1/2 - 1/q$ for $q \ge
+  2$; it has polynomial parameters if $2^{\ell(k,q)}$ is polynomial in $k + q$
+  and the list size is polynomial in $q$; and a uniform realization is one
+  encoder machine and one full-list decoder machine that work for all
+  parameters within a common polynomial time bound.
+\end{definition}
+
+\begin{theorem}[An explicit efficiently list-decodable family]
+  \label{thm:meta-explicit-code-family}
+  \uses{def:meta-list-code-family}
+  There is a family (for instance Reed--Solomon concatenated with Hadamard)
+  that is list-decodable, has polynomial parameters, and has a uniform
+  polynomial-time realization.
+\end{theorem}

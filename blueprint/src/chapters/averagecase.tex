@@ -1,0 +1,682 @@
+\chapter{Average-case complexity and the Hirahara program}
+\label{chap:averagecase}
+
+This chapter formalizes average-case complexity through explicit finite
+ensembles and errorless heuristics, and follows Hirahara's metacomplexity route
+toward excluding Impagliazzo's Heuristica, that is, toward proving $\cc{P} =
+\cc{NP}$ if and only if $\cc{DistNP} \subseteq \cc{AvgP}$. Formalized so far:
+finite and dyadic ensembles, errorless heuristics and $\cc{AvgP}$, Hirahara's
+auxiliary-unary distribution with exact $\cc{MINKT}$ probabilities, the
+dense-random-string extraction lemma, a finite Nisan--Wigderson reconstruction
+carried through list decoding to a Kolmogorov upper bound, conditional
+complexity and computational depth, symmetry of information as a named
+hypothesis, and a finite conditional theorem deriving $\cc{P} = \cc{NP}$ from
+symmetry of information together with $\cc{NP}$-hardness of a conditional gap
+problem; one hypothesis of that theorem is currently stated too strongly to be
+satisfiable (Theorem~\ref{thm:avg-soi-collapse}). The reconstruction results
+assume an efficiently list-decodable code family and, in the oracle form, an
+efficiently universal oracle machine; neither is instantiated in the library. Samplable ensembles and $\cc{DistNP}$ are not
+yet defined, so none of the headline equivalences is stated yet; they are the
+main open direction.
+
+% ---------------------------------------------------------------------------
+\section{Ensembles and errorless heuristics}
+
+\begin{definition}[Finite and dyadic ensembles]
+  \label{def:avg-ensemble}
+  \lean{Complexity.FiniteEnsemble, Complexity.DyadicEnsemble,
+    Complexity.DyadicEnsemble.toFinite}
+  \leanok
+  A finite ensemble assigns to each parameter $n$ a nonempty finite seed space
+  $S_n$ and a sample map $S_n \to \alpha$; the distribution at $n$ is the
+  pushforward of the uniform distribution on $S_n$, with multiplicity. A dyadic
+  ensemble is the special case $S_n = \{0,1\}^{\ell(n)}$, and its embedding into
+  finite ensembles preserves every event probability. No sample map is called
+  efficient until a machine realizes it (Definition~\ref{def:avg-distnp}).
+  Samples need not have length $n$.
+\end{definition}
+
+\begin{lemma}[Independent repetition]
+  \label{lem:avg-repetition}
+  \lean{Complexity.uniformAtLeastOneProbability_eq_one_sub_pow,
+    Complexity.half_le_uniformAtLeastOneProbability_of_singleDrawLower}
+  \leanok
+  If an event has probability $p$ under a uniform finite distribution, the
+  probability that one of $k$ independent draws hits it is exactly
+  $1 - (1-p)^k$; in particular it is at least $1/2$ whenever $kp' \ge 1$ for
+  some lower bound $p' \le p$.
+\end{lemma}
+\begin{proof}
+  \leanok
+  Count the complementary product event; then use $1 - (1-p)^k \ge kp/(1+kp)$.
+\end{proof}
+
+\begin{definition}[Errorless heuristics and $\cc{AvgP}$]
+  \label{def:avg-avgp}
+  \lean{Complexity.HeuristicAnswer, Complexity.HeuristicAlgorithm.IsErrorlessFor,
+    Complexity.DistributionalProblem, Complexity.AvgPAt, Complexity.AvgP}
+  \leanok
+  \uses{def:avg-ensemble, def:language, def:FP}
+  A heuristic answers accept, reject, or fail; it is errorless for $L$ if it
+  never accepts outside $L$ and never rejects inside $L$. A distributional
+  problem is a language with a finite ensemble of input strings.
+  $\cc{AvgP}_\delta$ consists of the distributional problems having an errorless
+  heuristic whose three-valued output is computable in $\cc{FP}$ and whose
+  failure probability on slice $n$ is at most $\delta(n)$ for every $n$.
+  $\cc{AvgP} = \bigcap_{c} \cc{AvgP}_{n^{-c}}$ (with $\max(1,n)^{-c}$ at
+  $n = 0$): for each $c$ there is a possibly different polynomial-time errorless
+  heuristic failing with probability at most $n^{-c}$. This is not the
+  single-scheme formulation in which the heuristic receives $1/\delta$ as an
+  input; relating the two is part of Definition~\ref{def:avg-heurp}.
+\end{definition}
+
+\begin{proposition}[Basic facts about errorless heuristics]
+  \label{prop:avg-avgp-basic}
+  \lean{Complexity.DistributionalProblem.mem_AvgP_of_decision,
+    Complexity.HeuristicAlgorithm.IsErrorlessFor.one_sub_languageProbability_sub_failure_le_reject}
+  \leanok
+  \uses{def:avg-avgp}
+  (a) If $d$ decides the language of a distributional problem and
+  $x \mapsto d(x)$ is in $\cc{FP}$, the problem is in $\cc{AvgP}$, for every
+  ensemble. (b) An errorless heuristic for $L$ rejects with probability at least
+  $1 - \Pr[L] - \Pr[\mathrm{fail}]$ on every slice.
+\end{proposition}
+\begin{proof}
+  \leanok
+  (a) Use the never-failing heuristic. (b) Errorlessness makes rejection
+  exactly the complement of $L$ minus failures.
+\end{proof}
+
+\begin{definition}[Samplable ensembles and $\cc{DistNP}$]
+  \label{def:avg-distnp}
+  \uses{def:avg-ensemble, def:avg-avgp, def:NP, def:FP}
+  An ensemble is polynomial-time samplable when a single machine computes its
+  sample map from a polynomially long seed in time polynomial in $n$, with
+  closure under polynomial-time maps, pairing, padding, products and
+  efficiently chosen mixtures. $\cc{DistNP}$ consists of pairs $(L, D)$ with
+  $L \in \cc{NP}$ and $D$ polynomial-time samplable. Levin-style domination is
+  kept as a separate notion if needed.
+\end{definition}
+
+\begin{definition}[Error-prone heuristics and $\cc{HeurP}$]
+  \label{def:avg-heurp}
+  \uses{def:avg-avgp}
+  Heuristics that may answer incorrectly on a set of bounded probability,
+  $\cc{Heur}_\delta\cc{P}$ and $\cc{HeurP}$, the single-scheme versions of
+  $\cc{AvgP}$ and $\cc{HeurP}$, randomized variants, and the standard
+  amplification and inclusion lemmas.
+\end{definition}
+
+\begin{theorem}[The easy direction]
+  \label{thm:avg-easy-direction}
+  \uses{def:avg-distnp, def:avg-avgp, def:P, def:NP}
+  \notready
+  If $\cc{P} = \cc{NP}$, then $\cc{DistNP} \subseteq \cc{AvgP}$.
+\end{theorem}
+\begin{proof}
+  \uses{prop:avg-avgp-basic}
+  Promote a $\cc{P}$ decider to a function in $\cc{FP}$ and apply
+  Proposition~\ref{prop:avg-avgp-basic}(a). The bridge from a $\cc{P}$ language
+  witness to an $\cc{FP}$ characteristic function is not yet proved.
+\end{proof}
+
+\begin{theorem}[Excluding Heuristica]
+  \label{thm:avg-heuristica}
+  \uses{def:avg-distnp, def:avg-avgp, def:P, def:NP}
+  \notready
+  $\cc{P} = \cc{NP}$ if and only if $\cc{DistNP} \subseteq \cc{AvgP}$. This is
+  an open problem; the nontrivial direction is $\cc{P} \neq \cc{NP} \Rightarrow
+  \cc{DistNP} \not\subseteq \cc{AvgP}$. The conditional results of this chapter
+  isolate hypotheses that would imply it.
+\end{theorem}
+\begin{proof}
+  \uses{thm:avg-easy-direction}
+  One direction is Theorem~\ref{thm:avg-easy-direction}.
+\end{proof}
+
+% ---------------------------------------------------------------------------
+\section{MINKT under the auxiliary-unary distribution}
+
+\begin{definition}[Auxiliary-unary ensemble]
+  \label{def:avg-auxiliary-unary}
+  \lean{Complexity.FiniteEnsemble.auxiliaryUnary}
+  \leanok
+  \uses{def:avg-ensemble, def:pair}
+  Hirahara's 2018 distribution $D^u$: at parameter $m > 0$, choose
+  $n \in \{0, \dots, m-1\}$ uniformly and $x \in \{0,1\}^n$ uniformly, and output
+  $\mathrm{pair}(x, 1^{m-n})$. The seed space has $m \cdot 2^m$ points. The slice
+  $m = 0$ is totalized as the point $\mathrm{pair}(\epsilon, \epsilon)$, a library
+  convention.
+\end{definition}
+
+\begin{lemma}[$\cc{MINKT}$ mass under $D^u$]
+  \label{lem:avg-auxiliary-unary-minkt}
+  \lean{Complexity.FiniteEnsemble.mass_auxiliaryUnary_pair,
+    Complexity.FiniteEnsemble.probability_auxiliaryUnary_minkt_eq_average,
+    Complexity.FiniteEnsemble.probability_auxiliaryUnary_minkt_le_average_incompressibility}
+  \leanok
+  \uses{def:avg-auxiliary-unary, def:meta-minkt}
+  For $0 < m$ and $|x| = n < m$, $D^u_m$ gives $\mathrm{pair}(x, 1^{m-n})$ mass
+  $1/(m \cdot 2^n)$. For every machine $U$ and threshold $r$,
+  \[
+    \Pr_{D^u_m}[\cc{MINKT}(U,r)] = \frac{1}{m}\sum_{n<m}
+      \Pr_{x \in \{0,1\}^n}\bigl[C^{m-n}_U(x) < r(n)\bigr]
+    \le \frac{1}{m}\sum_{n<m} \frac{2^{r(n)}-1}{2^n}.
+  \]
+\end{lemma}
+\begin{proof}
+  \leanok
+  \uses{thm:meta-incompressibility}
+  Condition on the split length; retaining the $n$-bit prefix of a uniform
+  $m$-bit seed preserves prefix-event probabilities. Then apply finite
+  incompressibility at each length.
+\end{proof}
+
+\begin{theorem}[Dense-random-string extraction]
+  \label{thm:avg-dense-extraction}
+  \lean{Complexity.MINKT.auxiliaryUnary_rejectProbability_ge_average}
+  \leanok
+  \uses{def:avg-auxiliary-unary, def:avg-avgp, def:meta-minkt}
+  For every $m > 0$, every machine $U$, every threshold $r$, and every errorless
+  heuristic $A$ for $\cc{MINKT}(U, r)$,
+  \[
+    \Pr_{D^u_m}[A \text{ rejects}] \ \ge\ 1 - \frac{1}{m}\sum_{n<m}
+      \frac{2^{r(n)}-1}{2^n} - \Pr_{D^u_m}[A \text{ fails}].
+  \]
+  Thus an errorless heuristic must certify a dense set of high-complexity
+  strings.
+\end{theorem}
+\begin{proof}
+  \leanok
+  \uses{lem:avg-auxiliary-unary-minkt, prop:avg-avgp-basic}
+  Combine Proposition~\ref{prop:avg-avgp-basic}(b) with
+  Lemma~\ref{lem:avg-auxiliary-unary-minkt}.
+\end{proof}
+
+% ---------------------------------------------------------------------------
+\section{Nisan--Wigderson reconstruction}
+
+\begin{definition}[Generators and time-bounded random tests]
+  \label{def:avg-bitgenerator}
+  \lean{Complexity.BitGenerator, Complexity.BitGenerator.distinguishingAdvantage,
+    Complexity.BitGenerator.IsTimeBoundedRandomTest,
+    Complexity.BitGenerator.IsDenseTest,
+    Complexity.BitGenerator.HasLowTimeBoundedComplexity}
+  \leanok
+  \uses{def:kolmogorov}
+  A generator is any map $G \colon \{0,1\}^d \to \{0,1\}^m$ (no efficiency is
+  built in). A test $T \subseteq \{0,1\}^m$ has distinguishing advantage
+  $|\Pr_s[G(s) \in T] - \Pr_y[y \in T]|$. Relative to a machine $M$, clock $t$
+  and threshold $r$: $T$ is a random test if every $y \in T$ has $C^t_M(y) \ge
+  r$; $T$ is $\delta$-dense if $\Pr_y[y \in T] \ge \delta$; and $G$ has low
+  complexity if every output satisfies $C^t_M(G(s)) < r$.
+\end{definition}
+
+\begin{lemma}[Statistical test, hybrid, and prediction steps]
+  \label{lem:avg-test-hybrid}
+  \lean{Complexity.BitGenerator.density_le_distinguishingAdvantage_of_randomTest,
+    Complexity.BitGenerator.exists_oriented_hybridGap_ge_average,
+    Complexity.NextBitPrediction.successProbability_eq_half_add_gap}
+  \leanok
+  \uses{def:avg-bitgenerator}
+  (a) A $\delta$-dense random test has advantage at least $\delta$ against every
+  low-complexity generator. (b) If $m > 0$ and the advantage is at least
+  $\delta$, then for $T$ or its complement some adjacent pair of Yao hybrids
+  differs in acceptance probability by at least $\delta/m$. (c) Over any
+  nonempty finite background space, the predictor that outputs a uniform
+  candidate bit when the test accepts and its complement otherwise succeeds with
+  probability exactly $1/2$ plus the acceptance gain from substituting the true
+  bit for the candidate.
+\end{lemma}
+\begin{proof}
+  \leanok
+  (a) No generator output lies in $T$. (b) Telescope the hybrid gaps and
+  average. (c) Expand the two candidate fibers.
+\end{proof}
+
+\begin{definition}[Nisan--Wigderson designs and generator]
+  \label{def:avg-nw-design}
+  \lean{Complexity.NWDesign, Complexity.NWDesign.HasOverlapBudget,
+    Complexity.NWDesign.generator}
+  \leanok
+  \uses{def:avg-bitgenerator}
+  An NW design is an ordered family $S_1, \dots, S_m$ of $\ell$-element subsets
+  of $[d]$, each enumerated injectively. It has overlap budget $b$ if for every
+  $i$, $\sum_{j<i} 2^{|S_i \cap S_j|} + (m - i) \le b$ (Hirahara's weak-design
+  cost). For $f \colon \{0,1\}^\ell \to \{0,1\}$ the generator is
+  $\mathrm{NW}^f(s) = (f(s|_{S_1}), \dots, f(s|_{S_m}))$.
+\end{definition}
+
+\begin{theorem}[Finite NW reconstruction]
+  \label{thm:avg-nw-reconstruction}
+  \lean{Complexity.NWDesign.exists_fixed_reconstruction_of_randomTest,
+    Complexity.NWDesign.half_le_checkedReconstructionBatch_of_randomTest}
+  \leanok
+  \uses{def:avg-nw-design, def:avg-bitgenerator}
+  Let $m > 0$, let $\mathrm{NW}^f$ have low complexity, and let $T$ be a
+  $\delta$-dense random test for the same machine, clock and threshold, and let
+  the design have overlap budget $b$. (a) There are a polarity, a coordinate $i$
+  and fixed advice whose predictor agrees with $f$ on at least a $1/2 +
+  \delta/m$ fraction of inputs, using at most $b + (d - \ell) + 1$ stored bits.
+  (b) If $\delta > 0$, exact checking of $\lceil 2m/\delta \rceil$ uniformly
+  sampled trials finds a certificate with agreement at least $1/2 +
+  \delta/(2m)$ with probability at least $1/2$, and every returned certificate
+  satisfies the same payload bound.
+\end{theorem}
+\begin{proof}
+  \leanok
+  \uses{lem:avg-test-hybrid, lem:avg-repetition}
+  Hybrid and prediction steps give the predictor; each predecessor block depends
+  only on its intersection with $S_i$ and is hardwired by a table of
+  $2^{|S_i \cap S_j|}$ entries; fiber averaging fixes the outside seed and later
+  tail. A reverse-Markov bound gives single-trial success at least
+  $\delta/(2m)$, and repetition gives (b).
+\end{proof}
+
+\begin{theorem}[NW reconstruction yields short descriptions]
+  \label{thm:avg-nw-kolmogorov}
+  \lean{Complexity.NWDesign.half_le_efficientlyUniversalKolmogorovComplexity_of_inverseDensity,
+    Complexity.NWDesign.half_le_efficientlyUniversalOracleKolmogorovComplexity_of_inverseDensity}
+  \leanok
+  \uses{thm:avg-nw-reconstruction, def:meta-list-code-family, def:universal,
+    def:avg-conditional}
+  Assume: a list-code family that is list-decodable at inverse accuracy and has
+  polynomial parameter bounds; $m > 0$ and $D > 0$; an NW design over the
+  coordinates of the code at inverse accuracy $q = 2mD$ with overlap budget $b$
+  and seed length $d$; a message $\mu$ such that $\mathrm{NW}^{\mathrm{Enc}(\mu)}$
+  has low complexity for $(M, t, r)$; and a $(1/D)$-dense random test $T$ for
+  $(M, t, r)$. Let $B = 1 + \lceil\log_2 m\rceil + (b + (d - \ell) + 1) +
+  \lceil \log_2 (C_L (q+1)^{e_L}) \rceil$, where $\ell$ is the coordinate length
+  and $C_L (q+1)^{e_L}$ the list-size bound.
+  (a) If additionally $U$ is an efficiently universal machine and a machine with
+  monotone clock $t_{\mathrm{dec}}$ realizes the indexed-message decoder for
+  this design, code and test, then there are constants $c, a, k$ such that
+  checked sampling with $\lceil 2mD \rceil$ trials succeeds with probability at
+  least $1/2$ and every returned certificate gives
+  $C^{a(B + t_{\mathrm{dec}}(B) + 1)^k}_U(\mu) \le B + c$.
+  (b) If instead $U$ is an efficiently universal oracle machine and one oracle
+  machine realizes the decoder for every finite test given as a membership
+  oracle, the same holds for the oracle complexity of $\mu$ relative to the
+  membership oracle of $T$, and the returned constants $c, a, k$ satisfy the
+  compiler transfer law for every finite test oracle.
+\end{theorem}
+\begin{proof}
+  \leanok
+  \uses{thm:meta-list-decoding, thm:meta-kolmogorov-invariance}
+  List-decode the predictor stored in the certificate, append a
+  $\lceil \log_2 L \rceil$-bit index of the correct candidate, the polarity bit
+  and the coordinate, and transfer the resulting description through the
+  universal compiler. In (a) the universality hypothesis can be discharged by
+  $\mathtt{utmTM}$; the code family, the decoder realization and (in (b)) the
+  universal oracle machine remain hypotheses.
+\end{proof}
+
+\begin{lemma}[Explicit weak designs]
+  \label{lem:avg-rrv-design}
+  \uses{def:avg-nw-design}
+  For every $m$, $\ell$ and $\rho > 1$ there is a polynomial-time computable NW
+  design with $\sum_{j<i} 2^{|S_i \cap S_j|} \le \rho(m-1)$ for every $i$ and
+  seed length $d = \lceil \ell/\ln \rho \rceil \cdot \ell$
+  (Raz--Reingold--Vadhan weak designs); its overlap budget is at most
+  $\rho(m-1) + m$.
+\end{lemma}
+
+\begin{theorem}[An efficiently universal oracle machine]
+  \label{thm:avg-oracle-utm}
+  \uses{def:universal, thm:utm}
+  There is an oracle machine that is efficiently universal for oracle machines,
+  analogous to $\mathtt{utmTM}$.
+\end{theorem}
+
+\begin{theorem}[Concrete reconstruction with square-root loss]
+  \label{thm:avg-nw-concrete}
+  \uses{thm:avg-nw-kolmogorov, lem:avg-rrv-design,
+    thm:meta-explicit-code-family, thm:avg-oracle-utm, thm:utm}
+  Instantiating Theorem~\ref{thm:avg-nw-kolmogorov} with an explicit code
+  family, explicit weak designs and concrete universal machines, and realizing
+  the design parser, sampler, checker and decoder by machines, yields
+  Hirahara's 2018 search step: a dense random test gives a randomized algorithm
+  that on input $(x, 1^t)$ finds a description of $x$ whose length exceeds
+  $C^t(x)$ by $O(\sqrt{C^t(x)})$ up to logarithmic factors, running within a
+  polynomially larger clock. The exact finite parameter theorem is proved first
+  and the asymptotic loss derived from it.
+\end{theorem}
+
+% ---------------------------------------------------------------------------
+\section{Conditional complexity, depth, and symmetry of information}
+
+\begin{definition}[Oracle and random-access conditional complexity]
+  \label{def:avg-conditional}
+  \lean{Complexity.OracleTM.timeBoundedKolmogorovComplexity,
+    Complexity.RandomAccessCondition.oracle,
+    Complexity.OracleTM.randomAccessConditionalTimeBoundedKolmogorovComplexity}
+  \leanok
+  \uses{def:kolmogorov}
+  For an oracle machine $N$ and Boolean oracle $A$, $C^{t,A}_N(x)$ is the
+  minimum length of a program on which $N^A$ produces $x$ within $t$ steps. The
+  random-access oracle of a string $y$ answers canonical tagged queries
+  ``bit $i$ of $y$'' and ``is $i < |y|$'', so it determines both the contents and
+  the length of $y$. Conditional complexity is
+  $C^t_N(x \mid y) = C^{t, \mathrm{oracle}(y)}_N(x)$. Other conditioning
+  conventions (sequential input, paper-specific evaluators) are not identified
+  with this one.
+\end{definition}
+
+\begin{definition}[Computational depth]
+  \label{def:avg-depth}
+  \lean{Complexity.TM.computationalDepthBetween, Complexity.TM.computationalDepth}
+  \leanok
+  \uses{def:kolmogorov}
+  For $s \le t$, $\mathrm{cd}^{s,t}_M(x) = C^s_M(x) - C^t_M(x)$ and
+  $\mathrm{cd}^{s}_M(x) = C^s_M(x) - C_M(x)$, where the difference is $\infty$
+  if either term is $\infty$.
+\end{definition}
+
+\begin{theorem}[Upper chain rule from a composition contract]
+  \label{thm:avg-upper-chain}
+  \lean{Complexity.timeBoundedKolmogorovComplexity_pair_le_add_of_conditional_composition}
+  \leanok
+  \uses{def:avg-conditional, def:pair}
+  Suppose a compiler $\kappa$ turns every program for $y$ (on machine $M_1$,
+  clock $t_1$, length at most $b_1$) and every conditional program for $x$
+  given $y$ (on $N$, clock $t_2$, length at most $b_2$) into a program on which
+  $M$ produces $\mathrm{pair}(x, y)$ within $t$ steps, with $|\kappa(p, q)| \le
+  |p| + |q| + c$. If $C^{t_1}_{M_1}(y) \le b_1$ and $C^{t_2}_N(x \mid y) \le
+  b_2$ (both finite), then
+  $C^t_M(\mathrm{pair}(x,y)) \le C^{t_2}_N(x \mid y) + C^{t_1}_{M_1}(y) + c$.
+\end{theorem}
+\begin{proof}
+  \leanok
+  Compile attaining programs.
+\end{proof}
+
+\begin{definition}[Time-bounded symmetry of information]
+  \label{def:avg-soi}
+  \lean{Complexity.TimeBoundedSymmetryOfInformation,
+    Complexity.PolynomialTimeBoundedSymmetryOfInformation}
+  \leanok
+  \uses{def:avg-conditional, def:pair}
+  For an ordinary machine $M$, a conditional oracle machine $N$, a clock
+  transformation $\kappa$ and a loss $\lambda$, $\mathrm{SoI}(M, N, \kappa,
+  \lambda)$ asserts, for all $x, y, t$ with $|x| + |y| \le t$: (i)
+  $C^t_M(\mathrm{pair}(x,y)) < \infty$, and (ii)
+  \[
+    C^{\kappa(t)}_N(x \mid y) + C^{\kappa(t)}_M(y) \ \le\
+    C^t_M(\mathrm{pair}(x,y)) + \lambda(t).
+  \]
+  The polynomial package asks for some $\kappa$ with $\kappa(t) \ge t$ and
+  $\kappa(t) \le a(t+1)^k$, and $\lambda(t) = \log_2 \kappa(t) + c$ for a
+  constant $c$. Condition (i) prevents a machine that describes nothing from
+  satisfying SoI vacuously. SoI is a hypothesis; nothing in the library asserts
+  it.
+\end{definition}
+
+\begin{theorem}[SoI cancels the condition's complexity]
+  \label{thm:avg-soi-cancellation}
+  \lean{Complexity.TimeBoundedSymmetryOfInformation.conditional_le_of_pair_upper}
+  \leanok
+  \uses{def:avg-soi, def:avg-depth}
+  Assume $\mathrm{SoI}(M, N, \kappa, \lambda)$, $|x| + |y| \le t$, $t' \le
+  \kappa(t)$, and a paired upper bound
+  $C^t_M(\mathrm{pair}(x,y)) \le C^{t''}_{N'}(x \mid y) + C^{t'}_M(y) + u$.
+  Then
+  \[
+    C^{\kappa(t)}_N(x \mid y) \ \le\ C^{t''}_{N'}(x \mid y) +
+      \mathrm{cd}^{t', \kappa(t)}_M(y) + u + \lambda(t).
+  \]
+\end{theorem}
+\begin{proof}
+  \leanok
+  Substitute the upper bound into the SoI inequality and cancel $C^{\kappa(t)}_M(y)$
+  using the exact additive decomposition of depth.
+\end{proof}
+
+\begin{theorem}[Concrete universal evaluators]
+  \label{thm:avg-evaluator}
+  \uses{thm:avg-upper-chain, def:avg-conditional, thm:utm, thm:avg-oracle-utm}
+  There are an efficiently universal ordinary machine and an efficiently
+  universal conditional oracle machine satisfying the condition-first
+  composition contract of Theorem~\ref{thm:avg-upper-chain} with a constant
+  additive loss and a polynomial clock, on all instances with $|x| + |y| \le
+  t$.
+\end{theorem}
+
+\begin{theorem}[Average-case easiness implies symmetry of information]
+  \label{thm:avg-distnp-soi}
+  \uses{def:avg-soi, def:avg-distnp, def:avg-avgp}
+  \notready
+  If $\cc{DistNP} \subseteq \cc{AvgP}$, then the polynomial time-bounded SoI
+  holds for the evaluators of Theorem~\ref{thm:avg-evaluator} (Hirahara 2022).
+\end{theorem}
+\begin{proof}
+  \uses{thm:avg-evaluator, thm:avg-dense-extraction, thm:avg-nw-concrete}
+  Split into a dense-string module, a language-compression module and clock
+  accounting.
+\end{proof}
+
+% ---------------------------------------------------------------------------
+\section{Gap problems and the conditional collapse}
+
+\begin{definition}[Logarithmic $\cc{GapMINKT}$]
+  \label{def:avg-gapminkt-log}
+  \lean{Complexity.GapMINKT.Logarithmic.problem,
+    Complexity.GapMINKT.Logarithmic.Estimator.SatisfiesBounds}
+  \leanok
+  \uses{def:meta-gapminkt}
+  Hirahara 2022, Definition~3.3: for a widening clock $\tau(n, t) \ge t$, the
+  promise on $(x, 1^t, 1^s)$ with yes side $C^t_U(x) \le s$ and no side
+  $C^{\tau}_U(x) > s + \lfloor \log_2 \tau \rfloor$, where $\tau = \tau(|x|,
+  t)$. An estimator $B$ satisfies Fact~3.4's sandwich if $B(x, 1^t) \le
+  C^t_U(x)$ and $C^{\tau}_U(x) \le B(x, 1^t) + \lfloor \log_2 \tau \rfloor$.
+\end{definition}
+
+\begin{theorem}[Fact 3.4: estimators versus gap solvers]
+  \label{thm:avg-fact34}
+  \lean{Complexity.GapMINKT.Logarithmic.problem_mem_PromiseP_of_estimatorLanguage_mem_P,
+    Complexity.GapMINKT.Logarithmic.Efficient.fp_and_satisfiesBoundsOn_printerClock}
+  \leanok
+  \uses{def:avg-gapminkt-log, def:promise, def:universal, def:FP}
+  (a) If an estimator satisfies the sandwich and its threshold language
+  $\{(x,1^t,1^s) : B(x,1^t) \le s\}$ is in $\cc{P}$, then logarithmic
+  $\cc{GapMINKT}$ is in $\cc{PromiseP}$. (b) Conversely, if $U$ is efficiently
+  universal and a decision function $d$ with $x \mapsto d(x)$ in $\cc{FP}$ solves
+  logarithmic $\cc{GapMINKT}$, there are $a, k$ such that the unary threshold
+  sweep built from $d$ is in $\cc{FP}$ and satisfies the sandwich on every
+  instance with $a(2|x|+3)^k \le t$.
+\end{theorem}
+\begin{proof}
+  \leanok
+  \uses{thm:meta-universal-kolmogorov}
+  (a) Threshold the estimator. (b) Scan $s = 0, \dots, t$ and return the least
+  accepted threshold; efficient universality supplies finite source complexity
+  above the printer clock.
+\end{proof}
+
+\begin{definition}[Conditional gap problems]
+  \label{def:avg-gapminckt}
+  \lean{Complexity.MINCKT.Instance, Complexity.GapMINCKT,
+    Complexity.GapMINCKT.Multiplicative.problem}
+  \leanok
+  \uses{def:avg-conditional, def:avg-depth, def:promise}
+  Hirahara 2022, Definitions~6.1 and~6.5. For a widening trivariate clock
+  $\tau(|x|, |y|, t) \ge t$, the promise $\cc{GapMINcKT}$ on canonical
+  $(x, y, 1^t, 1^s)$ has yes side $C^t_N(x \mid y) + \mathrm{cd}^{t,\tau}_M(y)
+  \le s$ and no side $C^{\tau}_N(x \mid y) > s + \lfloor \log_2 \tau \rfloor$.
+  The multiplicative version with factor $\phi \ge 1$ has the same yes side and
+  no side $C^{\tau}_N(x \mid y) > \phi(|x|) \cdot s + \lfloor \log_2 \tau
+  \rfloor$.
+\end{definition}
+
+\begin{theorem}[Proposition 6.2 core and hardness transfer]
+  \label{thm:avg-gapminckt-estimator}
+  \lean{Complexity.GapMINCKT_mem_PromiseP_of_estimatorLanguage_mem_P,
+    Complexity.GapMINCKT.Multiplicative.promiseNPHard_additive,
+    Complexity.GapMINCKT.Multiplicative.P_eq_NP_of_hard_of_estimatorLanguage_mem_P}
+  \leanok
+  \uses{def:avg-gapminckt, def:meta-promise-reduction}
+  (a) If an estimator $B$ satisfies $B \le C^t_N(x \mid y) +
+  \mathrm{cd}^{t,\tau}_M(y)$ and $C^{\tau}_N(x \mid y) \le B + \lfloor \log_2
+  \tau \rfloor$ on every instance and its threshold language is in $\cc{P}$, then
+  $\cc{GapMINcKT} \in \cc{PromiseP}$. (b) Promise-$\cc{NP}$-hardness of the
+  multiplicative problem with factor $\phi \ge 1$ implies promise-$\cc{NP}$-hardness
+  of the additive one. (c) Consequently, multiplicative hardness together with
+  such an estimator implies $\cc{P} = \cc{NP}$.
+\end{theorem}
+\begin{proof}
+  \leanok
+  \uses{thm:meta-promise-collapse}
+  (a) Threshold the estimator. (b) The identity is a promise reduction, since the
+  multiplicative no side is contained in the additive one. (c) Combine with
+  Theorem~\ref{thm:meta-promise-collapse}.
+\end{proof}
+
+\begin{theorem}[Conditional collapse from symmetry of information]
+  \label{thm:avg-soi-collapse}
+  \lean{Complexity.GapMINCKT.DifferenceEstimator.Unconditional.Iterated.Slack.P_eq_NP_of_multiplicative_hard_of_SoI,
+    Complexity.GapMINCKT.DifferenceEstimator.Unconditional.Iterated.Slack.P_eq_NP_of_multiplicative_hard_of_SoI_of_logarithmic_solver,
+    Complexity.GapMINCKT.DifferenceEstimator.Unconditional.Iterated.Slack.not_timeBoundedSymmetryOfInformation_of_P_ne_NP}
+  \leanok
+  \uses{def:avg-soi, def:avg-gapminckt, def:avg-gapminkt-log,
+    def:meta-promise-reduction}
+  Fix an ordinary machine $M$, a conditional oracle machine $N$, a monotone
+  primitive clock $p$ with $p(t) \ge t$ and $p(t) \le a(t+1)^k$, and constants
+  $c_{\mathrm{SoI}}, c_{\mathrm{pair}}$. Assume:
+  (i) a pair-composition hypothesis: a compiler producing $\mathrm{pair}(x,y)$ on
+  $M$ within $p(\max(t, |x|+|y|))$ steps from a program for $y$ on $M$ and a
+  conditional program for $x$ given $y$ on $N$ (each running within $t$ steps),
+  with length loss $c_{\mathrm{pair}}$, such that for
+  \emph{every} instance $(x, y, 1^t)$ the minima $C^t_M(y)$ and $C^t_N(x \mid y)$
+  are finite and within the compiler's budgets;
+  (ii) $\mathrm{SoI}(M, N, p, \log_2 p + c_{\mathrm{SoI}})$;
+  (iii) promise-$\cc{NP}$-hardness of the multiplicative $\cc{GapMINcKT}$ (factor
+  $\phi \ge 1$) at the explicit slack-amplified clock built from $p$; and
+  (iv) either an ordinary estimator satisfying Fact~3.4's sandwich at clock $p$
+  on every instance, whose induced two-query threshold language is in
+  $\cc{P}$, or a decision
+  function in $\cc{FP}$ solving logarithmic $\cc{GapMINKT}$ at clock $p$ together
+  with $\cc{FP}$ query builders for the two-query plan.
+  Then $\cc{P} = \cc{NP}$. Equivalently, if $\cc{P} \neq \cc{NP}$, then (i),
+  (iii) and (iv) rule out (ii). \emph{Warning:} as formalized, hypothesis (i)
+  is unsatisfiable, so this theorem is vacuous; see the caveat in the proof and
+  Theorem~\ref{thm:avg-soi-collapse-domain} for the intended form.
+\end{theorem}
+\begin{proof}
+  \leanok
+  \uses{thm:avg-upper-chain, thm:avg-soi-cancellation, thm:avg-fact34,
+    thm:avg-gapminckt-estimator}
+  Query the ordinary estimator on $\mathrm{pair}(x,y)$ at clock $p$ and on $y$
+  at clock $p^{3}$, subtract with an explicit rounding correction, and use SoI
+  and the upper chain to verify both halves of the conditional sandwich; the
+  final clock is $p^{4}$ amplified by a power-of-two slack that pays all
+  logarithmic and additive losses and is proved polynomially bounded.
+
+  \emph{Caveat.} As currently formalized, hypothesis (i)
+  (\texttt{SupportsPairUpper}) requires $C^t_M(y) < \infty$ and $C^t_N(x \mid y)
+  < \infty$ for every instance, including $t = 0$ with nonempty $y$ or $x$. No
+  machine produces a nonempty output in zero steps, so (i) is unsatisfiable and
+  the theorem is vacuous as stated. The meaningful form is
+  Theorem~\ref{thm:avg-soi-collapse-domain}.
+\end{proof}
+
+\begin{theorem}[Conditional collapse on the admissible domain]
+  \label{thm:avg-soi-collapse-domain}
+  \uses{def:avg-soi, def:avg-gapminckt, def:avg-gapminkt-log}
+  Theorem~\ref{thm:avg-soi-collapse} with the finiteness and budget requirements
+  of hypothesis (i) imposed only on instances with $|x| + |y| \le t$ (the domain
+  of the SoI hypothesis), the promise and the estimator restricted accordingly.
+\end{theorem}
+\begin{proof}
+  \uses{thm:avg-soi-collapse, thm:avg-evaluator}
+  Restrict the two-query plan to the admissible domain and handle the remaining
+  instances directly; check that the evaluators of
+  Theorem~\ref{thm:avg-evaluator} satisfy the restricted hypothesis.
+\end{proof}
+
+\begin{theorem}[Hardness of conditional gap MinKT excludes Heuristica]
+  \label{thm:avg-hardness-heuristica}
+  \uses{def:avg-gapminckt, def:avg-distnp, def:avg-avgp}
+  \notready
+  If, for the evaluators of Theorem~\ref{thm:avg-evaluator} and every admissible
+  polynomial clock, the multiplicative conditional gap problem is
+  $\cc{NP}$-hard under the exact reductions of the paper, then
+  $\cc{DistNP} \subseteq \cc{AvgP}$ implies $\cc{P} = \cc{NP}$. Published
+  $\cc{NP}$-hardness reaches only a sublinear-time regime, so this hypothesis is
+  open.
+\end{theorem}
+\begin{proof}
+  \uses{thm:avg-soi-collapse-domain, thm:avg-distnp-soi, thm:avg-fact34,
+    thm:avg-minkt-2018}
+  $\cc{DistNP} \subseteq \cc{AvgP}$ gives SoI and, through the paper's
+  worst-case to average-case step, an efficient logarithmic $\cc{GapMINKT}$
+  solver; apply Theorem~\ref{thm:avg-soi-collapse-domain}.
+\end{proof}
+
+% ---------------------------------------------------------------------------
+\section{Further theorems of the program}
+
+\begin{theorem}[Hirahara 2018: worst-case to average-case for $\cc{MINKT}$]
+  \label{thm:avg-minkt-2018}
+  \uses{def:meta-minkt, def:meta-gapminkt, def:avg-auxiliary-unary,
+    def:avg-distnp, def:avg-heurp}
+  \notready
+  (a) If $(\cc{MINKT}[r], D^u)$ is easy on average in the randomized errorless
+  sense of the paper, then $\cc{GapMINKT}$ with description loss of order
+  $\sqrt{s}$ (up to logarithmic factors) and polynomial clock blow-up has a
+  zero-error randomized worst-case search algorithm. (b) Hence, if that gap
+  problem is $\cc{NP}$-hard under the paper's randomized reductions,
+  average-case easiness of $\cc{DistNP}$ in the paper's randomized sense implies
+  worst-case easiness of $\cc{NP}$ in the corresponding randomized sense.
+\end{theorem}
+\begin{proof}
+  \uses{thm:avg-dense-extraction, thm:avg-nw-concrete,
+    lem:meta-gapminkt-search}
+  The heuristic's rejections form a dense random test; NW reconstruction turns
+  it into a description search; search to decision gives the gap solver.
+\end{proof}
+
+\begin{theorem}[The uniform-truth-table route for $\cc{MCSP}$]
+  \label{thm:avg-mcsp-route}
+  \uses{def:meta-mcsp, def:meta-gapmcsp, def:avg-heurp}
+  \notready
+  At the randomized complexity level of the paper, average-case easiness of
+  $\cc{MCSP}[2^{\varepsilon n}]$ on uniform truth tables is equivalent to
+  worst-case solvability of a very-large-gap $\cc{MCSP}$ approximation problem,
+  with arity $n$ and input length $N = 2^n$ kept distinct. This is not a
+  statement about exact $\cc{MCSP}$.
+\end{theorem}
+
+\begin{theorem}[Hirahara 2021: exponential hardness of $\cc{UP}$]
+  \label{thm:avg-up-dtime}
+  \uses{def:avg-distnp, def:avg-avgp, def:dtime}
+  \notready
+  If $\cc{UP} \not\subseteq \cc{DTIME}(2^{O(n/\log n)})$, then $\cc{DistNP}
+  \not\subseteq \cc{AvgP}$. The class $\cc{UP}$ and universal heuristic schemes
+  are not yet defined.
+\end{theorem}
+
+\begin{theorem}[$\cc{NP}$-hardness of partial-function problems]
+  \label{thm:avg-partial-hard}
+  \uses{def:meta-mcsp-variants, def:meta-minkt}
+  \notready
+  Partial $\cc{MCSP}$ and the partial variants $\cc{MINKT}^{*}$ and
+  $\cc{MKTP}^{*}$ are $\cc{NP}$-hard under randomized reductions (Hirahara 2022,
+  \emph{NP-Hardness of Learning Programs and Partial MCSP}). The extension from
+  partial to total problems is isolated as an open hypothesis, not assumed.
+\end{theorem}
+
+\begin{definition}[Meta-complexity padding conjecture]
+  \label{def:avg-padding}
+  \uses{def:kolmogorov, def:avg-distnp}
+  \notready
+  Distributional Kolmogorov complexity, approximation-preserving padding, and
+  the Meta-Complexity Padding Conjecture of Hirahara 2023 stated as an explicit
+  hypothesis, together with its conditional characterization of one-way
+  functions. It is never used as an unconditional theorem.
+\end{definition}
+
+\section{Open directions}
+
+Relativization, oracle-independence, natural-reduction and black-box-reduction
+barriers for this program should be recorded as formal oracle implications or
+countermodels once the oracle layer supports them. They constrain which proof
+interfaces can work and do not license assuming a nonrelativizing result.

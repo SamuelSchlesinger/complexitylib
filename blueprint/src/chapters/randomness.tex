@@ -1,0 +1,526 @@
+\chapter{Randomness, counting, and the polynomial hierarchy}
+\label{chap:randomness}
+
+This chapter covers probabilistic polynomial time, the polynomial hierarchy,
+and counting classes. A probabilistic machine is a nondeterministic machine
+whose choice bits are uniformly random and which is observed at a fixed clock;
+$\cc{BPP}$, $\cc{RP}$, $\cc{coRP}$, $\cc{ZPP}$, and $\cc{PP}$ are defined from
+its acceptance probability, and $\#\cc{P}$ from accepting leaves of the
+computation tree, a different count when paths halt early. Formalized results
+include the class definitions and elementary containments, the
+Sipser--Lautemann theorem, $\cc{PH} \subseteq \cc{PSPACE}$,
+$\cc{PP} \subseteq \cc{PSPACE}$, and Stockmeyer-style approximate counting with
+pairwise-independent hashing as a finite statement. The main open directions
+are the oracle characterization of the hierarchy, the closure properties of
+$\cc{PP}$ through $\cc{GapP}$, and Toda's theorem.
+
+\section{Randomized classes}
+
+The acceptance probability $\mathrm{acceptProb}_N(x, T)$ of a machine $N$ is
+the fraction of the $2^T$ choice sequences of length $T$ along which $N$ halts
+with output $1$ within $T$ steps (\texttt{NTM.acceptProb}, defined in the
+chapter on machine models). A path that halts after $t < T$ steps is counted
+once for each of its $2^{T - t}$ extensions. The finite probability toolkit
+used below is developed in the chapter on encodings: event probability, the
+bound $2^{-k}$ on majority failure over $12k + 1$ independent blocks, the
+invariance of acceptance probability under enlarging a clock by which every
+path has halted, and the repetition machine \texttt{NTM.repeatAtTime} that
+lifts majority amplification to machines. Adleman's theorem
+$\cc{BPP} \subseteq \cc{P/poly}$ (\texttt{Complexity.BPP\_subset\_PPoly}) is in
+the chapter on circuits.
+
+\begin{definition}[$\cc{BPP}$]
+  \label{def:BPP}
+  \lean{Complexity.BPP, Complexity.BPTIME}
+  \leanok
+  \uses{def:ntm, def:models-accept-prob}
+  $\cc{BPTIME}(T)$ is the set of languages $L$ for which there are a machine
+  $N$ and $f = O(T)$ such that every path halts within $f(|x|)$ steps,
+  $\mathrm{acceptProb}_N(x, f(|x|)) \ge 2/3$ for $x \in L$, and
+  $\mathrm{acceptProb}_N(x, f(|x|)) \le 1/3$ for $x \notin L$.
+  $\cc{BPP} = \bigcup_k \cc{BPTIME}(n^k)$.
+\end{definition}
+
+\begin{definition}[$\cc{RP}$ and $\cc{coRP}$]
+  \label{def:RP}
+  \lean{Complexity.RP, Complexity.RTIME, Complexity.coRP}
+  \leanok
+  \uses{def:ntm, def:models-accept-prob}
+  $\cc{RTIME}(T)$ is defined like $\cc{BPTIME}(T)$ with acceptance probability
+  at least $1/2$ on $x \in L$ and equal to $0$ on $x \notin L$.
+  $\cc{RP} = \bigcup_k \cc{RTIME}(n^k)$ and
+  $\cc{coRP} = \{L : \overline{L} \in \cc{RP}\}$.
+\end{definition}
+
+\begin{definition}[$\cc{ZPP}$]
+  \label{def:ZPP}
+  \lean{Complexity.ZPP}
+  \leanok
+  \uses{def:RP, def:models-accept-prob}
+  $\cc{ZPP} = \cc{RP} \cap \cc{coRP}$. The Las Vegas characterization is a
+  separate planned node (Theorem~\ref{thm:randomness-zpp-las-vegas}); the
+  library has only fixed-clock probabilistic semantics.
+\end{definition}
+
+\begin{definition}[$\cc{PP}$]
+  \label{def:PP}
+  \lean{Complexity.PP, Complexity.PPTIME}
+  \leanok
+  \uses{def:ntm, def:models-accept-prob}
+  $\cc{PPTIME}(T)$ is the set of languages $L$ for which there are a machine
+  $N$ and $f = O(T)$ such that every path halts within $f(|x|)$ steps and
+  $x \in L \iff \mathrm{acceptProb}_N(x, f(|x|)) > 1/2$.
+  $\cc{PP} = \bigcup_k \cc{PPTIME}(n^k)$.
+\end{definition}
+
+\begin{theorem}[Elementary containments]
+  \label{thm:randomness-containments}
+  \lean{Complexity.P_subset_BPP, Complexity.BPP_subset_PP, Complexity.RP_subset_NP, Complexity.ZPP_subset_RP, Complexity.ZPP_subset_coRP, Complexity.ZPP_subset_NP}
+  \leanok
+  \uses{def:P, def:NP, def:BPP, def:RP, def:ZPP, def:PP}
+  $\cc{P} \subseteq \cc{BPP} \subseteq \cc{PP}$; $\cc{RP} \subseteq \cc{NP}$;
+  $\cc{ZPP} \subseteq \cc{RP}$, $\cc{ZPP} \subseteq \cc{coRP}$, and
+  $\cc{ZPP} \subseteq \cc{NP}$.
+\end{theorem}
+\begin{proof}
+  \leanok
+  A deterministic machine viewed as probabilistic accepts with probability
+  $0$ or $1$. Since $2/3 > 1/2 > 1/3$, bounded error implies unbounded error.
+  A positive acceptance probability exhibits an accepting path, and
+  probability $0$ excludes one, so $\cc{RTIME}(T) \subseteq \cc{NTIME}(T)$.
+\end{proof}
+
+\begin{theorem}[$\cc{P} \subseteq \cc{ZPP}$]
+  \label{thm:randomness-P-subset-ZPP}
+  \uses{def:P, def:ZPP}
+  $\cc{P} \subseteq \cc{RP} \cap \cc{coRP} = \cc{ZPP}$.
+\end{theorem}
+\begin{proof}
+  \uses{prop:polytime-P-boolean, thm:randomness-containments}
+  A deterministic decider accepts yes-instances with probability $1$ and
+  no-instances with probability $0$, so $\cc{P} \subseteq \cc{RP}$; closure of
+  $\cc{P}$ under complement gives $\cc{P} \subseteq \cc{coRP}$.
+\end{proof}
+
+\begin{theorem}[$\cc{BPP}$ is closed under complement]
+  \label{thm:randomness-bpp-compl}
+  \uses{def:BPP}
+  If $L \in \cc{BPP}$ then $\overline{L} \in \cc{BPP}$.
+\end{theorem}
+\begin{proof}
+  Flip the output bit of the probabilistic machine, which exchanges acceptance
+  probability $p$ with $1 - p$ at the same clock. (The library's proof of
+  Sipser--Lautemann does not need this; it proves the $\Pi^p_2$ half
+  directly.)
+\end{proof}
+
+\begin{theorem}[Class-level error reduction]
+  \label{thm:randomness-bpp-amplification}
+  \uses{def:BPP}
+  For every $L \in \cc{BPP}$ and every polynomial $q$ there is a
+  polynomial-time probabilistic machine, all of whose paths halt within its
+  clock, that accepts every $x \in L$ with probability at least
+  $1 - 2^{-q(|x|)}$ and every $x \notin L$ with probability at most
+  $2^{-q(|x|)}$.
+\end{theorem}
+\begin{proof}
+  \uses{thm:encodings-repeat-amplification}
+  The repetition machine \texttt{NTM.repeatAtTime} with $12s + 1$ runs
+  already reaches error $2^{-s}$
+  (\texttt{NTM.repeatAtTime\_acceptProb\_ge\_one\_sub\_two\_pow},
+  \texttt{NTM.repeatAtTime\_acceptProb\_le\_two\_pow}), but it fixes the
+  repetition count and the clock in advance. The remaining work is a variant
+  that computes $q(|x|)$ and the clock from the input before repeating, or a
+  padding argument that reduces to a fixed count per input length.
+\end{proof}
+
+\begin{theorem}[Direct characterization of $\cc{coRP}$]
+  \label{thm:randomness-corp-direct}
+  \uses{def:RP}
+  $L \in \cc{coRP}$ if and only if some polynomial-time probabilistic machine,
+  all of whose paths halt within its clock, accepts every $x \in L$ with
+  probability $1$ and every $x \notin L$ with probability at most $1/2$.
+\end{theorem}
+\begin{proof}
+  Flip the output bit of an $\cc{RP}$ machine for $\overline{L}$, and
+  conversely.
+\end{proof}
+
+\begin{theorem}[$\cc{ZPP}$ is zero-error probabilistic time]
+  \label{thm:randomness-zpp-las-vegas}
+  \uses{def:ZPP}
+  \notready
+  $\cc{ZPP}$ equals the class of languages decided by a polynomial-time
+  probabilistic machine that outputs $1$, $0$, or ``don't know'', is never
+  wrong, and says ``don't know'' with probability at most $1/2$; and it equals
+  the class decided with zero error in expected polynomial time.
+\end{theorem}
+\begin{proof}
+  \uses{thm:randomness-corp-direct}
+  Run the $\cc{RP}$ and $\cc{coRP}$ machines and answer when one of them is
+  conclusive. Neither the three-valued output convention nor an expected-time
+  model is defined yet, and the expected-time semantics must be kept separate
+  from the strict all-paths clock: a machine that is always correct and halts
+  within a polynomial bound on every random string is already deterministic.
+\end{proof}
+
+\section{The polynomial hierarchy}
+
+\begin{definition}[The polynomial hierarchy]
+  \label{def:PH}
+  \lean{Complexity.PH, Complexity.SigmaP, Complexity.PiP, Complexity.polyExistsLang, Complexity.polyForallLang, Complexity.polyExistsClass, Complexity.polyForallClass}
+  \leanok
+  \uses{def:P, def:pair}
+  For a polynomial $p$ and a language $L'$, let
+  $\exists^p L' = \{x : \exists w\ (|w| \le p(|x|) \wedge \langle x, w \rangle
+  \in L')\}$ and $\forall^p L' = \{x : \forall w\ (|w| \le p(|x|) \Rightarrow
+  \langle x, w \rangle \in L')\}$. For a class $\mathcal{C}$, let
+  $\exists \mathcal{C}$ be the set of languages $\exists^p L'$ with $p$ a
+  polynomial and $L' \in \mathcal{C}$, and similarly $\forall \mathcal{C}$.
+  Then
+  $\Sigma^p_0 = \cc{P}$, $\Pi^p_k = \{L : \overline{L} \in \Sigma^p_k\}$,
+  $\Sigma^p_{k+1} = \exists \Pi^p_k$, and
+  $\cc{PH} = \bigcup_k \Sigma^p_k$.
+\end{definition}
+
+\begin{proposition}[Structure of the levels]
+  \label{prop:randomness-ph-levels}
+  \lean{Complexity.PiP_zero, Complexity.SigmaP_succ, Complexity.PiP_succ, Complexity.SigmaP_one, Complexity.PiP_one, Complexity.SigmaP_subset_SigmaP_succ, Complexity.PiP_subset_PiP_succ, Complexity.P_subset_PH}
+  \leanok
+  \uses{def:PH}
+  $\Pi^p_0 = \cc{P}$, $\Pi^p_{k+1} = \forall \Sigma^p_k$,
+  $\Sigma^p_1 = \exists \cc{P}$, and $\Pi^p_1 = \forall \cc{P}$. For every
+  $k$, $\Sigma^p_k \subseteq \Sigma^p_{k+1}$ and
+  $\Pi^p_k \subseteq \Pi^p_{k+1}$; in particular $\cc{P} \subseteq \cc{PH}$.
+\end{proposition}
+\begin{proof}
+  \leanok
+  \uses{prop:polytime-P-boolean, thm:polytime-preimage}
+  The complement of a bounded existential is the bounded universal of the
+  complement, and $\cc{P}$ is closed under complement. The two level
+  inclusions are proved together by induction; the base case uses the zero
+  witness bound and the fact that the first projection of a pair is in
+  $\cc{FP}$.
+\end{proof}
+
+\begin{theorem}[Collapse of the hierarchy]
+  \label{thm:randomness-ph-collapse}
+  \uses{def:PH, def:P, def:NP}
+  If $\Sigma^p_k = \Pi^p_k$ for some $k \ge 1$, then $\cc{PH} = \Sigma^p_k$.
+  In particular, if $\cc{P} = \cc{NP}$ then $\cc{PH} = \cc{P}$.
+\end{theorem}
+\begin{proof}
+  \uses{prop:randomness-ph-levels, thm:polytime-np-sigma1, thm:polytime-coNP-structure}
+  Adjacent existential quantifiers merge into one by pairing their witnesses,
+  so $\exists \Sigma^p_k = \Sigma^p_k$; then induct on the level. The special
+  case uses $\cc{NP} = \Sigma^p_1$ and $\cc{P} = \cc{NP} \Rightarrow
+  \cc{NP} = \cc{coNP}$.
+\end{proof}
+
+\begin{theorem}[Oracle characterization of the hierarchy]
+  \label{thm:randomness-ph-oracle}
+  \uses{def:PH, def:NP}
+  \notready
+  For every $k$, $\Sigma^p_{k+1} = \cc{NP}^{\Sigma^p_k}$, where
+  $\cc{NP}^{\mathcal{C}}$ is the class of languages decided in polynomial time
+  by a nondeterministic oracle machine with an oracle in $\mathcal{C}$.
+\end{theorem}
+\begin{proof}
+  \uses{thm:polytime-np-sigma1, prop:randomness-ph-levels}
+  The library has deterministic Boolean-oracle machines but no
+  nondeterministic oracle machines or relativized classes yet, and the result
+  depends on the exact query model. Given those, guess the query answers
+  together with $\Sigma^p_k$ certificates for the positive answers and
+  $\Pi^p_k$ certificates for the negative ones.
+\end{proof}
+
+\section{The Sipser--Lautemann theorem}
+
+\begin{lemma}[Lautemann's covering lemma]
+  \label{lem:randomness-covering}
+  \lean{Complexity.Lautemann.Covers, Complexity.Lautemann.exists_covers_of_eventProb_compl_le, Complexity.Lautemann.not_covers_of_eventProb_le}
+  \leanok
+  For $E \subseteq \{0,1\}^m$, say shifts $u_1, \dots, u_t \in \{0,1\}^m$ cover
+  if every $r \in \{0,1\}^m$ has some $i$ with $r \oplus u_i \in E$. If
+  $\Pr[\overline{E}] \le 2^{-k}$ and $m < kt$, some $t$ shifts cover. If
+  $\Pr[E] \le 2^{-k}$ and $t < 2^k$, no $t$ shifts cover.
+\end{lemma}
+\begin{proof}
+  \leanok
+  Shifting is a measure-preserving involution of the seed space; count the
+  shift tuples that fail to cover a given seed, and apply a union bound.
+\end{proof}
+
+\begin{lemma}[The Lautemann matrix is polynomial-time]
+  \label{lem:randomness-sl-matrix}
+  \lean{Complexity.MatrixVerdictInFP, Complexity.matrixVerdictInFP}
+  \leanok
+  \uses{def:FP, def:ntm}
+  For every machine $N$, polynomial time bound $p$, and polarity $b$, the
+  verdict of the quantifier-free matrix of Lautemann's characterization is in
+  $\cc{FP}$. On input $\langle \langle x, w \rangle, r \rangle$ it decodes a
+  tuple of shifts from $w$ and a seed from $r$ and returns the disjunction over
+  the shifts of the majority vote of the amplified trials of $N$ on $x$, run
+  for $p(|x|)$ steps along the shifted seed.
+\end{lemma}
+\begin{proof}
+  \leanok
+  \uses{thm:cobham}
+  No machine is constructed. The verdict is written in Cobham's algebra: payload
+  scanners decode the triple, the trial count and seed length are
+  $\mathrm{smash}$ lengths built from $p$, and each trial is one run of $N$
+  along its block of choice bits, simulated inside the algebra.
+\end{proof}
+
+\begin{theorem}[Sipser--Lautemann]
+  \label{thm:randomness-sipser-lautemann}
+  \lean{Complexity.SipserLautemann, Complexity.sipserLautemann, Complexity.BPP_subset_SigmaP_two, Complexity.BPP_subset_PiP_two}
+  \leanok
+  \uses{def:BPP, def:PH}
+  $\cc{BPP} \subseteq \Sigma^p_2 \cap \Pi^p_2$.
+\end{theorem}
+\begin{proof}
+  \leanok
+  \uses{lem:randomness-covering, lem:randomness-sl-matrix, lem:polytime-decision-fn, thm:encodings-amplification, lem:encodings-acceptprob}
+  Replace the machine's time bound by a dominating polynomial, which does not
+  change acceptance probabilities once every path has halted, and amplify by
+  majority vote over independent blocks. The covering lemma gives
+  $x \in L \iff \exists$ shifts $\forall$ seeds, some shifted amplified trial
+  accepts; the complementary form characterizes $x \notin L$ and gives the
+  $\Pi^p_2$ half directly. The matrix is in $\cc{P}$ by
+  Lemma~\ref{lem:randomness-sl-matrix} and
+  Lemma~\ref{lem:polytime-decision-fn}.
+\end{proof}
+
+\begin{corollary}[$\cc{BPP} \subseteq \cc{PH}$]
+  \label{cor:randomness-bpp-ph}
+  \lean{Complexity.BPP_subset_PH}
+  \leanok
+  \uses{def:BPP, def:PH}
+  $\cc{BPP} \subseteq \cc{PH}$.
+\end{corollary}
+\begin{proof}
+  \leanok
+  \uses{thm:randomness-sipser-lautemann}
+  $\Sigma^p_2 \subseteq \cc{PH}$.
+\end{proof}
+
+\section{Counting classes}
+
+\begin{definition}[$\#\cc{P}$]
+  \label{def:sharpP}
+  \lean{Complexity.SharpP, Complexity.NTM.acceptLeafCount}
+  \leanok
+  \uses{def:ntm}
+  $\mathrm{acceptLeafCount}_N(x, T)$ is the number of accepting leaves of the
+  computation tree of $N$ on $x$ truncated at depth $T$; a path that halts at
+  depth $t < T$ is one leaf, unlike in $\mathrm{acceptCount}$. $\#\cc{P}$ is
+  the set of $f \colon \{0,1\}^* \to \mathbb{N}$ for which some machine $N$ and
+  some $T = O(n^k)$ satisfy: every path halts within $T(|x|)$ steps and
+  $f(x) = \mathrm{acceptLeafCount}_N(x, T(|x|))$.
+\end{definition}
+
+\begin{lemma}[Accepting leaves]
+  \label{lem:randomness-leaf-count}
+  \lean{Complexity.NTM.acceptLeafCount_le, Complexity.NTM.acceptLeafCount_eq_of_le_of_allPathsHaltIn, Complexity.SharpP.le_two_pow}
+  \leanok
+  \uses{def:sharpP}
+  $\mathrm{acceptLeafCount}_N(x, T) \le 2^T$. If every path halts within
+  $T(|x|)$ steps and $T \le T'$ pointwise, the counts at $T'(|x|)$ and
+  $T(|x|)$ agree, so a $\#\cc{P}$ value does not depend on the choice of a
+  sufficient clock. Every $f \in \#\cc{P}$ satisfies $f(x) \le 2^{T(|x|)}$ for
+  some polynomially bounded $T$.
+\end{lemma}
+\begin{proof}
+  \leanok
+  Induction on the depth of the truncated tree.
+\end{proof}
+
+\begin{definition}[$\cc{GapP}$]
+  \label{def:randomness-gapp}
+  \lean{Complexity.GapP}
+  \leanok
+  \uses{def:sharpP}
+  $\cc{GapP}$ is the set of $h \colon \{0,1\}^* \to \mathbb{Z}$ of the form
+  $h = f - g$ with $f, g \in \#\cc{P}$.
+\end{definition}
+
+\begin{proposition}[$\cc{GapP}$ is closed under negation]
+  \label{prop:randomness-gapp-neg}
+  \lean{Complexity.GapP.neg_mem}
+  \leanok
+  \uses{def:randomness-gapp}
+  If $h \in \cc{GapP}$ then $-h \in \cc{GapP}$.
+\end{proposition}
+\begin{proof}
+  \leanok
+  Swap the two $\#\cc{P}$ functions.
+\end{proof}
+
+\begin{theorem}[$\cc{PP}$ via $\cc{GapP}$]
+  \label{thm:randomness-pp-gapp}
+  \uses{def:PP, def:randomness-gapp}
+  $\cc{GapP}$ is closed under addition and multiplication, and
+  $L \in \cc{PP}$ if and only if there is $h \in \cc{GapP}$ with
+  $x \in L \iff h(x) > 0$ for all $x$.
+\end{theorem}
+\begin{proof}
+  \uses{lem:randomness-leaf-count, lem:randomness-pp-integer, prop:randomness-gapp-neg}
+  $\cc{PP}$ counts fixed-length random strings while $\#\cc{P}$ counts leaves.
+  Pad the machine so that every path halts at exactly the clock, after which
+  the two counts agree, and take $h(x) = 2\,\mathrm{acceptCount}(x, T) - 2^T$.
+  For the converse, realize the positive and negative parts of $h$ by one
+  machine with balanced branches.
+\end{proof}
+
+\begin{theorem}[$\cc{PP}$ is closed under complement]
+  \label{thm:randomness-pp-compl}
+  \uses{def:PP}
+  If $L \in \cc{PP}$ then $\overline{L} \in \cc{PP}$.
+\end{theorem}
+\begin{proof}
+  \uses{thm:randomness-pp-gapp}
+  Flipping the output bit turns ``$> 1/2$'' into ``$\ge 1/2$''; ties are
+  removed by passing to the gap $1 - 2h$, which is positive exactly when
+  $h \le 0$.
+\end{proof}
+
+\begin{theorem}[Beigel--Reingold--Spielman]
+  \label{thm:randomness-pp-intersection}
+  \uses{def:PP}
+  $\cc{PP}$ is closed under intersection and union.
+\end{theorem}
+\begin{proof}
+  \uses{thm:randomness-pp-gapp, thm:randomness-pp-compl}
+  Approximate the sign function by low-degree rational functions and evaluate
+  them on $\cc{GapP}$ values.
+\end{proof}
+
+\begin{theorem}[Toda]
+  \label{thm:randomness-toda}
+  \uses{def:PH, def:sharpP}
+  \notready
+  $\cc{PH} \subseteq \cc{P}^{\#\cc{P}}$.
+\end{theorem}
+\begin{proof}
+  \uses{thm:randomness-pp-gapp, def:randomness-hash, thm:randomness-ph-oracle}
+  Needs polynomial-time machines with a function oracle, the Valiant--Vazirani
+  isolation lemma (from pairwise-independent hashing), modular counting, and
+  polynomial interpolation.
+\end{proof}
+
+\section{Polynomial-space upper bounds}
+
+The two containments below are proved by bespoke enumerating machines. They
+could instead be routed through the polynomial-space iteration theorem
+\texttt{SpaceIter.mem\_PSPACE\_of\_iterate}, as Savitch's theorem and
+$\cc{IP} \subseteq \cc{PSPACE}$ are.
+
+\begin{lemma}[$\cc{PP}$ as an integer comparison]
+  \label{lem:randomness-pp-integer}
+  \lean{Complexity.PP_integer_characterization}
+  \leanok
+  \uses{def:PP}
+  For every $L \in \cc{PP}$ there are a machine $N$ and a clock $f = O(n^m)$
+  such that every path halts within $f(|x|)$ steps and
+  $x \in L \iff 2^{f(|x|)} < 2 \cdot \mathrm{acceptCount}_N(x, f(|x|))$.
+\end{lemma}
+\begin{proof}
+  \leanok
+  Clear the denominator in $\mathrm{acceptCount}/2^f > 1/2$.
+\end{proof}
+
+\begin{theorem}[$\cc{PP} \subseteq \cc{PSPACE}$]
+  \label{thm:randomness-pp-pspace}
+  \lean{Complexity.PP_subset_PSPACE}
+  \leanok
+  \uses{def:PP, def:PSPACE}
+  $\cc{PP} \subseteq \cc{PSPACE}$.
+\end{theorem}
+\begin{proof}
+  \leanok
+  \uses{lem:randomness-pp-integer}
+  A deterministic machine enumerates the $2^{p(|x|)}$ choice sequences on a
+  counter tape that doubles as the choice tape, simulates one path at a time,
+  updates two tallies, and wipes its scratch space between passes; the loop is
+  exponentially long but each pass stays in the same polynomial window.
+\end{proof}
+
+\begin{theorem}[$\cc{PH} \subseteq \cc{PSPACE}$]
+  \label{thm:randomness-ph-subset-pspace}
+  \lean{Complexity.PH_subset_PSPACE}
+  \leanok
+  \uses{def:PH, def:PSPACE}
+  $\cc{PH} \subseteq \cc{PSPACE}$.
+\end{theorem}
+\begin{proof}
+  \leanok
+  \uses{prop:randomness-ph-levels}
+  By induction on the level it suffices that $\cc{PSPACE}$ is closed under
+  complement and under polynomially bounded existential quantification
+  (\texttt{Complexity.PH\_subset\_PSPACE\_of}). Complement reruns the machine
+  and flips the verdict with one extra cell; the existential enumerates the
+  bounded witnesses on one reused work tape.
+\end{proof}
+
+\begin{corollary}[$\cc{BPP} \subseteq \cc{PSPACE}$]
+  \label{cor:randomness-bpp-pspace}
+  \uses{def:BPP, def:PSPACE}
+  $\cc{BPP} \subseteq \cc{PSPACE}$.
+\end{corollary}
+\begin{proof}
+  \uses{thm:randomness-containments, thm:randomness-pp-pspace}
+  $\cc{BPP} \subseteq \cc{PP} \subseteq \cc{PSPACE}$; this composition is not
+  yet stated in the library.
+\end{proof}
+
+\section{Hashing and approximate counting}
+
+\begin{definition}[Pairwise-independent hash family]
+  \label{def:randomness-hash}
+  \lean{Complexity.PairwiseIndependentHash, Complexity.PairwiseIndependentHash.affine}
+  \leanok
+  \uses{def:bitstring}
+  A pairwise-independent family from $n$-bit to $m$-bit strings with $s$-bit
+  seeds is a map $h \colon \{0,1\}^s \times \{0,1\}^n \to \{0,1\}^m$ such that,
+  over a uniform seed, $\Pr[h(x) = y] = 2^{-m}$ for all $x, y$, and
+  $\Pr[h(x) = y \wedge h(x') = y'] = 2^{-2m}$ for all $x \neq x'$ and all
+  $y, y'$. The affine family $x \mapsto Ax + b$ over $\mathrm{GF}(2)$, with
+  $s = m(n+1)$, is one.
+\end{definition}
+
+\begin{theorem}[Relative approximate counting by hashing]
+  \label{thm:randomness-approx-count}
+  \lean{Complexity.ApproximateCounting.IsRelativeApproximation, Complexity.ApproximateCounting.Relative.one_sub_two_pow_le_eventProb_successEvent}
+  \leanok
+  \uses{def:randomness-hash}
+  Let $S \subseteq \{0,1\}^n$ be finite, $\varepsilon \ge 1$, and
+  $t \ge 0$. With probability at least $1 - 2^{-t}$ over its seed, the
+  amplified hashing estimator returns $e$ with
+  $(\varepsilon - 1)|S| \le \varepsilon e \le (\varepsilon + 1)|S|$. The
+  estimator queries $S$ only through exact answers to ``is this hash cell of
+  $S$ nonempty?''
+\end{theorem}
+\begin{proof}
+  \leanok
+  Stockmeyer's scheme: a factor-$16$ estimate from cell-occupancy answers at
+  logarithmically many hash widths, with majority over independent affine
+  hashes for each answer, applied to a Cartesian power of $S$ and followed by
+  an integer root.
+\end{proof}
+
+\begin{theorem}[Stockmeyer]
+  \label{thm:randomness-stockmeyer}
+  \uses{def:sharpP}
+  \notready
+  For every $f \in \#\cc{P}$ and polynomial $q$, a probabilistic
+  polynomial-time machine with an $\cc{NP}$ oracle outputs, with probability
+  at least $2/3$, a value $e$ with
+  $(1 - 1/q(|x|)) f(x) \le e \le (1 + 1/q(|x|)) f(x)$.
+\end{theorem}
+\begin{proof}
+  \uses{thm:randomness-approx-count, lem:polytime-guess-verify}
+  Apply Theorem~\ref{thm:randomness-approx-count} to the set of accepting
+  paths, answering each cell-occupancy question with one $\cc{NP}$ query.
+  Probabilistic oracle machines are not defined yet.
+\end{proof}

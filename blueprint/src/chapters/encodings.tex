@@ -1,0 +1,616 @@
+\chapter{Encodings and finite probability}
+\label{chap:encodings}
+
+This chapter covers the machine-independent layer that every other chapter
+relies on: how objects become binary strings, and how probabilities over random
+bit strings are counted. Formalized so far: fixed-length bit strings and their
+bridge to lists, the self-delimiting block framing and the pairing function
+$\langle x, y \rangle$ used for every two-argument machine input, canonical
+binary natural numbers, a rose-tree serialization, a canonical code for
+fan-in-two circuits, exact counting over $\{0,1\}^T$, uniform event
+probability with the union bound and majority amplification, and a fixed-time
+repetition wrapper for probabilistic machines whose acceptance probability is
+exactly a majority-event probability. The main open direction is
+consolidation: about 24 modules define ad hoc codecs and about 25 define ad hoc
+probability notions, which a reusable codec interface
+(Definition~\ref{def:encodings-codec}) and Mathlib's \texttt{Finset.expect} and
+\texttt{Finset.dens} should absorb.
+
+\section{Bit strings}
+
+\begin{definition}[Bit string]
+  \label{def:bitstring}
+  \lean{Complexity.BitString}
+  \leanok
+  A bit string of length $n$ is a function $\{0, \dots, n-1\} \to \{0,1\}$.
+  Circuits consume bit strings of a fixed length; machines consume lists.
+\end{definition}
+
+\begin{definition}[Bit strings as lists]
+  \label{def:encodings-bitstring-list}
+  \lean{Complexity.BitString.toList, Complexity.BitString.ofList, Complexity.BitString.toTotal}
+  \leanok
+  \uses{def:bitstring}
+  $\mathrm{toList}(x) = [x_0, \dots, x_{n-1}]$ serializes in increasing index
+  order; $\mathrm{ofList}$ reads a list whose length is proved to be $n$; and
+  $\mathrm{toTotal}(x) : \mathbb{N} \to \{0,1\}$ extends $x$ by $0$ outside
+  its range. The variable-length correspondence
+  $\{0,1\}^* \simeq \Sigma_n \{0,1\}^n$ is Mathlib's.
+\end{definition}
+
+\begin{lemma}[List bridge]
+  \label{lem:encodings-bitstring-roundtrip}
+  \lean{Complexity.BitString.length_toList, Complexity.BitString.toList_ofList, Complexity.BitString.ofList_toList, Complexity.BitString.toList_inj, Complexity.BitString.toList_append}
+  \leanok
+  \uses{def:encodings-bitstring-list}
+  $|\mathrm{toList}(x)| = n$; $\mathrm{toList}(\mathrm{ofList}(\ell)) = \ell$
+  and $\mathrm{ofList}(\mathrm{toList}(x)) = x$; $\mathrm{toList}$ is
+  injective; and $\mathrm{toList}$ sends concatenation of bit strings to list
+  append.
+\end{lemma}
+\begin{proof}
+  \leanok
+  Mathlib's \texttt{List.ofFn} lemmas.
+\end{proof}
+
+\section{Self-delimiting blocks and pairing}
+
+\begin{definition}[Self-delimiting blocks]
+  \label{def:encodings-delimit}
+  \lean{Complexity.delimit, Complexity.unpair?, Complexity.undelimitBlocks}
+  \leanok
+  The block of $x = x_1 \cdots x_n$ is
+  $\mathrm{delimit}(x) = x_1 x_1\, x_2 x_2 \cdots x_n x_n\, 0 1$: every bit is
+  doubled and the separator $01$ ends the block. The parser
+  $\mathrm{unpair?}$ reads one block off the front of a string and returns the
+  payload and the remaining suffix, or fails on malformed input;
+  $\mathrm{undelimitBlocks}$ parses a whole sequence of blocks.
+\end{definition}
+
+\begin{lemma}[Block framing round trips]
+  \label{lem:encodings-delimit}
+  \lean{Complexity.delimit_length, Complexity.unpair?_delimit_append, Complexity.eq_delimit_append_of_unpair?_eq_some, Complexity.undelimitBlocks_flatten_delimit}
+  \leanok
+  \uses{def:encodings-delimit}
+  $|\mathrm{delimit}(x)| = 2|x| + 2$. For all $x, y$,
+  $\mathrm{unpair?}(\mathrm{delimit}(x)\, y) = (x, y)$, and conversely if
+  $\mathrm{unpair?}(z) = (x, y)$ then $z = \mathrm{delimit}(x)\, y$. For every
+  list of strings $b_1, \dots, b_m$,
+  $\mathrm{undelimitBlocks}(\mathrm{delimit}(b_1) \cdots \mathrm{delimit}(b_m))
+  = [b_1, \dots, b_m]$.
+\end{lemma}
+\begin{proof}
+  \leanok
+  Induction on the payload; no doubled pair equals the separator.
+\end{proof}
+
+\begin{definition}[Pairing function]
+  \label{def:pair}
+  \lean{Complexity.pair}
+  \leanok
+  \uses{def:encodings-delimit}
+  $\langle x, y \rangle = \mathrm{delimit}(x)\, y$: the first component is
+  framed as a block and the second is appended verbatim.
+\end{definition}
+
+\begin{lemma}[Length of a pair]
+  \label{lem:encodings-pair-length}
+  \lean{Complexity.pair_length}
+  \leanok
+  \uses{def:pair}
+  $|\langle x, y \rangle| = 2|x| + 2 + |y|$.
+\end{lemma}
+\begin{proof}
+  \leanok
+  \uses{lem:encodings-delimit}
+  Induction on $x$.
+\end{proof}
+
+\begin{lemma}[Pairing is injective and decodable]
+  \label{lem:encodings-pair-inj}
+  \lean{Complexity.pair_inj, Complexity.unpair?_eq_some_iff}
+  \leanok
+  \uses{def:pair}
+  If $\langle x_1, y_1 \rangle = \langle x_2, y_2 \rangle$ then $x_1 = x_2$ and
+  $y_1 = y_2$. Moreover $\mathrm{unpair?}(z) = (x, y)$ if and only if
+  $z = \langle x, y \rangle$.
+\end{lemma}
+\begin{proof}
+  \leanok
+  \uses{lem:encodings-delimit}
+  Induction on $x_1$.
+\end{proof}
+
+\begin{definition}[Projections]
+  \label{def:encodings-pair-proj}
+  \lean{Complexity.pairFst, Complexity.pairSnd}
+  \leanok
+  \uses{def:pair}
+  $\pi_1$ reads doubled bits until the separator (returning the bits read so
+  far on malformed input), and $\pi_2$ returns the suffix after the first
+  block, or the empty string if there is no valid block. Both are total.
+\end{definition}
+
+\begin{lemma}[Projections of a pair]
+  \label{lem:encodings-pair-proj}
+  \lean{Complexity.pairFst_pair, Complexity.pairSnd_pair, Complexity.pairSnd_length_le}
+  \leanok
+  \uses{def:encodings-pair-proj}
+  $\pi_1 \langle x, y \rangle = x$, $\pi_2 \langle x, y \rangle = y$, and
+  $|\pi_2(z)| \le |z|$ for every $z$.
+\end{lemma}
+\begin{proof}
+  \leanok
+  Induction on $x$.
+\end{proof}
+
+\begin{theorem}[Pairing is polynomial-time]
+  \label{thm:encodings-pair-fp}
+  \lean{Complexity.pairFst_mem_FP, Complexity.pairSnd_mem_FP, Complexity.mem_FP_pair}
+  \leanok
+  \uses{def:encodings-pair-proj, def:FP}
+  $\pi_1, \pi_2 \in \cc{FP}$, and if $a, b \in \cc{FP}$ then
+  $z \mapsto \langle a(z), b(z) \rangle \in \cc{FP}$.
+\end{theorem}
+\begin{proof}
+  \leanok
+  \uses{thm:cobham}
+  The projections are block scanners of Cobham's algebra, and pairing is a
+  Cobham-definable combination.
+\end{proof}
+
+\section{Other formalized codes}
+
+\begin{definition}[Binary natural numbers]
+  \label{def:encodings-binary-nat}
+  \lean{Complexity.BinaryNatCode.encode, Complexity.BinaryNatCode.decode?}
+  \leanok
+  $\mathrm{bin}(v)$ is the minimal binary expansion of $v \in \mathbb{N}$,
+  least significant bit first, with $\mathrm{bin}(0)$ empty. The decoder
+  accepts a string only if it is the minimal expansion of its value, so
+  representations with trailing high zeros are rejected. The code is not
+  prefix-free; an enclosing framing layer fixes the field boundary.
+\end{definition}
+
+\begin{lemma}[Binary natural numbers form an exact codec]
+  \label{lem:encodings-binary-nat}
+  \lean{Complexity.BinaryNatCode.decode?_eq_some_iff, Complexity.BinaryNatCode.length_encode, Complexity.BinaryNatCode.encode_injective}
+  \leanok
+  \uses{def:encodings-binary-nat}
+  $\mathrm{decode}(w) = v$ if and only if $w = \mathrm{bin}(v)$;
+  $|\mathrm{bin}(v)|$ is the bit length of $v$; and $\mathrm{bin}$ is
+  injective.
+\end{lemma}
+\begin{proof}
+  \leanok
+  Mathlib's \texttt{Nat.bits} API.
+\end{proof}
+
+\begin{definition}[Rose-tree data and its serialization]
+  \label{def:encodings-data}
+  \lean{Complexity.Data, Complexity.Data.toBits, Complexity.DataEncode, Complexity.DataEncode.bitstringEncode}
+  \leanok
+  A rose tree is a finite list of rose trees. It is serialized as balanced
+  brackets: $0$ opens a node, its children follow in order, and $1$ closes it.
+  A type with an injective map into rose trees (instances exist for Booleans,
+  natural numbers, lists, options, and products) gets a bit-string encoding by
+  composing with this serialization. This layer supports the rose-tree machine
+  model.
+\end{definition}
+
+\begin{lemma}[Rose-tree serialization round trip]
+  \label{lem:encodings-data}
+  \lean{Complexity.Data.fromBits_toBits, Complexity.Data.length_toBits, Complexity.DataEncode.bitstringEncode_injective}
+  \leanok
+  \uses{def:encodings-data}
+  A decoder recovers every rose tree from its serialization; the serialization
+  of $d$ has length equal to the size of $d$; and the derived bit-string
+  encoding of any encodable type is injective.
+\end{lemma}
+\begin{proof}
+  \leanok
+  A stack-based parser inverts the bracket serialization.
+\end{proof}
+
+\begin{definition}[Circuit code]
+  \label{def:encodings-circuit-code}
+  \lean{Complexity.CircuitCode.encodeCircuit, Complexity.CircuitCode.evalCode}
+  \leanok
+  \uses{def:circuit}
+  A single-output circuit over the fan-in-two AND/OR basis (with negations on
+  gate inputs) is encoded as its gate count in terminated unary followed by
+  its internal gates in order and then its output gate, each gate as an
+  operation bit, two negation bits, and two absolute input wire indices in
+  terminated unary. $\mathrm{evalCode}(N, w, x)$ fails unless $|x| = N$;
+  otherwise it decodes $w$ exactly (rejecting trailing bits) and evaluates the
+  gates in order, failing on any reference to a later wire.
+\end{definition}
+
+\begin{theorem}[Circuit code correctness and size]
+  \label{thm:encodings-circuit-code}
+  \lean{Complexity.CircuitCode.evalCode_encodeCircuit, Complexity.CircuitCode.encodeCircuit_length_le_size}
+  \leanok
+  \uses{def:encodings-circuit-code, def:bitstring}
+  Let $C$ be a single-output fan-in-two AND/OR circuit on $N \ge 1$ inputs with
+  size $s$ (internal and output gates). For every $x \in \{0,1\}^N$,
+  $\mathrm{evalCode}(N, \mathrm{code}(C), \mathrm{toList}(x)) = C(x)$, and
+  $|\mathrm{code}(C)| \le 1 + s(2(N + s) + 6)$.
+\end{theorem}
+\begin{proof}
+  \leanok
+  The decoder is exact on canonical codes, and the array-backed evaluator
+  agrees with the typed evaluation gate by gate.
+\end{proof}
+
+\section{A reusable codec interface}
+
+The codes above were written one at a time, and many more live inside
+individual proofs. The following planned nodes describe the shared interface
+that should replace them.
+
+\begin{definition}[Binary codec]
+  \label{def:encodings-codec}
+  A binary codec for a type $\alpha$ with a size measure $\|\cdot\|$ consists of
+  an encoder $e : \alpha \to \{0,1\}^*$, a partial decoder
+  $d : \{0,1\}^* \to \alpha \cup \{\bot\}$, the round trip $d(e(a)) = a$,
+  canonicity ($d(w) = a$ implies $w = e(a)$), and an explicit size bound
+  $|e(a)| \le s(\|a\|)$. The existing rose-tree encodings
+  (Definition~\ref{def:encodings-data}) give injectivity only, with no decoder
+  at the level of $\alpha$ and no size bound.
+\end{definition}
+
+\begin{definition}[Pairing and tagged-sum codecs]
+  \label{def:encodings-codec-combinators}
+  \uses{def:encodings-codec, def:pair}
+  \notready
+  From codecs for $\alpha$ and $\beta$, the product codec encodes $(a, b)$ as
+  $\langle e_\alpha(a), e_\beta(b) \rangle$, with
+  $|e(a, b)| = 2|e_\alpha(a)| + 2 + |e_\beta(b)|$, and the tagged-sum codec
+  prefixes one tag bit. Both satisfy the codec laws.
+\end{definition}
+
+\begin{lemma}[Codec for bounded indices]
+  \label{lem:encodings-fin-codec}
+  \uses{def:encodings-codec, def:encodings-binary-nat}
+  \notready
+  For every $n \ge 1$ there is a codec for $\{0, \dots, n-1\}$ all of whose
+  codewords have length $\lceil \log_2 n \rceil$, whose decoder rejects values
+  $\ge n$.
+\end{lemma}
+
+\begin{definition}[Length-bounded list codec]
+  \label{def:encodings-list-codec}
+  \uses{def:encodings-codec, def:encodings-delimit}
+  \notready
+  From a codec for $\alpha$, a codec for lists over $\alpha$ that frames each
+  element as a block, with
+  $|e([a_1, \dots, a_m])| = \sum_i (2|e(a_i)| + 2)$.
+\end{definition}
+
+\begin{definition}[Canonical codes for machine objects]
+  \label{def:encodings-machine-codes}
+  \uses{def:encodings-codec, def:encodings-codec-combinators, lem:encodings-fin-codec, def:encodings-list-codec, def:models-cfg, def:tm}
+  \notready
+  Canonical codecs, with explicit length bounds, for finite functions (truth
+  tables), machine states, configurations of time-bounded runs, and bounded
+  interaction transcripts.
+\end{definition}
+
+\section{Finite counting}
+
+\begin{lemma}[Size of the sample space]
+  \label{lem:encodings-card}
+  \lean{Complexity.card_finArrowBool}
+  \leanok
+  $|\{0,1\}^T| = 2^T$.
+\end{lemma}
+\begin{proof}
+  \leanok
+  Mathlib's cardinality of function types.
+\end{proof}
+
+\begin{definition}[Blocks of a random string]
+  \label{def:encodings-blocks}
+  \lean{Complexity.blockEquiv, Complexity.blocksEquiv, Complexity.blockEventCount}
+  \leanok
+  \uses{def:bitstring}
+  $\{0,1\}^{a+b} \simeq \{0,1\}^a \times \{0,1\}^b$ splits a string into prefix
+  and suffix, and $\{0,1\}^{kT} \simeq (\{0,1\}^T)^k$ splits it into $k$ blocks
+  in row-major order. For an event $E \subseteq \{0,1\}^T$ and
+  $w \in \{0,1\}^{kT}$, $\#_E(w)$ is the number of blocks of $w$ lying in $E$.
+\end{definition}
+
+\begin{lemma}[Block independence, counting form]
+  \label{lem:encodings-block-count}
+  \lean{Complexity.card_filter_block, Complexity.card_blockEventCount_eq}
+  \leanok
+  \uses{def:encodings-blocks}
+  The number of $w \in \{0,1\}^{a+b}$ whose prefix satisfies $P$ and whose
+  suffix satisfies $Q$ is $|P| \cdot |Q|$. The number of
+  $w \in \{0,1\}^{kT}$ with $\#_E(w) = j$ is
+  $\binom{k}{j} |E|^j (2^T - |E|)^{k-j}$.
+\end{lemma}
+\begin{proof}
+  \leanok
+  Transport along the block equivalences and count tuples by their number of
+  successes.
+\end{proof}
+
+\begin{lemma}[Union bound, counting form]
+  \label{lem:encodings-union-count}
+  \lean{Complexity.card_filter_exists_le, Complexity.exists_good_seed}
+  \leanok
+  The number of points satisfying some $p_i$, $i \in s$, is at most
+  $\sum_{i \in s} |p_i|$. Consequently, if bad sets $B_i \subseteq S$ satisfy
+  $\sum_i |B_i| < |S|$, some $s \in S$ lies in no $B_i$.
+\end{lemma}
+\begin{proof}
+  \leanok
+  Cardinality of a finite union.
+\end{proof}
+
+\begin{definition}[Majority]
+  \label{def:encodings-majority}
+  \lean{Complexity.popCount, Complexity.majority, Complexity.blockMajority}
+  \leanok
+  \uses{def:encodings-blocks}
+  For $f \in \{0,1\}^k$, $\mathrm{maj}(f) = 1$ if and only if more than $k/2$
+  positions of $f$ are $1$ (strict majority). For $w \in \{0,1\}^{kT}$,
+  $\mathrm{maj}_E(w) = 1$ if and only if $2\,\#_E(w) > k$.
+\end{definition}
+
+\begin{lemma}[Majority counts]
+  \label{lem:encodings-majority-count}
+  \lean{Complexity.card_majority_eq_true, Complexity.card_majority_eq_false, Complexity.card_blockMajority_eq_false}
+  \leanok
+  \uses{def:encodings-majority}
+  $|\{f : \mathrm{maj}(f) = 1\}| = \sum_{r = \lfloor k/2 \rfloor + 1}^{k} \binom{k}{r}$
+  and $|\{f : \mathrm{maj}(f) = 0\}| = \sum_{r=0}^{\lfloor k/2 \rfloor} \binom{k}{r}$.
+  For $2r + 1$ blocks,
+  $|\{w : \mathrm{maj}_E(w) = 0\}| = \sum_{j=0}^{r} \binom{2r+1}{j} |E|^j (2^T - |E|)^{2r+1-j}$.
+\end{lemma}
+\begin{proof}
+  \leanok
+  \uses{lem:encodings-block-count}
+  Sum the exact fiber counts.
+\end{proof}
+
+\section{Event probability}
+
+\begin{definition}[Event probability]
+  \label{def:encodings-eventprob}
+  \lean{Complexity.eventProb}
+  \leanok
+  For a finite event $E \subseteq \{0,1\}^T$,
+  $\Pr[E] = |E| / 2^T \in \mathbb{Q}$.
+\end{definition}
+
+\begin{lemma}[Basic laws]
+  \label{lem:encodings-eventprob-basic}
+  \lean{Complexity.eventProb_nonneg, Complexity.eventProb_le_one, Complexity.eventProb_mono, Complexity.eventProb_compl, Complexity.eventProb_empty, Complexity.eventProb_univ}
+  \leanok
+  \uses{def:encodings-eventprob}
+  $0 \le \Pr[E] \le 1$; $E \subseteq F$ implies $\Pr[E] \le \Pr[F]$;
+  $\Pr[E^c] = 1 - \Pr[E]$; $\Pr[\emptyset] = 0$ and $\Pr[\{0,1\}^T] = 1$.
+\end{lemma}
+\begin{proof}
+  \leanok
+  \uses{lem:encodings-card}
+  Cardinality arithmetic.
+\end{proof}
+
+\begin{lemma}[Union bound]
+  \label{lem:encodings-union-bound}
+  \lean{Complexity.eventProb_union_le, Complexity.eventProb_biUnion_le, Complexity.eventProb_biUnion}
+  \leanok
+  \uses{def:encodings-eventprob}
+  $\Pr[E \cup F] \le \Pr[E] + \Pr[F]$, and
+  $\Pr[\bigcup_{i \in s} E_i] \le \sum_{i \in s} \Pr[E_i]$ for every finite
+  family, with equality when the family is pairwise disjoint.
+\end{lemma}
+\begin{proof}
+  \leanok
+  Induction on the index set.
+\end{proof}
+
+\begin{lemma}[Markov's inequality]
+  \label{lem:encodings-markov}
+  \lean{Complexity.eventProb_le_uniformAverage_div}
+  \leanok
+  \uses{def:encodings-eventprob}
+  Let $w : \{0,1\}^T \to \mathbb{Q}_{\ge 0}$ and $\theta > 0$. If
+  $w(r) \ge \theta$ for every $r \in E$, then
+  $\Pr[E] \le \mathbb{E}_r[w(r)] / \theta$, where $\mathbb{E}_r$ is the uniform
+  average.
+\end{lemma}
+\begin{proof}
+  \leanok
+  Compare sums.
+\end{proof}
+
+\begin{lemma}[Block independence]
+  \label{lem:encodings-eventprob-block}
+  \lean{Complexity.eventProb_block}
+  \leanok
+  \uses{def:encodings-eventprob, def:encodings-blocks}
+  $\Pr_{w \in \{0,1\}^{a+b}}[P(\text{prefix}) \wedge Q(\text{suffix})] =
+  \Pr[P] \cdot \Pr[Q]$.
+\end{lemma}
+\begin{proof}
+  \leanok
+  \uses{lem:encodings-block-count}
+  Divide the counting form by $2^{a+b}$.
+\end{proof}
+
+\begin{lemma}[Exact majority tail]
+  \label{lem:encodings-majority-tail}
+  \lean{Complexity.eventProb_blockMajority_eq_false}
+  \leanok
+  \uses{def:encodings-eventprob, def:encodings-majority}
+  With $p = \Pr[E]$, the probability over $w \in \{0,1\}^{(2r+1)T}$ that
+  $\mathrm{maj}_E(w) = 0$ is
+  $\sum_{j=0}^{r} \binom{2r+1}{j} p^j (1-p)^{2r+1-j}$.
+\end{lemma}
+\begin{proof}
+  \leanok
+  \uses{lem:encodings-majority-count}
+  Normalize the exact count.
+\end{proof}
+
+\begin{theorem}[Majority amplification]
+  \label{thm:encodings-amplification}
+  \lean{Complexity.eventProb_blockMajority_false_le_two_pow, Complexity.eventProb_blockMajority_true_ge_one_sub_two_pow, Complexity.eventProb_blockMajority_true_le_two_pow}
+  \leanok
+  \uses{def:encodings-eventprob, def:encodings-majority}
+  Let $E \subseteq \{0,1\}^T$ and $K = 12k + 1$ blocks. If $\Pr[E] \ge 2/3$, then
+  $\Pr[\mathrm{maj}_E = 0] \le 2^{-k}$ and $\Pr[\mathrm{maj}_E = 1] \ge 1 - 2^{-k}$.
+  If $\Pr[E] \le 1/3$, then $\Pr[\mathrm{maj}_E = 1] \le 2^{-k}$.
+\end{theorem}
+\begin{proof}
+  \leanok
+  \uses{lem:encodings-majority-tail, lem:encodings-eventprob-basic}
+  Bound the lower tail with $p \ge 2/3$ by $\frac13 (8/9)^r$ using that the
+  lower-half binomial coefficients sum to $4^r$ (an elementary bound, not a
+  Chernoff bound), take $r = 6k$, and pass to complements for the other two
+  statements.
+\end{proof}
+
+\begin{lemma}[Good seeds]
+  \label{lem:encodings-good-seed}
+  \lean{Complexity.exists_good_seed_of_sum_eventProb_lt_one, Complexity.exists_good_seed_of_eventProb_le_two_pow_succ}
+  \leanok
+  \uses{def:encodings-eventprob}
+  If $\sum_{i \in I} \Pr[B_i] < 1$ for bad events $B_i \subseteq \{0,1\}^S$,
+  some seed lies in no $B_i$. In particular, if $\Pr[B_x] \le 2^{-(n+1)}$ for
+  every $x \in \{0,1\}^n$, one seed avoids every $B_x$.
+\end{lemma}
+\begin{proof}
+  \leanok
+  \uses{lem:encodings-union-count}
+  The probabilistic method: the union bound in counting form.
+\end{proof}
+
+\begin{lemma}[Acceptance probability is event probability]
+  \label{lem:encodings-acceptprob}
+  \lean{Complexity.NTM.acceptProb_eq_eventProb, Complexity.NTM.acceptProb_eq_of_le_of_allPathsHaltIn}
+  \leanok
+  \uses{def:models-accept-prob, def:encodings-eventprob, def:ntm-decides}
+  The acceptance probability of $N$ on $x$ with clock $T$ is the event
+  probability of the set of accepting choice sequences of length $T$. If, on
+  every input $x$, every trace of $N$ halts within $T(|x|)$ steps, and
+  $T \le T'$ pointwise, then for every $x$ the acceptance probabilities with
+  clocks $T'(|x|)$ and $T(|x|)$ agree.
+\end{lemma}
+\begin{proof}
+  \leanok
+  The first statement is definitional. For the second, halted traces are
+  fixed and every short choice sequence has the same number of extensions.
+\end{proof}
+
+\begin{lemma}[Bridge to Mathlib densities]
+  \label{lem:encodings-eventprob-dens}
+  \uses{def:encodings-eventprob}
+  $\Pr[E]$ equals Mathlib's density \texttt{Finset.dens} of $E$ in
+  $\{0,1\}^T$, and the uniform average in Lemma~\ref{lem:encodings-markov} is
+  Mathlib's \texttt{Finset.expect}, so the laws above follow from Mathlib's
+  general finite-probability API.
+\end{lemma}
+
+\section{Repetition of probabilistic machines}
+
+\begin{definition}[Fixed-time repetition]
+  \label{def:encodings-repeat}
+  \lean{Complexity.NTM.repeatAtTime, Complexity.NTM.repeatAtTimeSteps, Complexity.NTM.repeatAcceptEvent, Complexity.repeatRandomSeed}
+  \leanok
+  \uses{def:ntm, def:encodings-majority}
+  For a machine $N$ with $n$ work tapes, $\mathrm{rep}(N, k, T)$ has $k(n+1)$
+  work tapes and performs $k$ sequential runs of $N$ for exactly $T$ steps each,
+  each run on a fresh bank of $n + 1$ work tapes (the last simulating the output
+  tape), rewinding the input tape between runs, and finally writes the strict
+  majority of the $k$ verdicts. Every run occupies exactly $2T + 2$ transitions
+  whether or not $N$ halts early, so the total time is $2 + k(2T + 2)$ and the
+  choice bits used by the simulated runs sit at fixed positions. The compact
+  seed of a choice sequence is the $kT$ bits at those positions, and the
+  accepting event of $N$ on $x$ is the set of accepting choice sequences in
+  $\{0,1\}^T$.
+\end{definition}
+
+\begin{theorem}[Repetition is correct pathwise]
+  \label{thm:encodings-repeat-correct}
+  \lean{Complexity.NTM.repeatAtTime_trace_correct}
+  \leanok
+  \uses{def:encodings-repeat}
+  Suppose every trace of $N$ on $x$ has halted after $T$ steps. Then for every
+  choice sequence $r$ of length $2 + k(2T + 2)$, the trace of
+  $\mathrm{rep}(N, k, T)$ on $x$ ends halted with output head at cell $1$ and
+  output cell $1$ equal to $\mathrm{maj}_E$ of the compact seed of $r$, where
+  $E$ is the accepting event of $N$ on $x$.
+\end{theorem}
+\begin{proof}
+  \leanok
+  Invariants for the setup, simulation, rewind, and finish phases of each
+  stride.
+\end{proof}
+
+\begin{theorem}[Exact acceptance probability of repetition]
+  \label{thm:encodings-repeat-prob}
+  \lean{Complexity.NTM.repeatAtTime_acceptProb_eq_eventProb}
+  \leanok
+  \uses{def:encodings-repeat, def:models-accept-prob, def:encodings-eventprob}
+  Under the same hypothesis, the acceptance probability of
+  $\mathrm{rep}(N, k, T)$ on $x$ with clock $2 + k(2T + 2)$ equals
+  $\Pr_{s \in \{0,1\}^{kT}}[\mathrm{maj}_E(s) = 1]$.
+\end{theorem}
+\begin{proof}
+  \leanok
+  \uses{thm:encodings-repeat-correct, lem:encodings-acceptprob}
+  Acceptance factors through the compact seed, and the administrative choice
+  bits cancel because every compact seed has the same number of extensions.
+\end{proof}
+
+\begin{theorem}[Amplification by repetition]
+  \label{thm:encodings-repeat-amplification}
+  \lean{Complexity.NTM.repeatAtTime_acceptProb_ge_one_sub_two_pow, Complexity.NTM.repeatAtTime_acceptProb_le_two_pow}
+  \leanok
+  \uses{def:encodings-repeat, def:models-accept-prob}
+  Suppose every trace of $N$ on $x$ has halted after $T$ steps, and let
+  $K = 12s + 1$. If $N$ accepts $x$ with probability at least $2/3$ (clock
+  $T$), then $\mathrm{rep}(N, K, T)$ accepts $x$ with probability at least
+  $1 - 2^{-s}$ (clock $2 + K(2T + 2)$). If $N$ accepts $x$ with probability at
+  most $1/3$, then $\mathrm{rep}(N, K, T)$ accepts $x$ with probability at most
+  $2^{-s}$.
+\end{theorem}
+\begin{proof}
+  \leanok
+  \uses{thm:encodings-repeat-prob, thm:encodings-amplification}
+  Combine the exact identity with majority amplification.
+\end{proof}
+
+\section{Zero-error randomized computation}
+
+\begin{definition}[Las Vegas algorithms]
+  \label{def:encodings-zpp-lv}
+  \uses{def:ntm, def:models-accept-prob}
+  $\cc{ZPP}_{\mathrm{LV}}$ is the class of languages $L$ with a probabilistic
+  machine $N$ and a polynomial $T$ such that every trace on every input $x$
+  halts within $T(|x|)$ steps with output either the correct verdict
+  $[x \in L]$ or a designated ``don't know'' answer, and the probability of
+  ``don't know'' is at most $1/2$. (The textbook expected-polynomial-time
+  formulation needs an expected-time machine semantics, which the library does
+  not have.)
+\end{definition}
+
+\begin{theorem}[Zero error equals one-sided error on both sides]
+  \label{thm:encodings-zpp-lv}
+  \uses{def:encodings-zpp-lv, def:ZPP, def:RP}
+  \notready
+  $\cc{ZPP}_{\mathrm{LV}} = \cc{ZPP}$, where the library defines
+  $\cc{ZPP} = \cc{RP} \cap \cc{coRP}$.
+\end{theorem}
+\begin{proof}
+  \uses{thm:encodings-repeat-amplification}
+  A Las Vegas machine gives an $\cc{RP}$ machine by answering $0$ on ``don't
+  know'', and symmetrically a $\cc{coRP}$ machine. Conversely, run the
+  $\cc{RP}$ and $\cc{coRP}$ machines and answer only when one of them
+  certifies the verdict.
+\end{proof}

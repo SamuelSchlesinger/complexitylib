@@ -1,0 +1,702 @@
+\chapter{Machine models}
+\label{chap:models}
+
+This chapter fixes the machine model that every complexity class in the library
+is defined from, and the tools for reasoning about it. The base model is the
+multi-tape Turing machine of Arora and Barak over the alphabet
+$\{0, 1, \sqcup, \triangleright\}$, with a read-only input tape, $k$ work tapes,
+and an output tape; deterministic, nondeterministic, and probabilistic machines
+share one configuration type and differ only in their transition functions and
+acceptance conditions. Formalized so far: the model with its time and output
+semantics, Hoare-style specifications for sequential, conditional, and looping
+composition, the quadratic reduction to one work tape, a fixed six-work-tape
+universal machine proved universal and polynomially efficiently universal, a
+weak deterministic time hierarchy, and a logarithmic-cost random access machine
+whose polynomial-time class equals $\cc{P}$. The main open directions are
+undecidability of the halting problem (now within reach, since the universal
+machine is proved to reflect as well as preserve halting), a time hierarchy
+under the
+textbook time-constructibility hypothesis, and space-level and variant-model
+robustness for random access machines.
+
+\section{Turing machines}
+
+\begin{definition}[Alphabet and tapes]
+  \label{def:models-tape}
+  \lean{Complexity.Γ, Complexity.Γw, Complexity.Dir3, Complexity.Tape, Complexity.Tape.HasOutput}
+  \leanok
+  The read alphabet is $\Gamma = \{0, 1, \sqcup, \triangleright\}$ and the write
+  alphabet is $\Gamma_w = \{0, 1, \sqcup\}$, so no transition can write the
+  start symbol $\triangleright$. A head moves left, right, or stays. A tape is a
+  head position $h \in \mathbb{N}$ together with contents
+  $\mathbb{N} \to \Gamma$. Tapes start with $\triangleright$ in cell $0$;
+  writing at cell $0$ is a no-op, so the marker is permanent, and moving left at
+  cell $0$ stays there. A tape \emph{has output}
+  $y \in \{0,1\}^*$ when cells $1, \dots, |y|$ hold the bits of $y$ and cell
+  $|y| + 1$ is blank.
+\end{definition}
+
+\begin{definition}[Language]
+  \label{def:language}
+  \lean{Complexity.Language}
+  \leanok
+  A language is a set of finite binary strings, $L \subseteq \{0,1\}^*$.
+\end{definition}
+
+\begin{definition}[Configuration]
+  \label{def:models-cfg}
+  \lean{Complexity.Cfg, Complexity.Cfg.init}
+  \leanok
+  \uses{def:models-tape}
+  A configuration of a machine with state set $Q$ and $k$ work tapes consists of
+  a state, an input tape, $k$ work tapes, and an output tape, each a named
+  field. The initial configuration on input $x$ is in the start state, with $x$
+  written from cell $1$ of the input tape, every other tape empty, and every
+  head at cell $0$.
+\end{definition}
+
+\begin{definition}[Deterministic Turing machine]
+  \label{def:tm}
+  \lean{Complexity.TM, Complexity.TM.step, Complexity.TM.reachesIn, Complexity.TM.reaches}
+  \leanok
+  \uses{def:models-cfg}
+  A deterministic Turing machine with $k$ work tapes consists of a finite state
+  type $Q$ with decidable equality, a start state and a halt state, and a
+  transition function
+  \[
+    \delta : Q \times \Gamma \times \Gamma^k \times \Gamma \to
+      Q \times \Gamma_w^k \times \Gamma_w \times \{\mathrm{L}, \mathrm{R}, \mathrm{S}\}^{k+2}
+  \]
+  that must move right every head reading $\triangleright$. One step applies
+  $\delta$ to the symbols under the four kinds of heads, writes on the work and
+  output tapes, and moves all heads; the halt state has no successor. The
+  relation $c \to^t c'$ holds when $c'$ is reached from $c$ in exactly $t$
+  steps.
+\end{definition}
+
+\begin{definition}[Nondeterministic and probabilistic Turing machine]
+  \label{def:ntm}
+  \lean{Complexity.NTM, Complexity.NTM.trace, Complexity.TM.toNTM}
+  \leanok
+  \uses{def:tm}
+  A nondeterministic Turing machine has the same data as a deterministic one
+  except that it has two transition functions $\delta_0, \delta_1$. Its
+  execution is defined only through the trace: given a choice sequence
+  $r \in \{0,1\}^T$, run $T$ steps, using $\delta_{r_i}$ at step $i$, and stay
+  put once the halt state is reached. The same structure serves as a
+  probabilistic machine, with $r$ read as random bits. A deterministic machine
+  embeds by taking $\delta_0 = \delta_1 = \delta$.
+\end{definition}
+
+\begin{definition}[Deciding in time]
+  \label{def:tm-decides}
+  \lean{Complexity.TM.DecidesInTime}
+  \leanok
+  \uses{def:tm, def:language}
+  A deterministic machine $M$ decides $L$ in time $T : \mathbb{N} \to \mathbb{N}$
+  if on every input $x$ it reaches the halt state within $T(|x|)$ steps, with
+  output cell $1$ equal to $1$ if $x \in L$ and equal to $0$ if $x \notin L$
+  (Arora--Barak Definition~1.2).
+\end{definition}
+
+\begin{definition}[Computing a function in time]
+  \label{def:tm-computes}
+  \lean{Complexity.TM.ComputesInTime, Complexity.TM.Computes}
+  \leanok
+  \uses{def:tm}
+  A deterministic machine $M$ computes $f : \{0,1\}^* \to \{0,1\}^*$ in time $T$
+  if on every input $x$ it halts within $T(|x|)$ steps and its output tape has
+  output $f(x)$. It computes $f$ if it does so for some $T$.
+\end{definition}
+
+\begin{definition}[Nondeterministic deciding]
+  \label{def:ntm-decides}
+  \lean{Complexity.NTM.DecidesInTime, Complexity.NTM.AcceptsInTime, Complexity.NTM.AllPathsHaltIn}
+  \leanok
+  \uses{def:ntm, def:language}
+  A nondeterministic machine $N$ accepts $x$ in time $T$ if some choice sequence
+  of length $T$ leads to the halt state with output cell $1$ equal to $1$. It
+  decides $L$ in time $T$ if every trace on every input $x$ has halted after
+  $T(|x|)$ steps, and $x \in L$ exactly when $N$ accepts $x$ in time $T(|x|)$
+  (Arora--Barak Definition~2.1). Rejection is the absence of an accepting path;
+  it does not require output $0$.
+\end{definition}
+
+\begin{definition}[Acceptance probability]
+  \label{def:models-accept-prob}
+  \lean{Complexity.NTM.acceptCount, Complexity.NTM.acceptProb, Complexity.NTM.outputProb}
+  \leanok
+  \uses{def:ntm}
+  For a machine $N$, input $x$, and clock $T$, the acceptance probability is the
+  rational number
+  \[
+    \Pr[N \text{ accepts } x \text{ in } T] =
+      \frac{|\{ r \in \{0,1\}^T : \text{the trace halts with output cell } 1 = 1\}|}{2^T},
+  \]
+  and the probability of output $y$ is defined the same way with the output
+  condition in place of acceptance. Both are meaningful when every trace has
+  halted by time $T$.
+\end{definition}
+
+\begin{lemma}[Deterministic machines as nondeterministic ones]
+  \label{lem:models-to-ntm}
+  \lean{Complexity.TM.toNTM_decidesInTime}
+  \leanok
+  \uses{def:tm-decides, def:ntm-decides}
+  If a deterministic machine decides $L$ in time $T$, its nondeterministic
+  embedding decides $L$ in time $T$.
+\end{lemma}
+\begin{proof}
+  \leanok
+  Every trace of the embedding is the deterministic run, frozen at the halt
+  state.
+\end{proof}
+
+\section{Output semantics}
+
+\begin{definition}[Halting and producing an output]
+  \label{def:produces}
+  \lean{Complexity.TM.Produces, Complexity.TM.ProducesInTime, Complexity.TM.Halts, Complexity.TM.HaltsInTime, Complexity.TM.runCfg}
+  \leanok
+  \uses{def:tm}
+  A deterministic machine $M$ halts on a program $p$ (within time $t$) if the
+  run from the initial configuration on $p$ reaches the halt state (within $t$
+  steps). It produces $y$ on $p$ (within time $t$) if moreover the output tape of
+  the halted configuration has output $y$. The bounded evaluator
+  $\mathrm{run}(c, t)$ is the configuration after $t$ steps, standing still once
+  halted.
+\end{definition}
+
+\begin{lemma}[Basic facts about production]
+  \label{lem:models-produces-basic}
+  \lean{Complexity.TM.ProducesInTime.iff_runCfg, Complexity.TM.ProducesInTime.mono, Complexity.TM.produces_iff_exists_producesInTime, Complexity.TM.ProducesInTime.take_time, Complexity.TM.Produces.output_unique}
+  \leanok
+  \uses{def:produces}
+  Let $M$ be a deterministic machine.
+  \begin{enumerate}
+    \item $M$ produces $y$ on $p$ within time $t$ if and only if
+      $\mathrm{run}(\mathrm{init}(p), t)$ is halted with output $y$; in
+      particular bounded production is decidable.
+    \item Bounded production is monotone in $t$, and $M$ produces $y$ on $p$
+      exactly when it does so within some finite time.
+    \item If $M$ produces $y$ on $p$ within time $t$, it produces $y$ on the
+      first $t$ bits of $p$ within time $t$.
+    \item If $M$ produces both $y$ and $y'$ on $p$, then $y = y'$.
+  \end{enumerate}
+\end{lemma}
+\begin{proof}
+  \leanok
+  Relate the relational run to the bounded evaluator; a run of $t$ steps
+  cannot move the input head past cell $t$.
+\end{proof}
+
+\begin{lemma}[Computing is pointwise production]
+  \label{lem:models-computes-iff-produces}
+  \lean{Complexity.TM.computesInTime_iff_forall_producesInTime, Complexity.TM.computes_iff_forall_produces}
+  \leanok
+  \uses{def:tm-computes, def:produces}
+  $M$ computes $f$ in time $T$ if and only if $M$ produces $f(x)$ on $x$ within
+  time $T(|x|)$ for every $x$. $M$ computes $f$ if and only if $M$ produces
+  $f(x)$ on every $x$.
+\end{lemma}
+\begin{proof}
+  \leanok
+  The first equivalence unfolds the definitions. For the second, take the maximum
+  halting time over the finitely many inputs of each length.
+\end{proof}
+
+\section{Combinators and Hoare-style specifications}
+
+\begin{definition}[Time-bounded Hoare triple]
+  \label{def:models-hoare}
+  \lean{Complexity.TM.HoareTime, Complexity.TM.Hoare, Complexity.TapePred}
+  \leanok
+  \uses{def:tm}
+  For predicates $\mathit{pre}, \mathit{post}$ on (input tape, work tapes,
+  output tape) and a bound $b \in \mathbb{N}$, the triple
+  $\{\mathit{pre}\}\, M\, \{\mathit{post}\}_b$ holds if $M$, started in its
+  start state on any tapes satisfying $\mathit{pre}$, halts within $b$ steps on
+  tapes satisfying $\mathit{post}$. The unbounded triple drops the step bound.
+\end{definition}
+
+\begin{definition}[Machine combinators]
+  \label{def:models-combinators}
+  \lean{Complexity.TM.seqTM, Complexity.TM.ifTM, Complexity.TM.loopTM, Complexity.TM.complementTM, Complexity.TM.unionTM}
+  \leanok
+  \uses{def:tm}
+  On machines with the same $k$ work tapes: $\mathrm{seq}(M_1, M_2)$ runs $M_1$
+  to completion and then $M_2$ on the same tapes; $\mathrm{if}(M_t, M_1, M_0)$
+  runs the test $M_t$ and branches on its output cell $1$;
+  $\mathrm{loop}(M_b, M_t)$ alternates a body and a test until the test outputs
+  $1$; $\mathrm{complement}(M)$ flips the verdict of $M$. The machine
+  $\mathrm{union}(M_1, M_2)$ is meant to decide $L_1 \cup L_2$ from deciders for
+  $L_1$ and $L_2$: it runs $M_1$ with its output redirected to a work tape and,
+  if $M_1$ rejects, runs $M_2$, using $k_1 + 1 + k_2$ work tapes. At each phase
+  boundary
+  every head reading $\triangleright$ moves to cell $1$, the other heads stay,
+  and the contents of well-formed tapes are unchanged.
+\end{definition}
+
+\begin{theorem}[Sequential composition rule]
+  \label{thm:models-seq-hoare}
+  \lean{Complexity.TM.seqTM_hoareTime}
+  \leanok
+  \uses{def:models-hoare, def:models-combinators}
+  If $\{\mathit{pre}\}\, M_1\, \{\mathit{mid}\}_{b_1}$, the phase-boundary
+  normalization maps tapes satisfying $\mathit{mid}$ to tapes satisfying
+  $\mathit{mid}'$, and $\{\mathit{mid}'\}\, M_2\, \{\mathit{post}\}_{b_2}$, then
+  $\{\mathit{pre}\}\, \mathrm{seq}(M_1, M_2)\, \{\mathit{post}\}_{b_1 + 1 + b_2}$.
+\end{theorem}
+\begin{proof}
+  \leanok
+  Simulate $M_1$ in the first phase, take one transition step, and simulate
+  $M_2$ in the second phase.
+\end{proof}
+
+\begin{theorem}[Conditional rule]
+  \label{thm:models-if-hoare}
+  \lean{Complexity.TM.ifTM_hoareTime}
+  \leanok
+  \uses{def:models-hoare, def:models-combinators}
+  Suppose $\{\mathit{pre}\}\, M_t\, \{\mathit{mid}\}_{b_t}$, where $\mathit{mid}$
+  guarantees well-formed tapes and output head position at most $p$; that
+  $\mathit{mid}$ with output cell $1$ equal to $1$ (resp.\ not $1$) routes, after
+  normalization, to the precondition of $M_1$ (resp.\ $M_0$); that
+  $\{\mathit{mid}_i\}\, M_i\, \{\mathit{post}_i\}_{b_i}$ for $i = 0, 1$; and that
+  both postconditions imply $\mathit{post}$ after normalization. Then
+  $\{\mathit{pre}\}\, \mathrm{if}(M_t, M_1, M_0)\, \{\mathit{post}\}_b$ with
+  $b = b_t + p + \max(b_1, b_0) + 5$.
+\end{theorem}
+\begin{proof}
+  \leanok
+  Simulate the test, rewind the output head to read the verdict, then
+  simulate the selected branch.
+\end{proof}
+
+\begin{theorem}[Loop rule]
+  \label{thm:models-loop-hoare}
+  \lean{Complexity.TM.loopTM_hoareTime}
+  \leanok
+  \uses{def:models-hoare, def:models-combinators}
+  Let $\mathit{inv}$ be an invariant and $v$ a variant with $v \le K$ under
+  $\mathit{inv}$. Suppose every iteration of $\mathrm{loop}(M_b, M_t)$ started
+  from $\mathit{inv}$ either halts within $b$ steps satisfying $\mathit{post}$,
+  or returns to the loop start within $b$ steps satisfying $\mathit{inv}$ with
+  $v$ strictly smaller. Then
+  $\{\mathit{inv}\}\, \mathrm{loop}(M_b, M_t)\, \{\mathit{post}\}_{(K+1) b}$.
+\end{theorem}
+\begin{proof}
+  \leanok
+  Induction on the variant.
+\end{proof}
+
+\section{Reduction to one work tape}
+
+\begin{theorem}[Single-tape reduction, nondeterministic]
+  \label{thm:models-ntm-single-tape}
+  \lean{Complexity.NTM.singleTapeSim_decidesInTime, Complexity.NTM.exists_singleTape_decidesInTime}
+  \leanok
+  \uses{def:ntm-decides}
+  If a nondeterministic machine $N$ with $k \ge 1$ work tapes decides $L$ in
+  time $T$, then its single-tape simulator, a machine with one work tape,
+  decides $L$ in time $16(k+1)(T(n) + n + 1)^2$. Consequently, for any $k$, if
+  $L$ is decided by some $k$-work-tape machine in time $T = O(n^c)$, it is
+  decided by some one-work-tape machine in time $O(n^{c'})$ for some $c'$.
+\end{theorem}
+\begin{proof}
+  \leanok
+  Interleave the $k$ work tapes on one tape in blocks carrying head markers;
+  each simulated step sweeps the used region. For $k = 0$, pad with a dummy
+  work tape.
+\end{proof}
+
+\begin{theorem}[Single-tape reduction, deterministic]
+  \label{thm:models-single-tape}
+  \lean{Complexity.TM.exists_singleTape_decidesInTime}
+  \leanok
+  \uses{def:tm-decides}
+  If a deterministic machine with $k$ work tapes decides $L$ in time $T$, then
+  some deterministic machine with one work tape decides $L$ in time
+  $16(k+1)(T(n) + n + 1)^2$.
+\end{theorem}
+\begin{proof}
+  \leanok
+  \uses{lem:models-to-ntm, thm:models-ntm-single-tape}
+  Embed as a nondeterministic machine, apply the single-tape simulation, which
+  preserves determinism and the output-$0$ rejection convention, and convert
+  back.
+\end{proof}
+
+\section{Universal simulation}
+
+\begin{definition}[Simulation]
+  \label{def:simulates}
+  \lean{Complexity.TM.Simulates}
+  \leanok
+  \uses{def:produces}
+  A deterministic machine $U$ simulates $M$ under a compiler
+  $c : \{0,1\}^* \to \{0,1\}^*$ if for every program $p$: $U$ halts on $c(p)$
+  if and only if $M$ halts on $p$, and for every $y$, $U$ produces $y$ on $c(p)$
+  if and only if $M$ produces $y$ on $p$.
+\end{definition}
+
+\begin{definition}[Timed simulation and overhead policies]
+  \label{def:models-simulates-in-time}
+  \lean{Complexity.TM.SimulatesInTime, Complexity.TM.HasAdditiveProgramOverhead, Complexity.TM.PolynomialTimeOverhead}
+  \leanok
+  \uses{def:produces}
+  $U$ simulates $M$ under $c$ in time $\tau : \{0,1\}^* \times \mathbb{N} \to \mathbb{N}$
+  if whenever $M$ halts on $p$ (resp.\ produces $y$ on $p$) within $t$ steps,
+  $U$ halts on $c(p)$ (resp.\ produces $y$ on $c(p)$) within $\tau(p, t)$ steps.
+  The compiler has additive overhead $C$ if $|c(p)| \le |p| + C$ for all $p$.
+  The clock $\tau$ is polynomial if $\tau(p, t) \le a (|p| + t + 1)^e$ for
+  some constants $a, e$.
+\end{definition}
+
+\begin{definition}[Computable function]
+  \label{def:computable}
+  \lean{Complexity.TM.IsComputable}
+  \leanok
+  \uses{def:tm-computes}
+  A function $f : \{0,1\}^* \to \{0,1\}^*$ is computable if some deterministic
+  machine, with any number of work tapes, computes $f$.
+\end{definition}
+
+\begin{definition}[Universal machine]
+  \label{def:universal}
+  \lean{Complexity.TM.IsUniversal, Complexity.TM.IsEfficientlyUniversal, Complexity.TM.IsEfficientlyUniversalFor}
+  \leanok
+  \uses{def:simulates, def:models-simulates-in-time, def:computable}
+  A deterministic machine $U$ is universal if for every $k$ and every machine
+  $M$ with $k$ work tapes there is a computable compiler $c$ such that $U$
+  simulates $M$ under $c$. It is efficiently universal if moreover $c$ has
+  additive overhead and $U$ simulates $M$ under $c$ in some polynomial clock.
+  Computability of $c$ is essential: without it a machine that copies its input
+  after a leading $0$ and diverges after a leading $1$ would qualify, with a
+  compiler that consults the source machine's halting behavior.
+\end{definition}
+
+\begin{lemma}[Simulation algebra]
+  \label{lem:models-simulation-algebra}
+  \lean{Complexity.TM.Simulates.refl, Complexity.TM.Simulates.comp, Complexity.TM.SimulatesInTime.comp, Complexity.TM.HasAdditiveProgramOverhead.comp, Complexity.TM.PolynomialTimeOverhead.comp, Complexity.TM.IsComputable.comp}
+  \leanok
+  \uses{def:simulates, def:models-simulates-in-time, def:computable}
+  Every machine simulates itself under the identity. If $U_1$ simulates $U_2$
+  under $c_1$ and $U_2$ simulates $M$ under $c_2$, then $U_1$ simulates $M$
+  under $c_1 \circ c_2$, and likewise for timed simulations with clock
+  $(p, t) \mapsto \tau_1(c_2(p), \tau_2(p, t))$. Additive overheads add;
+  polynomial clocks compose through a compiler with additive overhead; and
+  computable functions are closed under composition.
+\end{lemma}
+\begin{proof}
+  \leanok
+  Unfold the definitions; composition of computable functions sequences two
+  machines.
+\end{proof}
+
+\begin{lemma}[Universality transfers]
+  \label{lem:models-universal-transfer}
+  \lean{Complexity.TM.Simulates.isUniversal, Complexity.TM.IsEfficientlyUniversal.isUniversal}
+  \leanok
+  \uses{def:universal, lem:models-simulation-algebra}
+  A machine that simulates a universal machine under a computable compiler is
+  universal. Every efficiently universal machine is universal.
+\end{lemma}
+\begin{proof}
+  \leanok
+  \uses{lem:models-simulation-algebra}
+  Compose compilers.
+\end{proof}
+
+\begin{definition}[The universal machine]
+  \label{def:models-utm}
+  \lean{Complexity.TM.utmTM}
+  \leanok
+  \uses{def:models-combinators}
+  The universal machine $\mathcal{U}$ has six work tapes and is
+  $\mathrm{seq}(\mathrm{init}, \mathrm{seq}(\mathrm{loop}(\mathrm{body},
+  \mathrm{haltTest}), \mathrm{extract}))$. On input $\langle \alpha, x \rangle$
+  it parses the description $\alpha$ of a one-work-tape machine, simulates one
+  step per loop iteration, tests for the halt state, and finally copies the
+  simulated output tape to its own output tape.
+\end{definition}
+
+\begin{theorem}[Universal simulation of deciders]
+  \label{thm:models-utm-deciders}
+  \lean{Complexity.TM.UTMBody.utmTM_universal, Complexity.TM.UTMBody.utmTM_universal_padded}
+  \leanok
+  \uses{def:models-utm, def:tm-decides, def:pair}
+  Let $M$ be a deterministic machine with $k$ work tapes that decides $L$ in
+  time $T$, and let $T'(n) = 16(k+1)(T(n) + n + 1)^2$. There is a description
+  $\alpha_0$ such that for every string $j$ and every input $x$, with
+  $\alpha = \alpha_0 j$, the machine $\mathcal{U}$ on
+  $\langle \alpha, x \rangle$ halts within
+  $\mathrm{utmTime}(\alpha, T'(|x|), |x|)$ steps with output cell $1$ equal to
+  $1$ if $x \in L$ and $0$ if $x \notin L$. Here
+  $\mathrm{utmTime}(\alpha, t, n) = 4(2|\alpha| + 2 + n) + 4 g(\alpha) +
+  (t+1) s(\alpha) + 2t + 35$, where $g(\alpha)$ and $s(\alpha)$ depend only on
+  $\alpha$ (Arora--Barak Theorem~1.9, with the quadratic factor coming from the
+  single-tape reduction). The unpadded case, $j$ empty, is also stated on its
+  own.
+\end{theorem}
+\begin{proof}
+  \leanok
+  \uses{thm:models-single-tape, thm:models-seq-hoare, thm:models-loop-hoare}
+  Reduce $M$ to one work tape, encode it, and compose Hoare triples for the
+  parsing, per-step simulation loop, and extraction phases. Descriptions
+  tolerate arbitrary trailing padding.
+\end{proof}
+
+\begin{theorem}[The universal machine is universal]
+  \label{thm:utm}
+  \lean{Complexity.TM.utmTM_simulates_pair, Complexity.TM.utmTM_isEfficientlyUniversal, Complexity.TM.utmTM_isUniversal}
+  \leanok
+  \uses{def:models-utm, def:simulates, def:models-simulates-in-time, def:universal, def:pair}
+  For every $k$ and every machine $M$ with $k$ work tapes there is a description
+  $\alpha$ such that $\mathcal{U}$ simulates $M$ under the compiler
+  $p \mapsto \langle \alpha, p \rangle$, and does so in time
+  $(p, t) \mapsto \mathrm{utmTime}(\alpha, 16(k+1)(t + |p| + 1)^2, |p|)$.
+  Consequently $\mathcal{U}$ is efficiently universal (with additive program
+  overhead $2|\alpha| + 2$) and universal.
+\end{theorem}
+\begin{proof}
+  \leanok
+  \uses{thm:models-utm-deciders, lem:models-universal-transfer, lem:encodings-pair-length}
+  The simulation of Theorem~\ref{thm:models-utm-deciders} is run on arbitrary
+  programs and shown to reflect as well as preserve halting and output; the
+  compiler $p \mapsto \langle \alpha, p \rangle$ is computed by a fixed machine.
+\end{proof}
+
+\begin{theorem}[Undecidability of the halting problem]
+  \label{thm:models-halting-undecidable}
+  \uses{def:produces, def:tm-decides, def:universal}
+  Let $H = \{ p : \mathcal{U} \text{ halts on } p \}$. There are no $k$,
+  machine $M$ with $k$ work tapes, and bound $T$ such that $M$ decides $H$ in
+  time $T$. The same holds for $H_V$ for every universal machine $V$.
+\end{theorem}
+\begin{proof}
+  \uses{thm:utm, lem:models-universal-transfer}
+  Diagonalize: from a decider for $H$, build a machine that halts on its own
+  description exactly when $\mathcal{U}$ does not, and compile it through the
+  universality compiler.
+\end{proof}
+
+\section{The time hierarchy}
+
+\begin{definition}[Time-constructible function]
+  \label{def:models-time-constructible}
+  \lean{Complexity.TimeConstructible}
+  \leanok
+  \uses{def:tm-computes}
+  $T : \mathbb{N} \to \mathbb{N}$ is time-constructible if $T(n) \ge n$ for all
+  $n$ and some deterministic machine computes $x \mapsto \mathrm{bin}(T(|x|))$
+  (least significant bit first) in time $O(T(n))$ (Arora--Barak
+  Definition~1.12). The formalized hierarchy theorem does not use this notion.
+\end{definition}
+
+\begin{definition}[Clock-constructible function]
+  \label{def:models-clock-constructible}
+  \lean{Complexity.TM.ClockConstructible}
+  \leanok
+  \uses{def:models-hoare}
+  $g$ is clock-constructible if there are an eight-work-tape machine $M$ and a
+  constant $C$ such that, for every input $x$ and every admissible layout (input
+  head at cell $1$, every work head at a cell $\ge 1$ not reading
+  $\triangleright$, work tapes $5$ and $6$ blank, output head at cell $1$), the
+  triple holds in which $M$ writes a unary clock of length $g(|x|)$ on work
+  tape $6$ within $C (g(|x|) + |x| + 1)$ steps, returns every other work tape
+  exactly (so the scratch tape $5$ is restored blank), returns the input head
+  to cell $1$, and keeps the output head at cell $1$ with no $\triangleright$
+  past cell $0$. The layout is pinned to the diagonalizer that consumes it.
+\end{definition}
+
+\begin{lemma}[Polynomial clocks]
+  \label{lem:models-clock-pow}
+  \lean{Complexity.TM.clockConstructible_pow}
+  \leanok
+  \uses{def:models-clock-constructible}
+  For every $k \ge 1$, the function $n \mapsto (n+1)^k$ is clock-constructible.
+\end{lemma}
+\begin{proof}
+  \leanok
+  $n + 1$ is constructed by one input sweep, and clock-constructibility is
+  closed under multiplication by $n + 1$.
+\end{proof}
+
+\begin{theorem}[Deterministic time hierarchy, weak form]
+  \label{thm:time-hierarchy}
+  \lean{Complexity.time_hierarchy_weak, Complexity.time_hierarchy_weak_ssubset, Complexity.DTIME_pow_ssubset}
+  \leanok
+  \uses{def:dtime, def:models-clock-constructible}
+  Let $g$ be clock-constructible with $g(n) \ge 1$ for all $n$, and let
+  $(f(n) + n + 1)^2 = o(g(n))$. Then some language lies in
+  $\cc{DTIME}((n+1)^2 (g(n) + 1))$ but not in $\cc{DTIME}(f)$; in fact
+  $\cc{DTIME}(f) \subsetneq \cc{DTIME}((n+1)^2 (g(n) + 1))$. In particular, for
+  every $a \ge 1$,
+  $\cc{DTIME}((n+1)^a) \subsetneq \cc{DTIME}((n+1)^{2a+5})$.
+\end{theorem}
+\begin{proof}
+  \leanok
+  \uses{thm:models-utm-deciders, thm:models-single-tape, lem:models-clock-pow}
+  The diagonalizer runs the clock, simulates the machine described by its
+  input on that input under the clock, and flips the verdict. A hypothetical
+  $O(f)$ decider is reduced to one work tape and its description is padded
+  until the simulation budget falls below $g$.
+\end{proof}
+
+\begin{theorem}[Deterministic time hierarchy, textbook form]
+  \label{thm:models-time-hierarchy-strong}
+  \uses{def:dtime, def:models-time-constructible}
+  If $f$ and $g$ are time-constructible and $f(n) \log f(n) = o(g(n))$, then
+  $\cc{DTIME}(f) \subsetneq \cc{DTIME}(g)$ (Arora--Barak Theorem~3.1).
+\end{theorem}
+\begin{proof}
+  \uses{thm:utm}
+  Needs a universal simulation with $O(T \log T)$ overhead
+  (Hennie--Stearns), which the current machine does not provide: its overhead
+  is quadratic through the single-tape reduction. It also needs a bridge from
+  time-constructibility to the pinned clock layout.
+\end{proof}
+
+\section{Random access machines}
+
+The random access machine is a register machine with indirect addressing,
+measured by \emph{logarithmic} cost. Its role is to show that $\cc{P}$ does not
+depend on the Turing-machine conventions.
+
+\begin{definition}[Random access machine]
+  \label{def:models-ram}
+  \lean{Complexity.RAM.Instr, Complexity.RAM.Program, Complexity.RAM.Cfg, Complexity.RAM.step, Complexity.RAM.run, Complexity.RAM.initCfg, Complexity.RAM.Instr.logCost, Complexity.RAM.logTimeUpto, Complexity.RAM.unitTimeUpto, Complexity.RAM.spaceUpto}
+  \leanok
+  A program is a list of instructions over registers $R_0, R_1, \dots$ holding
+  natural numbers: immediate load, $\mathrm{add}$, truncated $\mathrm{sub}$,
+  $\mathrm{mul}$, indirect $\mathrm{load}$ ($R_d := R_{R_a}$) and
+  $\mathrm{store}$ ($R_{R_a} := R_s$), conditional and unconditional jumps, and
+  $\mathrm{halt}$; a program counter past the end halts. On input $x$,
+  $R_0 = |x|$, $R_{i+1} = x_i$, and all other registers are $0$. Each
+  instruction costs $1$ plus the bit length of every value it reads, computes,
+  or writes, including runtime addresses; register literals in the program are
+  not charged. Space is the peak, over the run, of the total bit length of the
+  addresses and contents of the nonzero registers. Unit time counts steps.
+\end{definition}
+
+\begin{definition}[RAM deciders and classes]
+  \label{def:models-ram-classes}
+  \lean{Complexity.RAM.Program.DecidesInTime, Complexity.RAM.Program.DecidesInSpace, Complexity.RAM.DTIME, Complexity.RAM.DSPACE, Complexity.RAM.P}
+  \leanok
+  \uses{def:models-ram, def:language}
+  A program decides $L$ in time $T$ if on every input $x$ it halts after
+  logarithmic cost at most $T(|x|)$ with $R_0 = 1$ if $x \in L$ and $R_0 = 0$
+  otherwise; deciding in space $S$ bounds peak space instead. Then
+  $\cc{DTIME}_{\mathrm{RAM}}(T)$ and $\cc{DSPACE}_{\mathrm{RAM}}(S)$ are the
+  languages decided in time $O(T)$ and space $O(S)$, and
+  $\cc{P}_{\mathrm{RAM}} = \bigcup_k \cc{DTIME}_{\mathrm{RAM}}(n^k)$.
+\end{definition}
+
+\begin{theorem}[Unit cost is unsound]
+  \label{thm:models-ram-log-gap}
+  \lean{Complexity.RAM.logGap_squaring}
+  \leanok
+  \uses{def:models-ram}
+  For every $k \ge 1$ there are a program and a configuration whose run halts
+  after $k + 1$ steps, with unit time exactly $k + 1$ and logarithmic time at
+  least $2^k$.
+\end{theorem}
+\begin{proof}
+  \leanok
+  Square a register $k$ times; the last multiplication writes
+  $2^{2^k}$, which has $2^k + 1$ bits.
+\end{proof}
+
+\begin{theorem}[Turing machines to RAMs]
+  \label{thm:models-p-subset-ram-p}
+  \lean{Complexity.RAM.TMConfig.Sparse.P_subset_RAM_P}
+  \leanok
+  \uses{def:models-ram-classes, def:P}
+  $\cc{P} \subseteq \cc{P}_{\mathrm{RAM}}$.
+\end{theorem}
+\begin{proof}
+  \leanok
+  One fixed RAM program, depending only on the Turing machine, stores the
+  configuration in a sparse interleaved register layout, computes cell
+  addresses at run time, and follows the halting run; its logarithmic cost is
+  bounded by a polynomial in the input length and the Turing time.
+\end{proof}
+
+\begin{theorem}[RAMs to Turing machines, parametric]
+  \label{thm:models-ram-dtime-sq}
+  \lean{Complexity.RAM.RegisterStore.Machine.RAM_DTIME_subset_DTIME_sq}
+  \leanok
+  \uses{def:models-ram-classes, def:dtime}
+  If $n + 1 = O(T(n))$, then
+  $\cc{DTIME}_{\mathrm{RAM}}(T) \subseteq \cc{DTIME}(T(n)^2)$.
+\end{theorem}
+\begin{proof}
+  \leanok
+  A twenty-work-tape machine built from the program keeps the public input
+  immutable, stores the mutable registers as a sparse tagged overlay of
+  address/value pairs, and charges each simulated step by the width of its
+  instruction; the charges sum to $O((n + T(n))^2)$.
+\end{proof}
+
+\begin{theorem}[RAMs to Turing machines, polynomial]
+  \label{thm:models-ram-p-subset-p}
+  \lean{Complexity.RAM.RegisterStore.Machine.RAM_P_subset_P}
+  \leanok
+  \uses{def:models-ram-classes, def:P}
+  $\cc{P}_{\mathrm{RAM}} \subseteq \cc{P}$.
+\end{theorem}
+\begin{proof}
+  \leanok
+  For each program, a twenty-work-tape machine built from it simulates the
+  program within a fourth-degree polynomial in input length and logarithmic
+  time; the number of RAM steps is at most the logarithmic time.
+\end{proof}
+
+\begin{theorem}[Polynomial time is model-independent]
+  \label{thm:models-ram-p-eq-p}
+  \lean{Complexity.RAM.RegisterStore.Machine.RAM_P_eq_P}
+  \leanok
+  \uses{def:models-ram-classes, def:P}
+  $\cc{P}_{\mathrm{RAM}} = \cc{P}$.
+\end{theorem}
+\begin{proof}
+  \leanok
+  \uses{thm:models-p-subset-ram-p, thm:models-ram-p-subset-p}
+  Antisymmetry of the two inclusions.
+\end{proof}
+
+\begin{theorem}[Turing machines to RAMs, parametric]
+  \label{thm:models-dtime-subset-ram-dtime}
+  \uses{def:models-ram-classes, def:dtime}
+  Under an explicit hypothesis that $T$ dominates the input length,
+  $\cc{DTIME}(T) \subseteq \cc{DTIME}_{\mathrm{RAM}}(T(n) \log T(n))$.
+\end{theorem}
+\begin{proof}
+  \uses{thm:models-p-subset-ram-p}
+  The simulation core already costs $O(t \log t)$ for $t$ simulated steps; the
+  input marshaller costs $O(n \log n)$, which the domination hypothesis must
+  absorb.
+\end{proof}
+
+\begin{theorem}[Polynomial space is model-independent]
+  \label{thm:models-ram-pspace}
+  \uses{def:models-ram-classes, def:PSPACE}
+  $\bigcup_k \cc{DSPACE}_{\mathrm{RAM}}(n^k) = \cc{PSPACE}$.
+\end{theorem}
+\begin{proof}
+  \uses{thm:models-ram-dtime-sq, thm:models-p-subset-ram-p}
+  Bound the space of the two existing simulations, charging the sparse
+  register store and the simulated tape contents.
+\end{proof}
+
+\begin{theorem}[Register-machine and Boolean-program variants]
+  \label{thm:models-ram-variants}
+  \uses{def:models-ram-classes, def:P}
+  \notready
+  Define register machines without indirect addressing and Boolean
+  (straight-line or bounded-loop) programs, and relate each to the RAM and to
+  Turing machines by explicit simulations, so that their polynomial-time
+  classes equal $\cc{P}$ as theorems rather than as separate class
+  definitions.
+\end{theorem}
