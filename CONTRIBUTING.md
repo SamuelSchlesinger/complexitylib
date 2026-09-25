@@ -159,14 +159,15 @@ lake exe runLinter Complexitylib \
   Complexitylib.Circuits.Encoding.Validation \
   Complexitylib.SAT.Tseitin.Machine.Validation
 lake env lean scripts/AxiomGuard.lean
+lake env lean scripts/BlueprintCheck.lean
 ```
 
-All nine commands must pass before submitting changes; CI runs them on every
+All ten commands must pass before submitting changes; CI runs them on every
 push. The first checks the complete library and treats warnings (including
 proof placeholders) as failures. The next five run executable regression
 suites that are intentionally outside the public import graph.
 
-The last three are the quality gates:
+The last four are the quality gates:
 
 - **`scripts/lint_style.py`** checks copyright headers, module docstrings,
   line length, whitespace, and that every non-internal, non-validation module
@@ -182,14 +183,21 @@ The last three are the quality gates:
   Complexitylib module and permits dependencies only on `propext`,
   `Classical.choice`, and `Quot.sound`. Its headline list is also a rename
   smoke test; update that index when a listed theorem is renamed.
+- **`scripts/BlueprintCheck.lean`** checks that every `\lean{...}` name in the
+  blueprint sources exists, so renaming or deleting a referenced declaration
+  fails CI. Update the blueprint in the same change.
 
 API documentation builds with doc-gen4 from the `docbuild/` subproject
-(`cd docbuild && lake build Complexitylib:docs`); CI publishes it weekly.
+(`cd docbuild && lake build Complexitylib:docs`); the blueprint builds with
+`leanblueprint web` from `blueprint/` (see `blueprint/README.md`). CI publishes
+both on every merge to `dev`, weekly, and on demand.
 
 ## Choosing a Contribution
 
-See [ROADMAP.md](ROADMAP.md) for dependency-ordered research programs and
-smaller entry tasks. A contribution does not need to prove a headline theorem:
+The [blueprint](https://samuelschlesinger.github.io/complexitylib/blueprint/)
+lists every planned result with its dependencies; planned nodes whose
+dependencies are formalized are ready to work on. [ROADMAP.md](ROADMAP.md)
+covers proof strategy and infrastructure priorities. A contribution does not need to prove a headline theorem:
 well-placed definitions, reusable finite-combinatorics lemmas, API cleanup,
 executable examples, and documented intermediate results are all valuable when
 they make a later milestone easier to state and prove.

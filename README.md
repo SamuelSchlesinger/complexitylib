@@ -1,5 +1,7 @@
 # Complexitylib
 
+[![CI](https://github.com/SamuelSchlesinger/complexitylib/actions/workflows/lean_action_ci.yml/badge.svg)](https://github.com/SamuelSchlesinger/complexitylib/actions/workflows/lean_action_ci.yml)
+
 A Lean 4 formalization of computational complexity theory, built on
 [Mathlib](https://github.com/leanprover-community/mathlib4). The machine
 model takes its shape from Arora and Barak's *Computational Complexity: A
@@ -8,8 +10,36 @@ precisely where they're used, with literature references where they help,
 and unafraid to diverge from any one text when a cleaner formalization
 exists.
 
-📖 **[Browse the API documentation](https://samuelschlesinger.github.io/complexitylib/)** —
-the full library, searchable, rebuilt and published on every merge to `dev`.
+- 📖 **[API documentation](https://samuelschlesinger.github.io/complexitylib/)** —
+  the full library, searchable, rebuilt on every merge to `dev`.
+- 🗺️ **[Blueprint](https://samuelschlesinger.github.io/complexitylib/blueprint/)** —
+  what is formalized, what is planned, and how it all depends on each other.
+
+## Main results
+
+All proved without `sorry` or custom axioms, over a concrete multi-tape
+Turing-machine model:
+
+- **Cook–Levin:** SAT and 3SAT are NP-complete.
+- **Cobham's theorem:** a machine-independent function algebra equals `FP`.
+- **Universal simulation:** one fixed machine simulates every machine through
+  the computable compiler `p ↦ ⟨α, p⟩`, reflecting halting and output, with
+  polynomial overhead.
+- **Deterministic time hierarchy** for clock-constructible bounds.
+- **Uniform circuits:** `P` equals logspace-uniform `P/poly`; `BPP ⊆ P/poly`.
+- **Space and interaction:** Savitch's theorem (`NPSPACE = PSPACE`),
+  `NL ⊆ P`, `PSPACE ⊆ EXP`, `IP ⊆ PSPACE`, `PH ⊆ PSPACE`, `PP ⊆ PSPACE`.
+- **The PCP theorem:** `NP = PCP(O(log n), O(1))`.
+- **Randomness:** Sipser–Lautemann (`BPP ⊆ Σ₂ᵖ ∩ Π₂ᵖ`), `BPP ⊆ PP`.
+- **Circuits:** Shannon's bounds, Schnorr's bound for parity, Valiant's depth
+  reduction, and Barrington's theorem (log-depth formulas and width-5
+  permutation branching programs decide the same families).
+- **Machine robustness:** the logarithmic-cost RAM and Turing machines define
+  the same `P`.
+
+The blueprint links each result to its Lean statement and lists the
+conditional results (for example, `NL = coNL` from `NL ⊆ coNL`) separately
+from the unconditional ones.
 
 ## Ethos
 
@@ -88,12 +118,14 @@ merge to `dev` (and weekly, plus on demand via the workflow).
 
 ## Contributing
 
-[ROADMAP.md](ROADMAP.md) orders the open research programs by dependency —
-from core API consolidation through uniform circuits, interactive proofs, and
-formalized barriers — and breaks each into review-sized steps.
-[CONTRIBUTING.md](CONTRIBUTING.md) covers style, layering, naming, and commit
-conventions. Design notes for the larger completed constructions live in
-`docs/`.
+The [blueprint](https://samuelschlesinger.github.io/complexitylib/blueprint/)
+shows which planned results are ready to work on; its sources are in
+[`blueprint/`](blueprint/). [ROADMAP.md](ROADMAP.md) covers how to prove things
+here and the infrastructure priorities. [CONTRIBUTING.md](CONTRIBUTING.md)
+covers style, layering, naming, and commit conventions. Design notes for the
+larger completed constructions live in `docs/`.
+
+To cite Complexitylib, see [CITATION.cff](CITATION.cff).
 
 ## License
 
