@@ -63,7 +63,9 @@ not a single witness string.
 
 - Embed `MA` into `IP` as a one-round protocol with an empty verifier message.
 - Amplification: sequential repetition and the resulting threshold robustness.
-- `NP ⊆ MA` through the witness characterization interface, and `IP ⊆ PSPACE`.
+- `NP ⊆ MA` through the witness characterization interface.
+
+`IP ⊆ PSPACE` is proved in `Complexitylib.Classes.Containments.IPSubsetPSPACE`.
 -/
 
 @[expose] public section
