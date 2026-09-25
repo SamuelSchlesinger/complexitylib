@@ -43,6 +43,11 @@ Turing-machine model:
   CSLib's De Morgan circuits translate into each other with linear overhead,
   which characterizes `P/poly` in CSLib's model and brings Lupanov's
   `(1 + ε) 2ⁿ / n` upper bound into this library.
+- **Algebraic circuits:** the algebraic-circuits library, imported as
+  `Complexitylib/Algebraic`, adds the `3(n - 1)` De Morgan parity bound, parity
+  ∉ AC⁰ by Håstad's switching lemma, monotone CLIQUE, Nechiporuk's formula
+  bound, Karchmer–Wigderson, and a polynomial circuit-size hierarchy
+  ([guide](docs/algebraic/README.md)).
 
 The blueprint links each result to its Lean statement and lists the
 conditional results (for example, `NL = coNL` from `NL ⊆ coNL`) separately
@@ -137,3 +142,5 @@ To cite Complexitylib, see [CITATION.cff](CITATION.cff).
 ## License
 
 Licensed under the [Apache License, Version 2.0](LICENSE).
+The imported algebraic-circuits library in `Complexitylib/Algebraic/` keeps
+its original [MIT license](Complexitylib/Algebraic/LICENSE).

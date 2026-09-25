@@ -12,6 +12,7 @@ statements; they are not the source of truth for current proof status.
 | [A5 — Reduction Emitter](A5-ReductionEmitter.md) | Polynomial-time construction of Cook–Levin formulas | Implemented; SAT NP-completeness is proved |
 | [Universal Turing Machine](UTM-design.md) | Description encoding, interpretation, fixed UTM, and clocking | Implemented through universal simulation and hierarchy support |
 | [M1 — Uniform Circuits](M1-UniformCircuits.md) | Circuit serialization, validated evaluation, and the TM/circuit bridge | Implemented: `UniformPPoly_eq_P` |
+| [Algebraic circuits](algebraic/README.md) | Guide to the imported algebraic-circuits library (`Complexitylib/Algebraic`) and its lower-bound developments | Imported wholesale; consolidation planned in `ROADMAP.md`, item 7 |
 
 For current status and future work, see the
 [blueprint](https://samuelschlesinger.github.io/complexitylib/blueprint/) and

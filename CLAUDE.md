@@ -89,8 +89,13 @@ same file are acceptable.
 - **`Complexity` root namespace**: every declaration lives under `Complexity`
   (avoids collisions with Mathlib's `Language`, keeps `P`/`NP`/`TM` out of the
   root scope). Files are wrapped in `namespace Complexity … end Complexity`.
-  Sole exception: `Complexitylib/Mathlib/` extends Mathlib types in their home
-  namespaces (dot-notation requires it) and holds upstreaming candidates only.
+  Exceptions: `Complexitylib/Mathlib/` extends Mathlib types in their home
+  namespaces (dot-notation requires it) and holds upstreaming candidates only;
+  `Complexitylib/Algebraic/` is the algebraic-circuits library imported
+  wholesale, which keeps its `Algebraic` namespace, its `Cslib.Circuits`
+  extensions, and a scoped style-lint exemption until the consolidation plan
+  in `ROADMAP.md` (item 7) migrates it. It keeps its MIT license
+  (`Complexitylib/Algebraic/LICENSE`), so its files carry the MIT header.
 - **Never shadow a root namespace**: an inner `namespace TM` block inside
   another namespace (e.g. producing `SAT.TM`) shadows the real `TM.*` API and
   forces `_root_.` escapes — the style linter tracks and shrinks `_root_.` use.

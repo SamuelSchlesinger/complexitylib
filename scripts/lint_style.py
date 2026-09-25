@@ -3,7 +3,8 @@
 
 Checks every `.lean` file under `Complexitylib/` for:
 
-  copyright   — a Mathlib-style copyright header at the top of the file
+  copyright   — a Mathlib-style copyright header at the top of the file (the
+                imported `Complexitylib/Algebraic/` keeps its MIT header)
   moduleDoc   — a module docstring (`/-! ... -/`)
   lineLength  — no line longer than 100 characters (lines containing URLs exempt)
   trailingWs  — no trailing whitespace
@@ -17,7 +18,9 @@ Checks every `.lean` file under `Complexitylib/` for:
                 validation-only build graph
 
 This is a hard gate: any violation fails the run. The quality refactor cleared
-every grandfathered violation, so there is no baseline to maintain.
+every grandfathered violation, so there is no baseline to maintain. The one
+scoped exemption is the imported algebraic-circuits library under
+`Complexitylib/Algebraic/` (see `IMPORTED_EXEMPTIONS`).
 
 Usage:
   python3 scripts/lint_style.py
@@ -38,6 +41,15 @@ COPYRIGHT_RE = re.compile(
     r"Authors: .*\n"
     r"-/\n"
 )
+# The imported algebraic-circuits library keeps its original MIT license.
+IMPORTED_COPYRIGHT_RE = re.compile(
+    r"\A/-\n"
+    r"Copyright \(c\) \d{4} .*\. All rights reserved\.\n"
+    r"Released under MIT license as described in the file "
+    r"Complexitylib/Algebraic/LICENSE\.\n"
+    r"Authors: .*\n"
+    r"-/\n"
+)
 MODULE_DOC_RE = re.compile(r"^/-!", re.MULTILINE)
 URL_RE = re.compile(r"https?://")
 IMPORT_RE = re.compile(
@@ -45,6 +57,16 @@ IMPORT_RE = re.compile(
     re.MULTILINE,
 )
 NON_PUBLIC_COMPONENTS = {"Internal", "Validation"}
+# The algebraic-circuits library, imported wholesale, keeps its upstream style
+# for two checks until the consolidation plan (ROADMAP.md, item 7) migrates it:
+# it extends CSLib's circuit types through `_root_.Cslib.Circuits` declarations,
+# and some of its lines, including module paths in its umbrella imports, exceed
+# 100 characters.
+IMPORTED_EXEMPTIONS = {
+    Path("Complexitylib") / "Algebraic": {"lineLength", "rootEscape"},
+    Path("Complexitylib") / "Algebraic.lean": {"lineLength"},
+}
+IMPORTED_PREFIXES = tuple(IMPORTED_EXEMPTIONS)
 BUILD_ROOTS = (
     "Complexitylib",
     "Complexitylib.Classes.P.Cobham.Validation",
@@ -59,7 +81,10 @@ def check_file(path: Path) -> set[str]:
     """Return the set of check names that `path` violates."""
     text = path.read_text(encoding="utf-8")
     violations = set()
-    if not COPYRIGHT_RE.match(text):
+    imported = path.relative_to(ROOT).is_relative_to(IMPORTED_PREFIXES[0]) or (
+        path.relative_to(ROOT) == IMPORTED_PREFIXES[1])
+    copyright_re = IMPORTED_COPYRIGHT_RE if imported else COPYRIGHT_RE
+    if not copyright_re.match(text):
         violations.add("copyright")
     if not MODULE_DOC_RE.search(text):
         violations.add("moduleDoc")
@@ -132,7 +157,11 @@ def collect() -> set[str]:
     found = set()
     for path in paths:
         rel = path.relative_to(ROOT)
-        for check in check_file(path):
+        exempt = set().union(*(
+            checks for prefix, checks in IMPORTED_EXEMPTIONS.items()
+            if rel.is_relative_to(prefix)
+        ))
+        for check in check_file(path) - exempt:
             found.add(f"{rel} : {check}")
     found.update(check_import_graph(paths))
     return found
