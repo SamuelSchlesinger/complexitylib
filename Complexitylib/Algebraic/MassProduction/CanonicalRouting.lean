@@ -74,13 +74,16 @@ def complementRoutingTagsCircuit
     (depth keyWidth payloadWidth : Nat) :
     Circuit DeMorgan.signature
       (networkBits depth (Routing.recordWidth keyWidth payloadWidth))
-      (∑ output, complementTagOutputGateCount depth keyWidth payloadWidth
-        output)
       (networkBits depth (Routing.recordWidth keyWidth payloadWidth)) :=
   Circuit.parallelFin
-    (networkBits depth (Routing.recordWidth keyWidth payloadWidth))
-    (complementTagOutputGateCount depth keyWidth payloadWidth) fun output =>
+    (networkBits depth (Routing.recordWidth keyWidth payloadWidth)) fun output =>
       (complementTagOutputExpression depth keyWidth payloadWidth output).circuit
+
+@[simp] theorem complementRoutingTagsCircuit_size
+    (depth keyWidth payloadWidth : Nat) :
+    (complementRoutingTagsCircuit depth keyWidth payloadWidth).size =
+      ∑ output, complementTagOutputGateCount depth keyWidth payloadWidth output := by
+  simp [complementRoutingTagsCircuit, complementTagOutputGateCount]
 
 @[simp] theorem complementRoutingTagsCircuit_eval
     (input : Fin (networkBits depth

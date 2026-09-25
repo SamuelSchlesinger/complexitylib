@@ -114,7 +114,7 @@ theorem outputRank_le_multiplicationCost
     (problem : Problem U)
     (targets : Fin m → U)
     (circuit : Circuit (Algebraic.Arithmetic.signature C)
-      problem.inputCount g m)
+      problem.inputCount m)
     (constructs : Multiple.Constructs (constant := constant)
       problem targets circuit) :
     outputRank (K := K) constant problem targets ≤
@@ -136,7 +136,7 @@ theorem circuit_multiplication_lowerBound_of_quotientIndependent
     (independent : LinearIndependent K
       ((freeSubmodule K constant problem).mkQ ∘ targets))
     (circuit : Circuit (Algebraic.Arithmetic.signature C)
-      problem.inputCount g m)
+      problem.inputCount m)
     (constructs : Multiple.Constructs (constant := constant)
       problem targets circuit) :
     m ≤ circuit.cost
@@ -154,7 +154,7 @@ theorem outputRank_le_gateCost
     (problem : Problem U)
     (targets : Fin m → U)
     (circuit : Circuit (Algebraic.Arithmetic.signature C)
-      problem.inputCount g m)
+      problem.inputCount m)
     (constructs : Multiple.Constructs (constant := constant)
       problem targets circuit) :
     outputRank (K := K) constant problem targets ≤
@@ -172,7 +172,7 @@ theorem outputRank_le_size
     (problem : Problem U)
     (targets : Fin m → U)
     (circuit : Circuit (Algebraic.Arithmetic.signature C)
-      problem.inputCount g m)
+      problem.inputCount m)
     (constructs : Multiple.Constructs (constant := constant)
       problem targets circuit) :
     outputRank (K := K) constant problem targets ≤ circuit.size :=

@@ -314,7 +314,7 @@ theorem circuit_addition_lowerBound
     (constant : K → R)
     (target : MvPolynomial (Fin n) R)
     (circuit : Circuit
-      (Algebraic.Arithmetic.signature K) n g 1)
+      (Algebraic.Arithmetic.signature K) n 1)
     (constructs :
       ({ inputCount := n, inputs := MvPolynomial.X, target := target } :
         Problem (MvPolynomial (Fin n) R)).Constructs circuit
@@ -330,7 +330,7 @@ theorem circuit_addition_lowerBound_of_separationNumber
     (constant : K → R)
     (target : MvPolynomial (Fin n) R)
     (circuit : Circuit
-      (Algebraic.Arithmetic.signature K) n g 1)
+      (Algebraic.Arithmetic.signature K) n 1)
     (constructs :
       ({ inputCount := n, inputs := MvPolynomial.X, target := target } :
         Problem (MvPolynomial (Fin n) R)).Constructs circuit
@@ -348,7 +348,7 @@ theorem circuit_addition_lowerBound_of_isSeparated
     (target : MvPolynomial (Fin n) R)
     (targetSeparated : IsSeparated target.support target.support)
     (circuit : Circuit
-      (Algebraic.Arithmetic.signature K) n g 1)
+      (Algebraic.Arithmetic.signature K) n 1)
     (constructs :
       ({ inputCount := n, inputs := MvPolynomial.X, target := target } :
         Problem (MvPolynomial (Fin n) R)).Constructs circuit

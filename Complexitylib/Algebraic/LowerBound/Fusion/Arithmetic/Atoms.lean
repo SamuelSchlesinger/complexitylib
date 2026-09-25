@@ -125,7 +125,7 @@ def circuitMultiplicationArguments
     [Mul U]
     (constant : C → U)
     (input : Fin n → U)
-    (circuit : Circuit (Algebraic.Arithmetic.signature C) n g m) :
+    (circuit : Circuit (Algebraic.Arithmetic.signature C) n m) :
     List (Fin 2 → U) :=
   multiplicationArguments
     (circuitAtoms circuit
@@ -138,7 +138,7 @@ theorem circuitMultiplicationArguments_length
     [Mul U]
     (constant : C → U)
     (input : Fin n → U)
-    (circuit : Circuit (Algebraic.Arithmetic.signature C) n g m) :
+    (circuit : Circuit (Algebraic.Arithmetic.signature C) n m) :
     (circuitMultiplicationArguments constant input circuit).length =
       circuit.cost
         (Algebraic.Arithmetic.multiplicationCost (K := C)) := by

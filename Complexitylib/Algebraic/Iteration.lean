@@ -28,18 +28,29 @@ export Cslib.Circuits (Circuit.iterateFunction)
 
 /-- Compose an endomorphism circuit with itself `steps` times. -/
 def _root_.Cslib.Circuits.Circuit.iterate
-    (circuit : Circuit σ n g n) :
-    (steps : Nat) -> Circuit σ n (steps * g) n
-  | 0 => (Circuit.id σ n).castCounts rfl (Nat.zero_mul g).symm rfl
-  | steps + 1 =>
-      (circuit.comp (circuit.iterate steps)).castCounts rfl
-        (Nat.succ_mul steps g).symm rfl
+    (circuit : Circuit σ n n) :
+    (steps : Nat) -> Circuit σ n n
+  | 0 => Circuit.id σ n
+  | steps + 1 => circuit.comp (circuit.iterate steps)
 
 export Cslib.Circuits (Circuit.iterate)
 
+/-- Iterating a circuit multiplies its gate count by the round count. -/
+@[simp] theorem _root_.Cslib.Circuits.Circuit.size_iterate
+    (circuit : Circuit σ n n)
+    (steps : Nat) :
+    (circuit.iterate steps).size = steps * circuit.size := by
+  induction steps with
+  | zero => simp [Circuit.iterate]
+  | succ steps inductionHypothesis =>
+      rw [Circuit.iterate, Cslib.Circuits.Circuit.size_comp, inductionHypothesis,
+        Nat.succ_mul]
+
+export Cslib.Circuits (Circuit.size_iterate)
+
 /-- Iterated circuit evaluation is function iteration. -/
 @[simp] theorem _root_.Cslib.Circuits.Circuit.eval_iterate
-    (circuit : Circuit σ n g n)
+    (circuit : Circuit σ n n)
     (steps : Nat)
     (interpretation : Interpretation σ U)
     (input : Fin n -> U) :
@@ -49,8 +60,7 @@ export Cslib.Circuits (Circuit.iterate)
   | zero =>
       simp [Circuit.iterate, Circuit.iterateFunction]
   | succ steps inductionHypothesis =>
-      simp only [Circuit.iterate, Circuit.eval_castCounts, Fin.cast_refl,
-        Function.comp_id, Circuit.eval_comp]
+      simp only [Circuit.iterate, Circuit.eval_comp]
       rw [inductionHypothesis]
       rfl
 
@@ -58,7 +68,7 @@ export Cslib.Circuits (Circuit.eval_iterate)
 
 /-- Iterating a circuit multiplies its weighted cost by the round count. -/
 @[simp] theorem _root_.Cslib.Circuits.Circuit.cost_iterate
-    (circuit : Circuit σ n g n)
+    (circuit : Circuit σ n n)
     (steps : Nat)
     (operationCost : OperationCost σ) :
     (circuit.iterate steps).cost operationCost =
@@ -66,7 +76,7 @@ export Cslib.Circuits (Circuit.eval_iterate)
   induction steps with
   | zero => simp [Circuit.iterate]
   | succ steps inductionHypothesis =>
-      rw [Circuit.iterate, Circuit.cost_castCounts, Circuit.cost_comp,
+      rw [Circuit.iterate, Circuit.cost_comp,
         inductionHypothesis, Nat.succ_mul]
 
 export Cslib.Circuits (Circuit.cost_iterate)

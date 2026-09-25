@@ -129,7 +129,7 @@ theorem Bound.circuit_lowerBound
     (bound : Bound target)
     (positive : 0 < bound.capacity)
     (circuit : Circuit
-      (Algebraic.SumOfTerms.signature (Term target)) 0 g 1)
+      (Algebraic.SumOfTerms.signature (Term target)) 0 1)
     (constructs : (Coverage.problem target).Constructs circuit
       (Algebraic.SumOfTerms.interpretation termSupport)) :
     target.card ⌈/⌉ bound.capacity ≤
@@ -223,7 +223,7 @@ theorem diagonal_lowerBound
     [Fintype I]
     [DecidableEq I]
     (circuit : Circuit
-      (Algebraic.SumOfTerms.signature (Term (diagonal I))) 0 g 1)
+      (Algebraic.SumOfTerms.signature (Term (diagonal I))) 0 1)
     (constructs : (Coverage.problem (diagonal I)).Constructs circuit
       (Algebraic.SumOfTerms.interpretation termSupport)) :
     Fintype.card I ≤

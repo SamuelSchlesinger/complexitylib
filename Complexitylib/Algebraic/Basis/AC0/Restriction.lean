@@ -688,20 +688,19 @@ noncomputable def empty
     ProgramRestriction (Program.empty : Program signature n 0) rho where
   gateCount := 0
   result := .empty
-  values := Fin.addCases (inputResidual rho) Fin.elim0
+  values := Wire.elim (inputResidual rho) Fin.elim0
   trace_eq := by
     intro input sourceWire
-    refine Fin.addCases (fun sourceInput => ?_)
-      (fun impossible => Fin.elim0 impossible) sourceWire
-    rw [Fin.addCases_left, Program.trace_input]
-    exact inputResidual_eval rho sourceInput input
+    cases sourceWire with
+    | input sourceInput => exact inputResidual_eval rho sourceInput input
+    | gate impossible => exact Fin.elim0 impossible
   logicalDepth_le := by
     intro sourceWire
-    refine Fin.addCases (fun sourceInput => ?_)
-      (fun impossible => Fin.elim0 impossible) sourceWire
-    rw [Fin.addCases_left, Program.trace_input]
-    by_cases live : rho sourceInput = none <;>
-      simp [inputResidual, live, ResidualValue.logicalDepth, Program.trace]
+    cases sourceWire with
+    | input sourceInput =>
+        by_cases live : rho sourceInput = none <;>
+          simp [inputResidual, live, ResidualValue.logicalDepth, Program.trace]
+    | gate impossible => exact Fin.elim0 impossible
   gateCount_le := Nat.le_refl 0
   cost_le := Nat.le_refl 0
 
@@ -745,11 +744,14 @@ def reuseLast
     ProgramRestriction (source.gate line) rho where
   gateCount := prior.gateCount
   result := prior.result
-  values := Fin.lastCases value prior.values
+  values := Wire.lastCases
+    (motive := fun _ => ResidualValue rho.liveCount prior.gateCount)
+    value prior.values
   trace_eq := by
     intro input sourceWire
-    refine Fin.lastCases ?_ (fun oldWire => ?_) sourceWire
-    · rw [Fin.lastCases_last]
+    induction sourceWire using Wire.lastCases with
+    | last =>
+      rw [Wire.lastCases_last]
       calc
         value.eval prior.result input =
             line.eval interpretation
@@ -759,17 +761,20 @@ def reuseLast
           value_eq input
         _ = (source.gate line).trace interpretation
               (rho.toLiveInputSubstitution.apply input)
-              (Fin.last (n + g)) :=
-          (Program.trace_gate_last source line interpretation _).symm
-    · rw [Fin.lastCases_castSucc, Program.trace_gate_castSucc]
+              (Wire.gate (Fin.last g)) :=
+          (Program.eval_gate_last source line interpretation _).symm
+    | castSucc oldWire =>
+      rw [Wire.lastCases_castSucc, Program.trace_gate_castSucc]
       exact prior.trace_eq input oldWire
   logicalDepth_le := by
     intro sourceWire
-    refine Fin.lastCases ?_ (fun oldWire => ?_) sourceWire
-    · rw [Fin.lastCases_last]
+    induction sourceWire using Wire.lastCases with
+    | last =>
+      rw [Wire.lastCases_last]
       exact logicalDepthBound.trans_eq
-        (Program.trace_gate_last source line logicalDepthInterpretation _).symm
-    · rw [Fin.lastCases_castSucc, Program.trace_gate_castSucc]
+        (Program.eval_gate_last source line logicalDepthInterpretation _).symm
+    | castSucc oldWire =>
+      rw [Wire.lastCases_castSucc, Program.trace_gate_castSucc]
       exact prior.logicalDepth_le oldWire
   gateCount_le := prior.gateCount_le.trans (Nat.le_succ g)
   cost_le := prior.cost_le.trans (Nat.le_add_right _ (andOrCost line.op))
@@ -798,15 +803,17 @@ def retainLast
     ProgramRestriction (source.gate line) rho where
   gateCount := prior.gateCount + 1
   result := prior.result.gate residualLine
-  values := Fin.lastCases
-    (.wire (Fin.last (rho.liveCount + prior.gateCount)))
+  values := Wire.lastCases
+    (motive := fun _ => ResidualValue rho.liveCount (prior.gateCount + 1))
+    (.wire (Wire.gate (Fin.last prior.gateCount)))
     (fun oldWire =>
       (prior.values oldWire).mapWires Wire.Renaming.castSucc)
   trace_eq := by
     intro input sourceWire
-    refine Fin.lastCases ?_ (fun oldWire => ?_) sourceWire
-    · rw [Fin.lastCases_last, ResidualValue.eval_wire,
-        Program.trace_gate_last]
+    induction sourceWire using Wire.lastCases with
+    | last =>
+      rw [Wire.lastCases_last, ResidualValue.eval_wire,
+        Program.trace_gateWire, Program.gateFunction_apply, Program.eval_gate_last]
       calc
         residualLine.eval interpretation input
             (prior.result.eval interpretation input) =
@@ -817,9 +824,10 @@ def retainLast
           line_eq input
         _ = (source.gate line).trace interpretation
               (rho.toLiveInputSubstitution.apply input)
-              (Fin.last (n + g)) :=
-          (Program.trace_gate_last source line interpretation _).symm
-    · rw [Fin.lastCases_castSucc]
+              (Wire.gate (Fin.last g)) :=
+          (Program.eval_gate_last source line interpretation _).symm
+    | castSucc oldWire =>
+      rw [Wire.lastCases_castSucc]
       calc
         ((prior.values oldWire).mapWires Wire.Renaming.castSucc).eval
             (prior.result.gate residualLine) input =
@@ -838,12 +846,14 @@ def retainLast
           (Program.trace_gate_castSucc source line interpretation _ _).symm
   logicalDepth_le := by
     intro sourceWire
-    refine Fin.lastCases ?_ (fun oldWire => ?_) sourceWire
-    · rw [Fin.lastCases_last, ResidualValue.logicalDepth,
-        Program.trace_gate_last]
+    induction sourceWire using Wire.lastCases with
+    | last =>
+      rw [Wire.lastCases_last, ResidualValue.logicalDepth,
+        Program.trace_gateWire, Program.gateFunction_apply, Program.eval_gate_last]
       exact logicalDepthBound.trans_eq
-        (Program.trace_gate_last source line logicalDepthInterpretation _).symm
-    · rw [Fin.lastCases_castSucc]
+        (Program.eval_gate_last source line logicalDepthInterpretation _).symm
+    | castSucc oldWire =>
+      rw [Wire.lastCases_castSucc]
       calc
         ((prior.values oldWire).mapWires
             Wire.Renaming.castSucc).logicalDepth
@@ -963,7 +973,7 @@ end ResidualCircuit
 /-- A circuit-level partial evaluation over the compact namespace of live
 variables. -/
 structure CircuitRestriction
-    (source : Circuit signature n g m)
+    (source : Circuit signature n m)
     (rho : PartialAssignment n) where
   /-- Number of gates in the residual circuit. -/
   gateCount : Nat
@@ -979,13 +989,13 @@ structure CircuitRestriction
     result.logicalOutputDepths output <=
       Circuit.logicalOutputDepths source output
   /-- Partial evaluation does not increase total gate count. -/
-  gateCount_le : gateCount <= g
+  gateCount_le : gateCount <= source.size
   /-- Partial evaluation does not increase charged AND/OR cost. -/
   cost_le : result.cost <= source.cost andOrCost
 
 /-- Partially evaluate an arbitrary-output AC0 circuit under `rho`. -/
 noncomputable def restrictCircuit
-    (source : Circuit signature n g m)
+    (source : Circuit signature n m)
     (rho : PartialAssignment n) : CircuitRestriction source rho := by
   let restricted := restrictProgram rho source.program
   let result : ResidualCircuit rho.liveCount restricted.gateCount m :=
@@ -1007,7 +1017,7 @@ namespace CircuitRestriction
 
 /-- Exact residual-circuit restriction does not increase logical depth. -/
 theorem logicalDepth_le
-    {source : Circuit signature n g m}
+    {source : Circuit signature n m}
     {rho : PartialAssignment n}
     (restriction : CircuitRestriction source rho) :
     restriction.result.logicalDepth <= Circuit.logicalDepth source := by
@@ -1022,7 +1032,7 @@ end CircuitRestriction
 /-- The compact residual circuit also realizes the original same-width
 restriction after projecting a complete input to its live coordinates. -/
 theorem restrictCircuit_eval_projectLive
-    (source : Circuit signature n g m)
+    (source : Circuit signature n m)
     (rho : PartialAssignment n)
     (input : Fin n -> Bool) :
     (restrictCircuit source rho).result.eval (rho.projectLive input) =
@@ -1054,19 +1064,23 @@ def constantLine (value : Bool) : Line signature n g :=
 requires at most one nullary constant gate. -/
 structure ResidualCircuit.Materialization
     (source : ResidualCircuit n g 1) where
-  /-- Gate count of the ordinary circuit. -/
-  gateCount : Nat
   /-- Ordinary one-output circuit. -/
-  result : Circuit signature n gateCount 1
+  result : Circuit signature n 1
   /-- Materialization preserves the residual output. -/
   eval_eq : forall input, result.eval interpretation input = source.eval input
   /-- Materializing a constant output adds at most one logical level. -/
   logicalDepth_le :
     Circuit.logicalDepth result <= source.logicalDepth + 1
   /-- At most one gate is added. -/
-  gateCount_le : gateCount <= g + 1
+  gateCount_le : result.size <= g + 1
   /-- At most one charged constant gate is added. -/
   cost_le : result.cost andOrCost <= source.cost + 1
+
+/-- Gate count of the ordinary circuit. -/
+abbrev ResidualCircuit.Materialization.gateCount
+    {source : ResidualCircuit n g 1}
+    (materialization : source.Materialization) : Nat :=
+  materialization.result.size
 
 namespace ResidualCircuit
 
@@ -1076,12 +1090,11 @@ def materialize
     (source : ResidualCircuit n g 1) : source.Materialization := by
   cases output_eq : source.outputs 0 with
   | wire sourceWire =>
-      let result : Circuit signature n g 1 :=
+      let result : Circuit signature n 1 :=
         { program := source.program
           outputs := fun _ => sourceWire }
       exact
-        { gateCount := g
-          result := result
+        { result := result
           eval_eq := by
             intro input
             funext output
@@ -1104,30 +1117,29 @@ def materialize
           cost_le := Nat.le_add_right _ 1 }
   | constant value =>
       let line := constantLine (n := n) (g := g) value
-      let result : Circuit signature n (g + 1) 1 :=
+      let result : Circuit signature n 1 :=
         { program := source.program.gate line
-          outputs := fun _ => Fin.last (n + g) }
+          outputs := fun _ => Wire.gate (Fin.last g) }
       exact
-        { gateCount := g + 1
-          result := result
+        { result := result
           eval_eq := by
             intro input
             funext output
             have output_zero : output = 0 := Fin.eq_zero output
             subst output
-            change (source.program.gate line).trace interpretation input
-                (Fin.last (n + g)) =
+            change (source.program.gate line).eval interpretation input
+                (Fin.last g) =
               (source.outputs 0).eval source.program input
-            rw [Program.trace_gate_last, constantLine_eval, output_eq,
+            rw [Program.eval_gate_last, constantLine_eval, output_eq,
               ResidualValue.eval_constant]
           logicalDepth_le := by
             rw [Circuit.logicalDepth_one_output,
               ResidualCircuit.logicalDepth_one_output]
-            change (source.program.gate line).trace
+            change (source.program.gate line).eval
                 logicalDepthInterpretation (fun _ => 0)
-                (Fin.last (n + g)) <=
+                (Fin.last g) <=
               (source.outputs 0).logicalDepth source.program + 1
-            rw [Program.trace_gate_last, output_eq]
+            rw [Program.eval_gate_last, output_eq]
             cases value <;>
               simp [line, constantLine, Line.eval,
                 logicalDepthInterpretation, ResidualValue.logicalDepth]
@@ -1143,12 +1155,10 @@ end ResidualCircuit
 unit of possible overhead is exactly the cost of materializing a constant
 output as a wire. -/
 structure OrdinaryCircuitRestriction
-    (source : Circuit signature n g 1)
+    (source : Circuit signature n 1)
     (rho : PartialAssignment n) where
-  /-- Gate count of the materialized restricted circuit. -/
-  gateCount : Nat
   /-- Ordinary circuit over exactly the live variables. -/
-  result : Circuit signature rho.liveCount gateCount 1
+  result : Circuit signature rho.liveCount 1
   /-- Exact pointwise semantics under the compact input substitution. -/
   eval_eq : forall input,
     result.eval interpretation input =
@@ -1159,21 +1169,27 @@ structure OrdinaryCircuitRestriction
   logicalDepth_le :
     Circuit.logicalDepth result <= Circuit.logicalDepth source + 1
   /-- Restriction and output materialization add at most one gate overall. -/
-  gateCount_le : gateCount <= g + 1
+  gateCount_le : result.size <= source.size + 1
   /-- Charged AND/OR cost grows by at most the one constant-output gate. -/
   cost_le : result.cost andOrCost <= source.cost andOrCost + 1
+
+/-- Gate count of the materialized restricted circuit. -/
+abbrev OrdinaryCircuitRestriction.gateCount
+    {source : Circuit signature n 1}
+    {rho : PartialAssignment n}
+    (restriction : OrdinaryCircuitRestriction source rho) : Nat :=
+  restriction.result.size
 
 /-- Partially evaluate a one-output AC0 circuit and materialize its output as
 an ordinary circuit wire. -/
 noncomputable def restrictOneOutputCircuit
-    (source : Circuit signature n g 1)
+    (source : Circuit signature n 1)
     (rho : PartialAssignment n) :
     OrdinaryCircuitRestriction source rho := by
   let restricted := restrictCircuit source rho
   let materialized := restricted.result.materialize
   exact
-    { gateCount := materialized.gateCount
-      result := materialized.result
+    { result := materialized.result
       eval_eq := by
         intro input
         exact (materialized.eval_eq input).trans (restricted.eval_eq input)
@@ -1186,7 +1202,7 @@ noncomputable def restrictOneOutputCircuit
 
 /-- Same-width semantics of the materialized restricted circuit. -/
 theorem restrictOneOutputCircuit_eval_projectLive
-    (source : Circuit signature n g 1)
+    (source : Circuit signature n 1)
     (rho : PartialAssignment n)
     (input : Fin n -> Bool) :
     (restrictOneOutputCircuit source rho).result.eval interpretation

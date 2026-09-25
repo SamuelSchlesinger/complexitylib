@@ -34,7 +34,7 @@ def andTarget : Target Bool 2 1 := fun input _ => input 0 && input 1
 def nandTarget : Target Bool 2 1 := fun input _ => !(input 0 && input 1)
 
 /-- Two gates with both the intermediate AND and final NAND exposed. -/
-def andNandCircuit : Circuit signature 2 2 (1 + 1) where
+def andNandCircuit : Circuit signature 2 (1 + 1) where
   program := ((Program.empty : Program signature 2 0).gate
     ⟨.and, Wire.input⟩).gate ⟨.not, fun _ => Wire.gate 0⟩
   outputs := Fin.append (fun _ => Wire.gate 0) (fun _ => Wire.gate 1)
@@ -65,16 +65,16 @@ private theorem no_projection_and_given_nand :
       Fin.append input (nandTarget input) selected = andTarget input 0 := by
   decide
 
-private theorem nand_size_lower (circuit : Circuit signature 2 gates 1)
-    (computes : circuit.ComputesWith interpretation nandTarget) : 2 ≤ gates := by
+private theorem nand_size_lower (circuit : Circuit signature 2 1)
+    (computes : circuit.ComputesWith interpretation nandTarget) : 2 ≤ circuit.size := by
+  rcases circuit with @⟨gates, program, outputs⟩
+  change 2 ≤ gates
   by_contra small
   have cases' : gates = 0 ∨ gates = 1 := by omega
   obtain rfl | rfl := cases'
-  · rcases circuit with ⟨program, outputs⟩
-    cases program
+  · cases program
     exact no_zero_gate_nand (outputs 0) (fun input => congrFun (computes input) 0)
-  · rcases circuit with ⟨program, outputs⟩
-    cases program with
+  · cases program with
     | gate priorProgram line =>
       cases priorProgram
       exact no_one_gate_nand line.op line.wires (outputs 0)
@@ -91,31 +91,32 @@ theorem gateComplexity_nand : Circuit.gateComplexity interpretation nandTarget =
         congrFun (andNandCircuit_computes input) (Fin.natAdd 1 output)
     exact Circuit.gateComplexity_le computes
   · apply Circuit.le_costComplexity
-    intro gates circuit computes
-    simpa [Circuit.size] using
-      (show (2 : ℕ∞) ≤ gates by exact_mod_cast nand_size_lower circuit computes)
+    intro circuit computes
+    simpa using
+      (show (2 : ℕ∞) ≤ circuit.size by exact_mod_cast nand_size_lower circuit computes)
 
 /-- Exposing the intermediate conjunction in the NAND circuit is free. -/
 theorem gateComplexity_and_nand :
     Circuit.gateComplexity interpretation
       (fun input => Fin.append (andTarget input) (nandTarget input)) = 2 := by
   apply le_antisymm (Circuit.gateComplexity_le andNandCircuit_computes)
+  show (2 : ℕ∞) ≤ _
   apply Circuit.le_costComplexity
-  intro gates circuit computes
+  intro circuit computes
   have nandComputes : (circuit.mapOutputs (Fin.natAdd 1)).ComputesWith
       interpretation nandTarget := by
     intro input
     funext output
     simpa only [Circuit.eval_mapOutputs, Function.comp_apply, Fin.append_right] using
       congrFun (computes input) (Fin.natAdd 1 output)
-  simpa [Circuit.size] using
-    (show (2 : ℕ∞) ≤ gates by exact_mod_cast nand_size_lower _ nandComputes)
+  simpa using
+    (show (2 : ℕ∞) ≤ circuit.size by exact_mod_cast nand_size_lower _ nandComputes)
 
 /-- Given NAND as a supplied value, one NOT gate recovers AND. -/
 theorem conditionalGateComplexity_and_given_nand :
     Circuit.conditionalGateComplexity interpretation andTarget nandTarget = 1 := by
   apply le_antisymm
-  · let recover : Circuit signature (2 + 1) 1 1 :=
+  · let recover : Circuit signature (2 + 1) 1 :=
       ⟨.gate .empty ⟨.not, fun _ => Wire.input (Fin.natAdd 2 0)⟩,
         fun _ => Wire.gate 0⟩
     have computes : recover.ComputesGiven interpretation andTarget nandTarget := by

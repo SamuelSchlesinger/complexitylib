@@ -212,8 +212,6 @@ theorem candidateRowCircuit_cost_le
   change
     ((orInputCircuit (prefixLast prefixWidth + 1)).comp
       (Circuit.parallelFin (prefixLast prefixWidth + 1)
-        (fun second => candidateDecodedGateCount
-          prefixWidth suffixWidth pairs pair side first second)
         (fun second =>
           candidateDecodedCircuit pair side first second))).cost
         DeMorgan.standardCost <= _
@@ -245,8 +243,6 @@ theorem sharedDecodedCircuit_cost_le
   change
     ((orInputCircuit (prefixLast prefixWidth + 1)).comp
       (Circuit.parallelFin (prefixLast prefixWidth + 1)
-        (fun first => candidateRowGateCount
-          prefixWidth suffixWidth pairs pair side first)
         (fun first => candidateRowCircuit pair side first))).cost
         DeMorgan.standardCost <= _
   rw [Circuit.cost_comp, Circuit.cost_parallelFin, orInputCircuit_cost]
@@ -327,11 +323,9 @@ def sharedLayerOverheadBound
 plus an explicit polynomial overhead. -/
 theorem sharedUhligLayerCircuit_cost_le_resource_sum_add_overhead
     (pairs : Nat)
-    (resourceGateCounts : Fin (prefixLast prefixWidth + 2) -> Nat)
     (resourceCircuits : (resource : Fin (prefixLast prefixWidth + 2)) ->
-      Circuit DeMorgan.signature (pairs * suffixWidth)
-        (resourceGateCounts resource) pairs) :
-    (sharedUhligLayerCircuit pairs resourceGateCounts resourceCircuits).cost
+      Circuit DeMorgan.signature (pairs * suffixWidth) pairs) :
+    (sharedUhligLayerCircuit pairs resourceCircuits).cost
         DeMorgan.standardCost <=
       (Finset.univ.sum fun resource : Fin (prefixLast prefixWidth + 2) =>
         (resourceCircuits resource).cost DeMorgan.standardCost) +

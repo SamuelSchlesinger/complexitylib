@@ -69,7 +69,7 @@ def interactionFamily
     (certificate : Interaction.Certificate (K := K)
       (Q := A →ₗ[K] B) constant problem)
     (circuit : Circuit (Algebraic.Arithmetic.signature C)
-      problem.inputCount g 1) :
+      problem.inputCount 1) :
     Fin (circuitMultiplicationArguments constant problem.inputs circuit).length →
       (A →ₗ[K] B) :=
   fun index =>
@@ -86,7 +86,7 @@ def IndexedBound
     (certificate : Interaction.Certificate (K := K)
       (Q := A →ₗ[K] B) constant problem)
     (circuit : Circuit (Algebraic.Arithmetic.signature C)
-      problem.inputCount g 1)
+      problem.inputCount 1)
     (budget :
       Fin (circuitMultiplicationArguments constant problem.inputs circuit).length →
         Nat) : Prop :=
@@ -102,7 +102,7 @@ def ArgumentBound
     (certificate : Interaction.Certificate (K := K)
       (Q := A →ₗ[K] B) constant problem)
     (circuit : Circuit (Algebraic.Arithmetic.signature C)
-      problem.inputCount g 1)
+      problem.inputCount 1)
     (budget : (Fin 2 → U) → Nat) : Prop :=
   ∀ arguments,
     arguments ∈
@@ -119,7 +119,7 @@ theorem targetFeature_mem_span
     (certificate : Interaction.Certificate (K := K)
       (Q := A →ₗ[K] B) constant problem)
     (circuit : Circuit (Algebraic.Arithmetic.signature C)
-      problem.inputCount g 1)
+      problem.inputCount 1)
     (constructs : problem.Constructs circuit
       (Algebraic.Arithmetic.interpretation constant)) :
     certificate.feature problem.target ∈
@@ -163,7 +163,7 @@ theorem IndexedBound.of_argumentBound
     (certificate : Interaction.Certificate (K := K)
       (Q := A →ₗ[K] B) constant problem)
     (circuit : Circuit (Algebraic.Arithmetic.signature C)
-      problem.inputCount g 1)
+      problem.inputCount 1)
     (budget : (Fin 2 → U) → Nat)
     (bound : ArgumentBound certificate circuit budget) :
     IndexedBound certificate circuit
@@ -180,7 +180,7 @@ theorem target_rank_le_sum_indexedBudget
     (certificate : Interaction.Certificate (K := K)
       (Q := A →ₗ[K] B) constant problem)
     (circuit : Circuit (Algebraic.Arithmetic.signature C)
-      problem.inputCount g 1)
+      problem.inputCount 1)
     (constructs : problem.Constructs circuit
       (Algebraic.Arithmetic.interpretation constant))
     (budget :
@@ -204,7 +204,7 @@ theorem targetRank_le_sum_indexedBudget
     (target_rank_ge : (targetRank : Cardinal) ≤
       LinearMap.rank (certificate.feature problem.target))
     (circuit : Circuit (Algebraic.Arithmetic.signature C)
-      problem.inputCount g 1)
+      problem.inputCount 1)
     (constructs : problem.Constructs circuit
       (Algebraic.Arithmetic.interpretation constant))
     (budget :
@@ -231,7 +231,7 @@ theorem exists_occurrence_budget_ge_ceilDiv
     (target_rank_ge : (targetRank : Cardinal) ≤
       LinearMap.rank (certificate.feature problem.target))
     (circuit : Circuit (Algebraic.Arithmetic.signature C)
-      problem.inputCount g 1)
+      problem.inputCount 1)
     (constructs : problem.Constructs circuit
       (Algebraic.Arithmetic.interpretation constant))
     (budget :
@@ -257,7 +257,7 @@ theorem targetRank_le_sum_argumentBudget
     (target_rank_ge : (targetRank : Cardinal) ≤
       LinearMap.rank (certificate.feature problem.target))
     (circuit : Circuit (Algebraic.Arithmetic.signature C)
-      problem.inputCount g 1)
+      problem.inputCount 1)
     (constructs : problem.Constructs circuit
       (Algebraic.Arithmetic.interpretation constant))
     (budget : (Fin 2 → U) → Nat)

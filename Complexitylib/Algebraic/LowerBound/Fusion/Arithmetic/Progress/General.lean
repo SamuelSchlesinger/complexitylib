@@ -43,20 +43,27 @@ def polynomialInterpretation
   Algebraic.Arithmetic.interpretation
     (fun scalar => MvPolynomial.C (constant scalar))
 
+/-- Extending the wire namespace by one gate commutes with the positional
+numbering of wires. -/
+theorem wire_index_castSucc
+    (wire : Wire n g) :
+    wire.castSucc.index = wire.index.castSucc := by
+  cases wire <;> exact Fin.ext rfl
+
 /-- Formal polynomial computed by one arithmetic line from variables naming
-all wires in its prefix. -/
+all wires in its prefix, each wire named by its position `Wire.index`. -/
 def lineFormalResult
     [CommSemiring R]
     (constant : K → R)
     (line : Line (Algebraic.Arithmetic.signature K) n g) :
-    MvPolynomial (Wire n g) R :=
+    MvPolynomial (Fin (n + g)) R :=
   match line with
   | ⟨.add, wires⟩ =>
-      MvPolynomial.X (wires (0 : Fin 2)) +
-        MvPolynomial.X (wires (1 : Fin 2))
+      MvPolynomial.X (wires (0 : Fin 2)).index +
+        MvPolynomial.X (wires (1 : Fin 2)).index
   | ⟨.mul, wires⟩ =>
-      MvPolynomial.X (wires (0 : Fin 2)) *
-        MvPolynomial.X (wires (1 : Fin 2))
+      MvPolynomial.X (wires (0 : Fin 2)).index *
+        MvPolynomial.X (wires (1 : Fin 2)).index
   | ⟨.constant scalar, _⟩ => MvPolynomial.C (constant scalar)
 
 /-- Eliminate the new last gate-variable by substituting its formal result. -/
@@ -64,8 +71,8 @@ def lineReverseSubstitution
     [CommSemiring R]
     (constant : K → R)
     (line : Line (Algebraic.Arithmetic.signature K) n g) :
-    MvPolynomial (Wire n (g + 1)) R →ₐ[R]
-      MvPolynomial (Wire n g) R :=
+    MvPolynomial (Fin (n + g + 1)) R →ₐ[R]
+      MvPolynomial (Fin (n + g)) R :=
   MvPolynomial.bind₁
     (Fin.lastCases (lineFormalResult constant line) MvPolynomial.X)
 
@@ -84,9 +91,9 @@ theorem lineReverseSubstitution_X_last
     (line : Line (Algebraic.Arithmetic.signature K) n g)
     (wire : Wire n g) :
     lineReverseSubstitution constant line
-        (MvPolynomial.X wire.castSucc) =
-      MvPolynomial.X wire := by
-  simp [lineReverseSubstitution]
+        (MvPolynomial.X wire.castSucc.index) =
+      MvPolynomial.X wire.index := by
+  simp [lineReverseSubstitution, wire_index_castSucc]
 
 /-- Expand every formal gate-variable by eliminating gates in reverse
 topological order. -/
@@ -94,7 +101,7 @@ def programExpansionHom
     [CommSemiring R]
     (constant : K → R) :
     (program : Program (Algebraic.Arithmetic.signature K) n g) →
-      MvPolynomial (Wire n g) R →ₐ[R] MvPolynomial (Fin n) R
+      MvPolynomial (Fin (n + g)) R →ₐ[R] MvPolynomial (Fin n) R
   | .empty => AlgHom.id R _
   | .gate program line =>
       (programExpansionHom constant program).comp
@@ -123,33 +130,33 @@ theorem programExpansionHom_X
     (constant : K → R)
     (program : Program (Algebraic.Arithmetic.signature K) n g)
     (wire : Wire n g) :
-    programExpansionHom constant program (MvPolynomial.X wire) =
+    programExpansionHom constant program (MvPolynomial.X wire.index) =
       program.trace (polynomialInterpretation constant (Fin n))
         MvPolynomial.X wire := by
   induction program with
   | empty =>
-      refine Fin.addCases (fun input => ?_)
-        (fun impossible => Fin.elim0 impossible) wire
-      simp only [programExpansionHom_empty, AlgHom.id_apply, Program.trace,
-        Fin.addCases_left]
-      exact congrArg MvPolynomial.X (Fin.ext rfl)
+      cases wire with
+      | input input =>
+          simp only [programExpansionHom_empty, AlgHom.id_apply,
+            Program.trace_input]
+          exact congrArg MvPolynomial.X (Fin.ext rfl)
+      | gate impossible => exact Fin.elim0 impossible
   | @gate g program line inductionHypothesis =>
-      refine Fin.lastCases ?_ (fun priorWire => ?_) wire
-      · rw [programExpansionHom_gate, AlgHom.comp_apply,
+      induction wire using Wire.lastCases with
+      | last =>
+        rw [show (Wire.gate (Fin.last g) : Wire n (g + 1)).index =
+            Fin.last (n.add g) from Fin.ext rfl]
+        rw [programExpansionHom_gate, AlgHom.comp_apply,
           lineReverseSubstitution_X_last]
         have outputTrace :
             (program.gate line).trace
                 (polynomialInterpretation constant (Fin n)) MvPolynomial.X
-                (Fin.last (n.add g)) =
+                (Wire.gate (Fin.last g)) =
               line.eval (polynomialInterpretation constant (Fin n))
                 MvPolynomial.X
                 (program.eval (polynomialInterpretation constant (Fin n))
-                  MvPolynomial.X) := by
-          unfold Program.trace
-          rw [show Fin.last (n.add g) =
-              Fin.natAdd n (Fin.last g) from Fin.ext rfl]
-          rw [Fin.addCases_right]
-          simp
+                  MvPolynomial.X) :=
+          Program.eval_gate_last program line _ _
         rw [outputTrace]
         cases line with
         | mk op wires =>
@@ -170,7 +177,8 @@ theorem programExpansionHom_X
                 simp [lineFormalResult, Line.eval,
                   polynomialInterpretation,
                   Algebraic.Arithmetic.interpretation]
-      · rw [programExpansionHom_gate, AlgHom.comp_apply,
+      | castSucc priorWire =>
+        rw [programExpansionHom_gate, AlgHom.comp_apply,
           lineReverseSubstitution_X_castSucc,
           Program.trace_gate_castSucc]
         exact inductionHypothesis priorWire
@@ -179,9 +187,9 @@ theorem programExpansionHom_X
 def circuitFormalOutput
     [CommSemiring R]
     (circuit : Circuit
-      (Algebraic.Arithmetic.signature K) n g 1) :
-    MvPolynomial (Wire n g) R :=
-  MvPolynomial.X (circuit.outputs 0)
+      (Algebraic.Arithmetic.signature K) n 1) :
+    MvPolynomial (Fin (n + circuit.size)) R :=
+  MvPolynomial.X (circuit.outputs 0).index
 
 /-- Polynomial obtained by reverse-substituting every gate into the formal
 output variable. -/
@@ -189,7 +197,7 @@ def circuitExpandedOutput
     [CommSemiring R]
     (constant : K → R)
     (circuit : Circuit
-      (Algebraic.Arithmetic.signature K) n g 1) :
+      (Algebraic.Arithmetic.signature K) n 1) :
     MvPolynomial (Fin n) R :=
   programExpansionHom constant circuit.program (circuitFormalOutput circuit)
 
@@ -198,7 +206,7 @@ theorem circuitExpandedOutput_eq_eval
     [CommSemiring R]
     (constant : K → R)
     (circuit : Circuit
-      (Algebraic.Arithmetic.signature K) n g 1) :
+      (Algebraic.Arithmetic.signature K) n 1) :
     circuitExpandedOutput constant circuit =
       circuit.eval (polynomialInterpretation constant (Fin n))
         MvPolynomial.X 0 := by
@@ -262,7 +270,7 @@ theorem Measure.reverseSubstitution_le
       (Algebraic.Arithmetic.signature K)}
     (measure : Measure constant operationCost)
     (line : Line (Algebraic.Arithmetic.signature K) n g)
-    (polynomial : MvPolynomial (Wire n (g + 1)) R) :
+    (polynomial : MvPolynomial (Fin (n + g + 1)) R) :
     measure.value (n + g)
         (lineReverseSubstitution constant line polynomial) ≤
       measure.value (n + g + 1) polynomial + operationCost line.op := by
@@ -274,13 +282,13 @@ theorem Measure.reverseSubstitution_le
           simpa [lineReverseSubstitution, lineFormalResult,
             Nat.add_assoc] using
             measure.add_substitution_le (n + g) polynomial
-              (wires (0 : Fin 2)) (wires (1 : Fin 2))
+              (wires (0 : Fin 2)).index (wires (1 : Fin 2)).index
       | mul =>
           change Fin 2 → Wire n g at wires
           simpa [lineReverseSubstitution, lineFormalResult,
             Nat.add_assoc] using
             measure.mul_substitution_le (n + g) polynomial
-              (wires (0 : Fin 2)) (wires (1 : Fin 2))
+              (wires (0 : Fin 2)).index (wires (1 : Fin 2)).index
       | constant scalar =>
           simpa [lineReverseSubstitution, lineFormalResult,
             Nat.add_assoc] using
@@ -294,7 +302,7 @@ theorem Measure.expansionHom_le_cost
       (Algebraic.Arithmetic.signature K)}
     (measure : Measure constant operationCost)
     (program : Program (Algebraic.Arithmetic.signature K) n g)
-    (polynomial : MvPolynomial (Wire n g) R) :
+    (polynomial : MvPolynomial (Fin (n + g)) R) :
     measure.value n (programExpansionHom constant program polynomial) ≤
       measure.value (n + g) polynomial + program.cost operationCost := by
   induction program with
@@ -328,7 +336,7 @@ theorem Measure.expandedOutput_le_cost
       (Algebraic.Arithmetic.signature K)}
     (measure : Measure constant operationCost)
     (circuit : Circuit
-      (Algebraic.Arithmetic.signature K) n g 1) :
+      (Algebraic.Arithmetic.signature K) n 1) :
     measure.value n (circuitExpandedOutput constant circuit) ≤
       circuit.cost operationCost := by
   have bound := measure.expansionHom_le_cost circuit.program
@@ -346,7 +354,7 @@ theorem Measure.circuit_lowerBound
     (measure : Measure constant operationCost)
     (target : MvPolynomial (Fin n) R)
     (circuit : Circuit
-      (Algebraic.Arithmetic.signature K) n g 1)
+      (Algebraic.Arithmetic.signature K) n 1)
     (constructs :
       ({ inputCount := n, inputs := MvPolynomial.X, target := target } :
         Problem (MvPolynomial (Fin n) R)).Constructs circuit

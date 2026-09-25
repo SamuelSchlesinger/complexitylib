@@ -39,9 +39,8 @@ theorem exists_finite_uhlig_circuit
     (copies : Nat)
     (copiesPositive : 0 < copies)
     (copiesBound : copies <= 2 ^ depth) :
-    exists gates,
-      exists circuit : Circuit DeMorgan.signature
-          (copies * recursiveWidth prefixWidth baseWidth depth) gates copies,
+    exists circuit : Circuit DeMorgan.signature
+          (copies * recursiveWidth prefixWidth baseWidth depth) copies,
         circuit.ComputesWith DeMorgan.interpretation
             (directProduct function copies) /\
           circuit.cost DeMorgan.standardCost <=
@@ -55,7 +54,7 @@ theorem exists_finite_uhlig_circuit
     exact copiesBound
   let circuit := fullCircuit.takeDirectProductPrefix
     copies copiesPositive copiesLeFull
-  refine ⟨_, circuit, ?_, ?_⟩
+  refine ⟨circuit, ?_, ?_⟩
   · exact Circuit.takeDirectProductPrefix_computes fullCircuit function
       (recursiveCircuit_computes prefixWidth baseWidth base depth function)
       copiesPositive copiesLeFull
@@ -77,9 +76,8 @@ theorem exists_finite_uhlig_circuit_at_width
     (copies : Nat)
     (copiesPositive : 0 < copies)
     (copiesBound : copies <= 2 ^ depth) :
-    exists gates,
-      exists circuit : Circuit DeMorgan.signature
-          (copies * inputs) gates copies,
+    exists circuit : Circuit DeMorgan.signature
+          (copies * inputs) copies,
         circuit.ComputesWith DeMorgan.interpretation
             (directProduct function copies) /\
           circuit.cost DeMorgan.standardCost <=

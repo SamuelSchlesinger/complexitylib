@@ -109,33 +109,33 @@ theorem CyclicCircuit.atomAt_mono_joinMeet
       (circuit.atomAt inputs upper gate).result
         (JoinMeet.setInterpretation Γ) := by
   have wireSubset : ∀ wire : Wire n g,
-      (Fin.addCases inputs lower : Wire n g → Set Γ) wire ⊆
-        (Fin.addCases inputs upper : Wire n g → Set Γ) wire := by
+      (Wire.elim inputs lower : Wire n g → Set Γ) wire ⊆
+        (Wire.elim inputs upper : Wire n g → Set Γ) wire := by
     intro wire
-    refine Fin.addCases (motive := fun wire =>
-      (Fin.addCases inputs lower : Wire n g → Set Γ) wire ⊆
-        (Fin.addCases inputs upper : Wire n g → Set Γ) wire)
+    refine Cslib.Circuits.Wire.rec (motive := fun wire =>
+      (Wire.elim inputs lower : Wire n g → Set Γ) wire ⊆
+        (Wire.elim inputs upper : Wire n g → Set Γ) wire)
       (fun input => ?_) (fun sourceGate => ?_) wire
-    · simpa only [Fin.addCases_left] using
+    · simpa only [Wire.elim_input] using
         (Set.Subset.rfl : inputs input ⊆ inputs input)
-    · simpa only [Fin.addCases_right] using stateSubset sourceGate
+    · simpa only [Wire.elim_gate] using stateSubset sourceGate
   let line := circuit.lines gate
   change JoinMeet.setInterpretation Γ line.op
-      ((Fin.addCases inputs lower : Wire n g → Set Γ) ∘ line.wires) ⊆
+      ((Wire.elim inputs lower : Wire n g → Set Γ) ∘ line.wires) ⊆
     JoinMeet.setInterpretation Γ line.op
-      ((Fin.addCases inputs upper : Wire n g → Set Γ) ∘ line.wires)
+      ((Wire.elim inputs upper : Wire n g → Set Γ) ∘ line.wires)
   cases line with
   | mk op wires =>
       cases op with
       | meet =>
           change
-            ((Fin.addCases inputs lower : Wire n g → Set Γ)
+            ((Wire.elim inputs lower : Wire n g → Set Γ)
                 (wires (0 : Fin 2)) ∩
-              (Fin.addCases inputs lower : Wire n g → Set Γ)
+              (Wire.elim inputs lower : Wire n g → Set Γ)
                 (wires (1 : Fin 2))) ⊆
-            ((Fin.addCases inputs upper : Wire n g → Set Γ)
+            ((Wire.elim inputs upper : Wire n g → Set Γ)
                 (wires (0 : Fin 2)) ∩
-              (Fin.addCases inputs upper : Wire n g → Set Γ)
+              (Wire.elim inputs upper : Wire n g → Set Γ)
                 (wires (1 : Fin 2)))
           exact Set.inter_subset_inter
             (wireSubset (wires (0 : Fin 2)))
@@ -174,20 +174,20 @@ noncomputable def pairCoverOfJoinMeetCyclic
         exact present'.1
       · simpa [candidate, gateBad] using present
     let finalWire : Wire problem.inputCount g → Set Γ :=
-      Fin.addCases problem.inputs constructs.values
+      Wire.elim problem.inputs constructs.values
     let candidateWire : Wire problem.inputCount g → Set Γ :=
-      Fin.addCases problem.inputs candidate
+      Wire.elim problem.inputs candidate
     have wire_observed : ∀ wire,
         point ∈ candidateWire wire →
           problem.restrict (finalWire wire) ∈ filter := by
       intro wire
-      refine Fin.addCases (motive := fun wire =>
+      refine Cslib.Circuits.Wire.rec (motive := fun wire =>
         point ∈ candidateWire wire →
           problem.restrict (finalWire wire) ∈ filter)
         (fun input present => ?_) (fun gate present => ?_) wire
-      · simp only [candidateWire, finalWire, Fin.addCases_left] at present ⊢
+      · simp only [candidateWire, finalWire, Wire.elim_input] at present ⊢
         exact above input present
-      · simp only [candidateWire, finalWire, Fin.addCases_right] at present ⊢
+      · simp only [candidateWire, finalWire, Wire.elim_gate] at present ⊢
         by_cases gateBad : bad gate
         · have excluded : point ∉ candidate gate := by
             simp [candidate, gateBad]

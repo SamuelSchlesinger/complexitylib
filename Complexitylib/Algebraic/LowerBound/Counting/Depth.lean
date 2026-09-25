@@ -207,7 +207,7 @@ theorem _root_.Cslib.Circuits.Program.gateFunction_mem_depthFunctions
       · unfold Program.gateFunction
         simp only [Program.eval, Program.depths, Fin.lastCases_last]
         let wireDepths : Wire n g → Nat :=
-          Fin.addCases (fun _ => 0) program.depths
+          Wire.elim (fun _ => 0) program.depths
         let maxDepth := Fin.foldl (σ.Arity line.op)
           (fun result argument =>
             max result (wireDepths (line.wires argument))) 0
@@ -217,14 +217,12 @@ theorem _root_.Cslib.Circuits.Program.gateFunction_mem_depthFunctions
             program.wireFunction interpretation wire ∈
               Depth.functions interpretation n (wireDepths wire) := by
           unfold Program.wireFunction Program.trace
-          refine Fin.addCases ?_ ?_ wire
-          · intro input
-            simp only [Fin.addCases_left, wireDepths]
+          cases wire with
+          | input input =>
             change (fun values : Fin n → U => values input) ∈
               Depth.functions interpretation n 0
             exact Depth.projection_mem_functions interpretation input 0
-          · intro priorGate
-            simp only [Fin.addCases_right, wireDepths]
+          | gate priorGate =>
             change program.gateFunction interpretation priorGate ∈
               Depth.functions interpretation n (program.depths priorGate)
             exact ih priorGate
@@ -256,14 +254,12 @@ theorem _root_.Cslib.Circuits.Program.wireFunction_mem_depthFunctions
       Depth.functions interpretation n (program.wireDepths wire) := by
   classical
   unfold Program.wireFunction Program.wireDepths Program.trace
-  refine Fin.addCases ?_ ?_ wire
-  · intro input
-    simp only [Fin.addCases_left]
+  cases wire with
+  | input input =>
     change (fun values : Fin n → U => values input) ∈
       Depth.functions interpretation n 0
     exact Depth.projection_mem_functions interpretation input 0
-  · intro gate
-    simp only [Fin.addCases_right]
+  | gate gate =>
     change program.gateFunction interpretation gate ∈
       Depth.functions interpretation n (program.depths gate)
     exact program.gateFunction_mem_depthFunctions interpretation gate
@@ -272,7 +268,7 @@ export Cslib.Circuits (Program.wireFunction_mem_depthFunctions)
 
 theorem _root_.Cslib.Circuits.Circuit.outputFunction_mem_depthFunctions
     [Fintype σ.Op] [Fintype U]
-    (circuit : Circuit σ n g m)
+    (circuit : Circuit σ n m)
     (interpretation : Interpretation σ U)
     (output : Fin m) :
     circuit.outputFunction interpretation output ∈
@@ -308,7 +304,7 @@ theorem Depth.card_targets_le
 
 theorem _root_.Cslib.Circuits.Circuit.eval_mem_depth_targets
     [Fintype σ.Op] [Fintype U]
-    (circuit : Circuit σ n g m)
+    (circuit : Circuit σ n m)
     (interpretation : Interpretation σ U)
     {depth : Nat}
     (bounded : circuit.depth ≤ depth) :
@@ -379,7 +375,7 @@ theorem _root_.Cslib.Circuits.Circuit.exists_depth_hard_in_family
     Finset.exists_mem_notMem_of_card_lt_card small
   refine ⟨target, inFamily, ?_⟩
   unfold Circuit.DepthHard
-  intro g circuit computes
+  intro circuit computes
   by_contra notDeep
   have bounded : circuit.depth ≤ depth := by omega
   apply notShallow

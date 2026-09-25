@@ -60,7 +60,7 @@ def termCircuit
     (term : Term K degree) :=
   (Algebraic.Arithmetic.Expression.circuit
       (scaleExpression term.scale)).comp
-    ((Algebraic.Arithmetic.Power.binaryCircuit (K := K) degree).2.comp
+    ((Algebraic.Arithmetic.Power.binaryCircuit (K := K) degree).comp
       (Algebraic.Arithmetic.Expression.circuit
         (linearFormExpression term)))
 
@@ -162,9 +162,6 @@ def translation
     ContextualTranslation
       (Algebraic.SumOfTerms.signature (Term K degree))
       (Algebraic.Arithmetic.signature K) degree where
-  gateCount
-    | .add => (additionExpression (K := K) degree).gateCount
-    | .term term => (termCircuit term).size
   operation
     | .add => Algebraic.Arithmetic.Expression.circuit
         (additionExpression (K := K) degree)
@@ -205,7 +202,7 @@ theorem compile_multiplicationCost_eq_termCost
     [Semiring K]
     (degree : Nat)
     (circuit : Circuit
-      (Algebraic.SumOfTerms.signature (Term K degree)) 0 g m) :
+      (Algebraic.SumOfTerms.signature (Term K degree)) 0 m) :
     ((translation (K := K) degree).compile circuit).cost
         (Algebraic.Arithmetic.multiplicationCost (K := K)) =
       termMultiplicationCount degree *
@@ -219,7 +216,7 @@ theorem compile_additionCost_eq_sourceCosts
     [Semiring K]
     (degree : Nat)
     (circuit : Circuit
-      (Algebraic.SumOfTerms.signature (Term K degree)) 0 g m) :
+      (Algebraic.SumOfTerms.signature (Term K degree)) 0 m) :
     ((translation (K := K) degree).compile circuit).cost
         (Algebraic.Arithmetic.additionCost (K := K)) =
       circuit.cost
@@ -287,7 +284,7 @@ theorem compile_eval
     [CommSemiring K]
     (degree : Nat)
     (circuit : Circuit
-      (Algebraic.SumOfTerms.signature (Term K degree)) 0 g m) :
+      (Algebraic.SumOfTerms.signature (Term K degree)) 0 m) :
     ((translation (K := K) degree).compile circuit).eval
         (Algebraic.Arithmetic.interpretation
           (MvPolynomial.C : K → MvPolynomial (Fin degree) K))

@@ -37,7 +37,7 @@ def MultiplicationOutputRankAtMost
     (constant : C → K)
     (degree : Nat)
     (degreeAtLeastTwo : 2 ≤ degree)
-    (circuit : Circuit (Algebraic.Arithmetic.signature C) degree g 1)
+    (circuit : Circuit (Algebraic.Arithmetic.signature C) degree 1)
     (localRank : Fin (degree + 1) → Nat) : Prop :=
   ∀ split,
     Rectangular.MultiplicationOutputRankAtMost constant degree split.1
@@ -50,7 +50,7 @@ theorem localRankAtMost_of_multiplicationOutputRankAtMost
     (constant : C → K)
     (degree : Nat)
     (degreeAtLeastTwo : 2 ≤ degree)
-    (circuit : Circuit (Algebraic.Arithmetic.signature C) degree g 1)
+    (circuit : Circuit (Algebraic.Arithmetic.signature C) degree 1)
     (localRank : Fin (degree + 1) → Nat)
     (bound : MultiplicationOutputRankAtMost constant degree degreeAtLeastTwo
       circuit localRank) :
@@ -70,7 +70,7 @@ theorem certifiedLowerBound_of_multiplicationOutputRankAtMost
     (degreeAtLeastTwo : 2 ≤ degree)
     (localRank : Fin (degree + 1) → Nat)
     (rankPositive : ∀ split, 0 < localRank split)
-    (circuit : Circuit (Algebraic.Arithmetic.signature C) degree g 1)
+    (circuit : Circuit (Algebraic.Arithmetic.signature C) degree 1)
     (constructs : (problem K degree).Constructs circuit
       (Algebraic.Arithmetic.interpretation
         (fun scalar ↦ MvPolynomial.C (constant scalar))))

@@ -22,7 +22,7 @@ namespace Algebraic.DeMorgan
 /-- A compiled expression upper-bounds the complexity of its semantics. -/
 theorem complexity_expression_le (expression : Expression n) :
     complexity expression.eval ≤ expression.gateCount := by
-  apply complexity_le expression.circuit
+  refine (complexity_le expression.circuit ?_).trans_eq expression.circuit_size
   intro input
   funext output
   have equal : output = 0 := Subsingleton.elim _ _

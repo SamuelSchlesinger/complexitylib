@@ -452,7 +452,7 @@ theorem circuit_multiplication_lowerBound
     (input_le_one : ∀ input,
       measure.value (problem.inputs input) ≤ 1)
     (target_ge : 2 ^ levels ≤ measure.value problem.target)
-    (circuit : Circuit (Arithmetic.signature K) problem.inputCount g 1)
+    (circuit : Circuit (Arithmetic.signature K) problem.inputCount 1)
     (constructs : problem.Constructs circuit
       (Arithmetic.interpretation constant)) :
     levels ≤ circuit.cost (Arithmetic.multiplicationCost (K := K)) :=

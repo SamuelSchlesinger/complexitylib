@@ -42,7 +42,7 @@ def arithmeticGateCount : Arithmetic.Op Bool -> Nat
 /-- The De Morgan circuit simulating each Boolean arithmetic operation: exclusive
 or for addition, conjunction for multiplication, and a constant gate. -/
 def arithmeticOperation : (op : Arithmetic.Op Bool) ->
-    Circuit signature (Arithmetic.arity op) (arithmeticGateCount op) 1
+    Circuit signature (Arithmetic.arity op) 1
   | .constant value =>
       { program := (Program.empty : Program signature 0 0).gate
           { op := if value then .true else .false
@@ -69,10 +69,15 @@ def arithmeticOperation : (op : Arithmetic.Op Bool) ->
                   (fun _ => Wire.gate (2 : Fin 3)) argument }
         outputs := fun _ => Wire.gate (Fin.last 3) }
 
+/-- The simulation of each Boolean arithmetic operation uses
+`arithmeticGateCount` gates. -/
+@[simp] theorem arithmeticOperation_size (op : Arithmetic.Op Bool) :
+    (arithmeticOperation op).size = arithmeticGateCount op := by
+  cases op <;> rfl
+
 /-- Translate Boolean-ring arithmetic to the De Morgan basis. -/
 def arithmeticTranslation :
     Translation (Arithmetic.signature Bool) signature where
-  gateCount := arithmeticGateCount
   operation := arithmeticOperation
 
 /-- The concrete operation circuits have the intended Boolean-ring

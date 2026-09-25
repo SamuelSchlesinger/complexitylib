@@ -47,10 +47,9 @@ theorem eventually_complexity_le_lupanov (ε : Real) (positive : 0 < ε) :
       (complexity function : Real) ≤ (1 + ε) * 2 ^ n / n := by
   obtain ⟨N, upper⟩ := Cslib.Circuits.Boolean.Lupanov.exists_circuit ε positive
   refine ⟨N, fun n large function => ?_⟩
-  obtain ⟨gates, circuit, computes, bounded⟩ := upper n large function
+  obtain ⟨circuit, computes, bounded⟩ := upper n large function
   have minimal := complexity_le (fromBoolean.compile circuit)
     ((fromBoolean_computes circuit function).2 computes)
-  change complexity function ≤ (fromBoolean.compile circuit).size at minimal
   rw [fromBoolean_size] at minimal
   exact (show (complexity function : Real) ≤ (circuit.size : Real) by
     exact_mod_cast minimal).trans bounded
@@ -58,7 +57,7 @@ theorem eventually_complexity_le_lupanov (ε : Real) (positive : 0 < ε) :
 /-- Free constants change the Shannon lower bound by at most two gates. -/
 theorem exists_standardCost_add_two_gt_two_pow_div :
     ∃ N : Nat, ∀ n ≥ N, ∃ function : ScalarFunction Bool n,
-      ∀ {g} (circuit : Circuit signature n g 1),
+      ∀ (circuit : Circuit signature n 1),
         circuit.ComputesWith interpretation (fun input _ => function input) →
           2 ^ n / (n : Real) < (circuit.cost standardCost : Real) + 2 := by
   obtain ⟨N, hard⟩ := exists_complexity_gt_two_pow_div
@@ -70,13 +69,13 @@ theorem exists_standardCost_add_two_gt_two_pow_div :
 /-- The standard weighted cost also satisfies Lupanov's sharp upper bound. -/
 theorem exists_standardCost_le_lupanov (ε : Real) (positive : 0 < ε) :
     ∃ N : Nat, ∀ n ≥ N, ∀ function : ScalarFunction Bool n,
-      ∃ g, ∃ circuit : Circuit signature n g 1,
+      ∃ circuit : Circuit signature n 1,
         circuit.ComputesWith interpretation (fun input _ => function input) ∧
           (circuit.cost standardCost : Real) ≤ (1 + ε) * 2 ^ n / n := by
   obtain ⟨N, upper⟩ := Cslib.Circuits.Boolean.Lupanov.exists_circuit ε positive
   refine ⟨N, fun n large function => ?_⟩
-  obtain ⟨gates, circuit, computes, bounded⟩ := upper n large function
-  refine ⟨_, fromBoolean.compile circuit,
+  obtain ⟨circuit, computes, bounded⟩ := upper n large function
+  refine ⟨fromBoolean.compile circuit,
     (fromBoolean_computes circuit function).2 computes, ?_⟩
   exact (show ((fromBoolean.compile circuit).cost standardCost : Real) ≤
       (circuit.size : Real) by

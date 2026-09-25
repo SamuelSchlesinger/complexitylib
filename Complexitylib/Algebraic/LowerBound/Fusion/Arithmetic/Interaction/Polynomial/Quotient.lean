@@ -212,7 +212,7 @@ theorem coefficientMatrix_rank_le_multiplicationCost_viaQuotient
     (notInput : ∀ selected input,
       exponent selected ≠ Finsupp.single (inputVariables input) 1)
     (outputs : Fin m → MvPolynomial σ K)
-    (circuit : Circuit (Algebraic.Arithmetic.signature C) n g m)
+    (circuit : Circuit (Algebraic.Arithmetic.signature C) n m)
     (constructs : Multiple.Constructs
       (constant := fun scalar => MvPolynomial.C (constant scalar))
       (inputProblem inputVariables) outputs circuit) :

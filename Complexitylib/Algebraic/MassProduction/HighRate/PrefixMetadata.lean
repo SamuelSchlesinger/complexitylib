@@ -74,13 +74,13 @@ theorem existsCircuit (positive : 0 < width)
     (code : LineCode (BinaryExtension width) (Fin dimension))
     (placement : Fin (2 ^ prefixWidth) ↪ InformationBit code copies)
     (requests suffixWidth copyBits selectorBits : Nat) :
-    ∃ gates, ∃ prepared : Circuit DeMorgan.signature (requests * (prefixWidth + suffixWidth)) gates
+    ∃ prepared : Circuit DeMorgan.signature (requests * (prefixWidth + suffixWidth))
       (requests * payloadWidth dimension width copyBits selectorBits suffixWidth),
       prepared.cost DeMorgan.standardCost ≤ costBound requests prefixWidth dimension width copyBits selectorBits ∧
       ∀ input request bit, prepared.eval DeMorgan.interpretation input (finProdFinEquiv (request, bit)) =
         Fin.append (metadata positive code placement copyBits selectorBits (requestSource input request))
           (requestSuffix input request) bit := by
-  obtain ⟨lookupGates, lookup, lookupCorrect, lookupBound⟩ := BatchLookup.existsCircuit prefixWidth
+  obtain ⟨lookup, lookupCorrect, lookupBound⟩ := BatchLookup.existsCircuit prefixWidth
     (metadataWidth dimension width copyBits selectorBits) requests
     (fun address => metadata positive code placement copyBits selectorBits (RuntimePacking.source address))
   let prefixIndex := fun index : Fin (requests * prefixWidth) =>
@@ -90,7 +90,7 @@ theorem existsCircuit (positive : 0 < width)
     let pair := (finProdFinEquiv (m := requests) (n := suffixWidth)).symm index
     (DeMorgan.Wiring.input (finProdFinEquiv (pair.1, Fin.natAdd prefixWidth pair.2)) :
       DeMorgan.Wiring (requests * (prefixWidth + suffixWidth)))
-  refine ⟨_, RecordArray.combine (lookup.mapInputs prefixIndex) (DeMorgan.Wiring.circuit suffixWires), ?_, ?_⟩
+  refine ⟨RecordArray.combine (lookup.mapInputs prefixIndex) (DeMorgan.Wiring.circuit suffixWires), ?_, ?_⟩
   · rw [RecordArray.combine_cost, Circuit.cost_mapInputs, DeMorgan.Wiring.circuit_cost, Nat.add_zero]
     exact lookupBound
   · intro input request bit

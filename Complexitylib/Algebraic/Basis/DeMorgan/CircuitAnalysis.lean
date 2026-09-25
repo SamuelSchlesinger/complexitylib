@@ -22,9 +22,9 @@ namespace Algebraic
 namespace DeMorgan
 
 /-- The charged origin of a one-output circuit's terminal value. -/
-structure OutputRoot (circuit : Circuit signature n g 1) where
+structure OutputRoot (circuit : Circuit signature n 1) where
   /-- Charged gate carrying the output, after contracting free gates. -/
-  gate : Fin g
+  gate : Fin circuit.size
   /-- Whether the terminal free chain negates the charged gate. -/
   negated : Bool
   /-- Exact contracted-origin equation for the output wire. -/
@@ -35,7 +35,7 @@ structure OutputRoot (circuit : Circuit signature n g 1) where
 
 /-- Equality at the charged root implies equality of the circuit output. -/
 theorem OutputRoot.output_eq_of_gate_eq
-    {circuit : Circuit signature n g 1}
+    {circuit : Circuit signature n 1}
     (root : OutputRoot circuit)
     (left right : Fin n → Bool)
     (gate_eq : circuit.program.gateFunction interpretation root.gate left =
@@ -62,7 +62,7 @@ theorem OutputRoot.output_eq_of_gate_eq
 
 /-- A changed circuit output forces its charged root to change. -/
 theorem OutputRoot.gate_ne_of_output_ne
-    {circuit : Circuit signature n g 1}
+    {circuit : Circuit signature n 1}
     (root : OutputRoot circuit)
     (left right : Fin n → Bool)
     (different : circuit.eval interpretation left 0 ≠
@@ -77,7 +77,7 @@ A one-output circuit structurally supported by every one of at least two inputs
 has a charged output root.
 -/
 theorem exists_outputRoot
-    (circuit : Circuit signature (n + 1) g 1)
+    (circuit : Circuit signature (n + 1) 1)
     (positive : 0 < n)
     (allSupported : ∀ input, input ∈ circuit.inputSupport) :
     Nonempty (OutputRoot circuit) := by

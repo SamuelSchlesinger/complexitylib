@@ -114,7 +114,7 @@ theorem restrictProgram_value_castSucc_eq_constant
   | false | true | id | not =>
       simp only [restrictProgram]
       dsimp [ProgramRestriction.reuseLast]
-      simpa only [Fin.lastCases_castSucc] using constant
+      simpa only [Wire.lastCases_castSucc] using constant
   | and | or =>
       simp only [restrictProgram, ProgramRestriction.appendBinary]
       split <;>
@@ -138,13 +138,13 @@ theorem restrictProgram_value_eq_constant_of_castSucc
   cases op with
   | false | true | id | not =>
       dsimp [restrictProgram, ProgramRestriction.reuseLast] at constant
-      rw [Fin.lastCases_castSucc] at constant
+      rw [Wire.lastCases_castSucc] at constant
       exact constant
   | and | or =>
       simp only [restrictProgram, ProgramRestriction.appendBinary] at constant
       split at constant
       · dsimp [ProgramRestriction.deleteLast] at constant
-        rw [Fin.lastCases_castSucc] at constant
+        rw [Wire.lastCases_castSucc] at constant
         exact constant
       · dsimp [ProgramRestriction.retainLast] at constant
         generalize prior_eq :
@@ -459,7 +459,7 @@ private theorem restrictProgram_last_and_of_simplifies
     subst value
     constructor
     · simp [ProgramRestriction.deleteLast]
-    · simp [ProgramRestriction.deleteLast, Wire.gate, Fin.natAdd_last]
+    · simp [ProgramRestriction.deleteLast]
   · rename_i actual
     have actualSimplifies :
         simplifyBinary .and (prior.values (wires 0))
@@ -499,7 +499,7 @@ private theorem restrictProgram_last_or_of_simplifies
     subst value
     constructor
     · simp [ProgramRestriction.deleteLast]
-    · simp [ProgramRestriction.deleteLast, Wire.gate, Fin.natAdd_last]
+    · simp [ProgramRestriction.deleteLast]
   · rename_i actual
     have actualSimplifies :
         simplifyBinary .or (prior.values (wires 0))
@@ -605,7 +605,7 @@ theorem annihilate_of_readsInput
               have lifted := restrictProgram_value_castSucc_eq_constant
                 source line selected prior.fixedValue prior.outputValue
                 prior.value_eq
-              simpa only [Fin.natAdd_castSucc] using lifted }⟩
+              exact lifted }⟩
 
 end DeMorgan
 end Algebraic

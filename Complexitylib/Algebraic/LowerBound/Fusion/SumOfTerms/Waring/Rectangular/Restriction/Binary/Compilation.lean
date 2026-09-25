@@ -36,7 +36,7 @@ variable {K : Type}
 def CriticalLayerOrPowerAtMultiplications
     [Field K]
     (degree : Nat)
-    (circuit : Circuit (Algebraic.Arithmetic.signature K) degree g 1) : Prop :=
+    (circuit : Circuit (Algebraic.Arithmetic.signature K) degree 1) : Prop :=
   ∀ arguments : Fin 2 → MvPolynomial (Fin degree) K,
     (⟨.mul, arguments⟩ : Atom (Algebraic.Arithmetic.signature K)
       (MvPolynomial (Fin degree) K)) ∈
@@ -123,7 +123,7 @@ theorem compiled_criticalLayerOrPowerAtMultiplications
     (degree : Nat)
     (degreeAtLeastTwo : 2 ≤ degree)
     (circuit : Circuit
-      (Algebraic.SumOfTerms.signature (Term K degree)) 0 g 1) :
+      (Algebraic.SumOfTerms.signature (Term K degree)) 0 1) :
     CriticalLayerOrPowerAtMultiplications degree
       ((Translation.Binary.translation (K := K) degree).compile circuit) := by
   intro arguments present
@@ -165,7 +165,7 @@ theorem compiled_decompositionAtMultiplications_one
     (degree : Nat)
     (degreeAtLeastTwo : 2 ≤ degree)
     (circuit : Circuit
-      (Algebraic.SumOfTerms.signature (Term K degree)) 0 g 1) :
+      (Algebraic.SumOfTerms.signature (Term K degree)) 0 1) :
     Algebraic.Fusion.Arithmetic.Interaction.Polynomial.Catalecticant.Rectangular.Decomposition.AtMultiplications
       (id : K → K) degree
       ((Translation.Binary.translation (K := K) degree).compile circuit) 1 := by
@@ -179,7 +179,7 @@ theorem compiled_constructs
     [Field K]
     (degree : Nat)
     (circuit : Circuit
-      (Algebraic.SumOfTerms.signature (Term K degree)) 0 g 1)
+      (Algebraic.SumOfTerms.signature (Term K degree)) 0 1)
     (constructs : (Rectangular.problem K degree).Constructs circuit
       (Algebraic.SumOfTerms.interpretation
         (termValue (K := K) (degree := degree)))) :
@@ -201,7 +201,7 @@ theorem compiled_choose_lowerBound
     (degree split : Nat)
     (degreeAtLeastTwo : 2 ≤ degree)
     (circuit : Circuit
-      (Algebraic.SumOfTerms.signature (Term K degree)) 0 g 1)
+      (Algebraic.SumOfTerms.signature (Term K degree)) 0 1)
     (constructs : (Rectangular.problem K degree).Constructs circuit
       (Algebraic.SumOfTerms.interpretation
         (termValue (K := K) (degree := degree)))) :
@@ -224,7 +224,7 @@ theorem compiled_profile_lowerBound
     (degree : Nat)
     (degreeAtLeastTwo : 2 ≤ degree)
     (circuit : Circuit
-      (Algebraic.SumOfTerms.signature (Term K degree)) 0 g 1)
+      (Algebraic.SumOfTerms.signature (Term K degree)) 0 1)
     (constructs : (Rectangular.problem K degree).Constructs circuit
       (Algebraic.SumOfTerms.interpretation
         (termValue (K := K) (degree := degree)))) :
@@ -246,7 +246,7 @@ theorem compiled_middle_lowerBound
     (degree : Nat)
     (degreeAtLeastTwo : 2 ≤ degree)
     (circuit : Circuit
-      (Algebraic.SumOfTerms.signature (Term K degree)) 0 g 1)
+      (Algebraic.SumOfTerms.signature (Term K degree)) 0 1)
     (constructs : (Rectangular.problem K degree).Constructs circuit
       (Algebraic.SumOfTerms.interpretation
         (termValue (K := K) (degree := degree)))) :
@@ -263,7 +263,7 @@ theorem choose_le_termCost_mul_sourceTermCost
     (degree split : Nat)
     (degreeAtLeastTwo : 2 ≤ degree)
     (circuit : Circuit
-      (Algebraic.SumOfTerms.signature (Term K degree)) 0 g 1)
+      (Algebraic.SumOfTerms.signature (Term K degree)) 0 1)
     (constructs : (Rectangular.problem K degree).Constructs circuit
       (Algebraic.SumOfTerms.interpretation
         (termValue (K := K) (degree := degree)))) :
@@ -281,7 +281,7 @@ theorem choose_le_linearLogCost_mul_sourceTermCost
     (degree split : Nat)
     (degreeAtLeastTwo : 2 ≤ degree)
     (circuit : Circuit
-      (Algebraic.SumOfTerms.signature (Term K degree)) 0 g 1)
+      (Algebraic.SumOfTerms.signature (Term K degree)) 0 1)
     (constructs : (Rectangular.problem K degree).Constructs circuit
       (Algebraic.SumOfTerms.interpretation
         (termValue (K := K) (degree := degree)))) :

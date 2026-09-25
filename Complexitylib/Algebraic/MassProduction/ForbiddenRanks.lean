@@ -114,11 +114,15 @@ theorem guardedRankOutputExpression_standardCost_le
 def guardedRankPostprocessCircuit
     (dimension width : Nat) :
     Circuit DeMorgan.signature (2 * (dimension * width))
-      (∑ output, guardedRankOutputGateCount dimension width output)
       (dimension * width) :=
-  Circuit.parallelFin (dimension * width)
-    (guardedRankOutputGateCount dimension width) fun output =>
+  Circuit.parallelFin (dimension * width) fun output =>
       (guardedRankOutputExpression dimension width output).circuit
+
+@[simp] theorem guardedRankPostprocessCircuit_size
+    (dimension width : Nat) :
+    (guardedRankPostprocessCircuit dimension width).size =
+      ∑ output, guardedRankOutputGateCount dimension width output := by
+  simp [guardedRankPostprocessCircuit, guardedRankOutputGateCount]
 
 @[simp] theorem guardedRankPostprocessCircuit_eval
     (input : Fin (2 * (dimension * width)) -> Bool)
@@ -376,11 +380,17 @@ noncomputable def forbiddenRankArrayCircuit
     (depth : Nat) :
     Circuit DeMorgan.signature
       (networkBits depth (dimension * width))
-      (networkRecords depth *
-        guardedProjectiveRankGateCount dimension widthPositive)
       (networkBits depth (dimension * width)) :=
   (guardedProjectiveRankCircuit dimension widthPositive).replicate
     (networkRecords depth)
+
+@[simp] theorem forbiddenRankArrayCircuit_size
+    (dimension : Nat)
+    (widthPositive : 0 < width)
+    (depth : Nat) :
+    (forbiddenRankArrayCircuit dimension widthPositive depth).size =
+      networkRecords depth * guardedProjectiveRankGateCount dimension widthPositive := by
+  simp [forbiddenRankArrayCircuit, guardedProjectiveRankGateCount]
 
 @[simp] theorem forbiddenRankArrayCircuit_eval_apply
     (widthPositive : 0 < width)

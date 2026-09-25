@@ -209,7 +209,7 @@ def multiplicationOccurrences
     [Field K]
     (constant : C → K)
     (n : Nat)
-    (circuit : Circuit (Algebraic.Arithmetic.signature C) (2 * n) g 1) :
+    (circuit : Circuit (Algebraic.Arithmetic.signature C) (2 * n) 1) :
     List (Fin 2 → MvPolynomial (Fin (2 * n)) K) :=
   circuitMultiplicationArguments
     (fun scalar => MvPolynomial.C (constant scalar))
@@ -223,7 +223,7 @@ cost. -/
     [Field K]
     (constant : C → K)
     (n : Nat)
-    (circuit : Circuit (Algebraic.Arithmetic.signature C) (2 * n) g 1) :
+    (circuit : Circuit (Algebraic.Arithmetic.signature C) (2 * n) 1) :
     (multiplicationOccurrences constant n circuit).length =
       circuit.cost
         (Algebraic.Arithmetic.multiplicationCost (K := C)) :=
@@ -240,7 +240,7 @@ def AtOccurrences
     [Field K]
     (constant : C → K)
     (n : Nat)
-    (circuit : Circuit (Algebraic.Arithmetic.signature C) (2 * n) g 1)
+    (circuit : Circuit (Algebraic.Arithmetic.signature C) (2 * n) 1)
     (budget : Fin (multiplicationOccurrences constant n circuit).length → Nat) :
     Prop :=
   ∀ index,
@@ -254,7 +254,7 @@ def ArgumentAtMost
     [Field K]
     (constant : C → K)
     (n : Nat)
-    (circuit : Circuit (Algebraic.Arithmetic.signature C) (2 * n) g 1)
+    (circuit : Circuit (Algebraic.Arithmetic.signature C) (2 * n) 1)
     (budget :
       (Fin 2 → MvPolynomial (Fin (2 * n)) K) → Nat) : Prop :=
   ∀ arguments,
@@ -270,7 +270,7 @@ theorem occurrenceIndexedBound_of_atOccurrences
     (constant : C → K)
     (n : Nat)
     (positive : 0 < n)
-    (circuit : Circuit (Algebraic.Arithmetic.signature C) (2 * n) g 1)
+    (circuit : Circuit (Algebraic.Arithmetic.signature C) (2 * n) 1)
     (budget : Fin (multiplicationOccurrences constant n circuit).length → Nat)
     (restricted : AtOccurrences constant n circuit budget) :
     Rank.Occurrence.IndexedBound (certificate constant n positive) circuit
@@ -290,7 +290,7 @@ theorem argumentBound_of_argumentAtMost
     (constant : C → K)
     (n : Nat)
     (positive : 0 < n)
-    (circuit : Circuit (Algebraic.Arithmetic.signature C) (2 * n) g 1)
+    (circuit : Circuit (Algebraic.Arithmetic.signature C) (2 * n) 1)
     (budget :
       (Fin 2 → MvPolynomial (Fin (2 * n)) K) → Nat)
     (restricted : ArgumentAtMost constant n circuit budget) :
@@ -311,7 +311,7 @@ theorem centralBinom_le_sum_occurrenceBudget
     (constant : C → K)
     (n : Nat)
     (positive : 0 < n)
-    (circuit : Circuit (Algebraic.Arithmetic.signature C) (2 * n) g 1)
+    (circuit : Circuit (Algebraic.Arithmetic.signature C) (2 * n) 1)
     (constructs : (problem K n).Constructs circuit
       (Algebraic.Arithmetic.interpretation
         (fun scalar => MvPolynomial.C (constant scalar))))
@@ -332,7 +332,7 @@ theorem exists_occurrence_budget_ge_centralBinom_ceilDiv
     (constant : C → K)
     (n : Nat)
     (positive : 0 < n)
-    (circuit : Circuit (Algebraic.Arithmetic.signature C) (2 * n) g 1)
+    (circuit : Circuit (Algebraic.Arithmetic.signature C) (2 * n) 1)
     (constructs : (problem K n).Constructs circuit
       (Algebraic.Arithmetic.interpretation
         (fun scalar => MvPolynomial.C (constant scalar))))
@@ -357,7 +357,7 @@ theorem centralBinom_le_sum_argumentBudget
     (constant : C → K)
     (n : Nat)
     (positive : 0 < n)
-    (circuit : Circuit (Algebraic.Arithmetic.signature C) (2 * n) g 1)
+    (circuit : Circuit (Algebraic.Arithmetic.signature C) (2 * n) 1)
     (constructs : (problem K n).Constructs circuit
       (Algebraic.Arithmetic.interpretation
         (fun scalar => MvPolynomial.C (constant scalar))))
@@ -380,7 +380,7 @@ def IndexedAtMost
     (constant : C → K)
     (n : Nat)
     (positive : 0 < n)
-    (circuit : Circuit (Algebraic.Arithmetic.signature C) (2 * n) g 1)
+    (circuit : Circuit (Algebraic.Arithmetic.signature C) (2 * n) 1)
     (budget : Fin (interactions (certificate constant n positive)
       (circuitAtoms circuit
         (Algebraic.Arithmetic.interpretation
@@ -404,7 +404,7 @@ theorem indexedBound_of_indexedAtMost
     (constant : C → K)
     (n : Nat)
     (positive : 0 < n)
-    (circuit : Circuit (Algebraic.Arithmetic.signature C) (2 * n) g 1)
+    (circuit : Circuit (Algebraic.Arithmetic.signature C) (2 * n) 1)
     (budget : Fin (interactions (certificate constant n positive)
       (circuitAtoms circuit
         (Algebraic.Arithmetic.interpretation
@@ -425,7 +425,7 @@ theorem centralBinom_le_sum_indexedBudget
     (constant : C → K)
     (n : Nat)
     (positive : 0 < n)
-    (circuit : Circuit (Algebraic.Arithmetic.signature C) (2 * n) g 1)
+    (circuit : Circuit (Algebraic.Arithmetic.signature C) (2 * n) 1)
     (constructs : (problem K n).Constructs circuit
       (Algebraic.Arithmetic.interpretation
         (fun scalar => MvPolynomial.C (constant scalar))))
@@ -448,7 +448,7 @@ def AtMultiplications
     [Field K]
     (constant : C → K)
     (n : Nat)
-    (circuit : Circuit (Algebraic.Arithmetic.signature C) (2 * n) g 1)
+    (circuit : Circuit (Algebraic.Arithmetic.signature C) (2 * n) 1)
     (termCount : Nat) : Prop :=
   ∀ arguments : Fin 2 → MvPolynomial (Fin (2 * n)) K,
     (⟨.mul, arguments⟩ : Atom (Algebraic.Arithmetic.signature C)
@@ -467,7 +467,7 @@ theorem atOccurrences_const_of_atMultiplications
     [Field K]
     (constant : C → K)
     (n : Nat)
-    (circuit : Circuit (Algebraic.Arithmetic.signature C) (2 * n) g 1)
+    (circuit : Circuit (Algebraic.Arithmetic.signature C) (2 * n) 1)
     (termCount : Nat)
     (restricted : AtMultiplications constant n circuit termCount) :
     AtOccurrences constant n circuit (fun _ => termCount) := by
@@ -482,7 +482,7 @@ theorem argumentAtMost_const_of_atMultiplications
     [Field K]
     (constant : C → K)
     (n : Nat)
-    (circuit : Circuit (Algebraic.Arithmetic.signature C) (2 * n) g 1)
+    (circuit : Circuit (Algebraic.Arithmetic.signature C) (2 * n) 1)
     (termCount : Nat)
     (restricted : AtMultiplications constant n circuit termCount) :
     ArgumentAtMost constant n circuit (fun _ => termCount) := by
@@ -499,7 +499,7 @@ theorem multiplicationOutputRankAtMost_of_atMultiplications
     (constant : C → K)
     (n : Nat)
     (positive : 0 < n)
-    (circuit : Circuit (Algebraic.Arithmetic.signature C) (2 * n) g 1)
+    (circuit : Circuit (Algebraic.Arithmetic.signature C) (2 * n) 1)
     (termCount : Nat)
     (restricted : AtMultiplications constant n circuit termCount) :
     MultiplicationOutputRankAtMost constant n positive circuit termCount := by
@@ -519,7 +519,7 @@ theorem centralBinom_ceilDiv_lowerBound
     (positive : 0 < n)
     (termCount : Nat)
     (termCountPositive : 0 < termCount)
-    (circuit : Circuit (Algebraic.Arithmetic.signature C) (2 * n) g 1)
+    (circuit : Circuit (Algebraic.Arithmetic.signature C) (2 * n) 1)
     (constructs : (problem K n).Constructs circuit
       (Algebraic.Arithmetic.interpretation
         (fun scalar => MvPolynomial.C (constant scalar))))
@@ -542,7 +542,7 @@ theorem centralBinom_le_cost_mul_termCount
     (n : Nat)
     (positive : 0 < n)
     (termCount : Nat)
-    (circuit : Circuit (Algebraic.Arithmetic.signature C) (2 * n) g 1)
+    (circuit : Circuit (Algebraic.Arithmetic.signature C) (2 * n) 1)
     (constructs : (problem K n).Constructs circuit
       (Algebraic.Arithmetic.interpretation
         (fun scalar => MvPolynomial.C (constant scalar))))

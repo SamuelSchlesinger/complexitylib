@@ -89,7 +89,7 @@ theorem forall_atoms_compileProgram
 /-- Circuit-level form of `forall_atoms_compileProgram`. -/
 theorem forall_atoms_compile
     (translation : Algebraic.ContextualTranslation σ τ q)
-    (circuit : Circuit σ n g m)
+    (circuit : Circuit σ n m)
     (interpretation : Interpretation τ U)
     (context : Fin q → U)
     (input : Fin n → U)

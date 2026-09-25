@@ -27,7 +27,7 @@ namespace Neq
 private theorem and_lowerBound_of_problem_eq
     {source : SetProblem (Ground (2 ^ n))}
     (same : source = problem (2 ^ n))
-    (circuit : Circuit AndOr.signature source.inputCount g 1)
+    (circuit : Circuit AndOr.signature source.inputCount 1)
     (constructs : source.Constructs circuit
       (AndOr.setInterpretation (Ground (2 ^ n)))) :
     n ≤ circuit.cost AndOr.andCost := by
@@ -44,7 +44,7 @@ theorem and_lowerBound_of_preimage
     (image :
       source.map (AndOr.preimageHomomorphism f).map =
         problem (2 ^ n))
-    (circuit : Circuit AndOr.signature source.inputCount g 1)
+    (circuit : Circuit AndOr.signature source.inputCount 1)
     (constructs : source.Constructs circuit
       (AndOr.setInterpretation Γ)) :
     n ≤ circuit.cost AndOr.andCost := by

@@ -26,7 +26,7 @@ set_option backward.isDefEq.respectTransparency false
 
 /-- Compute the clean flags, attach payloads, and select one complete row. -/
 def circuit
-    (flags : Circuit DeMorgan.signature inputs gates (networkRecords menuDepth * networkRecords requestDepth))
+    (flags : Circuit DeMorgan.signature inputs (networkRecords menuDepth * networkRecords requestDepth))
     (payloads : Fin (networkRecords menuDepth * networkRecords requestDepth) →
       Fin payloadWidth → DeMorgan.Wiring inputs)
     (positive : 0 < needed) (fits : needed ≤ networkRecords requestDepth) :=
@@ -35,7 +35,7 @@ def circuit
 
 /-- One original flagged record, with its complete payload. -/
 def record
-    (flags : Circuit DeMorgan.signature inputs gates (networkRecords menuDepth * networkRecords requestDepth))
+    (flags : Circuit DeMorgan.signature inputs (networkRecords menuDepth * networkRecords requestDepth))
     (payloads : Fin (networkRecords menuDepth * networkRecords requestDepth) →
       Fin payloadWidth → DeMorgan.Wiring inputs)
     (input : Fin inputs → Bool) (candidate : Fin (networkRecords menuDepth))
@@ -46,7 +46,7 @@ def record
 
 /-- The output permutes one candidate's original records and has a clean prefix. -/
 theorem circuit_selects
-    (flags : Circuit DeMorgan.signature inputs gates (networkRecords menuDepth * networkRecords requestDepth))
+    (flags : Circuit DeMorgan.signature inputs (networkRecords menuDepth * networkRecords requestDepth))
     (payloads : Fin (networkRecords menuDepth * networkRecords requestDepth) →
       Fin payloadWidth → DeMorgan.Wiring inputs)
     (positive : 0 < needed) (fits : needed ≤ networkRecords requestDepth)
@@ -85,7 +85,7 @@ theorem circuit_selects
 /-- Distinct request payloads give an actual permutation of request indices.
 Every accepted index is one of the original clean requests. -/
 theorem circuit_selects_indices
-    (flags : Circuit DeMorgan.signature inputs gates (networkRecords menuDepth * networkRecords requestDepth))
+    (flags : Circuit DeMorgan.signature inputs (networkRecords menuDepth * networkRecords requestDepth))
     (payloads : Fin (networkRecords menuDepth * networkRecords requestDepth) →
       Fin payloadWidth → DeMorgan.Wiring inputs)
     (positive : 0 < needed) (fits : needed ≤ networkRecords requestDepth)
@@ -111,7 +111,7 @@ theorem circuit_selects_indices
 /-- The flag computation is charged once; both selection sorts have their
 explicit linear record-count bounds. -/
 theorem circuit_cost_le
-    (flags : Circuit DeMorgan.signature inputs gates (networkRecords menuDepth * networkRecords requestDepth))
+    (flags : Circuit DeMorgan.signature inputs (networkRecords menuDepth * networkRecords requestDepth))
     (payloads : Fin (networkRecords menuDepth * networkRecords requestDepth) →
       Fin payloadWidth → DeMorgan.Wiring inputs)
     (positive : 0 < needed) (fits : needed ≤ networkRecords requestDepth) :

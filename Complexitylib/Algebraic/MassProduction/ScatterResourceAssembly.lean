@@ -157,16 +157,14 @@ noncomputable def resourceStageCircuit
     (destinationFits :
       2 ^ (groupBitWidth + dimension * width) <=
         networkRecords scatterDepth)
-    (gateCounts : Fin (resourceBitCount dimension width) -> Nat)
-    (resourceCircuits : forall member,
-      Circuit DeMorgan.signature (groups * suffixWidth)
-        (gateCounts member) groups) :=
+    (resourceCircuits : Fin (resourceBitCount dimension width) ->
+      Circuit DeMorgan.signature (groups * suffixWidth) groups) :=
   ((Circuit.id DeMorgan.signature
       (scheduleBitCount groups requestsPerGroup dimension width)).mapInputs
         (resourceStageScheduleInputIndex
           (scatterDepth := scatterDepth) (groupBitWidth := groupBitWidth)
           (suffixWidth := suffixWidth))).parallel
-    ((resourceBankCircuit destinationFits gateCounts resourceCircuits).mapInputs
+    ((resourceBankCircuit destinationFits resourceCircuits).mapInputs
       (resourceStageScatterInputIndex
         (groups := groups) (requestsPerGroup := requestsPerGroup)))
 
@@ -174,17 +172,15 @@ theorem resourceStageCircuit_eval
     (destinationFits :
       2 ^ (groupBitWidth + dimension * width) <=
         networkRecords scatterDepth)
-    (gateCounts : Fin (resourceBitCount dimension width) -> Nat)
-    (resourceCircuits : forall member,
-      Circuit DeMorgan.signature (groups * suffixWidth)
-        (gateCounts member) groups)
+    (resourceCircuits : Fin (resourceBitCount dimension width) ->
+      Circuit DeMorgan.signature (groups * suffixWidth) groups)
     (input : Fin (resourceStageInputCount groups requestsPerGroup dimension
       width scatterDepth groupBitWidth suffixWidth) -> Bool) :
     (resourceStageCircuit (requestsPerGroup := requestsPerGroup)
-      destinationFits gateCounts resourceCircuits).eval
+      destinationFits resourceCircuits).eval
         DeMorgan.interpretation input =
       Fin.append (resourceStageScheduleInput input)
-        ((resourceBankCircuit destinationFits gateCounts resourceCircuits).eval
+        ((resourceBankCircuit destinationFits resourceCircuits).eval
           DeMorgan.interpretation (resourceStageScatterInput input)) := by
   rw [resourceStageCircuit, Circuit.eval_parallel,
     Circuit.eval_mapInputs, Circuit.eval_id, Circuit.eval_mapInputs]
@@ -194,12 +190,10 @@ theorem resourceStageCircuit_eval
     (destinationFits :
       2 ^ (groupBitWidth + dimension * width) <=
         networkRecords scatterDepth)
-    (gateCounts : Fin (resourceBitCount dimension width) -> Nat)
-    (resourceCircuits : forall member,
-      Circuit DeMorgan.signature (groups * suffixWidth)
-        (gateCounts member) groups) :
+    (resourceCircuits : Fin (resourceBitCount dimension width) ->
+      Circuit DeMorgan.signature (groups * suffixWidth) groups) :
     (resourceStageCircuit (requestsPerGroup := requestsPerGroup)
-      destinationFits gateCounts resourceCircuits).cost
+      destinationFits resourceCircuits).cost
         DeMorgan.standardCost =
       ∑ member, (resourceCircuits member).cost DeMorgan.standardCost := by
   simp [resourceStageCircuit]
@@ -215,12 +209,10 @@ noncomputable def scatterResourceCircuit
     (destinationFits :
       2 ^ (groupBitWidth + dimension * width) <=
         networkRecords scatterDepth)
-    (gateCounts : Fin (resourceBitCount dimension width) -> Nat)
-    (resourceCircuits : forall member,
-      Circuit DeMorgan.signature (groups * suffixWidth)
-        (gateCounts member) groups) :=
+    (resourceCircuits : Fin (resourceBitCount dimension width) ->
+      Circuit DeMorgan.signature (groups * suffixWidth) groups) :=
   (resourceStageCircuit (requestsPerGroup := requestsPerGroup)
-    destinationFits gateCounts resourceCircuits).comp
+    destinationFits resourceCircuits).comp
       (scatterWithScheduleCircuit suffixWidth groupBitWidth capacity
         recordCount)
 
@@ -235,17 +227,15 @@ theorem scatterResourceCircuit_eval
     (destinationFits :
       2 ^ (groupBitWidth + dimension * width) <=
         networkRecords scatterDepth)
-    (gateCounts : Fin (resourceBitCount dimension width) -> Nat)
-    (resourceCircuits : forall member,
-      Circuit DeMorgan.signature (groups * suffixWidth)
-        (gateCounts member) groups)
+    (resourceCircuits : Fin (resourceBitCount dimension width) ->
+      Circuit DeMorgan.signature (groups * suffixWidth) groups)
     (input : Fin (scatterAssemblyInputCount groups requestsPerGroup dimension
       width totalRequests suffixWidth) -> Bool) :
     (scatterResourceCircuit suffixWidth groupBitWidth capacity recordCount
-      destinationFits gateCounts resourceCircuits).eval
+      destinationFits resourceCircuits).eval
         DeMorgan.interpretation input =
       Fin.append (scatterScheduleInput input)
-        ((resourceBankCircuit destinationFits gateCounts resourceCircuits).eval
+        ((resourceBankCircuit destinationFits resourceCircuits).eval
           DeMorgan.interpretation
           (canonicalFullScatterBits widthPositive groupBitWidth capacity
             (scatterScheduleInput input) (scatterSuffixInput input)
@@ -265,12 +255,10 @@ theorem scatterResourceCircuit_eval
     (destinationFits :
       2 ^ (groupBitWidth + dimension * width) <=
         networkRecords scatterDepth)
-    (gateCounts : Fin (resourceBitCount dimension width) -> Nat)
-    (resourceCircuits : forall member,
-      Circuit DeMorgan.signature (groups * suffixWidth)
-        (gateCounts member) groups) :
+    (resourceCircuits : Fin (resourceBitCount dimension width) ->
+      Circuit DeMorgan.signature (groups * suffixWidth) groups) :
     (scatterResourceCircuit suffixWidth groupBitWidth capacity recordCount
-      destinationFits gateCounts resourceCircuits).cost
+      destinationFits resourceCircuits).cost
         DeMorgan.standardCost =
       (CanonicalRouting.matchedCanonicalRoutingCircuit scatterDepth
           (incidenceKeyWidth groupBitWidth dimension width) suffixWidth).cost

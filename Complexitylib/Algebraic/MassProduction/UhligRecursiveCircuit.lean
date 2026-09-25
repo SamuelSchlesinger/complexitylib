@@ -85,20 +85,29 @@ noncomputable def recursiveCircuit
     Circuit DeMorgan.signature
       (recursiveCopies depth *
         recursiveWidth prefixWidth baseWidth depth)
-      (recursiveGateCount prefixWidth baseWidth base depth function)
       (recursiveCopies depth)
   | 0, function => (base.circuit function).replicateScalar 1
   | depth + 1, function =>
       let pairs := recursiveCopies depth
-      let resourceGateCounts :=
-        fun resource : Fin (prefixLast prefixWidth + 2) =>
-          recursiveGateCount prefixWidth baseWidth base depth
-            (resourceFunction function resource)
       let resourceCircuits :=
         fun resource : Fin (prefixLast prefixWidth + 2) =>
           recursiveCircuit prefixWidth baseWidth base depth
             (resourceFunction function resource)
-      sharedUhligLayerCircuit pairs resourceGateCounts resourceCircuits
+      sharedUhligLayerCircuit pairs resourceCircuits
+
+/-- The recursive circuit emits exactly `recursiveGateCount` gates. -/
+@[simp] theorem recursiveCircuit_size
+    (prefixWidth baseWidth : Nat)
+    (base : ScalarSynthesis baseWidth)
+    (depth : Nat)
+    (function : ScalarFunction Bool
+      (recursiveWidth prefixWidth baseWidth depth)) :
+    (recursiveCircuit prefixWidth baseWidth base depth function).size =
+      recursiveGateCount prefixWidth baseWidth base depth function := by
+  induction depth with
+  | zero => simp [recursiveCircuit, recursiveGateCount]
+  | succ depth inductionHypothesis =>
+      simp [recursiveCircuit, recursiveGateCount, inductionHypothesis]
 
 /-- Iterating the finite layer computes exactly `2 ^ depth` independent
 copies of the original function. -/
@@ -121,9 +130,6 @@ theorem recursiveCircuit_computes
       exact Circuit.replicateScalar_computes_directProduct outputFunction 1
   | succ depth inductionHypothesis =>
       exact sharedUhligLayerCircuit_computes function (recursiveCopies depth)
-        (fun resource =>
-          recursiveGateCount prefixWidth baseWidth base depth
-            (resourceFunction function resource))
         (fun resource =>
           recursiveCircuit prefixWidth baseWidth base depth
             (resourceFunction function resource))
@@ -171,9 +177,6 @@ computation. -/
   change
     (sharedUhligLayerCircuit (recursiveCopies depth)
       (fun resource =>
-        recursiveGateCount prefixWidth baseWidth base depth
-          (resourceFunction function resource))
-      (fun resource =>
         recursiveCircuit prefixWidth baseWidth base depth
           (resourceFunction function resource))).cost
         DeMorgan.standardCost = _
@@ -181,9 +184,6 @@ computation. -/
     (prefixWidth := prefixWidth)
     (suffixWidth := recursiveWidth prefixWidth baseWidth depth)
     (pairs := recursiveCopies depth)
-    (resourceGateCounts := fun resource =>
-      recursiveGateCount prefixWidth baseWidth base depth
-        (resourceFunction function resource))
     (resourceCircuits := fun resource =>
       recursiveCircuit prefixWidth baseWidth base depth
         (resourceFunction function resource))

@@ -150,7 +150,7 @@ def LocalRankAtMost
     (constant : C → K)
     (n : Nat)
     (positive : 0 < n)
-    (circuit : Circuit (Algebraic.Arithmetic.signature C) (2 * n) g 1)
+    (circuit : Circuit (Algebraic.Arithmetic.signature C) (2 * n) 1)
     (interactionRank : Nat) : Prop :=
   Rank.Local.CircuitBound (certificate constant n positive) circuit
     interactionRank
@@ -162,7 +162,7 @@ def MultiplicationOutputRankAtMost
     (constant : C → K)
     (n : Nat)
     (positive : 0 < n)
-    (circuit : Circuit (Algebraic.Arithmetic.signature C) (2 * n) g 1)
+    (circuit : Circuit (Algebraic.Arithmetic.signature C) (2 * n) 1)
     (interactionRank : Nat) : Prop :=
   Rank.Local.MultiplicationBound (certificate constant n positive) circuit
     interactionRank
@@ -174,7 +174,7 @@ theorem localRankAtMost_of_multiplicationOutputRankAtMost
     (constant : C → K)
     (n : Nat)
     (positive : 0 < n)
-    (circuit : Circuit (Algebraic.Arithmetic.signature C) (2 * n) g 1)
+    (circuit : Circuit (Algebraic.Arithmetic.signature C) (2 * n) 1)
     (interactionRank : Nat)
     (bound : MultiplicationOutputRankAtMost constant n positive circuit
       interactionRank) :
@@ -189,7 +189,7 @@ def PowerOrInvisibleAtMultiplications
     [Field K]
     (constant : C → K)
     (n : Nat)
-    (circuit : Circuit (Algebraic.Arithmetic.signature C) (2 * n) g 1) : Prop :=
+    (circuit : Circuit (Algebraic.Arithmetic.signature C) (2 * n) 1) : Prop :=
   ∀ arguments : Fin 2 → MvPolynomial (Fin (2 * n)) K,
     (⟨.mul, arguments⟩ : Atom (Algebraic.Arithmetic.signature C)
       (MvPolynomial (Fin (2 * n)) K)) ∈
@@ -212,7 +212,7 @@ theorem multiplicationOutputRankAtMost_one_of_powerOrInvisible
     (constant : C → K)
     (n : Nat)
     (positive : 0 < n)
-    (circuit : Circuit (Algebraic.Arithmetic.signature C) (2 * n) g 1)
+    (circuit : Circuit (Algebraic.Arithmetic.signature C) (2 * n) 1)
     (restricted : PowerOrInvisibleAtMultiplications constant n circuit) :
     MultiplicationOutputRankAtMost constant n positive circuit 1 := by
   intro arguments present
@@ -233,7 +233,7 @@ theorem localRankAtMost_one_of_powerOrInvisible
     (constant : C → K)
     (n : Nat)
     (positive : 0 < n)
-    (circuit : Circuit (Algebraic.Arithmetic.signature C) (2 * n) g 1)
+    (circuit : Circuit (Algebraic.Arithmetic.signature C) (2 * n) 1)
     (restricted : PowerOrInvisibleAtMultiplications constant n circuit) :
     LocalRankAtMost constant n positive circuit 1 :=
   localRankAtMost_of_multiplicationOutputRankAtMost constant n positive
@@ -250,7 +250,7 @@ theorem centralBinom_ceilDiv_lowerBound
     (positive : 0 < n)
     (interactionRank : Nat)
     (rankPositive : 0 < interactionRank)
-    (circuit : Circuit (Algebraic.Arithmetic.signature C) (2 * n) g 1)
+    (circuit : Circuit (Algebraic.Arithmetic.signature C) (2 * n) 1)
     (constructs : (problem K n).Constructs circuit
       (Algebraic.Arithmetic.interpretation
         (fun scalar => MvPolynomial.C (constant scalar))))
@@ -275,7 +275,7 @@ theorem centralBinom_le_cost_mul_rank
     (n : Nat)
     (positive : 0 < n)
     (interactionRank : Nat)
-    (circuit : Circuit (Algebraic.Arithmetic.signature C) (2 * n) g 1)
+    (circuit : Circuit (Algebraic.Arithmetic.signature C) (2 * n) 1)
     (constructs : (problem K n).Constructs circuit
       (Algebraic.Arithmetic.interpretation
         (fun scalar => MvPolynomial.C (constant scalar))))
@@ -297,7 +297,7 @@ theorem rankOne_multiplication_lowerBound
     (constant : C → K)
     (n : Nat)
     (positive : 0 < n)
-    (circuit : Circuit (Algebraic.Arithmetic.signature C) (2 * n) g 1)
+    (circuit : Circuit (Algebraic.Arithmetic.signature C) (2 * n) 1)
     (constructs : (problem K n).Constructs circuit
       (Algebraic.Arithmetic.interpretation
         (fun scalar => MvPolynomial.C (constant scalar))))
@@ -316,7 +316,7 @@ theorem powerOrInvisible_multiplication_lowerBound
     (constant : C → K)
     (n : Nat)
     (positive : 0 < n)
-    (circuit : Circuit (Algebraic.Arithmetic.signature C) (2 * n) g 1)
+    (circuit : Circuit (Algebraic.Arithmetic.signature C) (2 * n) 1)
     (constructs : (problem K n).Constructs circuit
       (Algebraic.Arithmetic.interpretation
         (fun scalar => MvPolynomial.C (constant scalar))))
@@ -336,7 +336,7 @@ theorem four_pow_lt_mul_multiplicationCost
     (constant : C → K)
     (n : Nat)
     (n_big : 4 ≤ n)
-    (circuit : Circuit (Algebraic.Arithmetic.signature C) (2 * n) g 1)
+    (circuit : Circuit (Algebraic.Arithmetic.signature C) (2 * n) 1)
     (constructs : (problem K n).Constructs circuit
       (Algebraic.Arithmetic.interpretation
         (fun scalar => MvPolynomial.C (constant scalar))))
@@ -356,7 +356,7 @@ theorem four_pow_lt_mul_size
     (constant : C → K)
     (n : Nat)
     (n_big : 4 ≤ n)
-    (circuit : Circuit (Algebraic.Arithmetic.signature C) (2 * n) g 1)
+    (circuit : Circuit (Algebraic.Arithmetic.signature C) (2 * n) 1)
     (constructs : (problem K n).Constructs circuit
       (Algebraic.Arithmetic.interpretation
         (fun scalar => MvPolynomial.C (constant scalar))))
@@ -376,7 +376,7 @@ theorem powerOrInvisible_four_pow_lt_mul_size
     (constant : C → K)
     (n : Nat)
     (n_big : 4 ≤ n)
-    (circuit : Circuit (Algebraic.Arithmetic.signature C) (2 * n) g 1)
+    (circuit : Circuit (Algebraic.Arithmetic.signature C) (2 * n) 1)
     (constructs : (problem K n).Constructs circuit
       (Algebraic.Arithmetic.interpretation
         (fun scalar => MvPolynomial.C (constant scalar))))

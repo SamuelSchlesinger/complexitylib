@@ -53,11 +53,12 @@ theorem mem_relativeFunctionsAtMost_iff
   constructor
   · intro present
     obtain ⟨circuit, _, equal⟩ := Finset.mem_image.mp present
-    exact ⟨circuit.1, Nat.le_of_lt_succ circuit.1.isLt, circuit.2,
+    exact ⟨circuit.2.1, circuit.2.2.le.trans (Nat.le_of_lt_succ circuit.1.isLt),
       fun x => congrFun equal x⟩
-  · rintro ⟨gates, bounded, circuit, computes⟩
-    exact Finset.mem_image.mpr ⟨⟨⟨gates, Nat.lt_succ_iff.mpr bounded⟩, circuit⟩,
-      Finset.mem_univ _, funext computes⟩
+  · rintro ⟨circuit, bounded, computes⟩
+    exact Finset.mem_image.mpr
+      ⟨⟨⟨circuit.size, Nat.lt_succ_iff.mpr bounded⟩, circuit, rfl⟩,
+        Finset.mem_univ _, funext computes⟩
 
 /-- Fixed supplied functions produce at most one target per circuit description. -/
 theorem card_relativeFunctionsAtMost_le

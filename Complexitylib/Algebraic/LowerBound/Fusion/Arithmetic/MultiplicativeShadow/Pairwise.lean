@@ -335,7 +335,7 @@ theorem circuit_addition_lowerBound
     (avoidRightRoots : ∀ output right,
       rootPoints leftValue rightOffset output ≠ -rightOffset right)
     (circuit : Circuit (Algebraic.Arithmetic.signature C)
-      (2 * n) g (n * n))
+      (2 * n) (n * n))
     (constructs : Interaction.Multiple.Constructs
       (constant := fun scalar ↦ MvPolynomial.C (constant scalar))
       (Interaction.Hessian.Pairwise.inputProblem K n) (targets K n) circuit) :
@@ -357,7 +357,7 @@ theorem circuit_multiplication_lowerBound
     (constant : C → K)
     (n : Nat)
     (circuit : Circuit (Algebraic.Arithmetic.signature C)
-      (2 * n) g (n * n))
+      (2 * n) (n * n))
     (constructs : Interaction.Multiple.Constructs
       (constant := fun scalar ↦ MvPolynomial.C (constant scalar))
       (Interaction.Hessian.Pairwise.inputProblem K n) (targets K n) circuit) :
@@ -384,7 +384,7 @@ theorem circuit_gate_lowerBound
     (avoidRightRoots : ∀ output right,
       rootPoints leftValue rightOffset output ≠ -rightOffset right)
     (circuit : Circuit (Algebraic.Arithmetic.signature C)
-      (2 * n) g (n * n))
+      (2 * n) (n * n))
     (constructs : Interaction.Multiple.Constructs
       (constant := fun scalar ↦ MvPolynomial.C (constant scalar))
       (Interaction.Hessian.Pairwise.inputProblem K n) (targets K n) circuit) :
@@ -406,7 +406,7 @@ theorem circuit_size_lowerBound
     (avoidRightRoots : ∀ output right,
       rootPoints leftValue rightOffset output ≠ -rightOffset right)
     (circuit : Circuit (Algebraic.Arithmetic.signature C)
-      (2 * n) g (n * n))
+      (2 * n) (n * n))
     (constructs : Interaction.Multiple.Constructs
       (constant := fun scalar ↦ MvPolynomial.C (constant scalar))
       (Interaction.Hessian.Pairwise.inputProblem K n) (targets K n) circuit) :
@@ -420,7 +420,7 @@ theorem rational_circuit_gate_lowerBound
     (constant : C → ℚ)
     (n : Nat)
     (circuit : Circuit (Algebraic.Arithmetic.signature C)
-      (2 * n) g (n * n))
+      (2 * n) (n * n))
     (constructs : Interaction.Multiple.Constructs
       (constant := fun scalar ↦ MvPolynomial.C (constant scalar))
       (Interaction.Hessian.Pairwise.inputProblem ℚ n) (targets ℚ n)
@@ -437,7 +437,7 @@ theorem rational_circuit_size_lowerBound
     (constant : C → ℚ)
     (n : Nat)
     (circuit : Circuit (Algebraic.Arithmetic.signature C)
-      (2 * n) g (n * n))
+      (2 * n) (n * n))
     (constructs : Interaction.Multiple.Constructs
       (constant := fun scalar ↦ MvPolynomial.C (constant scalar))
       (Interaction.Hessian.Pairwise.inputProblem ℚ n) (targets ℚ n)

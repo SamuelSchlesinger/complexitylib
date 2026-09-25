@@ -44,7 +44,7 @@ export Cslib.Circuits (Program.cost_add)
 
 /-- Circuit cost is additive in the operation-cost function. -/
 theorem _root_.Cslib.Circuits.Circuit.cost_add
-    (circuit : Circuit sigma n g m)
+    (circuit : Circuit sigma n m)
     (left right : OperationCost sigma) :
     circuit.cost (fun op => left op + right op) =
       circuit.cost left + circuit.cost right := by
@@ -69,7 +69,7 @@ export Cslib.Circuits (Program.cost_mono)
 /-- Pointwise domination of operation costs implies domination of circuit
 costs. -/
 theorem _root_.Cslib.Circuits.Circuit.cost_mono
-    (circuit : Circuit sigma n g m)
+    (circuit : Circuit sigma n m)
     (left right : OperationCost sigma)
     (bounded : ∀ op, left op ≤ right op) :
     circuit.cost left ≤ circuit.cost right := by
@@ -97,7 +97,7 @@ theorem gateCost_eq_additionCost_add_multiplicationCost
 /-- The total nonconstant arithmetic-gate cost is exactly additive complexity
 plus multiplicative complexity. -/
 theorem circuit_gateCost_eq_additionCost_add_multiplicationCost
-    (circuit : Circuit (Algebraic.Arithmetic.signature K) n g m) :
+    (circuit : Circuit (Algebraic.Arithmetic.signature K) n m) :
     circuit.cost (Algebraic.Arithmetic.gateCost (K := K)) =
       circuit.cost (Algebraic.Arithmetic.additionCost (K := K)) +
         circuit.cost
@@ -107,7 +107,7 @@ theorem circuit_gateCost_eq_additionCost_add_multiplicationCost
 
 /-- Addition-only cost is bounded by total arithmetic-gate cost. -/
 theorem circuit_additionCost_le_gateCost
-    (circuit : Circuit (Algebraic.Arithmetic.signature K) n g m) :
+    (circuit : Circuit (Algebraic.Arithmetic.signature K) n m) :
     circuit.cost (Algebraic.Arithmetic.additionCost (K := K)) ≤
       circuit.cost (Algebraic.Arithmetic.gateCost (K := K)) := by
   apply circuit.cost_mono
@@ -116,7 +116,7 @@ theorem circuit_additionCost_le_gateCost
 
 /-- Multiplication-only cost is bounded by total arithmetic-gate cost. -/
 theorem circuit_multiplicationCost_le_gateCost
-    (circuit : Circuit (Algebraic.Arithmetic.signature K) n g m) :
+    (circuit : Circuit (Algebraic.Arithmetic.signature K) n m) :
     circuit.cost (Algebraic.Arithmetic.multiplicationCost (K := K)) ≤
       circuit.cost (Algebraic.Arithmetic.gateCost (K := K)) := by
   apply circuit.cost_mono
@@ -126,7 +126,7 @@ theorem circuit_multiplicationCost_le_gateCost
 /-- Total nonconstant arithmetic-gate cost is bounded by circuit size;
 constant gates account for the possible gap. -/
 theorem circuit_gateCost_le_size
-    (circuit : Circuit (Algebraic.Arithmetic.signature K) n g m) :
+    (circuit : Circuit (Algebraic.Arithmetic.signature K) n m) :
     circuit.cost (Algebraic.Arithmetic.gateCost (K := K)) ≤ circuit.size := by
   rw [← circuit.cost_unit]
   apply circuit.cost_mono
@@ -136,7 +136,7 @@ theorem circuit_gateCost_le_size
 /-- Independent lower bounds for additions and multiplications add to a lower
 bound for all nonconstant arithmetic gates. -/
 theorem circuit_gate_lowerBound_of_components
-    (circuit : Circuit (Algebraic.Arithmetic.signature K) n g m)
+    (circuit : Circuit (Algebraic.Arithmetic.signature K) n m)
     (additionBound multiplicationBound : Nat)
     (additionLowerBound : additionBound ≤
       circuit.cost (Algebraic.Arithmetic.additionCost (K := K)))

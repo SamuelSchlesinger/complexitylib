@@ -45,7 +45,7 @@ abbrev Problem.membershipInput
 problem. -/
 def Problem.ComputesMembership
     (problem : SetProblem Γ)
-    (circuit : Circuit AndOr.signature problem.inputCount g 1) : Prop :=
+    (circuit : Circuit AndOr.signature problem.inputCount 1) : Prop :=
   ∀ point,
     circuit.eval AndOr.boolInterpretation (problem.membershipInput point) 0 =
       AndOr.membership point problem.target
@@ -54,7 +54,7 @@ def Problem.ComputesMembership
 set from the generator sets. -/
 theorem Problem.computesMembership_iff_constructs
     (problem : SetProblem Γ)
-    (circuit : Circuit AndOr.signature problem.inputCount g 1) :
+    (circuit : Circuit AndOr.signature problem.inputCount 1) :
     problem.ComputesMembership circuit ↔
       problem.Constructs circuit (AndOr.setInterpretation Γ) := by
   classical
@@ -100,7 +100,7 @@ theorem pairCover_lowerBound_of_computesMembership
     (admissible : SemifilterClass problem)
     (coverLowerBound : ∀ cover : PairCover problem admissible,
       L ≤ cover.cost)
-    (circuit : Circuit AndOr.signature problem.inputCount g 1)
+    (circuit : Circuit AndOr.signature problem.inputCount 1)
     (computes : problem.ComputesMembership circuit) :
     L ≤ circuit.cost AndOr.andCost :=
   pairCover_lowerBound problem admissible coverLowerBound circuit
@@ -110,7 +110,7 @@ theorem pairCover_lowerBound_of_computesMembership
 theorem pairCoverComplexity_le_cost_of_computesMembership
     (problem : SetProblem Γ)
     (admissible : SemifilterClass problem)
-    (circuit : Circuit AndOr.signature problem.inputCount g 1)
+    (circuit : Circuit AndOr.signature problem.inputCount 1)
     (computes : problem.ComputesMembership circuit) :
     pairCoverComplexity problem admissible ≤
       circuit.cost AndOr.andCost :=
@@ -144,7 +144,7 @@ theorem monotoneProblem_target_membership
 Boolean function with an AND/OR circuit. -/
 theorem monotoneProblem_computesMembership_iff
     (function : (Fin n → Bool) → Bool)
-    (circuit : Circuit AndOr.signature n g 1) :
+    (circuit : Circuit AndOr.signature n 1) :
     (monotoneProblem function).ComputesMembership circuit ↔
       ∀ assignment,
         circuit.eval AndOr.boolInterpretation assignment 0 =
@@ -183,7 +183,7 @@ theorem monotone_pairCover_lowerBound
     (coverLowerBound : ∀ cover :
       PairCover (monotoneProblem function) admissible,
         L ≤ cover.cost)
-    (circuit : Circuit AndOr.signature n g 1)
+    (circuit : Circuit AndOr.signature n 1)
     (computes : ∀ assignment,
       circuit.eval AndOr.boolInterpretation assignment 0 =
         function assignment) :
@@ -197,7 +197,7 @@ computation. -/
 theorem monotone_pairCoverComplexity_le_cost
     (function : (Fin n → Bool) → Bool)
     (admissible : SemifilterClass (monotoneProblem function))
-    (circuit : Circuit AndOr.signature n g 1)
+    (circuit : Circuit AndOr.signature n 1)
     (computes : ∀ assignment,
       circuit.eval AndOr.boolInterpretation assignment 0 =
         function assignment) :
@@ -292,7 +292,7 @@ theorem literalProblem_target_membership
 function from its positive and negative literal values. -/
 theorem literalProblem_computesMembership_iff
     (function : (Fin n → Bool) → Bool)
-    (circuit : Circuit AndOr.signature (n + n) g 1) :
+    (circuit : Circuit AndOr.signature (n + n) 1) :
     (literalProblem function).ComputesMembership circuit ↔
       ∀ assignment,
         circuit.eval AndOr.boolInterpretation (literalInput assignment) 0 =
@@ -331,7 +331,7 @@ theorem literal_pairCover_lowerBound
     (coverLowerBound : ∀ cover :
       PairCover (literalProblem function) admissible,
         L ≤ cover.cost)
-    (circuit : Circuit AndOr.signature (n + n) g 1)
+    (circuit : Circuit AndOr.signature (n + n) 1)
     (computes : ∀ assignment,
       circuit.eval AndOr.boolInterpretation (literalInput assignment) 0 =
         function assignment) :
@@ -345,7 +345,7 @@ over positive and negative input literals. -/
 theorem literal_pairCoverComplexity_le_cost
     (function : (Fin n → Bool) → Bool)
     (admissible : SemifilterClass (literalProblem function))
-    (circuit : Circuit AndOr.signature (n + n) g 1)
+    (circuit : Circuit AndOr.signature (n + n) 1)
     (computes : ∀ assignment,
       circuit.eval AndOr.boolInterpretation (literalInput assignment) 0 =
         function assignment) :

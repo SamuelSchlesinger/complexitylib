@@ -64,7 +64,7 @@ the observed carrier. -/
 theorem compile_eval_eq
     {left right : Translation σ τ}
     (equivalent : EquivalentOn U left right)
-    (circuit : Circuit σ n g m)
+    (circuit : Circuit σ n m)
     (interpretation : Interpretation τ U)
     (input : Fin n → U) :
     (left.compile circuit).eval interpretation input =
@@ -76,7 +76,7 @@ theorem compile_eval_eq
 theorem compile_cost_eq
     {left right : Translation σ τ}
     (equivalent : EquivalentOn U left right)
-    (circuit : Circuit σ n g m)
+    (circuit : Circuit σ n m)
     (operationCost : OperationCost τ) :
     (left.compile circuit).cost operationCost =
       (right.compile circuit).cost operationCost := by

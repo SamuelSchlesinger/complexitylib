@@ -168,35 +168,35 @@ namespace Circuit
 
 /-- Every NOT gate in the circuit is an input literal. -/
 def NegationsAtInputs
-    (circuit : Algebraic.Circuit signature n g m) : Prop :=
+    (circuit : Algebraic.Circuit signature n m) : Prop :=
   Program.NegationsAtInputs circuit.program
 
 /-- Logical depth of each designated output in Hastad's convention. -/
 def logicalOutputDepths
-    (circuit : Algebraic.Circuit signature n g m) : Fin m -> Nat :=
+    (circuit : Algebraic.Circuit signature n m) : Fin m -> Nat :=
   circuit.eval logicalDepthInterpretation (fun _ => 0)
 
 /-- Maximum number of AND/OR levels on a designated input-output path. -/
 def logicalDepth
-    (circuit : Algebraic.Circuit signature n g m) : Nat :=
+    (circuit : Algebraic.Circuit signature n m) : Nat :=
   Fin.foldl m
     (fun depth output => max depth (logicalOutputDepths circuit output)) 0
 
 /-- A one-output circuit's logical depth is the depth of its unique output. -/
 theorem logicalDepth_one_output
-    (circuit : Algebraic.Circuit signature n g 1) :
+    (circuit : Algebraic.Circuit signature n 1) :
     logicalDepth circuit = logicalOutputDepths circuit 0 := by
   simp [logicalDepth, Fin.foldl_succ]
 
 /-- Source-facing normal form: negations are input literals and consecutive
 AND/OR gates alternate. -/
-def NormalForm (circuit : Algebraic.Circuit signature n g m) : Prop :=
+def NormalForm (circuit : Algebraic.Circuit signature n m) : Prop :=
   NegationsAtInputs circuit ∧
     Program.Alternating circuit.program
 
 /-- Strong normal form in particular places every negation at an input. -/
 theorem NormalForm.negationsAtInputs
-    {circuit : Algebraic.Circuit signature n g m}
+    {circuit : Algebraic.Circuit signature n m}
     (normal : NormalForm circuit) :
     NegationsAtInputs circuit :=
   normal.1

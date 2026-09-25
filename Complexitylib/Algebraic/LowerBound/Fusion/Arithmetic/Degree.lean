@@ -55,7 +55,7 @@ theorem multiplication_lowerBound
     (input_le_one : ∀ input,
       (problem.inputs input).natDegree ≤ 1)
     (target_ge : 2 ^ levels ≤ problem.target.natDegree)
-    (circuit : Circuit (Arithmetic.signature K) problem.inputCount g 1)
+    (circuit : Circuit (Arithmetic.signature K) problem.inputCount 1)
     (constructs : problem.Constructs circuit
       (Arithmetic.interpretation Polynomial.C)) :
     levels ≤ circuit.cost (Arithmetic.multiplicationCost (K := K)) :=
@@ -77,7 +77,7 @@ theorem power_multiplication_lowerBound
     {K : Type u}
     [Semiring K]
     [Nontrivial K]
-    (circuit : Circuit (Arithmetic.signature K) 1 g 1)
+    (circuit : Circuit (Arithmetic.signature K) 1 1)
     (constructs : (powerProblem K n).Constructs circuit
       (Arithmetic.interpretation Polynomial.C)) :
     n ≤ circuit.cost (Arithmetic.multiplicationCost (K := K)) := by

@@ -60,8 +60,8 @@ theorem existsCircuit
     (budget : 512 * total * Nat.card (BinaryExtension width) ≤
       Nat.card (ℙ (BinaryExtension width) (Fin dimension → BinaryExtension width)))
     (targetProjection : Fin (dimension * width) → Fin requestWidth) :
-    ∃ gates, ∃ step : Circuit DeMorgan.signature
-      (inputWidth completed (networkRecords requestDepth) requestWidth (2 ^ width) (dimension * width)) gates
+    ∃ step : Circuit DeMorgan.signature
+      (inputWidth completed (networkRecords requestDepth) requestWidth (2 ^ width) (dimension * width))
       (inputWidth (completed + acceptedCount requestDepth) (pendingCount requestDepth)
         requestWidth (2 ^ width) (dimension * width)),
       step.cost DeMorgan.standardCost ≤ costBound total completed requestDepth dimension width requestWidth ∧
@@ -81,7 +81,7 @@ theorem existsCircuit
   let phase := GeometricPhase.circuit positive menu targetWires sourceKeys sourceFlags original exactRecords
     (acceptedCount_positive requestDepth) (acceptedCount_le requestDepth)
   let split := acceptedCount_add_pendingCount requestDepth
-  refine ⟨_, BufferAdvance.circuit phase split, ?_, ?_⟩
+  refine ⟨BufferAdvance.circuit phase split, ?_, ?_⟩
   · rw [BufferAdvance.circuit_cost]
     exact GeometricPhase.circuit_cost_le positive menu targetWires sourceKeys sourceFlags original exactRecords
       (acceptedCount_positive requestDepth) (acceptedCount_le requestDepth)

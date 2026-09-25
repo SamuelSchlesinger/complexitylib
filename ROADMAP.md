@@ -114,8 +114,17 @@ In order. Each item says why it matters and roughly how large it is.
    gates are therefore reproduced exactly, and CSLib's zero-input circuits
    remove `NeZero N` and `CircuitFamily.emptyOutput`. The algebraic-circuits
    library, imported wholesale as `Complexitylib/Algebraic` (done, September
-   2026), already works in this model. Each phase lands with public statements
-   unchanged:
+   2026), already works in this model.
+
+   The migration targets CSLib's circuit API as it will be once the author's
+   pending circuit work lands, built meanwhile from an integration branch:
+   bundled gate counts (#949), sequential and parallel composition (#952),
+   complexity on a support (#955), inductive wires (#957), language slices
+   (#954), counting via involutions (#950), and the unsubmitted relative
+   complexity, circuit families with `SIZE` and `P/poly`, and Redkin's exact
+   parity complexity `4(n - 1)`. CSLib's own `SIZE` and `PPoly` (De Morgan,
+   as in Arora and Barak) then become the reference classes. Each phase lands
+   with public statements unchanged:
    1. **Signatures and the exact correspondence.** `Basis.signature` and
       `Basis.interpretation` for every basis, and a size-preserving translation
       of typed circuits into straight-line programs over them.

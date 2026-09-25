@@ -104,10 +104,8 @@ resource bound, plus the fully explicit overhead. -/
       gatherDepth
 
 private theorem sum_resource_cost_le
-    (gateCounts : Fin (resourceBitCount dimension width) -> Nat)
-    (resourceCircuits : forall member,
-      Circuit DeMorgan.signature (groups * suffixWidth)
-        (gateCounts member) groups)
+    (resourceCircuits : Fin (resourceBitCount dimension width) ->
+      Circuit DeMorgan.signature (groups * suffixWidth) groups)
     (resourceBound : Nat)
     (bounded : forall member,
       (resourceCircuits member).cost DeMorgan.standardCost <= resourceBound) :
@@ -134,10 +132,8 @@ theorem circuit_cost_le
       totalRequests * nonzeroScalarCount width +
           2 ^ (groupBitWidth + dimension * width) + scatterPaddingCount =
         networkRecords scatterDepth)
-    (gateCounts : Fin (resourceBitCount dimension width) -> Nat)
-    (resourceCircuits : forall member,
-      Circuit DeMorgan.signature (groups * suffixWidth)
-        (gateCounts member) groups)
+    (resourceCircuits : Fin (resourceBitCount dimension width) ->
+      Circuit DeMorgan.signature (groups * suffixWidth) groups)
     (resourceBound : Nat)
     (resourcesBounded : forall member,
       (resourceCircuits member).cost DeMorgan.standardCost <= resourceBound)
@@ -148,7 +144,7 @@ theorem circuit_cost_le
     (RuntimePipeline.circuit (prefixWidth := prefixWidth) widthPositive
       gridPositive groupsPositive schedulerDepth suffixWidth groupBitWidth
       orderWidth allFit incidenceFits dummyTarget scatterRecordCount
-      gateCounts resourceCircuits gatherRecordCount).cost
+       resourceCircuits gatherRecordCount).cost
         DeMorgan.standardCost <=
       costBound totalRequests groups prefixWidth dimension width suffixWidth
         schedulerDepth groupBitWidth orderWidth scatterDepth gatherDepth
@@ -165,7 +161,7 @@ theorem circuit_cost_le
     (depth := scatterDepth)
     (keyWidth := incidenceKeyWidth groupBitWidth dimension width)
     (payloadWidth := suffixWidth)
-  have resourcesBound := sum_resource_cost_le gateCounts resourceCircuits
+  have resourcesBound := sum_resource_cost_le resourceCircuits
     resourceBound resourcesBounded
   have gatherBound :=
     CanonicalMetadataRouting.matchedCanonicalRoutingCircuit_cost_le
@@ -206,10 +202,8 @@ theorem booleanMassComplexity_le
       totalRequests * nonzeroScalarCount width +
           2 ^ (groupBitWidth + dimension * width) + scatterPaddingCount =
         networkRecords scatterDepth)
-    (gateCounts : Fin (resourceBitCount dimension width) -> Nat)
-    (resourceCircuits : forall member,
-      Circuit DeMorgan.signature (groups * suffixWidth)
-        (gateCounts member) groups)
+    (resourceCircuits : Fin (resourceBitCount dimension width) ->
+      Circuit DeMorgan.signature (groups * suffixWidth) groups)
     (resourcesCompute : forall
       (point : Fin (pointCount dimension width)) (bit : Fin width),
       (resourceCircuits (resourceMemberIndex point bit)).ComputesWith
@@ -238,7 +232,7 @@ theorem booleanMassComplexity_le
   let runtimeCircuit := RuntimePipeline.circuit
     (prefixWidth := prefixWidth) widthPositive gridPositive groupsPositive
     schedulerDepth suffixWidth groupBitWidth orderWidth allFit incidenceFits
-    dummyTarget scatterRecordCount gateCounts resourceCircuits
+    dummyTarget scatterRecordCount resourceCircuits
     gatherRecordCount
   have computesAll : runtimeCircuit.ComputesWith DeMorgan.interpretation
       (directProduct (RuntimePipeline.requestFunction function)
@@ -247,7 +241,7 @@ theorem booleanMassComplexity_le
       dimensionPositive gridPositive groupsPositive packingFits
       schedulerDepth suffixWidth groupBitWidth orderWidth groupFits allFit
       directionCapacity incidenceFits function dummyTarget scatterRecordCount
-      gateCounts resourceCircuits resourcesCompute gatherRecordCount
+       resourceCircuits resourcesCompute gatherRecordCount
   have upper := runtimeCircuit.costComplexity_le
     DeMorgan.standardCost computesAll
   have finiteCost :
@@ -257,7 +251,7 @@ theorem booleanMassComplexity_le
           resourceBound :=
     circuit_cost_le (prefixWidth := prefixWidth) widthPositive gridPositive
       groupsPositive schedulerDepth suffixWidth groupBitWidth orderWidth allFit
-      incidenceFits dummyTarget scatterRecordCount gateCounts resourceCircuits
+      incidenceFits dummyTarget scatterRecordCount resourceCircuits
       resourceBound resourcesBounded gatherRecordCount
   have castCost :
       (runtimeCircuit.cost DeMorgan.standardCost : ENat) <=
@@ -350,8 +344,6 @@ theorem booleanMassComplexity_le_of_resource_complexity
     ShannonSynthesis.minimumMassCircuit suffixWidth suffixLarge
       (canonicalResourceFunction widthPositive packingFits function member)
       groups
-  let gateCounts := fun member : Fin (resourceBitCount dimension width) =>
-    (resourceMinimum member).gateCount
   let resourceCircuits := fun member :
       Fin (resourceBitCount dimension width) =>
     (resourceMinimum member).circuit
@@ -382,7 +374,7 @@ theorem booleanMassComplexity_le_of_resource_complexity
   exact booleanMassComplexity_le widthPositive widthAtLeastTwo
     dimensionPositive gridPositive groupsPositive packingFits schedulerDepth
     suffixWidth groupBitWidth orderWidth groupFits allFit directionCapacity
-    incidenceFits function dummyTarget scatterRecordCount gateCounts
+    incidenceFits function dummyTarget scatterRecordCount
     resourceCircuits resourcesCompute resourceBound resourcesBounded
     gatherRecordCount
 

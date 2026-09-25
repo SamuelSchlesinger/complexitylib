@@ -67,12 +67,12 @@ theorem existsCircuit_linear
     (budget : 512 * total * Nat.card (BinaryExtension width) ≤
       Nat.card (ℙ (BinaryExtension width) (Fin dimension → BinaryExtension width)))
     (targetProjection : Fin (dimension * width) → Fin requestWidth) :
-    ∃ gates, ∃ scheduler : Circuit DeMorgan.signature
-      (inputWidth completed (networkRecords requestDepth) requestWidth (2 ^ width) (dimension * width)) gates
+    ∃ scheduler : Circuit DeMorgan.signature
+      (inputWidth completed (networkRecords requestDepth) requestWidth (2 ^ width) (dimension * width))
       (inputWidth total 0 requestWidth (2 ^ width) (dimension * width)),
       scheduler.cost DeMorgan.standardCost ≤ total * 2 ^ width * polynomialFactor total dimension width requestWidth ∧
       Transforms positive targetProjection scheduler total := by
-  obtain ⟨gates, scheduler, bound, correct⟩ := existsCircuit_complete positive dimensionPositive counts budget targetProjection
-  exact ⟨gates, scheduler, bound.trans (costBound_le_linear counts), correct⟩
+  obtain ⟨scheduler, bound, correct⟩ := existsCircuit_complete positive dimensionPositive counts budget targetProjection
+  exact ⟨scheduler, bound.trans (costBound_le_linear counts), correct⟩
 
 end Algebraic.MassProduction.Nonuniform.BufferIteration

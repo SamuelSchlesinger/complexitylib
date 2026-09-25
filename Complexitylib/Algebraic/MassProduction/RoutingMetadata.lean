@@ -206,15 +206,18 @@ def predecessorCopyCircuit
     (sourceTag destinationTag : Bool) :
     Circuit DeMorgan.signature
       (networkBits depth (recordWidth keyWidth metadataWidth valueWidth))
-      (∑ output, predecessorCopyOutputGateCount depth keyWidth metadataWidth
-        valueWidth sourceTag destinationTag output)
       (networkBits depth (recordWidth keyWidth metadataWidth valueWidth)) :=
   Circuit.parallelFin
-    (networkBits depth (recordWidth keyWidth metadataWidth valueWidth))
-    (predecessorCopyOutputGateCount depth keyWidth metadataWidth valueWidth
-      sourceTag destinationTag) fun output =>
+    (networkBits depth (recordWidth keyWidth metadataWidth valueWidth)) fun output =>
       (predecessorCopyOutputExpression depth keyWidth metadataWidth valueWidth
         sourceTag destinationTag output).circuit
+
+@[simp] theorem predecessorCopyCircuit_size
+    (depth keyWidth metadataWidth valueWidth : Nat)
+    (sourceTag destinationTag : Bool) :
+    (predecessorCopyCircuit depth keyWidth metadataWidth valueWidth sourceTag destinationTag).size =
+      ∑ output, predecessorCopyOutputGateCount depth keyWidth metadataWidth valueWidth sourceTag destinationTag output := by
+  simp [predecessorCopyCircuit, predecessorCopyOutputGateCount]
 
 @[simp] theorem predecessorCopyCircuit_eval
     (sourceTag destinationTag : Bool)
@@ -456,14 +459,19 @@ def sortedPredecessorCopyCircuit
     (sourceTag destinationTag : Bool) :
     Circuit DeMorgan.signature
       (networkBits depth (recordWidth keyWidth metadataWidth valueWidth))
-      (sortedPredecessorCopyGateCount depth keyWidth metadataWidth valueWidth
-        sourceTag destinationTag)
       (networkBits depth (recordWidth keyWidth metadataWidth valueWidth)) :=
   (predecessorCopyCircuit depth keyWidth metadataWidth valueWidth
     sourceTag destinationTag).comp
       (bitonicSortCircuit
         (Routing.keyAndTagFitsRecord keyWidth (metadataWidth + valueWidth))
         depth true)
+
+@[simp] theorem sortedPredecessorCopyCircuit_size
+    (depth keyWidth metadataWidth valueWidth : Nat)
+    (sourceTag destinationTag : Bool) :
+    (sortedPredecessorCopyCircuit depth keyWidth metadataWidth valueWidth sourceTag destinationTag).size =
+      sortedPredecessorCopyGateCount depth keyWidth metadataWidth valueWidth sourceTag destinationTag := by
+  simp [sortedPredecessorCopyCircuit, sortedPredecessorCopyGateCount]
 
 @[simp] theorem sortedPredecessorCopyCircuit_eval
     (sourceTag destinationTag : Bool)

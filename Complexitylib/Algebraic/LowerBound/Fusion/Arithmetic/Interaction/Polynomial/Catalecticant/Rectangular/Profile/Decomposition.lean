@@ -40,7 +40,7 @@ theorem multiplicationOutputRankAtMost
     (constant : C → K)
     (degree : Nat)
     (degreeAtLeastTwo : 2 ≤ degree)
-    (circuit : Circuit (Algebraic.Arithmetic.signature C) degree g 1)
+    (circuit : Circuit (Algebraic.Arithmetic.signature C) degree 1)
     (termCount : Nat)
     (restricted : Rectangular.Decomposition.AtMultiplications constant degree
       circuit termCount) :
@@ -61,7 +61,7 @@ theorem certifiedLowerBound
     (degreeAtLeastTwo : 2 ≤ degree)
     (termCount : Nat)
     (termCountPositive : 0 < termCount)
-    (circuit : Circuit (Algebraic.Arithmetic.signature C) degree g 1)
+    (circuit : Circuit (Algebraic.Arithmetic.signature C) degree 1)
     (constructs : (problem K degree).Constructs circuit
       (Algebraic.Arithmetic.interpretation
         (fun scalar ↦ MvPolynomial.C (constant scalar))))

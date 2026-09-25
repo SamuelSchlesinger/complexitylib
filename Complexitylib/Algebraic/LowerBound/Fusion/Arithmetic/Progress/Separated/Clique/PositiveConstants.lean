@@ -40,7 +40,7 @@ theorem circuit_addition_lowerBound_of_support_eq
       cliqueSupport vertexCount cliqueSize)
     (circuit : Circuit
       (Algebraic.Arithmetic.signature K)
-        (vertexCount * vertexCount) g 1)
+        (vertexCount * vertexCount) 1)
     (constructs :
       ({ inputCount := vertexCount * vertexCount,
           inputs := MvPolynomial.X, target := target } :
@@ -66,7 +66,7 @@ theorem circuit_addition_lowerBound
     (positive : ∀ scalar, 0 < constant scalar)
     (circuit : Circuit
       (Algebraic.Arithmetic.signature K)
-        (vertexCount * vertexCount) g 1)
+        (vertexCount * vertexCount) 1)
     (constructs :
       ({ inputCount := vertexCount * vertexCount,
           inputs := MvPolynomial.X,
@@ -89,7 +89,7 @@ theorem central_circuit_addition_lowerBound
     (positive : ∀ scalar, 0 < constant scalar)
     (circuit : Circuit
       (Algebraic.Arithmetic.signature K)
-        ((2 * halfVertices) * (2 * halfVertices)) g 1)
+        ((2 * halfVertices) * (2 * halfVertices)) 1)
     (constructs :
       ({ inputCount := (2 * halfVertices) * (2 * halfVertices),
           inputs := MvPolynomial.X,
@@ -116,7 +116,7 @@ theorem central_circuit_exponential_lowerBound
     (halfVerticesBig : 4 ≤ halfVertices)
     (circuit : Circuit
       (Algebraic.Arithmetic.signature K)
-        ((2 * halfVertices) * (2 * halfVertices)) g 1)
+        ((2 * halfVertices) * (2 * halfVertices)) 1)
     (constructs :
       ({ inputCount := (2 * halfVertices) * (2 * halfVertices),
           inputs := MvPolynomial.X,

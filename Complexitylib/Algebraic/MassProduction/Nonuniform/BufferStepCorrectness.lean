@@ -35,7 +35,7 @@ theorem advance_input_of_correct (positive : 0 < width)
     (menu : Fin (networkRecords menuDepth) → Fin (networkRecords requestDepth) →
       ℙ (BinaryExtension width) (Fin dimension → BinaryExtension width))
     (phase : Circuit DeMorgan.signature
-      (BufferInput.inputWidth completed (networkRecords requestDepth) requestWidth (2 ^ width) (dimension * width)) gates
+      (BufferInput.inputWidth completed (networkRecords requestDepth) requestWidth (2 ^ width) (dimension * width))
       (networkRecords requestDepth * (1 + BufferInput.storedWidth requestWidth (2 ^ width) (dimension * width))))
     (split : accepted + remaining = networkRecords requestDepth)
     (correct : GeometricPhase.CorrectOutput positive menu (pendingRecord state data)

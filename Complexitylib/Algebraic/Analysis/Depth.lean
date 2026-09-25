@@ -62,7 +62,7 @@ export Cslib.Circuits (Program.trace_depthInterpretation)
 /-- Evaluating a circuit in the arrival-time interpretation gives exactly its
 designated output depths. -/
 theorem _root_.Cslib.Circuits.Circuit.eval_depthInterpretation
-    (circuit : Circuit σ n g m) :
+    (circuit : Circuit σ n m) :
     circuit.eval σ.depthInterpretation (fun _ => 0) =
       circuit.outputDepths := by
   unfold Circuit.eval Circuit.outputDepths
@@ -74,7 +74,7 @@ export Cslib.Circuits (Circuit.eval_depthInterpretation)
 target arrival-time interpretation. -/
 theorem Translation.compile_outputDepths
     (translation : Translation σ τ)
-    (circuit : Circuit σ n g m) :
+    (circuit : Circuit σ n m) :
     (translation.compile circuit).outputDepths =
       circuit.eval (translation.pull τ.depthInterpretation) (fun _ => 0) := by
   rw [← Circuit.eval_depthInterpretation]

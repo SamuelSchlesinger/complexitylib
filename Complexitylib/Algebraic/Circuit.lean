@@ -25,8 +25,14 @@ export Cslib.Circuits (Circuit)
 namespace Circuit
 
 export Cslib.Circuits.Circuit
-  (id FanInAtMost instDecidableFanInAtMost size outputDepths depth eval eval_id map_eval
-   computation trace)
+  (wiring id size_wiring program_wiring outputs_wiring FanInAtMost instDecidableFanInAtMost
+   fanInAtMost_wiring outputDepths depth outputDepths_wiring depth_wiring eval eval_wiring
+   map_eval computation trace)
+
+/-- The identity circuit evaluates to its input. -/
+@[simp] theorem eval_id {σ : Signature} {n : Nat} {U : Type u}
+    (interpretation : Interpretation σ U) (input : Fin n → U) :
+    (Circuit.id σ n).eval interpretation input = input := rfl
 
 end Circuit
 end Algebraic

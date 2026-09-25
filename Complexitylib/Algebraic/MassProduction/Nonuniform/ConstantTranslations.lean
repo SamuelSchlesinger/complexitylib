@@ -44,9 +44,6 @@ def circuit (offsets : Fin points → Fin width → Bool)
   Circuit.parallelFin (points * width)
     (fun output =>
       let pair := (finProdFinEquiv (m := points) (n := width)).symm output
-      (expression (offsets pair.1 pair.2) (sources pair.1 pair.2)).gateCount)
-    (fun output =>
-      let pair := (finProdFinEquiv (m := points) (n := width)).symm output
       (expression (offsets pair.1 pair.2) (sources pair.1 pair.2)).circuit)
 
 /-- Each output point is its source vector XOR its fixed offset. -/

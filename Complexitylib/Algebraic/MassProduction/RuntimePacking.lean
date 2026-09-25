@@ -80,15 +80,14 @@ noncomputable def conversionStageCircuit
     (prefixWidth dimension width : Nat)
     (gridPositive : 0 < gridWidth dimension width) :
     Circuit DeMorgan.signature (prefixWidth + width)
-      (BaseConversion.gateCount prefixWidth gridPositive dimension)
       (coreOutputCount prefixWidth dimension width) :=
   let conversion :=
     (BaseConversion.circuit prefixWidth gridPositive dimension).mapInputs
       (conversionInputIndex prefixWidth width)
-  let selector : Circuit DeMorgan.signature (prefixWidth + width) 0 width :=
+  let selector : Circuit DeMorgan.signature (prefixWidth + width) width :=
     (Circuit.id DeMorgan.signature (prefixWidth + width)).mapOutputs
       (selectorInputIndex prefixWidth width)
-  (conversion.parallel selector).castCounts rfl (Nat.add_zero _) rfl
+  (conversion.parallel selector).castCounts rfl rfl
 
 /-- Divide by `width`, convert the quotient to base `gridWidth`, and retain
 the one-hot width remainder. -/
@@ -97,11 +96,17 @@ noncomputable def coreCircuit
     (widthPositive : 0 < width)
     (gridPositive : 0 < gridWidth dimension width) :
     Circuit DeMorgan.signature prefixWidth
-      (FixedDivision.prefixGateCount prefixWidth widthPositive prefixWidth +
-        BaseConversion.gateCount prefixWidth gridPositive dimension)
       (coreOutputCount prefixWidth dimension width) :=
   (conversionStageCircuit prefixWidth dimension width gridPositive).comp
     (FixedDivision.circuit prefixWidth widthPositive)
+
+@[simp] theorem coreCircuit_size
+    (prefixWidth dimension : Nat)
+    (widthPositive : 0 < width)
+    (gridPositive : 0 < gridWidth dimension width) :
+    (coreCircuit prefixWidth dimension widthPositive gridPositive).size =
+      FixedDivision.prefixGateCount prefixWidth widthPositive prefixWidth + BaseConversion.gateCount prefixWidth gridPositive dimension := by
+  simp [coreCircuit, conversionStageCircuit]
 
 /-- Core output index of one one-hot tensor-grid digit. -/
 noncomputable def coreDigitIndex
@@ -221,17 +226,17 @@ noncomputable def targetEncoderCircuit
     (prefixWidth dimension width : Nat) :
     Circuit DeMorgan.signature
       (coreOutputCount prefixWidth dimension width)
-      (targetEncoderGateCount prefixWidth dimension width)
       (dimension * width) :=
   Circuit.parallelFinVector dimension width
-    (fun coordinate => ∑ bit : Fin width,
-      (targetBitExpression prefixWidth dimension width
-        coordinate bit).gateCount)
     (fun coordinate => Circuit.parallelFin width
       (fun bit => (targetBitExpression prefixWidth dimension width
-        coordinate bit).gateCount)
-      (fun bit => (targetBitExpression prefixWidth dimension width
         coordinate bit).circuit))
+
+@[simp] theorem targetEncoderCircuit_size
+    (prefixWidth dimension width : Nat) :
+    (targetEncoderCircuit prefixWidth dimension width).size =
+      targetEncoderGateCount prefixWidth dimension width := by
+  simp [targetEncoderCircuit, targetEncoderGateCount]
 
 theorem targetBitExpression_eval_oneHot
     (input : Fin (coreOutputCount prefixWidth dimension width) -> Bool)
@@ -274,7 +279,7 @@ theorem targetBitExpression_eval_oneHot
 noncomputable def selectorCircuit
     (prefixWidth dimension width : Nat) :
     Circuit DeMorgan.signature
-      (coreOutputCount prefixWidth dimension width) 0 width :=
+      (coreOutputCount prefixWidth dimension width) width :=
   (Circuit.id DeMorgan.signature
     (coreOutputCount prefixWidth dimension width)).mapOutputs
       (coreSelectorIndex prefixWidth dimension width)
@@ -289,13 +294,18 @@ noncomputable def circuit
     (widthPositive : 0 < width)
     (gridPositive : 0 < gridWidth dimension width) :
     Circuit DeMorgan.signature prefixWidth
-      ((FixedDivision.prefixGateCount prefixWidth widthPositive prefixWidth +
-          BaseConversion.gateCount prefixWidth gridPositive dimension) +
-        targetEncoderGateCount prefixWidth dimension width)
       (outputCount dimension width) :=
   ((targetEncoderCircuit prefixWidth dimension width).parallel
       (selectorCircuit prefixWidth dimension width)).comp
         (coreCircuit prefixWidth dimension widthPositive gridPositive)
+
+@[simp] theorem circuit_size
+    (prefixWidth dimension : Nat)
+    (widthPositive : 0 < width)
+    (gridPositive : 0 < gridWidth dimension width) :
+    (circuit prefixWidth dimension widthPositive gridPositive).size =
+      (FixedDivision.prefixGateCount prefixWidth widthPositive prefixWidth + BaseConversion.gateCount prefixWidth gridPositive dimension) + targetEncoderGateCount prefixWidth dimension width := by
+  simp [circuit, targetEncoderGateCount, selectorCircuit]
 
 /-- Runtime target bits agree exactly with the canonical packed point. -/
 theorem circuit_eval_target

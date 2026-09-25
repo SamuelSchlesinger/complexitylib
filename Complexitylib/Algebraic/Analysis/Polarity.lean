@@ -75,7 +75,7 @@ export Cslib.Circuits (Signature.polarityInterpretation)
 
 /-- Per-output, per-input polarity profile of a circuit. -/
 def _root_.Cslib.Circuits.Circuit.polarityProfile
-    (circuit : Circuit σ n g m)
+    (circuit : Circuit σ n m)
     (policy : PolarityPolicy σ) : Fin m → Fin n → Polarity :=
   circuit.eval (σ.polarityInterpretation policy n) Polarity.inputProfile
 
@@ -85,7 +85,7 @@ export Cslib.Circuits (Circuit.polarityProfile)
 its target operation gadgets. -/
 theorem Translation.compile_polarityProfile
     (translation : Translation σ τ)
-    (circuit : Circuit σ n g m)
+    (circuit : Circuit σ n m)
     (targetPolicy : PolarityPolicy τ) :
     (translation.compile circuit).polarityProfile targetPolicy =
       circuit.eval

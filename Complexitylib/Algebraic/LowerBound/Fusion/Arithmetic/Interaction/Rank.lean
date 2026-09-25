@@ -166,7 +166,7 @@ theorem Certificate.circuit_lowerBound
       constant problem)
     (positive : 0 < certificate.interactionRank)
     (circuit : Circuit (Algebraic.Arithmetic.signature C)
-      problem.inputCount g 1)
+      problem.inputCount 1)
     (constructs : problem.Constructs circuit
       (Algebraic.Arithmetic.interpretation constant)) :
     certificate.targetRank ⌈/⌉ certificate.interactionRank ≤

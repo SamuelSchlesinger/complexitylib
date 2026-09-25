@@ -69,7 +69,7 @@ theorem matrix_rank_le_multiplicationCost
     (notInput : ∀ selected input,
       exponent selected ≠ Finsupp.single (inputVariables input) 1)
     (mix : Matrix (Fin m) (Fin m) K)
-    (circuit : Circuit (Algebraic.Arithmetic.signature C) n g m)
+    (circuit : Circuit (Algebraic.Arithmetic.signature C) n m)
     (constructs : Multiple.Constructs
       (constant := fun scalar => MvPolynomial.C (constant scalar))
       (inputProblem inputVariables) (targets exponent mix) circuit) :
@@ -93,7 +93,7 @@ theorem circuit_multiplication_lowerBound_of_det_ne_zero
       exponent selected ≠ Finsupp.single (inputVariables input) 1)
     (mix : Matrix (Fin m) (Fin m) K)
     (det_ne_zero : mix.det ≠ 0)
-    (circuit : Circuit (Algebraic.Arithmetic.signature C) n g m)
+    (circuit : Circuit (Algebraic.Arithmetic.signature C) n m)
     (constructs : Multiple.Constructs
       (constant := fun scalar => MvPolynomial.C (constant scalar))
       (inputProblem inputVariables) (targets exponent mix) circuit) :
@@ -158,7 +158,7 @@ theorem prefixTargets_multiplication_lowerBound
     (nonconstant : ∀ selected, exponent selected ≠ 0)
     (notInput : ∀ selected input,
       exponent selected ≠ Finsupp.single (inputVariables input) 1)
-    (circuit : Circuit (Algebraic.Arithmetic.signature C) n g m)
+    (circuit : Circuit (Algebraic.Arithmetic.signature C) n m)
     (constructs : Multiple.Constructs
       (constant := fun scalar => MvPolynomial.C (constant scalar))
       (inputProblem inputVariables) (prefixTargets exponent) circuit) :
@@ -180,7 +180,7 @@ theorem prefixTargets_gate_lowerBound
     (nonconstant : ∀ selected, exponent selected ≠ 0)
     (notInput : ∀ selected input,
       exponent selected ≠ Finsupp.single (inputVariables input) 1)
-    (circuit : Circuit (Algebraic.Arithmetic.signature C) n g m)
+    (circuit : Circuit (Algebraic.Arithmetic.signature C) n m)
     (constructs : Multiple.Constructs
       (constant := fun scalar => MvPolynomial.C (constant scalar))
       (inputProblem inputVariables) (prefixTargets exponent) circuit) :
@@ -200,7 +200,7 @@ theorem prefixTargets_size_lowerBound
     (nonconstant : ∀ selected, exponent selected ≠ 0)
     (notInput : ∀ selected input,
       exponent selected ≠ Finsupp.single (inputVariables input) 1)
-    (circuit : Circuit (Algebraic.Arithmetic.signature C) n g m)
+    (circuit : Circuit (Algebraic.Arithmetic.signature C) n m)
     (constructs : Multiple.Constructs
       (constant := fun scalar => MvPolynomial.C (constant scalar))
       (inputProblem inputVariables) (prefixTargets exponent) circuit) :

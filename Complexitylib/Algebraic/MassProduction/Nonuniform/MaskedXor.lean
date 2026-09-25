@@ -22,7 +22,7 @@ namespace Algebraic.MassProduction.Nonuniform.MaskedXor
 
 /-- One masked XOR fold for each request's point list. -/
 noncomputable def circuit (valid : Fin slots → Bool) (requests : Nat) :=
-  Circuit.parallelFin requests (fun _ => _)
+  Circuit.parallelFin requests
     (fun request => (UhligCircuit.xorInputCircuit slots).comp
       (DeMorgan.Wiring.circuit (fun slot =>
         if valid slot then (.input (finProdFinEquiv (request, slot)) : DeMorgan.Wiring (requests * slots))

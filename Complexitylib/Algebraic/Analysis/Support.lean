@@ -64,7 +64,7 @@ export Cslib.Circuits (Program.trace_supportInterpretation)
 /-- Circuit evaluation in the support interpretation gives each designated
 output's structural support. -/
 theorem _root_.Cslib.Circuits.Circuit.eval_supportInterpretation
-    (circuit : Circuit σ n g m) :
+    (circuit : Circuit σ n m) :
     circuit.eval (σ.supportInterpretation n) (fun input => {input}) =
       circuit.outputSupport := by
   unfold Circuit.eval Circuit.outputSupport
@@ -76,7 +76,7 @@ export Cslib.Circuits (Circuit.eval_supportInterpretation)
 pulled-back target support interpretation. -/
 theorem Translation.compile_outputSupport
     (translation : Translation σ τ)
-    (circuit : Circuit σ n g m) :
+    (circuit : Circuit σ n m) :
     (translation.compile circuit).outputSupport =
       circuit.eval (translation.pull (τ.supportInterpretation n))
         (fun input => {input}) := by

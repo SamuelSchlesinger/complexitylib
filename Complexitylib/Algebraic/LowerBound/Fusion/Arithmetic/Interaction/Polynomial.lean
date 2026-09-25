@@ -155,7 +155,7 @@ theorem coefficientSpan_finrank_le_multiplicationCost
     (notInput : ∀ selected input,
       exponent selected ≠ Finsupp.single (inputVariables input) 1)
     (outputs : Fin m → MvPolynomial σ K)
-    (circuit : Circuit (Algebraic.Arithmetic.signature C) n g m)
+    (circuit : Circuit (Algebraic.Arithmetic.signature C) n m)
     (constructs : Multiple.Constructs
       (constant := fun scalar => MvPolynomial.C (constant scalar))
       (inputProblem inputVariables) outputs circuit) :
@@ -185,7 +185,7 @@ theorem coefficientMatrix_rank_le_multiplicationCost
     (notInput : ∀ selected input,
       exponent selected ≠ Finsupp.single (inputVariables input) 1)
     (outputs : Fin m → MvPolynomial σ K)
-    (circuit : Circuit (Algebraic.Arithmetic.signature C) n g m)
+    (circuit : Circuit (Algebraic.Arithmetic.signature C) n m)
     (constructs : Multiple.Constructs
       (constant := fun scalar => MvPolynomial.C (constant scalar))
       (inputProblem inputVariables) outputs circuit) :
@@ -213,7 +213,7 @@ theorem coefficientMatrix_rank_le_gateCost
     (notInput : ∀ selected input,
       exponent selected ≠ Finsupp.single (inputVariables input) 1)
     (outputs : Fin m → MvPolynomial σ K)
-    (circuit : Circuit (Algebraic.Arithmetic.signature C) n g m)
+    (circuit : Circuit (Algebraic.Arithmetic.signature C) n m)
     (constructs : Multiple.Constructs
       (constant := fun scalar => MvPolynomial.C (constant scalar))
       (inputProblem inputVariables) outputs circuit) :
@@ -234,7 +234,7 @@ theorem coefficientMatrix_rank_le_size
     (notInput : ∀ selected input,
       exponent selected ≠ Finsupp.single (inputVariables input) 1)
     (outputs : Fin m → MvPolynomial σ K)
-    (circuit : Circuit (Algebraic.Arithmetic.signature C) n g m)
+    (circuit : Circuit (Algebraic.Arithmetic.signature C) n m)
     (constructs : Multiple.Constructs
       (constant := fun scalar => MvPolynomial.C (constant scalar))
       (inputProblem inputVariables) outputs circuit) :
@@ -255,7 +255,7 @@ theorem circuit_multiplication_lowerBound
     (nonconstant : ∀ output, exponent output ≠ 0)
     (notInput : ∀ output input,
       exponent output ≠ Finsupp.single (inputVariables input) 1)
-    (circuit : Circuit (Algebraic.Arithmetic.signature C) n g m)
+    (circuit : Circuit (Algebraic.Arithmetic.signature C) n m)
     (constructs : Multiple.Constructs
       (constant := fun scalar => MvPolynomial.C (constant scalar))
       (inputProblem inputVariables) (targets exponent) circuit) :
@@ -284,7 +284,7 @@ theorem circuit_gate_lowerBound
     (nonconstant : ∀ output, exponent output ≠ 0)
     (notInput : ∀ output input,
       exponent output ≠ Finsupp.single (inputVariables input) 1)
-    (circuit : Circuit (Algebraic.Arithmetic.signature C) n g m)
+    (circuit : Circuit (Algebraic.Arithmetic.signature C) n m)
     (constructs : Multiple.Constructs
       (constant := fun scalar => MvPolynomial.C (constant scalar))
       (inputProblem inputVariables) (targets exponent) circuit) :
@@ -304,7 +304,7 @@ theorem circuit_size_lowerBound
     (nonconstant : ∀ output, exponent output ≠ 0)
     (notInput : ∀ output input,
       exponent output ≠ Finsupp.single (inputVariables input) 1)
-    (circuit : Circuit (Algebraic.Arithmetic.signature C) n g m)
+    (circuit : Circuit (Algebraic.Arithmetic.signature C) n m)
     (constructs : Multiple.Constructs
       (constant := fun scalar => MvPolynomial.C (constant scalar))
       (inputProblem inputVariables) (targets exponent) circuit) :

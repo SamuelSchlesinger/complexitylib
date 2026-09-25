@@ -14,8 +14,8 @@ public import Complexitylib.Algebraic.Substitution
 This module supplies a small reusable expression language for arithmetic
 circuits.  Compilation is tree-shaped: the left subtree is emitted first, the
 right subtree is instantiated after it over the same original inputs, and the
-root operation is appended last.  The result is a dependently typed circuit
-whose gate count is definitionally the expression gate count.
+root operation is appended last.  The result is a circuit whose bundled
+`size` is definitionally the expression gate count.
 -/
 
 @[expose] public section
@@ -125,9 +125,13 @@ def compile : (expression : Expression C n) → Compilation expression
 
 /-- The one-output circuit emitted for an expression. -/
 def circuit (expression : Expression C n) :
-    Circuit (Arithmetic.signature C) n expression.gateCount 1 where
+    Circuit (Arithmetic.signature C) n 1 where
   program := (compile expression).program
   outputs := fun _ => (compile expression).output
+
+/-- The circuit emitted for an expression has exactly the expression gate count. -/
+@[simp] theorem size_circuit (expression : Expression C n) :
+    (circuit expression).size = expression.gateCount := rfl
 
 /-- Tree compilation preserves every binary arithmetic weighting exactly. -/
 theorem compile_weightedCost

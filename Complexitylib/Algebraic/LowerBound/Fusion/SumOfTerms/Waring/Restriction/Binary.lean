@@ -68,7 +68,7 @@ theorem powerCircuit_multiplicationAtomProperty
     (atom : Atom (Algebraic.Arithmetic.signature K)
       (MvPolynomial (Fin (2 * n)) K))
     (present : atom ∈ circuitAtoms
-      (Algebraic.Arithmetic.Power.binaryCircuit (K := K) exponent).2
+      (Algebraic.Arithmetic.Power.binaryCircuit (K := K) exponent)
       (Algebraic.Arithmetic.interpretation
         (MvPolynomial.C : K → MvPolynomial (Fin (2 * n)) K))
       (fun _ : Fin 1 ↦ linearForm term)) :

@@ -37,7 +37,7 @@ using canonical padding. Constants in the source table are hardwired. -/
 theorem existsCircuit
     (keyWidth valueWidth requests : Nat)
     (table : (Fin keyWidth → Bool) → Fin valueWidth → Bool) :
-    ∃ gates, ∃ lookup : Circuit DeMorgan.signature (requests * keyWidth) gates
+    ∃ lookup : Circuit DeMorgan.signature (requests * keyWidth)
         (requests * valueWidth),
       (∀ input request bit, lookup.eval DeMorgan.interpretation input
         (finProdFinEquiv (request, bit)) =
@@ -49,7 +49,7 @@ theorem existsCircuit
   let depth := FiniteParameters.binaryDepth records
   have recordCount : 2 ^ keyWidth + requests + FiniteParameters.paddingCount records =
       networkRecords depth := FiniteParameters.records_add_paddingCount records
-  refine ⟨_, circuit table recordCount, circuit_eval table recordCount, ?_⟩
+  refine ⟨circuit table recordCount, circuit_eval table recordCount, ?_⟩
   have recordsPositive : 0 < records := by
     have : 0 < (2 : Nat) ^ keyWidth := by positivity
     dsimp [records]

@@ -45,15 +45,8 @@ open scoped Classical
 
 /-- The argument wires of a widened binary line refer to earlier wires. -/
 theorem lines_wires_lt {n s : Nat} (p : Program Binary.signature n s) (g : Fin s) (a : Fin 2) :
-    ((p.lines g).wires a).val < n + g.val := by
-  induction p with
-  | empty => exact g.elim0
-  | @gate k q line ih =>
-    refine Fin.lastCases ?_ (fun j => ?_) g
-    · rw [Program.lines_gate_last, Line.mapWires_wires, Wire.Renaming.castSucc_apply]
-      simp
-    · rw [Program.lines_gate_castSucc, Line.mapWires_wires, Wire.Renaming.castSucc_apply]
-      simpa using ih j
+    ((p.lines g).wires a).index.val < n + g.val :=
+  p.lines_wires_lt g a
 
 namespace Wiring
 
@@ -264,11 +257,8 @@ theorem eq_firstOut_of_fst_eq_inl {e : Edge p out} {w : Signal p out}
       exact Fin.ext h₀
     · simp [fst, h₀] at h
 
-theorem input_ne_gate (j : Fin n) (g : Fin s) : Wire.input j ≠ (Wire.gate g : Wire n s) := by
-  intro h
-  have := congrArg Fin.val h
-  simp only [Wire.input, Wire.gate, Fin.val_castAdd, Fin.val_natAdd] at this
-  omega
+theorem input_ne_gate (j : Fin n) (g : Fin s) : Wire.input j ≠ (Wire.gate g : Wire n s) :=
+  fun h => by cases h
 
 /-- Every reachable wire other than the output gate feeds a slot. -/
 theorem fanout_pos (w : Signal p out) (hne : w.1 ≠ Wire.gate out) : 0 < fanout p out w := by
@@ -430,7 +420,7 @@ theorem eq_trace_of_satisfies {x : Fin n → Bool} {α : Edge p out → Bool}
     (hα : (network p out).Satisfies x α) :
     ∀ (w : Signal p out) (e : Edge p out), signal p out e = w →
       α e = p.trace Binary.interpretation x w.1 := by
-  suffices key : ∀ m, ∀ w : Signal p out, w.1.val = m → ∀ e, signal p out e = w →
+  suffices key : ∀ m, ∀ w : Signal p out, w.1.index.val = m → ∀ e, signal p out e = w →
       α e = p.trace Binary.interpretation x w.1 from fun w e he => key _ w rfl e he
   intro m
   induction m using Nat.strong_induction_on with
@@ -448,15 +438,17 @@ theorem eq_trace_of_satisfies {x : Fin n → Bool} {α : Edge p out → Bool}
   clear he
   obtain ⟨w, hw⟩ := w
   revert hw hm hpos
-  refine Fin.addCases (fun j => ?_) (fun g => ?_) w
-  · intro hw hm hpos
+  cases w with
+  | input j =>
+    intro hw hm hpos
     have hj : j ∈ (network p out).read := (mem_read p out).mpr hw
     have := hα.2 j hj
     change α (portEdge p out j) = x j at this
     rw [portEdge_of_reach p out hw] at this
     rw [this]
     simp
-  · intro hw hm hpos
+  | gate g =>
+    intro hw hm hpos
     have check := (hα.1 (.inl ⟨Wire.gate g, hw⟩) g hw rfl).1 hpos
     rw [check, opValue]
     simp only [Program.trace_gateWire, Program.gateFunction_apply]
@@ -499,8 +491,8 @@ theorem loopless : (network p out).Loopless := by
     · rw [fst_inl_of_fanout_eq_one p out t (fanout_eq_one_of_not_two_le p out t h₂)]
       simp only [snd, ne_eq, Sum.inl.injEq]
       intro h
-      have := congrArg (fun w : Signal p out => w.1.val) h
-      simp only [slotSignal, slotGate, Wire.gate, Fin.val_natAdd] at this
+      have := congrArg (fun w : Signal p out => w.1.index.val) h
+      simp only [slotSignal, slotGate, Cslib.Circuits.Wire.index_gate, Fin.val_natAdd] at this
       have := lines_wires_lt p t.1.1 t.1.2
       omega
   · show fst p out (.inr ⟨w, k⟩) ≠ snd p out (.inr ⟨w, k⟩)
@@ -535,10 +527,8 @@ theorem edgesAt_subset (v : Vertex p out) :
   · exact Finset.mem_union_left _ (Finset.mem_filter.mpr ⟨Finset.mem_univ _, h⟩)
   · exact Finset.mem_union_right _ (Finset.mem_filter.mpr ⟨Finset.mem_univ _, h⟩)
 
-theorem gate_injective {g g' : Fin s} (h : (Wire.gate g : Wire n s) = Wire.gate g') : g = g' := by
-  have := congrArg Fin.val h
-  simp only [Wire.gate, Fin.val_natAdd] at this
-  exact Fin.ext (by omega)
+theorem gate_injective {g g' : Fin s} (h : (Wire.gate g : Wire n s) = Wire.gate g') : g = g' :=
+  Cslib.Circuits.Wire.gate.inj h
 
 /-- A signal vertex receives at most two edges: the slots of its gate. -/
 theorem card_inEdges_inl_le (w : Signal p out) : (inEdges p out (.inl w)).card ≤ 2 := by
@@ -742,7 +732,9 @@ theorem card_slot : Fintype.card (Slot p out) = 2 * Fintype.card (ReachableGate 
 theorem card_signal :
     Fintype.card (Signal p out) = (read p out).card + Fintype.card (ReachableGate p out) := by
   rw [Fintype.card_subtype, Fintype.card_subtype, read, Finset.card_filter, Finset.card_filter,
-    Finset.card_filter, Fin.sum_univ_add]
+    Finset.card_filter]
+  exact (Fintype.sum_equiv (Wire.equiv n s) _ (Sum.elim _ _)
+    (fun w => by cases w <;> rfl)).trans (Fintype.sum_sum_type _)
 
 /-- There are fewer copy vertices than slots. -/
 theorem card_copy_le : Fintype.card (Copy p out) ≤ Fintype.card (Slot p out) := by

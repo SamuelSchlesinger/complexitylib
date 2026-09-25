@@ -7,6 +7,7 @@ Authors: Samuel Schlesinger
 module
 public import Complexitylib.Interop.Cslib.Circuit
 public import Complexitylib.Asymptotics
+public import Cslib.Computability.Circuit.Boolean.Family
 import Complexitylib.Classes.PPoly
 import Complexitylib.Circuits.Family
 import Cslib.Computability.Circuit.Boolean.Lupanov
@@ -32,6 +33,23 @@ fan-in-two AND/OR size complexity of each length slice of `L`: a language lies i
 - `Complexity.exists_language_not_mem_SIZE` — some language is outside `SIZE s`
   whenever `n + 2 s(n) ≤ 2ⁿ / n` eventually; in particular
   (`Complexity.exists_language_not_mem_SIZE_littleO`) whenever `s = o(2ⁿ / n)`
+- `Complexity.SIZE_subset_cslib_SIZE`, `Complexity.cslib_SIZE_subset_SIZE` — our
+  `SIZE` classes versus CSLib's De Morgan classes `Cslib.Circuits.Boolean.SIZE`
+- `Complexity.PPoly_eq_cslib_PPoly` — our `PPoly` is CSLib's
+  `Cslib.Circuits.Boolean.PPoly`; hence (`Complexity.exists_not_mem_PPoly`) some
+  language lies outside `PPoly`
+
+## Relation to CSLib's family-level results
+
+CSLib states Lupanov's and Shannon's bounds for De Morgan circuit families
+(`Cslib.Circuits.Boolean.exists_decides_size_le`,
+`Cslib.Circuits.Boolean.exists_language_lt_size`) and derives
+`Cslib.Circuits.Boolean.exists_not_mem_PPoly`. Our hard language
+(`Complexity.exists_language_sliceSizeComplexity_gt`) is CSLib's, and our
+`exists_not_mem_PPoly` is CSLib's through `PPoly_eq_cslib_PPoly`. The Lupanov
+results here are the fan-in-two AND/OR slice form of CSLib's family bound; they
+come from the per-function transfer `Complexity.lupanov_sizeComplexity`, which
+absorbs the extra output gate of `Circuit.ofCslib`.
 -/
 
 
@@ -104,39 +122,97 @@ theorem mem_SIZE_sliceSizeComplexity (L : Language) : L ∈ SIZE (sliceSizeCompl
 
 open Classical in
 /-- **`SIZE` in CSLib terms, forward.** If `L ∈ SIZE s`, then at every length
-`n` some CSLib De Morgan circuit with at most `n + 2 s(n) + 1` gates decides the
+`n` some CSLib De Morgan circuit of size at most `n + 2 s(n) + 1` decides the
 length-`n` slice of `L`. -/
 theorem exists_cslib_of_mem_SIZE {L : Language} {s : ℕ → ℕ} (hL : L ∈ SIZE s) (n : ℕ) :
-    ∃ g ≤ n + 2 * s n + 1, ∃ c : Cslib.Circuits.Circuit Boolean.signature n g 1,
-      c.Computes Boolean.interpretation fun x => decide (List.ofFn x ∈ L) := by
+    ∃ c : Cslib.Circuits.Circuit Boolean.signature n 1, c.size ≤ n + 2 * s n + 1 ∧
+      c.Computes Boolean.interpretation fun x _ => decide (List.ofFn x ∈ L) := by
   have h := mem_SIZE_iff_sliceSizeComplexity_le.mp hL n
   rcases n with _ | m
-  · obtain ⟨g, hg, c, hc⟩ :=
+  · obtain ⟨c, hc, hg⟩ :=
       (Synthesis.const (n := 0) (s := inputs 0) (decide ([] ∈ L))).exists_circuit
-    exact ⟨g, by omega, c, fun x => (hc x).trans (by simp)⟩
-  · obtain ⟨g, hg, c, hc⟩ := Circuit.exists_cslib_of_sizeComplexity
+    exact ⟨c, by omega, fun x => (hc x).trans (by simp)⟩
+  · obtain ⟨c, hg, hc⟩ := Circuit.exists_cslib_of_sizeComplexity
       fun x : BitString (m + 1) => decide (List.ofFn x ∈ L)
     rw [sliceSizeComplexity_succ] at h
-    exact ⟨g, by omega, c, hc⟩
+    exact ⟨c, by omega, hc⟩
 
 open Classical in
 /-- **`SIZE` in CSLib terms, backward.** If at every positive length `n` some
-CSLib De Morgan circuit with at most `s(n)` gates decides the length-`n` slice of
+CSLib De Morgan circuit of size at most `s(n)` decides the length-`n` slice of
 `L`, then `L ∈ SIZE (s + 1)`. -/
 theorem mem_SIZE_of_cslib {L : Language} {s : ℕ → ℕ}
-    (h : ∀ (n : ℕ) [NeZero n], ∃ g ≤ s n,
-      ∃ c : Cslib.Circuits.Circuit Boolean.signature n g 1,
-        c.Computes Boolean.interpretation fun x => decide (List.ofFn x ∈ L)) :
+    (h : ∀ (n : ℕ) [NeZero n], ∃ c : Cslib.Circuits.Circuit Boolean.signature n 1,
+      c.size ≤ s n ∧ c.Computes Boolean.interpretation fun x _ => decide (List.ofFn x ∈ L)) :
     L ∈ SIZE fun n => s n + 1 := by
   refine mem_SIZE_iff_sliceSizeComplexity_le.mpr fun n => ?_
   rcases n with _ | m
   · exact Nat.zero_le _
-  · obtain ⟨g, hg, c, hc⟩ := h (m + 1)
+  · obtain ⟨c, hg, hc⟩ := h (m + 1)
     exact (Circuit.sizeComplexity_le_of_cslib c hc).trans (by omega)
+
+open Classical in
+/-- CSLib's length-`n` slice of a language is its classical characteristic
+function on words of length `n`. -/
+theorem slice_eq_decide (L : Language) (n : ℕ) :
+    Language.slice L n = fun x => decide (List.ofFn x ∈ L) :=
+  rfl
+
+/-- **Our `SIZE` inside CSLib's.** A language with fan-in-two AND/OR circuits of
+size `s(n)` has De Morgan circuits of size `n + 2 s(n) + 1`. -/
+theorem SIZE_subset_cslib_SIZE (s : ℕ → ℕ) :
+    SIZE s ⊆ Cslib.Circuits.Boolean.SIZE fun n => n + 2 * s n + 1 := by
+  intro L hL
+  choose c hsize hc using exists_cslib_of_mem_SIZE hL
+  exact ⟨c, Cslib.Circuits.CircuitFamily.decides_id_iff.mpr hc, hsize⟩
+
+/-- **CSLib's `SIZE` inside ours.** A language with De Morgan circuits of size
+`s(n)` has fan-in-two AND/OR circuits of size `s(n) + 1`. -/
+theorem cslib_SIZE_subset_SIZE (s : ℕ → ℕ) :
+    Cslib.Circuits.Boolean.SIZE s ⊆ SIZE fun n => s n + 1 := by
+  rintro L ⟨F, hF, hsize⟩
+  exact mem_SIZE_of_cslib fun n _ =>
+    ⟨F n, hsize n, Cslib.Circuits.CircuitFamily.decides_id_iff.mp hF n⟩
+
+/-- Every natural-coefficient polynomial is bounded by `a * n ^ k + a` for some
+`a` and `k`. -/
+private theorem exists_eval_le_mul_pow_add (p : Polynomial ℕ) :
+    ∃ a k : ℕ, ∀ n, p.eval n ≤ a * n ^ k + a := by
+  refine ⟨∑ i ∈ Finset.range (p.natDegree + 1), p.coeff i, p.natDegree, fun n => ?_⟩
+  rw [Polynomial.eval_eq_sum_range, ← Nat.mul_add_one, Finset.sum_mul]
+  refine Finset.sum_le_sum fun i hi => Nat.mul_le_mul_left _ ?_
+  have hi' : i ≤ p.natDegree := Nat.lt_succ_iff.mp (Finset.mem_range.mp hi)
+  rcases Nat.eq_zero_or_pos n with rfl | hn
+  · rcases i with _ | i <;> simp
+  · exact (Nat.pow_le_pow_right hn hi').trans (Nat.le_succ _)
+
+/-- **Our `P/poly` is CSLib's.** Fan-in-two AND/OR circuits with free negations
+and De Morgan circuits counting every gate define the same class `P/poly`: the
+two size measures agree up to `n + 2s + 1`, and CSLib's bounds `n ^ k + k` are
+cofinal among polynomials. -/
+theorem PPoly_eq_cslib_PPoly : PPoly = Cslib.Circuits.Boolean.PPoly := by
+  apply Set.Subset.antisymm
+  · intro L hL
+    obtain ⟨p, hp⟩ := Set.mem_iUnion.mp hL
+    obtain ⟨a, k, hk⟩ := exists_eval_le_mul_pow_add (Polynomial.X + 2 * p + 1)
+    refine Cslib.Circuits.Boolean.mem_PPoly_of_le (SIZE_subset_cslib_SIZE _ hp) a k a
+      fun n => ?_
+    simpa using hk n
+  · intro L hL
+    obtain ⟨k, hk⟩ := Cslib.Circuits.Boolean.mem_PPoly_iff.mp hL
+    refine Set.mem_iUnion.mpr ⟨Polynomial.X ^ k + Polynomial.C (k + 1), ?_⟩
+    exact SIZE_mono (fun n => by simp [add_assoc]) (cslib_SIZE_subset_SIZE _ hk)
+
+/-- **Some language is not in `P/poly`.** This is CSLib's
+`Cslib.Circuits.Boolean.exists_not_mem_PPoly`, through `PPoly_eq_cslib_PPoly`. -/
+theorem exists_not_mem_PPoly : ∃ L : Language, L ∉ PPoly := by
+  rw [PPoly_eq_cslib_PPoly]
+  exact Cslib.Circuits.Boolean.exists_not_mem_PPoly
 
 /-- **Lupanov's bound for languages.** For every `ε > 0` there is `N₀` such that
 every language's slices of length `n ≥ N₀` have fan-in-two AND/OR size
-complexity at most `(1 + ε) 2ⁿ / n`. -/
+complexity at most `(1 + ε) 2ⁿ / n`. This is the fan-in-two AND/OR form of
+CSLib's family bound `Cslib.Circuits.Boolean.exists_decides_size_le`. -/
 theorem lupanov_sliceSizeComplexity {ε : ℝ} (hε : 0 < ε) :
     ∃ N₀ : ℕ, ∀ (L : Language) (n : ℕ), N₀ ≤ n →
       (sliceSizeComplexity L n : ℝ) ≤ (1 + ε) * 2 ^ n / n := by
@@ -181,31 +257,30 @@ theorem exists_mem_SIZE_bigO_two_pow_div (L : Language) :
 
 open Classical in
 /-- **A hard language.** Some language has slice size complexity above
-`(2ⁿ / n - n) / 2` at every large length `n`. -/
+`(2ⁿ / n - n) / 2` at every large length `n`. The language is the one of CSLib's
+family-level Shannon bound `Cslib.Circuits.Boolean.exists_language_lt_size`. -/
 theorem exists_language_sliceSizeComplexity_gt :
     ∃ L : Language, ∀ᶠ n : ℕ in atTop,
       (2 ^ n / n : ℝ) < n + 2 * (sliceSizeComplexity L n : ℝ) := by
-  obtain ⟨N₀, h⟩ := exists_sizeComplexity_gt_cslib
-  have h' : ∀ m : ℕ, ∃ f : BitString (m + 1) → Bool, N₀ ≤ m + 1 →
-      (2 : ℝ) ^ (m + 1) / ((m + 1 : ℕ) : ℝ) <
-        ((m + 1 : ℕ) : ℝ) + 2 * (Circuit.sizeComplexity Basis.andOr2 f : ℝ) := by
-    intro m
-    by_cases hm : N₀ ≤ m + 1
-    · obtain ⟨f, hf⟩ := h (m + 1) hm
-      exact ⟨f, fun _ => hf⟩
-    · exact ⟨fun _ => false, fun h => absurd h hm⟩
-  choose f hf using h'
-  let F : BoolFunFamily := fun n => match n with
-    | 0 => fun _ => false
-    | m + 1 => f m
-  refine ⟨F.toLanguage, eventually_atTop.mpr ⟨max N₀ 1, fun n hn => ?_⟩⟩
-  obtain ⟨m, rfl⟩ : ∃ m, n = m + 1 := ⟨n - 1, by omega⟩
-  have hslice : (fun x : BitString (m + 1) => decide (List.ofFn x ∈ F.toLanguage)) = f m := by
-    funext x
-    rw [Bool.eq_iff_iff, decide_eq_true_iff]
-    exact BoolFunFamily.mem_toLanguage_toList (f := F) x
-  rw [sliceSizeComplexity_succ, hslice]
-  exact hf m (le_of_max_le_left hn)
+  obtain ⟨L, N₀, hL⟩ := Cslib.Circuits.Boolean.exists_language_lt_size
+  have h : ∀ n, ∃ c : Cslib.Circuits.Circuit Boolean.signature n 1,
+      c.Computes Boolean.interpretation (fun x _ => Language.slice L n x) ∧
+        (0 < n → c.size ≤ n + 2 * sliceSizeComplexity L n) := by
+    intro n
+    rcases n with _ | m
+    · obtain ⟨c, hc⟩ := Interpretation.IsComplete.exists_computes
+        (I := Boolean.interpretation) fun x (_ : Fin 1) => Language.slice L 0 x
+      exact ⟨c, hc, fun h => absurd h (lt_irrefl 0)⟩
+    · obtain ⟨c, hg, hc⟩ := Circuit.exists_cslib_of_sizeComplexity
+        fun x : BitString (m + 1) => decide (List.ofFn x ∈ L)
+      exact ⟨c, hc, fun _ => hg⟩
+  choose F hF hsize using h
+  refine ⟨L, eventually_atTop.mpr ⟨max N₀ 1, fun n hn => ?_⟩⟩
+  have hlt := hL F (Cslib.Circuits.CircuitFamily.decides_id_iff.mpr hF) n
+    (le_of_max_le_left hn)
+  have hle : ((F n).size : ℝ) ≤ n + 2 * (sliceSizeComplexity L n : ℝ) := by
+    exact_mod_cast hsize n (by have := le_of_max_le_right hn; omega)
+  exact hlt.trans_le hle
 
 /-- **Hard languages outside small `SIZE` classes.** Some language lies outside
 `SIZE s` for every `s` with `n + 2 s(n) ≤ 2ⁿ / n` for all large `n`. -/

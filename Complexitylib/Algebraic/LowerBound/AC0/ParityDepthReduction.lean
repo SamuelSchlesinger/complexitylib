@@ -35,7 +35,7 @@ open scoped ENNReal
 schedule forces the final survivor count below the final tree bound, with no
 restriction on the placement of NOT gates. -/
 theorem retained_le_treeBound_of_iterated_parity_raw
-    (circuit : Algebraic.Circuit signature n g 1)
+    (circuit : Algebraic.Circuit signature n 1)
     (computes : circuit.ComputesWith interpretation (Parity.target n))
     (rounds : Nat)
     (circuitDepth : logicalDepth circuit ≤ rounds + 1)
@@ -68,7 +68,7 @@ theorem retained_le_treeBound_of_iterated_parity_raw
 
 /-- Compatibility wrapper for the checked input-negation presentation. -/
 theorem retained_le_treeBound_of_iterated_parity
-    (circuit : Algebraic.Circuit signature n g 1)
+    (circuit : Algebraic.Circuit signature n 1)
     (_normal : Program.NegationsAtInputs circuit.program)
     (computes : circuit.ComputesWith interpretation (Parity.target n))
     (rounds : Nat)
@@ -100,7 +100,7 @@ theorem retained_le_treeBound_of_iterated_parity
 layer: a schedule ending above its final tree allowance rules out the circuit,
 with arbitrary internal NOT gates. -/
 theorem not_computes_parity_of_iterated_switching_below_top_raw
-    (circuit : Algebraic.Circuit signature n g 1)
+    (circuit : Algebraic.Circuit signature n 1)
     (rounds : Nat)
     (circuitDepth : logicalDepth circuit ≤ rounds + 1)
     (treeBound : Nat → Nat)
@@ -132,7 +132,7 @@ theorem not_computes_parity_of_iterated_switching_below_top_raw
 
 /-- Compatibility wrapper for the checked input-negation presentation. -/
 theorem not_computes_parity_of_iterated_switching_below_top
-    (circuit : Algebraic.Circuit signature n g 1)
+    (circuit : Algebraic.Circuit signature n 1)
     (_normal : Program.NegationsAtInputs circuit.program)
     (rounds : Nat)
     (circuitDepth : logicalDepth circuit ≤ rounds + 1)

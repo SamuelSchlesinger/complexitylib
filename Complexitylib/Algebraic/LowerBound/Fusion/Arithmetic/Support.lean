@@ -322,7 +322,7 @@ theorem circuit_multiplication_lowerBound
       witness.1 ∉ (constantSupport scalar).monomials)
     (width : Nat)
     (positive : 0 < width)
-    (circuit : Circuit (Algebraic.Arithmetic.signature K) n g 1)
+    (circuit : Circuit (Algebraic.Arithmetic.signature K) n 1)
     (constructs : (problem inputs target).Constructs circuit
       (Algebraic.Arithmetic.interpretation constantSupport))
     (widthBound : MultiplicationWidthAtMost
@@ -352,7 +352,7 @@ theorem circuit_multiplication_lowerBound_of_singletonWidth
       witness.1 ∉ (inputs input).monomials)
     (constantAvoid : ∀ witness : ↥target, ∀ scalar,
       witness.1 ∉ (constantSupport scalar).monomials)
-    (circuit : Circuit (Algebraic.Arithmetic.signature K) n g 1)
+    (circuit : Circuit (Algebraic.Arithmetic.signature K) n 1)
     (constructs : (problem inputs target).Constructs circuit
       (Algebraic.Arithmetic.interpretation constantSupport))
     (widthBound : MultiplicationWidthAtMost

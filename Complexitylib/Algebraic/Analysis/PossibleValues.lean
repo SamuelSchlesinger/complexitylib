@@ -83,7 +83,7 @@ export Cslib.Circuits (Interpretation.singletonHomomorphism)
 singleton input sets. -/
 theorem _root_.Cslib.Circuits.Circuit.eval_possibleValues_singleton
     [Fintype U]
-    (circuit : Circuit σ n g m)
+    (circuit : Circuit σ n m)
     (interpretation : Interpretation σ U)
     (input : Fin n → U) :
     (fun value => {value}) ∘ circuit.eval interpretation input =
@@ -114,20 +114,19 @@ theorem _root_.Cslib.Circuits.Program.eval_mem_possibleValues
         unfold Line.eval
         rw [Interpretation.mem_possibleValues]
         let concreteArguments : Fin (σ.Arity line.op) → U :=
-          Fin.addCases concreteInput (program.eval interpretation concreteInput) ∘
+          Wire.elim concreteInput (program.eval interpretation concreteInput) ∘
             line.wires
         refine ⟨concreteArguments, ?_, rfl⟩
         intro argument
         have wireContained : ∀ wire : Wire n g,
-            (Fin.addCases concreteInput
-                (program.eval interpretation concreteInput) : Wire n g → U) wire ∈
-              (Fin.addCases abstractInput
-                (program.eval interpretation.possibleValues abstractInput) :
-                  Wire n g → Finset U) wire := by
+            Wire.elim concreteInput
+                (program.eval interpretation concreteInput) wire ∈
+              Wire.elim abstractInput
+                (program.eval interpretation.possibleValues abstractInput) wire := by
           intro wire
-          refine Fin.addCases (fun input => ?_) (fun priorGate => ?_) wire
-          · simpa using contained input
-          · simpa using ih priorGate
+          cases wire with
+          | input input => exact contained input
+          | gate priorGate => exact ih priorGate
         simpa [concreteArguments, Function.comp_apply] using
           wireContained (line.wires argument)
       · simpa only [Program.eval_gate_castSucc] using ih priorGate
@@ -145,11 +144,10 @@ theorem _root_.Cslib.Circuits.Program.trace_mem_possibleValues
     (wire : Wire n g) :
     program.trace interpretation concreteInput wire ∈
       program.trace interpretation.possibleValues abstractInput wire := by
-  refine Fin.addCases ?_ ?_ wire
-  · intro input
-    simpa [Program.trace] using contained input
-  · intro gate
-    simpa [Program.trace] using program.eval_mem_possibleValues interpretation
+  cases wire with
+  | input input => exact contained input
+  | gate gate =>
+    exact program.eval_mem_possibleValues interpretation
       concreteInput abstractInput contained gate
 
 export Cslib.Circuits (Program.trace_mem_possibleValues)
@@ -158,7 +156,7 @@ export Cslib.Circuits (Program.trace_mem_possibleValues)
 output set. -/
 theorem _root_.Cslib.Circuits.Circuit.eval_mem_possibleValues
     [Fintype U]
-    (circuit : Circuit σ n g m)
+    (circuit : Circuit σ n m)
     (interpretation : Interpretation σ U)
     (concreteInput : Fin n → U)
     (abstractInput : Fin n → Finset U)
@@ -176,7 +174,7 @@ level. -/
 theorem Translation.compile_possibleValues
     [Fintype U]
     (translation : Translation σ τ)
-    (circuit : Circuit σ n g m)
+    (circuit : Circuit σ n m)
     (interpretation : Interpretation τ U)
     (input : Fin n → Finset U) :
     (translation.compile circuit).eval interpretation.possibleValues input =

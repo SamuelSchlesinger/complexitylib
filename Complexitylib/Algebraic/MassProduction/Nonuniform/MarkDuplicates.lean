@@ -34,20 +34,20 @@ def body (record : Fin (1 + recordWidth) → Bool) : Fin recordWidth → Bool :=
 
 /-- Regard one Boolean duplicate flag per record as a width-one array. -/
 def flagsArrayCircuit (depth : Nat)
-    (keyCircuit : Circuit DeMorgan.signature recordWidth keyGates keyWidth) :=
+    (keyCircuit : Circuit DeMorgan.signature recordWidth keyWidth) :=
   (AdjacentDuplicates.circuit depth keyCircuit).mapOutputs
     (fun bit : Fin (networkRecords depth * 1) => (finProdFinEquiv.symm bit).1)
 
 /-- Attach the global duplicate flags to complete original records. -/
 def markCircuit (depth : Nat)
-    (keyCircuit : Circuit DeMorgan.signature recordWidth keyGates keyWidth) :=
+    (keyCircuit : Circuit DeMorgan.signature recordWidth keyWidth) :=
   RecordArray.combine (records := networkRecords depth) (leftWidth := 1)
     (rightWidth := recordWidth) (flagsArrayCircuit depth keyCircuit)
     (Circuit.id DeMorgan.signature (networkRecords depth * recordWidth))
 
 /-- Marking adds one flag and preserves every original bit. -/
 theorem markCircuit_eval_record
-    (keyCircuit : Circuit DeMorgan.signature recordWidth keyGates keyWidth)
+    (keyCircuit : Circuit DeMorgan.signature recordWidth keyWidth)
     (input : Fin (networkBits depth recordWidth) → Bool)
     (record : Fin (networkRecords depth)) :
     flatRecords ((markCircuit depth keyCircuit).eval DeMorgan.interpretation input) record =
@@ -61,7 +61,7 @@ theorem markCircuit_eval_record
   rfl
 
 @[simp] theorem markCircuit_body
-    (keyCircuit : Circuit DeMorgan.signature recordWidth keyGates keyWidth)
+    (keyCircuit : Circuit DeMorgan.signature recordWidth keyWidth)
     (input : Fin (networkBits depth recordWidth) → Bool)
     (record : Fin (networkRecords depth)) :
     body (flatRecords ((markCircuit depth keyCircuit).eval DeMorgan.interpretation input) record) =
@@ -72,7 +72,7 @@ theorem markCircuit_eval_record
   exact Fin.append_right _ _ bit
 
 @[simp] theorem markCircuit_flag
-    (keyCircuit : Circuit DeMorgan.signature recordWidth keyGates keyWidth)
+    (keyCircuit : Circuit DeMorgan.signature recordWidth keyWidth)
     (input : Fin (networkBits depth recordWidth) → Bool)
     (record : Fin (networkRecords depth)) :
     flag (flatRecords ((markCircuit depth keyCircuit).eval DeMorgan.interpretation input) record) =
@@ -82,16 +82,16 @@ theorem markCircuit_eval_record
 
 /-- The complete sort-mark-restore circuit. -/
 def circuit (depth : Nat)
-    (keyCircuit : Circuit DeMorgan.signature recordWidth keyGates keyWidth)
-    (identifierCircuit : Circuit DeMorgan.signature recordWidth identifierGates identifierWidth) :=
+    (keyCircuit : Circuit DeMorgan.signature recordWidth keyWidth)
+    (identifierCircuit : Circuit DeMorgan.signature recordWidth identifierWidth) :=
   ((KeyedSort.circuit depth true (identifierCircuit.mapInputs (Fin.natAdd 1))).comp
     (markCircuit depth keyCircuit)).comp (KeyedSort.circuit depth true keyCircuit)
 
 /-- Distinct increasing input identifiers restore both the original records
 and their exact duplicate flags to fixed output positions. -/
 theorem circuit_correct
-    (keyCircuit : Circuit DeMorgan.signature recordWidth keyGates keyWidth)
-    (identifierCircuit : Circuit DeMorgan.signature recordWidth identifierGates identifierWidth)
+    (keyCircuit : Circuit DeMorgan.signature recordWidth keyWidth)
+    (identifierCircuit : Circuit DeMorgan.signature recordWidth identifierWidth)
     (input : Fin (networkBits depth recordWidth) → Bool)
     (identifiersOrdered : StrictMono (fun index => toLex
       (identifierCircuit.eval DeMorgan.interpretation (flatRecords input index)))) :
@@ -164,8 +164,8 @@ theorem circuit_correct
 /-- Sorting and marking costs are additive, with linear record-count
 dependence throughout all three stages. -/
 theorem circuit_cost_le
-    (keyCircuit : Circuit DeMorgan.signature recordWidth keyGates keyWidth)
-    (identifierCircuit : Circuit DeMorgan.signature recordWidth identifierGates identifierWidth) :
+    (keyCircuit : Circuit DeMorgan.signature recordWidth keyWidth)
+    (identifierCircuit : Circuit DeMorgan.signature recordWidth identifierWidth) :
     (circuit depth keyCircuit identifierCircuit).cost DeMorgan.standardCost ≤
       (networkRecords depth * keyCircuit.cost DeMorgan.standardCost +
         depth * depth * networkRecords depth *

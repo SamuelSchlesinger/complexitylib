@@ -256,7 +256,7 @@ theorem Model.ceilDiv_witnessCard_le_circuitCost_of_local
     [Fintype model.Witness]
     (capacity : Nat)
     (positive : 0 < capacity)
-    (circuit : Circuit σ problem.inputCount g 1)
+    (circuit : Circuit σ problem.inputCount 1)
     (constructs : problem.Constructs circuit interpretation)
     (localBound : ∀ atom ∈
       circuitAtoms circuit interpretation problem.inputs,
@@ -370,7 +370,7 @@ theorem FailureBound.ceilDiv_witnessCard_le_circuitCost
     [Fintype model.Witness]
     (bound : FailureBound model)
     (positive : 0 < bound.capacity)
-    (circuit : Circuit σ problem.inputCount g 1)
+    (circuit : Circuit σ problem.inputCount 1)
     (constructs : problem.Constructs circuit interpretation) :
     Fintype.card model.Witness ⌈/⌉ bound.capacity ≤
       circuit.cost operationCost :=

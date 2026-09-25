@@ -109,13 +109,12 @@ theorem ShallowUpTo.succ_of_connective_raw
   induction program generalizing rho extension level bound with
   | empty =>
       intro wire _
-      let input : Fin n := ⟨wire.val, by omega⟩
-      have wireEq : wire = Wire.input (g := 0) input := by
-        apply Fin.ext
-        rfl
-      apply shallow.restrict extension wire
-      rw [wireEq, logicalWireDepths_input]
-      exact Nat.zero_le level
+      cases wire with
+      | input input =>
+          apply shallow.restrict extension (Wire.input input)
+          rw [logicalWireDepths_input]
+          exact Nat.zero_le level
+      | gate gate => exact Fin.elim0 gate
   | @gate gateCount prior line inductionHypothesis =>
       have priorShallow : ShallowUpTo prior rho level bound := by
         intro wire wireDepth
@@ -153,10 +152,11 @@ theorem ShallowUpTo.succ_of_connective_raw
         inductionHypothesis priorShallow priorNext
       intro wire wireDepth
       revert wireDepth
-      refine Fin.addCases (fun input _ => ?_)
-        (fun gate wireDepth => ?_) wire
-      · exact shallow.restrict extension (Wire.input input) (by simp)
-      · rw [logicalWireDepths_gate] at wireDepth
+      cases wire with
+      | input input => exact fun _ => shallow.restrict extension (Wire.input input) (by simp)
+      | gate gate =>
+        intro wireDepth
+        rw [logicalWireDepths_gate] at wireDepth
         rw [Algebraic.Program.wireFunction_gate]
         revert wireDepth
         refine Fin.lastCases (fun wireDepth => ?_)

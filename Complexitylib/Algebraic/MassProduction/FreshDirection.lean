@@ -61,10 +61,15 @@ def freshProjectiveRankCircuit
     (dimension width depth : Nat) :
     Circuit DeMorgan.signature
       (networkBits depth (dimension * width))
-      (freshProjectiveRankGateCount dimension width depth)
       (dimension * width) :=
   (leastMissingCircuit (projectiveRankSentinel dimension width) depth).comp
     (bitonicSortCircuit (le_refl (dimension * width)) depth true)
+
+@[simp] theorem freshProjectiveRankCircuit_size
+    (dimension width depth : Nat) :
+    (freshProjectiveRankCircuit dimension width depth).size =
+      freshProjectiveRankGateCount dimension width depth := by
+  simp [freshProjectiveRankCircuit, freshProjectiveRankGateCount]
 
 @[simp] theorem freshProjectiveRankCircuit_eval
     (input : Fin (networkBits depth (dimension * width)) -> Bool) :
@@ -171,10 +176,17 @@ noncomputable def freshProjectiveDirectionCircuit
     (depth : Nat) :
     Circuit DeMorgan.signature
       (networkBits depth (dimension * width))
-      (freshProjectiveDirectionGateCount dimension widthPositive depth)
       (dimension * width) :=
   (projectiveUnrankPackedCircuit dimension widthPositive).comp
     (freshProjectiveRankCircuit dimension width depth)
+
+@[simp] theorem freshProjectiveDirectionCircuit_size
+    (dimension : Nat)
+    (widthPositive : 0 < width)
+    (depth : Nat) :
+    (freshProjectiveDirectionCircuit dimension widthPositive depth).size =
+      freshProjectiveDirectionGateCount dimension widthPositive depth := by
+  simp [freshProjectiveDirectionCircuit, freshProjectiveDirectionGateCount]
 
 /-- Sentinel-aware direction selection. -/
 theorem freshProjectiveDirectionCircuit_sound_of_inRange_capacity

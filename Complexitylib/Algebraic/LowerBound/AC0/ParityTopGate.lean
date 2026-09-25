@@ -68,14 +68,13 @@ theorem liveCount_le_of_shallowBelow_computes_parityUpToNegation
     rho.liveCount ≤ bound := by
   induction program generalizing rho level bound with
   | empty =>
-      let input : Fin n := ⟨wire.val, by omega⟩
-      have wireEq : wire = Wire.input (g := 0) input := by
-        apply Fin.ext
-        rfl
-      apply shallow.parityUpToNegation_liveCount_le wire
-      · rw [wireEq, logicalWireDepths_input]
-        exact Nat.zero_le level
-      · exact phase
+      cases wire with
+      | input input =>
+          apply shallow.parityUpToNegation_liveCount_le (Wire.input input)
+          · rw [logicalWireDepths_input]
+            exact Nat.zero_le level
+          · exact phase
+      | gate gate => exact Fin.elim0 gate
   | @gate gateCount prior line inductionHypothesis =>
       have priorShallow : ShallowUpTo prior rho level bound := by
         intro priorWire priorDepth
@@ -92,11 +91,13 @@ theorem liveCount_le_of_shallowBelow_computes_parityUpToNegation
         rw [functionEq] at widened
         exact widened
       revert wireDepth phase
-      refine Fin.addCases (fun input _ phase => ?_)
-        (fun gate wireDepth phase => ?_) wire
-      · exact shallow.parityUpToNegation_liveCount_le
+      cases wire with
+      | input input =>
+        exact fun _ phase => shallow.parityUpToNegation_liveCount_le
           (Wire.input input) (by simp) phase
-      · rw [logicalWireDepths_gate] at wireDepth
+      | gate gate =>
+        intro wireDepth phase
+        rw [logicalWireDepths_gate] at wireDepth
         rw [Algebraic.Program.wireFunction_gate] at phase
         revert wireDepth phase
         refine Fin.lastCases (fun gateDepth phase => ?_)
@@ -167,7 +168,7 @@ namespace Circuit
 enough to bound its remaining live variables, even with arbitrary internal
 NOT gates. -/
 theorem liveCount_le_of_shallowBelowTop_computes_parity_raw
-    {circuit : Algebraic.Circuit signature n g 1}
+    {circuit : Algebraic.Circuit signature n 1}
     {rho : PartialAssignment n}
     {level bound : Nat}
     (computes : circuit.ComputesWith interpretation (Parity.target n))
@@ -188,7 +189,7 @@ theorem liveCount_le_of_shallowBelowTop_computes_parity_raw
 
 /-- Compatibility wrapper for the checked input-negation presentation. -/
 theorem liveCount_le_of_shallowBelowTop_computes_parity
-    {circuit : Algebraic.Circuit signature n g 1}
+    {circuit : Algebraic.Circuit signature n 1}
     {rho : PartialAssignment n}
     {level bound : Nat}
     (_normal : Program.NegationsAtInputs circuit.program)

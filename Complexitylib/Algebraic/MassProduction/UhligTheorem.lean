@@ -156,7 +156,7 @@ theorem uhlig_of_sharp_one_copy
     exact circuit_cost_le_normalizedBaseBound family internal baseWidth
       internalPositive basePositive baseFunction
       (baseSharp baseWidth basePastCutoff baseFunction)
-  obtain ⟨gates, circuit, computes, circuitBound⟩ :=
+  obtain ⟨circuit, computes, circuitBound⟩ :=
     exists_finite_uhlig_circuit_at_width prefixWidth baseWidth
       recursionDepth inputs widthIdentity (family baseWidth) baseBound
       baseCost function copies copiesPositive (by

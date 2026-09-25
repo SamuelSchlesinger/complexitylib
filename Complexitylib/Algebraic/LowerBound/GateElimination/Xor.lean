@@ -147,8 +147,7 @@ structure ThreeGateStep
     (interpretation : Interpretation σ Bool)
     (n : Nat)
     (phase : Bool)
-    {g : Nat}
-    (circuit : Circuit σ (n + 1) g 1) where
+    (circuit : Circuit σ (n + 1) 1) where
   /-- Input fixed by this elimination. -/
   selected : Fin (n + 1)
   /-- Boolean value assigned to the selected input. -/
@@ -172,7 +171,7 @@ structure ThreeGateEliminator
     (interpretation : Interpretation σ Bool) where
   /-- Produce a three-unit reduction for every minimum-cost non-base circuit. -/
   eliminate : ∀ (n : Nat), 0 < n → ∀ (phase : Bool),
-    ∀ {g : Nat} (circuit : Circuit σ (n + 1) g 1),
+    ∀ (circuit : Circuit σ (n + 1) 1),
       circuit.ComputesWith interpretation (target ⟨n + 1, phase⟩) →
       circuit.CostSizeMinimal operationCost interpretation
         (target ⟨n + 1, phase⟩) →
@@ -189,7 +188,7 @@ def framework
   rank := rank
   bound := bound
   reduce := by
-    intro state positive g circuit computes minimal
+    intro state positive circuit computes minimal
     rcases state with ⟨inputCount, phase⟩
     cases inputCount with
     | zero => simp [bound] at positive
@@ -219,8 +218,7 @@ theorem lowerBound
     {interpretation : Interpretation σ Bool}
     (eliminator : ThreeGateEliminator operationCost interpretation)
     (state : State)
-    {g : Nat}
-    (circuit : Circuit σ state.inputCount g 1)
+    (circuit : Circuit σ state.inputCount 1)
     (computes : circuit.ComputesWith interpretation (target state)) :
     3 * (state.inputCount - 1) ≤ circuit.cost operationCost := by
   exact (framework eliminator).lowerBound state circuit computes
@@ -231,8 +229,8 @@ theorem parity_lowerBound
     {operationCost : OperationCost σ}
     {interpretation : Interpretation σ Bool}
     (eliminator : ThreeGateEliminator operationCost interpretation)
-    {n g : Nat}
-    (circuit : Circuit σ n g 1)
+    {n : Nat}
+    (circuit : Circuit σ n 1)
     (computes : circuit.ComputesWith interpretation (parityTarget n)) :
     3 * (n - 1) ≤ circuit.cost operationCost := by
   apply lowerBound eliminator ⟨n, false⟩ circuit

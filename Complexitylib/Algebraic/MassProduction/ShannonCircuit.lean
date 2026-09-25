@@ -103,11 +103,13 @@ noncomputable def extensionExpression
 
 /-- Compute all extended minterms in parallel. -/
 noncomputable def extensionCircuit (width : Nat) :
-    Circuit DeMorgan.signature (2 ^ width + 1)
-      (extensionGateCount width) (2 ^ (width + 1)) :=
+    Circuit DeMorgan.signature (2 ^ width + 1) (2 ^ (width + 1)) :=
   Circuit.parallelFin (2 ^ (width + 1))
-    (fun assignment => (extensionExpression width assignment).gateCount)
     (fun assignment => (extensionExpression width assignment).circuit)
+
+@[simp] theorem extensionCircuit_size (width : Nat) :
+    (extensionCircuit width).size = extensionGateCount width := by
+  simp [extensionCircuit, extensionGateCount]
 
 @[simp] theorem extensionCircuit_eval
     (state : Fin (2 ^ width + 1) -> Bool)
@@ -116,7 +118,7 @@ noncomputable def extensionCircuit (width : Nat) :
       (state (previousMintermInput (assignmentTailIndex width assignment)) &&
         decide (state (newHeadInput width) =
           assignmentBits (width + 1) assignment 0)) := by
-  unfold extensionCircuit extensionGateCount
+  unfold extensionCircuit
   rw [Circuit.eval_parallelFin,
     DeMorgan.Expression.circuit_eval]
   simp [extensionExpression, DeMorgan.Expression.eval]
@@ -124,7 +126,7 @@ noncomputable def extensionCircuit (width : Nat) :
 theorem extensionCircuit_cost_le (width : Nat) :
     (extensionCircuit width).cost DeMorgan.standardCost <=
       2 * 2 ^ (width + 1) := by
-  unfold extensionCircuit extensionGateCount
+  unfold extensionCircuit
   rw [Circuit.cost_parallelFin]
   calc
     (∑ assignment : Fin (2 ^ (width + 1)),
@@ -153,7 +155,7 @@ theorem extensionCircuit_cost_le (width : Nat) :
 /-- A shared circuit computing the indicator of every Boolean assignment.
 The recursive layer prepends the new input bit, matching `Fin.cons`. -/
 noncomputable def mintermCircuit : (width : Nat) ->
-    Circuit DeMorgan.signature width (mintermGateCount width) (2 ^ width)
+    Circuit DeMorgan.signature width (2 ^ width)
   | 0 => (DeMorgan.Expression.constant true).circuit
   | width + 1 =>
       let previous :=
@@ -161,9 +163,15 @@ noncomputable def mintermCircuit : (width : Nat) ->
       let head :=
         (Circuit.id DeMorgan.signature (width + 1)).mapOutputs
           (fun _ : Fin 1 => (0 : Fin (width + 1)))
-      let state := (previous.parallel head).castCounts rfl
-        (Nat.add_zero _) rfl
+      let state := (previous.parallel head).castCounts rfl rfl
       (extensionCircuit width).comp state
+
+@[simp] theorem mintermCircuit_size (width : Nat) :
+    (mintermCircuit width).size = mintermGateCount width := by
+  induction width with
+  | zero => simp [mintermCircuit, mintermGateCount, DeMorgan.Expression.gateCount]
+  | succ width inductionHypothesis =>
+      simp [mintermCircuit, mintermGateCount, inductionHypothesis]
 
 /-- Equality with a decoded assignment is exactly equality of the head bit
 and equality of the encoded tail. -/
@@ -338,11 +346,13 @@ theorem columnExpression_eval_oneHot
 /-- All Boolean functions of `addressWidth` inputs, sharing the same address
 minterm vector. -/
 noncomputable def libraryCircuit (addressWidth : Nat) :
-    Circuit DeMorgan.signature (2 ^ addressWidth)
-      (libraryGateCount addressWidth) (2 ^ (2 ^ addressWidth)) :=
+    Circuit DeMorgan.signature (2 ^ addressWidth) (2 ^ (2 ^ addressWidth)) :=
   Circuit.parallelFin (2 ^ (2 ^ addressWidth))
-    (fun pattern => (columnExpression addressWidth pattern).gateCount)
     (fun pattern => (columnExpression addressWidth pattern).circuit)
+
+@[simp] theorem libraryCircuit_size (addressWidth : Nat) :
+    (libraryCircuit addressWidth).size = libraryGateCount addressWidth := by
+  simp [libraryCircuit, libraryGateCount]
 
 @[simp] theorem libraryCircuit_eval
     (addressWidth : Nat)
@@ -350,14 +360,14 @@ noncomputable def libraryCircuit (addressWidth : Nat) :
     (pattern : Fin (2 ^ (2 ^ addressWidth))) :
     (libraryCircuit addressWidth).eval DeMorgan.interpretation flags pattern =
       (columnExpression addressWidth pattern).eval flags := by
-  unfold libraryCircuit libraryGateCount
+  unfold libraryCircuit
   rw [Circuit.eval_parallelFin, DeMorgan.Expression.circuit_eval]
 
 theorem libraryCircuit_cost
     (addressWidth : Nat) :
     (libraryCircuit addressWidth).cost DeMorgan.standardCost =
       2 ^ (2 ^ addressWidth) * 2 ^ addressWidth := by
-  unfold libraryCircuit libraryGateCount
+  unfold libraryCircuit
   rw [Circuit.cost_parallelFin]
   calc
     (∑ pattern : Fin (2 ^ (2 ^ addressWidth)),
@@ -424,10 +434,14 @@ theorem append_addressInput_dataInput
 noncomputable def splitMintermCircuit
     (addressWidth dataWidth : Nat) :
     Circuit DeMorgan.signature (addressWidth + dataWidth)
-      (splitMintermGateCount addressWidth dataWidth)
       (2 ^ addressWidth + 2 ^ dataWidth) :=
   ((mintermCircuit addressWidth).mapInputs (Fin.castAdd dataWidth)).parallel
     ((mintermCircuit dataWidth).mapInputs (Fin.natAdd addressWidth))
+
+@[simp] theorem splitMintermCircuit_size (addressWidth dataWidth : Nat) :
+    (splitMintermCircuit addressWidth dataWidth).size =
+      splitMintermGateCount addressWidth dataWidth := by
+  simp [splitMintermCircuit, splitMintermGateCount]
 
 @[simp] theorem splitMintermCircuit_eval
     (input : Fin (addressWidth + dataWidth) -> Bool) :
@@ -453,14 +467,17 @@ minterm. -/
 noncomputable def libraryAndDataCircuit
     (addressWidth dataWidth : Nat) :
     Circuit DeMorgan.signature (2 ^ addressWidth + 2 ^ dataWidth)
-      (libraryAndDataGateCount addressWidth)
       (2 ^ (2 ^ addressWidth) + 2 ^ dataWidth) :=
   (((libraryCircuit addressWidth).mapInputs
       (Fin.castAdd (2 ^ dataWidth))).parallel
     ((Circuit.id DeMorgan.signature
         (2 ^ addressWidth + 2 ^ dataWidth)).mapOutputs
-      (Fin.natAdd (2 ^ addressWidth)))).castCounts rfl
-        (Nat.add_zero _) rfl
+      (Fin.natAdd (2 ^ addressWidth)))).castCounts rfl rfl
+
+@[simp] theorem libraryAndDataCircuit_size (addressWidth dataWidth : Nat) :
+    (libraryAndDataCircuit addressWidth dataWidth).size =
+      libraryAndDataGateCount addressWidth := by
+  simp [libraryAndDataCircuit, libraryAndDataGateCount]
 
 @[simp] theorem libraryAndDataCircuit_eval
     (state : Fin (2 ^ addressWidth + 2 ^ dataWidth) -> Bool) :
@@ -547,11 +564,15 @@ theorem synthesisExpression_standardCost
 split. -/
 noncomputable def circuit
     (function : ScalarFunction Bool (addressWidth + dataWidth)) :
-    Circuit DeMorgan.signature (addressWidth + dataWidth)
-      (synthesisGateCount function) 1 :=
+    Circuit DeMorgan.signature (addressWidth + dataWidth) 1 :=
   (synthesisExpression function).circuit.comp
     ((libraryAndDataCircuit addressWidth dataWidth).comp
       (splitMintermCircuit addressWidth dataWidth))
+
+@[simp] theorem circuit_size
+    (function : ScalarFunction Bool (addressWidth + dataWidth)) :
+    (circuit function).size = synthesisGateCount function := by
+  simp [circuit, synthesisGateCount]
 
 /-- Intermediate values after both minterm tables and the address-function
 library have been evaluated. -/

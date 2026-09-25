@@ -109,21 +109,20 @@ def joinHalfBits
 
 /-- Run one circuit on each half of a doubled flat record array. -/
 def Circuit.parallelHalves
-    (left : Circuit σ (networkBits depth recordWidth) leftGates
+    (left : Circuit σ (networkBits depth recordWidth)
       (networkBits depth recordWidth))
-    (right : Circuit σ (networkBits depth recordWidth) rightGates
+    (right : Circuit σ (networkBits depth recordWidth)
       (networkBits depth recordWidth)) :
     Circuit σ (networkBits (depth + 1) recordWidth)
-      (leftGates + rightGates)
       (networkBits (depth + 1) recordWidth) :=
   ((left.mapInputs (firstHalfWire depth recordWidth)).parallel
     (right.mapInputs (secondHalfWire depth recordWidth))).castCounts
-      rfl rfl (networkBits_succ depth recordWidth).symm
+      rfl (networkBits_succ depth recordWidth).symm
 
 @[simp] theorem Circuit.eval_parallelHalves
-    (left : Circuit σ (networkBits depth recordWidth) leftGates
+    (left : Circuit σ (networkBits depth recordWidth)
       (networkBits depth recordWidth))
-    (right : Circuit σ (networkBits depth recordWidth) rightGates
+    (right : Circuit σ (networkBits depth recordWidth)
       (networkBits depth recordWidth))
     (interpretation : Interpretation σ U)
     (input : Fin (networkBits (depth + 1) recordWidth) -> U) :
@@ -139,13 +138,21 @@ def Circuit.parallelHalves
   simp only [Function.comp_def, Fin.cast_eq_self]
 
 @[simp] theorem Circuit.cost_parallelHalves
-    (left : Circuit σ (networkBits depth recordWidth) leftGates
+    (left : Circuit σ (networkBits depth recordWidth)
       (networkBits depth recordWidth))
-    (right : Circuit σ (networkBits depth recordWidth) rightGates
+    (right : Circuit σ (networkBits depth recordWidth)
       (networkBits depth recordWidth))
     (operationCost : OperationCost σ) :
     (Circuit.parallelHalves left right).cost operationCost =
       left.cost operationCost + right.cost operationCost := by
+  simp [Circuit.parallelHalves]
+
+@[simp] theorem Circuit.size_parallelHalves
+    (left : Circuit σ (networkBits depth recordWidth)
+      (networkBits depth recordWidth))
+    (right : Circuit σ (networkBits depth recordWidth)
+      (networkBits depth recordWidth)) :
+    (Circuit.parallelHalves left right).size = left.size + right.size := by
   simp [Circuit.parallelHalves]
 
 /-- Read one record from a flat row-major network array. -/
@@ -197,8 +204,7 @@ def comparePairBits
 def comparePairCircuit
     (keyFits : keyWidth <= recordWidth)
     (ascending : Bool) :
-    Circuit DeMorgan.signature (2 * recordWidth)
-      (compareSwapGateCount keyFits) (2 * recordWidth) :=
+    Circuit DeMorgan.signature (2 * recordWidth) (2 * recordWidth) :=
   if ascending then compareSwapCircuit keyFits
   else (compareSwapCircuit keyFits).mapOutputs reverseRecordPairOutput
 
@@ -219,16 +225,31 @@ def comparePairCircuit
       (compareSwapCircuit keyFits).cost DeMorgan.standardCost := by
   cases ascending <;> simp [comparePairCircuit]
 
+@[simp] theorem comparePairCircuit_size
+    (keyFits : keyWidth <= recordWidth)
+    (ascending : Bool) :
+    (comparePairCircuit keyFits ascending).size =
+      compareSwapGateCount keyFits := by
+  cases ascending <;> simp [comparePairCircuit]
+
 /-- One gathered pair comparator inside a butterfly layer. -/
 def compareLayerPairCircuit
     (depth : Nat)
     (keyFits : keyWidth <= recordWidth)
     (ascending : Bool)
     (pair : Fin (networkRecords depth)) :
-    Circuit DeMorgan.signature (networkBits (depth + 1) recordWidth)
-      (compareSwapGateCount keyFits) (2 * recordWidth) :=
+    Circuit DeMorgan.signature (networkBits (depth + 1) recordWidth) (2 * recordWidth) :=
   (comparePairCircuit keyFits ascending).mapInputs
     (gatherLayerPairInput depth recordWidth pair)
+
+@[simp] theorem compareLayerPairCircuit_size
+    (depth : Nat)
+    (keyFits : keyWidth <= recordWidth)
+    (ascending : Bool)
+    (pair : Fin (networkRecords depth)) :
+    (compareLayerPairCircuit depth keyFits ascending pair).size =
+      compareSwapGateCount keyFits := by
+  simp [compareLayerPairCircuit]
 
 /-- Convert the desired half-major output layout to the pair-major layout
 emitted by `parallelFinVector`. -/
@@ -295,12 +316,18 @@ def compareLayerCircuit
     (keyFits : keyWidth <= recordWidth)
     (ascending : Bool) :
     Circuit DeMorgan.signature (networkBits (depth + 1) recordWidth)
-      (compareLayerGateCount depth keyFits)
       (networkBits (depth + 1) recordWidth) :=
   (Circuit.parallelFinVector (networkRecords depth) (2 * recordWidth)
-    (fun _ => compareSwapGateCount keyFits)
     (compareLayerPairCircuit depth keyFits ascending)).mapOutputs
       (compareLayerOutputMap depth recordWidth)
+
+@[simp] theorem compareLayerCircuit_size
+    (depth : Nat)
+    (keyFits : keyWidth <= recordWidth)
+    (ascending : Bool) :
+    (compareLayerCircuit depth keyFits ascending).size =
+      compareLayerGateCount depth keyFits := by
+  simp [compareLayerCircuit, compareLayerGateCount]
 
 @[simp] theorem compareLayerCircuit_eval
     (depth : Nat)
@@ -318,7 +345,7 @@ def compareLayerCircuit
       (m := networkRecords (depth + 1))
       (n := recordWidth)).symm output
   change (Circuit.parallelFinVector (networkRecords depth)
-      (2 * recordWidth) (fun _ => compareSwapGateCount keyFits)
+      (2 * recordWidth)
       (compareLayerPairCircuit depth keyFits ascending)).eval
       DeMorgan.interpretation input
       (if firstHalf : recordAndBit.1.val < networkRecords depth then
@@ -434,11 +461,10 @@ def bitonicMergeCircuit
     (keyFits : keyWidth <= recordWidth) :
     (depth : Nat) -> (ascending : Bool) ->
       Circuit DeMorgan.signature (networkBits depth recordWidth)
-        (bitonicMergeGateCount keyFits depth)
         (networkBits depth recordWidth)
   | 0, _ =>
       (Circuit.id DeMorgan.signature recordWidth).castCounts
-        (by simp [networkBits, networkRecords]) rfl
+        (by simp [networkBits, networkRecords])
         (by simp [networkBits, networkRecords])
   | depth + 1, ascending =>
       (Circuit.parallelHalves
@@ -451,11 +477,10 @@ def bitonicSortCircuit
     (keyFits : keyWidth <= recordWidth) :
     (depth : Nat) -> (ascending : Bool) ->
       Circuit DeMorgan.signature (networkBits depth recordWidth)
-        (bitonicSortGateCount keyFits depth)
         (networkBits depth recordWidth)
   | 0, _ =>
       (Circuit.id DeMorgan.signature recordWidth).castCounts
-        (by simp [networkBits, networkRecords]) rfl
+        (by simp [networkBits, networkRecords])
         (by simp [networkBits, networkRecords])
   | depth + 1, ascending =>
       (bitonicMergeCircuit keyFits (depth + 1) ascending).comp
@@ -553,6 +578,36 @@ def bitonicSortStandardCost
         Circuit.cost_parallelHalves, bitonicMergeCircuit_cost,
         inductionHypothesis, inductionHypothesis]
       rfl
+
+/-- The recursive merge emits exactly `bitonicMergeGateCount` gates. -/
+@[simp] theorem bitonicMergeCircuit_size
+    (keyFits : keyWidth <= recordWidth)
+    (depth : Nat)
+    (ascending : Bool) :
+    (bitonicMergeCircuit keyFits depth ascending).size =
+      bitonicMergeGateCount keyFits depth := by
+  induction depth generalizing ascending with
+  | zero =>
+      simp [bitonicMergeCircuit, bitonicMergeGateCount]
+  | succ depth inductionHypothesis =>
+      rw [bitonicMergeCircuit, Circuit.size_comp,
+        Circuit.size_parallelHalves, compareLayerCircuit_size,
+        inductionHypothesis]
+
+/-- The recursive sorter emits exactly `bitonicSortGateCount` gates. -/
+@[simp] theorem bitonicSortCircuit_size
+    (keyFits : keyWidth <= recordWidth)
+    (depth : Nat)
+    (ascending : Bool) :
+    (bitonicSortCircuit keyFits depth ascending).size =
+      bitonicSortGateCount keyFits depth := by
+  induction depth generalizing ascending with
+  | zero =>
+      simp [bitonicSortCircuit, bitonicSortGateCount]
+  | succ depth inductionHypothesis =>
+      rw [bitonicSortCircuit, Circuit.size_comp,
+        Circuit.size_parallelHalves, bitonicMergeCircuit_size,
+        inductionHypothesis, inductionHypothesis]
 
 /-- At successor depth, the merge has one half-array of comparators at
 each recursive level. -/

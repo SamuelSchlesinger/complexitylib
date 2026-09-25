@@ -46,12 +46,21 @@ def matchThenOrderCircuit
     (sourceTag destinationTag : Bool) :
     Circuit DeMorgan.signature
       (networkBits depth (recordWidth keyWidth payloadWidth))
-      (matchThenOrderGateCount depth keyWidth payloadWidth outputKeyWidth
-        outputOrder outputKeyFits sourceTag destinationTag)
       (networkBits depth (recordWidth keyWidth payloadWidth)) :=
   (bitonicSortByCircuit outputOrder outputKeyFits depth true).comp
     (sortedPredecessorCopyCircuit depth keyWidth payloadWidth
       sourceTag destinationTag)
+
+@[simp] theorem matchThenOrderCircuit_size
+    (depth keyWidth payloadWidth outputKeyWidth : Nat)
+    (outputOrder : Equiv.Perm (Fin (recordWidth keyWidth payloadWidth)))
+    (outputKeyFits : outputKeyWidth <= recordWidth keyWidth payloadWidth)
+    (sourceTag destinationTag : Bool) :
+    (matchThenOrderCircuit depth keyWidth payloadWidth outputKeyWidth
+        outputOrder outputKeyFits sourceTag destinationTag).size =
+      matchThenOrderGateCount depth keyWidth payloadWidth outputKeyWidth
+        outputOrder outputKeyFits sourceTag destinationTag := by
+  simp [matchThenOrderCircuit, matchThenOrderGateCount]
 
 /-- Pure semantics of one match-then-order stage. -/
 def matchThenOrderBits

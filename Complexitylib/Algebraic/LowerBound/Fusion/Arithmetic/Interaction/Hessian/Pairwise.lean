@@ -131,7 +131,7 @@ theorem circuit_multiplication_lowerBound
     (constant : C → K)
     (n : Nat)
     (circuit : Circuit (Algebraic.Arithmetic.signature C)
-      (2 * n) g (n * n))
+      (2 * n) (n * n))
     (constructs : Multiple.Constructs (constant := fun scalar =>
       MvPolynomial.C (constant scalar))
       (inputProblem K n) (targets K n) circuit) :
@@ -149,7 +149,7 @@ theorem circuit_gate_lowerBound
     (constant : C → K)
     (n : Nat)
     (circuit : Circuit (Algebraic.Arithmetic.signature C)
-      (2 * n) g (n * n))
+      (2 * n) (n * n))
     (constructs : Multiple.Constructs (constant := fun scalar =>
       MvPolynomial.C (constant scalar))
       (inputProblem K n) (targets K n) circuit) :
@@ -163,7 +163,7 @@ theorem circuit_size_lowerBound
     (constant : C → K)
     (n : Nat)
     (circuit : Circuit (Algebraic.Arithmetic.signature C)
-      (2 * n) g (n * n))
+      (2 * n) (n * n))
     (constructs : Multiple.Constructs (constant := fun scalar =>
       MvPolynomial.C (constant scalar))
       (inputProblem K n) (targets K n) circuit) :

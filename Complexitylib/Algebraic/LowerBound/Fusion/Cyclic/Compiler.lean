@@ -338,7 +338,7 @@ theorem closure_result_eq_generatedState
     refine Fin.addCases (motive := fun source =>
       point ∈ ((fun wire :
           Wire problem.inputCount (gateCount problem pairs) =>
-            (Fin.addCases problem.inputs (values problem pairs) :
+            (Wire.elim problem.inputs (values problem pairs) :
               Wire problem.inputCount (gateCount problem pairs) → Set Γ)
               wire) ∘
           sourceWire problem pairs set) source →
@@ -354,7 +354,7 @@ theorem closure_result_eq_generatedState
     · refine Fin.addCases (motive := fun remaining =>
         point ∈ ((fun wire :
             Wire problem.inputCount (gateCount problem pairs) =>
-              (Fin.addCases problem.inputs (values problem pairs) :
+              (Wire.elim problem.inputs (values problem pairs) :
                 Wire problem.inputCount (gateCount problem pairs) → Set Γ)
                 wire) ∘
             sourceWire problem pairs set)
@@ -425,7 +425,7 @@ theorem pair_result_eq_values
   rw [circuit_line_pairGate]
   let valuation :
       Wire problem.inputCount (gateCount problem pairs) → Set Γ :=
-    Fin.addCases problem.inputs (values problem pairs)
+    Wire.elim problem.inputs (values problem pairs)
   change valuation ((pairLine problem pairs index).wires (0 : Fin 2)) ∩
       valuation ((pairLine problem pairs index).wires (1 : Fin 2)) =
     values problem pairs (pairGate problem pairs index)
@@ -499,7 +499,7 @@ theorem source_subset_of_prefixed
       (JoinMeet.setInterpretation Γ) problem.inputs candidate)
     (set : Set (Problem.Outside problem))
     (source : Fin (sourceCount problem pairs)) :
-    (Fin.addCases problem.inputs candidate :
+    (Wire.elim problem.inputs candidate :
         Wire problem.inputCount (gateCount problem pairs) → Set Γ)
         (sourceWire problem pairs set source) ⊆
       candidate (closureGate problem pairs set) := by
@@ -509,7 +509,7 @@ theorem source_subset_of_prefixed
   rw [circuit_line_closureGate]
   simp only [closureLine, JoinMeet.setInterpretation, Set.mem_ofPred_eq]
   refine ⟨source, ?_⟩
-  change point ∈ (Fin.addCases problem.inputs candidate :
+  change point ∈ (Wire.elim problem.inputs candidate :
     Wire problem.inputCount (gateCount problem pairs) → Set Γ)
       (sourceWire problem pairs set source)
   exact present
@@ -583,7 +583,7 @@ theorem inter_subset_pair_of_prefixed
   rw [circuit_line_pairGate]
   let valuation :
       Wire problem.inputCount (gateCount problem pairs) → Set Γ :=
-    Fin.addCases problem.inputs candidate
+    Wire.elim problem.inputs candidate
   change point ∈
     valuation ((pairLine problem pairs index).wires (0 : Fin 2)) ∩
       valuation ((pairLine problem pairs index).wires (1 : Fin 2))

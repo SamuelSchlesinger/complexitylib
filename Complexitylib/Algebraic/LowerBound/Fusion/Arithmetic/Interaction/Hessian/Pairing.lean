@@ -200,7 +200,7 @@ coordinate, over every field and with arbitrary named scalar constants. -/
 theorem circuit_multiplication_lowerBound
     (constant : C → K)
     (n : Nat)
-    (circuit : Circuit (Algebraic.Arithmetic.signature C) (2 * n) g 1)
+    (circuit : Circuit (Algebraic.Arithmetic.signature C) (2 * n) 1)
     (constructs : (problem K n).Constructs circuit
       (Algebraic.Arithmetic.interpretation
         (fun scalar => MvPolynomial.C (constant scalar)))) :
@@ -228,7 +228,7 @@ theorem circuit_multiplication_lowerBound
 theorem circuit_gate_lowerBound
     (constant : C → K)
     (n : Nat)
-    (circuit : Circuit (Algebraic.Arithmetic.signature C) (2 * n) g 1)
+    (circuit : Circuit (Algebraic.Arithmetic.signature C) (2 * n) 1)
     (constructs : (problem K n).Constructs circuit
       (Algebraic.Arithmetic.interpretation
         (fun scalar => MvPolynomial.C (constant scalar)))) :
@@ -240,7 +240,7 @@ theorem circuit_gate_lowerBound
 theorem circuit_size_lowerBound
     (constant : C → K)
     (n : Nat)
-    (circuit : Circuit (Algebraic.Arithmetic.signature C) (2 * n) g 1)
+    (circuit : Circuit (Algebraic.Arithmetic.signature C) (2 * n) 1)
     (constructs : (problem K n).Constructs circuit
       (Algebraic.Arithmetic.interpretation
         (fun scalar => MvPolynomial.C (constant scalar)))) :

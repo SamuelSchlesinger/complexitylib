@@ -45,7 +45,7 @@ def CircuitBound
     (certificate : Interaction.Certificate (K := K)
       (Q := A →ₗ[K] B) constant problem)
     (circuit : Circuit (Algebraic.Arithmetic.signature C)
-      problem.inputCount g 1)
+      problem.inputCount 1)
     (interactionRank : Nat) : Prop :=
   ∀ interaction,
     interaction ∈ interactions certificate
@@ -61,7 +61,7 @@ def IndexedBound
     (certificate : Interaction.Certificate (K := K)
       (Q := A →ₗ[K] B) constant problem)
     (circuit : Circuit (Algebraic.Arithmetic.signature C)
-      problem.inputCount g 1)
+      problem.inputCount 1)
     (budget : Fin (interactions certificate
       (circuitAtoms circuit
         (Algebraic.Arithmetic.interpretation constant)
@@ -81,7 +81,7 @@ def MultiplicationBound
     (certificate : Interaction.Certificate (K := K)
       (Q := A →ₗ[K] B) constant problem)
     (circuit : Circuit (Algebraic.Arithmetic.signature C)
-      problem.inputCount g 1)
+      problem.inputCount 1)
     (interactionRank : Nat) : Prop :=
   ∀ arguments : Fin 2 → U,
     (⟨.mul, arguments⟩ :
@@ -100,7 +100,7 @@ theorem CircuitBound.of_multiplicationBound
     (certificate : Interaction.Certificate (K := K)
       (Q := A →ₗ[K] B) constant problem)
     (circuit : Circuit (Algebraic.Arithmetic.signature C)
-      problem.inputCount g 1)
+      problem.inputCount 1)
     (interactionRank : Nat)
     (bound : MultiplicationBound certificate circuit interactionRank) :
     CircuitBound certificate circuit interactionRank := by
@@ -132,7 +132,7 @@ theorem target_rank_le_sum_indexedBudget
     (certificate : Interaction.Certificate (K := K)
       (Q := A →ₗ[K] B) constant problem)
     (circuit : Circuit (Algebraic.Arithmetic.signature C)
-      problem.inputCount g 1)
+      problem.inputCount 1)
     (constructs : problem.Constructs circuit
       (Algebraic.Arithmetic.interpretation constant))
     (budget : Fin (interactions certificate
@@ -163,7 +163,7 @@ theorem targetRank_le_sum_indexedBudget
     (target_rank_ge : (targetRank : Cardinal) ≤
       LinearMap.rank (certificate.feature problem.target))
     (circuit : Circuit (Algebraic.Arithmetic.signature C)
-      problem.inputCount g 1)
+      problem.inputCount 1)
     (constructs : problem.Constructs circuit
       (Algebraic.Arithmetic.interpretation constant))
     (budget : Fin (interactions certificate
@@ -188,7 +188,7 @@ theorem target_rank_le_mul_multiplicationCost
       (Q := A →ₗ[K] B) constant problem)
     (interactionRank : Nat)
     (circuit : Circuit (Algebraic.Arithmetic.signature C)
-      problem.inputCount g 1)
+      problem.inputCount 1)
     (constructs : problem.Constructs circuit
       (Algebraic.Arithmetic.interpretation constant))
     (localBound : CircuitBound certificate circuit interactionRank) :
@@ -265,7 +265,7 @@ theorem targetRank_le_mul_multiplicationCost
     (target_rank_ge : (targetRank : Cardinal) ≤
       LinearMap.rank (certificate.feature problem.target))
     (circuit : Circuit (Algebraic.Arithmetic.signature C)
-      problem.inputCount g 1)
+      problem.inputCount 1)
     (constructs : problem.Constructs circuit
       (Algebraic.Arithmetic.interpretation constant))
     (localBound : CircuitBound certificate circuit interactionRank) :
@@ -292,7 +292,7 @@ theorem circuit_lowerBound
       LinearMap.rank (certificate.feature problem.target))
     (positive : 0 < interactionRank)
     (circuit : Circuit (Algebraic.Arithmetic.signature C)
-      problem.inputCount g 1)
+      problem.inputCount 1)
     (constructs : problem.Constructs circuit
       (Algebraic.Arithmetic.interpretation constant))
     (localBound : CircuitBound certificate circuit interactionRank) :

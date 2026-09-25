@@ -46,7 +46,7 @@ def _root_.Cslib.Circuits.Program.gateSupport :
   | .empty => Fin.elim0
   | .gate program line =>
       let prior := program.gateSupport
-      let wireSupport := Fin.addCases (fun k => {k}) prior
+      let wireSupport := Wire.elim (fun k => {k}) prior
       Fin.lastCases (line.inputSupport wireSupport) prior
 
 export Cslib.Circuits (Program.gateSupport)
@@ -54,7 +54,7 @@ export Cslib.Circuits (Program.gateSupport)
 /-- The input support of every input or gate wire in a program. -/
 def _root_.Cslib.Circuits.Program.wireSupport
     (program : Program σ n g) : Wire n g → Finset (Fin n) :=
-  Fin.addCases (fun k => {k}) program.gateSupport
+  Wire.elim (fun k => {k}) program.gateSupport
 
 export Cslib.Circuits (Program.wireSupport)
 
@@ -62,8 +62,7 @@ export Cslib.Circuits (Program.wireSupport)
 @[simp] theorem _root_.Cslib.Circuits.Program.wireSupport_input
     (program : Program σ n g)
     (input : Fin n) :
-    program.wireSupport (Wire.input (g := g) input) = {input} := by
-  simp [Program.wireSupport, Wire.input]
+    program.wireSupport (Wire.input input) = {input} := rfl
 
 export Cslib.Circuits (Program.wireSupport_input)
 
@@ -71,9 +70,8 @@ export Cslib.Circuits (Program.wireSupport_input)
 @[simp] theorem _root_.Cslib.Circuits.Program.wireSupport_gate
     (program : Program σ n g)
     (gate : Fin g) :
-    program.wireSupport (Wire.gate (n := n) gate) =
-      program.gateSupport gate := by
-  simp [Program.wireSupport, Wire.gate]
+    program.wireSupport (Wire.gate gate) =
+      program.gateSupport gate := rfl
 
 export Cslib.Circuits (Program.wireSupport_gate)
 
@@ -83,41 +81,48 @@ export Cslib.Circuits (Program.wireSupport_gate)
     (line : Line σ n g)
     (wire : Wire n g) :
     (program.gate line).wireSupport wire.castSucc = program.wireSupport wire := by
-  refine Fin.addCases (fun i => ?_) (fun j => ?_) wire
-  · simp [Program.wireSupport, Program.gateSupport, Fin.castSucc_castAdd]
-  · simp [Program.wireSupport, Program.gateSupport]
+  cases wire with
+  | input i => rfl
+  | gate j => simp [Program.wireSupport, Program.gateSupport]
 
 export Cslib.Circuits (Program.wireSupport_gate_castSucc)
 
-/-- The new wire is supported by precisely the inputs supporting the new line. -/
-@[simp] theorem _root_.Cslib.Circuits.Program.wireSupport_gate_last
+/-- The new gate is supported by precisely the inputs supporting the new line. -/
+@[simp] theorem _root_.Cslib.Circuits.Program.gateSupport_gate_last
     (program : Program σ n g)
     (line : Line σ n g) :
-    (program.gate line).wireSupport (Fin.last (n + g)) =
+    (program.gate line).gateSupport (Fin.last g) =
       line.inputSupport program.wireSupport := by
-  rw [← Fin.natAdd_last (n := n) (m := g)]
-  simp only [Program.wireSupport, Program.gateSupport,
-    Fin.addCases_right, Fin.lastCases_last]
-  rfl
+  simp only [Program.wireSupport, Program.gateSupport, Fin.lastCases_last]
+
+export Cslib.Circuits (Program.gateSupport_gate_last)
+
+/-- The new wire is supported by precisely the inputs supporting the new line. -/
+theorem _root_.Cslib.Circuits.Program.wireSupport_gate_last
+    (program : Program σ n g)
+    (line : Line σ n g) :
+    (program.gate line).wireSupport (Wire.gate (Fin.last g)) =
+      line.inputSupport program.wireSupport := by
+  simp only [Program.wireSupport, Program.gateSupport, Wire.elim_gate, Fin.lastCases_last]
 
 export Cslib.Circuits (Program.wireSupport_gate_last)
 
 /-- The input support of every designated output wire in a circuit. -/
 def _root_.Cslib.Circuits.Circuit.outputSupport
-    (c : Circuit σ n g m) : Fin m → Finset (Fin n) :=
+    (c : Circuit σ n m) : Fin m → Finset (Fin n) :=
   c.program.wireSupport ∘ c.outputs
 
 export Cslib.Circuits (Circuit.outputSupport)
 
 /-- The union of the input supports of a circuit's outputs. -/
-def _root_.Cslib.Circuits.Circuit.inputSupport (c : Circuit σ n g m) : Finset (Fin n) :=
+def _root_.Cslib.Circuits.Circuit.inputSupport (c : Circuit σ n m) : Finset (Fin n) :=
   Finset.univ.biUnion c.outputSupport
 
 export Cslib.Circuits (Circuit.inputSupport)
 
 /-- An input supports a circuit exactly when it supports a designated output wire. -/
 @[simp] theorem _root_.Cslib.Circuits.Circuit.mem_inputSupport
-    {c : Circuit σ n g m}
+    {c : Circuit σ n m}
     {input : Fin n} :
     input ∈ c.inputSupport ↔
       ∃ output, input ∈ c.program.wireSupport (c.outputs output) := by
@@ -145,20 +150,22 @@ theorem _root_.Cslib.Circuits.Program.eval_congr
         funext argument
         simp only [Function.comp_apply]
         let wireSupport : Wire n g → Finset (Fin n) :=
-          Fin.addCases (fun k => {k}) program.gateSupport
+          Wire.elim (fun k => {k}) program.gateSupport
         have agreeOnLine :
             ∀ i ∈ line.inputSupport wireSupport, left i = right i := by
           simpa [Program.gateSupport] using agree
         have wireValueEqual (wire : Wire n g) :
             (∀ i ∈ wireSupport wire, left i = right i) →
-            (Fin.addCases left (program.eval interpretation left) wire : U) =
-              (Fin.addCases right (program.eval interpretation right) wire : U) := by
-          refine Fin.addCases ?_ ?_ wire
-          · intro i h
-            simpa using h i (by simp [wireSupport])
-          · intro j h
-            simpa using ih j (fun i hi =>
-              h i (by simpa [wireSupport] using hi))
+            (Wire.elim left (program.eval interpretation left) wire : U) =
+              (Wire.elim right (program.eval interpretation right) wire : U) := by
+          cases wire with
+          | input i =>
+              intro h
+              simpa using h i (by simp [wireSupport])
+          | gate j =>
+              intro h
+              simpa using ih j (fun i hi =>
+                h i (by simpa [wireSupport] using hi))
         exact wireValueEqual (line.wires argument) fun i hi =>
           agreeOnLine i (Line.mem_inputSupport.mpr ⟨argument, hi⟩)
       · intro agree
@@ -179,11 +186,13 @@ theorem _root_.Cslib.Circuits.Program.trace_congr
       program.trace interpretation right wire := by
   unfold Program.trace
   revert agree
-  refine Fin.addCases ?_ ?_ wire
-  · intro input agree
+  cases wire with
+  | input input =>
+    intro agree
     simpa using agree input (by simp [Program.wireSupport])
-  · intro gate agree
-    simp only [Fin.addCases_right]
+  | gate gate =>
+    intro agree
+    simp only [Wire.elim_gate]
     apply program.eval_congr interpretation left right gate
     intro input present
     exact agree input (by simpa [Program.wireSupport] using present)
@@ -192,7 +201,7 @@ export Cslib.Circuits (Program.trace_congr)
 
 /-- Circuit evaluation depends only on the circuit's structural input support. -/
 theorem _root_.Cslib.Circuits.Circuit.eval_dependsOnlyOn
-    (c : Circuit σ n g m)
+    (c : Circuit σ n m)
     (interpretation : Interpretation σ U) :
     DependsOnlyOn (c.eval interpretation) c.inputSupport := by
   intro left right agree
@@ -205,7 +214,7 @@ export Cslib.Circuits (Circuit.eval_dependsOnlyOn)
 
 /-- A computed function depends only on the circuit's structural input support. -/
 theorem _root_.Cslib.Circuits.Circuit.ComputesWith.dependsOnlyOn
-    {c : Circuit σ n g m}
+    {c : Circuit σ n m}
     {interpretation : Interpretation σ U}
     {target : (Fin n → U) → Fin m → U}
     (computes : c.ComputesWith interpretation target) :
@@ -218,7 +227,7 @@ export Cslib.Circuits (Circuit.ComputesWith.dependsOnlyOn)
 
 /-- Legacy qualified name for structural support of a computed function. -/
 theorem Circuit.Computes.dependsOnlyOn
-    {circuit : Circuit σ n g m}
+    {circuit : Circuit σ n m}
     {interpretation : Interpretation σ U}
     {target : Target U n m}
     (computes : Circuit.Computes circuit interpretation target) :

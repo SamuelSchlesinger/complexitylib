@@ -29,7 +29,7 @@ open Cslib.Circuits
 /-- The one-gate circuit over this library's De Morgan basis simulating each
 operation of CSLib's De Morgan basis. -/
 def fromBooleanOperation : (op : Boolean.Op) →
-    Circuit signature (Boolean.signature.Arity op) 1 1
+    Circuit signature (Boolean.signature.Arity op) 1
   | .const false => (Translation.id signature).operation .false
   | .const true => (Translation.id signature).operation .true
   | .not => (Translation.id signature).operation .not
@@ -39,7 +39,6 @@ def fromBooleanOperation : (op : Boolean.Op) →
 /-- Realize CSLib's Boolean operations in the weighted De Morgan basis. -/
 def fromBoolean :
     Realization Boolean.signature signature Boolean.interpretation interpretation where
-  gateCount := fun _ => 1
   operation := fromBooleanOperation
   realizes := by
     funext op input
@@ -53,7 +52,7 @@ def fromBoolean :
     | or => exact congrFun (congrFun (Translation.pull_id (σ := signature) interpretation) .or) input
 
 /-- Importing a CSLib circuit preserves the number of internal gates. -/
-@[simp] theorem fromBoolean_size (circuit : Circuit Boolean.signature n g m) :
+@[simp] theorem fromBoolean_size (circuit : Circuit Boolean.signature n m) :
     (fromBoolean.compile circuit).size = circuit.size := by
   rw [← Circuit.cost_unit, Realization.compile_cost]
   have cost : fromBoolean.pullCost OperationCost.unit = OperationCost.unit := by
@@ -64,7 +63,7 @@ def fromBoolean :
   rw [cost, Circuit.cost_unit]
 
 /-- Weighted logical-gate cost is at most the imported CSLib gate count. -/
-theorem fromBoolean_standardCost_le (circuit : Circuit Boolean.signature n g m) :
+theorem fromBoolean_standardCost_le (circuit : Circuit Boolean.signature n m) :
     (fromBoolean.compile circuit).cost standardCost ≤ circuit.size := by
   calc
     _ ≤ 1 * (fromBoolean.compile circuit).size :=
@@ -80,7 +79,7 @@ def toBooleanGateCount : Op → Nat
 /-- The CSLib De Morgan circuit simulating each operation of this library's De
 Morgan basis; the identity uses no gate. -/
 def toBooleanOperation : (op : Op) →
-    Circuit Boolean.signature (arity op) (toBooleanGateCount op) 1
+    Circuit Boolean.signature (arity op) 1
   | .false => (Translation.id Boolean.signature).operation (.const false)
   | .true => (Translation.id Boolean.signature).operation (.const true)
   | .id => Circuit.id Boolean.signature 1
@@ -88,10 +87,14 @@ def toBooleanOperation : (op : Op) →
   | .and => (Translation.id Boolean.signature).operation .and
   | .or => (Translation.id Boolean.signature).operation .or
 
+/-- The CSLib simulation of each operation uses `toBooleanGateCount` gates. -/
+@[simp] theorem toBooleanOperation_size (op : Op) :
+    (toBooleanOperation op).size = toBooleanGateCount op := by
+  cases op <;> rfl
+
 /-- Realize De Morgan operations in CSLib, using a free wire for identity. -/
 def toBoolean :
     Realization signature Boolean.signature interpretation Boolean.interpretation where
-  gateCount := toBooleanGateCount
   operation := toBooleanOperation
   realizes := by
     funext op input
@@ -109,37 +112,32 @@ def toBoolean :
     | or => exact congrFun (congrFun (Translation.pull_id Boolean.interpretation) .or) input
 
 /-- Removing identity gates never increases the internal gate count. -/
-theorem toBoolean_size_le (circuit : Circuit signature n g m) :
+theorem toBoolean_size_le (circuit : Circuit signature n m) :
     (toBoolean.compile circuit).size ≤ circuit.size := by
   simpa only [Realization.compile, one_mul] using toBoolean.toTranslation.compile_size_le_mul circuit
     (K := 1) (by intro op; cases op <;> decide)
 
-/-- CSLib's scalar computation predicate agrees with generic computation
-for its Boolean interpretation and a single designated output. -/
-theorem boolean_computes_iff (circuit : Circuit Boolean.signature n g 1)
+/-- CSLib's computation predicate agrees with generic computation for its
+Boolean interpretation and a single designated output. -/
+theorem boolean_computes_iff (circuit : Circuit Boolean.signature n 1)
     (function : Cslib.BooleanFunction n) :
-    circuit.Computes Boolean.interpretation function ↔
-      circuit.ComputesWith Boolean.interpretation (fun input _ => function input) := by
-  constructor
-  · intro computes input
-    funext output
-    have equal : output = 0 := Subsingleton.elim _ _
-    simpa only [equal] using computes input
-  · intro computes input
-    exact congrFun (computes input) 0
+    circuit.Computes Boolean.interpretation (fun input _ => function input) ↔
+      circuit.ComputesWith Boolean.interpretation (fun input _ => function input) :=
+  Iff.rfl
 
 /-- Importing a Boolean circuit preserves its scalar computation contract. -/
-theorem fromBoolean_computes (circuit : Circuit Boolean.signature n g 1)
+theorem fromBoolean_computes (circuit : Circuit Boolean.signature n 1)
     (function : Cslib.BooleanFunction n) :
     (fromBoolean.compile circuit).ComputesWith interpretation (fun input _ => function input) ↔
-      circuit.Computes Boolean.interpretation function := by
+      circuit.Computes Boolean.interpretation (fun input _ => function input) := by
   rw [boolean_computes_iff]
   simp only [Circuit.ComputesWith, Realization.compile_eval]
 
 /-- Exporting a De Morgan circuit preserves its scalar computation contract. -/
-theorem toBoolean_computes (circuit : Circuit signature n g 1)
+theorem toBoolean_computes (circuit : Circuit signature n 1)
     (function : ScalarFunction Bool n) :
-    (toBoolean.compile circuit).Computes Boolean.interpretation function ↔
+    (toBoolean.compile circuit).Computes Boolean.interpretation
+        (fun input _ => function input) ↔
       circuit.ComputesWith interpretation (fun input _ => function input) := by
   rw [boolean_computes_iff]
   simp only [Circuit.ComputesWith, Realization.compile_eval]

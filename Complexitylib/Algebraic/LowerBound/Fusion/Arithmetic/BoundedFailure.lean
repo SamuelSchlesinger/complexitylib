@@ -133,7 +133,7 @@ theorem FailureRules.circuit_lowerBound
     (rules : FailureRules model)
     (positive : 0 < rules.capacity)
     (circuit : Circuit (Algebraic.Arithmetic.signature K)
-      problem.inputCount g 1)
+      problem.inputCount 1)
     (constructs : problem.Constructs circuit
       (Algebraic.Arithmetic.interpretation constant)) :
     Fintype.card model.Witness ⌈/⌉ rules.capacity ≤

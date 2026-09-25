@@ -83,10 +83,8 @@ theorem gather_evaluatedPackedResources_routes_incidence
       totalRequests * nonzeroScalarCount width +
           2 ^ (groupBitWidth + dimension * width) + scatterPaddingCount =
         networkRecords scatterDepth)
-    (gateCounts : Fin (resourceBitCount dimension width) -> Nat)
-    (resourceCircuits : forall member,
-      Circuit DeMorgan.signature (groups * suffixWidth)
-        (gateCounts member) groups)
+    (resourceCircuits : Fin (resourceBitCount dimension width) ->
+      Circuit DeMorgan.signature (groups * suffixWidth) groups)
     (computes : forall point bit,
       (resourceCircuits (resourceMemberIndex point bit)).ComputesWith
         DeMorgan.interpretation
@@ -111,7 +109,7 @@ theorem gather_evaluatedPackedResources_routes_incidence
       exact (Nat.le_add_left _ _).trans (Nat.le_add_right _ _)
     let resourceValues := evaluatedResourceValues groupsPositive
       groupBitWidth dimension width scatterDepth suffixWidth
-      scatterDestinationFits gateCounts resourceCircuits scatterOutput
+      scatterDestinationFits resourceCircuits scatterOutput
     let gatherOutput := canonicalGatherBits widthPositive groupBitWidth
       orderWidth incidenceFits capacity scheduleOutput resourceValues
       gatherDestinationValues gatherPaddingValues gatherRecordCount
@@ -138,7 +136,7 @@ theorem gather_evaluatedPackedResources_routes_incidence
     exact (Nat.le_add_left _ _).trans (Nat.le_add_right _ _)
   let resourceValues := evaluatedResourceValues groupsPositive
     groupBitWidth dimension width scatterDepth suffixWidth
-    scatterDestinationFits gateCounts resourceCircuits scatterOutput
+    scatterDestinationFits resourceCircuits scatterOutput
   let gatherOutput := canonicalGatherBits widthPositive groupBitWidth
     orderWidth incidenceFits capacity scheduleOutput resourceValues
     gatherDestinationValues gatherPaddingValues gatherRecordCount
@@ -150,7 +148,7 @@ theorem gather_evaluatedPackedResources_routes_incidence
   have evaluated := evaluatedResourceValues_routes_incidence widthPositive
     groupsPositive groupFits capacity scheduleOutput targets directions
     pointFormula withinGroupDisjoint requestSuffix scatterDestinationSuffix
-    scatterPaddingSuffix scatterRecordCount gateCounts resourceCircuits
+    scatterPaddingSuffix scatterRecordCount resourceCircuits
     (packedResourceFunction widthPositive placement function) computes
     incidence
   dsimp only at evaluated
@@ -278,10 +276,8 @@ theorem scatter_evaluate_gather_decode_recovers
       totalRequests * nonzeroScalarCount width +
           2 ^ (groupBitWidth + dimension * width) + scatterPaddingCount =
         networkRecords scatterDepth)
-    (gateCounts : Fin (resourceBitCount dimension width) -> Nat)
-    (resourceCircuits : forall member,
-      Circuit DeMorgan.signature (groups * suffixWidth)
-        (gateCounts member) groups)
+    (resourceCircuits : Fin (resourceBitCount dimension width) ->
+      Circuit DeMorgan.signature (groups * suffixWidth) groups)
     (computes : forall point bit,
       (resourceCircuits (resourceMemberIndex point bit)).ComputesWith
         DeMorgan.interpretation
@@ -305,7 +301,7 @@ theorem scatter_evaluate_gather_decode_recovers
       exact (Nat.le_add_left _ _).trans (Nat.le_add_right _ _)
     let resourceValues := evaluatedResourceValues groupsPositive
       groupBitWidth dimension width scatterDepth suffixWidth
-      scatterDestinationFits gateCounts resourceCircuits scatterOutput
+      scatterDestinationFits resourceCircuits scatterOutput
     let gatherOutput := canonicalGatherBits widthPositive groupBitWidth
       orderWidth incidenceFits capacity scheduleOutput resourceValues
       gatherDestinationValues gatherPaddingValues gatherRecordCount
@@ -337,7 +333,7 @@ theorem scatter_evaluate_gather_decode_recovers
     exact (Nat.le_add_left _ _).trans (Nat.le_add_right _ _)
   let resourceValues := evaluatedResourceValues groupsPositive
     groupBitWidth dimension width scatterDepth suffixWidth
-    scatterDestinationFits gateCounts resourceCircuits scatterOutput
+    scatterDestinationFits resourceCircuits scatterOutput
   let gatherOutput := canonicalGatherBits widthPositive groupBitWidth
     orderWidth incidenceFits capacity scheduleOutput resourceValues
     gatherDestinationValues gatherPaddingValues gatherRecordCount
@@ -359,7 +355,7 @@ theorem scatter_evaluate_gather_decode_recovers
       groupsPositive groupFits incidenceFits capacity scheduleOutput targets
       directions pointFormula withinGroupDisjoint placement function
       requestSuffix scatterDestinationSuffix scatterPaddingSuffix
-      scatterRecordCount gateCounts resourceCircuits computes
+      scatterRecordCount resourceCircuits computes
       gatherDestinationValues gatherPaddingValues gatherRecordCount incidence
   have lineRecovers : forall request,
       (∑ scalar, decodeBinaryExtension widthPositive
@@ -434,10 +430,8 @@ theorem grouped_scatter_evaluate_gather_decode_recovers
       totalRequests * nonzeroScalarCount width +
           2 ^ (groupBitWidth + dimension * width) + scatterPaddingCount =
         networkRecords scatterDepth)
-    (gateCounts : Fin (resourceBitCount dimension width) -> Nat)
-    (resourceCircuits : forall member,
-      Circuit DeMorgan.signature (groups * suffixWidth)
-        (gateCounts member) groups)
+    (resourceCircuits : Fin (resourceBitCount dimension width) ->
+      Circuit DeMorgan.signature (groups * suffixWidth) groups)
     (computes : forall point bit,
       (resourceCircuits (resourceMemberIndex point bit)).ComputesWith
         DeMorgan.interpretation
@@ -471,7 +465,7 @@ theorem grouped_scatter_evaluate_gather_decode_recovers
       exact (Nat.le_add_left _ _).trans (Nat.le_add_right _ _)
     let resourceValues := evaluatedResourceValues groupsPositive
       groupBitWidth dimension width scatterDepth suffixWidth
-      scatterDestinationFits gateCounts resourceCircuits scatterOutput
+      scatterDestinationFits resourceCircuits scatterOutput
     let gatherOutput := canonicalGatherBits widthPositive groupBitWidth
       orderWidth incidenceFits capacity scheduleOutput resourceValues
       gatherDestinationValues gatherPaddingValues gatherRecordCount
@@ -506,7 +500,7 @@ theorem grouped_scatter_evaluate_gather_decode_recovers
     dimensionPositive groupsPositive groupFits incidenceFits capacity
     scheduleOutput placement function requestSource requestSuffix directions
     pointFormula setFormula withinGroupDisjoint scatterDestinationSuffix
-    scatterPaddingSuffix scatterRecordCount gateCounts resourceCircuits
+    scatterPaddingSuffix scatterRecordCount resourceCircuits
     computes gatherDestinationValues gatherPaddingValues gatherRecordCount
 
 end PackedPipeline

@@ -49,7 +49,7 @@ theorem program_fanInAtMost_two {n g : Nat} (program : Program signature n g) :
   | gate program line ih => exact ⟨ih, le_rfl⟩
 
 /-- Every gate of a binary circuit has fan-in two. -/
-theorem circuit_fanInAtMost_two {n g m : Nat} (circuit : Circuit signature n g m) :
+theorem circuit_fanInAtMost_two {n m : Nat} (circuit : Circuit signature n m) :
     circuit.FanInAtMost 2 :=
   program_fanInAtMost_two circuit.program
 

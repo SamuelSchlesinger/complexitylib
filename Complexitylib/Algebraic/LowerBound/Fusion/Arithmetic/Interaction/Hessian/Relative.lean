@@ -33,7 +33,7 @@ variable {K : Type} {σ : Type} [Field K] [Fintype σ] [DecidableEq σ]
 The coefficients may depend on both the circuit and the evaluation point. -/
 theorem exists_source_hessian_residual
     (constant : C → K) (problem : Problem (MvPolynomial σ K)) (point : σ → K)
-    (circuit : Circuit (Algebraic.Arithmetic.signature C) problem.inputCount g 1)
+    (circuit : Circuit (Algebraic.Arithmetic.signature C) problem.inputCount 1)
     (constructs : problem.Constructs circuit
       (Algebraic.Arithmetic.interpretation (fun scalar => MvPolynomial.C (constant scalar)))) :
     ∃ coefficients : Fin problem.inputCount → K,
@@ -105,7 +105,7 @@ need coefficients in the residual: the raw generators have zero Hessian. -/
 theorem exists_helper_hessian_residual
     (constant : C → K) (target : MvPolynomial (Fin n) K)
     (supplied : Fin k → MvPolynomial (Fin n) K) (point : Fin n → K)
-    (circuit : Circuit (Algebraic.Arithmetic.signature C) (n + k) g 1)
+    (circuit : Circuit (Algebraic.Arithmetic.signature C) (n + k) 1)
     (computes : circuit.eval
       (Algebraic.Arithmetic.interpretation (fun scalar => MvPolynomial.C (constant scalar)))
       (Fin.append MvPolynomial.X supplied) 0 = target) :
@@ -140,7 +140,7 @@ theorem residualRank_le_twice_relativeCostComplexity
       (fun (_ : Unit) (_ : Fin 1) => target) (fun _ => sources) := by
   unfold Circuit.relativeCostComplexity
   simp only [ENat.mul_iInf_of_ne (by decide : (2 : ℕ∞) ≠ 0)]
-  refine le_iInf fun gates => le_iInf fun circuit => le_iInf fun computes => ?_
+  refine le_iInf fun circuit => le_iInf fun computes => ?_
   let problem : Problem (MvPolynomial σ K) := ⟨n, sources, target⟩
   obtain ⟨coefficients, bound⟩ := exists_source_hessian_residual constant problem point
     circuit (congrFun (computes ()) 0)
@@ -187,7 +187,7 @@ theorem relativeCostComplexity_lowerBound
       (Algebraic.Arithmetic.multiplicationCost (K := C))
       (fun (_ : Unit) (_ : Fin 1) => target) (fun _ => sources) := by
   apply Circuit.le_relativeCostComplexity
-  intro gates circuit computes
+  intro circuit computes
   let problem : Problem (MvPolynomial σ K) := ⟨n, sources, target⟩
   have constructs : problem.Constructs circuit _ := congrFun (computes ()) 0
   obtain ⟨coefficients, bound⟩ :=

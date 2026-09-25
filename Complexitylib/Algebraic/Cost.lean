@@ -98,7 +98,7 @@ export Cslib.Circuits (Program.cost_unit)
 
 /-- The cost of all gates in a circuit. -/
 def _root_.Cslib.Circuits.Circuit.cost
-    (circuit : Circuit σ n g m)
+    (circuit : Circuit σ n m)
     (operationCost : OperationCost σ) : Nat :=
   circuit.program.cost operationCost
 
@@ -113,7 +113,7 @@ export Cslib.Circuits (Circuit.cost_id)
 /-- If every operation costs at most `K`, circuit cost is at most `K` times
 its gate count. -/
 theorem _root_.Cslib.Circuits.Circuit.cost_le_mul_size
-    (circuit : Circuit σ n g m)
+    (circuit : Circuit σ n m)
     (operationCost : OperationCost σ)
     (bounded : ∀ op, operationCost op ≤ K) :
     circuit.cost operationCost ≤ K * circuit.size := by
@@ -123,7 +123,7 @@ export Cslib.Circuits (Circuit.cost_le_mul_size)
 
 /-- Unit cost is exactly circuit size. -/
 @[simp] theorem _root_.Cslib.Circuits.Circuit.cost_unit
-    (circuit : Circuit σ n g m) :
+    (circuit : Circuit σ n m) :
     circuit.cost OperationCost.unit = circuit.size := by
   exact circuit.program.cost_unit
 

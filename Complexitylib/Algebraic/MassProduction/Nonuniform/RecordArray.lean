@@ -30,14 +30,14 @@ def outputWire (records leftWidth rightWidth : Nat)
 
 /-- Compute both field arrays once, then interleave by free output wiring. -/
 def combine
-    (left : Circuit signature inputs leftGates (records * leftWidth))
-    (right : Circuit signature inputs rightGates (records * rightWidth)) :=
+    (left : Circuit signature inputs (records * leftWidth))
+    (right : Circuit signature inputs (records * rightWidth)) :=
   (left.parallel right).mapOutputs (outputWire records leftWidth rightWidth)
 
 /-- Each combined record is the concatenation of the two computed fields. -/
 theorem combine_eval
-    (left : Circuit signature inputs leftGates (records * leftWidth))
-    (right : Circuit signature inputs rightGates (records * rightWidth))
+    (left : Circuit signature inputs (records * leftWidth))
+    (right : Circuit signature inputs (records * rightWidth))
     (interpretation : Interpretation signature Value)
     (input : Fin inputs → Value) (record : Fin records) (bit : Fin (leftWidth + rightWidth)) :
     (combine left right).eval interpretation input (finProdFinEquiv (record, bit)) =
@@ -52,8 +52,8 @@ theorem combine_eval
 
 /-- Interleaving adds no cost to the two global computations. -/
 theorem combine_cost
-    (left : Circuit signature inputs leftGates (records * leftWidth))
-    (right : Circuit signature inputs rightGates (records * rightWidth))
+    (left : Circuit signature inputs (records * leftWidth))
+    (right : Circuit signature inputs (records * rightWidth))
     (cost : OperationCost signature) :
     (combine left right).cost cost = left.cost cost + right.cost cost := by
   rw [combine, Circuit.cost_mapOutputs, Circuit.cost_parallel]

@@ -208,7 +208,7 @@ of two `n`-bit strings contains at least `n` AND gates, regardless of the
 number of auxiliary variables or free OR gates. -/
 theorem and_lowerBound
     (circuit : Circuit AndOr.signature
-      (((n + n) + a) + ((n + n) + a)) g 1)
+      (((n + n) + a) + ((n + n) + a)) 1)
     (computes : UniversallyComputes circuit (function n)) :
     n ≤ circuit.cost AndOr.andCost :=
   Conondeterministic.and_lowerBound

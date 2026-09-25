@@ -33,7 +33,7 @@ theorem relativeCostComplexity_lowerBound
     (lower : ℕ∞) ≤ Circuit.relativeCostComplexity interpretation scheme.errorCost
       (fun x (_ : Fin 1) => target x) sources := by
   apply Circuit.le_relativeCostComplexity
-  intro gates circuit computes
+  intro circuit computes
   exact_mod_cast (separated (circuit.eval approximation initial 0)).trans
     (scheme.failures_card_le_cost circuit target (fun x => congrFun (computes x) 0))
 

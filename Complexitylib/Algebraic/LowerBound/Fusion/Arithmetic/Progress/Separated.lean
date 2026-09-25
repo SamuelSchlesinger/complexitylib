@@ -209,7 +209,7 @@ theorem circuit_addition_lowerBound
     (pullbacks : SubstitutionPullbacks)
     (target : MvPolynomial (Fin n) ℕ)
     (circuit : Circuit
-      (Algebraic.Arithmetic.signature PEmpty) n g 1)
+      (Algebraic.Arithmetic.signature PEmpty) n 1)
     (constructs :
       ({ inputCount := n, inputs := MvPolynomial.X, target := target } :
         Problem (MvPolynomial (Fin n) ℕ)).Constructs circuit
@@ -226,7 +226,7 @@ theorem circuit_addition_lowerBound_of_isSeparated
     (target : MvPolynomial (Fin n) ℕ)
     (targetSeparated : IsSeparated target.support target.support)
     (circuit : Circuit
-      (Algebraic.Arithmetic.signature PEmpty) n g 1)
+      (Algebraic.Arithmetic.signature PEmpty) n 1)
     (constructs :
       ({ inputCount := n, inputs := MvPolynomial.X, target := target } :
         Problem (MvPolynomial (Fin n) ℕ)).Constructs circuit

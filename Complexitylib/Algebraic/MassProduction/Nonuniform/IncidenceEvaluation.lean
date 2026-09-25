@@ -24,7 +24,7 @@ cost is the sum over actual resource circuits, with no padding multiplier.
 
 namespace Algebraic.MassProduction.Nonuniform.IncidenceEvaluation
 
-variable {resources : Nat} {memberGates : Fin resources → Nat}
+variable {resources : Nat}
 
 /-- Common polynomial bound for both routing passes. -/
 def routingCost (incidences resources keyWidth suffixWidth : Nat) : Nat :=
@@ -39,8 +39,8 @@ theorem existsCircuit
     (suffixes : Fin incidences → Fin suffixWidth → DeMorgan.Wiring inputs)
     (resourceKeys : Fin resources → Fin keyWidth → Bool)
     (resourceKeysDistinct : Function.Injective resourceKeys)
-    (members : (resource : Fin resources) → Circuit DeMorgan.signature suffixWidth (memberGates resource) 1) :
-    ∃ gates, ∃ evaluated : Circuit DeMorgan.signature inputs gates incidences,
+    (members : (resource : Fin resources) → Circuit DeMorgan.signature suffixWidth 1) :
+    ∃ evaluated : Circuit DeMorgan.signature inputs incidences,
       evaluated.cost DeMorgan.standardCost ≤
         routingCost incidences resources keyWidth suffixWidth +
           ∑ resource, (members resource).cost DeMorgan.standardCost ∧
@@ -53,14 +53,14 @@ theorem existsCircuit
         evaluated.eval DeMorgan.interpretation input incidence =
           (members resource).eval DeMorgan.interpretation
             (fun bit => (suffixes incidence bit).eval input) 0 := by
-  obtain ⟨scatterGates, scatter, scatterBound, scatterCorrect⟩ :=
+  obtain ⟨scatter, scatterBound, scatterCorrect⟩ :=
     MaskedScatter.existsCircuit valid keys suffixes resourceKeys
   let bank := (ResourceBank.circuit members).comp scatter
   have bankDefinition : bank = (ResourceBank.circuit members).comp scatter := rfl
-  obtain ⟨gatherGates, gather, gatherBound, gatherCorrect⟩ := ResourceGather.existsCircuit
+  obtain ⟨gather, gatherBound, gatherCorrect⟩ := ResourceGather.existsCircuit
     resourceKeys resourceKeysDistinct (PreparedInputs.output inputs)
     (fun incidence bit => PreparedInputs.original resources (keys incidence bit))
-  refine ⟨_, gather.comp (PreparedInputs.circuit bank), ?_, ?_⟩
+  refine ⟨gather.comp (PreparedInputs.circuit bank), ?_, ?_⟩
   · rw [Circuit.cost_comp, PreparedInputs.circuit_cost]
     have bankCost : bank.cost DeMorgan.standardCost = scatter.cost DeMorgan.standardCost +
         ∑ resource, (members resource).cost DeMorgan.standardCost := by

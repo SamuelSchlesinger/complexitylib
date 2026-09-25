@@ -44,22 +44,29 @@ export Cslib.Circuits (Program.Compaction)
 
 /-- A semantics-preserving circuit compaction that does not increase cost. -/
 structure _root_.Cslib.Circuits.Circuit.Compaction
-    (source : Circuit σ n g m)
+    (source : Circuit σ n m)
     (interpretation : Interpretation σ U) where
-  /-- Number of internal gates in the rebuilt circuit. -/
-  gateCount : Nat
   /-- Rebuilt circuit. -/
-  result : Circuit σ n gateCount m
+  result : Circuit σ n m
   /-- Pointwise semantic preservation. -/
   eval_eq : ∀ input, result.eval interpretation input =
     source.eval interpretation input
   /-- The rebuilt circuit has no more internal gates than the source. -/
-  gateCount_le : gateCount ≤ g
+  gateCount_le : result.size ≤ source.size
   /-- Compaction does not increase any nonnegative operation cost. -/
   cost_le : ∀ operationCost : OperationCost σ,
     result.cost operationCost ≤ source.cost operationCost
 
 export Cslib.Circuits (Circuit.Compaction)
+
+/-- Number of internal gates in the rebuilt circuit. -/
+abbrev _root_.Cslib.Circuits.Circuit.Compaction.gateCount
+    {source : Circuit σ n m}
+    {interpretation : Interpretation σ U}
+    (compaction : Circuit.Compaction source interpretation) : Nat :=
+  compaction.result.size
+
+export Cslib.Circuits.Circuit.Compaction (gateCount)
 
 namespace Program.Compaction
 
@@ -92,8 +99,7 @@ theorem _root_.Cslib.Circuits.Program.Compaction.mapLine_eval
       line.eval interpretation input (source.eval interpretation input) := by
   apply line.eval_mapRenaming
   intro gate
-  simpa only [Program.trace, Wire.Renaming.apply_gate,
-    Fin.addCases_right] using
+  simpa only [Program.trace, Wire.Renaming.apply_gate, Wire.elim_gate] using
     compaction.trace_eq input (Wire.gate gate)
 
 export Cslib.Circuits.Program.Compaction (mapLine_eval)
@@ -110,14 +116,15 @@ def _root_.Cslib.Circuits.Program.Compaction.copy
       wireMap := compaction.wireMap.appendLast
       trace_eq := by
         intro input wire
-        refine Fin.lastCases ?_ (fun priorWire => ?_) wire
-        · calc
+        induction wire using Wire.lastCases with
+        | last =>
+          calc
             (compaction.result.gate mappedLine).trace interpretation input
-                (compaction.wireMap.appendLast (Fin.last (n + g))) =
+                (compaction.wireMap.appendLast (Wire.gate (Fin.last g))) =
               (compaction.result.gate mappedLine).trace interpretation input
                 (Wire.gate (Fin.last compaction.gateCount)) := congrArg
                   ((compaction.result.gate mappedLine).trace interpretation input)
-                  (Wire.Renaming.appendLast_lastWire compaction.wireMap)
+                  (Wire.Renaming.appendLast_gates_last compaction.wireMap)
             _ = (compaction.result.gate mappedLine).gateFunction interpretation
                 (Fin.last compaction.gateCount) input := by
               rw [Program.trace_gateWire]
@@ -128,9 +135,11 @@ def _root_.Cslib.Circuits.Program.Compaction.copy
                 (source.eval interpretation input) :=
               compaction.mapLine_eval line input
             _ = (source.gate line).trace interpretation input
-                (Fin.last (n + g)) :=
-              (Program.trace_gate_last source line interpretation input).symm
-        · rw [Wire.Renaming.appendLast_castSucc,
+                (Wire.gate (Fin.last g)) := by
+              simp only [Program.trace_gateWire, Program.gateFunction_apply,
+                Program.eval_gate_last]
+        | castSucc priorWire =>
+          rw [Wire.Renaming.appendLast_castSucc,
             Program.trace_gate_castSucc, Program.trace_gate_castSucc]
           exact compaction.trace_eq input priorWire
       gateCount_le := Nat.add_le_add_right compaction.gateCount_le 1
@@ -157,22 +166,25 @@ def _root_.Cslib.Circuits.Program.Compaction.eliminate
   wireMap := compaction.wireMap.skipLast replacement
   trace_eq := by
     intro input wire
-    refine Fin.lastCases ?_ (fun priorWire => ?_) wire
-    · calc
+    induction wire using Wire.lastCases with
+    | last =>
+      calc
         compaction.result.trace interpretation input
-            (compaction.wireMap.skipLast replacement (Fin.last (n + g))) =
+            (compaction.wireMap.skipLast replacement (Wire.gate (Fin.last g))) =
           compaction.result.trace interpretation input replacement := congrArg
             (compaction.result.trace interpretation input)
-            (Wire.Renaming.skipLast_lastWire compaction.wireMap replacement)
+            (Wire.Renaming.skipLast_gates_last compaction.wireMap replacement)
         _ = (line.mapWires compaction.wireMap).eval interpretation input
             (compaction.result.eval interpretation input) := replacement_eq input
         _ = line.eval interpretation input
             (source.eval interpretation input) :=
           compaction.mapLine_eval line input
         _ = (source.gate line).trace interpretation input
-            (Fin.last (n + g)) :=
-          (Program.trace_gate_last source line interpretation input).symm
-    · rw [Wire.Renaming.skipLast_castSucc, Program.trace_gate_castSucc]
+            (Wire.gate (Fin.last g)) := by
+          simp only [Program.trace_gateWire, Program.gateFunction_apply,
+            Program.eval_gate_last]
+    | castSucc priorWire =>
+      rw [Wire.Renaming.skipLast_castSucc, Program.trace_gate_castSucc]
       exact compaction.trace_eq input priorWire
   gateCount_le := compaction.gateCount_le.trans (Nat.le_succ g)
   cost_le := by
@@ -184,16 +196,15 @@ export Cslib.Circuits.Program.Compaction (eliminate)
 
 /-- Lift a program compaction to a circuit by renaming its output wires. -/
 def _root_.Cslib.Circuits.Program.Compaction.toCircuit
-    {circuit : Circuit σ n g m}
+    {circuit : Circuit σ n m}
     (compaction : Program.Compaction circuit.program interpretation) :
     Circuit.Compaction circuit interpretation := by
-  let result : Circuit σ n compaction.gateCount m :=
+  let result : Circuit σ n m :=
     { program := compaction.result
       outputs := fun output =>
         compaction.wireMap (circuit.outputs output) }
   exact
-    { gateCount := compaction.gateCount
-      result := result
+    { result := result
       eval_eq := by
         intro input
         funext output
@@ -210,7 +221,7 @@ end Program.Compaction
 namespace Circuit.Compaction
 
 variable {σ : Signature} {n g m : Nat} {U : Type u}
-variable {source : Circuit σ n g m}
+variable {source : Circuit σ n m}
 variable {interpretation : Interpretation σ U}
 
 /-- View a compaction as a certified identity-substitution reduction. -/
@@ -219,7 +230,6 @@ def _root_.Cslib.Circuits.Circuit.Compaction.toReduction
     (operationCost : OperationCost σ) :
     Circuit.Reduction operationCost source interpretation
       InputSubstitution.id where
-  gateCount := compaction.gateCount
   result := compaction.result
   eval_eq := by
     intro input

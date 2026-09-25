@@ -117,7 +117,7 @@ def multiplicationOccurrences
     [Field K]
     (constant : C → K)
     (degree : Nat)
-    (circuit : Circuit (Algebraic.Arithmetic.signature C) degree g 1) :
+    (circuit : Circuit (Algebraic.Arithmetic.signature C) degree 1) :
     List (Fin 2 → MvPolynomial (Fin degree) K) :=
   circuitMultiplicationArguments
     (fun scalar => MvPolynomial.C (constant scalar))
@@ -128,7 +128,7 @@ def multiplicationOccurrences
     [Field K]
     (constant : C → K)
     (degree : Nat)
-    (circuit : Circuit (Algebraic.Arithmetic.signature C) degree g 1) :
+    (circuit : Circuit (Algebraic.Arithmetic.signature C) degree 1) :
     (multiplicationOccurrences constant degree circuit).length =
       circuit.cost
         (Algebraic.Arithmetic.multiplicationCost (K := C)) :=
@@ -142,7 +142,7 @@ def multiplicationOutput
     [Field K]
     (constant : C → K)
     (degree : Nat)
-    (circuit : Circuit (Algebraic.Arithmetic.signature C) degree g 1)
+    (circuit : Circuit (Algebraic.Arithmetic.signature C) degree 1)
     (index : Fin (multiplicationOccurrences constant degree circuit).length) :
     MvPolynomial (Fin degree) K :=
   let arguments :=
@@ -154,7 +154,7 @@ def AtOccurrences
     [Field K]
     (constant : C → K)
     (degree : Nat)
-    (circuit : Circuit (Algebraic.Arithmetic.signature C) degree g 1)
+    (circuit : Circuit (Algebraic.Arithmetic.signature C) degree 1)
     (budget : Fin (multiplicationOccurrences constant degree circuit).length →
       Nat) : Prop :=
   ∀ index,
@@ -168,7 +168,7 @@ theorem occurrenceIndexedBound_of_atOccurrences
     (constant : C → K)
     (degree split : Nat)
     (degreeAtLeastTwo : 2 ≤ degree)
-    (circuit : Circuit (Algebraic.Arithmetic.signature C) degree g 1)
+    (circuit : Circuit (Algebraic.Arithmetic.signature C) degree 1)
     (budget : Fin (multiplicationOccurrences constant degree circuit).length →
       Nat)
     (restricted : AtOccurrences constant degree circuit budget) :
@@ -191,7 +191,7 @@ theorem choose_le_sum_occurrenceBudget
     (constant : C → K)
     (degree split : Nat)
     (degreeAtLeastTwo : 2 ≤ degree)
-    (circuit : Circuit (Algebraic.Arithmetic.signature C) degree g 1)
+    (circuit : Circuit (Algebraic.Arithmetic.signature C) degree 1)
     (constructs : (problem K degree).Constructs circuit
       (Algebraic.Arithmetic.interpretation
         (fun scalar => MvPolynomial.C (constant scalar))))
@@ -216,7 +216,7 @@ theorem exists_occurrence_budget_ge_choose_ceilDiv
     (degree split : Nat)
     (degreeAtLeastTwo : 2 ≤ degree)
     (splitLe : split ≤ degree)
-    (circuit : Circuit (Algebraic.Arithmetic.signature C) degree g 1)
+    (circuit : Circuit (Algebraic.Arithmetic.signature C) degree 1)
     (constructs : (problem K degree).Constructs circuit
       (Algebraic.Arithmetic.interpretation
         (fun scalar => MvPolynomial.C (constant scalar))))
@@ -239,7 +239,7 @@ def AtMultiplications
     [Field K]
     (constant : C → K)
     (degree : Nat)
-    (circuit : Circuit (Algebraic.Arithmetic.signature C) degree g 1)
+    (circuit : Circuit (Algebraic.Arithmetic.signature C) degree 1)
     (termCount : Nat) : Prop :=
   ∀ arguments : Fin 2 → MvPolynomial (Fin degree) K,
     (⟨.mul, arguments⟩ : Atom (Algebraic.Arithmetic.signature C)
@@ -257,7 +257,7 @@ theorem multiplicationOutputRankAtMost_of_atMultiplications
     (constant : C → K)
     (degree split : Nat)
     (degreeAtLeastTwo : 2 ≤ degree)
-    (circuit : Circuit (Algebraic.Arithmetic.signature C) degree g 1)
+    (circuit : Circuit (Algebraic.Arithmetic.signature C) degree 1)
     (termCount : Nat)
     (restricted : AtMultiplications constant degree circuit termCount) :
     MultiplicationOutputRankAtMost constant degree split degreeAtLeastTwo
@@ -279,7 +279,7 @@ theorem choose_ceilDiv_lowerBound
     (degreeAtLeastTwo : 2 ≤ degree)
     (termCount : Nat)
     (termCountPositive : 0 < termCount)
-    (circuit : Circuit (Algebraic.Arithmetic.signature C) degree g 1)
+    (circuit : Circuit (Algebraic.Arithmetic.signature C) degree 1)
     (constructs : (problem K degree).Constructs circuit
       (Algebraic.Arithmetic.interpretation
         (fun scalar => MvPolynomial.C (constant scalar))))

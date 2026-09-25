@@ -33,7 +33,7 @@ noncomputable def minimumCircuit (function : ScalarFunction Bool n) :
     Circuit.Minimum (σ := signature) OperationCost.unit interpretation
       (fun input (_ : Fin 1) => function input) := by
   classical
-  let available := Classical.choose_spec (exists_circuit function)
+  let available := exists_circuit function
   let circuit := Classical.choose available
   exact circuit.minimum OperationCost.unit interpretation _ (Classical.choose_spec available)
 
@@ -45,16 +45,16 @@ noncomputable def complexity (function : ScalarFunction Bool n) : Nat :=
 theorem complexity_eq_gateComplexity (function : ScalarFunction Bool n) :
     (complexity function : ENat) =
       Circuit.gateComplexity (σ := signature) interpretation (fun input (_ : Fin 1) => function input) := by
-  simpa [Circuit.gateComplexity, complexity, Circuit.size] using
+  simpa [Circuit.gateComplexity, complexity] using
     (Circuit.costComplexity_eq OperationCost.unit
       (minimumCircuit function).computes (minimumCircuit function).minimal.cost).symm
 
 /-- Any concrete circuit upper-bounds minimum internal gate count. -/
-theorem complexity_le (circuit : Circuit signature n gates 1)
+theorem complexity_le (circuit : Circuit signature n 1)
     {function : ScalarFunction Bool n}
     (computes : circuit.ComputesWith interpretation (fun input _ => function input)) :
-    complexity function ≤ gates := by
-  simpa [complexity, Circuit.size] using (minimumCircuit function).minimal.cost circuit computes
+    complexity function ≤ circuit.size := by
+  simpa [complexity] using (minimumCircuit function).minimal.cost circuit computes
 
 /-- The constant functions have one-gate implementations at every width. -/
 theorem complexity_constant_le (n : Nat) (value : Bool) :
@@ -72,9 +72,9 @@ theorem gateHard_iff (function : ScalarFunction Bool n) (budget : Nat) :
   constructor
   · intro hard
     by_contra low
-    exact hard _ (Nat.le_of_not_gt low) (minimumCircuit function).circuit
+    exact hard (minimumCircuit function).circuit (Nat.le_of_not_gt low)
       (minimumCircuit function).computes
-  · intro hard gates small circuit computes
+  · intro hard circuit small computes
     have := complexity_le circuit computes
     omega
 
@@ -82,7 +82,7 @@ theorem gateHard_iff (function : ScalarFunction Bool n) (budget : Nat) :
 theorem complexity_update_le (function : ScalarFunction Bool n) (point : Fin n → Bool)
     (value : Bool) :
     complexity (Function.update function point value) ≤ complexity function + 2 * n := by
-  obtain ⟨gates, circuit, computes, bound⟩ := exists_update_circuit
+  obtain ⟨circuit, computes, bound⟩ := exists_update_circuit
     (minimumCircuit function).circuit function (minimumCircuit function).computes point value
   exact (complexity_le circuit computes).trans bound
 

@@ -25,8 +25,6 @@ namespace Algebraic.MassProduction.Nonuniform.RuntimeComposition
 open Sorting HighRate RuntimePipeline
 open scoped LinearAlgebra.Projectivization
 
-variable {memberGates : Fin (ResourceLayout.count copies dimension width) → Nat}
-
 set_option backward.isDefEq.respectTransparency false
 
 /-- Complete runtime overhead apart from the actual resource evaluations. -/
@@ -46,28 +44,28 @@ theorem existsCircuit
     (function : Fin (2 ^ prefixWidth) → (Fin suffixWidth → Bool) → Bool)
     (copyFits : copies ≤ 2 ^ copyBits) (selectorFits : width ≤ 2 ^ selectorBits)
     (members : (resource : Fin (ResourceLayout.count copies dimension width)) →
-      Circuit DeMorgan.signature suffixWidth (memberGates resource) 1)
+      Circuit DeMorgan.signature suffixWidth 1)
     (membersCorrect : ∀ resource suffix,
       (members resource).eval DeMorgan.interpretation suffix 0 =
         ResourceLayout.function positive code placement function resource suffix) :
-    ∃ gates, ∃ result : Circuit DeMorgan.signature (networkRecords depth * (prefixWidth + suffixWidth)) gates
+    ∃ result : Circuit DeMorgan.signature (networkRecords depth * (prefixWidth + suffixWidth))
       (networkRecords depth),
       result.cost DeMorgan.standardCost ≤ overhead depth copies prefixWidth dimension width suffixWidth copyBits selectorBits +
         ∑ resource, (members resource).cost DeMorgan.standardCost ∧
       result.ComputesWith DeMorgan.interpretation (directProduct (requestFunction function) (networkRecords depth)) := by
-  obtain ⟨preparationGates, preparation, preparationBound, preparationCorrect⟩ := PrefixMetadata.existsCircuit
+  obtain ⟨preparation, preparationBound, preparationCorrect⟩ := PrefixMetadata.existsCircuit
     positive code placement (networkRecords depth) suffixWidth copyBits selectorBits
   let original := fun (request : Fin (networkRecords depth))
       (bit : Fin (PrefixMetadata.payloadWidth dimension width copyBits selectorBits suffixWidth)) =>
     (DeMorgan.Wiring.input (finProdFinEquiv (request, bit)) :
       DeMorgan.Wiring (networkRecords depth * PrefixMetadata.payloadWidth dimension width copyBits selectorBits suffixWidth))
-  obtain ⟨recoveryGates, recovery, recoveryBound, recoveryCorrect⟩ := ScheduledRecovery.existsCircuit
+  obtain ⟨recovery, recoveryBound, recoveryCorrect⟩ := ScheduledRecovery.existsCircuit
     positive dimensionPositive budget code placement function copyFits selectorFits original
     (PrefixMetadata.targetProjection dimension width copyBits selectorBits suffixWidth)
     (PrefixMetadata.copyProjection dimension width copyBits selectorBits suffixWidth)
     (PrefixMetadata.selectorProjection dimension width copyBits selectorBits suffixWidth)
     (PrefixMetadata.suffixProjection dimension width copyBits selectorBits suffixWidth) members membersCorrect
-  refine ⟨_, recovery.comp preparation, ?_, ?_⟩
+  refine ⟨recovery.comp preparation, ?_, ?_⟩
   · rw [Circuit.cost_comp]
     exact (Nat.add_le_add preparationBound recoveryBound).trans_eq (by unfold overhead; omega)
   · intro input
@@ -98,7 +96,7 @@ theorem booleanMassComplexity_le
     (function : Fin (2 ^ prefixWidth) → (Fin suffixWidth → Bool) → Bool)
     (copyFits : copies ≤ 2 ^ copyBits) (selectorFits : width ≤ 2 ^ selectorBits)
     (members : (resource : Fin (ResourceLayout.count copies dimension width)) →
-      Circuit DeMorgan.signature suffixWidth (memberGates resource) 1)
+      Circuit DeMorgan.signature suffixWidth 1)
     (membersCorrect : ∀ resource suffix,
       (members resource).eval DeMorgan.interpretation suffix 0 =
         ResourceLayout.function positive code placement function resource suffix)
@@ -106,7 +104,7 @@ theorem booleanMassComplexity_le
     booleanMassComplexity (requestFunction function) (networkRecords depth) ≤
       (overhead depth copies prefixWidth dimension width suffixWidth copyBits selectorBits +
         ResourceLayout.count copies dimension width * resourceBound : Nat) := by
-  obtain ⟨gates, result, bound, computes⟩ := existsCircuit positive dimensionPositive budget code placement
+  obtain ⟨result, bound, computes⟩ := existsCircuit positive dimensionPositive budget code placement
     function copyFits selectorFits members membersCorrect
   have sumBound : (∑ resource, (members resource).cost DeMorgan.standardCost) ≤
       ResourceLayout.count copies dimension width * resourceBound := by

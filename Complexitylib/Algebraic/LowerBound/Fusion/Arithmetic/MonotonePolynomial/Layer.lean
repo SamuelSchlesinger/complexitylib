@@ -174,7 +174,7 @@ theorem multiplication_lowerBound
     (two_le : 2 ≤ k)
     (width : Nat)
     (positive : 0 < width)
-    (circuit : Circuit (Algebraic.Arithmetic.signature ℕ) n g 1)
+    (circuit : Circuit (Algebraic.Arithmetic.signature ℕ) n 1)
     (constructs : (problem n k).Constructs circuit
       (Algebraic.Arithmetic.interpretation MvPolynomial.C))
     (widthBound : MultiplicationSupportWidthAtMost circuit
@@ -195,7 +195,7 @@ theorem centralBinom_multiplication_lowerBound
     (two_le : 2 ≤ n)
     (width : Nat)
     (positive : 0 < width)
-    (circuit : Circuit (Algebraic.Arithmetic.signature ℕ) (2 * n) g 1)
+    (circuit : Circuit (Algebraic.Arithmetic.signature ℕ) (2 * n) 1)
     (constructs : (problem (2 * n) n).Constructs circuit
       (Algebraic.Arithmetic.interpretation MvPolynomial.C))
     (widthBound : MultiplicationSupportWidthAtMost circuit
@@ -215,7 +215,7 @@ theorem four_pow_lt_mul_width_sq_cost
     (n_big : 4 ≤ n)
     (width : Nat)
     (positive : 0 < width)
-    (circuit : Circuit (Algebraic.Arithmetic.signature ℕ) (2 * n) g 1)
+    (circuit : Circuit (Algebraic.Arithmetic.signature ℕ) (2 * n) 1)
     (constructs : (problem (2 * n) n).Constructs circuit
       (Algebraic.Arithmetic.interpretation MvPolynomial.C))
     (widthBound : MultiplicationSupportWidthAtMost circuit

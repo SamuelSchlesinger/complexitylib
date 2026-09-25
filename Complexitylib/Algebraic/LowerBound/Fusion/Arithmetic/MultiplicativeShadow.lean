@@ -252,10 +252,11 @@ theorem feature_trace_mem_of_programAtoms_subset
   induction program with
   | empty =>
       intro wire
-      refine Fin.addCases (fun input => ?_)
-        (fun impossible => Fin.elim0 impossible) wire
-      rw [Program.trace_input, certificate.input_zero input]
-      exact (generatedSubmodule certificate allAtoms).zero_mem
+      cases wire with
+      | input input =>
+          rw [Program.trace_input, certificate.input_zero input]
+          exact (generatedSubmodule certificate allAtoms).zero_mem
+      | gate impossible => exact Fin.elim0 impossible
   | @gate g program line inductionHypothesis =>
       have priorSubset : ∀ atom,
           atom ∈ programAtoms
@@ -265,11 +266,9 @@ theorem feature_trace_mem_of_programAtoms_subset
         exact atomsSubset atom (List.mem_append_left _ present)
       have priorMem := inductionHypothesis priorSubset
       intro wire
-      refine Fin.addCases (fun input => ?_) (fun gate => ?_) wire
-      · rw [Program.trace_input, certificate.input_zero input]
-        exact (generatedSubmodule certificate allAtoms).zero_mem
-      · refine Fin.lastCases ?_ (fun priorGate => ?_) gate
-        · let lastAtom := lineAtom line program
+      induction wire using Wire.lastCases with
+      | last =>
+          let lastAtom := lineAtom line program
             (Algebraic.Arithmetic.interpretation constant) problem.inputs
           have lastPresent : lastAtom ∈ allAtoms := by
             apply atomsSubset lastAtom
@@ -317,7 +316,9 @@ theorem feature_trace_mem_of_programAtoms_subset
                     generatedSubmodule certificate allAtoms
                   rw [certificate.constant_zero scalar]
                   exact (generatedSubmodule certificate allAtoms).zero_mem
-        · simpa [Program.trace] using priorMem (Wire.gate priorGate)
+      | castSucc priorWire =>
+          rw [Program.trace_gate_castSucc]
+          exact priorMem priorWire
 
 /-- Every output feature lies in the common span of the circuit's addition
 result shadows. -/
@@ -326,7 +327,7 @@ theorem feature_circuit_output_mem
     {problem : Problem U}
     (certificate : Certificate (K := K) (Q := Q) constant problem)
     (circuit : Circuit (Algebraic.Arithmetic.signature C)
-      problem.inputCount g m)
+      problem.inputCount m)
     (output : Fin m) :
     certificate.feature
         (circuit.eval (Algebraic.Arithmetic.interpretation constant)
@@ -354,7 +355,7 @@ theorem targetFeature_mem_circuitSubmodule
     (certificate : Certificate (K := K) (Q := Q) constant problem)
     (targets : Fin m → U)
     (circuit : Circuit (Algebraic.Arithmetic.signature C)
-      problem.inputCount g m)
+      problem.inputCount m)
     (constructs : Interaction.Multiple.Constructs (constant := constant)
       problem targets circuit)
     (output : Fin m) :
@@ -373,7 +374,7 @@ theorem featureSpan_finrank_le_additionCost
     (certificate : Certificate (K := K) (Q := Q) constant problem)
     (targets : Fin m → U)
     (circuit : Circuit (Algebraic.Arithmetic.signature C)
-      problem.inputCount g m)
+      problem.inputCount m)
     (constructs : Interaction.Multiple.Constructs (constant := constant)
       problem targets circuit) :
     Module.finrank K
@@ -428,7 +429,7 @@ theorem circuit_addition_lowerBound_of_linearIndependent
     (targets : Fin m → U)
     (independent : LinearIndependent K (certificate.feature ∘ targets))
     (circuit : Circuit (Algebraic.Arithmetic.signature C)
-      problem.inputCount g m)
+      problem.inputCount m)
     (constructs : Interaction.Multiple.Constructs (constant := constant)
       problem targets circuit) :
     m ≤ circuit.cost

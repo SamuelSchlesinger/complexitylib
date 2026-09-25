@@ -27,7 +27,6 @@ open BufferInput BufferModel HighRate
 open scoped LinearAlgebra.Projectivization
 
 variable {Source : Type*}
-variable {memberGates : Fin (ResourceLayout.count copies dimension width) → Nat}
 
 set_option backward.isDefEq.respectTransparency false
 
@@ -50,12 +49,12 @@ theorem existsCircuit
     (selectorProjection : Fin selectorBits → Fin requestWidth)
     (suffixProjection : Fin suffixWidth → Fin requestWidth)
     (members : (resource : Fin (ResourceLayout.count copies dimension width)) →
-      Circuit DeMorgan.signature suffixWidth (memberGates resource) 1)
+      Circuit DeMorgan.signature suffixWidth 1)
     (membersCorrect : ∀ resource suffix,
       (members resource).eval DeMorgan.interpretation suffix 0 =
         ResourceLayout.function positive code placement function resource suffix) :
-    ∃ gates, ∃ recovered : Circuit DeMorgan.signature
-      (inputWidth total 0 requestWidth (2 ^ width) (dimension * width)) gates total,
+    ∃ recovered : Circuit DeMorgan.signature
+      (inputWidth total 0 requestWidth (2 ^ width) (dimension * width)) total,
       recovered.cost DeMorgan.standardCost ≤
         IncidenceEvaluation.routingCost (total * 2 ^ width) (ResourceLayout.count copies dimension width)
           (ResourceLayout.keyWidth copyBits dimension width selectorBits) suffixWidth +
@@ -72,12 +71,12 @@ theorem existsCircuit
         ∀ request, recovered.eval DeMorgan.interpretation
           (input positive state data (targets code placement sources)) request =
             function (sources (state.order (.inl request))) (suffixes (state.order (.inl request))) := by
-  obtain ⟨evaluationGates, evaluated, bound, correct⟩ := IncidenceEvaluation.existsCircuit
+  obtain ⟨evaluated, bound, correct⟩ := IncidenceEvaluation.existsCircuit
     (incidenceValid (completed := total) positive)
     (BufferResourceWires.keys width dimension copyProjection selectorProjection)
     (BufferResourceWires.payload width dimension suffixProjection)
     (ResourceLayout.key copyBits selectorBits) (ResourceLayout.key_injective copyFits selectorFits) members
-  refine ⟨_, (MaskedXor.circuit (PaddedLinePoints.valid positive) total).comp evaluated, ?_, ?_⟩
+  refine ⟨(MaskedXor.circuit (PaddedLinePoints.valid positive) total).comp evaluated, ?_, ?_⟩
   · rw [Circuit.cost_comp, MaskedXor.circuit_cost]
     exact Nat.add_le_add_right bound _
   · intro data sources suffixes state scheduled copyCorrect selectorCorrect suffixCorrect request

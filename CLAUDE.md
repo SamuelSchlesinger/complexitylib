@@ -179,9 +179,11 @@ See CONTRIBUTING.md. Use `<type>(<scope>): <summary>` format with imperative moo
 
 ## Dependencies
 
-- **Lean**: `leanprover/lean4:v4.35.0-rc2` (see `lean-toolchain`)
-- **Mathlib**: commit `1cae91f0` (see `lakefile.toml`) — pinned to match [cslib](https://github.com/leanprover/cslib)'s `lake-manifest.json` so the foundations can be rebased onto it
-- **cslib**: commit `94ea80f4` (see `lakefile.toml`) — pinned by commit `rev`, never `main`. Its
+- **Lean**: `leanprover/lean4:v4.35.0-rc3` (see `lean-toolchain`)
+- **Mathlib**: commit `c55e6e78` (see `lakefile.toml`) — pinned to match [cslib](https://github.com/leanprover/cslib)'s `lake-manifest.json` so the foundations can be rebased onto it
+- **cslib**: commit `2a4389ba` of the `complexitylib-integration` branch of the author's fork
+  (`SamuelSchlesinger/cslib`, see `lakefile.toml`), which integrates the pending CSLib circuit PRs
+  until they land upstream; afterwards pin a `leanprover/cslib` commit again. Pinned by commit `rev`, never `main`. Its
   Mathlib pin must equal ours, so a cslib bump dictates the Mathlib and toolchain bump. cslib ships
   no olean cache; Lake compiles only the cslib modules we import.
 

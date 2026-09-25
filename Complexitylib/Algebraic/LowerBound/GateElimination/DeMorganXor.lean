@@ -27,9 +27,9 @@ namespace DeMorgan
 namespace XorElimination
 
 private theorem input_mem_support
-    {n g : Nat}
+    {n : Nat}
     {phase : Bool}
-    (circuit : Circuit signature n g 1)
+    (circuit : Circuit signature n 1)
     (computes : circuit.ComputesWith interpretation
       (GateElimination.Xor.target ⟨n, phase⟩))
     (input : Fin n) :
@@ -40,9 +40,9 @@ private theorem input_mem_support
   exact congrFun output_eq 0
 
 private theorem output_ne_of_target_ne
-    {n g : Nat}
+    {n : Nat}
     {phase : Bool}
-    {circuit : Circuit signature n g 1}
+    {circuit : Circuit signature n 1}
     (computes : circuit.ComputesWith interpretation
       (GateElimination.Xor.target ⟨n, phase⟩))
     {left right : Fin n → Bool}
@@ -57,10 +57,10 @@ private theorem output_ne_of_target_ne
 
 /-- The output root cannot itself be the first reader of a parity input. -/
 private theorem outputRoot_not_readsInput
-    {n g : Nat}
+    {n : Nat}
     (positive : 0 < n)
     (phase : Bool)
-    (circuit : Circuit signature (n + 1) g 1)
+    (circuit : Circuit signature (n + 1) 1)
     (computes : circuit.ComputesWith interpretation
       (GateElimination.Xor.target ⟨n + 1, phase⟩))
     (root : OutputRoot circuit)
@@ -140,10 +140,10 @@ private theorem outputRoot_not_readsInput
 
 /-- Assemble one three-gate reduction once the initial gate is known to vanish. -/
 private noncomputable def threeGateStep
-    {n g : Nat}
+    {n : Nat}
     (positive : 0 < n)
     (phase : Bool)
-    (circuit : Circuit signature (n + 1) g 1)
+    (circuit : Circuit signature (n + 1) 1)
     (computes : circuit.ComputesWith interpretation
       (GateElimination.Xor.target ⟨n + 1, phase⟩))
     (root : OutputRoot circuit)
@@ -212,12 +212,12 @@ private noncomputable def threeGateStep
       circuit.program selected annihilation.fixedValue firstUsesNext
         annihilation.value_eq
   have threeSubset :
-      ({initial.gate, first, next} : Finset (Fin g)) ⊆
+      ({initial.gate, first, next} : Finset (Fin circuit.size)) ⊆
         restricted.deleted := by
     simp only [Finset.insert_subset_iff, Finset.singleton_subset_iff]
     exact ⟨initialMember, firstMember, nextMember⟩
   have threeCard :
-      ({initial.gate, first, next} : Finset (Fin g)).card = 3 := by
+      ({initial.gate, first, next} : Finset (Fin circuit.size)).card = 3 := by
     rw [Finset.card_insert_of_notMem (by
       simp [Ne.symm first_ne_initial, Ne.symm next_ne_initial])]
     rw [Finset.card_insert_of_notMem (by simp [first_ne_next])]
@@ -277,10 +277,10 @@ private noncomputable def avoidSimpleOrigin
 
 /-- Use an input avoided by both origins to obtain the three-gate step. -/
 private noncomputable def threeGateStep_of_independent_initial
-    {n g : Nat}
+    {n : Nat}
     (positive : 0 < n)
     (phase : Bool)
-    (circuit : Circuit signature (n + 1) g 1)
+    (circuit : Circuit signature (n + 1) 1)
     (computes : circuit.ComputesWith interpretation
       (GateElimination.Xor.target ⟨n + 1, phase⟩))
     (root : OutputRoot circuit)
@@ -321,8 +321,7 @@ private noncomputable def threeGateStep_of_independent_initial
     (n : Nat)
     (positive : 0 < n)
     (phase : Bool)
-    {g : Nat}
-    (circuit : Circuit signature (n + 1) g 1)
+    (circuit : Circuit signature (n + 1) 1)
     (computes : circuit.ComputesWith interpretation
       (GateElimination.Xor.target ⟨n + 1, phase⟩)) :
     GateElimination.Xor.ThreeGateStep binaryCost interpretation n phase circuit := by
@@ -365,7 +364,7 @@ private noncomputable def threeGateStep_of_independent_initial
         (Fin.succAbove_ne input ⟨0, positive⟩).symm
       have literalIndependent
           (negated : Bool)
-          {wire : Wire (n + 1) g}
+          {wire : Wire (n + 1) circuit.size}
           (origin_eq : origins circuit.program wire =
             .wire negated (Wire.input input)) :
           ∀ left right : Fin (n + 1) → Bool,
@@ -452,7 +451,7 @@ executable elimination procedure.
 noncomputable def xorThreeGateEliminator :
     GateElimination.Xor.ThreeGateEliminator binaryCost interpretation where
   eliminate := by
-    intro n positive phase g circuit computes _
+    intro n positive phase circuit computes _
     exact XorElimination.eliminate n positive phase circuit computes
 
 /--
@@ -460,8 +459,8 @@ Every De Morgan circuit computing `n`-input XOR has at least `3 * (n - 1)`
 AND/OR gates. Constants and NOT gates are free in this cost model.
 -/
 theorem xor_lowerBound
-    {n g : Nat}
-    (circuit : Circuit signature n g 1)
+    {n : Nat}
+    (circuit : Circuit signature n 1)
     (computes : circuit.ComputesWith interpretation
       (GateElimination.Xor.parityTarget n)) :
     3 * (n - 1) ≤ circuit.cost binaryCost :=

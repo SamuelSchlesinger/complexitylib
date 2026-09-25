@@ -52,7 +52,7 @@ def gateOrigins :
       let prior : Fin g → ResidualValue n (g + 1) := fun oldGate =>
         (gateOrigins program oldGate).mapWires Wire.Renaming.castSucc
       let values : Wire n g → ResidualValue n (g + 1) :=
-        Fin.addCases
+        Wire.elim
           (fun input => .wire false (Wire.input input))
           prior
       let fresh : Wire n (g + 1) := Wire.gate (Fin.last g)
@@ -64,7 +64,7 @@ AND/OR-gate output.  Free internal gates are followed transitively.
 -/
 def origins
     (program : Program signature n g) : Wire n g → ResidualValue n g :=
-  Fin.addCases
+  Wire.elim
     (fun input => .wire false (Wire.input input))
     (gateOrigins program)
 
@@ -72,29 +72,24 @@ def origins
     (program : Program signature n g)
     (input : Fin n) :
     origins program (Wire.input input) =
-      .wire false (Wire.input input) := by
-  simp [origins]
+      .wire false (Wire.input input) := rfl
 
 @[simp] theorem origins_gateWire
     (program : Program signature n g)
     (gate : Fin g) :
-    origins program (Wire.gate gate) = gateOrigins program gate := by
-  simp [origins]
+    origins program (Wire.gate gate) = gateOrigins program gate := rfl
 
 /-- The origin map lifted through one appended gate. -/
 @[simp] theorem liftedOrigins_apply
     (program : Program signature n g)
     (wire : Wire n g) :
-    Fin.addCases
+    Wire.elim
         (fun input => ResidualValue.wire false (Wire.input input))
         (fun oldGate =>
           (gateOrigins program oldGate).mapWires Wire.Renaming.castSucc)
         wire =
       (origins program wire).mapWires Wire.Renaming.castSucc := by
-  refine Fin.addCases (fun input => ?_) (fun gate => ?_) wire
-  · rw [Fin.addCases_left, origins_input]
-    simp only [ResidualValue.mapWires, Wire.Renaming.apply_input]
-  · simp [origins]
+  cases wire <;> rfl
 
 @[simp] theorem gateOrigins_gate_castSucc
     (program : Program signature n g)
@@ -109,7 +104,7 @@ def origins
     (line : Line signature n g) :
     gateOrigins (program.gate line) (Fin.last g) =
       lineOrigin line
-        (Fin.addCases
+        (Wire.elim
           (fun input => .wire false (Wire.input input))
           (fun oldGate =>
             (gateOrigins program oldGate).mapWires Wire.Renaming.castSucc))
@@ -122,24 +117,16 @@ def origins
     (wire : Wire n g) :
     origins (program.gate line) wire.castSucc =
       (origins program wire).mapWires Wire.Renaming.castSucc := by
-  refine Fin.addCases (fun input => ?_) (fun gate => ?_) wire
-  · have castInput :
-        (Wire.input (g := g) input).castSucc =
-          Wire.input (g := g + 1) input := Fin.castSucc_castAdd input
-    rw [castInput, origins_input, origins_input,
-      ResidualValue.mapWires, Wire.Renaming.castSucc_apply, castInput]
-  · have castGate :
-        (Wire.gate (n := n) gate).castSucc =
-          Wire.gate (n := n) gate.castSucc := Fin.natAdd_castSucc.symm
-    rw [castGate, origins_gateWire, origins_gateWire,
-      gateOrigins_gate_castSucc]
+  cases wire with
+  | input input => rfl
+  | gate gate => exact gateOrigins_gate_castSucc program line gate
 
 theorem origins_gate_last
     (program : Program signature n g)
     (line : Line signature n g) :
     origins (program.gate line) (Wire.gate (Fin.last g)) =
       lineOrigin line
-        (Fin.addCases
+        (Wire.elim
           (fun input => .wire false (Wire.input input))
           (fun oldGate =>
             (gateOrigins program oldGate).mapWires Wire.Renaming.castSucc))
@@ -157,15 +144,15 @@ theorem origins_gateWire_last_of_charged
   rcases line with ⟨op, wires⟩
   cases op <;> simp_all [lineOrigin]
 
-/-- `Fin.last` spelling of `origins_gateWire_last_of_charged`. -/
+/-- Last-wire spelling of `origins_gateWire_last_of_charged`. With inductive
+wires the last wire is `Wire.gate (Fin.last g)`, so the two statements agree. -/
 theorem origins_last_of_charged
     (program : Program signature n g)
     (line : Line signature n g)
     (charged : binaryCost line.op = 1) :
-    origins (program.gate line) (Fin.last (n + g)) =
-      .wire false (Fin.last (n + g)) := by
-  rw [← Fin.natAdd_last (n := n) (m := g)]
-  exact origins_gateWire_last_of_charged program line charged
+    origins (program.gate line) (Wire.gate (Fin.last g)) =
+      .wire false (Wire.gate (Fin.last g)) :=
+  origins_gateWire_last_of_charged program line charged
 
 theorem origins_gateWire_last_false
     (program : Program signature n g)
@@ -263,15 +250,18 @@ theorem origins_support
       program.wireSupport wire := by
   induction program with
   | empty =>
-      refine Fin.addCases (fun input => ?_)
-        (fun impossible => Fin.elim0 impossible) wire
-      rw [origins_input, originSupport_wire,
-        Program.wireSupport_input]
+      cases wire with
+      | input input =>
+          rw [origins_input, originSupport_wire,
+            Program.wireSupport_input]
+      | gate impossible => exact Fin.elim0 impossible
   | @gate g program line inductionHypothesis =>
-      refine Fin.addCases (fun input => ?_) (fun gate => ?_) wire
-      · rw [origins_input, originSupport_wire,
+      cases wire with
+      | input input =>
+        rw [origins_input, originSupport_wire,
           Program.wireSupport_input]
-      · refine Fin.lastCases ?_ (fun oldGate => ?_) gate
+      | gate gate =>
+        refine Fin.lastCases ?_ (fun oldGate => ?_) gate
         · rw [origins_gateWire, gateOrigins_gate_last,
             Program.wireSupport_gate]
           simp only [Program.gateSupport, Fin.lastCases_last]
@@ -342,13 +332,10 @@ theorem validOrigin_map_castSucc
       change ValidOrigin (program.gate line)
         (.wire negated (Wire.Renaming.castSucc originWire))
       rcases valid with ⟨input, rfl⟩ | ⟨gate, rfl, charged⟩
-      · exact Or.inl ⟨input, by
-          rw [Wire.Renaming.castSucc_apply]
-          exact Fin.castSucc_castAdd input⟩
+      · exact Or.inl ⟨input, rfl⟩
       · exact Or.inr ⟨gate.castSucc, by
           constructor
-          · rw [Wire.Renaming.castSucc_apply]
-            exact Fin.natAdd_castSucc.symm
+          · rfl
           · simpa [Line.mapWires] using charged⟩
 
 /-- Every value returned by `Program.origins` is a valid charged origin. -/
@@ -358,16 +345,18 @@ theorem origins_valid
     ValidOrigin program (origins program wire) := by
   induction program with
   | empty =>
-      refine Fin.addCases (fun input => ?_) (fun impossible => Fin.elim0 impossible) wire
-      rw [origins_input]
-      change (∃ sourceInput,
-        Wire.input (g := 0) input = Wire.input sourceInput) ∨ _
-      exact Or.inl ⟨input, rfl⟩
+      cases wire with
+      | input input =>
+          rw [origins_input]
+          exact Or.inl ⟨input, rfl⟩
+      | gate impossible => exact Fin.elim0 impossible
   | @gate g program line inductionHypothesis =>
-      refine Fin.addCases (fun input => ?_) (fun gate => ?_) wire
-      · rw [origins_input]
+      cases wire with
+      | input input =>
+        rw [origins_input]
         exact Or.inl ⟨input, rfl⟩
-      · refine Fin.lastCases ?_ (fun oldGate => ?_) gate
+      | gate gate =>
+        refine Fin.lastCases ?_ (fun oldGate => ?_) gate
         · rw [origins_gateWire, gateOrigins_gate_last]
           rcases line with ⟨op, wires⟩
           cases op with
@@ -400,15 +389,18 @@ theorem origins_eval
       program.trace interpretation input wire := by
   induction program with
   | empty =>
-      refine Fin.addCases (fun sourceInput => ?_)
-        (fun impossible => Fin.elim0 impossible) wire
-      rw [origins_input]
-      rfl
+      cases wire with
+      | input sourceInput =>
+          rw [origins_input]
+          rfl
+      | gate impossible => exact Fin.elim0 impossible
   | @gate g program line inductionHypothesis =>
-      refine Fin.addCases (fun sourceInput => ?_) (fun gate => ?_) wire
-      · rw [origins_input]
+      cases wire with
+      | input sourceInput =>
+        rw [origins_input]
         rfl
-      · refine Fin.lastCases ?_ (fun oldGate => ?_) gate
+      | gate gate =>
+        refine Fin.lastCases ?_ (fun oldGate => ?_) gate
         · rw [origins_gateWire, gateOrigins_gate_last,
             Program.trace_gateWire, Program.gateFunction_gate_last]
           rcases line with ⟨op, wires⟩
@@ -435,13 +427,9 @@ theorem origins_eval
                 program.trace interpretation input (Wire.gate oldGate) :=
               gateEval
             _ = (program.gate line).trace interpretation input
-                (Wire.gate oldGate.castSucc) := by
-              symm
-              change (program.gate line).trace interpretation input
-                (Fin.natAdd n oldGate.castSucc) = _
-              rw [Fin.natAdd_castSucc]
-              exact Program.trace_gate_castSucc program line interpretation input
-                (Wire.gate oldGate)
+                (Wire.gate oldGate.castSucc) :=
+              (Program.trace_gate_castSucc program line interpretation input
+                (Wire.gate oldGate)).symm
 
 end DeMorgan
 end Algebraic

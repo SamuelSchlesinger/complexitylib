@@ -130,7 +130,7 @@ theorem identity_lowerBound
     [Fintype I]
     [DecidableEq I]
     (circuit : Circuit
-      (Algebraic.SumOfTerms.signature (Term K I)) 0 g 1)
+      (Algebraic.SumOfTerms.signature (Term K I)) 0 1)
     (constructs : (identityProblem K I).Constructs circuit
       (Algebraic.SumOfTerms.interpretation
         (termValue (K := K) (I := I)))) :
@@ -153,7 +153,7 @@ theorem layer_lowerBound
     [Field K]
     (n k : Nat)
     (circuit : Circuit
-      (Algebraic.SumOfTerms.signature (Term K (Layer n k))) 0 g 1)
+      (Algebraic.SumOfTerms.signature (Term K (Layer n k))) 0 1)
     (constructs : (identityProblem K (Layer n k)).Constructs circuit
       (Algebraic.SumOfTerms.interpretation
         (termValue (K := K) (I := Layer n k)))) :
@@ -168,7 +168,7 @@ theorem centralBinom_lowerBound
     [Field K]
     (n : Nat)
     (circuit : Circuit
-      (Algebraic.SumOfTerms.signature (Term K (Layer (2 * n) n))) 0 g 1)
+      (Algebraic.SumOfTerms.signature (Term K (Layer (2 * n) n))) 0 1)
     (constructs : (identityProblem K (Layer (2 * n) n)).Constructs circuit
       (Algebraic.SumOfTerms.interpretation
         (termValue (K := K) (I := Layer (2 * n) n)))) :
@@ -186,7 +186,7 @@ theorem four_pow_lt_mul_cost
     (n : Nat)
     (n_big : 4 ≤ n)
     (circuit : Circuit
-      (Algebraic.SumOfTerms.signature (Term K (Layer (2 * n) n))) 0 g 1)
+      (Algebraic.SumOfTerms.signature (Term K (Layer (2 * n) n))) 0 1)
     (constructs : (identityProblem K (Layer (2 * n) n)).Constructs circuit
       (Algebraic.SumOfTerms.interpretation
         (termValue (K := K) (I := Layer (2 * n) n)))) :

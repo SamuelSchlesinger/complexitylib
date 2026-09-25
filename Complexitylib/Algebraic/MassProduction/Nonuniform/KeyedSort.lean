@@ -35,15 +35,14 @@ def bodyPart (record : Fin (keyWidth + recordWidth) → Bool) : Fin recordWidth 
 
 /-- Compute the sorting key and carry each complete original record. -/
 def packCircuit (depth : Nat)
-    (keyCircuit : Circuit DeMorgan.signature recordWidth keyGates keyWidth) :=
+    (keyCircuit : Circuit DeMorgan.signature recordWidth keyWidth) :=
   Circuit.parallelFinVector (networkRecords depth) (keyWidth + recordWidth)
-    (fun _ => keyGates + 0)
     (fun record => (keyCircuit.parallel (Circuit.id DeMorgan.signature recordWidth)).mapInputs
       (fun bit => finProdFinEquiv (record, bit)))
 
 /-- Each packed record consists of its computed key and its original bits. -/
 theorem packCircuit_eval
-    (keyCircuit : Circuit DeMorgan.signature recordWidth keyGates keyWidth)
+    (keyCircuit : Circuit DeMorgan.signature recordWidth keyWidth)
     (input : Fin (networkBits depth recordWidth) → Bool)
     (record : Fin (networkRecords depth)) :
     flatRecords ((packCircuit depth keyCircuit).eval DeMorgan.interpretation input) record =
@@ -56,7 +55,7 @@ theorem packCircuit_eval
 
 /-- The explicit computed-key sorting circuit. -/
 def circuit (depth : Nat) (ascending : Bool)
-    (keyCircuit : Circuit DeMorgan.signature recordWidth keyGates keyWidth) :=
+    (keyCircuit : Circuit DeMorgan.signature recordWidth keyWidth) :=
   ((bitonicSortCircuit (Nat.le_add_right keyWidth recordWidth) depth ascending).comp
     (packCircuit depth keyCircuit)).mapOutputs
       (fun output =>
@@ -65,7 +64,7 @@ def circuit (depth : Nat) (ascending : Bool)
 
 /-- Output records are bodies of the sorted enriched records. -/
 theorem circuit_eval_record
-    (keyCircuit : Circuit DeMorgan.signature recordWidth keyGates keyWidth)
+    (keyCircuit : Circuit DeMorgan.signature recordWidth keyWidth)
     (input : Fin (networkBits depth recordWidth) → Bool)
     (record : Fin (networkRecords depth)) :
     flatRecords ((circuit depth ascending keyCircuit).eval DeMorgan.interpretation input) record =
@@ -81,7 +80,7 @@ theorem circuit_eval_record
 /-- Computing and dropping temporary keys preserves the original records
 as a complete-record permutation. -/
 theorem circuit_recordsPermute
-    (keyCircuit : Circuit DeMorgan.signature recordWidth keyGates keyWidth)
+    (keyCircuit : Circuit DeMorgan.signature recordWidth keyWidth)
     (input : Fin (networkBits depth recordWidth) → Bool) :
     FlatRecordsPermute
       ((circuit depth ascending keyCircuit).eval DeMorgan.interpretation input) input := by
@@ -104,7 +103,7 @@ theorem circuit_recordsPermute
 /-- The keys recomputed from output records are sorted in the requested
 direction. Key correctness follows from complete-record preservation. -/
 theorem circuit_keysSorted
-    (keyCircuit : Circuit DeMorgan.signature recordWidth keyGates keyWidth)
+    (keyCircuit : Circuit DeMorgan.signature recordWidth keyWidth)
     (input : Fin (networkBits depth recordWidth) → Bool) :
     Semantics.SequenceSorted ascending
       (fun record => toLex (keyCircuit.eval DeMorgan.interpretation
@@ -143,7 +142,7 @@ theorem circuit_keysSorted
 /-- Key computation is charged once per record; temporary keys add only
 their width to the sorting payload. -/
 theorem circuit_cost_le
-    (keyCircuit : Circuit DeMorgan.signature recordWidth keyGates keyWidth) :
+    (keyCircuit : Circuit DeMorgan.signature recordWidth keyWidth) :
     (circuit depth ascending keyCircuit).cost DeMorgan.standardCost ≤
       networkRecords depth * keyCircuit.cost DeMorgan.standardCost +
       depth * depth * networkRecords depth *

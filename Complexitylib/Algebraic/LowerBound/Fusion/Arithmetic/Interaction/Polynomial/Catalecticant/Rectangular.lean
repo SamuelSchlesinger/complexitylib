@@ -146,7 +146,7 @@ def LocalRankAtMost
     (constant : C → K)
     (degree split : Nat)
     (degreeAtLeastTwo : 2 ≤ degree)
-    (circuit : Circuit (Algebraic.Arithmetic.signature C) degree g 1)
+    (circuit : Circuit (Algebraic.Arithmetic.signature C) degree 1)
     (interactionRank : Nat) : Prop :=
   Rank.Local.CircuitBound
     (certificate constant degree split degreeAtLeastTwo) circuit interactionRank
@@ -157,7 +157,7 @@ def MultiplicationOutputRankAtMost
     (constant : C → K)
     (degree split : Nat)
     (degreeAtLeastTwo : 2 ≤ degree)
-    (circuit : Circuit (Algebraic.Arithmetic.signature C) degree g 1)
+    (circuit : Circuit (Algebraic.Arithmetic.signature C) degree 1)
     (interactionRank : Nat) : Prop :=
   Rank.Local.MultiplicationBound
     (certificate constant degree split degreeAtLeastTwo) circuit interactionRank
@@ -167,7 +167,7 @@ theorem localRankAtMost_of_multiplicationOutputRankAtMost
     (constant : C → K)
     (degree split : Nat)
     (degreeAtLeastTwo : 2 ≤ degree)
-    (circuit : Circuit (Algebraic.Arithmetic.signature C) degree g 1)
+    (circuit : Circuit (Algebraic.Arithmetic.signature C) degree 1)
     (interactionRank : Nat)
     (bound : MultiplicationOutputRankAtMost constant degree split
       degreeAtLeastTwo circuit interactionRank) :
@@ -186,7 +186,7 @@ theorem choose_ceilDiv_lowerBound
     (degreeAtLeastTwo : 2 ≤ degree)
     (interactionRank : Nat)
     (rankPositive : 0 < interactionRank)
-    (circuit : Circuit (Algebraic.Arithmetic.signature C) degree g 1)
+    (circuit : Circuit (Algebraic.Arithmetic.signature C) degree 1)
     (constructs : (problem K degree).Constructs circuit
       (Algebraic.Arithmetic.interpretation
         (fun scalar => MvPolynomial.C (constant scalar))))
@@ -211,7 +211,7 @@ theorem choose_le_cost_mul_rank
     (degree split : Nat)
     (degreeAtLeastTwo : 2 ≤ degree)
     (interactionRank : Nat)
-    (circuit : Circuit (Algebraic.Arithmetic.signature C) degree g 1)
+    (circuit : Circuit (Algebraic.Arithmetic.signature C) degree 1)
     (constructs : (problem K degree).Constructs circuit
       (Algebraic.Arithmetic.interpretation
         (fun scalar => MvPolynomial.C (constant scalar))))
@@ -234,7 +234,7 @@ theorem rankOne_multiplication_lowerBound
     (constant : C → K)
     (degree split : Nat)
     (degreeAtLeastTwo : 2 ≤ degree)
-    (circuit : Circuit (Algebraic.Arithmetic.signature C) degree g 1)
+    (circuit : Circuit (Algebraic.Arithmetic.signature C) degree 1)
     (constructs : (problem K degree).Constructs circuit
       (Algebraic.Arithmetic.interpretation
         (fun scalar => MvPolynomial.C (constant scalar))))
@@ -252,7 +252,7 @@ def PowerOrInvisibleAtMultiplications
     [Field K]
     (constant : C → K)
     (degree split : Nat)
-    (circuit : Circuit (Algebraic.Arithmetic.signature C) degree g 1) : Prop :=
+    (circuit : Circuit (Algebraic.Arithmetic.signature C) degree 1) : Prop :=
   ∀ arguments : Fin 2 → MvPolynomial (Fin degree) K,
     (⟨.mul, arguments⟩ : Atom (Algebraic.Arithmetic.signature C)
       (MvPolynomial (Fin degree) K)) ∈
@@ -272,7 +272,7 @@ theorem multiplicationOutputRankAtMost_one_of_powerOrInvisible
     (constant : C → K)
     (degree split : Nat)
     (degreeAtLeastTwo : 2 ≤ degree)
-    (circuit : Circuit (Algebraic.Arithmetic.signature C) degree g 1)
+    (circuit : Circuit (Algebraic.Arithmetic.signature C) degree 1)
     (restricted : PowerOrInvisibleAtMultiplications constant degree split
       circuit) :
     MultiplicationOutputRankAtMost constant degree split degreeAtLeastTwo
@@ -295,7 +295,7 @@ theorem powerOrInvisible_multiplication_lowerBound
     (constant : C → K)
     (degree split : Nat)
     (degreeAtLeastTwo : 2 ≤ degree)
-    (circuit : Circuit (Algebraic.Arithmetic.signature C) degree g 1)
+    (circuit : Circuit (Algebraic.Arithmetic.signature C) degree 1)
     (constructs : (problem K degree).Constructs circuit
       (Algebraic.Arithmetic.interpretation
         (fun scalar => MvPolynomial.C (constant scalar))))

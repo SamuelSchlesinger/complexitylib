@@ -25,15 +25,19 @@ namespace MassProduction
 /-- Explicit data for synthesizing every Boolean function at one fixed input
 width. -/
 structure ScalarSynthesis (width : Nat) where
-  /-- Program-gate count selected for each scalar target. -/
-  gateCount : ScalarFunction Bool width -> Nat
   /-- Concrete one-output circuit selected for each scalar target. -/
   circuit : (function : ScalarFunction Bool width) ->
-    Circuit DeMorgan.signature width (gateCount function) 1
+    Circuit DeMorgan.signature width 1
   /-- Proof that every selected circuit computes its requested target. -/
   computes : forall function,
     (circuit function).ComputesWith DeMorgan.interpretation
       (scalarTarget function)
+
+/-- Program-gate count selected for each scalar target. -/
+abbrev ScalarSynthesis.gateCount
+    (synthesis : ScalarSynthesis width)
+    (function : ScalarFunction Bool width) : Nat :=
+  (synthesis.circuit function).size
 
 /-- Width-indexed one-copy synthesis data. -/
 abbrev ScalarSynthesisFamily :=

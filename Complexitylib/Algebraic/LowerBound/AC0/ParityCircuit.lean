@@ -55,7 +55,7 @@ open scoped ENNReal
 /-- Every designated output depth is at most the circuit's maximum logical
 output depth. -/
 theorem logicalOutputDepth_le_logicalDepth
-    (circuit : Algebraic.Circuit signature n g m)
+    (circuit : Algebraic.Circuit signature n m)
     (output : Fin m) :
     logicalOutputDepths circuit output <= logicalDepth circuit := by
   exact Fin.le_foldl_max (logicalOutputDepths circuit) 0 output
@@ -63,7 +63,7 @@ theorem logicalOutputDepth_le_logicalDepth
 /-- A circuit logical-depth bound covers each designated output wire in the
 underlying program. -/
 theorem logicalWireDepth_output_le
-    (circuit : Algebraic.Circuit signature n g m)
+    (circuit : Algebraic.Circuit signature n m)
     (output : Fin m)
     (level : Nat)
     (depthBound : logicalDepth circuit <= level) :
@@ -74,7 +74,7 @@ theorem logicalWireDepth_output_le
 /-- Exact circuit computation of parity identifies the scalar function on its
 unique designated output wire. -/
 theorem wireFunction_output_eq_parity_of_computes
-    {circuit : Algebraic.Circuit signature n g 1}
+    {circuit : Algebraic.Circuit signature n 1}
     (computes : circuit.ComputesWith interpretation (Parity.target n)) :
     circuit.program.wireFunction interpretation (circuit.outputs 0) =
       Parity.function n := by
@@ -84,7 +84,7 @@ theorem wireFunction_output_eq_parity_of_computes
 /-- A shallow invariant covering a parity circuit's output leaves at most the
 tree-depth allowance many variables live. -/
 theorem liveCount_le_of_shallowUpTo_computes_parity
-    {circuit : Algebraic.Circuit signature n g 1}
+    {circuit : Algebraic.Circuit signature n 1}
     {rho : PartialAssignment n}
     {level bound : Nat}
     (computes : circuit.ComputesWith interpretation (Parity.target n))
@@ -100,7 +100,7 @@ theorem liveCount_le_of_shallowUpTo_computes_parity
 final survivor schedule below the common tree-depth allowance, with arbitrary
 internal NOT gates. -/
 theorem retained_le_bound_of_iterated_parity_raw
-    (circuit : Algebraic.Circuit signature n g 1)
+    (circuit : Algebraic.Circuit signature n 1)
     (computes : circuit.ComputesWith interpretation (Parity.target n))
     (depth bound : Nat)
     (circuitDepth : logicalDepth circuit <= depth)
@@ -127,7 +127,7 @@ theorem retained_le_bound_of_iterated_parity_raw
 
 /-- Compatibility wrapper for the checked input-negation presentation. -/
 theorem retained_le_bound_of_iterated_parity
-    (circuit : Algebraic.Circuit signature n g 1)
+    (circuit : Algebraic.Circuit signature n 1)
     (_normal : Program.NegationsAtInputs circuit.program)
     (computes : circuit.ComputesWith interpretation (Parity.target n))
     (depth bound : Nat)
@@ -153,7 +153,7 @@ theorem retained_le_bound_of_iterated_parity
 ends above the tree allowance, the circuit cannot compute parity, even with
 arbitrary internal NOT gates. -/
 theorem not_computes_parity_of_iterated_switching_raw
-    (circuit : Algebraic.Circuit signature n g 1)
+    (circuit : Algebraic.Circuit signature n 1)
     (depth bound : Nat)
     (circuitDepth : logicalDepth circuit <= depth)
     (oneLeBound : 1 <= bound)
@@ -179,7 +179,7 @@ theorem not_computes_parity_of_iterated_switching_raw
 
 /-- Compatibility wrapper for the checked input-negation presentation. -/
 theorem not_computes_parity_of_iterated_switching
-    (circuit : Algebraic.Circuit signature n g 1)
+    (circuit : Algebraic.Circuit signature n 1)
     (_normal : Program.NegationsAtInputs circuit.program)
     (depth bound : Nat)
     (circuitDepth : logicalDepth circuit <= depth)

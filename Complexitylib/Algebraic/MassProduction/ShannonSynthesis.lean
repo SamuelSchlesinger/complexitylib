@@ -35,13 +35,20 @@ noncomputable def shannonCircuit
     (inputsLarge : 16 <= inputs)
     (function : ScalarFunction Bool inputs) :
     Circuit DeMorgan.signature inputs
-      (synthesisGateCount
-        (reindexFunction (shannonAddressDataSum inputs inputsLarge) function))
       1 :=
   (circuit (addressWidth := shannonAddressWidth inputs)
     (dataWidth := shannonDataWidth inputs)
     (reindexFunction (shannonAddressDataSum inputs inputsLarge) function))
-      |>.castCounts (shannonAddressDataSum inputs inputsLarge) rfl rfl
+      |>.castCounts (shannonAddressDataSum inputs inputsLarge) rfl
+
+@[simp] theorem shannonCircuit_size
+    (inputs : Nat)
+    (inputsLarge : 16 <= inputs)
+    (function : ScalarFunction Bool inputs) :
+    (shannonCircuit inputs inputsLarge function).size =
+      synthesisGateCount
+        (reindexFunction (shannonAddressDataSum inputs inputsLarge) function) := by
+  simp [shannonCircuit]
 
 @[simp] theorem shannonCircuit_eval
     (inputs : Nat)
@@ -88,10 +95,18 @@ noncomputable def replicatedShannonCircuit
     (function : ScalarFunction Bool inputs)
     (copies : Nat) :
     Circuit DeMorgan.signature (copies * inputs)
-      (copies * synthesisGateCount
-        (reindexFunction (shannonAddressDataSum inputs inputsLarge) function))
       copies :=
   (shannonCircuit inputs inputsLarge function).replicateScalar copies
+
+@[simp] theorem replicatedShannonCircuit_size
+    (inputs : Nat)
+    (inputsLarge : 16 <= inputs)
+    (function : ScalarFunction Bool inputs)
+    (copies : Nat) :
+    (replicatedShannonCircuit inputs inputsLarge function copies).size =
+      copies * synthesisGateCount
+        (reindexFunction (shannonAddressDataSum inputs inputsLarge) function) := by
+  simp [replicatedShannonCircuit]
 
 theorem replicatedShannonCircuit_computes
     (inputs : Nat)

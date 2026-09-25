@@ -41,7 +41,7 @@ def termCircuit
     (term : Term K n) :=
   (Algebraic.Arithmetic.Expression.circuit
       (Translation.scaleExpression term.scale)).comp
-    ((Algebraic.Arithmetic.Power.binaryCircuit (K := K) (2 * n)).2.comp
+    ((Algebraic.Arithmetic.Power.binaryCircuit (K := K) (2 * n)).comp
       (Algebraic.Arithmetic.Expression.circuit
         (Translation.linearFormExpression term)))
 
@@ -100,9 +100,6 @@ def translation
     ContextualTranslation
       (Algebraic.SumOfTerms.signature (Term K n))
       (Algebraic.Arithmetic.signature K) (2 * n) where
-  gateCount
-    | .add => (Translation.additionExpression (K := K) n).gateCount
-    | .term term => (termCircuit term).size
   operation
     | .add => Algebraic.Arithmetic.Expression.circuit
         (Translation.additionExpression (K := K) n)
@@ -148,7 +145,7 @@ theorem compile_multiplicationCost_eq_termCost
     [Semiring K]
     (n : Nat)
     (circuit : Circuit
-      (Algebraic.SumOfTerms.signature (Term K n)) 0 g m) :
+      (Algebraic.SumOfTerms.signature (Term K n)) 0 m) :
     ((translation (K := K) n).compile circuit).cost
         (Algebraic.Arithmetic.multiplicationCost (K := K)) =
       termMultiplicationCount n *
@@ -164,7 +161,7 @@ theorem compile_additionCost_eq_sourceCosts
     [Semiring K]
     (n : Nat)
     (circuit : Circuit
-      (Algebraic.SumOfTerms.signature (Term K n)) 0 g m) :
+      (Algebraic.SumOfTerms.signature (Term K n)) 0 m) :
     ((translation (K := K) n).compile circuit).cost
         (Algebraic.Arithmetic.additionCost (K := K)) =
       circuit.cost
@@ -237,7 +234,7 @@ theorem compile_eval
     [CommSemiring K]
     (n : Nat)
     (circuit : Circuit
-      (Algebraic.SumOfTerms.signature (Term K n)) 0 g m) :
+      (Algebraic.SumOfTerms.signature (Term K n)) 0 m) :
     ((translation (K := K) n).compile circuit).eval
         (Algebraic.Arithmetic.interpretation
           (MvPolynomial.C : K → MvPolynomial (Fin (2 * n)) K))

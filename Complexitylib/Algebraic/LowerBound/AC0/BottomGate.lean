@@ -104,10 +104,9 @@ theorem NegationAtInput.castSucc
           obtain ⟨input, source⟩ := atInput
           refine ⟨input, ?_⟩
           change (Wire.Renaming.castSucc : Wire.Renaming n g (g + 1))
-              (wires 0) = (Wire.input (g := g + 1) input)
-          rw [Wire.Renaming.castSucc_apply]
-          rw [source]
-          exact Fin.castSucc_castAdd input
+              (wires 0) = (Wire.input input : Wire n (g + 1))
+          rw [Wire.Renaming.castSucc_apply, source]
+          rfl
       | and literalCount => trivial
       | or literalCount => trivial
 
@@ -142,21 +141,21 @@ theorem exists_literal_of_logicalWireDepth_zero_raw
       program.wireFunction interpretation wire = literal.eval := by
   induction program with
   | empty =>
-      let input : Fin n := ⟨wire.val, by omega⟩
-      refine ⟨⟨input, true⟩, ?_⟩
-      have wireEq : wire = Wire.input (g := 0) input := by
-        apply Fin.ext
-        rfl
-      rw [wireEq, Algebraic.Program.wireFunction_input]
-      funext assignment
-      cases inputValue : assignment input <;> simp [Literal.eval, inputValue]
+      cases wire with
+      | input input =>
+          refine ⟨⟨input, true⟩, ?_⟩
+          rw [Algebraic.Program.wireFunction_input]
+          funext assignment
+          cases inputValue : assignment input <;> simp [Literal.eval, inputValue]
+      | gate gate => exact Fin.elim0 gate
   | @gate gateCount prior line inductionHypothesis =>
       revert depthZero
-      refine Fin.lastCases (fun depthZero => ?_)
-        (fun priorWire depthZero => ?_) wire
-      · have gateDepthZero :
+      induction wire using Wire.lastCases with
+      | last =>
+        intro depthZero
+        have gateDepthZero :
             logicalGateDepths (prior.gate line) (Fin.last gateCount) = 0 := by
-          simpa [← Fin.natAdd_last] using depthZero
+          simpa using depthZero
         have operation : line.op = .not := by
           have widenedOperation := line_op_eq_not_of_logicalDepth_zero
             (prior.gate line) (Fin.last gateCount) gateDepthZero
@@ -180,11 +179,11 @@ theorem exists_literal_of_logicalWireDepth_zero_raw
                 have sourceValue := congrFun computes assignment
                 calc
                   (prior.gate ⟨.not, wires⟩).trace interpretation assignment
-                      (Fin.last (n + gateCount)) =
+                      (Wire.gate (Fin.last gateCount)) =
                       (⟨.not, wires⟩ : Algebraic.Line signature n gateCount).eval
                         interpretation assignment
                           (prior.eval interpretation assignment) :=
-                    Algebraic.Program.trace_gate_last prior ⟨.not, wires⟩
+                    Algebraic.Program.eval_gate_last prior ⟨.not, wires⟩
                       interpretation assignment
                   _ = !(prior.wireFunction interpretation (wires 0)
                         assignment) := by
@@ -195,7 +194,9 @@ theorem exists_literal_of_logicalWireDepth_zero_raw
                     rw [Literal.eval_negate]
             | and fanIn => simp at operation
             | or fanIn => simp at operation
-      · have priorDepthZero :
+      | castSucc priorWire =>
+        intro depthZero
+        have priorDepthZero :
             logicalWireDepths prior priorWire = 0 := by
           simpa [logicalWireDepths] using depthZero
         obtain ⟨literal, computes⟩ :=
@@ -386,60 +387,60 @@ theorem argument_logicalWireDepth_zero_of_gateDepth_one
           change Nat.succ
               (Fin.foldl literalCount
                 (fun depth current => max depth
-                  ((Fin.addCases (fun _ : Fin n => 0)
-                    (logicalGateDepths program) : Wire n g -> Nat)
+                  ((Wire.elim (fun _ : Fin n => 0)
+                    (logicalGateDepths program))
                     (wires current))) 0) = 1 at lineDepth
           have foldedZero :
               Fin.foldl literalCount
                 (fun depth current => max depth
-                  ((Fin.addCases (fun _ : Fin n => 0)
-                    (logicalGateDepths program) : Wire n g -> Nat)
+                  ((Wire.elim (fun _ : Fin n => 0)
+                    (logicalGateDepths program))
                     (wires current))) 0 = 0 := by
             omega
           apply Nat.eq_zero_of_le_zero
-          change (Fin.addCases (fun _ : Fin n => 0)
-              (logicalGateDepths program) : Wire n g -> Nat)
+          change (Wire.elim (fun _ : Fin n => 0)
+              (logicalGateDepths program))
               (wires argument) ≤ 0
           calc
             _ ≤ Fin.foldl literalCount
                   (fun depth current => max depth
-                    ((Fin.addCases (fun _ : Fin n => 0)
-                      (logicalGateDepths program) : Wire n g -> Nat)
+                    ((Wire.elim (fun _ : Fin n => 0)
+                      (logicalGateDepths program))
                       (wires current))) 0 :=
               Fin.le_foldl_max
                 (fun current =>
-                  (Fin.addCases (fun _ : Fin n => 0)
-                    (logicalGateDepths program) : Wire n g -> Nat)
+                  (Wire.elim (fun _ : Fin n => 0)
+                    (logicalGateDepths program))
                     (wires current)) 0 argument
             _ = 0 := foldedZero
       | or literalCount =>
           change Nat.succ
               (Fin.foldl literalCount
                 (fun depth current => max depth
-                  ((Fin.addCases (fun _ : Fin n => 0)
-                    (logicalGateDepths program) : Wire n g -> Nat)
+                  ((Wire.elim (fun _ : Fin n => 0)
+                    (logicalGateDepths program))
                     (wires current))) 0) = 1 at lineDepth
           have foldedZero :
               Fin.foldl literalCount
                 (fun depth current => max depth
-                  ((Fin.addCases (fun _ : Fin n => 0)
-                    (logicalGateDepths program) : Wire n g -> Nat)
+                  ((Wire.elim (fun _ : Fin n => 0)
+                    (logicalGateDepths program))
                     (wires current))) 0 = 0 := by
             omega
           apply Nat.eq_zero_of_le_zero
-          change (Fin.addCases (fun _ : Fin n => 0)
-              (logicalGateDepths program) : Wire n g -> Nat)
+          change (Wire.elim (fun _ : Fin n => 0)
+              (logicalGateDepths program))
               (wires argument) ≤ 0
           calc
             _ ≤ Fin.foldl literalCount
                   (fun depth current => max depth
-                    ((Fin.addCases (fun _ : Fin n => 0)
-                      (logicalGateDepths program) : Wire n g -> Nat)
+                    ((Wire.elim (fun _ : Fin n => 0)
+                      (logicalGateDepths program))
                       (wires current))) 0 :=
               Fin.le_foldl_max
                 (fun current =>
-                  (Fin.addCases (fun _ : Fin n => 0)
-                    (logicalGateDepths program) : Wire n g -> Nat)
+                  (Wire.elim (fun _ : Fin n => 0)
+                    (logicalGateDepths program))
                     (wires current)) 0 argument
             _ = 0 := foldedZero
 

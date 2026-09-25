@@ -127,7 +127,7 @@ theorem circuit_multiplication_lowerBound
     (positiveWidth : 0 < width)
     (circuit : Circuit
       (Algebraic.Arithmetic.signature K)
-        (vertexCount * vertexCount) g 1)
+        (vertexCount * vertexCount) 1)
     (constructs :
       ({ inputCount := vertexCount * vertexCount,
           inputs := MvPolynomial.X,
@@ -163,7 +163,7 @@ theorem circuit_gate_lowerBound
     (positiveWidth : 0 < width)
     (circuit : Circuit
       (Algebraic.Arithmetic.signature K)
-        (vertexCount * vertexCount) g 1)
+        (vertexCount * vertexCount) 1)
     (constructs :
       ({ inputCount := vertexCount * vertexCount,
           inputs := MvPolynomial.X,
@@ -194,7 +194,7 @@ theorem circuit_size_lowerBound
     (positiveWidth : 0 < width)
     (circuit : Circuit
       (Algebraic.Arithmetic.signature K)
-        (vertexCount * vertexCount) g 1)
+        (vertexCount * vertexCount) 1)
     (constructs :
       ({ inputCount := vertexCount * vertexCount,
           inputs := MvPolynomial.X,
@@ -224,7 +224,7 @@ theorem central_circuit_gate_lowerBound
     (positiveWidth : 0 < width)
     (circuit : Circuit
       (Algebraic.Arithmetic.signature K)
-        ((2 * halfVertices) * (2 * halfVertices)) g 1)
+        ((2 * halfVertices) * (2 * halfVertices)) 1)
     (constructs :
       ({ inputCount := (2 * halfVertices) * (2 * halfVertices),
           inputs := MvPolynomial.X,
@@ -258,7 +258,7 @@ theorem central_four_pow_lt_mul_width_sq_gateCost
     (positiveWidth : 0 < width)
     (circuit : Circuit
       (Algebraic.Arithmetic.signature K)
-        ((2 * halfVertices) * (2 * halfVertices)) g 1)
+        ((2 * halfVertices) * (2 * halfVertices)) 1)
     (constructs :
       ({ inputCount := (2 * halfVertices) * (2 * halfVertices),
           inputs := MvPolynomial.X,
@@ -308,7 +308,7 @@ theorem central_four_pow_lt_mul_width_sq_size
     (positiveWidth : 0 < width)
     (circuit : Circuit
       (Algebraic.Arithmetic.signature K)
-        ((2 * halfVertices) * (2 * halfVertices)) g 1)
+        ((2 * halfVertices) * (2 * halfVertices)) 1)
     (constructs :
       ({ inputCount := (2 * halfVertices) * (2 * halfVertices),
           inputs := MvPolynomial.X,

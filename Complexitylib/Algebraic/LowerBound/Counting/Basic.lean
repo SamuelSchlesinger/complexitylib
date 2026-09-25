@@ -21,13 +21,13 @@ namespace Algebraic
 
 /-- A circuit with a gate count chosen from `0, ..., G`. -/
 abbrev BoundedCircuit (σ : Signature) (n m G : Nat) :=
-  Σ g : Fin (G + 1), Circuit σ n g m
+  Σ g : Fin (G + 1), {circuit : Circuit σ n m // circuit.size = g}
 
 /-- Evaluate a circuit whose internal gate count is bounded by `G`. -/
 def BoundedCircuit.eval
     (circuit : BoundedCircuit σ n m G)
     (interpretation : Interpretation σ U) : Target U n m :=
-  circuit.2.eval interpretation
+  circuit.2.1.eval interpretation
 
 /-- Functions computed by circuits with at most `G` internal gates. -/
 noncomputable def _root_.Cslib.Circuits.Circuit.functionsAtMost
@@ -56,20 +56,20 @@ theorem _root_.Cslib.Circuits.Circuit.mem_functionsAtMost_iff
     {interpretation : Interpretation σ U}
     {target : Target U n m} :
     target ∈ Circuit.functionsAtMost interpretation n m G ↔
-      ∃ g ≤ G, ∃ circuit : Circuit σ n g m,
+      ∃ circuit : Circuit σ n m, circuit.size ≤ G ∧
         circuit.ComputesWith interpretation target := by
   classical
   constructor
   · intro present
     rw [Circuit.functionsAtMost, Finset.mem_image] at present
     obtain ⟨circuit, _, equal⟩ := present
-    exact ⟨circuit.1, Nat.le_of_lt_succ circuit.1.isLt, circuit.2,
+    exact ⟨circuit.2.1, circuit.2.2.le.trans (Nat.le_of_lt_succ circuit.1.isLt),
       fun input => by
         simpa [BoundedCircuit.eval] using congrFun equal input⟩
-  · rintro ⟨g, bounded, circuit, computes⟩
+  · rintro ⟨circuit, bounded, computes⟩
     rw [Circuit.functionsAtMost, Finset.mem_image]
-    let index : Fin (G + 1) := ⟨g, Nat.lt_succ_iff.mpr bounded⟩
-    refine ⟨⟨index, circuit⟩, Finset.mem_univ _, ?_⟩
+    let index : Fin (G + 1) := ⟨circuit.size, Nat.lt_succ_iff.mpr bounded⟩
+    refine ⟨⟨index, circuit, rfl⟩, Finset.mem_univ _, ?_⟩
     simpa [BoundedCircuit.eval] using computes.eval_eq
 
 export Cslib.Circuits (Circuit.mem_functionsAtMost_iff)

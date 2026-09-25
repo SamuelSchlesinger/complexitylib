@@ -119,7 +119,7 @@ def mapInputs
 
 /-- One free constant gate. -/
 def constantCircuit (value : Bool) (n : Nat) :
-    Circuit signature n 1 1 where
+    Circuit signature n 1 where
   program := (Program.empty : Program signature n 0).gate
     { op := if value then .true else .false
       wires := fun argument => Fin.elim0
@@ -127,21 +127,21 @@ def constantCircuit (value : Bool) (n : Nat) :
   outputs := fun _ => Wire.gate (Fin.last 0)
 
 /-- One direct `NOT` gate. -/
-def notCircuit : Circuit signature 1 1 1 where
+def notCircuit : Circuit signature 1 1 where
   program := (Program.empty : Program signature 1 0).gate
     { op := .not
       wires := fun _ => Wire.input 0 }
   outputs := fun _ => Wire.gate (Fin.last 0)
 
 /-- One direct `AND` gate. -/
-def andCircuit : Circuit signature 2 1 1 where
+def andCircuit : Circuit signature 2 1 where
   program := (Program.empty : Program signature 2 0).gate
     { op := .and
       wires := fun input => Wire.input input }
   outputs := fun _ => Wire.gate (Fin.last 0)
 
 /-- One direct `OR` gate. -/
-def orCircuit : Circuit signature 2 1 1 where
+def orCircuit : Circuit signature 2 1 where
   program := (Program.empty : Program signature 2 0).gate
     { op := .or
       wires := fun input => Wire.input input }
@@ -196,7 +196,7 @@ def orCircuit : Circuit signature 2 1 1 where
 
 /-- Compile an expression into a one-output De Morgan circuit. -/
 def circuit : (expression : Expression n) ->
-    Circuit signature n expression.gateCount 1
+    Circuit signature n 1
   | .input index =>
       (Circuit.id signature n).mapOutputs (fun _ => index)
   | .constant value => constantCircuit value n
@@ -205,6 +205,20 @@ def circuit : (expression : Expression n) ->
       (left.circuit.parallel right.circuit)
   | .or left right => orCircuit.comp
       (left.circuit.parallel right.circuit)
+
+/-- Compilation emits exactly `gateCount` program gates. -/
+@[simp] theorem circuit_size
+    (expression : Expression n) :
+    expression.circuit.size = expression.gateCount := by
+  induction expression with
+  | input index => rfl
+  | constant value => rfl
+  | not child inductionHypothesis =>
+      simp [circuit, gateCount, inductionHypothesis, notCircuit]
+  | and left right leftIH rightIH =>
+      simp [circuit, gateCount, leftIH, rightIH, andCircuit]
+  | or left right leftIH rightIH =>
+      simp [circuit, gateCount, leftIH, rightIH, orCircuit]
 
 /-- Compilation preserves Boolean semantics. -/
 @[simp] theorem circuit_eval

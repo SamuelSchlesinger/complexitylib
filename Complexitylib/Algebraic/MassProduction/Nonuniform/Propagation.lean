@@ -76,7 +76,7 @@ theorem program_eval
         rw [lastIndex, program, Program.eval_gate_last]
         simp only [Line.eval, DeMorgan.interpretation]
         simp only [Function.comp_apply, Nat.one_ne_zero, ↓reduceIte,
-          Wire.input, Wire.gate, Fin.addCases_left, Fin.addCases_right,
+          Wire.elim_input, Wire.elim_gate,
           Program.eval_gate_last, Line.eval, DeMorgan.interpretation]
         rw [ih (by omega) processed (by omega)]
         simp only [value, sourceInput, linkInput, dite_eq_left (by omega : processed < count)]
@@ -97,9 +97,13 @@ theorem program_cost (count processed : Nat) (fits : processed ≤ count) :
       omega
 
 /-- All propagated values, in the same order as the input records. -/
-def circuit (count : Nat) : Circuit DeMorgan.signature (count + count) (1 + 2 * count) count where
+def circuit (count : Nat) : Circuit DeMorgan.signature (count + count) count where
   program := program count count le_rfl
   outputs := fun index => Wire.gate ⟨2 * (index.val + 1), by omega⟩
+
+/-- The circuit has one free constant plus two gates per record. -/
+@[simp] theorem circuit_size (count : Nat) :
+    (circuit count).size = 1 + 2 * count := rfl
 
 /-- The concrete circuit implements the segmented recurrence. -/
 theorem circuit_eval (input : Fin (count + count) → Bool) (index : Fin count) :

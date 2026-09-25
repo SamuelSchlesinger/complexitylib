@@ -79,12 +79,14 @@ theorem vectorCoordinateNonzeroFlags_eq_true_iff
 /-- Compute and share all coordinate nonzero flags. -/
 def vectorCoordinateNonzeroCircuit (dimension width : Nat) :
     Circuit DeMorgan.signature (dimension * width)
-      (∑ coordinate,
-        vectorCoordinateNonzeroGateCount dimension width coordinate)
       dimension :=
-  Circuit.parallelFin dimension
-    (vectorCoordinateNonzeroGateCount dimension width) fun coordinate =>
+  Circuit.parallelFin dimension fun coordinate =>
       (vectorCoordinateNonzeroExpression dimension width coordinate).circuit
+
+@[simp] theorem vectorCoordinateNonzeroCircuit_size (dimension width : Nat) :
+    (vectorCoordinateNonzeroCircuit dimension width).size =
+      ∑ coordinate, vectorCoordinateNonzeroGateCount dimension width coordinate := by
+  simp [vectorCoordinateNonzeroCircuit, vectorCoordinateNonzeroGateCount]
 
 @[simp] theorem vectorCoordinateNonzeroCircuit_eval
     (input : Fin (dimension * width) -> Bool) :
@@ -283,11 +285,14 @@ def normalizationPivotBitExpression
 
 /-- Select the first nonzero field coordinate from a flagged vector. -/
 def normalizationPivotFromFlaggedCircuit (dimension width : Nat) :
-    Circuit DeMorgan.signature (dimension * width + dimension)
-      (∑ bit, normalizationPivotBitGateCount dimension width bit) width :=
-  Circuit.parallelFin width
-    (normalizationPivotBitGateCount dimension width) fun bit =>
+    Circuit DeMorgan.signature (dimension * width + dimension) width :=
+  Circuit.parallelFin width fun bit =>
       (normalizationPivotBitExpression dimension width bit).circuit
+
+@[simp] theorem normalizationPivotFromFlaggedCircuit_size (dimension width : Nat) :
+    (normalizationPivotFromFlaggedCircuit dimension width).size =
+      ∑ bit, normalizationPivotBitGateCount dimension width bit := by
+  simp [normalizationPivotFromFlaggedCircuit, normalizationPivotBitGateCount]
 
 /-- Select the first nonzero coordinate directly from a packed vector. -/
 def normalizationPivotCircuit (dimension width : Nat) :=
@@ -382,10 +387,8 @@ noncomputable def normalizationInversePreparationCircuit
     Circuit.eval_parallel]
   unfold normalizationInversePreparationBits
   congr 1
-  · rw [Circuit.eval_mapOutputs, Circuit.eval_id]
-    rfl
-  · rw [Circuit.eval_mapInputs]
-    rfl
+  rw [Circuit.eval_mapInputs]
+  rfl
 
 /-- Vector together with the inverse of its selected pivot. -/
 noncomputable def normalizationVectorAndInverseCircuit
@@ -474,14 +477,19 @@ noncomputable def normalizationMultiplicationCircuit
     (dimension : Nat)
     (widthPositive : 0 < width) :
     Circuit DeMorgan.signature (dimension * width + width)
-      (∑ _ : Fin dimension,
-        normalizationCoordinateMultiplicationGateCount widthPositive)
       (dimension * width) :=
   Circuit.parallelFinVector dimension width
-    (fun _ => normalizationCoordinateMultiplicationGateCount widthPositive)
     fun coordinate =>
       normalizationCoordinateMultiplicationCircuit
         dimension widthPositive coordinate
+
+@[simp] theorem normalizationMultiplicationCircuit_size
+    (dimension : Nat)
+    (widthPositive : 0 < width) :
+    (normalizationMultiplicationCircuit dimension widthPositive).size =
+      ∑ _ : Fin dimension, normalizationCoordinateMultiplicationGateCount widthPositive := by
+  simp [normalizationMultiplicationCircuit, normalizationCoordinateMultiplicationGateCount,
+    normalizationCoordinateMultiplicationCircuit]
 
 @[simp] theorem normalizationMultiplicationCircuit_eval
     (widthPositive : 0 < width)

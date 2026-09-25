@@ -88,7 +88,7 @@ theorem map_compile_eval
     {source : Interpretation σ U}
     {target : Interpretation τ V}
     (simulation : Simulation translation source target)
-    (circuit : Circuit σ n g m)
+    (circuit : Circuit σ n m)
     (input : Fin n → U) :
     simulation.map ∘ circuit.eval source input =
       (translation.compile circuit).eval target

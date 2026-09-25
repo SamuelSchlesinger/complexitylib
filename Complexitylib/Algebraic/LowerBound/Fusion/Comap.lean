@@ -52,7 +52,7 @@ theorem Problem.Constructs.map
     {i₂ : Interpretation σ U₂}
     (h : Homomorphism i₁ i₂)
     {problem : Problem U₁}
-    {circuit : Circuit σ problem.inputCount g 1}
+    {circuit : Circuit σ problem.inputCount 1}
     (constructs : problem.Constructs circuit i₁) :
     (problem.map h.map).Constructs circuit i₂ := by
   unfold Problem.Constructs at constructs ⊢
@@ -188,7 +188,7 @@ theorem Framework.lowerBound_of_map
     (h : Homomorphism i₁ i₂)
     {model : Model operationCost i₂ (problem.map h.map)}
     (framework : Framework model)
-    (circuit : Circuit σ problem.inputCount g 1)
+    (circuit : Circuit σ problem.inputCount 1)
     (constructs : problem.Constructs circuit i₁) :
     framework.bound ≤ circuit.cost operationCost :=
   framework.lowerBound circuit (constructs.map h)
@@ -197,7 +197,7 @@ theorem Framework.lowerBound_of_map
 theorem Model.coverComplexity_le_cost_of_map
     (h : Homomorphism i₁ i₂)
     (model : Model operationCost i₂ (problem.map h.map))
-    (circuit : Circuit σ problem.inputCount g 1)
+    (circuit : Circuit σ problem.inputCount 1)
     (constructs : problem.Constructs circuit i₁) :
     model.coverComplexity ≤ circuit.cost operationCost :=
   model.coverComplexity_le_cost circuit (constructs.map h)

@@ -461,7 +461,7 @@ theorem compiled_criticalLayerOrPowerAtMultiplications
     (n : Nat)
     (positive : 0 < n)
     (circuit : Circuit
-      (Algebraic.SumOfTerms.signature (Term K n)) 0 g 1) :
+      (Algebraic.SumOfTerms.signature (Term K n)) 0 1) :
     Algebraic.Fusion.Arithmetic.Interaction.Polynomial.Catalecticant.Degree.CriticalLayerOrPowerAtMultiplications
       (id : K → K) n ((Translation.translation (K := K) n).compile circuit) := by
   intro arguments present
@@ -502,7 +502,7 @@ theorem sharedCompiled_criticalLayerOrPowerAtMultiplications
     (n : Nat)
     (positive : 0 < n)
     (circuit : Circuit
-      (Algebraic.SumOfTerms.signature (Term K n)) 0 g 1) :
+      (Algebraic.SumOfTerms.signature (Term K n)) 0 1) :
     Algebraic.Fusion.Arithmetic.Interaction.Polynomial.Catalecticant.Degree.CriticalLayerOrPowerAtMultiplications
       (id : K → K) n
         ((Translation.sharedTranslation (K := K) n).compile circuit) := by
@@ -545,7 +545,7 @@ theorem compiled_decompositionAtMultiplications_one
     (n : Nat)
     (positive : 0 < n)
     (circuit : Circuit
-      (Algebraic.SumOfTerms.signature (Term K n)) 0 g 1) :
+      (Algebraic.SumOfTerms.signature (Term K n)) 0 1) :
     Algebraic.Fusion.Arithmetic.Interaction.Polynomial.Catalecticant.Decomposition.AtMultiplications
       (id : K → K) n ((Translation.translation (K := K) n).compile circuit)
       1 := by
@@ -563,7 +563,7 @@ theorem sharedCompiled_decompositionAtMultiplications_one
     (n : Nat)
     (positive : 0 < n)
     (circuit : Circuit
-      (Algebraic.SumOfTerms.signature (Term K n)) 0 g 1) :
+      (Algebraic.SumOfTerms.signature (Term K n)) 0 1) :
     Algebraic.Fusion.Arithmetic.Interaction.Polynomial.Catalecticant.Decomposition.AtMultiplications
       (id : K → K) n
       ((Translation.sharedTranslation (K := K) n).compile circuit) 1 := by
@@ -580,7 +580,7 @@ theorem compiled_constructs
     [Field K]
     (n : Nat)
     (circuit : Circuit
-      (Algebraic.SumOfTerms.signature (Term K n)) 0 g 1)
+      (Algebraic.SumOfTerms.signature (Term K n)) 0 1)
     (constructs : (Waring.problem K n).Constructs circuit
       (Algebraic.SumOfTerms.interpretation (termValue (K := K) (n := n)))) :
     (Algebraic.Fusion.Arithmetic.Interaction.Polynomial.Catalecticant.problem K n).Constructs
@@ -599,7 +599,7 @@ theorem sharedCompiled_constructs
     [Field K]
     (n : Nat)
     (circuit : Circuit
-      (Algebraic.SumOfTerms.signature (Term K n)) 0 g 1)
+      (Algebraic.SumOfTerms.signature (Term K n)) 0 1)
     (constructs : (Waring.problem K n).Constructs circuit
       (Algebraic.SumOfTerms.interpretation (termValue (K := K) (n := n)))) :
     (Algebraic.Fusion.Arithmetic.Interaction.Polynomial.Catalecticant.problem K n).Constructs
@@ -620,7 +620,7 @@ theorem compiled_multiplication_lowerBound
     (n : Nat)
     (positive : 0 < n)
     (circuit : Circuit
-      (Algebraic.SumOfTerms.signature (Term K n)) 0 g 1)
+      (Algebraic.SumOfTerms.signature (Term K n)) 0 1)
     (constructs : (Waring.problem K n).Constructs circuit
       (Algebraic.SumOfTerms.interpretation (termValue (K := K) (n := n)))) :
     Nat.centralBinom n ≤
@@ -640,7 +640,7 @@ theorem sharedCompiled_multiplication_lowerBound
     (n : Nat)
     (positive : 0 < n)
     (circuit : Circuit
-      (Algebraic.SumOfTerms.signature (Term K n)) 0 g 1)
+      (Algebraic.SumOfTerms.signature (Term K n)) 0 1)
     (constructs : (Waring.problem K n).Constructs circuit
       (Algebraic.SumOfTerms.interpretation (termValue (K := K) (n := n)))) :
     Nat.centralBinom n ≤
@@ -660,7 +660,7 @@ theorem centralBinom_le_sharedTermCost_mul_sourceTermCost
     (n : Nat)
     (positive : 0 < n)
     (circuit : Circuit
-      (Algebraic.SumOfTerms.signature (Term K n)) 0 g 1)
+      (Algebraic.SumOfTerms.signature (Term K n)) 0 1)
     (constructs : (Waring.problem K n).Constructs circuit
       (Algebraic.SumOfTerms.interpretation (termValue (K := K) (n := n)))) :
     Nat.centralBinom n ≤
@@ -678,7 +678,7 @@ theorem compiled_four_pow_lt_mul_size
     (n : Nat)
     (n_big : 4 ≤ n)
     (circuit : Circuit
-      (Algebraic.SumOfTerms.signature (Term K n)) 0 g 1)
+      (Algebraic.SumOfTerms.signature (Term K n)) 0 1)
     (constructs : (Waring.problem K n).Constructs circuit
       (Algebraic.SumOfTerms.interpretation (termValue (K := K) (n := n)))) :
     4 ^ n < n * ((Translation.translation (K := K) n).compile circuit).size :=
@@ -696,7 +696,7 @@ theorem sharedCompiled_four_pow_lt_mul_size
     (n : Nat)
     (n_big : 4 ≤ n)
     (circuit : Circuit
-      (Algebraic.SumOfTerms.signature (Term K n)) 0 g 1)
+      (Algebraic.SumOfTerms.signature (Term K n)) 0 1)
     (constructs : (Waring.problem K n).Constructs circuit
       (Algebraic.SumOfTerms.interpretation (termValue (K := K) (n := n)))) :
     4 ^ n < n *

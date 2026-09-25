@@ -279,9 +279,9 @@ theorem sound_trace_of_preserves
   induction program with
   | empty =>
       intro wire
-      refine Fin.addCases (fun input => ?_) (fun gate => Fin.elim0 gate) wire
-      rw [Program.trace_input]
-      exact model.input_sound witness input
+      cases wire with
+      | input input => exact model.input_sound witness input
+      | gate gate => exact Fin.elim0 gate
   | @gate g program line inductionHypothesis =>
       have preservesPrior : ∀ atom ∈
           programAtoms interpretation problem.inputs program,
@@ -290,11 +290,9 @@ theorem sound_trace_of_preserves
         exact preserves atom (List.mem_append_left _ present)
       have priorSound := inductionHypothesis preservesPrior
       intro wire
-      refine Fin.addCases (fun input => ?_) (fun gate => ?_) wire
-      · rw [Program.trace_input]
-        exact model.input_sound witness input
-      · refine Fin.lastCases ?_ (fun priorGate => ?_) gate
-        · let lastAtom := lineAtom line program interpretation problem.inputs
+      induction wire using Wire.lastCases with
+      | last =>
+          let lastAtom := lineAtom line program interpretation problem.inputs
           have lastPresent : lastAtom ∈
               programAtoms interpretation problem.inputs (program.gate line) := by
             simp [lastAtom]
@@ -306,26 +304,27 @@ theorem sound_trace_of_preserves
           have resultSound := lastPreserved argumentsSound
           rw [Program.trace_gateWire, Program.gateFunction_gate_last]
           exact resultSound
-        · simpa [Program.trace] using
-            priorSound (Wire.gate (n := problem.inputCount) priorGate)
+      | castSucc priorWire =>
+          rw [Program.trace_gate_castSucc]
+          exact priorSound priorWire
 
 /-- A circuit constructs a problem when its sole output is the target value. -/
 def Problem.Constructs
     (problem : Problem U)
-    (circuit : Circuit σ problem.inputCount g 1)
+    (circuit : Circuit σ problem.inputCount 1)
     (interpretation : Interpretation σ U) : Prop :=
   circuit.eval interpretation problem.inputs 0 = problem.target
 
 /-- Semantic gate configurations extracted from a circuit. -/
 def circuitAtoms
-    (circuit : Circuit σ n g m)
+    (circuit : Circuit σ n m)
     (interpretation : Interpretation σ U)
     (input : Fin n → U) : List (Atom σ U) :=
   programAtoms interpretation input circuit.program
 
 /-- Extracted circuit atoms have exactly the circuit's weighted cost. -/
 theorem circuitAtoms_cost
-    (circuit : Circuit σ n g m)
+    (circuit : Circuit σ n m)
     (interpretation : Interpretation σ U)
     (input : Fin n → U)
     (operationCost : OperationCost σ) :
@@ -341,7 +340,7 @@ def coverOfCircuit
     {interpretation : Interpretation σ U}
     {problem : Problem U}
     (model : Model operationCost interpretation problem)
-    (circuit : Circuit σ problem.inputCount g 1)
+    (circuit : Circuit σ problem.inputCount 1)
     (constructs : problem.Constructs circuit interpretation) : Cover model where
   atoms := circuitAtoms circuit interpretation problem.inputs
   isCover := by
@@ -362,7 +361,7 @@ theorem coverOfCircuit_cost
     {interpretation : Interpretation σ U}
     {problem : Problem U}
     (model : Model operationCost interpretation problem)
-    (circuit : Circuit σ problem.inputCount g 1)
+    (circuit : Circuit σ problem.inputCount 1)
     (constructs : problem.Constructs circuit interpretation) :
     (coverOfCircuit model circuit constructs).cost =
       circuit.cost operationCost := by
@@ -377,7 +376,7 @@ theorem Model.lowerBound
     {problem : Problem U}
     (model : Model operationCost interpretation problem)
     (coverLowerBound : ∀ cover : Cover model, L ≤ cover.cost)
-    (circuit : Circuit σ problem.inputCount g 1)
+    (circuit : Circuit σ problem.inputCount 1)
     (constructs : problem.Constructs circuit interpretation) :
     L ≤ circuit.cost operationCost := by
   let cover := coverOfCircuit model circuit constructs
@@ -392,7 +391,7 @@ theorem Model.coverComplexity_le_cost
     {interpretation : Interpretation σ U}
     {problem : Problem U}
     (model : Model operationCost interpretation problem)
-    (circuit : Circuit σ problem.inputCount g 1)
+    (circuit : Circuit σ problem.inputCount 1)
     (constructs : problem.Constructs circuit interpretation) :
     model.coverComplexity ≤ circuit.cost operationCost := by
   calc
@@ -424,7 +423,7 @@ theorem Framework.lowerBound
     {problem : Problem U}
     {model : Model operationCost interpretation problem}
     (framework : Framework model)
-    (circuit : Circuit σ problem.inputCount g 1)
+    (circuit : Circuit σ problem.inputCount 1)
     (constructs : problem.Constructs circuit interpretation) :
     framework.bound ≤ circuit.cost operationCost :=
   model.lowerBound framework.coverLowerBound circuit constructs

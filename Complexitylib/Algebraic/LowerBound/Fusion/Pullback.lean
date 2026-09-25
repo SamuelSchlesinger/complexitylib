@@ -179,7 +179,7 @@ theorem Atom.preservedBy_pullbackModel
 /-- A constructing target circuit yields a pair cover of the source problem. -/
 def SemifilterPullback.pairCoverOfCircuit
     (pullback : SemifilterPullback source target admissible)
-    (circuit : Circuit AndOr.signature target.inputCount g 1)
+    (circuit : Circuit AndOr.signature target.inputCount 1)
     (constructs : target.Constructs circuit (AndOr.setInterpretation Δ)) :
     PairCover source admissible where
   pairs := pullback.pairs
@@ -206,7 +206,7 @@ def SemifilterPullback.pairCoverOfCircuit
 /-- Pullback preserves the exact AND cost of a constructing circuit. -/
 theorem SemifilterPullback.pairCoverOfCircuit_cost
     (pullback : SemifilterPullback source target admissible)
-    (circuit : Circuit AndOr.signature target.inputCount g 1)
+    (circuit : Circuit AndOr.signature target.inputCount 1)
     (constructs : target.Constructs circuit (AndOr.setInterpretation Δ)) :
     (pullback.pairCoverOfCircuit circuit constructs).cost =
       circuit.cost AndOr.andCost := by
@@ -221,7 +221,7 @@ theorem SemifilterPullback.lowerBound
     (pullback : SemifilterPullback source target admissible)
     (coverLowerBound : ∀ cover : PairCover source admissible,
       L ≤ cover.cost)
-    (circuit : Circuit AndOr.signature target.inputCount g 1)
+    (circuit : Circuit AndOr.signature target.inputCount 1)
     (constructs : target.Constructs circuit (AndOr.setInterpretation Δ)) :
     L ≤ circuit.cost AndOr.andCost := by
   rw [← pullback.pairCoverOfCircuit_cost circuit constructs]

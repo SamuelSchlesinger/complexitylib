@@ -52,7 +52,7 @@ theorem matrix_rank_le_multiplicationCost
     (two_le : 2 ≤ k)
     (mix : Matrix (Fin (Nat.choose n k)) (Fin (Nat.choose n k)) K)
     (circuit : Circuit (Algebraic.Arithmetic.signature C)
-      n g (Nat.choose n k))
+      n (Nat.choose n k))
     (constructs : Multiple.Constructs
       (constant := fun scalar => MvPolynomial.C (constant scalar))
       (Squarefree.inputProblem K n) (targets K n k mix) circuit) :
@@ -76,7 +76,7 @@ theorem circuit_multiplication_lowerBound_of_det_ne_zero
     (mix : Matrix (Fin (Nat.choose n k)) (Fin (Nat.choose n k)) K)
     (det_ne_zero : mix.det ≠ 0)
     (circuit : Circuit (Algebraic.Arithmetic.signature C)
-      n g (Nat.choose n k))
+      n (Nat.choose n k))
     (constructs : Multiple.Constructs
       (constant := fun scalar => MvPolynomial.C (constant scalar))
       (Squarefree.inputProblem K n) (targets K n k mix) circuit) :
@@ -107,7 +107,7 @@ theorem prefixTargets_multiplication_lowerBound
     (n k : Nat)
     (two_le : 2 ≤ k)
     (circuit : Circuit (Algebraic.Arithmetic.signature C)
-      n g (Nat.choose n k))
+      n (Nat.choose n k))
     (constructs : Multiple.Constructs
       (constant := fun scalar => MvPolynomial.C (constant scalar))
       (Squarefree.inputProblem K n) (prefixTargets K n k) circuit) :
@@ -128,7 +128,7 @@ theorem prefixTargets_size_lowerBound
     (n k : Nat)
     (two_le : 2 ≤ k)
     (circuit : Circuit (Algebraic.Arithmetic.signature C)
-      n g (Nat.choose n k))
+      n (Nat.choose n k))
     (constructs : Multiple.Constructs
       (constant := fun scalar => MvPolynomial.C (constant scalar))
       (Squarefree.inputProblem K n) (prefixTargets K n k) circuit) :
@@ -145,7 +145,7 @@ theorem centralBinom_prefixTargets_multiplication_lowerBound
     (n : Nat)
     (two_le : 2 ≤ n)
     (circuit : Circuit (Algebraic.Arithmetic.signature C)
-      (2 * n) g (Nat.centralBinom n))
+      (2 * n) (Nat.centralBinom n))
     (constructs : Multiple.Constructs
       (constant := fun scalar => MvPolynomial.C (constant scalar))
       (Squarefree.inputProblem K (2 * n))
@@ -163,7 +163,7 @@ theorem four_pow_lt_mul_multiplicationCost
     (n : Nat)
     (n_big : 4 ≤ n)
     (circuit : Circuit (Algebraic.Arithmetic.signature C)
-      (2 * n) g (Nat.centralBinom n))
+      (2 * n) (Nat.centralBinom n))
     (constructs : Multiple.Constructs
       (constant := fun scalar => MvPolynomial.C (constant scalar))
       (Squarefree.inputProblem K (2 * n))
@@ -182,7 +182,7 @@ theorem four_pow_lt_mul_size
     (n : Nat)
     (n_big : 4 ≤ n)
     (circuit : Circuit (Algebraic.Arithmetic.signature C)
-      (2 * n) g (Nat.centralBinom n))
+      (2 * n) (Nat.centralBinom n))
     (constructs : Multiple.Constructs
       (constant := fun scalar => MvPolynomial.C (constant scalar))
       (Squarefree.inputProblem K (2 * n))

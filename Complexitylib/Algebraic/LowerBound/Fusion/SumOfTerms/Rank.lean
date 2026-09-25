@@ -154,7 +154,7 @@ theorem RankCertificate.circuit_lowerBound
     (certificate : RankCertificate (K := K) (A := A) (B := B) termValue problem)
     (positive : 0 < certificate.termRank)
     (circuit : Circuit (Algebraic.SumOfTerms.signature T)
-      problem.inputCount g 1)
+      problem.inputCount 1)
     (constructs : problem.Constructs circuit
       (Algebraic.SumOfTerms.interpretation termValue)) :
     certificate.targetRank ⌈/⌉ certificate.termRank ≤

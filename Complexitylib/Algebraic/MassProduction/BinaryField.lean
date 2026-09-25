@@ -363,12 +363,17 @@ theorem multiplicationCoordinateExpression_eval
 noncomputable def binaryExtensionMulCircuit
     (widthPositive : 0 < width) :
     Circuit DeMorgan.signature (2 * width)
-      (∑ output, multiplicationCoordinateGateCount widthPositive output)
       width :=
-  Circuit.parallelFin width
-    (multiplicationCoordinateGateCount widthPositive) fun output =>
+  Circuit.parallelFin width fun output =>
       DeMorgan.ArithmeticExpression.circuit
         (multiplicationCoordinateExpression widthPositive output)
+
+@[simp] theorem binaryExtensionMulCircuit_size
+    (widthPositive : 0 < width) :
+    (binaryExtensionMulCircuit widthPositive).size =
+      ∑ output, multiplicationCoordinateGateCount widthPositive output := by
+  simp [binaryExtensionMulCircuit, multiplicationCoordinateGateCount,
+    DeMorgan.ArithmeticExpression.circuit]
 
 /-- The explicit multiplication circuit has exactly the encoded field
 multiplication semantics. -/
@@ -442,13 +447,16 @@ theorem encode_binaryExtensionAddBits
 
 /-- Explicit coordinatewise De Morgan circuit for binary-field addition. -/
 def binaryExtensionAddCircuit (width : Nat) :
-    Circuit DeMorgan.signature (2 * width)
-      (∑ output : Fin width,
-        additionCoordinateGateCount (width := width) output) width :=
-  Circuit.parallelFin width
-    (fun output : Fin width => additionCoordinateGateCount output) fun output =>
+    Circuit DeMorgan.signature (2 * width) width :=
+  Circuit.parallelFin width fun output =>
     DeMorgan.ArithmeticExpression.circuit
       (additionCoordinateExpression output)
+
+@[simp] theorem binaryExtensionAddCircuit_size (width : Nat) :
+    (binaryExtensionAddCircuit width).size =
+      ∑ output : Fin width, additionCoordinateGateCount (width := width) output := by
+  simp [binaryExtensionAddCircuit, additionCoordinateGateCount,
+    DeMorgan.ArithmeticExpression.circuit]
 
 @[simp] theorem binaryExtensionAddCircuit_eval
     (input : Fin (2 * width) -> Bool) :
@@ -472,7 +480,7 @@ chosen four-gate XOR implementation. -/
 /-- Free projection of one field element from a row-major pair. -/
 def binaryExtensionSideCircuit
     (width : Nat)
-    (side : Fin 2) : Circuit DeMorgan.signature (2 * width) 0 width :=
+    (side : Fin 2) : Circuit DeMorgan.signature (2 * width) width :=
   (Circuit.id DeMorgan.signature (2 * width)).mapOutputs
     (binaryExtensionPairIndex side)
 
@@ -566,8 +574,8 @@ def binaryExtensionPairBits
 /-- A `parallelPair` circuit has exactly the corresponding packed-pair
 semantics. -/
 theorem Circuit.eval_parallelPair_eq_binaryExtensionPairBits
-    (left : Circuit DeMorgan.signature n g width)
-    (right : Circuit DeMorgan.signature n h width)
+    (left : Circuit DeMorgan.signature n width)
+    (right : Circuit DeMorgan.signature n width)
     (input : Fin n -> Bool) :
     (left.parallelPair right).eval DeMorgan.interpretation input =
       binaryExtensionPairBits

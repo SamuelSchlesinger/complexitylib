@@ -139,15 +139,20 @@ noncomputable def circuit
       totalRequests * nonzeroScalarCount width <= networkRecords depth) :
     Circuit DeMorgan.signature
       (inputCount depth keyWidth metadataWidth valueWidth totalRequests)
-      (∑ request, decoderGateCount keyWidth metadataWidth valueWidth
-        destinationFits request)
       totalRequests :=
   Circuit.parallelFin totalRequests
-    (decoderGateCount keyWidth metadataWidth valueWidth destinationFits)
     (fun request => DeMorgan.ArithmeticExpression.circuit
       (decoderExpression (keyWidth := keyWidth)
         (metadataWidth := metadataWidth) (valueWidth := valueWidth)
         destinationFits request))
+
+@[simp] theorem circuit_size
+    (destinationFits :
+      totalRequests * nonzeroScalarCount width <= networkRecords depth) :
+    (circuit (keyWidth := keyWidth) (metadataWidth := metadataWidth)
+        (valueWidth := valueWidth) destinationFits).size =
+      ∑ request, decoderGateCount keyWidth metadataWidth valueWidth destinationFits request := by
+  simp [circuit, decoderGateCount, DeMorgan.ArithmeticExpression.circuit]
 
 @[simp] theorem circuit_eval_apply
     (destinationFits :

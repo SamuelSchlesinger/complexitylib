@@ -189,7 +189,6 @@ noncomputable def greedyStageInputCircuit
     Circuit DeMorgan.signature
       (priorRequests * lineBitWidth dimension width +
         pointBitWidth dimension width)
-      0
       ((networkRecords depth + 1) * pointBitWidth dimension width) :=
   (Circuit.id DeMorgan.signature
     (priorRequests * lineBitWidth dimension width +
@@ -416,10 +415,9 @@ noncomputable def greedyScheduleCircuit
     (requests * nonzeroScalarCount width ≤ networkRecords depth) ->
     Circuit DeMorgan.signature
       (requests * pointBitWidth dimension width)
-      (greedyScheduleGateCount dimension widthPositive depth requests)
       (requests * lineBitWidth dimension width)
   | 0, _ => (Circuit.id DeMorgan.signature 0).castCounts
-      (Nat.zero_mul (pointBitWidth dimension width)).symm rfl
+      (Nat.zero_mul (pointBitWidth dimension width)).symm
       (Nat.zero_mul (lineBitWidth dimension width)).symm
   | requests + 1, allFit => by
       have priorFit : requests * nonzeroScalarCount width ≤
@@ -432,7 +430,7 @@ noncomputable def greedyScheduleCircuit
             (targetPrefixInputIndex requests
               (pointBitWidth dimension width))
       let targetCircuit : Circuit DeMorgan.signature
-          ((requests + 1) * pointBitWidth dimension width) 0
+          ((requests + 1) * pointBitWidth dimension width)
           (pointBitWidth dimension width) :=
         (Circuit.id DeMorgan.signature
           ((requests + 1) * pointBitWidth dimension width)).mapOutputs
@@ -446,18 +444,29 @@ noncomputable def greedyScheduleCircuit
           dimension widthPositive depth).comp stageInput
       let retainedPrefix : Circuit DeMorgan.signature
           (requests * lineBitWidth dimension width +
-            pointBitWidth dimension width)
-          0 (requests * lineBitWidth dimension width) :=
+            pointBitWidth dimension width) (requests * lineBitWidth dimension width) :=
         (Circuit.id DeMorgan.signature
           (requests * lineBitWidth dimension width +
             pointBitWidth dimension width)).mapOutputs
               (Fin.castAdd (pointBitWidth dimension width))
       let appendLine := (retainedPrefix.parallel currentLine).castCounts
-        rfl rfl (Nat.succ_mul requests
+        rfl (Nat.succ_mul requests
           (lineBitWidth dimension width)).symm
-      exact (appendLine.comp retainedState).castCounts rfl
-        (by
-          simp [greedyScheduleGateCount, Circuit.size]) rfl
+      exact (appendLine.comp retainedState).castCounts rfl rfl
+
+/-- The unrolled scheduler emits exactly `greedyScheduleGateCount` gates. -/
+@[simp] theorem greedyScheduleCircuit_size
+    (dimension : Nat)
+    (widthPositive : 0 < width)
+    (depth requests : Nat)
+    (fits : requests * nonzeroScalarCount width ≤ networkRecords depth) :
+    (greedyScheduleCircuit dimension widthPositive depth requests fits).size =
+      greedyScheduleGateCount dimension widthPositive depth requests := by
+  induction requests with
+  | zero => simp [greedyScheduleCircuit, greedyScheduleGateCount]
+  | succ requests inductionHypothesis =>
+      simp [greedyScheduleCircuit, greedyScheduleGateCount,
+        inductionHypothesis, greedyStageInputCircuit]
 
 /-! ## Decoding the recursively emitted schedule -/
 

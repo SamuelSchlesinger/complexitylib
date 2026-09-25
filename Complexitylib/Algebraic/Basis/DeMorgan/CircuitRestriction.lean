@@ -12,7 +12,7 @@ public import Complexitylib.Algebraic.Basis.DeMorgan.Restriction
 
 The source program is restricted directly, and its designated output wire is
 then materialized in the residual program when necessary. Deleted charged
-gates are indexed by `Fin g`, the original source-gate type. The exact cost
+gates are indexed by `Fin source.size`, the original source-gate type. The exact cost
 identity is exposed as a standard `Circuit.Reduction` certificate.
 -/
 
@@ -26,15 +26,13 @@ Restriction of a one-output De Morgan circuit, with the exact set of deleted
 charged source gates.
 -/
 structure CircuitRestriction
-    (source : Circuit signature (n + 1) g 1)
+    (source : Circuit signature (n + 1) 1)
     (selected : Fin (n + 1))
     (fixedValue : Bool) where
-  /-- Number of internal gates in the residual circuit. -/
-  gateCount : Nat
   /-- Residual circuit on the remaining inputs. -/
-  result : Circuit signature n gateCount 1
+  result : Circuit signature n 1
   /-- Deleted charged gates in the original source program. -/
-  deleted : Finset (Fin g)
+  deleted : Finset (Fin source.size)
   /-- Pointwise semantics under the chosen input restriction. -/
   eval_eq : ∀ input,
     result.eval interpretation input =
@@ -45,10 +43,18 @@ structure CircuitRestriction
 
 namespace CircuitRestriction
 
+/-- Number of internal gates in the residual circuit. -/
+abbrev gateCount
+    {source : Circuit signature (n + 1) 1}
+    {selected : Fin (n + 1)}
+    {fixedValue : Bool}
+    (restriction : CircuitRestriction source selected fixedValue) : Nat :=
+  restriction.result.size
+
 /-- Materialize the residual value of the designated source output, using
 at most one free gate for a constant or a negation. -/
 def ofProgram
-    {source : Circuit signature (n + 1) g 1}
+    {source : Circuit signature (n + 1) 1}
     {selected : Fin (n + 1)}
     {fixedValue : Bool}
     (program : ProgramRestriction source.program selected fixedValue) :
@@ -56,8 +62,7 @@ def ofProgram
   let outputValue := program.values (source.outputs 0)
   let materialized := materialize program.result outputValue
   exact
-    { gateCount := materialized.gateCount
-      result := { program := materialized.result, outputs := fun _ => materialized.output }
+    { result := { program := materialized.result, outputs := fun _ => materialized.output }
       deleted := program.deleted
       eval_eq := by
         intro input
@@ -74,13 +79,12 @@ def ofProgram
 
 /-- View an exact circuit restriction as a generic certified reduction. -/
 def toReduction
-    {source : Circuit signature (n + 1) g 1}
+    {source : Circuit signature (n + 1) 1}
     {selected : Fin (n + 1)}
     {fixedValue : Bool}
     (restriction : CircuitRestriction source selected fixedValue) :
     Circuit.Reduction binaryCost source interpretation
       (InputSubstitution.fix selected fixedValue) where
-  gateCount := restriction.gateCount
   result := restriction.result
   eval_eq := restriction.eval_eq
   saving := restriction.deleted.card
@@ -90,7 +94,7 @@ end CircuitRestriction
 
 /-- Partial-evaluate a one-output circuit after fixing one input. -/
 noncomputable def restrictCircuit
-    (source : Circuit signature (n + 1) g 1)
+    (source : Circuit signature (n + 1) 1)
     (selected : Fin (n + 1))
     (fixedValue : Bool) :
     CircuitRestriction source selected fixedValue := by
@@ -100,7 +104,7 @@ noncomputable def restrictCircuit
 
 /-- Circuit restriction exposes exactly the source program's deletion set. -/
 @[simp] theorem restrictCircuit_deleted
-    (source : Circuit signature (n + 1) g 1)
+    (source : Circuit signature (n + 1) 1)
     (selected : Fin (n + 1))
     (fixedValue : Bool) :
     (restrictCircuit source selected fixedValue).deleted =

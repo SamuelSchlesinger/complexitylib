@@ -306,7 +306,7 @@ constant-free monotone shared circuits. -/
 theorem powSelf_lt_circuitSize
     (w : Nat)
     (sixteen_le : 16 ≤ w)
-    (circuit : Circuit AndOr.signature (edgeCount (w ^ 20)) g 1)
+    (circuit : Circuit AndOr.signature (edgeCount (w ^ 20)) 1)
     (computes : ∀ assignment,
       circuit.eval AndOr.boolInterpretation assignment 0 =
         function (w ^ 20) (w ^ 4) assignment) :
@@ -331,7 +331,7 @@ theorem powSelf_lt_circuitSize
 theorem twoPow_lt_circuitSize
     (t : Nat)
     (four_le : 4 ≤ t)
-    (circuit : Circuit AndOr.signature (edgeCount ((2 ^ t) ^ 20)) g 1)
+    (circuit : Circuit AndOr.signature (edgeCount ((2 ^ t) ^ 20)) 1)
     (computes : ∀ assignment,
       circuit.eval AndOr.boolInterpretation assignment 0 =
         function ((2 ^ t) ^ 20) ((2 ^ t) ^ 4) assignment) :

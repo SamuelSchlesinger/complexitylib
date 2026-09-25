@@ -28,14 +28,16 @@ namespace Algebraic
 /-- An implementation of every source operation by a target circuit with a
 shared `q`-input context followed by its ordinary arguments. -/
 structure ContextualTranslation (σ τ : Signature) (q : Nat) where
-  /-- Number of target gates used to implement a source operation. -/
-  gateCount : σ.Op → Nat
   /-- Target circuit implementing a source operation from the shared context
   and the operation's local arguments. -/
   operation : (op : σ.Op) →
-    Circuit τ (q + σ.Arity op) (gateCount op) 1
+    Circuit τ (q + σ.Arity op) 1
 
 namespace ContextualTranslation
+
+/-- Number of target gates used to implement a source operation. -/
+abbrev gateCount (translation : ContextualTranslation σ τ q) (op : σ.Op) : Nat :=
+  (translation.operation op).size
 
 /-- Concatenate the shared context with the ordinary circuit inputs. -/
 def appendInputs
@@ -92,10 +94,9 @@ def compileProgram
   | .empty =>
       { gateCount := 0
         program := .empty
-        wires := fun wire =>
-          Fin.addCases
+        wires := Wire.elim
             (fun input => Wire.input (Fin.natAdd q input))
-            (fun gate => Fin.elim0 gate) wire }
+            (fun gate => Fin.elim0 gate) }
   | .gate source line =>
       let prior := translation.compileProgram source
       let implementation := translation.operation line.op
@@ -108,7 +109,9 @@ def compileProgram
         implementationInputs
       { gateCount := prior.gateCount + translation.gateCount line.op
         program := instantiated.program
-        wires := Fin.lastCases
+        wires := Wire.lastCases
+          (motive := fun _ =>
+            Wire (q + n) (prior.gateCount + translation.gateCount line.op))
           (instantiated.outputs 0)
           (fun priorWire =>
             Wire.Renaming.castAdd (translation.gateCount line.op)
@@ -117,14 +120,14 @@ def compileProgram
 /-- Number of target gates produced by contextual compilation. -/
 def compiledGateCount
     (translation : ContextualTranslation σ τ q)
-    (circuit : Circuit σ n g m) : Nat :=
+    (circuit : Circuit σ n m) : Nat :=
   (translation.compileProgram circuit.program).gateCount
 
 /-- Compile a circuit, prefixing its source inputs by the shared context. -/
 def compile
     (translation : ContextualTranslation σ τ q)
-    (circuit : Circuit σ n g m) :
-    Circuit τ (q + n) (translation.compiledGateCount circuit) m :=
+    (circuit : Circuit σ n m) :
+    Circuit τ (q + n) m :=
   let compiled := translation.compileProgram circuit.program
   { program := compiled.program
     outputs := compiled.wires ∘ circuit.outputs }
@@ -143,14 +146,9 @@ theorem compileProgram_trace
       source.trace (translation.pull interpretation context) input wire := by
   induction source with
   | empty =>
-      refine Fin.addCases (fun sourceInput => ?_)
-        (fun gate => Fin.elim0 gate) wire
-      have input_eq : (sourceInput : Wire n 0) =
-          (Wire.input (g := 0) sourceInput : Wire n 0) := by
-        apply Fin.ext
-        rfl
-      rw [input_eq]
-      simp [compileProgram]
+      cases wire with
+      | input sourceInput => simp [compileProgram]
+      | gate gate => exact Fin.elim0 gate
   | @gate g source line inductionHypothesis =>
       let prior := translation.compileProgram source
       let implementation := translation.operation line.op
@@ -161,8 +159,10 @@ theorem compileProgram_trace
           (fun argument => prior.wires (line.wires argument))
       let instantiated := implementation.instantiate prior.program
         implementationInputs
-      refine Fin.lastCases ?_ (fun priorWire => ?_) wire
-      · simp only [compileProgram, Fin.lastCases_last]
+      induction wire using Wire.lastCases with
+      | last =>
+        simp only [compileProgram]
+        erw [Wire.lastCases_last]
         have input_eq :
             prior.program.trace interpretation (appendInputs context input) ∘
                 implementationInputs =
@@ -197,9 +197,11 @@ theorem compileProgram_trace
           _ = line.eval (translation.pull interpretation context) input
                 (source.eval
                   (translation.pull interpretation context) input) := rfl
-          _ = _ := (Program.trace_gate_last source line
+          _ = _ := (Program.eval_gate_last source line
             (translation.pull interpretation context) input).symm
-      · simp only [compileProgram, Fin.lastCases_castSucc]
+      | castSucc priorWire =>
+        simp only [compileProgram]
+        erw [Wire.lastCases_castSucc]
         change instantiated.program.trace interpretation
           (appendInputs context input)
           (Wire.Renaming.castAdd (translation.gateCount line.op)
@@ -214,7 +216,7 @@ theorem compileProgram_trace
 /-- Contextual circuit compilation preserves evaluation exactly. -/
 theorem compile_eval
     (translation : ContextualTranslation σ τ q)
-    (circuit : Circuit σ n g m)
+    (circuit : Circuit σ n m)
     (interpretation : Interpretation τ U)
     (context : Fin q → U)
     (input : Fin n → U) :
@@ -243,7 +245,7 @@ theorem compileProgram_cost
 exactly. -/
 theorem compile_cost
     (translation : ContextualTranslation σ τ q)
-    (circuit : Circuit σ n g m)
+    (circuit : Circuit σ n m)
     (operationCost : OperationCost τ) :
     (translation.compile circuit).cost operationCost =
       circuit.cost (translation.pullCost operationCost) :=
@@ -252,7 +254,7 @@ theorem compile_cost
 /-- The compiled size is source cost under contextual gadget sizes. -/
 theorem compile_size
     (translation : ContextualTranslation σ τ q)
-    (circuit : Circuit σ n g m) :
+    (circuit : Circuit σ n m) :
     (translation.compile circuit).size =
       circuit.cost (translation.pullCost OperationCost.unit) := by
   rw [← Circuit.cost_unit, translation.compile_cost]
@@ -260,7 +262,7 @@ theorem compile_size
 /-- A uniform contextual gadget-size bound controls compilation size. -/
 theorem compile_size_le_mul
     (translation : ContextualTranslation σ τ q)
-    (circuit : Circuit σ n g m)
+    (circuit : Circuit σ n m)
     (bounded : ∀ op, (translation.operation op).size ≤ K) :
     (translation.compile circuit).size ≤ K * circuit.size := by
   rw [translation.compile_size]

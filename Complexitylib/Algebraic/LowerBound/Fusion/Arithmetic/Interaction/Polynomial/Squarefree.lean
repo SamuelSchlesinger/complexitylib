@@ -107,7 +107,7 @@ theorem circuit_multiplication_lowerBound
     (n k : Nat)
     (two_le : 2 ≤ k)
     (circuit : Circuit (Algebraic.Arithmetic.signature C)
-      n g (Nat.choose n k))
+      n (Nat.choose n k))
     (constructs : Multiple.Constructs
       (constant := fun scalar => MvPolynomial.C (constant scalar))
       (inputProblem K n) (targets K n k) circuit) :
@@ -128,7 +128,7 @@ theorem circuit_gate_lowerBound
     (n k : Nat)
     (two_le : 2 ≤ k)
     (circuit : Circuit (Algebraic.Arithmetic.signature C)
-      n g (Nat.choose n k))
+      n (Nat.choose n k))
     (constructs : Multiple.Constructs
       (constant := fun scalar => MvPolynomial.C (constant scalar))
       (inputProblem K n) (targets K n k) circuit) :
@@ -144,7 +144,7 @@ theorem circuit_size_lowerBound
     (n k : Nat)
     (two_le : 2 ≤ k)
     (circuit : Circuit (Algebraic.Arithmetic.signature C)
-      n g (Nat.choose n k))
+      n (Nat.choose n k))
     (constructs : Multiple.Constructs
       (constant := fun scalar => MvPolynomial.C (constant scalar))
       (inputProblem K n) (targets K n k) circuit) :
@@ -159,7 +159,7 @@ theorem centralBinom_multiplication_lowerBound
     (n : Nat)
     (two_le : 2 ≤ n)
     (circuit : Circuit (Algebraic.Arithmetic.signature C)
-      (2 * n) g (Nat.centralBinom n))
+      (2 * n) (Nat.centralBinom n))
     (constructs : Multiple.Constructs
       (constant := fun scalar => MvPolynomial.C (constant scalar))
       (inputProblem K (2 * n)) (targets K (2 * n) n) circuit) :
@@ -177,7 +177,7 @@ theorem four_pow_lt_mul_multiplicationCost
     (n : Nat)
     (n_big : 4 ≤ n)
     (circuit : Circuit (Algebraic.Arithmetic.signature C)
-      (2 * n) g (Nat.centralBinom n))
+      (2 * n) (Nat.centralBinom n))
     (constructs : Multiple.Constructs
       (constant := fun scalar => MvPolynomial.C (constant scalar))
       (inputProblem K (2 * n)) (targets K (2 * n) n) circuit) :
@@ -195,7 +195,7 @@ theorem four_pow_lt_mul_size
     (n : Nat)
     (n_big : 4 ≤ n)
     (circuit : Circuit (Algebraic.Arithmetic.signature C)
-      (2 * n) g (Nat.centralBinom n))
+      (2 * n) (Nat.centralBinom n))
     (constructs : Multiple.Constructs
       (constant := fun scalar => MvPolynomial.C (constant scalar))
       (inputProblem K (2 * n)) (targets K (2 * n) n) circuit) :

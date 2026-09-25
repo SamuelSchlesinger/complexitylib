@@ -345,7 +345,7 @@ theorem Atom.preservedBy_semifilterModel
 def pairCoverOfCircuit
     (problem : SetProblem Γ)
     (admissible : SemifilterClass problem)
-    (circuit : Circuit AndOr.signature problem.inputCount g 1)
+    (circuit : Circuit AndOr.signature problem.inputCount 1)
     (constructs : problem.Constructs circuit (AndOr.setInterpretation Γ)) :
     PairCover problem admissible where
   pairs := intersectionPairs problem
@@ -374,7 +374,7 @@ def pairCoverOfCircuit
 theorem pairCoverOfCircuit_cost
     (problem : SetProblem Γ)
     (admissible : SemifilterClass problem)
-    (circuit : Circuit AndOr.signature problem.inputCount g 1)
+    (circuit : Circuit AndOr.signature problem.inputCount 1)
     (constructs : problem.Constructs circuit (AndOr.setInterpretation Γ)) :
     (pairCoverOfCircuit problem admissible circuit constructs).cost =
       circuit.cost AndOr.andCost := by
@@ -388,7 +388,7 @@ theorem pairCover_lowerBound
     (admissible : SemifilterClass problem)
     (coverLowerBound : ∀ cover : PairCover problem admissible,
       L ≤ cover.cost)
-    (circuit : Circuit AndOr.signature problem.inputCount g 1)
+    (circuit : Circuit AndOr.signature problem.inputCount 1)
     (constructs : problem.Constructs circuit (AndOr.setInterpretation Γ)) :
     L ≤ circuit.cost AndOr.andCost := by
   rw [← pairCoverOfCircuit_cost problem admissible circuit constructs]
@@ -398,7 +398,7 @@ theorem pairCover_lowerBound
 theorem pairCoverComplexity_le_cost
     (problem : SetProblem Γ)
     (admissible : SemifilterClass problem)
-    (circuit : Circuit AndOr.signature problem.inputCount g 1)
+    (circuit : Circuit AndOr.signature problem.inputCount 1)
     (constructs : problem.Constructs circuit (AndOr.setInterpretation Γ)) :
     pairCoverComplexity problem admissible ≤
       circuit.cost AndOr.andCost := by

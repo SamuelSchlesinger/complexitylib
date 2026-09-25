@@ -38,7 +38,7 @@ namespace Cslib.Circuits.Circuit
 
 /-- A circuit computes a target family when its formal inputs are supplied
 by `sources`. The common domain need not be a product or a finite type. -/
-def ComputesFrom (circuit : Circuit σ n gates m)
+def ComputesFrom (circuit : Circuit σ n m)
     (interpretation : Interpretation σ U)
     (target : X → Fin m → U) (sources : X → Fin n → U) : Prop :=
   ∀ x, circuit.eval interpretation (sources x) = target x
@@ -48,7 +48,7 @@ family. No implementation of the sources is charged or required. -/
 noncomputable def relativeCostComplexity
     (interpretation : Interpretation σ U) (operationCost : OperationCost σ)
     (target : X → Fin m → U) (sources : X → Fin n → U) : ℕ∞ :=
-  ⨅ gates, ⨅ circuit : Circuit σ n gates m,
+  ⨅ circuit : Circuit σ n m,
     ⨅ _ : circuit.ComputesFrom interpretation target sources,
       (circuit.cost operationCost : ℕ∞)
 
@@ -60,42 +60,42 @@ noncomputable def relativeGateComplexity
 
 /-- A concrete implementation bounds relative complexity. -/
 theorem relativeCostComplexity_le
-    {circuit : Circuit σ n gates m} {interpretation : Interpretation σ U}
+    {circuit : Circuit σ n m} {interpretation : Interpretation σ U}
     {target : X → Fin m → U} {sources : X → Fin n → U}
     (operationCost : OperationCost σ)
     (computes : circuit.ComputesFrom interpretation target sources) :
     relativeCostComplexity interpretation operationCost target sources ≤
       circuit.cost operationCost := by
   unfold relativeCostComplexity
-  exact iInf_le_of_le gates <| iInf_le_of_le circuit <| iInf_le_of_le computes le_rfl
+  exact iInf_le_of_le circuit <| iInf_le_of_le computes le_rfl
 
 /-- A lower bound for all implementations bounds relative complexity. -/
 theorem le_relativeCostComplexity
     {interpretation : Interpretation σ U}
     {target : X → Fin m → U} {sources : X → Fin n → U}
     (operationCost : OperationCost σ) (bound : ℕ∞)
-    (lowerBound : ∀ {gates} (circuit : Circuit σ n gates m),
+    (lowerBound : ∀ (circuit : Circuit σ n m),
       circuit.ComputesFrom interpretation target sources → bound ≤ circuit.cost operationCost) :
     bound ≤ relativeCostComplexity interpretation operationCost target sources := by
   unfold relativeCostComplexity
-  exact le_iInf fun _ => le_iInf fun circuit => le_iInf fun computes => lowerBound circuit computes
+  exact le_iInf fun circuit => le_iInf fun computes => lowerBound circuit computes
 
 /-- A finite relative budget is witnessed by a concrete circuit. -/
 theorem relativeCostComplexity_le_iff
     (interpretation : Interpretation σ U) (operationCost : OperationCost σ)
     (target : X → Fin m → U) (sources : X → Fin n → U) (budget : Nat) :
     relativeCostComplexity interpretation operationCost target sources ≤ budget ↔
-      ∃ gates, ∃ circuit : Circuit σ n gates m,
+      ∃ circuit : Circuit σ n m,
         circuit.ComputesFrom interpretation target sources ∧ circuit.cost operationCost ≤ budget := by
   constructor
   · intro bounded
     have below : relativeCostComplexity interpretation operationCost target sources <
         ((budget + 1 : Nat) : ℕ∞) := bounded.trans_lt (by exact_mod_cast Nat.lt_succ_self budget)
     simp only [relativeCostComplexity, iInf_lt_iff] at below
-    obtain ⟨gates, circuit, computes, costLt⟩ := below
+    obtain ⟨circuit, computes, costLt⟩ := below
     have costLt' : circuit.cost operationCost < budget + 1 := by exact_mod_cast costLt
-    exact ⟨gates, circuit, computes, Nat.le_of_lt_succ costLt'⟩
-  · rintro ⟨gates, circuit, computes, bounded⟩
+    exact ⟨circuit, computes, Nat.le_of_lt_succ costLt'⟩
+  · rintro ⟨circuit, computes, bounded⟩
     exact (relativeCostComplexity_le operationCost computes).trans (by exact_mod_cast bounded)
 
 /-- Finiteness is exactly representability from the supplied family. -/
@@ -103,7 +103,7 @@ theorem relativeCostComplexity_lt_top_iff
     (interpretation : Interpretation σ U) (operationCost : OperationCost σ)
     (target : X → Fin m → U) (sources : X → Fin n → U) :
     relativeCostComplexity interpretation operationCost target sources < ⊤ ↔
-      ∃ gates, ∃ circuit : Circuit σ n gates m,
+      ∃ circuit : Circuit σ n m,
         circuit.ComputesFrom interpretation target sources := by
   simp only [relativeCostComplexity, iInf_lt_iff, ENat.natCast_lt_top, exists_prop, and_true]
 
@@ -112,7 +112,7 @@ theorem relativeCostComplexity_lt_top_iff
     (interpretation : Interpretation σ U) (operationCost : OperationCost σ)
     (target : X → Fin m → U) (sources : X → Fin n → U) :
     relativeCostComplexity interpretation operationCost target sources = ⊤ ↔
-      ¬ ∃ gates, ∃ circuit : Circuit σ n gates m,
+      ¬ ∃ circuit : Circuit σ n m,
         circuit.ComputesFrom interpretation target sources := by
   rw [eq_top_iff, ← not_lt, relativeCostComplexity_lt_top_iff]
 
@@ -121,10 +121,10 @@ theorem relativeGateComplexity_le_iff
     (interpretation : Interpretation σ U)
     (target : X → Fin m → U) (sources : X → Fin n → U) (budget : Nat) :
     relativeGateComplexity interpretation target sources ≤ budget ↔
-      ∃ gates ≤ budget, ∃ circuit : Circuit σ n gates m,
+      ∃ circuit : Circuit σ n m, circuit.size ≤ budget ∧
         circuit.ComputesFrom interpretation target sources := by
   simp only [relativeGateComplexity, relativeCostComplexity_le_iff,
-    cost_unit, size, exists_and_left, and_comm]
+    cost_unit, and_comm]
 
 /-- With unit gate costs, zero complexity means selecting fixed source wires.
 This characterization need not hold when operations can have zero weight. -/
@@ -135,12 +135,17 @@ theorem relativeGateComplexity_eq_zero_iff
       ∃ select : Fin m → Fin n, ∀ x, sources x ∘ select = target x := by
   constructor
   · intro zero
-    obtain ⟨gates, bounded, circuit, computes⟩ :=
+    obtain ⟨circuit, bounded, computes⟩ :=
       (relativeGateComplexity_le_iff interpretation target sources 0).mp zero.le
+    rcases circuit with @⟨gates, program, outputs⟩
     have gatesZero : gates = 0 := Nat.eq_zero_of_le_zero bounded
     subst gates
-    let select : Fin m → Fin n := fun i => Fin.cast (Nat.add_zero n) (circuit.outputs i)
-    have outputEq (i : Fin m) : circuit.outputs i = Wire.input (select i) := Fin.ext rfl
+    let select : Fin m → Fin n := fun i => Wire.elim _root_.id Fin.elim0 (outputs i)
+    have outputEq (i : Fin m) : outputs i = Wire.input (select i) := by
+      simp only [select]
+      cases outputs i with
+      | input j => rfl
+      | gate g => exact g.elim0
     refine ⟨select, fun x => ?_⟩
     rw [← computes x]
     funext i
@@ -191,8 +196,8 @@ theorem relativeCostComplexity_triangle
   conv_rhs =>
     unfold relativeCostComplexity
     simp only [ENat.iInf_add, ENat.add_iInf]
-  refine le_iInf fun innerGates => le_iInf fun inner => le_iInf fun innerComputes =>
-    le_iInf fun outerGates => le_iInf fun outer => le_iInf fun outerComputes => ?_
+  refine le_iInf fun inner => le_iInf fun innerComputes =>
+    le_iInf fun outer => le_iInf fun outerComputes => ?_
   have computes : (outer.comp inner).ComputesFrom interpretation target sources := by
     intro x
     rw [eval_comp, innerComputes x]
@@ -234,8 +239,8 @@ theorem relativeCostComplexity_pair_le
   conv_rhs =>
     unfold relativeCostComplexity
     simp only [ENat.iInf_add, ENat.add_iInf]
-  refine le_iInf fun rightGates => le_iInf fun right => le_iInf fun rightComputes =>
-    le_iInf fun leftGates => le_iInf fun left => le_iInf fun leftComputes => ?_
+  refine le_iInf fun right => le_iInf fun rightComputes =>
+    le_iInf fun left => le_iInf fun leftComputes => ?_
   have computes : (left.parallel right).ComputesFrom interpretation
       (fun x => Fin.append (first x) (second x)) sources := by
     intro x
@@ -250,7 +255,7 @@ theorem relativeCostComplexity_mono_sources
     relativeCostComplexity interpretation operationCost target more ≤
       relativeCostComplexity interpretation operationCost target sources := by
   apply le_relativeCostComplexity
-  intro gates circuit computes
+  intro circuit computes
   have reindexed : (circuit.mapInputs select).ComputesFrom interpretation target more := by
     intro x
     rw [eval_mapInputs]
@@ -266,7 +271,7 @@ theorem relativeCostComplexity_map_outputs_le
     relativeCostComplexity interpretation operationCost (fun x i => target x (select i)) sources ≤
       relativeCostComplexity interpretation operationCost target sources := by
   apply le_relativeCostComplexity
-  intro gates circuit computes
+  intro circuit computes
   have selected : (circuit.mapOutputs select).ComputesFrom interpretation
       (fun x i => target x (select i)) sources := by
     intro x
@@ -299,10 +304,10 @@ theorem relativeCostComplexity_eq_iInf
   apply le_antisymm
   · refine le_iInf fun h => le_iInf fun agrees => ?_
     apply le_costComplexity
-    intro gates circuit computes
+    intro circuit computes
     exact relativeCostComplexity_le operationCost (fun x => (computes _).trans (agrees x))
   · apply le_relativeCostComplexity
-    intro gates circuit computes
+    intro circuit computes
     exact iInf_le_of_le (circuit.eval interpretation) <|
       iInf_le_of_le computes <| costComplexity_le operationCost (fun _ => rfl)
 
@@ -313,7 +318,7 @@ theorem relativeCostComplexity_precomp_le
     relativeCostComplexity interpretation operationCost (target ∘ map) (sources ∘ map) ≤
       relativeCostComplexity interpretation operationCost target sources := by
   apply le_relativeCostComplexity
-  intro gates circuit computes
+  intro circuit computes
   exact relativeCostComplexity_le operationCost (fun y => computes (map y))
 
 /-- Relative computation after a change of domain can use any implementation
@@ -340,7 +345,7 @@ theorem relativeCostComplexity_precomp_eq
       relativeCostComplexity interpretation operationCost target sources := by
   apply le_antisymm (relativeCostComplexity_precomp_le ..)
   apply le_relativeCostComplexity
-  intro gates circuit computes
+  intro circuit computes
   apply relativeCostComplexity_le operationCost
   intro x
   obtain ⟨y, rfl⟩ := onto x
@@ -349,7 +354,7 @@ theorem relativeCostComplexity_precomp_eq
 /-- Equal supplied values must give equal target values whenever a circuit
 computes the target. This necessary condition does not assume completeness. -/
 theorem ComputesFrom.agrees_on_fibers
-    {circuit : Circuit σ n gates m} {interpretation : Interpretation σ U}
+    {circuit : Circuit σ n m} {interpretation : Interpretation σ U}
     {target : X → Fin m → U} {sources : X → Fin n → U}
     (computes : circuit.ComputesFrom interpretation target sources)
     {x y : X} (equal : sources x = sources y) : target x = target y := by
@@ -357,7 +362,7 @@ theorem ComputesFrom.agrees_on_fibers
 
 /-- Circuit computation factors through the supplied values. -/
 theorem ComputesFrom.factorsThrough
-    {circuit : Circuit σ n gates m} {interpretation : Interpretation σ U}
+    {circuit : Circuit σ n m} {interpretation : Interpretation σ U}
     {target : X → Fin m → U} {sources : X → Fin n → U}
     (computes : circuit.ComputesFrom interpretation target sources) :
     Function.FactorsThrough target sources :=
@@ -371,7 +376,7 @@ theorem relativeCostComplexity_eq_top_of_fiber_collision
     {x y : X} (same : sources x = sources y) (different : target x ≠ target y) :
     relativeCostComplexity interpretation operationCost target sources = ⊤ := by
   rw [relativeCostComplexity_eq_top_iff]
-  rintro ⟨gates, circuit, computes⟩
+  rintro ⟨circuit, computes⟩
   exact different (computes.agrees_on_fibers same)
 
 /-- For a functionally complete interpretation, equality on source fibers is
@@ -387,12 +392,12 @@ theorem relativeCostComplexity_lt_top_iff_factorsThrough
       Function.FactorsThrough target sources := by
   rw [relativeCostComplexity_lt_top_iff]
   constructor
-  · rintro ⟨gates, circuit, computes⟩
+  · rintro ⟨circuit, computes⟩
     exact computes.factorsThrough
   · intro factors
     obtain ⟨extension, equal⟩ := (Function.factorsThrough_iff target).mp factors
-    obtain ⟨gates, circuit, computes⟩ := complete n m extension
-    refine ⟨gates, circuit, fun x => ?_⟩
+    obtain ⟨circuit, computes⟩ := complete n m extension
+    refine ⟨circuit, fun x => ?_⟩
     rw [equal]
     exact computes (sources x)
 
@@ -407,12 +412,12 @@ theorem relativeCostComplexity_eq_of_rightInverse
       costComplexity interpretation operationCost (target ∘ sectionMap) := by
   apply le_antisymm
   · apply le_costComplexity
-    intro gates circuit computes
+    intro circuit computes
     apply relativeCostComplexity_le operationCost
     intro x
     exact (computes (sources x)).trans (respects _ _ (sectionLaw (sources x)))
   · apply le_relativeCostComplexity
-    intro gates circuit computes
+    intro circuit computes
     apply costComplexity_le operationCost
     intro input
     simpa only [sectionLaw input, Function.comp_apply] using computes (sectionMap input)

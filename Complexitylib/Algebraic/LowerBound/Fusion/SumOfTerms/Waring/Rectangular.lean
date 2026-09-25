@@ -421,7 +421,7 @@ theorem choose_lowerBound
     [CharZero K]
     (degree split : Nat)
     (circuit : Circuit
-      (Algebraic.SumOfTerms.signature (Term K degree)) 0 g 1)
+      (Algebraic.SumOfTerms.signature (Term K degree)) 0 1)
     (constructs : (problem K degree).Constructs circuit
       (Algebraic.SumOfTerms.interpretation
         (termValue (K := K) (degree := degree)))) :
@@ -439,7 +439,7 @@ theorem centralBinom_lowerBound
     [CharZero K]
     (n : Nat)
     (circuit : Circuit
-      (Algebraic.SumOfTerms.signature (Term K (2 * n))) 0 g 1)
+      (Algebraic.SumOfTerms.signature (Term K (2 * n))) 0 1)
     (constructs : (problem K (2 * n)).Constructs circuit
       (Algebraic.SumOfTerms.interpretation
         (termValue (K := K) (degree := 2 * n)))) :

@@ -51,9 +51,9 @@ def Expression.ofFunction : {n : Nat} → ScalarFunction Bool n → Expression n
 
 /-- Every scalar Boolean function has a De Morgan circuit. -/
 theorem exists_circuit (function : ScalarFunction Bool n) :
-    ∃ gates, ∃ circuit : Circuit signature n gates 1,
+    ∃ circuit : Circuit signature n 1,
       circuit.ComputesWith interpretation (fun input _ => function input) := by
-  refine ⟨_, (Expression.ofFunction function).circuit, ?_⟩
+  refine ⟨(Expression.ofFunction function).circuit, ?_⟩
   intro input
   funext output
   have equal : output = 0 := Fin.eq_zero output
@@ -65,8 +65,7 @@ theorem functionallyComplete :
     Interpretation.FunctionallyComplete (σ := signature) interpretation := by
   intro n m target
   let expressions (output : Fin m) := Expression.ofFunction (fun input => target input output)
-  refine ⟨_, Circuit.parallelFin m (fun output => (expressions output).gateCount)
-    (fun output => (expressions output).circuit), ?_⟩
+  refine ⟨Circuit.parallelFin m (fun output => (expressions output).circuit), ?_⟩
   intro input
   funext output
   simp [expressions]

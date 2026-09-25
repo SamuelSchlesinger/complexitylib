@@ -83,21 +83,26 @@ theorem card_program [Fintype σ.Op] :
         ih, card_line]
       simp [Finset.prod_range_succ]
 
-/-- A circuit is its program paired with its designated output wires. -/
+/-- A circuit with exactly `g` gates is its program paired with its designated
+output wires. -/
 def circuitEquiv (σ : Signature) (n g m : Nat) :
-    Circuit σ n g m ≃ Program σ n g × (Fin m → Wire n g) where
-  toFun circuit := (circuit.program, circuit.outputs)
-  invFun pair := ⟨pair.1, pair.2⟩
-  left_inv _ := rfl
+    {circuit : Circuit σ n m // circuit.size = g} ≃ Program σ n g × (Fin m → Wire n g) where
+  toFun
+    | ⟨⟨program, outputs⟩, rfl⟩ => (program, outputs)
+  invFun pair := ⟨⟨pair.1, pair.2⟩, rfl⟩
+  left_inv := by
+    rintro ⟨⟨program, outputs⟩, rfl⟩
+    rfl
   right_inv _ := rfl
 
-noncomputable instance instFintypeCircuit [Fintype σ.Op] : Fintype (Circuit σ n g m) :=
+noncomputable instance instFintypeCircuit [Fintype σ.Op] :
+    Fintype {circuit : Circuit σ n m // circuit.size = g} :=
   Fintype.ofEquiv (Program σ n g × (Fin m → Wire n g))
     (circuitEquiv σ n g m).symm
 
 /-- Exact number of circuits with `g` gates and `m` designated outputs. -/
 theorem card_circuit [Fintype σ.Op] :
-    Fintype.card (Circuit σ n g m) =
+    Fintype.card {circuit : Circuit σ n m // circuit.size = g} =
       (∏ j ∈ Finset.range g,
         ∑ op : σ.Op, (n + j) ^ σ.Arity op) *
       (n + g) ^ m := by

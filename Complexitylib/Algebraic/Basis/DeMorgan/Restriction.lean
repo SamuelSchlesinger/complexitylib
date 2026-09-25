@@ -121,33 +121,28 @@ def empty
       selected fixedValue where
   gateCount := 0
   result := .empty
-  values := Fin.insertNth selected (.constant fixedValue)
-    (fun remaining => .wire false (Wire.input remaining))
+  values := Wire.elim
+    (Fin.insertNth (α := fun _ => ResidualValue n 0) selected (.constant fixedValue)
+      (fun remaining => .wire false (Wire.input remaining)))
+    Fin.elim0
   trace_eq := by
     intro input sourceWire
-    refine Fin.succAboveCases selected ?_ (fun remaining => ?_) sourceWire
-    · simp only [Fin.insertNth_apply_same, ResidualValue.eval_constant]
-      change fixedValue =
-        (Program.empty : Program signature (n + 1) 0).trace interpretation
-          ((InputSubstitution.fix selected fixedValue).apply input)
-          (Wire.input (g := 0) selected)
-      simp [Program.trace]
-    · simp only [Fin.insertNth_apply_succAbove,
-        ResidualValue.eval_wire_false]
-      change
-        (Program.empty : Program signature n 0).trace interpretation input
-            (Wire.input (g := 0) remaining) =
-        (Program.empty : Program signature (n + 1) 0).trace interpretation
-          ((InputSubstitution.fix selected fixedValue).apply input)
-          (Wire.input (g := 0) (selected.succAbove remaining))
-      simp [Program.trace]
+    cases sourceWire with
+    | gate impossible => exact Fin.elim0 impossible
+    | input sourceInput =>
+      refine Fin.succAboveCases selected ?_ (fun remaining => ?_) sourceInput
+      · simp only [Wire.elim_input, Fin.insertNth_apply_same, ResidualValue.eval_constant]
+        simp [Program.trace]
+      · simp only [Wire.elim_input, Fin.insertNth_apply_succAbove,
+          ResidualValue.eval_wire_false]
+        simp [Program.trace]
   selected_eq := by
-    simp [Wire.input]
+    simp
   followsOrigins := by
     intro sourceWire
-    refine Fin.addCases (fun input => ?_)
-      (fun impossible => Fin.elim0 impossible) sourceWire
-    rw [origins_input, ResidualValue.bindWires_wire_false]
+    cases sourceWire with
+    | input input => rw [origins_input, ResidualValue.bindWires_wire_false]
+    | gate impossible => exact Fin.elim0 impossible
   deleted := ∅
   cost_eq := rfl
 
@@ -172,17 +167,19 @@ def reuseLast
       value =
         (origins (source.gate line)
           (Wire.gate (Fin.last g))).bindWires
-          ((Fin.lastCases value prior.values) :
-            Wire (n + 1) (g + 1) → ResidualValue n prior.gateCount))
+          (Wire.lastCases (motive := fun _ => ResidualValue n prior.gateCount)
+            value prior.values))
     (free : binaryCost line.op = 0) :
     ProgramRestriction (source.gate line) selected fixedValue where
   gateCount := prior.gateCount
   result := prior.result
-  values := Fin.lastCases value prior.values
+  values := Wire.lastCases (motive := fun _ => ResidualValue n prior.gateCount)
+    value prior.values
   trace_eq := by
     intro input sourceWire
-    refine Fin.lastCases ?_ (fun oldWire => ?_) sourceWire
-    · rw [Fin.lastCases_last]
+    induction sourceWire using Wire.lastCases with
+    | last =>
+      rw [Wire.lastCases_last]
       calc
         value.eval prior.result input =
             line.eval interpretation
@@ -192,25 +189,23 @@ def reuseLast
           value_eq input
         _ = (source.gate line).trace interpretation
               ((InputSubstitution.fix selected fixedValue).apply input)
-              (Fin.last ((n + 1) + g)) := by
+              (Wire.gate (Fin.last g)) := by
           symm
-          exact Program.trace_gate_last source line interpretation _
-    · rw [Fin.lastCases_castSucc, Program.trace_gate_castSucc]
+          exact Program.eval_gate_last source line interpretation _
+    | castSucc oldWire =>
+      rw [Wire.lastCases_castSucc, Program.trace_gate_castSucc]
       exact prior.trace_eq input oldWire
-  selected_eq := by
-    have inputCast :
-        (Wire.input (g := g) selected).castSucc =
-          Wire.input (g := g + 1) selected := Fin.castSucc_castAdd selected
-    rw [← inputCast, Fin.lastCases_castSucc]
-    exact prior.selected_eq
+  selected_eq := prior.selected_eq
   followsOrigins := by
     intro sourceWire
-    refine Fin.lastCases ?_ (fun oldWire => ?_) sourceWire
-    · rw [Fin.lastCases_last]
-      simpa [Wire.gate, Fin.natAdd_last] using value_origin_eq
-    · rw [Fin.lastCases_castSucc, origins_gate_castSucc,
+    induction sourceWire using Wire.lastCases with
+    | last =>
+      rw [Wire.lastCases_last]
+      exact value_origin_eq
+    | castSucc oldWire =>
+      rw [Wire.lastCases_castSucc, origins_gate_castSucc,
         ResidualValue.bindWires_mapWires]
-      simpa only [Wire.Renaming.castSucc_apply, Fin.lastCases_castSucc] using
+      simpa only [Wire.Renaming.castSucc_apply, Wire.lastCases_castSucc] using
         prior.followsOrigins oldWire
   deleted := prior.deleted.map Fin.castSuccEmb
   cost_eq := by
@@ -237,11 +232,13 @@ def deleteLast
     ProgramRestriction (source.gate line) selected fixedValue where
   gateCount := prior.gateCount
   result := prior.result
-  values := Fin.lastCases value prior.values
+  values := Wire.lastCases (motive := fun _ => ResidualValue n prior.gateCount)
+    value prior.values
   trace_eq := by
     intro input sourceWire
-    refine Fin.lastCases ?_ (fun oldWire => ?_) sourceWire
-    · rw [Fin.lastCases_last]
+    induction sourceWire using Wire.lastCases with
+    | last =>
+      rw [Wire.lastCases_last]
       calc
         value.eval prior.result input =
             line.eval interpretation
@@ -251,29 +248,27 @@ def deleteLast
           value_eq input
         _ = (source.gate line).trace interpretation
               ((InputSubstitution.fix selected fixedValue).apply input)
-              (Fin.last ((n + 1) + g)) := by
+              (Wire.gate (Fin.last g)) := by
           symm
-          exact Program.trace_gate_last source line interpretation _
-    · rw [Fin.lastCases_castSucc, Program.trace_gate_castSucc]
+          exact Program.eval_gate_last source line interpretation _
+    | castSucc oldWire =>
+      rw [Wire.lastCases_castSucc, Program.trace_gate_castSucc]
       exact prior.trace_eq input oldWire
-  selected_eq := by
-    have inputCast :
-        (Wire.input (g := g) selected).castSucc =
-          Wire.input (g := g + 1) selected := Fin.castSucc_castAdd selected
-    rw [← inputCast, Fin.lastCases_castSucc]
-    exact prior.selected_eq
+  selected_eq := prior.selected_eq
   followsOrigins := by
     intro sourceWire
-    refine Fin.lastCases ?_ (fun oldWire => ?_) sourceWire
-    · rw [Fin.lastCases_last]
+    induction sourceWire using Wire.lastCases with
+    | last =>
+      rw [Wire.lastCases_last]
       have originLast := origins_gateWire_last_of_charged source line charged
       have bound := congrArg (fun origin => origin.bindWires
-        ((Fin.lastCases value prior.values) :
-          Wire (n + 1) (g + 1) → ResidualValue n prior.gateCount)) originLast
-      simpa [Wire.gate, Fin.natAdd_last] using bound.symm
-    · rw [Fin.lastCases_castSucc, origins_gate_castSucc,
+        (Wire.lastCases (motive := fun _ => ResidualValue n prior.gateCount)
+          value prior.values)) originLast
+      simpa using bound.symm
+    | castSucc oldWire =>
+      rw [Wire.lastCases_castSucc, origins_gate_castSucc,
         ResidualValue.bindWires_mapWires]
-      simpa only [Wire.Renaming.castSucc_apply, Fin.lastCases_castSucc] using
+      simpa only [Wire.Renaming.castSucc_apply, Wire.lastCases_castSucc] using
         prior.followsOrigins oldWire
   deleted := insert (Fin.last g) (prior.deleted.map Fin.castSuccEmb)
   cost_eq := by
@@ -305,12 +300,14 @@ def retainLast
     ProgramRestriction (source.gate line) selected fixedValue where
   gateCount := retained.gateCount
   result := retained.result
-  values := Fin.lastCases (.wire false retained.output) (fun oldWire =>
-    (prior.values oldWire).mapWires retained.embedding)
+  values := Wire.lastCases (motive := fun _ => ResidualValue n retained.gateCount)
+    (.wire false retained.output) (fun oldWire =>
+      (prior.values oldWire).mapWires retained.embedding)
   trace_eq := by
     intro input sourceWire
-    refine Fin.lastCases ?_ (fun oldWire => ?_) sourceWire
-    · rw [Fin.lastCases_last, ResidualValue.eval_wire_false]
+    induction sourceWire using Wire.lastCases with
+    | last =>
+      rw [Wire.lastCases_last, ResidualValue.eval_wire_false]
       calc
         retained.result.trace interpretation input retained.output =
             line.eval interpretation
@@ -320,34 +317,35 @@ def retainLast
           output_eq input
         _ = (source.gate line).trace interpretation
               ((InputSubstitution.fix selected fixedValue).apply input)
-              (Fin.last ((n + 1) + g)) := by
+              (Wire.gate (Fin.last g)) := by
           symm
-          exact Program.trace_gate_last source line interpretation _
-    · rw [Fin.lastCases_castSucc, Program.trace_gate_castSucc,
+          exact Program.eval_gate_last source line interpretation _
+    | castSucc oldWire =>
+      rw [Wire.lastCases_castSucc, Program.trace_gate_castSucc,
         ResidualValue.eval_mapWires]
       · exact prior.trace_eq input oldWire
       · intro residualWire
         exact retained.embedding_eq input residualWire
   selected_eq := by
-    have inputCast :
-        (Wire.input (g := g) selected).castSucc =
-          Wire.input (g := g + 1) selected := Fin.castSucc_castAdd selected
-    rw [← inputCast, Fin.lastCases_castSucc, prior.selected_eq]
+    change (prior.values (Wire.input selected)).mapWires retained.embedding = _
+    rw [prior.selected_eq]
     rfl
   followsOrigins := by
     intro sourceWire
-    refine Fin.lastCases ?_ (fun oldWire => ?_) sourceWire
-    · rw [Fin.lastCases_last]
+    induction sourceWire using Wire.lastCases with
+    | last =>
+      rw [Wire.lastCases_last]
       have originLast := origins_gateWire_last_of_charged source line charged
       have bound := congrArg (fun origin => origin.bindWires
-        ((Fin.lastCases (.wire false retained.output) (fun oldWire =>
-          (prior.values oldWire).mapWires retained.embedding)) :
-          Wire (n + 1) (g + 1) → ResidualValue n retained.gateCount)) originLast
-      simpa [Wire.gate, Fin.natAdd_last] using bound.symm
-    · rw [Fin.lastCases_castSucc, origins_gate_castSucc,
+        (Wire.lastCases (motive := fun _ => ResidualValue n retained.gateCount)
+          (.wire false retained.output) (fun oldWire =>
+            (prior.values oldWire).mapWires retained.embedding))) originLast
+      simpa using bound.symm
+    | castSucc oldWire =>
+      rw [Wire.lastCases_castSucc, origins_gate_castSucc,
         ResidualValue.bindWires_mapWires]
       rw [prior.followsOrigins, ResidualValue.mapWires_bindWires]
-      simp only [Wire.Renaming.castSucc_apply, Fin.lastCases_castSucc]
+      simp only [Wire.Renaming.castSucc_apply, Wire.lastCases_castSucc]
   deleted := prior.deleted.map Fin.castSuccEmb
   cost_eq := by
     rw [Finset.card_map, retained.cost_eq, Program.cost_gate, charged]
@@ -405,7 +403,8 @@ noncomputable def restrictProgram
             (fun _ => rfl) (by
               let nextValues : Wire (n + 1) (g + 1) →
                   ResidualValue n prior.gateCount :=
-                Fin.lastCases (.constant false) prior.values
+                Wire.lastCases (motive := fun _ => ResidualValue n prior.gateCount)
+                  (.constant false) prior.values
               have originEq := origins_gateWire_last_false source wires
               calc
                 ResidualValue.constant false =
@@ -419,7 +418,8 @@ noncomputable def restrictProgram
             (fun _ => rfl) (by
               let nextValues : Wire (n + 1) (g + 1) →
                   ResidualValue n prior.gateCount :=
-                Fin.lastCases (.constant true) prior.values
+                Wire.lastCases (motive := fun _ => ResidualValue n prior.gateCount)
+                  (.constant true) prior.values
               have originEq := origins_gateWire_last_true source wires
               calc
                 ResidualValue.constant true =
@@ -436,7 +436,8 @@ noncomputable def restrictProgram
             rfl) (by
               let nextValues : Wire (n + 1) (g + 1) →
                   ResidualValue n prior.gateCount :=
-                Fin.lastCases argument prior.values
+                Wire.lastCases (motive := fun _ => ResidualValue n prior.gateCount)
+                  argument prior.values
               have originEq := origins_gateWire_last_id source wires
               calc
                 argument =
@@ -464,7 +465,8 @@ noncomputable def restrictProgram
             rfl) (by
               let nextValues : Wire (n + 1) (g + 1) →
                   ResidualValue n prior.gateCount :=
-                Fin.lastCases argument.negate prior.values
+                Wire.lastCases (motive := fun _ => ResidualValue n prior.gateCount)
+                  argument.negate prior.values
               have originEq := origins_gateWire_last_not source wires
               calc
                 argument.negate =

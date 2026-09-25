@@ -41,7 +41,7 @@ def Constructs
     (problem : Problem U)
     (targets : Fin m → U)
     (circuit : Circuit (Algebraic.Arithmetic.signature C)
-      problem.inputCount g m) : Prop :=
+      problem.inputCount m) : Prop :=
   circuit.eval (Algebraic.Arithmetic.interpretation constant)
     problem.inputs = targets
 
@@ -53,7 +53,7 @@ theorem targetFeature_mem_circuitSubmodule
     (certificate : Certificate (K := K) (Q := Q) constant problem)
     (targets : Fin m → U)
     (circuit : Circuit (Algebraic.Arithmetic.signature C)
-      problem.inputCount g m)
+      problem.inputCount m)
     (constructs : Constructs (constant := constant) problem targets circuit)
     (output : Fin m) :
     certificate.feature (targets output) ∈
@@ -72,7 +72,7 @@ theorem featureSpan_finrank_le_multiplicationCost
     (certificate : Certificate (K := K) (Q := Q) constant problem)
     (targets : Fin m → U)
     (circuit : Circuit (Algebraic.Arithmetic.signature C)
-      problem.inputCount g m)
+      problem.inputCount m)
     (constructs : Constructs (constant := constant) problem targets circuit) :
     Module.finrank K
         (Submodule.span K (Set.range (certificate.feature ∘ targets))) ≤
@@ -128,7 +128,7 @@ theorem circuit_multiplication_lowerBound_of_linearIndependent
     (targets : Fin m → U)
     (independent : LinearIndependent K (certificate.feature ∘ targets))
     (circuit : Circuit (Algebraic.Arithmetic.signature C)
-      problem.inputCount g m)
+      problem.inputCount m)
     (constructs : Constructs (constant := constant) problem targets circuit) :
     m ≤ circuit.cost
       (Algebraic.Arithmetic.multiplicationCost (K := C)) := by

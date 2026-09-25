@@ -72,7 +72,7 @@ namespace Cslib.Circuits.Circuit
 
 /-- Every relative implementation uses a source subset determining its target. -/
 theorem ComputesFrom.sourceSupport
-    {circuit : Circuit σ n gates m} {interpretation : Interpretation σ U}
+    {circuit : Circuit σ n m} {interpretation : Interpretation σ U}
     {target : X → Fin m → U} {sources : X → Fin n → U}
     (computes : circuit.ComputesFrom interpretation target sources) :
     SourceSupport target sources circuit.inputSupport := by
@@ -82,7 +82,7 @@ theorem ComputesFrom.sourceSupport
 
 /-- The weighted frontier bound specialized to all designated output wires. -/
 theorem card_inputSupport_le_cost
-    (circuit : Circuit σ n gates m) (weight : OperationCost σ)
+    (circuit : Circuit σ n m) (weight : OperationCost σ)
     (bounded : ∀ op, σ.Arity op ≤ weight op + 1) :
     circuit.inputSupport.card ≤ m + circuit.cost weight := by
   have bound := circuit.program.card_frontierSupport_le weight bounded
@@ -104,13 +104,13 @@ theorem sourceSupportSize_le_relativeCostComplexity
       relativeCostComplexity interpretation weight target sources := by
   unfold relativeCostComplexity
   simp only [ENat.add_iInf]
-  refine le_iInf fun gates => le_iInf fun circuit => le_iInf fun computes => ?_
+  refine le_iInf fun circuit => le_iInf fun computes => ?_
   exact (sourceSupportSize_le computes.sourceSupport).trans
     (by exact_mod_cast circuit.card_inputSupport_le_cost weight bounded)
 
 /-- A bounded-fan-in implementation must touch enough supplied values. -/
 theorem sourceSupportSize_le_size
-    {circuit : Circuit σ n gates m} {interpretation : Interpretation σ U}
+    {circuit : Circuit σ n m} {interpretation : Interpretation σ U}
     {target : X → Fin m → U} {sources : X → Fin n → U}
     (computes : circuit.ComputesFrom interpretation target sources)
     (bounded : circuit.FanInAtMost b) :
@@ -130,7 +130,7 @@ theorem sourceSupportSize_le_relativeGateComplexity
     exact_mod_cast (show b - 1 ≠ 0 by omega)
   unfold relativeGateComplexity relativeCostComplexity
   simp only [ENat.mul_iInf_of_ne nonzero, ENat.add_iInf]
-  refine le_iInf fun gates => le_iInf fun circuit => le_iInf fun computes => ?_
+  refine le_iInf fun circuit => le_iInf fun computes => ?_
   have fanIn : circuit.FanInAtMost b := by
     have allPrograms : ∀ {g} (program : Program σ n g), program.FanInAtMost b := by
       intro g program

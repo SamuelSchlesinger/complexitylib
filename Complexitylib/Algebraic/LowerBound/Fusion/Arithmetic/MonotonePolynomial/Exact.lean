@@ -244,7 +244,7 @@ variable [NoZeroDivisors R] [ExactSupport.ZeroSumFree R]
 abbrev MultiplicationSupportWidthAtMost
     [DecidableEq σ]
     (constant : K → R)
-    (circuit : Circuit (Algebraic.Arithmetic.signature K) n g 1)
+    (circuit : Circuit (Algebraic.Arithmetic.signature K) n 1)
     (inputs : Fin n → MvPolynomial σ R)
     (width : Nat) : Prop :=
   Support.MultiplicationWidthAtMost
@@ -260,7 +260,7 @@ theorem constructs_support
     (constant : K → R)
     (inputs : Fin n → MvPolynomial σ R)
     (target : MvPolynomial σ R)
-    (circuit : Circuit (Algebraic.Arithmetic.signature K) n g 1)
+    (circuit : Circuit (Algebraic.Arithmetic.signature K) n 1)
     (constructs :
       ({ inputCount := n, inputs := inputs, target := target } :
         Problem (MvPolynomial σ R)).Constructs circuit
@@ -303,7 +303,7 @@ theorem circuit_multiplication_lowerBound
         (constantSupport (σ := σ) (constant scalar)).monomials)
     (width : Nat)
     (positive : 0 < width)
-    (circuit : Circuit (Algebraic.Arithmetic.signature K) n g 1)
+    (circuit : Circuit (Algebraic.Arithmetic.signature K) n 1)
     (constructs :
       ({ inputCount := n, inputs := inputs, target := target } :
         Problem (MvPolynomial σ R)).Constructs circuit
@@ -332,7 +332,7 @@ theorem circuit_multiplication_lowerBound_of_disjoint
     (target_nonconstant : 0 ∉ target.support)
     (width : Nat)
     (positive : 0 < width)
-    (circuit : Circuit (Algebraic.Arithmetic.signature K) n g 1)
+    (circuit : Circuit (Algebraic.Arithmetic.signature K) n 1)
     (constructs :
       ({ inputCount := n, inputs := inputs, target := target } :
         Problem (MvPolynomial σ R)).Constructs circuit

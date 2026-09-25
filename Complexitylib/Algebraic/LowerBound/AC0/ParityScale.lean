@@ -79,7 +79,7 @@ namespace Circuit
 /-- Quantitative parity size tradeoff at an arbitrary integral scale, with
 arbitrary internal NOT gates charged at zero. -/
 theorem parity_size_tradeoff_at_scale_raw
-    (circuit : Algebraic.Circuit signature n g 1)
+    (circuit : Algebraic.Circuit signature n 1)
     (computes : circuit.ComputesWith interpretation (Parity.target n))
     (depth t : Nat)
     (twoLeDepth : 2 ≤ depth)
@@ -99,7 +99,7 @@ theorem parity_size_tradeoff_at_scale_raw
 
 /-- Compatibility wrapper for the checked input-negation presentation. -/
 theorem parity_size_tradeoff_at_scale
-    (circuit : Algebraic.Circuit signature n g 1)
+    (circuit : Algebraic.Circuit signature n 1)
     (_normal : Program.NegationsAtInputs circuit.program)
     (computes : circuit.ComputesWith interpretation (Parity.target n))
     (depth t : Nat)

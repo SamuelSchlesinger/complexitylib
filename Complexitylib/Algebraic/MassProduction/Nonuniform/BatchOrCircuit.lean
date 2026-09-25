@@ -131,7 +131,7 @@ theorem existsCircuit
     (sourceKeys : Fin sources → Fin keyWidth → DeMorgan.Wiring inputs)
     (sourceValues : Fin sources → Fin valueWidth → DeMorgan.Wiring inputs)
     (queryKeys : Fin requests → Fin keyWidth → DeMorgan.Wiring inputs) :
-    ∃ gates, ∃ routed : Circuit DeMorgan.signature inputs gates (requests * valueWidth),
+    ∃ routed : Circuit DeMorgan.signature inputs (requests * valueWidth),
       (∀ input request bit,
         routed.eval DeMorgan.interpretation input (finProdFinEquiv (request, bit)) = true ↔
           ∃ source, (fun keyBit => (sourceKeys source keyBit).eval input) =
@@ -145,7 +145,7 @@ theorem existsCircuit
   have recordCount : sources + requests + (1 + FiniteParameters.paddingCount records) =
       networkRecords depth := by
     simpa only [depth, records, Nat.add_assoc] using FiniteParameters.records_add_paddingCount records
-  refine ⟨_, circuit sourceKeys sourceValues queryKeys recordCount,
+  refine ⟨circuit sourceKeys sourceValues queryKeys recordCount,
     circuit_eval_iff sourceKeys sourceValues queryKeys recordCount, ?_⟩
   have positive : 0 < records := by dsimp [records]; omega
   have padded := (FiniteParameters.networkRecords_binaryDepth_lt_two_mul records positive).le

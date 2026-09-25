@@ -88,11 +88,16 @@ theorem eval_finAppend_apply
 /-- Compile an arbitrary vector of input selections and constants. -/
 def circuit
     (specification : Fin outputs -> Wiring inputs) :
-    Circuit signature inputs
-      (∑ output, (specification output).expression.gateCount) outputs :=
+    Circuit signature inputs outputs :=
   Circuit.parallelFin outputs
-    (fun output => (specification output).expression.gateCount)
     (fun output => (specification output).expression.circuit)
+
+/-- The compiled wiring layer has one gate per hardwired constant. -/
+@[simp] theorem circuit_size
+    (specification : Fin outputs -> Wiring inputs) :
+    (circuit specification).size =
+      ∑ output, (specification output).expression.gateCount := by
+  simp [circuit]
 
 @[simp] theorem circuit_eval
     (specification : Fin outputs -> Wiring inputs)

@@ -33,16 +33,20 @@ open ShannonSynthesis
 noncomputable def lupanovCircuit
     (inputs : Nat)
     (function : ScalarFunction Bool inputs) :
-    Circuit DeMorgan.signature inputs
-      (synthesisGateCount
-        (reindexFunction (lupanovAddressDataSum inputs) function)
-        (lupanovBlockSize inputs)) 1 :=
+    Circuit DeMorgan.signature inputs 1 :=
   (circuit
       (addressWidth := lupanovAddressWidth inputs)
       (dataWidth := lupanovDataWidth inputs)
       (reindexFunction (lupanovAddressDataSum inputs) function)
       (lupanovBlockSize inputs)).castCounts
-    (lupanovAddressDataSum inputs) rfl rfl
+    (lupanovAddressDataSum inputs) rfl
+
+@[simp] theorem lupanovCircuit_size
+    (inputs : Nat)
+    (function : ScalarFunction Bool inputs) :
+    (lupanovCircuit inputs function).size =
+      synthesisGateCount (reindexFunction (lupanovAddressDataSum inputs) function) (lupanovBlockSize inputs) := by
+  simp [lupanovCircuit, synthesisGateCount]
 
 @[simp] theorem lupanovCircuit_eval
     (inputs : Nat)
@@ -81,10 +85,6 @@ theorem lupanovCircuit_cost_le
 /-- Explicit one-copy synthesis data at every width. -/
 noncomputable def lupanovScalarSynthesis
     (inputs : Nat) : ScalarSynthesis inputs where
-  gateCount function :=
-    synthesisGateCount
-      (reindexFunction (lupanovAddressDataSum inputs) function)
-      (lupanovBlockSize inputs)
   circuit := lupanovCircuit inputs
   computes := lupanovCircuit_computes inputs
 

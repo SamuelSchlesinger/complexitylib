@@ -26,7 +26,6 @@ open Sorting BufferInput BufferModel HighRate
 open scoped LinearAlgebra.Projectivization
 
 variable {Source : Type*}
-variable {memberGates : Fin (ResourceLayout.count copies dimension width) → Nat}
 
 set_option backward.isDefEq.respectTransparency false
 
@@ -57,11 +56,11 @@ theorem existsCircuit
     (selectorProjection : Fin selectorBits → Fin payloadWidth)
     (suffixProjection : Fin suffixWidth → Fin payloadWidth)
     (members : (resource : Fin (ResourceLayout.count copies dimension width)) →
-      Circuit DeMorgan.signature suffixWidth (memberGates resource) 1)
+      Circuit DeMorgan.signature suffixWidth 1)
     (membersCorrect : ∀ resource suffix,
       (members resource).eval DeMorgan.interpretation suffix 0 =
         ResourceLayout.function positive code placement function resource suffix) :
-    ∃ gates, ∃ result : Circuit DeMorgan.signature inputs gates (networkRecords depth),
+    ∃ result : Circuit DeMorgan.signature inputs (networkRecords depth),
       result.cost DeMorgan.standardCost ≤
         overhead depth copies dimension width payloadWidth copyBits selectorBits suffixWidth +
           ∑ resource, (members resource).cost DeMorgan.standardCost ∧
@@ -75,19 +74,19 @@ theorem existsCircuit
           finiteIndexBits selectorBits (placement (sources request)).2.2 bit) →
         (∀ request bit, (original request (suffixProjection bit)).eval input = suffixes request bit) →
         ∀ request, result.eval DeMorgan.interpretation input request = function (sources request) (suffixes request) := by
-  obtain ⟨scheduleGates, schedule, scheduleBound, scheduleCorrect⟩ := Scheduler.existsCircuit
+  obtain ⟨schedule, scheduleBound, scheduleCorrect⟩ := Scheduler.existsCircuit
     positive dimensionPositive budget original targetProjection
-  obtain ⟨recoveryGates, recovery, recoveryBound, recoveryCorrect⟩ := BufferResourceEvaluation.existsCircuit
+  obtain ⟨recovery, recoveryBound, recoveryCorrect⟩ := BufferResourceEvaluation.existsCircuit
     (total := networkRecords depth) positive code placement function copyFits selectorFits
     (fun bit => Fin.natAdd depth (copyProjection bit))
     (fun bit => Fin.natAdd depth (selectorProjection bit))
     (fun bit => Fin.natAdd depth (suffixProjection bit)) members membersCorrect
   let identifiers := fun (request : Fin (networkRecords depth)) (bit : Fin depth) => PreparedInputs.original (networkRecords depth)
     (BufferResourceWires.dataWire (2 ^ width) (dimension * width) request (Fin.castAdd payloadWidth bit))
-  obtain ⟨restoreGates, restore, restoreBound, restoreCorrect⟩ := RestoreRequestOrder.existsCircuit
+  obtain ⟨restore, restoreBound, restoreCorrect⟩ := RestoreRequestOrder.existsCircuit
     (PowerLayout.codes depth) (PowerLayout.codes_injective depth) identifiers
     (PreparedInputs.output (inputWidth (networkRecords depth) 0 (depth + payloadWidth) (2 ^ width) (dimension * width)))
-  refine ⟨_, restore.comp ((PreparedInputs.circuit recovery).comp schedule), ?_, ?_⟩
+  refine ⟨restore.comp ((PreparedInputs.circuit recovery).comp schedule), ?_, ?_⟩
   · rw [Circuit.cost_comp, Circuit.cost_comp, PreparedInputs.circuit_cost]
     have combined := Nat.add_le_add (Nat.add_le_add scheduleBound recoveryBound) restoreBound
     exact combined.trans_eq (by unfold overhead; ring)

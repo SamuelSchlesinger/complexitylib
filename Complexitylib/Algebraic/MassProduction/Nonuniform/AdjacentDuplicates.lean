@@ -117,7 +117,6 @@ theorem expression_eval_iff
 /-- Duplicate flags from an already-computed array of keys. -/
 def flagsCircuit (depth keyWidth : Nat) :=
   Circuit.parallelFin (networkRecords depth)
-    (fun index => (expression depth keyWidth index).gateCount)
     (fun index => (expression depth keyWidth index).circuit)
 
 /-- Sorted key arrays yield exact global duplicate flags. -/
@@ -133,13 +132,13 @@ theorem flagsCircuit_eval_iff
 
 /-- Compute each key once for subsequent adjacent comparisons. -/
 def keysCircuit (depth : Nat)
-    (keyCircuit : Circuit DeMorgan.signature recordWidth keyGates keyWidth) :=
-  Circuit.parallelFinVector (networkRecords depth) keyWidth (fun _ => keyGates)
+    (keyCircuit : Circuit DeMorgan.signature recordWidth keyWidth) :=
+  Circuit.parallelFinVector (networkRecords depth) keyWidth
     (fun record => keyCircuit.mapInputs (fun bit => finProdFinEquiv (record, bit)))
 
 /-- The key array contains the computed key of each original record. -/
 theorem keysCircuit_eval
-    (keyCircuit : Circuit DeMorgan.signature recordWidth keyGates keyWidth)
+    (keyCircuit : Circuit DeMorgan.signature recordWidth keyWidth)
     (input : Fin (networkBits depth recordWidth) → Bool)
     (record : Fin (networkRecords depth)) :
     flatRecords ((keysCircuit depth keyCircuit).eval DeMorgan.interpretation input) record =
@@ -150,12 +149,12 @@ theorem keysCircuit_eval
 
 /-- Complete duplicate detector, including key computation. -/
 def circuit (depth : Nat)
-    (keyCircuit : Circuit DeMorgan.signature recordWidth keyGates keyWidth) :=
+    (keyCircuit : Circuit DeMorgan.signature recordWidth keyWidth) :=
   (flagsCircuit depth keyWidth).comp (keysCircuit depth keyCircuit)
 
 /-- Exact global duplicate detection whenever the computed keys are sorted. -/
 theorem circuit_eval_iff
-    (keyCircuit : Circuit DeMorgan.signature recordWidth keyGates keyWidth)
+    (keyCircuit : Circuit DeMorgan.signature recordWidth keyWidth)
     (input : Fin (networkBits depth recordWidth) → Bool)
     (ordered : Monotone (fun record => toLex
       (keyCircuit.eval DeMorgan.interpretation (flatRecords input record))))
@@ -170,7 +169,7 @@ theorem circuit_eval_iff
 
 /-- Linear record-count cost, including the two local comparisons. -/
 theorem circuit_cost_le
-    (keyCircuit : Circuit DeMorgan.signature recordWidth keyGates keyWidth) :
+    (keyCircuit : Circuit DeMorgan.signature recordWidth keyWidth) :
     (circuit depth keyCircuit).cost DeMorgan.standardCost ≤
       networkRecords depth * (keyCircuit.cost DeMorgan.standardCost + 12 * keyWidth + 1) := by
   have localCost (index : Fin (networkRecords depth)) :

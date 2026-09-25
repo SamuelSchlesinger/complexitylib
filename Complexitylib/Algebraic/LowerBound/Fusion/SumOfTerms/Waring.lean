@@ -465,7 +465,7 @@ theorem centralBinom_lowerBound
     [CharZero K]
     (n : Nat)
     (circuit : Circuit
-      (Algebraic.SumOfTerms.signature (Term K n)) 0 g 1)
+      (Algebraic.SumOfTerms.signature (Term K n)) 0 1)
     (constructs : (problem K n).Constructs circuit
       (Algebraic.SumOfTerms.interpretation
         (termValue (K := K) (n := n)))) :
@@ -484,7 +484,7 @@ theorem four_pow_lt_mul_cost
     (n : Nat)
     (n_big : 4 ≤ n)
     (circuit : Circuit
-      (Algebraic.SumOfTerms.signature (Term K n)) 0 g 1)
+      (Algebraic.SumOfTerms.signature (Term K n)) 0 1)
     (constructs : (problem K n).Constructs circuit
       (Algebraic.SumOfTerms.interpretation
         (termValue (K := K) (n := n)))) :

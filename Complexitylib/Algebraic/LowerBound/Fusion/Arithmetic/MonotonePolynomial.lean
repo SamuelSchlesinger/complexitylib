@@ -264,7 +264,7 @@ circuit.  Its definition evaluates the same syntax in the exact support
 interpretation furnished by `supportHomomorphism`. -/
 abbrev MultiplicationSupportWidthAtMost
     [DecidableEq σ]
-    (circuit : Circuit (Algebraic.Arithmetic.signature ℕ) n g 1)
+    (circuit : Circuit (Algebraic.Arithmetic.signature ℕ) n 1)
     (inputs : Fin n → MvPolynomial σ ℕ)
     (width : Nat) : Prop :=
   Support.MultiplicationWidthAtMost
@@ -279,7 +279,7 @@ theorem constructs_support
     [DecidableEq σ]
     (inputs : Fin n → MvPolynomial σ ℕ)
     (target : MvPolynomial σ ℕ)
-    (circuit : Circuit (Algebraic.Arithmetic.signature ℕ) n g 1)
+    (circuit : Circuit (Algebraic.Arithmetic.signature ℕ) n 1)
     (constructs :
       ({ inputCount := n, inputs := inputs, target := target } :
         Problem (MvPolynomial σ ℕ)).Constructs circuit
@@ -314,7 +314,7 @@ theorem circuit_multiplication_lowerBound
       witness.1 ∉ (constantSupport (σ := σ) scalar).monomials)
     (width : Nat)
     (positive : 0 < width)
-    (circuit : Circuit (Algebraic.Arithmetic.signature ℕ) n g 1)
+    (circuit : Circuit (Algebraic.Arithmetic.signature ℕ) n 1)
     (constructs :
       ({ inputCount := n, inputs := inputs, target := target } :
         Problem (MvPolynomial σ ℕ)).Constructs circuit
@@ -338,7 +338,7 @@ theorem circuit_multiplication_lowerBound_of_singletonWidth
       witness.1 ∉ (supportValue (inputs input)).monomials)
     (constantAvoid : ∀ witness : ↥(supportFinset target), ∀ scalar,
       witness.1 ∉ (constantSupport (σ := σ) scalar).monomials)
-    (circuit : Circuit (Algebraic.Arithmetic.signature ℕ) n g 1)
+    (circuit : Circuit (Algebraic.Arithmetic.signature ℕ) n 1)
     (constructs :
       ({ inputCount := n, inputs := inputs, target := target } :
         Problem (MvPolynomial σ ℕ)).Constructs circuit
@@ -361,7 +361,7 @@ theorem circuit_multiplication_lowerBound_of_disjoint
     (target_nonconstant : 0 ∉ target.support)
     (width : Nat)
     (positive : 0 < width)
-    (circuit : Circuit (Algebraic.Arithmetic.signature ℕ) n g 1)
+    (circuit : Circuit (Algebraic.Arithmetic.signature ℕ) n 1)
     (constructs :
       ({ inputCount := n, inputs := inputs, target := target } :
         Problem (MvPolynomial σ ℕ)).Constructs circuit

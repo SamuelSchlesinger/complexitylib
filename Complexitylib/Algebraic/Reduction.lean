@@ -25,10 +25,10 @@ namespace Algebraic
 /-- A circuit has minimum weighted cost among all circuits computing a target. -/
 def _root_.Cslib.Circuits.Circuit.CostMinimal
     (operationCost : OperationCost σ)
-    (circuit : Circuit σ n g m)
+    (circuit : Circuit σ n m)
     (interpretation : Interpretation σ U)
     (target : Target U n m) : Prop :=
-  ∀ {h : Nat} (competitor : Circuit σ n h m),
+  ∀ (competitor : Circuit σ n m),
     competitor.ComputesWith interpretation target →
       circuit.cost operationCost ≤ competitor.cost operationCost
 
@@ -40,16 +40,16 @@ gate count. The tie-break excludes gratuitous zero-cost internal structure.
 -/
 structure _root_.Cslib.Circuits.Circuit.CostSizeMinimal
     (operationCost : OperationCost σ)
-    (circuit : Circuit σ n g m)
+    (circuit : Circuit σ n m)
     (interpretation : Interpretation σ U)
     (target : Target U n m) : Prop where
   /-- No implementation has lower weighted cost. -/
   cost : circuit.CostMinimal operationCost interpretation target
   /-- Among equal-cost implementations, none has fewer internal gates. -/
-  gateCount : ∀ {h : Nat} (competitor : Circuit σ n h m),
+  gateCount : ∀ (competitor : Circuit σ n m),
     competitor.ComputesWith interpretation target →
     competitor.cost operationCost = circuit.cost operationCost →
-      g ≤ h
+      circuit.size ≤ competitor.size
 
 export Cslib.Circuits (Circuit.CostSizeMinimal)
 
@@ -58,16 +58,24 @@ structure _root_.Cslib.Circuits.Circuit.Minimum
     (operationCost : OperationCost σ)
     (interpretation : Interpretation σ U)
     (target : Target U n m) where
-  /-- Number of internal gates in the chosen implementation. -/
-  gateCount : Nat
   /-- Chosen implementation. -/
-  circuit : Circuit σ n gateCount m
+  circuit : Circuit σ n m
   /-- The implementation computes the requested target. -/
   computes : circuit.ComputesWith interpretation target
   /-- The implementation is cost-minimal with a gate-count tie-break. -/
   minimal : circuit.CostSizeMinimal operationCost interpretation target
 
 export Cslib.Circuits (Circuit.Minimum)
+
+/-- Number of internal gates in the chosen implementation. -/
+abbrev _root_.Cslib.Circuits.Circuit.Minimum.gateCount
+    {operationCost : OperationCost σ}
+    {interpretation : Interpretation σ U}
+    {target : Target U n m}
+    (minimum : Circuit.Minimum operationCost interpretation target) : Nat :=
+  minimum.circuit.size
+
+export Cslib.Circuits.Circuit.Minimum (gateCount)
 
 namespace Circuit
 
@@ -79,49 +87,51 @@ classical proof witness, not an executable circuit optimizer.
 -/
 noncomputable def _root_.Cslib.Circuits.Circuit.minimum
     (operationCost : OperationCost σ)
-    (circuit : Circuit σ n g m)
+    (circuit : Circuit σ n m)
     (interpretation : Interpretation σ U)
     (target : Target U n m)
     (computes : circuit.ComputesWith interpretation target) :
     Circuit.Minimum operationCost interpretation target := by
   classical
   let RealizedCost : Nat → Prop := fun cost =>
-    ∃ gateCount, ∃ implementation : Circuit σ n gateCount m,
+    ∃ implementation : Circuit σ n m,
       implementation.ComputesWith interpretation target ∧
         implementation.cost operationCost = cost
   have realized : ∃ cost, RealizedCost cost :=
-    ⟨circuit.cost operationCost, g, circuit, computes, rfl⟩
+    ⟨circuit.cost operationCost, circuit, computes, rfl⟩
   let minimumCost := Nat.find realized
   have minimumRealized : RealizedCost minimumCost := Nat.find_spec realized
   let RealizedGateCount : Nat → Prop := fun gateCount =>
-    ∃ implementation : Circuit σ n gateCount m,
+    ∃ implementation : Circuit σ n m, implementation.size = gateCount ∧
       implementation.ComputesWith interpretation target ∧
         implementation.cost operationCost = minimumCost
-  have realizedGateCount : ∃ gateCount, RealizedGateCount gateCount :=
-    minimumRealized
+  have realizedGateCount : ∃ gateCount, RealizedGateCount gateCount := by
+    obtain ⟨implementation, implementationComputes, implementationCost⟩ := minimumRealized
+    exact ⟨implementation.size, implementation, rfl, implementationComputes,
+      implementationCost⟩
   let gateCount := Nat.find realizedGateCount
   have gateCountRealized : RealizedGateCount gateCount :=
     Nat.find_spec realizedGateCount
   let implementation := Classical.choose gateCountRealized
   have implementationSpec := Classical.choose_spec gateCountRealized
   exact
-    { gateCount := gateCount
-      circuit := implementation
-      computes := implementationSpec.1
+    { circuit := implementation
+      computes := implementationSpec.2.1
       minimal :=
         { cost := by
-            intro competitorGateCount competitor competitorComputes
+            intro competitor competitorComputes
             have competitorRealized :
                 RealizedCost (competitor.cost operationCost) :=
-              ⟨competitorGateCount, competitor, competitorComputes, rfl⟩
-            rw [implementationSpec.2]
+              ⟨competitor, competitorComputes, rfl⟩
+            rw [implementationSpec.2.2]
             exact Nat.find_min' realized competitorRealized
           gateCount := by
-            intro competitorGateCount competitor competitorComputes equalCost
+            intro competitor competitorComputes equalCost
             have competitorRealized :
-                RealizedGateCount competitorGateCount :=
-              ⟨competitor, competitorComputes, by
-                rw [equalCost, implementationSpec.2]⟩
+                RealizedGateCount competitor.size :=
+              ⟨competitor, rfl, competitorComputes, by
+                rw [equalCost, implementationSpec.2.2]⟩
+            rw [implementationSpec.1]
             exact Nat.find_min' realizedGateCount competitorRealized } }
 
 export Cslib.Circuits.Circuit (minimum)
@@ -131,13 +141,11 @@ end Circuit
 /-- A circuit reduction under an input substitution with certified cost saving. -/
 structure _root_.Cslib.Circuits.Circuit.Reduction
     (operationCost : OperationCost σ)
-    (source : Circuit σ n g m)
+    (source : Circuit σ n m)
     (interpretation : Interpretation σ U)
     (substitution : InputSubstitution U n k) where
-  /-- Number of internal gates in the residual circuit. -/
-  gateCount : Nat
   /-- The residual circuit on the new inputs. -/
-  result : Circuit σ k gateCount m
+  result : Circuit σ k m
   /-- The residual circuit agrees with the source under the substitution. -/
   eval_eq : ∀ input,
     result.eval interpretation input =
@@ -152,14 +160,24 @@ export Cslib.Circuits (Circuit.Reduction)
 
 namespace Circuit.Reduction
 
+/-- Number of internal gates in the residual circuit. -/
+abbrev _root_.Cslib.Circuits.Circuit.Reduction.gateCount
+    {operationCost : OperationCost σ}
+    {source : Circuit σ n m}
+    {interpretation : Interpretation σ U}
+    {substitution : InputSubstitution U n k}
+    (reduction : Circuit.Reduction operationCost source interpretation substitution) : Nat :=
+  reduction.result.size
+
+export Cslib.Circuits.Circuit.Reduction (gateCount)
+
 /-- The identity circuit reduction. -/
 def _root_.Cslib.Circuits.Circuit.Reduction.refl
     (operationCost : OperationCost σ)
-    (circuit : Circuit σ n g m)
+    (circuit : Circuit σ n m)
     (interpretation : Interpretation σ U) :
     Circuit.Reduction operationCost circuit interpretation
       InputSubstitution.id where
-  gateCount := g
   result := circuit
   eval_eq := fun _ => rfl
   saving := 0
@@ -173,8 +191,8 @@ original source circuit. This is the bridge from optimal-circuit elimination
 arguments to lower bounds for arbitrary circuits.
 -/
 def _root_.Cslib.Circuits.Circuit.Reduction.rebaseSource
-    {source : Circuit σ n g m}
-    {replacement : Circuit σ n h m}
+    {source : Circuit σ n m}
+    {replacement : Circuit σ n m}
     {target : Target U n m}
     {substitution : InputSubstitution U n k}
     (reduction : Circuit.Reduction operationCost replacement interpretation
@@ -184,7 +202,6 @@ def _root_.Cslib.Circuits.Circuit.Reduction.rebaseSource
     (cost_le : replacement.cost operationCost ≤
       source.cost operationCost) :
     Circuit.Reduction operationCost source interpretation substitution where
-  gateCount := reduction.gateCount
   result := reduction.result
   eval_eq := by
     intro input
@@ -204,7 +221,6 @@ def _root_.Cslib.Circuits.Circuit.Reduction.trans
       secondSubstitution) :
     Circuit.Reduction operationCost source interpretation
       (firstSubstitution.comp secondSubstitution) where
-  gateCount := second.gateCount
   result := second.result
   eval_eq := by
     intro input

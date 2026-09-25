@@ -28,24 +28,34 @@ variable {K R : Type}
 
 /-- Append one gate that squares the output of a one-output circuit. -/
 def squareCircuit
-    (circuit : Circuit (Arithmetic.signature K) 1 g 1) :
-    Circuit (Arithmetic.signature K) 1 (g + 1) 1 where
+    (circuit : Circuit (Arithmetic.signature K) 1 1) :
+    Circuit (Arithmetic.signature K) 1 1 where
   program := circuit.program.gate
     { op := .mul
       wires := fun _ ↦ circuit.outputs 0 }
-  outputs := fun _ ↦ Wire.gate (Fin.last g)
+  outputs := fun _ ↦ Wire.gate (Fin.last circuit.size)
 
 /-- Append one gate that multiplies a circuit's output by its original input.
 The original input remains available because programs retain their input-wire
 namespace. -/
 def multiplyInputCircuit
-    (circuit : Circuit (Arithmetic.signature K) 1 g 1) :
-    Circuit (Arithmetic.signature K) 1 (g + 1) 1 where
+    (circuit : Circuit (Arithmetic.signature K) 1 1) :
+    Circuit (Arithmetic.signature K) 1 1 where
   program := circuit.program.gate
     { op := .mul
       wires := fun argument ↦
         Fin.cases (circuit.outputs 0) (fun _ ↦ Wire.input 0) argument }
-  outputs := fun _ ↦ Wire.gate (Fin.last g)
+  outputs := fun _ ↦ Wire.gate (Fin.last circuit.size)
+
+/-- Squaring appends exactly one gate. -/
+@[simp] theorem size_squareCircuit
+    (circuit : Circuit (Arithmetic.signature K) 1 1) :
+    (squareCircuit circuit).size = circuit.size + 1 := rfl
+
+/-- Multiplication by the retained input appends exactly one gate. -/
+@[simp] theorem size_multiplyInputCircuit
+    (circuit : Circuit (Arithmetic.signature K) 1 1) :
+    (multiplyInputCircuit circuit).size = circuit.size + 1 := rfl
 
 /-- Squaring has the expected semantics. -/
 theorem squareCircuit_eval
@@ -53,13 +63,13 @@ theorem squareCircuit_eval
     [Mul R]
     (constant : K → R)
     (input : Fin 1 → R)
-    (circuit : Circuit (Arithmetic.signature K) 1 g 1) :
+    (circuit : Circuit (Arithmetic.signature K) 1 1) :
     (squareCircuit circuit).eval (Arithmetic.interpretation constant) input 0 =
       circuit.eval (Arithmetic.interpretation constant) input 0 *
         circuit.eval (Arithmetic.interpretation constant) input 0 := by
-  change (circuit.program.gate _).trace
-      (Arithmetic.interpretation constant) input (Fin.last (1 + g)) = _
-  rw [Program.trace_gate_last]
+  change (circuit.program.gate _).eval
+      (Arithmetic.interpretation constant) input (Fin.last circuit.size) = _
+  rw [Program.eval_gate_last]
   change circuit.program.trace (Arithmetic.interpretation constant) input
       (circuit.outputs 0) *
         circuit.program.trace (Arithmetic.interpretation constant) input
@@ -72,13 +82,13 @@ theorem multiplyInputCircuit_eval
     [Mul R]
     (constant : K → R)
     (input : Fin 1 → R)
-    (circuit : Circuit (Arithmetic.signature K) 1 g 1) :
+    (circuit : Circuit (Arithmetic.signature K) 1 1) :
     (multiplyInputCircuit circuit).eval
         (Arithmetic.interpretation constant) input 0 =
       circuit.eval (Arithmetic.interpretation constant) input 0 * input 0 := by
-  change (circuit.program.gate _).trace
-      (Arithmetic.interpretation constant) input (Fin.last (1 + g)) = _
-  rw [Program.trace_gate_last]
+  change (circuit.program.gate _).eval
+      (Arithmetic.interpretation constant) input (Fin.last circuit.size) = _
+  rw [Program.eval_gate_last]
   change circuit.program.trace (Arithmetic.interpretation constant) input
       (circuit.outputs 0) *
         circuit.program.trace (Arithmetic.interpretation constant) input
@@ -88,68 +98,71 @@ theorem multiplyInputCircuit_eval
 
 /-- Squaring adds exactly one multiplication to the circuit cost. -/
 @[simp] theorem squareCircuit_multiplicationCost
-    (circuit : Circuit (Arithmetic.signature K) 1 g 1) :
+    (circuit : Circuit (Arithmetic.signature K) 1 1) :
     (squareCircuit circuit).cost
         (Arithmetic.multiplicationCost (K := K)) =
       circuit.cost (Arithmetic.multiplicationCost (K := K)) + 1 := rfl
 
 /-- Multiplication by the retained input adds exactly one multiplication. -/
 @[simp] theorem multiplyInputCircuit_multiplicationCost
-    (circuit : Circuit (Arithmetic.signature K) 1 g 1) :
+    (circuit : Circuit (Arithmetic.signature K) 1 1) :
     (multiplyInputCircuit circuit).cost
         (Arithmetic.multiplicationCost (K := K)) =
       circuit.cost (Arithmetic.multiplicationCost (K := K)) + 1 := rfl
 
 /-- Squaring introduces no addition cost. -/
 @[simp] theorem squareCircuit_additionCost
-    (circuit : Circuit (Arithmetic.signature K) 1 g 1) :
+    (circuit : Circuit (Arithmetic.signature K) 1 1) :
     (squareCircuit circuit).cost (Arithmetic.additionCost (K := K)) =
       circuit.cost (Arithmetic.additionCost (K := K)) := by
   simp [squareCircuit, Circuit.cost, Arithmetic.additionCost]
 
 /-- Multiplication by the retained input introduces no addition cost. -/
 @[simp] theorem multiplyInputCircuit_additionCost
-    (circuit : Circuit (Arithmetic.signature K) 1 g 1) :
+    (circuit : Circuit (Arithmetic.signature K) 1 1) :
     (multiplyInputCircuit circuit).cost
         (Arithmetic.additionCost (K := K)) =
       circuit.cost (Arithmetic.additionCost (K := K)) := by
   simp [multiplyInputCircuit, Circuit.cost, Arithmetic.additionCost]
 
-/-- A shared binary-power circuit, packaged with its inferred gate count.
+/-- A shared binary-power circuit; its gate count is the bundled `size`.
 Zero uses one free constant gate; one is the zero-gate identity; each further
 binary digit contributes one squaring and, for a one bit, one multiplication
 by the retained input. -/
 def binaryCircuit
     [One K]
     (exponent : Nat) :
-    Σ gateCount, Circuit (Arithmetic.signature K) 1 gateCount 1 :=
-  Nat.binaryRecFromOne
-    ⟨1, Algebraic.Arithmetic.Expression.circuit (.constant 1)⟩
-    ⟨0, Circuit.id (Arithmetic.signature K) 1⟩
+    Circuit (Arithmetic.signature K) 1 1 :=
+  Nat.binaryRecFromOne (motive := fun _ ↦ Circuit (Arithmetic.signature K) 1 1)
+    (Algebraic.Arithmetic.Expression.circuit (.constant 1))
+    (Circuit.id (Arithmetic.signature K) 1)
     (fun bit _exponent _nonzero prior ↦
       if bit then
-        ⟨prior.1 + 2,
-          multiplyInputCircuit (squareCircuit prior.2)⟩
+        multiplyInputCircuit (squareCircuit prior)
       else
-        ⟨prior.1 + 1, squareCircuit prior.2⟩)
+        squareCircuit prior)
     exponent
 
-/-- Gate count carried by the dependent binary-power package. -/
+/-- Gate count of the binary-power circuit. -/
 def binaryPowerGateCount
     [One K]
     (exponent : Nat) : Nat :=
-  (binaryCircuit (K := K) exponent).1
+  (binaryCircuit (K := K) exponent).size
 
-/-- Binary powering with a named gate-count index.
-
-This projection is easier to mention at concrete exponents than the second
-projection of the dependent pair returned by `binaryCircuit`. -/
+/-- Binary powering under a name that is easy to mention at concrete
+exponents; its gate count is `binaryPowerGateCount`. -/
 def binaryPowerCircuit
     [One K]
     (exponent : Nat) :
-    Circuit (Arithmetic.signature K) 1
-      (binaryPowerGateCount (K := K) exponent) 1 :=
-  (binaryCircuit (K := K) exponent).2
+    Circuit (Arithmetic.signature K) 1 1 :=
+  binaryCircuit (K := K) exponent
+
+/-- The named binary-power circuit has `binaryPowerGateCount` gates. -/
+@[simp] theorem size_binaryPowerCircuit
+    [One K]
+    (exponent : Nat) :
+    (binaryPowerCircuit (K := K) exponent).size =
+      binaryPowerGateCount (K := K) exponent := rfl
 
 /-- Exact number of multiplication gates used by `binaryCircuit`. -/
 def binaryMultiplicationCount (exponent : Nat) : Nat :=
@@ -160,13 +173,13 @@ def binaryMultiplicationCount (exponent : Nat) : Nat :=
 @[simp] theorem binaryCircuit_zero
     [One K] :
     binaryCircuit (K := K) 0 =
-      ⟨1, Algebraic.Arithmetic.Expression.circuit (.constant 1)⟩ := by
+      Algebraic.Arithmetic.Expression.circuit (.constant 1) := by
   simp [binaryCircuit]
 
 @[simp] theorem binaryCircuit_one
     [One K] :
     binaryCircuit (K := K) 1 =
-      ⟨0, Circuit.id (Arithmetic.signature K) 1⟩ := by
+      Circuit.id (Arithmetic.signature K) 1 := by
   simp [binaryCircuit]
 
 theorem binaryCircuit_bit
@@ -176,12 +189,9 @@ theorem binaryCircuit_bit
     (nonzero : exponent ≠ 0) :
     binaryCircuit (K := K) (Nat.bit bit exponent) =
       if bit then
-        ⟨(binaryCircuit (K := K) exponent).1 + 2,
-          multiplyInputCircuit
-            (squareCircuit (binaryCircuit (K := K) exponent).2)⟩
+        multiplyInputCircuit (squareCircuit (binaryCircuit (K := K) exponent))
       else
-        ⟨(binaryCircuit (K := K) exponent).1 + 1,
-          squareCircuit (binaryCircuit (K := K) exponent).2⟩ := by
+        squareCircuit (binaryCircuit (K := K) exponent) := by
   unfold binaryCircuit
   rw [Nat.binaryRecFromOne_eq bit exponent nonzero]
 
@@ -210,7 +220,7 @@ theorem binaryCircuit_eval
     (mapsOne : constant 1 = 1)
     (input : Fin 1 → R)
     (exponent : Nat) :
-    (binaryCircuit (K := K) exponent).2.eval
+    (binaryCircuit (K := K) exponent).eval
         (Arithmetic.interpretation constant) input 0 = input 0 ^ exponent := by
   induction exponent using Nat.binaryRecFromOne with
   | zero =>
@@ -258,7 +268,7 @@ binary count. -/
 @[simp] theorem binaryCircuit_multiplicationCost
     [One K]
     (exponent : Nat) :
-    (binaryCircuit (K := K) exponent).2.cost
+    (binaryCircuit (K := K) exponent).cost
         (Arithmetic.multiplicationCost (K := K)) =
       binaryMultiplicationCount exponent := by
   induction exponent using Nat.binaryRecFromOne with
@@ -286,7 +296,7 @@ binary count. -/
 @[simp] theorem binaryCircuit_additionCost
     [One K]
     (exponent : Nat) :
-    (binaryCircuit (K := K) exponent).2.cost
+    (binaryCircuit (K := K) exponent).cost
         (Arithmetic.additionCost (K := K)) = 0 := by
   induction exponent using Nat.binaryRecFromOne with
   | zero =>

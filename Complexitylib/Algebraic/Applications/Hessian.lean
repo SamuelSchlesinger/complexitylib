@@ -33,7 +33,7 @@ theorem hessianRank_lowerBound
     (constant : C → K)
     (point : Fin n → K)
     (polynomial : MvPolynomial (Fin n) K)
-    (circuit : Circuit (Arithmetic.signature C) n g 1)
+    (circuit : Circuit (Arithmetic.signature C) n 1)
     (computes : circuit.eval
       (Arithmetic.interpretation (MvPolynomial.C ∘ constant)) MvPolynomial.X 0 = polynomial) :
     (Hessian.matrix point polynomial).rank ⌈/⌉ 2 ≤

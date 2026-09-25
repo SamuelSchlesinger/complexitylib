@@ -50,7 +50,7 @@ export Cslib.Circuits (Signature.degreeInterpretation)
 
 /-- Degree profile of a circuit when every original input has degree one. -/
 def _root_.Cslib.Circuits.Circuit.degreeProfile
-    (circuit : Circuit σ n g m)
+    (circuit : Circuit σ n m)
     (mode : σ.Op → DegreeMode) : Fin m → Nat :=
   circuit.eval (σ.degreeInterpretation mode) (fun _ => 1)
 
@@ -60,7 +60,7 @@ export Cslib.Circuits (Circuit.degreeProfile)
 operation rules implemented by the target gadgets. -/
 theorem Translation.compile_degreeProfile
     (translation : Translation σ τ)
-    (circuit : Circuit σ n g m)
+    (circuit : Circuit σ n m)
     (targetMode : τ.Op → DegreeMode) :
     (translation.compile circuit).degreeProfile targetMode =
       circuit.eval

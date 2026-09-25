@@ -29,7 +29,7 @@ def expression (index : Fin count) : DeMorgan.Expression ((count + count) + coun
 
 /-- Compile one constant-size expression per point. -/
 def combineCircuit (count : Nat) :=
-  Circuit.parallelFin count (fun index => (expression index).gateCount)
+  Circuit.parallelFin count
     (fun index => (expression index).circuit)
 
 /-- The combining stage reads the corresponding bits of each shared array. -/
@@ -49,16 +49,16 @@ theorem combineCircuit_cost :
 
 /-- Evaluate each shared subcircuit once and combine their pointwise outputs. -/
 def circuit
-    (left : Circuit DeMorgan.signature inputs leftGates count)
-    (right : Circuit DeMorgan.signature inputs rightGates count)
-    (valid : Circuit DeMorgan.signature inputs validGates count) :=
+    (left : Circuit DeMorgan.signature inputs count)
+    (right : Circuit DeMorgan.signature inputs count)
+    (valid : Circuit DeMorgan.signature inputs count) :=
   (combineCircuit count).comp ((left.parallel right).parallel valid)
 
 /-- Exact pointwise semantics of the shared composition. -/
 theorem circuit_eval
-    (left : Circuit DeMorgan.signature inputs leftGates count)
-    (right : Circuit DeMorgan.signature inputs rightGates count)
-    (valid : Circuit DeMorgan.signature inputs validGates count)
+    (left : Circuit DeMorgan.signature inputs count)
+    (right : Circuit DeMorgan.signature inputs count)
+    (valid : Circuit DeMorgan.signature inputs count)
     (input : Fin inputs → Bool) (index : Fin count) :
     (circuit left right valid).eval DeMorgan.interpretation input index =
       (valid.eval DeMorgan.interpretation input index &&
@@ -67,9 +67,9 @@ theorem circuit_eval
 
 /-- Each shared subcircuit is charged once, plus two gates per point. -/
 theorem circuit_cost
-    (left : Circuit DeMorgan.signature inputs leftGates count)
-    (right : Circuit DeMorgan.signature inputs rightGates count)
-    (valid : Circuit DeMorgan.signature inputs validGates count) :
+    (left : Circuit DeMorgan.signature inputs count)
+    (right : Circuit DeMorgan.signature inputs count)
+    (valid : Circuit DeMorgan.signature inputs count) :
     (circuit left right valid).cost DeMorgan.standardCost =
       (left.cost DeMorgan.standardCost + right.cost DeMorgan.standardCost +
         valid.cost DeMorgan.standardCost) + 2 * count := by

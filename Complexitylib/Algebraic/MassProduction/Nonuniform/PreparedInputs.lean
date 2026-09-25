@@ -20,7 +20,7 @@ duplicating the preprocessing computation or adding charged gates.
 namespace Algebraic.MassProduction.Nonuniform.PreparedInputs
 
 /-- Preserve the original inputs after the generated output block. -/
-def circuit (generated : Circuit DeMorgan.signature inputs gates outputs) :=
+def circuit (generated : Circuit DeMorgan.signature inputs outputs) :=
   generated.parallel (Circuit.id DeMorgan.signature inputs)
 
 /-- Lift an original wire or constant past the generated output block. -/
@@ -34,21 +34,21 @@ def output (inputs : Nat) (index : Fin outputs) : DeMorgan.Wiring (outputs + inp
   .input (Fin.castAdd inputs index)
 
 /-- The preprocessing output is its generated values followed by the original input. -/
-theorem circuit_eval (generated : Circuit DeMorgan.signature inputs gates outputs)
+theorem circuit_eval (generated : Circuit DeMorgan.signature inputs outputs)
     (input : Fin inputs → Bool) :
     (circuit generated).eval DeMorgan.interpretation input =
       Fin.append (generated.eval DeMorgan.interpretation input) input := by
   rw [circuit, Circuit.eval_parallel, Circuit.eval_id]
 
 /-- Original values survive preprocessing exactly. -/
-theorem original_eval (generated : Circuit DeMorgan.signature inputs gates outputs)
+theorem original_eval (generated : Circuit DeMorgan.signature inputs outputs)
     (wire : DeMorgan.Wiring inputs) (input : Fin inputs → Bool) :
     (original outputs wire).eval ((circuit generated).eval DeMorgan.interpretation input) = wire.eval input := by
   rw [circuit_eval]
   cases wire <;> simp [original]
 
 /-- Generated values are available as fixed wires. -/
-theorem output_eval (generated : Circuit DeMorgan.signature inputs gates outputs)
+theorem output_eval (generated : Circuit DeMorgan.signature inputs outputs)
     (index : Fin outputs) (input : Fin inputs → Bool) :
     (output inputs index).eval ((circuit generated).eval DeMorgan.interpretation input) =
       generated.eval DeMorgan.interpretation input index := by
@@ -56,7 +56,7 @@ theorem output_eval (generated : Circuit DeMorgan.signature inputs gates outputs
   simp only [output, DeMorgan.Wiring.eval_input, Fin.append_left]
 
 /-- Keeping the original inputs adds no charged gates. -/
-theorem circuit_cost (generated : Circuit DeMorgan.signature inputs gates outputs) :
+theorem circuit_cost (generated : Circuit DeMorgan.signature inputs outputs) :
     (circuit generated).cost DeMorgan.standardCost = generated.cost DeMorgan.standardCost := by
   rw [circuit, Circuit.cost_parallel, Circuit.cost_id, Nat.add_zero]
 

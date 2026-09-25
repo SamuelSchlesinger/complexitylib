@@ -144,7 +144,7 @@ theorem Certificate.circuit_lowerBound
     (certificate : Certificate (K := K) (A := A) (B := B)
       termValue termWeight problem)
     (circuit : Circuit (Algebraic.SumOfTerms.signature T)
-      problem.inputCount g 1)
+      problem.inputCount 1)
     (constructs : problem.Constructs circuit
       (Algebraic.SumOfTerms.interpretation termValue)) :
     certificate.targetRank ≤

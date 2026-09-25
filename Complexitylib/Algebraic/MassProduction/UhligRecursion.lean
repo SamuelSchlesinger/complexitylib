@@ -249,21 +249,17 @@ theorem recursiveCircuit_cost_le
       rw [recursiveCircuit_cost_zero]
       simpa [recursiveOverhead] using baseCost function
   | succ depth inductionHypothesis =>
-      let resourceGateCounts :=
-        fun resource : Fin (prefixLast prefixWidth + 2) =>
-          recursiveGateCount prefixWidth baseWidth base depth
-            (resourceFunction function resource)
       let resourceCircuits :=
         fun resource : Fin (prefixLast prefixWidth + 2) =>
           recursiveCircuit prefixWidth baseWidth base depth
             (resourceFunction function resource)
       change
         (sharedUhligLayerCircuit (recursiveCopies depth)
-          resourceGateCounts resourceCircuits).cost
+          resourceCircuits).cost
             DeMorgan.standardCost <= _
       calc
         (sharedUhligLayerCircuit (recursiveCopies depth)
-            resourceGateCounts resourceCircuits).cost
+            resourceCircuits).cost
               DeMorgan.standardCost <=
             (Finset.univ.sum fun resource :
                 Fin (prefixLast prefixWidth + 2) =>
@@ -275,7 +271,6 @@ theorem recursiveCircuit_cost_le
             (prefixWidth := prefixWidth)
             (suffixWidth := recursiveWidth prefixWidth baseWidth depth)
             (pairs := recursiveCopies depth)
-            (resourceGateCounts := resourceGateCounts)
             (resourceCircuits := resourceCircuits)
         _ <=
             (Finset.univ.sum fun _resource :

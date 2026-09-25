@@ -32,7 +32,7 @@ theorem existsCircuit
       Nat.card (ℙ (BinaryExtension width) (Fin dimension → BinaryExtension width)))
     (original : Fin (networkRecords depth) → Fin payloadWidth → DeMorgan.Wiring inputs)
     (targetProjection : Fin (dimension * width) → Fin payloadWidth) :
-    ∃ gates, ∃ scheduler : Circuit DeMorgan.signature inputs gates
+    ∃ scheduler : Circuit DeMorgan.signature inputs
       (inputWidth (networkRecords depth) 0 (depth + payloadWidth) (2 ^ width) (dimension * width)),
       scheduler.cost DeMorgan.standardCost ≤ networkRecords depth * 2 ^ width *
         BufferIteration.polynomialFactor (networkRecords depth) dimension width (depth + payloadWidth) ∧
@@ -44,10 +44,10 @@ theorem existsCircuit
           scheduler.eval DeMorgan.interpretation input =
             BufferModel.input positive state (TaggedBuffer.data original input) targets ∧
           WellScheduled state targets := by
-  obtain ⟨gates, iteration, bound, correct⟩ := BufferIteration.existsCircuit_linear
+  obtain ⟨iteration, bound, correct⟩ := BufferIteration.existsCircuit_linear
     positive dimensionPositive (Nat.zero_add (networkRecords depth)) budget
     (fun bit => Fin.natAdd depth (targetProjection bit))
-  refine ⟨_, iteration.comp (TaggedBuffer.circuit dimension width original), ?_, ?_⟩
+  refine ⟨iteration.comp (TaggedBuffer.circuit dimension width original), ?_, ?_⟩
   · rw [Circuit.cost_comp, TaggedBuffer.circuit_cost, Nat.zero_add]
     exact bound
   · intro input targets targetCorrect

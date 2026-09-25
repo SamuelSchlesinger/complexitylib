@@ -30,8 +30,8 @@ record counts transport the circuit and its semantic contract together. -/
 private def RealizesBound (positive : 0 < width)
     (targetProjection : Fin (dimension * width) → Fin requestWidth)
     (total completed pending nextCompleted nextPending bound : Nat) : Prop :=
-  ∃ gates, ∃ scheduler : Circuit DeMorgan.signature
-    (inputWidth completed pending requestWidth (2 ^ width) (dimension * width)) gates
+  ∃ scheduler : Circuit DeMorgan.signature
+    (inputWidth completed pending requestWidth (2 ^ width) (dimension * width))
     (inputWidth nextCompleted nextPending requestWidth (2 ^ width) (dimension * width)),
     scheduler.cost DeMorgan.standardCost ≤ bound ∧
       Transforms positive targetProjection scheduler total
@@ -51,8 +51,8 @@ theorem existsCircuit
     (budget : 512 * total * Nat.card (BinaryExtension width) ≤
       Nat.card (ℙ (BinaryExtension width) (Fin dimension → BinaryExtension width)))
     (targetProjection : Fin (dimension * width) → Fin requestWidth) :
-    ∃ gates, ∃ scheduler : Circuit DeMorgan.signature
-      (inputWidth completed (networkRecords requestDepth) requestWidth (2 ^ width) (dimension * width)) gates
+    ∃ scheduler : Circuit DeMorgan.signature
+      (inputWidth completed (networkRecords requestDepth) requestWidth (2 ^ width) (dimension * width))
       (inputWidth (completed + networkRecords requestDepth) 0 requestWidth (2 ^ width) (dimension * width)),
       scheduler.cost DeMorgan.standardCost ≤ costBound total dimension width requestWidth requestDepth completed ∧
       Transforms positive targetProjection scheduler total := by
@@ -68,19 +68,19 @@ theorem existsCircuit
         (completed + acceptedCount (depth + 1)) (pendingCount (depth + 1))
         (BufferedPhase.costBound total completed (depth + 1) dimension width requestWidth) at stepExists
       rw [acceptedCount_succ, pendingCount_succ] at stepExists
-      obtain ⟨stepGates, step, stepBound, stepCorrect⟩ := stepExists
+      obtain ⟨step, stepBound, stepCorrect⟩ := stepExists
       have nextCounts : (completed + networkRecords depth) + networkRecords depth = total := by
         simpa only [networkRecords, Nat.add_assoc] using counts
-      obtain ⟨tailGates, tail, tailBound, tailCorrect⟩ := inductionHypothesis nextCounts
-      have composed : ∃ gates, ∃ scheduler : Circuit DeMorgan.signature
-          (inputWidth completed (networkRecords (depth + 1)) requestWidth (2 ^ width) (dimension * width)) gates
+      obtain ⟨tail, tailBound, tailCorrect⟩ := inductionHypothesis nextCounts
+      have composed : ∃ scheduler : Circuit DeMorgan.signature
+          (inputWidth completed (networkRecords (depth + 1)) requestWidth (2 ^ width) (dimension * width))
           (inputWidth ((completed + networkRecords depth) + networkRecords depth) 0
             requestWidth (2 ^ width) (dimension * width)),
           scheduler.cost DeMorgan.standardCost ≤
             BufferedPhase.costBound total completed (depth + 1) dimension width requestWidth +
               costBound total dimension width requestWidth depth (completed + networkRecords depth) ∧
           Transforms positive targetProjection scheduler total := by
-        refine ⟨_, tail.comp step, ?_, ?_⟩
+        refine ⟨tail.comp step, ?_, ?_⟩
         · rw [Circuit.cost_comp]
           exact Nat.add_le_add stepBound tailBound
         · exact Transforms.comp positive targetProjection step tail stepCorrect tailCorrect
@@ -98,8 +98,8 @@ theorem existsCircuit_complete
     (budget : 512 * total * Nat.card (BinaryExtension width) ≤
       Nat.card (ℙ (BinaryExtension width) (Fin dimension → BinaryExtension width)))
     (targetProjection : Fin (dimension * width) → Fin requestWidth) :
-    ∃ gates, ∃ scheduler : Circuit DeMorgan.signature
-      (inputWidth completed (networkRecords requestDepth) requestWidth (2 ^ width) (dimension * width)) gates
+    ∃ scheduler : Circuit DeMorgan.signature
+      (inputWidth completed (networkRecords requestDepth) requestWidth (2 ^ width) (dimension * width))
       (inputWidth total 0 requestWidth (2 ^ width) (dimension * width)),
       scheduler.cost DeMorgan.standardCost ≤ costBound total dimension width requestWidth requestDepth completed ∧
       Transforms positive targetProjection scheduler total := by

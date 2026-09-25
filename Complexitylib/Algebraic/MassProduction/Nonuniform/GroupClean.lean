@@ -27,7 +27,7 @@ def expression (points : Fin slots → Fin pointCount) : DeMorgan.Expression poi
 
 /-- Compile one clean flag per request. -/
 def flagsCircuit (points : Fin requests → Fin slots → Fin pointCount) :=
-  Circuit.parallelFin requests (fun request => (expression (points request)).gateCount)
+  Circuit.parallelFin requests
     (fun request => (expression (points request)).circuit)
 
 /-- No point in a request is conflicting exactly when its clean flag is true. -/
@@ -53,13 +53,13 @@ theorem flagsCircuit_cost
 
 /-- Aggregate all requests after running the point circuit once. -/
 def circuit (points : Fin requests → Fin slots → Fin pointCount)
-    (conflicts : Circuit DeMorgan.signature inputs gates pointCount) :=
+    (conflicts : Circuit DeMorgan.signature inputs pointCount) :=
   (flagsCircuit points).comp conflicts
 
 /-- Exact clean-request semantics for a shared point-conflict circuit. -/
 theorem circuit_eval_iff
     (points : Fin requests → Fin slots → Fin pointCount)
-    (conflicts : Circuit DeMorgan.signature inputs gates pointCount)
+    (conflicts : Circuit DeMorgan.signature inputs pointCount)
     (input : Fin inputs → Bool) (request : Fin requests) :
     (circuit points conflicts).eval DeMorgan.interpretation input request = true ↔
       ∀ slot, conflicts.eval DeMorgan.interpretation input (points request slot) = false := by
@@ -68,7 +68,7 @@ theorem circuit_eval_iff
 /-- Only linear work in the number of request-point slots is added. -/
 theorem circuit_cost
     (points : Fin requests → Fin slots → Fin pointCount)
-    (conflicts : Circuit DeMorgan.signature inputs gates pointCount) :
+    (conflicts : Circuit DeMorgan.signature inputs pointCount) :
     (circuit points conflicts).cost DeMorgan.standardCost =
       conflicts.cost DeMorgan.standardCost + requests * (slots + 1) := by
   rw [circuit, Circuit.cost_comp, flagsCircuit_cost]

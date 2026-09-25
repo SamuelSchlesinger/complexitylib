@@ -585,7 +585,7 @@ def materialize
         { gateCount := g + 1
           result := program.gate line
           embedding := Wire.Renaming.castSucc
-          output := Fin.last (n + g)
+          output := Wire.gate (Fin.last g)
           embedding_eq := by
             intro input sourceWire
             simpa only [Wire.Renaming.castSucc_apply] using
@@ -593,7 +593,7 @@ def materialize
                 program line interpretation input sourceWire
           output_eq := by
             intro input
-            rw [Program.trace_gate_last]
+            rw [Program.trace_gateWire, Program.gateFunction_apply, Program.eval_gate_last]
             cases value <;> rfl
           cost_eq := by
             simp [line] }
@@ -616,7 +616,7 @@ def materialize
             { gateCount := g + 1
               result := program.gate line
               embedding := Wire.Renaming.castSucc
-              output := Fin.last (n + g)
+              output := Wire.gate (Fin.last g)
               embedding_eq := by
                 intro input oldWire
                 simpa only [Wire.Renaming.castSucc_apply] using
@@ -624,7 +624,7 @@ def materialize
                     program line interpretation input oldWire
               output_eq := by
                 intro input
-                rw [Program.trace_gate_last]
+                rw [Program.trace_gateWire, Program.gateFunction_apply, Program.eval_gate_last]
                 rfl
               cost_eq := by simp [line] }
 
@@ -672,7 +672,7 @@ def retainGate
       result := result
       embedding := Wire.Renaming.castSucc.comp
         (second.embedding.comp first.embedding)
-      output := Fin.last (n + second.gateCount)
+      output := Wire.gate (Fin.last second.gateCount)
       embedding_eq := by
         intro input sourceWire
         rw [Wire.Renaming.comp_apply, Wire.Renaming.comp_apply,
@@ -681,7 +681,7 @@ def retainGate
         rw [second.embedding_eq, first.embedding_eq]
       output_eq := by
         intro input
-        rw [Program.trace_gate_last]
+        rw [Program.trace_gateWire, Program.gateFunction_apply, Program.eval_gate_last]
         rw [binaryLine_eval]
         change op.eval
           (second.result.trace interpretation input

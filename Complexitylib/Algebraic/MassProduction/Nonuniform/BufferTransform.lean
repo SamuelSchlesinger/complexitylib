@@ -25,7 +25,7 @@ open BufferInput
 state over the same original request dataset and targets. -/
 def Transforms (positive : 0 < width) (targetProjection : Fin (dimension * width) → Fin requestWidth)
     (circuit : Circuit DeMorgan.signature
-      (inputWidth completed pending requestWidth (2 ^ width) (dimension * width)) gates
+      (inputWidth completed pending requestWidth (2 ^ width) (dimension * width))
       (inputWidth nextCompleted nextPending requestWidth (2 ^ width) (dimension * width)))
     (total : Nat) : Prop :=
   ∀ (data : Fin total → Fin requestWidth → Bool)
@@ -42,10 +42,10 @@ def Transforms (positive : 0 < width) (targetProjection : Fin (dimension * width
 theorem Transforms.comp (positive : 0 < width)
     (targetProjection : Fin (dimension * width) → Fin requestWidth)
     (first : Circuit DeMorgan.signature
-      (inputWidth completed pending requestWidth (2 ^ width) (dimension * width)) firstGates
+      (inputWidth completed pending requestWidth (2 ^ width) (dimension * width))
       (inputWidth middleCompleted middlePending requestWidth (2 ^ width) (dimension * width)))
     (last : Circuit DeMorgan.signature
-      (inputWidth middleCompleted middlePending requestWidth (2 ^ width) (dimension * width)) lastGates
+      (inputWidth middleCompleted middlePending requestWidth (2 ^ width) (dimension * width))
       (inputWidth nextCompleted nextPending requestWidth (2 ^ width) (dimension * width)))
     (firstCorrect : Transforms positive targetProjection first total)
     (lastCorrect : Transforms positive targetProjection last total) :

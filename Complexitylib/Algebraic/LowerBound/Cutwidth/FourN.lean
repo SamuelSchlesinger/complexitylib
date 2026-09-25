@@ -194,9 +194,10 @@ theorem lt_size_of_bounds {η C : ℝ} (hη : 0 < η) (hη1 : η ≤ 1 / 18) (hC
     (hacc : 2 ^ (n - 2) ≤ (accepting f).card) (hrect : RectangleFree f K)
     (hpow : 8 * n ^ (2 * c) ≤ 2 ^ n)
     (hlog : (4 + 3 * c) * Real.logb 2 n + (C + 22) < 3 * η * n)
-    {s : Nat} (circuit : Circuit Binary.signature n s 1)
-    (computes : circuit.Computes Binary.interpretation f) :
-    (4 - 18 * η) * n < s := by
+    (circuit : Circuit Binary.signature n 1)
+    (computes : circuit.Computes Binary.interpretation fun x _ => f x) :
+    (4 - 18 * η) * n < circuit.size := by
+  rcases circuit with @⟨s, program, outputs⟩
   by_contra hs
   rw [not_lt] at hs
   -- Basic facts about `K` and `⌈log₂ K⌉`.
@@ -231,18 +232,19 @@ theorem lt_size_of_bounds {η C : ℝ} (hη : 0 < η) (hη1 : η ≤ 1 / 18) (hC
       (by positivity)).mpr (show (K : ℝ) ≤ (n : ℝ) ^ c by exact_mod_cast hK)
     rwa [Real.logb_pow] at h
   -- The circuit's output wire.
-  set g := circuit.outputs 0 with hg
-  have eval_eq : ∀ x, f x = circuit.program.trace Binary.interpretation x g := by
+  obtain ⟨g, hg⟩ : ∃ g, outputs 0 = g := ⟨_, rfl⟩
+  have eval_eq : ∀ x, f x = program.trace Binary.interpretation x g := by
     intro x
-    rw [← computes x]
-    rfl
+    rw [← hg]
+    exact (congrFun (computes x) 0).symm
   -- The function depends only on the inputs read by the output cone, and
   -- that cone must contain all but fewer than `k` inputs.
   have support : ∀ R : Finset (Fin n), DependsOnlyOn f R → n - R.card < k :=
     fun R hR => sub_card_lt_clog hK1 hrect hacc hbig hR
   revert eval_eq
-  refine Fin.addCases (fun j => ?_) (fun out => ?_) g
-  · -- The output is an input wire: the function ignores all but one coordinate.
+  cases g with
+  | input j =>
+    -- The output is an input wire: the function ignores all but one coordinate.
     intro eval_eq
     have hR : DependsOnlyOn f {j} := by
       intro x y agree
@@ -253,8 +255,9 @@ theorem lt_size_of_bounds {η C : ℝ} (hη : 0 < η) (hη1 : η ≤ 1 / 18) (hC
     have h' : ((n - 1 : Nat) : ℝ) < k := by exact_mod_cast (by omega : n - 1 < k)
     rw [Nat.cast_sub (by omega), Nat.cast_one] at h'
     linarith
-  · intro eval_eq
-    set p := circuit.program with hp
+  | gate out =>
+    intro eval_eq
+    set p := program with hp
     have feq : f = fun x => p.eval Binary.interpretation x out := by
       funext x
       rw [eval_eq]
@@ -338,8 +341,9 @@ theorem eventually_lt_size
     (hacc : ∀ᶠ n in atTop, 2 ^ (n - 2) ≤ (accepting (f n)).card)
     (hrect : ∀ᶠ n in atTop, RectangleFree (f n) (K n))
     {ε : ℝ} (hε : 0 < ε) :
-    ∀ᶠ n in atTop, ∀ {s : Nat} (circuit : Circuit Binary.signature n s 1),
-      circuit.Computes Binary.interpretation (f n) → (4 - ε) * n < s := by
+    ∀ᶠ n in atTop, ∀ circuit : Circuit Binary.signature n 1,
+      circuit.Computes Binary.interpretation (fun x _ => f n x) →
+        (4 - ε) * n < circuit.size := by
   set ε' := min ε 1 with hε'
   have hε'pos : 0 < ε' := lt_min hε one_pos
   have hε'le : ε' ≤ ε := min_le_left _ _
@@ -355,7 +359,7 @@ theorem eventually_lt_size
   have hpow := Nat.eventually_mul_pow_le_pow 8 (2 * c) one_lt_two
   filter_upwards [hK, hacc, hrect, hlog, hpow, eventually_ge_atTop 2] with n hKn haccn
     hrectn hlogn hpown hn2
-  intro s circuit computes
+  intro circuit computes
   have key := lt_size_of_bounds hηpos hη1 (le_max_right C 0) order' hn2 hKn haccn hrectn hpown
     hlogn circuit computes
   have : (4 - ε) * n ≤ (4 - 18 * η) * n := by
@@ -375,8 +379,9 @@ theorem eventually_lt_size_of_pathwidthBound
     (hacc : ∀ᶠ n in atTop, 2 ^ (n - 2) ≤ (accepting (f n)).card)
     (hrect : ∀ᶠ n in atTop, RectangleFree (f n) (K n))
     {ε : ℝ} (hε : 0 < ε) :
-    ∀ᶠ n in atTop, ∀ {s : Nat} (circuit : Circuit Binary.signature n s 1),
-      circuit.Computes Binary.interpretation (f n) → (4 - ε) * n < s := by
+    ∀ᶠ n in atTop, ∀ circuit : Circuit Binary.signature n 1,
+      circuit.Computes Binary.interpretation (fun x _ => f n x) →
+        (4 - ε) * n < circuit.size := by
   refine eventually_lt_size (fun η hη => ?_) f K c hK hacc hrect hε
   obtain ⟨N₀, hN₀⟩ := pathwidth (η / 2) (by positivity)
   refine ⟨N₀ + 9, ?_⟩

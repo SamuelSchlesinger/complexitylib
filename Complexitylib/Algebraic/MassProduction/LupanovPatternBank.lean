@@ -100,13 +100,17 @@ noncomputable def leftBlockCircuit
     (addressWidth blockSize : Nat)
     (block : Fin (blockCount addressWidth blockSize)) :
     Circuit DeMorgan.signature (2 ^ addressWidth)
-      (leftBlockGateCount addressWidth blockSize block)
       (patternCount blockSize) :=
   Circuit.parallelFin (patternCount blockSize)
     (fun pattern =>
-      (leftExpression addressWidth blockSize block pattern).gateCount)
-    (fun pattern =>
       (leftExpression addressWidth blockSize block pattern).circuit)
+
+@[simp] theorem leftBlockCircuit_size
+    (addressWidth blockSize : Nat)
+    (block : Fin (blockCount addressWidth blockSize)) :
+    (leftBlockCircuit addressWidth blockSize block).size =
+      leftBlockGateCount addressWidth blockSize block := by
+  simp [leftBlockCircuit, leftBlockGateCount]
 
 @[simp] theorem leftBlockCircuit_eval
     (addressWidth blockSize : Nat)
@@ -116,7 +120,7 @@ noncomputable def leftBlockCircuit
     (leftBlockCircuit addressWidth blockSize block).eval
         DeMorgan.interpretation flags pattern =
       (leftExpression addressWidth blockSize block pattern).eval flags := by
-  unfold leftBlockCircuit leftBlockGateCount
+  unfold leftBlockCircuit
   rw [Circuit.eval_parallelFin, DeMorgan.Expression.circuit_eval]
 
 theorem leftBlockCircuit_cost
@@ -125,7 +129,7 @@ theorem leftBlockCircuit_cost
     (leftBlockCircuit addressWidth blockSize block).cost
         DeMorgan.standardCost =
       patternCount blockSize * blockSize := by
-  unfold leftBlockCircuit leftBlockGateCount
+  unfold leftBlockCircuit
   rw [Circuit.cost_parallelFin]
   calc
     (∑ pattern : Fin (patternCount blockSize),
@@ -152,11 +156,17 @@ noncomputable def rightBlockCircuit
     (blockSize : Nat)
     (block : Fin (blockCount addressWidth blockSize)) :
     Circuit DeMorgan.signature (2 ^ dataWidth)
-      (rightBlockGateCount function blockSize block)
       (patternCount blockSize) :=
   Circuit.parallelFin (patternCount blockSize)
-    (fun pattern => (rightExpression function block pattern).gateCount)
     (fun pattern => (rightExpression function block pattern).circuit)
+
+@[simp] theorem rightBlockCircuit_size
+    (function : ScalarFunction Bool (addressWidth + dataWidth))
+    (blockSize : Nat)
+    (block : Fin (blockCount addressWidth blockSize)) :
+    (rightBlockCircuit function blockSize block).size =
+      rightBlockGateCount function blockSize block := by
+  simp [rightBlockCircuit, rightBlockGateCount]
 
 @[simp] theorem rightBlockCircuit_eval
     (function : ScalarFunction Bool (addressWidth + dataWidth))
@@ -167,7 +177,7 @@ noncomputable def rightBlockCircuit
     (rightBlockCircuit function blockSize block).eval
         DeMorgan.interpretation flags pattern =
       (rightExpression function block pattern).eval flags := by
-  unfold rightBlockCircuit rightBlockGateCount
+  unfold rightBlockCircuit
   rw [Circuit.eval_parallelFin, DeMorgan.Expression.circuit_eval]
 
 theorem rightBlockCircuit_cost
@@ -176,7 +186,7 @@ theorem rightBlockCircuit_cost
     (block : Fin (blockCount addressWidth blockSize)) :
     (rightBlockCircuit function blockSize block).cost
         DeMorgan.standardCost = 2 ^ dataWidth := by
-  unfold rightBlockCircuit rightBlockGateCount
+  unfold rightBlockCircuit
   rw [Circuit.cost_parallelFin]
   calc
     (∑ pattern : Fin (patternCount blockSize),
@@ -200,14 +210,18 @@ theorem rightBlockCircuit_cost
 noncomputable def leftBankCircuit
     (addressWidth dataWidth blockSize : Nat) :
     Circuit DeMorgan.signature (2 ^ addressWidth + 2 ^ dataWidth)
-      (leftBankGateCount addressWidth blockSize)
       (blockCount addressWidth blockSize * patternCount blockSize) :=
   Circuit.parallelFinVector
     (blockCount addressWidth blockSize) (patternCount blockSize)
-    (fun block => leftBlockGateCount addressWidth blockSize block)
     (fun block =>
       (leftBlockCircuit addressWidth blockSize block).mapInputs
         (Fin.castAdd (2 ^ dataWidth)))
+
+@[simp] theorem leftBankCircuit_size
+    (addressWidth dataWidth blockSize : Nat) :
+    (leftBankCircuit addressWidth dataWidth blockSize).size =
+      leftBankGateCount addressWidth blockSize := by
+  simp [leftBankCircuit, leftBankGateCount]
 
 @[simp] theorem leftBankCircuit_eval
     (addressWidth dataWidth blockSize : Nat)
@@ -228,7 +242,7 @@ theorem leftBankCircuit_cost
         DeMorgan.standardCost =
       blockCount addressWidth blockSize *
         (patternCount blockSize * blockSize) := by
-  unfold leftBankCircuit leftBankGateCount
+  unfold leftBankCircuit
   rw [Circuit.cost_parallelFinVector]
   simp only [Circuit.cost_mapInputs, leftBlockCircuit_cost]
   simp
@@ -246,14 +260,19 @@ noncomputable def rightBankCircuit
     (function : ScalarFunction Bool (addressWidth + dataWidth))
     (blockSize : Nat) :
     Circuit DeMorgan.signature (2 ^ addressWidth + 2 ^ dataWidth)
-      (rightBankGateCount function blockSize)
       (blockCount addressWidth blockSize * patternCount blockSize) :=
   Circuit.parallelFinVector
     (blockCount addressWidth blockSize) (patternCount blockSize)
-    (fun block => rightBlockGateCount function blockSize block)
     (fun block =>
       (rightBlockCircuit function blockSize block).mapInputs
         (Fin.natAdd (2 ^ addressWidth)))
+
+@[simp] theorem rightBankCircuit_size
+    (function : ScalarFunction Bool (addressWidth + dataWidth))
+    (blockSize : Nat) :
+    (rightBankCircuit function blockSize).size =
+      rightBankGateCount function blockSize := by
+  simp [rightBankCircuit, rightBankGateCount]
 
 @[simp] theorem rightBankCircuit_eval
     (function : ScalarFunction Bool (addressWidth + dataWidth))
@@ -274,7 +293,7 @@ theorem rightBankCircuit_cost
     (blockSize : Nat) :
     (rightBankCircuit function blockSize).cost DeMorgan.standardCost =
       blockCount addressWidth blockSize * 2 ^ dataWidth := by
-  unfold rightBankCircuit rightBankGateCount
+  unfold rightBankCircuit
   rw [Circuit.cost_parallelFinVector]
   simp only [Circuit.cost_mapInputs, rightBlockCircuit_cost]
   simp

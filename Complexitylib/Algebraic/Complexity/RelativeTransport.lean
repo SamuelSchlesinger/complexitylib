@@ -47,7 +47,7 @@ namespace Circuit
 theorem ComputesFrom.map
     {first : Interpretation σ U} {second : Interpretation σ V}
     (hom : Homomorphism first second)
-    {circuit : Circuit σ n gates m}
+    {circuit : Circuit σ n m}
     {target : X → Fin m → U} {sources : X → Fin n → U}
     (computes : circuit.ComputesFrom first target sources) :
     circuit.ComputesFrom second (fun x => hom.map ∘ target x)
@@ -64,7 +64,7 @@ theorem relativeCostComplexity_map_le
       (fun x => hom.map ∘ sources x) ≤
         relativeCostComplexity first operationCost target sources := by
   apply le_relativeCostComplexity
-  intro gates circuit computes
+  intro circuit computes
   exact relativeCostComplexity_le operationCost (computes.map hom)
 
 /-- An embedding of interpretations preserves relative complexity exactly.
@@ -79,7 +79,7 @@ theorem relativeCostComplexity_map_eq
         relativeCostComplexity first operationCost target sources := by
   apply le_antisymm (relativeCostComplexity_map_le hom operationCost target sources)
   apply le_relativeCostComplexity
-  intro gates circuit computes
+  intro circuit computes
   apply relativeCostComplexity_le operationCost
   intro x
   funext i
@@ -90,7 +90,7 @@ theorem relativeCostComplexity_map_eq
 
 /-- A circuit on function-valued inputs evaluates at each point independently. -/
 @[simp] theorem eval_pointwise_apply
-    (circuit : Circuit σ n gates m) (interpretation : Interpretation σ U)
+    (circuit : Circuit σ n m) (interpretation : Interpretation σ U)
     (input : Fin n → X → U) (output : Fin m) (x : X) :
     circuit.eval (interpretation.pointwise X) input output x =
       circuit.eval interpretation (fun i => input i x) output :=
@@ -99,7 +99,7 @@ theorem relativeCostComplexity_map_eq
 /-- Computing a tuple of functions pointwise is exactly relative computation
 of the corresponding family on their common domain. -/
 theorem computesFrom_iff_eval_pointwise
-    (circuit : Circuit σ n gates m) (interpretation : Interpretation σ U)
+    (circuit : Circuit σ n m) (interpretation : Interpretation σ U)
     (target : X → Fin m → U) (sources : X → Fin n → U) :
     circuit.ComputesFrom interpretation target sources ↔
       circuit.eval (interpretation.pointwise X) (fun i x => sources x i) =
@@ -117,7 +117,6 @@ theorem relativeCostComplexity_pointwise
       (fun (_ : Unit) i x => target x i) (fun (_ : Unit) i x => sources x i) =
         relativeCostComplexity interpretation operationCost target sources := by
   unfold relativeCostComplexity
-  apply iInf_congr fun gates => ?_
   apply iInf_congr fun circuit => ?_
   have equivalent : circuit.ComputesFrom (interpretation.pointwise X)
       (fun (_ : Unit) i x => target x i) (fun (_ : Unit) i x => sources x i) ↔
@@ -143,7 +142,7 @@ theorem relativeCostComplexity_le
       Circuit.relativeCostComplexity (translation.pull interpretation)
         (translation.pullCost operationCost) target sources := by
   apply Circuit.le_relativeCostComplexity
-  intro gates circuit computes
+  intro circuit computes
   have compiled : (translation.compile circuit).ComputesFrom interpretation target sources := by
     intro x
     exact (translation.compile_eval circuit interpretation (sources x)).trans (computes x)

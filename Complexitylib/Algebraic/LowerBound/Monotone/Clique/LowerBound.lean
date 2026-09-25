@@ -64,7 +64,7 @@ def outputFamily
     (two_le_petals : 2 ≤ petalCount)
     (width : Nat)
     (two_le_width : 2 ≤ width)
-    (circuit : Circuit AndOr.signature (edgeCount n) g 1) :
+    (circuit : Circuit AndOr.signature (edgeCount n) 1) :
     NormalFamily n petalCount width :=
   circuit.eval
     (normalInterpretation petalCount two_le_petals width)
@@ -77,7 +77,7 @@ theorem outputFamily_nonempty
     (two_le_petals : 2 ≤ petalCount)
     (two_le_width : 2 ≤ width)
     (width_succ_le_k : width + 1 ≤ k)
-    (circuit : Circuit AndOr.signature (edgeCount n) g 1)
+    (circuit : Circuit AndOr.signature (edgeCount n) 1)
     (computes : ∀ assignment,
       circuit.eval AndOr.boolInterpretation assignment 0 =
         function n k assignment)
@@ -140,7 +140,7 @@ theorem acceptedColorings_card_le_negativeCost
     (kPositive : 0 < k)
     (two_le_petals : 2 ≤ petalCount)
     (two_le_width : 2 ≤ width)
-    (circuit : Circuit AndOr.signature (edgeCount n) g 1)
+    (circuit : Circuit AndOr.signature (edgeCount n) 1)
     (computes : ∀ assignment,
       circuit.eval AndOr.boolInterpretation assignment 0 =
         function n k assignment) :
@@ -189,7 +189,7 @@ theorem circuitSize_dichotomy
     (two_le_width : 2 ≤ width)
     (width_succ_le_k : width + 1 ≤ k)
     (colorsLarge : 2 * width ^ 2 ≤ k - 1)
-    (circuit : Circuit AndOr.signature (edgeCount n) g 1)
+    (circuit : Circuit AndOr.signature (edgeCount n) 1)
     (computes : ∀ assignment,
       circuit.eval AndOr.boolInterpretation assignment 0 =
         function n k assignment) :
@@ -235,7 +235,7 @@ theorem sizeBound_lt_circuitSize
     (negativeBudget :
       2 * negativeGateCap n (k - 1) petalCount width * sizeBound <
         (k - 1) ^ n)
-    (circuit : Circuit AndOr.signature (edgeCount n) g 1)
+    (circuit : Circuit AndOr.signature (edgeCount n) 1)
     (computes : ∀ assignment,
       circuit.eval AndOr.boolInterpretation assignment 0 =
         function n k assignment) :

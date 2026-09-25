@@ -25,15 +25,15 @@ theorem existsCircuit
     (codes : Fin requests → Fin idWidth → Bool) (distinct : Function.Injective codes)
     (identifiers : Fin requests → Fin idWidth → DeMorgan.Wiring inputs)
     (values : Fin requests → DeMorgan.Wiring inputs) :
-    ∃ gates, ∃ restored : Circuit DeMorgan.signature inputs gates requests,
+    ∃ restored : Circuit DeMorgan.signature inputs requests,
       restored.cost DeMorgan.standardCost ≤ 256 * (requests + requests + 1) *
         (FiniteParameters.binaryDepth (requests + requests + 1) + idWidth + 1 + 2) ^ 5 ∧
       ∀ (input : Fin inputs → Bool) (order : Equiv.Perm (Fin requests)),
         (∀ request bit, (identifiers request bit).eval input = codes (order request) bit) →
         ∀ request, restored.eval DeMorgan.interpretation input (order request) = (values request).eval input := by
-  obtain ⟨gates, routed, bound, correct⟩ := MaskedScatter.existsCircuit (fun _ : Fin requests => true)
+  obtain ⟨routed, bound, correct⟩ := MaskedScatter.existsCircuit (fun _ : Fin requests => true)
     identifiers (fun request (_ : Fin 1) => values request) codes
-  refine ⟨gates, routed.mapOutputs (fun request => finProdFinEquiv (request, (0 : Fin 1))), ?_, ?_⟩
+  refine ⟨routed.mapOutputs (fun request => finProdFinEquiv (request, (0 : Fin 1))), ?_, ?_⟩
   · rw [Circuit.cost_mapOutputs]
     exact bound
   · intro input order identifiersCorrect request

@@ -74,14 +74,16 @@ end Block
 /-- An implementation of every source operation by a width-`k`, multi-output
 target circuit. -/
 structure BlockTranslation (σ τ : Signature) (k : Nat) where
-  /-- Number of target gates used by each operation gadget. -/
-  gateCount : σ.Op → Nat
   /-- A gadget receives one target block per source argument and returns one
   target block. -/
   operation : (op : σ.Op) →
-    Circuit τ (σ.Arity op * k) (gateCount op) k
+    Circuit τ (σ.Arity op * k) k
 
 namespace BlockTranslation
+
+/-- Number of target gates used by each operation gadget. -/
+abbrev gateCount (translation : BlockTranslation σ τ k) (op : σ.Op) : Nat :=
+  (translation.operation op).size
 
 /-- Pull a target interpretation back to an interpretation on width-`k`
 blocks. -/
@@ -117,11 +119,9 @@ def compileProgram
   | .empty =>
       { gateCount := 0
         program := .empty
-        wires := fun wire =>
-          Fin.addCases
+        wires := Wire.elim
             (fun input component => Block.inputWire input component)
-            (fun gate => Fin.elim0 gate)
-            wire }
+            (fun gate => Fin.elim0 gate) }
   | .gate source line =>
       let prior := translation.compileProgram source
       let implementation := translation.operation line.op
@@ -132,7 +132,9 @@ def compileProgram
       let instantiated := implementation.instantiate prior.program inputWires
       { gateCount := prior.gateCount + translation.gateCount line.op
         program := instantiated.program
-        wires := Fin.lastCases
+        wires := Wire.lastCases
+          (motive := fun _ => Fin k →
+            Wire (n * k) (prior.gateCount + translation.gateCount line.op))
           (fun component => instantiated.outputs component)
           (fun priorWire component =>
             Wire.Renaming.castAdd (translation.gateCount line.op)
@@ -141,14 +143,14 @@ def compileProgram
 /-- Number of target gates produced by block compilation. -/
 def compiledGateCount
     (translation : BlockTranslation σ τ k)
-    (circuit : Circuit σ n g m) : Nat :=
+    (circuit : Circuit σ n m) : Nat :=
   (translation.compileProgram circuit.program).gateCount
 
 /-- Compile a source circuit, flattening its input and output blocks. -/
 def compile
     (translation : BlockTranslation σ τ k)
-    (circuit : Circuit σ n g m) :
-    Circuit τ (n * k) (translation.compiledGateCount circuit) (m * k) :=
+    (circuit : Circuit σ n m) :
+    Circuit τ (n * k) (m * k) :=
   let compiled := translation.compileProgram circuit.program
   { program := compiled.program
     outputs := Block.flatten fun output =>
@@ -168,14 +170,9 @@ theorem compileProgram_trace
       source.trace (translation.pull interpretation) input wire component := by
   induction source generalizing component with
   | empty =>
-      refine Fin.addCases (fun sourceInput => ?_)
-        (fun gate => Fin.elim0 gate) wire
-      have input_eq : (sourceInput : Wire n 0) =
-          (Wire.input (g := 0) sourceInput : Wire n 0) := by
-        apply Fin.ext
-        rfl
-      rw [input_eq]
-      simp [compileProgram, Block.inputWire]
+      cases wire with
+      | input sourceInput => simp [compileProgram, Block.inputWire]
+      | gate gate => exact Fin.elim0 gate
   | @gate g source line ih =>
       let prior := translation.compileProgram source
       let implementation := translation.operation line.op
@@ -184,8 +181,10 @@ theorem compileProgram_trace
         let pair := finProdFinEquiv.symm index
         prior.wires (line.wires pair.1) pair.2
       let instantiated := implementation.instantiate prior.program inputWires
-      refine Fin.lastCases ?_ (fun priorWire => ?_) wire
-      · simp only [compileProgram, Fin.lastCases_last]
+      induction wire using Wire.lastCases with
+      | last =>
+        simp only [compileProgram]
+        erw [Wire.lastCases_last]
         let operationInput : Fin (σ.Arity line.op) → Fin k → U :=
           fun argument component =>
             source.trace (translation.pull interpretation) input
@@ -220,11 +219,13 @@ theorem compileProgram_trace
             rfl
           _ = (source.gate line).trace
                 (translation.pull interpretation) input
-                (Fin.last (n + g)) component := by
+                (Wire.gate (Fin.last g)) component := by
             exact congrFun
-              (Program.trace_gate_last source line
+              (Program.eval_gate_last source line
                 (translation.pull interpretation) input).symm component
-      · simp only [compileProgram, Fin.lastCases_castSucc]
+      | castSucc priorWire =>
+        simp only [compileProgram]
+        erw [Wire.lastCases_castSucc]
         change instantiated.program.trace interpretation (Block.flatten input)
             (Wire.Renaming.castAdd (translation.gateCount line.op)
               (prior.wires priorWire component)) = _
@@ -240,7 +241,7 @@ theorem compileProgram_trace
 /-- Block compilation preserves evaluation exactly after flattening. -/
 theorem compile_eval
     (translation : BlockTranslation σ τ k)
-    (circuit : Circuit σ n g m)
+    (circuit : Circuit σ n m)
     (interpretation : Interpretation τ U)
     (input : Fin n → Fin k → U) :
     (translation.compile circuit).eval interpretation
@@ -274,7 +275,7 @@ theorem compileProgram_cost
 /-- Block circuit compilation preserves pulled-back weighted cost exactly. -/
 theorem compile_cost
     (translation : BlockTranslation σ τ k)
-    (circuit : Circuit σ n g m)
+    (circuit : Circuit σ n m)
     (operationCost : OperationCost τ) :
     (translation.compile circuit).cost operationCost =
       circuit.cost (translation.pullCost operationCost) :=
@@ -284,7 +285,7 @@ theorem compile_cost
 operation by its gadget gate count. -/
 theorem compile_size
     (translation : BlockTranslation σ τ k)
-    (circuit : Circuit σ n g m) :
+    (circuit : Circuit σ n m) :
     (translation.compile circuit).size =
       circuit.cost (translation.pullCost OperationCost.unit) := by
   rw [← Circuit.cost_unit, translation.compile_cost]
@@ -293,7 +294,7 @@ theorem compile_size
 for block compilation. -/
 theorem compile_size_le_mul
     (translation : BlockTranslation σ τ k)
-    (circuit : Circuit σ n g m)
+    (circuit : Circuit σ n m)
     (bounded : ∀ op, (translation.operation op).size ≤ K) :
     (translation.compile circuit).size ≤ K * circuit.size := by
   rw [translation.compile_size]
@@ -346,7 +347,7 @@ theorem map_compile_eval
     {source : Interpretation σ U}
     {target : Interpretation τ V}
     (simulation : BlockSimulation translation source target)
-    (circuit : Circuit σ n g m)
+    (circuit : Circuit σ n m)
     (input : Fin n → U) :
     Block.flatten (simulation.map ∘ circuit.eval source input) =
       (translation.compile circuit).eval target

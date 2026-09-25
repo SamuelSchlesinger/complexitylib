@@ -84,7 +84,7 @@ def certificate :
 least the matrix dimension. -/
 theorem identity_lowerBound
     (circuit : Circuit
-      (Algebraic.SumOfTerms.signature (Term K I)) 0 g 1)
+      (Algebraic.SumOfTerms.signature (Term K I)) 0 1)
     (constructs : (identityProblem K I).Constructs circuit
       (Algebraic.SumOfTerms.interpretation
         (termValue (K := K) (I := I)))) :
@@ -96,7 +96,7 @@ theorem identity_lowerBound
 theorem layer_lowerBound
     (n k : Nat)
     (circuit : Circuit
-      (Algebraic.SumOfTerms.signature (Term K (Layer n k))) 0 g 1)
+      (Algebraic.SumOfTerms.signature (Term K (Layer n k))) 0 1)
     (constructs : (identityProblem K (Layer n k)).Constructs circuit
       (Algebraic.SumOfTerms.interpretation
         (termValue (K := K) (I := Layer n k)))) :
@@ -109,7 +109,7 @@ coefficient. -/
 theorem centralBinom_lowerBound
     (n : Nat)
     (circuit : Circuit
-      (Algebraic.SumOfTerms.signature (Term K (Layer (2 * n) n))) 0 g 1)
+      (Algebraic.SumOfTerms.signature (Term K (Layer (2 * n) n))) 0 1)
     (constructs : (identityProblem K (Layer (2 * n) n)).Constructs circuit
       (Algebraic.SumOfTerms.interpretation
         (termValue (K := K) (I := Layer (2 * n) n)))) :
@@ -124,7 +124,7 @@ theorem four_pow_lt_n_mul_cost
     (n : Nat)
     (nBig : 4 ≤ n)
     (circuit : Circuit
-      (Algebraic.SumOfTerms.signature (Term K (Layer (2 * n) n))) 0 g 1)
+      (Algebraic.SumOfTerms.signature (Term K (Layer (2 * n) n))) 0 1)
     (constructs : (identityProblem K (Layer (2 * n) n)).Constructs circuit
       (Algebraic.SumOfTerms.interpretation
         (termValue (K := K) (I := Layer (2 * n) n)))) :

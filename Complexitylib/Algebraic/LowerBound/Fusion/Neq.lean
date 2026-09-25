@@ -253,7 +253,7 @@ theorem le_ultraPairCoverComplexity (n : Nat) :
 at least `n` AND gates, even with free OR gates. -/
 theorem and_lowerBound
     (circuit : Circuit AndOr.signature
-      ((2 ^ n) + (2 ^ n)) g 1)
+      ((2 ^ n) + (2 ^ n)) 1)
     (constructs : (problem (2 ^ n)).Constructs circuit
       (AndOr.setInterpretation (Ground (2 ^ n)))) :
     n ≤ circuit.cost AndOr.andCost :=
@@ -264,7 +264,7 @@ theorem and_lowerBound
 witnesses. -/
 theorem and_lowerBound_via_ultra
     (circuit : Circuit AndOr.signature
-      ((2 ^ n) + (2 ^ n)) g 1)
+      ((2 ^ n) + (2 ^ n)) 1)
     (constructs : (problem (2 ^ n)).Constructs circuit
       (AndOr.setInterpretation (Ground (2 ^ n)))) :
     n ≤ circuit.cost AndOr.andCost :=

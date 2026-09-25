@@ -84,9 +84,7 @@ theorem SimpleOrigin.ne_gate
       obtain ⟨input, rfl⟩ := simple
       intro equal
       injection equal with _ wire_eq
-      have values := congrArg Fin.val wire_eq
-      simp only [Fin.val_castAdd, Fin.val_natAdd] at values
-      omega
+      cases wire_eq
 
 /--
 An initial charged gate, presented with its two named arguments.  Its arguments
@@ -386,16 +384,16 @@ theorem ReadsInput.of_castSucc
   refine ⟨by simpa [ChargedGate] using charged, ?_⟩
   rw [origins_gate_castSucc] at origin_eq
   have target_eq :
-      (ResidualValue.wire negated (Wire.input (g := g) input)).mapWires
+      (ResidualValue.wire negated (Wire.input input : Wire n g)).mapWires
           Wire.Renaming.castSucc =
-        ResidualValue.wire negated (Wire.input (g := g + 1) input) := by
+        ResidualValue.wire negated (Wire.input input : Wire n (g + 1)) := by
     simp only [ResidualValue.mapWires, Wire.Renaming.apply_input]
   rw [← target_eq] at origin_eq
   have castSuccInjective : Function.Injective
       (Wire.Renaming.castSucc : Wire.Renaming n g (g + 1)) := by
     intro left right equal
-    exact Fin.castSucc_injective _ (by
-      simpa only [Wire.Renaming.castSucc_apply] using equal)
+    simp only [Wire.Renaming.castSucc_apply] at equal
+    cases left <;> cases right <;> simp_all [Wire.castSucc]
   exact ⟨argument, negated,
     ResidualValue.mapWires_injective castSuccInjective origin_eq⟩
 
@@ -415,16 +413,16 @@ theorem ReadsInput.of_last
   rcases reads with ⟨charged, argument, negated, origin_eq⟩
   rw [origins_gate_castSucc] at origin_eq
   have target_eq :
-      (ResidualValue.wire negated (Wire.input (g := g) input)).mapWires
+      (ResidualValue.wire negated (Wire.input input : Wire n g)).mapWires
           Wire.Renaming.castSucc =
-        ResidualValue.wire negated (Wire.input (g := g + 1) input) := by
+        ResidualValue.wire negated (Wire.input input : Wire n (g + 1)) := by
     simp only [ResidualValue.mapWires, Wire.Renaming.apply_input]
   rw [← target_eq] at origin_eq
   have castSuccInjective : Function.Injective
       (Wire.Renaming.castSucc : Wire.Renaming n g (g + 1)) := by
     intro left right equal
-    exact Fin.castSucc_injective _ (by
-      simpa only [Wire.Renaming.castSucc_apply] using equal)
+    simp only [Wire.Renaming.castSucc_apply] at equal
+    cases left <;> cases right <;> simp_all [Wire.castSucc]
   exact ⟨charged, argument, negated,
     ResidualValue.mapWires_injective castSuccInjective origin_eq⟩
 
@@ -443,16 +441,16 @@ theorem ReadsOnlyInput.of_castSucc
   obtain ⟨negated, origin_eq⟩ := allArguments argument
   rw [origins_gate_castSucc] at origin_eq
   have target_eq :
-      (ResidualValue.wire negated (Wire.input (g := g) input)).mapWires
+      (ResidualValue.wire negated (Wire.input input : Wire n g)).mapWires
           Wire.Renaming.castSucc =
-        ResidualValue.wire negated (Wire.input (g := g + 1) input) := by
+        ResidualValue.wire negated (Wire.input input : Wire n (g + 1)) := by
     simp only [ResidualValue.mapWires, Wire.Renaming.apply_input]
   rw [← target_eq] at origin_eq
   have castSuccInjective : Function.Injective
       (Wire.Renaming.castSucc : Wire.Renaming n g (g + 1)) := by
     intro left right equal
-    exact Fin.castSucc_injective _ (by
-      simpa only [Wire.Renaming.castSucc_apply] using equal)
+    simp only [Wire.Renaming.castSucc_apply] at equal
+    cases left <;> cases right <;> simp_all [Wire.castSucc]
   exact ⟨negated,
     ResidualValue.mapWires_injective castSuccInjective origin_eq⟩
 
@@ -475,16 +473,16 @@ theorem ReadsOnlyInput.of_last
   obtain ⟨negated, origin_eq⟩ := allArguments argument
   rw [origins_gate_castSucc] at origin_eq
   have target_eq :
-      (ResidualValue.wire negated (Wire.input (g := g) input)).mapWires
+      (ResidualValue.wire negated (Wire.input input : Wire n g)).mapWires
           Wire.Renaming.castSucc =
-        ResidualValue.wire negated (Wire.input (g := g + 1) input) := by
+        ResidualValue.wire negated (Wire.input input : Wire n (g + 1)) := by
     simp only [ResidualValue.mapWires, Wire.Renaming.apply_input]
   rw [← target_eq] at origin_eq
   have castSuccInjective : Function.Injective
       (Wire.Renaming.castSucc : Wire.Renaming n g (g + 1)) := by
     intro left right equal
-    exact Fin.castSucc_injective _ (by
-      simpa only [Wire.Renaming.castSucc_apply] using equal)
+    simp only [Wire.Renaming.castSucc_apply] at equal
+    cases left <;> cases right <;> simp_all [Wire.castSucc]
   exact ⟨negated,
     ResidualValue.mapWires_injective castSuccInjective origin_eq⟩
 
@@ -535,18 +533,18 @@ theorem UsesGate.of_castSucc
   refine ⟨by simpa [ChargedGate] using charged, ?_⟩
   rw [origins_gate_castSucc] at origin_eq
   have target_eq :
-      (ResidualValue.wire negated (Wire.gate (n := n) source)).mapWires
+      (ResidualValue.wire negated (Wire.gate source : Wire n g)).mapWires
           Wire.Renaming.castSucc =
         ResidualValue.wire negated
-          (Wire.gate (n := n) source.castSucc) := by
+          (Wire.gate source.castSucc : Wire n (g + 1)) := by
     simp only [ResidualValue.mapWires, Wire.Renaming.apply_gate,
       Wire.Renaming.castSucc]
   rw [← target_eq] at origin_eq
   have castSuccInjective : Function.Injective
       (Wire.Renaming.castSucc : Wire.Renaming n g (g + 1)) := by
     intro left right equal
-    exact Fin.castSucc_injective _ (by
-      simpa only [Wire.Renaming.castSucc_apply] using equal)
+    simp only [Wire.Renaming.castSucc_apply] at equal
+    cases left <;> cases right <;> simp_all [Wire.castSucc]
   exact ⟨argument, negated,
     ResidualValue.mapWires_injective castSuccInjective origin_eq⟩
 
@@ -581,9 +579,11 @@ private theorem mappedOrigin_ne_last
       simp only [ResidualValue.mapWires, Wire.Renaming.castSucc_apply]
       intro equal
       injection equal with _ wires
-      have impossible : originWire.castSucc = Fin.last (n + g) := by
-        simpa only [Fin.natAdd_last] using wires
-      exact Fin.castSucc_ne_last originWire impossible
+      cases originWire with
+      | input i => simp at wires
+      | gate j =>
+          injection wires with wires
+          exact Fin.castSucc_ne_last j wires
 
 /-- A charged dependency edge cannot be a self-loop. -/
 theorem UsesGate.ne

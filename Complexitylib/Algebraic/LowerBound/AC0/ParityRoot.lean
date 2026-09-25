@@ -109,7 +109,7 @@ namespace Circuit
 /-- Root-selected product-form lower bound for depth-`d` parity circuits,
 allowing arbitrary internal NOT gates at zero cost. -/
 theorem parity_size_tradeoff_at_root_raw
-    (circuit : Algebraic.Circuit signature n g 1)
+    (circuit : Algebraic.Circuit signature n 1)
     (computes : circuit.ComputesWith interpretation (Parity.target n))
     (depth : Nat)
     (twoLeDepth : 2 ≤ depth)
@@ -130,7 +130,7 @@ theorem parity_size_tradeoff_at_root_raw
 
 /-- Compatibility wrapper for the checked input-negation presentation. -/
 theorem parity_size_tradeoff_at_root
-    (circuit : Algebraic.Circuit signature n g 1)
+    (circuit : Algebraic.Circuit signature n 1)
     (_normal : Program.NegationsAtInputs circuit.program)
     (computes : circuit.ComputesWith interpretation (Parity.target n))
     (depth : Nat)
@@ -146,7 +146,7 @@ theorem parity_size_tradeoff_at_root
 /-- Root-selected lower bound with the AND/OR cost isolated by natural-number
 floor division, allowing arbitrary internal NOT gates at zero cost. -/
 theorem parity_andOrCost_lower_bound_at_root_raw
-    (circuit : Algebraic.Circuit signature n g 1)
+    (circuit : Algebraic.Circuit signature n 1)
     (computes : circuit.ComputesWith interpretation (Parity.target n))
     (depth : Nat)
     (twoLeDepth : 2 ≤ depth)
@@ -161,7 +161,7 @@ theorem parity_andOrCost_lower_bound_at_root_raw
 
 /-- Compatibility wrapper for the checked input-negation presentation. -/
 theorem parity_andOrCost_lower_bound_at_root
-    (circuit : Algebraic.Circuit signature n g 1)
+    (circuit : Algebraic.Circuit signature n 1)
     (_normal : Program.NegationsAtInputs circuit.program)
     (computes : circuit.ComputesWith interpretation (Parity.target n))
     (depth : Nat)

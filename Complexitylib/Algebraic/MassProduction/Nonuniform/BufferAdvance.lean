@@ -73,7 +73,7 @@ def wiring (completed requestWidth slots keyWidth : Nat) (split : accepted + rem
 
 /-- Run the phase once and compact its results into the next buffer. -/
 def circuit
-    (phase : Circuit DeMorgan.signature (inputWidth completed pending requestWidth slots keyWidth) gates
+    (phase : Circuit DeMorgan.signature (inputWidth completed pending requestWidth slots keyWidth)
       (pending * (1 + storedWidth requestWidth slots keyWidth)))
     (split : accepted + remaining = pending) :=
   (DeMorgan.Wiring.circuit (wiring completed requestWidth slots keyWidth split)).comp
@@ -82,7 +82,7 @@ def circuit
 /-- Exact semantics of buffer compaction: old records, accepted point lists,
 and the pending original-data suffix all appear at their fixed positions. -/
 theorem circuit_eval
-    (phase : Circuit DeMorgan.signature (inputWidth completed pending requestWidth slots keyWidth) gates
+    (phase : Circuit DeMorgan.signature (inputWidth completed pending requestWidth slots keyWidth)
       (pending * (1 + storedWidth requestWidth slots keyWidth)))
     (split : accepted + remaining = pending)
     (completedRecords : Fin completed → Fin (storedWidth requestWidth slots keyWidth) → Bool)
@@ -108,7 +108,7 @@ theorem circuit_eval
 
 /-- Buffer compaction adds no charged gates. -/
 theorem circuit_cost
-    (phase : Circuit DeMorgan.signature (inputWidth completed pending requestWidth slots keyWidth) gates
+    (phase : Circuit DeMorgan.signature (inputWidth completed pending requestWidth slots keyWidth)
       (pending * (1 + storedWidth requestWidth slots keyWidth)))
     (split : accepted + remaining = pending) :
     (circuit phase split).cost DeMorgan.standardCost = phase.cost DeMorgan.standardCost := by

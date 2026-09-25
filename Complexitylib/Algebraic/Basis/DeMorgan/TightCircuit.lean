@@ -59,14 +59,41 @@ private theorem flatMap_length_le_one_exception {α β : Type*} [DecidableEq α]
       simp only [List.flatMap_cons, List.length_append, List.length_cons]
       omega
 
+/-- Read a position of the input-first wire numbering `Wire.index` back as a wire. -/
+private def wireOf : Fin (n + g) → Wire n g := Fin.addCases Wire.input Wire.gate
+
+private theorem wireOf_index (wire : Wire n g) : wireOf wire.index = wire := by
+  cases wire <;> simp [wireOf]
+
+private theorem wireOf_castAdd (i : Fin n) :
+    (wireOf (Fin.castAdd g i) : Wire n g) = Wire.input i := by
+  simp [wireOf]
+
+private theorem wireOf_last :
+    (wireOf (Fin.last (n + g)) : Wire n (g + 1)) = Wire.gate (Fin.last g) := by
+  rw [show (Fin.last (n + g) : Fin (n + (g + 1))) = Fin.natAdd n (Fin.last g) from Fin.ext rfl,
+    wireOf, Fin.addCases_right]
+
+private theorem wireOf_castSucc (i : Fin (n + g)) :
+    (wireOf (i.castSucc : Fin (n + (g + 1))) : Wire n (g + 1)) = (wireOf i).castSucc := by
+  refine Fin.addCases (fun j => ?_) (fun j => ?_) i
+  · rw [show ((Fin.castAdd g j).castSucc : Fin (n + (g + 1))) = Fin.castAdd (g + 1) j from
+      Fin.ext rfl]
+    simp [wireOf]
+  · rw [show ((Fin.natAdd n j).castSucc : Fin (n + (g + 1))) = Fin.natAdd n j.castSucc from
+      Fin.ext rfl]
+    simp [wireOf]
+
 private def lineExpression (line : Line signature n g) : Expression (n + g) :=
   match line with
   | ⟨.false, _⟩ => .constant false
   | ⟨.true, _⟩ => .constant true
-  | ⟨.id, wires⟩ => .input (wires ⟨0, by decide⟩)
-  | ⟨.not, wires⟩ => .not (.input (wires ⟨0, by decide⟩))
-  | ⟨.and, wires⟩ => .and (.input (wires ⟨0, by decide⟩)) (.input (wires ⟨1, by decide⟩))
-  | ⟨.or, wires⟩ => .or (.input (wires ⟨0, by decide⟩)) (.input (wires ⟨1, by decide⟩))
+  | ⟨.id, wires⟩ => .input (wires ⟨0, by decide⟩).index
+  | ⟨.not, wires⟩ => .not (.input (wires ⟨0, by decide⟩).index)
+  | ⟨.and, wires⟩ =>
+      .and (.input (wires ⟨0, by decide⟩).index) (.input (wires ⟨1, by decide⟩).index)
+  | ⟨.or, wires⟩ =>
+      .or (.input (wires ⟨0, by decide⟩).index) (.input (wires ⟨1, by decide⟩).index)
 
 private theorem lineExpression_length (line : Line signature n g) :
     (lineExpression line).inputList.length ≤ binaryCost line.op + 1 := by
@@ -75,10 +102,11 @@ private theorem lineExpression_length (line : Line signature n g) :
 
 private theorem lineExpression_eval (program : Program signature n g) (line : Line signature n g)
     (input : Fin n → Bool) :
-    (lineExpression line).eval (program.trace interpretation input) =
+    (lineExpression line).eval (program.trace interpretation input ∘ wireOf) =
       line.eval interpretation input (program.eval interpretation input) := by
   obtain ⟨op, wires⟩ := line
-  cases op <;> rfl
+  cases op <;> (try simp only [lineExpression, Expression.eval, Function.comp_apply,
+    wireOf_index]) <;> rfl
 
 private def unrollLast (expression : Expression (n + (g + 1))) (line : Line signature n g) :
     Expression (n + g) :=
@@ -86,15 +114,17 @@ private def unrollLast (expression : Expression (n + (g + 1))) (line : Line sign
 
 private theorem unrollLast_eval (expression : Expression (n + (g + 1)))
     (program : Program signature n g) (line : Line signature n g) (input : Fin n → Bool) :
-    (unrollLast expression line).eval (program.trace interpretation input) =
-      expression.eval ((program.gate line).trace interpretation input) := by
+    (unrollLast expression line).eval (program.trace interpretation input ∘ wireOf) =
+      expression.eval ((program.gate line).trace interpretation input ∘ wireOf) := by
   rw [unrollLast, Expression.eval_substitute]
   apply Expression.eval_congr_inputList
   intro wire _
   refine Fin.lastCases ?_ (fun wire => ?_) wire
   · simp only [Nat.add_eq, Fin.lastCases_last]
-    rw [lineExpression_eval, Program.trace_gate_last]
-  · simp only [Fin.lastCases_castSucc, Expression.eval, Program.trace_gate_castSucc]
+    rw [lineExpression_eval, Function.comp_apply, wireOf_last]
+    exact (Program.eval_gate_last program line interpretation input).symm
+  · simp only [Fin.lastCases_castSucc, Expression.eval, Function.comp_apply, wireOf_castSucc,
+      Program.trace_gate_castSucc]
 
 private theorem unrollLast_length (expression : Expression (n + (g + 1)))
     (line : Line signature n g) (once : expression.ReadOnce) :
@@ -108,48 +138,59 @@ private theorem unrollLast_length (expression : Expression (n + (g + 1)))
 
 private theorem expression_dependsOn_frontier (program : Program signature n g)
     (expression : Expression (n + g)) :
-    DependsOnlyOn (fun input => expression.eval (program.trace interpretation input))
-      (program.frontierSupport expression.inputList.toFinset) := by
+    DependsOnlyOn (fun input => expression.eval (program.trace interpretation input ∘ wireOf))
+      (program.frontierSupport (expression.inputList.toFinset.image wireOf)) := by
   intro left right agree
   apply Expression.eval_congr_inputList
   intro wire present
   apply Program.trace_congr
   intro i supported
-  exact agree i (Finset.mem_biUnion.mpr ⟨wire, List.mem_toFinset.mpr present, supported⟩)
+  exact agree i (Finset.mem_biUnion.mpr ⟨wireOf wire,
+    Finset.mem_image_of_mem _ (List.mem_toFinset.mpr present), supported⟩)
 
 private theorem essential_le_frontier (program : Program signature n g)
     (expression : Expression (n + g))
-    (essential : ∀ i, EssentialAt (fun input => expression.eval (program.trace interpretation input)) i) :
+    (essential : ∀ i, EssentialAt
+      (fun input => expression.eval (program.trace interpretation input ∘ wireOf)) i) :
     n ≤ expression.inputList.toFinset.card + program.cost binaryCost := by
-  have included : Finset.univ ⊆ program.frontierSupport expression.inputList.toFinset := by
+  have included :
+      Finset.univ ⊆ program.frontierSupport (expression.inputList.toFinset.image wireOf) := by
     intro i _
     exact (essential i).mem_support (expression_dependsOn_frontier program expression)
   have lower := Finset.card_le_card included
-  have upper := program.card_frontierSupport_le binaryCost arity_le_binaryCost expression.inputList.toFinset
+  have upper := program.card_frontierSupport_le binaryCost arity_le_binaryCost
+    (expression.inputList.toFinset.image wireOf)
+  have image := Finset.card_image_le (s := expression.inputList.toFinset) (f := wireOf)
   simp only [Finset.card_univ, Fintype.card_fin] at lower
   omega
 
 private theorem exists_readOnce_of_tight_frontier (program : Program signature n g)
     (expression : Expression (n + g)) (once : expression.ReadOnce)
-    (essential : ∀ i, EssentialAt (fun input => expression.eval (program.trace interpretation input)) i)
+    (essential : ∀ i, EssentialAt
+      (fun input => expression.eval (program.trace interpretation input ∘ wireOf)) i)
     (tight : expression.inputList.length + program.cost binaryCost ≤ n) :
     ∃ result : Expression n, result.ReadOnce ∧
-      ∀ input, result.eval input = expression.eval (program.trace interpretation input) := by
+      ∀ input, result.eval input =
+        expression.eval (program.trace interpretation input ∘ wireOf) := by
   induction program with
   | empty =>
     refine ⟨expression, once, ?_⟩
     intro input
     apply Expression.eval_congr_inputList
     intro wire _
-    change input wire = (Program.empty : Program signature n 0).trace interpretation input (Wire.input wire)
-    exact (Program.trace_input _ _ _ _).symm
+    change input wire = (Program.empty : Program signature n 0).trace interpretation input
+      (wireOf (Fin.castAdd 0 wire))
+    rw [wireOf_castAdd]
+    rfl
   | @gate g program line ih =>
     let next := unrollLast expression line
-    have evalNext : (fun input => next.eval (program.trace interpretation input)) =
-        (fun input => expression.eval ((program.gate line).trace interpretation input)) := by
+    have evalNext : (fun input => next.eval (program.trace interpretation input ∘ wireOf)) =
+        (fun input =>
+          expression.eval ((program.gate line).trace interpretation input ∘ wireOf)) := by
       funext input
       exact unrollLast_eval expression program line input
-    have nextEssential : ∀ i, EssentialAt (fun input => next.eval (program.trace interpretation input)) i := by
+    have nextEssential : ∀ i,
+        EssentialAt (fun input => next.eval (program.trace interpretation input ∘ wireOf)) i := by
       simpa [evalNext] using essential
     have nextTight : next.inputList.length + program.cost binaryCost ≤ n := by
       have lengthBound := unrollLast_length expression line once
@@ -162,17 +203,21 @@ private theorem exists_readOnce_of_tight_frontier (program : Program signature n
       have equal : next.inputList.toFinset.card = next.inputList.length := by omega
       exact (Multiset.toFinset_card_eq_card_iff_nodup (m := ⟦next.inputList⟧)).mp equal
     obtain ⟨result, resultOnce, computes⟩ := ih next nextOnce nextEssential nextTight
-    exact ⟨result, resultOnce, fun input => (computes input).trans (unrollLast_eval expression program line input)⟩
+    exact ⟨result, resultOnce,
+      fun input => (computes input).trans (unrollLast_eval expression program line input)⟩
 
 /-- A shared circuit using the minimum possible number of binary gates has read-once semantics. -/
-theorem exists_readOnce_of_binaryCost_le (circuit : Circuit signature n g 1)
+theorem exists_readOnce_of_binaryCost_le (circuit : Circuit signature n 1)
     {function : ScalarFunction Bool n}
     (computes : circuit.ComputesWith interpretation (fun input _ => function input))
     (essential : ∀ i, EssentialAt function i) (tight : circuit.cost binaryCost + 1 ≤ n) :
     ∃ expression : Expression n, expression.ReadOnce ∧ expression.eval = function := by
-  let output : Expression (n + g) := .input (circuit.outputs 0)
-  have equal : (fun input => output.eval (circuit.program.trace interpretation input)) = function := by
+  let output : Expression (n + circuit.size) := .input (circuit.outputs 0).index
+  have equal :
+      (fun input => output.eval (circuit.program.trace interpretation input ∘ wireOf)) =
+        function := by
     funext input
+    simp only [output, Expression.eval, Function.comp_apply, wireOf_index]
     exact congrFun (computes input) 0
   obtain ⟨expression, once, correct⟩ := exists_readOnce_of_tight_frontier circuit.program output
     (by simp [output, Expression.ReadOnce, Expression.inputList])
@@ -181,7 +226,7 @@ theorem exists_readOnce_of_binaryCost_le (circuit : Circuit signature n g 1)
   exact (funext correct).trans equal
 
 /-- Unateness is forced at the tight binary-gate budget, even with arbitrary circuit sharing. -/
-theorem unate_of_binaryCost_le (circuit : Circuit signature n g 1)
+theorem unate_of_binaryCost_le (circuit : Circuit signature n 1)
     {function : ScalarFunction Bool n}
     (computes : circuit.ComputesWith interpretation (fun input _ => function input))
     (essential : ∀ i, EssentialAt function i) (tight : circuit.cost binaryCost + 1 ≤ n) :
@@ -198,9 +243,9 @@ private theorem trace_monotone_of_binaryCost_eq (program : Program signature n g
   induction program with
   | empty =>
     intro left right h wire
-    change (Program.empty : Program signature n 0).trace interpretation left (Wire.input wire) ≤
-      (Program.empty : Program signature n 0).trace interpretation right (Wire.input wire)
-    simpa using h wire
+    cases wire with
+    | input i => exact h i
+    | gate j => exact j.elim0
   | @gate g program line ih =>
     have priorBound := binaryCost_le_gateCount program
     have lineBound : binaryCost line.op ≤ 1 := by cases line.op <;> decide
@@ -208,8 +253,9 @@ private theorem trace_monotone_of_binaryCost_eq (program : Program signature n g
     have charged : binaryCost line.op = 1 := by simp only [Program.cost_gate] at allBinary; omega
     have priorMonotone := ih priorEqual
     intro left right h wire
-    refine Fin.lastCases ?_ (fun wire => ?_) wire
-    · simp only [Nat.add_eq, Program.trace_gate_last]
+    induction wire using Wire.lastCases with
+    | last =>
+      simp only [Program.trace_gateWire, Program.gateFunction_apply, Program.eval_gate_last]
       obtain ⟨op, wires⟩ := line
       cases op <;> simp only [binaryCost_false, binaryCost_true, binaryCost_id,
         binaryCost_not, binaryCost_and, binaryCost_or] at charged
@@ -224,21 +270,23 @@ private theorem trace_monotone_of_binaryCost_eq (program : Program signature n g
           cases c : program.trace interpretation left (wires ⟨1, by decide⟩) <;>
           cases d : program.trace interpretation right (wires ⟨1, by decide⟩) <;>
           simp_all [Program.trace]
-    · simpa using priorMonotone h wire
+    | castSucc wire => simpa using priorMonotone h wire
 
 /-- An essential non-unate function needs at least `n+1` native gates in an arbitrary shared circuit. -/
-theorem size_ge_of_essential_nonunate (circuit : Circuit signature n g 1)
+theorem size_ge_of_essential_nonunate (circuit : Circuit signature n 1)
     {function : ScalarFunction Bool n}
     (computes : circuit.ComputesWith interpretation (fun input _ => function input))
-    (essential : ∀ i, EssentialAt function i) (nonunate : ¬Unate function) : n + 1 ≤ g := by
+    (essential : ∀ i, EssentialAt function i) (nonunate : ¬Unate function) :
+    n + 1 ≤ circuit.size := by
   have binaryLower : n ≤ circuit.cost binaryCost := by
     by_contra small
     exact nonunate (unate_of_binaryCost_le circuit computes essential (by omega))
   have binaryBound := binaryCost_le_gateCount circuit.program
-  change circuit.cost binaryCost ≤ g at binaryBound
-  have strict : circuit.cost binaryCost < g := by
+  change circuit.cost binaryCost ≤ circuit.size at binaryBound
+  have strict : circuit.cost binaryCost < circuit.size := by
     by_contra large
-    have equal : circuit.program.cost binaryCost = g := by change circuit.cost binaryCost = g; omega
+    have equal : circuit.program.cost binaryCost = circuit.size := by
+      change circuit.cost binaryCost = circuit.size; omega
     have monotone := trace_monotone_of_binaryCost_eq circuit.program equal
     apply nonunate
     apply unate_of_monotone

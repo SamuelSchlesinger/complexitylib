@@ -212,7 +212,7 @@ theorem Bound.circuit_lowerBound
     {termSupport : T → FiniteSupport M}
     (bound : Bound target termSupport)
     (positive : 0 < bound.capacity)
-    (circuit : Circuit (Algebraic.SumOfTerms.signature T) 0 g 1)
+    (circuit : Circuit (Algebraic.SumOfTerms.signature T) 0 1)
     (constructs : (problem target).Constructs circuit
       (Algebraic.SumOfTerms.interpretation termSupport)) :
     target.card ⌈/⌉ bound.capacity ≤
@@ -227,7 +227,7 @@ theorem circuit_lowerBound_of_separated
     {termSupport : T → FiniteSupport M}
     (separated : ∀ term,
       (coveredWitnesses target termSupport term).card ≤ 1)
-    (circuit : Circuit (Algebraic.SumOfTerms.signature T) 0 g 1)
+    (circuit : Circuit (Algebraic.SumOfTerms.signature T) 0 1)
     (constructs : (problem target).Constructs circuit
       (Algebraic.SumOfTerms.interpretation termSupport)) :
     target.card ≤

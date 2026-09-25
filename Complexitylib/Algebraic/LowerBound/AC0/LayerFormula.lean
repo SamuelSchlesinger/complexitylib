@@ -124,7 +124,7 @@ theorem eval_eq_or
     (operation : line.op = .or fanIn) :
     line.eval interpretation inputs gates =
       interpretation (.or fanIn) (fun argument =>
-        (Fin.addCases inputs gates : Wire n g -> Bool)
+        Wire.elim inputs gates
           (line.wires
             (Fin.cast (congrArg arity operation).symm argument))) := by
   cases line with
@@ -146,7 +146,7 @@ theorem eval_eq_and
     (operation : line.op = .and fanIn) :
     line.eval interpretation inputs gates =
       interpretation (.and fanIn) (fun argument =>
-        (Fin.addCases inputs gates : Wire n g -> Bool)
+        Wire.elim inputs gates
           (line.wires
             (Fin.cast (congrArg arity operation).symm argument))) := by
   cases line with

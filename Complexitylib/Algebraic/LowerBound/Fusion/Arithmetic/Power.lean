@@ -50,7 +50,7 @@ theorem binaryCircuit_multiplicationPowerAtMost
     (exponent : Nat)
     (atom : Atom (Algebraic.Arithmetic.signature K) R)
     (present : atom ∈ circuitAtoms
-      (Algebraic.Arithmetic.Power.binaryCircuit (K := K) exponent).2
+      (Algebraic.Arithmetic.Power.binaryCircuit (K := K) exponent)
       (Algebraic.Arithmetic.interpretation constant) input) :
     MultiplicationPowerAtMost (K := K) (input 0) exponent atom := by
   induction exponent using Nat.binaryRecFromOne generalizing atom with
@@ -74,7 +74,7 @@ theorem binaryCircuit_multiplicationPowerAtMost
       | false =>
           change atom ∈ circuitAtoms
             (Algebraic.Arithmetic.Power.squareCircuit
-              (Algebraic.Arithmetic.Power.binaryCircuit (K := K) prior).2)
+              (Algebraic.Arithmetic.Power.binaryCircuit (K := K) prior))
             _ _ at present
           simp only [circuitAtoms, Algebraic.Arithmetic.Power.squareCircuit,
             programAtoms_gate] at present
@@ -102,9 +102,9 @@ theorem binaryCircuit_multiplicationPowerAtMost
                     (Algebraic.Arithmetic.interpretation constant)) = _
               rw [resultEq]
               change
-                ((Algebraic.Arithmetic.Power.binaryCircuit (K := K) prior).2.eval
+                ((Algebraic.Arithmetic.Power.binaryCircuit (K := K) prior).eval
                     (Algebraic.Arithmetic.interpretation constant) input 0) *
-                  ((Algebraic.Arithmetic.Power.binaryCircuit (K := K) prior).2.eval
+                  ((Algebraic.Arithmetic.Power.binaryCircuit (K := K) prior).eval
                     (Algebraic.Arithmetic.interpretation constant) input 0) = _
               rw [Algebraic.Arithmetic.Power.binaryCircuit_eval constant mapsOne,
                 ← pow_add]
@@ -112,7 +112,7 @@ theorem binaryCircuit_multiplicationPowerAtMost
           change atom ∈ circuitAtoms
             (Algebraic.Arithmetic.Power.multiplyInputCircuit
               (Algebraic.Arithmetic.Power.squareCircuit
-                (Algebraic.Arithmetic.Power.binaryCircuit (K := K) prior).2))
+                (Algebraic.Arithmetic.Power.binaryCircuit (K := K) prior)))
             _ _ at present
           simp only [circuitAtoms,
             Algebraic.Arithmetic.Power.multiplyInputCircuit,
@@ -120,7 +120,7 @@ theorem binaryCircuit_multiplicationPowerAtMost
           rcases List.mem_append.mp present with inSquareCircuit | inOdd
           · change atom ∈ circuitAtoms
               (Algebraic.Arithmetic.Power.squareCircuit
-                (Algebraic.Arithmetic.Power.binaryCircuit (K := K) prior).2)
+                (Algebraic.Arithmetic.Power.binaryCircuit (K := K) prior))
               _ _ at inSquareCircuit
             simp only [circuitAtoms,
               Algebraic.Arithmetic.Power.squareCircuit,
@@ -149,9 +149,9 @@ theorem binaryCircuit_multiplicationPowerAtMost
                       (Algebraic.Arithmetic.interpretation constant)) = _
                 rw [resultEq]
                 change
-                  ((Algebraic.Arithmetic.Power.binaryCircuit (K := K) prior).2.eval
+                  ((Algebraic.Arithmetic.Power.binaryCircuit (K := K) prior).eval
                       (Algebraic.Arithmetic.interpretation constant) input 0) *
-                    ((Algebraic.Arithmetic.Power.binaryCircuit (K := K) prior).2.eval
+                    ((Algebraic.Arithmetic.Power.binaryCircuit (K := K) prior).eval
                       (Algebraic.Arithmetic.interpretation constant) input 0) = _
                 rw [Algebraic.Arithmetic.Power.binaryCircuit_eval constant mapsOne,
                   ← pow_add]
@@ -173,7 +173,7 @@ theorem binaryCircuit_multiplicationPowerAtMost
               rw [resultEq]
               change
                 (Algebraic.Arithmetic.Power.squareCircuit
-                    (Algebraic.Arithmetic.Power.binaryCircuit (K := K) prior).2).eval
+                    (Algebraic.Arithmetic.Power.binaryCircuit (K := K) prior)).eval
                     (Algebraic.Arithmetic.interpretation constant) input 0 *
                   input 0 = _
               rw [Algebraic.Arithmetic.Power.squareCircuit_eval,

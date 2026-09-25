@@ -83,18 +83,18 @@ noncomputable def _root_.Cslib.Circuits.Program.normalize
         have representative_eq := Classical.choose_spec duplicate
         have replacement_eq (input : Fin n → U) :
             prior.result.trace interpretation input
-                (Wire.gate (n := n) representative) =
+                (Wire.gate representative : Wire n prior.gateCount) =
               mappedLine.eval interpretation input
                 (prior.result.eval interpretation input) := by
           rw [Program.trace_gateWire]
           exact congrFun representative_eq input
         let compacted := priorCompaction.eliminate line
-          (Wire.gate (n := n) representative) replacement_eq
+          (Wire.gate representative) replacement_eq
         exact
           { gateCount := prior.gateCount
             result := prior.result
             wireMap := prior.wireMap.skipLast
-              (Wire.gate (n := n) representative)
+              (Wire.gate representative)
             trace_eq := compacted.trace_eq
             injective_gateFunction := prior.injective_gateFunction
             gateCount_le := compacted.gateCount_le
@@ -136,31 +136,38 @@ export Cslib.Circuits (Program.normalize)
 /-- A semantics-preserving circuit normalization with pairwise distinct internal
 gate functions. -/
 structure _root_.Cslib.Circuits.Circuit.Normalization
-    (circuit : Circuit σ n g m)
+    (circuit : Circuit σ n m)
     (interpretation : Interpretation σ U) where
-  /-- Number of internal gates after normalization. -/
-  gateCount : Nat
   /-- The normalized circuit. -/
-  result : Circuit σ n gateCount m
+  result : Circuit σ n m
   eval_eq : result.eval interpretation = circuit.eval interpretation
   injective_gateFunction :
     Function.Injective (result.program.gateFunction interpretation)
-  gateCount_le : gateCount ≤ g
+  gateCount_le : result.size ≤ circuit.size
   /-- Normalization does not increase any nonnegative operation cost. -/
   cost_le : ∀ operationCost : OperationCost σ,
     result.cost operationCost ≤ circuit.cost operationCost
 
 export Cslib.Circuits (Circuit.Normalization)
 
+/-- Number of internal gates after normalization. -/
+abbrev _root_.Cslib.Circuits.Circuit.Normalization.gateCount
+    {circuit : Circuit σ n m}
+    {interpretation : Interpretation σ U}
+    (normalization : Circuit.Normalization circuit interpretation) : Nat :=
+  normalization.result.size
+
+export Cslib.Circuits.Circuit.Normalization (gateCount)
+
 /-- Normalize the program and rename the designated output wires. -/
 noncomputable def _root_.Cslib.Circuits.Circuit.normalize
     [Fintype U]
-    (circuit : Circuit σ n g m)
+    (circuit : Circuit σ n m)
     (interpretation : Interpretation σ U) :
     Circuit.Normalization circuit interpretation := by
   classical
   let normalized := circuit.program.normalize interpretation
-  let result : Circuit σ n normalized.gateCount m :=
+  let result : Circuit σ n m :=
     { program := normalized.result
       outputs := fun output =>
         normalized.wireMap (circuit.outputs output) }
@@ -169,8 +176,7 @@ noncomputable def _root_.Cslib.Circuits.Circuit.normalize
         circuit.eval interpretation input output := by
     exact normalized.trace_eq input (circuit.outputs output)
   exact
-    { gateCount := normalized.gateCount
-      result := result
+    { result := result
       eval_eq := by
         funext input output
         exact outputEval input output
@@ -193,9 +199,9 @@ noncomputable def _root_.Cslib.Circuits.Circuit.irredundantFunctions
     (n g m : Nat) : Finset (Target U n m) := by
   classical
   exact
-    (Finset.univ.filter fun circuit : Circuit σ n g m =>
-      circuit.Irredundant interpretation).image fun circuit =>
-        circuit.eval interpretation
+    (Finset.univ.filter fun circuit : {circuit : Circuit σ n m // circuit.size = g} =>
+      circuit.1.Irredundant interpretation).image fun circuit =>
+        circuit.1.eval interpretation
 
 export Cslib.Circuits (Circuit.irredundantFunctions)
 
@@ -204,11 +210,12 @@ theorem _root_.Cslib.Circuits.Circuit.mem_irredundantFunctions_iff
     {interpretation : Interpretation σ U}
     {target : Target U n m} :
     target ∈ Circuit.irredundantFunctions interpretation n g m ↔
-      ∃ circuit : Circuit σ n g m,
+      ∃ circuit : Circuit σ n m, circuit.size = g ∧
         circuit.Irredundant interpretation ∧
           circuit.eval interpretation = target := by
   classical
-  simp [Circuit.irredundantFunctions]
+  simp only [Circuit.irredundantFunctions, Finset.mem_image, Finset.mem_filter,
+    Finset.mem_univ, true_and, Subtype.exists, exists_prop]
 
 export Cslib.Circuits (Circuit.mem_irredundantFunctions_iff)
 
@@ -231,15 +238,15 @@ theorem _root_.Cslib.Circuits.Circuit.functionsAtMost_subset_irredundantFunction
       Circuit.irredundantFunctionsAtMost interpretation n m G := by
   classical
   intro target present
-  obtain ⟨g, bounded, circuit, computes⟩ :=
+  obtain ⟨circuit, bounded, computes⟩ :=
     Circuit.mem_functionsAtMost_iff.mp present
-  obtain ⟨k, gateCountLe, normalized, evalEq, injective⟩ :=
+  obtain ⟨normalized, evalEq, injective, gateCountLe⟩ :=
     circuit.exists_irredundant interpretation
   rw [Circuit.irredundantFunctionsAtMost, Finset.mem_biUnion]
-  refine ⟨k, Finset.mem_range.mpr ?_, ?_⟩
+  refine ⟨normalized.size, Finset.mem_range.mpr ?_, ?_⟩
   · exact Nat.lt_succ_of_le (gateCountLe.trans bounded)
   rw [Circuit.mem_irredundantFunctions_iff]
-  refine ⟨normalized, injective, ?_⟩
+  refine ⟨normalized, rfl, injective, ?_⟩
   rw [evalEq]
   exact computes.eval_eq
 

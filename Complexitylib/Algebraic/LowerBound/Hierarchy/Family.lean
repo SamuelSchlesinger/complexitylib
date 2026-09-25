@@ -44,8 +44,8 @@ theorem mem_sizeClass_iff (family : FunctionFamily) (bound : Nat → Nat) :
           ∃ constant : Nat, ∀ᶠ n in atTop, circuits.size n ≤ constant * bound n := by
   constructor
   · rintro ⟨constant, bounded⟩
-    refine ⟨{ gateCount := fun n => complexity (family n)
-              circuit := fun n => (minimumCircuit (family n)).circuit }, ?_, constant, bounded⟩
+    refine ⟨{ circuit := fun n => (minimumCircuit (family n)).circuit }, ?_, constant,
+      bounded⟩
     intro n
     exact (minimumCircuit (family n)).computes
   · rintro ⟨circuits, computes, constant, bounded⟩

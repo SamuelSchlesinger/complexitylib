@@ -675,12 +675,17 @@ def candidateRecordsCircuit
     (depth : Nat) :
     Circuit DeMorgan.signature
       (networkBits depth rankWidth)
-      (∑ output, candidateRecordBitGateCount upperBound depth output)
       (networkBits depth (candidateRecordWidth rankWidth)) :=
   Circuit.parallelFin
-    (networkBits depth (candidateRecordWidth rankWidth))
-    (candidateRecordBitGateCount upperBound depth) fun output =>
+    (networkBits depth (candidateRecordWidth rankWidth)) fun output =>
       (candidateRecordBitExpression upperBound depth output).circuit
+
+@[simp] theorem candidateRecordsCircuit_size
+    (upperBound : Fin rankWidth -> Bool)
+    (depth : Nat) :
+    (candidateRecordsCircuit upperBound depth).size =
+      ∑ output, candidateRecordBitGateCount upperBound depth output := by
+  simp [candidateRecordsCircuit, candidateRecordBitGateCount]
 
 @[simp] theorem candidateRecordsCircuit_eval
     (upperBound : Fin rankWidth -> Bool)
@@ -1406,11 +1411,17 @@ def leastMissingCircuit
     (depth : Nat) :
     Circuit DeMorgan.signature
       (networkBits depth rankWidth)
-      (leastMissingGateCount upperBound depth)
       rankWidth :=
   ((bitonicSortCircuit (candidateFlagFits rankWidth) depth false).comp
     (candidateRecordsCircuit upperBound depth)).mapOutputs
       (firstCandidateValueIndex depth)
+
+@[simp] theorem leastMissingCircuit_size
+    (upperBound : Fin rankWidth -> Bool)
+    (depth : Nat) :
+    (leastMissingCircuit upperBound depth).size =
+      leastMissingGateCount upperBound depth := by
+  simp [leastMissingCircuit, leastMissingGateCount]
 
 @[simp] theorem leastMissingCircuit_eval
     (upperBound : Fin rankWidth -> Bool)

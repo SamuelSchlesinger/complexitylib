@@ -166,10 +166,8 @@ noncomputable def finiteMassProductionCircuit
       totalRequests * nonzeroScalarCount width +
           2 ^ (groupBitWidth + dimension * width) + scatterPaddingCount =
         networkRecords scatterDepth)
-    (gateCounts : Fin (resourceBitCount dimension width) -> Nat)
-    (resourceCircuits : forall member,
-      Circuit DeMorgan.signature (groups * suffixWidth)
-        (gateCounts member) groups)
+    (resourceCircuits : Fin (resourceBitCount dimension width) ->
+      Circuit DeMorgan.signature (groups * suffixWidth) groups)
     (gatherRecordCount :
       2 ^ (groupBitWidth + dimension * width) +
           totalRequests * nonzeroScalarCount width + gatherPaddingCount =
@@ -178,7 +176,7 @@ noncomputable def finiteMassProductionCircuit
     (totalRequests := totalRequests) groupsPositive
   (assembledPipelineCircuit groupsPositive suffixWidth groupBitWidth
     orderWidth incidenceFits capacity placement requestSource
-    scatterRecordCount gateCounts resourceCircuits gatherRecordCount).comp
+    scatterRecordCount resourceCircuits gatherRecordCount).comp
       (fixedScheduleAndSuffixCircuit widthPositive groupsPositive
         schedulerDepth suffixWidth allFit placement requestSource dummyTarget)
 
@@ -197,10 +195,8 @@ theorem finiteMassProductionCircuit_eval
       totalRequests * nonzeroScalarCount width +
           2 ^ (groupBitWidth + dimension * width) + scatterPaddingCount =
         networkRecords scatterDepth)
-    (gateCounts : Fin (resourceBitCount dimension width) -> Nat)
-    (resourceCircuits : forall member,
-      Circuit DeMorgan.signature (groups * suffixWidth)
-        (gateCounts member) groups)
+    (resourceCircuits : Fin (resourceBitCount dimension width) ->
+      Circuit DeMorgan.signature (groups * suffixWidth) groups)
     (gatherRecordCount :
       2 ^ (groupBitWidth + dimension * width) +
           totalRequests * nonzeroScalarCount width + gatherPaddingCount =
@@ -208,7 +204,7 @@ theorem finiteMassProductionCircuit_eval
     (input : Fin (totalRequests * suffixWidth) -> Bool) :
     (finiteMassProductionCircuit widthPositive groupsPositive schedulerDepth
       suffixWidth groupBitWidth orderWidth allFit incidenceFits placement
-      requestSource dummyTarget scatterRecordCount gateCounts resourceCircuits
+      requestSource dummyTarget scatterRecordCount resourceCircuits
       gatherRecordCount).eval DeMorgan.interpretation input =
       let groupSize := requestGroupSize totalRequests groups
       let capacity := requestGroupCapacity
@@ -224,7 +220,7 @@ theorem finiteMassProductionCircuit_eval
         schedulerDepth groups groupSize allFit paddedTargets
       (assembledPipelineCircuit groupsPositive suffixWidth groupBitWidth
         orderWidth incidenceFits capacity placement requestSource
-        scatterRecordCount gateCounts resourceCircuits gatherRecordCount).eval
+        scatterRecordCount resourceCircuits gatherRecordCount).eval
           DeMorgan.interpretation (Fin.append schedule input) := by
   rw [finiteMassProductionCircuit, Circuit.eval_comp,
     fixedScheduleAndSuffixCircuit_eval]
@@ -255,10 +251,8 @@ theorem finiteMassProductionCircuit_recovers
       totalRequests * nonzeroScalarCount width +
           2 ^ (groupBitWidth + dimension * width) + scatterPaddingCount =
         networkRecords scatterDepth)
-    (gateCounts : Fin (resourceBitCount dimension width) -> Nat)
-    (resourceCircuits : forall member,
-      Circuit DeMorgan.signature (groups * suffixWidth)
-        (gateCounts member) groups)
+    (resourceCircuits : Fin (resourceBitCount dimension width) ->
+      Circuit DeMorgan.signature (groups * suffixWidth) groups)
     (computes : forall point bit,
       (resourceCircuits (resourceMemberIndex point bit)).ComputesWith
         DeMorgan.interpretation
@@ -272,7 +266,7 @@ theorem finiteMassProductionCircuit_recovers
     (input : Fin (totalRequests * suffixWidth) -> Bool) :
     (finiteMassProductionCircuit widthPositive groupsPositive schedulerDepth
       suffixWidth groupBitWidth orderWidth allFit incidenceFits placement
-      requestSource dummyTarget scatterRecordCount gateCounts resourceCircuits
+      requestSource dummyTarget scatterRecordCount resourceCircuits
       gatherRecordCount).eval DeMorgan.interpretation input =
       fun request => function (requestSource request)
         (fun bit => input (finProdFinEquiv (request, bit))) := by
@@ -292,7 +286,7 @@ theorem finiteMassProductionCircuit_recovers
     incidenceFits allFit directionCapacity placement function requestSource
     requestSuffix dummyTarget
     (fun _destination _bit => false)
-    (fun _padding _bit => false) scatterRecordCount gateCounts
+    (fun _padding _bit => false) scatterRecordCount
     resourceCircuits computes
     (fun _destination _bit => false)
     (fun _padding _bit => false) gatherRecordCount
@@ -315,17 +309,15 @@ resource bank, gather routing, and decoder. -/
       totalRequests * nonzeroScalarCount width +
           2 ^ (groupBitWidth + dimension * width) + scatterPaddingCount =
         networkRecords scatterDepth)
-    (gateCounts : Fin (resourceBitCount dimension width) -> Nat)
-    (resourceCircuits : forall member,
-      Circuit DeMorgan.signature (groups * suffixWidth)
-        (gateCounts member) groups)
+    (resourceCircuits : Fin (resourceBitCount dimension width) ->
+      Circuit DeMorgan.signature (groups * suffixWidth) groups)
     (gatherRecordCount :
       2 ^ (groupBitWidth + dimension * width) +
           totalRequests * nonzeroScalarCount width + gatherPaddingCount =
         networkRecords gatherDepth) :
     (finiteMassProductionCircuit widthPositive groupsPositive schedulerDepth
       suffixWidth groupBitWidth orderWidth allFit incidenceFits placement
-      requestSource dummyTarget scatterRecordCount gateCounts resourceCircuits
+      requestSource dummyTarget scatterRecordCount resourceCircuits
       gatherRecordCount).cost DeMorgan.standardCost =
       (groupedScheduleCircuit dimension widthPositive schedulerDepth groups
         (requestGroupSize totalRequests groups) allFit).cost

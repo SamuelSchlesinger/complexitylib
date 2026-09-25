@@ -111,7 +111,7 @@ theorem requestSet_eq (positive : 0 < width)
 
 /-- Original request data is carried without modification. -/
 theorem payloadWires_original_eval
-    (generated : Circuit DeMorgan.signature inputs gates (generatedBits menuDepth requestDepth dimension width))
+    (generated : Circuit DeMorgan.signature inputs (generatedBits menuDepth requestDepth dimension width))
     (original : Fin (networkRecords requestDepth) → Fin requestWidth → DeMorgan.Wiring inputs)
     (input : Fin inputs → Bool) (candidate : Fin (networkRecords menuDepth))
     (request : Fin (networkRecords requestDepth)) (bit : Fin requestWidth) :
@@ -135,7 +135,7 @@ theorem payloadWires_point_eval
 
 /-- Lifting source wires past preprocessing preserves their occupied set. -/
 theorem occupied_prepared
-    (generated : Circuit DeMorgan.signature inputs gates outputs)
+    (generated : Circuit DeMorgan.signature inputs outputs)
     (sourceKeys : Fin sources → Fin keyWidth → DeMorgan.Wiring inputs)
     (sourceFlags : Fin sources → DeMorgan.Wiring inputs) (input : Fin inputs → Bool) :
     MenuPointLayout.occupied

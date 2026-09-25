@@ -163,51 +163,51 @@ theorem argument_logicalWireDepth_lt_gateDepth
           change Nat.succ
               (Fin.foldl argumentCount
                 (fun depth current => max depth
-                  ((Fin.addCases (fun _ : Fin n => 0)
-                    (logicalGateDepths program) : Wire n g -> Nat)
+                  ((Wire.elim (fun _ : Fin n => 0)
+                    (logicalGateDepths program))
                     (wires current))) 0) =
             logicalGateDepths program gate at lineDepth
           rw [← lineDepth]
           change
-            (Fin.addCases (fun _ : Fin n => 0)
-              (logicalGateDepths program) : Wire n g -> Nat)
+            (Wire.elim (fun _ : Fin n => 0)
+              (logicalGateDepths program))
                 (wires argument) <
               Nat.succ
                 (Fin.foldl argumentCount
                   (fun depth current => max depth
-                    ((Fin.addCases (fun _ : Fin n => 0)
-                      (logicalGateDepths program) : Wire n g -> Nat)
+                    ((Wire.elim (fun _ : Fin n => 0)
+                      (logicalGateDepths program))
                       (wires current))) 0)
           exact Nat.lt_succ_of_le
             (Fin.le_foldl_max
               (fun current =>
-                (Fin.addCases (fun _ : Fin n => 0)
-                  (logicalGateDepths program) : Wire n g -> Nat)
+                (Wire.elim (fun _ : Fin n => 0)
+                  (logicalGateDepths program))
                   (wires current)) 0 argument)
       | or argumentCount =>
           change Nat.succ
               (Fin.foldl argumentCount
                 (fun depth current => max depth
-                  ((Fin.addCases (fun _ : Fin n => 0)
-                    (logicalGateDepths program) : Wire n g -> Nat)
+                  ((Wire.elim (fun _ : Fin n => 0)
+                    (logicalGateDepths program))
                     (wires current))) 0) =
             logicalGateDepths program gate at lineDepth
           rw [← lineDepth]
           change
-            (Fin.addCases (fun _ : Fin n => 0)
-              (logicalGateDepths program) : Wire n g -> Nat)
+            (Wire.elim (fun _ : Fin n => 0)
+              (logicalGateDepths program))
                 (wires argument) <
               Nat.succ
                 (Fin.foldl argumentCount
                   (fun depth current => max depth
-                    ((Fin.addCases (fun _ : Fin n => 0)
-                      (logicalGateDepths program) : Wire n g -> Nat)
+                    ((Wire.elim (fun _ : Fin n => 0)
+                      (logicalGateDepths program))
                       (wires current))) 0)
           exact Nat.lt_succ_of_le
             (Fin.le_foldl_max
               (fun current =>
-                (Fin.addCases (fun _ : Fin n => 0)
-                  (logicalGateDepths program) : Wire n g -> Nat)
+                (Wire.elim (fun _ : Fin n => 0)
+                  (logicalGateDepths program))
                   (wires current)) 0 argument)
 
 /-- If a connective gate is in the next logical layer, each argument lies in

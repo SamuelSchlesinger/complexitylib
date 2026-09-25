@@ -28,30 +28,33 @@ open scoped BigOperators
 /-- Preserve the original inputs and append every routed resource value. -/
 noncomputable def layerStateCircuit
     (pairs : Nat)
-    (resourceGateCounts : Fin (prefixLast prefixWidth + 2) -> Nat)
     (resourceCircuits : (resource : Fin (prefixLast prefixWidth + 2)) ->
-      Circuit DeMorgan.signature (pairs * suffixWidth)
-        (resourceGateCounts resource) pairs) :
+      Circuit DeMorgan.signature (pairs * suffixWidth) pairs) :
     Circuit DeMorgan.signature
       (layerInputCount prefixWidth suffixWidth pairs)
-      (Finset.univ.sum fun resource : Fin (prefixLast prefixWidth + 2) =>
-        routedResourceGateCount prefixWidth suffixWidth pairs
-          resourceGateCounts resource)
       (layerStateCount prefixWidth suffixWidth pairs) :=
   (Circuit.id DeMorgan.signature
       (layerInputCount prefixWidth suffixWidth pairs)).parallel
-    (resourceBankCircuit pairs resourceGateCounts resourceCircuits)
-  |>.castCounts rfl (Nat.zero_add _) rfl
+    (resourceBankCircuit pairs resourceCircuits)
+  |>.castCounts rfl rfl
+
+@[simp] theorem layerStateCircuit_size
+    (pairs : Nat)
+    (resourceCircuits : (resource : Fin (prefixLast prefixWidth + 2)) ->
+      Circuit DeMorgan.signature (pairs * suffixWidth) pairs) :
+    (layerStateCircuit pairs resourceCircuits).size =
+      Finset.univ.sum fun resource : Fin (prefixLast prefixWidth + 2) =>
+        routedResourceGateCount prefixWidth suffixWidth pairs
+          (fun resource => (resourceCircuits resource).size) resource := by
+  simp [layerStateCircuit]
 
 @[simp] theorem layerStateCircuit_eval_original
     (pairs : Nat)
-    (resourceGateCounts : Fin (prefixLast prefixWidth + 2) -> Nat)
     (resourceCircuits : (resource : Fin (prefixLast prefixWidth + 2)) ->
-      Circuit DeMorgan.signature (pairs * suffixWidth)
-        (resourceGateCounts resource) pairs)
+      Circuit DeMorgan.signature (pairs * suffixWidth) pairs)
     (input : Fin (layerInputCount prefixWidth suffixWidth pairs) -> Bool) :
     originalInputFromState
-        ((layerStateCircuit pairs resourceGateCounts resourceCircuits).eval
+        ((layerStateCircuit pairs resourceCircuits).eval
           DeMorgan.interpretation input) = input := by
   funext originalInput
   simp [originalInputFromState, layerStateCircuit]
@@ -59,17 +62,15 @@ noncomputable def layerStateCircuit
 theorem layerStateCircuit_eval_resource
     (function : ScalarFunction Bool (prefixWidth + suffixWidth))
     (pairs : Nat)
-    (resourceGateCounts : Fin (prefixLast prefixWidth + 2) -> Nat)
     (resourceCircuits : (resource : Fin (prefixLast prefixWidth + 2)) ->
-      Circuit DeMorgan.signature (pairs * suffixWidth)
-        (resourceGateCounts resource) pairs)
+      Circuit DeMorgan.signature (pairs * suffixWidth) pairs)
     (computes : forall resource,
       (resourceCircuits resource).ComputesWith DeMorgan.interpretation
         (directProduct (resourceFunction function resource) pairs))
     (input : Fin (layerInputCount prefixWidth suffixWidth pairs) -> Bool)
     (resource : Fin (prefixLast prefixWidth + 2))
     (pair : Fin pairs) :
-    (layerStateCircuit pairs resourceGateCounts resourceCircuits).eval
+    (layerStateCircuit pairs resourceCircuits).eval
         DeMorgan.interpretation input (resourceStateIndex resource pair) =
       resourceValue function input pair resource := by
   rw [layerStateCircuit, Circuit.eval_castCounts]
@@ -77,7 +78,7 @@ theorem layerStateCircuit_eval_resource
   rw [Circuit.eval_parallel]
   unfold resourceStateIndex
   rw [Fin.append_right]
-  exact resourceBankCircuit_eval function pairs resourceGateCounts
+  exact resourceBankCircuit_eval function pairs
     resourceCircuits computes input resource pair
 
 /-- Decoding the completed layer state agrees with the semantic Uhlig
@@ -85,61 +86,61 @@ decoder. -/
 theorem decodedStateValue_layerStateCircuit_eval
     (function : ScalarFunction Bool (prefixWidth + suffixWidth))
     (pairs : Nat)
-    (resourceGateCounts : Fin (prefixLast prefixWidth + 2) -> Nat)
     (resourceCircuits : (resource : Fin (prefixLast prefixWidth + 2)) ->
-      Circuit DeMorgan.signature (pairs * suffixWidth)
-        (resourceGateCounts resource) pairs)
+      Circuit DeMorgan.signature (pairs * suffixWidth) pairs)
     (computes : forall resource,
       (resourceCircuits resource).ComputesWith DeMorgan.interpretation
         (directProduct (resourceFunction function resource) pairs))
     (input : Fin (layerInputCount prefixWidth suffixWidth pairs) -> Bool)
     (pair : Fin pairs) (side : Fin 2) :
     decodedStateValue
-        ((layerStateCircuit pairs resourceGateCounts resourceCircuits).eval
+        ((layerStateCircuit pairs resourceCircuits).eval
           DeMorgan.interpretation input)
         pair side =
       decodedValue function input pair side := by
   unfold decodedStateValue decodedValue
-  rw [layerStateCircuit_eval_original pairs resourceGateCounts
+  rw [layerStateCircuit_eval_original pairs
     resourceCircuits input]
   unfold recoveryPair
   apply Finset.sum_congr rfl
   intro resource _member
-  exact layerStateCircuit_eval_resource function pairs resourceGateCounts
+  exact layerStateCircuit_eval_resource function pairs
     resourceCircuits computes input resource pair
 
 /-- Quantitatively useful finite Uhlig layer, using circuit sharing inside
 each XOR decoder. -/
 noncomputable def sharedUhligLayerCircuit
     (pairs : Nat)
-    (resourceGateCounts : Fin (prefixLast prefixWidth + 2) -> Nat)
     (resourceCircuits : (resource : Fin (prefixLast prefixWidth + 2)) ->
-      Circuit DeMorgan.signature (pairs * suffixWidth)
-        (resourceGateCounts resource) pairs) :
+      Circuit DeMorgan.signature (pairs * suffixWidth) pairs) :
     Circuit DeMorgan.signature
       (layerInputCount prefixWidth suffixWidth pairs)
-      ((Finset.univ.sum fun resource : Fin (prefixLast prefixWidth + 2) =>
-          routedResourceGateCount prefixWidth suffixWidth pairs
-            resourceGateCounts resource) +
-        (Finset.univ.sum fun output : Fin (2 * pairs) =>
-          sharedDecoderOutputGateCount
-            prefixWidth suffixWidth pairs output))
       (2 * pairs) :=
   (sharedDecoderCircuit prefixWidth suffixWidth pairs).comp
-    (layerStateCircuit pairs resourceGateCounts resourceCircuits)
+    (layerStateCircuit pairs resourceCircuits)
+
+@[simp] theorem sharedUhligLayerCircuit_size
+    (pairs : Nat)
+    (resourceCircuits : (resource : Fin (prefixLast prefixWidth + 2)) ->
+      Circuit DeMorgan.signature (pairs * suffixWidth) pairs) :
+    (sharedUhligLayerCircuit pairs resourceCircuits).size =
+      (Finset.univ.sum fun resource : Fin (prefixLast prefixWidth + 2) =>
+          routedResourceGateCount prefixWidth suffixWidth pairs
+            (fun resource => (resourceCircuits resource).size) resource) +
+        (Finset.univ.sum fun output : Fin (2 * pairs) =>
+          sharedDecoderOutputGateCount prefixWidth suffixWidth pairs output) := by
+  simp [sharedUhligLayerCircuit]
 
 /-- Exact correctness of the shared finite layer. -/
 theorem sharedUhligLayerCircuit_computes
     (function : ScalarFunction Bool (prefixWidth + suffixWidth))
     (pairs : Nat)
-    (resourceGateCounts : Fin (prefixLast prefixWidth + 2) -> Nat)
     (resourceCircuits : (resource : Fin (prefixLast prefixWidth + 2)) ->
-      Circuit DeMorgan.signature (pairs * suffixWidth)
-        (resourceGateCounts resource) pairs)
+      Circuit DeMorgan.signature (pairs * suffixWidth) pairs)
     (computes : forall resource,
       (resourceCircuits resource).ComputesWith DeMorgan.interpretation
         (directProduct (resourceFunction function resource) pairs)) :
-    (sharedUhligLayerCircuit pairs resourceGateCounts
+    (sharedUhligLayerCircuit pairs
       resourceCircuits).ComputesWith DeMorgan.interpretation
         (directProduct function (2 * pairs)) := by
   intro input
@@ -148,17 +149,15 @@ theorem sharedUhligLayerCircuit_computes
     sharedDecoderCircuit_eval]
   let pairSide := decoderPairSide output
   rw [decodedStateValue_layerStateCircuit_eval function pairs
-    resourceGateCounts resourceCircuits computes input pairSide.1 pairSide.2]
+     resourceCircuits computes input pairSide.1 pairSide.2]
   exact congrFun (decodedValue_eq_directProduct function input) output
 
 /-- Exact cost ledger for the shared finite layer. -/
 @[simp] theorem sharedUhligLayerCircuit_cost
     (pairs : Nat)
-    (resourceGateCounts : Fin (prefixLast prefixWidth + 2) -> Nat)
     (resourceCircuits : (resource : Fin (prefixLast prefixWidth + 2)) ->
-      Circuit DeMorgan.signature (pairs * suffixWidth)
-        (resourceGateCounts resource) pairs) :
-    (sharedUhligLayerCircuit pairs resourceGateCounts resourceCircuits).cost
+      Circuit DeMorgan.signature (pairs * suffixWidth) pairs) :
+    (sharedUhligLayerCircuit pairs resourceCircuits).cost
         DeMorgan.standardCost =
       (Finset.univ.sum fun resource : Fin (prefixLast prefixWidth + 2) =>
         ((Finset.univ.sum fun _pair : Fin pairs =>
@@ -176,20 +175,25 @@ theorem sharedUhligLayerCircuit_computes
 /-- Compose routing, supplied resource evaluation, and exact decoding. -/
 noncomputable def uhligLayerCircuit
     (pairs : Nat)
-    (resourceGateCounts : Fin (prefixLast prefixWidth + 2) -> Nat)
     (resourceCircuits : (resource : Fin (prefixLast prefixWidth + 2)) ->
-      Circuit DeMorgan.signature (pairs * suffixWidth)
-        (resourceGateCounts resource) pairs) :
+      Circuit DeMorgan.signature (pairs * suffixWidth) pairs) :
     Circuit DeMorgan.signature
       (layerInputCount prefixWidth suffixWidth pairs)
-      ((Finset.univ.sum fun resource : Fin (prefixLast prefixWidth + 2) =>
-          routedResourceGateCount prefixWidth suffixWidth pairs
-            resourceGateCounts resource) +
-        (Finset.univ.sum fun output : Fin (2 * pairs) =>
-          decoderGateCount prefixWidth suffixWidth pairs output))
       (2 * pairs) :=
   (decoderCircuit prefixWidth suffixWidth pairs).comp
-    (layerStateCircuit pairs resourceGateCounts resourceCircuits)
+    (layerStateCircuit pairs resourceCircuits)
+
+@[simp] theorem uhligLayerCircuit_size
+    (pairs : Nat)
+    (resourceCircuits : (resource : Fin (prefixLast prefixWidth + 2)) ->
+      Circuit DeMorgan.signature (pairs * suffixWidth) pairs) :
+    (uhligLayerCircuit pairs resourceCircuits).size =
+      (Finset.univ.sum fun resource : Fin (prefixLast prefixWidth + 2) =>
+          routedResourceGateCount prefixWidth suffixWidth pairs
+            (fun resource => (resourceCircuits resource).size) resource) +
+        (Finset.univ.sum fun output : Fin (2 * pairs) =>
+          decoderGateCount prefixWidth suffixWidth pairs output) := by
+  simp [uhligLayerCircuit]
 
 /-- Exact finite Uhlig circuit theorem. If each resource function is
 available on `pairs` independent suffixes, one explicit De Morgan circuit
@@ -197,30 +201,26 @@ computes `2 * pairs` independent copies of the original function. -/
 theorem uhligLayerCircuit_computes
     (function : ScalarFunction Bool (prefixWidth + suffixWidth))
     (pairs : Nat)
-    (resourceGateCounts : Fin (prefixLast prefixWidth + 2) -> Nat)
     (resourceCircuits : (resource : Fin (prefixLast prefixWidth + 2)) ->
-      Circuit DeMorgan.signature (pairs * suffixWidth)
-        (resourceGateCounts resource) pairs)
+      Circuit DeMorgan.signature (pairs * suffixWidth) pairs)
     (computes : forall resource,
       (resourceCircuits resource).ComputesWith DeMorgan.interpretation
         (directProduct (resourceFunction function resource) pairs)) :
-    (uhligLayerCircuit pairs resourceGateCounts resourceCircuits).ComputesWith
+    (uhligLayerCircuit pairs resourceCircuits).ComputesWith
       DeMorgan.interpretation (directProduct function (2 * pairs)) := by
   intro input
   funext output
   rw [uhligLayerCircuit, Circuit.eval_comp, decoderCircuit_eval]
   let pairSide := decoderPairSide output
   rw [decodedStateValue_layerStateCircuit_eval function pairs
-    resourceGateCounts resourceCircuits computes input pairSide.1 pairSide.2]
+     resourceCircuits computes input pairSide.1 pairSide.2]
   exact congrFun (decodedValue_eq_directProduct function input) output
 
 @[simp] theorem layerStateCircuit_cost
     (pairs : Nat)
-    (resourceGateCounts : Fin (prefixLast prefixWidth + 2) -> Nat)
     (resourceCircuits : (resource : Fin (prefixLast prefixWidth + 2)) ->
-      Circuit DeMorgan.signature (pairs * suffixWidth)
-        (resourceGateCounts resource) pairs) :
-    (layerStateCircuit pairs resourceGateCounts resourceCircuits).cost
+      Circuit DeMorgan.signature (pairs * suffixWidth) pairs) :
+    (layerStateCircuit pairs resourceCircuits).cost
         DeMorgan.standardCost =
       Finset.univ.sum fun resource : Fin (prefixLast prefixWidth + 2) =>
         ((Finset.univ.sum fun _pair : Fin pairs =>
@@ -232,11 +232,9 @@ theorem uhligLayerCircuit_computes
 /-- Exact cost ledger for the complete finite layer. -/
 @[simp] theorem uhligLayerCircuit_cost
     (pairs : Nat)
-    (resourceGateCounts : Fin (prefixLast prefixWidth + 2) -> Nat)
     (resourceCircuits : (resource : Fin (prefixLast prefixWidth + 2)) ->
-      Circuit DeMorgan.signature (pairs * suffixWidth)
-        (resourceGateCounts resource) pairs) :
-    (uhligLayerCircuit pairs resourceGateCounts resourceCircuits).cost
+      Circuit DeMorgan.signature (pairs * suffixWidth) pairs) :
+    (uhligLayerCircuit pairs resourceCircuits).cost
         DeMorgan.standardCost =
       (Finset.univ.sum fun resource : Fin (prefixLast prefixWidth + 2) =>
         ((Finset.univ.sum fun _pair : Fin pairs =>

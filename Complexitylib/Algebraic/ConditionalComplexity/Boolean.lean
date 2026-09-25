@@ -31,18 +31,18 @@ theorem synthesis_of_conditionalGateComplexity_le
     Synthesis interpretation (Set.range fun i input => supplied input i)
       (Set.range fun i input => target input i) budget := by
   classical
-  obtain ⟨gates, sizeBound, circuit, computes⟩ :=
+  obtain ⟨circuit, sizeBound, computes⟩ :=
     (Circuit.conditionalGateComplexity_le_iff interpretation target supplied budget).mp bounded
   intro priorGates prior availableGiven
   choose wires wiresEval using fun i =>
     mem_available.mp (availableGiven (Set.mem_range_self i))
   let inputWires : Fin (n + k) → Wire n priorGates := Fin.append Wire.input wires
   let combined := circuit.instantiate prior inputWires
-  refine ⟨priorGates + gates, combined.program, Nat.add_le_add_left sizeBound _, ?_, ?_⟩
+  refine ⟨priorGates + circuit.size, combined.program, Nat.add_le_add_left sizeBound _, ?_, ?_⟩
   · intro f present
     obtain ⟨wire, wireEval⟩ := mem_available.mp present
     apply mem_available.mpr
-    refine ⟨Wire.Renaming.castAdd gates wire, fun input => ?_⟩
+    refine ⟨Wire.Renaming.castAdd circuit.size wire, fun input => ?_⟩
     exact (circuit.program.instantiate_trace_ambient prior inputWires interpretation input wire).trans
       (wireEval input)
   · rintro _ ⟨output, rfl⟩

@@ -28,8 +28,6 @@ set_option backward.isDefEq.respectTransparency false
 /-- Compute every copied-value bit through its shared propagation circuit. -/
 def valuesCircuit (depth keyWidth metadataWidth valueWidth : Nat) :=
   Circuit.parallelFinVector valueWidth (networkRecords depth)
-    (fun bit => (payloadCircuit depth keyWidth (metadataWidth + valueWidth)
-      (Fin.natAdd metadataWidth bit)).size)
     (fun bit => payloadCircuit depth keyWidth (metadataWidth + valueWidth)
       (Fin.natAdd metadataWidth bit))
 

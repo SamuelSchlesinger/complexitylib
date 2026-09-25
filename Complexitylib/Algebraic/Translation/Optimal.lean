@@ -54,15 +54,13 @@ noncomputable def ofFunctionalCompleteness
   classical
   let witness (op : σ.Op) :=
     complete (σ.Arity op) 1 (source.operationTarget op)
-  let gateCount (op : σ.Op) := Classical.choose (witness op)
-  let operation (op : σ.Op) : Circuit τ (σ.Arity op) (gateCount op) 1 :=
-    Classical.choose (Classical.choose_spec (witness op))
+  let operation (op : σ.Op) : Circuit τ (σ.Arity op) 1 :=
+    Classical.choose (witness op)
   have computes (op : σ.Op) :
       (operation op).ComputesWith target (source.operationTarget op) :=
-    Classical.choose_spec (Classical.choose_spec (witness op))
+    Classical.choose_spec (witness op)
   exact
-    { gateCount := gateCount
-      operation := operation
+    { operation := operation
       realizes := by
         funext op input
         exact congrFun (computes op input) 0 }
@@ -98,8 +96,7 @@ noncomputable def minimize
       (source.operationTarget op) (realization.operation_computes op)
   exact
     { toRealization :=
-        { gateCount := fun op => (selected op).gateCount
-          operation := fun op => (selected op).circuit
+        { operation := fun op => (selected op).circuit
           realizes := by
             funext op input
             exact congrFun ((selected op).computes input) 0 }

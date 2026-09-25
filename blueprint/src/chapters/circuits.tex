@@ -158,7 +158,8 @@ says otherwise.
 \begin{theorem}[CSLib circuits]
   \label{thm:circuits-cslib}
   \lean{Complexity.Circuit.eval_ofCslib, Complexity.Circuit.exists_cslib,
-    Complexity.mem_PPoly_iff_cslib}
+    Complexity.mem_PPoly_iff_cslib, Complexity.PPoly_eq_cslib_PPoly,
+    Complexity.SIZE_subset_cslib_SIZE, Complexity.cslib_SIZE_subset_SIZE}
   \leanok
   \uses{def:circuit, def:circuits-bases, def:PPoly}
   A De Morgan circuit in CSLib's model (constants, negation, and binary
@@ -167,7 +168,10 @@ says otherwise.
   fan-in-two AND/OR circuit with $N$ inputs, $G$ internal gates, and $M$ outputs
   is a CSLib circuit with at most $N + 2G + M$ gates. Consequently $L \in
   \cc{P/poly}$ if and only if, for some polynomial $p$, every length-$n$ slice
-  of $L$ is decided by a CSLib circuit with at most $p(n)$ gates.
+  of $L$ is decided by a CSLib circuit with at most $p(n)$ gates, so
+  $\cc{P/poly}$ is exactly CSLib's $\cc{P/poly}$. The size classes interleave:
+  $\cc{SIZE}(s)$ lies in CSLib's $\cc{SIZE}(n + 2s + 1)$, and CSLib's
+  $\cc{SIZE}(s)$ lies in $\cc{SIZE}(s + 1)$.
 \end{theorem}
 \begin{proof}
   \leanok

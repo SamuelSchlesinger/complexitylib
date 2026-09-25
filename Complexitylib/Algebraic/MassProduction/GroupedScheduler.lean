@@ -64,12 +64,19 @@ noncomputable def groupedScheduleCircuit
       networkRecords depth) :
     Circuit DeMorgan.signature
       (groups * (requestsPerGroup * pointBitWidth dimension width))
-      (groups *
-        greedyScheduleGateCount dimension widthPositive depth
-          requestsPerGroup)
       (groups * (requestsPerGroup * lineBitWidth dimension width)) :=
   (greedyScheduleCircuit dimension widthPositive depth requestsPerGroup
     allFit).replicate groups
+
+@[simp] theorem groupedScheduleCircuit_size
+    (dimension : Nat)
+    (widthPositive : 0 < width)
+    (depth groups requestsPerGroup : Nat)
+    (allFit : requestsPerGroup * nonzeroScalarCount width <=
+      networkRecords depth) :
+    (groupedScheduleCircuit dimension widthPositive depth groups requestsPerGroup allFit).size =
+      groups * greedyScheduleGateCount dimension widthPositive depth requestsPerGroup := by
+  simp [groupedScheduleCircuit]
 
 /-- Evaluate all group schedulers on the rectangular target family. -/
 noncomputable def groupedScheduleOutput

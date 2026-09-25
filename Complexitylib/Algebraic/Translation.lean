@@ -24,13 +24,15 @@ namespace Algebraic
 /-- An implementation of every operation of `σ` by a scalar `τ`-circuit
 with the same inputs. -/
 structure Translation (σ τ : Signature) where
-  /-- Number of target gates used to implement a source operation. -/
-  gateCount : σ.Op → Nat
   /-- Target circuit implementing a source operation. -/
   operation : (op : σ.Op) →
-    Circuit τ (σ.Arity op) (gateCount op) 1
+    Circuit τ (σ.Arity op) 1
 
 namespace Translation
+
+/-- Number of target gates used to implement a source operation. -/
+abbrev gateCount (translation : Translation σ τ) (op : σ.Op) : Nat :=
+  (translation.operation op).size
 
 /-- Pull a target interpretation back through a circuit translation. -/
 def pull
@@ -93,17 +95,23 @@ def compileProgram
 /-- Number of target gates produced when compiling a source circuit. -/
 def compiledGateCount
     (translation : Translation σ τ)
-    (circuit : Circuit σ n g m) : Nat :=
+    (circuit : Circuit σ n m) : Nat :=
   (translation.compileProgram circuit.program).gateCount
 
 /-- Compile a circuit through a signature translation. -/
 def compile
     (translation : Translation σ τ)
-    (circuit : Circuit σ n g m) :
-    Circuit τ n (translation.compiledGateCount circuit) m :=
+    (circuit : Circuit σ n m) :
+    Circuit τ n m :=
   let compiled := translation.compileProgram circuit.program
   { program := compiled.program
     outputs := compiled.wires ∘ circuit.outputs }
+
+/-- A compiled circuit has the compiled gate count. -/
+@[simp] theorem size_compile
+    (translation : Translation σ τ)
+    (circuit : Circuit σ n m) :
+    (translation.compile circuit).size = translation.compiledGateCount circuit := rfl
 
 /-- Program compilation preserves the value of every source wire. -/
 theorem compileProgram_trace
@@ -117,27 +125,23 @@ theorem compileProgram_trace
       source.trace (translation.pull interpretation) input wire := by
   induction source with
   | empty =>
-      refine Fin.addCases (fun sourceInput => ?_)
-        (fun gate => Fin.elim0 gate) wire
-      have input_eq : (sourceInput : Wire n 0) =
-          (Wire.input (g := 0) sourceInput : Wire n 0) := by
-        apply Fin.ext
-        rfl
-      rw [input_eq]
-      simp [compileProgram]
+      cases wire with
+      | input sourceInput => rfl
+      | gate gate => exact Fin.elim0 gate
   | @gate g source line ih =>
       let prior := translation.compileProgram source
       let implementation := translation.operation line.op
       let inputs := prior.wires ∘ line.wires
       let instantiated := implementation.instantiate prior.program inputs
-      refine Fin.lastCases ?_ (fun priorWire => ?_) wire
-      · simp only [compileProgram]
+      induction wire using Wire.lastCases with
+      | last =>
+        simp only [compileProgram]
         have mappedLast :
             (((Wire.Renaming.castAdd
                 (translation.gateCount line.op)).comp prior.wires).skipLast
-                (instantiated.outputs 0)) (Fin.last (n + g)) =
+                (instantiated.outputs 0)) (Wire.gate (Fin.last g)) =
               instantiated.outputs 0 :=
-          Wire.Renaming.skipLast_lastWire _ _
+          Wire.Renaming.skipLast_gates_last _ _
         have input_eq :
             prior.program.trace interpretation input ∘ inputs =
               source.trace (translation.pull interpretation) input ∘
@@ -159,13 +163,20 @@ theorem compileProgram_trace
                   input_eq
           _ = line.eval (translation.pull interpretation) input
                 (source.eval (translation.pull interpretation) input) := rfl
-          _ = _ := (Program.trace_gate_last source line
+          _ = _ := (Program.eval_gate_last source line
             (translation.pull interpretation) input).symm
-      · simp only [compileProgram, Wire.Renaming.skipLast_castSucc,
-          Wire.Renaming.comp_apply]
-        change instantiated.program.trace interpretation input
-          (Wire.Renaming.castAdd (translation.gateCount line.op)
-            (prior.wires priorWire)) = _
+      | castSucc priorWire =>
+        simp only [compileProgram]
+        have mappedPrior :
+            (((Wire.Renaming.castAdd
+                (translation.gateCount line.op)).comp prior.wires).skipLast
+                (instantiated.outputs 0)) priorWire.castSucc =
+              Wire.Renaming.castAdd (translation.gateCount line.op)
+                (prior.wires priorWire) :=
+          (Wire.Renaming.skipLast_castSucc _ _ priorWire).trans
+            (Wire.Renaming.comp_apply _ _ priorWire)
+        refine (congrArg (instantiated.program.trace interpretation input)
+          mappedPrior).trans ?_
         exact (implementation.program.instantiate_trace_ambient
             prior.program inputs interpretation input
             (prior.wires priorWire)).trans <|
@@ -176,7 +187,7 @@ theorem compileProgram_trace
 /-- Compiling a circuit preserves evaluation exactly. -/
 theorem compile_eval
     (translation : Translation σ τ)
-    (circuit : Circuit σ n g m)
+    (circuit : Circuit σ n m)
     (interpretation : Interpretation τ U)
     (input : Fin n → U) :
     (translation.compile circuit).eval interpretation input =
@@ -200,7 +211,7 @@ theorem compileProgram_cost
 /-- Circuit compilation preserves pulled-back weighted cost exactly. -/
 theorem compile_cost
     (translation : Translation σ τ)
-    (circuit : Circuit σ n g m)
+    (circuit : Circuit σ n m)
     (operationCost : OperationCost τ) :
     (translation.compile circuit).cost operationCost =
       circuit.cost (translation.pullCost operationCost) :=
@@ -210,7 +221,7 @@ theorem compile_cost
 costs at most `K` times the source gate count. -/
 theorem compile_cost_le_mul_size
     (translation : Translation σ τ)
-    (circuit : Circuit σ n g m)
+    (circuit : Circuit σ n m)
     (operationCost : OperationCost τ)
     (bounded : ∀ op, translation.pullCost operationCost op ≤ K) :
     (translation.compile circuit).cost operationCost ≤
@@ -222,7 +233,7 @@ theorem compile_cost_le_mul_size
 is charged by the size of its implementation. -/
 theorem compile_size
     (translation : Translation σ τ)
-    (circuit : Circuit σ n g m) :
+    (circuit : Circuit σ n m) :
     (translation.compile circuit).size =
       circuit.cost (translation.pullCost OperationCost.unit) := by
   rw [← Circuit.cost_unit, translation.compile_cost]
@@ -231,7 +242,7 @@ theorem compile_size
 size by at most a factor of `K`. -/
 theorem compile_size_le_mul
     (translation : Translation σ τ)
-    (circuit : Circuit σ n g m)
+    (circuit : Circuit σ n m)
     (bounded : ∀ op, (translation.operation op).size ≤ K) :
     (translation.compile circuit).size ≤ K * circuit.size := by
   rw [translation.compile_size]
@@ -241,7 +252,6 @@ theorem compile_size_le_mul
 
 /-- The identity translation implements each operation with one gate. -/
 def id (σ : Signature) : Translation σ σ where
-  gateCount := fun _ => 1
   operation := fun op =>
     { program := (Program.empty : Program σ (σ.Arity op) 0).gate
         { op := op
@@ -253,7 +263,7 @@ def id (σ : Signature) : Translation σ σ where
     (Translation.id σ).pull interpretation = interpretation := by
   funext op input
   simp only [pull, id, Circuit.eval, Function.comp_apply,
-    Program.trace, Fin.addCases_right]
+    Program.trace, Wire.elim_gate]
   change (Program.empty.gate
       { op := op
         wires := fun argument => Wire.input argument }).eval
@@ -262,8 +272,6 @@ def id (σ : Signature) : Translation σ σ where
   rw [Program.eval_gate_last]
   unfold Line.eval
   congr 1
-  funext argument
-  simp
 
 @[simp] theorem pullCost_id
     (operationCost : OperationCost σ) :
@@ -273,7 +281,7 @@ def id (σ : Signature) : Translation σ σ where
 
 /-- Compilation through the identity translation preserves semantics. -/
 theorem compile_id_eval
-    (circuit : Circuit σ n g m)
+    (circuit : Circuit σ n m)
     (interpretation : Interpretation σ U)
     (input : Fin n → U) :
     ((Translation.id σ).compile circuit).eval interpretation input =
@@ -282,7 +290,7 @@ theorem compile_id_eval
 
 /-- Compilation through the identity translation preserves weighted cost. -/
 theorem compile_id_cost
-    (circuit : Circuit σ n g m)
+    (circuit : Circuit σ n m)
     (operationCost : OperationCost σ) :
     ((Translation.id σ).compile circuit).cost operationCost =
       circuit.cost operationCost := by
@@ -293,8 +301,6 @@ first translation through the second. -/
 def comp
     (outer : Translation τ υ)
     (inner : Translation σ τ) : Translation σ υ where
-  gateCount := fun op =>
-    outer.compiledGateCount (inner.operation op)
   operation := fun op => outer.compile (inner.operation op)
 
 /-- Interpretations pull back contravariantly through composition. -/
@@ -322,7 +328,7 @@ theorem pullCost_comp
 theorem compile_comp_eval
     (outer : Translation τ υ)
     (inner : Translation σ τ)
-    (circuit : Circuit σ n g m)
+    (circuit : Circuit σ n m)
     (interpretation : Interpretation υ U)
     (input : Fin n → U) :
     ((outer.comp inner).compile circuit).eval interpretation input =
@@ -334,7 +340,7 @@ cost. -/
 theorem compile_comp_cost
     (outer : Translation τ υ)
     (inner : Translation σ τ)
-    (circuit : Circuit σ n g m)
+    (circuit : Circuit σ n m)
     (operationCost : OperationCost υ) :
     ((outer.comp inner).compile circuit).cost operationCost =
       (outer.compile (inner.compile circuit)).cost operationCost := by
@@ -387,9 +393,8 @@ def compile
     {source : Interpretation σ U}
     {target : Interpretation τ U}
     (realization : Realization σ τ source target)
-    (circuit : Circuit σ n g m) :
-    Circuit τ n
-      (realization.toTranslation.compiledGateCount circuit) m :=
+    (circuit : Circuit σ n m) :
+    Circuit τ n m :=
   realization.toTranslation.compile circuit
 
 /-- Pull a weighted target cost back through a realization. -/
@@ -405,7 +410,7 @@ theorem compile_eval
     {source : Interpretation σ U}
     {target : Interpretation τ U}
     (realization : Realization σ τ source target)
-    (circuit : Circuit σ n g m)
+    (circuit : Circuit σ n m)
     (input : Fin n → U) :
     (realization.compile circuit).eval target input =
       circuit.eval source input := by
@@ -416,7 +421,7 @@ theorem compile_cost
     {source : Interpretation σ U}
     {target : Interpretation τ U}
     (realization : Realization σ τ source target)
-    (circuit : Circuit σ n g m)
+    (circuit : Circuit σ n m)
     (operationCost : OperationCost τ) :
     (realization.compile circuit).cost operationCost =
       circuit.cost (realization.pullCost operationCost) :=
@@ -430,10 +435,10 @@ theorem transport_lowerBound
     (realization : Realization σ τ source targetInterpretation)
     (operationCost : OperationCost τ)
     (target : Target U n m)
-    (lowerBound : ∀ {h} (targetCircuit : Circuit τ n h m),
+    (lowerBound : ∀ (targetCircuit : Circuit τ n m),
       targetCircuit.ComputesWith targetInterpretation target →
         L ≤ targetCircuit.cost operationCost)
-    (circuit : Circuit σ n g m)
+    (circuit : Circuit σ n m)
     (computes : circuit.ComputesWith source target) :
     L ≤ circuit.cost (realization.pullCost operationCost) := by
   have compiledComputes :

@@ -25,16 +25,16 @@ theorem existsCircuit
     (distinct : Function.Injective resourceKeys)
     (values : Fin resources → DeMorgan.Wiring inputs)
     (queryKeys : Fin queries → Fin keyWidth → DeMorgan.Wiring inputs) :
-    ∃ gates, ∃ gathered : Circuit DeMorgan.signature inputs gates queries,
+    ∃ gathered : Circuit DeMorgan.signature inputs queries,
       gathered.cost DeMorgan.standardCost ≤ 256 * (resources + queries + 1) *
         (FiniteParameters.binaryDepth (resources + queries + 1) + keyWidth + 1 + 2) ^ 5 ∧
       ∀ (input : Fin inputs → Bool) (query : Fin queries) (resource : Fin resources),
         (fun bit => (queryKeys query bit).eval input) = resourceKeys resource →
         gathered.eval DeMorgan.interpretation input query = (values resource).eval input := by
-  obtain ⟨gates, gathered, correct, bound⟩ := BatchOr.existsCircuit
+  obtain ⟨gathered, correct, bound⟩ := BatchOr.existsCircuit
     (fun resource bit => .constant (resourceKeys resource bit))
     (fun resource (_ : Fin 1) => values resource) queryKeys
-  refine ⟨gates, gathered.mapOutputs (fun query => finProdFinEquiv (query, (0 : Fin 1))), ?_, ?_⟩
+  refine ⟨gathered.mapOutputs (fun query => finProdFinEquiv (query, (0 : Fin 1))), ?_, ?_⟩
   · rw [Circuit.cost_mapOutputs]
     exact bound
   · intro input query resource matching

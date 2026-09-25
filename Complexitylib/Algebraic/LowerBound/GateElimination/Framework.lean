@@ -53,8 +53,7 @@ structure Step
     (problem : State → Problem U m)
     (rank bound : State → Nat)
     (state : State)
-    {g : Nat}
-    (circuit : Circuit σ (problem state).inputCount g m) where
+    (circuit : Circuit σ (problem state).inputCount m) where
   /-- State reached after the restriction. -/
   next : State
   /-- Gate elimination makes well-founded progress. -/
@@ -94,7 +93,7 @@ structure Framework
   bound : State → Nat
   /-- Every positive-bound computation admits a paying elimination step. -/
   reduce : ∀ state, 0 < bound state →
-    ∀ {g} (circuit : Circuit σ (problem state).inputCount g m),
+    ∀ (circuit : Circuit σ (problem state).inputCount m),
       circuit.ComputesWith interpretation (problem state).target →
         Step operationCost interpretation problem rank bound state circuit
 
@@ -116,7 +115,7 @@ structure OptimalFramework
   bound : State → Nat
   /-- Every positive-bound, minimum-cost computation admits a paying step. -/
   reduce : ∀ state, 0 < bound state →
-    ∀ {g} (circuit : Circuit σ (problem state).inputCount g m),
+    ∀ (circuit : Circuit σ (problem state).inputCount m),
       circuit.ComputesWith interpretation (problem state).target →
       circuit.CostSizeMinimal operationCost interpretation
         (problem state).target →
@@ -133,14 +132,14 @@ theorem lowerBound
     {interpretation : Interpretation σ U}
     {m : Nat}
     (framework : Framework (State := State) operationCost interpretation m) :
-    ∀ state {g} (circuit :
-        Circuit σ (framework.problem state).inputCount g m),
+    ∀ state (circuit :
+        Circuit σ (framework.problem state).inputCount m),
       circuit.ComputesWith interpretation (framework.problem state).target →
         framework.bound state ≤ circuit.cost operationCost := by
   intro state
   induction state using (measure framework.rank).wf.induction with
   | h state inductionHypothesis =>
-      intro g circuit computes
+      intro circuit computes
       by_cases zero : framework.bound state = 0
       · simp [zero]
       · have positive : 0 < framework.bound state := Nat.pos_of_ne_zero zero
@@ -179,7 +178,7 @@ noncomputable def toFramework
   rank := optimalFramework.rank
   bound := optimalFramework.bound
   reduce := by
-    intro state positive g circuit computes
+    intro state positive circuit computes
     let minimum := circuit.minimum operationCost interpretation
       (optimalFramework.problem state).target computes
     let optimalStep := optimalFramework.reduce state positive
@@ -202,8 +201,8 @@ theorem lowerBound
     {m : Nat}
     (optimalFramework :
       OptimalFramework (State := State) operationCost interpretation m) :
-    ∀ state {g} (circuit : Circuit σ
-        (optimalFramework.problem state).inputCount g m),
+    ∀ state (circuit : Circuit σ
+        (optimalFramework.problem state).inputCount m),
       circuit.ComputesWith interpretation (optimalFramework.problem state).target →
         optimalFramework.bound state ≤ circuit.cost operationCost := by
   exact optimalFramework.toFramework.lowerBound

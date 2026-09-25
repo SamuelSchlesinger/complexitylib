@@ -54,7 +54,6 @@ def inputExpression (depth keyWidth payloadWidth : Nat) (bit : Fin payloadWidth)
 /-- Compile all local source and link tests. -/
 def inputsCircuit (depth keyWidth payloadWidth : Nat) (bit : Fin payloadWidth) :=
   Circuit.parallelFin (networkRecords depth + networkRecords depth)
-    (fun index => (inputExpression depth keyWidth payloadWidth bit index).gateCount)
     (fun index => (inputExpression depth keyWidth payloadWidth bit index).circuit)
 
 /-- Broadcast one selected payload bit across all records. -/

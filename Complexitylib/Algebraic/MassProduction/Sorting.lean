@@ -276,11 +276,16 @@ def compareSwapBits
 def compareSwapCircuit
     (keyFits : keyWidth <= recordWidth) :
     Circuit DeMorgan.signature (2 * recordWidth)
-      (compareSwapGateCount keyFits)
       (2 * recordWidth) :=
-  Circuit.parallelFin (2 * recordWidth)
-    (compareSwapBitGateCount keyFits) fun output =>
+  Circuit.parallelFin (2 * recordWidth) fun output =>
       (compareSwapBitExpression keyFits output).circuit
+
+/-- The compiled compare--exchange emits exactly `compareSwapGateCount`
+gates. -/
+@[simp] theorem compareSwapCircuit_size
+    (keyFits : keyWidth <= recordWidth) :
+    (compareSwapCircuit keyFits).size = compareSwapGateCount keyFits := by
+  simp [compareSwapCircuit, compareSwapGateCount, compareSwapBitGateCount]
 
 @[simp] theorem compareSwapCircuit_eval
     (keyFits : keyWidth <= recordWidth)

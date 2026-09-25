@@ -50,7 +50,7 @@ theorem card_looseCircuit [Fintype σ.Op] :
     Fintype.card (LooseCircuit σ n g m) =
       σ.lineCount (n + g) ^ g * (n + g) ^ m := by
   rw [Fintype.card_congr (looseCircuitEquiv σ n g m), Fintype.card_prod]
-  simp only [Fintype.card_fun, Fintype.card_fin, card_line,
+  simp only [Fintype.card_fun, Fintype.card_fin, card_line, Wire.card,
     Signature.lineCount]
 
 /-- A loose circuit valuation solves all of its internal gate equations. -/
@@ -68,63 +68,81 @@ def LooseCircuit.evalOutputs
     (_interpretation : Interpretation σ U)
     (input : Fin n → U)
     (values : Fin g → U) : Fin m → U :=
-  fun output => Fin.addCases input values (circuit.outputs output)
+  fun output => Wire.elim input values (circuit.outputs output)
+
+/-- Rename gate wires along a bijection of gate labels, fixing every input. -/
+def _root_.Cslib.Circuits.Wire.Renaming.ofEquiv
+    (labels : Fin g ≃ Fin h) : Wire.Renaming n g h where
+  gates := fun gate => Wire.gate (labels gate)
+
+export Cslib.Circuits (Wire.Renaming.ofEquiv)
+
+theorem _root_.Cslib.Circuits.Wire.value_ofEquiv
+    (labels : Fin g ≃ Fin h)
+    (inputs : Fin n → U)
+    (values : Fin g → U)
+    (wire : Wire n g) :
+    Wire.elim inputs (values ∘ labels.symm) (Wire.Renaming.ofEquiv labels wire) =
+      Wire.elim inputs values wire := by
+  cases wire <;> simp [Wire.Renaming.ofEquiv, Function.comp_apply]
+
+export Cslib.Circuits (Wire.value_ofEquiv)
 
 theorem _root_.Cslib.Circuits.Wire.value_permutation
     (permutation : Equiv.Perm (Fin g))
     (inputs : Fin n → U)
     (values : Fin g → U)
     (wire : Wire n g) :
-    (Fin.addCases inputs (values ∘ permutation.symm) : Wire n g → U)
+    Wire.elim inputs (values ∘ permutation.symm)
         (Wire.Renaming.ofPermutation permutation wire) =
-      (Fin.addCases inputs values : Wire n g → U) wire := by
-  refine Fin.addCases (fun input => ?_) (fun gate => ?_) wire <;>
-    simp [Wire.Renaming.ofPermutation, Function.comp_apply]
+      Wire.elim inputs values wire :=
+  Wire.value_ofEquiv permutation inputs values wire
 
 export Cslib.Circuits (Wire.value_permutation)
 
-/-- Forget topological order, then rename every internal gate. -/
+/-- Forget topological order, then rename every internal gate along a bijection
+onto the labels `Fin g`. -/
 def _root_.Cslib.Circuits.Circuit.relabel
-    (circuit : Circuit σ n g m)
-    (permutation : Equiv.Perm (Fin g)) : LooseCircuit σ n g m where
+    (circuit : Circuit σ n m)
+    (labels : Fin circuit.size ≃ Fin g) : LooseCircuit σ n g m where
   internal := fun gate =>
-    (circuit.program.lines (permutation.symm gate)).mapWires
-      (Wire.Renaming.ofPermutation permutation)
+    (circuit.program.lines (labels.symm gate)).mapWires
+      (Wire.Renaming.ofEquiv labels)
   outputs := fun output =>
-    Wire.Renaming.ofPermutation permutation (circuit.outputs output)
+    Wire.Renaming.ofEquiv labels (circuit.outputs output)
 
 export Cslib.Circuits (Circuit.relabel)
 
 theorem _root_.Cslib.Circuits.Circuit.relabel_satisfies
-    (circuit : Circuit σ n g m)
-    (permutation : Equiv.Perm (Fin g))
+    (circuit : Circuit σ n m)
+    (labels : Fin circuit.size ≃ Fin g)
     (interpretation : Interpretation σ U)
     (input : Fin n → U) :
-    (circuit.relabel permutation).Satisfies interpretation input
-      (circuit.program.eval interpretation input ∘ permutation.symm) := by
+    (circuit.relabel labels).Satisfies interpretation input
+      (circuit.program.eval interpretation input ∘ labels.symm) := by
   intro gate
   unfold Circuit.relabel
   simp only [Function.comp_apply]
   rw [Line.eval_mapWires]
   · exact (circuit.program.lines_eval interpretation input
-      (permutation.symm gate)).symm
+      (labels.symm gate)).symm
   · intro wire
-    exact Wire.value_permutation permutation input
+    exact Wire.value_ofEquiv labels input
       (circuit.program.eval interpretation input) wire
 
 export Cslib.Circuits (Circuit.relabel_satisfies)
 
 theorem _root_.Cslib.Circuits.Circuit.relabel_evalOutputs
-    (circuit : Circuit σ n g m)
-    (permutation : Equiv.Perm (Fin g))
+    (circuit : Circuit σ n m)
+    (labels : Fin circuit.size ≃ Fin g)
     (interpretation : Interpretation σ U)
     (input : Fin n → U) :
-    (circuit.relabel permutation).evalOutputs interpretation input
-        (circuit.program.eval interpretation input ∘ permutation.symm) =
+    (circuit.relabel labels).evalOutputs interpretation input
+        (circuit.program.eval interpretation input ∘ labels.symm) =
       circuit.eval interpretation input := by
   funext output
   unfold Circuit.relabel LooseCircuit.evalOutputs Circuit.eval
-  exact Wire.value_permutation permutation input
+  exact Wire.value_ofEquiv labels input
     (circuit.program.eval interpretation input) (circuit.outputs output)
 
 /-! ## Acyclicity and unique valuations -/
@@ -136,7 +154,7 @@ def _root_.Cslib.Circuits.Wire.Below
     (rank : Fin g → Nat)
     (bound : Nat)
     (wire : Wire n g) : Prop :=
-  Fin.addCases (fun _ => True) (fun gate => rank gate < bound) wire
+  Wire.elim (fun _ => True) (fun gate => rank gate < bound) wire
 
 export Cslib.Circuits (Wire.Below)
 
@@ -146,9 +164,7 @@ theorem _root_.Cslib.Circuits.Wire.below_castSucc
     Wire.Below (fun gate : Fin (g + 1) => gate.val) gate.castSucc.val
         wire.castSucc ↔
       Wire.Below (fun gate : Fin g => gate.val) gate.val wire := by
-  refine Fin.addCases (fun input => ?_) (fun priorGate => ?_) wire
-  · simp [Wire.Below, Fin.castSucc_castAdd]
-  · simp [Wire.Below]
+  cases wire <;> simp [Wire.Below]
 
 export Cslib.Circuits (Wire.below_castSucc)
 
@@ -156,9 +172,7 @@ theorem _root_.Cslib.Circuits.Wire.below_last
     (wire : Wire n g) :
     Wire.Below (fun gate : Fin (g + 1) => gate.val) (Fin.last g).val
       wire.castSucc := by
-  refine Fin.addCases (fun input => ?_) (fun priorGate => ?_) wire
-  · simp [Wire.Below, Fin.castSucc_castAdd]
-  · simp [Wire.Below]
+  cases wire <;> simp [Wire.Below]
 
 export Cslib.Circuits (Wire.below_last)
 
@@ -207,29 +221,38 @@ theorem _root_.Cslib.Circuits.Wire.below_permutation
         (Wire.Renaming.ofPermutation permutation wire) ↔
       Wire.Below (fun original : Fin g => original.val)
         (permutation.symm gate).val wire := by
-  refine Fin.addCases (fun input => ?_) (fun original => ?_) wire
-  · simp [Wire.Below, Wire.Renaming.ofPermutation,
-      Wire.Renaming.apply]
-  · simp [Wire.Below, Wire.Renaming.ofPermutation,
-      Wire.Renaming.apply]
+  cases wire <;> simp [Wire.Below, Wire.Renaming.ofPermutation]
 
 export Cslib.Circuits (Wire.below_permutation)
 
+theorem _root_.Cslib.Circuits.Wire.below_ofEquiv
+    (labels : Fin g ≃ Fin h)
+    (gate : Fin h)
+    (wire : Wire n g) :
+    Wire.Below (fun renamed => (labels.symm renamed).val)
+        (labels.symm gate).val
+        (Wire.Renaming.ofEquiv labels wire) ↔
+      Wire.Below (fun original : Fin g => original.val)
+        (labels.symm gate).val wire := by
+  cases wire <;> simp [Wire.Below, Wire.Renaming.ofEquiv]
+
+export Cslib.Circuits (Wire.below_ofEquiv)
+
 theorem _root_.Cslib.Circuits.Circuit.relabel_acyclic
-    (circuit : Circuit σ n g m)
-    (permutation : Equiv.Perm (Fin g)) :
-    (circuit.relabel permutation).AcyclicUnder
-      (fun gate => (permutation.symm gate).val) := by
+    (circuit : Circuit σ n m)
+    (labels : Fin circuit.size ≃ Fin g) :
+    (circuit.relabel labels).AcyclicUnder
+      (fun gate => (labels.symm gate).val) := by
   intro gate
   change ∀ argument : Fin
-      (σ.Arity (circuit.program.lines (permutation.symm gate)).op), _
+      (σ.Arity (circuit.program.lines (labels.symm gate)).op), _
   intro argument
-  change Wire.Below (fun gate => (permutation.symm gate).val)
-    (permutation.symm gate).val
-    (Wire.Renaming.ofPermutation permutation
-      ((circuit.program.lines (permutation.symm gate)).wires argument))
-  rw [Wire.below_permutation]
-  exact circuit.program.lines_below (permutation.symm gate) argument
+  change Wire.Below (fun gate => (labels.symm gate).val)
+    (labels.symm gate).val
+    (Wire.Renaming.ofEquiv labels
+      ((circuit.program.lines (labels.symm gate)).wires argument))
+  rw [Wire.below_ofEquiv]
+  exact circuit.program.lines_below (labels.symm gate) argument
 
 export Cslib.Circuits (Circuit.relabel_acyclic)
 
@@ -241,13 +264,11 @@ theorem _root_.Cslib.Circuits.Wire.values_eq_of_below
     (inputs : Fin n → U)
     (left right : Fin g → U)
     (agree : ∀ gate, rank gate < bound → left gate = right gate) :
-    (Fin.addCases inputs left : Wire n g → U) wire =
-      (Fin.addCases inputs right : Wire n g → U) wire := by
-  revert below
-  refine Fin.addCases (fun originalInput _ => ?_)
-    (fun dependency below => ?_) wire
-  · simp
-  · simpa using agree dependency (by simpa [Wire.Below] using below)
+    Wire.elim inputs left wire = Wire.elim inputs right wire := by
+  cases wire with
+  | input originalInput => rfl
+  | gate dependency =>
+    simpa using agree dependency (by simpa [Wire.Below] using below)
 
 export Cslib.Circuits (Wire.values_eq_of_below)
 
@@ -307,11 +328,21 @@ noncomputable def _root_.Cslib.Circuits.Circuit.irredundantRepresentative
     [Fintype σ.Op] [Fintype U]
     (interpretation : Interpretation σ U)
     (target : Circuit.IrredundantTarget interpretation n g m) :
-    Circuit σ n g m :=
+    Circuit σ n m :=
   Classical.choose
     (Circuit.mem_irredundantFunctions_iff.mp target.property)
 
 export Cslib.Circuits (Circuit.irredundantRepresentative)
+
+theorem _root_.Cslib.Circuits.Circuit.irredundantRepresentative_size
+    [Fintype σ.Op] [Fintype U]
+    (interpretation : Interpretation σ U)
+    (target : Circuit.IrredundantTarget interpretation n g m) :
+    (Circuit.irredundantRepresentative interpretation target).size = g :=
+  (Classical.choose_spec
+    (Circuit.mem_irredundantFunctions_iff.mp target.property)).1
+
+export Cslib.Circuits (Circuit.irredundantRepresentative_size)
 
 theorem _root_.Cslib.Circuits.Circuit.irredundantRepresentative_irredundant
     [Fintype σ.Op] [Fintype U]
@@ -320,7 +351,7 @@ theorem _root_.Cslib.Circuits.Circuit.irredundantRepresentative_irredundant
     (Circuit.irredundantRepresentative interpretation target).Irredundant
       interpretation :=
   (Classical.choose_spec
-    (Circuit.mem_irredundantFunctions_iff.mp target.property)).1
+    (Circuit.mem_irredundantFunctions_iff.mp target.property)).2.1
 
 export Cslib.Circuits (Circuit.irredundantRepresentative_irredundant)
 
@@ -331,9 +362,22 @@ theorem _root_.Cslib.Circuits.Circuit.irredundantRepresentative_eval
     (Circuit.irredundantRepresentative interpretation target).eval interpretation =
       target.val :=
   (Classical.choose_spec
-    (Circuit.mem_irredundantFunctions_iff.mp target.property)).2
+    (Circuit.mem_irredundantFunctions_iff.mp target.property)).2.2
 
 export Cslib.Circuits (Circuit.irredundantRepresentative_eval)
+
+/-- Gate labels of the chosen representative, renamed by a permutation of
+`Fin g`. -/
+noncomputable def _root_.Cslib.Circuits.Circuit.representativeLabels
+    [Fintype σ.Op] [Fintype U]
+    (interpretation : Interpretation σ U)
+    (target : Circuit.IrredundantTarget interpretation n g m)
+    (permutation : Equiv.Perm (Fin g)) :
+    Fin (Circuit.irredundantRepresentative interpretation target).size ≃ Fin g :=
+  (finCongr (Circuit.irredundantRepresentative_size interpretation target)).trans
+    permutation
+
+export Cslib.Circuits (Circuit.representativeLabels)
 
 /-- Encode one chosen irredundant circuit for a function under a gate renaming. -/
 noncomputable def _root_.Cslib.Circuits.Circuit.sharpEncoding
@@ -342,7 +386,8 @@ noncomputable def _root_.Cslib.Circuits.Circuit.sharpEncoding
     Circuit.IrredundantTarget interpretation n g m × Equiv.Perm (Fin g) →
       LooseCircuit σ n g m :=
     fun pair =>
-      (Circuit.irredundantRepresentative interpretation pair.1).relabel pair.2
+      (Circuit.irredundantRepresentative interpretation pair.1).relabel
+        (Circuit.representativeLabels interpretation pair.1 pair.2)
 
 export Cslib.Circuits (Circuit.sharpEncoding)
 
@@ -357,25 +402,28 @@ theorem _root_.Cslib.Circuits.Circuit.sharpEncoding_injective
   rintro ⟨leftTarget, leftPermutation⟩ ⟨rightTarget, rightPermutation⟩ encodedEqual
   let leftCircuit := Circuit.irredundantRepresentative interpretation leftTarget
   let rightCircuit := Circuit.irredundantRepresentative interpretation rightTarget
+  let leftLabels :=
+    Circuit.representativeLabels interpretation leftTarget leftPermutation
+  let rightLabels :=
+    Circuit.representativeLabels interpretation rightTarget rightPermutation
   have relabelEqual :
-      leftCircuit.relabel leftPermutation =
-        rightCircuit.relabel rightPermutation := by
-    simpa only [Circuit.sharpEncoding, leftCircuit, rightCircuit] using encodedEqual
+      leftCircuit.relabel leftLabels =
+        rightCircuit.relabel rightLabels := encodedEqual
   have valuationEqual (input : Fin n → U) :
-      leftCircuit.program.eval interpretation input ∘ leftPermutation.symm =
-        rightCircuit.program.eval interpretation input ∘ rightPermutation.symm := by
+      leftCircuit.program.eval interpretation input ∘ leftLabels.symm =
+        rightCircuit.program.eval interpretation input ∘ rightLabels.symm := by
     apply LooseCircuit.satisfies_unique
-      (leftCircuit.relabel leftPermutation) interpretation input
-      (fun gate => (leftPermutation.symm gate).val)
-      (leftCircuit.relabel_acyclic leftPermutation)
-      (leftCircuit.relabel_satisfies leftPermutation interpretation input)
+      (leftCircuit.relabel leftLabels) interpretation input
+      (fun gate => (leftLabels.symm gate).val)
+      (leftCircuit.relabel_acyclic leftLabels)
+      (leftCircuit.relabel_satisfies leftLabels interpretation input)
     rw [relabelEqual]
-    exact rightCircuit.relabel_satisfies rightPermutation interpretation input
+    exact rightCircuit.relabel_satisfies rightLabels interpretation input
   have circuitEvalEqual :
       leftCircuit.eval interpretation = rightCircuit.eval interpretation := by
     funext input
-    rw [← leftCircuit.relabel_evalOutputs leftPermutation interpretation input,
-      ← rightCircuit.relabel_evalOutputs rightPermutation interpretation input,
+    rw [← leftCircuit.relabel_evalOutputs leftLabels interpretation input,
+      ← rightCircuit.relabel_evalOutputs rightLabels interpretation input,
       relabelEqual, valuationEqual input]
   have targetValueEqual : leftTarget.val = rightTarget.val := by
     calc
@@ -386,22 +434,29 @@ theorem _root_.Cslib.Circuits.Circuit.sharpEncoding_injective
         Circuit.irredundantRepresentative_eval interpretation rightTarget
   have targetEqual : leftTarget = rightTarget := Subtype.ext targetValueEqual
   subst rightTarget
-  have permutationEqual : leftPermutation = rightPermutation := by
+  have labelsEqual : leftLabels = rightLabels := by
     apply Equiv.ext
     intro gate
     have gateFunctionsEqual :
         leftCircuit.program.gateFunction interpretation gate =
           leftCircuit.program.gateFunction interpretation
-            (rightPermutation.symm (leftPermutation gate)) := by
+            (rightLabels.symm (leftLabels gate)) := by
       funext input
-      have atRenamedGate := congrFun (valuationEqual input) (leftPermutation gate)
+      have atRenamedGate := congrFun (valuationEqual input) (leftLabels gate)
       simpa only [leftCircuit, rightCircuit, Function.comp_apply,
         Equiv.symm_apply_apply, Program.gateFunction] using atRenamedGate
     have gateEqual :=
       Circuit.irredundantRepresentative_irredundant interpretation leftTarget
         gateFunctionsEqual
-    have renamedEqual := congrArg rightPermutation gateEqual
+    have renamedEqual := congrArg rightLabels gateEqual
     simpa using renamedEqual.symm
+  have permutationEqual : leftPermutation = rightPermutation := by
+    apply Equiv.ext
+    intro gate
+    have atGate := congrArg (fun labels => labels
+      ((finCongr (Circuit.irredundantRepresentative_size interpretation
+        leftTarget)).symm gate)) labelsEqual
+    simpa [leftLabels, rightLabels, Circuit.representativeLabels] using atGate
   subst rightPermutation
   rfl
 
@@ -505,7 +560,7 @@ theorem _root_.Cslib.Circuits.Circuit.exists_hard_sharp_of_complete
     (large : σ.sharpBudget n m G < Target.count U n m) :
     ∃ target : Target U n m,
       Circuit.GateHard interpretation G target ∧
-      ∃ g, ∃ circuit : Circuit σ n g m,
+      ∃ circuit : Circuit σ n m,
         circuit.ComputesWith interpretation target := by
   obtain ⟨target, hard⟩ := Circuit.exists_hard_sharp interpretation large
   exact ⟨target, hard, complete n m target⟩

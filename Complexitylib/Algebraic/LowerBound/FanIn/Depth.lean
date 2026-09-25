@@ -68,21 +68,19 @@ private theorem _root_.Cslib.Circuits.Program.card_gateSupport_le_depth
       refine Fin.lastCases ?_ (fun j => ?_) k
       · simp only [Program.gateSupport, Program.depths, Fin.lastCases_last]
         let wireSupport : Wire n g → Finset (Fin n) :=
-          Fin.addCases (fun k => {k}) program.gateSupport
+          Wire.elim (fun k => {k}) program.gateSupport
         let wireDepths : Wire n g → Nat :=
-          Fin.addCases (fun _ => 0) program.depths
+          Wire.elim (fun _ => 0) program.depths
         apply line.card_inputSupport_le_depth wireSupport wireDepths r lineBounded
         intro wire
-        refine Fin.addCases ?_ ?_ wire
-        · intro i
-          simp [wireSupport, wireDepths]
-        · intro j
-          simpa [wireSupport, wireDepths] using ih programBounded j
+        cases wire with
+        | input i => simp [wireSupport, wireDepths]
+        | gate j => simpa [wireSupport, wireDepths] using ih programBounded j
       · simp only [Program.gateSupport, Program.depths, Fin.lastCases_castSucc]
         exact ih programBounded j
 
 private theorem _root_.Cslib.Circuits.Circuit.card_inputSupport_le_depth_aux
-    (c : Circuit σ n g m)
+    (c : Circuit σ n m)
     (r : Nat)
     (bounded : c.FanInAtMost r) :
     c.inputSupport.card ≤ m * (max 1 r) ^ c.depth := by
@@ -93,10 +91,9 @@ private theorem _root_.Cslib.Circuits.Circuit.card_inputSupport_le_depth_aux
     let wire := c.outputs output
     change (c.program.wireSupport wire).card ≤
       (max 1 r) ^ c.program.wireDepths wire
-    refine Fin.addCases ?_ ?_ wire
-    · intro i
-      simp [Program.wireSupport, Program.wireDepths]
-    · intro j
+    cases wire with
+    | input i => simp [Program.wireSupport, Program.wireDepths]
+    | gate j =>
       simpa [Program.wireSupport, Program.wireDepths] using
         c.program.card_gateSupport_le_depth r bounded j
   have supportBound := Finset.card_biUnion_le_card_mul
@@ -109,7 +106,7 @@ private theorem _root_.Cslib.Circuits.Circuit.card_inputSupport_le_depth_aux
 /-- A fan-in-`r` circuit has at most `m * (max 1 r) ^ c.depth` supporting
 inputs. The maximum accounts for direct output wires when `r = 0`. -/
 theorem _root_.Cslib.Circuits.Circuit.card_inputSupport_le_depth
-    (c : Circuit σ n g m)
+    (c : Circuit σ n m)
     {r : Nat}
     (bounded : c.FanInAtMost r) :
     c.inputSupport.card ≤ m * (max 1 r) ^ c.depth := by
@@ -121,7 +118,7 @@ export Cslib.Circuits (Circuit.card_inputSupport_le_depth)
 `selected` is essential to `target`, then `selected` has at most
 `m * (max 1 r) ^ c.depth` elements. -/
 theorem _root_.Cslib.Circuits.Circuit.essential_le_depth
-    (c : Circuit σ n g m)
+    (c : Circuit σ n m)
     {interpretation : Interpretation σ U}
     {target : (Fin n → U) → Fin m → U}
     {selected : Finset (Fin n)}

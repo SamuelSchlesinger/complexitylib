@@ -345,13 +345,16 @@ def transitionOutputExpression
 /-- One verified long-division transition. -/
 def transitionCircuit
     (divisorPositive : 0 < divisor) :
-    Circuit DeMorgan.signature (divisor + 1)
-      (transitionGateCount divisorPositive) (divisor + 1) :=
+    Circuit DeMorgan.signature (divisor + 1) (divisor + 1) :=
   Circuit.parallelFin (divisor + 1)
     (fun output =>
-      (transitionOutputExpression divisorPositive output).gateCount)
-    (fun output =>
       (transitionOutputExpression divisorPositive output).circuit)
+
+@[simp] theorem transitionCircuit_size
+    (divisorPositive : 0 < divisor) :
+    (transitionCircuit divisorPositive).size =
+      transitionGateCount divisorPositive := by
+  simp [transitionCircuit, transitionGateCount]
 
 @[simp] theorem transitionCircuit_eval_state
     (divisorPositive : 0 < divisor)
@@ -396,15 +399,18 @@ def initialStateCircuit
     (inputWidth : Nat)
     (divisorPositive : 0 < divisor) :
     Circuit DeMorgan.signature inputWidth
-      (initialStateGateCount (inputWidth := inputWidth) divisorPositive)
       divisor :=
   Circuit.parallelFin divisor
     (fun state =>
       (initialStateExpression
-        (inputWidth := inputWidth) divisorPositive state).gateCount)
-    (fun state =>
-      (initialStateExpression
         (inputWidth := inputWidth) divisorPositive state).circuit)
+
+@[simp] theorem initialStateCircuit_size
+    (inputWidth : Nat)
+    (divisorPositive : 0 < divisor) :
+    (initialStateCircuit inputWidth divisorPositive).size =
+      initialStateGateCount (inputWidth := inputWidth) divisorPositive := by
+  simp [initialStateCircuit, initialStateGateCount]
 
 @[simp] theorem initialStateCircuit_eval
     (input : Fin inputWidth -> Bool)
@@ -437,7 +443,7 @@ def roundInputIndex
 def roundInputCircuit
     (inputWidth rounds : Nat)
     (roundFits : rounds + 1 <= inputWidth) :
-    Circuit DeMorgan.signature inputWidth 0 1 :=
+    Circuit DeMorgan.signature inputWidth 1 :=
   (Circuit.id DeMorgan.signature inputWidth).mapOutputs
     (fun _ => roundInputIndex inputWidth rounds roundFits)
 
@@ -507,17 +513,21 @@ while retaining all earlier quotient bits for free. -/
 def divisionStepCircuit
     (divisorPositive : 0 < divisor)
     (rounds : Nat) :
-    Circuit DeMorgan.signature ((divisor + rounds) + 1)
-      (transitionGateCount divisorPositive) (divisor + (rounds + 1)) :=
+    Circuit DeMorgan.signature ((divisor + rounds) + 1) (divisor + (rounds + 1)) :=
   let transition :=
     (transitionCircuit divisorPositive).mapInputs
       (transitionRoundInputIndex divisor rounds)
-  let retained : Circuit DeMorgan.signature ((divisor + rounds) + 1)
-      0 rounds :=
+  let retained : Circuit DeMorgan.signature ((divisor + rounds) + 1) rounds :=
     (Circuit.id DeMorgan.signature ((divisor + rounds) + 1)).mapOutputs
       (retainedQuotientInputIndex divisor rounds)
-  (transition.parallel retained).castCounts rfl (Nat.add_zero _)
-    (by omega)
+  (transition.parallel retained).castCounts rfl (by omega)
+
+@[simp] theorem divisionStepCircuit_size
+    (divisorPositive : 0 < divisor)
+    (rounds : Nat) :
+    (divisionStepCircuit divisorPositive rounds).size =
+      transitionGateCount divisorPositive := by
+  simp [divisionStepCircuit, transitionGateCount]
 
 theorem divisionStepCircuit_eval_state
     (divisorPositive : 0 < divisor)
@@ -635,10 +645,9 @@ noncomputable def divisionPrefixCircuit
     (divisorPositive : 0 < divisor) :
     (rounds : Nat) -> (fits : rounds <= inputWidth) ->
     Circuit DeMorgan.signature inputWidth
-      (prefixGateCount inputWidth divisorPositive rounds)
       (divisor + rounds)
   | 0, _ =>
-      (initialStateCircuit inputWidth divisorPositive).castCounts rfl rfl
+      (initialStateCircuit inputWidth divisorPositive).castCounts rfl
         (Nat.add_zero divisor).symm
   | rounds + 1, fits => by
       have priorFits : rounds <= inputWidth := by omega
@@ -647,8 +656,24 @@ noncomputable def divisionPrefixCircuit
       let currentBit := roundInputCircuit inputWidth rounds fits
       let priorWithBit := prior.parallel currentBit
       exact ((divisionStepCircuit divisorPositive rounds).comp
-        priorWithBit).castCounts rfl (by
-          simp [prefixGateCount]) rfl
+        priorWithBit).castCounts rfl rfl
+
+/-- The unrolled circuit emits exactly `prefixGateCount` gates. -/
+@[simp] theorem divisionPrefixCircuit_size
+    (inputWidth : Nat)
+    (divisorPositive : 0 < divisor)
+    (rounds : Nat)
+    (fits : rounds <= inputWidth) :
+    (divisionPrefixCircuit inputWidth divisorPositive rounds fits).size =
+      prefixGateCount inputWidth divisorPositive rounds := by
+  induction rounds with
+  | zero =>
+      simp [divisionPrefixCircuit, prefixGateCount, initialStateCircuit,
+        initialStateGateCount]
+  | succ rounds inductionHypothesis =>
+      simp [divisionPrefixCircuit, prefixGateCount,
+        inductionHypothesis (by omega), divisionStepCircuit, transitionCircuit,
+        transitionGateCount, roundInputCircuit]
 
 /-- The unrolled circuit exposes the exact one-hot remainder and accumulated
 little-endian quotient after every processed prefix. -/
@@ -952,11 +977,18 @@ noncomputable def circuit
     (inputWidth : Nat)
     (divisorPositive : 0 < divisor) :
     Circuit DeMorgan.signature inputWidth
-      (prefixGateCount inputWidth divisorPositive inputWidth)
       (inputWidth + divisor) :=
   (divisionPrefixCircuit inputWidth divisorPositive inputWidth
     (Nat.le_refl inputWidth)).mapOutputs
       (divisionOutputIndex inputWidth divisor)
+
+/-- The public divider emits exactly `prefixGateCount` gates. -/
+@[simp] theorem circuit_size
+    (inputWidth : Nat)
+    (divisorPositive : 0 < divisor) :
+    (circuit inputWidth divisorPositive).size =
+      prefixGateCount inputWidth divisorPositive inputWidth := by
+  simp [circuit]
 
 @[simp] theorem circuit_eval_quotient
     (divisorPositive : 0 < divisor)

@@ -178,7 +178,7 @@ theorem powerCircuit_multiplicationAtomProperty
     (atom : Atom (Algebraic.Arithmetic.signature K)
       (MvPolynomial (Fin degree) K))
     (present : atom ∈ circuitAtoms
-      (Algebraic.Arithmetic.Power.binaryCircuit (K := K) exponent).2
+      (Algebraic.Arithmetic.Power.binaryCircuit (K := K) exponent)
       (Algebraic.Arithmetic.interpretation
         (MvPolynomial.C : K → MvPolynomial (Fin degree) K))
       (fun _ : Fin 1 ↦ linearForm term)) :
@@ -238,7 +238,7 @@ theorem termCircuit_multiplicationAtomProperty
       exact powerCircuit_multiplicationAtomProperty degree term degree le_rfl
         _ inPower arguments rfl
   · have powerEval :
-        ((Algebraic.Arithmetic.Power.binaryCircuit (K := K) degree).2.comp
+        ((Algebraic.Arithmetic.Power.binaryCircuit (K := K) degree).comp
           (Algebraic.Arithmetic.Expression.circuit
             (Translation.Binary.linearFormExpression term))).eval
             (Algebraic.Arithmetic.interpretation MvPolynomial.C)

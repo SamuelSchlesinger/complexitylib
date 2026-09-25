@@ -42,14 +42,14 @@ def polynomialInterpretation
 /-- Formal polynomial computed by one constant-free arithmetic line. -/
 def lineFormalResult
     (line : Line (Algebraic.Arithmetic.signature PEmpty) n g) :
-    MvPolynomial (Wire n g) ℕ :=
+    MvPolynomial (Fin (n + g)) ℕ :=
   General.lineFormalResult noConstants line
 
 /-- Eliminate the newest gate-variable by reverse substitution. -/
 def lineReverseSubstitution
     (line : Line (Algebraic.Arithmetic.signature PEmpty) n g) :
-    MvPolynomial (Wire n (g + 1)) ℕ →ₐ[ℕ]
-      MvPolynomial (Wire n g) ℕ :=
+    MvPolynomial (Fin (n + g + 1)) ℕ →ₐ[ℕ]
+      MvPolynomial (Fin (n + g)) ℕ :=
   General.lineReverseSubstitution noConstants line
 
 theorem lineReverseSubstitution_X_last
@@ -62,14 +62,14 @@ theorem lineReverseSubstitution_X_last
 @[simp] theorem lineReverseSubstitution_X_castSucc
     (line : Line (Algebraic.Arithmetic.signature PEmpty) n g)
     (wire : Wire n g) :
-    lineReverseSubstitution line (MvPolynomial.X wire.castSucc) =
-      MvPolynomial.X wire :=
+    lineReverseSubstitution line (MvPolynomial.X wire.castSucc.index) =
+      MvPolynomial.X wire.index :=
   General.lineReverseSubstitution_X_castSucc noConstants line wire
 
 /-- Expand all formal gate-variables into input variables. -/
 def programExpansionHom
     (program : Program (Algebraic.Arithmetic.signature PEmpty) n g) :
-    MvPolynomial (Wire n g) ℕ →ₐ[ℕ] MvPolynomial (Fin n) ℕ :=
+    MvPolynomial (Fin (n + g)) ℕ →ₐ[ℕ] MvPolynomial (Fin n) ℕ :=
   General.programExpansionHom noConstants program
 
 @[simp] theorem programExpansionHom_empty :
@@ -89,7 +89,7 @@ def programExpansionHom
 theorem programExpansionHom_X
     (program : Program (Algebraic.Arithmetic.signature PEmpty) n g)
     (wire : Wire n g) :
-    programExpansionHom program (MvPolynomial.X wire) =
+    programExpansionHom program (MvPolynomial.X wire.index) =
       program.trace (polynomialInterpretation (Fin n))
         MvPolynomial.X wire :=
   General.programExpansionHom_X noConstants program wire
@@ -97,21 +97,21 @@ theorem programExpansionHom_X
 /-- The formal output variable of a single-output circuit. -/
 def circuitFormalOutput
     (circuit : Circuit
-      (Algebraic.Arithmetic.signature PEmpty) n g 1) :
-    MvPolynomial (Wire n g) ℕ :=
+      (Algebraic.Arithmetic.signature PEmpty) n 1) :
+    MvPolynomial (Fin (n + circuit.size)) ℕ :=
   General.circuitFormalOutput circuit
 
 /-- Polynomial obtained after eliminating every gate-variable. -/
 def circuitExpandedOutput
     (circuit : Circuit
-      (Algebraic.Arithmetic.signature PEmpty) n g 1) :
+      (Algebraic.Arithmetic.signature PEmpty) n 1) :
     MvPolynomial (Fin n) ℕ :=
   General.circuitExpandedOutput noConstants circuit
 
 /-- Reverse substitution agrees with ordinary circuit evaluation. -/
 theorem circuitExpandedOutput_eq_eval
     (circuit : Circuit
-      (Algebraic.Arithmetic.signature PEmpty) n g 1) :
+      (Algebraic.Arithmetic.signature PEmpty) n 1) :
     circuitExpandedOutput circuit =
       circuit.eval (polynomialInterpretation (Fin n))
         MvPolynomial.X 0 :=
@@ -165,7 +165,7 @@ theorem Measure.reverseSubstitution_le
       (Algebraic.Arithmetic.signature PEmpty)}
     (measure : Measure operationCost)
     (line : Line (Algebraic.Arithmetic.signature PEmpty) n g)
-    (polynomial : MvPolynomial (Wire n (g + 1)) ℕ) :
+    (polynomial : MvPolynomial (Fin (n + g + 1)) ℕ) :
     measure.value (n + g) (lineReverseSubstitution line polynomial) ≤
       measure.value (n + g + 1) polynomial + operationCost line.op :=
   measure.toGeneral.reverseSubstitution_le line polynomial
@@ -176,7 +176,7 @@ theorem Measure.expansionHom_le_cost
       (Algebraic.Arithmetic.signature PEmpty)}
     (measure : Measure operationCost)
     (program : Program (Algebraic.Arithmetic.signature PEmpty) n g)
-    (polynomial : MvPolynomial (Wire n g) ℕ) :
+    (polynomial : MvPolynomial (Fin (n + g)) ℕ) :
     measure.value n (programExpansionHom program polynomial) ≤
       measure.value (n + g) polynomial + program.cost operationCost :=
   measure.toGeneral.expansionHom_le_cost program polynomial
@@ -187,7 +187,7 @@ theorem Measure.expandedOutput_le_cost
       (Algebraic.Arithmetic.signature PEmpty)}
     (measure : Measure operationCost)
     (circuit : Circuit
-      (Algebraic.Arithmetic.signature PEmpty) n g 1) :
+      (Algebraic.Arithmetic.signature PEmpty) n 1) :
     measure.value n (circuitExpandedOutput circuit) ≤
       circuit.cost operationCost :=
   measure.toGeneral.expandedOutput_le_cost circuit
@@ -200,7 +200,7 @@ theorem Measure.circuit_lowerBound
     (measure : Measure operationCost)
     (target : MvPolynomial (Fin n) ℕ)
     (circuit : Circuit
-      (Algebraic.Arithmetic.signature PEmpty) n g 1)
+      (Algebraic.Arithmetic.signature PEmpty) n 1)
     (constructs :
       ({ inputCount := n, inputs := MvPolynomial.X, target := target } :
         Problem (MvPolynomial (Fin n) ℕ)).Constructs circuit

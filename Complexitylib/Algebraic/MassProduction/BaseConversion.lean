@@ -135,19 +135,25 @@ noncomputable def stepCircuit
     (basePositive : 0 < base)
     (digits : Nat) :
     Circuit DeMorgan.signature (inputWidth + digits * base)
-      (FixedDivision.prefixGateCount inputWidth basePositive inputWidth)
       (inputWidth + (digits + 1) * base) :=
   let divide :=
     (FixedDivision.circuit inputWidth basePositive).mapInputs
       (quotientInputIndex inputWidth (digits * base))
   let retained : Circuit DeMorgan.signature
-      (inputWidth + digits * base) 0 (digits * base) :=
+      (inputWidth + digits * base) (digits * base) :=
     (Circuit.id DeMorgan.signature
       (inputWidth + digits * base)).mapOutputs
         (retainedInputIndex inputWidth (digits * base))
   (divide.parallel retained).mapOutputs
-    (stepOutputIndex inputWidth base digits) |>.castCounts rfl
-      (Nat.add_zero _) rfl
+    (stepOutputIndex inputWidth base digits) |>.castCounts rfl rfl
+
+@[simp] theorem stepCircuit_size
+    (inputWidth : Nat)
+    (basePositive : 0 < base)
+    (digits : Nat) :
+    (stepCircuit inputWidth basePositive digits).size =
+      FixedDivision.prefixGateCount inputWidth basePositive inputWidth := by
+  simp [stepCircuit]
 
 @[simp] theorem stepCircuit_eval_quotient
     (basePositive : 0 < base)
@@ -222,13 +228,24 @@ noncomputable def circuit
     (basePositive : 0 < base) :
     (digits : Nat) ->
     Circuit DeMorgan.signature inputWidth
-      (gateCount inputWidth basePositive digits)
       (inputWidth + digits * base)
-  | 0 => (Circuit.id DeMorgan.signature inputWidth).castCounts rfl rfl
+  | 0 => (Circuit.id DeMorgan.signature inputWidth).castCounts rfl
       (by simp)
   | digits + 1 =>
       ((stepCircuit inputWidth basePositive digits).comp
-        (circuit inputWidth basePositive digits)).castCounts rfl rfl rfl
+        (circuit inputWidth basePositive digits)).castCounts rfl rfl
+
+/-- Repeated conversion emits exactly `gateCount` gates. -/
+@[simp] theorem circuit_size
+    (inputWidth : Nat)
+    (basePositive : 0 < base)
+    (digits : Nat) :
+    (circuit inputWidth basePositive digits).size =
+      gateCount inputWidth basePositive digits := by
+  induction digits with
+  | zero => simp [circuit, gateCount]
+  | succ digits inductionHypothesis =>
+      simp [circuit, gateCount, inductionHypothesis, stepCircuit]
 
 /-- Natural quotient represented by the current quotient block. -/
 def quotientValue

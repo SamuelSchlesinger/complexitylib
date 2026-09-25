@@ -43,7 +43,6 @@ def row
 /-- Sort each candidate's requests with clean records first. -/
 def rowsCircuit (menuDepth requestDepth payloadWidth : Nat) :=
   Circuit.parallelFinVector (networkRecords menuDepth) (rowBits requestDepth payloadWidth)
-    (fun _ => bitonicSortGateCount (by omega : 1 ≤ 1 + payloadWidth) requestDepth)
     (fun candidate => (FlagSelection.circuit requestDepth payloadWidth).mapInputs
       (fun bit => finProdFinEquiv (candidate, bit)))
 

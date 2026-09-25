@@ -48,7 +48,7 @@ namespace Cslib.Circuits.Circuit
 
 /-- Compute `target` from the original inputs and the free values of `supplied`.
 Only inputs of the form `(x, supplied x)` constrain the circuit. -/
-def ComputesGiven (circuit : Circuit σ (n + k) gates m)
+def ComputesGiven (circuit : Circuit σ (n + k) m)
     (interpretation : Interpretation σ U)
     (target : Target U n m) (supplied : Target U n k) : Prop :=
   circuit.ComputesFrom interpretation target (fun input => Fin.append input (supplied input))
@@ -70,7 +70,7 @@ noncomputable def conditionalGateComplexity
 
 /-- A concrete conditional implementation bounds the minimum weighted cost. -/
 theorem conditionalCostComplexity_le
-    {circuit : Circuit σ (n + k) gates m}
+    {circuit : Circuit σ (n + k) m}
     {interpretation : Interpretation σ U}
     {target : Target U n m} {supplied : Target U n k}
     (operationCost : OperationCost σ)
@@ -84,7 +84,7 @@ theorem le_conditionalCostComplexity
     {interpretation : Interpretation σ U}
     {target : Target U n m} {supplied : Target U n k}
     (operationCost : OperationCost σ) (bound : ℕ∞)
-    (lowerBound : ∀ {gates} (circuit : Circuit σ (n + k) gates m),
+    (lowerBound : ∀ (circuit : Circuit σ (n + k) m),
       circuit.ComputesGiven interpretation target supplied →
         bound ≤ circuit.cost operationCost) :
     bound ≤ conditionalCostComplexity interpretation operationCost target supplied :=
@@ -96,7 +96,7 @@ theorem conditionalCostComplexity_le_iff
     (interpretation : Interpretation σ U) (operationCost : OperationCost σ)
     (target : Target U n m) (supplied : Target U n k) (budget : Nat) :
     conditionalCostComplexity interpretation operationCost target supplied ≤ budget ↔
-      ∃ gates, ∃ circuit : Circuit σ (n + k) gates m,
+      ∃ circuit : Circuit σ (n + k) m,
         circuit.ComputesGiven interpretation target supplied ∧
           circuit.cost operationCost ≤ budget :=
   relativeCostComplexity_le_iff interpretation operationCost target
@@ -108,7 +108,7 @@ theorem conditionalCostComplexity_lt_top_iff
     (interpretation : Interpretation σ U) (operationCost : OperationCost σ)
     (target : Target U n m) (supplied : Target U n k) :
     conditionalCostComplexity interpretation operationCost target supplied < ⊤ ↔
-      ∃ gates, ∃ circuit : Circuit σ (n + k) gates m,
+      ∃ circuit : Circuit σ (n + k) m,
         circuit.ComputesGiven interpretation target supplied :=
   relativeCostComplexity_lt_top_iff interpretation operationCost target
     (fun input => Fin.append input (supplied input))
@@ -118,7 +118,7 @@ theorem conditionalCostComplexity_lt_top_iff
     (interpretation : Interpretation σ U) (operationCost : OperationCost σ)
     (target : Target U n m) (supplied : Target U n k) :
     conditionalCostComplexity interpretation operationCost target supplied = ⊤ ↔
-      ¬ ∃ gates, ∃ circuit : Circuit σ (n + k) gates m,
+      ¬ ∃ circuit : Circuit σ (n + k) m,
         circuit.ComputesGiven interpretation target supplied :=
   relativeCostComplexity_eq_top_iff interpretation operationCost target
     (fun input => Fin.append input (supplied input))
@@ -137,7 +137,7 @@ theorem conditionalCostComplexity_eq_iInf
 
 /-- A conditional circuit gives an upper bound on conditional gate count. -/
 theorem conditionalGateComplexity_le
-    {circuit : Circuit σ (n + k) gates m}
+    {circuit : Circuit σ (n + k) m}
     {interpretation : Interpretation σ U}
     {target : Target U n m} {supplied : Target U n k}
     (computes : circuit.ComputesGiven interpretation target supplied) :
@@ -150,7 +150,7 @@ theorem conditionalGateComplexity_le_iff
     (interpretation : Interpretation σ U)
     (target : Target U n m) (supplied : Target U n k) (budget : Nat) :
     conditionalGateComplexity interpretation target supplied ≤ budget ↔
-      ∃ gates ≤ budget, ∃ circuit : Circuit σ (n + k) gates m,
+      ∃ circuit : Circuit σ (n + k) m, circuit.size ≤ budget ∧
         circuit.ComputesGiven interpretation target supplied :=
   relativeGateComplexity_le_iff interpretation target
     (fun input => Fin.append input (supplied input)) budget

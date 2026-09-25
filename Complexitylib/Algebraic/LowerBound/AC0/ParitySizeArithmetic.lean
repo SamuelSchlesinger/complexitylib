@@ -116,7 +116,7 @@ namespace Circuit
 /-- Fully integral finite AC0 parity lower bound, allowing arbitrary internal
 NOT gates without changing the AND/OR cost. -/
 theorem not_computes_parity_of_integral_bounds_raw
-    (circuit : Algebraic.Circuit signature n g 1)
+    (circuit : Algebraic.Circuit signature n 1)
     (depth t : Nat)
     (twoLeDepth : 2 ≤ depth)
     (circuitDepth : logicalDepth circuit ≤ depth)
@@ -134,7 +134,7 @@ theorem not_computes_parity_of_integral_bounds_raw
 
 /-- Compatibility wrapper for the checked input-negation presentation. -/
 theorem not_computes_parity_of_integral_bounds
-    (circuit : Algebraic.Circuit signature n g 1)
+    (circuit : Algebraic.Circuit signature n 1)
     (_normal : Program.NegationsAtInputs circuit.program)
     (depth t : Nat)
     (twoLeDepth : 2 ≤ depth)

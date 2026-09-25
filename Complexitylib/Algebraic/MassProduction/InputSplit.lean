@@ -146,7 +146,7 @@ theorem costComplexity_reindexInputs_le
         (fun input output => target (input ∘ inputMap) output) <=
       Circuit.costComplexity interpretation operationCost target := by
   apply Circuit.le_costComplexity
-  intro gates circuit computes
+  intro circuit computes
   have mappedComputes :
       (circuit.mapInputs inputMap).ComputesWith interpretation
         (fun input output => target (input ∘ inputMap) output) := by

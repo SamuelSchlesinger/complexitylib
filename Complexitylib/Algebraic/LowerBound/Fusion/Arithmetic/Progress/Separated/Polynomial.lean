@@ -71,7 +71,7 @@ theorem circuit_addition_lowerBound
     (support : Finset (Fin n →₀ ℕ))
     (separated : IsSeparated support support)
     (circuit : Circuit
-      (Algebraic.Arithmetic.signature PEmpty) n g 1)
+      (Algebraic.Arithmetic.signature PEmpty) n 1)
     (constructs :
       ({ inputCount := n, inputs := MvPolynomial.X,
           target := ofSupport support } :

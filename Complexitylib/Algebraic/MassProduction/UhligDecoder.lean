@@ -325,14 +325,17 @@ noncomputable def decoderCircuit
     (prefixWidth suffixWidth pairs : Nat) :
     Circuit DeMorgan.signature
       (layerStateCount prefixWidth suffixWidth pairs)
-      (Finset.univ.sum fun output : Fin (2 * pairs) =>
-        decoderGateCount prefixWidth suffixWidth pairs output)
       (2 * pairs) :=
   Circuit.parallelFin (2 * pairs)
-    (decoderGateCount prefixWidth suffixWidth pairs)
     (fun output =>
       (decoderOutputExpression (prefixWidth := prefixWidth)
         (suffixWidth := suffixWidth) output).circuit)
+
+@[simp] theorem decoderCircuit_size
+    (prefixWidth suffixWidth pairs : Nat) :
+    (decoderCircuit prefixWidth suffixWidth pairs).size =
+      Finset.univ.sum fun output : Fin (2 * pairs) => decoderGateCount prefixWidth suffixWidth pairs output := by
+  simp [decoderCircuit, decoderGateCount]
 
 @[simp] theorem decoderCircuit_eval
     (state : Fin (layerStateCount prefixWidth suffixWidth pairs) -> Bool)
@@ -370,8 +373,13 @@ def xorInputExpression (count : Nat) :
 
 /-- De Morgan circuit obtained by compiling the shared arithmetic XOR fold. -/
 noncomputable def xorInputCircuit (count : Nat) :
-    Circuit DeMorgan.signature count (xorInputGateCount count) 1 :=
+    Circuit DeMorgan.signature count 1 :=
   DeMorgan.ArithmeticExpression.circuit (xorInputExpression count)
+
+@[simp] theorem xorInputCircuit_size (count : Nat) :
+    (xorInputCircuit count).size =
+      xorInputGateCount count := by
+  simp [xorInputCircuit, xorInputGateCount, DeMorgan.ArithmeticExpression.circuit]
 
 @[simp] theorem xorInputCircuit_eval
     (count : Nat) (input : Fin count -> Bool) :
@@ -398,8 +406,13 @@ def orInputExpression (count : Nat) : DeMorgan.Expression count :=
 
 /-- De Morgan circuit implementing the shared OR fold. -/
 def orInputCircuit (count : Nat) :
-    Circuit DeMorgan.signature count (orInputGateCount count) 1 :=
+    Circuit DeMorgan.signature count 1 :=
   (orInputExpression count).circuit
+
+@[simp] theorem orInputCircuit_size (count : Nat) :
+    (orInputCircuit count).size =
+      orInputGateCount count := by
+  simp [orInputCircuit, orInputGateCount]
 
 @[simp] theorem orInputCircuit_eval
     (count : Nat) (input : Fin count -> Bool) :
@@ -422,17 +435,22 @@ noncomputable def fixedResourceVectorCircuit
     (first second : Fin (prefixLast prefixWidth + 1)) :
     Circuit DeMorgan.signature
       (layerStateCount prefixWidth suffixWidth pairs)
-      (Finset.univ.sum fun resource : Fin (prefixLast prefixWidth + 2) =>
-        (fixedResourceTermExpression (suffixWidth := suffixWidth)
-          pair side first second resource).gateCount)
       (prefixLast prefixWidth + 2) :=
   Circuit.parallelFin (prefixLast prefixWidth + 2)
     (fun resource =>
       (fixedResourceTermExpression (suffixWidth := suffixWidth)
-        pair side first second resource).gateCount)
-    (fun resource =>
-      (fixedResourceTermExpression (suffixWidth := suffixWidth)
         pair side first second resource).circuit)
+
+@[simp] theorem fixedResourceVectorCircuit_size
+    (pair : Fin pairs)
+    (side : Fin 2)
+    (first second : Fin (prefixLast prefixWidth + 1)) :
+    (fixedResourceVectorCircuit (suffixWidth := suffixWidth)
+        pair side first second).size =
+      Finset.univ.sum fun resource : Fin (prefixLast prefixWidth + 2) =>
+        (fixedResourceTermExpression (suffixWidth := suffixWidth)
+          pair side first second resource).gateCount := by
+  simp [fixedResourceVectorCircuit]
 
 @[simp] theorem fixedResourceVectorCircuit_eval
     (pair : Fin pairs)
@@ -471,14 +489,22 @@ noncomputable def sharedFixedDecodedCircuit
     (first second : Fin (prefixLast prefixWidth + 1)) :
     Circuit DeMorgan.signature
       (layerStateCount prefixWidth suffixWidth pairs)
-      ((Finset.univ.sum fun resource : Fin (prefixLast prefixWidth + 2) =>
-          (fixedResourceTermExpression (suffixWidth := suffixWidth)
-            pair side first second resource).gateCount) +
-        xorInputGateCount (prefixLast prefixWidth + 2))
       1 :=
   (xorInputCircuit (prefixLast prefixWidth + 2)).comp
     (fixedResourceVectorCircuit (suffixWidth := suffixWidth)
       pair side first second)
+
+@[simp] theorem sharedFixedDecodedCircuit_size
+    (pair : Fin pairs)
+    (side : Fin 2)
+    (first second : Fin (prefixLast prefixWidth + 1)) :
+    (sharedFixedDecodedCircuit (suffixWidth := suffixWidth)
+        pair side first second).size =
+      (Finset.univ.sum fun resource : Fin (prefixLast prefixWidth + 2) =>
+          (fixedResourceTermExpression (suffixWidth := suffixWidth)
+            pair side first second resource).gateCount) +
+        xorInputGateCount (prefixLast prefixWidth + 2) := by
+  simp [sharedFixedDecodedCircuit]
 
 @[simp] theorem sharedFixedDecodedCircuit_eval
     (pair : Fin pairs)
@@ -553,8 +579,6 @@ noncomputable def candidateDecodedCircuit
     (first second : Fin (prefixLast prefixWidth + 1)) :
     Circuit DeMorgan.signature
       (layerStateCount prefixWidth suffixWidth pairs)
-      (candidateDecodedGateCount prefixWidth suffixWidth pairs
-        pair side first second)
       1 :=
   candidatePostprocessExpression.circuit.comp
     ((stateSourceIndicatorExpression (suffixWidth := suffixWidth)
@@ -563,6 +587,13 @@ noncomputable def candidateDecodedCircuit
         pair 1 second).circuit.parallel
         (sharedFixedDecodedCircuit (suffixWidth := suffixWidth)
           pair side first second)))
+
+@[simp] theorem candidateDecodedCircuit_size
+    (pair : Fin pairs) (side : Fin 2)
+    (first second : Fin (prefixLast prefixWidth + 1)) :
+    (candidateDecodedCircuit (suffixWidth := suffixWidth) pair side first second).size =
+      candidateDecodedGateCount prefixWidth suffixWidth pairs pair side first second := by
+  simp [candidateDecodedCircuit, candidateDecodedGateCount]
 
 @[simp] theorem candidateDecodedCircuit_eval
     (pair : Fin pairs) (side : Fin 2)
@@ -616,13 +647,17 @@ noncomputable def candidateRowCircuit
     (first : Fin (prefixLast prefixWidth + 1)) :
     Circuit DeMorgan.signature
       (layerStateCount prefixWidth suffixWidth pairs)
-      (candidateRowGateCount prefixWidth suffixWidth pairs pair side first)
       1 :=
   (orInputCircuit (prefixLast prefixWidth + 1)).comp
     (Circuit.parallelFin (prefixLast prefixWidth + 1)
-      (fun second => candidateDecodedGateCount
-        prefixWidth suffixWidth pairs pair side first second)
       (fun second => candidateDecodedCircuit pair side first second))
+
+@[simp] theorem candidateRowCircuit_size
+    (pair : Fin pairs) (side : Fin 2)
+    (first : Fin (prefixLast prefixWidth + 1)) :
+    (candidateRowCircuit (suffixWidth := suffixWidth) pair side first).size =
+      candidateRowGateCount prefixWidth suffixWidth pairs pair side first := by
+  simp [candidateRowCircuit, candidateRowGateCount]
 
 @[simp] theorem candidateRowCircuit_eval
     (pair : Fin pairs) (side : Fin 2)
@@ -639,23 +674,19 @@ noncomputable def candidateRowCircuit
   change
     ((orInputCircuit (prefixLast prefixWidth + 1)).comp
       (Circuit.parallelFin (prefixLast prefixWidth + 1)
-        (fun second => candidateDecodedGateCount
-          prefixWidth suffixWidth pairs pair side first second)
         (fun second =>
           candidateDecodedCircuit pair side first second))).eval
         DeMorgan.interpretation state 0 = _
   rw [Circuit.eval_comp, orInputCircuit_eval]
   have bankEval :
       (Circuit.parallelFin (prefixLast prefixWidth + 1)
-        (fun second => candidateDecodedGateCount
-          prefixWidth suffixWidth pairs pair side first second)
         (fun second => candidateDecodedCircuit pair side first second)).eval
           DeMorgan.interpretation state =
         fun second =>
           (candidateDecodedCircuit pair side first second).eval
             DeMorgan.interpretation state 0 := by
     funext second
-    exact Circuit.eval_parallelFin _ _ _ _ _ second
+    exact Circuit.eval_parallelFin _ _ _ _ second
   rw [bankEval]
   simp only [candidateDecodedCircuit_eval]
   let second := requestSource (originalInputFromState state) pair 1
@@ -695,13 +726,17 @@ noncomputable def sharedDecodedCircuit
     (pair : Fin pairs) (side : Fin 2) :
     Circuit DeMorgan.signature
       (layerStateCount prefixWidth suffixWidth pairs)
-      (sharedDecodedGateCount prefixWidth suffixWidth pairs pair side)
       1 :=
   (orInputCircuit (prefixLast prefixWidth + 1)).comp
     (Circuit.parallelFin (prefixLast prefixWidth + 1)
-      (fun first => candidateRowGateCount
-        prefixWidth suffixWidth pairs pair side first)
       (fun first => candidateRowCircuit pair side first))
+
+@[simp] theorem sharedDecodedCircuit_size
+    (pair : Fin pairs) (side : Fin 2) :
+    (sharedDecodedCircuit (prefixWidth := prefixWidth) (suffixWidth := suffixWidth)
+        pair side).size =
+      sharedDecodedGateCount prefixWidth suffixWidth pairs pair side := by
+  simp [sharedDecodedCircuit, sharedDecodedGateCount]
 
 @[simp] theorem sharedDecodedCircuit_eval
     (pair : Fin pairs) (side : Fin 2)
@@ -712,22 +747,18 @@ noncomputable def sharedDecodedCircuit
   change
     ((orInputCircuit (prefixLast prefixWidth + 1)).comp
       (Circuit.parallelFin (prefixLast prefixWidth + 1)
-        (fun first => candidateRowGateCount
-          prefixWidth suffixWidth pairs pair side first)
         (fun first => candidateRowCircuit pair side first))).eval
         DeMorgan.interpretation state 0 = _
   rw [Circuit.eval_comp, orInputCircuit_eval]
   have bankEval :
       (Circuit.parallelFin (prefixLast prefixWidth + 1)
-        (fun first => candidateRowGateCount
-          prefixWidth suffixWidth pairs pair side first)
         (fun first => candidateRowCircuit pair side first)).eval
           DeMorgan.interpretation state =
         fun first =>
           (candidateRowCircuit pair side first).eval
             DeMorgan.interpretation state 0 := by
     funext first
-    exact Circuit.eval_parallelFin _ _ _ _ _ first
+    exact Circuit.eval_parallelFin _ _ _ _ first
   rw [bankEval]
   simp only [candidateRowCircuit_eval]
   let first := requestSource (originalInputFromState state) pair 0
@@ -769,14 +800,17 @@ noncomputable def sharedDecoderCircuit
     (prefixWidth suffixWidth pairs : Nat) :
     Circuit DeMorgan.signature
       (layerStateCount prefixWidth suffixWidth pairs)
-      (Finset.univ.sum fun output : Fin (2 * pairs) =>
-        sharedDecoderOutputGateCount prefixWidth suffixWidth pairs output)
       (2 * pairs) :=
   Circuit.parallelFin (2 * pairs)
-    (sharedDecoderOutputGateCount prefixWidth suffixWidth pairs)
     (fun output =>
       let pairSide := decoderPairSide output
       sharedDecodedCircuit pairSide.1 pairSide.2)
+
+@[simp] theorem sharedDecoderCircuit_size
+    (prefixWidth suffixWidth pairs : Nat) :
+    (sharedDecoderCircuit prefixWidth suffixWidth pairs).size =
+      Finset.univ.sum fun output : Fin (2 * pairs) => sharedDecoderOutputGateCount prefixWidth suffixWidth pairs output := by
+  simp [sharedDecoderCircuit, sharedDecoderOutputGateCount]
 
 @[simp] theorem sharedDecoderCircuit_eval
     (state : Fin (layerStateCount prefixWidth suffixWidth pairs) -> Bool)

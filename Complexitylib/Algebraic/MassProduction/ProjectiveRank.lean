@@ -1004,12 +1004,16 @@ noncomputable def projectiveUnrankPackedCircuit
     (dimension : Nat)
     (widthPositive : 0 < width) :
     Circuit DeMorgan.signature (dimension * width)
-      (∑ output,
-        projectiveUnrankBitGateCount dimension widthPositive output)
       (dimension * width) :=
-  Circuit.parallelFin (dimension * width)
-    (projectiveUnrankBitGateCount dimension widthPositive) fun output =>
+  Circuit.parallelFin (dimension * width) fun output =>
       (projectiveUnrankBitExpression dimension widthPositive output).circuit
+
+@[simp] theorem projectiveUnrankPackedCircuit_size
+    (dimension : Nat)
+    (widthPositive : 0 < width) :
+    (projectiveUnrankPackedCircuit dimension widthPositive).size =
+      ∑ output, projectiveUnrankBitGateCount dimension widthPositive output := by
+  simp [projectiveUnrankPackedCircuit, projectiveUnrankBitGateCount]
 
 @[simp] theorem projectiveUnrankPackedCircuit_eval
     (widthPositive : 0 < width)
@@ -1171,11 +1175,14 @@ theorem projectiveUnrankPackedCircuit_cost_le
 rank. -/
 def projectiveRankPackedCircuit (dimension width : Nat) :
     Circuit DeMorgan.signature (dimension * width)
-      (∑ output, projectiveRankBitGateCount dimension width output)
       (dimension * width) :=
-  Circuit.parallelFin (dimension * width)
-    (projectiveRankBitGateCount dimension width) fun output =>
+  Circuit.parallelFin (dimension * width) fun output =>
       (projectiveRankBitExpression dimension width output).circuit
+
+@[simp] theorem projectiveRankPackedCircuit_size (dimension width : Nat) :
+    (projectiveRankPackedCircuit dimension width).size =
+      ∑ output, projectiveRankBitGateCount dimension width output := by
+  simp [projectiveRankPackedCircuit, projectiveRankBitGateCount]
 
 @[simp] theorem projectiveRankPackedCircuit_eval
     (input : Fin (dimension * width) -> Bool) :

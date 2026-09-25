@@ -41,7 +41,7 @@ theorem existsCircuit
     (sourceKeys : Fin sources → Fin keyWidth → DeMorgan.Wiring inputs)
     (payload : Fin sources → Fin valueWidth → DeMorgan.Wiring inputs)
     (resourceKeys : Fin resources → Fin keyWidth → Bool) :
-    ∃ gates, ∃ scattered : Circuit DeMorgan.signature inputs gates (resources * valueWidth),
+    ∃ scattered : Circuit DeMorgan.signature inputs (resources * valueWidth),
       scattered.cost DeMorgan.standardCost ≤ 256 * (sources + resources + 1) *
         (FiniteParameters.binaryDepth (sources + resources + 1) + keyWidth + valueWidth + 2) ^ 5 ∧
       ∀ (input : Fin inputs → Bool) (source : Fin sources) (resource : Fin resources),
@@ -52,9 +52,9 @@ theorem existsCircuit
             (fun bit => (sourceKeys source bit).eval input) → other = source) →
         ∀ bit, scattered.eval DeMorgan.interpretation input (finProdFinEquiv (resource, bit)) =
           (payload source bit).eval input := by
-  obtain ⟨gates, scattered, correct, bound⟩ := BatchOr.existsCircuit sourceKeys (values valid payload)
+  obtain ⟨scattered, correct, bound⟩ := BatchOr.existsCircuit sourceKeys (values valid payload)
     (fun resource bit => .constant (resourceKeys resource bit))
-  refine ⟨gates, scattered, bound, ?_⟩
+  refine ⟨scattered, bound, ?_⟩
   intro input source resource active matching unique bit
   apply Bool.eq_iff_iff.mpr
   rw [correct]

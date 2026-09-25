@@ -334,15 +334,20 @@ def predecessorCopyCircuit
     (sourceTag destinationTag : Bool) :
     Circuit DeMorgan.signature
       (networkBits depth (recordWidth keyWidth payloadWidth))
-      (∑ output, predecessorCopyOutputGateCount depth keyWidth payloadWidth
-        sourceTag destinationTag output)
       (networkBits depth (recordWidth keyWidth payloadWidth)) :=
   Circuit.parallelFin
-    (networkBits depth (recordWidth keyWidth payloadWidth))
-    (predecessorCopyOutputGateCount depth keyWidth payloadWidth
-      sourceTag destinationTag) fun output =>
+    (networkBits depth (recordWidth keyWidth payloadWidth)) fun output =>
       (predecessorCopyOutputExpression depth keyWidth payloadWidth
         sourceTag destinationTag output).circuit
+
+@[simp] theorem predecessorCopyCircuit_size
+    (depth keyWidth payloadWidth : Nat)
+    (sourceTag destinationTag : Bool) :
+    (predecessorCopyCircuit depth keyWidth payloadWidth
+        sourceTag destinationTag).size =
+      ∑ output, predecessorCopyOutputGateCount depth keyWidth payloadWidth
+        sourceTag destinationTag output := by
+  simp [predecessorCopyCircuit, predecessorCopyOutputGateCount]
 
 @[simp] theorem predecessorCopyCircuit_eval
     (sourceTag destinationTag : Bool)
@@ -592,13 +597,20 @@ def sortedPredecessorCopyCircuit
     (sourceTag destinationTag : Bool) :
     Circuit DeMorgan.signature
       (networkBits depth (recordWidth keyWidth payloadWidth))
-      (sortedPredecessorCopyGateCount depth keyWidth payloadWidth
-        sourceTag destinationTag)
       (networkBits depth (recordWidth keyWidth payloadWidth)) :=
   (predecessorCopyCircuit depth keyWidth payloadWidth
       sourceTag destinationTag).comp
     (Sorting.bitonicSortCircuit
       (keyAndTagFitsRecord keyWidth payloadWidth) depth true)
+
+@[simp] theorem sortedPredecessorCopyCircuit_size
+    (depth keyWidth payloadWidth : Nat)
+    (sourceTag destinationTag : Bool) :
+    (sortedPredecessorCopyCircuit depth keyWidth payloadWidth
+        sourceTag destinationTag).size =
+      sortedPredecessorCopyGateCount depth keyWidth payloadWidth
+        sourceTag destinationTag := by
+  simp [sortedPredecessorCopyCircuit, sortedPredecessorCopyGateCount]
 
 /-- Direction-parameterized match pass.  Descending order with source tag
 `true` and destination tag `false` is useful when a subsequent canonical sort
@@ -608,13 +620,18 @@ def sortedPredecessorCopyCircuitOrdered
     (ascending sourceTag destinationTag : Bool) :
     Circuit DeMorgan.signature
       (networkBits depth (recordWidth keyWidth payloadWidth))
-      (sortedPredecessorCopyGateCount depth keyWidth payloadWidth
-        sourceTag destinationTag)
       (networkBits depth (recordWidth keyWidth payloadWidth)) :=
   (predecessorCopyCircuit depth keyWidth payloadWidth
       sourceTag destinationTag).comp
     (Sorting.bitonicSortCircuit
       (keyAndTagFitsRecord keyWidth payloadWidth) depth ascending)
+
+@[simp] theorem sortedPredecessorCopyCircuitOrdered_size
+    (depth keyWidth payloadWidth : Nat)
+    (ascending sourceTag destinationTag : Bool) :
+    (sortedPredecessorCopyCircuitOrdered depth keyWidth payloadWidth ascending sourceTag destinationTag).size =
+      sortedPredecessorCopyGateCount depth keyWidth payloadWidth sourceTag destinationTag := by
+  simp [sortedPredecessorCopyCircuitOrdered, sortedPredecessorCopyGateCount]
 
 @[simp] theorem sortedPredecessorCopyCircuitOrdered_eval
     (ascending sourceTag destinationTag : Bool)

@@ -95,7 +95,7 @@ theorem circuit_multiplication_lowerBound_of_linearIndependent
     (targets : Fin m → U)
     (independent : LinearIndependent K (feature ∘ targets))
     (circuit : Circuit (Algebraic.Arithmetic.signature C)
-      problem.inputCount g m)
+      problem.inputCount m)
     (constructs : Multiple.Constructs (constant := constant)
       problem targets circuit) :
     m ≤ circuit.cost

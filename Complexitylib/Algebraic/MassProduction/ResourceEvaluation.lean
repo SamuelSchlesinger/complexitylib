@@ -175,18 +175,14 @@ noncomputable def resourceBankCircuit
     (destinationFits :
       2 ^ (groupBitWidth + dimension * width) <=
         networkRecords routingDepth)
-    (gateCounts : Fin (resourceBitCount dimension width) -> Nat)
-    (resourceCircuits : forall member,
-      Circuit DeMorgan.signature (groups * suffixWidth)
-        (gateCounts member) groups) :
+    (resourceCircuits : Fin (resourceBitCount dimension width) ->
+      Circuit DeMorgan.signature (groups * suffixWidth) groups) :
     Circuit DeMorgan.signature
       (networkBits routingDepth
         (Routing.recordWidth
           (incidenceKeyWidth groupBitWidth dimension width) suffixWidth))
-      (∑ member, gateCounts member)
       (resourceBitCount dimension width * groups) :=
-  Circuit.parallelFinVector (resourceBitCount dimension width) groups
-    gateCounts fun member =>
+  Circuit.parallelFinVector (resourceBitCount dimension width) groups fun member =>
       (resourceCircuits member).mapInputs
         (resourceCircuitInputIndex destinationFits member)
 
@@ -194,10 +190,8 @@ noncomputable def resourceBankCircuit
     (destinationFits :
       2 ^ (groupBitWidth + dimension * width) <=
         networkRecords routingDepth)
-    (gateCounts : Fin (resourceBitCount dimension width) -> Nat)
-    (resourceCircuits : forall member,
-      Circuit DeMorgan.signature (groups * suffixWidth)
-        (gateCounts member) groups)
+    (resourceCircuits : Fin (resourceBitCount dimension width) ->
+      Circuit DeMorgan.signature (groups * suffixWidth) groups)
     (scatterOutput : Fin (networkBits routingDepth
       (Routing.recordWidth
         (incidenceKeyWidth groupBitWidth dimension width) suffixWidth)) ->
@@ -205,7 +199,7 @@ noncomputable def resourceBankCircuit
     (point : Fin (pointCount dimension width))
     (bit : Fin width)
     (group : Fin groups) :
-    (resourceBankCircuit destinationFits gateCounts resourceCircuits).eval
+    (resourceBankCircuit destinationFits resourceCircuits).eval
         DeMorgan.interpretation scatterOutput
         (finProdFinEquiv (resourceMemberIndex point bit, group)) =
       (resourceCircuits (resourceMemberIndex point bit)).eval
@@ -221,11 +215,9 @@ the fixed input wiring is free. -/
     (destinationFits :
       2 ^ (groupBitWidth + dimension * width) <=
         networkRecords routingDepth)
-    (gateCounts : Fin (resourceBitCount dimension width) -> Nat)
-    (resourceCircuits : forall member,
-      Circuit DeMorgan.signature (groups * suffixWidth)
-        (gateCounts member) groups) :
-    (resourceBankCircuit destinationFits gateCounts resourceCircuits).cost
+    (resourceCircuits : Fin (resourceBitCount dimension width) ->
+      Circuit DeMorgan.signature (groups * suffixWidth) groups) :
+    (resourceBankCircuit destinationFits resourceCircuits).cost
         DeMorgan.standardCost =
       ∑ member, (resourceCircuits member).cost DeMorgan.standardCost := by
   rw [resourceBankCircuit, Circuit.cost_parallelFinVector]
@@ -271,10 +263,8 @@ theorem resourceBankCircuit_eval_incidence
       totalRequests * nonzeroScalarCount width +
           2 ^ (groupBitWidth + dimension * width) + paddingCount =
         networkRecords routingDepth)
-    (gateCounts : Fin (resourceBitCount dimension width) -> Nat)
-    (resourceCircuits : forall member,
-      Circuit DeMorgan.signature (groups * suffixWidth)
-        (gateCounts member) groups)
+    (resourceCircuits : Fin (resourceBitCount dimension width) ->
+      Circuit DeMorgan.signature (groups * suffixWidth) groups)
     (resourceFunctions : Fin (pointCount dimension width) -> Fin width ->
       ScalarFunction Bool suffixWidth)
     (computes : forall point bit,
@@ -295,7 +285,7 @@ theorem resourceBankCircuit_eval_incidence
       scheduleOutput incidence
     let group := (scheduledIncidenceSlotAt widthPositive capacity
       scheduleOutput incidence).1
-    (resourceBankCircuit destinationFits gateCounts resourceCircuits).eval
+    (resourceBankCircuit destinationFits resourceCircuits).eval
         DeMorgan.interpretation scatterOutput
         (finProdFinEquiv (resourceMemberIndex point bit, group)) =
       resourceFunctions point bit
@@ -493,17 +483,15 @@ noncomputable def evaluatedResourceValues
     (destinationFits :
       2 ^ (groupBitWidth + dimension * width) <=
         networkRecords routingDepth)
-    (gateCounts : Fin (resourceBitCount dimension width) -> Nat)
-    (resourceCircuits : forall member,
-      Circuit DeMorgan.signature (groups * suffixWidth)
-        (gateCounts member) groups)
+    (resourceCircuits : Fin (resourceBitCount dimension width) ->
+      Circuit DeMorgan.signature (groups * suffixWidth) groups)
     (scatterOutput : Fin (networkBits routingDepth
       (Routing.recordWidth
         (incidenceKeyWidth groupBitWidth dimension width) suffixWidth)) ->
       Bool) :
     Fin (2 ^ (groupBitWidth + dimension * width)) -> Fin width -> Bool :=
   resourceValuesFromBank groupsPositive groupBitWidth dimension width
-    ((resourceBankCircuit destinationFits gateCounts resourceCircuits).eval
+    ((resourceBankCircuit destinationFits resourceCircuits).eval
       DeMorgan.interpretation scatterOutput)
 
 set_option maxHeartbeats 800000 in
@@ -542,10 +530,8 @@ theorem evaluatedResourceValues_routes_incidence
       totalRequests * nonzeroScalarCount width +
           2 ^ (groupBitWidth + dimension * width) + paddingCount =
         networkRecords routingDepth)
-    (gateCounts : Fin (resourceBitCount dimension width) -> Nat)
-    (resourceCircuits : forall member,
-      Circuit DeMorgan.signature (groups * suffixWidth)
-        (gateCounts member) groups)
+    (resourceCircuits : Fin (resourceBitCount dimension width) ->
+      Circuit DeMorgan.signature (groups * suffixWidth) groups)
     (resourceFunctions : Fin (pointCount dimension width) -> Fin width ->
       ScalarFunction Bool suffixWidth)
     (computes : forall point bit,
@@ -562,7 +548,7 @@ theorem evaluatedResourceValues_routes_incidence
       rw [← recordCount]
       exact (Nat.le_add_left _ _).trans (Nat.le_add_right _ _)
     evaluatedResourceValues groupsPositive groupBitWidth dimension width
-        routingDepth suffixWidth destinationFits gateCounts resourceCircuits
+        routingDepth suffixWidth destinationFits resourceCircuits
         scatterOutput
         (fullIncidenceDestination widthPositive groupBitWidth capacity
           scheduleOutput incidence) =
@@ -585,7 +571,7 @@ theorem evaluatedResourceValues_routes_incidence
       groupsPositive groupFits capacity scheduleOutput]
   exact resourceBankCircuit_eval_incidence widthPositive groupFits capacity
     scheduleOutput targets directions pointFormula withinGroupDisjoint
-    requestSuffix destinationSuffix paddingSuffix recordCount gateCounts
+    requestSuffix destinationSuffix paddingSuffix recordCount
     resourceCircuits resourceFunctions computes incidence bit
 
 /-! ## Packed evaluation-code resources -/

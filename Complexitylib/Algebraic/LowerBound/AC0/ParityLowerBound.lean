@@ -56,7 +56,7 @@ open scoped ENNReal
 probabilities, tree bounds, and floor-divided survivor targets, with arbitrary
 internal NOT gates. -/
 theorem not_computes_parity_of_concrete_parameters_raw
-    (circuit : Algebraic.Circuit signature n g 1)
+    (circuit : Algebraic.Circuit signature n 1)
     (rounds : Nat)
     (circuitDepth : logicalDepth circuit ≤ rounds + 1)
     (t : Nat)
@@ -88,7 +88,7 @@ theorem not_computes_parity_of_concrete_parameters_raw
 
 /-- Compatibility wrapper for the checked input-negation presentation. -/
 theorem not_computes_parity_of_concrete_parameters
-    (circuit : Algebraic.Circuit signature n g 1)
+    (circuit : Algebraic.Circuit signature n 1)
     (_normal : Program.NegationsAtInputs circuit.program)
     (rounds : Nat)
     (circuitDepth : logicalDepth circuit ≤ rounds + 1)
@@ -105,7 +105,7 @@ theorem not_computes_parity_of_concrete_parameters
 `d-1` restriction rounds, leaving the top gate for the normal-form
 obstruction. Arbitrary internal NOT gates are permitted. -/
 theorem not_computes_parity_of_concrete_depth_reduction_raw
-    (circuit : Algebraic.Circuit signature n g 1)
+    (circuit : Algebraic.Circuit signature n 1)
     (depth t : Nat)
     (twoLeDepth : 2 ≤ depth)
     (circuitDepth : logicalDepth circuit ≤ depth)
@@ -123,7 +123,7 @@ theorem not_computes_parity_of_concrete_depth_reduction_raw
 
 /-- Compatibility wrapper for the checked input-negation presentation. -/
 theorem not_computes_parity_of_concrete_depth_reduction
-    (circuit : Algebraic.Circuit signature n g 1)
+    (circuit : Algebraic.Circuit signature n 1)
     (_normal : Program.NegationsAtInputs circuit.program)
     (depth t : Nat)
     (twoLeDepth : 2 ≤ depth)

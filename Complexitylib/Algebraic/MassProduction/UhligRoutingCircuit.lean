@@ -433,11 +433,8 @@ theorem routedSuffixExpression_eval
 noncomputable def resourceRouterCircuit
     (resource : Fin (prefixLast prefixWidth + 2)) :
     Circuit DeMorgan.signature (2 * (prefixWidth + suffixWidth))
-      (Finset.univ.sum fun bit : Fin suffixWidth =>
-        (routedSuffixExpression resource bit).gateCount)
       suffixWidth :=
   Circuit.parallelFin suffixWidth
-    (fun bit => (routedSuffixExpression resource bit).gateCount)
     (fun bit => (routedSuffixExpression resource bit).circuit)
 
 @[simp] theorem resourceRouterCircuit_eval
@@ -506,19 +503,30 @@ theorem localSource_pairInputMap
   Finset.univ.sum fun bit : Fin suffixWidth =>
     (routedSuffixExpression resource bit).gateCount
 
+@[simp] theorem resourceRouterCircuit_size
+    (resource : Fin (prefixLast prefixWidth + 2)) :
+    (resourceRouterCircuit (suffixWidth := suffixWidth) resource).size =
+      resourceRouterGateCount prefixWidth suffixWidth resource := by
+  simp [resourceRouterCircuit, resourceRouterGateCount]
+
 /-- Route all request pairs to one shared resource circuit. -/
 noncomputable def resourceRouterArrayCircuit
     (pairs : Nat)
     (resource : Fin (prefixLast prefixWidth + 2)) :
     Circuit DeMorgan.signature
       ((2 * pairs) * (prefixWidth + suffixWidth))
-      (Finset.univ.sum fun _pair : Fin pairs =>
-        resourceRouterGateCount prefixWidth suffixWidth resource)
       (pairs * suffixWidth) :=
   Circuit.parallelFinVector pairs suffixWidth
-    (fun _pair => resourceRouterGateCount prefixWidth suffixWidth resource)
     (fun pair => (resourceRouterCircuit resource).mapInputs
       (pairInputMap pair))
+
+@[simp] theorem resourceRouterArrayCircuit_size
+    (pairs : Nat)
+    (resource : Fin (prefixLast prefixWidth + 2)) :
+    (resourceRouterArrayCircuit (suffixWidth := suffixWidth) pairs resource).size =
+      Finset.univ.sum fun _pair : Fin pairs =>
+        resourceRouterGateCount prefixWidth suffixWidth resource := by
+  simp [resourceRouterArrayCircuit]
 
 @[simp] theorem resourceRouterArrayCircuit_eval
     (pairs : Nat)
@@ -550,21 +558,29 @@ noncomputable def routedResourceCircuit
     (pairs : Nat)
     (resource : Fin (prefixLast prefixWidth + 2))
     (resourceCircuit : Circuit DeMorgan.signature
-      (pairs * suffixWidth) gates pairs) :
+      (pairs * suffixWidth) pairs) :
     Circuit DeMorgan.signature
       ((2 * pairs) * (prefixWidth + suffixWidth))
-      ((Finset.univ.sum fun _pair : Fin pairs =>
-          resourceRouterGateCount prefixWidth suffixWidth resource) +
-        gates)
       pairs :=
   resourceCircuit.comp (resourceRouterArrayCircuit pairs resource)
+
+@[simp] theorem routedResourceCircuit_size
+    (pairs : Nat)
+    (resource : Fin (prefixLast prefixWidth + 2))
+    (resourceCircuit : Circuit DeMorgan.signature
+      (pairs * suffixWidth) pairs) :
+    (routedResourceCircuit pairs resource resourceCircuit).size =
+      (Finset.univ.sum fun _pair : Fin pairs =>
+          resourceRouterGateCount prefixWidth suffixWidth resource) +
+        resourceCircuit.size := by
+  simp [routedResourceCircuit]
 
 theorem routedResourceCircuit_eval
     (function : ScalarFunction Bool (prefixWidth + suffixWidth))
     (pairs : Nat)
     (resource : Fin (prefixLast prefixWidth + 2))
     (resourceCircuit : Circuit DeMorgan.signature
-      (pairs * suffixWidth) gates pairs)
+      (pairs * suffixWidth) pairs)
     (computes : resourceCircuit.ComputesWith DeMorgan.interpretation
       (directProduct (resourceFunction function resource) pairs))
     (input : Fin ((2 * pairs) * (prefixWidth + suffixWidth)) -> Bool)
@@ -590,36 +606,37 @@ theorem routedResourceCircuit_eval
 /-- All Uhlig resources evaluated in parallel, in `(resource, pair)` order. -/
 noncomputable def resourceBankCircuit
     (pairs : Nat)
-    (resourceGateCounts : Fin (prefixLast prefixWidth + 2) -> Nat)
     (resourceCircuits : (resource : Fin (prefixLast prefixWidth + 2)) ->
-      Circuit DeMorgan.signature (pairs * suffixWidth)
-        (resourceGateCounts resource) pairs) :
+      Circuit DeMorgan.signature (pairs * suffixWidth) pairs) :
     Circuit DeMorgan.signature
       ((2 * pairs) * (prefixWidth + suffixWidth))
-      (Finset.univ.sum fun resource : Fin (prefixLast prefixWidth + 2) =>
-        routedResourceGateCount prefixWidth suffixWidth pairs
-          resourceGateCounts resource)
       ((prefixLast prefixWidth + 2) * pairs) :=
   Circuit.parallelFinVector (prefixLast prefixWidth + 2) pairs
-    (routedResourceGateCount prefixWidth suffixWidth pairs
-      resourceGateCounts)
     (fun resource => routedResourceCircuit pairs resource
       (resourceCircuits resource))
+
+@[simp] theorem resourceBankCircuit_size
+    (pairs : Nat)
+    (resourceCircuits : (resource : Fin (prefixLast prefixWidth + 2)) ->
+      Circuit DeMorgan.signature (pairs * suffixWidth) pairs) :
+    (resourceBankCircuit pairs resourceCircuits).size =
+      Finset.univ.sum fun resource : Fin (prefixLast prefixWidth + 2) =>
+        routedResourceGateCount prefixWidth suffixWidth pairs
+          (fun resource => (resourceCircuits resource).size) resource := by
+  simp [resourceBankCircuit, routedResourceGateCount]
 
 theorem resourceBankCircuit_eval
     (function : ScalarFunction Bool (prefixWidth + suffixWidth))
     (pairs : Nat)
-    (resourceGateCounts : Fin (prefixLast prefixWidth + 2) -> Nat)
     (resourceCircuits : (resource : Fin (prefixLast prefixWidth + 2)) ->
-      Circuit DeMorgan.signature (pairs * suffixWidth)
-        (resourceGateCounts resource) pairs)
+      Circuit DeMorgan.signature (pairs * suffixWidth) pairs)
     (computes : forall resource,
       (resourceCircuits resource).ComputesWith DeMorgan.interpretation
         (directProduct (resourceFunction function resource) pairs))
     (input : Fin ((2 * pairs) * (prefixWidth + suffixWidth)) -> Bool)
     (resource : Fin (prefixLast prefixWidth + 2))
     (pair : Fin pairs) :
-    (resourceBankCircuit pairs resourceGateCounts resourceCircuits).eval
+    (resourceBankCircuit pairs resourceCircuits).eval
         DeMorgan.interpretation input (finProdFinEquiv (resource, pair)) =
       resourceValue function input pair resource := by
   rw [resourceBankCircuit, Circuit.eval_parallelFinVector]
@@ -628,11 +645,9 @@ theorem resourceBankCircuit_eval
 
 @[simp] theorem resourceBankCircuit_cost
     (pairs : Nat)
-    (resourceGateCounts : Fin (prefixLast prefixWidth + 2) -> Nat)
     (resourceCircuits : (resource : Fin (prefixLast prefixWidth + 2)) ->
-      Circuit DeMorgan.signature (pairs * suffixWidth)
-        (resourceGateCounts resource) pairs) :
-    (resourceBankCircuit pairs resourceGateCounts resourceCircuits).cost
+      Circuit DeMorgan.signature (pairs * suffixWidth) pairs) :
+    (resourceBankCircuit pairs resourceCircuits).cost
         DeMorgan.standardCost =
       Finset.univ.sum fun resource : Fin (prefixLast prefixWidth + 2) =>
         ((Finset.univ.sum fun _pair : Fin pairs =>

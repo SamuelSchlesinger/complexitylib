@@ -33,53 +33,62 @@ theorem _root_.Cslib.Circuits.Program.card_frontierSupport_le (program : Program
     (program.frontierSupport frontier).card ≤ frontier.card + program.cost weight := by
   induction program with
   | empty =>
-    have included : (Program.empty : Program σ n 0).frontierSupport frontier ⊆ frontier := by
+    have included : (Program.empty : Program σ n 0).frontierSupport frontier ⊆
+        frontier.image (Wire.elim id Fin.elim0) := by
       intro i member
       obtain ⟨wire, present, supported⟩ := Finset.mem_biUnion.mp member
       revert present supported
-      refine Fin.addCases (fun input present supported => ?_) (fun j => Fin.elim0 j) wire
+      cases wire with
+      | gate j => exact Fin.elim0 j
+      | input input =>
+      intro present supported
       have same : i = input := by
         change i ∈ (Program.empty : Program σ n 0).wireSupport (Wire.input input) at supported
         simpa only [Program.wireSupport_input, Finset.mem_singleton] using supported
-      simpa [same] using present
-    simpa using Finset.card_le_card included
+      exact Finset.mem_image.mpr ⟨Wire.input input, present, same.symm⟩
+    simpa using (Finset.card_le_card included).trans Finset.card_image_le
   | @gate g program line ih =>
     let prior := Finset.univ.filter (fun wire : Wire n g => wire.castSucc ∈ frontier)
     let arguments := Finset.univ.image line.wires
-    let opened := if Fin.last (n + g) ∈ frontier then prior ∪ arguments else prior
+    let opened := if Wire.gate (Fin.last g) ∈ frontier then prior ∪ arguments else prior
+    have castSucc_injective : Function.Injective (Wire.castSucc : Wire n g → Wire n (g + 1)) := by
+      intro a b equal
+      cases a <;> cases b <;> simp_all [Wire.castSucc]
     have supports : (program.gate line).frontierSupport frontier ⊆
         program.frontierSupport opened := by
       intro i member
       obtain ⟨wire, present, supported⟩ := Finset.mem_biUnion.mp member
       revert present supported
-      refine Fin.lastCases ?_ (fun wire => ?_) wire
-      · intro present supported
-        simp only [Nat.add_eq] at present supported
+      induction wire using Wire.lastCases with
+      | last =>
+        intro present supported
         rw [Program.wireSupport_gate_last] at supported
         obtain ⟨argument, supported⟩ := Line.mem_inputSupport.mp supported
         exact Finset.mem_biUnion.mpr ⟨line.wires argument,
           by simp [opened, arguments, present], supported⟩
-      · intro present supported
+      | castSucc wire =>
+        intro present supported
         rw [Program.wireSupport_gate_castSucc] at supported
         refine Finset.mem_biUnion.mpr ⟨wire, ?_, supported⟩
-        by_cases last : Fin.last (n + g) ∈ frontier <;> simp [opened, prior, last, present]
+        by_cases last : Wire.gate (Fin.last g) ∈ frontier <;> simp [opened, prior, last, present]
     have priorBound : prior.card ≤ frontier.card := by
-      apply Finset.card_le_card_of_injOn Fin.castSucc
+      apply Finset.card_le_card_of_injOn Wire.castSucc
       · intro wire present
         simpa [prior] using present
-      · exact (Fin.castSucc_injective _).injOn
+      · exact castSucc_injective.injOn
     have argumentBound : arguments.card ≤ weight line.op + 1 := by
       calc
         arguments.card ≤ (Finset.univ : Finset (Fin (σ.Arity line.op))).card := Finset.card_image_le
         _ = σ.Arity line.op := by simp
         _ ≤ weight line.op + 1 := bounded line.op
     have openedBound : opened.card ≤ frontier.card + weight line.op := by
-      by_cases last : Fin.last (n + g) ∈ frontier
-      · have eraseBound : prior.card ≤ (frontier.erase (Fin.last (n + g))).card := by
-          apply Finset.card_le_card_of_injOn Fin.castSucc
+      by_cases last : Wire.gate (Fin.last g) ∈ frontier
+      · have eraseBound : prior.card ≤ (frontier.erase (Wire.gate (Fin.last g))).card := by
+          apply Finset.card_le_card_of_injOn Wire.castSucc
           · intro wire present
-            exact Finset.mem_erase.mpr ⟨by simp, by simpa [prior] using present⟩
-          · exact (Fin.castSucc_injective _).injOn
+            refine Finset.mem_erase.mpr ⟨?_, by simpa [prior] using present⟩
+            cases wire <;> simp [Wire.castSucc, Fin.castSucc_ne_last]
+          · exact castSucc_injective.injOn
         have erased := Finset.card_erase_of_mem last
         have positive := Finset.one_le_card.mpr ⟨_, last⟩
         have unionBound := Finset.card_union_le prior arguments

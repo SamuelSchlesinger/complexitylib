@@ -76,29 +76,32 @@ private def correction (value : Bool) : Expression 2 :=
 
 /-- Modify one truth-table entry without duplicating the original circuit.
 The bound counts every internal gate in the De Morgan signature. -/
-theorem exists_update_circuit (circuit : Circuit signature n g 1)
+theorem exists_update_circuit (circuit : Circuit signature n 1)
     (function : ScalarFunction Bool n)
     (computes : circuit.ComputesWith interpretation (fun input _ => function input))
     (point : Fin n → Bool) (value : Bool) :
-    ∃ gates, ∃ result : Circuit signature n gates 1,
+    ∃ result : Circuit signature n 1,
       result.ComputesWith interpretation (fun input _ => Function.update function point value input) ∧
-        gates ≤ g + 2 * n := by
+        result.size ≤ circuit.size + 2 * n := by
   classical
   cases n with
   | zero =>
-      refine ⟨1, (Expression.constant value : Expression 0).circuit, ?_, ?_⟩
+      refine ⟨(Expression.constant value : Expression 0).circuit, ?_, ?_⟩
       · intro input
         funext output
         have outputZero : output = 0 := Subsingleton.elim _ _
         have inputPoint : input = point := Subsingleton.elim _ _
         simp [outputZero, inputPoint, Expression.circuit_eval, Expression.eval]
-      · have valid := (circuit.outputs 0).isLt
-        change (circuit.outputs 0).val < 0 + g at valid
+      · have positive : 0 < circuit.size := by
+          cases circuit.outputs 0 with
+          | input i => exact i.elim0
+          | gate j => exact Nat.zero_lt_of_lt j.isLt
+        simp only [Expression.circuit_size, Expression.gateCount]
         omega
   | succ n =>
       let test := pointTest n point value
       let result := (correction value).circuit.comp (circuit.parallel test.circuit)
-      refine ⟨_, result, ?_, ?_⟩
+      refine ⟨result, ?_, ?_⟩
       · intro input
         funext output
         have outputZero : output = 0 := Subsingleton.elim _ _
@@ -121,7 +124,9 @@ theorem exists_update_circuit (circuit : Circuit signature n g 1)
           rw [testValue]
           by_cases equal : input = point <;> simp [equal]
       · have bound := pointTest_gateCount_le point value
-        change g + test.gateCount + (correction value).gateCount ≤ g + 2 * (n + 1)
+        change circuit.size + test.circuit.size + (correction value).circuit.size ≤
+          circuit.size + 2 * (n + 1)
+        simp only [Expression.circuit_size]
         cases value <;> simp only [correction, Expression.gateCount, Bool.false_eq_true,
           ite_false, ite_true] <;> dsimp [test] at * <;> omega
 

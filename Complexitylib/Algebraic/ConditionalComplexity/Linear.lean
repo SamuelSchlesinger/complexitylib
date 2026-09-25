@@ -102,10 +102,11 @@ theorem exists_representation_of_sourceSupport
     simp [extended, absent] at present
 
 private theorem exists_sum_circuit {σ : Signature} {U : Type} [AddCommMonoid U]
-    (interpretation : Interpretation σ U) (addition : Circuit σ 2 1 1)
+    (interpretation : Interpretation σ U) (addition : Circuit σ 2 1)
+    (addition_size : addition.size = 1)
     (addition_eval : ∀ input, addition.eval interpretation input 0 = input 0 + input 1)
     (selected : Finset (Fin N)) (nonempty : selected.Nonempty) :
-    ∃ gates, ∃ circuit : Circuit σ N gates 1,
+    ∃ circuit : Circuit σ N 1,
       circuit.size + 1 = selected.card ∧
         ∀ input, circuit.eval interpretation input 0 = ∑ i ∈ selected, input i := by
   classical
@@ -115,12 +116,12 @@ private theorem exists_sum_circuit {σ : Signature} {U : Type} [AddCommMonoid U]
       let projection := (Circuit.id σ N).mapOutputs (fun _ : Fin 1 => i)
       by_cases empty : selected = ∅
       · subst selected
-        refine ⟨0, projection, by simp [Circuit.size], ?_⟩
+        refine ⟨projection, by simp [projection], ?_⟩
         intro input
         simp [projection]
-      · obtain ⟨gates, circuit, size, evaluates⟩ := ih (Finset.nonempty_iff_ne_empty.mpr empty)
-        refine ⟨_, addition.comp (projection.parallel circuit), ?_, ?_⟩
-        · simpa [Circuit.size, Finset.card_insert_of_notMem absent] using size
+      · obtain ⟨circuit, size, evaluates⟩ := ih (Finset.nonempty_iff_ne_empty.mpr empty)
+        refine ⟨addition.comp (projection.parallel circuit), ?_, ?_⟩
+        · simpa [projection, addition_size, Finset.card_insert_of_notMem absent] using size
         · intro input
           rw [Circuit.eval_comp, addition_eval]
           simp only [Circuit.eval_parallel]
@@ -130,7 +131,8 @@ private theorem exists_sum_circuit {σ : Signature} {U : Type} [AddCommMonoid U]
 /-- A nonzero represented linear target has an XOR implementation with one
 fewer gates than the number of nonzero representation coefficients. -/
 theorem relativeGateComplexity_le_weight
-    (interpretation : Interpretation σ (ZMod 2)) (addition : Circuit σ 2 1 1)
+    (interpretation : Interpretation σ (ZMod 2)) (addition : Circuit σ 2 1)
+    (addition_size : addition.size = 1)
     (addition_eval : ∀ input, addition.eval interpretation input 0 = input 0 + input 1)
     (target : Fin n → ZMod 2) (nonzero : target ≠ 0)
     (rows : Fin k → Fin n → ZMod 2) (coefficients : Fin k → ZMod 2)
@@ -146,8 +148,8 @@ theorem relativeGateComplexity_le_weight
     apply nonzero
     rw [← represents]
     simp [zero_coefficients]
-  obtain ⟨gates, circuit, size, evaluates⟩ :=
-    exists_sum_circuit interpretation addition addition_eval selected nonempty
+  obtain ⟨circuit, size, evaluates⟩ :=
+    exists_sum_circuit interpretation addition addition_size addition_eval selected nonempty
   have computes : circuit.ComputesFrom interpretation
       (fun input (_ : Fin 1) => target ⬝ᵥ input) (forms rows) := by
     intro input
@@ -173,7 +175,7 @@ representation, and a one-gate XOR operation attains it. -/
 theorem relativeGateComplexity_eq_min_weight
     (interpretation : Interpretation σ (ZMod 2))
     (bounded : ∀ op, σ.Arity op ≤ 2)
-    (addition : Circuit σ 2 1 1)
+    (addition : Circuit σ 2 1) (addition_size : addition.size = 1)
     (addition_eval : ∀ input, addition.eval interpretation input 0 = input 0 + input 1)
     (target : Fin n → ZMod 2) (nonzero : target ≠ 0)
     (rows : Fin k → Fin n → ZMod 2) :
@@ -183,10 +185,10 @@ theorem relativeGateComplexity_eq_min_weight
         ((weight coefficients - 1 : Nat) : ℕ∞) := by
   apply le_antisymm
   · exact le_iInf fun coefficients => le_iInf fun represents =>
-      relativeGateComplexity_le_weight interpretation addition addition_eval
+      relativeGateComplexity_le_weight interpretation addition addition_size addition_eval
         target nonzero rows coefficients represents
   · apply Circuit.le_relativeCostComplexity
-    intro gates circuit computes
+    intro circuit computes
     obtain ⟨coefficients, represents, small⟩ := exists_representation_of_sourceSupport
       target rows circuit.inputSupport computes.sourceSupport
     calc
@@ -244,7 +246,7 @@ other unary or binary operations, including nonlinear ones. -/
 theorem conditionalGateComplexity_eq_min_weight
     (interpretation : Interpretation σ (ZMod 2))
     (bounded : ∀ op, σ.Arity op ≤ 2)
-    (addition : Circuit σ 2 1 1)
+    (addition : Circuit σ 2 1) (addition_size : addition.size = 1)
     (addition_eval : ∀ input, addition.eval interpretation input 0 = input 0 + input 1)
     (target : Fin n → ZMod 2) (nonzero : target ≠ 0)
     (supplied : Fin k → Fin n → ZMod 2) :
@@ -255,7 +257,7 @@ theorem conditionalGateComplexity_eq_min_weight
   change Circuit.relativeGateComplexity interpretation _
     (fun input => Fin.append input (forms supplied input)) = _
   rw [← forms_withCoordinates, relativeGateComplexity_eq_min_weight
-    interpretation bounded addition addition_eval target nonzero]
+    interpretation bounded addition addition_size addition_eval target nonzero]
   apply le_antisymm
   · refine le_iInf fun coefficients => ?_
     let combined := Fin.append (target + ∑ j, coefficients j • supplied j) coefficients

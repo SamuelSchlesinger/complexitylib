@@ -53,14 +53,14 @@ def combine
 /-- The Boolean function computed by a verifier circuit on a combined
 assignment, with negations available only as input literals. -/
 def verifierFunction
-    (circuit : Circuit AndOr.signature ((n + a) + (n + a)) g 1)
+    (circuit : Circuit AndOr.signature ((n + a) + (n + a)) 1)
     (assignment : Fin (n + a) → Bool) : Bool :=
   circuit.eval AndOr.boolInterpretation (literalInput assignment) 0
 
 /-- A verifier universally computes `function` when a primary input is true
 exactly if every auxiliary completion is accepted. -/
 def UniversallyComputes
-    (circuit : Circuit AndOr.signature ((n + a) + (n + a)) g 1)
+    (circuit : Circuit AndOr.signature ((n + a) + (n + a)) 1)
     (function : (Fin n → Bool) → Bool) : Prop :=
   ∀ primary,
     function primary = true ↔
@@ -70,7 +70,7 @@ def UniversallyComputes
 /-- Every false primary assignment has a rejecting auxiliary completion. -/
 theorem exists_rejectingAuxiliary
     {function : (Fin n → Bool) → Bool}
-    {circuit : Circuit AndOr.signature ((n + a) + (n + a)) g 1}
+    {circuit : Circuit AndOr.signature ((n + a) + (n + a)) 1}
     (computes : UniversallyComputes circuit function)
     (counterexample : Problem.Outside (literalProblem function)) :
     ∃ auxiliary,
@@ -92,7 +92,7 @@ theorem exists_rejectingAuxiliary
 /-- A selected rejecting auxiliary completion for each false primary input. -/
 def rejectingAuxiliary
     {function : (Fin n → Bool) → Bool}
-    {circuit : Circuit AndOr.signature ((n + a) + (n + a)) g 1}
+    {circuit : Circuit AndOr.signature ((n + a) + (n + a)) 1}
     (computes : UniversallyComputes circuit function)
     (counterexample : Problem.Outside (literalProblem function)) :
     Fin a → Bool :=
@@ -100,7 +100,7 @@ def rejectingAuxiliary
 
 @[simp] theorem verifierFunction_rejectingAuxiliary
     {function : (Fin n → Bool) → Bool}
-    {circuit : Circuit AndOr.signature ((n + a) + (n + a)) g 1}
+    {circuit : Circuit AndOr.signature ((n + a) + (n + a)) 1}
     (computes : UniversallyComputes circuit function)
     (counterexample : Problem.Outside (literalProblem function)) :
     verifierFunction circuit
@@ -111,7 +111,7 @@ def rejectingAuxiliary
 /-- Map a false primary assignment to its selected rejecting verifier input. -/
 def counterexampleMap
     {function : (Fin n → Bool) → Bool}
-    {circuit : Circuit AndOr.signature ((n + a) + (n + a)) g 1}
+    {circuit : Circuit AndOr.signature ((n + a) + (n + a)) 1}
     (computes : UniversallyComputes circuit function) :
     Problem.Outside (literalProblem function) → Fin (n + a) → Bool :=
   fun counterexample =>
@@ -119,7 +119,7 @@ def counterexampleMap
 
 @[simp] theorem counterexampleMap_castAdd
     {function : (Fin n → Bool) → Bool}
-    {circuit : Circuit AndOr.signature ((n + a) + (n + a)) g 1}
+    {circuit : Circuit AndOr.signature ((n + a) + (n + a)) 1}
     (computes : UniversallyComputes circuit function)
     (counterexample : Problem.Outside (literalProblem function))
     (input : Fin n) :
@@ -129,7 +129,7 @@ def counterexampleMap
 
 @[simp] theorem counterexampleMap_natAdd
     {function : (Fin n → Bool) → Bool}
-    {circuit : Circuit AndOr.signature ((n + a) + (n + a)) g 1}
+    {circuit : Circuit AndOr.signature ((n + a) + (n + a)) 1}
     (computes : UniversallyComputes circuit function)
     (counterexample : Problem.Outside (literalProblem function))
     (input : Fin a) :
@@ -141,7 +141,7 @@ def counterexampleMap
 coordinate to true. -/
 def positiveAuxiliarySet
     {function : (Fin n → Bool) → Bool}
-    {circuit : Circuit AndOr.signature ((n + a) + (n + a)) g 1}
+    {circuit : Circuit AndOr.signature ((n + a) + (n + a)) 1}
     (computes : UniversallyComputes circuit function)
     (input : Fin a) : Set (Problem.Outside (literalProblem function)) :=
   { counterexample |
@@ -149,7 +149,7 @@ def positiveAuxiliarySet
 
 theorem positiveAuxiliarySet_compl
     {function : (Fin n → Bool) → Bool}
-    {circuit : Circuit AndOr.signature ((n + a) + (n + a)) g 1}
+    {circuit : Circuit AndOr.signature ((n + a) + (n + a)) 1}
     (computes : UniversallyComputes circuit function)
     (input : Fin a) :
     (positiveAuxiliarySet computes input)ᶜ =
@@ -163,7 +163,7 @@ theorem positiveAuxiliarySet_compl
 side of each selected auxiliary coordinate it accepts. -/
 def fusedAuxiliary
     {function : (Fin n → Bool) → Bool}
-    {circuit : Circuit AndOr.signature ((n + a) + (n + a)) g 1}
+    {circuit : Circuit AndOr.signature ((n + a) + (n + a)) 1}
     (computes : UniversallyComputes circuit function)
     (witness : SemifilterWitness
       (literalProblem function) SemifilterClass.ultra) :
@@ -178,7 +178,7 @@ def fusedAuxiliary
 coordinatewise semi-ultrafilter fusion of selected rejecting assignments. -/
 def referencePoint
     {function : (Fin n → Bool) → Bool}
-    {circuit : Circuit AndOr.signature ((n + a) + (n + a)) g 1}
+    {circuit : Circuit AndOr.signature ((n + a) + (n + a)) 1}
     (computes : UniversallyComputes circuit function)
     (witness : SemifilterWitness
       (literalProblem function) SemifilterClass.ultra) :
@@ -187,7 +187,7 @@ def referencePoint
 
 @[simp] theorem referencePoint_castAdd
     {function : (Fin n → Bool) → Bool}
-    {circuit : Circuit AndOr.signature ((n + a) + (n + a)) g 1}
+    {circuit : Circuit AndOr.signature ((n + a) + (n + a)) 1}
     (computes : UniversallyComputes circuit function)
     (witness : SemifilterWitness
       (literalProblem function) SemifilterClass.ultra)
@@ -198,7 +198,7 @@ def referencePoint
 
 @[simp] theorem referencePoint_natAdd
     {function : (Fin n → Bool) → Bool}
-    {circuit : Circuit AndOr.signature ((n + a) + (n + a)) g 1}
+    {circuit : Circuit AndOr.signature ((n + a) + (n + a)) 1}
     (computes : UniversallyComputes circuit function)
     (witness : SemifilterWitness
       (literalProblem function) SemifilterClass.ultra)
@@ -209,7 +209,7 @@ def referencePoint
 
 theorem positiveAuxiliarySet_mem_of_fused_eq_true
     {function : (Fin n → Bool) → Bool}
-    {circuit : Circuit AndOr.signature ((n + a) + (n + a)) g 1}
+    {circuit : Circuit AndOr.signature ((n + a) + (n + a)) 1}
     (computes : UniversallyComputes circuit function)
     (witness : SemifilterWitness
       (literalProblem function) SemifilterClass.ultra)
@@ -222,7 +222,7 @@ theorem positiveAuxiliarySet_mem_of_fused_eq_true
 
 theorem compl_positiveAuxiliarySet_mem_of_fused_eq_false
     {function : (Fin n → Bool) → Bool}
-    {circuit : Circuit AndOr.signature ((n + a) + (n + a)) g 1}
+    {circuit : Circuit AndOr.signature ((n + a) + (n + a)) 1}
     (computes : UniversallyComputes circuit function)
     (witness : SemifilterWitness
       (literalProblem function) SemifilterClass.ultra)
@@ -237,7 +237,7 @@ theorem compl_positiveAuxiliarySet_mem_of_fused_eq_false
 /-- Every fused reference assignment is accepted by the verifier. -/
 theorem referencePoint_mem_target
     {function : (Fin n → Bool) → Bool}
-    {circuit : Circuit AndOr.signature ((n + a) + (n + a)) g 1}
+    {circuit : Circuit AndOr.signature ((n + a) + (n + a)) 1}
     (computes : UniversallyComputes circuit function)
     (witness : SemifilterWitness
       (literalProblem function) SemifilterClass.ultra) :
@@ -249,7 +249,7 @@ theorem referencePoint_mem_target
 /-- Selected counterexample assignments lie outside the verifier target. -/
 theorem counterexampleMap_not_mem_target
     {function : (Fin n → Bool) → Bool}
-    {circuit : Circuit AndOr.signature ((n + a) + (n + a)) g 1}
+    {circuit : Circuit AndOr.signature ((n + a) + (n + a)) 1}
     (computes : UniversallyComputes circuit function)
     (counterexample : Problem.Outside (literalProblem function)) :
     counterexampleMap computes counterexample ∉
@@ -263,7 +263,7 @@ theorem counterexampleMap_not_mem_target
 /-- Soundness of every verifier literal under the counterexample pullback. -/
 theorem input_sound
     {function : (Fin n → Bool) → Bool}
-    {circuit : Circuit AndOr.signature ((n + a) + (n + a)) g 1}
+    {circuit : Circuit AndOr.signature ((n + a) + (n + a)) 1}
     (computes : UniversallyComputes circuit function)
     (witness : SemifilterWitness
       (literalProblem function) SemifilterClass.ultra)
@@ -333,7 +333,7 @@ theorem input_sound
 computing verifier. -/
 def pullback
     {function : (Fin n → Bool) → Bool}
-    {circuit : Circuit AndOr.signature ((n + a) + (n + a)) g 1}
+    {circuit : Circuit AndOr.signature ((n + a) + (n + a)) 1}
     (computes : UniversallyComputes circuit function) :
     SemifilterPullback
       (literalProblem function)
@@ -347,7 +347,7 @@ def pullback
 
 /-- A verifier circuit constructs its own literal set problem. -/
 theorem constructs_verifierProblem
-    (circuit : Circuit AndOr.signature ((n + a) + (n + a)) g 1) :
+    (circuit : Circuit AndOr.signature ((n + a) + (n + a)) 1) :
     (literalProblem (verifierFunction circuit)).Constructs circuit
       (AndOr.setInterpretation (Fin (n + a) → Bool)) := by
   apply ((literalProblem (verifierFunction circuit)).computesMembership_iff_constructs
@@ -362,7 +362,7 @@ theorem and_lowerBound
     (coverLowerBound : ∀ cover : PairCover
       (literalProblem function) SemifilterClass.ultra,
         L ≤ cover.cost)
-    (circuit : Circuit AndOr.signature ((n + a) + (n + a)) g 1)
+    (circuit : Circuit AndOr.signature ((n + a) + (n + a)) 1)
     (computes : UniversallyComputes circuit function) :
     L ≤ circuit.cost AndOr.andCost :=
   (pullback computes).lowerBound coverLowerBound circuit

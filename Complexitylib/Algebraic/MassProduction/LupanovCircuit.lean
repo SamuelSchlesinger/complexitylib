@@ -41,10 +41,16 @@ noncomputable def patternBankCircuit
     (function : ScalarFunction Bool (addressWidth + dataWidth))
     (blockSize : Nat) :
     Circuit DeMorgan.signature (2 ^ addressWidth + 2 ^ dataWidth)
-      (patternBankGateCount function blockSize)
       (bankWidth addressWidth blockSize + bankWidth addressWidth blockSize) :=
   (leftBankCircuit addressWidth dataWidth blockSize).parallel
     (rightBankCircuit function blockSize)
+
+@[simp] theorem patternBankCircuit_size
+    (function : ScalarFunction Bool (addressWidth + dataWidth))
+    (blockSize : Nat) :
+    (patternBankCircuit function blockSize).size =
+      patternBankGateCount function blockSize := by
+  simp [patternBankCircuit, patternBankGateCount]
 
 /-- Coordinate of a left-bank flag in the combined pattern state. -/
 def leftPatternInput
@@ -132,11 +138,17 @@ theorem synthesisExpression_standardCost
 noncomputable def circuit
     (function : ScalarFunction Bool (addressWidth + dataWidth))
     (blockSize : Nat) :
-    Circuit DeMorgan.signature (addressWidth + dataWidth)
-      (synthesisGateCount function blockSize) 1 :=
+    Circuit DeMorgan.signature (addressWidth + dataWidth) 1 :=
   (synthesisExpression addressWidth blockSize).circuit.comp
     ((patternBankCircuit function blockSize).comp
       (splitMintermCircuit addressWidth dataWidth))
+
+@[simp] theorem circuit_size
+    (function : ScalarFunction Bool (addressWidth + dataWidth))
+    (blockSize : Nat) :
+    (circuit function blockSize).size =
+      synthesisGateCount function blockSize := by
+  simp [circuit, synthesisGateCount]
 
 /-- Explicit finite cost ledger. -/
 def costBound

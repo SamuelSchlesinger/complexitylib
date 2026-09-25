@@ -17,8 +17,8 @@ complexity classes quantify over a sequence of circuits.  This module supplies
 that missing bridge without fixing a gate basis.
 
 A `Circuit.Family sigma m` chooses one `m`-output circuit for every input width.
-Its gate count remains an explicit index, so `size` agrees definitionally with
-the finite circuit model.  Polynomial size and constant depth are expressed by
+Its gate count at each width is the member circuit's `size`, so `size` agrees
+definitionally with the finite circuit model.  Polynomial size and constant depth are expressed by
 exact natural-number bounds.  The factor `(n + 1) ^ degree` makes the definition
 well behaved at input width zero and avoids burying finite-prefix adjustments
 inside asymptotic notation.
@@ -118,14 +118,19 @@ end Resource
 
 /-- A nonuniform family chooses one finite circuit at each input width. -/
 structure _root_.Cslib.Circuits.Circuit.Family (sigma : Signature) (m : Nat) where
-  /-- Number of internal gates at each input width. -/
-  gateCount : Nat -> Nat
   /-- The circuit chosen nonuniformly at each input width. -/
-  circuit : (n : Nat) -> Circuit sigma n (gateCount n) m
+  circuit : (n : Nat) -> Circuit sigma n m
 
 export Cslib.Circuits.Circuit (Family)
 
 namespace Family
+
+/-- Number of internal gates at each input width. -/
+def _root_.Cslib.Circuits.Circuit.Family.gateCount (family : Circuit.Family sigma m)
+    (n : Nat) : Nat :=
+  (family.circuit n).size
+
+export Cslib.Circuits.Circuit.Family (gateCount)
 
 /-- Gate-count size of every member of a circuit family. -/
 def _root_.Cslib.Circuits.Circuit.Family.size (family : Circuit.Family sigma m) (n : Nat) : Nat :=

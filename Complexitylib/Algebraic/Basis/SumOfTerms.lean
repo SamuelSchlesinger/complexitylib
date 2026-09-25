@@ -127,7 +127,7 @@ theorem program_cost_weightedCost
 
 /-- Circuit form of exact weighted source-cost decomposition. -/
 theorem circuit_cost_weightedCost
-    (circuit : Circuit (signature T) n g m)
+    (circuit : Circuit (signature T) n m)
     (addition term : Nat) :
     circuit.cost (weightedCost addition term) =
       addition * circuit.cost (additionCost (T := T)) +

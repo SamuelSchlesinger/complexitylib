@@ -28,7 +28,7 @@ noncomputable def _root_.Cslib.Circuits.Circuit.costComplexity
     (interpretation : Interpretation σ U)
     (operationCost : OperationCost σ)
     (target : Target U n m) : ℕ∞ :=
-  ⨅ g, ⨅ circuit : Circuit σ n g m,
+  ⨅ circuit : Circuit σ n m,
     ⨅ _ : circuit.ComputesWith interpretation target,
       (circuit.cost operationCost : ℕ∞)
 
@@ -46,7 +46,7 @@ namespace Circuit
 
 /-- Any concrete implementation upper-bounds minimum weighted complexity. -/
 theorem _root_.Cslib.Circuits.Circuit.costComplexity_le
-    {circuit : Circuit σ n g m}
+    {circuit : Circuit σ n m}
     {interpretation : Interpretation σ U}
     {target : Target U n m}
     (operationCost : OperationCost σ)
@@ -54,7 +54,7 @@ theorem _root_.Cslib.Circuits.Circuit.costComplexity_le
     Circuit.costComplexity interpretation operationCost target ≤
       circuit.cost operationCost := by
   unfold Circuit.costComplexity
-  exact iInf_le_of_le g <| iInf_le_of_le circuit <|
+  exact iInf_le_of_le circuit <|
     iInf_le_of_le computes le_rfl
 
 export Cslib.Circuits.Circuit (costComplexity_le)
@@ -66,12 +66,12 @@ theorem _root_.Cslib.Circuits.Circuit.le_costComplexity
     {target : Target U n m}
     (operationCost : OperationCost σ)
     (bound : ℕ∞)
-    (lowerBound : ∀ {g} (circuit : Circuit σ n g m),
+    (lowerBound : ∀ (circuit : Circuit σ n m),
       circuit.ComputesWith interpretation target →
         bound ≤ circuit.cost operationCost) :
     bound ≤ Circuit.costComplexity interpretation operationCost target := by
   unfold Circuit.costComplexity
-  refine le_iInf fun g => le_iInf fun circuit => le_iInf fun computes => ?_
+  refine le_iInf fun circuit => le_iInf fun computes => ?_
   exact lowerBound circuit computes
 
 export Cslib.Circuits.Circuit (le_costComplexity)
@@ -84,11 +84,11 @@ theorem _root_.Cslib.Circuits.Circuit.le_costComplexity_iff
     (operationCost : OperationCost σ)
     (bound : ℕ∞) :
     bound ≤ Circuit.costComplexity interpretation operationCost target ↔
-      ∀ {g} (circuit : Circuit σ n g m),
+      ∀ (circuit : Circuit σ n m),
         circuit.ComputesWith interpretation target →
           bound ≤ circuit.cost operationCost := by
   constructor
-  · intro bounded g circuit computes
+  · intro bounded circuit computes
     exact bounded.trans (circuit.costComplexity_le operationCost computes)
   · exact Circuit.le_costComplexity operationCost bound
 
@@ -100,19 +100,17 @@ theorem _root_.Cslib.Circuits.Circuit.costComplexity_lt_top_iff
     {target : Target U n m}
     (operationCost : OperationCost σ) :
     Circuit.costComplexity interpretation operationCost target < ⊤ ↔
-      ∃ g, ∃ circuit : Circuit σ n g m,
+      ∃ circuit : Circuit σ n m,
         circuit.ComputesWith interpretation target := by
   constructor
   · intro finite
     unfold Circuit.costComplexity at finite
     rw [iInf_lt_iff] at finite
-    obtain ⟨g, finite⟩ := finite
-    rw [iInf_lt_iff] at finite
     obtain ⟨circuit, finite⟩ := finite
     rw [iInf_lt_iff] at finite
     obtain ⟨computes, _⟩ := finite
-    exact ⟨g, circuit, computes⟩
-  · rintro ⟨g, circuit, computes⟩
+    exact ⟨circuit, computes⟩
+  · rintro ⟨circuit, computes⟩
     exact (circuit.costComplexity_le operationCost computes).trans_lt
       (ENat.natCast_lt_top _)
 
@@ -123,7 +121,7 @@ export Cslib.Circuits.Circuit (costComplexity_lt_top_iff)
     {target : Target U n m}
     (operationCost : OperationCost σ) :
     Circuit.costComplexity interpretation operationCost target = ⊤ ↔
-      ¬ ∃ g, ∃ circuit : Circuit σ n g m,
+      ¬ ∃ circuit : Circuit σ n m,
         circuit.ComputesWith interpretation target := by
   rw [eq_top_iff, ← not_lt, Circuit.costComplexity_lt_top_iff]
 
@@ -131,7 +129,7 @@ export Cslib.Circuits.Circuit (costComplexity_eq_top_iff)
 
 /-- A minimum-cost concrete circuit realizes the extended-natural complexity. -/
 theorem _root_.Cslib.Circuits.Circuit.costComplexity_eq
-    {circuit : Circuit σ n g m}
+    {circuit : Circuit σ n m}
     {interpretation : Interpretation σ U}
     {target : Target U n m}
     (operationCost : OperationCost σ)
@@ -141,14 +139,14 @@ theorem _root_.Cslib.Circuits.Circuit.costComplexity_eq
       circuit.cost operationCost := by
   apply le_antisymm (circuit.costComplexity_le operationCost computes)
   apply Circuit.le_costComplexity
-  intro h competitor competitorComputes
+  intro competitor competitorComputes
   exact_mod_cast minimal competitor competitorComputes
 
 export Cslib.Circuits.Circuit (costComplexity_eq)
 
 /-- Any concrete implementation upper-bounds minimum gate complexity. -/
 theorem _root_.Cslib.Circuits.Circuit.gateComplexity_le
-    {circuit : Circuit σ n g m}
+    {circuit : Circuit σ n m}
     {interpretation : Interpretation σ U}
     {target : Target U n m}
     (computes : circuit.ComputesWith interpretation target) :
@@ -173,7 +171,7 @@ theorem costComplexity_le
       Circuit.costComplexity (translation.pull interpretation)
         (translation.pullCost operationCost) target := by
   apply Circuit.le_costComplexity
-  intro g circuit computes
+  intro circuit computes
   have compiledComputes :
       (translation.compile circuit).ComputesWith interpretation target := by
     intro input
@@ -197,11 +195,11 @@ theorem gateComplexity_le_mul
         (translation.pull interpretation) target := by
   let sourceComplexity := Circuit.gateComplexity
     (translation.pull interpretation) target
-  have pointwise : ∀ {g} (circuit : Circuit σ n g m),
+  have pointwise : ∀ (circuit : Circuit σ n m),
       circuit.ComputesWith (translation.pull interpretation) target →
         Circuit.gateComplexity interpretation target ≤
           (K : ℕ∞) * circuit.size := by
-    intro g circuit computes
+    intro circuit computes
     have compiledComputes :
         (translation.compile circuit).ComputesWith interpretation target := by
       intro input
@@ -213,12 +211,10 @@ theorem gateComplexity_le_mul
     (K : ℕ∞) * sourceComplexity
   change Circuit.gateComplexity interpretation target ≤
     (K : ℕ∞) *
-      (⨅ g, ⨅ circuit : Circuit σ n g m,
+      (⨅ circuit : Circuit σ n m,
         ⨅ _ : circuit.ComputesWith (translation.pull interpretation) target,
           (circuit.cost OperationCost.unit : ℕ∞))
   have nonzero : (K : ℕ∞) ≠ 0 := by exact_mod_cast (Nat.ne_of_gt positive)
-  rw [ENat.mul_iInf_of_ne nonzero]
-  refine le_iInf fun g => ?_
   rw [ENat.mul_iInf_of_ne nonzero]
   refine le_iInf fun circuit => ?_
   rw [ENat.mul_iInf_of_ne nonzero]
@@ -231,11 +227,11 @@ theorem transport_sizeLowerBound
     (translation : Translation σ τ)
     (interpretation : Interpretation τ U)
     (target : Target U n m)
-    (lowerBound : ∀ {h} (targetCircuit : Circuit τ n h m),
+    (lowerBound : ∀ (targetCircuit : Circuit τ n m),
       targetCircuit.ComputesWith interpretation target →
         L ≤ targetCircuit.size)
     (bounded : ∀ op, (translation.operation op).size ≤ K)
-    (circuit : Circuit σ n g m)
+    (circuit : Circuit σ n m)
     (computes : circuit.ComputesWith (translation.pull interpretation) target) :
     L ≤ K * circuit.size := by
   have compiledComputes :
@@ -252,11 +248,11 @@ theorem transport_sizeLowerBound_ceilDiv
     (interpretation : Interpretation τ U)
     (target : Target U n m)
     (positive : 0 < K)
-    (lowerBound : ∀ {h} (targetCircuit : Circuit τ n h m),
+    (lowerBound : ∀ (targetCircuit : Circuit τ n m),
       targetCircuit.ComputesWith interpretation target →
         L ≤ targetCircuit.size)
     (bounded : ∀ op, (translation.operation op).size ≤ K)
-    (circuit : Circuit σ n g m)
+    (circuit : Circuit σ n m)
     (computes : circuit.ComputesWith (translation.pull interpretation) target) :
     L ⌈/⌉ K ≤ circuit.size := by
   rw [ceilDiv_le_iff_le_mul positive]
@@ -366,11 +362,11 @@ theorem transport_sizeLowerBound
     {targetInterpretation : Interpretation τ U}
     (realization : Realization σ τ source targetInterpretation)
     (target : Target U n m)
-    (lowerBound : ∀ {h} (targetCircuit : Circuit τ n h m),
+    (lowerBound : ∀ (targetCircuit : Circuit τ n m),
       targetCircuit.ComputesWith targetInterpretation target →
         L ≤ targetCircuit.size)
     (bounded : ∀ op, (realization.operation op).size ≤ K)
-    (circuit : Circuit σ n g m)
+    (circuit : Circuit σ n m)
     (computes : circuit.ComputesWith source target) :
     L ≤ K * circuit.size := by
   have computesPull :
@@ -390,11 +386,11 @@ theorem transport_sizeLowerBound_ceilDiv
     (realization : Realization σ τ source targetInterpretation)
     (target : Target U n m)
     (positive : 0 < K)
-    (lowerBound : ∀ {h} (targetCircuit : Circuit τ n h m),
+    (lowerBound : ∀ (targetCircuit : Circuit τ n m),
       targetCircuit.ComputesWith targetInterpretation target →
         L ≤ targetCircuit.size)
     (bounded : ∀ op, (realization.operation op).size ≤ K)
-    (circuit : Circuit σ n g m)
+    (circuit : Circuit σ n m)
     (computes : circuit.ComputesWith source target) :
     L ⌈/⌉ K ≤ circuit.size := by
   rw [ceilDiv_le_iff_le_mul positive]

@@ -96,7 +96,7 @@ theorem preimage_eq_neq :
 `Fin (2 ^ n)` uses at least `n` AND gates, even when OR gates are free. -/
 theorem and_lowerBound
     (circuit : Circuit AndOr.signature
-      ((2 ^ n) + (2 ^ n)) g 1)
+      ((2 ^ n) + (2 ^ n)) 1)
     (computes : ∀ assignment,
       circuit.eval AndOr.boolInterpretation assignment 0 =
         function assignment) :

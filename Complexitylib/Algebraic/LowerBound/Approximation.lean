@@ -139,24 +139,21 @@ theorem program_correct
   induction program with
   | empty =>
       intro wire
-      refine Fin.addCases (fun input => ?_) (fun gate => Fin.elim0 gate) wire
-      rw [Program.trace_input, Program.trace_input]
-      exact scheme.input_correct sample input
+      cases wire with
+      | input input => exact scheme.input_correct sample input
+      | gate gate => exact Fin.elim0 gate
   | @gate g prior line inductionHypothesis =>
       simp only [programExceptions_gate, Finset.mem_union, not_or] at fresh
       intro wire
-      refine Fin.lastCases ?_ (fun priorWire => ?_) wire
-      · have approxLast := Program.trace_gate_last prior line
-            approxInterpretation approxInput
-        have exactLast := Program.trace_gate_last prior line
-            exactInterpretation (exactInput sample)
+      induction wire using Wire.lastCases with
+      | last =>
         change scheme.relation
-          ((prior.gate line).trace exactInterpretation (exactInput sample)
-            (Fin.last (n + g)))
+          ((prior.gate line).eval exactInterpretation (exactInput sample)
+            (Fin.last g))
           (decode
-            ((prior.gate line).trace approxInterpretation approxInput
-              (Fin.last (n + g))) sample)
-        rw [approxLast, exactLast]
+            ((prior.gate line).eval approxInterpretation approxInput
+              (Fin.last g)) sample)
+        rw [Program.eval_gate_last, Program.eval_gate_last]
         let arguments :=
           lineArguments prior line approxInterpretation approxInput
         have localCorrect := scheme.gate_correct line.op arguments sample fresh.2
@@ -168,7 +165,8 @@ theorem program_correct
             (fun input => decode (arguments input) sample) (fun input => ?_))
           localCorrect
         exact inductionHypothesis fresh.1 (line.wires input)
-      · simpa only [Program.trace_gate_castSucc] using
+      | castSucc priorWire =>
+        simpa only [Program.trace_gate_castSucc] using
           inductionHypothesis fresh.1 priorWire
 
 /-- A circuit output is correct on every sample outside the union of its
@@ -176,7 +174,7 @@ local exceptions. -/
 theorem circuit_correct
     (scheme : Scheme exactInterpretation approxInterpretation decode
       exactInput approxInput)
-    (circuit : Circuit σ n g m)
+    (circuit : Circuit σ n m)
     (output : Fin m)
     (sample : Sample)
     (fresh : sample ∉ scheme.programExceptions circuit.program) :
@@ -218,7 +216,7 @@ theorem failures_subset_programExceptions
     (scheme : Scheme exactInterpretation approxInterpretation decode
       exactInput approxInput)
     [DecidableRel scheme.relation]
-    (circuit : Circuit σ n g 1)
+    (circuit : Circuit σ n 1)
     (target : Sample → U)
     (computes : ∀ sample,
       circuit.eval exactInterpretation (exactInput sample) 0 = target sample) :
@@ -239,7 +237,7 @@ theorem failures_card_le_cost
     (scheme : Scheme exactInterpretation approxInterpretation decode
       exactInput approxInput)
     [DecidableRel scheme.relation]
-    (circuit : Circuit σ n g 1)
+    (circuit : Circuit σ n 1)
     (target : Sample → U)
     (computes : ∀ sample,
       circuit.eval exactInterpretation (exactInput sample) 0 = target sample) :

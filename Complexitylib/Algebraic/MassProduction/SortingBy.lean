@@ -157,11 +157,19 @@ def bitonicSortByCircuit
     (depth : Nat)
     (ascending : Bool) :
     Circuit DeMorgan.signature (networkBits depth recordWidth)
-      (bitonicSortGateCount keyFits depth)
       (networkBits depth recordWidth) :=
   ((bitonicSortCircuit keyFits depth ascending).mapInputs
       (recordBitEquiv depth recordWidth bitOrder)).mapOutputs
     (recordBitEquiv depth recordWidth bitOrder.symm)
+
+@[simp] theorem bitonicSortByCircuit_size
+    (bitOrder : Equiv.Perm (Fin recordWidth))
+    (keyFits : keyWidth <= recordWidth)
+    (depth : Nat)
+    (ascending : Bool) :
+    (bitonicSortByCircuit bitOrder keyFits depth ascending).size =
+      bitonicSortGateCount keyFits depth := by
+  simp [bitonicSortByCircuit]
 
 @[simp] theorem bitonicSortByCircuit_eval
     (bitOrder : Equiv.Perm (Fin recordWidth))

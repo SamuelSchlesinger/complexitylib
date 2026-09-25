@@ -193,7 +193,7 @@ theorem coefficientMatrix_rank_le_multiplicationCost
     [Field K]
     (n : Nat)
     (outputs : Fin m → MvPolynomial (Fin n) K)
-    (circuit : Circuit (Algebraic.Arithmetic.signature K) n g m)
+    (circuit : Circuit (Algebraic.Arithmetic.signature K) n m)
     (constructs : Multiple.Constructs
       (constant := (MvPolynomial.C : K → MvPolynomial (Fin n) K))
       (inputProblem K n) outputs circuit) :
@@ -210,7 +210,7 @@ theorem coefficientMatrix_rank_le_size
     [Field K]
     (n : Nat)
     (outputs : Fin m → MvPolynomial (Fin n) K)
-    (circuit : Circuit (Algebraic.Arithmetic.signature K) n g m)
+    (circuit : Circuit (Algebraic.Arithmetic.signature K) n m)
     (constructs : Multiple.Constructs
       (constant := (MvPolynomial.C : K → MvPolynomial (Fin n) K))
       (inputProblem K n) outputs circuit) :

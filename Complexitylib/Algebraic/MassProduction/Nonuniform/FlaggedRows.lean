@@ -36,7 +36,7 @@ theorem recordIndex_assoc (candidate : Fin candidates) (request : Fin requests) 
 
 /-- Regard the computed flags as an array of width-one records. -/
 def flagsArrayCircuit
-    (flags : Circuit DeMorgan.signature inputs gates (networkRecords menuDepth * networkRecords requestDepth)) :=
+    (flags : Circuit DeMorgan.signature inputs (networkRecords menuDepth * networkRecords requestDepth)) :=
   flags.mapOutputs
     (fun bit : Fin ((networkRecords menuDepth * networkRecords requestDepth) * 1) =>
       (finProdFinEquiv.symm bit).1)
@@ -52,7 +52,7 @@ def payloadCircuit
 
 /-- Assemble the complete flagged rows without copying the flag computation. -/
 def circuit
-    (flags : Circuit DeMorgan.signature inputs gates (networkRecords menuDepth * networkRecords requestDepth))
+    (flags : Circuit DeMorgan.signature inputs (networkRecords menuDepth * networkRecords requestDepth))
     (payloads : Fin (networkRecords menuDepth * networkRecords requestDepth) →
       Fin payloadWidth → DeMorgan.Wiring inputs) :=
   (RecordArray.combine (records := networkRecords menuDepth * networkRecords requestDepth)
@@ -62,7 +62,7 @@ def circuit
 
 /-- Each candidate/request record has its computed flag and original payload. -/
 theorem circuit_eval_record
-    (flags : Circuit DeMorgan.signature inputs gates (networkRecords menuDepth * networkRecords requestDepth))
+    (flags : Circuit DeMorgan.signature inputs (networkRecords menuDepth * networkRecords requestDepth))
     (payloads : Fin (networkRecords menuDepth * networkRecords requestDepth) →
       Fin payloadWidth → DeMorgan.Wiring inputs)
     (input : Fin inputs → Bool) (candidate : Fin (networkRecords menuDepth))
@@ -85,7 +85,7 @@ theorem circuit_eval_record
 
 /-- The selection flag is exactly the computed clean flag. -/
 theorem circuit_eval_flag
-    (flags : Circuit DeMorgan.signature inputs gates (networkRecords menuDepth * networkRecords requestDepth))
+    (flags : Circuit DeMorgan.signature inputs (networkRecords menuDepth * networkRecords requestDepth))
     (payloads : Fin (networkRecords menuDepth * networkRecords requestDepth) →
       Fin payloadWidth → DeMorgan.Wiring inputs)
     (input : Fin inputs → Bool) (candidate : Fin (networkRecords menuDepth))
@@ -100,7 +100,7 @@ theorem circuit_eval_flag
 
 /-- Adding the payloads and regrouping the rows adds no charged gates. -/
 theorem circuit_cost
-    (flags : Circuit DeMorgan.signature inputs gates (networkRecords menuDepth * networkRecords requestDepth))
+    (flags : Circuit DeMorgan.signature inputs (networkRecords menuDepth * networkRecords requestDepth))
     (payloads : Fin (networkRecords menuDepth * networkRecords requestDepth) →
       Fin payloadWidth → DeMorgan.Wiring inputs) :
     (circuit flags payloads).cost DeMorgan.standardCost = flags.cost DeMorgan.standardCost := by

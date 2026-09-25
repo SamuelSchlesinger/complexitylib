@@ -75,7 +75,7 @@ input-or-block-root wire. -/
 noncomputable def translateWire
     (source : CyclicCircuit JoinMeet.signature n g) :
     Wire n g → Wire n (gateCount source) :=
-  Fin.addCases Wire.input (fun gate => Wire.gate (rootGate source gate))
+  Wire.elim Wire.input (fun gate => Wire.gate (rootGate source gate))
 
 /-- A binary line with the two specified wires. -/
 def binaryLine
@@ -101,9 +101,9 @@ theorem binaryLine_eval_or
     (state : Fin g → Set Γ) :
     (binaryLine .or left right).eval
         (AndOr.setInterpretation Γ) inputs state =
-      (Fin.addCases inputs state : Wire n g → Set Γ) left ∪
-        (Fin.addCases inputs state : Wire n g → Set Γ) right := by
-  let valuation : Wire n g → Set Γ := Fin.addCases inputs state
+      (Wire.elim inputs state : Wire n g → Set Γ) left ∪
+        (Wire.elim inputs state : Wire n g → Set Γ) right := by
+  let valuation : Wire n g → Set Γ := Wire.elim inputs state
   change valuation ((binaryLine .or left right).wires (0 : Fin 2)) ∪
       valuation ((binaryLine .or left right).wires (1 : Fin 2)) =
     valuation left ∪ valuation right
@@ -116,9 +116,9 @@ theorem binaryLine_eval_and
     (state : Fin g → Set Γ) :
     (binaryLine .and left right).eval
         (AndOr.setInterpretation Γ) inputs state =
-      (Fin.addCases inputs state : Wire n g → Set Γ) left ∩
-        (Fin.addCases inputs state : Wire n g → Set Γ) right := by
-  let valuation : Wire n g → Set Γ := Fin.addCases inputs state
+      (Wire.elim inputs state : Wire n g → Set Γ) left ∩
+        (Wire.elim inputs state : Wire n g → Set Γ) right := by
+  let valuation : Wire n g → Set Γ := Wire.elim inputs state
   change valuation ((binaryLine .and left right).wires (0 : Fin 2)) ∩
       valuation ((binaryLine .and left right).wires (1 : Fin 2)) =
     valuation left ∩ valuation right
@@ -190,7 +190,7 @@ def sourceWireValue
     (inputs : Fin n → Set Γ)
     (state : Fin g → Set Γ) :
     Wire n g → Set Γ :=
-  Fin.addCases inputs state
+  Wire.elim inputs state
 
 /-- Union of those arguments whose indices occur before a local accumulator
 position.  Position zero is bottom; position `i + 1` includes arguments
@@ -342,19 +342,19 @@ theorem translatedWire_value
         (source.atomAt inputs state gate).result
           (JoinMeet.setInterpretation Γ))
     (wire : Wire n g) :
-    (Fin.addCases inputs (values source inputs state) :
+    (Wire.elim inputs (values source inputs state) :
         Wire n (gateCount source) → Set Γ)
         (translateWire source wire) =
       sourceWireValue inputs state wire := by
-  refine Fin.addCases (motive := fun wire =>
-    (Fin.addCases inputs (values source inputs state) :
+  refine Cslib.Circuits.Wire.rec (motive := fun wire =>
+    (Wire.elim inputs (values source inputs state) :
         Wire n (gateCount source) → Set Γ)
         (translateWire source wire) =
       sourceWireValue inputs state wire)
     (fun input => ?_) (fun gate => ?_) wire
   · simp [translateWire, sourceWireValue]
   · simp only [translateWire, sourceWireValue,
-      Fin.addCases_right, rootGate]
+      Wire.elim_gate, rootGate]
     rw [values_expandedGate]
     exact blockValue_root source inputs state fixed gate
 
@@ -373,7 +373,7 @@ theorem blockValueOf_fixed
       targetState (encode localGate) =
         blockValueOf line rootValue arguments localGate)
     (translateValue : ∀ index,
-      (Fin.addCases inputs targetState : Wire n h → Set Γ)
+      (Wire.elim inputs targetState : Wire n h → Set Γ)
           (translate (line.wires index)) = arguments index)
     (localGate : Fin (blockGateCount line.op)) :
     blockValueOf line rootValue arguments localGate =
@@ -385,9 +385,9 @@ theorem blockValueOf_fixed
       | meet =>
           change Fin 2 → Set Γ at arguments
           change rootValue =
-            (Fin.addCases inputs targetState : Wire n h → Set Γ)
+            (Wire.elim inputs targetState : Wire n h → Set Γ)
                 (translate (wires (0 : Fin 2))) ∩
-              (Fin.addCases inputs targetState : Wire n h → Set Γ)
+              (Wire.elim inputs targetState : Wire n h → Set Γ)
                 (translate (wires (1 : Fin 2)))
           rw [translateValue (0 : Fin 2), translateValue (1 : Fin 2)]
           exact fixed
@@ -400,29 +400,27 @@ theorem blockValueOf_fixed
             targetState (encode localGate) =
               joinPrefix arguments localGate at encodeValue
           change ∀ index : Fin count,
-            (Fin.addCases inputs targetState : Wire n h → Set Γ)
+            (Wire.elim inputs targetState : Wire n h → Set Γ)
                 (translate (wires index)) =
               arguments index at translateValue
           refine Fin.cases ?_ (fun index => ?_) localGate
           · simp only [blockValueOf, blockLineOf, Fin.cases_zero]
             rw [binaryLine_eval_or]
-            simp only [Fin.addCases_right]
+            simp only [Wire.elim_gate]
             rw [encodeValue (0 : Fin (count + 1)), joinPrefix_zero]
             simp
           · simp only [blockValueOf, blockLineOf, Fin.cases_succ]
             rw [binaryLine_eval_or]
-            simp only [Fin.addCases_right]
+            simp only [Wire.elim_gate]
             rw [encodeValue index.castSucc]
             have translated := translateValue index
             have translated' :
-                (Fin.addCases inputs targetState : Wire n h → Set Γ)
+                (Wire.elim inputs targetState : Wire n h → Set Γ)
                     (translate (wires index)) = arguments index :=
               translated
             change joinPrefix arguments index.succ =
               joinPrefix arguments index.castSucc ∪
-                (fun wire : Wire n h =>
-                  Fin.addCases inputs targetState wire)
-                    (translate (wires index))
+                Wire.elim inputs targetState (translate (wires index))
             rw [translated', joinPrefix_succ]
 
 /-- The expanded values satisfy every binary cyclic equation. -/
@@ -475,12 +473,12 @@ theorem restrictedWire_value
     (targetState : Fin (gateCount source) → Set Γ)
     (wire : Wire n g) :
     sourceWireValue inputs (restrictedState source targetState) wire =
-      (Fin.addCases inputs targetState :
+      (Wire.elim inputs targetState :
         Wire n (gateCount source) → Set Γ)
         (translateWire source wire) := by
-  refine Fin.addCases (motive := fun wire =>
+  refine Cslib.Circuits.Wire.rec (motive := fun wire =>
     sourceWireValue inputs (restrictedState source targetState) wire =
-      (Fin.addCases inputs targetState :
+      (Wire.elim inputs targetState :
         Wire n (gateCount source) → Set Γ)
         (translateWire source wire))
     (fun input => ?_) (fun gate => ?_) wire
@@ -521,7 +519,7 @@ theorem sourceResult_subset_root
           (AndOr.setInterpretation Γ) inputs targetState ⊆
         targetState (encode localGate)) :
     JoinMeet.setInterpretation Γ line.op
-        ((Fin.addCases inputs targetState : Wire n h → Set Γ) ∘
+        ((Wire.elim inputs targetState : Wire n h → Set Γ) ∘
           translate ∘ line.wires) ⊆
       targetState (encode (rootLocal line.op)) := by
   cases line with
@@ -530,9 +528,9 @@ theorem sourceResult_subset_root
       | meet =>
           change Fin 2 → Wire n g at wires
           change
-            (Fin.addCases inputs targetState : Wire n h → Set Γ)
+            (Wire.elim inputs targetState : Wire n h → Set Γ)
                   (translate (wires (0 : Fin 2))) ∩
-                (Fin.addCases inputs targetState : Wire n h → Set Γ)
+                (Wire.elim inputs targetState : Wire n h → Set Γ)
                   (translate (wires (1 : Fin 2))) ⊆
               targetState (encode (0 : Fin 1))
           have prefixedRoot := blockPrefixed (0 : Fin 1)
@@ -549,7 +547,7 @@ theorem sourceResult_subset_root
                 (AndOr.setInterpretation Γ) inputs targetState ⊆
               targetState (encode localGate) at blockPrefixed
           let arguments : Fin count → Set Γ := fun index =>
-            (Fin.addCases inputs targetState : Wire n h → Set Γ)
+            (Wire.elim inputs targetState : Wire n h → Set Γ)
               (translate (wires index))
           have step : ∀ index : Fin count,
               targetState (encode index.castSucc) ∪ arguments index ⊆
@@ -577,9 +575,9 @@ theorem restrictedState_prefixed
   intro gate
   unfold CyclicCircuit.atomAt Atom.result
   rw [show
-      (Fin.addCases inputs (restrictedState source targetState) :
+      (Wire.elim inputs (restrictedState source targetState) :
           Wire n g → Set Γ) ∘ (source.lines gate).wires =
-        (Fin.addCases inputs targetState :
+        (Wire.elim inputs targetState :
           Wire n (gateCount source) → Set Γ) ∘
             translateWire source ∘ (source.lines gate).wires by
     funext index
@@ -614,7 +612,7 @@ theorem blockValueOf_subset_of_prefixed
     (rootSubset : rootValue ⊆ targetState (encode (rootLocal line.op)))
     (argumentSubset : ∀ index,
       arguments index ⊆
-        (Fin.addCases inputs targetState : Wire n h → Set Γ)
+        (Wire.elim inputs targetState : Wire n h → Set Γ)
           (translate (line.wires index)))
     (blockPrefixed : ∀ localGate,
       (blockLineOf line encode translate localGate).eval
@@ -638,7 +636,7 @@ theorem blockValueOf_subset_of_prefixed
           change Fin (count + 1) at localGate
           change ∀ index : Fin count,
             arguments index ⊆
-              (Fin.addCases inputs targetState : Wire n h → Set Γ)
+              (Wire.elim inputs targetState : Wire n h → Set Γ)
                 (translate (wires index)) at argumentSubset
           change ∀ localGate : Fin (count + 1),
             (blockLineOf
@@ -647,7 +645,7 @@ theorem blockValueOf_subset_of_prefixed
                 (AndOr.setInterpretation Γ) inputs targetState ⊆
               targetState (encode localGate) at blockPrefixed
           let targetArguments : Fin count → Set Γ := fun index =>
-            (Fin.addCases inputs targetState : Wire n h → Set Γ)
+            (Wire.elim inputs targetState : Wire n h → Set Γ)
               (translate (wires index))
           have step : ∀ index : Fin count,
               targetState (encode index.castSucc) ∪ targetArguments index ⊆
@@ -671,12 +669,12 @@ theorem sourceWire_subset_target
       sourceState gate ⊆ targetState (rootGate source gate))
     (wire : Wire n g) :
     sourceWireValue inputs sourceState wire ⊆
-      (Fin.addCases inputs targetState :
+      (Wire.elim inputs targetState :
         Wire n (gateCount source) → Set Γ)
         (translateWire source wire) := by
-  refine Fin.addCases (motive := fun wire =>
+  refine Cslib.Circuits.Wire.rec (motive := fun wire =>
     sourceWireValue inputs sourceState wire ⊆
-      (Fin.addCases inputs targetState :
+      (Wire.elim inputs targetState :
         Wire n (gateCount source) → Set Γ)
         (translateWire source wire))
     (fun input => ?_) (fun gate => ?_) wire

@@ -132,7 +132,7 @@ theorem rootMultiplicityFeatureSpan_finrank_le_additionCost
       (problem.inputs input).rootMultiplicity (points point) = 0)
     (targets : Fin m → K[X])
     (circuit : Circuit (Algebraic.Arithmetic.signature C)
-      problem.inputCount g m)
+      problem.inputCount m)
     (constructs : Interaction.Multiple.Constructs
       (constant := fun scalar ↦ Polynomial.C (constant scalar))
       problem targets circuit) :
@@ -162,7 +162,7 @@ theorem circuit_addition_lowerBound_of_rootMultiplicityFeature
     (independent : LinearIndependent K
       (rootMultiplicityFeature points ∘ targets))
     (circuit : Circuit (Algebraic.Arithmetic.signature C)
-      problem.inputCount g m)
+      problem.inputCount m)
     (constructs : Interaction.Multiple.Constructs
       (constant := fun scalar ↦ Polynomial.C (constant scalar))
       problem targets circuit) :
@@ -239,7 +239,7 @@ theorem shiftTargets_addition_lowerBound
     (points : Fin m → K)
     (injective : Function.Injective points)
     (nonzero : ∀ point, points point ≠ 0)
-    (circuit : Circuit (Algebraic.Arithmetic.signature C) 1 g m)
+    (circuit : Circuit (Algebraic.Arithmetic.signature C) 1 m)
     (constructs : circuit.eval
       (Algebraic.Arithmetic.interpretation
         (fun scalar ↦ Polynomial.C (constant scalar)))

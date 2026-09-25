@@ -82,12 +82,8 @@ nodes but zero standard cost. -/
 def constantBitVectorCircuit
     (inputWidth : Nat)
     (bits : Fin width -> Bool) :
-    Circuit DeMorgan.signature inputWidth
-      (∑ bit, (DeMorgan.Expression.constant
-        (n := inputWidth) (bits bit)).gateCount) width :=
+    Circuit DeMorgan.signature inputWidth width :=
   Circuit.parallelFin width
-    (fun bit => (DeMorgan.Expression.constant
-      (n := inputWidth) (bits bit)).gateCount)
     fun bit => (DeMorgan.Expression.constant
       (n := inputWidth) (bits bit)).circuit
 
@@ -112,7 +108,7 @@ def lineInputCoordinateCircuit
     (dimension width : Nat)
     (side : Fin 2)
     (coordinate : Fin dimension) :
-    Circuit DeMorgan.signature (2 * (dimension * width)) 0 width :=
+    Circuit DeMorgan.signature (2 * (dimension * width)) width :=
   (Circuit.id DeMorgan.signature (2 * (dimension * width))).mapOutputs
     fun bit => finProdFinEquiv
       (side, finProdFinEquiv (coordinate, bit))
@@ -298,8 +294,6 @@ noncomputable def linePointCircuit
     (widthPositive : 0 < width)
     (scalar : Fin (nonzeroScalarCount width)) :=
   Circuit.parallelFinVector dimension width
-    (fun coordinate => linePointCoordinateGateCount
-      dimension widthPositive coordinate scalar)
     fun coordinate =>
       linePointCoordinateCircuit
         dimension widthPositive coordinate scalar
@@ -346,7 +340,6 @@ noncomputable def lineEnumerationCircuit
     (dimension : Nat)
     (widthPositive : 0 < width) :=
   Circuit.parallelFinVector (nonzeroScalarCount width) (dimension * width)
-    (fun scalar => linePointGateCount dimension widthPositive scalar)
     fun scalar => linePointCircuit dimension widthPositive scalar
 
 @[simp] theorem lineEnumerationCircuit_eval_apply
@@ -488,7 +481,7 @@ theorem enumeratedPuncturedLine_normalized_eq
 def schedulerStageTargetCircuit
     (dimension width depth : Nat) :
     Circuit DeMorgan.signature
-      ((networkRecords depth + 1) * (dimension * width)) 0
+      ((networkRecords depth + 1) * (dimension * width))
       (dimension * width) :=
   (Circuit.id DeMorgan.signature
     ((networkRecords depth + 1) * (dimension * width))).mapOutputs

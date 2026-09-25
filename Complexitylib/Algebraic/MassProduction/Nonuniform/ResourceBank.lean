@@ -21,16 +21,16 @@ suffix block and produces one Boolean value.
 
 namespace Algebraic.MassProduction.Nonuniform.ResourceBank
 
-variable {resources : Nat} {gates : Fin resources → Nat}
+variable {resources : Nat}
 
 /-- Evaluate every resource once on its own input block. -/
-def circuit (members : (resource : Fin resources) → Circuit DeMorgan.signature suffixWidth (gates resource) 1) :=
-  Circuit.parallelFin resources gates
+def circuit (members : (resource : Fin resources) → Circuit DeMorgan.signature suffixWidth 1) :=
+  Circuit.parallelFin resources
     (fun resource => (members resource).mapInputs (fun bit => finProdFinEquiv (resource, bit)))
 
 /-- Every bank output is exactly its resource's evaluation on its suffix block. -/
 theorem circuit_eval
-    (members : (resource : Fin resources) → Circuit DeMorgan.signature suffixWidth (gates resource) 1)
+    (members : (resource : Fin resources) → Circuit DeMorgan.signature suffixWidth 1)
     (input : Fin (resources * suffixWidth) → Bool) (resource : Fin resources) :
     (circuit members).eval DeMorgan.interpretation input resource =
       (members resource).eval DeMorgan.interpretation
@@ -40,14 +40,14 @@ theorem circuit_eval
 
 /-- No routing padding is charged as an extra resource evaluation. -/
 theorem circuit_cost
-    (members : (resource : Fin resources) → Circuit DeMorgan.signature suffixWidth (gates resource) 1) :
+    (members : (resource : Fin resources) → Circuit DeMorgan.signature suffixWidth 1) :
     (circuit members).cost DeMorgan.standardCost = ∑ resource, (members resource).cost DeMorgan.standardCost := by
   rw [circuit, Circuit.cost_parallelFin]
   simp only [Circuit.cost_mapInputs]
 
 /-- A common resource bound contributes exactly `resources * bound`. -/
 theorem circuit_cost_le
-    (members : (resource : Fin resources) → Circuit DeMorgan.signature suffixWidth (gates resource) 1)
+    (members : (resource : Fin resources) → Circuit DeMorgan.signature suffixWidth 1)
     (bounded : ∀ resource, (members resource).cost DeMorgan.standardCost ≤ bound) :
     (circuit members).cost DeMorgan.standardCost ≤ resources * bound := by
   rw [circuit_cost]

@@ -232,7 +232,7 @@ theorem circuit_multiplication_lowerBound
     (target_rank_ge : (targetRank : Cardinal) ≤
       LinearMap.rank (linearMap point problem.target))
     (circuit : Circuit (Algebraic.Arithmetic.signature C)
-      problem.inputCount g 1)
+      problem.inputCount 1)
     (constructs : problem.Constructs circuit
       (Algebraic.Arithmetic.interpretation
         (fun scalar => MvPolynomial.C (constant scalar)))) :
@@ -258,7 +258,7 @@ theorem polynomial_circuit_multiplication_lowerBound
     (targetRank : Nat)
     (target_rank_ge : (targetRank : Cardinal) ≤
       LinearMap.rank (linearMap point target))
-    (circuit : Circuit (Algebraic.Arithmetic.signature C) n g 1)
+    (circuit : Circuit (Algebraic.Arithmetic.signature C) n 1)
     (constructs :
       ({ inputCount := n, inputs := MvPolynomial.X, target := target } :
         Problem (MvPolynomial (Fin n) K)).Constructs circuit

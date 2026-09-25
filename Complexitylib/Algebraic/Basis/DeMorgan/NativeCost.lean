@@ -31,7 +31,6 @@ private def contextExpression (op : Op) : Expression (2 + arity op) :=
   | .or => .or (.input ⟨2, by decide⟩) (.input ⟨3, by decide⟩)
 
 private def nativeTranslation : ContextualTranslation signature signature 2 where
-  gateCount op := (contextExpression op).gateCount
   operation op := (contextExpression op).circuit
 
 private def constantContext : Fin 2 → Bool := Fin.cons false (Fin.cons true Fin.elim0)
@@ -44,9 +43,9 @@ private theorem nativeTranslation_pull : nativeTranslation.pull interpretation c
 
 private theorem nativeTranslation_pullCost : nativeTranslation.pullCost OperationCost.unit = standardCost := by
   funext op
-  cases op <;> simp [ContextualTranslation.pullCost, nativeTranslation, contextExpression, Circuit.size]
+  cases op <;> simp [ContextualTranslation.pullCost, nativeTranslation, contextExpression]
 
-private def initializeConstants (n : Nat) : Circuit signature n 2 (2 + n) :=
+private def initializeConstants (n : Nat) : Circuit signature n (2 + n) :=
   ((Expression.constant false : Expression n).circuit.parallel
     (Expression.constant true : Expression n).circuit).parallel (Circuit.id signature n)
 
@@ -61,44 +60,44 @@ private theorem initializeConstants_eval (input : Fin n → Bool) :
   · intro index
     simp [initializeConstants, Circuit.eval_parallel, ContextualTranslation.appendInputs]
 
-private def rawWithSharedConstants (circuit : Circuit signature n g m) :
-    Circuit signature n (2 + nativeTranslation.compiledGateCount circuit) m :=
+private def rawWithSharedConstants (circuit : Circuit signature n m) :
+    Circuit signature n m :=
   (nativeTranslation.compile circuit).comp (initializeConstants n)
 
-private theorem rawWithSharedConstants_eval (circuit : Circuit signature n g m) (input : Fin n → Bool) :
+private theorem rawWithSharedConstants_eval (circuit : Circuit signature n m) (input : Fin n → Bool) :
     (rawWithSharedConstants circuit).eval interpretation input = circuit.eval interpretation input := by
   rw [rawWithSharedConstants, Circuit.eval_comp, initializeConstants_eval,
     ContextualTranslation.compile_eval, nativeTranslation_pull]
 
-private theorem rawWithSharedConstants_size (circuit : Circuit signature n g m) :
+private theorem initializeConstants_size : (initializeConstants n).size = 2 := by
+  simp [initializeConstants, Expression.gateCount]
+
+private theorem rawWithSharedConstants_size (circuit : Circuit signature n m) :
     (rawWithSharedConstants circuit).size = circuit.cost standardCost + 2 := by
   have size := nativeTranslation.compile_size circuit
   rw [nativeTranslation_pullCost] at size
-  change 2 + nativeTranslation.compiledGateCount circuit = circuit.cost standardCost + 2
-  change nativeTranslation.compiledGateCount circuit = circuit.cost standardCost at size
+  rw [rawWithSharedConstants, Circuit.size_comp, size, initializeConstants_size]
   omega
 
-private theorem native_compiled_count (circuit : Circuit signature n g m) :
-    2 + nativeTranslation.compiledGateCount circuit = circuit.cost standardCost + 2 :=
-  rawWithSharedConstants_size circuit
-
 /-- Compile a circuit while sharing two constant gates and eliminating identity gates. -/
-@[no_expose] def withSharedConstants (circuit : Circuit signature n g m) :
-    Circuit signature n (circuit.cost standardCost + 2) m :=
-  (rawWithSharedConstants circuit).castCounts rfl (native_compiled_count circuit) rfl
+@[no_expose] def withSharedConstants (circuit : Circuit signature n m) :
+    Circuit signature n m :=
+  rawWithSharedConstants circuit
 
 /-- Sharing constants preserves every designated output. -/
-theorem withSharedConstants_eval (circuit : Circuit signature n g m) (input : Fin n → Bool) :
+theorem withSharedConstants_eval (circuit : Circuit signature n m) (input : Fin n → Bool) :
     (withSharedConstants circuit).eval interpretation input = circuit.eval interpretation input := by
-  rw [withSharedConstants, Circuit.eval_castCounts]
-  simpa using rawWithSharedConstants_eval circuit input
+  rw [withSharedConstants]
+  exact rawWithSharedConstants_eval circuit input
 
 /-- The translated native size is precisely standard logical-gate cost plus two. -/
-theorem withSharedConstants_size (circuit : Circuit signature n g m) :
-    (withSharedConstants circuit).size = circuit.cost standardCost + 2 := rfl
+theorem withSharedConstants_size (circuit : Circuit signature n m) :
+    (withSharedConstants circuit).size = circuit.cost standardCost + 2 := by
+  rw [withSharedConstants]
+  exact rawWithSharedConstants_size circuit
 
 /-- Any standard-cost circuit yields a native upper bound with only two extra gates. -/
-theorem complexity_le_standardCost_add_two (circuit : Circuit signature n g 1)
+theorem complexity_le_standardCost_add_two (circuit : Circuit signature n 1)
     {function : ScalarFunction Bool n}
     (computes : circuit.ComputesWith interpretation (fun input _ => function input)) :
     complexity function ≤ circuit.cost standardCost + 2 := by
@@ -106,7 +105,6 @@ theorem complexity_le_standardCost_add_two (circuit : Circuit signature n g 1)
     intro input
     rw [withSharedConstants_eval]
     exact computes input)
-  change complexity function ≤ (withSharedConstants circuit).size at bound
   rwa [withSharedConstants_size] at bound
 
 end Algebraic.DeMorgan

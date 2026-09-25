@@ -62,13 +62,16 @@ def binaryExtensionVectorAddBits
 def binaryExtensionVectorAddCircuit
     (dimension width : Nat) :
     Circuit DeMorgan.signature (2 * (dimension * width))
-      (∑ _coordinate : Fin dimension,
-        vectorAdditionCoordinateGateCount width)
       (dimension * width) :=
-  Circuit.parallelFinVector dimension width
-    (fun _ => vectorAdditionCoordinateGateCount width) fun coordinate =>
+  Circuit.parallelFinVector dimension width fun coordinate =>
       (binaryExtensionAddCircuit width).mapInputs
         (vectorCoordinatePairIndex dimension width coordinate)
+
+@[simp] theorem binaryExtensionVectorAddCircuit_size
+    (dimension width : Nat) :
+    (binaryExtensionVectorAddCircuit dimension width).size =
+      ∑ _coordinate : Fin dimension, vectorAdditionCoordinateGateCount width := by
+  simp [binaryExtensionVectorAddCircuit, vectorAdditionCoordinateGateCount]
 
 @[simp] theorem binaryExtensionVectorAddCircuit_eval
     (input : Fin (2 * (dimension * width)) -> Bool) :
@@ -202,26 +205,30 @@ def pointTargetDifferenceArrayRawCircuit
     (dimension width depth : Nat) :
     Circuit DeMorgan.signature
       ((networkRecords depth + 1) * (dimension * width))
-      (∑ _record : Fin (networkRecords depth),
-        ∑ _coordinate : Fin dimension,
-          vectorAdditionCoordinateGateCount width)
       (networkRecords depth * (dimension * width)) :=
-  Circuit.parallelFinVector (networkRecords depth) (dimension * width)
-    (fun _ => ∑ _coordinate : Fin dimension,
-      vectorAdditionCoordinateGateCount width) fun record =>
+  Circuit.parallelFinVector (networkRecords depth) (dimension * width) fun record =>
       (binaryExtensionVectorAddCircuit dimension width).mapInputs
         (stageDifferenceInputIndex depth (dimension * width) record)
+
+@[simp] theorem pointTargetDifferenceArrayRawCircuit_size
+    (dimension width depth : Nat) :
+    (pointTargetDifferenceArrayRawCircuit dimension width depth).size =
+      ∑ _record : Fin (networkRecords depth), ∑ _coordinate : Fin dimension, vectorAdditionCoordinateGateCount width := by
+  simp [pointTargetDifferenceArrayRawCircuit, vectorAdditionCoordinateGateCount]
 
 /-- Compute all point-minus-target vectors in parallel. -/
 def pointTargetDifferenceArrayCircuit
     (dimension width depth : Nat) :
     Circuit DeMorgan.signature
       ((networkRecords depth + 1) * (dimension * width))
-      (∑ _record : Fin (networkRecords depth),
-        ∑ _coordinate : Fin dimension,
-          vectorAdditionCoordinateGateCount width)
       (networkRecords depth * (dimension * width)) :=
   pointTargetDifferenceArrayRawCircuit dimension width depth
+
+@[simp] theorem pointTargetDifferenceArrayCircuit_size
+    (dimension width depth : Nat) :
+    (pointTargetDifferenceArrayCircuit dimension width depth).size =
+      ∑ _record : Fin (networkRecords depth), ∑ _coordinate : Fin dimension, vectorAdditionCoordinateGateCount width := by
+  simp [pointTargetDifferenceArrayCircuit, vectorAdditionCoordinateGateCount]
 
 @[simp] theorem pointTargetDifferenceArrayRawCircuit_eval_apply
     (input : Fin ((networkRecords depth + 1) * (dimension * width)) -> Bool)
@@ -523,11 +530,11 @@ theorem schedulerStageCircuit_disjoint_of_nonzero_capacity
             widthPositive input points target pointBits targetBits]
         exact capacity)
   refine ⟨direction, ?_, disjoint⟩
-  exact (Circuit.eval_comp
+  exact (Circuit.eval_comp (I := DeMorgan.interpretation)
     (ForbiddenRanks.freshDirectionFromDifferencesCircuit
       dimension widthPositive depth)
     (pointTargetDifferenceArrayCircuit dimension width depth)
-    DeMorgan.interpretation input).trans directionKey
+    input).trans directionKey
 
 /-- The total-array capacity condition is a convenient sufficient form of
 one-stage correctness. -/
