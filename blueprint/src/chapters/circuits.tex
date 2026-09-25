@@ -155,6 +155,26 @@ says otherwise.
   Convert between polynomial bounds and big-O power bounds.
 \end{proof}
 
+\begin{theorem}[Circuits as straight-line programs]
+  \label{thm:circuits-straightline}
+  \lean{Complexity.Circuit.toStraightLine, Complexity.Circuit.eval_toStraightLine,
+    Complexity.Circuit.size_toStraightLine}
+  \leanok
+  \uses{def:circuit, def:circuits-bases}
+  Every basis $B$ is a CSLib signature whose operation symbols are the gates of
+  $B$: an operation, a fan-in it allows, and a negation flag for each input,
+  interpreted exactly as the gate evaluates. A circuit over $B$ with $G$
+  internal gates and $M$ outputs becomes a CSLib circuit over this signature
+  that computes the same function and has exactly $G + M$ gates, its size.
+\end{theorem}
+\begin{proof}
+  \leanok
+  The program lists the internal gates and then the output gates, with each
+  wire renumbered in CSLib's layout, and the outputs are the last $M$ gates.
+  Induction on the position shows that every gate of the program carries the
+  value of the corresponding typed gate.
+\end{proof}
+
 \begin{theorem}[CSLib circuits]
   \label{thm:circuits-cslib}
   \lean{Complexity.Circuit.eval_ofCslib, Complexity.Circuit.exists_cslib,

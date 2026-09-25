@@ -127,7 +127,9 @@ In order. Each item says why it matters and roughly how large it is.
    with public statements unchanged:
    1. **Signatures and the exact correspondence.** `Basis.signature` and
       `Basis.interpretation` for every basis, and a size-preserving translation
-      of typed circuits into straight-line programs over them.
+      of typed circuits into straight-line programs over them
+      (`Circuit.toStraightLine`, `Complexitylib/Circuits/StraightLine.lean`;
+      the converse translation is next).
    2. **Redefine the measures and classes** (`sizeComplexity`, `SIZE`, `PPoly`,
       `CircuitFamily`, `DEPTH`, `NC`, `AC`, `TC`) over CSLib circuits, keeping
       their names, and re-prove the old statements through the correspondence.

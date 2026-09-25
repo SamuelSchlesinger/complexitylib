@@ -72,6 +72,7 @@ public import Complexitylib.Circuits.Nondeterminism
 public import Complexitylib.Circuits.Hardwiring
 public import Complexitylib.Circuits.Unrolling
 public import Complexitylib.Circuits.Valiant
+public import Complexitylib.Circuits.StraightLine
 import Complexitylib.Circuits.Internal.Bridge
 
 /-! # Circuit Complexity Library
@@ -253,6 +254,8 @@ Theorem modules (re-export definitions + main results):
 * `Complexitylib.Circuits.Schnorr` — Schnorr's XOR lower bound
 * `Complexitylib.Circuits.Nondeterminism` — nondeterministic quantification complexity bounds
 * `Complexitylib.Circuits.Valiant` — Valiant's depth reduction lemma for digraphs
+* `Complexitylib.Circuits.StraightLine` — typed circuits as CSLib straight-line programs, with
+  the same function and size
 
 Internal modules contain proof machinery (CircDesc, DNF construction,
 restriction/elimination arguments) and are not intended for direct use.

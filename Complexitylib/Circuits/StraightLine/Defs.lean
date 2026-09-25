@@ -1,0 +1,110 @@
+/-
+Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Samuel Schlesinger
+-/
+
+module
+public import Cslib.Computability.Circuit.Basic
+public import Complexitylib.Circuits.Basic
+
+/-!
+# Complexitylib bases as CSLib signatures
+
+CSLib's circuits (`Cslib.Circuits.Circuit`) are straight-line programs over a
+signature. This file turns each Complexitylib basis into such a signature
+without changing its cost model. An operation symbol of `B.signature` is a
+whole gate of `B`: an operation, a fan-in that the operation allows, and a
+negation flag for each input. Its interpretation `B.interpretation` is exactly
+`Gate.eval`, so negations stay free, and a basis with unbounded fan-in becomes
+a signature with infinitely many operation symbols.
+
+`Circuit.toStraightLine` translates a typed circuit `Circuit B N M G` into a
+CSLib circuit over `B.signature`. The program lists the `G` internal gates and
+then the `M` output gates, and the CSLib outputs are the last `M` gates, so the
+translation has exactly `G + M` gates, the typed circuit's `size`.
+
+## Main definitions
+
+- `Complexity.Basis.GateKind`, `Complexity.Basis.signature`,
+  `Complexity.Basis.interpretation` — a basis as a CSLib signature
+- `Complexity.Circuit.toStraightLine` — a typed circuit as a CSLib circuit
+-/
+
+
+@[expose] public section
+
+namespace Complexity
+
+open Cslib.Circuits
+
+/-- A gate kind of the basis `B`: an operation, a fan-in that the operation
+allows, and a negation flag for each input. -/
+structure Basis.GateKind (B : Basis) where
+  /-- The basis operation. -/
+  op : B.Op
+  /-- The number of inputs. -/
+  fanIn : ℕ
+  /-- The operation allows this fan-in. -/
+  arityOk : (B.arity op).satisfiedBy fanIn
+  /-- Which inputs are negated before the operation is applied. -/
+  negated : Fin fanIn → Bool
+
+/-- The CSLib signature of a basis: one operation symbol per gate kind, with
+the gate kind's fan-in as its arity. -/
+def Basis.signature (B : Basis) : Signature where
+  Op := B.GateKind
+  Arity kind := kind.fanIn
+
+/-- The interpretation of a basis's signature: a gate kind negates the flagged
+inputs and applies its operation, exactly as `Gate.eval` does. -/
+def Basis.interpretation (B : Basis) : Interpretation B.signature Bool :=
+  fun kind input => B.eval kind.op kind.fanIn kind.arityOk
+    fun i => (kind.negated i).xor (input i)
+
+/-- The gate kind of a gate: its operation, fan-in, and negation flags. -/
+def Gate.kind {B : Basis} {W : ℕ} (gate : Gate B W) : B.GateKind :=
+  ⟨gate.op, gate.fanIn, gate.arityOk, gate.negated⟩
+
+namespace StraightLine
+
+variable {σ : Signature} {N : ℕ}
+
+/-- The CSLib wire with index `w` in the layout of typed circuits, where the
+first `N` wires are the inputs and wire `N + j` is gate `j`. -/
+def wireOfIndex {j : ℕ} (w : ℕ) (hw : w < N + j) : Wire N j :=
+  if h : w < N then .input ⟨w, h⟩ else .gate ⟨w - N, by omega⟩
+
+/-- The program whose gate `j` computes line `lines j`, which reads only the
+inputs and the gates before `j`. -/
+def ofLines : (g : ℕ) → ((j : Fin g) → Line σ N j) → Program σ N g
+  | 0, _ => .empty
+  | g + 1, lines => .gate (ofLines g fun j => lines j.castSucc) (lines (Fin.last g))
+
+end StraightLine
+
+namespace Circuit
+
+variable {B : Basis} {N M G : ℕ} [NeZero N] [NeZero M]
+
+/-- Line `j` of the straight-line form of a typed circuit: internal gate `j`
+for `j < G`, and output gate `j - G` otherwise. -/
+def straightLineAt (c : Circuit B N M G) (j : Fin (G + M)) : Line B.signature N j :=
+  if h : j.val < G then
+    ⟨(c.gates ⟨j, h⟩).kind, fun k => StraightLine.wireOfIndex ((c.gates ⟨j, h⟩).inputs k).val
+      (by simpa using c.acyclic ⟨j, h⟩ k)⟩
+  else
+    ⟨(c.outputs ⟨j - G, by omega⟩).kind, fun k =>
+      StraightLine.wireOfIndex ((c.outputs ⟨j - G, by omega⟩).inputs k).val
+        (by have := ((c.outputs ⟨j - G, by omega⟩).inputs k).isLt; omega)⟩
+
+/-- The typed circuit `c` as a CSLib circuit over `B.signature`: its internal
+gates followed by its output gates, with the output gates as outputs. -/
+def toStraightLine (c : Circuit B N M G) : Cslib.Circuits.Circuit B.signature N M where
+  size := G + M
+  program := StraightLine.ofLines (G + M) c.straightLineAt
+  outputs o := .gate (Fin.natAdd G o)
+
+end Circuit
+
+end Complexity
