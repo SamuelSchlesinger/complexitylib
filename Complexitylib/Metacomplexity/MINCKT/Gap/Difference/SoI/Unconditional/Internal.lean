@@ -39,11 +39,16 @@ theorem SupportsPairUpper.pair_upper_internal
       inst.complexity conditionalMachine +
           ordinaryMachine.timeBoundedKolmogorovComplexity
             inst.condition inst.time +
-        (plan.pairUpperLoss inst : WithTop ℕ) :=
-  timeBoundedKolmogorovComplexity_pair_le_add_of_conditional_composition_internal
-    (hsupports.composes inst) (hsupports.length_le inst)
-      (hsupports.condition_finite inst) (hsupports.result_finite inst)
-      (hsupports.condition_le_bound inst) (hsupports.result_le_bound inst)
+        (plan.pairUpperLoss inst : WithTop ℕ) := by
+  by_cases hcondition :
+      ordinaryMachine.timeBoundedKolmogorovComplexity inst.condition inst.time = ⊤
+  · simp [hcondition]
+  by_cases hresult : inst.complexity conditionalMachine = ⊤
+  · simp [hresult]
+  exact timeBoundedKolmogorovComplexity_pair_le_add_of_conditional_composition_internal
+    (hsupports.composes inst) (hsupports.length_le inst) hcondition hresult
+      (hsupports.condition_le_bound inst hcondition)
+      (hsupports.result_le_bound inst hresult)
 
 theorem Compatible.satisfiesSoIInputsOnQueries_internal
     {ordinaryTapes conditionalTapes : ℕ}

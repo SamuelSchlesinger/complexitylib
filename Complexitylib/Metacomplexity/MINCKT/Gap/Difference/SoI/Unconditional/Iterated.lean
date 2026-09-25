@@ -124,25 +124,15 @@ theorem IsRegularClock.conditionalParameters_widening
     (conditionalParameters clock).IsWidening :=
   hclock.conditionalParameters_widening_internal
 
-/-- Every ordinary-estimator query in the iterated plan has finite
-time-bounded complexity. Paired queries use the operational composition
-upper bound; condition queries use the attained source minimum and clock
-widening. -/
-theorem IsRegularClock.estimatorQuery_finite
-    {ordinaryTapes conditionalTapes : ℕ}
-    {clock : ℕ → ℕ}
-    {pairUpperLoss correction : MINCKT.Instance → ℕ}
-    {composition : PairCompositionPlan}
-    {ordinaryMachine : TM ordinaryTapes}
-    {conditionalMachine : OracleTM conditionalTapes}
-    (hclock : IsRegularClock clock)
-    (hsupports : SupportsPairUpper (plan clock pairUpperLoss correction)
-      composition ordinaryMachine conditionalMachine)
-    {query : MINKT.Instance}
-    (hquery : (plan clock pairUpperLoss correction).IsEstimatorQuery query) :
-    ordinaryMachine.timeBoundedKolmogorovComplexity
-      query.output query.time ≠ ⊤ :=
-  hclock.estimatorQuery_finite_internal hsupports hquery
+/-- The full-domain estimator sandwich is unsatisfiable for the iterated
+plan's ordinary parameters: their transformed clock ignores output length, so at
+source time `0` no machine prints a string longer than `clock 0`. The
+consequences therefore require the sandwich only on the plan's own estimator
+queries (`SatisfiesBoundsOn`). -/
+theorem not_satisfiesBounds_ordinaryParameters {tapes : ℕ} (machine : TM tapes)
+    (clock : ℕ → ℕ) (estimate : GapMINKT.Logarithmic.Estimator) :
+    ¬ estimate.SatisfiesBounds machine (ordinaryParameters clock) :=
+  not_satisfiesBounds_ordinaryParameters_internal machine clock estimate
 
 /-- The exact iterated clocks and finite loss inequalities discharge every
 non-machine field of the unconditional-estimator compatibility contract. -/

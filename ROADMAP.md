@@ -59,20 +59,17 @@ stable surface modules is part of priority 2 below.
 
 In order. Each item says why it matters and roughly how large it is.
 
-1. **Remove vacuous and silent hypotheses.**
-   - The symmetry-of-information collapse theorems
-     (`P_eq_NP_of_multiplicative_hard_of_SoI` and its variants) assume
-     `SupportsPairUpper`, which nothing satisfies: its `condition_finite` field
-     demands a finite zero-step complexity for nonempty strings. Restrict its
-     finiteness fields to instances with `|x| + |y| ≤ t`, as the SoI
-     hypothesis already does, and re-prove the collapse.
+1. **Guard against vacuous and silent hypotheses.**
    - Add two audits to CI, each with an allowlist of famous open problems and
      clearly named conditional theorems. The first flags theorem hypotheses
      that are closed propositions, the shape of an unproved assumption. The
      second flags predicates that public theorems assume but the library never
      establishes. Pair the second with a non-vacuity rule: every interface
      predicate a public theorem assumes has at least one instance. That rule
-     would have caught `SupportsPairUpper`.
+     would have caught the unsatisfiable hypotheses that made the
+     symmetry-of-information collapse theorems vacuous until September 2026
+     (a pair-composition contract demanding finite zero-step complexities, and
+     an estimator required to be correct at every clock).
    - Instantiate the remaining uninstantiated interfaces: a universal oracle
      machine for `OracleTM.IsEfficientlyUniversal`, and a list-decodable code
      family for the Nisan–Wigderson reconstruction.

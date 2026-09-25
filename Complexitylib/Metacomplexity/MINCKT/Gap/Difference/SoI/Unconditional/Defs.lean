@@ -100,7 +100,13 @@ def accountingSchedule (plan : Plan)
 end Plan
 
 /-- Operational evidence that the plan's `pairUpperLoss` really gives the
-unconditional upper-chain bound used by the SoI argument. -/
+unconditional upper-chain bound used by the SoI argument.
+
+No finiteness is demanded. When the condition minimum `C^t(y)` or the
+conditional minimum `C^t(x | y)` is infinite, the upper chain holds trivially,
+so the budgets only need to contain the minima that are attained. (Demanding
+finite minima at every instance would be unsatisfiable: no machine produces a
+nonempty string within zero steps.) -/
 structure SupportsPairUpper
     {ordinaryTapes conditionalTapes : ℕ}
     (plan : Plan) (composition : PairCompositionPlan)
@@ -119,19 +125,16 @@ structure SupportsPairUpper
     resultProgram.length ≤ composition.resultBound inst →
     (composition.compile conditionProgram resultProgram).length ≤
       resultProgram.length + conditionProgram.length + plan.pairUpperLoss inst
-  /-- The source-clock condition minimum is attained. -/
-  condition_finite : ∀ inst : MINCKT.Instance,
-    ordinaryMachine.timeBoundedKolmogorovComplexity
-      inst.condition inst.time ≠ ⊤
-  /-- The source-clock conditional minimum is attained. -/
-  result_finite : ∀ inst : MINCKT.Instance,
-    inst.complexity conditionalMachine ≠ ⊤
-  /-- The chosen condition budget contains the attained minimum. -/
+  /-- The chosen condition budget contains the condition minimum whenever
+  that minimum is attained. -/
   condition_le_bound : ∀ inst : MINCKT.Instance,
+    ordinaryMachine.timeBoundedKolmogorovComplexity inst.condition inst.time ≠ ⊤ →
     ordinaryMachine.timeBoundedKolmogorovComplexity inst.condition inst.time ≤
       (composition.conditionBound inst : WithTop ℕ)
-  /-- The chosen conditional-result budget contains the attained minimum. -/
+  /-- The chosen conditional-result budget contains the conditional minimum
+  whenever that minimum is attained. -/
   result_le_bound : ∀ inst : MINCKT.Instance,
+    inst.complexity conditionalMachine ≠ ⊤ →
     inst.complexity conditionalMachine ≤
       (composition.resultBound inst : WithTop ℕ)
 

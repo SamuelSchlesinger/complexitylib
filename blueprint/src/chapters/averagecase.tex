@@ -530,9 +530,27 @@ main open direction.
   Theorem~\ref{thm:meta-promise-collapse}.
 \end{proof}
 
+\begin{lemma}[No estimator is correct on every ordinary instance]
+  \label{lem:avg-no-full-estimator}
+  \lean{Complexity.GapMINCKT.DifferenceEstimator.Unconditional.Iterated.not_satisfiesBounds_ordinaryParameters}
+  \leanok
+  \uses{def:avg-gapminkt-log}
+  For the ordinary parameters of the iterated plan, whose transformed clock is
+  $p(t)$ regardless of output length, no estimator satisfies Fact~3.4's
+  sandwich on every instance: at source time $0$, no machine prints a string of
+  length $p(0) + 1$ within $p(0)$ steps. The estimator hypotheses below are
+  therefore restricted to the plan's own queries.
+\end{lemma}
+\begin{proof}
+  \leanok
+  The output cell at position $p(0) + 1$ is untouched by any run of at most
+  $p(0)$ steps, so it stays blank.
+\end{proof}
+
 \begin{theorem}[Conditional collapse from symmetry of information]
   \label{thm:avg-soi-collapse}
   \lean{Complexity.GapMINCKT.DifferenceEstimator.Unconditional.Iterated.Slack.P_eq_NP_of_multiplicative_hard_of_SoI,
+    Complexity.GapMINCKT.DifferenceEstimator.Unconditional.Iterated.Slack.P_eq_NP_of_multiplicative_hard_of_SoI_of_implementations,
     Complexity.GapMINCKT.DifferenceEstimator.Unconditional.Iterated.Slack.P_eq_NP_of_multiplicative_hard_of_SoI_of_logarithmic_solver,
     Complexity.GapMINCKT.DifferenceEstimator.Unconditional.Iterated.Slack.not_timeBoundedSymmetryOfInformation_of_P_ne_NP}
   \leanok
@@ -540,56 +558,44 @@ main open direction.
     def:meta-promise-reduction}
   Fix an ordinary machine $M$, a conditional oracle machine $N$, a monotone
   primitive clock $p$ with $p(t) \ge t$ and $p(t) \le a(t+1)^k$, and constants
-  $c_{\mathrm{SoI}}, c_{\mathrm{pair}}$. Assume:
+  $c_{\mathrm{SoI}}, c_{\mathrm{pair}}$. The plan queries the ordinary estimator
+  on $\mathrm{pair}(x,y)$ at clock $p(t')$ and on $y$ at clock $p^3(t')$, where
+  $t' = \max(t, |x|+|y|)$. Assume:
   (i) a pair-composition hypothesis: a compiler producing $\mathrm{pair}(x,y)$ on
-  $M$ within $p(\max(t, |x|+|y|))$ steps from a program for $y$ on $M$ and a
-  conditional program for $x$ given $y$ on $N$ (each running within $t$ steps),
-  with length loss $c_{\mathrm{pair}}$, such that for
-  \emph{every} instance $(x, y, 1^t)$ the minima $C^t_M(y)$ and $C^t_N(x \mid y)$
-  are finite and within the compiler's budgets;
+  $M$ within $p(t')$ steps from a program for $y$ on $M$ and a conditional
+  program for $x$ given $y$ on $N$ (each running within $t$ steps), with length
+  loss $c_{\mathrm{pair}}$ and program budgets that contain $C^t_M(y)$ and
+  $C^t_N(x \mid y)$ whenever these minima are finite;
   (ii) $\mathrm{SoI}(M, N, p, \log_2 p + c_{\mathrm{SoI}})$;
   (iii) promise-$\cc{NP}$-hardness of the multiplicative $\cc{GapMINcKT}$ (factor
   $\phi \ge 1$) at the explicit slack-amplified clock built from $p$; and
   (iv) either an ordinary estimator satisfying Fact~3.4's sandwich at clock $p$
-  on every instance, whose induced two-query threshold language is in
-  $\cc{P}$, or a decision
-  function in $\cc{FP}$ solving logarithmic $\cc{GapMINKT}$ at clock $p$ together
-  with $\cc{FP}$ query builders for the two-query plan.
+  on the plan's queries, whose induced two-query threshold language is in
+  $\cc{P}$ (or which has an encoded implementation with $\cc{FP}$ query
+  builders), or a decision function in $\cc{FP}$ solving logarithmic
+  $\cc{GapMINKT}$ at clock $p$, together with $\cc{FP}$ query builders and the
+  premise that every query of the plan has finite complexity on $M$.
   Then $\cc{P} = \cc{NP}$. Equivalently, if $\cc{P} \neq \cc{NP}$, then (i),
-  (iii) and (iv) rule out (ii). \emph{Warning:} as formalized, hypothesis (i)
-  is unsatisfiable, so this theorem is vacuous; see the caveat in the proof and
-  Theorem~\ref{thm:avg-soi-collapse-domain} for the intended form.
+  (iii) and (iv) rule out (ii).
 \end{theorem}
 \begin{proof}
   \leanok
   \uses{thm:avg-upper-chain, thm:avg-soi-cancellation, thm:avg-fact34,
-    thm:avg-gapminckt-estimator}
+    thm:avg-gapminckt-estimator, lem:avg-no-full-estimator}
   Query the ordinary estimator on $\mathrm{pair}(x,y)$ at clock $p$ and on $y$
   at clock $p^{3}$, subtract with an explicit rounding correction, and use SoI
   and the upper chain to verify both halves of the conditional sandwich; the
   final clock is $p^{4}$ amplified by a power-of-two slack that pays all
-  logarithmic and additive losses and is proved polynomially bounded.
+  logarithmic and additive losses and is proved polynomially bounded. When
+  $C^t_M(y)$ or $C^t_N(x \mid y)$ is infinite, the upper chain holds trivially,
+  so hypothesis (i) needs no finiteness.
 
-  \emph{Caveat.} As currently formalized, hypothesis (i)
-  (\texttt{SupportsPairUpper}) requires $C^t_M(y) < \infty$ and $C^t_N(x \mid y)
-  < \infty$ for every instance, including $t = 0$ with nonempty $y$ or $x$. No
-  machine produces a nonempty output in zero steps, so (i) is unsatisfiable and
-  the theorem is vacuous as stated. The meaningful form is
-  Theorem~\ref{thm:avg-soi-collapse-domain}.
-\end{proof}
-
-\begin{theorem}[Conditional collapse on the admissible domain]
-  \label{thm:avg-soi-collapse-domain}
-  \uses{def:avg-soi, def:avg-gapminckt, def:avg-gapminkt-log}
-  Theorem~\ref{thm:avg-soi-collapse} with the finiteness and budget requirements
-  of hypothesis (i) imposed only on instances with $|x| + |y| \le t$ (the domain
-  of the SoI hypothesis), the promise and the estimator restricted accordingly.
-\end{theorem}
-\begin{proof}
-  \uses{thm:avg-soi-collapse, thm:avg-evaluator}
-  Restrict the two-query plan to the admissible domain and handle the remaining
-  instances directly; check that the evaluators of
-  Theorem~\ref{thm:avg-evaluator} satisfy the restricted hypothesis.
+  An earlier formalization demanded finite minima at every instance and an
+  estimator correct on every instance. Both are unsatisfiable (no machine
+  prints a nonempty string in zero steps, and
+  Lemma~\ref{lem:avg-no-full-estimator}), which made the theorem vacuous; the
+  current statements have no such obstruction. No instance of hypothesis (i)
+  for concrete universal machines is constructed yet.
 \end{proof}
 
 \begin{theorem}[Hardness of conditional gap MinKT excludes Heuristica]
@@ -604,11 +610,11 @@ main open direction.
   open.
 \end{theorem}
 \begin{proof}
-  \uses{thm:avg-soi-collapse-domain, thm:avg-distnp-soi, thm:avg-fact34,
+  \uses{thm:avg-soi-collapse, thm:avg-distnp-soi, thm:avg-fact34,
     thm:avg-minkt-2018}
   $\cc{DistNP} \subseteq \cc{AvgP}$ gives SoI and, through the paper's
   worst-case to average-case step, an efficient logarithmic $\cc{GapMINKT}$
-  solver; apply Theorem~\ref{thm:avg-soi-collapse-domain}.
+  solver; apply Theorem~\ref{thm:avg-soi-collapse}.
 \end{proof}
 
 % ---------------------------------------------------------------------------
