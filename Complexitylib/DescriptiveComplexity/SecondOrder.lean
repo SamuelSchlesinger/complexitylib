@@ -12,6 +12,7 @@ public import Complexitylib.DescriptiveComplexity.SecondOrder.Renaming
 public import Complexitylib.DescriptiveComplexity.SecondOrder.Connectives
 public import Complexitylib.DescriptiveComplexity.SecondOrder.ModelChecking
 public import Complexitylib.DescriptiveComplexity.SecondOrder.Encoding
+public import Complexitylib.DescriptiveComplexity.SecondOrder.Certificate
 
 /-!
 # Second-order logic over finite structures

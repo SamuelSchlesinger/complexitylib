@@ -831,7 +831,11 @@ existing logics rather than a restriction imposed on them.
 
 \begin{definition}[Existential-SO binary certificate checking]
   \label{def:desc-exist-so-certificate}
-
+  \lean{Complexity.DescriptiveComplexity.SOFormula.witnessArities,
+    Complexity.DescriptiveComplexity.SOFormula.witnessPolynomial,
+    Complexity.DescriptiveComplexity.SOFormula.checkCertificate,
+    Complexity.DescriptiveComplexity.SOSentence.checkEncoded}
+  \leanok
   \uses{def:desc-existential-so, def:desc-so-certificate-encoding,
     def:desc-matrix-model-checking, def:desc-decoder}
   List the existential prefix's arities from outermost to innermost. Consume
