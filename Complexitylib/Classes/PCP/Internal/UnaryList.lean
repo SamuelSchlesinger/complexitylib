@@ -254,17 +254,10 @@ theorem length_mulC_append (m c w : ℕ) :
 theorem length_bitstringEncode_list {α : Type} [DataEncode α] (l : List α) :
     (DataEncode.bitstringEncode l).length
       = 2 + (l.map fun a => (DataEncode.bitstringEncode a).length).sum := by
-  induction l with
-  | nil => simp [DataEncode.bitstringEncode_def]
-  | cons a l ih =>
-      have hcons : DataEncode.encode (a :: l)
-          = Data.l (DataEncode.encode a :: l.map DataEncode.encode) := rfl
-      have htail : DataEncode.encode l = Data.l (l.map DataEncode.encode) := rfl
-      rw [DataEncode.bitstringEncode_def, hcons, Data.length_toBits, Data.cons_size,
-        ← htail, ← Data.length_toBits, ← Data.length_toBits,
-        ← DataEncode.bitstringEncode_def, ← DataEncode.bitstringEncode_def, ih]
-      simp
-      omega
+  rw [DataEncode.bitstringEncode_list, List.length_cons, List.length_append,
+    List.length_flatten, List.map_map]
+  simp only [List.length_singleton, Function.comp_def]
+  omega
 
 @[simp] theorem length_encPair (w c : ℕ) :
     (encPair (List.replicate w true) (List.replicate c true)).length = 4 * w + 4 * c + 6 := by

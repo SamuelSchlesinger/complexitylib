@@ -13,7 +13,8 @@ A model of the left-to-right pass over a serialized `Data` value: a bracket
 depth, a count of the top-level children already passed, and the bits collected
 while inside the child that was asked for. This file is about the model alone —
 that it really does extract the requested child — and says nothing about
-computability.
+computability; `Complexitylib.Classes.PCP.Internal.DataScan` runs the same pass
+as a polynomial-time fold.
 
 Two facts drive everything. The depth and the count evolve without looking at
 the collected bits, and the collected bits only ever grow at the end

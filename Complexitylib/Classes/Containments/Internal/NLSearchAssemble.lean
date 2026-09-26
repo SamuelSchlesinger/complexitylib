@@ -7,6 +7,7 @@ module
 public import Complexitylib.Classes.Containments.Internal.BlockSearchCorrect
 public import Complexitylib.Classes.Containments.Internal.BlockAccept
 public import Complexitylib.Classes.P.DecisionFn
+public import Complexitylib.Classes.P.Bridge
 public import Complexitylib.Classes.L
 
 /-!
@@ -21,7 +22,6 @@ search is complete.
 
 ## Main definitions
 
-- `Complexity.polyRuler` — a ruler of polynomial length
 - `Complexity.searchState` — the unpacked search state after `n` steps
 
 ## Main results
@@ -41,23 +41,6 @@ open Cobham
 variable {k : ℕ}
 
 /-! ## Rulers of polynomial length -/
-
-/-- A ruler whose length is a polynomial in the input length. -/
-def polyRuler (q : Polynomial ℕ) (x : List Bool) : List Bool :=
-  List.replicate (q.eval x.length) false
-
-@[simp] theorem polyRuler_length (q : Polynomial ℕ) (x : List Bool) :
-    (polyRuler q x).length = q.eval x.length := by
-  rw [polyRuler, List.length_replicate]
-
-theorem polyRulerFn_mem_FP (q : Polynomial ℕ) {a : List Bool → List Bool} (ha : a ∈ FP) :
-    (fun z => polyRuler q (a z)) ∈ FP := by
-  have h : Cobham fun v : Fin 1 → List Bool =>
-      List.replicate (Cobham.polyLen q (v 0)).length false :=
-    Cobham.zeroBlockFn (Cobham.polyLen_mem q (Cobham.proj 0))
-  refine unFn_mem_FP (g := polyRuler q) ?_ ha
-  refine h.of_eq fun v => ?_
-  rw [polyRuler, Cobham.polyLen_length]
 
 /-- The block ruler of a polynomial window. -/
 theorem blockRuler_eq_polyRuler (q : Polynomial ℕ) (x : List Bool) :

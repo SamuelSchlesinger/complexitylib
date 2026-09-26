@@ -96,10 +96,7 @@ theorem bitstringEncode_of_entries {α : Type} [DataEncode α]
       rw [List.getElem_map, List.getElem_map, List.getElem_range]
       exact h i hi
     rw [List.flatMap_def, this]
-  rw [hcat, DataEncode.bitstringEncode_def,
-    show DataEncode.encode l = Data.l (l.map DataEncode.encode) from rfl,
-    Data.toBits_l, List.map_map]
-  congr 2
+  rw [hcat, DataEncode.bitstringEncode_list, List.cons_append]
 
 theorem length_entryCat_le (E : List Bool → List Bool) (x : List Bool) (b : ℕ) :
     ∀ n, (∀ i < n, (E (pair x (List.replicate i true))).length ≤ b) →

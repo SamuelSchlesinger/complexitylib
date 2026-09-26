@@ -121,12 +121,9 @@ theorem bitstringEncode_append (l₁ l₂ : List α) :
     DataEncode.bitstringEncode (l₁ ++ l₂)
       = false :: (posInner (DataEncode.bitstringEncode l₁)
           ++ posInner (DataEncode.bitstringEncode l₂)) ++ [true] := by
-  rw [posInner_bitstringEncode, posInner_bitstringEncode,
-    DataEncode.bitstringEncode_def,
-    show DataEncode.encode (l₁ ++ l₂)
-      = Data.l ((l₁ ++ l₂).map DataEncode.encode) from rfl,
-    Data.toBits_l, List.map_append, List.map_append, List.flatten_append]
-  simp
+  rw [posInner_bitstringEncode, posInner_bitstringEncode, DataEncode.bitstringEncode_append,
+    List.map_map, List.map_map, List.cons_append]
+  rfl
 
 /-- **Comparing entries compares positions.** The scan returns each entry's own
 serialization, and that serialization determines the entry. -/

@@ -5,6 +5,7 @@ Authors: Bolton Bailey
 -/
 module
 public import Complexitylib.Classes.Containments.Internal.SavitchBits
+public import Complexitylib.Classes.P.Bridge
 
 /-!
 # Binary addition and comparison inside the polynomial-time algebra
@@ -728,34 +729,6 @@ theorem two_pow_lt_two_mul_iff (t : ℕ) (w : List Bool) (hw : w.length = t + 1)
 @[simp] theorem selectHead_cons_false (x y : List Bool) :
     Cobham.selectHead [false] x y = y := by
   rw [Cobham.selectHead]; simp
-
-/-! ## Emptiness and the leading bit -/
-
-/-- Is the string empty, as a flag. -/
-def emptyFlag (y : List Bool) : List Bool := lenLeFlag [] y
-
-@[simp] theorem emptyFlag_nil : emptyFlag [] = [true] := rfl
-
-theorem emptyFlag_cons (b : Bool) (y : List Bool) : emptyFlag (b :: y) = [false] := by
-  rw [emptyFlag, lenLeFlag]
-  simp [nonemptyFlag, notBit]
-
-theorem emptyFlag_pair (a b : List Bool) : emptyFlag (pair a b) = [false] := by
-  cases a with
-  | nil => rw [pair]; rfl
-  | cons c a => rw [pair_cons_eq]; exact emptyFlag_cons _ _
-
-theorem emptyFlagFn_mem_FP {a : List Bool → List Bool} (ha : a ∈ FP) :
-    (fun z => emptyFlag (a z)) ∈ FP :=
-  lenLeFlagFn_mem_FP (constFn_mem_FP []) ha
-
-/-- Drop the leading bit. -/
-def dropOne (y : List Bool) : List Bool := y.drop 1
-
-theorem dropOneFn_mem_FP {a : List Bool → List Bool} (ha : a ∈ FP) :
-    (fun z => dropOne (a z)) ∈ FP := by
-  have := dropLenFn_mem_FP (constFn_mem_FP [false]) ha
-  simpa [dropOne] using this
 
 /-! ## The strings of a given length -/
 

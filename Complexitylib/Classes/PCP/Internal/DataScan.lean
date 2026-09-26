@@ -9,7 +9,7 @@ public import Complexitylib.Classes.P.Cobham.Internal.Reverse
 public import Complexitylib.Classes.P.UnaryLength
 public import Complexitylib.Classes.Containments.Internal.BinArith
 public import Complexitylib.Encoding.DataEncode
-public import Complexitylib.Classes.PCP.Internal.DataScanSpec
+public import Complexitylib.Encoding.DataScan
 
 /-!
 # Scanning a serialized `Data` value

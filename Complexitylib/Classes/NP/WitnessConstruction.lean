@@ -6,7 +6,7 @@ Authors: Samuel Schlesinger
 
 module
 public import Complexitylib.Classes.NP.Witness
-import Complexitylib.Classes.PCP.Internal.GuessVerifyGeneric
+import Complexitylib.Classes.NP.Internal.GuessVerify
 
 /-!
 # The guess-and-verify NTM construction

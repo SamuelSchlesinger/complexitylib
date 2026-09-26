@@ -21,7 +21,8 @@ and `ℕ` (binary encoding via `List Bool`)
 Every `DataEncode` instance also yields a *bitstring* encoding `DataEncode.bitstringEncode`, by
 serializing the target `Data` value with `Data.toBits`. Since both the `DataEncode` instance and
 `Data.toBits` are injective, `bitstringEncode` is injective too
-(`DataEncode.bitstringEncode_injective`).
+(`DataEncode.bitstringEncode_injective`). A list is encoded as its entries' encodings inside one
+pair of brackets (`DataEncode.bitstringEncode_list`, `DataEncode.bitstringEncode_append`).
 -/
 
 
@@ -118,5 +119,23 @@ the injectivity of the `DataEncode` instance with that of `Data.toBits`. -/
 theorem DataEncode.bitstringEncode_injective {α : Type} [DataEncode α] :
     Function.Injective (DataEncode.bitstringEncode (α := α)) :=
   Data.toBits_injective.comp DataEncode.h_inj
+
+/-- **The encoding of a list.** A list is encoded as its entries' encodings, one after
+another, inside a single pair of brackets. -/
+theorem DataEncode.bitstringEncode_list {α : Type} [DataEncode α] (l : List α) :
+    DataEncode.bitstringEncode l
+      = false :: ((l.map DataEncode.bitstringEncode).flatten ++ [true]) := by
+  rw [DataEncode.bitstringEncode_def,
+    show DataEncode.encode l = Data.l (l.map DataEncode.encode) from rfl, Data.toBits_l,
+    List.map_map]
+  rfl
+
+/-- **The encoding of an append.** The entries of both lists, one run after the other,
+inside a single pair of brackets. -/
+theorem DataEncode.bitstringEncode_append {α : Type} [DataEncode α] (l₁ l₂ : List α) :
+    DataEncode.bitstringEncode (l₁ ++ l₂)
+      = false :: ((l₁.map DataEncode.bitstringEncode).flatten
+          ++ (l₂.map DataEncode.bitstringEncode).flatten ++ [true]) := by
+  rw [DataEncode.bitstringEncode_list, List.map_append, List.flatten_append]
 
 end Complexity

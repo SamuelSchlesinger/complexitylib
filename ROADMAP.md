@@ -45,9 +45,9 @@ Check these before constructing a Turing machine.
 
 | Goal | Lever | Where |
 | --- | --- | --- |
-| `f ∈ FP` | Cobham's algebra and the closure rules built on it; `iterate_mem_FP` for polynomially many iterations of a step | `Classes/P/Cobham.lean`, `Classes/Containments/Internal/FPBridge.lean`, `Classes/P/Cobham/Internal.lean` |
+| `f ∈ FP` | Cobham's algebra and the closure rules built on it; `iterate_mem_FP` for polynomially many iterations of a step | `Classes/P/Cobham.lean`, `Classes/Containments/Internal/FPBridge.lean` (re-exported with `polyRuler`, `emptyFlag`, `dropOne` by `Classes/P/Bridge.lean`), `Classes/P/Cobham/Internal.lean` |
 | `L ∈ P` | `mem_P_of_decisionFn`, `mem_P_preimage`, `P_compl`, `P_inter`, `P_union` | `Classes/P/DecisionFn.lean`, `Classes/P/Preimage.lean`, `Classes/Containments.lean` |
-| `L ∈ NP` | `NP.mem_NP_of_FNP`, `mem_NP_of_poly_witness` (polynomial-time verifier, bounded witnesses) | `Classes/NP/WitnessConstruction.lean` |
+| `L ∈ NP` | `NP.mem_NP_of_FNP`, `mem_NP_of_poly_witness` (polynomial-time verifier, bounded witnesses) | `Classes/NP/WitnessConstruction.lean`, `Classes/NP/Internal/GuessVerify.lean` |
 | `L ∈ PSPACE` | `mem_PSPACE_of_iterate` (exponentially many iterations of an `FP` step on a polynomial-size state), `PSPACE_compl` | `Classes/Containments/Internal/SpaceIterate.lean`, `Classes/Containments/Internal/ComplementSpace.lean` |
 | universal simulation | `TM.utmTM_simulates_pair` | `Models/TuringMachine/UTM/Universality.lean` |
 | closure under reductions | `MapReducesPoly.mem_P`, `MapReducesPoly.mem_NP`, `mem_NP_preimage` | `Classes/NP/Reduction.lean`, `Classes/NP/Closure.lean` |

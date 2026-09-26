@@ -54,7 +54,6 @@ public import Complexitylib.Classes.PCP.Internal.ConstraintGraph
 public import Complexitylib.Classes.PCP.Internal.CubeBlocks
 public import Complexitylib.Classes.PCP.Internal.DartCorrelation
 public import Complexitylib.Classes.PCP.Internal.DataScan
-public import Complexitylib.Classes.PCP.Internal.DataScanSpec
 public import Complexitylib.Classes.PCP.Internal.DegreeReduction
 public import Complexitylib.Classes.PCP.Internal.DegreeReductionSound
 public import Complexitylib.Classes.PCP.Internal.Dinur
@@ -71,7 +70,6 @@ public import Complexitylib.Classes.PCP.Internal.FiniteKey
 public import Complexitylib.Classes.PCP.Internal.FinsetPlurality
 public import Complexitylib.Classes.PCP.Internal.GapReduction
 public import Complexitylib.Classes.PCP.Internal.GapTheorem
-public import Complexitylib.Classes.PCP.Internal.GuessVerifyGeneric
 public import Complexitylib.Classes.PCP.Internal.Hadamard
 public import Complexitylib.Classes.PCP.Internal.HadamardTester
 public import Complexitylib.Classes.PCP.Internal.KilledCSP

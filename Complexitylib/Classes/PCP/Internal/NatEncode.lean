@@ -54,14 +54,9 @@ theorem boolBits_eq (b : Bool) : boolBits b = (DataEncode.encode b).toBits := by
 /-- **The cipher describes the encoding.** -/
 theorem bitstringEncode_list (l : List Bool) :
     DataEncode.bitstringEncode l = false :: (l.flatMap boolBits) ++ [true] := by
-  rw [DataEncode.bitstringEncode_def,
-    show DataEncode.encode l = Data.l (l.map DataEncode.encode) from rfl, Data.toBits_l,
-    List.map_map]
-  congr 2
-  rw [List.flatMap_def]
-  congr 1
-  refine List.map_congr_left fun b _ => ?_
-  rw [Function.comp_apply, boolBits_eq]
+  have hmap : l.map DataEncode.bitstringEncode = l.map boolBits :=
+    List.map_congr_left fun b _ => (boolBits_eq b).symm
+  rw [DataEncode.bitstringEncode_list, hmap, List.flatMap_def, List.cons_append]
 
 /-! ### Running the cipher -/
 

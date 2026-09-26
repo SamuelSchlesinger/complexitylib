@@ -56,20 +56,16 @@ theorem encBit_eq (b : Bool) : (DataEncode.encode b).toBits = encBit b := by
 
 theorem encMsg_eq (v : List Bool) :
     (DataEncode.encode v).toBits = encMsg v := by
-  show (Data.l (v.map DataEncode.encode)).toBits = _
-  rw [Data.toBits_l, encMsg, List.map_map]
-  have hmap : List.map (Data.toBits ∘ DataEncode.encode) v = v.map encBit :=
+  have hmap : v.map DataEncode.bitstringEncode = v.map encBit :=
     List.map_congr_left fun b _ => encBit_eq b
-  rw [hmap]
+  rw [← DataEncode.bitstringEncode_def, DataEncode.bitstringEncode_list, hmap, encMsg]
 
 /-- **The transcript's encoding, spelled out.** -/
 theorem bitstringEncode_transcript (τ : List (List Bool)) :
     DataEncode.bitstringEncode τ = false :: (encBody τ ++ [true]) := by
-  show (Data.l (τ.map DataEncode.encode)).toBits = _
-  rw [Data.toBits_l, encBody, List.map_map]
-  have hmap : List.map (Data.toBits ∘ DataEncode.encode) τ = τ.map encMsg :=
+  have hmap : τ.map DataEncode.bitstringEncode = τ.map encMsg :=
     List.map_congr_left fun v _ => encMsg_eq v
-  rw [hmap]
+  rw [DataEncode.bitstringEncode_list, hmap, encBody]
 
 @[simp] theorem encBody_nil : encBody [] = [] := rfl
 

@@ -10,6 +10,7 @@ public import Complexitylib.Encoding.Pairing
 public import Complexitylib.Encoding.BinaryNat
 public import Complexitylib.Encoding.Data
 public import Complexitylib.Encoding.DataEncode
+public import Complexitylib.Encoding.DataScan
 
 /-!
 # Encodings
@@ -20,5 +21,7 @@ self-delimiting block framing and its parsers
 (`Complexitylib.Encoding.Pairing`), canonical minimal binary natural-number
 fields (`Complexitylib.Encoding.BinaryNat`), and the rose-tree `Data` type
 (`Complexitylib.Encoding.Data`) together with the `DataEncode` typeclass and its
-derived bitstring encoding (`Complexitylib.Encoding.DataEncode`).
+derived bitstring encoding (`Complexitylib.Encoding.DataEncode`), and a model of
+the bracket scan that reads one child back out of a serialized list
+(`Complexitylib.Encoding.DataScan`).
 -/

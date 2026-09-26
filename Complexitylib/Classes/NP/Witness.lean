@@ -36,7 +36,7 @@ import this one.
 ## How `WitnessNTMConstruction` is proved
 
 The proof (`mem_NP_of_poly_witness`, in
-`Complexitylib.Classes.PCP.Internal.GuessVerifyGeneric`) has two steps.
+`Complexitylib.Classes.NP.Internal.GuessVerify`) has two steps.
 
 1. **Linear witnesses** (`mem_NP_of_linear_witness`). The guess-and-verify NTM
    `SAT.satGuessVerifyNTM M` guesses a string `y` of length at most `|x| + 1`,

@@ -6,10 +6,9 @@ Authors: Bolton Bailey
 module
 public import Complexitylib.SAT.Internal.GuessVerify
 public import Complexitylib.Classes.NP.Closure
+public import Complexitylib.Classes.P.Bridge
 public import Complexitylib.Classes.P.DecisionFn
 public import Complexitylib.Classes.Containments
-public import Complexitylib.Classes.Containments.Internal.NLSearchAssemble
-public import Complexitylib.Classes.Containments.Internal.SavitchFrame
 public import Complexitylib.Classes.P.Cobham.Internal
 
 /-!
@@ -97,9 +96,9 @@ noncomputable def padVerifier (p : Polynomial ℕ) (L₀ : Language) : Language 
 theorem padVerifier_mem_P {p : Polynomial ℕ} {L₀ : Language} (hL₀ : L₀ ∈ P) :
     padVerifier p L₀ ∈ P := by
   have hff : (fun w : List Bool => pairFst (pairFst w)) ∈ FP :=
-    fstBlockOf_mem_FP Cobham.fstBlock_mem_FP
+    mem_FP_comp Cobham.fstBlock_mem_FP Cobham.fstBlock_mem_FP
   have hsf : (fun w : List Bool => pairSnd (pairFst w)) ∈ FP :=
-    sndBlockOf_mem_FP Cobham.fstBlock_mem_FP
+    mem_FP_comp Cobham.fstBlock_mem_FP Cobham.sndBlock_mem_FP
   have hA : (fun w : List Bool =>
       pair (pairFst (pairFst w)) (pairSnd w)) ⁻¹' L₀ ∈ P :=
     mem_P_preimage (Cobham.pairFn_mem_FP hff Cobham.sndBlock_mem_FP) hL₀
