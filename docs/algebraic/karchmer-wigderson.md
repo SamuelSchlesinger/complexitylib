@@ -50,20 +50,48 @@ formulaDepth (compose f g) ≤ formulaDepth f + formulaDepth g
 formulaSize (compose f g) ≤ formulaSize f * formulaSize g
 ```
 
-and projections prove the converse one-sided bounds: `formulaDepth g ≤
-formulaDepth (compose f g)` when `f` is sensitive at some point, and
-`formulaDepth f ≤ formulaDepth (compose f g)` when `g` is not constant.
+for all `f` and `g` (`formulaDepth_compose_le`, `formulaSize_compose_le`).
+Projections prove one-sided bounds in the other direction:
+`formulaDepth g ≤ formulaDepth (compose f g)` when `f` is not constant
+(`formulaDepth_inner_le_compose_of_nonConstant`), and
+`formulaDepth f ≤ formulaDepth (compose f g)` when `g` is not constant
+(`formulaDepth_outer_le_compose_of_nonConstant`). Here `NonConstant f` means
+that `f x ≠ f y` for some inputs `x` and `y`.
 
 ## The conjecture
 
-`KRWDepth s` states that for all `f` and `g`,
+The Karchmer–Raz–Wigderson conjecture says that for non-constant `f` and `g`
+the upper bounds above are tight up to lower-order terms. The library states
+its strong form, with a constant slack, and does not prove it.
+`KRWDepthWith c` says that for all `m` and `n` and all non-constant
+`f : Cslib.BooleanFunction m` and `g : Cslib.BooleanFunction n`,
 
 ```lean
-formulaDepth f + formulaDepth g ≤ formulaDepth (compose f g) + s m n
+formulaDepth f + formulaDepth g ≤ formulaDepth (compose f g) + c
 ```
 
-with an explicit slack `s`; `KRWSize c` is the multiplicative size form. The
-conjecture, in any form with sublinear slack, is open. The known partial
-results (composition with parity, with the universal relation, and with
-lifted inner functions) are theorems about these objects and are natural
-next targets for formalization.
+and `KRWSizeWith c` says that for all such `f` and `g`,
+
+```lean
+formulaSize f * formulaSize g ≤ c * formulaSize (compose f g)
+```
+
+The slack `c` is a single natural number, independent of `m`, `n`, `f`, and
+`g`, and the quantities are the `ℕ∞`-valued infima above. The conjectures
+themselves are `KRWDepth := ∃ c, KRWDepthWith c` and
+`KRWSize := ∃ c, KRWSizeWith c`. A larger slack gives a weaker statement
+(`KRWDepthWith.mono`, `KRWSizeWith.mono`). Forms whose slack grows with `m` or
+`n` are not formalized.
+
+Both non-constancy hypotheses are necessary. If `f` or `g` is constant then
+`f ⋄ g` is constant, of depth `0` and size `1`, while the conjunction of all
+`k` bits has formula size at least `k` and depth at least `log₂ k`. So for
+every `c`, the statement obtained from `KRWDepthWith c` or `KRWSizeWith c` by
+dropping the non-constancy of `g` is false
+(`not_forall_depth_of_constant_inner`, `not_forall_size_of_constant_inner`),
+and so is the statement obtained by dropping the non-constancy of `f`
+(`not_forall_depth_of_constant_outer`, `not_forall_size_of_constant_outer`).
+
+The conjecture is open. The known partial results (composition with parity,
+with the universal relation, and with lifted inner functions) are theorems
+about these objects and are natural next targets for formalization.

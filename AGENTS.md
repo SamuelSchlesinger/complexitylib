@@ -29,21 +29,28 @@ out of the public import graph.
 Quality gates (also run in CI; see CONTRIBUTING.md):
 
 ```bash
-python3 scripts/lint_style.py        # headers, module docs, 100-col, _root_ escapes
+python3 scripts/lint_style.py        # headers, module docs, 100-col, _root_, imports, native_decide
 lake exe runLinter Complexitylib \
   Complexitylib.Classes.P.Cobham.Validation \
   Complexitylib.Models.TuringMachine.SingleTape.Validation \
   Complexitylib.Models.TuringMachine.Repetition.Validation \
   Complexitylib.Circuits.Encoding.Validation \
   Complexitylib.SAT.Tseitin.Machine.Validation  # env linters, including private graphs
-lake env lean scripts/AxiomGuard.lean  # all project declarations on std axioms only
-lake env lean scripts/BlueprintCheck.lean  # every blueprint \lean{} name exists
+lake env lean scripts/AxiomGuard.lean  # every project declaration on std axioms only
+lake env lean scripts/BlueprintCheck.lean  # blueprint links, \leanok markers, node kinds, labels
 ```
 
 Both linters are hard gates: any violation fails the run. The refactor cleared
 and removed the former shrink-only baselines, so keep the tree clean. Suppress
 a genuinely-intended env-lint with a documented inline `@[nolint …]` on the
 declaration — never a project-level baseline.
+
+Never use `native_decide` (or `decide +native`) outside the executable
+validation modules. `lint_style.py` rejects it in every `.lean` file except
+files named `Validation.lean` outside the public import graph, where it closes
+`example`s used as regression tests. The axiom guard's scope and limits (it
+trusts the `.olean` files, allows `Classical.choice`, and cannot see
+`example`s) are documented in the header of `scripts/AxiomGuard.lean`.
 
 ## Architecture
 
@@ -97,11 +104,19 @@ same file are acceptable.
 - **`Complexity` root namespace**: every declaration lives under `Complexity`
   (avoids collisions with Mathlib's `Language`, keeps `P`/`NP`/`TM` out of the
   root scope). Files are wrapped in `namespace Complexity … end Complexity`.
-  Sole exception: `Complexitylib/Mathlib/` extends Mathlib types in their home
-  namespaces (dot-notation requires it) and holds upstreaming candidates only.
+  Exceptions: `Complexitylib/Mathlib/` extends Mathlib types in their home
+  namespaces (dot-notation requires it) and holds upstreaming candidates only;
+  `Complexitylib/Cslib/` likewise extends CSLib types in their home namespaces
+  (e.g. `Cslib.Circuits`) and holds upstreaming candidates only;
+  `Complexitylib/Algebraic/` is the algebraic-circuits library imported
+  wholesale, which keeps its `Algebraic` namespace, its `Cslib.Circuits`
+  extensions, and a scoped style-lint exemption until the consolidation plan
+  in `ROADMAP.md` (item 7) migrates it. It keeps its MIT license
+  (`Complexitylib/Algebraic/LICENSE`), so its files carry the MIT header.
 - **Never shadow a root namespace**: an inner `namespace TM` block inside
   another namespace (e.g. producing `SAT.TM`) shadows the real `TM.*` API and
-  forces `_root_.` escapes — the style linter tracks and shrinks `_root_.` use.
+  forces `_root_.` escapes — the style linter rejects `_root_.` outside the
+  imported algebraic-circuits library.
 - **Arora-Barak style**: Fixed alphabet `Γ = {0, 1, □, ▷}`, three-way directions (`Dir3`), explicit `qstart`/`qhalt` states.
 - **Named tapes**: `Cfg` has separate `input : Tape`, `work : Fin n → Tape`, `output : Tape` fields. This avoids degenerate `Fin k` indexing and makes the read-only/read-write distinction structural.
 - **DTM (`TM`)**: Single deterministic transition function `δ`. Execution via `step` (computable) and relational `stepRel`/`reaches`/`reachesIn`.
@@ -190,7 +205,19 @@ See CONTRIBUTING.md. Use `<type>(<scope>): <summary>` format with imperative moo
 
 ## Dependencies
 
-- **Lean**: `leanprover/lean4:v4.30.0` (see `lean-toolchain`)
-- **Mathlib**: `v4.30.0` (see `lakefile.toml`)
+- **Lean**: `leanprover/lean4:v4.35.0-rc3` (see `lean-toolchain`)
+- **Mathlib**: commit `c55e6e78` (see `lakefile.toml`) — pinned to match the pinned cslib
+  commit's `lake-manifest.json` so the foundations can be rebased onto
+  [cslib](https://github.com/leanprover/cslib)
+- **cslib**: commit `2a4389ba` of the `complexitylib-integration` branch of the author's fork
+  (`SamuelSchlesinger/cslib`, see `lakefile.toml`), which integrates the pending CSLib circuit PRs
+  until they land upstream; afterwards pin a `leanprover/cslib` commit again. Pinned by commit
+  `rev`, never a branch. Its Mathlib pin must equal ours, so a cslib bump dictates the Mathlib and
+  toolchain bump. cslib ships no olean cache; Lake compiles only the cslib modules we import.
 
-When updating either, both must be updated in lockstep.
+When updating any of the three, all must be updated in lockstep: pick the cslib commit first, then
+take its `lean-toolchain` and Mathlib `rev`. The `docbuild/` subproject pins the same toolchain
+separately: bump `docbuild/lean-toolchain` and the `doc-gen4` `rev` (tagged per Lean release) in
+`docbuild/lakefile.toml`, then regenerate its manifest with
+`cd docbuild && MATHLIB_NO_CACHE_ON_UPDATE=1 lake update`. Any new root dependency also needs this
+regeneration or the docs workflow fails with "not in manifest".

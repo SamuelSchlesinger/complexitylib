@@ -332,7 +332,8 @@ sources. For the upper bound, sum a minimum representation with an XOR tree.
 The nonzero-target assumption matters: the zero function need not be a free
 wire in this model.
 
-The regression suite checks three-bit parity in a basis containing addition,
+The standalone repository's regression suite, which was not imported into
+Complexitylib, checks three-bit parity in a basis containing addition,
 multiplication, and constants: its complexity is two with no helpers, one
 with `x_0+x_1` supplied, and zero with the entire parity supplied.
 
@@ -374,7 +375,8 @@ This is `Pairing.preprocessedMultiplicationComplexity_eq`. There is no
 bound on the number, degrees, or computation costs of the helpers. Every
 source-adjusted Hessian has block form `[[A,I],[I,0]]`, which is invertible
 over every field. The lower bound is `n`; the usual sum of `n` products
-attains it. Tests include characteristic two and a degree-seven helper.
+attains it. The standalone repository's tests, not imported here, include
+characteristic two and a degree-seven helper.
 
 ### 5. Restrictions and parameterizations
 
@@ -410,8 +412,9 @@ L <= R_e(f | S)
 `Approximation.Scheme.relativeCostComplexity_lowerBound_of_localErrors`
 states this directly. A second endpoint accepts the library's more general
 one-sided approximation relation. Both reuse its union-of-exceptions proof
-for shared circuits, counting each gate once. The regression suite obtains
-the one-gate lower bound for AND by approximating gates with projections.
+for shared circuits, counting each gate once. The standalone repository's
+regression suite, not imported here, obtains the one-gate lower bound for AND
+by approximating gates with projections.
 
 These results adapt standard support, linear-algebra, Hessian, restriction,
 and approximation arguments to supplied information. No novelty or priority

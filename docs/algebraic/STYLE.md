@@ -54,24 +54,26 @@ surface navigable without forcing breaking renames on existing users.
 
 ## Validation
 
-Before submitting a change, run:
+Before submitting a change, run Complexitylib's gates from the repository
+root:
 
 ```sh
-lake build Algebraic AlgebraicTests --wfail
-lake test
-lake lint
-python3 -m unittest discover -s scripts -p 'test_*.py'
-python3 scripts/check_imports.py
+lake build --wfail
+lake exe runLinter Complexitylib
+lake env lean scripts/AxiomGuard.lean
+python3 scripts/lint_style.py
 ```
 
-Public behavior belongs in the downstream-style `AlgebraicTests` suite.
-Proof-local examples can remain near their defining module when they clarify a
-construction, but they do not replace an import-level regression.
+`scripts/AxiomGuard.lean` checks every declaration compiled from a
+Complexitylib module, including this library's private declarations and its
+extensions in `Cslib.Circuits`, against the standard axiom allowlist
+(`propext`, `Classical.choice`, `Quot.sound`). `scripts/lint_style.py` rejects
+`native_decide` and requires every public module to be reachable from the
+root `Complexitylib` import, so a new file must be imported by
+`Complexitylib/Algebraic.lean` or one of its imports.
 
-`AlgebraicTests.AxiomAudit` checks all library-owned declarations visible through
-the public import, including extensions in `Cslib.Circuits` and transitive
-private proof dependencies, against the standard logical axiom allowlist.
-Unexported modern-module declarations unreachable from the public API are
-outside the audit. Public import coverage is a separate CI gate: a new file
-must be reachable from `Algebraic.lean` so that its public interface is built
-and audited. New test files must be reachable from `AlgebraicTests.lean`.
+The standalone repository's downstream-style `AlgebraicTests` suite and its
+import checker were not imported, and Complexitylib's executable `Validation`
+modules do not cover this library. Examples that clarify a construction can
+remain near their defining module; `example`s add no declaration, so the axiom
+audit cannot see them.

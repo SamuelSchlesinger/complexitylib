@@ -1,9 +1,13 @@
 # CSLib cost-module rehearsal
 
-[cslib-cost.patch](cslib-cost.patch) is an isolated extraction of
-[`Complexitylib/Algebraic/Cost.lean`](../../../Complexitylib/Algebraic/Cost.lean) against CSLib commit
-`91ab23c78b12e6c9d6fe747fa3f55c2771dd376e`, checked on 2026-09-15.
-It is a review artifact; no pull request has been opened.
+[cslib-cost.patch](cslib-cost.patch) is an isolated extraction of the
+library's cost module, now
+[`Complexitylib/Algebraic/Cost.lean`](../../../Complexitylib/Algebraic/Cost.lean),
+against CSLib commit `91ab23c78b12e6c9d6fe747fa3f55c2771dd376e`, checked on
+2026-09-15 in the standalone algebraic-circuits repository. The module has
+since been ported to the API of Complexitylib's pinned CSLib fork, so the
+patch reflects its earlier form. It is a review artifact; no pull request has
+been opened.
 
 The patch puts the operation-cost type and program/circuit cost API directly
 in `Cslib.Circuits`, without the local compatibility exports. It uses modern
@@ -15,13 +19,14 @@ free input outputs, and unit cost. Both root import files include the additions.
 Apply the patch to the named CSLib revision:
 
 ```sh
-git apply --check /path/to/algebraic-circuits/docs/upstream/cslib-cost.patch
-git apply /path/to/algebraic-circuits/docs/upstream/cslib-cost.patch
+git apply --check /path/to/complexitylib/docs/algebraic/upstream/cslib-cost.patch
+git apply /path/to/complexitylib/docs/algebraic/upstream/cslib-cost.patch
 ```
 
 The isolated checkout used its own dependency manifest, including Mathlib
-`87befc843c2b3a1be12f7fe9ba274d212b544348`, rather than this repository's
-Mathlib pin. The patch applies cleanly to the unmodified target source.
+`87befc843c2b3a1be12f7fe9ba274d212b544348`, rather than the Mathlib pin of the
+standalone algebraic-circuits repository where this rehearsal was made. The
+patch applied cleanly to the unmodified target source.
 The open circuit PRs #429, #890, and #891 do not add this cost module in the
 file lists inspected on that date; recheck overlap before submitting.
 

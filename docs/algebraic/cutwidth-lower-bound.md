@@ -29,8 +29,9 @@ before `ε`. The variant `eventually_lt_size` takes the graph-ordering bound
 
 ## Hypotheses
 
-Two statements enter as hypotheses, so the library adds no axioms; the axiom
-audit in `AlgebraicTests.AxiomAudit` covers every declaration.
+Two statements enter as hypotheses, so the library adds no axioms;
+Complexitylib's axiom audit, `scripts/AxiomGuard.lean`, checks every
+declaration of the development.
 
 1. **A rectangle-free hard family.** A *one-rectangle* of `f` is a product
    `P × Q`, for a split of the coordinates into `U` and its complement, on

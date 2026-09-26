@@ -113,11 +113,11 @@ structural identity, fan-out, and output designations are free. The formal
 theorems prove circuit existence and gate cost. They make no efficient uniform
 construction claim for the offline menus, information set, or placement.
 
-Validation commands:
+Validation commands, run from the Complexitylib repository root:
 
 ```sh
-lake build Algebraic AlgebraicTests --wfail
-lake test
-lake lint
-git diff --check
+lake build --wfail
+lake exe runLinter Complexitylib
+lake env lean scripts/AxiomGuard.lean
+python3 scripts/lint_style.py
 ```

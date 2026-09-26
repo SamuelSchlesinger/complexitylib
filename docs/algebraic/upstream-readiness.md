@@ -1,5 +1,16 @@
 # Upstream preparation
 
+> **Standalone record.** This record was written in the standalone
+> [algebraic-circuits repository](https://github.com/SamuelSchlesinger/algebraic-circuits)
+> before the library was imported into Complexitylib. Its pins, commands, and
+> evidence (`AlgebraicTests`, `scripts/check_imports.py`, `scripts/build_docs.sh`)
+> refer to that repository; the test suite and scripts were not imported. In
+> Complexitylib every file of the library has been converted to Lean's module
+> system, it builds against the pinned CSLib fork described in the
+> [guide](README.md), and it is checked by Complexitylib's gates
+> (`lake build --wfail`, `lake exe runLinter Complexitylib`,
+> `scripts/AxiomGuard.lean`, and `scripts/lint_style.py`).
+
 The objective is to make the library a reviewable source of reusable circuit
 theory for a project such as CSLib. The entire repository is not yet ready for
 an upstream submission. Completed historical and restricted-model results
@@ -8,8 +19,9 @@ readiness of the remaining developments.
 
 ## Upstream baseline
 
-The library pins CSLib to `94ea80f41a5678fce997a004f0d8d12dbe47cc4b` and Lean
-`v4.35.0-rc2`. On 2026-09-24 this was the head of CSLib `main`; it includes
+At the time of this record the standalone library pinned CSLib to
+`94ea80f41a5678fce997a004f0d8d12dbe47cc4b` and Lean `v4.35.0-rc2`. On
+2026-09-24 this was the head of CSLib `main`; it includes
 the merged [Lupanov PR #890](https://github.com/leanprover/cslib/pull/890) and
 [Shannon PR #891](https://github.com/leanprover/cslib/pull/891). The update
 from the earlier stacked-PR pin required renaming the identifier `given`,
@@ -40,7 +52,7 @@ maintainer communication has been made as part of it.
 | Rank bounds repeated finite-span decomposition proofs | Share `LinearMap.rank_le_sum_of_mem_span` across interaction, uniform term, and weighted term bounds; use Mathlib's existing span decomposition | `Algebraic.LinearAlgebra.Rank`; rebuilt Fusion applications |
 | Axiom checks covered only a selected De Morgan subtree | Audit all library-owned declarations visible through the public import, including canonical CSLib namespace extensions and transitive private proof dependencies | `AlgebraicTests.AxiomAudit`, including an imported modern-module negative fixture |
 | A new unimported file could escape public audit coverage | Require complete library and test import closures; include the routing compatibility facade | `scripts/check_imports.py` and its negative regressions |
-| Results and cost conventions were difficult to locate | Add a result/import/model table, cost guide, and links to checked downstream examples | `docs/applications.md` |
+| Results and cost conventions were difficult to locate | Add a result/import/model table, cost guide, and links to checked downstream examples | [`applications.md`](applications.md) |
 | Local compilation did not exercise the current upstream dependency pins | Extract weighted cost directly into the current CSLib namespace and validate it in an isolated checkout | [Cost patch and reproduction record](upstream/README.md), with the explicit MIT-header exception |
 
 The axiom gate permits exactly `propext`, `Classical.choice`, and `Quot.sound`.
@@ -72,12 +84,15 @@ strict header linter requires Apache wording where the copied sources preserve
 MIT notices. The production files and their licensing have not been converted.
 This is evidence about module-system compatibility, not an upstream CI pass.
 
-1. **Modern module and style compatibility.** The local source still uses
-   legacy imports. Lean rejects a modern `module` importing a legacy source
-   module, so an upstream-facing module conversion must proceed from the
-   foundations outward. Add correct license/author headers, preserve existing
-   source credit, and run CSLib's syntax and text linters rather than treating
-   the local environment-linter pass as equivalent to upstream CI.
+1. **Modern module and style compatibility.** At the time of this record the
+   standalone source still used legacy imports. Lean rejects a modern `module`
+   importing a legacy source module, so an upstream-facing module conversion
+   must proceed from the foundations outward. The import into Complexitylib
+   has since converted every file to a `module`; the files keep their MIT
+   headers, and CSLib's syntax and text linters have not been run on them.
+   Add correct license/author headers, preserve existing source credit, and
+   run CSLib's linters rather than treating the local environment-linter pass
+   as equivalent to upstream CI.
 2. **Canonical APIs and dependency structure.** Review remaining compatibility
    aliases and extension placement against the current CSLib circuit API.
    Keep generic semantics and cost operations reusable without research
@@ -109,7 +124,7 @@ This is evidence about module-system compatibility, not an upstream CI pass.
 
 ## Local verification
 
-Run from the repository root:
+In the standalone repository these checks were run from its root:
 
 ```sh
 python3 -m unittest discover -s scripts -p 'test_*.py'
@@ -121,9 +136,11 @@ git diff --check
 scripts/build_docs.sh
 ```
 
-The source/import gate and Lean regression suite run in CI. The new modules
-must also appear in the generated documentation. These gates complement the
-remaining mathematical, API, and upstream-integration review above.
+The source/import gate and Lean regression suite ran in that repository's
+CI, and the new modules had to appear in the generated documentation. In
+Complexitylib, use the gates listed at the top of this record instead. These
+gates complement the remaining mathematical, API, and upstream-integration
+review above.
 
 On 2026-09-15 these local checks passed after the source-gate restriction and
 shared rank refactors. The axiom audit covered 13,649 imported library-owned

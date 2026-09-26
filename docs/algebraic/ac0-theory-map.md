@@ -136,7 +136,12 @@ bit and excludes the all-zero difference string from every nonfinal block.
 The entries below preserve the sequence of verified checkpoints. Phrases such
 as "next obligation" record the frontier at that checkpoint; the current
 status is the milestone table above, and later entries close those historical
-obligations.
+obligations. The checkpoints were verified in the standalone algebraic-circuits
+repository: its gates (`lake build Algebraic AlgebraicTests --wfail`,
+`lake test`, `lake lint`, and its regression and axiom-audit suite) were not
+imported into Complexitylib. Here the development is checked by
+`lake build --wfail`, `lake exe runLinter Complexitylib`,
+`scripts/AxiomGuard.lean`, and `scripts/lint_style.py`.
 
 The direct arbitrary-NOT depth-reduction strengthening passed
 `lake build Algebraic AlgebraicTests --wfail`, `lake test`, `lake lint`,

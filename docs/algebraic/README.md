@@ -2,14 +2,20 @@
 
 > **Imported library.** This is the guide of the algebraic-circuits library, imported
 > wholesale into Complexitylib as `Complexitylib/Algebraic/` (module paths
-> `Complexitylib.Algebraic.*`; declarations keep the `Algebraic` namespace). Build
-> and pin instructions below refer to the upstream repository; in Complexitylib the
-> library builds as part of `lake build`. See `ROADMAP.md` (item 7) for the plan to
-> consolidate it with Complexitylib's circuit developments.
+> `Complexitylib.Algebraic.*`; declarations keep the `Algebraic` namespace). It
+> builds as part of Complexitylib's `lake build` and is checked by Complexitylib's
+> gates (see [Build and checks](#build-and-checks)). See `ROADMAP.md` (item 7) for
+> the plan to consolidate it with Complexitylib's circuit developments.
 > Imported on 2026-09-25 from the algebraic-circuits working tree (commit
 > `3998dc4` plus uncommitted changes that move it to Complexitylib's Lean, Mathlib,
 > and CSLib pins), converted to Lean's module system with minimal edits and no
-> changes to theorem statements. It keeps its MIT license
+> changes to theorem statements. Later changes in Complexitylib alter statements
+> only where needed: the port to the pinned CSLib fork (a circuit's gate count is
+> now its `size` field rather than a type index, and wires are CSLib's inductive
+> `Wire`), and a faithful restatement of the KRW conjecture (see the
+> [Karchmer–Wigderson guide](karchmer-wigderson.md)). The standalone repository's
+> regression suite (`AlgebraicTests`), import checker, research notes, and
+> documentation scripts were not imported. It keeps its MIT license
 > ([`Complexitylib/Algebraic/LICENSE`](../../Complexitylib/Algebraic/LICENSE)).
 
 Algebraic is a Lean 4 library for finite-arity universal algebra and shared
@@ -23,11 +29,18 @@ gate basis.
 The signatures, interpretations, homomorphisms, wires, programs, and circuits
 come from `Cslib.Computability.Circuit`. The `Algebraic` core imports re-export
 these types and their operations, so native CSLib circuits work directly with
-the library's constructions and lower bounds. Lake pins CSLib to revision
-`94ea80f41a5678fce997a004f0d8d12dbe47cc4b` of upstream `main`, which includes
-the merged [Shannon #891](https://github.com/leanprover/cslib/pull/891) and
+the library's constructions and lower bounds. Complexitylib's `lakefile.toml`
+pins CSLib to commit `2a4389ba8d47778cafdd79f522f0b17b623b18b7`, the head of
+the `complexitylib-integration` branch of the author's fork
+(`SamuelSchlesinger/cslib`), with its matching Lean (`v4.35.0-rc3`) and Mathlib
+versions. That branch contains upstream `main` at
+`94ea80f41a5678fce997a004f0d8d12dbe47cc4b`, which includes the merged
+[Shannon #891](https://github.com/leanprover/cslib/pull/891) and
 [Lupanov #890](https://github.com/leanprover/cslib/pull/890) circuit
-developments, with its matching Lean (`v4.35.0-rc2`) and Mathlib versions.
+developments, and integrates pending CSLib circuit pull requests, among them
+bundled gate counts ([#949](https://github.com/leanprover/cslib/pull/949)) and
+inductive wires ([#957](https://github.com/leanprover/cslib/pull/957)). The pin
+returns to a `leanprover/cslib` commit once that work lands.
 
 - A `Signature` describes operation symbols and their arities, while an
   `Interpretation` assigns them concrete meaning.
@@ -96,7 +109,7 @@ the relation to `Synthesis`, a checked counterexample to an exact chain rule,
 and counting bounds for random targets with a fixed supplied family.
 
 The point-update and counting arguments for strict circuit size hierarchies
-are described in [`docs/circuit-hierarchy.md`](circuit-hierarchy.md).
+are described in the [circuit hierarchy guide](circuit-hierarchy.md).
 Basic Boolean operations, input masks, numerical thresholds, and the compiler
 that shares constant gates remain available as focused modules under
 `Algebraic.Basis.DeMorgan`.
@@ -127,8 +140,9 @@ maximal subfunction count on every block simultaneously. The
 `Algebraic.LowerBound.KarchmerWigderson` provides the communication-game
 view of De Morgan formulas, the Karchmer–Wigderson theorem, the composition
 `f ⋄ g` with its elementary depth and size bounds, and the
-Karchmer–Raz–Wigderson conjecture as an explicit proposition; see the
-[Karchmer–Wigderson guide](karchmer-wigderson.md).
+Karchmer–Raz–Wigderson conjecture, in depth and size forms with constant slack
+for non-constant functions, as explicit propositions that are not proved; see
+the [Karchmer–Wigderson guide](karchmer-wigderson.md).
 
 `Algebraic.Basis.DeMorgan.ShannonLupanov` transfers CSLib's sharp bounds to
 the local De Morgan complexity measures. The conversions preserve semantics,
@@ -148,64 +162,61 @@ generated API reference give their full statements. The
 [upstream preparation record](upstream-readiness.md) tracks the remaining
 integration and review work.
 
-The [library stocktake](research/library-stocktake-2026-09-08.md) records the
-retained results and the removal of the later star/topology research branch.
-The preparatory noncommutative recurrence is kept in
-[`research/noncommutative`](research/noncommutative/README.md), outside the
-public library and regression suite.
+The standalone repository's research notes (its library stocktake and the
+preparatory noncommutative recurrence) were not imported; they remain in the
+[algebraic-circuits repository](https://github.com/SamuelSchlesinger/algebraic-circuits).
 
-## Build
+## Build and checks
+
+The library is part of Complexitylib's default target and root import, so the
+repository-wide commands build and check it:
 
 ```sh
 lake build --wfail
+lake exe runLinter Complexitylib      # Mathlib/Batteries environment linters
+lake env lean scripts/AxiomGuard.lean # axiom audit
+python3 scripts/lint_style.py         # headers, module docs, imports, native_decide
 ```
 
-Run all default declaration linters over the `Algebraic` modules:
+`scripts/AxiomGuard.lean` checks that every declaration compiled from a
+Complexitylib module, including every `Complexitylib.Algebraic.*` module and
+the library's `Cslib.Circuits` extensions, depends only on `propext`,
+`Classical.choice`, and `Quot.sound`; a declaration depending on `sorry` or
+`native_decide` fails it. Its header documents its limits: it trusts the
+compiled `.olean` files and cannot see `example`s.
 
-```sh
-lake lint
-```
+`scripts/lint_style.py` checks the MIT header, module docstrings, import
+reachability, and the `native_decide` ban for these files. The imported
+library has a scoped exemption from its line-length and `_root_` checks until
+the consolidation in `ROADMAP.md` (item 7).
 
-## Tests
-
-Compile the downstream-style public API regression suite:
-
-```sh
-lake test
-```
-
-This includes a transitive axiom audit of all library-owned declarations
-visible through the public import, including their private proof dependencies.
-Only `propext`, `Classical.choice`, and `Quot.sound` are allowed. Unexported
-modern-module declarations unreachable from the public API are outside the
-audit. Small executable tests using `native_decide` are kept outside the library.
-
-Check that every library and test module is reachable from its root import,
-and that elementary modules do not depend on research or sharp synthesis:
-
-```sh
-python3 -m unittest discover -s scripts -p 'test_*.py'
-python3 scripts/check_imports.py
-```
+The standalone repository's `lake test` suite (`AlgebraicTests`, with its own
+axiom audit and executable `native_decide` tests), its `lake lint` driver, and
+its import checker `scripts/check_imports.py` were not imported. Complexitylib's
+executable regression modules (`Complexitylib.Classes.P.Cobham.Validation`,
+`Complexitylib.Models.TuringMachine.SingleTape.Validation`,
+`Complexitylib.Models.TuringMachine.Repetition.Validation`,
+`Complexitylib.Circuits.Encoding.Validation`, and
+`Complexitylib.SAT.Tseitin.Machine.Validation`, each built with
+`lake build --wfail <module>`) cover other parts of Complexitylib; none covers
+this library. The regression files that the guides cite by link live in the
+[algebraic-circuits repository](https://github.com/SamuelSchlesinger/algebraic-circuits).
 
 ## Documentation
 
-The API reference is generated with
-[doc-gen4](https://github.com/leanprover/doc-gen4). First build the local site:
+The API reference, including this library, is generated with
+[doc-gen4](https://github.com/leanprover/doc-gen4) from Complexitylib's
+`docbuild/` subproject:
 
 ```sh
-scripts/build_docs.sh
+cd docbuild && lake build Complexitylib:docs
 ```
 
-Then serve it and open <http://localhost:8000/>:
-
-```sh
-python3 -m http.server --directory _site
-```
-
-The first documentation build also processes imported Mathlib modules and can
+CI publishes it at <https://samuelschlesinger.github.io/complexitylib/>. The
+first documentation build also processes imported Mathlib modules and can
 take substantially longer than later incremental builds.
 
 ## License
 
-Algebraic is available under the [MIT License](LICENSE).
+Algebraic is available under the
+[MIT License](../../Complexitylib/Algebraic/LICENSE).

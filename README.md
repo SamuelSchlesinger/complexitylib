@@ -17,8 +17,8 @@ exists.
 
 ## Main results
 
-All proved without `sorry` or custom axioms, over a concrete multi-tape
-Turing-machine model:
+All proved over a concrete multi-tape Turing-machine model; no declaration
+depends on `sorry` or a custom axiom:
 
 - **Cook–Levin:** SAT and 3SAT are NP-complete.
 - **Cobham's theorem:** a machine-independent function algebra equals `FP`.
@@ -73,7 +73,7 @@ encodings; parsing, malformed inputs, and output conventions are explicit.
 Constructions expose an exact resource bound first and an asymptotic corollary
 second.
 
-**Nothing on faith.** The library has no `sorry` and no custom axioms:
+**Nothing on faith.** No declaration depends on `sorry` or a custom axiom:
 `scripts/AxiomGuard.lean` mechanically audits every declaration compiled from
 Complexitylib modules for dependencies beyond Lean's three standard axioms,
 and CI enforces it — along with Mathlib's style and environment linters — on

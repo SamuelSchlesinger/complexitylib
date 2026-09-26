@@ -192,7 +192,8 @@ The last four are the quality gates:
 - **`scripts/AxiomGuard.lean`** audits every declaration originating in a
   Complexitylib module, following its dependencies transitively into Mathlib
   and CSLib, and permits dependencies only on `propext`, `Classical.choice`,
-  and `Quot.sound`; `sorry` and `native_decide` in any declaration fail it.
+  and `Quot.sound`; a declaration that depends on `sorry` or `native_decide`
+  fails it.
   Know its limits: it trusts the compiled `.olean` files rather than
   re-checking them independently (as `lean4checker` would); it allows
   `Classical.choice`, so a claim that a function is computable rests on the

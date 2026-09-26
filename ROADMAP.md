@@ -68,8 +68,9 @@ In order. Each item says why it matters and roughly how large it is.
      predicate a public theorem assumes has at least one instance. That rule
      would have caught the unsatisfiable hypotheses that made the
      symmetry-of-information collapse theorems vacuous until September 2026
-     (a pair-composition contract demanding finite zero-step complexities, and
-     an estimator required to be correct at every clock).
+     (a pair-composition contract demanding finite zero-step complexities, an
+     estimator required to be correct at every clock, and a finiteness field
+     inside `TimeBoundedSymmetryOfInformation` that no machine can meet).
    - Instantiate the remaining uninstantiated interfaces: a universal oracle
      machine for `OracleTM.IsEfficientlyUniversal`, and a list-decodable code
      family for the Nisan–Wigderson reconstruction.

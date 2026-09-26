@@ -18,7 +18,7 @@ the concrete bases or research developments.
 | Parity versus AC0 | `Algebraic.LowerBound.AC0.ParitySeparation` | `AC0.parity_not_raw_computable`; shared unbounded-fan-in circuits, polynomial connective count, bounded logical depth, arbitrary internal NOT gates |
 | `(4 - ε) n` gates over the full binary basis | `Algebraic.LowerBound.Cutwidth` | `Cutwidth.eventually_lt_size_of_pathwidthBound`; rectangle-free functions with polynomial threshold and `2 ^ (n - 2)` accepting inputs, assuming the `(1/6 + ξ) h` pathwidth bound for simple cubic graphs; see the [cutwidth guide](cutwidth-lower-bound.md) |
 | `Ω(n² / log n)` formula leaves over the full binary basis | `Algebraic.LowerBound.Nechiporuk` | `Nechiporuk.eventually_sq_le_leaves`; rectangle-free functions with polynomial threshold and `2 ^ (n - 2)` accepting inputs, no graph-theoretic hypothesis; see the [Nechiporuk guide](nechiporuk-lower-bound.md) |
-| Formula depth as communication complexity | `Algebraic.LowerBound.KarchmerWigderson` | `KW.formulaDepth_eq_protocolDepth`, `KW.formulaSize_eq_protocolSize`; De Morgan formulas and Karchmer–Wigderson protocols, composition bounds, and the KRW conjecture `KW.KRWDepth` as a proposition; see the [Karchmer–Wigderson guide](karchmer-wigderson.md) |
+| Formula depth as communication complexity | `Algebraic.LowerBound.KarchmerWigderson` | `KW.formulaDepth_eq_protocolDepth`, `KW.formulaSize_eq_protocolSize`; De Morgan formulas and Karchmer–Wigderson protocols, composition bounds, and the KRW conjecture in depth and size forms (`KW.KRWDepth`, `KW.KRWSize`: some constant slack works for all non-constant `f` and `g`) as unproved propositions; see the [Karchmer–Wigderson guide](karchmer-wigderson.md) |
 | Monotone Boolean CLIQUE | `Algebraic.LowerBound.Monotone.Clique.Exponential` | `Monotone.Clique.Exponential.powSelf_lt_circuitSize`; more than `w^w` gates for `w^4`-CLIQUE on `w^20` vertices when `w ≥ 16`, in the binary constant-free AND/OR basis |
 | Hessian multiplication bound | `Algebraic.Applications.Hessian` | `Applications.hessianRank_lowerBound`; natural Hessian rank divided by two and rounded up, for formal polynomials over a field |
 | Squarefree monomial as a sum of powers | `Algebraic.Applications.Waring` | `Applications.waringSum_lowerBound`; at least `choose (2*n) n` scaled powers of linear forms over a characteristic-zero field |
@@ -57,6 +57,13 @@ efficient executable circuit optimizer.
 
 ## Checked examples
 
+The regression files linked in this section are in the standalone
+[algebraic-circuits repository](https://github.com/SamuelSchlesinger/algebraic-circuits),
+where they were checked; they were not imported into Complexitylib, and
+Complexitylib's build does not compile them or the snippets on this page. The
+declarations they exercise are part of Complexitylib and are covered by its
+build, linters, and axiom audit.
+
 ### Elementary synthesis
 
 ```lean
@@ -72,8 +79,11 @@ example (input : Fin 2 → Bool) :
 ```
 
 The [completeness regressions](https://github.com/SamuelSchlesinger/algebraic-circuits/blob/main/AlgebraicTests/Completeness.lean) also check
-zero-input and zero-output targets. This module's import boundary is guarded
-against minimum-complexity, lower-bound, and Lupanov dependencies.
+zero-input and zero-output targets. The module imports only
+`Algebraic.Basis.DeMorgan.Expression` and `Algebraic.Semantics`, and its
+transitive imports contain no minimum-complexity, lower-bound, or synthesis
+module. The standalone repository's import checker enforced that boundary; it
+was not imported, so in Complexitylib the boundary is not mechanically guarded.
 
 ### Translating away gates
 
