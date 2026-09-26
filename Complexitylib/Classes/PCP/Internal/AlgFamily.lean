@@ -4,24 +4,31 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Bolton Bailey
 -/
 module
-public import Complexitylib.Classes.PCP.Internal.AlgLevel
 public import Complexitylib.Classes.PCP.Internal.TowerTable
 public import Complexitylib.Classes.PCP.Internal.FamilyFin
 
 /-!
 # The expander's table, for a requested size
 
-`AlgLevel` finds the tower level a request calls for, and `TowerTable` writes the
-rotation table of a level. Putting the two together writes the table of the
-level a request calls for — and it is polynomially long, because the level the
-search reports always names a size within a constant factor of the request.
+The expander family answers a request for `n` vertices with the first tower
+member of at least `2 n` of them, and `TowerTable` writes the rotation table of a
+level. This module finds the level a request calls for — the first `L` with
+`2 n ≤ d ^ (L + 1)`, a ceiling logarithm — and writes that level's table. The
+table is polynomially long, because the level found always names a size within a
+constant factor of the request.
 
 ## Main definitions
 
+- `Complexity.levelFn`, `Complexity.sizeFn` — the level for a requested count,
+  and its size
 - `Complexity.FinBase.famTableFn` — the table for a requested size
 
 ## Main results
 
+- `Complexity.levelFn_length` — the search finds the first level that is large
+  enough
+- `Complexity.pow_levelFn_le` — whatever level it reports, that level's size is
+  polynomially bounded
 - `Complexity.FinBase.famTableFn_mem_FP` — writing it is polynomial time
 - `Complexity.FinBase.famRotFn_mem_FP` — and the family's rotation map is
   polynomial time
@@ -32,6 +39,75 @@ search reports always names a size within a constant factor of the request.
 @[expose] public section
 
 namespace Complexity
+
+/-! ### Finding the tower level -/
+
+/-- **The tower level for a requested count**, in unary: the first level `L`
+with `2 |z| ≤ d ^ (L + 1)`, which is `Nat.clog d (2 |z|) - 1`, capped at
+`p.eval |z|`. -/
+def levelFn (d : ℕ) (p : Polynomial ℕ) (z : List Bool) : List Bool :=
+  List.replicate (min (Nat.clog d (2 * z.length) - 1) (p.eval z.length)) true
+
+theorem levelFn_mem_FP (d : ℕ) (p : Polynomial ℕ) : levelFn d p ∈ FP :=
+  (((UnaryFn.const d).clog ((UnaryFn.const 2).mul (UnaryFn.length id_mem_FP))).sub
+    (UnaryFn.const 1)).min (UnaryFn.polyEval p (UnaryFn.length id_mem_FP))
+
+/-- **The search finds the first level that is large enough.** -/
+theorem levelFn_length (d : ℕ) (p : Polynomial ℕ) (z : List Bool) (L : ℕ)
+    (hL : 2 * z.length ≤ d ^ (L + 1)) (hmin : ∀ i < L, ¬ (2 * z.length ≤ d ^ (i + 1)))
+    (hp : L ≤ p.eval z.length) :
+    (levelFn d p z).length = L := by
+  rw [levelFn, List.length_replicate]
+  suffices h : Nat.clog d (2 * z.length) - 1 = L by rw [h]; exact min_eq_left hp
+  rcases Nat.lt_or_ge 1 d with hd | hd
+  · have h1 : Nat.clog d (2 * z.length) ≤ L + 1 := (Nat.clog_le_iff_le_pow hd).mpr hL
+    rcases Nat.eq_zero_or_pos L with rfl | hL0
+    · omega
+    · have h2 : L < Nat.clog d (2 * z.length) := (Nat.lt_clog_iff_pow_lt hd).mpr
+        (lt_of_not_ge fun h => hmin (L - 1) (by omega) (by rwa [Nat.sub_add_cancel hL0]))
+      omega
+  · rw [Nat.clog_of_left_le_one hd]
+    rcases Nat.eq_zero_or_pos L with rfl | hL0
+    · rfl
+    · have hz : 2 * z.length ≤ 1 :=
+        hL.trans ((Nat.pow_le_pow_left hd _).trans (le_of_eq (one_pow _)))
+      exact absurd (by omega) (hmin 0 hL0)
+
+/-- **Whatever level the search reports, its size is bounded** — which is what
+lets the table at that level be written down. -/
+theorem pow_levelFn_le (d : ℕ) (p : Polynomial ℕ) (z : List Bool) :
+    d ^ ((levelFn d p z).length + 1) ≤ d + 2 * z.length * d := by
+  rw [levelFn, List.length_replicate, pow_succ]
+  suffices h : d ^ min (Nat.clog d (2 * z.length) - 1) (p.eval z.length) ≤ 1 + 2 * z.length by
+    calc _ ≤ (1 + 2 * z.length) * d := Nat.mul_le_mul_right d h
+      _ = d + 2 * z.length * d := by ring
+  have hk := min_le_left (Nat.clog d (2 * z.length) - 1) (p.eval z.length)
+  generalize min (Nat.clog d (2 * z.length) - 1) (p.eval z.length) = k at hk ⊢
+  rcases Nat.lt_or_ge 1 d with hd | hd
+  · by_cases hlt : k < Nat.clog d (2 * z.length)
+    · have := (Nat.lt_clog_iff_pow_lt hd).mp hlt
+      omega
+    · rw [show k = 0 by omega, pow_zero]
+      omega
+  · calc d ^ k ≤ 1 ^ k := Nat.pow_le_pow_left hd k
+      _ = 1 := one_pow k
+      _ ≤ 1 + 2 * z.length := by omega
+
+/-- The size at the level the search reports. -/
+def sizeFn (d : ℕ) (p : Polynomial ℕ) (z : List Bool) : List Bool :=
+  List.replicate (d ^ ((levelFn d p z).length + 1)) true
+
+theorem sizeFn_mem_FP (d : ℕ) (p : Polynomial ℕ) : sizeFn d p ∈ FP :=
+  UnaryFn.pow_of_le (UnaryFn.const d)
+    ((UnaryFn.length (levelFn_mem_FP d p)).add (UnaryFn.const 1))
+    ((UnaryFn.const d).add
+      (((UnaryFn.const 2).mul (UnaryFn.length id_mem_FP)).mul (UnaryFn.const d)))
+    (pow_levelFn_le d p)
+
+/-- **The size the search reports is the power its level names.** -/
+theorem sizeFn_length (d : ℕ) (p : Polynomial ℕ) (z : List Bool) :
+    (sizeFn d p z).length = d ^ ((levelFn d p z).length + 1) :=
+  List.length_replicate ..
 
 namespace FinBase
 

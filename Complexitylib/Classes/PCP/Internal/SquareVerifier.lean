@@ -4,7 +4,8 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Bolton Bailey
 -/
 module
-public import Complexitylib.Classes.PCP.Internal.PosScan
+public import Complexitylib.Classes.P.DataEncode
+public import Complexitylib.Classes.PCP.Internal.BinCounter
 public import Complexitylib.Classes.PCP.Defs
 public import Complexitylib.Classes.EventProb
 

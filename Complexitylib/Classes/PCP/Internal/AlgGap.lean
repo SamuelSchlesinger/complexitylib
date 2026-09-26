@@ -147,7 +147,8 @@ theorem gapFn_eq {init ruler : List Bool → List Bool} {z : List Bool}
     gapFn F hd init ruler z
       = encGraph ((Dinur.step (F.toFamily hd) (qOf F hd) (qOf_pos F hd))^[(ruler z).length] G) := by
   rw [gapFn, h]
-  exact iterate_encGraph (roundFn_eq F hd) _ G
+  exact ((Function.Semiconj.iterate_right (f := encGraph)
+    (fun G => (roundFn_eq F hd G).symm) _) G).symm
 
 /-- **And writing it is polynomial-time.** -/
 theorem gapFn_mem_FP {init ruler width : List Bool → List Bool}
@@ -158,7 +159,7 @@ theorem gapFn_mem_FP {init ruler width : List Bool → List Bool}
         (encGraph ((Dinur.step (F.toFamily hd) (qOf F hd) (qOf_pos F hd))^[n] G)).length
           ≤ (width z).length) :
     gapFn F hd init ruler ∈ FP :=
-  iterate_mem_FP_encGraph (roundFn_mem_FP F hd) hinit hruler hwidth
+  iterate_mem_FP_along encGraph (roundFn_mem_FP F hd) hinit hruler hwidth
     (roundFn_eq F hd) hinitG hbound
 
 end Complexity

@@ -116,17 +116,19 @@ def widthFn (p₀ q : Polynomial ℕ) (v cw d : ℕ) (n : ℕ) : ℕ :=
     + (2 * q.eval n + 1) ^ d * q.eval n
       * (8 * (2 * p₀.eval n + 1 + v * ((2 * q.eval n + 1) ^ d * q.eval n)) + cw)
 
-theorem widthFn_hasRuler (p₀ q : Polynomial ℕ) (v cw d : ℕ) :
-    HasRuler (widthFn p₀ q v cw d) := by
-  have hm : HasRuler fun n => q.eval n := HasRuler.of_poly q
-  have hV : HasRuler fun n => 2 * p₀.eval n + 1 :=
-    HasRuler.add (HasRuler.mul (HasRuler.const 2) (HasRuler.of_poly p₀)) (HasRuler.const 1)
-  have hB : HasRuler fun n => (2 * q.eval n + 1) ^ d :=
-    HasRuler.pow (HasRuler.add (HasRuler.mul (HasRuler.const 2) hm) (HasRuler.const 1)) _
-  have hBm := HasRuler.mul hB hm
-  have hA := HasRuler.add hV (HasRuler.mul (HasRuler.const v) hBm)
-  exact HasRuler.add (HasRuler.add (HasRuler.mul (HasRuler.const 2) hA) (HasRuler.const 4))
-    (HasRuler.mul hBm (HasRuler.add (HasRuler.mul (HasRuler.const 8) hA) (HasRuler.const cw)))
+/-- The width is polynomially bounded. The bound is assembled from the closure
+properties of `PolyBound`, so no arithmetic is ever performed on a constant. -/
+theorem widthFn_polyBound (p₀ q : Polynomial ℕ) (v cw d : ℕ) :
+    PolyBound (widthFn p₀ q v cw d) := by
+  have hm : PolyBound fun n => q.eval n := PolyBound.eval q
+  have hV : PolyBound fun n => 2 * p₀.eval n + 1 :=
+    ((PolyBound.const 2).mul (PolyBound.eval p₀)).add (PolyBound.const 1)
+  have hB : PolyBound fun n => (2 * q.eval n + 1) ^ d :=
+    (((PolyBound.const 2).mul hm).add (PolyBound.const 1)).pow _
+  have hBm := hB.mul hm
+  have hA := hV.add ((PolyBound.const v).mul hBm)
+  exact (((PolyBound.const 2).mul hA).add (PolyBound.const 4)).add
+    (hBm.mul (((PolyBound.const 8).mul hA).add (PolyBound.const cw)))
 
 set_option maxRecDepth 100000 in
 /-- **Writing the gap graph is polynomial-time.** -/
@@ -137,8 +139,10 @@ theorem gapAll_mem_FP (hEfp : E ∈ FP) (hpad : padU ∈ FP)
     (hp₀ : ∀ x, (E x).length ≤ p₀.eval x.length)
     (hq : ∀ x, (padU x).length = q.eval x.length) :
     gapAll F hd E padU ∈ FP := by
-  obtain ⟨R, hR, hRlen⟩ := widthFn_hasRuler p₀ q (vertFactor (F.toFamily hd) (qOf F hd))
+  obtain ⟨pw, hpw⟩ := widthFn_polyBound p₀ q (vertFactor (F.toFamily hd) (qOf F hd))
     (4 * Fintype.card (DinurAlpha → DinurAlpha → Bool) + 10) (growthExp F hd)
+  obtain ⟨R, hR, hRlen'⟩ := Cobham.exists_ruler pw
+  have hRlen := fun z : List Bool => (hpw z.length).trans (hRlen' z)
   refine gapFn_mem_FP F hd (basePadFn_mem_FP E hEfp hpad _) (gapRuler_mem_FP padU hpad) hR
     (fun z => ⟨_, basePadFn_eq E hE h3 z (hmark z) (hle z)⟩) ?_
   intro z G hG n hn

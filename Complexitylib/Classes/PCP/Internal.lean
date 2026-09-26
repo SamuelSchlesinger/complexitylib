@@ -14,11 +14,9 @@ public import Complexitylib.Classes.PCP.Internal.AlgGapAll
 public import Complexitylib.Classes.PCP.Internal.AlgGapCSP
 public import Complexitylib.Classes.PCP.Internal.AlgGraph
 public import Complexitylib.Classes.PCP.Internal.AlgInit
-public import Complexitylib.Classes.PCP.Internal.AlgIter
 public import Complexitylib.Classes.PCP.Internal.AlgKey
 public import Complexitylib.Classes.PCP.Internal.AlgKeyFn
 public import Complexitylib.Classes.PCP.Internal.AlgKilled
-public import Complexitylib.Classes.PCP.Internal.AlgLevel
 public import Complexitylib.Classes.PCP.Internal.AlgLog
 public import Complexitylib.Classes.PCP.Internal.AlgPCP
 public import Complexitylib.Classes.PCP.Internal.AlgPosNum
@@ -34,7 +32,6 @@ public import Complexitylib.Classes.PCP.Internal.Amplification
 public import Complexitylib.Classes.PCP.Internal.Arithmetize
 public import Complexitylib.Classes.PCP.Internal.BaseAlg
 public import Complexitylib.Classes.PCP.Internal.BinCounter
-public import Complexitylib.Classes.PCP.Internal.BinToUnary
 public import Complexitylib.Classes.PCP.Internal.BitwiseFP
 public import Complexitylib.Classes.PCP.Internal.BoundNotConstructible
 public import Complexitylib.Classes.PCP.Internal.BoundedQuant
@@ -53,7 +50,6 @@ public import Complexitylib.Classes.PCP.Internal.ConsistencyLang
 public import Complexitylib.Classes.PCP.Internal.ConstraintGraph
 public import Complexitylib.Classes.PCP.Internal.CubeBlocks
 public import Complexitylib.Classes.PCP.Internal.DartCorrelation
-public import Complexitylib.Classes.PCP.Internal.DataScan
 public import Complexitylib.Classes.PCP.Internal.DegreeReduction
 public import Complexitylib.Classes.PCP.Internal.DegreeReductionSound
 public import Complexitylib.Classes.PCP.Internal.Dinur
@@ -83,7 +79,6 @@ public import Complexitylib.Classes.PCP.Internal.Materialize
 public import Complexitylib.Classes.PCP.Internal.MaxLoop
 public import Complexitylib.Classes.PCP.Internal.MergeGen
 public import Complexitylib.Classes.PCP.Internal.Mixing
-public import Complexitylib.Classes.PCP.Internal.NatEncode
 public import Complexitylib.Classes.PCP.Internal.NumEnc
 public import Complexitylib.Classes.PCP.Internal.NumEncPi
 public import Complexitylib.Classes.PCP.Internal.PCPtoSAT
@@ -92,8 +87,6 @@ public import Complexitylib.Classes.PCP.Internal.PadGraph
 public import Complexitylib.Classes.PCP.Internal.PermArith
 public import Complexitylib.Classes.PCP.Internal.PermCount
 public import Complexitylib.Classes.PCP.Internal.PermGraph
-public import Complexitylib.Classes.PCP.Internal.PosScan
-public import Complexitylib.Classes.PCP.Internal.PositionsFP
 public import Complexitylib.Classes.PCP.Internal.Power
 public import Complexitylib.Classes.PCP.Internal.PoweringBound
 public import Complexitylib.Classes.PCP.Internal.Preprocess
@@ -103,7 +96,6 @@ public import Complexitylib.Classes.PCP.Internal.RegularGraph
 public import Complexitylib.Classes.PCP.Internal.SecondMoment
 public import Complexitylib.Classes.PCP.Internal.SelfLoops
 public import Complexitylib.Classes.PCP.Internal.SquareVerifier
-public import Complexitylib.Classes.PCP.Internal.StripTrailing
 public import Complexitylib.Classes.PCP.Internal.SubsetNP
 public import Complexitylib.Classes.PCP.Internal.SubsetNPFinal
 public import Complexitylib.Classes.PCP.Internal.SymbolCodec

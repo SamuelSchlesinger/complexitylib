@@ -28,7 +28,8 @@ on numbers and propositions rather than on strings.
 The rules cover
 - the length of a polynomial-time output, constants, and the two halves of a
   pair, which is how a loop's body reads the loop's input and index;
-- addition, multiplication, truncated subtraction, minimum and maximum;
+- addition, multiplication, truncated subtraction, minimum and maximum, fixed
+  powers and polynomials;
 - comparisons, the Boolean connectives, and case distinction on a test;
 - loops over the indices below a polynomial-time bound: a sum, a count, the
   first index at which a test passes, a maximum, and iterating an update whose
@@ -47,7 +48,8 @@ example, `z ↦ |z| / 3` is polynomial-time by
 - `UnaryFn.mem_FP`, `UnaryFn.of_eq`, `FPPred.of_iff` — moving between the rules
   and `FP`
 - `UnaryFn.length`, `UnaryFn.const`, `UnaryFn.lift`, `UnaryFn.index`
-- `UnaryFn.add`, `UnaryFn.mul`, `UnaryFn.sub`, `UnaryFn.min`, `UnaryFn.max`
+- `UnaryFn.add`, `UnaryFn.mul`, `UnaryFn.sub`, `UnaryFn.min`, `UnaryFn.max`,
+  `UnaryFn.pow`, `UnaryFn.polyEval`
 - `FPPred.le`, `FPPred.lt`, `FPPred.eq`, `FPPred.and`, `FPPred.or`, `FPPred.not`
 - `FPPred.ite_mem_FP`, `UnaryFn.ite` — case distinction
 - `UnaryFn.sum`, `UnaryFn.count`, `UnaryFn.find`, `UnaryFn.bmax`,
@@ -167,6 +169,21 @@ theorem UnaryFn.min (hf : UnaryFn f) (hg : UnaryFn g) : UnaryFn fun z => min (f 
 /-- **The maximum** is polynomial-time. -/
 theorem UnaryFn.max (hf : UnaryFn f) (hg : UnaryFn g) : UnaryFn fun z => max (f z) (g z) :=
   (hf.add (hg.sub hf)).of_eq fun z => by omega
+
+/-- **A fixed power** of a polynomial-time number is polynomial-time. -/
+theorem UnaryFn.pow (hf : UnaryFn f) (d : ℕ) : UnaryFn fun z => f z ^ d := by
+  induction d with
+  | zero => exact (UnaryFn.const 1).of_eq fun _ => (pow_zero _).symm
+  | succ d ih => exact (ih.mul hf).of_eq fun _ => (pow_succ _ _).symm
+
+/-- **A polynomial** in a polynomial-time number is polynomial-time. In
+particular `z ↦ p.eval |z|` is, by `UnaryFn.polyEval p (UnaryFn.length id_mem_FP)`. -/
+theorem UnaryFn.polyEval (p : Polynomial ℕ) (hf : UnaryFn f) :
+    UnaryFn fun z => p.eval (f z) := by
+  induction p using Polynomial.induction_on' with
+  | add p q hp hq => exact (hp.add hq).of_eq fun _ => (Polynomial.eval_add ..).symm
+  | monomial d a =>
+    exact ((UnaryFn.const a).mul (hf.pow d)).of_eq fun _ => (Polynomial.eval_monomial ..).symm
 
 /-! ## Comparisons and connectives -/
 

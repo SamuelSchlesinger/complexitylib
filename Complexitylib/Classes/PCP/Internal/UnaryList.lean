@@ -6,17 +6,16 @@ Authors: Bolton Bailey
 module
 public import Complexitylib.Classes.P.UnaryLength
 public import Complexitylib.Classes.P.Unary
-public import Complexitylib.Classes.PCP.Internal.PosScan
+public import Complexitylib.Classes.P.DataEncode
 public import Complexitylib.Classes.PCP.Internal.UnaryDivMod
-public import Complexitylib.Classes.PCP.Internal.NatEncode
 
 /-!
 # Reading a table of unary numbers
 
 An algorithm that materializes a graph writes a list of records and reads them
-back. `PosScan` reads an entry of an encoded list, and `DataEncode` writes the
-entries; what is missing is getting a *number* back out, in the unary form the
-loops of the toolkit consume.
+back. `posAt` reads an entry of an encoded list and `encodeList_mem_FP` writes
+one (`Complexitylib.Classes.P.DataEncode`); what is missing is getting a
+*number* back out, in the unary form the loops of the toolkit consume.
 
 Storing the number in unary makes that a length computation: the encoding of a
 unary string of `w` marks is `4 * w + 2` bits long — two brackets, and four bits
@@ -178,21 +177,13 @@ theorem mulC_mem_FP {a : List Bool → List Bool} (ha : a ∈ FP) (c : ℕ) :
 /-! ### Writing records -/
 
 /-- The encoding of a unary string. -/
-def encUnary (s : List Bool) : List Bool := false :: s.flatMap boolBits ++ [true]
+def encUnary (s : List Bool) : List Bool := DataEncode.bitstringEncode s
 
-theorem encUnary_eq (s : List Bool) : encUnary s = DataEncode.bitstringEncode s :=
-  (bitstringEncode_list s).symm
+theorem encUnary_eq (s : List Bool) : encUnary s = DataEncode.bitstringEncode s := rfl
 
 theorem encUnary_mem_FP {a : List Bool → List Bool} (ha : a ∈ FP) :
-    (fun z => encUnary (a z)) ∈ FP := by
-  have hflat : (fun z => (a z).flatMap boolBits) ∈ FP := by
-    have hpair : (fun z => pair z (a z)) ∈ FP := Cobham.pairFn_mem_FP id_mem_FP ha
-    have := mem_FP_comp hpair flatBitsFn_mem_FP
-    refine mem_FP_of_eq this fun z => ?_
-    rw [Function.comp_apply, flatBitsFn_eq, pairSnd_pair]
-  have hcons := mem_FP_comp hflat (Cobham.cons_mem_FP false)
-  have := Cobham.appendFn_mem_FP hcons (constFn_mem_FP [true])
-  exact mem_FP_of_eq this fun z => rfl
+    (fun z => encUnary (a z)) ∈ FP :=
+  encodeList_mem_FP ha
 
 /-- The encoding of a pair of unary strings. -/
 def encPair (a b : List Bool) : List Bool := false :: (encUnary a ++ encUnary b) ++ [true]

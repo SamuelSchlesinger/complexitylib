@@ -6,7 +6,6 @@ Authors: Bolton Bailey
 module
 public import Complexitylib.Classes.PCP.Internal.UnaryList
 public import Complexitylib.Classes.PCP.Internal.ListEncode
-public import Complexitylib.Classes.PCP.Internal.PositionsFP
 
 /-!
 # Writing out a table

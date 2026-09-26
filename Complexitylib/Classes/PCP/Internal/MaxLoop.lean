@@ -5,7 +5,7 @@ Authors: Bolton Bailey
 -/
 module
 public import Complexitylib.Classes.PCP.Internal.UnaryDivMod
-public import Complexitylib.Classes.PCP.Internal.PositionsFP
+public import Complexitylib.Classes.PCP.Internal.ListEncode
 public import Complexitylib.Classes.P.Range
 
 /-!

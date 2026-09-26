@@ -4,7 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Bolton Bailey
 -/
 module
-public import Complexitylib.Classes.PCP.Internal.PositionsFP
+public import Complexitylib.Classes.PCP.Internal.ListEncode
 public import Complexitylib.Classes.PCP.Internal.SquareVerifier
 public import Complexitylib.Classes.PCP.Internal.CoinEnum
 
@@ -67,14 +67,20 @@ variable (A : AlgCSP) (p : Polynomial ℕ)
 /-- The edge a coin string names. -/
 def edgeIdx (z : List Bool) : ℕ := binValLE (pairSnd z)
 
-/-- That index in unary, as far as the clamp allows. -/
-noncomputable def edgeU (z : List Bool) : List Bool := unaryVal p z
+/-- That index in unary, capped at `p.eval |z|`. -/
+def edgeU (z : List Bool) : List Bool :=
+  List.replicate (min (edgeIdx z) (p.eval z.length)) true
 
-theorem edgeU_mem_FP : edgeU p ∈ FP := unaryVal_mem_FP p
+theorem edgeU_mem_FP : edgeU p ∈ FP :=
+  (UnaryFn.fromBitsLE_min Cobham.sndBlock_mem_FP
+    (UnaryFn.polyEval p (UnaryFn.length id_mem_FP))).of_eq fun z => by
+    rw [edgeIdx, binValLE_eq_fromBitsLE]
+    rfl
 
 theorem edgeU_eq {z : List Bool}
     (h : 2 ^ (pairSnd z).length ≤ p.eval z.length) :
-    edgeU p z = List.replicate (edgeIdx z) true := unaryVal_eq h
+    edgeU p z = List.replicate (edgeIdx z) true := by
+  rw [edgeU, min_eq_left (show edgeIdx z ≤ _ from (binValLE_lt _).le.trans h)]
 
 /-- Is the named edge a real one? -/
 noncomputable def inRange (z : List Bool) : List Bool :=
@@ -172,20 +178,6 @@ theorem posU_mem_FP : A.posU p ∈ FP := by
     exact this
   exact Cobham.appendFn_mem_FP hmul hoff
 
-theorem cntU_eq_replicate (z : List Bool) :
-    A.cntU p z = List.replicate (A.cntU p z).length true := by
-  rw [cntU]
-  rcases Cobham.lenLeFlag_flag (List.replicate (A.numEdges (pairFst z)) true)
-    (true :: edgeU p z) with h | h <;> rw [inRange, h]
-  · rw [selectHead_cons_true, List.length_replicate]
-  · rw [selectHead_cons_false]
-    simp
-
-theorem posU_eq_replicate (w : List Bool) :
-    A.posU p w = List.replicate (A.posU p w).length true := by
-  rw [posU, List.length_append, List.length_replicate, List.length_replicate,
-    List.replicate_add]
-
 /-! ### The verifier -/
 
 /-- How many queries, as a number. -/
@@ -247,16 +239,9 @@ theorem cnt_le (z : List Bool) : A.cnt p z ≤ 2 * A.width := by
 /-- **The verifier of a constraint graph.** -/
 noncomputable def verifier : PCPVerifier where
   positions x ρ := (List.range (A.cnt p (pair x ρ))).map (A.pos p (pair x ρ))
-  positions_mem := by
-    have hcnt : (fun z : List Bool => List.replicate (A.cnt p z) true) ∈ FP := by
-      refine mem_FP_of_eq (A.cntU_mem_FP p) fun z => ?_
-      rw [cnt, ← cntU_eq_replicate]
-    obtain ⟨g, hg, hgspec⟩ := positions_mem_of_unary hcnt (A.posU_mem_FP p)
-      (fun z i => by
-        show A.posU p (pair z (List.replicate i true))
-          = List.replicate (A.posU p (pair z (List.replicate i true))).length true
-        rw [← posU_eq_replicate])
-    exact ⟨g, hg, fun x ρ => hgspec (pair x ρ)⟩
+  positions_mem := ⟨_, natListEncode_mem_FP (UnaryFn.length (A.cntU_mem_FP p))
+    (UnaryFn.length (mem_FP_comp (Cobham.pairFn_mem_FP Cobham.fstBlock_mem_FP UnaryFn.index)
+      (A.posU_mem_FP p))), fun _ _ => rfl⟩
   verdict := A.verdictLang p
   verdict_mem := A.verdictLang_mem_P p
 

@@ -5,7 +5,6 @@ Authors: Bolton Bailey
 -/
 module
 public import Complexitylib.Classes.PCP.Internal.AlgEdge
-public import Complexitylib.Classes.PCP.Internal.AlgIter
 public import Complexitylib.Classes.PCP.Internal.GapReduction
 
 /-!

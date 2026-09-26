@@ -24,6 +24,7 @@ form the complexity classes are stated in.
   the closure API
 - `PolyBound.bigO` — a polynomial bound is a big-O power bound
 - `PolyBound.exists_mul_pow_bound` — a polynomial bound is an `A * (n + 1) ^ B` bound
+- `PolyBound.two_pow_of_bigO_log` — `2 ^ O(log n)` is polynomially bounded
 -/
 
 
@@ -98,6 +99,27 @@ theorem exists_mul_pow_bound {f : ℕ → ℕ} (hf : PolyBound f) :
     omega
   exact Nat.mul_le_mul_left _
     (le_trans (Nat.pow_le_pow_left (by omega) i) (Nat.pow_le_pow_right (by omega) hi'))
+
+/-- **A logarithmic exponent gives a polynomial bound.** If `r n = O(log n)`,
+then `2 ^ r n` is bounded by a polynomial at every `n`: eventually
+`2 ^ r n ≤ 2 ^ (c log n) ≤ n ^ c`, and the finitely many values before that are
+bounded by a constant. -/
+theorem two_pow_of_bigO_log {r : ℕ → ℕ} (h : r =O fun n => Nat.log 2 n) :
+    PolyBound fun n => 2 ^ r n := by
+  obtain ⟨c, N, hN⟩ := BigO.exists_nat_bound h
+  refine ⟨Polynomial.X ^ c + Polynomial.C ((Finset.range (N + 1)).sup fun n => 2 ^ r n),
+    fun n => ?_⟩
+  simp only [Polynomial.eval_add, Polynomial.eval_C, Polynomial.eval_pow, Polynomial.eval_X]
+  by_cases hn : n < N + 1
+  · have := Finset.le_sup (f := fun n => 2 ^ r n) (Finset.mem_range.mpr hn)
+    omega
+  · have h1 : 2 ^ r n ≤ 2 ^ (c * Nat.log 2 n) :=
+      Nat.pow_le_pow_right (by omega) (hN n (by omega))
+    have h2 : 2 ^ (c * Nat.log 2 n) = (2 ^ Nat.log 2 n) ^ c := by
+      rw [← pow_mul, Nat.mul_comm]
+    have h3 : (2 ^ Nat.log 2 n) ^ c ≤ n ^ c :=
+      Nat.pow_le_pow_left (Nat.pow_log_le_self 2 (by omega)) _
+    omega
 
 end PolyBound
 

@@ -63,8 +63,11 @@ This file aggregates the definitions and theorems for P, FP, and PSPACE.
 - `toBitsLE_mem_FP`, `bits_mem_FP`, `UnaryFn.fromBitsLE_min` — writing a
   polynomial-time number in binary, and reading a binary numeral back below a
   polynomial-time cap
-- `encodeList_mem_FP`, `natEncode_mem_FP` — writing the `DataEncode` encoding of
-  a bit list or of a polynomial-time number
+- `encodeList_mem_FP`, `natEncode_mem_FP`, `natListEncode_mem_FP` — writing the
+  `DataEncode` encoding of a bit list, of a polynomial-time number, or of a list
+  of them
+- `posAt_mem_FP`, `posCount_mem_FP` — reading the entries of an encoded list,
+  and their number
 -/
 
 
