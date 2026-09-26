@@ -309,8 +309,9 @@ theorem target_eq_prod_X
     (MvPolynomial.prod_X_pow (R := K) (fun _ : Fin (2 * n) => 1)
       (Finset.univ : Finset (Fin (2 * n)))).symm
 
-/-- Nonzero scalar appearing on the diagonal of the normalized target
-catalecticant. -/
+/-- The inverse, in `K`, of the multinomial coefficient of the target exponent;
+it appears on the diagonal of the normalized target catalecticant. It is
+nonzero in characteristic zero (`targetScalar_ne_zero`). -/
 noncomputable def targetScalar
     (K : Type)
     [Field K]
@@ -365,14 +366,12 @@ noncomputable def feature
     (n := MatrixRank.Layer (2 * n) n)).toLinearMap.comp
       (catalecticant K n)
 
-/-- Feature of the target is a nonzero scalar multiple of the identity map.
-`CharZero K` makes the normalizing scalar nonzero, although that proof-only
-assumption cannot occur syntactically in the conclusion. -/
-@[nolint unusedArguments]
+/-- Feature of the target is `targetScalar K n` times the identity map, over
+any field. The scalar is nonzero in characteristic zero
+(`targetScalar_ne_zero`). -/
 theorem feature_target
     {K : Type}
     [Field K]
-    [CharZero K]
     (n : Nat) :
     feature K n (target K n) =
       targetScalar K n • LinearMap.id := by

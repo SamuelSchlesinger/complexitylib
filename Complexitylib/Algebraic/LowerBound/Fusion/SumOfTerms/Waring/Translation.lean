@@ -89,6 +89,17 @@ def sharedTermCircuit
       (sharedPowerExpression (K := K) (2 * n))).comp
       (Algebraic.Arithmetic.Expression.circuit (linearFormExpression term)))
 
+/-- The linear form, the shared power chain, and the scaling, in sequence. -/
+@[simp] theorem sharedTermCircuit_size
+    [Zero K]
+    [One K]
+    (term : Term K n) :
+    (sharedTermCircuit term).size =
+      (linearFormExpression term).gateCount +
+          (sharedPowerExpression (K := K) (2 * n)).gateCount +
+        (scaleExpression term.scale).gateCount := by
+  simp [sharedTermCircuit]
+
 /-- Arithmetic expression implementing the source addition gate after the
 `2n` shared context inputs. -/
 def additionExpression

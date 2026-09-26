@@ -31,6 +31,15 @@ def valuesCircuit (depth keyWidth metadataWidth valueWidth : Nat) :=
     (fun bit => payloadCircuit depth keyWidth (metadataWidth + valueWidth)
       (Fin.natAdd metadataWidth bit))
 
+/-- The exact gate count of `valuesCircuit`. -/
+@[simp] theorem valuesCircuit_size
+    (depth keyWidth metadataWidth valueWidth : Nat) :
+    (valuesCircuit depth keyWidth metadataWidth valueWidth).size =
+      ∑ member : Fin valueWidth,
+        (payloadCircuit depth keyWidth (metadataWidth + valueWidth)
+            (Fin.natAdd metadataWidth member)).size := by
+  simp [valuesCircuit]
+
 /-- Free output wiring retains all fields preceding the copied-value block. -/
 def outputWire (depth keyWidth metadataWidth valueWidth : Nat)
     (output : Fin (networkBits depth (recordWidth keyWidth metadataWidth valueWidth))) :
@@ -52,6 +61,13 @@ def recordsCircuit (depth keyWidth metadataWidth valueWidth : Nat) :=
       (networkBits depth (recordWidth keyWidth metadataWidth valueWidth))).parallel
     (valuesCircuit depth keyWidth metadataWidth valueWidth)).mapOutputs
       (outputWire depth keyWidth metadataWidth valueWidth)
+
+/-- `recordsCircuit` has exactly the gates of `valuesCircuit`; the surrounding wiring adds none. -/
+@[simp] theorem recordsCircuit_size
+    (depth keyWidth metadataWidth valueWidth : Nat) :
+    (recordsCircuit depth keyWidth metadataWidth valueWidth).size =
+      (valuesCircuit depth keyWidth metadataWidth valueWidth).size := by
+  simp [recordsCircuit]
 
 /-- Every header and metadata bit is preserved by free output wiring. -/
 theorem recordsCircuit_eval_preserved

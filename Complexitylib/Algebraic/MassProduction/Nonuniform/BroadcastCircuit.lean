@@ -56,10 +56,25 @@ def inputsCircuit (depth keyWidth payloadWidth : Nat) (bit : Fin payloadWidth) :
   Circuit.parallelFin (networkRecords depth + networkRecords depth)
     (fun index => (inputExpression depth keyWidth payloadWidth bit index).circuit)
 
+/-- The exact gate count of `inputsCircuit`. -/
+@[simp] theorem inputsCircuit_size
+    (depth keyWidth payloadWidth : Nat) (bit : Fin payloadWidth) :
+    (inputsCircuit depth keyWidth payloadWidth bit).size =
+      ∑ x : Fin (networkRecords depth + networkRecords depth),
+        (inputExpression depth keyWidth payloadWidth bit x).gateCount := by
+  simp [inputsCircuit]
+
 /-- Broadcast one selected payload bit across all records. -/
 def payloadCircuit (depth keyWidth payloadWidth : Nat) (bit : Fin payloadWidth) :=
   (Propagation.circuit (networkRecords depth)).comp
     (inputsCircuit depth keyWidth payloadWidth bit)
+
+/-- The exact gate count of `payloadCircuit`. -/
+@[simp] theorem payloadCircuit_size
+    (depth keyWidth payloadWidth : Nat) (bit : Fin payloadWidth) :
+    (payloadCircuit depth keyWidth payloadWidth bit).size =
+      (inputsCircuit depth keyWidth payloadWidth bit).size + (1 + 2 * networkRecords depth) := by
+  simp [payloadCircuit]
 
 /-- Local tests have exactly their expression semantics. -/
 theorem inputsCircuit_eval

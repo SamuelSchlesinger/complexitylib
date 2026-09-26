@@ -79,6 +79,21 @@ def circuit
   (DeMorgan.Wiring.circuit (wiring completed requestWidth slots keyWidth split)).comp
     (PreparedInputs.circuit phase)
 
+/-- The exact gate count of `circuit`. -/
+@[simp] theorem circuit_size
+    (phase : Circuit DeMorgan.signature (inputWidth completed pending requestWidth slots keyWidth)
+      (pending * (1 + storedWidth requestWidth slots keyWidth)))
+    (split : accepted + remaining = pending) :
+    (circuit phase split).size =
+      (PreparedInputs.circuit phase).size +
+        ∑ output :
+          Fin
+            (inputWidth (completed + accepted) remaining requestWidth slots
+              keyWidth),
+          (wiring completed requestWidth slots keyWidth split
+                output).expression.gateCount := by
+  simp [circuit]
+
 /-- Exact semantics of buffer compaction: old records, accepted point lists,
 and the pending original-data suffix all appear at their fixed positions. -/
 theorem circuit_eval

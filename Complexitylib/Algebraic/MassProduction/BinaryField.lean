@@ -484,6 +484,13 @@ def binaryExtensionSideCircuit
   (Circuit.id DeMorgan.signature (2 * width)).mapOutputs
     (binaryExtensionPairIndex side)
 
+/-- `binaryExtensionSideCircuit` is pure wiring: it has no gates. -/
+@[simp] theorem binaryExtensionSideCircuit_size
+    (width : Nat)
+    (side : Fin 2) :
+    (binaryExtensionSideCircuit width side).size = 0 := by
+  simp [binaryExtensionSideCircuit]
+
 @[simp] theorem binaryExtensionSideCircuit_eval
     (side : Fin 2)
     (input : Fin (2 * width) -> Bool) :
@@ -513,6 +520,13 @@ noncomputable def binaryExtensionSquareCircuit
     (widthPositive : 0 < width) :=
   (binaryExtensionMulCircuit widthPositive).mapInputs fun flat =>
     ((finProdFinEquiv (m := 2) (n := width)).symm flat).2
+
+/-- The exact gate count of `binaryExtensionSquareCircuit`. -/
+@[simp] theorem binaryExtensionSquareCircuit_size
+    (widthPositive : 0 < width) :
+    (binaryExtensionSquareCircuit widthPositive).size =
+      ∑ output : Fin width, multiplicationCoordinateGateCount widthPositive output := by
+  simp [binaryExtensionSquareCircuit]
 
 @[simp] theorem binaryExtensionSquareCircuit_eval
     (widthPositive : 0 < width)
@@ -598,6 +612,14 @@ noncomputable def binaryExtensionSquareRightCircuit
   (binaryExtensionSquareCircuit widthPositive).mapInputs
     (binaryExtensionPairIndex 1)
 
+/-- `binaryExtensionSquareRightCircuit` has exactly the gates of `binaryExtensionSquareCircuit`; the
+surrounding wiring adds none. -/
+@[simp] theorem binaryExtensionSquareRightCircuit_size
+    (widthPositive : 0 < width) :
+    (binaryExtensionSquareRightCircuit widthPositive).size =
+      (binaryExtensionSquareCircuit widthPositive).size := by
+  simp [binaryExtensionSquareRightCircuit]
+
 @[simp] theorem binaryExtensionSquareRightCircuit_eval
     (widthPositive : 0 < width)
     (input : Fin (2 * width) -> Bool) :
@@ -655,6 +677,14 @@ noncomputable def binaryExtensionInverseUpdateInputsCircuit
   (binaryExtensionSquareRightCircuit widthPositive).parallelPair
     (binaryExtensionSideCircuit width 0)
 
+/-- The exact gate count of `binaryExtensionInverseUpdateInputsCircuit`. -/
+@[simp] theorem binaryExtensionInverseUpdateInputsCircuit_size
+    (widthPositive : 0 < width) :
+    (binaryExtensionInverseUpdateInputsCircuit widthPositive).size =
+      (binaryExtensionSquareRightCircuit widthPositive).size +
+        (binaryExtensionSideCircuit width 0).size := by
+  simp [binaryExtensionInverseUpdateInputsCircuit]
+
 @[simp] theorem binaryExtensionInverseUpdateInputsCircuit_eval
     (widthPositive : 0 < width)
     (input : Fin (2 * width) -> Bool) :
@@ -710,6 +740,16 @@ noncomputable def binaryExtensionInverseStepCircuit
   (binaryExtensionSideCircuit width 0).parallelPair
     ((binaryExtensionMulCircuit widthPositive).comp
       (binaryExtensionInverseUpdateInputsCircuit widthPositive))
+
+/-- The exact gate count of `binaryExtensionInverseStepCircuit`. -/
+@[simp] theorem binaryExtensionInverseStepCircuit_size
+    (widthPositive : 0 < width) :
+    (binaryExtensionInverseStepCircuit widthPositive).size =
+      (binaryExtensionSideCircuit width 0).size +
+        ((binaryExtensionInverseUpdateInputsCircuit widthPositive).size +
+          ∑ output : Fin width,
+            multiplicationCoordinateGateCount widthPositive output) := by
+  simp [binaryExtensionInverseStepCircuit]
 
 @[simp] theorem binaryExtensionInverseStepCircuit_eval
     (widthPositive : 0 < width)
@@ -795,6 +835,12 @@ def binaryExtensionInverseInitialCircuit (width : Nat) :=
   (Circuit.id DeMorgan.signature width).parallelPair
     (Circuit.id DeMorgan.signature width)
 
+/-- `binaryExtensionInverseInitialCircuit` is pure wiring: it has no gates. -/
+@[simp] theorem binaryExtensionInverseInitialCircuit_size
+    (width : Nat) :
+    (binaryExtensionInverseInitialCircuit width).size = 0 := by
+  simp [binaryExtensionInverseInitialCircuit]
+
 @[simp] theorem binaryExtensionInverseInitialCircuit_eval
     (input : Fin width -> Bool) :
     (binaryExtensionInverseInitialCircuit width).eval
@@ -815,6 +861,14 @@ noncomputable def binaryExtensionInverseStateCircuit
     (widthPositive : 0 < width) :=
   (binaryExtensionInverseStepCircuit widthPositive).iterate (width - 2) |>.comp
     (binaryExtensionInverseInitialCircuit width)
+
+/-- The exact gate count of `binaryExtensionInverseStateCircuit`. -/
+@[simp] theorem binaryExtensionInverseStateCircuit_size
+    (widthPositive : 0 < width) :
+    (binaryExtensionInverseStateCircuit widthPositive).size =
+      (binaryExtensionInverseInitialCircuit width).size +
+        (width - 2) * (binaryExtensionInverseStepCircuit widthPositive).size := by
+  simp [binaryExtensionInverseStateCircuit]
 
 @[simp] theorem binaryExtensionInverseStateCircuit_eval
     (widthPositive : 0 < width)
@@ -839,12 +893,28 @@ noncomputable def binaryExtensionInversePreSquareCircuit
   (binaryExtensionSideCircuit width 1).comp
     (binaryExtensionInverseStateCircuit widthPositive)
 
+/-- The exact gate count of `binaryExtensionInversePreSquareCircuit`. -/
+@[simp] theorem binaryExtensionInversePreSquareCircuit_size
+    (widthPositive : 0 < width) :
+    (binaryExtensionInversePreSquareCircuit widthPositive).size =
+      (binaryExtensionInverseStateCircuit widthPositive).size +
+        (binaryExtensionSideCircuit width 1).size := by
+  simp [binaryExtensionInversePreSquareCircuit]
+
 /-- Explicit inverse circuit using the addition chain
 `x -> x^3 -> x^7 -> ... -> x^(2^(width-1)-1)`, followed by one square. -/
 noncomputable def binaryExtensionInverseCircuit
     (widthPositive : 0 < width) :=
   (binaryExtensionSquareCircuit widthPositive).comp
     (binaryExtensionInversePreSquareCircuit widthPositive)
+
+/-- The exact gate count of `binaryExtensionInverseCircuit`. -/
+@[simp] theorem binaryExtensionInverseCircuit_size
+    (widthPositive : 0 < width) :
+    (binaryExtensionInverseCircuit widthPositive).size =
+      (binaryExtensionInversePreSquareCircuit widthPositive).size +
+        (binaryExtensionSquareCircuit widthPositive).size := by
+  simp [binaryExtensionInverseCircuit]
 
 @[simp] theorem binaryExtensionInversePreSquareCircuit_eval
     (widthPositive : 0 < width)

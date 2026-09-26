@@ -40,6 +40,13 @@ def packCircuit (depth : Nat)
     (fun record => (keyCircuit.parallel (Circuit.id DeMorgan.signature recordWidth)).mapInputs
       (fun bit => finProdFinEquiv (record, bit)))
 
+/-- Packing costs exactly one key evaluation per record. -/
+@[simp] theorem packCircuit_size
+    (depth : Nat)
+    (keyCircuit : Circuit DeMorgan.signature recordWidth keyWidth) :
+    (packCircuit depth keyCircuit).size = networkRecords depth * keyCircuit.size := by
+  simp [packCircuit]
+
 /-- Each packed record consists of its computed key and its original bits. -/
 theorem packCircuit_eval
     (keyCircuit : Circuit DeMorgan.signature recordWidth keyWidth)
@@ -61,6 +68,17 @@ def circuit (depth : Nat) (ascending : Bool)
       (fun output =>
         let pair := (finProdFinEquiv (m := networkRecords depth) (n := recordWidth)).symm output
         finProdFinEquiv (pair.1, Fin.natAdd keyWidth pair.2))
+
+/-- One key evaluation per record, then the bitonic sort; discarding the keys is pure wiring. -/
+@[simp] theorem circuit_size
+    (depth : Nat) (ascending : Bool)
+    (keyCircuit : Circuit DeMorgan.signature recordWidth keyWidth) :
+    (circuit depth ascending keyCircuit).size =
+      networkRecords depth * keyCircuit.size +
+        bitonicSortGateCount (Nat.le_add_right keyWidth recordWidth) depth := by
+  show (packCircuit depth keyCircuit).size +
+      (bitonicSortCircuit (Nat.le_add_right keyWidth recordWidth) depth ascending).size = _
+  simp [packCircuit]
 
 /-- Output records are bodies of the sorted enriched records. -/
 theorem circuit_eval_record

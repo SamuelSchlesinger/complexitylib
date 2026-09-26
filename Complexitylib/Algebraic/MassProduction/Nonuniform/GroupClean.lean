@@ -30,6 +30,12 @@ def flagsCircuit (points : Fin requests → Fin slots → Fin pointCount) :=
   Circuit.parallelFin requests
     (fun request => (expression (points request)).circuit)
 
+/-- The exact gate count of `flagsCircuit`. -/
+@[simp] theorem flagsCircuit_size
+    (points : Fin requests → Fin slots → Fin pointCount) :
+    (flagsCircuit points).size = ∑ x : Fin requests, (expression (points x)).gateCount := by
+  simp [flagsCircuit]
+
 /-- No point in a request is conflicting exactly when its clean flag is true. -/
 theorem flagsCircuit_eval_iff
     (points : Fin requests → Fin slots → Fin pointCount)
@@ -55,6 +61,13 @@ theorem flagsCircuit_cost
 def circuit (points : Fin requests → Fin slots → Fin pointCount)
     (conflicts : Circuit DeMorgan.signature inputs pointCount) :=
   (flagsCircuit points).comp conflicts
+
+/-- The exact gate count of `circuit`. -/
+@[simp] theorem circuit_size
+    (points : Fin requests → Fin slots → Fin pointCount)
+    (conflicts : Circuit DeMorgan.signature inputs pointCount) :
+    (circuit points conflicts).size = conflicts.size + (flagsCircuit points).size := by
+  simp [circuit]
 
 /-- Exact clean-request semantics for a shared point-conflict circuit. -/
 theorem circuit_eval_iff

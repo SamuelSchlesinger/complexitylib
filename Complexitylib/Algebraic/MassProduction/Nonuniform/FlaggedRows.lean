@@ -41,6 +41,13 @@ def flagsArrayCircuit
     (fun bit : Fin ((networkRecords menuDepth * networkRecords requestDepth) * 1) =>
       (finProdFinEquiv.symm bit).1)
 
+/-- The exact gate count of `flagsArrayCircuit`. -/
+@[simp] theorem flagsArrayCircuit_size
+    (flags : Circuit DeMorgan.signature inputs
+      (networkRecords menuDepth * networkRecords requestDepth)) :
+    (flagsArrayCircuit flags).size = flags.size := by
+  simp [flagsArrayCircuit]
+
 /-- The request payloads are selected by free wiring. -/
 def payloadCircuit
     (payloads : Fin (networkRecords menuDepth * networkRecords requestDepth) →
@@ -49,6 +56,17 @@ def payloadCircuit
     let pair := (finProdFinEquiv (m := networkRecords menuDepth * networkRecords requestDepth)
       (n := payloadWidth)).symm bit
     payloads pair.1 pair.2)
+
+/-- The exact gate count of `payloadCircuit`. -/
+@[simp] theorem payloadCircuit_size
+    (payloads : Fin (networkRecords menuDepth * networkRecords requestDepth) →
+      Fin payloadWidth → DeMorgan.Wiring inputs) :
+    (payloadCircuit payloads).size =
+      ∑ output :
+        Fin
+          (networkRecords menuDepth * networkRecords requestDepth * payloadWidth),
+        (payloads output.divNat output.modNat).expression.gateCount := by
+  simp [payloadCircuit]
 
 /-- Assemble the complete flagged rows without copying the flag computation. -/
 def circuit
@@ -59,6 +77,16 @@ def circuit
     (leftWidth := 1) (rightWidth := payloadWidth) (flagsArrayCircuit flags)
     (payloadCircuit payloads)).mapOutputs
       (Fin.cast (Nat.mul_assoc (networkRecords menuDepth) (networkRecords requestDepth) (1 + payloadWidth)).symm)
+
+/-- `circuit` has exactly the gates of `RecordArray.combine`; the surrounding wiring adds none. -/
+@[simp] theorem circuit_size
+    (flags : Circuit DeMorgan.signature inputs (networkRecords menuDepth * networkRecords requestDepth))
+    (payloads : Fin (networkRecords menuDepth * networkRecords requestDepth) →
+      Fin payloadWidth → DeMorgan.Wiring inputs) :
+    (circuit flags payloads).size =
+      (RecordArray.combine (flagsArrayCircuit flags)
+          (payloadCircuit payloads)).size := by
+  simp [circuit]
 
 /-- Each candidate/request record has its computed flag and original payload. -/
 theorem circuit_eval_record

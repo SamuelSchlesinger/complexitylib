@@ -161,6 +161,15 @@ noncomputable def rawAndProjectiveRankCircuit
   (Circuit.id DeMorgan.signature (dimension * width)).parallelPair
     (projectiveDirectionRankCircuit dimension widthPositive)
 
+/-- `rawAndProjectiveRankCircuit` has exactly the gates of `projectiveDirectionRankCircuit`; the
+surrounding wiring adds none. -/
+@[simp] theorem rawAndProjectiveRankCircuit_size
+    (dimension : Nat)
+    (widthPositive : 0 < width) :
+    (rawAndProjectiveRankCircuit dimension widthPositive).size =
+      (projectiveDirectionRankCircuit dimension widthPositive).size := by
+  simp [rawAndProjectiveRankCircuit]
+
 @[simp] theorem rawAndProjectiveRankCircuit_raw
     (widthPositive : 0 < width)
     (input : Fin (dimension * width) -> Bool)
@@ -215,6 +224,16 @@ noncomputable def guardedProjectiveRankCircuit
     (widthPositive : 0 < width) :=
   (guardedRankPostprocessCircuit dimension width).comp
     (rawAndProjectiveRankCircuit dimension widthPositive)
+
+/-- The exact gate count of `guardedProjectiveRankCircuit`. -/
+@[simp] theorem guardedProjectiveRankCircuit_size
+    (dimension : Nat)
+    (widthPositive : 0 < width) :
+    (guardedProjectiveRankCircuit dimension widthPositive).size =
+      (rawAndProjectiveRankCircuit dimension widthPositive).size +
+        ∑ output : Fin (dimension * width),
+          guardedRankOutputGateCount dimension width output := by
+  simp [guardedProjectiveRankCircuit]
 
 @[simp] theorem guardedProjectiveRankCircuit_eval_zero
     (widthPositive : 0 < width) :
@@ -472,6 +491,16 @@ noncomputable def freshDirectionFromDifferencesCircuit
   (FreshDirection.freshProjectiveDirectionCircuit
       dimension widthPositive depth).comp
     (forbiddenRankArrayCircuit dimension widthPositive depth)
+
+/-- One guarded rank per input record, then the fresh-direction search. -/
+@[simp] theorem freshDirectionFromDifferencesCircuit_size
+    (dimension : Nat)
+    (widthPositive : 0 < width)
+    (depth : Nat) :
+    (freshDirectionFromDifferencesCircuit dimension widthPositive depth).size =
+      networkRecords depth * guardedProjectiveRankGateCount dimension widthPositive +
+        FreshDirection.freshProjectiveDirectionGateCount dimension widthPositive depth := by
+  simp [freshDirectionFromDifferencesCircuit]
 
 /-- A scheduler stage returns a canonical direction key whose rank differs
 from the guarded rank of every packed input vector.  Each nonzero input block

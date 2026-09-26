@@ -46,6 +46,13 @@ def rowsCircuit (menuDepth requestDepth payloadWidth : Nat) :=
     (fun candidate => (FlagSelection.circuit requestDepth payloadWidth).mapInputs
       (fun bit => finProdFinEquiv (candidate, bit)))
 
+/-- One flag sort per candidate row. -/
+@[simp] theorem rowsCircuit_size
+    (menuDepth requestDepth payloadWidth : Nat) :
+    (rowsCircuit menuDepth requestDepth payloadWidth).size =
+      networkRecords menuDepth * (FlagSelection.circuit requestDepth payloadWidth).size := by
+  simp [rowsCircuit]
+
 /-- Each output row is exactly its independent flag sort. -/
 theorem rowsCircuit_eval
     (input : Fin (networkRecords menuDepth * rowBits requestDepth payloadWidth) → Bool)
@@ -101,6 +108,18 @@ def circuit (menuDepth requestDepth payloadWidth needed : Nat)
     (rowsCircuit menuDepth requestDepth payloadWidth)).mapOutputs
       (fun bit => finProdFinEquiv
         ((⟨0, by simp⟩ : Fin (networkRecords menuDepth)), Fin.natAdd 1 bit))
+
+/-- Candidate selection has exactly the gates of its row sorts, its packing layer, and its final
+flag sort. -/
+@[simp] theorem circuit_size
+    (menuDepth requestDepth payloadWidth needed : Nat)
+    (positive : 0 < needed) (fits : needed ≤ networkRecords requestDepth) :
+    (circuit menuDepth requestDepth payloadWidth needed positive fits).size =
+      (rowsCircuit menuDepth requestDepth payloadWidth).size +
+        ((DeMorgan.Wiring.circuit
+            (packWiring menuDepth requestDepth payloadWidth needed positive fits)).size +
+          (FlagSelection.circuit menuDepth (rowBits requestDepth payloadWidth)).size) := by
+  rfl
 
 /-- If any candidate has enough clean requests, the selected complete row
 comes from one candidate and all required prefix positions are clean. -/

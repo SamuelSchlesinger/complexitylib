@@ -41,6 +41,34 @@ noncomputable def selector (positive : 0 < width) (menuDepth : Nat)
     (fun source => PreparedInputs.original (generatedBits menuDepth requestDepth dimension width) (sourceFlags source))
     recordCount (payloadWires menuDepth dimension width original) neededPositive neededFits
 
+/-- `selector` has exactly the gates of `MenuSelection.circuit`; the surrounding wiring adds
+none. -/
+@[simp] theorem selector_size
+    (positive : 0 < width) (menuDepth : Nat)
+    (sourceKeys : Fin sources → Fin (dimension * width) → DeMorgan.Wiring inputs)
+    (sourceFlags : Fin sources → DeMorgan.Wiring inputs)
+    (original : Fin (networkRecords requestDepth) → Fin requestWidth → DeMorgan.Wiring inputs)
+    (recordCount : sources + networkRecords (menuDepth + requestDepth + width) + padding =
+      networkRecords routingDepth)
+    (neededPositive : 0 < needed) (neededFits : needed ≤ networkRecords requestDepth) :
+    (selector positive menuDepth sourceKeys sourceFlags original recordCount neededPositive
+      neededFits).size =
+      (MenuSelection.circuit (PowerLayout.points menuDepth requestDepth width)
+          (PowerLayout.codes menuDepth)
+          (validWires positive menuDepth requestDepth inputs dimension)
+          (keyWires menuDepth requestDepth inputs dimension width)
+          (fun source bit =>
+            PreparedInputs.original
+              (generatedBits menuDepth requestDepth dimension width)
+              (sourceKeys source bit))
+          (fun source =>
+            PreparedInputs.original
+              (generatedBits menuDepth requestDepth dimension width)
+              (sourceFlags source))
+          recordCount (payloadWires menuDepth dimension width original)
+          neededPositive neededFits).size := by
+  simp [selector]
+
 /-- One complete geometric phase: point generation followed by menu selection. -/
 noncomputable def circuit (positive : 0 < width)
     (menu : Fin (networkRecords menuDepth) → Fin (networkRecords requestDepth) →
@@ -54,6 +82,26 @@ noncomputable def circuit (positive : 0 < width)
     (neededPositive : 0 < needed) (neededFits : needed ≤ networkRecords requestDepth) :=
   (selector positive menuDepth sourceKeys sourceFlags original recordCount neededPositive neededFits).comp
     (PreparedInputs.circuit (AffineMenuPoints.circuit positive menu targetWires))
+
+/-- The exact gate count of `circuit`. -/
+@[simp] theorem circuit_size
+    (positive : 0 < width)
+    (menu : Fin (networkRecords menuDepth) → Fin (networkRecords requestDepth) →
+      ℙ (BinaryExtension width) (Fin dimension → BinaryExtension width))
+    (targetWires : Fin (networkRecords requestDepth) → Fin (dimension * width) → DeMorgan.Wiring inputs)
+    (sourceKeys : Fin sources → Fin (dimension * width) → DeMorgan.Wiring inputs)
+    (sourceFlags : Fin sources → DeMorgan.Wiring inputs)
+    (original : Fin (networkRecords requestDepth) → Fin requestWidth → DeMorgan.Wiring inputs)
+    (recordCount : sources + networkRecords (menuDepth + requestDepth + width) + padding =
+      networkRecords routingDepth)
+    (neededPositive : 0 < needed) (neededFits : needed ≤ networkRecords requestDepth) :
+    (circuit positive menu targetWires sourceKeys sourceFlags original recordCount neededPositive
+      neededFits).size =
+      (PreparedInputs.circuit
+            (AffineMenuPoints.circuit positive menu targetWires)).size +
+        (selector positive menuDepth sourceKeys sourceFlags original recordCount
+            neededPositive neededFits).size := by
+  simp [circuit]
 
 /-- Explicit arithmetic bound for the geometric phase, including point generation. -/
 def costBound (menuDepth requestDepth width dimension routingDepth requestWidth : Nat) : Nat :=

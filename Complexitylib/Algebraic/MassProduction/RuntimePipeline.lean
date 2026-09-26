@@ -126,6 +126,24 @@ noncomputable def runtimeScheduleSuffixSelectorCircuit
       (requestDataArrayCircuit totalRequests prefixWidth dimension suffixWidth
         widthPositive gridPositive)
 
+/-- The exact gate count of `runtimeScheduleSuffixSelectorCircuit`. -/
+@[simp] theorem runtimeScheduleSuffixSelectorCircuit_size
+    (totalRequests groups prefixWidth dimension width suffixWidth
+      schedulerDepth : Nat)
+    (widthPositive : 0 < width)
+    (gridPositive : 0 < gridWidth dimension width)
+    (allFit : requestGroupSize totalRequests groups *
+        nonzeroScalarCount width <= networkRecords schedulerDepth)
+    (dummyTarget : Fin dimension -> BinaryExtension width) :
+    (runtimeScheduleSuffixSelectorCircuit totalRequests groups prefixWidth dimension width
+      suffixWidth schedulerDepth widthPositive gridPositive allFit dummyTarget).size =
+      (requestDataArrayCircuit totalRequests prefixWidth dimension suffixWidth
+            widthPositive gridPositive).size +
+        (scheduleSuffixSelectorCircuit totalRequests groups
+            (requestGroupSize totalRequests groups) dimension width suffixWidth
+            schedulerDepth widthPositive allFit dummyTarget).size := by
+  simp [runtimeScheduleSuffixSelectorCircuit]
+
 theorem runtimeScheduleSuffixSelectorCircuit_eval
     (widthPositive : 0 < width)
     (gridPositive : 0 < gridWidth dimension width)
@@ -232,6 +250,39 @@ noncomputable def circuit
       (runtimeScheduleSuffixSelectorCircuit totalRequests groups prefixWidth
         dimension width suffixWidth schedulerDepth widthPositive gridPositive
         allFit dummyTarget)
+
+/-- The exact gate count of `circuit`. -/
+@[simp] theorem circuit_size
+    (prefixWidth : Nat)
+    (widthPositive : 0 < width)
+    (gridPositive : 0 < gridWidth dimension width)
+    (groupsPositive : 0 < groups)
+    (schedulerDepth suffixWidth groupBitWidth orderWidth : Nat)
+    (allFit : requestGroupSize totalRequests groups *
+      nonzeroScalarCount width <= networkRecords schedulerDepth)
+    (incidenceFits :
+      totalRequests * nonzeroScalarCount width <= 2 ^ orderWidth)
+    (dummyTarget : Fin dimension -> BinaryExtension width)
+    (scatterRecordCount :
+      totalRequests * nonzeroScalarCount width +
+          2 ^ (groupBitWidth + dimension * width) + scatterPaddingCount =
+        networkRecords scatterDepth)
+    (resourceCircuits : Fin (resourceBitCount dimension width) ->
+      Circuit DeMorgan.signature (groups * suffixWidth) groups)
+    (gatherRecordCount :
+      2 ^ (groupBitWidth + dimension * width) +
+          totalRequests * nonzeroScalarCount width + gatherPaddingCount =
+        networkRecords gatherDepth) :
+    (circuit prefixWidth widthPositive gridPositive groupsPositive schedulerDepth suffixWidth
+      groupBitWidth orderWidth allFit incidenceFits dummyTarget scatterRecordCount resourceCircuits
+      gatherRecordCount).size =
+      (runtimeScheduleSuffixSelectorCircuit totalRequests groups prefixWidth
+            dimension width suffixWidth schedulerDepth widthPositive gridPositive
+            allFit dummyTarget).size +
+        (dynamicAssembledPipelineCircuit groupsPositive suffixWidth groupBitWidth
+            orderWidth incidenceFits (requestGroupCapacity groupsPositive)
+            scatterRecordCount resourceCircuits gatherRecordCount).size := by
+  simp [circuit]
 
 set_option maxHeartbeats 2000000 in
 /-- The complete runtime circuit returns every requested value in its original

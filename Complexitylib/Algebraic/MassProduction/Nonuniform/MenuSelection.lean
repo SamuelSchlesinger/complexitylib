@@ -62,6 +62,27 @@ noncomputable def circuit
   SelectRows.circuit (MenuClean.circuit layout codes valid keys sourceKeys sourceFlags recordCount)
     payloads positive fits
 
+/-- `circuit` has exactly the gates of `SelectRows.circuit`; the surrounding wiring adds none. -/
+@[simp] theorem circuit_size
+    (layout : (Fin (networkRecords menuDepth) × Fin (networkRecords requestDepth) × Fin slots) ≃
+      Fin (networkRecords depth))
+    (codes : Fin (networkRecords menuDepth) → Fin groupWidth → Bool)
+    (valid : Fin (networkRecords depth) → DeMorgan.Wiring inputs)
+    (keys : Fin (networkRecords depth) → Fin keyWidth → DeMorgan.Wiring inputs)
+    (sourceKeys : Fin sources → Fin keyWidth → DeMorgan.Wiring inputs)
+    (sourceFlags : Fin sources → DeMorgan.Wiring inputs)
+    (recordCount : sources + networkRecords depth + padding = networkRecords routingDepth)
+    (payloads : Fin (networkRecords menuDepth * networkRecords requestDepth) →
+      Fin payloadWidth → DeMorgan.Wiring inputs)
+    (positive : 0 < needed) (fits : needed ≤ networkRecords requestDepth) :
+    (circuit layout codes valid keys sourceKeys sourceFlags recordCount payloads positive
+      fits).size =
+      (SelectRows.circuit
+          (MenuClean.circuit layout codes valid keys sourceKeys sourceFlags
+            recordCount)
+          payloads positive fits).size := by
+  simp [circuit]
+
 /-- The chosen candidate preserves all request payloads and has a clean
 prefix of the requested size. Distinct payloads can be ensured by hardwired
 request identifiers. -/

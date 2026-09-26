@@ -195,6 +195,14 @@ noncomputable def greedyStageInputCircuit
       pointBitWidth dimension width)).mapOutputs
         (greedyStageInputIndex dimension width depth priorRequests priorFits)
 
+/-- `greedyStageInputCircuit` is pure wiring: it has no gates. -/
+@[simp] theorem greedyStageInputCircuit_size
+    (dimension width depth priorRequests : Nat)
+    (priorFits : priorRequests * nonzeroScalarCount width ≤
+      networkRecords depth) :
+    (greedyStageInputCircuit dimension width depth priorRequests priorFits).size = 0 := by
+  simp [greedyStageInputCircuit]
+
 @[simp] theorem greedyStageInputCircuit_cost
     (priorFits : priorRequests * nonzeroScalarCount width ≤
       networkRecords depth) :

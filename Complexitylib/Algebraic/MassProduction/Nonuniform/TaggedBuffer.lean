@@ -62,6 +62,19 @@ noncomputable def circuit (dimension width : Nat)
   DeMorgan.Wiring.circuit (BufferInput.encode (slots := 2 ^ width) (keyWidth := dimension * width)
     (fun request : Fin 0 => Fin.elim0 request) (requestWires original))
 
+/-- The exact gate count of `circuit`. -/
+@[simp] theorem circuit_size
+    (dimension width : Nat)
+    (original : Fin (networkRecords depth) → Fin payloadWidth → DeMorgan.Wiring inputs) :
+    (circuit dimension width original).size =
+      ∑ output :
+        Fin
+          (BufferInput.inputWidth 0 (networkRecords depth) (depth + payloadWidth)
+            (2 ^ width) (dimension * width)),
+        (BufferInput.encode (fun (request : Fin 0) => request.elim0)
+              (requestWires original) output).expression.gateCount := by
+  simp [circuit]
+
 /-- Initialization has zero charged gates. -/
 theorem circuit_cost (dimension width : Nat)
     (original : Fin (networkRecords depth) → Fin payloadWidth → DeMorgan.Wiring inputs) :

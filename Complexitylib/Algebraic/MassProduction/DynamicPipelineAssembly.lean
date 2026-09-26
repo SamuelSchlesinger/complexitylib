@@ -137,6 +137,31 @@ noncomputable def gatherWithSelectorsCircuit
         totalRequests suffixWidth)).mapOutputs
         scheduledSelectorInputIndex)
 
+/-- Carrying the runtime selectors alongside the gathered records is pure wiring. -/
+@[simp] theorem gatherWithSelectorsCircuit_size
+    (groupsPositive : 0 < groups)
+    (suffixWidth groupBitWidth orderWidth : Nat)
+    (incidenceFits :
+      totalRequests * nonzeroScalarCount width <= 2 ^ orderWidth)
+    (capacity : totalRequests <= groups * requestsPerGroup)
+    (scatterRecordCount :
+      totalRequests * nonzeroScalarCount width +
+          2 ^ (groupBitWidth + dimension * width) + scatterPaddingCount =
+        networkRecords scatterDepth)
+    (resourceCircuits : Fin (resourceBitCount dimension width) ->
+      Circuit DeMorgan.signature (groups * suffixWidth) groups)
+    (gatherRecordCount :
+      2 ^ (groupBitWidth + dimension * width) +
+          totalRequests * nonzeroScalarCount width + gatherPaddingCount =
+        networkRecords gatherDepth) :
+    (gatherWithSelectorsCircuit groupsPositive suffixWidth groupBitWidth orderWidth incidenceFits
+      capacity scatterRecordCount resourceCircuits gatherRecordCount).size =
+      (scatterResourceGatherCircuit groupsPositive suffixWidth groupBitWidth
+        orderWidth incidenceFits capacity scatterRecordCount
+        (by rw [← scatterRecordCount]; exact (Nat.le_add_left _ _).trans (Nat.le_add_right _ _))
+        resourceCircuits gatherRecordCount).size := by
+  simp [gatherWithSelectorsCircuit]
+
 theorem gatherWithSelectorsCircuit_eval
     (groupsPositive : 0 < groups)
     (suffixWidth groupBitWidth orderWidth : Nat)
@@ -230,6 +255,36 @@ noncomputable def dynamicAssembledPipelineCircuit
       (gatherWithSelectorsCircuit groupsPositive suffixWidth groupBitWidth
         orderWidth incidenceFits capacity scatterRecordCount
         resourceCircuits gatherRecordCount)
+
+/-- The dynamic pipeline has exactly the gates of the gather stage followed by one runtime decoder
+per request. -/
+@[simp] theorem dynamicAssembledPipelineCircuit_size
+    (groupsPositive : 0 < groups)
+    (suffixWidth groupBitWidth orderWidth : Nat)
+    (incidenceFits :
+      totalRequests * nonzeroScalarCount width <= 2 ^ orderWidth)
+    (capacity : totalRequests <= groups * requestsPerGroup)
+    (scatterRecordCount :
+      totalRequests * nonzeroScalarCount width +
+          2 ^ (groupBitWidth + dimension * width) + scatterPaddingCount =
+        networkRecords scatterDepth)
+    (resourceCircuits : Fin (resourceBitCount dimension width) ->
+      Circuit DeMorgan.signature (groups * suffixWidth) groups)
+    (gatherRecordCount :
+      2 ^ (groupBitWidth + dimension * width) +
+          totalRequests * nonzeroScalarCount width + gatherPaddingCount =
+        networkRecords gatherDepth) :
+    (dynamicAssembledPipelineCircuit groupsPositive suffixWidth groupBitWidth orderWidth
+      incidenceFits capacity scatterRecordCount resourceCircuits gatherRecordCount).size =
+      (gatherWithSelectorsCircuit groupsPositive suffixWidth groupBitWidth orderWidth
+            incidenceFits capacity scatterRecordCount resourceCircuits
+            gatherRecordCount).size +
+        ∑ request : Fin totalRequests,
+          decoderGateCount (width := width) (depth := gatherDepth)
+            (incidenceKeyWidth groupBitWidth dimension width) (orderWidth + 1) width
+            (by rw [← gatherRecordCount]; exact (Nat.le_add_left _ _).trans (Nat.le_add_right _ _))
+            request := by
+  simp [dynamicAssembledPipelineCircuit]
 
 set_option maxHeartbeats 1500000 in
 /-- When the appended selectors are one-hot at the specified coordinates,

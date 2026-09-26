@@ -193,6 +193,25 @@ noncomputable def scatterAssemblyCircuit
   DeMorgan.Wiring.circuit (scatterAssemblySpecification
     (suffixWidth := suffixWidth) groupBitWidth capacity recordCount)
 
+/-- The exact gate count of `scatterAssemblyCircuit`. -/
+@[simp] theorem scatterAssemblyCircuit_size
+    (suffixWidth : Nat)
+    (groupBitWidth : Nat)
+    (capacity : totalRequests <= groups * requestsPerGroup)
+    (recordCount :
+      totalRequests * nonzeroScalarCount width +
+          2 ^ (groupBitWidth + dimension * width) + paddingCount =
+        networkRecords routingDepth) :
+    (scatterAssemblyCircuit suffixWidth groupBitWidth capacity recordCount).size =
+      ∑ output :
+        Fin
+          (networkBits routingDepth
+            (Routing.recordWidth (incidenceKeyWidth groupBitWidth dimension width)
+              suffixWidth)),
+        (scatterAssemblySpecification groupBitWidth capacity recordCount
+              output).expression.gateCount := by
+  simp [scatterAssemblyCircuit]
+
 @[simp] theorem scatterAssemblyCircuit_cost
     (groupBitWidth : Nat)
     (capacity : totalRequests <= groups * requestsPerGroup)
@@ -241,6 +260,21 @@ noncomputable def scatterRoutingCircuit
   (CanonicalRouting.matchedCanonicalRoutingCircuit routingDepth
     (incidenceKeyWidth groupBitWidth dimension width) suffixWidth).comp
       (scatterAssemblyCircuit suffixWidth groupBitWidth capacity recordCount)
+
+/-- The exact gate count of `scatterRoutingCircuit`. -/
+@[simp] theorem scatterRoutingCircuit_size
+    (suffixWidth groupBitWidth : Nat)
+    (capacity : totalRequests <= groups * requestsPerGroup)
+    (recordCount :
+      totalRequests * nonzeroScalarCount width +
+          2 ^ (groupBitWidth + dimension * width) + paddingCount =
+        networkRecords routingDepth) :
+    (scatterRoutingCircuit suffixWidth groupBitWidth capacity recordCount).size =
+      (scatterAssemblyCircuit suffixWidth groupBitWidth capacity
+            recordCount).size +
+        (CanonicalRouting.matchedCanonicalRoutingCircuit routingDepth
+            (incidenceKeyWidth groupBitWidth dimension width) suffixWidth).size := by
+  simp [scatterRoutingCircuit]
 
 @[simp] theorem scatterRoutingCircuit_cost
     (suffixWidth groupBitWidth : Nat)

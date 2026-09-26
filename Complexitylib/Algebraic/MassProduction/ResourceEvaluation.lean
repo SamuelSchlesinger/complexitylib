@@ -186,6 +186,18 @@ noncomputable def resourceBankCircuit
       (resourceCircuits member).mapInputs
         (resourceCircuitInputIndex destinationFits member)
 
+/-- The bank has exactly the resource circuits' gates combined; routing each circuit to its
+destination block is pure wiring. -/
+@[simp] theorem resourceBankCircuit_size
+    (destinationFits :
+      2 ^ (groupBitWidth + dimension * width) <=
+        networkRecords routingDepth)
+    (resourceCircuits : Fin (resourceBitCount dimension width) ->
+      Circuit DeMorgan.signature (groups * suffixWidth) groups) :
+    (resourceBankCircuit destinationFits resourceCircuits).size =
+      ∑ member, (resourceCircuits member).size := by
+  simp [resourceBankCircuit]
+
 @[simp] theorem resourceBankCircuit_eval_apply
     (destinationFits :
       2 ^ (groupBitWidth + dimension * width) <=

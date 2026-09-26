@@ -447,6 +447,13 @@ def roundInputCircuit
   (Circuit.id DeMorgan.signature inputWidth).mapOutputs
     (fun _ => roundInputIndex inputWidth rounds roundFits)
 
+/-- `roundInputCircuit` is pure wiring: it has no gates. -/
+@[simp] theorem roundInputCircuit_size
+    (inputWidth rounds : Nat)
+    (roundFits : rounds + 1 <= inputWidth) :
+    (roundInputCircuit inputWidth rounds roundFits).size = 0 := by
+  simp [roundInputCircuit]
+
 @[simp] theorem roundInputCircuit_eval
     (input : Fin inputWidth -> Bool)
     (roundFits : rounds + 1 <= inputWidth) :

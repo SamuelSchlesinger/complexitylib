@@ -62,6 +62,17 @@ noncomputable def requestDataCircuit
       (requestInputCount prefixWidth suffixWidth)).mapOutputs
         (requestSuffixInputIndex prefixWidth suffixWidth))
 
+/-- The exact gate count of `requestDataCircuit`. -/
+@[simp] theorem requestDataCircuit_size
+    (prefixWidth dimension suffixWidth : Nat)
+    (widthPositive : 0 < width)
+    (gridPositive : 0 < gridWidth dimension width) :
+    (requestDataCircuit prefixWidth dimension suffixWidth widthPositive gridPositive).size =
+      FixedDivision.prefixGateCount prefixWidth widthPositive prefixWidth +
+          BaseConversion.gateCount prefixWidth gridPositive dimension +
+        targetEncoderGateCount prefixWidth dimension width := by
+  simp [requestDataCircuit]
+
 /-- Process all request rows independently. -/
 noncomputable def requestDataArrayCircuit
     (totalRequests prefixWidth dimension suffixWidth : Nat)
@@ -69,6 +80,18 @@ noncomputable def requestDataArrayCircuit
     (gridPositive : 0 < gridWidth dimension width) :=
   (requestDataCircuit prefixWidth dimension suffixWidth widthPositive
     gridPositive).replicate totalRequests
+
+/-- The exact gate count of `requestDataArrayCircuit`. -/
+@[simp] theorem requestDataArrayCircuit_size
+    (totalRequests prefixWidth dimension suffixWidth : Nat)
+    (widthPositive : 0 < width)
+    (gridPositive : 0 < gridWidth dimension width) :
+    (requestDataArrayCircuit totalRequests prefixWidth dimension suffixWidth widthPositive
+      gridPositive).size =
+      totalRequests *
+        (requestDataCircuit prefixWidth dimension suffixWidth widthPositive
+            gridPositive).size := by
+  simp [requestDataArrayCircuit]
 
 /-- Read one request row from the complete runtime input. -/
 def requestInput

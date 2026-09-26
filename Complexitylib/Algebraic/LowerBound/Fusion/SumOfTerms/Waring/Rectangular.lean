@@ -256,13 +256,16 @@ theorem target_eq_prod_X
     (MvPolynomial.prod_X_pow (R := K) (fun _ : Fin degree => 1)
       (Finset.univ : Finset (Fin degree))).symm
 
-/-- Nonzero scalar on the target catalecticant diagonal. -/
+/-- The inverse, in `K`, of the multinomial coefficient of the target exponent;
+it appears on the target catalecticant diagonal. It is nonzero in
+characteristic zero (`targetScalar_ne_zero`). -/
 noncomputable def targetScalar
     (K : Type)
     [Field K]
     (degree : Nat) : K :=
   ((targetExponent degree).multinomial : K)⁻¹
 
+/-- The target normalizing scalar is nonzero in characteristic zero. -/
 theorem targetScalar_ne_zero
     {K : Type}
     [Field K]
@@ -314,14 +317,12 @@ noncomputable def feature
     (n := MatrixRank.Layer degree split)).toLinearMap.comp
       (catalecticant K degree split)
 
-/-- The target feature is a nonzero scalar multiple of the identity map.
-`CharZero K` makes the normalizing scalar nonzero, although that proof-only
-assumption cannot occur syntactically in the conclusion. -/
-@[nolint unusedArguments]
+/-- The target feature is `targetScalar K degree` times the identity map, over
+any field. The scalar is nonzero in characteristic zero
+(`targetScalar_ne_zero`). -/
 theorem feature_target
     {K : Type}
     [Field K]
-    [CharZero K]
     (degree split : Nat) :
     feature K degree split (target K degree) =
       targetScalar K degree • LinearMap.id := by

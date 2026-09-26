@@ -34,6 +34,13 @@ def combine
     (right : Circuit signature inputs (records * rightWidth)) :=
   (left.parallel right).mapOutputs (outputWire records leftWidth rightWidth)
 
+/-- The exact gate count of `combine`. -/
+@[simp] theorem combine_size
+    (left : Circuit signature inputs (records * leftWidth))
+    (right : Circuit signature inputs (records * rightWidth)) :
+    (combine left right).size = left.size + right.size := by
+  simp [combine]
+
 /-- Each combined record is the concatenation of the two computed fields. -/
 theorem combine_eval
     (left : Circuit signature inputs (records * leftWidth))

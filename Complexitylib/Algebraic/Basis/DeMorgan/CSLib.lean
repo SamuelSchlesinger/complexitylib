@@ -117,15 +117,17 @@ theorem toBoolean_size_le (circuit : Circuit signature n m) :
   simpa only [Realization.compile, one_mul] using toBoolean.toTranslation.compile_size_le_mul circuit
     (K := 1) (by intro op; cases op <;> decide)
 
-/-- CSLib's computation predicate agrees with generic computation for its
-Boolean interpretation and a single designated output. -/
+/-- CSLib's `Circuit.Computes` and this library's `Circuit.ComputesWith` are the
+same predicate, so this holds by `Iff.rfl`. It is definitional and kept only for
+compatibility with code written against the earlier, scalar CSLib predicate. -/
 theorem boolean_computes_iff (circuit : Circuit Boolean.signature n 1)
     (function : Cslib.BooleanFunction n) :
     circuit.Computes Boolean.interpretation (fun input _ => function input) ↔
       circuit.ComputesWith Boolean.interpretation (fun input _ => function input) :=
   Iff.rfl
 
-/-- Importing a Boolean circuit preserves its scalar computation contract. -/
+/-- The imported De Morgan circuit computes `function` on its single output
+exactly when the CSLib circuit does. -/
 theorem fromBoolean_computes (circuit : Circuit Boolean.signature n 1)
     (function : Cslib.BooleanFunction n) :
     (fromBoolean.compile circuit).ComputesWith interpretation (fun input _ => function input) ↔
@@ -133,7 +135,8 @@ theorem fromBoolean_computes (circuit : Circuit Boolean.signature n 1)
   rw [boolean_computes_iff]
   simp only [Circuit.ComputesWith, Realization.compile_eval]
 
-/-- Exporting a De Morgan circuit preserves its scalar computation contract. -/
+/-- The exported CSLib circuit computes `function` on its single output exactly
+when the De Morgan circuit does. -/
 theorem toBoolean_computes (circuit : Circuit signature n 1)
     (function : ScalarFunction Bool n) :
     (toBoolean.compile circuit).Computes Boolean.interpretation

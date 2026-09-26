@@ -44,6 +44,11 @@ def notCircuit : Circuit signature (1 * 2) 2 where
   outputs := ![Block.inputWire (0 : Fin 1) (1 : Fin 2),
     Block.inputWire (0 : Fin 1) (0 : Fin 2)]
 
+/-- The dual-rail NOT only swaps the rails: it has no gates. -/
+@[simp] theorem notCircuit_size :
+    notCircuit.size = 0 := by
+  simp [notCircuit]
+
 /-- The positive AND output of a dual-rail AND gadget. -/
 def andPositiveLine (inputCount : Nat) :
     Line signature (inputCount * 2) 0 :=
@@ -85,6 +90,13 @@ def andCircuit (inputCount : Nat) :
       (andNegativeLine inputCount)
     outputs := ![Wire.gate (0 : Fin 2), Wire.gate (1 : Fin 2)] }
 
+/-- The dual-rail AND gadget has exactly two gates: an AND for the positive rail and an OR for its
+complement. -/
+@[simp] theorem andCircuit_size
+    (inputCount : Nat) :
+    (andCircuit inputCount).size = 2 := by
+  simp [andCircuit]
+
 /-- The positive OR output of a dual-rail OR gadget. -/
 def orPositiveLine (inputCount : Nat) :
     Line signature (inputCount * 2) 0 :=
@@ -125,6 +137,13 @@ def orCircuit (inputCount : Nat) :
   { program := (Program.empty.gate (orPositiveLine inputCount)).gate
       (orNegativeLine inputCount)
     outputs := ![Wire.gate (0 : Fin 2), Wire.gate (1 : Fin 2)] }
+
+/-- The dual-rail OR gadget has exactly two gates: an OR for the positive rail and an AND for its
+complement. -/
+@[simp] theorem orCircuit_size
+    (inputCount : Nat) :
+    (orCircuit inputCount).size = 2 := by
+  simp [orCircuit]
 
 /-- Number of gates in a dual-rail operation gadget. -/
 def gateCount : Op -> Nat
@@ -588,6 +607,12 @@ def positiveOutputs
     Circuit signature n m :=
   circuit.mapOutputs fun output =>
     finProdFinEquiv (output, (0 : Fin 2))
+
+/-- Keeping only the positive rails adds no gates. -/
+@[simp] theorem positiveOutputs_size
+    (circuit : Circuit signature n (m * 2)) :
+    (positiveOutputs circuit).size = circuit.size := by
+  simp [positiveOutputs]
 
 /-- Eliminate every internal negation by dual-rail compilation. The resulting
 circuit contains `n` input-literal NOT gates followed by a negation-free

@@ -32,6 +32,12 @@ def combineCircuit (count : Nat) :=
   Circuit.parallelFin count
     (fun index => (expression index).circuit)
 
+/-- The exact gate count of `combineCircuit`. -/
+@[simp] theorem combineCircuit_size
+    (count : Nat) :
+    (combineCircuit count).size = ∑ x : Fin count, (expression x).gateCount := by
+  simp [combineCircuit]
+
 /-- The combining stage reads the corresponding bits of each shared array. -/
 theorem combineCircuit_eval
     (left right valid : Fin count → Bool) (index : Fin count) :
@@ -53,6 +59,15 @@ def circuit
     (right : Circuit DeMorgan.signature inputs count)
     (valid : Circuit DeMorgan.signature inputs count) :=
   (combineCircuit count).comp ((left.parallel right).parallel valid)
+
+/-- The exact gate count of `circuit`. -/
+@[simp] theorem circuit_size
+    (left : Circuit DeMorgan.signature inputs count)
+    (right : Circuit DeMorgan.signature inputs count)
+    (valid : Circuit DeMorgan.signature inputs count) :
+    (circuit left right valid).size =
+      left.size + right.size + valid.size + (combineCircuit count).size := by
+  simp [circuit]
 
 /-- Exact pointwise semantics of the shared composition. -/
 theorem circuit_eval

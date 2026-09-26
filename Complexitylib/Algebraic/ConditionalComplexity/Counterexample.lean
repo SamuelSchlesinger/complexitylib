@@ -39,6 +39,11 @@ def andNandCircuit : Circuit signature 2 (1 + 1) where
     ⟨.and, Wire.input⟩).gate ⟨.not, fun _ => Wire.gate 0⟩
   outputs := Fin.append (fun _ => Wire.gate 0) (fun _ => Wire.gate 1)
 
+/-- The shared circuit has exactly two gates: the AND and the NOT that turns it into the NAND. -/
+@[simp] theorem andNandCircuit_size :
+    andNandCircuit.size = 2 := by
+  simp [andNandCircuit]
+
 /-- The shared circuit computes the pair of functions. -/
 theorem andNandCircuit_computes :
     andNandCircuit.ComputesWith interpretation

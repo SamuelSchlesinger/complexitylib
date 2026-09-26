@@ -126,12 +126,23 @@ def constantCircuit (value : Bool) (n : Nat) :
         (Fin.cast (by cases value <;> rfl) argument) }
   outputs := fun _ => Wire.gate (Fin.last 0)
 
+/-- `constantCircuit` is a single constant gate. -/
+@[simp] theorem constantCircuit_size
+    (value : Bool) (n : Nat) :
+    (constantCircuit value n).size = 1 := by
+  simp [constantCircuit]
+
 /-- One direct `NOT` gate. -/
 def notCircuit : Circuit signature 1 1 where
   program := (Program.empty : Program signature 1 0).gate
     { op := .not
       wires := fun _ => Wire.input 0 }
   outputs := fun _ => Wire.gate (Fin.last 0)
+
+/-- `notCircuit` is a single gate. -/
+@[simp] theorem notCircuit_size :
+    notCircuit.size = 1 := by
+  simp [notCircuit]
 
 /-- One direct `AND` gate. -/
 def andCircuit : Circuit signature 2 1 where
@@ -140,12 +151,22 @@ def andCircuit : Circuit signature 2 1 where
       wires := fun input => Wire.input input }
   outputs := fun _ => Wire.gate (Fin.last 0)
 
+/-- `andCircuit` is a single gate. -/
+@[simp] theorem andCircuit_size :
+    andCircuit.size = 1 := by
+  simp [andCircuit]
+
 /-- One direct `OR` gate. -/
 def orCircuit : Circuit signature 2 1 where
   program := (Program.empty : Program signature 2 0).gate
     { op := .or
       wires := fun input => Wire.input input }
   outputs := fun _ => Wire.gate (Fin.last 0)
+
+/-- `orCircuit` is a single gate. -/
+@[simp] theorem orCircuit_size :
+    orCircuit.size = 1 := by
+  simp [orCircuit]
 
 @[simp] private theorem constantCircuit_eval
     (value : Bool)

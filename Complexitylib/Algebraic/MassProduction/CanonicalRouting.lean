@@ -271,6 +271,17 @@ def canonicalSortCircuit
       (Routing.keyAndTagFitsRecord keyWidth payloadWidth) depth true).comp
     (complementRoutingTagsCircuit depth keyWidth payloadWidth)
 
+/-- The exact gate count of `canonicalSortCircuit`. -/
+@[simp] theorem canonicalSortCircuit_size
+    (depth keyWidth payloadWidth : Nat) :
+    (canonicalSortCircuit depth keyWidth payloadWidth).size =
+      ∑ output :
+          Fin (networkBits depth (Routing.recordWidth keyWidth payloadWidth)),
+          complementTagOutputGateCount depth keyWidth payloadWidth output +
+        bitonicSortGateCount (Routing.keyAndTagFitsRecord keyWidth payloadWidth)
+          depth := by
+  simp [canonicalSortCircuit]
+
 @[simp] theorem canonicalSortCircuit_eval
     (input : Fin (networkBits depth
       (Routing.recordWidth keyWidth payloadWidth)) -> Bool) :
@@ -634,6 +645,15 @@ def matchedCanonicalRoutingCircuit
   (canonicalSortCircuit depth keyWidth payloadWidth).comp
     (Routing.sortedPredecessorCopyCircuit depth keyWidth payloadWidth
       false true)
+
+/-- The exact gate count of `matchedCanonicalRoutingCircuit`. -/
+@[simp] theorem matchedCanonicalRoutingCircuit_size
+    (depth keyWidth payloadWidth : Nat) :
+    (matchedCanonicalRoutingCircuit depth keyWidth payloadWidth).size =
+      Routing.sortedPredecessorCopyGateCount depth keyWidth payloadWidth false
+          true +
+        (canonicalSortCircuit depth keyWidth payloadWidth).size := by
+  simp [matchedCanonicalRoutingCircuit]
 
 @[simp] theorem matchedCanonicalRoutingCircuit_eval
     (input : Fin (networkBits depth

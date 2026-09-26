@@ -34,6 +34,13 @@ def flag
 def circuit (depth payloadWidth : Nat) :=
   bitonicSortCircuit (by omega : 1 ≤ 1 + payloadWidth) depth false
 
+/-- Flag selection is exactly one bitonic sort. -/
+@[simp] theorem circuit_size
+    (depth payloadWidth : Nat) :
+    (circuit depth payloadWidth).size =
+      bitonicSortGateCount (by omega : 1 ≤ 1 + payloadWidth) depth := by
+  simp [circuit]
+
 /-- The one-bit key order is the ordinary order on Boolean flags. -/
 theorem key_le_iff
     (input : Fin (networkBits depth (1 + payloadWidth)) → Bool)

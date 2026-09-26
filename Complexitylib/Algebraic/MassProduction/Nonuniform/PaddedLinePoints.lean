@@ -106,6 +106,19 @@ noncomputable def circuit (positive : 0 < width)
     (fun slot => binaryExtensionVectorBits positive (scalarAt positive slot • direction.rep))
     (fun _ bit => (DeMorgan.Wiring.input bit : DeMorgan.Wiring (dimension * width)))
 
+/-- `circuit` has exactly the gates of `ConstantTranslations.circuit`; the surrounding wiring adds
+none. -/
+@[simp] theorem circuit_size
+    (positive : 0 < width)
+    (direction : ℙ (BinaryExtension width) (Fin dimension → BinaryExtension width)) :
+    (circuit positive direction).size =
+      (ConstantTranslations.circuit
+        (fun slot =>
+          binaryExtensionVectorBits positive (scalarAt positive slot • direction.rep))
+        (fun _ bit =>
+          (DeMorgan.Wiring.input bit : DeMorgan.Wiring (dimension * width)))).size := by
+  simp [circuit]
+
 /-- The circuit emits the complete padded affine line in slot order. -/
 theorem circuit_eval (positive : 0 < width)
     (target : Fin dimension → BinaryExtension width)

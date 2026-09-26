@@ -75,6 +75,18 @@ noncomputable def occupancyCircuit
   (BatchOr.circuit sourceKeys (fun source (_ : Fin 1) => sourceFlags source) keys recordCount).mapOutputs
     (fun index => finProdFinEquiv (index, (0 : Fin 1)))
 
+/-- `occupancyCircuit` has exactly the gates of `BatchOr.circuit`; the surrounding wiring adds
+none. -/
+@[simp] theorem occupancyCircuit_size
+    (sourceKeys : Fin sources → Fin keyWidth → DeMorgan.Wiring inputs)
+    (sourceFlags : Fin sources → DeMorgan.Wiring inputs)
+    (keys : Fin (networkRecords depth) → Fin keyWidth → DeMorgan.Wiring inputs)
+    (recordCount : sources + networkRecords depth + padding = networkRecords routingDepth) :
+    (occupancyCircuit sourceKeys sourceFlags keys recordCount).size =
+      (BatchOr.circuit sourceKeys (fun source (_ : Fin 1) => sourceFlags source) keys
+        recordCount).size := by
+  simp [occupancyCircuit]
+
 /-- Occupancy is exactly the existence of an active matching source. -/
 theorem occupancyCircuit_eval_iff
     (sourceKeys : Fin sources → Fin keyWidth → DeMorgan.Wiring inputs)
@@ -99,6 +111,20 @@ noncomputable def circuit
     (recordCount : sources + networkRecords depth + padding = networkRecords routingDepth) :=
   MaskedOr.circuit (DuplicateFlags.circuit (taggedKeys groups valid keys))
     (occupancyCircuit sourceKeys sourceFlags keys recordCount) (DeMorgan.Wiring.circuit valid)
+
+/-- `circuit` has exactly the gates of `MaskedOr.circuit`; the surrounding wiring adds none. -/
+@[simp] theorem circuit_size
+    (groups : Fin (networkRecords depth) → Fin groupWidth → Bool)
+    (valid : Fin (networkRecords depth) → DeMorgan.Wiring inputs)
+    (keys : Fin (networkRecords depth) → Fin keyWidth → DeMorgan.Wiring inputs)
+    (sourceKeys : Fin sources → Fin keyWidth → DeMorgan.Wiring inputs)
+    (sourceFlags : Fin sources → DeMorgan.Wiring inputs)
+    (recordCount : sources + networkRecords depth + padding = networkRecords routingDepth) :
+    (circuit groups valid keys sourceKeys sourceFlags recordCount).size =
+      (MaskedOr.circuit (DuplicateFlags.circuit (taggedKeys groups valid keys))
+          (occupancyCircuit sourceKeys sourceFlags keys recordCount)
+          (DeMorgan.Wiring.circuit valid)).size := by
+  simp [circuit]
 
 /-- Exact conflict semantics, with invalid slots and different candidates excluded. -/
 theorem circuit_eval_iff

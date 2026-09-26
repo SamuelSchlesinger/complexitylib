@@ -43,6 +43,21 @@ noncomputable def circuit
   GroupClean.circuit (pointIndices layout)
     (PointConflicts.circuit (MenuPointLayout.groups layout codes) valid keys sourceKeys sourceFlags recordCount)
 
+/-- `circuit` has exactly the gates of `GroupClean.circuit`; the surrounding wiring adds none. -/
+@[simp] theorem circuit_size
+    (layout : (Fin candidates × Fin requests × Fin slots) ≃ Fin (networkRecords depth))
+    (codes : Fin candidates → Fin groupWidth → Bool)
+    (valid : Fin (networkRecords depth) → DeMorgan.Wiring inputs)
+    (keys : Fin (networkRecords depth) → Fin keyWidth → DeMorgan.Wiring inputs)
+    (sourceKeys : Fin sources → Fin keyWidth → DeMorgan.Wiring inputs)
+    (sourceFlags : Fin sources → DeMorgan.Wiring inputs)
+    (recordCount : sources + networkRecords depth + padding = networkRecords routingDepth) :
+    (circuit layout codes valid keys sourceKeys sourceFlags recordCount).size =
+      (GroupClean.circuit (pointIndices layout)
+          (PointConflicts.circuit (MenuPointLayout.groups layout codes) valid keys
+            sourceKeys sourceFlags recordCount)).size := by
+  simp [circuit]
+
 /-- Every fixed output is exactly its candidate's clean-request predicate. -/
 theorem circuit_eval_iff
     (layout : (Fin candidates × Fin requests × Fin slots) ≃ Fin (networkRecords depth))

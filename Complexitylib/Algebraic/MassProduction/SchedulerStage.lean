@@ -451,6 +451,18 @@ noncomputable def schedulerStageCircuit
       dimension widthPositive depth).comp
     (pointTargetDifferenceArrayCircuit dimension width depth)
 
+/-- A scheduler stage has exactly the gates of its difference array followed by the fresh-direction
+search. -/
+@[simp] theorem schedulerStageCircuit_size
+    (dimension : Nat)
+    (widthPositive : 0 < width)
+    (depth : Nat) :
+    (schedulerStageCircuit dimension widthPositive depth).size =
+      (pointTargetDifferenceArrayCircuit dimension width depth).size +
+        (ForbiddenRanks.freshDirectionFromDifferencesCircuit dimension widthPositive
+          depth).size := by
+  rfl
+
 /-- Uniform polynomial ledger for one fully expanded scheduler stage. -/
 def schedulerStageCostBound
     (dimension width depth : Nat) : Nat :=

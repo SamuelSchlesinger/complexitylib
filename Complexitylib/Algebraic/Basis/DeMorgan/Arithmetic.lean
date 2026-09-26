@@ -165,6 +165,12 @@ theorem finSum_weightedCost
 def circuit (expression : Arithmetic.Expression Bool n) :=
   arithmeticTranslation.compile expression.circuit
 
+/-- The exact gate count of `circuit`. -/
+@[simp] theorem circuit_size
+    (expression : Arithmetic.Expression Bool n) :
+    (circuit expression).size = arithmeticTranslation.compiledGateCount expression.circuit := by
+  simp [circuit]
+
 /-- Compiled Boolean expressions have exactly their Boolean-ring semantics. -/
 @[simp] theorem circuit_eval
     (expression : Arithmetic.Expression Bool n)

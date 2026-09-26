@@ -64,6 +64,17 @@ def termCircuit
       (Algebraic.Arithmetic.Expression.circuit
         (linearFormExpression term)))
 
+/-- The linear form, the binary power, and the scaling, in sequence. -/
+@[simp] theorem termCircuit_size
+    [Zero K]
+    [One K]
+    (term : Term K degree) :
+    (termCircuit term).size =
+      (linearFormExpression term).gateCount +
+          (Arithmetic.Power.binaryCircuit (K := K) degree).size +
+        (scaleExpression term.scale).gateCount := by
+  simp [termCircuit]
+
 /-- Exact multiplication charge of one rectangular binary term gadget. -/
 def termMultiplicationCount (degree : Nat) : Nat :=
   degree + Algebraic.Arithmetic.Power.binaryMultiplicationCount degree + 1

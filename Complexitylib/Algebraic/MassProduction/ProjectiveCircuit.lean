@@ -119,6 +119,14 @@ def normalizationFlaggedCircuit (dimension width : Nat) :=
   (Circuit.id DeMorgan.signature (dimension * width)).parallel
     (vectorCoordinateNonzeroCircuit dimension width)
 
+/-- The exact gate count of `normalizationFlaggedCircuit`. -/
+@[simp] theorem normalizationFlaggedCircuit_size
+    (dimension width : Nat) :
+    (normalizationFlaggedCircuit dimension width).size =
+      ∑ coordinate : Fin dimension,
+        vectorCoordinateNonzeroGateCount dimension width coordinate := by
+  simp [normalizationFlaggedCircuit]
+
 @[simp] theorem normalizationFlaggedCircuit_eval
     (input : Fin (dimension * width) -> Bool) :
     (normalizationFlaggedCircuit dimension width).eval
@@ -299,6 +307,14 @@ def normalizationPivotCircuit (dimension width : Nat) :=
   (normalizationPivotFromFlaggedCircuit dimension width).comp
     (normalizationFlaggedCircuit dimension width)
 
+/-- The exact gate count of `normalizationPivotCircuit`. -/
+@[simp] theorem normalizationPivotCircuit_size
+    (dimension width : Nat) :
+    (normalizationPivotCircuit dimension width).size =
+      (normalizationFlaggedCircuit dimension width).size +
+        ∑ bit : Fin width, normalizationPivotBitGateCount dimension width bit := by
+  simp [normalizationPivotCircuit]
+
 @[simp] theorem normalizationPivotCircuit_eval
     (input : Fin (dimension * width) -> Bool) :
     (normalizationPivotCircuit dimension width).eval
@@ -348,6 +364,14 @@ def normalizationVectorAndPivotCircuit (dimension width : Nat) :=
   (Circuit.id DeMorgan.signature (dimension * width)).parallel
     (normalizationPivotCircuit dimension width)
 
+/-- `normalizationVectorAndPivotCircuit` has exactly the gates of `normalizationPivotCircuit`; the
+surrounding wiring adds none. -/
+@[simp] theorem normalizationVectorAndPivotCircuit_size
+    (dimension width : Nat) :
+    (normalizationVectorAndPivotCircuit dimension width).size =
+      (normalizationPivotCircuit dimension width).size := by
+  simp [normalizationVectorAndPivotCircuit]
+
 @[simp] theorem normalizationVectorAndPivotCircuit_eval
     (input : Fin (dimension * width) -> Bool) :
     (normalizationVectorAndPivotCircuit dimension width).eval
@@ -377,6 +401,15 @@ noncomputable def normalizationInversePreparationCircuit
     ((binaryExtensionInverseCircuit widthPositive).mapInputs
       (Fin.natAdd (dimension * width)))
 
+/-- `normalizationInversePreparationCircuit` has exactly the gates of
+`binaryExtensionInverseCircuit`; the surrounding wiring adds none. -/
+@[simp] theorem normalizationInversePreparationCircuit_size
+    (dimension : Nat)
+    (widthPositive : 0 < width) :
+    (normalizationInversePreparationCircuit dimension widthPositive).size =
+      (binaryExtensionInverseCircuit widthPositive).size := by
+  simp [normalizationInversePreparationCircuit]
+
 @[simp] theorem normalizationInversePreparationCircuit_eval
     (widthPositive : 0 < width)
     (input : Fin (dimension * width + width) -> Bool) :
@@ -396,6 +429,15 @@ noncomputable def normalizationVectorAndInverseCircuit
     (widthPositive : 0 < width) :=
   (normalizationInversePreparationCircuit dimension widthPositive).comp
     (normalizationVectorAndPivotCircuit dimension width)
+
+/-- The exact gate count of `normalizationVectorAndInverseCircuit`. -/
+@[simp] theorem normalizationVectorAndInverseCircuit_size
+    (dimension : Nat)
+    (widthPositive : 0 < width) :
+    (normalizationVectorAndInverseCircuit dimension widthPositive).size =
+      (normalizationVectorAndPivotCircuit dimension width).size +
+        (normalizationInversePreparationCircuit dimension widthPositive).size := by
+  simp [normalizationVectorAndInverseCircuit]
 
 @[simp] theorem normalizationVectorAndInverseCircuit_eval
     (widthPositive : 0 < width)
@@ -429,6 +471,15 @@ noncomputable def normalizationCoordinateMultiplicationCircuit
     (coordinate : Fin dimension) :=
   (binaryExtensionMulCircuit widthPositive).mapInputs
     (normalizationCoordinateMultiplicationInput dimension width coordinate)
+
+/-- The exact gate count of `normalizationCoordinateMultiplicationCircuit`. -/
+@[simp] theorem normalizationCoordinateMultiplicationCircuit_size
+    (dimension : Nat)
+    (widthPositive : 0 < width)
+    (coordinate : Fin dimension) :
+    (normalizationCoordinateMultiplicationCircuit dimension widthPositive coordinate).size =
+      ∑ output : Fin width, multiplicationCoordinateGateCount widthPositive output := by
+  simp [normalizationCoordinateMultiplicationCircuit]
 
 theorem normalizationCoordinateMultiplicationCircuit_eval
     (widthPositive : 0 < width)
@@ -515,6 +566,15 @@ noncomputable def normalizeBinaryExtensionVectorCircuit
     (widthPositive : 0 < width) :=
   (normalizationMultiplicationCircuit dimension widthPositive).comp
     (normalizationVectorAndInverseCircuit dimension widthPositive)
+
+/-- The exact gate count of `normalizeBinaryExtensionVectorCircuit`. -/
+@[simp] theorem normalizeBinaryExtensionVectorCircuit_size
+    (dimension : Nat)
+    (widthPositive : 0 < width) :
+    (normalizeBinaryExtensionVectorCircuit dimension widthPositive).size =
+      (normalizationVectorAndInverseCircuit dimension widthPositive).size +
+        dimension * normalizationCoordinateMultiplicationGateCount widthPositive := by
+  simp [normalizeBinaryExtensionVectorCircuit]
 
 /-- On an encoded nonzero vector, the shared inverse stage preserves the
 vector and appends the encoding of the inverse pivot. -/

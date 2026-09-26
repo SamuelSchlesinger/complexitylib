@@ -38,12 +38,32 @@ def flagsArrayCircuit (depth : Nat)
   (AdjacentDuplicates.circuit depth keyCircuit).mapOutputs
     (fun bit : Fin (networkRecords depth * 1) => (finProdFinEquiv.symm bit).1)
 
+/-- `flagsArrayCircuit` has exactly the gates of `AdjacentDuplicates.circuit`; the surrounding
+wiring adds none. -/
+@[simp] theorem flagsArrayCircuit_size
+    (depth : Nat)
+    (keyCircuit : Circuit DeMorgan.signature recordWidth keyWidth) :
+    (flagsArrayCircuit depth keyCircuit).size =
+      (AdjacentDuplicates.circuit depth keyCircuit).size := by
+  simp [flagsArrayCircuit]
+
 /-- Attach the global duplicate flags to complete original records. -/
 def markCircuit (depth : Nat)
     (keyCircuit : Circuit DeMorgan.signature recordWidth keyWidth) :=
   RecordArray.combine (records := networkRecords depth) (leftWidth := 1)
     (rightWidth := recordWidth) (flagsArrayCircuit depth keyCircuit)
     (Circuit.id DeMorgan.signature (networkRecords depth * recordWidth))
+
+/-- `markCircuit` has exactly the gates of `RecordArray.combine`; the surrounding wiring adds
+none. -/
+@[simp] theorem markCircuit_size
+    (depth : Nat)
+    (keyCircuit : Circuit DeMorgan.signature recordWidth keyWidth) :
+    (markCircuit depth keyCircuit).size =
+      (RecordArray.combine (flagsArrayCircuit depth keyCircuit)
+          (Circuit.id DeMorgan.signature
+            (networkRecords depth * recordWidth))).size := by
+  simp [markCircuit]
 
 /-- Marking adds one flag and preserves every original bit. -/
 theorem markCircuit_eval_record
@@ -86,6 +106,18 @@ def circuit (depth : Nat)
     (identifierCircuit : Circuit DeMorgan.signature recordWidth identifierWidth) :=
   ((KeyedSort.circuit depth true (identifierCircuit.mapInputs (Fin.natAdd 1))).comp
     (markCircuit depth keyCircuit)).comp (KeyedSort.circuit depth true keyCircuit)
+
+/-- The exact gate count of `circuit`. -/
+@[simp] theorem circuit_size
+    (depth : Nat)
+    (keyCircuit : Circuit DeMorgan.signature recordWidth keyWidth)
+    (identifierCircuit : Circuit DeMorgan.signature recordWidth identifierWidth) :
+    (circuit depth keyCircuit identifierCircuit).size =
+      (KeyedSort.circuit depth true keyCircuit).size +
+        ((markCircuit depth keyCircuit).size +
+          (KeyedSort.circuit depth true
+              (identifierCircuit.mapInputs (Fin.natAdd 1))).size) := by
+  simp [circuit]
 
 /-- Distinct increasing input identifiers restore both the original records
 and their exact duplicate flags to fixed output positions. -/

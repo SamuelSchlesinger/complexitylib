@@ -23,10 +23,18 @@ namespace Algebraic.MassProduction.Nonuniform.ResourceBank
 
 variable {resources : Nat}
 
-/-- Evaluate every resource once on its own input block. -/
+/-- Evaluate every resource once on its own input block. Its gates are exactly the
+members' gates (`circuit_size`). -/
 def circuit (members : (resource : Fin resources) → Circuit DeMorgan.signature suffixWidth 1) :=
   Circuit.parallelFin resources
     (fun resource => (members resource).mapInputs (fun bit => finProdFinEquiv (resource, bit)))
+
+/-- The bank has exactly the members' gates, one member per resource: routing padding adds no
+gates. -/
+@[simp] theorem circuit_size
+    (members : (resource : Fin resources) → Circuit DeMorgan.signature suffixWidth 1) :
+    (circuit members).size = ∑ resource, (members resource).size := by
+  simp [circuit]
 
 /-- Every bank output is exactly its resource's evaluation on its suffix block. -/
 theorem circuit_eval

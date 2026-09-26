@@ -87,6 +87,13 @@ def constantBitVectorCircuit
     fun bit => (DeMorgan.Expression.constant
       (n := inputWidth) (bits bit)).circuit
 
+/-- One constant gate per output bit, and no other gates. -/
+@[simp] theorem constantBitVectorCircuit_size
+    (inputWidth : Nat)
+    (bits : Fin width -> Bool) :
+    (constantBitVectorCircuit inputWidth bits).size = width := by
+  simp [constantBitVectorCircuit]
+
 @[simp] theorem constantBitVectorCircuit_eval
     (input : Fin inputWidth -> Bool) :
     (constantBitVectorCircuit inputWidth bits).eval
@@ -112,6 +119,14 @@ def lineInputCoordinateCircuit
   (Circuit.id DeMorgan.signature (2 * (dimension * width))).mapOutputs
     fun bit => finProdFinEquiv
       (side, finProdFinEquiv (coordinate, bit))
+
+/-- `lineInputCoordinateCircuit` is pure wiring: it has no gates. -/
+@[simp] theorem lineInputCoordinateCircuit_size
+    (dimension width : Nat)
+    (side : Fin 2)
+    (coordinate : Fin dimension) :
+    (lineInputCoordinateCircuit dimension width side coordinate).size = 0 := by
+  simp [lineInputCoordinateCircuit]
 
 @[simp] theorem lineInputCoordinateCircuit_eval
     (input : Fin (2 * (dimension * width)) -> Bool)
@@ -189,6 +204,21 @@ noncomputable def directionScalarProductCircuit
         (decodeBinaryExtension widthPositive
           (enumeratedNonzeroScalar scalar))))
 
+/-- The exact gate count of `directionScalarProductCircuit`. -/
+@[simp] theorem directionScalarProductCircuit_size
+    (dimension : Nat)
+    (widthPositive : 0 < width)
+    (coordinate : Fin dimension)
+    (scalar : Fin (nonzeroScalarCount width)) :
+    (directionScalarProductCircuit dimension widthPositive coordinate scalar).size =
+      (lineInputCoordinateCircuit dimension width 1 coordinate).size +
+          (constantBitVectorCircuit (2 * (dimension * width))
+              (decodeBinaryExtension widthPositive
+                (enumeratedNonzeroScalar scalar))).size +
+        ∑ output : Fin width,
+          multiplicationCoordinateGateCount widthPositive output := by
+  simp [directionScalarProductCircuit]
+
 @[simp] theorem directionScalarProductCircuit_eval_lineInput
     (widthPositive : 0 < width)
     (target direction : Fin dimension -> BinaryExtension width)
@@ -234,6 +264,19 @@ noncomputable def linePointCoordinateCircuit
     ((lineInputCoordinateCircuit dimension width 0 coordinate).parallelPair
       (directionScalarProductCircuit dimension widthPositive
         coordinate scalar))
+
+/-- The exact gate count of `linePointCoordinateCircuit`. -/
+@[simp] theorem linePointCoordinateCircuit_size
+    (dimension : Nat)
+    (widthPositive : 0 < width)
+    (coordinate : Fin dimension)
+    (scalar : Fin (nonzeroScalarCount width)) :
+    (linePointCoordinateCircuit dimension widthPositive coordinate scalar).size =
+      (lineInputCoordinateCircuit dimension width 0 coordinate).size +
+          (directionScalarProductCircuit dimension widthPositive coordinate
+              scalar).size +
+        ∑ output : Fin width, additionCoordinateGateCount output := by
+  simp [linePointCoordinateCircuit]
 
 @[simp] theorem linePointCoordinateCircuit_eval_lineInput
     (widthPositive : 0 < width)
@@ -298,6 +341,16 @@ noncomputable def linePointCircuit
       linePointCoordinateCircuit
         dimension widthPositive coordinate scalar
 
+/-- The exact gate count of `linePointCircuit`. -/
+@[simp] theorem linePointCircuit_size
+    (dimension : Nat)
+    (widthPositive : 0 < width)
+    (scalar : Fin (nonzeroScalarCount width)) :
+    (linePointCircuit dimension widthPositive scalar).size =
+      ∑ member : Fin dimension,
+        (linePointCoordinateCircuit dimension widthPositive member scalar).size := by
+  simp [linePointCircuit]
+
 @[simp] theorem linePointCircuit_eval_lineInput
     (widthPositive : 0 < width)
     (target direction : Fin dimension -> BinaryExtension width)
@@ -341,6 +394,15 @@ noncomputable def lineEnumerationCircuit
     (widthPositive : 0 < width) :=
   Circuit.parallelFinVector (nonzeroScalarCount width) (dimension * width)
     fun scalar => linePointCircuit dimension widthPositive scalar
+
+/-- The exact gate count of `lineEnumerationCircuit`. -/
+@[simp] theorem lineEnumerationCircuit_size
+    (dimension : Nat)
+    (widthPositive : 0 < width) :
+    (lineEnumerationCircuit dimension widthPositive).size =
+      ∑ member : Fin (nonzeroScalarCount width),
+        (linePointCircuit dimension widthPositive member).size := by
+  simp [lineEnumerationCircuit]
 
 @[simp] theorem lineEnumerationCircuit_eval_apply
     (widthPositive : 0 < width)
@@ -487,6 +549,12 @@ def schedulerStageTargetCircuit
     ((networkRecords depth + 1) * (dimension * width))).mapOutputs
       (SchedulerStage.stageTargetInputIndex depth (dimension * width))
 
+/-- `schedulerStageTargetCircuit` is pure wiring: it has no gates. -/
+@[simp] theorem schedulerStageTargetCircuit_size
+    (dimension width depth : Nat) :
+    (schedulerStageTargetCircuit dimension width depth).size = 0 := by
+  simp [schedulerStageTargetCircuit]
+
 @[simp] theorem schedulerStageTargetCircuit_eval
     (input : Fin ((networkRecords depth + 1) *
       (dimension * width)) -> Bool) :
@@ -527,6 +595,18 @@ noncomputable def scheduledLineEnumerationCircuit
     ((schedulerStageTargetCircuit dimension width depth).parallelPair
       (SchedulerStage.schedulerStageCircuit
         dimension widthPositive depth))
+
+/-- The exact gate count of `scheduledLineEnumerationCircuit`. -/
+@[simp] theorem scheduledLineEnumerationCircuit_size
+    (dimension : Nat)
+    (widthPositive : 0 < width)
+    (depth : Nat) :
+    (scheduledLineEnumerationCircuit dimension widthPositive depth).size =
+      (schedulerStageTargetCircuit dimension width depth).size +
+          (SchedulerStage.schedulerStageCircuit dimension widthPositive
+              depth).size +
+        (lineEnumerationCircuit dimension widthPositive).size := by
+  simp [scheduledLineEnumerationCircuit]
 
 /-- Decode an emitted row-major array of packed field vectors as a finite
 set.  Classical equality remains local to this boundary. -/

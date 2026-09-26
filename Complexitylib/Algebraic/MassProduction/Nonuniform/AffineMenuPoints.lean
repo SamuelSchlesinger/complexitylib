@@ -49,6 +49,18 @@ noncomputable def circuit (positive : 0 < width)
     (targets : Fin (networkRecords requestDepth) → Fin (dimension * width) → DeMorgan.Wiring inputs) :=
   ConstantTranslations.circuit (offsets positive menu) (sources targets)
 
+/-- `circuit` has exactly the gates of `ConstantTranslations.circuit`; the surrounding wiring adds
+none. -/
+@[simp] theorem circuit_size
+    (positive : 0 < width)
+    (menu : Fin (networkRecords menuDepth) → Fin (networkRecords requestDepth) →
+      ℙ (BinaryExtension width) (Fin dimension → BinaryExtension width))
+    (targets : Fin (networkRecords requestDepth) → Fin (dimension * width) → DeMorgan.Wiring inputs) :
+    (circuit positive menu targets).size =
+      (ConstantTranslations.circuit (offsets positive menu)
+          (sources targets)).size := by
+  simp [circuit]
+
 /-- Exact field semantics at every fixed candidate/request/scalar output. -/
 theorem circuit_eval (positive : 0 < width)
     (menu : Fin (networkRecords menuDepth) → Fin (networkRecords requestDepth) →

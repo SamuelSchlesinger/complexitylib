@@ -93,6 +93,16 @@ def canonicalGatherCircuit
     (incidenceKeyWidth groupBitWidth dimension width)
     (orderWidth + 1) valueWidth
 
+/-- `canonicalGatherCircuit` has exactly the gates of `matchedCanonicalRoutingCircuit`; the
+surrounding wiring adds none. -/
+@[simp] theorem canonicalGatherCircuit_size
+    (routingDepth groupBitWidth dimension width orderWidth valueWidth : Nat) :
+    (canonicalGatherCircuit routingDepth groupBitWidth dimension width orderWidth valueWidth).size =
+      (matchedCanonicalRoutingCircuit routingDepth
+          (incidenceKeyWidth groupBitWidth dimension width) (orderWidth + 1)
+          valueWidth).size := by
+  simp [canonicalGatherCircuit]
+
 @[simp] theorem canonicalGatherCircuit_eval
     (input : Fin (networkBits routingDepth
       (recordWidth

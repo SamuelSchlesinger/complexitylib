@@ -33,6 +33,18 @@ def circuit
   (CandidateSelection.circuit menuDepth requestDepth payloadWidth needed positive fits).comp
     (FlaggedRows.circuit flags payloads)
 
+/-- Row selection has exactly the gates of the flagged rows followed by candidate selection. -/
+@[simp] theorem circuit_size
+    (flags : Circuit DeMorgan.signature inputs (networkRecords menuDepth * networkRecords requestDepth))
+    (payloads : Fin (networkRecords menuDepth * networkRecords requestDepth) →
+      Fin payloadWidth → DeMorgan.Wiring inputs)
+    (positive : 0 < needed) (fits : needed ≤ networkRecords requestDepth) :
+    (circuit flags payloads positive fits).size =
+      (FlaggedRows.circuit flags payloads).size +
+        (CandidateSelection.circuit menuDepth requestDepth payloadWidth needed positive
+          fits).size := by
+  rfl
+
 /-- One original flagged record, with its complete payload. -/
 def record
     (flags : Circuit DeMorgan.signature inputs (networkRecords menuDepth * networkRecords requestDepth))

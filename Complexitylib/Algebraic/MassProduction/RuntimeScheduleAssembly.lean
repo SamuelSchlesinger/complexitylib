@@ -67,6 +67,20 @@ noncomputable def paddedTargetCircuit
     (paddedTargetSpecification totalRequests groups requestsPerGroup
       dimension width suffixWidth widthPositive dummyTarget)
 
+/-- The exact gate count of `paddedTargetCircuit`. -/
+@[simp] theorem paddedTargetCircuit_size
+    (totalRequests groups requestsPerGroup dimension width suffixWidth : Nat)
+    (widthPositive : 0 < width)
+    (dummyTarget : Fin dimension -> BinaryExtension width) :
+    (paddedTargetCircuit totalRequests groups requestsPerGroup dimension width suffixWidth
+      widthPositive dummyTarget).size =
+      ∑ output :
+        Fin (groups * (requestsPerGroup * pointBitWidth dimension width)),
+        (paddedTargetSpecification totalRequests groups requestsPerGroup dimension
+              width suffixWidth widthPositive dummyTarget
+              output).expression.gateCount := by
+  simp [paddedTargetCircuit]
+
 @[simp] theorem paddedTargetCircuit_cost
     (widthPositive : 0 < width)
     (dummyTarget : Fin dimension -> BinaryExtension width) :
@@ -175,6 +189,15 @@ noncomputable def suffixSelectorCircuit
   DeMorgan.Wiring.circuit
     (suffixSelectorSpecification totalRequests dimension width suffixWidth)
 
+/-- The exact gate count of `suffixSelectorCircuit`. -/
+@[simp] theorem suffixSelectorCircuit_size
+    (totalRequests dimension width suffixWidth : Nat) :
+    (suffixSelectorCircuit totalRequests dimension width suffixWidth).size =
+      ∑ output : Fin (suffixSelectorCount totalRequests suffixWidth width),
+        (suffixSelectorSpecification totalRequests dimension width suffixWidth
+              output).expression.gateCount := by
+  simp [suffixSelectorCircuit]
+
 @[simp] theorem suffixSelectorCircuit_eval
     (input : Fin (totalRequests *
       requestDataCount dimension width suffixWidth) -> Bool) :
@@ -207,6 +230,24 @@ noncomputable def scheduleSuffixSelectorCircuit
     (paddedTargetCircuit totalRequests groups requestsPerGroup dimension width
       suffixWidth widthPositive dummyTarget)).parallel
     (suffixSelectorCircuit totalRequests dimension width suffixWidth)
+
+/-- The exact gate count of `scheduleSuffixSelectorCircuit`. -/
+@[simp] theorem scheduleSuffixSelectorCircuit_size
+    (totalRequests groups requestsPerGroup dimension width
+      suffixWidth schedulerDepth : Nat)
+    (widthPositive : 0 < width)
+    (allFit : requestsPerGroup * nonzeroScalarCount width <=
+      networkRecords schedulerDepth)
+    (dummyTarget : Fin dimension -> BinaryExtension width) :
+    (scheduleSuffixSelectorCircuit totalRequests groups requestsPerGroup dimension width suffixWidth
+      schedulerDepth widthPositive allFit dummyTarget).size =
+      (paddedTargetCircuit totalRequests groups requestsPerGroup dimension width
+              suffixWidth widthPositive dummyTarget).size +
+          groups *
+            greedyScheduleGateCount dimension widthPositive schedulerDepth
+              requestsPerGroup +
+        (suffixSelectorCircuit totalRequests dimension width suffixWidth).size := by
+  simp [scheduleSuffixSelectorCircuit]
 
 theorem scheduleSuffixSelectorCircuit_eval
     (widthPositive : 0 < width)

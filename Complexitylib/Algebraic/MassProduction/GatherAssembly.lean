@@ -260,6 +260,28 @@ noncomputable def gatherAssemblyCircuit
   DeMorgan.Wiring.circuit (gatherAssemblySpecification groupsPositive
     groupBitWidth orderWidth incidenceFits capacity recordCount)
 
+/-- The exact gate count of `gatherAssemblyCircuit`. -/
+@[simp] theorem gatherAssemblyCircuit_size
+    (groupsPositive : 0 < groups)
+    (groupBitWidth orderWidth : Nat)
+    (incidenceFits :
+      totalRequests * nonzeroScalarCount width <= 2 ^ orderWidth)
+    (capacity : totalRequests <= groups * requestsPerGroup)
+    (recordCount :
+      2 ^ (groupBitWidth + dimension * width) +
+          totalRequests * nonzeroScalarCount width + paddingCount =
+        networkRecords routingDepth) :
+    (gatherAssemblyCircuit groupsPositive groupBitWidth orderWidth incidenceFits capacity
+      recordCount).size =
+      ∑ output :
+        Fin
+          (networkBits routingDepth
+            (Routing.recordWidth (incidenceKeyWidth groupBitWidth dimension width)
+              (orderWidth + 1 + width))),
+        (gatherAssemblySpecification groupsPositive groupBitWidth orderWidth
+              incidenceFits capacity recordCount output).expression.gateCount := by
+  simp [gatherAssemblyCircuit]
+
 @[simp] theorem gatherAssemblyCircuit_cost
     (groupsPositive : 0 < groups)
     (groupBitWidth orderWidth : Nat)
@@ -339,6 +361,26 @@ noncomputable def gatherRoutingCircuit
     (orderWidth + 1) width).comp
       (gatherAssemblyCircuit groupsPositive groupBitWidth orderWidth
         incidenceFits capacity recordCount)
+
+/-- The exact gate count of `gatherRoutingCircuit`. -/
+@[simp] theorem gatherRoutingCircuit_size
+    (groupsPositive : 0 < groups)
+    (groupBitWidth orderWidth : Nat)
+    (incidenceFits :
+      totalRequests * nonzeroScalarCount width <= 2 ^ orderWidth)
+    (capacity : totalRequests <= groups * requestsPerGroup)
+    (recordCount :
+      2 ^ (groupBitWidth + dimension * width) +
+          totalRequests * nonzeroScalarCount width + paddingCount =
+        networkRecords routingDepth) :
+    (gatherRoutingCircuit groupsPositive groupBitWidth orderWidth incidenceFits capacity
+      recordCount).size =
+      (gatherAssemblyCircuit groupsPositive groupBitWidth orderWidth incidenceFits
+            capacity recordCount).size +
+        (matchedCanonicalRoutingCircuit routingDepth
+            (incidenceKeyWidth groupBitWidth dimension width) (orderWidth + 1)
+            width).size := by
+  simp [gatherRoutingCircuit]
 
 @[simp] theorem gatherRoutingCircuit_cost
     (groupsPositive : 0 < groups)

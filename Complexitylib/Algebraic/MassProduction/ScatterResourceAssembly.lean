@@ -45,6 +45,19 @@ noncomputable def scatterWithScheduleCircuit
           (suffixWidth := suffixWidth))).parallel
     (scatterRoutingCircuit suffixWidth groupBitWidth capacity recordCount)
 
+/-- `scatterWithScheduleCircuit` has exactly the gates of `scatterRoutingCircuit`; the surrounding
+wiring adds none. -/
+@[simp] theorem scatterWithScheduleCircuit_size
+    (suffixWidth groupBitWidth : Nat)
+    (capacity : totalRequests <= groups * requestsPerGroup)
+    (recordCount :
+      totalRequests * nonzeroScalarCount width +
+          2 ^ (groupBitWidth + dimension * width) + paddingCount =
+        networkRecords scatterDepth) :
+    (scatterWithScheduleCircuit suffixWidth groupBitWidth capacity recordCount).size =
+      (scatterRoutingCircuit suffixWidth groupBitWidth capacity recordCount).size := by
+  simp [scatterWithScheduleCircuit]
+
 theorem scatterWithScheduleCircuit_eval
     (widthPositive : 0 < width)
     (suffixWidth groupBitWidth : Nat)
@@ -151,7 +164,8 @@ noncomputable def resourceStageScatterInput
   simp [resourceStageScatterInput, resourceStageScatterInputIndex]
 
 /-- Preserve the schedule while evaluating every shorter resource circuit in
-parallel on the routed scatter output. -/
+parallel on the routed scatter output. Its gates are exactly the resource circuits'
+gates (`resourceStageCircuit_size`). -/
 noncomputable def resourceStageCircuit
     (requestsPerGroup : Nat)
     (destinationFits :
@@ -167,6 +181,19 @@ noncomputable def resourceStageCircuit
     ((resourceBankCircuit destinationFits resourceCircuits).mapInputs
       (resourceStageScatterInputIndex
         (groups := groups) (requestsPerGroup := requestsPerGroup)))
+
+/-- The resource stage has exactly the resource circuits' gates combined; preserving the schedule
+and routing the scatter output are pure wiring. -/
+@[simp] theorem resourceStageCircuit_size
+    (requestsPerGroup : Nat)
+    (destinationFits :
+      2 ^ (groupBitWidth + dimension * width) <=
+        networkRecords scatterDepth)
+    (resourceCircuits : Fin (resourceBitCount dimension width) ->
+      Circuit DeMorgan.signature (groups * suffixWidth) groups) :
+    (resourceStageCircuit requestsPerGroup destinationFits resourceCircuits).size =
+      ∑ member, (resourceCircuits member).size := by
+  simp [resourceStageCircuit, resourceBankCircuit]
 
 theorem resourceStageCircuit_eval
     (destinationFits :
@@ -215,6 +242,27 @@ noncomputable def scatterResourceCircuit
     destinationFits resourceCircuits).comp
       (scatterWithScheduleCircuit suffixWidth groupBitWidth capacity
         recordCount)
+
+/-- The exact gate count of `scatterResourceCircuit`. -/
+@[simp] theorem scatterResourceCircuit_size
+    (suffixWidth groupBitWidth : Nat)
+    (capacity : totalRequests <= groups * requestsPerGroup)
+    (recordCount :
+      totalRequests * nonzeroScalarCount width +
+          2 ^ (groupBitWidth + dimension * width) + paddingCount =
+        networkRecords scatterDepth)
+    (destinationFits :
+      2 ^ (groupBitWidth + dimension * width) <=
+        networkRecords scatterDepth)
+    (resourceCircuits : Fin (resourceBitCount dimension width) ->
+      Circuit DeMorgan.signature (groups * suffixWidth) groups) :
+    (scatterResourceCircuit suffixWidth groupBitWidth capacity recordCount destinationFits
+      resourceCircuits).size =
+      (scatterWithScheduleCircuit suffixWidth groupBitWidth capacity
+            recordCount).size +
+        (resourceStageCircuit requestsPerGroup destinationFits
+            resourceCircuits).size := by
+  simp [scatterResourceCircuit]
 
 theorem scatterResourceCircuit_eval
     (widthPositive : 0 < width)

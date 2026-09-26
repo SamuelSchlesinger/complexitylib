@@ -1201,6 +1201,16 @@ noncomputable def projectiveDirectionRankCircuit
   (projectiveRankPackedCircuit dimension width).comp
     (normalizeBinaryExtensionVectorCircuit dimension widthPositive)
 
+/-- The exact gate count of `projectiveDirectionRankCircuit`. -/
+@[simp] theorem projectiveDirectionRankCircuit_size
+    (dimension : Nat)
+    (widthPositive : 0 < width) :
+    (projectiveDirectionRankCircuit dimension widthPositive).size =
+      (normalizeBinaryExtensionVectorCircuit dimension widthPositive).size +
+        ∑ output : Fin (dimension * width),
+          projectiveRankBitGateCount dimension width output := by
+  simp [projectiveDirectionRankCircuit]
+
 @[simp] theorem projectiveDirectionRankCircuit_eval_projective
     (widthPositive : 0 < width)
     (widthAtLeastTwo : 2 <= width)

@@ -91,6 +91,22 @@ noncomputable def circuit
     (DeMorgan.Wiring.circuit (layoutWiring sourceKeys sourceValues queryKeys recordCount))).mapOutputs
       (outputIndex recordCount)
 
+/-- The exact gate count of `circuit`. -/
+@[simp] theorem circuit_size
+    (sourceKeys : Fin sources → Fin keyWidth → DeMorgan.Wiring inputs)
+    (sourceValues : Fin sources → Fin valueWidth → DeMorgan.Wiring inputs)
+    (queryKeys : Fin requests → Fin keyWidth → DeMorgan.Wiring inputs)
+    (recordCount : sources + requests + padding = networkRecords depth) :
+    (circuit sourceKeys sourceValues queryKeys recordCount).size =
+      ∑ output :
+          Fin
+            (networkBits depth
+              (Routing.recordWidth keyWidth (depth + 1 + valueWidth))),
+          (layoutWiring sourceKeys sourceValues queryKeys recordCount
+                output).expression.gateCount +
+        (Broadcast.routingCircuit depth keyWidth (depth + 1) valueWidth).size := by
+  simp [circuit]
+
 /-- An output bit is true exactly when a matching source bit is true. -/
 theorem circuit_eval_iff
     (sourceKeys : Fin sources → Fin keyWidth → DeMorgan.Wiring inputs)

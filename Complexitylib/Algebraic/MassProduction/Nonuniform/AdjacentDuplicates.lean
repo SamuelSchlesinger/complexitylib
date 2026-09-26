@@ -119,6 +119,13 @@ def flagsCircuit (depth keyWidth : Nat) :=
   Circuit.parallelFin (networkRecords depth)
     (fun index => (expression depth keyWidth index).circuit)
 
+/-- The exact gate count of `flagsCircuit`. -/
+@[simp] theorem flagsCircuit_size
+    (depth keyWidth : Nat) :
+    (flagsCircuit depth keyWidth).size =
+      ∑ x : Fin (networkRecords depth), (expression depth keyWidth x).gateCount := by
+  simp [flagsCircuit]
+
 /-- Sorted key arrays yield exact global duplicate flags. -/
 theorem flagsCircuit_eval_iff
     (input : Fin (networkBits depth keyWidth) → Bool)
@@ -136,6 +143,13 @@ def keysCircuit (depth : Nat)
   Circuit.parallelFinVector (networkRecords depth) keyWidth
     (fun record => keyCircuit.mapInputs (fun bit => finProdFinEquiv (record, bit)))
 
+/-- Computing the keys costs exactly one key evaluation per record. -/
+@[simp] theorem keysCircuit_size
+    (depth : Nat)
+    (keyCircuit : Circuit DeMorgan.signature recordWidth keyWidth) :
+    (keysCircuit depth keyCircuit).size = networkRecords depth * keyCircuit.size := by
+  simp [keysCircuit]
+
 /-- The key array contains the computed key of each original record. -/
 theorem keysCircuit_eval
     (keyCircuit : Circuit DeMorgan.signature recordWidth keyWidth)
@@ -151,6 +165,14 @@ theorem keysCircuit_eval
 def circuit (depth : Nat)
     (keyCircuit : Circuit DeMorgan.signature recordWidth keyWidth) :=
   (flagsCircuit depth keyWidth).comp (keysCircuit depth keyCircuit)
+
+/-- The detector has exactly the gates of its key computation followed by its local comparisons. -/
+@[simp] theorem circuit_size
+    (depth : Nat)
+    (keyCircuit : Circuit DeMorgan.signature recordWidth keyWidth) :
+    (circuit depth keyCircuit).size =
+      (keysCircuit depth keyCircuit).size + (flagsCircuit depth keyWidth).size := by
+  rfl
 
 /-- Exact global duplicate detection whenever the computed keys are sorted. -/
 theorem circuit_eval_iff

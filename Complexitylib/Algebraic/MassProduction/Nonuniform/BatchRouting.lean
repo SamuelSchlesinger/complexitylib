@@ -28,10 +28,27 @@ def sortedCircuit (depth keyWidth metadataWidth valueWidth : Nat) :=
     (bitonicSortCircuit
       (Routing.keyAndTagFitsRecord keyWidth (metadataWidth + valueWidth)) depth true)
 
+/-- The bitonic sort followed by the value broadcast. -/
+@[simp] theorem sortedCircuit_size
+    (depth keyWidth metadataWidth valueWidth : Nat) :
+    (sortedCircuit depth keyWidth metadataWidth valueWidth).size =
+      bitonicSortGateCount
+          (Routing.keyAndTagFitsRecord keyWidth (metadataWidth + valueWidth)) depth +
+        (recordsCircuit depth keyWidth metadataWidth valueWidth).size := by
+  simp [sortedCircuit]
+
 /-- The complete two-sort batched router. -/
 def routingCircuit (depth keyWidth metadataWidth valueWidth : Nat) :=
   (canonicalSortCircuit depth keyWidth metadataWidth valueWidth).comp
     (sortedCircuit depth keyWidth metadataWidth valueWidth)
+
+/-- The exact gate count of `routingCircuit`. -/
+@[simp] theorem routingCircuit_size
+    (depth keyWidth metadataWidth valueWidth : Nat) :
+    (routingCircuit depth keyWidth metadataWidth valueWidth).size =
+      (sortedCircuit depth keyWidth metadataWidth valueWidth).size +
+        (canonicalSortCircuit depth keyWidth metadataWidth valueWidth).size := by
+  simp [routingCircuit]
 
 @[simp] theorem recordsCircuit_complementedHeader
     (input : Fin (networkBits depth (recordWidth keyWidth metadataWidth valueWidth)) → Bool)

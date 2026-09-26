@@ -75,7 +75,8 @@ def selectorInputIndex
     Fin width -> Fin (prefixWidth + width) :=
   Fin.natAdd prefixWidth
 
-/-- Repeated grid-base conversion alongside the retained selector. -/
+/-- Repeated grid-base conversion alongside the retained selector. It has exactly
+`BaseConversion.gateCount` gates (`conversionStageCircuit_size`). -/
 noncomputable def conversionStageCircuit
     (prefixWidth dimension width : Nat)
     (gridPositive : 0 < gridWidth dimension width) :
@@ -88,6 +89,15 @@ noncomputable def conversionStageCircuit
     (Circuit.id DeMorgan.signature (prefixWidth + width)).mapOutputs
       (selectorInputIndex prefixWidth width)
   (conversion.parallel selector).castCounts rfl rfl
+
+/-- The conversion stage has exactly the gates of the repeated grid-base conversion; carrying the
+one-hot selector alongside it is pure wiring. -/
+@[simp] theorem conversionStageCircuit_size
+    (prefixWidth dimension width : Nat)
+    (gridPositive : 0 < gridWidth dimension width) :
+    (conversionStageCircuit prefixWidth dimension width gridPositive).size =
+      BaseConversion.gateCount prefixWidth gridPositive dimension := by
+  simp [conversionStageCircuit]
 
 /-- Divide by `width`, convert the quotient to base `gridWidth`, and retain
 the one-hot width remainder. -/
@@ -283,6 +293,12 @@ noncomputable def selectorCircuit
   (Circuit.id DeMorgan.signature
     (coreOutputCount prefixWidth dimension width)).mapOutputs
       (coreSelectorIndex prefixWidth dimension width)
+
+/-- `selectorCircuit` is pure wiring: it has no gates. -/
+@[simp] theorem selectorCircuit_size
+    (prefixWidth dimension width : Nat) :
+    (selectorCircuit prefixWidth dimension width).size = 0 := by
+  simp [selectorCircuit]
 
 /-- Final output width: target point followed by one-hot basis selector. -/
 @[reducible] def outputCount (dimension width : Nat) : Nat :=

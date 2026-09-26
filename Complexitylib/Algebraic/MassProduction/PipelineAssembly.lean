@@ -67,6 +67,34 @@ noncomputable def scatterResourceGatherCircuit
       (scatterResourceCircuit suffixWidth groupBitWidth capacity
         scatterRecordCount scatterDestinationFits resourceCircuits)
 
+/-- The exact gate count of `scatterResourceGatherCircuit`. -/
+@[simp] theorem scatterResourceGatherCircuit_size
+    (groupsPositive : 0 < groups)
+    (suffixWidth groupBitWidth orderWidth : Nat)
+    (incidenceFits :
+      totalRequests * nonzeroScalarCount width <= 2 ^ orderWidth)
+    (capacity : totalRequests <= groups * requestsPerGroup)
+    (scatterRecordCount :
+      totalRequests * nonzeroScalarCount width +
+          2 ^ (groupBitWidth + dimension * width) + scatterPaddingCount =
+        networkRecords scatterDepth)
+    (scatterDestinationFits :
+      2 ^ (groupBitWidth + dimension * width) <=
+        networkRecords scatterDepth)
+    (resourceCircuits : Fin (resourceBitCount dimension width) ->
+      Circuit DeMorgan.signature (groups * suffixWidth) groups)
+    (gatherRecordCount :
+      2 ^ (groupBitWidth + dimension * width) +
+          totalRequests * nonzeroScalarCount width + gatherPaddingCount =
+        networkRecords gatherDepth) :
+    (scatterResourceGatherCircuit groupsPositive suffixWidth groupBitWidth orderWidth incidenceFits
+      capacity scatterRecordCount scatterDestinationFits resourceCircuits gatherRecordCount).size =
+      (scatterResourceCircuit suffixWidth groupBitWidth capacity
+            scatterRecordCount scatterDestinationFits resourceCircuits).size +
+        (gatherRoutingCircuit groupsPositive groupBitWidth orderWidth
+            incidenceFits capacity gatherRecordCount).size := by
+  simp [scatterResourceGatherCircuit]
+
 theorem scatterResourceGatherCircuit_eval
     (groupsPositive : 0 < groups)
     (widthPositive : 0 < width)
@@ -186,6 +214,39 @@ noncomputable def assembledPipelineCircuit
       (scatterResourceGatherCircuit groupsPositive suffixWidth groupBitWidth
         orderWidth incidenceFits capacity scatterRecordCount
         scatterDestinationFits resourceCircuits gatherRecordCount)
+
+/-- The assembled pipeline has exactly the gates of scatter, resource evaluation and gather,
+followed by one fixed decoder per request. -/
+@[simp] theorem assembledPipelineCircuit_size
+    (groupsPositive : 0 < groups)
+    (suffixWidth groupBitWidth orderWidth : Nat)
+    (incidenceFits :
+      totalRequests * nonzeroScalarCount width <= 2 ^ orderWidth)
+    (capacity : totalRequests <= groups * requestsPerGroup)
+    (placement : Prefix ↪ PackedBitPosition dimension width)
+    (requestSource : Fin totalRequests -> Prefix)
+    (scatterRecordCount :
+      totalRequests * nonzeroScalarCount width +
+          2 ^ (groupBitWidth + dimension * width) + scatterPaddingCount =
+        networkRecords scatterDepth)
+    (resourceCircuits : Fin (resourceBitCount dimension width) ->
+      Circuit DeMorgan.signature (groups * suffixWidth) groups)
+    (gatherRecordCount :
+      2 ^ (groupBitWidth + dimension * width) +
+          totalRequests * nonzeroScalarCount width + gatherPaddingCount =
+        networkRecords gatherDepth) :
+    (assembledPipelineCircuit groupsPositive suffixWidth groupBitWidth orderWidth incidenceFits
+      capacity placement requestSource scatterRecordCount resourceCircuits gatherRecordCount).size =
+      (scatterResourceGatherCircuit groupsPositive suffixWidth groupBitWidth
+            orderWidth incidenceFits capacity scatterRecordCount
+            (by rw [← scatterRecordCount]; exact (Nat.le_add_left _ _).trans (Nat.le_add_right _ _))
+            resourceCircuits gatherRecordCount).size +
+        ∑ request : Fin totalRequests,
+          GatherDecoder.decoderGateCount (width := width) (depth := gatherDepth)
+            (incidenceKeyWidth groupBitWidth dimension width) (orderWidth + 1)
+            (by rw [← gatherRecordCount]; exact (Nat.le_add_left _ _).trans (Nat.le_add_right _ _))
+            (fun request => (placement (requestSource request)).2) request := by
+  simp [assembledPipelineCircuit]
 
 theorem assembledPipelineCircuit_eval
     (groupsPositive : 0 < groups)

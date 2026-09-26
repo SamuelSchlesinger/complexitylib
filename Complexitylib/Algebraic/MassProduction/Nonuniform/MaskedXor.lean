@@ -28,6 +28,18 @@ noncomputable def circuit (valid : Fin slots → Bool) (requests : Nat) :=
         if valid slot then (.input (finProdFinEquiv (request, slot)) : DeMorgan.Wiring (requests * slots))
         else .constant false)))
 
+/-- The exact gate count of `circuit`. -/
+@[simp] theorem circuit_size
+    (valid : Fin slots → Bool) (requests : Nat) :
+    (circuit valid requests).size =
+      ∑ output : Fin requests,
+        (∑ output_1 : Fin slots,
+            (if valid output_1 = true then
+                  DeMorgan.Wiring.input (finProdFinEquiv (output, output_1))
+                else DeMorgan.Wiring.constant false).expression.gateCount +
+          UhligCircuit.xorInputGateCount slots) := by
+  simp [circuit]
+
 /-- Each output is the Boolean sum over that request's valid point slots. -/
 theorem circuit_eval (valid : Fin slots → Bool)
     (input : Fin (requests * slots) → Bool) (request : Fin requests) :

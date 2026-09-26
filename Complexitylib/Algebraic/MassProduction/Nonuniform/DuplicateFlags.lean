@@ -29,9 +29,21 @@ set_option backward.isDefEq.respectTransparency false
 def keyCircuit (depth keyWidth : Nat) :=
   (Circuit.id DeMorgan.signature (keyWidth + depth)).mapOutputs (Fin.castAdd depth)
 
+/-- `keyCircuit` is pure wiring: it has no gates. -/
+@[simp] theorem keyCircuit_size
+    (depth keyWidth : Nat) :
+    (keyCircuit depth keyWidth).size = 0 := by
+  simp [keyCircuit]
+
 /-- Read the ordering identifier after the key. -/
 def identifierCircuit (depth keyWidth : Nat) :=
   (Circuit.id DeMorgan.signature (keyWidth + depth)).mapOutputs (Fin.natAdd keyWidth)
+
+/-- `identifierCircuit` is pure wiring: it has no gates. -/
+@[simp] theorem identifierCircuit_size
+    (depth keyWidth : Nat) :
+    (identifierCircuit depth keyWidth).size = 0 := by
+  simp [identifierCircuit]
 
 /-- Add the original record index as hardwired metadata. -/
 noncomputable def layoutWiring
@@ -58,6 +70,15 @@ noncomputable def circuit
   ((MarkDuplicates.circuit depth (keyCircuit depth keyWidth) (identifierCircuit depth keyWidth)).comp
     (DeMorgan.Wiring.circuit (layoutWiring keys))).mapOutputs
       (fun record => finProdFinEquiv (record, Fin.castAdd (keyWidth + depth) (0 : Fin 1)))
+
+/-- The exact gate count of `circuit`. -/
+@[simp] theorem circuit_size
+    (keys : Fin (networkRecords depth) → Fin keyWidth → DeMorgan.Wiring inputs) :
+    (circuit keys).size =
+      (DeMorgan.Wiring.circuit (layoutWiring keys)).size +
+        (MarkDuplicates.circuit depth (keyCircuit depth keyWidth)
+            (identifierCircuit depth keyWidth)).size := by
+  rfl
 
 /-- A flag is true precisely when a distinct input record has the same key. -/
 theorem circuit_eval_iff

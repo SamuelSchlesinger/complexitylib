@@ -95,6 +95,19 @@ noncomputable def circuit
   ((Broadcast.routingCircuit depth keyWidth (depth + 1) valueWidth).comp
     (DeMorgan.Wiring.circuit (layoutWiring table recordCount))).mapOutputs (outputIndex recordCount)
 
+/-- The exact gate count of `circuit`. -/
+@[simp] theorem circuit_size
+    (table : (Fin keyWidth → Bool) → Fin valueWidth → Bool)
+    (recordCount : 2 ^ keyWidth + requests + padding = networkRecords depth) :
+    (circuit table recordCount).size =
+      ∑ output :
+          Fin
+            (networkBits depth
+              (Routing.recordWidth keyWidth (depth + 1 + valueWidth))),
+          (layoutWiring table recordCount output).expression.gateCount +
+        (Broadcast.routingCircuit depth keyWidth (depth + 1) valueWidth).size := by
+  simp [circuit]
+
 /-- Every query receives its table value, with arbitrary address repetition. -/
 theorem circuit_eval
     (table : (Fin keyWidth → Bool) → Fin valueWidth → Bool)

@@ -51,6 +51,18 @@ noncomputable def fixedGroupedTargetAssemblyCircuit
   DeMorgan.Wiring.circuit (inputs := totalRequests * suffixWidth) fun output =>
     .constant (groupedTargetArrayBits widthPositive targets output)
 
+/-- Every output bit is a hardwired constant: exactly one constant gate per output bit and no other
+gates. -/
+@[simp] theorem fixedGroupedTargetAssemblyCircuit_size
+    (totalRequests : Nat)
+    (suffixWidth : Nat)
+    (widthPositive : 0 < width)
+    (targets : Fin groups -> Fin requestsPerGroup ->
+      Fin dimension -> BinaryExtension width) :
+    (fixedGroupedTargetAssemblyCircuit totalRequests suffixWidth widthPositive targets).size =
+      groups * (requestsPerGroup * pointBitWidth dimension width) := by
+  simp [fixedGroupedTargetAssemblyCircuit, DeMorgan.Wiring.expression]
+
 @[simp] theorem fixedGroupedTargetAssemblyCircuit_cost
     (suffixWidth : Nat)
     (widthPositive : 0 < width)
@@ -98,6 +110,28 @@ noncomputable def fixedScheduleAndSuffixCircuit
     (fixedGroupedTargetAssemblyCircuit (totalRequests := totalRequests)
       suffixWidth widthPositive paddedTargets)).parallel
     (Circuit.id DeMorgan.signature (totalRequests * suffixWidth))
+
+/-- The exact gate count of `fixedScheduleAndSuffixCircuit`. -/
+@[simp] theorem fixedScheduleAndSuffixCircuit_size
+    (widthPositive : 0 < width)
+    (groupsPositive : 0 < groups)
+    (schedulerDepth suffixWidth : Nat)
+    (allFit : requestGroupSize totalRequests groups *
+      nonzeroScalarCount width <= networkRecords schedulerDepth)
+    (placement : Prefix ↪ PackedBitPosition dimension width)
+    (requestSource : Fin totalRequests -> Prefix)
+    (dummyTarget : Fin dimension -> BinaryExtension width) :
+    (fixedScheduleAndSuffixCircuit widthPositive groupsPositive schedulerDepth suffixWidth allFit
+      placement requestSource dummyTarget).size =
+      (fixedGroupedTargetAssemblyCircuit totalRequests suffixWidth widthPositive
+            (paddedGroupedTargets (requestGroupCapacity groupsPositive)
+              (fun request =>
+                packedTargetPoint widthPositive placement (requestSource request))
+              dummyTarget)).size +
+        groups *
+          greedyScheduleGateCount dimension widthPositive schedulerDepth
+            (requestGroupSize totalRequests groups) := by
+  simp [fixedScheduleAndSuffixCircuit]
 
 theorem fixedScheduleAndSuffixCircuit_eval
     (widthPositive : 0 < width)
@@ -179,6 +213,39 @@ noncomputable def finiteMassProductionCircuit
     scatterRecordCount resourceCircuits gatherRecordCount).comp
       (fixedScheduleAndSuffixCircuit widthPositive groupsPositive
         schedulerDepth suffixWidth allFit placement requestSource dummyTarget)
+
+/-- The exact gate count of `finiteMassProductionCircuit`. -/
+@[simp] theorem finiteMassProductionCircuit_size
+    (widthPositive : 0 < width)
+    (groupsPositive : 0 < groups)
+    (schedulerDepth suffixWidth groupBitWidth orderWidth : Nat)
+    (allFit : requestGroupSize totalRequests groups *
+      nonzeroScalarCount width <= networkRecords schedulerDepth)
+    (incidenceFits :
+      totalRequests * nonzeroScalarCount width <= 2 ^ orderWidth)
+    (placement : Prefix ↪ PackedBitPosition dimension width)
+    (requestSource : Fin totalRequests -> Prefix)
+    (dummyTarget : Fin dimension -> BinaryExtension width)
+    (scatterRecordCount :
+      totalRequests * nonzeroScalarCount width +
+          2 ^ (groupBitWidth + dimension * width) + scatterPaddingCount =
+        networkRecords scatterDepth)
+    (resourceCircuits : Fin (resourceBitCount dimension width) ->
+      Circuit DeMorgan.signature (groups * suffixWidth) groups)
+    (gatherRecordCount :
+      2 ^ (groupBitWidth + dimension * width) +
+          totalRequests * nonzeroScalarCount width + gatherPaddingCount =
+        networkRecords gatherDepth) :
+    (finiteMassProductionCircuit widthPositive groupsPositive schedulerDepth suffixWidth
+      groupBitWidth orderWidth allFit incidenceFits placement requestSource dummyTarget
+      scatterRecordCount resourceCircuits gatherRecordCount).size =
+      (fixedScheduleAndSuffixCircuit widthPositive groupsPositive schedulerDepth
+            suffixWidth allFit placement requestSource dummyTarget).size +
+        (assembledPipelineCircuit groupsPositive suffixWidth groupBitWidth
+            orderWidth incidenceFits (requestGroupCapacity groupsPositive)
+            placement requestSource scatterRecordCount resourceCircuits
+            gatherRecordCount).size := by
+  simp [finiteMassProductionCircuit]
 
 theorem finiteMassProductionCircuit_eval
     (widthPositive : 0 < width)

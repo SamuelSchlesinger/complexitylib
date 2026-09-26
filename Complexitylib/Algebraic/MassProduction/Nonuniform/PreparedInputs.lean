@@ -23,6 +23,12 @@ namespace Algebraic.MassProduction.Nonuniform.PreparedInputs
 def circuit (generated : Circuit DeMorgan.signature inputs outputs) :=
   generated.parallel (Circuit.id DeMorgan.signature inputs)
 
+/-- The exact gate count of `circuit`. -/
+@[simp] theorem circuit_size
+    (generated : Circuit DeMorgan.signature inputs outputs) :
+    (circuit generated).size = generated.size := by
+  simp [circuit]
+
 /-- Lift an original wire or constant past the generated output block. -/
 def original (outputs : Nat) (wire : DeMorgan.Wiring inputs) : DeMorgan.Wiring (outputs + inputs) :=
   match wire with
