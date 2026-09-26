@@ -110,11 +110,14 @@ In order. Each item says why it matters and roughly how large it is.
    on the typed representation mathematically. Each of our bases is one CSLib
    signature whose operation symbols are our gates: an operation, a fan-in,
    and a negation pattern. Unbounded fan-in and threshold bases are signatures
-   with infinitely many operations. Our free negations and counted output
-   gates are therefore reproduced exactly, and CSLib's zero-input circuits
-   remove `NeZero N` and `CircuitFamily.emptyOutput`. The algebraic-circuits
+   with infinitely many operations. Our free negations are therefore
+   reproduced exactly, and so are counted output gates, on circuits whose
+   outputs are all internal gates (`Circuit.GatedOutputs`). `NeZero N` and
+   `CircuitFamily.emptyOutput` stay: the fan-in-two AND/OR basis has no
+   constants, so it has no zero-input circuits. The algebraic-circuits
    library, imported wholesale as `Complexitylib/Algebraic` (done, September
-   2026), already works in this model.
+   2026), already works in this model. The detailed plan for phases 2 and 3
+   is `docs/CircuitMigration.md`.
 
    The migration targets CSLib's circuit API as it will be once the author's
    pending circuit work lands, built meanwhile from an integration branch:
@@ -129,7 +132,7 @@ In order. Each item says why it matters and roughly how large it is.
       `Basis.interpretation` for every basis, and a size-preserving translation
       of typed circuits into straight-line programs over them
       (`Circuit.toStraightLine`, `Complexitylib/Circuits/StraightLine.lean`;
-      the converse translation is next).
+      done). The converse, from gated CSLib circuits, is next.
    2. **Redefine the measures and classes** (`sizeComplexity`, `SIZE`, `PPoly`,
       `CircuitFamily`, `DEPTH`, `NC`, `AC`, `TC`) over CSLib circuits, keeping
       their names, and re-prove the old statements through the correspondence.
