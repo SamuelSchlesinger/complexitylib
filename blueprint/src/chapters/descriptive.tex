@@ -1066,7 +1066,9 @@ existing logics rather than a restriction imposed on them.
 
 \begin{definition}[Arithmetic first-order evaluation]
   \label{def:desc-arithmetic-model-checking}
-
+  \lean{Complexity.DescriptiveComplexity.Term.evalCode,
+    Complexity.DescriptiveComplexity.Formula.evalCode}
+  \leanok
   \uses{def:desc-fo-syntax, def:desc-arithmetic-addresses}
   Given a cardinality $n$, a bit string, and natural-number variable values,
   evaluate terms and formulas directly by arithmetic table access. A constant
@@ -1078,7 +1080,10 @@ existing logics rather than a restriction imposed on them.
 
 \begin{theorem}[Arithmetic evaluation agrees with satisfaction]
   \label{thm:desc-arithmetic-model-checking}
-
+  \lean{Complexity.DescriptiveComplexity.Term.evalCode_encodeStruct,
+    Complexity.DescriptiveComplexity.Formula.evalCode_encodeStruct,
+    Complexity.DescriptiveComplexity.Sentence.evalCode_encodeStruct}
+  \leanok
   \uses{def:desc-arithmetic-model-checking, def:desc-fo-semantics,
     thm:desc-arithmetic-addresses}
   On $\mathrm{enc}(\mathcal{A})$, supplied with $\mathcal{A}$'s cardinality and
@@ -1087,25 +1092,94 @@ existing logics rather than a restriction imposed on them.
   when the formula is satisfied. The sentence case uses the empty environment.
 \end{theorem}
 \begin{proof}
-
+  \leanok
   One-hot lookup recovers each constant. Induct on the formula, using the exact
   arithmetic read lemmas for relation atoms and the correspondence between
   bounded naturals and elements of $\mathrm{Fin}(n)$ at quantifiers.
 \end{proof}
 
-\begin{theorem}[First-order queries are in polynomial time]
-  \label{thm:desc-fo-in-P}
-  \uses{def:desc-query-language, def:desc-fo-semantics, def:P}
-  For every first-order sentence $\varphi$, the language of the query
-  $\mathcal{A} \mapsto (\mathcal{A} \models \varphi)$ is in $\cc{P}$.
+\begin{theorem}[Fixed-formula arithmetic evaluation is polynomial-time]
+  \label{thm:desc-arithmetic-model-checking-polytime}
+  \lean{Complexity.DescriptiveComplexity.Term.evalCode_unary,
+    Complexity.DescriptiveComplexity.Formula.evalCode_fpPred,
+    Complexity.DescriptiveComplexity.Formula.evalCode_mem_FP}
+  \leanok
+  \uses{def:desc-arithmetic-model-checking, thm:desc-encoding-access-polytime,
+    lem:polytime-unary-closure, def:FP}
+  Fix the vocabulary and formula. If the supplied string is an $\cc{FP}$
+  function of the input, and the cardinality and free-variable values can be
+  written in unary in polynomial time, then term values have the same unary
+  polynomial-time property and the formula's one-bit verdict belongs to
+  $\cc{FP}$. No encoding-validity assumption is needed for this time bound.
 \end{theorem}
 \begin{proof}
-  \uses{thm:desc-model-checking, thm:desc-encoding-roundtrip}
-  Parse the input, then run the model checker. With $\varphi$ fixed, it makes
-  $O(n^{\mathrm{qr}(\varphi)})$ recursive calls, each reading truth-table and
-  constant bits at computable offsets. The same recursion with one
-  logarithmic-size counter per quantifier would give the stronger bound
-  $\cc{FO} \subseteq \cc{L}$.
+  \leanok
+  Constants use bounded search over polynomial-time bit tests. Induct on the
+  formula using predicate closure under Boolean connectives and bounded
+  quantifiers. The environment at a quantifier prepends the loop index to the
+  previous polynomial-time values. The formula is fixed, so the induction
+  applies the machine closure rules only a fixed number of times.
+\end{proof}
+
+\begin{definition}[Truth-table generation for open formulas]
+  \label{def:desc-formula-table-code}
+  \lean{Complexity.DescriptiveComplexity.Formula.tableCode}
+  \leanok
+  \uses{def:desc-arithmetic-model-checking, def:desc-arithmetic-addresses}
+  For a formula with $k$ free variables, scan the indices $0,\ldots,n^k-1$,
+  decode each index into its $k$ coordinates, and record the arithmetic
+  evaluator's verdict. This produces the relation table in the encoder's order.
+\end{definition}
+
+\begin{theorem}[Correct polynomial-time truth-table generation]
+  \label{thm:desc-formula-table-code}
+  \lean{Complexity.DescriptiveComplexity.Formula.tableCode_length,
+    Complexity.DescriptiveComplexity.Formula.tableCode_encodeStruct,
+    Complexity.DescriptiveComplexity.Formula.tableCode_mem_FP}
+  \leanok
+  \uses{def:desc-formula-table-code, thm:desc-arithmetic-model-checking,
+    thm:desc-arithmetic-model-checking-polytime, thm:desc-encoding-access-polytime}
+  The table has exactly $n^k$ bits. On an encoded structure it equals the
+  canonical relation encoding of the formula's Boolean evaluator. For a fixed
+  formula, generating the whole table is in $\cc{FP}$ whenever the supplied
+  string is in $\cc{FP}$ and $n$ is a polynomial-time unary number.
+\end{theorem}
+\begin{proof}
+  \leanok
+  Arithmetic tuple decoding reproduces the original enumeration, and evaluation
+  correctness identifies each bit. The output length $n^k$ is polynomial-time
+  for fixed $k$; each bit is a polynomial-time fixed-formula evaluation on
+  polynomial-time coordinates. Apply the bitwise output construction.
+\end{proof}
+
+\begin{theorem}[First-order queries are in polynomial time]
+  \label{thm:desc-fo-in-P}
+  \lean{Complexity.DescriptiveComplexity.Sentence.queryLanguage_fpPred,
+    Complexity.DescriptiveComplexity.Sentence.queryLanguage_mem_P,
+    Complexity.DescriptiveComplexity.Sentence.evalEncoded_mem_FP,
+    Complexity.DescriptiveComplexity.FODefinable.queryLanguage_mem_P}
+  \leanok
+  \uses{def:desc-query-language, def:desc-fo-semantics, def:P, def:FP}
+  For every fixed first-order sentence $\varphi$, the language of the query
+  $\mathcal{A} \mapsto (\mathcal{A} \models \varphi)$ is in the existing machine
+  class $\cc{P}$, and its encoded Boolean evaluator has a one-bit verdict in
+  $\cc{FP}$. Consequently, $\operatorname{FODefinable}(Q)$ implies
+  $\operatorname{queryLanguage}(Q)\in\cc{P}$. Malformed strings are rejected.
+  These are data-complexity results; neither polynomial combined complexity
+  nor logarithmic space is asserted.
+\end{theorem}
+\begin{proof}
+  \leanok
+  \uses{thm:desc-encoded-model-checking, thm:desc-valid-encodings-P,
+    thm:desc-arithmetic-model-checking,
+    thm:desc-arithmetic-model-checking-polytime, lem:polytime-unary-closure}
+  Parse the unary cardinality and conjoin encoding validity with arithmetic
+  sentence evaluation. This is a polynomial-time predicate and agrees with
+  query-language membership on every string. Apply the machine decision-function
+  bridge. The existing encoded evaluator computes the same Boolean verdict, so
+  its one-bit output belongs to $\cc{FP}$ as well. This is the standard
+  fixed-formula model-checking argument used in Immerman's descriptive complexity
+  development, with encoding validation included.
 \end{proof}
 
 \begin{definition}[Arithmetic second-order certificate verification]

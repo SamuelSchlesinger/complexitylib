@@ -34,6 +34,7 @@ public import Complexitylib.DescriptiveComplexity.Encoding.PolynomialTime
 public import Complexitylib.DescriptiveComplexity.Encoding.Validity
 public import Complexitylib.DescriptiveComplexity.Encoding.Decoding
 public import Complexitylib.DescriptiveComplexity.ModelChecking.Encoded
+public import Complexitylib.DescriptiveComplexity.ModelChecking.PolynomialTime
 public import Complexitylib.DescriptiveComplexity.Circuit
 public import Complexitylib.DescriptiveComplexity.Circuit.Encoding
 public import Complexitylib.DescriptiveComplexity.Circuit.Validity
