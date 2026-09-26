@@ -17,10 +17,13 @@ monotone circuit lower bounds, pseudorandom restrictions, and resolution size
 and width lower bounds leading to the pigeonhole principle and to Cook--Reckhow
 proof systems (roadmap track L5).
 Section~\ref{sec:lowerbounds-algebraic} collects the results of the imported
-algebraic-circuits library, stated for CSLib's circuit model: parity bounds in
-the De Morgan basis and in $\cc{AC}^0$, monotone CLIQUE, Nechiporuk's formula
-bound, Karchmer--Wigderson, a circuit-size hierarchy, conditional complexity,
-algebraic lower bounds, and mass production.
+algebraic-circuits library: parity bounds in the De Morgan basis and in
+$\cc{AC}^0$, monotone CLIQUE, Nechiporuk's formula bound, Karchmer--Wigderson,
+a circuit-size hierarchy, conditional complexity, algebraic lower bounds, and
+mass production. Its circuit results use CSLib's circuits, each over the
+imported library's own signature and cost model; Nechiporuk's bound and
+Karchmer--Wigderson are about formulas, and the Waring bound is an identity of
+polynomials.
 
 \section{Counting bounds}
 \label{sec:lowerbounds-counting}
@@ -120,9 +123,21 @@ algebraic lower bounds, and mass production.
 \label{sec:lowerbounds-algebraic}
 
 These results come from the algebraic-circuits library, imported wholesale
-under \texttt{Complexitylib/Algebraic}. They are stated for CSLib's circuit
-model and keep the \texttt{Algebraic} namespace; the consolidation plan in
-\texttt{ROADMAP.md} relates them to the statements elsewhere in this chapter.
+under \texttt{Complexitylib/Algebraic}, and keep the \texttt{Algebraic}
+namespace. The circuit results are stated for CSLib's straight-line circuits
+(\texttt{Cslib.Circuits.Circuit}), but each over the imported library's own
+signature and cost model, not over CSLib's De Morgan signature or the bases of
+this library. For example, its De Morgan signature adds an identity gate to
+constants, negation, conjunction, and disjunction; the parity bound charges
+only conjunctions and disjunctions, while the hierarchy counts every gate; its
+$\cc{AC}^0$ circuits have unbounded fan-in, with negations free and adding no
+depth. Each node names its model and what it counts. Nechiporuk's bound and
+Karchmer--Wigderson are stated for the imported library's formula types, not
+for circuits, and the Waring bound is an identity of polynomials with no
+circuit in its statement. Conditional complexity is defined in this library,
+although it lives in CSLib's namespace. The consolidation plan in
+\texttt{ROADMAP.md} relates these results to the statements elsewhere in this
+chapter.
 
 \begin{theorem}[Parity in the De Morgan basis]
   \label{thm:lowerbounds-algebraic-xor}
@@ -171,10 +186,14 @@ model and keep the \texttt{Algebraic} namespace; the consolidation plan in
   \label{thm:lowerbounds-algebraic-nechiporuk}
   \lean{Algebraic.Nechiporuk.eventually_sq_le_leaves}
   \leanok
-  If a family of Boolean functions is $K(n)$-rectangle-free with
-  $K(n) \le n^c$ and has at least $2^{n - 2}$ accepting inputs, then for all
-  large $n$ every formula over the full binary basis computing its length-$n$
-  member has at least $n^2 / (64(c + 3)\log_2 n)$ leaves.
+  Suppose that, for all large $n$, the length-$n$ member of a family of
+  Boolean functions is $K(n)$-rectangle-free (under every split of its inputs,
+  every rectangle of accepted inputs has a side with fewer than $K(n)$
+  elements), with $K(n) \le n^c$, and has at least $2^{n - 2}$ accepting
+  inputs. Then for all large $n$ every formula over the full binary basis
+  computing the length-$n$ member has at least $n^2 / (64(c + 3)\log_2 n)$
+  leaves. This is a conditional statement about any such family: no explicit
+  rectangle-free family is formalized.
 \end{theorem}
 \begin{proof}
   \leanok
@@ -186,9 +205,10 @@ model and keep the \texttt{Algebraic} namespace; the consolidation plan in
   \label{thm:lowerbounds-algebraic-kw}
   \lean{Algebraic.KW.formulaDepth_eq_protocolDepth, Algebraic.KW.formulaSize_eq_protocolSize}
   \leanok
-  The minimum depth and size of a De Morgan formula for $f$ equal the minimum
-  depth and number of leaves of a protocol for the Karchmer--Wigderson game of
-  $f$.
+  For every $f$ on $n \ge 1$ inputs, the minimum depth and size of a De Morgan
+  formula for $f$ equal the minimum depth and number of leaves of a protocol
+  for the Karchmer--Wigderson game of $f$. At $n = 0$ the game has no
+  protocol, since a protocol answers with an input position.
 \end{theorem}
 \begin{proof}
   \leanok
@@ -245,10 +265,19 @@ model and keep the \texttt{Algebraic} namespace; the consolidation plan in
   \leanok
   \uses{def:lowerbounds-algebraic-conditional}
   Conditional complexity obeys the triangle inequality: computing $h$ given
-  $f$ costs at most computing $h$ given $g$ plus computing $g$ given $f$. Over
-  $\mathbb{F}_2$, with gates of fan-in at most two, the conditional complexity
-  of a nonzero linear form given linear helpers is exactly a minimum weight,
-  whatever other operations the basis contains.
+  $f$ costs at most computing $h$ given $g$ plus computing $g$ given $f$.
+  Over $\mathbb{F}_2$, take any basis whose gates have fan-in at most two and
+  in which $x_0 + x_1$ is computed by a single gate. Then the conditional
+  complexity of a nonzero linear form $t \cdot x$ given linear helpers
+  $s_1 \cdot x, \ldots, s_k \cdot x$ is exactly
+  \[
+    \min_{c \in \mathbb{F}_2^k}
+      \Bigl(\lvert c \rvert + \bigl\lvert t + \textstyle\sum_j c_j s_j \bigr\rvert
+        - 1\Bigr),
+  \]
+  where $\lvert\cdot\rvert$ is Hamming weight: the fewest helpers and inputs
+  whose sum is the target, minus one. The basis may contain other operations
+  as well; the single-gate addition is a hypothesis of the theorem.
 \end{theorem}
 \begin{proof}
   \leanok
@@ -261,14 +290,18 @@ model and keep the \texttt{Algebraic} namespace; the consolidation plan in
   \label{thm:lowerbounds-algebraic-hessian}
   \lean{Algebraic.Applications.hessianRank_lowerBound}
   \leanok
-  Every arithmetic circuit computing a polynomial $p$ over a field uses at least
-  $\lceil \operatorname{rank} H_p(a) / 2 \rceil$ multiplications, where $H_p(a)$ is
-  the Hessian of $p$ at any point $a$.
+  Every arithmetic circuit over a field, with addition, multiplication, and
+  constant gates, whose output equals $p$ as a formal polynomial has at least
+  $\lceil \operatorname{rank} H_p(a) / 2 \rceil$ multiplication gates, where
+  $H_p(a)$ is the Hessian of $p$ at any point $a$. Additions and constants are
+  free, but every multiplication gate is counted, including multiplication by
+  a constant. This is weaker than the classical form of the bound, which
+  counts only nonscalar multiplications.
 \end{theorem}
 \begin{proof}
   \leanok
   Each multiplication gate raises the rank of the second-order part of the
-  computed polynomials by at most two, while additions and scalars do not.
+  computed polynomials by at most two, while additions and constants do not.
 \end{proof}
 
 \begin{theorem}[Waring bound for the squarefree monomial]
@@ -309,9 +342,15 @@ model and keep the \texttt{Algebraic} namespace; the consolidation plan in
   Assume that for every $\xi > 0$ all sufficiently large simple 3-regular
   graphs on $h$ vertices have pathwidth at most $(1/6 + \xi)h$. Then every
   rectangle-free Boolean function family with polynomial rectangle threshold
-  and at least $2^{n-2}$ accepting inputs needs more than $(4 - \varepsilon)n$
-  gates over the full binary basis, for every $\varepsilon > 0$ and all large
-  $n$. The pathwidth bound is an explicit hypothesis of the theorem.
+  and at least $2^{n-2}$ accepting inputs, as in
+  Theorem~\ref{thm:lowerbounds-algebraic-nechiporuk}, needs more than
+  $(4 - \varepsilon)n$ gates over the full binary basis, for every
+  $\varepsilon > 0$ and all large $n$. The pathwidth bound is an explicit
+  hypothesis of the theorem. It is the published theorem of Fomin and H{\o}ie
+  on the pathwidth of cubic graphs, which is not formalized here. As for
+  Theorem~\ref{thm:lowerbounds-algebraic-nechiporuk}, no explicit
+  rectangle-free family is formalized, so this is a conditional statement
+  about any such family.
 \end{theorem}
 \begin{proof}
   \leanok
@@ -321,14 +360,35 @@ model and keep the \texttt{Algebraic} namespace; the consolidation plan in
 
 \begin{definition}[The KRW conjecture]
   \label{def:lowerbounds-algebraic-krw}
-  \lean{Algebraic.KW.KRWDepth, Algebraic.KW.KRWSize}
+  \lean{Algebraic.KW.NonConstant, Algebraic.KW.KRWDepthWith,
+    Algebraic.KW.KRWSizeWith, Algebraic.KW.KRWDepth, Algebraic.KW.KRWSize,
+    Algebraic.KW.formulaDepth_compose_le, Algebraic.KW.formulaSize_compose_le,
+    Algebraic.KW.not_forall_depth_of_constant_inner,
+    Algebraic.KW.not_forall_depth_of_constant_outer,
+    Algebraic.KW.not_forall_size_of_constant_inner,
+    Algebraic.KW.not_forall_size_of_constant_outer}
   \leanok
   \uses{thm:lowerbounds-algebraic-kw}
-  The Karchmer--Raz--Wigderson conjecture, stated with explicit slack: the
-  formula depth of a block composition $f \diamond g$ is at least the sum of the
-  depths of $f$ and $g$ up to an additive slack, and its formula size is at
-  least the product of their sizes up to a multiplicative slack. The
-  conjecture is open; it is formalized as a statement only.
+  Let $D(f)$ and $L(f)$ be the minimum depth and the minimum number of leaves
+  of a De Morgan formula computing $f$. For $f$ on $m$ bits and $g$ on $n$
+  bits, the block composition $f \diamond g$ applies $f$ to the values of $g$
+  on $m$ disjoint blocks of $n$ bits. Substituting formulas gives
+  $D(f \diamond g) \le D(f) + D(g)$ and $L(f \diamond g) \le L(f)\,L(g)$ for
+  all $f$ and $g$; both bounds are proved.
+
+  The Karchmer--Raz--Wigderson conjecture says these bounds are nearly tight.
+  It is formalized in its strong form, with a constant slack. The depth form
+  says that there is a constant $c$ such that
+  $D(f) + D(g) \le D(f \diamond g) + c$ for all $m$, $n$ and all non-constant
+  $f$ and $g$. The size form says that there is a constant $c$ such that
+  $L(f)\,L(g) \le c \cdot L(f \diamond g)$ for all such $f$ and $g$. The
+  constant does not depend on $m$, $n$, $f$ or $g$; forms whose slack grows
+  with $m$ or $n$ are not formalized. The conjecture is open; it is formalized
+  as a statement only.
+
+  Both non-constancy hypotheses are needed. If $f$ or $g$ is constant, so is
+  $f \diamond g$, and it is proved that dropping either hypothesis makes the
+  depth form and the size form false for every $c$.
 \end{definition}
 
 \section{Essential inputs and gate elimination}

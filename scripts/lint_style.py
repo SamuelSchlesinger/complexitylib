@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 """Style linter for Complexitylib.
 
-Checks every `.lean` file under `Complexitylib/` for:
+Checks every `.lean` file under `Complexitylib/` (and the root
+`Complexitylib.lean`) for:
 
   copyright   — a Mathlib-style copyright header at the top of the file (the
                 imported `Complexitylib/Algebraic/` keeps its MIT header)
@@ -17,6 +18,18 @@ Checks every `.lean` file under `Complexitylib/` for:
   buildImport — every module is reachable from the root or a required
                 validation-only build graph
 
+and every `.lean` file of the repository outside hidden directories such as
+`.lake/` (so also `scripts/*.lean`) for:
+
+  nativeDecide — no `native_decide`, `decide +native`, `native := true`, or
+                 direct `ofReduceBool`/`ofReduceNat` in code (comments and
+                 string literals are ignored). The only exemption is a file
+                 named `Validation.lean` outside the public `Complexitylib`
+                 import graph: the executable validation modules use
+                 `native_decide` in `example`s as regression tests, which add
+                 no declaration, so `scripts/AxiomGuard.lean` cannot see them
+                 and nothing can depend on them.
+
 This is a hard gate: any violation fails the run. The quality refactor cleared
 every grandfathered violation, so there is no baseline to maintain. The one
 scoped exemption is the imported algebraic-circuits library under
@@ -26,6 +39,7 @@ Usage:
   python3 scripts/lint_style.py
 """
 
+import os
 import re
 import sys
 from pathlib import Path
@@ -57,6 +71,15 @@ IMPORT_RE = re.compile(
     re.MULTILINE,
 )
 NON_PUBLIC_COMPONENTS = {"Internal", "Validation"}
+# Evaluation by the compiler instead of the kernel: `native_decide`, its
+# `decide +native` and `native := true` spellings, and the axioms they use.
+NATIVE_RE = re.compile(
+    r"\bnative_decide\b|\+native\b|\bnative\s*:=\s*true\b"
+    r"|\bofReduceBool\b|\bofReduceNat\b"
+)
+# A character literal such as `'a'`, `'\n'` or `'\u{3b1}'`.
+CHAR_LITERAL_RE = re.compile(r"'(?:\\[^'\n]+|[^'\\\n])'")
+VALIDATION_FILE = "Validation.lean"
 # The algebraic-circuits library, imported wholesale, keeps its upstream style
 # for two checks until the consolidation plan (ROADMAP.md, item 7) migrates it:
 # it extends CSLib's circuit types through `_root_.Cslib.Circuits` declarations,
@@ -100,6 +123,67 @@ def check_file(path: Path) -> set[str]:
     return violations
 
 
+def lean_code(text: str) -> str:
+    """Return `text` with comments and string literals blanked out.
+
+    Handles nested block comments (`/- ... -/`, including doc comments), line
+    comments (`--`), string literals with escapes, and character literals.
+    Newlines are kept so that the result has the same lines as `text`.
+    """
+    out = []
+    i, n, depth = 0, len(text), 0
+    while i < n:
+        if depth:
+            if text.startswith("/-", i):
+                depth, i = depth + 1, i + 2
+            elif text.startswith("-/", i):
+                depth, i = depth - 1, i + 2
+            else:
+                if text[i] == "\n":
+                    out.append("\n")
+                i += 1
+        elif text.startswith("/-", i):
+            depth, i = 1, i + 2
+        elif text.startswith("--", i):
+            end = text.find("\n", i)
+            i = n if end == -1 else end
+        elif text[i] == '"':
+            i += 1
+            while i < n and text[i] != '"':
+                if text[i] == "\n":
+                    out.append("\n")
+                i += 2 if text[i] == "\\" else 1
+            i += 1
+            out.append('""')
+        elif text[i] == "'" and (i == 0 or not (
+                text[i - 1].isalnum() or text[i - 1] in "_'!?." or ord(text[i - 1]) > 127)):
+            match = CHAR_LITERAL_RE.match(text, i)
+            if match:
+                out.append("' '")
+                i = match.end()
+            else:
+                out.append(text[i])
+                i += 1
+        else:
+            out.append(text[i])
+            i += 1
+    return "".join(out)
+
+
+def uses_native_evaluation(path: Path) -> bool:
+    """Whether the code of `path` (outside comments and strings) evaluates natively."""
+    return NATIVE_RE.search(lean_code(path.read_text(encoding="utf-8"))) is not None
+
+
+def repository_lean_files() -> list[Path]:
+    """Return every `.lean` file of the repository outside hidden directories."""
+    found = []
+    for directory, subdirectories, files in os.walk(ROOT):
+        subdirectories[:] = sorted(d for d in subdirectories if not d.startswith("."))
+        found.extend(Path(directory) / name for name in files if name.endswith(".lean"))
+    return sorted(found)
+
+
 def module_name(path: Path) -> str:
     """Return the Lean module name corresponding to `path`."""
     return ".".join(path.relative_to(ROOT).with_suffix("").parts)
@@ -135,6 +219,25 @@ def reachable_modules(imports: dict[str, set[str]], roots: list[str]) -> set[str
     return reachable
 
 
+def public_modules(paths: list[Path]) -> set[str]:
+    """Return the modules reachable from the public `Complexitylib` root import."""
+    _, imports = import_graph(paths)
+    return reachable_modules(imports, ["Complexitylib"])
+
+
+def check_native_evaluation(paths: list[Path]) -> set[str]:
+    """Return files that evaluate natively outside the executable validation modules."""
+    public = public_modules(paths)
+    violations = set()
+    for path in repository_lean_files():
+        rel = path.relative_to(ROOT)
+        validation = (path.name == VALIDATION_FILE and rel.parts[0] == "Complexitylib"
+                      and module_name(path) not in public)
+        if not validation and uses_native_evaluation(path):
+            violations.add(f"{rel} : nativeDecide")
+    return violations
+
+
 def check_import_graph(paths: list[Path]) -> set[str]:
     """Return modules missing from the public or required build graphs."""
     modules, imports = import_graph(paths)
@@ -164,6 +267,7 @@ def collect() -> set[str]:
         for check in check_file(path) - exempt:
             found.add(f"{rel} : {check}")
     found.update(check_import_graph(paths))
+    found.update(check_native_evaluation(paths))
     return found
 
 

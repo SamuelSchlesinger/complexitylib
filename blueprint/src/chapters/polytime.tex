@@ -173,7 +173,7 @@ machines be re-proved as short programs through Cobham's theorem.
     Complexity.TM.ComputesInTime.computableInTimeAndSpace,
     Complexity.computableInTimeAndSpace_of_mem_FP}
   \leanok
-  \uses{def:dtime, def:P, def:FP}
+  \uses{def:dtime, def:P, def:FP, def:space-dtisp}
   If a machine with $k$ work tapes decides $L$ within time $f$, then a
   multi-tape machine in CSLib's model decides $L$ within time and space
   $(2k + 3)(2f + 5)$. CSLib's machines take their alphabet as a parameter,
@@ -211,13 +211,20 @@ machines be re-proved as short programs through Cobham's theorem.
   \label{thm:polytime-cslib-P-eq}
   \lean{Complexity.decidesInTime_of_decidableInTimeAndSpace,
     Complexity.mem_DTIME_of_decidableInTimeAndSpace,
+    Complexity.mem_P_of_decidableInTimeAndSpace,
     Complexity.mem_P_iff_decidableInTimeAndSpace}
   \leanok
   \uses{thm:polytime-cslib-multitape}
-  A CSLib multi-tape machine deciding $L$ within time $t$ yields one of our
-  machines deciding $L$ within time $3t$. Consequently a language is in
-  $\cc{P}$ if and only if some multi-tape machine in CSLib's model decides it
-  within polynomial time.
+  A CSLib multi-tape machine deciding $L$ within time $t(|x|)$, under any
+  space bound, yields one of our machines deciding $L$ within time $3t$.
+  Hence CSLib time $t$ gives $\cc{DTIME}(t)$, and CSLib polynomial time gives
+  $\cc{P}$. Together with Theorem~\ref{thm:polytime-cslib-multitape}, a
+  language is in $\cc{P}$ if and only if some multi-tape machine in CSLib's
+  model decides it within polynomial time. The Lean equivalence states its
+  right side with one polynomial bounding both time and space; the forward
+  direction supplies the space bound, and the converse ignores it. This
+  direction carries time only: the CSLib space bound is discarded, so there is
+  as yet no converse for $\cc{DTISP}$, $\cc{L}$, or $\cc{FP}$.
 \end{theorem}
 \begin{proof}
   \leanok

@@ -158,7 +158,8 @@ says otherwise.
 \begin{theorem}[Circuits as straight-line programs]
   \label{thm:circuits-straightline}
   \lean{Complexity.Circuit.toStraightLine, Complexity.Circuit.eval_toStraightLine,
-    Complexity.Circuit.size_toStraightLine}
+    Complexity.Circuit.size_toStraightLine, Complexity.Circuit.gatedOutputs_toStraightLine,
+    Complexity.Circuit.totalFanIn_toStraightLine}
   \leanok
   \uses{def:circuit, def:circuits-bases}
   Every basis $B$ is a CSLib signature whose operation symbols are the gates of
@@ -166,6 +167,9 @@ says otherwise.
   interpreted exactly as the gate evaluates. A circuit over $B$ with $G$
   internal gates and $M$ outputs becomes a CSLib circuit over this signature
   that computes the same function and has exactly $G + M$ gates, its size.
+  Every output of the translation is an internal gate, and its total fan-in is
+  that of the original circuit. The translation goes one way: the converse,
+  from CSLib circuits whose outputs are internal gates, is planned.
 \end{theorem}
 \begin{proof}
   \leanok
@@ -182,16 +186,26 @@ says otherwise.
     Complexity.SIZE_subset_cslib_SIZE, Complexity.cslib_SIZE_subset_SIZE}
   \leanok
   \uses{def:circuit, def:circuits-bases, def:PPoly}
-  A De Morgan circuit in CSLib's model (constants, negation, and binary
-  conjunction and disjunction, every gate counted) with $g$ gates and $M$
-  outputs is a fan-in-two AND/OR circuit of size $g + M$. Conversely, a
-  fan-in-two AND/OR circuit with $N$ inputs, $G$ internal gates, and $M$ outputs
-  is a CSLib circuit with at most $N + 2G + M$ gates. Consequently $L \in
-  \cc{P/poly}$ if and only if, for some polynomial $p$, every length-$n$ slice
-  of $L$ is decided by a CSLib circuit with at most $p(n)$ gates, so
-  $\cc{P/poly}$ is exactly CSLib's $\cc{P/poly}$. The size classes interleave:
-  $\cc{SIZE}(s)$ lies in CSLib's $\cc{SIZE}(n + 2s + 1)$, and CSLib's
-  $\cc{SIZE}(s)$ lies in $\cc{SIZE}(s + 1)$.
+  Let $N, M \ge 1$. A De Morgan circuit in CSLib's model (constants,
+  negation, and binary conjunction and disjunction, every gate counted) with
+  $N$ inputs, $g$ gates, and $M$ outputs is a fan-in-two AND/OR circuit of
+  size $g + M$ computing the same outputs. Conversely, a fan-in-two AND/OR
+  circuit with $N$ inputs, $G$ internal gates, and $M$ outputs has a CSLib
+  circuit with at most $N + 2G + M$ gates computing the same outputs.
+  Consequently $L \in \cc{P/poly}$ if and only if, for some polynomial $p$,
+  every length-$n$ slice of $L$, including $n = 0$, is decided by a CSLib
+  circuit with at most $p(n)$ gates, and $\cc{P/poly}$ equals CSLib's
+  $\cc{P/poly}$. The size classes interleave: $\cc{SIZE}(s)$ lies in
+  CSLib's $\cc{SIZE}(n + 2s + 1)$, and CSLib's $\cc{SIZE}(s)$ lies in
+  $\cc{SIZE}(s + 1)$.
+
+  CSLib's Boolean $\cc{SIZE}$ and $\cc{P/poly}$ (at most $s(n)$ De Morgan gates
+  at every length $n$, and $\bigcup_k \cc{SIZE}(n^k + k)$) are pending CSLib
+  work by this library's author, not yet in upstream CSLib; the library builds
+  them from the pinned integration branch. The equality of the two
+  $\cc{P/poly}$ classes is therefore a consistency check between two
+  definitions by the same author, not corroboration by an independently
+  reviewed upstream definition.
 \end{theorem}
 \begin{proof}
   \leanok
@@ -210,9 +224,10 @@ says otherwise.
     Complexity.exists_cslib_of_mem_DEPTH, Complexity.mem_DEPTH_of_cslib}
   \leanok
   \uses{thm:circuits-cslib}
-  The translation of a CSLib De Morgan circuit has exactly one more level of
-  depth, for its output gates. Conversely, a fan-in-two AND/OR circuit with $N$
-  inputs, $G$ internal gates, and $M$ outputs has a CSLib circuit with exactly
+  Let $N, M \ge 1$, as in Theorem~\ref{thm:circuits-cslib}. The translation
+  of a CSLib De Morgan circuit has exactly one more level of depth, for its
+  output gates. Conversely, a fan-in-two AND/OR circuit with $N$ inputs, $G$
+  internal gates, and $M$ outputs has a CSLib circuit with exactly
   $N + 2G + M$ gates and at most one more level of depth. So depth in the two
   models agrees up to an additive constant.
 \end{theorem}

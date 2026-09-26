@@ -23,14 +23,37 @@ Run with:
 lake env lean scripts/AxiomGuard.lean
 ```
 
-The audit selects declarations by their module of origin, not by declaration
-name. It therefore covers private and generated declarations as well as the
-library's extensions in foreign namespaces such as `Digraph` and `Nat`. The
-executable validation modules are imported explicitly because they are
-intentionally absent from the public `Complexitylib` import graph.
-
 CI runs this on every push. `headlineTheorems` remains a readable index and a
 rename smoke test; it does not determine the scope of the axiom audit.
+
+## Scope
+
+- **Every Complexitylib module.** The audit visits every constant stored for
+  every `Complexitylib` module in the environment: the modules reached through
+  the root `Complexitylib` import and the executable validation modules, which
+  are imported explicitly above because they are intentionally absent from the
+  public import graph. The `buildImport` check of `scripts/lint_style.py` keeps
+  every module reachable from one of these imports. Declarations are selected
+  by module of origin, not by name, so private and generated declarations and
+  the library's extensions in foreign namespaces such as `Digraph`, `Nat`, and
+  `Cslib.Circuits` are covered.
+- **Transitive dependencies.** The axioms of a declaration are collected
+  through every constant it uses, including constants from Mathlib and CSLib,
+  so a nonstandard axiom anywhere below a library declaration is reported.
+  `sorry` (`sorryAx`) and `native_decide` (`Lean.ofReduceBool`) are caught
+  this way when a declaration depends on them.
+- **Trusts the `.olean` files.** The audit reads declarations as the build
+  stored them. It does not re-check them independently in the kernel, as a
+  tool such as `lean4checker` would.
+- **Allows `Classical.choice`.** Any `noncomputable def` passes. A claim in
+  this library that a function is computable, in the complexity-theoretic
+  sense, rests on the machine semantics (a machine computing it within a
+  stated bound), not on Lean's notion of computability.
+- **Does not see `example`s or `#guard`s.** Neither adds a constant to the
+  environment. The executable validation modules close some `example`s with
+  `native_decide` and run `#guard`s, as regression tests that trust the
+  compiler; no declaration can depend on them. `scripts/lint_style.py` rejects
+  `native_decide` in every other `.lean` file.
 -/
 
 open Lean

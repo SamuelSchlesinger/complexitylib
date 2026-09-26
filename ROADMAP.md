@@ -111,8 +111,14 @@ In order. Each item says why it matters and roughly how large it is.
    signature whose operation symbols are our gates: an operation, a fan-in,
    and a negation pattern. Unbounded fan-in and threshold bases are signatures
    with infinitely many operations. Our free negations are therefore
-   reproduced exactly, and so are counted output gates, on circuits whose
-   outputs are all internal gates (`Circuit.GatedOutputs`). `NeZero N` and
+   reproduced exactly. Counted output gates are reproduced exactly on
+   single-output circuits whose output is an internal gate
+   (`Circuit.GatedOutputs`). With several outputs they are not: a gated CSLib
+   circuit may point two outputs at one gate, or feed an output gate into
+   later gates, while typed outputs are distinct sink gates, so the planned
+   converse translation gives only the bounds
+   CSLib size ≤ typed size ≤ CSLib size + M − 1. Every size class is
+   single-output. `NeZero N` and
    `CircuitFamily.emptyOutput` stay: the fan-in-two AND/OR basis has no
    constants, so it has no zero-input circuits. The algebraic-circuits
    library, imported wholesale as `Complexitylib/Algebraic` (done, September
@@ -128,11 +134,17 @@ In order. Each item says why it matters and roughly how large it is.
    parity complexity `4(n - 1)`. CSLib's own `SIZE` and `PPoly` (De Morgan,
    as in Arora and Barak) then become the reference classes. Each phase lands
    with public statements unchanged:
-   1. **Signatures and the exact correspondence.** `Basis.signature` and
-      `Basis.interpretation` for every basis, and a size-preserving translation
-      of typed circuits into straight-line programs over them
-      (`Circuit.toStraightLine`, `Complexitylib/Circuits/StraightLine.lean`;
-      done). The converse, from gated CSLib circuits, is next.
+   1. **Signatures and the correspondence.** `Basis.signature` and
+      `Basis.interpretation` for every basis (done), and translations between
+      typed circuits and straight-line programs over them. The forward
+      translation `Circuit.toStraightLine`
+      (`Complexitylib/Circuits/StraightLine.lean`) is done: it computes the
+      same function (`eval_toStraightLine`), has the same size
+      (`size_toStraightLine`), has gated outputs
+      (`gatedOutputs_toStraightLine`), and has the same total fan-in
+      (`totalFanIn_toStraightLine`). So far the correspondence runs one way,
+      from typed circuits to CSLib's. The converse translation, from gated
+      CSLib circuits, with depth and the round trip, is next.
    2. **Redefine the measures and classes** (`sizeComplexity`, `SIZE`, `PPoly`,
       `CircuitFamily`, `DEPTH`, `NC`, `AC`, `TC`) over CSLib circuits, keeping
       their names, and re-prove the old statements through the correspondence.

@@ -37,16 +37,19 @@ Turing-machine model:
 - **Machine robustness:** the logarithmic-cost RAM and Turing machines define
   the same `P`.
 - **CSLib interoperability:** our machines and CSLib's multi-tape machines
-  simulate each other with constant-factor overhead, so `P` is exactly CSLib's
-  polynomial time, and `DTIME`, `DTISP`, and `FP` transfer to CSLib's time and
-  space measures; CSLib's regular languages are in `L`. Our circuits and
-  CSLib's De Morgan circuits translate into each other with linear overhead,
-  which characterizes `P/poly` in CSLib's model and brings Lupanov's
-  `(1 + ε) 2ⁿ / n` upper bound into this library.
+  simulate each other with constant-factor time overhead, so `P` is exactly
+  CSLib's polynomial time. `DTIME`, `DTISP`, and `FP` transfer to CSLib's time
+  and space measures; the converse direction carries time only. CSLib's
+  regular languages are in `L`. Our circuits and CSLib's De Morgan circuits
+  translate into each other with linear overhead, which characterizes `P/poly`
+  in CSLib's model, shows it equal to the Boolean `P/poly` of the author's
+  pending CSLib work, and brings Lupanov's `(1 + ε) 2ⁿ / n` upper bound into
+  this library.
 - **Algebraic circuits:** the algebraic-circuits library, imported as
-  `Complexitylib/Algebraic`, adds the `3(n - 1)` De Morgan parity bound, parity
-  ∉ AC⁰ by Håstad's switching lemma, monotone CLIQUE, Nechiporuk's formula
-  bound, Karchmer–Wigderson, and a polynomial circuit-size hierarchy
+  `Complexitylib/Algebraic`, adds, in its own circuit and formula models, the
+  `3(n - 1)` De Morgan parity bound, parity ∉ AC⁰ by Håstad's switching lemma,
+  monotone CLIQUE, Nechiporuk's formula bound for rectangle-free families,
+  Karchmer–Wigderson, and a polynomial circuit-size hierarchy
   ([guide](docs/algebraic/README.md)).
 
 The blueprint links each result to its Lean statement and lists the
@@ -74,7 +77,12 @@ second.
 `scripts/AxiomGuard.lean` mechanically audits every declaration compiled from
 Complexitylib modules for dependencies beyond Lean's three standard axioms,
 and CI enforces it — along with Mathlib's style and environment linters — on
-every push.
+every push. No declaration depends on `native_decide`: the executable
+validation modules, outside the public import graph, use it only in
+`example`s as regression tests, and the style linter rejects it everywhere
+else. The audit trusts the compiled `.olean` files and allows
+`Classical.choice`, so claims that a function is computable rest on the
+machine semantics; its header documents its scope.
 
 **AI-assisted development.** This project uses AI coding assistants for proof
 development, refactoring, documentation, and research exploration. AI-assisted
@@ -122,7 +130,7 @@ are pinned (currently Lean v4.35.0-rc3, tracking the [cslib](https://github.com/
 lake build --wfail
 ```
 
-CI additionally runs five executable regression suites and three quality gates;
+CI additionally runs five executable regression suites and four quality gates;
 see [CONTRIBUTING.md](CONTRIBUTING.md) for the full list and the style guide.
 API documentation builds with doc-gen4 from `docbuild/` and publishes to
 [GitHub Pages](https://samuelschlesinger.github.io/complexitylib/) on every

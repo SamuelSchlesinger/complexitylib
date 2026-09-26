@@ -141,6 +141,11 @@ Aggregation files (`Complexitylib.lean`, `Models.lean`, …) contain only
 - Prefer Mathlib's existing types and lemmas over custom ones.
 - Every `set_option maxHeartbeats` (or similar escape hatch) needs an adjacent
   comment justifying it.
+- No `native_decide` (nor `decide +native`): proofs are checked by the kernel.
+  The only exception is the executable validation modules (files named
+  `Validation.lean` outside the public import graph), which may close
+  `example`s with it as regression tests. `scripts/lint_style.py` enforces
+  this.
 
 ## Building and quality gates
 
@@ -170,22 +175,42 @@ suites that are intentionally outside the public import graph.
 The last four are the quality gates:
 
 - **`scripts/lint_style.py`** checks copyright headers, module docstrings,
-  line length, whitespace, and that every non-internal, non-validation module
-  is reachable from the public root import. It also ensures every module belongs
-  to the root or one of the required validation-only build graphs. It is a hard
-  gate: any violation fails the run.
+  line length, whitespace, `_root_.` escapes, and that every non-internal,
+  non-validation module is reachable from the public root import. It also
+  ensures every module belongs to the root or one of the required
+  validation-only build graphs. Across every `.lean` file of the repository
+  (including `scripts/`), it rejects `native_decide`, `decide +native`,
+  `native := true`, and direct uses of `ofReduceBool`/`ofReduceNat` in code,
+  ignoring comments and strings; the only exempt files are those named
+  `Validation.lean` outside the public import graph. It is a hard gate: any
+  violation fails the run.
 - **`lake exe runLinter …`** runs the Mathlib/Batteries environment linters
   (missing docstrings, naming, unused arguments, simp hygiene, …) over the
   public root and all five validation-only import graphs, also as a hard gate.
   To suppress a genuinely-intended lint, put a documented inline
   `@[nolint …]` on the declaration — there is no project-level baseline.
 - **`scripts/AxiomGuard.lean`** audits every declaration originating in a
-  Complexitylib module and permits dependencies only on `propext`,
-  `Classical.choice`, and `Quot.sound`. Its headline list is also a rename
-  smoke test; update that index when a listed theorem is renamed.
-- **`scripts/BlueprintCheck.lean`** checks that every `\lean{...}` name in the
-  blueprint sources exists, so renaming or deleting a referenced declaration
-  fails CI. Update the blueprint in the same change.
+  Complexitylib module, following its dependencies transitively into Mathlib
+  and CSLib, and permits dependencies only on `propext`, `Classical.choice`,
+  and `Quot.sound`; `sorry` and `native_decide` in any declaration fail it.
+  Know its limits: it trusts the compiled `.olean` files rather than
+  re-checking them independently (as `lean4checker` would); it allows
+  `Classical.choice`, so a claim that a function is computable rests on the
+  machine semantics, not on Lean's computability; and it cannot see
+  `example`s or `#guard`s, which add no declarations. The executable
+  validation modules use `native_decide` only in such `example`s. Its header
+  documents this scope. Its headline list is also a rename smoke test; update
+  that index when a listed theorem is renamed.
+- **`scripts/BlueprintCheck.lean`** checks the blueprint's links and markers:
+  every `\lean{...}` name exists; a node's statement carries `\leanok` exactly
+  when it has `\lean` references (and is not `\notready`); a proof carries
+  `\leanok` only with its statement, and the proof of a linked result carries
+  it; a theorem, lemma, proposition, or corollary cites at least one proof, not
+  only definitions, and a definition cites a non-proof; every node has a
+  label, labels are unique, and every `\uses{...}` and `\ref{...}` resolves.
+  Renaming or deleting a referenced declaration fails CI, so update the
+  blueprint in the same change. Whether the prose matches the Lean statement
+  is checked by review.
 
 API documentation builds with doc-gen4 from the `docbuild/` subproject
 (`cd docbuild && lake build Complexitylib:docs`); the blueprint builds with

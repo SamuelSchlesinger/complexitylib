@@ -15,27 +15,42 @@ blueprint node, add `\lean{...}` and `\leanok` to that node in the same change.
 
 ```bash
 lake build --wfail
+lake build --wfail Complexitylib.Classes.P.Cobham.Validation
 lake build --wfail Complexitylib.Models.TuringMachine.SingleTape.Validation
+lake build --wfail Complexitylib.Models.TuringMachine.Repetition.Validation
 lake build --wfail Complexitylib.Circuits.Encoding.Validation
+lake build --wfail Complexitylib.SAT.Tseitin.Machine.Validation
 ```
 
-Always verify all three commands pass before considering a change complete.
-The latter two run executable regression guards that are intentionally kept
+Always verify all six commands pass before considering a change complete.
+The latter five run executable regression guards that are intentionally kept
 out of the public import graph.
 
 Quality gates (also run in CI; see CONTRIBUTING.md):
 
 ```bash
-python3 scripts/lint_style.py        # headers, module docs, 100-col, _root_ escapes
-lake exe runLinter Complexitylib     # Mathlib/Batteries env linters
-lake env lean scripts/AxiomGuard.lean  # headline theorems on std axioms only
-lake env lean scripts/BlueprintCheck.lean  # every blueprint \lean{} name exists
+python3 scripts/lint_style.py        # headers, module docs, 100-col, _root_, imports, native_decide
+lake exe runLinter Complexitylib \
+  Complexitylib.Classes.P.Cobham.Validation \
+  Complexitylib.Models.TuringMachine.SingleTape.Validation \
+  Complexitylib.Models.TuringMachine.Repetition.Validation \
+  Complexitylib.Circuits.Encoding.Validation \
+  Complexitylib.SAT.Tseitin.Machine.Validation  # env linters, including private graphs
+lake env lean scripts/AxiomGuard.lean  # every project declaration on std axioms only
+lake env lean scripts/BlueprintCheck.lean  # blueprint links, \leanok markers, node kinds, labels
 ```
 
 Both linters are hard gates: any violation fails the run. The refactor cleared
 and removed the former shrink-only baselines, so keep the tree clean. Suppress
 a genuinely-intended env-lint with a documented inline `@[nolint …]` on the
 declaration — never a project-level baseline.
+
+Never use `native_decide` (or `decide +native`) outside the executable
+validation modules. `lint_style.py` rejects it in every `.lean` file except
+files named `Validation.lean` outside the public import graph, where it closes
+`example`s used as regression tests. The axiom guard's scope and limits (it
+trusts the `.olean` files, allows `Classical.choice`, and cannot see
+`example`s) are documented in the header of `scripts/AxiomGuard.lean`.
 
 ## Architecture
 
@@ -100,7 +115,8 @@ same file are acceptable.
   (`Complexitylib/Algebraic/LICENSE`), so its files carry the MIT header.
 - **Never shadow a root namespace**: an inner `namespace TM` block inside
   another namespace (e.g. producing `SAT.TM`) shadows the real `TM.*` API and
-  forces `_root_.` escapes — the style linter tracks and shrinks `_root_.` use.
+  forces `_root_.` escapes — the style linter rejects `_root_.` outside the
+  imported algebraic-circuits library.
 - **Arora-Barak style**: Fixed alphabet `Γ = {0, 1, □, ▷}`, three-way directions (`Dir3`), explicit `qstart`/`qhalt` states.
 - **Named tapes**: `Cfg` has separate `input : Tape`, `work : Fin n → Tape`, `output : Tape` fields. This avoids degenerate `Fin k` indexing and makes the read-only/read-write distinction structural.
 - **DTM (`TM`)**: Single deterministic transition function `δ`. Execution via `step` (computable) and relational `stepRel`/`reaches`/`reachesIn`.

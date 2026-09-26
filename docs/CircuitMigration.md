@@ -1,10 +1,18 @@
 # Moving the circuit developments to CSLib's circuit model
 
-Status (2026-09-26): phase 1 and the start of phase 2 are done:
+Status (2026-09-26): the forward translation of phase 1 and steps 2.1–2.2
+are done:
 
 - step 0: the build moves to the CSLib integration branch (commit `00f41e9`),
-  and typed circuits translate to CSLib straight-line programs with the same
-  function and size (`Circuit.toStraightLine`, `eda4781`);
+  and typed circuits translate to CSLib straight-line programs
+  (`Circuit.toStraightLine`, `eda4781`). Proved: the translation computes the
+  same function (`eval_toStraightLine`, the forward half of E5), has the same
+  size (`size_toStraightLine`, E1), has gated outputs
+  (`gatedOutputs_toStraightLine`, E2), and has the same total fan-in
+  (`totalFanIn_toStraightLine`, E7). The correspondence so far runs one way,
+  from typed circuits to CSLib's; the converse translation (ROADMAP phase 1,
+  step 2.3 here: `ofStraightLine` with E3, E4, E6 and the converse half of E5)
+  is next;
 - step 2.1: the basis and typed-circuit definitions are split
   (`Circuits/Basis/Defs`, `Circuits/Typed/Defs`, `d2bc6fe`);
 - step 2.2: `Complexitylib/Cslib/Circuit` extends CSLib circuits with gated
@@ -22,9 +30,11 @@ reachable), which integrates the pending CSLib circuit PRs until they land
 upstream.
 
 The design redefines Complexitylib's measures and `CircuitFamily` over CSLib
-circuits on `Basis.signature`. The invariant `GatedOutputs` (every output is
-an internal gate) reproduces the typed size charge exactly, so every public
-statement keeps its text and meaning, and `emptyOutput` stays.
+circuits on `Basis.signature`. On single-output circuits, the invariant
+`GatedOutputs` (the output is an internal gate) reproduces the typed size
+charge exactly. Every size measure and class is single-output, so every public
+statement keeps its text and meaning, and `emptyOutput` stays. With several
+outputs the charge is not reproduced exactly (§3.1).
 
 ## 0. Decisions at a glance
 
@@ -32,7 +42,7 @@ statement keeps its text and meaning, and `emptyOutput` stays.
    - Redefined: `Realizable`, `realizationSizes`, `sizeComplexityWithTop`, `sizeComplexity` and `CircuitFamily` (with `function`, `size`, `depth`).
    - Text unchanged, meaning carried by the new family: every class (`SIZEWithBasis`, `SIZE`, `PPoly`, `DEPTHWithBasis`, `DEPTH`, `NC`/`AC`/`TC`, `NC0`/`NC1`/`AC0`/`TC0`, `UniformPPoly`, `PromiseSIZEWithBasis`).
    - CSLib's `ecomplexity`, `complexity`, `Boolean.SIZE`, `Boolean.PPoly`, `CircuitFamily` and `DecidableInSize` stay reference notions, connected by theorems.
-2. **Counted output gates → `Cslib.Circuits.Circuit.GatedOutputs`.** "Every output is an internal gate" is exactly the typed charge, for every basis, with no copy-gate hypothesis. `max 1 ∘ ecomplexity` is a theorem, not the definition.
+2. **Counted output gates → `Cslib.Circuits.Circuit.GatedOutputs`.** On single-output circuits, "the output is an internal gate" is exactly the typed charge, for every basis, with no copy-gate hypothesis. With M ≥ 2 outputs it is not: a gated CSLib circuit may point two outputs at one gate, or feed an output gate into later gates, while typed outputs are M distinct sink gates, so the converse translation gives only CSLib size ≤ typed size ≤ CSLib size + M − 1 (§3.1). Every size measure and class is single-output. `max 1 ∘ ecomplexity` is a theorem, not the definition.
 3. **Free negations** are carried by the signature: an operation symbol is a whole `Basis.GateKind`. Nothing needs converting.
 4. **`emptyOutput` and `[NeZero N]` stay.** ROADMAP item 7's claim that zero-input circuits remove them is wrong and gets corrected (§1, F1).
 5. **The converse `Circuit.ofStraightLine` is Σ-valued and exact for single-output gated circuits** (size, depth, eval, and the round trip), so the family flip needs no copy gates and no `≤` repairs.
@@ -310,17 +320,20 @@ No aliases, for these reasons:
 
 ### 3.1 Counted output gates vs free output wires: `GatedOutputs`
 
-These exact equalities carry every statement:
+These equalities, once all are proved, carry every statement. E1, E2, E7 and
+the forward half of E5 are proved; the rest come with the converse translation
+(step 2.3). The size equality E3 gives the typed size exactly only for M = 1,
+and the round trip E6 is stated for M = 1.
 
 | Id | Equality | Source |
 |---|---|---|
-| E1 | `c.toStraightLine.size = c.size` (= G + M) | `size_toStraightLine` (exists) |
-| E2 | `c.toStraightLine.GatedOutputs` | F3 |
-| E3 | `(ofStraightLine c hc).2.size = c.size - 1 + M`; for M = 1, `= c.size` | rfl, plus `size_pos` |
-| E4 | `depth_toStraightLine`, `depth_ofStraightLine`: equal | F4; generalizes `Program.depths_eq_lines_depth` and `wireDepth_ofCslib` |
-| E5 | `eval_toStraightLine` (exists), `eval_ofStraightLine` | generalizes `wireValue_ofCslib` |
-| E6 | `ofStraightLine c.toStraightLine _ = ⟨G, c⟩` (M = 1) | `Gate.ext`, `Circuit.ext` |
-| E7 | `totalFanIn_toStraightLine` | lines are the typed gates |
+| E1 | `c.toStraightLine.size = c.size` (= G + M) | `size_toStraightLine` (proved) |
+| E2 | `c.toStraightLine.GatedOutputs` | `gatedOutputs_toStraightLine` (proved; F3) |
+| E3 | `(ofStraightLine c hc).2.size = c.size - 1 + M`; for M = 1, `= c.size` | planned: rfl, plus `size_pos` |
+| E4 | `depth_toStraightLine`, `depth_ofStraightLine`: equal | planned: F4; generalizes `Program.depths_eq_lines_depth` and `wireDepth_ofCslib` |
+| E5 | `eval_toStraightLine` (proved), `eval_ofStraightLine` (planned) | generalizes `wireValue_ofCslib` |
+| E6 | `ofStraightLine c.toStraightLine _ = ⟨G, c⟩` (M = 1) | planned: `Gate.ext`, `Circuit.ext` |
+| E7 | `totalFanIn_toStraightLine` | proved: lines are the typed gates |
 
 Consequences:
 - `realizationSizes_eq_typed` and `realizable_iff_typed` follow from E1 to E3 and E5, so every measure lemma keeps its text.
@@ -446,7 +459,7 @@ phase boundaries, after the gates pass in CI.
 |---|---|---|---|
 | 2.1 | `refactor(Circuits): split the basis and typed-circuit definitions` | §2.1 pure move | names unchanged; `Basic.lean` re-exports |
 | 2.2 | `refactor(Cslib): gated outputs, program helpers, and dedupes` | §2.2; CLAUDE.md exception; F7 dedupes (Interop files re-pointed) | additive, plus renames confined to 3 Interop files and StraightLine |
-| 2.3 | `feat(StraightLine): converse translation with exact size and depth` | `Gate.ofLine`, `ofStraightLine`, E2 to E7, `@[ext]` on `Gate`/`Circuit` | additive |
+| 2.3 | `feat(StraightLine): converse translation with exact size and depth` | `Gate.ofLine`, `ofStraightLine`, E3 to E6 (E2 and E7 are already proved), `@[ext]` on `Gate`/`Circuit` | additive |
 | 2.4 | `feat(StraightLine): copy gates, output gating, finite andOr2 kinds` | `HasCopyGate` with 4 instances, `StraightLine.gated`, `Fintype`/`DecidableEq` (F15) | additive |
 | 2.5 | `refactor(Circuits): define circuit size complexity over CSLib circuits` | §2.4 `Size/{Defs,Internal}.lean` and `Size.lean`; Basic.lean API lemmas re-proved by rewriting with `realizationSizes_eq_typed` | statements unchanged; no consumer unfolds the measures (F10). Rebuilds about 696 modules, so it stays alone. |
 | 2.6 | `refactor(Family): route family construction through ofTyped` | `Family/Typed.lean` shims on the old structure (irreducible, rfl lemmas); the 9 constructor files (F11) switch to `ofTyped` | old structure untouched; shims are identities |

@@ -17,10 +17,17 @@ logics) are related to it by explicit simulations.
 \section{Reading the blueprint}
 
 \begin{itemize}
-  \item A node with a Lean link is formalized, and the Lean statement is
-    exactly the one written here. The library contains no \texttt{sorry} and no
-    custom axioms; CI checks every declaration against Lean's three standard
-    axioms and checks that every Lean name in this blueprint exists.
+  \item A node with a Lean link is formalized. Its prose is meant to state the
+    linked Lean statement with all of its hypotheses, but the Lean statement is
+    authoritative: where the two differ, what is proved is the Lean statement.
+    CI checks that every declaration of the library depends on no axioms
+    beyond Lean's three standard ones, so no declaration uses \texttt{sorry}
+    or a custom axiom. It also checks the blueprint's links and markers: every
+    Lean name exists; a statement is marked formalized exactly when it has a
+    Lean link; the proof of a linked result is marked formalized; a theorem
+    cites at least one Lean proof, not only definitions; and every label,
+    \emph{uses} entry, and cross-reference resolves. Nothing checks that the
+    prose matches the Lean statement; that is done by review.
   \item A node without a Lean link is planned. Its \emph{uses} list names the
     results a proof is expected to need.
   \item A result proved under a hypothesis is stated as that implication. For
