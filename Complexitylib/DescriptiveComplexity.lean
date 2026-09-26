@@ -31,6 +31,8 @@ public import Complexitylib.DescriptiveComplexity.Problems.Copies
 public import Complexitylib.DescriptiveComplexity.Encoding.Positions
 public import Complexitylib.DescriptiveComplexity.Encoding.Decoding
 public import Complexitylib.DescriptiveComplexity.ModelChecking.Encoded
+public import Complexitylib.DescriptiveComplexity.Circuit
+public import Complexitylib.DescriptiveComplexity.Circuit.Encoding
 
 /-!
 # Descriptive complexity

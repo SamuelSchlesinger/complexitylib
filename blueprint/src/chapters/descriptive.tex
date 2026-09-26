@@ -1533,6 +1533,66 @@ existing logics rather than a restriction imposed on them.
   queries is already formalized.
 \end{proof}
 
+\begin{definition}[Table inputs and finite quantifier expansion]
+  \label{def:desc-circuit-expansion}
+  \lean{Complexity.DescriptiveComplexity.StructureInput,
+    Complexity.DescriptiveComplexity.StructureInput.Represents,
+    Complexity.DescriptiveComplexity.StructureInput.compile,
+    Complexity.DescriptiveComplexity.InputSite,
+    Complexity.DescriptiveComplexity.tableLayout,
+    Complexity.DescriptiveComplexity.tableInput,
+    Complexity.DescriptiveComplexity.Formula.expansionPolynomial}
+  \leanok
+  \uses{def:desc-fo-syntax, def:desc-structure, def:lowerbounds-ac0-formula}
+  At a fixed universe size $n$, an input layout assigns wires to relation-table
+  entries and one-hot constant blocks. There is a fixed finite numbering of all
+  these sites, independent of the structure's relation and constant values.
+  Compile a formula under an assignment of its free variables as follows:
+  relation atoms select a table entry by testing all argument values; equality
+  tests whether both terms select the same value; negation uses De Morgan
+  duality; Boolean connectives remain gates; and quantifiers become unbounded
+  gates over the $n$ possible values. The result is an \texttt{AC0Formula}.
+
+  Define $P_\varphi\in\mathbb N[X]$ by
+  $P_{R(\bar t)}=1+(a+2)X^a$ for an $a$-ary relation,
+  $P_{t=u}=1+3X$, $P_{\neg\varphi}=P_\varphi$,
+  $P_{\varphi\wedge\psi}=P_{\varphi\vee\psi}=1+P_\varphi+P_\psi$, and
+  $P_{Qx\,\varphi}=1+XP_\varphi$ for $Q\in\{\exists,\forall\}$.
+  This is the finite expansion used in Immerman, Section~5.4, Theorem~5.22.
+\end{definition}
+
+\begin{theorem}[Correctness, polynomial size, and constant depth of expansion]
+  \label{thm:desc-circuit-expansion}
+  \lean{Complexity.DescriptiveComplexity.tableInputCount_eq,
+    Complexity.DescriptiveComplexity.tableInput_represents,
+    Complexity.DescriptiveComplexity.StructureInput.compile_sat,
+    Complexity.DescriptiveComplexity.StructureInput.compile_size,
+    Complexity.DescriptiveComplexity.StructureInput.compile_depth,
+    Complexity.DescriptiveComplexity.Formula.table_expansion_sat,
+    Complexity.DescriptiveComplexity.Sentence.table_expansion_models}
+  \leanok
+  \uses{def:desc-circuit-expansion, def:desc-fo-semantics}
+  The table layout has exactly $\sum_i n^{a_i}+cn$ inputs, where $a_i$ are
+  relation arities and $c$ is the number of constants. Every decidable structure
+  supplies a valid table input. On any represented structure, the compiled
+  formula evaluates to true exactly when the source formula is satisfied under
+  the supplied assignment. Its tree size is exactly $P_\varphi(n)$ and its depth
+  is at most $|\varphi|+1$, uniformly over layouts and assignments.
+
+  The numbering of input sites is chosen noncomputably; compilation from a given
+  layout is computable. These statements concern fixed-size table inputs, not
+  yet the library's bit-string encoding with its unary prefix or a circuit family.
+\end{theorem}
+\begin{proof}
+  \leanok
+  A constant selector reads its one-hot bit. In a relation atom exactly the tuple
+  of argument values passes all selectors, so its input relation bit determines
+  the answer. Induct on the source formula; finite conjunction and disjunction
+  realize the quantifiers. Sum the child sizes for the polynomial identity and
+  take their maximum depths plus one for each gate. De Morgan negation preserves
+  both tree size and depth.
+\end{proof}
+
 \begin{theorem}[Circuit realization of an unbounded formula]
   \label{thm:desc-formula-circuit}
   \lean{Complexity.AC0Formula.exists_circuit,
@@ -1553,6 +1613,60 @@ existing logics rather than a restriction imposed on them.
   is the sum of child sizes and whose depth is their maximum, then compose with
   one connective gate. Empty conjunctions and disjunctions use nullary AND and
   OR gates. The extra depth layer comes from counting leaf output gates.
+\end{proof}
+
+\begin{theorem}[First-order circuit realization on table inputs]
+  \label{thm:desc-table-circuit}
+  \lean{Complexity.DescriptiveComplexity.StructureInput.exists_circuit,
+    Complexity.DescriptiveComplexity.StructureInput.exists_circuit_sat}
+  \leanok
+  \uses{thm:desc-circuit-expansion, thm:desc-formula-circuit}
+  Fix a universe size $n$, a layout on $N>0$ input wires, a formula $\varphi$,
+  and a free-variable assignment. There is a single circuit computing the
+  expansion on every input, with size exactly $P_\varphi(n)$ and depth at most
+  $|\varphi|+2$. On every represented structure it computes satisfaction of
+  $\varphi$ under that assignment. The circuit is selected from the formula,
+  layout, and assignment alone, independently of the input table contents.
+\end{theorem}
+\begin{proof}
+  \leanok
+  Apply the formula realization theorem to the finite quantifier expansion,
+  then combine the exact size, depth, and satisfaction theorems. No claim about
+  invalid encodings or uniform circuit generation is needed for this statement.
+\end{proof}
+
+\begin{definition}[Circuit layout for the structure encoding]
+  \label{def:desc-encoding-layout}
+  \lean{Complexity.DescriptiveComplexity.encodingLayout,
+    Complexity.DescriptiveComplexity.encodedInput}
+  \leanok
+  \uses{def:desc-circuit-expansion, def:desc-encoding-positions}
+  Assign each relation and constant-table wire its actual bit position in the
+  full structure encoding. Present an encoded structure as a Boolean input
+  vector of length $\ell_V(n)$. This layout is computable.
+\end{definition}
+
+\begin{theorem}[Circuit expansion on the actual structure encoding]
+  \label{thm:desc-encoded-expansion}
+  \lean{Complexity.DescriptiveComplexity.encodedInput_represents,
+    Complexity.DescriptiveComplexity.ofFn_encodedInput,
+    Complexity.DescriptiveComplexity.Formula.encoded_expansion_sat,
+    Complexity.DescriptiveComplexity.Sentence.encoded_expansion_models,
+    Complexity.DescriptiveComplexity.Sentence.exists_encoding_circuit}
+  \leanok
+  \uses{def:desc-encoding-layout, thm:desc-encoding-positions, thm:desc-table-circuit}
+  The input vector's list is exactly the original encoding. Every encoded
+  structure represents its relation and constant tables under
+  this layout. Therefore the expansion computes satisfaction on the actual
+  encoding, including for open formulas. At each universe size there is one
+  circuit on $\ell_V(n)$ inputs computing the sentence expansion on every input,
+  of size $P_\varphi(n)$ and depth at most $|\varphi|+2$.
+  The following validator supplies rejection of malformed inputs.
+\end{theorem}
+\begin{proof}
+  \leanok
+  Apply correctness of bit positions to obtain the representation predicate,
+  then instantiate expansion correctness and circuit realization.
 \end{proof}
 
 \begin{theorem}[$\cc{FO} \subseteq \cc{AC^0}$, nonuniform]
