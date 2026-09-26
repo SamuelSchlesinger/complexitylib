@@ -88,12 +88,13 @@ theorem TimeBoundedSymmetryOfInformation.conditional_ne_top_internal
     (hsoi : TimeBoundedSymmetryOfInformation ordinaryMachine
       conditionalMachine clock loss)
     {first condition : List Bool} {time : ℕ}
-    (hsize : first.length + condition.length ≤ time) :
+    (hsize : first.length + condition.length ≤ time)
+    (hpair : ordinaryMachine.timeBoundedKolmogorovComplexity
+      (pair first condition) time ≠ ⊤) :
     conditionalMachine.randomAccessConditionalTimeBoundedKolmogorovComplexity
       first condition (clock time) ≠ ⊤ := by
   intro htop
   have hchain := hsoi.chain_le first condition time hsize
-  have hpair := hsoi.pairFinite first condition time hsize
   obtain ⟨pairValue, hpairValue⟩ := WithTop.ne_top_iff_exists.mp hpair
   rw [htop, WithTop.top_add, ← hpairValue] at hchain
   change (⊤ : WithTop ℕ) ≤ ((pairValue + loss time : ℕ) : WithTop ℕ) at hchain
@@ -107,12 +108,13 @@ theorem TimeBoundedSymmetryOfInformation.condition_ne_top_internal
     (hsoi : TimeBoundedSymmetryOfInformation ordinaryMachine
       conditionalMachine clock loss)
     {first condition : List Bool} {time : ℕ}
-    (hsize : first.length + condition.length ≤ time) :
+    (hsize : first.length + condition.length ≤ time)
+    (hpair : ordinaryMachine.timeBoundedKolmogorovComplexity
+      (pair first condition) time ≠ ⊤) :
     ordinaryMachine.timeBoundedKolmogorovComplexity
       condition (clock time) ≠ ⊤ := by
   intro htop
   have hchain := hsoi.chain_le first condition time hsize
-  have hpair := hsoi.pairFinite first condition time hsize
   obtain ⟨pairValue, hpairValue⟩ := WithTop.ne_top_iff_exists.mp hpair
   rw [htop, WithTop.add_top, ← hpairValue] at hchain
   change (⊤ : WithTop ℕ) ≤ ((pairValue + loss time : ℕ) : WithTop ℕ) at hchain
@@ -129,11 +131,10 @@ theorem TimeBoundedSymmetryOfInformation.weaken_loss_internal
     TimeBoundedSymmetryOfInformation ordinaryMachine conditionalMachine
       clock secondLoss := by
   constructor
-  · exact hsoi.pairFinite
-  · intro first condition time hsize
-    exact (hsoi.chain_le first condition time hsize).trans <|
-      withTopNat_add_le_add_internal le_rfl
-        (WithTop.coe_le_coe.mpr (hloss time))
+  intro first condition time hsize
+  exact (hsoi.chain_le first condition time hsize).trans <|
+    withTopNat_add_le_add_internal le_rfl
+      (WithTop.coe_le_coe.mpr (hloss time))
 
 theorem TimeBoundedSymmetryOfInformation.weaken_clock_internal
     {ordinaryTapes conditionalTapes : ℕ}
@@ -146,26 +147,25 @@ theorem TimeBoundedSymmetryOfInformation.weaken_clock_internal
     TimeBoundedSymmetryOfInformation ordinaryMachine conditionalMachine
       secondClock loss := by
   constructor
-  · exact hsoi.pairFinite
-  · intro first condition time hsize
-    calc
+  intro first condition time hsize
+  calc
+    conditionalMachine.randomAccessConditionalTimeBoundedKolmogorovComplexity
+            first condition (secondClock time) +
+        ordinaryMachine.timeBoundedKolmogorovComplexity
+          condition (secondClock time) ≤
       conditionalMachine.randomAccessConditionalTimeBoundedKolmogorovComplexity
-              first condition (secondClock time) +
+              first condition (firstClock time) +
           ordinaryMachine.timeBoundedKolmogorovComplexity
-            condition (secondClock time) ≤
-        conditionalMachine.randomAccessConditionalTimeBoundedKolmogorovComplexity
-                first condition (firstClock time) +
-            ordinaryMachine.timeBoundedKolmogorovComplexity
-              condition (firstClock time) := by
-                apply withTopNat_add_le_add_internal
-                · exact
-                    OracleTM.randomAccessConditionalTimeBoundedKolmogorovComplexity_mono_internal
-                      conditionalMachine first condition (hclock time)
-                · exact TM.timeBoundedKolmogorovComplexity_mono_internal
-                    ordinaryMachine condition (hclock time)
-      _ ≤ ordinaryMachine.timeBoundedKolmogorovComplexity
-              (pair first condition) time + (loss time : WithTop ℕ) :=
-        hsoi.chain_le first condition time hsize
+            condition (firstClock time) := by
+              apply withTopNat_add_le_add_internal
+              · exact
+                  OracleTM.randomAccessConditionalTimeBoundedKolmogorovComplexity_mono_internal
+                    conditionalMachine first condition (hclock time)
+              · exact TM.timeBoundedKolmogorovComplexity_mono_internal
+                  ordinaryMachine condition (hclock time)
+    _ ≤ ordinaryMachine.timeBoundedKolmogorovComplexity
+            (pair first condition) time + (loss time : WithTop ℕ) :=
+      hsoi.chain_le first condition time hsize
 
 theorem TimeBoundedSymmetryOfInformation.conditional_le_of_pair_upper_internal
     {ordinaryTapes conditionalTapes alternativeTapes : ℕ}
@@ -194,7 +194,16 @@ theorem TimeBoundedSymmetryOfInformation.conditional_le_of_pair_upper_internal
           ordinaryMachine.computationalDepthBetween
             condition conditionTime (clock time) +
         (upperLoss : WithTop ℕ) + (loss time : WithTop ℕ) := by
-  have hcondition := hsoi.condition_ne_top_internal hsize
+  by_cases hcondition : ordinaryMachine.timeBoundedKolmogorovComplexity
+      condition (clock time) = ⊤
+  · -- The later-clock condition term is infinite, so the depth term, and with it
+    -- the whole right-hand side, is `⊤`.
+    have hdepthTop : ordinaryMachine.computationalDepthBetween
+        condition conditionTime (clock time) = ⊤ := by
+      rw [TM.computationalDepthBetween, hcondition]
+      exact descriptionDifference_top_right_internal _
+    rw [hdepthTop, WithTop.add_top, WithTop.top_add, WithTop.top_add]
+    exact le_top
   have hdepth := TM.computationalDepthBetween_add_later_internal
     ordinaryMachine condition hclock
   have htotal :

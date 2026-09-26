@@ -22,7 +22,10 @@ language is in `P`, NP-hardness of the corresponding multiplicative gap forces
 
 Every remaining research obligation stays explicit in the theorem statement;
 in particular, this result does not assert the SoI hypothesis, a concrete
-universal evaluator, estimator efficiency, or multiplicative-gap hardness.
+universal evaluator, estimator efficiency, or multiplicative-gap hardness. The
+SoI hypothesis is satisfiable on its own (it holds trivially for a machine that
+describes nothing), so the theorems here are not vacuous on that account; the
+remaining hypotheses are what constrain the machines.
 
 The estimator is required to be correct only on the plan's paired and
 condition-only queries, whose clocks dominate their output lengths. Correctness
@@ -199,9 +202,9 @@ theorem P_eq_NP_of_multiplicative_hard_of_SoI_of_logarithmic_solver
         hfactor hhard
 
 /-- Assuming `P ≠ NP`, the simultaneous SoI, estimator-efficiency, compiler,
-and multiplicative-hardness hypotheses are inconsistent. This is the precise
-contrapositive needed before a future `DistNP ⊆ AvgP → SoI` theorem can rule
-out Heuristica. -/
+and multiplicative-hardness hypotheses are inconsistent. This is the
+contrapositive form a future `DistNP ⊆ AvgP → SoI` theorem (for machines also
+meeting the other hypotheses) would combine with to rule out Heuristica. -/
 theorem not_timeBoundedSymmetryOfInformation_of_P_ne_NP
     {ordinaryTapes conditionalTapes : ℕ}
     {clock : ℕ → ℕ} (additive compilerLoss : ℕ)

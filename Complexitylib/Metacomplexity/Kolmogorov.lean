@@ -38,7 +38,7 @@ complexity value is at most `t`.
 - `TM.computationalDepthBetween_add` -- exact three-clock depth telescoping
 - `timeBoundedKolmogorovComplexity_pair_le_of_composition` -- finite upper chain rule
 - `timeBoundedKolmogorovComplexity_pair_le_add_of_conditional_composition` -- additive chain
-- `TimeBoundedSymmetryOfInformation` -- explicit non-vacuous lower-chain hypothesis
+- `TimeBoundedSymmetryOfInformation` -- explicit machine-relative lower-chain hypothesis
 - `TimeBoundedSymmetryOfInformation.conditional_le_of_pair_upper` -- depth-loss bridge
 - `TimeBoundedSymmetryOfInformation.conditional_le_of_composition` -- evaluator bridge
 - `TM.Simulates.plainKolmogorovComplexity_le_add` -- additive invariance direction
@@ -169,7 +169,9 @@ theorem Simulates.plainKolmogorovComplexity_le_add
 
 /-- A polynomial timed simulation transfers a bounded description of length
 `bound` into one of length `bound + constant` under an explicit polynomially
-larger clock. The returned coefficients are those supplied by the clock policy. -/
+larger clock. The coefficient and exponent are uniform over all outputs, source
+clocks and bounds. (The proof takes them from the clock policy `hclock`, but
+the statement asserts only their existence.) -/
 theorem PolynomialTimeOverhead.kolmogorov_transfer
     {simulator : TM simulatorTapes} {source : TM sourceTapes}
     {compile : List Bool → List Bool} {constant : ℕ} {clock : TimeOverhead}

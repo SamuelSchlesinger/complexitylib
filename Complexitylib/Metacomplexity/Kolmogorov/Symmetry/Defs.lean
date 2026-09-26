@@ -19,11 +19,17 @@ form
 `C_cond^{p(t)}(x | y) + C^{p(t)}(y) <= C^t(pair x y) + log p(t)`.
 
 This layer makes the ordinary machine, random-access conditional machine,
-canonical pair codec, transformed clock, and loss function explicit. Because
-the machines are arbitrary rather than implicitly universal, the fixed-clock
-hypothesis also requires the joint bounded complexity to be finite. This
-prevents an incapable joint machine from satisfying the inequality vacuously
-through `top`.
+canonical pair codec, transformed clock, and loss function explicit.
+
+The hypothesis is only the inequality. Where `C^t(pair x y) = ⊤` (in particular
+whenever `t` is too small for the machine to print `pair x y`) it holds
+trivially, and for a machine that describes nothing it holds everywhere; the
+machines must be constrained separately (by universality or by the other
+hypotheses of a theorem) for it to carry content. An earlier version also
+demanded `C^t(pair x y) ≠ ⊤` whenever `|x| + |y| ≤ t`; that requirement can
+never hold, since `|pair x y| = 2|x| + 2 + |y|` exceeds the number of output
+cells a run of `|x| + |y|` steps can write, so it was removed. Finiteness of
+the joint complexity is now a hypothesis of the individual lemmas that need it.
 -/
 
 
@@ -41,18 +47,17 @@ structure IsAdmissibleKolmogorovClock (clock : ℕ → ℕ) : Prop where
     clock time ≤ coefficient * (time + 1) ^ exponent
 
 /-- Machine-relative time-bounded symmetry of information for a fixed clock
-transform and loss. The first conjunct is a non-vacuity condition needed when
-the ordinary machine is not yet known to be universal. -/
+transform and loss: for every `x`, `y` and `t ≥ |x| + |y|`,
+`C_N^{κ(t)}(x | y) + C_M^{κ(t)}(y) ≤ C_M^t(pair x y) + λ(t)`.
+
+It is only the inequality. It holds trivially wherever the right-hand side is
+`⊤`, so it constrains nothing for a machine `M` that describes nothing; theorems
+assuming it must restrict the machines by other hypotheses. -/
 structure TimeBoundedSymmetryOfInformation
     {ordinaryTapes conditionalTapes : ℕ}
     (ordinaryMachine : TM ordinaryTapes)
     (conditionalMachine : OracleTM conditionalTapes)
     (clock loss : ℕ → ℕ) : Prop where
-  /-- Every admissible paired instance has a bounded description. -/
-  pairFinite : ∀ first condition time,
-    first.length + condition.length ≤ time →
-    ordinaryMachine.timeBoundedKolmogorovComplexity
-      (pair first condition) time ≠ ⊤
   /-- The lower-chain inequality at the transformed clock. -/
   chain_le : ∀ first condition time,
     first.length + condition.length ≤ time →

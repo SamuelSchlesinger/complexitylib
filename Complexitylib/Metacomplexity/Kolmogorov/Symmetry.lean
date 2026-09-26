@@ -11,10 +11,13 @@ public import Complexitylib.Metacomplexity.Kolmogorov.Symmetry.Internal
 /-!
 # Time-bounded symmetry of information
 
-This module exposes a non-vacuous machine-relative version of Hirahara's SoI
-hypothesis. The lower-chain inequality is separate from the unconditional upper
-chain rule: SoI is a substantive hypothesis, while upper composition follows
-from an evaluator contract.
+This module exposes a machine-relative version of Hirahara's SoI hypothesis.
+The lower-chain inequality is separate from the unconditional upper chain rule:
+SoI is a hypothesis, while upper composition follows from an evaluator
+contract. SoI is satisfiable (it holds trivially wherever the joint complexity
+is `⊤`), so it only has content together with hypotheses that make the
+machines capable; lemmas that need a finite joint complexity assume it
+explicitly.
 
 The polynomial package quantifies an identity-dominating, polynomially bounded
 clock and retains an explicit additive constant next to its base-two logarithmic
@@ -32,8 +35,8 @@ theorem isAdmissibleKolmogorovClock_id :
     IsAdmissibleKolmogorovClock id :=
   isAdmissibleKolmogorovClock_id_internal
 
-/-- Non-vacuous SoI forces the transformed conditional description to exist on
-every admissible pair. -/
+/-- On an admissible pair whose joint description is finite, SoI forces the
+transformed conditional description to exist. -/
 theorem TimeBoundedSymmetryOfInformation.conditional_ne_top
     {ordinaryTapes conditionalTapes : ℕ}
     {ordinaryMachine : TM ordinaryTapes}
@@ -42,13 +45,15 @@ theorem TimeBoundedSymmetryOfInformation.conditional_ne_top
     (hsoi : TimeBoundedSymmetryOfInformation ordinaryMachine
       conditionalMachine clock loss)
     {first condition : List Bool} {time : ℕ}
-    (hsize : first.length + condition.length ≤ time) :
+    (hsize : first.length + condition.length ≤ time)
+    (hpair : ordinaryMachine.timeBoundedKolmogorovComplexity
+      (pair first condition) time ≠ ⊤) :
     conditionalMachine.randomAccessConditionalTimeBoundedKolmogorovComplexity
       first condition (clock time) ≠ ⊤ :=
-  hsoi.conditional_ne_top_internal hsize
+  hsoi.conditional_ne_top_internal hsize hpair
 
-/-- Non-vacuous SoI also forces the transformed ordinary description of the
-condition to exist. -/
+/-- On an admissible pair whose joint description is finite, SoI also forces
+the transformed ordinary description of the condition to exist. -/
 theorem TimeBoundedSymmetryOfInformation.condition_ne_top
     {ordinaryTapes conditionalTapes : ℕ}
     {ordinaryMachine : TM ordinaryTapes}
@@ -57,10 +62,12 @@ theorem TimeBoundedSymmetryOfInformation.condition_ne_top
     (hsoi : TimeBoundedSymmetryOfInformation ordinaryMachine
       conditionalMachine clock loss)
     {first condition : List Bool} {time : ℕ}
-    (hsize : first.length + condition.length ≤ time) :
+    (hsize : first.length + condition.length ≤ time)
+    (hpair : ordinaryMachine.timeBoundedKolmogorovComplexity
+      (pair first condition) time ≠ ⊤) :
     ordinaryMachine.timeBoundedKolmogorovComplexity
       condition (clock time) ≠ ⊤ :=
-  hsoi.condition_ne_top_internal hsize
+  hsoi.condition_ne_top_internal hsize hpair
 
 /-- Increasing the permitted loss preserves a fixed-clock SoI theorem. -/
 theorem TimeBoundedSymmetryOfInformation.weaken_loss
