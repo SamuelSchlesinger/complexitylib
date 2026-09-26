@@ -21,6 +21,7 @@ public import Complexitylib.DescriptiveComplexity.Examples
 public import Complexitylib.DescriptiveComplexity.SecondOrder.Reduction
 public import Complexitylib.DescriptiveComplexity.SecondOrder.Definable
 public import Complexitylib.DescriptiveComplexity.Interpretation
+public import Complexitylib.DescriptiveComplexity.Interpretation.Pullback
 public import Complexitylib.DescriptiveComplexity.Problem
 public import Complexitylib.DescriptiveComplexity.Encoding.Positions
 public import Complexitylib.DescriptiveComplexity.Encoding.Decoding
