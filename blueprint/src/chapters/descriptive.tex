@@ -645,6 +645,28 @@ existing logics rather than a restriction imposed on them.
   queries is already formalized.
 \end{proof}
 
+\begin{theorem}[Circuit realization of an unbounded formula]
+  \label{thm:desc-formula-circuit}
+  \lean{Complexity.AC0Formula.exists_circuit,
+    Complexity.Circuit.depth_parallel,
+    Complexity.Circuit.exists_parallelFamily_depth}
+  \leanok
+  \uses{def:lowerbounds-ac0-formula, def:circuit, def:circuits-bases}
+  For $N>0$, every unbounded formula $F$ on $N$ inputs has an equivalent
+  single-output circuit over the unbounded AND/OR basis. Its size is exactly
+  $\operatorname{size}(F)$ and its depth is at most
+  $\operatorname{depth}(F)+1$. The statement includes constant leaves, signed
+  literals, and empty connectives.
+\end{theorem}
+\begin{proof}
+  \leanok
+  Realize each constant or literal by one output gate. Induct on formula size.
+  For a nonempty connective, pack the child circuits in parallel, whose size
+  is the sum of child sizes and whose depth is their maximum, then compose with
+  one connective gate. Empty conjunctions and disjunctions use nullary AND and
+  OR gates. The extra depth layer comes from counting leaf output gates.
+\end{proof}
+
 \begin{theorem}[$\cc{FO} \subseteq \cc{AC^0}$, nonuniform]
   \label{thm:desc-fo-ac0}
   \uses{def:desc-query-language, def:desc-fo-semantics, def:NC-AC, def:bitstring}

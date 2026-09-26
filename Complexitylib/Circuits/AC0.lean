@@ -7,6 +7,8 @@ Authors: Samuel Schlesinger
 module
 public import Complexitylib.Circuits.AC0.Defs
 public import Complexitylib.Circuits.AC0.NormalForm
+public import Complexitylib.Circuits.AC0.NormalForm.Connectives
+public import Complexitylib.Circuits.AC0.Compilation
 public import Complexitylib.Circuits.AC0.Normalization
 public import Complexitylib.Circuits.AC0.Restriction
 public import Complexitylib.Circuits.AC0.Switching
@@ -30,6 +32,8 @@ unfolding of a selected circuit output to an equivalent formula without
 increasing depth. Duplicate signed incidences are canonicalized before
 unfolding, yielding an explicit polynomial tree-size bound at constant circuit
 depth.
+Conversely, every unbounded formula on a positive number of inputs has a circuit
+realization with exactly the same size and at most one extra depth layer.
 
 The switching surface includes both an elementary ambient-arity encoding and
 a width-sensitive finite Håstad encoding for CNFs and DNFs. De Morgan duality,
