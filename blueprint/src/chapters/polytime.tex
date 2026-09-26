@@ -490,41 +490,95 @@ these facts are stated in the chapter on encodings
   bound on the values the states encode, when $F$ computes a map on them.
 \end{proof}
 
-\begin{lemma}[Range concatenation and streaming folds in $\cc{FP}$]
+\begin{lemma}[Loops over a range in $\cc{FP}$]
   \label{lem:polytime-fp-combinators}
-  \uses{def:FP}
-  The following combinators preserve $\cc{FP}$.
+  \lean{Complexity.catRange_mem_FP, Complexity.flatMap_range_mem_FP,
+    Complexity.listEncFn_mem_FP, Complexity.listEncFn_eq_bitstringEncode,
+    Complexity.countOver_mem_FP, Complexity.findFirst_mem_FP,
+    Complexity.length_findFirst_eq, Complexity.maxFn_mem_FP, Complexity.maxFn_eq,
+    Complexity.bitwise_mem_FP}
+  \leanok
+  \uses{def:FP, def:pair, def:encodings-data}
+  Let $f \in \cc{FP}$, write $1^i$ for the string of $i$ ones, and write
+  $f_i(z) = f(\langle z, 1^i \rangle)$.
   \begin{enumerate}
-    \item Bounded concatenation over a range: if
-      $(z, i) \mapsto f(z, i)$ is in $\cc{FP}$ (on paired inputs, with $i$ in
-      unary) and $m \in \cc{FP}$, then
-      $z \mapsto f(z, 0) \, f(z, 1) \cdots f(z, |m(z)| - 1)$ is in $\cc{FP}$.
-    \item Streaming finite-state fold: for a finite state set $Q$, a transition
-      $\delta \colon Q \times \{0,1\} \to Q$, an initial state, and an output
-      map $o \colon Q \times \{0,1\} \to \{0,1\}^*$, the transducer that scans
-      $z$ from left to right and emits $o(q_i, z_i)$ at each position is in
-      $\cc{FP}$; more generally the state may be a polynomially bounded string
-      updated by an $\cc{FP}$ step.
+    \item Concatenation over a range: the map
+      $\langle u, z \rangle \mapsto f_0(z) \, f_1(z) \cdots f_{|u| - 1}(z)$
+      is in $\cc{FP}$. Hence for every $m \in \cc{FP}$ the map
+      $z \mapsto f_0(z) \, f_1(z) \cdots f_{|m(z)| - 1}(z)$ is in $\cc{FP}$.
+    \item List encoding: the same concatenation between a leading $0$ and a
+      trailing $1$ is in $\cc{FP}$. If $f_i(z)$ is the serialization of the
+      $i$-th entry of a list $\ell$ with $|\ell| = |u|$, it is the
+      serialization of $\ell$.
+    \item Counting: the map sending $\langle 1^n, z \rangle$ to $1^s$, where
+      $s = \sum_{i < n} |f_i(z)|$, is in $\cc{FP}$.
+    \item Search: the map sending $\langle 1^n, z \rangle$ to $1^c$ is in
+      $\cc{FP}$, where, whenever some $f_i(z)$ with $i < n$ is nonempty, $c$
+      is the least such $i$.
+    \item Maximum: the map sending $\langle 1^n, z \rangle$ to $1^M$, where
+      $M = \max_{i < n} |f_i(z)|$ (and $M = 0$ when $n = 0$), is in
+      $\cc{FP}$.
+    \item Bitwise description: if $x \mapsto 1^{\ell(x)}$ is in $\cc{FP}$ and
+      $f_i(x)$ is the single bit $b(x, i)$ for all $x$ and $i$, then
+      $x \mapsto b(x, 0) \, b(x, 1) \cdots b(x, \ell(x) - 1)$ is in $\cc{FP}$.
   \end{enumerate}
 \end{lemma}
 \begin{proof}
+  \leanok
+  \uses{lem:polytime-iterate}
+  The concatenation is a loop by Lemma~\ref{lem:polytime-iterate}, whose state
+  holds the output so far, the index in unary, and $z$. After $k \le |u|$
+  rounds the state holds $k$ outputs of $f$. Each is polynomially long in
+  $|\langle u, z \rangle|$, because an $\cc{FP}$ function has polynomially long
+  outputs, and $k \le |\langle u, z \rangle|$, so the states are polynomially
+  bounded and no bound has to be supplied. A range given by $m$ is the first
+  map applied to $\langle m(z), z \rangle$. The other items are corollaries. The
+  list encoder adds two constant bits. A count is the length of a
+  concatenation. The search counts the $j < n$ such that $f_i(z)$ is empty for
+  every $i \le j$. The maximum is at most the total length $s$, so it is the
+  number of $j < s$ such that some $|f_i(z)|$ exceeds $j$, which is a count of
+  counts. A bitwise description is a concatenation of one-bit outputs.
+
+  In Lean, in \texttt{Classes/P/Range.lean}, with $f$ reading
+  $\langle z, 1^i \rangle$ as above: \texttt{Complexity.catRange\_mem\_FP} and
+  \texttt{Complexity.flatMap\_range\_mem\_FP} are item 1,
+  \texttt{Complexity.listEncFn\_mem\_FP} and
+  \texttt{Complexity.listEncFn\_eq\_bitstringEncode} item 2,
+  \texttt{Complexity.countOver\_mem\_FP} with
+  \texttt{Complexity.length\_countOver} and
+  \texttt{Complexity.countOver\_eq\_replicate} item 3,
+  \texttt{Complexity.findFirst\_mem\_FP} with
+  \texttt{Complexity.length\_findFirst\_eq} and
+  \texttt{Complexity.findFirst\_eq\_replicate} item 4,
+  \texttt{Complexity.maxFn\_mem\_FP} with \texttt{Complexity.maxFn\_eq} item
+  5, and \texttt{Complexity.bitwise\_mem\_FP} item 6. Concatenations over index
+  ranges describe the Cook--Levin emitter, whose clause families are indexed
+  that way.
+\end{proof}
+
+\begin{lemma}[Streaming folds in $\cc{FP}$]
+  \label{lem:polytime-fp-streaming}
+  \uses{def:FP}
+  For a finite state set $Q$, a transition
+  $\delta \colon Q \times \{0,1\} \to Q$, an initial state, and an output map
+  $o \colon Q \times \{0,1\} \to \{0,1\}^*$, the transducer that scans $z$
+  from left to right and emits $o(q_i, z_i)$ at each position is in $\cc{FP}$.
+  More generally, the state may be a polynomially bounded string updated by an
+  $\cc{FP}$ step.
+\end{lemma}
+\begin{proof}
   \uses{thm:cobham, lem:polytime-iterate}
-  Both are instances of Lemma~\ref{lem:polytime-iterate}, with the state
-  carrying the output produced so far, or can be written directly by limited
-  recursion on notation. Special cases of the first item are already proved in
-  the proof-internal modules under \texttt{Classes/PCP/Internal}:
-  \texttt{Complexity.bitwise\_mem\_FP} covers the case in which every
-  $f(z, i)$ is a single bit and the count is given in unary by an $\cc{FP}$
-  function, and \texttt{Complexity.listEncFn\_mem\_FP} maps an input
-  $\langle u, z \rangle$ to $f(z, 0) \cdots f(z, |u| - 1)$ between two
-  bracket bits, under an explicit polynomial bound on the length of the
-  accumulated state; in both, $f(z, i)$ is an $\cc{FP}$ function applied to
-  $\langle z, 1^i \rangle$. The general statement above is not yet
-  formalized. These two combinators describe the Cook--Levin
-  emitter (clause families are concatenations over index ranges), the Tseitin
-  transducer (one streaming pass over a CNF encoding), and the $\mathrm{SAT}$
-  verifier (a streaming evaluation); see the open directions at the end of this
-  chapter.
+  An instance of Lemma~\ref{lem:polytime-iterate}, with the state carrying the
+  output produced so far, or limited recursion on notation directly. This
+  statement is not yet formalized. What is formalized is a fold in the other
+  direction, \texttt{Complexity.recFold\_mem\_FP\_of\_bound} in
+  \texttt{Classes/P/Iterate.lean}. It reads the input from its last bit to its
+  first and updates a polynomially short state by one of two $\cc{FP}$ steps.
+  The left-to-right scan, and the finite-state transducer with its output map,
+  are not yet derived from it. Streaming passes of this kind describe the
+  Tseitin transducer (one pass over a CNF encoding) and the $\mathrm{SAT}$
+  verifier (a streaming evaluation); see the open directions at the end of
+  this chapter.
 \end{proof}
 
 \section{Witnesses, FNP, and TFNP}
@@ -973,10 +1027,10 @@ these facts are stated in the chapter on encodings
   per gate), so $\mathrm{FSAT}$ is $\cc{NP}$-complete.
 \end{theorem}
 \begin{proof}
-  \uses{thm:cook-levin, lem:polytime-np-hard-transfer, lem:polytime-guess-verify, lem:polytime-fp-combinators}
+  \uses{thm:cook-levin, lem:polytime-np-hard-transfer, lem:polytime-guess-verify, lem:polytime-fp-streaming}
   Membership by guess and verify with a formula evaluator; both reductions are
   streaming transducers, most easily written through
-  Lemma~\ref{lem:polytime-fp-combinators}.
+  Lemma~\ref{lem:polytime-fp-streaming}.
 \end{proof}
 
 \begin{definition}[Graph problems]
@@ -1026,7 +1080,8 @@ Two refactors do not fit as nodes.
     Theorem~\ref{thm:polytime-sat-np} take roughly 10.5 thousand lines, the
     Cook--Levin emitter and its assembly about 6.8 thousand, and the Tseitin
     transducer of Lemma~\ref{lem:polytime-tseitin} about 5 thousand. With the
-    combinators of Lemma~\ref{lem:polytime-fp-combinators}, each should become
+    loops of Lemma~\ref{lem:polytime-fp-combinators} and the streaming folds of
+    Lemma~\ref{lem:polytime-fp-streaming}, each should become
     a short Cobham program plus a correctness proof about ordinary Lean
     functions, as already done for the Sipser--Lautemann matrix verdict.
   \item \textbf{Surface placement.} Lemma~\ref{lem:polytime-guess-verify}

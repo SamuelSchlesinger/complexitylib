@@ -15,6 +15,7 @@ public import Complexitylib.Classes.P.FinsetDomain
 public import Complexitylib.Classes.P.Cobham
 public import Complexitylib.Classes.P.Pairing
 public import Complexitylib.Classes.P.Iterate
+public import Complexitylib.Classes.P.Range
 import Complexitylib.Models.TuringMachine.Subroutines.CopyOutput
 
 /-!
@@ -44,6 +45,9 @@ This file aggregates the definitions and theorems for P, FP, and PSPACE.
   `iterate_mem_FP_along` — iterating a polynomial-time step is polynomial-time
   while the states stay polynomially short
 - `recFold_mem_FP_of_bound` — so is a bitwise fold with polynomially short states
+- `catRange_mem_FP`, `flatMap_range_mem_FP` — concatenating a polynomial-time
+  rule's outputs over a unary range is polynomial-time, with corollaries for
+  list encodings, counts, bounded search, maxima and bitwise descriptions
 -/
 
 

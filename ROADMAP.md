@@ -45,7 +45,7 @@ Check these before constructing a Turing machine.
 
 | Goal | Lever | Where |
 | --- | --- | --- |
-| `f ∈ FP` | Cobham's algebra and the closure rules built on it; `iterate_mem_FP` and its variants for polynomially many iterations of a step, `recFold_mem_FP_of_bound` for a bitwise fold with short states | `Classes/P/Cobham.lean`, `Classes/P/Iterate.lean`, `Classes/Containments/Internal/FPBridge.lean` (re-exported with `polyRuler`, `emptyFlag`, `dropOne` by `Classes/P/Bridge.lean`), `Classes/P/Cobham/Internal.lean` |
+| `f ∈ FP` | Cobham's algebra and the closure rules built on it; `iterate_mem_FP` and its variants for polynomially many iterations of a step, `recFold_mem_FP_of_bound` for a bitwise fold with short states; `catRange_mem_FP` for concatenating a rule's outputs over a unary range, with corollaries for list encodings, counts, bounded search, maxima and bitwise descriptions | `Classes/P/Cobham.lean`, `Classes/P/Iterate.lean`, `Classes/P/Range.lean`, `Classes/Containments/Internal/FPBridge.lean` (re-exported with `polyRuler`, `emptyFlag`, `dropOne` by `Classes/P/Bridge.lean`), `Classes/P/Cobham/Internal.lean` |
 | `L ∈ P` | `mem_P_of_decisionFn`, `mem_P_preimage`, `P_compl`, `P_inter`, `P_union` | `Classes/P/DecisionFn.lean`, `Classes/P/Preimage.lean`, `Classes/Containments.lean` |
 | `L ∈ NP` | `NP.mem_NP_of_FNP`, `mem_NP_of_poly_witness` (polynomial-time verifier, bounded witnesses) | `Classes/NP/WitnessConstruction.lean`, `Classes/NP/Internal/GuessVerify.lean` |
 | `L ∈ PSPACE` | `mem_PSPACE_of_iterate` (exponentially many iterations of an `FP` step on a polynomial-size state), `PSPACE_compl` | `Classes/Containments/Internal/SpaceIterate.lean`, `Classes/Containments/Internal/ComplementSpace.lean` |
@@ -79,9 +79,9 @@ In order. Each item says why it matters and roughly how large it is.
    machines), the Cook–Levin emitter (about 6.7k), the Tseitin transducer
    (about 6k), `PP ⊆ PSPACE` and `PH ⊆ PSPACE` (about 10k, bespoke machines),
    and the concrete languages can each be re-proved in a few hundred lines
-   with the levers above plus two new `FP` combinators: bounded concatenation
-   over a range, and a streaming finite-state fold. Keep public statements;
-   replace proofs.
+   with the levers above, including concatenation over a range
+   (`catRange_mem_FP`), plus one new `FP` combinator, a streaming finite-state
+   fold. Keep public statements; replace proofs.
 3. **One polynomial-space game-tree theorem.** Evaluating a
    polynomial-depth, exponentially branching game tree is in `PSPACE`.
    Savitch, `IP ⊆ PSPACE`, `PH ⊆ PSPACE`, `PP ⊆ PSPACE`, and `TQBF ∈ PSPACE`
