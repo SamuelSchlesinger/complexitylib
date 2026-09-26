@@ -33,6 +33,7 @@ public import Complexitylib.DescriptiveComplexity.Encoding.Decoding
 public import Complexitylib.DescriptiveComplexity.ModelChecking.Encoded
 public import Complexitylib.DescriptiveComplexity.Circuit
 public import Complexitylib.DescriptiveComplexity.Circuit.Encoding
+public import Complexitylib.DescriptiveComplexity.Circuit.Validity
 
 /-!
 # Descriptive complexity
