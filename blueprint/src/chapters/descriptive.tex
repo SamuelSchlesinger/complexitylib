@@ -563,6 +563,99 @@ existing logics rather than a restriction imposed on them.
   monotone in $n$, while the unary prefix is strictly increasing.
 \end{proof}
 
+\begin{definition}[Arithmetic encoding addresses]
+  \label{def:desc-arithmetic-addresses}
+
+  \uses{def:desc-encoding-positions}
+  A tuple has the little-endian base-$n$ index
+  $a_0+n a_1+\cdots+n^{k-1}a_{k-1}$. The address of a relation-table entry adds
+  $n+1$ for the header and the lengths of all earlier relation tables. A
+  constant-table address adds the header, all relation-table lengths, $cn$ for
+  the preceding $c$ constant blocks, and the chosen element's value.
+  Fixed-width tuple decoding repeatedly takes remainder and quotient by $n$,
+  recovering coordinates from an index in the same little-endian order.
+\end{definition}
+
+\begin{theorem}[Arithmetic addresses match the encoder]
+  \label{thm:desc-arithmetic-addresses}
+
+  \uses{def:desc-arithmetic-addresses, thm:desc-encoding-positions}
+  For coordinates below $n$, a $k$-tuple's index is below $n^k$ and selects that
+  tuple in the encoder's enumeration. The arithmetic relation and constant
+  addresses equal their existing site positions exactly. Reading these
+  addresses in a structure encoding recovers the relation bit or the indicated
+  one-hot equality. The tuple index also recovers a bit from a standalone
+  relation truth table. This includes nullary relations and empty tuples.
+  For $n>0$, every decoded coordinate is below $n$, re-encoding recovers every
+  index below $n^k$, and scanning numeric indices reproduces the tuple enumeration.
+\end{theorem}
+\begin{proof}
+
+  Prove that indexing a flattened list uses the total length of preceding
+  blocks plus the index inside the chosen block. Induct on tuple length for
+  the base-$n$ index, then apply the flattened-list rule to the relation and
+  constant blocks. The site enumeration has no duplicates, so its inverse
+  index is the same arithmetic position.
+\end{proof}
+
+\begin{theorem}[Polynomial-time access to encoded structures]
+  \label{thm:desc-encoding-access-polytime}
+
+  \uses{thm:desc-arithmetic-addresses, lem:polytime-string-access,
+    lem:polytime-unary-closure, def:desc-so-certificate-encoding}
+  For a fixed vocabulary, relation symbol, and tuple arity, polynomial-time
+  unary cardinality and coordinates give polynomial-time unary tuple indices,
+  relation addresses, and constant addresses. Each fixed coordinate extracted
+  from a polynomial-time unary tuple index is also polynomial-time. The full structure length and
+  any fixed relation context's certificate length are polynomial-time unary
+  numbers. Parsing cardinality from the leading true run and testing the
+  expected encoded length are polynomial-time. Relation and constant bit
+  tests at these addresses are polynomial-time predicates on any supplied
+  $\cc{FP}$ string, with false at missing positions.
+\end{theorem}
+\begin{proof}
+
+  Each address and length is a fixed sum of products and fixed powers.
+  Apply the unary arithmetic closure rules, then polynomial-time bit access.
+  The prefix parser is the leading-run construction of
+  Lemma~\ref{lem:polytime-string-access}.
+\end{proof}
+
+\begin{definition}[Explicit structure-encoding validity]
+  \label{def:desc-valid-encoding}
+
+  \uses{def:desc-arithmetic-addresses}
+  At cardinality $n$, require $n\ge2$, total length $\ell_V(n)$, header bits
+  $1^n0$, and exactly one true bit in every constant block. Express the latter
+  as: for each constant there is an $a<n$ such that every $b<n$ has block bit
+  equal to the truth value of $a=b$. Relation-table bits are unrestricted.
+\end{definition}
+
+\begin{theorem}[Valid encodings form a language in P]
+  \label{thm:desc-valid-encodings-P}
+
+  \uses{def:desc-valid-encoding, thm:desc-encoding-access-polytime,
+    thm:desc-encoding-roundtrip, lem:polytime-unary-closure, def:P}
+  The validity conditions hold iff the string encodes a structure of the
+  specified size. Applying them at the cardinality parsed from the unary
+  prefix recognizes exactly the encoder's image. The conditions are
+  polynomial-time predicates, so
+  $\{\mathrm{enc}(\mathcal A):\mathcal A\text{ is a decidable }V\text{-structure}\}
+  \in\cc{P}$ for the library's deterministic machine class. Successful decoding
+  is likewise a polynomial-time predicate. No formula-evaluation time bound
+  is asserted by this theorem.
+\end{theorem}
+\begin{proof}
+
+  The forward direction constructs the relations by reading their table bits
+  and the constants from the unique marked values. The address equalities and
+  encoding reconstruction theorem recover the whole string. The converse uses
+  the encoder's header and table-read theorems. Header and one-hot checks are
+  bounded quantifiers over polynomial-time bit reads and arithmetic comparisons.
+  Combine them with the length and minimum-size tests, parse the cardinality,
+  and apply the polynomial-time decision-function theorem.
+\end{proof}
+
 \begin{definition}[Structure decoder]
   \label{def:desc-decoder}
   \lean{Complexity.DescriptiveComplexity.readStructCandidate,
@@ -633,6 +726,99 @@ existing logics rather than a restriction imposed on them.
   Induct on $\varphi$.
 \end{proof}
 
+\begin{definition}[Boolean relation environments and matrix evaluation]
+  \label{def:desc-matrix-model-checking}
+  \lean{Complexity.DescriptiveComplexity.DecREnv,
+    Complexity.DescriptiveComplexity.DecREnv.toREnv,
+    Complexity.DescriptiveComplexity.DecREnv.empty,
+    Complexity.DescriptiveComplexity.DecREnv.cons,
+    Complexity.DescriptiveComplexity.SOFormula.evalMatrixB,
+    Complexity.DescriptiveComplexity.SOFormula.decidableMatrixSat}
+  \leanok
+  \uses{def:desc-so-semantics, def:desc-existential-so, def:desc-model-checking}
+  A Boolean relation environment assigns a Boolean table of the prescribed
+  arity to every free relation variable. Interpret true bits as relation
+  membership. Given an FO-matrix certificate, evaluate vocabulary atoms in the
+  decidable structure, relation-variable atoms in these tables, and first-order
+  quantifiers over the finite universe. Second-order quantifiers are excluded
+  by the matrix certificate. Satisfaction with these inputs is decidable.
+\end{definition}
+
+\begin{theorem}[Matrix correctness and completeness of Boolean witnesses]
+  \label{thm:desc-matrix-model-checking}
+  \lean{Complexity.DescriptiveComplexity.DecREnv.toREnv_empty,
+    Complexity.DescriptiveComplexity.DecREnv.toREnv_cons,
+    Complexity.DescriptiveComplexity.DecREnv.toREnv_injective,
+    Complexity.DescriptiveComplexity.DecREnv.toREnv_surjective,
+    Complexity.DescriptiveComplexity.SOFormula.evalMatrixB_eq_sat,
+    Complexity.DescriptiveComplexity.SOFormula.evalMatrixB_ofFormula,
+    Complexity.DescriptiveComplexity.SOFormula.exists_evalMatrixB_iff,
+    Complexity.DescriptiveComplexity.SOFormula.forall_evalMatrixB_iff}
+  \leanok
+  \uses{def:desc-matrix-model-checking, thm:desc-model-checking, thm:desc-fo-in-so}
+  Boolean relation environments represent exactly the semantic environments,
+  and representation commutes with extension. The matrix evaluator returns
+  true iff the matrix is satisfied under the represented environment. On an
+  embedded FO formula it agrees exactly with the original FO evaluator.
+  Existential, or universal, quantification over semantic relation environments
+  is equivalent to quantification over Boolean tables tested by the evaluator.
+  These statements include empty contexts and nullary relation variables.
+  This theorem concerns semantic environments; the following certificate layers
+  supply their binary encodings. Theorem~\ref{thm:desc-so-verifier-polytime}
+  proves the machine polynomial-time bound on those encodings.
+\end{theorem}
+\begin{proof}
+  \leanok
+  Boolean values are determined by whether they equal true. Classically, the
+  characteristic function of each semantic relation gives its Boolean table.
+  Induct on the matrix for evaluation correctness, using finite enumeration for
+  first-order quantifiers. Represent every semantic environment by its Boolean
+  tables to transport existential and universal quantification. This is the
+  verification step of Immerman, Section~7.1, Proposition~7.6.
+\end{proof}
+
+\begin{definition}[Binary relation certificates]
+  \label{def:desc-so-certificate-encoding}
+
+  \uses{def:desc-matrix-model-checking, def:desc-encoding}
+  For a universe of size $n$ and relation arities $k_1,\ldots,k_m$, concatenate
+  the relation truth tables in context order, using the structure encoder's
+  tuple enumeration. The arities and $n$ are external parameters, so no header
+  is needed. The expected length is $\sum_j n^{k_j}$. Direct reading supplies
+  false for missing entries; the checked decoder accepts only the exact length.
+\end{definition}
+
+\begin{theorem}[Exact relation-certificate encoding]
+  \label{thm:desc-so-certificate-encoding}
+
+  \uses{def:desc-so-certificate-encoding}
+  Encoding bijects Boolean relation environments with strings of exactly
+  $\sum_j n^{k_j}$ bits. Both round trips hold, and rejection means precisely
+  a length mismatch. Extending the context prepends the new table; a unary
+  table lists its bits in vertex order. Nullary relations take one bit and the
+  empty context takes none. The exact length is a polynomial in $n$, monotone
+  in $n$.
+\end{theorem}
+\begin{proof}
+
+  Every table cell occurs in the site enumeration. Its length equals the
+  cardinality of the site type, so there are no duplicates. Reading at the
+  index of a cell and indexing a duplicate-free enumeration give the two
+  inverse laws. Sum the individual table lengths; each is $n^{k_j}$.
+\end{proof}
+
+\begin{definition}[Existential-SO binary certificate checking]
+  \label{def:desc-exist-so-certificate}
+
+  \uses{def:desc-existential-so, def:desc-so-certificate-encoding,
+    def:desc-matrix-model-checking, def:desc-decoder}
+  List the existential prefix's arities from outermost to innermost. Consume
+  one truth-table block at each relation quantifier, extending the Boolean
+  relation environment. At the FO matrix, require an empty remaining
+  certificate and run matrix evaluation. For an encoded input, first decode
+  the structure and reject if decoding fails. These are computable functions.
+\end{definition}
+
 \begin{definition}[Encoded sentence evaluator]
   \label{def:desc-encoded-model-checking}
   \lean{Complexity.DescriptiveComplexity.Sentence.evalEncoded}
@@ -661,6 +847,35 @@ existing logics rather than a restriction imposed on them.
   correctness of sentence evaluation.
 \end{proof}
 
+\begin{definition}[Arithmetic first-order evaluation]
+  \label{def:desc-arithmetic-model-checking}
+
+  \uses{def:desc-fo-syntax, def:desc-arithmetic-addresses}
+  Given a cardinality $n$, a bit string, and natural-number variable values,
+  evaluate terms and formulas directly by arithmetic table access. A constant
+  is the first marked position in its one-hot block, or $n$ if no position is
+  marked. First-order quantifiers range over $0,\ldots,n-1$. The functions are
+  total, including on malformed strings; semantic correctness requires a valid
+  structure encoding and variable values in its universe.
+\end{definition}
+
+\begin{theorem}[Arithmetic evaluation agrees with satisfaction]
+  \label{thm:desc-arithmetic-model-checking}
+
+  \uses{def:desc-arithmetic-model-checking, def:desc-fo-semantics,
+    thm:desc-arithmetic-addresses}
+  On $\mathrm{enc}(\mathcal{A})$, supplied with $\mathcal{A}$'s cardinality and
+  the numeric values of an environment, arithmetic term evaluation recovers the
+  semantic element's value. Arithmetic formula evaluation returns true exactly
+  when the formula is satisfied. The sentence case uses the empty environment.
+\end{theorem}
+\begin{proof}
+
+  One-hot lookup recovers each constant. Induct on the formula, using the exact
+  arithmetic read lemmas for relation atoms and the correspondence between
+  bounded naturals and elements of $\mathrm{Fin}(n)$ at quantifiers.
+\end{proof}
+
 \begin{theorem}[First-order queries are in polynomial time]
   \label{thm:desc-fo-in-P}
   \uses{def:desc-query-language, def:desc-fo-semantics, def:P}
@@ -674,6 +889,64 @@ existing logics rather than a restriction imposed on them.
   constant bits at computable offsets. The same recursion with one
   logarithmic-size counter per quantifier would give the stronger bound
   $\cc{FO} \subseteq \cc{L}$.
+\end{proof}
+
+\begin{definition}[Arithmetic second-order certificate verification]
+  \label{def:desc-so-verifier-code}
+
+  \uses{def:desc-arithmetic-model-checking, def:desc-exist-so-certificate}
+  Supply each free relation as its truth-table string. Matrix evaluation uses
+  arithmetic structure reads and tuple indices into these relation tables.
+  Each existential relation quantifier checks that at least $n^k$ bits remain,
+  takes the next $n^k$ bits as its new table, and recurses on the rest. At the
+  matrix, require that no certificate bits remain. All operations are total;
+  structure validity is checked separately.
+\end{definition}
+
+\begin{theorem}[Arithmetic and semantic certificate checkers agree]
+  \label{thm:desc-so-verifier-code}
+
+  \uses{def:desc-so-verifier-code, thm:desc-matrix-model-checking,
+    thm:desc-so-certificate-encoding, thm:desc-arithmetic-model-checking}
+  On an encoded structure and canonical encodings of free relation tables,
+  arithmetic matrix evaluation agrees with satisfaction and with the existing
+  Boolean matrix evaluator. Arithmetic prefix consumption gives exactly the
+  existing certificate checker's verdict, for every certificate, including
+  short or trailing data. The statements allow arbitrary free element and
+  relation environments.
+\end{theorem}
+\begin{proof}
+
+  Induct on the matrix, using arithmetic tuple lookup for relation-variable
+  atoms. Induct along the existential prefix for certificate checking. Singleton
+  relation decoding succeeds exactly when its block has the required length;
+  its round trip identifies that block with the decoded relation's truth table.
+\end{proof}
+
+\begin{theorem}[Existential-SO certificate checking is polynomial-time]
+  \label{thm:desc-so-verifier-polytime}
+
+  \uses{def:desc-so-verifier-code, thm:desc-encoding-access-polytime,
+    lem:polytime-string-access, lem:polytime-unary-closure, def:FP}
+  For a fixed matrix or existential-SO formula, arithmetic verification is a
+  polynomial-time predicate whenever the supplied strings are in $\cc{FP}$
+  and the cardinality and element values are polynomial-time unary numbers.
+  In particular, for every fixed existential-SO sentence $\varphi$, the function
+  \[
+    z\longmapsto[\operatorname{checkEncoded}_{\varphi}
+      (\operatorname{pairFst}(z),\operatorname{pairSnd}(z))]
+  \]
+  belongs to $\cc{FP}$. Its verdict includes structure validation and rejection
+  of incorrect certificate lengths. The formula is a fixed parameter.
+\end{theorem}
+\begin{proof}
+
+  \uses{thm:desc-so-verifier-code, thm:desc-valid-encodings-P}
+  Induct on the matrix using polynomial-time table reads, Boolean operations,
+  and bounded first-order quantifiers. Induct along the existential prefix using
+  polynomial-time length tests and slicing. Conjoin arithmetic verification with
+  structure validity at the parsed cardinality. Agreement with the original
+  checker transfers this machine bound to its existing verdict function.
 \end{proof}
 
 \section{First-order reductions}
