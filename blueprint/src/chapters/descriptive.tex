@@ -1581,17 +1581,113 @@ existing logics rather than a restriction imposed on them.
   quantifiers to the definable universe.
 \end{proof}
 
-\begin{theorem}[String-level reductions]
-  \label{thm:desc-string-reduction}
-  \uses{def:desc-fo-reduction, def:desc-query-language, def:reduction}
-  If $Q_1 \le_{\cc{FO}} Q_2$, then the language of $Q_1$ polynomial-time
-  many-one reduces to the language of $Q_2$.
+\begin{definition}[Encoded universe-preserving interpretation]
+  \label{def:desc-encoded-interpretation}
+  \lean{Complexity.DescriptiveComplexity.FOInterpretation.applyDec,
+    Complexity.DescriptiveComplexity.FOInterpretation.rawEncoding,
+    Complexity.DescriptiveComplexity.FOInterpretation.mapEncoding}
+  \leanok
+  \uses{def:desc-interpretation, def:desc-decoder, def:desc-formula-table-code}
+  Evaluate the defining relation formulas to obtain a decidable target structure
+  on the same universe, with constants copied from their designated source
+  constants. The binary map decodes, interprets, and re-encodes, sending every
+  malformed string to $[]$. A separate arithmetic generator writes the header,
+  all target relation truth tables, and the designated one-hot constant blocks
+  at a supplied cardinality, without validating the source string.
+\end{definition}
+
+\begin{theorem}[Encoded interpretation correctness and full output size]
+  \label{thm:desc-encoded-interpretation}
+  \lean{Complexity.DescriptiveComplexity.FOInterpretation.applyDec_toFinStruct,
+    Complexity.DescriptiveComplexity.FOInterpretation.rawEncoding_encodeStruct,
+    Complexity.DescriptiveComplexity.FOInterpretation.rawEncoding_length,
+    Complexity.DescriptiveComplexity.FOInterpretation.mapEncoding_encodeStruct,
+    Complexity.DescriptiveComplexity.FOInterpretation.mapEncoding_of_decode_eq_none,
+    Complexity.DescriptiveComplexity.FOInterpretation.mapEncoding_nil,
+    Complexity.DescriptiveComplexity.FOInterpretation.mapEncoding_length_encodeStruct,
+    Complexity.DescriptiveComplexity.FOInterpretation.mapEncoding_length_le,
+    Complexity.DescriptiveComplexity.FOInterpretation.mapEncoding_mem_queryLanguage_iff}
+  \leanok
+  \uses{def:desc-encoded-interpretation, thm:desc-formula-table-code,
+    thm:desc-encoding-roundtrip, thm:desc-encoding-positions}
+  Computable interpretation represents the original structure map exactly. Both
+  generators return $\mathrm{enc}(I(\mathcal A))$ on $\mathrm{enc}(\mathcal A)$.
+  The raw generator has length $\ell_W(n)$, including all target relation and
+  constant blocks. On arbitrary input $x$, the validated map's length is at most
+  $\ell_W(|x|)$; malformed input produces $[]$. For every target query $Q$,
+  \[
+    \operatorname{mapEncoding}_I(x)\in\operatorname{queryLanguage}(Q)
+    \iff x\in\operatorname{queryLanguage}(Q\circ I).
+  \]
 \end{theorem}
 \begin{proof}
-  \uses{thm:desc-encoding-roundtrip, thm:desc-model-checking, thm:desc-transport, prop:desc-encoding-length}
-  Decode the input. Compute each target truth table by model-checking the defining
-  formulas, and re-encode. Send malformed inputs to a fixed non-encoding, such as
-  the empty string: every encoding has length at least $n + 1 \ge 3$.
+  \leanok
+  Formula truth-table correctness identifies the relation blocks; arithmetic
+  constant reads recover the designated one-hot blocks. Sum their exact lengths
+  with the header. The unary prefix gives $n\le |x|$, and encoded length is
+  monotone. Split on decoding for language membership; the empty string is never
+  a valid structure encoding.
+\end{proof}
+
+\begin{theorem}[Encoded interpretations are polynomial-time]
+  \label{thm:desc-encoded-interpretation-polytime}
+  \lean{Complexity.DescriptiveComplexity.FOInterpretation.rawEncoding_mem_FP,
+    Complexity.DescriptiveComplexity.FOInterpretation.mapEncoding_mem_FP}
+  \leanok
+  \uses{def:desc-encoded-interpretation, thm:desc-formula-table-code,
+    thm:desc-encoding-access-polytime, thm:desc-valid-encodings-P, def:FP}
+  Every fixed universe-preserving FO interpretation has its encoded map in
+  $\cc{FP}$. More generally, its arithmetic generator is polynomial-time when
+  supplied a polynomial-time string and a polynomial-time unary cardinality.
+\end{theorem}
+\begin{proof}
+  \leanok
+  \uses{thm:desc-encoded-interpretation}
+  Generate each target relation table by the formula table theorem, and each
+  constant block by a bounded scan of source bits. Concatenate the fixed list
+  of blocks and the header. Parse the source cardinality and guard this
+  polynomial-time generator with encoding validity, returning $[]$ on failure.
+  Correctness identifies this function with the decoder-based map.
+\end{proof}
+
+\begin{theorem}[String-level reductions]
+  \label{thm:desc-string-reduction}
+  \lean{Complexity.DescriptiveComplexity.FOReduces.mapReducesPoly,
+    Complexity.DescriptiveComplexity.FOProjReduces.mapReducesPoly,
+    Complexity.DescriptiveComplexity.FOReduces.queryLanguage_mem_P,
+    Complexity.DescriptiveComplexity.FOReduces.queryLanguage_mem_NP}
+  \leanok
+  \uses{def:desc-fo-reduction, def:desc-query-language, def:reduction}
+  If $Q_1 \le_{\cc{FO}} Q_2$ under the existing universe-preserving API, then
+  the language of $Q_1$ polynomial-time many-one reduces to the language of $Q_2$.
+  The legacy quantifier-free restriction has the same consequence. Machine
+  $\cc{P}$ and $\cc{NP}$ membership therefore transport backward along these
+  structural reductions. The tagged tuple encoding bridge remains separate.
+\end{theorem}
+\begin{proof}
+  \leanok
+  \uses{thm:desc-encoded-interpretation, thm:desc-encoded-interpretation-polytime,
+    lem:polytime-reduction-transport}
+  Use the interpretation's encoded map as the reduction function. The structural
+  carrying equivalence and exact language pullback give correctness on every
+  string. Apply the existing machine-class closure theorems.
+\end{proof}
+
+\begin{corollary}[Structural criterion for machine NP-completeness]
+  \label{cor:desc-structural-np-complete}
+  \lean{Complexity.DescriptiveComplexity.ExistSODefinable.npComplete_of_foReduces}
+  \leanok
+  \uses{def:desc-exist-so-definable, def:desc-fo-reduction, def:np-complete}
+  Suppose $Q_2$ is existential-SO definable, $\operatorname{queryLanguage}(Q_1)$
+  is NP-hard, and $Q_1\le_{\cc{FO}}Q_2$ under the universe-preserving API.
+  Then $\operatorname{queryLanguage}(Q_2)$ is NP-complete for the existing
+  machine definitions. The source hardness is an explicit hypothesis.
+\end{corollary}
+\begin{proof}
+  \leanok
+  \uses{thm:desc-fagin-upper, thm:desc-string-reduction, lem:polytime-np-hard-transfer}
+  Fagin's upper direction gives target membership in NP. The encoded reduction
+  transports the supplied source hardness.
 \end{proof}
 
 \section{Capturing complexity classes}
