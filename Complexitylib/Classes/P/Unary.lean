@@ -154,6 +154,12 @@ theorem UnaryFn.mul (hf : UnaryFn f) (hg : UnaryFn g) : UnaryFn fun z => f z * g
   (UnaryFn.length (Cobham.mulLenFn_mem_FP hf hg)).of_eq fun z => by
     simp only [List.length_replicate]
 
+/-- Raising a polynomial-time number to a fixed natural exponent is polynomial-time. -/
+theorem UnaryFn.pow_const (hf : UnaryFn f) (k : Nat) : UnaryFn fun z => f z ^ k := by
+  induction k with
+  | zero => exact UnaryFn.const 1
+  | succ k ih => exact (ih.mul hf).of_eq fun z => (Nat.pow_succ (f z) k).symm
+
 /-- **Truncated subtraction** is polynomial-time. -/
 theorem UnaryFn.sub (hf : UnaryFn f) (hg : UnaryFn g) : UnaryFn fun z => f z - g z :=
   mem_FP_of_eq (dropLenFn_mem_FP hg hf) fun z => by

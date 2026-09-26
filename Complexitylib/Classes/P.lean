@@ -17,6 +17,7 @@ public import Complexitylib.Classes.P.Pairing
 public import Complexitylib.Classes.P.Iterate
 public import Complexitylib.Classes.P.Range
 public import Complexitylib.Classes.P.Unary
+public import Complexitylib.Classes.P.StringAccess
 public import Complexitylib.Classes.P.BoundedQuant
 public import Complexitylib.Classes.P.NatCodes
 public import Complexitylib.Classes.P.DataEncode
@@ -60,6 +61,8 @@ This file aggregates the definitions and theorems for P, FP, and PSPACE.
   logarithms
 - `FPPred.forall_lt`, `FPPred.exists_lt` — quantifying a polynomial-time test
   over the indices below a polynomial-time number
+- `getBit_mem_FP`, `UnaryFn.leadingTrueLength` — polynomial-time bit reads and
+  unary-prefix parsing, including missing bits and unterminated prefixes
 - `toBitsLE_mem_FP`, `bits_mem_FP`, `UnaryFn.fromBitsLE_min` — writing a
   polynomial-time number in binary, and reading a binary numeral back below a
   polynomial-time cap
