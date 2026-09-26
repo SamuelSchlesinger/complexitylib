@@ -1717,23 +1717,42 @@ existing logics rather than a restriction imposed on them.
   formula-to-circuit realization.
 \end{proof}
 
+\begin{definition}[Characteristic family of a query language]
+  \label{def:desc-query-family}
+  \lean{Complexity.DescriptiveComplexity.queryFamily}
+  \leanok
+  \uses{def:desc-query-language, def:bitstring}
+  For each binary input length $N$, define
+  $\mathrm{queryFamily}(Q)_N(x)=1$ exactly when the list of bits in $x$ belongs to
+  $\mathrm{queryLanguage}(Q)$. This noncomputable characteristic family is
+  defined for every query, including queries that are not decidable.
+\end{definition}
+
 \begin{theorem}[$\cc{FO} \subseteq \cc{AC^0}$, nonuniform]
   \label{thm:desc-fo-ac0}
-  \uses{def:desc-query-language, def:desc-fo-semantics, def:NC-AC, def:bitstring}
-  For every first-order sentence $\varphi$, consider the characteristic family of
-  the language of $\mathcal{A} \mapsto (\mathcal{A} \models \varphi)$: the Boolean
-  function at input length $N$ is the indicator of the language restricted to
-  $\{0,1\}^N$. This family lies in $\cc{AC^0}$.
+  \lean{Complexity.DescriptiveComplexity.queryFamily_eq_true,
+    Complexity.DescriptiveComplexity.queryFamily_zero,
+    Complexity.DescriptiveComplexity.Sentence.exists_circuit_on_length,
+    Complexity.DescriptiveComplexity.Sentence.queryFamily_mem_AC0,
+    Complexity.DescriptiveComplexity.FODefinable.queryFamily_mem_AC0}
+  \leanok
+  \uses{def:desc-query-family, def:desc-fo-semantics, def:NC-AC}
+  Every first-order definable query has its characteristic family in the existing
+  nonuniform class $\cc{AC^0}$. For a defining sentence $\varphi$, at every positive
+  input length $N$ there is a circuit of size at most $V_\varphi(N)$ and depth at
+  most $|\varphi|+5$. Its output agrees with the query family on every bit string.
+  The family rejects the empty input.
 \end{theorem}
 \begin{proof}
-  \uses{prop:desc-encoding-length, thm:desc-model-checking}
+  \leanok
+  \uses{thm:desc-encoding-positions, thm:desc-encoding-validator}
   The encoding length is strictly increasing in the universe size, so at most one
-  size $n$ has encodings of length $N$. Build a circuit that checks the unary
-  prefix and that each constant block is one-hot. Replace each quantifier by an
-  unbounded fan-in gate of fan-in $n$, and each atom by an input bit, or by an
-  unbounded fan-in selection over the one-hot block when an argument is a
-  constant. The depth is $O(\lvert\varphi\rvert)$, a constant, and the size is
-  polynomial in $n$, hence in $N$.
+  size $n$ has encodings of length $N$. At that length, use the validated sentence
+  circuit. At every other positive length use a constant-false circuit, and set
+  the family's empty-input output to false. Since $n<N$ and $V_\varphi$ has
+  natural coefficients, $V_\varphi(n)\le V_\varphi(N)$. Select the finite circuit
+  witnesses to obtain a polynomial-size, constant-depth family. A definability
+  witness identifies its language with the language of the query.
 \end{proof}
 
 \begin{theorem}[Barrington--Immerman--Straubing]
