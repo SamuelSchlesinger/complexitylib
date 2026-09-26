@@ -6,6 +6,8 @@ Authors: Samuel Schlesinger
 
 module
 public import Complexitylib.Circuits.Basic
+public import Complexitylib.Circuits.Basis.Defs
+public import Complexitylib.Circuits.Typed.Defs
 public import Complexitylib.Circuits.BitString
 public import Complexitylib.Circuits.BinaryComparison
 public import Complexitylib.Circuits.BinaryMinimum
@@ -161,9 +163,13 @@ function, with `⊤` for an unrealizable function. The natural-valued
 
 Public modules (definitions a reviewer should read):
 
-* `Complexitylib.Circuits.Basic` — `BitString`, `BoolFunFamily`, `Circuit`, `Basis`, `Gate`,
-  `CompleteBasis`, `Realizable`, `sizeComplexityWithTop`, `sizeComplexity`,
-  `wireDepth`, `depth`
+* `Complexitylib.Circuits.Basis.Defs` — `BitString`, `BoolFunFamily`, `Arity`, `Basis`,
+  and a basis as a CSLib signature (`Basis.GateKind`, `Basis.signature`,
+  `Basis.interpretation`)
+* `Complexitylib.Circuits.Typed.Defs` — `Gate`, `Circuit`, `eval`, `wireDepth`, `depth`,
+  `size`, `CompleteBasis`
+* `Complexitylib.Circuits.Basic` — `Realizable`, `sizeComplexityWithTop`,
+  `sizeComplexity`; re-exports `Basis.Defs` and `Typed.Defs`
 * `Complexitylib.Circuits.BitString` — canonical bridges between `BitString n`
   and `List Bool`
 * `Complexitylib.Circuits.Composition` — serial circuit composition with exact

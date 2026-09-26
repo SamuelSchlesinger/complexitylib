@@ -6,18 +6,16 @@ Authors: Samuel Schlesinger
 
 module
 public import Cslib.Computability.Circuit.Basic
-public import Complexitylib.Circuits.Basic
+public import Complexitylib.Circuits.Basis.Defs
+public import Complexitylib.Circuits.Typed.Defs
 
 /-!
-# Complexitylib bases as CSLib signatures
+# Typed circuits as CSLib straight-line programs
 
 CSLib's circuits (`Cslib.Circuits.Circuit`) are straight-line programs over a
-signature. This file turns each Complexitylib basis into such a signature
-without changing its cost model. An operation symbol of `B.signature` is a
-whole gate of `B`: an operation, a fan-in that the operation allows, and a
-negation flag for each input. Its interpretation `B.interpretation` is exactly
-`Gate.eval`, so negations stay free, and a basis with unbounded fan-in becomes
-a signature with infinitely many operation symbols.
+signature, and `Basis.signature` (in `Complexitylib.Circuits.Basis.Defs`) makes
+each Complexitylib basis such a signature: an operation symbol of `B.signature`
+is a whole gate kind of `B`, so `Gate.kind` turns each gate into one.
 
 `Circuit.toStraightLine` translates a typed circuit `Circuit B N M G` into a
 CSLib circuit over `B.signature`. The program lists the `G` internal gates and
@@ -26,8 +24,8 @@ translation has exactly `G + M` gates, the typed circuit's `size`.
 
 ## Main definitions
 
-- `Complexity.Basis.GateKind`, `Complexity.Basis.signature`,
-  `Complexity.Basis.interpretation` — a basis as a CSLib signature
+- `Complexity.Gate.kind` — the gate kind of a gate, an operation symbol of
+  `B.signature`
 - `Complexity.Circuit.toStraightLine` — a typed circuit as a CSLib circuit
 -/
 
@@ -37,30 +35,6 @@ translation has exactly `G + M` gates, the typed circuit's `size`.
 namespace Complexity
 
 open Cslib.Circuits
-
-/-- A gate kind of the basis `B`: an operation, a fan-in that the operation
-allows, and a negation flag for each input. -/
-structure Basis.GateKind (B : Basis) where
-  /-- The basis operation. -/
-  op : B.Op
-  /-- The number of inputs. -/
-  fanIn : ℕ
-  /-- The operation allows this fan-in. -/
-  arityOk : (B.arity op).satisfiedBy fanIn
-  /-- Which inputs are negated before the operation is applied. -/
-  negated : Fin fanIn → Bool
-
-/-- The CSLib signature of a basis: one operation symbol per gate kind, with
-the gate kind's fan-in as its arity. -/
-def Basis.signature (B : Basis) : Signature where
-  Op := B.GateKind
-  Arity kind := kind.fanIn
-
-/-- The interpretation of a basis's signature: a gate kind negates the flagged
-inputs and applies its operation, exactly as `Gate.eval` does. -/
-def Basis.interpretation (B : Basis) : Interpretation B.signature Bool :=
-  fun kind input => B.eval kind.op kind.fanIn kind.arityOk
-    fun i => (kind.negated i).xor (input i)
 
 /-- The gate kind of a gate: its operation, fan-in, and negation flags. -/
 def Gate.kind {B : Basis} {W : ℕ} (gate : Gate B W) : B.GateKind :=
