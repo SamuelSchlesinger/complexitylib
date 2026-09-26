@@ -1,5 +1,8 @@
 # Complexitylib — Agent Guide
 
+This is the shared instruction source for coding agents in this repository.
+`CLAUDE.md` points here; maintain repository guidance in this file.
+
 ## Project Overview
 
 A Lean 4 library formalizing computational complexity theory, built on Mathlib. The machine model is shaped by Arora and Barak's *Computational Complexity: A Modern Approach* — a concrete 4-symbol alphabet and separate deterministic/nondeterministic machine types — but the library sets its own conventions and diverges from any one text where a cleaner formalization exists. NTMs and PTMs share the same structure (two transition functions); they differ only in acceptance semantics (existential vs counting).
@@ -153,31 +156,76 @@ Follow Mathlib style:
 
 ## Lean Proof Development Workflow
 
-Develop proofs iteratively, not all at once. Use the LSP tools to stay
-grounded in the actual proof state at every step.
+Develop proofs in checked increments. Use tools to resolve specific uncertainty
+and obtain compiler feedback. Tool-call frequency is not a measure of rigor;
+choose the cheapest reliable way to answer the next question.
 
-### Core approach
+### Work in coherent proof blocks
 
-1. **Start with `sorry`**: Stub out the theorem body with `sorry`, then use
-   `lean_goal` or `lean_diagnostic_messages` to confirm the statement is
-   well-typed and see the initial goal.
-2. **Expand one tactic at a time**: Replace `sorry` with a tactic (e.g.
-   `intro`, `induction`, `cases`, `simp`, `constructor`), followed by
-   `sorry` for each remaining subgoal. Check the proof state after each
-   step.
-3. **Check proof state constantly**: Use `lean_goal` on the line/column of
-   a `sorry` or tactic keyword to see the current hypotheses and goal.
-   Never write multi-line tactic blocks blind.
-4. **Use `lean_multi_attempt`** to test candidate closers (`simp`, `omega`,
-   `exact?`, `aesop`) without editing the file.
-5. **Use search tools** (`lean_leansearch`, `lean_loogle`,
-   `lean_state_search`, `lean_local_search`) to find lemmas when stuck,
-   rather than guessing names.
+1. **Establish the statement and proof idea.** For an unfamiliar result, inspect
+   the relevant definitions and theorem signatures, identify the mathematical
+   argument, and check that the statement expresses the intended claim. Check
+   a new dependent statement early, before building downstream proofs on it.
+   A temporary `sorry` is useful for isolating a statement or subgoal; it is
+   optional scaffolding, not a required first step, and must be removed before
+   completion.
+2. **Write the smallest useful unit.** Write a routine proof in full when the
+   steps are understood. For a difficult proof, implement one helper lemma,
+   induction branch, or coherent tactic block, then check it. Several tactics
+   between checks are expected; there is no requirement to query Lean after
+   each `intro`, `constructor`, or other predictable step.
+3. **Inspect when uncertainty increases.** Use the actual goal and local context
+   when elaboration surprises you, an induction hypothesis has an unexpected
+   type, dependent case analysis changes the context, or a plausible closer
+   fails for an unclear reason. Reduce the block size until the obstacle is
+   understood. After a representative case works, reuse its pattern and check
+   the resulting proof together; inspect other branches individually when
+   their contexts materially differ.
+4. **Check before expanding the dependency chain.** Confirm that each meaningful
+   unit elaborates before building substantial work on top of it. Use focused
+   diagnostics or a scoped build during development. A successful tactic probe
+   still needs to be incorporated and checked in the actual file. Finish with
+   the repository build and quality gates listed above; intermediate checks
+   do not replace them.
+
+### Choose tools by the question
+
+- **Current goal or hypotheses:** use `lean_goal` at the relevant location.
+  Inspect the unresolved part, rather than repeatedly dumping a whole file.
+- **Does the edited unit elaborate?** Use `lean_diagnostic_messages` or
+  `lake build --wfail <Module>`. Prefer a scoped build when changed imports
+  or multiple dependent files are involved. Avoid obtaining the same feedback
+  from several tools unless their results disagree or a required gate remains.
+- **Which lemma applies?** Search local source or use `lean_local_search` first
+  when a likely name or module is known. Use `lean_leansearch`, `lean_loogle`,
+  or `lean_state_search` for a conceptual search. Inspect the selected lemma's
+  actual signature instead of repeatedly guessing names or argument order.
+- **Which of a few plausible closers works?** Use `lean_multi_attempt` when
+  batching candidates is cheaper than separate edit/check cycles. Select
+  candidates from the goal's structure; broad tactic spraying is not a proof
+  strategy. Write an evident closer directly and check the resulting unit.
+- Batch independent reads and searches where supported. Keep edits and checks
+  that depend on those edits sequential. Reuse information already obtained
+  until a relevant source change or diagnostic gives reason to refresh it.
+
+### Recover from failures deliberately
+
+- When attempts keep failing for the same reason, inspect the mismatch and
+  reconsider the statement, induction generalization, or needed helper lemma.
+  Repeating speculative tactics without new information is a cue to change
+  approach.
+- If diagnostics report stale imports or disagree with recently changed
+  dependencies, build the smallest affected module and refresh diagnostics.
+  If MCP/LSP results remain stale, use the scoped command-line build to check
+  the saved source. Do not rewrite a working proof to accommodate stale state
+  or keep polling unchanged diagnostics.
+- If an MCP tool is unavailable, continue with source inspection and scoped
+  Lean/Lake checks. Tool availability should not block work that the compiler
+  can validate. Report the checks actually completed and any unresolved
+  failures; never infer success from a tool returning no useful result.
 
 ### Practical tips
 
-- After `induction`/`cases`, check each branch's goal individually — they
-  often differ in subtle ways.
 - When `omega` fails on a goal containing `match`/`if`/`max`:
   - **`match`**: use `cases` or `generalize x = s; cases s` to eliminate
     the match discriminant. If a pattern variable shadows an outer name
@@ -191,8 +239,6 @@ grounded in the actual proof state at every step.
     Pattern: `le_trans ih_result (max_le_max_left done (by simp [hns]; omega))`.
   - Use `first | tac1 | tac2` when different case-split branches need
     different strategies (e.g. `le_max_left` vs `le_max_right`).
-- When a proof has many similar cases, get one working first, then
-  replicate the pattern.
 - If the IH signature doesn't match what you expect, use `lean_goal` to
   inspect its exact type — the implicit arguments may already be
   specialized.
