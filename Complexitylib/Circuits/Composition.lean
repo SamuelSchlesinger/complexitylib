@@ -22,6 +22,8 @@ size, rather than duplicating the inner circuit once per outer use.
 * `Circuit.depth_compose_le` -- depth is at most the sum of source depths.
 * `Circuit.eval_parallel` -- parallel composition appends output tuples.
 * `Circuit.size_parallel` -- parallel composition also has exact additive size.
+* `Circuit.depth_parallel` -- parallel depth is the maximum of component depths.
+* `Circuit.exists_parallelFamily_depth` -- finite packing with a common depth bound.
 -/
 
 
@@ -165,6 +167,32 @@ theorem exists_parallelFamily {count : ℕ} [NeZero count]
           ∀ input i,
             packed.eval input i = ((circuits i).2.eval input) 0 :=
   exists_parallelFamily_internal circuits
+
+/-- Parallel composition preserves every left-component wire depth. -/
+theorem wireDepth_parallel_left
+    (left : Circuit B N K G₁) (right : Circuit B N M G₂) (wire : Fin (N + G₁)) :
+    (left.parallel right).wireDepth (embedParallelLeftWire wire) = left.wireDepth wire :=
+  wireDepth_parallel_left_internal left right wire
+
+/-- Parallel composition preserves every right-component wire depth. -/
+theorem wireDepth_parallel_right
+    (left : Circuit B N K G₁) (right : Circuit B N M G₂) (wire : Fin (N + G₂)) :
+    (left.parallel right).wireDepth (embedParallelRightWire wire) = right.wireDepth wire :=
+  wireDepth_parallel_right_internal left right wire
+
+/-- Parallel composition preserves depth exactly as the maximum of the two depths. -/
+theorem depth_parallel (left : Circuit B N K G₁) (right : Circuit B N M G₂) :
+    (left.parallel right).depth = max left.depth right.depth :=
+  depth_parallel_internal left right
+
+/-- A finite family can be packed without increasing a common depth bound. -/
+theorem exists_parallelFamily_depth {count : Nat} [NeZero count]
+    (circuits : Fin count → Σ gates, Circuit B N 1 gates) (d : Nat)
+    (hdepth : ∀ i, (circuits i).2.depth ≤ d) :
+    ∃ gates, ∃ packed : Circuit B N count gates,
+      packed.size = (∑ i, (circuits i).2.size) ∧ packed.depth ≤ d ∧
+        ∀ input i, packed.eval input i = ((circuits i).2.eval input) 0 :=
+  exists_parallelFamily_depth_internal circuits d hdepth
 
 end Circuit
 

@@ -413,68 +413,6 @@ theorem size_parallel_internal
   simp only [Circuit.size]
   omega
 
-private theorem exists_parallelFamily_succ_internal (count : ℕ)
-    (circuits : Fin (count + 1) →
-      Σ internalGates, Circuit B N 1 internalGates) :
-    ∃ internalGates,
-      ∃ packed : Circuit B N (count + 1) internalGates,
-        packed.size = (∑ i, ((circuits i).2).size) ∧
-          ∀ input i,
-            packed.eval input i = ((circuits i).2.eval input) 0 := by
-  induction count with
-  | zero =>
-      rcases hfirst : circuits 0 with ⟨internalGates, circuit⟩
-      refine ⟨internalGates, circuit, ?_, ?_⟩
-      · simpa using (congrArg (fun bundled => bundled.2.size) hfirst).symm
-      · intro input output
-        have houtput : output = 0 := by
-          apply Fin.ext
-          omega
-        subst output
-        rw [hfirst]
-  | succ count ih =>
-      let initialCircuits : Fin (count + 1) →
-          Σ internalGates, Circuit B N 1 internalGates :=
-        fun i => circuits i.castSucc
-      obtain ⟨prefixGates, prefixCircuit, hprefixSize, hprefixEval⟩ :=
-        ih initialCircuits
-      rcases hlast : circuits (Fin.last (count + 1)) with
-        ⟨lastGates, lastCircuit⟩
-      refine
-        ⟨prefixGates + lastGates,
-          prefixCircuit.parallel lastCircuit, ?_, ?_⟩
-      · rw [size_parallel_internal, hprefixSize,
-          Fin.sum_univ_castSucc
-            (fun i : Fin (count + 1 + 1) => ((circuits i).2).size)]
-        have hlastSize :=
-          congrArg (fun bundled => bundled.2.size) hlast
-        simp only [initialCircuits]
-        simpa only using congrArg
-          (fun size =>
-            (∑ i : Fin (count + 1), ((circuits i.castSucc).2).size) +
-              size)
-          hlastSize.symm
-      · intro input output
-        refine Fin.lastCases ?_ (fun prior => ?_) output
-        · rw [eval_parallel_internal]
-          rw [Fin.append_right_eq_snoc, Fin.snoc_last, hlast]
-        · rw [eval_parallel_internal]
-          rw [show prior.castSucc = Fin.castAdd 1 prior by rfl,
-            Fin.append_left]
-          exact hprefixEval input prior
-
-theorem exists_parallelFamily_internal {count : ℕ} [NeZero count]
-    (circuits : Fin count →
-      Σ internalGates, Circuit B N 1 internalGates) :
-    ∃ internalGates,
-      ∃ packed : Circuit B N count internalGates,
-        packed.size = (∑ i, ((circuits i).2).size) ∧
-          ∀ input i,
-            packed.eval input i = ((circuits i).2.eval input) 0 := by
-  cases count with
-  | zero => exact (NeZero.ne 0 rfl).elim
-  | succ count => exact exists_parallelFamily_succ_internal count circuits
-
 private theorem le_fold_max {n : ℕ} (f : Fin n → ℕ) (i : Fin n) :
     f i ≤ Fin.foldl n (fun acc j => max acc (f j)) 0 := by
   induction n with
@@ -724,6 +662,202 @@ theorem depth_compose_le_internal
   unfold Circuit.depth
   exact fold_max_le_add_fold_max inner.depth
     outer.outputDepth (outer.compose inner).outputDepth houtput
+
+theorem wireDepth_parallel_left_internal
+    (left : Circuit B N K G₁) (right : Circuit B N M G₂)
+    (wire : Fin (N + G₁)) :
+    (left.parallel right).wireDepth (embedParallelLeftWire wire) =
+      left.wireDepth wire := by
+  induction hwire : wire.val using Nat.strong_induction_on generalizing wire with
+  | h wireIndex ih =>
+    by_cases hinput : wire.val < N
+    · rw [Circuit.wireDepth_of_lt (left.parallel right) (embedParallelLeftWire wire)
+        (by simpa only [embedParallelLeftWire] using hinput),
+        Circuit.wireDepth_of_lt left wire hinput]
+    · rw [Circuit.wireDepth_of_not_lt (left.parallel right) (embedParallelLeftWire wire)
+        (by simpa only [embedParallelLeftWire] using hinput),
+        Circuit.wireDepth_of_not_lt left wire hinput]
+      have hbound := wire.isLt
+      have hgate : (left.parallel right).gates
+          ⟨(embedParallelLeftWire (G₂ := G₂) wire).val - N, by
+            simp only [embedParallelLeftWire]; omega⟩ =
+          (left.gates ⟨wire.val - N, by omega⟩).rewire embedParallelLeftWire := by
+        change (parallelGate left right ⟨wire.val - N, _⟩).val = _
+        exact parallelGate_left left right _ (by dsimp only; omega)
+      rw [hgate]
+      simp only [Gate.rewire]
+      congr 1
+      congr 1
+      funext acc k
+      congr 1
+      let source := (left.gates ⟨wire.val - N, by omega⟩).inputs k
+      exact ih source.val (by
+        have ha := left.acyclic ⟨wire.val - N, by omega⟩ k
+        change source.val < N + (wire.val - N) at ha
+        omega) source rfl
+
+theorem wireDepth_parallel_right_internal
+    (left : Circuit B N K G₁) (right : Circuit B N M G₂)
+    (wire : Fin (N + G₂)) :
+    (left.parallel right).wireDepth (embedParallelRightWire wire) =
+      right.wireDepth wire := by
+  induction hwire : wire.val using Nat.strong_induction_on generalizing wire with
+  | h wireIndex ih =>
+    by_cases hinput : wire.val < N
+    · rw [Circuit.wireDepth_of_lt (left.parallel right) (embedParallelRightWire wire)
+        (by simp [embedParallelRightWire, hinput]),
+        Circuit.wireDepth_of_lt right wire hinput]
+    · have hembed : (embedParallelRightWire (G₁ := G₁) wire).val =
+          N + G₁ + (wire.val - N) := by simp [embedParallelRightWire, hinput]
+      rw [Circuit.wireDepth_of_not_lt (left.parallel right) (embedParallelRightWire wire)
+        (by rw [hembed]; omega), Circuit.wireDepth_of_not_lt right wire hinput]
+      have hbound := wire.isLt
+      have hgate : (left.parallel right).gates
+          ⟨(embedParallelRightWire (G₁ := G₁) wire).val - N, by rw [hembed]; omega⟩ =
+          (right.gates ⟨wire.val - N, by omega⟩).rewire embedParallelRightWire := by
+        have hnot : ¬ G₁ + (wire.val - N) < G₁ := by omega
+        simp [parallel, parallelGate, hembed, Nat.add_assoc, hnot]
+      rw [hgate]
+      simp only [Gate.rewire]
+      congr 1
+      congr 1
+      funext acc k
+      congr 1
+      let source := (right.gates ⟨wire.val - N, by omega⟩).inputs k
+      exact ih source.val (by
+        have ha := right.acyclic ⟨wire.val - N, by omega⟩ k
+        change source.val < N + (wire.val - N) at ha
+        omega) source rfl
+
+theorem outputDepth_parallel_left_internal
+    (left : Circuit B N K G₁) (right : Circuit B N M G₂) (j : Fin K) :
+    (left.parallel right).outputDepth (Fin.castAdd M j) = left.outputDepth j := by
+  have houtput : (left.parallel right).outputs (Fin.castAdd M j) =
+      (left.outputs j).rewire embedParallelLeftWire := by simp [parallel]
+  unfold Circuit.outputDepth
+  rw [houtput]
+  simp only [Gate.rewire, wireDepth_parallel_left_internal]
+
+theorem outputDepth_parallel_right_internal
+    (left : Circuit B N K G₁) (right : Circuit B N M G₂) (j : Fin M) :
+    (left.parallel right).outputDepth (Fin.natAdd K j) = right.outputDepth j := by
+  have houtput : (left.parallel right).outputs (Fin.natAdd K j) =
+      (right.outputs j).rewire embedParallelRightWire := by simp [parallel]
+  unfold Circuit.outputDepth
+  rw [houtput]
+  simp only [Gate.rewire, wireDepth_parallel_right_internal]
+
+private theorem fold_max_le_iff {count : Nat} (f : Fin count → Nat) (d : Nat) :
+    Fin.foldl count (fun acc j => max acc (f j)) 0 ≤ d ↔ ∀ j, f j ≤ d := by
+  constructor
+  · intro h j
+    exact (le_fold_max f j).trans h
+  · intro h
+    induction count with
+    | zero => simp [Fin.foldl_zero]
+    | succ count ih =>
+      rw [Fin.foldl_succ_last]
+      exact max_le (ih _ (fun j => h j.castSucc)) (h _)
+
+theorem depth_parallel_internal
+    (left : Circuit B N K G₁) (right : Circuit B N M G₂) :
+    (left.parallel right).depth = max left.depth right.depth := by
+  apply le_antisymm
+  · apply (fold_max_le_iff _ _).mpr
+    intro j
+    refine Fin.addCases (fun i => ?_) (fun i => ?_) j
+    · rw [outputDepth_parallel_left_internal]
+      exact (le_fold_max left.outputDepth i).trans (le_max_left _ _)
+    · rw [outputDepth_parallel_right_internal]
+      exact (le_fold_max right.outputDepth i).trans (le_max_right _ _)
+  · apply max_le
+    · apply (fold_max_le_iff _ _).mpr
+      intro j
+      rw [← outputDepth_parallel_left_internal left right j]
+      exact le_fold_max (left.parallel right).outputDepth (Fin.castAdd M j)
+    · apply (fold_max_le_iff _ _).mpr
+      intro j
+      rw [← outputDepth_parallel_right_internal left right j]
+      exact le_fold_max (left.parallel right).outputDepth (Fin.natAdd K j)
+
+private theorem exists_parallelFamily_succ_internal (count : ℕ)
+    (circuits : Fin (count + 1) →
+      Σ internalGates, Circuit B N 1 internalGates) (d : Nat)
+    (hdepth : ∀ i, (circuits i).2.depth ≤ d) :
+    ∃ internalGates,
+      ∃ packed : Circuit B N (count + 1) internalGates,
+        packed.size = (∑ i, ((circuits i).2).size) ∧ packed.depth ≤ d ∧
+          ∀ input i,
+            packed.eval input i = ((circuits i).2.eval input) 0 := by
+  induction count with
+  | zero =>
+      rcases hfirst : circuits 0 with ⟨internalGates, circuit⟩
+      refine ⟨internalGates, circuit, ?_, ?_, ?_⟩
+      · simpa using (congrArg (fun bundled => bundled.2.size) hfirst).symm
+      · exact (congrArg (fun bundled => bundled.2.depth) hfirst) ▸ hdepth 0
+      · intro input output
+        have houtput : output = 0 := by
+          apply Fin.ext
+          omega
+        subst output
+        rw [hfirst]
+  | succ count ih =>
+      let initialCircuits : Fin (count + 1) →
+          Σ internalGates, Circuit B N 1 internalGates :=
+        fun i => circuits i.castSucc
+      obtain ⟨prefixGates, prefixCircuit, hprefixSize, hprefixDepth, hprefixEval⟩ :=
+        ih initialCircuits (fun i => hdepth i.castSucc)
+      rcases hlast : circuits (Fin.last (count + 1)) with
+        ⟨lastGates, lastCircuit⟩
+      refine
+        ⟨prefixGates + lastGates,
+          prefixCircuit.parallel lastCircuit, ?_, ?_, ?_⟩
+      · rw [size_parallel_internal, hprefixSize,
+          Fin.sum_univ_castSucc
+            (fun i : Fin (count + 1 + 1) => ((circuits i).2).size)]
+        have hlastSize :=
+          congrArg (fun bundled => bundled.2.size) hlast
+        simp only [initialCircuits]
+        simpa only using congrArg
+          (fun size =>
+            (∑ i : Fin (count + 1), ((circuits i.castSucc).2).size) +
+              size)
+          hlastSize.symm
+      · rw [depth_parallel_internal]
+        exact max_le hprefixDepth ((congrArg (fun bundled => bundled.2.depth) hlast) ▸
+          hdepth (Fin.last (count + 1)))
+      · intro input output
+        refine Fin.lastCases ?_ (fun prior => ?_) output
+        · rw [eval_parallel_internal]
+          rw [Fin.append_right_eq_snoc, Fin.snoc_last, hlast]
+        · rw [eval_parallel_internal]
+          rw [show prior.castSucc = Fin.castAdd 1 prior by rfl,
+            Fin.append_left]
+          exact hprefixEval input prior
+
+theorem exists_parallelFamily_depth_internal {count : ℕ} [NeZero count]
+    (circuits : Fin count →
+      Σ internalGates, Circuit B N 1 internalGates) (d : Nat)
+    (hdepth : ∀ i, (circuits i).2.depth ≤ d) :
+    ∃ internalGates,
+      ∃ packed : Circuit B N count internalGates,
+        packed.size = (∑ i, ((circuits i).2).size) ∧ packed.depth ≤ d ∧
+          ∀ input i,
+            packed.eval input i = ((circuits i).2.eval input) 0 := by
+  cases count with
+  | zero => exact (NeZero.ne 0 rfl).elim
+  | succ count => exact exists_parallelFamily_succ_internal count circuits d hdepth
+
+theorem exists_parallelFamily_internal {count : ℕ} [NeZero count]
+    (circuits : Fin count → Σ internalGates, Circuit B N 1 internalGates) :
+    ∃ internalGates, ∃ packed : Circuit B N count internalGates,
+      packed.size = (∑ i, ((circuits i).2).size) ∧
+        ∀ input i, packed.eval input i = ((circuits i).2.eval input) 0 := by
+  obtain ⟨gates, packed, hsize, _, heval⟩ := exists_parallelFamily_depth_internal circuits
+    (Fin.foldl count (fun acc i => max acc (circuits i).2.depth) 0)
+    (le_fold_max fun i => (circuits i).2.depth)
+  exact ⟨gates, packed, hsize, heval⟩
+
 
 end Circuit
 
