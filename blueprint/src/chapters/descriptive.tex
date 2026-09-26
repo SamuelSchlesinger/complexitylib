@@ -238,6 +238,23 @@ existing logics rather than a restriction imposed on them.
   Immediate from the definitions.
 \end{proof}
 
+\begin{definition}[Invariant decision problem]
+  \label{def:desc-decision-problem}
+  \lean{Complexity.DescriptiveComplexity.DecisionProblem,
+    Complexity.DescriptiveComplexity.DecisionProblem.ofFODefinable,
+    Complexity.DescriptiveComplexity.DecisionProblem.ofExistSODefinable,
+    Complexity.DescriptiveComplexity.DecisionProblem.complement,
+    Complexity.DescriptiveComplexity.DecisionProblem.inter,
+    Complexity.DescriptiveComplexity.DecisionProblem.union}
+  \leanok
+  \uses{def:desc-query, prop:desc-order-independent-closure,
+    def:desc-fo-definable, def:desc-exist-so-definable}
+  A decision problem bundles a query with its isomorphism invariance. Logical
+  definability supplies this law. Complement, intersection, and union inherit
+  it. This is the interface of Senellart--Gnatenko, Section~3.1, restricted to our
+  convention of at least two elements.
+\end{definition}
+
 \begin{theorem}[First-order sentences are order-independent]
   \label{thm:desc-fo-order-independent}
   \lean{Complexity.DescriptiveComplexity.Sentence.orderIndependent}
@@ -471,6 +488,36 @@ existing logics rather than a restriction imposed on them.
   \uses{thm:desc-so-iso-invariance}
   Specialize to the empty environments, and use $\neg$, $\wedge$, $\vee$ for the
   closure properties.
+\end{proof}
+
+\begin{definition}[Existential second-order definability]
+  \label{def:desc-exist-so-definable}
+  \lean{Complexity.DescriptiveComplexity.ExistSODefinable}
+  \leanok
+  \uses{def:desc-existential-so, def:desc-so-definable}
+  A query is existential second-order definable if a sentence in
+  $\exists\cc{SO}$ prefix form defines it on every structure.
+\end{definition}
+
+\begin{theorem}[Existential SO queries, FO inclusion, and positive Boolean closure]
+  \label{thm:desc-exist-so-definable}
+  \lean{Complexity.DescriptiveComplexity.ExistSODefinable.toSODefinable,
+    Complexity.DescriptiveComplexity.ExistSODefinable.orderIndependent,
+    Complexity.DescriptiveComplexity.FODefinable.toExistSODefinable,
+    Complexity.DescriptiveComplexity.ExistSODefinable.inter,
+    Complexity.DescriptiveComplexity.ExistSODefinable.union}
+  \leanok
+  \uses{def:desc-exist-so-definable, def:desc-fo-definable}
+  Every existential SO query is SO definable and invariant under isomorphism.
+  Every FO-definable query is existential SO definable with an empty prefix.
+  Existential SO definable queries are closed under intersection and union.
+\end{theorem}
+\begin{proof}
+  \leanok
+  \uses{thm:desc-so-definable, thm:desc-fo-in-so, thm:desc-exist-so-connectives}
+  Forget the fragment certificate for the first claim, and embed the FO witness
+  into SO for the second. Merge the existential witness prefixes for intersection
+  and union, retaining the syntactic fragment certificate.
 \end{proof}
 
 \section{Encodings and model checking}
@@ -845,6 +892,52 @@ existing logics rather than a restriction imposed on them.
   the structure and reject if decoding fails. These are computable functions.
 \end{definition}
 
+\begin{theorem}[Sound, complete, polynomially bounded certificates]
+  \label{thm:desc-exist-so-certificate}
+  \lean{Complexity.DescriptiveComplexity.SOFormula.witnessArities_of_isFOMatrix,
+    Complexity.DescriptiveComplexity.SOFormula.witnessPolynomial_eval,
+    Complexity.DescriptiveComplexity.SOFormula.checkCertificate_matrix,
+    Complexity.DescriptiveComplexity.SOFormula.checkCertificate_ofFormula,
+    Complexity.DescriptiveComplexity.SOFormula.checkCertificate_soExist_append,
+    Complexity.DescriptiveComplexity.SOFormula.checkCertificate_sound,
+    Complexity.DescriptiveComplexity.SOFormula.checkCertificate_length,
+    Complexity.DescriptiveComplexity.SOFormula.exists_checkCertificate_iff,
+    Complexity.DescriptiveComplexity.SOSentence.checkEncoded_encodeStruct,
+    Complexity.DescriptiveComplexity.SOSentence.checkEncoded_of_decode_eq_none,
+    Complexity.DescriptiveComplexity.SOSentence.exists_checkEncoded_iff,
+    Complexity.DescriptiveComplexity.SOSentence.checkEncoded_certificate_length,
+    Complexity.DescriptiveComplexity.SOSentence.checkEncoded_length_le,
+    Complexity.DescriptiveComplexity.SOSentence.exists_checkEncoded_bounded_iff,
+    Complexity.DescriptiveComplexity.ExistSODefinable.exists_bounded_certificate}
+  \leanok
+  \uses{def:desc-exist-so-certificate, thm:desc-so-certificate-encoding,
+    thm:desc-matrix-model-checking, thm:desc-encoding-roundtrip,
+    thm:desc-exist-so-definable}
+  For every existential-SO formula and supplied free environments, an accepted
+  binary certificate exists iff the formula is satisfied. Every accepted
+  certificate has exactly $\sum_j n^{k_j}$ bits. For a sentence defining $Q$,
+  \[
+    x\in\operatorname{queryLanguage}(Q)
+    \quad\Longleftrightarrow\quad
+    \exists y,\ |y|\le p(|x|)\ \land\ \operatorname{checkEncoded}(x,y)=\mathrm{true},
+    \qquad p(X)=\sum_j X^{k_j}.
+  \]
+  Malformed structure encodings and incorrect certificate lengths are rejected.
+  Theorem~\ref{thm:desc-so-verifier-polytime} proves the checker's polynomial
+  machine running-time bound.
+\end{theorem}
+\begin{proof}
+  \leanok
+  Induct along the existential prefix. A decoded table supplies a semantic
+  relation; conversely, the characteristic function of a semantic witness
+  supplies its encoded table. Matrix correctness closes the induction, and
+  requiring no remaining bits gives the exact certificate length. Decode the
+  structure to obtain the language characterization. The unary cardinality
+  prefix gives $n\le |x|$; monotonicity transfers the length polynomial from
+  universe size to input length. This formalizes the certificate and semantic
+  verification parts of Immerman, Proposition~7.6.
+\end{proof}
+
 \begin{definition}[Encoded sentence evaluator]
   \label{def:desc-encoded-model-checking}
   \lean{Complexity.DescriptiveComplexity.Sentence.evalEncoded}
@@ -1077,6 +1170,28 @@ existing logics rather than a restriction imposed on them.
   replacing vocabulary atoms by their defining FO formulas. Translate constants
   and retain relation variables, relation arities and all quantifiers.
 \end{definition}
+
+\begin{theorem}[Second-order transport and reduction closure]
+  \label{thm:desc-so-transport}
+  \lean{Complexity.DescriptiveComplexity.FOInterpretation.translateSO_sat,
+    Complexity.DescriptiveComplexity.FOInterpretation.isFOMatrix_translateSO,
+    Complexity.DescriptiveComplexity.FOInterpretation.isExistSO_translateSO,
+    Complexity.DescriptiveComplexity.SODefinable.of_reduces,
+    Complexity.DescriptiveComplexity.ExistSODefinable.of_reduces}
+  \leanok
+  \uses{def:desc-so-pullback, def:desc-exist-so-definable, def:desc-fo-reduction}
+  Satisfaction is preserved under arbitrary element and relation environments.
+  A pulled-back formula is an FO matrix, respectively in existential SO prefix
+  form, exactly when the original is. Consequently SO definability and
+  existential SO definability are closed under the existing FO reductions.
+\end{theorem}
+\begin{proof}
+  \leanok
+  \uses{thm:desc-substitution, thm:desc-fo-in-so}
+  Induct on the formula. The interpreted universe is unchanged, so the same
+  relations witness second-order quantification. Translate a defining sentence
+  to obtain reduction closure.
+\end{proof}
 
 \begin{definition}[Dimension-$k$ interpretation]
   \label{def:desc-dim-k}
