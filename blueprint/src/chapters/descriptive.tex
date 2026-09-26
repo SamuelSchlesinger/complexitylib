@@ -1232,6 +1232,95 @@ existing logics rather than a restriction imposed on them.
   interpretation, decode the sole coordinate and use the substitution lemma.
 \end{proof}
 
+\begin{definition}[Tagged formula pullback and composition]
+  \label{def:desc-tagged-pullback}
+  \lean{Complexity.DescriptiveComplexity.TaggedFOInterpretation.pullbackWith,
+    Complexity.DescriptiveComplexity.TaggedFOInterpretation.translate,
+    Complexity.DescriptiveComplexity.TaggedFOInterpretation.translateSentence,
+    Complexity.DescriptiveComplexity.TaggedFOInterpretation.comp,
+    Complexity.DescriptiveComplexity.TaggedFOInterpretation.idInterp}
+  \leanok
+  \uses{def:desc-tagged-interpretation, def:desc-fo-blocks, def:desc-substitution}
+  Pullback replaces each free target variable by a tag and a tuple of source
+  terms. Equality compares tags and all coordinates. Quantifiers become finite
+  tag choices followed by coordinate blocks. Composition pulls the outer relation
+  formulas back along the inner interpretation and flattens the nested tuples.
+  This is the tagged full-product case of Immerman, Definition~3.3; constants are
+  source-constant tuples as allowed in its footnote.
+\end{definition}
+
+\begin{theorem}[Tagged formula transport and composition]
+  \label{thm:desc-tagged-transport}
+  \lean{Complexity.DescriptiveComplexity.TaggedFOInterpretation.pullbackWith_sat,
+    Complexity.DescriptiveComplexity.TaggedFOInterpretation.translate_sat,
+    Complexity.DescriptiveComplexity.TaggedFOInterpretation.translateSentence_models,
+    Complexity.DescriptiveComplexity.TaggedFOInterpretation.compIso,
+    Complexity.DescriptiveComplexity.TaggedFOInterpretation.idIso,
+    Complexity.DescriptiveComplexity.TaggedFOInterpretation.comp_query,
+    Complexity.DescriptiveComplexity.TaggedFOInterpretation.translateSentence_comp_models,
+    Complexity.DescriptiveComplexity.FODefinable.pullQuery}
+  \leanok
+  \uses{def:desc-tagged-pullback, thm:desc-tagged-semantics, def:desc-fo-semantics,
+    def:desc-fo-definable}
+  Pullback preserves satisfaction under arbitrary assignments, including open
+  formulas, and preserves FO definability of queries. A source structure models
+  a translated sentence exactly when its interpreted structure models the
+  original. This is Immerman, Proposition~3.5 and Remark~3.6, for the tagged
+  full-product construction. Composing parameters $(t_1,d_1)$ and $(t_2,d_2)$
+  gives $(t_2 t_1^{d_2},d_2d_1)$ and a structure isomorphic to successive
+  application. The identity interpretation is isomorphic to its input.
+  Translating along a composite agrees semantically with successive translations.
+\end{theorem}
+\begin{proof}
+  \leanok
+  \uses{thm:desc-substitution, thm:desc-fo-blocks, thm:desc-fo-iso-invariance}
+  Induct on the formula with arbitrary source coordinate terms. The tuple codec
+  transfers quantifier witnesses. Flattening nested tags and coordinates is a
+  bijection; the open-formula theorem proves preservation of relations, and
+  constant coordinates compose directly. Isomorphism invariance proves the
+  semantic law for composite sentence translations.
+\end{proof}
+
+\begin{definition}[Tagged first-order reduction]
+  \label{def:desc-tagged-reduction}
+  \lean{Complexity.DescriptiveComplexity.TaggedFOReduction,
+    Complexity.DescriptiveComplexity.TaggedFOReduction.refl,
+    Complexity.DescriptiveComplexity.TaggedFOReduction.trans,
+    Complexity.DescriptiveComplexity.TaggedFOReduction.complement,
+    Complexity.DescriptiveComplexity.TaggedFOReduces,
+    Complexity.DescriptiveComplexity.TaggedFOReduces.preorder}
+  \leanok
+  \uses{def:desc-decision-problem, def:desc-tagged-pullback, thm:desc-tagged-transport}
+  A tagged reduction $P \leq Q$ supplies positive tag and dimension counts,
+  a tagged interpretation $I$, and $P(\mathcal A)\iff Q(I(\mathcal A))$ for
+  every source structure. Reducibility is existence of such a witness.
+  Identities, composites, and complementary reductions are explicit witnesses.
+  On one vocabulary this relation defines a preorder; the API also supports
+  reductions across vocabularies.
+\end{definition}
+
+\begin{theorem}[Tagged reduction laws and definability closure]
+  \label{thm:desc-tagged-reduction}
+  \lean{Complexity.DescriptiveComplexity.TaggedFOReduces.refl,
+    Complexity.DescriptiveComplexity.TaggedFOReduces.trans,
+    Complexity.DescriptiveComplexity.TaggedFOReduces.complement,
+    Complexity.DescriptiveComplexity.FOReduces.toTaggedFOReduces,
+    Complexity.DescriptiveComplexity.FODefinable.of_taggedReduces}
+  \leanok
+  \uses{def:desc-tagged-reduction, def:desc-fo-reduction, def:desc-fo-definable}
+  Tagged reducibility is reflexive, transitive, and respects complement. It
+  includes the original universe-preserving reductions between invariant
+  problems. If $P$ reduces to an FO-definable $Q$, then $P$ is FO-definable.
+\end{theorem}
+\begin{proof}
+  \leanok
+  \uses{thm:desc-tagged-transport, thm:desc-tagged-semantics}
+  Target invariance identifies the composite interpreted structure with successive
+  application. Negate the membership equivalence for complement; translate a
+  defining sentence for downward closure. The old reduction is the one-tag,
+  one-coordinate case up to isomorphism.
+\end{proof}
+
 \begin{definition}[Dimension-$k$ interpretation]
   \label{def:desc-dim-k}
   \uses{def:desc-interpretation}
