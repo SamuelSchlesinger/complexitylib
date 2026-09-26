@@ -9,10 +9,11 @@ public import Complexitylib.DescriptiveComplexity.FirstOrder.Syntax
 public import Complexitylib.DescriptiveComplexity.FirstOrder.Semantics
 public import Complexitylib.DescriptiveComplexity.FirstOrder.Isomorphism
 public import Complexitylib.DescriptiveComplexity.FirstOrder.Substitution
+public import Complexitylib.DescriptiveComplexity.FirstOrder.Blocks
 
 /-!
 # First-order logic over finite structures
 
-Aggregates the first-order syntax, semantics, isomorphism-invariance, and
-substitution modules.
+Aggregates first-order syntax, semantics, isomorphism invariance, substitution,
+finite connectives, and quantifier blocks.
 -/

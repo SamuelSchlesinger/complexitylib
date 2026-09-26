@@ -45,7 +45,7 @@ namespace DescriptiveComplexity
 variable {V : Vocabulary}
 
 /-- A Boolean query is **first-order definable** if some FO sentence defines it. -/
-def FODefinable (Q : BooleanQuery V) : Prop :=
+@[expose] def FODefinable (Q : BooleanQuery V) : Prop :=
   ∃ φ : Sentence V, ∀ A : FinStruct V, Q A ↔ (A ⊨ φ)
 
 /-- **FO-definable queries are order-independent** (Immerman Proposition 1.16,

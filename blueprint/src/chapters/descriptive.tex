@@ -177,6 +177,42 @@ existing logics rather than a restriction imposed on them.
   lemma evaluating lifted substitutions.
 \end{proof}
 
+\begin{definition}[Finite connectives and quantifier blocks]
+  \label{def:desc-fo-blocks}
+  \lean{Complexity.DescriptiveComplexity.envBlock,
+    Complexity.DescriptiveComplexity.Term.shiftBy,
+    Complexity.DescriptiveComplexity.Formula.existBlock,
+    Complexity.DescriptiveComplexity.Formula.allBlock,
+    Complexity.DescriptiveComplexity.Formula.conjFin,
+    Complexity.DescriptiveComplexity.Formula.disjFin}
+  \leanok
+  \uses{def:desc-fo-syntax, def:desc-fo-semantics, def:desc-substitution}
+  A quantifier block binds the first $k$ variables of a formula; its environment
+  places the $k$ coordinates before the old variables. Terms can be shifted
+  across an entire block. Finite conjunctions and disjunctions are iterated
+  binary connectives, with truth and falsity as their respective empty cases.
+\end{definition}
+
+\begin{theorem}[Block and finite-connective semantics]
+  \label{thm:desc-fo-blocks}
+  \lean{Complexity.DescriptiveComplexity.Term.shiftBy_eval,
+    Complexity.DescriptiveComplexity.Formula.existBlock_sat,
+    Complexity.DescriptiveComplexity.Formula.allBlock_sat,
+    Complexity.DescriptiveComplexity.Formula.conjFin_sat,
+    Complexity.DescriptiveComplexity.Formula.disjFin_sat}
+  \leanok
+  \uses{def:desc-fo-blocks}
+  Shifting a term across a block preserves its value. Existential and universal
+  blocks quantify over all coordinate tuples; finite conjunction and disjunction
+  mean that every, respectively some, indexed formula holds. These statements
+  include zero-length blocks and empty index sets.
+\end{theorem}
+\begin{proof}
+  \leanok
+  Induct on the block length or connective list. Extend and restrict tuples by
+  their head and tail in the quantifier cases.
+\end{proof}
+
 \section{Boolean queries and definability}
 
 \begin{definition}[Boolean query]

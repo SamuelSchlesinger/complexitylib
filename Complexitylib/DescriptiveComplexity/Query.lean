@@ -25,7 +25,7 @@ namespace Complexity
 namespace DescriptiveComplexity
 
 /-- A boolean query over vocabulary V: a property of finite V-structures. -/
-def BooleanQuery (V : Vocabulary) := FinStruct V → Prop
+abbrev BooleanQuery (V : Vocabulary) := FinStruct V → Prop
 
 namespace BooleanQuery
 
