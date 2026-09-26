@@ -4,6 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Bolton Bailey
 -/
 module
+public import Complexitylib.Classes.P.UnaryLength
 public import Complexitylib.Classes.PCP.Internal.PosScan
 public import Complexitylib.Classes.PCP.Internal.UnaryDivMod
 public import Complexitylib.Classes.PCP.Internal.NatEncode
@@ -133,16 +134,14 @@ theorem sndEnc_mem_FP {a : List Bool → List Bool} (ha : a ∈ FP) :
 
 /-! ### Unary arithmetic with constants -/
 
-/-- Any string, as that many marks. -/
-noncomputable def marks (s : List Bool) : List Bool := divFn [false] s
+/-- Any string, as that many marks: its length, written in unary. -/
+def marks (s : List Bool) : List Bool := List.replicate s.length true
 
-theorem marks_eq (s : List Bool) : marks s = List.replicate s.length true := by
-  rw [marks, divFn_eq (by norm_num)]
-  simp
+theorem marks_eq (s : List Bool) : marks s = List.replicate s.length true := rfl
 
 theorem marks_mem_FP {a : List Bool → List Bool} (ha : a ∈ FP) :
     (fun z => marks (a z)) ∈ FP :=
-  mem_FP_of_eq (mem_FP_comp ha (divFn_mem_FP [false])) fun _ => rfl
+  mem_FP_comp ha unaryLength_mem_FP
 
 /-- Division by a constant. -/
 noncomputable def divC (c : ℕ) (s : List Bool) : List Bool :=
