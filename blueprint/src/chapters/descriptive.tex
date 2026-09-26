@@ -523,6 +523,46 @@ existing logics rather than a restriction imposed on them.
   machine-model languages.
 \end{definition}
 
+\begin{definition}[Computable positions in the encoding]
+  \label{def:desc-encoding-positions}
+  \lean{Complexity.DescriptiveComplexity.encodingTableSites,
+    Complexity.DescriptiveComplexity.encodingPosition,
+    Complexity.DescriptiveComplexity.encodingLength}
+  \leanok
+  \uses{def:desc-encoding}
+  Enumerate relation and constant-table sites in the encoder's order.
+  A site's bit position is its index in this list plus $n+1$ for the unary
+  prefix. The full length is $\ell_V(n)=n+1+\sum_R n^{\mathrm{ar}(R)}+cn$.
+\end{definition}
+
+\begin{theorem}[Correct positions and unique encoded size]
+  \label{thm:desc-encoding-positions}
+  \lean{Complexity.DescriptiveComplexity.mem_encodingTableSites,
+    Complexity.DescriptiveComplexity.encodingTableSites_nodup,
+    Complexity.DescriptiveComplexity.encodingPosition_lt,
+    Complexity.DescriptiveComplexity.getElem?_encodeStruct_position,
+    Complexity.DescriptiveComplexity.getElem?_encodeStruct_header,
+    Complexity.DescriptiveComplexity.encodeStruct_eq_of_values,
+    Complexity.DescriptiveComplexity.encodeStruct_length_eq,
+    Complexity.DescriptiveComplexity.card_lt_encodingLength,
+    Complexity.DescriptiveComplexity.encodingLength_pos,
+    Complexity.DescriptiveComplexity.encodingLength_strictMono}
+  \leanok
+  \uses{def:desc-encoding-positions, prop:desc-encoding-length}
+  Every table site occurs exactly once in the enumeration, its position is below
+  $\ell_V(n)$, and reading that position in an encoded structure recovers
+  exactly its table value. Moreover $n<\ell_V(n)$, and $\ell_V$ is strictly
+  increasing. Thus a fixed input length corresponds to at most one universe size.
+  Correct length, header bits, and table bits characterize the complete encoding.
+\end{theorem}
+\begin{proof}
+  \leanok
+  Map the site list to its values to recover the existing truth-table encoder.
+  Use completeness and cardinality of the tuple enumeration for uniqueness and
+  lookup; list extensionality gives reconstruction. Every table-length term is
+  monotone in $n$, while the unary prefix is strictly increasing.
+\end{proof}
+
 \begin{definition}[Structure decoder]
   \label{def:desc-decoder}
   \uses{def:desc-encoding}

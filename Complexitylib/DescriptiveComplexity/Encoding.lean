@@ -43,7 +43,7 @@ one-hot block per distinguished constant — and computes its length; it is step
 -/
 
 
-public section
+@[expose] public section
 
 namespace Complexity
 
