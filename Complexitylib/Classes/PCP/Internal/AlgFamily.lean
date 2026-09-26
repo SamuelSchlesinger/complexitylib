@@ -176,7 +176,7 @@ theorem famRotFn_mem_FP : F.famRotFn p ∈ FP := by
   exact mem_FP_of_eq houter fun _ => rfl
 
 /-- **The rotation function runs the family's rotation map.** -/
-theorem famRotFn_eq (hd : 1 < F.deg) (n v i : ℕ) (hn : 0 < n)
+theorem famRotFn_eq (hd : 1 < F.deg) (n v i : ℕ)
     (hp : F.fitLevel hd n ≤ p.eval n) :
     F.famRotFn p (pair (List.replicate n true)
         (pair (List.replicate v true) (List.replicate i true)))
@@ -190,7 +190,7 @@ theorem famRotFn_eq (hd : 1 < F.deg) (n v i : ℕ) (hn : 0 < n)
     F.famTableFn_eq p hd n hp
   have hm : (divFn2 (pair (List.replicate n true)
       (sizeFn (F.deg ^ 4) p (List.replicate n true))) ++ [true]).length = F.wid hd n := by
-    rw [divFn2_eq (by rw [hrep]; exact hn), List.length_append, List.length_replicate,
+    rw [divFn2_eq, List.length_append, List.length_replicate,
       List.length_cons, List.length_nil, hrep, hN, wid, RegGraph.mergeWidth]
   have hs : (divC F.fitD (List.replicate i true)) = List.replicate (i / F.fitD) true := by
     rw [divC_eq, List.length_replicate]
@@ -231,10 +231,10 @@ theorem famRotFn_eq (hd : 1 < F.deg) (n v i : ℕ) (hn : 0 < n)
         show F.deg ^ 2 = F.fitD from rfl,
         mul_add_div_of_lt hdpos (Nat.mod_lt _ hdpos), Nat.mul_add_mod_of_lt (Nat.mod_lt _ hdpos)]
       refine congrArg₂ pair ?_ ?_
-      · rw [marks_eq, modFn2_eq (by rw [hrep]; exact hn),
+      · rw [marks_eq, modFn2_eq,
           List.length_replicate, hrep, List.length_replicate]
       · rw [marks_eq, List.length_append, List.length_replicate,
-          length_mulC, divFn2_eq (by rw [hrep]; exact hn), List.length_replicate, hrep,
+          length_mulC, divFn2_eq, List.length_replicate, hrep,
           List.length_replicate]
         exact congrArg (List.replicate · true) (by ring)
     · rw [ite_eq_right h2, ifLtLen_neg (by rw [hlift, hN]; exact h2)]

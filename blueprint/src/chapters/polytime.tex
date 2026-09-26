@@ -335,12 +335,14 @@ these facts are stated in the chapter on encodings
 \begin{lemma}[Basic polynomial-time functions]
   \label{lem:polytime-FP-basic}
   \lean{Complexity.constFn_mem_FP, Complexity.unaryLength_mem_FP,
-    Complexity.ite_mem_finset_mem_FP}
+    Complexity.ite_mem_finset_mem_FP, Complexity.mem_FP_of_bounded_key}
   \leanok
   \uses{def:FP}
   Every constant function is in $\cc{FP}$, and so is $x \mapsto 1^{|x|}$. For
   every function $g$ and every finite set $S$ of strings, the function equal
-  to $g$ on $S$ and to the empty string off $S$ is in $\cc{FP}$.
+  to $g$ on $S$ and to the empty string off $S$ is in $\cc{FP}$. Hence if
+  $k \in \cc{FP}$ and $|k(x)| \le L$ for all $x$, then $x \mapsto g(k(x))$ is
+  in $\cc{FP}$ for every function $g$.
 \end{lemma}
 \begin{proof}
   \leanok
@@ -350,7 +352,8 @@ these facts are stated in the chapter on encodings
   over the input, in $n + 2$ steps. For a function supported on $S$, the finite
   table of its values on $S$ is hard-wired into the states of a machine that
   decides membership in $S$ while scanning the input and then writes the
-  stored value, in linear time.
+  stored value, in linear time. For the last claim take $S$ to be the strings
+  of length at most $L$ and compose with $k$.
 \end{proof}
 
 \begin{theorem}[Closure under polynomial-time preimages]
@@ -377,9 +380,9 @@ these facts are stated in the chapter on encodings
   \label{lem:polytime-decision-fn}
   \lean{Complexity.containsOne_mem_P, Complexity.mem_P_of_decisionFn,
     Complexity.mem_P_of_decisionFn_bool, Complexity.exists_decisionFn_of_mem_P,
-    Complexity.mem_P_iff_exists_decisionFn}
+    Complexity.mem_P_iff_exists_decisionFn, Complexity.mem_P_of_bounded_key}
   \leanok
-  \uses{def:P, def:FP}
+  \uses{def:P, def:FP, lem:polytime-FP-basic}
   The language of strings containing a $1$ is in $\cc{P}$. If $f \in \cc{FP}$
   and, for all $x$, $x \in L$ exactly when $f(x)$ contains a $1$, then
   $L \in \cc{P}$. In particular, if $g$ is Boolean-valued, the function
@@ -387,7 +390,9 @@ these facts are stated in the chapter on encodings
   $x \in L \iff g(x) = 1$, then $L \in \cc{P}$. Conversely, every
   $L \in \cc{P}$ has such a Boolean-valued $g$; so $L \in \cc{P}$ if and only
   if some Boolean-valued $g$ with $x \mapsto [g(x)]$ in $\cc{FP}$ satisfies
-  $x \in L \iff g(x) = 1$ for all $x$.
+  $x \in L \iff g(x) = 1$ for all $x$. Finally, if $k \in \cc{FP}$ and
+  $|k(x)| \le L$ for all $x$, then $\{x : Q(k(x))\} \in \cc{P}$ for every
+  predicate $Q$.
 \end{lemma}
 \begin{proof}
   \leanok
@@ -397,7 +402,9 @@ these facts are stated in the chapter on encodings
   Cobham's theorem this lets membership in $\cc{P}$ be established by writing
   a function rather than a machine. For the converse, run a polynomial-time
   decider for its time bound inside Cobham's algebra (halted configurations
-  are fixed points of the encoded step) and read off the verdict cell.
+  are fixed points of the encoded step) and read off the verdict cell. The
+  last claim takes $g(x) = [Q(k(x))]$, which is in $\cc{FP}$ by
+  Lemma~\ref{lem:polytime-FP-basic}.
 \end{proof}
 
 \section{Cobham's theorem: FP as a programming language}
@@ -579,7 +586,9 @@ these facts are stated in the chapter on encodings
     Complexity.UnaryFn.sum, Complexity.UnaryFn.count, Complexity.UnaryFn.find,
     Complexity.UnaryFn.bmax, Complexity.UnaryFn.iterate, Complexity.UnaryFn.div,
     Complexity.UnaryFn.mod, Complexity.UnaryFn.powMin, Complexity.UnaryFn.size,
-    Complexity.UnaryFn.log, Complexity.UnaryFn.clog, Complexity.FPPred.mem_P}
+    Complexity.UnaryFn.log, Complexity.UnaryFn.clog, Complexity.FPPred.forall_lt,
+    Complexity.FPPred.exists_lt, Complexity.FPPred.of_bounded_key,
+    Complexity.FPPred.mem_P}
   \leanok
   \uses{def:polytime-unary-fn}
   In the sense of Definition~\ref{def:polytime-unary-fn}, the following are
@@ -599,12 +608,16 @@ these facts are stated in the chapter on encodings
       $n(z)$ if there is none), and the largest $f(\langle z, 1^i \rangle)$.
       Also $k(z)$ rounds of an update $x \mapsto s(z, x)$ from $a(z)$, when
       $\langle z, 1^x \rangle \mapsto s(z, x)$ is polynomial-time and every
-      value along the way is at most a polynomial-time number.
+      value along the way is at most a polynomial-time number. Also the
+      bounded quantifiers: $p(\langle z, 1^i \rangle)$ for every $i < n(z)$,
+      and for some $i < n(z)$.
     \item $f(z) / g(z)$ and $f(z) \bmod g(z)$ (with $f / 0 = 0$), the capped
       power $\min(b(z)^{k(z)}, c(z))$, the binary length of $f(z)$, and the
       floor and ceiling logarithms of $f(z)$ to the base $b(z)$.
   \end{enumerate}
-  A language whose membership predicate is polynomial-time is in $\cc{P}$.
+  Every predicate $z \mapsto Q(k(z))$ of a key $k \in \cc{FP}$ of bounded
+  length is polynomial-time. A language whose membership predicate is
+  polynomial-time is in $\cc{P}$.
 \end{lemma}
 \begin{proof}
   \leanok
@@ -616,17 +629,23 @@ these facts are stated in the chapter on encodings
   leading bit. A sum is a count of Lemma~\ref{lem:polytime-fp-combinators}, a
   count is a sum of zeros and ones, and the maximum is the maximum of that
   lemma. The least $i$ with $p$ counts the $j < n(z)$ at which $p$ fails at
-  every index up to $j$, a count of counts. The update loop is an instance of
+  every index up to $j$, a count of counts. The universal quantifier holds
+  when that count equals $n(z)$, and the existential one is the negation of
+  the universal quantifier of $\neg p$. The update loop is an instance of
   Lemma~\ref{lem:polytime-iterate} on $\langle 1^x, z \rangle$, whose length
   is bounded because the bound is written by a polynomial-time function.
   Item 4 is derived from these: $f / g$ counts the $i < f$ with $g > 0$ and
   $(i + 1) g \le f$, and $f \bmod g = f - g \cdot (f / g)$; the capped power
   iterates $x \mapsto \min(b x, c)$; the binary length of $f$ counts the
   $i < f$ with $2^i \le f$, and the logarithms count the $i < f$ with
-  $b^{i+1} \le f$ and with $b^i < f$, comparing capped powers. The last claim
-  is Lemma~\ref{lem:polytime-decision-fn}.
+  $b^{i+1} \le f$ and with $b^i < f$, comparing capped powers. A predicate of
+  a bounded key has its one-bit verdict in $\cc{FP}$ by
+  Lemma~\ref{lem:polytime-FP-basic}. The last claim is
+  Lemma~\ref{lem:polytime-decision-fn}.
 
-  In Lean, in \texttt{Classes/P/Unary.lean}, with the membership test in
+  In Lean, in \texttt{Classes/P/Unary.lean}, with the bounded quantifiers in
+  \texttt{Classes/P/BoundedQuant.lean}, the bounded key in
+  \texttt{Classes/P/FinsetDomain.lean} and the membership test in
   \texttt{Classes/P/DecisionFn.lean}.
 \end{proof}
 

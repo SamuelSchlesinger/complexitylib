@@ -571,7 +571,7 @@ theorem cloudStepFn_eq (hd : 1 < F.deg) (v : Fin G.numVerts) (c j : ℕ)
               (⟨j, hj⟩ : Fin (F.toFamily hd).degree))).2.val) :=
     F.famRotVal_eq hd hpos (⟨_, hidxlt⟩ : Fin (G.cloudList v).length) ⟨j, hj⟩
   have hrot := F.famRotFn_eq pol hd (G.cloudList v).length
-    (countBelow (G.cloudCodes v) c) j hpos hp
+    (countBelow (G.cloudCodes v) c) j hp
   rw [hval] at hrot
   have helt : cloudEltFn (pair (encGraph G) (pair (List.replicate v.val true)
       (List.replicate ((F.toFamily hd).rot (G.cloudList v).length
@@ -592,7 +592,7 @@ theorem cloudStepFn_eq (hd : 1 < F.deg) (v : Fin G.numVerts) (c j : ℕ)
   rw [← G.halfCode_getElem_cloudList v _ (Fin.isLt _)]
 
 /-- **The expander move computes what it should.** -/
-theorem expStepFn_eq (hd : 1 < F.deg) (v j : ℕ) (hn : 0 < 2 * G.numEdges)
+theorem expStepFn_eq (hd : 1 < F.deg) (v j : ℕ)
     (hp : F.fitLevel hd (2 * G.numEdges) ≤ pol.eval (2 * G.numEdges)) :
     expStepFn F pol (pair (encGraph G)
         (pair (List.replicate v true) (List.replicate j true)))
@@ -602,7 +602,7 @@ theorem expStepFn_eq (hd : 1 < F.deg) (v j : ℕ) (hn : 0 < 2 * G.numEdges)
       = List.replicate (2 * G.numEdges) true := by
     rw [marks_eq, length_count_encGraph]
   rw [expStepFn, pairFst_pair, pairSnd_pair, hmarks]
-  exact F.famRotFn_eq pol hd _ v j hn hp
+  exact F.famRotFn_eq pol hd _ v j hp
 
 /-! ### The whole rotation map -/
 
@@ -772,7 +772,7 @@ theorem preRotFn_eq (hd : 1 < F.deg) (v d : ℕ) (hv : v < 2 * G.numEdges)
     have hdropk : (List.replicate d true).drop (2 + (F.toFamily hd).degree)
         = List.replicate (d - (2 + (F.toFamily hd).degree)) true := by simp
     rw [ifLtLen_neg (by simpa using h2), ite_eq_right h2, hdropk,
-      expStepFn_eq G F pol hd v (d - (2 + (F.toFamily hd).degree)) hne hpe]
+      expStepFn_eq G F pol hd v (d - (2 + (F.toFamily hd).degree)) hpe]
     rw [ConstraintGraph.expStepN, dite_eq_left hvlt, dite_eq_left hjlt]
     simp only [pairFst_pair, pairSnd_pair]
     have hk := key _ horder hvlt hjlt

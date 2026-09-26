@@ -127,7 +127,7 @@ theorem baseTailU_eq {Φ : List Bool → CNF} (hE : ∀ x, E x = (Φ x).encode)
       = ((Φ x).maxVar + 1) + e / 3 := by
   rw [baseTailU, pairFst_pair, pairSnd_pair, List.length_append,
     List.length_append, List.length_replicate, List.length_singleton,
-    divFn_eq (by simp) (List.replicate e true), List.length_replicate,
+    divFn_eq (List.replicate e true), List.length_replicate,
     List.length_replicate, baseMaxU_eq E hE h3]
   congr 1
 
@@ -223,7 +223,7 @@ theorem length_baseKey_le (w : ℕ) (z : List Bool) :
   have hs := length_baseSigns_le E z
   have hm : (modFn [false, false, false]
       (pairSnd (pairFst z))).length ≤ 2 := by
-    rw [modFn_eq (by simp)]
+    rw [modFn_eq]
     simp only [List.length_replicate,
       show ([false, false, false] : List Bool).length = 3 from rfl]
     omega
@@ -402,7 +402,7 @@ theorem baseSigns_pair (hE : ∀ x, E x = (Φ x).encode) (h3 : ∀ x, CNF.Is3CNF
       exact q.isLt
     rw [hE, litSignFn_encode (Φ x) hj hq, litOf_eq (Φ x) hj q hq]
   rw [baseSigns, pairFst_pair, pairSnd_pair, pairFst_pair,
-    divFn_eq (by simp) (List.replicate e true), List.length_replicate,
+    divFn_eq (List.replicate e true), List.length_replicate,
     show ([false, false, false] : List Bool).length = 3 from rfl]
   have h0 : litSignFn (pair (pair (List.replicate (e / 3) true) []) (E x))
       = [(litOf (Φ x) (e / 3) 0).sign] := hsign 0
@@ -420,7 +420,7 @@ theorem baseKey_pair (hE : ∀ x, E x = (Φ x).encode) (h3 : ∀ x, CNF.Is3CNF (
       = pair (pair [(litOf (Φ x) (e / 3) 0).sign, (litOf (Φ x) (e / 3) 1).sign,
           (litOf (Φ x) (e / 3) 2).sign] (List.replicate (e % 3) true)) a := by
   rw [baseKey, baseSigns_pair E hE h3 x he a, pairFst_pair, pairSnd_pair,
-    pairSnd_pair, modFn_eq (by simp) (List.replicate e true),
+    pairSnd_pair, modFn_eq (List.replicate e true),
     List.length_replicate, show ([false, false, false] : List Bool).length = 3 from rfl,
     List.take_of_length_le (by omega)]
 

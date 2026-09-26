@@ -47,12 +47,7 @@ theorem bitwise_mem_FP_of_mem_P {len : List Bool → ℕ} {b : List Bool → ℕ
     (hLspec : ∀ x i, pair x (List.replicate i true) ∈ L ↔ b x i = true) :
     (fun x => (List.range (len x)).map (b x)) ∈ FP := by
   obtain ⟨g, hgFP, hg⟩ := exists_decisionFn_of_mem_P hL
-  refine bitwise_mem_FP hlen hgFP ?_
-  intro x i
-  have : g (pair x (List.replicate i true)) = b x i := by
-    have h1 := (hg (pair x (List.replicate i true))).symm.trans (hLspec x i)
-    cases hb : b x i <;> cases hgv : g (pair x (List.replicate i true)) <;>
-      simp [hb, hgv] at h1 ⊢
-  rw [this]
+  exact bitwise_mem_FP hlen hgFP fun x i =>
+    congrArg (fun c => [c]) (Bool.eq_iff_iff.mpr ((hg _).symm.trans (hLspec x i)))
 
 end Complexity

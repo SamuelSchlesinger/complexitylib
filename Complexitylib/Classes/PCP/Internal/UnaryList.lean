@@ -71,27 +71,19 @@ theorem length_bitstringEncode_replicate (w : ℕ) :
     (DataEncode.bitstringEncode (List.replicate w true)).length = 4 * w + 2 := by
   rw [DataEncode.bitstringEncode_def, Data.length_toBits, size_encode_replicate]
 
-/-- The unary number an encoded unary string stands for. -/
-noncomputable def unaryOf (e : List Bool) : List Bool :=
-  divFn [false, false, false, false] (dropOne (dropOne e))
+/-- The unary number an encoded unary string stands for: its length without the
+two brackets, divided by four. -/
+def unaryOf (e : List Bool) : List Bool := List.replicate ((e.length - 2) / 4) true
 
 theorem unaryOf_encode (w : ℕ) :
     unaryOf (DataEncode.bitstringEncode (List.replicate w true)) = List.replicate w true := by
-  rw [unaryOf, divFn_eq (by norm_num)]
+  rw [unaryOf, length_bitstringEncode_replicate]
   congr 1
-  have hlen : (dropOne (dropOne
-      (DataEncode.bitstringEncode (List.replicate w true)))).length = 4 * w := by
-    rw [dropOne, dropOne, List.length_drop, List.length_drop,
-      length_bitstringEncode_replicate]
-    omega
-  rw [hlen]
-  norm_num
+  omega
 
 theorem unaryOf_mem_FP {a : List Bool → List Bool} (ha : a ∈ FP) :
-    (fun z => unaryOf (a z)) ∈ FP := by
-  have h := mem_FP_comp (dropOneFn_mem_FP (dropOneFn_mem_FP ha))
-    (divFn_mem_FP [false, false, false, false])
-  exact mem_FP_of_eq h fun z => rfl
+    (fun z => unaryOf (a z)) ∈ FP :=
+  (((UnaryFn.length ha).sub (UnaryFn.const 2)).div (UnaryFn.const 4)).mem_FP
 
 /-! ### Pairs -/
 
@@ -180,10 +172,8 @@ def mulC (c : ℕ) (s : List Bool) : List Bool := List.replicate (s.length * c) 
   rw [mulC, List.length_replicate]
 
 theorem mulC_mem_FP {a : List Bool → List Bool} (ha : a ∈ FP) (c : ℕ) :
-    (fun z => mulC c (a z)) ∈ FP := by
-  have := Cobham.mulLenFn_mem_FP ha (constFn_mem_FP (List.replicate c false))
-  refine mem_FP_of_eq this fun z => ?_
-  rw [mulC, List.length_replicate]
+    (fun z => mulC c (a z)) ∈ FP :=
+  ((UnaryFn.length ha).mul (UnaryFn.const c)).replicate_mem_FP false
 
 /-! ### Writing records -/
 

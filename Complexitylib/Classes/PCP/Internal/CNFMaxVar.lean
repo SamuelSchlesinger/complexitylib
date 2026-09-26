@@ -124,7 +124,7 @@ theorem slotVar_eq (φ : CNF) {i j p : ℕ} (hj : j < φ.length) (hp : p < (φ[j
     (hdj : i / 3 = j) (hdp : i % 3 = p) :
     (slotVar (pair φ.encode (List.replicate i true))).length = ((φ[j]'hj)[p]'hp).var := by
   rw [slotVar, pairSnd_pair, pairFst_pair,
-    divFn_eq (by simp) (List.replicate i true), modFn_eq (by simp) (List.replicate i true)]
+    divFn_eq (List.replicate i true), modFn_eq (List.replicate i true)]
   simp only [List.length_replicate,
     show ([false, false, false] : List Bool).length = 3 from rfl, hdj, hdp]
   rw [litVarFn_encode φ hj hp, List.length_replicate]

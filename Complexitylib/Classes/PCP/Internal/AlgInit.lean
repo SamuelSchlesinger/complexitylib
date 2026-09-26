@@ -94,7 +94,7 @@ theorem baseCodeKey_mem_FP (hE : E ∈ FP) : baseCodeKey E ∈ FP := by
 theorem baseCodeKey_length_le (w : List Bool) : (baseCodeKey E w).length ≤ 12 := by
   have hs : (baseSigns E (pair w [])).length ≤ 3 := length_baseSigns_le E _
   have hm : (modFn [false, false, false] (pairSnd w)).length ≤ 2 := by
-    rw [modFn_eq (by simp), List.length_replicate]
+    rw [modFn_eq, List.length_replicate]
     have : (pairSnd w).length % [false, false, false].length < 3 := by
       simpa using Nat.mod_lt _ (by omega)
     omega
@@ -109,7 +109,7 @@ theorem baseCodeKey_pair (hE : ∀ x, E x = (Φ x).encode) (h3 : ∀ x, CNF.Is3C
       = pair [(litOf (Φ x) (e / 3) 0).sign, (litOf (Φ x) (e / 3) 1).sign,
           (litOf (Φ x) (e / 3) 2).sign] (List.replicate (e % 3) true) := by
   rw [baseCodeKey, baseSigns_pair E hE h3 x he [], pairSnd_pair,
-    modFn_eq (by simp) (List.replicate e true), List.length_replicate,
+    modFn_eq (List.replicate e true), List.length_replicate,
     show ([false, false, false] : List Bool).length = 3 from rfl]
 
 /-! ### The constraint's code, from the key -/

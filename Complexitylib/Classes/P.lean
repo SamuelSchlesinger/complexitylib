@@ -17,6 +17,7 @@ public import Complexitylib.Classes.P.Pairing
 public import Complexitylib.Classes.P.Iterate
 public import Complexitylib.Classes.P.Range
 public import Complexitylib.Classes.P.Unary
+public import Complexitylib.Classes.P.BoundedQuant
 public import Complexitylib.Classes.P.NatCodes
 public import Complexitylib.Classes.P.DataEncode
 import Complexitylib.Models.TuringMachine.Subroutines.CopyOutput
@@ -43,6 +44,8 @@ This file aggregates the definitions and theorems for P, FP, and PSPACE.
 - `mem_P_preimage` — `P` is closed under preimages of functions in `FP`
 - `unaryLength_mem_FP` — materializing the unary input length belongs to `FP`
 - `ite_mem_finset_mem_FP` — functions supported on a finite set belong to `FP`
+- `mem_FP_of_bounded_key`, `FPPred.of_bounded_key` — any value or test of a
+  polynomial-time key of bounded length is polynomial-time
 - `CobhamFP_eq_FP` — Cobham's machine-independent characterization of `FP`
 - `iterate_mem_FP`, `iterate_mem_FP_of_polyBound`, `iterate_mem_FP_of_step_le`,
   `iterate_mem_FP_along` — iterating a polynomial-time step is polynomial-time
@@ -55,6 +58,8 @@ This file aggregates the definitions and theorems for P, FP, and PSPACE.
   (written in unary) and polynomial-time tests: arithmetic, comparisons,
   connectives, case distinction, bounded loops, division, capped powers and
   logarithms
+- `FPPred.forall_lt`, `FPPred.exists_lt` — quantifying a polynomial-time test
+  over the indices below a polynomial-time number
 - `toBitsLE_mem_FP`, `bits_mem_FP`, `UnaryFn.fromBitsLE_min` — writing a
   polynomial-time number in binary, and reading a binary numeral back below a
   polynomial-time cap

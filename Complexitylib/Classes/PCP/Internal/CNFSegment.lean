@@ -6,6 +6,7 @@ Authors: Bolton Bailey
 module
 public import Complexitylib.Classes.PCP.Internal.CNFCount
 public import Complexitylib.Classes.PCP.Internal.PositionsFP
+public import Complexitylib.Classes.PCP.Internal.UnaryDivMod
 
 /-!
 # Cutting out one clause of an encoded formula
