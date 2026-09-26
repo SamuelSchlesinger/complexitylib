@@ -1184,7 +1184,9 @@ existing logics rather than a restriction imposed on them.
 
 \begin{definition}[Arithmetic second-order certificate verification]
   \label{def:desc-so-verifier-code}
-
+  \lean{Complexity.DescriptiveComplexity.SOFormula.evalMatrixCode,
+    Complexity.DescriptiveComplexity.SOFormula.checkCertificateCode}
+  \leanok
   \uses{def:desc-arithmetic-model-checking, def:desc-exist-so-certificate}
   Supply each free relation as its truth-table string. Matrix evaluation uses
   arithmetic structure reads and tuple indices into these relation tables.
@@ -1196,7 +1198,10 @@ existing logics rather than a restriction imposed on them.
 
 \begin{theorem}[Arithmetic and semantic certificate checkers agree]
   \label{thm:desc-so-verifier-code}
-
+  \lean{Complexity.DescriptiveComplexity.SOFormula.evalMatrixCode_encodeStruct,
+    Complexity.DescriptiveComplexity.SOFormula.evalMatrixCode_eq_evalMatrixB,
+    Complexity.DescriptiveComplexity.SOFormula.checkCertificateCode_encodeStruct}
+  \leanok
   \uses{def:desc-so-verifier-code, thm:desc-matrix-model-checking,
     thm:desc-so-certificate-encoding, thm:desc-arithmetic-model-checking}
   On an encoded structure and canonical encodings of free relation tables,
@@ -1207,7 +1212,7 @@ existing logics rather than a restriction imposed on them.
   relation environments.
 \end{theorem}
 \begin{proof}
-
+  \leanok
   Induct on the matrix, using arithmetic tuple lookup for relation-variable
   atoms. Induct along the existential prefix for certificate checking. Singleton
   relation decoding succeeds exactly when its block has the required length;
@@ -1216,7 +1221,11 @@ existing logics rather than a restriction imposed on them.
 
 \begin{theorem}[Existential-SO certificate checking is polynomial-time]
   \label{thm:desc-so-verifier-polytime}
-
+  \lean{Complexity.DescriptiveComplexity.SOFormula.evalMatrixCode_fpPred,
+    Complexity.DescriptiveComplexity.SOFormula.checkCertificateCode_fpPred,
+    Complexity.DescriptiveComplexity.SOSentence.checkEncoded_fpPred,
+    Complexity.DescriptiveComplexity.SOSentence.checkEncoded_mem_FP}
+  \leanok
   \uses{def:desc-so-verifier-code, thm:desc-encoding-access-polytime,
     lem:polytime-string-access, lem:polytime-unary-closure, def:FP}
   For a fixed matrix or existential-SO formula, arithmetic verification is a
@@ -1231,7 +1240,7 @@ existing logics rather than a restriction imposed on them.
   of incorrect certificate lengths. The formula is a fixed parameter.
 \end{theorem}
 \begin{proof}
-
+  \leanok
   \uses{thm:desc-so-verifier-code, thm:desc-valid-encodings-P}
   Induct on the matrix using polynomial-time table reads, Boolean operations,
   and bounded first-order quantifiers. Induct along the existential prefix using
@@ -1600,16 +1609,23 @@ existing logics rather than a restriction imposed on them.
 
 \begin{theorem}[Fagin, $\exists\cc{SO} \subseteq \cc{NP}$]
   \label{thm:desc-fagin-upper}
+  \lean{Complexity.DescriptiveComplexity.SOSentence.queryLanguage_mem_NP,
+    Complexity.DescriptiveComplexity.ExistSODefinable.queryLanguage_mem_NP}
+  \leanok
   \uses{def:desc-existential-so, def:desc-so-semantics, def:desc-so-definable, def:desc-query-language, def:NP}
   Let $\varphi$ be a second-order sentence in $\exists\cc{SO}$ form that defines
-  $Q$. Then the language of $Q$ is in $\cc{NP}$.
+  $Q$. Then the language of $Q$ is in the existing machine class $\cc{NP}$,
+  with every malformed structure encoding rejected.
 \end{theorem}
 \begin{proof}
-  \uses{thm:desc-model-checking, thm:desc-fo-in-P, thm:desc-encoding-roundtrip}
-  The certificate is the truth tables of the quantified relations, of polynomial
-  total length $\sum_j n^{k_j}$. The verifier model-checks the FO matrix under
-  the resulting relation environment, extending \texttt{evalB} to relation
-  variables.
+  \leanok
+  \uses{thm:desc-exist-so-certificate, thm:desc-so-verifier-polytime,
+    lem:polytime-guess-verify}
+  The binary checker is polynomial-time, accepts some certificate exactly on
+  the query language, and accepts only certificates of length at most
+  $p(|x|)=\sum_j|x|^{k_j}$. Apply the proved guess-and-verify NTM construction to
+  this verifier and bound. This formalizes Immerman, Section~7.1,
+  Proposition~7.6; the converse tableau construction is a separate theorem.
 \end{proof}
 
 \begin{theorem}[Fagin, $\cc{NP} \subseteq \exists\cc{SO}$]
