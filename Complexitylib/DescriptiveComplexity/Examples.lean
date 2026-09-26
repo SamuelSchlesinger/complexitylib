@@ -94,8 +94,8 @@ def cycle3Iso : Iso cycle3 cycle3' where
   const_map j := Fin.elim0 j
 
 /-- The binary string "101" of length 3: positions 0 and 2 are 1-bits.
-    `Fin 3` supplies a canonical meta-level ordering; ordered formula atoms are
-    not yet part of the first-order syntax. -/
+    This base vocabulary contains only the bit relation. The `Numerical` module's
+    canonical expansion can additionally make order available to formulas. -/
 def string101 : FinStruct stringBuiltinOrder where
   card := 3
   hcard := by omega

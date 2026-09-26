@@ -19,8 +19,8 @@ public import Complexitylib.DescriptiveComplexity.Vocabulary
 
   Canonical numeric operations (min, max, ≤, succ) are not stored in the
   structure but are available as meta-level helpers computed from the `Fin`
-  ordering. The current first-order syntax does not yet contain terms or atoms
-  that can reference these helpers.
+  ordering. The separate `Numerical` module adds canonical vocabulary extensions
+  for strict order, BIT, addition, and multiplication, usable as ordinary FO atoms.
 -/
 
 

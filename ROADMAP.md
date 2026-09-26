@@ -320,18 +320,19 @@ packing, relation tables, and constant blocks produce the existing interpreted
 structure's encoding, of full length `encodingLength W (tags * n ^ dim)`.
 Its `FP` bound is the remaining part of the tagged encoding bridge.
 
-The logic still has no built-in order, `BIT`, `ADD`, or `MUL`. Add canonical
-numerical-predicate extensions and explicit formula translations proving
-`FO[BIT] = FO[ADD, MUL]`; arithmetic in the encoder does not supply these logical
-predicates. Use ternary addition and multiplication relations restricted from
-natural arithmetic, with no modular wraparound. Keep this as a sequence of
-small checked layers, with the corresponding blueprint nodes in each commit.
+Canonical numerical extensions now expose strict order, `BIT`, `ADD`, and `MUL`
+as ordinary FO atoms, with proved semantics and computable expansions. Input
+formulas embed without changing truth. Addition and multiplication are ternary
+relations restricted from natural arithmetic, without modular wraparound.
+Next add derived successor and endpoint formulas, then explicit formula
+translations proving `FO[BIT] = FO[ADD, MUL]`. Keep this as a sequence of small
+checked layers, with the corresponding blueprint nodes in each commit.
 
 Other next priorities are the tagged encoding machine bound, tagged SO transport,
 and the converse of Fagin's theorem. The NP-to-ESO direction still needs
 a tuple-indexed computation tableau and a guessed order; Immerman--Vardi needs
 fixed-point logic and both capture directions. The ordered `FO[BIT]` capture of uniform
-`AC0` needs a uniformity predicate and an ordered syntax. Domain restrictions
+`AC0` still needs a uniformity predicate and both capture directions. Domain restrictions
 and exact projections remain distinct extensions.
 
 ## Quality gates

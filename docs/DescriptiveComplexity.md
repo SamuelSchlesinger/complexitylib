@@ -53,10 +53,15 @@ here are written against our syntax; no companion-library source was vendored.
 ## Present boundary
 
 Our structures use `Fin n`, require `n ≥ 2`, and allow relation and constant
-symbols. The syntax uses de Bruijn indices and has no built-in order atoms.
-It also has no built-in `BIT`, `ADD`, or `MUL` predicates. The canonical order
-helpers on `Fin n` and the arithmetic used to access binary encodings are outside
-the object logic. No theorem `FO[BIT] = FO[ADD, MUL]` is formalized here.
+symbols. The syntax uses de Bruijn indices. `Vocabulary.withNumerical` appends
+selected symbols for canonical strict order, `BIT`, `ADD`, and `MUL`, interpreted
+on canonical expansions by `FinStruct.withNumerical`. These are ordinary FO
+relation atoms with proved semantics. `BIT(x, i)` tests zero-based bit `i` of `x`;
+addition and multiplication are ternary graphs of natural arithmetic restricted
+to the universe, without modular wraparound. `FODefinableWithNumerical` requires
+correctness only on those canonical expansions. Such queries may depend on the
+labeling of the original input structure. No theorem `FO[BIT] = FO[ADD, MUL]`
+is formalized here.
 `BooleanQuery.IsOrderIndependent` means invariance under structure isomorphism;
 it is distinct from independence of an auxiliary order in an ordered logic.
 The companion library instead uses Mathlib model theory and quantifies its
@@ -69,8 +74,15 @@ to source constants. Its `FOReduces` relation composes and transports FO truth.
 Immerman's exact first-order projection normal form. The existing `Embedding`
 already preserves and reflects relations; `InjectiveHom` is the weaker notion.
 
-This change adds:
+Completed layers include:
 
+- Canonical numerical vocabulary profiles and formula atoms (`Numerical.lean`).
+  The order, BIT, and arithmetic profiles select exactly `<`, `BIT`, and
+  `ADD`/`MUL`, respectively. Forgetting the added symbols recovers the input
+  structure, embedding input formulas preserves satisfaction, and the computable
+  expansion agrees with the propositional one. The existing Boolean evaluator
+  therefore works on these extensions. The conventions follow Schweikardt and
+  Schwentick, [*A note on the expressive power of linear orders*, Section 2](https://lmcs.episciences.org/1008/pdf).
 - SO formula transport with arbitrary free element and relation environments,
   preserving both FO matrices and existential SO prefixes, and SO reduction
   closure (`SecondOrder/Reduction.lean`).
@@ -278,12 +290,11 @@ The graph constructions are semantic examples, not completeness or hardness resu
    existing bit-string encoding. Encoding validation and the length-zero case
    complete the `CircuitFamily` construction and prove nonuniform `FO ⊆ AC0`.
    Next use the bridge with circuit lower bounds to obtain inexpressibility
-   results. Develop the ordered `FO[BIT]` capture of uniform `AC0` separately;
-   its uniformity predicate and ordered syntax are not defined yet.
-   First add canonical numerical-predicate extensions for `<`, `BIT`, `ADD`,
-   and `MUL`. Interpret addition and multiplication as ternary graphs of natural
-   arithmetic restricted to the finite universe, with no modular wraparound.
-   Prove explicit formula translations for `FO[BIT] = FO[ADD, MUL]`, uniformly
+   results. Canonical numerical-predicate extensions for `<`, `BIT`, `ADD`,
+   and `MUL` are implemented with semantic correctness and computable expansion.
+   Develop the `FO[BIT]` capture of uniform `AC0` separately; its uniformity
+   predicate is not defined yet. Next prove explicit formula translations for
+   `FO[BIT] = FO[ADD, MUL]`, uniformly
    in the universe size. The mathematical equivalence, including definability
    of order from `BIT`, is stated in Schweikardt and Schwentick,
    [*A note on the expressive power of linear orders*, Theorem 1.1](https://lmcs.episciences.org/1008/pdf).
@@ -297,8 +308,9 @@ The graph constructions are semantic examples, not completeness or hardness resu
    only after both directions compile; then transfer structural completeness to
    machine `NPComplete` via the encoding bridge.
 6. **Grow a catalog and the logics together.** Use SAT/3SAT, fixed-color graph
-   coloring, independent set and vertex cover to test the reduction API. Add
-   ordered vocabulary extensions, tuple transitive closure, and monotone least
+   coloring, independent set and vertex cover to test the reduction API. Extend
+   the order interface with derived successor and endpoint formulas; add tuple
+   transitive closure and monotone least
    fixed points with bounded finite iteration. Prioritize reachability and
    circuit value as consumers before NL and P capture. Partial fixed points and
    SO alternation can then connect to PSPACE and the existing PH. Keep exact

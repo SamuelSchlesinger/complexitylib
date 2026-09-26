@@ -11,6 +11,8 @@ are formalized:
     injective homomorphisms and substructure inclusions between them;
   \item first-order logic with de Bruijn variables, substitution, and invariance
     under isomorphism;
+  \item canonical vocabulary extensions for strict order, BIT, addition, and
+    multiplication, with atomic semantics and preservation of input formulas;
   \item Boolean queries, order independence, and first-order definability;
   \item second-order logic, its $\exists\cc{SO}$ fragment, and invariance under
     isomorphism;
@@ -69,11 +71,13 @@ are recorded in \texttt{docs/DescriptiveComplexity.md}.
 $n \ge 2$ (Immerman's Proviso~1.15). Queries are properties of structures with
 $\mathrm{Prop}$-valued relations. The encoding and the model checker take
 decidable structures, whose relations are $\mathrm{Bool}$-valued and which coerce
-to ordinary structures. The canonical order on $\mathrm{Fin}(n)$ is available as
-meta-level helpers, but the first- and second-order syntax is unordered, so
-formulas cannot mention it. Order independence is therefore a theorem about the
-existing logics rather than a restriction imposed on them. There are no built-in
-BIT, addition, or multiplication predicates in the current syntax either.
+to ordinary structures. The core syntax treats all relation symbols uniformly.
+Explicit numerical vocabulary extensions make canonical order, BIT, addition,
+and multiplication available as ordinary first-order atoms. Their definability
+predicate evaluates sentences only on canonical expansions of input structures;
+the resulting queries may depend on the input labeling. The existing
+isomorphism-invariance theorem concerns the entire vocabulary, including any
+added symbols, and does not assert independence from an auxiliary order.
 
 \section{Vocabularies and finite structures}
 
@@ -1778,26 +1782,74 @@ BIT, addition, or multiplication predicates in the current syntax either.
 
 \begin{definition}[Ordered first-order logic]
   \label{def:desc-ordered-fo}
+  \lean{Complexity.DescriptiveComplexity.Vocabulary.withOrder,
+    Complexity.DescriptiveComplexity.Formula.orderLt}
+  \leanok
   \uses{def:desc-fo-syntax, def:desc-structure}
-  A vocabulary extension with designated relations for canonical order and
-  successor, and constants for minimum and maximum, on $\mathrm{Fin}(n)$.
-  Interpret this vocabulary by the existing meta-level helpers, making these
-  relations available to formulas. The existing unordered syntax and its unrestricted
-  invariance theorem stay unchanged. Ordered sentences are preserved only by maps
-  that respect the canonical order, and they need not define order-independent
-  queries.
+  Append a designated binary relation for canonical strict order on
+  $\mathrm{Fin}(n)$, retaining the input relations and constants. Order atoms
+  use the existing first-order syntax. Satisfaction on canonical expansions
+  can depend on the labeling of the original structure. Derived successor and
+  endpoint formulas remain planned.
 \end{definition}
 
 \begin{definition}[Canonical numerical predicates]
   \label{def:desc-numerical-predicates}
+  \lean{Complexity.DescriptiveComplexity.NumericalPredicate,
+    Complexity.DescriptiveComplexity.NumericalPredicate.Holds,
+    Complexity.DescriptiveComplexity.Vocabulary.withNumerical,
+    Complexity.DescriptiveComplexity.Vocabulary.withBit,
+    Complexity.DescriptiveComplexity.Vocabulary.withArithmetic,
+    Complexity.DescriptiveComplexity.FinStruct.withNumerical,
+    Complexity.DescriptiveComplexity.DecFinStruct.withNumerical,
+    Complexity.DescriptiveComplexity.FOInterpretation.forgetNumerical,
+    Complexity.DescriptiveComplexity.Formula.withNumerical,
+    Complexity.DescriptiveComplexity.Formula.numerical,
+    Complexity.DescriptiveComplexity.Formula.bit,
+    Complexity.DescriptiveComplexity.Formula.add,
+    Complexity.DescriptiveComplexity.Formula.mul,
+    Complexity.DescriptiveComplexity.FODefinableWithNumerical}
+  \leanok
   \uses{def:desc-ordered-fo, def:desc-structure}
   On $\{0,\ldots,n-1\}$, let $\mathrm{BIT}(x,i)$ hold when bit $i$ of $x$ is
-  one, $\mathrm{ADD}(x,y,z)$ when $x+y=z$ in $\mathbb N$, and
+  one (counting from zero), $\mathrm{ADD}(x,y,z)$ when $x+y=z$ in $\mathbb N$, and
   $\mathrm{MUL}(x,y,z)$ when $xy=z$ in $\mathbb N$. The latter two are ternary
   relations restricted to the universe, without modular wraparound. Extend
   each input vocabulary by the selected predicates with these fixed semantics.
-  These logical extensions have not yet been implemented.
+  Definability means agreement with a single sentence on every canonical
+  expansion. The BIT profile adds only BIT; the arithmetic profile adds only
+  ADD and MUL. These conventions follow Schweikardt and Schwentick,
+  \emph{A note on the expressive power of linear orders}, Section~2 (2011),
+  \url{https://lmcs.episciences.org/1008/pdf}.
 \end{definition}
+
+\begin{theorem}[Semantics of canonical numerical expansion]
+  \label{thm:desc-numerical-semantics}
+  \lean{Complexity.DescriptiveComplexity.FOInterpretation.forgetNumerical_apply,
+    Complexity.DescriptiveComplexity.Formula.withNumerical_sat,
+    Complexity.DescriptiveComplexity.Formula.numerical_sat,
+    Complexity.DescriptiveComplexity.Formula.orderLt_sat,
+    Complexity.DescriptiveComplexity.Formula.bit_sat,
+    Complexity.DescriptiveComplexity.Formula.add_sat,
+    Complexity.DescriptiveComplexity.Formula.mul_sat,
+    Complexity.DescriptiveComplexity.DecFinStruct.withNumerical_toFinStruct,
+    Complexity.DescriptiveComplexity.FODefinable.withNumerical}
+  \leanok
+  \uses{def:desc-numerical-predicates, def:desc-fo-semantics}
+  Forgetting the added symbols recovers the original structure. Translating an
+  input formula into the extended vocabulary preserves satisfaction under every
+  free-variable assignment, so FO definitions remain definitions after expansion.
+  Each numerical atom holds exactly when its evaluated arguments satisfy the
+  designated natural-number relation. The Boolean expansion agrees with the
+  propositional expansion.
+\end{theorem}
+\begin{proof}
+  \leanok
+  Split relation indices into input and numerical symbols. For input formulas,
+  apply satisfaction transport through the interpretation that forgets the
+  numerical symbols. Numerical atoms and Boolean expansion follow directly
+  from their definitions.
+\end{proof}
 
 \begin{theorem}[BIT and arithmetic have the same first-order expressive power]
   \label{thm:desc-bit-arithmetic}

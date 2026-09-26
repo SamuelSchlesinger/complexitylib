@@ -16,6 +16,7 @@ public import Complexitylib.DescriptiveComplexity.SecondOrder.Reduction
 public import Complexitylib.DescriptiveComplexity.SecondOrder.Definable
 public import Complexitylib.DescriptiveComplexity.SecondOrder.PolynomialTime
 public import Complexitylib.DescriptiveComplexity.Definable
+public import Complexitylib.DescriptiveComplexity.Numerical
 public import Complexitylib.DescriptiveComplexity.Reduction
 public import Complexitylib.DescriptiveComplexity.Reduction.Encoding
 public import Complexitylib.DescriptiveComplexity.Interpretation
@@ -71,6 +72,10 @@ encodings and induce polynomial-time many-one reductions. Combining these with
 an ESO target witness transfers known NP-hardness to machine NP-completeness.
 Tagged interpretations also have exact arithmetic encoding semantics, including
 their packed constants; their polynomial-time machine bound remains open.
+Canonical vocabulary extensions expose strict order, BIT, addition, and
+multiplication as ordinary FO atoms. Their natural-number semantics and the
+truth-preserving embedding of input formulas are proved. `FO[BIT] = FO[ADD, MUL]`
+and uniform circuit capture remain planned.
 Worked examples include an SO
 definition and executable witness checker for bipartiteness, the two-copy graph
 interpretation, and a disjoint-copy
