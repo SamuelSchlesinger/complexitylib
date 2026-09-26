@@ -1690,6 +1690,50 @@ existing logics rather than a restriction imposed on them.
   transports the supplied source hardness.
 \end{proof}
 
+\begin{definition}[Tagged interpretations on binary encodings]
+  \label{def:desc-tagged-encoding}
+  \lean{Complexity.DescriptiveComplexity.TaggedFOInterpretation.applyDec,
+    Complexity.DescriptiveComplexity.TaggedFOInterpretation.relationEnvCode,
+    Complexity.DescriptiveComplexity.TaggedFOInterpretation.relationBitCode,
+    Complexity.DescriptiveComplexity.TaggedFOInterpretation.relationTableCode,
+    Complexity.DescriptiveComplexity.TaggedFOInterpretation.constantCode,
+    Complexity.DescriptiveComplexity.TaggedFOInterpretation.rawEncoding,
+    Complexity.DescriptiveComplexity.TaggedFOInterpretation.mapEncoding}
+  \leanok
+  \uses{def:desc-tagged-interpretation, def:desc-arithmetic-model-checking,
+    def:desc-decoder}
+  Evaluate the interpretation on decidable structures. An arithmetic generator
+  extracts tags by division, coordinates by base expansion, selects a defining
+  relation formula from the fixed finite tag cases, and packs source-constant
+  tuples. The binary map decodes, interprets, and re-encodes; malformed inputs
+  map to $[]$.
+\end{definition}
+
+\begin{theorem}[Exact encoded semantics of tagged interpretations]
+  \label{thm:desc-tagged-encoding}
+  \lean{Complexity.DescriptiveComplexity.TaggedFOInterpretation.elementEquiv_tag_val,
+    Complexity.DescriptiveComplexity.TaggedFOInterpretation.elementEquiv_coord_val,
+    Complexity.DescriptiveComplexity.TaggedFOInterpretation.elementEquiv_symm_val,
+    Complexity.DescriptiveComplexity.TaggedFOInterpretation.applyDec_toFinStruct,
+    Complexity.DescriptiveComplexity.TaggedFOInterpretation.rawEncoding_encodeStruct,
+    Complexity.DescriptiveComplexity.TaggedFOInterpretation.rawEncoding_length,
+    Complexity.DescriptiveComplexity.TaggedFOInterpretation.mapEncoding_encodeStruct,
+    Complexity.DescriptiveComplexity.TaggedFOInterpretation.mapEncoding_of_decode_eq_none}
+  \leanok
+  \uses{def:desc-tagged-encoding, thm:desc-arithmetic-addresses,
+    thm:desc-arithmetic-model-checking}
+  Arithmetic generation equals the encoding of the existing interpreted
+  structure exactly. Its length is $\ell_W(t n^d)$, including every relation
+  and constant block. The binary map has the asserted valid-input behavior and
+  rejects malformed encodings. Its polynomial-time machine bound remains open.
+\end{theorem}
+\begin{proof}
+  \leanok
+  The product equivalence uses quotient and remainder; the tuple equivalence
+  uses the same little-endian positional numeral as the encoder. These
+  identities identify each generated relation and constant block.
+\end{proof}
+
 \section{Capturing complexity classes}
 
 \begin{definition}[Ordered first-order logic]

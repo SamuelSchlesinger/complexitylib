@@ -27,6 +27,7 @@ public import Complexitylib.DescriptiveComplexity.Interpretation.Pullback
 public import Complexitylib.DescriptiveComplexity.Interpretation.Composition
 public import Complexitylib.DescriptiveComplexity.Problem
 public import Complexitylib.DescriptiveComplexity.TaggedReduction
+public import Complexitylib.DescriptiveComplexity.TaggedReduction.Encoding
 public import Complexitylib.DescriptiveComplexity.Problems.Coloring
 public import Complexitylib.DescriptiveComplexity.Problems.Interpretations
 public import Complexitylib.DescriptiveComplexity.Problems.Copies
