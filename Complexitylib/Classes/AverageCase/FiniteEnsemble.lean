@@ -64,7 +64,7 @@ theorem uniformProbability_union_le {Ω : Type u}
 
 /-- Conditioning by a finite partition of a uniform sample space. -/
 theorem uniformProbability_eq_sum_fiberwise
-    {Ω : Type u} {ι : Type v} [Fintype Ω] [DecidableEq Ω]
+    {Ω : Type u} {ι : Type v} [Fintype Ω]
     [DecidableEq ι] (event : Finset Ω) (indices : Finset ι) (f : Ω → ι)
     (hmaps : (event : Set Ω).MapsTo f indices) :
     uniformProbability event =
@@ -74,8 +74,8 @@ theorem uniformProbability_eq_sum_fiberwise
 
 /-- Independent finite uniform seeds multiply event probabilities. -/
 theorem uniformProbability_product
-    {Ω : Type u} {Ξ : Type v} [Fintype Ω] [DecidableEq Ω]
-    [Fintype Ξ] [DecidableEq Ξ] (P : Ω → Prop) (Q : Ξ → Prop)
+    {Ω : Type u} {Ξ : Type v} [Fintype Ω]
+    [Fintype Ξ] (P : Ω → Prop) (Q : Ξ → Prop)
     [DecidablePred P] [DecidablePred Q] :
     uniformProbability
         (Finset.univ.filter fun seed : Ω × Ξ => P seed.1 ∧ Q seed.2) =
@@ -85,16 +85,11 @@ theorem uniformProbability_product
 
 /-- Uniform probability on a product is the average of its conditional fiber
 probabilities over the first coordinate. -/
--- The signature mirrors the family this belongs to; the argument is part of
--- that shape even where this member does not consult it.
-@[nolint unusedArguments]
 theorem uniformProbability_product_eq_average_fibers
     {advice : Type u} {challenge : Type v}
-    [Fintype advice] [DecidableEq advice] [Nonempty advice]
-    [Fintype challenge] [DecidableEq challenge] [Nonempty challenge]
+    [Fintype advice] [Nonempty advice]
+    [Fintype challenge] [Nonempty challenge]
     (event : advice → challenge → Prop)
-    [DecidablePred fun sample : advice × challenge =>
-      event sample.1 sample.2]
     [∀ fixed, DecidablePred (event fixed)] :
     uniformProbability (Finset.univ.filter fun sample : advice × challenge =>
         event sample.1 sample.2) =
@@ -105,16 +100,11 @@ theorem uniformProbability_product_eq_average_fibers
 
 /-- Some first-coordinate fiber has probability at least the joint product
 probability. -/
--- The signature mirrors the family this belongs to; the argument is part of
--- that shape even where this member does not consult it.
-@[nolint unusedArguments]
 theorem exists_fiber_uniformProbability_ge
     {advice : Type u} {challenge : Type v}
-    [Fintype advice] [DecidableEq advice] [Nonempty advice]
-    [Fintype challenge] [DecidableEq challenge] [Nonempty challenge]
+    [Fintype advice] [Nonempty advice]
+    [Fintype challenge] [Nonempty challenge]
     (event : advice → challenge → Prop)
-    [DecidablePred fun sample : advice × challenge =>
-      event sample.1 sample.2]
     [∀ fixed, DecidablePred (event fixed)] :
     ∃ fixed : advice,
       uniformProbability (Finset.univ.filter fun sample : advice × challenge =>
@@ -125,7 +115,7 @@ theorem exists_fiber_uniformProbability_ge
 /-- If a finite statistic is at most one, its mean is bounded by a threshold
 plus the probability of exceeding that threshold times the remaining range. -/
 theorem uniformMean_le_threshold_add_probability
-    {sample : Type u} [Fintype sample] [DecidableEq sample]
+    {sample : Type u} [Fintype sample]
     [Nonempty sample] (value : sample → ℚ) (threshold : ℚ)
     (hupper : ∀ input, value input ≤ 1) :
     uniformMean value ≤ threshold +
@@ -135,7 +125,7 @@ theorem uniformMean_le_threshold_add_probability
 
 /-- Exact reverse averaging bound for a statistic bounded above by one. -/
 theorem uniformMean_sub_div_le_probability_ge
-    {sample : Type u} [Fintype sample] [DecidableEq sample]
+    {sample : Type u} [Fintype sample]
     [Nonempty sample] (value : sample → ℚ) (lower threshold : ℚ)
     (hupper : ∀ input, value input ≤ 1)
     (hlower : lower ≤ uniformMean value) (hthreshold : threshold < 1) :
@@ -149,7 +139,7 @@ theorem uniformMean_sub_div_le_probability_ge
 `1/2 + ε` forces an `ε/2` fraction of samples to have value at least
 `1/2 + ε/2`. -/
 theorem half_epsilon_le_probability_ge_of_le_uniformMean
-    {sample : Type u} [Fintype sample] [DecidableEq sample]
+    {sample : Type u} [Fintype sample]
     [Nonempty sample] (value : sample → ℚ) (epsilon : ℚ)
     (hepsilon : 0 ≤ epsilon) (hupper : ∀ input, value input ≤ 1)
     (hmean : 1 / 2 + epsilon ≤ uniformMean value) :
@@ -207,8 +197,8 @@ theorem half_le_uniformAtLeastOneProbability_of_singleDrawLower
 /-- Relabeling a finite uniform sample space by an equivalence preserves event
 probability. -/
 theorem uniformProbability_equiv
-    {Ω : Type u} {Ξ : Type v} [Fintype Ω] [DecidableEq Ω]
-    [Fintype Ξ] [DecidableEq Ξ] (e : Ω ≃ Ξ) (P : Ξ → Prop)
+    {Ω : Type u} {Ξ : Type v} [Fintype Ω]
+    [Fintype Ξ] (e : Ω ≃ Ξ) (P : Ξ → Prop)
     [DecidablePred P] :
     uniformProbability (Finset.univ.filter fun x : Ω => P (e x)) =
       uniformProbability (Finset.univ.filter P) :=

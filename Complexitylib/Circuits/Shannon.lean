@@ -5,6 +5,7 @@ Authors: Samuel Schlesinger
 -/
 
 module
+public import Complexitylib.Circuits.AndOrNot
 public import Complexitylib.Circuits.Internal.ShannonBridge
 public import Complexitylib.Circuits.Internal.ShannonUpper
 
@@ -30,7 +31,8 @@ The main theorem is `shannon_lower_bound_circuit`:
 The statement uses the library's total `Circuit.size`; for a single-output
 circuit this is `G + 1`.
 
-When `Basis.andOr2` is known to be complete, this yields a
+Since `Basis.andOr2` is complete (the `CompleteBasis Basis.andOr2` instance
+of `Complexitylib.Circuits.AndOrNot`, imported here), this yields a
 `sizeComplexity` bound via `shannon_sizeComplexity`.
 
 * `shannon_upper_bound` — for sufficiently large `N`, every Boolean function
@@ -61,8 +63,7 @@ theorem shannon_lower_bound_circuit (N : Nat) [NeZero N] (hN : 6 ≤ N) :
 /-- **Shannon lower bound in terms of `sizeComplexity`**: for `N ≥ 6`,
     there exists a Boolean function whose fan-in-2 AND/OR circuit complexity
     exceeds `2^N / (5N)`. -/
-theorem shannon_sizeComplexity (N : Nat) [NeZero N] (hN : 6 ≤ N)
-    [CompleteBasis Basis.andOr2] :
+theorem shannon_sizeComplexity (N : Nat) [NeZero N] (hN : 6 ≤ N) :
     ∃ f : BitString N → Bool,
       Circuit.sizeComplexity Basis.andOr2 f > 2 ^ N / (5 * N) := by
   obtain ⟨f, hf⟩ := shannon_lower_bound_circuit N hN
@@ -80,7 +81,7 @@ theorem shannon_sizeComplexity (N : Nat) [NeZero N] (hN : 6 ≤ N)
     `(1 + o(1)) · 2^N / N` bound due to Lupanov (1958) is
     `Complexity.lupanov_sizeComplexity` in `Complexitylib.Interop.Cslib.Circuit`,
     transferred from CSLib. -/
-theorem shannon_upper_bound [CompleteBasis Basis.andOr2]
+theorem shannon_upper_bound
     (N : Nat) (hN : 16 ≤ N) [NeZero N]
     (f : BitString N → Bool) :
     Circuit.sizeComplexity Basis.andOr2 f ≤ 18 * 2 ^ N / N := by

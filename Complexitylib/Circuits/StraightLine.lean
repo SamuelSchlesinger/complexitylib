@@ -6,18 +6,23 @@ Authors: Samuel Schlesinger
 
 module
 public import Complexitylib.Circuits.StraightLine.Defs
+public import Complexitylib.Circuits.Dependency.Defs
 
 /-!
 # Typed circuits as CSLib straight-line programs
 
 This file proves that `Circuit.toStraightLine`, which turns a typed circuit
-over a basis `B` into a CSLib circuit over `B.signature`, preserves both the
-computed function and the size. It is the correspondence on which the move of
-Complexitylib's circuit developments to CSLib's model rests (see
-`ROADMAP.md`, item 7).
+over a basis `B` into a CSLib circuit over `B.signature`, preserves the computed
+function, the size, and the total fan-in, and that its outputs are gates
+(`Cslib.Circuits.Circuit.GatedOutputs`). It is the correspondence on which the
+move of Complexitylib's circuit developments to CSLib's model rests (see
+`ROADMAP.md`, item 7). The correspondence proved here runs one way, from typed
+circuits to CSLib circuits; the translation back is not yet formalized.
 
 ## Main results
 
+- `Complexity.Basis.interpretation_kind` — the interpretation of a gate's kind
+  is the gate's evaluation
 - `Complexity.StraightLine.eval_ofLines` — each gate of a program built from
   lines evaluates its line on the values of the earlier gates
 - `Complexity.StraightLine.index_wireOfIndex` — the wire with index `w` in the
@@ -26,6 +31,10 @@ Complexitylib's circuit developments to CSLib's model rests (see
   typed circuit computes
 - `Complexity.Circuit.size_toStraightLine` — the translation has the typed
   circuit's size
+- `Complexity.Circuit.gatedOutputs_toStraightLine` — every output of the
+  translation is an internal gate
+- `Complexity.Circuit.totalFanIn_toStraightLine` — the translation has the typed
+  circuit's total fan-in
 -/
 
 
@@ -34,6 +43,13 @@ public section
 namespace Complexity
 
 open Cslib.Circuits
+
+/-- The interpretation of a gate's kind, applied to the values of the gate's
+input wires, is the gate's evaluation: `Basis.interpretation` negates the
+flagged inputs and applies the operation exactly as `Gate.eval` does. -/
+theorem Basis.interpretation_kind {B : Basis} {W : ℕ} (g : Gate B W) (v : BitString W) :
+    B.interpretation g.kind (v ∘ g.inputs) = g.eval v :=
+  rfl
 
 namespace StraightLine
 
@@ -149,6 +165,30 @@ theorem eval_toStraightLine (c : Circuit B N M G) (x : BitString N) :
 /-- **The straight-line form has the typed circuit's size.** -/
 theorem size_toStraightLine (c : Circuit B N M G) : c.toStraightLine.size = c.size :=
   rfl
+
+/-- **The straight-line form has gated outputs.** Its outputs are the last `M`
+gates, the typed circuit's output gates, never an original input. -/
+theorem gatedOutputs_toStraightLine (c : Circuit B N M G) : c.toStraightLine.GatedOutputs :=
+  fun _ => trivial
+
+/-- **The straight-line form has the typed circuit's total fan-in.** CSLib's
+`Circuit.totalFanIn` of the translation, the sum of the arities of its lines,
+equals the typed circuit's `Circuit.totalFanIn`, the sum of the fan-ins of its
+internal and output gates. -/
+theorem totalFanIn_toStraightLine (c : Circuit B N M G) :
+    c.toStraightLine.totalFanIn = c.totalFanIn := by
+  change (Program.ofLines (G + M) c.straightLineAt).totalFanIn = _
+  rw [Program.totalFanIn_eq_sum_lines, Circuit.totalFanIn, Fin.sum_univ_add]
+  simp only [Program.lines_ofLines, Line.mapWires]
+  congr 1
+  · refine Finset.sum_congr rfl fun i _ => ?_
+    simp [straightLineAt, Basis.signature, Gate.kind]
+  · refine Finset.sum_congr rfl fun j _ => ?_
+    have h : ¬ ((Fin.natAdd G j : Fin (G + M)) : ℕ) < G := by simp
+    simp only [straightLineAt, h, ↓reduceDIte]
+    show (c.outputs _).fanIn = _
+    congr 2
+    exact Fin.ext (by simp)
 
 end Circuit
 

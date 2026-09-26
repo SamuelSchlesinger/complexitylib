@@ -50,6 +50,20 @@ CSLib states Lupanov's and Shannon's bounds for De Morgan circuit families
 results here are the fan-in-two AND/OR slice form of CSLib's family bound; they
 come from the per-function transfer `Complexity.lupanov_sizeComplexity`, which
 absorbs the extra output gate of `Circuit.ofCslib`.
+
+## Provenance of CSLib's family-level classes
+
+CSLib's circuit families and the classes `Cslib.Circuits.Boolean.SIZE` and
+`Cslib.Circuits.Boolean.PPoly` (with their family-level Lupanov and Shannon
+bounds and `Cslib.Circuits.Boolean.exists_not_mem_PPoly`), together with
+`Language.slice`, are not yet in upstream CSLib. They are pending CSLib work by
+this library's author, pinned here from the integration branch of the
+`SamuelSchlesinger/cslib` fork. The comparisons with them in this file are
+therefore consistency checks against those definitions, not corroboration by
+independently reviewed ones, and they may need revisiting if the definitions
+change before merging. The counting argument behind the hard language,
+`Cslib.Circuits.Boolean.Shannon.exists_hard_function`, is merged upstream
+(CSLib PR #891).
 -/
 
 
@@ -159,7 +173,12 @@ theorem slice_eq_decide (L : Language) (n : ℕ) :
   rfl
 
 /-- **Our `SIZE` inside CSLib's.** A language with fan-in-two AND/OR circuits of
-size `s(n)` has De Morgan circuits of size `n + 2 s(n) + 1`. -/
+size `s(n)` has De Morgan circuits of size `n + 2 s(n) + 1`.
+
+`Cslib.Circuits.Boolean.SIZE` comes from the author's pending CSLib work, pinned
+from the integration branch of the `SamuelSchlesinger/cslib` fork, so this
+inclusion is a consistency check with that definition (see the module
+docstring). -/
 theorem SIZE_subset_cslib_SIZE (s : ℕ → ℕ) :
     SIZE s ⊆ Cslib.Circuits.Boolean.SIZE fun n => n + 2 * s n + 1 := by
   intro L hL
@@ -167,7 +186,12 @@ theorem SIZE_subset_cslib_SIZE (s : ℕ → ℕ) :
   exact ⟨c, Cslib.Circuits.CircuitFamily.decides_id_iff.mpr hc, hsize⟩
 
 /-- **CSLib's `SIZE` inside ours.** A language with De Morgan circuits of size
-`s(n)` has fan-in-two AND/OR circuits of size `s(n) + 1`. -/
+`s(n)` has fan-in-two AND/OR circuits of size `s(n) + 1`.
+
+`Cslib.Circuits.Boolean.SIZE` comes from the author's pending CSLib work, pinned
+from the integration branch of the `SamuelSchlesinger/cslib` fork, so this
+inclusion is a consistency check with that definition (see the module
+docstring). -/
 theorem cslib_SIZE_subset_SIZE (s : ℕ → ℕ) :
     Cslib.Circuits.Boolean.SIZE s ⊆ SIZE fun n => s n + 1 := by
   rintro L ⟨F, hF, hsize⟩
@@ -189,7 +213,13 @@ private theorem exists_eval_le_mul_pow_add (p : Polynomial ℕ) :
 /-- **Our `P/poly` is CSLib's.** Fan-in-two AND/OR circuits with free negations
 and De Morgan circuits counting every gate define the same class `P/poly`: the
 two size measures agree up to `n + 2s + 1`, and CSLib's bounds `n ^ k + k` are
-cofinal among polynomials. -/
+cofinal among polynomials.
+
+`Cslib.Circuits.Boolean.PPoly` and the `Cslib.Circuits.Boolean.SIZE` classes it
+is built from come from the author's pending CSLib work, pinned from the
+integration branch of the `SamuelSchlesinger/cslib` fork and not yet reviewed
+upstream. The equality is therefore a consistency check between this library's
+`PPoly` and those definitions (see the module docstring). -/
 theorem PPoly_eq_cslib_PPoly : PPoly = Cslib.Circuits.Boolean.PPoly := by
   apply Set.Subset.antisymm
   · intro L hL
@@ -204,7 +234,13 @@ theorem PPoly_eq_cslib_PPoly : PPoly = Cslib.Circuits.Boolean.PPoly := by
     exact SIZE_mono (fun n => by simp [add_assoc]) (cslib_SIZE_subset_SIZE _ hk)
 
 /-- **Some language is not in `P/poly`.** This is CSLib's
-`Cslib.Circuits.Boolean.exists_not_mem_PPoly`, through `PPoly_eq_cslib_PPoly`. -/
+`Cslib.Circuits.Boolean.exists_not_mem_PPoly`, through `PPoly_eq_cslib_PPoly`.
+
+That theorem and `Cslib.Circuits.Boolean.PPoly` come from the author's pending
+CSLib work, pinned from the integration branch of the `SamuelSchlesinger/cslib`
+fork; the counting argument underneath,
+`Cslib.Circuits.Boolean.Shannon.exists_hard_function`, is merged upstream (see
+the module docstring). -/
 theorem exists_not_mem_PPoly : ∃ L : Language, L ∉ PPoly := by
   rw [PPoly_eq_cslib_PPoly]
   exact Cslib.Circuits.Boolean.exists_not_mem_PPoly

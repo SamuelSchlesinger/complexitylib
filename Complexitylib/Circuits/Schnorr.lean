@@ -5,6 +5,7 @@ Authors: Samuel Schlesinger
 -/
 
 module
+public import Complexitylib.Circuits.AndOrNot
 public import Complexitylib.Circuits.XOR
 public import Complexitylib.Circuits.Internal.SchnorrBridge
 
@@ -36,7 +37,8 @@ The hypothesis allows the circuit to compute either XOR or its complement
 (`comp = true` for complement). For a single-output circuit,
 `c.size = G + 1`, so the bound is equivalently `G ≥ 2(N - 1)`.
 
-When `Basis.andOr2` is known to be complete, this yields a
+Since `Basis.andOr2` is complete (the `CompleteBasis Basis.andOr2` instance
+of `Complexitylib.Circuits.AndOrNot`, imported here), this yields a
 `sizeComplexity` bound via `sizeComplexity_xorBool_ge`.
 -/
 
@@ -59,8 +61,7 @@ theorem schnorr_lower_bound_circuit (N G : Nat) [NeZero N]
 
 /-- **Schnorr lower bound in terms of `sizeComplexity`**: the fan-in-2
     AND/OR circuit complexity of N-input XOR is at least `2N − 1`. -/
-theorem sizeComplexity_xorBool_ge (N : Nat) [NeZero N]
-    [CompleteBasis Basis.andOr2] :
+theorem sizeComplexity_xorBool_ge (N : Nat) [NeZero N] :
     Circuit.sizeComplexity Basis.andOr2 (Schnorr.xorBool N) ≥ 2 * N - 1 := by
   by_contra hlt; push Not at hlt
   obtain ⟨G, c, hs, hc⟩ := Circuit.sizeComplexity_witness (B := Basis.andOr2)

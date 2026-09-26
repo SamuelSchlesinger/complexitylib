@@ -2197,7 +2197,7 @@ theorem diagTM_decidesInTime (clk : TM 8) (C : ℕ) (g : ℕ → ℕ)
 /-- **The diagonal flip.** On a well-formed input `x` whose interpreted
     machine halts within the clock budget at `mcF`, the diagonalizer
     accepts `x` exactly when the interpreted machine does **not**. -/
-theorem diagTM_flips_of_halts (clk : TM 8) (C : ℕ) (g : ℕ → ℕ)
+theorem diagTM_flips (clk : TM 8) (C : ℕ) (g : ℕ → ℕ)
     (hclk : ClockWitness clk C g)
     (x : List Bool) (hterm : TerminatedRegion x)
     (T : ℕ) (mcF : Cfg 1 (decodeDesc x).toTM.Q) (hT : T ≤ g x.length)
@@ -2215,22 +2215,6 @@ theorem diagTM_flips_of_halts (clk : TM 8) (C : ℕ) (g : ℕ → ℕ)
     simp [hm]
   · rw [ite_eq_right hm]
     simp [hm]
-
-set_option linter.unusedVariables false in
-/-- Compatibility form of `diagTM_flips_of_halts`. The positivity hypothesis
-    is not needed for the flip itself, but remains in this public signature for
-    callers of the original theorem. -/
--- The signature mirrors the family this belongs to; the argument is part of
--- that shape even where this member does not consult it.
-@[nolint unusedArguments]
-theorem diagTM_flips (clk : TM 8) (C : ℕ) (g : ℕ → ℕ)
-    (hclk : ClockWitness clk C g) (hg1 : ∀ n, 1 ≤ g n)
-    (x : List Bool) (hterm : TerminatedRegion x)
-    (T : ℕ) (mcF : Cfg 1 (decodeDesc x).toTM.Q) (hT : T ≤ g x.length)
-    (hrun : (decodeDesc x).toTM.reachesIn T ((decodeDesc x).toTM.initCfg x) mcF)
-    (hhalt : (decodeDesc x).toTM.halted mcF) :
-    (x ∈ diagLang clk ↔ mcF.output.cells 1 ≠ Γ.one) :=
-  diagTM_flips_of_halts clk C g hclk x hterm T mcF hT hrun hhalt
 
 /-- **Polynomial envelope for the diagonalizer's time bound**:
     `diagTime C g n ≤ (C + 786) * ((n + 1)² * (g n + 1))`. -/

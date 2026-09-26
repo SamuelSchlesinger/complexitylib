@@ -29,9 +29,6 @@ structure ThresholdOp where
   cutoff : ℕ
   deriving Repr, DecidableEq
 
--- This record printer intentionally ignores precedence.
-attribute [nolint unusedArguments] instReprThresholdOp.repr
-
 namespace ThresholdOp
 
 /-- Count the true inputs to an `n`-ary threshold gate. -/

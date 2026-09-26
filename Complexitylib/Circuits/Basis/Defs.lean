@@ -19,7 +19,10 @@ built over it without changing its cost model. An operation symbol of
 operation allows, and a negation flag for each input. Its interpretation
 `B.interpretation` negates the flagged inputs and applies the operation, so
 negations stay free, and a basis with unbounded fan-in becomes a signature with
-infinitely many operation symbols.
+infinitely many operation symbols. CSLib's size over `B.signature` is thus this
+library's convention (one unit per gate, whatever its fan-in or negation
+pattern), not the size over CSLib's De Morgan basis, which charges negation
+gates; `Complexitylib.Interop.Cslib.Circuit` relates the two.
 
 ## Main definitions
 
@@ -98,7 +101,8 @@ def Basis.signature (B : Basis) : Signature where
   Arity kind := kind.fanIn
 
 /-- The interpretation of a basis's signature: a gate kind negates the flagged
-inputs and applies its operation, exactly as `Gate.eval` does. -/
+inputs and applies its operation, exactly as `Gate.eval` does
+(`Basis.interpretation_kind` in `Complexitylib.Circuits.StraightLine`). -/
 def Basis.interpretation (B : Basis) : Interpretation B.signature Bool :=
   fun kind input => B.eval kind.op kind.fanIn kind.arityOk
     fun i => (kind.negated i).xor (input i)

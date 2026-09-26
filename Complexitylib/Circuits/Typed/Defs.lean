@@ -168,7 +168,6 @@ those conventions agree only up to additive/linear overhead, not on exact size
 bounds. -/
 -- The circuit argument is unused by design: `size` is determined by the
 -- indices, and the argument exists purely to enable `c.size` dot notation.
-@[nolint unusedArguments]
 def size (_ : Circuit B N M G) : Nat := G + M
 
 end Circuit

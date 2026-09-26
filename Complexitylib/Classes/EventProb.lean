@@ -201,10 +201,7 @@ theorem eventProb_biUnion_le {T : ℕ} {ι : Type*} [DecidableEq ι] (s : Finset
 
 /-- Finite additivity: the probability of a disjoint finite union is the sum of
     the probabilities of its events. -/
--- The signature mirrors the family this belongs to; the argument is part of
--- that shape even where this member does not consult it.
-@[nolint unusedArguments]
-theorem eventProb_biUnion {T : ℕ} {ι : Type*} [DecidableEq ι]
+theorem eventProb_biUnion {T : ℕ} {ι : Type*}
     (s : Finset ι) (E : ι → Finset (Fin T → Bool))
     (h : (s : Set ι).PairwiseDisjoint E) :
     eventProb (s.biUnion E) = ∑ i ∈ s, eventProb (E i) := by

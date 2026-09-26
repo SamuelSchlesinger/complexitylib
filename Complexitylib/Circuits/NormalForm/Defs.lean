@@ -49,9 +49,6 @@ structure Literal (N : Nat) where
   polarity : Bool
   deriving Repr, DecidableEq
 
--- These record printers intentionally ignore precedence.
-attribute [nolint unusedArguments] instReprLiteral.repr
-
 /-- Evaluate a literal on a bit assignment. -/
 def Literal.eval (l : Literal N) (x : BitString N) : Bool :=
   if l.polarity then x l.var else !x l.var
@@ -117,9 +114,6 @@ structure CNF (N : Nat) where
   /-- The clauses of the formula. Each clause is a list of literals. -/
   clauses : List (List (Literal N))
   deriving Repr, DecidableEq
-
--- These record printers intentionally ignore precedence.
-attribute [nolint unusedArguments] instReprCNF.repr
 
 namespace CNF
 
@@ -211,9 +205,6 @@ structure DNF (N : Nat) where
   /-- The terms of the formula. Each term is a list of literals. -/
   terms : List (List (Literal N))
   deriving Repr, DecidableEq
-
--- These record printers intentionally ignore precedence.
-attribute [nolint unusedArguments] instReprDNF.repr
 
 namespace DNF
 

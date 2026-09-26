@@ -70,7 +70,7 @@ instance instNeZeroAddLeft [NeZero m] : NeZero (k + m) :=
     is redirected using the gate's negation flags to produce the correct
     constant, without adding extra gates.  See `Complexitylib.Circuits.Internal.Nondeterminism`
     for the construction. -/
-theorem sizeComplexity_restrictFirst_le [CompleteBasis Basis.andOr2] [NeZero m]
+theorem sizeComplexity_restrictFirst_le [NeZero m]
     (f : BitString ((k + 1) + m) → Bool) (b : Bool) :
     Circuit.sizeComplexity Basis.andOr2 (restrictFirst f b) ≤
       Circuit.sizeComplexity Basis.andOr2 f := by
@@ -85,7 +85,7 @@ theorem sizeComplexity_restrictFirst_le [CompleteBasis Basis.andOr2] [NeZero m]
     sum of their individual complexities plus one (for the OR output gate).
 
     Uses `ShannonUpper.binopCircuit` to compose two circuits side-by-side. -/
-theorem sizeComplexity_or_le [CompleteBasis Basis.andOr2] [NeZero N]
+theorem sizeComplexity_or_le [NeZero N]
     (g₁ g₂ : BitString N → Bool) :
     Circuit.sizeComplexity Basis.andOr2 (fun x => g₁ x || g₂ x) ≤
       Circuit.sizeComplexity Basis.andOr2 g₁ +
@@ -146,7 +146,7 @@ private theorem cast_fun_fin_apply {n n' : Nat}
       one gate; and the inductive hypothesis bounds each branch by
       `2^k · (s + 1) − 1`.  After the "+1 trick":
       `(size₁ + size₂ + 1) + 1 = (size₁ + 1) + (size₂ + 1) ≤ 2^(k+1) · (s + 1)`. -/
-theorem sizeComplexity_existsQuantify_le [CompleteBasis Basis.andOr2]
+theorem sizeComplexity_existsQuantify_le
     (f : BitString (k + m) → Bool) [NeZero m] :
     Circuit.sizeComplexity Basis.andOr2 (existsQuantify f) ≤
       2 ^ k * (Circuit.sizeComplexity Basis.andOr2 f + 1) := by
@@ -200,7 +200,7 @@ theorem sizeComplexity_existsQuantify_le [CompleteBasis Basis.andOr2]
     exponential circuit complexity,
     `existsQuantify f` has complexity at most `O(2^m / m)`, which decreases
     exponentially as more variables are quantified away. -/
-theorem sizeComplexity_existsQuantify_le_shannon [CompleteBasis Basis.andOr2]
+theorem sizeComplexity_existsQuantify_le_shannon
     (f : BitString (k + m) → Bool) [NeZero m] (hm : 16 ≤ m) :
     Circuit.sizeComplexity Basis.andOr2 (existsQuantify f) ≤ 18 * 2 ^ m / m :=
   shannon_upper_bound m hm (existsQuantify f)
@@ -210,7 +210,7 @@ theorem sizeComplexity_existsQuantify_le_shannon [CompleteBasis Basis.andOr2]
     When `sizeComplexity(f) ≈ 2^(k+m)/2`, the Shannon bound
     `18 · 2^m / m` is exponentially better than the naive
     `2^k · (s + 1)`, especially for large `k`. -/
-theorem sizeComplexity_existsQuantify_le_min [CompleteBasis Basis.andOr2]
+theorem sizeComplexity_existsQuantify_le_min
     (f : BitString (k + m) → Bool) [NeZero m] (hm : 16 ≤ m) :
     Circuit.sizeComplexity Basis.andOr2 (existsQuantify f) ≤
       min (2 ^ k * (Circuit.sizeComplexity Basis.andOr2 f + 1)) (18 * 2 ^ m / m) :=

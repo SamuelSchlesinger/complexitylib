@@ -60,8 +60,11 @@ noncomputable def sizeComplexityWithTop
 This natural-valued interface requires completeness so that the set of
 realizing circuits is nonempty. Use `sizeComplexityWithTop` when the basis may
 be incomplete. -/
--- Completeness is an intentional API precondition. The infimum expression
--- itself does not inspect the selected witness.
+-- `[CompleteBasis B]` is unused in the body but deliberate: for an incomplete
+-- basis `realizationSizes B f` can be empty, and `sInf ∅ = 0` would report an
+-- unrealizable `f` as having size `0`. Requiring completeness confines this
+-- `ℕ`-valued measure to bases where `realizationSizes_nonempty` holds, so the
+-- infimum is attained (`sizeComplexity_witness`, `sizeComplexity_pos`).
 @[nolint unusedArguments]
 noncomputable def sizeComplexity
     (B : Basis) [CompleteBasis B] (f : BitString N → Bool) : Nat :=

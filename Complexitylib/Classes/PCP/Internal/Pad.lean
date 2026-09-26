@@ -83,10 +83,7 @@ theorem unsatFrac_pad (G : ConstraintGraph α) {N : ℕ} (h : G.numVerts ≤ N)
     (G.pad N h).unsatFrac a = G.unsatFrac (G.restrict h a) := rfl
 
 /-- **Padding does not change the value.** -/
--- The signature mirrors the family this belongs to; the argument is part of
--- that shape even where this member does not consult it.
-@[nolint unusedArguments]
-theorem unsatVal_pad [Fintype α] [Nonempty α] [DecidableEq α] (G : ConstraintGraph α)
+theorem unsatVal_pad [Fintype α] [Nonempty α] (G : ConstraintGraph α)
     (N : ℕ) (h : G.numVerts ≤ N) :
     (G.pad N h).unsatVal = G.unsatVal := by
   classical

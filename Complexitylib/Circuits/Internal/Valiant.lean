@@ -156,10 +156,7 @@ omit [Fintype V] in
 /-- **Extending a simple path by an edge.** In an acyclic digraph, a
 simple path `p` ending at `u` followed by an edge `u → v` yields a
 simple path ending at `v` that is one longer. -/
--- The signature mirrors the family this belongs to; the argument is part of
--- that shape even where this member does not consult it.
-@[nolint unusedArguments]
-private lemma extend_simple_path [DecidableEq V] (G : Digraph V) (hac : IsAcyclic G)
+private lemma extend_simple_path (G : Digraph V) (hac : IsAcyclic G)
     {u v : V} (huv : G.Adj u v) {n : ℕ} {p : Fin (n + 1) → V}
     (hsp : G.IsPath p) (hpu : p (Fin.last n) = u) :
     ∃ p' : Fin (n + 2) → V, G.IsPath p' ∧ p' (Fin.last (n + 1)) = v := by
@@ -190,7 +187,7 @@ private lemma extend_simple_path [DecidableEq V] (G : Digraph V) (hac : IsAcycli
 ending at `u` followed by the edge `(u,v)` is a strictly longer simple
 path ending at `v` (using acyclicity to ensure `v` does not already
 appear in the path). -/
-lemma canonicalLabel_isLegal [DecidableEq V] (G : Digraph V) (hac : IsAcyclic G) :
+lemma canonicalLabel_isLegal (G : Digraph V) (hac : IsAcyclic G) :
     IsLegalLabeling G G.canonicalLabel := by
   intro u v huv
   obtain ⟨p, hsp, hpu⟩ :=
@@ -353,8 +350,6 @@ private lemma testBit_firstDifferBit_pivot_of_lt
     omega
   · simp [hxb, hyb] at hxor_bit
 
-variable [DecidableEq V]
-
 /-- Edges whose canonical-label endpoints' `k`-bit binary
 representations first disagree at MSB position `i`. -/
 noncomputable def levelEdges
@@ -458,7 +453,7 @@ private def maskOutI (k : ℕ) (I : Finset ℕ) (x : ℕ) : ℕ :=
   ∑ i ∈ (Finset.Ioc 0 k) \ I,
     (if x.testBit (k - i) then 2 ^ (k - i) else 0)
 
-omit [Fintype V] [DecidableEq V] in
+omit [Fintype V] in
 /-- Geometric series: `∑ m ∈ range n, 2^m = 2^n - 1`. -/
 private lemma sum_range_pow_two (n : ℕ) :
     ∑ m ∈ Finset.range n, (2 : ℕ) ^ m = 2 ^ n - 1 := by
@@ -470,7 +465,7 @@ private lemma sum_range_pow_two (n : ℕ) :
     have h2 : 2 ^ (n + 1) = 2 * 2 ^ n := by rw [pow_succ]; ring
     omega
 
-omit [Fintype V] [DecidableEq V] in
+omit [Fintype V] in
 /-- **Split the mask sum at a pivot.** For `j ∈ (Ioc 0 k) \ I`, the
 `maskOutI` sum decomposes into contributions above `j`, at `j`, and below. -/
 private lemma maskOutI_split_at_pivot
@@ -502,7 +497,7 @@ private lemma maskOutI_split_at_pivot
       h_filt_lt, h_filt_gt]
   ring
 
-omit [Fintype V] [DecidableEq V] in
+omit [Fintype V] in
 /-- **Below-pivot bound.** The sum of mask contributions at positions below
 the pivot `j` is strictly less than `2 ^ (k - j)` (geometric-series bound). -/
 private lemma maskOutI_sum_below_lt
@@ -535,7 +530,7 @@ private lemma maskOutI_sum_below_lt
   have h3 : 0 < 2 ^ (k - j) := Nat.two_pow_pos _
   omega
 
-omit [Fintype V] [DecidableEq V] in
+omit [Fintype V] in
 /-- **Key legality.** If `x < y < 2 ^ k` and their first MSB disagreement
 is *not* in `I`, then `maskOutI k I x < maskOutI k I y`.
 
@@ -572,7 +567,6 @@ private lemma maskOutI_lt_of_firstDifferBit_not_mem
   rw [hmask_x, hmask_y, ← hup_eq]
   omega
 
-omit [DecidableEq V] in
 /-- **Image bound.** The image of `maskOutI k I` over any function `f : V → ℕ`
 has at most `2 ^ (k - |I|)` elements, because `maskOutI k I x` is determined
 by the `k - |I|` bits of `x` at positions outside `I`. -/
@@ -615,7 +609,7 @@ private lemma maskOutI_image_card_le
 canonical label with the `I`-th bits deleted is a legal labeling of
 the remaining graph; its image has at most `2 ^ (k - I.card)` values,
 so the remaining depth is bounded by that. -/
-lemma depth_deleteEdges_levelEdges_le
+lemma depth_deleteEdges_levelEdges_le [DecidableEq V]
     (G : Digraph V) [DecidableRel G.Adj] {k : ℕ}
     (hac : IsAcyclic G) (hd : G.depth ≤ 2 ^ k)
     (I : Finset ℕ) (hI : I ⊆ Finset.Ioc 0 k) :

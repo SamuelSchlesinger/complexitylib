@@ -21,7 +21,10 @@ Aggregation module for bridges to other libraries, currently CSLib.
 - `Complexitylib.Interop.Cslib` connects the machine model to CSLib's step
   relations and, through `Complexitylib.Interop.Cslib.Regular`, to the
   regular-language and automata theory that CSLib builds on Mathlib's
-  `Language`: regular languages are in `DSPACE(0)`, hence in `L` and `P`.
+  `Language`: the finite-state scanner that runs a regular language's automaton
+  places it in `DSPACE(0)`, in `L`, and in `P`, each proved separately from
+  that scanner (`mem_DSPACE_zero_of_isRegular`, `mem_L_of_isRegular`,
+  `mem_P_of_isRegular`).
 - `Complexitylib.Interop.Cslib.MultiTape` runs our machines on CSLib's
   multi-tape machines, transferring `DTIME`, `DTISP`, `P`, and `FP` to CSLib's
   time and space measures. `Complexitylib.Interop.Cslib.FromMultiTape` runs

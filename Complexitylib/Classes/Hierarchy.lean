@@ -113,7 +113,7 @@ theorem time_hierarchy_weak {f g : ℕ → ℕ}
     le_trans ht' (harith x.length (by omega) (by omega))
   -- Step 7: the diagonal flip contradicts the decider's own verdict.
   have hflip :=
-    TM.diagTM_flips_of_halts clk C g hclk x hterm t' mcF hT hrun hhalt
+    TM.diagTM_flips clk C g hclk x hterm t' mcF hT hrun hhalt
   by_cases hxmem : x ∈ TM.diagLang clk
   · exact hflip.mp hxmem (hmem hxmem)
   · exact hxmem (hflip.mpr (by rw [hnmem hxmem]; decide))

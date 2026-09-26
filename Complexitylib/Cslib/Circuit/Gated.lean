@@ -12,9 +12,21 @@ public import Cslib.Computability.Circuit.Composition
 
 A CSLib circuit (`Cslib.Circuits.Circuit`) may designate any wire as an output,
 including an original input, and designating outputs is free. Complexitylib's
-typed circuits instead charge one gate per output. The two conventions agree
-exactly on circuits whose every output is an internal gate, which this file
-names `Circuit.GatedOutputs`.
+typed circuits instead end in `M` distinct output gates, each counted in the
+size. This file names the CSLib circuits whose every output is an internal gate
+`Circuit.GatedOutputs`.
+
+Translating a typed circuit into CSLib's model gives a circuit with gated
+outputs and the same size (`Complexity.Circuit.gatedOutputs_toStraightLine` and
+`Complexity.Circuit.size_toStraightLine`, in
+`Complexitylib.Circuits.StraightLine`). Gated outputs alone do not make the two
+size conventions agree when there are several outputs: two outputs may name the
+same gate, and an output gate may feed later gates, neither of which a typed
+circuit allows. A gated CSLib circuit with two outputs can thus have a single
+gate, while a typed circuit with two outputs has at least two. With a single
+output, the output gate of a gated circuit could serve as the typed output gate,
+but the translation from gated CSLib circuits back to typed circuits, and with
+it any exact size match in that direction, is not yet formalized.
 
 Sequential composition keeps this property when the outer circuit has it, and
 parallel composition keeps it when both circuits do. The number of outputs
@@ -112,8 +124,11 @@ end Wire
 namespace Circuit
 
 /-- Every designated output of `c` is an internal gate, never an original
-input. These are the circuits on which charging one gate per output, as typed
-circuits do, and CSLib's free outputs agree. -/
+input. Typed circuits translate to circuits with this property and the same
+size (`Complexity.Circuit.gatedOutputs_toStraightLine`,
+`Complexity.Circuit.size_toStraightLine`). The property alone does not match
+CSLib's free outputs with the typed charge of one distinct gate per output: with
+several outputs, gated outputs may share a gate or feed later gates. -/
 def GatedOutputs (c : Circuit σ n m) : Prop :=
   ∀ o, (c.outputs o).IsGate
 

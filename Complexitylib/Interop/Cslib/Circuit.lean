@@ -27,9 +27,13 @@ gates. The two sizes agree up to a factor of two and an additive `N`:
 - `Circuit.exists_cslib` turns one of ours with `G` internal gates into a CSLib
   circuit of size at most `N + 2G + M`.
 
-CSLib proves the sharp counting bounds for its model, so they transfer here. In
-particular Lupanov's upper bound, previously missing from this library, now
-holds for `Circuit.sizeComplexity`.
+CSLib proves the sharp counting bounds for its model, and they transfer here
+with different losses. Lupanov's upper bound, previously missing from this
+library, transfers sharply: `Circuit.sizeComplexity` is at most
+`(1 + ε) 2ⁿ / n` for large `n`. Shannon's lower bound pays the factor of two of
+`Circuit.exists_cslib`: some function has `2ⁿ / n < n + 2 · sizeComplexity`,
+that is, size complexity above `(2ⁿ / n - n) / 2`, about half the sharp bound
+`2ⁿ / n`.
 
 ## Main results
 
