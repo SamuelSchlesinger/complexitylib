@@ -779,7 +779,14 @@ existing logics rather than a restriction imposed on them.
 
 \begin{definition}[Binary relation certificates]
   \label{def:desc-so-certificate-encoding}
-
+  \lean{Complexity.DescriptiveComplexity.DecREnv.EncodingSite,
+    Complexity.DescriptiveComplexity.DecREnv.encodingSites,
+    Complexity.DescriptiveComplexity.DecREnv.encodingLength,
+    Complexity.DescriptiveComplexity.DecREnv.encodingPolynomial,
+    Complexity.DescriptiveComplexity.DecREnv.encode,
+    Complexity.DescriptiveComplexity.DecREnv.read,
+    Complexity.DescriptiveComplexity.DecREnv.decode}
+  \leanok
   \uses{def:desc-matrix-model-checking, def:desc-encoding}
   For a universe of size $n$ and relation arities $k_1,\ldots,k_m$, concatenate
   the relation truth tables in context order, using the structure encoder's
@@ -790,7 +797,22 @@ existing logics rather than a restriction imposed on them.
 
 \begin{theorem}[Exact relation-certificate encoding]
   \label{thm:desc-so-certificate-encoding}
-
+  \lean{Complexity.DescriptiveComplexity.DecREnv.mem_encodingSites,
+    Complexity.DescriptiveComplexity.DecREnv.encodingSites_nodup,
+    Complexity.DescriptiveComplexity.DecREnv.encodingSites_length,
+    Complexity.DescriptiveComplexity.DecREnv.encode_length,
+    Complexity.DescriptiveComplexity.DecREnv.encode_eq_flatMap,
+    Complexity.DescriptiveComplexity.DecREnv.encode_cons,
+    Complexity.DescriptiveComplexity.DecREnv.encode_unary,
+    Complexity.DescriptiveComplexity.DecREnv.read_encode,
+    Complexity.DescriptiveComplexity.DecREnv.encode_read,
+    Complexity.DescriptiveComplexity.DecREnv.decode_encode,
+    Complexity.DescriptiveComplexity.DecREnv.encode_injective,
+    Complexity.DescriptiveComplexity.DecREnv.decode_eq_some_iff,
+    Complexity.DescriptiveComplexity.DecREnv.decode_eq_none_iff,
+    Complexity.DescriptiveComplexity.DecREnv.encodingPolynomial_eval,
+    Complexity.DescriptiveComplexity.DecREnv.encodingLength_mono}
+  \leanok
   \uses{def:desc-so-certificate-encoding}
   Encoding bijects Boolean relation environments with strings of exactly
   $\sum_j n^{k_j}$ bits. Both round trips hold, and rejection means precisely
@@ -800,7 +822,7 @@ existing logics rather than a restriction imposed on them.
   in $n$.
 \end{theorem}
 \begin{proof}
-
+  \leanok
   Every table cell occurs in the site enumeration. Its length equals the
   cardinality of the site type, so there are no duplicates. Reading at the
   index of a cell and indexing a duplicate-free enumeration give the two
