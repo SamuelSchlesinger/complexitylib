@@ -7,6 +7,8 @@ Authors: Samuel Schlesinger
 module
 public import Complexitylib.Interop.Cslib.Circuit.Defs
 public import Complexitylib.Circuits.DepthClasses.Defs
+public import Complexitylib.Circuits.StraightLine
+public import Complexitylib.Cslib.Circuit.Program
 import Complexitylib.Interop.Cslib.Circuit
 
 /-!
@@ -31,9 +33,11 @@ and every rail sits at most one layer above our wire, so depth grows by at most
 one. The two directions pin the depth class `DEPTH` down in CSLib terms up to
 an additive constant.
 
-Both constructions reason about wire numbers in our layout `Fin (N + g)` and
-reach CSLib's inductive wires through `Circuit.ofCslibWire` and
-`Circuit.toCslibWire`.
+Both constructions reason about wire numbers in our layout `Fin (N + g)`, which
+is CSLib's numbering `Wire.index`, and reach CSLib's inductive wires through
+`StraightLine.wireOfIndex`. They build and bound CSLib programs with
+`Program.ofLines` and `Program.wireDepths_le` from
+`Complexitylib.Cslib.Circuit.Program`.
 
 ## Main results
 
@@ -45,13 +49,6 @@ reach CSLib's inductive wires through `Circuit.ofCslibWire` and
   has a CSLib circuit of size `N + 2G + M` and depth at most one more
 - `Complexity.exists_cslib_of_mem_DEPTH`, `Complexity.mem_DEPTH_of_cslib` —
   `DEPTH d` versus CSLib circuits of depth `d + 1`
-
-## Supporting CSLib lemmas
-
-- `Complexity.Program.depths_eq_lines_depth` — CSLib's depth equation, line by line
-- `Complexity.Program.wireDepths_le` — bounding CSLib depth by a certificate
-- `Complexity.Program.ofLines`, `Complexity.Program.lines_ofLines` — building a
-  program from its lines, widened by `Complexity.Program.wireCastLE`
 -/
 public section
 
@@ -91,96 +88,7 @@ private theorem foldl_max_add_one {n : ℕ} [NeZero n] (f : Fin n → ℕ) :
       (foldl_max_le_iff f _).mpr fun k => by have := hL k; omega
     omega
 
-variable {σ : Signature} {N g : ℕ}
-
-/-- Widening a wire into a longer program keeps its CSLib depth. -/
-theorem Program.wireDepths_gate_castSucc (p : Program σ N g) (line : Line σ N g)
-    (w : Wire N g) : (p.gate line).wireDepths w.castSucc = p.wireDepths w := by
-  cases w <;> simp [Program.wireDepths, Program.depths]
-
-/-- Line `j` of a program has the CSLib depth of gate `j`. -/
-theorem Program.depths_eq_lines_depth (p : Program σ N g) (j : Fin g) :
-    p.depths j = (p.lines j).depth p.wireDepths := by
-  induction p with
-  | empty => exact j.elim0
-  | @gate g p line ih =>
-    have hmap (l : Line σ N g) :
-        (l.mapWires Wire.Renaming.castSucc).depth (p.gate line).wireDepths =
-          l.depth p.wireDepths := by
-      simp only [Line.depth, Line.mapWires, Function.comp_apply, Wire.Renaming.castSucc_apply,
-        Program.wireDepths_gate_castSucc]
-    refine Fin.lastCases ?_ (fun j => ?_) j
-    · rw [Program.lines_gate_last, hmap]
-      simp only [Program.depths, Fin.lastCases_last]
-      rfl
-    · rw [Program.lines_gate_castSucc, hmap, ← ih]
-      simp [Program.depths]
-
-/-- The program whose line `j` is `F j`, a line reading only the inputs and the
-`j` gates before it. -/
-def Program.ofLines : (g : ℕ) → ((j : Fin g) → Line σ N j) → Program σ N g
-  | 0, _ => .empty
-  | g + 1, F => .gate (Program.ofLines g fun j => F j.castSucc) (F (Fin.last g))
-
-/-- Regard a wire of a program with `j` gates as a wire of a program with
-`g ≥ j` gates, extending the first. -/
-def Program.wireCastLE {j g : ℕ} (h : j ≤ g) : Wire N j → Wire N g :=
-  Wire.elim Wire.input fun k => Wire.gate (Fin.castLE h k)
-
-/-- Widening a wire keeps its number. -/
-@[simp] theorem Program.ofCslibWire_wireCastLE {j g : ℕ} (h : j ≤ g) (w : Wire N j) :
-    Circuit.ofCslibWire (Program.wireCastLE h w) =
-      Fin.castLE (Nat.add_le_add_left h N) (Circuit.ofCslibWire w) := by
-  cases w <;> exact Fin.ext rfl
-
-/-- The lines of `Program.ofLines` are the given lines, widened. -/
-theorem Program.lines_ofLines (g : ℕ) (F : (j : Fin g) → Line σ N j) (j : Fin g) :
-    (Program.ofLines g F).lines j = (F j).mapWires (Program.wireCastLE j.isLt.le) := by
-  induction g with
-  | zero => exact j.elim0
-  | succ g ih =>
-    refine Fin.lastCases ?_ (fun j => ?_) j
-    · rw [Program.ofLines, Program.lines_gate_last]
-      rfl
-    · rw [Program.ofLines, Program.lines_gate_castSucc, ih]
-      simp only [Line.mapWires]
-      congr 1
-      funext a
-      simp only [Function.comp_apply, Wire.Renaming.castSucc_apply]
-      generalize (F j.castSucc).wires a = w
-      cases w with
-      | input i => rfl
-      | gate k => exact congrArg Wire.gate (Fin.ext rfl)
-
-/-- A line's depth is monotone in the depths of the wires it reads. -/
-theorem Line.depth_mono {g : ℕ} (l : Line σ N g) {d e : Wire N g → ℕ}
-    (h : ∀ a, d (l.wires a) ≤ e (l.wires a)) : l.depth d ≤ l.depth e := by
-  unfold Line.depth
-  refine Nat.succ_le_succ ((foldl_max_le_iff _ _).mpr fun k => ?_)
-  exact (h k).trans (le_foldl_max (fun k => e (l.wires k)) k)
-
-/-- **Bounding CSLib depth by a line-wise certificate.** If `b` bounds every
-line's depth at the line's own wire, it bounds every wire's depth. -/
-theorem Program.wireDepths_le (p : Program σ N g) (b : Wire N g → ℕ)
-    (hb : ∀ j, (p.lines j).depth b ≤ b (Wire.gate j)) (w : Wire N g) :
-    p.wireDepths w ≤ b w := by
-  have hg : ∀ n (j : Fin g), j.val = n → p.depths j ≤ b (Wire.gate j) := by
-    intro n
-    induction n using Nat.strong_induction_on with
-    | _ n ih =>
-    intro j hj
-    rw [Program.depths_eq_lines_depth]
-    refine le_trans (Line.depth_mono _ fun a => ?_) (hb j)
-    have hlt := Program.lines_wires_lt p j a
-    generalize (p.lines j).wires a = w at hlt ⊢
-    cases w with
-    | input i => simp [Program.wireDepths]
-    | gate k =>
-      simp only [Program.wireDepths, Wire.elim_gate]
-      exact ih k (by simp at hlt; omega) k rfl
-  cases w with
-  | input i => simp [Program.wireDepths]
-  | gate j => exact hg _ j rfl
+variable {N g : ℕ}
 
 namespace Circuit
 
@@ -188,7 +96,7 @@ namespace Circuit
 on the wires it reads and depth zero on the first input. -/
 theorem ofCslibGate_depth [NeZero N] (l : Line Boolean.signature N g)
     (d : Fin (N + g) → ℕ) (e : Wire N g → ℕ) (h0 : d firstWire = 0)
-    (hl : ∀ a, d (ofCslibWire (l.wires a)) = e (l.wires a)) :
+    (hl : ∀ a, d (l.wires a).index = e (l.wires a)) :
     1 + Fin.foldl (ofCslibGate l).fanIn
         (fun acc k => max acc (d ((ofCslibGate l).inputs k))) 0 = l.depth e := by
   obtain ⟨op, w⟩ := l
@@ -208,7 +116,7 @@ theorem wireDepth_natAdd {G : ℕ} (c : Circuit Basis.andOr2 N M G) (k : Fin G) 
 /-- **Wire depths agree.** Every wire of the translation has the CSLib depth of
 the same wire. -/
 theorem wireDepth_ofCslib (c : Cslib.Circuits.Circuit Boolean.signature N M)
-    (w : Wire N c.size) : (ofCslib c).wireDepth (ofCslibWire w) = c.program.wireDepths w := by
+    (w : Wire N c.size) : (ofCslib c).wireDepth w.index = c.program.wireDepths w := by
   suffices h : ∀ n (j : Fin c.size), j.val = n →
       (ofCslib c).wireDepth (Fin.natAdd N j) = c.program.depths j by
     cases w with
@@ -233,7 +141,7 @@ sits one layer above CSLib's output wire `j`. -/
 theorem outputDepth_ofCslib (c : Cslib.Circuits.Circuit Boolean.signature N M) (j : Fin M) :
     (ofCslib c).outputDepth j = c.outputDepths j + 1 := by
   show 1 + Fin.foldl 2 (fun acc k => max acc ((ofCslib c).wireDepth
-      (![ofCslibWire (c.outputs j), ofCslibWire (c.outputs j)] k))) 0 = _
+      (![(c.outputs j).index, (c.outputs j).index] k))) 0 = _
   simp [Fin.foldl_succ, wireDepth_ofCslib, Cslib.Circuits.Circuit.outputDepths, Nat.add_comm]
 
 /-- **Circuit depth grows by exactly one.** The translation of a CSLib circuit
@@ -270,24 +178,24 @@ Morgan when `b` is true), in a program reading `N + j` wires. -/
 def dualLine {W j : ℕ} (gt : Gate Basis.andOr2 W) (b : Bool)
     (h : ∀ k b', litIdx N (gt.inputs k) b' < N + j) : Line Boolean.signature N j :=
   let w : Fin 2 → Wire N j := fun a =>
-    toCslibWire ⟨litIdx N (gt.inputs (Fin.cast (fanIn_andOr2 gt).symm a))
-      (b.xor (gt.negated (Fin.cast (fanIn_andOr2 gt).symm a))), h _ _⟩
+    StraightLine.wireOfIndex (litIdx N (gt.inputs (Fin.cast (fanIn_andOr2 gt).symm a))
+      (b.xor (gt.negated (Fin.cast (fanIn_andOr2 gt).symm a)))) (h _ _)
   if (opIsAnd gt.op).xor b then ⟨.and, w⟩ else ⟨.or, w⟩
 
 /-- The line `dualLine gt b` computes `b ⊕ gt` from correct literal values. -/
 theorem dualLine_eval {W j : ℕ} (gt : Gate Basis.andOr2 W) (b : Bool)
     (h : ∀ k b', litIdx N (gt.inputs k) b' < N + j) (v : Wire N j → Bool) (val : Fin W → Bool)
-    (hv : ∀ (w : Fin W) (b' : Bool) (i : Wire N j), (ofCslibWire i).val = litIdx N w b' →
+    (hv : ∀ (w : Fin W) (b' : Bool) (i : Wire N j), i.index.val = litIdx N w b' →
       v i = b'.xor (val w)) :
     Boolean.interpretation (dualLine gt b h).op (v ∘ (dualLine gt b h).wires) =
       b.xor (gt.eval val) := by
   obtain ⟨op, fanIn, hfan, inputs, negated⟩ := gt
   change fanIn = 2 at hfan
   subst hfan
-  have h0 := hv (inputs 0) (b.xor (negated 0)) (toCslibWire ⟨_, h 0 (b.xor (negated 0))⟩)
-    (by rw [ofCslibWire_toCslibWire])
-  have h1 := hv (inputs 1) (b.xor (negated 1)) (toCslibWire ⟨_, h 1 (b.xor (negated 1))⟩)
-    (by rw [ofCslibWire_toCslibWire])
+  have h0 := hv (inputs 0) (b.xor (negated 0))
+    (StraightLine.wireOfIndex _ (h 0 (b.xor (negated 0)))) (by rw [StraightLine.index_wireOfIndex])
+  have h1 := hv (inputs 1) (b.xor (negated 1))
+    (StraightLine.wireOfIndex _ (h 1 (b.xor (negated 1)))) (by rw [StraightLine.index_wireOfIndex])
   cases op <;> cases b <;>
     simp [dualLine, opIsAnd, Boolean.interpretation, Gate.eval, Basis.andOr2,
       AndOrOp.eval_two_and, AndOrOp.eval_two_or] at h0 h1 ⊢ <;>
@@ -296,17 +204,17 @@ theorem dualLine_eval {W j : ℕ} (gt : Gate Basis.andOr2 W) (b : Bool)
 /-- The line `dualLine gt b` sits one layer above the literals it reads. -/
 theorem dualLine_depth_le {W j : ℕ} (gt : Gate Basis.andOr2 W) (b : Bool)
     (h : ∀ k b', litIdx N (gt.inputs k) b' < N + j) (e : Wire N j → ℕ) (d : Fin W → ℕ)
-    (he : ∀ (w : Fin W) (b' : Bool) (i : Wire N j), (ofCslibWire i).val = litIdx N w b' →
+    (he : ∀ (w : Fin W) (b' : Bool) (i : Wire N j), i.index.val = litIdx N w b' →
       e i ≤ d w + 1) :
     (dualLine gt b h).depth e ≤
       (1 + Fin.foldl gt.fanIn (fun acc k => max acc (d (gt.inputs k))) 0) + 1 := by
   obtain ⟨op, fanIn, hfan, inputs, negated⟩ := gt
   change fanIn = 2 at hfan
   subst hfan
-  have h0 := he (inputs 0) (b.xor (negated 0)) (toCslibWire ⟨_, h 0 (b.xor (negated 0))⟩)
-    (by rw [ofCslibWire_toCslibWire])
-  have h1 := he (inputs 1) (b.xor (negated 1)) (toCslibWire ⟨_, h 1 (b.xor (negated 1))⟩)
-    (by rw [ofCslibWire_toCslibWire])
+  have h0 := he (inputs 0) (b.xor (negated 0))
+    (StraightLine.wireOfIndex _ (h 0 (b.xor (negated 0)))) (by rw [StraightLine.index_wireOfIndex])
+  have h1 := he (inputs 1) (b.xor (negated 1))
+    (StraightLine.wireOfIndex _ (h 1 (b.xor (negated 1)))) (by rw [StraightLine.index_wireOfIndex])
   unfold dualLine
   split <;> simp [Line.depth, Fin.foldl_succ] at h0 h1 ⊢ <;> omega
 
@@ -391,11 +299,11 @@ theorem program_eval_toCslib (c : Circuit Basis.andOr2 N M G) (x : BitString N) 
   show (Program.ofLines (N + 2 * G + M) c.dualRailLine).eval Boolean.interpretation x = _
   refine (Program.eq_eval_of_forall_lines_eval _ _ _ _ fun j => ?_).symm
   rw [Program.lines_ofLines]
-  have hv : ∀ (w : Fin (N + G)) (b' : Bool) (i : Wire N j), (ofCslibWire i).val = litIdx N w b' →
+  have hv : ∀ (w : Fin (N + G)) (b' : Bool) (i : Wire N j), i.index.val = litIdx N w b' →
       (Wire.elim x (c.dualRailValue x) ∘ Program.wireCastLE j.isLt.le) i =
         b'.xor (c.wireValue x w) := by
     intro w b' i hi
-    rw [Function.comp_apply, elim_eq_addCases_ofCslibWire, Program.ofCslibWire_wireCastLE]
+    rw [Function.comp_apply, Wire.elim_eq_addCases_index, Program.index_wireCastLE]
     exact c.addCases_dualRailValue x w b' _ (by simpa using hi)
   show Boolean.interpretation (c.dualRailLine j).op
     ((Wire.elim x (c.dualRailValue x) ∘ Program.wireCastLE j.isLt.le) ∘
@@ -468,15 +376,15 @@ theorem dualRailDepth_le (c : Circuit Basis.andOr2 N M G) (w : Fin (N + G)) (b :
 /-- Every wire of the dual-rail simulation meets its depth certificate. -/
 theorem wireDepths_toCslib_le (c : Circuit Basis.andOr2 N M G)
     (w : Wire N (N + 2 * G + M)) :
-    c.toCslib.program.wireDepths w ≤ c.dualRailDepth (ofCslibWire w) := by
+    c.toCslib.program.wireDepths w ≤ c.dualRailDepth w.index := by
   show (Program.ofLines (N + 2 * G + M) c.dualRailLine).wireDepths w ≤ _
-  refine Program.wireDepths_le _ (c.dualRailDepth ∘ ofCslibWire) (fun j => ?_) w
+  refine Program.wireDepths_le _ (c.dualRailDepth ∘ Wire.index) (fun j => ?_) w
   rw [Program.lines_ofLines]
   show (c.dualRailLine j).depth
-    ((c.dualRailDepth ∘ ofCslibWire) ∘ Program.wireCastLE j.isLt.le) ≤
+    ((c.dualRailDepth ∘ Wire.index) ∘ Program.wireCastLE j.isLt.le) ≤
       c.dualRailDepth (Fin.natAdd N j)
-  have he : ∀ (w : Fin (N + G)) (b' : Bool) (i : Wire N j), (ofCslibWire i).val = litIdx N w b' →
-      ((c.dualRailDepth ∘ ofCslibWire) ∘ Program.wireCastLE j.isLt.le) i ≤
+  have he : ∀ (w : Fin (N + G)) (b' : Bool) (i : Wire N j), i.index.val = litIdx N w b' →
+      ((c.dualRailDepth ∘ Wire.index) ∘ Program.wireCastLE j.isLt.le) i ≤
         c.wireDepth w + 1 :=
     fun w b' i hi => c.dualRailDepth_le w b' _ (by simpa using hi)
   by_cases h1 : j.val < N
@@ -515,15 +423,14 @@ theorem depth_toCslib_le (c : Circuit Basis.andOr2 N M G) :
   refine (foldl_max_le_iff _ _).mpr fun o => ?_
   show c.toCslib.program.wireDepths (c.toCslib.outputs o) ≤ _
   refine (c.wireDepths_toCslib_le _).trans ?_
-  have ho : c.dualRailDepth (ofCslibWire (c.toCslib.outputs o)) = c.outputDepth o + 1 := by
+  have ho : c.dualRailDepth (c.toCslib.outputs o).index = c.outputDepth o + 1 := by
     show c.dualRailDepth (Fin.natAdd N (⟨N + 2 * G + o, by omega⟩ : Fin (N + 2 * G + M))) = _
     unfold dualRailDepth
     rw [dite_eq_right_of_eq_false (eq_false (by simp only [Fin.val_natAdd]; omega)),
       dite_eq_right_of_eq_false (eq_false (by simp only [Fin.val_natAdd]; omega)),
       dite_eq_right_of_eq_false (eq_false (by simp only [Fin.val_natAdd]; omega))]
     exact congrArg (· + 1) (congrArg _ (Fin.ext (by simp only [Fin.val_natAdd]; omega)))
-  rw [ho]
-  exact Nat.add_le_add_right (le_foldl_max _ o) 1
+  exact ho.le.trans (Nat.add_le_add_right (le_foldl_max _ o) 1)
 
 end DualRail
 

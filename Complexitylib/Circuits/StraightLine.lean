@@ -20,6 +20,8 @@ Complexitylib's circuit developments to CSLib's model rests (see
 
 - `Complexity.StraightLine.eval_ofLines` — each gate of a program built from
   lines evaluates its line on the values of the earlier gates
+- `Complexity.StraightLine.index_wireOfIndex` — the wire with index `w` in the
+  typed layout has CSLib index `w`
 - `Complexity.Circuit.eval_toStraightLine` — the translation computes what the
   typed circuit computes
 - `Complexity.Circuit.size_toStraightLine` — the translation has the typed
@@ -37,23 +39,32 @@ namespace StraightLine
 
 variable {σ : Signature} {N : ℕ} {U : Type*}
 
-/-- Each gate of `ofLines g lines` evaluates its line on the values of the
-earlier gates. -/
+/-- The wire with index `w` in the layout of typed circuits has CSLib index
+`w`. -/
+@[simp] theorem index_wireOfIndex {j : ℕ} (w : ℕ) (hw : w < N + j) :
+    (wireOfIndex w hw).index = ⟨w, hw⟩ := by
+  unfold wireOfIndex
+  split
+  · rfl
+  · next h => exact Fin.ext (by simp; omega)
+
+/-- Each gate of `Program.ofLines g lines` evaluates its line on the values of
+the earlier gates. -/
 theorem eval_ofLines (I : Interpretation σ U) (x : Fin N → U) :
     ∀ (g : ℕ) (lines : (j : Fin g) → Line σ N j) (j : Fin g),
-      (ofLines g lines).eval I x j =
-        (lines j).eval I x fun k => (ofLines g lines).eval I x (Fin.castLE (by omega) k)
+      (Program.ofLines g lines).eval I x j =
+        (lines j).eval I x fun k => (Program.ofLines g lines).eval I x (Fin.castLE (by omega) k)
   | 0, _, j => j.elim0
   | g + 1, lines, j => by
     induction j using Fin.lastCases with
     | last =>
-      rw [ofLines, Program.eval_gate_last]
+      rw [Program.ofLines, Program.eval_gate_last]
       congr 1
       funext k
       rw [show (Fin.castLE (by omega) k : Fin (g + 1)) = Fin.castSucc k from Fin.ext rfl,
         Program.eval_gate_castSucc]
     | cast j =>
-      rw [ofLines, Program.eval_gate_castSucc, eval_ofLines I x g]
+      rw [Program.ofLines, Program.eval_gate_castSucc, eval_ofLines I x g]
       congr 1
       funext k
       rw [show (Fin.castLE (by omega) k : Fin (g + 1)) = Fin.castSucc (Fin.castLE (by omega) k)
@@ -99,12 +110,12 @@ private theorem elim_wireOfIndex (c : Circuit B N M G) (x : BitString N) (j : Fi
 /-- Every position of the straight-line form holds its typed value. -/
 private theorem eval_straightLine (c : Circuit B N M G) (x : BitString N) :
     ∀ (bound : ℕ) (j : Fin (G + M)), j.val < bound →
-      (StraightLine.ofLines (G + M) c.straightLineAt).eval B.interpretation x j =
+      (Program.ofLines (G + M) c.straightLineAt).eval B.interpretation x j =
         c.straightLineValue x j
   | 0, _, h => absurd h (Nat.not_lt_zero _)
   | bound + 1, j, hj => by
     have hvalues : ∀ k : Fin j,
-        (StraightLine.ofLines (G + M) c.straightLineAt).eval B.interpretation x
+        (Program.ofLines (G + M) c.straightLineAt).eval B.interpretation x
             (Fin.castLE (by omega) k) = c.straightLineValue x (Fin.castLE (by omega) k) :=
       fun k => eval_straightLine c x bound _ (by simp; omega)
     rw [StraightLine.eval_ofLines]

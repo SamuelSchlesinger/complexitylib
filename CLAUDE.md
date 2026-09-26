@@ -91,6 +91,8 @@ same file are acceptable.
   root scope). Files are wrapped in `namespace Complexity … end Complexity`.
   Exceptions: `Complexitylib/Mathlib/` extends Mathlib types in their home
   namespaces (dot-notation requires it) and holds upstreaming candidates only;
+  `Complexitylib/Cslib/` likewise extends CSLib types in their home namespaces
+  (e.g. `Cslib.Circuits`) and holds upstreaming candidates only;
   `Complexitylib/Algebraic/` is the algebraic-circuits library imported
   wholesale, which keeps its `Algebraic` namespace, its `Cslib.Circuits`
   extensions, and a scoped style-lint exemption until the consolidation plan

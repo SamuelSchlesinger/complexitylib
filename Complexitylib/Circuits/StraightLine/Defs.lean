@@ -8,6 +8,8 @@ module
 public import Cslib.Computability.Circuit.Basic
 public import Complexitylib.Circuits.Basis.Defs
 public import Complexitylib.Circuits.Typed.Defs
+public import Complexitylib.Cslib.Circuit.Gated
+public import Complexitylib.Cslib.Circuit.Program
 
 /-!
 # Typed circuits as CSLib straight-line programs
@@ -42,18 +44,12 @@ def Gate.kind {B : Basis} {W : ℕ} (gate : Gate B W) : B.GateKind :=
 
 namespace StraightLine
 
-variable {σ : Signature} {N : ℕ}
+variable {N : ℕ}
 
 /-- The CSLib wire with index `w` in the layout of typed circuits, where the
 first `N` wires are the inputs and wire `N + j` is gate `j`. -/
 def wireOfIndex {j : ℕ} (w : ℕ) (hw : w < N + j) : Wire N j :=
   if h : w < N then .input ⟨w, h⟩ else .gate ⟨w - N, by omega⟩
-
-/-- The program whose gate `j` computes line `lines j`, which reads only the
-inputs and the gates before `j`. -/
-def ofLines : (g : ℕ) → ((j : Fin g) → Line σ N j) → Program σ N g
-  | 0, _ => .empty
-  | g + 1, lines => .gate (ofLines g fun j => lines j.castSucc) (lines (Fin.last g))
 
 end StraightLine
 
@@ -76,7 +72,7 @@ def straightLineAt (c : Circuit B N M G) (j : Fin (G + M)) : Line B.signature N 
 gates followed by its output gates, with the output gates as outputs. -/
 def toStraightLine (c : Circuit B N M G) : Cslib.Circuits.Circuit B.signature N M where
   size := G + M
-  program := StraightLine.ofLines (G + M) c.straightLineAt
+  program := Program.ofLines (G + M) c.straightLineAt
   outputs o := .gate (Fin.natAdd G o)
 
 end Circuit

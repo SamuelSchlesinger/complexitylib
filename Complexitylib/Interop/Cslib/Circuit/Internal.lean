@@ -37,7 +37,7 @@ variable {N M G g : ℕ}
 /-- The gate simulating a line computes the line's operation. -/
 theorem ofCslibGate_eval [NeZero N] (l : Line Boolean.signature N g) (v : BitString (N + g)) :
     (ofCslibGate l).eval v =
-      Boolean.interpretation l.op (fun a => v (ofCslibWire (l.wires a))) := by
+      Boolean.interpretation l.op (fun a => v (l.wires a).index) := by
   obtain ⟨op, w⟩ := l
   cases op with
   | const b =>
@@ -54,13 +54,13 @@ theorem ofCslibGate_eval [NeZero N] (l : Line Boolean.signature N g) (v : BitStr
 /-- Our wire values in the translation are the CSLib program's wire values. -/
 theorem wireValue_ofCslib [NeZero N] [NeZero M]
     (c : Cslib.Circuits.Circuit Boolean.signature N M) (x : BitString N) (w : Wire N c.size) :
-    (ofCslib c).wireValue x (ofCslibWire w) = c.program.trace Boolean.interpretation x w := by
+    (ofCslib c).wireValue x w.index = c.program.trace Boolean.interpretation x w := by
   set values : Fin c.size → Bool := fun j => (ofCslib c).wireValue x (Fin.natAdd N j)
-  have helim : ∀ w, Wire.elim x values w = (ofCslib c).wireValue x (ofCslibWire w) := by
+  have helim : ∀ w, Wire.elim x values w = (ofCslib c).wireValue x w.index := by
     intro w
     cases w with
     | input i =>
-      rw [Wire.elim_input, ofCslibWire_input, wireValue_of_lt _ _ _ (by simp)]
+      rw [Wire.elim_input, Wire.index_input, wireValue_of_lt _ _ _ (by simp)]
       rfl
     | gate j => rfl
   have heval : values = c.program.eval Boolean.interpretation x := by
