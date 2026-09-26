@@ -684,6 +684,16 @@ existing logics rather than a restriction imposed on them.
   projection is a reduction.
 \end{proof}
 
+\begin{definition}[Second-order pullback]
+  \label{def:desc-so-pullback}
+  \lean{Complexity.DescriptiveComplexity.FOInterpretation.translateSO}
+  \leanok
+  \uses{def:desc-interpretation, def:desc-so-syntax}
+  Pull an SO formula back through a universe-preserving interpretation by
+  replacing vocabulary atoms by their defining FO formulas. Translate constants
+  and retain relation variables, relation arities and all quantifiers.
+\end{definition}
+
 \begin{definition}[Dimension-$k$ interpretation]
   \label{def:desc-dim-k}
   \uses{def:desc-interpretation}

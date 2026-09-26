@@ -18,6 +18,7 @@ public import Complexitylib.DescriptiveComplexity.Encoding
 public import Complexitylib.DescriptiveComplexity.ModelChecking
 public import Complexitylib.DescriptiveComplexity.Language
 public import Complexitylib.DescriptiveComplexity.Examples
+public import Complexitylib.DescriptiveComplexity.SecondOrder.Reduction
 
 /-!
 # Descriptive complexity
