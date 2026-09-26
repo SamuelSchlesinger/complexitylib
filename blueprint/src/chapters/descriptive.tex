@@ -370,6 +370,49 @@ existing logics rather than a restriction imposed on them.
   quantifiers. Arity preservation makes each renamed relation atom well-typed.
 \end{proof}
 
+\begin{definition}[Existential-prefix connectives]
+  \label{def:desc-exist-so-connectives}
+  \lean{Complexity.DescriptiveComplexity.SOFormula.mergeExist,
+    Complexity.DescriptiveComplexity.SOFormula.existConj,
+    Complexity.DescriptiveComplexity.SOFormula.existDisj}
+  \leanok
+  \uses{def:desc-so-renaming, def:desc-existential-so}
+  To conjoin or disjoin two existential SO formulas, move each leading
+  existential relation quantifier outward, weakening the other operand past its
+  binder. Once both prefixes have been removed, conjoin or disjoin the matrices.
+  The total operation is also defined on arbitrary SO formulas; it moves only
+  their leading existential SO quantifiers. This implements the existential
+  prefix manipulation in Immerman, Section~7.1.
+\end{definition}
+
+\begin{theorem}[Correctness and size of existential-prefix connectives]
+  \label{thm:desc-exist-so-connectives}
+  \lean{Complexity.DescriptiveComplexity.SOFormula.mergeExist_sat,
+    Complexity.DescriptiveComplexity.SOFormula.isExistSO_mergeExist,
+    Complexity.DescriptiveComplexity.SOFormula.size_mergeExist,
+    Complexity.DescriptiveComplexity.SOFormula.existConj_sat,
+    Complexity.DescriptiveComplexity.SOFormula.existDisj_sat,
+    Complexity.DescriptiveComplexity.SOFormula.IsExistSO.existConj,
+    Complexity.DescriptiveComplexity.SOFormula.IsExistSO.existDisj,
+    Complexity.DescriptiveComplexity.SOFormula.size_existConj,
+    Complexity.DescriptiveComplexity.SOFormula.size_existDisj}
+  \leanok
+  \uses{def:desc-exist-so-connectives, thm:desc-so-renaming}
+  The resulting formulas have the usual conjunction and disjunction semantics
+  under arbitrary free-variable environments. If both operands are in
+  existential SO prefix form, so is the result. Each operation has size exactly
+  $|\varphi|+|\psi|+1$, with no duplication of either formula.
+\end{theorem}
+\begin{proof}
+  \leanok
+  Induct over prefix merging. Weakening makes the other operand independent of
+  the relation being quantified. Move the quantifier past the connective; for
+  disjunction, an unused witness can be any relation, including the empty one.
+  The sum of operand sizes decreases at each recursive step, since renaming
+  preserves size and the step removes one quantifier. The final connective adds
+  exactly one syntax node.
+\end{proof}
+
 \begin{definition}[Second-order definable query]
   \label{def:desc-so-definable}
   \lean{Complexity.DescriptiveComplexity.SODefinable}
