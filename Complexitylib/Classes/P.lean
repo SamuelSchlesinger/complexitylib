@@ -14,6 +14,7 @@ public import Complexitylib.Classes.P.UnaryLength
 public import Complexitylib.Classes.P.FinsetDomain
 public import Complexitylib.Classes.P.Cobham
 public import Complexitylib.Classes.P.Pairing
+public import Complexitylib.Classes.P.Iterate
 import Complexitylib.Models.TuringMachine.Subroutines.CopyOutput
 
 /-!
@@ -39,6 +40,10 @@ This file aggregates the definitions and theorems for P, FP, and PSPACE.
 - `unaryLength_mem_FP` — materializing the unary input length belongs to `FP`
 - `ite_mem_finset_mem_FP` — functions supported on a finite set belong to `FP`
 - `CobhamFP_eq_FP` — Cobham's machine-independent characterization of `FP`
+- `iterate_mem_FP`, `iterate_mem_FP_of_polyBound`, `iterate_mem_FP_of_step_le`,
+  `iterate_mem_FP_along` — iterating a polynomial-time step is polynomial-time
+  while the states stay polynomially short
+- `recFold_mem_FP_of_bound` — so is a bitwise fold with polynomially short states
 -/
 
 

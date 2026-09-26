@@ -462,23 +462,32 @@ these facts are stated in the chapter on encodings
 
 \begin{lemma}[Iteration in $\cc{FP}$]
   \label{lem:polytime-iterate}
-  \lean{Complexity.Cobham.iterate_mem_FP}
+  \lean{Complexity.iterate_mem_FP, Complexity.iterate_mem_FP_of_polyBound,
+    Complexity.iterate_mem_FP_of_step_le, Complexity.iterate_mem_FP_along}
   \leanok
   \uses{def:FP}
   Let $F, \mathit{init}, \mathit{ruler}, \mathit{width} \in \cc{FP}$, and
   suppose $|F^m(\mathit{init}(z))| \le |\mathit{width}(z)|$ for every $z$ and
   every $m \le |\mathit{ruler}(z)|$. Then
   $z \mapsto F^{|\mathit{ruler}(z)|}(\mathit{init}(z))$ is in $\cc{FP}$.
+  The same holds when the width is replaced by a polynomial bound
+  $|F^m(\mathit{init}(z))| \le B(|z|)$, or by a constant $c$ with
+  $|F^{m+1}(\mathit{init}(z))| \le |F^m(\mathit{init}(z))| + c$ for every
+  $m < |\mathit{ruler}(z)|$.
 \end{lemma}
 \begin{proof}
   \leanok
   One machine iterates a truncated step once per bit of its own input, with a
   unary counter that stops applying $F$ after $|\mathit{ruler}(z)|$ rounds;
-  the width bound keeps every intermediate state polynomially long. The
-  declaration lives in the proof-internal
-  module \texttt{Classes/P/Cobham/Internal.lean}; it is the main lever for
-  writing polynomial-time loops and is a candidate for promotion to a surface
-  module.
+  the width bound keeps every intermediate state polynomially long. This
+  machine is \texttt{Complexity.Cobham.iterate\_mem\_FP} in the proof-internal
+  module \texttt{Classes/P/Cobham/Internal.lean}. The surface module
+  \texttt{Classes/P/Iterate.lean} restates it and derives the variants: a
+  polynomial bound has a ruler in $\cc{FP}$ at least as long, and a per-step
+  bound gives a polynomial one, because $\mathit{init}(z)$ and
+  $\mathit{ruler}(z)$ are outputs of polynomial-time functions and so are
+  polynomially long. \texttt{Complexity.iterate\_mem\_FP\_along} states the
+  bound on the values the states encode, when $F$ computes a map on them.
 \end{proof}
 
 \begin{lemma}[Range concatenation and streaming folds in $\cc{FP}$]
@@ -1022,8 +1031,8 @@ Two refactors do not fit as nodes.
     functions, as already done for the Sipser--Lautemann matrix verdict.
   \item \textbf{Surface placement.} Lemma~\ref{lem:polytime-guess-verify}
     (\texttt{mem\_NP\_of\_poly\_witness} and \texttt{mem\_NP\_of\_linear\_witness})
-    lives in \texttt{Classes/PCP/Internal}, its relational linear form in
-    \texttt{SAT/Internal}, and Lemma~\ref{lem:polytime-iterate} in
-    \texttt{Classes/P/Cobham/Internal}; these are general tools and belong in
-    surface modules under \texttt{Classes/NP} and \texttt{Classes/P}.
+    lives in \texttt{Classes/NP/Internal} and its relational linear form in
+    \texttt{SAT/Internal}; these are general tools and belong in a surface
+    module under \texttt{Classes/NP}, as Lemma~\ref{lem:polytime-iterate}
+    now has one in \texttt{Classes/P/Iterate}.
 \end{itemize}
