@@ -5,7 +5,7 @@ Authors: Samuel Schlesinger
 -/
 
 module
-public import Complexitylib.DescriptiveComplexity.Encoding
+public import Complexitylib.DescriptiveComplexity.Encoding.Decoding
 public import Complexitylib.DescriptiveComplexity.Query
 public import Complexitylib.Models.TuringMachine
 
@@ -24,6 +24,9 @@ ultimately rest on.
 - `DescriptiveComplexity.queryLanguage` — the language of a query.
 - `DescriptiveComplexity.mem_queryLanguage` — a `Q`-satisfying structure's encoding
   is in `Q`'s language.
+- `mem_queryLanguage_iff_decodeStruct` — exact membership via successful decoding.
+- `encodeStruct_mem_queryLanguage_iff` — encoding preserves and reflects the query.
+- `not_mem_queryLanguage_of_decodeStruct_eq_none` — malformed inputs are rejected.
 -/
 
 
@@ -44,6 +47,24 @@ def queryLanguage (Q : BooleanQuery V) : Language :=
 theorem mem_queryLanguage (Q : BooleanQuery V) (A : DecFinStruct V)
     (hQ : Q A.toFinStruct) : encodeStruct A ∈ queryLanguage Q :=
   ⟨A, rfl, hQ⟩
+
+/-- Query-language membership is exactly successful decoding followed by the query. -/
+theorem mem_queryLanguage_iff_decodeStruct (Q : BooleanQuery V) (bits : List Bool) :
+    bits ∈ queryLanguage Q ↔
+      ∃ A : DecFinStruct V, decodeStruct V bits = some A ∧ Q A.toFinStruct := by
+  simp only [queryLanguage, Set.mem_ofPred_eq, decodeStruct_eq_some_iff]
+
+/-- Encoding preserves and reflects the answer to any structural Boolean query. -/
+theorem encodeStruct_mem_queryLanguage_iff (Q : BooleanQuery V) (A : DecFinStruct V) :
+    encodeStruct A ∈ queryLanguage Q ↔ Q A.toFinStruct := by
+  rw [mem_queryLanguage_iff_decodeStruct]
+  simp
+
+/-- A malformed encoding is outside every induced query language. -/
+theorem not_mem_queryLanguage_of_decodeStruct_eq_none (Q : BooleanQuery V) (bits : List Bool)
+    (h : decodeStruct V bits = none) : bits ∉ queryLanguage Q := by
+  rw [mem_queryLanguage_iff_decodeStruct]
+  simp only [h, reduceCtorEq, false_and, exists_false, not_false_eq_true]
 
 end DescriptiveComplexity
 

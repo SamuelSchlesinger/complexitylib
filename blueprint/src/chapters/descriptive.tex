@@ -565,26 +565,43 @@ existing logics rather than a restriction imposed on them.
 
 \begin{definition}[Structure decoder]
   \label{def:desc-decoder}
-  \uses{def:desc-encoding}
+  \lean{Complexity.DescriptiveComplexity.readStructCandidate,
+    Complexity.DescriptiveComplexity.decodeStruct}
+  \leanok
+  \uses{def:desc-encoding, def:desc-encoding-positions}
   A computable parser $\mathrm{dec} : \{0,1\}^* \to V\text{-structures} \cup \{\bot\}$.
-  It reads the unary size and then the fixed-length relation and constant blocks,
-  and returns $\bot$ on malformed input, including a size below $2$ and a
-  constant block that is not one-hot.
+  It checks the unary size and total length, reads relation bits and the first
+  set bit in each constant block, and accepts only when re-encoding this candidate
+  reproduces the entire input. It returns $\bot$ on malformed input, including
+  a size below $2$, a constant block that is not one-hot, or trailing data.
 \end{definition}
 
 \begin{theorem}[Encoding round trip]
   \label{thm:desc-encoding-roundtrip}
+  \lean{Complexity.DescriptiveComplexity.decodeStruct_encodeStruct,
+    Complexity.DescriptiveComplexity.decodeStruct_nil,
+    Complexity.DescriptiveComplexity.decodeStruct_eq_some_iff,
+    Complexity.DescriptiveComplexity.decodeStruct_eq_none_iff,
+    Complexity.DescriptiveComplexity.encodeStruct_injective,
+    Complexity.DescriptiveComplexity.mem_queryLanguage_iff_decodeStruct,
+    Complexity.DescriptiveComplexity.encodeStruct_mem_queryLanguage_iff,
+    Complexity.DescriptiveComplexity.not_mem_queryLanguage_of_decodeStruct_eq_none}
+  \leanok
   \uses{def:desc-decoder, def:desc-encoding}
-  \notready
-  $\mathrm{dec}(\mathrm{enc}(\mathcal{A})) = \mathcal{A}$, up to extensional
-  equality of relations. Hence $\mathrm{enc}$ is injective, and
+  $\mathrm{dec}(\mathrm{enc}(\mathcal{A})) = \mathcal{A}$ exactly, with
+  extensional equality of the relation and constant functions.
+  Decoding returns $\mathcal{A}$ iff its encoding equals the input; rejection
+  is equivalent to being outside the encoder's image. Hence $\mathrm{enc}$ is injective, and
   $x \in \mathrm{queryLanguage}(Q)$ iff $\mathrm{dec}(x) = \mathcal{A} \neq \bot$
   and $Q(\mathcal{A})$.
 \end{theorem}
 \begin{proof}
-  \uses{prop:desc-encoding-length}
-  Recover the size with \texttt{encodeStruct\_card}, then split the remainder by
-  the known block lengths.
+  \leanok
+  \uses{prop:desc-encoding-length, thm:desc-encoding-positions}
+  Recover the size with \texttt{encodeStruct\_card}; position lookup recovers
+  each relation bit and the unique set bit in every constant block. The candidate
+  is therefore the original structure. The final re-encoding check proves the
+  converse for arbitrary input strings.
 \end{proof}
 
 \begin{definition}[Boolean model checker]
@@ -614,6 +631,34 @@ existing logics rather than a restriction imposed on them.
 \begin{proof}
   \leanok
   Induct on $\varphi$.
+\end{proof}
+
+\begin{definition}[Encoded sentence evaluator]
+  \label{def:desc-encoded-model-checking}
+  \lean{Complexity.DescriptiveComplexity.Sentence.evalEncoded}
+  \leanok
+  \uses{def:desc-decoder, def:desc-model-checking}
+  Decode the input string, evaluate the sentence on a successfully decoded
+  structure, and return false if decoding fails.
+\end{definition}
+
+\begin{theorem}[Encoded model checking recognizes the induced language]
+  \label{thm:desc-encoded-model-checking}
+  \lean{Complexity.DescriptiveComplexity.Sentence.evalEncoded_eq_queryLanguage,
+    Complexity.DescriptiveComplexity.Sentence.evalEncoded_encodeStruct,
+    Complexity.DescriptiveComplexity.Sentence.evalEncoded_nil}
+  \leanok
+  \uses{def:desc-encoded-model-checking, thm:desc-model-checking,
+    thm:desc-encoding-roundtrip, def:desc-query-language}
+  The encoded evaluator returns true exactly on the induced query language,
+  for every input string. On an encoded structure it agrees with the original
+  structure-level evaluator. Theorem~\ref{thm:desc-fo-in-P} proves that a
+  polynomial-time machine computes this verdict for each fixed sentence.
+\end{theorem}
+\begin{proof}
+  \leanok
+  Split on decoding and combine its exact success characterization with
+  correctness of sentence evaluation.
 \end{proof}
 
 \begin{theorem}[First-order queries are in polynomial time]
