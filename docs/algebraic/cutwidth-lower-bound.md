@@ -61,6 +61,8 @@ declaration of the development.
 | Median ordering | `MedianOrdering.card_cutFinset_key_lt_le` in `Algebraic.LowerBound.Cutwidth.MedianOrdering`: a path decomposition with bags of size at most `p + 1` gives a vertex ordering of a cubic graph with prefix cuts at most `p + 2`. |
 | Expansion | `Compression.exists_linearOrder` and `Multigraph.orderingBound_of_pathwidthBound` in `Algebraic.LowerBound.Cutwidth.Expansion`: `PathwidthBound ξ N₀` implies `OrderingBound (2 ξ) (N₀ + 9)`. |
 | Assembly | `card_accepting_le_of_orderingBound`, `lt_size_of_bounds`, `eventually_lt_size`, and `eventually_lt_size_of_pathwidthBound` in `Algebraic.LowerBound.Cutwidth.FourN`. |
+| Nondeterministic circuits | `Network.forget` in `Algebraic.LowerBound.Cutwidth.Forget` drops the ports of witness inputs, keeping the multigraph; `nondet_lt_size_of_bounds` and `nondet_eventually_lt_size_of_pathwidthBound` in `Algebraic.LowerBound.Cutwidth.Nondeterministic` give the same `(4 − ε) n` bound for circuits on `n + m` inputs, `m ≤ n`, computing `f` as an existential projection. |
+| Average case | `Wiring.trace_eq_of_agree_backward` in `Algebraic.LowerBound.Cutwidth.Direction`, the one-sided count `Network.card_accepting_inter_le` in `Algebraic.LowerBound.Cutwidth.Balanced`, and `eventually_card_agree_le_of_pathwidthBound` in `Algebraic.LowerBound.Cutwidth.AverageCase`: a circuit with at most `(4 − ε) n` gates agrees with a `(K, ν)`-balanced function on at most `(1/2 + 3ν) 2ⁿ + 2 ^ ((1 − ε/24) n)` inputs. See the [average-case note](average-case-cutwidth.md). |
 
 ### The cut-counting lemma
 

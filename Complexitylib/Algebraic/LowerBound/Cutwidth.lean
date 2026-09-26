@@ -14,6 +14,11 @@ public import Complexitylib.Algebraic.LowerBound.Cutwidth.MedianOrdering
 public import Complexitylib.Algebraic.LowerBound.Cutwidth.Compression
 public import Complexitylib.Algebraic.LowerBound.Cutwidth.Expansion
 public import Complexitylib.Algebraic.LowerBound.Cutwidth.FourN
+public import Complexitylib.Algebraic.LowerBound.Cutwidth.Forget
+public import Complexitylib.Algebraic.LowerBound.Cutwidth.Nondeterministic
+public import Complexitylib.Algebraic.LowerBound.Cutwidth.Direction
+public import Complexitylib.Algebraic.LowerBound.Cutwidth.Balanced
+public import Complexitylib.Algebraic.LowerBound.Cutwidth.AverageCase
 
 /-!
 # The cutwidth lower bound
@@ -21,8 +26,11 @@ public import Complexitylib.Algebraic.LowerBound.Cutwidth.FourN
 This umbrella collects the `(4 - ε) n` lower bound for circuits over the full
 binary basis: rectangle-free functions, the cut-counting lemma for constraint
 networks, the wiring graph of a circuit, the derivation of the graph-ordering
-bound from the pathwidth hypothesis for cubic graphs, and the final assembly.
-Start from `Algebraic.LowerBound.Cutwidth.FourN`.
+bound from the pathwidth hypothesis for cubic graphs, the final assembly, the
+transfer to nondeterministic circuits by forgetting witness ports, and the
+average-case bound for balanced functions through the direction of the
+wiring graph. Start from `Algebraic.LowerBound.Cutwidth.FourN`; the
+average case is `Algebraic.LowerBound.Cutwidth.AverageCase`.
 -/
 
 @[expose] public section

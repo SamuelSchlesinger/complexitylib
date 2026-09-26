@@ -32,6 +32,12 @@ Two statements enter as hypotheses rather than being proved here:
 
 The main theorem is `eventually_lt_size`. The fixed-`n` core is
 `lt_size_of_bounds`, whose numeric hypotheses are discharged asymptotically.
+
+The proof organization, the threshold-edge charging, the application of a
+sumset extractor as the hard family, and the merge-tree restoration argument
+follow Ryan Williams's private working note *A (4 − ε)n lower bound for
+Boolean circuits* (September 2026), which uses the circuit-to-read-once
+compiler of the author's counting note. The formalization is the author's.
 -/
 
 @[expose] public section
@@ -184,6 +190,102 @@ theorem eventually_mul_logb_add_lt (A B : ℝ) {δ : ℝ} (hδ : 0 < δ) :
     nlinarith
   linarith
 
+/-- **The numeric core.** A `K`-rectangle-free function with at least
+`2 ^ (n - 2)` accepting inputs cannot satisfy the accepting-input bound of
+the cut-counting lemma for a circuit with `s ≤ (4 - 18 η) n` gates reading
+`n'` inputs, when `n - n' < ⌈log₂ K⌉` and `n` is large enough. The bound is
+taken as a hypothesis so that the deterministic and nondeterministic
+assemblies share this argument. -/
+theorem false_of_accepting_bound {η C : ℝ} (hη : 0 < η) (hη1 : η ≤ 1 / 18) (hC : 0 ≤ C)
+    {n : Nat} (hn : 2 ≤ n) {f : Cslib.BooleanFunction n} {K c : Nat} (hK : K ≤ n ^ c)
+    (hacc : 2 ^ (n - 2) ≤ (accepting f).card) (hK1 : 1 < K)
+    (hpow : 8 * n ^ (2 * c) ≤ 2 ^ n)
+    (hlog : (4 + 3 * c) * Real.logb 2 n + (C + 22) < 3 * η * n)
+    {s n' : Nat} (hs : (s : ℝ) ≤ (4 - 18 * η) * n) (hn'le : n' ≤ n)
+    (hread : n - n' < Nat.clog 2 K)
+    {Vb : ℝ} (hVpos : 0 < Vb) (hVb : Vb ≤ 16 * n)
+    (bound : (accepting f).card < K * 2 ^ (n - n') ∨
+      ((accepting f).card : ℝ) ≤ Vb * (2 : ℝ) ^ ((1 / 3 + η) * max ((s : ℝ) - n') 0 +
+        3 * Real.logb 2 Vb + C + 3) * K ^ 2) : False := by
+  have hacc_pos : 0 < (accepting f).card := lt_of_lt_of_le (Nat.two_pow_pos _) hacc
+  have hpow' : 2 ^ n = 4 * 2 ^ (n - 2) := by
+    calc 2 ^ n = 2 ^ (n - 2 + 2) := by rw [Nat.sub_add_cancel hn]
+      _ = 4 * 2 ^ (n - 2) := by rw [pow_add]; ring
+  have hbig : 2 * K ^ 2 ≤ 2 ^ (n - 2) := by
+    have : K ^ 2 ≤ n ^ (2 * c) := by
+      rw [mul_comm, pow_mul]
+      exact Nat.pow_le_pow_left hK 2
+    omega
+  set k := Nat.clog 2 K with hk_def
+  have hk1 : 1 ≤ k := Nat.clog_pos one_lt_two hK1
+  have hlow : 2 ^ (k - 1) < K := Nat.pow_pred_clog_lt_self one_lt_two hK1
+  have hn1 : (1 : ℝ) ≤ n := by exact_mod_cast (by omega : 1 ≤ n)
+  have hlogn : 0 ≤ Real.logb 2 n := Real.logb_nonneg one_lt_two hn1
+  have hkR : (k : ℝ) < c * Real.logb 2 n + 1 := by
+    have h₁ : ((2 : ℝ) ^ (k - 1)) < (n : ℝ) ^ c := by
+      have : (2 ^ (k - 1) : Nat) < n ^ c := hlow.trans_le hK
+      exact_mod_cast this
+    have h₂ := (Real.logb_lt_logb one_lt_two (by positivity) h₁)
+    rw [Real.logb_pow, Real.logb_pow, Real.logb_self_eq_one one_lt_two, mul_one] at h₂
+    have : ((k - 1 : Nat) : ℝ) = (k : ℝ) - 1 := by
+      rw [Nat.cast_sub hk1]
+      simp
+    linarith
+  have hlogK : Real.logb 2 K ≤ c * Real.logb 2 n := by
+    have h := (Real.logb_le_logb one_lt_two (by exact_mod_cast (by omega : 0 < K))
+      (by positivity)).mpr (show (K : ℝ) ≤ (n : ℝ) ^ c by exact_mod_cast hK)
+    rwa [Real.logb_pow] at h
+  rcases bound with small | large
+  · -- Few inputs are read: the count is below `K ^ 2`, contradicting the accepting bound.
+    have h₁ : 2 ^ (n - n') ≤ 2 ^ (k - 1) := Nat.pow_le_pow_right two_pos (by omega)
+    have h₂ : (accepting f).card < K * K :=
+      small.trans_le ((Nat.mul_le_mul_left K h₁).trans (Nat.mul_le_mul_left K hlow.le))
+    have : K * K = K ^ 2 := by ring
+    omega
+  · -- The main case: compare exponents.
+    have hreadR : (n : ℝ) - n' < k := by
+      have : n - n' < k := hread
+      have : ((n - n' : Nat) : ℝ) < k := by exact_mod_cast this
+      rwa [Nat.cast_sub hn'le] at this
+    have hmax : max ((s : ℝ) - n') 0 ≤ (3 - 18 * η) * n + k := by
+      apply max_le
+      · linarith
+      · nlinarith
+    have hprod : (1 / 3 + η) * max ((s : ℝ) - n') 0 ≤
+        (1 - 3 * η) * n + (c * Real.logb 2 n + 1) / 2 := by
+      have h₁ := mul_le_mul_of_nonneg_left hmax (by linarith : (0 : ℝ) ≤ 1 / 3 + η)
+      have hk0 : (0 : ℝ) ≤ k := by positivity
+      have h₂ : (1 / 3 + η) * k ≤ k / 2 := by nlinarith
+      have h₃ : (1 / 3 + η) * ((3 - 18 * η) * n) ≤ (1 - 3 * η) * n := by nlinarith
+      nlinarith
+    have hlogS : Real.logb 2 Vb ≤ 4 + Real.logb 2 n := by
+      calc Real.logb 2 Vb ≤ Real.logb 2 (16 * n) :=
+            (Real.logb_le_logb one_lt_two hVpos (by positivity)).mpr hVb
+        _ = 4 + Real.logb 2 n := by
+            rw [Real.logb_mul (by norm_num) (by positivity),
+              show (16 : ℝ) = 2 ^ (4 : Nat) by norm_num, Real.logb_pow,
+              Real.logb_self_eq_one one_lt_two]
+            ring
+    -- Take binary logarithms of the main inequality.
+    have hM : ((accepting f).card : ℝ) > 0 := by exact_mod_cast hacc_pos
+    have hKpos : (0 : ℝ) < K := by exact_mod_cast (by omega : 0 < K)
+    have hSpos : (0 : ℝ) < Vb := hVpos
+    set X : ℝ := (1 / 3 + η) * max ((s : ℝ) - n') 0 + 3 * Real.logb 2 Vb + C + 3
+      with hX
+    have hlower : (2 : ℝ) ^ ((n : ℝ) - 2) ≤ (accepting f).card := by
+      have : ((2 : ℝ) ^ (n - 2 : Nat)) ≤ (accepting f).card := by exact_mod_cast hacc
+      rwa [← Real.rpow_natCast, Nat.cast_sub hn] at this
+    have hupper : ((accepting f).card : ℝ) ≤
+        (2 : ℝ) ^ (Real.logb 2 Vb + X + 2 * Real.logb 2 K) := by
+      rw [Real.rpow_add (by norm_num), Real.rpow_add (by norm_num), Real.rpow_logb (by norm_num)
+        (by norm_num) hSpos, show (2 : ℝ) ^ (2 * Real.logb 2 K) = ((2 : ℝ) ^ Real.logb 2 K) ^ 2 by
+          rw [← Real.rpow_natCast, ← Real.rpow_mul (by norm_num)]
+          push_cast
+          ring_nf, Real.rpow_logb (by norm_num) (by norm_num) hKpos]
+      exact large
+    have hexp := (Real.rpow_le_rpow_left_iff one_lt_two).mp (hlower.trans hupper)
+    linarith
+
 /-- **The fixed-`n` core of the lower bound.** With the graph-ordering
 hypothesis for slack `η ≤ 1/18`, a `K`-rectangle-free function with at least
 `2 ^ (n - 2)` accepting inputs and `K ≤ n ^ c` needs more than `(4 - 18 η) n`
@@ -227,10 +329,6 @@ theorem lt_size_of_bounds {η C : ℝ} (hη : 0 < η) (hη1 : η ≤ 1 / 18) (hC
       rw [Nat.cast_sub hk1]
       simp
     linarith
-  have hlogK : Real.logb 2 K ≤ c * Real.logb 2 n := by
-    have h := (Real.logb_le_logb one_lt_two (by exact_mod_cast (by omega : 0 < K))
-      (by positivity)).mpr (show (K : ℝ) ≤ (n : ℝ) ^ c by exact_mod_cast hK)
-    rwa [Real.logb_pow] at h
   -- The circuit's output wire.
   obtain ⟨g, hg⟩ : ∃ g, outputs 0 = g := ⟨_, rfl⟩
   have eval_eq : ∀ x, f x = program.trace Binary.interpretation x g := by
@@ -271,63 +369,11 @@ theorem lt_size_of_bounds {η C : ℝ} (hη : 0 < η) (hη1 : η ≤ 1 / 18) (hC
         (Wiring.network_computes p out).dependsOnlyOn
       exact support _ (by rw [feq]; exact hR)
     have hn'le : n' ≤ n := Wiring.card_read_le p out
-    rcases card_accepting_le_of_orderingBound hη.le hC order p out hK1 hrect' with small | large
-    · -- Few inputs are read: the count is below `K ^ 2`, contradicting the accepting bound.
-      have h₁ : 2 ^ (n - n') ≤ 2 ^ (k - 1) := Nat.pow_le_pow_right two_pos (by omega)
-      have h₂ : (accepting fun x => p.eval Binary.interpretation x out).card < K * K :=
-        small.trans_le ((Nat.mul_le_mul_left K h₁).trans (Nat.mul_le_mul_left K hlow.le))
-      have : K * K = K ^ 2 := by ring
-      omega
-    · -- The main case: compare exponents.
+    have hVb : ((n : ℝ) + 3 * s) ≤ 16 * n := by
       have hs' : (s : ℝ) ≤ (4 - 18 * η) * n := hs
-      have hreadR : (n : ℝ) - n' < k := by
-        have : n - n' < k := hread
-        have : ((n - n' : Nat) : ℝ) < k := by exact_mod_cast this
-        rwa [Nat.cast_sub hn'le] at this
-      have hmax : max ((s : ℝ) - n') 0 ≤ (3 - 18 * η) * n + k := by
-        apply max_le
-        · linarith
-        · nlinarith
-      have hprod : (1 / 3 + η) * max ((s : ℝ) - n') 0 ≤
-          (1 - 3 * η) * n + (c * Real.logb 2 n + 1) / 2 := by
-        have h₁ := mul_le_mul_of_nonneg_left hmax (by linarith : (0 : ℝ) ≤ 1 / 3 + η)
-        have hk0 : (0 : ℝ) ≤ k := by positivity
-        have h₂ : (1 / 3 + η) * k ≤ k / 2 := by nlinarith
-        have h₃ : (1 / 3 + η) * ((3 - 18 * η) * n) ≤ (1 - 3 * η) * n := by nlinarith
-        nlinarith
-      have hlogS : Real.logb 2 (n + 3 * s) ≤ 4 + Real.logb 2 n := by
-        have hpos : (0 : ℝ) < n + 3 * s := by positivity
-        have hle : (n : ℝ) + 3 * s ≤ 16 * n := by nlinarith
-        calc Real.logb 2 (n + 3 * s) ≤ Real.logb 2 (16 * n) :=
-              (Real.logb_le_logb one_lt_two hpos (by positivity)).mpr hle
-          _ = 4 + Real.logb 2 n := by
-              rw [Real.logb_mul (by norm_num) (by positivity),
-                show (16 : ℝ) = 2 ^ (4 : Nat) by norm_num, Real.logb_pow,
-                Real.logb_self_eq_one one_lt_two]
-              ring
-      -- Take binary logarithms of the main inequality.
-      have hM : ((accepting fun x => p.eval Binary.interpretation x out).card : ℝ) > 0 := by
-        exact_mod_cast (feq ▸ hacc_pos)
-      have hKpos : (0 : ℝ) < K := by exact_mod_cast (by omega : 0 < K)
-      have hSpos : (0 : ℝ) < n + 3 * s := by positivity
-      set X : ℝ := (1 / 3 + η) * max ((s : ℝ) - n') 0 + 3 * Real.logb 2 (n + 3 * s) + C + 3
-        with hX
-      have hlower : (2 : ℝ) ^ ((n : ℝ) - 2) ≤
-          (accepting fun x => p.eval Binary.interpretation x out).card := by
-        have : ((2 : ℝ) ^ (n - 2 : Nat)) ≤
-            (accepting fun x => p.eval Binary.interpretation x out).card := by
-          exact_mod_cast hacc'
-        rwa [← Real.rpow_natCast, Nat.cast_sub hn] at this
-      have hupper : ((accepting fun x => p.eval Binary.interpretation x out).card : ℝ) ≤
-          (2 : ℝ) ^ (Real.logb 2 (n + 3 * s) + X + 2 * Real.logb 2 K) := by
-        rw [Real.rpow_add (by norm_num), Real.rpow_add (by norm_num), Real.rpow_logb (by norm_num)
-          (by norm_num) hSpos, show (2 : ℝ) ^ (2 * Real.logb 2 K) = ((2 : ℝ) ^ Real.logb 2 K) ^ 2 by
-            rw [← Real.rpow_natCast, ← Real.rpow_mul (by norm_num)]
-            push_cast
-            ring_nf, Real.rpow_logb (by norm_num) (by norm_num) hKpos]
-        exact large
-      have hexp := (Real.rpow_le_rpow_left_iff one_lt_two).mp (hlower.trans hupper)
-      linarith
+      nlinarith
+    exact false_of_accepting_bound hη hη1 hC hn hK hacc' hK1 hpow hlog hs hn'le hread
+      (by positivity) hVb (card_accepting_le_of_orderingBound hη.le hC order p out hK1 hrect')
 
 /-- **Theorem 1.** Assume the graph-ordering lemma for every slack `η > 0` and
 a family of functions `f n` that is `K n`-rectangle-free with `K n ≤ n ^ c`

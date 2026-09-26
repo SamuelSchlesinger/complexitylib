@@ -132,7 +132,13 @@ needs more than `(4 - ε) n` gates over the full binary basis `B₂`, for every
 graphs and the existence of such a hard family are explicit hypotheses of
 `Cutwidth.eventually_lt_size_of_pathwidthBound`; the library adds no axioms.
 The [cutwidth guide](cutwidth-lower-bound.md) describes the argument and
-its hypotheses. `Algebraic.LowerBound.Nechiporuk` proves that the same
+its hypotheses. Two corollaries share the assembly: the same bound for
+nondeterministic circuits with at most `n` witness bits
+(`Cutwidth.nondet_eventually_lt_size_of_pathwidthBound`), and an average-case
+form for balanced functions, where circuits of size `(4 - ε) n` agree with the
+function on at most `(1/2 + 3ν) 2 ^ n + 2 ^ ((1 - ε/24) n)` inputs
+(`Cutwidth.eventually_card_agree_le_of_pathwidthBound`, see the
+[average-case note](average-case-cutwidth.md)). `Algebraic.LowerBound.Nechiporuk` proves that the same
 functions need `Ω(n² / log n)` leaves in any formula over the full binary
 basis, by Nechiporuk's subfunction counting; rectangle-freeness gives the
 maximal subfunction count on every block simultaneously. The

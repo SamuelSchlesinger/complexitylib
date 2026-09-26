@@ -478,12 +478,69 @@ chapter.
   on the pathwidth of cubic graphs, which is not formalized here. As for
   Theorem~\ref{thm:lowerbounds-algebraic-nechiporuk}, no explicit
   rectangle-free family is formalized, so this is a conditional statement
-  about any such family.
+  about any such family. The argument follows Ryan Williams's private working
+  note of September 2026, which combines the rectangle bound for read-once
+  programs with the circuit-to-read-once compiler of the author's counting
+  note.
 \end{theorem}
 \begin{proof}
   \leanok
   Order the gates by a path decomposition of the circuit's wiring graph and
   count the rectangles cut at each position.
+\end{proof}
+
+\begin{theorem}[Cutwidth bound for nondeterministic circuits, conditional]
+  \label{thm:lowerbounds-algebraic-cutwidth-nondet}
+  \lean{Algebraic.Cutwidth.nondet_eventually_lt_size_of_pathwidthBound}
+  \leanok
+  \uses{thm:lowerbounds-algebraic-cutwidth}
+  Under the hypotheses of Theorem~\ref{thm:lowerbounds-algebraic-cutwidth},
+  the same bound holds for nondeterministic circuits: for every
+  $\varepsilon > 0$ and all large $n$, every circuit on $n + m$ inputs with
+  $m \le n$ whose accepted inputs $x$ are exactly those with some witness $y$
+  making the output $1$ has more than $(4 - \varepsilon)n$ gates.
+  Nondeterminism does not reduce the size below this bound.
+\end{theorem}
+\begin{proof}
+  \leanok
+  Witness inputs are read by the wiring graph but carry no port of the
+  computed function, so forgetting their ports (\texttt{Network.forget})
+  leaves a network with the same multigraph computing the existential
+  projection. The excess of the wiring graph counts every reachable input,
+  ordinary or witness, so it is at most the gate count minus the ordinary
+  inputs read, and the deterministic assembly applies unchanged.
+\end{proof}
+
+\begin{theorem}[Average-case cutwidth bound, conditional]
+  \label{thm:lowerbounds-algebraic-cutwidth-average}
+  \lean{Algebraic.Cutwidth.eventually_card_agree_le_of_pathwidthBound}
+  \leanok
+  \uses{thm:lowerbounds-algebraic-cutwidth}
+  Call $f$ $(K, \nu)$-balanced when on every rectangle with both sides of
+  size at least $K$, under every split of the coordinates, the fraction of
+  accepting inputs lies within $\nu$ of one half (a sumset extractor with
+  error $\nu$ is balanced with $K$ polynomial). Under the pathwidth
+  hypothesis of Theorem~\ref{thm:lowerbounds-algebraic-cutwidth}, for every
+  family $f_n$ that is $(K_n, \nu)$-balanced with $K_n \le n^c$, every
+  $\varepsilon > 0$, and all large $n$, every circuit with at most
+  $(4 - \varepsilon)n$ binary gates agrees with $f_n$ on at most
+  $(1/2 + 3\nu)\,2^n + 2^{(1 - \varepsilon/24)n}$ inputs.
+\end{theorem}
+\begin{proof}
+  \leanok
+  The worst-case count gives nothing here, since an input whose past set is
+  still small at a vertex lies in a thin rectangle on which a balanced
+  function is unconstrained. Instead the direction of the wiring graph is
+  used: at a cut, the forward-crossing bits are determined by the inputs read
+  so far together with the backward-crossing bits, and symmetrically for the
+  future. This caps the number of cut assignments a fixed past or future can
+  see, so the thin-rectangle mass at a prefix $L$ is at most
+  $(K - 1)(2^{n - a(L)} + 2^{n - c(L)})$ with $a(L)$ the inputs read minus
+  the forward cut and $c(L)$ the inputs unread minus the backward cut. Along
+  the vertex order $a$ grows by at most four per step and $a + c$ is $n$
+  minus the cut, so a prefix with both $a$ and $c$ linear exists whenever
+  the cutwidth is below $(1 - \Omega(\varepsilon))n$. Circuits reading few
+  inputs are constant on subcubes, which balance handles directly.
 \end{proof}
 
 \begin{definition}[The KRW conjecture]
