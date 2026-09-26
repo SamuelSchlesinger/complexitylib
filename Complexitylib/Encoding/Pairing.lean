@@ -31,7 +31,11 @@ namespace Complexity
 /-- Encode a pair of binary strings as a single binary string.
     Each bit of `x` is doubled (`false ↦ [false, false]`, `true ↦ [true, true]`),
     followed by the separator `[false, true]`, followed by `y` verbatim.
-    This encoding is injective and computable in linear time. -/
+    The output has length `2|x| + 2 + |y|` (`pair_length`) and the encoding is
+    injective (`pair_inj`). Machine-level cost is recorded elsewhere: `pair` of
+    two `FP` functions is in `FP` (`mem_FP_pair`), and `x ↦ pair (f x) x` has
+    an explicit bound (`TM.pairWithInputTM_computesInTime`); no linear-time
+    bound for `pair` itself is stated. -/
 def pair (x y : List Bool) : List Bool :=
   delimit x ++ y
 

@@ -81,6 +81,8 @@ enough for `TM.seqTM_keepsWindow_of_post`.
 - `PH_subset_PSPACE_of_polyExistsLang_internal` — the containment, modulo one concrete
   language-level statement
 - `PH_enumerator_exists` — the enumerating machine, with its window and its verdict
+- `polyExistsClass_PSPACE_subset_PSPACE_internal` — closure of `PSPACE` under the bounded
+  existential
 - `PH_subset_PSPACE_internal` — the containment
 -/
 
@@ -118,7 +120,7 @@ theorem PH_subset_PSPACE_of_internal
 only the polynomially bounded existential quantifier remains. -/
 theorem PH_subset_PSPACE_of_polyExists_internal (hex : polyExistsClass PSPACE ⊆ PSPACE) :
     PH ⊆ PSPACE :=
-  PH_subset_PSPACE_of_internal (fun _ h => PSPACE_compl h) hex
+  PH_subset_PSPACE_of_internal (fun _ h => PSPACE_compl_internal h) hex
 
 /-- **Membership in a bounded existential, as two numeric quantifiers.** This is the condition the
 enumerating machine decides: iterate a witness length and a witness value, and test the pair. -/
@@ -186,7 +188,7 @@ theorem PH_enumerator_exists (p : Polynomial ℕ) (L' : Language) (hL' : L' ∈ 
   obtain ⟨k, M, f, hdecS, hf⟩ := hm
   obtain ⟨s, hs⟩ := BigO.pow_polynomial_bound hf
   have hdec : M.DecidesInTime L' (TM.spaceTimeBound M f) :=
-    TM.decidesInTime_of_decidesInSpace hdecS
+    TM.decidesInTime_of_decidesInSpace_internal hdecS
   have hne : M.qstart ≠ M.qhalt := TM.qstart_ne_qhalt_of_decidesInTime M hdec
   refine ⟨PolyExists.enumTapes k, PolyExists.enumTM M p (PolyExists.bHPoly p s),
     PolyExists.bWPoly ((PolyExists.scratchTargets k).length) p s (PolyExists.bHPoly p s), ?_, ?_⟩
@@ -210,6 +212,14 @@ theorem PH_enumerator_exists (p : Polynomial ℕ) (L' : Language) (hL' : L' ∈ 
         (s.eval (PolyExists.bP x.length (p.eval x.length))))
     exact PolyExists.enumTM_decides M s hs hdecS hdec p x _ _ _ _ bBody bTest
       rfl rfl rfl rfl hb1 hb2
+
+/-- **`PSPACE` is closed under polynomially bounded existential quantification.** The witness
+enumerator of `PH_enumerator_exists` keeps a polynomial window and decides the bounded
+existential, and `mem_PSPACE_of_polyWindow` turns that into `PSPACE` membership. -/
+theorem polyExistsClass_PSPACE_subset_PSPACE_internal : polyExistsClass PSPACE ⊆ PSPACE :=
+  polyExistsClass_PSPACE_subset_PSPACE_of fun p L' hL' => by
+    obtain ⟨k, tm, q, hwin, hdec⟩ := PH_enumerator_exists p L' hL'
+    exact mem_PSPACE_of_polyWindow tm q hwin hdec
 
 /-- **`PH ⊆ PSPACE`.** The induction on the level leaves two closure properties of `PSPACE`;
 complement is `PSPACE_compl`, and the bounded existential is discharged by the witness

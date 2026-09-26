@@ -65,7 +65,8 @@ def mapIndex (φ : Fin n → Fin N) : Formula n → Formula N
   | and l r, x => by simp [mapIndex, eval_mapIndex φ l, eval_mapIndex φ r]
   | or l r, x => by simp [mapIndex, eval_mapIndex φ l, eval_mapIndex φ r]
 
-@[simp] theorem depth_mapIndex (φ : Fin n → Fin N) : ∀ F : Formula n, (F.mapIndex φ).depth = F.depth
+@[simp] theorem depth_mapIndex (φ : Fin n → Fin N) :
+    ∀ F : Formula n, (F.mapIndex φ).depth = F.depth
   | lit _ _ => rfl
   | const _ => rfl
   | and l r => by simp [mapIndex, depth, depth_mapIndex φ l, depth_mapIndex φ r]
@@ -131,7 +132,8 @@ theorem leaves_subst_le (σ : Fin N → Formula n) {L : Nat} (hL : 1 ≤ L)
     omega
 
 /-- Every Boolean function has a De Morgan formula, by Shannon expansion. -/
-theorem exists_computes : ∀ (n : Nat) (f : Cslib.BooleanFunction n), ∃ F : Formula n, F.Computes f
+theorem exists_computes :
+    ∀ (n : Nat) (f : Cslib.BooleanFunction n), ∃ F : Formula n, F.Computes f
   | 0, f => ⟨const (f Fin.elim0), fun x => by
       rw [Subsingleton.elim x Fin.elim0]
       rfl⟩
@@ -218,7 +220,8 @@ theorem formulaDepth_compose_le (f : Cslib.BooleanFunction m) (g : Cslib.Boolean
   refine le_iInf fun F => ?_
   rw [ENat.add_iInf]
   refine le_iInf fun G => ?_
-  refine (iInf_le (fun H : {H : Formula (m * n) // H.Computes (compose f g)} => (H.1.depth : ℕ∞))
+  refine (iInf_le
+    (fun H : {H : Formula (m * n) // H.Computes (compose f g)} => (H.1.depth : ℕ∞))
     ⟨F.1.compose G.1, Formula.compose_computes F.2 G.2⟩).trans ?_
   exact_mod_cast Formula.depth_compose_le F.1 G.1
 
@@ -482,7 +485,8 @@ theorem card_vars_le_leaves : ∀ F : Formula n, F.vars.card ≤ F.leaves
     exact (Finset.card_union_le _ _).trans
       (Nat.add_le_add (card_vars_le_leaves l) (card_vars_le_leaves r))
 
-theorem eval_update_of_not_mem_vars {i : Fin n} (b : Bool) (x : Fin n → Bool) :
+/-- Changing a coordinate that a formula does not read leaves its value unchanged. -/
+theorem eval_update_of_notMem_vars {i : Fin n} (b : Bool) (x : Fin n → Bool) :
     ∀ F : Formula n, i ∉ F.vars → F.eval (Function.update x i b) = F.eval x
   | lit j _, h => by
     have hji : j ≠ i := fun hji => h (by simp [vars, hji])
@@ -490,10 +494,10 @@ theorem eval_update_of_not_mem_vars {i : Fin n} (b : Bool) (x : Fin n → Bool) 
   | const _, _ => rfl
   | and l r, h => by
     simp only [vars, Finset.mem_union, not_or] at h
-    simp [eval_update_of_not_mem_vars b x l h.1, eval_update_of_not_mem_vars b x r h.2]
+    simp [eval_update_of_notMem_vars b x l h.1, eval_update_of_notMem_vars b x r h.2]
   | or l r, h => by
     simp only [vars, Finset.mem_union, not_or] at h
-    simp [eval_update_of_not_mem_vars b x l h.1, eval_update_of_not_mem_vars b x r h.2]
+    simp [eval_update_of_notMem_vars b x l h.1, eval_update_of_notMem_vars b x r h.2]
 
 /-- A formula reads every coordinate its function is sensitive to. -/
 theorem mem_vars_of_computes {F : Formula n} {f : Cslib.BooleanFunction n} (hF : F.Computes f)
@@ -501,7 +505,7 @@ theorem mem_vars_of_computes {F : Formula n} {f : Cslib.BooleanFunction n} (hF :
     (h : f (Function.update a i true) ≠ f (Function.update a i false)) : i ∈ F.vars := by
   by_contra hi
   apply h
-  rw [← hF, ← hF, eval_update_of_not_mem_vars _ _ _ hi, eval_update_of_not_mem_vars _ _ _ hi]
+  rw [← hF, ← hF, eval_update_of_notMem_vars _ _ _ hi, eval_update_of_notMem_vars _ _ _ hi]
 
 theorem leaves_le_two_pow_depth : ∀ F : Formula n, F.leaves ≤ 2 ^ F.depth
   | lit _ _ => by simp [leaves, depth]

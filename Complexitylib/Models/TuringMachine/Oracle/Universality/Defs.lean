@@ -43,7 +43,13 @@ structure Simulates (simulator : OracleTM simulatorTapes)
     simulator.Produces oracle (compile program) output ↔
       source.Produces oracle program output
 
-/-- Forward oracle-uniform simulation under an explicit clock transform. -/
+/-- Forward oracle-uniform simulation under an explicit clock transform: every
+bounded production of the source transfers to the simulator under the same
+clock, for every oracle.
+
+This is weaker than its deterministic namesake `TM.SimulatesInTime`, which also
+has a `halts` field transferring bounded halting; here only bounded production
+(`produces`) is transferred. -/
 structure SimulatesInTime (simulator : OracleTM simulatorTapes)
     (source : OracleTM sourceTapes) (compile : List Bool → List Bool)
     (clock : TM.TimeOverhead) : Prop where

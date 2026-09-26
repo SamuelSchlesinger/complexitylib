@@ -88,7 +88,10 @@ def canonicalDecisionTreeAux :
           (formula.restrict
             (Restriction.On.single literal.var true)))
 
-/-- The canonical finite decision tree for a DNF. -/
+/-- The canonical finite decision tree for a DNF, querying one variable at a
+time (the first literal of the first surviving term). This is *not* the tree
+measured by the switching lemma's bad event `switchingBad`, which uses the
+complete-block tree `switchingDecisionTree` / `switchingDecisionTreeUnder`. -/
 def canonicalDecisionTree (formula : DNF N) :
     DecisionTree.On N :=
   canonicalDecisionTreeAux formula.vars.card formula
@@ -116,7 +119,9 @@ noncomputable def switchingDecisionTreeAux :
           switchingDecisionTreeAux fuel
             (formula.restrict assignment)
 
-/-- The canonical complete-block tree used in switching arguments. -/
+/-- The complete-block tree used in switching arguments (often called the
+canonical tree in the literature, but distinct from `canonicalDecisionTree`,
+which queries one variable at a time). -/
 noncomputable def switchingDecisionTree (formula : DNF N) :
     DecisionTree.On N :=
   switchingDecisionTreeAux formula.vars.card formula

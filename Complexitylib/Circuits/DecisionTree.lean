@@ -13,7 +13,7 @@ public import Std.Tactic.BVDecide.Normalize.Bool
 # Boolean decision trees
 
 Decision trees over Boolean variables, with evaluation, depth, and leaf-count
-measures (roadmap track L4). A decision tree queries one variable per internal
+measures. A decision tree queries one variable per internal
 node and branches on its value; leaves carry the output bit. Decision trees are
 the combinatorial substrate for restrictions and switching-lemma arguments, and
 are distinct from the DAG-shaped `Circuit`.

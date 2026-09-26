@@ -57,16 +57,17 @@ def payloadCircuit
       (n := payloadWidth)).symm bit
     payloads pair.1 pair.2)
 
-/-- The exact gate count of `payloadCircuit`. -/
+/-- The exact gate count of `payloadCircuit`: one gate for every payload bit
+wired to a constant, and none for bits wired to inputs. -/
 @[simp] theorem payloadCircuit_size
     (payloads : Fin (networkRecords menuDepth * networkRecords requestDepth) →
       Fin payloadWidth → DeMorgan.Wiring inputs) :
     (payloadCircuit payloads).size =
-      ∑ output :
-        Fin
-          (networkRecords menuDepth * networkRecords requestDepth * payloadWidth),
-        (payloads output.divNat output.modNat).expression.gateCount := by
-  simp [payloadCircuit]
+      ∑ record, ∑ bit, (payloads record bit).expression.gateCount := by
+  rw [payloadCircuit, DeMorgan.Wiring.circuit_size]
+  exact (finProdFinEquiv.symm.sum_comp fun pair =>
+    (payloads pair.1 pair.2).expression.gateCount).trans
+      (Fintype.sum_prod_type' fun record bit => (payloads record bit).expression.gateCount)
 
 /-- Assemble the complete flagged rows without copying the flag computation. -/
 def circuit
@@ -80,7 +81,8 @@ def circuit
 
 /-- `circuit` has exactly the gates of `RecordArray.combine`; the surrounding wiring adds none. -/
 @[simp] theorem circuit_size
-    (flags : Circuit DeMorgan.signature inputs (networkRecords menuDepth * networkRecords requestDepth))
+    (flags : Circuit DeMorgan.signature inputs
+      (networkRecords menuDepth * networkRecords requestDepth))
     (payloads : Fin (networkRecords menuDepth * networkRecords requestDepth) →
       Fin payloadWidth → DeMorgan.Wiring inputs) :
     (circuit flags payloads).size =

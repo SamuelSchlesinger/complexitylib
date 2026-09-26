@@ -141,7 +141,9 @@ theorem eventProb_relativeDeviationEvent_le
   hash.eventProb_relativeDeviationEvent_le_internal
     set target epsilon hepsilon hmean
 
-/-- Empty- and nonempty-cell events partition the affine seeds. -/
+/-- For every pairwise-independent family, the empty-cell and nonempty-cell
+events partition its seeds: the empty-cell event is the complement of the
+nonempty-cell event. -/
 theorem emptyCellEvent_eq_compl_nonemptyCellEvent
     {domainWidth rangeWidth seedWidth : ℕ}
     (hash : PairwiseIndependentHash domainWidth rangeWidth seedWidth)

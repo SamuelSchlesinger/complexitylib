@@ -88,7 +88,8 @@ noncomputable def circuit (positive : 0 < width)
     (positive : 0 < width)
     (menu : Fin (networkRecords menuDepth) → Fin (networkRecords requestDepth) →
       ℙ (BinaryExtension width) (Fin dimension → BinaryExtension width))
-    (targetWires : Fin (networkRecords requestDepth) → Fin (dimension * width) → DeMorgan.Wiring inputs)
+    (targetWires :
+      Fin (networkRecords requestDepth) → Fin (dimension * width) → DeMorgan.Wiring inputs)
     (sourceKeys : Fin sources → Fin (dimension * width) → DeMorgan.Wiring inputs)
     (sourceFlags : Fin sources → DeMorgan.Wiring inputs)
     (original : Fin (networkRecords requestDepth) → Fin requestWidth → DeMorgan.Wiring inputs)

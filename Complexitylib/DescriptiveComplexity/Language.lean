@@ -16,7 +16,7 @@ The bridge from descriptive complexity to the machine model: a Boolean query ove
 finite structures induces a **language** (a set of bit strings) — the encodings of
 the structures satisfying it. This is where a logical characterization of a query
 becomes a statement about a machine-model `Language`, the connection Fagin's
-theorem (`NP = ∃SO`) and the other logic/complexity correspondences on track L6
+theorem (`NP = ∃SO`) and the other planned logic/complexity correspondences
 ultimately rest on.
 
 ## Main definitions and results

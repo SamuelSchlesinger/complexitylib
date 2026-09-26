@@ -125,10 +125,17 @@ instance : Fintype Dir3 where
   elems := {.left, .right, .stay}
   complete := fun x => by cases x <;> simp
 
-/-- A one-sided infinite tape. Cell 0 is the leftmost cell and permanently
-    contains `▷`. The head cannot move left of cell 0 (moving left at position 0
-    is a no-op via `Nat` subtraction). Writing at cell 0 is a no-op,
-    preserving `▷`. -/
+/-- A one-sided infinite tape: a head position and the contents of every cell.
+    Cell 0 is the leftmost cell. The head cannot move left of cell 0 (moving
+    left at position 0 is a no-op via `Nat` subtraction), and writing at cell 0
+    is a no-op.
+
+    The structure itself allows any symbol in any cell. The left-end marker `▷`
+    at cell 0 is an invariant of the semantics, not of the type: `Tape.init`
+    places it, machines write only symbols of `Γw` (never `▷`), and writes at
+    cell 0 are ignored, so every tape reachable from an initial configuration
+    satisfies `Tape.StartInvariant`. Statements about arbitrary tapes that need
+    the marker must assume that invariant. -/
 @[ext]
 structure Tape where
   /-- The head position; cell 0 is the leftmost cell. -/

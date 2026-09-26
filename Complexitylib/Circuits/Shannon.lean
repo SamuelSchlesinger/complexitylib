@@ -12,7 +12,9 @@ public import Complexitylib.Circuits.Internal.ShannonUpper
 /-! # Shannon Bounds
 
 For `N ≥ 6`, there exists a Boolean function on `N` inputs that cannot be
-computed by any fan-in-2 AND/OR circuit with fewer than `2^N / (5N)` gates.
+computed by any fan-in-2 AND/OR circuit of total size (`Circuit.size`, which is
+`G + 1` for a single-output circuit with `G` internal gates) at most
+`⌊2^N / (5N)⌋`.
 
 The proof proceeds by a counting (pigeonhole) argument: the number of
 distinct circuits of a given size is strictly less than the number of
@@ -35,8 +37,8 @@ Since `Basis.andOr2` is complete (the `CompleteBasis Basis.andOr2` instance
 of `Complexitylib.Circuits.AndOrNot`, imported here), this yields a
 `sizeComplexity` bound via `shannon_sizeComplexity`.
 
-* `shannon_upper_bound` — for sufficiently large `N`, every Boolean function
-  on `N` inputs has `sizeComplexity` at most `18 · 2^N / N`.
+* `shannon_upper_bound` — for `N ≥ 16`, every Boolean function on `N` inputs
+  has `sizeComplexity` at most `⌊18 · 2^N / N⌋`.
 
 Together these establish that worst-case circuit complexity is `Θ(2^N / N)`.
 -/

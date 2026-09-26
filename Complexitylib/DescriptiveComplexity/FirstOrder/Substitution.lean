@@ -18,7 +18,7 @@ under the environment `k ↦ ⟦ρ k⟧_σ`.
 The de Bruijn bookkeeping is handled by `Term.shift` (raise every index by one, for
 crossing a binder) and `liftSubst` (extend a substitution under a binder: the new
 variable 0 stays, everything else is shifted). This is the engine behind the
-fundamental theorem of first-order interpretations (roadmap L6): the transport of a
+fundamental theorem of first-order interpretations: the transport of a
 formula along an `FOInterpretation`.
 
 ## Main definitions and results

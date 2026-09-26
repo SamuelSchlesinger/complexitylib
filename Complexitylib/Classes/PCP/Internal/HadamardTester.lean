@@ -70,7 +70,7 @@ theorem signBit_chi (u : ZMod 2) : signBit (chi u) = u := by
 /-- **A self-corrected read is right.** The decoded-level restatement of
 `local_correctability`: the value returned is the codeword's bit, read as a
 sign. -/
-theorem prob_read_ge {m : ℕ} (f : BooleanFunction m) (hf : IsBooleanValued f)
+theorem prob_read_ge {m : ℕ} (f : BooleanFunction m) (_hf : IsBooleanValued f)
     (a : Cube m) {ε : ℝ} (hc : IsClose f (signOf (hadamard a)) ε) (x : Cube m) :
     1 - 2 * ε ≤ Pr[fun r : Cube m => f r * f (x + r) = chi (hadamard a x)] := by
   classical
@@ -79,7 +79,7 @@ theorem prob_read_ge {m : ℕ} (f : BooleanFunction m) (hf : IsBooleanValued f)
   have heq : (χ (Finset.univ.filter fun i => a i = 1)) x = chi (hadamard a x) := by
     rw [← signOf_hadamard]
     rfl
-  have h := local_correctability f hf (Finset.univ.filter fun i => a i = 1) hS x
+  have h := local_correctability f (Finset.univ.filter fun i => a i = 1) hS x
   rw [heq] at h
   exact h
 

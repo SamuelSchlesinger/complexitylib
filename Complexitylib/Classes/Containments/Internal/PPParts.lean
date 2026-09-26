@@ -148,7 +148,6 @@ def tallyState {n : ℕ} (cIdx aIdx rIdx : Fin n) (I : Tape) (rest : Fin n → T
 /-- The iteration count read back off the counter tape. The input and output tapes are ignored;
 they are present because `TM.loopTM_hoareTime_indexed` takes the index as a function of the whole
 tape state. -/
-@[nolint unusedArguments]
 noncomputable def tallyIdx {n : ℕ} (cIdx : Fin n) :
     Tape → (Fin n → Tape) → Tape → ℕ :=
   fun _ work _ => Classical.epsilon fun v => (work cIdx).HasBinaryNat v

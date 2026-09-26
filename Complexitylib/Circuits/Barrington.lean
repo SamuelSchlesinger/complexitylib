@@ -19,7 +19,7 @@ public import Std.Tactic.BVDecide.Normalize.Prop
 Barrington's theorem builds a width-`5` permutation branching program for any
 `NC¹` formula by representing a Boolean function through a fixed non-identity
 permutation. This module formalizes the reusable, group-theoretic heart of that
-construction (roadmap track M3), independent of the eventual `S₅` choice of
+construction, independent of the eventual `S₅` choice of
 permutations.
 
 The central notion is `BP.Computes σ p f`: the program `p` *represents* the

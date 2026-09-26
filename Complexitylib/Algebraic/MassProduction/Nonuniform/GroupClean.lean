@@ -33,7 +33,8 @@ def flagsCircuit (points : Fin requests → Fin slots → Fin pointCount) :=
 /-- The exact gate count of `flagsCircuit`. -/
 @[simp] theorem flagsCircuit_size
     (points : Fin requests → Fin slots → Fin pointCount) :
-    (flagsCircuit points).size = ∑ x : Fin requests, (expression (points x)).gateCount := by
+    (flagsCircuit points).size =
+      ∑ request : Fin requests, (expression (points request)).gateCount := by
   simp [flagsCircuit]
 
 /-- No point in a request is conflicting exactly when its clean flag is true. -/

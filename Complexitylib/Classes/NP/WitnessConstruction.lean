@@ -19,8 +19,9 @@ file only repackages that theorem. A polynomial-time decider for `pairLang R`
 is a verifier in `P`, the witness-length bound transfers through
 `mem_pairLang_pair`, and `NP` membership unfolds to the required NTM.
 
-With the construction proved, the FNP witness characterization of `NP` holds
-unconditionally.
+With the construction proved, the FNP ⇒ NP direction of the witness
+characterization holds unconditionally (`NP.mem_NP_of_FNP`). The converse, that
+every `NP` language has an FNP witness relation, is not yet formalized.
 
 ## Main results
 

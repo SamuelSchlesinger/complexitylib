@@ -311,22 +311,22 @@ theorem executableEstimator_eq_timeSearchEstimator_internal
   exact encodedTimeSearchEstimator_length_encode_internal decide inst
 
 theorem fp_and_satisfiesBoundsOn_printerClock_internal
-    {tapes : ℕ} {machine : TM tapes} {parameters : Parameters}
-    (huniversal : machine.IsEfficientlyUniversal)
-    {decide : List Bool → Bool}
-    (hdecide : (fun bits => [decide bits]) ∈ FP)
-    (haccept : ∀ bits ∈ yesLanguage machine, decide bits = true)
-    (hreject : ∀ bits ∈ noLanguage machine parameters,
-      decide bits = false) :
-    ∃ coefficient exponent,
+    {tapes : ℕ} {machine : TM tapes}
+    (huniversal : machine.IsEfficientlyUniversal) :
+    ∃ coefficient exponent, ∀ {parameters : Parameters}
+      {decide : List Bool → Bool},
+      (fun bits => [decide bits]) ∈ FP →
+      (∀ bits ∈ yesLanguage machine, decide bits = true) →
+      (∀ bits ∈ noLanguage machine parameters, decide bits = false) →
       encodedTimeSearchEstimator decide ∈ FP ∧
         (executableEstimator decide).SatisfiesBoundsOn machine parameters
           (fun inst => coefficient *
             (2 * inst.output.length + 3) ^ exponent ≤ inst.time) := by
   obtain ⟨constant, coefficient, exponent, hprinter⟩ :=
     huniversal.timeBoundedKolmogorovComplexity_printer
-  refine ⟨coefficient, exponent,
-    encodedTimeSearchEstimator_mem_FP_internal decide hdecide, ?_⟩
+  refine ⟨coefficient, exponent, ?_⟩
+  intro parameters decide hdecide haccept hreject
+  refine ⟨encodedTimeSearchEstimator_mem_FP_internal decide hdecide, ?_⟩
   rw [executableEstimator_eq_timeSearchEstimator_internal]
   apply timeSearchEstimator_satisfiesBoundsOn_internal haccept hreject
   intro inst heligible

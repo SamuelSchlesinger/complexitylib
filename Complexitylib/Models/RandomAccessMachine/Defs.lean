@@ -37,10 +37,13 @@ designed to avoid. `RAM.logGap_squaring` in the surface file turns this into a
 theorem about this very model.
 
 The **logarithmic-cost** measure charges each instruction the total bit-length
-of the numbers it manipulates (operand *contents* and, for indirect operands,
-the runtime *addresses*), plus a base cost of `1` so every step costs at least
-one time unit. Under this measure the RAM is polynomially equivalent to the
-multi-tape Turing machine of `Complexitylib.Models.TuringMachine`; the precise
+of the numbers it manipulates (operand *contents*, computed results, and, for
+indirect operands, the runtime *addresses*), plus a base cost of `1` so every
+step costs at least one time unit. The one exception is `sub`, which charges its
+operands but not its result; truncated subtraction never produces a number
+longer than its first operand, so the result is still paid for. Under this
+measure the RAM is polynomially equivalent to the multi-tape Turing machine of
+`Complexitylib.Models.TuringMachine`; the precise
 two-way simulation bounds are recorded in the surface module
 `Complexitylib.Models.RandomAccessMachine`.
 
@@ -71,7 +74,8 @@ two-way simulation bounds are recorded in the surface module
   size, so the cost does not separately charge for them; runtime addresses
   (`R a` in `load`/`store`) *are* charged via `bitlen (c.regs a)`. This keeps the
   cost within a constant factor of the Cook–Reckhow measure while remaining
-  sound: every value read, computed, or written is charged its bit-length.
+  sound: every value read, computed, or written is charged its bit-length,
+  except the result of `sub`, which is bounded by the (charged) first operand.
 - **Out-of-range `pc` halts**: `curInstr` reads `Instr.halt` when `pc` is past the
   program, so a program need not end in `halt` and jumps may target the end.
 -/
@@ -156,11 +160,14 @@ def step (P : Program) (c : Cfg) : Cfg := stepInstr (curInstr P c) c
 
 /-- The logarithmic cost of executing instruction `i` in configuration `c`: the
     base cost `1` plus the bit-length of every value the instruction reads,
-    computes, or writes (and, for indirect operands, the runtime address).
+    computes, or writes (and, for indirect operands, the runtime address), with
+    one exception: `sub` charges only its two operands, not its result.
 
     This is the crux of the model's soundness: every number the instruction
-    touches is charged its bit-length, so a run of total log-cost `T` can only
-    manipulate numbers of bit-length at most `T`. See the module docstring. -/
+    touches is charged its bit-length or is no longer than a charged number
+    (the truncated difference `c.regs s - c.regs t` is at most `c.regs s`), so
+    a run of total log-cost `T` can only manipulate numbers of bit-length at
+    most `T`. See the module docstring. -/
 def Instr.logCost (i : Instr) (c : Cfg) : ℕ :=
   match i with
   | .imm _ v   => bitlen v + 1

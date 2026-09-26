@@ -136,8 +136,11 @@ theorem barringtonTargetBase_ne_one : barringtonTargetBase ≠ 1 := by
   simp at horder
 
 /-- **Constructive finite Barrington theorem.** The explicit compiled program
-evaluates to one fixed nonidentity `5`-cycle exactly when the formula is true,
-and its length is at most `4 ^ depth`. -/
+evaluates to the fixed target `barringtonTargetBase` exactly when the formula is
+true (and to the identity otherwise), the target is not the identity, and the
+program's length is at most `4 ^ depth`. That the target is a `5`-cycle is the
+separate theorem `barringtonTargetBase_spec`; this statement records only that
+it is nonidentity. -/
 theorem barringtonCompile_representation (formula : BoolFormula) :
     barringtonTargetBase ≠ 1 ∧
       (∀ assignment,

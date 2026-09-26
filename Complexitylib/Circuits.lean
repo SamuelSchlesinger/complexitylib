@@ -100,8 +100,8 @@ function, with `⊤` for an unrealizable function. The natural-valued
 
 * **Shannon counting lower bound** (`shannon_lower_bound_circuit`):
   For `N ≥ 6`, there exists a Boolean function on `N` inputs that cannot
-  be computed by any fan-in-2 AND/OR circuit with fewer than `2^N / (5N)`
-  gates.
+  be computed by any fan-in-2 AND/OR circuit of total size `G + 1` at most
+  `⌊2^N / (5N)⌋`, where `G` counts internal gates.
 
 * **Essential-input lower bound**
   (`Circuit.card_essentialInputs_le_totalFanIn`):

@@ -13,10 +13,10 @@ public import Mathlib.Order.ConditionallyCompleteLattice.Basic
 /-!
 # Karchmer–Wigderson games
 
-A De Morgan formula has literal leaves and binary AND and OR gates. The
-Karchmer–Wigderson game of `f` gives Alice an input `x` with `f x = 1` and
-Bob an input `y` with `f y = 0`; they must agree on a coordinate where `x`
-and `y` differ. A deterministic protocol is a binary tree whose internal
+A De Morgan formula has literal and constant leaves and binary AND and OR
+gates. The Karchmer–Wigderson game of `f` gives Alice an input `x` with
+`f x = 1` and Bob an input `y` with `f y = 0`; they must agree on a coordinate
+where `x` and `y` differ. A deterministic protocol is a binary tree whose internal
 nodes are owned by one player and branch on that player's input, and whose
 leaves name a coordinate.
 
@@ -28,9 +28,12 @@ input violates, and a literal leaf names its coordinate
 rectangle of inputs still consistent with the transcript, and the formula
 built with OR at Alice's nodes and AND at Bob's nodes is `1` on Alice's side
 and `0` on Bob's side of every rectangle (`Protocol.toFormula`). Depth and
-leaf count are preserved in both directions, so the minimum formula depth of
-`f` equals the minimum protocol depth of its game
-(`formulaDepth_eq_protocolDepth`), and likewise for leaf size.
+leaf count are preserved in both directions, so for `n ≥ 1` the minimum formula
+depth of `f` equals the minimum protocol depth of its game
+(`formulaDepth_eq_protocolDepth`), and likewise for leaf size
+(`formulaSize_eq_protocolSize`). Both need `[NeZero n]`: with no coordinates
+there is no protocol at all (a leaf must name a coordinate), so the protocol
+measures are `⊤`, while a constant formula has depth `0`.
 -/
 
 @[expose] public section
@@ -82,7 +85,10 @@ def depth : Formula n → Nat
   | and l r => max l.depth r.depth + 1
   | or l r => max l.depth r.depth + 1
 
-/-- The number of leaves, counting literals and constants. -/
+/-- The number of leaves, counting literals and constants, so every formula has
+at least one leaf. This differs from `Algebraic.Binary.Formula.leaves`, which
+counts only variable leaves and gives constants leaf size `0`; `formulaSize` and
+the KRW statements use this convention. -/
 def leaves : Formula n → Nat
   | lit _ _ => 1
   | const _ => 1

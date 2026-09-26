@@ -21,7 +21,7 @@ universe, so satisfaction is decidable. This module gives a `Bool`-valued evalua
 `Formula.evalB` over a decidable structure (`DecFinStruct`) and proves it agrees
 with the propositional `Sat`/`Models`.
 
-Computable FO model checking is a prerequisite for several roadmap L6 milestones:
+Computable FO model checking is a prerequisite for several planned results:
 the `∃SO ⊆ NP` direction of Fagin's theorem (an `NP` machine guesses the witnessing
 relations and *checks the FO matrix* in polynomial time), the Immerman–Vardi
 characterization, and the `FO ⊆ AC⁰` bridge.

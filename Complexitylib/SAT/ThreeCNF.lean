@@ -12,7 +12,7 @@ public import Std.Tactic.BVDecide.Normalize.Prop
 # 3-CNF formulas
 
 The **3-CNF** refinement of the existing `CNF` type: a CNF is in 3-CNF when every
-clause has exactly three literals. Following the roadmap (track N3), 3-CNF is
+clause has exactly three literals. 3-CNF is
 introduced here as a *predicate* on the existing `CNF = List Clause`, so that all
 of the `CNF` semantics (`CNF.eval`, `CNF.Satisfiable`, `CNF.maxVar`, renaming)
 apply unchanged and a 3-CNF is literally a CNF.

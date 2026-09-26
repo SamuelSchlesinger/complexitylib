@@ -46,15 +46,19 @@ def circuit (offsets : Fin points → Fin width → Bool)
       let pair := (finProdFinEquiv (m := points) (n := width)).symm output
       (expression (offsets pair.1 pair.2) (sources pair.1 pair.2)).circuit)
 
-/-- The exact gate count of `circuit`. -/
+/-- The exact gate count of `circuit`: the gates of the translated expression of
+every point and bit. -/
 @[simp] theorem circuit_size
     (offsets : Fin points → Fin width → Bool)
     (sources : Fin points → Fin width → DeMorgan.Wiring inputs) :
     (circuit offsets sources).size =
-      ∑ x : Fin (points * width),
-        (expression (offsets x.divNat x.modNat)
-            (sources x.divNat x.modNat)).gateCount := by
-  simp [circuit]
+      ∑ point, ∑ bit, (expression (offsets point bit) (sources point bit)).gateCount := by
+  rw [circuit, Circuit.size_parallelFin]
+  simp only [DeMorgan.Expression.circuit_size]
+  exact (finProdFinEquiv.symm.sum_comp fun pair =>
+    (expression (offsets pair.1 pair.2) (sources pair.1 pair.2)).gateCount).trans
+      (Fintype.sum_prod_type' fun point bit =>
+        (expression (offsets point bit) (sources point bit)).gateCount)
 
 /-- Each output point is its source vector XOR its fixed offset. -/
 theorem circuit_eval (offsets : Fin points → Fin width → Bool)

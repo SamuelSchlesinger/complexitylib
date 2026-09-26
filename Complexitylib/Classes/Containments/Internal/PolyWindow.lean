@@ -14,8 +14,10 @@ public import Complexitylib.Classes.P.Defs
 Membership in `PSPACE` is stated asymptotically: some space function that is `O(n^k)`. A machine
 under construction needs the opposite — a concrete polynomial it can be checked against, and a
 way to hand that polynomial back as a `PSPACE` membership when it is done. The two theorems here
-are that exchange, in both directions, and every space-bounded construction in this folder passes
-through them.
+are that exchange, in both directions. The iteration lemma (`SpaceIter.mem_PSPACE_of_iterate`),
+Savitch's theorem, and the `PP ⊆ PSPACE` and `PH ⊆ PSPACE` machines pass through them; other
+space results in this folder (complement closure, `PSPACE ⊆ EXP`, the `NL` results) work with
+the space predicates directly.
 
 ## Main results
 

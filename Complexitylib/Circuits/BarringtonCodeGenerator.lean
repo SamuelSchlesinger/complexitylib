@@ -75,9 +75,11 @@ theorem length_barringtonCompileCode_encode_le
         4 ^ formula.depth * ((FormulaCode.encode formula).length + 15) :=
   length_barringtonCompileCode_encode_le_internal formula
 
-/-- **Bitstring-level constructive Barrington theorem.** Generated code decodes
-to a program with exact formula semantics through the fixed nonidentity target
-cycle and instruction count at most `4 ^ depth`. -/
+/-- **Bitstring-level constructive Barrington theorem.** On the canonical code
+of a formula, the generated code decodes to the compiled program, which has
+exact formula semantics through the fixed target `barringtonTargetBase` (stated
+here only to be nonidentity; it is a `5`-cycle by `barringtonTargetBase_spec`)
+and instruction count at most `4 ^ depth`. -/
 theorem barringtonCompileCode_spec (formula : BoolFormula) :
     barringtonTargetBase ≠ 1 ∧
       (∀ assignment,

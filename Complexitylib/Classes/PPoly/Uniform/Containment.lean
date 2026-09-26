@@ -31,8 +31,8 @@ theorem circuitEvalLanguage_mem_P : CircuitCode.circuitEvalLanguage ∈ P :=
   circuitEvalLanguage_mem_P_internal
 
 /-- **Logspace-uniform polynomial-size circuit families decide only languages
-in `P`.** This is the circuits-to-machines direction of Arora–Barak
-Theorem 6.7. -/
+in `P`.** This is the circuits-to-machines direction of the uniform
+characterization of `P` (Arora–Barak Section 6.2). -/
 theorem UniformPPoly_subset_P : UniformPPoly ⊆ P :=
   UniformPPoly_subset_P_internal
 

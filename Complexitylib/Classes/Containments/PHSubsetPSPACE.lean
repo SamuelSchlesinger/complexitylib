@@ -6,6 +6,7 @@ Authors: Bolton Bailey
 module
 public import Complexitylib.Classes.PH
 public import Complexitylib.Classes.P.Defs
+public import Complexitylib.Classes.Containments.SpaceComplement
 public import Complexitylib.Classes.Containments.Internal.PHSubsetPSPACE
 
 /-!
@@ -54,6 +55,7 @@ accounting. See `Complexitylib.Classes.Containments.Internal.PHBounds`.
   quantifiers; no quantifier over witness strings survives)
 - `PH_subset_PSPACE_of_polyExistsLang` — the containment, granted one concrete statement
 - `PH_subset_PSPACE_of_enumerator` — the containment, granted one machine
+- `polyExistsClass_PSPACE_subset_PSPACE` — `PSPACE` is closed under the bounded existential
 - `PH_subset_PSPACE` — the containment
 
 -/
@@ -117,6 +119,13 @@ theorem PH_subset_PSPACE_of_enumerator
           (x ∉ polyExistsLang p L' → c'.output.cells 1 = Γ.zero))) :
     PH ⊆ PSPACE :=
   PH_subset_PSPACE_of_enumerator_internal h
+
+/-- **`PSPACE` is closed under polynomially bounded existential quantification**: if
+`L' ∈ PSPACE` and `p` is a polynomial, then `{x | ∃ w, |w| ≤ p(|x|) ∧ pair x w ∈ L'}` is in
+`PSPACE`. A machine enumerates the candidate witnesses on one work tape, reusing it for each, and
+runs the decider for `L'` on every pair. -/
+theorem polyExistsClass_PSPACE_subset_PSPACE : polyExistsClass PSPACE ⊆ PSPACE :=
+  polyExistsClass_PSPACE_subset_PSPACE_internal
 
 /-- **`PH ⊆ PSPACE`**: every level of the polynomial hierarchy is decided in polynomial space.
 The alternating prefix is consumed one quantifier at a time — a complement flips the verdict, and

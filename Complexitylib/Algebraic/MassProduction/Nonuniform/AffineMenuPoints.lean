@@ -55,7 +55,8 @@ none. -/
     (positive : 0 < width)
     (menu : Fin (networkRecords menuDepth) → Fin (networkRecords requestDepth) →
       ℙ (BinaryExtension width) (Fin dimension → BinaryExtension width))
-    (targets : Fin (networkRecords requestDepth) → Fin (dimension * width) → DeMorgan.Wiring inputs) :
+    (targets :
+      Fin (networkRecords requestDepth) → Fin (dimension * width) → DeMorgan.Wiring inputs) :
     (circuit positive menu targets).size =
       (ConstantTranslations.circuit (offsets positive menu)
           (sources targets)).size := by

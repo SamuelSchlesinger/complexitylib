@@ -16,13 +16,17 @@ public import Complexitylib.Classes.NP
 
 ⚠️ Unreviewed by Bolton
 
-Savitch's theorem: nondeterminism costs only a squaring of space.
+Savitch's theorem, at the level of classes: `NPSPACE ⊆ PSPACE`.
 
 The reachability predicate `Reach(u, v, 2^i)` — is `v` reachable from `u` in at most `2^i` steps —
 satisfies `Reach(u, v, 2^i) ↔ ∃ m, Reach(u, m, 2^(i-1)) ∧ Reach(m, v, 2^(i-1))`. Recursing on `i`
-and reusing the same space for the two subcalls costs `O(S)` bits per level and `O(log 2^S) = O(S)`
-levels, so a machine using space `S` is simulated deterministically in space `O(S²)` — polynomial
-space is closed under this squaring.
+and reusing the same space for the two subcalls costs `O(S)` bits per level and `O(S)` levels,
+which in the textbook argument simulates a nondeterministic space-`S` machine deterministically in
+space `O(S²)`.
+
+This file proves only the class inclusion. The parametric bound `NSPACE(S) ⊆ DSPACE(S²)` is not
+formalized: the deterministic machine below comes from iterating a polynomial-time step function
+under a polynomial space window, and no `O(S²)` bound is stated or extracted from it.
 
 ## How the proof runs
 
@@ -89,8 +93,9 @@ theorem NPSPACE_bounded_reachability {L : Language} (hL : L ∈ NPSPACE) :
           tm.halted c ∧ c.output.cells 1 = Γ.one :=
   NPSPACE_bounded_reachability_internal hL
 
-/-- **`NPSPACE ⊆ PSPACE`** (Savitch): halving the path length recursively simulates a
-nondeterministic space-`S` machine deterministically in space `O(S²)`. -/
+/-- **`NPSPACE ⊆ PSPACE`** (Savitch): halving the path length recursively decides a polynomially
+space-bounded nondeterministic machine deterministically in polynomial space. Only this class
+inclusion is stated; the quantitative `O(S²)` space bound of Savitch's theorem is not. -/
 theorem NPSPACE_subset_PSPACE : NPSPACE ⊆ PSPACE :=
   NPSPACE_subset_PSPACE_internal
 

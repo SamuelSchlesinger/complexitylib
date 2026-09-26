@@ -91,6 +91,8 @@ public import Complexitylib.Classes.Containments.NPSPACESubsetPSPACE
 public import Complexitylib.Classes.Containments.PHSubsetPSPACE
 public import Complexitylib.Classes.Containments.PPSubsetPSPACE
 public import Complexitylib.Classes.Containments.PSPACESubsetEXP
+public import Complexitylib.Classes.Containments.SpaceComplement
+public import Complexitylib.Classes.P.Verdict
 public import Complexitylib.Classes.Containments.PSPACESubsetIP
 public import Complexitylib.Classes.Containments.PSPACESubsetNPSPACE
 public import Complexitylib.Classes.Hierarchy

@@ -60,8 +60,8 @@ def inputsCircuit (depth keyWidth payloadWidth : Nat) (bit : Fin payloadWidth) :
 @[simp] theorem inputsCircuit_size
     (depth keyWidth payloadWidth : Nat) (bit : Fin payloadWidth) :
     (inputsCircuit depth keyWidth payloadWidth bit).size =
-      ∑ x : Fin (networkRecords depth + networkRecords depth),
-        (inputExpression depth keyWidth payloadWidth bit x).gateCount := by
+      ∑ index : Fin (networkRecords depth + networkRecords depth),
+        (inputExpression depth keyWidth payloadWidth bit index).gateCount := by
   simp [inputsCircuit]
 
 /-- Broadcast one selected payload bit across all records. -/

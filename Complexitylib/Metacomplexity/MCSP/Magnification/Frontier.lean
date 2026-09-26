@@ -15,7 +15,11 @@ This module exposes the exact lower-bound antecedent of the selected
 Oliveira--Pich--Santhanam magnification theorem. It keeps a fixed denominator
 constant, the small-positive-`beta` quantifier, and the eventual input-length
 circuit lower bound separate. It does not assert the conditional class
-separation, whose anti-checker construction remains to be formalized.
+separation. Of the anti-checker construction, only the circuit-assembly half is
+proved (`AntiCheckerLemma.hasGenerators_of_hasApproximateCounterFamilies`: correct
+approximate-counter families yield the generators). Deriving
+`HasApproximateCounterFamilies` from `NP ⊆ P/poly`, and the solver and
+magnification steps, remain to be formalized.
 -/
 
 

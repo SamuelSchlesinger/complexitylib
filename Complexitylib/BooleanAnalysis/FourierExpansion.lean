@@ -145,7 +145,8 @@ theorem fourierWeightAtDegree_nonneg (f : BooleanFunction n) (k : ℕ) : 0 ≤ �
 /-- **Total Fourier weight of a Boolean function is one.** Summing the
     degree-`k` weights of a `±1`-valued function over all degrees gives `1`, since
     `⟪f, f⟫ = 𝔼[f²] = 𝔼[1] = 1`. This is what makes `k ↦ 𝐖 f k` a probability
-    distribution on degrees — the *spectral sample* of `f`. -/
+    distribution on degrees: the distribution of `|S|` for `S` drawn from the
+    spectral sample of `f` (`spectralSample`, a distribution on sets). -/
 theorem sum_fourierWeightAtDegree_boolean (f : BooleanFunction n)
     (hf : IsBooleanValued f) : ∑ k ∈ Finset.range (n + 1), 𝐖 f k = 1 := by
   rw [sum_fourierWeightAtDegree, parseval]
@@ -245,8 +246,10 @@ theorem variance_eq_sum_fourierCoeff_sq (f : BooleanFunction n) :
   congr 1
   ext S; simp [Finset.mem_erase, Finset.mem_filter, and_comm]
 
-/-- **Fact 1.14**: For Boolean-valued `f`,
-    `Var[f] = 1 - 𝔼[f]² = 4·Pr[f=1]·Pr[f=-1] ∈ [0, 1]`. -/
+/-- **Fact 1.14** (first part): For Boolean-valued `f`, `Var[f] = 1 - 𝔼[f]²`.
+    The rest of the fact, `Var[f] = 4·Pr[f=1]·Pr[f=-1] ∈ [0, 1]`, is
+    `variance_boolean_prob`, `variance_boolean_nonneg` and
+    `variance_boolean_le_one`. -/
 theorem variance_boolean (f : BooleanFunction n) (hf : IsBooleanValued f) :
     Var[f] = 1 - (𝔼[f]) ^ 2 := by
   unfold variance
@@ -431,11 +434,12 @@ theorem blr_soundness (f : BooleanFunction n) (hf : IsBooleanValued f) (ε : ℝ
 /-- **Proposition 1.31** (Local correctability): If `f` is `ε`-close to the
     linear function `χ S`, then for every `x`, the algorithm
     "choose `y` uniformly, output `f(y) · f(x + y)`" outputs `(χ S) x`
-    with probability at least `1 - 2ε`. -/
-theorem local_correctability (f : BooleanFunction n) (hf : IsBooleanValued f)
+    with probability at least `1 - 2ε`. No Boolean-valuedness is needed: the
+    union bound over the two reads uses only closeness. -/
+theorem local_correctability (f : BooleanFunction n)
     (S : Finset (Fin n)) (hclose : IsClose f (χ S) ε) (x : Cube n) :
     Pr[fun y => f y * f (x + y) = (χ S) x] ≥ 1 - 2 * ε :=
-  Internal.local_correctability_proof f hf S ε hclose x
+  Internal.local_correctability_proof f S ε hclose x
 
 /-- **The degree-0 part is the mean.** The only coordinate set of size `0` is `∅`,
     and `χ_∅ ≡ 1`, so `f^{=0}` is the constant function `𝔼[f]`. -/
@@ -893,9 +897,11 @@ theorem noiseStabilityBilin_eq_inner (ρ : ℝ) (f g : BooleanFunction n) :
 /-! ### Hypercontractivity foundations
 
 The `(2, 4)`-hypercontractive inequality `‖T_{1/√3} f‖₄ ≤ ‖f‖₂` is the analytic
-engine behind the KKL theorem, Friedgut's junta theorem, and the Linial–Mansour–Nisan
-`AC⁰` bound (roadmap L7). Its proof is an induction over coordinates whose base case
-is the elementary single-bit inequality below; the tensorization step remains. -/
+engine behind the KKL theorem, Friedgut's junta theorem, and the level-1 inequality.
+(The library's Linial–Mansour–Nisan `AC⁰` bound does not use it: that proof goes
+through the switching lemma and the Fourier-degree bound for decision trees.) Its
+proof is an induction over coordinates whose base case is the elementary single-bit
+inequality below; the tensorization step remains. -/
 
 /-- **The two-point `(2, 4)`-hypercontractive inequality** (Bonami's base case). For a
     single-bit function `f(x) = a + b·x` on `x ∈ {−1, +1}`, the noised function
@@ -1063,9 +1069,11 @@ theorem fourierWeightAtDegree_one_le_totalInfluence (f : BooleanFunction n) :
   exact Finset.sum_le_sum_of_subset_of_nonneg (Finset.filter_subset _ _)
     (fun S _ _ => mul_nonneg (by positivity) (sq_nonneg _))
 
-/-- **Level-1 inequality (coordinate form).** The total weight on the degree-1
+/-- **Degree-1 weight is at most total influence.** The total weight on the degree-1
     coefficients is at most the total influence: `∑_i 𝓕(f, {i})² ≤ I[f]`. Immediate by
-    summing `fourierCoeff_singleton_sq_le_influence` over the coordinates. -/
+    summing `fourierCoeff_singleton_sq_le_influence` over the coordinates. This is the
+    elementary bound, not O'Donnell's hypercontractive Level-1 inequality
+    `W¹[f] ≤ O(α² log(1/α))`, which is not formalized. -/
 theorem sum_fourierCoeff_singleton_sq_le_totalInfluence (f : BooleanFunction n) :
     ∑ i : Fin n, (𝓕 f {i}) ^ 2 ≤ totalInfluence f := by
   rw [totalInfluence_eq_sum_influence]

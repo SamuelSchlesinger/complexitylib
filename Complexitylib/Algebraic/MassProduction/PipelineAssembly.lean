@@ -239,12 +239,16 @@ followed by one fixed decoder per request. -/
       capacity placement requestSource scatterRecordCount resourceCircuits gatherRecordCount).size =
       (scatterResourceGatherCircuit groupsPositive suffixWidth groupBitWidth
             orderWidth incidenceFits capacity scatterRecordCount
-            (by rw [← scatterRecordCount]; exact (Nat.le_add_left _ _).trans (Nat.le_add_right _ _))
+            (by
+              rw [← scatterRecordCount]
+              exact (Nat.le_add_left _ _).trans (Nat.le_add_right _ _))
             resourceCircuits gatherRecordCount).size +
         ∑ request : Fin totalRequests,
           GatherDecoder.decoderGateCount (width := width) (depth := gatherDepth)
             (incidenceKeyWidth groupBitWidth dimension width) (orderWidth + 1)
-            (by rw [← gatherRecordCount]; exact (Nat.le_add_left _ _).trans (Nat.le_add_right _ _))
+            (by
+              rw [← gatherRecordCount]
+              exact (Nat.le_add_left _ _).trans (Nat.le_add_right _ _))
             (fun request => (placement (requestSource request)).2) request := by
   simp [assembledPipelineCircuit]
 

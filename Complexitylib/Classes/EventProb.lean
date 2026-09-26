@@ -18,7 +18,7 @@ public import Mathlib.Tactic.Positivity.Finset
 
 The uniform probability of a finite event over `T` random bits, `|E| / 2^T`,
 defined once as `eventProb` and related to `Finset.card` and to the existing
-rational PTM acceptance probability `NTM.acceptProb` (roadmap track N2).
+rational PTM acceptance probability `NTM.acceptProb`.
 
 ## Main results
 

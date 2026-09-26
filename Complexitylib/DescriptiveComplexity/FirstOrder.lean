@@ -13,5 +13,6 @@ public import Complexitylib.DescriptiveComplexity.FirstOrder.Substitution
 /-!
 # First-order logic over finite structures
 
-Aggregates the first-order syntax, semantics, and isomorphism-invariance modules.
+Aggregates the first-order syntax, semantics, isomorphism-invariance, and
+substitution modules.
 -/

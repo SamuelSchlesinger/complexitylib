@@ -18,15 +18,17 @@ in the formula, which is satisfiable when the formula is and whose
 unsatisfiability value is at least a universal constant when it is not.
 
 Three ingredients meet: the reduction of `ThreeSATCSP` carried across alphabets
-by `GapReduction`, the expander family of `ExpanderExists`, and the amplifier of
-`Dinur`, whose `dichotomy` supplies the gap after logarithmically many rounds.
+by `GapReduction`, the explicit expander family `algFamily` of `FamilyFin` (a
+numbered tower over a constant-size base picked once by
+`Classical.choose exists_finBase`), and the amplifier of `Dinur`, whose
+`dichotomy` supplies the gap after logarithmically many rounds.
 
-What this does *not* supply is computability. `gapGraph` is defined through
-`Classical.choose` — the expander family is obtained by counting, not
-constructed — so it is a reduction in the mathematical sense only. Turning it
-into a `PCPVerifier`, which additionally demands an `FP` query function and a
-`P` verdict, needs an explicit expander family and a polynomial-time
-implementation of every round.
+This module states the gap theorem as a reduction in the mathematical sense:
+`gapGraph` is a `noncomputable` definition and no running time is claimed here.
+The polynomial-time implementation is elsewhere: `exists_pcp_of_mem_NP` in
+`Complexitylib.Classes.PCP.Internal.AlgPCP` runs the same amplifier over the
+same tower (`Dinur.amplifier (algF.toFamily algHd)`, with `algF = algBase`) and
+packages it as a `PCPVerifier` with an `FP` query function and a `P` verdict.
 
 ## Main definitions
 

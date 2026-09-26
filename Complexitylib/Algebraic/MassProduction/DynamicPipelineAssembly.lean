@@ -158,7 +158,9 @@ noncomputable def gatherWithSelectorsCircuit
       capacity scatterRecordCount resourceCircuits gatherRecordCount).size =
       (scatterResourceGatherCircuit groupsPositive suffixWidth groupBitWidth
         orderWidth incidenceFits capacity scatterRecordCount
-        (by rw [← scatterRecordCount]; exact (Nat.le_add_left _ _).trans (Nat.le_add_right _ _))
+        (by
+          rw [← scatterRecordCount]
+          exact (Nat.le_add_left _ _).trans (Nat.le_add_right _ _))
         resourceCircuits gatherRecordCount).size := by
   simp [gatherWithSelectorsCircuit]
 
@@ -282,7 +284,9 @@ per request. -/
         ∑ request : Fin totalRequests,
           decoderGateCount (width := width) (depth := gatherDepth)
             (incidenceKeyWidth groupBitWidth dimension width) (orderWidth + 1) width
-            (by rw [← gatherRecordCount]; exact (Nat.le_add_left _ _).trans (Nat.le_add_right _ _))
+            (by
+              rw [← gatherRecordCount]
+              exact (Nat.le_add_left _ _).trans (Nat.le_add_right _ _))
             request := by
   simp [dynamicAssembledPipelineCircuit]
 

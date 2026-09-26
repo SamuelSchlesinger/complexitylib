@@ -8,11 +8,13 @@ module
 public import Complexitylib.DescriptiveComplexity.Structure
 
 /-!
-  # Isomorphisms, Embeddings, and Substructures
+  # Isomorphisms, embeddings, and injective homomorphisms
 
   We define isomorphisms between finite structures, prove they form an
   equivalence relation, and show that isomorphic structures have the same
-  cardinality. We also define embeddings and substructures.
+  cardinality. We also define embeddings (injective maps that preserve and
+  reflect relations, as in model theory) and the weaker injective
+  homomorphisms (which only preserve them).
 -/
 
 
@@ -146,52 +148,60 @@ theorem card_eq (f : A ≅ B) : A.card = B.card :=
 
 end Iso
 
-/-- An embedding of structure A into structure B. -/
-structure Embedding (A B : FinStruct V) where
-  /-- The embedding function -/
+/-- An injective homomorphism of structure `A` into structure `B`: an injective
+    map of universes that preserves constants and carries every relation tuple of
+    `A` to a relation tuple of `B`. Relations are preserved but not reflected, so
+    `B` may relate images of elements that `A` does not relate; the notion that
+    also reflects them is `Embedding`. -/
+structure InjectiveHom (A B : FinStruct V) where
+  /-- The map of universes -/
   toFun : Fin A.card → Fin B.card
-  /-- The embedding is injective -/
+  /-- The map is injective -/
   injective : Function.Injective toFun
   /-- Relations are preserved (forward direction only) -/
   rel_map : ∀ i args, A.rel i args → B.rel i (toFun ∘ args)
   /-- Constants are preserved -/
   const_map : ∀ j, toFun (A.const j) = B.const j
 
-namespace Embedding
+namespace InjectiveHom
 
-/-- Every isomorphism gives an embedding. -/
-def ofIso {A B : FinStruct V} (f : A ≅ B) : Embedding A B where
+/-- Every isomorphism gives an injective homomorphism. -/
+def ofIso {A B : FinStruct V} (f : A ≅ B) : InjectiveHom A B where
   toFun := f.toFun
   injective := f.toFun_injective
   rel_map i args h := (f.rel_map i args).mp h
   const_map := f.const_map
 
-end Embedding
+end InjectiveHom
 
-/-- Structure A is a substructure of B if there is an inclusion that
-    both preserves and reflects relations. -/
-structure IsSubstructure (A B : FinStruct V) where
-  /-- The inclusion function -/
+/-- An embedding of structure `A` into structure `B`, in the model-theoretic
+    sense (Mathlib's `FirstOrder.Language.Embedding`): an injective map of
+    universes that preserves constants and both preserves and reflects
+    relations. Its image is a substructure of `B` isomorphic to `A`, so
+    `Nonempty (Embedding A B)` says that `A` is, up to isomorphism, a
+    substructure of `B`. -/
+structure Embedding (A B : FinStruct V) where
+  /-- The map of universes -/
   toFun : Fin A.card → Fin B.card
-  /-- The inclusion is injective -/
+  /-- The map is injective -/
   injective : Function.Injective toFun
   /-- Relations are preserved and reflected -/
   rel_iff : ∀ i args, A.rel i args ↔ B.rel i (toFun ∘ args)
   /-- Constants are preserved -/
   const_map : ∀ j, toFun (A.const j) = B.const j
 
-namespace IsSubstructure
+namespace Embedding
 
-/-- Every structure is a substructure of itself. -/
-def refl (A : FinStruct V) : IsSubstructure A A where
+/-- The identity embedding. -/
+def refl (A : FinStruct V) : Embedding A A where
   toFun := id
   injective := Function.injective_id
   rel_iff _ _ := Iff.rfl
   const_map _ := rfl
 
-/-- Substructure is transitive. -/
-def trans {A B C : FinStruct V} (f : IsSubstructure A B)
-    (g : IsSubstructure B C) : IsSubstructure A C where
+/-- Composition of embeddings. -/
+def trans {A B C : FinStruct V} (f : Embedding A B)
+    (g : Embedding B C) : Embedding A C where
   toFun := g.toFun ∘ f.toFun
   injective := Function.Injective.comp g.injective f.injective
   rel_iff i args := by
@@ -200,7 +210,21 @@ def trans {A B C : FinStruct V} (f : IsSubstructure A B)
     · intro h; exact (f.rel_iff i args).mpr ((g.rel_iff i _).mpr h)
   const_map j := by simp [Function.comp, f.const_map, g.const_map]
 
-end IsSubstructure
+/-- Every isomorphism is an embedding. -/
+def ofIso {A B : FinStruct V} (f : A ≅ B) : Embedding A B where
+  toFun := f.toFun
+  injective := f.toFun_injective
+  rel_iff := f.rel_map
+  const_map := f.const_map
+
+/-- An embedding is in particular an injective homomorphism. -/
+def toInjectiveHom {A B : FinStruct V} (f : Embedding A B) : InjectiveHom A B where
+  toFun := f.toFun
+  injective := f.injective
+  rel_map i args h := (f.rel_iff i args).mp h
+  const_map := f.const_map
+
+end Embedding
 
 end DescriptiveComplexity
 

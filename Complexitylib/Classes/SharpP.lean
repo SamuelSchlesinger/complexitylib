@@ -13,7 +13,7 @@ public import Complexitylib.Classes.FiniteCounting
 # The counting class `#P`
 
 **#P** (sharp-P) is the class of functions that count the accepting leaves of a
-polynomial-time nondeterministic computation tree (roadmap track L5).
+polynomial-time nondeterministic computation tree.
 
 This is deliberately distinct from `NTM.acceptCount`, which counts fixed-length
 choice strings for probabilistic semantics. If a machine halts early, all
@@ -162,8 +162,9 @@ theorem SharpP.le_two_pow {f : List Bool → ℕ} (hf : f ∈ SharpP) :
     fun x => (hval x).le.trans (N.acceptLeafCount_le x (T x.length))⟩
 
 /-- **GapP**: the class of integer-valued functions expressible as the difference
-    of two `#P` functions (equivalently, accepting minus rejecting paths of a
-    polynomial-time nondeterministic machine). -/
+    of two `#P` functions. The textbook alternative characterization (accepting
+    minus rejecting paths of a single polynomial-time nondeterministic machine)
+    is not formalized here. -/
 def GapP : Set (List Bool → ℤ) :=
   {h | ∃ f g : List Bool → ℕ, f ∈ SharpP ∧ g ∈ SharpP ∧ ∀ x, h x = (f x : ℤ) - (g x : ℤ)}
 

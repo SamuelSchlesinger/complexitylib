@@ -103,7 +103,6 @@ def markCount (cols : ℕ → Fin (j + 1) → Γ) (off : ℕ) (r : Fin (j + 1)) 
 second that there are at least two. -/
 -- The last two columns are the chunk's symbol bits, which this check ignores; the arity is
 -- fixed by `Complexity.Scanner.chunkRun`.
-@[nolint unusedArguments]
 def markStep (r : Fin (j + 1)) (x : Bool × Bool)
     (c1 _c2 _c3 : Fin (j + 1) → Γ) : Bool × Bool :=
   if c1 r = Γ.one then (true, x.1 || x.2) else x
@@ -213,7 +212,6 @@ theorem agreeOk_iff (cols : ℕ → Fin (j + 1) → Γ) (off : ℕ) (a b : Fin (
 /-- The head stays: the markers must agree. -/
 -- The last two columns are the chunk's symbol bits, which this check ignores; the arity is
 -- fixed by `Complexity.Scanner.chunkRun`.
-@[nolint unusedArguments]
 def stayStep (a b : Fin (j + 1)) (x : Bool) (c1 _c2 _c3 : Fin (j + 1) → Γ) : Bool :=
   x && (decide (c1 a = Γ.one) == decide (c1 b = Γ.one))
 
@@ -242,7 +240,6 @@ def prevMark (cols : ℕ → Fin (j + 1) → Γ) (off : ℕ) (a : Fin (j + 1)) (
 /-- The head moves right: the new marker is one chunk on. -/
 -- The last two columns are the chunk's symbol bits, which this check ignores; the arity is
 -- fixed by `Complexity.Scanner.chunkRun`.
-@[nolint unusedArguments]
 def rightStep (a b : Fin (j + 1)) (x : Bool × Bool) (c1 _c2 _c3 : Fin (j + 1) → Γ) :
     Bool × Bool :=
   (x.1 && (decide (c1 b = Γ.one) == x.2), decide (c1 a = Γ.one))
@@ -281,7 +278,6 @@ left stays put. The fold carries the previous chunk's new marker, whether chunk 
 and whether the old marker was on chunk zero. -/
 -- The last two columns are the chunk's symbol bits, which this check ignores; the arity is
 -- fixed by `Complexity.Scanner.chunkRun`.
-@[nolint unusedArguments]
 def leftStep (a b : Fin (j + 1)) (x : Bool × Bool × Bool × Bool)
     (c1 _c2 _c3 : Fin (j + 1) → Γ) : Bool × Bool × Bool × Bool :=
   let mA := decide (c1 a = Γ.one)

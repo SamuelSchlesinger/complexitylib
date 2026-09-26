@@ -13,8 +13,9 @@ public import Complexitylib.Classes.FNP.Internal
 
 This file defines the function/search complexity classes **FNP** and **TFNP**
 (see `FNP/Defs.lean`) and proves the fundamental connection between TFNP and
-NP ∩ coNP: if a language has both NP and coNP witness relations, the combined
-certificate-finding problem is in TFNP (Megiddo–Papadimitriou 1991).
+NP ∩ coNP: if a language has FNP witness relations for both membership and
+non-membership, the combined certificate-finding problem is in TFNP
+(Megiddo–Papadimitriou 1991).
 -/
 
 
@@ -27,10 +28,11 @@ namespace Complexity
     relation is in TFNP. Any witness valid for either component serves as a
     solution to the combined search problem.
 
-    Combined with the NP witness theorem
-    (`NP = {L | ∃ R ∈ FNP, ∀ x, x ∈ L ↔ ∃ y, R x y}`),
-    this establishes that every language in NP ∩ coNP gives rise to a TFNP
-    search problem. -/
+    The witness relations are hypotheses. Deriving them from `L ∈ NP` and
+    `L ∈ coNP` would need the direction `NP ⊆ {L | ∃ R ∈ FNP, ∀ x, x ∈ L ↔ ∃ y,
+    R x y}` of the FNP witness characterization, which is not yet formalized;
+    only the converse (`NP.mem_NP_of_FNP`) is proved. So the library does not
+    yet show that every language in NP ∩ coNP gives rise to a TFNP problem. -/
 theorem orRelation_mem_TFNP_of_NP_coNP_witnesses
     {R₁ R₂ : List Bool → List Bool → Prop} {L : Language}
     (hR₁ : R₁ ∈ FNP) (hR₂ : R₂ ∈ FNP)

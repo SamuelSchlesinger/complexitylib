@@ -51,11 +51,12 @@ which is why the rotation map is an involution.
   controls the Rayleigh quotient
 - `Complexity.RegGraph.ip_cloudPar_cloudPerp` — the two parts are orthogonal
 - `Complexity.RegGraph.ip_two_mul_le` — the weighted arithmetic-geometric bound
-- `Complexity.RegGraph.ip_step_zigzag_le` — **the RVW estimate**
+- `Complexity.RegGraph.ip_step_zigzag_le` — **the zig-zag estimate** `λ_G + λ_H + λ_H²`
+  (the simple bound from the Reingold–Vadhan–Wigderson analysis, not their tight one)
 - `Complexity.RegGraph.ip_cloudStep_le` — the cloud move is a contraction
-- `Complexity.RegGraph.abs_ip_step_zigzag_le` — the RVW estimate, two-sided
-- `Complexity.RegGraph.spectralBound_zigzag` — **the spectral bound of the
-  product**
+- `Complexity.RegGraph.abs_ip_step_zigzag_le` — the same estimate, two-sided
+- `Complexity.RegGraph.spectralBound_zigzag` — **a spectral bound for the
+  product**: `λ_G + λ_H + λ_H²`, from the simple estimate
 -/
 
 @[expose] public section
@@ -565,7 +566,10 @@ theorem ip_crossStep_self (g : G.V × G.D → ℝ) :
   erw [ip, ip]
   exact sum_sq_crossStep_aux G g
 
-/-! ### The Reingold–Vadhan–Wigderson estimate -/
+/-! ### The zig-zag estimate
+
+The simple bound `λ_G + λ_H + λ_H²` on the zig-zag product's second eigenvalue, from the
+Reingold–Vadhan–Wigderson analysis. Their tight bound is not formalized. -/
 
 theorem eq_zero_of_ip_self_eq_zero {g : G.V × G.D → ℝ} (h : ip G g g = 0)
     (x : G.V × G.D) : g x = 0 := by
@@ -691,7 +695,7 @@ theorem abs_ip_cloudPar_crossStep_le {lam : ℝ} (hG : G.SpectralBound lam) (hla
         mul_le_mul_of_nonneg_left hray hd
     _ = lam * ((G.deg : ℝ) * ∑ v : G.V, (cloudMean G f v) ^ 2) := by ring
 
-/-- **The RVW estimate, two-sided.** This is the form the conversion to
+/-- **The zig-zag estimate, two-sided.** This is the form the conversion to
 `SpectralBound` needs, since polarisation uses the bound on both signs. -/
 theorem abs_ip_step_zigzag_le {lamG lamH : ℝ} (hG : G.SpectralBound lamG)
     (hH : H.SpectralBound lamH) (hlamG : 0 ≤ lamG) (hlamH : 0 ≤ lamH)
@@ -798,7 +802,8 @@ theorem ip_polarise (f g : G.V × G.D → ℝ) :
   rw [key, hcross]
   ring
 
-/-- **The spectral bound of the zig-zag product.** -/
+/-- **A spectral bound for the zig-zag product**: `λ_G + λ_H + λ_H²`, the simple
+estimate (not the tight Reingold–Vadhan–Wigderson bound). -/
 theorem spectralBound_zigzag {lamG lamH : ℝ} (hG : G.SpectralBound lamG)
     (hH : H.SpectralBound lamH) (hlamG : 0 ≤ lamG) (hlamH : 0 ≤ lamH) :
     (zigzag G H e).SpectralBound (lamG + lamH + lamH ^ 2) := by

@@ -518,8 +518,13 @@ abbrev IfQ (QT QThen QElse : Type) := QT ⊕ IfPhase ⊕ QThen ⊕ QElse
 
     ## Time
 
-    `t_test + (output_head_pos + 2) + 1 + t_branch + 1` where
-    `output_head_pos ≤ t_test`. Total: at most `2·t_test + t_branch + 4`. -/
+    The rewind costs one step per output cell the head must cross, so the
+    total depends on where the test leaves the output head. The proved bound
+    (`ifTM_hoareTime`) is `b_test + p + max b_then b_else + 5` steps when the
+    test halts within `b_test` steps with well-formed tapes (`▷` at cell 0 and
+    nowhere else) and its output head at a position at most `p`, and each
+    branch halts within its own bound. (The head position is
+    not bounded by the test's running time in general: it may start anywhere.) -/
 def ifTM (tmTest : TM n) (tmThen : TM n) (tmElse : TM n) : TM n :=
   haveI : Fintype tmTest.Q := tmTest.finQ
   haveI : DecidableEq tmTest.Q := tmTest.decEq
@@ -760,8 +765,8 @@ abbrev LoopQ (QBody QTest : Type) := QBody ⊕ LoopPhase ⊕ QTest
 
     ## Use case
 
-    The UTM's main loop: `loopTM simStepTM checkHaltTM` runs one simulation
-    step, then checks if the simulated machine has halted. -/
+    The UTM's main loop: `loopTM UTMBody.bodyTM haltTestTM` runs one
+    simulation step, then checks if the simulated machine has halted. -/
 def loopTM (tmBody : TM n) (tmTest : TM n) : TM n :=
   haveI : Fintype tmBody.Q := tmBody.finQ
   haveI : DecidableEq tmBody.Q := tmBody.decEq

@@ -80,8 +80,10 @@ def transducerSnapshot (tm : TM k) (c : Cfg k tm.Q) (inputLength space : ℕ)
     decide (c.output.head = 0),
     c.output.read)
 
-/-- A concrete upper bound on the number of finite snapshots of a `k`-work-tape
-transducer using auxiliary space `space` on inputs of length `inputLength`. -/
+/-- The number of finite snapshots of a `k`-work-tape transducer using auxiliary
+space `space` on inputs of length `inputLength`: exactly the cardinality of
+`TM.TransducerSnapshot` (`card_transducerSnapshot`), and hence an upper bound on
+the number of distinct snapshots a run can visit. -/
 def transducerConfigBound (tm : TM k) (inputLength space : ℕ) : ℕ :=
   8 * Fintype.card tm.Q * (inputLength + space + 2) *
     (((space + 1) * 4 ^ (space + 1)) ^ k)

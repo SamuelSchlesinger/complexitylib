@@ -89,7 +89,10 @@ def sharedTermCircuit
       (sharedPowerExpression (K := K) (2 * n))).comp
       (Algebraic.Arithmetic.Expression.circuit (linearFormExpression term)))
 
-/-- The linear form, the shared power chain, and the scaling, in sequence. -/
+/-- The gate count of `sharedTermCircuit` is the sum of the tree gate counts of
+its three stages: the linear form, the shared power chain, and the final
+scaling. Composing the stages adds no gates. Unlike the multiplication and
+addition charges below, the count includes the named-constant gates. -/
 @[simp] theorem sharedTermCircuit_size
     [Zero K]
     [One K]

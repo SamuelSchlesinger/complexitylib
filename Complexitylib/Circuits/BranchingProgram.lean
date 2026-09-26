@@ -16,8 +16,7 @@ public import Mathlib.Data.Finset.Dedup
 Width-`w` **permutation branching programs**: a program is a list of
 instructions, each of which reads one input variable and applies one of two
 permutations of `Fin w` accordingly; the program evaluates to the ordered
-product of the selected permutations (roadmap track M3, toward Barrington's
-theorem).
+product of the selected permutations (toward Barrington's theorem).
 
 ## Main definitions and results
 

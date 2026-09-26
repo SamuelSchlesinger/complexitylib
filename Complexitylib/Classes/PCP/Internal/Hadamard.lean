@@ -654,7 +654,7 @@ theorem eq_tensorAssign_of_prob_consistent (a : Cube n) (b : Cube (n * n))
 /-- **A corrected read is right.** Reading a close-to-linear table by
 self-correction, with the randomness taken from the first block of a bundled
 random string, returns the codeword's value except with probability `2ε`. -/
-theorem prob_corrected_read_left (f : BooleanFunction n) (hf : IsBooleanValued f)
+theorem prob_corrected_read_left (f : BooleanFunction n) (_hf : IsBooleanValued f)
     (S : Finset (Fin n)) {ε : ℝ} (hclose : IsClose f (χ S) ε) (x : Cube n) :
     1 - 2 * ε ≤ Pr[fun z : Cube (n + n) =>
       f (leftBlock z) * f (x + leftBlock z) = (χ S) x] := by
@@ -662,10 +662,10 @@ theorem prob_corrected_read_left (f : BooleanFunction n) (hf : IsBooleanValued f
       = Pr[fun y : Cube n => f y * f (x + y) = (χ S) x] :=
     prob_leftBlock (fun y => f y * f (x + y) = (χ S) x)
   rw [h]
-  exact local_correctability f hf S hclose x
+  exact local_correctability f S hclose x
 
 /-- The same for the second block. -/
-theorem prob_corrected_read_right (f : BooleanFunction n) (hf : IsBooleanValued f)
+theorem prob_corrected_read_right (f : BooleanFunction n) (_hf : IsBooleanValued f)
     (S : Finset (Fin n)) {ε : ℝ} (hclose : IsClose f (χ S) ε) (x : Cube n) :
     1 - 2 * ε ≤ Pr[fun z : Cube (n + n) =>
       f (rightBlock z) * f (x + rightBlock z) = (χ S) x] := by
@@ -673,7 +673,7 @@ theorem prob_corrected_read_right (f : BooleanFunction n) (hf : IsBooleanValued 
       = Pr[fun y : Cube n => f y * f (x + y) = (χ S) x] :=
     prob_rightBlock (fun y => f y * f (x + y) = (χ S) x)
   rw [h]
-  exact local_correctability f hf S hclose x
+  exact local_correctability f S hclose x
 
 /-- **Two corrected reads are both right.** The union bound over the two blocks:
 bundling the randomness is what makes this an ordinary one-variable union bound
@@ -753,7 +753,7 @@ read returns the codeword's value, except with probability `2kε`.
 
 Parameterising by the block maps keeps this independent of how many reads the
 tester makes and how the string is carved up. -/
-theorem prob_all_reads {m k : ℕ} (f : BooleanFunction n) (hf : IsBooleanValued f)
+theorem prob_all_reads {m k : ℕ} (f : BooleanFunction n) (_hf : IsBooleanValued f)
     (S : Finset (Fin n)) {ε : ℝ} (hclose : IsClose f (χ S) ε)
     (blk : Fin k → Cube m → Cube n)
     (hblk : ∀ (i : Fin k) (P : Cube n → Prop),
@@ -768,6 +768,6 @@ theorem prob_all_reads {m k : ℕ} (f : BooleanFunction n) (hf : IsBooleanValued
       = Pr[fun y : Cube n => f y * f (pts i + y) = (χ S) (pts i)] :=
     hblk i (fun y => f y * f (pts i + y) = (χ S) (pts i))
   rw [hmarg]
-  exact local_correctability f hf S hclose (pts i)
+  exact local_correctability f S hclose (pts i)
 
 end Complexity

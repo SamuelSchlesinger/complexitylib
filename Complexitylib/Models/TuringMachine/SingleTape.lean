@@ -30,7 +30,7 @@ This is a reusable robustness lemma:
 
 * `singleTapeSim N : NTM 1` — the simulating machine (`SingleTape/Sim.lean`),
   for `k ≥ 1`; 0-work-tape machines are handled by padding (`Pad.lean`).
-* `singleTapeSimTime T` — the `(T + n + 1)²` time overhead.
+* `singleTapeSimTime k T` — the explicit time bound `16·(k+1)·(T n + n + 1)²`.
 * `singleTapeSim_allPathsHaltIn`, `singleTapeSim_acceptsInTime_iff` — the two
   behavioural facts (timing + acceptance equivalence), assembled from the
   forward (`acceptsInTime_singleTapeSim_of_acceptsInTime`) and reverse
@@ -53,8 +53,11 @@ namespace NTM
 /-- Time overhead of the single-tape simulation: the classic quadratic blow-up
     `(T + n + 1)²`, times a per-machine constant `16·(k+1)` that absorbs the
     block width (each super-position is `3k` cells) and the four sweeps per
-    simulated step. The constant is deliberately generous; only the `=O` class
-    (which absorbs it) is used downstream. -/
+    simulated step. The constant is deliberately generous. Downstream results
+    use both the `=O` class (`singleTapeSimTime_bigO`) and the explicit formula:
+    the universal machine's clock (`TM.utmTM_simulates_pair`) states the same
+    quadratic `16(k+1)(t+|p|+1)²`, and the time hierarchy theorem
+    (`time_hierarchy_weak`) unfolds it. -/
 def singleTapeSimTime (k : ℕ) (T : ℕ → ℕ) : ℕ → ℕ :=
   fun n => 16 * (k + 1) * (T n + n + 1) ^ 2
 

@@ -23,10 +23,10 @@ outputs and the same size (`Complexity.Circuit.gatedOutputs_toStraightLine` and
 size conventions agree when there are several outputs: two outputs may name the
 same gate, and an output gate may feed later gates, neither of which a typed
 circuit allows. A gated CSLib circuit with two outputs can thus have a single
-gate, while a typed circuit with two outputs has at least two. With a single
-output, the output gate of a gated circuit could serve as the typed output gate,
-but the translation from gated CSLib circuits back to typed circuits, and with
-it any exact size match in that direction, is not yet formalized.
+gate, while a typed circuit with two outputs has at least two. The converse
+translation, from gated CSLib circuits back to typed circuits, is planned
+(`docs/CircuitMigration.md`, step 2.3) but not yet formalized, so this library
+proves no size comparison in that direction.
 
 Sequential composition keeps this property when the outer circuit has it, and
 parallel composition keeps it when both circuits do. The number of outputs

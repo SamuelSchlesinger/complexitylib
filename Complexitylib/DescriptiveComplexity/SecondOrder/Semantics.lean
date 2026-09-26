@@ -17,7 +17,7 @@ variable in the de Bruijn context `rctx` as a relation of its arity on the
 universe. Second-order quantifiers range over all such relations, extending the
 relation environment with `rCons`.
 
-This is step 2 of the Fagin decomposition (roadmap L6). The FO fragment embeds
+This is step 2 of the Fagin decomposition. The FO fragment embeds
 faithfully: `SOFormula.ofFormula_sat` shows the embedding preserves satisfaction,
 so first-order truth is a special case of second-order truth
 (`SOSentence.models_ofFormula`).

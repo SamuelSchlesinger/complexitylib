@@ -24,6 +24,8 @@ statements about them can be read without opening any proof internals.
 - `NTM.ReachesCfgIn`, `NTM.ReachesCfgLe` — reachability in exactly, and in at most, a given
   number of steps; the step count is what Savitch's recursion halves
 - `logWindow` — a concrete `O(log n)` search window
+- `TM.spaceTimeBound` — the configuration count of a space-bounded deterministic machine, which
+  bounds its running time (`PSPACE ⊆ EXP`)
 -/
 
 @[expose] public section
@@ -67,5 +69,20 @@ def reachSet (tm : NTM k) (c₀ : Cfg k tm.Q) : ℕ → Set (Cfg k tm.Q)
   | t + 1 => reachSet tm c₀ t ∪ {c' | ∃ c ∈ reachSet tm c₀ t, tm.Succ c c'}
 
 end NTM
+
+namespace TM
+
+variable {k : ℕ}
+
+/-- The exponential configuration bound of a space-`f` machine: the number of states, times the
+`n + f n + 2` input-head positions, times, for each of the `k` work tapes and the output tape, a
+head position within the window and window contents over the four-letter alphabet. A decider
+that stays within space `f` halts within this many steps
+(`TM.decidesInTime_of_decidesInSpace`). -/
+def spaceTimeBound (tm : TM k) (f : ℕ → ℕ) (n : ℕ) : ℕ :=
+  Fintype.card tm.Q *
+    ((n + f n + 2) * (((f n + 1) * 4 ^ (f n + 1)) ^ k * ((f n + 2) * 4 ^ (f n + 2))))
+
+end TM
 
 end Complexity

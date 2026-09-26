@@ -6,6 +6,7 @@ Authors: Bolton Bailey
 module
 public import Complexitylib.Classes.P.Defs
 public import Complexitylib.Classes.Exponential
+public import Complexitylib.Classes.Containments.Defs
 public import Complexitylib.Classes.Containments.Internal.ConfigCount
 public import Complexitylib.Classes.P.Cobham.Internal.Simulate
 
@@ -147,11 +148,6 @@ theorem windowed_runCfg {tm : TM k} {L : Language} {f : ℕ → ℕ}
           simp only [Option.getD_some]
           exact hprev.step hs hspace
 
-/-- The exponential configuration bound of a space-`f` machine. -/
-def spaceTimeBound (tm : TM k) (f : ℕ → ℕ) (n : ℕ) : ℕ :=
-  Fintype.card tm.Q *
-    ((n + f n + 2) * (((f n + 1) * 4 ^ (f n + 1)) ^ k * ((f n + 2) * 4 ^ (f n + 2))))
-
 /-- **A space-bounded machine halts within its configuration count.** -/
 theorem halt_time_le {tm : TM k} {L : Language} {f : ℕ → ℕ}
     (hdec : tm.DecidesInSpace L f) (x : List Bool) {t : ℕ}
@@ -201,7 +197,7 @@ theorem spaceTimeBound_le_two_pow_poly (tm : TM k) (f : ℕ → ℕ) (p : Polyno
 open Classical in
 /-- **A space-bounded decider is a time-bounded decider**, with no change of machine: the run
 halts by the time it would have to repeat a configuration. -/
-theorem decidesInTime_of_decidesInSpace {tm : TM k} {L : Language} {f : ℕ → ℕ}
+theorem decidesInTime_of_decidesInSpace_internal {tm : TM k} {L : Language} {f : ℕ → ℕ}
     (hdec : tm.DecidesInSpace L f) : tm.DecidesInTime L (spaceTimeBound tm f) := by
   intro x
   obtain ⟨c', hreach, hhalted, hone, hzero⟩ := hdec.2 x
@@ -263,6 +259,6 @@ theorem PSPACE_subset_EXP_internal : PSPACE ⊆ EXP := by
   obtain ⟨k, tm, f, hdec, hbig⟩ := hm
   obtain ⟨j, hO⟩ := TM.spaceTimeBound_bigO (tm := tm) hbig
   exact Set.mem_iUnion.mpr
-    ⟨j, k, tm, TM.spaceTimeBound tm f, TM.decidesInTime_of_decidesInSpace hdec, hO⟩
+    ⟨j, k, tm, TM.spaceTimeBound tm f, TM.decidesInTime_of_decidesInSpace_internal hdec, hO⟩
 
 end Complexity

@@ -11,9 +11,11 @@ public import Complexitylib.Classes.Randomized.ApproximateCounting.Weak.Hashing.
 /-!
 # Relative approximate counting -- definitions
 
-The constant-success relative estimator runs the factor-`16` hashing estimator
-on a Cartesian power and recovers an integer count through the upper-root
-rounding convention.
+The amplified relative estimator runs the factor-`16` hashing estimator on a
+Cartesian power and recovers an integer count through the upper-root rounding
+convention. A parameter `failureBits` sets the failure probability, which the
+surface module bounds by `2^-failureBits`; constant success probability `3/4`
+is the case `failureBits = 2`.
 -/
 
 
@@ -35,7 +37,8 @@ is the remaining global failure exponent. -/
 def errorBits (domainWidth precision failureBits : ℕ) : ℕ :=
   poweredWidth domainWidth precision + 2 + failureBits
 
-/-- Total random-seed width of the constant-success relative estimator. -/
+/-- Total random-seed width of the amplified relative estimator with failure
+exponent `failureBits` (failure probability at most `2^-failureBits`). -/
 def seedWidth (domainWidth precision failureBits : ℕ) : ℕ :=
   Weak.hashingSeedWidth (poweredWidth domainWidth precision)
     (errorBits domainWidth precision failureBits)

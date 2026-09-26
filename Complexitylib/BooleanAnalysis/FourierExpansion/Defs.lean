@@ -388,19 +388,23 @@ def IsLinear (f : BooleanFunction n) : Prop :=
 def IsMultiplicative (f : BooleanFunction n) : Prop :=
   ∀ x y, f (x + y) = f x * f y
 
-/-- Two Boolean-valued functions are `ε`-close if `dist(f, g) ≤ ε`.
-    (Definition 1.29) -/
+/-- Two functions are `ε`-close if `dist(f, g) ≤ ε`, where `dist` is the
+    fraction of inputs on which they differ (Definition 1.29, stated there for
+    Boolean-valued functions; no Boolean-valuedness is required here). -/
 def IsClose (f g : BooleanFunction n) (ε : ℝ) : Prop :=
   hammingDist f g ≤ ε
 
-/-- A Boolean-valued function is `ε`-close to a property `P` if there
-    exists `g` satisfying `P` with `dist(f, g) ≤ ε`. (Definition 1.29) -/
+/-- A function is `ε`-close to a property `P` if there exists `g` satisfying
+    `P` with `dist(f, g) ≤ ε` (Definition 1.29, stated there for Boolean-valued
+    functions; no Boolean-valuedness is required here). -/
 def IsCloseToProperty (f : BooleanFunction n)
     (P : BooleanFunction n → Prop) (ε : ℝ) : Prop :=
   ∃ g, P g ∧ IsClose f g ε
 
-/-- The BLR acceptance probability: `Pr_{x,y}[f(x)·f(y) = f(x+y)]`,
-    which equals `1/2 + 1/2 · ∑_S 𝓕 f S ^ 3`. -/
+/-- The BLR acceptance probability: `Pr_{x,y}[f(x)·f(y) = f(x+y)]`. For
+    Boolean-valued `f` it equals `1/2 + 1/2 · ∑_S 𝓕 f S ^ 3` (`blrAcceptProb_eq`);
+    without that hypothesis the identity can fail (for `f = 0` the probability
+    is `1`). -/
 noncomputable def blrAcceptProb (f : BooleanFunction n) : ℝ :=
   Pr₂[fun x y => f x * f y = f (x + y)]
 

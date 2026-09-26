@@ -63,7 +63,9 @@ therefore consistency checks against those definitions, not corroboration by
 independently reviewed ones, and they may need revisiting if the definitions
 change before merging. The counting argument behind the hard language,
 `Cslib.Circuits.Boolean.Shannon.exists_hard_function`, is merged upstream
-(CSLib PR #891).
+(CSLib PR #891), but the pinned version restates it for the bundled circuit
+size `Circuit.size` of the pending CSLib PR #949, so the statement used here is
+itself part of the pending work.
 -/
 
 
@@ -238,9 +240,10 @@ theorem PPoly_eq_cslib_PPoly : PPoly = Cslib.Circuits.Boolean.PPoly := by
 
 That theorem and `Cslib.Circuits.Boolean.PPoly` come from the author's pending
 CSLib work, pinned from the integration branch of the `SamuelSchlesinger/cslib`
-fork; the counting argument underneath,
-`Cslib.Circuits.Boolean.Shannon.exists_hard_function`, is merged upstream (see
-the module docstring). -/
+fork. The counting argument underneath,
+`Cslib.Circuits.Boolean.Shannon.exists_hard_function`, is merged upstream, but
+the pinned version is restated for the bundled circuit size of the pending CSLib
+PR #949 (see the module docstring). -/
 theorem exists_not_mem_PPoly : ∃ L : Language, L ∉ PPoly := by
   rw [PPoly_eq_cslib_PPoly]
   exact Cslib.Circuits.Boolean.exists_not_mem_PPoly

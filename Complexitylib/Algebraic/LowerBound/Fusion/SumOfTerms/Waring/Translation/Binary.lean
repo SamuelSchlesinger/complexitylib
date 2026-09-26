@@ -45,7 +45,10 @@ def termCircuit
       (Algebraic.Arithmetic.Expression.circuit
         (Translation.linearFormExpression term)))
 
-/-- The linear form, the binary power, and the scaling, in sequence. -/
+/-- The gate count of `termCircuit` is the tree gate count of the linear form,
+plus the gate count of the binary power circuit, plus the tree gate count of the
+final scaling. Composing the stages adds no gates. Unlike the multiplication and
+addition charges below, the count includes the named-constant gates. -/
 @[simp] theorem termCircuit_size
     [Zero K]
     [One K]

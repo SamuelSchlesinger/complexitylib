@@ -5,6 +5,7 @@ Authors: Bolton Bailey
 -/
 module
 public import Complexitylib.Classes.Randomized
+public import Complexitylib.Classes.Containments
 public import Complexitylib.Classes.Containments.Internal.PPSubsetPSPACE
 public import Complexitylib.Classes.P.Defs
 
@@ -46,11 +47,7 @@ at all and is handled separately, by a machine that publishes `0`.
 - `PP_subset_PSPACE_of_tallyMachine` — the same, with the obligation reduced to a machine
   deciding one arithmetic predicate
 - `PP_subset_PSPACE` — the containment
-
-## TODO
-
-- `BPP ⊆ PSPACE` now follows from `BPP_subset_PP`; state it where the randomized classes are
-  related.
+- `BPP_subset_PSPACE` — `BPP ⊆ PSPACE`, through `BPP_subset_PP`
 -/
 
 @[expose] public section
@@ -59,6 +56,9 @@ namespace Complexity
 
 /-- **`PP ⊆ PSPACE`**: count accepting paths by enumerating choice sequences in place. -/
 theorem PP_subset_PSPACE : PP ⊆ PSPACE := PP_subset_PSPACE_internal
+
+/-- **`BPP ⊆ PSPACE`**, as the composite `BPP ⊆ PP ⊆ PSPACE`. -/
+theorem BPP_subset_PSPACE : BPP ⊆ PSPACE := BPP_subset_PP.trans PP_subset_PSPACE
 
 /-- **`PP` with no rational arithmetic left.** A language of `PP` is decided by comparing twice
 the number of accepting choice sequences against their total count `2 ^ T` — a comparison of two

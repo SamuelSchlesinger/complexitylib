@@ -12,7 +12,9 @@ public import Complexitylib.DescriptiveComplexity.Isomorphism
 
   A boolean query over vocabulary V is a property of finite V-structures.
   A query is order-independent if isomorphic structures give the same answer
-  (Definition 1.16 in Immerman).
+  (Immerman, Chapter 1). The theorem that first-order sentences define
+  order-independent queries is cited as Immerman Proposition 1.16
+  (`Sentence.orderIndependent`).
 -/
 
 

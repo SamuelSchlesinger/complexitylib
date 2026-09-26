@@ -35,7 +35,8 @@ def circuit
 
 /-- Row selection has exactly the gates of the flagged rows followed by candidate selection. -/
 @[simp] theorem circuit_size
-    (flags : Circuit DeMorgan.signature inputs (networkRecords menuDepth * networkRecords requestDepth))
+    (flags : Circuit DeMorgan.signature inputs
+      (networkRecords menuDepth * networkRecords requestDepth))
     (payloads : Fin (networkRecords menuDepth * networkRecords requestDepth) →
       Fin payloadWidth → DeMorgan.Wiring inputs)
     (positive : 0 < needed) (fits : needed ≤ networkRecords requestDepth) :

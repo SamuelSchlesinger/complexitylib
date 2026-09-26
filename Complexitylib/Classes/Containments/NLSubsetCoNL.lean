@@ -82,7 +82,7 @@ steps, and the space accounting that keeps every register logarithmically wide.
 ## TODO
 
 - Build the counting machine and discharge the hypothesis of `NL_subset_coNL_of_counting`.
-  `CoNLSubsetNL.coNL_subset_NL_of_NL_subset_coNL` then gives the reverse inclusion, so this
+  `coNL_subset_NL_of_NL_subset_coNL` then gives the reverse inclusion, so this
   single direction settles `NL = coNL`.
 -/
 
@@ -95,7 +95,7 @@ under complement, by inductive counting of the reachable configurations. -/
 def NLSubsetCoNL : Prop := NL ⊆ coNL
 
 /-- **The complement of an `NL` language, spelled out.** An input is outside the language exactly
-when every configuration reached by the bounded search of `NLSubsetP.NL_bounded_reachability`
+when every configuration reached by the bounded search of `NL_bounded_reachability`
 fails to be accepting. Inductive counting exists to certify this universally quantified
 statement nondeterministically. -/
 theorem NL_complement_characterization {L : Language} (hL : L ∈ NL) :

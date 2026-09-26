@@ -17,7 +17,7 @@ List ℕ` giving the arities of the relation variables in scope (innermost first
 by the number `n` of first-order variables in scope, so `soExist k` pushes a fresh
 arity-`k` relation variable onto `rctx`.
 
-This is step 1 of the Fagin decomposition (roadmap L6): the `∃SO` fragment of this
+This is step 1 of the Fagin decomposition: the `∃SO` fragment of this
 syntax is the one Fagin's theorem characterizes as `NP`.
 
 ## Main definitions

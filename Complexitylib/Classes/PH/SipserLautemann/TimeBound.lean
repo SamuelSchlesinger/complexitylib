@@ -60,23 +60,14 @@ variable {n : ℕ}
 /-- **The acceptance probability is frozen past the halting time.** If all
 paths halt within `T (|x|)` steps, running the machine for any longer bound
 leaves the acceptance probability unchanged: the surplus choice bits partition
-the enlarged sample space into equal fibers over the original one. -/
+the enlarged sample space into equal fibers over the original one. This is the
+`AllPathsHaltIn` form of `NTM.acceptProb_eq_of_le_of_allChoicesHalt`, with a
+scalar larger clock (`NTM.acceptProb_eq_of_le_of_allPathsHaltIn` is the version
+for a pointwise-larger clock function). -/
 theorem acceptProb_eq_of_allPathsHaltIn {tm : NTM n} {T : ℕ → ℕ}
     (hN : tm.AllPathsHaltIn T) (x : List Bool) {T' : ℕ} (hle : T x.length ≤ T') :
-    tm.acceptProb x T' = tm.acceptProb x (T x.length) := by
-  classical
-  obtain ⟨i, rfl⟩ := Nat.exists_eq_add_of_le hle
-  rw [acceptProb_eq_eventProb, acceptProb_eq_eventProb]
-  refine eventProb_filter_of_constant_fibers (htotal := rfl)
-    (randomSeed := blockFst (T x.length) i) _ _ ?_ (card_filter_blockFst_eq _ _)
-  intro w
-  have hagree : ∀ j : Fin (T x.length),
-      w ⟨j.val, by omega⟩ = blockFst (T x.length) i w j := by
-    intro j
-    rfl
-  have hhalt : tm.halted (tm.trace (T x.length) (blockFst (T x.length) i w)
-      (tm.initCfg x)) := hN x _
-  rw [tm.trace_mono (Nat.le_add_right _ i) hagree hhalt]
+    tm.acceptProb x T' = tm.acceptProb x (T x.length) :=
+  tm.acceptProb_eq_of_le_of_allChoicesHalt x hle (hN x)
 
 /-- The completeness condition transfers to any pointwise-larger time bound. -/
 theorem acceptsWithProb_of_le {tm : NTM n} {L : Language} {T T' : ℕ → ℕ} {c : ℚ}

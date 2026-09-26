@@ -35,7 +35,7 @@ def combineCircuit (count : Nat) :=
 /-- The exact gate count of `combineCircuit`. -/
 @[simp] theorem combineCircuit_size
     (count : Nat) :
-    (combineCircuit count).size = ∑ x : Fin count, (expression x).gateCount := by
+    (combineCircuit count).size = ∑ index : Fin count, (expression index).gateCount := by
   simp [combineCircuit]
 
 /-- The combining stage reads the corresponding bits of each shared array. -/

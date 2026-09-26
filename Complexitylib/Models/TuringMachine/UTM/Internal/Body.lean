@@ -29,7 +29,7 @@ and output tapes are untouched (the loop verdict on the output tape is
 written by the halt-test machine, not the body).
 
 This file defines the machine only; its `HoareTime` spec and the
-correspondence with `TMDesc.toTM.step` live in `BodyInternal.lean` (M3).
+correspondence with `TMDesc.toTM.step` live in `BodyInternal.lean`.
 -/
 
 

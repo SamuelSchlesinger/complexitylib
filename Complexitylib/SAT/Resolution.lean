@@ -11,10 +11,10 @@ public import Std.Tactic.BVDecide.Normalize.BitVec
 /-!
 # Resolution
 
-The single resolution step on CNF clauses and its **soundness** (roadmap track
-L5). The resolvent of `c₁` and `c₂` on a variable `v` drops the positive literal
-`x_v` from `c₁` and the negative literal `¬x_v` from `c₂` and disjoins the
-remainder. Soundness — any assignment satisfying both parents satisfies the
+The single resolution step on CNF clauses and its **soundness**. The resolvent
+of `c₁` and `c₂` on a variable `v` drops the positive literal `x_v` from `c₁`
+and the negative literal `¬x_v` from `c₂` and disjoins the remainder.
+Soundness — any assignment satisfying both parents satisfies the
 resolvent — is the semantic core underlying resolution proof systems.
 
 ## Main definitions and results

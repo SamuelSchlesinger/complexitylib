@@ -24,13 +24,16 @@ public import Complexitylib.DescriptiveComplexity.Examples
 
 Foundations of descriptive complexity (after Immerman), imported from the
 `descriptive-complexity` project and grown inside this corpus: vocabularies
-(signatures), finite structures, isomorphisms/embeddings/substructures,
-first-order logic (syntax, semantics, isomorphism-invariance), Boolean queries
-and order-independence, and worked examples.
+(signatures), finite structures, isomorphisms, injective homomorphisms and
+substructures, first-order logic (syntax, semantics, substitution,
+isomorphism-invariance), second-order logic (syntax, semantics,
+isomorphism-invariance), Boolean queries and order-independence, FO-definable
+queries, first-order reductions and quantifier-free projections, computable
+first-order model checking, bit-string encodings of finite structures and the
+languages they induce (`queryLanguage`), and worked examples.
 
 The headline foundational result is `DescriptiveComplexity.Sentence.orderIndependent`
 (Immerman Proposition 1.16): first-order sentences define order-independent
-queries. This is the substrate for the logic-vs-complexity correspondences
-(Fagin's theorem `NP = ∃SO`, `FO ⊆ AC⁰`, etc.) on roadmap track L (descriptive
-complexity).
+queries. This is the substrate for the planned logic-vs-complexity
+correspondences (Fagin's theorem `NP = ∃SO`, `FO ⊆ AC⁰`, etc.).
 -/

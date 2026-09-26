@@ -44,13 +44,14 @@ and costs only a `2^q` blow-up in query count against the adaptive variant.
   read
 - `PCPVerifier.Accepts`, `PCPVerifier.acceptEvent`
 - `PCP` — the class `PCP[r(n), q(n)]`
+- `Constructible` — a resource bound that can be written out in unary
 
 ## Main results
 
-- `PCP_mono` — more coins or more queries only enlarge the class
+- `PCP_mono_queries` — more queries only enlarge the class (monotonicity in the
+  number of coins is not proved: the verifier must use exactly `r n` coins)
 - `P_subset_PCP` — the definition contains `P` for every `r` and `q`: the
   verifier reads nothing and ignores its coins
-- `Constructible` — a resource bound that can be written out in unary
 
 ## Conventions
 

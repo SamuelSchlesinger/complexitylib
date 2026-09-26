@@ -123,7 +123,7 @@ def flagsCircuit (depth keyWidth : Nat) :=
 @[simp] theorem flagsCircuit_size
     (depth keyWidth : Nat) :
     (flagsCircuit depth keyWidth).size =
-      ∑ x : Fin (networkRecords depth), (expression depth keyWidth x).gateCount := by
+      ∑ record : Fin (networkRecords depth), (expression depth keyWidth record).gateCount := by
   simp [flagsCircuit]
 
 /-- Sorted key arrays yield exact global duplicate flags. -/

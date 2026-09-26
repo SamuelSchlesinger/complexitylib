@@ -87,10 +87,15 @@ This is the encoded size assuming an encoding into parenthesized expressions. -/
 def Data.size : Data → ℕ
   | Data.l xs => 2 + (xs.map Data.size |>.sum)
 
+/-- Every `Data` value has positive size (at least the two enclosing
+parentheses). -/
 @[simp]
-lemma Data.size_le {d : Data} : 0 < d.size := by
+lemma Data.size_pos {d : Data} : 0 < d.size := by
   obtain ⟨xs⟩ := d
   grind [Data.size]
+
+@[deprecated Data.size_pos (since := "2026-09-25")]
+lemma Data.size_le {d : Data} : 0 < d.size := Data.size_pos
 
 @[simp, scoped grind =]
 lemma Data.size_empty : Data.empty.size = 2 := by simp [Data.empty, Data.size]
@@ -108,7 +113,7 @@ lemma Data.size_lt_of_mem {c : Data} {xs : List Data} (hc : c ∈ xs) :
   | cons a as ih =>
     rw [Data.cons_size]
     rcases List.mem_cons.1 hc with h | h
-    · subst h; have := @Data.size_le (Data.l as); omega
+    · subst h; have := @Data.size_pos (Data.l as); omega
     · have := ih h; omega
 
 /-- Recursion principle for `Data`. -/

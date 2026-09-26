@@ -83,8 +83,10 @@ namespace Complexity
 /-- **Sipser–Lautemann**: bounded-error probabilistic polynomial time lies in
 the second level of the polynomial hierarchy, `BPP ⊆ Σ₂ᵖ ∩ Π₂ᵖ`.
 
-Stated as a `Prop` so that results can depend on it explicitly; it is proved
-from the `MatrixInP` interface by `sipserLautemann_of_matrixInP`. -/
+Stated as a `Prop` so that results can depend on it explicitly. It is proved
+unconditionally as `sipserLautemann` (via `sipserLautemann_of_verdictInFP` and
+`matrixVerdictInFP`); `sipserLautemann_of_matrixInP` derives it from the
+alternative `MatrixInP` interface. -/
 def SipserLautemann : Prop :=
   BPP ⊆ SigmaP 2 ∩ PiP 2
 

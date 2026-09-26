@@ -14,7 +14,7 @@ public import Mathlib.Tactic.Positivity.Finset
 
 The **density** of a property of `n`-bit Boolean functions: the fraction of the
 `2 ^ (2 ^ n)` Boolean functions that the property contains, as an exact rational
-(roadmap track L3, toward natural-proofs largeness). This mirrors the
+(toward natural-proofs largeness). This mirrors the
 random-bit `eventProb` layer but over the sample space of all Boolean functions.
 
 ## Main results

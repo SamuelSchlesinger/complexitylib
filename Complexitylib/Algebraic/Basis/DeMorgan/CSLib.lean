@@ -36,6 +36,14 @@ def fromBooleanOperation : (op : Boolean.Op) →
   | .and => (Translation.id signature).operation .and
   | .or => (Translation.id signature).operation .or
 
+/-- Each CSLib De Morgan operation is simulated by exactly one gate of this
+library's De Morgan basis. -/
+@[simp] theorem fromBooleanOperation_size (op : Boolean.Op) :
+    (fromBooleanOperation op).size = 1 := by
+  cases op with
+  | const value => cases value <;> rfl
+  | not | and | or => rfl
+
 /-- Realize CSLib's Boolean operations in the weighted De Morgan basis. -/
 def fromBoolean :
     Realization Boolean.signature signature Boolean.interpretation interpretation where
@@ -45,11 +53,19 @@ def fromBoolean :
     cases op with
     | const value =>
         cases value
-        · exact congrFun (congrFun (Translation.pull_id (σ := signature) interpretation) .false) input
-        · exact congrFun (congrFun (Translation.pull_id (σ := signature) interpretation) .true) input
-    | not => exact congrFun (congrFun (Translation.pull_id (σ := signature) interpretation) .not) input
-    | and => exact congrFun (congrFun (Translation.pull_id (σ := signature) interpretation) .and) input
-    | or => exact congrFun (congrFun (Translation.pull_id (σ := signature) interpretation) .or) input
+        · exact congrFun
+            (congrFun (Translation.pull_id (σ := signature) interpretation) .false) input
+        · exact congrFun
+            (congrFun (Translation.pull_id (σ := signature) interpretation) .true) input
+    | not =>
+        exact congrFun
+          (congrFun (Translation.pull_id (σ := signature) interpretation) .not) input
+    | and =>
+        exact congrFun
+          (congrFun (Translation.pull_id (σ := signature) interpretation) .and) input
+    | or =>
+        exact congrFun
+          (congrFun (Translation.pull_id (σ := signature) interpretation) .or) input
 
 /-- Importing a CSLib circuit preserves the number of internal gates. -/
 @[simp] theorem fromBoolean_size (circuit : Circuit Boolean.signature n m) :
@@ -114,8 +130,9 @@ def toBoolean :
 /-- Removing identity gates never increases the internal gate count. -/
 theorem toBoolean_size_le (circuit : Circuit signature n m) :
     (toBoolean.compile circuit).size ≤ circuit.size := by
-  simpa only [Realization.compile, one_mul] using toBoolean.toTranslation.compile_size_le_mul circuit
-    (K := 1) (by intro op; cases op <;> decide)
+  simpa only [Realization.compile, one_mul] using
+    toBoolean.toTranslation.compile_size_le_mul circuit (K := 1)
+      (by intro op; cases op <;> decide)
 
 /-- CSLib's `Circuit.Computes` and this library's `Circuit.ComputesWith` are the
 same predicate, so this holds by `Iff.rfl`. It is definitional and kept only for

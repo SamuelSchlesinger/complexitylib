@@ -14,7 +14,7 @@ public import Complexitylib.DescriptiveComplexity.FirstOrder.Isomorphism
 Second-order satisfaction is preserved by isomorphisms, so second-order (and hence
 `∃SO`) sentences define order-independent queries. This is the second-order analogue
 of `Formula.sat_iso` / `Sentence.orderIndependent`, and it is step 3 of the Fagin
-decomposition (roadmap L6).
+decomposition.
 
 The extra ingredient over the first-order case is transporting a **relation**
 environment across the isomorphism (`REnv.map`), together with the fact that this

@@ -17,15 +17,18 @@ the source by FO formulas, one per target relation symbol. This module gives the
 dimension-1 (universe-preserving) case — each target relation is an FO-definable
 relation on the same universe — the foundational special case of the general
 dimension-`k` interpretation (whose target universe is a definable subset of `domᵏ`,
-recorded as a roadmap L6 milestone).
+which is not yet formalized).
 
 First-order reductions are the reductions of descriptive complexity: weak enough to
 sit inside `FO`/`AC⁰`, yet enough to define completeness for the standard classes.
-Their quantifier-free restriction — **first-order projections** — is weaker still and
-is the notion under which many natural problems are complete.
+Their quantifier-free restriction is formalized here as `FOProjReduces`: a
+quantifier-free, dimension-1 interpretation on unordered structures. This is coarser
+than Immerman's first-order projections (over ordered structures, of dimension `k`,
+in a specific projective normal form), which are the reductions in the literature's
+completeness results; those results are not stated for `FOProjReduces`.
 
 Each Boolean query induces a machine-model `Language` via `queryLanguage`; the
-string-level FO-reduction (an FO map on encodings) is a further step on track L6.
+string-level FO-reduction (an FO map on encodings) is not yet formalized.
 
 ## Main definitions and results
 
@@ -226,8 +229,10 @@ theorem FOInterpretation.IsQuantifierFree.comp {U : Vocabulary}
   rw [show (I₂.comp I₁).relFormula i = I₁.translate (I₂.relFormula i) from rfl,
     hI₁.quantifierRank_translate, hI₂ i]
 
-/-- A **first-order projection** reduction: an FO-reduction witnessed by a
-    quantifier-free interpretation. -/
+/-- A **first-order projection** reduction in this module's coarse sense: an
+    FO-reduction witnessed by a quantifier-free dimension-1 interpretation. This
+    is weaker than Immerman's first-order projections (ordered, dimension `k`,
+    projective normal form); see the module docstring. -/
 def FOProjReduces (Q₁ : BooleanQuery V) (Q₂ : BooleanQuery W) : Prop :=
   ∃ I : FOInterpretation V W, I.IsQuantifierFree ∧ ∀ A : FinStruct V, Q₁ A ↔ Q₂ (I.apply A)
 

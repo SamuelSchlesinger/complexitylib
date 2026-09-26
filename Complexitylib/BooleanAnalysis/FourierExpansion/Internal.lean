@@ -504,7 +504,7 @@ theorem parityFun_mul_cancel (S : Finset (Fin n)) (x y : Cube n) :
   rw [this, show (χ S) y * (χ S) y = (χ S) y ^ 2 from by ring, h, mul_one]
 
 /-- Local correctability of the Fourier decoding algorithm. -/
-theorem local_correctability_proof (f : BooleanFunction n) (_hf : IsBooleanValued f)
+theorem local_correctability_proof (f : BooleanFunction n)
     (S : Finset (Fin n)) (ε : ℝ) (hclose : IsClose f (χ S) ε) (x : Cube n) :
     Pr[fun y => f y * f (x + y) = (χ S) x] ≥ 1 - 2 * ε := by
   have hdist : hammingDist f (χ S) ≤ ε := hclose

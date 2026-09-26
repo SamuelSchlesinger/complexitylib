@@ -20,7 +20,7 @@ public import Std.Tactic.BVDecide.Normalize.Prop
 Exact cardinality lemmas for the finite sample space `Fin T → Bool` used by the
 probabilistic-machine semantics (`NTM.acceptCount`, `NTM.acceptProb`). These are
 the reusable combinatorial facts underlying randomized classes, amplification,
-and interactive proofs (roadmap track N2).
+and interactive proofs.
 
 ## Main results
 
@@ -80,8 +80,9 @@ theorem card_boolFunc (n : ℕ) :
   rw [Fintype.card_fun, Fintype.card_bool, card_finArrowBool]
 
 /-- There are exactly `2 ^ (n * n)` directed graphs (adjacency matrices) on `n`
-    vertices — the number of `n × n` Boolean matrices. The size datum behind
-    adjacency-matrix encodings of graph languages such as CLIQUE. -/
+    vertices — the number of `n × n` Boolean matrices. A standalone counting
+    fact for adjacency-matrix encodings; no graph language in the library is
+    currently encoded through it. -/
 theorem card_adjMatrix (n : ℕ) :
     Fintype.card (Fin n → Fin n → Bool) = 2 ^ (n * n) := by
   rw [Fintype.card_fun, card_finArrowBool, Fintype.card_fin, ← pow_mul]
@@ -89,7 +90,9 @@ theorem card_adjMatrix (n : ℕ) :
 /-- An `n`-vertex adjacency matrix biject with `n²`-bit strings by row-major
     serialization. Packaging this as an `Equiv` gives a canonical encode
     (`adjMatrixEquivBitVec`) and decode (`.symm`) that are inverse by
-    construction — the codec behind graph-language encodings. -/
+    construction. It is a candidate codec for graph languages; no module of
+    the library uses it yet (the PCP clique construction has its own
+    encoding). -/
 def adjMatrixEquivBitVec (n : ℕ) :
     (Fin n → Fin n → Bool) ≃ (Fin (n * n) → Bool) :=
   (Equiv.curry (Fin n) (Fin n) Bool).symm.trans
@@ -138,7 +141,7 @@ def blockAppend (a b : ℕ) (u : Fin a → Bool) (v : Fin b → Bool) : Fin (a +
     individual counts. Because `blockEquiv` is a bijection onto the product sample
     space, the joint event factors — the exact-count statement of independence across
     blocks, and the combinatorial heart of relating a repeated machine's acceptance to
-    its single-run acceptance (amplification, roadmap N2/M2). -/
+    its single-run acceptance (amplification). -/
 theorem card_filter_block {a b : ℕ}
     (P : (Fin a → Bool) → Prop) (Q : (Fin b → Bool) → Prop)
     [DecidablePred P] [DecidablePred Q] :

@@ -33,27 +33,24 @@ unconditional forms `NP.mem_NP_of_FNP` and `NP.witnessLang_mem_NP`. It lives
 downstream because the guess-and-verify machine is built from modules that
 import this one.
 
-## Proof strategy for `WitnessNTMConstruction`
+## How `WitnessNTMConstruction` is proved
 
-Given:
-- a DTM `M` deciding `pairLang R` in polynomial time, and
-- a polynomial `p` bounding witness length (`PolyBalanced R`),
+The proof (`mem_NP_of_poly_witness`, in
+`Complexitylib.Classes.PCP.Internal.GuessVerifyGeneric`) has two steps.
 
-construct an NTM `N` that, on input `x`:
+1. **Linear witnesses** (`mem_NP_of_linear_witness`). The guess-and-verify NTM
+   `SAT.satGuessVerifyNTM M` guesses a string `y` of length at most `|x| + 1`,
+   forms `pair x y`, and runs the deterministic verifier `M` on it. It decides
+   every language whose members are exactly the inputs with such a short
+   certificate accepted by `M`, in time polynomial when `M`'s is.
+2. **Polynomial witnesses by padding.** For a witness bound `p`, the input `x`
+   is padded to `pair x r` with a ruler `r` long enough that the bound becomes
+   linear in the padded length (`padWith`). The language is the preimage of
+   the padded language `padLang p L₀` under this polynomial-time map, and `NP`
+   is closed under such preimages (`mem_NP_preimage`).
 
-1. **Guess phase.** Reads `p.eval |x|` nondeterministic bits and writes them
-   onto a dedicated work tape as a guessed witness `y`.
-2. **Pair construction.** Copies `pair(x, y)` onto another work tape using
-   `x` from the input tape and the guessed `y` from the witness tape.
-3. **Verification.** Simulates `M` on the constructed pair (reading from
-   the work tape that holds `pair(x, y)` instead of the input tape).
-
-The total running time is polynomial: `O(p(n) + n + T(2n + p(n) + 2))`
-where `T(n) = n^c` bounds `M`.
-
-The proved construction (`mem_NP_of_poly_witness`) follows this outline for
-witnesses of length at most `|x| + 1`, and reduces the general polynomial
-bound to that case by padding the input.
+The result is stated only as membership in `NP`; no explicit running-time
+bound for the composed machine is recorded.
 -/
 
 
@@ -84,9 +81,10 @@ def witnessLang (R : List Bool → List Bool → Prop) : Language :=
     bounding witness length, there exists an NTM deciding
     `witnessLang R = {x | ∃ y, R x y}` in polynomial time.
 
-    The construction is the standard Arora-Barak guess-and-verify:
-    nondeterministically write a witness of length `≤ p(|x|)` onto a work
-    tape, build `pair(x, y)` on another work tape, then simulate `M`.
+    The textbook (Arora–Barak) machine nondeterministically writes a witness
+    of length `≤ p(|x|)`, builds `pair(x, y)`, and simulates `M`. The library's
+    proof instead guesses witnesses of length at most `|x| + 1` and reaches a
+    general polynomial bound by padding the input (see the module docstring).
 
     This is isolated as a named proposition so that this file's results can
     be stated before the machine is available in the import graph. It is

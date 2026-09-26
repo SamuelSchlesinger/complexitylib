@@ -13,8 +13,8 @@ public import Mathlib.Tactic.NormNum.Pow
 
 The one-variable **multilinear extension** of a Boolean-indexed value into a
 commutative ring, `mle₁ f x = f false · (1 - x) + f true · x`, and its defining
-interpolation identities at the Boolean points `0` and `1` (roadmap track L1,
-toward arithmetization and the sum-check protocol). This is the atomic building
+interpolation identities at the Boolean points `0` and `1` (toward
+arithmetization and the sum-check protocol). This is the atomic building
 block of the multilinear extension of a full Boolean function, and the reason
 arithmetized formulas agree with their Boolean originals on the cube.
 

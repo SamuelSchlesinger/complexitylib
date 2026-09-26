@@ -28,17 +28,28 @@ noncomputable def circuit (valid : Fin slots → Bool) (requests : Nat) :=
         if valid slot then (.input (finProdFinEquiv (request, slot)) : DeMorgan.Wiring (requests * slots))
         else .constant false)))
 
-/-- The exact gate count of `circuit`. -/
+/-- The exact gate count of `circuit`: each request's fold has one constant gate
+for every invalid slot, which is wired to `false`, plus the
+`UhligCircuit.xorInputGateCount slots` gates of the XOR fold; valid slots are
+free input wires. -/
 @[simp] theorem circuit_size
     (valid : Fin slots → Bool) (requests : Nat) :
     (circuit valid requests).size =
-      ∑ output : Fin requests,
-        (∑ output_1 : Fin slots,
-            (if valid output_1 = true then
-                  DeMorgan.Wiring.input (finProdFinEquiv (output, output_1))
-                else DeMorgan.Wiring.constant false).expression.gateCount +
-          UhligCircuit.xorInputGateCount slots) := by
-  simp [circuit]
+      requests * ((Finset.univ.filter fun slot => valid slot = false).card +
+        UhligCircuit.xorInputGateCount slots) := by
+  have constants : ∀ request : Fin requests,
+      (∑ slot : Fin slots, (if valid slot then
+          (.input (finProdFinEquiv (request, slot)) : DeMorgan.Wiring (requests * slots))
+        else .constant false).expression.gateCount) =
+        (Finset.univ.filter fun slot => valid slot = false).card := by
+    intro request
+    rw [Finset.card_filter]
+    refine Finset.sum_congr rfl fun slot _ => ?_
+    cases valid slot <;> rfl
+  rw [circuit, Circuit.size_parallelFin]
+  simp only [Circuit.size_comp, DeMorgan.Wiring.circuit_size,
+    UhligCircuit.xorInputCircuit_size, constants, Finset.sum_const, Finset.card_univ,
+    Fintype.card_fin, smul_eq_mul]
 
 /-- Each output is the Boolean sum over that request's valid point slots. -/
 theorem circuit_eval (valid : Fin slots → Bool)

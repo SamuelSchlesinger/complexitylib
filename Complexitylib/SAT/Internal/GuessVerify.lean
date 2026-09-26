@@ -4479,8 +4479,10 @@ theorem satGuessVerifyTime_bigO_of_bigO {f : ℕ → ℕ} {c : ℕ}
 
 /-- Direct SAT route: if the deterministic verifier for `Witness` is in `P`,
     then the completed SAT-specialized guess-and-verify machine puts `language`
-    in `NP`. This bypasses the still-open generic witness-language interface
-    and packages the concrete construction proved in this file. -/
+    in `NP`. It packages the concrete construction proved in this file
+    directly, without going through the generic witness-language interface
+    `NP.WitnessNTMConstruction` (itself proved downstream as
+    `NP.witnessNTMConstruction`, from the same machine). -/
 theorem language_mem_NP_of_verifierP_direct (h : pairLang Witness ∈ P) :
     language ∈ NP := by
   obtain ⟨c, k, M, f, hM, hfO⟩ := Set.mem_iUnion.mp h

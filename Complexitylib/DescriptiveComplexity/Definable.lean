@@ -18,7 +18,7 @@ every FO-definable query is order-independent (`FODefinable.orderIndependent`, a
 packaging of Immerman Proposition 1.16). Since FO has `¬`, `∧`, `∨`, the
 FO-definable queries are closed under complement, intersection, and union.
 
-This is the template for the logic/complexity correspondences on track L6: a class
+This is the template for the planned logic/complexity correspondences: a class
 of logics defines a class of queries, and expressibility questions become lower
 bounds.
 

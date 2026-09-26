@@ -58,7 +58,10 @@ def eval : Formula n → (Fin n → Bool) → Bool
 @[simp] theorem eval_gate (op : Op) (left right : Formula n) (input : Fin n → Bool) :
     (gate op left right).eval input = op (left.eval input) (right.eval input) := rfl
 
-/-- The number of variable leaves: the leaf size of the formula. -/
+/-- The number of variable leaves: the leaf size of the formula. Constant leaves
+count `0`. This differs from `Algebraic.KW.Formula.leaves`, which also counts
+constant leaves (so there every formula has leaf size at least `1`); the
+Nechiporuk and cutwidth bounds use this convention. -/
 def leaves : Formula n → Nat
   | var _ => 1
   | const _ => 0

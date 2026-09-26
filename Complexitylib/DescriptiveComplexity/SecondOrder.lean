@@ -13,5 +13,5 @@ public import Complexitylib.DescriptiveComplexity.SecondOrder.Isomorphism
 # Second-order logic over finite structures
 
 Aggregates the second-order syntax, semantics, and isomorphism-invariance
-modules, the foundations for Fagin's theorem `NP = ∃SO` on roadmap track L6.
+modules, the foundations for Fagin's theorem `NP = ∃SO` (not yet formalized).
 -/

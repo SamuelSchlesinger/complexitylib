@@ -29,7 +29,7 @@ step interleaved to keep the intermediate polynomials small.
 
 ## TODO
 
-- Prove it. This is the deepest single theorem on the roadmap's long-term track.
+- Prove it.
 -/
 
 @[expose] public section

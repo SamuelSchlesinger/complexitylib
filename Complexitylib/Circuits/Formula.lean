@@ -14,7 +14,7 @@ public import Mathlib.Data.Finset.Lattice.Basic
 # Boolean formulas and formula size
 
 Boolean formulas as *trees* over `∧`, `∨`, `¬`, variables, and constants, with a
-tree `size` (total node count) and `leaves` count (roadmap track L4). Formula
+tree `size` (total node count) and `leaves` count. Formula
 size is deliberately kept **separate** from DAG circuit size: a formula counts
 every occurrence of a subformula, whereas a DAG-shaped `Circuit` may share a
 subcircuit among several parents. Consequently formula size can be

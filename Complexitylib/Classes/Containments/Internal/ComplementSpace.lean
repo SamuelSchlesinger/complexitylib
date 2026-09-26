@@ -39,8 +39,8 @@ The head-bounce lemmas it uses are shared with the loop combinator and live in
 - `TM.complement_head_bound` — after the simulation, no head passes `max head 1`
 - `TM.complementTM_withinDecisionSpace` — every reachable configuration stays in the window
 - `TM.complementTM_decidesInSpace` — the complement is decided in space `S + 1`
-- `DSPACE_compl` — a space class with room for one more cell is closed under complement
-- `PSPACE_compl` — **`PSPACE` is closed under complement**
+- `DSPACE_compl_internal` — a space class with room for one more cell is closed under complement
+- `PSPACE_compl_internal` — **`PSPACE` is closed under complement** (surface: `PSPACE_compl`)
 -/
 
 @[expose] public section
@@ -250,7 +250,7 @@ end TM
 
 /-- **A space class with room for one more cell is closed under complement.** The one extra cell
 is what the rewind to the verdict cell costs. -/
-theorem DSPACE_compl {L : Language} {S : ℕ → ℕ} (hone : (fun _ => 1) =O S)
+theorem DSPACE_compl_internal {L : Language} {S : ℕ → ℕ} (hone : (fun _ => 1) =O S)
     (h : L ∈ DSPACE S) : Lᶜ ∈ DSPACE S := by
   obtain ⟨m, tm, f, hdec, hf⟩ := h
   exact ⟨m, tm.complementTM, fun j => f j + 1,
@@ -259,8 +259,8 @@ theorem DSPACE_compl {L : Language} {S : ℕ → ℕ} (hone : (fun _ => 1) =O S)
 /-- **`PSPACE` is closed under complement.** The same machine runs, then rewinds its output head
 to the verdict cell and flips the bit; the rewind only moves heads leftward or off the left
 marker, so it costs one extra cell of space and no more. -/
-theorem PSPACE_compl {L : Language} (h : L ∈ PSPACE) : Lᶜ ∈ PSPACE := by
+theorem PSPACE_compl_internal {L : Language} (h : L ∈ PSPACE) : Lᶜ ∈ PSPACE := by
   obtain ⟨k, hk⟩ := Set.mem_iUnion.mp h
-  exact Set.mem_iUnion.mpr ⟨k, DSPACE_compl (BigO.const_le_pow 1 k) hk⟩
+  exact Set.mem_iUnion.mpr ⟨k, DSPACE_compl_internal (BigO.const_le_pow 1 k) hk⟩
 
 end Complexity

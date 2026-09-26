@@ -14,7 +14,7 @@ public import Std.Tactic.BVDecide.Normalize.Prop
 
 A **restriction** is a partial assignment that fixes some variables to constants
 and leaves the rest free — the basic operation behind random-restriction and
-switching-lemma arguments (roadmap track L4). This module defines restrictions,
+switching-lemma arguments. This module defines restrictions,
 their composition, and proves that evaluating a *restricted* Boolean formula
 agrees with evaluating the original under the restriction applied to the
 assignment (evaluation commutes with restriction).

@@ -17,17 +17,26 @@ To connect descriptive complexity to the machine model, a finite structure must 
 presented as an input to a Turing machine — a bit string. The standard encoding
 (for an *ordered* universe `Fin card`) lists, for each relation, its **truth
 table**: the values over all tuples in the canonical order. This module builds the
-relational part of that encoding and computes its length; it is step 5 (structure
-→ bit-string encoding) of the Fagin decomposition on roadmap track L6.
+full encoding — the cardinality in unary, the relational truth tables, and one
+one-hot block per distinguished constant — and computes its length; it is step 5
+(structure → bit-string encoding) of the Fagin decomposition.
 
 ## Main definitions and results
 
+- `DescriptiveComplexity.encodeStruct` — the full computable encoding of a decidable
+  structure: `card` in unary (terminated by `false`), the relational truth tables,
+  then the constant blocks.
+- `DescriptiveComplexity.encodeStruct_length`, `encodeStruct_card` — its length, and
+  recovery of the cardinality from the unary prefix.
+- `DescriptiveComplexity.encodeStruct_of_isRelational` — for constant-free
+  vocabularies the encoding is the unary cardinality followed by the relations.
 - `DescriptiveComplexity.encodeRel`, `encodeRel_length` — a relation's truth table
   (length `card ^ arity`).
 - `DescriptiveComplexity.encodeRels`, `encodeRels_length` — the relational part of
   a structure's encoding, and its total length.
-- `DescriptiveComplexity.encodeConstC`, `encodeConstsC` — computable one-hot
-  encodings of the distinguished constants.
+- `DescriptiveComplexity.encodeConstC`, `encodeConstsC`, `encodeConstC_injective` —
+  computable one-hot encodings of the distinguished constants; a block determines
+  its constant.
 - `DescriptiveComplexity.allTuples`, `encodeRelC` — a **computable** tuple
   enumeration and a computable truth-table encoding (needed for the machine-side
   Fagin bridge).
