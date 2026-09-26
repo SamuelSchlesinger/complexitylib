@@ -17,6 +17,8 @@ public import Complexitylib.Classes.P.Pairing
 public import Complexitylib.Classes.P.Iterate
 public import Complexitylib.Classes.P.Range
 public import Complexitylib.Classes.P.Unary
+public import Complexitylib.Classes.P.NatCodes
+public import Complexitylib.Classes.P.DataEncode
 import Complexitylib.Models.TuringMachine.Subroutines.CopyOutput
 
 /-!
@@ -53,6 +55,11 @@ This file aggregates the definitions and theorems for P, FP, and PSPACE.
   (written in unary) and polynomial-time tests: arithmetic, comparisons,
   connectives, case distinction, bounded loops, division, capped powers and
   logarithms
+- `toBitsLE_mem_FP`, `bits_mem_FP`, `UnaryFn.fromBitsLE_min` — writing a
+  polynomial-time number in binary, and reading a binary numeral back below a
+  polynomial-time cap
+- `encodeList_mem_FP`, `natEncode_mem_FP` — writing the `DataEncode` encoding of
+  a bit list or of a polynomial-time number
 -/
 
 

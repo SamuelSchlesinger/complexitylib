@@ -630,6 +630,51 @@ these facts are stated in the chapter on encodings
   \texttt{Classes/P/DecisionFn.lean}.
 \end{proof}
 
+\begin{lemma}[Binary codes of numbers in $\cc{FP}$]
+  \label{lem:polytime-binary-codes}
+  \lean{Complexity.toBitsLE_mem_FP, Complexity.bits_mem_FP,
+    Complexity.UnaryFn.fromBitsLE_min, Complexity.UnaryFn.fromBitsLE_of_le,
+    Complexity.encodeList_mem_FP, Complexity.natEncode_mem_FP}
+  \leanok
+  \uses{def:polytime-unary-fn, def:encodings-binary-nat, def:encodings-data}
+  Let $w, n, c$ be polynomial-time numbers in the sense of
+  Definition~\ref{def:polytime-unary-fn}, let $s \in \cc{FP}$, and for a
+  string $x$ let $v(x)$ be its value as a binary numeral, least significant
+  bit first.
+  \begin{enumerate}
+    \item The low $w(z)$ bits of $n(z)$, least significant first, and the
+      minimal binary expansion $\mathrm{bin}(n(z))$ are in $\cc{FP}$ as
+      functions of $z$.
+    \item $\min(v(s(z)), c(z))$ is a polynomial-time number; so is
+      $v(s(z))$ itself when $v(s(z)) \le c(z)$ for all $z$.
+    \item The serialization of $s(z)$ as a list of bits, and the
+      serialization of the number $n(z)$, are in $\cc{FP}$ as functions of
+      $z$.
+  \end{enumerate}
+\end{lemma}
+\begin{proof}
+  \leanok
+  \uses{lem:polytime-unary-closure, lem:polytime-fp-combinators}
+  Bit $i$ of $n$ is $\lfloor n / 2^i \rfloor \bmod 2$, and capping the power
+  at $n + 1$ does not change the quotient, so each bit is a polynomial-time
+  test of $\langle z, 1^i \rangle$ by Lemma~\ref{lem:polytime-unary-closure};
+  the expansion of width $w(z)$ is the bitwise description of
+  Lemma~\ref{lem:polytime-fp-combinators}, and $\mathrm{bin}(n)$ is the
+  expansion of width the binary length of $n$. Reading a numeral back is a
+  fold over its bits, from the last to the first, that doubles the value,
+  adds the bit and caps the result at $c(z)$. The cap keeps the states
+  polynomially short and does not change the capped result, since doubling
+  and adding preserve being at least $c(z)$. The serialization of a bit list
+  puts $01$ or $0011$ for each bit between a leading $0$ and a trailing $1$,
+  which is a fold whose state is at most four times as long as the list; a
+  number is serialized as the list $\mathrm{bin}(n)$, so no width has to be
+  supplied.
+
+  In Lean, in \texttt{Classes/P/NatCodes.lean} and
+  \texttt{Classes/P/DataEncode.lean}; the folds are instances of
+  \texttt{Complexity.recFold\_mem\_FP\_of\_bound}.
+\end{proof}
+
 \begin{lemma}[Streaming folds in $\cc{FP}$]
   \label{lem:polytime-fp-streaming}
   \uses{def:FP}

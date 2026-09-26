@@ -5,6 +5,7 @@ Authors: Bolton Bailey
 -/
 module
 public import Complexitylib.Classes.PH
+public import Complexitylib.Mathlib.NatBits
 public import Mathlib.Data.Nat.Bits
 
 /-!
@@ -30,6 +31,8 @@ Nothing here is about machines: it is the arithmetic that makes an enumeration f
   bitstrings and length-plus-value pairs
 - `exists_bounded_iff`, `exists_bounded_iff_le` — the bounded existential over strings is one
   over two numbers, in either bit order
+- `binValLE_eq_fromBitsLE`, `bitsOfLenLE_eq_toBitsLE` — the little-endian forms are
+  `Nat.fromBitsLE` and `Nat.toBitsLE`
 - `choicesOfNat`, `natOfChoices` — choice sequences as counter values, for the path-counting
   machine
 - `bitsOfLenLE_getElem`, `choicesOfNat_apply` — each bit of the enumeration is a bit of the
@@ -201,6 +204,25 @@ theorem exists_bounded_iff_le (m : ℕ) (P : List Bool → Prop) :
     exact ⟨w.length, hlen, binValLE w, binValLE_lt w, by rwa [bitsOfLenLE_binValLE]⟩
   · rintro ⟨ℓ, hℓ, v, -, hP⟩
     exact ⟨bitsOfLenLE ℓ v, by simpa using hℓ, hP⟩
+
+/-- **`binValLE` is `Nat.fromBitsLE`**, the little-endian decoder of
+`Complexitylib.Mathlib.NatBits`. -/
+theorem binValLE_eq_fromBitsLE : ∀ w : List Bool, binValLE w = Nat.fromBitsLE w
+  | [] => rfl
+  | b :: w => by rw [binValLE, Nat.fromBitsLE_cons, binValLE_eq_fromBitsLE w]
+
+/-- Reading back a string of length `ℓ` gives the value modulo `2 ^ ℓ`. -/
+theorem binValLE_bitsOfLenLE_mod : ∀ ℓ v : ℕ, binValLE (bitsOfLenLE ℓ v) = v % 2 ^ ℓ
+  | 0, v => by simp [bitsOfLenLE, binValLE, Nat.mod_one]
+  | ℓ + 1, v => by
+    rw [bitsOfLenLE, binValLE, binValLE_bitsOfLenLE_mod ℓ, pow_succ', Nat.mod_mul]
+    rcases Nat.mod_two_eq_zero_or_one v with h | h <;> simp [h]
+
+/-- **`bitsOfLenLE` is `Nat.toBitsLE`**, the little-endian fixed-width encoder of
+`Complexitylib.Mathlib.NatBits`. -/
+theorem bitsOfLenLE_eq_toBitsLE (ℓ v : ℕ) : bitsOfLenLE ℓ v = Nat.toBitsLE ℓ v :=
+  Nat.fromBitsLE_inj_of_length_eq (by simp) (by
+    rw [← binValLE_eq_fromBitsLE, binValLE_bitsOfLenLE_mod, Nat.fromBitsLE_toBitsLE_mod])
 
 
 /-! ## Choice sequences as counter values
