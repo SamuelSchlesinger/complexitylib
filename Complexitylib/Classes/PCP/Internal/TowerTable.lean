@@ -45,9 +45,6 @@ theorem mul_add_div_of_lt {a b c : ℕ} (hc : 0 < c) (h : b < c) : (a * c + b) /
   rw [show a * c + b = b + c * a by ring, Nat.add_mul_div_left _ _ hc,
     Nat.div_eq_of_lt h, Nat.zero_add]
 
-theorem mul_add_mod_of_lt {a b c : ℕ} (h : b < c) : (a * c + b) % c = b := by
-  rw [show a * c + b = b + c * a by ring, Nat.add_mul_mod_self_left, Nat.mod_eq_of_lt h]
-
 namespace FinBase
 
 variable (F : FinBase)
@@ -227,7 +224,7 @@ theorem stepRec_eq {k j : ℕ} (hj : j < F.size (k + 1) * F.deg ^ 2) :
     have := (F.rotVal_lt k hult hs0).2
     rwa [hq0] at this
   rw [F.tableFst_table hidx0, F.tableSnd_table hidx0,
-    mul_add_div_of_lt hd2 hs0, mul_add_mod_of_lt hs0, hq0]
+    mul_add_div_of_lt hd2 hs0, Nat.mul_add_mod_of_lt hs0, hq0]
   simp only [length_mulC_append]
   -- the second lookup
   have hidx1 : w0 * F.deg ^ 2 + p1 % F.deg ^ 2 < F.size k * F.deg ^ 2 := by
@@ -239,7 +236,7 @@ theorem stepRec_eq {k j : ℕ} (hj : j < F.size (k + 1) * F.deg ^ 2) :
     have := (F.rotVal_lt k hw0 hs1).2
     rwa [hq1] at this
   rw [F.tableFst_table hidx1, F.tableSnd_table hidx1,
-    mul_add_div_of_lt hd2 hs1, mul_add_mod_of_lt hs1, hq1]
+    mul_add_div_of_lt hd2 hs1, Nat.mul_add_mod_of_lt hs1, hq1]
   simp only [marks_append_mulC]
   -- the base turn back
   have hblt : j % F.deg ^ 2 % F.deg < F.deg := Nat.mod_lt _ hd1

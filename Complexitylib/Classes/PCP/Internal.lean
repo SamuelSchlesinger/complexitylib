@@ -77,7 +77,6 @@ public import Complexitylib.Classes.PCP.Internal.KilledCSP
 public import Complexitylib.Classes.PCP.Internal.KilledFirstMoment
 public import Complexitylib.Classes.PCP.Internal.KilledPlurality
 public import Complexitylib.Classes.PCP.Internal.KilledWalk
-public import Complexitylib.Classes.PCP.Internal.LengthMod
 public import Complexitylib.Classes.PCP.Internal.ListEncode
 public import Complexitylib.Classes.PCP.Internal.LocalTest
 public import Complexitylib.Classes.PCP.Internal.Margulis

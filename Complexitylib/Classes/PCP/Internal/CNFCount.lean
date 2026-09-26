@@ -136,13 +136,13 @@ theorem ccStep_one (c s : List Bool) :
       ∧ X.length ≤ c.length + 1 ∧ Y.length ≤ s.length := by
   rw [ccStep, pairFst_pair, pairSnd_pair]
   refine ⟨_, _, rfl, ?_, ?_⟩
-  · refine le_trans (length_selectHead_le _ _ _) ?_
+  · refine le_trans (Cobham.selectHead_length_le _ _ _) ?_
     simp only [max_le_iff]
     refine ⟨by omega, ?_⟩
-    refine le_trans (length_selectHead_le _ _ _) ?_
+    refine le_trans (Cobham.selectHead_length_le _ _ _) ?_
     simp only [max_le_iff]
     refine ⟨?_, by omega⟩
-    refine le_trans (length_selectHead_le _ _ _) ?_
+    refine le_trans (Cobham.selectHead_length_le _ _ _) ?_
     simp
   · rw [dropOne, dropOne, List.length_drop, List.length_drop]
     omega

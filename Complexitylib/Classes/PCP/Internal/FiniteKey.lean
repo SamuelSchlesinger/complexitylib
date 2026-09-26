@@ -28,8 +28,6 @@ the key alone is a table lookup too, whatever wrote the table.
 
 - `Complexity.mem_P_of_bounded_key` — a bounded-key predicate is in `P`
 - `Complexity.mem_FP_of_bounded_key` — a bounded-key value is in `FP`
-- `Complexity.mem_FP_of_key_congr` — and so is a value that merely *agrees*
-  wherever the key does
 -/
 
 @[expose] public section
@@ -89,18 +87,5 @@ theorem mem_FP_of_bounded_key {key : List Bool → List Bool} (hkey : key ∈ FP
   have hcomp := mem_FP_comp hkey hite
   refine mem_FP_of_eq hcomp fun z => ?_
   rw [Function.comp_apply, ite_eq_left (mem_keySet.mpr ⟨hL z, trivial⟩)]
-
-/-- **A value that depends on its input only through a bounded key is in `FP`.**
-No rule computing the value from the key need be exhibited: agreeing wherever
-the key agrees is enough. -/
-theorem mem_FP_of_key_congr {key : List Bool → List Bool} (hkey : key ∈ FP)
-    {L : ℕ} (hL : ∀ z, (key z).length ≤ L) {val : List Bool → List Bool}
-    (hcongr : ∀ z z', key z = key z' → val z = val z') : val ∈ FP := by
-  classical
-  refine mem_FP_of_eq (mem_FP_of_bounded_key hkey hL
-    (fun s => if h : ∃ z, key z = s then val (Classical.choose h) else [])) fun z => ?_
-  have hex : ∃ w, key w = key z := ⟨z, rfl⟩
-  rw [dite_eq_left hex]
-  exact hcongr _ z (Classical.choose_spec hex)
 
 end Complexity

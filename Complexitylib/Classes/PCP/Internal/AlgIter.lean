@@ -10,9 +10,10 @@ public import Complexitylib.Classes.PCP.Internal.AlgEdge
 # Iterating a round
 
 Amplification runs a round logarithmically many times. On the algorithm's side
-that is an iteration of one `FP` function; on the abstract side it is
-`Amplifier.iter`. This module says the two agree, for any round function that
-computes its transformation.
+that is an iteration of one `FP` function; on the abstract side it is an
+iterate `T^[k]` of the round's transformation (`Amplifier.iter` unfolds to
+one). This module says the two agree, for any round function that computes its
+transformation.
 
 ## Main results
 
@@ -38,13 +39,6 @@ theorem iterate_encGraph {f : List Bool → List Bool}
   | succ k ih =>
       intro G
       rw [Function.iterate_succ_apply, Function.iterate_succ_apply, hstep, ih]
-
-/-- **And it writes the amplifier's iterate.** -/
-theorem iterate_encGraph_amplifier [Nonempty α] {f : List Bool → List Bool}
-    (A : Amplifier α)
-    (hstep : ∀ G : ConstraintGraph α, f (encGraph G) = encGraph (A.transform G)) :
-    ∀ (k : ℕ) (G : ConstraintGraph α), f^[k] (encGraph G) = encGraph (A.iter k G) :=
-  iterate_encGraph hstep
 
 /-- **The iteration is an `FP` function.** The bound the iteration rule wants is
 supplied on the *graphs*, where the round's size bounds live, rather than on

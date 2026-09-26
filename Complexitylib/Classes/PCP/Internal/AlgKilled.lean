@@ -199,12 +199,6 @@ theorem walkFn_eq (hd : 1 < F.deg) (G : ConstraintGraph α) (v s : ℕ)
 
 /-! ### Where the walk stops -/
 
-theorem findIdx_map {β γ : Type} (f : β → γ) (p : γ → Bool) (l : List β) :
-    (l.map f).findIdx p = l.findIdx (fun x => p (f x)) := by
-  induction l with
-  | nil => rfl
-  | cons a t ih => rw [List.map_cons, List.findIdx_cons, List.findIdx_cons, ih]
-
 /-- The first zero digit at or after `i`, among the next `n` digits. -/
 def stopFromNum (q c : ℕ) : ℕ → ℕ → ℕ
   | i, 0 => i
@@ -219,7 +213,8 @@ theorem stopFromNum_eq_findIdx (q c : ℕ) : ∀ (n i : ℕ), stopFromNum q c i 
       rw [stopFromNum, List.finRange_zero, List.findIdx_nil, Nat.add_zero]
   | succ n ih =>
       intro i
-      rw [stopFromNum, List.finRange_succ, List.findIdx_cons, findIdx_map]
+      rw [stopFromNum, List.finRange_succ, List.findIdx_cons, List.findIdx_map,
+        Function.comp_def]
       by_cases h : (c / q ^ i) % q = 0
       · rw [ite_eq_left h]
         simp [h]

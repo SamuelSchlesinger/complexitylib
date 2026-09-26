@@ -5,7 +5,7 @@ Authors: Bolton Bailey
 -/
 module
 public import Complexitylib.Classes.PCP.Defs
-public import Complexitylib.Classes.PCP.Internal.LengthMod
+public import Complexitylib.Languages.LengthDivBy
 
 /-!
 # The randomness bound has to be constructible
@@ -48,8 +48,8 @@ def coinLenVerifier : PCPVerifier where
   positions := fun _ _ => []
   positions_mem :=
     ⟨fun _ => DataEncode.bitstringEncode ([] : List ℕ), constFn_mem_FP _, fun _ _ => rfl⟩
-  verdict := lenMod4
-  verdict_mem := lenMod4_mem_P
+  verdict := Language.lengthDivBy 4
+  verdict_mem := lengthDivBy_mem_P 4
 
 @[simp] theorem positions_coinLenVerifier (x r : List Bool) :
     coinLenVerifier.positions x r = [] := rfl
@@ -67,13 +67,9 @@ theorem length_transcript (x ρ : List Bool) :
 theorem accepts_coinLenVerifier_iff (x π ρ : List Bool) :
     coinLenVerifier.Accepts x π ρ ↔ (2 * ρ.length + 2) % 4 = 0 := by
   rw [PCPVerifier.Accepts, positions_coinLenVerifier]
-  show pair (pair x ρ) [] ∈ lenMod4 ↔ _
-  rw [lenMod4]
-  show (pair (pair x ρ) []).length % 4 = 0 ↔ _
-  rw [length_transcript]
-  constructor
-  · intro h; omega
-  · intro h; omega
+  show pair (pair x ρ) [] ∈ Language.lengthDivBy 4 ↔ _
+  rw [Language.mem_lengthDivBy, length_transcript]
+  omega
 
 theorem accepts_of_length_one {x π ρ : List Bool} (h : ρ.length = 1) :
     coinLenVerifier.Accepts x π ρ := by

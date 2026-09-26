@@ -28,9 +28,6 @@ the width bound for `natEncodeFn`.
 
 namespace Complexity
 
-theorem fstBlock_length_le (z : List Bool) : (pairFst z).length ≤ z.length := by
-  induction z using pairFst.induct <;> simp [pairFst] <;> omega
-
 /-- The encoding of one position, read off a packed argument. -/
 noncomputable def posEntryFn (P : List Bool → List Bool) (w : List Bool) : List Bool :=
   natEncodeFn (pair (P w) (P w))
@@ -72,8 +69,8 @@ theorem positions_mem_of_unary {pos : List Bool → ℕ → ℕ} {cnt : List Boo
       ((listStep E)^[k] (pair (pair [] []) (pairSnd z'))).length
         ≤ p.eval z'.length := by
     intro z' k hk
-    have hx : (pairSnd z').length ≤ z'.length := sndBlock_length_le z'
-    have hf : (pairFst z').length ≤ z'.length := fstBlock_length_le z'
+    have hx : (pairSnd z').length ≤ z'.length := pairSnd_length_le z'
+    have hf : (pairFst z').length ≤ z'.length := pairFst_length_le z'
     have hb : ∀ i < k, (E (pair (pairSnd z') (List.replicate i true))).length
         ≤ pE.eval (3 * z'.length + 2) := by
       intro i hi

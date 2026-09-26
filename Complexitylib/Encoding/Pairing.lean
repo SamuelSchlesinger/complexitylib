@@ -299,6 +299,10 @@ theorem pairSnd_eq_unpair? (z : List Bool) :
   unfold pairSnd
   cases unpair? z <;> rfl
 
+/-- The first component of a pair is no longer than the pair. -/
+theorem pairFst_length_le (z : List Bool) : (pairFst z).length ≤ z.length := by
+  induction z using pairFst.induct <;> simp [pairFst] <;> omega
+
 /-- The second component of a pair is no longer than the pair. -/
 theorem pairSnd_length_le (z : List Bool) : (pairSnd z).length ≤ z.length := by
   rcases hu : unpair? z with _ | ⟨p, q⟩

@@ -178,14 +178,6 @@ theorem chkStep_iterate (vf : List Bool → List Bool) (xu : List Bool) :
 
 /-! ## The packed scan -/
 
-theorem sndBlock_length_le (z : List Bool) : (pairSnd z).length ≤ z.length := by
-  rcases hu : unpair? z with _ | ⟨p, q⟩
-  · rw [show pairSnd z = [] from by rw [pairSnd, hu]]
-    simp
-  · have hz : z = pair p q := unpair?_eq_some_iff.mp hu
-    rw [show pairSnd z = q from by rw [pairSnd, hu], hz, pair_length]
-    omega
-
 /-- The packed scan state: the verifier's fixed arguments, the running flag, and the chain of
 frames still to check. -/
 def chkPack (xu acc S : List Bool) : List Bool := pair xu (pair acc S)
@@ -250,7 +242,7 @@ theorem chkStep_iterate_length (vf : List Bool → List Bool) (xu acc S : List B
         split
         · exact le_rfl
         · split
-          · exact sndBlock_length_le S
+          · exact pairSnd_length_le S
           · simp
       obtain ⟨h1, h2, h3⟩ := ih (selectHead (emptyFlag S) acc
         (andBit acc (chkOneP vf xu (pairFst S))))

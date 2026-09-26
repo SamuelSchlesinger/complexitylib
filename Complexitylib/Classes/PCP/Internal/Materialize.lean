@@ -45,8 +45,8 @@ theorem materialize_mem_FP {E : List Bool → List Bool} (hE : E ∈ FP) : listE
   set Q : Polynomial ℕ := q.comp (3 * Polynomial.X + Polynomial.C 2) with hQ
   refine listEncFn_mem_FP hE
     (4 * Polynomial.X * Q + 3 * Polynomial.X + Polynomial.C 6) fun z k hk => ?_
-  have hfz : (pairFst z).length ≤ z.length := fstBlock_length_le z
-  have hsz : (pairSnd z).length ≤ z.length := sndBlock_length_le z
+  have hfz : (pairFst z).length ≤ z.length := pairFst_length_le z
+  have hsz : (pairSnd z).length ≤ z.length := pairSnd_length_le z
   have hkz : k ≤ z.length := le_trans hk hfz
   have hrec : ∀ i < k, (E (pair (pairSnd z) (List.replicate i true))).length
       ≤ Q.eval z.length := by

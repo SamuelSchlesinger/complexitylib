@@ -19,26 +19,18 @@ and for that one needs a size that is both computable and large enough for every
 input of that length.
 
 Any `FP` function has one: a machine that runs in time `p` writes at most
-`p |x|` bits, so `p` bounds the output length uniformly over inputs of a given
-length, and `Cobham.exists_exact_ruler` writes `p |x|` marks.
+`p |x|` bits (`Cobham.output_length_poly_of_mem_FP`), so `p` bounds the output
+length uniformly over inputs of a given length, and `Cobham.exists_exact_ruler`
+writes `p |x|` marks.
 
 ## Main results
 
-- `Complexity.exists_length_bound` — an `FP` function's output is polynomially
-  long
-- `Complexity.exists_padRuler` — hence a uniform, computable padding size
+- `Complexity.exists_padRuler` — a uniform, computable padding size
 -/
 
 @[expose] public section
 
 namespace Complexity
-
-/-- **An `FP` function's output is polynomially long.** -/
-theorem exists_length_bound {f : List Bool → List Bool} (hf : f ∈ FP) :
-    ∃ p : Polynomial ℕ, ∀ x, (f x).length ≤ p.eval x.length := by
-  rw [mem_FP_iff_computesInTime_polynomial] at hf
-  obtain ⟨_, _, p, hcomp⟩ := hf
-  exact ⟨p, fun x => hcomp.output_length_le x⟩
 
 /-- A formula is no longer than its encoding. -/
 theorem length_le_length_encode (φ : SAT.CNF) : φ.length ≤ φ.encode.length := by
@@ -56,7 +48,7 @@ theorem exists_padRuler {f : List Bool → List Bool} (hf : f ∈ FP) (c : ℕ) 
       ∧ (∀ x, padU x = List.replicate (padU x).length true)
       ∧ (∀ x, (padU x).length = q.eval x.length)
       ∧ ∀ x, c * (f x).length ≤ (padU x).length := by
-  obtain ⟨p, hp⟩ := exists_length_bound hf
+  obtain ⟨p, hp⟩ := Cobham.output_length_poly_of_mem_FP hf
   obtain ⟨R, hR, hRlen⟩ := Cobham.exists_exact_ruler (Polynomial.C c * p)
   refine ⟨fun z => marks (R z), Polynomial.C c * p, marks_mem_FP hR, fun x => ?_, ?_, ?_⟩
   · show marks (R x) = List.replicate (marks (R x)).length true

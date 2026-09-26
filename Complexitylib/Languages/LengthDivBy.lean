@@ -52,6 +52,10 @@ namespace Language
 /-- Strings whose length is divisible by `k`. -/
 def lengthDivBy (k : ℕ) : Language := {x | k ∣ x.length}
 
+/-- Membership in `lengthDivBy k` unfolds to divisibility of the length. -/
+@[simp] theorem mem_lengthDivBy {k : ℕ} {x : List Bool} :
+    x ∈ lengthDivBy k ↔ k ∣ x.length := Iff.rfl
+
 end Language
 
 -- ════════════════════════════════════════════════════════════════════════

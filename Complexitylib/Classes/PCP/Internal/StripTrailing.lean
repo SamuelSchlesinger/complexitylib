@@ -163,6 +163,6 @@ theorem stripFn_mem_FP : stripFn ∈ FP := by
 theorem stripFn_eq (z : List Bool) :
     stripFn z = stripTrailing (pairSnd z) := by
   refine recFoldClamp_stripTrailing _ _ _ ?_
-  exact sndBlock_length_le z
+  exact pairSnd_length_le z
 
 end Complexity

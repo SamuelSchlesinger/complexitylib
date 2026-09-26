@@ -139,7 +139,7 @@ theorem exists_pcp_of_mem_NP {L : Language} (hL : L ∈ NP) :
     rw [← hEeq x] at h2
     rw [hlen x]
     omega
-  obtain ⟨p0, hp0⟩ := exists_length_bound hEfp
+  obtain ⟨p0, hp0⟩ := Cobham.output_length_poly_of_mem_FP hEfp
   have hgap : gapAll algF algHd E padU ∈ FP :=
     gapAll_mem_FP algF algHd E padU hEfp hpadfp hEeq h3 hmark hle p0 q hp0 hq
   have hmodels := gapAlg_models algF algHd E padU hgap hEeq h3 hmark hle

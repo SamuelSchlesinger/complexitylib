@@ -162,8 +162,8 @@ theorem maxFn_mem_FP {f : List Bool → List Bool} (hf : f ∈ FP) : maxFn f ∈
         ≤ (polyRuler q (id w)).length := by
     intro w k hk
     obtain ⟨M, hM, hlen⟩ := maxStep_iterate f (pairSnd w) k
-    have hfw : (pairFst w).length ≤ w.length := fstBlock_length_le w
-    have hzw : (pairSnd w).length ≤ w.length := sndBlock_length_le w
+    have hfw : (pairFst w).length ≤ w.length := pairFst_length_le w
+    have hzw : (pairSnd w).length ≤ w.length := pairSnd_length_le w
     have hMB : M.length ≤ pf.eval (3 * w.length + 2) := by
       rw [hlen]
       refine maxOver_le k fun i hi => ?_

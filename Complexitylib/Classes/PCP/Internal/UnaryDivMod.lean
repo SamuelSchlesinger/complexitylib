@@ -106,15 +106,6 @@ theorem dmStep_iterate {B : List Bool} (hb : 0 < B.length) :
 
 /-! ### Halving -/
 
-theorem length_selectHead_le (s x y : List Bool) :
-    (Cobham.selectHead s x y).length ≤ max x.length y.length := by
-  rw [Cobham.selectHead]
-  split
-  · exact le_max_left _ _
-  · split
-    · exact le_max_right _ _
-    · simp
-
 theorem dmStep_one (q r b : List Bool) :
     ∃ q' r', dmStep (pair (pair q r) b) = pair (pair q' r') b
       ∧ q'.length ≤ q.length + 1 ∧ r'.length ≤ r.length + 1 := by
@@ -125,9 +116,9 @@ theorem dmStep_one (q r b : List Bool) :
   have hb : pairSnd (pair (pair q r) b) = b := pairSnd_pair _ _
   rw [dmStep, hq, hr, hb]
   refine ⟨_, _, rfl, ?_, ?_⟩
-  · refine le_trans (length_selectHead_le _ _ _) ?_
+  · refine le_trans (Cobham.selectHead_length_le _ _ _) ?_
     simp
-  · refine le_trans (length_selectHead_le _ _ _) ?_
+  · refine le_trans (Cobham.selectHead_length_le _ _ _) ?_
     simp
 
 theorem dmStep_shape : ∀ (k : ℕ) (q r b : List Bool),
@@ -193,17 +184,6 @@ theorem modFn_eq {b : List Bool} (hb : 0 < b.length) (s : List Bool) :
 
 /-! ### Dividing by a length read from the input -/
 
-theorem fstBlock_len_le (z : List Bool) : (pairFst z).length ≤ z.length := by
-  induction z using pairFst.induct <;> simp [pairFst] <;> omega
-
-theorem sndBlock_len_le (z : List Bool) : (pairSnd z).length ≤ z.length := by
-  rcases hu : unpair? z with _ | ⟨p, q⟩
-  · rw [show pairSnd z = [] from by rw [pairSnd, hu]]
-    simp
-  · have hz : z = pair p q := unpair?_eq_some_iff.mp hu
-    rw [show pairSnd z = q from by rw [pairSnd, hu], hz, pair_length]
-    omega
-
 /-- The counting run with the divisor read from the argument: `pair b s`. -/
 noncomputable def dmRun2 (z : List Bool) : List Bool :=
   dmStep^[(pairSnd z).length] (pair (pair [] []) (pairFst z))
@@ -226,8 +206,8 @@ theorem dmRun2_mem_FP : dmRun2 ∈ FP := by
         ≤ (polyRuler (Polynomial.C 7 * Polynomial.X + Polynomial.C 6) (id z)).length := by
     intro z k hk
     obtain ⟨q', r', h1, hq, hr⟩ := dmStep_shape k [] [] (pairFst z)
-    have hf : (pairFst z).length ≤ z.length := fstBlock_len_le z
-    have hs : (pairSnd z).length ≤ z.length := sndBlock_len_le z
+    have hf : (pairFst z).length ≤ z.length := pairFst_length_le z
+    have hs : (pairSnd z).length ≤ z.length := pairSnd_length_le z
     rw [h1, pair_length, pair_length, polyRuler_length]
     simp only [Polynomial.eval_add, Polynomial.eval_mul, Polynomial.eval_C,
       Polynomial.eval_X, id, List.length_nil, Nat.zero_add] at *

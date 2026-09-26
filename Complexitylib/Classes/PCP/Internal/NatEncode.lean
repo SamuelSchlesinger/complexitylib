@@ -142,7 +142,7 @@ theorem flatBitsFn_mem_FP : flatBitsFn ∈ FP := by
 theorem flatBitsFn_eq (z : List Bool) :
     flatBitsFn z = (pairSnd z).flatMap boolBits := by
   refine recFoldClamp_flatBits _ _ _ ?_
-  have := sndBlock_length_le z
+  have := pairSnd_length_le z
   omega
 
 /-- **The encoding of a bit list, in polynomial time.** -/

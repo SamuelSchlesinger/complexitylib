@@ -109,18 +109,6 @@ theorem pow_edgeFactor_le (m : ℕ) :
     _ ≤ (2 * m + 1) ^ growthExp F hd :=
         Nat.pow_le_pow_left (two_pow_rulerLen_le m) _
 
-/-- How wide the iteration ever gets. -/
-noncomputable def widthPoly (p₀ q : Polynomial ℕ) : Polynomial ℕ :=
-  2 * (2 * p₀ + 1
-      + Polynomial.C (vertFactor (F.toFamily hd) (qOf F hd))
-        * ((2 * q + 1) ^ growthExp F hd * q)) + 4
-    + (2 * q + 1) ^ growthExp F hd * q
-      * (8 * (2 * p₀ + 1
-            + Polynomial.C (vertFactor (F.toFamily hd) (qOf F hd))
-              * ((2 * q + 1) ^ growthExp F hd * q))
-          + Polynomial.C (4 * Fintype.card (DinurAlpha → DinurAlpha → Bool)) + 10)
-
-
 /-- How wide the iteration ever gets, as a function of the input's length. The
 round's constants are parameters, so that no tactic here ever meets them. -/
 def widthFn (p₀ q : Polynomial ℕ) (v cw d : ℕ) (n : ℕ) : ℕ :=

@@ -229,7 +229,7 @@ theorem famRotFn_eq (hd : 1 < F.deg) (n v i : ℕ) (hn : 0 < n)
           _ ≤ F.size (F.fitLevel hd n) * F.fitD := Nat.mul_le_mul_right _ hsucc
       rw [hT, hidx, F.tableFst_table hbound, F.tableSnd_table hbound,
         show F.deg ^ 2 = F.fitD from rfl,
-        mul_add_div_of_lt hdpos (Nat.mod_lt _ hdpos), mul_add_mod_of_lt (Nat.mod_lt _ hdpos)]
+        mul_add_div_of_lt hdpos (Nat.mod_lt _ hdpos), Nat.mul_add_mod_of_lt (Nat.mod_lt _ hdpos)]
       refine congrArg₂ pair ?_ ?_
       · rw [marks_eq, modFn2_eq (by rw [hrep]; exact hn),
           List.length_replicate, hrep, List.length_replicate]

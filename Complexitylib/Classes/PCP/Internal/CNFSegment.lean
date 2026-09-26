@@ -275,12 +275,12 @@ theorem segStep_one (tgt cnt coll s : List Bool) :
   | b :: t =>
       rw [segStep, hr, emptyFlag_cons, selectHead_cons_false, ht, hc, hl]
       refine ⟨_, _, _, rfl, ?_, ?_, ?_⟩
-      · refine le_trans (length_selectHead_le _ _ _) ?_
+      · refine le_trans (Cobham.selectHead_length_le _ _ _) ?_
         simp
-      · refine le_trans (length_selectHead_le _ _ _) ?_
+      · refine le_trans (Cobham.selectHead_length_le _ _ _) ?_
         simp only [max_le_iff]
         refine ⟨by omega, ?_⟩
-        refine le_trans (length_selectHead_le _ _ _) ?_
+        refine le_trans (Cobham.selectHead_length_le _ _ _) ?_
         simp only [max_le_iff]
         refine ⟨?_, by omega⟩
         rw [List.length_append]
@@ -328,8 +328,8 @@ theorem segAtFn_mem_FP : segAtFn s0 s1 ∈ FP := by
     intro z k hk
     obtain ⟨cnt', coll', s', h1, hc, hl, hss⟩ :=
       segStep_shape s0 s1 k (pairFst z) [] [] (pairSnd z)
-    have hfz : (pairFst z).length ≤ z.length := fstBlock_length_le z
-    have hsz : (pairSnd z).length ≤ z.length := sndBlock_length_le z
+    have hfz : (pairFst z).length ≤ z.length := pairFst_length_le z
+    have hsz : (pairSnd z).length ≤ z.length := pairSnd_length_le z
     rw [h1, pair_length, pair_length, pair_length, polyRuler_length]
     simp only [Polynomial.eval_add, Polynomial.eval_mul, Polynomial.eval_C,
       Polynomial.eval_X, id, List.length_nil, Nat.zero_add] at *
