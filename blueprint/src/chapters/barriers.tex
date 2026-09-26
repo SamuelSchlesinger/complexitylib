@@ -9,30 +9,46 @@ technique relativizes. Natural proofs need Boolean-function properties measured
 on truth tables, largeness as an explicit density, and pseudorandom function
 security with explicit parameters. Formalized so far: deterministic
 Boolean-oracle Turing machines with a dedicated query tape and one-step lookups,
-the conservative embedding of ordinary machines, oracle universality
-interfaces (with no concrete universal oracle machine yet), and the finite
-counting layer of property density and negligible functions. Nondeterministic
-oracle machines, relativized classes, the Baker--Gill--Solovay worlds, natural
-properties and the Razborov--Rudich theorem are planned.
+their acceptance, deciding and output semantics, the conservative embedding of
+ordinary machines, oracle-uniform simulation and universality interfaces (with
+no concrete universal oracle machine yet), the finite counting layer of
+property density, and the definition of negligible functions (without closure
+lemmas). Nondeterministic oracle machines, relativized classes, the
+Baker--Gill--Solovay worlds, natural properties, pseudorandom function
+families and the Razborov--Rudich theorem are planned.
 
 \section{Oracle machines}
 
 \begin{definition}[Deterministic oracle Turing machines]
   \label{def:barriers-oracle-tm}
   \lean{Complexity.BooleanOracle, Complexity.BooleanOracle.Decides,
-    Complexity.Tape.oracleQuery, Complexity.OracleCfg, Complexity.OracleTM,
-    Complexity.OracleTM.step, Complexity.OracleTM.reachesIn}
+    Complexity.Tape.oracleQuery, Complexity.OracleCfg, Complexity.OracleCfg.init,
+    Complexity.OracleLocalTransition, Complexity.OracleTM,
+    Complexity.OracleTM.step, Complexity.OracleTM.stepRel,
+    Complexity.OracleTM.reachesIn}
   \leanok
-  \uses{def:tm, def:language}
-  A Boolean oracle is a function $\{0,1\}^* \to \{0,1\}$; it decides $A$ if it
-  is the characteristic function of $A$. An oracle TM has the input, work and
-  output tapes of an ordinary TM plus a dedicated read-write query tape, and a
-  map sending each query state to a pair of successor states. In a query state
-  the machine looks up the query word, formed by the cells strictly between the
-  left marker and the query head (a cell reads $1$ only if it holds $1$), and
-  enters the yes- or no-successor. The lookup costs exactly one step and
-  changes nothing but the state; in particular the query tape is not erased.
-  All other states apply an ordinary local transition.
+  \uses{def:models-tape, def:models-cfg, def:tm, def:language}
+  A Boolean oracle is a function $O : \{0,1\}^* \to \{0,1\}$; it decides a
+  language $A$ if $O(w) = 1 \iff w \in A$ for every $w$. An oracle TM with $k$
+  work tapes has a finite state type with decidable equality, a start state
+  and a halt state; the input, $k$ work and output tapes of an ordinary TM plus
+  a dedicated read-write query tape; a partial map sending each query state to
+  a pair (yes-successor, no-successor); and a local transition that reads the
+  symbols under all heads (the query head included), writes symbols of
+  $\Gamma_w$ on the query, work and output tapes, and moves every head, moving
+  right every head that reads $\triangleright$. The initial configuration on
+  $x$ is in the start state with $x$ on the input tape and every other tape
+  empty. One step relative to $O$ is defined as follows. The halt state has no
+  successor. In a non-halted query state the machine reads the query word,
+  formed by the cells strictly between the left marker and the query head in
+  left-to-right order (a cell reads $1$ only if it holds $1$; $0$, blank and
+  $\triangleright$ read as $0$), and enters the yes-successor if $O$ answers
+  $1$ on it and the no-successor otherwise. The lookup costs exactly one step
+  and changes nothing but the state; in particular the query tape is not
+  erased, and writing the query costs ordinary local steps. Every other
+  non-halted state applies the local transition. The relation
+  $c \to_O^t c'$ holds when $c'$ is reached from $c$ in exactly $t$ steps
+  relative to $O$.
 \end{definition}
 
 \begin{definition}[Oracle acceptance, deciding and output]
@@ -42,12 +58,38 @@ properties and the Razborov--Rudich theorem are planned.
     Complexity.OracleTM.Halts, Complexity.OracleTM.ProducesInTime,
     Complexity.OracleTM.Produces}
   \leanok
-  \uses{def:barriers-oracle-tm}
-  Relative to an oracle $O$, an oracle TM decides $L$ in time $T$ if on every
-  input $x$ it halts within $T(|x|)$ steps with verdict $1$ if $x \in L$ and $0$
-  otherwise. Acceptance, halting and exact output production are defined with
-  and without a step budget, in the same shape as for ordinary machines.
+  \uses{def:barriers-oracle-tm, def:models-tape, def:language}
+  Fix an oracle $O$ and an oracle TM $M$; all runs are relative to $O$, and
+  every step, local or lookup, counts toward a budget. $M$ accepts $x$ (within
+  $t$ steps) if the run on $x$ reaches the halt state (after at most $t$
+  steps) with output cell $1$ equal to $1$. $M$ decides $L$ in time
+  $T : \mathbb{N} \to \mathbb{N}$ if on every input $x$ it reaches the halt
+  state within $T(|x|)$ steps, with output cell $1$ equal to $1$ if $x \in L$
+  and equal to $0$ if $x \notin L$. $M$ halts on a program $p$ within $t$
+  steps if the run on $p$ reaches the halt state after at most $t$ steps, and
+  produces $y$ on $p$ within $t$ steps if moreover the halted output tape has
+  output $y$. $M$ halts on $p$ (produces $y$ on $p$) if it does so within some
+  finite budget. These have the same shape as the corresponding definitions for
+  ordinary machines.
 \end{definition}
+
+\begin{lemma}[Clock monotonicity for oracle machines]
+  \label{lem:barriers-oracle-clock-mono}
+  \lean{Complexity.OracleTM.HaltsInTime.mono,
+    Complexity.OracleTM.halts_of_haltsInTime,
+    Complexity.OracleTM.ProducesInTime.mono,
+    Complexity.OracleTM.produces_of_producesInTime}
+  \leanok
+  \uses{def:barriers-oracle-decides}
+  For every oracle, halting and producing $y$ within $t$ steps imply the same
+  within any $t' \ge t$ steps, and imply eventual halting and eventual
+  production of $y$, respectively.
+\end{lemma}
+\begin{proof}
+  \leanok
+  The same run witnesses the larger budget, and the eventual notions are
+  defined by existentially quantifying the budget.
+\end{proof}
 
 \begin{lemma}[Oracle execution is deterministic]
   \label{lem:barriers-oracle-deterministic}
@@ -56,33 +98,46 @@ properties and the Razborov--Rudich theorem are planned.
     Complexity.OracleTM.reachesIn_functional,
     Complexity.OracleTM.step_query_true, Complexity.OracleTM.step_query_false,
     Complexity.OracleTM.reachesIn_one_query_true,
-    Complexity.OracleTM.reachesIn_one_query_false}
+    Complexity.OracleTM.reachesIn_one_query_false,
+    Complexity.Tape.length_oracleQuery, Complexity.OracleTM.reachesIn_map}
   \leanok
   \uses{def:barriers-oracle-tm}
-  A step is undefined exactly at the halt state; each configuration has at
-  most one successor and each exact-time run has a unique final configuration.
-  In a non-halted query state, a true answer is one step to the yes-successor
-  and a false answer is one step to the no-successor, with all tapes
-  unchanged.
+  Fix an oracle. A step is undefined exactly at the halt state; each
+  configuration has at most one successor and each exact-time run has a unique
+  final configuration. In a non-halted query state, a true answer is one step
+  to the yes-successor and a false answer is one step to the no-successor,
+  with all tapes unchanged. The query word of a tape whose head is at cell $h$
+  has exactly $h - 1$ bits (none when $h = 0$). A map from oracle
+  configurations to configurations of an ordinary machine that sends every
+  oracle step to an ordinary step sends every exact-time oracle run to an
+  ordinary run with the same number of steps.
 \end{lemma}
 \begin{proof}
   \leanok
-  Unfold the step function.
+  Unfold the step function; the last claim is induction on the run.
 \end{proof}
 
 \begin{definition}[Ordinary machines as oracle machines]
   \label{def:barriers-to-oracle}
   \lean{Complexity.TM.toOracleTM, Complexity.OracleCfg.erase}
   \leanok
-  \uses{def:tm, def:barriers-oracle-tm}
-  Every TM is an oracle TM with no query states whose query tape is inert.
-  Erasing the query tape maps oracle configurations to ordinary ones.
+  \uses{def:tm, def:models-cfg, def:barriers-oracle-tm}
+  Every TM with $k$ work tapes is an oracle TM with $k$ work tapes, the same
+  states, start and halt state, and no query states. Its local transition
+  applies the source transition to the input, work and output tapes and keeps
+  the query tape inert: it writes only blanks there, and moves the query head
+  right when it reads $\triangleright$ and leaves it in place otherwise.
+  Erasing the query tape maps an oracle configuration to the ordinary
+  configuration with the same state and input, work and output tapes.
 \end{definition}
 
 \begin{theorem}[The embedding is conservative for every oracle]
   \label{thm:barriers-to-oracle-conservative}
   \lean{Complexity.TM.toOracleTM_queryTransition,
     Complexity.TM.toOracleTM_step_oracle_independent,
+    Complexity.OracleCfg.erase_init,
+    Complexity.TM.erase_toOracleTM_step,
+    Complexity.TM.exists_toOracleTM_step_of_step_erase,
     Complexity.TM.erase_toOracleTM_reachesIn,
     Complexity.TM.exists_toOracleTM_reachesIn_of_reachesIn_erase,
     Complexity.TM.toOracleTM_decidesInTime_iff,
@@ -90,16 +145,29 @@ properties and the Razborov--Rudich theorem are planned.
   \leanok
   \uses{def:barriers-to-oracle, def:barriers-oracle-decides, def:tm-decides,
     def:produces}
-  The embedded machine has no query states and its steps do not depend on the
-  oracle. Its exact-time runs erase to runs of the source machine with the same
-  number of steps, and every source run lifts. Consequently, for every oracle
-  $O$, the embedded machine decides $L$ in time $T$ relative to $O$ if and only
-  if the source decides $L$ in time $T$, and likewise for bounded output
-  production.
+  Let $M$ be a TM and $M'$ its embedding. $M'$ has no query states and each of
+  its steps is the same for every oracle. Erasing the initial oracle
+  configuration on $x$ gives the ordinary initial configuration on $x$. For
+  every oracle and every oracle configuration $c$, the step of $M'$ from $c$,
+  erased, equals the step of $M$ from the erasure of $c$ (both undefined or
+  both defined and equal), and every step of $M$ from the erasure of $c$ lifts
+  to a step of $M'$ from $c$ whose result erases to it. Hence every exact-time
+  run of $M'$ erases to a run of $M$ with the same number of steps, and every
+  exact-time run of $M$
+  from the erasure of $c$ lifts to a run of $M'$ from $c$ of the same length
+  whose final configuration erases to the final configuration of $M$.
+  Consequently, for every oracle $O$, language $L$ and bound
+  $T : \mathbb{N} \to \mathbb{N}$, $M'$ decides $L$ in time $T$ relative to $O$
+  if and only if $M$ decides $L$ in time $T$; and for every program $p$, output
+  $y$ and budget $t$, $M'$ produces $y$ on $p$ within $t$ steps relative to $O$
+  if and only if $M$ does.
 \end{theorem}
 \begin{proof}
   \leanok
-  Step-by-step correspondence under erasure, in both directions.
+  Step-by-step correspondence under erasure, in both directions: erase an
+  oracle run to get the source run, and lift a source run from the erased
+  initial configuration, reading the verdict or output off the erased final
+  configuration.
 \end{proof}
 
 \begin{definition}[Oracle universality]
@@ -109,14 +177,27 @@ properties and the Razborov--Rudich theorem are planned.
     Complexity.OracleTM.IsEfficientlyUniversalFor,
     Complexity.OracleTM.IsEfficientlyUniversal}
   \leanok
-  \uses{def:barriers-oracle-decides, def:computable, def:universal}
-  An oracle machine $U$ simulates $M$ under a compiler $c$ if, for every oracle
-  and program, $U$ halts on $c(p)$ exactly when $M$ halts on $p$ and produces
-  the same outputs; the timed version transfers bounded production under an
-  explicit clock. $U$ is universal if every oracle machine has a computable
-  compiler, chosen independently of the oracle; it is efficiently universal if
-  the compiler also has additive description overhead and a polynomial clock,
-  all fixed before the oracle.
+  \uses{def:barriers-oracle-decides, def:computable, def:universal,
+    def:models-simulates-in-time}
+  An oracle machine $U$ simulates an oracle machine $M$ under a compiler
+  $c : \{0,1\}^* \to \{0,1\}^*$ if for every oracle $O$ and program $p$: $U$
+  halts on $c(p)$ relative to $O$ if and only if $M$ halts on $p$ relative to
+  $O$, and for every $y$, $U$ produces $y$ on $c(p)$ relative to $O$ if and
+  only if $M$ produces $y$ on $p$ relative to $O$. $U$ simulates $M$ under $c$
+  in time $\tau : \{0,1\}^* \times \mathbb{N} \to \mathbb{N}$ if for every
+  oracle $O$, whenever $M$ produces $y$ on $p$ within $t$ steps relative to
+  $O$, $U$ produces $y$ on $c(p)$ within $\tau(p, t)$ steps relative to $O$;
+  unlike the ordinary timed simulation, bounded halting alone is not required
+  to transfer. $U$ is universal if for every $k$ and every oracle machine $M$
+  with $k$ work tapes there is a compiler $c$, computable by an ordinary
+  deterministic machine, such that $U$ simulates $M$ under $c$. For a policy
+  of admissible clocks, $U$ is efficiently universal for the policy if moreover
+  $c$ has additive overhead ($|c(p)| \le |p| + C$) and $U$ simulates $M$ under
+  $c$ in some admissible clock $\tau$; it is efficiently universal if this
+  holds for the polynomial policy, which admits $\tau$ when
+  $\tau(p, t) \le a (|p| + t + 1)^e$ for some constants $a, e$. In every case
+  the compiler, constant and clock depend on $M$ but are chosen once for all
+  oracles.
 \end{definition}
 
 \begin{lemma}[Basic facts about oracle simulation]
@@ -124,12 +205,18 @@ properties and the Razborov--Rudich theorem are planned.
   \lean{Complexity.OracleTM.Simulates.refl, Complexity.OracleTM.Simulates.comp,
     Complexity.OracleTM.SimulatesInTime.refl,
     Complexity.OracleTM.SimulatesInTime.comp,
-    Complexity.OracleTM.IsEfficientlyUniversal.isUniversal}
+    Complexity.OracleTM.IsEfficientlyUniversalFor.isUniversal,
+    Complexity.OracleTM.IsEfficientlyUniversal.isUniversal,
+    Complexity.OracleTM.IsEfficientlyUniversalFor.mono}
   \leanok
   \uses{def:barriers-oracle-universal}
-  Simulation is reflexive under the identity compiler and composes, with timed
-  simulations nesting their clocks; efficient oracle universality implies
-  oracle universality.
+  Every oracle machine simulates itself under the identity compiler, in time
+  $(p, t) \mapsto t$. If $U_1$ simulates $U_2$ under $c_1$ and $U_2$ simulates
+  $M$ under $c_2$, then $U_1$ simulates $M$ under $c_1 \circ c_2$, and
+  likewise for timed simulations with clock
+  $(p, t) \mapsto \tau_1(c_2(p), \tau_2(p, t))$. Efficient oracle universality
+  for any clock policy, in particular the polynomial one, implies oracle
+  universality, and enlarging the policy preserves efficient universality.
 \end{lemma}
 \begin{proof}
   \leanok
@@ -139,10 +226,13 @@ properties and the Razborov--Rudich theorem are planned.
 \begin{theorem}[A universal oracle machine]
   \label{thm:barriers-universal-oracle-machine}
   \uses{def:barriers-oracle-universal}
-  There is an oracle TM that is efficiently universal. At present oracle
-  simulation and universality are only interfaces, taken as hypotheses by the
-  oracle Kolmogorov-complexity transfer theorems and the Nisan--Wigderson
-  reconstruction.
+  There is an oracle TM that is efficiently universal (for the polynomial
+  policy). At present oracle simulation and universality are only interfaces:
+  a timed oracle simulation with additive overhead and a polynomial clock is a
+  hypothesis of the oracle Kolmogorov-complexity transfer theorem
+  (Lemma~\ref{lem:avg-oracle-kolmogorov}(c)), and
+  efficient oracle universality is a hypothesis of the Nisan--Wigderson
+  reconstruction; no universal oracle machine has been constructed.
 \end{theorem}
 \begin{proof}
   \uses{thm:utm}
@@ -213,18 +303,19 @@ properties and the Razborov--Rudich theorem are planned.
   There is an oracle $B$ with $\cc{P}^B \neq \cc{NP}^B$.
 \end{theorem}
 \begin{proof}
-  \uses{lem:barriers-unary-test-language, def:barriers-clocked-enumeration,
-    thm:time-hierarchy}
+  \uses{lem:barriers-unary-test-language, def:barriers-clocked-enumeration}
   Build $B$ in stages so that the $i$-th clocked machine errs on $U_B$ at a
-  fresh length; a clocked machine queries fewer than $2^n$ strings of length
-  $n$, and later stages must not change answers earlier stages relied on.
+  fresh length $n$ large enough that its clock $p_i(n)$ is below $2^n$; such a
+  run queries fewer than $2^n$ strings of length $n$, and later stages must not
+  change answers earlier stages relied on.
 \end{proof}
 
 \begin{lemma}[A PSPACE-complete oracle collapses both classes]
   \label{lem:barriers-pspace-oracle-collapse}
   \uses{def:barriers-relativized-classes, def:PSPACE}
   \notready
-  If $A$ is PSPACE-complete then $\cc{P}^A = \cc{NP}^A = \cc{PSPACE}$.
+  If $A$ is PSPACE-complete under polynomial-time many-one reductions then
+  $\cc{P}^A = \cc{NP}^A = \cc{PSPACE}$.
 \end{lemma}
 \begin{proof}
   \uses{thm:space-tqbf-complete, thm:space-savitch}
@@ -276,18 +367,22 @@ properties and the Razborov--Rudich theorem are planned.
   \lean{Complexity.density}
   \leanok
   \uses{lem:barriers-card-boolfunc}
-  For a finite set $P$ of Boolean functions on $n$ bits, its density is the
-  exact rational $|P| / 2^{2^n}$.
+  For a set $P$ of Boolean functions on $n$ bits (necessarily finite), its
+  density is the exact rational $|P| / 2^{2^n}$, the fraction of all Boolean
+  functions on $n$ bits that lie in $P$.
 \end{definition}
 
 \begin{lemma}[Density laws]
   \label{lem:barriers-density-laws}
-  \lean{Complexity.density_nonneg, Complexity.density_le_one,
-    Complexity.density_compl, Complexity.density_union_le}
+  \lean{Complexity.card_le_card_boolFunc, Complexity.density_nonneg,
+    Complexity.density_le_one, Complexity.density_compl,
+    Complexity.density_union_le}
   \leanok
-  \uses{def:barriers-density}
+  \uses{def:barriers-density, lem:barriers-card-boolfunc}
+  For all sets $P, Q$ of Boolean functions on $n$ bits: $|P| \le 2^{2^n}$,
   $0 \le \mathrm{density}(P) \le 1$,
-  $\mathrm{density}(P^c) = 1 - \mathrm{density}(P)$, and
+  $\mathrm{density}(P^c) = 1 - \mathrm{density}(P)$ with $P^c$ the complement
+  among all Boolean functions on $n$ bits, and
   $\mathrm{density}(P \cup Q) \le \mathrm{density}(P) + \mathrm{density}(Q)$.
 \end{lemma}
 \begin{proof}
@@ -299,8 +394,8 @@ properties and the Razborov--Rudich theorem are planned.
   \label{def:barriers-negligible}
   \lean{Complexity.Negligible}
   \leanok
-  $f : \mathbb{N} \to \mathbb{R}$ is negligible if for every $c$ there is
-  $N > 0$ with $|f(n)| < 1 / n^c$ for all $n \ge N$.
+  $f : \mathbb{N} \to \mathbb{R}$ is negligible if for every $c \in \mathbb{N}$
+  there is $N > 0$ with $|f(n)| < 1 / n^c$ for all $n \ge N$.
 \end{definition}
 
 \begin{lemma}[Closure of negligible functions]
@@ -345,7 +440,8 @@ properties and the Razborov--Rudich theorem are planned.
 \begin{proof}
   Count. The finite statistical-test layer of the metacomplexity development
   already proves the analogous statement for dense sets of high-complexity
-  strings against short-seed generators.
+  strings against low-complexity generators
+  (Lemma~\ref{lem:avg-test-hybrid}(a)), but not this Boolean-function form.
 \end{proof}
 
 \begin{theorem}[Razborov--Rudich, parameterized conditional form]
@@ -369,9 +465,10 @@ properties and the Razborov--Rudich theorem are planned.
   \label{cor:barriers-natural-proofs}
   \uses{def:barriers-natural-property, def:barriers-prf, def:PPoly}
   \notready
-  If there is a pseudorandom function family in $\cc{P/poly}$ secure against
-  distinguishers of size $2^{n^{\varepsilon}}$ for some $\varepsilon > 0$, then
-  no $\cc{P/poly}$-constructive property of inverse-exponential density is
+  If for some $\varepsilon > 0$ there is a pseudorandom function family in
+  $\cc{P/poly}$ against which no distinguisher of size $2^{n^{\varepsilon}}$
+  has advantage $2^{-n^{\varepsilon}}$ or more, then no
+  $\cc{P/poly}$-constructive property of density at least $2^{-O(n)}$ is
   useful against $\cc{P/poly}$. The pseudorandomness hypothesis is an explicit
   assumption, not a proved fact.
 \end{corollary}

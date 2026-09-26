@@ -8,16 +8,17 @@ $\{0, 1, \sqcup, \triangleright\}$, with a read-only input tape, $k$ work tapes,
 and an output tape; deterministic, nondeterministic, and probabilistic machines
 share one configuration type and differ only in their transition functions and
 acceptance conditions. Formalized so far: the model with its time and output
-semantics, Hoare-style specifications for sequential, conditional, and looping
-composition, the quadratic reduction to one work tape, a fixed six-work-tape
-universal machine proved universal and polynomially efficiently universal, a
-weak deterministic time hierarchy, and a logarithmic-cost random access machine
-whose polynomial-time class equals $\cc{P}$. The main open directions are
-undecidability of the halting problem (now within reach, since the universal
-machine is proved to reflect as well as preserve halting), a time hierarchy
-under the
-textbook time-constructibility hypothesis, and space-level and variant-model
-robustness for random access machines.
+semantics; machine combinators with Hoare-style rules for sequential,
+conditional, looping, and complementing composition, and deciders for
+complements and unions; the quadratic reduction to one work tape; a fixed
+six-work-tape universal machine proved universal and polynomially efficiently
+universal; a weak deterministic time hierarchy; and a logarithmic-cost random
+access machine whose polynomial-time class equals $\cc{P}$. The main open
+directions are undecidability of the halting problem (now within reach, since
+the universal machine is proved to reflect as well as preserve halting), a time
+hierarchy under the textbook time-constructibility hypothesis, a
+$T \log T$ simulation of Turing machines by random access machines, and
+space-level and variant-model robustness for random access machines.
 
 \section{Turing machines}
 
@@ -29,9 +30,11 @@ robustness for random access machines.
   alphabet is $\Gamma_w = \{0, 1, \sqcup\}$, so no transition can write the
   start symbol $\triangleright$. A head moves left, right, or stays. A tape is a
   head position $h \in \mathbb{N}$ together with contents
-  $\mathbb{N} \to \Gamma$. Tapes start with $\triangleright$ in cell $0$;
-  writing at cell $0$ is a no-op, so the marker is permanent, and moving left at
-  cell $0$ stays there. A tape \emph{has output}
+  $\mathbb{N} \to \Gamma$; the type allows any symbol in any cell. Initial
+  tapes have $\triangleright$ in cell $0$ and nowhere else, writing at cell $0$
+  is a no-op, and moving left at cell $0$ stays there, so every tape reachable
+  from an initial configuration keeps this marker invariant (statements about
+  arbitrary tapes assume it explicitly). A tape \emph{has output}
   $y \in \{0,1\}^*$ when cells $1, \dots, |y|$ hold the bits of $y$ and cell
   $|y| + 1$ is blank.
 \end{definition}
@@ -68,10 +71,11 @@ robustness for random access machines.
       Q \times \Gamma_w^k \times \Gamma_w \times \{\mathrm{L}, \mathrm{R}, \mathrm{S}\}^{k+2}
   \]
   that must move right every head reading $\triangleright$. One step applies
-  $\delta$ to the symbols under the four kinds of heads, writes on the work and
-  output tapes, and moves all heads; the halt state has no successor. The
-  relation $c \to^t c'$ holds when $c'$ is reached from $c$ in exactly $t$
-  steps.
+  $\delta$ to the current state and the symbols under the input head, the $k$
+  work heads, and the output head, writes on the work and output tapes, and
+  moves all heads; the halt state has no successor. The relation
+  $c \to^t c'$ holds when $c'$ is reached from $c$ in exactly $t$ steps, and
+  $c \to^* c'$ is its reflexive--transitive closure.
 \end{definition}
 
 \begin{definition}[Nondeterministic and probabilistic Turing machine]
@@ -80,7 +84,8 @@ robustness for random access machines.
   \leanok
   \uses{def:tm}
   A nondeterministic Turing machine has the same data as a deterministic one
-  except that it has two transition functions $\delta_0, \delta_1$. Its
+  except that it has two transition functions $\delta_0, \delta_1$, each
+  subject to the same rule at $\triangleright$. Its
   execution is defined only through the trace: given a choice sequence
   $r \in \{0,1\}^T$, run $T$ steps, using $\delta_{r_i}$ at step $i$, and stay
   put once the halt state is reached. The same structure serves as a
@@ -140,16 +145,20 @@ robustness for random access machines.
 
 \begin{lemma}[Deterministic machines as nondeterministic ones]
   \label{lem:models-to-ntm}
-  \lean{Complexity.TM.toNTM_decidesInTime}
+  \lean{Complexity.TM.toNTM_decidesInTime, Complexity.TM.toNTM_accepts_iff}
   \leanok
   \uses{def:tm-decides, def:ntm-decides}
   If a deterministic machine decides $L$ in time $T$, its nondeterministic
-  embedding decides $L$ in time $T$.
+  embedding decides $L$ in time $T$. Without a time bound, a deterministic
+  machine and its embedding accept the same strings, where acceptance means
+  reaching the halt state (after some number of steps, along some choice
+  sequence) with output cell $1$ equal to $1$.
 \end{lemma}
 \begin{proof}
   \leanok
   Every trace of the embedding is the deterministic run, frozen at the halt
-  state.
+  state; for acceptance without a bound, the trace of the embedding reaches
+  exactly the configurations the deterministic run reaches.
 \end{proof}
 
 \section{Output semantics}
@@ -169,7 +178,7 @@ robustness for random access machines.
 
 \begin{lemma}[Basic facts about production]
   \label{lem:models-produces-basic}
-  \lean{Complexity.TM.ProducesInTime.iff_runCfg, Complexity.TM.ProducesInTime.mono, Complexity.TM.produces_iff_exists_producesInTime, Complexity.TM.ProducesInTime.take_time, Complexity.TM.Produces.output_unique}
+  \lean{Complexity.TM.ProducesInTime.iff_runCfg, Complexity.TM.instDecidableProducesInTime, Complexity.TM.ProducesInTime.mono, Complexity.TM.produces_iff_exists_producesInTime, Complexity.TM.ProducesInTime.take_time, Complexity.TM.ProducesInTime.output_unique, Complexity.TM.Produces.output_unique}
   \leanok
   \uses{def:produces}
   Let $M$ be a deterministic machine.
@@ -181,7 +190,8 @@ robustness for random access machines.
       exactly when it does so within some finite time.
     \item If $M$ produces $y$ on $p$ within time $t$, it produces $y$ on the
       first $t$ bits of $p$ within time $t$.
-    \item If $M$ produces both $y$ and $y'$ on $p$, then $y = y'$.
+    \item If $M$ produces both $y$ and $y'$ on $p$, then $y = y'$; this holds
+      also for bounded production under two different clocks.
   \end{enumerate}
 \end{lemma}
 \begin{proof}
@@ -226,16 +236,63 @@ robustness for random access machines.
   \uses{def:tm}
   On machines with the same $k$ work tapes: $\mathrm{seq}(M_1, M_2)$ runs $M_1$
   to completion and then $M_2$ on the same tapes; $\mathrm{if}(M_t, M_1, M_0)$
-  runs the test $M_t$ and branches on its output cell $1$;
-  $\mathrm{loop}(M_b, M_t)$ alternates a body and a test until the test outputs
-  $1$; $\mathrm{complement}(M)$ flips the verdict of $M$. The machine
-  $\mathrm{union}(M_1, M_2)$ is meant to decide $L_1 \cup L_2$ from deciders for
-  $L_1$ and $L_2$: it runs $M_1$ with its output redirected to a work tape and,
-  if $M_1$ rejects, runs $M_2$, using $k_1 + 1 + k_2$ work tapes. At each phase
-  boundary
-  every head reading $\triangleright$ moves to cell $1$, the other heads stay,
-  and the contents of well-formed tapes are unchanged.
+  runs the test $M_t$, rewinds the output head, and runs $M_1$ if output cell
+  $1$ holds $1$ and $M_0$ otherwise; $\mathrm{loop}(M_b, M_t)$ alternates the
+  body and the test, rewinding the output head after each test, and halts once
+  the test leaves $1$ in output cell $1$; $\mathrm{complement}(M)$ runs $M$,
+  rewinds the output head, and exchanges $0$ and $1$ in output cell $1$ (a
+  blank stays blank). In $\mathrm{seq}$ (from $M_1$ to $M_2$), in
+  $\mathrm{loop}$ (from the body to the test), and in $\mathrm{if}$ (from the
+  branch to the final halt state), the handover is a single step in which
+  every head reading $\triangleright$ moves one cell right, the other heads
+  stay, and no tape cell changes except that a $\triangleright$ outside cell
+  $0$ would be overwritten by a blank. After the test in $\mathrm{if}$ and
+  $\mathrm{loop}$ the handover takes several steps: one such step; then steps
+  that move the output head left one cell at a time until it reads
+  $\triangleright$, and then one cell right; and a last step that reads the
+  output cell under the head (cell $1$ when $\triangleright$ appears on the
+  output tape only at cell $0$) and enters the chosen branch, the body, or the
+  halt state. In each of these steps every input or work head reading
+  $\triangleright$ moves one cell right and the others stay, and cells change
+  only as in the single-step handover. The machine
+  $\mathrm{union}(M_1, M_2)$, with $M_i$ on $k_i$ work tapes, has
+  $k_1 + 1 + k_2$ work tapes: it runs $M_1$ with its output redirected to work
+  tape $k_1$, halts with $1$ in output cell $1$ if cell $1$ of that work tape
+  holds $1$, and otherwise rewinds the input and runs $M_2$ on the last $k_2$
+  work tapes and the real output tape.
 \end{definition}
+
+\begin{lemma}[Deciders for complements and unions]
+  \label{lem:models-complement-union}
+  \lean{Complexity.TM.complementTM_decidesInTime, Complexity.TM.unionTM_decidesInTime, Complexity.TM.complementTM_hoareTime}
+  \leanok
+  \uses{def:models-combinators, def:tm-decides, def:models-hoare}
+  \begin{enumerate}
+    \item If $M$ decides $L$ in time $T$, then $\mathrm{complement}(M)$
+      decides $\{0,1\}^* \setminus L$ in time $2T(n) + 4$.
+    \item If $M_1$ decides $L_1$ in time $T_1$ and $M_2$ decides $L_2$ in time
+      $T_2$, then $\mathrm{union}(M_1, M_2)$ decides $L_1 \cup L_2$ in time
+      $10\,T_1(n) + T_2(n)$.
+    \item If $\{\mathit{pre}\}\, M\, \{\mathit{post}\}_b$, where
+      $\mathit{post}$ guarantees that the output tape holds $\triangleright$
+      at cell $0$ and nowhere else, that the output head is at a cell at most
+      $p$, and that output cell $1$ holds a symbol satisfying $\varphi$, then
+      $\{\mathit{pre}\}\, \mathrm{complement}(M)\, \{\mathit{post}'\}_{b + p + 4}$,
+      where $\mathit{post}'$ says that output cell $1$ holds the flip of some
+      symbol satisfying $\varphi$ ($0$ and $1$ exchanged, anything else made
+      blank).
+  \end{enumerate}
+\end{lemma}
+\begin{proof}
+  \leanok
+  For the complement, simulate $M$, then rewind the output head to
+  $\triangleright$, step to cell $1$, and write the flipped symbol. For the
+  union, simulate $M_1$, rewind its redirected output and read its verdict, and
+  either accept at once or rewind the input and simulate $M_2$; the transition
+  costs at most $2T_1(n) + 7$ steps, which is absorbed into $9\,T_1(n)$ because
+  a decider cannot halt in zero steps (its start state would then be its halt
+  state, leaving a blank verdict cell).
+\end{proof}
 
 \begin{theorem}[Sequential composition rule]
   \label{thm:models-seq-hoare}
@@ -259,9 +316,11 @@ robustness for random access machines.
   \leanok
   \uses{def:models-hoare, def:models-combinators}
   Suppose $\{\mathit{pre}\}\, M_t\, \{\mathit{mid}\}_{b_t}$, where $\mathit{mid}$
-  guarantees well-formed tapes and output head position at most $p$; that
-  $\mathit{mid}$ with output cell $1$ equal to $1$ (resp.\ not $1$) routes, after
-  normalization, to the precondition of $M_1$ (resp.\ $M_0$); that
+  guarantees that every tape holds $\triangleright$ at cell $0$ and nowhere
+  else and that the output head is at a cell at most $p$; that $\mathit{mid}$
+  with output cell $1$ equal to $1$ (resp.\ not $1$) implies the precondition
+  of $M_1$ (resp.\ $M_0$) on the tapes obtained by normalizing the input and
+  work tapes and placing the output head at cell $1$; that
   $\{\mathit{mid}_i\}\, M_i\, \{\mathit{post}_i\}_{b_i}$ for $i = 0, 1$; and that
   both postconditions imply $\mathit{post}$ after normalization. Then
   $\{\mathit{pre}\}\, \mathrm{if}(M_t, M_1, M_0)\, \{\mathit{post}\}_b$ with
@@ -369,11 +428,15 @@ robustness for random access machines.
   \uses{def:simulates, def:models-simulates-in-time, def:computable}
   A deterministic machine $U$ is universal if for every $k$ and every machine
   $M$ with $k$ work tapes there is a computable compiler $c$ such that $U$
-  simulates $M$ under $c$. It is efficiently universal if moreover $c$ has
-  additive overhead and $U$ simulates $M$ under $c$ in some polynomial clock.
-  Computability of $c$ is essential: without it a machine that copies its input
-  after a leading $0$ and diverges after a leading $1$ would qualify, with a
-  compiler that consults the source machine's halting behavior.
+  simulates $M$ under $c$. It is efficiently universal for an admissibility
+  predicate on clocks if for every such $M$ there are a computable compiler
+  $c$, a constant $C$, and a clock $\tau$ such that $U$ simulates $M$ under
+  $c$, $c$ has additive overhead $C$, $U$ simulates $M$ under $c$ in time
+  $\tau$, and $\tau$ is admissible; it is efficiently universal when the
+  predicate is polynomiality. Computability of $c$ is essential: without it a
+  machine that copies its input after a leading $0$ and diverges after a
+  leading $1$ would be universal, with a compiler that consults the source
+  machine's halting behavior and output.
 \end{definition}
 
 \begin{lemma}[Simulation algebra]
@@ -396,16 +459,19 @@ robustness for random access machines.
 
 \begin{lemma}[Universality transfers]
   \label{lem:models-universal-transfer}
-  \lean{Complexity.TM.Simulates.isUniversal, Complexity.TM.IsEfficientlyUniversal.isUniversal}
+  \lean{Complexity.TM.Simulates.isUniversal, Complexity.TM.IsEfficientlyUniversal.isUniversal, Complexity.TM.IsEfficientlyUniversalFor.isUniversal}
   \leanok
   \uses{def:universal, lem:models-simulation-algebra}
   A machine that simulates a universal machine under a computable compiler is
-  universal. Every efficiently universal machine is universal.
+  universal. Every machine that is efficiently universal for some
+  admissibility predicate, in particular every efficiently universal machine,
+  is universal.
 \end{lemma}
 \begin{proof}
   \leanok
   \uses{lem:models-simulation-algebra}
-  Compose compilers.
+  Compose compilers for the first claim; for the second, forget the overhead
+  data.
 \end{proof}
 
 \begin{definition}[The universal machine]
@@ -423,7 +489,7 @@ robustness for random access machines.
 
 \begin{theorem}[Universal simulation of deciders]
   \label{thm:models-utm-deciders}
-  \lean{Complexity.TM.UTMBody.utmTM_universal, Complexity.TM.UTMBody.utmTM_universal_padded}
+  \lean{Complexity.TM.UTMBody.utmTM_universal, Complexity.TM.UTMBody.utmTM_universal_padded, Complexity.TM.UTMBody.utmTM_simulates_decider}
   \leanok
   \uses{def:models-utm, def:tm-decides, def:pair}
   Let $M$ be a deterministic machine with $k$ work tapes that decides $L$ in
@@ -437,7 +503,12 @@ robustness for random access machines.
   (t+1) s(\alpha) + 2t + 35$, where $g(\alpha)$ and $s(\alpha)$ depend only on
   $\alpha$ (Arora--Barak Theorem~1.9, with the quadratic factor coming from the
   single-tape reduction). The unpadded case, $j$ empty, is also stated on its
-  own.
+  own. The underlying linear-time statement is also formalized: for every
+  description $\alpha$ satisfying a syntactic side condition on its table
+  region (met by every encoded machine, with or without padding), if the
+  one-work-tape machine that $\alpha$ describes decides $L$ in time $T$, then
+  $\mathcal{U}$ on $\langle \alpha, x \rangle$ halts within
+  $\mathrm{utmTime}(\alpha, T(|x|), |x|)$ steps with the same verdict.
 \end{theorem}
 \begin{proof}
   \leanok
@@ -461,15 +532,21 @@ robustness for random access machines.
 \end{theorem}
 \begin{proof}
   \leanok
-  \uses{thm:models-utm-deciders, lem:models-universal-transfer, lem:encodings-pair-length}
-  The simulation of Theorem~\ref{thm:models-utm-deciders} is run on arbitrary
-  programs and shown to reflect as well as preserve halting and output; the
-  compiler $p \mapsto \langle \alpha, p \rangle$ is computed by a fixed machine.
+  \uses{thm:models-utm-deciders, lem:models-simulation-algebra, lem:models-universal-transfer, lem:encodings-pair-length, thm:encodings-pair-fp}
+  The phase Hoare triples behind Theorem~\ref{thm:models-utm-deciders} are
+  applied to arbitrary programs instead of deciders: the single-tape
+  simulation of $M$, the interpretation of its encoded description, and
+  $\mathcal{U}$ each preserve halting and exact output within their clocks and
+  diverge whenever the simulated machine diverges. Composing the three
+  simulations gives the clock above. The compiler
+  $p \mapsto \langle \alpha, p \rangle$ is polynomial-time computable and adds
+  exactly $2|\alpha| + 2$ bits, and the composed clock is bounded by a
+  polynomial in $|p| + t + 1$.
 \end{proof}
 
 \begin{theorem}[Undecidability of the halting problem]
   \label{thm:models-halting-undecidable}
-  \uses{def:produces, def:tm-decides, def:universal}
+  \uses{def:produces, def:tm-decides, def:universal, def:models-utm}
   Let $H = \{ p : \mathcal{U} \text{ halts on } p \}$. There are no $k$,
   machine $M$ with $k$ work tapes, and bound $T$ such that $M$ decides $H$ in
   time $T$. The same holds for $H_V$ for every universal machine $V$.
@@ -500,27 +577,33 @@ robustness for random access machines.
   \leanok
   \uses{def:models-hoare}
   $g$ is clock-constructible if there are an eight-work-tape machine $M$ and a
-  constant $C$ such that, for every input $x$ and every admissible layout (input
-  head at cell $1$, every work head at a cell $\ge 1$ not reading
-  $\triangleright$, work tapes $5$ and $6$ blank, output head at cell $1$), the
-  triple holds in which $M$ writes a unary clock of length $g(|x|)$ on work
-  tape $6$ within $C (g(|x|) + |x| + 1)$ steps, returns every other work tape
-  exactly (so the scratch tape $5$ is restored blank), returns the input head
-  to cell $1$, and keeps the output head at cell $1$ with no $\triangleright$
-  past cell $0$. The layout is pinned to the diagonalizer that consumes it.
+  constant $C$ such that, for every input $x$ and every starting layout in
+  which the input tape holds $x$ with its head at cell $1$, every work head is
+  at a cell $\ge 1$ not reading $\triangleright$, work tapes $5$ and $6$ are
+  blank with their heads at cell $1$, and the output head is at cell $1$ with
+  $\triangleright$ at cell $0$ and nowhere else, $M$ started in its start state
+  halts within $C (g(|x|) + |x| + 1)$ steps with: work tape $6$ holding the
+  unary clock of length $g(|x|)$ (cells $1, \dots, g(|x|)$ equal to $1$, the
+  rest blank, head at cell $1$); every other work tape exactly as it started
+  (so the scratch tape $5$ is again blank); the input head back at cell $1$;
+  and the output head at cell $1$ with $\triangleright$ still at cell $0$ and
+  nowhere else. The layout is pinned to the diagonalizer that consumes it.
 \end{definition}
 
 \begin{lemma}[Polynomial clocks]
   \label{lem:models-clock-pow}
-  \lean{Complexity.TM.clockConstructible_pow}
+  \lean{Complexity.TM.clockConstructible_succ, Complexity.TM.ClockConstructible.mul_succ, Complexity.TM.clockConstructible_pow}
   \leanok
   \uses{def:models-clock-constructible}
-  For every $k \ge 1$, the function $n \mapsto (n+1)^k$ is clock-constructible.
+  The function $n \mapsto n + 1$ is clock-constructible, and if $g$ is
+  clock-constructible then so is $n \mapsto g(n)(n+1)$. Hence for every
+  $k \ge 1$ the function $n \mapsto (n+1)^k$ is clock-constructible.
 \end{lemma}
 \begin{proof}
   \leanok
-  $n + 1$ is constructed by one input sweep, and clock-constructibility is
-  closed under multiplication by $n + 1$.
+  $n + 1$ is constructed by one input sweep. For the product, run the clock
+  for $g$, move it to the scratch tape, and append it to the clock tape once
+  per input position. Induction on $k$ gives the powers.
 \end{proof}
 
 \begin{theorem}[Deterministic time hierarchy, weak form]
@@ -537,11 +620,19 @@ robustness for random access machines.
 \end{theorem}
 \begin{proof}
   \leanok
-  \uses{thm:models-utm-deciders, thm:models-single-tape, lem:models-clock-pow}
-  The diagonalizer runs the clock, simulates the machine described by its
-  input on that input under the clock, and flips the verdict. A hypothetical
-  $O(f)$ decider is reduced to one work tape and its description is padded
-  until the simulation budget falls below $g$.
+  \uses{def:models-utm, thm:models-seq-hoare, thm:models-if-hoare, thm:models-single-tape, lem:models-clock-pow}
+  The diagonalizer is an eight-work-tape machine built with the combinators.
+  On input $x$ it forms $\langle x, x \rangle$ on a work tape, outputs $0$ if
+  $x$ fails the syntactic side condition on descriptions, and otherwise runs
+  the clock for $g(|x|)$, runs a clocked variant of $\mathcal{U}$ (built from
+  the same initialization, halt-test, and extraction phases) on
+  $\langle x, x \rangle$ within that budget, and negates the verdict; it runs
+  within a constant times $(n+1)^2 (g(n) + 1)$ steps. A hypothetical decider in
+  time $f_0 = O(f)$ is reduced to one work tape, and its description, padded
+  with enough zeros, is an input on which the simulation budget
+  $16(k+1)(f_0(n) + n + 1)^2$ falls below $g(n)$; there the diagonalizer's
+  verdict contradicts the decider's. The polynomial case takes
+  $g(n) = (n+1)^{2a+3}$.
 \end{proof}
 
 \begin{theorem}[Deterministic time hierarchy, textbook form]
@@ -574,10 +665,17 @@ depend on the Turing-machine conventions.
   $\mathrm{store}$ ($R_{R_a} := R_s$), conditional and unconditional jumps, and
   $\mathrm{halt}$; a program counter past the end halts. On input $x$,
   $R_0 = |x|$, $R_{i+1} = x_i$, and all other registers are $0$. Each
-  instruction costs $1$ plus the bit length of every value it reads, computes,
-  or writes, including runtime addresses; register literals in the program are
-  not charged. Space is the peak, over the run, of the total bit length of the
-  addresses and contents of the nonzero registers. Unit time counts steps.
+  instruction costs $1$ plus bit lengths of the values it touches: the
+  constant of an immediate load; both operands and the result for $\mathrm{add}$
+  and $\mathrm{mul}$; both operands for $\mathrm{sub}$ (whose result is no
+  longer than its first operand); the runtime address and the value moved for
+  indirect $\mathrm{load}$ and $\mathrm{store}$; the tested register for a
+  conditional jump; nothing more for $\mathrm{jmp}$ and $\mathrm{halt}$.
+  Register indices and jump targets written in the program are not charged.
+  The logarithmic time of a run is the total cost of its non-halted steps, and
+  its unit time is the number of those steps. Space is the peak, over the
+  configurations visited, of the total bit length of the addresses and
+  contents of the nonzero registers.
 \end{definition}
 
 \begin{definition}[RAM deciders and classes]
@@ -604,32 +702,40 @@ depend on the Turing-machine conventions.
 \end{theorem}
 \begin{proof}
   \leanok
-  Square a register $k$ times; the last multiplication writes
-  $2^{2^k}$, which has $2^k + 1$ bits.
+  Load $2$ into a register and square it $k$ times; the last multiplication
+  writes $2^{2^k}$, which has $2^k + 1$ bits.
 \end{proof}
 
 \begin{theorem}[Turing machines to RAMs]
   \label{thm:models-p-subset-ram-p}
-  \lean{Complexity.RAM.TMConfig.Sparse.P_subset_RAM_P}
+  \lean{Complexity.RAM.TMConfig.Sparse.P_subset_RAM_P, Complexity.RAM.TMConfig.Sparse.compiledDecision_decidesInTime, Complexity.RAM.TMConfig.Sparse.mem_DTIME_of_decidesInTime}
   \leanok
   \uses{def:models-ram-classes, def:P}
-  $\cc{P} \subseteq \cc{P}_{\mathrm{RAM}}$.
+  $\cc{P} \subseteq \cc{P}_{\mathrm{RAM}}$. More precisely, if a
+  deterministic machine $M$ decides $L$ in time $T$, a fixed RAM program
+  built from $M$ decides $L$ in logarithmic time $\beta_M(n, T(n))$, for an
+  explicit bound $\beta_M(n, t)$ depending only on $M$, $n$, and $t$; so
+  $L \in \cc{DTIME}_{\mathrm{RAM}}(n \mapsto \beta_M(n, T(n)))$.
 \end{theorem}
 \begin{proof}
   \leanok
   One fixed RAM program, depending only on the Turing machine, stores the
   configuration in a sparse interleaved register layout, computes cell
-  addresses at run time, and follows the halting run; its logarithmic cost is
-  bounded by a polynomial in the input length and the Turing time.
+  addresses at run time, and follows the halting run before copying the verdict
+  to $R_0$. When $T$ is bounded by a polynomial, so is
+  $n \mapsto \beta_M(n, T(n))$.
 \end{proof}
 
 \begin{theorem}[RAMs to Turing machines, parametric]
   \label{thm:models-ram-dtime-sq}
-  \lean{Complexity.RAM.RegisterStore.Machine.RAM_DTIME_subset_DTIME_sq}
+  \lean{Complexity.RAM.RegisterStore.Machine.RAM_DTIME_subset_DTIME_sq, Complexity.RAM.RegisterStore.Machine.denseProgramDecision_decidesInTime}
   \leanok
   \uses{def:models-ram-classes, def:dtime}
   If $n + 1 = O(T(n))$, then
-  $\cc{DTIME}_{\mathrm{RAM}}(T) \subseteq \cc{DTIME}(T(n)^2)$.
+  $\cc{DTIME}_{\mathrm{RAM}}(T) \subseteq \cc{DTIME}(T(n)^2)$. More
+  precisely, with no hypothesis on $T$: if a program $P$ decides $L$ in
+  logarithmic time $T$, a fixed twenty-work-tape machine built from $P$
+  decides $L$ in time $c_P (n + T(n) + 1)^2$, where $c_P$ depends only on $P$.
 \end{theorem}
 \begin{proof}
   \leanok
@@ -641,10 +747,13 @@ depend on the Turing-machine conventions.
 
 \begin{theorem}[RAMs to Turing machines, polynomial]
   \label{thm:models-ram-p-subset-p}
-  \lean{Complexity.RAM.RegisterStore.Machine.RAM_P_subset_P}
+  \lean{Complexity.RAM.RegisterStore.Machine.RAM_P_subset_P, Complexity.RAM.RegisterStore.Machine.programDecision_decidesInTime}
   \leanok
   \uses{def:models-ram-classes, def:P}
-  $\cc{P}_{\mathrm{RAM}} \subseteq \cc{P}$.
+  $\cc{P}_{\mathrm{RAM}} \subseteq \cc{P}$. The proof goes through a second
+  simulator: if a program $P$ decides $L$ in logarithmic time $T$, a fixed
+  twenty-work-tape machine built from $P$ decides $L$ in time
+  $10^9 m_P (n + (m_P + 2) T(n) + m_P + 4)^4$, where $m_P$ depends only on $P$.
 \end{theorem}
 \begin{proof}
   \leanok
@@ -671,12 +780,18 @@ depend on the Turing-machine conventions.
   \uses{def:models-ram-classes, def:dtime}
   Under an explicit hypothesis that $T$ dominates the input length,
   $\cc{DTIME}(T) \subseteq \cc{DTIME}_{\mathrm{RAM}}(T(n) \log T(n))$.
+  What is formalized is only the exact-bound form of
+  Theorem~\ref{thm:models-p-subset-ram-p}, membership in
+  $\cc{DTIME}_{\mathrm{RAM}}(n \mapsto \beta_M(n, T(n)))$; the asymptotic
+  estimate of $\beta_M$ is open.
 \end{theorem}
 \begin{proof}
   \uses{thm:models-p-subset-ram-p}
-  The simulation core already costs $O(t \log t)$ for $t$ simulated steps; the
-  input marshaller costs $O(n \log n)$, which the domination hypothesis must
-  absorb.
+  In the explicit bound $\beta_M(n, t)$ of the fixed simulator, each of the
+  $t + 1$ simulated steps is charged a constant number of words whose width is
+  the bit length of a bound polynomial in $n + t$, so the core should cost
+  $O(t \log(n + t))$; the input marshaller's cost must be bounded as well and
+  absorbed by the domination hypothesis.
 \end{proof}
 
 \begin{theorem}[Polynomial space is model-independent]

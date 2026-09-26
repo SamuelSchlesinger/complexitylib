@@ -9,35 +9,52 @@ its acceptance probability, and $\#\cc{P}$ from accepting leaves of the
 computation tree, a different count when paths halt early. Formalized results
 include the class definitions and elementary containments, the
 Sipser--Lautemann theorem, $\cc{PH} \subseteq \cc{PSPACE}$,
-$\cc{PP} \subseteq \cc{PSPACE}$, and Stockmeyer-style approximate counting with
-pairwise-independent hashing as a finite statement. The main open directions
+$\cc{PP} \subseteq \cc{PSPACE}$ (hence $\cc{BPP} \subseteq \cc{PSPACE}$), and
+Stockmeyer-style relative approximate
+counting with pairwise-independent hashing, stated for a fixed finite set and a
+uniformly random seed (no oracle machine is involved). The main open directions
 are the oracle characterization of the hierarchy, the closure properties of
 $\cc{PP}$ through $\cc{GapP}$, and Toda's theorem.
 
 \section{Randomized classes}
 
 The acceptance probability $\mathrm{acceptProb}_N(x, T)$ of a machine $N$ is
-the fraction of the $2^T$ choice sequences of length $T$ along which $N$ halts
-with output $1$ within $T$ steps (\texttt{NTM.acceptProb}, defined in the
-chapter on machine models). A path that halts after $t < T$ steps is counted
-once for each of its $2^{T - t}$ extensions. The finite probability toolkit
-used below is developed in the chapter on encodings: event probability, the
-bound $2^{-k}$ on majority failure over $12k + 1$ independent blocks, the
-invariance of acceptance probability under enlarging a clock by which every
-path has halted, and the repetition machine \texttt{NTM.repeatAtTime} that
-lifts majority amplification to machines. Adleman's theorem
-$\cc{BPP} \subseteq \cc{P/poly}$ (\texttt{Complexity.BPP\_subset\_PPoly}) is in
-the chapter on circuits.
+the fraction of the $2^T$ choice sequences of length $T$ along which the trace
+of $N$ on $x$ after $T$ steps is in the halting state with output cell $1$
+equal to $1$ (\texttt{NTM.acceptProb}, defined in the chapter on machine
+models). A path that halts after $t < T$ steps is counted once for each of its
+$2^{T - t}$ extensions. The finite probability toolkit used below is developed
+in the chapter on encodings: event probability, the bound $2^{-k}$ on majority
+failure over $12k + 1$ independent blocks, the invariance of acceptance
+probability under enlarging a clock by which every path has halted, and the
+repetition machine \texttt{NTM.repeatAtTime} that lifts majority amplification
+to machines. Adleman's theorem $\cc{BPP} \subseteq \cc{P/poly}$
+(\texttt{Complexity.BPP\_subset\_PPoly}) is in the chapter on circuits.
+
+\begin{definition}[Probabilistic acceptance conditions]
+  \label{def:randomness-ppt}
+  \lean{Complexity.NTM.AcceptsWithProb, Complexity.NTM.RejectsWithProb, Complexity.NTM.IsPPT}
+  \leanok
+  \uses{def:ntm, def:ntm-decides, def:models-accept-prob}
+  Let $N$ be a machine, $L$ a language, $T \colon \mathbb{N} \to \mathbb{N}$ a
+  clock, and $c$ a rational. $N$ accepts $L$ with probability at least $c$ at
+  clock $T$ if $\mathrm{acceptProb}_N(x, T(|x|)) \ge c$ for every $x \in L$,
+  and $N$ accepts non-members with probability at most $c$ at clock $T$ if
+  $\mathrm{acceptProb}_N(x, T(|x|)) \le c$ for every $x \notin L$. $N$ is
+  probabilistic polynomial-time if there are $f$ and $d$ with $f = O(n^d)$
+  such that every trace of $N$ on every input $x$ has halted after $f(|x|)$
+  steps.
+\end{definition}
 
 \begin{definition}[$\cc{BPP}$]
   \label{def:BPP}
   \lean{Complexity.BPP, Complexity.BPTIME}
   \leanok
-  \uses{def:ntm, def:models-accept-prob}
+  \uses{def:ntm, def:models-accept-prob, def:randomness-ppt}
   $\cc{BPTIME}(T)$ is the set of languages $L$ for which there are a machine
-  $N$ and $f = O(T)$ such that every path halts within $f(|x|)$ steps,
-  $\mathrm{acceptProb}_N(x, f(|x|)) \ge 2/3$ for $x \in L$, and
-  $\mathrm{acceptProb}_N(x, f(|x|)) \le 1/3$ for $x \notin L$.
+  $N$ (with any number of work tapes) and $f = O(T)$ such that every path
+  halts within $f(|x|)$ steps, $\mathrm{acceptProb}_N(x, f(|x|)) \ge 2/3$ for
+  $x \in L$, and $\mathrm{acceptProb}_N(x, f(|x|)) \le 1/3$ for $x \notin L$.
   $\cc{BPP} = \bigcup_k \cc{BPTIME}(n^k)$.
 \end{definition}
 
@@ -45,10 +62,10 @@ the chapter on circuits.
   \label{def:RP}
   \lean{Complexity.RP, Complexity.RTIME, Complexity.coRP}
   \leanok
-  \uses{def:ntm, def:models-accept-prob}
+  \uses{def:ntm, def:models-accept-prob, def:randomness-ppt}
   $\cc{RTIME}(T)$ is defined like $\cc{BPTIME}(T)$ with acceptance probability
-  at least $1/2$ on $x \in L$ and equal to $0$ on $x \notin L$.
-  $\cc{RP} = \bigcup_k \cc{RTIME}(n^k)$ and
+  at least $1/2$ on $x \in L$ and at most $0$, that is equal to $0$, on
+  $x \notin L$. $\cc{RP} = \bigcup_k \cc{RTIME}(n^k)$ and
   $\cc{coRP} = \{L : \overline{L} \in \cc{RP}\}$.
 \end{definition}
 
@@ -75,19 +92,26 @@ the chapter on circuits.
 
 \begin{theorem}[Elementary containments]
   \label{thm:randomness-containments}
-  \lean{Complexity.P_subset_BPP, Complexity.BPP_subset_PP, Complexity.RP_subset_NP, Complexity.ZPP_subset_RP, Complexity.ZPP_subset_coRP, Complexity.ZPP_subset_NP}
+  \lean{Complexity.DTIME_subset_BPTIME, Complexity.BPTIME_subset_PPTIME, Complexity.RTIME_subset_NTIME, Complexity.P_subset_BPP, Complexity.BPP_subset_PP, Complexity.P_subset_PP, Complexity.RP_subset_NP, Complexity.ZPP_subset_RP, Complexity.ZPP_subset_coRP, Complexity.ZPP_subset_NP, Complexity.RP_subset_NEXP, Complexity.ZPP_subset_NEXP}
   \leanok
-  \uses{def:P, def:NP, def:BPP, def:RP, def:ZPP, def:PP}
+  \uses{def:dtime, def:ntime, def:P, def:NP, def:EXP, def:BPP, def:RP, def:ZPP, def:PP}
+  For every $T$, $\cc{DTIME}(T) \subseteq \cc{BPTIME}(T) \subseteq
+  \cc{PPTIME}(T)$ and $\cc{RTIME}(T) \subseteq \cc{NTIME}(T)$. Consequently
   $\cc{P} \subseteq \cc{BPP} \subseteq \cc{PP}$; $\cc{RP} \subseteq \cc{NP}$;
   $\cc{ZPP} \subseteq \cc{RP}$, $\cc{ZPP} \subseteq \cc{coRP}$, and
-  $\cc{ZPP} \subseteq \cc{NP}$.
+  $\cc{ZPP} \subseteq \cc{NP}$; and $\cc{RP}, \cc{ZPP} \subseteq \cc{NEXP}$.
 \end{theorem}
 \begin{proof}
   \leanok
-  A deterministic machine viewed as probabilistic accepts with probability
-  $0$ or $1$. Since $2/3 > 1/2 > 1/3$, bounded error implies unbounded error.
-  A positive acceptance probability exhibits an accepting path, and
-  probability $0$ excludes one, so $\cc{RTIME}(T) \subseteq \cc{NTIME}(T)$.
+  \uses{thm:polytime-P-subset-NP}
+  A deterministic machine viewed as probabilistic has the same trace on every
+  choice sequence, so it accepts with probability $1$ or $0$. Since
+  $2/3 > 1/2 > 1/3$, bounded error implies unbounded error with the same
+  machine and clock. A positive acceptance probability exhibits an accepting
+  path, and probability $0$ excludes one, so the same machine witnesses
+  $\cc{RTIME}(T) \subseteq \cc{NTIME}(T)$. The $\cc{ZPP}$ inclusions are
+  immediate from $\cc{ZPP} = \cc{RP} \cap \cc{coRP}$, and the $\cc{NEXP}$
+  inclusions compose with $\cc{NP} \subseteq \cc{NEXP}$.
 \end{proof}
 
 \begin{theorem}[$\cc{P} \subseteq \cc{ZPP}$]
@@ -108,9 +132,12 @@ the chapter on circuits.
   If $L \in \cc{BPP}$ then $\overline{L} \in \cc{BPP}$.
 \end{theorem}
 \begin{proof}
-  Flip the output bit of the probabilistic machine, which exchanges acceptance
-  probability $p$ with $1 - p$ at the same clock. (The library's proof of
-  Sipser--Lautemann does not need this; it proves the $\Pi^p_2$ half
+  Run the probabilistic machine and output $1$ exactly when it does not halt
+  with output $1$. Since every path has halted by the clock, this exchanges
+  acceptance probability $p$ with $1 - p$; the extra steps that rewind the
+  output head and rewrite the verdict keep the clock $O(f)$, and acceptance
+  probability does not change once every path has halted. (The library's proof
+  of Sipser--Lautemann does not need this; it proves the $\Pi^p_2$ half
   directly.)
 \end{proof}
 
@@ -142,8 +169,8 @@ the chapter on circuits.
   probability $1$ and every $x \notin L$ with probability at most $1/2$.
 \end{theorem}
 \begin{proof}
-  Flip the output bit of an $\cc{RP}$ machine for $\overline{L}$, and
-  conversely.
+  Complement the verdict of an $\cc{RP}$ machine for $\overline{L}$ (output $1$
+  exactly when it does not output $1$), and conversely.
 \end{proof}
 
 \begin{theorem}[$\cc{ZPP}$ is zero-error probabilistic time]
@@ -158,10 +185,13 @@ the chapter on circuits.
 \begin{proof}
   \uses{thm:randomness-corp-direct}
   Run the $\cc{RP}$ and $\cc{coRP}$ machines and answer when one of them is
-  conclusive. Neither the three-valued output convention nor an expected-time
-  model is defined yet, and the expected-time semantics must be kept separate
-  from the strict all-paths clock: a machine that is always correct and halts
-  within a polynomial bound on every random string is already deterministic.
+  conclusive; the first equality is also planned as
+  Theorem~\ref{thm:encodings-zpp-lv}. Neither the three-valued output
+  convention nor an expected-time model is defined yet, and the expected-time
+  semantics must be kept separate from the strict all-paths clock: a machine
+  that is always correct and halts within a polynomial bound on every random
+  string can be run on a fixed random string, so it decides a language in
+  $\cc{P}$.
 \end{proof}
 
 \section{The polynomial hierarchy}
@@ -171,10 +201,11 @@ the chapter on circuits.
   \lean{Complexity.PH, Complexity.SigmaP, Complexity.PiP, Complexity.polyExistsLang, Complexity.polyForallLang, Complexity.polyExistsClass, Complexity.polyForallClass}
   \leanok
   \uses{def:P, def:pair}
-  For a polynomial $p$ and a language $L'$, let
+  For a polynomial $p \in \mathbb{N}[X]$ and a language $L'$, let
   $\exists^p L' = \{x : \exists w\ (|w| \le p(|x|) \wedge \langle x, w \rangle
   \in L')\}$ and $\forall^p L' = \{x : \forall w\ (|w| \le p(|x|) \Rightarrow
-  \langle x, w \rangle \in L')\}$. For a class $\mathcal{C}$, let
+  \langle x, w \rangle \in L')\}$, where $\langle \cdot, \cdot \rangle$ is the
+  library's pairing. For a class $\mathcal{C}$, let
   $\exists \mathcal{C}$ be the set of languages $\exists^p L'$ with $p$ a
   polynomial and $L' \in \mathcal{C}$, and similarly $\forall \mathcal{C}$.
   Then
@@ -185,22 +216,31 @@ the chapter on circuits.
 
 \begin{proposition}[Structure of the levels]
   \label{prop:randomness-ph-levels}
-  \lean{Complexity.PiP_zero, Complexity.SigmaP_succ, Complexity.PiP_succ, Complexity.SigmaP_one, Complexity.PiP_one, Complexity.SigmaP_subset_SigmaP_succ, Complexity.PiP_subset_PiP_succ, Complexity.P_subset_PH}
+  \lean{Complexity.compl_polyExistsLang, Complexity.compl_polyForallLang, Complexity.complClass_polyExistsClass, Complexity.complClass_polyForallClass, Complexity.PiP_zero, Complexity.SigmaP_succ, Complexity.PiP_succ, Complexity.SigmaP_one, Complexity.PiP_one, Complexity.P_subset_polyExistsClass_P, Complexity.P_subset_polyForallClass_P, Complexity.SigmaP_subset_SigmaP_succ, Complexity.PiP_subset_PiP_succ, Complexity.SigmaP_subset_PH, Complexity.P_subset_PH}
   \leanok
   \uses{def:PH}
-  $\Pi^p_0 = \cc{P}$, $\Pi^p_{k+1} = \forall \Sigma^p_k$,
-  $\Sigma^p_1 = \exists \cc{P}$, and $\Pi^p_1 = \forall \cc{P}$. For every
-  $k$, $\Sigma^p_k \subseteq \Sigma^p_{k+1}$ and
-  $\Pi^p_k \subseteq \Pi^p_{k+1}$; in particular $\cc{P} \subseteq \cc{PH}$.
+  Complementation exchanges the quantifiers:
+  $\overline{\exists^p L'} = \forall^p \overline{L'}$ and
+  $\overline{\forall^p L'} = \exists^p \overline{L'}$, and at the level of
+  classes the complement class of $\exists \mathcal{C}$ is
+  $\forall \{L : \overline{L} \in \mathcal{C}\}$ and dually. Since $\cc{P}$ is
+  closed under complement, $\Pi^p_0 = \cc{P}$; and
+  $\Sigma^p_{k+1} = \exists \Pi^p_k$, $\Pi^p_{k+1} = \forall \Sigma^p_k$,
+  $\Sigma^p_1 = \exists \cc{P}$, and $\Pi^p_1 = \forall \cc{P}$. Moreover
+  $\cc{P} \subseteq \exists \cc{P}$ and $\cc{P} \subseteq \forall \cc{P}$, and
+  for every $k$, $\Sigma^p_k \subseteq \Sigma^p_{k+1}$,
+  $\Pi^p_k \subseteq \Pi^p_{k+1}$, and $\Sigma^p_k \subseteq \cc{PH}$; in
+  particular $\cc{P} \subseteq \cc{PH}$.
 \end{proposition}
 \begin{proof}
   \leanok
-  \uses{prop:polytime-P-boolean, thm:polytime-preimage}
+  \uses{prop:polytime-P-boolean, thm:polytime-preimage, thm:encodings-pair-fp}
   The complement of a bounded existential is the bounded universal of the
   complement, and $\cc{P}$ is closed under complement. The two level
-  inclusions are proved together by induction; the base case uses the zero
-  witness bound and the fact that the first projection of a pair is in
-  $\cc{FP}$.
+  inclusions are proved together by induction, using monotonicity of $\exists$
+  and $\forall$ in the class; the base case uses the zero witness bound, under
+  which the only witness is the empty string, and the fact that the first
+  projection of a pair is in $\cc{FP}$.
 \end{proof}
 
 \begin{theorem}[Collapse of the hierarchy]
@@ -219,7 +259,7 @@ the chapter on circuits.
 
 \begin{theorem}[Oracle characterization of the hierarchy]
   \label{thm:randomness-ph-oracle}
-  \uses{def:PH, def:NP}
+  \uses{def:PH, def:NP, def:barriers-oracle-ntm, def:barriers-relativized-classes}
   \notready
   For every $k$, $\Sigma^p_{k+1} = \cc{NP}^{\Sigma^p_k}$, where
   $\cc{NP}^{\mathcal{C}}$ is the class of languages decided in polynomial time
@@ -240,36 +280,82 @@ the chapter on circuits.
   \label{lem:randomness-covering}
   \lean{Complexity.Lautemann.Covers, Complexity.Lautemann.exists_covers_of_eventProb_compl_le, Complexity.Lautemann.not_covers_of_eventProb_le}
   \leanok
+  \uses{def:encodings-eventprob}
   For $E \subseteq \{0,1\}^m$, say shifts $u_1, \dots, u_t \in \{0,1\}^m$ cover
-  if every $r \in \{0,1\}^m$ has some $i$ with $r \oplus u_i \in E$. If
-  $\Pr[\overline{E}] \le 2^{-k}$ and $m < kt$, some $t$ shifts cover. If
-  $\Pr[E] \le 2^{-k}$ and $t < 2^k$, no $t$ shifts cover.
+  $E$ if every $r \in \{0,1\}^m$ has some $i$ with $r \oplus u_i \in E$. If
+  $\Pr[\overline{E}] \le 2^{-k}$ and $m < kt$, some $t$ shifts cover $E$. If
+  $\Pr[E] \le 2^{-k}$ and $t < 2^k$, no $t$ shifts cover $E$.
 \end{lemma}
 \begin{proof}
   \leanok
-  Shifting is a measure-preserving involution of the seed space; count the
-  shift tuples that fail to cover a given seed, and apply a union bound.
+  Shifting is a measure-preserving involution of the seed space. For
+  existence, the shift tuples that fail to cover a fixed seed number
+  $|\overline{E}|^t$, and a union bound over the $2^m$ seeds leaves a covering
+  tuple. For non-existence, the $t$ shifted copies of $E$ have total size
+  $t|E| < 2^m$.
+\end{proof}
+
+\begin{lemma}[Lautemann's characterization]
+  \label{lem:randomness-lautemann-char}
+  \lean{Complexity.Lautemann.matrixLang, Complexity.Lautemann.mem_iff_exists_covers, Complexity.Lautemann.notMem_iff_exists_covers_compl, Complexity.Lautemann.eq_polyExistsLang_of_boundedError, Complexity.Lautemann.compl_eq_polyExistsLang_of_boundedError, Complexity.NTM.acceptProb_eq_of_allPathsHaltIn, Complexity.NTM.acceptsWithProb_of_le, Complexity.NTM.rejectsWithProb_of_le}
+  \leanok
+  \uses{def:PH, def:randomness-ppt, def:encodings-majority, def:encodings-repeat}
+  Let $N$ accept every $x \in L$ with probability at least $2/3$ and every
+  $x \notin L$ with probability at most $1/3$ at a clock $f$ (no halting
+  assumption is needed here). For $n = |x|$ let $R = 12(f(n) + 11) + 1$ be the
+  number of trials, $\ell = R f(n)$ the amplified seed length, and
+  $E_x \subseteq \{0,1\}^{\ell}$ the set of seeds on which a strict majority of
+  the $R$ runs of $N$ on $x$, each for $f(n)$ steps along its own block of
+  $f(n)$ bits, accepts. Then $x \in L$ if and only if some $\ell + 1$ shifts
+  cover $E_x$, and $x \notin L$ if and only if some $\ell + 1$ shifts cover
+  $\overline{E_x}$.
+
+  For a polarity $b \in \{0,1\}$, the matrix language $M_b$ is the set of $z$
+  such that, with $x$, $w$, $r$ the components that the pair decoders read
+  from $z$ (exactly $x$, $w$, $r$ when $z = \langle \langle x, w \rangle, r
+  \rangle$) and $\ell$ computed from $|x|$: if $|r| = \ell$, then for some
+  $i \le \ell$ the majority verdict of the $R$ runs along $r \oplus u_i$ equals
+  $b$, where $u_0, \dots, u_{\ell} \in \{0,1\}^{\ell}$ are the consecutive
+  blocks of $w$ (bits beyond $|w|$ read as $0$). If $p$ and $q$ are polynomials
+  with $(\ell + 1)\ell \le p(n)$ and $\ell \le q(n)$ for all $n$, then
+  $L = \exists^p \forall^q M_1$ and $\overline{L} = \exists^p \forall^q M_0$.
+
+  Finally, if every path of $N$ halts within $T(|x|)$ steps, then
+  $\mathrm{acceptProb}_N(x, T') = \mathrm{acceptProb}_N(x, T(|x|))$ for every
+  $T' \ge T(|x|)$, so both bounded-error conditions transfer from the clock
+  $T$ to any pointwise larger clock.
+\end{lemma}
+\begin{proof}
+  \leanok
+  \uses{lem:randomness-covering, thm:encodings-amplification, lem:encodings-acceptprob}
+  The acceptance probability at clock $f$ is the probability of the
+  single-trial accepting event, so majority amplification with exponent
+  $f(n) + 11$ bounds the failure event by $2^{-(f(n)+11)}$. Since
+  $\ell < (f(n) + 11)(\ell + 1)$ the covering lemma gives covering shifts, and
+  since $\ell + 1 < 2^{f(n)+11}$ it rules them out in the other case. The
+  existential witness encodes the covering tuple, and the universal variable
+  ranges over encoded seeds. For the last part, the surplus choice bits split
+  the enlarged sample space into equal fibers over the original one.
 \end{proof}
 
 \begin{lemma}[The Lautemann matrix is polynomial-time]
   \label{lem:randomness-sl-matrix}
-  \lean{Complexity.MatrixVerdictInFP, Complexity.matrixVerdictInFP}
+  \lean{Complexity.Lautemann.matrixVerdict, Complexity.MatrixVerdictInFP, Complexity.matrixVerdictInFP, Complexity.MatrixInP, Complexity.matrixInP_of_verdictInFP}
   \leanok
-  \uses{def:FP, def:ntm}
-  For every machine $N$, polynomial time bound $p$, and polarity $b$, the
-  verdict of the quantifier-free matrix of Lautemann's characterization is in
-  $\cc{FP}$. On input $\langle \langle x, w \rangle, r \rangle$ it decodes a
-  tuple of shifts from $w$ and a seed from $r$ and returns the disjunction over
-  the shifts of the majority vote of the amplified trials of $N$ on $x$, run
-  for $p(|x|)$ steps along the shifted seed.
+  \uses{def:FP, def:P, lem:randomness-lautemann-char}
+  For every machine $N$, polynomial $p \in \mathbb{N}[X]$, and polarity $b$, take
+  the clock $f = p$ in Lemma~\ref{lem:randomness-lautemann-char}. The verdict
+  function $z \mapsto [z \in M_b]$, with one output bit, is in $\cc{FP}$;
+  consequently $M_b \in \cc{P}$.
 \end{lemma}
 \begin{proof}
   \leanok
-  \uses{thm:cobham}
+  \uses{thm:cobham, lem:polytime-decision-fn}
   No machine is constructed. The verdict is written in Cobham's algebra: payload
   scanners decode the triple, the trial count and seed length are
   $\mathrm{smash}$ lengths built from $p$, and each trial is one run of $N$
-  along its block of choice bits, simulated inside the algebra.
+  along its block of choice bits, simulated inside the algebra. The verdict
+  function then decides $M_b$ in polynomial time.
 \end{proof}
 
 \begin{theorem}[Sipser--Lautemann]
@@ -281,15 +367,16 @@ the chapter on circuits.
 \end{theorem}
 \begin{proof}
   \leanok
-  \uses{lem:randomness-covering, lem:randomness-sl-matrix, lem:polytime-decision-fn, thm:encodings-amplification, lem:encodings-acceptprob}
-  Replace the machine's time bound by a dominating polynomial, which does not
-  change acceptance probabilities once every path has halted, and amplify by
-  majority vote over independent blocks. The covering lemma gives
-  $x \in L \iff \exists$ shifts $\forall$ seeds, some shifted amplified trial
-  accepts; the complementary form characterizes $x \notin L$ and gives the
-  $\Pi^p_2$ half directly. The matrix is in $\cc{P}$ by
-  Lemma~\ref{lem:randomness-sl-matrix} and
-  Lemma~\ref{lem:polytime-decision-fn}.
+  \uses{lem:randomness-lautemann-char, lem:randomness-sl-matrix, prop:randomness-ph-levels}
+  Replace the machine's time bound by a pointwise dominating polynomial $P$,
+  which does not change acceptance probabilities once every path has halted.
+  With $B = (12P + 133)P$, the polynomials $p = (B + 1)B$ and $q = B$ bound
+  the witness and seed lengths, so
+  Lemma~\ref{lem:randomness-lautemann-char} writes $L$ and $\overline{L}$ as
+  $\exists^p \forall^q M_1$ and $\exists^p \forall^q M_0$. By
+  Lemma~\ref{lem:randomness-sl-matrix} both matrices are in $\cc{P}$, so
+  $\forall^q M_b \in \Pi^p_1$ and $L, \overline{L} \in \Sigma^p_2$; the second
+  gives the $\Pi^p_2$ half directly.
 \end{proof}
 
 \begin{corollary}[$\cc{BPP} \subseteq \cc{PH}$]
@@ -301,7 +388,7 @@ the chapter on circuits.
 \end{corollary}
 \begin{proof}
   \leanok
-  \uses{thm:randomness-sipser-lautemann}
+  \uses{thm:randomness-sipser-lautemann, prop:randomness-ph-levels}
   $\Sigma^p_2 \subseteq \cc{PH}$.
 \end{proof}
 
@@ -309,31 +396,45 @@ the chapter on circuits.
 
 \begin{definition}[$\#\cc{P}$]
   \label{def:sharpP}
-  \lean{Complexity.SharpP, Complexity.NTM.acceptLeafCount}
+  \lean{Complexity.SharpP, Complexity.NTM.acceptLeafCount, Complexity.NTM.acceptLeafCountFrom}
   \leanok
-  \uses{def:ntm}
+  \uses{def:ntm, def:ntm-decides}
   $\mathrm{acceptLeafCount}_N(x, T)$ is the number of accepting leaves of the
-  computation tree of $N$ on $x$ truncated at depth $T$; a path that halts at
-  depth $t < T$ is one leaf, unlike in $\mathrm{acceptCount}$. $\#\cc{P}$ is
-  the set of $f \colon \{0,1\}^* \to \mathbb{N}$ for which some machine $N$ and
+  computation tree of $N$ on $x$ truncated at depth $T$: a halted
+  configuration contributes $1$ if its output cell $1$ equals $1$ and $0$
+  otherwise, a configuration that has not halted at depth $T$ contributes $0$,
+  and any other configuration contributes the sum over its two successors. So a
+  path that halts at depth $t < T$ is one leaf, unlike in
+  $\mathrm{acceptCount}$. $\#\cc{P}$ is the set of
+  $f \colon \{0,1\}^* \to \mathbb{N}$ for which some machine $N$, some $k$, and
   some $T = O(n^k)$ satisfy: every path halts within $T(|x|)$ steps and
-  $f(x) = \mathrm{acceptLeafCount}_N(x, T(|x|))$.
+  $f(x) = \mathrm{acceptLeafCount}_N(x, T(|x|))$ for every $x$.
 \end{definition}
 
 \begin{lemma}[Accepting leaves]
   \label{lem:randomness-leaf-count}
-  \lean{Complexity.NTM.acceptLeafCount_le, Complexity.NTM.acceptLeafCount_eq_of_le_of_allPathsHaltIn, Complexity.SharpP.le_two_pow}
+  \lean{Complexity.NTM.acceptLeafCountFrom_le, Complexity.NTM.acceptLeafCount_le, Complexity.NTM.acceptCount_le, Complexity.NTM.acceptLeafCount_eq_of_le_of_allChoicesHalt, Complexity.NTM.acceptLeafCount_eq_of_le_of_allPathsHaltIn, Complexity.SharpP.le_two_pow}
   \leanok
-  \uses{def:sharpP}
-  $\mathrm{acceptLeafCount}_N(x, T) \le 2^T$. If every path halts within
-  $T(|x|)$ steps and $T \le T'$ pointwise, the counts at $T'(|x|)$ and
-  $T(|x|)$ agree, so a $\#\cc{P}$ value does not depend on the choice of a
-  sufficient clock. Every $f \in \#\cc{P}$ satisfies $f(x) \le 2^{T(|x|)}$ for
-  some polynomially bounded $T$.
+  \uses{def:sharpP, def:models-accept-prob}
+  For every machine $N$, input $x$, and $T \in \mathbb{N}$,
+  $\mathrm{acceptLeafCount}_N(x, T) \le 2^T$ (more generally, the tree rooted
+  at any configuration and truncated at depth $T$ has at most $2^T$ accepting
+  leaves), and likewise $\mathrm{acceptCount}_N(x, T) \le 2^T$. If every
+  length-$T$ choice sequence leaves $N$ on $x$ in a halted configuration after
+  $T$ steps and $T \le T'$, then
+  $\mathrm{acceptLeafCount}_N(x, T') = \mathrm{acceptLeafCount}_N(x, T)$; in
+  particular, if every path halts within $T(|x|)$ steps for every $x$ and
+  $T \le T'$ pointwise, the accepting-leaf counts at $T'(|x|)$ and $T(|x|)$
+  agree for every $x$, so a $\#\cc{P}$ value does not depend on the choice of
+  a sufficient clock. (No such invariance is claimed for
+  $\mathrm{acceptCount}$, which counts length-$T$ choice strings, so a path
+  that halts early is counted once for each unused suffix.) For every $f \in \#\cc{P}$ there are $k$ and $T = O(n^k)$ such that
+  $f(x) \le 2^{T(|x|)}$ for every $x$.
 \end{lemma}
 \begin{proof}
   \leanok
-  Induction on the depth of the truncated tree.
+  Induction on the depth of the truncated tree; $\mathrm{acceptCount}$ counts a
+  subset of the $2^T$ choice sequences.
 \end{proof}
 
 \begin{definition}[$\cc{GapP}$]
@@ -380,9 +481,10 @@ the chapter on circuits.
 \end{theorem}
 \begin{proof}
   \uses{thm:randomness-pp-gapp}
-  Flipping the output bit turns ``$> 1/2$'' into ``$\ge 1/2$''; ties are
-  removed by passing to the gap $1 - 2h$, which is positive exactly when
-  $h \le 0$.
+  Complementing the verdict turns ``$> 1/2$'' into ``$\le 1/2$'', and ties
+  are the obstacle. With $h \in \cc{GapP}$ integer-valued and
+  $x \in L \iff h(x) > 0$, pass to the gap $1 - 2h$, which is positive exactly
+  when $h \le 0$.
 \end{proof}
 
 \begin{theorem}[Beigel--Reingold--Spielman]
@@ -418,16 +520,19 @@ $\cc{IP} \subseteq \cc{PSPACE}$ are.
 
 \begin{lemma}[$\cc{PP}$ as an integer comparison]
   \label{lem:randomness-pp-integer}
-  \lean{Complexity.PP_integer_characterization}
+  \lean{Complexity.NTM.acceptProb_gt_half_iff, Complexity.PP_integer_characterization}
   \leanok
-  \uses{def:PP}
-  For every $L \in \cc{PP}$ there are a machine $N$ and a clock $f = O(n^m)$
-  such that every path halts within $f(|x|)$ steps and
+  \uses{def:PP, def:models-accept-prob}
+  For every machine $N$, input $x$ and clock $T$,
+  $\mathrm{acceptProb}_N(x, T) > 1/2 \iff 2^T < 2 \cdot
+  \mathrm{acceptCount}_N(x, T)$. Hence for every $L \in \cc{PP}$ there are a
+  machine $N$, some $m$, and a clock $f = O(n^m)$ such that every path halts
+  within $f(|x|)$ steps and
   $x \in L \iff 2^{f(|x|)} < 2 \cdot \mathrm{acceptCount}_N(x, f(|x|))$.
 \end{lemma}
 \begin{proof}
   \leanok
-  Clear the denominator in $\mathrm{acceptCount}/2^f > 1/2$.
+  Clear the denominator in $\mathrm{acceptCount}/2^T > 1/2$.
 \end{proof}
 
 \begin{theorem}[$\cc{PP} \subseteq \cc{PSPACE}$]
@@ -439,74 +544,270 @@ $\cc{IP} \subseteq \cc{PSPACE}$ are.
 \end{theorem}
 \begin{proof}
   \leanok
-  \uses{lem:randomness-pp-integer}
-  A deterministic machine enumerates the $2^{p(|x|)}$ choice sequences on a
-  counter tape that doubles as the choice tape, simulates one path at a time,
-  updates two tallies, and wipes its scratch space between passes; the loop is
-  exponentially long but each pass stays in the same polynomial window.
+  \uses{lem:randomness-pp-integer, lem:space-poly-window}
+  Dominate the clock pointwise by a polynomial $p$. A deterministic machine
+  evaluates the horizon from $|x|$ and enumerates the choice sequences up to it
+  on a counter tape that doubles as the choice tape, simulates one path at a
+  time, updates two tallies, and wipes its scratch space between passes; the
+  loop is exponentially long but each pass stays in the same polynomial window.
+  (The simulated machine is prefixed by two steps that ignore their choice bits,
+  which doubles the accepting count, matched by doubling the horizon; a source
+  machine whose start state is its halting state has no accepting path and is
+  handled by a machine that outputs $0$.)
 \end{proof}
 
 \begin{theorem}[$\cc{PH} \subseteq \cc{PSPACE}$]
   \label{thm:randomness-ph-subset-pspace}
-  \lean{Complexity.PH_subset_PSPACE}
+  \lean{Complexity.SigmaP_subset_PSPACE_of, Complexity.PH_subset_PSPACE_of, Complexity.PH_enumerator_exists, Complexity.polyExistsClass_PSPACE_subset_PSPACE, Complexity.PH_subset_PSPACE}
   \leanok
   \uses{def:PH, def:PSPACE}
-  $\cc{PH} \subseteq \cc{PSPACE}$.
+  If $\cc{PSPACE}$ is closed under complement and $\exists \cc{PSPACE}
+  \subseteq \cc{PSPACE}$, then $\Sigma^p_k \subseteq \cc{PSPACE}$ for every
+  $k$, and hence $\cc{PH} \subseteq \cc{PSPACE}$. For every polynomial $p$ and
+  every $L' \in \cc{PSPACE}$ there are a deterministic machine and a polynomial
+  $Q$ such that every configuration the machine reaches on $x$ is within
+  decision space $Q(|x|)$ and the machine halts on every $x$ with output $1$
+  if $x \in \exists^p L'$ and $0$ otherwise; hence $\exists \cc{PSPACE}
+  \subseteq \cc{PSPACE}$. Consequently $\cc{PH} \subseteq \cc{PSPACE}$.
 \end{theorem}
 \begin{proof}
   \leanok
-  \uses{prop:randomness-ph-levels}
-  By induction on the level it suffices that $\cc{PSPACE}$ is closed under
-  complement and under polynomially bounded existential quantification
-  (\texttt{Complexity.PH\_subset\_PSPACE\_of}). Complement reruns the machine
-  and flips the verdict with one extra cell; the existential enumerates the
-  bounded witnesses on one reused work tape.
+  \uses{prop:randomness-ph-levels, prop:space-dtime-dspace, lem:space-compl, lem:space-poly-window}
+  Induct on the level, starting from $\cc{P} \subseteq \cc{PSPACE}$ and using
+  monotonicity of $\exists$. Complement is Lemma~\ref{lem:space-compl}: rerun
+  the machine and flip the verdict with one extra cell. For the existential, the
+  machine enumerates the witnesses of length at most $p(|x|)$ on one reused
+  work tape, driven by a single counter below $2^{p(|x|)+1}$, and runs a
+  decider for $L'$ on each pair; by Lemma~\ref{lem:space-poly-window} this puts
+  $\exists^p L'$ in $\cc{PSPACE}$.
 \end{proof}
 
 \begin{corollary}[$\cc{BPP} \subseteq \cc{PSPACE}$]
   \label{cor:randomness-bpp-pspace}
+  \lean{Complexity.BPP_subset_PSPACE}
+  \leanok
   \uses{def:BPP, def:PSPACE}
   $\cc{BPP} \subseteq \cc{PSPACE}$.
 \end{corollary}
 \begin{proof}
+  \leanok
   \uses{thm:randomness-containments, thm:randomness-pp-pspace}
-  $\cc{BPP} \subseteq \cc{PP} \subseteq \cc{PSPACE}$; this composition is not
-  yet stated in the library.
+  $\cc{BPP} \subseteq \cc{PP} \subseteq \cc{PSPACE}$. (It also follows from
+  Corollary~\ref{cor:randomness-bpp-ph} and
+  Theorem~\ref{thm:randomness-ph-subset-pspace}.)
 \end{proof}
 
 \section{Hashing and approximate counting}
 
+The results of this section are finite statements about a fixed set
+$S \subseteq \{0,1\}^n$ and a uniformly random seed; probabilities are
+normalized counts over seeds. Only Lemma~\ref{lem:randomness-affine-zero-circuit}
+and Corollary~\ref{cor:randomness-approx-count-hardwire} involve a
+computation model (circuits), and Stockmeyer's theorem for $\#\cc{P}$ with an
+$\cc{NP}$ oracle remains planned.
+
 \begin{definition}[Pairwise-independent hash family]
   \label{def:randomness-hash}
-  \lean{Complexity.PairwiseIndependentHash, Complexity.PairwiseIndependentHash.affine}
+  \lean{Complexity.PairwiseIndependentHash, Complexity.PairwiseIndependentHash.affineSeedWidth, Complexity.PairwiseIndependentHash.affineEval, Complexity.PairwiseIndependentHash.affine, Complexity.PairwiseIndependentHash.cell, Complexity.PairwiseIndependentHash.cellSize, Complexity.PairwiseIndependentHash.averageCellSize, Complexity.PairwiseIndependentHash.cellSizeVariance}
   \leanok
-  \uses{def:bitstring}
+  \uses{def:bitstring, def:encodings-eventprob}
   A pairwise-independent family from $n$-bit to $m$-bit strings with $s$-bit
   seeds is a map $h \colon \{0,1\}^s \times \{0,1\}^n \to \{0,1\}^m$ such that,
   over a uniform seed, $\Pr[h(x) = y] = 2^{-m}$ for all $x, y$, and
   $\Pr[h(x) = y \wedge h(x') = y'] = 2^{-2m}$ for all $x \neq x'$ and all
-  $y, y'$. The affine family $x \mapsto Ax + b$ over $\mathrm{GF}(2)$, with
-  $s = m(n+1)$, is one.
+  $y, y'$. The affine family $x \mapsto Ax + b$ over $\mathrm{GF}(2)$, whose
+  seed lists the $m$ rows $(a_i, b_i)$ of $n + 1$ bits each, so
+  $s = m(n+1)$, is one. For $S \subseteq \{0,1\}^n$, a target
+  $y \in \{0,1\}^m$ and a seed $\sigma$, the cell is
+  $C_\sigma = \{x \in S : h_\sigma(x) = y\}$; $\mu$ and $\mathrm{Var}$ denote
+  the average and the variance of $|C_\sigma|$ over all $2^s$ seeds.
 \end{definition}
+
+\begin{lemma}[Pairwise-independent hashing lemma]
+  \label{lem:randomness-hash-occupancy}
+  \lean{Complexity.PairwiseIndependentHash.averageCellSize_eq, Complexity.PairwiseIndependentHash.averageOrderedPairCellSize_eq, Complexity.PairwiseIndependentHash.orderedPairCellSize_eq, Complexity.PairwiseIndependentHash.averageCellSizeSquare_eq_add, Complexity.PairwiseIndependentHash.averageCellSizeSquare_eq, Complexity.PairwiseIndependentHash.cellSizeVariance_eq, Complexity.PairwiseIndependentHash.cellSizeVariance_nonneg, Complexity.PairwiseIndependentHash.cellSizeVariance_le_averageCellSize, Complexity.PairwiseIndependentHash.eventProb_deviationEvent_le_variance_div_sq, Complexity.PairwiseIndependentHash.eventProb_deviationEvent_le_average_div_sq, Complexity.PairwiseIndependentHash.eventProb_relativeDeviationEvent_le, Complexity.PairwiseIndependentHash.eventProb_nonemptyCellEvent_le_averageCellSize, Complexity.PairwiseIndependentHash.eventProb_emptyCellEvent_le_inv_averageCellSize, Complexity.PairwiseIndependentHash.one_sub_inv_averageCellSize_le_eventProb_nonemptyCellEvent, Complexity.PairwiseIndependentHash.eventProb_nonemptyCellEvent_le_one_eighth, Complexity.PairwiseIndependentHash.seven_eighths_le_eventProb_nonemptyCellEvent, Complexity.PairwiseIndependentHash.majorityNonempty, Complexity.PairwiseIndependentHash.one_sub_two_pow_le_eventProb_majorityNonemptyEvent, Complexity.PairwiseIndependentHash.eventProb_majorityEmptyEvent_le_two_pow, Complexity.PairwiseIndependentHash.eventProb_majorityNonemptyEvent_le_two_pow}
+  \leanok
+  \uses{def:randomness-hash, def:encodings-majority}
+  For every pairwise-independent family, $S \subseteq \{0,1\}^n$ and target
+  $y$: $\mu = |S|/2^m$; the average number of ordered pairs of distinct
+  members of $C_\sigma$, which is $|C_\sigma|(|C_\sigma| - 1)$, is
+  $(|S|^2 - |S|)/2^{2m}$; the average of $|C_\sigma|^2$ is the sum of these
+  two; and $\mathrm{Var} = (|S|/2^m)(1 - 2^{-m})$, so
+  $0 \le \mathrm{Var} \le \mu$. For every $r > 0$,
+  $\Pr[\,\bigl||C_\sigma| - \mu\bigr| \ge r\,] \le \mathrm{Var}/r^2 \le
+  \mu/r^2$, and if $\varepsilon > 0$ and $\mu > 0$ then
+  $\Pr[\,\bigl||C_\sigma| - \mu\bigr| \ge \varepsilon\mu\,] \le
+  1/(\varepsilon^2\mu)$. For occupancy, $\Pr[C_\sigma \neq \emptyset] \le \mu$,
+  and if $\mu > 0$ then $\Pr[C_\sigma = \emptyset] \le 1/\mu$, so
+  $\Pr[C_\sigma \neq \emptyset] \ge 1 - 1/\mu$; in particular
+  $\Pr[C_\sigma \neq \emptyset] \le 1/8$ when $\mu \le 1/8$ and
+  $\Pr[C_\sigma \neq \emptyset] \ge 7/8$ when $\mu \ge 8$. Finally, let the
+  amplified occupancy test on $(12k + 1)s$ seed bits return the strict
+  majority of the answers ``$C_\sigma \neq \emptyset$'' for its $12k + 1$
+  blocks $\sigma$. If $\mu \ge 8$ it returns $1$ with probability at least
+  $1 - 2^{-k}$ (so $0$ with probability at most $2^{-k}$), and if
+  $\mu \le 1/8$ it returns $1$ with probability at most $2^{-k}$.
+\end{lemma}
+\begin{proof}
+  \leanok
+  \uses{lem:encodings-markov, thm:encodings-amplification}
+  Summing over the members and the ordered pairs of $S$, uniformity and
+  pairwise independence give the two factorial moments. Chebyshev's inequality
+  is the finite Markov bound applied to the squared deviation, and
+  $C_\sigma = \emptyset$ forces a deviation of at least $\mu$. The occupancy
+  gap $7/8$ versus $1/8$ lies outside $[1/3, 2/3]$, so majority amplification
+  over $12k + 1$ blocks applies.
+\end{proof}
+
+\begin{lemma}[A circuit for the zero cell of an affine hash]
+  \label{lem:randomness-affine-zero-circuit}
+  \lean{Complexity.PairwiseIndependentHash.AffineCircuit.linearValue_eq_sum_add, Complexity.PairwiseIndependentHash.AffineCircuit.compileZeroRaw, Complexity.PairwiseIndependentHash.AffineCircuit.length_compileZeroRaw, Complexity.PairwiseIndependentHash.AffineCircuit.compileZeroRaw_wellFormed, Complexity.PairwiseIndependentHash.AffineCircuit.eval?_compileZeroRaw, Complexity.PairwiseIndependentHash.AffineCircuit.zeroValue_eq_decide, Complexity.PairwiseIndependentHash.AffineCircuit.zeroValue_affineEval}
+  \leanok
+  \uses{def:randomness-hash, def:circuits-code}
+  Let $N \ge 1$, and let index maps select, among $N$ primary input wires, the
+  $m(n + 1)$ coefficients of $m$ affine forms
+  $x \mapsto \langle a_i, x \rangle \oplus b_i$ over $\mathrm{GF}(2)$ and the
+  $n$ coordinates of $x$. There is a raw fan-in-two circuit (a gate list whose
+  last gate is the output) with exactly $m(4n + 4) + 2m + 4$ gates that is well
+  formed over $N$ inputs and, on every $N$-bit input, evaluates to $1$ exactly
+  when all $m$ selected forms vanish on the selected $x$. When the coefficients
+  are the rows of an affine-hash seed $\sigma$, this is the test
+  $h_\sigma(x) = 0^m$.
+\end{lemma}
+\begin{proof}
+  \leanok
+  One AND gate per coefficient-coordinate product and a linear-size parity
+  fragment per row compute each form; a threshold fragment detecting a nonzero
+  row, followed by one negated copy gate, gives the all-zero test.
+\end{proof}
+
+\begin{definition}[Approximation contracts]
+  \label{def:randomness-approx}
+  \lean{Complexity.ApproximateCounting.IsFactorApproximation, Complexity.ApproximateCounting.IsRelativeApproximation}
+  \leanok
+  For naturals $a$ and $e$: $e$ approximates $a$ within factor $F$ if
+  $e \le Fa$ and $a \le Fe$; and $e$ approximates $a$ with relative error
+  $1/q$ if $q > 0$ and $(q - 1)a \le qe \le (q + 1)a$, that is,
+  $(1 - 1/q)a \le e \le (1 + 1/q)a$.
+\end{definition}
+
+\begin{lemma}[Constant-factor approximate counting]
+  \label{lem:randomness-weak-count}
+  \lean{Complexity.ApproximateCounting.Weak.estimate, Complexity.ApproximateCounting.Weak.ResponsesAccurate, Complexity.ApproximateCounting.Weak.estimate_lt_two_pow_add_four, Complexity.ApproximateCounting.Weak.estimate_isFactorApproximation, Complexity.ApproximateCounting.Weak.hashingEstimate, Complexity.ApproximateCounting.Weak.hashingEstimate_lt_two_pow_add_four, Complexity.ApproximateCounting.Weak.eventProb_badHashingEvent_le, Complexity.ApproximateCounting.Weak.one_sub_error_le_eventProb_factorApproximationEvent, Complexity.ApproximateCounting.Weak.three_fourths_le_eventProb_factorApproximationEvent}
+  \leanok
+  \uses{def:randomness-approx, def:randomness-hash, lem:randomness-hash-occupancy}
+  Given answers $\rho_0, \dots, \rho_{n+3} \in \{0,1\}$, one per hash width
+  $j$, the estimate is $0$ if $\rho_0 = 0$ and otherwise $2^{j^*}$, where $j^*$
+  is the largest $j$ with $\rho_j = 1$; it is always below $2^{n+4}$. Call the
+  answers accurate for $a$ if $\rho_0 = [a > 0]$, $\rho_j = 1$ whenever
+  $8 \cdot 2^j \le a$, and $\rho_j = 0$ whenever $8a \le 2^j$. If
+  $a \le 2^n$ and the answers are accurate for $a$, the estimate approximates
+  $a$ within factor $16$. The hashing estimator for $S \subseteq \{0,1\}^n$
+  with amplification $k$ sets $\rho_0 = [S \neq \emptyset]$ and, for
+  $j \ge 1$, takes $\rho_j$ to be the amplified occupancy test of
+  Lemma~\ref{lem:randomness-hash-occupancy} for the affine family to $j$ bits
+  and target $0^j$, each width on its own block of the seed. The probability
+  that some answer is not accurate for $|S|$ is at most $(n + 4)2^{-k}$, so the
+  estimator approximates $|S|$ within factor $16$ with probability at least
+  $1 - (n + 4)2^{-k}$, and at least $3/4$ when $k = n + 4$.
+\end{lemma}
+\begin{proof}
+  \leanok
+  \uses{lem:encodings-union-bound}
+  At width $j$ the mean cell size is $|S|/2^j$, so the widths that must answer
+  $1$ have mean at least $8$ and those that must answer $0$ have mean at most
+  $1/8$; the amplified occupancy bounds and a union bound over the $n + 4$
+  widths give the probability. The factor-$16$ bound is arithmetic on the
+  largest positive width.
+\end{proof}
+
+\begin{lemma}[Accuracy boosting by Cartesian powers]
+  \label{lem:randomness-power-boost}
+  \lean{Complexity.ApproximateCounting.cartesianPower, Complexity.ApproximateCounting.relativeCopies, Complexity.ApproximateCounting.upperRootEstimate, Complexity.ApproximateCounting.boostedEstimate, Complexity.ApproximateCounting.mem_cartesianPower_iff, Complexity.ApproximateCounting.card_cartesianPower, Complexity.ApproximateCounting.relativeCopies_separates_sixteen, Complexity.ApproximateCounting.upperRootEstimate_isRelativeApproximation, Complexity.ApproximateCounting.boostedEstimate_isRelativeApproximation, Complexity.ApproximateCounting.boostedEstimate_cartesianPower_isRelativeApproximation}
+  \leanok
+  \uses{def:randomness-approx, def:encodings-blocks}
+  The $c$-fold Cartesian power $S^c \subseteq \{0,1\}^{cn}$ of
+  $S \subseteq \{0,1\}^n$, encoded row-major, consists of the strings all of
+  whose $n$-bit blocks lie in $S$, and $|S^c| = |S|^c$. If $c \ge 1$,
+  $q \ge 1$, $F^2 q^c \le (q + 1)^c$, and $e$ approximates $a^c$ within factor
+  $F$, then $\lfloor (Fe)^{1/c} \rfloor$ approximates $a$ with relative error
+  $1/q$. For $F = 16$ and $c = 8q$ the separation condition holds for every
+  $q \ge 1$, so a factor-$16$ estimate $e$ of $|S^{8q}|$ yields the relative
+  estimate $\lfloor (16e)^{1/(8q)} \rfloor$ of $|S|$.
+\end{lemma}
+\begin{proof}
+  \leanok
+  Multiplying by $F$ before the floor root selects the upper endpoint of the
+  interval $[e/F, Fe]$ containing $a^c$, and the separation condition makes
+  the $c$-th root of that interval shorter than the relative-error window.
+\end{proof}
 
 \begin{theorem}[Relative approximate counting by hashing]
   \label{thm:randomness-approx-count}
-  \lean{Complexity.ApproximateCounting.IsRelativeApproximation, Complexity.ApproximateCounting.Relative.one_sub_two_pow_le_eventProb_successEvent}
+  \lean{Complexity.ApproximateCounting.Relative.hashingEstimate, Complexity.ApproximateCounting.Relative.successEvent, Complexity.ApproximateCounting.Relative.failureEvent, Complexity.ApproximateCounting.Relative.one_sub_two_pow_le_eventProb_successEvent, Complexity.ApproximateCounting.Relative.eventProb_failureEvent_le_two_pow, Complexity.ApproximateCounting.Relative.three_fourths_le_eventProb_successEvent, Complexity.ApproximateCounting.Relative.hashingEstimate_lt_two_pow_succ}
   \leanok
-  \uses{def:randomness-hash}
-  Let $S \subseteq \{0,1\}^n$ be finite, $\varepsilon \ge 1$, and
-  $t \ge 0$. With probability at least $1 - 2^{-t}$ over its seed, the
-  amplified hashing estimator returns $e$ with
-  $(\varepsilon - 1)|S| \le \varepsilon e \le (\varepsilon + 1)|S|$. The
-  estimator queries $S$ only through exact answers to ``is this hash cell of
-  $S$ nonempty?''
+  \uses{def:randomness-hash, def:randomness-approx}
+  Let $S \subseteq \{0,1\}^n$, let $q \ge 1$ be an integer, and let
+  $t \ge 0$. The relative hashing estimator runs the constant-factor hashing
+  estimator of Lemma~\ref{lem:randomness-weak-count} on $S^{8q}$ with
+  amplification $k = 8qn + 2 + t$ and returns
+  $\lfloor (16w)^{1/(8q)} \rfloor$ for its output $w$. With probability at
+  least $1 - 2^{-t}$ over the seed, its output $e$ satisfies
+  $(q - 1)|S| \le qe \le (q + 1)|S|$; for $t = 2$ this probability is at least
+  $3/4$. Its output is always below $2^{n+1}$. By construction (this is a
+  property of the definition, not a separate theorem), the estimator reads
+  $S$ only through whether $S^{8q}$ is nonempty and whether zero cells
+  $\{z \in S^{8q} : h(z) = 0^j\}$ of affine hashes $h$ are nonempty.
 \end{theorem}
 \begin{proof}
   \leanok
-  Stockmeyer's scheme: a factor-$16$ estimate from cell-occupancy answers at
-  logarithmically many hash widths, with majority over independent affine
-  hashes for each answer, applied to a Cartesian power of $S$ and followed by
-  an integer root.
+  \uses{lem:randomness-weak-count, lem:randomness-power-boost}
+  Stockmeyer's scheme. The constant-factor estimator on $S^{8q}$, of width
+  $8qn$, fails with probability at most
+  $(8qn + 4)2^{-(8qn + 2 + t)} \le 2^{-t}$, and on success the Cartesian-power
+  lemma converts its factor-$16$ estimate of $|S|^{8q}$ into a
+  relative-error-$1/q$ estimate of $|S|$.
+\end{proof}
+
+\begin{corollary}[Fixing the estimator's seed]
+  \label{cor:randomness-approx-count-hardwire}
+  \lean{Complexity.Circuit.badSeedEvent, Complexity.Circuit.exists_uniform_correct_seed, Complexity.Circuit.exists_hardwired_correct_circuit, Complexity.ApproximateCounting.Relative.OutputIsAccurate, Complexity.ApproximateCounting.Relative.CircuitImplements, Complexity.ApproximateCounting.Relative.badSeedEvent_eq_failureEvent, Complexity.ApproximateCounting.Relative.eventProb_badSeedEvent_le_two_pow, Complexity.ApproximateCounting.Relative.exists_hardwired_accurate_circuit, Complexity.ApproximateCounting.Relative.OracleProgramImplements, Complexity.ApproximateCounting.Relative.inlineCircuitImplements, Complexity.ApproximateCounting.Relative.exists_hardwired_accurate_of_mem_PPoly}
+  \leanok
+  \uses{def:circuit, def:circuits-bases, def:PPoly, thm:randomness-approx-count}
+  Let $C$ be a fan-in-two circuit with $s + a$ inputs, $a \ge 1$, and $M \ge 1$
+  outputs, whose first $s$ inputs are a random seed, and let a decidable
+  predicate say which outputs are correct for which inputs
+  $u \in \{0,1\}^a$. If for every $u$ the seeds $\sigma$ on which $C(\sigma u)$
+  is incorrect for $u$ have probability at most $2^{-(a+1)}$, then one seed is
+  correct for every $u$, and hardwiring it gives a circuit on $a$ inputs with
+  the same internal gate count and the same size that is correct for every
+  $u$.
+
+  Now fix $q \ge 1$, $t$, and sets $S_u \subseteq \{0,1\}^n$ for
+  $u \in \{0,1\}^a$, and say $C$ implements the relative estimator if, for
+  every seed $\sigma$ and every $u$, the output of $C(\sigma u)$ read as a
+  little-endian unsigned integer equals the output of the estimator of
+  Theorem~\ref{thm:randomness-approx-count} on $S_u$ with seed $\sigma$. Then
+  $C$ fails to output a relative-error-$1/q$ approximation of $|S_u|$ exactly on
+  the estimator's failure seeds, hence with probability at most $2^{-t}$ for
+  every $u$; for $t = a + 1$, hardwiring a seed gives a circuit of the same size
+  that is accurate on every $u$. The same holds for a fixed-round adaptive
+  oracle program of fan-in-two circuits (\texttt{AdaptiveOracleProgram}):
+  inlining circuits that answer every query of the right width as the oracle
+  does preserves implementing the estimator, and if the program implements it
+  with $t = a + 1$ relative to every oracle deciding a language
+  $A \in \cc{P/poly}$, then for some polynomial-size circuit family deciding
+  $A$, inlining that family and hardwiring a seed gives an ordinary circuit,
+  of the same size as the inlined program, that is accurate on every $u$.
+\end{corollary}
+\begin{proof}
+  \leanok
+  \uses{lem:encodings-good-seed, lem:circuits-hardwiring}
+  A union bound over the $2^a$ inputs leaves a seed that is good for all of
+  them, and fixing an input prefix keeps the gates. For the estimator the bad
+  seeds of $C$ are exactly the failure seeds, whose probability is bounded by
+  Theorem~\ref{thm:randomness-approx-count}; for oracle programs, first inline
+  the circuit oracle, which preserves every output.
 \end{proof}
 
 \begin{theorem}[Stockmeyer]
@@ -520,7 +821,10 @@ $\cc{IP} \subseteq \cc{PSPACE}$ are.
 \end{theorem}
 \begin{proof}
   \uses{thm:randomness-approx-count, lem:polytime-guess-verify}
-  Apply Theorem~\ref{thm:randomness-approx-count} to the set of accepting
-  paths, answering each cell-occupancy question with one $\cc{NP}$ query.
-  Probabilistic oracle machines are not defined yet.
+  Pad the machine so that every path halts exactly at the clock, so that its
+  accepting leaves correspond to its accepting choice sequences, and apply
+  Theorem~\ref{thm:randomness-approx-count} to that set, answering each
+  cell-occupancy question with one $\cc{NP}$ query. Probabilistic oracle
+  machines are not defined yet; the circuit-level form of the seed and oracle
+  bookkeeping is Corollary~\ref{cor:randomness-approx-count-hardwire}.
 \end{proof}

@@ -12,12 +12,15 @@ carried through list decoding to a Kolmogorov upper bound, conditional
 complexity and computational depth, symmetry of information as a named
 hypothesis, and a finite conditional theorem deriving $\cc{P} = \cc{NP}$ from
 symmetry of information together with $\cc{NP}$-hardness of a conditional gap
-problem; one hypothesis of that theorem is currently stated too strongly to be
-satisfiable (Theorem~\ref{thm:avg-soi-collapse}). The reconstruction results
-assume an efficiently list-decodable code family and, in the oracle form, an
-efficiently universal oracle machine; neither is instantiated in the library. Samplable ensembles and $\cc{DistNP}$ are not
-yet defined, so none of the headline equivalences is stated yet; they are the
-main open direction.
+problem. The symmetry-of-information hypothesis is machine-relative and holds
+trivially for machines that describe nothing, so it has content only together
+with the other hypotheses of the theorems that use it
+(Definition~\ref{def:avg-soi}). The reconstruction results assume a list-decodable code
+family with polynomial parameter bounds, a machine realizing the decoder, and,
+in the oracle form, an efficiently universal oracle machine; none of these is
+instantiated in the library. Samplable ensembles and $\cc{DistNP}$ are not yet
+defined, so none of the headline equivalences is stated yet; they are the main
+open direction.
 
 % ---------------------------------------------------------------------------
 \section{Ensembles and errorless heuristics}
@@ -25,11 +28,13 @@ main open direction.
 \begin{definition}[Finite and dyadic ensembles]
   \label{def:avg-ensemble}
   \lean{Complexity.FiniteEnsemble, Complexity.DyadicEnsemble,
-    Complexity.DyadicEnsemble.toFinite}
+    Complexity.DyadicEnsemble.toFinite,
+    Complexity.DyadicEnsemble.probability_toFinite}
   \leanok
   A finite ensemble assigns to each parameter $n$ a nonempty finite seed space
-  $S_n$ and a sample map $S_n \to \alpha$; the distribution at $n$ is the
-  pushforward of the uniform distribution on $S_n$, with multiplicity. A dyadic
+  $S_n$ (with decidable equality) and a sample map $S_n \to \alpha$; the
+  distribution at $n$ is the pushforward of the uniform distribution on $S_n$,
+  with multiplicity. A dyadic
   ensemble is the special case $S_n = \{0,1\}^{\ell(n)}$, and its embedding into
   finite ensembles preserves every event probability. No sample map is called
   efficient until a machine realizes it (Definition~\ref{def:avg-distnp}).
@@ -39,47 +44,60 @@ main open direction.
 \begin{lemma}[Independent repetition]
   \label{lem:avg-repetition}
   \lean{Complexity.uniformAtLeastOneProbability_eq_one_sub_pow,
+    Complexity.trials_mul_div_one_add_le_uniformAtLeastOneProbability,
     Complexity.half_le_uniformAtLeastOneProbability_of_singleDrawLower}
   \leanok
-  If an event has probability $p$ under a uniform finite distribution, the
-  probability that one of $k$ independent draws hits it is exactly
-  $1 - (1-p)^k$; in particular it is at least $1/2$ whenever $kp' \ge 1$ for
+  If an event has probability $p$ under the uniform distribution on a nonempty
+  finite sample space, the probability that at least one of $k$ independent
+  uniform draws hits it is exactly $1 - (1-p)^k$, and it is at least
+  $kp/(1+kp)$; in particular it is at least $1/2$ whenever $kp' \ge 1$ for
   some lower bound $p' \le p$.
 \end{lemma}
 \begin{proof}
   \leanok
-  Count the complementary product event; then use $1 - (1-p)^k \ge kp/(1+kp)$.
+  Count the complementary product event; then use $1 - (1-p)^k \ge kp/(1+kp)$,
+  which is at least $1/2$ once $kp \ge 1$.
 \end{proof}
 
 \begin{definition}[Errorless heuristics and $\cc{AvgP}$]
   \label{def:avg-avgp}
   \lean{Complexity.HeuristicAnswer, Complexity.HeuristicAlgorithm.IsErrorlessFor,
-    Complexity.DistributionalProblem, Complexity.AvgPAt, Complexity.AvgP}
+    Complexity.HeuristicAlgorithm.IsPolynomialTime,
+    Complexity.HeuristicAlgorithm.FailsWithProbabilityAtMost,
+    Complexity.DistributionalProblem, Complexity.AvgPAt,
+    Complexity.inversePolynomialFailure, Complexity.AvgP}
   \leanok
   \uses{def:avg-ensemble, def:language, def:FP}
-  A heuristic answers accept, reject, or fail; it is errorless for $L$ if it
-  never accepts outside $L$ and never rejects inside $L$. A distributional
-  problem is a language with a finite ensemble of input strings.
-  $\cc{AvgP}_\delta$ consists of the distributional problems having an errorless
-  heuristic whose three-valued output is computable in $\cc{FP}$ and whose
-  failure probability on slice $n$ is at most $\delta(n)$ for every $n$.
-  $\cc{AvgP} = \bigcap_{c} \cc{AvgP}_{n^{-c}}$ (with $\max(1,n)^{-c}$ at
-  $n = 0$): for each $c$ there is a possibly different polynomial-time errorless
-  heuristic failing with probability at most $n^{-c}$. This is not the
+  A heuristic is a deterministic map from strings to the three answers accept,
+  reject and fail; it is errorless for $L$ if it never accepts outside $L$ and
+  never rejects inside $L$. It runs in polynomial time when its answer, encoded
+  as $[\mathrm{true}]$, $[\mathrm{false}]$ or the empty string respectively, is
+  a function in $\cc{FP}$. A distributional problem is a language with a finite
+  ensemble of input strings. For $\delta \colon \mathbb{N} \to \mathbb{Q}$,
+  $\cc{AvgP}_\delta$ consists of the distributional problems having a
+  polynomial-time errorless heuristic whose failure probability on slice $n$ is
+  at most $\delta(n)$ for every $n$. $\cc{AvgP} = \bigcap_{c \in \mathbb{N}}
+  \cc{AvgP}_{\delta_c}$ with $\delta_c(n) = 1/\max(1,n)^c$, which is $n^{-c}$
+  for $n \ge 1$ and $1$ at $n = 0$: for each $c$ there is a possibly different
+  polynomial-time errorless heuristic meeting $\delta_c$. This is not the
   single-scheme formulation in which the heuristic receives $1/\delta$ as an
   input; relating the two is part of Definition~\ref{def:avg-heurp}.
 \end{definition}
 
 \begin{proposition}[Basic facts about errorless heuristics]
   \label{prop:avg-avgp-basic}
-  \lean{Complexity.DistributionalProblem.mem_AvgP_of_decision,
+  \lean{Complexity.DistributionalProblem.mem_AvgPAt_of_decision,
+    Complexity.DistributionalProblem.mem_AvgP_of_decision,
     Complexity.HeuristicAlgorithm.IsErrorlessFor.one_sub_languageProbability_sub_failure_le_reject}
   \leanok
   \uses{def:avg-avgp}
-  (a) If $d$ decides the language of a distributional problem and
-  $x \mapsto d(x)$ is in $\cc{FP}$, the problem is in $\cc{AvgP}$, for every
-  ensemble. (b) An errorless heuristic for $L$ rejects with probability at least
-  $1 - \Pr[L] - \Pr[\mathrm{fail}]$ on every slice.
+  (a) If a Boolean function $d$ satisfies $d(x) = \mathrm{true}$ exactly when
+  $x$ lies in the language of a distributional problem, and the one-bit
+  function $x \mapsto [d(x)]$ is in $\cc{FP}$, then the problem lies in
+  $\cc{AvgP}_\delta$ for every nonnegative $\delta$ and in $\cc{AvgP}$, whatever
+  its ensemble. (b) An errorless heuristic for $L$ (efficient or not) rejects
+  with probability at least $1 - \Pr[L] - \Pr[\mathrm{fail}]$ on every slice of
+  every finite ensemble.
 \end{proposition}
 \begin{proof}
   \leanok
@@ -115,9 +133,9 @@ main open direction.
 \end{theorem}
 \begin{proof}
   \uses{prop:avg-avgp-basic}
-  Promote a $\cc{P}$ decider to a function in $\cc{FP}$ and apply
-  Proposition~\ref{prop:avg-avgp-basic}(a). The bridge from a $\cc{P}$ language
-  witness to an $\cc{FP}$ characteristic function is not yet proved.
+  Promote a $\cc{P}$ decider to a one-bit decision function in $\cc{FP}$
+  (Lemma~\ref{lem:polytime-decision-fn}) and apply Proposition~\ref{prop:avg-avgp-basic}(a). What is missing is the
+  definition of $\cc{DistNP}$ needed to state the theorem.
 \end{proof}
 
 \begin{theorem}[Excluding Heuristica]
@@ -139,14 +157,17 @@ main open direction.
 
 \begin{definition}[Auxiliary-unary ensemble]
   \label{def:avg-auxiliary-unary}
-  \lean{Complexity.FiniteEnsemble.auxiliaryUnary}
+  \lean{Complexity.FiniteEnsemble.auxiliaryUnary, Complexity.AuxiliaryUnarySeed.card}
   \leanok
   \uses{def:avg-ensemble, def:pair}
   Hirahara's 2018 distribution $D^u$: at parameter $m > 0$, choose
   $n \in \{0, \dots, m-1\}$ uniformly and $x \in \{0,1\}^n$ uniformly, and output
-  $\mathrm{pair}(x, 1^{m-n})$. The seed space has $m \cdot 2^m$ points. The slice
-  $m = 0$ is totalized as the point $\mathrm{pair}(\epsilon, \epsilon)$, a library
-  convention.
+  $\mathrm{pair}(x, 1^{m-n})$. The library realizes this with the seed space
+  $\{0, \dots, m-1\} \times \{0,1\}^m$, keeping the first $n$ bits of the
+  $m$-bit string as $x$, so the slice has $m \cdot 2^m$ equiprobable seeds. The
+  parameter $m$ is the sum $|x| + (m-n)$ of the component lengths, not the
+  length of the encoded pair. The slice $m = 0$ is totalized as the point
+  $\mathrm{pair}(\epsilon, \epsilon)$ (a single seed), a library convention.
 \end{definition}
 
 \begin{lemma}[$\cc{MINKT}$ mass under $D^u$]
@@ -178,13 +199,14 @@ main open direction.
   \leanok
   \uses{def:avg-auxiliary-unary, def:avg-avgp, def:meta-minkt}
   For every $m > 0$, every machine $U$, every threshold $r$, and every errorless
-  heuristic $A$ for $\cc{MINKT}(U, r)$,
+  heuristic $A$ for $\cc{MINKT}(U, r)$ (no efficiency is assumed),
   \[
     \Pr_{D^u_m}[A \text{ rejects}] \ \ge\ 1 - \frac{1}{m}\sum_{n<m}
       \frac{2^{r(n)}-1}{2^n} - \Pr_{D^u_m}[A \text{ fails}].
   \]
-  Thus an errorless heuristic must certify a dense set of high-complexity
-  strings.
+  Thus, when the average and the failure probability are small, an errorless
+  heuristic must certify, by rejecting, a dense set of strings of high
+  time-bounded complexity.
 \end{theorem}
 \begin{proof}
   \leanok
@@ -221,8 +243,10 @@ main open direction.
   \uses{def:avg-bitgenerator}
   (a) A $\delta$-dense random test has advantage at least $\delta$ against every
   low-complexity generator. (b) If $m > 0$ and the advantage is at least
-  $\delta$, then for $T$ or its complement some adjacent pair of Yao hybrids
-  differs in acceptance probability by at least $\delta/m$. (c) Over any
+  $\delta$, then for $T$ or its complement there is $i < m$ such that the Yao
+  hybrid whose first $i+1$ coordinates come from $G$ (the rest uniform) is
+  accepted with probability at least $\delta/m$ more than the hybrid whose
+  first $i$ coordinates do. (c) Over any
   nonempty finite background space, the predictor that outputs a uniform
   candidate bit when the test accepts and its complement otherwise succeeds with
   probability exactly $1/2$ plus the acceptance gain from substituting the true
@@ -257,7 +281,9 @@ main open direction.
   $\delta$-dense random test for the same machine, clock and threshold, and let
   the design have overlap budget $b$. (a) There are a polarity, a coordinate $i$
   and fixed advice whose predictor agrees with $f$ on at least a $1/2 +
-  \delta/m$ fraction of inputs, using at most $b + (d - \ell) + 1$ stored bits.
+  \delta/m$ fraction of inputs, and whose stored data (predecessor tables,
+  later output bits, outside seed bits and the candidate bit, excluding codec
+  overhead) has at most $b + (d - \ell) + 1$ bits.
   (b) If $\delta > 0$, exact checking of $\lceil 2m/\delta \rceil$ uniformly
   sampled trials finds a certificate with agreement at least $1/2 +
   \delta/(2m)$ with probability at least $1/2$, and every returned certificate
@@ -275,30 +301,48 @@ main open direction.
 
 \begin{theorem}[NW reconstruction yields short descriptions]
   \label{thm:avg-nw-kolmogorov}
-  \lean{Complexity.NWDesign.half_le_efficientlyUniversalKolmogorovComplexity_of_inverseDensity,
-    Complexity.NWDesign.half_le_efficientlyUniversalOracleKolmogorovComplexity_of_inverseDensity}
+  \lean{Complexity.NWDesign.half_le_timeBoundedKolmogorovComplexity_of_inverseDensity,
+    Complexity.NWDesign.half_le_efficientlyUniversalKolmogorovComplexity_of_inverseDensity,
+    Complexity.NWDesign.half_le_oracleTimeBoundedKolmogorovComplexity_of_inverseDensity,
+    Complexity.NWDesign.half_le_efficientlyUniversalOracleKolmogorovComplexity_of_inverseDensity,
+    Complexity.NWDesign.UniformEncodedMessageDecoderRealization.half_le_efficientlyUniversalKolmogorovComplexity_of_inverseDensity,
+    Complexity.NWDesign.UniformOracleEncodedMessageDecoderRealization.half_le_efficientlyUniversalKolmogorovComplexity_of_inverseDensity}
   \leanok
   \uses{thm:avg-nw-reconstruction, def:meta-list-code-family, def:universal,
     def:avg-conditional}
-  Assume: a list-code family that is list-decodable at inverse accuracy and has
+  Assume: a list-code family that is list-decodable at inverse accuracy (up to
+  relative distance $1/2 - 1/q$ at every inverse accuracy $q \ge 2$) and has
   polynomial parameter bounds; $m > 0$ and $D > 0$; an NW design over the
   coordinates of the code at inverse accuracy $q = 2mD$ with overlap budget $b$
   and seed length $d$; a message $\mu$ such that $\mathrm{NW}^{\mathrm{Enc}(\mu)}$
   has low complexity for $(M, t, r)$; and a $(1/D)$-dense random test $T$ for
   $(M, t, r)$. Let $B = 1 + \lceil\log_2 m\rceil + (b + (d - \ell) + 1) +
   \lceil \log_2 (C_L (q+1)^{e_L}) \rceil$, where $\ell$ is the coordinate length
-  and $C_L (q+1)^{e_L}$ the list-size bound.
-  (a) If additionally $U$ is an efficiently universal machine and a machine with
-  monotone clock $t_{\mathrm{dec}}$ realizes the indexed-message decoder for
-  this design, code and test, then there are constants $c, a, k$ such that
-  checked sampling with $\lceil 2mD \rceil$ trials succeeds with probability at
-  least $1/2$ and every returned certificate gives
+  and $C_L (q+1)^{e_L}$ the list-size bound. In each case below, checked
+  sampling with $\lceil 2mD \rceil$ trials at agreement threshold
+  $1/2 + 1/(2mD)$ succeeds with probability at least $1/2$, and the stated
+  bound on $\mu$ holds for every returned certificate.
+  (a) If a machine $\mathrm{Dec}$ with monotone clock $t_{\mathrm{dec}}$
+  realizes the indexed-message decoder for this design, code and test, then
+  $C^{t_{\mathrm{dec}}(B)}_{\mathrm{Dec}}(\mu) \le B$; if moreover $U$ is an
+  efficiently universal machine, there are constants $c, a, k$ with
   $C^{a(B + t_{\mathrm{dec}}(B) + 1)^k}_U(\mu) \le B + c$.
-  (b) If instead $U$ is an efficiently universal oracle machine and one oracle
-  machine realizes the decoder for every finite test given as a membership
-  oracle, the same holds for the oracle complexity of $\mu$ relative to the
-  membership oracle of $T$, and the returned constants $c, a, k$ satisfy the
-  compiler transfer law for every finite test oracle.
+  (b) If instead one oracle machine $\mathrm{Dec}$ with monotone clock
+  $t_{\mathrm{dec}}$ realizes the decoder for this design and code and every
+  finite test given as a membership oracle, the same two bounds hold for
+  oracle complexity relative to the membership oracle of $T$, now with $U$ an
+  efficiently universal oracle machine. Moreover the returned $c, a, k$ satisfy
+  a transfer law for every finite test $T'$ and message $\mu'$: if some
+  description of length at most $b'$ decodes to $\mu'$ under $T'$, then
+  $C^{a(b' + t_{\mathrm{dec}}(b') + 1)^k,\, T'}_U(\mu') \le b' + c$.
+  (c) If a single decoder machine serves every parameter choice of the family,
+  reading the design and test from an explicit encoding $e$ framed with the
+  description (or, in the oracle form, the numeric parameters and design from
+  a canonical encoding $e$, with the test as an oracle), then for efficiently
+  universal $U$ one triple $c, a, k$, chosen before all parameters, designs,
+  tests and messages, gives the bound of (a) (respectively of (b)) on every
+  instance satisfying the assumptions above, with $B$ replaced by
+  $2|e| + 2 + B$.
 \end{theorem}
 \begin{proof}
   \leanok
@@ -306,9 +350,10 @@ main open direction.
   List-decode the predictor stored in the certificate, append a
   $\lceil \log_2 L \rceil$-bit index of the correct candidate, the polarity bit
   and the coordinate, and transfer the resulting description through the
-  universal compiler. In (a) the universality hypothesis can be discharged by
-  $\mathtt{utmTM}$; the code family, the decoder realization and (in (b)) the
-  universal oracle machine remain hypotheses.
+  universal compiler. In (a) and the ordinary form of (c) the universality
+  hypothesis can be discharged by $\mathtt{utmTM}$; the code family, the
+  decoder realization and (in (b) and the oracle form of (c)) the universal
+  oracle machine remain hypotheses.
 \end{proof}
 
 \begin{lemma}[Explicit weak designs]
@@ -353,23 +398,55 @@ main open direction.
   \leanok
   \uses{def:kolmogorov}
   For an oracle machine $N$ and Boolean oracle $A$, $C^{t,A}_N(x)$ is the
-  minimum length of a program on which $N^A$ produces $x$ within $t$ steps. The
-  random-access oracle of a string $y$ answers canonical tagged queries
-  ``bit $i$ of $y$'' and ``is $i < |y|$'', so it determines both the contents and
-  the length of $y$. Conditional complexity is
+  minimum length of a program on which $N^A$ produces $x$ within $t$ steps
+  ($\infty$ if there is none). The random-access oracle of a string $y$ answers
+  canonical tagged queries ``bit $i$ of $y$'' and ``is $i < |y|$'' (malformed
+  and out-of-range queries answer false), so it determines both the contents
+  and the length of $y$. Conditional complexity is
   $C^t_N(x \mid y) = C^{t, \mathrm{oracle}(y)}_N(x)$. Other conditioning
   conventions (sequential input, paper-specific evaluators) are not identified
   with this one.
 \end{definition}
 
+\begin{lemma}[Basic laws of oracle complexity]
+  \label{lem:avg-oracle-kolmogorov}
+  \lean{Complexity.OracleTM.timeBoundedKolmogorovComplexity_mono,
+    Complexity.TM.toOracleTM_timeBoundedKolmogorovComplexity_eq,
+    Complexity.OracleTM.SimulatesInTime.kolmogorov_transfer}
+  \leanok
+  \uses{def:avg-conditional, def:barriers-to-oracle,
+    def:barriers-oracle-universal}
+  Fix an oracle machine $N$ and an oracle $A$. (a) If $t \le t'$ then
+  $C^{t',A}_N(x) \le C^{t,A}_N(x)$. (b) For an ordinary machine $M$ viewed as
+  an oracle machine that never queries, $C^{t,A}_M(x) = C^t_M(x)$ for every
+  oracle $A$. (c) Suppose $N$ simulates an oracle machine $N'$ in time $\tau$
+  under a compiler $c$ (bounded productions transfer for every oracle; bounded
+  halting is not required), with $|c(p)| \le |p| + C$ and $\tau(p, t) \le a
+  (|p| + t + 1)^e$ for all $p, t$. Then there are $a', e'$, chosen once for
+  all oracles, such that for every oracle $A$, string $x$, clock $t$ and bound
+  $b$, $C^{t,A}_{N'}(x) \le b$ implies
+  $C^{a'(b + t + 1)^{e'},A}_N(x) \le b + C$.
+\end{lemma}
+\begin{proof}
+  \leanok
+  (a) A program producing $x$ within $t$ steps also does within $t'$. (b) The
+  embedded machine's runs do not depend on the oracle. (c) Compile a
+  witnessing program of length at most $b$ and bound the simulation clock using
+  that length.
+\end{proof}
+
 \begin{definition}[Computational depth]
   \label{def:avg-depth}
-  \lean{Complexity.TM.computationalDepthBetween, Complexity.TM.computationalDepth}
+  \lean{Complexity.descriptionDifference, Complexity.TM.computationalDepthBetween,
+    Complexity.TM.computationalDepth}
   \leanok
   \uses{def:kolmogorov}
-  For $s \le t$, $\mathrm{cd}^{s,t}_M(x) = C^s_M(x) - C^t_M(x)$ and
+  $\mathrm{cd}^{s,t}_M(x) = C^s_M(x) - C^t_M(x)$ and
   $\mathrm{cd}^{s}_M(x) = C^s_M(x) - C_M(x)$, where the difference is $\infty$
-  if either term is $\infty$.
+  if either term is $\infty$ and truncated natural subtraction otherwise. Both
+  are defined for all clocks; the second subtraction is always exact, and the
+  first is exact when $s \le t$ (then $C^t_M(x) \le C^s_M(x)$), the case in
+  which its laws are stated.
 \end{definition}
 
 \begin{theorem}[Upper chain rule from a composition contract]
@@ -381,8 +458,8 @@ main open direction.
   clock $t_1$, length at most $b_1$) and every conditional program for $x$
   given $y$ (on $N$, clock $t_2$, length at most $b_2$) into a program on which
   $M$ produces $\mathrm{pair}(x, y)$ within $t$ steps, with $|\kappa(p, q)| \le
-  |p| + |q| + c$. If $C^{t_1}_{M_1}(y) \le b_1$ and $C^{t_2}_N(x \mid y) \le
-  b_2$ (both finite), then
+  |p| + |q| + c$ for all such $p, q$. If $C^{t_1}_{M_1}(y) \le b_1$ and
+  $C^{t_2}_N(x \mid y) \le b_2$ (both finite), then
   $C^t_M(\mathrm{pair}(x,y)) \le C^{t_2}_N(x \mid y) + C^{t_1}_{M_1}(y) + c$.
 \end{theorem}
 \begin{proof}
@@ -393,42 +470,59 @@ main open direction.
 \begin{definition}[Time-bounded symmetry of information]
   \label{def:avg-soi}
   \lean{Complexity.TimeBoundedSymmetryOfInformation,
+    Complexity.IsAdmissibleKolmogorovClock,
     Complexity.PolynomialTimeBoundedSymmetryOfInformation}
   \leanok
   \uses{def:avg-conditional, def:pair}
   For an ordinary machine $M$, a conditional oracle machine $N$, a clock
   transformation $\kappa$ and a loss $\lambda$, $\mathrm{SoI}(M, N, \kappa,
-  \lambda)$ asserts, for all $x, y, t$ with $|x| + |y| \le t$: (i)
-  $C^t_M(\mathrm{pair}(x,y)) < \infty$, and (ii)
+  \lambda)$ asserts, for all $x, y, t$ with $|x| + |y| \le t$,
   \[
     C^{\kappa(t)}_N(x \mid y) + C^{\kappa(t)}_M(y) \ \le\
     C^t_M(\mathrm{pair}(x,y)) + \lambda(t).
   \]
   The polynomial package asks for some $\kappa$ with $\kappa(t) \ge t$ and
-  $\kappa(t) \le a(t+1)^k$, and $\lambda(t) = \log_2 \kappa(t) + c$ for a
-  constant $c$. Condition (i) prevents a machine that describes nothing from
-  satisfying SoI vacuously. SoI is a hypothesis; nothing in the library asserts
-  it.
+  $\kappa(t) \le a(t+1)^k$ for all $t$, and $\lambda(t) = \lfloor \log_2
+  \kappa(t) \rfloor + c$ for a constant $c$. The inequality holds trivially
+  wherever $C^t_M(\mathrm{pair}(x,y)) = \infty$, in particular whenever $t$ is
+  too small for $M$ to print $\mathrm{pair}(x,y)$, and everywhere for a machine
+  $M$ that describes nothing; so SoI has content only for machines constrained
+  by other hypotheses. (An earlier version also required
+  $C^t_M(\mathrm{pair}(x,y)) < \infty$ whenever $|x| + |y| \le t$. That is
+  impossible, since a run of $t$ steps writes at most $t$ output bits while
+  $|\mathrm{pair}(x,y)| = 2|x| + 2 + |y| > t$ at $t = |x| + |y|$, and the
+  requirement was removed.) SoI is a hypothesis; nothing in the library
+  asserts it.
 \end{definition}
 
 \begin{theorem}[SoI cancels the condition's complexity]
   \label{thm:avg-soi-cancellation}
-  \lean{Complexity.TimeBoundedSymmetryOfInformation.conditional_le_of_pair_upper}
+  \lean{Complexity.TimeBoundedSymmetryOfInformation.conditional_le_of_pair_upper,
+    Complexity.TimeBoundedSymmetryOfInformation.conditional_le_of_composition}
   \leanok
-  \uses{def:avg-soi, def:avg-depth}
-  Assume $\mathrm{SoI}(M, N, \kappa, \lambda)$, $|x| + |y| \le t$, $t' \le
+  \uses{def:avg-soi, def:avg-depth, thm:avg-upper-chain}
+  (a) Assume $\mathrm{SoI}(M, N, \kappa, \lambda)$, $|x| + |y| \le t$, $t' \le
   \kappa(t)$, and a paired upper bound
-  $C^t_M(\mathrm{pair}(x,y)) \le C^{t''}_{N'}(x \mid y) + C^{t'}_M(y) + u$.
-  Then
+  $C^t_M(\mathrm{pair}(x,y)) \le C^{t''}_{N'}(x \mid y) + C^{t'}_M(y) + u$
+  for some oracle machine $N'$ and clock $t''$. Then
   \[
     C^{\kappa(t)}_N(x \mid y) \ \le\ C^{t''}_{N'}(x \mid y) +
       \mathrm{cd}^{t', \kappa(t)}_M(y) + u + \lambda(t).
   \]
+  (b) In particular the same conclusion holds with $u = c$ when the paired
+  upper bound is replaced by the hypotheses of
+  Theorem~\ref{thm:avg-upper-chain} for joint machine $M$ at clock $t$,
+  condition machine $M$ at clock $t'$ and conditional machine $N'$ at clock
+  $t''$. Neither part assumes $C^t_M(\mathrm{pair}(x,y)) < \infty$: when
+  $C^{\kappa(t)}_M(y) = \infty$, the depth term, and with it the right-hand
+  side, is $\infty$.
 \end{theorem}
 \begin{proof}
   \leanok
-  Substitute the upper bound into the SoI inequality and cancel $C^{\kappa(t)}_M(y)$
-  using the exact additive decomposition of depth.
+  If $C^{\kappa(t)}_M(y) = \infty$ the conclusion is trivial. Otherwise
+  substitute the upper bound into the SoI inequality and cancel
+  $C^{\kappa(t)}_M(y)$ using the exact additive decomposition of depth; for
+  (b), obtain the upper bound from Theorem~\ref{thm:avg-upper-chain}.
 \end{proof}
 
 \begin{theorem}[Concrete universal evaluators]
@@ -459,52 +553,71 @@ main open direction.
 
 \begin{definition}[Logarithmic $\cc{GapMINKT}$]
   \label{def:avg-gapminkt-log}
-  \lean{Complexity.GapMINKT.Logarithmic.problem,
-    Complexity.GapMINKT.Logarithmic.Estimator.SatisfiesBounds}
+  \lean{Complexity.GapMINKT.Logarithmic.Parameters,
+    Complexity.GapMINKT.Logarithmic.problem,
+    Complexity.GapMINKT.Logarithmic.Estimator.SatisfiesBounds,
+    Complexity.GapMINKT.Logarithmic.Estimator.SatisfiesBoundsOn}
   \leanok
   \uses{def:meta-gapminkt}
   Hirahara 2022, Definition~3.3: for a widening clock $\tau(n, t) \ge t$, the
-  promise on $(x, 1^t, 1^s)$ with yes side $C^t_U(x) \le s$ and no side
-  $C^{\tau}_U(x) > s + \lfloor \log_2 \tau \rfloor$, where $\tau = \tau(|x|,
-  t)$. An estimator $B$ satisfies Fact~3.4's sandwich if $B(x, 1^t) \le
-  C^t_U(x)$ and $C^{\tau}_U(x) \le B(x, 1^t) + \lfloor \log_2 \tau \rfloor$.
+  promise on canonical $(x, 1^t, 1^s)$ with yes side $C^t_U(x) \le s$ and no
+  side $C^{\tau}_U(x) > s + \lfloor \log_2 \tau \rfloor$, where $\tau =
+  \tau(|x|, t)$. An estimator $B$ satisfies Fact~3.4's sandwich if $B(x, 1^t)
+  \le C^t_U(x)$ and $C^{\tau}_U(x) \le B(x, 1^t) + \lfloor \log_2 \tau
+  \rfloor$ on every instance $(x, 1^t)$; it satisfies it on a set $E$ of
+  instances if these hold for every instance in $E$.
 \end{definition}
 
 \begin{theorem}[Fact 3.4: estimators versus gap solvers]
   \label{thm:avg-fact34}
   \lean{Complexity.GapMINKT.Logarithmic.problem_mem_PromiseP_of_estimatorLanguage_mem_P,
+    Complexity.GapMINKT.Logarithmic.Efficient.executableEstimator_satisfiesBoundsOn,
+    Complexity.GapMINKT.Logarithmic.Efficient.fp_and_satisfiesBoundsOn_lengthWithinTime,
     Complexity.GapMINKT.Logarithmic.Efficient.fp_and_satisfiesBoundsOn_printerClock}
   \leanok
   \uses{def:avg-gapminkt-log, def:promise, def:universal, def:FP}
-  (a) If an estimator satisfies the sandwich and its threshold language
+  Fix a machine $U$ and a widening clock $\tau$. (a) If an estimator satisfies
+  the sandwich on every instance and its threshold language
   $\{(x,1^t,1^s) : B(x,1^t) \le s\}$ is in $\cc{P}$, then logarithmic
-  $\cc{GapMINKT}$ is in $\cc{PromiseP}$. (b) Conversely, if $U$ is efficiently
-  universal and a decision function $d$ with $x \mapsto d(x)$ in $\cc{FP}$ solves
-  logarithmic $\cc{GapMINKT}$, there are $a, k$ such that the unary threshold
-  sweep built from $d$ is in $\cc{FP}$ and satisfies the sandwich on every
-  instance with $a(2|x|+3)^k \le t$.
+  $\cc{GapMINKT}$ is in $\cc{PromiseP}$. (b) Conversely, let a Boolean
+  function $d$ solve logarithmic $\cc{GapMINKT}$ (accepting yes instances and
+  rejecting no instances) with $x \mapsto [d(x)]$ in $\cc{FP}$. The unary
+  threshold sweep built from $d$ is in $\cc{FP}$, and its output length
+  satisfies the sandwich on every set of instances on which $C^t_U(x) <
+  \infty$; in particular on the paper's domain $|x| \le t$ provided
+  $C^t_U(x) < \infty$ for every such instance. If $U$ is efficiently universal,
+  no finiteness proviso is needed on a printer-clock domain instead: there are
+  $a, k$ depending only on $U$ such that, for every widening clock $\tau$ and
+  every such $d$, the sweep satisfies the sandwich on every instance with
+  $a(2|x|+3)^k \le t$.
 \end{theorem}
 \begin{proof}
   \leanok
   \uses{thm:meta-universal-kolmogorov}
   (a) Threshold the estimator. (b) Scan $s = 0, \dots, t$ and return the least
-  accepted threshold; efficient universality supplies finite source complexity
-  above the printer clock.
+  accepted threshold, whose sandwich needs only $C^t_U(x) < \infty$ (then
+  $C^t_U(x) \le t$); efficient universality supplies that finiteness above the
+  printer clock.
 \end{proof}
 
 \begin{definition}[Conditional gap problems]
   \label{def:avg-gapminckt}
   \lean{Complexity.MINCKT.Instance, Complexity.GapMINCKT,
-    Complexity.GapMINCKT.Multiplicative.problem}
+    Complexity.GapMINCKT.Multiplicative.problem,
+    Complexity.GapMINCKT.Estimator.SatisfiesBounds}
   \leanok
   \uses{def:avg-conditional, def:avg-depth, def:promise}
-  Hirahara 2022, Definitions~6.1 and~6.5. For a widening trivariate clock
+  Hirahara 2022, Definitions~6.1 and~6.5. Fix an ordinary machine $M$ and a
+  conditional oracle machine $N$. For a widening trivariate clock
   $\tau(|x|, |y|, t) \ge t$, the promise $\cc{GapMINcKT}$ on canonical
   $(x, y, 1^t, 1^s)$ has yes side $C^t_N(x \mid y) + \mathrm{cd}^{t,\tau}_M(y)
   \le s$ and no side $C^{\tau}_N(x \mid y) > s + \lfloor \log_2 \tau \rfloor$.
-  The multiplicative version with factor $\phi \ge 1$ has the same yes side and
-  no side $C^{\tau}_N(x \mid y) > \phi(|x|) \cdot s + \lfloor \log_2 \tau
-  \rfloor$.
+  The multiplicative version with factor $\phi \colon \mathbb{N} \to
+  \mathbb{N}$, $\phi \ge 1$, has the same yes side and no side
+  $C^{\tau}_N(x \mid y) > \phi(|x|) \cdot s + \lfloor \log_2 \tau \rfloor$. A
+  conditional estimator $B$ satisfies Proposition~6.2's sandwich if $B(x, y,
+  1^t) \le C^t_N(x \mid y) + \mathrm{cd}^{t,\tau}_M(y)$ and $C^{\tau}_N(x \mid
+  y) \le B(x, y, 1^t) + \lfloor \log_2 \tau \rfloor$ on every instance.
 \end{definition}
 
 \begin{theorem}[Proposition 6.2 core and hardness transfer]
@@ -514,13 +627,16 @@ main open direction.
     Complexity.GapMINCKT.Multiplicative.P_eq_NP_of_hard_of_estimatorLanguage_mem_P}
   \leanok
   \uses{def:avg-gapminckt, def:meta-promise-reduction}
-  (a) If an estimator $B$ satisfies $B \le C^t_N(x \mid y) +
-  \mathrm{cd}^{t,\tau}_M(y)$ and $C^{\tau}_N(x \mid y) \le B + \lfloor \log_2
-  \tau \rfloor$ on every instance and its threshold language is in $\cc{P}$, then
+  Fix $M$, $N$ and a widening clock $\tau$. (a) If an estimator $B$ satisfies
+  $B \le C^t_N(x \mid y) + \mathrm{cd}^{t,\tau}_M(y)$ and $C^{\tau}_N(x \mid y)
+  \le B + \lfloor \log_2 \tau \rfloor$ on every instance and its threshold
+  language $\{(x, y, 1^t, 1^s) : B(x, y, 1^t) \le s\}$ is in $\cc{P}$, then
   $\cc{GapMINcKT} \in \cc{PromiseP}$. (b) Promise-$\cc{NP}$-hardness of the
   multiplicative problem with factor $\phi \ge 1$ implies promise-$\cc{NP}$-hardness
-  of the additive one. (c) Consequently, multiplicative hardness together with
-  such an estimator implies $\cc{P} = \cc{NP}$.
+  of the additive one with the same clock. (c) Consequently, multiplicative
+  hardness together with such an estimator implies $\cc{P} = \cc{NP}$. The
+  second half of the sandwich forces $C^{\tau}_N(x \mid y) < \infty$ on every
+  instance, a genuine restriction on $\tau$ and $N$.
 \end{theorem}
 \begin{proof}
   \leanok
@@ -535,11 +651,13 @@ main open direction.
   \lean{Complexity.GapMINCKT.DifferenceEstimator.Unconditional.Iterated.not_satisfiesBounds_ordinaryParameters}
   \leanok
   \uses{def:avg-gapminkt-log}
-  For the ordinary parameters of the iterated plan, whose transformed clock is
-  $p(t)$ regardless of output length, no estimator satisfies Fact~3.4's
-  sandwich on every instance: at source time $0$, no machine prints a string of
-  length $p(0) + 1$ within $p(0)$ steps. The estimator hypotheses below are
-  therefore restricted to the plan's own queries.
+  For every machine $U$ and every function $p \colon \mathbb{N} \to
+  \mathbb{N}$, take the ordinary parameters of the iterated plan, whose
+  transformed clock is $\tau(n, t) = p(t)$ regardless of output length. No
+  estimator satisfies Fact~3.4's sandwich for $U$ and $\tau$ on every instance:
+  at source time $0$, no machine prints a string of length $p(0) + 1$ within
+  $p(0)$ steps. The estimator hypotheses below are therefore restricted to the
+  plan's own queries.
 \end{lemma}
 \begin{proof}
   \leanok
@@ -552,50 +670,66 @@ main open direction.
   \lean{Complexity.GapMINCKT.DifferenceEstimator.Unconditional.Iterated.Slack.P_eq_NP_of_multiplicative_hard_of_SoI,
     Complexity.GapMINCKT.DifferenceEstimator.Unconditional.Iterated.Slack.P_eq_NP_of_multiplicative_hard_of_SoI_of_implementations,
     Complexity.GapMINCKT.DifferenceEstimator.Unconditional.Iterated.Slack.P_eq_NP_of_multiplicative_hard_of_SoI_of_logarithmic_solver,
-    Complexity.GapMINCKT.DifferenceEstimator.Unconditional.Iterated.Slack.not_timeBoundedSymmetryOfInformation_of_P_ne_NP}
+    Complexity.GapMINCKT.DifferenceEstimator.Unconditional.Iterated.Slack.not_timeBoundedSymmetryOfInformation_of_P_ne_NP,
+    Complexity.GapMINCKT.DifferenceEstimator.Unconditional.Iterated.Slack.not_timeBoundedSymmetryOfInformation_of_P_ne_NP_of_implementations,
+    Complexity.GapMINCKT.DifferenceEstimator.Unconditional.Iterated.Slack.not_timeBoundedSymmetryOfInformation_of_P_ne_NP_of_logarithmic_solver,
+    Complexity.GapMINCKT.DifferenceEstimator.Unconditional.Iterated.Slack.IsAdmissibleClock.parameters_admissible}
   \leanok
   \uses{def:avg-soi, def:avg-gapminckt, def:avg-gapminkt-log,
     def:meta-promise-reduction}
   Fix an ordinary machine $M$, a conditional oracle machine $N$, a monotone
-  primitive clock $p$ with $p(t) \ge t$ and $p(t) \le a(t+1)^k$, and constants
-  $c_{\mathrm{SoI}}, c_{\mathrm{pair}}$. The plan queries the ordinary estimator
-  on $\mathrm{pair}(x,y)$ at clock $p(t')$ and on $y$ at clock $p^3(t')$, where
-  $t' = \max(t, |x|+|y|)$. Assume:
+  primitive clock $p$ with $p(t) \ge t$ and $p(t) \le a(t+1)^k$ for all $t$,
+  and constants $c_{\mathrm{SoI}}, c_{\mathrm{pair}}$. The plan queries the
+  ordinary estimator on $(\mathrm{pair}(x,y), 1^{p(t')})$ and on
+  $(y, 1^{p^3(t')})$, where $t' = \max(t, |x|+|y|)$. From $p$,
+  $c_{\mathrm{SoI}}$ and $c_{\mathrm{pair}}$ the library builds an explicit
+  slack-amplified clock $\tau(|x|, |y|, t) = 2^{e}\,(p^4(t+|x|+|y|)+1)
+  (t+|x|+|y|+1)$, whose exponent $e$ collects the logarithmic losses and the
+  two constants, and proves it widening and polynomially bounded. Assume:
   (i) a pair-composition hypothesis: a compiler producing $\mathrm{pair}(x,y)$ on
   $M$ within $p(t')$ steps from a program for $y$ on $M$ and a conditional
   program for $x$ given $y$ on $N$ (each running within $t$ steps), with length
   loss $c_{\mathrm{pair}}$ and program budgets that contain $C^t_M(y)$ and
   $C^t_N(x \mid y)$ whenever these minima are finite;
-  (ii) $\mathrm{SoI}(M, N, p, \log_2 p + c_{\mathrm{SoI}})$;
-  (iii) promise-$\cc{NP}$-hardness of the multiplicative $\cc{GapMINcKT}$ (factor
-  $\phi \ge 1$) at the explicit slack-amplified clock built from $p$; and
-  (iv) either an ordinary estimator satisfying Fact~3.4's sandwich at clock $p$
-  on the plan's queries, whose induced two-query threshold language is in
-  $\cc{P}$ (or which has an encoded implementation with $\cc{FP}$ query
-  builders), or a decision function in $\cc{FP}$ solving logarithmic
-  $\cc{GapMINKT}$ at clock $p$, together with $\cc{FP}$ query builders and the
-  premise that every query of the plan has finite complexity on $M$.
+  (ii) $\mathrm{SoI}(M, N, p, \lambda)$ with $\lambda(t) = \lfloor \log_2 p(t)
+  \rfloor + c_{\mathrm{SoI}}$;
+  (iii) promise-$\cc{NP}$-hardness of the multiplicative $\cc{GapMINcKT}$ for
+  $M$, $N$ (factor $\phi \ge 1$) at the slack-amplified clock $\tau$; and
+  (iv) either an ordinary estimator satisfying Fact~3.4's sandwich for $M$ at
+  the ordinary clock $(n, t) \mapsto p(t)$ on the plan's queries, whose induced two-query
+  threshold language is in $\cc{P}$ (or which has an $\cc{FP}$ implementation
+  whose output length is the estimate, together with $\cc{FP}$ query and ruler
+  builders for the plan), or a Boolean function $d$ with $x \mapsto [d(x)]$ in
+  $\cc{FP}$ solving logarithmic $\cc{GapMINKT}$ for $M$ at that clock,
+  together with those $\cc{FP}$ builders and the premise that every query of
+  the plan has finite complexity on $M$.
   Then $\cc{P} = \cc{NP}$. Equivalently, if $\cc{P} \neq \cc{NP}$, then (i),
-  (iii) and (iv) rule out (ii).
+  (iii) and each form of (iv) rule out (ii).
 \end{theorem}
 \begin{proof}
   \leanok
   \uses{thm:avg-upper-chain, thm:avg-soi-cancellation, thm:avg-fact34,
-    thm:avg-gapminckt-estimator, lem:avg-no-full-estimator}
+    thm:avg-gapminckt-estimator}
   Query the ordinary estimator on $\mathrm{pair}(x,y)$ at clock $p$ and on $y$
   at clock $p^{3}$, subtract with an explicit rounding correction, and use SoI
-  and the upper chain to verify both halves of the conditional sandwich; the
+  and the upper chain to verify both halves of the conditional sandwich (the
+  cancellation of Theorem~\ref{thm:avg-soi-cancellation} is redone inline from
+  inequality (ii) and the depth decomposition), then apply
+  Theorem~\ref{thm:avg-gapminckt-estimator}(c); in the solver form, the
+  threshold sweep of Theorem~\ref{thm:avg-fact34}(b) supplies the estimator. The
   final clock is $p^{4}$ amplified by a power-of-two slack that pays all
   logarithmic and additive losses and is proved polynomially bounded. When
   $C^t_M(y)$ or $C^t_N(x \mid y)$ is infinite, the upper chain holds trivially,
   so hypothesis (i) needs no finiteness.
 
-  An earlier formalization demanded finite minima at every instance and an
-  estimator correct on every instance. Both are unsatisfiable (no machine
-  prints a nonempty string in zero steps, and
-  Lemma~\ref{lem:avg-no-full-estimator}), which made the theorem vacuous; the
-  current statements have no such obstruction. No instance of hypothesis (i)
-  for concrete universal machines is constructed yet.
+  An earlier formalization demanded finite minima at every instance, an
+  estimator correct on every instance, and (inside SoI) a finite joint
+  complexity at every clock $t \ge |x| + |y|$. All three are unsatisfiable (no
+  machine prints a nonempty string in zero steps,
+  Lemma~\ref{lem:avg-no-full-estimator}, and the output-length bound of
+  Definition~\ref{def:avg-soi}), and the current statements avoid all three.
+  No instance of hypothesis (i) for concrete universal machines is constructed
+  yet.
 \end{proof}
 
 \begin{theorem}[Hardness of conditional gap MinKT excludes Heuristica]

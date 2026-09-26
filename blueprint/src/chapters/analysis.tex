@@ -2,38 +2,51 @@
 \label{chap:analysis}
 
 This chapter covers the Fourier analysis of Boolean functions, following
-O'Donnell's \emph{Analysis of Boolean Functions}. It supplies analytic tools for
-small-depth circuit lower bounds and for property testing. Everything lives in
-\texttt{Complexitylib.BooleanAnalysis} (the \texttt{FourierExpansion} surface,
-with \texttt{FourierExpansion.Defs} and \texttt{FourierExpansion.Internal}).
-The following are formalized: the parity basis, Fourier expansion, Plancherel
-and Parseval, the degree decomposition, the BLR linearity test with soundness,
-the spectral theory of noise and influence (O'Donnell, Chapters~1--2), and the
-one-bit base case of the Bonami inequality. The BLR soundness theorem is also
-used by the Hadamard tester in the PCP development. The main open direction is
-hypercontractivity: its tensorization step is what the level-1 inequality, FKN,
-KKL, Friedgut's junta theorem, and the Linial--Mansour--Nisan concentration
-bound for $\cc{AC^0}$ all need.
+O'Donnell's \emph{Analysis of Boolean Functions}. These tools are aimed at
+small-depth circuit lower bounds and at property testing. So far only the
+property-testing side is used elsewhere in the library: the BLR soundness
+theorem is used by the Hadamard tester in the PCP development. Everything
+formalized here lives in \texttt{Complexitylib.BooleanAnalysis} (the
+\texttt{FourierExpansion} surface, with \texttt{FourierExpansion.Defs} and
+\texttt{FourierExpansion.Internal}). The following are formalized: the parity
+basis, the Fourier expansion, Plancherel and Parseval, the degree
+decomposition, the BLR linearity test with soundness and local correction, the
+spectral definitions and basic identities of noise stability, noise
+sensitivity, the noise operator, derivatives, and influence (O'Donnell,
+Chapter~1 and parts of Chapter~2), the reading of influence as the probability
+of a pivotal flip, and the one-bit base case of the Bonami inequality. The
+correlated-input readings of the noise quantities, monotone functions, $L^p$
+norms, and hypercontractivity are not yet formalized. Hypercontractivity is the
+main open direction: its tensorization step is what the level-1 inequality,
+FKN, KKL, and Friedgut's junta theorem all need. The Linial--Mansour--Nisan
+concentration bound for $\cc{AC^0}$ needs instead the Fourier degree bound for
+decision trees and a Fourier-side restriction API.
 
 \paragraph{Conventions.} The cube is $\mathbb{F}_2^n$, written
 \texttt{Cube n = Fin n -> ZMod 2}. The encoding is $\chi(0) = 1$, $\chi(1) = -1$, so
 bit $0$ is the value $+1$ in O'Donnell's $\{-1,1\}^n$ picture. ``Boolean-valued''
-always means $\{-1,1\}$-valued. Noise stability, the noise operator, the
-derivative, and the influences are all \emph{defined} spectrally. Their
-combinatorial readings are theorems (or, for the correlated-input readings,
-planned theorems).
+always means $\{-1,1\}$-valued. Noise stability, the noise operator, noise
+sensitivity, the derivative, and the influences are all \emph{defined}
+spectrally. Some combinatorial readings are theorems: influence is the
+probability that flipping a coordinate changes a Boolean-valued function, and
+the derivative is a twisted pointwise difference
+(Theorems~\ref{thm:analysis-influence-derivative}
+and~\ref{thm:analysis-influence-pivotal}). The correlated-input readings of the
+noise quantities are planned (Proposition~\ref{prop:analysis-noise-correlated}).
 
 \section{The cube and the Fourier basis}
 
 \begin{definition}[Boolean functions on the cube]
   \label{def:analysis-cube}
-  \lean{Complexity.BooleanAnalysis.Cube, Complexity.BooleanAnalysis.BooleanFunction, Complexity.BooleanAnalysis.BooleanFunction.innerProductSpace, Complexity.BooleanAnalysis.inner_def, Complexity.BooleanAnalysis.expect}
+  \lean{Complexity.BooleanAnalysis.Cube, Complexity.BooleanAnalysis.BooleanFunction, Complexity.BooleanAnalysis.BooleanFunction.innerProductSpace, Complexity.BooleanAnalysis.inner_def, Complexity.BooleanAnalysis.expect, Complexity.BooleanAnalysis.expect_unfold, Complexity.BooleanAnalysis.inner_eq_expect}
   \leanok
   $\mathrm{BooleanFunction}(n)$ is the real vector space of functions
   $f : \mathbb{F}_2^n \to \mathbb{R}$. Its inner product space structure comes
   from the uniform-measure inner product
-  $\langle f, g \rangle = 2^{-n} \sum_x f(x) g(x) = \mathbb{E}_x[f(x) g(x)]$, and
-  $\mathbb{E}[f] = 2^{-n} \sum_x f(x)$ is the uniform expectation. The type is a
+  $\langle f, g \rangle = 2^{-n} \sum_x f(x) g(x)$. The uniform expectation
+  $\mathbb{E}[f]$ is the average of $f$ over the cube, so
+  $\mathbb{E}[f] = 2^{-n} \sum_x f(x)$ and
+  $\langle f, g \rangle = \mathbb{E}_x[f(x) g(x)]$. The type is a
   \texttt{def} rather than an \texttt{abbrev}, so the $L^2$ norm does not clash
   with Mathlib's sup norm on function types.
 \end{definition}
@@ -45,24 +58,26 @@ planned theorems).
   \uses{def:analysis-cube}
   $\chi : \mathbb{F}_2 \to \mathbb{R}$ sends $b \mapsto (-1)^b$. For
   $S \subseteq [n]$, the parity function is
-  $\chi_S(x) = \prod_{i \in S} \chi(x_i)$. A function is \emph{Boolean-valued} if
-  every value is $1$ or $-1$.
+  $\chi_S(x) = \prod_{i \in S} \chi(x_i)$, so $\chi_\emptyset = 1$. A function
+  is \emph{Boolean-valued} if every value is $1$ or $-1$.
 \end{definition}
 
 \begin{theorem}[Orthonormality of parities]
   \label{thm:analysis-parity-orthonormal}
-  \lean{Complexity.BooleanAnalysis.parityFun_orthonormal, Complexity.BooleanAnalysis.expect_parityFun, Complexity.BooleanAnalysis.parityFun_mul, Complexity.BooleanAnalysis.parityFun_add, Complexity.BooleanAnalysis.isBooleanValued_parityFun}
+  \lean{Complexity.BooleanAnalysis.parityFun_orthonormal, Complexity.BooleanAnalysis.expect_parityFun, Complexity.BooleanAnalysis.parityFun_mul, Complexity.BooleanAnalysis.parityFun_add, Complexity.BooleanAnalysis.isBooleanValued_parityFun, Complexity.BooleanAnalysis.parityFun_injective}
   \leanok
   \uses{def:analysis-parity}
   $\langle \chi_S, \chi_T \rangle = [S = T]$ and $\mathbb{E}[\chi_S] = [S = \emptyset]$.
-  Moreover, $\chi_S \chi_T = \chi_{S \triangle T}$,
-  $\chi_S(x + y) = \chi_S(x) \chi_S(y)$, and every $\chi_S$ is Boolean-valued.
+  Moreover, $\chi_S \chi_T = \chi_{S \triangle T}$ pointwise,
+  $\chi_S(x + y) = \chi_S(x) \chi_S(y)$, every $\chi_S$ is Boolean-valued, and
+  $S \mapsto \chi_S$ is injective.
 \end{theorem}
 \begin{proof}
   \leanok
-  $\mathbb{E}[\chi_S] = \prod_{i \in S} \mathbb{E}[\chi(x_i)]$ vanishes as soon
-  as $S$ is nonempty. Orthonormality then follows from
-  $\chi_S \chi_T = \chi_{S \triangle T}$.
+  If $j \in S$, translating by the unit vector $e_j$ permutes the cube and
+  negates $\chi_S$, so $\sum_x \chi_S(x) = -\sum_x \chi_S(x) = 0$.
+  Orthonormality then follows from $\chi_S \chi_T = \chi_{S \triangle T}$,
+  since $S \triangle T = \emptyset$ iff $S = T$.
 \end{proof}
 
 \begin{definition}[Fourier coefficients and weights]
@@ -78,45 +93,55 @@ planned theorems).
 
 \begin{theorem}[Fourier expansion]
   \label{thm:analysis-fourier-expansion}
-  \lean{Complexity.BooleanAnalysis.fourier_expansion, Complexity.BooleanAnalysis.fourier_uniqueness, Complexity.BooleanAnalysis.fourierCoeff_ext, Complexity.BooleanAnalysis.eq_iff_fourierCoeff}
+  \lean{Complexity.BooleanAnalysis.fourier_expansion, Complexity.BooleanAnalysis.parityFun_span, Complexity.BooleanAnalysis.fourier_uniqueness, Complexity.BooleanAnalysis.fourierCoeff_ext, Complexity.BooleanAnalysis.eq_iff_fourierCoeff, Complexity.BooleanAnalysis.eq_zero_iff_fourierCoeff}
   \leanok
   \uses{def:analysis-fourier-coeff}
   Every $f : \mathbb{F}_2^n \to \mathbb{R}$ satisfies
-  $f(x) = \sum_S \widehat{f}(S) \chi_S(x)$. The coefficients are unique: if
-  $f = \sum_S c_S \chi_S$ pointwise, then $c_S = \widehat{f}(S)$ for all $S$. In
-  particular, two functions are equal iff all their Fourier coefficients agree.
+  $f(x) = \sum_S \widehat{f}(S) \chi_S(x)$, so the parities span. The
+  coefficients are unique: if $f = \sum_S c_S \chi_S$ pointwise, then
+  $c_S = \widehat{f}(S)$ for all $S$. In particular, two functions are equal iff
+  all their Fourier coefficients agree, and $f = 0$ iff every coefficient
+  vanishes.
 \end{theorem}
 \begin{proof}
   \leanok
   \uses{thm:analysis-parity-orthonormal}
-  The $2^n$ orthonormal parities span a $2^n$-dimensional space. Uniqueness comes
-  from taking inner products with each $\chi_T$.
+  Substituting $\widehat{f}(S) = 2^{-n} \sum_y f(y) \chi_S(y)$ and
+  $\chi_S(y)\chi_S(x) = \chi_S(x + y)$ gives
+  $\sum_S \widehat{f}(S)\chi_S(x) = 2^{-n} \sum_y f(y) \sum_S \chi_S(x + y)$,
+  and $\sum_S \chi_S(z)$ is $2^n$ at $z = 0$ and $0$ elsewhere. Uniqueness comes
+  from taking inner products with each $\chi_T$. Two functions with the same
+  coefficients have the same expansion.
 \end{proof}
 
 \begin{theorem}[Plancherel and Parseval]
   \label{thm:analysis-plancherel}
-  \lean{Complexity.BooleanAnalysis.plancherel, Complexity.BooleanAnalysis.parseval, Complexity.BooleanAnalysis.parseval_boolean, Complexity.BooleanAnalysis.norm_sq_eq_sum_fourierCoeff_sq}
+  \lean{Complexity.BooleanAnalysis.plancherel, Complexity.BooleanAnalysis.parseval, Complexity.BooleanAnalysis.norm_sq_eq_inner, Complexity.BooleanAnalysis.norm_sq_eq_sum_fourierCoeff_sq, Complexity.BooleanAnalysis.parseval_boolean, Complexity.BooleanAnalysis.abs_fourierCoeff_le_one}
   \leanok
   \uses{def:analysis-fourier-coeff}
   $\langle f, g \rangle = \sum_S \widehat{f}(S) \widehat{g}(S)$ and
   $\lVert f \rVert_2^2 = \langle f, f \rangle = \sum_S \widehat{f}(S)^2$. If $f$ is
-  Boolean-valued, then $\sum_S \widehat{f}(S)^2 = 1$.
+  Boolean-valued, then $\sum_S \widehat{f}(S)^2 = 1$, so
+  $|\widehat{f}(S)| \le 1$ for every $S$.
 \end{theorem}
 \begin{proof}
   \leanok
-  \uses{thm:analysis-fourier-expansion}
-  Expand both functions and use orthonormality.
+  \uses{thm:analysis-parity-orthonormal, thm:analysis-fourier-expansion}
+  The parities are orthonormal and span, so they form an orthonormal basis, and
+  Plancherel is Parseval's identity for that basis. For Boolean-valued $f$,
+  $\langle f, f \rangle = \mathbb{E}[f^2] = 1$.
 \end{proof}
 
 \begin{definition}[Variance, covariance, probability, distance]
   \label{def:analysis-moments}
-  \lean{Complexity.BooleanAnalysis.variance, Complexity.BooleanAnalysis.covariance, Complexity.BooleanAnalysis.prob, Complexity.BooleanAnalysis.hammingDist}
+  \lean{Complexity.BooleanAnalysis.variance, Complexity.BooleanAnalysis.covariance, Complexity.BooleanAnalysis.indicator, Complexity.BooleanAnalysis.prob, Complexity.BooleanAnalysis.hammingDist}
   \leanok
   \uses{def:analysis-cube}
   $\mathrm{Var}[f] = \mathbb{E}[f^2] - \mathbb{E}[f]^2$ and
   $\mathrm{Cov}[f,g] = \mathbb{E}[fg] - \mathbb{E}[f]\mathbb{E}[g]$. The uniform
-  probability of a predicate $P$ is $\Pr[P] = \mathbb{E}[1_P]$, and the relative
-  Hamming distance is $\mathrm{dist}(f,g) = \Pr_x[f(x) \neq g(x)]$.
+  probability of a predicate $P$ is $\Pr[P] = \mathbb{E}[1_P]$, where $1_P$ is
+  the $0$--$1$ indicator of $P$, and the relative Hamming distance is
+  $\mathrm{dist}(f,g) = \Pr_x[f(x) \neq g(x)]$.
 \end{definition}
 
 \begin{proposition}[Moments in Fourier form]
@@ -134,7 +159,31 @@ planned theorems).
   \leanok
   \uses{thm:analysis-plancherel}
   Take $\chi_\emptyset = 1$ in the definition of $\widehat{f}(\emptyset)$, then
-  apply Plancherel and split off the empty set.
+  apply Plancherel and split off the empty set. For Boolean-valued functions,
+  $f^2 = 1$ pointwise, and $f(x) g(x)$ is $1$ where $f$ and $g$ agree and $-1$
+  where they differ.
+\end{proof}
+
+\begin{proposition}[Variance bounds]
+  \label{prop:analysis-variance-boolean}
+  \lean{Complexity.BooleanAnalysis.variance_nonneg, Complexity.BooleanAnalysis.variance_boolean_prob, Complexity.BooleanAnalysis.variance_boolean_nonneg, Complexity.BooleanAnalysis.variance_boolean_le_one, Complexity.BooleanAnalysis.variance_dist_bounds}
+  \leanok
+  \uses{def:analysis-moments, def:analysis-parity}
+  Every $f$ has $\mathrm{Var}[f] \ge 0$. If $f$ is Boolean-valued, then
+  $\mathrm{Var}[f] = 4 \Pr[f = 1] \Pr[f = -1]$ and
+  $0 \le \mathrm{Var}[f] \le 1$. Moreover, with
+  $\varepsilon = \min(\mathrm{dist}(f, 1), \mathrm{dist}(f, -1))$, the distance
+  to the nearer constant function,
+  $2\varepsilon \le \mathrm{Var}[f] \le 4\varepsilon$.
+\end{proposition}
+\begin{proof}
+  \leanok
+  \uses{prop:analysis-moments-fourier}
+  The variance is a sum of squared Fourier coefficients. For Boolean-valued $f$,
+  let $p = \Pr[f = 1]$ and $q = \Pr[f = -1]$. Then $p + q = 1$ and
+  $\mathbb{E}[f] = p - q$, so $\mathrm{Var}[f] = 1 - (p - q)^2 = 4pq$. Also
+  $\mathrm{dist}(f, 1) = q$ and $\mathrm{dist}(f, -1) = p$, and
+  $2\min(p,q) \le 4pq \le 4\min(p,q)$.
 \end{proof}
 
 \begin{definition}[Densities and convolution]
@@ -145,23 +194,27 @@ planned theorems).
   The convolution is $(f * g)(x) = \mathbb{E}_y[f(y)\,g(x + y)]$. A density is a
   nonnegative $\varphi$ with $\mathbb{E}[\varphi] = 1$. The density of a nonempty
   set $A$ is $\varphi_A = 1_A / \mathbb{E}[1_A]$. For $A = \emptyset$ the Lean
-  definition returns a junk value, so theorems about $\varphi_A$ assume $A$ is
-  nonempty.
+  definition divides by zero and returns the zero function, so theorems about
+  $\varphi_A$ assume $A$ is nonempty.
 \end{definition}
 
 \begin{theorem}[Convolution theorem]
   \label{thm:analysis-convolution}
-  \lean{Complexity.BooleanAnalysis.fourierCoeff_convolution, Complexity.BooleanAnalysis.convolution_density_isDensity, Complexity.BooleanAnalysis.fourierCoeff_setDensity}
+  \lean{Complexity.BooleanAnalysis.fourierCoeff_convolution, Complexity.BooleanAnalysis.convolution_density_isDensity, Complexity.BooleanAnalysis.setDensity_isDensity, Complexity.BooleanAnalysis.fourierCoeff_setDensity, Complexity.BooleanAnalysis.setDensity_singleton_zero, Complexity.BooleanAnalysis.fourierCoeff_setDensity_singleton_zero}
   \leanok
   \uses{def:analysis-convolution, def:analysis-fourier-coeff}
   $\widehat{f * g}(S) = \widehat{f}(S)\,\widehat{g}(S)$. The convolution of two
-  densities is a density. For nonempty $A$,
-  $\widehat{\varphi_A}(S) = |A|^{-1} \sum_{x \in A} \chi_S(x)$.
+  densities is a density. For nonempty $A$, $\varphi_A$ is a density and
+  $\widehat{\varphi_A}(S) = |A|^{-1} \sum_{x \in A} \chi_S(x)$. In particular,
+  $\varphi_{\{0\}} = \sum_S \chi_S$, and every Fourier coefficient of
+  $\varphi_{\{0\}}$ is $1$.
 \end{theorem}
 \begin{proof}
   \leanok
   \uses{thm:analysis-parity-orthonormal}
-  Substitute $x = y + z$ and use $\chi_S(y + z) = \chi_S(y)\chi_S(z)$.
+  Substitute $x = y + z$ and use $\chi_S(y + z) = \chi_S(y)\chi_S(z)$. The
+  density claims follow by exchanging the two averages in
+  $\mathbb{E}[\varphi * \psi]$ and by computing $\mathbb{E}[1_A] = |A|/2^n$.
 \end{proof}
 
 \section{Degree structure}
@@ -181,19 +234,21 @@ planned theorems).
 
 \begin{theorem}[Degree decomposition]
   \label{thm:analysis-degree-decomposition}
-  \lean{Complexity.BooleanAnalysis.sum_degreePart, Complexity.BooleanAnalysis.degreePart_inner_eq_zero, Complexity.BooleanAnalysis.norm_sq_degreePart, Complexity.BooleanAnalysis.sum_fourierWeightAtDegree, Complexity.BooleanAnalysis.lowDegreePart_eq_sum, Complexity.BooleanAnalysis.lowDegreePart_self_inner, Complexity.BooleanAnalysis.fourierCoeff_degreePart}
+  \lean{Complexity.BooleanAnalysis.sum_degreePart, Complexity.BooleanAnalysis.degreePart_inner_eq_zero, Complexity.BooleanAnalysis.norm_sq_degreePart, Complexity.BooleanAnalysis.sum_fourierWeightAtDegree, Complexity.BooleanAnalysis.sum_fourierWeightAtDegree_boolean, Complexity.BooleanAnalysis.lowDegreePart_eq_sum, Complexity.BooleanAnalysis.lowDegreePart_self_inner, Complexity.BooleanAnalysis.fourierCoeff_degreePart, Complexity.BooleanAnalysis.degreePart_zero, Complexity.BooleanAnalysis.degree_le, Complexity.BooleanAnalysis.variance_eq_sum_fourierWeightAtDegree_pos}
   \leanok
-  \uses{def:analysis-degree-part}
+  \uses{def:analysis-degree-part, def:analysis-moments}
   $f = \sum_{k=0}^{n} f^{=k}$ and
   $\widehat{f^{=k}}(T) = [|T| = k]\,\widehat{f}(T)$. For $j \neq k$ the parts
   $f^{=j}$ and $g^{=k}$ are orthogonal. Also $\lVert f^{=k} \rVert_2^2 = W^k[f]$,
-  $\sum_{k=0}^n W^k[f] = \langle f, f \rangle$,
-  $f^{\le k} = \sum_{j \le k} f^{=j}$, and
-  $\langle f^{\le k}, f^{\le k} \rangle = \sum_{j \le k} W^j[f]$.
+  $\sum_{k=0}^n W^k[f] = \langle f, f \rangle$ (which is $1$ for Boolean-valued
+  $f$), $f^{\le k} = \sum_{j \le k} f^{=j}$, and
+  $\langle f^{\le k}, f^{\le k} \rangle = \sum_{j \le k} W^j[f]$. Finally,
+  $f^{=0}$ is the constant $\mathbb{E}[f]$,
+  $\mathrm{Var}[f] = \sum_{k=1}^n W^k[f]$, and $\deg f \le n$.
 \end{theorem}
 \begin{proof}
   \leanok
-  \uses{thm:analysis-fourier-expansion, thm:analysis-plancherel}
+  \uses{thm:analysis-fourier-expansion, thm:analysis-plancherel, prop:analysis-moments-fourier}
   Regroup the Fourier expansion and Parseval's sum by $|S|$. The projection $f^{=k}$
   keeps exactly the coefficients with $|S| = k$.
 \end{proof}
@@ -206,9 +261,11 @@ planned theorems).
   \leanok
   \uses{def:analysis-parity, def:analysis-moments}
   $f$ is \emph{linear} if $f = \chi_S$ for some $S$. It is \emph{multiplicative}
-  if $f(x + y) = f(x) f(y)$ for all $x, y$. It is $\varepsilon$-close to a property
-  $P$ if some $g$ satisfying $P$ has $\mathrm{dist}(f, g) \le \varepsilon$. The BLR
-  acceptance probability is $\Pr_{x,y}[f(x) f(y) = f(x + y)]$.
+  if $f(x + y) = f(x) f(y)$ for all $x, y$. It is $\varepsilon$-close to $g$ if
+  $\mathrm{dist}(f, g) \le \varepsilon$, and $\varepsilon$-close to a property
+  $P$ if it is $\varepsilon$-close to some $g$ satisfying $P$. The BLR
+  acceptance probability is $\Pr_{x,y}[f(x) f(y) = f(x + y)]$ for independent
+  uniform $x$ and $y$.
 \end{definition}
 
 \begin{theorem}[Linear iff multiplicative]
@@ -221,7 +278,7 @@ planned theorems).
 \begin{proof}
   \leanok
   A multiplicative $\pm 1$-valued function is a character of $\mathbb{F}_2^n$.
-  Read off $S$ from its values on the unit vectors.
+  Take $S = \{i : f(e_i) = -1\}$ and write each $x$ as a sum of unit vectors.
 \end{proof}
 
 \begin{proposition}[BLR acceptance in Fourier form]
@@ -261,8 +318,10 @@ planned theorems).
   \lean{Complexity.BooleanAnalysis.local_correctability}
   \leanok
   \uses{def:analysis-linear}
-  If a Boolean-valued $f$ is $\varepsilon$-close to $\chi_S$, then for every $x$,
-  $\Pr_y[f(y) f(x + y) = \chi_S(x)] \ge 1 - 2\varepsilon$.
+  If a real-valued $f$ on $\{0,1\}^n$ is $\varepsilon$-close to $\chi_S$ (it
+  differs from $\chi_S$ on at most an $\varepsilon$ fraction of inputs), then for
+  every $x$, $\Pr_y[f(y) f(x + y) = \chi_S(x)] \ge 1 - 2\varepsilon$. No
+  Boolean-valuedness is needed.
 \end{proposition}
 \begin{proof}
   \leanok
@@ -289,37 +348,45 @@ planned theorems).
 
 \begin{theorem}[The noise operator]
   \label{thm:analysis-noise-op}
-  \lean{Complexity.BooleanAnalysis.fourierCoeff_noiseOp, Complexity.BooleanAnalysis.noiseOp_one, Complexity.BooleanAnalysis.noiseOp_zero, Complexity.BooleanAnalysis.noiseStability_eq_inner, Complexity.BooleanAnalysis.noiseStabilityBilin_eq_inner, Complexity.BooleanAnalysis.noiseStabilityBilin_symm}
+  \lean{Complexity.BooleanAnalysis.fourierCoeff_noiseOp, Complexity.BooleanAnalysis.noiseOp_one, Complexity.BooleanAnalysis.noiseOp_zero, Complexity.BooleanAnalysis.noiseStability_eq_inner, Complexity.BooleanAnalysis.noiseStabilityBilin_eq_inner, Complexity.BooleanAnalysis.noiseStabilityBilin_symm, Complexity.BooleanAnalysis.noiseStabilityBilin_self, Complexity.BooleanAnalysis.noiseStabilityBilin_one}
   \leanok
   \uses{def:analysis-noise}
   $\widehat{T_\rho f}(S) = \rho^{|S|} \widehat{f}(S)$, $T_1 f = f$, and
   $T_0 f = \mathbb{E}[f] \cdot 1$. Also
   $\mathrm{Stab}_\rho[f] = \langle f, T_\rho f \rangle$ and
-  $\mathrm{Stab}_\rho[f,g] = \langle f, T_\rho g \rangle$. Since the bilinear form
-  is symmetric, $T_\rho$ is self-adjoint.
+  $\mathrm{Stab}_\rho[f,g] = \langle f, T_\rho g \rangle$. The bilinear form is
+  symmetric, restricts to $\mathrm{Stab}_\rho[f]$ on the diagonal, and equals
+  $\langle f, g \rangle$ at $\rho = 1$. Combining symmetry with
+  $\mathrm{Stab}_\rho[f,g] = \langle f, T_\rho g \rangle$ shows that $T_\rho$ is
+  self-adjoint; this corollary is not stated as a separate declaration.
 \end{theorem}
 \begin{proof}
   \leanok
-  \uses{thm:analysis-parity-orthonormal, thm:analysis-plancherel}
-  Read off coefficients using orthonormality, then apply Plancherel.
+  \uses{thm:analysis-parity-orthonormal, thm:analysis-plancherel, thm:analysis-fourier-expansion}
+  Read off coefficients using orthonormality, then apply Plancherel. The
+  identities for $T_1$ and $T_0$ compare Fourier coefficients.
 \end{proof}
 
 \begin{proposition}[Basic properties of noise stability]
   \label{prop:analysis-noise-stability}
-  \lean{Complexity.BooleanAnalysis.noiseStability_eq_sum_weight, Complexity.BooleanAnalysis.noiseStability_one, Complexity.BooleanAnalysis.noiseStability_zero_eq_expect_sq, Complexity.BooleanAnalysis.noiseStability_mono, Complexity.BooleanAnalysis.noiseStability_le_self_inner, Complexity.BooleanAnalysis.noiseStability_add_two_noiseSensitivity, Complexity.BooleanAnalysis.noiseSensitivity_antitone}
+  \lean{Complexity.BooleanAnalysis.noiseStability_eq_sum_weight, Complexity.BooleanAnalysis.noiseStability_one, Complexity.BooleanAnalysis.noiseStability_zero_eq_expect_sq, Complexity.BooleanAnalysis.noiseStability_nonneg, Complexity.BooleanAnalysis.sq_expect_le_noiseStability, Complexity.BooleanAnalysis.noiseStability_mono, Complexity.BooleanAnalysis.noiseStability_le_self_inner, Complexity.BooleanAnalysis.noiseStability_boolean_le_one, Complexity.BooleanAnalysis.noiseStability_add_two_noiseSensitivity, Complexity.BooleanAnalysis.noiseSensitivity_antitone, Complexity.BooleanAnalysis.noiseSensitivity_nonneg, Complexity.BooleanAnalysis.noiseSensitivity_one}
   \leanok
   \uses{def:analysis-noise, def:analysis-degree-part}
-  $\mathrm{Stab}_\rho[f] = \sum_k \rho^k W^k[f]$. Moreover
-  $\mathrm{Stab}_1[f] = \langle f, f \rangle$ and
-  $\mathrm{Stab}_0[f] = \mathbb{E}[f]^2$. On $0 \le \rho_1 \le \rho_2$,
+  $\mathrm{Stab}_\rho[f] = \sum_{k=0}^n \rho^k W^k[f]$. Moreover
+  $\mathrm{Stab}_1[f] = \langle f, f \rangle$,
+  $\mathrm{Stab}_0[f] = \mathbb{E}[f]^2$, and $\mathrm{NS}_1[f] = 0$. For
+  $\rho \ge 0$, $0 \le \mathbb{E}[f]^2 \le \mathrm{Stab}_\rho[f]$. On
+  $0 \le \rho_1 \le \rho_2$,
   $\mathrm{Stab}_{\rho_1}[f] \le \mathrm{Stab}_{\rho_2}[f]$ and
   $\mathrm{NS}_{\rho_2}[f] \le \mathrm{NS}_{\rho_1}[f]$. For
-  $\rho \in [0,1]$, $\mathrm{Stab}_\rho[f] \le \langle f, f \rangle$. Always,
+  $\rho \in [0,1]$, $\mathrm{Stab}_\rho[f] \le \langle f, f \rangle$ (so
+  $\mathrm{Stab}_\rho[f] \le 1$ for Boolean-valued $f$) and
+  $\mathrm{NS}_\rho[f] \ge 0$. Always,
   $\mathrm{Stab}_\rho[f] + 2\,\mathrm{NS}_\rho[f] = \langle f, f \rangle$.
 \end{proposition}
 \begin{proof}
   \leanok
-  \uses{thm:analysis-plancherel}
+  \uses{thm:analysis-plancherel, prop:analysis-moments-fourier}
   Term-by-term comparison of the spectral sums.
 \end{proof}
 
@@ -355,50 +422,58 @@ planned theorems).
 
 \begin{proposition}[Basic properties of influence]
   \label{prop:analysis-influence-basic}
-  \lean{Complexity.BooleanAnalysis.totalInfluence_eq_sum_influence, Complexity.BooleanAnalysis.totalInfluence_eq_sum_weight, Complexity.BooleanAnalysis.totalInfluence_le, Complexity.BooleanAnalysis.totalInfluence_boolean_le, Complexity.BooleanAnalysis.totalInfluence_le_of_degree, Complexity.BooleanAnalysis.totalInfluence_parityFun, Complexity.BooleanAnalysis.influence_parityFun}
+  \lean{Complexity.BooleanAnalysis.totalInfluence_eq_sum_influence, Complexity.BooleanAnalysis.totalInfluence_eq_sum_weight, Complexity.BooleanAnalysis.influence_nonneg, Complexity.BooleanAnalysis.totalInfluence_nonneg, Complexity.BooleanAnalysis.influence_le_totalInfluence, Complexity.BooleanAnalysis.influence_le_self_inner, Complexity.BooleanAnalysis.influence_boolean_le_one, Complexity.BooleanAnalysis.totalInfluence_le, Complexity.BooleanAnalysis.totalInfluence_boolean_le, Complexity.BooleanAnalysis.totalInfluence_le_of_degree, Complexity.BooleanAnalysis.totalInfluence_boolean_le_of_degree, Complexity.BooleanAnalysis.totalInfluence_parityFun, Complexity.BooleanAnalysis.influence_parityFun}
   \leanok
   \uses{def:analysis-influence, def:analysis-degree-part}
-  $\mathbf{I}[f] = \sum_i \mathrm{Inf}_i[f] = \sum_k k\,W^k[f]$, and
-  $\mathbf{I}[f] \le n \langle f, f \rangle$, which is at most $n$ for
+  $\mathbf{I}[f] = \sum_i \mathrm{Inf}_i[f] = \sum_{k=0}^n k\,W^k[f]$. Each
+  influence satisfies $0 \le \mathrm{Inf}_i[f] \le \mathbf{I}[f]$ and
+  $\mathrm{Inf}_i[f] \le \langle f, f \rangle$, which is $1$ for Boolean-valued
+  $f$. Also $\mathbf{I}[f] \le n \langle f, f \rangle$, which is $n$ for
   Boolean-valued $f$. If every coefficient on sets of size greater than $d$
-  vanishes, then $\mathbf{I}[f] \le d \langle f, f\rangle$. For parities,
+  vanishes, then $\mathbf{I}[f] \le d \langle f, f\rangle$, hence
+  $\mathbf{I}[f] \le d$ for Boolean-valued $f$. For parities,
   $\mathbf{I}[\chi_S] = |S|$ and $\mathrm{Inf}_i[\chi_S] = [i \in S]$.
 \end{proposition}
 \begin{proof}
   \leanok
-  \uses{thm:analysis-plancherel}
+  \uses{thm:analysis-plancherel, thm:analysis-parity-orthonormal}
   Exchange the sums over $i$ and $S$, and bound $|S|$ by $n$ or $d$.
 \end{proof}
 
 \begin{definition}[Coordinate flip, derivative, sensitivity operator]
   \label{def:analysis-derivative}
-  \lean{Complexity.BooleanAnalysis.flipCoord, Complexity.BooleanAnalysis.flipEquiv, Complexity.BooleanAnalysis.derivative, Complexity.BooleanAnalysis.sensitivityOp}
+  \lean{Complexity.BooleanAnalysis.flipCoord, Complexity.BooleanAnalysis.flipEquiv, Complexity.BooleanAnalysis.flipCoord_flipCoord, Complexity.BooleanAnalysis.derivative, Complexity.BooleanAnalysis.sensitivityOp}
   \leanok
   \uses{def:analysis-fourier-coeff}
   $x^{\oplus i}$ flips coordinate $i$ of $x$. This is an involutive equivalence of
   the cube. The derivative is defined spectrally:
   $D_i f = \sum_{S \ni i} \widehat{f}(S)\, \chi_{S \setminus \{i\}}$. The
   sensitivity operator is $L_i f(x) = (f(x) - f(x^{\oplus i}))/2$. These are
-  different operators: $D_i$ removes $i$ from each frequency, while $L_i$ keeps
-  only the frequencies that contain $i$.
+  different operators: by Theorem~\ref{thm:analysis-influence-derivative},
+  $D_i$ removes $i$ from each frequency, while $L_i$ keeps only the frequencies
+  that contain $i$.
 \end{definition}
 
 \begin{theorem}[Influence as a squared norm]
   \label{thm:analysis-influence-derivative}
-  \lean{Complexity.BooleanAnalysis.fourierCoeff_derivative, Complexity.BooleanAnalysis.influence_eq_norm_sq_derivative, Complexity.BooleanAnalysis.fourierCoeff_sensitivityOp, Complexity.BooleanAnalysis.influence_eq_norm_sq_sensitivityOp, Complexity.BooleanAnalysis.sensitivityOp_eq_parityFun_mul_derivative, Complexity.BooleanAnalysis.fourierCoeff_comp_flipCoord}
+  \lean{Complexity.BooleanAnalysis.fourierCoeff_derivative, Complexity.BooleanAnalysis.influence_eq_norm_sq_derivative, Complexity.BooleanAnalysis.fourierCoeff_sensitivityOp, Complexity.BooleanAnalysis.influence_eq_norm_sq_sensitivityOp, Complexity.BooleanAnalysis.sensitivityOp_eq_parityFun_mul_derivative, Complexity.BooleanAnalysis.fourierCoeff_comp_flipCoord, Complexity.BooleanAnalysis.parityFun_flipCoord, Complexity.BooleanAnalysis.expect_flipCoord}
   \leanok
   \uses{def:analysis-derivative, def:analysis-influence}
+  The flip preserves expectations, $\mathbb{E}_x[g(x^{\oplus i})] = \mathbb{E}[g]$,
+  and $\chi_S(x^{\oplus i}) = (-1)^{[i \in S]} \chi_S(x)$. Precomposing with the
+  flip gives
+  $\widehat{f \circ \oplus_i}(T) = (-1)^{[i \in T]} \widehat{f}(T)$. Moreover
   $\widehat{D_i f}(T) = [i \notin T]\,\widehat{f}(T \cup \{i\})$ and
   $\widehat{L_i f}(T) = [i \in T]\,\widehat{f}(T)$. Hence
   $\mathrm{Inf}_i[f] = \lVert D_i f \rVert_2^2 = \lVert L_i f \rVert_2^2$ and
-  $L_i f = \chi_{\{i\}} \cdot D_i f$. Precomposing with the flip gives
-  $\widehat{f \circ \oplus_i}(T) = (-1)^{[i \in T]} \widehat{f}(T)$.
+  $L_i f = \chi_{\{i\}} \cdot D_i f$.
 \end{theorem}
 \begin{proof}
   \leanok
-  \uses{thm:analysis-plancherel, thm:analysis-parity-orthonormal}
+  \uses{thm:analysis-plancherel, thm:analysis-parity-orthonormal, thm:analysis-fourier-expansion}
   The flip is measure-preserving and negates exactly the parities containing $i$.
-  Then apply Parseval.
+  Then apply Parseval, and compare Fourier coefficients for
+  $L_i f = \chi_{\{i\}} \cdot D_i f$.
 \end{proof}
 
 \begin{theorem}[Influence as pivotality]
@@ -409,6 +484,8 @@ planned theorems).
   For Boolean-valued $f$,
   $\mathrm{Inf}_i[f] = \Pr_x[f(x) \neq f(x^{\oplus i})]$ and
   $\mathbf{I}[f] = \mathbb{E}_x\bigl[\#\{i : f(x) \neq f(x^{\oplus i})\}\bigr]$.
+  The Lean statements write the probability as the expectation of the
+  $0$--$1$ indicator.
 \end{theorem}
 \begin{proof}
   \leanok
@@ -450,11 +527,14 @@ planned theorems).
   \leanok
   \uses{def:analysis-influence, def:analysis-fourier-coeff}
   $\widehat{f}(\{i\})^2 \le \mathrm{Inf}_i[f]$ and
-  $\sum_i \widehat{f}(\{i\})^2 = W^1[f] \le \mathbf{I}[f]$.
+  $\sum_i \widehat{f}(\{i\})^2 = W^1[f] \le \mathbf{I}[f]$. These are not the
+  hypercontractive level-1 inequality of
+  Theorem~\ref{thm:analysis-level1-inequality}.
 \end{proposition}
 \begin{proof}
   \leanok
-  Each inequality drops nonnegative terms from a spectral sum.
+  The singletons are exactly the sets of size $1$. Each inequality drops
+  nonnegative terms from a spectral sum.
 \end{proof}
 
 \section{Monotone functions}
@@ -467,7 +547,9 @@ planned theorems).
   $0$. A function $f$ is \emph{monotone} if $x \le y$ implies $f(x) \le f(y)$.
   This is O'Donnell's order on $\{-1,1\}^n$. It is the reverse of the bitwise
   order on $\mathbb{F}_2^n$, and the Lean definition must record the choice
-  explicitly.
+  explicitly. The circuit library's \texttt{IsMonotoneBoolFun} is a different
+  notion: monotonicity of $\{0,1\}$-valued functions on bit strings in the
+  bitwise order.
 \end{definition}
 
 \begin{theorem}[Influences of monotone functions]
@@ -509,8 +591,10 @@ planned theorems).
   \leanok
   For all real $a, b$,
   $\frac{1}{2}\bigl((a + b/\sqrt{3})^4 + (a - b/\sqrt{3})^4\bigr) \le (a^2 + b^2)^2$.
-  That is, on one bit, $\lVert T_{1/\sqrt{3}} f \rVert_4^4 \le \lVert f \rVert_2^4$
-  for $f(x) = a + bx$.
+  Read on one bit, this says
+  $\lVert T_{1/\sqrt{3}} f \rVert_4^4 \le \lVert f \rVert_2^4$ for
+  $f(x) = a + bx$. The Lean statement is only the real inequality; the library
+  has no $L^4$ norm or one-bit noise operator.
 \end{lemma}
 \begin{proof}
   \leanok
@@ -595,8 +679,8 @@ planned theorems).
 \begin{theorem}[Kahn--Kalai--Linial]
   \label{thm:analysis-kkl}
   \uses{def:analysis-influence, def:analysis-moments}
-  There is an absolute constant $c > 0$ such that every Boolean-valued
-  $f : \mathbb{F}_2^n \to \mathbb{R}$ has a coordinate $i$ with
+  There is an absolute constant $c > 0$ such that for every $n \ge 1$, every
+  Boolean-valued $f : \mathbb{F}_2^n \to \mathbb{R}$ has a coordinate $i$ with
   $\mathrm{Inf}_i[f] \ge c \cdot \mathrm{Var}[f] \cdot \frac{\log n}{n}$.
 \end{theorem}
 \begin{proof}
@@ -630,18 +714,21 @@ These nodes connect this chapter to the circuit lower-bound chapter. The
 Linial--Mansour--Nisan argument consumes the switching lemma formalized there
 (random restrictions collapse small-depth circuits to shallow decision trees),
 together with the fact that a shallow decision tree has low Fourier degree.
+Nothing in this section is formalized yet.
 
 \begin{definition}[Real-valued view of a Boolean function on bit strings]
   \label{def:analysis-bridge}
   \uses{def:bitstring, def:analysis-parity}
   Every $F : \{0,1\}^n \to \{0,1\}$ on bit strings determines the Boolean-valued
-  function $x \mapsto \chi(F(x))$ on the cube. This must be a public bridge. The
-  PCP development has only a private, PCP-specific version of it.
+  function $x \mapsto \chi(F(x))$ on the cube. This must be a public bridge.
+  The PCP development has only a related map, \texttt{Complexity.signOf} in an
+  internal module, which sends an $\mathbb{F}_2$-valued function on the cube
+  to its $\pm 1$ encoding. It does not act on bit strings.
 \end{definition}
 
 \begin{theorem}[Decision trees have low degree]
   \label{thm:analysis-decision-tree-degree}
-  \uses{def:analysis-bridge, def:analysis-degree-part}
+  \uses{def:analysis-bridge, def:analysis-degree-part, def:lowerbounds-decision-tree}
   \notready
   If $F$ is computed by a decision tree of depth $t$, then the real-valued view of
   $F$ has degree at most $t$.
@@ -654,14 +741,14 @@ together with the fact that a shallow decision tree has low Fourier degree.
 
 \begin{theorem}[Linial--Mansour--Nisan]
   \label{thm:analysis-lmn}
-  \uses{def:analysis-bridge, def:analysis-degree-part, def:circuit, def:NC-AC}
+  \uses{def:analysis-bridge, def:analysis-degree-part, def:circuit, def:circuits-bases, def:NC-AC}
   \notready
   Suppose $F$ is computed by an unbounded fan-in AND/OR circuit with negations of
   size $s$ and depth $d$. Then its real-valued view satisfies
   $W^{>k}[F] \le s \cdot 2^{-\Omega(k^{1/d})}$ for every $k$.
 \end{theorem}
 \begin{proof}
-  \uses{thm:analysis-decision-tree-degree, thm:analysis-degree-decomposition, thm:lowerbounds-switching}
+  \uses{thm:analysis-decision-tree-degree, thm:analysis-degree-decomposition, thm:lowerbounds-switching, thm:lowerbounds-staged-switching, thm:lowerbounds-ac0-normalization}
   Relate $W^{>k}[F]$ to the expected high-degree weight of a random restriction
   of $F$. The restriction formula is
   $\widehat{F_{J \mid z}}(S) = \sum_{T \subseteq \bar J} \widehat{F}(S \cup T)\chi_T(z)$.
@@ -671,10 +758,12 @@ together with the fact that a shallow decision tree has low Fourier degree.
 
 \begin{corollary}[Parity is not in $\cc{AC^0}$, via LMN]
   \label{cor:analysis-lmn-parity}
-  \uses{def:analysis-bridge, def:circuit}
+  \uses{def:analysis-bridge, def:circuit, def:circuits-bases, def:lowerbounds-parity}
   \notready
-  Every unbounded fan-in circuit of depth $d$ computing the parity of $n$ bits
-  has size $2^{\Omega(n^{1/d})}$.
+  For each fixed $d$, every unbounded fan-in circuit of depth $d$ computing the
+  parity of $n$ bits has size $2^{\Omega(n^{1/d})}$. Håstad's bound
+  (Theorem~\ref{thm:lowerbounds-hastad-size}) improves the exponent to
+  $n^{1/(d-1)}$.
 \end{corollary}
 \begin{proof}
   \uses{thm:analysis-lmn, prop:analysis-influence-basic}

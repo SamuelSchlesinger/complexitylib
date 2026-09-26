@@ -8,9 +8,10 @@ an encoded view, and its coins are a uniformly random point of
 $\{0,1\}^t$. Formalized so far: the three interactive classes with
 completeness $2/3$ and soundness $1/3$, $\cc{P} \subseteq \cc{MA}$ and
 $\cc{P} \subseteq \cc{AM}$, $\cc{IP} \subseteq \cc{PSPACE}$ by evaluating the
-protocol's game tree, and the PCP theorem
-$\cc{NP} = \cc{PCP}(O(\log n), O(1))$ with a constructible randomness bound,
-proved along Dinur's gap-amplification route. The main open direction is
+protocol's game tree, the one-variable multilinear extension, and the PCP
+theorem $\cc{NP} = \cc{PCP}(O(\log n), O(1))$ (completeness $1$, soundness
+$1/2$) with a constructible randomness bound, proved along Dinur's
+gap-amplification route. The main open direction is
 $\cc{PSPACE} \subseteq \cc{IP}$ (hence $\cc{IP} = \cc{PSPACE}$) through
 sum-check and arithmetization, followed by hardness of approximation built on
 the PCP theorem.
@@ -20,49 +21,60 @@ the PCP theorem.
 \begin{definition}[Protocols, strategies and transcripts]
   \label{def:interaction-protocol}
   \lean{Complexity.Transcript, Complexity.ProverStrategy,
-    Complexity.ProverStrategy.Bounded, Complexity.Protocol,
-    Complexity.Protocol.transcript, Complexity.Protocol.Accepts,
-    Complexity.Protocol.acceptEvent}
+    Complexity.ProverStrategy.Bounded, Complexity.protocolView,
+    Complexity.Protocol, Complexity.Protocol.transcript,
+    Complexity.Protocol.Accepts, Complexity.Protocol.acceptEvent}
   \leanok
-  \uses{def:FP, def:P, def:pair}
-  A transcript is a list of messages; the verifier speaks at even positions and
-  the prover at odd ones. A prover strategy maps the visible transcript to the
-  next message; it never sees the verifier's coins, and it is bounded by $m$
-  if all its messages have length at most $m$. A protocol consists of a round
-  count, a coin count and a message-length bound (functions of the input
+  \uses{def:FP, def:P, def:pair, def:encodings-data,
+    def:encodings-bitstring-list}
+  A transcript is a list of messages (bit strings); the verifier speaks at
+  even positions and the prover at odd ones. A prover strategy is an arbitrary
+  function from the visible transcript to the next message; it never sees the
+  verifier's coins, and it is bounded by $m$ if the message it returns on
+  every transcript has length at most $m$. A protocol consists of a round
+  count, a coin count $c$ and a message-length bound (functions of the input
   length), a next-message function in $\cc{FP}$ applied to the encoded view
-  $\mathrm{pair}(\mathrm{pair}(x, r), \langle \tau \rangle)$ of the input,
-  the private coins $r$ and the transcript $\tau$, a proof that the verifier's
-  messages respect the length bound, and a verdict language in $\cc{P}$ on the
-  final view. Each round appends the verifier's message and then the prover's
-  reply; the accept event is the set of coin strings on which the verdict
-  accepts the completed interaction.
+  $\mathrm{pair}(\mathrm{pair}(x, r), \langle \tau \rangle)$ of the input $x$,
+  the private coins $r$ and the transcript $\tau$ (where
+  $\langle \tau \rangle$ is the rose-tree serialization of $\tau$), a proof
+  that for every $x$, $r$ and $\tau$ the verifier's message has length at most
+  the message bound at $|x|$, and a verdict language in $\cc{P}$. Each round
+  appends the verifier's message, computed from the current view, and then the
+  prover's reply to the transcript extended by that message. The verifier
+  accepts if the view of the transcript after the round count at $|x|$ many
+  rounds lies in the verdict language, and the accept event is the set of coin
+  strings $r \in \{0,1\}^{c(|x|)}$ on which it accepts.
 \end{definition}
 
 \begin{definition}[IP]
   \label{def:IP}
   \lean{Complexity.IP}
   \leanok
-  \uses{def:interaction-protocol}
-  $L \in \cc{IP}$ if some protocol whose round count, coin count and message
-  bound are given by polynomials satisfies: for $x \in L$ some strategy bounded
-  by the message bound is accepted with probability at least $2/3$, and for
-  $x \notin L$ every bounded strategy is accepted with probability at most
-  $1/3$. The counts are required to be polynomials, not merely polynomially
-  bounded, so that the verifier can compute them.
+  \uses{def:interaction-protocol, def:encodings-eventprob}
+  $L \in \cc{IP}$ if some protocol whose round count, coin count $c$ and
+  message bound $m$ are given by polynomials with natural-number coefficients
+  satisfies: for $x \in L$ some strategy bounded by $m(|x|)$ is accepted with
+  probability at least $2/3$, and for $x \notin L$ every strategy bounded by
+  $m(|x|)$ is accepted with probability at most $1/3$, the probability being
+  over uniform $r \in \{0,1\}^{c(|x|)}$. The counts are required to be
+  polynomials, not merely polynomially bounded, so that the verifier can
+  compute them.
 \end{definition}
 
 \begin{definition}[MA and AM]
   \label{def:MA-AM}
-  \lean{Complexity.MA, Complexity.AM}
+  \lean{Complexity.merlinEvent, Complexity.MA, Complexity.arthurEvent,
+    Complexity.AM}
   \leanok
-  \uses{def:P, def:pair}
-  $L \in \cc{MA}$ if there are a polynomial $p$ and $V \in \cc{P}$ such that
+  \uses{def:P, def:pair, def:encodings-eventprob}
+  $L \in \cc{MA}$ if there are a polynomial $p$ with natural-number
+  coefficients and $V \in \cc{P}$ such that
   for $x \in L$ some proof $w$ with $|w| \le p(|x|)$ makes
   $\mathrm{pair}(\mathrm{pair}(x, w), r) \in V$ for at least $2/3$ of the
   $r \in \{0,1\}^{p(|x|)}$, and for $x \notin L$ every such proof does so for at
   most $1/3$ of them. $L \in \cc{AM}$ if the coins $r$ come first and are
-  public: the fraction of $r$ admitting some reply $w$ with $|w| \le p(|x|)$
+  public: the fraction of $r \in \{0,1\}^{p(|x|)}$ admitting some reply $w$
+  with $|w| \le p(|x|)$
   and $\mathrm{pair}(\mathrm{pair}(x, r), w) \in V$ is at least $2/3$ for
   members and at most $1/3$ for non-members.
 \end{definition}
@@ -76,20 +88,24 @@ the PCP theorem.
 \end{proposition}
 \begin{proof}
   \leanok
-  The verifier ignores the proof and the coins and decides the input it
-  recovers from the encoded view.
+  Take $p = 0$, so there are no coins and the proof or reply is empty; the
+  verifier decides the input it recovers from the encoded view, so the
+  acceptance probability is $1$ on members and $0$ on non-members.
 \end{proof}
 
 \begin{lemma}[Strategy extensionality]
   \label{lem:interaction-strategy-ext}
-  \lean{Complexity.Protocol.transcript_congr, Complexity.Protocol.accepts_congr,
+  \lean{Complexity.Protocol.transcript_length,
+    Complexity.Protocol.transcript_congr, Complexity.Protocol.accepts_congr,
     Complexity.Protocol.acceptEvent_congr}
   \leanok
   \uses{def:interaction-protocol}
-  If two strategies agree on all transcripts of length at most $2n$, the
-  transcripts after $n$ rounds coincide. Hence acceptance and the accept event
-  depend on the strategy only through its values on transcripts of length at
-  most twice the round count.
+  The transcript after $n$ rounds has length exactly $2n$. If two strategies
+  agree on all transcripts of length at most $2n$, then for every input and
+  every coin string the transcripts after $n$ rounds coincide. Hence
+  acceptance and the accept event on input $x$ depend on the strategy only
+  through its values on transcripts of length at most twice the round count
+  at $|x|$.
 \end{lemma}
 \begin{proof}
   \leanok
@@ -99,18 +115,26 @@ the PCP theorem.
 
 \begin{lemma}[The game value and an optimal prover]
   \label{lem:interaction-game-value}
-  \lean{Complexity.Protocol.gval, Complexity.Protocol.card_acceptEvent_le_gval,
-    Complexity.Protocol.gval_eq_card_acceptEvent,
-    Complexity.Protocol.optStrategy_bounded}
+  \lean{Complexity.Protocol.consFinset, Complexity.Protocol.vset,
+    Complexity.Protocol.gval, Complexity.Protocol.card_acceptEvent_le_gval,
+    Complexity.Protocol.optStrategy, Complexity.Protocol.optStrategy_bounded,
+    Complexity.Protocol.gval_eq_card_acceptEvent}
   \leanok
   \uses{def:interaction-protocol}
-  For a protocol and an input $x$, define $\mathrm{gval}$ by recursion down the
-  transcript tree: at a leaf it counts the coin strings consistent with the
-  transcript that the verdict accepts, and at an internal node it sums, over
-  the verifier messages still possible, the maximum over replies of length at
-  most the message bound of the value below. Then the number of accepting coin
-  strings of every bounded strategy is at most $\mathrm{gval}$ at the root, and
-  a bounded deterministic strategy attains it.
+  Fix a protocol, an input $x$, a coin count $t$ and a message bound $m$. A
+  coin string $r \in \{0,1\}^t$ is consistent with a transcript $\tau$ if
+  every verifier message recorded in $\tau$ is the one the verifier sends on
+  coins $r$. Define $\mathrm{gval}$ at a transcript $\tau$ by recursion on the
+  number of remaining rounds: with none left it counts the coin strings
+  consistent with $\tau$ on which the verdict accepts the view of $\tau$, and
+  otherwise it sums, over the verifier messages that the consistent coin
+  strings produce next, the maximum over replies of length at most $m$ of the
+  value one round down. Let $\mathrm{gval}(x)$ be its value at the root: coin
+  count $c(|x|)$, message bound and round count at $|x|$, and the empty
+  transcript. Then every strategy bounded by the message bound at $|x|$ has at
+  most $\mathrm{gval}(x)$ accepting coin strings, and a bounded strategy
+  chosen for $x$ (a maximizing reply at every node) has exactly
+  $\mathrm{gval}(x)$.
 \end{lemma}
 \begin{proof}
   \leanok
@@ -120,18 +144,23 @@ the PCP theorem.
 
 \begin{theorem}[IP membership is a game-value comparison]
   \label{thm:interaction-ip-game-value}
-  \lean{Complexity.IP_membership_is_game_value}
+  \lean{Complexity.Protocol.mem_iff_gval, Complexity.IP_membership_is_game_value}
   \leanok
   \uses{def:IP, lem:interaction-game-value}
-  For every $L \in \cc{IP}$ there is a protocol such that, for every $x$,
-  $x \in L$ if and only if $2^{c(|x|)} < 2\,\mathrm{gval}(x)$, where $c$ is the
-  coin count and $\mathrm{gval}(x)$ is the root value.
+  If a protocol and a language $L$ satisfy the completeness and soundness
+  conditions of $\cc{IP}$ (no polynomial bound on the counts is needed), then
+  for every $x$, $x \in L$ if and only if $2^{c(|x|)} < 2\,\mathrm{gval}(x)$,
+  where $c$ is the coin count and $\mathrm{gval}(x)$ is the root value of
+  Lemma~\ref{lem:interaction-game-value}. In particular, for every
+  $L \in \cc{IP}$ there is a protocol with this property.
 \end{theorem}
 \begin{proof}
   \leanok
   \uses{lem:interaction-game-value}
-  Completeness puts the optimum above two thirds of the coin space and
-  soundness puts it below one third.
+  By the lemma, the root value is the largest accepting count of a bounded
+  strategy. Completeness puts it at least two thirds of the coin space on
+  members and soundness at most one third on non-members, so comparing it
+  with half the coin space separates them.
 \end{proof}
 
 \begin{theorem}[$\cc{IP} \subseteq \cc{PSPACE}$]
@@ -152,16 +181,18 @@ the PCP theorem.
 
 \begin{proposition}[IP = PSPACE, given the hard half]
   \label{prop:interaction-ip-eq-pspace-of}
-  \lean{Complexity.IP_eq_PSPACE_of_pspace_subset_ip, Complexity.IP_eq_PSPACE_of}
+  \lean{Complexity.PSPACESubsetIP, Complexity.IP_eq_PSPACE_of_pspace_subset_ip,
+    Complexity.IP_eq_PSPACE_of}
   \leanok
   \uses{def:IP, def:PSPACE}
-  If $\cc{PSPACE} \subseteq \cc{IP}$, then $\cc{IP} = \cc{PSPACE}$.
+  If $\cc{PSPACE} \subseteq \cc{IP}$, then $\cc{IP} = \cc{PSPACE}$. The
+  hypothesis is also recorded, unproved, as the proposition
+  \texttt{PSPACESubsetIP}, and the conclusion is stated from either form.
 \end{proposition}
 \begin{proof}
   \leanok
   \uses{thm:interaction-ip-subset-pspace}
-  Antisymmetry with Theorem~\ref{thm:interaction-ip-subset-pspace}. The
-  hypothesis is recorded as the proposition \texttt{PSPACESubsetIP}.
+  Antisymmetry with Theorem~\ref{thm:interaction-ip-subset-pspace}.
 \end{proof}
 
 \begin{definition}[Completeness and soundness parameters]
@@ -224,7 +255,8 @@ the PCP theorem.
     Complexity.mle₁_bool}
   \leanok
   For $f : \{0,1\} \to R$ with $R$ a commutative ring, let
-  $\widetilde{f}(x) = f(0)(1 - x) + f(1)\,x$. Then $\widetilde{f}(0) = f(0)$ and
+  $\widetilde{f} : R \to R$ be $\widetilde{f}(x) = f(0)(1 - x) + f(1)\,x$.
+  Then $\widetilde{f}(0) = f(0)$ and
   $\widetilde{f}(1) = f(1)$, so $\widetilde{f}$ agrees with $f$ at both Boolean
   points.
 \end{lemma}
@@ -249,8 +281,10 @@ the PCP theorem.
   $\mathbb{F}^m$ is a root with probability at most $d / |\mathbb{F}|$; in
   particular a nonzero univariate polynomial of degree $d$ has at most $d$
   roots. Mathlib provides the counting statement for
-  \texttt{MvPolynomial}; what remains is the bridge to the library's
-  finite probability over encoded coin strings.
+  \texttt{MvPolynomial} (\texttt{MvPolynomial.schwartz\_zippel\_totalDegree},
+  over an integral domain with points drawn from $S^m$ for a finite set $S$);
+  nothing in this node is formalized in the library yet, and what remains is
+  the bridge to the library's finite probability over encoded coin strings.
 \end{lemma}
 
 \begin{definition}[The sum-check protocol]
@@ -321,7 +355,9 @@ the PCP theorem.
 \begin{theorem}[$\cc{PSPACE} \subseteq \cc{IP}$ (Shamir)]
   \label{thm:interaction-pspace-subset-ip}
   \uses{def:PSPACE, def:IP}
-  $\cc{PSPACE} \subseteq \cc{IP}$.
+  $\cc{PSPACE} \subseteq \cc{IP}$. The statement is recorded, unproved, as the
+  proposition \texttt{PSPACESubsetIP} of
+  Proposition~\ref{prop:interaction-ip-eq-pspace-of}.
 \end{theorem}
 \begin{proof}
   \uses{thm:interaction-tqbf-protocol, thm:space-tqbf-complete}
@@ -347,23 +383,27 @@ the PCP theorem.
     Complexity.PCPVerifier.Accepts, Complexity.PCPVerifier.acceptEvent,
     Complexity.PCPVerifier.QueryBounded}
   \leanok
-  \uses{def:FP, def:P, def:pair}
-  A PCP verifier is non-adaptive: an $\cc{FP}$ function computes, from the input
-  $x$ and the coins $r$, the list of proof positions it reads, and a verdict
-  language in $\cc{P}$ decides $\mathrm{pair}(\mathrm{pair}(x, r), a)$, where $a$
-  lists the proof bits found there. A position past the end of the proof reads
-  as $0$. The verifier is query-bounded by $q$ if it reads at most $q(|x|)$
-  positions for every $x$ and $r$.
+  \uses{def:FP, def:P, def:pair, def:encodings-data}
+  A PCP verifier is non-adaptive: it has a list of proof positions (natural
+  numbers) for each input $x$ and coin string $r$, together with an $\cc{FP}$
+  function mapping $\mathrm{pair}(x, r)$ to the rose-tree serialization of
+  that list, and a verdict language in $\cc{P}$ that decides
+  $\mathrm{pair}(\mathrm{pair}(x, r), a)$, where $a$ lists the bits of the
+  proof (a finite bit string) found at those positions. A position past the
+  end of the proof reads as $0$. The verifier is query-bounded by $q$ if it
+  reads at most $q(|x|)$ positions for every $x$ and every coin string $r$.
 \end{definition}
 
 \begin{definition}[PCP classes]
   \label{def:PCP}
   \lean{Complexity.PCP}
   \leanok
-  \uses{def:interaction-pcp-verifier}
+  \uses{def:interaction-pcp-verifier, def:encodings-eventprob}
+  For arbitrary functions $r, q : \mathbb{N} \to \mathbb{N}$,
   $L \in \cc{PCP}(r, q)$ if some verifier query-bounded by $q$, using exactly
-  $r(|x|)$ coins, accepts some proof of each $x \in L$ with probability $1$,
-  and accepts every proof of each $x \notin L$ with probability at most $1/2$.
+  $r(|x|)$ uniformly random coins, accepts some proof of each $x \in L$ with
+  probability $1$, and accepts every proof of each $x \notin L$ with
+  probability at most $1/2$.
 \end{definition}
 
 \begin{definition}[Constructible bounds]
@@ -384,8 +424,10 @@ the PCP theorem.
 \end{proposition}
 \begin{proof}
   \leanok
-  A verifier that reads nothing and ignores its coins; raising the query bound
-  weakens a hypothesis.
+  For the first, a verifier that reads nothing, ignores its coins and decides
+  the input it recovers from the encoded view. For the second, the same
+  verifier meets any pointwise larger query bound. Monotonicity in the coin
+  count is not formalized.
 \end{proof}
 
 \begin{proposition}[The randomness bound must be constructible]
@@ -399,61 +441,82 @@ the PCP theorem.
 \end{proposition}
 \begin{proof}
   \leanok
-  Use the indicator of $A$ as the coin count and a verifier that accepts
-  exactly when it received one coin. Since there are uncountably many sets $A$
+  Use the indicator of $A$ as the coin count, the zero query bound, and a
+  verifier that reads nothing and accepts exactly when it received one coin.
+  Since there are uncountably many sets $A$
   and $\cc{NP}$ is countable, the unrestricted union is not $\cc{NP}$; this
   consequence is argued in the documentation, not stated in Lean.
 \end{proof}
 
 \begin{lemma}[PCP soundness amplification]
   \label{lem:interaction-pcp-amplification}
-  \lean{Complexity.PCPWith, Complexity.mem_PCP_of_PCPWith}
+  \lean{Complexity.PCPWith, Complexity.PCPWith_half, Complexity.PCPWith_square,
+    Complexity.mem_PCP_of_PCPWith}
   \leanok
   \uses{def:PCP, def:interaction-constructible}
-  Let $\cc{PCP}_s(r, q)$ be the class with soundness error $s$ in place of
-  $1/2$. If $r$ is constructible and $0 \le s < 1$, every language in
-  $\cc{PCP}_s(r, q)$ is in $\cc{PCP}(2^j r, 2^j q)$ for some constant $j$.
+  For a rational $s$, let $\cc{PCP}_s(r, q)$ be the class with soundness
+  error $s$ in place of $1/2$, so $\cc{PCP}_{1/2}(r, q) = \cc{PCP}(r, q)$. If
+  $r$ is constructible and $0 \le s$, then
+  $\cc{PCP}_s(r, q) \subseteq \cc{PCP}_{s^2}(2r, 2q)$. Consequently, if $r$
+  is constructible and $0 \le s < 1$, every language in $\cc{PCP}_s(r, q)$ is
+  in $\cc{PCP}(2^j r, 2^j q)$ for some $j \in \mathbb{N}$.
 \end{lemma}
 \begin{proof}
   \leanok
-  Running the verifier twice on independent coins squares the error; split the
-  coin string at the constructible per-run count.
+  Running the verifier twice on independent coins squares the error and keeps
+  perfect completeness; the coin string is split at the constructible per-run
+  count, and doubling keeps the bound constructible. After $j$ doublings the
+  error is $s^{2^j} \le s^j$, which is below $1/2$ for large $j$.
 \end{proof}
 
 \begin{definition}[Constraint graphs]
   \label{def:interaction-constraint-graph}
   \lean{Complexity.ConstraintGraph, Complexity.ConstraintGraph.Satisfiable,
-    Complexity.ConstraintGraph.unsatVal}
+    Complexity.ConstraintGraph.unsatFrac, Complexity.ConstraintGraph.unsatVal,
+    Complexity.ConstraintGraph.unsatVal_eq_zero_iff_satisfiable}
   \leanok
-  A constraint graph over a finite alphabet $\Sigma$ is a finite multigraph
-  whose edges carry binary constraints on the labels of their endpoints. It is
-  satisfiable if some labelling satisfies every edge, and its unsatisfiability
-  value is the least fraction of edges left unsatisfied by any labelling.
+  A constraint graph over an alphabet $\Sigma$ has vertices
+  $\{0, \dots, V - 1\}$ and finitely many indexed directed edges (parallel
+  edges and self-loops allowed), each carrying a Boolean-valued binary
+  constraint on the labels of its tail and head. It is satisfiable if some
+  labelling of the vertices satisfies every edge. For finite nonempty
+  $\Sigma$, its unsatisfiability value is the least, over all labellings, of
+  the fraction of edges left unsatisfied (taken to be $0$ for an edgeless
+  graph); it is $0$ exactly when the graph is satisfiable.
 \end{definition}
 
 \begin{theorem}[Dinur's gap theorem for 3SAT]
   \label{thm:interaction-dinur-gap}
-  \lean{Complexity.gapGraph, Complexity.satisfiable_gapGraph,
-    Complexity.gap_le_unsatVal_gapGraph, Complexity.numEdges_gapGraph_le,
-    Complexity.dinurAmp_gap_pos}
+  \lean{Complexity.DinurAlpha, Complexity.Amplifier,
+    Complexity.Amplifier.dichotomy, Complexity.dinurAmp, Complexity.gapGraph,
+    Complexity.satisfiable_gapGraph, Complexity.gap_le_unsatVal_gapGraph,
+    Complexity.numEdges_gapGraph_le, Complexity.dinurAmp_gap_pos,
+    Complexity.dinurAmp_gap_le_one}
   \leanok
-  \uses{def:interaction-constraint-graph}
-  There are a fixed finite alphabet, a constant $\gamma > 0$ and a map
-  $\varphi \mapsto G_\varphi$ from CNF formulas to constraint graphs such that,
-  for every 3CNF $\varphi$: $G_\varphi$ has polynomially many edges in the
-  number of clauses of $\varphi$, $G_\varphi$ is satisfiable if $\varphi$ is,
-  and the unsatisfiability value of $G_\varphi$ is at least $\gamma$ if
-  $\varphi$ is unsatisfiable. The map is defined as a noncomputable mathematical
-  reduction; the polynomial-time counterpart used for the PCP theorem is built
-  from the same amplifier inside the proof of
+  \uses{def:interaction-constraint-graph, def:polytime-sat}
+  There are a fixed finite alphabet, constants $0 < \gamma \le 1$ and $c$,
+  and a map $\varphi \mapsto G_\varphi$ from CNF formulas to constraint graphs
+  over that alphabet such that: for every CNF $\varphi$ with $m$ clauses,
+  $G_\varphi$ has at most $(6m + 2)^{c} \cdot 3m$ edges; and for every
+  $\varphi$ in which every clause has exactly three literals, $G_\varphi$ is
+  satisfiable if $\varphi$ is, and the unsatisfiability value of $G_\varphi$
+  is at least $\gamma$ if $\varphi$ is unsatisfiable. The map is defined as a
+  noncomputable mathematical reduction; the polynomial-time counterpart used
+  for the PCP theorem is built from the same amplifier inside the proof of
   Theorem~\ref{thm:interaction-np-subset-pcp}.
 \end{theorem}
 \begin{proof}
   \leanok
-  Logarithmically many rounds of Dinur's amplifier (expander preprocessing,
-  graph powering, and alphabet reduction through a Hadamard-code assignment
-  tester) applied to the constraint graph of the formula; each round at least
-  doubles a small unsatisfiability value at a constant-factor cost in size.
+  An amplifier is a transformation of constraint graphs over a fixed alphabet
+  that multiplies the edge count by at most a constant, preserves
+  satisfiability, and maps unsatisfiability value $v$ to at least
+  $\min(\gamma, 2v)$. Dinur's round (expander preprocessing, graph powering,
+  and alphabet reduction through a Hadamard-code assignment tester, over an
+  explicit expander family) is one. Iterating it $k$ times on a graph with at
+  most $2^k$ edges gives the dichotomy: satisfiable graphs stay satisfiable
+  and unsatisfiable ones reach value at least $\gamma$. Apply it to the
+  $3m$-edge constraint graph of the formula with
+  $k = \lfloor \log_2 3m \rfloor + 1$.
 \end{proof}
 
 \begin{theorem}[$\cc{NP} \subseteq \cc{PCP}(O(\log n), O(1))$]
@@ -461,18 +524,27 @@ the PCP theorem.
   \lean{Complexity.exists_pcp_of_mem_NP}
   \leanok
   \uses{def:NP, def:PCP, def:interaction-constructible}
-  For every $L \in \cc{NP}$ there are a constructible $r = O(\log n)$ and
-  $q = O(1)$ with $L \in \cc{PCP}(r, q)$.
+  For every $L \in \cc{NP}$ there are a constructible $r$ with
+  $r = O(\log n)$ and a $q$ with $q = O(1)$ such that
+  $L \in \cc{PCP}(r, q)$. Here $f = O(g)$ means $f(n) \le C\,g(n)$ for some
+  constant $C$ and all sufficiently large $n$, and $\log n$ is
+  $\lfloor \log_2 n \rfloor$; the $q$ produced is a constant function.
 \end{theorem}
 \begin{proof}
   \leanok
-  \uses{thm:cook-levin, def:interaction-constraint-graph,
-    lem:interaction-pcp-amplification}
-  Reduce to 3CNF satisfiability, compute the gap constraint graph by a
-  polynomial-time implementation of every round of Dinur's amplifier (the
-  amplifier of Theorem~\ref{thm:interaction-dinur-gap}) with an explicit
-  expander family, and let the verifier read one random edge;
-  amplification brings the constant gap below $1/2$.
+  \uses{thm:cook-levin, lem:polytime-tseitin, def:interaction-constraint-graph,
+    thm:interaction-dinur-gap, lem:interaction-pcp-amplification}
+  Map each input, by an $\cc{FP}$ function, to an exact-3CNF that is
+  satisfiable exactly when the input is in $L$ (Cook--Levin followed by
+  Tseitin splitting). Pad its constraint graph to a size fixed by the input
+  length and compute the gap constraint graph by a polynomial-time
+  implementation of every round of Dinur's amplifier (the amplifier of
+  Theorem~\ref{thm:interaction-dinur-gap}, over its explicit expander
+  family). The verifier picks a random edge from logarithmically many coins
+  and reads the fixed-width labels of its two endpoints, so members are
+  accepted with probability $1$ and non-members with probability bounded
+  away from $1$; Lemma~\ref{lem:interaction-pcp-amplification} brings the
+  soundness error below $1/2$.
 \end{proof}
 
 \begin{theorem}[$\cc{PCP}(O(\log n), O(1)) \subseteq \cc{NP}$]
@@ -480,14 +552,22 @@ the PCP theorem.
   \lean{Complexity.PCP_subset_NP}
   \leanok
   \uses{def:PCP, def:NP, def:interaction-constructible}
-  If $r$ is constructible, $r = O(\log n)$ and $q = O(1)$, then
+  If $r$ is constructible, $r = O(\log n)$ and $q = O(1)$ (in the sense of
+  Theorem~\ref{thm:interaction-np-subset-pcp}), then
   $\cc{PCP}(r, q) \subseteq \cc{NP}$.
 \end{theorem}
 \begin{proof}
   \leanok
+  \uses{lem:polytime-guess-verify}
   The verifier's behaviour on all $2^{r(n)} = \mathrm{poly}(n)$ coin strings
-  is determined by a polynomial-size table of answers; guess the table and
-  check it deterministically.
+  is determined by a polynomial-size table listing, for each coin string, the
+  answers to its constantly many queries. The witness is such a table; a
+  polynomial-time check, which uses constructibility to write out
+  $2^{r(n)}$, verifies its length, its consistency (a position queried under
+  two coin strings gets the same answer), and acceptance on every coin
+  string. A member has such a table by perfect completeness; a non-member has
+  none, since a consistent table gives a proof accepted with probability
+  $1 > 1/2$.
 \end{proof}
 
 \begin{theorem}[PCP theorem]
@@ -495,14 +575,16 @@ the PCP theorem.
   \lean{Complexity.PCP_theorem}
   \leanok
   \uses{def:NP, def:PCP, def:interaction-constructible}
-  $\cc{NP} = \bigcup \cc{PCP}(r, q)$, the union over all constructible
-  $r = O(\log n)$ and all $q = O(1)$.
+  $\cc{NP} = \bigcup \cc{PCP}(r, q)$, the union over all constructible $r$
+  with $r = O(\log n)$ and all $q$ with $q = O(1)$ (in the sense of
+  Theorem~\ref{thm:interaction-np-subset-pcp}; no constructibility is
+  required of $q$).
 \end{theorem}
 \begin{proof}
   \leanok
-  \uses{thm:interaction-np-subset-pcp, thm:interaction-pcp-subset-np,
-    prop:interaction-constructible-needed}
-  The two inclusions. The constructibility requirement cannot be dropped, by
+  \uses{thm:interaction-np-subset-pcp, thm:interaction-pcp-subset-np}
+  The two inclusions. The constructibility requirement on $r$ cannot be
+  dropped, by
   Proposition~\ref{prop:interaction-constructible-needed}.
 \end{proof}
 

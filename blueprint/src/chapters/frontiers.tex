@@ -2,31 +2,40 @@
 \label{chap:frontiers}
 
 This chapter records areas the library does not yet cover. For each it names one
-precise target, what the target would build on, and a first step. None of the
-nodes below is formalized, and most are not yet ready: stating them in Lean
-needs a definition the library does not have. Where related infrastructure
-exists elsewhere, it is named as a starting point, not as progress toward the
-target.
+precise target, what the target would build on, and a first step. Most nodes
+below are not formalized, and most of those are not yet ready: stating them in
+Lean needs a definition the library does not have. The exception is the
+general Karchmer--Wigderson theorem, with its protocol model: the imported
+algebraic-circuits library proves it (Definition~\ref{def:frontiers-kw-protocol}
+and Theorem~\ref{thm:frontiers-kw-general}). Where related infrastructure exists
+elsewhere, it is named as a starting point, not as progress toward the target.
 
 \section{Hardness of approximation}
 
-The PCP theorem $\cc{NP} = \cc{PCP}[O(\log n), O(1)]$ is formalized in the
-interaction chapter, with perfect completeness and soundness $1/2$. Optimal
-inapproximability is a far target beyond it.
+The PCP theorem is formalized in the interaction chapter
+(Theorem~\ref{thm:interaction-pcp-theorem}): $\cc{NP}$ is the union of the
+classes $\cc{PCP}(r, q)$ over constructible $r = O(\log n)$ and $q = O(1)$,
+with perfect completeness and soundness $1/2$. Optimal inapproximability is a
+far target beyond it. The intermediate steps (gap constraint satisfaction,
+label cover and parallel repetition) appear in the interaction chapter's
+section on hardness of approximation.
 
 \begin{theorem}[Håstad's 3-bit PCP]
   \label{thm:frontiers-hastad}
   \uses{def:PCP, def:NP}
   \notready
-  Write $\cc{PCP}_{c,s}[r, q]$ for the variant of $\cc{PCP}[r,q]$ with
-  completeness $c$ and soundness $s$. For every $\varepsilon > 0$,
-  $\cc{NP} = \cc{PCP}_{1-\varepsilon,\, 1/2+\varepsilon}[O(\log n), 3]$ with a
-  verifier that accepts iff the XOR of the three bits it reads equals a bit
-  determined by its coins. Consequently, approximating MAX-3SAT within a factor
-  $7/8 + \varepsilon$ is $\cc{NP}$-hard.
+  Write $\cc{PCP}_{c,s}(r, q)$ for the variant of $\cc{PCP}(r,q)$ with
+  completeness $c$ and soundness $s$. For every $\varepsilon > 0$, $\cc{NP}$ is
+  the union of the classes $\cc{PCP}_{1-\varepsilon,\, 1/2+\varepsilon}(r, 3)$
+  over $r = O(\log n)$, with a verifier that accepts iff the XOR of the three
+  bits it reads equals a bit determined by its coins. Consequently,
+  approximating MAX-3SAT within a factor $7/8 + \varepsilon$ is
+  $\cc{NP}$-hard.
 \end{theorem}
 \begin{proof}
-  \uses{def:analysis-fourier-coeff, def:analysis-noise, thm:interaction-pcp-theorem, thm:interaction-parallel-repetition}
+  \uses{def:analysis-fourier-coeff, def:analysis-noise,
+    thm:analysis-blr-soundness, thm:interaction-pcp-theorem,
+    thm:interaction-parallel-repetition}
   Compose the PCP theorem with parallel repetition (Label Cover) and a long-code
   test. Its soundness analysis is Fourier analysis with noise, extending the BLR
   argument. First step: define $\cc{PCP}_{c,s}$ with explicit rational $c$ and
@@ -36,18 +45,24 @@ inapproximability is a far target beyond it.
 
 \section{Derandomization}
 
-The metacomplexity chapter already formalizes finite pseudorandomness
-infrastructure:
+The library's metacomplexity modules, presented in the average-case chapter,
+already formalize finite pseudorandomness infrastructure:
 \begin{itemize}
-  \item fixed-length generators \texttt{Complexity.BitGenerator} with their
-    distinguishing advantage;
-  \item Yao's hybrid and next-bit-prediction identities;
+  \item fixed-length generators \texttt{Complexity.BitGenerator}, arbitrary maps
+    with no efficiency built in, and their distinguishing advantage against a
+    finite test (Definition~\ref{def:avg-bitgenerator});
+  \item Yao's hybrid step and the next-bit-prediction identity
+    (Lemma~\ref{lem:avg-test-hybrid});
   \item Nisan--Wigderson designs \texttt{Complexity.NWDesign} and the associated
-    generator \texttt{Complexity.NWDesign.generator};
-  \item a finite reconstruction step against time-bounded Kolmogorov tests.
+    generator \texttt{Complexity.NWDesign.generator}
+    (Definition~\ref{def:avg-nw-design});
+  \item a finite reconstruction step against tests made of strings of high
+    time-bounded Kolmogorov complexity
+    (Theorem~\ref{thm:avg-nw-reconstruction}).
 \end{itemize}
-What is missing is the circuit-based statement of pseudorandomness, and the
-hardness-versus-randomness theorems built on it.
+What is missing is the circuit-based statement of pseudorandomness, the
+existence of designs with the needed parameters, and the
+hardness-versus-randomness theorems built on them.
 
 \begin{definition}[Pseudorandom generator against circuits]
   \label{def:frontiers-prg}
@@ -85,15 +100,20 @@ hardness-versus-randomness theorems built on it.
   such that, for all sufficiently large $n$, no circuit of size $2^{\varepsilon n}$
   decides $L$ on all inputs of length $n$. Then $\cc{BPP} = \cc{P}$. This
   almost-everywhere hypothesis is stronger than
-  $L \notin \cc{SIZE}(2^{\varepsilon n})$, which gives only infinitely-often
-  hardness.
+  $L \notin \cc{SIZE}(2^{\varepsilon n})$: the library's $\cc{SIZE}$ bounds the
+  size at every length (Definition~\ref{def:SIZE}), so non-membership only
+  says that some length has no such circuit, and even an eventual size bound
+  would give only infinitely-often hardness.
 \end{theorem}
 \begin{proof}
   \uses{thm:frontiers-nw, def:meta-list-code-family}
   Amplify worst-case hardness to the average-case hardness required by
   Nisan--Wigderson, via local list decoding of a concatenated code or the XOR
   lemma. First step: instantiate the abstract list-decodable code interface
-  \texttt{Complexity.BooleanListCode} with a concrete locally list-decodable code.
+  \texttt{Complexity.BooleanListCode}, whose decoder reads the whole received
+  word, with a concrete code, and add the local decoding this argument needs.
+  An explicit list-decodable family is itself still planned
+  (Theorem~\ref{thm:meta-explicit-code-family}).
 \end{proof}
 
 \begin{theorem}[Braverman: polylogarithmic independence fools $\cc{AC^0}$]
@@ -126,11 +146,17 @@ hardness-versus-randomness theorems built on it.
   in $\cc{DSPACE}(\log^2 n)$.
 \end{theorem}
 \begin{proof}
+  \uses{def:randomness-hash}
   Recursively apply pairwise-independent hash functions, halving the program at
-  each level. First step: define read-once branching programs and $\cc{BPL}$ as
-  logspace probabilistic machines that halt in polynomial time. The library's
-  branching programs are the width-$5$ permutation programs used for Barrington's
-  theorem, which are not read-once.
+  each level. The library's fixed-width pairwise-independent hash families
+  (Definition~\ref{def:randomness-hash}), built for Stockmeyer-style counting,
+  are a starting point. First step: define read-once branching programs and
+  $\cc{BPL}$ as logspace probabilistic machines that halt in polynomial time.
+  The library's branching programs are width-$w$ permutation programs, used at
+  width $5$ for Barrington's theorem: each step applies a permutation of the
+  $w$ states selected by one input bit, so they are not required to be
+  read-once, and their steps are permutations rather than arbitrary maps
+  between layers.
 \end{proof}
 
 \begin{theorem}[Reingold: $\cc{SL} = \cc{L}$]
@@ -143,10 +169,13 @@ hardness-versus-randomness theorems built on it.
   Make the graph regular, then alternate powering with zig-zag products against a
   constant-size expander until the graph is an expander of logarithmic diameter.
   The resulting rotation maps are computable in logspace. The PCP development's
-  internal modules contain regular graphs with rotation maps, the zig-zag product
-  with its Reingold--Vadhan--Wigderson spectral bound, and a zig-zag tower of
-  expanders, all of which may be reusable. First step: fix a graph encoding and state the undirected
-  connectivity language.
+  internal modules contain regular graphs presented by rotation maps, the
+  zig-zag product of $G$ and $H$ with the spectral bound
+  $\lambda_G + \lambda_H + \lambda_H^2$ (the simpler
+  Reingold--Vadhan--Wigderson estimate), and a zig-zag tower of expanders
+  grown from one constant-size base graph, all of which may be reusable. They
+  are not stated about space-bounded computation. First step: fix a graph
+  encoding and state the undirected connectivity language.
 \end{proof}
 
 \section{Cryptographic foundations}
@@ -189,17 +218,27 @@ hardness-versus-randomness theorems built on it.
   Evaluate the tree of generator applications along the input bits. A hybrid
   argument over tree levels, restricted to the nodes the adversary queries,
   bounds the advantage. First step: define cryptographic PRGs and a PRF oracle
-  game with negligible advantage, compatible with the natural-proofs barrier.
-  Also prove that one-way permutations yield PRGs via Goldreich--Levin and the
-  existing Yao hybrid lemma.
+  game with negligible advantage, compatible with the planned pseudorandom
+  function families of the natural-proofs barrier
+  (Definition~\ref{def:barriers-prf}). Also prove that one-way permutations
+  yield PRGs via Goldreich--Levin and the existing finite Yao hybrid step
+  (Lemma~\ref{lem:avg-test-hybrid}).
 \end{proof}
 
 \section{Communication complexity}
 
-The library formalizes the monotone Karchmer--Wigderson correspondence. Its
-rectangle-indexed protocols (\texttt{Complexity.KarchmerWigderson.Protocol})
-translate to and from monotone formulas with exactly equal depth. General
-two-party communication complexity is not formalized.
+The library formalizes the monotone Karchmer--Wigderson correspondence
+(Theorem~\ref{thm:lowerbounds-kw}). Its rectangle-indexed protocols
+(\texttt{Complexity.KarchmerWigderson.Protocol}) translate to and from monotone
+formulas with exactly equal depth. The imported algebraic-circuits library
+proves the general Karchmer--Wigderson theorem for De~Morgan formulas, for
+protocols specialized to Karchmer--Wigderson games
+(Definition~\ref{def:frontiers-kw-protocol} and
+Theorem~\ref{thm:frontiers-kw-general}; the same result is
+Theorem~\ref{thm:lowerbounds-algebraic-kw}). General two-party communication
+complexity is not formalized: protocols for arbitrary functions and relations,
+randomized protocols, and lower-bound methods such as rectangle partitions,
+fooling sets and discrepancy.
 
 \begin{definition}[Deterministic protocols]
   \label{def:frontiers-protocol}
@@ -207,6 +246,9 @@ two-party communication complexity is not formalized.
   internal node is owned by Alice, who branches on a function of $x$, or by Bob,
   who branches on a function of $y$. Each leaf is labelled by an output. The
   cost is the depth, and $D(f)$ is the minimum cost of a protocol computing $f$.
+  Only the protocols of Karchmer--Wigderson games are formalized
+  (Definition~\ref{def:frontiers-kw-protocol}); their leaves name a
+  coordinate, and they solve a relation rather than compute a function.
 \end{definition}
 
 \begin{theorem}[Discrepancy bound for inner product]
@@ -227,22 +269,79 @@ two-party communication complexity is not formalized.
   partition lemma and the fooling-set bound $D(\mathrm{EQ}_n) \ge n$.
 \end{proof}
 
+\begin{definition}[Karchmer--Wigderson games and their protocols]
+  \label{def:frontiers-kw-protocol}
+  \lean{Algebraic.KW.Formula, Algebraic.KW.Formula.eval,
+    Algebraic.KW.Formula.depth, Algebraic.KW.Formula.leaves,
+    Algebraic.KW.Formula.Computes, Algebraic.KW.Protocol,
+    Algebraic.KW.Protocol.run, Algebraic.KW.Protocol.depth,
+    Algebraic.KW.Protocol.leaves, Algebraic.KW.Protocol.Solves,
+    Algebraic.KW.Protocol.SolvesKW, Algebraic.KW.formulaDepth,
+    Algebraic.KW.formulaSize, Algebraic.KW.protocolDepth,
+    Algebraic.KW.protocolSize}
+  \leanok
+  \uses{def:bitstring}
+  These definitions come from the imported algebraic-circuits library. A
+  De~Morgan formula on $n$ inputs is a binary tree whose leaves are literals
+  $x_i$ or $\lnot x_i$ or Boolean constants and whose internal nodes are
+  binary AND or OR gates. A protocol on $n$ inputs is a binary tree whose
+  leaves each name a coordinate $i < n$ and whose internal nodes are each
+  owned by Alice or by Bob and branch by an arbitrary Boolean function of the
+  owner's whole input in $\{0,1\}^n$; on inputs $x$ for Alice and $y$ for Bob
+  it outputs the coordinate at the leaf it reaches. For both, the depth is the
+  length of a longest root-to-leaf path (a leaf has depth $0$) and the size is
+  the number of leaves, constant leaves included. A protocol solves the game on
+  a rectangle $A \times B$ if its output $i$ satisfies $x_i \neq y_i$ for all
+  $x \in A$ and $y \in B$; it solves the Karchmer--Wigderson game of
+  $f : \{0,1\}^n \to \{0,1\}$ if it solves the game on
+  $f^{-1}(1) \times f^{-1}(0)$. The minimum formula depth and size of $f$ (over
+  formulas computing $f$ at every input) and the minimum protocol depth and size
+  of its game are infima in $\mathbb{N} \cup \{\infty\}$, equal to $\infty$ when
+  no formula or protocol exists.
+\end{definition}
+
 \begin{theorem}[Karchmer--Wigderson, general form]
   \label{thm:frontiers-kw-general}
-  \uses{def:frontiers-protocol, def:bitstring}
-  \notready
-  For every non-constant $f : \{0,1\}^n \to \{0,1\}$, the minimum depth of a
-  De~Morgan formula computing $f$ equals $D(\mathrm{KW}_f)$. Here $\mathrm{KW}_f$
-  is the relation in which Alice holds $x \in f^{-1}(1)$, Bob holds
-  $y \in f^{-1}(0)$, and they must output some $i$ with $x_i \neq y_i$.
+  \lean{Algebraic.KW.formulaDepth_eq_protocolDepth,
+    Algebraic.KW.formulaSize_eq_protocolSize}
+  \leanok
+  \uses{def:frontiers-kw-protocol}
+  In the model of Definition~\ref{def:frontiers-kw-protocol}, for every
+  $n \ge 1$ and every $f : \{0,1\}^n \to \{0,1\}$, constant or not, the minimum
+  depth of a De~Morgan formula computing $f$ equals the minimum depth of a
+  protocol for the Karchmer--Wigderson game of $f$, in which Alice holds
+  $x \in f^{-1}(1)$, Bob holds $y \in f^{-1}(0)$, and they must output some $i$
+  with $x_i \neq y_i$. Likewise the minimum number of leaves of a formula
+  computing $f$ equals the minimum number of leaves of a protocol for the game.
+  The hypothesis $n \ge 1$ cannot be dropped: for $n = 0$ no protocol exists,
+  since a leaf must name a coordinate, while a constant formula has depth $0$.
+  This is the result of Theorem~\ref{thm:lowerbounds-algebraic-kw}.
 \end{theorem}
 \begin{proof}
-  Adapt the existing depth-exact monotone translation. Leaves may now output any
-  differing coordinate, not only one where the one-input has a $1$, and correspond
-  to literals of either sign. First step: generalize the protocol type to relations.
+  \leanok
+  Both translations preserve depth and leaf count exactly. From a formula: an
+  OR gate becomes an Alice node where she says whether her input satisfies the
+  left disjunct, and play continues in a disjunct her input satisfies; an AND
+  gate becomes a Bob node where he says whether his input satisfies the left
+  conjunct, and play continues in a conjunct his input violates. A literal leaf
+  names its coordinate, and a constant leaf, reachable only on an empty
+  rectangle, names a default coordinate, which exists because $n \ge 1$. From a
+  protocol: track the rectangle of inputs consistent with the transcript. Alice
+  nodes become OR gates, Bob nodes become AND gates, and a leaf naming $i$
+  becomes whichever of $x_i$ and $\lnot x_i$ is $1$ on Alice's side and $0$ on
+  Bob's side, or a constant when one side is empty.
 \end{proof}
 
 \section{Algebraic complexity}
+
+The imported algebraic-circuits library already has arithmetic circuits: CSLib
+straight-line circuits over its arithmetic signature
+(\texttt{Algebraic.Arithmetic.signature}), with binary addition, binary
+multiplication and constant gates, evaluable in any carrier with addition and
+multiplication, in particular as formal polynomials in Mathlib's
+\texttt{MvPolynomial}. They are used for lower bounds on computing a single
+polynomial, such as Theorem~\ref{thm:lowerbounds-algebraic-hessian}. Polynomial
+families, degree bounds, projections and the classes below are not formalized.
 
 \begin{definition}[$\cc{VP}$ and $\cc{VNP}$]
   \label{def:frontiers-vp-vnp}
@@ -264,9 +363,11 @@ two-party communication complexity is not formalized.
 \begin{proof}
   Show the permanent is in $\cc{VNP}$ via Ryser's formula. For hardness, convert
   formulas to weighted graphs whose cycle covers compute the polynomial. First
-  step: define arithmetic circuits over Mathlib's \texttt{MvPolynomial} and
-  $p$-projections. The Boolean counterpart, $\#\cc{P}$-completeness of the
-  $0/1$ permanent, would connect to the existing class $\#\cc{P}$.
+  step: on top of the imported arithmetic circuits and their
+  \texttt{MvPolynomial} semantics, define polynomial families, their size and
+  degree bounds, and $p$-projections. The Boolean counterpart,
+  $\#\cc{P}$-completeness of the $0/1$ permanent, would connect to the existing
+  class $\#\cc{P}$ (Definition~\ref{def:sharpP}).
 \end{proof}
 
 \section{Fine-grained and parameterized complexity}
@@ -313,9 +414,12 @@ two-party communication complexity is not formalized.
   $\cc{BQP} \subseteq \cc{PP}$.
 \end{theorem}
 \begin{proof}
-  With Hadamard and Toffoli gates all amplitudes are real. The acceptance
-  probability is $(\#\text{positive} - \#\text{negative paths})/2^h$ over
-  polynomially checkable computation paths, which a $\cc{PP}$ machine can compare
-  with a threshold. First step: define the path-sum semantics of such circuits
-  and prove it agrees with the matrix semantics on small examples.
+  With Hadamard and Toffoli gates all amplitudes are real: each amplitude is a
+  signed count of computation paths divided by $2^{h/2}$, where $h$ is the
+  number of Hadamard gates. Squaring, the acceptance probability is
+  $(\#\text{positive} - \#\text{negative})/2^h$ over pairs of polynomially
+  checkable paths that end in the same accepting basis state, which a $\cc{PP}$
+  machine can compare with a threshold. First step: define the path-sum
+  semantics of such circuits and prove it agrees with the matrix semantics on
+  small examples.
 \end{proof}

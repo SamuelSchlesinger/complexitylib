@@ -6,12 +6,15 @@ $\cc{DSPACE}$ and $\cc{NSPACE}$, the logarithmic-space classes $\cc{L}$,
 $\cc{NL}$, $\cc{coNL}$ and $\cc{FL}$, polynomial space, and quantified Boolean
 formulas. Space is measured by an honest auxiliary-space convention in which
 neither the input tape nor the output tape can serve as hidden workspace.
-Formalized so far: $\cc{L} \subseteq \cc{P}$, $\cc{FL} \subseteq \cc{FP}$,
-$\cc{NL} \subseteq \cc{P}$, Savitch's theorem in the polynomial-union form
-$\cc{PSPACE} = \cc{NPSPACE}$, $\cc{PSPACE} \subseteq \cc{EXP}$, and a reduction
-of the Immerman--Szelepcs\'enyi theorem to the construction of one counting
-machine. Savitch's theorem and $\cc{IP} \subseteq \cc{PSPACE}$ both go through
-one lever: iterating a polynomial-time step function on a polynomially bounded
+Formalized so far: the elementary containments, closure of $\cc{PSPACE}$ under
+complement, regular languages in $\cc{L}$, $\cc{L} \subseteq \cc{P}$,
+$\cc{FL} \subseteq \cc{FP}$, $\cc{NL} \subseteq \cc{P}$, Savitch's theorem in
+the polynomial-union form $\cc{PSPACE} = \cc{NPSPACE}$,
+$\cc{PSPACE} \subseteq \cc{EXP}$, the syntax and semantics of quantified
+Boolean formulas, space-aware Hoare contracts, and a reduction of the
+Immerman--Szelepcs\'enyi theorem to the construction of one counting machine.
+Savitch's theorem and $\cc{IP} \subseteq \cc{PSPACE}$ both go through one
+lever: iterating a polynomial-time step function on a polynomially bounded
 state stays in $\cc{PSPACE}$. The main open directions are the unconditional
 $\cc{NL} = \cc{coNL}$, a log-space programming layer, PSPACE-completeness of
 TQBF, alternation, and the space hierarchy theorems. Throughout, $\log n$ is
@@ -31,19 +34,25 @@ constant factor.
   A configuration on an input of length $n$ is within auxiliary space $s$ when
   every work head is at position at most $s$ and the input head is at position
   at most $n + s + 1$: the input and its first trailing blank are free, and
-  travel farther into the blank tail is charged. A decider configuration must in
-  addition keep its output head at position at most $s + 1$; only the verdict
-  cell $1$ is free.
+  travel farther into the blank tail is charged. The output head is not
+  constrained. A configuration is within decision space $s$ when in addition
+  its output head is at position at most $s + 1$; only the verdict cell $1$ is
+  free.
 
-  A DTM decides $L$ in space $S$ if every configuration reachable on $x$ is
-  within decision space $S(|x|)$ and the machine halts on every input with
-  verdict $1$ on members and $0$ on non-members. An NTM decides $L$ in space $S$
-  if it decides $L$ within some time bound $T$ on every choice sequence and
-  every configuration along every path, up to time $T(|x|)$, is within decision
-  space $S(|x|)$. A machine is a \emph{transducer} if its output head never
-  moves left. A DTM computes $f$ in space $S$ if it is a transducer, every
-  reachable configuration is within auxiliary space $S(|x|)$, and it halts with
-  output $f(x)$; the output length is not charged.
+  A DTM decides $L$ in space $S$ if every configuration reachable from its
+  initial configuration on $x$ is within decision space $S(|x|)$ and, for every
+  $x$, some reachable configuration is halted with verdict $1$ if $x \in L$
+  and $0$ if $x \notin L$. An NTM decides $L$ in space $S$ if there is a time
+  bound $T$ such that every choice sequence halts within $T(|x|)$ steps,
+  $x \in L$ exactly when some choice sequence of length $T(|x|)$ ends halted
+  with verdict $1$, and every configuration along every path, up to time
+  $T(|x|)$, is within decision space $S(|x|)$. A machine is a
+  \emph{transducer} if its transition function never moves the output head
+  left (for an NTM, under either choice bit); the two deciding predicates do
+  not require this. A DTM computes $f$ in space $S$ if it is a transducer,
+  every reachable configuration is within auxiliary space $S(|x|)$, and on
+  every input $x$ it halts with output $f(x)$; the output length is not
+  charged.
 \end{definition}
 
 \begin{definition}[Deterministic space]
@@ -60,8 +69,8 @@ constant factor.
   \lean{Complexity.NSPACE}
   \leanok
   \uses{def:space-decides-in-space}
-  $\cc{NSPACE}(S)$ is the class of languages decided by some NTM in space $f$
-  for some $f = O(S)$.
+  $\cc{NSPACE}(S)$ is the class of languages decided by some NTM, with any
+  number of work tapes, in space $f$ for some $f = O(S)$.
 \end{definition}
 
 \begin{definition}[Polynomial space]
@@ -85,8 +94,8 @@ constant factor.
   \lean{Complexity.L}
   \leanok
   \uses{def:space-decides-in-space}
-  $\cc{L}$ is the class of languages decided by a deterministic transducer in
-  space $f$ for some $f = O(\log n)$.
+  $\cc{L}$ is the class of languages decided by a deterministic transducer,
+  with any number of work tapes, in space $f$ for some $f = O(\log n)$.
 \end{definition}
 
 \begin{definition}[Nondeterministic logarithmic space]
@@ -94,8 +103,9 @@ constant factor.
   \lean{Complexity.NL}
   \leanok
   \uses{def:space-decides-in-space}
-  $\cc{NL}$ is the class of languages decided by a nondeterministic transducer
-  in space $f$ for some $f = O(\log n)$.
+  $\cc{NL}$ is the class of languages decided by a nondeterministic
+  transducer, with any number of work tapes, in space $f$ for some
+  $f = O(\log n)$.
 \end{definition}
 
 \begin{definition}[Complement of NL]
@@ -106,16 +116,16 @@ constant factor.
   $\cc{coNL}$ is the class of languages whose complements are in $\cc{NL}$.
 \end{definition}
 
-\begin{definition}[Log-space functions]
+\begin{definition}[Log-space functions and search problems]
   \label{def:FL}
-  \lean{Complexity.FL}
+  \lean{Complexity.FL, Complexity.FNL, Complexity.TFNL}
   \leanok
-  \uses{def:space-decides-in-space}
+  \uses{def:space-decides-in-space, def:L, def:pairlang}
   $\cc{FL}$ is the class of functions $\{0,1\}^* \to \{0,1\}^*$ computed by a
   DTM in space $S$ for some $S = O(\log n)$. The output is unbounded in length
-  and one-way. The same module defines the search classes $\cc{FNL}$ and
-  $\cc{TFNL}$ (polynomially balanced relations whose pair language is in
-  $\cc{L}$, and their total restriction).
+  and one-way. $\cc{FNL}$ is the class of polynomially balanced relations whose
+  pair language is in $\cc{L}$, and $\cc{TFNL}$ consists of the relations in
+  $\cc{FNL}$ that are total: every $x$ has some $y$ with $R(x, y)$.
 \end{definition}
 
 \begin{definition}[Simultaneous time and space; SC]
@@ -123,9 +133,11 @@ constant factor.
   \lean{Complexity.TM.DecidesInTimeSpace, Complexity.DTISP, Complexity.SC}
   \leanok
   \uses{def:space-decides-in-space}
-  $\cc{DTISP}(T, S)$ is the class of languages decided by a \emph{single} DTM
-  that halts within time $O(T)$ and whose reachable configurations all stay
-  within decision space $O(S)$. Steve's class is
+  A DTM decides $L$ in time $T$ and space $S$ if every reachable configuration
+  on $x$ is within decision space $S(|x|)$ and on every input it halts within
+  $T(|x|)$ steps with the correct verdict. $\cc{DTISP}(T, S)$ is the class of
+  languages decided by a \emph{single} DTM in time $t$ and space $s$ for some
+  $t = O(T)$ and $s = O(S)$. Steve's class is
   $\cc{SC} = \bigcup_{k, j} \cc{DTISP}(n^k, (\log n)^j)$.
 \end{definition}
 
@@ -133,36 +145,44 @@ constant factor.
 
 \begin{lemma}[Determinism embeds in nondeterminism]
   \label{lem:space-dspace-nspace}
-  \lean{Complexity.DSPACE_subset_NSPACE, Complexity.DSPACE_mono,
+  \lean{Complexity.TM.toNTM_decidesInSpace, Complexity.TM.toNTM_isTransducer,
+    Complexity.DSPACE_subset_NSPACE, Complexity.DSPACE_mono,
     Complexity.NSPACE_mono, Complexity.L_subset_NL,
     Complexity.PSPACE_subset_NPSPACE}
   \leanok
-  \uses{def:dspace, def:nspace, def:L, def:NL, def:PSPACE, def:NPSPACE}
-  For every $S$, $\cc{DSPACE}(S) \subseteq \cc{NSPACE}(S)$. If
-  $S_1 = O(S_2)$ then $\cc{DSPACE}(S_1) \subseteq \cc{DSPACE}(S_2)$ and
+  \uses{def:space-decides-in-space, def:dspace, def:nspace, def:L, def:NL,
+    def:PSPACE, def:NPSPACE}
+  If a DTM decides $L$ in space $S$, then so does its embedding as an NTM whose
+  two transition functions coincide, and the embedding of a transducer is a
+  transducer. Hence for every $S$, $\cc{DSPACE}(S) \subseteq \cc{NSPACE}(S)$.
+  If $S_1 = O(S_2)$ then $\cc{DSPACE}(S_1) \subseteq \cc{DSPACE}(S_2)$ and
   $\cc{NSPACE}(S_1) \subseteq \cc{NSPACE}(S_2)$. Consequently
   $\cc{L} \subseteq \cc{NL}$ and $\cc{PSPACE} \subseteq \cc{NPSPACE}$.
 \end{lemma}
 \begin{proof}
   \leanok
-  A DTM is an NTM whose two transition functions coincide; the embedding
-  preserves the space predicate and the transducer discipline.
+  The embedded NTM follows the same run on every choice sequence; its uniform
+  time bound is the largest halting time over the finitely many inputs of each
+  length. Monotonicity is transitivity of $O$.
 \end{proof}
 
 \begin{proposition}[Time bounds space]
   \label{prop:space-dtime-dspace}
-  \lean{Complexity.DTIME_subset_DSPACE, Complexity.P_subset_PSPACE,
-    Complexity.P_subset_NPSPACE}
+  \lean{Complexity.DTIME_subset_DSPACE, Complexity.DTIME_subset_NSPACE,
+    Complexity.P_subset_PSPACE, Complexity.P_subset_NPSPACE}
   \leanok
-  \uses{def:dtime, def:dspace, def:P, def:PSPACE, def:NPSPACE}
-  For every $T$, $\cc{DTIME}(T) \subseteq \cc{DSPACE}(T)$. Hence
+  \uses{def:dtime, def:dspace, def:nspace, def:P, def:PSPACE, def:NPSPACE}
+  For every $T$, $\cc{DTIME}(T) \subseteq \cc{DSPACE}(T)$ and
+  $\cc{DTIME}(T) \subseteq \cc{NSPACE}(T)$. Hence
   $\cc{P} \subseteq \cc{PSPACE}$ and $\cc{P} \subseteq \cc{NPSPACE}$.
 \end{proposition}
 \begin{proof}
   \leanok
   \uses{lem:space-dspace-nspace}
-  Every head moves at most one cell per step, so the same machine meets the
-  space bound given by its running time.
+  Every head moves at most one cell per step and a decider in time $f$ halts
+  within $f(|x|)$ steps, so every reachable configuration of the same machine
+  is within decision space $f(|x|)$. The nondeterministic statements compose
+  this with Lemma~\ref{lem:space-dspace-nspace}.
 \end{proof}
 
 \begin{lemma}[Closure under complement]
@@ -176,8 +196,9 @@ constant factor.
 \begin{proof}
   \leanok
   Run the decider, rewind the output head to the verdict cell, and flip the
-  bit. The rewind costs one extra cell; the delicate point is that the space
-  predicate constrains every reachable configuration, not only the last.
+  bit. The rewind costs one extra cell, so the new machine decides the
+  complement in space $f + 1$; the delicate point is that the space predicate
+  constrains every reachable configuration, not only the last.
 \end{proof}
 
 \begin{lemma}[PSPACE as an explicit polynomial window]
@@ -187,32 +208,42 @@ constant factor.
   \leanok
   \uses{def:PSPACE}
   $L \in \cc{PSPACE}$ if and only if there are a DTM $M$ and a polynomial $q$
-  such that every configuration $M$ reaches on $x$ is within decision space
-  $q(|x|)$ and $M$ halts on every input with the correct verdict.
+  with natural-number coefficients such that every configuration $M$ reaches
+  on $x$ is within decision space $q(|x|)$ and $M$ halts on every input with
+  the correct verdict.
 \end{lemma}
 \begin{proof}
   \leanok
   Unfold the union and replace the asymptotic bound by a dominating polynomial.
-  Every space-bounded construction in the library enters $\cc{PSPACE}$ through
-  the converse direction.
+  The iteration lemma, Savitch's theorem, and the
+  $\cc{PP} \subseteq \cc{PSPACE}$ and $\cc{PH} \subseteq \cc{PSPACE}$ machines
+  enter $\cc{PSPACE}$ through the converse direction.
 \end{proof}
 
 \begin{theorem}[Regular languages are in $\cc{L}$]
   \label{thm:space-regular-in-L}
-  \lean{Complexity.mem_DSPACE_zero_of_isRegular, Complexity.mem_L_of_isRegular,
+  \lean{Complexity.mem_DSPACE_zero_of_isRegular,
+    Complexity.mem_DSPACE_of_isRegular, Complexity.mem_L_of_isRegular,
     Complexity.mem_L_of_nfa, Complexity.mem_L_of_twoWayNA,
     Complexity.mem_L_of_finite_monoid, Complexity.mem_L_of_regex}
   \leanok
-  \uses{def:dspace, def:L, thm:polytime-regular-in-P}
-  Every regular binary language is in $\cc{DSPACE}(0)$ and hence in $\cc{L}$.
-  So are the languages of CSLib's finite automata, one-way or two-way, of
-  regular expressions, and of finite monoids.
+  \uses{def:dspace, def:L}
+  Every regular binary language, in the sense shared by Mathlib and CSLib
+  (accepted by a finite deterministic automaton), is in $\cc{DSPACE}(0)$, hence
+  in $\cc{DSPACE}(S)$ for every $S$, and is in $\cc{L}$. The languages of
+  CSLib's finite nondeterministic automata, one-way or two-way, the languages
+  of regular expressions over $\{0,1\}$, and the preimages of subsets of
+  finite monoids under monoid homomorphisms from binary strings are in
+  $\cc{L}$.
 \end{theorem}
 \begin{proof}
   \leanok
-  The finite-state scanner has no work tapes, never moves its input head past
-  the first blank after the input, and never moves its output head past the
-  verdict cell, so it uses no charged space.
+  The finite-state scanner of Theorem~\ref{thm:polytime-regular-in-P} has no
+  work tapes, never moves its input head past the first blank after the input,
+  and never moves its output head past the verdict cell, so it decides the
+  language in space $0$. Its output head never moves left, so it is also a
+  transducer, as membership in $\cc{L}$ requires. For the other models, CSLib
+  first shows that the language is regular.
 \end{proof}
 
 \section{Configuration graphs and space-to-time}
@@ -233,26 +264,42 @@ constant factor.
   that is, the state of breadth-first search after $t$ rounds.
 \end{definition}
 
-\begin{definition}[Bounded configuration counting API]
+\begin{definition}[Windowed configurations and their codes]
   \label{def:space-bounded-configs}
+  \lean{Complexity.Windowed, Complexity.windowed_init, Complexity.Code,
+    Complexity.cfgCode, Complexity.cfgCode_inj, Complexity.card_Code,
+    Complexity.card_Code_le_two_pow, Complexity.Windowed.step,
+    Complexity.Windowed.stepCfg, Complexity.windowed_of_reachesCfg}
+  \leanok
   \uses{def:space-decides-in-space, def:space-config-graph}
-  For a DTM or NTM with state set $Q$ and $k$ work tapes, input length $n$ and
-  space $s$: the configurations within decision space $s$ whose tape contents
-  outside the visited window equal their initial contents form a finite type,
-  with an explicit injective code and a cardinality bound of the form
-  $|Q| \cdot (n + s + 2) \cdot 2^{c (k + 1)(s + 1)}$. A step or a halting run
-  that stays inside the window preserves the invariant. This would give one
-  public statement for what is currently proved piecewise: the deterministic
-  transducer snapshots of Theorem~\ref{thm:space-space-to-time}, and the
-  internal windowed configuration codes behind
+  Fix an input $x$ of length $n$ and a space bound $s$, and consider
+  configurations with state set $Q$ and $k$ work tapes. A configuration is
+  \emph{windowed} if its input tape holds the initial input contents, every
+  work cell beyond position $s$ is blank, and every output cell beyond
+  position $s + 1$ is blank; the initial configuration is windowed. The code
+  of a configuration records its state, its input head clamped to at most
+  $n + s + 1$, each work head clamped to at most $s$ together with work cells
+  $0, \dots, s$, and its output head clamped to at most $s + 1$ together with
+  output cells $0, \dots, s + 1$. Two windowed configurations within decision
+  space $s$ with the same code are equal. There are exactly
+  $|Q|\,(n + s + 2)\,\bigl((s + 1)\,4^{s + 1}\bigr)^k\,(s + 2)\,4^{s + 2}$
+  codes, which is at most $2^{|Q| + (n + s + 2) + 3k(s + 1) + 3(s + 2)}$. A DTM
+  step, or an NTM step under either choice bit, from a windowed configuration
+  within decision space $s$ gives a windowed configuration. Hence, if every
+  configuration reachable in the configuration graph from a windowed
+  configuration is within decision space $s$, then all of them are windowed.
+  These declarations live in proof-internal modules and are shared by
   $\cc{PSPACE} \subseteq \cc{EXP}$, $\cc{NL} \subseteq \cc{P}$, Savitch's
-  theorem and the inductive-counting certificate.
+  theorem and the inductive-counting certificate. The sharper count for
+  transducers under auxiliary space, in Theorem~\ref{thm:space-space-to-time},
+  is separate.
 \end{definition}
 
 \begin{theorem}[Space bounds give time bounds]
   \label{thm:space-space-to-time}
   \lean{Complexity.TM.transducerConfigBound,
     Complexity.TM.card_transducerSnapshot,
+    Complexity.TM.IsTransducer.reachesIn_succ_le_transducerConfigBound,
     Complexity.TM.IsTransducer.reachesIn_le_transducerConfigBound,
     Complexity.TM.DecidesInSpace.decidesInTime_configBound,
     Complexity.TM.ComputesInSpace.computesInTime_configBound}
@@ -263,11 +310,12 @@ constant factor.
   $B(n, s) = 8\,|Q|\,(n + s + 2)\,\bigl((s + 1)\,4^{s + 1}\bigr)^k$, the exact
   number of reduced snapshots (state, input head, bounded view of each work
   tape, whether the output head is on the left marker, and the symbol under the
-  output head). A halting run of $M$ on an input of length $n$ that stays within
-  auxiliary space $s$ takes at most $B(n, s)$ steps. Consequently, if $M$
-  decides $L$ in space $S$ then $M$ decides $L$ in time $n \mapsto B(n, S(n))$,
-  and if $M$ computes $f$ in space $S$ then $M$ computes $f$ in time
-  $n \mapsto B(n, S(n))$.
+  output head). If every configuration $M$ reaches from its initial
+  configuration on $x$ is within auxiliary space $s$, and $M$ reaches a halted
+  configuration in $t$ steps, then $t + 1 \le B(|x|, s)$; in particular
+  $t \le B(|x|, s)$. Consequently, if $M$ decides $L$ in space $S$ then $M$
+  decides $L$ in time $n \mapsto B(n, S(n))$, and if $M$ computes $f$ in space
+  $S$ then $M$ computes $f$ in time $n \mapsto B(n, S(n))$.
 \end{theorem}
 \begin{proof}
   \leanok
@@ -281,8 +329,9 @@ constant factor.
     Complexity.L_subset_P, Complexity.FL_subset_FP}
   \leanok
   \uses{def:L, def:FL, def:P, def:FP}
-  If $S = O(\log n)$, then for a transducer with $k$ work tapes there is $c$
-  with $B(n, S(n)) = O(n^{1 + (2c + 1)k})$. Hence $\cc{L} \subseteq \cc{P}$ and
+  If $S = O(\log n)$, then for every DTM with $k$ work tapes there is $c$ with
+  $B(n, S(n)) = O(n^{1 + (2c + 1)k})$, where $B$ is the snapshot count of
+  Theorem~\ref{thm:space-space-to-time}. Hence $\cc{L} \subseteq \cc{P}$ and
   $\cc{FL} \subseteq \cc{FP}$.
 \end{theorem}
 \begin{proof}
@@ -296,16 +345,25 @@ constant factor.
 
 \begin{theorem}[$\cc{PSPACE} \subseteq \cc{EXP}$]
   \label{thm:space-pspace-subset-exp}
-  \lean{Complexity.PSPACE_subset_EXP}
+  \lean{Complexity.PSPACE_subset_EXP, Complexity.TM.spaceTimeBound,
+    Complexity.TM.decidesInTime_of_decidesInSpace,
+    Complexity.TM.spaceTimeBound_bigO}
   \leanok
-  \uses{def:PSPACE, def:EXP}
-  $\cc{PSPACE} \subseteq \cc{EXP}$.
+  \uses{def:PSPACE, def:EXP, def:space-decides-in-space, def:tm-decides}
+  $\cc{PSPACE} \subseteq \cc{EXP}$. More precisely, if a DTM $M$ with state set
+  $Q$ and $k$ work tapes decides $L$ in space $f$, transducer or not, then $M$
+  decides $L$ in time
+  $n \mapsto |Q|\,(n + f(n) + 2)\,\bigl((f(n) + 1)\,4^{f(n) + 1}\bigr)^k\,
+  (f(n) + 2)\,4^{f(n) + 2}$, and if $f = O(n^m)$ this bound is
+  $O(2^{n^j})$ for some $j$.
 \end{theorem}
 \begin{proof}
   \leanok
-  A head that never leaves its window cannot write outside it, so there are
-  $2^{O(S)}$ configurations within the space bound, and a deterministic halting
-  run visits none twice. The same machine decides the language in exponential
+  \uses{def:space-bounded-configs}
+  Every configuration of the run is windowed, so distinct configurations of
+  the run have distinct codes, and a deterministic halting run visits no
+  configuration twice before it halts. The halting time is therefore below the
+  number of codes, and the same machine decides the language in exponential
   time.
 \end{proof}
 
@@ -313,35 +371,49 @@ constant factor.
 
 \begin{lemma}[NL as bounded reachability]
   \label{lem:space-nl-reachability}
-  \lean{Complexity.NL_bounded_reachability,
+  \lean{Complexity.mem_iff_exists_accepting_reachable,
+    Complexity.NL_bounded_reachability,
     Complexity.NL_complement_characterization}
   \leanok
   \uses{def:NL, def:space-config-graph}
-  For every $L \in \cc{NL}$ there are an NTM $M$ and constants $A, B$ such that
-  for every $x$: $x \in L$ if and only if some configuration in
+  If an NTM $M$ decides $L$ in some space bound, then $x \in L$ if and only if
+  some configuration reachable from $\mathrm{init}(x)$ in the configuration
+  graph of $M$ is halted with verdict $1$. For every $L \in \cc{NL}$ there are
+  an NTM $M$ and constants $A, B$ such that for every $x$: $x \in L$ if and
+  only if some configuration in
   $\mathrm{reachSet}(\mathrm{init}(x), A(|x| + 1)^B)$ is halted with verdict
   $1$. Equivalently, $x \notin L$ if and only if no configuration of that set is
   halted with verdict $1$.
 \end{lemma}
 \begin{proof}
   \leanok
-  A log-space machine has polynomially many configurations inside its window,
-  so breadth-first search saturates within polynomially many rounds.
+  \uses{def:space-bounded-configs}
+  A log-space machine has polynomially many configuration codes inside its
+  window, so breadth-first search saturates within polynomially many rounds.
 \end{proof}
 
 \begin{theorem}[$\cc{NL} \subseteq \cc{P}$]
   \label{thm:space-NL-subset-P}
-  \lean{Complexity.NL_subset_P, Complexity.coNL_subset_P}
+  \lean{Complexity.NL_subset_P, Complexity.coNL_subset_P,
+    Complexity.NL_subset_P_of_search}
   \leanok
-  \uses{def:NL, def:coNL, def:P}
-  $\cc{NL} \subseteq \cc{P}$ and $\cc{coNL} \subseteq \cc{P}$.
+  \uses{def:NL, def:coNL, def:P, def:space-config-graph}
+  $\cc{NL} \subseteq \cc{P}$ and $\cc{coNL} \subseteq \cc{P}$. The library also
+  records a reduction of $\cc{NL} \subseteq \cc{P}$ to one machine, which the
+  proof below does not use: if for every NTM $M$ deciding some language in
+  space $S = O(\log n)$ and all constants $A, B$ some DTM decides, within an
+  explicit polynomial time bound, the set of $x$ such that some configuration
+  in $\mathrm{reachSet}(\mathrm{init}(x), A(|x| + 1)^B)$ of $M$ is halted with
+  verdict $1$, then $\cc{NL} \subseteq \cc{P}$.
 \end{theorem}
 \begin{proof}
   \leanok
-  \uses{lem:space-nl-reachability, thm:cobham}
+  \uses{lem:space-nl-reachability, thm:cobham, lem:polytime-iterate,
+    lem:polytime-decision-fn, prop:polytime-P-boolean}
   The worklist search over encoded configurations is programmed in Cobham's
-  function algebra and run for polynomially many rounds. The $\cc{coNL}$ case
-  follows because $\cc{P}$ is closed under complement; it does not use the
+  function algebra and run for polynomially many rounds, and the verdict
+  function gives membership in $\cc{P}$. The $\cc{coNL}$ case follows because
+  $\cc{P}$ is closed under complement; it does not use the
   Immerman--Szelepcs\'enyi theorem.
 \end{proof}
 
@@ -349,25 +421,29 @@ constant factor.
   \label{lem:space-inductive-counting}
   \lean{Complexity.inductive_counting_certificate,
     Complexity.NL_membership_is_walk, Complexity.NL_nonmembership_by_counting,
-    Complexity.NL_complement_certificate}
+    Complexity.logWindow, Complexity.NL_complement_certificate}
   \leanok
-  \uses{def:space-config-graph, def:NL}
+  \uses{def:space-config-graph, def:space-bounded-configs, def:NL}
   (1) If $T \subseteq \mathrm{reachSet}(c_0, i)$ and
   $|\mathrm{reachSet}(c_0, i)| \le |T|$ then $T = \mathrm{reachSet}(c_0, i)$.
-  (2) A configuration code lies in round $i$ of the coded search if and only if
-  some sequence of $i$ steps, each staying put or moving to a successor, reaches
-  it from the start. (3) If a list of distinct verified members of round $i$ is
-  at least as long as the round, every code missing from the list is outside the
-  round. (4) For every $L \in \cc{NL}$ there are an NTM and constants
-  $C, D, A, B$ such that $x \notin L$ if and only if round $A(|x| + 1)^B$ of the
-  search in the window $C \log |x| + D$ can be listed in this sense with no
-  member halted with verdict $1$.
+  The coded search starts from one configuration code and in each round adds
+  the codes of the successors of the configurations the current codes decode
+  to. (2) A code lies in round $i$ of the coded search from $a_0$ if and only if
+  some sequence of $i$ steps from $a_0$, each staying put or moving to such a
+  successor code, reaches it. (3) If a list of distinct members of round $i$
+  is at least as long as the round, every code missing from the list is
+  outside the round. (4) For every $L \in \cc{NL}$ there are an NTM and
+  constants $C, D, A, B$ such that $x \notin L$ if and only if round
+  $A(|x| + 1)^B$ of the coded search from the code of $\mathrm{init}(x)$, in
+  the window $C \log |x| + D$, can be listed in this sense with no member
+  decoding to a halted configuration with verdict $1$.
 \end{lemma}
 \begin{proof}
   \leanok
   \uses{lem:space-nl-reachability}
   A subset of a finite set that is at least as large is the whole set; the
-  codes are the fixed-width configuration codes used by the search.
+  codes are the fixed-width configuration codes of
+  Definition~\ref{def:space-bounded-configs}.
 \end{proof}
 
 \begin{proposition}[The two inclusions are equivalent]
@@ -431,13 +507,13 @@ constant factor.
   \lean{Complexity.SpaceIter.mem_PSPACE_of_iterate}
   \leanok
   \uses{def:FP, def:PSPACE, def:pair}
-  Let $G \in \cc{FP}$, let $r, w$ be polynomials, and let
-  $N : \{0,1\}^* \to \mathbb{N}$ satisfy $1 \le N(x) \le 2^{w(|x|)}$. Write
-  $y_i = G^i(\mathrm{pair}(\varepsilon, x))$. Suppose $|y_i| \le r(|x|)$ for
-  $i \le N(x) + 1$, $y_i$ does not begin with $1$ for $0 < i < N(x)$,
-  $y_{N(x)}$ begins with $1$ (the done flag), and $y_{N(x)+1}$ is nonempty. If
-  $x \in L$ exactly when $y_{N(x)+1}$ begins with $1$, then
-  $L \in \cc{PSPACE}$.
+  Let $G \in \cc{FP}$, let $r, w$ be polynomials with natural-number
+  coefficients, and let $N : \{0,1\}^* \to \mathbb{N}$ satisfy
+  $1 \le N(x) \le 2^{w(|x|)}$. Write $y_i = G^i(\mathrm{pair}(\varepsilon, x))$.
+  Suppose $|y_i| \le r(|x|)$ for $i \le N(x) + 1$, $y_i$ does not begin with
+  $1$ (it is empty or begins with $0$) for $0 < i < N(x)$, $y_{N(x)}$ begins
+  with $1$ (the done flag), and $y_{N(x)+1}$ is nonempty. If $x \in L$ exactly
+  when $y_{N(x)+1}$ begins with $1$, then $L \in \cc{PSPACE}$.
 \end{lemma}
 \begin{proof}
   \leanok
@@ -460,14 +536,18 @@ constant factor.
   $2^i$ steps. (2) If a map into a finite type of cardinality at most $N$
   separates the configurations reachable from $c_0$, then $c$ is reachable
   from $c_0$ if and only if it is reachable within $N$ steps. (3) For every
-  $L \in \cc{NPSPACE}$ there are an NTM and a polynomial $q$ such that
-  $x \in L$ if and only if some halted configuration with verdict $1$ is
-  reachable from $\mathrm{init}(x)$ within $2^{q(|x|)}$ steps.
+  $L \in \cc{NPSPACE}$ there are an NTM and a polynomial $q$ with
+  natural-number coefficients such that $x \in L$ if and only if some halted
+  configuration with verdict $1$ is reachable from $\mathrm{init}(x)$ within
+  $2^{q(|x|)}$ steps.
 \end{lemma}
 \begin{proof}
   \leanok
+  \uses{def:space-bounded-configs, lem:space-nl-reachability}
   A walk longer than the number of codes repeats a configuration, and the loop
-  can be cut out; halving splits a walk at its midpoint.
+  can be cut out; halving splits a walk at its midpoint. For (3), membership
+  is reachability of an accepting configuration, and the configuration codes
+  number at most $2$ to a polynomial.
 \end{proof}
 
 \begin{theorem}[Savitch]
@@ -480,13 +560,13 @@ constant factor.
 \begin{proof}
   \leanok
   \uses{lem:space-savitch-recursion, lem:space-iterate,
-    lem:space-dspace-nspace}
+    lem:space-dspace-nspace, def:space-bounded-configs, thm:cobham}
   Savitch's recursion is written as a stack machine whose single step is a
-  polynomial-time function on a polynomially long encoded stack; the midpoint
-  enumeration ranges over every string of the configuration-code width. The
-  step is iterated $2^{\mathrm{poly}}$ times by
+  polynomial-time function, built in Cobham's algebra, on a polynomially long
+  encoded stack; the midpoint enumeration ranges over every string of the
+  configuration-code width. The step is iterated $2^{\mathrm{poly}}$ times by
   Lemma~\ref{lem:space-iterate}. The reverse inclusion is the embedding of
-  DTMs into NTMs.
+  DTMs into NTMs. No bound of the form $O(S^2)$ is extracted.
 \end{proof}
 
 \begin{theorem}[Savitch, parametric form]
@@ -539,30 +619,42 @@ constant factor.
 \begin{definition}[Quantified Boolean formulas]
   \label{def:space-qbf}
   \lean{Complexity.QBF, Complexity.QBF.eval, Complexity.QBF.freeVars,
-    Complexity.QBF.Closed, Complexity.QBF.IsTrue, Complexity.QBF.quantDepth}
+    Complexity.QBF.Closed, Complexity.QBF.IsTrue, Complexity.QBF.quantDepth,
+    Complexity.QBF.QuantifierFree}
   \leanok
   A QBF is built from variables $x_i$ ($i \in \mathbb{N}$), the constants
   $\top$ and $\bot$, negation, conjunction, disjunction, and the quantifiers
   $\exists x_i$ and $\forall x_i$. It is evaluated under an assignment
   $\alpha : \mathbb{N} \to \{0,1\}$; a quantifier over $x_i$ evaluates its body
-  under both updates of $\alpha$ at $i$. A formula is closed when it has no
-  free variables, and true when it evaluates to $1$ under the all-false
-  assignment. The quantifier depth bounds, but does not count, alternations.
+  under both updates of $\alpha$ at $i$ and takes the disjunction ($\exists$)
+  or conjunction ($\forall$) of the two values. A formula is closed when it has
+  no free variables, and true when it evaluates to $1$ under the all-false
+  assignment. The quantifier depth is the largest number of quantifiers on a
+  root-to-leaf path; it bounds, but does not count, alternations, and a
+  formula is quantifier-free when its depth is $0$.
 \end{definition}
 
 \begin{lemma}[QBF semantics]
   \label{lem:space-qbf-semantics}
   \lean{Complexity.QBF.eval_ex_iff, Complexity.QBF.eval_all_iff,
     Complexity.QBF.eval_eq_of_agree, Complexity.QBF.eval_closed_eq,
-    Complexity.QBF.isTrue_neg_iff, Complexity.QBF.isTrue_conj_iff,
-    Complexity.QBF.isTrue_disj_iff}
+    Complexity.QBF.eval_update_not_mem, Complexity.QBF.eval_ex_not_mem,
+    Complexity.QBF.eval_all_not_mem, Complexity.QBF.eval_neg_ex,
+    Complexity.QBF.eval_neg_all, Complexity.QBF.isTrue_neg_iff,
+    Complexity.QBF.isTrue_conj_iff, Complexity.QBF.isTrue_disj_iff,
+    Complexity.QBF.isTrue_ex_of_isTrue_all, Complexity.QBF.quantifierFree_conj}
   \leanok
   \uses{def:space-qbf}
   $\exists x_i\, \varphi$ is true under $\alpha$ if and only if $\varphi$ is
   true under $\alpha[i \mapsto b]$ for some $b$, and dually for $\forall$.
   Evaluation depends only on the free variables, so a closed formula has an
-  assignment-independent value. Truth commutes with negation, conjunction and
-  disjunction.
+  assignment-independent value, and updating or quantifying a variable that is
+  not free changes nothing. Under every assignment,
+  $\neg \exists x_i\, \varphi$ has the value of $\forall x_i\, \neg \varphi$,
+  and $\neg \forall x_i\, \varphi$ that of $\exists x_i\, \neg \varphi$. Truth
+  commutes with negation, conjunction and disjunction, and if
+  $\forall x_i\, \varphi$ is true then so is $\exists x_i\, \varphi$. A
+  conjunction is quantifier-free exactly when both conjuncts are.
 \end{lemma}
 \begin{proof}
   \leanok
@@ -668,13 +760,71 @@ constant factor.
 
 Membership in $\cc{FL}$ is currently established machine by machine, for
 example for the tableau serializer behind logspace-uniform circuits, and the
-only structural fact about $\cc{FL}$ is $\cc{FL} \subseteq \cc{FP}$. An
-experimental layer of proof-carrying binary register routines
-(\texttt{BinaryRoutine}) already composes sequentially, supports loops with
-width certificates that collapse to logarithmic space, and yields a
-$\mathrm{ComputesInSpace}$ contract; its programs see only the input length,
-not the input bits. The nodes below would make log-space programming as
-routine as Cobham's algebra makes polynomial time.
+only structural fact about $\cc{FL}$ is $\cc{FL} \subseteq \cc{FP}$. Two
+layers already support writing such machines. Space-aware Hoare contracts
+(Definition~\ref{def:space-hoare}) pair a time-bounded triple with an
+all-reachable auxiliary-space bound, compose sequentially at the larger of the
+two budgets, and package per-input contracts of a transducer into a
+$\mathrm{ComputesInSpace}$ statement. An experimental layer of proof-carrying
+binary register routines (\texttt{BinaryRoutine}) composes sequentially,
+supports loops with width certificates that collapse to logarithmic space, and
+yields a $\mathrm{ComputesInSpace}$ contract; its programs see only the input
+length, not the input bits. The planned nodes below would make log-space
+programming as routine as Cobham's algebra makes polynomial time.
+
+\begin{definition}[Space-aware Hoare contracts]
+  \label{def:space-hoare}
+  \lean{Complexity.TM.HoareSpace, Complexity.TM.HoareTimeSpace}
+  \leanok
+  \uses{def:models-hoare, def:space-decides-in-space}
+  For a DTM $M$, a precondition $\mathit{pre}$ on (input tape, work tapes,
+  output tape), an input length $n$ and a space bound $s$, the space contract
+  holds if, whenever $M$ starts in its start state on tapes satisfying
+  $\mathit{pre}$, every configuration it reaches is within auxiliary space $s$
+  for input length $n$. The time-and-space contract with bounds $b$, $n$ and
+  $s$ is the conjunction of the time-bounded triple
+  $\{\mathit{pre}\}\, M\, \{\mathit{post}\}_b$ with this space contract.
+\end{definition}
+
+\begin{lemma}[Rules for space-aware contracts]
+  \label{lem:space-hoare-rules}
+  \lean{Complexity.TM.hoareSpace_of_invariant,
+    Complexity.TM.HoareTime.toHoareTimeSpace,
+    Complexity.TM.HoareTimeSpace.consequence, Complexity.TM.IsTransducer.seqTM,
+    Complexity.TM.seqTM_hoareTimeSpace,
+    Complexity.TM.computesInSpace_of_hoareTimeSpace}
+  \leanok
+  \uses{def:space-hoare, def:models-combinators, def:space-decides-in-space}
+  (1) A configuration predicate that holds at every start satisfying
+  $\mathit{pre}$, is preserved by every step, and implies auxiliary space $s$
+  gives the space contract. (2) If $\{\mathit{pre}\}\, M\,
+  \{\mathit{post}\}_b$ holds and every start configuration satisfying
+  $\mathit{pre}$ is within auxiliary space $s_0$, then the time-and-space
+  contract holds with space $s_0 + b$. (3) A time-and-space contract survives
+  strengthening the precondition, weakening the postcondition, and enlarging
+  the time bound, the input length and the space bound. (4) The sequential
+  composition of two transducers is a transducer. If $M_1$ satisfies the
+  time-and-space contract from $\mathit{pre}$ to $\mathit{mid}$ with bounds
+  $b_1, n, s_1$, the phase-boundary normalization maps tapes satisfying
+  $\mathit{mid}$ to tapes satisfying $\mathit{mid}'$, and $M_2$ satisfies the
+  contract from $\mathit{mid}'$ to $\mathit{post}$ with bounds $b_2, n, s_2$,
+  then $\mathrm{seq}(M_1, M_2)$ satisfies the contract from $\mathit{pre}$ to
+  $\mathit{post}$ with bounds $b_1 + 1 + b_2$, $n$ and $\max(s_1, s_2)$.
+  (5) If a transducer satisfies, for every input $x$, the time-and-space
+  contract from the initial tapes on $x$ to ``the output tape holds $f(x)$''
+  with bounds $T(|x|)$, $|x|$ and $S(|x|)$, then it computes $f$ in space $S$.
+\end{lemma}
+\begin{proof}
+  \leanok
+  \uses{thm:models-seq-hoare}
+  (1) is induction along the reachable configurations. For (2), the run halts
+  within $b$ steps, so every reachable configuration is at most $b$ steps from
+  its start, and each step moves each head by at most one cell. For (4), the
+  time component is
+  Theorem~\ref{thm:models-seq-hoare}; the first phase is covered by the
+  contract of $M_1$, and the normalized start of $M_2$ and everything after it
+  by the contract of $M_2$.
+\end{proof}
 
 \begin{theorem}[FL is closed under composition]
   \label{thm:space-fl-comp}
@@ -740,10 +890,11 @@ routine as Cobham's algebra makes polynomial time.
   program that outputs a single bit decides a language in $\cc{L}$.
 \end{theorem}
 \begin{proof}
-  \uses{thm:space-fl-comp}
+  \uses{thm:space-fl-comp, lem:space-hoare-rules}
   Each register becomes a binary work tape, input access becomes a seek driven
   by a counter, and loops become binary counters, reusing the Hoare-style
-  binary-counter subroutines. The counting machine of
+  binary-counter subroutines and the space-aware contracts of
+  Lemma~\ref{lem:space-hoare-rules}. The counting machine of
   Theorem~\ref{thm:space-immerman} and the tableau serializer would then be
   written as programs.
 \end{proof}

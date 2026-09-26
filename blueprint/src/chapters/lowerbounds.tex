@@ -11,19 +11,23 @@ the soundness of resolution. For $\cc{AC}^0$ it proves a finite, width-sensitive
 switching lemma, iterates it through arbitrary depth-bounded formulas, and
 derives a finite counting obstruction for every formula computing parity. All
 of these results are finite or nonuniform. The next target is the family-level
-theorem that parity is not in $\cc{AC}^0$, which needs only arithmetic on top
-of the finite obstruction (roadmap track L4). Beyond it, the plan covers
-monotone circuit lower bounds, pseudorandom restrictions, and resolution size
-and width lower bounds leading to the pigeonhole principle and to Cook--Reckhow
-proof systems (roadmap track L5).
+theorem that parity is not in $\cc{AC}^0$ as defined in this library. Circuits
+are already normalized to formulas
+(Theorem~\ref{thm:lowerbounds-ac0-normalization}), so what remains is
+arithmetic on top of the finite obstruction (roadmap track L4). Beyond it, the
+plan covers monotone circuit lower bounds, pseudorandom restrictions, and
+resolution size and width lower bounds leading to the pigeonhole principle and
+to Cook--Reckhow proof systems (roadmap track L5).
 Section~\ref{sec:lowerbounds-algebraic} collects the results of the imported
-algebraic-circuits library: parity bounds in the De Morgan basis and in
-$\cc{AC}^0$, monotone CLIQUE, Nechiporuk's formula bound, Karchmer--Wigderson,
-a circuit-size hierarchy, conditional complexity, algebraic lower bounds, and
-mass production. Its circuit results use CSLib's circuits, each over the
-imported library's own signature and cost model; Nechiporuk's bound and
-Karchmer--Wigderson are about formulas, and the Waring bound is an identity of
-polynomials.
+algebraic-circuits library: parity bounds in the De Morgan basis and in its own
+$\cc{AC}^0$ model (including parity outside that model's $\cc{AC}^0$ and an
+explicit Håstad-type size bound), monotone CLIQUE at explicit parameters,
+Nechiporuk's formula bound, Karchmer--Wigderson, a circuit-size hierarchy,
+conditional complexity, algebraic lower bounds, and mass production; the
+imported sunflower lemma appears in Section~\ref{sec:lowerbounds-monotone}. Its
+circuit results use CSLib's circuits, each over the imported library's own
+signature and cost model; Nechiporuk's bound and Karchmer--Wigderson are about
+formulas, and the Waring bound is an identity of polynomials.
 
 \section{Counting bounds}
 \label{sec:lowerbounds-counting}
@@ -35,7 +39,8 @@ polynomials.
   \uses{def:circuit, def:circuits-bases, def:circuits-size-complexity}
   For every $N \ge 6$ there is a function $f : \{0,1\}^N \to \{0,1\}$ that no
   fan-in-two AND/OR circuit of size at most $\lfloor 2^N / (5N) \rfloor$
-  computes. Equivalently, $\mathrm{size}(f) > \lfloor 2^N / (5N) \rfloor$.
+  computes, where the size $G + 1$ of a single-output circuit counts its output
+  gate. Consequently $\mathrm{size}(f) > \lfloor 2^N / (5N) \rfloor$.
 \end{theorem}
 \begin{proof}
   \leanok
@@ -84,7 +89,8 @@ polynomials.
   \leanok
   \uses{def:circuits-size-complexity, thm:circuits-cslib}
   For all sufficiently large $N$, some $f : \{0,1\}^N \to \{0,1\}$ satisfies
-  $\mathrm{size}(f) > (2^N / N - N) / 2$.
+  $2^N / N < N + 2\,\mathrm{size}(f)$, that is,
+  $\mathrm{size}(f) > (2^N / N - N) / 2$, with $2^N / N$ a real quotient.
 \end{theorem}
 \begin{proof}
   \leanok
@@ -98,25 +104,39 @@ polynomials.
   \label{thm:lowerbounds-size-classes}
   \lean{Complexity.mem_SIZE_iff_sliceSizeComplexity_le,
     Complexity.exists_cslib_of_mem_SIZE, Complexity.mem_SIZE_of_cslib,
-    Complexity.lupanov_sliceSizeComplexity, Complexity.exists_mem_SIZE_bigO_two_pow_div,
+    Complexity.lupanov_sliceSizeComplexity, Complexity.exists_mem_SIZE_lupanov,
+    Complexity.exists_mem_SIZE_bigO_two_pow_div,
     Complexity.exists_language_not_mem_SIZE,
     Complexity.exists_language_not_mem_SIZE_littleO}
   \leanok
-  \uses{def:SIZE, thm:lowerbounds-lupanov, thm:lowerbounds-shannon-cslib, thm:circuits-cslib}
-  A language is in $\cc{SIZE}(s)$ exactly when the size complexity of each of
-  its length slices is at most $s$, and $\cc{SIZE}$ transfers to CSLib's De
-  Morgan circuits with the overheads of Theorem~\ref{thm:circuits-cslib}. Every
-  language is in $\cc{SIZE}(s)$ for some $s = O(2^n / n)$, indeed with
-  $s(n) \le (1 + \varepsilon) 2^n / n$ for large $n$. Conversely, some language
-  lies outside $\cc{SIZE}(s)$ whenever $n + 2s(n) \le 2^n / n$ for large $n$,
-  in particular whenever $s = o(2^n / n)$.
+  \uses{def:SIZE, thm:lowerbounds-lupanov, thm:circuits-cslib}
+  Let the slice complexity of a language $L$ at length $n \ge 1$ be the size
+  complexity of its length-$n$ slice, and $0$ at $n = 0$, where a circuit
+  family answers with a stored bit. Then $L \in \cc{SIZE}(s)$ exactly when the
+  slice complexity is at most $s(n)$ at every $n$. If $L \in \cc{SIZE}(s)$, then
+  every length-$n$ slice, $n = 0$ included, is decided by a CSLib De Morgan
+  circuit with at most $n + 2s(n) + 1$ gates; conversely, CSLib circuits with at
+  most $s(n)$ gates at every length $n \ge 1$ put $L$ in $\cc{SIZE}(s + 1)$.
+
+  For every $\varepsilon > 0$ there is one threshold $N_0$ such that every
+  language has slice complexity at most $(1 + \varepsilon) 2^n / n$ at every
+  length $n \ge N_0$. Hence every language is in $\cc{SIZE}(s)$ for some $s$
+  with $s(n) \le (1 + \varepsilon) 2^n / n$ for all large $n$, and for some
+  $s = O(\lfloor 2^n / n \rfloor)$. Conversely, a single language lies outside
+  $\cc{SIZE}(s)$ for every $s$ with $n + 2s(n) \le 2^n / n$ for all large $n$,
+  in particular for every $s = o(\lfloor 2^n / n \rfloor)$.
 \end{theorem}
 \begin{proof}
   \leanok
-  \uses{thm:lowerbounds-lupanov, thm:lowerbounds-shannon-cslib}
-  Apply Lupanov's bound to every slice, with finitely many small lengths
-  absorbed into the big-O constant. For the lower bound, take a hard function
-  at every large length and let the language consist of its accepted strings.
+  \uses{thm:lowerbounds-lupanov, thm:circuits-cslib}
+  Apply Lupanov's bound to every slice. A big-O bound only constrains large
+  lengths, so Lupanov's bound with $\varepsilon = 1$ gives
+  $O(\lfloor 2^n / n \rfloor)$, the floor costing at most a factor of two. For
+  the lower bound,
+  CSLib's family-level Shannon bound gives a language with
+  $2^n / n < n + 2\,\mathrm{size}$ at every large length after translating
+  circuits as in Theorem~\ref{thm:circuits-cslib}; a size bound $s$ with
+  $n + 2s(n) \le 2^n / n$ for large $n$ contradicts this at some length.
 \end{proof}
 
 \section{Results from the algebraic-circuits library}
@@ -128,13 +148,14 @@ namespace. The circuit results are stated for CSLib's straight-line circuits
 (\texttt{Cslib.Circuits.Circuit}), but each over the imported library's own
 signature and cost model, not over CSLib's De Morgan signature or the bases of
 this library. For example, its De Morgan signature adds an identity gate to
-constants, negation, conjunction, and disjunction; the parity bound charges
-only conjunctions and disjunctions, while the hierarchy counts every gate; its
-$\cc{AC}^0$ circuits have unbounded fan-in, with negations free and adding no
-depth. Each node names its model and what it counts. Nechiporuk's bound and
-Karchmer--Wigderson are stated for the imported library's formula types, not
-for circuits, and the Waring bound is an identity of polynomials with no
-circuit in its statement. Conditional complexity is defined in this library,
+constants, negation, conjunction, and disjunction; the De Morgan parity bound
+charges only conjunctions and disjunctions, while the hierarchy counts every
+gate; its $\cc{AC}^0$ circuits have unbounded fan-in, with negations free and
+adding no depth; mass production charges negations, conjunctions, and
+disjunctions but not constants or identities. Each node names its model and
+what it counts. Nechiporuk's bound and Karchmer--Wigderson are stated for the
+imported library's formula types, not for circuits, and the Waring bound is an
+identity of polynomials with no circuit in its statement. Conditional complexity is defined in this library,
 although it lives in CSLib's namespace. The consolidation plan in
 \texttt{ROADMAP.md} relates these results to the statements elsewhere in this
 chapter.
@@ -143,8 +164,9 @@ chapter.
   \label{thm:lowerbounds-algebraic-xor}
   \lean{Algebraic.DeMorgan.xor_lowerBound}
   \leanok
-  Every De Morgan circuit computing $n$-input parity has at least $3(n - 1)$
-  AND and OR gates; constants and negations are free.
+  For every $n$, every circuit over the imported library's De Morgan signature
+  computing $n$-input parity has at least $3(n - 1)$ AND and OR gates; constant,
+  identity, and negation gates are free.
 \end{theorem}
 \begin{proof}
   \leanok
@@ -154,30 +176,68 @@ chapter.
 
 \begin{theorem}[Parity is not in $\cc{AC}^0$]
   \label{thm:lowerbounds-algebraic-parity-ac0}
-  \lean{Algebraic.AC0.parity_not_computable}
+  \lean{Algebraic.AC0.parity_not_computable, Algebraic.AC0.parity_not_raw_computable}
   \leanok
-  No family of constant-depth, polynomial-size, unbounded fan-in AND/OR
-  circuits with negations at the inputs computes parity. This is stated for
-  the imported library's own $\cc{AC}^0$ model; deriving
-  Theorem~\ref{thm:lowerbounds-parity-not-ac0} for $\cc{AC}^0$ as defined here
-  from it is part of the consolidation plan.
+  No nonuniform family of unbounded fan-in AND/OR circuits with negations at
+  the inputs, with polynomially many AND and OR gates (negations free) and
+  constant AND/OR depth (negations add no depth), computes parity at every
+  input length. The same holds when negation gates may occur anywhere in the
+  circuits. This is stated for the imported library's own $\cc{AC}^0$ model;
+  deriving Theorem~\ref{thm:lowerbounds-parity-not-ac0} for $\cc{AC}^0$ as
+  defined here from it is part of the consolidation plan.
 \end{theorem}
 \begin{proof}
   \leanok
+  \uses{thm:lowerbounds-algebraic-hastad}
   Håstad's switching lemma: random restrictions collapse each bottom layer
   of such a circuit to a shallow decision tree, reducing the depth, while
-  parity restricts to parity on the remaining inputs.
+  parity restricts to parity on the remaining inputs. At input length
+  $(20(t + 1))^{d - 1}$ this forces $2^{t + 1} \le 20\,t\,S$ for a depth-$d$
+  circuit with $S$ AND and OR gates, which a polynomial bound on $S$ violates
+  for large $t$.
+\end{proof}
+
+\begin{theorem}[Håstad's size bound, imported model]
+  \label{thm:lowerbounds-algebraic-hastad}
+  \lean{Algebraic.AC0.Circuit.parity_size_tradeoff_at_scale_raw,
+    Algebraic.AC0.Circuit.parity_andOrCost_lower_bound_at_root_raw}
+  \leanok
+  Consider circuits of the imported library's $\cc{AC}^0$ model: unbounded
+  fan-in AND and OR gates and negation gates anywhere, where $S$ counts the AND
+  and OR gates and the depth counts AND and OR levels only. Let $d \ge 2$ and
+  $t \ge 1$. Every such circuit with $n \ge (20(t + 1))^{d - 1}$ inputs and
+  depth at most $d$ that computes $n$-input parity satisfies
+  $2^{t + 1} \le 20\,t\,S$. In particular, if $n \ge 40^{d - 1}$ and
+  $q = \lfloor \lfloor n^{1/(d-1)} \rfloor / 20 \rfloor$, with
+  $\lfloor n^{1/(d-1)} \rfloor$ the integer root, then
+  $S \ge \lfloor 2^q / (20(q - 1)) \rfloor$. This bound is of order
+  $2^{\Omega(n^{1/(d-1)})}$, but no asymptotic form is stated. It is not
+  transferred to the circuits of this library; see
+  Theorem~\ref{thm:lowerbounds-hastad-size}.
+\end{theorem}
+\begin{proof}
+  \leanok
+  Apply $d - 1$ rounds of random restrictions. Each round switches one layer,
+  with a union bound over the $S$ AND and OR gates, while an explicit integer
+  schedule keeps enough inputs free; the unreduced top gate is then a
+  bounded-width normal form, which cannot compute parity on the surviving
+  inputs. The switching condition is equivalent to $20\,t\,S < 2^{t + 1}$, and
+  $n \ge (20(t + 1))^{d - 1}$ implies the survivor condition.
 \end{proof}
 
 \begin{theorem}[Monotone CLIQUE]
   \label{thm:lowerbounds-algebraic-clique}
   \lean{Algebraic.Monotone.Clique.Exponential.twoPow_lt_circuitSize}
   \leanok
-  On $N = 2^{20t}$ vertices with $t \ge 4$, every monotone circuit computing
-  $2^{4t}$-CLIQUE has more than $2^{t \cdot 2^t}$ gates.
+  Let $t \ge 4$ and $N = 2^{20t}$. Every circuit over the imported library's
+  binary AND/OR signature (fan-in-two AND and OR gates, no constants and no
+  negations, every gate counted) whose inputs are the $\binom{N}{2}$ edge
+  variables of an $N$-vertex graph and which computes $2^{4t}$-CLIQUE has more
+  than $2^{t \cdot 2^t}$ gates.
 \end{theorem}
 \begin{proof}
   \leanok
+  \uses{lem:lowerbounds-sunflower}
   Razborov's method of approximations, with the sunflower lemma bounding the
   error introduced at each gate.
 \end{proof}
@@ -189,11 +249,14 @@ chapter.
   Suppose that, for all large $n$, the length-$n$ member of a family of
   Boolean functions is $K(n)$-rectangle-free (under every split of its inputs,
   every rectangle of accepted inputs has a side with fewer than $K(n)$
-  elements), with $K(n) \le n^c$, and has at least $2^{n - 2}$ accepting
-  inputs. Then for all large $n$ every formula over the full binary basis
-  computing the length-$n$ member has at least $n^2 / (64(c + 3)\log_2 n)$
-  leaves. This is a conditional statement about any such family: no explicit
-  rectangle-free family is formalized.
+  elements), with $K(n) \le n^c$ for a natural number $c$, and has at least
+  $2^{n - 2}$ accepting inputs. Then for all large $n$ every formula over the
+  full binary basis (all sixteen binary gates, constant leaves allowed)
+  computing the length-$n$ member satisfies
+  $n^2 \le 64(c + 3)\log_2 n \cdot L$, where $L$ counts variable leaves and
+  constants are free; that is, it has at least $n^2 / (64(c + 3)\log_2 n)$
+  variable leaves. This is a conditional statement about any such family: no
+  explicit rectangle-free family is formalized.
 \end{theorem}
 \begin{proof}
   \leanok
@@ -205,10 +268,17 @@ chapter.
   \label{thm:lowerbounds-algebraic-kw}
   \lean{Algebraic.KW.formulaDepth_eq_protocolDepth, Algebraic.KW.formulaSize_eq_protocolSize}
   \leanok
-  For every $f$ on $n \ge 1$ inputs, the minimum depth and size of a De Morgan
-  formula for $f$ equal the minimum depth and number of leaves of a protocol
-  for the Karchmer--Wigderson game of $f$. At $n = 0$ the game has no
-  protocol, since a protocol answers with an input position.
+  Consider the imported library's De Morgan formulas, trees of literal leaves
+  $x_i$ and $\neg x_i$, constant leaves, and binary AND and OR gates, with depth
+  the length of a longest root-to-leaf path and size the number of leaves,
+  constants included. In the Karchmer--Wigderson game of $f$, Alice holds $x$
+  with $f(x) = 1$, Bob holds $y$ with $f(y) = 0$, and a deterministic protocol
+  must output a coordinate where $x$ and $y$ differ. For every $f$ on $n \ge 1$
+  inputs, the minimum depth of a formula computing $f$ equals the minimum
+  depth of a protocol for this game, and the minimum size of a formula equals
+  the minimum number of leaves of a protocol. The hypothesis $n \ge 1$ is used
+  because a protocol leaf names an input position; the fact that no protocol
+  exists at $n = 0$ is a remark, not a formalized statement.
 \end{theorem}
 \begin{proof}
   \leanok
@@ -221,25 +291,37 @@ chapter.
   \label{thm:lowerbounds-algebraic-hierarchy}
   \lean{Algebraic.DeMorgan.polynomialSize_ssubset}
   \leanok
-  For real exponents $1 \le a < b$, the class of function families with De
-  Morgan circuits of size $O(n^a)$ is strictly contained in the class with
-  size $O(n^b)$.
+  For real exponents $1 \le a < b$, the class of Boolean function families,
+  one function for each input length, whose De Morgan circuit complexity in
+  the imported library's signature (every gate counted, constants and
+  identities included) is at most $C \lfloor n^a \rfloor$ for some constant $C$
+  and all large $n$ is strictly contained in the corresponding class for
+  $\lfloor n^b \rfloor$. The families are nonuniform and no explicit separating
+  family is given.
 \end{theorem}
 \begin{proof}
   \leanok
-  Change a function of size at most $n^a$ at a few points at a time: each
-  point update changes size by $O(n)$, so some intermediate function has size
-  between $n^a$ and $n^b$, while Shannon's bound supplies hard functions.
+  \uses{lem:lowerbounds-algebraic-lipschitz}
+  At each length walk from a constant function towards a function of
+  complexity above $2^n / n$, which Shannon's counting bound supplies, one
+  truth-table entry at a time. Each step changes the complexity by at most
+  $2n$, so some function has complexity in
+  $(\lfloor n^b \rfloor - 2n, \lfloor n^b \rfloor]$. The resulting family is in
+  the larger class, and since $\lfloor n^b \rfloor - 2n$ eventually exceeds
+  every constant multiple of $\lfloor n^a \rfloor$, not in the smaller one.
 \end{proof}
 
 \begin{lemma}[Hamming-Lipschitz circuit complexity]
   \label{lem:lowerbounds-algebraic-lipschitz}
   \lean{Algebraic.DeMorgan.complexity_dist_le, Algebraic.DeMorgan.exists_complexity_between}
   \leanok
-  The De Morgan circuit complexity of $n$-input Boolean functions changes by
-  at most $2n$ per changed truth-table entry. Consequently every threshold
-  $t \ge 1$ below the complexity of some function is crossed with overshoot at
-  most $2n$: some function has complexity in $(t, t + 2n]$.
+  Let $C(f)$ be the minimum number of gates of a single-output circuit over the
+  imported library's De Morgan signature computing $f : \{0,1\}^n \to \{0,1\}$,
+  every gate counted, constants and identities included. Then
+  $\lvert C(f) - C(g) \rvert \le 2n \cdot d_H(f, g)$, where $d_H$ is the
+  number of truth-table entries on which $f$ and $g$ differ. Consequently, if
+  $t \ge 1$ and $t < C(h)$ for some $h$, then some $f$ has
+  $t < C(f) \le t + 2n$.
 \end{lemma}
 \begin{proof}
   \leanok
@@ -252,10 +334,13 @@ chapter.
   \label{def:lowerbounds-algebraic-conditional}
   \lean{Cslib.Circuits.Circuit.conditionalGateComplexity}
   \leanok
-  The conditional complexity of a target given supplied functions is the
-  minimum number of gates computing the target from the original inputs and
-  the supplied values as free extra inputs, and $\infty$ when no circuit
-  computes it.
+  Fix a signature and an interpretation of it. The conditional complexity of a
+  target $f$, possibly with several outputs, given supplied functions
+  $g_1, \ldots, g_k$ of the same input is the minimum number of gates, every
+  gate counted, of a circuit $h$ with $h(x, g(x)) = f(x)$ for every $x$: the
+  original inputs and the supplied values are free extra inputs, and nothing is
+  required of $h(x, y)$ when $y \ne g(x)$. It is $\infty$ when no circuit
+  computes $f$ this way.
 \end{definition}
 
 \begin{theorem}[Laws of conditional complexity]
@@ -264,10 +349,12 @@ chapter.
     Algebraic.ConditionalComplexity.Linear.conditionalGateComplexity_eq_min_weight}
   \leanok
   \uses{def:lowerbounds-algebraic-conditional}
-  Conditional complexity obeys the triangle inequality: computing $h$ given
-  $f$ costs at most computing $h$ given $g$ plus computing $g$ given $f$.
-  Over $\mathbb{F}_2$, take any basis whose gates have fan-in at most two and
-  in which $x_0 + x_1$ is computed by a single gate. Then the conditional
+  Over any signature and interpretation, conditional complexity obeys the
+  triangle inequality: computing $h$ given $f$ costs at most computing $h$
+  given $g$ plus computing $g$ given $f$.
+  Over $\mathbb{F}_2$, take any signature whose operations have arity at most
+  two, interpreted over $\mathbb{F}_2$, in which some one-gate circuit computes
+  $x_0 + x_1$. Then the conditional
   complexity of a nonzero linear form $t \cdot x$ given linear helpers
   $s_1 \cdot x, \ldots, s_k \cdot x$ is exactly
   \[
@@ -276,8 +363,9 @@ chapter.
         - 1\Bigr),
   \]
   where $\lvert\cdot\rvert$ is Hamming weight: the fewest helpers and inputs
-  whose sum is the target, minus one. The basis may contain other operations
-  as well; the single-gate addition is a hypothesis of the theorem.
+  whose sum is the target, minus one. Every gate is counted, constant gates
+  included. The signature may contain other operations as well, nonlinear ones
+  included; the single-gate addition is a hypothesis of the theorem.
 \end{theorem}
 \begin{proof}
   \leanok
@@ -309,8 +397,10 @@ chapter.
   \lean{Algebraic.Applications.waringSum_lowerBound}
   \leanok
   Over a field of characteristic zero, any expression of $x_1 x_2 \cdots x_{2n}$
-  as a sum of scaled $2n$-th powers of linear forms has at least
-  $\binom{2n}{n}$ terms.
+  as a polynomial identity $\sum_{i \in I} a_i \ell_i^{2n}$, with scalars $a_i$
+  and linear forms $\ell_i$ without constant term, has
+  $\lvert I \rvert \ge \binom{2n}{n}$. This bounds the number of terms of this
+  restricted representation, not arithmetic circuit size.
 \end{theorem}
 \begin{proof}
   \leanok
@@ -323,16 +413,52 @@ chapter.
   \lean{Algebraic.MassProduction.BlockInduction.exponentialMassProduction,
     Algebraic.MassProduction.Nonuniform.realSharpMassProduction}
   \leanok
-  For every rate $0 \le \gamma < 1$ and $\varepsilon > 0$, for all sufficiently
-  large $n$, every Boolean function on $n$ inputs can be evaluated on up to
-  $2^{\gamma n}$ independent input blocks by a single De Morgan circuit of cost
-  at most $(1/(1 - \gamma) + \varepsilon)\, 2^n / n$.
+  Circuits are over the imported library's De Morgan signature with its
+  standard cost: negation, AND, and OR gates cost one, constants and identities
+  are free. For $f$ on $n$ inputs and $t \ge 1$, the mass complexity of $f$ at
+  $t$ copies is the minimum cost of one circuit that evaluates $f$
+  independently on $t$ disjoint blocks of $n$ inputs.
+
+  For every real $0 \le \gamma < 1$ and $\varepsilon > 0$ there is a threshold
+  such that for every $n$ above it, every $f$ on $n$ inputs, and every
+  $1 \le t \le 2^{\gamma n}$, the mass complexity of $f$ at $t$ copies is at
+  most $(1/(1 - \gamma) + \varepsilon)\, 2^n / n$. In a coarser discrete form,
+  for all natural numbers $a < b$ there is a constant $C$ such that at every
+  length $n \ge 1$, every $f$ on $n$ inputs, and every
+  $1 \le t \le 2^{\lfloor a n / b \rfloor}$, the mass complexity is at most
+  $C \lfloor 2^n / n \rfloor$.
 \end{theorem}
 \begin{proof}
   \leanok
   A nonuniform construction that routes all copies through shared table
-  lookups: sorting networks gather the requests, and each table entry is
-  computed once and broadcast to every copy that needs it.
+  lookups: sorting and routing networks gather the requests, each table entry
+  is computed once and broadcast to every copy that needs it, and finite-field
+  local-recovery codes with disjoint-line scheduling serve the requests. The
+  discrete form comes from an induction over equal input blocks, which reaches
+  every rational rate below one.
+\end{proof}
+
+\begin{theorem}[Uhlig's mass production]
+  \label{thm:lowerbounds-algebraic-uhlig}
+  \lean{Algebraic.MassProduction.LupanovSynthesis.uhlig_massProduction}
+  \leanok
+  \uses{thm:lowerbounds-algebraic-mass-production}
+  With mass complexity as in
+  Theorem~\ref{thm:lowerbounds-algebraic-mass-production}, let
+  $D : \mathbb{N} \to \mathbb{N}$ satisfy $D(n) = o(n / \log n)$ in the
+  discrete form: for every natural number $M \ge 1$, eventually
+  $M \cdot D(n) \cdot \lfloor \log_2 n \rfloor \le n$. Then for every natural
+  number $P \ge 1$, for all large $n$, every $f$ on $n$ inputs, and every
+  $1 \le t \le 2^{D(n)}$, the mass complexity of $f$ at $t$ copies is at most
+  $(1 + 1/P)\, 2^n / n$, stated without division as
+  $P\,n \cdot \mathrm{mass}(f, t) \le (P + 1)\, 2^n$.
+\end{theorem}
+\begin{proof}
+  \leanok
+  Combine a coefficient-one Lupanov circuit for a single copy with Uhlig's
+  recursive two-copy construction, in which XORs of subfunctions at adjacent
+  prefix values serve as shared resources from which each request is recovered
+  through its own disjoint set of resources.
 \end{proof}
 
 \begin{theorem}[Cutwidth bound, conditional]
@@ -340,12 +466,14 @@ chapter.
   \lean{Algebraic.Cutwidth.eventually_lt_size_of_pathwidthBound}
   \leanok
   Assume that for every $\xi > 0$ all sufficiently large simple 3-regular
-  graphs on $h$ vertices have pathwidth at most $(1/6 + \xi)h$. Then every
-  rectangle-free Boolean function family with polynomial rectangle threshold
-  and at least $2^{n-2}$ accepting inputs, as in
-  Theorem~\ref{thm:lowerbounds-algebraic-nechiporuk}, needs more than
-  $(4 - \varepsilon)n$ gates over the full binary basis, for every
-  $\varepsilon > 0$ and all large $n$. The pathwidth bound is an explicit
+  graphs on $h$ vertices have pathwidth at most $(1/6 + \xi)h$, that is, a
+  path decomposition whose bags have at most $(1/6 + \xi)h + 1$ vertices. Then
+  every rectangle-free Boolean function family with polynomial rectangle
+  threshold and at least $2^{n-2}$ accepting inputs, as in
+  Theorem~\ref{thm:lowerbounds-algebraic-nechiporuk}, needs circuits of more
+  than $(4 - \varepsilon)n$ gates over the full binary basis (all sixteen
+  binary gates, every gate counted), for every $\varepsilon > 0$ and all large
+  $n$. The pathwidth bound is an explicit
   hypothesis of the theorem. It is the published theorem of Fomin and H{\o}ie
   on the pathwidth of cubic graphs, which is not formalized here. As for
   Theorem~\ref{thm:lowerbounds-algebraic-nechiporuk}, no explicit
@@ -369,8 +497,10 @@ chapter.
     Algebraic.KW.not_forall_size_of_constant_outer}
   \leanok
   \uses{thm:lowerbounds-algebraic-kw}
-  Let $D(f)$ and $L(f)$ be the minimum depth and the minimum number of leaves
-  of a De Morgan formula computing $f$. For $f$ on $m$ bits and $g$ on $n$
+  Let $D(f)$ and $L(f)$ be the minimum depth and the minimum number of leaves,
+  constant leaves included, of a De Morgan formula of
+  Theorem~\ref{thm:lowerbounds-algebraic-kw} computing $f$; they are defined
+  for every number of inputs, $0$ included. For $f$ on $m$ bits and $g$ on $n$
   bits, the block composition $f \diamond g$ applies $f$ to the values of $g$
   on $m$ disjoint blocks of $n$ bits. Substituting formulas gives
   $D(f \diamond g) \le D(f) + D(g)$ and $L(f \diamond g) \le L(f)\,L(g)$ for
@@ -409,9 +539,11 @@ chapter.
     Complexity.Circuit.card_essentialInputs_le_mul_size}
   \leanok
   \uses{def:lowerbounds-essential, def:circuit, def:circuits-bases}
-  Over any basis, the number of essential inputs of the function computed by a
-  circuit is at most the circuit's total fan-in. For circuits over the
-  AND/OR basis of fan-in at most $k$, it is at most $k$ times the size.
+  Over any basis, the number of essential inputs of the function
+  $\{0,1\}^N \to \{0,1\}^M$ computed by a circuit is at most the circuit's
+  total fan-in, the number of gate-input occurrences with output gates
+  included. For circuits over the AND/OR basis of fan-in at most $k$, it is at
+  most $k$ times the size $G + M$.
 \end{theorem}
 \begin{proof}
   \leanok
@@ -433,8 +565,8 @@ chapter.
   \leanok
   \uses{def:lowerbounds-parity, def:circuits-size-complexity}
   Every fan-in-two AND/OR circuit computing $N$-bit parity or its complement,
-  $N \ge 1$, has size at least $2N - 1$. Hence
-  $\mathrm{size}(\oplus_N) \ge 2N - 1$.
+  $N \ge 1$, has size at least $2N - 1$, that is, at least $2(N - 1)$ internal
+  gates. Hence $\mathrm{size}(\oplus_N) \ge 2N - 1$.
 \end{theorem}
 \begin{proof}
   \leanok
@@ -449,10 +581,10 @@ chapter.
   \label{thm:lowerbounds-valiant}
   \lean{Complexity.Valiant.depth_reduction}
   \leanok
-  Let $G$ be a finite acyclic digraph with $S$ edges whose longest path has at
-  most $2^k$ vertices, and let $r \le k$. There is a set $F$ of edges with
-  $k\,|F| \le r S$ whose removal leaves a digraph whose longest path has at
-  most $2^k / 2^r$ vertices.
+  Let $G$ be a finite acyclic digraph with $S$ edges whose longest simple path
+  has at most $2^k$ vertices, and let $r \le k$. There is a set $F$ of edges of
+  $G$ with $k\,|F| \le r S$ whose removal leaves a digraph whose longest simple
+  path has at most $2^k / 2^r$ vertices.
 \end{theorem}
 \begin{proof}
   \leanok
@@ -465,9 +597,9 @@ chapter.
   \label{cor:lowerbounds-valiant-circuit}
   \uses{def:circuit}
   Let $C$ be a circuit whose dependency graph has longest paths of at most
-  $2^k$ vertices, and let $r \le k$. Removing a set $F$ of wires with
-  $k\,|F| \le r \cdot \mathrm{totalFanIn}(C)$ leaves a dependency graph whose
-  longest paths have at most $2^{k-r}$ vertices.
+  $2^k$ vertices, and let $r \le k$. There is a set $F$ of dependency edges
+  with $k\,|F| \le r \cdot \mathrm{totalFanIn}(C)$ whose removal leaves a
+  graph whose longest paths have at most $2^{k-r}$ vertices.
 \end{corollary}
 \begin{proof}
   \uses{thm:lowerbounds-valiant, lem:circuits-dependency-graph}
@@ -499,8 +631,10 @@ chapter.
   \uses{def:bitstring}
   A monotone formula over $N$ variables is a tree built from variables
   $x_0, \dots, x_{N-1}$ and binary conjunction and disjunction, without
-  constants or negation. Its leaves are its variable occurrences. A function
-  $f$ is monotone if $x \le y$ pointwise and $f(x) = 1$ imply $f(y) = 1$.
+  constants or negation. Its leaves are its variable occurrences, and its depth
+  is the length of a longest root-to-leaf path, variables having depth zero. A
+  function $f$ is monotone if $x \le y$ pointwise and $f(x) = 1$ imply
+  $f(y) = 1$.
 \end{definition}
 
 \begin{lemma}[Monotone formulas]
@@ -524,13 +658,14 @@ chapter.
     Complexity.KarchmerWigderson.Protocol.depth}
   \leanok
   \uses{def:bitstring}
-  A protocol for the monotone Karchmer--Wigderson game of
-  $f : \{0,1\}^N \to \{0,1\}$ is a tree indexed by rectangles $X \times Y$ with
-  $X \subseteq f^{-1}(1)$ and $Y \subseteq f^{-1}(0)$, starting from
-  $f^{-1}(1) \times f^{-1}(0)$. At an internal node, Alice splits $X$ or Bob
-  splits $Y$ by an arbitrary predicate. A leaf names a coordinate $i$ with
-  $x_i = 1$ for all $x \in X$ and $y_i = 0$ for all $y \in Y$. The depth is the
-  height of the tree.
+  A protocol is a tree indexed by a rectangle $X \times Y$ of sets of inputs in
+  $\{0,1\}^N$, $X$ on the one side and $Y$ on the zero side. At an internal
+  node, Alice splits $X$ or Bob splits $Y$ by an arbitrary predicate, and the
+  two children are indexed by the two parts. A leaf names a coordinate $i$ with
+  $x_i = 1$ for all $x \in X$ and $y_i = 0$ for all $y \in Y$. A protocol for
+  the monotone Karchmer--Wigderson game of $f : \{0,1\}^N \to \{0,1\}$ is one
+  indexed by the root rectangle $f^{-1}(1) \times f^{-1}(0)$, so every node's
+  rectangle lies in it. The depth is the height of the tree.
 \end{definition}
 
 \begin{theorem}[Monotone Karchmer--Wigderson]
@@ -540,9 +675,14 @@ chapter.
     Complexity.KarchmerWigderson.Protocol.exists_protocol_depth_iff_formula_depth}
   \leanok
   \uses{def:lowerbounds-kw, def:lowerbounds-monotone-formula}
-  For every $f : \{0,1\}^N \to \{0,1\}$ and $d \in \mathbb{N}$, the monotone
-  Karchmer--Wigderson game of $f$ has a protocol of depth at most $d$ if and
-  only if some monotone formula of depth at most $d$ computes $f$.
+  Every monotone formula computing $f : \{0,1\}^N \to \{0,1\}$ yields a
+  protocol for the monotone Karchmer--Wigderson game of $f$ of the same depth,
+  and every such protocol yields a monotone formula of the same depth computing
+  $f$. Hence, for every $d \in \mathbb{N}$, the game has a protocol of depth at
+  most $d$ if and only if some monotone formula of depth at most $d$ computes
+  $f$. There is no monotonicity hypothesis on $f$; by
+  Lemma~\ref{lem:lowerbounds-monotone-formula}, both sides fail when $f$ is not
+  monotone.
 \end{theorem}
 \begin{proof}
   \leanok
@@ -560,10 +700,13 @@ chapter.
     Complexity.BoolFormula.restrict}
   \leanok
   \uses{def:circuits-formula}
-  A restriction assigns each variable either a fixed bit or ``free''; the
-  finite-arity version does this for exactly $N$ variables. Restrictions
-  compose, the earlier one taking precedence, and act on assignments and on
-  formulas by substituting constants for fixed variables.
+  A restriction assigns each variable $x_i$, $i \in \mathbb{N}$, either a
+  fixed bit or ``free''; the finite-arity version does this for exactly $N$
+  variables. The composition $\rho_1 \circ \rho_2$ fixes a variable to
+  $\rho_1$'s value when $\rho_1$ fixes it and to $\rho_2$'s value otherwise.
+  A restriction acts on a total assignment by overwriting the fixed variables,
+  and on a Boolean formula by replacing each fixed variable with the
+  corresponding constant.
 \end{definition}
 
 \begin{lemma}[Restriction and evaluation]
@@ -573,9 +716,9 @@ chapter.
   \leanok
   \uses{def:lowerbounds-restriction}
   Evaluating $\varphi|_\rho$ at $\alpha$ equals evaluating $\varphi$ at
-  $\rho$ applied to $\alpha$. Restricting by $\rho_1$ and then $\rho_2$ equals
-  restricting by their composition, and restriction preserves formula size and
-  depth.
+  $\rho$ applied to $\alpha$. Restricting by $\rho_1$ and then by $\rho_2$
+  equals restricting by $\rho_1 \circ \rho_2$, and restriction preserves
+  formula size and depth exactly.
 \end{lemma}
 \begin{proof}
   \leanok
@@ -602,12 +745,15 @@ chapter.
     Complexity.DNF.eval_restrict, Complexity.DNF.width_restrict_le}
   \leanok
   \uses{def:lowerbounds-normal-forms, def:lowerbounds-restriction}
-  Every CNF and DNF has a simplified restriction that computes it under the
-  restriction and whose width does not exceed the original width.
+  For a finite-arity restriction $\rho$ and a CNF or DNF $\varphi$ over $N$
+  variables, the simplified restriction $\varphi|_\rho$ satisfies
+  $\varphi|_\rho(x) = \varphi(\rho \text{ applied to } x)$ for every
+  $x \in \{0,1\}^N$, and its width is at most the width of $\varphi$.
 \end{lemma}
 \begin{proof}
   \leanok
-  Delete falsified literals, and delete satisfied clauses (falsified terms).
+  In a CNF delete falsified literals and satisfied clauses; in a DNF delete
+  satisfied literals and falsified terms.
 \end{proof}
 
 \begin{definition}[Decision tree]
@@ -658,15 +804,18 @@ chapter.
 \begin{definition}[Sparse random restriction]
   \label{def:lowerbounds-random-restriction}
   \lean{Complexity.RandomRestriction.Seed, Complexity.RandomRestriction.decode,
-    Complexity.RandomRestriction.eventCount}
+    Complexity.RandomRestriction.eventCount, Complexity.RandomRestriction.card_seed,
+    Complexity.RandomRestriction.card_decodeSymbol_none,
+    Complexity.RandomRestriction.card_decodeSymbol_some}
   \leanok
   \uses{def:lowerbounds-restriction}
   For $q \in \mathbb{N}$, a seed assigns to each of $N$ coordinates one of
-  $2q + 1$ symbols: one free symbol and $q$ labelled copies of each fixed bit.
-  A seed decodes to a restriction, so a uniform seed leaves each coordinate
-  free with probability $1/(2q+1)$ and fixes it to each bit with probability
-  $q/(2q+1)$, independently. Events are measured by exact counts of seeds
-  among the $(2q + 1)^N$.
+  $2q + 1$ symbols: one free symbol and $q$ labelled copies of each fixed bit,
+  so there are exactly $(2q + 1)^N$ seeds. A seed decodes to a finite-arity
+  restriction, so a uniform seed leaves each coordinate free with probability
+  $1/(2q+1)$ and fixes it to each bit with probability $q/(2q+1)$,
+  independently. Events are measured by exact counts of seeds rather than by
+  probabilities.
 \end{definition}
 
 \begin{theorem}[Switching lemma, counting form]
@@ -682,13 +831,20 @@ chapter.
     def:lowerbounds-decision-tree}
   Let $\varphi$ be a DNF of width $w$ over $N$ variables, no term of which
   contains a complementary pair of literals, and let $q, s \in \mathbb{N}$.
-  Call a restriction bad if the canonical decision tree of the restricted
-  formula has depth at least $s$. Then
+  Call a restriction bad if the complete-block switching decision tree of the
+  restricted formula has depth at least $s$. This tree, rather than the
+  canonical tree that queries one variable at a time, is the one used here: at
+  the first surviving term it queries all of that term's free variables before
+  accepting or continuing.
+  Then
   \[ \#\{\text{bad seeds}\} \cdot q^s \le (2q + 1)^N \, (4(w + 1))^s . \]
-  Every DNF agrees with such a sub-DNF of no larger width, and the same bounds
-  hold for CNFs. Dividing by $(2q+1)^N q^s$: a uniform seed, which leaves each
-  coordinate free with probability $1/(2q+1)$, is bad with probability at most
-  $(4(w+1)/q)^s$ when $q \ge 1$.
+  Every DNF agrees with its sub-DNF of consistent terms, whose width is no
+  larger, and the bound holds for that sub-DNF with $w$ the original width.
+  The same bounds hold for CNFs, where the condition is that no clause
+  contains a complementary pair, and the switching tree and bad event are
+  defined through the De Morgan dual DNF. Reading the counts as
+  probabilities, which is not a separate formal statement: a uniform seed is
+  bad with probability at most $(4(w+1)/q)^s$ when $q \ge 1$.
 \end{theorem}
 \begin{proof}
   \leanok
@@ -705,8 +861,10 @@ chapter.
   \leanok
   \uses{def:bitstring}
   A negation-normal unbounded formula over $N$ variables is a tree built from
-  constants, literals, and AND and OR gates of any fan-in. Its size counts all
-  nodes, and its depth counts gates on a longest root-to-leaf path.
+  constants, literals, and AND and OR gates of any fan-in; an empty AND is true
+  and an empty OR is false. Its size counts all nodes (constants, literal
+  occurrences, and gates), and its depth counts gates on a longest
+  root-to-leaf path.
 \end{definition}
 
 \begin{theorem}[Normalization of $\cc{AC}^0$ circuits]
@@ -714,8 +872,9 @@ chapter.
   \lean{Complexity.Circuit.outputAC0Formula, Complexity.Circuit.outputAC0Formula_spec}
   \leanok
   \uses{def:lowerbounds-ac0-formula, def:circuits-bases}
-  Let $C$ be an unbounded-fan-in AND/OR circuit with $N$ inputs and $G$
-  internal gates, and let output $j$ have depth $D$. Some negation-normal
+  Let $C$ be an unbounded-fan-in AND/OR circuit, with negations only through
+  the free per-input flags, with $N$ inputs and $G$ internal gates, and let
+  output $j$ have depth $D$, counting the output gate. Some negation-normal
   unbounded formula computes output $j$, has depth at most $D$, and has size at
   most $(2(N + G) + 1)^{D+1}$.
 \end{theorem}
@@ -735,9 +894,10 @@ chapter.
   \uses{def:lowerbounds-ac0-formula, def:lowerbounds-random-restriction,
     def:lowerbounds-decision-tree}
   Let $\varphi$ be a negation-normal unbounded formula over $N$ variables with
-  depth at most $d$, and let $s \ge 2$ and $q \in \mathbb{N}$. Applying $d$
-  independent sparse restrictions, one per level, turns $\varphi$ into a
-  decision tree that computes $\varphi$ under the composed restriction. The
+  depth at most $d$, and let $s \ge 2$ and $q \in \mathbb{N}$. For any
+  sequence of $d$ restrictions, one per level, a staged compiler turns
+  $\varphi$ into a decision tree that computes $\varphi$ under their composition,
+  earlier restrictions taking precedence. For $d$ independent sparse seeds, the
   number of $d$-tuples of seeds for which this decision tree has depth at least
   $s$, multiplied by $q^s$, is at most
   $\mathrm{size}(\varphi)\,((2q+1)^N)^d\,(4(s + 1))^s$. Consequently, if $q > 0$
@@ -751,10 +911,12 @@ chapter.
   \leanok
   \uses{thm:lowerbounds-switching, lem:lowerbounds-dt-normal-form,
     lem:lowerbounds-normal-form-restrict}
-  At each level the children are already decision trees of depth below $s$,
-  hence CNFs or DNFs of width below $s$, so the switching lemma applies at
-  every node; a union bound over the nodes and the exact first moment of the
-  number of surviving variables give the criterion.
+  At a gate, the earlier stages have compiled the children to decision trees;
+  their conjunction is a CNF and their disjunction a DNF of width at most the
+  largest child depth. Unless some child already failed, that width is below
+  $s$, so the switching lemma bounds the failures at the gate. A union bound
+  over the nodes and the exact first moment of the number of surviving
+  variables give the criterion.
 \end{proof}
 
 \begin{theorem}[Finite parity obstruction]
@@ -779,7 +941,10 @@ chapter.
 \begin{theorem}[Parity is not in $\cc{AC}^0$]
   \label{thm:lowerbounds-parity-not-ac0}
   \uses{def:NC-AC, def:lowerbounds-parity}
-  The parity family is not in $\cc{AC}^0$.
+  The parity family is not in $\cc{AC}^0$. The analogous statement for the
+  imported library's $\cc{AC}^0$ model is
+  Theorem~\ref{thm:lowerbounds-algebraic-parity-ac0}; this one, for
+  $\cc{AC}^0$ as defined in this library, is not yet formalized.
 \end{theorem}
 \begin{proof}
   \uses{thm:lowerbounds-ac0-normalization, thm:lowerbounds-parity-obstruction}
@@ -795,6 +960,10 @@ chapter.
   For every $d \ge 2$ there is $\varepsilon_d > 0$ such that, for all
   sufficiently large $N$, every unbounded-fan-in AND/OR circuit of depth $d$
   computing $N$-bit parity has size at least $2^{\varepsilon_d N^{1/(d-1)}}$.
+  Theorem~\ref{thm:lowerbounds-algebraic-hastad} proves an explicit
+  non-asymptotic form of this bound for the imported library's $\cc{AC}^0$
+  model; the statement here, for the circuits of this library, is not yet
+  formalized.
 \end{theorem}
 \begin{proof}
   \uses{thm:lowerbounds-ac0-normalization, thm:lowerbounds-staged-switching}
@@ -871,14 +1040,21 @@ chapter.
 
 \begin{lemma}[Sunflower lemma]
   \label{lem:lowerbounds-sunflower}
-  Every family of more than $\ell!\,(p-1)^\ell$ sets, each of size $\ell$,
-  contains $p$ sets whose pairwise intersections all equal their common
-  intersection.
+  \lean{Algebraic.Sunflower.containsSunflower_of_uniform,
+    Algebraic.Sunflower.containsSunflower_of_bounded}
+  \leanok
+  Let $p \ge 2$. Every finite family of more than $\ell!\,(p-1)^\ell$ finite
+  sets, each of size exactly $\ell$, contains $p$ distinct sets whose pairwise
+  intersections are all equal (to their common intersection). The same holds
+  for more than $(\ell + 1)\,\ell!\,(p-1)^\ell$ sets, each of size at most
+  $\ell$. This is proved in the imported algebraic-circuits library.
 \end{lemma}
 \begin{proof}
+  \leanok
   Induction on $\ell$: either a maximal pairwise-disjoint subfamily has $p$
   members, or some element lies in many sets and the lemma applies to them
-  with that element removed (Erd\H{o}s--Rado).
+  with that element removed (Erd\H{o}s--Rado). For sets of size at most $\ell$,
+  some size class has more than $\ell!\,(p-1)^\ell$ members.
 \end{proof}
 
 \begin{theorem}[Monotone clique lower bound]
@@ -888,7 +1064,11 @@ chapter.
   There is $\varepsilon > 0$ such that for all $k \le n^{1/4}$, every monotone
   circuit deciding whether an $n$-vertex graph, given by its adjacency bits,
   contains a $k$-clique has size at least $2^{\varepsilon \sqrt{k}}$
-  (Razborov; Alon--Boppana; Arora--Barak Theorem~14.7).
+  (Razborov; Alon--Boppana; Arora--Barak Theorem~14.7). Only a weaker bound at
+  special parameters, in the imported library's model, is formalized:
+  Theorem~\ref{thm:lowerbounds-algebraic-clique} gives more than
+  $2^{t \cdot 2^t}$ gates for $k = 2^{4t}$ and $n = 2^{20t}$, $t \ge 4$, which
+  for large $t$ is below $2^{\varepsilon \sqrt{k}} = 2^{\varepsilon 4^t}$.
 \end{theorem}
 \begin{proof}
   \uses{lem:lowerbounds-sunflower}
@@ -906,7 +1086,8 @@ chapter.
   \lean{Complexity.SAT.Clause.resolvent, Complexity.SAT.CNF.Derives}
   \leanok
   Clauses are lists of literals over variables in $\mathbb{N}$, and a CNF is a
-  list of clauses. The resolvent of clauses $C_1$ and $C_2$ on a variable $v$
+  list of clauses; an assignment is a finite list of bits, variables beyond its
+  end reading $0$. The resolvent of clauses $C_1$ and $C_2$ on a variable $v$
   deletes every occurrence of $x_v$ from $C_1$ and of $\neg x_v$ from $C_2$
   and concatenates the rest. A clause is derivable from $\varphi$ if it is a
   clause of $\varphi$ or a resolvent of two derivable clauses. There is no

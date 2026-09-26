@@ -3,17 +3,21 @@
 
 This chapter covers Boolean circuits over explicit bases, nonuniform circuit
 families and the class $\cc{P/poly}$, its characterization by polynomial
-advice, logspace-uniform circuit families, the containment
-$\cc{BPP} \subseteq \cc{P/poly}$, the small-depth classes $\cc{NC}$, $\cc{AC}$
-and $\cc{TC}$, Boolean formulas, and Barrington's theorem. Roadmap tracks M1--M3
-are essentially complete: the library proves that polynomial advice and
+advice, the translation to and from CSLib's circuit model, logspace-uniform
+circuit families, the containment $\cc{BPP} \subseteq \cc{P/poly}$, the
+small-depth classes $\cc{NC}$, $\cc{AC}$ and $\cc{TC}$, Boolean formulas, and
+Barrington's theorem. The library proves that polynomial advice and
 polynomial-size circuits give the same class, that logspace-uniform
-polynomial-size circuit families decide exactly $\cc{P}$ (Arora--Barak
-Theorem~6.7), that $\cc{BPP} \subseteq \cc{P/poly}$, and the nonuniform
-Barrington theorem for logarithmic-depth formulas. The main open mathematical
-item is a uniform Barrington theorem. The main open infrastructure items are a
-circuit encoding designed for log-space generation and a consolidation of the
-library's parallel circuit and formula representations
+polynomial-size circuit families decide exactly $\cc{P}$ (Arora--Barak,
+Section~6.2), that $\cc{BPP} \subseteq \cc{P/poly}$, the nonuniform Barrington
+theorem for variable-bounded logarithmic-depth formulas, and the containment of
+$\cc{NC}^1$ in the formula and branching-program classes of that theorem. Still
+planned are the interleaving $\cc{NC}^i \subseteq \cc{AC}^i \subseteq
+\cc{NC}^{i+1}$, the containment of logarithmic-depth formulas in $\cc{NC}^1$
+(and with it $\cc{NC}^1 = \cc{FormulaNC1}$), and a uniform Barrington theorem,
+which is the main open mathematical item. The main open infrastructure items
+are a circuit encoding designed for log-space generation and a consolidation of
+the library's parallel circuit and formula representations
 (Section~\ref{sec:circuits-open}).
 
 Two conventions hold throughout. The size of a circuit counts internal and
@@ -29,21 +33,26 @@ says otherwise.
 
 \begin{definition}[Boolean circuit]
   \label{def:circuit}
-  \lean{Complexity.Basis, Complexity.Circuit, Complexity.Circuit.eval,
-    Complexity.Circuit.size, Complexity.Circuit.depth}
+  \lean{Complexity.Basis, Complexity.Gate, Complexity.Gate.eval,
+    Complexity.Circuit, Complexity.Circuit.eval, Complexity.Circuit.size,
+    Complexity.Circuit.depth}
   \leanok
   \uses{def:bitstring}
-  A \emph{basis} is a type of operations, each with an arity constraint and an
-  evaluation map on bit strings of admissible length. A circuit over a basis
-  $B$ with $N \ge 1$ inputs, $M \ge 1$ outputs and $G$ internal gates consists
-  of $G$ internal gates and $M$ output gates. A gate applies an operation of $B$
-  to a list of wires, and each gate input carries its own negation flag. The
-  wires are the $N$ inputs followed by the $G$ internal gates, and internal
-  gate $i$ may read only wires $0, \dots, N + i - 1$, so the circuit is acyclic
-  by construction. Evaluation $C : \{0,1\}^N \to \{0,1\}^M$ computes the wire
-  values in index order. The \emph{size} of $C$ is $G + M$. The \emph{depth} is
-  the largest number of gates on a path from an input to an output, the output
-  gate included.
+  A \emph{basis} is a type of operations, each with an arity constraint (any
+  fan-in, fan-in exactly $k$, or fan-in at most $k$) and an evaluation map on
+  bit strings of admissible length. A circuit over a basis $B$ with $N \ge 1$
+  inputs, $M \ge 1$ outputs and $G$ internal gates consists of $G$ internal
+  gates and $M$ output gates. A gate applies an operation of $B$ to a list of
+  wires whose length the operation admits, and each gate input carries its own
+  negation flag. The wires are the $N$ inputs followed by the $G$ internal
+  gates. Internal gate $i$ may read only wires $0, \dots, N + i - 1$, so the
+  circuit is acyclic by construction, and an output gate may read any wire.
+  Evaluation $C : \{0,1\}^N \to \{0,1\}^M$ gives each input wire its input bit
+  and each gate the value of its operation on its input wires, each negated
+  when its flag is set. The \emph{size} of $C$ is $G + M$. The depth of an
+  input wire is $0$, the depth of a gate is one more than the largest depth of
+  a wire it reads ($1$ for a gate with no inputs), and the \emph{depth} of $C$
+  is the largest depth of an output gate.
 \end{definition}
 
 \begin{definition}[AND/OR bases]
@@ -53,40 +62,50 @@ says otherwise.
   \leanok
   \uses{def:circuit}
   The bases whose operations are AND and OR with fan-in exactly $2$, with
-  fan-in at most $k$, and with unbounded fan-in. Negation is available only
-  through the free per-input flags. Unless stated otherwise, a circuit is a
-  circuit over the fan-in-two basis.
+  fan-in at most $k$, and with any fan-in. In the last two a gate may have no
+  inputs, and then computes the empty conjunction $1$ or the empty disjunction
+  $0$. Negation is available only through the free per-input flags. Unless
+  stated otherwise, a circuit is a circuit over the fan-in-two basis.
 \end{definition}
 
 \begin{definition}[Circuit size complexity]
   \label{def:circuits-size-complexity}
-  \lean{Complexity.CompleteBasis, Complexity.Circuit.sizeComplexityWithTop,
+  \lean{Complexity.CompleteBasis, Complexity.instCompleteBasisAndOr2,
+    Complexity.Circuit.Realizable, Complexity.Circuit.sizeComplexityWithTop,
     Complexity.Circuit.sizeComplexityWithTop_eq_top_iff,
     Complexity.Circuit.sizeComplexity, Complexity.Circuit.sizeComplexityWithTop_eq_coe}
   \leanok
-  \uses{def:circuit}
-  For $f : \{0,1\}^N \to \{0,1\}$ and a basis $B$, $\mathrm{size}_B(f)$ is the
-  least size of a single-output circuit over $B$ computing $f$. The general
-  version takes values in $\mathbb{N} \cup \{\infty\}$ and equals $\infty$
-  exactly when no circuit over $B$ computes $f$. For a complete basis, such as
-  the fan-in-two AND/OR basis, a natural-number-valued version is provided and
-  agrees with it.
+  \uses{def:circuit, def:circuits-bases}
+  A basis is \emph{complete} if, for all $N, M \ge 1$, every function
+  $\{0,1\}^N \to \{0,1\}^M$ is computed by some circuit over it; the fan-in-two
+  AND/OR basis is complete. For $N \ge 1$, $f : \{0,1\}^N \to \{0,1\}$ and a
+  basis $B$, $\mathrm{size}_B(f)$ is the least size of a single-output circuit
+  over $B$ computing $f$. The general version takes values in
+  $\mathbb{N} \cup \{\infty\}$ and equals $\infty$ exactly when no circuit over
+  $B$ computes $f$. For a complete basis a natural-number-valued version is
+  provided, and it agrees with the general one.
 \end{definition}
 
 \begin{lemma}[Dependency graph]
   \label{lem:circuits-dependency-graph}
-  \lean{Complexity.Circuit.dependencyGraph,
+  \lean{Complexity.Circuit.dependencyGraph, Complexity.Circuit.totalFanIn,
+    Complexity.Circuit.dependencyGraph_adj_val_lt,
     Complexity.Circuit.dependencyGraph_isAcyclic,
     Complexity.Circuit.dependencyGraph_edge_card_le_totalFanIn}
   \leanok
   \uses{def:circuit}
-  The wiring digraph of a circuit, on its $N + G + M$ input, internal and
-  output vertices, is acyclic, and its number of edges is at most the total
-  fan-in of the circuit (the number of gate-input occurrences).
+  The wiring digraph of a circuit has its $N + G + M$ input, internal and
+  output vertices, numbered in that order, and an edge from each wire to every
+  gate that reads it. Every edge goes from a smaller index to a larger one, so
+  the digraph is acyclic, and its number of edges is at most the total fan-in
+  of the circuit (the number of gate-input occurrences, output gates included).
+  The bound can be strict, since a gate that reads one wire twice contributes
+  one edge.
 \end{lemma}
 \begin{proof}
   \leanok
-  Every edge goes from a smaller vertex index to a larger one.
+  Internal gate $i$ reads only wires below $N + i$, and the output vertices
+  come last. Each edge comes from at least one gate-input occurrence.
 \end{proof}
 
 \begin{lemma}[Hardwiring an input prefix]
@@ -95,14 +114,37 @@ says otherwise.
     Complexity.Circuit.restrictPrefix_size}
   \leanok
   \uses{def:circuit}
-  Let $C$ be a fan-in-two circuit on $k + m$ inputs with $m \ge 1$, and let
-  $s \in \{0,1\}^k$. There is a circuit $C_s$ on $m$ inputs of the same size as
-  $C$ such that $C_s(y) = C(s\,y)$ for every $y \in \{0,1\}^m$.
+  Let $C$ be a fan-in-two circuit on $k + m$ inputs with $m \ge 1$, $M \ge 1$
+  outputs and $G$ internal gates, and let $s \in \{0,1\}^k$. There is a
+  fan-in-two circuit $C_s$ on $m$ inputs, again with $M$ outputs and $G$
+  internal gates and hence of the same size as $C$, such that $C_s(y) = C(s\,y)$
+  for every $y \in \{0,1\}^m$, where $s\,y$ is the concatenation.
 \end{lemma}
 \begin{proof}
   \leanok
-  Fix the inputs one at a time; each step removes one input wire and keeps the
+  Fix the inputs one at a time; each step removes one input wire, rewires the
+  gates that read it so that they compute the same values, and keeps the
   gates.
+\end{proof}
+
+\begin{lemma}[Existential quantification of inputs]
+  \label{lem:circuits-exists-quantify}
+  \lean{Complexity.existsQuantify, Complexity.sizeComplexity_restrictFirst_le,
+    Complexity.sizeComplexity_or_le, Complexity.sizeComplexity_existsQuantify_le}
+  \leanok
+  \uses{def:circuits-size-complexity}
+  Write $\mathrm{size}$ for the fan-in-two AND/OR size complexity. Let
+  $m \ge 1$, let $f : \{0,1\}^{k + m} \to \{0,1\}$, and let
+  $g : \{0,1\}^m \to \{0,1\}$ output $1$ on $y$ exactly when $f(x\,y) = 1$ for
+  some $x \in \{0,1\}^k$. Then
+  $\mathrm{size}(g) \le 2^k (\mathrm{size}(f) + 1)$.
+\end{lemma}
+\begin{proof}
+  \leanok
+  Induction on $k$. Fixing the first input of a function to a constant does
+  not increase its size, since the input can be hardwired without adding
+  gates, and the disjunction of two functions has size at most the sum of
+  their sizes plus one.
 \end{proof}
 
 \section{Circuit families and $\cc{P/poly}$}
@@ -112,14 +154,14 @@ says otherwise.
   \label{def:circuits-family}
   \lean{Complexity.CircuitFamily, Complexity.CircuitFamily.function,
     Complexity.CircuitFamily.size, Complexity.CircuitFamily.PolynomialSize,
-    Complexity.CircuitFamily.Decides}
+    Complexity.CircuitFamily.language, Complexity.CircuitFamily.Decides}
   \leanok
   \uses{def:circuit, def:language}
   A circuit family over $B$ consists of a single-output circuit $C_n$ over $B$
-  on $n$ inputs for every $n \ge 1$, together with an output bit for the empty
-  input. It computes the Boolean function family given by $C_n$ at length
-  $n \ge 1$ and by the stored bit at length $0$, and it decides the language of
-  strings on which it outputs $1$. Its size at $n \ge 1$ is the size of $C_n$,
+  on $n$ inputs, with any number of internal gates, for every $n \ge 1$,
+  together with an output bit for the empty input. It computes the Boolean
+  function family given by $C_n$ at length $n \ge 1$ and by the stored bit at
+  length $0$, and it decides the language of strings on which it outputs $1$. Its size at $n \ge 1$ is the size of $C_n$,
   and its size at $0$ is $0$. It has polynomial size if a single polynomial
   $p \in \mathbb{N}[X]$ satisfies $\mathrm{size}(n) \le p(n)$ for every $n$.
 \end{definition}
@@ -148,7 +190,8 @@ says otherwise.
   \leanok
   \uses{def:PPoly}
   $L \in \cc{P/poly}$ if and only if some fan-in-two circuit family decides $L$
-  and has size $O(n^k)$ for some $k$.
+  and has size $O(n^k)$ for some $k$, that is, size at most $C n^k$ at every
+  sufficiently large length $n$, for some constant $C$.
 \end{proposition}
 \begin{proof}
   \leanok
@@ -157,19 +200,22 @@ says otherwise.
 
 \begin{theorem}[Circuits as straight-line programs]
   \label{thm:circuits-straightline}
-  \lean{Complexity.Circuit.toStraightLine, Complexity.Circuit.eval_toStraightLine,
+  \lean{Complexity.Basis.signature, Complexity.Basis.interpretation,
+    Complexity.Basis.interpretation_kind,
+    Complexity.Circuit.toStraightLine, Complexity.Circuit.eval_toStraightLine,
     Complexity.Circuit.size_toStraightLine, Complexity.Circuit.gatedOutputs_toStraightLine,
     Complexity.Circuit.totalFanIn_toStraightLine}
   \leanok
   \uses{def:circuit, def:circuits-bases}
-  Every basis $B$ is a CSLib signature whose operation symbols are the gates of
-  $B$: an operation, a fan-in it allows, and a negation flag for each input,
-  interpreted exactly as the gate evaluates. A circuit over $B$ with $G$
-  internal gates and $M$ outputs becomes a CSLib circuit over this signature
-  that computes the same function and has exactly $G + M$ gates, its size.
-  Every output of the translation is an internal gate, and its total fan-in is
-  that of the original circuit. The translation goes one way: the converse,
-  from CSLib circuits whose outputs are internal gates, is planned.
+  Every basis $B$ is a CSLib signature whose operation symbols are the gate
+  kinds of $B$: an operation, a fan-in it allows, and a negation flag for each
+  input, interpreted exactly as a gate of that kind evaluates. A circuit over
+  $B$ with $N \ge 1$ inputs, $G$ internal gates and $M \ge 1$ outputs becomes a
+  CSLib circuit over this signature that computes the same function and has
+  exactly $G + M$ gates, its size. Every output of the translation is an
+  internal gate, and its total fan-in is that of the original circuit. The
+  translation goes one way for general bases: the converse, from CSLib
+  circuits over $B$'s signature whose outputs are internal gates, is planned.
 \end{theorem}
 \begin{proof}
   \leanok
@@ -181,17 +227,25 @@ says otherwise.
 
 \begin{theorem}[CSLib circuits]
   \label{thm:circuits-cslib}
-  \lean{Complexity.Circuit.eval_ofCslib, Complexity.Circuit.exists_cslib,
+  \lean{Complexity.Circuit.ofCslib, Complexity.Circuit.eval_ofCslib,
+    Complexity.Circuit.size_ofCslib, Complexity.Circuit.exists_cslib,
+    Complexity.Circuit.sizeComplexity_le_of_cslib,
+    Complexity.Circuit.exists_cslib_of_sizeComplexity,
     Complexity.mem_PPoly_iff_cslib, Complexity.PPoly_eq_cslib_PPoly,
     Complexity.SIZE_subset_cslib_SIZE, Complexity.cslib_SIZE_subset_SIZE}
   \leanok
-  \uses{def:circuit, def:circuits-bases, def:PPoly}
+  \uses{def:circuit, def:circuits-bases, def:circuits-size-complexity, def:SIZE,
+    def:PPoly}
   Let $N, M \ge 1$. A De Morgan circuit in CSLib's model (constants,
-  negation, and binary conjunction and disjunction, every gate counted) with
-  $N$ inputs, $g$ gates, and $M$ outputs is a fan-in-two AND/OR circuit of
-  size $g + M$ computing the same outputs. Conversely, a fan-in-two AND/OR
-  circuit with $N$ inputs, $G$ internal gates, and $M$ outputs has a CSLib
-  circuit with at most $N + 2G + M$ gates computing the same outputs.
+  negation, and binary conjunction and disjunction, every gate counted, and
+  outputs designated wires at no cost) with $N$ inputs, $g$ gates, and $M$
+  outputs becomes a fan-in-two AND/OR circuit of size exactly $g + M$
+  computing the same outputs. Conversely, a fan-in-two AND/OR circuit with $N$
+  inputs, $G$ internal gates, and $M$ outputs has a CSLib circuit with at most
+  $N + 2G + M$ gates computing the same outputs. For a single function $f$ on
+  $N$ bits, a CSLib circuit with $g$ gates computing $f$ gives
+  $\mathrm{size}(f) \le g + 1$ for the fan-in-two AND/OR size complexity, and
+  $f$ has a CSLib circuit with at most $N + 2\,\mathrm{size}(f)$ gates.
   Consequently $L \in \cc{P/poly}$ if and only if, for some polynomial $p$,
   every length-$n$ slice of $L$, including $n = 0$, is decided by a CSLib
   circuit with at most $p(n)$ gates, and $\cc{P/poly}$ equals CSLib's
@@ -218,18 +272,42 @@ says otherwise.
   constant gate in CSLib's model.
 \end{proof}
 
+\begin{corollary}[A language outside $\cc{P/poly}$]
+  \label{cor:circuits-not-ppoly}
+  \lean{Complexity.exists_not_mem_PPoly}
+  \leanok
+  \uses{def:PPoly}
+  Some language is not in $\cc{P/poly}$.
+\end{corollary}
+\begin{proof}
+  \leanok
+  \uses{thm:circuits-cslib}
+  By the equality with CSLib's $\cc{P/poly}$, this is CSLib's theorem that
+  some language lies outside its $\cc{P/poly}$: by Shannon's counting argument
+  some language has, at every large length $n$, no De Morgan circuit with at
+  most $2^n / n$ gates, and every bound $n^k + k$ falls below $2^n / n$ for
+  large $n$. That theorem, like CSLib's $\cc{P/poly}$, comes from the pending
+  CSLib work described in Theorem~\ref{thm:circuits-cslib}.
+\end{proof}
+
 \begin{theorem}[Depth in CSLib's circuit model]
   \label{thm:circuits-cslib-depth}
   \lean{Complexity.Circuit.depth_ofCslib, Complexity.Circuit.exists_cslib_depth_le,
     Complexity.exists_cslib_of_mem_DEPTH, Complexity.mem_DEPTH_of_cslib}
   \leanok
-  \uses{thm:circuits-cslib}
-  Let $N, M \ge 1$, as in Theorem~\ref{thm:circuits-cslib}. The translation
-  of a CSLib De Morgan circuit has exactly one more level of depth, for its
-  output gates. Conversely, a fan-in-two AND/OR circuit with $N$ inputs, $G$
-  internal gates, and $M$ outputs has a CSLib circuit with exactly
-  $N + 2G + M$ gates and at most one more level of depth. So depth in the two
-  models agrees up to an additive constant.
+  \uses{thm:circuits-cslib, def:NC-AC}
+  Let $N, M \ge 1$, as in Theorem~\ref{thm:circuits-cslib}. In CSLib's model
+  inputs have depth $0$, every gate (negations and constants included) adds
+  one level, and the depth of a circuit is the largest depth of an output
+  wire. The translation of a CSLib De Morgan circuit has depth exactly one
+  more, for its output gates. Conversely, a fan-in-two AND/OR circuit with $N$
+  inputs, $G$ internal gates, and $M$ outputs has a CSLib circuit computing
+  the same outputs with exactly $N + 2G + M$ gates and depth at most one more.
+  For the depth classes $\cc{DEPTH}(d)$ of Definition~\ref{def:NC-AC}: if
+  $f \in \cc{DEPTH}(d)$, then for every $n \ge 1$ some CSLib circuit of depth
+  at most $d(n) + 1$ computes $f_n$; and if for every $n \ge 1$ some CSLib
+  circuit of depth at most $d(n)$ computes $f_n$, then
+  $f \in \cc{DEPTH}(n \mapsto d(n) + 1)$.
 \end{theorem}
 \begin{proof}
   \leanok
@@ -258,26 +336,33 @@ says otherwise.
 
 \begin{definition}[Polynomial advice]
   \label{def:PAdvice}
-  \lean{Complexity.Advice, Complexity.PolynomialAdvice,
+  \lean{Complexity.Advice, Complexity.PolynomialAdvice, Complexity.advisedInput,
     Complexity.TM.DecidesWithAdviceInTime, Complexity.PAdvice}
   \leanok
   \uses{def:tm, def:pair, def:language}
   An advice function $a : \mathbb{N} \to \{0,1\}^*$ has polynomial length if
-  $|a(n)| \le p(n)$ for a polynomial $p$. A deterministic machine $M$ decides
-  $L$ with advice $a$ in time $T$ if on input $\langle a(|x|), x \rangle$ (the
-  library's self-delimiting pairing) it halts within $T(|x|)$ steps with output
-  $1$ when $x \in L$ and $0$ otherwise. The time bound is measured in $|x|$,
-  not in the length of the paired input. $\cc{PAdvice}$ is the class of
-  languages decided with polynomial-length advice in time $O(n^d)$ for some
-  $d$.
+  $|a(n)| \le p(n)$ for every $n$ and a polynomial $p \in \mathbb{N}[X]$. A
+  deterministic machine $M$ decides $L$ with advice $a$ in time $T$ if on input
+  $\langle a(|x|), x \rangle$ (the library's self-delimiting pairing) it halts
+  within $T(|x|)$ steps with $1$ in the first output cell when $x \in L$ and
+  $0$ otherwise. The time bound is measured in $|x|$, not in the length of the
+  paired input. $\cc{PAdvice}$ is the class of languages decided, by a machine
+  with any number of work tapes, with polynomial-length advice in time
+  $O(n^d)$ for some $d$.
 \end{definition}
 
 \begin{theorem}
   \label{thm:circuits-padvice-subset-ppoly}
-  \lean{Complexity.PAdvice_subset_PPoly}
+  \lean{Complexity.PAdvice_subset_PPoly, Complexity.TM.adviceCircuitFamily,
+    Complexity.TM.DecidesWithAdviceInTime.adviceCircuitFamily_decides,
+    Complexity.TM.adviceCircuitFamily_size_bigO,
+    Complexity.TM.DecidesWithAdviceInTime.mem_PPoly}
   \leanok
   \uses{def:PAdvice, def:PPoly}
-  $\cc{PAdvice} \subseteq \cc{P/poly}$.
+  $\cc{PAdvice} \subseteq \cc{P/poly}$. More precisely, if a deterministic
+  machine decides $L$ with advice $a$ in time $T = O(n^d)$, then hardwiring
+  the advice into its acceptance circuits gives a fan-in-two family of size
+  $O(n^{3d})$ deciding $L$, whatever the length of the advice.
 \end{theorem}
 \begin{proof}
   \leanok
@@ -288,17 +373,27 @@ says otherwise.
 
 \begin{theorem}
   \label{thm:circuits-ppoly-subset-padvice}
-  \lean{Complexity.PPoly_subset_PAdvice}
+  \lean{Complexity.PPoly_subset_PAdvice,
+    Complexity.CircuitFamily.polynomialAdvice_encodeAt,
+    Complexity.CircuitFamily.Decides.evalFamilyTM_decidesWithAdviceInTime,
+    Complexity.CircuitFamily.adviceEvalTime_bigO,
+    Complexity.CircuitFamily.Decides.mem_PAdvice}
   \leanok
-  \uses{def:PAdvice, def:PPoly}
-  $\cc{P/poly} \subseteq \cc{PAdvice}$.
+  \uses{def:PAdvice, def:PPoly, def:circuits-code}
+  $\cc{P/poly} \subseteq \cc{PAdvice}$. More precisely, if a fan-in-two family
+  $F$ of size $O(n^d)$ decides $L$, then its family codes
+  (Definition~\ref{def:circuits-code}) form polynomial-length advice, with
+  which the serialized circuit evaluator of
+  Theorem~\ref{thm:circuits-evaluator} decides $L$ in time $O(n^{4(d+1)})$,
+  measured in $|x|$.
 \end{theorem}
 \begin{proof}
   \leanok
   \uses{lem:circuits-codec, thm:circuits-evaluator}
-  The advice at length $n$ is the canonical code of the length-$n$ circuit,
-  which has polynomial length, and the machine is the serialized circuit
-  evaluator. A family of size $O(n^d)$ is evaluated in time $O(n^{4(d+1)})$.
+  The advice at length $n$ is the family code at length $n$, which has
+  polynomial length by Lemma~\ref{lem:circuits-codec}, and the machine is the
+  serialized circuit evaluator, whose quadratic running time in the length of
+  the paired input is polynomial in $|x|$.
 \end{proof}
 
 \begin{corollary}
@@ -321,6 +416,7 @@ says otherwise.
   \label{def:circuits-code}
   \lean{Complexity.CircuitCode.RawCircuit, Complexity.CircuitCode.encodeCircuit,
     Complexity.CircuitCode.evalCode, Complexity.CircuitFamily.encodeAt,
+    Complexity.CircuitCode.evalFamilyCode,
     Complexity.CircuitCode.circuitEvalLanguage}
   \leanok
   \uses{def:circuits-family, def:pair}
@@ -333,8 +429,13 @@ says otherwise.
   wire that is not yet computed, and evaluates the gates in order with a memo
   array. The code of a family at length $0$ is the bit
   $0$ followed by the stored answer; at length $n \ge 1$ it is the bit $1$
-  followed by the code of $C_n$. The evaluation language is the set of pairs
-  $\langle c, x \rangle$ such that the family code $c$ evaluates to $1$ on $x$.
+  followed by the code of $C_n$. The family evaluator runs a code $c$ on a
+  string $x$ as follows: if $x$ is empty, $c$ must be $0\,b$ for a bit $b$,
+  and the answer is $b$; if $x$ is nonempty, $c$ must be $1\,c'$, and the
+  answer is $\mathrm{evalCode}(|x|, c', x)$; every other case is rejected. The
+  evaluation language is the set of strings $\langle c, x \rangle$ (the
+  library's self-delimiting pairing) on which the family evaluator returns
+  $1$.
 \end{definition}
 
 \begin{lemma}[Codec correctness]
@@ -343,7 +444,7 @@ says otherwise.
     Complexity.CircuitCode.encodeCircuit_length_le_size}
   \leanok
   \uses{def:circuits-code}
-  For a fan-in-two single-output circuit $C$ with $N$ inputs and size $s$,
+  For a fan-in-two single-output circuit $C$ with $N \ge 1$ inputs and size $s$,
   $\mathrm{evalCode}(N, \mathrm{code}(C), x) = C(x)$ for every
   $x \in \{0,1\}^N$, and $|\mathrm{code}(C)| \le 1 + s\,(2(N + s) + 6)$.
 \end{lemma}
@@ -355,15 +456,16 @@ says otherwise.
 \begin{theorem}[Serialized evaluator]
   \label{thm:circuits-evaluator}
   \lean{Complexity.CircuitCode.Machine.evalFamilyTM,
+    Complexity.CircuitCode.Machine.evalFamilyTime,
     Complexity.CircuitCode.Machine.evalFamilyTM_decidesInTime,
     Complexity.CircuitCode.Machine.evalFamilyTime_bigO_quadratic,
     Complexity.circuitEvalLanguage_mem_P}
   \leanok
   \uses{def:circuits-code, def:tm-decides, def:P}
   A fixed deterministic machine with three work tapes decides the evaluation
-  language in time $O(n^2)$, where $n$ is the length of its input
-  $\langle c, x \rangle$; malformed pairs and malformed codes are rejected.
-  In particular the evaluation language is in $\cc{P}$.
+  language within $4n + 20(n + 1)^2 + 17 = O(n^2)$ steps on every input of
+  length $n$; malformed pairs and malformed codes are rejected. In particular
+  the evaluation language is in $\cc{P}$.
 \end{theorem}
 \begin{proof}
   \leanok
@@ -385,18 +487,23 @@ than computing the output of a deterministic run.
   \label{thm:circuits-acceptance-circuit}
   \lean{Complexity.CircuitUnrolling.acceptanceCircuit,
     Complexity.CircuitUnrolling.acceptanceCircuit_eval,
+    Complexity.CircuitUnrolling.acceptanceSizeCoeff,
     Complexity.CircuitUnrolling.acceptanceCircuit_size_le,
+    Complexity.CircuitUnrolling.canonicalAcceptanceCircuit,
     Complexity.CircuitUnrolling.card_acceptingChoices_eq_acceptCount}
   \leanok
   \uses{def:ntm, def:circuit}
-  Let $M$ be a nondeterministic machine and $T, n \in \mathbb{N}$. For every
-  placement of $n$ data wires and $T$ choice wires among the inputs, there is a
-  fan-in-two circuit that outputs $1$ on data $x \in \{0,1\}^n$ and choices
-  $c \in \{0,1\}^T$ exactly when the $T$-step trace of $M$ on $x$ under $c$ is
-  halted with output $1$. Its size is at most $\kappa_M (T + 2)^3$ for a
-  constant $\kappa_M$ depending only on $M$. With the choices placed first, the
-  number of choice strings accepted on $x$ equals the number of accepting
-  choice sequences of $M$ on $x$ at horizon $T$.
+  Let $M$ be a nondeterministic machine and $T, n, m \in \mathbb{N}$ with
+  $m \ge 1$. For every assignment of the $n$ data positions and the $T$ choice
+  positions to input wires among $m$ inputs, there is a fan-in-two circuit on
+  $m$ inputs that, on every input whose data wires carry $x \in \{0,1\}^n$ and
+  whose choice wires carry $c \in \{0,1\}^T$, outputs $1$ exactly when the
+  $T$-step trace of $M$ on $x$ under $c$ is in the halting state with $1$ in
+  the first output cell. Its size is at most $\kappa_M (T + 2)^3$ for a
+  constant $\kappa_M$ depending only on $M$, not on $n$ or $m$. With the
+  choices placed first ($m = T + n \ge 1$), the number of $c \in \{0,1\}^T$
+  on which the circuit accepts $c\,x$ equals the number of accepting choice
+  sequences of length $T$ of $M$ on $x$.
 \end{theorem}
 \begin{proof}
   \leanok
@@ -412,9 +519,12 @@ than computing the output of a deterministic run.
     Complexity.TM.unrollingCircuitFamily_size_bigO}
   \leanok
   \uses{def:tm-decides, def:circuits-family}
-  If a deterministic machine decides $L$ in time $f$, the family of its
-  acceptance circuits at horizon $f(n)$, with the unused choice inputs
-  hardwired, decides $L$. If $f = O(n^d)$, the family has size $O(n^{3d})$.
+  For a deterministic machine $M$ and $f : \mathbb{N} \to \mathbb{N}$, the
+  unrolling family has at length $n \ge 1$ the acceptance circuit of $M$ at
+  horizon $f(n)$ with every choice input hardwired to $0$, and at length $0$
+  the output bit of the $f(0)$-step run on the empty input. If $M$ decides $L$
+  in time $f$, the family decides $L$. If $f = O(n^d)$, the family has size
+  $O(n^{3d})$.
 \end{theorem}
 \begin{proof}
   \leanok
@@ -433,8 +543,8 @@ than computing the output of a deterministic run.
   \leanok
   \uses{def:PPoly, def:circuits-code, def:FL}
   A fan-in-two circuit family is logspace-uniform if some function in
-  $\cc{FL}$ maps $1^n$ to the family code at length $n$, for every $n$
-  (Arora--Barak Definition~6.5). The generator reads $n$ in unary, and its
+  $\cc{FL}$ maps $1^n$ to the family code at length $n$, for every $n$, as in
+  Arora--Barak, Section~6.2. The generator reads $n$ in unary, and its
   output at $n = 0$ carries the stored empty-input answer. The class
   $\cc{UniformPPoly}$ consists of the languages decided by a logspace-uniform
   circuit family of polynomial size. P-uniformity is not used.
@@ -461,29 +571,50 @@ than computing the output of a deterministic run.
 \end{theorem}
 \begin{proof}
   \leanok
-  \uses{thm:circuits-evaluator, def:FP}
+  \uses{thm:circuits-evaluator, thm:space-L-subset-P, thm:polytime-preimage}
   Since $\cc{FL} \subseteq \cc{FP}$, the map
   $x \mapsto \langle \mathrm{gen}(1^{|x|}), x \rangle$ is in $\cc{FP}$. The
   language is the preimage of the evaluation language under this map, and
-  $\cc{P}$ is closed under preimages by $\cc{FP}$ functions.
+  $\cc{P}$ is closed under preimages by $\cc{FP}$ functions. The size bound of
+  the family is not used.
 \end{proof}
 
-\begin{lemma}[The tableau code map is in $\cc{FL}$]
+\begin{lemma}[Padded tableau circuits and their code map]
   \label{lem:circuits-padded-code-fl}
   \lean{Complexity.TM.directUnrollingCircuitFamily,
+    Complexity.TM.directUnrollingGateBound,
+    Complexity.TM.paddedDirectUnrollingRawCircuit,
+    Complexity.TM.paddedDirectUnrollingCircuitFamily,
     Complexity.TM.paddedDirectUnrollingCode,
+    Complexity.TM.paddedDirectUnrollingCircuitFamily_encodeAt,
+    Complexity.TM.DecidesInTime.paddedDirectUnrollingCircuitFamily_decides,
+    Complexity.TM.paddedDirectUnrollingCircuitFamily_size_bigO,
+    Complexity.TM.directSerializerHorizonPolynomial,
     Complexity.TM.paddedDirectUnrollingCode_mem_FL}
   \leanok
-  \uses{def:tm, def:circuits-code, def:FL}
-  For a deterministic machine $M$ and a horizon $h$, let $D_{M,h}(n)$ be the
-  family code at length $n$ of the direct unrolling of $M$ at horizon $h(n)$,
-  padded with semantically dead constant gates to a closed-form cubic gate
-  count. For every polynomial $q$ and $h(n) = q(n) + n + 1$, the map
+  \uses{def:tm, def:tm-decides, def:circuits-code, def:FL,
+    thm:circuits-acceptance-circuit}
+  Let $M$ be a deterministic machine and $h : \mathbb{N} \to \mathbb{N}$. The
+  direct unrolling of $M$ at horizon $h$ has at length $n \ge 1$ the acceptance
+  circuit of Theorem~\ref{thm:circuits-acceptance-circuit} at horizon $h(n)$ on
+  $n$ inputs, the data on the inputs in order and every choice position on
+  input $0$. The padded direct unrolling $P_{M,h}$ appends to this gate list
+  constant-$0$ gates up to $\kappa_M (h(n) + 2)^3$ gates and then a gate
+  copying the original output, so its gate count is a closed-form cubic in
+  $h(n)$; at length $0$ it stores the output bit of the $h(0)$-step run on the
+  empty input. Let $D_{M,h}(n)$ be the family code of $P_{M,h}$ at length $n$.
+  If $M$ decides $L$ in time $h$, then $P_{M,h}$ decides $L$, and if
+  $h = O(n^d)$, then $P_{M,h}$ has size $O(n^{3d})$. For every polynomial
+  $q \in \mathbb{N}[X]$ and $h(n) = q(n) + n + 1$, the map
   $x \mapsto D_{M,h}(|x|)$ is in $\cc{FL}$.
 \end{lemma}
 \begin{proof}
   \leanok
-  The direct unrolling is an initialization fragment, a stream of fixed-size
+  The padding gates are never read and the final gate copies the acceptance
+  bit, so correctness and the size bound come from
+  Theorem~\ref{thm:circuits-acceptance-circuit}, the choices being irrelevant
+  to a deterministic machine. For the code map, the direct unrolling is an
+  initialization fragment, a stream of fixed-size
   transition fragments whose wire offsets have closed forms, and a final gate.
   A streaming transducer computes the offsets with binary counters, addition,
   multiply-add and fixed-polynomial evaluation, and writes each reference in
@@ -493,19 +624,23 @@ than computing the output of a deterministic run.
 
 \begin{theorem}
   \label{thm:circuits-p-subset-uniform}
-  \lean{Complexity.P_subset_UniformPPoly, Complexity.TM.DecidesInTime.mem_UniformPPoly}
+  \lean{Complexity.P_subset_UniformPPoly, Complexity.TM.DecidesInTime.mem_UniformPPoly,
+    Complexity.TM.DecidesInTime.directSerializerHorizon}
   \leanok
   \uses{def:P, def:UniformPPoly}
-  $\cc{P} \subseteq \cc{UniformPPoly}$.
+  $\cc{P} \subseteq \cc{UniformPPoly}$. More precisely, every language decided
+  by a deterministic machine within $q(n)$ steps, for a polynomial
+  $q \in \mathbb{N}[X]$, is in $\cc{UniformPPoly}$.
 \end{theorem}
 \begin{proof}
   \leanok
-  \uses{lem:circuits-padded-code-fl, thm:circuits-acceptance-circuit}
-  The padded direct unrolling of a polynomial-time decider decides its
-  language, has polynomial size, and has a code map in $\cc{FL}$.
+  \uses{lem:circuits-padded-code-fl}
+  A machine that decides $L$ in time $q$ also decides it in time
+  $h(n) = q(n) + n + 1$. At horizon $h$ its padded direct unrolling decides
+  $L$, has polynomial size, and has a code map in $\cc{FL}$.
 \end{proof}
 
-\begin{theorem}[Arora--Barak Theorem~6.7]
+\begin{theorem}[Logspace-uniform circuits capture $\cc{P}$]
   \label{thm:circuits-uniform-eq-p}
   \lean{Complexity.UniformPPoly_eq_P}
   \leanok
@@ -523,15 +658,18 @@ than computing the output of a deterministic run.
 
 \begin{lemma}[One seed for all inputs of a length]
   \label{lem:circuits-uniform-seed}
-  \lean{Complexity.NTM.exists_uniform_correct_seed}
+  \lean{Complexity.NTM.uniformSeedRuns, Complexity.NTM.exists_uniform_correct_seed}
   \leanok
   \uses{def:ntm}
-  Let $M$ be a probabilistic machine with time horizon $f$ that accepts every
-  $x \in L$ with probability at least $2/3$ and every $x \notin L$ with
-  probability at most $1/3$. For every $n$ there is a single string of
-  $r(n) f(n)$ random bits, where $r(n) = 12(n + 1) + 1$, on which the majority
-  vote of $r(n)$ runs of $M$, each on its own block of $f(n)$ bits, is correct
-  for every $x \in \{0,1\}^n$.
+  Let $M$ be a probabilistic machine and $f : \mathbb{N} \to \mathbb{N}$ such
+  that, for every $x$, the fraction of choice strings $c \in \{0,1\}^{f(|x|)}$
+  on which the $f(|x|)$-step trace of $M$ on $x$ under $c$ is halted with
+  output $1$ is at least $2/3$ if $x \in L$ and at most $1/3$ if
+  $x \notin L$; no halting assumption is made. For every $n$ there is a
+  single string of $r(n) f(n)$ random bits, where $r(n) = 12(n + 1) + 1$, on
+  which the strict majority vote of these $f(n)$-step runs of $M$, one on each
+  of the $r(n)$ consecutive blocks of $f(n)$ bits, is correct for every
+  $x \in \{0,1\}^n$.
 \end{lemma}
 \begin{proof}
   \leanok
@@ -541,15 +679,17 @@ than computing the output of a deterministic run.
 
 \begin{theorem}[Hardwired amplification]
   \label{thm:circuits-hardwired-amplification}
-  \lean{Complexity.NTM.hardwiredAmplificationFamily,
+  \lean{Complexity.NTM.uniformCorrectSeed, Complexity.NTM.hardwiredAmplificationFamily,
     Complexity.NTM.hardwiredAmplificationFamily_decides,
     Complexity.NTM.hardwiredAmplificationFamily_size_bigO}
   \leanok
-  \uses{def:ntm, def:circuits-family}
-  Under the hypotheses of Lemma~\ref{lem:circuits-uniform-seed}, hardwiring
-  the selected seed into $r(n)$ parallel copies of the acceptance circuit at
-  horizon $f(n)$, followed by a strict-majority fragment, gives a fan-in-two
-  circuit family deciding $L$. If $f = O(n^d)$, its size is $O(n^{3d+4})$.
+  \uses{def:ntm, def:circuits-family, lem:circuits-uniform-seed}
+  Under the hypotheses of Lemma~\ref{lem:circuits-uniform-seed}, the family
+  whose circuit at length $n \ge 1$ hardwires a seed selected by that lemma
+  into $r(n)$ parallel copies of the acceptance circuit at horizon $f(n)$,
+  followed by a strict-majority fragment, and whose answer at length $0$ is
+  whether the empty string is in $L$, is a fan-in-two circuit family deciding
+  $L$. If $f = O(n^d)$, its size is $O(n^{3d+4})$.
 \end{theorem}
 \begin{proof}
   \leanok
@@ -588,16 +728,22 @@ than computing the output of a deterministic run.
 \section{Small-depth classes}
 \label{sec:circuits-depth}
 
-\begin{definition}[$\cc{NC}^i$ and $\cc{AC}^i$]
+\begin{definition}[$\cc{DEPTH}$, $\cc{NC}^i$ and $\cc{AC}^i$]
   \label{def:NC-AC}
-  \lean{Complexity.polylogDepth, Complexity.NC, Complexity.AC, Complexity.NC1,
-    Complexity.AC0}
+  \lean{Complexity.DEPTHWithBasis, Complexity.DEPTH, Complexity.polylogDepth,
+    Complexity.NC, Complexity.AC, Complexity.NC0, Complexity.NC1, Complexity.AC0}
   \leanok
   \uses{def:circuits-family, def:circuits-bases}
   These are classes of Boolean function families, one function
-  $\{0,1\}^n \to \{0,1\}$ for each $n$, not of languages. A family is in
+  $\{0,1\}^n \to \{0,1\}$ for each $n$ (including $n = 0$), not of languages.
+  The depth of a circuit family at length $n \ge 1$ is the depth of $C_n$, and
+  at length $0$ it is $0$. For $d : \mathbb{N} \to \mathbb{N}$,
+  $\cc{DEPTH}(d)$ consists of the families computed by a fan-in-two AND/OR
+  circuit family of depth at most $d(n)$ at every length $n$, with no size
+  bound; the same definition is available over any basis. A family is in
   $\cc{NC}^i$ if a fan-in-two AND/OR circuit family of polynomial size and
-  depth at most $c\,(\lfloor \log_2 n \rfloor + 1)^i$, for some constant $c$,
+  depth at most $c\,(\lfloor \log_2 n \rfloor + 1)^i$ at every length $n$, for
+  some constant $c \in \mathbb{N}$ (with $\lfloor \log_2 0 \rfloor = 0$),
   computes it. $\cc{AC}^i$ is defined the same way with unbounded fan-in.
   $\cc{NC}^0$, $\cc{NC}^1$ and $\cc{AC}^0$ are the special cases. These classes
   are nonuniform.
@@ -610,19 +756,22 @@ than computing the output of a deterministic run.
   \leanok
   \uses{def:NC-AC}
   A threshold gate with cutoff $t$ outputs $1$ when at least $t$ of its
-  inputs are $1$; the threshold basis has unweighted threshold gates of
-  unbounded fan-in. $\cc{TC}^i$ is defined like $\cc{AC}^i$ over this basis.
+  inputs are $1$; the threshold basis has unweighted threshold gates of any
+  fan-in, with the free negation flags on their inputs. $\cc{TC}^i$ is defined
+  like $\cc{AC}^i$ over this basis.
 \end{definition}
 
 \begin{proposition}[Depth hierarchies]
   \label{prop:circuits-depth-classes}
   \lean{Complexity.NC_mono, Complexity.AC_mono, Complexity.TC_mono,
-    Complexity.AC_subset_TC, Complexity.AC0_subset_TC0}
+    Complexity.NC0_subset_NC1, Complexity.AC_subset_TC, Complexity.AC0_subset_TC0}
   \leanok
   \uses{def:NC-AC, def:circuits-TC}
   For $i \le j$, $\cc{NC}^i \subseteq \cc{NC}^j$, $\cc{AC}^i \subseteq \cc{AC}^j$
-  and $\cc{TC}^i \subseteq \cc{TC}^j$. For every $i$,
-  $\cc{AC}^i \subseteq \cc{TC}^i$.
+  and $\cc{TC}^i \subseteq \cc{TC}^j$; in particular
+  $\cc{NC}^0 \subseteq \cc{NC}^1$. For every $i$,
+  $\cc{AC}^i \subseteq \cc{TC}^i$; in particular
+  $\cc{AC}^0 \subseteq \cc{TC}^0$.
 \end{proposition}
 \begin{proof}
   \leanok
@@ -638,9 +787,12 @@ than computing the output of a deterministic run.
   For every $i$, $\cc{NC}^i \subseteq \cc{AC}^i \subseteq \cc{NC}^{i+1}$.
 \end{proposition}
 \begin{proof}
-  A fan-in-two gate is an unbounded gate. Conversely, replace each unbounded
-  gate, whose fan-in is polynomial, by a balanced fan-in-two tree of depth
-  $O(\log n)$.
+  A fan-in-two gate is an unbounded gate. Conversely, size does not count
+  wires, so first merge repeated inputs of each unbounded gate: a gate of a
+  circuit with $n$ inputs and $G$ internal gates then reads at most
+  $2(n + G)$ distinct literals, a polynomial number. Replace each such gate by
+  a balanced fan-in-two tree of depth $O(\log n)$, and a gate with no inputs
+  by a constant built from an input and its negation.
 \end{proof}
 
 \section{Formulas and Barrington's theorem}
@@ -649,25 +801,30 @@ than computing the output of a deterministic run.
 \begin{definition}[Boolean formula]
   \label{def:circuits-formula}
   \lean{Complexity.BoolFormula, Complexity.BoolFormula.eval,
-    Complexity.BoolFormula.size, Complexity.BoolFormula.depth}
+    Complexity.BoolFormula.size, Complexity.BoolFormula.depth,
+    Complexity.BoolFormula.vars}
   \leanok
   A Boolean formula is a tree built from variables $x_i$ ($i \in \mathbb{N}$),
   the two constants, negation, and binary conjunction and disjunction. It is
   evaluated under a total assignment $\mathbb{N} \to \{0,1\}$. Its size is its
-  number of nodes, and its depth is the length of a longest root-to-leaf path,
-  with each negation counted as one level.
+  number of nodes, its depth is the length of a longest root-to-leaf path,
+  with each negation counted as one level, and its variables are the indices
+  $i$ of the variables $x_i$ occurring in it.
 \end{definition}
 
 \begin{lemma}[Unfolding a circuit output]
   \label{lem:circuits-output-formula}
   \lean{Complexity.Circuit.outputFormula, Complexity.Circuit.eval_outputFormula,
+    Complexity.Circuit.vars_outputFormula_lt,
     Complexity.Circuit.depth_outputFormula_le_outputDepth}
   \leanok
   \uses{def:circuit, def:circuits-formula}
-  Unfolding one output of a fan-in-two circuit gives a formula over the
-  circuit's inputs that computes that output and has depth at most twice the
-  output's depth. No size bound is claimed, since shared subcircuits are
-  duplicated.
+  Unfolding one output of a fan-in-two circuit $C$ with $N \ge 1$ inputs gives
+  a formula whose variables are all below $N$, which under every assignment
+  $\alpha$ computes that output of $C$ on
+  $(\alpha(0), \dots, \alpha(N - 1))$, and whose depth is at most twice the
+  depth of that output gate. No size bound is claimed, since shared
+  subcircuits are duplicated.
 \end{lemma}
 \begin{proof}
   \leanok
@@ -678,15 +835,16 @@ than computing the output of a deterministic run.
 \begin{definition}[Permutation branching program]
   \label{def:circuits-bp}
   \lean{Complexity.BPInstr, Complexity.BP, Complexity.BP.eval,
-    Complexity.BP.Computes}
+    Complexity.BP.vars, Complexity.BP.Computes}
   \leanok
   A width-$w$ permutation branching program is a list of instructions
-  $(i, \pi_0, \pi_1)$ with $\pi_0, \pi_1 \in S_w$. Under an assignment
-  $\alpha$, an instruction selects $\pi_{\alpha(i)}$, and the program evaluates
-  to the product $\pi^{(1)} \pi^{(2)} \cdots \pi^{(k)}$ of the selected
-  permutations in $S_w$, where multiplication is composition. A program
-  computes $f$ through $\sigma$ if it evaluates to $\sigma$ when $f(\alpha) = 1$
-  and to the identity otherwise.
+  $(i, \pi_0, \pi_1)$ with $i \in \mathbb{N}$ and $\pi_0, \pi_1 \in S_w$; the
+  instruction reads variable $i$. Under an assignment $\alpha$, an instruction
+  selects $\pi_{\alpha(i)}$, and the program evaluates to the product
+  $\pi^{(1)} \pi^{(2)} \cdots \pi^{(k)}$ of the selected permutations in
+  $S_w$, where $(\pi \tau)(y) = \pi(\tau(y))$. A program computes $f$ through
+  $\sigma$ if, under every assignment $\alpha$, it evaluates to $\sigma$ when
+  $f(\alpha) = 1$ and to the identity otherwise.
 \end{definition}
 
 \begin{lemma}[Five-cycles are commutators]
@@ -694,8 +852,9 @@ than computing the output of a deterministic run.
   \lean{Complexity.exists_fiveCycle_commutator,
     Complexity.every_fiveCycle_is_commutator}
   \leanok
-  Every $5$-cycle in $S_5$ is the commutator $[a, b]$ of two $5$-cycles $a$
-  and $b$.
+  Some two $5$-cycles in $S_5$ have a $5$-cycle as their commutator, and
+  every $5$-cycle in $S_5$ is the commutator $[a, b] = a b a^{-1} b^{-1}$ of
+  two $5$-cycles $a$ and $b$.
 \end{lemma}
 \begin{proof}
   \leanok
@@ -705,49 +864,71 @@ than computing the output of a deterministic run.
 
 \begin{theorem}[Barrington, finite form]
   \label{thm:circuits-barrington-finite}
-  \lean{Complexity.barrington_representation_depth_four,
+  \lean{Complexity.Computes_formula_depth_four,
+    Complexity.barrington_representation_depth_four,
     Complexity.barrington_quadratic_of_log_depth}
   \leanok
   \uses{def:circuits-formula, def:circuits-bp}
-  Every Boolean formula of depth $d$ is computed, through some
-  $\sigma \neq 1$ in $S_5$, by a width-$5$ permutation branching program of
-  length at most $4^d$. In particular, a formula of depth at most $\log_2 n$,
-  with $n \ge 1$, has such a program of length at most $n^2$.
+  For every $5$-cycle $\sigma \in S_5$, every Boolean formula of depth $d$ is
+  computed through $\sigma$ by a width-$5$ permutation branching program of
+  length at most $4^d$; in particular it is computed through some
+  $\sigma \neq 1$ by such a program. A formula of depth at most
+  $\lfloor \log_2 n \rfloor$, with $n \ge 1$, is therefore computed through
+  some $\sigma \neq 1$ by a width-$5$ program of length at most $n^2$.
 \end{theorem}
 \begin{proof}
   \leanok
   \uses{lem:circuits-five-cycles}
-  Literals and constants are direct. Negation retargets to $\sigma^{-1}$ and
-  appends a constant instruction. Conjunction realizes a target $5$-cycle as
-  the commutator of two $5$-cycles and concatenates four subprograms.
+  Induction on the formula, for all target $5$-cycles at once. The variable
+  $x_i$ is the instruction $(i, 1, \sigma)$, the constant true is a single
+  constant instruction, and false is the empty program. For a negation,
+  compute the subformula through $\sigma^{-1}$ and fold a final
+  multiplication by $\sigma$ into the last instruction, so the length does not
+  grow. For a conjunction, write $\sigma = [a, b]$ with $5$-cycles $a$ and
+  $b$ and concatenate programs for the two conjuncts through $a$ and $b$ and
+  their inverses, four blocks of length at most $4^{d-1}$. A disjunction is a
+  negated conjunction of negations, with the negations folded in the same
+  way.
 \end{proof}
 
 \begin{theorem}[Constructive Barrington compiler]
   \label{thm:circuits-barrington-compiler}
-  \lean{Complexity.barringtonCompile, Complexity.barringtonCompile_representation}
+  \lean{Complexity.barringtonCompile, Complexity.barringtonTargetBase,
+    Complexity.barringtonTargetBase_spec, Complexity.barringtonCompile_computes,
+    Complexity.barringtonCompile_length_le, Complexity.barringtonCompile_var_bound,
+    Complexity.barringtonCompile_representation}
   \leanok
   \uses{def:circuits-formula, def:circuits-bp}
-  An explicit computable compiler maps every formula $\varphi$ to a width-$5$
-  program that evaluates to one fixed $5$-cycle $\sigma_0$ when $\varphi$ is
-  true and to the identity otherwise, of length at most $4^{\mathrm{depth}(\varphi)}$.
+  An explicit computable compiler maps every formula $\varphi$ and target
+  $\sigma \in S_5$ to a width-$5$ program of length at most
+  $4^{\mathrm{depth}(\varphi)}$ which, whenever $\sigma$ is a $5$-cycle,
+  computes $\varphi$ through $\sigma$. If every variable of $\varphi$ is at
+  most $b$, then so is the variable read by every instruction. For the fixed
+  $5$-cycle $\sigma_0 = [a_0, b_0]$, the commutator of two explicit
+  $5$-cycles, the program evaluates to $\sigma_0 \neq 1$ when $\varphi$ is true
+  and to the identity otherwise.
 \end{theorem}
 \begin{proof}
   \leanok
-  \uses{thm:circuits-barrington-finite}
-  Replace each choice of conjugating permutation by a search through an
-  explicit enumeration of $S_5$.
+  \uses{lem:circuits-five-cycles}
+  Follow the recursion of Theorem~\ref{thm:circuits-barrington-finite},
+  writing each target $5$-cycle $\sigma$ as the commutator of the conjugates
+  of $a_0$ and $b_0$ by the first permutation, in an explicit enumeration of
+  $S_5$, that conjugates $\sigma_0$ to $\sigma$.
 \end{proof}
 
 \begin{lemma}[Programs to balanced formulas]
   \label{lem:circuits-bp-to-formula}
   \lean{Complexity.BP.decisionFormula, Complexity.BP.eval_decisionFormula_eq_true,
-    Complexity.BP.depth_decisionFormula_le}
+    Complexity.BP.depth_decisionFormula_le, Complexity.BP.vars_decisionFormula_lt}
   \leanok
   \uses{def:circuits-formula, def:circuits-bp}
   For a width-$w$ program $P$ of length $\ell$ and a point $x$, there is a
-  formula that is true exactly when the value of $P$ moves $x$, has depth at
-  most $(w + 1) \lceil \log_2 \ell \rceil + 2$, and reads only variables read
-  by $P$.
+  formula that, under every assignment, is true exactly when the value of $P$
+  moves $x$, and that has depth at most $(w + 1) \lceil \log_2 \ell \rceil + 2$,
+  where $\lceil \log_2 \ell \rceil$ is read as $0$ for $\ell \le 1$. If every
+  instruction of $P$ reads a variable below $n$, then every variable of the
+  formula is below $n$.
 \end{lemma}
 \begin{proof}
   \leanok
@@ -763,29 +944,46 @@ than computing the output of a deterministic run.
   \uses{def:circuits-formula, def:circuits-bp}
   $\cc{FormulaNC1}$ is the class of Boolean function families computed by a
   family of formulas $(\varphi_n)$ in which $\varphi_n$ reads only variables
-  below $n$ and has depth at most $c \log_2 n + c$ for a constant $c$.
-  $\cc{Width5BP}$ is the class of Boolean function families decided by a
-  family of width-$5$ programs $P_n$ for $n \ge 1$, each reading only
-  variables below $n$ and with a designated point $x_n$, together with an
-  explicit answer at $n = 0$; the output is $1$ exactly when the value of $P_n$
-  moves $x_n$, and the length of $P_n$ is at most $C (n + 1)^k$ for constants
-  $C, k$.
+  below $n$, is evaluated on $x \in \{0,1\}^n$ under the assignment sending
+  $i < n$ to $x_i$ (and every other index to $0$), and has depth at most
+  $c \lfloor \log_2 n \rfloor + c$ for a constant $c$. $\cc{Width5BP}$ is the
+  class of Boolean function families decided by a family of width-$5$
+  programs $P_n$ for $n \ge 1$, each reading only variables below $n$ and with
+  a designated point $x_n$, together with an explicit answer at $n = 0$; on
+  $x \in \{0,1\}^n$ the output is $1$ exactly when the value of $P_n$ under
+  the same assignment moves $x_n$, and the length of $P_n$ is at most
+  $C (n + 1)^k$ for constants $C, k$.
 \end{definition}
 
 \begin{theorem}[Barrington]
   \label{thm:circuits-barrington}
   \lean{Complexity.fixedArityFormulaFamily_exists_bp,
-    Complexity.fixedArityBPFamily_exists_formula, Complexity.barrington_equivalence}
+    Complexity.fixedArityBPFamily_exists_formula, Complexity.barrington_equivalence,
+    Complexity.FormulaNC1OnTotalAssignments, Complexity.Width5BPOnTotalAssignments,
+    Complexity.barrington_equivalence_onTotalAssignments}
   \leanok
   \uses{def:circuits-formula-nc1}
-  $\cc{FormulaNC1} = \cc{Width5BP}$.
+  $\cc{FormulaNC1} = \cc{Width5BP}$: every formula family witnessing
+  membership in $\cc{FormulaNC1}$ has a program family witnessing membership in
+  $\cc{Width5BP}$ that computes the same Boolean function family, and
+  conversely. The same equality holds for the total-assignment variants, whose
+  members assign to each $n$ a function $(\mathbb{N} \to \{0,1\}) \to \{0,1\}$:
+  there the formula at $n$ may read any variable and has depth at most
+  $c \lfloor \log_2 n \rfloor + c$, and the program at $n$ may read any
+  variable, decides by whether it moves a designated point, and has length at
+  most $C (n + 1)^k$ at every $n$, including $n = 0$.
 \end{theorem}
 \begin{proof}
   \leanok
-  \uses{thm:circuits-barrington-finite, lem:circuits-bp-to-formula}
-  Depth $c \log_2 n + c$ gives length $4^{c \log_2 n + c}$, which is
-  polynomial. Conversely, a program of polynomial length has a balanced
-  decision formula of logarithmic depth.
+  \uses{thm:circuits-barrington-compiler, lem:circuits-bp-to-formula}
+  Compile $\varphi_n$ at the fixed $5$-cycle $\sigma_0$. The program evaluates
+  to $\sigma_0$ or to the identity, and a $5$-cycle moves every point, so any
+  designated point is moved exactly when $\varphi_n$ is true. Its length is at
+  most $4^{c \lfloor \log_2 n \rfloor + c} \le 4^c n^{2c}$, and it reads only
+  variables below $n$ (constant instructions read variable $0$). Conversely,
+  a program of length at most $C (n + 1)^k$ has a balanced decision formula of
+  depth at most $6 \lceil \log_2 (C (n + 1)^k) \rceil + 2$, which is
+  logarithmic in $n$, with its variables below $n$.
 \end{proof}
 
 \begin{theorem}
@@ -799,8 +997,10 @@ than computing the output of a deterministic run.
 \begin{proof}
   \leanok
   \uses{lem:circuits-output-formula, thm:circuits-barrington}
-  Unfold the output of each circuit; the depth at most doubles and the
-  variables stay below the arity.
+  Unfold the output of each circuit; the depth at most doubles, from
+  $c \lfloor \log_2 n \rfloor + c$ to
+  $2c \lfloor \log_2 n \rfloor + 2c$, and the variables stay below the arity.
+  The polynomial size bound is not used.
 \end{proof}
 
 \begin{theorem}
@@ -811,24 +1011,30 @@ than computing the output of a deterministic run.
 \end{theorem}
 \begin{proof}
   \uses{thm:circuits-nc1-subset-width5bp, thm:circuits-barrington}
-  A formula of depth $d$ has at most $2^{d+1}$ nodes, so logarithmic depth
-  gives polynomial size. Compile each node to a gate, moving negations into
-  input flags and building constants from an input and its negation.
+  A formula of depth $d$ has fewer than $2^{d+1}$ nodes, so logarithmic depth
+  gives polynomial size. At each length $n \ge 1$, compile each node to a
+  gate, pushing negations down by De Morgan's laws into input flags and
+  building constants from an input and its negation; the stored answer at
+  length $0$ is the value of $\varphi_0$.
 \end{proof}
 
 \begin{lemma}[Bit-level Barrington generator]
   \label{lem:circuits-barrington-codegen}
   \lean{Complexity.FormulaCode.encode, Complexity.FormulaCode.encode_injective,
     Complexity.BPCode.Program.encode, Complexity.BPCode.Program.encode_injective,
-    Complexity.barringtonCompileCode, Complexity.barringtonCompileCode_spec,
+    Complexity.barringtonCompileCode, Complexity.barringtonCompileCode_encode,
+    Complexity.barringtonCompileCode_spec,
     Complexity.length_barringtonCompileCode_encode_le}
   \leanok
   \uses{thm:circuits-barrington-compiler}
-  There are injective codes for formulas (postfix token
-  streams) and for width-$5$ programs (fixed seven-bit permutation ranks and
-  unary variable indices), and a total function $g$ on bit strings such that,
-  for every formula $\varphi$ of depth $d$, $g(\mathrm{code}(\varphi))$ decodes
-  to the compiled program of Theorem~\ref{thm:circuits-barrington-compiler} and
+  There are injective codes for formulas (a unary token count followed by the
+  postfix token stream) and for width-$5$ programs (a unary instruction count
+  followed by the instructions, each a unary variable index and two seven-bit
+  permutation ranks), and a total function $g$ on bit strings, sending every
+  string that does not decode to a formula to the empty string, such that for
+  every formula $\varphi$ of depth $d$, $g(\mathrm{code}(\varphi))$ is the
+  code of, and decodes to, the program compiled from $\varphi$ at $\sigma_0$
+  in Theorem~\ref{thm:circuits-barrington-compiler}, and
   $|g(\mathrm{code}(\varphi))| \le 4^d + 1 + 4^d (|\mathrm{code}(\varphi)| + 15)$.
 \end{lemma}
 \begin{proof}
