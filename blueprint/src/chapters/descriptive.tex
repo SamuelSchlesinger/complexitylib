@@ -520,6 +520,72 @@ existing logics rather than a restriction imposed on them.
   and union, retaining the syntactic fragment certificate.
 \end{proof}
 
+\begin{definition}[Bipartite query and its sentence]
+  \label{def:desc-bipartite}
+  \lean{Complexity.DescriptiveComplexity.GraphQuery.Edge,
+    Complexity.DescriptiveComplexity.GraphQuery.Bipartite,
+    Complexity.DescriptiveComplexity.GraphQuery.bipartiteSentence}
+  \leanok
+  \uses{def:desc-query, def:desc-so-syntax}
+  A graph is bipartite if a Boolean color assignment gives different colors to
+  the endpoints of every directed edge. Symmetry and loop-freeness are not
+  assumed. Its proposed sentence is
+  $\exists X\,\forall x\,\forall y\,
+  (E(x,y)\to(X(x)\leftrightarrow\neg X(y)))$.
+\end{definition}
+
+\begin{theorem}[Bipartiteness is existential SO definable]
+  \label{thm:desc-bipartite}
+  \lean{Complexity.DescriptiveComplexity.GraphQuery.bipartiteSentence_models,
+    Complexity.DescriptiveComplexity.GraphQuery.bipartite_existSODefinable,
+    Complexity.DescriptiveComplexity.GraphQuery.bipartite_of_no_edges,
+    Complexity.DescriptiveComplexity.GraphQuery.not_bipartite_of_loop}
+  \leanok
+  \uses{def:desc-bipartite, def:desc-exist-so-definable}
+  The sentence defines exactly the bipartite query. An edgeless graph satisfies
+  it, and a graph with a self-loop does not.
+\end{theorem}
+\begin{proof}
+  \leanok
+  A unary relation determines a Boolean color by its characteristic function;
+  conversely, take the vertices with color true. The edge condition is exactly
+  disagreement of the colors. This is the example in Senellart--Gnatenko,
+  Section~2.1, proved against an independently stated coloring predicate.
+\end{proof}
+
+\begin{definition}[Checking a supplied graph bipartition]
+  \label{def:desc-bipartite-checker}
+  \lean{Complexity.DescriptiveComplexity.GraphQuery.checkBipartition}
+  \leanok
+  \uses{def:desc-bipartite, def:desc-matrix-model-checking}
+  Given a decidable graph and a Boolean color for each vertex, supply that color
+  table to the two-universal-quantifier FO matrix of the bipartite sentence and
+  evaluate the matrix.
+\end{definition}
+
+\begin{theorem}[Bipartition checker correctness]
+  \label{thm:desc-bipartite-checker}
+  \lean{Complexity.DescriptiveComplexity.GraphQuery.checkBipartition_eq_true,
+    Complexity.DescriptiveComplexity.GraphQuery.exists_checkBipartition_iff,
+    Complexity.DescriptiveComplexity.GraphQuery.checkEncoded_bipartite_colors,
+    Complexity.DescriptiveComplexity.GraphQuery.exists_checkEncoded_bipartite_iff}
+  \leanok
+  \uses{def:desc-bipartite-checker, thm:desc-matrix-model-checking,
+    thm:desc-bipartite, thm:desc-exist-so-certificate}
+  The checker accepts exactly when every directed edge joins vertices of
+  different colors. A graph is bipartite iff some Boolean coloring is accepted.
+  On an encoded graph, the general binary certificate checker agrees with this
+  checker when the certificate lists one color bit per vertex. Existence of an
+  accepted certificate characterizes the ordinary bipartite-graph query language.
+\end{theorem}
+\begin{proof}
+  \leanok
+  Apply matrix-evaluation correctness and the semantic characterization of the
+  bipartite matrix. For Boolean values, the relation condition is precisely
+  inequality of the two colors. Unary truth-table encoding lists colors in
+  vertex order, and the prefix checker consumes exactly that table.
+\end{proof}
+
 \section{Encodings and model checking}
 
 \begin{definition}[Encoding structures as bit strings]
@@ -1232,6 +1298,32 @@ existing logics rather than a restriction imposed on them.
   interpretation, decode the sole coordinate and use the substitution lemma.
 \end{proof}
 
+\begin{definition}[Two-copy graph interpretation]
+  \label{def:desc-double-cover}
+  \lean{Complexity.DescriptiveComplexity.GraphQuery.doubleCover}
+  \leanok
+  \uses{def:desc-tagged-interpretation, def:desc-bipartite}
+  Give each source vertex a left and right copy. An output edge exists from
+  $(0,x)$ to $(1,y)$ exactly when the source has $E(x,y)$; no other tag pair
+  carries an edge.
+\end{definition}
+
+\begin{theorem}[Two-copy graph semantics]
+  \label{thm:desc-double-cover}
+  \lean{Complexity.DescriptiveComplexity.GraphQuery.doubleCover_card,
+    Complexity.DescriptiveComplexity.GraphQuery.doubleCover_rel,
+    Complexity.DescriptiveComplexity.GraphQuery.doubleCover_bipartite}
+  \leanok
+  \uses{def:desc-double-cover}
+  The two-copy graph has exactly $2n$ vertices and the stated edges. It is
+  bipartite for every input graph. This is an interpretation example, not a
+  reduction preserving the source's bipartiteness.
+\end{theorem}
+\begin{proof}
+  \leanok
+  Unfold the relation formula and color by the tag.
+\end{proof}
+
 \begin{definition}[Tagged formula pullback and composition]
   \label{def:desc-tagged-pullback}
   \lean{Complexity.DescriptiveComplexity.TaggedFOInterpretation.pullbackWith,
@@ -1319,6 +1411,35 @@ existing logics rather than a restriction imposed on them.
   application. Negate the membership equivalence for complement; translate a
   defining sentence for downward closure. The old reduction is the one-tag,
   one-coordinate case up to isomorphism.
+\end{proof}
+
+\begin{definition}[Disjoint graph copies]
+  \label{def:desc-disjoint-copies}
+  \lean{Complexity.DescriptiveComplexity.GraphQuery.disjointCopies,
+    Complexity.DescriptiveComplexity.GraphQuery.bipartiteProblem,
+    Complexity.DescriptiveComplexity.GraphQuery.disjointCopiesReduction}
+  \leanok
+  \uses{def:desc-tagged-reduction, def:desc-bipartite}
+  For a fixed $c>0$, interpret a graph on $\mathrm{Fin}(c)\times\mathrm{Fin}(n)$
+  with $E((i,x),(j,y))$ iff $i=j$ and $E(x,y)$ in the source. This defines the
+  union of $c$ disjoint copies and a reduction of bipartiteness to itself.
+\end{definition}
+
+\begin{theorem}[Disjoint copies preserve and reflect bipartiteness]
+  \label{thm:desc-disjoint-copies}
+  \lean{Complexity.DescriptiveComplexity.GraphQuery.disjointCopies_edge,
+    Complexity.DescriptiveComplexity.GraphQuery.disjointCopies_bipartite}
+  \leanok
+  \uses{def:desc-disjoint-copies}
+  The interpreted edges have the stated semantics. For every source graph, the
+  disjoint union is bipartite exactly when the source is. The construction applies
+  to directed graphs and permits loops; it is a semantic reduction example,
+  with no hardness claim.
+\end{theorem}
+\begin{proof}
+  \leanok
+  Extend a source coloring by ignoring tags. In the reverse direction, restrict
+  a coloring to the copy with tag $0$, which exists since $c>0$.
 \end{proof}
 
 \begin{definition}[Dimension-$k$ interpretation]
