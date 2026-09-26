@@ -5,6 +5,7 @@ Authors: Bolton Bailey
 -/
 module
 public import Complexitylib.Classes.P.Preimage
+public import Complexitylib.Classes.P.Unary.Defs
 public import Complexitylib.Languages.Contains
 
 /-!
@@ -24,6 +25,7 @@ contains a `1`, and `P` is closed under polynomial-time preimages.
 
 - `mem_P_of_decisionFn` — a verdict function in `FP` puts its language in `P`
 - `mem_P_of_decisionFn_bool` — the same with a `Bool`-valued verdict
+- `FPPred.mem_P` — a language whose membership test is `FPPred` is in `P`
 -/
 
 @[expose] public section
@@ -48,5 +50,11 @@ theorem mem_P_of_decisionFn_bool {g : List Bool → Bool} {L : Language}
   refine mem_P_of_decisionFn hf (fun x => ?_)
   rw [hL x]
   simp
+
+/-- **A polynomial-time membership test decides a language in `P`.** The form of
+`mem_P_of_decisionFn_bool` for the tests of `Complexitylib.Classes.P.Unary`. -/
+theorem FPPred.mem_P {L : Language} (hL : FPPred fun x => x ∈ L) : L ∈ P := by
+  obtain ⟨g, hg, hgL⟩ := hL
+  exact mem_P_of_decisionFn_bool hg hgL
 
 end Complexity

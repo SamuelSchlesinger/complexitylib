@@ -204,8 +204,8 @@ theorem stepRec_eq {k j : ℕ} (hj : j < F.size (k + 1) * F.deg ^ 2) :
     have := (F.baseVal_lt hxlt halt).1
     rwa [hp] at this
   rw [stepRec]
-  simp only [pairFst_pair, pairSnd_pair, divC_eq hd2, modC_eq hd2,
-    divC_eq hd4, modC_eq hd4, divC_eq hd1, modC_eq hd1, List.length_replicate,
+  simp only [pairFst_pair, pairSnd_pair, divC_eq, modC_eq,
+    divC_eq, modC_eq, divC_eq, modC_eq, List.length_replicate,
     F.baseRec_eq hxlt halt, hp, unaryOf_fstEnc_encPair, unaryOf_sndEnc_encPair,
     length_mulC_append, ← tableFst_def, ← tableSnd_def]
   -- the first lookup

@@ -5,6 +5,7 @@ Authors: Bolton Bailey
 -/
 module
 public import Complexitylib.Classes.P.UnaryLength
+public import Complexitylib.Classes.P.Unary
 public import Complexitylib.Classes.PCP.Internal.PosScan
 public import Complexitylib.Classes.PCP.Internal.UnaryDivMod
 public import Complexitylib.Classes.PCP.Internal.NatEncode
@@ -143,29 +144,23 @@ theorem marks_mem_FP {a : List Bool → List Bool} (ha : a ∈ FP) :
     (fun z => marks (a z)) ∈ FP :=
   mem_FP_comp ha unaryLength_mem_FP
 
-/-- Division by a constant. -/
-noncomputable def divC (c : ℕ) (s : List Bool) : List Bool :=
-  divFn (List.replicate c false) s
+/-- Division by a constant, in unary; `divC 0 s` is empty. -/
+def divC (c : ℕ) (s : List Bool) : List Bool := List.replicate (s.length / c) true
 
-theorem divC_eq {c : ℕ} (hc : 0 < c) (s : List Bool) :
-    divC c s = List.replicate (s.length / c) true := by
-  rw [divC, divFn_eq (by simpa using hc), List.length_replicate]
+theorem divC_eq {c : ℕ} (s : List Bool) : divC c s = List.replicate (s.length / c) true := rfl
 
 theorem divC_mem_FP {a : List Bool → List Bool} (ha : a ∈ FP) (c : ℕ) :
     (fun z => divC c (a z)) ∈ FP :=
-  mem_FP_of_eq (mem_FP_comp ha (divFn_mem_FP _)) fun _ => rfl
+  ((UnaryFn.length ha).div (UnaryFn.const c)).mem_FP
 
-/-- Remainder by a constant. -/
-noncomputable def modC (c : ℕ) (s : List Bool) : List Bool :=
-  modFn (List.replicate c false) s
+/-- Remainder by a constant, in unary; `modC 0 s` is `s` in marks. -/
+def modC (c : ℕ) (s : List Bool) : List Bool := List.replicate (s.length % c) true
 
-theorem modC_eq {c : ℕ} (hc : 0 < c) (s : List Bool) :
-    modC c s = List.replicate (s.length % c) true := by
-  rw [modC, modFn_eq (by simpa using hc), List.length_replicate]
+theorem modC_eq {c : ℕ} (s : List Bool) : modC c s = List.replicate (s.length % c) true := rfl
 
 theorem modC_mem_FP {a : List Bool → List Bool} (ha : a ∈ FP) (c : ℕ) :
     (fun z => modC c (a z)) ∈ FP :=
-  mem_FP_of_eq (mem_FP_comp ha (modFn_mem_FP _)) fun _ => rfl
+  ((UnaryFn.length ha).mod (UnaryFn.const c)).mem_FP
 
 /-- The product of two lengths. -/
 def mulLen (a b : List Bool) : List Bool := List.replicate (a.length * b.length) false

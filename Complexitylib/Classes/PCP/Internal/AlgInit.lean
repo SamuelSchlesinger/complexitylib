@@ -161,7 +161,7 @@ theorem baseVertsU_eq (hE : ∀ x, E x = (Φ x).encode) (h3 : ∀ x, CNF.Is3CNF 
     (x : List Bool) :
     baseVertsU E x = List.replicate (baseCSP (Φ x)).numVerts true := by
   have hnv : (baseCSP (Φ x)).numVerts = ((Φ x).maxVar + 1) + (Φ x).length := rfl
-  rw [baseVertsU, marks_eq, baseMaxU_eq E hE h3, baseEdgesU_eq E hE, divC_eq (by omega),
+  rw [baseVertsU, marks_eq, baseMaxU_eq E hE h3, baseEdgesU_eq E hE, divC_eq,
     List.length_replicate, Nat.mul_div_cancel_left _ (by omega), hnv]
   rw [show ([true] : List Bool) = List.replicate 1 true from rfl,
     ← List.replicate_add, ← List.replicate_add]

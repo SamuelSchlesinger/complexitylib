@@ -231,9 +231,9 @@ theorem ownerFn_eq (G : ConstraintGraph α) (p : ℕ) (hp : p / 2 < G.numEdges) 
     ownerFn (pair (encGraph G) (List.replicate p true))
       = List.replicate (G.ownerNum p) true := by
   have hdiv : (divC 2 (List.replicate p true)) = List.replicate (p / 2) true := by
-    rw [divC_eq (by norm_num), List.length_replicate]
+    rw [divC_eq, List.length_replicate]
   have hmod : (modC 2 (List.replicate p true)) = List.replicate (p % 2) true := by
-    rw [modC_eq (by norm_num), List.length_replicate]
+    rw [modC_eq, List.length_replicate]
   rw [ownerFn, pairSnd_pair, pairFst_pair, hdiv, hmod,
     List.length_replicate, ConstraintGraph.ownerNum, dite_eq_left hp]
   by_cases h : p % 2 = 0
@@ -619,10 +619,10 @@ theorem flipFn_eq (v : ℕ) :
     flipFn (List.replicate v true)
       = List.replicate (if v % 2 = 0 then v + 1 else v - 1) true := by
   by_cases h : v % 2 = 0
-  · rw [flipFn, modC_eq (by norm_num), List.length_replicate, h,
+  · rw [flipFn, modC_eq, List.length_replicate, h,
       ifEqLen_pos (by simp)]
     simp [List.replicate_succ']
-  · rw [flipFn, modC_eq (by norm_num), List.length_replicate,
+  · rw [flipFn, modC_eq, List.length_replicate,
       ifEqLen_neg (by simp [h]), ite_eq_right h, dropOne]
     simp
 

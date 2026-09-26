@@ -556,6 +556,80 @@ these facts are stated in the chapter on encodings
   that way.
 \end{proof}
 
+\begin{definition}[Polynomial-time numbers and tests]
+  \label{def:polytime-unary-fn}
+  \lean{Complexity.UnaryFn, Complexity.FPPred}
+  \leanok
+  \uses{def:FP}
+  A function $f$ from strings to natural numbers is \emph{polynomial-time} if
+  $z \mapsto 1^{f(z)}$ is in $\cc{FP}$, that is, if its value can be written
+  in unary in polynomial time. A predicate $p$ on strings is
+  \emph{polynomial-time} if there is a Boolean-valued $g$ with
+  $z \mapsto [g(z)]$ in $\cc{FP}$ and $p(z) \iff g(z) = 1$ for all $z$.
+\end{definition}
+
+\begin{lemma}[Closure rules for polynomial-time numbers]
+  \label{lem:polytime-unary-closure}
+  \lean{Complexity.UnaryFn.length, Complexity.UnaryFn.const,
+    Complexity.UnaryFn.lift, Complexity.UnaryFn.index, Complexity.UnaryFn.add,
+    Complexity.UnaryFn.mul, Complexity.UnaryFn.sub, Complexity.UnaryFn.min,
+    Complexity.UnaryFn.max, Complexity.FPPred.le, Complexity.FPPred.lt,
+    Complexity.FPPred.eq, Complexity.FPPred.and, Complexity.FPPred.or,
+    Complexity.FPPred.not, Complexity.FPPred.ite_mem_FP, Complexity.UnaryFn.ite,
+    Complexity.UnaryFn.sum, Complexity.UnaryFn.count, Complexity.UnaryFn.find,
+    Complexity.UnaryFn.bmax, Complexity.UnaryFn.iterate, Complexity.UnaryFn.div,
+    Complexity.UnaryFn.mod, Complexity.UnaryFn.powMin, Complexity.UnaryFn.size,
+    Complexity.UnaryFn.log, Complexity.UnaryFn.clog, Complexity.FPPred.mem_P}
+  \leanok
+  \uses{def:polytime-unary-fn}
+  In the sense of Definition~\ref{def:polytime-unary-fn}, the following are
+  polynomial-time, for polynomial-time numbers $f, g, n, b, k, c$ and
+  predicates $p, q$.
+  \begin{enumerate}
+    \item The length $|h(z)|$ of any $h \in \cc{FP}$, every constant, and
+      $f(z) + g(z)$, $f(z) \cdot g(z)$, $f(z) \mathbin{\dot-} g(z)$,
+      $\min(f(z), g(z))$ and $\max(f(z), g(z))$.
+    \item The predicates $f(z) \le g(z)$, $f(z) < g(z)$, $f(z) = g(z)$,
+      $p \wedge q$, $p \vee q$ and $\neg p$, and the case distinction
+      $z \mapsto$ ($f(z)$ if $p(z)$, else $g(z)$). The same case distinction
+      between two functions in $\cc{FP}$ is in $\cc{FP}$.
+    \item Loops over the indices below $n(z)$, whose body reads
+      $\langle z, 1^i \rangle$: the sum of $f(\langle z, 1^i \rangle)$, the
+      number of $i$ with $p(\langle z, 1^i \rangle)$, the least such $i$ (or
+      $n(z)$ if there is none), and the largest $f(\langle z, 1^i \rangle)$.
+      Also $k(z)$ rounds of an update $x \mapsto s(z, x)$ from $a(z)$, when
+      $\langle z, 1^x \rangle \mapsto s(z, x)$ is polynomial-time and every
+      value along the way is at most a polynomial-time number.
+    \item $f(z) / g(z)$ and $f(z) \bmod g(z)$ (with $f / 0 = 0$), the capped
+      power $\min(b(z)^{k(z)}, c(z))$, the binary length of $f(z)$, and the
+      floor and ceiling logarithms of $f(z)$ to the base $b(z)$.
+  \end{enumerate}
+  A language whose membership predicate is polynomial-time is in $\cc{P}$.
+\end{lemma}
+\begin{proof}
+  \leanok
+  \uses{lem:polytime-FP-basic, lem:polytime-fp-combinators,
+    lem:polytime-iterate, lem:polytime-decision-fn, thm:cobham}
+  Items 1 and 2 are closure rules of Cobham's algebra on unary strings:
+  concatenation, the length product, dropping and taking a prefix, the length
+  comparison, the Boolean connectives on one-bit strings, and selection by a
+  leading bit. A sum is a count of Lemma~\ref{lem:polytime-fp-combinators}, a
+  count is a sum of zeros and ones, and the maximum is the maximum of that
+  lemma. The least $i$ with $p$ counts the $j < n(z)$ at which $p$ fails at
+  every index up to $j$, a count of counts. The update loop is an instance of
+  Lemma~\ref{lem:polytime-iterate} on $\langle 1^x, z \rangle$, whose length
+  is bounded because the bound is written by a polynomial-time function.
+  Item 4 is derived from these: $f / g$ counts the $i < f$ with $g > 0$ and
+  $(i + 1) g \le f$, and $f \bmod g = f - g \cdot (f / g)$; the capped power
+  iterates $x \mapsto \min(b x, c)$; the binary length of $f$ counts the
+  $i < f$ with $2^i \le f$, and the logarithms count the $i < f$ with
+  $b^{i+1} \le f$ and with $b^i < f$, comparing capped powers. The last claim
+  is Lemma~\ref{lem:polytime-decision-fn}.
+
+  In Lean, in \texttt{Classes/P/Unary.lean}, with the membership test in
+  \texttt{Classes/P/DecisionFn.lean}.
+\end{proof}
+
 \begin{lemma}[Streaming folds in $\cc{FP}$]
   \label{lem:polytime-fp-streaming}
   \uses{def:FP}

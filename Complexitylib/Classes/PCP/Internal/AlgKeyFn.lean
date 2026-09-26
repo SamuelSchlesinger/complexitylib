@@ -189,7 +189,7 @@ theorem keyFn_mem_FP : keyFn F pol r ∈ FP := by
 /-! ### What the blocks read -/
 
 /-- **The blocks split an edge number.** -/
-theorem blocks_eq (hD : 0 < r.cD) (hZ : 0 < r.cZ) (g : List Bool) (a b c d : ℕ)
+theorem blocks_eq (hD : 0 < r.cD) (g : List Bool) (a b c d : ℕ)
     (hb : b < r.cD) (hc : c < r.cZ) (hd : d < 22) :
     testFn r (pair g (List.replicate (((a * r.cD + b) * r.cZ + c) * 22 + d) true))
         = List.replicate (a * r.cD + b) true
@@ -207,24 +207,24 @@ theorem blocks_eq (hD : 0 < r.cD) (hZ : 0 < r.cZ) (g : List Bool) (a b c d : ℕ
   rw [← hre] at h1 h2 h3
   have htest : testFn r (pair g (List.replicate (((a * r.cD + b) * r.cZ + c) * 22 + d) true))
       = List.replicate (a * r.cD + b) true := by
-    rw [testFn, pairSnd_pair, divC_eq (by positivity), List.length_replicate, h1]
+    rw [testFn, pairSnd_pair, divC_eq, List.length_replicate, h1]
   refine ⟨htest, ?_, ?_, ?_, ?_⟩
-  · rw [vertFn, htest, divC_eq hD, List.length_replicate, Nat.add_comm,
+  · rw [vertFn, htest, divC_eq, List.length_replicate, Nat.add_comm,
       Nat.add_mul_div_right _ _ hD, Nat.div_eq_of_lt hb, Nat.zero_add]
-  · rw [dartFn, htest, modC_eq hD, List.length_replicate, Nat.add_comm,
+  · rw [dartFn, htest, modC_eq, List.length_replicate, Nat.add_comm,
       Nat.add_mul_mod_self_right, Nat.mod_eq_of_lt hb]
-  · rw [randFn, pairSnd_pair, modC_eq (by positivity), List.length_replicate,
-      divC_eq (by omega), List.length_replicate, h2]
-  · rw [readFn, pairSnd_pair, modC_eq (by omega), List.length_replicate, h3]
+  · rw [randFn, pairSnd_pair, modC_eq, List.length_replicate,
+      divC_eq, List.length_replicate, h2]
+  · rw [readFn, pairSnd_pair, modC_eq, List.length_replicate, h3]
 
 /-- **The dart block splits into steps and coins.** -/
 theorem steps_coin_eq (hQ : 0 < r.cQ) (w : List Bool) (s t : ℕ) (ht : t < r.cQ)
     (hdart : dartFn r w = List.replicate (s * r.cQ + t) true) :
     stepsFn r w = List.replicate s true ∧ coinFn r w = List.replicate t true := by
   constructor
-  · rw [stepsFn, hdart, divC_eq hQ, List.length_replicate, Nat.add_comm,
+  · rw [stepsFn, hdart, divC_eq, List.length_replicate, Nat.add_comm,
       Nat.add_mul_div_right _ _ hQ, Nat.div_eq_of_lt ht, Nat.zero_add]
-  · rw [coinFn, hdart, modC_eq hQ, List.length_replicate, Nat.add_comm,
+  · rw [coinFn, hdart, modC_eq, List.length_replicate, Nat.add_comm,
       Nat.add_mul_mod_self_right, Nat.mod_eq_of_lt ht]
 
 /-- **The walk's input**, once the blocks are known. -/
@@ -293,9 +293,9 @@ theorem stopBlk_eq (hd : 1 < F.deg) (G : ConstraintGraph α) (hq : 0 < r.q)
   have hxenc : NumEnc.enc x = NumEnc.enc x.1 * r.q ^ r.T + NumEnc.enc x.2 := rfl
   have hco : coinsOf r.q r.T (killArg r w) = List.replicate (NumEnc.enc x.2) true := by
     rw [killArg_eq r hg hv hdart, coinsOf, pairSnd_pair, pairSnd_pair,
-      modC_eq (Nat.pow_pos hq), List.length_replicate, hxenc, Nat.add_comm,
+      modC_eq, List.length_replicate, hxenc, Nat.add_comm,
       Nat.add_mul_mod_self_right, Nat.mod_eq_of_lt hlt]
-  rw [stopBlk, stopFn_eq hq hco r.T 0, ← stopAtNum_eq_stopFromNum, stopAtNum_eq hq x.2]
+  rw [stopBlk, stopFn_eq hco r.T 0, ← stopAtNum_eq_stopFromNum, stopAtNum_eq hq x.2]
   rfl
 
 variable {F pol} in
@@ -322,7 +322,7 @@ theorem parBlk_eq (hd : 1 < F.deg) (G : ConstraintGraph α) (hq : 0 < r.q)
   rw [parDigit, hstop, hdeg, hP]
   by_cases hjk : j < (G.preprocess (F.toFamily hd)).graph.kLen x
   · rw [ifLtLen_pos (by simpa using hjk), walkArg_eq r hg hv hs,
-      walkFn_enc hd G v x hpc hpe j (le_of_lt hjk), modC_eq (by omega),
+      walkFn_enc hd G v x hpc hpe j (le_of_lt hjk), modC_eq,
       List.length_replicate, List.length_replicate]
     show _ = NumEnc.enc (StepKey.par _ _)
     rw [stepKeyOf]
@@ -374,7 +374,7 @@ theorem codeBlk_eq (hd : 1 < F.deg) (G : ConstraintGraph α) (hq : 0 < r.q)
   rw [codeDigit, hstop, hdeg, hP]
   by_cases hjk : j < (G.preprocess (F.toFamily hd)).graph.kLen x
   · rw [ifLtLen_pos (by simpa using hjk), hg, walkArg_eq r hg hv hs,
-      walkFn_enc hd G v x hpc hpe j (le_of_lt hjk), divC_eq (by omega),
+      walkFn_enc hd G v x hpc hpe j (le_of_lt hjk), divC_eq,
       List.length_take]
     simp only [List.length_replicate]
     have henc : NumEnc.enc ((G.preprocess (F.toFamily hd)).graph.walkAt
@@ -467,7 +467,7 @@ variable {F pol} in
 /-- **The algorithm writes out the walk's own data.** -/
 theorem keyFn_eq (hd : 1 < F.deg) (G : ConstraintGraph α) (hq : 0 < r.q)
     (hdeg : r.deg = (F.toFamily hd).degree) (hP : r.P = G.preDeg (F.toFamily hd))
-    (hC : r.C = Fintype.card (α → α → Bool)) (hZ : 0 < r.cZ)
+    (hC : r.C = Fintype.card (α → α → Bool))
     (v : (G.preprocess (F.toFamily hd)).graph.V)
     (x : (Fin r.T → (G.preprocess (F.toFamily hd)).graph.D) × (Fin r.T → Fin r.q))
     {B : ℕ} (z : Cube (ROf B)) (i : ReadIdx)
@@ -490,7 +490,7 @@ theorem keyFn_eq (hd : 1 < F.deg) (G : ConstraintGraph α) (hq : 0 < r.q)
   obtain ⟨-, hv, hdart, hrand, hread⟩ :=
     blocks_eq r (by
       rw [Round.cD, hP]
-      exact Nat.mul_pos (Nat.pow_pos (G.preDeg_pos _)) (Nat.pow_pos hq)) hZ (encGraph G)
+      exact Nat.mul_pos (Nat.pow_pos (G.preDeg_pos _)) (Nat.pow_pos hq)) (encGraph G)
       (NumEnc.enc v) (NumEnc.enc x) (NumEnc.enc z) (NumEnc.enc i) hxlt hzlt hilt
   have hclt : NumEnc.enc x.2 < r.cQ := NumEnc.enc_lt x.2
   have hxenc : NumEnc.enc x = NumEnc.enc x.1 * r.cQ + NumEnc.enc x.2 := rfl
@@ -515,28 +515,28 @@ theorem keyFn_length_le (hQ : 0 < r.cQ) (hD : 0 < r.cD) (hZ : 0 < r.cZ) (hC : 0 
     (w : List Bool) :
     (keyFn F pol r w).length ≤ keyBound r := by
   have hdart : (dartFn r w).length < r.cD := by
-    rw [dartFn, modC_eq hD, List.length_replicate]
+    rw [dartFn, modC_eq, List.length_replicate]
     exact Nat.mod_lt _ hD
   have hsteps : (stepsFn r w).length ≤ r.cD := by
-    rw [stepsFn, divC_eq hQ, List.length_replicate]
+    rw [stepsFn, divC_eq, List.length_replicate]
     exact le_trans (Nat.div_le_self _ _) (le_of_lt hdart)
   have hcoin : (coinFn r w).length < r.cQ := by
-    rw [coinFn, modC_eq hQ, List.length_replicate]
+    rw [coinFn, modC_eq, List.length_replicate]
     exact Nat.mod_lt _ hQ
   have hrand : (randFn r w).length ≤ r.cZ := by
-    rw [randFn, divC_eq (by omega), List.length_replicate, modC_eq (by positivity),
+    rw [randFn, divC_eq, List.length_replicate, modC_eq,
       List.length_replicate]
     have hlt : (pairSnd w).length % (r.cZ * 22) < r.cZ * 22 :=
       Nat.mod_lt _ (by positivity)
     exact Nat.div_le_of_le_mul (by omega)
   have hread : (readFn w).length ≤ 22 := by
-    rw [readFn, modC_eq (by omega), List.length_replicate]
+    rw [readFn, modC_eq, List.length_replicate]
     exact le_of_lt (Nat.mod_lt _ (by omega))
   have hpar : (digitSum 2 (parDigit F pol r) r.T w).length ≤ r.T * (1 * 2 ^ r.T) := by
     refine length_digitSum_le (by omega) (fun j u => ?_) r.T w
     rw [parDigit]
     by_cases h : (List.replicate j true).length < (stopBlk r u).length
-    · rw [ifLtLen_pos h, modC_eq (by omega), List.length_replicate]
+    · rw [ifLtLen_pos h, modC_eq, List.length_replicate]
       omega
     · rw [ifLtLen_neg h]
       simp
@@ -587,7 +587,7 @@ variable {F pol} in
 /-- **The cube algorithm computes the composed edge's cube.** -/
 theorem cubeFn_eq (hd : 1 < F.deg) (G : ConstraintGraph α) (hq : 0 < r.q)
     (hdeg : r.deg = (F.toFamily hd).degree) (hP : r.P = G.preDeg (F.toFamily hd))
-    (hC : r.C = Fintype.card (α → α → Bool)) (hZ : 0 < r.cZ)
+    (hC : r.C = Fintype.card (α → α → Bool))
     (v : (G.preprocess (F.toFamily hd)).graph.V)
     (x : (Fin r.T → (G.preprocess (F.toFamily hd)).graph.D) × (Fin r.T → Fin r.q))
     (z : Cube (ROf B)) (i : ReadIdx)
@@ -601,14 +601,14 @@ theorem cubeFn_eq (hd : 1 < F.deg) (G : ConstraintGraph α) (hq : 0 < r.q)
         (((NumEnc.enc v * r.cD + NumEnc.enc x) * r.cZ + NumEnc.enc z) * 22 + NumEnc.enc i) true))
       = List.replicate (((G.preprocess (F.toFamily hd)).killedPow r.q r.T hq).cubeNum
           encβ (v, x) z i) true := by
-  rw [cubeFn, keyFn_eq r hd G hq hdeg hP hC hZ v x z i hcZ hpc hpe, keyOfString_packKey,
+  rw [cubeFn, keyFn_eq r hd G hq hdeg hP hC v x z i hcZ hpc hpe, keyOfString_packKey,
     cubeOfKey_eq G (F.toFamily hd) hq v x z i encβ]
 
 variable {F pol} in
 /-- **The cube algorithm**, with the dart given as one object. -/
 theorem cubeFn_eq' (hd : 1 < F.deg) (G : ConstraintGraph α) (hq : 0 < r.q)
     (hdeg : r.deg = (F.toFamily hd).degree) (hP : r.P = G.preDeg (F.toFamily hd))
-    (hC : r.C = Fintype.card (α → α → Bool)) (hZ : 0 < r.cZ)
+    (hC : r.C = Fintype.card (α → α → Bool))
     (p : ((G.preprocess (F.toFamily hd)).killedPow r.q r.T hq).Dart)
     (z : Cube (ROf B)) (i : ReadIdx)
     (hcZ : r.cZ = NumEnc.card (Cube (ROf B)))
@@ -623,13 +623,13 @@ theorem cubeFn_eq' (hd : 1 < F.deg) (G : ConstraintGraph α) (hq : 0 < r.q)
       = List.replicate (((G.preprocess (F.toFamily hd)).killedPow r.q r.T hq).cubeNum
           encβ p z i) true := by
   obtain ⟨v, x⟩ := p
-  exact cubeFn_eq r hd G hq hdeg hP hC hZ v x z i hcZ hpc hpe dflt encβ
+  exact cubeFn_eq r hd G hq hdeg hP hC v x z i hcZ hpc hpe dflt encβ
 
 variable {F pol} in
 /-- **The code algorithm computes the composed edge's constraint.** -/
 theorem codeFn_eq (hd : 1 < F.deg) (G : ConstraintGraph α) (hq : 0 < r.q)
     (hdeg : r.deg = (F.toFamily hd).degree) (hP : r.P = G.preDeg (F.toFamily hd))
-    (hC : r.C = Fintype.card (α → α → Bool)) (hZ : 0 < r.cZ)
+    (hC : r.C = Fintype.card (α → α → Bool))
     (v : (G.preprocess (F.toFamily hd)).graph.V)
     (x : (Fin r.T → (G.preprocess (F.toFamily hd)).graph.D) × (Fin r.T → Fin r.q))
     (z : Cube (ROf B)) (i : ReadIdx)
@@ -644,14 +644,14 @@ theorem codeFn_eq (hd : 1 < F.deg) (G : ConstraintGraph α) (hq : 0 < r.q)
       = List.replicate (codeOfRel (MultiTest.relOfCheck
           ((((G.preprocess (F.toFamily hd)).killedPow r.q r.T hq).compose encβ).check (v, x) z)
           i)) true := by
-  rw [codeFn, keyFn_eq r hd G hq hdeg hP hC hZ v x z i hcZ hpc hpe, keyOfString_packKey,
+  rw [codeFn, keyFn_eq r hd G hq hdeg hP hC v x z i hcZ hpc hpe, keyOfString_packKey,
     codeOfKey_eq G (F.toFamily hd) hq v x z i encβ]
 
 variable {F pol} in
 /-- **The code algorithm**, with the dart given as one object. -/
 theorem codeFn_eq' (hd : 1 < F.deg) (G : ConstraintGraph α) (hq : 0 < r.q)
     (hdeg : r.deg = (F.toFamily hd).degree) (hP : r.P = G.preDeg (F.toFamily hd))
-    (hC : r.C = Fintype.card (α → α → Bool)) (hZ : 0 < r.cZ)
+    (hC : r.C = Fintype.card (α → α → Bool))
     (p : ((G.preprocess (F.toFamily hd)).killedPow r.q r.T hq).Dart)
     (z : Cube (ROf B)) (i : ReadIdx)
     (hcZ : r.cZ = NumEnc.card (Cube (ROf B)))
@@ -667,6 +667,6 @@ theorem codeFn_eq' (hd : 1 < F.deg) (G : ConstraintGraph α) (hq : 0 < r.q)
           ((((G.preprocess (F.toFamily hd)).killedPow r.q r.T hq).compose encβ).check p z)
           i)) true := by
   obtain ⟨v, x⟩ := p
-  exact codeFn_eq r hd G hq hdeg hP hC hZ v x z i hcZ hpc hpe dflt encβ
+  exact codeFn_eq r hd G hq hdeg hP hC v x z i hcZ hpc hpe dflt encβ
 
 end Complexity

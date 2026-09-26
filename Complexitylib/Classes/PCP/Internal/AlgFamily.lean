@@ -193,9 +193,9 @@ theorem famRotFn_eq (hd : 1 < F.deg) (n v i : ℕ) (hn : 0 < n)
     rw [divFn2_eq (by rw [hrep]; exact hn), List.length_append, List.length_replicate,
       List.length_cons, List.length_nil, hrep, hN, wid, RegGraph.mergeWidth]
   have hs : (divC F.fitD (List.replicate i true)) = List.replicate (i / F.fitD) true := by
-    rw [divC_eq hdpos, List.length_replicate]
+    rw [divC_eq, List.length_replicate]
   have hc : (modC F.fitD (List.replicate i true)) = List.replicate (i % F.fitD) true := by
-    rw [modC_eq hdpos, List.length_replicate]
+    rw [modC_eq, List.length_replicate]
   have hlift : (List.replicate v true
       ++ mulLen (divC F.fitD (List.replicate i true)) (List.replicate n true)).length
       = v + i / F.fitD * n := by

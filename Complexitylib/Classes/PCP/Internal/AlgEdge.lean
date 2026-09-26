@@ -117,7 +117,7 @@ theorem tailBlk_eq (posF : ℕ) (r : Round) (G : ConstraintGraph α) {w : List B
 /-! ### Which block the second endpoint lies in -/
 
 theorem readFn_length_le (w : List Bool) : (readFn w).length ≤ 22 := by
-  rw [readFn, modC_eq (by omega), List.length_replicate]
+  rw [readFn, modC_eq, List.length_replicate]
   exact le_of_lt (Nat.mod_lt _ (by omega))
 
 /-- The kind of block a read lands in. -/
@@ -396,19 +396,19 @@ theorem stepFn_eq (F : FinBase) (pol : Polynomial ℕ) (hd : 1 < F.deg)
       rw [NumEnc.card_eq_fintype_card]
       exact G.order_preprocess (F.toFamily hd)
     obtain ⟨htest, hvert, hdart, hrand, hread⟩ :=
-      blocks_eq r hDpos (by omega) (encGraph G)
+      blocks_eq r hDpos (encGraph G)
         (NumEnc.enc p.1) (NumEnc.enc p.2) (NumEnc.enc z) (NumEnc.enc i) hblt hclt hilt
     simp only [edgeRule]
     rw [tailBlk_eq posF r G (pairFst_pair _ _) htest hrand,
       RegCSP.tailNum_split' (cZ := r.cZ) _ _ _ _ _ _ hrZ hclt hilt, hposF]
-    rw [codeFn_eq' (B := Dinur.bits (F.toFamily hd) r.T) r hd G hq hdeg hP hC (by omega) p z i
+    rw [codeFn_eq' (B := Dinur.bits (F.toFamily hd) r.T) r hd G hq hdeg hP hC p z i
       (by rw [hrZ, NumEnc.card_eq_fintype_card, card_cube]) hpc hpe dflt
       (Dinur.enc (F.toFamily hd) G r.T)]
     have hread : readFn (pair (encGraph G) (List.replicate
         (((NumEnc.enc p.1 * r.cD + NumEnc.enc p.2) * r.cZ + NumEnc.enc z) * 22
           + NumEnc.enc i) true)) = List.replicate (NumEnc.enc i) true := hread
     have hcube := cubeFn_eq' (B := Dinur.bits (F.toFamily hd) r.T) r hd G hq hdeg hP hC
-      (by omega) p z i (by rw [hrZ, NumEnc.card_eq_fintype_card, card_cube]) hpc hpe dflt
+      p z i (by rw [hrZ, NumEnc.card_eq_fintype_card, card_cube]) hpc hpe dflt
       (Dinur.enc (F.toFamily hd) G r.T)
     have hblock : blockBlk F pol r (pair (encGraph G) (List.replicate
         (((NumEnc.enc p.1 * r.cD + NumEnc.enc p.2) * r.cZ + NumEnc.enc z) * 22

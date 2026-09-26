@@ -16,6 +16,7 @@ public import Complexitylib.Classes.P.Cobham
 public import Complexitylib.Classes.P.Pairing
 public import Complexitylib.Classes.P.Iterate
 public import Complexitylib.Classes.P.Range
+public import Complexitylib.Classes.P.Unary
 import Complexitylib.Models.TuringMachine.Subroutines.CopyOutput
 
 /-!
@@ -48,6 +49,10 @@ This file aggregates the definitions and theorems for P, FP, and PSPACE.
 - `catRange_mem_FP`, `flatMap_range_mem_FP` — concatenating a polynomial-time
   rule's outputs over a unary range is polynomial-time, with corollaries for
   list encodings, counts, bounded search, maxima and bitwise descriptions
+- `UnaryFn`, `FPPred` — closure rules for polynomial-time functions to `ℕ`
+  (written in unary) and polynomial-time tests: arithmetic, comparisons,
+  connectives, case distinction, bounded loops, division, capped powers and
+  logarithms
 -/
 
 

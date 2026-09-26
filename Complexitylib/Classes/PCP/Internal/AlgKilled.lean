@@ -187,8 +187,8 @@ theorem walkFn_eq (hd : 1 < F.deg) (G : ConstraintGraph α) (v s : ℕ)
           (divC (G.preDeg (F.toFamily hd) ^ k) (List.replicate s true))
           = List.replicate ((s / G.preDeg (F.toFamily hd) ^ k)
             % G.preDeg (F.toFamily hd)) true := by
-        rw [divC_eq (Nat.pow_pos hPpos), List.length_replicate,
-          modC_eq hPpos, List.length_replicate]
+        rw [divC_eq, List.length_replicate,
+          modC_eq, List.length_replicate]
       have hdlt : (s / G.preDeg (F.toFamily hd) ^ k) % G.preDeg (F.toFamily hd)
           < 2 + 2 * (F.toFamily hd).degree := by
         rw [← G.preDeg_eq (F.toFamily hd)]
@@ -256,7 +256,7 @@ theorem stopFn_mem_FP {q : ℕ} {co : List Bool → List Bool} (hco : co ∈ FP)
       rw [stopFn]
 
 /-- **The stopping algorithm finds the stopping index.** -/
-theorem stopFn_eq {q : ℕ} (hq : 0 < q) {co : List Bool → List Bool} {z : List Bool} {c : ℕ}
+theorem stopFn_eq {q : ℕ} {co : List Bool → List Bool} {z : List Bool} {c : ℕ}
     (hco : co z = List.replicate c true) :
     ∀ (n i : ℕ), stopFn q co i n z = List.replicate (stopFromNum q c i n) true := by
   intro n
@@ -265,7 +265,7 @@ theorem stopFn_eq {q : ℕ} (hq : 0 < q) {co : List Bool → List Bool} {z : Lis
   | succ n ih =>
       intro i
       have hdig : modC q (divC (q ^ i) (co z)) = List.replicate ((c / q ^ i) % q) true := by
-        rw [hco, divC_eq (Nat.pow_pos hq), List.length_replicate, modC_eq hq,
+        rw [hco, divC_eq, List.length_replicate, modC_eq,
           List.length_replicate]
       rw [stopFn, hdig, stopFromNum]
       by_cases h : (c / q ^ i) % q = 0
@@ -308,7 +308,7 @@ theorem backFn_eq (hd : 1 < F.deg) (G : ConstraintGraph α) (v s i : ℕ)
       (divC (G.preDeg (F.toFamily hd) ^ i) (List.replicate s true))
       = List.replicate ((s / G.preDeg (F.toFamily hd) ^ i)
         % G.preDeg (F.toFamily hd)) true := by
-    rw [divC_eq (Nat.pow_pos hPpos), List.length_replicate, modC_eq hPpos,
+    rw [divC_eq, List.length_replicate, modC_eq,
       List.length_replicate]
   have hdlt : (s / G.preDeg (F.toFamily hd) ^ i) % G.preDeg (F.toFamily hd)
       < 2 + 2 * (F.toFamily hd).degree := by
@@ -371,7 +371,7 @@ theorem length_revSum (hd : 1 < F.deg) (G : ConstraintGraph α) (v s k : ℕ)
       · rw [ite_eq_left h, ite_eq_left h, backFn_eq hd G v s (k - 1 - n) hv hpc hpe,
           List.length_replicate]
       · rw [ite_eq_right h, ite_eq_right h, pairSnd_pair, pairSnd_pair,
-          divC_eq (Nat.pow_pos hPpos), List.length_replicate, modC_eq hPpos]
+          divC_eq, List.length_replicate, modC_eq]
         simp
 
 namespace ConstraintGraph
@@ -477,16 +477,16 @@ theorem revNumFn_eq (hd : 1 < F.deg) (G : ConstraintGraph α) (T q v s c : ℕ)
     rw [Nat.add_comm, Nat.add_mul_mod_self_right, Nat.mod_eq_of_lt hc]
   have hco : coinsOf q T (pair (encGraph G) (pair (List.replicate v true)
       (List.replicate (s * q ^ T + c) true))) = List.replicate c true := by
-    rw [coinsOf, pairSnd_pair, pairSnd_pair, modC_eq hqT,
+    rw [coinsOf, pairSnd_pair, pairSnd_pair, modC_eq,
       List.length_replicate, hmod]
   have htw : toWalk q T (pair (encGraph G) (pair (List.replicate v true)
       (List.replicate (s * q ^ T + c) true)))
       = pair (encGraph G) (pair (List.replicate v true) (List.replicate s true)) := by
     rw [toWalk, pairFst_pair, pairSnd_pair, pairFst_pair,
-      pairSnd_pair, divC_eq hqT, List.length_replicate, hdiv]
+      pairSnd_pair, divC_eq, List.length_replicate, hdiv]
   have hstop : stopFn q (coinsOf q T) 0 T (pair (encGraph G) (pair (List.replicate v true)
       (List.replicate (s * q ^ T + c) true))) = List.replicate (stopAtNum T q c) true := by
-    rw [stopFn_eq hq hco T 0, ← stopAtNum_eq_stopFromNum]
+    rw [stopFn_eq hco T 0, ← stopAtNum_eq_stopFromNum]
   have hle : stopAtNum T q c ≤ T := by
     have h : (List.finRange T).findIdx (fun j : Fin T => (c / q ^ j.val) % q == 0)
         ≤ (List.finRange T).length := List.findIdx_le_length
@@ -513,16 +513,16 @@ theorem killedRotFn_eq (hd : 1 < F.deg) (G : ConstraintGraph α) (T q v s c : �
     rw [Nat.add_comm, Nat.add_mul_mod_self_right, Nat.mod_eq_of_lt hc]
   have hco : coinsOf q T (pair (encGraph G) (pair (List.replicate v true)
       (List.replicate (s * q ^ T + c) true))) = List.replicate c true := by
-    rw [coinsOf, pairSnd_pair, pairSnd_pair, modC_eq hqT,
+    rw [coinsOf, pairSnd_pair, pairSnd_pair, modC_eq,
       List.length_replicate, hmod]
   have htw : toWalk q T (pair (encGraph G) (pair (List.replicate v true)
       (List.replicate (s * q ^ T + c) true)))
       = pair (encGraph G) (pair (List.replicate v true) (List.replicate s true)) := by
     rw [toWalk, pairFst_pair, pairSnd_pair, pairFst_pair,
-      pairSnd_pair, divC_eq hqT, List.length_replicate, hdiv]
+      pairSnd_pair, divC_eq, List.length_replicate, hdiv]
   have hstop : stopFn q (coinsOf q T) 0 T (pair (encGraph G) (pair (List.replicate v true)
       (List.replicate (s * q ^ T + c) true))) = List.replicate (stopAtNum T q c) true := by
-    rw [stopFn_eq hq hco T 0, ← stopAtNum_eq_stopFromNum]
+    rw [stopFn_eq hco T 0, ← stopAtNum_eq_stopFromNum]
   have hle : stopAtNum T q c ≤ T := by
     have h : (List.finRange T).findIdx (fun j : Fin T => (c / q ^ j.val) % q == 0)
         ≤ (List.finRange T).length := List.findIdx_le_length
