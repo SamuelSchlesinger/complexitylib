@@ -1193,6 +1193,45 @@ existing logics rather than a restriction imposed on them.
   to obtain reduction closure.
 \end{proof}
 
+\begin{definition}[Full tagged tuple interpretation]
+  \label{def:desc-tagged-interpretation}
+  \lean{Complexity.DescriptiveComplexity.TaggedFOInterpretation,
+    Complexity.DescriptiveComplexity.TaggedFOInterpretation.elementEquiv,
+    Complexity.DescriptiveComplexity.TaggedFOInterpretation.relationEnv,
+    Complexity.DescriptiveComplexity.TaggedFOInterpretation.apply}
+  \leanok
+  \uses{def:desc-fo-syntax, def:desc-structure}
+  For positive $t,d$, the target universe is
+  $\mathrm{Fin}(t)\times\mathrm{Fin}(n)^d$, presented on
+  $\mathrm{Fin}(t n^d)$. A relation of arity $a$ has a defining formula with
+  $ad$ variables for each assignment of tags to its arguments. Target constants
+  are tagged tuples of source constants. This full-product construction has no
+  domain restriction or quotient; it follows Senellart--Gnatenko, Section~3.2.
+\end{definition}
+
+\begin{theorem}[Size and isomorphism transport for tagged interpretations]
+  \label{thm:desc-tagged-semantics}
+  \lean{Complexity.DescriptiveComplexity.TaggedFOInterpretation.apply_card,
+    Complexity.DescriptiveComplexity.TaggedFOInterpretation.mapIso,
+    Complexity.DescriptiveComplexity.TaggedFOInterpretation.pullQuery_orderIndependent,
+    Complexity.DescriptiveComplexity.FOInterpretation.toTaggedIso,
+    Complexity.DescriptiveComplexity.FOInterpretation.toTagged_query}
+  \leanok
+  \uses{def:desc-tagged-interpretation, def:desc-iso, def:desc-query}
+  The output has exactly $t n^d$ elements. Input isomorphisms act coordinatewise
+  on the output, so invariant queries remain invariant under pullback of
+  structures. Each original dimension-1 interpretation is the one-tag,
+  one-coordinate case up to isomorphism, hence gives the same answer for any
+  invariant target query.
+\end{theorem}
+\begin{proof}
+  \leanok
+  \uses{thm:desc-fo-iso-invariance, thm:desc-substitution}
+  Decode tagged tuples, apply the input isomorphism to each coordinate, and
+  encode again. Formula invariance proves relation preservation. For the old
+  interpretation, decode the sole coordinate and use the substitution lemma.
+\end{proof}
+
 \begin{definition}[Dimension-$k$ interpretation]
   \label{def:desc-dim-k}
   \uses{def:desc-interpretation}
