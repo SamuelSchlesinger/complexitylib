@@ -176,9 +176,11 @@ machines be re-proved as short programs through Cobham's theorem.
   \uses{def:dtime, def:P, def:FP}
   If a machine with $k$ work tapes decides $L$ within time $f$, then a
   multi-tape machine in CSLib's model decides $L$ within time and space
-  $(2k + 3)(2f + 5)$. CSLib's model has a binary alphabet, a read-only input
-  tape clamped to the input, two-way work tapes that start blank, and emitted
-  output, and it counts the work cells visited as space. Consequently every
+  $(2k + 3)(2f + 5)$. CSLib's machines take their alphabet as a parameter,
+  and its complexity definitions use machines over the binary alphabet with
+  finitely many states: a read-only input tape clamped to the input, two-way
+  work tapes that start blank, and emitted output, with the work cells visited
+  counted as space. Consequently every
   language in $\cc{DTIME}(T)$ is decided there within time and space $O(T)$,
   and every language in $\cc{P}$ within polynomial time and space. The
   simulation is also space-faithful: a machine deciding $L$ within time $T$
@@ -221,8 +223,8 @@ machines be re-proved as short programs through Cobham's theorem.
   \leanok
   \uses{thm:polytime-cslib-multitape}
   Theorem~\ref{thm:polytime-cslib-multitape} gives one direction. For the
-  converse, CSLib's machines are binary, so their tape symbols (blank, $0$,
-  $1$) are already ours. Fold each two-way work tape onto a one-sided tape,
+  converse, the machines in CSLib's complexity definitions are binary, so
+  their tape symbols (blank, $0$, $1$) are already ours. Fold each two-way work tape onto a one-sided tape,
   sending CSLib cell $z \ge 0$ to cell $2z + 1$ and $z < 0$ to cell $-2z$, and
   detect a crossing of the fold by bumping into $\triangleright$. Track the
   clamped input head directly and write emitted bits from output cell $1$.
