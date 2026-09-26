@@ -727,7 +727,17 @@ existing logics rather than a restriction imposed on them.
 
 \begin{theorem}[Polynomial-time access to encoded structures]
   \label{thm:desc-encoding-access-polytime}
-
+  \lean{Complexity.DescriptiveComplexity.tupleIndex_unary,
+    Complexity.DescriptiveComplexity.tupleDigits_unary,
+    Complexity.DescriptiveComplexity.relationAddress_unary,
+    Complexity.DescriptiveComplexity.constantAddress_unary,
+    Complexity.DescriptiveComplexity.encodingLength_unary,
+    Complexity.DescriptiveComplexity.DecREnv.encodingLength_unary,
+    Complexity.DescriptiveComplexity.encodedCard_unary,
+    Complexity.DescriptiveComplexity.encodingLengthMatches_fpPred,
+    Complexity.DescriptiveComplexity.relationBit_fpPred,
+    Complexity.DescriptiveComplexity.constantBit_fpPred}
+  \leanok
   \uses{thm:desc-arithmetic-addresses, lem:polytime-string-access,
     lem:polytime-unary-closure, def:desc-so-certificate-encoding}
   For a fixed vocabulary, relation symbol, and tuple arity, polynomial-time
@@ -741,7 +751,7 @@ existing logics rather than a restriction imposed on them.
   $\cc{FP}$ string, with false at missing positions.
 \end{theorem}
 \begin{proof}
-
+  \leanok
   Each address and length is a fixed sum of products and fixed powers.
   Apply the unary arithmetic closure rules, then polynomial-time bit access.
   The prefix parser is the leading-run construction of
@@ -750,7 +760,8 @@ existing logics rather than a restriction imposed on them.
 
 \begin{definition}[Explicit structure-encoding validity]
   \label{def:desc-valid-encoding}
-
+  \lean{Complexity.DescriptiveComplexity.IsValidEncoding}
+  \leanok
   \uses{def:desc-arithmetic-addresses}
   At cardinality $n$, require $n\ge2$, total length $\ell_V(n)$, header bits
   $1^n0$, and exactly one true bit in every constant block. Express the latter
@@ -760,7 +771,14 @@ existing logics rather than a restriction imposed on them.
 
 \begin{theorem}[Valid encodings form a language in P]
   \label{thm:desc-valid-encodings-P}
-
+  \lean{Complexity.DescriptiveComplexity.isValidEncoding_encodeStruct,
+    Complexity.DescriptiveComplexity.isValidEncoding_iff,
+    Complexity.DescriptiveComplexity.isValidEncoding_parsed_iff,
+    Complexity.DescriptiveComplexity.isValidEncoding_fpPred,
+    Complexity.DescriptiveComplexity.encodable_fpPred,
+    Complexity.DescriptiveComplexity.decodable_fpPred,
+    Complexity.DescriptiveComplexity.validEncodings_mem_P}
+  \leanok
   \uses{def:desc-valid-encoding, thm:desc-encoding-access-polytime,
     thm:desc-encoding-roundtrip, lem:polytime-unary-closure, def:P}
   The validity conditions hold iff the string encodes a structure of the
@@ -773,7 +791,7 @@ existing logics rather than a restriction imposed on them.
   is asserted by this theorem.
 \end{theorem}
 \begin{proof}
-
+  \leanok
   The forward direction constructs the relations by reading their table bits
   and the constants from the unique marked values. The address equalities and
   encoding reconstruction theorem recover the whole string. The converse uses
