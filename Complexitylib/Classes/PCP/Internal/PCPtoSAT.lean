@@ -5,6 +5,7 @@ Authors: Bolton Bailey
 -/
 module
 public import Complexitylib.Classes.PCP.Internal.SubsetNP
+public import Complexitylib.Classes.PCP.Internal.FiniteKey
 public import Complexitylib.SAT.Semantics
 public import Complexitylib.SAT.Language
 public import Complexitylib.SAT.Verifier
@@ -32,13 +33,8 @@ constant.
 
 ## Main definitions
 
-- `Complexity.allVecs` — the bit vectors of a given length
 - `Complexity.PCPVerifier.varIdx` — the variable holding one answer
 - `Complexity.PCPVerifier.toCNF` — the formula
-
-## Main results
-
-- `Complexity.mem_allVecs_iff` — `allVecs n` is exactly the vectors of length `n`
 -/
 
 @[expose] public section
@@ -46,50 +42,6 @@ constant.
 namespace Complexity
 
 open SAT
-
-/-! ### Enumerating bit vectors -/
-
-/-- Every bit vector of a given length. -/
-def allVecs : ℕ → List (List Bool)
-  | 0 => [[]]
-  | n + 1 => (allVecs n).flatMap fun v => [false :: v, true :: v]
-
-theorem mem_allVecs_iff : ∀ (n : ℕ) (b : List Bool), b ∈ allVecs n ↔ b.length = n := by
-  intro n
-  induction n with
-  | zero =>
-      intro b
-      constructor
-      · intro hb
-        simp only [allVecs, List.mem_singleton] at hb
-        rw [hb]
-        rfl
-      · intro hb
-        have : b = [] := List.length_eq_zero_iff.1 hb
-        rw [this]
-        simp [allVecs]
-  | succ m ih =>
-      intro b
-      constructor
-      · intro hb
-        simp only [allVecs, List.mem_flatMap] at hb
-        obtain ⟨v, hv, hbv⟩ := hb
-        have hlen : v.length = m := (ih v).1 hv
-        simp only [List.mem_cons] at hbv
-        rcases hbv with h | h | h
-        · rw [h, List.length_cons, hlen]
-        · rw [h, List.length_cons, hlen]
-        · exact absurd h (by simp)
-      · intro hb
-        match b with
-        | [] => exact absurd hb (by simp)
-        | c :: v =>
-            have hlen : v.length = m := by
-              rw [List.length_cons] at hb
-              omega
-            simp only [allVecs, List.mem_flatMap]
-            refine ⟨v, (ih v).2 hlen, ?_⟩
-            cases c <;> simp
 
 namespace PCPVerifier
 

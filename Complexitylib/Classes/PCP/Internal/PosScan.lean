@@ -5,8 +5,7 @@ Authors: Bolton Bailey
 -/
 module
 public import Complexitylib.Classes.PCP.Internal.DataScan
-public import Complexitylib.Classes.PCP.Internal.SubsetNP
-public import Complexitylib.Classes.PCP.Internal.CoinEnum
+public import Complexitylib.Classes.PCP.Internal.BinCounter
 
 /-!
 # Reading a verifier's query list

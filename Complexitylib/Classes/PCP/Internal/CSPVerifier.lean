@@ -6,6 +6,7 @@ Authors: Bolton Bailey
 module
 public import Complexitylib.Classes.PCP.Internal.PositionsFP
 public import Complexitylib.Classes.PCP.Internal.SquareVerifier
+public import Complexitylib.Classes.PCP.Internal.CoinEnum
 
 /-!
 # A verifier for a constraint graph

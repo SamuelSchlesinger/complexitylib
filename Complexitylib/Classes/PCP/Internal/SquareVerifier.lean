@@ -5,6 +5,7 @@ Authors: Bolton Bailey
 -/
 module
 public import Complexitylib.Classes.PCP.Internal.PosScan
+public import Complexitylib.Classes.PCP.Defs
 public import Complexitylib.Classes.EventProb
 
 /-!

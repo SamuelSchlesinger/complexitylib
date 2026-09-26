@@ -4,7 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Bolton Bailey
 -/
 module
-public import Complexitylib.Classes.PCP.Internal.CoinEnum
+public import Complexitylib.Classes.Containments.Internal.WitnessEnum
 
 /-!
 # Writing symbols as fixed-width blocks

@@ -5,6 +5,7 @@ Authors: Bolton Bailey
 -/
 module
 public import Complexitylib.Classes.PCP.Internal.PosScan
+public import Complexitylib.Classes.PCP.Internal.CoinEnum
 public import Complexitylib.Classes.PCP.Internal.UnaryExp
 public import Complexitylib.Classes.PCP.Internal.BoundedQuant
 

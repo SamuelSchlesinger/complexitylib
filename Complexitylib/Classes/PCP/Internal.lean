@@ -33,6 +33,7 @@ public import Complexitylib.Classes.PCP.Internal.AlphabetLift
 public import Complexitylib.Classes.PCP.Internal.Amplification
 public import Complexitylib.Classes.PCP.Internal.Arithmetize
 public import Complexitylib.Classes.PCP.Internal.BaseAlg
+public import Complexitylib.Classes.PCP.Internal.BinCounter
 public import Complexitylib.Classes.PCP.Internal.BinToUnary
 public import Complexitylib.Classes.PCP.Internal.BitwiseFP
 public import Complexitylib.Classes.PCP.Internal.BoundNotConstructible
