@@ -230,6 +230,110 @@ or loop. Prefer projection lemmas and narrowly oriented rewrite rules to marking
 transition definitions `[simp]`. Moving a theorem must keep its public name or
 leave a compatibility alias.
 
+## Descriptive complexity expansion
+
+The expansion prompted by Senellart and Gnatenko's September 2026 paper is
+specified in [`docs/DescriptiveComplexity.md`](docs/DescriptiveComplexity.md).
+The completed layers provide second-order transport for universe-preserving
+reductions, existential SO definability, tagged formula pullback and composition,
+and reductions between invariant decision problems. Graph examples include the
+existential SO definition of bipartiteness and a reduction by disjoint copies.
+The pullback theorem follows Immerman's Proposition 3.5, including open formulas
+and source-constant tuples; tagged composition is proved up to isomorphism.
+Relation-variable renaming now has exact identity and composition laws,
+open-formula satisfaction, size preservation, and preservation of FO matrices
+and existential SO prefixes. Capture-avoiding conjunction and disjunction merge
+the leading relation quantifiers without duplicating syntax: the result has
+size `φ.size + ψ.size + 1`. Consequently `ExistSODefinable` is closed under
+intersection and union with explicit prefix-form witnesses.
+Boolean relation environments now represent exactly the semantic relation
+environments. A computable evaluator checks FO matrices against supplied
+Boolean tables, with correctness for arbitrary free element assignments and
+exact agreement with the existing FO evaluator. Existential and universal
+quantification over semantic relation environments can therefore use Boolean
+tables. A concrete bipartition checker accepts exactly proper Boolean colorings.
+Relation environments now have canonical binary truth-table encodings of exact
+length `∑ n ^ arity`, with both round trips and rejection exactly on wrong
+lengths. An existential-SO certificate checker consumes the prefix tables in
+order, rejects missing or trailing bits, and evaluates the FO matrix. Soundness
+and completeness hold for open formulas with supplied free environments. For
+sentences, the encoded checker characterizes the full query language and has a
+fixed polynomial certificate bound in input length. On bipartite graphs, the
+certificate is one color bit per vertex and the checker agrees with the existing
+Boolean-coloring evaluator.
+
+The circuit track now compiles arbitrary FO formulas to the existing
+`AC0Formula` representation. It proves satisfaction on relation tables and
+one-hot constant blocks, exact polynomial tree size in the universe cardinality,
+and depth at most the source formula's size plus one. A reusable realization
+theorem converts these trees to actual unbounded circuits of exactly the same
+size and depth at most one greater, at positive input width. A computable layout
+now reads the exact positions in `encodeStruct`, and encoded length is strictly
+increasing in universe size. The decoder has exact round trips, encoding
+injectivity, and rejection precisely outside the encoder's image. The encoded
+FO evaluator is proved correct for the full induced binary language.
+Encoding validity now has a depth-three formula of size
+`n + 4 + numConsts * (1 + n * (1 + n))`. Conjoining it with sentence expansion
+gives circuits recognizing the exact query language, including malformed-input
+rejection. These circuits form a family at all input lengths, with false output
+at length zero and at lengths supporting no valid encodings. The proved
+`FODefinable.queryFamily_mem_AC0` connects FO definability to the existing
+nonuniform `AC0` class, with depth at most `φ.size + 5` and a polynomial size
+bound in input length.
+
+The machine track now has arithmetic addresses proved equal to the encoder's
+enumerated positions. Tuple indices use little-endian base-`n` coordinates;
+relation and constant addresses add the exact preceding block lengths. Bit
+access, unary-cardinality parsing, these addresses, and structure/certificate
+lengths have machine-level polynomial-time proofs. Explicit length, header, and
+one-hot tests characterize the encoder's image. Bounded quantification over
+polynomial-time bit tests proves `validEncodings_mem_P`, as well as a
+polynomial-time predicate for successful decoding.
+
+Fixed-formula evaluation now has a machine-level polynomial-time proof.
+Constants use bounded search of their one-hot blocks, and first-order quantifiers
+use the bounded-quantifier rules with polynomial-time free-variable values.
+Combining evaluation with encoding validation proves
+`FODefinable.queryLanguage_mem_P`; the existing `Sentence.evalEncoded` verdict
+also belongs to `FP`. The formula is fixed in these results, and no logarithmic
+space bound is claimed.
+
+Existential-SO verification now also has a polynomial-time machine proof.
+Arithmetic matrix evaluation reads the supplied relation tables, and prefix
+checking consumes each block by polynomial-time slicing. Both agree with the
+existing Boolean evaluators. `SOSentence.checkEncoded_mem_FP` gives the complete
+verdict function, including malformed-input rejection, an `FP` implementation.
+Together with the proved witness bound and guess-and-verify NTM, this proves
+`ExistSODefinable.queryLanguage_mem_NP`, the upper direction of Fagin's theorem.
+
+The universe-preserving reduction bridge is now proved. Numeric tuple decoding
+reproduces the encoder's order, and fixed-formula truth-table generation belongs
+to `FP`. `FOInterpretation.mapEncoding` computes the exact interpreted structure
+encoding and maps every malformed input to `[]`. Its full output length is
+bounded by the target encoding polynomial in input length.
+`FOReduces.mapReducesPoly` lifts structural reductions to machine many-one
+reductions. Together with the ESO upper bound, this gives an NP-completeness
+criterion from an NP-hard source language and a structural FO reduction.
+
+Tagged tuple encodings now have exact arithmetic semantics: tag and coordinate
+packing, relation tables, and constant blocks produce the existing interpreted
+structure's encoding, of full length `encodingLength W (tags * n ^ dim)`.
+Its `FP` bound is the remaining part of the tagged encoding bridge.
+
+The logic still has no built-in order, `BIT`, `ADD`, or `MUL`. Add canonical
+numerical-predicate extensions and explicit formula translations proving
+`FO[BIT] = FO[ADD, MUL]`; arithmetic in the encoder does not supply these logical
+predicates. Use ternary addition and multiplication relations restricted from
+natural arithmetic, with no modular wraparound. Keep this as a sequence of
+small checked layers, with the corresponding blueprint nodes in each commit.
+
+Other next priorities are the tagged encoding machine bound, tagged SO transport,
+and the converse of Fagin's theorem. The NP-to-ESO direction still needs
+a tuple-indexed computation tableau and a guessed order; Immerman--Vardi needs
+fixed-point logic and both capture directions. The ordered `FO[BIT]` capture of uniform
+`AC0` needs a uniformity predicate and an ordered syntax. Domain restrictions
+and exact projections remain distinct extensions.
+
 ## Quality gates
 
 Every change must leave these green (CI runs all of them):

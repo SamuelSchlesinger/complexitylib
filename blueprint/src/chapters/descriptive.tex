@@ -14,17 +14,56 @@ are formalized:
   \item Boolean queries, order independence, and first-order definability;
   \item second-order logic, its $\exists\cc{SO}$ fragment, and invariance under
     isomorphism;
+  \item arity-preserving relation renaming and existential-prefix conjunction
+    and disjunction, proving intersection and union closure for $\exists\cc{SO}$;
+  \item Boolean relation witnesses, verified FO-matrix evaluation, and an
+    executable checker for a supplied graph bipartition;
+  \item exact binary relation certificates and sound, complete existential-SO
+    certificate checking with polynomial witness lengths on encoded inputs;
+  \item polynomial-time existential-SO certificate checking and Fagin's upper
+    direction $\exists\cc{SO}\subseteq\cc{NP}$ for the existing machine class;
   \item a bit-string encoding of structures and the language a query induces;
-  \item a computable first-order model checker, proved correct, with no bound on
-    its running time;
+  \item a correct computable first-order model checker, with polynomial-time
+    machines computing each fixed sentence's encoded verdict;
+  \item compilation of first-order model checking into unbounded Boolean
+    formula trees, with table-input correctness, exact polynomial size, and
+    depth independent of the universe size for each fixed source formula;
+  \item exact decoding, constant-depth encoding validation, and circuit families
+    proving $\cc{FO} \subseteq \cc{AC^0}$ for the induced binary languages;
+  \item arithmetic encoding addresses, polynomial-time input access, and
+    recognition of valid encodings in the deterministic machine class $\cc{P}$;
+  \item $\cc{FO}\subseteq\cc{P}$ for the induced binary query languages,
+    including rejection of malformed inputs;
   \item universe-preserving (dimension-1) first-order reductions and their
-    quantifier-free restriction, both of which are preorders.
+    quantifier-free restriction, both of which are preorders;
+  \item polynomial-time encoded maps for those interpretations, giving machine
+    many-one reductions and a structural NP-completeness criterion;
+  \item second-order transport through those reductions, preserving existential
+    second-order prefix form, and existential SO definability;
+  \item full tagged tuple interpretations, with exact size, formula pullback,
+    and composition up to isomorphism, including the original dimension-1 maps;
+  \item exact arithmetic encodings of tagged interpretations, including all
+    relation and constant blocks; their machine time bound remains open;
+  \item invariant decision problems and a tagged reduction preorder, with
+    downward closure of first-order definability;
+  \item a bipartite sentence equivalent to Boolean coloring, and the two-copy
+    graph interpretation with its proved bipartition, as well as disjoint copies
+    as a reduction preserving bipartiteness.
 \end{itemize}
-No capture theorem is formalized yet, and the link from logic to machines stops
-at the definition of the language of a query: there is no decoder, no running-time
-bound, and no machine construction. The main planned result is Fagin's theorem
-$\cc{NP} = \exists\cc{SO}$. Later planned results are $\cc{FO} \subseteq \cc{AC^0}$
-and the Immerman--Vardi theorem.
+The nonuniform circuit inclusion uses the existing binary encoding and rejects
+malformed inputs at every length, including zero. Fixed-formula evaluation also
+has a bound against the machine polynomial-time predicate, as does existential-SO
+certificate checking. The latter yields $\exists\cc{SO}\subseteq\cc{NP}$.
+Planned results include the converse direction of Fagin's theorem, the
+Immerman--Vardi theorem, and the ordered
+$\cc{FO}[\mathrm{BIT}]$ characterization of uniform $\cc{AC^0}$.
+
+The current expansion draws on Pierre Senellart and Anton Gnatenko,
+\emph{Descriptive Complexity in Lean: Completeness by First-Order Reductions}
+(arXiv:2609.18261, 2026), especially its interpretation and definability
+interfaces. Their logically defined classes and our machine-defined classes
+require an explicit bridge. The implementation sequence and source comparison
+are recorded in \texttt{docs/DescriptiveComplexity.md}.
 
 \paragraph{Conventions.} A structure has universe $\mathrm{Fin}(n)$ with
 $n \ge 2$ (Immerman's Proviso~1.15). Queries are properties of structures with
@@ -33,7 +72,8 @@ decidable structures, whose relations are $\mathrm{Bool}$-valued and which coerc
 to ordinary structures. The canonical order on $\mathrm{Fin}(n)$ is available as
 meta-level helpers, but the first- and second-order syntax is unordered, so
 formulas cannot mention it. Order independence is therefore a theorem about the
-existing logics rather than a restriction imposed on them.
+existing logics rather than a restriction imposed on them. There are no built-in
+BIT, addition, or multiplication predicates in the current syntax either.
 
 \section{Vocabularies and finite structures}
 
@@ -862,9 +902,9 @@ existing logics rather than a restriction imposed on them.
   environment $\sigma$, $\mathrm{evalB}(\mathcal{A}, \sigma, \varphi) = \mathrm{true}$
   iff $\mathcal{A}, \sigma \models \varphi$, and likewise for sentences under the
   empty environment. Hence $\mathcal{A} \models \varphi$ is decidable for every
-  decidable structure $\mathcal{A}$ and sentence $\varphi$. This is correctness
-  only: no bound on the evaluator's running time and no machine implementation
-  are formalized.
+  decidable structure $\mathcal{A}$ and sentence $\varphi$. This node concerns
+  semantic correctness; Theorem~\ref{thm:desc-fo-in-P} supplies the polynomial-time
+  machine bound for fixed sentences on encoded structures.
 \end{theorem}
 \begin{proof}
   \leanok
@@ -1557,9 +1597,9 @@ existing logics rather than a restriction imposed on them.
   a coloring to the copy with tag $0$, which exists since $c>0$.
 \end{proof}
 
-\begin{definition}[Dimension-$k$ interpretation]
+\begin{definition}[Relativized dimension-$k$ interpretation]
   \label{def:desc-dim-k}
-  \uses{def:desc-interpretation}
+  \uses{def:desc-tagged-interpretation}
   A dimension-$k$ interpretation defines the target universe as a definable subset
   of $\mathrm{dom}^k$. Each target relation of arity $a$ is defined by a formula
   with $a k$ free variables. This requires a codec
@@ -1739,13 +1779,37 @@ existing logics rather than a restriction imposed on them.
 \begin{definition}[Ordered first-order logic]
   \label{def:desc-ordered-fo}
   \uses{def:desc-fo-syntax, def:desc-structure}
-  First-order logic extended with atoms for the canonical order $\le$, successor,
-  minimum, and maximum of $\mathrm{Fin}(n)$. These atoms are interpreted by the
-  existing meta-level helpers. The existing unordered syntax and its unrestricted
+  A vocabulary extension with designated relations for canonical order and
+  successor, and constants for minimum and maximum, on $\mathrm{Fin}(n)$.
+  Interpret this vocabulary by the existing meta-level helpers, making these
+  relations available to formulas. The existing unordered syntax and its unrestricted
   invariance theorem stay unchanged. Ordered sentences are preserved only by maps
   that respect the canonical order, and they need not define order-independent
   queries.
 \end{definition}
+
+\begin{definition}[Canonical numerical predicates]
+  \label{def:desc-numerical-predicates}
+  \uses{def:desc-ordered-fo, def:desc-structure}
+  On $\{0,\ldots,n-1\}$, let $\mathrm{BIT}(x,i)$ hold when bit $i$ of $x$ is
+  one, $\mathrm{ADD}(x,y,z)$ when $x+y=z$ in $\mathbb N$, and
+  $\mathrm{MUL}(x,y,z)$ when $xy=z$ in $\mathbb N$. The latter two are ternary
+  relations restricted to the universe, without modular wraparound. Extend
+  each input vocabulary by the selected predicates with these fixed semantics.
+  These logical extensions have not yet been implemented.
+\end{definition}
+
+\begin{theorem}[BIT and arithmetic have the same first-order expressive power]
+  \label{thm:desc-bit-arithmetic}
+  \uses{def:desc-numerical-predicates, def:desc-fo-syntax, def:desc-fo-semantics}
+  Over finite initial segments, with the same additional input relations,
+  $\cc{FO}[\mathrm{BIT}]=\cc{FO}[\mathrm{ADD},\mathrm{MUL}]$.
+  Each direction requires formulas independent of the universe size, together
+  with a satisfaction-preserving translation. Canonical order is itself
+  definable from BIT. This is a planned formalization of the equivalences in
+  Schweikardt and Schwentick, \emph{A note on the expressive power of linear
+  orders}, Theorem~1.1 (2011), \url{https://lmcs.episciences.org/1008/pdf}.
+\end{theorem}
 
 \begin{theorem}[Fagin, $\exists\cc{SO} \subseteq \cc{NP}$]
   \label{thm:desc-fagin-upper}

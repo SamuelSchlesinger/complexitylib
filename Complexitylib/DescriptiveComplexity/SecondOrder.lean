@@ -17,6 +17,11 @@ public import Complexitylib.DescriptiveComplexity.SecondOrder.Certificate
 /-!
 # Second-order logic over finite structures
 
-Aggregates the second-order syntax, semantics, and isomorphism-invariance
-modules, the foundations for Fagin's theorem `NP = ∃SO` (not yet formalized).
+Aggregates second-order syntax, semantics, isomorphism invariance, relation
+renaming, existential-prefix connectives, and verified matrix evaluation with
+Boolean relation witnesses. Canonical truth-table certificates have exact length,
+and existential-SO sentences have verified binary certificate checkers with
+polynomial witness bounds. The downstream `SecondOrder.PolynomialTime` module
+proves their polynomial-time machine bound and Fagin's upper direction `∃SO ⊆ NP`.
+The converse tableau construction remains planned.
 -/

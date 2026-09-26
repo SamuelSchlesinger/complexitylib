@@ -16,8 +16,11 @@ structures) is a first-order *interpretation*: the target structure is defined f
 the source by FO formulas, one per target relation symbol. This module gives the
 dimension-1 (universe-preserving) case — each target relation is an FO-definable
 relation on the same universe — the foundational special case of the general
-dimension-`k` interpretation (whose target universe is a definable subset of `domᵏ`,
-which is not yet formalized).
+dimension-`k` interpretation. `TaggedFOInterpretation` in the `Interpretation`
+module supplies full tagged tuple universes and their isomorphisms. Its `Pullback`
+and `Composition` modules give formula transport and composition; `TaggedReduction`
+bundles the resulting reductions between invariant problems. Definable subuniverses
+remain a separate extension.
 
 First-order reductions are the reductions of descriptive complexity: weak enough to
 sit inside `FO`/`AC⁰`, yet enough to define completeness for the standard classes.
@@ -27,8 +30,10 @@ than Immerman's first-order projections (over ordered structures, of dimension `
 in a specific projective normal form), which are the reductions in the literature's
 completeness results; those results are not stated for `FOProjReduces`.
 
-Each Boolean query induces a machine-model `Language` via `queryLanguage`; the
-string-level FO-reduction (an FO map on encodings) is not yet formalized.
+Each Boolean query induces a machine-model `Language` via `queryLanguage`.
+`Reduction.Encoding` proves that these universe-preserving interpretations
+induce polynomial-time many-one reductions on the full binary languages,
+including malformed inputs.
 
 ## Main definitions and results
 
