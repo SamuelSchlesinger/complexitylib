@@ -678,7 +678,11 @@ existing logics rather than a restriction imposed on them.
 
 \begin{definition}[Arithmetic encoding addresses]
   \label{def:desc-arithmetic-addresses}
-
+  \lean{Complexity.DescriptiveComplexity.tupleIndex,
+    Complexity.DescriptiveComplexity.tupleDigits,
+    Complexity.DescriptiveComplexity.relationAddress,
+    Complexity.DescriptiveComplexity.constantAddress}
+  \leanok
   \uses{def:desc-encoding-positions}
   A tuple has the little-endian base-$n$ index
   $a_0+n a_1+\cdots+n^{k-1}a_{k-1}$. The address of a relation-table entry adds
@@ -691,7 +695,17 @@ existing logics rather than a restriction imposed on them.
 
 \begin{theorem}[Arithmetic addresses match the encoder]
   \label{thm:desc-arithmetic-addresses}
-
+  \lean{Complexity.DescriptiveComplexity.tupleIndex_lt,
+    Complexity.DescriptiveComplexity.getElem?_allTuples_index,
+    Complexity.DescriptiveComplexity.getElem?_encodeRelC_index,
+    Complexity.DescriptiveComplexity.tupleDigits_lt,
+    Complexity.DescriptiveComplexity.tupleIndex_tupleDigits,
+    Complexity.DescriptiveComplexity.map_allTuples_eq_range,
+    Complexity.DescriptiveComplexity.encodingPosition_relation,
+    Complexity.DescriptiveComplexity.encodingPosition_constant,
+    Complexity.DescriptiveComplexity.getElem?_encodeStruct_relation,
+    Complexity.DescriptiveComplexity.getElem?_encodeStruct_constant}
+  \leanok
   \uses{def:desc-arithmetic-addresses, thm:desc-encoding-positions}
   For coordinates below $n$, a $k$-tuple's index is below $n^k$ and selects that
   tuple in the encoder's enumeration. The arithmetic relation and constant
@@ -703,7 +717,7 @@ existing logics rather than a restriction imposed on them.
   index below $n^k$, and scanning numeric indices reproduces the tuple enumeration.
 \end{theorem}
 \begin{proof}
-
+  \leanok
   Prove that indexing a flattened list uses the total length of preceding
   blocks plus the index inside the chosen block. Induct on tuple length for
   the base-$n$ index, then apply the flattened-list rule to the relation and

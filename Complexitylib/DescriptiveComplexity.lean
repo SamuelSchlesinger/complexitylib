@@ -29,6 +29,7 @@ public import Complexitylib.DescriptiveComplexity.Problems.Coloring
 public import Complexitylib.DescriptiveComplexity.Problems.Interpretations
 public import Complexitylib.DescriptiveComplexity.Problems.Copies
 public import Complexitylib.DescriptiveComplexity.Encoding.Positions
+public import Complexitylib.DescriptiveComplexity.Encoding.Arithmetic
 public import Complexitylib.DescriptiveComplexity.Encoding.Decoding
 public import Complexitylib.DescriptiveComplexity.ModelChecking.Encoded
 public import Complexitylib.DescriptiveComplexity.Circuit
