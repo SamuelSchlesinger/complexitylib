@@ -8,6 +8,7 @@ module
 public import Complexitylib.DescriptiveComplexity.SecondOrder.Syntax
 public import Complexitylib.DescriptiveComplexity.SecondOrder.Semantics
 public import Complexitylib.DescriptiveComplexity.SecondOrder.Isomorphism
+public import Complexitylib.DescriptiveComplexity.SecondOrder.Renaming
 
 /-!
 # Second-order logic over finite structures

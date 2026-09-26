@@ -319,6 +319,57 @@ existing logics rather than a restriction imposed on them.
   existential quantifiers followed by an FO matrix.
 \end{definition}
 
+\begin{definition}[Relation-variable renaming]
+  \label{def:desc-so-renaming}
+  \lean{Complexity.DescriptiveComplexity.RelRenaming,
+    Complexity.DescriptiveComplexity.RelRenaming.id,
+    Complexity.DescriptiveComplexity.RelRenaming.comp,
+    Complexity.DescriptiveComplexity.RelRenaming.lift,
+    Complexity.DescriptiveComplexity.RelRenaming.weaken,
+    Complexity.DescriptiveComplexity.RelRenaming.pull,
+    Complexity.DescriptiveComplexity.SOFormula.renameRel}
+  \leanok
+  \uses{def:desc-so-syntax, def:desc-so-semantics}
+  A relation renaming maps de Bruijn indices between contexts while preserving
+  each relation's arity. Its lift fixes a newly bound relation and renames the
+  older variables. Weakening shifts all free relation indices past a fresh
+  binder. Formula renaming lifts beneath both kinds of SO quantifier, leaving
+  element variables and vocabulary symbols unchanged. Pullback reads a target
+  relation environment at the renamed source indices.
+\end{definition}
+
+\begin{theorem}[Relation-renaming laws]
+  \label{thm:desc-so-renaming}
+  \lean{Complexity.DescriptiveComplexity.RelRenaming.ext,
+    Complexity.DescriptiveComplexity.RelRenaming.lift_id,
+    Complexity.DescriptiveComplexity.RelRenaming.lift_comp,
+    Complexity.DescriptiveComplexity.RelRenaming.pull_id,
+    Complexity.DescriptiveComplexity.RelRenaming.pull_comp,
+    Complexity.DescriptiveComplexity.RelRenaming.pull_lift_rCons,
+    Complexity.DescriptiveComplexity.RelRenaming.pull_weaken_rCons,
+    Complexity.DescriptiveComplexity.SOFormula.renameRel_sat,
+    Complexity.DescriptiveComplexity.SOFormula.renameRel_weaken_sat,
+    Complexity.DescriptiveComplexity.SOFormula.size_renameRel,
+    Complexity.DescriptiveComplexity.SOFormula.isFOMatrix_renameRel,
+    Complexity.DescriptiveComplexity.SOFormula.isExistSO_renameRel,
+    Complexity.DescriptiveComplexity.SOFormula.renameRel_id,
+    Complexity.DescriptiveComplexity.SOFormula.renameRel_comp}
+  \leanok
+  \uses{def:desc-so-renaming, def:desc-existential-so}
+  Satisfaction after renaming is satisfaction under the pulled-back relation
+  environment, for arbitrary free element and relation assignments. Weakening
+  ignores the new relation. Identity and composition hold as exact equalities
+  of syntax, and renaming preserves size and preserves and reflects both FO
+  matrices and existential SO prefix form. These statements include nullary
+  relation variables and do not require an injective renaming.
+\end{theorem}
+\begin{proof}
+  \leanok
+  Split relation indices into the fresh head and the older tail to prove the
+  environment laws. Induct on formulas, using the lifted renaming under SO
+  quantifiers. Arity preservation makes each renamed relation atom well-typed.
+\end{proof}
+
 \begin{definition}[Second-order definable query]
   \label{def:desc-so-definable}
   \lean{Complexity.DescriptiveComplexity.SODefinable}
