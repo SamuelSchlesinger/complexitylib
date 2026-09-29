@@ -795,6 +795,100 @@ than computing the output of a deterministic run.
   by a constant built from an input and its negation.
 \end{proof}
 
+\section{Shallow circuits for symmetric functions}
+\label{sec:circuits-shallow-symmetric}
+
+This section formalizes the upper bounds of Victor Lecomte and Prasanna
+Ramakrishnan, \emph{Optimal Shallow Circuits for Majority},
+\href{https://arxiv.org/abs/2609.34029}{arXiv:2609.34029v1} (2026),
+Sections 3 and 4. The witnesses are native CSLib circuits over the library's
+unbounded AND/OR signature. Size counts AND/OR gates; negated input literals
+are free. The matching lower bound attributed to H\aa stad in the paper is
+not reproved here.
+
+\begin{definition}[Symmetry, majority, and input negations]
+  \label{def:circuits-shallow-symmetric}
+  \lean{Complexity.Shallow.weight, Complexity.Shallow.Symmetric,
+    Complexity.Shallow.majority, Complexity.Shallow.InputNegationsOnly}
+  \leanok
+  \uses{def:circuits-bases}
+  A Boolean function is symmetric when it is constant on each Hamming-weight
+  level. Majority accepts precisely when $2|x| \ge n$, including ties.
+  A circuit has input-only negations when every negated gate argument reads
+  a primary input; no internal gate output is negated.
+\end{definition}
+
+\begin{lemma}[Shifted distinctness tests]
+  \label{lem:circuits-shallow-shifts}
+  \lean{Complexity.Shallow.ShiftTest, Complexity.Shallow.ShiftTest.sound,
+    Complexity.Shallow.card_acceptingShifts,
+    Complexity.Shallow.exists_simultaneous_shiftTest_cover}
+  \leanok
+  Let $G$ be a finite abelian group of order $k$, let $w:G\to G$ be a block
+  weight vector, and fix a target $t\in G$. A shift $s:G\to G$ accepts when
+  $\sum_i s_i=\sum_{a\in G}a-t$ and the values $w_i+s_i$ are distinct.
+  Acceptance implies $\sum_i w_i=t$. If $\sum_i w_i=t$, exactly $k!$ of the
+  $k^k$ shifts accept. For finitely many groups $G_j$ and at most $2^n$ valid
+  inputs, a family of $3^{\sum_j |G_j|}(n+1)$ simultaneous tests covers every
+  valid input.
+\end{lemma}
+\begin{proof}
+  \leanok
+  Accepting shifts correspond bijectively to permutations of $G$ via
+  $s_i=\pi(i)-w_i$. The inequality $k^k\le 3^k k!$ bounds the failure
+  probability, and a finite union bound supplies the covering family.
+  The formalization samples all shifts and rejects incorrect sums, instead
+  of restricting the sampling space to compatible sums as in the paper.
+\end{proof}
+
+\begin{theorem}[Lecomte--Ramakrishnan symmetric-function upper bound]
+  \label{thm:circuits-shallow-symmetric}
+  \lean{Complexity.Shallow.symmetric_upper_bound,
+    Complexity.Shallow.symmetric_upper_bound_nat}
+  \leanok
+  \uses{def:circuits-shallow-symmetric}
+  For every fixed integer $d\ge2$ there is a real constant $C_d>0$ such
+  that, for every $n\ge1$ and every symmetric $f:\{0,1\}^n\to\{0,1\}$,
+  there is an unbounded-fan-in AND/OR circuit computing $f$, with depth at
+  most $d$, size at most $2^{C_d n^{1/(d-1)}}$, and input-only negations.
+  The constant is uniform over $n$ and $f$. An integer-root version gives
+  size at most $2^{K_d(\lfloor n^{1/(d-1)}\rfloor+1)}$ for some natural
+  constant $K_d$, also at $n=0$.
+\end{theorem}
+\begin{proof}
+  \leanok
+  \uses{lem:circuits-shallow-shifts}
+  Induct on depth, using a truth-table CNF or DNF at depth two. At the next
+  depth, choose powers of distinct primes, each comparable to an integer
+  root scale, whose product exceeds $n$. For each modulus, partition the
+  inputs into balanced residue blocks. Complementing the second block
+  makes a difference of two block weights a symmetric function of the
+  combined inputs, so the induction hypothesis computes each comparison.
+  Merge their AND roots to build shifted tests, and add one OR layer over
+  a covering family. Coprimality makes the modular equalities certify exact
+  weight. Merge the OR roots for all accepted weights to compute $f$.
+  The explicit finite recurrence bounds size by $2^{O(k)}$ when
+  $n\le k^{d-1}$. The layer compiler preserves gate count, bounds CSLib's
+  circuit depth, and restricts all negations to primary inputs.
+\end{proof}
+
+\begin{corollary}[Depth three and majority]
+  \label{cor:circuits-shallow-majority}
+  \lean{Complexity.Shallow.symmetric_depth_three,
+    Complexity.Shallow.majority_upper_bound}
+  \leanok
+  \uses{def:circuits-shallow-symmetric}
+  Every symmetric function has depth-three circuits of size
+  $2^{O(\sqrt n)}$. In particular, majority has circuits of depth at most
+  $d$ and size $2^{O(n^{1/(d-1)})}$ at each fixed $d\ge2$, with input-only
+  negations in both statements.
+\end{corollary}
+\begin{proof}
+  \leanok
+  \uses{thm:circuits-shallow-symmetric}
+  Specialize to depth three, or to the majority function, respectively.
+\end{proof}
+
 \section{Formulas and Barrington's theorem}
 \label{sec:circuits-barrington}
 

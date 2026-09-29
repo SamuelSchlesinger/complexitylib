@@ -66,6 +66,7 @@ public import Complexitylib.Circuits.XOR
 public import Complexitylib.Circuits.XOR.Restriction
 public import Complexitylib.Circuits.EssentialInput
 public import Complexitylib.Circuits.Shannon
+public import Complexitylib.Circuits.Shallow
 public import Complexitylib.Circuits.LowerBound
 public import Complexitylib.Circuits.Schnorr
 public import Complexitylib.Circuits.DepthClasses
@@ -256,6 +257,8 @@ Theorem modules (re-export definitions + main results):
 
 * `Complexitylib.Circuits.AndOrNot` — functional completeness of AND/OR
 * `Complexitylib.Circuits.Shannon` — Shannon counting lower bound
+* `Complexitylib.Circuits.Shallow` — the Lecomte--Ramakrishnan shallow-circuit
+  upper bound for symmetric functions, directly in CSLib's circuit model
 * `Complexitylib.Circuits.LowerBound` — gate elimination lower bound
 * `Complexitylib.Circuits.Schnorr` — Schnorr's XOR lower bound
 * `Complexitylib.Circuits.Nondeterminism` — nondeterministic quantification complexity bounds
