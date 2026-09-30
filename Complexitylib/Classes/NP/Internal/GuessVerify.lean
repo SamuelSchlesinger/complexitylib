@@ -5,6 +5,8 @@ Authors: Bolton Bailey
 -/
 module
 public import Complexitylib.SAT.Internal.GuessVerify
+public import Complexitylib.Models.TuringMachine.Witness.Verifier
+public import Complexitylib.Classes.NP.Internal.VerifierBounds
 public import Complexitylib.Classes.NP.Closure
 public import Complexitylib.Classes.P.Bridge
 public import Complexitylib.Classes.P.DecisionFn
@@ -14,17 +16,16 @@ public import Complexitylib.Classes.P.Cobham.Internal
 /-!
 # Guess and verify, for any language
 
-The guess-and-verify machine built for SAT is not in fact specific to SAT: it
-takes an arbitrary deterministic verifier `M`, guesses a string of length at
-most `|x| + 1`, pairs it with the input and runs `M` on the result. Every
-structural theorem about it in `SAT/Internal/GuessVerify` is already stated for
-an arbitrary language `L`; only the final assembly mentions SAT.
+The linear witness theorem is a corollary of the generic finite-verifier
+compiler: compute a unary bound, materialize a reusable certificate on charged
+work tape, build the paired virtual input, and run the ordinary verifier. The
+online-witness equivalence then supplies an NTM with the compiler's explicit
+resource bounds. The earlier SAT-specific machine theorem is retained below
+for compatibility, but does not justify the generic membership proof.
 
-This module performs that assembly generically, first for witnesses of linear
-length and then for any polynomial witness bound, by padding the input until the
-bound is linear. `Complexitylib.Classes.NP.WitnessConstruction` repackages the
-result as the proof `NP.witnessNTMConstruction` of the guess-and-verify
-interface `NP.WitnessNTMConstruction`.
+Polynomial witness bounds are reduced to the linear case by padding as before.
+`Complexitylib.Classes.NP.WitnessConstruction` packages this route as the
+unconditional proof of `NP.WitnessNTMConstruction` and the FNP-to-NP corollaries.
 
 ## Main results
 
@@ -71,10 +72,21 @@ verifier accepts is in `NP`. -/
 theorem mem_NP_of_linear_witness {L L₀ : Language} (hL₀ : L₀ ∈ P)
     (hchar : ∀ x, x ∈ L ↔ ∃ y : List Bool, y.length ≤ x.length + 1 ∧ pair x y ∈ L₀) :
     L ∈ NP := by
-  obtain ⟨c, k, M, f, hM, hfO⟩ := Set.mem_iUnion.mp hL₀
-  obtain ⟨d, hgO⟩ := SAT.satGuessVerifyTime_bigO_of_bigO hfO
-  exact Set.mem_iUnion.mpr ⟨d, k + 3, SAT.satGuessVerifyNTM M, SAT.satGuessVerifyTime f,
-    guessVerify_decidesInTime M hM hchar, hgO⟩
+  obtain ⟨c, k, M, T, hM, hT⟩ := Set.mem_iUnion.mp hL₀
+  obtain ⟨d, hd⟩ := WitnessTM.Verifier.time_linear_bigO_of_bigO hT
+  have hcompile' := WitnessTM.Verifier.compile_decidesInTimeSpace WitnessBoundSetup.linear M
+    (TM.decidesInTimeSpace_of_decidesInTime hM)
+  have hlang : L = WitnessTM.Verifier.language (fun n => n + 1) L₀ := by
+    ext x
+    exact hchar x
+  rw [← hlang] at hcompile'
+  have hNTM := ((WitnessTM.Verifier.compile WitnessBoundSetup.linear M).decidesInTimeSpace_iff
+    L (WitnessTM.Verifier.time WitnessBoundSetup.linear T)
+      (WitnessTM.Verifier.space WitnessBoundSetup.linear T)).mp hcompile'
+  exact Set.mem_iUnion.mpr ⟨d, WitnessTM.Verifier.tapes 0 k,
+    (WitnessTM.Verifier.compile WitnessBoundSetup.linear M).toNTM,
+    WitnessTM.Verifier.time WitnessBoundSetup.linear T, hNTM.1, hd⟩
+
 
 /-! ### Any polynomial witness bound -/
 
