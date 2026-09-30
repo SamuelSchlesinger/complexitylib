@@ -6,6 +6,7 @@ Authors: Samuel Schlesinger
 
 module
 public import Complexitylib.BooleanAnalysis.FourierExpansion
+public import Complexitylib.BooleanAnalysis.PolynomialCorrelation
 
 /-!
 # Analysis of Boolean functions
@@ -20,6 +21,9 @@ Currently formalized: Boolean functions and the Fourier expansion, with the
 parity functions as an orthonormal basis, Fourier coefficients and weights,
 Parseval/Plancherel, and the mean/variance/covariance and convolution API;
 Chapter 2 foundations include noise stability, the noise operator, derivatives,
-and coordinate and total influence. All definitions and theorems live under the
+and coordinate and total influence. The polynomial correlation development proves
+the exponential XOR-of-majorities bound of Chattopadhyay, Hatami, Lee, Lovett,
+Tal, and Viola (2026), including its finite middle-band estimate.
+All definitions and theorems live under the
 `Complexity.BooleanAnalysis` namespace.
 -/

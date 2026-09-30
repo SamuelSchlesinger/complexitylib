@@ -8,7 +8,8 @@ property-testing side is used elsewhere in the library: the BLR soundness
 theorem is used by the Hadamard tester in the PCP development. Everything
 formalized here lives in \texttt{Complexitylib.BooleanAnalysis} (the
 \texttt{FourierExpansion} surface, with \texttt{FourierExpansion.Defs} and
-\texttt{FourierExpansion.Internal}). The following are formalized: the parity
+\texttt{FourierExpansion.Internal}, and the \texttt{PolynomialCorrelation}
+development). The following Fourier results are formalized: the parity
 basis, the Fourier expansion, Plancherel and Parseval, the degree
 decomposition, the BLR linearity test with soundness and local correction, the
 spectral definitions and basic identities of noise stability, noise
@@ -21,6 +22,11 @@ main open direction: its tensorization step is what the level-1 inequality,
 FKN, KKL, and Friedgut's junta theorem all need. The Linial--Mansour--Nisan
 concentration bound for $\cc{AC^0}$ needs instead the Fourier degree bound for
 decision trees and a Fourier-side restriction API.
+
+Section~\ref{sec:analysis-polynomial-correlation} also formalizes the exponential
+correlation bound for XOR of majorities against low-degree binary polynomials.
+Its proof uses finite interpolation and dimension counting independently of
+the Fourier infrastructure.
 
 \paragraph{Conventions.} The cube is $\mathbb{F}_2^n$, written
 \texttt{Cube n = Fin n -> ZMod 2}. The encoding is $\chi(0) = 1$, $\chi(1) = -1$, so
@@ -769,4 +775,114 @@ Nothing in this section is formalized yet.
   \uses{thm:analysis-lmn, prop:analysis-influence-basic}
   The real-valued view of parity is $\chi_{[n]}$, whose entire Fourier weight
   sits at degree $n$.
+\end{proof}
+
+\section{Exponential correlation bounds for binary polynomials}
+\label{sec:analysis-polynomial-correlation}
+
+This section formalizes Theorem~1.1 and the finite estimate of Section~2.3 of
+Eshan Chattopadhyay, Pooya Hatami, Chin Ho Lee, Shachar Lovett, Avishay Tal,
+and Emanuele Viola, \emph{Exponential Correlation Bounds for Polynomials},
+\href{https://arxiv.org/abs/2609.28839}{arXiv:2609.28839v1} (2026).
+The improved numerical constant and the pseudorandom-generator applications
+in the appendices are not formalized here.
+
+\begin{definition}[Block majority and absolute correlation]
+  \label{def:analysis-polynomial-correlation}
+  \lean{Complexity.BooleanAnalysis.PolynomialCorrelation.BlockCube,
+    Complexity.BooleanAnalysis.PolynomialCorrelation.majority,
+    Complexity.BooleanAnalysis.PolynomialCorrelation.xorMajority,
+    Complexity.BooleanAnalysis.PolynomialCorrelation.xorMajorityBits,
+    Complexity.BooleanAnalysis.PolynomialCorrelation.polynomialEval,
+    Complexity.BooleanAnalysis.PolynomialCorrelation.correlation,
+    Complexity.BooleanAnalysis.PolynomialCorrelation.middleBandCount}
+  \leanok
+  Set $\ell=2m+1$. Inputs have $k$ blocks of $\ell$ bits, represented either
+  by their true-coordinate subsets or by ordinary $\mathbb F_2$ assignments.
+  Write $h_i(x)=[|x^{(i)}|>m]$ and $H(x)=\sum_i h_i(x)$ in $\mathbb F_2$.
+  Define $\operatorname{corr}(f,g)=|\mathbb E_x(-1)^{f(x)+g(x)}|$ for uniform $x$,
+  and $N_{m,d}=\#\{A\subseteq[\ell]:|A|\le m<|A|+d\}$.
+\end{definition}
+
+\begin{definition}[Modified-degree filtration]
+  \label{def:analysis-polynomial-weight}
+  \lean{Complexity.BooleanAnalysis.PolynomialCorrelation.monomial,
+    Complexity.BooleanAnalysis.PolynomialCorrelation.Low,
+    Complexity.BooleanAnalysis.PolynomialCorrelation.lowSpan,
+    Complexity.BooleanAnalysis.PolynomialCorrelation.Term,
+    Complexity.BooleanAnalysis.PolynomialCorrelation.termEval,
+    Complexity.BooleanAnalysis.PolynomialCorrelation.weight,
+    Complexity.BooleanAnalysis.PolynomialCorrelation.filtration}
+  \leanok
+  \uses{def:analysis-polynomial-correlation}
+  Let $V_m$ span the squarefree monomials $x^A$ with $|A|\le m$.
+  A product generator $x^{\mathbf A}h^S$ has weight
+  $(m+1)|S|+\sum_{i\notin S}|A_i|$, with each $|A_i|\le m$.
+  Let $F_r$ be the span of generators of weight at most $r$.
+\end{definition}
+
+\begin{lemma}[Odd-block interpolation]
+  \label{lem:analysis-polynomial-interpolation}
+  \lean{Complexity.BooleanAnalysis.PolynomialCorrelation.low_interpolation,
+    Complexity.BooleanAnalysis.PolynomialCorrelation.majority_decomposition}
+  \leanok
+  \uses{def:analysis-polynomial-weight}
+  Every function on $\{x:|x|\le m\}$ has an interpolant in $V_m$.
+  Every function on an odd block is $q+hr$ for some $q,r\in V_m$.
+\end{lemma}
+\begin{proof}
+  \leanok
+  Restricted monomials span by triangular elimination on subset cardinality.
+  Complementing coordinates handles the upper half of the cube.
+\end{proof}
+
+\begin{lemma}[Polynomial multiplication]
+  \label{lem:analysis-polynomial-multiplication}
+  \lean{Complexity.BooleanAnalysis.PolynomialCorrelation.polynomial_mul_mem}
+  \leanok
+  \uses{lem:analysis-polynomial-interpolation}
+  If $f\in F_r$ and $p$ has ordinary total degree at most $d$, then $pf\in F_{r+d}$.
+\end{lemma}
+\begin{proof}
+  \leanok
+  Reinterpolate a block when a variable reaches its middle level; use $h_i^2=h_i$.
+  Iterate over each monomial in the polynomial's support.
+\end{proof}
+
+\begin{theorem}[Finite middle-band bound]
+  \label{thm:analysis-polynomial-correlation-finite}
+  \lean{Complexity.BooleanAnalysis.PolynomialCorrelation.xorMajority_correlation_le_middleBand}
+  \leanok
+  \uses{lem:analysis-polynomial-multiplication}
+  For every $p\in\mathbb F_2[X_{i,j}]$ of total degree at most $d$,
+  \[
+    \operatorname{corr}(H,p)\le \left(\frac{2N_{m,d}}{2^\ell}\right)^k.
+  \]
+\end{theorem}
+\begin{proof}
+  \leanok
+  On $E=\{p=H\}$, eliminate a majority factor from a block with $|A_i|+d\le m$,
+  using induction on weight. Counting retained generators gives
+  $2|E|\le 2^{k\ell}+(2N_{m,d})^k$. Apply the same bound to $p+1$.
+\end{proof}
+
+\begin{theorem}[Exponential correlation bound, Theorem 1.1]
+  \label{thm:analysis-polynomial-correlation}
+  \lean{Complexity.BooleanAnalysis.PolynomialCorrelation.xorMajority_correlation_le,
+    Complexity.BooleanAnalysis.PolynomialCorrelation.xorMajorityBits_correlation_le}
+  \leanok
+  \uses{thm:analysis-polynomial-correlation-finite}
+  For $\ell=2m+1$ and every binary polynomial $p$ of total degree at most $d$,
+  \[
+    \operatorname{corr}(\mathrm{Maj}_\ell^{\oplus k},p)
+      \le \left(\frac{2d}{\sqrt\ell}\right)^k.
+  \]
+  The formal statements include $k=0$ and $d=0$.
+\end{theorem}
+\begin{proof}
+  \leanok
+  Bound $N_{m,d}\le d\binom\ell m$ and
+  $\binom\ell m\le 2^\ell/\sqrt\ell$.
+  The latter follows from the elementary inductive inequality
+  $(3m+1)\binom{2m}{m}^2\le16^m$.
 \end{proof}
