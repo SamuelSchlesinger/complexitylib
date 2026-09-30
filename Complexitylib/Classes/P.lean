@@ -15,6 +15,7 @@ public import Complexitylib.Classes.P.FinsetDomain
 public import Complexitylib.Classes.P.Cobham
 public import Complexitylib.Classes.P.Pairing
 public import Complexitylib.Classes.P.Iterate
+public import Complexitylib.Classes.P.InitializedIterate
 public import Complexitylib.Classes.P.Range
 public import Complexitylib.Classes.P.Unary
 public import Complexitylib.Classes.P.StringAccess
@@ -51,6 +52,8 @@ This file aggregates the definitions and theorems for P, FP, and PSPACE.
 - `iterate_mem_FP`, `iterate_mem_FP_of_polyBound`, `iterate_mem_FP_of_step_le`,
   `iterate_mem_FP_along` — iterating a polynomial-time step is polynomial-time
   while the states stay polynomially short
+- `initializedStep_mem_FP`, `initializedStep_iterate` — initialize a packed state once
+  and iterate with the original input preserved, while intermediate states stay nonempty
 - `recFold_mem_FP_of_bound` — so is a bitwise fold with polynomially short states
 - `catRange_mem_FP`, `flatMap_range_mem_FP` — concatenating a polynomial-time
   rule's outputs over a unary range is polynomial-time, with corollaries for

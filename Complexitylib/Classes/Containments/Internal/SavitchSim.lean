@@ -225,16 +225,14 @@ theorem savG_iterate (tm : NTM k) (qp lp : Polynomial ℕ) (x : List Bool) :
     ∀ j : ℕ, (savG tm qp lp)^[j + 1] (pair [] x)
       = pair (encSst (savR qp x)
           ((savSem tm (savR qp x))^[j] (savInitSst tm qp lp x))) x := by
+  have horbit (i : ℕ) : (savStep tm)^[i] (savInit tm qp lp x)
+      = encSst (savR qp x)
+          ((savSem tm (savR qp x))^[i] (savInitSst tm qp lp x)) := by
+    rw [savInit_eq, savStep_iterate _ _ _ _ (savInitSst_stkOk tm qp lp x)]
   intro j
-  induction j with
-  | zero =>
-      rw [Function.iterate_one, savG_nil, savInit_eq]
-      rfl
-  | succ j ih =>
-      have hst : Sav.StkOk ((savSem tm (savR qp x))^[j] (savInitSst tm qp lp x)) :=
-        savSem_iterate_stkOk tm _ j _ (savInitSst_stkOk tm qp lp x)
-      rw [Function.iterate_succ_apply', ih, savG_step _ _ _ _ _ (encSst_ne_nil _ _),
-        savStep_encSst tm _ _ hst, Function.iterate_succ_apply']
+  change (initializedStep (savInit tm qp lp) (fun _ => savStep tm))^[j + 1] (pair [] x) = _
+  rw [initializedStep_iterate _ _ _ j (fun i _ => by rw [horbit]; exact encSst_ne_nil _ _),
+    horbit]
 
 /-- The head of a packed state is its done flag. -/
 theorem headD_pair_encSst (R : List Bool) (s : Sav.Sst) (x : List Bool) :

@@ -497,6 +497,33 @@ these facts are stated in the chapter on encodings
   bound on the values the states encode, when $F$ computes a map on them.
 \end{proof}
 
+\begin{lemma}[Initialized iteration with a preserved input]
+  \label{lem:polytime-initialized-iterate}
+  \lean{Complexity.initializedStep, Complexity.initializedStep_mem_FP,
+    Complexity.initializedStep_iterate}
+  \leanok
+  \uses{def:FP, def:pair}
+  Given an initializer $I$ and a step $F_x$ depending on an unchanged input $x$,
+  let $G$ replace $\mathrm{pair}(\varepsilon,x)$ by
+  $\mathrm{pair}(I(x),x)$ and replace $\mathrm{pair}(s,x)$, for nonempty $s$,
+  by $\mathrm{pair}(F_x(s),x)$. On arbitrary strings it uses the total pair
+  projections. If $I$ and the function mapping a packed state and input to
+  $F_x(s)$ belong to $\cc{FP}$, then $G \in \cc{FP}$. Whenever
+  $F_x^j(I(x))$ is nonempty for every $j<n$,
+  \[
+    G^{n+1}(\mathrm{pair}(\varepsilon,x))
+      = \mathrm{pair}(F_x^n(I(x)),x).
+  \]
+  The last state may be empty; the extra call is exactly initialization.
+\end{lemma}
+\begin{proof}
+  \leanok
+  Pairing, projections, and branching on emptiness are polynomial-time.
+  Induction on $n$ proves the orbit equation; nonemptiness prevents a later
+  call from initializing again. Both the Savitch and IP stack walks use this
+  controller and their existing encoded-step simulation theorems.
+\end{proof}
+
 \begin{lemma}[Loops over a range in $\cc{FP}$]
   \label{lem:polytime-fp-combinators}
   \lean{Complexity.catRange_mem_FP, Complexity.flatMap_range_mem_FP,
