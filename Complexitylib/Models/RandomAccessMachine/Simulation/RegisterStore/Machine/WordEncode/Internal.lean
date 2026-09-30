@@ -48,13 +48,6 @@ private theorem parked_of_binaryPrefix {t : Tape} {bits : List Bool}
   ⟨by rw [h.1]; omega,
     (show t.HasBinaryContent bits from h.2).cells_ne_start⟩
 
-private theorem cells_eq_init_of_binaryContent {t : Tape} {bits : List Bool}
-    (h : t.HasBinaryContent bits) (hstart : t.cells 0 = Γ.start) :
-    t.cells = (Tape.init (bits.map Γ.ofBool)).cells := by
-  let parked : Tape := { head := bits.length + 1, cells := t.cells }
-  have hprefix : parked.HasBinaryPrefix bits := ⟨rfl, h⟩
-  simpa [parked] using hprefix.cells_eq_init hstart
-
 theorem workEmitTM_reachesIn_frame_internal
     (idx : Fin n) (mode : WorkEmitMode) :
     ∀ (bits emitted : List Bool)
@@ -479,7 +472,7 @@ theorem rewindWordEncodeTM_hoareTime_frame_internal
     · simpa [finalCfg, TM.phase2Wrap] using hencodeInput.trans hrewindInput
     · change (encodeDone.work idx).cells = (work₀ idx).cells
       rw [hencodeCells, hrewindTarget]
-      exact (cells_eq_init_of_binaryContent hcontent hstart).symm
+      exact (hcontent.cells_eq_init hstart).symm
     · simpa [finalCfg, TM.phase2Wrap] using hencodeHead
     · intro i hi
       change encodeDone.work i = work₀ i

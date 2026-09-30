@@ -92,6 +92,20 @@ theorem HasBinaryContent.cells_ne_start {t : Tape} {bits : List Bool}
   · rw [hji, h.2 i (Nat.le_of_not_gt hi)]
     decide
 
+/-- Canonical binary contents with the left marker at cell zero have exactly
+the initialized cell contents, independently of the tape head. -/
+theorem HasBinaryContent.cells_eq_init {t : Tape} {bits : List Bool}
+    (h : t.HasBinaryContent bits) (h0 : t.cells 0 = Γ.start) :
+    t.cells = (Tape.init (bits.map Γ.ofBool)).cells := by
+  funext j
+  cases j with
+  | zero => simpa using h0
+  | succ i =>
+      by_cases hi : i < bits.length
+      · rw [h.1 i hi, Tape.init_ofBool_cells_lt bits i hi]
+      · have hge : bits.length ≤ i := by omega
+        rw [h.2 i hge, Tape.init_ofBool_cells_ge bits i hge]
+
 /-- Overwriting one in-range binary cell preserves canonical contents and
 updates exactly that bit. -/
 theorem HasBinaryContent.write_set {t : Tape} {bits : List Bool}
@@ -142,55 +156,24 @@ theorem hasOutput_of_hasBinaryString {t : Tape} {bits : List Bool}
 /-- A completed binary tape never contains `▷` after the left-end marker. -/
 theorem cells_ne_start_of_hasBinaryString {t : Tape} {bits : List Bool}
     (h : t.HasBinaryString bits) :
-    ∀ j, j ≥ 1 → t.cells j ≠ Γ.start := by
-  intro j hj
-  let i := j - 1
-  have hj_eq : j = i + 1 := by omega
-  by_cases hi : i < bits.length
-  · rw [hj_eq, h.2.1 i hi]
-    cases bits[i]'hi <;> simp [Γ.ofBool]
-  · have hge : bits.length ≤ i := by omega
-    rw [hj_eq, h.2.2 i hge]
-    decide
+    ∀ j, j ≥ 1 → t.cells j ≠ Γ.start :=
+  h.hasBinaryContent.cells_ne_start
 
 /-- A completed binary tape with the left marker at cell `0` is exactly the
     standard initialized tape for those bits, moved to cell `1`. -/
 theorem eq_init_move_right_of_hasBinaryString {t : Tape} {bits : List Bool}
     (h : t.HasBinaryString bits) (h0 : t.cells 0 = Γ.start) :
     t = (Tape.init (bits.map Γ.ofBool)).move Dir3.right := by
-  cases t with
-  | mk head cells =>
-    simp only [HasBinaryString] at h
-    rcases h with ⟨hhead, hbits, htail⟩
-    simp only at h0 hbits htail
-    subst head
-    simp only [Tape.move]
-    congr
-    funext j
-    by_cases hj0 : j = 0
-    · subst hj0
-      simp [Tape.init, h0]
-    · let i := j - 1
-      have hj : j = i + 1 := by omega
-      rw [hj]
-      by_cases hi : i < bits.length
-      · rw [hbits i hi, Tape.init_ofBool_cells_lt bits i hi]
-      · have hge : bits.length ≤ i := by omega
-        rw [htail i hge, Tape.init_ofBool_cells_ge bits i hge]
+  apply Tape.ext
+  · simpa only [Tape.move, Tape.init_head, Nat.zero_add] using h.1
+  · exact h.hasBinaryContent.cells_eq_init h0
 
 /-- A binary prefix with the left marker at cell zero has exactly the
 canonical initialized cell contents, independently of its current head. -/
 theorem HasBinaryPrefix.cells_eq_init {t : Tape} {bits : List Bool}
     (h : t.HasBinaryPrefix bits) (h0 : t.cells 0 = Γ.start) :
-    t.cells = (Tape.init (bits.map Γ.ofBool)).cells := by
-  funext j
-  cases j with
-  | zero => simpa using h0
-  | succ i =>
-      by_cases hi : i < bits.length
-      · rw [h.2.1 i hi, Tape.init_ofBool_cells_lt bits i hi]
-      · have hge : bits.length ≤ i := by omega
-        rw [h.2.2 i hge, Tape.init_ofBool_cells_ge bits i hge]
+    t.cells = (Tape.init (bits.map Γ.ofBool)).cells :=
+  HasBinaryContent.cells_eq_init h.2 h0
 
 /-- Bounded completed binary tapes expose exact initialized tape shape for
     some string whose length satisfies the same bound. -/
@@ -357,16 +340,8 @@ theorem hasBinaryPrefix_write_bit_cell0 {t : Tape} {bits : List Bool} (bit : Boo
 /-- A binary prefix never contains `▷` after the left-end marker. -/
 theorem cells_ne_start_of_hasBinaryPrefix {t : Tape} {bits : List Bool}
     (h : t.HasBinaryPrefix bits) :
-    ∀ j, j ≥ 1 → t.cells j ≠ Γ.start := by
-  intro j hj
-  let i := j - 1
-  have hj_eq : j = i + 1 := by omega
-  by_cases hi : i < bits.length
-  · rw [hj_eq, h.2.1 i hi]
-    cases bits[i]'hi <;> simp [Γ.ofBool]
-  · have hge : bits.length ≤ i := by omega
-    rw [hj_eq, h.2.2 i hge]
-    decide
+    ∀ j, j ≥ 1 → t.cells j ≠ Γ.start :=
+  HasBinaryContent.cells_ne_start h.2
 
 /-- Moving a completed binary string's head to the first blank, without
     changing its cells, yields the corresponding appendable prefix. -/
