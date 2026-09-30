@@ -127,6 +127,58 @@ space-level and variant-model robustness for random access machines.
   it does not require output $0$.
 \end{definition}
 
+\begin{definition}[Online witness machines]
+  \label{def:models-witness-tm}
+  \lean{Complexity.WitnessTM, Complexity.WitnessTM.run, Complexity.WitnessTM.toNTM,
+    Complexity.NTM.toWitnessTM, Complexity.WitnessTM.AllWitnessesHaltIn,
+    Complexity.WitnessTM.AcceptsInTime, Complexity.WitnessTM.DecidesInTime,
+    Complexity.WitnessTM.DecidesInTimeSpace, Complexity.WitnessTM.DecidesInSpace,
+    Complexity.NTM.DecidesInTimeSpace}
+  \leanok
+  \uses{def:tm, def:ntm-decides, def:space-decides-in-space}
+  An online witness machine has $k$ ordinary work tapes and a separate read-only
+  Boolean stream. A designated consuming state reads its next bit and advances
+  that head; other states neither consult nor advance it. The witness begins
+  at its first bit and has no observable end marker. Loading the external
+  witness is part of initialization. A time bound $T(|x|)$ must hold uniformly
+  over all streams. Acceptance means halting with output $1$; any other halted
+  verdict rejects. Space is measured after forgetting the witness tape, using
+  the ordinary decision-space convention for input, work, and output heads.
+  Simultaneous bounds apply to this same machine and every prefix of every run.
+\end{definition}
+
+\begin{theorem}[Online witnesses and nondeterminism]
+  \label{thm:models-witness-ntm}
+  \lean{Complexity.WitnessTM.run_congr_prefix, Complexity.WitnessTM.exists_run_eq_trace,
+    Complexity.WitnessTM.exists_trace_eq_run,
+    Complexity.WitnessTM.allWitnessesHaltIn_iff,
+    Complexity.WitnessTM.acceptsInTime_iff, Complexity.WitnessTM.decidesInTime_iff,
+    Complexity.WitnessTM.decidesInTimeSpace_iff, Complexity.WitnessTM.decidesInSpace_iff,
+    Complexity.NTM.toNTM_toWitnessTM, Complexity.NTM.toWitnessTM_decidesInTime_iff,
+    Complexity.NTM.toWitnessTM_decidesInTimeSpace_iff,
+    Complexity.NTM.toWitnessTM_decidesInSpace_iff}
+  \leanok
+  \uses{def:models-witness-tm}
+  Every online witness machine has an equivalent nondeterministic machine,
+  and every nondeterministic machine has an online witness presentation.
+  Both translations preserve the exact time bound $T$, the exact charged-space
+  bound $S$, and their simultaneous use, with the same $k$ charged work tapes.
+  The bounds are arbitrary functions; no polynomial or constructibility
+  hypothesis is required. A visible $t$-step run depends only on the first $t$
+  witness bits, so the stream can be represented by a finite certificate.
+  This equivalence concerns one-way, consumed witnesses;
+  it does not grant free rereadable certificate storage.
+\end{theorem}
+\begin{proof}
+  \leanok
+  Substitute the current nondeterministic choice for the next consumed witness
+  bit. Nonconsuming transitions ignore that choice. Conversely, record the choices
+  of consuming transitions in order on the witness stream. At every clock the
+  sets of visible endpoints coincide, so halting, acceptance, and every prefix's
+  space bound agree. For the reverse translation, supply one witness bit per NTM
+  step; removing this tape recovers the original NTM.
+\end{proof}
+
 \begin{definition}[Acceptance probability]
   \label{def:models-accept-prob}
   \lean{Complexity.NTM.acceptCount, Complexity.NTM.acceptProb, Complexity.NTM.outputProb}
