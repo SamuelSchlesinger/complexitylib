@@ -5,6 +5,7 @@ Authors: Samuel Schlesinger
 -/
 
 module
+import Complexitylib.Models.TuringMachine.Frame
 public import
   Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Machine.Program.DenseDefs
 public import Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Machine.Program
@@ -36,16 +37,6 @@ private theorem blankOutput_parked :
   intro j hj
   simp [Tape.init, Tape.move]
   omega
-
-private theorem phaseTransition_of_parked
-    {inp out : Tape} {work : Fin n → Tape}
-    (hinput : TM.Parked inp) (hwork : ∀ i, TM.Parked (work i))
-    (houtput : TM.Parked out) :
-    TM.transitionInput inp = inp ∧
-      (fun i => TM.transitionTape (work i)) = work ∧
-      TM.transitionTape out = out :=
-  TM.phaseTransition_eq_self_of_reads_ne_start hinput.read_ne_start
-    (fun i => (hwork i).read_ne_start) houtput.read_ne_start
 
 /-- Final dense lookup and Boolean emission recover the decoded RAM verdict
 register. -/
@@ -93,8 +84,8 @@ theorem denseProgramOutputTM_hoareTime_internal
     (registerVerdictTM tapes.liftedLhs) hlookup
     (by
       rintro inp work out ⟨hinp, hresult, hout⟩
-      obtain ⟨hi, hw, ho⟩ := phaseTransition_of_parked
-        (inp := inp) (work := work) (out := out)
+      obtain ⟨hi, hw, ho⟩ := TM.parked_transition
+        (inp₀ := inp) (W := work) (out₀ := out)
         (by simpa [hinp] using hinput) hresult.parked
         (by simpa [hout, blank] using blankOutput_parked)
       rw [hi, hw, ho]
@@ -156,8 +147,8 @@ theorem denseProgramOutputTM_hoareTime_haltOutput_internal
     (registerVerdictTM tapes.liftedLhs) hlookup
     (by
       rintro inp work out ⟨hinp, hresult, hout⟩
-      obtain ⟨hi, hw, ho⟩ := phaseTransition_of_parked
-        (inp := inp) (work := work) (out := out)
+      obtain ⟨hi, hw, ho⟩ := TM.parked_transition
+        (inp₀ := inp) (W := work) (out₀ := out)
         (by simpa [hinp] using hinput) hresult.parked
         (by simpa [hout, haltOut] using hhaltOutParked)
       rw [hi, hw, ho]

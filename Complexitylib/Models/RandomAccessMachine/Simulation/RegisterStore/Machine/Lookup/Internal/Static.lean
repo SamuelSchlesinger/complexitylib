@@ -5,6 +5,7 @@ Authors: Samuel Schlesinger
 -/
 
 module
+import Complexitylib.Models.TuringMachine.Frame
 public import
   Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Machine.Lookup.Internal.Assemble
 public import Complexitylib.Models.TuringMachine.Subroutines.BinaryAddConst
@@ -25,16 +26,6 @@ namespace RegisterStore
 namespace Machine
 
 variable {n : ℕ}
-
-private theorem phaseTransition_of_parked
-    {inp out : Tape} {work : Fin n → Tape}
-    (hinput : TM.Parked inp) (hwork : ∀ i, TM.Parked (work i))
-    (houtput : TM.Parked out) :
-    TM.transitionInput inp = inp ∧
-      (fun i => TM.transitionTape (work i)) = work ∧
-      TM.transitionTape out = out :=
-  TM.phaseTransition_eq_self_of_reads_ne_start hinput.read_ne_start
-    (fun i => (hwork i).read_ne_start) houtput.read_ne_start
 
 private theorem staticAddress_parked (address : ℕ) :
     TM.Parked
@@ -351,8 +342,8 @@ theorem entryLookupStatic_hoareTime_internal
     (TM.resetBinaryWorkTM tapes.querySource) hloaded
     (by
       rintro inp work out ⟨hinp, hlookup, hout⟩
-      obtain ⟨hi, hw, ho⟩ := phaseTransition_of_parked
-        (inp := inp) (work := work) (out := out)
+      obtain ⟨hi, hw, ho⟩ := TM.parked_transition
+        (inp₀ := inp) (W := work) (out₀ := out)
         (by simpa [hinp] using hinput) hlookup.parked
         (by simpa [hout] using houtput)
       rw [hi, hw, ho]
@@ -365,8 +356,8 @@ theorem entryLookupStatic_hoareTime_internal
     (by
       rintro inp work out ⟨hinp, hwork, hout⟩
       subst work
-      obtain ⟨hi, hw, ho⟩ := phaseTransition_of_parked
-        (inp := inp) (work := loadedInitial) (out := out)
+      obtain ⟨hi, hw, ho⟩ := TM.parked_transition
+        (inp₀ := inp) (W := loadedInitial) (out₀ := out)
         (by simpa [hinp] using hinput) hloadedReady.scanner.parked
         (by simpa [hout] using houtput)
       rw [hi, hw, ho]

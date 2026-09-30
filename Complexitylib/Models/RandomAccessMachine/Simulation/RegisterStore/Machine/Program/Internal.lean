@@ -5,6 +5,7 @@ Authors: Samuel Schlesinger
 -/
 
 module
+import Complexitylib.Models.TuringMachine.Frame
 public import Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Machine.Program.Defs
 public import
   Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Machine.Instruction.Dispatch
@@ -617,16 +618,6 @@ theorem instructionHaltOutput_eq_blank_of_ne_halt_internal
     simp_all [instructionHaltOutput, instructionHaltVerdict, TM.idleDir,
       Tape.writeAndMove, Tape.move, Tape.write, Tape.read, Tape.init]
 
-private theorem phaseTransition_of_parked
-    {inp out : Tape} {work : Fin n → Tape}
-    (hinput : TM.Parked inp) (hwork : ∀ i, TM.Parked (work i))
-    (houtput : TM.Parked out) :
-    TM.transitionInput inp = inp ∧
-      (fun i => TM.transitionTape (work i)) = work ∧
-      TM.transitionTape out = out :=
-  TM.phaseTransition_eq_self_of_reads_ne_start hinput.read_ne_start
-    (fun i => (hwork i).read_ne_start) houtput.read_ne_start
-
 /-- The loop's fixed three-step rewind/check tail preserves every tape exactly. -/
 theorem programLoop_rewind_check_internal (tmBody tmTest : TM n)
     (c : Complexity.Cfg n (TM.LoopQ tmBody.Q tmTest.Q))
@@ -839,8 +830,8 @@ theorem dispatchHaltTM_hoareTime_frame_internal
         (instructionHaltVerdictTM (.halt : Instr)) hreset'
         (by
           rintro inp work out ⟨hinp, hworkEq, hout⟩
-          obtain ⟨hi, hw, ho⟩ := phaseTransition_of_parked
-            (inp := inp) (work := work) (out := out)
+          obtain ⟨hi, hw, ho⟩ := TM.parked_transition
+            (inp₀ := inp) (W := work) (out₀ := out)
             (by simpa [hinp] using hinput)
             (by simpa [hworkEq] using
               hready.1.control.lookup.scanner.parked)
@@ -967,8 +958,8 @@ theorem dispatchHaltTM_hoareTime_frame_internal
           (dispatchHaltTM tapes program) hpred'
           (by
             rintro inp' work' out' ⟨hinp', hwork', hout'⟩
-            obtain ⟨hi, hw, ho⟩ := phaseTransition_of_parked
-              (inp := inp') (work := work') (out := out')
+            obtain ⟨hi, hw, ho⟩ := TM.parked_transition
+              (inp₀ := inp') (W := work') (out₀ := out')
               (by simpa [hinp', hinp] using hinput)
               (by
                 intro i
@@ -1060,8 +1051,8 @@ theorem programHaltTM_hoareTime_frame_internal
     (dispatchHaltTM tapes program) hcopy
     (by
       rintro inp work out ⟨hinp, hworkEq, hout⟩
-      obtain ⟨hi, hw, ho⟩ := phaseTransition_of_parked
-        (inp := inp) (work := work) (out := out)
+      obtain ⟨hi, hw, ho⟩ := TM.parked_transition
+        (inp₀ := inp) (W := work) (out₀ := out)
         (by simpa [hinp] using hinput)
         (by simpa [hworkEq, selectorWork, selectorTape] using hselectorParked)
         (by simpa [hout] using blank_parked)

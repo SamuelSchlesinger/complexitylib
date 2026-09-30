@@ -5,6 +5,7 @@ Authors: Samuel Schlesinger
 -/
 
 module
+import Complexitylib.Models.TuringMachine.Frame
 public import
   Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Machine.Instruction.DenseDefs
 public import
@@ -36,16 +37,6 @@ private theorem hasBinaryPrefix_parked {t : Tape} {bits : List Bool}
     exact Γ.ofBool_ne_start _
   · rw [h.2.2 i (Nat.le_of_not_gt hi)]
     decide
-
-private theorem phaseTransition_of_parked
-    {inp out : Tape} {work : Fin n → Tape}
-    (hinput : TM.Parked inp) (hwork : ∀ i, TM.Parked (work i))
-    (houtput : TM.Parked out) :
-    TM.transitionInput inp = inp ∧
-      (fun i => TM.transitionTape (work i)) = work ∧
-      TM.transitionTape out = out :=
-  TM.phaseTransition_eq_self_of_reads_ne_start hinput.read_ne_start
-    (fun i => (hwork i).read_ne_start) houtput.read_ne_start
 
 /-- Exact semantic and time contract for one immediate dense-overlay write. -/
 theorem denseImmediateInstructionTM_hoareTime_frame
@@ -133,8 +124,8 @@ theorem denseImmediateInstructionTM_hoareTime_frame
     (by
       rintro inp work out ⟨hinp, hwork, hout⟩
       subst work
-      obtain ⟨hi, hw, ho⟩ := phaseTransition_of_parked
-        (inp := inp) (work := updateWork) (out := out)
+      obtain ⟨hi, hw, ho⟩ := TM.parked_transition
+        (inp₀ := inp) (W := updateWork) (out₀ := out)
         (by simpa [hinp] using hinput) hready.2.2.2.2.2
         (by simpa [hout] using houtputParked)
       rw [hi, hw, ho]
@@ -158,8 +149,8 @@ theorem denseImmediateInstructionTM_hoareTime_frame
               ⟨by rw [hnat.2.1], hnat.2.hasBinaryContent.cells_ne_start⟩)
         · simpa only [valueWork, Function.update_of_ne hi] using
             hinitial.scanner.parked i
-      obtain ⟨hi, hw, ho⟩ := phaseTransition_of_parked
-        (inp := inp) (work := valueWork) (out := out)
+      obtain ⟨hi, hw, ho⟩ := TM.parked_transition
+        (inp₀ := inp) (W := valueWork) (out₀ := out)
         (by simpa [hinp] using hinput) hparked
         (by simpa [hout] using houtputParked)
       rw [hi, hw, ho]

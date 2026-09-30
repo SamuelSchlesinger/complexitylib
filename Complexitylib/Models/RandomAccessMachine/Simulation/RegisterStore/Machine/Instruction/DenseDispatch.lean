@@ -5,6 +5,7 @@ Authors: Samuel Schlesinger
 -/
 
 module
+import Complexitylib.Models.TuringMachine.Frame
 public import
   Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Machine.Instruction.DenseSim
 public import Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.DenseOverlay
@@ -40,16 +41,6 @@ private theorem blankOutput_parked :
   intro j hj
   simp [Tape.init, Tape.move]
   omega
-
-private theorem phaseTransition_of_parked
-    {inp out : Tape} {work : Fin n → Tape}
-    (hinput : TM.Parked inp) (hwork : ∀ i, TM.Parked (work i))
-    (houtput : TM.Parked out) :
-    TM.transitionInput inp = inp ∧
-      (fun i => TM.transitionTape (work i)) = work ∧
-      TM.transitionTape out = out :=
-  TM.phaseTransition_eq_self_of_reads_ne_start hinput.read_ne_start
-    (fun i => (hwork i).read_ne_start) houtput.read_ne_start
 
 /-- The decrementing branch tree selects the corresponding dense instruction,
 including the out-of-range halt convention. -/
@@ -124,8 +115,8 @@ theorem denseDispatchProgramTM_hoareTime_frame
         (denseExecuteInstructionTM tapes .halt) hreset'
         (by
           rintro inp work out ⟨hinp, hworkEq, hout⟩
-          obtain ⟨hi, hw, ho⟩ := phaseTransition_of_parked
-            (inp := inp) (work := work) (out := out)
+          obtain ⟨hi, hw, ho⟩ := TM.parked_transition
+            (inp₀ := inp) (W := work) (out₀ := out)
             (by simpa [hinp] using hinput)
             (by simpa [hworkEq] using
               hready.1.control.lookup.scanner.parked)
@@ -260,8 +251,8 @@ theorem denseDispatchProgramTM_hoareTime_frame
           (denseDispatchProgramTM tapes program) hpred'
           (by
             rintro inp' work' out' ⟨hinp', hwork', hout'⟩
-            obtain ⟨hi, hw, ho⟩ := phaseTransition_of_parked
-              (inp := inp') (work := work') (out := out')
+            obtain ⟨hi, hw, ho⟩ := TM.parked_transition
+              (inp₀ := inp') (W := work') (out₀ := out')
               (by simpa [hinp', hinp] using hinput)
               (by
                 intro i
@@ -392,7 +383,7 @@ theorem denseProgramInstructionTM_hoareTime_frame
       have houtParked : TM.Parked out := by simpa [hout] using houtput
       have hworkParked : ∀ i, TM.Parked (work i) := by
         simpa [hworkEq, selectorWork, selectorTape] using hselectorParked
-      obtain ⟨hi, hw, ho⟩ := phaseTransition_of_parked
+      obtain ⟨hi, hw, ho⟩ := TM.parked_transition
         hinpParked hworkParked houtParked
       rw [hi, hw, ho]
       exact ⟨hinp, by simpa [selectorWork, selectorTape] using hworkEq,
@@ -510,7 +501,7 @@ theorem denseProgramStepTM_hoareTime_frame
       have hinpParked : TM.Parked inp := by simpa [hinp] using hinput
       have houtParked : TM.Parked out := by
         simpa [hout, blank] using blankOutput_parked
-      obtain ⟨hi, hw, ho⟩ := phaseTransition_of_parked hinpParked
+      obtain ⟨hi, hw, ho⟩ := TM.parked_transition hinpParked
         hcleanupReady.result.parked houtParked
       rw [hi, hw, ho]
       exact ⟨hinp, hcleanupReady, hout⟩)
