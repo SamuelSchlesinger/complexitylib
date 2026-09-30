@@ -1108,9 +1108,9 @@ these facts are stated in the chapter on encodings
   makes $z \in \mathrm{SAT}$ equivalent to the existence of a witness. The
   three-work-tape deterministic verifier parses the formula and evaluates it
   at the witness, and a $\mathrm{SAT}$-specialized guess-and-verify machine
-  turns it into a nondeterministic decider. That machine is the one
-  Lemma~\ref{lem:polytime-guess-verify} later reuses for arbitrary verifiers;
-  the proof here does not go through the lemma.
+  turns it into a nondeterministic decider. This proof is independent of the
+  generic finite-verifier compiler used in
+  Lemma~\ref{lem:polytime-guess-verify}.
 \end{proof}
 
 \begin{theorem}[Cook--Levin]
