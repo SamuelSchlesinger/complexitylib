@@ -28,6 +28,34 @@ namespace Cslib.Circuits.Boolean.Correction
 
 variable {n m : ℕ}
 
+/-- A scalar correction is its support indicator; applying it costs four XOR gates. -/
+theorem complexity_dist_le_indicator (f g : (Fin n → Bool) → Fin 1 → Bool) :
+    Nat.dist (complexity interpretation f) (complexity interpretation g) ≤
+      complexity interpretation (indicator (errorSupport f g)) + 4 := by
+  have hf : (fun x (_ : Fin 1) => f x 0) = f := by
+    ext x j; exact congrArg (f x) (Subsingleton.elim _ _)
+  have hg : (fun x (_ : Fin 1) => g x 0) = g := by
+    ext x j; exact congrArg (g x) (Subsingleton.elim _ _)
+  have support : {x | f x 0 ≠ g x 0} = errorSupport f g := by
+    ext x
+    change (f x 0 ≠ g x 0) ↔ f x ≠ g x
+    apply not_congr
+    constructor
+    · intro equal
+      funext j
+      simpa only [Fin.eq_zero j] using equal
+    · intro equal
+      exact congrFun equal 0
+  have forward := Internal.scalar_complexity_le (fun x => f x 0) (fun x => g x 0)
+  have backward := Internal.scalar_complexity_le (fun x => g x 0) (fun x => f x 0)
+  rw [hf, hg, support] at forward
+  have reverse : {x | g x 0 ≠ f x 0} = errorSupport f g := by
+    rw [← support]
+    ext; exact ne_comm
+  rw [hf, hg, reverse] at backward
+  unfold Nat.dist
+  omega
+
 /-- A support and a partial vector correction bound the cost of correcting `g` into `f`. -/
 theorem complexityGiven_le_of_cover
     (f g : (Fin n → Bool) → Fin m → Bool) (s : Set (Fin n → Bool))

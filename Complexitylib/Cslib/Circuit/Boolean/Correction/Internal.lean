@@ -6,6 +6,7 @@ Authors: Samuel Schlesinger
 module
 
 public import Complexitylib.Cslib.Circuit.Boolean.Correction.Defs
+import Complexitylib.Cslib.Circuit.Synthesis
 
 /-!
 # Circuits for support-masked corrections
@@ -20,6 +21,40 @@ sharing is preserved too. Each selected output adds one mask and four XOR gates.
 namespace Cslib.Circuits.Boolean.Correction.Internal
 
 variable {n m : ℕ}
+
+theorem complexity_xor_le (f g : BooleanFunction n) :
+    complexity interpretation (fun x (_ : Fin 1) => Bool.xor (f x) (g x)) ≤
+      complexity interpretation (fun x (_ : Fin 1) => f x) +
+        complexity interpretation (fun x (_ : Fin 1) => g x) + 4 := by
+  obtain ⟨cf, hf, sf⟩ := exists_computes_size_eq_complexity
+    (I := interpretation) (f := fun x (_ : Fin 1) => f x)
+  obtain ⟨cg, hg, sg⟩ := exists_computes_size_eq_complexity
+    (I := interpretation) (f := fun x (_ : Fin 1) => g x)
+  have hf' : Synthesis interpretation (inputs n) {f} cf.size := by
+    simpa using hf.synthesis
+  have hg' : Synthesis interpretation (inputs n) {g} cg.size := by
+    simpa using hg.synthesis
+  have finish : Synthesis interpretation (inputs n ∪ ({f} ∪ {g}))
+      {fun x => Bool.xor (f x) (g x)} 4 :=
+    Synthesis.xor_of_mem (by simp) (by simp)
+  simpa [sf, sg] using ((hf'.union hg').trans finish).complexity_le
+
+theorem scalar_complexity_le (f g : BooleanFunction n) :
+    complexity interpretation (fun x (_ : Fin 1) => f x) ≤
+      complexity interpretation (fun x (_ : Fin 1) => g x) +
+        complexity interpretation (indicator {x | f x ≠ g x}) + 4 := by
+  classical
+  have equal : (fun x (_ : Fin 1) =>
+      Bool.xor (g x) (indicator {x | f x ≠ g x} x 0)) =
+      (fun x (_ : Fin 1) => f x) := by
+    funext x j
+    simp only [indicator, Set.mem_ofPred_eq]
+    by_cases h : f x = g x
+    · simp [h]
+    · simpa [h] using (Bool.eq_not_iff.mpr h).symm
+  have bound := complexity_xor_le g (fun x => indicator {x | f x ≠ g x} x 0)
+  rw [equal] at bound
+  exact bound
 
 /-- Wire carrying an old output in the correction interface. -/
 def oldWire (outputs : Finset (Fin m)) (j : Fin m) : Fin (m + 1 + outputs.card) :=

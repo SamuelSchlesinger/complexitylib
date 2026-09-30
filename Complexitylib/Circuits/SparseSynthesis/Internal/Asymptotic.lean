@@ -49,6 +49,20 @@ theorem eventually_scalar_complexities (P : ℕ) :
     have h := complexityOn_le_of_computesOn c correct
     exact (Nat.mul_le_mul_left (P * p) ((h.trans size).trans mono)).trans partialBound
 
+theorem eventually_scalar_correction_nat (P : ℕ) :
+    ∀ᶠ p : ℕ in atTop, ∀ f g : BitString (2 * p) → Fin 1 → Bool,
+      rowDistance f g ≤ 2 ^ p →
+      P * Nat.dist (complexity interpretation f) (complexity interpretation g) ≤
+        (P + 2) * 2 ^ p := by
+  classical
+  filter_upwards [eventually_scalar_complexities P,
+    Nat.eventually_mul_pow_le_pow (4 * P) 0 Nat.one_lt_two] with p scalar overhead f g small
+  have support := (scalar (errorSupport f g).toFinset small).1
+  rw [Set.coe_toFinset] at support
+  have correction := Nat.mul_le_mul_left P (complexity_dist_le_indicator f g)
+  simp only [pow_zero, mul_one] at overhead
+  nlinarith
+
 theorem eventually_correction_nat (P : ℕ) :
     ∀ᶠ p : ℕ in atTop, ∀ (m : ℕ) (f g : BitString (2 * p) → Fin m → Bool)
       (domain : Finset (BitString (2 * p))) (outputs : Finset (Fin m)),

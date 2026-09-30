@@ -441,6 +441,147 @@ $H/\log_2 H+O(n+r)$ for arbitrary $n,r,d$. In particular, counting possible
 error maps alone is not an upper-bound synthesis theorem. The theorem above
 establishes the proposed coefficient-three regime without that assumption.
 
+\begin{theorem}[Scalar square-root continuity with leading constant one]
+  \label{thm:lowerbounds-scalar-square-root-correction}
+  \lean{Cslib.Circuits.Boolean.Correction.complexity_dist_le_indicator,
+    Complexity.CircuitSparseSynthesis.complexity_dist_le_sqrt}
+  \leanok
+  \uses{def:lowerbounds-correction,thm:lowerbounds-square-root-synthesis}
+  For scalar functions and $S=\{x:f(x)\ne g(x)\}$,
+  \[
+    |C(f)-C(g)|\le C(1_S)+4.
+  \]
+  Consequently, for every $\varepsilon>0$ and all sufficiently large $p$,
+  uniformly over scalar functions on $2p$ bits with at most $2^p$ errors,
+  \[
+    |C(f)-C(g)|\le(1+\varepsilon)2^p.
+  \]
+\end{theorem}
+\begin{proof}
+  \leanok
+  Since $f\oplus g=1_S$, append a circuit for $1_S$ and four XOR gates.
+  Exchange $f,g$, apply sparse support synthesis, and absorb the four gates
+  into the epsilon slack.
+\end{proof}
+
+\begin{corollary}[Exact hardness forces row errors]
+  \label{cor:lowerbounds-sparse-hardness-transfer}
+  \lean{Complexity.CircuitSparseSynthesis.rowDistance_gt_of_complexity_gt,
+    Complexity.CircuitSparseSynthesis.scalar_rowDistance_gt_of_complexity_gt}
+  \leanok
+  \uses{thm:lowerbounds-square-root-correction,
+    thm:lowerbounds-scalar-square-root-correction}
+  For every $\varepsilon>0$ and all sufficiently large $p$, let
+  $F:\{0,1\}^{2p}\to\{0,1\}^m$ with $m\le2p$. If
+  \[
+    C(F)>s+(3+\varepsilon)2^p,
+  \]
+  then every circuit with at most $s$ gates disagrees with $F$ on more than
+  $2^p$ input rows. For a scalar function, replace $3$ by $1$.
+  The thresholds are uniform in the functions and in $s$.
+\end{corollary}
+\begin{proof}
+  \leanok
+  A size-$s$ circuit defines a function $G$ with $C(G)\le s$. If there
+  were at most $2^p$ erroneous rows, the continuity bound would contradict
+  the assumed lower bound. The resulting error fraction is greater than
+  $2^{-p}$; this statement does not give a constant error fraction.
+\end{proof}
+
+\begin{corollary}[Vanishing relative cost of sparse edits]
+  \label{cor:lowerbounds-sparse-relative-stability}
+  \lean{Complexity.CircuitSparseSynthesis.complexity_dist_isLittleO}
+  \leanok
+  \uses{thm:lowerbounds-square-root-correction}
+  Let $F_p,G_p$ be vector functions on $2p$ bits, with arbitrary common
+  output width depending on $p$. Suppose that eventually they differ on at
+  most $2^p$ rows and at most $2p$ output coordinates. If
+  $2^p=o(C(F_p))$, then
+  \[
+    |C(F_p)-C(G_p)|=o(C(F_p)).
+  \]
+\end{corollary}
+\begin{proof}
+  \leanok
+  The uniform continuity theorem with $\varepsilon=1$ gives
+  $|C(F_p)-C(G_p)|=O(2^p)$. Compose this estimate with the assumed little-o
+  relation. No structure or computability assumption on the edits is needed.
+\end{proof}
+
+\begin{theorem}[Optimal order of the sparse correction cost]
+  \label{thm:lowerbounds-sparse-correction-sharpness}
+  \lean{Complexity.CircuitSparseSynthesis.exists_sparse_complexity_gt,
+    Complexity.CircuitSparseSynthesis.exists_rowDistance_eq_complexity_dist_ge,
+    Complexity.CircuitSparseSynthesis.not_isLittleO_of_uniform_correction_bound}
+  \leanok
+  \uses{def:lowerbounds-correction}
+  For every $p\ge4$ there exists $S\subseteq\{0,1\}^{2p}$ with $|S|=2^p$
+  and $C(1_S)>2^p/16$. There is also a scalar $f$ at exactly $2^p$ errors
+  from zero satisfying
+  \[
+    |C(f)-C(0)|\ge 2^p/16.
+  \]
+  Consequently, any real-valued function $b(p)$ eventually bounding the
+  complexity difference of every scalar pair at distance at most $2^p$
+  fails to satisfy $b(p)=o(2^p)$.
+\end{theorem}
+\begin{proof}
+  \leanok
+  Apply Shannon's circuit-counting argument to graph indicators. The
+  $2^{p2^p}$ maps $\{0,1\}^p\to\{0,1\}^p$ have distinct graphs, each of
+  size $2^p$. CSLib's De Morgan count, even after discarding its factorial
+  saving, bounds the number of functions with at most $s$ gates by
+  \[
+    (s+1)\bigl(5(2p+s+1)^2\bigr)^s(2p+s).
+  \]
+  At $s=2^{p-4}$ and $p\ge4$ this is strictly less than $2^{p2^p}$.
+  A missing graph gives the first assertion. Since $C(0)\le1$ and circuit
+  sizes are integers, the same witness gives the complexity-distance bound.
+  A hypothetical little-o modulus is eventually at most $2^p/32$, a
+  contradiction. The witnesses are nonconstructive, and the constant
+  $1/16$ is not asserted to be optimal.
+\end{proof}
+
+\begin{definition}[Circuit supports as a set family]
+  \label{def:lowerbounds-circuit-supports}
+  \lean{Complexity.CircuitSparseSynthesis.circuitSupports}
+  \leanok
+  \uses{def:lowerbounds-correction}
+  Let $\mathcal C_{n,s}$ be the finite family of sets
+  $T\subseteq\{0,1\}^n$ with $C(1_T)\le s$.
+  A family shatters $S$ if every $A\subseteq S$ is $S\cap T$ for some
+  member $T$ of the family. Its VC dimension is the largest cardinality
+  of a shattered set, using Mathlib's finite set-family definitions.
+\end{definition}
+
+\begin{theorem}[Uniform sample interpolation and shattering]
+  \label{thm:lowerbounds-circuit-shattering}
+  \lean{Complexity.CircuitSparseSynthesis.exists_interpolating_circuit,
+    Complexity.CircuitSparseSynthesis.circuitSupports_shatters,
+    Complexity.CircuitSparseSynthesis.le_vcDim_circuitSupports}
+  \leanok
+  \uses{thm:lowerbounds-square-root-synthesis,def:lowerbounds-circuit-supports}
+  For every $\varepsilon>0$ and all sufficiently large $p$, every assignment
+  of Boolean labels to any sample $S\subseteq\{0,1\}^{2p}$ of size at most
+  $2^p$ is computed on $S$ by a circuit of size at most
+  \[
+    s_p=\left\lfloor(1+\varepsilon)\frac{2^p}{p}\right\rfloor.
+  \]
+  Thus $\mathcal C_{2p,s_p}$ shatters every such $S$, and its VC dimension
+  is at least $2^p$. With $D=2^p$, this budget is
+  $(1+o(1))D/\log_2 D$.
+\end{theorem}
+\begin{proof}
+  \leanok
+  Extend the sample labels arbitrarily to the full cube and apply partial
+  synthesis. Its minimum is attained by a concrete circuit, and its integer
+  size is at most the displayed floor. For a subset $A\subseteq S$, use
+  its indicator as the labels and take the support of the resulting circuit;
+  its intersection with $S$ is exactly $A$. A sample of cardinality $2^p$
+  gives the VC-dimension bound. Circuit outputs outside the sample are
+  unrestricted; this is an interpolation result, not a learning algorithm.
+\end{proof}
+
 \begin{definition}[Conditional circuit complexity]
   \label{def:lowerbounds-algebraic-conditional}
   \lean{Cslib.Circuits.Circuit.conditionalGateComplexity}
