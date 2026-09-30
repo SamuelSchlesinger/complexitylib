@@ -16,6 +16,7 @@ public import Complexitylib.Models.TuringMachine.SingleTape
 public import Complexitylib.Models.TuringMachine.ChoiceTape
 public import Complexitylib.Models.TuringMachine.GuessTape
 public import Complexitylib.Models.TuringMachine.GuessStream
+public import Complexitylib.Models.TuringMachine.Witness
 public import Complexitylib.Models.TuringMachine.GuessAssembly
 public import Complexitylib.Models.TuringMachine.Combinators
 public import Complexitylib.Models.TuringMachine.Combinators.ForBinaryWork
