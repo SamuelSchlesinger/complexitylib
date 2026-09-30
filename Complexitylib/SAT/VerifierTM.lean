@@ -4434,24 +4434,12 @@ private theorem tape_eq_initTape_of_cells (t : Tape) (l : List Bool)
     (hdata : ∀ i, (h : i < l.length) → t.cells (1 + i) = Γ.ofBool (l[i]'h))
     (hblank : ∀ j, j ≥ 1 + l.length → t.cells j = Γ.blank) :
     t = (Tape.init (l.map Γ.ofBool)).move Dir3.right := by
-  have hc2 : t.cells = ((Tape.init (l.map Γ.ofBool)).move Dir3.right).cells := by
-    funext j
-    rw [Tape.move_cells]
-    cases j with
-    | zero => rw [h0]; simp [Tape.init]
-    | succ k =>
-        by_cases hk : k < l.length
-        · rw [Tape.init_ofBool_cells_lt l k hk]
-          have hd := hdata k hk
-          rwa [show (1 : ℕ) + k = k + 1 from by ring] at hd
-        · rw [Tape.init_ofBool_cells_ge l k (by omega)]
-          exact hblank (k + 1) (by omega)
-  have hh2 : t.head = ((Tape.init (l.map Γ.ofBool)).move Dir3.right).head := by
-    rw [hh]; simp [Tape.move, Tape.init]
-  calc t = ⟨t.head, t.cells⟩ := rfl
-    _ = ⟨((Tape.init (l.map Γ.ofBool)).move Dir3.right).head,
-          ((Tape.init (l.map Γ.ofBool)).move Dir3.right).cells⟩ := by rw [hh2, hc2]
-    _ = (Tape.init (l.map Γ.ofBool)).move Dir3.right := rfl
+  apply Tape.eq_init_move_right_of_hasBinaryString (bits := l) ?_ h0
+  refine ⟨hh, ?_, ?_⟩
+  · intro i hi
+    simpa only [Nat.add_comm] using hdata i hi
+  · intro i hi
+    exact hblank (i + 1) (by omega)
 
 /-- **Setup success path.** When `|α| ≤ |z| + 1`, the full split/setup pipeline
 runs from the initial configuration on `pair z α` to the evaluator's first read,
