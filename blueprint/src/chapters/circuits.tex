@@ -147,6 +147,52 @@ says otherwise.
   their sizes plus one.
 \end{proof}
 
+\section{Wire uses and shared gates}
+\label{sec:circuits-sharing}
+
+This section uses native CSLib circuits: size counts operation gates, while
+designated outputs are free wire selections. The results allow arbitrary
+signatures, repeated arguments and outputs, and zero inputs or outputs.
+
+\begin{definition}[Wire uses and sharing]
+  \label{def:circuits-wire-uses}
+  \lean{Cslib.Circuits.Circuit.WireUse, Cslib.Circuits.Circuit.useWire,
+    Cslib.Circuits.Circuit.wireUses, Cslib.Circuits.Circuit.inputUses,
+    Cslib.Circuits.Circuit.excessFanout, Cslib.Circuits.Circuit.sharedGates,
+    Cslib.Circuits.Circuit.NoUnusedGates}
+  \leanok
+  \uses{thm:circuits-straightline}
+  A wire use is one gate-argument slot or one designated output; repeated
+  occurrences count separately. Write $u(v)$ for the number of uses of wire
+  $v$, $w$ for the sum over original input wires, and
+  $e=\sum_{v\text{ a gate}}\max\{u(v)-1,0\}$. A shared gate has $u(v)\ge2$.
+  There are no unused gates when every gate has at least one use.
+\end{definition}
+
+\begin{theorem}[Wire-use budget]
+  \label{thm:circuits-wire-use-budget}
+  \lean{Cslib.Circuits.Circuit.wire_use_balance,
+    Cslib.Circuits.Circuit.card_sharedGates_le_excessFanout,
+    Cslib.Circuits.Circuit.inputUses_add_excessFanout_eq,
+    Cslib.Circuits.Circuit.inputUses_add_card_sharedGates_le}
+  \leanok
+  \uses{def:circuits-wire-uses}
+  For a circuit with $s$ gates, $m$ outputs, total fan-in $t$, and no unused
+  gates, $w+e+s=t+m$. The number $q$ of shared gates is at most $e$.
+  If every gate has fan-in exactly two, $w+e=s+m$; if every gate has
+  fan-in at most two, $w+q\le s+m$. In particular, a single-output binary
+  circuit without unused gates satisfies $w+e=s+1$ and $w+q\le s+1$.
+\end{theorem}
+\begin{proof}
+  \leanok
+  Count the same uses by their slots and by their supplying wires. Each
+  gate contributes its first use and its excess; each shared gate has
+  at least one excess use.
+\end{proof}
+
+These are structural sharing bounds. Assigning communication or rank costs
+to shared gates requires additional definitions and theorems.
+
 \section{Circuit families and $\cc{P/poly}$}
 \label{sec:circuits-families}
 

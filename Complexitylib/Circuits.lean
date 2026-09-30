@@ -24,6 +24,7 @@ public import Complexitylib.Circuits.KeyedMinimumTournament.Family
 public import Complexitylib.Circuits.Majority
 public import Complexitylib.Circuits.Multiplexer
 public import Complexitylib.Circuits.Dependency
+public import Complexitylib.Cslib.Circuit.Fanout
 public import Complexitylib.Circuits.DecisionTree
 public import Complexitylib.Circuits.DecisionTree.Finite
 public import Complexitylib.Circuits.DecisionTree.Block
