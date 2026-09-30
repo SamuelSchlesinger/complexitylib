@@ -5,6 +5,7 @@ Authors: Samuel Schlesinger
 -/
 
 module
+import Complexitylib.Models.TuringMachine.Frame
 public import
   Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Machine.Instruction.DenseDefs
 public import
@@ -27,16 +28,6 @@ variable {n : ℕ}
 private theorem hasBinaryNat_parked {t : Tape} {value : ℕ}
     (h : t.HasBinaryNat value) : TM.Parked t :=
   ⟨by rw [h.2.1], h.2.hasBinaryContent.cells_ne_start⟩
-
-private theorem phaseTransition_of_parked
-    {inp out : Tape} {work : Fin n → Tape}
-    (hinput : TM.Parked inp) (hwork : ∀ i, TM.Parked (work i))
-    (houtput : TM.Parked out) :
-    TM.transitionInput inp = inp ∧
-      (fun i => TM.transitionTape (work i)) = work ∧
-      TM.transitionTape out = out :=
-  TM.phaseTransition_eq_self_of_reads_ne_start hinput.read_ne_start
-    (fun i => (hwork i).read_ne_start) houtput.read_ne_start
 
 private def DenseZeroJumpBranchResult
     (tapes : ControlInstructionTapes n) (input : List Bool)
@@ -344,8 +335,8 @@ theorem denseZeroJumpInstructionTM_hoareTime_frame
       rintro inp work out ⟨hinp, hbranchResult, hout⟩
       obtain ⟨lookupWork, hlookupResult, hoperand, hpcResult,
         hparked, hframe⟩ := hbranchResult
-      obtain ⟨hi, hw, ho⟩ := phaseTransition_of_parked
-        (inp := inp) (work := work) (out := out)
+      obtain ⟨hi, hw, ho⟩ := TM.parked_transition
+        (inp₀ := inp) (W := work) (out₀ := out)
         (by simpa [hinp] using hinput) hparked
         (by simpa [hout] using houtput)
       rw [hi, hw, ho]
@@ -361,8 +352,8 @@ theorem denseZeroJumpInstructionTM_hoareTime_frame
       (TM.resetBinaryWorkTM tapes.data.lhs)) hlookup
     (by
       rintro inp work out ⟨hinp, hlookupResult, hout⟩
-      obtain ⟨hi, hw, ho⟩ := phaseTransition_of_parked
-        (inp := inp) (work := work) (out := out)
+      obtain ⟨hi, hw, ho⟩ := TM.parked_transition
+        (inp₀ := inp) (W := work) (out₀ := out)
         (by simpa [inp₀, hinp] using hinput) hlookupResult.parked
         (by simpa [hout] using houtput)
       rw [hi, hw, ho]

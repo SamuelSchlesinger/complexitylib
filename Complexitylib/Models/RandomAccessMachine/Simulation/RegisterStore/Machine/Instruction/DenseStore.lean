@@ -5,6 +5,7 @@ Authors: Samuel Schlesinger
 -/
 
 module
+import Complexitylib.Models.TuringMachine.Frame
 public import
   Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Machine.Instruction.DenseDirect
 
@@ -32,16 +33,6 @@ private theorem hasBinaryPrefix_parked {t : Tape} {bits : List Bool}
     exact Γ.ofBool_ne_start _
   · rw [h.2.2 i (Nat.le_of_not_gt hi)]
     decide
-
-private theorem phaseTransition_of_parked
-    {inp out : Tape} {work : Fin n → Tape}
-    (hinput : TM.Parked inp) (hwork : ∀ i, TM.Parked (work i))
-    (houtput : TM.Parked out) :
-    TM.transitionInput inp = inp ∧
-      (fun i => TM.transitionTape (work i)) = work ∧
-      TM.transitionTape out = out :=
-  TM.phaseTransition_eq_self_of_reads_ne_start hinput.read_ne_start
-    (fun i => (hwork i).read_ne_start) houtput.read_ne_start
 
 private theorem denseStoreOperands_values
     (tapes : BinaryInstructionTapes n) (input : List Bool)
@@ -411,14 +402,14 @@ theorem denseIndirectStoreInstructionTM_hoareTime_frame
       subst work
       have hready := denseStoreUpdate_ready tapes input overlay addressRegister
         source initialWork operandsWork hinitial hops
-      obtain ⟨hi, hw, ho⟩ := phaseTransition_of_parked
-        (inp := inp)
-        (work := Function.update
+      obtain ⟨hi, hw, ho⟩ := TM.parked_transition
+        (inp₀ := inp)
+        (W := Function.update
           (Function.update operandsWork tapes.update.entry.query
             ((Tape.init (address.bits.map Γ.ofBool)).move Dir3.right))
           tapes.update.replacement
           ((Tape.init (value.bits.map Γ.ofBool)).move Dir3.right))
-        (out := out) (by simpa [hinp] using hinput) hready.2.2.2.2.2
+        (out₀ := out) (by simpa [hinp] using hinput) hready.2.2.2.2.2
         (by simpa [hout] using houtputParked)
       rw [hi, hw, ho]
       exact ⟨hinp, ⟨operandsWork, _, hops, rfl, rfl⟩, hout⟩)
@@ -445,11 +436,11 @@ theorem denseIndirectStoreInstructionTM_hoareTime_frame
                 ((Tape.init (address.bits.map Γ.ofBool)).move Dir3.right) from
               ⟨by rw [hnat.2.1], hnat.2.hasBinaryContent.cells_ne_start⟩)
         · simpa only [Function.update_of_ne hi] using hvalues.2.2.2 i
-      obtain ⟨hi, hw, ho⟩ := phaseTransition_of_parked
-        (inp := inp)
-        (work := Function.update operandsWork tapes.update.entry.query
+      obtain ⟨hi, hw, ho⟩ := TM.parked_transition
+        (inp₀ := inp)
+        (W := Function.update operandsWork tapes.update.entry.query
           ((Tape.init (address.bits.map Γ.ofBool)).move Dir3.right))
-        (out := out) (by simpa [hinp] using hinput) hparked
+        (out₀ := out) (by simpa [hinp] using hinput) hparked
         (by simpa [hout] using houtputParked)
       rw [hi, hw, ho]
       exact ⟨hinp, ⟨operandsWork, hops, rfl⟩, hout⟩)
@@ -467,8 +458,8 @@ theorem denseIndirectStoreInstructionTM_hoareTime_frame
       rintro inp work out ⟨hinp, hops, hout⟩
       have hvalues := denseStoreOperands_values tapes input overlay
         addressRegister source initialWork work hops
-      obtain ⟨hi, hw, ho⟩ := phaseTransition_of_parked
-        (inp := inp) (work := work) (out := out)
+      obtain ⟨hi, hw, ho⟩ := TM.parked_transition
+        (inp₀ := inp) (W := work) (out₀ := out)
         (by simpa [hinp] using hinput) hvalues.2.2.2
         (by simpa [hout] using houtputParked)
       rw [hi, hw, ho]

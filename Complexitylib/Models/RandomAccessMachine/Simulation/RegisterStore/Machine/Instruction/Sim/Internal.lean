@@ -5,6 +5,7 @@ Authors: Samuel Schlesinger
 -/
 
 module
+import Complexitylib.Models.TuringMachine.Frame
 public import
   Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Machine.Instruction.Sim.Defs
 import Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore
@@ -72,16 +73,6 @@ private theorem blank_parked :
   refine ⟨by simp [Tape.move], ?_⟩
   intro j hj
   simp [Tape.move, Tape.init, show j ≠ 0 by omega]
-
-private theorem phaseTransition_of_parked
-    {inp out : Tape} {work : Fin n → Tape}
-    (hinput : TM.Parked inp) (hwork : ∀ i, TM.Parked (work i))
-    (houtput : TM.Parked out) :
-    TM.transitionInput inp = inp ∧
-      (fun i => TM.transitionTape (work i)) = work ∧
-      TM.transitionTape out = out :=
-  TM.phaseTransition_eq_self_of_reads_ne_start hinput.read_ne_start
-    (fun i => (hwork i).read_ne_start) houtput.read_ne_start
 
 /-- The finite decrementing branch tree selects the corresponding static
 instruction, assuming the individual instruction kernels satisfy their common
@@ -152,8 +143,8 @@ theorem dispatchProgramTM_hoareTime_of_execute_internal
         (executeInstructionTM tapes .halt) hreset'
         (by
           rintro inp work out ⟨hinp, hworkEq, hout⟩
-          obtain ⟨hi, hw, ho⟩ := phaseTransition_of_parked
-            (inp := inp) (work := work) (out := out)
+          obtain ⟨hi, hw, ho⟩ := TM.parked_transition
+            (inp₀ := inp) (W := work) (out₀ := out)
             (by simpa [hinp] using hinput)
             (by simpa [hworkEq] using
               hready.1.control.lookup.scanner.parked)
@@ -276,8 +267,8 @@ theorem dispatchProgramTM_hoareTime_of_execute_internal
           (dispatchProgramTM tapes program) hpred'
           (by
             rintro inp' work' out' ⟨hinp', hwork', hout'⟩
-            obtain ⟨hi, hw, ho⟩ := phaseTransition_of_parked
-              (inp := inp') (work := work') (out := out')
+            obtain ⟨hi, hw, ho⟩ := TM.parked_transition
+              (inp₀ := inp') (W := work') (out₀ := out')
               (by simpa [hinp', hinp] using hinput)
               (by
                 intro i
@@ -989,7 +980,7 @@ theorem bufferedCleanupTM_hoareTime_frame_internal
     have houtParked : TM.Parked out := by simpa [hout] using houtput
     have hworkParked : ∀ i, TM.Parked (work i) := by
       simpa [hwork] using hwork₀
-    obtain ⟨hi, hw, ho⟩ := phaseTransition_of_parked hinpParked
+    obtain ⟨hi, hw, ho⟩ := TM.parked_transition hinpParked
       hworkParked houtParked
     rw [hi, hw, ho]
     exact ⟨hinp, hwork, hout⟩
@@ -1186,7 +1177,7 @@ theorem programStepTM_hoareTime_frame_internal
       rintro inp work out ⟨hinp, hcleanupReady, hout⟩
       have hinpParked : TM.Parked inp := by simpa [hinp] using hinput
       have houtParked : TM.Parked out := by simpa [hout, blank] using blank_parked
-      obtain ⟨hi, hw, ho⟩ := phaseTransition_of_parked hinpParked
+      obtain ⟨hi, hw, ho⟩ := TM.parked_transition hinpParked
         hcleanupReady.result.parked houtParked
       rw [hi, hw, ho]
       exact ⟨hinp, hcleanupReady, hout⟩)

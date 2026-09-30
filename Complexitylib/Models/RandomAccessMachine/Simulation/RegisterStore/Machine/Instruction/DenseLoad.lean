@@ -5,6 +5,7 @@ Authors: Samuel Schlesinger
 -/
 
 module
+import Complexitylib.Models.TuringMachine.Frame
 public import
   Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Machine.Instruction.DenseDefs
 public import
@@ -38,16 +39,6 @@ private theorem hasBinaryPrefix_parked {t : Tape} {bits : List Bool}
     exact Γ.ofBool_ne_start _
   · rw [h.2.2 i (Nat.le_of_not_gt hi)]
     decide
-
-private theorem phaseTransition_of_parked
-    {inp out : Tape} {work : Fin n → Tape}
-    (hinput : TM.Parked inp) (hwork : ∀ i, TM.Parked (work i))
-    (houtput : TM.Parked out) :
-    TM.transitionInput inp = inp ∧
-      (fun i => TM.transitionTape (work i)) = work ∧
-      TM.transitionTape out = out :=
-  TM.phaseTransition_eq_self_of_reads_ne_start hinput.read_ne_start
-    (fun i => (hwork i).read_ne_start) houtput.read_ne_start
 
 private theorem denseScanner_indirect_of_lhs
     (tapes : BinaryInstructionTapes n) (input : List Bool)
@@ -172,8 +163,8 @@ private theorem denseIndirectReads_hoareTime
     (denseOverlayLookupTM tapes.indirectLoadLookup) haddress
     (by
       rintro inp work out ⟨hinp, haddressResult, hout⟩
-      obtain ⟨hi, hw, ho⟩ := phaseTransition_of_parked
-        (inp := inp) (work := work) (out := out)
+      obtain ⟨hi, hw, ho⟩ := TM.parked_transition
+        (inp₀ := inp) (W := work) (out₀ := out)
         (by simpa [inp₀, hinp] using hinput) haddressResult.parked
         (by simpa [hout] using houtput)
       rw [hi, hw, ho]
@@ -328,11 +319,11 @@ theorem denseIndirectLoadInstructionTM_hoareTime_frame
       subst work
       have hparked := (scanner_updateQuery_of_indirect_internal tapes overlay
         destination loadedWork hloadedResult.scanner).parked
-      obtain ⟨hi, hw, ho⟩ := phaseTransition_of_parked
-        (inp := inp)
-        (work := Function.update loadedWork tapes.update.entry.query
+      obtain ⟨hi, hw, ho⟩ := TM.parked_transition
+        (inp₀ := inp)
+        (W := Function.update loadedWork tapes.update.entry.query
           ((Tape.init (destination.bits.map Γ.ofBool)).move Dir3.right))
-        (out := out) (by simpa [hinp] using hinput) hparked
+        (out₀ := out) (by simpa [hinp] using hinput) hparked
         (by simpa [hout] using houtputParked)
       rw [hi, hw, ho]
       exact ⟨hinp, ⟨addressWork, loadedWork, haddressResult,
@@ -346,8 +337,8 @@ theorem denseIndirectLoadInstructionTM_hoareTime_frame
     (by
       rintro inp work out ⟨hinp, ⟨addressWork, haddressResult,
         hloadedResult⟩, hout⟩
-      obtain ⟨hi, hw, ho⟩ := phaseTransition_of_parked
-        (inp := inp) (work := work) (out := out)
+      obtain ⟨hi, hw, ho⟩ := TM.parked_transition
+        (inp₀ := inp) (W := work) (out₀ := out)
         (by simpa [hinp] using hinput) hloadedResult.parked
         (by simpa [hout] using houtputParked)
       rw [hi, hw, ho]

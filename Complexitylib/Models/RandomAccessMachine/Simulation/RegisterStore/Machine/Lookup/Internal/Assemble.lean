@@ -5,6 +5,7 @@ Authors: Samuel Schlesinger
 -/
 
 module
+import Complexitylib.Models.TuringMachine.Frame
 import
   Complexitylib.Models.RandomAccessMachine.Simulation.RegisterStore.Machine.Lookup.Internal.Prepare
 import
@@ -93,16 +94,6 @@ private theorem entryLookupValueCopy_ready_hoareTime
     initialWork work inp₀ out₀ hready hinput houtput inp work out
       ⟨hinp, rfl, hout⟩
 
-private theorem phaseTransition_of_parked
-    {inp out : Tape} {work : Fin n → Tape}
-    (hinput : TM.Parked inp) (hwork : ∀ i, TM.Parked (work i))
-    (houtput : TM.Parked out) :
-    TM.transitionInput inp = inp ∧
-      (fun i => TM.transitionTape (work i)) = work ∧
-      TM.transitionTape out = out :=
-  TM.phaseTransition_eq_self_of_reads_ne_start hinput.read_ne_start
-    (fun i => (hwork i).read_ne_start) houtput.read_ne_start
-
 /-- Scanner reset, source rewind, and count restoration form one reusable tail
 whose endpoint is the original blank-query scanner ABI. -/
 theorem entryLookupRestoreTail_hoareTime_internal
@@ -133,8 +124,8 @@ theorem entryLookupRestoreTail_hoareTime_internal
     hsource
     (by
       rintro inp work out ⟨hinp, hready, hout⟩
-      obtain ⟨hi, hw, ho⟩ := phaseTransition_of_parked
-        (inp := inp) (work := work) (out := out)
+      obtain ⟨hi, hw, ho⟩ := TM.parked_transition
+        (inp₀ := inp) (W := work) (out₀ := out)
         (by simpa [hinp] using hinput) hready.parked
         (by simpa [hout] using houtput)
       rw [hi, hw, ho]
@@ -148,8 +139,8 @@ theorem entryLookupRestoreTail_hoareTime_internal
     hreset
     (by
       rintro inp work out ⟨hinp, hready, hout⟩
-      obtain ⟨hi, hw, ho⟩ := phaseTransition_of_parked
-        (inp := inp) (work := work) (out := out)
+      obtain ⟨hi, hw, ho⟩ := TM.parked_transition
+        (inp₀ := inp) (W := work) (out₀ := out)
         (by simpa [hinp] using hinput) hready.parked
         (by simpa [hout] using houtput)
       rw [hi, hw, ho]
@@ -188,8 +179,8 @@ theorem entryLookupCopyRestore_hoareTime_internal
     (entryLookupRestoreTailTM tapes) hcopy
     (by
       rintro inp work out ⟨hinp, hready, hout⟩
-      obtain ⟨hi, hw, ho⟩ := phaseTransition_of_parked
-        (inp := inp) (work := work) (out := out)
+      obtain ⟨hi, hw, ho⟩ := TM.parked_transition
+        (inp₀ := inp) (W := work) (out₀ := out)
         (by simpa [hinp] using hinput) hready.restore.parked
         (by simpa [hout] using houtput)
       rw [hi, hw, ho]
@@ -204,8 +195,8 @@ theorem entryLookupCopyRestore_hoareTime_internal
     hrewind
     (by
       rintro inp work out ⟨hinp, hready, hout⟩
-      obtain ⟨hi, hw, ho⟩ := phaseTransition_of_parked
-        (inp := inp) (work := work) (out := out)
+      obtain ⟨hi, hw, ho⟩ := TM.parked_transition
+        (inp₀ := inp) (W := work) (out₀ := out)
         (by simpa [hinp] using hinput) hready.restore.parked
         (by simpa [hout] using houtput)
       rw [hi, hw, ho]
@@ -221,8 +212,8 @@ theorem entryLookupCopyRestore_hoareTime_internal
     (by
       rintro inp work out ⟨hinp, hready, hout⟩
       rcases hready with ⟨preparedWork, hprepared, hscanned⟩
-      obtain ⟨hi, hw, ho⟩ := phaseTransition_of_parked
-        (inp := inp) (work := work) (out := out)
+      obtain ⟨hi, hw, ho⟩ := TM.parked_transition
+        (inp₀ := inp) (W := work) (out₀ := out)
         (by simpa [hinp] using hinput) hscanned.result.parked
         (by simpa [hout] using houtput)
       rw [hi, hw, ho]
@@ -254,8 +245,8 @@ theorem entryLookupLoaded_hoareTime_internal
     (entryLookupCopyRestoreTM tapes) hprepare
     (by
       rintro inp work out ⟨hinp, hprepared, hout⟩
-      obtain ⟨hi, hw, ho⟩ := phaseTransition_of_parked
-        (inp := inp) (work := work) (out := out)
+      obtain ⟨hi, hw, ho⟩ := TM.parked_transition
+        (inp₀ := inp) (W := work) (out₀ := out)
         (by simpa [hinp] using hinput) hprepared.parked
         (by simpa [hout] using houtput)
       rw [hi, hw, ho]
