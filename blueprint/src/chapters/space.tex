@@ -584,6 +584,34 @@ constant factor.
   function.
 \end{proof}
 
+\begin{lemma}[Ordered exponential folds use polynomial space]
+  \label{lem:space-bitstring-fold}
+  \lean{Complexity.SpaceIter.mem_PSPACE_of_bitstring_fold,
+    Complexity.SpaceIter.mem_PSPACE_of_exists_bitstring}
+  \leanok
+  \uses{def:FP, def:PSPACE}
+  Fix polynomials $w,v$. On input $x$, let $W=w(|x|)$ and enumerate all
+  $W$-bit strings $c_i$ in increasing little-endian numeric order. Starting
+  with $a_0=\operatorname{seed}(x)$, set
+  $a_{i+1}=\operatorname{update}(x,c_i,a_i)$ for $i<2^W$.
+  If the seed, update, and final Boolean test are polynomial-time, and
+  $|a_i|\le v(|x|)$ for every $i\le 2^W$, then the language defined by testing
+  $a_{2^W}$ lies in $\cc{PSPACE}$. The update need not be associative or
+  commutative, and accumulators may be empty. At $W=0$ the single candidate
+  is the empty string. Boolean disjunction gives fixed-width witness search
+  as an instance with a one-bit accumulator.
+\end{lemma}
+\begin{proof}
+  \leanok
+  \uses{lem:space-iterate}
+  Store one fixed-width counter and the accumulator, preserving $x$ with
+  the initialized iteration controller. The packed state has length at most
+  $4W+2v(|x|)+|x|+22$; completion is signalled at iteration $2^W+1$, and one
+  more application publishes the answer. Lemma~\ref{lem:space-iterate}
+  applies. This is the depth-one fold layer; polynomial-depth trees still
+  require a stack and its correctness proof.
+\end{proof}
+
 \begin{theorem}[Polynomial-depth game trees are evaluated in PSPACE]
   \label{thm:space-game-tree}
   \uses{def:FP, def:PSPACE}

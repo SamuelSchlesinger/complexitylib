@@ -8,6 +8,7 @@ module
 public import Complexitylib.Classes.Time
 public import Complexitylib.Classes.Space
 public import Complexitylib.Classes.Space.Iterate
+public import Complexitylib.Classes.Space.BitstringFold
 public import Complexitylib.Classes.FiniteCounting
 public import Complexitylib.Classes.EventProb
 public import Complexitylib.Classes.AverageCase
