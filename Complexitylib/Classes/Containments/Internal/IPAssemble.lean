@@ -5,6 +5,7 @@ Authors: Bolton Bailey
 -/
 module
 public import Complexitylib.Classes.Containments.Internal.IPLeaf
+public import Complexitylib.Classes.P.InitializedIterate
 public import Complexitylib.Classes.Containments.Internal.SpaceIterate
 
 /-!
@@ -40,29 +41,23 @@ open Cobham
 the input the second, so the very first call — on `pair [] x` — builds the initial state. -/
 noncomputable def ipG (prot : Protocol) (vd : List Bool → List Bool)
     (rp cp mp : Polynomial ℕ) (z : List Bool) : List Bool :=
-  pair
-    (selectHead (emptyFlag (pairFst z))
-      (IPM.ipInit (polyRuler cp (pairSnd z)) (polyRuler rp (pairSnd z)))
-      (IPM.ipStep (polyRuler mp (pairSnd z)) (polyRuler cp (pairSnd z))
-        (okFn prot.vmsg vd (polyRuler rp (pairSnd z)) (pairSnd z)) (pairFst z)))
-    (pairSnd z)
+  initializedStep
+    (fun x => IPM.ipInit (polyRuler cp x) (polyRuler rp x))
+    (fun x => IPM.ipStep (polyRuler mp x) (polyRuler cp x)
+      (okFn prot.vmsg vd (polyRuler rp x) x)) z
 
 theorem ipG_nil (prot : Protocol) (vd : List Bool → List Bool) (rp cp mp : Polynomial ℕ)
     (x : List Bool) :
     ipG prot vd rp cp mp (pair [] x)
-      = pair (IPM.ipInit (polyRuler cp x) (polyRuler rp x)) x := by
-  rw [ipG, pairFst_pair, pairSnd_pair, emptyFlag_nil, selectHead_cons_true]
+      = pair (IPM.ipInit (polyRuler cp x) (polyRuler rp x)) x :=
+  initializedStep_nil _ _ _
 
 theorem ipG_step (prot : Protocol) (vd : List Bool → List Bool) (rp cp mp : Polynomial ℕ)
     (st x : List Bool) (h : st ≠ []) :
     ipG prot vd rp cp mp (pair st x)
       = pair (IPM.ipStep (polyRuler mp x) (polyRuler cp x)
-          (okFn prot.vmsg vd (polyRuler rp x) x) st) x := by
-  obtain ⟨b, t, rfl⟩ : ∃ b t, st = b :: t := by
-    cases st with
-    | nil => exact absurd rfl h
-    | cons b t => exact ⟨b, t, rfl⟩
-  rw [ipG, pairFst_pair, pairSnd_pair, emptyFlag_cons, selectHead_cons_false]
+          (okFn prot.vmsg vd (polyRuler rp x) x) st) x :=
+  initializedStep_step _ _ _ _ h
 
 /-! ## The orbit -/
 
@@ -94,19 +89,16 @@ theorem ipG_iterate (x : List Bool) :
           ⟨false, false, none,
             [IPM.freshFrm (prot.walkParams x) [] (polyRuler rp x)]⟩)) x := by
   have hokf := okFn_hokf prot vd hvd (polyRuler rp x) x ((polyRuler rp x).length + 1) le_rfl
+  have hinit := IPM.ipInit_eq _ (prot.walkParams x) (cr_length prot cp hcp x) (polyRuler rp x)
+  have hsim := Protocol.ipStep_iterate_walk prot x _ _
+    (mr_length prot mp hmp x) (cr_length prot cp hcp x) _ _ hokf
   intro j
-  induction j with
-  | zero =>
-      rw [Function.iterate_one, ipG_nil,
-        IPM.ipInit_eq _ (prot.walkParams x) (cr_length prot cp hcp x),
-        Function.iterate_zero_apply]
-  | succ j ih =>
-      rw [Function.iterate_succ_apply' (IPM.step (prot.walkParams x)) j,
-        Function.iterate_succ_apply', ih, ipG_step _ _ _ _ _ _ _ (IPM.encSst_ne_nil _),
-        IPM.ipStep_encSst (prot.walkParams x) _ _ (mr_length prot mp hmp x)
-          (cr_length prot cp hcp x) _ ((polyRuler rp x).length + 1) hokf _
-          (IPM.iterate_encOk (prot.walkParams x) _ j _
-            (IPM.encOk_start (prot.walkParams x) (polyRuler rp x)))]
+  change (initializedStep
+    (fun y => IPM.ipInit (polyRuler cp y) (polyRuler rp y))
+    (fun y => IPM.ipStep (polyRuler mp y) (polyRuler cp y)
+      (okFn prot.vmsg vd (polyRuler rp y) y)))^[j + 1] (pair [] x) = _
+  rw [initializedStep_iterate _ _ _ j (fun i _ => by
+    rw [hinit, hsim]; exact IPM.encSst_ne_nil _), hinit, hsim]
 
 end
 
@@ -184,10 +176,10 @@ theorem ip_mem_PSPACE (prot : Protocol) {L : Language} (rp cp mp r w : Polynomia
   have hmr : (fun z => polyRuler mp (pairSnd z)) ∈ FP := polyRulerFn_mem_FP mp hsnd
   have hrr : (fun z => polyRuler rp (pairSnd z)) ∈ FP := polyRulerFn_mem_FP rp hsnd
   have hGfp : ipG prot vd rp cp mp ∈ FP := by
-    refine Cobham.pairFn_mem_FP (Cobham.selectHeadFn_mem_FP (emptyFlagFn_mem_FP hfst)
-      (IPM.ipInitFn_mem_FP hcr hrr) ?_) hsnd
-    exact IPM.ipStepFn_mem_FP hmr hcr hfst
-      (fun hu hv => okFnFn_mem_FP prot.vmsg_mem hvdFP hrr hsnd hu hv)
+    apply initializedStep_mem_FP
+    · exact IPM.ipInitFn_mem_FP (polyRulerFn_mem_FP cp hid) (polyRulerFn_mem_FP rp hid)
+    · exact IPM.ipStepFn_mem_FP hmr hcr hfst
+        (fun hu hv => okFnFn_mem_FP prot.vmsg_mem hvdFP hrr hsnd hu hv)
   have hex := ipRun_exists prot rp hrp hcomp hsound
   have horb := ipG_iterate prot vd rp cp mp hcp hmp hvd
   have hN : ∀ x : List Bool, (fun y => ipT prot L rp hex y + 2) x = ipT prot L rp hex x + 2 :=

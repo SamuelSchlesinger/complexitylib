@@ -5,6 +5,7 @@ Authors: Bolton Bailey
 -/
 module
 public import Complexitylib.Classes.Containments.Internal.SavitchFrame
+public import Complexitylib.Classes.P.InitializedIterate
 public import Complexitylib.Classes.Containments.Internal.CodeAccept
 public import Complexitylib.Classes.Containments.Internal.NLSearchAssemble
 public import Complexitylib.Classes.Containments.Internal.BinArith
@@ -171,27 +172,20 @@ noncomputable def savInit (tm : NTM k) (qp lp : Polynomial ℕ) (x : List Bool) 
 first component and the input the second, so the very first call — on
 `pair [] x` — is the one that builds the initial state. -/
 noncomputable def savG (tm : NTM k) (qp lp : Polynomial ℕ) (z : List Bool) : List Bool :=
-  pair (selectHead (emptyFlag (pairFst z))
-    (savInit tm qp lp (pairSnd z)) (savStep tm (pairFst z))) (pairSnd z)
+  initializedStep (savInit tm qp lp) (fun _ => savStep tm) z
 
 @[simp] theorem savG_pair (tm : NTM k) (qp lp : Polynomial ℕ) (s x : List Bool) :
     savG tm qp lp (pair s x)
-      = pair (selectHead (emptyFlag s) (savInit tm qp lp x) (savStep tm s)) x := by
-  rw [savG, pairFst_pair, pairSnd_pair]
+      = pair (selectHead (emptyFlag s) (savInit tm qp lp x) (savStep tm s)) x :=
+  initializedStep_pair _ _ _ _
 
 theorem savG_nil (tm : NTM k) (qp lp : Polynomial ℕ) (x : List Bool) :
-    savG tm qp lp (pair [] x) = pair (savInit tm qp lp x) x := by
-  rw [savG_pair, emptyFlag_nil, selectHead]
-  simp
+    savG tm qp lp (pair [] x) = pair (savInit tm qp lp x) x :=
+  initializedStep_nil _ _ _
 
 theorem savG_step (tm : NTM k) (qp lp : Polynomial ℕ) (s x : List Bool) (hs : s ≠ []) :
-    savG tm qp lp (pair s x) = pair (savStep tm s) x := by
-  obtain ⟨b, t, rfl⟩ : ∃ b t, s = b :: t := by
-    cases s with
-    | nil => exact absurd rfl hs
-    | cons b t => exact ⟨b, t, rfl⟩
-  rw [savG_pair, emptyFlag_cons, selectHead]
-  simp
+    savG tm qp lp (pair s x) = pair (savStep tm s) x :=
+  initializedStep_step _ _ _ _ hs
 
 /-! ## The step is polynomial-time -/
 
@@ -286,14 +280,8 @@ theorem savInitFn_mem_FP (tm : NTM k) (qp lp : Polynomial ℕ)
       (constFn_mem_FP []))
 
 theorem savG_mem_FP (tm : NTM k) (qp lp : Polynomial ℕ) : savG tm qp lp ∈ FP := by
-  have hid : (fun z : List Bool => z) ∈ FP := CobhamFP_subset_FP (Cobham.proj 0)
-  have hfst := fstBlockOf_mem_FP hid
-  have hsnd := sndBlockOf_mem_FP hid
-  have hstep : (fun z => savStep tm (pairFst z)) ∈ FP := by
-    have := mem_FP_comp hfst (savStep_mem_FP tm)
-    exact this
-  exact Cobham.pairFn_mem_FP
-    (Cobham.selectHeadFn_mem_FP (emptyFlagFn_mem_FP hfst)
-      (savInitFn_mem_FP tm qp lp hsnd) hstep) hsnd
+  apply initializedStep_mem_FP
+  · exact savInitFn_mem_FP tm qp lp (CobhamFP_subset_FP (Cobham.proj 0))
+  · exact mem_FP_comp pairFst_mem_FP (savStep_mem_FP tm)
 
 end Complexity
