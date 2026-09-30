@@ -794,6 +794,45 @@ these facts are stated in the chapter on encodings
   such that every $x$ has some $y$ with $R(x, y)$.
 \end{definition}
 
+\begin{theorem}[Finite verification with charged certificates]
+  \label{thm:polytime-finite-verifier}
+  \lean{Complexity.WitnessBoundSetup, Complexity.WitnessBoundSetup.linear,
+    Complexity.WitnessTM.Verifier.compile, Complexity.WitnessTM.Verifier.time,
+    Complexity.WitnessTM.Verifier.space,
+    Complexity.WitnessTM.Verifier.compile_decidesInTimeSpace,
+    Complexity.WitnessTM.Verifier.compile_decidesInTime}
+  \leanok
+  \uses{def:models-witness-tm, thm:models-witness-ntm, def:pair}
+  Suppose an ordinary deterministic verifier decides $L_0$ in time $T$ and
+  decision space $S$. Let a concrete setup machine compute a unary witness
+  bound $B(n)$ in time $A(n)$ and space $U(n)$, restoring the input and leaving
+  the required parked frame. There is a witness machine deciding
+  $\{x : \exists y,\ |y| \le B(|x|) \land \langle x,y\rangle \in L_0\}$.
+  It stores the finite certificate and paired virtual input on charged work
+  tapes. Put $R_B(n)=\max_{m\le B(n)} R(2n+2+m)$, $G(n)=3B(n)+3$, and
+  $P_B(n)=4n+2B(n)+10$. Its bounds are
+  \[
+    A(n)+1+(G(n)+1+(P_B(n)+1+T_B(n)))
+  \]
+  in time and
+  \[
+    \max\{U(n),\ 1+G(n)+P_B(n),\ 2n+2+B(n)+S_B(n)+1\}
+  \]
+  in charged space. No monotonicity of $T$ or $S$ is assumed. The online
+  witness equivalence transfers these same compiler bounds to an NTM.
+\end{theorem}
+\begin{proof}
+  \leanok
+  First realize the unary bound in a private setup block, reserving separate
+  blank verifier and certificate tapes. The bounded guessing phase stores
+  every certificate of length at most $B(n)$ and no longer one. The remaining
+  deterministic phases construct the pair and run the verifier in a disjoint
+  work-tape block. Their contracts preserve the frame and bound every reachable
+  prefix, including output travel. The certificate source is read once; the
+  stored reusable copy is charged. For $B(n)=n+1$, a concrete one-counter setup
+  has $A(n)=U(n)=4n+11$.
+\end{proof}
+
 \begin{lemma}[Guess and verify]
   \label{lem:polytime-guess-verify}
   \lean{Complexity.mem_NP_of_poly_witness, Complexity.mem_NP_of_linear_witness,
@@ -812,11 +851,13 @@ these facts are stated in the chapter on encodings
 \end{lemma}
 \begin{proof}
   \leanok
-  \uses{thm:polytime-preimage, prop:polytime-P-boolean, lem:polytime-decision-fn}
-  The guess-and-verify machine built for $\mathrm{SAT}$ is generic: it guesses
-  a string of length at most $|x| + 1$, pairs it with the input, and runs the
-  deterministic verifier, which handles linearly bounded witnesses (the two
-  linear statements). A general polynomial bound is reduced to the linear case
+  \uses{thm:polytime-finite-verifier, thm:polytime-preimage, prop:polytime-P-boolean,
+    lem:polytime-decision-fn}
+  Instantiate Theorem~\ref{thm:polytime-finite-verifier} with the concrete
+  bound $B(n)=n+1$. Its time is $13n+32+T_B(n)$, which is polynomial whenever
+  the verifier's time is polynomial. This proves the linear witness statement;
+  the online-witness equivalence supplies its NTM. A general polynomial bound
+  is reduced to the linear case
   by padding the input with a polynomial-length ruler: the padded verifier
   checks the original verifier on the unpadded pair and checks that the ruler
   is long enough, which is in $\cc{P}$ by intersection and a length-comparison

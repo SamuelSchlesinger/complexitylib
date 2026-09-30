@@ -38,19 +38,19 @@ import this one.
 The proof (`mem_NP_of_poly_witness`, in
 `Complexitylib.Classes.NP.Internal.GuessVerify`) has two steps.
 
-1. **Linear witnesses** (`mem_NP_of_linear_witness`). The guess-and-verify NTM
-   `SAT.satGuessVerifyNTM M` guesses a string `y` of length at most `|x| + 1`,
-   forms `pair x y`, and runs the deterministic verifier `M` on it. It decides
-   every language whose members are exactly the inputs with such a short
-   certificate accepted by `M`, in time polynomial when `M`'s is.
+1. **Linear witnesses** (`mem_NP_of_linear_witness`). The generic
+   `WitnessTM.Verifier.compile` machine computes the bound `|x| + 1`, stores
+   a bounded finite certificate on charged work tape, constructs `pair x y`,
+   and runs the ordinary verifier. Online-witness equivalence supplies the
+   NTM. The compiler records explicit time and independent space bounds.
 2. **Polynomial witnesses by padding.** For a witness bound `p`, the input `x`
-   is padded to `pair x r` with a ruler `r` long enough that the bound becomes
+   is padded to `pair x r` with a ruler long enough that the bound becomes
    linear in the padded length (`padWith`). The language is the preimage of
    the padded language `padLang p L₀` under this polynomial-time map, and `NP`
    is closed under such preimages (`mem_NP_preimage`).
 
-The result is stated only as membership in `NP`; no explicit running-time
-bound for the composed machine is recorded.
+The compiler's linear-instance runtime is explicit. The padding-based
+polynomial-witness corollary remains stated as membership in `NP`.
 -/
 
 
