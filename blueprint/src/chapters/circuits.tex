@@ -331,6 +331,47 @@ says otherwise.
   Unroll a polynomial-time decider into its circuit family.
 \end{proof}
 
+\section{Circuit cuts}
+\label{sec:circuits-cuts}
+
+This section uses native CSLib circuits. The cut semantics works for arbitrary
+signatures and interpretations, with values in any type $U$.
+
+\begin{definition}[Guessed values at a cut]
+  \label{def:circuits-cut-values}
+  \lean{Cslib.Circuits.Program.evalCut, Cslib.Circuits.Program.CutConsistent}
+  \leanok
+  \uses{thm:circuits-straightline}
+  For selected gates $S$, input $x$, and guesses $a:S\to U$, evaluate an
+  unselected gate normally and a selected gate by its guess. The guess is
+  consistent when each selected gate's own operation, applied to the values
+  of its argument wires under this evaluation, gives its guessed value.
+\end{definition}
+
+\begin{theorem}[Unique consistent cut certificate]
+  \label{thm:circuits-cut-certificate}
+  \lean{Cslib.Circuits.Program.cutConsistent_iff,
+    Cslib.Circuits.Program.existsUnique_cutConsistent,
+    Cslib.Circuits.Program.evalCut_eq_eval_of_consistent,
+    Cslib.Circuits.Circuit.eval_eq_iff_exists_cut}
+  \leanok
+  \uses{def:circuits-cut-values}
+  Every input has exactly one consistent guess at any selected set of
+  gates: the actual evaluation restricted to that set. A consistent guess
+  recovers all gate values. Consequently $C(x)=y$ if and only if there is
+  a consistent guess whose cut evaluation gives output $y$.
+\end{theorem}
+\begin{proof}
+  \leanok
+  The actual values give a consistent guess by induction in program order.
+  Conversely, a consistent cut evaluation satisfies every gate equation,
+  so CSLib's uniqueness theorem for program evaluation identifies it with
+  the original evaluation.
+\end{proof}
+
+This establishes the semantic certificate property. Formula-size and
+communication-cost bounds for cut circuits remain further work.
+
 \section{Advice}
 \label{sec:circuits-advice}
 

@@ -76,6 +76,7 @@ public import Complexitylib.Circuits.Hardwiring
 public import Complexitylib.Circuits.Unrolling
 public import Complexitylib.Circuits.Valiant
 public import Complexitylib.Circuits.StraightLine
+public import Complexitylib.Cslib.Circuit.Cut
 public import Complexitylib.Circuits.SparseSynthesis
 public import Complexitylib.Circuits.SparseSynthesis.Consequences
 public import Complexitylib.Circuits.SparseSynthesis.Sharpness
