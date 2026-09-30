@@ -19,6 +19,9 @@ public import Complexitylib.Models.TuringMachine.GuessStream
 public import Complexitylib.Models.TuringMachine.Witness
 public import Complexitylib.Models.TuringMachine.Witness.BoundSetup
 public import Complexitylib.Models.TuringMachine.Witness.BoundSetup.Reserved
+public import Complexitylib.Models.TuringMachine.Witness.Store
+public import Complexitylib.Models.TuringMachine.Witness.Verifier.Defs
+import Complexitylib.Models.TuringMachine.Witness.Verifier.Internal.Suffix
 import Complexitylib.Models.TuringMachine.Witness.Verifier.Internal.Run
 public import Complexitylib.Models.TuringMachine.GuessAssembly
 public import Complexitylib.Models.TuringMachine.Combinators
