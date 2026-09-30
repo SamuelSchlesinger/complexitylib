@@ -32,6 +32,10 @@ def affine (domainWidth rangeWidth : ℕ) :
   uniform := affine_uniform_internal
   pairwise := affine_pairwise_internal
 
+/-- Evaluation of the affine family is the concrete Boolean-ring matrix map. -/
+@[simp] theorem affine_eval (domainWidth rangeWidth : ℕ) :
+    (affine domainWidth rangeWidth).eval = affineEval := by simp [affine]
+
 end PairwiseIndependentHash
 
 end Complexity

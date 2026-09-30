@@ -330,6 +330,117 @@ chapter.
   to a hard one entry by entry.
 \end{proof}
 
+\paragraph{Sparse corrections in CSLib's circuit model.}
+The following results use the native CSLib De Morgan signature, counting
+AND, OR, NOT, and constant gates, with free fan-out and output designation.
+They refine the entry-by-entry estimate above by sharing the support and
+the labels of a whole correction. The synthesis methods are classical:
+see A.~V.~Chashkin, \emph{On computing partial Boolean functions} (in Russian),
+\emph{Mathematical Problems of Cybernetics} 22 (2024), pp.~152--222,
+\href{https://doi.org/10.20948/mvk-2024-152}{Sections 2--3}, which credit
+L.~A.~Sholomov for partial-function synthesis and O.~B.~Lupanov for
+bounded-weight synthesis. The formalization proves the needed specialization
+from finite pattern banks and affine hashing.
+
+\begin{definition}[Rows and active outputs of a correction]
+  \label{def:lowerbounds-correction}
+  \lean{Cslib.Circuits.Boolean.Correction.errorSupport,
+    Cslib.Circuits.Boolean.Correction.rowDistance,
+    Cslib.Circuits.Boolean.Correction.activeOutputs,
+    Cslib.Circuits.Boolean.Correction.errorVector}
+  \leanok
+  For $F,G:\{0,1\}^n\to\{0,1\}^m$, let
+  $S=\{x:F(x)\ne G(x)\}$, $d=|S|$, and
+  $R=\{j:F_j\not\equiv G_j\}$, with $r=|R|$.
+  The error vector $E_R=(F\oplus G)|_R$ contains only the selected output
+  coordinates. Write $C^S(E_R)$ for the minimum size of a circuit agreeing
+  with $E_R$ on $S$; its values outside $S$ are unrestricted.
+\end{definition}
+
+\begin{theorem}[Finite relative correction bound]
+  \label{thm:lowerbounds-relative-correction}
+  \lean{Cslib.Circuits.Boolean.Correction.complexityGiven_le_of_cover,
+    Cslib.Circuits.Boolean.Correction.complexity_dist_le_of_cover,
+    Cslib.Circuits.Boolean.Correction.complexity_dist_le_sum_of_cover}
+  \leanok
+  \uses{def:lowerbounds-correction}
+  Let $S$ contain every row on which $F$ and $G$ differ, and let $R$ contain
+  every output coordinate that changes. With the original input and $G(x)$
+  supplied for free,
+  \[
+    C(F\mid G)\le C(1_S)+C^S(E_R)+5r,
+    \qquad
+    |C(F)-C(G)|\le C(1_S)+C^S(E_R)+5r.
+  \]
+  Moreover $C^S(E_R)\le\sum_{j\in R}C^S((E_R)_j)$.
+\end{theorem}
+\begin{proof}
+  \leanok
+  Build the support indicator and the partial label circuit once. Mask each
+  selected label with the support bit, then XOR it with the corresponding
+  output of $G$. This costs one AND and four further gates per selected
+  output; the other outputs reuse their old wires. Exchange $F,G$ for the
+  reverse inequality. Scalar label circuits can be appended with shared
+  inputs.
+\end{proof}
+
+\begin{theorem}[Uniform sparse and partial synthesis at square-root weight]
+  \label{thm:lowerbounds-square-root-synthesis}
+  \lean{Complexity.CircuitSparseSynthesis.complexity_indicator_le,
+    Complexity.CircuitSparseSynthesis.complexityOn_le}
+  \leanok
+  \uses{def:randomness-hash}
+  For every $\varepsilon>0$, for all sufficiently large integers $p$,
+  uniformly over all $S\subseteq\{0,1\}^{2p}$ with $|S|\le 2^p$ and all
+  Boolean functions $u$,
+  \[
+    C(1_S)\le(1+\varepsilon)2^p,
+    \qquad
+    C^S(u)\le(1+\varepsilon)\frac{2^p}{p}.
+  \]
+\end{theorem}
+\begin{proof}
+  \leanok
+  Share column and row minterms and a bank of short patterns. Sparse rows
+  are partitioned into tuples of true columns. For partial rows, a greedy
+  covering argument supplies a bank extending every assignment on at most
+  $K$ positions; interval masks protect the specified values of other chunks.
+  The leading assembly cost is one OR per chunk. Affine hashing reduces the
+  input width at polynomial cost. Repeated membership filters synthesize
+  $1_S$, while one hash and explicit collision repairs suffice for partial
+  labels. Choose parameters with an exponential gap for every secondary
+  table and repair term, and absorb the polynomial factors in that gap.
+\end{proof}
+
+\begin{theorem}[Uniform square-root continuity for vector circuits]
+  \label{thm:lowerbounds-square-root-correction}
+  \lean{Complexity.CircuitSparseSynthesis.complexity_dist_le_three_sqrt,
+    Complexity.CircuitSparseSynthesis.complexity_dist_le_three_sqrt_of_cover}
+  \leanok
+  \uses{thm:lowerbounds-relative-correction,thm:lowerbounds-square-root-synthesis}
+  For every $\varepsilon>0$, there exists $p_0$ such that for all $p\ge p_0$,
+  every output width $m$, and all
+  $F,G:\{0,1\}^{2p}\to\{0,1\}^m$ with at most $2^p$ differing input rows
+  and at most $2p$ active output coordinates,
+  \[
+    |C(F)-C(G)|\le(3+\varepsilon)2^p.
+  \]
+  The threshold is independent of $m,F,G$. The same bound holds when only
+  covering sets for the erroneous rows and active outputs are supplied.
+\end{theorem}
+\begin{proof}
+  \leanok
+  Apply the finite correction bound. The support costs $(1+o(1))2^p$;
+  at most $2p$ scalar partial labels cost a total of $(2+o(1))2^p$.
+  The $5r\le 10p$ correction gates are lower order. The proof keeps the
+  estimates uniform before converting them to the displayed epsilon bound.
+\end{proof}
+
+These results do not assert the unrestricted vector entropy formula
+$H/\log_2 H+O(n+r)$ for arbitrary $n,r,d$. In particular, counting possible
+error maps alone is not an upper-bound synthesis theorem. The theorem above
+establishes the proposed coefficient-three regime without that assumption.
+
 \begin{definition}[Conditional circuit complexity]
   \label{def:lowerbounds-algebraic-conditional}
   \lean{Cslib.Circuits.Circuit.conditionalGateComplexity}

@@ -76,6 +76,7 @@ public import Complexitylib.Circuits.Hardwiring
 public import Complexitylib.Circuits.Unrolling
 public import Complexitylib.Circuits.Valiant
 public import Complexitylib.Circuits.StraightLine
+public import Complexitylib.Circuits.SparseSynthesis
 import Complexitylib.Circuits.Internal.Bridge
 
 /-! # Circuit Complexity Library
