@@ -4,7 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Samuel Schlesinger
 -/
 module
-public import Complexitylib.Classes.NP.Internal.PairBuildTM
+public import Complexitylib.Models.TuringMachine.Subroutines.PairBuild
 public import Complexitylib.Models.TuringMachine.Frame
 public import Complexitylib.Models.TuringMachine.Hoare.Safety
 

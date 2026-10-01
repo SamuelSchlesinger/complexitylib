@@ -7,7 +7,7 @@ Authors: Samuel Schlesinger
 module
 public import Complexitylib.Models.TuringMachine.Witness.BoundSetup.Reserved
 public import Complexitylib.Models.TuringMachine.Witness.Store
-public import Complexitylib.Classes.NP.Internal.PairBuildTM
+public import Complexitylib.Models.TuringMachine.Subroutines.PairBuild
 public import Complexitylib.Models.TuringMachine.Combinators.ApplyDecide
 public import Complexitylib.Models.TuringMachine.Placement.Hoare
 
