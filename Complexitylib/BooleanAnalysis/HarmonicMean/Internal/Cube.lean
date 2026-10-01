@@ -6,6 +6,7 @@ Authors: Samuel Schlesinger
 
 module
 public import Complexitylib.BooleanAnalysis.HarmonicMean.Internal.Mean
+public import Complexitylib.BooleanAnalysis.Bernoulli.Internal
 import Mathlib.Data.Fin.VecNotation
 import Mathlib.Algebra.BigOperators.Fin
 import Mathlib.Tactic.FunProp
@@ -30,56 +31,6 @@ theorem expect_cons_internal {n : ℕ} (f : (Fin (n + 1) → Bool) → ℝ) :
   rw [← Fintype.expect_equiv (Fin.consEquiv (fun _ : Fin (n + 1) => Bool))
     (fun x => f (Fin.cons x.1 x.2)) f (fun _ => rfl)]
   rw [expect_pair_internal, expect_bool_internal]
-
-theorem sum_cons_internal {n : ℕ} (f : (Fin (n + 1) → Bool) → ℝ) :
-    (∑ x, f x) = (∑ x, f (Fin.cons false x)) + ∑ x, f (Fin.cons true x) := by
-  rw [← (Fin.consEquiv (fun _ : Fin (n + 1) => Bool)).sum_comp f]
-  rw [Fintype.sum_prod_type, Fintype.sum_bool]
-  exact add_comm _ _
-
-theorem bernoulliWeight_cons_internal {n : ℕ} (p : ℝ) (b : Bool)
-    (selected : Fin n → Bool) :
-    bernoulliWeight p (Fin.cons b selected) =
-      (if b then p else 1 - p) * bernoulliWeight p selected := by
-  simp [bernoulliWeight, Fin.prod_univ_succ]
-
-theorem bernoulliAverage_cons_internal {n : ℕ} (p : ℝ)
-    (f : (Fin (n + 1) → Bool) → ℝ) :
-    bernoulliAverage p f =
-      (1 - p) * bernoulliAverage p (fun x => f (Fin.cons false x)) +
-        p * bernoulliAverage p (fun x => f (Fin.cons true x)) := by
-  unfold bernoulliAverage
-  rw [sum_cons_internal]
-  simp_rw [bernoulliWeight_cons_internal]
-  simp only [Bool.false_eq_true, ite_false, ite_true, mul_assoc, ← mul_sum]
-
-theorem bernoulliAverage_mono_internal {ι : Type*} [Fintype ι] [DecidableEq ι]
-    {p : ℝ} (hp : 0 ≤ p) (hp' : p ≤ 1) {f g : (ι → Bool) → ℝ}
-    (hfg : ∀ x, f x ≤ g x) : bernoulliAverage p f ≤ bernoulliAverage p g := by
-  classical
-  apply sum_le_sum
-  intro x _
-  apply mul_le_mul_of_nonneg_left (hfg x)
-  apply prod_nonneg
-  intro i _
-  split_ifs
-  · exact hp
-  · exact sub_nonneg.mpr hp'
-
-theorem bernoulliAverage_const_internal {ι : Type*} [Fintype ι] [DecidableEq ι] (p c : ℝ) :
-    bernoulliAverage p (fun _ : ι → Bool => c) = c := by
-  classical
-  unfold bernoulliAverage bernoulliWeight
-  rw [← sum_mul, ← Fintype.prod_sum (fun (_ : ι) (b : Bool) => if b then p else 1 - p)]
-  simp
-
-theorem bernoulliAverage_linear_internal {ι : Type*} [Fintype ι] [DecidableEq ι]
-    (p a b : ℝ) (f g : (ι → Bool) → ℝ) :
-    bernoulliAverage p (fun x => a * f x + b * g x) =
-      a * bernoulliAverage p f + b * bernoulliAverage p g := by
-  unfold bernoulliAverage
-  simp only [mul_add, sum_add_distrib]
-  congr 1 <;> rw [mul_sum] <;> apply sum_congr rfl <;> intro x _ <;> ring
 
 theorem projectionAverage_nonneg_internal {ι : Type*} [Fintype ι] [DecidableEq ι]
     {f : (ι → Bool) → ℝ} (hf : ∀ x, 0 ≤ f x) (selected x : ι → Bool) :

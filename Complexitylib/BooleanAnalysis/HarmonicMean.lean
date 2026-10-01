@@ -5,6 +5,7 @@ Authors: Samuel Schlesinger
 -/
 
 module
+public import Complexitylib.BooleanAnalysis.Bernoulli
 public import Complexitylib.BooleanAnalysis.HarmonicMean.Defs
 public import Complexitylib.BooleanAnalysis.HarmonicMean.Internal.Density
 public import Complexitylib.BooleanAnalysis.HarmonicMean.Internal.Projection
@@ -25,8 +26,10 @@ projected patterns. Zero entries give harmonic mean zero, as in the paper.
 `expect_sqrt_le_bernoulliAverage_sqrt_harmonicTransform` is Lemma 12, including
 dimension zero. `harmonicTransform_good_probability` supplies the intermediate
 1/4-sampling estimate in the proof of Lemma 10, using a density bound `B` in
-place of `2 ^ k`. The sparse-sampling conclusion of Lemma 10 and the top-down
-communication and circuit lower bounds of Theorem 3 are not yet formalized.
+place of `2 ^ k`. The sparse-sampling conclusion and pattern count of Lemma 10
+are proved in `Complexitylib.BooleanAnalysis.LightPatterns`.
+The top-down communication and circuit lower bounds of Theorem 3 remain open
+formalization work.
 -/
 
 public section
@@ -168,11 +171,6 @@ theorem harmonicTransform_full (f : (ι → Bool) → ℝ) :
 theorem harmonicTransform_const (c : ℝ) (selected : ι → Bool) :
     harmonicTransform (fun _ => c) selected = c := harmonicTransform_const_internal c selected
 
-/-- Product Bernoulli weights sum to one. This identity holds algebraically
-for every `p`; they are nonnegative when `p ∈ [0, 1]`. -/
-theorem bernoulliAverage_const (p c : ℝ) :
-    bernoulliAverage p (fun _ : ι → Bool => c) = c := bernoulliAverage_const_internal p c
-
 end Projection
 
 /-- Corollary 1(2): revealing more coordinates decreases the harmonic transform.
@@ -196,8 +194,8 @@ theorem expect_sqrt_le_bernoulliAverage_sqrt_harmonicTransform {n : ℕ}
 
 /-- Intermediate estimate in the proof of Lemma 10: a normalized density bounded
 by `B` has harmonic transform at least `1 / (4 * B)` with probability at least
-`1 / (2 * sqrt B)` under `1/4`-coordinate sampling. Transference to sparse
-sampling is a further step, not an assumption of this theorem. -/
+`1 / (2 * sqrt B)` under `1/4`-coordinate sampling. The `LightPatterns` module
+transfers this estimate to sparse sampling. -/
 theorem harmonicTransform_good_probability {n : ℕ} {f : (Fin n → Bool) → ℝ}
     (hf : ∀ x, 0 ≤ f x) (hmean : (𝔼 x, f x) = 1) {B : ℝ} (hB : 1 ≤ B)
     (hbound : ∀ x, f x ≤ B) :

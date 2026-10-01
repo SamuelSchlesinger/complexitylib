@@ -237,13 +237,14 @@ leave a compatibility alias.
 ## Top-down parity lower bounds
 
 The track for Oliver Korten's *Top-Down Lower Bounds for All Depths* (ECCC
-TR26-221, 2026) targets Theorem 3. The first checked layer is
-`BooleanAnalysis.HarmonicMean`: the variational formula, all three transform
-properties, the biased-cube inequality (Lemmas 11--12 and Corollary 1), and
-the intermediate `1/4`-sampling estimate from the proof of Lemma 10.
-The representation agrees with marginals on actual coordinate patterns and
-handles zero values. Next prove the downward-family transference step and
-complete Lemma 10; the mirror-set argument, bounded-round KW model, and
+TR26-221, 2026) targets Theorem 3. `BooleanAnalysis.HarmonicMean` proves the
+variational formula, all three transform properties, and the biased-cube
+inequality (Lemmas 11--12 and Corollary 1). `BooleanAnalysis.Bernoulli` proves
+downward-family transference, and `BooleanAnalysis.LightPatterns` completes
+Lemma 10 with its exact constants and count of low-probability patterns.
+The mass-to-density bridge is checked, including zero masses and rate zero.
+Next formalize conditional fibers and their average deficit bound (Lemma 4),
+then the improved mirror-set argument. The bounded-round KW model and
 Theorem 3 remain open formalization work. The source-to-declaration map and
 remaining dependencies are in [`docs/TopDownLowerBounds.md`](docs/TopDownLowerBounds.md).
 

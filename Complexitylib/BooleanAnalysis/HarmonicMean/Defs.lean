@@ -5,7 +5,7 @@ Authors: Samuel Schlesinger
 -/
 
 module
-public import Mathlib.Algebra.Order.BigOperators.Expect
+public import Complexitylib.BooleanAnalysis.Bernoulli.Defs
 public import Mathlib.Analysis.Real.Sqrt
 public import Mathlib.Data.Fintype.Pi
 
@@ -56,16 +56,5 @@ noncomputable def harmonicTransform {ι : Type*} [Fintype ι] [DecidableEq ι]
   classical
   exact harmonicMean (projectionAverage f selected)
 
-/-- Product Bernoulli weight of a coordinate set with inclusion parameter `p`. -/
-noncomputable def bernoulliWeight {ι : Type*} [Fintype ι]
-    (p : ℝ) (selected : ι → Bool) : ℝ :=
-  ∏ i, if selected i then p else 1 - p
-
-/-- Finite expectation over independently selected coordinates. It is a probability
-expectation when `0 ≤ p ≤ 1`. -/
-noncomputable def bernoulliAverage {ι : Type*} [Fintype ι] [DecidableEq ι]
-    (p : ℝ) (f : (ι → Bool) → ℝ) : ℝ := by
-  classical
-  exact ∑ selected, bernoulliWeight p selected * f selected
 
 end Complexity.BooleanAnalysis

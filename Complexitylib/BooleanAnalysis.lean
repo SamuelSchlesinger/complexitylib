@@ -5,8 +5,10 @@ Authors: Samuel Schlesinger
 -/
 
 module
+public import Complexitylib.BooleanAnalysis.Bernoulli
 public import Complexitylib.BooleanAnalysis.FourierExpansion
 public import Complexitylib.BooleanAnalysis.HarmonicMean
+public import Complexitylib.BooleanAnalysis.LightPatterns
 public import Complexitylib.BooleanAnalysis.PolynomialCorrelation
 
 /-!
@@ -26,8 +28,10 @@ and coordinate and total influence. The polynomial correlation development prove
 the exponential XOR-of-majorities bound of Chattopadhyay, Hatami, Lee, Lovett,
 Tal, and Viola (2026), including its finite middle-band estimate.
 The harmonic mean development proves Korten's (2026) variational formula,
-transform properties, and biased-cube inequality (Lemmas 11--12 and Corollary 1),
-as a first layer toward his top-down parity lower bound.
+transform properties, and biased-cube inequality (Lemmas 11--12 and Corollary 1).
+Bernoulli transference then gives the improved light-patterns lemma (Lemma 10),
+with its exact constants and marginal-probability pattern count. These supply
+the analytic prerequisites for his top-down parity lower bound.
 All definitions and theorems live under the
 `Complexity.BooleanAnalysis` namespace.
 -/

@@ -896,8 +896,9 @@ in the appendices are not formalized here.
 This section follows Oliver Korten, \emph{Top-Down Lower Bounds for All
 Depths}, ECCC TR26-221 (2026),
 \url{https://eccc.weizmann.ac.il/report/2026/221/}. It formalizes the analytic
-core of Section~4. The improved light-patterns lemma and the communication
-adversary leading to Theorem~3 are subsequent formalization targets.
+core of Section~4, including the improved light-patterns lemma with its exact
+constants. The mirror-set argument and communication adversary leading to
+Theorem~3 remain formalization targets.
 Here the cube is represented by Boolean functions on the coordinate type;
 a coordinate set is also represented by its Boolean membership function.
 
@@ -1034,18 +1035,82 @@ a coordinate set is also represented by its Boolean membership function.
   Bound the indicator of $f_R(z)\le b$ by $b/f_R(z)$ and average.
 \end{proof}
 
+\begin{theorem}[Downward-family transference]
+  \label{thm:analysis-bernoulli-transference}
+  \lean{Complexity.BooleanAnalysis.bernoulliAverage_union,
+    Complexity.BooleanAnalysis.bernoulliAverage_bias_antitone,
+    Complexity.BooleanAnalysis.bernoulliAverage_lowerSet_pow_le,
+    Complexity.BooleanAnalysis.bernoulliAverage_lowerSet_transfer}
+  \leanok
+  \uses{def:analysis-harmonic}
+  If $A\subseteq2^{[n]}$ is nonempty and downward closed, and
+  $0\le r\le1/20$, then
+  \[
+    \Pr_{R\subseteq_r[n]}[R\in A]
+      \ge \Pr_{S\subseteq_{1/4}[n]}[S\in A]^{5r}.
+  \]
+  Korten attributes the transfer principle to Yufei Zhao,
+  \emph{Probabilistic Methods in Combinatorics}, Lemma~4.3.7,
+  \url{https://yufeizhao.com/pm/probmethod_notes.pdf}.
+\end{theorem}
+\begin{proof}
+  \leanok
+  The union of independent masks of rates $p,q$ has rate $p+q-pq$.
+  Iterating $h$ rate-$r$ masks gives union rate $1-(1-r)^h\le hr$;
+  downward closure bounds its membership probability by $\Pr_r(A)^h$.
+  For $r>0$, take $h=\lfloor1/(4r)\rfloor$, so $hr\le1/4$ and
+  $1/h\le5r$, and use monotonicity in the sampling rate. At $r=0$,
+  the sampled set is empty and belongs to $A$.
+\end{proof}
+
+\begin{definition}[Marginal probability mass]
+  \label{def:analysis-coordinate-mass}
+  \lean{Complexity.BooleanAnalysis.coordinateMass}
+  \leanok
+  For a real mass function $\mu$ on the cube, define
+  $\mu_R(z)=\sum_{x:x_R=z}\mu(x)$. If $\mu\ge0$ and $\sum_x\mu(x)=1$,
+  this is the probability of the pattern $z$ under the marginal distribution.
+\end{definition}
+
+\begin{theorem}[Mass-to-density marginal bridge]
+  \label{thm:analysis-coordinate-mass}
+  \lean{Complexity.BooleanAnalysis.coordinateMass_nonneg,
+    Complexity.BooleanAnalysis.sum_coordinateMass,
+    Complexity.BooleanAnalysis.coordinateMarginal_normalize}
+  \leanok
+  \uses{def:analysis-coordinate-mass, def:analysis-harmonic}
+  Marginalization preserves total mass and nonnegativity. If
+  $f(x)=2^n\mu(x)$, then $f_R(z)=2^{|R|}\mu_R(z)$.
+\end{theorem}
+\begin{proof}
+  \leanok
+  Split the cube into selected and complementary coordinates and factor the
+  finite sums. The number of completions is $2^{n-|R|}$.
+\end{proof}
+
 \begin{lemma}[Improved light patterns, Korten Lemma 10]
   \label{lem:analysis-improved-light-patterns}
+  \lean{Complexity.BooleanAnalysis.harmonicTransform_sparse_good_probability,
+    Complexity.BooleanAnalysis.improved_light_patterns_density,
+    Complexity.BooleanAnalysis.improved_light_patterns}
+  \leanok
   \uses{thm:analysis-harmonic-good-probability, cor:analysis-harmonic-properties,
-    thm:analysis-harmonic-light-fraction}
+    thm:analysis-harmonic-light-fraction, thm:analysis-bernoulli-transference,
+    thm:analysis-coordinate-mass}
   Let $k\ge1$, $0\le r\le(512k)^{-1}$, and let $X$ be a distribution on
   $\{0,1\}^n$ of min-entropy deficit at most $k$. With probability at least
   $63/64$ over $R\subseteq_r[n]$, at most $2^{|R|-k}$ patterns $z$ have
   $\Pr[X_R=z]\le2^{-|R|-2k-2}$.
-  This sparse-sampling conclusion is not yet formalized.
+  In Lean the distribution is a nonnegative real mass function summing to
+  one, with pointwise bound $\mu(x)\le2^{k-n}$. This is the min-entropy
+  deficit condition; $k$ is real. The statement includes zero masses,
+  dimension zero, and $r=0$.
 \end{lemma}
 \begin{proof}
+  \leanok
   Transfer the downward-closed family of good projections from rate $1/4$
   to rate $r$, then apply Markov's inequality to the reciprocal marginal
-  density. The transfer and parameter specialization remain to be proved.
+  density. The failure probability is at most $5r(k/2+1)\le1/64$.
+  Convert the fraction of light normalized-density patterns into the
+  stated count using the mass-to-density marginal bridge.
 \end{proof}
