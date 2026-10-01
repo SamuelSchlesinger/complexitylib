@@ -6,7 +6,7 @@ Authors: Samuel Schlesinger
 
 module
 public import Complexitylib.SAT.Headline
-public import Complexitylib.SAT.Internal.LinearGuessVerify
+public import Complexitylib.Classes.NP.Verifier.Linear
 public import Complexitylib.SAT.ThreeSAT.Verifier
 public import Complexitylib.Classes.Containments
 
@@ -74,7 +74,7 @@ theorem pairLang_witness_mem_P : pairLang Witness ∈ P := by
 /-- **3SAT ∈ NP.** Exact-3 satisfiability has linearly bounded witnesses and
 a deterministic polynomial-time verifier. -/
 theorem language_mem_NP : language ∈ NP :=
-  SAT.language_mem_NP_of_linear_witness_verifierP_direct
+  NP.mem_NP_of_linear_witness
     witness_length_le mem_language_iff_witness pairLang_witness_mem_P
 
 end ThreeSAT

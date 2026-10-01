@@ -31,6 +31,10 @@ jobs:
         run: lake build --wfail Complexitylib.Circuits.Encoding.Validation
       - name: Run Tseitin-machine regression guards
         run: lake build --wfail Complexitylib.SAT.Tseitin.Machine.Validation
+      - name: Check public verifier and exact-machine compatibility APIs
+        run: |
+          lake env lean scripts/VerifierApiCheck.lean
+          lake env lean scripts/SATGuessVerifyApiCheck.lean
       - name: Run environment linters, including validation-only graphs
         run: |
           lake exe runLinter Complexitylib \

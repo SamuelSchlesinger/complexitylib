@@ -36,7 +36,7 @@ import this one.
 ## How `WitnessNTMConstruction` is proved
 
 The proof (`mem_NP_of_poly_witness`, in
-`Complexitylib.Classes.NP.Internal.GuessVerify`) has two steps.
+`Complexitylib.Classes.NP.Verifier`) has two steps.
 
 1. **Linear witnesses** (`mem_NP_of_linear_witness`). The generic
    `WitnessTM.Verifier.compile` machine computes the bound `|x| + 1`, stores

@@ -5,7 +5,7 @@ Authors: Bolton Bailey
 -/
 module
 public import Complexitylib.Classes.PCP.Internal.ConsistencyLang
-public import Complexitylib.Classes.NP.Internal.GuessVerify
+public import Complexitylib.Classes.NP.Verifier
 
 /-!
 # `PCP[O(log n), O(1)] ⊆ NP`

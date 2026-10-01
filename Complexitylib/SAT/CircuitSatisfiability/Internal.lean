@@ -14,7 +14,7 @@ import Complexitylib.Classes.P.DecisionFn
 import Complexitylib.Classes.P.Pairing
 import Complexitylib.Classes.PPoly.Uniform.Containment
 import Complexitylib.Models.TuringMachine.Subroutines.PairValidate
-import Complexitylib.SAT.Internal.LinearGuessVerify
+import Complexitylib.Classes.NP.Verifier.Linear
 
 /-!
 # Padded circuit satisfiability -- proof internals
@@ -131,7 +131,7 @@ theorem pairLang_witness_mem_P_internal : pairLang Witness ∈ P := by
         verifierLengthLanguage_mem_P
 
 theorem language_mem_NP_internal : language ∈ NP :=
-  SAT.language_mem_NP_of_linear_witness_verifierP_direct
+  NP.mem_NP_of_linear_witness
     witness_length_le_internal (fun _ => Iff.rfl)
     pairLang_witness_mem_P_internal
 
@@ -275,7 +275,7 @@ theorem pairLang_extensionWitness_mem_P_internal :
           extensionVerifierLengthLanguage_mem_P
 
 theorem extensionLanguage_mem_NP_internal : extensionLanguage ∈ NP :=
-  SAT.language_mem_NP_of_linear_witness_verifierP_direct
+  NP.mem_NP_of_linear_witness
     extensionWitness_length_le_internal (fun _ => Iff.rfl)
     pairLang_extensionWitness_mem_P_internal
 

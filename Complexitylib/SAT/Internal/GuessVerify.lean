@@ -13,9 +13,10 @@ public import Complexitylib.Models.TuringMachine.Combinators.Internal.Retarget
 /-!
 # SAT-specialized guess-and-verify NTM
 
-This file implements the concrete SAT route to NP. It avoids the still-open
-generic `NP.WitnessNTMConstruction` by using the proved linear counter
-subroutine for SAT witnesses, whose length is bounded by `|x| + 1`. The final
+This file implements the concrete SAT route to NP. It retains the original
+linear-counter construction for SAT witnesses, whose length is bounded by
+`|x| + 1`. The generic `NP.witnessNTMConstruction` is now proved separately
+through the finite-certificate compiler. The final
 theorems prove the composed machine decides `language` in polynomial time from a
 polynomial-time verifier.
 
@@ -4482,7 +4483,7 @@ theorem satGuessVerifyTime_bigO_of_bigO {f : ℕ → ℕ} {c : ℕ}
     in `NP`. It packages the concrete construction proved in this file
     directly, without going through the generic witness-language interface
     `NP.WitnessNTMConstruction` (itself proved downstream as
-    `NP.witnessNTMConstruction`, from the same machine). -/
+    `NP.witnessNTMConstruction`, from the finite-certificate compiler). -/
 theorem language_mem_NP_of_verifierP_direct (h : pairLang Witness ∈ P) :
     language ∈ NP := by
   obtain ⟨c, k, M, f, hM, hfO⟩ := Set.mem_iUnion.mp h

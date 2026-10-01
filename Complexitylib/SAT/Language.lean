@@ -23,7 +23,7 @@ relation `Witness`, and proves the two core bridge theorems:
 These are the semantic and witness-length ingredients used by both routes to
 `SAT ∈ NP`. The executable verifier is specified in `SAT/Verifier.lean`, its
 polynomial-time TM implementation is proved in `SAT/VerifierTM.lean`, and the
-SAT-specialized guess-and-verify construction is assembled into the
+generic verifier-to-NP construction is assembled into the
 unconditional headline theorem in `SAT/Headline.lean`.
 -/
 

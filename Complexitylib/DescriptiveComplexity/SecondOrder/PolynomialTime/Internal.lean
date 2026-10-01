@@ -12,7 +12,7 @@ public import Complexitylib.DescriptiveComplexity.SecondOrder.Certificate
 public import Complexitylib.Classes.NP
 import Complexitylib.Classes.P
 import Complexitylib.Classes.P.DecisionFn
-import Complexitylib.Classes.NP.Internal.GuessVerify
+import Complexitylib.Classes.NP.Verifier
 
 /-!+# Correctness and polynomial time of second-order verification
 
