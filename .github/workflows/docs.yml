@@ -64,9 +64,41 @@ jobs:
           restore-keys: lake-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('./lean-toolchain') }}-${{ hashFiles('./lake-manifest.json') }}
       - name: Fetch Mathlib build cache
         run: lake exe cache get
+      # Lean CI caches compiled modules, but not doc-gen4's expensive analysis.
+      # This separate cache contains only dependency database rows and analysis
+      # markers. Project declarations, source links, HTML, and search indexes
+      # are always generated from the current checkout.
+      - name: Fingerprint the public graph's dependency imports
+        id: docs-imports
+        run: |
+          key=$(python3 scripts/cache_docs_dependencies.py --imports-key)
+          echo "key=$key" >> "$GITHUB_OUTPUT"
+      - name: Restore dependency documentation analysis
+        id: docs-cache
+        uses: actions/cache/restore@caa296126883cff596d87d8935842f9db880ef25 # v5
+        with:
+          path: docbuild/.lake/dependency-docs-cache
+          key: docs-analysis-v1-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('./lean-toolchain', './lakefile.toml', './lake-manifest.json', './docbuild/lean-toolchain', './docbuild/lakefile.toml', './docbuild/lake-manifest.json', './scripts/cache_docs_dependencies.py', './scripts/lint_style.py') }}-${{ steps.docs-imports.outputs.key }}
+      - name: Seed the fresh documentation build
+        run: |
+          if test -d docbuild/.lake/dependency-docs-cache; then
+            mkdir -p docbuild/.lake/build
+            cp -a docbuild/.lake/dependency-docs-cache/. docbuild/.lake/build/
+          fi
       - name: Build documentation
         working-directory: docbuild
         run: lake build Complexitylib:docs
+      # Write only successful, trusted default-branch builds. Never cache HTML
+      # or Complexitylib analysis, including deleted/renamed modules.
+      - name: Stage dependency documentation analysis
+        if: github.ref == 'refs/heads/dev' && steps.docs-cache.outputs.cache-hit != 'true'
+        run: python3 scripts/cache_docs_dependencies.py
+      - name: Save dependency documentation analysis
+        if: github.ref == 'refs/heads/dev' && steps.docs-cache.outputs.cache-hit != 'true'
+        uses: actions/cache/save@caa296126883cff596d87d8935842f9db880ef25 # v5
+        with:
+          path: docbuild/.lake/dependency-docs-cache
+          key: ${{ steps.docs-cache.outputs.cache-primary-key }}
       - name: Publish the blueprint under /blueprint
         run: cp -r blueprint/web docbuild/.lake/build/doc/blueprint
       - name: Upload documentation artifact

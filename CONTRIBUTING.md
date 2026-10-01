@@ -157,6 +157,7 @@ lake build --wfail Complexitylib.Models.TuringMachine.Repetition.Validation
 lake build --wfail Complexitylib.Circuits.Encoding.Validation
 lake build --wfail Complexitylib.SAT.Tseitin.Machine.Validation
 python3 scripts/lint_style.py
+python3 -m unittest discover -s scripts -p 'test_*.py'
 lake exe runLinter Complexitylib \
   Complexitylib.Classes.P.Cobham.Validation \
   Complexitylib.Models.TuringMachine.SingleTape.Validation \
@@ -167,12 +168,12 @@ lake env lean scripts/AxiomGuard.lean
 lake env lean scripts/BlueprintCheck.lean
 ```
 
-All ten commands must pass before submitting changes; CI runs them on every
+All eleven commands must pass before submitting changes; CI runs them on every
 push. The first checks the complete library and treats warnings (including
 proof placeholders) as failures. The next five run executable regression
 suites that are intentionally outside the public import graph.
 
-The last four are the quality gates:
+The last five are the quality gates:
 
 - **`scripts/lint_style.py`** checks copyright headers, module docstrings,
   line length, whitespace, `_root_.` escapes, and that every non-internal,
@@ -184,6 +185,9 @@ The last four are the quality gates:
   ignoring comments and strings; the only exempt files are those named
   `Validation.lean` outside the public import graph. It is a hard gate: any
   violation fails the run.
+- **`python3 -m unittest discover …`** checks the maintenance scripts, including
+  that the documentation cache retains dependency analysis while excluding
+  project declarations, removed modules, and rendered output.
 - **`lake exe runLinter …`** runs the Mathlib/Batteries environment linters
   (missing docstrings, naming, unused arguments, simp hygiene, …) over the
   public root and all five validation-only import graphs, also as a hard gate.
@@ -217,6 +221,16 @@ API documentation builds with doc-gen4 from the `docbuild/` subproject
 (`cd docbuild && lake build Complexitylib:docs`); the blueprint builds with
 `leanblueprint web` from `blueprint/` (see `blueprint/README.md`). CI publishes
 both on every merge to `dev`, weekly, and on demand.
+
+The docs workflow reuses Lean CI's compiled-module cache and separately caches
+doc-gen4's dependency analysis database and markers. Both dependency manifests
+and toolchains, plus the public graph's external import set, participate in the
+cache key. `scripts/cache_docs_dependencies.py`
+stages only dependency rows, using SQLite's foreign-key cascades to remove all
+Complexitylib data; project analysis, source links, HTML, and search indexes are
+rebuilt from the current checkout. Only successful `dev` builds save this cache.
+If a cache is damaged, delete the matching `docs-analysis-v1-…` entry in GitHub
+Actions caches (or bump the workflow's cache version) to force a cold rebuild.
 
 ## Choosing a Contribution
 

@@ -130,7 +130,7 @@ are pinned (currently Lean v4.35.0-rc3, tracking the [cslib](https://github.com/
 lake build --wfail
 ```
 
-CI additionally runs five executable regression suites and four quality gates;
+CI additionally runs five executable regression suites and five quality gates;
 see [CONTRIBUTING.md](CONTRIBUTING.md) for the full list and the style guide.
 API documentation builds with doc-gen4 from `docbuild/` and publishes to
 [GitHub Pages](https://samuelschlesinger.github.io/complexitylib/) on every
