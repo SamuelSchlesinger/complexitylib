@@ -15,7 +15,7 @@ Lemma 10 of Oliver Korten, *Top-Down Lower Bounds for All Depths*,
 ECCC TR26-221 (2026), https://eccc.weizmann.ac.il/report/2026/221/.
 
 `improved_light_patterns` uses an arbitrary nonnegative real probability mass
-function summing to one. The pointwise bound `mass x ≤ 2 ^ (k - n)` expresses
+function summing to one. The pointwise bound `mass x ≤ 2 ^ (k - Fintype.card ι)` expresses
 min-entropy deficit at most `k`. With probability at least `63/64` over
 independent coordinate sampling of rate `r ≤ 1/(512*k)`, at most `2^(|R|-k)`
 patterns have marginal probability at most `2^(-|R|-2*k-2)`.
@@ -23,8 +23,9 @@ patterns have marginal probability at most `2^(-|R|-2*k-2)`.
 `improved_light_patterns_density` gives the equivalent fraction statement for
 normalized densities. `coordinateMarginal_normalize` verifies the passage from
 probability masses to normalized marginal densities. All results include
-dimension zero, zero masses, and sampling rate zero. The subsequent mirror-set
-and communication arguments for Theorem 3 are not yet formalized.
+arbitrary finite coordinate types, dimension zero, zero masses, and sampling rate
+zero. `Complexitylib.BooleanAnalysis.MirrorSets` applies this lemma in the
+improved mirror-set argument.
 -/
 
 public section
@@ -47,14 +48,15 @@ theorem coordinateMass_nonneg {ι : Type*} [Fintype ι] [DecidableEq ι]
   sum_nonneg fun _ _ => hm _
 
 /-- Normalizing the input mass by `2^n` normalizes each marginal by `2^|R|`. -/
-theorem coordinateMarginal_normalize {n : ℕ} (mass : (Fin n → Bool) → ℝ)
-    (s : Fin n → Bool) (z : {i // s i = true} → Bool) :
-    coordinateMarginal (fun x => (2 : ℝ) ^ n * mass x) s z =
+theorem coordinateMarginal_normalize {ι : Type*} [Fintype ι] [DecidableEq ι]
+    (mass : (ι → Bool) → ℝ) (s : ι → Bool) (z : {i // s i = true} → Bool) :
+    coordinateMarginal (fun x => (2 : ℝ) ^ Fintype.card ι * mass x) s z =
       (2 : ℝ) ^ Fintype.card {i // s i = true} * coordinateMass mass s z :=
   coordinateMarginal_normalize_internal mass s z
 
 /-- Sparse-sampling estimate for the harmonic transform in the proof of Lemma 10. -/
-theorem harmonicTransform_sparse_good_probability {n : ℕ} {f : (Fin n → Bool) → ℝ}
+theorem harmonicTransform_sparse_good_probability {ι : Type*} [Fintype ι] [DecidableEq ι]
+    {f : (ι → Bool) → ℝ}
     (hf : ∀ x, 0 ≤ f x) (hmean : (𝔼 x, f x) = 1) {k r : ℝ} (hk : 1 ≤ k)
     (hbound : ∀ x, f x ≤ (2 : ℝ) ^ k) (hr : 0 ≤ r) (hr' : r ≤ 1 / (512 * k)) :
     63 / 64 ≤ bernoulliAverage r
@@ -63,7 +65,8 @@ theorem harmonicTransform_sparse_good_probability {n : ℕ} {f : (Fin n → Bool
 
 /-- Lemma 10 for normalized densities: with probability at least `63/64`, the
 fraction of patterns with marginal density at most `2^(-2*k-2)` is at most `2^-k`. -/
-theorem improved_light_patterns_density {n : ℕ} {f : (Fin n → Bool) → ℝ}
+theorem improved_light_patterns_density {ι : Type*} [Fintype ι] [DecidableEq ι]
+    {f : (ι → Bool) → ℝ}
     (hf : ∀ x, 0 ≤ f x) (hmean : (𝔼 x, f x) = 1) {k r : ℝ} (hk : 1 ≤ k)
     (hbound : ∀ x, f x ≤ (2 : ℝ) ^ k) (hr : 0 ≤ r) (hr' : r ≤ 1 / (512 * k)) :
     63 / 64 ≤ bernoulliAverage r (fun s =>
@@ -74,9 +77,10 @@ theorem improved_light_patterns_density {n : ℕ} {f : (Fin n → Bool) → ℝ}
 /-- Korten's improved light-patterns lemma (Lemma 10), with its exact constants
 and pattern count. Nonnegative masses summing to one represent a distribution;
 the pointwise bound is min-entropy deficit at most the real parameter `k`. -/
-theorem improved_light_patterns {n : ℕ} {mass : (Fin n → Bool) → ℝ}
+theorem improved_light_patterns {ι : Type*} [Fintype ι] [DecidableEq ι]
+    {mass : (ι → Bool) → ℝ}
     (hm : ∀ x, 0 ≤ mass x) (hmean : (∑ x, mass x) = 1) {k r : ℝ} (hk : 1 ≤ k)
-    (hbound : ∀ x, mass x ≤ (2 : ℝ) ^ (k - n))
+    (hbound : ∀ x, mass x ≤ (2 : ℝ) ^ (k - Fintype.card ι))
     (hr : 0 ≤ r) (hr' : r ≤ 1 / (512 * k)) :
     63 / 64 ≤ bernoulliAverage r (fun s =>
       if ((univ.filter fun z => coordinateMass mass s z ≤

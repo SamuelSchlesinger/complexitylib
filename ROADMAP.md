@@ -245,9 +245,13 @@ Lemma 10 with its exact constants and count of low-probability patterns.
 The mass-to-density bridge is checked, including zero masses and rate zero.
 `BooleanAnalysis.Fibers` proves the conditional-fiber entropy bound (Lemma 4),
 the `63/64` good-fiber estimate, and the uniform-mass deficit bridge.
-Next prove the conditional law for the two sampled coordinate sets and apply
-Lemma 10 inside each good fiber, then finish the improved mirror-set argument.
-The bounded-round KW model and Theorem 3 remain open formalization work.
+`BooleanAnalysis.CoordinateSampling` proves the conditional law for the two
+sampled coordinate sets. Lemma 10 now applies to arbitrary finite coordinate
+types, and `BooleanAnalysis.MirrorSets` proves `improved_mirror_set`, completing the
+improved mirror step with `q = 32768*k*p`, reverse limit deficit `194*k`,
+and mirror deficit at most `2*k+2`. Next add the bounded-round KW model,
+rectangle adversary and parity initialization, then derive the recurrence
+and wire lower bound of Theorem 3.
 The source-to-declaration map and
 remaining dependencies are in [`docs/TopDownLowerBounds.md`](docs/TopDownLowerBounds.md).
 

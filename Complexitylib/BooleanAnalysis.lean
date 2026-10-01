@@ -6,10 +6,12 @@ Authors: Samuel Schlesinger
 
 module
 public import Complexitylib.BooleanAnalysis.Bernoulli
+public import Complexitylib.BooleanAnalysis.CoordinateSampling
 public import Complexitylib.BooleanAnalysis.Fibers
 public import Complexitylib.BooleanAnalysis.FourierExpansion
 public import Complexitylib.BooleanAnalysis.HarmonicMean
 public import Complexitylib.BooleanAnalysis.LightPatterns
+public import Complexitylib.BooleanAnalysis.MirrorSets
 public import Complexitylib.BooleanAnalysis.PolynomialCorrelation
 
 /-!
@@ -34,7 +36,9 @@ Bernoulli transference then gives the improved light-patterns lemma (Lemma 10),
 with its exact constants and marginal-probability pattern count. These supply
 analytic prerequisites for his top-down parity lower bound. The coordinate-fiber
 development proves the conditional entropy bound (Lemma 4) and its good-fiber
-probability estimate for the mirror-set argument.
+probability estimate. The conditional coordinate-sampling law and guided
+distribution complete the improved mirror-set lemma, with explicit constants
+`q = 32768*k*p` and reverse limit deficit `194*k`.
 All definitions and theorems live under the
 `Complexity.BooleanAnalysis` namespace.
 -/

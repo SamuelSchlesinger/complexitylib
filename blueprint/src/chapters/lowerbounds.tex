@@ -1525,8 +1525,7 @@ establishes the proposed coefficient-three regime without that assumption.
 
 \begin{theorem}[Korten's top-down lower bound, Theorem 3]
   \label{thm:lowerbounds-korten-topdown}
-  \uses{lem:analysis-improved-light-patterns, cor:analysis-good-fiber,
-    def:lowerbounds-parity}
+  \uses{lem:analysis-improved-mirror-set, def:lowerbounds-parity}
   For every $d\ge2$ there is $\varepsilon_d>0$ such that, for all sufficiently
   large $n$, the general Karchmer--Wigderson game for $n$-bit parity has no
   deterministic protocol of at most $d$ rounds with at most
@@ -1537,9 +1536,9 @@ establishes the proposed coefficient-three regime without that assumption.
   prerequisites are in Section~\ref{sec:analysis-harmonic}.
 \end{theorem}
 \begin{proof}
-  Use the improved light-patterns lemma to obtain the stronger mirror-set
-  step, maintain the rectangle invariant through bounded-message protocol
-  rounds, and apply the general KW correspondence with explicit wire
-  accounting. These steps, including the bounded-round protocol model and
-  parameter recurrence, remain formalization work.
+  Apply the checked improved mirror-set lemma to maintain the rectangle
+  invariant through bounded-message protocol rounds, then use the general
+  KW correspondence with explicit wire accounting. The protocol model,
+  adversary invariant, parity initialization, parameter recurrence, and
+  wire correspondence remain formalization work.
 \end{proof}

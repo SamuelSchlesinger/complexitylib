@@ -7,6 +7,7 @@ Authors: Samuel Schlesinger
 module
 public import Complexitylib.BooleanAnalysis.LightPatterns.Defs
 public import Complexitylib.BooleanAnalysis.HarmonicMean
+public import Complexitylib.BooleanAnalysis.HarmonicMean.Internal.Reindex
 import Mathlib.Tactic.FieldSimp
 import Mathlib.Tactic.Linarith
 
@@ -30,7 +31,7 @@ namespace Complexity.BooleanAnalysis
 open Finset
 open scoped BigOperators Classical
 
-theorem harmonicTransform_sparse_good_probability_internal {n : ℕ} {f : (Fin n → Bool) → ℝ}
+theorem harmonicTransform_sparse_good_probability_fin_internal {n : ℕ} {f : (Fin n → Bool) → ℝ}
     (hf : ∀ x, 0 ≤ f x) (hmean : (𝔼 x, f x) = 1) {k r : ℝ} (hk : 1 ≤ k)
     (hbound : ∀ x, f x ≤ (2 : ℝ) ^ k) (hr : 0 ≤ r) (hr' : r ≤ 1 / (512 * k)) :
     63 / 64 ≤ bernoulliAverage r
@@ -75,7 +76,25 @@ theorem harmonicTransform_sparse_good_probability_internal {n : ℕ} {f : (Fin n
   change 63 / 64 ≤ bernoulliAverage r (fun s => if s ∈ A then (1 : ℝ) else 0)
   nlinarith
 
-theorem improved_light_patterns_density_internal {n : ℕ} {f : (Fin n → Bool) → ℝ}
+theorem harmonicTransform_sparse_good_probability_internal {ι : Type*} [Fintype ι] [DecidableEq ι]
+    {f : (ι → Bool) → ℝ} (hf : ∀ x, 0 ≤ f x) (hmean : (𝔼 x, f x) = 1)
+    {k r : ℝ} (hk : 1 ≤ k) (hbound : ∀ x, f x ≤ (2 : ℝ) ^ k)
+    (hr : 0 ≤ r) (hr' : r ≤ 1 / (512 * k)) :
+    63 / 64 ≤ bernoulliAverage r
+      (fun s => if 1 / (4 * (2 : ℝ) ^ k) ≤ harmonicTransform f s then 1 else 0) := by
+  let e := (Fintype.equivFin ι).symm
+  have hmean' : (𝔼 x : Fin (Fintype.card ι) → Bool,
+      f (fun j => x (e.symm j))) = 1 := by
+    exact (Fintype.expect_equiv (Equiv.arrowCongr e (Equiv.refl Bool))
+      (fun x => f (fun j => x (e.symm j))) f (fun _ => rfl)).trans hmean
+  have h := harmonicTransform_sparse_good_probability_fin_internal
+    (fun x => hf (fun j => x (e.symm j))) hmean' hk (fun x => hbound _) hr hr'
+  simp_rw [harmonicTransform_reindex_internal e] at h
+  rwa [bernoulliAverage_reindex_internal e r
+    (fun s => if 1 / (4 * (2 : ℝ) ^ k) ≤ harmonicTransform f s then 1 else 0)] at h
+
+theorem improved_light_patterns_density_internal {ι : Type*} [Fintype ι] [DecidableEq ι]
+    {f : (ι → Bool) → ℝ}
     (hf : ∀ x, 0 ≤ f x) (hmean : (𝔼 x, f x) = 1) {k r : ℝ} (hk : 1 ≤ k)
     (hbound : ∀ x, f x ≤ (2 : ℝ) ^ k) (hr : 0 ≤ r) (hr' : r ≤ 1 / (512 * k)) :
     63 / 64 ≤ bernoulliAverage r (fun s =>
@@ -99,16 +118,17 @@ theorem improved_light_patterns_density_internal {n : ℕ} {f : (Fin n → Bool)
   · rw [ite_eq_right hs]
     split_ifs <;> norm_num
 
-theorem coordinateMarginal_normalize_internal {n : ℕ} (mass : (Fin n → Bool) → ℝ) (s : Fin n → Bool)
+theorem coordinateMarginal_normalize_internal {ι : Type*} [Fintype ι] [DecidableEq ι]
+    (mass : (ι → Bool) → ℝ) (s : ι → Bool)
     (z : {i // s i = true} → Bool) :
-    coordinateMarginal (fun x => (2 : ℝ) ^ n * mass x) s z =
+    coordinateMarginal (fun x => (2 : ℝ) ^ Fintype.card ι * mass x) s z =
       (2 : ℝ) ^ Fintype.card {i // s i = true} * coordinateMass mass s z := by
   let e := Equiv.piEquivPiSubtypeProd (fun i => s i = true) (fun _ => Bool)
-  have hc : (2 : ℝ) ^ n =
+  have hc : (2 : ℝ) ^ Fintype.card ι =
       (2 : ℝ) ^ Fintype.card {i // s i = true} *
         (Fintype.card ({i // s i ≠ true} → Bool) : ℝ) := by
     have h := Fintype.card_congr e
-    simp only [Fintype.card_fun, Fintype.card_bool, Fintype.card_fin, Fintype.card_prod] at h
+    simp only [Fintype.card_fun, Fintype.card_bool, Fintype.card_prod] at h
     simp only [Fintype.card_fun, Fintype.card_bool]
     exact_mod_cast h
   unfold coordinateMarginal coordinateMass
@@ -117,21 +137,22 @@ theorem coordinateMarginal_normalize_internal {n : ℕ} (mass : (Fin n → Bool)
     exact_mod_cast (Fintype.card_pos : 0 < Fintype.card ({i // s i ≠ true} → Bool))
   field_simp
 
-theorem improved_light_patterns_internal {n : ℕ} {mass : (Fin n → Bool) → ℝ}
+theorem improved_light_patterns_internal {ι : Type*} [Fintype ι] [DecidableEq ι]
+    {mass : (ι → Bool) → ℝ}
     (hm : ∀ x, 0 ≤ mass x) (hmean : (∑ x, mass x) = 1) {k r : ℝ} (hk : 1 ≤ k)
-    (hbound : ∀ x, mass x ≤ (2 : ℝ) ^ (k - n))
+    (hbound : ∀ x, mass x ≤ (2 : ℝ) ^ (k - Fintype.card ι))
     (hr : 0 ≤ r) (hr' : r ≤ 1 / (512 * k)) :
     63 / 64 ≤ bernoulliAverage r (fun s =>
       if ((univ.filter fun z => coordinateMass mass s z ≤
           (2 : ℝ) ^ (-(Fintype.card {i // s i = true} : ℝ) - 2 * k - 2)).card : ℝ) ≤
         (2 : ℝ) ^ ((Fintype.card {i // s i = true} : ℝ) - k) then 1 else 0) := by
-  let f : (Fin n → Bool) → ℝ := fun x => (2 : ℝ) ^ n * mass x
+  let f : (ι → Bool) → ℝ := fun x => (2 : ℝ) ^ Fintype.card ι * mass x
   have hf : ∀ x, 0 ≤ f x := fun x => mul_nonneg (by positivity) (hm x)
   have hsum : (𝔼 x, f x) = 1 := by
     dsimp [f]
     rw [Fintype.expect_eq_sum_div_card, ← mul_sum, hmean]
     simp
-  have hproduct : (2 : ℝ) ^ n * (2 : ℝ) ^ (k - n) = (2 : ℝ) ^ k := by
+  have hproduct : (2 : ℝ) ^ Fintype.card ι * (2 : ℝ) ^ (k - Fintype.card ι) = (2 : ℝ) ^ k := by
     rw [← Real.rpow_natCast, ← Real.rpow_add (by norm_num)]
     congr 1
     ring
@@ -156,7 +177,7 @@ theorem improved_light_patterns_internal {n : ℕ} {mass : (Fin n → Bool) → 
   have he (z : {i // s i = true} → Bool) :
       coordinateMarginal f s z ≤ (2 : ℝ) ^ (-2 * k - 2) ↔
         coordinateMass mass s z ≤ (2 : ℝ) ^ (-(m : ℝ) - 2 * k - 2) := by
-    change coordinateMarginal (fun x => (2 : ℝ) ^ n * mass x) s z ≤ _ ↔ _
+    change coordinateMarginal (fun x => (2 : ℝ) ^ Fintype.card ι * mass x) s z ≤ _ ↔ _
     rw [coordinateMarginal_normalize_internal, ← hthreshold]
     exact mul_le_mul_iff_right₀ hp
   have havg : (𝔼 z, if coordinateMarginal f s z ≤ (2 : ℝ) ^ (-2 * k - 2) then

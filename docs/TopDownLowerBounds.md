@@ -10,6 +10,8 @@ The public APIs are `Complexitylib.BooleanAnalysis.HarmonicMean`,
 `Complexitylib.BooleanAnalysis.Bernoulli`, and
 `Complexitylib.BooleanAnalysis.LightPatterns`, under `Complexity.BooleanAnalysis`.
 `Complexitylib.BooleanAnalysis.Fibers` supplies the conditional-fiber layer.
+`Complexitylib.BooleanAnalysis.CoordinateSampling` and
+`Complexitylib.BooleanAnalysis.MirrorSets` complete the improved mirror-set lemma.
 
 | Paper | Lean declaration | Status |
 | --- | --- | --- |
@@ -21,10 +23,14 @@ The public APIs are `Complexitylib.BooleanAnalysis.HarmonicMean`,
 | Reciprocal-density Markov step | `coordinateMarginal_light_fraction_le` | Proved on actual projected patterns |
 | Downward-family transference | `bernoulliAverage_lowerSet_transfer`, `bernoulliAverage_lowerSet_pow_le` | Proved, including rate zero |
 | Lemma 10, sparse-sampling conclusion | `harmonicTransform_sparse_good_probability`, `improved_light_patterns_density` | Proved with the exact constants |
-| Lemma 10, probability masses and pattern counts | `improved_light_patterns`, `coordinateMarginal_normalize` | Proved for every real `k >= 1` |
+| Lemma 10, probability masses and pattern counts | `improved_light_patterns`, `coordinateMarginal_normalize` | Proved for real `k >= 1` and arbitrary finite coordinate types |
 | Lemma 4, conditional-fiber entropy | `expect_uniformDeficit_coordinateFiber` | Proved for arbitrary finite coordinate types |
 | Good fibers in the mirror-set proof | `coordinateFiber_good_probability` | Proved with the exact `64*k` and `63/64` constants |
-| Improved mirror-set argument and Theorem 3 | — | Not yet formalized |
+| Conditional coordinate law | `bernoulliAverage_union_difference_subtype`, `conditionalSamplingRate_bounds` | Proved, including the dependent selected-coordinate type |
+| Definition 2, density limits | `IsDensityLimit` | Defined using actual fiber density |
+| Completion estimate in the improved mirror argument | `mirror_bad_modifications_probability` | Proved with probability `31/32` |
+| Improved mirror-set lemma | `improved_mirror_set` | Proved with constants `32768` and `194` |
+| Bounded-round adversary and Theorem 3 | — | Not yet formalized |
 
 A coordinate set is a Boolean membership function. Expectations use finite
 Mathlib sums. `projectionAverage` represents a marginal on the full cube;
@@ -61,25 +67,34 @@ Markov then gives deficit at most `64*k` with probability at least `63/64`.
 All entropy interpretations require nonempty sets; the real-valued deficit
 definition documents its finite extension at the empty set.
 
+For independent `P` and `Q`, the joint sampling theorem identifies
+`S = P union Q` and `R = P \ Q`: conditional on `S`, the coordinates of `R`
+inside `S` are independent with rate `p*(1-q)/(p+q-p*q) <= p/q`. This is an
+identity of finite expectations, including tests depending on the subtype `S`.
+Applying Lemma 10 with deficit parameter `64*k` gives a completion density of
+at least `2^(-194*k)` for all but a `2^(-k-6)` fraction of first modifications,
+with probability at least `31/32`, when `q = 32768*k*p <= 1/2`.
+
+The checked guiding distribution samples uniformly from `Y` within a dense
+fiber, and from the entire fiber otherwise. Its density is at most `2^k`.
+This replaces the paper's fixed-size guiding sets with uniform conditional
+sampling and avoids rounding cardinalities. It lands in `Y`
+with probability at least `3/4`, and has subsequent completion failure
+probability at most `1/16`. Consequently `improved_mirror_set` gives a nonempty
+`Y' subset Y` of deficit at most `2*k+2`, every point of which is a
+`(q,194*k)`-limit of `X`. The constants are explicit choices for Korten's
+Section 3 argument with the improved Section 4 lemma.
+
 ## Remaining proof layers
 
-1. Prove the conditional law of `R = P \ Q` given `S = P union Q`, and
-   transport Lemma 10 to arbitrary finite coordinate types so it applies
-   inside the checked fibers. Then formalize guiding distributions and the
-   improved mirror-set argument. The planned constants are `q = 32768*k*p`
-   and output limit deficit `194*k`: applying Lemma 10 with parameter `64*k`
-   gives marginal threshold `2^(-|R|-128*k-2)`, which the fiber's deficit
-   turns into completion density `2^(-192*k-2) >= 2^(-194*k)` for `k >= 1`.
-   This parameter specialization and the mirror-set conclusion are still
-   proof obligations.
-2. Add general, bounded-round KW protocols with bounded message alphabets,
+1. Add general, bounded-round KW protocols with bounded message alphabets,
    subrectangle restriction, and their adversary theorem. The existing
    `Complexity.KarchmerWigderson.Protocol` is monotone and sends one bit per
    node; it is not the protocol model needed here.
-3. Instantiate the parity adversary, solve the parameter recurrence, and
+2. Instantiate the parity adversary, solve the parameter recurrence, and
    connect the protocol obstruction to unbounded-fan-in De Morgan circuits,
    with explicit wire accounting, before deriving the asymptotic bound.
 
 This track does not use the existing random-restriction parity lower bound
-to stand in for the report's top-down argument. Lemma 10 is proved; Theorem 3
-remains unformalized and is not assumed as an axiom or hypothesis.
+to stand in for the report's top-down argument. The analytic lemmas and improved
+mirror-set step are proved; Theorem 3 remains unformalized and is not assumed as an axiom or hypothesis.

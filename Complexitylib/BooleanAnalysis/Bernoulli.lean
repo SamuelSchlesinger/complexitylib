@@ -37,6 +37,18 @@ theorem bernoulliAverage_mono {ι : Type*} [Fintype ι] [DecidableEq ι]
     (hfg : ∀ x, f x ≤ g x) : bernoulliAverage p f ≤ bernoulliAverage p g :=
   bernoulliAverage_mono_internal hp hp' hfg
 
+/-- An equivalence of coordinate types preserves Bernoulli expectations. -/
+theorem bernoulliAverage_reindex {ι κ : Type*} [Fintype ι] [Fintype κ]
+    [DecidableEq ι] [DecidableEq κ] (e : ι ≃ κ) (p : ℝ) (f : (κ → Bool) → ℝ) :
+    bernoulliAverage p (fun x => f (fun j => x (e.symm j))) = bernoulliAverage p f :=
+  bernoulliAverage_reindex_internal e p f
+
+/-- Restricting a Bernoulli mask to fixed coordinates preserves its product law. -/
+theorem bernoulliAverage_restrict {ι : Type*} [Fintype ι] [DecidableEq ι]
+    (p : ℝ) (s : ι → Bool) (f : ({i // s i = true} → Bool) → ℝ) :
+    bernoulliAverage p (fun x : ι → Bool => f (fun i => x i)) = bernoulliAverage p f :=
+  bernoulliAverage_restrict_internal p s f
+
 /-- Sampling at rate zero selects the empty coordinate set. -/
 theorem bernoulliAverage_zero {n : ℕ} (f : (Fin n → Bool) → ℝ) :
     bernoulliAverage 0 f = f (fun _ => false) := bernoulliAverage_zero_internal f

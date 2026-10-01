@@ -6,7 +6,7 @@ Authors: Samuel Schlesinger
 
 module
 public import Complexitylib.BooleanAnalysis.Fibers.Defs
-public import Complexitylib.BooleanAnalysis.Fibers.Internal
+public import Complexitylib.BooleanAnalysis.Fibers.Internal.Resampling
 
 /-!
 # Korten's conditional-fiber entropy lemma
@@ -101,5 +101,52 @@ theorem coordinateFiber_good_probability {ι : Type*} [Fintype ι] [DecidableEq 
     63 / 64 ≤ 𝔼 x ∈ X, if uniformDeficit (coordinateFiber X s x) ≤ 64 * k then
       (1 : ℝ) else 0 :=
   coordinateFiber_good_probability_internal X hX s hk hdef
+
+/-- Uniform resampling on the whole cube restricts to uniform sampling on
+any fixed selected-coordinate subtype. -/
+theorem expect_restrict_coordinates {ι : Type*} [Fintype ι] [DecidableEq ι]
+    (s : ι → Bool) (f : ({i // s i = true} → Bool) → ℝ) :
+    (𝔼 x : ι → Bool, f (fun i => x i)) = 𝔼 x, f x :=
+  expect_restrict_coordinates_internal s f
+
+/-- Whole-cube resampling completes the restriction of the sampled point. -/
+theorem resample_eq_completePattern {ι : Type*} (s x y : ι → Bool) :
+    resample s x y = completePattern s x (fun i => y i) :=
+  resample_eq_completePattern_internal s x y
+
+/-- The fraction of a fiber is the probability that coordinate resampling
+lands in the set. -/
+theorem coordinateDensity_eq_expect {ι : Type*} [Fintype ι] [DecidableEq ι]
+    (X : Finset (ι → Bool)) (s x : ι → Bool) :
+    coordinateDensity X s x = 𝔼 y, if resample s x y ∈ X then (1 : ℝ) else 0 :=
+  coordinateDensity_eq_expect_internal X s x
+
+/-- Fiber densities are nonnegative, including for empty fibers. -/
+theorem coordinateDensity_nonneg {ι : Type*} [Fintype ι] [DecidableEq ι]
+    (X : Finset (ι → Bool)) (s x : ι → Bool) : 0 ≤ coordinateDensity X s x := by
+  unfold coordinateDensity
+  positivity
+
+/-- Uniform densities are nonnegative, including for the empty set. -/
+theorem uniformDensity_nonneg {ι : Type*} [Fintype ι]
+    (X : Finset (ι → Bool)) (x : ι → Bool) : 0 ≤ uniformDensity X x :=
+  mul_nonneg (by positivity) (uniformMass_nonneg X x)
+
+/-- Normalization of the density of a nonempty finite cube subset. -/
+theorem expect_uniformDensity {ι : Type*} [Fintype ι] [DecidableEq ι]
+    {X : Finset (ι → Bool)} (hX : X.Nonempty) : (𝔼 x, uniformDensity X x) = 1 :=
+  expect_uniformDensity_internal hX
+
+/-- Entropy deficit bounds the normalized density pointwise. -/
+theorem uniformDensity_le_rpow {ι : Type*} [Fintype ι]
+    {X : Finset (ι → Bool)} (hX : X.Nonempty) {k : ℝ} (hk : uniformDeficit X ≤ k)
+    (x : ι → Bool) : uniformDensity X x ≤ (2 : ℝ) ^ k :=
+  uniformDensity_le_rpow_internal hX hk x
+
+/-- The density is `2^deficit` on the nonempty set and zero elsewhere. -/
+theorem uniformDensity_eq_deficit {ι : Type*} [Fintype ι]
+    {X : Finset (ι → Bool)} (hX : X.Nonempty) (z : ι → Bool) :
+    uniformDensity X z = (2 : ℝ) ^ uniformDeficit X * (if z ∈ X then 1 else 0) :=
+  uniformDensity_eq_deficit_internal hX z
 
 end Complexity.BooleanAnalysis

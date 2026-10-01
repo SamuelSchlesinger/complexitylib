@@ -76,6 +76,52 @@ theorem bernoulliAverage_const_internal {ι : Type*} [Fintype ι] [DecidableEq �
   rw [← sum_mul, ← Fintype.prod_sum (fun (_ : ι) (b : Bool) => if b then p else 1 - p)]
   simp
 
+theorem bernoulliWeight_reindex_internal {ι κ : Type*} [Fintype ι] [Fintype κ]
+    (e : ι ≃ κ) (p : ℝ) (s : κ → Bool) :
+    bernoulliWeight p (fun i => s (e i)) = bernoulliWeight p s := by
+  exact e.prod_comp (fun i => if s i then p else 1 - p)
+
+theorem bernoulliAverage_reindex_internal {ι κ : Type*} [Fintype ι] [Fintype κ]
+    [DecidableEq ι] [DecidableEq κ] (e : ι ≃ κ) (p : ℝ) (f : (κ → Bool) → ℝ) :
+    bernoulliAverage p (fun x => f (fun j => x (e.symm j))) = bernoulliAverage p f := by
+  let E := Equiv.arrowCongr e (Equiv.refl Bool)
+  unfold bernoulliAverage
+  rw [← E.sum_comp (fun x => bernoulliWeight p x * f x)]
+  apply sum_congr rfl
+  intro x _
+  change bernoulliWeight p x * f (fun j => x (e.symm j)) =
+    bernoulliWeight p (fun j => x (e.symm j)) * f (fun j => x (e.symm j))
+  rw [bernoulliWeight_reindex_internal]
+
+theorem bernoulliWeight_split_internal {ι : Type*} [Fintype ι]
+    (p : ℝ) (s x : ι → Bool) :
+    bernoulliWeight p x = bernoulliWeight p (fun i : {i // s i = true} => x i) *
+      bernoulliWeight p (fun i : {i // s i ≠ true} => x i) := by
+  exact (Fintype.prod_subtype_mul_prod_subtype (fun i => s i = true)
+    (fun i => if x i then p else 1 - p)).symm
+
+theorem bernoulliAverage_restrict_internal {ι : Type*} [Fintype ι] [DecidableEq ι]
+    (p : ℝ) (s : ι → Bool) (f : ({i // s i = true} → Bool) → ℝ) :
+    bernoulliAverage p (fun x : ι → Bool => f (fun i => x i)) = bernoulliAverage p f := by
+  let e := Equiv.piEquivPiSubtypeProd (fun i => s i = true) (fun _ => Bool)
+  unfold bernoulliAverage
+  rw [← e.symm.sum_comp (fun x => bernoulliWeight p x * f (fun i => x i))]
+  simp_rw [bernoulliWeight_split_internal p s]
+  have hleft (z : ({i // s i = true} → Bool) × ({i // s i ≠ true} → Bool)) :
+      (fun i : {i // s i = true} => e.symm z i) = z.1 := by
+    funext i
+    simp [e, Equiv.piEquivPiSubtypeProd, i.property]
+  have hright (z : ({i // s i = true} → Bool) × ({i // s i ≠ true} → Bool)) :
+      (fun i : {i // s i ≠ true} => e.symm z i) = z.2 := by
+    funext i
+    simp [e, Equiv.piEquivPiSubtypeProd, i.property]
+  simp_rw [hleft, hright]
+  rw [Fintype.sum_prod_type]
+  have htotal : (∑ y : {i // s i ≠ true} → Bool, bernoulliWeight p y) = 1 := by
+    simpa [bernoulliAverage] using
+      bernoulliAverage_const_internal (ι := {i // s i ≠ true}) p 1
+  simp only [mul_assoc, ← mul_sum, ← sum_mul, htotal, one_mul]
+
 theorem bernoulliAverage_linear_internal {ι : Type*} [Fintype ι] [DecidableEq ι]
     (p a b : ℝ) (f g : (ι → Bool) → ℝ) :
     bernoulliAverage p (fun x => a * f x + b * g x) =
@@ -282,5 +328,21 @@ theorem bernoulliAverage_lowerSet_transfer_internal {n : ℕ} {A : Set (Fin n �
         (bernoulliAverage_indicator_bounds_internal A hr.le hr1).1 hpos).mpr
       rw [Real.rpow_natCast]
       exact bernoulliAverage_lowerSet_pow_le_internal hA hr.le hr1 (by norm_num) h hupper
+
+theorem bernoulliAverage_expect_comm_internal {ι : Type*} [Fintype ι] [DecidableEq ι]
+    {α : Type*} (A : Finset α)
+    (p : ℝ) (f : (ι → Bool) → α → ℝ) :
+    bernoulliAverage p (fun s => 𝔼 x ∈ A, f s x) =
+      𝔼 x ∈ A, bernoulliAverage p (fun s => f s x) := by
+  unfold bernoulliAverage
+  simp_rw [mul_expect]
+  exact (expect_sum_comm A univ _).symm
+
+theorem bernoulliAverage_sub_internal {ι : Type*} [Fintype ι] [DecidableEq ι]
+    (p : ℝ) (f g : (ι → Bool) → ℝ) :
+    bernoulliAverage p (fun s => f s - g s) = bernoulliAverage p f - bernoulliAverage p g := by
+  simpa only [one_mul, neg_one_mul, sub_eq_add_neg] using
+    bernoulliAverage_linear_internal p 1 (-1) f g
+
 
 end Complexity.BooleanAnalysis

@@ -1104,7 +1104,8 @@ a coordinate set is also represented by its Boolean membership function.
   In Lean the distribution is a nonnegative real mass function summing to
   one, with pointwise bound $\mu(x)\le2^{k-n}$. This is the min-entropy
   deficit condition; $k$ is real. The statement includes zero masses,
-  dimension zero, and $r=0$.
+  dimension zero, and $r=0$. The coordinate type may be any finite type,
+  including a subtype selected by a preceding sample.
 \end{lemma}
 \begin{proof}
   \leanok
@@ -1120,7 +1121,10 @@ a coordinate set is also represented by its Boolean membership function.
   \lean{Complexity.BooleanAnalysis.uniformMass,
     Complexity.BooleanAnalysis.uniformDeficit,
     Complexity.BooleanAnalysis.completePattern,
-    Complexity.BooleanAnalysis.coordinateFiber}
+    Complexity.BooleanAnalysis.coordinateFiber,
+    Complexity.BooleanAnalysis.resample,
+    Complexity.BooleanAnalysis.coordinateDensity,
+    Complexity.BooleanAnalysis.uniformDensity}
   \leanok
   For nonempty $X\subseteq\{0,1\}^I$, let $\mu_X$ be its uniform mass
   function and $D_\infty(X)=|I|-\log_2|X|$. Given $S\subseteq I$ and
@@ -1128,6 +1132,9 @@ a coordinate set is also represented by its Boolean membership function.
   using $x$ outside $S$ belongs to $X$. Its deficit is measured relative to
   the $|S|$-dimensional cube. The real-valued Lean definition takes value
   $|I|$ at the empty set; entropy interpretations require nonemptiness.
+  Write $x[S\leftarrow y]$ for replacing $x$ on $S$ using $y$,
+  $\rho_X(S,x)=|X_{x,S}|/2^{|S|}$ for the fiber density, and
+  $f_X=2^{|I|}\mu_X$ for the normalized cube density.
 \end{definition}
 
 \begin{theorem}[Fiber representation and uniform-mass bounds]
@@ -1183,4 +1190,118 @@ a coordinate set is also represented by its Boolean membership function.
 \begin{proof}
   \leanok
   Apply Markov's inequality to the nonnegative fiber deficit.
+\end{proof}
+
+
+\begin{theorem}[Resampling and normalized densities]
+  \label{thm:analysis-resampling-density}
+  \lean{Complexity.BooleanAnalysis.expect_restrict_coordinates,
+    Complexity.BooleanAnalysis.resample_eq_completePattern,
+    Complexity.BooleanAnalysis.coordinateDensity_eq_expect,
+    Complexity.BooleanAnalysis.coordinateDensity_nonneg,
+    Complexity.BooleanAnalysis.uniformDensity_nonneg,
+    Complexity.BooleanAnalysis.expect_uniformDensity,
+    Complexity.BooleanAnalysis.uniformDensity_le_rpow,
+    Complexity.BooleanAnalysis.uniformDensity_eq_deficit}
+  \leanok
+  \uses{def:analysis-coordinate-fiber, thm:analysis-fiber-representation}
+  Uniform sampling restricts to uniform sampling on a selected-coordinate
+  subtype, and $\rho_X(S,x)=\Pr_y[x[S\leftarrow y]\in X]$.
+  Fiber densities and normalized densities are nonnegative.
+  For nonempty $X$, $\mathbb E f_X=1$ and
+  $f_X(z)=2^{D_\infty(X)}\mathbf1[z\in X]$; thus
+  $D_\infty(X)\le k$ implies $f_X(z)\le2^k$.
+\end{theorem}
+\begin{proof}
+  \leanok
+  Split the cube into selected and complementary coordinates. Normalize
+  the uniform mass and exponentiate its entropy deficit.
+\end{proof}
+
+\begin{theorem}[Conditional coordinate sampling]
+  \label{thm:analysis-conditional-sampling}
+  \lean{Complexity.BooleanAnalysis.bernoulliAverage_reindex,
+    Complexity.BooleanAnalysis.bernoulliAverage_restrict,
+    Complexity.BooleanAnalysis.bernoulliAverage_union_difference,
+    Complexity.BooleanAnalysis.bernoulliAverage_union_difference_subtype,
+    Complexity.BooleanAnalysis.conditionalSamplingRate_bounds}
+  \leanok
+  Bernoulli expectations are invariant under coordinate equivalences, and
+  restriction preserves their product law. Let $P\subseteq_p I$ and
+  $Q\subseteq_q I$ be independent and let $\theta=p+q-pq$.
+  If $\theta r=p(1-q)$, then for every test function on pairs $(S,R)$,
+  with $R\subseteq S$,
+  \[
+    \mathbb E_{P,Q}F(P\cup Q,P\setminus Q)
+      =\mathbb E_{S\subseteq_\theta I}\mathbb E_{R\subseteq_r S}F(S,R).
+  \]
+  This is an algebraic identity, including degenerate rates. When
+  $p\ge0$ and $0<q\le1$, the ratio $r=p(1-q)/(p+q-pq)$ belongs to
+  $[0,1]$ and is at most $p/q$.
+\end{theorem}
+\begin{proof}
+  \leanok
+  Check the two Boolean coordinates and induct on dimension, then
+  transport by an equivalence of finite coordinate types. Factor out
+  unused coordinates to obtain the subtype formulation.
+\end{proof}
+
+\begin{definition}[Density limit, Korten Definition 2]
+  \label{def:analysis-density-limit}
+  \lean{Complexity.BooleanAnalysis.IsDensityLimit}
+  \leanok
+  \uses{def:analysis-coordinate-fiber}
+  A point $x$ is a $(p,k)$-limit of $Y$ if
+  $\Pr_{P\subseteq_p I}[\rho_Y(P,x)\ge2^{-k}]\ge3/4$.
+\end{definition}
+
+\begin{lemma}[Completion estimate for the improved mirror argument]
+  \label{lem:analysis-mirror-completion}
+  \lean{Complexity.BooleanAnalysis.mirror_bad_modifications_probability}
+  \leanok
+  \uses{cor:analysis-good-fiber, lem:analysis-improved-light-patterns,
+    thm:analysis-conditional-sampling, thm:analysis-resampling-density}
+  Suppose $X$ is nonempty, $D_\infty(X)\le k$, $k\ge1$, $p>0$, and
+  $q=32768kp\le1/2$. With probability at least $31/32$ over independent
+  $P\subseteq_p I$, $Q\subseteq_q I$, and uniform $x\in X$,
+  \[
+    \Pr_y[\rho_X(Q,x[P\leftarrow y])<2^{-194k}]\le2^{-k-6}.
+  \]
+\end{lemma}
+\begin{proof}
+  \leanok
+  Condition on $S=P\cup Q$. The entropy lemma bounds the fiber deficit
+  by $64k$ with probability $63/64$. Lemma~10 with parameter $64k$
+  bounds light projected patterns, again with probability $63/64$.
+  The conditional rate is at most $(32768k)^{-1}$.
+  A projected density multiplied by $2^{-D_\infty(X_{x,S})}$ equals
+  the completion density. Outside the light patterns this is at least
+  $2^{-192k-2}\ge2^{-194k}$. Their fraction is at most
+  $2^{-64k}\le2^{-k-6}$. Combine the two good events.
+\end{proof}
+
+\begin{lemma}[Improved strong mirror-set lemma]
+  \label{lem:analysis-improved-mirror-set}
+  \lean{Complexity.BooleanAnalysis.improved_mirror_set}
+  \leanok
+  \uses{lem:analysis-mirror-completion, def:analysis-density-limit,
+    thm:analysis-fiber-representation}
+  Let $X,Y\subseteq\{0,1\}^I$, with $X$ nonempty,
+  $D_\infty(X)\le k$, $k\ge1$, $p>0$, and $q=32768kp\le1/2$.
+  If every point of $X$ is a $(p,k)$-limit of $Y$, there is a nonempty
+  $Y'\subseteq Y$ with $D_\infty(Y')\le2k+2$ such that every point of
+  $Y'$ is a $(q,194k)$-limit of $X$.
+\end{lemma}
+\begin{proof}
+  \leanok
+  Sample a uniform $x\in X$ and a rate-$p$ mask. On fibers of $Y$
+  of density at least $2^{-k}$, sample uniformly from their intersection
+  with $Y$; otherwise sample from the whole fiber. This variant of
+  Korten's guiding sets has density at most $2^k$ relative to uniform
+  fiber sampling. Its output belongs to $Y$ with probability at least
+  $3/4$, and the completion estimate bounds its subsequent failure
+  probability by $1/16$. A Markov argument leaves mass at least $1/4$
+  on the points in $Y$ that are $(q,194k)$-limits of $X$.
+  The output mass of any set $A$ is at most $2^k|A|/|X|$, proving
+  $|Y'|\ge2^{|I|-2k-2}$.
 \end{proof}

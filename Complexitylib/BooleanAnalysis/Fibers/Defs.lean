@@ -49,4 +49,19 @@ noncomputable def coordinateFiber {ι : Type*} [Fintype ι] [DecidableEq ι]
     (X : Finset (ι → Bool)) (s x : ι → Bool) : Finset ({i // s i = true} → Bool) :=
   univ.filter (fun z => completePattern s x z ∈ X)
 
+/-- Replace selected coordinates of `x` by those of `y`. -/
+def resample {ι : Type*} (s x y : ι → Bool) : ι → Bool :=
+  fun i => if s i then y i else x i
+
+/-- Fraction of the free-coordinate cube over `x` that belongs to `X`. -/
+noncomputable def coordinateDensity {ι : Type*} [Fintype ι] [DecidableEq ι]
+    (X : Finset (ι → Bool)) (s x : ι → Bool) : ℝ :=
+  (coordinateFiber X s x).card / (2 : ℝ) ^ Fintype.card {i // s i = true}
+
+/-- Density of uniform mass relative to the uniform Boolean cube. Its
+uniform cube expectation is one when `X` is nonempty. -/
+noncomputable def uniformDensity {ι : Type*} [Fintype ι]
+    (X : Finset (ι → Bool)) (x : ι → Bool) : ℝ :=
+  (2 : ℝ) ^ Fintype.card ι * uniformMass X x
+
 end Complexity.BooleanAnalysis
