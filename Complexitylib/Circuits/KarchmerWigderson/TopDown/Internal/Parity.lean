@@ -69,35 +69,7 @@ theorem coordinateDensity_half_of_flip_internal (f : (ι → Bool) → Bool)
   exact expect_half_of_flip_internal (fun y => f (resample P x y)) i
     (fun y => by rw [hflip, hf]) b
 
-theorem bernoulliAverage_nonempty_internal (p : ℝ) :
-    bernoulliAverage p (fun P : ι → Bool => if ∃ i, P i = true then (1 : ℝ) else 0) =
-      1 - (1 - p) ^ Fintype.card ι := by
-  have he (P : ι → Bool) : (if ∃ i, P i = true then (1 : ℝ) else 0) =
-      1 - (if P = (fun _ => false) then 1 else 0) := by
-    by_cases h : ∃ i, P i = true
-    · have hn : P ≠ fun _ => false := by
-        intro hn
-        obtain ⟨i, hi⟩ := h
-        simp [hn] at hi
-      simp [h, hn]
-    · have hn : P = fun _ => false := by
-        funext i
-        have hi : P i ≠ true := fun hi => h ⟨i, hi⟩
-        simpa using hi
-      simp [hn]
-  simp_rw [he, bernoulliAverage_sub_internal, bernoulliAverage_const]
-  congr 1
-  simp [bernoulliAverage, bernoulliWeight]
 
-theorem one_sub_pow_bound_internal {p : ℝ} (hp' : p ≤ 1) (n : ℕ) :
-    (1 - p) ^ n * (1 + (n : ℝ) * p) ≤ 1 := by
-  induction n with
-  | zero => simp
-  | succ n ih =>
-    rw [pow_succ, Nat.cast_succ]
-    have hnon := mul_nonneg (pow_nonneg (sub_nonneg.mpr hp') n)
-      (mul_nonneg (show (0 : ℝ) ≤ n + 1 by positivity) (sq_nonneg p))
-    nlinarith
 
 theorem parity_initial_internal {n : ℕ} (hn : 0 < n) (b : Bool) :
     (univ.filter fun x : Fin n → Bool => Schnorr.xorBool n x = b).Nonempty ∧

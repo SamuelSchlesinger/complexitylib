@@ -49,6 +49,18 @@ theorem not_solves_bounded_density {d : ℕ} (P : RoundProtocol ι M d)
   not_solves_bounded_density_internal P hM hk hmk hbudget h
 
 /-- Bilateral initial limits save the first mirror step. This is the
+finite obstruction with an arbitrary initial deficit bound `k ≥ 1`. -/
+theorem not_solves_bilateral_density_with_deficit {d : ℕ} (P : RoundProtocol ι M (d + 1))
+    {X Y : Finset (ι → Bool)} {m p k : ℝ}
+    (hM : (Fintype.card M : ℝ) ≤ (2 : ℝ) ^ m) (hm : 0 ≤ m) (hk : 1 ≤ k) (hp : 0 < p)
+    (hX : X.Nonempty) (hY : Y.Nonempty) (hdX : uniformDeficit X ≤ k) (hdY : uniformDeficit Y ≤ k)
+    (hleft : ∀ x ∈ X, IsDensityLimit Y p k x) (hright : ∀ y ∈ Y, IsDensityLimit X p k y)
+    (hbudget : (32768 * (194 : ℝ) ^ d * (m + k)) ^ d * p ≤ 1 / 4) :
+    ¬ P.Solves X Y :=
+  not_solves_bilateral_density_with_deficit_internal
+    P hM hm hk hp hX hY hdX hdY hleft hright hbudget
+
+/-- Bilateral initial limits save the first mirror step. This is the
 `d`-th-power obstruction for protocols with at most `d+1` rounds. -/
 theorem not_solves_bilateral_density {d : ℕ} (P : RoundProtocol ι M (d + 1))
     {X Y : Finset (ι → Bool)} {m p : ℝ}

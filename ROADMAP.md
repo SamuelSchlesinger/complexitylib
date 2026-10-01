@@ -234,7 +234,7 @@ or loop. Prefer projection lemmas and narrowly oriented rewrite rules to marking
 transition definitions `[simp]`. Moving a theorem must keep its public name or
 leave a compatibility alias.
 
-## Top-down parity lower bounds
+## Top-down parity and majority lower bounds
 
 The track for Oliver Korten's *Top-Down Lower Bounds for All Depths* (ECCC
 TR26-221, 2026) completes Theorem 3. `BooleanAnalysis.HarmonicMean` proves the
@@ -258,6 +258,16 @@ The circuit-to-protocol translation gives `Circuit.parity_wire_lower_bound`
 for unbounded AND/OR circuits with free input negations and the existing
 `totalFanIn` wire count. The source-to-declaration map, model conventions,
 and explicit constants are in [`docs/TopDownLowerBounds.md`](docs/TopDownLowerBounds.md).
+
+`Circuits.KarchmerWigderson.TopDown.Majority` extends this argument to strict
+majority, including even input lengths with ties false. The two adjacent
+Hamming layers have logarithmic deficit and at least half their coordinates
+lead to the other layer by a single-bit flip. Sparse sampling gives bilateral
+density limits, so the generalized first-message argument retains the
+`1/(d-1)` exponent. The checked `majority_communication_lower_bound` and
+`Circuit.majority_wire_lower_bound` use the same protocol and circuit models
+as the parity result. This is an extension of Korten's method; his Theorem 3
+states the parity case.
 
 ## Descriptive complexity expansion
 

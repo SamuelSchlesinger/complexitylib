@@ -1,8 +1,11 @@
-# Top-down parity lower bounds
+# Top-down parity and majority lower bounds
 
 Source: Oliver Korten, [*Top-Down Lower Bounds for All Depths*, ECCC TR26-221](https://eccc.weizmann.ac.il/report/2026/221/),
 30 September 2026. **Theorem 3 is formalized**, with communication cost
 `Omega_d(n^(1/(d-1)))` and the resulting exponential wire lower bound.
+The argument is also extended to strict majority with the same exponent,
+using the two Hamming layers on either side of its threshold. This extension
+is proved here; Korten's Theorem 3 states the parity result.
 
 ## Checked layer
 
@@ -15,6 +18,8 @@ The public APIs are `Complexitylib.BooleanAnalysis.HarmonicMean`,
 `Complexitylib.Circuits.KarchmerWigderson.TopDown` exports both parts of
 Theorem 3, using the general protocol model in `KarchmerWigderson.Rounds`
 and the circuit translation in `KarchmerWigderson.Circuit`.
+`Complexitylib.Circuits.KarchmerWigderson.TopDown.Majority` exports the
+majority extension, including its initialization lemmas.
 
 | Paper | Lean declaration | Status |
 | --- | --- | --- |
@@ -36,7 +41,7 @@ and the circuit translation in `KarchmerWigderson.Circuit`.
 | General bounded-round KW protocols | `KarchmerWigderson.RoundProtocol`, `RoundProtocol.SolvesKW` | Defined with arbitrary finite message alphabets |
 | Rectangle invariant | `KarchmerWigderson.DensityRectangle` | Defined with an actual sampling rate below the rate cap |
 | Bounded-round adversary | `RoundProtocol.not_solves_density`, `RoundProtocol.not_solves_bounded_density` | Proved for adaptive speakers and early termination |
-| Bilateral initialization | `RoundProtocol.not_solves_bilateral_density` | Proved, saving the first mirror step |
+| Bilateral initialization | `RoundProtocol.not_solves_bilateral_density`, `RoundProtocol.not_solves_bilateral_density_with_deficit` | Proved, saving the first mirror step, including arbitrary initial deficit at least one |
 | Explicit parity bound | `RoundProtocol.not_solves_parity_finite` | Proved with the finite inequality below |
 | Theorem 3, communication | `KarchmerWigderson.parity_communication_lower_bound` | Proved for every fixed number of rounds at least two |
 | Lemma 1, circuit-to-protocol direction | `Circuit.exists_roundProtocol` | Proved for unbounded AND/OR circuits with free input negations |
@@ -127,6 +132,9 @@ While all rate caps stay at most `1/4`, no coordinate separates the entire
 rectangle. Induction on the remaining messages rules out a solving protocol.
 Both parity classes initially have deficit one and bilateral density limits
 at rate `4/n`; this saves the first mirror step.
+The generalized bilateral theorem allows any initial deficit `k >= 1` and
+limits with parameters `(p,k)`. After selecting the first message cell,
+the remaining adversary starts with deficit at most `m+k`.
 
 ## Theorem 3 and explicit constants
 
@@ -168,3 +176,56 @@ The proof follows the paper's harmonic-mean, light-pattern, mirror-set,
 and top-down adversary route. It does not invoke the existing
 random-restriction parity lower bound. All statements are proved in Lean
 without proof placeholders or additional axioms.
+
+## Majority extension
+
+The predicate is the existing `Complexity.majority`: an input is true exactly
+when more than half its bits are true. Ties are false, and the theorems cover
+both even and odd input lengths. The initialization uses
+
+```
+X = weightLayer n (n/2)
+Y = weightLayer n (n/2 + 1)
+K(n) = majorityDeficitBound n = 128 + log_2(2*(n+1)).
+```
+
+Both layers have at least `2^n/(2*(n+1))` elements for `n >= 2`: the middle
+binomial coefficient is at least the average, and the next one is at least
+half as large. Their entropy deficits are therefore logarithmic.
+
+Every point of either layer has at least half its coordinates leading to the
+other layer by a single-bit flip. Sampling coordinates independently at rate
+`16/n` hits such a neighbor with probability at least `8/9`. The expected
+mask size is `16`, so the chance it exceeds `128` is at most `1/8`. With
+probability at least `55/72 >= 3/4`, the mask thus contains a valid flip and
+has at most `128` coordinates. That one completion already gives fiber density
+at least `2^(-128)`. This proves bilateral density limits with parameters
+`(16/n,K(n))` for `n >= 16`.
+
+| Extension | Lean declaration |
+| --- | --- |
+| Sparse density limit from many single-bit neighbors | `BooleanAnalysis.isDensityLimit_of_many_neighbors` |
+| Logarithmic deficits of the majority layers | `BooleanAnalysis.majority_layers_deficit` |
+| Bilateral majority initialization | `BooleanAnalysis.majority_layers_limits` |
+| Finite protocol obstruction | `KarchmerWigderson.RoundProtocol.not_solves_majority_finite` |
+| Communication lower bound | `KarchmerWigderson.majority_communication_lower_bound` |
+| Wire lower bound | `Circuit.majority_wire_lower_bound` |
+
+All names in this table are under `Complexity`. For `d >= 2` messages, put
+`t = d-1` and `C_d = 32768*194^t`. The finite obstruction is
+
+```
+64 * (C_d * (m + K(n)))^t <= n.
+```
+
+The asymptotic proof takes `epsilon_d = 1/(128*C_d)` and uses the checked
+fact that `K(n) = o(n^(1/t))`. For sufficiently large `n`, both the initial
+deficit and any cost `m <= epsilon_d*n^(1/t)` fit the finite budget.
+The threshold is proved to exist; this argument does not give a closed-form
+numeric threshold. The resulting communication lower bound is
+`Omega_d(n^(1/(d-1)))`, and the wire lower bound is
+`2^(Omega_d(n^(1/(d-1))))` in the same circuit model as the parity theorem.
+
+This extension uses Korten's harmonic-mean and mirror-set machinery with
+the adjacent-layer initialization proved here. No claim of a new asymptotic
+lower bound is made.

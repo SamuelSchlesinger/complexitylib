@@ -1520,7 +1520,7 @@ establishes the proposed coefficient-three regime without that assumption.
   a polynomially bounded proof system.
 \end{proof}
 
-\section{Top-down parity lower bounds}
+\section{Top-down parity and majority lower bounds}
 \label{sec:lowerbounds-topdown-parity}
 
 \begin{definition}[General bounded-round KW protocols]
@@ -1598,18 +1598,19 @@ establishes the proposed coefficient-three regime without that assumption.
 
 \begin{lemma}[Bilateral initial limits]
   \label{lem:lowerbounds-bilateral-adversary}
-  \lean{Complexity.KarchmerWigderson.RoundProtocol.not_solves_bilateral_density}
+  \lean{Complexity.KarchmerWigderson.RoundProtocol.not_solves_bilateral_density,
+    Complexity.KarchmerWigderson.RoundProtocol.not_solves_bilateral_density_with_deficit}
   \leanok
   \uses{thm:lowerbounds-density-adversary}
-  Suppose $X,Y$ are nonempty, each has deficit at most one, and each
-  consists of $(p,1)$-limits of the other, where $p>0$. If $m\ge0$ and
-  $(32768\cdot194^t(m+1))^t p\le1/4$, no protocol with at most $t+1$
+  Suppose $k\ge1$, $X,Y$ are nonempty, each has deficit at most $k$, and
+  each consists of $(p,k)$-limits of the other, where $p>0$. If $m\ge0$ and
+  $(32768\cdot194^t(m+k))^t p\le1/4$, no protocol with at most $t+1$
   messages from an alphabet of size at most $2^m$ solves $X\times Y$.
 \end{lemma}
 \begin{proof}
   \leanok
   Select the first message cell without mirroring. Both deficits are
-  now at most $m+1$, and the retained limit condition faces the selected
+  now at most $m+k$, and the retained limit condition faces the selected
   side. Apply the density adversary for the remaining $t$ rounds.
 \end{proof}
 
@@ -1678,4 +1679,99 @@ establishes the proposed coefficient-three regime without that assumption.
   Apply the finite parity obstruction. For the wire conclusion, a
   circuit with at most $2^{\varepsilon_d n^{1/t}}$ wires would give a
   protocol contradicting the communication conclusion.
+\end{proof}
+
+\subsection{Majority extension}
+
+The following extends the formalized argument to strict majority. Korten's
+Theorem~3 states the parity case; the adjacent-layer initialization below
+allows the same adversary to prove the majority bound.
+
+\begin{definition}[Majority boundary layers and deficit bound]
+  \label{def:lowerbounds-majority-layers}
+  \lean{Complexity.BooleanAnalysis.weightLayer,
+    Complexity.BooleanAnalysis.majorityDeficitBound}
+  \leanok
+  \uses{def:encodings-majority}
+  Let $L_{n,r}=\{x\in\{0,1\}^n:|x|=r\}$, where $|x|$ is Hamming weight.
+  The boundary layers of strict majority are
+  $X=L_{n,\lfloor n/2\rfloor}$ and $Y=L_{n,\lfloor n/2\rfloor+1}$.
+  Put $K(n)=128+\log_2(2(n+1))$. A tie belongs to the false side.
+\end{definition}
+
+\begin{lemma}[Many neighbors give a sparse density limit]
+  \label{lem:lowerbounds-neighbor-density-limit}
+  \lean{Complexity.BooleanAnalysis.isDensityLimit_of_many_neighbors}
+  \leanok
+  \uses{def:analysis-density-limit}
+  Suppose $n\ge16$ and at least half the coordinates of $x\in\{0,1\}^n$
+  yield a point of $Z$ when flipped. Then $x$ is a $(16/n,128)$-limit of $Z$.
+\end{lemma}
+\begin{proof}
+  \leanok
+  Sample each coordinate with probability $16/n$. The probability of
+  hitting a valid flip is at least $8/9$, using $(1-p)^s(1+sp)\le1$.
+  The expected mask size is $16$, so the chance it exceeds $128$ is at
+  most $1/8$. With probability at least $55/72\ge3/4$, a valid flip is
+  selected and the mask has at most $128$ coordinates. That single
+  completion gives fiber density at least $2^{-128}$.
+\end{proof}
+
+\begin{lemma}[Bilateral majority initialization]
+  \label{lem:lowerbounds-majority-initialization}
+  \lean{Complexity.BooleanAnalysis.majority_layers_deficit,
+    Complexity.BooleanAnalysis.majority_layers_limits}
+  \leanok
+  \uses{def:lowerbounds-majority-layers, lem:lowerbounds-neighbor-density-limit}
+  For $n\ge16$, both boundary layers are nonempty and have deficit at most
+  $K(n)$. Each consists of $(16/n,K(n))$-limits of the other.
+\end{lemma}
+\begin{proof}
+  \leanok
+  The middle binomial coefficient is at least $2^n/(n+1)$, and its upper
+  neighbor is at least half as large. Thus both layers have deficit at
+  most $\log_2(2(n+1))$. Each point of $X$ has at least $n/2$ zero bits,
+  and each point of $Y$ has at least $n/2$ one bits. Flipping any of
+  these bits reaches the other layer. Apply the neighbor lemma and
+  weaken its deficit parameter from $128$ to $K(n)$.
+\end{proof}
+
+\begin{theorem}[Explicit finite majority obstruction]
+  \label{thm:lowerbounds-majority-topdown-finite}
+  \lean{Complexity.KarchmerWigderson.RoundProtocol.not_solves_majority_finite}
+  \leanok
+  \uses{lem:lowerbounds-bilateral-adversary, lem:lowerbounds-majority-initialization}
+  If $m\ge0$ and
+  $64(32768\cdot194^t(m+K(n)))^t\le n$, no protocol with at most $t+1$
+  messages, each from an alphabet of size at most $2^m$, solves the
+  general KW game for $n$-bit strict majority.
+\end{theorem}
+\begin{proof}
+  \leanok
+  The size condition implies $n\ge64$ and gives the rate budget in the
+  bilateral adversary at $p=16/n$ and $k=K(n)$. Restrict a putative
+  majority protocol to the two boundary layers to obtain a contradiction.
+\end{proof}
+
+\begin{theorem}[Top-down majority lower bounds]
+  \label{thm:lowerbounds-majority-topdown}
+  \lean{Complexity.KarchmerWigderson.majority_communication_lower_bound,
+    Complexity.Circuit.majority_wire_lower_bound}
+  \leanok
+  \uses{thm:lowerbounds-majority-topdown-finite,
+    thm:lowerbounds-circuit-round-protocol}
+  For every $d\ge2$ there is $\varepsilon_d>0$ such that, for all sufficiently
+  large $n$, the general KW game for strict majority has no deterministic
+  protocol of at most $d$ rounds with at most $\varepsilon_d n^{1/(d-1)}$
+  bits per message. Consequently, every depth-at-most-$d$ unbounded-fan-in
+  De Morgan circuit for strict majority has more than
+  $2^{\varepsilon_d n^{1/(d-1)}}$ wires. This covers both even and odd $n$.
+\end{theorem}
+\begin{proof}
+  \leanok
+  Put $t=d-1$, $C=32768\cdot194^t$, and $\varepsilon_d=(128C)^{-1}$.
+  Since $K(n)=o(n^{1/t})$, eventually $K(n)\le\varepsilon_d n^{1/t}$.
+  If also $m\le\varepsilon_d n^{1/t}$, then
+  $C(m+K(n))\le n^{1/t}/64$, implying the finite obstruction.
+  Apply the circuit-to-protocol theorem for the wire conclusion.
 \end{proof}

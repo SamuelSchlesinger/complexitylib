@@ -105,14 +105,14 @@ theorem not_solves_bounded_density_internal {d : ℕ} (P : RoundProtocol ι M d)
     exact (mul_le_mul_of_nonneg_right (pow_le_pow_right₀ hC hi) hp).trans hbudget
   · simpa only [K, B, pow_zero, one_mul] using h
 
-theorem not_solves_bilateral_density_internal {d : ℕ} (P : RoundProtocol ι M (d + 1))
-    {X Y : Finset (ι → Bool)} {m p : ℝ}
-    (hM : (Fintype.card M : ℝ) ≤ (2 : ℝ) ^ m) (hm : 0 ≤ m) (hp : 0 < p)
-    (hX : X.Nonempty) (hY : Y.Nonempty) (hdX : uniformDeficit X ≤ 1) (hdY : uniformDeficit Y ≤ 1)
-    (hleft : ∀ x ∈ X, IsDensityLimit Y p 1 x) (hright : ∀ y ∈ Y, IsDensityLimit X p 1 y)
-    (hbudget : (32768 * (194 : ℝ) ^ d * (m + 1)) ^ d * p ≤ 1 / 4) :
+theorem not_solves_bilateral_density_with_deficit_internal {d : ℕ} (P : RoundProtocol ι M (d + 1))
+    {X Y : Finset (ι → Bool)} {m p k : ℝ}
+    (hM : (Fintype.card M : ℝ) ≤ (2 : ℝ) ^ m) (hm : 0 ≤ m) (hk : 1 ≤ k) (hp : 0 < p)
+    (hX : X.Nonempty) (hY : Y.Nonempty) (hdX : uniformDeficit X ≤ k) (hdY : uniformDeficit Y ≤ k)
+    (hleft : ∀ x ∈ X, IsDensityLimit Y p k x) (hright : ∀ y ∈ Y, IsDensityLimit X p k y)
+    (hbudget : (32768 * (194 : ℝ) ^ d * (m + k)) ^ d * p ≤ 1 / 4) :
     ¬ P.Solves X Y := by
-  have hC : 1 ≤ 32768 * (194 : ℝ) ^ d * (m + 1) := by
+  have hC : 1 ≤ 32768 * (194 : ℝ) ^ d * (m + k) := by
     have hh : 1 ≤ (194 : ℝ) ^ d := one_le_pow₀ (by norm_num)
     nlinarith [mul_nonneg (show 0 ≤ (194 : ℝ) ^ d by positivity) hm]
   have hcap : p ≤ 1 / 4 := by
@@ -122,31 +122,43 @@ theorem not_solves_bilateral_density_internal {d : ℕ} (P : RoundProtocol ι M 
   intro hsol
   cases P with
   | answer i =>
-    have h : DensityRectangle X Y p 1 := ⟨hX, hY, hdX, hdY, p, hp, le_rfl, Or.inl hleft⟩
+    have h : DensityRectangle X Y p k := ⟨hX, hY, hdX, hdY, p, hp, le_rfl, Or.inl hleft⟩
     exact h.not_separated_internal (by linarith) i hsol
   | alice send next =>
     obtain ⟨a, hne, hdef⟩ := exists_large_message_fiber_internal X hX send hM
     let X' := X.filter (fun x => send x = a)
-    have hnew : DensityRectangle X' Y p (m + 1) := by
+    have hnew : DensityRectangle X' Y p (m + k) := by
       refine ⟨hne, hY, by linarith, by linarith, p, hp, le_rfl, Or.inl ?_⟩
       intro x hx
       exact (hleft x (Finset.mem_filter.mp hx).1).mono_deficit_internal
         hp.le (by linarith) (by linarith)
-    apply (next a).not_solves_bounded_density_internal hM (by linarith) le_rfl hbudget hnew
+    apply (next a).not_solves_bounded_density_internal hM (k := m + k)
+      (by linarith) (by linarith) hbudget hnew
     intro x hx y hy
     have he := hsol x (Finset.mem_filter.mp hx).1 y hy
     simpa only [run, (Finset.mem_filter.mp hx).2] using he
   | bob send next =>
     obtain ⟨a, hne, hdef⟩ := exists_large_message_fiber_internal Y hY send hM
     let Y' := Y.filter (fun y => send y = a)
-    have hnew : DensityRectangle X Y' p (m + 1) := by
+    have hnew : DensityRectangle X Y' p (m + k) := by
       refine ⟨hX, hne, by linarith, by linarith, p, hp, le_rfl, Or.inr ?_⟩
       intro y hy
       exact (hright y (Finset.mem_filter.mp hy).1).mono_deficit_internal
         hp.le (by linarith) (by linarith)
-    apply (next a).not_solves_bounded_density_internal hM (by linarith) le_rfl hbudget hnew
+    apply (next a).not_solves_bounded_density_internal hM (k := m + k)
+      (by linarith) (by linarith) hbudget hnew
     intro x hx y hy
     have he := hsol x hx y (Finset.mem_filter.mp hy).1
     simpa only [run, (Finset.mem_filter.mp hy).2] using he
+
+theorem not_solves_bilateral_density_internal {d : ℕ} (P : RoundProtocol ι M (d + 1))
+    {X Y : Finset (ι → Bool)} {m p : ℝ}
+    (hM : (Fintype.card M : ℝ) ≤ (2 : ℝ) ^ m) (hm : 0 ≤ m) (hp : 0 < p)
+    (hX : X.Nonempty) (hY : Y.Nonempty) (hdX : uniformDeficit X ≤ 1) (hdY : uniformDeficit Y ≤ 1)
+    (hleft : ∀ x ∈ X, IsDensityLimit Y p 1 x) (hright : ∀ y ∈ Y, IsDensityLimit X p 1 y)
+    (hbudget : (32768 * (194 : ℝ) ^ d * (m + 1)) ^ d * p ≤ 1 / 4) :
+    ¬ P.Solves X Y :=
+  not_solves_bilateral_density_with_deficit_internal P hM hm le_rfl hp
+    hX hY hdX hdY hleft hright hbudget
 
 end Complexity.KarchmerWigderson.RoundProtocol

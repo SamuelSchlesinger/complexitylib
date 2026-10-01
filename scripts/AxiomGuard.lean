@@ -122,9 +122,11 @@ def headlineTheorems : List Name := [
   `Complexity.shannon_upper_bound,
   `Complexity.Circuit.card_essentialInputs_le_mul_size,
   `Complexity.sizeComplexity_xorBool_ge,
-  -- Korten's top-down parity lower bounds
+  -- Korten's top-down parity lower bounds and the majority extension
   `Complexity.KarchmerWigderson.parity_communication_lower_bound,
   `Complexity.Circuit.parity_wire_lower_bound,
+  `Complexity.KarchmerWigderson.majority_communication_lower_bound,
+  `Complexity.Circuit.majority_wire_lower_bound,
   `Complexity.Valiant.depth_reduction
 ]
 

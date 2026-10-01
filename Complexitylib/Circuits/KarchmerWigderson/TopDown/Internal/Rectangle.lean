@@ -7,6 +7,7 @@ Authors: Samuel Schlesinger
 module
 public import Complexitylib.Circuits.KarchmerWigderson.TopDown.Defs
 public import Complexitylib.BooleanAnalysis.MirrorSets
+public import Complexitylib.Circuits.KarchmerWigderson.TopDown.Internal.Sampling
 import Mathlib.Combinatorics.Pigeonhole
 import Mathlib.Tactic.FieldSimp
 import Mathlib.Tactic.Linarith
@@ -58,28 +59,6 @@ theorem exists_large_message_fiber_internal {M : Type*} [Fintype M] [DecidableEq
   congr 1
   ring
 
-theorem bernoulliAverage_coordinate_internal (p : ℝ) (i : ι) :
-    bernoulliAverage p (fun s : ι → Bool => if s i then (1 : ℝ) else 0) = p := by
-  let e := Equiv.piSplitAt i (fun _ : ι => Bool)
-  have hw (s : ι → Bool) : bernoulliWeight p s =
-      (if s i then p else 1 - p) * bernoulliWeight p (fun j : {j // j ≠ i} => s j) := by
-    exact Fintype.prod_eq_mul_prod_subtype_ne (fun j => if s j then p else 1 - p) i
-  unfold bernoulliAverage
-  rw [← e.symm.sum_comp (fun s => bernoulliWeight p s * (if s i then (1 : ℝ) else 0))]
-  simp_rw [hw]
-  have hleft (z : Bool × ({j // j ≠ i} → Bool)) : e.symm z i = z.1 := by
-    simp [e, Equiv.piSplitAt]
-  have hright (z : Bool × ({j // j ≠ i} → Bool)) :
-      (fun j : {j // j ≠ i} => e.symm z j) = z.2 := by
-    funext j
-    simp [e, Equiv.piSplitAt, j.property]
-  simp_rw [hleft, hright]
-  rw [Fintype.sum_prod_type, Fintype.sum_bool]
-  simp only [Bool.false_eq_true, ite_true, ite_false, mul_one, mul_zero,
-    sum_const_zero, add_zero, ← mul_sum]
-  have hs : (∑ s : {j // j ≠ i} → Bool, bernoulliWeight p s) = 1 := by
-    simpa [bernoulliAverage] using bernoulliAverage_const (ι := {j // j ≠ i}) p 1
-  rw [hs, mul_one]
 
 theorem IsDensityLimit.agrees_internal {Y : Finset (ι → Bool)} {p k : ℝ} {x : ι → Bool}
     (hlim : IsDensityLimit Y p k x) (hp : 0 ≤ p) (hp' : p < 3 / 4) (i : ι) :
