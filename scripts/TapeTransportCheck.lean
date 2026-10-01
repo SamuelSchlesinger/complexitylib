@@ -7,6 +7,7 @@ module
 public import Complexitylib.Models.TuringMachine.Lift.Hoare
 public import Complexitylib.Models.TuringMachine.Placement.Window
 public import Complexitylib.Models.TuringMachine.Combinators.RetargetCompute
+public import Complexitylib.Models.TuringMachine.Combinators.ApplyDecide
 
 /-!
 # Exact tape-layout transport regression examples
@@ -155,6 +156,70 @@ example {n n' : ℕ} (M : TM n) (N : TM n') (wrap : Cfg n M.Q → Cfg n' N.Q)
     {t : ℕ} {c c' : Cfg n M.Q} (hrun : M.reachesIn t c c') :
     N.reachesIn t (wrap c) (wrap c') :=
   TM.reachesIn_map' wrap hstep hrun
+
+-- Exact retarget-input transport permits arbitrary real-input frames, even malformed ones.
+example : ∃ r, (TM.retargetInput tick).reachesIn 1
+    (TM.retargetWrap tick markerFrame (tick.initCfg [])) (TM.retargetWrap tick r afterTick) :=
+  TM.retargetInput_reachesIn_of_reachesIn tick tick_run Tape.StartInvariant.init_nil
+    (fun _ => Tape.StartInvariant.init_nil) Tape.StartInvariant.init_nil markerFrame
+
+example : ((TM.retargetInput tick).step
+    (TM.retargetWrap tick markerFrame (tick.initCfg []))).map
+      (fun c => c.input.head) = some 3 := by
+  rfl
+
+example : ((TM.retargetInput tick).step
+    (TM.retargetWrap tick nonmarkerAtZero (tick.initCfg []))).map
+      (fun c => c.input.head) = some 0 := by
+  rfl
+
+-- Time zero does not advance the real-input frame, including an already-halted source.
+example : (TM.retargetInput stopped).reachesIn 0
+    (TM.retargetWrap stopped markerFrame (stopped.initCfg []))
+    (TM.retargetWrap stopped markerFrame (stopped.initCfg [])) := .zero
+
+example : (TM.retargetInput stopped).step
+    (TM.retargetWrap stopped markerFrame (stopped.initCfg [])) = none := by
+  rfl
+
+-- The virtual-input invariant is essential: a misplaced marker is rewritten on a work tape,
+-- whereas the source's read-only input keeps that same cell unchanged.
+private def badVirtual : Cfg 0 Bool :=
+  ⟨false, markerFrame, fun _ => Tape.init [], Tape.init []⟩
+
+example : (tick.step badVirtual).map (fun c => c.input.cells 2) = some Γ.start := by
+  rfl
+
+example : ((TM.retargetInput tick).step
+    (TM.retargetWrap tick (Tape.init []) badVirtual)).map
+      (fun c => (c.work (Fin.last 0)).cells 2) = some Γ.blank := by
+  rfl
+
+private theorem tick_window (c : Cfg 0 Bool) (hc : tick.reaches (tick.initCfg []) c) :
+    c.WithinDecisionSpace 0 1 := by
+  obtain ⟨t, ht⟩ := tick.reaches_to_reachesIn hc
+  have htime : t ≤ 1 := tick.reachesIn_le_halt ht tick_run rfl
+  refine ⟨⟨fun i => Fin.elim0 i, ?_⟩, ?_⟩
+  · have hi := tick.input_head_reachesIn_bound ht
+    change c.input.head ≤ 0 + t at hi
+    omega
+  · have ho := tick.output_head_reachesIn_bound ht
+    change c.output.head ≤ 0 + t at ho
+    omega
+
+-- Every prefix is charged correctly, including head-zero entry and positive real-input heads.
+-- The relocated source input costs m + s + 1 = 2; the real input retains its max-head bound.
+example (r : Tape) (hrsi : Tape.StartInvariant r) (hr : max r.head 1 ≤ 3) :
+    ∀ D, (TM.retargetInput tick).reaches (TM.retargetWrap tick r (tick.initCfg [])) D →
+      D.WithinDecisionSpace 0 2 :=
+  TM.retargetInput_keepsWindow_of_reaches tick r (tick.initCfg []) tick_window
+    Tape.StartInvariant.init_nil (fun _ => Tape.StartInvariant.init_nil)
+    Tape.StartInvariant.init_nil hrsi (by decide) hr
+
+-- The started wrapper keeps the same reachability, even when its start state differs.
+example {k : ℕ} (M : TM k) (c d : Cfg (k + 1) M.Q) :
+    (TM.retargetInputStarted M).reaches c d ↔ (TM.retargetInput M).reaches c d :=
+  TM.retargetInputStarted_reaches_iff M c d
 
 end TapeTransportCheck
 end Complexity

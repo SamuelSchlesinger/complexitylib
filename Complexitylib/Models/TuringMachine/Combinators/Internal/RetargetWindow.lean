@@ -81,37 +81,25 @@ theorem retargetInput_keepsWindow_of_reaches (M : TM k) (r₀ : Tape) (c₀ : Cf
     (hr : max r₀.head 1 ≤ inputLength + space + 1) :
     ∀ d, (retargetInput M).reaches (retargetWrap M r₀ c₀) d →
       d.WithinDecisionSpace inputLength space := by
-  have key : ∀ d, (retargetInput M).reaches (retargetWrap M r₀ c₀) d →
-      ∃ r c, M.reaches c₀ c ∧ Tape.StartInvariant c.input ∧
-        (∀ i, Tape.StartInvariant (c.work i)) ∧ Tape.StartInvariant c.output ∧
-        Tape.StartInvariant r ∧ r.head ≤ max r₀.head 1 ∧ d = retargetWrap M r c := by
-    intro d hd
-    induction hd with
-    | refl =>
-        exact ⟨r₀, c₀, Relation.ReflTransGen.refl, hc₀inp, hc₀work, hc₀out, hr₀,
-          le_max_left _ _, rfl⟩
-    | @tail dmid dnext _ hstep ih =>
-        obtain ⟨r, cM, hreach, hinp, hwork, hout, hrsi, hrhead, rfl⟩ := ih
-        have hstep' : (retargetInput M).step (retargetWrap M r cM) = some dnext := hstep
-        have hne0 : (retargetWrap M r cM).state ≠ (retargetInput M).qhalt :=
-          state_ne_qhalt_of_step hstep'
-        have hne : cM.state ≠ M.qhalt := hne0
-        obtain ⟨cM', hstep0⟩ : ∃ cM', M.step cM = some cM' := by
-          rw [TM.step, ite_eq_right hne]
-          exact ⟨_, rfl⟩
-        have hcomm := retargetInput_step_commute M hstep0 r hinp
-        have hd'eq := Option.some_inj.mp (hstep'.symm.trans hcomm)
-        obtain ⟨hinp', hwork', hout'⟩ := Tape.StartInvariant.step M hstep0 hinp hwork hout
-        refine ⟨r.move (idleDir r.read), cM', Relation.ReflTransGen.tail hreach hstep0,
-          hinp', hwork', hout', ?_, ?_, hd'eq⟩
-        · rw [move_idleDir_eq_of_startInvariant hrsi]
-          exact ⟨hrsi.1, hrsi.2⟩
-        · rw [move_idleDir_eq_of_startInvariant hrsi]
-          show max r.head 1 ≤ max r₀.head 1
-          omega
   intro d hd
-  obtain ⟨r, cM, hreach, -, -, -, -, hrhead, rfl⟩ := key d hd
-  exact retargetInput_within M r cM (hM cM hreach) hspace (by omega)
+  obtain ⟨t, ht⟩ := (retargetInput M).reaches_to_reachesIn hd
+  obtain ⟨c, hreach, r, rfl, _, _, hrhead⟩ := reachesIn_transport (tm' := M)
+    (fun d c => ∃ r, d = retargetWrap M r c ∧
+      (Tape.StartInvariant c.input ∧ (∀ i, Tape.StartInvariant (c.work i)) ∧
+        Tape.StartInvariant c.output) ∧ Tape.StartInvariant r ∧ r.head ≤ max r₀.head 1)
+    (by
+      rintro _ d' c ⟨r, rfl, hi, hrsi, hrhead⟩ hs
+      have hne : c.state ≠ M.qhalt := state_ne_qhalt_of_step (tm := retargetInput M) hs
+      cases hc : M.step c with
+      | none => simp [TM.step, hne] at hc
+      | some c' =>
+          have heq := Option.some.inj (hs.symm.trans (retargetInput_step_commute M hc r hi.1))
+          refine ⟨c', rfl, _, heq, Tape.StartInvariant.step M hc hi.1 hi.2.1 hi.2.2,
+            hrsi.move _, ?_⟩
+          rw [move_idleDir_eq_of_startInvariant hrsi]
+          exact max_le hrhead (le_max_right _ _))
+    ht ⟨r₀, rfl, ⟨hc₀inp, hc₀work, hc₀out⟩, hr₀, le_max_left _ _⟩
+  exact retargetInput_within M r c (hM c (reaches_of_reachesIn hreach)) hspace (by omega)
 
 /-! ## The started wrapper -/
 
@@ -120,18 +108,10 @@ reach exactly the same configurations. Only their start states differ. -/
 theorem retargetInputStarted_reaches_iff (M : TM k) (c d : Cfg (k + 1) M.Q) :
     (retargetInputStarted M).reaches c d ↔ (retargetInput M).reaches c d := by
   constructor
-  · intro h
-    induction h with
-    | refl => exact Relation.ReflTransGen.refl
-    | tail _ hs ih =>
-        exact Relation.ReflTransGen.tail ih
-          ((retargetInputStarted_step_eq M _).symm.trans hs)
-  · intro h
-    induction h with
-    | refl => exact Relation.ReflTransGen.refl
-    | tail _ hs ih =>
-        exact Relation.ReflTransGen.tail ih
-          ((retargetInputStarted_step_eq M _).trans hs)
+  · exact Relation.ReflTransGen.lift (p := (retargetInput M).stepRel) id
+      (fun _ _ hs => (retargetInputStarted_step_eq M _).symm.trans hs) c d
+  · exact Relation.ReflTransGen.lift (p := (retargetInputStarted M).stepRel) id
+      (fun _ _ hs => (retargetInputStarted_step_eq M _).trans hs) c d
 
 /-- **The started wrapper keeps the window too.** It runs the same steps as `TM.retargetInput`,
 so the accounting of `TM.retargetInput_keepsWindow_of_reaches` applies verbatim. -/
