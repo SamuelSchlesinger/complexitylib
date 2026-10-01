@@ -19,6 +19,7 @@ public import Complexitylib.SAT.Encoding
 public import Complexitylib.SAT.Language
 public import Complexitylib.SAT.Verifier
 public import Complexitylib.SAT.Headline
+public import Complexitylib.SAT.GuessVerify
 public import Complexitylib.SAT.CircuitOracle
 public import Complexitylib.SAT.CircuitSatisfiability
 public import Complexitylib.SAT.ThreeSAT.Headline
@@ -47,8 +48,8 @@ infrastructure used by the polynomial-time verifier.
   `mem_language_iff_witness` / `polyBalanced_witness`.
 - `Verifier` — executable decoding and checking for `pair(z, α)`.
 - `VerifierTM` — deterministic TM components for the machine-level verifier.
-- `GuessVerify` — the proved SAT-specialized NTM composition for counter
-  setup, bounded guessing, pair construction, and verifier simulation.
+- `GuessVerify` — compatibility API for the SAT-specialized NTM, preserving
+  its concrete machine and exact bounds separately from the generic NP route.
 - `Headline` / `CookLevin.Assembly` — `SAT ∈ NP` and the final
   NP-completeness theorem.
 - `CircuitOracle` — extraction of a polynomial-size SAT circuit oracle from

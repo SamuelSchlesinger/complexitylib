@@ -81,6 +81,12 @@ def headlineTheorems : List Name := [
   -- Closure under polynomial-time reductions
   `Complexity.MapReducesPoly.mem_NP,
   `Complexity.MapReducesPoly.mem_coNP,
+  -- Public verifier API and exact-machine compatibility
+  `Complexity.mem_NP_of_linear_witness,
+  `Complexity.mem_NP_of_poly_witness,
+  `Complexity.NP.mem_NP_of_linear_witness,
+  `Complexity.guessVerify_decidesInTime,
+  `Complexity.SAT.linearGuessVerify_decidesInTime,
   -- FNP witness characterization (guess and verify)
   `Complexity.NP.witnessNTMConstruction,
   `Complexity.NP.mem_NP_of_FNP,
