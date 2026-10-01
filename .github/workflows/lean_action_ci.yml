@@ -35,6 +35,8 @@ jobs:
         run: |
           lake env lean scripts/VerifierApiCheck.lean
           lake env lean scripts/SATGuessVerifyApiCheck.lean
+      - name: Check exact tape-layout transport boundaries
+        run: lake env lean scripts/TapeTransportCheck.lean
       - name: Run environment linters, including validation-only graphs
         run: |
           lake exe runLinter Complexitylib \

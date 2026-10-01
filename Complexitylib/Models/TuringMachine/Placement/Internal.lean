@@ -1,11 +1,12 @@
 /-
 Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
-Authors: Samuel Schlesinger
+Authors: Samuel Schlesinger, Samuel’s dot
 -/
 
 module
 public import Complexitylib.Models.TuringMachine.Placement.Defs
+public import Complexitylib.Models.TuringMachine.Transport
 
 /-!
 # Work-tape placement correctness internals
@@ -113,14 +114,11 @@ theorem placeWorkTM_reachesIn_placeWorkCfg_stable_internal (tm : TM n)
     (hextra : ∀ i, ¬placeWorkInMiddle pre n i → (extras i).read ≠ Γ.start) :
     (placeWorkTM pre post tm).reachesIn t
       (placeWorkCfg tm pre post extras c)
-      (placeWorkCfg tm pre post extras c') := by
-  induction hreach with
-  | zero => exact .zero
-  | step hstep _ ih =>
-    exact .step (by
-      rw [placeWorkTM_step_placeWorkCfg_stable_internal tm pre post extras _ hextra,
-        hstep]
-      rfl) ih
+      (placeWorkCfg tm pre post extras c') :=
+  reachesIn_map' (placeWorkCfg tm pre post extras)
+    (fun a a' ha => by
+      rw [placeWorkTM_step_placeWorkCfg_stable_internal tm pre post extras a hextra, ha]
+      rfl) hreach
 
 /-- The canonical parked frame is fixed by a placed source step. -/
 theorem placeWorkTM_step_placeWorkParkedCfg_internal (tm : TM n) (pre post : ℕ)

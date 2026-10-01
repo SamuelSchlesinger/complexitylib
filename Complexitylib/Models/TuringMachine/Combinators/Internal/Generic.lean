@@ -1,11 +1,12 @@
 /-
 Copyright (c) 2025 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
-Authors: Samuel Schlesinger
+Authors: Samuel Schlesinger, Samuel’s dot
 -/
 
 module
 public import Complexitylib.Models.TuringMachine.Combinators
+public import Complexitylib.Models.TuringMachine.Transport
 
 /-!
 # Generic proof tools for TM combinators
@@ -96,10 +97,8 @@ theorem reachesIn_map {tm tm' : TM n}
       tm'.step (wrap c) = some (wrap c'))
     {t : ℕ} {c c' : Cfg n tm.Q}
     (hreach : tm.reachesIn t c c') :
-    tm'.reachesIn t (wrap c) (wrap c') := by
-  induction hreach with
-  | zero => exact .zero
-  | step hstep _ ih => exact .step (h_step _ _ hstep) ih
+    tm'.reachesIn t (wrap c) (wrap c') :=
+  reachesIn_map' wrap h_step hreach
 
 -- ════════════════════════════════════════════════════════════════════════
 -- Generic tape rewind loop (parameterized by tape accessor)

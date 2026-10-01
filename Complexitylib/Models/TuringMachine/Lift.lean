@@ -1,11 +1,12 @@
 /-
 Copyright (c) 2025 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
-Authors: Samuel Schlesinger
+Authors: Samuel Schlesinger, Samuel’s dot
 -/
 
 module
 public import Complexitylib.Models.TuringMachine.Combinators
+public import Complexitylib.Models.TuringMachine.Transport
 
 /-!
 # Tape-layout combinators: extra work tapes and output retargeting
@@ -25,14 +26,15 @@ its behavior:
 
 ## Correspondence proofs
 
-Both combinators are proved correct by a step-commutation lemma through a
-configuration embedding (`liftCfg` / `retargetCfg`): one step of the
-derived machine on an embedded configuration equals one step of `tm`,
-embedded. The embeddings park the dummy tapes at cell 1 with blank cells;
-the initial configuration instead has dummy heads at cell 0 (on `▷`), so
-the step lemma is stated for any dummy tape with `cells = Tape.init []` and
-`head ≤ 1` — covering both the initial bounce and the parked steady state
-(mirroring `NTM.pad0`).
+Both combinators preserve exact runs through configuration embeddings. `liftCfgWith`
+tracks arbitrary extra tapes through their idle actions; when those tapes read non-marker
+symbols, their entire contents and heads form a stable frame. `liftCfg` specializes this
+embedding to parked blank extras. `retargetCfg` parks the unused real output tape.
+
+Genuine initialization instead puts unused heads at cell 0. The initial-step lemmas
+handle that bounce separately, so time-zero configurations are not confused with parked
+ones. Shared configuration transport then lifts exact runs and reflects every reachable
+prefix without changing the concrete transition functions.
 
 The time bounds are preserved *exactly* (no `+ 1`): the dummy-tape bounce
 happens during the simulated machine's own first step.
@@ -108,6 +110,46 @@ def liftTM (tm : TM n) (m : ℕ) : TM (n + m) where
     · next hlt => exact hwork ⟨i.val, hlt⟩ hi
     · next hlt => exact idleDir_right_of_start hi
 
+/-- The extra-tape index of a lifted tape index `i` with `n ≤ i.val`. -/
+def extraIdx {n m : ℕ} (i : Fin (n + m)) (h : n ≤ i.val) : Fin m :=
+  ⟨i.val - n, by have := i.isLt; omega⟩
+
+/-- Embed a configuration of `tm : TM n` into one of `tm.liftTM m` with the
+    extra work tapes pinned to the fixed tapes `extras`. Generalizes
+    `liftCfg`, which is the special case
+    `extras = fun _ => (Tape.init []).move Dir3.right`. -/
+def liftCfgWith (tm : TM n) (m : ℕ) (extras : Fin m → Tape) (c : Cfg n tm.Q) :
+    Cfg (n + m) tm.Q where
+  state := c.state
+  input := c.input
+  work := fun i =>
+    if h : i.val < n then c.work ⟨i.val, h⟩
+    else extras (extraIdx i (Nat.le_of_not_lt h))
+  output := c.output
+
+/-- `liftCfgWith` leaves the state unchanged. -/
+@[simp] theorem liftCfgWith_state (tm : TM n) (m : ℕ) (extras : Fin m → Tape)
+    (c : Cfg n tm.Q) : (liftCfgWith tm m extras c).state = c.state := rfl
+
+/-- `liftCfgWith` leaves the input tape unchanged. -/
+@[simp] theorem liftCfgWith_input (tm : TM n) (m : ℕ) (extras : Fin m → Tape)
+    (c : Cfg n tm.Q) : (liftCfgWith tm m extras c).input = c.input := rfl
+
+/-- `liftCfgWith` leaves the output tape unchanged. -/
+@[simp] theorem liftCfgWith_output (tm : TM n) (m : ℕ) (extras : Fin m → Tape)
+    (c : Cfg n tm.Q) : (liftCfgWith tm m extras c).output = c.output := rfl
+
+/-- `liftCfgWith` maps the first `n` work tapes to `c`'s work tapes. -/
+theorem liftCfgWith_work_lt (tm : TM n) (m : ℕ) (extras : Fin m → Tape)
+    (c : Cfg n tm.Q) (i : Fin (n + m)) (h : i.val < n) :
+    (liftCfgWith tm m extras c).work i = c.work ⟨i.val, h⟩ := dite_eq_left h
+
+/-- `liftCfgWith` maps the extra work tapes to the pinned tapes. -/
+theorem liftCfgWith_work_ge (tm : TM n) (m : ℕ) (extras : Fin m → Tape)
+    (c : Cfg n tm.Q) (i : Fin (n + m)) (h : n ≤ i.val) :
+    (liftCfgWith tm m extras c).work i = extras (extraIdx i h) :=
+  dite_eq_right (Nat.not_lt.mpr h)
+
 /-- Embed a configuration of `tm : TM n` into one of `tm.liftTM m`:
     work tapes `i < n` are `c`'s, the extras are the canonical parked
     blank tape (head 1, blank cells). State, input, and output are
@@ -142,74 +184,77 @@ theorem liftCfg_work_ge (tm : TM n) (m : ℕ) (c : Cfg n tm.Q)
     (tm.liftCfg m c).work i = (Tape.init []).move Dir3.right :=
   dite_eq_right (Nat.not_lt.mpr h)
 
-/-- **Unified step commutation** for `liftTM`. If the extra work tapes of
-    `C` are blank with head at cell 0 or 1 and the rest of `C` matches `c`,
-    then one step of `tm.liftTM m` from `C` is one step of `tm` from `c`,
-    embedded via `liftCfg` (extras parked). This covers both the initial
-    bounce (extra heads at 0, on `▷`) and the parked steady state. -/
-private theorem liftTM_step_of_extras (tm : TM n) (m : ℕ) {c : Cfg n tm.Q}
-    {C : Cfg (n + m) tm.Q}
-    (hs : C.state = c.state) (hi : C.input = c.input) (ho : C.output = c.output)
-    (hw : ∀ (i : Fin (n + m)) (h : i.val < n), C.work i = c.work ⟨i.val, h⟩)
-    (hd : ∀ i : Fin (n + m), n ≤ i.val →
-      (C.work i).cells = (Tape.init []).cells ∧ (C.work i).head ≤ 1) :
-    (tm.liftTM m).step C = (tm.step c).map (tm.liftCfg m) := by
-  by_cases hh : c.state = tm.qhalt
-  · -- both machines are halted
-    have hC : C.state = (tm.liftTM m).qhalt := hs.trans hh
-    have h1 : (tm.liftTM m).step C = none := by
-      simp only [step, hC, ↓reduceIte]
-    have h2 : tm.step c = none := by
-      simp only [step, hh, ↓reduceIte]
-    rw [h1, h2]; rfl
+/-- The canonical lifted embedding is the arbitrary-frame embedding with blank parked extras. -/
+theorem liftCfgWith_blank (tm : TM n) (m : ℕ) (c : Cfg n tm.Q) :
+    liftCfgWith tm m (fun _ => (Tape.init []).move Dir3.right) c = tm.liftCfg m c := rfl
+
+/-- A lifted step simulates the source step and applies one idle action to each extra tape.
+The frame is arbitrary: it need not be blank, start-invariant, or already parked. -/
+theorem liftTM_step_liftCfgWith_frame (tm : TM n) (m : ℕ)
+    (extras : Fin m → Tape) (c : Cfg n tm.Q) :
+    (tm.liftTM m).step (liftCfgWith tm m extras c) =
+      (tm.step c).map (liftCfgWith tm m (fun j =>
+        (extras j).writeAndMove (readBackWrite (extras j).read) (idleDir (extras j).read))) := by
+  by_cases hhalt : c.state = tm.qhalt
+  · simp [TM.step, liftCfgWith, liftTM, hhalt]
   · cases hstep : tm.step c with
-    | none => exact absurd hstep (by simp [step, hh])
+    | none => exact absurd hstep (by simp [TM.step, hhalt])
     | some c' =>
-      -- extract the explicit stepped configuration
-      simp only [step, hh, ↓reduceIte, Option.some.injEq] at hstep
+      simp only [TM.step, hhalt, ↓reduceIte, Option.some.injEq] at hstep
       subst hstep
-      have hinner : (fun i : Fin n => (C.work (Fin.castAdd m i)).read)
-          = fun i => (c.work i).read :=
-        funext fun i => by rw [hw (Fin.castAdd m i) i.isLt]; rfl
-      simp only [step, Option.map_some]
-      dsimp only [liftTM, liftCfg]
-      rw [hs, hi, ho, hinner]
-      simp only [hh, ↓reduceIte]
-      refine congrArg some (Cfg.mk.injEq _ _ _ _ _ _ _ _ |>.mpr ⟨rfl, rfl, ?_, rfl⟩)
-      funext i
-      by_cases hik : i.val < n
-      · rw [hw i hik, dite_eq_left hik, dite_eq_left hik, dite_eq_left hik]
-      · have hdi := hd i (Nat.le_of_not_lt hik)
-        rw [dite_eq_right hik, dite_eq_right hik, dite_eq_right hik]
-        exact dummy_writeAndMove (C.work i) hdi.1 hdi.2
+      have hreads :
+          (fun i : Fin n => ((liftCfgWith tm m extras c).work (Fin.castAdd m i)).read) =
+            (fun i => (c.work i).read) := by
+        funext i
+        rw [liftCfgWith_work_lt tm m extras c (Fin.castAdd m i) i.isLt]
+        rfl
+      simp only [TM.step, Option.map_some,
+        show (liftCfgWith tm m extras c).state = c.state from rfl,
+        show (tm.liftTM m).qhalt = tm.qhalt from rfl]
+      split
+      · exact (hhalt ‹_›).elim
+      · dsimp only [liftTM]
+        rw [liftCfgWith_input, liftCfgWith_output, hreads]
+        refine congrArg some (Cfg.ext rfl rfl (funext fun i => ?_) rfl)
+        by_cases hi : i.val < n <;> simp only [liftCfgWith, hi, ↓reduceDIte]
+
+/-- Non-marker extra tapes form a stable arbitrary frame for a lifted step. -/
+theorem liftTM_step_liftCfgWith (tm : TM n) (m : ℕ) {extras : Fin m → Tape}
+    (hex : ∀ j : Fin m, (extras j).read ≠ Γ.start) (c : Cfg n tm.Q) :
+    (tm.liftTM m).step (liftCfgWith tm m extras c) =
+      (tm.step c).map (liftCfgWith tm m extras) := by
+  rw [liftTM_step_liftCfgWith_frame]
+  have hframe : (fun j => (extras j).writeAndMove
+      (readBackWrite (extras j).read) (idleDir (extras j).read)) = extras := by
+    funext j
+    rw [writeAndMove_readBack _ (hex j)]
+    simp [idleDir, hex j, Tape.move]
+  rw [hframe]
 
 /-- **Step commutation** on embedded configurations: once the extra tapes
-    are parked, `tm.liftTM m` steps exactly as `tm` does through
-    `liftCfg`. -/
+    are parked, `tm.liftTM m` steps exactly as `tm` does through `liftCfg`. -/
 theorem liftTM_step_liftCfg (tm : TM n) (m : ℕ) (c : Cfg n tm.Q) :
     (tm.liftTM m).step (tm.liftCfg m c) = (tm.step c).map (tm.liftCfg m) :=
-  liftTM_step_of_extras tm m rfl rfl rfl (fun _ h => dite_eq_left h)
-    (fun i h => by
-      rw [liftCfg_work_ge tm m c i h]
-      exact ⟨rfl, Nat.le_refl 1⟩)
+  liftTM_step_liftCfgWith tm m (extras := fun _ => (Tape.init []).move Dir3.right)
+    (fun _ => by decide) c
 
-/-- The first step out of the lifted initial configuration: the extra
-    tapes bounce off `▷` into the parked position while `tm` performs its
-    own first step. -/
+/-- The first lifted step parks the surrounding blank tapes during the source's own step. -/
 private theorem liftTM_step_initCfg (tm : TM n) (m : ℕ) (x : List Bool) :
     (tm.liftTM m).step ((tm.liftTM m).initCfg x)
-      = (tm.step (tm.initCfg x)).map (tm.liftCfg m) :=
-  liftTM_step_of_extras tm m rfl rfl rfl (fun _ _ => rfl)
-    (fun _ _ => ⟨rfl, Nat.zero_le 1⟩)
+      = (tm.step (tm.initCfg x)).map (tm.liftCfg m) := by
+  have hcfg : (tm.liftTM m).initCfg x =
+      liftCfgWith tm m (fun _ => Tape.init []) (tm.initCfg x) := by
+    refine Cfg.ext rfl rfl (funext fun i => ?_) rfl
+    by_cases hi : i.val < n <;> simp only [liftCfgWith, hi, ↓reduceDIte]
+  rw [hcfg, liftTM_step_liftCfgWith_frame]
+  rfl
 
 /-- Multi-step commutation through `liftCfg`. -/
 private theorem liftTM_reachesIn_liftCfg (tm : TM n) (m : ℕ) {t : ℕ}
     {c c' : Cfg n tm.Q} (h : tm.reachesIn t c c') :
-    (tm.liftTM m).reachesIn t (tm.liftCfg m c) (tm.liftCfg m c') := by
-  induction h with
-  | zero => exact .zero
-  | step hstep _ ih =>
-    exact .step (by rw [liftTM_step_liftCfg, hstep]; rfl) ih
+    (tm.liftTM m).reachesIn t (tm.liftCfg m c) (tm.liftCfg m c') :=
+  reachesIn_map' (tm' := tm.liftTM m) (tm.liftCfg m)
+    (fun a a' ha => by rw [liftTM_step_liftCfg, ha]; rfl) h
 
 /-- Multi-step simulation from the initial configuration: the lifted run
     tracks `tm`'s run in the same number of steps, agreeing on state and
@@ -489,11 +534,9 @@ private theorem retargetOutput_step_initCfg (tm : TM n) (x : List Bool) :
 /-- Multi-step commutation through `retargetCfg`. -/
 private theorem retargetOutput_reachesIn_retargetCfg (tm : TM n) {t : ℕ}
     {c c' : Cfg n tm.Q} (h : tm.reachesIn t c c') :
-    (tm.retargetOutput).reachesIn t (tm.retargetCfg c) (tm.retargetCfg c') := by
-  induction h with
-  | zero => exact .zero
-  | step hstep _ ih =>
-    exact .step (by rw [retargetOutput_step_retargetCfg, hstep]; rfl) ih
+    (tm.retargetOutput).reachesIn t (tm.retargetCfg c) (tm.retargetCfg c') :=
+  reachesIn_map' (tm' := tm.retargetOutput) tm.retargetCfg
+    (fun a a' ha => by rw [retargetOutput_step_retargetCfg, ha]; rfl) h
 
 /-- Redirecting output to a fresh work tape preserves every exact run through
 the canonical configuration embedding. -/
