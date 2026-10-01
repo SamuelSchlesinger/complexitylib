@@ -7,6 +7,7 @@ Authors: Samuel Schlesinger
 module
 public import Complexitylib.Models.TuringMachine.Hoare.Space.Defs
 public import Complexitylib.Models.TuringMachine.Hoare
+import Complexitylib.Models.TuringMachine.Hoare.Safety
 public import Complexitylib.Models.TuringMachine.SpaceTime.Internal.Reachability
 
 /-!
@@ -171,7 +172,8 @@ theorem IsTransducer.seqTM_internal {tm₁ tm₂ : TM n}
 
 /-- Internal sequential composition rule.  Both phases use one shared logical
 input length and auxiliary-space budget; the phase boundary is covered by the
-second contract at its reflexive initial configuration. -/
+second contract at its reflexive initial configuration. The all-reachable
+component specializes the generic tape-safety composition rule. -/
 theorem seqTM_hoareTimeSpace_internal (tm₁ tm₂ : TM n)
     {pre mid mid' post : TapePred n} {b₁ b₂ inputLength space₁ space₂ : ℕ}
     (h₁ : tm₁.HoareTimeSpace pre mid b₁ inputLength space₁)
@@ -183,57 +185,12 @@ theorem seqTM_hoareTimeSpace_internal (tm₁ tm₂ : TM n)
       inputLength (max space₁ space₂) := by
   constructor
   · exact seqTM_hoareTime tm₁ tm₂ h₁.1 htrans h₂.1
-  · intro inp work out hpre c hreach
-    obtain ⟨c₁, t₁, _ht₁, hreach₁, hhalt₁, hmid⟩ :=
-      h₁.1 inp work out hpre
-    have hmid' := htrans c₁.input c₁.work c₁.output hmid
-    obtain ⟨c₂, t₂, _ht₂, hreach₂, hhalt₂, _hpost⟩ :=
-      h₂.1 (transitionInput c₁.input)
-        (fun i => transitionTape (c₁.work i)) (transitionTape c₁.output) hmid'
-    have hfull := seqTM_reachesIn_of_reachesIn tm₁ tm₂
-      hreach₁ hhalt₁ hreach₂
-    have hfullHalt :
-        (seqTM tm₁ tm₂).halted (phase2Wrap tm₁ tm₂ c₂) :=
-      (phase2Wrap_halted_iff tm₁ tm₂ c₂).2 hhalt₂
-    obtain ⟨t, hreachT⟩ := (seqTM tm₁ tm₂).reaches_to_reachesIn hreach
-    have ht : t ≤ t₁ + 1 + t₂ :=
-      (seqTM tm₁ tm₂).reachesIn_le_halt hreachT hfull hfullHalt
-    by_cases hphase₁ : t ≤ t₁
-    · obtain ⟨d, hprefix, _hsuffix⟩ :=
-        reachesIn_prefix_internal hreach₁ hphase₁
-      have hwrapped := seqTM_reachesIn_phase1Wrap tm₁ tm₂ hprefix
-      have hwrapped' :
-          (seqTM tm₁ tm₂).reachesIn t
-            { state := (seqTM tm₁ tm₂).qstart, input := inp,
-              work := work, output := out }
-            (phase1Wrap tm₁ tm₂ d) := by
-        simpa [phase1Wrap, seqTM] using hwrapped
-      have hc : c = phase1Wrap tm₁ tm₂ d :=
-        (seqTM tm₁ tm₂).reachesIn_right_unique hreachT hwrapped'
-      rw [hc]
-      have hd := h₁.2 inp work out hpre d
-        (TM.reaches_of_reachesIn hprefix)
-      exact hd.mono_internal le_rfl (le_max_left _ _)
-    · have hphase₂ : t₁ + 1 ≤ t := by omega
-      let u := t - (t₁ + 1)
-      have hu : u ≤ t₂ := by
-        dsimp only [u]
-        omega
-      obtain ⟨d, hprefix, _hsuffix⟩ :=
-        reachesIn_prefix_internal hreach₂ hu
-      have hwrapped := seqTM_reachesIn_of_reachesIn tm₁ tm₂
-        hreach₁ hhalt₁ hprefix
-      have htime : t₁ + 1 + u = t := by
-        dsimp only [u]
-        omega
-      rw [htime] at hwrapped
-      have hc : c = phase2Wrap tm₁ tm₂ d :=
-        (seqTM tm₁ tm₂).reachesIn_right_unique hreachT hwrapped
-      rw [hc]
-      have hd := h₂.2 (transitionInput c₁.input)
-        (fun i => transitionTape (c₁.work i)) (transitionTape c₁.output)
-        hmid' d (TM.reaches_of_reachesIn hprefix)
-      exact hd.mono_internal le_rfl (le_max_right _ _)
+  · change (seqTM tm₁ tm₂).HoareSafety pre
+      (fun inp work _ => (∀ i, (work i).head ≤ max space₁ space₂) ∧
+        inp.head ≤ inputLength + max space₁ space₂ + 1)
+    exact seqTM_hoareSafety tm₁ tm₂ h₁.1 htrans h₂.1
+      (h₁.2.mono_internal le_rfl (le_max_left _ _))
+      (h₂.2.mono_internal le_rfl (le_max_right _ _))
 
 /-- Internal bridge from fresh-start time-and-space contracts to function
 computation in space. -/
