@@ -11,6 +11,20 @@ from lint_style import imported_modules, lean_code
 
 
 class DependencyDocsCacheTest(unittest.TestCase):
+    def test_import_reader_rejects_unsupported_tokens(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            path = root / "Complexitylib.lean"
+            for name in ("Mathlib.Fooα", "Mathlib.Fooβ", "«Foreign.One»",
+                         "«Foreign.Two»", "Mathlib.«Quoted Name»", "Mathlib.Foo'",
+                         "Mathlib.Foo?", "Mathlib."):
+                with self.subTest(name=name):
+                    path.write_text(f"public meta import {name}\n", encoding="utf-8")
+                    with self.assertRaisesRegex(ValueError, "unsupported module import token"):
+                        imported_modules(path)
+                    with self.assertRaisesRegex(ValueError, "unsupported module import token"):
+                        dependency_import_key(root)
+
     def test_import_reader_handles_lean_header_syntax(self):
         with tempfile.TemporaryDirectory() as temporary:
             path = Path(temporary) / "Example.lean"
