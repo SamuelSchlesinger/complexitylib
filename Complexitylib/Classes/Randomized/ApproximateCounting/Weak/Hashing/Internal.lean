@@ -8,6 +8,7 @@ module
 public import Complexitylib.Classes.Randomized.ApproximateCounting.Weak.Hashing.Defs
 import Complexitylib.Classes.AverageCase.FiniteEnsemble
 import Complexitylib.Classes.Randomized.ApproximateCounting.Weak
+import Complexitylib.Classes.Randomized.ApproximateCounting.Internal.ErrorBudget
 import Complexitylib.Classes.Randomized.Hashing
 
 /-!
@@ -278,36 +279,13 @@ theorem one_sub_error_le_eventProb_factorApproximationEvent_internal
   exact le_trans (one_sub_error_le_eventProb_goodHashingEvent_internal set)
     (eventProb_mono (goodHashingEvent_subset_factorApproximationEvent set))
 
-private theorem add_four_le_two_pow_add_two (n : ℕ) :
-    n + 4 ≤ 2 ^ (n + 2) := by
-  induction n with
-  | zero => norm_num
-  | succ n ih =>
-      rw [show n + 1 + 2 = (n + 2) + 1 by omega, Nat.pow_succ]
-      have hp : 1 ≤ 2 ^ (n + 2) := Nat.one_le_two_pow
-      omega
-
-private theorem add_four_div_two_pow_add_four_le_one_fourth (n : ℕ) :
-    (n + 4 : ℚ) / (2 : ℚ) ^ (n + 4) ≤ 1 / 4 := by
-  calc
-    (n + 4 : ℚ) / (2 : ℚ) ^ (n + 4) ≤
-        (2 : ℚ) ^ (n + 2) / (2 : ℚ) ^ (n + 4) := by
-      gcongr
-      exact_mod_cast add_four_le_two_pow_add_two n
-    _ = 1 / 4 := by
-      have hnonzero : (2 : ℚ) ^ (n + 2) ≠ 0 := by positivity
-      have hdenominator :
-          (2 : ℚ) ^ (n + 4) = (2 : ℚ) ^ (n + 2) * 4 := by
-        rw [show n + 4 = n + 2 + 2 by omega, pow_add]
-        norm_num
-      rw [hdenominator]
-      field_simp
-
 theorem three_fourths_le_eventProb_factorApproximationEvent_internal
     {domainWidth : ℕ} (set : Finset (BitString domainWidth)) :
     3 / 4 ≤ eventProb
       (factorApproximationEvent (errorBits := domainWidth + 4) set) := by
-  have herror := add_four_div_two_pow_add_four_le_one_fourth domainWidth
+  have herror : (domainWidth + 4 : ℚ) / (2 : ℚ) ^ (domainWidth + 4) ≤ 1 / 4 := by
+    convert add_four_div_two_pow_errorBits_le_internal domainWidth 2 using 1
+    norm_num [Nat.add_assoc]
   have hsuccess := one_sub_error_le_eventProb_factorApproximationEvent_internal
     (errorBits := domainWidth + 4) set
   linarith
