@@ -42,6 +42,7 @@ Usage:
 import os
 import re
 import sys
+from dataclasses import dataclass
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -66,10 +67,6 @@ IMPORTED_COPYRIGHT_RE = re.compile(
 )
 MODULE_DOC_RE = re.compile(r"^/-!", re.MULTILINE)
 URL_RE = re.compile(r"https?://")
-IMPORT_RE = re.compile(
-    r"^\s*(?:(?:public|private)\s+)?(?:meta\s+)?import(?:\s+all)?\s+(\S+)",
-    re.MULTILINE,
-)
 # The repository uses unquoted ASCII module names. Detect every import first,
 # then reject richer Lean identifiers rather than truncate or omit them.
 MODULE_NAME_RE = re.compile(r"[A-Za-z_][A-Za-z0-9_]*(?:\.[A-Za-z_][A-Za-z0-9_]*)*")
@@ -197,19 +194,59 @@ def module_name(path: Path) -> str:
     return ".".join(path.relative_to(ROOT).with_suffix("").parts)
 
 
-def imported_modules(path: Path) -> set[str]:
-    """Return complete ASCII module names; reject unsupported import tokens.
+@dataclass(frozen=True)
+class ModuleImport:
+    """One source import, including its module-system visibility and staging."""
+
+    name: str
+    public: bool
+    meta: bool
+    import_all: bool
+
+
+def module_imports(text: str, source: str = "<source>") -> list[ModuleImport]:
+    """Read source imports once for lint, caches, and dependency-boundary audits.
 
     Lean also permits Unicode, quoted, and apostrophe-containing identifiers.
     Those need an extended reader before use here: silently truncating or
     omitting them would make both import-graph checks and cache keys unsound.
+    Ordinary imports are public in legacy files, private in `module` files.
     """
-    text = path.read_text(encoding="utf-8")
-    imports = set(IMPORT_RE.findall(lean_code(text, stop_at_module_doc=True)))
-    for name in sorted(imports):
-        if not MODULE_NAME_RE.fullmatch(name):
-            raise ValueError(f"{path}: unsupported module import token {name!r}")
+    # Header commands are whitespace-delimited, not line-delimited: Lean accepts
+    # `module prelude import A public import B` on a single line.
+    tokens = iter(lean_code(text, stop_at_module_doc=True).split())
+    token = next(tokens, None)
+    modular = token == "module"
+    if modular:
+        token = next(tokens, None)
+    if token == "prelude":
+        token = next(tokens, None)
+    imports = []
+    while token is not None:
+        visibility = token if token in {"public", "private"} else None
+        if visibility:
+            token = next(tokens, None)
+        meta = token == "meta"
+        if meta:
+            token = next(tokens, None)
+        if token != "import":
+            break  # The header ends at the first body command (e.g. public section).
+        token = next(tokens, None)
+        import_all = token == "all"
+        name = next(tokens, None) if import_all else token
+        if name is None or not MODULE_NAME_RE.fullmatch(name):
+            raise ValueError(f"{source}: unsupported module import token {name!r}")
+        imports.append(ModuleImport(
+            name, visibility == "public" or (visibility is None and not modular),
+            meta, import_all,
+        ))
+        token = next(tokens, None)
     return imports
+
+
+def imported_modules(path: Path) -> set[str]:
+    """Return complete ASCII module names; reject unsupported import tokens."""
+    return {entry.name for entry in module_imports(path.read_text(encoding="utf-8"), str(path))}
 
 
 def import_graph(paths: list[Path]) -> tuple[dict[str, Path], dict[str, set[str]]]:

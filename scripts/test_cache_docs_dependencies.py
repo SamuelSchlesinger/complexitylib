@@ -11,6 +11,27 @@ from lint_style import imported_modules, lean_code
 
 
 class DependencyDocsCacheTest(unittest.TestCase):
+    def test_import_key_handles_same_line_header_commands(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            path = root / "Complexitylib.lean"
+            for text, names in (
+                ("module prelude\nimport A\n", {"A"}),
+                ("module import A\n", {"A"}),
+                ("module\npublic import A import B\n", {"A", "B"}),
+            ):
+                with self.subTest(header=text):
+                    path.write_text(text)
+                    self.assertEqual(imported_modules(path), names)
+                    original = dependency_import_key(root)
+                    path.write_text(text.replace("A", "Changed"))
+                    self.assertNotEqual(dependency_import_key(root), original)
+            path.write_text("module public import A meta import B\n")
+            original = dependency_import_key(root)
+            # Visibility/staging do not change which dependency docs are needed.
+            path.write_text("module import A public import B\n")
+            self.assertEqual(dependency_import_key(root), original)
+
     def test_import_reader_rejects_unsupported_tokens(self):
         with tempfile.TemporaryDirectory() as temporary:
             root = Path(temporary)

@@ -39,6 +39,10 @@ jobs:
         run: lake env lean scripts/TapeTransportCheck.lean
       - name: Check exact shared stack encoding and compatibility
         run: lake env lean scripts/StackEncodingCheck.lean
+      - name: Check public pair-builder and legacy import APIs
+        run: |
+          lake env lean scripts/PairBuildApiCheck.lean
+          lake env lean scripts/PairBuildCompatibilityCheck.lean
       - name: Run environment linters, including validation-only graphs
         run: |
           lake exe runLinter Complexitylib \
