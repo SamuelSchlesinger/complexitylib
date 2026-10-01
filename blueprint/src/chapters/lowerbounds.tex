@@ -1519,3 +1519,26 @@ establishes the proposed coefficient-three regime without that assumption.
   proof system puts it in $\cc{NP}$; conversely an $\cc{NP}$ verifier for it is
   a polynomially bounded proof system.
 \end{proof}
+
+\section{Top-down parity lower bounds}
+\label{sec:lowerbounds-topdown-parity}
+
+\begin{theorem}[Korten's top-down lower bound, Theorem 3]
+  \label{thm:lowerbounds-korten-topdown}
+  \uses{lem:analysis-improved-light-patterns, def:lowerbounds-parity}
+  For every $d\ge2$ there is $\varepsilon_d>0$ such that, for all sufficiently
+  large $n$, the general Karchmer--Wigderson game for $n$-bit parity has no
+  deterministic protocol of at most $d$ rounds with at most
+  $\varepsilon_d n^{1/(d-1)}$ bits in each message. Consequently, a depth-$d$
+  unbounded-fan-in De Morgan circuit for parity has more than
+  $2^{\varepsilon_d n^{1/(d-1)}}$ wires.
+  This top-down argument is not yet formalized; its checked analytic
+  prerequisites are in Section~\ref{sec:analysis-harmonic}.
+\end{theorem}
+\begin{proof}
+  Use the improved light-patterns lemma to obtain the stronger mirror-set
+  step, maintain the rectangle invariant through bounded-message protocol
+  rounds, and apply the general KW correspondence with explicit wire
+  accounting. These steps, including the bounded-round protocol model and
+  parameter recurrence, remain formalization work.
+\end{proof}

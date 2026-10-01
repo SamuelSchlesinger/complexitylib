@@ -27,6 +27,9 @@ Section~\ref{sec:analysis-polynomial-correlation} also formalizes the exponentia
 correlation bound for XOR of majorities against low-degree binary polynomials.
 Its proof uses finite interpolation and dimension counting independently of
 the Fourier infrastructure.
+Section~\ref{sec:analysis-harmonic} develops Korten's harmonic mean transform,
+including its variational formula and the analytic inequality used in his
+top-down parity lower bound.
 
 \paragraph{Conventions.} The cube is $\mathbb{F}_2^n$, written
 \texttt{Cube n = Fin n -> ZMod 2}. The encoding is $\chi(0) = 1$, $\chi(1) = -1$, so
@@ -885,4 +888,164 @@ in the appendices are not formalized here.
   $\binom\ell m\le 2^\ell/\sqrt\ell$.
   The latter follows from the elementary inductive inequality
   $(3m+1)\binom{2m}{m}^2\le16^m$.
+\end{proof}
+
+\section{Harmonic means and top-down lower bounds}
+\label{sec:analysis-harmonic}
+
+This section follows Oliver Korten, \emph{Top-Down Lower Bounds for All
+Depths}, ECCC TR26-221 (2026),
+\url{https://eccc.weizmann.ac.il/report/2026/221/}. It formalizes the analytic
+core of Section~4. The improved light-patterns lemma and the communication
+adversary leading to Theorem~3 are subsequent formalization targets.
+Here the cube is represented by Boolean functions on the coordinate type;
+a coordinate set is also represented by its Boolean membership function.
+
+\begin{definition}[Harmonic mean and coordinate transform]
+  \label{def:analysis-harmonic}
+  \lean{Complexity.BooleanAnalysis.harmonicMean,
+    Complexity.BooleanAnalysis.coordinateMarginal,
+    Complexity.BooleanAnalysis.projectionAverage,
+    Complexity.BooleanAnalysis.harmonicTransform,
+    Complexity.BooleanAnalysis.bernoulliAverage}
+  \leanok
+  For nonnegative $f$ on a nonempty finite set, its harmonic mean is
+  $(\mathbb{E}_x f(x)^{-1})^{-1}$ if all entries are positive, and zero
+  otherwise. On the Boolean cube, let
+  $f_R(z)=\mathbb{E}[f(x)\mid x_R=z]$. The harmonic transform is
+  $\breve f(R)=(\mathbb{E}_z f_R(z)^{-1})^{-1}$, with the same zero convention.
+  Bernoulli coordinate expectations assign a mask $R$ weight
+  $p^{|R|}(1-p)^{n-|R|}$.
+\end{definition}
+
+\begin{theorem}[Marginal representation]
+  \label{thm:analysis-harmonic-marginal}
+  \lean{Complexity.BooleanAnalysis.projectionAverage_eq_coordinateMarginal,
+    Complexity.BooleanAnalysis.expect_coordinateMarginal,
+    Complexity.BooleanAnalysis.harmonicTransform_eq_harmonicMean_coordinateMarginal,
+    Complexity.BooleanAnalysis.bernoulliAverage_const}
+  \leanok
+  \uses{def:analysis-harmonic}
+  The full-cube representation of a projection agrees with $f_R(x_R)$.
+  Its harmonic mean equals the harmonic mean over actual projected patterns,
+  and $\mathbb{E}_z f_R(z)=\mathbb{E}_x f(x)$. Bernoulli weights sum to one.
+\end{theorem}
+\begin{proof}
+  \leanok
+  Split the coordinates into $R$ and its complement and factor the finite
+  expectations. Each projected pattern has the same number of completions.
+\end{proof}
+
+\begin{theorem}[Variational formula, Korten Lemma 11]
+  \label{thm:analysis-harmonic-variational}
+  \lean{Complexity.BooleanAnalysis.harmonicMean_variational,
+    Complexity.BooleanAnalysis.harmonicMean_exists_weight,
+    Complexity.BooleanAnalysis.harmonicTransform_variational}
+  \leanok
+  \uses{def:analysis-harmonic, thm:analysis-harmonic-marginal}
+  For every nonnegative function $f$,
+  \[
+    \breve f(R)=\inf_{w\ge0,\ \mathbb{E}w=1}
+      \mathbb{E}_z[f_R(z)w(z)^2].
+  \]
+  The infimum is attained, including when a projected value is zero.
+  The finite harmonic-mean version holds on any nonempty finite type.
+\end{theorem}
+\begin{proof}
+  \leanok
+  If a value vanishes, concentrate a normalized weight there. Otherwise,
+  the reciprocal density gives an attaining weight; completing the square
+  proves the matching lower bound for every admissible weight.
+\end{proof}
+
+\begin{corollary}[Transform properties, Korten Corollary 1]
+  \label{cor:analysis-harmonic-properties}
+  \lean{Complexity.BooleanAnalysis.harmonicTransform_concave,
+    Complexity.BooleanAnalysis.harmonicTransform_antitone,
+    Complexity.BooleanAnalysis.harmonicTransform_le_expect,
+    Complexity.BooleanAnalysis.harmonicTransform_empty,
+    Complexity.BooleanAnalysis.harmonicTransform_full}
+  \leanok
+  \uses{thm:analysis-harmonic-variational}
+  The map $f\mapsto\breve f$ is pointwise concave on nonnegative functions.
+  If $R\subseteq S$, then $\breve f(S)\le\breve f(R)$. Furthermore,
+  $0\le\breve f(R)\le\mathbb{E}f=\breve f(\varnothing)$, and
+  $\breve f([n])$ is the harmonic mean of $f$.
+\end{corollary}
+\begin{proof}
+  \leanok
+  Use the variational minimum for concavity. For coordinate inclusion,
+  induct on dimension using the arithmetic and harmonic means of the two
+  slices, their monotonicity, and concavity. The endpoints follow directly
+  from the definition.
+\end{proof}
+
+\begin{theorem}[Harmonic mean inequality, Korten Lemma 12]
+  \label{thm:analysis-harmonic-inequality}
+  \lean{Complexity.BooleanAnalysis.expect_sqrt_le_bernoulliAverage_sqrt_harmonicTransform}
+  \leanok
+  \uses{cor:analysis-harmonic-properties}
+  For every $n\ge0$ and every $f:\{0,1\}^n\to\mathbb{R}_{\ge0}$,
+  \[
+    \mathbb{E}_{R\subseteq_{1/4}[n]}\sqrt{\breve f(R)}
+      \ge \mathbb{E}_{x\in\{0,1\}^n}\sqrt{f(x)}.
+  \]
+\end{theorem}
+\begin{proof}
+  \leanok
+  Prove the one-bit inequality by a square, then induct on dimension.
+  If the first coordinate is absent, average its two slices; if it is
+  present, take the harmonic mean of their transforms. Apply concavity
+  and the one-bit inequality before the induction hypotheses.
+\end{proof}
+
+\begin{theorem}[Good projections at sampling rate $1/4$]
+  \label{thm:analysis-harmonic-good-probability}
+  \lean{Complexity.BooleanAnalysis.harmonicTransform_good_probability}
+  \leanok
+  \uses{thm:analysis-harmonic-inequality, cor:analysis-harmonic-properties}
+  If $0\le f\le B$, $\mathbb{E}f=1$, and $B\ge1$, then
+  \[
+    \Pr_{R\subseteq_{1/4}[n]}[\breve f(R)\ge(4B)^{-1}]
+      \ge (2\sqrt B)^{-1}.
+  \]
+  This is the intermediate estimate in the proof of Korten's Lemma~10.
+\end{theorem}
+\begin{proof}
+  \leanok
+  Since $f\le B$, the mean of $\sqrt f$ is at least $B^{-1/2}$.
+  Apply the harmonic mean inequality and bound $\sqrt{\breve f}$ by one
+  on the good event and by $(2\sqrt B)^{-1}$ outside it.
+\end{proof}
+
+\begin{theorem}[Light patterns from a harmonic mean bound]
+  \label{thm:analysis-harmonic-light-fraction}
+  \lean{Complexity.BooleanAnalysis.harmonicMean_light_fraction_le,
+    Complexity.BooleanAnalysis.coordinateMarginal_light_fraction_le}
+  \leanok
+  \uses{def:analysis-harmonic, thm:analysis-harmonic-marginal}
+  For nonnegative $f$, if $0<a\le\breve f(R)$ and $b\ge0$, then
+  $\Pr_{z\in\{0,1\}^R}[f_R(z)\le b]\le b/a$.
+  The same bound holds for any nonempty finite type and its harmonic mean.
+\end{theorem}
+\begin{proof}
+  \leanok
+  The positive harmonic mean forces every entry to be positive.
+  Bound the indicator of $f_R(z)\le b$ by $b/f_R(z)$ and average.
+\end{proof}
+
+\begin{lemma}[Improved light patterns, Korten Lemma 10]
+  \label{lem:analysis-improved-light-patterns}
+  \uses{thm:analysis-harmonic-good-probability, cor:analysis-harmonic-properties,
+    thm:analysis-harmonic-light-fraction}
+  Let $k\ge1$, $0\le r\le(512k)^{-1}$, and let $X$ be a distribution on
+  $\{0,1\}^n$ of min-entropy deficit at most $k$. With probability at least
+  $63/64$ over $R\subseteq_r[n]$, at most $2^{|R|-k}$ patterns $z$ have
+  $\Pr[X_R=z]\le2^{-|R|-2k-2}$.
+  This sparse-sampling conclusion is not yet formalized.
+\end{lemma}
+\begin{proof}
+  Transfer the downward-closed family of good projections from rate $1/4$
+  to rate $r$, then apply Markov's inequality to the reciprocal marginal
+  density. The transfer and parameter specialization remain to be proved.
 \end{proof}

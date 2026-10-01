@@ -234,6 +234,19 @@ or loop. Prefer projection lemmas and narrowly oriented rewrite rules to marking
 transition definitions `[simp]`. Moving a theorem must keep its public name or
 leave a compatibility alias.
 
+## Top-down parity lower bounds
+
+The track for Oliver Korten's *Top-Down Lower Bounds for All Depths* (ECCC
+TR26-221, 2026) targets Theorem 3. The first checked layer is
+`BooleanAnalysis.HarmonicMean`: the variational formula, all three transform
+properties, the biased-cube inequality (Lemmas 11--12 and Corollary 1), and
+the intermediate `1/4`-sampling estimate from the proof of Lemma 10.
+The representation agrees with marginals on actual coordinate patterns and
+handles zero values. Next prove the downward-family transference step and
+complete Lemma 10; the mirror-set argument, bounded-round KW model, and
+Theorem 3 remain open formalization work. The source-to-declaration map and
+remaining dependencies are in [`docs/TopDownLowerBounds.md`](docs/TopDownLowerBounds.md).
+
 ## Descriptive complexity expansion
 
 The expansion prompted by Senellart and Gnatenko's September 2026 paper is
