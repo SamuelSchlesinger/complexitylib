@@ -1,7 +1,7 @@
 /-
 Copyright (c) 2026 Bolton Bailey. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
-Authors: Bolton Bailey, Samuel’s dot
+Authors: Bolton Bailey
 -/
 module
 public import Complexitylib.Models.TuringMachine.Combinators.Internal.Retarget
