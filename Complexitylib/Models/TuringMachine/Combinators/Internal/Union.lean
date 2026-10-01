@@ -250,112 +250,8 @@ private theorem idle_move_preserves_head (t : Tape)
   rw [idleDir_stay_of_ge_one t hhead hno]; rfl
 
 -- ════════════════════════════════════════════════════════════════════════
--- Union TM delta helpers for UnionPhase states
--- ════════════════════════════════════════════════════════════════════════
-
-/-- Delta computation for rewindOut when fake output is not at start. -/
-private theorem unionTM_delta_rewindOut_nostart (tm₁ : TM n₁) (tm₂ : TM n₂)
-    (iHead : Γ) (wHeads : Fin (n₁ + 1 + n₂) → Γ) (oHead : Γ)
-    (hread : wHeads fakeOutIdx ≠ Γ.start) :
-    (unionTM tm₁ tm₂).δ (Sum.inr (Sum.inl UnionPhase.rewindOut)) iHead wHeads oHead =
-    ( Sum.inr (Sum.inl UnionPhase.rewindOut),
-      fun i => if i.val = n₁ then readBackWrite (wHeads fakeOutIdx) else .blank,
-      .blank, idleDir iHead,
-      fun i => if i.val = n₁ then Dir3.left else idleDir (wHeads i),
-      idleDir oHead ) := by
-  unfold unionTM; simp only [ite_eq_right hread]
-
-/-- Delta computation for rewindOut when fake output is at start. -/
-private theorem unionTM_delta_rewindOut_start (tm₁ : TM n₁) (tm₂ : TM n₂)
-    (iHead : Γ) (wHeads : Fin (n₁ + 1 + n₂) → Γ) (oHead : Γ)
-    (hread : wHeads fakeOutIdx = Γ.start) :
-    (unionTM tm₁ tm₂).δ (Sum.inr (Sum.inl UnionPhase.rewindOut)) iHead wHeads oHead =
-    ( Sum.inr (Sum.inl UnionPhase.checkResult),
-      fun _ => .blank, .blank, idleDir iHead,
-      fun i => if i.val = n₁ then Dir3.right else idleDir (wHeads i),
-      idleDir oHead ) := by
-  unfold unionTM; simp only [ite_eq_left hread]
-
-/-- Delta computation for checkResult when fake output reads Γ.one. -/
-private theorem unionTM_delta_checkResult_one (tm₁ : TM n₁) (tm₂ : TM n₂)
-    (iHead : Γ) (wHeads : Fin (n₁ + 1 + n₂) → Γ) (oHead : Γ)
-    (hread : wHeads fakeOutIdx = Γ.one) :
-    (unionTM tm₁ tm₂).δ (Sum.inr (Sum.inl UnionPhase.checkResult)) iHead wHeads oHead =
-    ( Sum.inr (Sum.inr tm₂.qhalt),
-      fun _ => .blank, .one, idleDir iHead,
-      fun i => idleDir (wHeads i),
-      idleDir oHead ) := by
-  unfold unionTM; simp only [ite_eq_left hread]
-
-/-- Delta computation for checkResult when fake output does not read Γ.one. -/
-private theorem unionTM_delta_checkResult_notone (tm₁ : TM n₁) (tm₂ : TM n₂)
-    (iHead : Γ) (wHeads : Fin (n₁ + 1 + n₂) → Γ) (oHead : Γ)
-    (hread : wHeads fakeOutIdx ≠ Γ.one) :
-    (unionTM tm₁ tm₂).δ (Sum.inr (Sum.inl UnionPhase.checkResult)) iHead wHeads oHead =
-    allIdle (Sum.inr (Sum.inl UnionPhase.rewindIn)) iHead wHeads oHead := by
-  unfold unionTM; simp only [ite_eq_right hread]
-
-/-- Delta computation for rewindIn when input is not at start. -/
-private theorem unionTM_delta_rewindIn_nostart (tm₁ : TM n₁) (tm₂ : TM n₂)
-    (iHead : Γ) (wHeads : Fin (n₁ + 1 + n₂) → Γ) (oHead : Γ)
-    (hread : iHead ≠ Γ.start) :
-    (unionTM tm₁ tm₂).δ (Sum.inr (Sum.inl UnionPhase.rewindIn)) iHead wHeads oHead =
-    ( Sum.inr (Sum.inl UnionPhase.rewindIn),
-      fun _ => .blank, .blank, Dir3.left,
-      fun i => idleDir (wHeads i),
-      idleDir oHead ) := by
-  simp only [unionTM, ite_eq_right hread]
-
-/-- Delta computation for rewindIn when input is at start. -/
-private theorem unionTM_delta_rewindIn_start (tm₁ : TM n₁) (tm₂ : TM n₂)
-    (iHead : Γ) (wHeads : Fin (n₁ + 1 + n₂) → Γ) (oHead : Γ)
-    (hread : iHead = Γ.start) :
-    (unionTM tm₁ tm₂).δ (Sum.inr (Sum.inl UnionPhase.rewindIn)) iHead wHeads oHead =
-    ( Sum.inr (Sum.inl UnionPhase.setup2),
-      fun _ => .blank, .blank, Dir3.right,
-      fun i => idleDir (wHeads i),
-      idleDir oHead ) := by
-  simp only [unionTM, ite_eq_left hread]
-
-/-- Delta computation for setup2. -/
-private theorem unionTM_delta_setup2 (tm₁ : TM n₁) (tm₂ : TM n₂)
-    (iHead : Γ) (wHeads : Fin (n₁ + 1 + n₂) → Γ) (oHead : Γ) :
-    (unionTM tm₁ tm₂).δ (Sum.inr (Sum.inl UnionPhase.setup2)) iHead wHeads oHead =
-    ( Sum.inr (Sum.inr tm₂.qstart),
-      fun _ => .blank, .blank, moveLeftDir iHead,
-      fun i => if i.val ≤ n₁ then idleDir (wHeads i) else moveLeftDir (wHeads i),
-      moveLeftDir oHead ) := by
-  unfold unionTM; rfl
-
-/-- Delta computation for Phase 1 halted state (transition to rewindOut). -/
-private theorem unionTM_delta_inl_qhalt (tm₁ : TM n₁) (tm₂ : TM n₂)
-    (iHead : Γ) (wHeads : Fin (n₁ + 1 + n₂) → Γ) (oHead : Γ) :
-    (unionTM tm₁ tm₂).δ (Sum.inl tm₁.qhalt) iHead wHeads oHead =
-    ( Sum.inr (Sum.inl UnionPhase.rewindOut),
-      fun i => if i.val = n₁ then readBackWrite (wHeads fakeOutIdx) else .blank,
-      .blank,
-      idleDir iHead,
-      fun i => idleDir (wHeads i),
-      idleDir oHead ) := by
-  simp only [unionTM, ite_true]
-
--- ════════════════════════════════════════════════════════════════════════
 -- One-step lemmas for union TM
 -- ════════════════════════════════════════════════════════════════════════
-
-/-- The union machine is not halted in any UnionPhase state. -/
-private theorem unionTM_mid_not_halted (tm₁ : TM n₁) (tm₂ : TM n₂) (m : UnionPhase)
-    {c : Cfg (n₁ + 1 + n₂) (UnionQ tm₁.Q tm₂.Q)}
-    (hstate : c.state = Sum.inr (Sum.inl m)) :
-    c.state ≠ (unionTM tm₁ tm₂).qhalt := by
-  rw [hstate]; exact fun h => nomatch h
-
-/-- The union machine is not halted when in a Phase 1 state. -/
-private theorem unionTM_inl_not_halted (tm₁ : TM n₁) (tm₂ : TM n₂) (q : tm₁.Q)
-    {c : Cfg (n₁ + 1 + n₂) (UnionQ tm₁.Q tm₂.Q)}
-    (hstate : c.state = Sum.inl q) :
-    c.state ≠ (unionTM tm₁ tm₂).qhalt := by
-  rw [hstate]; exact fun h => nomatch h
 
 /-- Step the union machine from a rewindOut state with non-start fake output read. -/
 private theorem step_rewindOut_nostart_cfg (tm₁ : TM n₁) (tm₂ : TM n₂)
@@ -735,11 +631,6 @@ private theorem rewind_input_loop (tm₁ : TM n₁) (tm₂ : TM n₂) :
 private theorem idleTape_moveLeft :
     (unionIdleTape.write Γw.blank.toΓ).move (moveLeftDir unionIdleTape.read) = Tape.init [] := by
   simp [unionIdleTape, moveLeftDir, Tape.write, Tape.move, Tape.read, Tape.init]
-
-/-- unionIdleTape stays unionIdleTape when written with blank and moved by idleDir (on any tape). -/
-private theorem tape_idle_step (t : Tape) (ht : t = unionIdleTape) :
-    (t.write Γw.blank.toΓ).move (idleDir t.read) = unionIdleTape := by
-  rw [ht]; exact idleTape_step_idle
 
 /-- Input cells are preserved through any reachesIn (input tape is read-only). -/
 private theorem union_input_cells_of_step (tm₁ : TM n₁) (tm₂ : TM n₂)
