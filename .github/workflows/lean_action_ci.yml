@@ -37,6 +37,8 @@ jobs:
           lake env lean scripts/SATGuessVerifyApiCheck.lean
       - name: Check exact tape-layout transport boundaries
         run: lake env lean scripts/TapeTransportCheck.lean
+      - name: Check choice-preserving NTM prefix transport
+        run: lake env lean scripts/NTMTraceTransportCheck.lean
       - name: Check exact shared stack encoding and compatibility
         run: lake env lean scripts/StackEncodingCheck.lean
       - name: Check public pair-builder and legacy import APIs

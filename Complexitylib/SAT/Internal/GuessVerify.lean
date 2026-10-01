@@ -1,7 +1,7 @@
 /-
 Copyright (c) 2025 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
-Authors: Samuel Schlesinger
+Authors: Samuel Schlesinger, Samuel’s dot
 -/
 
 module
@@ -9,6 +9,7 @@ public import Complexitylib.SAT.Language
 public import Complexitylib.Classes.NP.Internal.PairBuildTM
 public import Complexitylib.Models.TuringMachine.Subroutines.GuessBounded
 public import Complexitylib.Models.TuringMachine.Combinators.Internal.Retarget
+import Complexitylib.Models.TuringMachine.Trace
 
 /-!
 # SAT-specialized guess-and-verify NTM
@@ -797,40 +798,8 @@ theorem satGuessVerify_counter_trace_prefix (M : TM k) :
       (satGuessVerifyNTM M).trace T choices (satCounterWrap M c) =
         satCounterWrap M
           (((TM.inputLengthPlusOneCounterTM (satCounterIdx k)).toNTM).trace T choices c) := by
-  intro T
-  induction T with
-  | zero =>
-      intro choices c _hnot
-      rfl
-  | succ T ih =>
-      intro choices c hnot
-      let counterNTM := (TM.inputLengthPlusOneCounterTM (satCounterIdx k)).toNTM
-      let choicesTail : Fin T → Bool := fun i => choices ⟨i.val + 1, by omega⟩
-      let c1 : Cfg (k + 3) TM.LinearCounterPhase :=
-        counterNTM.trace 1 (fun _ => choices ⟨0, by omega⟩) c
-      have hstate : c.state ≠ TM.LinearCounterPhase.done := by
-        have h0 := hnot 0 (by omega)
-        exact h0
-      rw [NTM.trace_succ (satGuessVerifyNTM M) T choices (satCounterWrap M c)]
-      rw [satGuessVerify_counter_trace_one M (choices ⟨0, by omega⟩) c hstate]
-      have htail : ∀ t (ht : t < T),
-          (counterNTM.trace t
-            (fun i => choicesTail ⟨i.val, Nat.lt_trans i.isLt ht⟩) c1).state ≠
-              TM.LinearCounterPhase.done := by
-        intro t ht
-        have hfull := hnot (t + 1) (by omega)
-        let choicesPrefix : Fin (t + 1) → Bool := fun i => choices ⟨i.val, by omega⟩
-        have hsplit :=
-          NTM.trace_succ counterNTM t choicesPrefix c
-        change (counterNTM.trace t
-          (fun i => choicesTail ⟨i.val, Nat.lt_trans i.isLt ht⟩) c1).state ≠
-            TM.LinearCounterPhase.done
-        rw [← hsplit]
-        exact hfull
-      rw [ih choicesTail c1 htail]
-      have hsplitFull :=
-        NTM.trace_succ counterNTM T choices c
-      rw [hsplitFull]
+  exact NTM.trace_map_prefix ((TM.inputLengthPlusOneCounterTM (satCounterIdx k)).toNTM)
+    (satGuessVerifyNTM M) (satCounterWrap M) (satGuessVerify_counter_trace_one M)
 
 /-- If the counter subroutine first reaches `done` at time `T`, then the
     composed machine exits the counter phase on the next step. -/
@@ -1191,40 +1160,8 @@ theorem satGuessVerify_rewindInput_trace_prefix (M : TM k) :
       (satGuessVerifyNTM M).trace T choices (satRewindInputWrap M c) =
         satRewindInputWrap M
           (((TM.rewindInputTM (n := k + 3)).toNTM).trace T choices c) := by
-  intro T
-  induction T with
-  | zero =>
-      intro choices c _hnot
-      rfl
-  | succ T ih =>
-      intro choices c hnot
-      let rewindNTM := (TM.rewindInputTM (n := k + 3)).toNTM
-      let choicesTail : Fin T → Bool := fun i => choices ⟨i.val + 1, by omega⟩
-      let c1 : Cfg (k + 3) TM.RewindPhase :=
-        rewindNTM.trace 1 (fun _ => choices ⟨0, by omega⟩) c
-      have hstate : c.state ≠ TM.RewindPhase.done := by
-        have h0 := hnot 0 (by omega)
-        exact h0
-      rw [NTM.trace_succ (satGuessVerifyNTM M) T choices (satRewindInputWrap M c)]
-      rw [satGuessVerify_rewindInput_trace_one M (choices ⟨0, by omega⟩) c hstate]
-      have htail : ∀ t (ht : t < T),
-          (rewindNTM.trace t
-            (fun i => choicesTail ⟨i.val, Nat.lt_trans i.isLt ht⟩) c1).state ≠
-              TM.RewindPhase.done := by
-        intro t ht
-        have hfull := hnot (t + 1) (by omega)
-        let choicesPrefix : Fin (t + 1) → Bool := fun i => choices ⟨i.val, by omega⟩
-        have hsplit :=
-          NTM.trace_succ rewindNTM t choicesPrefix c
-        change (rewindNTM.trace t
-          (fun i => choicesTail ⟨i.val, Nat.lt_trans i.isLt ht⟩) c1).state ≠
-            TM.RewindPhase.done
-        rw [← hsplit]
-        exact hfull
-      rw [ih choicesTail c1 htail]
-      have hsplitFull :=
-        NTM.trace_succ rewindNTM T choices c
-      rw [hsplitFull]
+  exact NTM.trace_map_prefix ((TM.rewindInputTM (n := k + 3)).toNTM) (satGuessVerifyNTM M)
+    (satRewindInputWrap M) (satGuessVerify_rewindInput_trace_one M)
 
 /-- If the input-rewind subroutine first reaches `done` at time `T`, then the
     composed machine exits the rewind phase on the next step. -/
@@ -1539,40 +1476,8 @@ theorem satGuessVerify_guess_trace_prefix (M : TM k) :
       (satGuessVerifyNTM M).trace T choices (satGuessWrap M c) =
         satGuessWrap M
           ((NTM.guessBoundedNTM (satWitnessIdx k) (satCounterIdx k)).trace T choices c) := by
-  intro T
-  induction T with
-  | zero =>
-      intro choices c _hnot
-      rfl
-  | succ T ih =>
-      intro choices c hnot
-      let guessNTM := NTM.guessBoundedNTM (satWitnessIdx k) (satCounterIdx k)
-      let choicesTail : Fin T → Bool := fun i => choices ⟨i.val + 1, by omega⟩
-      let c1 : Cfg (k + 3) NTM.GuessBoundedPhase :=
-        guessNTM.trace 1 (fun _ => choices ⟨0, by omega⟩) c
-      have hstate : c.state ≠ NTM.GuessBoundedPhase.done := by
-        have h0 := hnot 0 (by omega)
-        exact h0
-      rw [NTM.trace_succ (satGuessVerifyNTM M) T choices (satGuessWrap M c)]
-      rw [satGuessVerify_guess_trace_one M (choices ⟨0, by omega⟩) c hstate]
-      have htail : ∀ t (ht : t < T),
-          (guessNTM.trace t
-            (fun i => choicesTail ⟨i.val, Nat.lt_trans i.isLt ht⟩) c1).state ≠
-              NTM.GuessBoundedPhase.done := by
-        intro t ht
-        have hfull := hnot (t + 1) (by omega)
-        let choicesPrefix : Fin (t + 1) → Bool := fun i => choices ⟨i.val, by omega⟩
-        have hsplit :=
-          NTM.trace_succ guessNTM t choicesPrefix c
-        change (guessNTM.trace t
-          (fun i => choicesTail ⟨i.val, Nat.lt_trans i.isLt ht⟩) c1).state ≠
-            NTM.GuessBoundedPhase.done
-        rw [← hsplit]
-        exact hfull
-      rw [ih choicesTail c1 htail]
-      have hsplitFull :=
-        NTM.trace_succ guessNTM T choices c
-      rw [hsplitFull]
+  exact NTM.trace_map_prefix (NTM.guessBoundedNTM (satWitnessIdx k) (satCounterIdx k))
+    (satGuessVerifyNTM M) (satGuessWrap M) (satGuessVerify_guess_trace_one M)
 
 /-- If the bounded-guess subroutine first reaches `done` at time `T`, then
     the composed machine exits the guess phase on the next step. -/
@@ -2592,40 +2497,8 @@ theorem satGuessVerify_pair_trace_prefix (M : TM k) :
       (satGuessVerifyNTM M).trace T choices (satPairWrap M c) =
         satPairWrap M
           (((TM.pairBuildTM (satWitnessIdx k) (satPairIdx k)).toNTM).trace T choices c) := by
-  intro T
-  induction T with
-  | zero =>
-      intro choices c _hnot
-      rfl
-  | succ T ih =>
-      intro choices c hnot
-      let pairNTM := (TM.pairBuildTM (satWitnessIdx k) (satPairIdx k)).toNTM
-      let choicesTail : Fin T → Bool := fun i => choices ⟨i.val + 1, by omega⟩
-      let c1 : Cfg (k + 3) TM.PairBuildPhase :=
-        pairNTM.trace 1 (fun _ => choices ⟨0, by omega⟩) c
-      have hstate : c.state ≠ TM.PairBuildPhase.done := by
-        have h0 := hnot 0 (by omega)
-        exact h0
-      rw [NTM.trace_succ (satGuessVerifyNTM M) T choices (satPairWrap M c)]
-      rw [satGuessVerify_pair_trace_one M (choices ⟨0, by omega⟩) c hstate]
-      have htail : ∀ t (ht : t < T),
-          (pairNTM.trace t
-            (fun i => choicesTail ⟨i.val, Nat.lt_trans i.isLt ht⟩) c1).state ≠
-              TM.PairBuildPhase.done := by
-        intro t ht
-        have hfull := hnot (t + 1) (by omega)
-        let choicesPrefix : Fin (t + 1) → Bool := fun i => choices ⟨i.val, by omega⟩
-        have hsplit :=
-          NTM.trace_succ pairNTM t choicesPrefix c
-        change (pairNTM.trace t
-          (fun i => choicesTail ⟨i.val, Nat.lt_trans i.isLt ht⟩) c1).state ≠
-            TM.PairBuildPhase.done
-        rw [← hsplit]
-        exact hfull
-      rw [ih choicesTail c1 htail]
-      have hsplitFull :=
-        NTM.trace_succ pairNTM T choices c
-      rw [hsplitFull]
+  exact NTM.trace_map_prefix ((TM.pairBuildTM (satWitnessIdx k) (satPairIdx k)).toNTM)
+    (satGuessVerifyNTM M) (satPairWrap M) (satGuessVerify_pair_trace_one M)
 
 /-- If the pair-builder subroutine first reaches `done` at time `T`, then the
     composed machine exits the pair phase on the next step. -/
@@ -2869,40 +2742,8 @@ theorem satGuessVerify_verify_trace_prefix (M : TM k) :
       (satGuessVerifyNTM M).trace T choices (satVerifyWrap M c) =
         satVerifyWrap M
           (((satVerifyPhaseTM M).toNTM).trace T choices c) := by
-  intro T
-  induction T with
-  | zero =>
-      intro choices c _hnot
-      rfl
-  | succ T ih =>
-      intro choices c hnot
-      let verifyNTM := (satVerifyPhaseTM M).toNTM
-      let choicesTail : Fin T → Bool := fun i => choices ⟨i.val + 1, by omega⟩
-      let c1 : Cfg (k + 3) M.Q :=
-        verifyNTM.trace 1 (fun _ => choices ⟨0, by omega⟩) c
-      have hstate : c.state ≠ M.qhalt := by
-        have h0 := hnot 0 (by omega)
-        exact h0
-      rw [NTM.trace_succ (satGuessVerifyNTM M) T choices (satVerifyWrap M c)]
-      rw [satGuessVerify_verify_trace_one M (choices ⟨0, by omega⟩) c hstate]
-      have htail : ∀ t (ht : t < T),
-          (verifyNTM.trace t
-            (fun i => choicesTail ⟨i.val, Nat.lt_trans i.isLt ht⟩) c1).state ≠
-              M.qhalt := by
-        intro t ht
-        have hfull := hnot (t + 1) (by omega)
-        let choicesPrefix : Fin (t + 1) → Bool := fun i => choices ⟨i.val, by omega⟩
-        have hsplit :=
-          NTM.trace_succ verifyNTM t choicesPrefix c
-        change (verifyNTM.trace t
-          (fun i => choicesTail ⟨i.val, Nat.lt_trans i.isLt ht⟩) c1).state ≠
-            M.qhalt
-        rw [← hsplit]
-        exact hfull
-      rw [ih choicesTail c1 htail]
-      have hsplitFull :=
-        NTM.trace_succ verifyNTM T choices c
-      rw [hsplitFull]
+  exact NTM.trace_map_prefix ((satVerifyPhaseTM M).toNTM) (satGuessVerifyNTM M)
+    (satVerifyWrap M) (satGuessVerify_verify_trace_one M)
 
 /-- If the verifier phase has halted by time `T`, then the composed SAT
     machine, started in verifier phase, is halted by time `T` as well. -/
