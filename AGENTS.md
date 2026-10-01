@@ -33,6 +33,7 @@ Quality gates (also run in CI; see CONTRIBUTING.md):
 
 ```bash
 python3 scripts/lint_style.py        # headers, module docs, 100-col, _root_, imports, native_decide
+python3 -m unittest discover -s scripts -p 'test_*.py'  # maintenance scripts
 lake exe runLinter Complexitylib \
   Complexitylib.Classes.P.Cobham.Validation \
   Complexitylib.Models.TuringMachine.SingleTape.Validation \

@@ -67,7 +67,7 @@ IMPORTED_COPYRIGHT_RE = re.compile(
 MODULE_DOC_RE = re.compile(r"^/-!", re.MULTILINE)
 URL_RE = re.compile(r"https?://")
 IMPORT_RE = re.compile(
-    r"^(?:public |private )?import(?: all)?\s+([A-Za-z0-9_.]+)",
+    r"^\s*(?:(?:public|private)\s+)?(?:meta\s+)?import(?:\s+all)?\s+([A-Za-z0-9_.]+)",
     re.MULTILINE,
 )
 NON_PUBLIC_COMPONENTS = {"Internal", "Validation"}
@@ -123,12 +123,13 @@ def check_file(path: Path) -> set[str]:
     return violations
 
 
-def lean_code(text: str) -> str:
+def lean_code(text: str, *, stop_at_module_doc: bool = False) -> str:
     """Return `text` with comments and string literals blanked out.
 
     Handles nested block comments (`/- ... -/`, including doc comments), line
     comments (`--`), string literals with escapes, and character literals.
     Newlines are kept so that the result has the same lines as `text`.
+    Import readers can stop at the first module doc command, after the header.
     """
     out = []
     i, n, depth = 0, len(text), 0
@@ -142,9 +143,13 @@ def lean_code(text: str) -> str:
                 if text[i] == "\n":
                     out.append("\n")
                 i += 1
+        elif stop_at_module_doc and text.startswith("/-!", i):
+            break
         elif text.startswith("/-", i):
+            out.append(" ")
             depth, i = 1, i + 2
         elif text.startswith("--", i):
+            out.append(" ")
             end = text.find("\n", i)
             i = n if end == -1 else end
         elif text[i] == '"':
@@ -192,8 +197,7 @@ def module_name(path: Path) -> str:
 def imported_modules(path: Path) -> set[str]:
     """Return the module names imported by `path`."""
     text = path.read_text(encoding="utf-8")
-    header = text.split("/-!", 1)[0]
-    return set(IMPORT_RE.findall(header))
+    return set(IMPORT_RE.findall(lean_code(text, stop_at_module_doc=True)))
 
 
 def import_graph(paths: list[Path]) -> tuple[dict[str, Path], dict[str, set[str]]]:
