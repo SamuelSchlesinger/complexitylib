@@ -243,9 +243,12 @@ inequality (Lemmas 11--12 and Corollary 1). `BooleanAnalysis.Bernoulli` proves
 downward-family transference, and `BooleanAnalysis.LightPatterns` completes
 Lemma 10 with its exact constants and count of low-probability patterns.
 The mass-to-density bridge is checked, including zero masses and rate zero.
-Next formalize conditional fibers and their average deficit bound (Lemma 4),
-then the improved mirror-set argument. The bounded-round KW model and
-Theorem 3 remain open formalization work. The source-to-declaration map and
+`BooleanAnalysis.Fibers` proves the conditional-fiber entropy bound (Lemma 4),
+the `63/64` good-fiber estimate, and the uniform-mass deficit bridge.
+Next prove the conditional law for the two sampled coordinate sets and apply
+Lemma 10 inside each good fiber, then finish the improved mirror-set argument.
+The bounded-round KW model and Theorem 3 remain open formalization work.
+The source-to-declaration map and
 remaining dependencies are in [`docs/TopDownLowerBounds.md`](docs/TopDownLowerBounds.md).
 
 ## Descriptive complexity expansion

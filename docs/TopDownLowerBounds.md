@@ -9,6 +9,7 @@ Source: Oliver Korten, [*Top-Down Lower Bounds for All Depths*, ECCC TR26-221](h
 The public APIs are `Complexitylib.BooleanAnalysis.HarmonicMean`,
 `Complexitylib.BooleanAnalysis.Bernoulli`, and
 `Complexitylib.BooleanAnalysis.LightPatterns`, under `Complexity.BooleanAnalysis`.
+`Complexitylib.BooleanAnalysis.Fibers` supplies the conditional-fiber layer.
 
 | Paper | Lean declaration | Status |
 | --- | --- | --- |
@@ -21,6 +22,8 @@ The public APIs are `Complexitylib.BooleanAnalysis.HarmonicMean`,
 | Downward-family transference | `bernoulliAverage_lowerSet_transfer`, `bernoulliAverage_lowerSet_pow_le` | Proved, including rate zero |
 | Lemma 10, sparse-sampling conclusion | `harmonicTransform_sparse_good_probability`, `improved_light_patterns_density` | Proved with the exact constants |
 | Lemma 10, probability masses and pattern counts | `improved_light_patterns`, `coordinateMarginal_normalize` | Proved for every real `k >= 1` |
+| Lemma 4, conditional-fiber entropy | `expect_uniformDeficit_coordinateFiber` | Proved for arbitrary finite coordinate types |
+| Good fibers in the mirror-set proof | `coordinateFiber_good_probability` | Proved with the exact `64*k` and `63/64` constants |
 | Improved mirror-set argument and Theorem 3 | — | Not yet formalized |
 
 A coordinate set is a Boolean membership function. Expectations use finite
@@ -48,12 +51,27 @@ independent masks and monotonicity in the sampling rate, then iterates the
 union argument. This gives `P_r(A) >= P_(1/4)(A)^(5*r)` for nonempty downward
 families and `0 <= r <= 1/20`.
 
+`coordinateFiber X S x` contains patterns on `S` whose completions, using `x`
+outside `S`, lie in `X`. Its entropy deficit is therefore measured in the
+`|S|`-dimensional cube. `card_coordinateFiber` identifies its size with the
+full-cube conditional fiber. A finite log-sum inequality proves that the
+average deficit, for a uniform point of nonempty `X`, is at most that of `X`.
+Markov then gives deficit at most `64*k` with probability at least `63/64`.
+`uniformMass_le_rpow` connects this deficit bound to Lemma 10's mass bound.
+All entropy interpretations require nonempty sets; the real-valued deficit
+definition documents its finite extension at the empty set.
+
 ## Remaining proof layers
 
-1. Formalize conditional fibers and their average entropy-deficit bound
-   (Lemma 4), then the guiding distributions and the mirror-set argument.
-   Derive the `O(kp)` version from Lemma 10, tracking the changed deficit
-   constants rather than copying the `65k` parameter from Lemma 5 unchanged.
+1. Prove the conditional law of `R = P \ Q` given `S = P union Q`, and
+   transport Lemma 10 to arbitrary finite coordinate types so it applies
+   inside the checked fibers. Then formalize guiding distributions and the
+   improved mirror-set argument. The planned constants are `q = 32768*k*p`
+   and output limit deficit `194*k`: applying Lemma 10 with parameter `64*k`
+   gives marginal threshold `2^(-|R|-128*k-2)`, which the fiber's deficit
+   turns into completion density `2^(-192*k-2) >= 2^(-194*k)` for `k >= 1`.
+   This parameter specialization and the mirror-set conclusion are still
+   proof obligations.
 2. Add general, bounded-round KW protocols with bounded message alphabets,
    subrectangle restriction, and their adversary theorem. The existing
    `Complexity.KarchmerWigderson.Protocol` is monotone and sends one bit per

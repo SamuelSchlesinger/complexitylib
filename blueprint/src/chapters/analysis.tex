@@ -1114,3 +1114,73 @@ a coordinate set is also represented by its Boolean membership function.
   Convert the fraction of light normalized-density patterns into the
   stated count using the mass-to-density marginal bridge.
 \end{proof}
+
+\begin{definition}[Uniform deficits and coordinate fibers]
+  \label{def:analysis-coordinate-fiber}
+  \lean{Complexity.BooleanAnalysis.uniformMass,
+    Complexity.BooleanAnalysis.uniformDeficit,
+    Complexity.BooleanAnalysis.completePattern,
+    Complexity.BooleanAnalysis.coordinateFiber}
+  \leanok
+  For nonempty $X\subseteq\{0,1\}^I$, let $\mu_X$ be its uniform mass
+  function and $D_\infty(X)=|I|-\log_2|X|$. Given $S\subseteq I$ and
+  $x\in X$, the fiber $X_{x,S}$ consists of patterns on $S$ whose completion
+  using $x$ outside $S$ belongs to $X$. Its deficit is measured relative to
+  the $|S|$-dimensional cube. The real-valued Lean definition takes value
+  $|I|$ at the empty set; entropy interpretations require nonemptiness.
+\end{definition}
+
+\begin{theorem}[Fiber representation and uniform-mass bounds]
+  \label{thm:analysis-fiber-representation}
+  \lean{Complexity.BooleanAnalysis.card_coordinateFiber,
+    Complexity.BooleanAnalysis.coordinateFiber_nonempty,
+    Complexity.BooleanAnalysis.uniformDeficit_nonneg,
+    Complexity.BooleanAnalysis.card_eq_rpow_sub_uniformDeficit,
+    Complexity.BooleanAnalysis.uniformDeficit_le_iff,
+    Complexity.BooleanAnalysis.uniformMass_nonneg,
+    Complexity.BooleanAnalysis.sum_uniformMass,
+    Complexity.BooleanAnalysis.sum_uniformMass_mul,
+    Complexity.BooleanAnalysis.uniformMass_le_rpow}
+  \leanok
+  \uses{def:analysis-coordinate-fiber}
+  The pattern fiber has the same cardinality as
+  $\{y\in X:y_{I\setminus S}=x_{I\setminus S}\}$ and is nonempty for
+  $x\in X$. For nonempty $X$, $D_\infty(X)\le k$ if and only if
+  $|X|\ge2^{|I|-k}$; in that case $\mu_X(x)\le2^{k-|I|}$ for every $x$.
+  The mass function is nonnegative, sums to one, and computes uniform
+  finite-set expectations.
+\end{theorem}
+\begin{proof}
+  \leanok
+  Completing and restricting patterns give the fiber bijection. The
+  deficit and mass bounds follow by exponentiating the defining logarithm.
+\end{proof}
+
+\begin{lemma}[Conditional-fiber entropy, Korten Lemma 4]
+  \label{lem:analysis-fiber-entropy}
+  \lean{Complexity.BooleanAnalysis.expect_uniformDeficit_coordinateFiber}
+  \leanok
+  \uses{def:analysis-coordinate-fiber, thm:analysis-fiber-representation}
+  For every nonempty $X$ and every fixed $S\subseteq I$,
+  $\mathbb E_{x\sim X} D_\infty(X_{x,S})\le D_\infty(X)$.
+\end{lemma}
+\begin{proof}
+  \leanok
+  Group points by their restriction outside $S$. The finite log-sum
+  inequality lower-bounds the average log fiber size by
+  $\log|X|-|I\setminus S|\log2$. Subtract from $|S|$ and convert to base two.
+\end{proof}
+
+\begin{corollary}[Good-fiber probability]
+  \label{cor:analysis-good-fiber}
+  \lean{Complexity.BooleanAnalysis.coordinateFiber_good_probability}
+  \leanok
+  \uses{lem:analysis-fiber-entropy}
+  If $X$ is nonempty, $k>0$, and $D_\infty(X)\le k$, then for every fixed
+  $S$, with probability at least $63/64$ over $x\sim X$,
+  $D_\infty(X_{x,S})\le64k$.
+\end{corollary}
+\begin{proof}
+  \leanok
+  Apply Markov's inequality to the nonnegative fiber deficit.
+\end{proof}
