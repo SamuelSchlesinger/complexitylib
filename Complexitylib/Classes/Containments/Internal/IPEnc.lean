@@ -1,10 +1,11 @@
 /-
 Copyright (c) 2026 Bolton Bailey. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
-Authors: Bolton Bailey
+Authors: Bolton Bailey, Samuel’s dot
 -/
 module
 public import Complexitylib.Classes.Containments.Internal.IPSem
+public import Complexitylib.Encoding.Stack
 
 /-!
 # The walk's state on a bitstring
@@ -42,9 +43,7 @@ def encFrm (f : Frm) : List Bool :=
   pair f.lvl (pair f.v (pair f.a (pair f.sum (pair f.best f.body))))
 
 /-- The stack on the tape: a right-nested chain of pairs, empty stack being the empty string. -/
-def encStk : List Frm → List Bool
-  | [] => []
-  | f :: fs => pair (encFrm f) (encStk fs)
+def encStk : List Frm → List Bool := StackEncoding.encode encFrm
 
 @[simp] theorem encStk_nil : encStk [] = [] := rfl
 
@@ -373,14 +372,8 @@ theorem encFrm_length_le (P : Params) (D B : ℕ) (f : Frm) (hl : f.lvl.length +
   omega
 
 theorem encStk_length_le : ∀ (fs : List Frm) (B : ℕ),
-    (∀ g ∈ fs, (encFrm g).length ≤ B) → (encStk fs).length ≤ fs.length * (2 * B + 2)
-  | [], _, _ => by simp
-  | f :: fs, B, h => by
-      have hf : (encFrm f).length ≤ B := h f List.mem_cons_self
-      have hrest := encStk_length_le fs B fun g hg => h g (List.mem_cons_of_mem _ hg)
-      rw [encStk_cons, pair_length, List.length_cons,
-        show (fs.length + 1) * (2 * B + 2) = fs.length * (2 * B + 2) + (2 * B + 2) from by ring]
-      omega
+    (∀ g ∈ fs, (encFrm g).length ≤ B) → (encStk fs).length ≤ fs.length * (2 * B + 2) :=
+  StackEncoding.length_encode_le encFrm
 
 theorem StkDepth.mem_le {D : ℕ} : ∀ {stk : List Frm}, StkDepth D stk →
     ∀ f ∈ stk, f.lvl.length + 1 ≤ D

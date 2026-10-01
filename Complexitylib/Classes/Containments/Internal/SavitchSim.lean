@@ -1,7 +1,7 @@
 /-
 Copyright (c) 2026 Bolton Bailey. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
-Authors: Bolton Bailey
+Authors: Bolton Bailey, Samuel’s dot
 -/
 module
 public import Complexitylib.Classes.Containments.Internal.SavitchSem
@@ -243,14 +243,8 @@ theorem headD_pair_encSst (R : List Bool) (s : Sav.Sst) (x : List Bool) :
 /-! ## How long an encoded state is -/
 
 theorem encStack_length_le : ∀ (fs : List (List Bool)) (B : ℕ), (∀ f ∈ fs, f.length ≤ B) →
-    (encStack fs).length ≤ fs.length * (2 * B + 2)
-  | [], _, _ => by simp
-  | f :: fs, B, h => by
-      have hf : f.length ≤ B := h f List.mem_cons_self
-      have hrest := encStack_length_le fs B fun g hg => h g (List.mem_cons_of_mem _ hg)
-      rw [encStack_cons, pair_length, List.length_cons,
-        show (fs.length + 1) * (2 * B + 2) = fs.length * (2 * B + 2) + (2 * B + 2) from by ring]
-      omega
+    (encStack fs).length ≤ fs.length * (2 * B + 2) :=
+  StackEncoding.length_encode_le id
 
 theorem encFrm_length_le {Lmax Wm : ℕ} {f : Sav.Frm} (hl : f.lvl.length ≤ Lmax)
     (hs : Sav.FrmSize Wm f) : (encFrm f).length ≤ 2 * Lmax + 5 * Wm + 14 := by
