@@ -7,6 +7,7 @@ Authors: Samuel Schlesinger
 module
 public import Complexitylib.Classes.Randomized.ApproximateCounting.Relative.Defs
 import Complexitylib.Classes.Randomized.ApproximateCounting.Power
+import Complexitylib.Classes.Randomized.ApproximateCounting.Internal.ErrorBudget
 import Complexitylib.Classes.Randomized.ApproximateCounting.Weak.Hashing
 import Mathlib.Analysis.SpecialFunctions.Pow.NthRootLemmas
 
@@ -80,40 +81,13 @@ private theorem factorApproximationEvent_subset_successEvent
     IsRelativeApproximation precision set.card
       (hashingEstimate precision failureBits set seed)) seed).mpr hgood
 
-private theorem add_four_le_two_pow_add_two (n : ℕ) :
-    n + 4 ≤ 2 ^ (n + 2) := by
-  induction n with
-  | zero => norm_num
-  | succ n ih =>
-      rw [show n + 1 + 2 = (n + 2) + 1 by omega, Nat.pow_succ]
-      have hp : 1 ≤ 2 ^ (n + 2) := Nat.one_le_two_pow
-      omega
-
-private theorem add_four_div_two_pow_errorBits_le
-    (n failureBits : ℕ) :
-    (n + 4 : ℚ) / (2 : ℚ) ^ (n + 2 + failureBits) ≤
-      1 / (2 : ℚ) ^ failureBits := by
-  calc
-    (n + 4 : ℚ) / (2 : ℚ) ^ (n + 2 + failureBits) ≤
-        (2 : ℚ) ^ (n + 2) / (2 : ℚ) ^ (n + 2 + failureBits) := by
-      gcongr
-      exact_mod_cast add_four_le_two_pow_add_two n
-    _ = 1 / (2 : ℚ) ^ failureBits := by
-      have hdenominator :
-          (2 : ℚ) ^ (n + 2 + failureBits) =
-            (2 : ℚ) ^ (n + 2) * (2 : ℚ) ^ failureBits := by
-        rw [show n + 2 + failureBits = (n + 2) + failureBits by omega,
-          pow_add]
-      rw [hdenominator]
-      field_simp
-
 theorem one_sub_two_pow_le_eventProb_successEvent_internal
     {domainWidth precision failureBits : ℕ}
     (set : Finset (BitString domainWidth)) (hprecision : 0 < precision) :
     1 - 1 / (2 : ℚ) ^ failureBits ≤
       eventProb (successEvent precision failureBits set) := by
   let width := poweredWidth domainWidth precision
-  have herror := add_four_div_two_pow_errorBits_le width failureBits
+  have herror := add_four_div_two_pow_errorBits_le_internal width failureBits
   calc
     1 - 1 / (2 : ℚ) ^ failureBits ≤
         1 - (width + 4 : ℚ) /
