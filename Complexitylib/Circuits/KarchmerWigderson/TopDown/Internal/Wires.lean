@@ -1,0 +1,46 @@
+/-
+Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Samuel Schlesinger
+-/
+
+module
+public import Complexitylib.Circuits.KarchmerWigderson.Circuit
+public import Complexitylib.Circuits.KarchmerWigderson.TopDown.Internal.Parity
+
+/-!
+# The wire lower bound in Korten's Theorem 3
+
+Apply the checked communication bound to the protocol of a circuit. Taking
+the putative message cost to be the real threshold itself avoids rounding a
+logarithm: `totalFanIn ≤ 2^m` is exactly the needed alphabet-size bound.
+
+Source: Oliver Korten, *Top-Down Lower Bounds for All Depths*, ECCC TR26-221
+(2026), https://eccc.weizmann.ac.il/report/2026/221/.
+-/
+
+public section
+
+namespace Complexity.Circuit
+
+theorem parity_wire_lower_bound_internal (rounds : ℕ) (hrounds : 2 ≤ rounds) :
+    ∃ ε : ℝ, 0 < ε ∧ ∃ n0 : ℕ, ∀ n : ℕ, n0 ≤ n → ∀ [NeZero n] (g : ℕ)
+      (c : Circuit Basis.unboundedAndOr n 1 g), c.depth ≤ rounds →
+      (∀ x, c.eval x 0 = Schnorr.xorBool n x) →
+      (2 : ℝ) ^ (ε * (n : ℝ) ^ (((rounds - 1 : ℕ) : ℝ)⁻¹)) < c.totalFanIn := by
+  obtain ⟨ε, hε, n0, hcomm⟩ :=
+    KarchmerWigderson.parity_communication_lower_bound_internal.{0} rounds hrounds
+  refine ⟨ε, hε, n0, ?_⟩
+  intro n hn _ g c hdepth hcompute
+  by_contra hsmall
+  have hsize : (c.totalFanIn : ℝ) ≤ (2 : ℝ) ^
+      (ε * (n : ℝ) ^ (((rounds - 1 : ℕ) : ℝ)⁻¹)) := le_of_not_gt hsmall
+  obtain ⟨P, hP⟩ := exists_roundProtocol c rounds hdepth 0
+  have hcost := hcomm n hn (M := Fin c.totalFanIn)
+    (ε * (n : ℝ) ^ (((rounds - 1 : ℕ) : ℝ)⁻¹))
+    (mul_nonneg hε.le (Real.rpow_nonneg (by positivity) _)) (by simpa using hsize) le_rfl P
+  apply hcost
+  have he : (fun x => c.eval x 0) = Schnorr.xorBool n := funext hcompute
+  rwa [he] at hP
+
+end Complexity.Circuit

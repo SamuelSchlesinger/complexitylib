@@ -59,6 +59,9 @@ public import Complexitylib.Circuits.BasisHom
 public import Complexitylib.Circuits.Threshold
 public import Complexitylib.Circuits.Monotone
 public import Complexitylib.Circuits.KarchmerWigderson
+public import Complexitylib.Circuits.KarchmerWigderson.Circuit
+public import Complexitylib.Circuits.KarchmerWigderson.Rounds
+public import Complexitylib.Circuits.KarchmerWigderson.TopDown
 public import Complexitylib.Circuits.Encoding
 public import Complexitylib.Circuits.Family
 public import Complexitylib.Circuits.Encoding.Family

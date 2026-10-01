@@ -1523,22 +1523,159 @@ establishes the proposed coefficient-three regime without that assumption.
 \section{Top-down parity lower bounds}
 \label{sec:lowerbounds-topdown-parity}
 
+\begin{definition}[General bounded-round KW protocols]
+  \label{def:lowerbounds-round-protocol}
+  \lean{Complexity.KarchmerWigderson.RoundProtocol,
+    Complexity.KarchmerWigderson.RoundProtocol.run,
+    Complexity.KarchmerWigderson.RoundProtocol.Solves,
+    Complexity.KarchmerWigderson.RoundProtocol.SolvesKW,
+    Complexity.KarchmerWigderson.RoundProtocol.swapPlayers}
+  \leanok
+  A protocol on coordinates $I$ with alphabet $M$ and at most $d$ rounds
+  either outputs a fixed coordinate or lets one player send a message in
+  $M$, followed by a protocol with one fewer round. The speaker depends
+  only on the preceding transcript, and a message depends only on that
+  speaker's input. A solving protocol outputs a coordinate where the two
+  inputs differ, in either orientation. For a function $f$, Alice's input
+  belongs to $f^{-1}(0)$ and Bob's to $f^{-1}(1)$.
+  The bound $|M|\le2^m$ expresses per-message cost $m$.
+\end{definition}
+
+\begin{lemma}[Player swapping]
+  \label{lem:lowerbounds-round-swap}
+  \lean{Complexity.KarchmerWigderson.RoundProtocol.run_swapPlayers,
+    Complexity.KarchmerWigderson.RoundProtocol.SolvesKW.swapPlayers}
+  \leanok
+  \uses{def:lowerbounds-round-protocol}
+  Swapping every speaker exchanges the inputs in the protocol's run.
+  Hence a protocol for $f$ gives a protocol for $\neg f$ with the same
+  alphabet and round bound.
+\end{lemma}
+\begin{proof}
+  \leanok
+  Induct on the protocol tree.
+\end{proof}
+
+\begin{definition}[Density rectangle]
+  \label{def:lowerbounds-density-rectangle}
+  \lean{Complexity.KarchmerWigderson.DensityRectangle}
+  \leanok
+  \uses{def:analysis-density-limit}
+  A $(p,k)$-density rectangle consists of nonempty sets $X,Y$ of deficit
+  at most $k$, and some $0<r\le p$ such that every point on one side is an
+  $(r,k)$-limit of the other. The actual rate $r$ is retained because
+  density-limit conditions need not be monotone in the sampling rate.
+\end{definition}
+
+\begin{theorem}[Density-rectangle adversary]
+  \label{thm:lowerbounds-density-adversary}
+  \lean{Complexity.KarchmerWigderson.RoundProtocol.not_solves_density,
+    Complexity.KarchmerWigderson.RoundProtocol.not_solves_bounded_density}
+  \leanok
+  \uses{def:lowerbounds-round-protocol, def:lowerbounds-density-rectangle,
+    lem:analysis-improved-mirror-set}
+  Let $|M|\le2^m$. Suppose, for $0\le i<d$,
+  \[
+    k_i\ge1,\quad k_{i+1}\ge194k_i,\quad
+    k_{i+1}\ge2k_i+2+m,\quad p_{i+1}\ge32768k_ip_i,
+  \]
+  and $p_i\le1/4$ for $0\le i\le d$. No protocol with at most $d$
+  messages solves a $(p_0,k_0)$-density rectangle.
+  In particular, for $k\ge1$ and $m+1\le k$, the condition
+  $(32768\cdot194^d k)^d p\le1/4$ suffices for a $(p,k)$-rectangle.
+\end{theorem}
+\begin{proof}
+  \leanok
+  A largest message cell loses at most $m$ in deficit. Before selecting
+  the cell, mirror if needed so the current limit condition faces the
+  speaking player. The recurrences preserve the density rectangle.
+  A density limit at rate less than $3/4$ has a point of the other set
+  agreeing with it at any specified coordinate, so no leaf can solve
+  the rectangle. Induct on the remaining messages, allowing early
+  termination. For the finite specialization take
+  $k_i=194^ik$ and $p_i=(32768\cdot194^d k)^i p$.
+\end{proof}
+
+\begin{lemma}[Bilateral initial limits]
+  \label{lem:lowerbounds-bilateral-adversary}
+  \lean{Complexity.KarchmerWigderson.RoundProtocol.not_solves_bilateral_density}
+  \leanok
+  \uses{thm:lowerbounds-density-adversary}
+  Suppose $X,Y$ are nonempty, each has deficit at most one, and each
+  consists of $(p,1)$-limits of the other, where $p>0$. If $m\ge0$ and
+  $(32768\cdot194^t(m+1))^t p\le1/4$, no protocol with at most $t+1$
+  messages from an alphabet of size at most $2^m$ solves $X\times Y$.
+\end{lemma}
+\begin{proof}
+  \leanok
+  Select the first message cell without mirroring. Both deficits are
+  now at most $m+1$, and the retained limit condition faces the selected
+  side. Apply the density adversary for the remaining $t$ rounds.
+\end{proof}
+
+\begin{theorem}[Explicit finite parity obstruction]
+  \label{thm:lowerbounds-parity-topdown-finite}
+  \lean{Complexity.KarchmerWigderson.RoundProtocol.not_solves_parity_finite}
+  \leanok
+  \uses{lem:lowerbounds-bilateral-adversary, def:lowerbounds-parity}
+  If $m\ge0$ and
+  $16(32768\cdot194^t(m+1))^t\le n$, no protocol with at most $t+1$
+  messages, each from an alphabet of size at most $2^m$, solves the
+  general KW game for $n$-bit parity.
+\end{theorem}
+\begin{proof}
+  \leanok
+  The two parity classes have deficit one. If a resampled coordinate
+  set is nonempty, flipping any selected coordinate pairs the two
+  parities, so each parity fiber has density $1/2$. At rate $4/n$ the
+  empty-set probability is at most $1/5$, using
+  $(1-p)^n(1+np)\le1$. Thus the initial limits are bilateral.
+  The size condition implies $n\ge16$ and the required rate budget.
+\end{proof}
+
+\begin{theorem}[Circuits give bounded-round protocols]
+  \label{thm:lowerbounds-circuit-round-protocol}
+  \lean{Complexity.Circuit.exists_roundProtocol}
+  \leanok
+  \uses{def:circuit, def:circuits-bases, def:lowerbounds-round-protocol,
+    lem:lowerbounds-round-swap, lem:circuits-dependency-graph}
+  For each output of an unbounded-fan-in AND/OR circuit with free
+  input negations, depth at most $d$ gives a general KW protocol with
+  at most $d$ messages from an alphabet of size $\mathrm{totalFanIn}$.
+  This is the circuit-to-protocol direction of the Karchmer--Wigderson
+  correspondence in Korten's Lemma~1. The wire count includes every
+  gate-input occurrence, including output gates and repeated wires.
+\end{theorem}
+\begin{proof}
+  \leanok
+  Descend through a disagreeing gate input. For OR, Bob selects a true
+  child; for AND, Alice selects a false child. Negated inputs swap the
+  players. Each gate's fan-in is at most the total wire count. Empty
+  gates have an empty KW relation, so an arbitrary coordinate suffices.
+\end{proof}
+
 \begin{theorem}[Korten's top-down lower bound, Theorem 3]
   \label{thm:lowerbounds-korten-topdown}
-  \uses{lem:analysis-improved-mirror-set, def:lowerbounds-parity}
+  \lean{Complexity.KarchmerWigderson.parity_communication_lower_bound,
+    Complexity.Circuit.parity_wire_lower_bound}
+  \leanok
+  \uses{thm:lowerbounds-parity-topdown-finite,
+    thm:lowerbounds-circuit-round-protocol}
   For every $d\ge2$ there is $\varepsilon_d>0$ such that, for all sufficiently
   large $n$, the general Karchmer--Wigderson game for $n$-bit parity has no
   deterministic protocol of at most $d$ rounds with at most
   $\varepsilon_d n^{1/(d-1)}$ bits in each message. Consequently, a depth-$d$
   unbounded-fan-in De Morgan circuit for parity has more than
   $2^{\varepsilon_d n^{1/(d-1)}}$ wires.
-  This top-down argument is not yet formalized; its checked analytic
-  prerequisites are in Section~\ref{sec:analysis-harmonic}.
+  The analytic prerequisites of this top-down proof are in
+  Section~\ref{sec:analysis-harmonic}.
 \end{theorem}
 \begin{proof}
-  Apply the checked improved mirror-set lemma to maintain the rectangle
-  invariant through bounded-message protocol rounds, then use the general
-  KW correspondence with explicit wire accounting. The protocol model,
-  adversary invariant, parity initialization, parameter recurrence, and
-  wire correspondence remain formalization work.
+  \leanok
+  Put $t=d-1$, $C=32768\cdot194^t$, $\varepsilon_d=(32C)^{-1}$, and
+  $N_d=(32C)^t$. If $n\ge N_d$ and $m\le\varepsilon_d n^{1/t}$,
+  then $C(m+1)\le n^{1/t}/16$, so $16(C(m+1))^t\le n$.
+  Apply the finite parity obstruction. For the wire conclusion, a
+  circuit with at most $2^{\varepsilon_d n^{1/t}}$ wires would give a
+  protocol contradicting the communication conclusion.
 \end{proof}

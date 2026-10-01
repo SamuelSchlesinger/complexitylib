@@ -237,7 +237,7 @@ leave a compatibility alias.
 ## Top-down parity lower bounds
 
 The track for Oliver Korten's *Top-Down Lower Bounds for All Depths* (ECCC
-TR26-221, 2026) targets Theorem 3. `BooleanAnalysis.HarmonicMean` proves the
+TR26-221, 2026) completes Theorem 3. `BooleanAnalysis.HarmonicMean` proves the
 variational formula, all three transform properties, and the biased-cube
 inequality (Lemmas 11--12 and Corollary 1). `BooleanAnalysis.Bernoulli` proves
 downward-family transference, and `BooleanAnalysis.LightPatterns` completes
@@ -249,11 +249,15 @@ the `63/64` good-fiber estimate, and the uniform-mass deficit bridge.
 sampled coordinate sets. Lemma 10 now applies to arbitrary finite coordinate
 types, and `BooleanAnalysis.MirrorSets` proves `improved_mirror_set`, completing the
 improved mirror step with `q = 32768*k*p`, reverse limit deficit `194*k`,
-and mirror deficit at most `2*k+2`. Next add the bounded-round KW model,
-rectangle adversary and parity initialization, then derive the recurrence
-and wire lower bound of Theorem 3.
-The source-to-declaration map and
-remaining dependencies are in [`docs/TopDownLowerBounds.md`](docs/TopDownLowerBounds.md).
+and mirror deficit at most `2*k+2`. `Circuits.KarchmerWigderson.Rounds`
+defines general protocols with bounded message alphabets and at most `d`
+rounds. `Circuits.KarchmerWigderson.TopDown` proves the rectangle adversary,
+bilateral parity initialization, explicit finite obstruction, and
+`parity_communication_lower_bound` with exponent `1/(d-1)`.
+The circuit-to-protocol translation gives `Circuit.parity_wire_lower_bound`
+for unbounded AND/OR circuits with free input negations and the existing
+`totalFanIn` wire count. The source-to-declaration map, model conventions,
+and explicit constants are in [`docs/TopDownLowerBounds.md`](docs/TopDownLowerBounds.md).
 
 ## Descriptive complexity expansion
 

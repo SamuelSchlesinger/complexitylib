@@ -1,7 +1,7 @@
 # Top-down parity lower bounds
 
 Source: Oliver Korten, [*Top-Down Lower Bounds for All Depths*, ECCC TR26-221](https://eccc.weizmann.ac.il/report/2026/221/),
-30 September 2026. The target is **Theorem 3**, with communication cost
+30 September 2026. **Theorem 3 is formalized**, with communication cost
 `Omega_d(n^(1/(d-1)))` and the resulting exponential wire lower bound.
 
 ## Checked layer
@@ -12,6 +12,9 @@ The public APIs are `Complexitylib.BooleanAnalysis.HarmonicMean`,
 `Complexitylib.BooleanAnalysis.Fibers` supplies the conditional-fiber layer.
 `Complexitylib.BooleanAnalysis.CoordinateSampling` and
 `Complexitylib.BooleanAnalysis.MirrorSets` complete the improved mirror-set lemma.
+`Complexitylib.Circuits.KarchmerWigderson.TopDown` exports both parts of
+Theorem 3, using the general protocol model in `KarchmerWigderson.Rounds`
+and the circuit translation in `KarchmerWigderson.Circuit`.
 
 | Paper | Lean declaration | Status |
 | --- | --- | --- |
@@ -30,7 +33,18 @@ The public APIs are `Complexitylib.BooleanAnalysis.HarmonicMean`,
 | Definition 2, density limits | `IsDensityLimit` | Defined using actual fiber density |
 | Completion estimate in the improved mirror argument | `mirror_bad_modifications_probability` | Proved with probability `31/32` |
 | Improved mirror-set lemma | `improved_mirror_set` | Proved with constants `32768` and `194` |
-| Bounded-round adversary and Theorem 3 | — | Not yet formalized |
+| General bounded-round KW protocols | `KarchmerWigderson.RoundProtocol`, `RoundProtocol.SolvesKW` | Defined with arbitrary finite message alphabets |
+| Rectangle invariant | `KarchmerWigderson.DensityRectangle` | Defined with an actual sampling rate below the rate cap |
+| Bounded-round adversary | `RoundProtocol.not_solves_density`, `RoundProtocol.not_solves_bounded_density` | Proved for adaptive speakers and early termination |
+| Bilateral initialization | `RoundProtocol.not_solves_bilateral_density` | Proved, saving the first mirror step |
+| Explicit parity bound | `RoundProtocol.not_solves_parity_finite` | Proved with the finite inequality below |
+| Theorem 3, communication | `KarchmerWigderson.parity_communication_lower_bound` | Proved for every fixed number of rounds at least two |
+| Lemma 1, circuit-to-protocol direction | `Circuit.exists_roundProtocol` | Proved for unbounded AND/OR circuits with free input negations |
+| Theorem 3, wires | `Circuit.parity_wire_lower_bound` | Proved for the library's circuit depth and total input-wire count |
+
+Analytic declarations above are in `Complexity.BooleanAnalysis`. The other
+names are under `Complexity`; `RoundProtocol` abbreviates
+`Complexity.KarchmerWigderson.RoundProtocol` in the table.
 
 A coordinate set is a Boolean membership function. Expectations use finite
 Mathlib sums. `projectionAverage` represents a marginal on the full cube;
@@ -85,16 +99,72 @@ probability at most `1/16`. Consequently `improved_mirror_set` gives a nonempty
 `(q,194*k)`-limit of `X`. The constants are explicit choices for Korten's
 Section 3 argument with the improved Section 4 lemma.
 
-## Remaining proof layers
+## Protocol model and adversary
 
-1. Add general, bounded-round KW protocols with bounded message alphabets,
-   subrectangle restriction, and their adversary theorem. The existing
-   `Complexity.KarchmerWigderson.Protocol` is monotone and sends one bit per
-   node; it is not the protocol model needed here.
-2. Instantiate the parity adversary, solve the parameter recurrence, and
-   connect the protocol obstruction to unbounded-fan-in De Morgan circuits,
-   with explicit wire accounting, before deriving the asymptotic bound.
+`RoundProtocol I M d` is a deterministic tree of at most `d` messages from
+`M`. A node's speaker is determined by the transcript; the sent message
+depends only on that speaker's input. A leaf specifies a coordinate where
+the inputs must differ. Alice holds a zero-input and Bob a one-input of the
+function. The alphabet bound `card M <= 2^m` represents per-message cost.
+The protocol may terminate early, and the coordinate difference can have
+either orientation. This is the general KW game from Korten's Section 1.1.
 
-This track does not use the existing random-restriction parity lower bound
-to stand in for the report's top-down argument. The analytic lemmas and improved
-mirror-set step are proved; Theorem 3 remains unformalized and is not assumed as an axiom or hypothesis.
+`DensityRectangle X Y p k` says both sets are nonempty and have deficit at
+most `k`, and one side consists of `(r,k)`-limits of the other for some
+`0 < r <= p`. Keeping the actual rate is essential: a density-limit
+condition is not assumed monotone in its sampling rate. Selecting a message
+cell adds at most `m` to the deficit. If the limit condition faces the wrong
+speaker, the improved mirror lemma first restricts that speaker's set.
+The next deficit and rate caps may be any values satisfying
+
+```
+k_(i+1) >= 194*k_i
+k_(i+1) >= 2*k_i + 2 + m
+p_(i+1) >= 32768*k_i*p_i.
+```
+
+While all rate caps stay at most `1/4`, no coordinate separates the entire
+rectangle. Induction on the remaining messages rules out a solving protocol.
+Both parity classes initially have deficit one and bilateral density limits
+at rate `4/n`; this saves the first mirror step.
+
+## Theorem 3 and explicit constants
+
+For `d` messages, put `t = d-1`. The checked finite obstruction is
+
+```
+16 * (32768 * 194^t * (m+1))^t <= n.
+```
+
+Under this condition, no protocol with `card M <= 2^m` and `m >= 0` solves
+the parity KW game. For every `d >= 2`, the asymptotic proof uses
+
+```
+C_d = 32768 * 194^(d-1)
+epsilon_d = 1 / (32*C_d)
+N_d = (32*C_d)^(d-1).
+```
+
+If `n >= N_d` and `m <= epsilon_d*n^(1/(d-1))`, the finite obstruction
+applies. The public communication theorem quantifies over every finite
+message alphabet, so its constant and threshold depend only on `d`.
+
+The circuit translation is the circuit-to-protocol direction of the
+[Karchmer--Wigderson correspondence](https://doi.org/10.1137/0403021), as
+stated in Korten's Lemma 1. For each output of a depth-at-most-`d` circuit,
+`Circuit.exists_roundProtocol` constructs a solving protocol with at most
+`d` messages from an alphabet of size `totalFanIn`. Each gate chooses an
+input edge; negated edges swap the players without adding a round.
+Applying the communication theorem with cost
+`epsilon_d*n^(1/(d-1))` rules out `totalFanIn <= 2^cost`.
+
+The wire theorem uses `Circuit Basis.unboundedAndOr n 1 g`, with arbitrary
+internal gate count `g` and free negation flags on gate inputs.
+`totalFanIn` counts gate-input occurrences, including output gates, repeated
+wires, and unused internal gates. The circuit model requires a nonzero
+input count, which is automatic in the sufficiently-large-`n` regime.
+
+The proof follows the paper's harmonic-mean, light-pattern, mirror-set,
+and top-down adversary route. It does not invoke the existing
+random-restriction parity lower bound. All statements are proved in Lean
+without proof placeholders or additional axioms.
