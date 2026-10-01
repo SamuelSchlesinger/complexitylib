@@ -1,7 +1,7 @@
 /-
 Copyright (c) 2026 Bolton Bailey. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
-Authors: Bolton Bailey
+Authors: Bolton Bailey, Samuel’s dot
 -/
 module
 public import Complexitylib.Models.TuringMachine.Placement
@@ -36,19 +36,10 @@ theorem placeWorkTM_reaches_reflect (tm : TM n) (pre post : ℕ)
     (hinv : ∀ i, ¬ placeWorkInMiddle pre n i → Tape.StartInvariant (extras i))
     (hhead : ∀ i, ¬ placeWorkInMiddle pre n i → 1 ≤ (extras i).head) :
     ∀ D, (placeWorkTM pre post tm).reaches (placeWorkCfg tm pre post extras c₀) D →
-      ∃ c, tm.reaches c₀ c ∧ D = placeWorkCfg tm pre post extras c := by
-  intro D hD
-  induction hD with
-  | refl => exact ⟨c₀, Relation.ReflTransGen.refl, rfl⟩
-  | @tail dmid dnext _ hstp ih =>
-      obtain ⟨c, hreach, rfl⟩ := ih
-      have hcomm := placeWorkTM_step_placeWorkCfg_of_startInvariant tm pre post extras c
-        hinv hhead
-      have hstp' : (placeWorkTM pre post tm).step (placeWorkCfg tm pre post extras c)
-          = some dnext := hstp
-      rw [hcomm] at hstp'
-      obtain ⟨c', hstep, hD⟩ := Option.map_eq_some_iff.mp hstp'
-      exact ⟨c', Relation.ReflTransGen.tail hreach hstep, hD.symm⟩
+      ∃ c, tm.reaches c₀ c ∧ D = placeWorkCfg tm pre post extras c :=
+  reaches_map_reflect (placeWorkCfg tm pre post extras)
+    (fun c => placeWorkTM_step_placeWorkCfg_of_startInvariant tm pre post extras c hinv hhead)
+    c₀
 
 /-- **A placed machine keeps its source's window**, given that the tapes on either side sit
 inside it. -/

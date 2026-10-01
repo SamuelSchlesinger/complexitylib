@@ -1,46 +1,24 @@
 /-
 Copyright (c) 2025 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
-Authors: Samuel Schlesinger
+Authors: Samuel Schlesinger, Samuel’s dot
 -/
 
 module
-public import Complexitylib.Models.TuringMachine.Lift
-public import Complexitylib.Models.TuringMachine.Hoare.Defs
+public import Complexitylib.Models.TuringMachine.Lift.Hoare
 public import Complexitylib.Models.TuringMachine.Registers
 public import Complexitylib.Models.TuringMachine.UTM.Internal.VTape
 
 /-!
 # Clock infrastructure for the time-bounded universal machine
 
-Everything lives in `namespace TM` (the machines here are generic
-`TM`-building blocks in the style of `Subroutines.lean` / `DecReg.lean`,
-not `bodyTM` phase states, so they sit beside `liftTM` rather than in
-`TM.UTMBody`). Two pieces:
+The generic `liftTM` frame rules live in `Lift.Hoare`, re-exported here for
+compatibility. They preserve arbitrary non-marker extra tapes with the source's
+unchanged time bound; the clocked UTM uses them to pin tape 6 while running a
+six-tape phase.
 
-1. **`HoareTime` lifting through `liftTM`**: a Hoare-style spec for
-   `tm : TM n` transfers to `tm.liftTM m` with the same time bound, with
-   the `m` extra work tapes *exactly* preserved.
-   - `liftTM_hoareTime_frame` is the ghost-pinned frame version: the extras
-     hold **arbitrary** parked content (head ≥ 1, reading a non-`▷`
-     symbol) — needed to run lifted 6-tape UTM phases while tape 6 holds
-     the clock.
-   - `liftTM_hoareTime` is the special case where the extras hold the
-     canonical parked blank tape `(Tape.init []).move Dir3.right` (the
-     tape `liftCfg` pins them to).
-
-   The key observation: `liftTM`'s extra-tape action is
-   `readBackWrite`/`idleDir` — exactly `transitionTape`, which is the
-   identity on any tape reading a non-`▷` symbol (`transitionTape_eq_self`).
-   So the extras are preserved exactly at every step, for *any* parked
-   content, not just the blank tape hard-wired into `liftCfg`. Since
-   `Lift.lean`'s step commutation is specialized to blank extras (and its
-   internals are private), we redo the small step lemma here against the
-   generalized embedding `liftCfgWith`.
-
-2. **The clock machines**, both `TM 7`, acting on work tape 6 (`clkT`),
-   which holds a unary counter (`1`s on cells `1..v`, head parked at 1 —
-   i.e. `HoldsExact (List.replicate v Γw.one)` with head 1):
+The clock machines below are both `TM 7`, acting on work tape 6 (`clkT`),
+which holds a unary counter (`1`s on cells `1..v`, head parked at 1):
    - `decClockTM` — scan right to the last mark, blank it, rewind to
      cell 1; a zero counter is left unchanged. Spec: `decClockTM_hoareTime`
      (ghost style: `2*v + 6` steps, every other tape exactly unchanged).
@@ -56,200 +34,6 @@ not `bodyTM` phase states, so they sit beside `liftTM` rather than in
 namespace Complexity
 
 namespace TM
-
--- ════════════════════════════════════════════════════════════════════════
--- Cross-arity simulation lifting
--- ════════════════════════════════════════════════════════════════════════
-
-/-- Cross-arity generalization of `reachesIn_map`: the simulating
-    machine may have a different number of work tapes. If `wrap` commutes
-    with `step`, then `reachesIn` lifts through the embedding. -/
-theorem reachesIn_map' {n n' : ℕ} {tm : TM n} {tm' : TM n'}
-    (wrap : Cfg n tm.Q → Cfg n' tm'.Q)
-    (h_step : ∀ c c' : Cfg n tm.Q, tm.step c = some c' →
-      tm'.step (wrap c) = some (wrap c'))
-    {t : ℕ} {c c' : Cfg n tm.Q}
-    (hreach : tm.reachesIn t c c') :
-    tm'.reachesIn t (wrap c) (wrap c') := by
-  induction hreach with
-  | zero => exact .zero
-  | step hstep _ ih => exact .step (h_step _ _ hstep) ih
-
-/-- Configuration extensionality (pointwise on the work tapes). -/
-private theorem cfg_ext {k : ℕ} {Q : Type} {c c' : Cfg k Q}
-    (hs : c.state = c'.state) (hi : c.input = c'.input)
-    (hw : ∀ i, c.work i = c'.work i) (ho : c.output = c'.output) : c = c' := by
-  obtain ⟨s, i, w, o⟩ := c
-  obtain ⟨s', i', w', o'⟩ := c'
-  cases hs; cases hi; cases ho
-  exact congrArg (fun w => Cfg.mk s i w o) (funext hw)
-
--- ════════════════════════════════════════════════════════════════════════
--- liftCfgWith: the lifted embedding with arbitrary pinned extras
--- ════════════════════════════════════════════════════════════════════════
-
-/-- The extra-tape index of a lifted tape index `i` with `n ≤ i.val`. -/
-def extraIdx {n m : ℕ} (i : Fin (n + m)) (h : n ≤ i.val) : Fin m :=
-  ⟨i.val - n, by have := i.isLt; omega⟩
-
-variable {n : ℕ}
-
-/-- Embed a configuration of `tm : TM n` into one of `tm.liftTM m` with the
-    extra work tapes pinned to the fixed tapes `extras`. Generalizes
-    `liftCfg`, which is the special case
-    `extras = fun _ => (Tape.init []).move Dir3.right`. -/
-def liftCfgWith (tm : TM n) (m : ℕ) (extras : Fin m → Tape) (c : Cfg n tm.Q) :
-    Cfg (n + m) tm.Q where
-  state := c.state
-  input := c.input
-  work := fun i =>
-    if h : i.val < n then c.work ⟨i.val, h⟩
-    else extras (extraIdx i (Nat.le_of_not_lt h))
-  output := c.output
-
-/-- `liftCfgWith` leaves the state unchanged. -/
-@[simp] theorem liftCfgWith_state (tm : TM n) (m : ℕ) (extras : Fin m → Tape)
-    (c : Cfg n tm.Q) : (liftCfgWith tm m extras c).state = c.state := rfl
-
-/-- `liftCfgWith` leaves the input tape unchanged. -/
-@[simp] theorem liftCfgWith_input (tm : TM n) (m : ℕ) (extras : Fin m → Tape)
-    (c : Cfg n tm.Q) : (liftCfgWith tm m extras c).input = c.input := rfl
-
-/-- `liftCfgWith` leaves the output tape unchanged. -/
-@[simp] theorem liftCfgWith_output (tm : TM n) (m : ℕ) (extras : Fin m → Tape)
-    (c : Cfg n tm.Q) : (liftCfgWith tm m extras c).output = c.output := rfl
-
-/-- `liftCfgWith` maps the first `n` work tapes to `c`'s work tapes. -/
-theorem liftCfgWith_work_lt (tm : TM n) (m : ℕ) (extras : Fin m → Tape)
-    (c : Cfg n tm.Q) (i : Fin (n + m)) (h : i.val < n) :
-    (liftCfgWith tm m extras c).work i = c.work ⟨i.val, h⟩ := dite_eq_left h
-
-/-- `liftCfgWith` maps the extra work tapes to the pinned tapes. -/
-theorem liftCfgWith_work_ge (tm : TM n) (m : ℕ) (extras : Fin m → Tape)
-    (c : Cfg n tm.Q) (i : Fin (n + m)) (h : n ≤ i.val) :
-    (liftCfgWith tm m extras c).work i = extras (extraIdx i h) :=
-  dite_eq_right (Nat.not_lt.mpr h)
-
-/-- **Unified step commutation** for `liftTM` with arbitrary parked extras.
-    Mirror of `Lift.lean`'s (private) blank-extras step lemma: the extras'
-    per-step action is `transitionTape`, the identity on any tape reading a
-    non-`▷` symbol. -/
-private theorem liftTM_step_of_parked (tm : TM n) (m : ℕ) {extras : Fin m → Tape}
-    (hex : ∀ j : Fin m, (extras j).read ≠ Γ.start)
-    {c : Cfg n tm.Q} {C : Cfg (n + m) tm.Q}
-    (hs : C.state = c.state) (hi : C.input = c.input) (ho : C.output = c.output)
-    (hw : ∀ (i : Fin (n + m)) (h : i.val < n), C.work i = c.work ⟨i.val, h⟩)
-    (hd : ∀ (i : Fin (n + m)) (h : n ≤ i.val), C.work i = extras (extraIdx i h)) :
-    (tm.liftTM m).step C = (tm.step c).map (liftCfgWith tm m extras) := by
-  by_cases hh : c.state = tm.qhalt
-  · -- both machines are halted
-    have h1 : (tm.liftTM m).step C = none := by
-      simp only [step]
-      exact ite_eq_left (show C.state = (tm.liftTM m).qhalt from by rw [hs, hh]; rfl)
-    have h2 : tm.step c = none := by
-      simp only [step, hh, ↓reduceIte]
-    rw [h1, h2]; rfl
-  · cases hstep : tm.step c with
-    | none => exact absurd hstep (by simp [step, hh])
-    | some c' =>
-      -- extract the explicit stepped configuration
-      simp only [step, hh, ↓reduceIte, Option.some.injEq] at hstep
-      subst hstep
-      have hinner : (fun i : Fin n => (C.work (Fin.castAdd m i)).read)
-          = fun i => (c.work i).read :=
-        funext fun i => by rw [hw (Fin.castAdd m i) i.isLt]; rfl
-      simp only [step, Option.map_some]
-      dsimp only [liftTM, liftCfgWith]
-      rw [hs, hi, ho, hinner]
-      erw [ite_eq_right hh]
-      refine congrArg some (Cfg.mk.injEq _ _ _ _ _ _ _ _ |>.mpr ⟨rfl, rfl, ?_, rfl⟩)
-      funext i
-      by_cases hik : i.val < n
-      · rw [hw i hik, dite_eq_left hik, dite_eq_left hik, dite_eq_left hik]
-      · have hge := Nat.le_of_not_lt hik
-        rw [dite_eq_right hik, dite_eq_right hik, dite_eq_right hik, hd i hge]
-        exact transitionTape_eq_self (hex _)
-
-/-- **Step commutation** on embedded configurations with arbitrary parked
-    extras: `tm.liftTM m` steps exactly as `tm` does through `liftCfgWith`. -/
-private theorem liftTM_step_liftCfgWith (tm : TM n) (m : ℕ) {extras : Fin m → Tape}
-    (hex : ∀ j : Fin m, (extras j).read ≠ Γ.start) (c : Cfg n tm.Q) :
-    (tm.liftTM m).step (liftCfgWith tm m extras c)
-      = (tm.step c).map (liftCfgWith tm m extras) :=
-  liftTM_step_of_parked tm m hex rfl rfl rfl
-    (fun _ h => dite_eq_left h) (fun _ h => dite_eq_right (Nat.not_lt.mpr h))
-
--- ════════════════════════════════════════════════════════════════════════
--- HoareTime lifting
--- ════════════════════════════════════════════════════════════════════════
-
-/-- **Frame rule for `liftTM` Hoare specs** (ghost-pinned extras). If
-    `tm : TM n` satisfies `{pre} tm {post} [≤ b]`, then `tm.liftTM m`
-    satisfies the same triple on its first `n` work tapes while the `m`
-    extra tapes — holding *arbitrary* parked content `extras` (head ≥ 1,
-    reading a non-`▷` symbol) — are preserved **exactly**, with the same
-    time bound. This is what lets lifted 6-tape UTM phases run while tape
-    6 holds the clock. -/
-theorem liftTM_hoareTime_frame {n m : ℕ} (tm : TM n) {pre post : TapePred n}
-    {b : ℕ} (extras : Fin m → Tape)
-    (hex : ∀ j : Fin m, 1 ≤ (extras j).head ∧ (extras j).read ≠ Γ.start)
-    (h : tm.HoareTime pre post b) :
-    (tm.liftTM m).HoareTime
-      (fun inp work out => pre inp (fun i => work (Fin.castAdd m i)) out ∧
-        ∀ j : Fin m, work (Fin.natAdd n j) = extras j)
-      (fun inp work out => post inp (fun i => work (Fin.castAdd m i)) out ∧
-        ∀ j : Fin m, work (Fin.natAdd n j) = extras j)
-      b := by
-  have hex' : ∀ j : Fin m, (extras j).read ≠ Γ.start := fun j => (hex j).2
-  rintro inp work out ⟨hpre, hpark⟩
-  obtain ⟨c', t, ht, hreach, hhalt, hpost⟩ :=
-    h inp (fun i => work (Fin.castAdd m i)) out hpre
-  -- the lifted start configuration is the embedded n-tape start configuration
-  have hstart :
-      ({ state := (tm.liftTM m).qstart, input := inp, work := work, output := out }
-        : Cfg (n + m) (tm.liftTM m).Q)
-      = liftCfgWith tm m extras
-          { state := tm.qstart, input := inp,
-            work := fun i => work (Fin.castAdd m i), output := out } := by
-    refine cfg_ext rfl rfl (fun i => ?_) rfl
-    by_cases hik : i.val < n
-    · rw [liftCfgWith_work_lt tm m extras _ i hik]
-      rfl
-    · rw [liftCfgWith_work_ge tm m extras _ i (Nat.le_of_not_lt hik),
-        ← hpark (extraIdx i (Nat.le_of_not_lt hik))]
-      exact congrArg work (Fin.ext (show i.val = n + (i.val - n) by
-        have := Nat.le_of_not_lt hik; omega))
-  refine ⟨liftCfgWith tm m extras c', t, ht, ?_, ?_, ?_, ?_⟩
-  · rw [hstart]
-    exact reachesIn_map' (tm' := tm.liftTM m) (liftCfgWith tm m extras)
-      (fun a a' ha => by rw [liftTM_step_liftCfgWith tm m hex', ha]; rfl) hreach
-  · exact hhalt
-  · have hwl : (fun i => (liftCfgWith tm m extras c').work (Fin.castAdd m i))
-        = c'.work := by
-      funext i
-      rw [liftCfgWith_work_lt tm m extras c' (Fin.castAdd m i) i.isLt]
-      rfl
-    rw [liftCfgWith_input, liftCfgWith_output, hwl]
-    exact hpost
-  · intro j
-    rw [liftCfgWith_work_ge tm m extras c' (Fin.natAdd n j)
-      (Nat.le_add_right n j.val)]
-    exact congrArg extras (Fin.ext (show n + j.val - n = j.val by omega))
-
-/-- **`liftTM` preserves Hoare specs** (blank extras). Special case of
-    `liftTM_hoareTime_frame`: the extra tapes start and end as the
-    canonical parked blank tape `(Tape.init []).move Dir3.right`. -/
-theorem liftTM_hoareTime {n m : ℕ} (tm : TM n) {pre post : TapePred n} {b : ℕ}
-    (h : tm.HoareTime pre post b) :
-    (tm.liftTM m).HoareTime
-      (fun inp work out => pre inp (fun i => work (Fin.castAdd m i)) out ∧
-        ∀ j : Fin m, work (Fin.natAdd n j) = (Tape.init []).move Dir3.right)
-      (fun inp work out => post inp (fun i => work (Fin.castAdd m i)) out ∧
-        ∀ j : Fin m, work (Fin.natAdd n j) = (Tape.init []).move Dir3.right)
-      b := by
-  have hblank : ((Tape.init []).move Dir3.right).read ≠ Γ.start := by decide
-  exact liftTM_hoareTime_frame tm (fun _ => (Tape.init []).move Dir3.right)
-    (fun _ => ⟨Nat.le_refl 1, hblank⟩) h
 
 -- ════════════════════════════════════════════════════════════════════════
 -- The clock tape and its contents

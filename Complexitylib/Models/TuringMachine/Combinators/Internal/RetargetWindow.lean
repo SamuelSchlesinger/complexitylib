@@ -1,7 +1,7 @@
 /-
 Copyright (c) 2026 Bolton Bailey. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
-Authors: Bolton Bailey
+Authors: Bolton Bailey, Samuel’s dot
 -/
 module
 public import Complexitylib.Models.TuringMachine.Combinators.Internal.Retarget
@@ -159,25 +159,9 @@ theorem retargetOutput_keepsWindow_of_reaches {m : ℕ} (tm : TM m) (c₀ : Cfg 
     (htm : ∀ c, tm.reaches c₀ c → c.WithinDecisionSpace inputLength space) :
     ∀ D, tm.retargetOutput.reaches (tm.retargetCfg c₀) D →
       D.WithinDecisionSpace inputLength (space + 1) := by
-  have key : ∀ D, tm.retargetOutput.reaches (tm.retargetCfg c₀) D →
-      ∃ c, tm.reaches c₀ c ∧ D = tm.retargetCfg c := by
-    intro D hD
-    induction hD with
-    | refl => exact ⟨c₀, Relation.ReflTransGen.refl, rfl⟩
-    | @tail dmid dnext _ hs ih =>
-        obtain ⟨c, hreach, rfl⟩ := ih
-        have hs' : tm.retargetOutput.step (tm.retargetCfg c) = some dnext := hs
-        rw [retargetOutput_step_retargetCfg] at hs'
-        cases hstep : tm.step c with
-        | none =>
-            rw [hstep] at hs'
-            exact absurd hs' (by nofun)
-        | some c' =>
-            rw [hstep] at hs'
-            exact ⟨c', Relation.ReflTransGen.tail hreach hstep,
-              (Option.some_inj.mp hs').symm⟩
   intro D hD
-  obtain ⟨c, hreach, rfl⟩ := key D hD
+  obtain ⟨c, hreach, rfl⟩ := reaches_map_reflect (tm' := tm.retargetOutput) tm.retargetCfg
+    (retargetOutput_step_retargetCfg tm) c₀ D hD
   have hc := htm c hreach
   refine ⟨⟨fun i => ?_, ?_⟩, ?_⟩
   · by_cases h : i.val < m
@@ -259,25 +243,9 @@ theorem liftTM_keepsWindow_of_reaches {m' : ℕ} (tm : TM m') (m : ℕ) (c₀ : 
     (htm : ∀ c, tm.reaches c₀ c → c.WithinDecisionSpace inputLength space) :
     ∀ D, (tm.liftTM m).reaches (tm.liftCfg m c₀) D →
       D.WithinDecisionSpace inputLength space := by
-  have key : ∀ D, (tm.liftTM m).reaches (tm.liftCfg m c₀) D →
-      ∃ c, tm.reaches c₀ c ∧ D = tm.liftCfg m c := by
-    intro D hD
-    induction hD with
-    | refl => exact ⟨c₀, Relation.ReflTransGen.refl, rfl⟩
-    | @tail dmid dnext _ hstp ih =>
-        obtain ⟨c, hreach, rfl⟩ := ih
-        have hs' : (tm.liftTM m).step (tm.liftCfg m c) = some dnext := hstp
-        rw [liftTM_step_liftCfg] at hs'
-        cases hstep : tm.step c with
-        | none =>
-            rw [hstep] at hs'
-            exact absurd hs' (by nofun)
-        | some c' =>
-            rw [hstep] at hs'
-            exact ⟨c', Relation.ReflTransGen.tail hreach hstep,
-              (Option.some_inj.mp hs').symm⟩
   intro D hD
-  obtain ⟨c, hreach, rfl⟩ := key D hD
+  obtain ⟨c, hreach, rfl⟩ := reaches_map_reflect (tm' := tm.liftTM m) (tm.liftCfg m)
+    (liftTM_step_liftCfg tm m) c₀ D hD
   have hc := htm c hreach
   refine ⟨⟨fun i => ?_, ?_⟩, ?_⟩
   · by_cases hi : i.val < m'
