@@ -1,10 +1,11 @@
 /-
 Copyright (c) 2026 Bolton Bailey. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
-Authors: Bolton Bailey
+Authors: Bolton Bailey, Samuel’s dot
 -/
 module
 public import Complexitylib.Classes.Containments.Internal.SavitchBits
+public import Complexitylib.Encoding.Stack
 
 /-!
 # The tape of Savitch's stack machine
@@ -106,9 +107,7 @@ def frM (f : List Bool) : List Bool :=
 /-! ## Stacks -/
 
 /-- A stack of frames, top first. -/
-def encStack : List (List Bool) → List Bool
-  | [] => []
-  | f :: fs => pair f (encStack fs)
+def encStack : List (List Bool) → List Bool := StackEncoding.encode id
 
 @[simp] theorem encStack_nil : encStack [] = [] := rfl
 
@@ -126,28 +125,20 @@ def stkRest (S : List Bool) : List Bool := pairSnd S
 @[simp] theorem stkRest_pair (f g : List Bool) : stkRest (pair f g) = g := by simp [stkRest]
 
 theorem stkTop_cons (f : List Bool) (fs : List (List Bool)) :
-    stkTop (encStack (f :: fs)) = f := by simp
+    stkTop (encStack (f :: fs)) = f :=
+  StackEncoding.pairFst_encode_cons id f fs
 
 theorem stkRest_cons (f : List Bool) (fs : List (List Bool)) :
-    stkRest (encStack (f :: fs)) = encStack fs := by simp
+    stkRest (encStack (f :: fs)) = encStack fs :=
+  StackEncoding.pairSnd_encode_cons id f fs
 
 /-- A stack is empty exactly when its encoding is. -/
-theorem encStack_eq_nil_iff (fs : List (List Bool)) : encStack fs = [] ↔ fs = [] := by
-  cases fs with
-  | nil => exact ⟨fun _ => rfl, fun _ => rfl⟩
-  | cons f fs =>
-      refine ⟨fun h => absurd h ?_, fun h => absurd h (by simp)⟩
-      rw [encStack_cons]
-      intro hc
-      have := congrArg List.length hc
-      rw [pair_length] at this
-      simp at this
+theorem encStack_eq_nil_iff (fs : List (List Bool)) : encStack fs = [] ↔ fs = [] :=
+  StackEncoding.encode_eq_nil_iff id fs
 
 @[simp] theorem encStack_length (fs : List (List Bool)) :
-    (encStack fs).length = fs.foldr (fun f n => 2 * f.length + 2 + n) 0 := by
-  induction fs with
-  | nil => rfl
-  | cons f fs ih => rw [encStack_cons, pair_length, ih, List.foldr_cons]
+    (encStack fs).length = fs.foldr (fun f n => 2 * f.length + 2 + n) 0 :=
+  StackEncoding.length_encode id fs
 
 /-! ## The state -/
 

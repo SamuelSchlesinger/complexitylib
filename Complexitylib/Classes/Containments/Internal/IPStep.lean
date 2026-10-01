@@ -1,7 +1,7 @@
 /-
 Copyright (c) 2026 Bolton Bailey. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
-Authors: Bolton Bailey
+Authors: Bolton Bailey, Samuel’s dot
 -/
 module
 public import Complexitylib.Classes.Containments.Internal.IPEnc
@@ -124,11 +124,11 @@ def sRest (S : List Bool) : List Bool := pairSnd S
 @[simp] theorem sRest_pair (y S : List Bool) : sRest (pair y S) = S := by
   rw [sRest, pairSnd_pair]
 
-theorem sTop_cons (f : Frm) (fs : List Frm) : sTop (encStk (f :: fs)) = encFrm f := by
-  rw [encStk_cons, sTop_pair]
+theorem sTop_cons (f : Frm) (fs : List Frm) : sTop (encStk (f :: fs)) = encFrm f :=
+  StackEncoding.pairFst_encode_cons encFrm f fs
 
-theorem sRest_cons (f : Frm) (fs : List Frm) : sRest (encStk (f :: fs)) = encStk fs := by
-  rw [encStk_cons, sRest_pair]
+theorem sRest_cons (f : Frm) (fs : List Frm) : sRest (encStk (f :: fs)) = encStk fs :=
+  StackEncoding.pairSnd_encode_cons encFrm f fs
 
 /-! ## The encoded step -/
 
