@@ -1,7 +1,7 @@
 /-
 Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
-Authors: Samuel Schlesinger
+Authors: Samuel Schlesinger, Samuel’s dot
 -/
 
 module
@@ -47,6 +47,25 @@ theorem trace_invariant_internal (tm : NTM n) (T : ℕ)
       · exact initial
       · intro time htime current hcurrent
         simpa using step time (Nat.lt_succ_of_lt htime) current hcurrent
+
+theorem trace_map_prefix_internal {n' : ℕ} (source : NTM n) (target : NTM n')
+    (wrap : Cfg n source.Q → Cfg n' target.Q)
+    (step : ∀ (choice : Bool) (c : Cfg n source.Q), c.state ≠ source.qhalt →
+      target.trace 1 (fun _ => choice) (wrap c) =
+        wrap (source.trace 1 (fun _ => choice) c))
+    (T : ℕ) (choices : Fin T → Bool) (c : Cfg n source.Q)
+    (running : ∀ t (ht : t < T),
+      (source.trace t (fun i => choices ⟨i.val, Nat.lt_trans i.isLt ht⟩) c).state ≠
+        source.qhalt) :
+    target.trace T choices (wrap c) = wrap (source.trace T choices c) := by
+  induction T with
+  | zero => rfl
+  | succ T ih =>
+      rw [trace_snoc_internal target, trace_snoc_internal source]
+      have hprefix := ih (fun i => choices i.castSucc) (fun t ht =>
+        running t (Nat.lt_succ_of_lt ht))
+      rw [hprefix]
+      exact step (choices (Fin.last T)) _ (running T (Nat.lt_succ_self T))
 
 end NTM
 
