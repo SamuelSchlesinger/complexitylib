@@ -128,16 +128,9 @@ theorem retargetWrap_work_last (M : TM k) (realInput : Tape) (c : Cfg k M.Q) :
 private theorem tape_writeBack_eq_move (t : Tape) (d : Dir3)
     (h : t.head = 0 ∨ t.read ≠ Γ.start) :
     t.writeAndMove (readBackWrite t.read).toΓ d = t.move d := by
-  show (t.write (readBackWrite t.read).toΓ).move d = t.move d
-  have hwrite : t.write (readBackWrite t.read).toΓ = t := by
-    simp only [Tape.write]
-    rcases h with hh | hne
-    · simp [hh]
-    · split
-      · rfl
-      · rw [toΓ_readBackWrite_of_ne_start hne]
-        simp [Tape.read, Function.update_eq_self]
-  rw [hwrite]
+  rcases h with hzero | hread
+  · simp only [Tape.writeAndMove, Tape.write, hzero, ↓reduceIte]
+  · exact writeAndMove_readBack t hread d
 
 /-- One step of `M` corresponds to one step of `retargetInput M` through
     `retargetWrap`. The real-input tape drifts by `move (idleDir · )`.
@@ -217,15 +210,15 @@ theorem retargetInput_reachesIn_of_reachesIn (M : TM k)
       (retargetInput M).reachesIn t
         (retargetWrap M realInput c)
         (retargetWrap M finalReal c') := by
-  induction hreach generalizing realInput with
-  | zero => exact ⟨realInput, .zero⟩
-  | @step c₀ c_mid _ _ hstep hrest ih =>
-    obtain ⟨hinp', hwork', hout'⟩ :=
-      Tape.StartInvariant.step M hstep hinp hwork hout
-    have hcommute := retargetInput_step_commute M hstep realInput hinp
-    obtain ⟨finalReal', hreach'⟩ := ih hinp' hwork' hout'
-      (realInput.move (idleDir realInput.read))
-    exact ⟨finalReal', .step hcommute hreach'⟩
+  obtain ⟨_, hr, r, rfl, _⟩ := reachesIn_transport (tm' := retargetInput M)
+    (fun c d => ∃ r, d = retargetWrap M r c ∧ Tape.StartInvariant c.input ∧
+      (∀ i, Tape.StartInvariant (c.work i)) ∧ Tape.StartInvariant c.output)
+    (by
+      rintro c c' _ ⟨r, rfl, hi, hw, ho⟩ hs
+      exact ⟨_, retargetInput_step_commute M hs r hi, _, rfl,
+        Tape.StartInvariant.step M hs hi hw ho⟩)
+    hreach ⟨realInput, rfl, hinp, hwork, hout⟩
+  exact ⟨r, hr⟩
 
 -- ════════════════════════════════════════════════════════════════════════
 -- User-facing: retargetInput M decides on a virtual input
