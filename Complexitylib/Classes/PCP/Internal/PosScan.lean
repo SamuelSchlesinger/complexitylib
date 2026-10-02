@@ -6,6 +6,7 @@ Authors: Bolton Bailey
 module
 public import Complexitylib.Classes.PCP.Internal.DataScan
 public import Complexitylib.Classes.PCP.Internal.BinCounter
+import Complexitylib.Tactic.PolyTime
 
 /-!
 # Reading a verifier's query list
@@ -39,19 +40,9 @@ namespace Complexity
 the string the scan consumes. -/
 def posInner (e : List Bool) : List Bool := (e.drop 1).take (e.length - 2)
 
-theorem posInner_mem_FP {a : List Bool → List Bool} (ha : a ∈ FP) :
+@[polytime] theorem posInner_mem_FP {a : List Bool → List Bool} (ha : a ∈ FP) :
     (fun z => posInner (a z)) ∈ FP := by
-  have hdrop : (fun z => dropOne (a z)) ∈ FP := dropOneFn_mem_FP ha
-  have hlen : (fun z => List.replicate ((a z).length - 2) false) ∈ FP := by
-    have h1 : (fun z => dropOne (dropOne (a z))) ∈ FP := dropOneFn_mem_FP hdrop
-    have := zeroBlockFn_mem_FP h1
-    refine mem_FP_of_eq this fun z => ?_
-    congr 1
-    rw [dropOne, dropOne, List.length_drop, List.length_drop]
-    omega
-  have := Cobham.takeLenFn_mem_FP hlen hdrop
-  refine mem_FP_of_eq this fun z => ?_
-  rw [posInner, dropOne, List.length_replicate]
+  polytime [posInner]
 
 /-- The `i`-th entry of an encoded list, as its own serialization. -/
 noncomputable def posAt (e : List Bool) (i : ℕ) : List Bool :=
@@ -61,19 +52,18 @@ noncomputable def posAt (e : List Bool) (i : ℕ) : List Bool :=
 noncomputable def posCount (e : List Bool) : List Bool :=
   DataScan.childCount DataScan.scanPoly (DataScan.scanArg 0 (posInner e))
 
-theorem posAt_mem_FP {a b : List Bool → List Bool} (ha : a ∈ FP) (hb : b ∈ FP) :
+@[polytime] theorem posAt_mem_FP {a b : List Bool → List Bool} (ha : a ∈ FP) (hb : b ∈ FP) :
     (fun z => posAt (b z) (a z).length) ∈ FP := by
-  have harg : (fun z => DataScan.scanArg (a z).length (posInner (b z))) ∈ FP :=
-    DataScan.scanArg_mem_FP ha (posInner_mem_FP hb)
-  have := mem_FP_comp harg (DataScan.childOf_mem_FP DataScan.scanPoly)
-  exact this
+  polytime [posAt, DataScan.scanArg]
 
-theorem posCount_mem_FP {b : List Bool → List Bool} (hb : b ∈ FP) :
+/-- An encoded entry can be read at any index computable in unary. -/
+@[polytime] theorem posAt_mem_FP_of_unary {i : List Bool → ℕ} {b : List Bool → List Bool}
+    (hi : UnaryFn i) (hb : b ∈ FP) : (fun z => posAt (b z) (i z)) ∈ FP := by
+  simpa only [List.length_replicate] using posAt_mem_FP hi.mem_FP hb
+
+@[polytime] theorem posCount_mem_FP {b : List Bool → List Bool} (hb : b ∈ FP) :
     (fun z => posCount (b z)) ∈ FP := by
-  have harg : (fun z => DataScan.scanArg (([] : List Bool)).length (posInner (b z))) ∈ FP :=
-    DataScan.scanArg_mem_FP (constFn_mem_FP []) (posInner_mem_FP hb)
-  have := mem_FP_comp harg (DataScan.childCount_mem_FP DataScan.scanPoly)
-  exact this
+  polytime [posCount, DataScan.scanArg]
 
 /-! ### What the scan reads -/
 

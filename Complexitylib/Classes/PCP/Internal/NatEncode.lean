@@ -6,6 +6,7 @@ Authors: Bolton Bailey
 module
 public import Complexitylib.Classes.PCP.Internal.StripTrailing
 public import Complexitylib.Classes.PCP.Internal.PosScan
+import Complexitylib.Tactic.PolyTime
 
 /-!
 # Writing out an encoded bit list
@@ -68,15 +69,11 @@ def blitZero (z : List Bool) : List Bool :=
 def blitOne (z : List Bool) : List Bool :=
   [false, false, true, true] ++ pairSnd (pairFst z)
 
-theorem blitZero_mem_FP : blitZero ∈ FP := by
-  have h : (fun z : List Bool => pairSnd (pairFst z)) ∈ FP :=
-    mem_FP_comp Cobham.fstBlock_mem_FP Cobham.sndBlock_mem_FP
-  exact Cobham.appendFn_mem_FP (constFn_mem_FP [false, true]) h
+@[polytime] theorem blitZero_mem_FP : blitZero ∈ FP := by
+  polytime [blitZero]
 
-theorem blitOne_mem_FP : blitOne ∈ FP := by
-  have h : (fun z : List Bool => pairSnd (pairFst z)) ∈ FP :=
-    mem_FP_comp Cobham.fstBlock_mem_FP Cobham.sndBlock_mem_FP
-  exact Cobham.appendFn_mem_FP (constFn_mem_FP [false, false, true, true]) h
+@[polytime] theorem blitOne_mem_FP : blitOne ∈ FP := by
+  polytime [blitOne]
 
 theorem length_flatMap_boolBits (l : List Bool) :
     (l.flatMap boolBits).length ≤ 4 * l.length := by
@@ -127,7 +124,7 @@ def flatBitsFn (z : List Bool) : List Bool :=
   Cobham.recFoldClamp blitZero blitOne (4 * z.length) [] (pairFst z)
     (pairSnd z)
 
-theorem flatBitsFn_mem_FP : flatBitsFn ∈ FP := by
+@[polytime] theorem flatBitsFn_mem_FP : flatBitsFn ∈ FP := by
   have := Cobham.recFoldClamp_mem_FP blitZero_mem_FP blitOne_mem_FP
     (constFn_mem_FP []) (Polynomial.C 4 * Polynomial.X)
   refine mem_FP_of_eq this fun z => ?_
@@ -143,12 +140,8 @@ theorem flatBitsFn_eq (z : List Bool) :
 /-- **The encoding of a bit list, in polynomial time.** -/
 def encodeListFn (z : List Bool) : List Bool := false :: flatBitsFn z ++ [true]
 
-theorem encodeListFn_mem_FP : encodeListFn ∈ FP := by
-  have hcons := mem_FP_comp flatBitsFn_mem_FP (Cobham.cons_mem_FP false)
-  have := Cobham.appendFn_mem_FP hcons (constFn_mem_FP [true])
-  refine mem_FP_of_eq this fun z => ?_
-  rw [encodeListFn]
-  simp
+@[polytime] theorem encodeListFn_mem_FP : encodeListFn ∈ FP := by
+  polytime [encodeListFn]
 
 theorem encodeListFn_eq (z : List Bool) :
     encodeListFn z = DataEncode.bitstringEncode (pairSnd z) := by
@@ -162,26 +155,8 @@ noncomputable def natEncodeFn (z : List Bool) : List Bool :=
   encodeListFn (pair [] (stripFn (pair []
     (coinStr (pairFst z).length (pairSnd z).length))))
 
-theorem natEncodeFn_mem_FP : natEncodeFn ∈ FP := by
-  have hw : (fun z : List Bool =>
-      List.replicate (pairFst z).length true) ∈ FP := by
-    have := mem_FP_comp Cobham.fstBlock_mem_FP unaryLength_mem_FP
-    exact this
-  have hv : (fun z : List Bool =>
-      List.replicate (pairSnd z).length true) ∈ FP := by
-    have := mem_FP_comp Cobham.sndBlock_mem_FP unaryLength_mem_FP
-    exact this
-  have hcoin := coinStr_mem_FP hw hv
-  have h1 : (fun z => pair [] (coinStr (pairFst z).length
-      (pairSnd z).length)) ∈ FP :=
-    Cobham.pairFn_mem_FP (constFn_mem_FP []) hcoin
-  have h2 := mem_FP_comp h1 stripFn_mem_FP
-  have h3 : (fun z => pair [] (stripFn (pair []
-      (coinStr (pairFst z).length (pairSnd z).length)))) ∈ FP := by
-    refine Cobham.pairFn_mem_FP (constFn_mem_FP []) ?_
-    exact h2
-  have := mem_FP_comp h3 encodeListFn_mem_FP
-  exact this
+@[polytime] theorem natEncodeFn_mem_FP : natEncodeFn ∈ FP := by
+  polytime [natEncodeFn]
 
 /-- **It really is the number's encoding**, whenever the width holds the
 value. -/

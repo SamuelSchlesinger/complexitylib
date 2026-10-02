@@ -7,6 +7,7 @@ module
 public import Complexitylib.Classes.PCP.Internal.AlgLevel
 public import Complexitylib.Classes.PCP.Internal.TowerTable
 public import Complexitylib.Classes.PCP.Internal.FamilyFin
+import Complexitylib.Tactic.PolyTime
 
 /-!
 # The expander's table, for a requested size
@@ -73,7 +74,7 @@ theorem eval_tableWidth (n : ℕ) :
     Polynomial.eval_X]
 
 /-- **Writing the table for a requested size is polynomial time.** -/
-theorem famTableFn_mem_FP : F.famTableFn p ∈ FP := by
+@[polytime] theorem famTableFn_mem_FP : F.famTableFn p ∈ FP := by
   refine F.table_mem_FP (levelFn_mem_FP (F.deg ^ 4) p)
     (polyRulerFn_mem_FP F.tableWidth id_mem_FP) ?_
   intro z l hl
@@ -143,37 +144,8 @@ noncomputable def famRotFn (z : List Bool) : List Bool :=
       (pair (marks v) (marks i)))
     (pair (marks v) (marks i))
 
-theorem famRotFn_mem_FP : F.famRotFn p ∈ FP := by
-  have hn : (fun z : List Bool => pairFst z) ∈ FP := Cobham.fstBlock_mem_FP
-  have hv : (fun z : List Bool => pairFst (pairSnd z)) ∈ FP :=
-    mem_FP_of_eq (mem_FP_comp Cobham.sndBlock_mem_FP Cobham.fstBlock_mem_FP) fun _ => rfl
-  have hi : (fun z : List Bool => pairSnd (pairSnd z)) ∈ FP :=
-    mem_FP_of_eq (mem_FP_comp Cobham.sndBlock_mem_FP Cobham.sndBlock_mem_FP) fun _ => rfl
-  have hN : (fun z : List Bool => sizeFn (F.deg ^ 4) p (pairFst z)) ∈ FP :=
-    mem_FP_of_eq (mem_FP_comp hn (sizeFn_mem_FP _ p)) fun _ => rfl
-  have hT : (fun z : List Bool => F.famTableFn p (pairFst z)) ∈ FP :=
-    mem_FP_of_eq (mem_FP_comp hn (F.famTableFn_mem_FP p)) fun _ => rfl
-  have hm := Cobham.appendFn_mem_FP
-    (mem_FP_of_eq (mem_FP_comp (Cobham.pairFn_mem_FP hn hN) divFn2_mem_FP) fun _ => rfl)
-    (constFn_mem_FP [true])
-  have hs := divC_mem_FP hi F.fitD
-  have hc := modC_mem_FP hi F.fitD
-  have hlift := Cobham.appendFn_mem_FP hv (mulLen_mem_FP hs hn)
-  have hidx := Cobham.appendFn_mem_FP
-    (mulLen_mem_FP hlift (constFn_mem_FP (List.replicate F.fitD true))) hc
-  have hy1 := tableFst_mem_FP hidx hT
-  have hy2 := tableSnd_mem_FP hidx hT
-  have hmod := mem_FP_of_eq
-    (mem_FP_comp (Cobham.pairFn_mem_FP hn hy1) modFn2_mem_FP) fun _ => rfl
-  have hdiv := mem_FP_of_eq
-    (mem_FP_comp (Cobham.pairFn_mem_FP hn hy1) divFn2_mem_FP) fun _ => rfl
-  have hstep := Cobham.pairFn_mem_FP (marks_mem_FP hmod)
-    (marks_mem_FP (Cobham.appendFn_mem_FP hy2 (mulC_mem_FP hdiv F.fitD)))
-  have hstay := Cobham.pairFn_mem_FP (marks_mem_FP hv) (marks_mem_FP hi)
-  have hinner := ifLtLen_mem_FP hlift hN hstep hstay
-  have houter := ifLtLen_mem_FP hi
-    (mulLen_mem_FP hm (constFn_mem_FP (List.replicate F.fitD true))) hinner hstay
-  exact mem_FP_of_eq houter fun _ => rfl
+@[polytime] theorem famRotFn_mem_FP : F.famRotFn p ∈ FP := by
+  polytime [famRotFn]
 
 /-- **The rotation function runs the family's rotation map.** -/
 theorem famRotFn_eq (hd : 1 < F.deg) (n v i : ℕ)

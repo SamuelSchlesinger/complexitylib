@@ -7,6 +7,7 @@ module
 public import Complexitylib.Classes.PCP.Internal.CNFTokens
 public import Complexitylib.SAT.ThreeCNF
 public import Complexitylib.Classes.PCP.Internal.MaxLoop
+import Complexitylib.Tactic.PolyTime
 
 /-!
 # The largest variable index, by slot
@@ -105,20 +106,8 @@ noncomputable def slotVar (w : List Bool) : List Bool :=
   litVarFn (pair (pair (divFn [false, false, false] (pairSnd w))
     (modFn [false, false, false] (pairSnd w))) (pairFst w))
 
-theorem slotVar_mem_FP : slotVar ∈ FP := by
-  have hs : (fun w : List Bool => pairSnd w) ∈ FP := Cobham.sndBlock_mem_FP
-  have hf : (fun w : List Bool => pairFst w) ∈ FP := Cobham.fstBlock_mem_FP
-  have hd : (fun w : List Bool => divFn [false, false, false] (pairSnd w)) ∈ FP := by
-    have := mem_FP_comp hs (divFn_mem_FP [false, false, false])
-    refine mem_FP_of_eq this fun w => ?_
-    rw [Function.comp_apply]
-  have hm : (fun w : List Bool => modFn [false, false, false] (pairSnd w)) ∈ FP := by
-    have := mem_FP_comp hs (modFn_mem_FP [false, false, false])
-    refine mem_FP_of_eq this fun w => ?_
-    rw [Function.comp_apply]
-  have := mem_FP_comp (Cobham.pairFn_mem_FP (Cobham.pairFn_mem_FP hd hm) hf) litVarFn_mem_FP
-  refine mem_FP_of_eq this fun w => ?_
-  rw [Function.comp_apply, slotVar]
+@[polytime] theorem slotVar_mem_FP : slotVar ∈ FP := by
+  polytime [slotVar]
 
 theorem slotVar_eq (φ : CNF) {i j p : ℕ} (hj : j < φ.length) (hp : p < (φ[j]'hj).length)
     (hdj : i / 3 = j) (hdp : i % 3 = p) :

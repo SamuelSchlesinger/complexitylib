@@ -5,6 +5,7 @@ Authors: Bolton Bailey
 -/
 module
 public import Complexitylib.Classes.PCP.Internal.ListEncode
+import Complexitylib.Tactic.PolyTime
 
 /-!
 # A verifier's query list from its positions
@@ -32,10 +33,9 @@ namespace Complexity
 noncomputable def posEntryFn (P : List Bool → List Bool) (w : List Bool) : List Bool :=
   natEncodeFn (pair (P w) (P w))
 
-theorem posEntryFn_mem_FP {P : List Bool → List Bool} (hP : P ∈ FP) :
+@[polytime] theorem posEntryFn_mem_FP {P : List Bool → List Bool} (hP : P ∈ FP) :
     posEntryFn P ∈ FP := by
-  have := mem_FP_comp (Cobham.pairFn_mem_FP hP hP) natEncodeFn_mem_FP
-  exact this
+  polytime [posEntryFn]
 
 theorem posEntryFn_eq {P : List Bool → List Bool} (w : List Bool) :
     posEntryFn P w = DataEncode.bitstringEncode ((P w).length) := by

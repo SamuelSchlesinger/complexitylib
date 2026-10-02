@@ -7,6 +7,7 @@ module
 public import Complexitylib.Classes.PCP.Internal.UnaryList
 public import Complexitylib.Classes.PCP.Internal.ConstraintGraph
 public import Complexitylib.Classes.PCP.Internal.Materialize
+import Complexitylib.Tactic.PolyTime
 
 /-!
 # A constraint graph as a string
@@ -162,11 +163,9 @@ edge record. -/
 noncomputable def buildGraph (nv cnt E : List Bool → List Bool) (z : List Bool) : List Bool :=
   pair (nv z) (listEncFn E (pair (cnt z) z))
 
-theorem buildGraph_mem_FP {nv cnt E : List Bool → List Bool} (hnv : nv ∈ FP)
+@[polytime] theorem buildGraph_mem_FP {nv cnt E : List Bool → List Bool} (hnv : nv ∈ FP)
     (hcnt : cnt ∈ FP) (hE : E ∈ FP) : buildGraph nv cnt E ∈ FP := by
-  have harg := Cobham.pairFn_mem_FP hcnt id_mem_FP
-  have hlist := mem_FP_comp harg (materialize_mem_FP hE)
-  exact mem_FP_of_eq (Cobham.pairFn_mem_FP hnv hlist) fun _ => rfl
+  polytime [buildGraph]
 
 /-- **The rule writes the graph.** -/
 theorem buildGraph_eq {nv cnt E : List Bool → List Bool} {z : List Bool}
@@ -185,25 +184,25 @@ theorem buildGraph_eq {nv cnt E : List Bool → List Bool} {z : List Bool}
 
 /-! ### Reading one, in polynomial time -/
 
-theorem gVertsFn_mem_FP {g : List Bool → List Bool} (hg : g ∈ FP) :
-    (fun z => marks (pairFst (g z))) ∈ FP :=
-  marks_mem_FP (mem_FP_comp hg Cobham.fstBlock_mem_FP)
+@[polytime] theorem gVertsFn_mem_FP {g : List Bool → List Bool} (hg : g ∈ FP) :
+    (fun z => marks (pairFst (g z))) ∈ FP := by
+  polytime
 
-theorem gEdgesFn_mem_FP {g : List Bool → List Bool} (hg : g ∈ FP) :
-    (fun z => posCount (pairSnd (g z))) ∈ FP :=
-  posCount_mem_FP (mem_FP_comp hg Cobham.sndBlock_mem_FP)
+@[polytime] theorem gEdgesFn_mem_FP {g : List Bool → List Bool} (hg : g ∈ FP) :
+    (fun z => posCount (pairSnd (g z))) ∈ FP := by
+  polytime
 
-theorem gTailFn_mem_FP {f g : List Bool → List Bool} (hf : f ∈ FP) (hg : g ∈ FP) :
-    (fun z => recFst (pairSnd (g z)) (f z).length) ∈ FP :=
-  recFst_mem_FP hf (mem_FP_comp hg Cobham.sndBlock_mem_FP)
+@[polytime] theorem gTailFn_mem_FP {f g : List Bool → List Bool} (hf : f ∈ FP) (hg : g ∈ FP) :
+    (fun z => recFst (pairSnd (g z)) (f z).length) ∈ FP := by
+  polytime
 
-theorem gHeadFn_mem_FP {f g : List Bool → List Bool} (hf : f ∈ FP) (hg : g ∈ FP) :
-    (fun z => recSnd (pairSnd (g z)) (f z).length) ∈ FP :=
-  recSnd_mem_FP hf (mem_FP_comp hg Cobham.sndBlock_mem_FP)
+@[polytime] theorem gHeadFn_mem_FP {f g : List Bool → List Bool} (hf : f ∈ FP) (hg : g ∈ FP) :
+    (fun z => recSnd (pairSnd (g z)) (f z).length) ∈ FP := by
+  polytime
 
-theorem gCodeFn_mem_FP {f g : List Bool → List Bool} (hf : f ∈ FP) (hg : g ∈ FP) :
-    (fun z => recThd (pairSnd (g z)) (f z).length) ∈ FP :=
-  recThd_mem_FP hf (mem_FP_comp hg Cobham.sndBlock_mem_FP)
+@[polytime] theorem gCodeFn_mem_FP {f g : List Bool → List Bool} (hf : f ∈ FP) (hg : g ∈ FP) :
+    (fun z => recThd (pairSnd (g z)) (f z).length) ∈ FP := by
+  polytime
 
 theorem length_marks_fstBlock (z : List Bool) :
     (marks (pairFst z)).length = gVerts z := by

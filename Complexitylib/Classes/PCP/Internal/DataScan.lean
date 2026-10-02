@@ -10,6 +10,7 @@ public import Complexitylib.Classes.P.UnaryLength
 public import Complexitylib.Classes.Containments.Internal.BinArith
 public import Complexitylib.Encoding.DataEncode
 public import Complexitylib.Encoding.DataScan
+import Complexitylib.Tactic.PolyTime
 
 /-!
 # Scanning a serialized `Data` value
@@ -92,34 +93,29 @@ def initState : List Bool := pair [] (pair [] [])
 
 /-! ### Polynomial time -/
 
-theorem wsOf_mem_FP : wsOf ∈ FP :=
-  mem_FP_comp Cobham.fstBlock_mem_FP Cobham.fstBlock_mem_FP
+@[polytime] theorem wsOf_mem_FP : wsOf ∈ FP := by
+  polytime [wsOf]
 
-theorem stOf_mem_FP : stOf ∈ FP :=
-  mem_FP_comp Cobham.fstBlock_mem_FP Cobham.sndBlock_mem_FP
+@[polytime] theorem stOf_mem_FP : stOf ∈ FP := by
+  polytime [stOf]
 
-theorem depthOf_mem_FP : depthOf ∈ FP :=
-  mem_FP_comp stOf_mem_FP Cobham.fstBlock_mem_FP
+@[polytime] theorem depthOf_mem_FP : depthOf ∈ FP := by
+  polytime [depthOf]
 
-theorem countOf_mem_FP : countOf ∈ FP :=
-  mem_FP_comp (mem_FP_comp stOf_mem_FP Cobham.sndBlock_mem_FP) Cobham.fstBlock_mem_FP
+@[polytime] theorem countOf_mem_FP : countOf ∈ FP := by
+  polytime [countOf]
 
-theorem accOf_mem_FP : accOf ∈ FP :=
-  mem_FP_comp (mem_FP_comp stOf_mem_FP Cobham.sndBlock_mem_FP) Cobham.sndBlock_mem_FP
+@[polytime] theorem accOf_mem_FP : accOf ∈ FP := by
+  polytime [accOf]
 
-theorem collect_mem_FP (b : Bool) : (fun z => collect z b) ∈ FP :=
-  Cobham.selectHeadFn_mem_FP (eqFlagFn_mem_FP countOf_mem_FP wsOf_mem_FP)
-    (Cobham.appendFn_mem_FP accOf_mem_FP (constFn_mem_FP [b])) accOf_mem_FP
+@[polytime] theorem collect_mem_FP (b : Bool) : (fun z => collect z b) ∈ FP := by
+  polytime [collect]
 
-theorem openStep_mem_FP : openStep ∈ FP :=
-  Cobham.pairFn_mem_FP (mem_FP_comp depthOf_mem_FP (Cobham.cons_mem_FP true))
-    (Cobham.pairFn_mem_FP countOf_mem_FP (collect_mem_FP false))
+@[polytime] theorem openStep_mem_FP : openStep ∈ FP := by
+  polytime [openStep]
 
-theorem closeStep_mem_FP : closeStep ∈ FP := by
-  have hdrop : (fun z => dropOne (depthOf z)) ∈ FP := dropOneFn_mem_FP depthOf_mem_FP
-  refine Cobham.pairFn_mem_FP hdrop (Cobham.pairFn_mem_FP ?_ (collect_mem_FP true))
-  exact Cobham.selectHeadFn_mem_FP (emptyFlagFn_mem_FP hdrop)
-    (mem_FP_comp countOf_mem_FP (Cobham.cons_mem_FP true)) countOf_mem_FP
+@[polytime] theorem closeStep_mem_FP : closeStep ∈ FP := by
+  polytime [closeStep]
 
 /-- **The scan.** On `pair (unary i) s` it runs the two steps over `s`, keeping
 every intermediate state within `p.eval` bits, and returns the collected bits. -/
@@ -128,7 +124,7 @@ def childOf (p : Polynomial ℕ) (z : List Bool) : List Bool :=
     (Cobham.recFoldClamp openStep closeStep (p.eval z.length) initState
       (pairFst z) (pairSnd z)))
 
-theorem childOf_mem_FP (p : Polynomial ℕ) : childOf p ∈ FP := by
+@[polytime] theorem childOf_mem_FP (p : Polynomial ℕ) : childOf p ∈ FP := by
   have hfold := Cobham.recFoldClamp_mem_FP openStep_mem_FP closeStep_mem_FP
     (constFn_mem_FP initState) p
   exact mem_FP_comp (mem_FP_comp hfold Cobham.sndBlock_mem_FP) Cobham.sndBlock_mem_FP
@@ -290,15 +286,9 @@ noncomputable def scanPoly : Polynomial ℕ := Polynomial.C 5 * Polynomial.X + P
 order the fold consumes. -/
 def scanArg (i : ℕ) (s : List Bool) : List Bool := pair (List.replicate i true) s.reverse
 
-theorem scanArg_mem_FP {a b : List Bool → List Bool} (ha : a ∈ FP) (hb : b ∈ FP) :
+@[polytime] theorem scanArg_mem_FP {a b : List Bool → List Bool} (ha : a ∈ FP) (hb : b ∈ FP) :
     (fun z => scanArg (a z).length (b z)) ∈ FP := by
-  have hrep : (fun z => List.replicate (a z).length true) ∈ FP := by
-    have := mem_FP_comp ha unaryLength_mem_FP
-    exact this
-  have hrev : (fun z => (b z).reverse) ∈ FP := by
-    have := mem_FP_comp hb reverse_mem_FP
-    exact this
-  exact Cobham.pairFn_mem_FP hrep hrev
+  polytime [scanArg]
 
 /-- **The scan extracts the child.** Reading the concatenated serializations of
 `xs` returns the `i`-th one, or nothing when there is no such child. -/
@@ -320,7 +310,7 @@ def childCount (p : Polynomial ℕ) (z : List Bool) : List Bool :=
     (Cobham.recFoldClamp openStep closeStep (p.eval z.length) initState
       (pairFst z) (pairSnd z)))
 
-theorem childCount_mem_FP (p : Polynomial ℕ) : childCount p ∈ FP := by
+@[polytime] theorem childCount_mem_FP (p : Polynomial ℕ) : childCount p ∈ FP := by
   have hfold := Cobham.recFoldClamp_mem_FP openStep_mem_FP closeStep_mem_FP
     (constFn_mem_FP initState) p
   exact mem_FP_comp (mem_FP_comp hfold Cobham.sndBlock_mem_FP) Cobham.fstBlock_mem_FP

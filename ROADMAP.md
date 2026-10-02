@@ -109,10 +109,15 @@ In order. Each item says why it matters and roughly how large it is.
    same problem. Needed: `FL` closed under composition; a compiled loop
    language over O(1) registers of O(log n) bits with one correctness theorem;
    and a circuit encoding whose gate references are affine in loop counters.
-5. **Proof automation.** Tag the `FP` and `PolyBound` closure rules for
-   `fun_prop`; the PCP development alone applies them by hand about 900
-   times. Try `grind` on frame, `Function.update`, and index goals. The
-   library currently has no custom tactics or simp sets.
+5. **Proof automation.** `Complexitylib.Tactic.PolyTime` adapts the CSLib
+   crypto branch's `polytime` approach to `FP`, `UnaryFn`, and `FPPred`:
+   registered closure rules, local algorithm certificates, and bounded
+   iteration. The PCP development uses it throughout arithmetic, parsers,
+   verifier construction, and expander graph algorithms. Register reusable
+   certificates with `@[polytime]`; use `polytime [program]` to unfold a
+   program and compose its certificates. General loops still need explicit
+   state-size invariants. Add automation for `PolyBound`, and try `grind`
+   on frame, `Function.update`, and index goals.
 6. **Consolidate duplicated representations.** About 24 modules define their
    own codecs, about 25 define their own probability notions (Mathlib's
    `Finset.expect` and `Finset.dens` cover them), circuits and formulas have

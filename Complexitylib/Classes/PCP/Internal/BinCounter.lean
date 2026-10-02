@@ -8,6 +8,7 @@ public import Complexitylib.Classes.Containments.Internal.SavitchBits
 public import Complexitylib.Classes.Containments.Internal.FPBridge
 public import Complexitylib.Classes.Containments.Internal.BinArith
 public import Complexitylib.Classes.Containments.Internal.WitnessEnum
+import Complexitylib.Tactic.PolyTime.Init
 
 /-!
 # A binary counter from a unary index
@@ -36,12 +37,12 @@ polynomial-time step a polynomial number of times is `iterate_mem_FP`.
 namespace Complexity
 
 /-- A block of zeros as wide as a computed string. -/
-theorem zeroBlockFn_mem_FP {a : List Bool → List Bool} (ha : a ∈ FP) :
+@[polytime] theorem zeroBlockFn_mem_FP {a : List Bool → List Bool} (ha : a ∈ FP) :
     (fun z => List.replicate (a z).length false) ∈ FP :=
   unFn_mem_FP (g := fun s => List.replicate s.length false)
     (Cobham.zeroBlockFn (Cobham.proj 0)) ha
 
-theorem bumpBits_mem_FP : bumpBits ∈ FP := by
+@[polytime] theorem bumpBits_mem_FP : bumpBits ∈ FP := by
   have h := bumpCodeFn_mem_FP id_mem_FP
   refine mem_FP_of_eq h fun z => ?_
   simp
@@ -63,7 +64,7 @@ theorem coinStr_eq {t c : ℕ} (h : c < 2 ^ t) : coinStr t c = bitsOfLenLE t c :
 supplied in unary, the counter is polynomial-time computable — with no bound on
 the index, so that the function is total where a loop guard has not yet been
 applied. -/
-theorem coinStr_mem_FP {t c : List Bool → ℕ}
+@[polytime] theorem coinStr_mem_FP {t c : List Bool → ℕ}
     (ht : (fun z => List.replicate (t z) true) ∈ FP)
     (hc : (fun z => List.replicate (c z) true) ∈ FP) :
     (fun z => coinStr (t z) (c z)) ∈ FP := by

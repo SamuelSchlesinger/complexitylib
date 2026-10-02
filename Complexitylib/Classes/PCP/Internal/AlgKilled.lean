@@ -6,6 +6,7 @@ Authors: Bolton Bailey
 module
 public import Complexitylib.Classes.PCP.Internal.AlgPreRot
 public import Complexitylib.Classes.PCP.Internal.AlgWalk
+import Complexitylib.Tactic.PolyTime
 
 /-!
 # The killed walk, as an algorithm
@@ -108,7 +109,7 @@ noncomputable def selectAt (f : ℕ → List Bool → List Bool) (key : List Boo
   | n + 1, z =>
       ifEqLen (key z) (List.replicate (n + 1) true) (f (n + 1) z) (selectAt f key n z)
 
-theorem selectAt_mem_FP {f : ℕ → List Bool → List Bool} {key : List Bool → List Bool}
+@[polytime] theorem selectAt_mem_FP {f : ℕ → List Bool → List Bool} {key : List Bool → List Bool}
     (hf : ∀ k, f k ∈ FP) (hkey : key ∈ FP) : ∀ n, selectAt f key n ∈ FP := by
   intro n
   induction n with
@@ -150,7 +151,7 @@ noncomputable def walkFn (deg P : ℕ) : ℕ → List Bool → List Bool
           (pair (walkFn deg P k w)
             (modC P (divC (P ^ k) (pairSnd (pairSnd w)))))))
 
-theorem walkFn_mem_FP (deg P : ℕ) : ∀ k, walkFn F pol deg P k ∈ FP := by
+@[polytime] theorem walkFn_mem_FP (deg P : ℕ) : ∀ k, walkFn F pol deg P k ∈ FP := by
   intro k
   induction k with
   | zero =>
@@ -244,7 +245,7 @@ noncomputable def stopFn (q : ℕ) (co : List Bool → List Bool) :
       ifEqLen (modC q (divC (q ^ i) (co z))) [] (List.replicate i true)
         (stopFn q co (i + 1) n z)
 
-theorem stopFn_mem_FP {q : ℕ} {co : List Bool → List Bool} (hco : co ∈ FP) :
+@[polytime] theorem stopFn_mem_FP {q : ℕ} {co : List Bool → List Bool} (hco : co ∈ FP) :
     ∀ (n i : ℕ), stopFn q co i n ∈ FP := by
   intro n
   induction n with
@@ -281,16 +282,8 @@ noncomputable def backFn (deg P i : ℕ) (w : List Bool) : List Bool :=
       (pair (walkFn F pol deg P i w)
         (modC P (divC (P ^ i) (pairSnd (pairSnd w)))))))
 
-theorem backFn_mem_FP (deg P i : ℕ) : backFn F pol deg P i ∈ FP := by
-  have hs : (fun w : List Bool => pairSnd (pairSnd w)) ∈ FP :=
-    mem_FP_comp Cobham.sndBlock_mem_FP Cobham.sndBlock_mem_FP
-  have h := mem_FP_comp (Cobham.pairFn_mem_FP Cobham.fstBlock_mem_FP
-    (Cobham.pairFn_mem_FP (walkFn_mem_FP F pol deg P i)
-      (modC_mem_FP (divC_mem_FP hs (P ^ i)) P)))
-    (mem_FP_comp (preRotFn_mem_FP F pol deg) Cobham.sndBlock_mem_FP)
-  refine mem_FP_of_eq h fun w => ?_
-  simp only [Function.comp_apply]
-  rw [backFn]
+@[polytime] theorem backFn_mem_FP (deg P i : ℕ) : backFn F pol deg P i ∈ FP := by
+  polytime [backFn]
 
 variable {F pol} in
 /-- **The back-label algorithm reads the label off the rotation map.** -/
@@ -327,7 +320,7 @@ noncomputable def revSum (deg P k : ℕ) : ℕ → List Bool → List Bool
         (if n < k then backFn F pol deg P (k - 1 - n) w
           else modC P (divC (P ^ n) (pairSnd (pairSnd w))))
 
-theorem revSum_mem_FP (deg P k : ℕ) : ∀ n, revSum F pol deg P k n ∈ FP := by
+@[polytime] theorem revSum_mem_FP (deg P k : ℕ) : ∀ n, revSum F pol deg P k n ∈ FP := by
   intro n
   induction n with
   | zero => exact mem_FP_of_eq (constFn_mem_FP []) fun w => by rw [revSum]
@@ -403,13 +396,11 @@ noncomputable def toWalk (q T : ℕ) (z : List Bool) : List Bool :=
     (pair (pairFst (pairSnd z))
       (divC (q ^ T) (pairSnd (pairSnd z))))
 
-theorem coinsOf_mem_FP (q T : ℕ) : coinsOf q T ∈ FP :=
-  modC_mem_FP (mem_FP_comp Cobham.sndBlock_mem_FP Cobham.sndBlock_mem_FP) _
+@[polytime] theorem coinsOf_mem_FP (q T : ℕ) : coinsOf q T ∈ FP := by
+  polytime [coinsOf]
 
-theorem toWalk_mem_FP (q T : ℕ) : toWalk q T ∈ FP :=
-  Cobham.pairFn_mem_FP Cobham.fstBlock_mem_FP
-    (Cobham.pairFn_mem_FP (mem_FP_comp Cobham.sndBlock_mem_FP Cobham.fstBlock_mem_FP)
-      (divC_mem_FP (mem_FP_comp Cobham.sndBlock_mem_FP Cobham.sndBlock_mem_FP) _))
+@[polytime] theorem toWalk_mem_FP (q T : ℕ) : toWalk q T ∈ FP := by
+  polytime [toWalk]
 
 /-- **The dart a killed walk comes back by**, on `pair (graph) (pair (unary
 vertex) (unary dart))`. -/
@@ -417,11 +408,8 @@ noncomputable def revNumFn (deg P T q : ℕ) (z : List Bool) : List Bool :=
   selectAt (fun k w => marks (revSum F pol deg P k T (toWalk q T w)))
     (fun w => stopFn q (coinsOf q T) 0 T w) T z
 
-theorem revNumFn_mem_FP (deg P T q : ℕ) : revNumFn F pol deg P T q ∈ FP :=
-  selectAt_mem_FP
-    (fun k => marks_mem_FP (mem_FP_of_eq
-      (mem_FP_comp (toWalk_mem_FP q T) (revSum_mem_FP F pol deg P k T)) fun _ => rfl))
-    (stopFn_mem_FP (coinsOf_mem_FP q T) T 0) T
+@[polytime] theorem revNumFn_mem_FP (deg P T q : ℕ) : revNumFn F pol deg P T q ∈ FP := by
+  polytime [revNumFn]
 
 /-- **The powered graph's rotation map**, on `pair (graph) (pair (unary vertex)
 (unary dart))`: walk to the end, come back by the reversed labels, and keep the
@@ -432,21 +420,8 @@ noncomputable def killedRotFn (deg P T q : ℕ) (z : List Bool) : List Bool :=
       (fun w => stopFn q (coinsOf q T) 0 T w) T z)
     (marks (mulC (q ^ T) (revNumFn F pol deg P T q z)) ++ coinsOf q T z)
 
-theorem killedRotFn_mem_FP (deg P T q : ℕ) : killedRotFn F pol deg P T q ∈ FP := by
-  have hkey : (fun w : List Bool => stopFn q (coinsOf q T) 0 T w) ∈ FP :=
-    stopFn_mem_FP (coinsOf_mem_FP q T) T 0
-  have hwalk : ∀ k, (fun w : List Bool => walkFn F pol deg P k (toWalk q T w)) ∈ FP :=
-    fun k => mem_FP_of_eq (mem_FP_comp (toWalk_mem_FP q T) (walkFn_mem_FP F pol deg P k))
-      fun _ => rfl
-  have hrev : ∀ k, (fun w : List Bool =>
-      marks (revSum F pol deg P k T (toWalk q T w))) ∈ FP :=
-    fun k => marks_mem_FP (mem_FP_of_eq
-      (mem_FP_comp (toWalk_mem_FP q T) (revSum_mem_FP F pol deg P k T)) fun _ => rfl)
-  refine mem_FP_of_eq (Cobham.pairFn_mem_FP (selectAt_mem_FP hwalk hkey T)
-    (Cobham.appendFn_mem_FP
-      (marks_mem_FP (mulC_mem_FP (selectAt_mem_FP hrev hkey T) (q ^ T)))
-      (coinsOf_mem_FP q T))) fun w => ?_
-  rw [killedRotFn, revNumFn]
+@[polytime] theorem killedRotFn_mem_FP (deg P T q : ℕ) : killedRotFn F pol deg P T q ∈ FP := by
+  polytime [killedRotFn]
 
 variable {F pol} in
 theorem marks_revSum_eq (hd : 1 < F.deg) (G : ConstraintGraph α) (T v s k : ℕ)

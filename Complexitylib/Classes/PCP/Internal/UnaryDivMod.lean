@@ -6,6 +6,7 @@ Authors: Bolton Bailey
 module
 public import Complexitylib.Classes.P
 public import Complexitylib.Classes.P.Bridge
+import Complexitylib.Tactic.PolyTime
 
 /-!
 # Division with remainder, in unary
@@ -54,11 +55,11 @@ theorem divFn_eq {b : List Bool} (s : List Bool) :
 theorem modFn_eq {b : List Bool} (s : List Bool) :
     modFn b s = List.replicate (s.length % b.length) true := rfl
 
-theorem divFn_mem_FP (b : List Bool) : divFn b ∈ FP :=
-  ((UnaryFn.length id_mem_FP).div (UnaryFn.const b.length)).mem_FP
+@[polytime] theorem divFn_mem_FP (b : List Bool) : divFn b ∈ FP := by
+  polytime [divFn]
 
-theorem modFn_mem_FP (b : List Bool) : modFn b ∈ FP :=
-  ((UnaryFn.length id_mem_FP).mod (UnaryFn.const b.length)).mem_FP
+@[polytime] theorem modFn_mem_FP (b : List Bool) : modFn b ∈ FP := by
+  polytime [modFn]
 
 /-! ### Dividing by a length read from the input -/
 
@@ -78,19 +79,19 @@ theorem modFn2_eq {b : List Bool} (s : List Bool) :
     modFn2 (pair b s) = List.replicate (s.length % b.length) true := by
   rw [modFn2, pairFst_pair, pairSnd_pair]
 
-theorem divFn2_mem_FP : divFn2 ∈ FP :=
-  ((UnaryFn.length Cobham.sndBlock_mem_FP).div (UnaryFn.length Cobham.fstBlock_mem_FP)).mem_FP
+@[polytime] theorem divFn2_mem_FP : divFn2 ∈ FP := by
+  polytime [divFn2]
 
-theorem modFn2_mem_FP : modFn2 ∈ FP :=
-  ((UnaryFn.length Cobham.sndBlock_mem_FP).mod (UnaryFn.length Cobham.fstBlock_mem_FP)).mem_FP
+@[polytime] theorem modFn2_mem_FP : modFn2 ∈ FP := by
+  polytime [modFn2]
 
 /-! ### Halving -/
 
 /-- **Halving a length**, in unary. -/
 def halfFn (s : List Bool) : List Bool := List.replicate (s.length / 2) true
 
-theorem halfFn_mem_FP : halfFn ∈ FP :=
-  ((UnaryFn.length id_mem_FP).div (UnaryFn.const 2)).mem_FP
+@[polytime] theorem halfFn_mem_FP : halfFn ∈ FP := by
+  polytime [halfFn]
 
 theorem halfFn_eq (s : List Bool) : halfFn s = List.replicate (s.length / 2) true := rfl
 

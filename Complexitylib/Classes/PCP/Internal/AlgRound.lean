@@ -7,6 +7,7 @@ module
 public import Complexitylib.Classes.PCP.Internal.AlgEdge
 public import Complexitylib.Classes.PCP.Internal.AlgIter
 public import Complexitylib.Classes.PCP.Internal.GapReduction
+import Complexitylib.Tactic.PolyTime.Init
 
 /-!
 # One round, uniformly
@@ -139,7 +140,7 @@ theorem roundOf_C_pos : 0 < (roundOf F hd).C := by
   rw [roundOf_C]
   exact cRel_pos
 
-theorem roundFn_mem_FP : roundFn F hd ∈ FP :=
+@[polytime] theorem roundFn_mem_FP : roundFn F hd ∈ FP :=
   stepFn_mem_FP F (2 * Polynomial.X) (roundOf F hd) _ _ _ _ _ _
     (roundOf_cQ_pos F hd) (roundOf_cD_pos F hd) (roundOf_cZ_pos F hd) (roundOf_C_pos F hd)
     (dfltKey F hd) (encOf F hd)

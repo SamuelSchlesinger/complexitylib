@@ -5,6 +5,7 @@ Authors: Bolton Bailey
 -/
 module
 public import Complexitylib.Classes.Containments.Internal.BinArith
+import Complexitylib.Tactic.PolyTime
 
 /-!
 # Counting out the value of a bit string
@@ -41,22 +42,18 @@ def binDbl (z : List Bool) : List Bool :=
 def binDblOne (z : List Bool) : List Bool :=
   pairSnd (pairFst z) ++ pairSnd (pairFst z) ++ [true]
 
-theorem binDbl_mem_FP : binDbl ∈ FP := by
-  have h : (fun z : List Bool => pairSnd (pairFst z)) ∈ FP :=
-    mem_FP_comp Cobham.fstBlock_mem_FP Cobham.sndBlock_mem_FP
-  exact Cobham.appendFn_mem_FP h h
+@[polytime] theorem binDbl_mem_FP : binDbl ∈ FP := by
+  polytime [binDbl]
 
-theorem binDblOne_mem_FP : binDblOne ∈ FP := by
-  have h : (fun z : List Bool => pairSnd (pairFst z)) ∈ FP :=
-    mem_FP_comp Cobham.fstBlock_mem_FP Cobham.sndBlock_mem_FP
-  exact Cobham.appendFn_mem_FP (Cobham.appendFn_mem_FP h h) (constFn_mem_FP [true])
+@[polytime] theorem binDblOne_mem_FP : binDblOne ∈ FP := by
+  polytime [binDblOne]
 
 /-- **The value of a bit string, in unary**, computed on `pair anything bits`. -/
 def unaryVal (p : Polynomial ℕ) (z : List Bool) : List Bool :=
   Cobham.recFoldClamp binDbl binDblOne (p.eval z.length) [] (pairFst z)
     (pairSnd z)
 
-theorem unaryVal_mem_FP (p : Polynomial ℕ) : unaryVal p ∈ FP :=
+@[polytime] theorem unaryVal_mem_FP (p : Polynomial ℕ) : unaryVal p ∈ FP :=
   Cobham.recFoldClamp_mem_FP binDbl_mem_FP binDblOne_mem_FP (constFn_mem_FP []) p
 
 theorem binValLE_cons_false (l : List Bool) : binValLE (false :: l) = 2 * binValLE l := by

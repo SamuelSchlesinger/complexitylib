@@ -6,6 +6,7 @@ Authors: Bolton Bailey
 module
 public import Complexitylib.Classes.PCP.Internal.AlgGapAll
 public import Complexitylib.Classes.PCP.Internal.BaseAlg
+import Complexitylib.Tactic.PolyTime
 
 /-!
 # The gap graph, as an algorithm
@@ -45,9 +46,8 @@ variable (F : FinBase) (hd : 1 < F.deg) (E padU : List Bool → List Bool)
 noncomputable def gapStr (z : List Bool) : List Bool :=
   gapAll F hd E padU (pairFst (pairFst z))
 
-theorem gapStr_mem_FP (hgap : gapAll F hd E padU ∈ FP) : gapStr F hd E padU ∈ FP :=
-  mem_FP_of_eq (mem_FP_comp (mem_FP_comp Cobham.fstBlock_mem_FP Cobham.fstBlock_mem_FP) hgap)
-    fun _ => rfl
+@[polytime] theorem gapStr_mem_FP (hgap : gapAll F hd E padU ∈ FP) : gapStr F hd E padU ∈ FP := by
+  polytime [gapStr]
 
 /-- The code of the constraint the argument names, clamped to the number of
 constraints there are. -/
@@ -55,24 +55,17 @@ noncomputable def gapCodeBlk (z : List Bool) : List Bool :=
   (recThd (pairSnd (gapStr F hd E padU z))
     (pairSnd (pairFst z)).length).take cRel
 
-theorem gapCodeBlk_mem_FP (hgap : gapAll F hd E padU ∈ FP) :
+@[polytime] theorem gapCodeBlk_mem_FP (hgap : gapAll F hd E padU ∈ FP) :
     gapCodeBlk F hd E padU ∈ FP := by
-  have hidx : (fun z : List Bool => pairSnd (pairFst z)) ∈ FP :=
-    mem_FP_of_eq (mem_FP_comp Cobham.fstBlock_mem_FP Cobham.sndBlock_mem_FP) fun _ => rfl
-  have hrec := gCodeFn_mem_FP hidx (gapStr_mem_FP F hd E padU hgap)
-  refine mem_FP_of_eq (Cobham.takeLenFn_mem_FP
-    (constFn_mem_FP (List.replicate cRel false)) hrec) fun z => ?_
-  rw [gapCodeBlk, List.length_replicate]
+  polytime [gapCodeBlk]
 
 /-- Everything the constraint depends on: the code and the two symbol blocks. -/
 noncomputable def gapOkKey (z : List Bool) : List Bool :=
   pair (gapCodeBlk F hd E padU z) ((pairSnd z).take 46)
 
-theorem gapOkKey_mem_FP (hgap : gapAll F hd E padU ∈ FP) : gapOkKey F hd E padU ∈ FP :=
-  Cobham.pairFn_mem_FP (gapCodeBlk_mem_FP F hd E padU hgap)
-    (mem_FP_of_eq (Cobham.takeLenFn_mem_FP
-      (constFn_mem_FP (List.replicate 46 false)) Cobham.sndBlock_mem_FP)
-      fun z => by rw [List.length_replicate])
+@[polytime]
+theorem gapOkKey_mem_FP (hgap : gapAll F hd E padU ∈ FP) : gapOkKey F hd E padU ∈ FP := by
+  polytime [gapOkKey]
 
 theorem gapOkKey_length_le (z : List Bool) :
     (gapOkKey F hd E padU z).length ≤ 2 * cRel + 48 := by

@@ -7,6 +7,7 @@ module
 public import Complexitylib.Classes.PCP.Internal.PosScan
 public import Complexitylib.Classes.PCP.Defs
 public import Complexitylib.Classes.EventProb
+import Complexitylib.Tactic.PolyTime
 
 /-!
 # Running a verifier twice
@@ -78,31 +79,24 @@ variable {V t}
 variable {f : List Bool → List Bool}
 variable (ht : (fun x : List Bool => List.replicate (t x.length) true) ∈ FP)
 
-theorem vX_mem_FP : vX ∈ FP := mem_FP_comp Cobham.fstBlock_mem_FP Cobham.fstBlock_mem_FP
+@[polytime] theorem vX_mem_FP : vX ∈ FP := by
+  polytime [vX]
 
-theorem vR_mem_FP : vR ∈ FP := mem_FP_comp Cobham.fstBlock_mem_FP Cobham.sndBlock_mem_FP
+@[polytime] theorem vR_mem_FP : vR ∈ FP := by
+  polytime [vR]
 
-theorem vA_mem_FP : vA ∈ FP := Cobham.sndBlock_mem_FP
+@[polytime] theorem vA_mem_FP : vA ∈ FP := by
+  polytime [vA]
 
 include ht in
-theorem fstCoinsFn_mem_FP {a b : List Bool → List Bool} (ha : a ∈ FP) (hb : b ∈ FP) :
+@[polytime] theorem fstCoinsFn_mem_FP {a b : List Bool → List Bool} (ha : a ∈ FP) (hb : b ∈ FP) :
     (fun z => fstCoins t (a z) (b z)) ∈ FP := by
-  have hlen : (fun z => List.replicate (t (a z).length) true) ∈ FP := by
-    have := mem_FP_comp ha ht
-    exact this
-  have := Cobham.takeLenFn_mem_FP hlen hb
-  refine mem_FP_of_eq this fun z => ?_
-  rw [fstCoins, List.length_replicate]
+  polytime [fstCoins]
 
 include ht in
-theorem sndCoinsFn_mem_FP {a b : List Bool → List Bool} (ha : a ∈ FP) (hb : b ∈ FP) :
+@[polytime] theorem sndCoinsFn_mem_FP {a b : List Bool → List Bool} (ha : a ∈ FP) (hb : b ∈ FP) :
     (fun z => sndCoins t (a z) (b z)) ∈ FP := by
-  have hlen : (fun z => List.replicate (t (a z).length) true) ∈ FP := by
-    have := mem_FP_comp ha ht
-    exact this
-  have := dropLenFn_mem_FP hlen hb
-  refine mem_FP_of_eq this fun z => ?_
-  rw [sndCoins, List.length_replicate]
+  polytime [sndCoins]
 
 include ht in
 /-- The doubled verifier's query list is polynomial-time computable. -/
@@ -306,7 +300,7 @@ theorem PCPWith_mono {r q : ℕ → ℕ} {s s' : ℚ} (h : s ≤ s') :
   rintro L ⟨V, hQ, hc, hsound⟩
   exact ⟨V, hQ, hc, fun x hx π => le_trans (hsound x hx π) h⟩
 
-theorem constructible_double {r : ℕ → ℕ}
+@[polytime] theorem constructible_double {r : ℕ → ℕ}
     (hr : (fun x : List Bool => List.replicate (r x.length) true) ∈ FP) :
     (fun x : List Bool => List.replicate (r x.length + r x.length) true) ∈ FP := by
   have := Cobham.appendFn_mem_FP hr hr

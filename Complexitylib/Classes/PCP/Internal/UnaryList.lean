@@ -9,6 +9,7 @@ public import Complexitylib.Classes.P.Unary
 public import Complexitylib.Classes.PCP.Internal.PosScan
 public import Complexitylib.Classes.PCP.Internal.UnaryDivMod
 public import Complexitylib.Classes.PCP.Internal.NatEncode
+import Complexitylib.Tactic.PolyTime
 
 /-!
 # Reading a table of unary numbers
@@ -81,9 +82,9 @@ theorem unaryOf_encode (w : ℕ) :
   congr 1
   omega
 
-theorem unaryOf_mem_FP {a : List Bool → List Bool} (ha : a ∈ FP) :
-    (fun z => unaryOf (a z)) ∈ FP :=
-  (((UnaryFn.length ha).sub (UnaryFn.const 2)).div (UnaryFn.const 4)).mem_FP
+@[polytime] theorem unaryOf_mem_FP {a : List Bool → List Bool} (ha : a ∈ FP) :
+    (fun z => unaryOf (a z)) ∈ FP := by
+  polytime [unaryOf]
 
 /-! ### Pairs -/
 
@@ -115,15 +116,13 @@ theorem sndEnc_eq {α β : Type} [DataEncode α] [DataEncode β] (a : α) (b : �
       (by norm_num)]
   rfl
 
-theorem fstEnc_mem_FP {a : List Bool → List Bool} (ha : a ∈ FP) :
+@[polytime] theorem fstEnc_mem_FP {a : List Bool → List Bool} (ha : a ∈ FP) :
     (fun z => fstEnc (a z)) ∈ FP := by
-  have h := posAt_mem_FP (constFn_mem_FP ([] : List Bool)) ha
-  exact mem_FP_of_eq h fun z => rfl
+  polytime [fstEnc]
 
-theorem sndEnc_mem_FP {a : List Bool → List Bool} (ha : a ∈ FP) :
+@[polytime] theorem sndEnc_mem_FP {a : List Bool → List Bool} (ha : a ∈ FP) :
     (fun z => sndEnc (a z)) ∈ FP := by
-  have h := posAt_mem_FP (constFn_mem_FP ([true] : List Bool)) ha
-  exact mem_FP_of_eq h fun z => rfl
+  polytime [sndEnc]
 
 /-! ### Unary arithmetic with constants -/
 
@@ -132,27 +131,27 @@ def marks (s : List Bool) : List Bool := List.replicate s.length true
 
 theorem marks_eq (s : List Bool) : marks s = List.replicate s.length true := rfl
 
-theorem marks_mem_FP {a : List Bool → List Bool} (ha : a ∈ FP) :
-    (fun z => marks (a z)) ∈ FP :=
-  mem_FP_comp ha unaryLength_mem_FP
+@[polytime] theorem marks_mem_FP {a : List Bool → List Bool} (ha : a ∈ FP) :
+    (fun z => marks (a z)) ∈ FP := by
+  polytime [marks]
 
 /-- Division by a constant, in unary; `divC 0 s` is empty. -/
 def divC (c : ℕ) (s : List Bool) : List Bool := List.replicate (s.length / c) true
 
 theorem divC_eq {c : ℕ} (s : List Bool) : divC c s = List.replicate (s.length / c) true := rfl
 
-theorem divC_mem_FP {a : List Bool → List Bool} (ha : a ∈ FP) (c : ℕ) :
-    (fun z => divC c (a z)) ∈ FP :=
-  ((UnaryFn.length ha).div (UnaryFn.const c)).mem_FP
+@[polytime] theorem divC_mem_FP {a : List Bool → List Bool} (ha : a ∈ FP) (c : ℕ) :
+    (fun z => divC c (a z)) ∈ FP := by
+  polytime [divC]
 
 /-- Remainder by a constant, in unary; `modC 0 s` is `s` in marks. -/
 def modC (c : ℕ) (s : List Bool) : List Bool := List.replicate (s.length % c) true
 
 theorem modC_eq {c : ℕ} (s : List Bool) : modC c s = List.replicate (s.length % c) true := rfl
 
-theorem modC_mem_FP {a : List Bool → List Bool} (ha : a ∈ FP) (c : ℕ) :
-    (fun z => modC c (a z)) ∈ FP :=
-  ((UnaryFn.length ha).mod (UnaryFn.const c)).mem_FP
+@[polytime] theorem modC_mem_FP {a : List Bool → List Bool} (ha : a ∈ FP) (c : ℕ) :
+    (fun z => modC c (a z)) ∈ FP := by
+  polytime [modC]
 
 /-- The product of two lengths. -/
 def mulLen (a b : List Bool) : List Bool := List.replicate (a.length * b.length) false
@@ -161,9 +160,9 @@ def mulLen (a b : List Bool) : List Bool := List.replicate (a.length * b.length)
     (mulLen a b).length = a.length * b.length := by
   rw [mulLen, List.length_replicate]
 
-theorem mulLen_mem_FP {f g : List Bool → List Bool} (hf : f ∈ FP) (hg : g ∈ FP) :
-    (fun z => mulLen (f z) (g z)) ∈ FP :=
-  Cobham.mulLenFn_mem_FP hf hg
+@[polytime] theorem mulLen_mem_FP {f g : List Bool → List Bool} (hf : f ∈ FP) (hg : g ∈ FP) :
+    (fun z => mulLen (f z) (g z)) ∈ FP := by
+  polytime [mulLen]
 
 /-- Multiplication by a constant, as a length. -/
 def mulC (c : ℕ) (s : List Bool) : List Bool := List.replicate (s.length * c) false
@@ -171,9 +170,9 @@ def mulC (c : ℕ) (s : List Bool) : List Bool := List.replicate (s.length * c) 
 @[simp] theorem length_mulC (c : ℕ) (s : List Bool) : (mulC c s).length = s.length * c := by
   rw [mulC, List.length_replicate]
 
-theorem mulC_mem_FP {a : List Bool → List Bool} (ha : a ∈ FP) (c : ℕ) :
-    (fun z => mulC c (a z)) ∈ FP :=
-  ((UnaryFn.length ha).mul (UnaryFn.const c)).replicate_mem_FP false
+@[polytime] theorem mulC_mem_FP {a : List Bool → List Bool} (ha : a ∈ FP) (c : ℕ) :
+    (fun z => mulC c (a z)) ∈ FP := by
+  polytime [mulC]
 
 /-! ### Writing records -/
 
@@ -183,16 +182,10 @@ def encUnary (s : List Bool) : List Bool := false :: s.flatMap boolBits ++ [true
 theorem encUnary_eq (s : List Bool) : encUnary s = DataEncode.bitstringEncode s :=
   (bitstringEncode_list s).symm
 
-theorem encUnary_mem_FP {a : List Bool → List Bool} (ha : a ∈ FP) :
+@[polytime] theorem encUnary_mem_FP {a : List Bool → List Bool} (ha : a ∈ FP) :
     (fun z => encUnary (a z)) ∈ FP := by
-  have hflat : (fun z => (a z).flatMap boolBits) ∈ FP := by
-    have hpair : (fun z => pair z (a z)) ∈ FP := Cobham.pairFn_mem_FP id_mem_FP ha
-    have := mem_FP_comp hpair flatBitsFn_mem_FP
-    refine mem_FP_of_eq this fun z => ?_
-    rw [Function.comp_apply, flatBitsFn_eq, pairSnd_pair]
-  have hcons := mem_FP_comp hflat (Cobham.cons_mem_FP false)
-  have := Cobham.appendFn_mem_FP hcons (constFn_mem_FP [true])
-  exact mem_FP_of_eq this fun z => rfl
+  simp_rw [encUnary_eq]
+  polytime
 
 /-- The encoding of a pair of unary strings. -/
 def encPair (a b : List Bool) : List Bool := false :: (encUnary a ++ encUnary b) ++ [true]
@@ -207,12 +200,9 @@ theorem encPair_eq (a b : List Bool) :
     encPair a b = DataEncode.bitstringEncode ((a, b) : List Bool × List Bool) := by
   rw [bitstringEncode_prod_eq, encPair, encUnary_eq, encUnary_eq]
 
-theorem encPair_mem_FP {a b : List Bool → List Bool} (ha : a ∈ FP) (hb : b ∈ FP) :
+@[polytime] theorem encPair_mem_FP {a b : List Bool → List Bool} (ha : a ∈ FP) (hb : b ∈ FP) :
     (fun z => encPair (a z) (b z)) ∈ FP := by
-  have happ := Cobham.appendFn_mem_FP (encUnary_mem_FP ha) (encUnary_mem_FP hb)
-  have hcons := mem_FP_comp happ (Cobham.cons_mem_FP false)
-  have := Cobham.appendFn_mem_FP hcons (constFn_mem_FP [true])
-  exact mem_FP_of_eq this fun z => rfl
+  polytime [encPair]
 
 theorem unaryOf_fstEnc_encPair (w c : ℕ) :
     unaryOf (fstEnc (encPair (List.replicate w true) (List.replicate c true)))
@@ -276,13 +266,25 @@ theorem tableSnd_eq (hj : j < l.length)
     tableSnd (DataEncode.bitstringEncode l) j = List.replicate c true := by
   rw [tableSnd, posAt_eq_of_lt hj, h, sndEnc_eq, unaryOf_encode]
 
-theorem tableFst_mem_FP {a b : List Bool → List Bool} (ha : a ∈ FP) (hb : b ∈ FP) :
-    (fun z => tableFst (b z) (a z).length) ∈ FP :=
-  unaryOf_mem_FP (fstEnc_mem_FP (posAt_mem_FP ha hb))
+@[polytime] theorem tableFst_mem_FP {a b : List Bool → List Bool} (ha : a ∈ FP) (hb : b ∈ FP) :
+    (fun z => tableFst (b z) (a z).length) ∈ FP := by
+  polytime [tableFst]
 
-theorem tableSnd_mem_FP {a b : List Bool → List Bool} (ha : a ∈ FP) (hb : b ∈ FP) :
-    (fun z => tableSnd (b z) (a z).length) ∈ FP :=
-  unaryOf_mem_FP (sndEnc_mem_FP (posAt_mem_FP ha hb))
+/-- Read the first table field at any index computable in unary. -/
+@[polytime] theorem tableFst_mem_FP_of_unary {i : List Bool → ℕ}
+    {table : List Bool → List Bool} (hi : UnaryFn i) (ht : table ∈ FP) :
+    (fun z => tableFst (table z) (i z)) ∈ FP := by
+  polytime [tableFst]
+
+@[polytime] theorem tableSnd_mem_FP {a b : List Bool → List Bool} (ha : a ∈ FP) (hb : b ∈ FP) :
+    (fun z => tableSnd (b z) (a z).length) ∈ FP := by
+  polytime [tableSnd]
+
+/-- Read the second table field at any index computable in unary. -/
+@[polytime] theorem tableSnd_mem_FP_of_unary {i : List Bool → ℕ}
+    {table : List Bool → List Bool} (hi : UnaryFn i) (ht : table ∈ FP) :
+    (fun z => tableSnd (table z) (i z)) ∈ FP := by
+  polytime [tableSnd]
 
 /-! ### Records of three numbers -/
 
@@ -302,12 +304,9 @@ theorem encTriple_eq (a b c : List Bool) :
     length_bitstringEncode_replicate, length_encPair]
   omega
 
-theorem encTriple_mem_FP {a b c : List Bool → List Bool} (ha : a ∈ FP) (hb : b ∈ FP)
+@[polytime] theorem encTriple_mem_FP {a b c : List Bool → List Bool} (ha : a ∈ FP) (hb : b ∈ FP)
     (hc : c ∈ FP) : (fun z => encTriple (a z) (b z) (c z)) ∈ FP := by
-  have happ := Cobham.appendFn_mem_FP (encUnary_mem_FP ha) (encPair_mem_FP hb hc)
-  have hcons := mem_FP_comp happ (Cobham.cons_mem_FP false)
-  have := Cobham.appendFn_mem_FP hcons (constFn_mem_FP [true])
-  exact mem_FP_of_eq this fun _ => rfl
+  polytime [encTriple]
 
 /-- The first number of the `j`-th record of a table of triples. -/
 noncomputable def recFst (T : List Bool) (j : ℕ) : List Bool := unaryOf (fstEnc (posAt T j))
@@ -337,17 +336,35 @@ theorem recThd_eq (hj : j < l3.length)
     recThd (DataEncode.bitstringEncode l3) j = List.replicate c true := by
   rw [recThd, posAt_eq_of_lt hj, h, sndEnc_eq, sndEnc_eq, unaryOf_encode]
 
-theorem recFst_mem_FP {f g : List Bool → List Bool} (hf : f ∈ FP) (hg : g ∈ FP) :
-    (fun z => recFst (g z) (f z).length) ∈ FP :=
-  unaryOf_mem_FP (fstEnc_mem_FP (posAt_mem_FP hf hg))
+@[polytime] theorem recFst_mem_FP {f g : List Bool → List Bool} (hf : f ∈ FP) (hg : g ∈ FP) :
+    (fun z => recFst (g z) (f z).length) ∈ FP := by
+  polytime [recFst]
 
-theorem recSnd_mem_FP {f g : List Bool → List Bool} (hf : f ∈ FP) (hg : g ∈ FP) :
-    (fun z => recSnd (g z) (f z).length) ∈ FP :=
-  unaryOf_mem_FP (fstEnc_mem_FP (sndEnc_mem_FP (posAt_mem_FP hf hg)))
+/-- Read the first record field at any index computable in unary. -/
+@[polytime] theorem recFst_mem_FP_of_unary {i : List Bool → ℕ}
+    {table : List Bool → List Bool} (hi : UnaryFn i) (ht : table ∈ FP) :
+    (fun z => recFst (table z) (i z)) ∈ FP := by
+  polytime [recFst]
 
-theorem recThd_mem_FP {f g : List Bool → List Bool} (hf : f ∈ FP) (hg : g ∈ FP) :
-    (fun z => recThd (g z) (f z).length) ∈ FP :=
-  unaryOf_mem_FP (sndEnc_mem_FP (sndEnc_mem_FP (posAt_mem_FP hf hg)))
+@[polytime] theorem recSnd_mem_FP {f g : List Bool → List Bool} (hf : f ∈ FP) (hg : g ∈ FP) :
+    (fun z => recSnd (g z) (f z).length) ∈ FP := by
+  polytime [recSnd]
+
+/-- Read the second record field at any index computable in unary. -/
+@[polytime] theorem recSnd_mem_FP_of_unary {i : List Bool → ℕ}
+    {table : List Bool → List Bool} (hi : UnaryFn i) (ht : table ∈ FP) :
+    (fun z => recSnd (table z) (i z)) ∈ FP := by
+  polytime [recSnd]
+
+@[polytime] theorem recThd_mem_FP {f g : List Bool → List Bool} (hf : f ∈ FP) (hg : g ∈ FP) :
+    (fun z => recThd (g z) (f z).length) ∈ FP := by
+  polytime [recThd]
+
+/-- Read the third record field at any index computable in unary. -/
+@[polytime] theorem recThd_mem_FP_of_unary {i : List Bool → ℕ}
+    {table : List Bool → List Bool} (hi : UnaryFn i) (ht : table ∈ FP) :
+    (fun z => recThd (table z) (i z)) ∈ FP := by
+  polytime [recThd]
 
 /-! ### Digit sums -/
 
@@ -359,7 +376,7 @@ noncomputable def digitSum (radix : ℕ) (digit : ℕ → List Bool → List Boo
   | 0, _ => []
   | n + 1, w => digitSum radix digit n w ++ mulC (radix ^ n) (digit n w)
 
-theorem digitSum_mem_FP {radix : ℕ} {digit : ℕ → List Bool → List Bool}
+@[polytime] theorem digitSum_mem_FP {radix : ℕ} {digit : ℕ → List Bool → List Bool}
     (hd : ∀ i, digit i ∈ FP) : ∀ n, digitSum radix digit n ∈ FP := by
   intro n
   induction n with

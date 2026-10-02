@@ -8,6 +8,7 @@ public import Complexitylib.Classes.PCP.Internal.AlgGap
 public import Complexitylib.Classes.PCP.Internal.AlgInit
 public import Complexitylib.Classes.PCP.Internal.AlgFormula
 public import Complexitylib.Classes.PCP.Internal.AlgUniform
+import Complexitylib.Tactic.PolyTime
 
 /-!
 # The gap graph of an input
@@ -43,8 +44,8 @@ variable (F : FinBase) (hd : 1 < F.deg) (E padU : List Bool → List Bool)
 `2 ^ rounds`. -/
 noncomputable def gapRuler (x : List Bool) : List Bool := logRuler (padU x)
 
-theorem gapRuler_mem_FP (hpad : padU ∈ FP) : gapRuler padU ∈ FP :=
-  mem_FP_of_eq (mem_FP_comp hpad logRuler_mem_FP) fun _ => rfl
+@[polytime] theorem gapRuler_mem_FP (hpad : padU ∈ FP) : gapRuler padU ∈ FP := by
+  polytime [gapRuler]
 
 @[simp] theorem length_gapRuler (x : List Bool) :
     (gapRuler padU x).length = rulerLen (padU x).length := by
@@ -130,7 +131,7 @@ theorem widthFn_hasRuler (p₀ q : Polynomial ℕ) (v cw d : ℕ) :
 
 set_option maxRecDepth 100000 in
 /-- **Writing the gap graph is polynomial-time.** -/
-theorem gapAll_mem_FP (hEfp : E ∈ FP) (hpad : padU ∈ FP)
+@[polytime] theorem gapAll_mem_FP (hEfp : E ∈ FP) (hpad : padU ∈ FP)
     (hE : ∀ x, E x = (Φ x).encode) (h3 : ∀ x, CNF.Is3CNF (Φ x))
     (hmark : ∀ x, padU x = List.replicate (padU x).length true)
     (hle : ∀ x, 3 * (Φ x).length ≤ (padU x).length) (p₀ q : Polynomial ℕ)

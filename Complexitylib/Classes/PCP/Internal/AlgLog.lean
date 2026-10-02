@@ -5,6 +5,7 @@ Authors: Bolton Bailey
 -/
 module
 public import Complexitylib.Classes.PCP.Internal.Materialize
+import Complexitylib.Tactic.PolyTime
 
 /-!
 # A ruler of logarithmic length
@@ -49,18 +50,8 @@ noncomputable def logStep (z : List Bool) : List Bool :=
       (pairSnd (pairSnd (pairFst z))
         ++ pairSnd (pairSnd (pairFst z))))
 
-theorem logStep_mem_FP : logStep ∈ FP := by
-  have hacc : (fun z : List Bool => pairSnd (pairFst z)) ∈ FP :=
-    mem_FP_comp Cobham.fstBlock_mem_FP Cobham.sndBlock_mem_FP
-  have hr : (fun z : List Bool =>
-      pairFst (pairSnd (pairFst z))) ∈ FP :=
-    mem_FP_comp hacc Cobham.fstBlock_mem_FP
-  have hth : (fun z : List Bool =>
-      pairSnd (pairSnd (pairFst z))) ∈ FP :=
-    mem_FP_comp hacc Cobham.sndBlock_mem_FP
-  exact ifLtLen_mem_FP Cobham.sndBlock_mem_FP (dropOneFn_mem_FP hth) hacc
-    (Cobham.pairFn_mem_FP (Cobham.appendFn_mem_FP hr (constFn_mem_FP [true]))
-      (Cobham.appendFn_mem_FP hth hth))
+@[polytime] theorem logStep_mem_FP : logStep ∈ FP := by
+  polytime [logStep]
 
 theorem rulerLen_le (n : ℕ) : rulerLen n ≤ n := by
   induction n with
@@ -209,7 +200,7 @@ noncomputable def logRulerRaw (w : List Bool) : List Bool :=
   Cobham.recFoldClamp logStep logStep (4 * w.length + 4) (pair [] [true])
     (pairFst w) (pairSnd w)
 
-theorem logRulerRaw_mem_FP : logRulerRaw ∈ FP := by
+@[polytime] theorem logRulerRaw_mem_FP : logRulerRaw ∈ FP := by
   refine mem_FP_of_eq (Cobham.recFoldClamp_mem_FP logStep_mem_FP logStep_mem_FP
     (constFn_mem_FP (pair [] [true])) (4 * Polynomial.X + 4)) fun w => ?_
   rw [logRulerRaw]
@@ -219,9 +210,8 @@ theorem logRulerRaw_mem_FP : logRulerRaw ∈ FP := by
 noncomputable def logRuler (z : List Bool) : List Bool :=
   pairFst (logRulerRaw (pair [] z))
 
-theorem logRuler_mem_FP : logRuler ∈ FP :=
-  mem_FP_of_eq (mem_FP_comp (Cobham.pairFn_mem_FP (constFn_mem_FP []) id_mem_FP)
-    (mem_FP_comp logRulerRaw_mem_FP Cobham.fstBlock_mem_FP)) fun _ => rfl
+@[polytime] theorem logRuler_mem_FP : logRuler ∈ FP := by
+  polytime [logRuler]
 
 /-- **The ruler is as long as the fold says.** -/
 theorem logRuler_eq (z : List Bool) :

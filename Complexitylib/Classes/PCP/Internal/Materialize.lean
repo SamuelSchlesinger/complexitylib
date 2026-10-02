@@ -7,6 +7,7 @@ module
 public import Complexitylib.Classes.PCP.Internal.UnaryList
 public import Complexitylib.Classes.PCP.Internal.ListEncode
 public import Complexitylib.Classes.PCP.Internal.PositionsFP
+import Complexitylib.Tactic.PolyTime
 
 /-!
 # Writing out a table
@@ -35,6 +36,7 @@ namespace Complexity
 
 /-- **A record rule materializes a list in polynomial time.** No bound need be
 supplied: this is `listEncFn_mem_FP`. -/
+@[polytime]
 theorem materialize_mem_FP {E : List Bool → List Bool} (hE : E ∈ FP) : listEncFn E ∈ FP :=
   listEncFn_mem_FP hE
 
@@ -80,12 +82,9 @@ theorem ifEqLen_neg {a b : List Bool} (h : a.length ≠ b.length) (x y : List Bo
     | cons c t => exact ⟨c, t, rfl⟩
   rw [ifEqLen, hct, Cobham.selectHead_emptyFlag_cons]
 
-theorem ifEqLen_mem_FP {a b x y : List Bool → List Bool} (ha : a ∈ FP) (hb : b ∈ FP)
+@[polytime] theorem ifEqLen_mem_FP {a b x y : List Bool → List Bool} (ha : a ∈ FP) (hb : b ∈ FP)
     (hx : x ∈ FP) (hy : y ∈ FP) : (fun z => ifEqLen (a z) (b z) (x z) (y z)) ∈ FP := by
-  have hd1 := dropLenFn_mem_FP ha hb
-  have hd2 := dropLenFn_mem_FP hb ha
-  exact Cobham.selectHeadFn_mem_FP
-    (Cobham.emptyFlag_mem_FP (Cobham.appendFn_mem_FP hd1 hd2)) hx hy
+  polytime [ifEqLen]
 
 /-- `x` when the first string is shorter than the second, `y` otherwise. -/
 noncomputable def ifLtLen (a b x y : List Bool) : List Bool :=
@@ -110,9 +109,8 @@ theorem ifLtLen_neg {a b : List Bool} (h : ¬ a.length < b.length) (x y : List B
     omega
   rw [ifLtLen, hb, Cobham.selectHead_emptyFlag_nil]
 
-theorem ifLtLen_mem_FP {a b x y : List Bool → List Bool} (ha : a ∈ FP) (hb : b ∈ FP)
-    (hx : x ∈ FP) (hy : y ∈ FP) : (fun z => ifLtLen (a z) (b z) (x z) (y z)) ∈ FP :=
-  Cobham.selectHeadFn_mem_FP
-    (Cobham.emptyFlag_mem_FP (dropLenFn_mem_FP ha hb)) hy hx
+@[polytime] theorem ifLtLen_mem_FP {a b x y : List Bool → List Bool} (ha : a ∈ FP) (hb : b ∈ FP)
+    (hx : x ∈ FP) (hy : y ∈ FP) : (fun z => ifLtLen (a z) (b z) (x z) (y z)) ∈ FP := by
+  polytime [ifLtLen]
 
 end Complexity

@@ -6,6 +6,7 @@ Authors: Bolton Bailey
 module
 public import Complexitylib.Classes.PCP.Internal.BinToUnary
 public import Complexitylib.Classes.Containments.Internal.IPLeaf
+import Complexitylib.Tactic.PolyTime
 
 /-!
 # The canonical bits of a number
@@ -96,16 +97,11 @@ def stripZero (z : List Bool) : List Bool :=
 def stripOne (z : List Bool) : List Bool :=
   true :: pairSnd (pairFst z)
 
-theorem stripZero_mem_FP : stripZero ∈ FP := by
-  have h : (fun z : List Bool => pairSnd (pairFst z)) ∈ FP :=
-    mem_FP_comp Cobham.fstBlock_mem_FP Cobham.sndBlock_mem_FP
-  exact Cobham.selectHeadFn_mem_FP (emptyFlagFn_mem_FP h) (constFn_mem_FP [])
-    (mem_FP_comp h (Cobham.cons_mem_FP false))
+@[polytime] theorem stripZero_mem_FP : stripZero ∈ FP := by
+  polytime [stripZero]
 
-theorem stripOne_mem_FP : stripOne ∈ FP := by
-  have h : (fun z : List Bool => pairSnd (pairFst z)) ∈ FP :=
-    mem_FP_comp Cobham.fstBlock_mem_FP Cobham.sndBlock_mem_FP
-  exact mem_FP_comp h (Cobham.cons_mem_FP true)
+@[polytime] theorem stripOne_mem_FP : stripOne ∈ FP := by
+  polytime [stripOne]
 
 /-- The fold computes `stripTrailing`, as long as the clamp allows the answer. -/
 theorem recFoldClamp_stripTrailing (bound : ℕ) (W : List Bool) :
@@ -153,7 +149,7 @@ def stripFn (z : List Bool) : List Bool :=
   Cobham.recFoldClamp stripZero stripOne z.length [] (pairFst z)
     (pairSnd z)
 
-theorem stripFn_mem_FP : stripFn ∈ FP := by
+@[polytime] theorem stripFn_mem_FP : stripFn ∈ FP := by
   have := Cobham.recFoldClamp_mem_FP stripZero_mem_FP stripOne_mem_FP
     (constFn_mem_FP []) (Polynomial.X)
   refine mem_FP_of_eq this fun z => ?_

@@ -7,6 +7,7 @@ module
 public import Complexitylib.Classes.PCP.Internal.CNFCount
 public import Complexitylib.Classes.PCP.Internal.PositionsFP
 public import Complexitylib.Classes.PCP.Internal.UnaryDivMod
+import Complexitylib.Tactic.PolyTime
 
 /-!
 # Cutting out one clause of an encoded formula
@@ -66,7 +67,7 @@ def segRest (z : List Bool) : List Bool := pairSnd (pairSnd z)
 def matchBit (b : Bool) (s : List Bool) : List Bool :=
   if b then Cobham.selectHead s [true] [false] else Cobham.selectHead s [false] [true]
 
-theorem matchBit_mem_FP (b : Bool) {a : List Bool → List Bool} (ha : a ∈ FP) :
+@[polytime] theorem matchBit_mem_FP (b : Bool) {a : List Bool → List Bool} (ha : a ∈ FP) :
     (fun z => matchBit b (a z)) ∈ FP := by
   cases b
   · exact Cobham.selectHeadFn_mem_FP ha (constFn_mem_FP [false]) (constFn_mem_FP [true])
@@ -96,39 +97,26 @@ def segStep (s0 s1 : Bool) (z : List Bool) : List Bool :=
             (segColl z ++ (segRest z).take 2) (segColl z)))
         (dropOne (dropOne (segRest z)))))
 
-theorem segTgt_mem_FP : segTgt ∈ FP :=
-  mem_FP_comp Cobham.fstBlock_mem_FP Cobham.fstBlock_mem_FP
+@[polytime] theorem segTgt_mem_FP : segTgt ∈ FP := by
+  polytime [segTgt]
 
-theorem segCnt_mem_FP : segCnt ∈ FP :=
-  mem_FP_comp Cobham.fstBlock_mem_FP Cobham.sndBlock_mem_FP
+@[polytime] theorem segCnt_mem_FP : segCnt ∈ FP := by
+  polytime [segCnt]
 
-theorem segColl_mem_FP : segColl ∈ FP :=
-  mem_FP_comp Cobham.sndBlock_mem_FP Cobham.fstBlock_mem_FP
+@[polytime] theorem segColl_mem_FP : segColl ∈ FP := by
+  polytime [segColl]
 
-theorem segRest_mem_FP : segRest ∈ FP :=
-  mem_FP_comp Cobham.sndBlock_mem_FP Cobham.sndBlock_mem_FP
+@[polytime] theorem segRest_mem_FP : segRest ∈ FP := by
+  polytime [segRest]
 
-theorem segIsSep_mem_FP (s0 s1 : Bool) : segIsSep s0 s1 ∈ FP :=
-  andBitFn_mem_FP (matchBit_mem_FP s0 segRest_mem_FP)
-    (matchBit_mem_FP s1 (dropOneFn_mem_FP segRest_mem_FP))
+@[polytime] theorem segIsSep_mem_FP (s0 s1 : Bool) : segIsSep s0 s1 ∈ FP := by
+  polytime [segIsSep]
 
-theorem segHere_mem_FP : segHere ∈ FP :=
-  andBitFn_mem_FP (lenLeFlagFn_mem_FP segCnt_mem_FP segTgt_mem_FP)
-    (lenLeFlagFn_mem_FP segTgt_mem_FP segCnt_mem_FP)
+@[polytime] theorem segHere_mem_FP : segHere ∈ FP := by
+  polytime [segHere]
 
-theorem segStep_mem_FP (s0 s1 : Bool) : segStep s0 s1 ∈ FP := by
-  have htake : (fun z : List Bool => (segRest z).take 2) ∈ FP := by
-    have := Cobham.takeLenFn_mem_FP (constFn_mem_FP [false, false]) segRest_mem_FP
-    refine mem_FP_of_eq this fun z => ?_
-    rfl
-  refine Cobham.selectHeadFn_mem_FP (emptyFlagFn_mem_FP segRest_mem_FP) id_mem_FP ?_
-  refine Cobham.pairFn_mem_FP (Cobham.pairFn_mem_FP segTgt_mem_FP ?_)
-    (Cobham.pairFn_mem_FP ?_ (dropOneFn_mem_FP (dropOneFn_mem_FP segRest_mem_FP)))
-  · exact Cobham.selectHeadFn_mem_FP (segIsSep_mem_FP s0 s1)
-      (mem_FP_comp segCnt_mem_FP (Cobham.cons_mem_FP true)) segCnt_mem_FP
-  · refine Cobham.selectHeadFn_mem_FP (segIsSep_mem_FP s0 s1) segColl_mem_FP ?_
-    exact Cobham.selectHeadFn_mem_FP segHere_mem_FP
-      (Cobham.appendFn_mem_FP segColl_mem_FP htake) segColl_mem_FP
+@[polytime] theorem segStep_mem_FP (s0 s1 : Bool) : segStep s0 s1 ∈ FP := by
+  polytime [segStep]
 
 /-! ### What the scan collects -/
 
@@ -313,7 +301,7 @@ noncomputable def segAtFn (s0 s1 : Bool) (z : List Bool) : List Bool :=
   segColl ((segStep s0 s1)^[(pairSnd z).length]
     (pair (pair (pairFst z) []) (pair [] (pairSnd z))))
 
-theorem segAtFn_mem_FP : segAtFn s0 s1 ∈ FP := by
+@[polytime] theorem segAtFn_mem_FP : segAtFn s0 s1 ∈ FP := by
   have hf : (fun z : List Bool => pairFst z) ∈ FP := Cobham.fstBlock_mem_FP
   have hs : (fun z : List Bool => pairSnd z) ∈ FP := Cobham.sndBlock_mem_FP
   have hinit : (fun z : List Bool =>
@@ -355,18 +343,8 @@ noncomputable def litSegFn (z : List Bool) : List Bool :=
     (pair (pairSnd (pairFst z))
       (segAtFn true false (pair (pairFst (pairFst z)) (pairSnd z))))
 
-theorem litSegFn_mem_FP : litSegFn ∈ FP := by
-  have hj : (fun z : List Bool => pairFst (pairFst z)) ∈ FP :=
-    mem_FP_comp Cobham.fstBlock_mem_FP Cobham.fstBlock_mem_FP
-  have hp : (fun z : List Bool => pairSnd (pairFst z)) ∈ FP :=
-    mem_FP_comp Cobham.fstBlock_mem_FP Cobham.sndBlock_mem_FP
-  have he : (fun z : List Bool => pairSnd z) ∈ FP := Cobham.sndBlock_mem_FP
-  have hcl : (fun z : List Bool => segAtFn true false
-      (pair (pairFst (pairFst z)) (pairSnd z))) ∈ FP := by
-    have := mem_FP_comp (Cobham.pairFn_mem_FP hj he) (segAtFn_mem_FP true false)
-    exact this
-  have := mem_FP_comp (Cobham.pairFn_mem_FP hp hcl) (segAtFn_mem_FP false true)
-  exact this
+@[polytime] theorem litSegFn_mem_FP : litSegFn ∈ FP := by
+  polytime [litSegFn]
 
 theorem litSegFn_eq {j p : ℕ} {e : List Bool} (h : Even e.length) :
     litSegFn (pair (pair (List.replicate j true) (List.replicate p true)) e)
@@ -378,13 +356,8 @@ theorem litSegFn_eq {j p : ℕ} {e : List Bool} (h : Even e.length) :
 /-- The variable a literal names, in unary. -/
 noncomputable def litVarFn (z : List Bool) : List Bool := halfFn ((litSegFn z).drop 2)
 
-theorem litVarFn_mem_FP : litVarFn ∈ FP := by
-  have hdrop : (fun z : List Bool => (litSegFn z).drop 2) ∈ FP := by
-    have := dropLenFn_mem_FP (constFn_mem_FP [false, false]) litSegFn_mem_FP
-    refine mem_FP_of_eq this fun z => ?_
-    rfl
-  have := mem_FP_comp hdrop halfFn_mem_FP
-  exact this
+@[polytime] theorem litVarFn_mem_FP : litVarFn ∈ FP := by
+  polytime [litVarFn]
 
 theorem litVarFn_eq {j p : ℕ} {e : List Bool} (h : Even e.length) :
     litVarFn (pair (pair (List.replicate j true) (List.replicate p true)) e)
@@ -396,8 +369,8 @@ theorem litVarFn_eq {j p : ℕ} {e : List Bool} (h : Even e.length) :
 noncomputable def litSignFn (z : List Bool) : List Bool :=
   Cobham.selectHead (litSegFn z) [true] [false]
 
-theorem litSignFn_mem_FP : litSignFn ∈ FP :=
-  Cobham.selectHeadFn_mem_FP litSegFn_mem_FP (constFn_mem_FP [true]) (constFn_mem_FP [false])
+@[polytime] theorem litSignFn_mem_FP : litSignFn ∈ FP := by
+  polytime [litSignFn]
 
 theorem litSignFn_eq {j p : ℕ} {e : List Bool} (h : Even e.length) :
     litSignFn (pair (pair (List.replicate j true) (List.replicate p true)) e)

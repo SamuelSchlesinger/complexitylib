@@ -5,6 +5,7 @@ Authors: Bolton Bailey
 -/
 module
 public import Complexitylib.Classes.PCP.Internal.VerifierLang
+import Complexitylib.Tactic.PolyTime
 
 /-!
 # Checking that a witness is consistent
@@ -68,37 +69,32 @@ def conC3 (y : List Bool) : ℕ := (pairSnd (pairFst y)).length
 /-- The second query index. -/
 def conC4 (y : List Bool) : ℕ := (pairSnd y).length
 
-theorem conY2_mem_FP : conY2 ∈ FP :=
-  mem_FP_comp Cobham.fstBlock_mem_FP Cobham.fstBlock_mem_FP
+@[polytime] theorem conY2_mem_FP : conY2 ∈ FP := by
+  polytime [conY2]
 
-theorem conY1_mem_FP : conY1 ∈ FP :=
-  mem_FP_comp conY2_mem_FP Cobham.fstBlock_mem_FP
+@[polytime] theorem conY1_mem_FP : conY1 ∈ FP := by
+  polytime [conY1]
 
-theorem conY0_mem_FP : conY0 ∈ FP :=
-  mem_FP_comp conY1_mem_FP Cobham.fstBlock_mem_FP
+@[polytime] theorem conY0_mem_FP : conY0 ∈ FP := by
+  polytime [conY0]
 
-theorem conX_mem_FP : conX ∈ FP :=
-  mem_FP_comp conY0_mem_FP Cobham.fstBlock_mem_FP
+@[polytime] theorem conX_mem_FP : conX ∈ FP := by
+  polytime [conX]
 
-theorem conW_mem_FP : conW ∈ FP :=
-  mem_FP_comp conY0_mem_FP Cobham.sndBlock_mem_FP
+@[polytime] theorem conW_mem_FP : conW ∈ FP := by
+  polytime [conW]
 
-theorem unary_conC1_mem_FP : (fun y => List.replicate (conC1 y) true) ∈ FP := by
-  have := mem_FP_comp (mem_FP_comp conY1_mem_FP Cobham.sndBlock_mem_FP) unaryLength_mem_FP
-  exact this
+@[polytime] theorem unary_conC1_mem_FP : (fun y => List.replicate (conC1 y) true) ∈ FP := by
+  polytime [conC1]
 
-theorem unary_conC2_mem_FP : (fun y => List.replicate (conC2 y) true) ∈ FP := by
-  have := mem_FP_comp (mem_FP_comp conY2_mem_FP Cobham.sndBlock_mem_FP) unaryLength_mem_FP
-  exact this
+@[polytime] theorem unary_conC2_mem_FP : (fun y => List.replicate (conC2 y) true) ∈ FP := by
+  polytime [conC2]
 
-theorem unary_conC3_mem_FP : (fun y => List.replicate (conC3 y) true) ∈ FP := by
-  have := mem_FP_comp
-    (mem_FP_comp Cobham.fstBlock_mem_FP Cobham.sndBlock_mem_FP) unaryLength_mem_FP
-  exact this
+@[polytime] theorem unary_conC3_mem_FP : (fun y => List.replicate (conC3 y) true) ∈ FP := by
+  polytime [conC3]
 
-theorem unary_conC4_mem_FP : (fun y => List.replicate (conC4 y) true) ∈ FP := by
-  have := mem_FP_comp Cobham.sndBlock_mem_FP unaryLength_mem_FP
-  exact this
+@[polytime] theorem unary_conC4_mem_FP : (fun y => List.replicate (conC4 y) true) ∈ FP := by
+  polytime [conC4]
 
 /-! ### The check -/
 
@@ -140,78 +136,37 @@ variable (hf : f ∈ FP)
   (hr : (fun x : List Bool => List.replicate (r x.length) true) ∈ FP)
 
 include hr in
-theorem conRho_mem_FP : conRho r ∈ FP := by
-  have ht : (fun y : List Bool => List.replicate (r (conX y).length) true) ∈ FP := by
-    have := mem_FP_comp conX_mem_FP hr
-    exact this
-  exact coinStr_mem_FP ht unary_conC1_mem_FP
+@[polytime] theorem conRho_mem_FP : conRho r ∈ FP := by
+  polytime [conRho, conC1]
 
 include hr in
-theorem conRho'_mem_FP : conRho' r ∈ FP := by
-  have ht : (fun y : List Bool => List.replicate (r (conX y).length) true) ∈ FP := by
-    have := mem_FP_comp conX_mem_FP hr
-    exact this
-  exact coinStr_mem_FP ht unary_conC2_mem_FP
+@[polytime] theorem conRho'_mem_FP : conRho' r ∈ FP := by
+  polytime [conRho', conC2]
 
 include hf hr in
-theorem conP_mem_FP : conP f r ∈ FP := by
-  have hb : (fun y => f (pair (conX y) (conRho r y))) ∈ FP := by
-    have := mem_FP_comp (Cobham.pairFn_mem_FP conX_mem_FP (conRho_mem_FP r hr)) hf
-    exact this
-  have := posAt_mem_FP unary_conC3_mem_FP hb
-  refine mem_FP_of_eq this fun y => ?_
-  rw [conP, List.length_replicate]
+@[polytime] theorem conP_mem_FP : conP f r ∈ FP := by
+  polytime [conP, conC3]
 
 include hf hr in
-theorem conP'_mem_FP : conP' f r ∈ FP := by
-  have hb : (fun y => f (pair (conX y) (conRho' r y))) ∈ FP := by
-    have := mem_FP_comp (Cobham.pairFn_mem_FP conX_mem_FP (conRho'_mem_FP r hr)) hf
-    exact this
-  have := posAt_mem_FP unary_conC4_mem_FP hb
-  refine mem_FP_of_eq this fun y => ?_
-  rw [conP', List.length_replicate]
+@[polytime] theorem conP'_mem_FP : conP' f r ∈ FP := by
+  polytime [conP', conC4]
 
 /-- The offset of a slot in the witness, in unary. -/
-theorem offset_mem_FP {c d : List Bool → ℕ}
+@[polytime] theorem offset_mem_FP {c d : List Bool → ℕ}
     (hc : (fun y => List.replicate (c y) true) ∈ FP)
     (hd : (fun y => List.replicate (d y) true) ∈ FP) :
     (fun y => List.replicate (c y * Q + d y) false) ∈ FP := by
-  have hQ : (fun _ : List Bool => List.replicate Q false) ∈ FP :=
-    Cobham.const_replicate_mem_FP Q
-  have hmul : (fun y => List.replicate ((c y) * Q) false) ∈ FP := by
-    have := Cobham.mulLenFn_mem_FP hc hQ
-    refine mem_FP_of_eq this fun y => ?_
-    rw [List.length_replicate, List.length_replicate]
-  have hzero : (fun y => List.replicate (d y) false) ∈ FP := by
-    have := zeroBlockFn_mem_FP hd
-    refine mem_FP_of_eq this fun y => ?_
-    rw [List.length_replicate]
-  have := Cobham.appendFn_mem_FP hmul hzero
-  refine mem_FP_of_eq this fun y => ?_
-  rw [← List.replicate_add]
+  polytime
 
-theorem conB_mem_FP : conB Q ∈ FP := by
-  have hs := offset_mem_FP Q unary_conC1_mem_FP unary_conC3_mem_FP
-  have hl : (fun _ : List Bool => [false]) ∈ FP := constFn_mem_FP [false]
-  have := wBlock_mem_FP conW_mem_FP hs hl
-  refine mem_FP_of_eq this fun y => ?_
-  rw [conB, List.length_replicate]
-  rfl
+@[polytime] theorem conB_mem_FP : conB Q ∈ FP := by
+  polytime [conB, conC1, conC3]
 
-theorem conB'_mem_FP : conB' Q ∈ FP := by
-  have hs := offset_mem_FP Q unary_conC2_mem_FP unary_conC4_mem_FP
-  have hl : (fun _ : List Bool => [false]) ∈ FP := constFn_mem_FP [false]
-  have := wBlock_mem_FP conW_mem_FP hs hl
-  refine mem_FP_of_eq this fun y => ?_
-  rw [conB', List.length_replicate]
-  rfl
+@[polytime] theorem conB'_mem_FP : conB' Q ∈ FP := by
+  polytime [conB', conC2, conC4]
 
 include hf hr in
-theorem conChk_mem_FP : conChk f r Q ∈ FP := by
-  refine Cobham.selectHeadFn_mem_FP ?_ ?_ (constFn_mem_FP [true])
-  · exact andBitFn_mem_FP (eqFlagFn_mem_FP (conP_mem_FP f r hf hr) (conP'_mem_FP f r hf hr))
-      (notBitFn_mem_FP (emptyFlagFn_mem_FP (conP_mem_FP f r hf hr)))
-  · exact eqFlagFn_mem_FP (conB_mem_FP Q) (conB'_mem_FP Q)
+@[polytime] theorem conChk_mem_FP : conChk f r Q ∈ FP := by
+  polytime [conChk]
 
 /-- One iteration of the consistency check. -/
 noncomputable def consInner : Language := {y | ∃ b ∈ conChk f r Q y, b = true}

@@ -6,6 +6,7 @@ Authors: Bolton Bailey
 module
 public import Complexitylib.Classes.PCP.Internal.AlgRound
 public import Complexitylib.Classes.PCP.Internal.AlgLog
+import Complexitylib.Tactic.PolyTime.Init
 
 /-!
 # Amplifying, logarithmically many times
@@ -150,7 +151,7 @@ theorem gapFn_eq {init ruler : List Bool → List Bool} {z : List Bool}
   exact iterate_encGraph (roundFn_eq F hd) _ G
 
 /-- **And writing it is polynomial-time.** -/
-theorem gapFn_mem_FP {init ruler width : List Bool → List Bool}
+@[polytime] theorem gapFn_mem_FP {init ruler width : List Bool → List Bool}
     (hinit : init ∈ FP) (hruler : ruler ∈ FP) (hwidth : width ∈ FP)
     (hinitG : ∀ z, ∃ G : ConstraintGraph DinurAlpha, init z = encGraph G)
     (hbound : ∀ (z : List Bool) (G : ConstraintGraph DinurAlpha), init z = encGraph G →

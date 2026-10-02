@@ -6,6 +6,7 @@ Authors: Bolton Bailey
 module
 public import Complexitylib.Classes.PCP.Internal.AlgKey
 public import Complexitylib.Classes.PCP.Internal.AlgKilled
+import Complexitylib.Tactic.PolyTime
 
 /-!
 # Reading an edge's data off the input
@@ -101,28 +102,32 @@ noncomputable def walkArg (w : List Bool) : List Bool :=
 noncomputable def killArg (w : List Bool) : List Bool :=
   pair (pairFst w) (pair (vertFn r w) (dartFn r w))
 
-theorem testFn_mem_FP : testFn r ∈ FP := divC_mem_FP Cobham.sndBlock_mem_FP _
+@[polytime] theorem testFn_mem_FP : testFn r ∈ FP := by
+  polytime [testFn]
 
-theorem randFn_mem_FP : randFn r ∈ FP :=
-  divC_mem_FP (modC_mem_FP Cobham.sndBlock_mem_FP _) _
+@[polytime] theorem randFn_mem_FP : randFn r ∈ FP := by
+  polytime [randFn]
 
-theorem readFn_mem_FP : readFn ∈ FP := modC_mem_FP Cobham.sndBlock_mem_FP _
+@[polytime] theorem readFn_mem_FP : readFn ∈ FP := by
+  polytime [readFn]
 
-theorem dartFn_mem_FP : dartFn r ∈ FP := modC_mem_FP (testFn_mem_FP r) _
+@[polytime] theorem dartFn_mem_FP : dartFn r ∈ FP := by
+  polytime [dartFn]
 
-theorem vertFn_mem_FP : vertFn r ∈ FP := divC_mem_FP (testFn_mem_FP r) _
+@[polytime] theorem vertFn_mem_FP : vertFn r ∈ FP := by
+  polytime [vertFn]
 
-theorem stepsFn_mem_FP : stepsFn r ∈ FP := divC_mem_FP (dartFn_mem_FP r) _
+@[polytime] theorem stepsFn_mem_FP : stepsFn r ∈ FP := by
+  polytime [stepsFn]
 
-theorem coinFn_mem_FP : coinFn r ∈ FP := modC_mem_FP (dartFn_mem_FP r) _
+@[polytime] theorem coinFn_mem_FP : coinFn r ∈ FP := by
+  polytime [coinFn]
 
-theorem walkArg_mem_FP : walkArg r ∈ FP :=
-  Cobham.pairFn_mem_FP Cobham.fstBlock_mem_FP
-    (Cobham.pairFn_mem_FP (vertFn_mem_FP r) (stepsFn_mem_FP r))
+@[polytime] theorem walkArg_mem_FP : walkArg r ∈ FP := by
+  polytime [walkArg]
 
-theorem killArg_mem_FP : killArg r ∈ FP :=
-  Cobham.pairFn_mem_FP Cobham.fstBlock_mem_FP
-    (Cobham.pairFn_mem_FP (vertFn_mem_FP r) (dartFn_mem_FP r))
+@[polytime] theorem killArg_mem_FP : killArg r ∈ FP := by
+  polytime [killArg]
 
 /-! ### The walk's data -/
 
@@ -130,20 +135,16 @@ theorem killArg_mem_FP : killArg r ∈ FP :=
 noncomputable def stopBlk (w : List Bool) : List Bool :=
   stopFn r.q (coinsOf r.q r.T) 0 r.T (killArg r w)
 
-theorem stopBlk_mem_FP : stopBlk r ∈ FP :=
-  mem_FP_of_eq (mem_FP_comp (killArg_mem_FP r)
-    (stopFn_mem_FP (coinsOf_mem_FP r.q r.T) r.T 0)) fun _ => rfl
+@[polytime] theorem stopBlk_mem_FP : stopBlk r ∈ FP := by
+  polytime [stopBlk]
 
 /-- The parity of the vertex the `i`-th step stands on, and `0` past the end. -/
 noncomputable def parDigit (i : ℕ) (w : List Bool) : List Bool :=
   ifLtLen (List.replicate i true) (stopBlk r w)
     (modC 2 (walkFn F pol r.deg r.P i (walkArg r w))) []
 
-theorem parDigit_mem_FP (i : ℕ) : parDigit F pol r i ∈ FP :=
-  ifLtLen_mem_FP (constFn_mem_FP _) (stopBlk_mem_FP r)
-    (modC_mem_FP (mem_FP_of_eq
-      (mem_FP_comp (walkArg_mem_FP r) (walkFn_mem_FP F pol r.deg r.P i)) fun _ => rfl) 2)
-    (constFn_mem_FP [])
+@[polytime] theorem parDigit_mem_FP (i : ℕ) : parDigit F pol r i ∈ FP := by
+  polytime [parDigit]
 
 /-- The code of the constraint the `i`-th step meets, and `0` past the end. -/
 noncomputable def codeDigit (i : ℕ) (w : List Bool) : List Bool :=
@@ -151,17 +152,8 @@ noncomputable def codeDigit (i : ℕ) (w : List Bool) : List Bool :=
     ((recThd (pairSnd (pairFst w))
       (divC 2 (walkFn F pol r.deg r.P i (walkArg r w))).length).take r.C) []
 
-theorem codeDigit_mem_FP (i : ℕ) : codeDigit F pol r i ∈ FP := by
-  have hwalk : (fun w : List Bool => walkFn F pol r.deg r.P i (walkArg r w)) ∈ FP :=
-    mem_FP_of_eq (mem_FP_comp (walkArg_mem_FP r) (walkFn_mem_FP F pol r.deg r.P i))
-      fun _ => rfl
-  have hcode : (fun w : List Bool => recThd (pairSnd (pairFst w))
-      (divC 2 (walkFn F pol r.deg r.P i (walkArg r w))).length) ∈ FP :=
-    gCodeFn_mem_FP (divC_mem_FP hwalk 2) Cobham.fstBlock_mem_FP
-  refine ifLtLen_mem_FP (constFn_mem_FP _) (stopBlk_mem_FP r) ?_ (constFn_mem_FP [])
-  have := Cobham.takeLenFn_mem_FP (constFn_mem_FP (List.replicate r.C true)) hcode
-  refine mem_FP_of_eq this fun w => ?_
-  rw [List.length_replicate]
+@[polytime] theorem codeDigit_mem_FP (i : ℕ) : codeDigit F pol r i ∈ FP := by
+  polytime [codeDigit]
 
 /-! ### The data as a string -/
 
@@ -173,18 +165,8 @@ noncomputable def keyFn (w : List Bool) : List Bool :=
       (pair ((revNumFn F pol r.deg r.P r.T r.q (killArg r w)).take (r.P ^ r.T))
         (pair (randFn r w) (readFn w))))
 
-theorem keyFn_mem_FP : keyFn F pol r ∈ FP := by
-  refine Cobham.pairFn_mem_FP (Cobham.pairFn_mem_FP (stepsFn_mem_FP r) (coinFn_mem_FP r))
-    (Cobham.pairFn_mem_FP
-      (Cobham.pairFn_mem_FP (marks_mem_FP (digitSum_mem_FP (parDigit_mem_FP F pol r) r.T))
-        (marks_mem_FP (digitSum_mem_FP (codeDigit_mem_FP F pol r) r.T)))
-      (Cobham.pairFn_mem_FP ?_ (Cobham.pairFn_mem_FP (randFn_mem_FP r) readFn_mem_FP)))
-  have hrev : (fun w : List Bool => revNumFn F pol r.deg r.P r.T r.q (killArg r w)) ∈ FP :=
-    mem_FP_of_eq (mem_FP_comp (killArg_mem_FP r)
-      (revNumFn_mem_FP F pol r.deg r.P r.T r.q)) fun _ => rfl
-  have := Cobham.takeLenFn_mem_FP (constFn_mem_FP (List.replicate (r.P ^ r.T) true)) hrev
-  refine mem_FP_of_eq this fun w => ?_
-  rw [List.length_replicate]
+@[polytime] theorem keyFn_mem_FP : keyFn F pol r ∈ FP := by
+  polytime [keyFn]
 
 /-! ### What the blocks read -/
 
@@ -571,13 +553,13 @@ noncomputable def codeFn
     (encβ : (PreWalk E r.T → α) → Cube B) (w : List Bool) : List Bool :=
   List.replicate (codeOfKey encβ (keyOfString dflt (keyFn F pol r w))) true
 
-theorem cubeFn_mem_FP (hQ : 0 < r.cQ) (hD : 0 < r.cD) (hZ : 0 < r.cZ) (hC : 0 < r.C)
+@[polytime] theorem cubeFn_mem_FP (hQ : 0 < r.cQ) (hD : 0 < r.cD) (hZ : 0 < r.cZ) (hC : 0 < r.C)
     (dflt : StepKey E r.T r.q B (Fintype.card (α → α → Bool)))
     (encβ : (PreWalk E r.T → α) → Cube B) : cubeFn F pol r dflt encβ ∈ FP :=
   mem_FP_of_bounded_key (keyFn_mem_FP F pol r) (keyFn_length_le F pol r hQ hD hZ hC)
     (fun s => List.replicate (cubeOfKey encβ (keyOfString dflt s)) true)
 
-theorem codeFn_mem_FP (hQ : 0 < r.cQ) (hD : 0 < r.cD) (hZ : 0 < r.cZ) (hC : 0 < r.C)
+@[polytime] theorem codeFn_mem_FP (hQ : 0 < r.cQ) (hD : 0 < r.cD) (hZ : 0 < r.cZ) (hC : 0 < r.C)
     (dflt : StepKey E r.T r.q B (Fintype.card (α → α → Bool)))
     (encβ : (PreWalk E r.T → α) → Cube B) : codeFn F pol r dflt encβ ∈ FP :=
   mem_FP_of_bounded_key (keyFn_mem_FP F pol r) (keyFn_length_le F pol r hQ hD hZ hC)

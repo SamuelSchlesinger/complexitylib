@@ -8,6 +8,7 @@ public import Complexitylib.Classes.PCP.Internal.PosScan
 public import Complexitylib.Classes.PCP.Internal.CoinEnum
 public import Complexitylib.Classes.PCP.Internal.UnaryExp
 public import Complexitylib.Classes.PCP.Internal.BoundedQuant
+import Complexitylib.Tactic.PolyTime
 
 /-!
 # The witness layout of a PCP verifier
@@ -59,10 +60,16 @@ theorem exists_const_query_bound {V : PCPVerifier} {q : ℕ → ℕ}
 /-- The witness block starting at `start` and holding `len` answers. -/
 def wBlock (w : List Bool) (start len : ℕ) : List Bool := (w.drop start).take len
 
-theorem wBlock_mem_FP {w s l : List Bool → List Bool}
+@[polytime] theorem wBlock_mem_FP {w s l : List Bool → List Bool}
     (hw : w ∈ FP) (hs : s ∈ FP) (hl : l ∈ FP) :
-    (fun z => wBlock (w z) (s z).length (l z).length) ∈ FP :=
-  Cobham.takeLenFn_mem_FP hl (dropLenFn_mem_FP hs hw)
+    (fun z => wBlock (w z) (s z).length (l z).length) ∈ FP := by
+  polytime [wBlock]
+
+/-- A witness slice may use any start and length computable in unary. -/
+@[polytime] theorem wBlock_mem_FP_of_unary {w : List Bool → List Bool}
+    {s l : List Bool → ℕ} (hw : w ∈ FP) (hs : UnaryFn s) (hl : UnaryFn l) :
+    (fun z => wBlock (w z) (s z) (l z)) ∈ FP := by
+  polytime [wBlock]
 
 theorem length_wBlock {w : List Bool} {start len : ℕ} (h : start + len ≤ w.length) :
     (wBlock w start len).length = len := by
@@ -140,47 +147,21 @@ noncomputable def accView (y : List Bool) : List Bool :=
     (wBlock (accW y) ((pairSnd y).length * Q)
       (posCount (f (pair (accX y) (accCoin r y)))).length)
 
-theorem accX_mem_FP : accX ∈ FP :=
-  mem_FP_comp Cobham.fstBlock_mem_FP Cobham.fstBlock_mem_FP
+@[polytime] theorem accX_mem_FP : accX ∈ FP := by
+  polytime [accX]
 
-theorem accW_mem_FP : accW ∈ FP :=
-  mem_FP_comp Cobham.fstBlock_mem_FP Cobham.sndBlock_mem_FP
+@[polytime] theorem accW_mem_FP : accW ∈ FP := by
+  polytime [accW]
 
-theorem accCoin_mem_FP
+@[polytime] theorem accCoin_mem_FP
     (hr : (fun x : List Bool => List.replicate (r x.length) true) ∈ FP) :
     accCoin r ∈ FP := by
-  have ht : (fun y : List Bool => List.replicate (r (accX y).length) true) ∈ FP := by
-    have := mem_FP_comp accX_mem_FP hr
-    exact this
-  have hc : (fun y : List Bool => List.replicate (pairSnd y).length true) ∈ FP := by
-    have := mem_FP_comp Cobham.sndBlock_mem_FP unaryLength_mem_FP
-    exact this
-  exact coinStr_mem_FP ht hc
+  polytime [accCoin]
 
-theorem accView_mem_FP (hf : f ∈ FP)
+@[polytime] theorem accView_mem_FP (hf : f ∈ FP)
     (hr : (fun x : List Bool => List.replicate (r x.length) true) ∈ FP) :
     accView f r Q ∈ FP := by
-  have hcoin := accCoin_mem_FP r hr
-  have hview : (fun y => pair (accX y) (accCoin r y)) ∈ FP :=
-    Cobham.pairFn_mem_FP accX_mem_FP hcoin
-  have hfv : (fun y => f (pair (accX y) (accCoin r y))) ∈ FP := by
-    have := mem_FP_comp hview hf
-    exact this
-  have hcount : (fun y => posCount (f (pair (accX y) (accCoin r y)))) ∈ FP :=
-    posCount_mem_FP hfv
-  have hoff : (fun y : List Bool =>
-      List.replicate ((pairSnd y).length * Q) false) ∈ FP := by
-    have hb : (fun _ : List Bool => List.replicate Q false) ∈ FP :=
-      Cobham.const_replicate_mem_FP Q
-    have := Cobham.mulLenFn_mem_FP Cobham.sndBlock_mem_FP hb
-    refine mem_FP_of_eq this fun y => ?_
-    rw [List.length_replicate]
-  have hblk : (fun y => wBlock (accW y)
-      (List.replicate ((pairSnd y).length * Q) false).length
-      (posCount (f (pair (accX y) (accCoin r y)))).length) ∈ FP :=
-    wBlock_mem_FP accW_mem_FP hoff hcount
-  refine Cobham.pairFn_mem_FP hview (mem_FP_of_eq hblk fun y => ?_)
-  rw [List.length_replicate]
+  polytime [accView]
 
 /-- One iteration's condition: the verifier accepts the view. -/
 noncomputable def accInner : Language := accView f r Q ⁻¹' V.verdict

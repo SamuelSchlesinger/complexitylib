@@ -7,6 +7,7 @@ module
 public import Complexitylib.Classes.PCP.Internal.PositionsFP
 public import Complexitylib.Classes.PCP.Internal.SquareVerifier
 public import Complexitylib.Classes.PCP.Internal.CoinEnum
+import Complexitylib.Tactic.PolyTime
 
 /-!
 # A verifier for a constraint graph
@@ -64,13 +65,25 @@ namespace AlgCSP
 
 variable (A : AlgCSP) (p : Polynomial ℕ)
 
+/-- The stored edge-count certificate in the number-valued interface. -/
+@[polytime] theorem numEdges_unary : UnaryFn A.numEdges := A.numEdges_mem
+
+/-- Read an endpoint on a certified input and an index computable in unary. -/
+@[polytime] theorem vert_unary (b : Bool) {x : List Bool → List Bool}
+    {i : List Bool → ℕ} (hx : x ∈ FP) (hi : UnaryFn i) :
+    UnaryFn (fun z => A.vert b (x z) (i z)) := by
+  change (fun z => List.replicate (A.vert b (x z) (i z)) true) ∈ FP
+  simpa only [Function.comp_def, pairFst_pair, pairSnd_pair, List.length_replicate] using
+    mem_FP_comp (mem_FP_pair hx hi.mem_FP) (A.vert_mem b)
+
 /-- The edge a coin string names. -/
 def edgeIdx (z : List Bool) : ℕ := binValLE (pairSnd z)
 
 /-- That index in unary, as far as the clamp allows. -/
 noncomputable def edgeU (z : List Bool) : List Bool := unaryVal p z
 
-theorem edgeU_mem_FP : edgeU p ∈ FP := unaryVal_mem_FP p
+@[polytime] theorem edgeU_mem_FP : edgeU p ∈ FP := by
+  polytime [edgeU]
 
 theorem edgeU_eq {z : List Bool}
     (h : 2 ^ (pairSnd z).length ≤ p.eval z.length) :
@@ -81,12 +94,8 @@ noncomputable def inRange (z : List Bool) : List Bool :=
   Cobham.lenLeFlag (List.replicate (A.numEdges (pairFst z)) true)
     (true :: edgeU p z)
 
-theorem inRange_mem_FP : A.inRange p ∈ FP := by
-  have hn : (fun z : List Bool =>
-      List.replicate (A.numEdges (pairFst z)) true) ∈ FP := by
-    have := mem_FP_comp Cobham.fstBlock_mem_FP A.numEdges_mem
-    exact this
-  exact lenLeFlagFn_mem_FP hn (mem_FP_comp (edgeU_mem_FP p) (Cobham.cons_mem_FP true))
+@[polytime] theorem inRange_mem_FP : A.inRange p ∈ FP := by
+  polytime [inRange]
 
 theorem inRange_eq_true_iff {z : List Bool}
     (h : 2 ^ (pairSnd z).length ≤ p.eval z.length) :
@@ -101,9 +110,8 @@ coin string names no edge. -/
 noncomputable def cntU (z : List Bool) : List Bool :=
   Cobham.selectHead (A.inRange p z) (List.replicate (2 * A.width) true) []
 
-theorem cntU_mem_FP : A.cntU p ∈ FP :=
-  Cobham.selectHeadFn_mem_FP (A.inRange_mem_FP p)
-    (constFn_mem_FP (List.replicate (2 * A.width) true)) (constFn_mem_FP [])
+@[polytime] theorem cntU_mem_FP : A.cntU p ∈ FP := by
+  polytime [cntU]
 
 /-! ### Where the verifier looks -/
 
@@ -113,22 +121,15 @@ noncomputable def vertU (b : Bool) (w : List Bool) : List Bool :=
   List.replicate (A.vert b (pairFst (pairFst w))
     (edgeU p (pairFst w)).length) true
 
-theorem vertU_mem_FP (b : Bool) : A.vertU p b ∈ FP := by
-  have hx : (fun w : List Bool => pairFst (pairFst w)) ∈ FP :=
-    mem_FP_comp Cobham.fstBlock_mem_FP Cobham.fstBlock_mem_FP
-  have he : (fun w : List Bool => edgeU p (pairFst w)) ∈ FP :=
-    mem_FP_comp Cobham.fstBlock_mem_FP (edgeU_mem_FP p)
-  have := mem_FP_comp (Cobham.pairFn_mem_FP hx he) (A.vert_mem b)
-  refine mem_FP_of_eq this fun w => ?_
-  rw [vertU, Function.comp_apply, pairFst_pair, pairSnd_pair]
+@[polytime] theorem vertU_mem_FP (b : Bool) : A.vertU p b ∈ FP := by
+  polytime [vertU]
 
 /-- Is this query in the low half? -/
 def lowFlag (w : List Bool) : List Bool :=
   Cobham.lenLeFlag (List.replicate A.width true) (true :: pairSnd w)
 
-theorem lowFlag_mem_FP : A.lowFlag ∈ FP :=
-  lenLeFlagFn_mem_FP (constFn_mem_FP (List.replicate A.width true))
-    (mem_FP_comp Cobham.sndBlock_mem_FP (Cobham.cons_mem_FP true))
+@[polytime] theorem lowFlag_mem_FP : A.lowFlag ∈ FP := by
+  polytime [lowFlag]
 
 theorem lowFlag_eq_true_iff (w : List Bool) :
     A.lowFlag w = [true] ↔ (pairSnd w).length < A.width := by
@@ -139,12 +140,8 @@ theorem lowFlag_eq_true_iff (w : List Bool) :
 def offU (w : List Bool) : List Bool :=
   Cobham.selectHead (A.lowFlag w) (pairSnd w) ((pairSnd w).drop A.width)
 
-theorem offU_mem_FP : A.offU ∈ FP := by
-  refine Cobham.selectHeadFn_mem_FP A.lowFlag_mem_FP Cobham.sndBlock_mem_FP ?_
-  have := dropLenFn_mem_FP (constFn_mem_FP (List.replicate A.width true))
-    Cobham.sndBlock_mem_FP
-  refine mem_FP_of_eq this fun w => ?_
-  rw [List.length_replicate]
+@[polytime] theorem offU_mem_FP : A.offU ∈ FP := by
+  polytime [offU]
 
 /-- **The position a query reads**, in unary. -/
 noncomputable def posU (w : List Bool) : List Bool :=
@@ -153,24 +150,8 @@ noncomputable def posU (w : List Bool) : List Bool :=
       * A.width) true
     ++ List.replicate (A.offU w).length true
 
-theorem posU_mem_FP : A.posU p ∈ FP := by
-  have hv : (fun w => Cobham.selectHead (A.lowFlag w) (A.vertU p false w)
-      (A.vertU p true w)) ∈ FP :=
-    Cobham.selectHeadFn_mem_FP A.lowFlag_mem_FP (A.vertU_mem_FP p false)
-      (A.vertU_mem_FP p true)
-  have hmul : (fun w => List.replicate
-      ((Cobham.selectHead (A.lowFlag w) (A.vertU p false w) (A.vertU p true w)).length
-        * A.width) true) ∈ FP := by
-    have hb : (fun _ : List Bool => List.replicate A.width false) ∈ FP :=
-      Cobham.const_replicate_mem_FP A.width
-    have hm := Cobham.mulLenFn_mem_FP hv hb
-    have := mem_FP_comp hm unaryLength_mem_FP
-    refine mem_FP_of_eq this fun w => ?_
-    rw [Function.comp_apply, List.length_replicate, List.length_replicate]
-  have hoff : (fun w => List.replicate (A.offU w).length true) ∈ FP := by
-    have := mem_FP_comp A.offU_mem_FP unaryLength_mem_FP
-    exact this
-  exact Cobham.appendFn_mem_FP hmul hoff
+@[polytime] theorem posU_mem_FP : A.posU p ∈ FP := by
+  polytime [posU]
 
 theorem cntU_eq_replicate (z : List Bool) :
     A.cntU p z = List.replicate (A.cntU p z).length true := by
@@ -200,12 +181,8 @@ noncomputable def okArg (z : List Bool) : List Bool :=
   pair (pair (pairFst (pairFst z)) (edgeU p (pairFst z)))
     (pairSnd z)
 
-theorem okArg_mem_FP : okArg p ∈ FP := by
-  have hx : (fun z : List Bool => pairFst (pairFst z)) ∈ FP :=
-    mem_FP_comp Cobham.fstBlock_mem_FP Cobham.fstBlock_mem_FP
-  have he : (fun z : List Bool => edgeU p (pairFst z)) ∈ FP :=
-    mem_FP_comp Cobham.fstBlock_mem_FP (edgeU_mem_FP p)
-  exact Cobham.pairFn_mem_FP (Cobham.pairFn_mem_FP hx he) Cobham.sndBlock_mem_FP
+@[polytime] theorem okArg_mem_FP : okArg p ∈ FP := by
+  polytime [okArg]
 
 /-- The verdict: accept unless the coin string names a real edge whose
 constraint fails. -/

@@ -10,6 +10,7 @@ public import Complexitylib.Classes.PCP.Internal.FiniteKey
 public import Complexitylib.Classes.PCP.Internal.SymbolCodec
 public import Complexitylib.Classes.PCP.Internal.CSPVerifier
 public import Complexitylib.Classes.PCP.Internal.AlgCSPModel
+import Complexitylib.Tactic.PolyTime
 
 /-!
 # The base graph, as an algorithm sees it
@@ -54,12 +55,8 @@ variable (E : List Bool → List Bool)
 noncomputable def baseEdgesU (z : List Bool) : List Bool :=
   clauseCountFn (E z) ++ clauseCountFn (E z) ++ clauseCountFn (E z)
 
-theorem baseEdgesU_mem_FP (hE : E ∈ FP) : baseEdgesU E ∈ FP := by
-  have hc : (fun z => clauseCountFn (E z)) ∈ FP := by
-    have := mem_FP_comp hE clauseCountFn_mem_FP
-    refine mem_FP_of_eq this fun z => ?_
-    rw [Function.comp_apply]
-  exact Cobham.appendFn_mem_FP (Cobham.appendFn_mem_FP hc hc) hc
+@[polytime] theorem baseEdgesU_mem_FP (hE : E ∈ FP) : baseEdgesU E ∈ FP := by
+  polytime [baseEdgesU]
 
 theorem baseEdgesU_eq {Φ : List Bool → CNF} (hE : ∀ x, E x = (Φ x).encode) (x : List Bool) :
     baseEdgesU E x = List.replicate (3 * (Φ x).length) true := by
@@ -72,12 +69,8 @@ theorem baseEdgesU_eq {Φ : List Bool → CNF} (hE : ∀ x, E x = (Φ x).encode)
 noncomputable def baseMaxU (z : List Bool) : List Bool :=
   maxFn slotVar (pair (baseEdgesU E z) (E z))
 
-theorem baseMaxU_mem_FP (hE : E ∈ FP) : baseMaxU E ∈ FP := by
-  have hpair : (fun z => pair (baseEdgesU E z) (E z)) ∈ FP :=
-    Cobham.pairFn_mem_FP (baseEdgesU_mem_FP E hE) hE
-  have := mem_FP_comp hpair (maxFn_mem_FP slotVar_mem_FP)
-  refine mem_FP_of_eq this fun z => ?_
-  rw [Function.comp_apply, baseMaxU]
+@[polytime] theorem baseMaxU_mem_FP (hE : E ∈ FP) : baseMaxU E ∈ FP := by
+  polytime [baseMaxU]
 
 theorem baseMaxU_eq {Φ : List Bool → CNF} (hE : ∀ x, E x = (Φ x).encode)
     (h3 : ∀ x, CNF.Is3CNF (Φ x)) (x : List Bool) :
@@ -93,31 +86,11 @@ noncomputable def baseTailU (w : List Bool) : List Bool :=
 noncomputable def baseHeadU (w : List Bool) : List Bool :=
   slotVar (pair (E (pairFst w)) (pairSnd w))
 
-theorem baseTailU_mem_FP (hE : E ∈ FP) : baseTailU E ∈ FP := by
-  have hm : (fun w => baseMaxU E (pairFst w)) ∈ FP := by
-    have := mem_FP_comp Cobham.fstBlock_mem_FP (baseMaxU_mem_FP E hE)
-    refine mem_FP_of_eq this fun w => ?_
-    rw [Function.comp_apply]
-  have hd : (fun w : List Bool =>
-      List.replicate (divFn [false, false, false] (pairSnd w)).length true) ∈ FP := by
-    have h1 : (fun w : List Bool => divFn [false, false, false] (pairSnd w)) ∈ FP := by
-      have := mem_FP_comp Cobham.sndBlock_mem_FP (divFn_mem_FP [false, false, false])
-      refine mem_FP_of_eq this fun w => ?_
-      rw [Function.comp_apply]
-    have := mem_FP_comp h1 unaryLength_mem_FP
-    refine mem_FP_of_eq this fun w => ?_
-    rw [Function.comp_apply]
-  exact Cobham.appendFn_mem_FP (Cobham.appendFn_mem_FP hm (constFn_mem_FP [true])) hd
+@[polytime] theorem baseTailU_mem_FP (hE : E ∈ FP) : baseTailU E ∈ FP := by
+  polytime [baseTailU]
 
-theorem baseHeadU_mem_FP (hE : E ∈ FP) : baseHeadU E ∈ FP := by
-  have hp : (fun w => pair (E (pairFst w)) (pairSnd w)) ∈ FP := by
-    refine Cobham.pairFn_mem_FP ?_ Cobham.sndBlock_mem_FP
-    have := mem_FP_comp Cobham.fstBlock_mem_FP hE
-    refine mem_FP_of_eq this fun w => ?_
-    rw [Function.comp_apply]
-  have := mem_FP_comp hp slotVar_mem_FP
-  refine mem_FP_of_eq this fun w => ?_
-  rw [Function.comp_apply, baseHeadU]
+@[polytime] theorem baseHeadU_mem_FP (hE : E ∈ FP) : baseHeadU E ∈ FP := by
+  polytime [baseHeadU]
 
 /-! ### What the endpoints compute -/
 
@@ -164,7 +137,7 @@ noncomputable def baseKey (w : ℕ) (z : List Bool) : List Bool :=
       (modFn [false, false, false] (pairSnd (pairFst z))))
     ((pairSnd z).take (2 * w))
 
-theorem baseSigns_mem_FP (hE : E ∈ FP) : baseSigns E ∈ FP := by
+@[polytime] theorem baseSigns_mem_FP (hE : E ∈ FP) : baseSigns E ∈ FP := by
   have hx : (fun z : List Bool => E (pairFst (pairFst z))) ∈ FP := by
     have := mem_FP_comp (mem_FP_comp Cobham.fstBlock_mem_FP Cobham.fstBlock_mem_FP) hE
     refine mem_FP_of_eq this fun z => ?_
@@ -187,19 +160,8 @@ theorem baseSigns_mem_FP (hE : E ∈ FP) : baseSigns E ∈ FP := by
   exact Cobham.appendFn_mem_FP (Cobham.appendFn_mem_FP (hsign []) (hsign [true]))
     (hsign [true, true])
 
-theorem baseKey_mem_FP (hE : E ∈ FP) (w : ℕ) : baseKey E w ∈ FP := by
-  have hm : (fun z : List Bool =>
-      modFn [false, false, false] (pairSnd (pairFst z))) ∈ FP := by
-    have := mem_FP_comp (mem_FP_comp Cobham.fstBlock_mem_FP Cobham.sndBlock_mem_FP)
-      (modFn_mem_FP [false, false, false])
-    refine mem_FP_of_eq this fun z => ?_
-    rw [Function.comp_apply, Function.comp_apply]
-  have ht : (fun z : List Bool => (pairSnd z).take (2 * w)) ∈ FP := by
-    have := Cobham.takeLenFn_mem_FP
-      (constFn_mem_FP (List.replicate (2 * w) false)) Cobham.sndBlock_mem_FP
-    refine mem_FP_of_eq this fun z => ?_
-    rw [List.length_replicate]
-  exact Cobham.pairFn_mem_FP (Cobham.pairFn_mem_FP (baseSigns_mem_FP E hE) hm) ht
+@[polytime] theorem baseKey_mem_FP (hE : E ∈ FP) (w : ℕ) : baseKey E w ∈ FP := by
+  polytime [baseKey]
 
 theorem length_baseSigns_le (z : List Bool) : (baseSigns E z).length ≤ 3 := by
   have hs : ∀ y, (litSignFn y).length ≤ 1 := by

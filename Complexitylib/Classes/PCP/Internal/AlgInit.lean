@@ -7,6 +7,7 @@ module
 public import Complexitylib.Classes.PCP.Internal.BaseAlg
 public import Complexitylib.Classes.PCP.Internal.AlgGraph
 public import Complexitylib.Classes.PCP.Internal.PadGraph
+import Complexitylib.Tactic.PolyTime
 
 /-!
 # The starting graph, written out
@@ -79,17 +80,8 @@ noncomputable def baseCodeKey (w : List Bool) : List Bool :=
   pair (baseSigns E (pair w []))
     (modFn [false, false, false] (pairSnd w))
 
-theorem baseCodeKey_mem_FP (hE : E ∈ FP) : baseCodeKey E ∈ FP := by
-  have harg : (fun w : List Bool => pair w []) ∈ FP :=
-    Cobham.pairFn_mem_FP id_mem_FP (constFn_mem_FP [])
-  have hsigns : (fun w : List Bool => baseSigns E (pair w [])) ∈ FP := by
-    refine mem_FP_of_eq (mem_FP_comp harg (baseSigns_mem_FP E hE)) fun w => ?_
-    rw [Function.comp_apply]
-  have hmod : (fun w : List Bool => modFn [false, false, false] (pairSnd w)) ∈ FP := by
-    refine mem_FP_of_eq (mem_FP_comp Cobham.sndBlock_mem_FP
-      (modFn_mem_FP [false, false, false])) fun w => ?_
-    rw [Function.comp_apply]
-  exact Cobham.pairFn_mem_FP hsigns hmod
+@[polytime] theorem baseCodeKey_mem_FP (hE : E ∈ FP) : baseCodeKey E ∈ FP := by
+  polytime [baseCodeKey]
 
 theorem baseCodeKey_length_le (w : List Bool) : (baseCodeKey E w).length ≤ 12 := by
   have hs : (baseSigns E (pair w [])).length ≤ 3 := length_baseSigns_le E _
@@ -152,10 +144,8 @@ theorem baseCodeFn_codeKey (hE : ∀ x, E x = (Φ x).encode) (h3 : ∀ x, CNF.Is
 noncomputable def baseVertsU (z : List Bool) : List Bool :=
   marks (baseMaxU E z) ++ [true] ++ divC 3 (baseEdgesU E z)
 
-theorem baseVertsU_mem_FP (hE : E ∈ FP) : baseVertsU E ∈ FP :=
-  Cobham.appendFn_mem_FP
-    (Cobham.appendFn_mem_FP (marks_mem_FP (baseMaxU_mem_FP E hE)) (constFn_mem_FP [true]))
-    (divC_mem_FP (baseEdgesU_mem_FP E hE) 3)
+@[polytime] theorem baseVertsU_mem_FP (hE : E ∈ FP) : baseVertsU E ∈ FP := by
+  polytime [baseVertsU]
 
 theorem baseVertsU_eq (hE : ∀ x, E x = (Φ x).encode) (h3 : ∀ x, CNF.Is3CNF (Φ x))
     (x : List Bool) :
@@ -205,12 +195,11 @@ noncomputable def baseGraphFn (g : List Bool → List Bool) : List Bool → List
   buildGraph (baseVertsU E) (baseEdgesU E)
     (fun w => encTriple (marks (baseTailU E w)) (marks (baseHeadU E w)) (g (baseCodeKey E w)))
 
-theorem baseGraphFn_mem_FP (hE : E ∈ FP) (g : List Bool → List Bool) :
-    baseGraphFn E g ∈ FP :=
-  buildGraph_mem_FP (baseVertsU_mem_FP E hE) (baseEdgesU_mem_FP E hE)
-    (encTriple_mem_FP (marks_mem_FP (baseTailU_mem_FP E hE))
-      (marks_mem_FP (baseHeadU_mem_FP E hE))
-      (mem_FP_of_bounded_key (baseCodeKey_mem_FP E hE) (baseCodeKey_length_le E) g))
+@[polytime] theorem baseGraphFn_mem_FP (hE : E ∈ FP) (g : List Bool → List Bool) :
+    baseGraphFn E g ∈ FP := by
+  have hcode := mem_FP_of_bounded_key
+    (baseCodeKey_mem_FP E hE) (baseCodeKey_length_le E) g
+  polytime [baseGraphFn]
 
 /-- **The rule writes the starting graph.** -/
 theorem baseGraphFn_eq (hE : ∀ x, E x = (Φ x).encode) (h3 : ∀ x, CNF.Is3CNF (Φ x))
@@ -238,15 +227,11 @@ noncomputable def basePadFn (padU g : List Bool → List Bool) : List Bool → L
       (encTriple (marks (baseTailU E w)) (marks (baseHeadU E w)) (g (baseCodeKey E w)))
       (encTriple [] [] trivCode))
 
-theorem basePadFn_mem_FP (hE : E ∈ FP) (hP : padU ∈ FP) (g : List Bool → List Bool) :
+@[polytime] theorem basePadFn_mem_FP (hE : E ∈ FP) (hP : padU ∈ FP) (g : List Bool → List Bool) :
     basePadFn E padU g ∈ FP := by
-  refine buildGraph_mem_FP (baseVertsU_mem_FP E hE) hP (ifLtLen_mem_FP Cobham.sndBlock_mem_FP
-    ?_ (encTriple_mem_FP (marks_mem_FP (baseTailU_mem_FP E hE))
-      (marks_mem_FP (baseHeadU_mem_FP E hE))
-      (mem_FP_of_bounded_key (baseCodeKey_mem_FP E hE) (baseCodeKey_length_le E) g))
-    (constFn_mem_FP _))
-  exact mem_FP_of_eq (mem_FP_comp Cobham.fstBlock_mem_FP (baseEdgesU_mem_FP E hE))
-    fun w => rfl
+  have hcode := mem_FP_of_bounded_key
+    (baseCodeKey_mem_FP E hE) (baseCodeKey_length_le E) g
+  polytime [basePadFn]
 
 /-- **The rule writes the padded starting graph.** -/
 theorem basePadFn_eq (hE : ∀ x, E x = (Φ x).encode) (h3 : ∀ x, CNF.Is3CNF (Φ x))

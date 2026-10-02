@@ -11,6 +11,7 @@ public import Complexitylib.Classes.P.PairWithInput
 public import Complexitylib.Classes.P.Composition
 public import Complexitylib.Classes.Containments.Internal.FPBridge
 public import Complexitylib.Classes.Containments.Internal.PVerdict
+import Complexitylib.Tactic.PolyTime.Init
 
 /-!
 # Computing an output one bit at a time, from a language in `P`
@@ -41,7 +42,7 @@ namespace Complexity
 `bitwise_mem_FP` with the bit rule established as a decision problem ("does
 position `i` of the output carry a one?"), which is the form in which
 `RAM_P_eq_P` delivers it. -/
-theorem bitwise_mem_FP_of_mem_P {len : List Bool → ℕ} {b : List Bool → ℕ → Bool}
+@[polytime] theorem bitwise_mem_FP_of_mem_P {len : List Bool → ℕ} {b : List Bool → ℕ → Bool}
     (hlen : (fun x => List.replicate (len x) true) ∈ FP)
     {L : Language} (hL : L ∈ P)
     (hLspec : ∀ x i, pair x (List.replicate i true) ∈ L ↔ b x i = true) :

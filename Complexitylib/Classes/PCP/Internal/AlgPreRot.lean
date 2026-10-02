@@ -8,6 +8,7 @@ public import Complexitylib.Classes.PCP.Internal.AlgGraph
 public import Complexitylib.Classes.PCP.Internal.AlgPreprocess
 public import Complexitylib.Classes.PCP.Internal.Materialize
 public import Complexitylib.Classes.PCP.Internal.AlgFamily
+import Complexitylib.Tactic.PolyTime
 
 /-!
 # Reading a half-edge's endpoint
@@ -49,13 +50,8 @@ noncomputable def ownerFn (z : List Bool) : List Bool :=
     (recSnd (pairSnd (pairFst z)) (divC 2 (pairSnd z)).length)
     (recFst (pairSnd (pairFst z)) (divC 2 (pairSnd z)).length)
 
-theorem ownerFn_mem_FP : ownerFn ∈ FP := by
-  have hp : (fun z : List Bool => pairSnd z) ∈ FP := Cobham.sndBlock_mem_FP
-  have hG : (fun z : List Bool => pairSnd (pairFst z)) ∈ FP :=
-    mem_FP_of_eq (mem_FP_comp Cobham.fstBlock_mem_FP Cobham.sndBlock_mem_FP) fun _ => rfl
-  have he := divC_mem_FP hp 2
-  have hb := modC_mem_FP hp 2
-  exact ifEqLen_mem_FP hb (constFn_mem_FP []) (recSnd_mem_FP he hG) (recFst_mem_FP he hG)
+@[polytime] theorem ownerFn_mem_FP : ownerFn ∈ FP := by
+  polytime [ownerFn]
 
 /-! ### Counting a cloud -/
 
@@ -65,18 +61,8 @@ noncomputable def cloudMark (w : List Bool) : List Bool :=
   ifEqLen (ownerFn (pair (pairFst (pairFst w)) (pairSnd w)))
     (pairSnd (pairFst w)) [true] []
 
-theorem cloudMark_mem_FP : cloudMark ∈ FP := by
-  have hG : (fun w : List Bool => pairFst (pairFst w)) ∈ FP :=
-    mem_FP_comp Cobham.fstBlock_mem_FP Cobham.fstBlock_mem_FP
-  have hu : (fun w : List Bool => pairSnd (pairFst w)) ∈ FP :=
-    mem_FP_comp Cobham.fstBlock_mem_FP Cobham.sndBlock_mem_FP
-  have hj : (fun w : List Bool => pairSnd w) ∈ FP := Cobham.sndBlock_mem_FP
-  have hown : (fun w : List Bool =>
-      ownerFn (pair (pairFst (pairFst w)) (pairSnd w))) ∈ FP := by
-    have h := mem_FP_comp (Cobham.pairFn_mem_FP hG hj) ownerFn_mem_FP
-    refine mem_FP_of_eq h fun w => ?_
-    rw [Function.comp_apply]
-  exact ifEqLen_mem_FP hown hu (constFn_mem_FP [true]) (constFn_mem_FP [])
+@[polytime] theorem cloudMark_mem_FP : cloudMark ∈ FP := by
+  polytime [cloudMark]
 
 theorem length_cloudMark (Gz u j : List Bool) :
     (cloudMark (pair (pair Gz u) j)).length
@@ -95,17 +81,8 @@ noncomputable def cloudSizeFn (z : List Bool) : List Bool :=
   countOver cloudMark
     (pair (marks (mulC 2 (posCount (pairSnd (pairFst z))))) z)
 
-theorem cloudSizeFn_mem_FP : cloudSizeFn ∈ FP := by
-  have hcnt : (fun z : List Bool =>
-      marks (mulC 2 (posCount (pairSnd (pairFst z))))) ∈ FP := by
-    have h1 : (fun z : List Bool => pairSnd (pairFst z)) ∈ FP :=
-      mem_FP_comp Cobham.fstBlock_mem_FP Cobham.sndBlock_mem_FP
-    exact marks_mem_FP (mulC_mem_FP (posCount_mem_FP h1) 2)
-  have harg := Cobham.pairFn_mem_FP hcnt id_mem_FP
-  have h := mem_FP_comp harg (countOver_mem_FP cloudMark_mem_FP)
-  refine mem_FP_of_eq h fun w => ?_
-  rw [Function.comp_apply, cloudSizeFn]
-  rfl
+@[polytime] theorem cloudSizeFn_mem_FP : cloudSizeFn ∈ FP := by
+  polytime [cloudSizeFn]
 
 /-- **The count is the number of half-edges the rule accepts.** -/
 theorem length_cloudSizeFn (Gz u : List Bool) (m : ℕ)
@@ -125,13 +102,8 @@ noncomputable def cloudIdxFn (z : List Bool) : List Bool :=
   countOver cloudMark
     (pair (marks (pairSnd z)) (pair (pairFst z) (ownerFn z)))
 
-theorem cloudIdxFn_mem_FP : cloudIdxFn ∈ FP := by
-  have hcnt := marks_mem_FP Cobham.sndBlock_mem_FP
-  have hdata := Cobham.pairFn_mem_FP Cobham.fstBlock_mem_FP ownerFn_mem_FP
-  have h := mem_FP_comp (Cobham.pairFn_mem_FP hcnt hdata)
-    (countOver_mem_FP cloudMark_mem_FP)
-  refine mem_FP_of_eq h fun w => ?_
-  rw [Function.comp_apply, cloudIdxFn]
+@[polytime] theorem cloudIdxFn_mem_FP : cloudIdxFn ∈ FP := by
+  polytime [cloudIdxFn]
 
 /-- **The index is the number of earlier half-edges in the same cloud.** -/
 theorem length_cloudIdxFn (Gz : List Bool) (p : ℕ) :
@@ -159,32 +131,8 @@ noncomputable def eltMark (w : List Bool) : List Bool :=
       (pairSnd (pairSnd (pairFst w))) [true] [])
     []
 
-theorem eltMark_mem_FP : eltMark ∈ FP := by
-  have hG : (fun w : List Bool => pairFst (pairFst w)) ∈ FP :=
-    mem_FP_comp Cobham.fstBlock_mem_FP Cobham.fstBlock_mem_FP
-  have hc : (fun w : List Bool => pairSnd w) ∈ FP := Cobham.sndBlock_mem_FP
-  have hu : (fun w : List Bool =>
-      pairFst (pairSnd (pairFst w))) ∈ FP :=
-    mem_FP_comp (mem_FP_comp Cobham.fstBlock_mem_FP Cobham.sndBlock_mem_FP)
-      Cobham.fstBlock_mem_FP
-  have hk : (fun w : List Bool =>
-      pairSnd (pairSnd (pairFst w))) ∈ FP :=
-    mem_FP_comp (mem_FP_comp Cobham.fstBlock_mem_FP Cobham.sndBlock_mem_FP)
-      Cobham.sndBlock_mem_FP
-  have harg := Cobham.pairFn_mem_FP hG hc
-  have hown : (fun w : List Bool =>
-      ownerFn (pair (pairFst (pairFst w)) (pairSnd w))) ∈ FP := by
-    have h := mem_FP_comp harg ownerFn_mem_FP
-    refine mem_FP_of_eq h fun w => ?_
-    rw [Function.comp_apply]
-  have hidx : (fun w : List Bool =>
-      cloudIdxFn (pair (pairFst (pairFst w)) (pairSnd w))) ∈ FP := by
-    have h := mem_FP_comp harg cloudIdxFn_mem_FP
-    refine mem_FP_of_eq h fun w => ?_
-    rw [Function.comp_apply]
-  exact ifEqLen_mem_FP hown hu
-    (ifEqLen_mem_FP hidx hk (constFn_mem_FP [true]) (constFn_mem_FP []))
-    (constFn_mem_FP [])
+@[polytime] theorem eltMark_mem_FP : eltMark ∈ FP := by
+  polytime [eltMark]
 
 theorem length_eltMark (Gz u k c : List Bool) :
     (eltMark (pair (pair Gz (pair u k)) c)).length
@@ -214,15 +162,8 @@ theorem cloudEltFn_eq_replicate (z : List Bool) :
   conv_lhs => rw [cloudEltFn, findFirst_eq_replicate]
   rw [← cloudEltFn]
 
-theorem cloudEltFn_mem_FP : cloudEltFn ∈ FP := by
-  have h1 : (fun z : List Bool => pairSnd (pairFst z)) ∈ FP :=
-    mem_FP_comp Cobham.fstBlock_mem_FP Cobham.sndBlock_mem_FP
-  have hcnt := marks_mem_FP (mulC_mem_FP (posCount_mem_FP h1) 2)
-  have h := mem_FP_comp (Cobham.pairFn_mem_FP hcnt id_mem_FP)
-    (findFirst_mem_FP eltMark_mem_FP)
-  refine mem_FP_of_eq h fun w => ?_
-  rw [Function.comp_apply, cloudEltFn]
-  rfl
+@[polytime] theorem cloudEltFn_mem_FP : cloudEltFn ∈ FP := by
+  polytime [cloudEltFn]
 
 variable {α : Type} [Fintype α] [DecidableEq α]
 
@@ -459,51 +400,8 @@ noncomputable def cloudStepFn (z : List Bool) : List Bool :=
             (pairFst (pairSnd z))))
           (pairSnd (pairSnd z))))))
 
-theorem cloudStepFn_mem_FP : cloudStepFn F pol ∈ FP := by
-  have hG : (fun z : List Bool => pairFst (pairFst z)) ∈ FP :=
-    mem_FP_comp Cobham.fstBlock_mem_FP Cobham.fstBlock_mem_FP
-  have hu : (fun z : List Bool => pairSnd (pairFst z)) ∈ FP :=
-    mem_FP_comp Cobham.fstBlock_mem_FP Cobham.sndBlock_mem_FP
-  have hc : (fun z : List Bool => pairFst (pairSnd z)) ∈ FP :=
-    mem_FP_comp Cobham.sndBlock_mem_FP Cobham.fstBlock_mem_FP
-  have hj : (fun z : List Bool => pairSnd (pairSnd z)) ∈ FP :=
-    mem_FP_comp Cobham.sndBlock_mem_FP Cobham.sndBlock_mem_FP
-  have hsize : (fun z : List Bool => cloudSizeFn (pair (pairFst (pairFst z))
-      (pairSnd (pairFst z)))) ∈ FP := by
-    have h := mem_FP_comp (Cobham.pairFn_mem_FP hG hu) cloudSizeFn_mem_FP
-    refine mem_FP_of_eq h fun w => ?_
-    rw [Function.comp_apply]
-  have hidx : (fun z : List Bool => cloudIdxFn (pair (pairFst (pairFst z))
-      (pairFst (pairSnd z)))) ∈ FP := by
-    have h := mem_FP_comp (Cobham.pairFn_mem_FP hG hc) cloudIdxFn_mem_FP
-    refine mem_FP_of_eq h fun w => ?_
-    rw [Function.comp_apply]
-  have hy : (fun z : List Bool => F.famRotFn pol
-      (pair (cloudSizeFn (pair (pairFst (pairFst z))
-          (pairSnd (pairFst z))))
-        (pair (cloudIdxFn (pair (pairFst (pairFst z))
-            (pairFst (pairSnd z))))
-          (pairSnd (pairSnd z))))) ∈ FP := by
-    have h := mem_FP_comp (Cobham.pairFn_mem_FP hsize (Cobham.pairFn_mem_FP hidx hj))
-      (F.famRotFn_mem_FP pol)
-    refine mem_FP_of_eq h fun w => ?_
-    rw [Function.comp_apply]
-  have helt : (fun z : List Bool => cloudEltFn (pair (pairFst (pairFst z))
-      (pair (pairSnd (pairFst z))
-        (pairFst (F.famRotFn pol
-          (pair (cloudSizeFn (pair (pairFst (pairFst z))
-              (pairSnd (pairFst z))))
-            (pair (cloudIdxFn (pair (pairFst (pairFst z))
-                (pairFst (pairSnd z))))
-              (pairSnd (pairSnd z))))))))) ∈ FP := by
-    have h := mem_FP_comp (Cobham.pairFn_mem_FP hG
-      (Cobham.pairFn_mem_FP hu (mem_FP_comp hy Cobham.fstBlock_mem_FP))) cloudEltFn_mem_FP
-    refine mem_FP_of_eq h fun w => ?_
-    simp only [Function.comp_apply]
-  have hout := Cobham.pairFn_mem_FP helt (mem_FP_comp hy Cobham.sndBlock_mem_FP)
-  refine mem_FP_of_eq hout fun w => ?_
-  simp only [Function.comp_apply]
-  rw [cloudStepFn]
+@[polytime] theorem cloudStepFn_mem_FP : cloudStepFn F pol ∈ FP := by
+  polytime [cloudStepFn]
 
 /-- The expander move, on `pair (graph) (pair (unary vertex) (unary dart))`. -/
 noncomputable def expStepFn (z : List Bool) : List Bool :=
@@ -511,14 +409,8 @@ noncomputable def expStepFn (z : List Bool) : List Bool :=
     (pair (marks (mulC 2 (posCount (pairSnd (pairFst z)))))
       (pairSnd z))
 
-theorem expStepFn_mem_FP : expStepFn F pol ∈ FP := by
-  have h1 : (fun z : List Bool => pairSnd (pairFst z)) ∈ FP :=
-    mem_FP_comp Cobham.fstBlock_mem_FP Cobham.sndBlock_mem_FP
-  have hcnt := marks_mem_FP (mulC_mem_FP (posCount_mem_FP h1) 2)
-  have h := mem_FP_comp (Cobham.pairFn_mem_FP hcnt Cobham.sndBlock_mem_FP)
-    (F.famRotFn_mem_FP pol)
-  refine mem_FP_of_eq h fun w => ?_
-  rw [Function.comp_apply, expStepFn]
+@[polytime] theorem expStepFn_mem_FP : expStepFn F pol ∈ FP := by
+  polytime [expStepFn]
 
 /-- **The cloud move computes what it should.** -/
 theorem cloudStepFn_eq (hd : 1 < F.deg) (v : Fin G.numVerts) (c j : ℕ)
@@ -610,10 +502,9 @@ theorem expStepFn_eq (hd : 1 < F.deg) (v j : ℕ)
 noncomputable def flipFn (v : List Bool) : List Bool :=
   ifEqLen (modC 2 v) [] (v ++ [true]) (dropOne v)
 
-theorem flipFn_mem_FP {f : List Bool → List Bool} (hf : f ∈ FP) :
-    (fun z => flipFn (f z)) ∈ FP :=
-  ifEqLen_mem_FP (modC_mem_FP hf 2) (constFn_mem_FP [])
-    (Cobham.appendFn_mem_FP hf (constFn_mem_FP [true])) (dropOneFn_mem_FP hf)
+@[polytime] theorem flipFn_mem_FP {f : List Bool → List Bool} (hf : f ∈ FP) :
+    (fun z => flipFn (f z)) ∈ FP := by
+  polytime [flipFn]
 
 theorem flipFn_eq (v : ℕ) :
     flipFn (List.replicate v true)
@@ -658,7 +549,7 @@ noncomputable def preRotFn (deg : ℕ) (z : List Bool) : List Bool :=
                 ((pairSnd (pairSnd z)).drop (2 + deg)))))
             ++ List.replicate (2 + deg) true))))
 
-theorem preRotFn_mem_FP (deg : ℕ) : preRotFn F pol deg ∈ FP := by
+@[polytime] theorem preRotFn_mem_FP (deg : ℕ) : preRotFn F pol deg ∈ FP := by
   have hG : (fun z : List Bool => pairFst z) ∈ FP := Cobham.fstBlock_mem_FP
   have hv : (fun z : List Bool => pairFst (pairSnd z)) ∈ FP :=
     mem_FP_comp Cobham.sndBlock_mem_FP Cobham.fstBlock_mem_FP

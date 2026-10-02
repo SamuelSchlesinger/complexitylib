@@ -5,6 +5,7 @@ Authors: Bolton Bailey
 -/
 module
 public import Complexitylib.Classes.PCP.Internal.AlgEdge
+import Complexitylib.Tactic.PolyTime.Init
 
 /-!
 # Iterating a round
@@ -43,7 +44,7 @@ theorem iterate_encGraph {f : List Bool → List Bool}
 /-- **The iteration is an `FP` function.** The bound the iteration rule wants is
 supplied on the *graphs*, where the round's size bounds live, rather than on
 their encodings. -/
-theorem iterate_mem_FP_encGraph {f init ruler width : List Bool → List Bool}
+@[polytime] theorem iterate_mem_FP_encGraph {f init ruler width : List Bool → List Bool}
     {T : ConstraintGraph α → ConstraintGraph α}
     (hf : f ∈ FP) (hinit : init ∈ FP) (hruler : ruler ∈ FP) (hwidth : width ∈ FP)
     (hstep : ∀ G : ConstraintGraph α, f (encGraph G) = encGraph (T G))

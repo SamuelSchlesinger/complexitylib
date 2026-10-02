@@ -6,6 +6,7 @@ Authors: Bolton Bailey
 module
 public import Complexitylib.Classes.PCP.Internal.AlgKeyFn
 public import Complexitylib.Classes.PCP.Internal.AlgPosNum
+import Complexitylib.Tactic.PolyTime
 
 /-!
 # A composed edge's record
@@ -71,20 +72,11 @@ theorem posBlk_eq (cardB cardN cardNN cardD k b c : ℕ) (cardV kind block cube 
   congr 2
   ring
 
-theorem posBlk_mem_FP {cardB cardN cardNN cardD : ℕ}
+@[polytime] theorem posBlk_mem_FP {cardB cardN cardNN cardD : ℕ}
     {cardV kind block cube : List Bool → List Bool}
     (hV : cardV ∈ FP) (hk : kind ∈ FP) (hb : block ∈ FP) (hc : cube ∈ FP) :
     (fun w => posBlk cardB cardN cardNN cardD (cardV w) (kind w) (block w) (cube w)) ∈ FP := by
-  have hbb := marks_mem_FP (mulC_mem_FP hb cardB)
-  have hVB := marks_mem_FP (mulC_mem_FP hV cardB)
-  have hNb := marks_mem_FP (mulC_mem_FP hb cardN)
-  have hNV := marks_mem_FP (mulC_mem_FP hV (cardD * cardN))
-  have hNNb := marks_mem_FP (mulC_mem_FP hb cardNN)
-  exact ifEqLen_mem_FP hk (constFn_mem_FP []) (Cobham.appendFn_mem_FP hbb hc)
-    (ifEqLen_mem_FP hk (constFn_mem_FP [true])
-      (Cobham.appendFn_mem_FP hVB (Cobham.appendFn_mem_FP hNb hc))
-      (Cobham.appendFn_mem_FP hVB
-        (Cobham.appendFn_mem_FP hNV (Cobham.appendFn_mem_FP hNNb hc))))
+  polytime [posBlk]
 
 /-! ### The first endpoint -/
 
@@ -96,12 +88,8 @@ noncomputable def tailBlk (posF : ℕ) (r : Round) (w : List Bool) : List Bool :
   marks (mulC posF (posCount (pairSnd (pairFst w))))
     ++ (marks (mulC r.cZ (testFn r w)) ++ randFn r w)
 
-theorem tailBlk_mem_FP (posF : ℕ) (r : Round) : tailBlk posF r ∈ FP :=
-  Cobham.appendFn_mem_FP
-    (marks_mem_FP (mulC_mem_FP (posCount_mem_FP
-      (mem_FP_comp Cobham.fstBlock_mem_FP Cobham.sndBlock_mem_FP)) posF))
-    (Cobham.appendFn_mem_FP (marks_mem_FP (mulC_mem_FP (testFn_mem_FP r) r.cZ))
-      (randFn_mem_FP r))
+@[polytime] theorem tailBlk_mem_FP (posF : ℕ) (r : Round) : tailBlk posF r ∈ FP := by
+  polytime [tailBlk]
 
 /-- **The first endpoint's algorithm computes it.** -/
 theorem tailBlk_eq (posF : ℕ) (r : Round) (G : ConstraintGraph α) {w : List Bool} {t zN : ℕ}
@@ -124,7 +112,7 @@ theorem readFn_length_le (w : List Bool) : (readFn w).length ≤ 22 := by
 noncomputable def kindBlk (w : List Bool) : List Bool :=
   List.replicate (RegCSP.readKind (decOr ReadIdx.f1x (readFn w).length)) true
 
-theorem kindBlk_mem_FP : kindBlk ∈ FP :=
+@[polytime] theorem kindBlk_mem_FP : kindBlk ∈ FP :=
   mem_FP_of_bounded_key readFn_mem_FP readFn_length_le
     (fun s => List.replicate (RegCSP.readKind (decOr ReadIdx.f1x s.length)) true)
 
@@ -143,15 +131,9 @@ noncomputable def blockBlk (F : FinBase) (pol : Polynomial ℕ) (r : Round) (w :
       (pairFst (killedRotFn F pol r.deg r.P r.T r.q (killArg r w)))
       (testFn r w))
 
-theorem blockBlk_mem_FP (F : FinBase) (pol : Polynomial ℕ) (r : Round) :
+@[polytime] theorem blockBlk_mem_FP (F : FinBase) (pol : Polynomial ℕ) (r : Round) :
     blockBlk F pol r ∈ FP := by
-  have hrot : (fun w : List Bool =>
-      pairFst (killedRotFn F pol r.deg r.P r.T r.q (killArg r w))) ∈ FP :=
-    mem_FP_of_eq (mem_FP_comp (killArg_mem_FP r)
-      (mem_FP_comp (killedRotFn_mem_FP F pol r.deg r.P r.T r.q) Cobham.fstBlock_mem_FP))
-      fun _ => rfl
-  exact ifEqLen_mem_FP readFn_mem_FP (constFn_mem_FP _) (vertFn_mem_FP r)
-    (ifEqLen_mem_FP readFn_mem_FP (constFn_mem_FP _) hrot (testFn_mem_FP r))
+  polytime [blockBlk]
 
 /-- **The block is the one the read asks for.** -/
 theorem blockBlk_eq {β : Type} {R : RegCSP β}
@@ -181,9 +163,8 @@ theorem blockBlk_eq {β : Type} {R : RegCSP β}
 noncomputable def vertCount (w : List Bool) : List Bool :=
   marks (mulC 2 (posCount (pairSnd (pairFst w))))
 
-theorem vertCount_mem_FP : vertCount ∈ FP :=
-  marks_mem_FP (mulC_mem_FP (posCount_mem_FP
-    (mem_FP_comp Cobham.fstBlock_mem_FP Cobham.sndBlock_mem_FP)) 2)
+@[polytime] theorem vertCount_mem_FP : vertCount ∈ FP := by
+  polytime [vertCount]
 
 theorem vertCount_eq (G : ConstraintGraph α) {w : List Bool}
     (hg : pairFst w = encGraph G) :
@@ -201,14 +182,13 @@ noncomputable def headBlk (F : FinBase) (pol : Polynomial ℕ) (r : Round)
   posBlk cardB cardN cardNN r.cD (vertCount w) (kindBlk w) (blockBlk F pol r w)
     (cubeFn F pol r dflt encβ w)
 
-theorem headBlk_mem_FP (F : FinBase) (pol : Polynomial ℕ) (r : Round)
+@[polytime] theorem headBlk_mem_FP (F : FinBase) (pol : Polynomial ℕ) (r : Round)
     (cardB cardN cardNN : ℕ) {E : ExpanderFamily} {B : ℕ}
     (hQ : 0 < r.cQ) (hD : 0 < r.cD) (hZ : 0 < r.cZ) (hC : 0 < r.C)
     (dflt : StepKey E r.T r.q B (Fintype.card (α → α → Bool)))
     (encβ : (PreWalk E r.T → α) → Cube B) :
-    headBlk F pol r cardB cardN cardNN dflt encβ ∈ FP :=
-  posBlk_mem_FP vertCount_mem_FP kindBlk_mem_FP (blockBlk_mem_FP F pol r)
-    (cubeFn_mem_FP F pol r hQ hD hZ hC dflt encβ)
+    headBlk F pol r cardB cardN cardNN dflt encβ ∈ FP := by
+  polytime [headBlk]
 
 /-- **The second endpoint's algorithm computes its number.** -/
 theorem headBlk_eq (F : FinBase) (pol : Polynomial ℕ) (r : Round)
@@ -301,15 +281,13 @@ noncomputable def edgeRule (F : FinBase) (pol : Polynomial ℕ) (r : Round)
   encTriple (tailBlk posF r w) (headBlk F pol r cardB cardN cardNN dflt encβ w)
     (codeFn F pol r dflt encβ w)
 
-theorem edgeRule_mem_FP (F : FinBase) (pol : Polynomial ℕ) (r : Round)
+@[polytime] theorem edgeRule_mem_FP (F : FinBase) (pol : Polynomial ℕ) (r : Round)
     (posF cardB cardN cardNN : ℕ) {E : ExpanderFamily} {B : ℕ}
     (hQ : 0 < r.cQ) (hD : 0 < r.cD) (hZ : 0 < r.cZ) (hC : 0 < r.C)
     (dflt : StepKey E r.T r.q B (Fintype.card (α → α → Bool)))
     (encβ : (PreWalk E r.T → α) → Cube B) :
-    edgeRule F pol r posF cardB cardN cardNN dflt encβ ∈ FP :=
-  encTriple_mem_FP (tailBlk_mem_FP posF r)
-    (headBlk_mem_FP F pol r cardB cardN cardNN hQ hD hZ hC dflt encβ)
-    (codeFn_mem_FP F pol r hQ hD hZ hC dflt encβ)
+    edgeRule F pol r posF cardB cardN cardNN dflt encβ ∈ FP := by
+  polytime [edgeRule]
 
 /-- **The graph a round produces**, from the graph it is given. -/
 noncomputable def stepFn (F : FinBase) (pol : Polynomial ℕ) (r : Round)
@@ -329,15 +307,13 @@ theorem countBlk_eq (G : ConstraintGraph α) (c : ℕ) :
     rwa [gEdges] at h
   rw [marks_eq, length_mulC, hcnt, Nat.mul_comm]
 
-theorem stepFn_mem_FP (F : FinBase) (pol : Polynomial ℕ) (r : Round)
+@[polytime] theorem stepFn_mem_FP (F : FinBase) (pol : Polynomial ℕ) (r : Round)
     (vertF edgeF posF cardB cardN cardNN : ℕ) {E : ExpanderFamily} {B : ℕ}
     (hQ : 0 < r.cQ) (hD : 0 < r.cD) (hZ : 0 < r.cZ) (hC : 0 < r.C)
     (dflt : StepKey E r.T r.q B (Fintype.card (α → α → Bool)))
     (encβ : (PreWalk E r.T → α) → Cube B) :
-    stepFn F pol r vertF edgeF posF cardB cardN cardNN dflt encβ ∈ FP :=
-  buildGraph_mem_FP (marks_mem_FP (mulC_mem_FP (posCount_mem_FP Cobham.sndBlock_mem_FP) vertF))
-    (marks_mem_FP (mulC_mem_FP (posCount_mem_FP Cobham.sndBlock_mem_FP) edgeF))
-    (edgeRule_mem_FP F pol r posF cardB cardN cardNN hQ hD hZ hC dflt encβ)
+    stepFn F pol r vertF edgeF posF cardB cardN cardNN dflt encβ ∈ FP := by
+  polytime [stepFn]
 
 /-- **One round of amplification, computed.** The algorithm's output is the
 graph the round produces. -/

@@ -9,6 +9,7 @@ public import Complexitylib.Classes.P.Cobham
 public meta import Complexitylib.Classes.P.Cobham
 public import Complexitylib.Classes.P.Cobham.Internal.Encoding
 public meta import Complexitylib.Classes.P.Cobham.Internal.Encoding
+public import Complexitylib.Tactic.PolyTime.Validation
 
 /-!
 # Executable validation for Cobham's characterization
@@ -17,6 +18,7 @@ These closed checks guard the representation choices on which the formal
 characterization depends: the all-one smash basis, recursion on notation,
 fixed-arity tuple encoding, configuration tape order, corrected writes, and the
 edge cases of zero work tapes and a head at the simulation-window boundary.
+This root also imports the polynomial-time tactic's certificate regression checks.
 
 This module is intentionally absent from the public import graph. Build it with
 `lake build --wfail Complexitylib.Classes.P.Cobham.Validation`.

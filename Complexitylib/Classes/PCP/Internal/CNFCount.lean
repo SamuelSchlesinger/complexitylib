@@ -6,6 +6,7 @@ Authors: Bolton Bailey
 module
 public import Complexitylib.Classes.Containments.Internal.BinArith
 public import Complexitylib.Classes.Containments.Internal.NLSearchAssemble
+import Complexitylib.Tactic.PolyTime
 
 /-!
 # Counting the clauses of an encoded formula
@@ -60,14 +61,8 @@ def ccStep (z : List Bool) : List Bool :=
         (pairFst z)))
     (dropOne (dropOne (pairSnd z)))
 
-theorem ccStep_mem_FP : ccStep ∈ FP := by
-  have hc : (fun z : List Bool => pairFst z) ∈ FP := Cobham.fstBlock_mem_FP
-  have hs : (fun z : List Bool => pairSnd z) ∈ FP := Cobham.sndBlock_mem_FP
-  have hd : (fun z : List Bool => dropOne (pairSnd z)) ∈ FP := dropOneFn_mem_FP hs
-  refine Cobham.pairFn_mem_FP ?_ (dropOneFn_mem_FP hd)
-  refine Cobham.selectHeadFn_mem_FP (emptyFlagFn_mem_FP hs) hc ?_
-  exact Cobham.selectHeadFn_mem_FP hs
-    (Cobham.selectHeadFn_mem_FP hd hc (mem_FP_comp hc (Cobham.cons_mem_FP true))) hc
+@[polytime] theorem ccStep_mem_FP : ccStep ∈ FP := by
+  polytime [ccStep]
 
 @[simp] theorem ccStep_nil (c : List Bool) : ccStep (pair c []) = pair c [] := by
   rw [ccStep, pairFst_pair, pairSnd_pair, emptyFlag_nil,
@@ -165,7 +160,7 @@ theorem ccStep_shape : ∀ (k : ℕ) (c s : List Bool),
 noncomputable def clauseCountFn (z : List Bool) : List Bool :=
   pairFst (ccStep^[z.length] (pair [] z))
 
-theorem clauseCountFn_mem_FP : clauseCountFn ∈ FP := by
+@[polytime] theorem clauseCountFn_mem_FP : clauseCountFn ∈ FP := by
   have hinit : (fun z : List Bool => pair [] z) ∈ FP :=
     mem_FP_pairWithInput (constFn_mem_FP [])
   have hwidth : (fun z : List Bool => polyRuler (Polynomial.C 3 * Polynomial.X

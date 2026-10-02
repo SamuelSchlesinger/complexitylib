@@ -5,6 +5,7 @@ Authors: Bolton Bailey
 -/
 module
 public import Complexitylib.Classes.PCP.Internal.Materialize
+import Complexitylib.Tactic.PolyTime
 
 /-!
 # Finding the tower level
@@ -56,24 +57,8 @@ noncomputable def levelStep (d : ℕ) (st : List Bool) : List Bool :=
       (pairSnd st))
     st
 
-theorem levelStep_mem_FP (d : ℕ) : levelStep d ∈ FP := by
-  have hk : (fun st : List Bool => pairFst (pairFst st)) ∈ FP :=
-    mem_FP_comp Cobham.fstBlock_mem_FP Cobham.fstBlock_mem_FP
-  have hs : (fun st : List Bool => pairSnd (pairFst st)) ∈ FP :=
-    mem_FP_comp Cobham.fstBlock_mem_FP Cobham.sndBlock_mem_FP
-  have hn : (fun st : List Bool => pairSnd st) ∈ FP := Cobham.sndBlock_mem_FP
-  have hbound : (fun st : List Bool =>
-      List.replicate d true ++ mulC (2 * d) (pairSnd st)) ∈ FP :=
-    Cobham.appendFn_mem_FP (constFn_mem_FP (List.replicate d true)) (mulC_mem_FP hn (2 * d))
-  have hadv : (fun st : List Bool =>
-      pair (pair (pairFst (pairFst st) ++ [true])
-        ((marks (mulC d (pairSnd (pairFst st)))).take
-          (List.replicate d true ++ mulC (2 * d) (pairSnd st)).length))
-        (pairSnd st)) ∈ FP :=
-    Cobham.pairFn_mem_FP
-      (Cobham.pairFn_mem_FP (Cobham.appendFn_mem_FP hk (constFn_mem_FP [true]))
-        (Cobham.takeLenFn_mem_FP hbound (marks_mem_FP (mulC_mem_FP hs d)))) hn
-  exact ifLtLen_mem_FP hs (Cobham.appendFn_mem_FP hn hn) hadv id_mem_FP
+@[polytime] theorem levelStep_mem_FP (d : ℕ) : levelStep d ∈ FP := by
+  polytime [levelStep]
 
 theorem levelStep_apply (d k s : ℕ) (Z : List Bool) :
     levelStep d (pair (pair (List.replicate k true) (List.replicate s true)) Z)
@@ -225,7 +210,7 @@ noncomputable def levelFn (d : ℕ) (p : Polynomial ℕ) (z : List Bool) : List 
   pairFst (pairFst
     ((levelStep d)^[(polyRuler p z).length] (pair (pair [] (List.replicate d true)) z)))
 
-theorem levelFn_mem_FP (d : ℕ) (p : Polynomial ℕ) : levelFn d p ∈ FP := by
+@[polytime] theorem levelFn_mem_FP (d : ℕ) (p : Polynomial ℕ) : levelFn d p ∈ FP := by
   have hinit : (fun z : List Bool => pair (pair [] (List.replicate d true)) z) ∈ FP :=
     Cobham.pairFn_mem_FP (constFn_mem_FP (pair [] (List.replicate d true))) id_mem_FP
   have hruler : (fun z : List Bool => polyRuler p z) ∈ FP := polyRulerFn_mem_FP p id_mem_FP
@@ -252,7 +237,7 @@ noncomputable def sizeFn (d : ℕ) (p : Polynomial ℕ) (z : List Bool) : List B
   pairSnd (pairFst
     ((levelStep d)^[(polyRuler p z).length] (pair (pair [] (List.replicate d true)) z)))
 
-theorem sizeFn_mem_FP (d : ℕ) (p : Polynomial ℕ) : sizeFn d p ∈ FP := by
+@[polytime] theorem sizeFn_mem_FP (d : ℕ) (p : Polynomial ℕ) : sizeFn d p ∈ FP := by
   have hinit : (fun z : List Bool => pair (pair [] (List.replicate d true)) z) ∈ FP :=
     Cobham.pairFn_mem_FP (constFn_mem_FP (pair [] (List.replicate d true))) id_mem_FP
   have hruler : (fun z : List Bool => polyRuler p z) ∈ FP := polyRulerFn_mem_FP p id_mem_FP

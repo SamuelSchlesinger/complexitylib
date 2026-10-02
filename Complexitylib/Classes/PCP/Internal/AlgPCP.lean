@@ -6,6 +6,7 @@ Authors: Bolton Bailey
 module
 public import Complexitylib.Classes.PCP.Internal.AlgGapCSP
 public import Complexitylib.Classes.PCP.Internal.SquareVerifier
+import Complexitylib.Tactic.PolyTime.Init
 
 /-!
 # Every NP language has a PCP verifier
@@ -81,7 +82,7 @@ theorem gapCoins_bigO_log (q : Polynomial ℕ) :
   exact rulerLen_bigO_log hAB
 
 /-- Doubling a constructible bound `j` times keeps it constructible. -/
-theorem constructible_pow_mul {t : ℕ → ℕ}
+@[polytime] theorem constructible_pow_mul {t : ℕ → ℕ}
     (ht : (fun x : List Bool => List.replicate (t x.length) true) ∈ FP) (j : ℕ) :
     (fun x : List Bool => List.replicate (2 ^ j * t x.length) true) ∈ FP := by
   induction j with

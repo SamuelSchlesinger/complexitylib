@@ -7,6 +7,7 @@ module
 public import Complexitylib.Classes.P.Cobham.Internal
 public import Complexitylib.Classes.Containments.Internal.NLSearchAssemble
 public import Complexitylib.Asymptotics
+import Complexitylib.Tactic.PolyTime
 
 /-!
 # Counting out `2 ^ r n` in unary
@@ -36,7 +37,8 @@ namespace Complexity
 /-- Doubling: the string followed by itself. -/
 def dbl (s : List Bool) : List Bool := s ++ s
 
-theorem dbl_mem_FP : dbl ∈ FP := Cobham.appendFn_mem_FP id_mem_FP id_mem_FP
+@[polytime] theorem dbl_mem_FP : dbl ∈ FP := by
+  polytime [dbl]
 
 theorem dbl_iterate (n : ℕ) : dbl^[n] [true] = List.replicate (2 ^ n) true := by
   induction n with
@@ -84,7 +86,7 @@ theorem exists_poly_two_pow_of_bigO_log {r : ℕ → ℕ} (h : r =O fun n => Nat
 /-- **Writing `2 ^ r n` marks.** If the number of coins is available in unary in
 polynomial time and the number of coin strings is polynomially bounded, then
 that many marks can be written in polynomial time. -/
-theorem unaryExp_mem_FP {r : ℕ → ℕ}
+@[polytime] theorem unaryExp_mem_FP {r : ℕ → ℕ}
     (hr : (fun x : List Bool => List.replicate (r x.length) true) ∈ FP)
     (p : Polynomial ℕ) (hp : ∀ n, 2 ^ r n ≤ p.eval n) :
     (fun x : List Bool => List.replicate (2 ^ r x.length) true) ∈ FP := by
@@ -103,7 +105,7 @@ theorem unaryExp_mem_FP {r : ℕ → ℕ}
 open scoped Complexity in
 /-- **The form the assembly uses.** A constructible logarithmic randomness bound
 lets the number of coin strings be counted out in polynomial time. -/
-theorem unaryExp_mem_FP_of_bigO_log {r : ℕ → ℕ}
+@[polytime] theorem unaryExp_mem_FP_of_bigO_log {r : ℕ → ℕ}
     (hr : (fun x : List Bool => List.replicate (r x.length) true) ∈ FP)
     (h : r =O fun n => Nat.log 2 n) :
     (fun x : List Bool => List.replicate (2 ^ r x.length) true) ∈ FP := by

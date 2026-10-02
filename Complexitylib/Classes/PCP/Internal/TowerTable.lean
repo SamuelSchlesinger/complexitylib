@@ -8,6 +8,7 @@ public import Complexitylib.Classes.PCP.Internal.TowerFin
 public import Complexitylib.Classes.PCP.Internal.Materialize
 public import Complexitylib.Classes.P.FinsetDomain
 public import Complexitylib.Classes.PCP.Internal.FiniteKey
+import Complexitylib.Tactic.PolyTime
 
 /-!
 # The tower's rotation table
@@ -100,7 +101,7 @@ def baseKeyBound : ℕ := 2 * F.deg ^ 4 + 2 + F.deg
 noncomputable def baseRec (z : List Bool) : List Bool :=
   if z ∈ keySet F.baseKeyBound (fun _ => True) then F.baseRaw z else []
 
-theorem baseRec_mem_FP : F.baseRec ∈ FP :=
+@[polytime] theorem baseRec_mem_FP : F.baseRec ∈ FP :=
   ite_mem_finset_mem_FP F.baseRaw (keySet F.baseKeyBound (fun _ => True))
 
 theorem baseRec_eq {x a : ℕ} (hx : x < F.deg ^ 4) (ha : a < F.deg) :
@@ -144,37 +145,8 @@ noncomputable def stepRec (z : List Bool) : List Bool :=
   let R2 := unaryOf (sndEnc R)
   encPair (marks (R1 ++ mulC (F.deg ^ 4) W1)) (marks (P2 ++ mulC F.deg R2))
 
-theorem stepRec_mem_FP : F.stepRec ∈ FP := by
-  have hT := Cobham.fstBlock_mem_FP
-  have hJ := Cobham.sndBlock_mem_FP
-  have hV := divC_mem_FP hJ (F.deg ^ 2)
-  have hI := modC_mem_FP hJ (F.deg ^ 2)
-  have hU := divC_mem_FP hV (F.deg ^ 4)
-  have hX := modC_mem_FP hV (F.deg ^ 4)
-  have hA := divC_mem_FP hI F.deg
-  have hB := modC_mem_FP hI F.deg
-  have hP := mem_FP_comp (Cobham.pairFn_mem_FP hX hA) F.baseRec_mem_FP
-  have hP1 := unaryOf_mem_FP (fstEnc_mem_FP hP)
-  have hP2 := unaryOf_mem_FP (sndEnc_mem_FP hP)
-  have hIdx0 := Cobham.appendFn_mem_FP (mulC_mem_FP hU (F.deg ^ 2))
-    (divC_mem_FP hP1 (F.deg ^ 2))
-  have hQ0 := posAt_mem_FP hIdx0 hT
-  have hW0 := unaryOf_mem_FP (fstEnc_mem_FP hQ0)
-  have hC0 := unaryOf_mem_FP (sndEnc_mem_FP hQ0)
-  have hIdx1 := Cobham.appendFn_mem_FP (mulC_mem_FP hW0 (F.deg ^ 2))
-    (modC_mem_FP hP1 (F.deg ^ 2))
-  have hQ1 := posAt_mem_FP hIdx1 hT
-  have hW1 := unaryOf_mem_FP (fstEnc_mem_FP hQ1)
-  have hC1 := unaryOf_mem_FP (sndEnc_mem_FP hQ1)
-  have hRarg := Cobham.pairFn_mem_FP
-    (marks_mem_FP (Cobham.appendFn_mem_FP hC0 (mulC_mem_FP hC1 (F.deg ^ 2)))) hB
-  have hR := mem_FP_comp hRarg F.baseRec_mem_FP
-  have hR1 := unaryOf_mem_FP (fstEnc_mem_FP hR)
-  have hR2 := unaryOf_mem_FP (sndEnc_mem_FP hR)
-  have hOut := encPair_mem_FP
-    (marks_mem_FP (Cobham.appendFn_mem_FP hR1 (mulC_mem_FP hW1 (F.deg ^ 4))))
-    (marks_mem_FP (Cobham.appendFn_mem_FP hP2 (mulC_mem_FP hR2 F.deg)))
-  exact mem_FP_of_eq hOut fun _ => rfl
+@[polytime] theorem stepRec_mem_FP : F.stepRec ∈ FP := by
+  polytime [stepRec]
 
 /-- **The record rule computes the level above.** -/
 theorem stepRec_eq {k j : ℕ} (hj : j < F.size (k + 1) * F.deg ^ 2) :
@@ -258,10 +230,8 @@ theorem stepRec_eq {k j : ℕ} (hj : j < F.size (k + 1) * F.deg ^ 2) :
 noncomputable def tableStep (T : List Bool) : List Bool :=
   listEncFn F.stepRec (pair (marks (mulC (F.deg ^ 4) (posCount T))) T)
 
-theorem tableStep_mem_FP : F.tableStep ∈ FP := by
-  have hcount := marks_mem_FP (mulC_mem_FP (posCount_mem_FP id_mem_FP) (F.deg ^ 4))
-  have harg := Cobham.pairFn_mem_FP hcount id_mem_FP
-  exact mem_FP_of_eq (mem_FP_comp harg (materialize_mem_FP F.stepRec_mem_FP)) fun _ => rfl
+@[polytime] theorem tableStep_mem_FP : F.tableStep ∈ FP := by
+  polytime [tableStep]
 
 theorem tableStep_eq (k : ℕ) : F.tableStep (F.table k) = F.table (k + 1) := by
   have hcount : marks (mulC (F.deg ^ 4) (posCount (F.table k)))
@@ -302,13 +272,14 @@ theorem length_table_le (l : ℕ) :
 
 /-! ### Climbing to a level -/
 
-theorem tableStep_iterate : ∀ l : ℕ, F.tableStep^[l] (F.table 0) = F.table l
+@[polytime] theorem tableStep_iterate : ∀ l : ℕ, F.tableStep^[l] (F.table 0) = F.table l
   | 0 => rfl
   | l + 1 => by
       rw [Function.iterate_succ_apply', tableStep_iterate l, tableStep_eq]
 
 /-- **The table of a requested level is polynomial time**, as soon as there is
 room to write it down. -/
+@[polytime]
 theorem table_mem_FP {ruler width : List Bool → List Bool} (hr : ruler ∈ FP) (hw : width ∈ FP)
     (hbound : ∀ z, ∀ l ≤ (ruler z).length, (F.table l).length ≤ (width z).length) :
     (fun z => F.table (ruler z).length) ∈ FP := by
