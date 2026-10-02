@@ -135,14 +135,6 @@ the clause count unchanged. -/
     List.map_replicate, List.foldl_cons, tokenStep]
   exact foldl_true_tokens count var
 
-/-- Scanning one well-formed source literal increments the current clause
-count, or becomes invalid if three literals were already complete. -/
-private theorem foldl_literal (count : Fin 4) (lit : Lit) :
-    (lit.rawTokens ++ [EncToken.litSep]).foldl tokenStep (.between count) =
-      if h : count.val < 3 then .between ⟨count.val + 1, by omega⟩ else .invalid := by
-  rw [List.foldl_append, foldl_rawTokens]
-  simp only [List.foldl_cons, List.foldl_nil, tokenStep]
-
 /-- One encoded clause followed by its separator returns to the initial state
 exactly when the clause has width three. -/
 private theorem foldl_clause (clause : Clause) :

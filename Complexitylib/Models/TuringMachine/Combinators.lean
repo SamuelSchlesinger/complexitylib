@@ -81,7 +81,6 @@ def moveLeftDir (head : Γ) : Dir3 :=
 
 /-- `idleDir` moves right when reading the start symbol `▷`. -/
 theorem idleDir_start : idleDir Γ.start = Dir3.right := rfl
-private theorem moveLeftDir_start : moveLeftDir Γ.start = Dir3.right := rfl
 
 /-- If the head reads `▷`, then `idleDir` moves right — the shape of the
     `δ_right_of_start` obligation for idle tapes. -/

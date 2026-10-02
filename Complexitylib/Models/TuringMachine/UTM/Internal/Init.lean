@@ -377,14 +377,6 @@ private theorem takeField_fst_length : ∀ l : List Γw, (takeField l).1.length 
   | .one :: rest => by
       simpa [takeField] using takeField_fst_length rest
 
-/-- Doubling every bit doubles the length. -/
-private theorem dbl_length : ∀ l : List Bool, (l.flatMap fun b => [b, b]).length = 2 * l.length
-  | [] => rfl
-  | b :: rest => by
-      simp only [List.flatMap_cons, List.length_append, dbl_length rest, List.length_cons,
-        List.length_nil]
-      omega
-
 -- ════════════════════════════════════════════════════════════════════════
 -- Input-suffix tracking
 -- ════════════════════════════════════════════════════════════════════════

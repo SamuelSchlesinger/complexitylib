@@ -75,17 +75,6 @@ private theorem pad0_dummy_step (w : Tape) (hc : w.cells = (Tape.init []).cells)
     · show w.head ≤ 1
       exact hh
 
-/-- The padded transition function, in applied form: the original's action on
-    state/input/output, the dummy action on the work tape. -/
-private theorem pad0_δ_apply (N : NTM 0) (b : Bool) (q : N.Q) (si : Γ)
-    (sw : Fin 1 → Γ) (so : Γ) :
-    (pad0 N).δ b q si sw so
-      = ((N.δ b q si (fun i => i.elim0) so).1, fun _ => Γw.blank,
-         (N.δ b q si (fun i => i.elim0) so).2.2.1,
-         (N.δ b q si (fun i => i.elim0) so).2.2.2.1,
-         fun i => if sw i = Γ.start then Dir3.right else Dir3.stay,
-         (N.δ b q si (fun i => i.elim0) so).2.2.2.2.2) := rfl
-
 /-- **Trace correspondence.** The padded machine's run tracks the original's
     component-wise; the dummy work tape keeps its initial cells with the head
     parked at cell 0 or 1. -/

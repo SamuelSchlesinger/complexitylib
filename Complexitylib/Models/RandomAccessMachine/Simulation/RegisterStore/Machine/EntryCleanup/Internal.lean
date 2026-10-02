@@ -58,12 +58,6 @@ private theorem query_not_mem_entryMissTargets (tapes : EntryMatchTapes n) :
   change (if slot.val = 6 then 8 else slot.val + 1) = 7 at hval
   split at hval <;> omega
 
-private theorem cleanupIdx_ne_query (tapes : EntryMatchTapes n)
-    (slot : Fin 7) : tapes.cleanupIdx slot ≠ tapes.query := by
-  intro heq
-  exact query_not_mem_entryMissTargets tapes
-    (heq ▸ cleanupIdx_mem tapes slot)
-
 private theorem readable_target_content
     (tapes : EntryMatchTapes n) (entry : Entry) (rest queryBits : List Bool)
     (initialWork matchedWork : Fin n → Tape)
@@ -136,15 +130,6 @@ private theorem readable_target_start
   · exact hmatch.valueCounterStart
   · exact hmatch.valueWidth.1
   · exact hmatch.resultStart
-
-private theorem readable_target_head
-    (tapes : EntryMatchTapes n) (entry : Entry) (rest queryBits : List Bool)
-    (initialWork matchedWork : Fin n → Tape)
-    (hmatch : ReadableEntryMatch tapes entry rest queryBits initialWork matchedWork) :
-    ∀ i, i ∈ entryMissTargets tapes →
-      (matchedWork i).head ≤ entryMissHeadBound entry queryBits initialWork i := by
-  intro i _
-  exact hmatch.headBound i
 
 private theorem resetBinaryBlank_hasBinaryNat_zero :
     TM.resetBinaryBlank.HasBinaryNat 0 := by

@@ -29,10 +29,6 @@ namespace Machine
 
 variable {n : ℕ}
 
-private theorem hasBinaryNat_parked {t : Tape} {value : ℕ}
-    (h : t.HasBinaryNat value) : TM.Parked t :=
-  ⟨by rw [h.2.1], h.2.hasBinaryContent.cells_ne_start⟩
-
 private theorem hasBinaryPrefix_parked {t : Tape} {bits : List Bool}
     (h : t.HasBinaryPrefix bits) : TM.Parked t := by
   refine ⟨by rw [h.1]; omega, ?_⟩

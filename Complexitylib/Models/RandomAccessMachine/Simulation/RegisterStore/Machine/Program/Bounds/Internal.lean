@@ -121,11 +121,6 @@ private theorem binarySuccTime_le_width (value width : ℕ)
     TM.binarySuccTime value ≤ 2 * width + 2 := by
   exact le_trans (TM.binarySuccTime_le value) (by omega)
 
-private theorem binaryPredTime_le_width (value width : ℕ)
-    (hvalue : (value + 1).size ≤ width) :
-    TM.binaryPredTime value ≤ 2 * width + 2 := by
-  exact le_trans (TM.binaryPredTime_le value) (by omega)
-
 private theorem binaryCopyTime_le_width (srcValue dstValue width : ℕ)
     (hsrc : srcValue.size ≤ width) (hdst : dstValue.size ≤ width) :
     TM.binaryCopyTime srcValue dstValue ≤ 5 * width + 20 := by
@@ -154,62 +149,6 @@ private theorem binaryAddConstTime_zero_le_width (constant width : ℕ)
   have htime := binaryAddConstTime_zero_le constant
   nlinarith [Nat.mul_le_mul (Nat.add_le_add_right hconstant 1)
     (Nat.add_le_add_right hconstant 1)]
-
-private theorem forWorkOnesLoopTime_succ_le
-    (limit value count : ℕ) (hsum : value + count ≤ limit) :
-    TM.forWorkOnesLoopTime TM.binarySuccTime value count ≤
-      1 + count * (2 * limit + 4) := by
-  induction count generalizing value with
-  | zero => simp [TM.forWorkOnesLoopTime]
-  | succ count ih =>
-      rw [TM.forWorkOnesLoopTime]
-      have hvalue : value ≤ limit := by omega
-      have hsize : value.size ≤ limit :=
-        le_trans (size_le_self value) hvalue
-      have hsucc := binarySuccTime_le_width value limit hsize
-      have htail := ih (value + 1) (by omega)
-      rw [Nat.succ_mul]
-      omega
-
-private theorem wordWidthTime_le (width : ℕ) :
-    wordWidthTime width ≤ 4 * (width + 1) ^ 2 := by
-  have hloop := forWorkOnesLoopTime_succ_le width 0 width (by omega)
-  unfold wordWidthTime
-  nlinarith
-
-private theorem binaryForLoopTime_one_le
-    (limit value count : ℕ) (hsum : value + count ≤ limit) :
-    TM.binaryForLoopTime (fun _ => 1) limit value count ≤
-      (count + 1) * (4 * limit + 8) := by
-  induction count generalizing value with
-  | zero =>
-      simp only [TM.binaryForLoopTime, TM.binaryForCompareTime]
-      have hsize := size_le_self limit
-      omega
-  | succ count ih =>
-      rw [TM.binaryForLoopTime]
-      have hvalue : value ≤ limit := by omega
-      have hsize : value.size ≤ limit :=
-        le_trans (size_le_self value) hvalue
-      have hsucc := binarySuccTime_le_width value limit hsize
-      have hlimitSize := size_le_self limit
-      have htail := ih (value + 1) (by omega)
-      simp only [TM.binaryForCompareTime, TM.binaryForIterationTime]
-      nlinarith
-
-private theorem wordPayloadTime_le (width : ℕ) :
-    wordPayloadTime width ≤ 8 * (width + 1) ^ 2 := by
-  have hloop := binaryForLoopTime_one_le width 0 width (by omega)
-  unfold wordPayloadTime
-  nlinarith
-
-private theorem wordDecodeTime_le (width bound : ℕ)
-    (hwidth : width ≤ bound) :
-    wordDecodeTime width ≤ 20 * (bound + 1) ^ 2 := by
-  have hprefix := wordWidthTime_le width
-  have hpayload := wordPayloadTime_le width
-  unfold wordDecodeTime
-  nlinarith [Nat.mul_le_mul hwidth hwidth]
 
 private theorem entryMatchReadTime_le (entry : Entry)
     (queryBits : List Bool) (bound : ℕ)
@@ -359,68 +298,6 @@ private theorem entryScanTime_le_cube {m : ℕ}
     _ ≤ 1300 * (bound + 1) * (bound + 1) ^ 2 := by
       exact Nat.mul_le_mul_right _ (Nat.mul_le_mul_left 1300 hfactor)
     _ = 1300 * (bound + 1) ^ 3 := by ring
-
-private theorem encodedStoreLength_le_uniform (store : Store) (bound : ℕ)
-    (hentries : ∀ entry ∈ store,
-      entry.1.bits.length ≤ bound ∧ entry.2.bits.length ≤ bound) :
-    encodedStoreLength store ≤ store.length * (4 * bound + 2) := by
-  induction store with
-  | nil => simp [encodedStoreLength]
-  | cons entry rest ih =>
-      have hentry := hentries entry (by simp)
-      have hrest : ∀ current ∈ rest,
-          current.1.bits.length ≤ bound ∧
-            current.2.bits.length ≤ bound := by
-        intro current hcurrent
-        exact hentries current (by simp [hcurrent])
-      have htail := ih hrest
-      have hhead : (Entry.encode entry).length ≤ 4 * bound + 2 := by
-        rw [Entry.encode_length]
-        have haddressWidth : bitlen entry.1 ≤ bound := by
-          simpa only [bitlen, Nat.size_eq_bits_len] using hentry.1
-        have hvalueWidth : bitlen entry.2 ≤ bound := by
-          simpa only [bitlen, Nat.size_eq_bits_len] using hentry.2
-        omega
-      unfold encodedStoreLength at htail ⊢
-      simp only [List.flatMap_cons, List.length_append, List.length_cons,
-        Nat.succ_mul]
-      ring_nf at htail ⊢
-      omega
-
-private theorem entryScanTime_le_square {m : ℕ}
-    (tapes : EntryScanTapes m) (queryBits : List Bool)
-    (store : Store) (bound : ℕ)
-    (hbound : 1 ≤ bound) (hstoreLength : store.length ≤ bound)
-    (hentries : ∀ entry ∈ store,
-      entry.1.bits.length ≤ bound ∧ entry.2.bits.length ≤ bound)
-    (hquery : queryBits.length ≤ bound) :
-    entryScanTime tapes queryBits store ≤ 7000 * (bound + 1) ^ 2 := by
-  have hscan := entryScanTime_le_encoded tapes queryBits store
-  have hencoded := encodedStoreLength_le_uniform store bound hentries
-  have hcount : bitlen store.length ≤ bound := by
-    unfold bitlen
-    exact le_trans (size_le_self store.length) hstoreLength
-  have hfactor : queryBits.length + bitlen store.length + 2 ≤
-      2 * bound + 2 := by omega
-  have hencoded' : encodedStoreLength store ≤
-      bound * (4 * bound + 2) :=
-    le_trans hencoded (Nat.mul_le_mul_right _ hstoreLength)
-  have hqueryTerm : store.length *
-      (queryBits.length + bitlen store.length + 2) ≤
-      bound * (2 * bound + 2) :=
-    Nat.mul_le_mul hstoreLength hfactor
-  have hinside : encodedStoreLength store +
-        store.length * (queryBits.length + bitlen store.length + 2) + 1 ≤
-      7 * (bound + 1) ^ 2 := by
-    nlinarith
-  exact le_trans hscan (by
-    calc
-      1000 * (encodedStoreLength store +
-            store.length *
-              (queryBits.length + bitlen store.length + 2) + 1)
-          ≤ 1000 * (7 * (bound + 1) ^ 2) :=
-        Nat.mul_le_mul_left 1000 hinside
-      _ = 7000 * (bound + 1) ^ 2 := by ring)
 
 private theorem read_bits_length_le (store : Store) (address bound : ℕ)
     (hentries : ∀ entry ∈ store, entry.2.bits.length ≤ bound) :

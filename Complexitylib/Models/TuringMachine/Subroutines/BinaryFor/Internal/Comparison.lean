@@ -171,14 +171,6 @@ private theorem binaryForWorkAt_one_eq (work : Fin n → Tape)
       exact tapeAtHead_eq_self hlimit
     · exact binaryForWorkAt_other work hic hil 1
 
-private theorem binaryForWorkAt_selected_cells (work : Fin n → Tape)
-    {counterIdx limitIdx : Fin n} (head : ℕ) (i : Fin n)
-    (hi : i = counterIdx ∨ i = limitIdx) :
-    (binaryForWorkAt work counterIdx limitIdx head i).cells = (work i).cells := by
-  rcases hi with rfl | rfl
-  · simp [binaryForWorkAt_counter]
-  · simp [binaryForWorkAt]
-
 private theorem binaryForWorkAt_move_right (work : Fin n → Tape)
     {counterIdx limitIdx : Fin n} (hne : counterIdx ≠ limitIdx) (head : ℕ) :
     Function.update

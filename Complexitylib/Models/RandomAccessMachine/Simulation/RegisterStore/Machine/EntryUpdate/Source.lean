@@ -107,55 +107,6 @@ private theorem resetBinaryWorkManyTM_readOnly_of_not_mem
       exact (resetBinaryWorkTM_readOnly_of_ne target other hnotmem.1).seqTM
         (ih hnotmem.2)
 
-private theorem forWorkOnesTM_readOnly (driver other : Fin n) (body : TM n)
-    (hbody : body.WorkReadOnly other) :
-    (TM.forWorkOnesTM driver body).WorkReadOnly other := by
-  intro state inputHead workHeads outputHead hstate
-  cases state with
-  | inl phase =>
-      cases phase with
-      | scan =>
-          by_cases hstart : workHeads driver = Γ.start
-          · simp [TM.forWorkOnesTM, hstart]
-          · by_cases hone : workHeads driver = Γ.one
-            · simp [TM.forWorkOnesTM, hone]
-            · simp only [TM.forWorkOnesTM, hstart, hone, ↓reduceIte]
-              rfl
-      | done => exact (hstate rfl).elim
-  | inr state =>
-      by_cases hhalt : state = body.qhalt
-      · simp only [TM.forWorkOnesTM, hhalt, ↓reduceIte]
-        rfl
-      · simpa [TM.forWorkOnesTM, hhalt] using
-          hbody state inputHead workHeads outputHead hhalt
-
-private theorem binaryForTM_readOnly (body : TM n)
-    (counter limit other : Fin n) (hbody : body.WorkReadOnly other)
-    (hne : other ≠ counter) :
-    (TM.binaryForTM body counter limit).WorkReadOnly other := by
-  have hiteration :
-      (TM.binaryForIterationTM body counter).WorkReadOnly other := by
-    exact hbody.seqTM (binarySuccTM_readOnly_of_ne counter other hne)
-  intro state inputHead workHeads outputHead hstate
-  cases state with
-  | inl phase =>
-      cases phase with
-      | scan equalSoFar =>
-          by_cases hblank :
-              workHeads counter = Γ.blank ∧ workHeads limit = Γ.blank <;>
-            simp [TM.binaryForTM, hblank]
-      | rewind equalSoFar =>
-          by_cases hstart :
-              workHeads counter = Γ.start ∧ workHeads limit = Γ.start <;>
-            simp [TM.binaryForTM, hstart]
-      | done => exact (hstate rfl).elim
-  | inr state =>
-      by_cases hhalt : state = (TM.binaryForIterationTM body counter).qhalt
-      · simp only [TM.binaryForTM, hhalt, ↓reduceIte]
-        rfl
-      · simpa [TM.binaryForTM, hhalt] using
-          hiteration state inputHead workHeads outputHead hhalt
-
 private theorem workEmitTM_readOnly (target other : Fin n)
     (mode : WorkEmitMode) :
     (workEmitTM target mode).WorkReadOnly other := by
@@ -194,32 +145,6 @@ private theorem rewindEntryEncodeTM_readOnly
   exact (rewindWordEncodeTM_readOnly tapes.address other).seqTM
     (rewindWordEncodeTM_readOnly tapes.value other)
 
-private theorem payloadBitTM_source_readOnly (source target : Fin n)
-    (hne : source ≠ target) :
-    (payloadBitTM source target).WorkReadOnly source := by
-  intro state inputHead workHeads outputHead hstate
-  cases state with
-  | copy =>
-      cases hread : workHeads source with
-      | zero | one => simp [payloadBitTM, hread, hne]
-      | blank =>
-          simp [payloadBitTM, hread, TM.allReadBack]
-      | start => simp [payloadBitTM, hread, TM.allIdle, TM.readBackWrite]
-  | done => exact (hstate rfl).elim
-
-private theorem wordSeparatorTM_source_readOnly (source : Fin n) :
-    (wordSeparatorTM source).WorkReadOnly source := by
-  intro state inputHead workHeads outputHead hstate
-  cases state with
-  | skip =>
-      by_cases hzero : workHeads source = Γ.zero
-      · simp [wordSeparatorTM, hzero]
-      · by_cases hstart : workHeads source = Γ.start
-        · simp [wordSeparatorTM, hstart, TM.allIdle, TM.readBackWrite]
-        · simp only [wordSeparatorTM, hzero, hstart, ↓reduceIte]
-          simp [TM.allReadBack]
-  | done => exact (hstate rfl).elim
-
 private theorem binaryEqTM_readOnly_of_ne_result
     (lhs rhs result other : Fin n) (hne : other ≠ result) :
     (TM.binaryEqTM lhs rhs result).WorkReadOnly other := by
@@ -237,38 +162,6 @@ private theorem binaryEqTM_readOnly_of_ne_result
           simp [TM.binaryEqTM, heq, hrhs]
         · simp [TM.binaryEqTM, hblank, heq, hne]
   | done => exact (hstate rfl).elim
-
-private theorem wordDecodeTM_source_readOnly
-    (source target counter width : Fin n)
-    (hsourceTarget : source ≠ target)
-    (hsourceCounter : source ≠ counter)
-    (hsourceWidth : source ≠ width) :
-    (wordDecodeTM source target counter width).WorkReadOnly source := by
-  have hwidth : (wordWidthTM source width).WorkReadOnly source := by
-    unfold wordWidthTM
-    exact forWorkOnesTM_readOnly source source (TM.binarySuccTM width)
-      (binarySuccTM_readOnly_of_ne width source hsourceWidth)
-  have hpayload :
-      (wordPayloadTM source target counter width).WorkReadOnly source := by
-    unfold wordPayloadTM
-    exact binaryForTM_readOnly (payloadBitTM source target) counter width source
-      (payloadBitTM_source_readOnly source target hsourceTarget) hsourceCounter
-  unfold wordDecodeTM
-  exact hwidth.seqTM
-    ((wordSeparatorTM_source_readOnly source).seqTM hpayload)
-
-private theorem entryDecodeTM_source_readOnly (tapes : EntryDecodeTapes n) :
-    (entryDecodeTM tapes).WorkReadOnly tapes.source := by
-  unfold entryDecodeTM
-  exact
-    (wordDecodeTM_source_readOnly tapes.source tapes.address
-      tapes.addressCounter tapes.addressWidth
-      (tapes.ne (by decide)) (tapes.ne (by decide))
-      (tapes.ne (by decide))).seqTM
-    (wordDecodeTM_source_readOnly tapes.source tapes.value
-      tapes.valueCounter tapes.valueWidth
-      (tapes.ne (by decide)) (tapes.ne (by decide))
-      (tapes.ne (by decide)))
 
 private theorem wordDecodeLinearTM_source_readOnly
     (source target marker : Fin n) (hsourceTarget : source ≠ target)

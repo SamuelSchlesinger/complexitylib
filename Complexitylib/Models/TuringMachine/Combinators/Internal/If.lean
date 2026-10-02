@@ -71,12 +71,6 @@ private theorem ifQ_else_ne_halt {QT QThen QElse : Type} {q : QElse} :
     (Sum.inr (Sum.inr (Sum.inr q)) : IfQ QT QThen QElse) ≠
       Sum.inr (Sum.inl IfPhase.done) := nofun
 
-private theorem ifQ_phase_ne_halt {QT QThen QElse : Type}
-    {p : IfPhase} (hp : p ≠ .done) :
-    (Sum.inr (Sum.inl p) : IfQ QT QThen QElse) ≠
-      Sum.inr (Sum.inl IfPhase.done) :=
-  fun h => hp (Sum.inl.inj (Sum.inr.inj h))
-
 -- ════════════════════════════════════════════════════════════════════════
 -- Test phase: ifTM simulates tmTest (via generic simulation lifting)
 -- ════════════════════════════════════════════════════════════════════════

@@ -45,23 +45,6 @@ namespace VerifierTM
 -- Small tape helpers
 -- ════════════════════════════════════════════════════════════════════════
 
-private theorem eq_initTape_move_right_of_cells_head_one {t : Tape} (bits : List Bool)
-    (hcells : t.cells = (Tape.init (bits.map Γ.ofBool)).cells)
-    (hhead : t.head = 1) :
-    t = (Tape.init (bits.map Γ.ofBool)).move Dir3.right := by
-  have hbits : t.HasBinaryString bits := by
-    refine ⟨hhead, ?_, ?_⟩
-    · intro i hi
-      rw [hcells]
-      exact Tape.init_ofBool_cells_lt bits i hi
-    · intro i hi
-      rw [hcells]
-      exact Tape.init_ofBool_cells_ge bits i hi
-  have h0 : t.cells 0 = Γ.start := by
-    rw [hcells]
-    simp [Tape.init]
-  exact Tape.eq_init_move_right_of_hasBinaryString hbits h0
-
 private theorem cells_eq_initTape_ofBool_cell0 {t : Tape} (bits : List Bool)
     (hcells : t.cells = (Tape.init (bits.map Γ.ofBool)).cells) :
     t.cells 0 = Γ.start := by
@@ -1838,10 +1821,6 @@ private def SatEvalMode.assignmentHead : SatEvalMode → ℕ → ℕ
   | .boundary .., _ => 1
   | .inLit .., var => var + 1
 
-private def SatEvalMode.varBound : SatEvalMode → ℕ → ℕ → Prop
-  | .boundary .., _, _ => True
-  | .inLit .., var, k => var ≤ k
-
 private theorem finishEvalMode_toΓ_eq_finish (mode : SatEvalMode) (var : ℕ) :
     (finishEvalMode mode).toΓ =
       (if (mode.toSemState var).finish then Γ.one else Γ.zero) := by
@@ -2428,11 +2407,6 @@ assignment after each completed literal gives a quadratic upper bound once
 `α.length ≤ z.length + 1`; this standalone bound keeps both lengths explicit. -/
 def satEvalOnInputTime (zLen αLen : ℕ) : ℕ :=
   (zLen + 1) * (αLen + 3) + 2
-
-private def satEvalSemFrom (α suffix : List Bool) (mode : SatEvalMode) (var : ℕ) : Bool :=
-  match tokenize? suffix with
-  | none => false
-  | some toks => satEvalSemRun α toks (mode.toSemState var)
 
 private def parseEvalResult (α : Assignment) (toks : List EncToken)
     (rawRev : List Bool) (clauseRev : Clause) (cnfRev : CNF) : Bool :=

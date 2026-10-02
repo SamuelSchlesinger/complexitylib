@@ -347,13 +347,6 @@ private theorem read_blank (inv : BalancedScanInv c x x.length h) : c.input.read
   show (Tape.init (x.map Γ.ofBool)).cells (x.length + 1) = Γ.blank
   simp [Tape.init]
 
-/-- Input cells are never ▷ at positions ≥ 1. -/
-private theorem input_ns (inv : BalancedScanInv c x k h) :
-    ∀ j, j ≥ 1 → c.input.cells j ≠ Γ.start := by
-  intro j hj
-  rw [inv.ic]
-  exact Tape.init_ns _ (map_ofBool_ns x) j hj
-
 /-- Work reads ▷ iff the work head is at 0. -/
 private theorem work_read_start_iff (inv : BalancedScanInv c x k h) :
     (c.work 0).read = Γ.start ↔ h = 0 := by

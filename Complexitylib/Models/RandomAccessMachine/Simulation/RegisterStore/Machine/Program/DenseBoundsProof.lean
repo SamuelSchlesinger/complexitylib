@@ -385,10 +385,6 @@ private theorem size_le_self (value : ℕ) : value.size ≤ value := by
   rw [Nat.size_le]
   exact Nat.lt_pow_self (by decide)
 
-private theorem bitlen_le_succ (value : ℕ) : bitlen value ≤ value + 1 := by
-  unfold bitlen
-  exact le_trans (size_le_self value) (Nat.le_succ value)
-
 private theorem bitlen_succ_le (value : ℕ) :
     bitlen (value + 1) ≤ bitlen value + 1 := by
   rw [bitlen, bitlen, Nat.size_le]
