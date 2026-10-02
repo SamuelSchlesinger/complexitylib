@@ -38,32 +38,6 @@ private theorem StepClean.caseFormulaClean_internal
     · simp [hi]
   simpa [hupdate] using hclean.movedHeadClean.caseClean
 
-private theorem StepClean.movedHeadClean_atPosition_internal
-    {values : BinaryValues WorkCount} (hclean : StepClean values)
-    (position : ℕ) :
-    MovedHeadFormulaClean
-      (Function.update values Work.position position) := by
-  refine
-    { caseClean := ?_
-      limit₂ := ?_
-      loop₁ := ?_
-      savedOutput := ?_
-      direction := ?_
-      atomKind := ?_ }
-  · have hupdate :
-        Function.update (Function.update values Work.position position)
-            Work.position 0 =
-          Function.update values Work.position 0 := by
-      funext i
-      by_cases hi : i = Work.position <;> simp [hi]
-    simpa [hupdate] using hclean.movedHeadClean.caseClean
-  · simpa [Work.position, Work.limit₂] using hclean.movedHeadClean.limit₂
-  · simpa [Work.position, Work.loop₁] using hclean.movedHeadClean.loop₁
-  · simpa [Work.position, Work.savedOutput] using
-      hclean.movedHeadClean.savedOutput
-  · simpa [Work.position, Work.direction] using hclean.movedHeadClean.direction
-  · simpa [Work.position, Work.atomKind] using hclean.movedHeadClean.atomKind
-
 /-- The canonical formula-block size function specialized to one machine. -/
 noncomputable def stepFormulaSizeAtSpecializedInternal (tm : NTM k)
     (T atomIndex : ℕ) : ℕ :=
@@ -189,47 +163,6 @@ private theorem list_ofFn_four (f : Fin 4 → α) :
   rw [List.ofFn_succ, List.ofFn_succ, List.ofFn_succ, List.ofFn_succ]
   rfl
 
-private theorem binaryForValues_eq_trajectory
-    (body : BinaryRoutine n) (counter : Fin n)
-    (initial : BinaryValues n) (trajectory : ℕ → BinaryValues n)
-    (hzero : trajectory 0 = initial)
-    (hstep : ∀ index,
-      BinaryRoutine.binaryForStep body counter (trajectory index) =
-        trajectory (index + 1)) :
-    ∀ count,
-      BinaryRoutine.binaryForValues body counter initial count =
-        trajectory count := by
-  intro count
-  induction count with
-  | zero => exact hzero.symm
-  | succ count ih =>
-      rw [BinaryRoutine.binaryForValues, ih, hstep]
-
-private theorem binaryForEmitted_eq_indexedGateBlocks
-    (body : BinaryRoutine n) (counter : Fin n)
-    (initial : BinaryValues n) (trajectory : ℕ → BinaryValues n)
-    (blockAt : ℕ → CircuitCode.RawCircuit)
-    (hzero : trajectory 0 = initial)
-    (hstep : ∀ index,
-      BinaryRoutine.binaryForStep body counter (trajectory index) =
-        trajectory (index + 1))
-    (hemitted : ∀ index,
-      body.emitted (trajectory index) =
-        (blockAt index).flatMap CircuitCode.RawGate.encode) :
-    ∀ count,
-      BinaryRoutine.binaryForEmitted body counter initial count =
-        (indexedGateBlocks count blockAt).flatMap
-          CircuitCode.RawGate.encode := by
-  intro count
-  induction count with
-  | zero => rfl
-  | succ count ih =>
-      rw [BinaryRoutine.binaryForEmitted, ih,
-        binaryForValues_eq_trajectory body counter initial trajectory hzero
-          hstep count,
-        hemitted, indexedGateBlocks_succ_last]
-      simp [List.flatMap_append]
-
 private theorem binaryForValues_eq_trajectory_bounded
     (body : BinaryRoutine n) (counter : Fin n)
     (initial : BinaryValues n) (trajectory : ℕ → BinaryValues n)
@@ -271,33 +204,6 @@ private theorem binaryForEmitted_eq_indexedGateBlocks_bounded
         hemitted count (by omega), indexedGateBlocks_succ_last]
       simp [List.flatMap_append]
 
-private theorem seqList_ofFn_effect_eq_trajectory
-    (count : ℕ) (routineAt : Fin count → BinaryRoutine n)
-    (initial : BinaryValues n) (trajectory : ℕ → BinaryValues n)
-    (hzero : trajectory 0 = initial)
-    (hstep : ∀ index : Fin count,
-      (routineAt index).effect (trajectory index.val) =
-        trajectory (index.val + 1)) :
-    (BinaryRoutine.seqList (List.ofFn routineAt)).effect initial =
-      trajectory count := by
-  induction count generalizing initial trajectory with
-  | zero => simpa [BinaryRoutine.seqList, BinaryRoutine.identity,
-      BinaryRoutine.emitBits] using hzero.symm
-  | succ count ih =>
-      rw [← hzero, List.ofFn_succ]
-      change
-        (BinaryRoutine.seqList (List.ofFn fun index =>
-          routineAt index.succ)).effect
-            ((routineAt 0).effect (trajectory 0)) = trajectory (count + 1)
-      have hstepZero := hstep 0
-      simp only [Fin.val_zero] at hstepZero
-      rw [hstepZero]
-      apply ih (fun index => routineAt index.succ) (trajectory 1)
-        (fun index => trajectory (index + 1))
-      · rfl
-      · intro index
-        simpa [Nat.add_assoc] using hstep index.succ
-
 private theorem seqList_ofFn_emitted_eq_indexedGateBlocks
     (count : ℕ) (routineAt : Fin count → BinaryRoutine n)
     (initial : BinaryValues n) (trajectory : ℕ → BinaryValues n)
@@ -336,78 +242,6 @@ private theorem seqList_ofFn_emitted_eq_indexedGateBlocks
         simpa [Nat.add_assoc] using hstep index.succ
       · intro index
         simpa using hemitted index.succ
-
-private theorem seqList_ofFn_emitted_congr
-    (first second : Fin count → BinaryRoutine n)
-    (heffect : ∀ index values,
-      (first index).effect values = (second index).effect values)
-    (hemitted : ∀ index values,
-      (first index).emitted values = (second index).emitted values) :
-    ∀ values,
-      (BinaryRoutine.seqList (List.ofFn first)).emitted values =
-        (BinaryRoutine.seqList (List.ofFn second)).emitted values := by
-  intro values
-  induction count generalizing values with
-  | zero => rfl
-  | succ count ih =>
-      rw [List.ofFn_succ, List.ofFn_succ]
-      change
-        (first 0).emitted values ++
-            (BinaryRoutine.seqList (List.ofFn fun index =>
-              first index.succ)).emitted ((first 0).effect values) =
-          (second 0).emitted values ++
-            (BinaryRoutine.seqList (List.ofFn fun index =>
-              second index.succ)).emitted ((second 0).effect values)
-      rw [hemitted 0 values, heffect 0 values]
-      congr 1
-      apply ih
-      · intro index current
-        exact heffect index.succ current
-      · intro index current
-        exact hemitted index.succ current
-
-private theorem seqList_ofFn_emitted_congr_of_invariant
-    (first second : Fin count → BinaryRoutine n)
-    (invariant : BinaryValues n → Prop) (values : BinaryValues n)
-    (hinvariant : invariant values)
-    (heffect : ∀ index current, invariant current →
-      (first index).effect current = (second index).effect current)
-    (hemitted : ∀ index current, invariant current →
-      (first index).emitted current = (second index).emitted current)
-    (hpreserve : ∀ index current, invariant current →
-      invariant ((first index).effect current)) :
-    (BinaryRoutine.seqList (List.ofFn first)).emitted values =
-      (BinaryRoutine.seqList (List.ofFn second)).emitted values := by
-  induction count generalizing values with
-  | zero => rfl
-  | succ count ih =>
-      rw [List.ofFn_succ, List.ofFn_succ]
-      change
-        (first 0).emitted values ++
-            (BinaryRoutine.seqList (List.ofFn fun index =>
-              first index.succ)).emitted ((first 0).effect values) =
-          (second 0).emitted values ++
-            (BinaryRoutine.seqList (List.ofFn fun index =>
-              second index.succ)).emitted ((second 0).effect values)
-      rw [hemitted 0 values hinvariant]
-      congr 1
-      calc
-        (BinaryRoutine.seqList (List.ofFn fun index =>
-            first index.succ)).emitted ((first 0).effect values) =
-            (BinaryRoutine.seqList (List.ofFn fun index =>
-              second index.succ)).emitted ((first 0).effect values) := by
-              apply ih (fun index => first index.succ)
-                (fun index => second index.succ) ((first 0).effect values)
-                (hpreserve 0 values hinvariant)
-              · intro index current hcurrent
-                exact heffect index.succ current hcurrent
-              · intro index current hcurrent
-                exact hemitted index.succ current hcurrent
-              · intro index current hcurrent
-                exact hpreserve index.succ current hcurrent
-        _ = (BinaryRoutine.seqList (List.ofFn fun index =>
-              second index.succ)).emitted ((second 0).effect values) := by
-              rw [heffect 0 values hinvariant]
 
 private theorem CaseFormulaClean.updateAvailable_emitted_internal
     {values : BinaryValues WorkCount} (hclean : CaseFormulaClean values)
@@ -486,15 +320,6 @@ theorem MovedHeadFormulaClean.updateAvailable_emitted_internal
     | simpa [Work.available, Work.savedOutput] using hclean.savedOutput
     | simpa [Work.available, Work.direction] using hclean.direction
     | simpa [Work.available, Work.atomKind] using hclean.atomKind
-
-private theorem StepClean.movedHeadAtPositionAvailable_emitted
-    {values : BinaryValues WorkCount} (hclean : StepClean values)
-    (position available : ℕ) :
-    MovedHeadFormulaClean
-      (Function.update (Function.update values Work.position position)
-        Work.available available) := by
-  apply MovedHeadFormulaClean.updateAvailable_emitted_internal
-  exact hclean.movedHeadClean_atPosition_internal position
 
 private theorem MovedHeadFormulaClean.atPositionAvailable_emitted
     {values : BinaryValues WorkCount}
