@@ -54,14 +54,21 @@ jobs:
           fi
           test -f blueprint/web/chap-intro.html
           test -f blueprint/web/dep_graph_document.html
-      # Reuse CI's compiled library; Lake still validates changed sources.
-      # Keep the path and key format aligned with lean-action's root cache.
-      - name: Restore Lean CI build cache
+      # Match Lean CI's exact dependency snapshot and incremental project
+      # build. Docs can only see successful dev snapshots: PR project caches
+      # have an isolated scope. Lake still validates restored project sources.
+      - name: Restore Lean dependencies
+        id: lean-deps
         uses: actions/cache/restore@caa296126883cff596d87d8935842f9db880ef25 # v5
         with:
-          path: ./.lake
-          key: lake-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('./lean-toolchain') }}-${{ hashFiles('./lake-manifest.json') }}-${{ github.sha }}
-          restore-keys: lake-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('./lean-toolchain') }}-${{ hashFiles('./lake-manifest.json') }}
+          path: .lake/packages
+          key: lean-deps-v1-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('lean-toolchain', 'lakefile.toml', 'lake-manifest.json') }}
+      - name: Restore project build
+        uses: actions/cache/restore@caa296126883cff596d87d8935842f9db880ef25 # v5
+        with:
+          path: .lake/build
+          key: lean-build-v1-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('lean-toolchain', 'lakefile.toml', 'lake-manifest.json') }}-${{ github.sha }}
+          restore-keys: lean-build-v1-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('lean-toolchain', 'lakefile.toml', 'lake-manifest.json') }}-
       - name: Fetch Mathlib build cache
         run: lake exe cache get
       # Lean CI caches compiled modules, but not doc-gen4's expensive analysis.

@@ -11,7 +11,7 @@ import Mathlib.Tactic.IntervalCases
 /-!
 # Choice-preserving prefix transport regression examples
 
-Run with `lake env lean scripts/NTMTraceTransportCheck.lean`.
+Run with `lake build --wfail NTMTraceTransportCheck`.
 Kernel-checked examples cover zero steps, both choices, a source that halts at the
 endpoint, and a target that continues afterwards. Reversing the choice sequence
 can introduce an early source halt and invalidate transport beyond that boundary.

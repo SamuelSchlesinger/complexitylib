@@ -9,7 +9,7 @@ public import Complexitylib.SAT.GuessVerify
 /-!
 # Exact-machine compatibility regression examples
 
-Run with `lake env lean scripts/SATGuessVerifyApiCheck.lean`.
+Run with `lake build --wfail SATGuessVerifyApiCheck`.
 The old theorem names still describe the old concrete machine, tape count, and
 clock. Importing the compatibility surface also retains the language-level API
 previously available from `Classes.NP.Internal.GuessVerify`.

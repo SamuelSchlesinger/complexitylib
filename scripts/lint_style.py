@@ -177,7 +177,13 @@ def lean_code(text: str, *, stop_at_module_doc: bool = False) -> str:
 
 def uses_native_evaluation(path: Path) -> bool:
     """Whether the code of `path` (outside comments and strings) evaluates natively."""
-    return NATIVE_RE.search(lean_code(path.read_text(encoding="utf-8"))) is not None
+    text = path.read_text(encoding="utf-8")
+    # Blanking comments and literals cannot introduce any of these spellings.
+    # Most files contain none, so avoid scanning their entire bodies in Python.
+    # Keep the full lexer/regex check for candidates, including commented tokens.
+    if not any(token in text for token in ("native", "ofReduceBool", "ofReduceNat")):
+        return False
+    return NATIVE_RE.search(lean_code(text)) is not None
 
 
 def repository_lean_files() -> list[Path]:

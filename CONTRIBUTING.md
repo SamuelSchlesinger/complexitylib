@@ -150,28 +150,26 @@ Aggregation files (`Complexitylib.lean`, `Models.lean`, …) contain only
 ## Building and quality gates
 
 ```bash
-lake build --wfail
-lake build --wfail Complexitylib.Classes.P.Cobham.Validation
-lake build --wfail Complexitylib.Models.TuringMachine.SingleTape.Validation
-lake build --wfail Complexitylib.Models.TuringMachine.Repetition.Validation
-lake build --wfail Complexitylib.Circuits.Encoding.Validation
-lake build --wfail Complexitylib.SAT.Tseitin.Machine.Validation
-python3 scripts/lint_style.py
-python3 -m unittest discover -s scripts -p 'test_*.py'
-lake exe runLinter Complexitylib \
+lake build --wfail Complexitylib \
   Complexitylib.Classes.P.Cobham.Validation \
   Complexitylib.Models.TuringMachine.SingleTape.Validation \
   Complexitylib.Models.TuringMachine.Repetition.Validation \
   Complexitylib.Circuits.Encoding.Validation \
-  Complexitylib.SAT.Tseitin.Machine.Validation
+  Complexitylib.SAT.Tseitin.Machine.Validation \
+  ApiChecks runLinter
+python3 scripts/lint_style.py
+python3 -m unittest discover -s scripts -p 'test_*.py'
+lake env python3 scripts/lint_environment.py
 lake env lean scripts/AxiomGuard.lean
 lake env lean scripts/BlueprintCheck.lean
 ```
 
-All eleven commands must pass before submitting changes; CI runs them on every
-push. The first checks the complete library and treats warnings (including
-proof placeholders) as failures. The next five run executable regression
-suites that are intentionally outside the public import graph.
+All commands must pass before submitting changes; CI runs them on every push.
+The build checks the complete library, all five executable regression suites,
+and the seven separate API-check modules, treating warnings (including proof
+placeholders) as failures. Both kinds of regressions remain outside the public
+import graph. One Lake invocation shares dependency-graph setup; unchanged
+API checks reuse normal Lake traces instead of re-elaborating every time.
 
 The last five are the quality gates:
 
@@ -188,9 +186,12 @@ The last five are the quality gates:
 - **`python3 -m unittest discover …`** checks the maintenance scripts, including
   that the documentation cache retains dependency analysis while excluding
   project declarations, removed modules, and rendered output.
-- **`lake exe runLinter …`** runs the Mathlib/Batteries environment linters
-  (missing docstrings, naming, unused arguments, simp hygiene, …) over the
-  public root and all five validation-only import graphs, also as a hard gate.
+- **`scripts/lint_environment.py`**, run under `lake env`, invokes the same
+  upstream `runLinter` executable on the public root and each of the five
+  validation-only graphs in a separate process. All default and slow
+  Mathlib/Batteries checks (docstrings, naming, unused arguments, simp hygiene,
+  …) remain hard gates. This releases memory between roots without merging
+  their import environments, whose global attributes can affect lint results.
   To suppress a genuinely-intended lint, put a documented inline
   `@[nolint …]` on the declaration — there is no project-level baseline.
 - **`scripts/AxiomGuard.lean`** audits every declaration originating in a
@@ -216,6 +217,56 @@ The last five are the quality gates:
   Renaming or deleting a referenced declaration fails CI, so update the
   blueprint in the same change. Whether the prose matches the Lean statement
   is checked by review.
+
+### Incremental local builds
+
+During development, pass the smallest affected modules to one
+`lake build --wfail <Module> <OtherModule>` invocation per coherent edit. This
+shares setup instead of starting Lake separately for every file. Once the
+batch is ready, run the complete build and quality gates above on the final
+tree before submitting; focused checks do not replace the merge gates.
+Keep `.lake/` between runs: Lake checks source and dependency traces, so a
+clean rebuild is unnecessary after ordinary edits. On memory-constrained
+machines, `LEAN_NUM_THREADS=2 lake build --wfail ...` bounds Lean's worker
+threads; choose a value appropriate for your machine rather than forcing it
+on every contributor.
+
+For an isolated API regression, use `lake build --wfail VerifierApiCheck`
+(or the corresponding module name). `lake build --wfail ApiChecks` runs all
+seven as separate modules, preserving each file's public-only or compatibility
+imports. Lake rebuilds relevant changed imports before reusing a test artifact.
+The axiom and blueprint scripts are still executed on every full verification;
+they are deliberately excluded from the cached API target.
+
+A matched warm-checkout measurement on Lean v4.35.0-rc3 with
+`LEAN_NUM_THREADS=2` compared the former command sequence (six library and
+validation builds, seven direct API checks, and the linter executable build)
+with the combined build above. Across three alternating trials on the same
+sources and caches, median time fell from 18.72 s to 2.18 s. The combined run
+reused the API artifacts; no library modules recompiled. This measures saved
+startup and repeated API-check work, not faster proof checking or a cold build.
+It excludes the remaining quality gates, and timings vary by machine.
+
+### CI build caches
+
+CI stores pinned dependencies (`.lake/packages`) separately from project
+outputs (`.lake/build`). Both keys include the operating system, architecture,
+toolchain, Lake configuration, and dependency manifest. Only the smaller
+project cache adds the commit SHA and allows fallback to an earlier commit
+with the same configuration; Lake still checks its source and dependency
+traces. Dependency caches require an exact key.
+
+Only successful `dev` runs save the dependency cache, after every quality gate
+passes, including the `runLinter` executable that previously built after the
+cache was saved. Successful `dev` and pull-request runs save project outputs,
+including validations and API checks. GitHub scopes PR caches to that PR's
+merge ref, so dev, docs, and other PRs cannot restore them. This lets later PR
+iterations reuse their own builds without uploading another copy of pinned
+dependencies; duplicate feature-branch push runs do not save project caches.
+Mathlib's official cache fetch still runs, including on GitHub-cache hits, so
+missing dependency artifacts retain their fallback.
+The first run with a new cache format or dependency key is cold; cache misses
+never skip a build or quality gate.
 
 API documentation builds with doc-gen4 from the `docbuild/` subproject
 (`cd docbuild && lake build Complexitylib:docs`); the blueprint builds with

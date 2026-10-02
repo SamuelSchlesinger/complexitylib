@@ -2220,7 +2220,7 @@ theorem stepFormulasEffectSize_eq_prefixSize_internal (tm : NTM k) (T : ℕ) :
     · unfold stepHeadFormulasEffectSizeInternal
       congr 2
       rw [List.map_ofFn]
-      congr 1
+      apply congrArg (fun blockAt : Fin tapeCount → ℕ => List.ofFn blockAt)
       funext index
       simp [tapeAt, tapeCount]
     · intro index hindex

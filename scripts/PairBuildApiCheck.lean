@@ -9,7 +9,7 @@ public import Complexitylib.Models.TuringMachine.Subroutines.PairBuild
 /-!
 # Public pair-builder API checks
 
-Run with `lake env lean scripts/PairBuildApiCheck.lean`.
+Run with `lake build --wfail PairBuildApiCheck`.
 The only import is the supported model-layer surface. These kernel checks
 preserve the concrete machine, exact bound, initialized-tape postcondition,
 NTM lift, and frame theorem availability. No NP or SAT import is needed.

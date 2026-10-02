@@ -9,7 +9,7 @@ public import Complexitylib.Classes.NP.Internal.PairBuildTM
 /-!
 # Legacy pair-builder import compatibility
 
-Run with `lake env lean scripts/PairBuildCompatibilityCheck.lean`.
+Run with `lake build --wfail PairBuildCompatibilityCheck`.
 A module-style client of the old import path retains the same transparent
 machine, exact bound, instance, helpers, and correctness theorems.
 -/
