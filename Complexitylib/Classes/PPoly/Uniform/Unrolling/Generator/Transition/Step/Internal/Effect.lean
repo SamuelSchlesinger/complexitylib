@@ -1727,30 +1727,6 @@ theorem emitStepHeadTapeCopies_effect_internal (tm : NTM k)
               hreference, htemporary, Work.position, Work.gateCount,
               Work.available, Work.reference₀, Work.temporary₃]
 
-private theorem cellCopyBody_effect (tm : NTM k) (tape : TapeSlot k)
-    (values : BinaryValues WorkCount) :
-    (match tape with
-      | .input => emitStepImmutableCellCopies
-      | .work index => emitStepWritableCellCopies tm (.work index)
-      | .output => emitStepWritableCellCopies tm .output).effect values =
-      Function.update
-        (Function.update
-          (Function.update
-            (Function.update values Work.gateCount
-              (values Work.gateCount + stepCellPositionEffectSizeInternal tm tape
-                (values Work.horizon) (values Work.position)))
-            Work.available (values Work.available + 4))
-          Work.reference₀ 0) Work.temporary₃ 0 := by
-  cases tape with
-  | input =>
-      simpa [stepCellPositionEffectSizeInternal] using
-        emitStepImmutableCellCopies_effect_internal values
-  | work index =>
-      simpa using! emitStepWritableCellCopies_effect_internal tm (.work index)
-        values
-  | output =>
-      simpa using! emitStepWritableCellCopies_effect_internal tm .output values
-
 private theorem clearPosition_after_copyUpdates
     (values : BinaryValues WorkCount)
     (positionValue gateCountValue availableValue : ℕ)

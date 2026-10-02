@@ -72,19 +72,6 @@ lemma TM.toNTM_trace_choice_irrel (tm : TM n) (T : ℕ) (c : Cfg n tm.Q)
     · rfl
     · exact ih _ _ _
 
-/-- If a DTM reaches `c'` in exactly `t` steps, then `toNTM.trace t` agrees. -/
-private lemma TM.toNTM_reachesIn_trace (tm : TM n) {c c' : Cfg n tm.Q} {t : ℕ}
-    (h : tm.reachesIn t c c') (ch : Fin t → Bool) :
-    tm.toNTM.trace t ch c = c' := by
-  induction h with
-  | zero => rfl
-  | @step c₀ c_mid _ _ hstep _ ih =>
-    have hne := state_ne_qhalt_of_step hstep
-    rw [tm.toNTM_trace_step _ ch hne]
-    have : (tm.step c₀).get (by simp [TM.step, hne]) = c_mid := by
-      simp [TM.step, hne] at hstep ⊢; exact hstep
-    rw [this]; exact ih _
-
 /-- If a DTM halts within `t ≤ T` steps, then `toNTM.trace T` reaches the same
     halted configuration regardless of choices. -/
 lemma TM.toNTM_trace_of_reachesIn (tm : TM n) {c c' : Cfg n tm.Q}

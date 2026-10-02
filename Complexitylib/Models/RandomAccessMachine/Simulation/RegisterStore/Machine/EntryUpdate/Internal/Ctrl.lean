@@ -429,13 +429,6 @@ theorem entryUpdateTM_step_test_append_internal
     exact (hwork i).writeAndMove_readBack_idle
   · exact houtput.writeAndMove_readBack_idle
 
-private theorem entryUpdateMarkFoundWork_apply_eq
-    (tapes : EntryUpdateTapes n) (work : Fin n → Tape) :
-    entryUpdateMarkFoundWork tapes work tapes.found =
-      (work tapes.found).writeAndMove Γ.one
-        (TM.idleDir (work tapes.found).read) := by
-  simp [entryUpdateMarkFoundWork]
-
 private theorem entryUpdateMarkFoundWork_apply_ne
     (tapes : EntryUpdateTapes n) (work : Fin n → Tape)
     (i : Fin n) (hi : i ≠ tapes.found) :

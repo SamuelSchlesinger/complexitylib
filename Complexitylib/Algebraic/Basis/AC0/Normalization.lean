@@ -572,20 +572,6 @@ private theorem negationsAtInputs_append_of_negationFree
       exact ⟨inductionHypothesis sourceFree.1,
         negationAtInput_map_of_ne line _ sourceFree.2⟩
 
-private theorem negationsAtInputs_instantiate_of_negationFree
-    (source : Program signature n g)
-    (ambient : Program signature n' h)
-    (inputWires : Fin n -> Wire n' h)
-    (sourceFree : NegationFree source)
-    (ambientNormal : AC0.Program.NegationsAtInputs ambient) :
-    AC0.Program.NegationsAtInputs
-      (source.instantiate ambient inputWires) := by
-  induction source with
-  | empty => simpa [Program.instantiate] using ambientNormal
-  | gate source line inductionHypothesis =>
-      exact ⟨inductionHypothesis sourceFree.1,
-        negationAtInput_map_of_ne line _ sourceFree.2⟩
-
 private theorem inputNegationProgram_negationsAtInputs
     (bound : g <= n) :
     AC0.Program.NegationsAtInputs

@@ -136,15 +136,6 @@ theorem card_blockAdvice (width length : Nat) :
   rw [Fintype.card_congr equiv]
   simp
 
-private theorem card_nonzeroDifference (length : Nat) :
-    Fintype.card {differences : Fin length → Bool //
-        differences ≠ fun _ => false} =
-      2 ^ length - 1 := by
-  rw [Fintype.card_subtype_compl
-    (fun differences : Fin length → Bool =>
-      differences = fun _ => false)]
-  simp
-
 /-- Requiring a mismatch removes exactly the all-zero difference string. -/
 theorem card_continuingBlockAdvice (width length : Nat) :
     Fintype.card (ContinuingBlockAdvice width length) =

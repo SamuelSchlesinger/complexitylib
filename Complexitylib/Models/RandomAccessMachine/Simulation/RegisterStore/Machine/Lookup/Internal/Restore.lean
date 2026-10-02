@@ -294,10 +294,6 @@ private theorem blank_hasBinaryPrefix_nil :
     simpa using blank_hasBinaryNat_zero.2
   exact ⟨by simpa using hstring.1, hstring.2⟩
 
-private theorem blank_parked : TM.Parked TM.resetBinaryBlank :=
-  ⟨by rw [blank_hasBinaryNat_zero.2.1],
-    blank_hasBinaryNat_zero.2.hasBinaryContent.cells_ne_start⟩
-
 private theorem scratchReset_sourceReady
     (tapes : EntryLookupRestoreTapes n) (store : Store) (address : ℕ)
     (initialWork work : Fin n → Tape)

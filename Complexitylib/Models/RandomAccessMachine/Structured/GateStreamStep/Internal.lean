@@ -555,45 +555,6 @@ private theorem saveRestart_bound {bound : ℕ} {store : Store}
     (by simp [Basic.writeValue]; omega)
   simpa [saveRestartStore, saveRestartOps, Basic.execList, saved0] using h3
 
-private theorem header_op {gateStart base : ℕ} {gate : CircuitCode.RawGate}
-    {tail wires : List Bool} {store : Store}
-    (hready : Ready gateStart base gate tail wires store) :
-    headerStore store gateStart = Input.bitValue gate.opBit := by
-  have hlarge : 10 < gateStart := by
-    have hbase := hready.base_ge
-    have hcode := hready.memo_before_code
-    simp only [spillRemainingReg] at hbase
-    omega
-  rw [header_high store gateStart hlarge]
-  have hcode := hready.code_eq 0
-  simpa [codeBits, CircuitCode.RawGate.encode] using hcode
-
-private theorem header_negated0 {gateStart base : ℕ}
-    {gate : CircuitCode.RawGate} {tail wires : List Bool} {store : Store}
-    (hready : Ready gateStart base gate tail wires store) :
-    headerStore store (gateStart + 1) =
-      Input.bitValue gate.negated₀ := by
-  have hlarge : 10 < gateStart + 1 := by
-    have hbase := hready.base_ge
-    have hcode := hready.memo_before_code
-    simp only [spillRemainingReg] at hbase
-    omega
-  rw [header_high store (gateStart + 1) hlarge, hready.code_eq 1]
-  simp [codeBits, CircuitCode.RawGate.encode]
-
-private theorem header_negated1 {gateStart base : ℕ}
-    {gate : CircuitCode.RawGate} {tail wires : List Bool} {store : Store}
-    (hready : Ready gateStart base gate tail wires store) :
-    headerStore store (gateStart + 2) =
-      Input.bitValue gate.negated₁ := by
-  have hlarge : 10 < gateStart + 2 := by
-    have hbase := hready.base_ge
-    have hcode := hready.memo_before_code
-    simp only [spillRemainingReg] at hbase
-    omega
-  rw [header_high store (gateStart + 2) hlarge, hready.code_eq 2]
-  simp [codeBits, CircuitCode.RawGate.encode]
-
 private theorem decoders_internal {gateStart base : ℕ} {gate : CircuitCode.RawGate}
     {tail wires : List Bool} {store : Store}
     (hready : Ready gateStart base gate tail wires store)

@@ -57,21 +57,6 @@ private theorem not_halted_append_head (pre suffix : Program) (op : Basic)
   simp [Halted, curInstr_append_head]
   cases op <;> simp [Basic.instr]
 
-private theorem not_halted_jz (pre suffix : Program) (test target : ℕ)
-    (regs : Store) :
-    ¬Halted (pre ++ Instr.jz test target :: suffix)
-      { pc := pre.length, regs := regs } := by
-  simp [Halted, curInstr_append_head]
-
-private theorem not_halted_jmp (pre suffix : Program) (target : ℕ)
-    (regs : Store) :
-    ¬Halted (pre ++ Instr.jmp target :: suffix)
-      { pc := pre.length, regs := regs } := by
-  simp [Halted, curInstr_append_head]
-
-private theorem cfg_space_eq_store_space (pc : ℕ) (regs : Store) :
-    (Cfg.mk pc regs).space = regs.space := rfl
-
 private theorem step_basic (pre suffix : Program) (op : Basic) (regs : Store) :
     step (pre ++ op.instr :: suffix) { pc := pre.length, regs := regs } =
       { pc := pre.length + 1, regs := op.exec regs } := by

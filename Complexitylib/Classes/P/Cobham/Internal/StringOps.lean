@@ -219,14 +219,6 @@ private theorem xorStep_mem (β : Bool) : Cobham (xorStep β) := by
   · exact (iteFn hbit hcons1 hcons0).of_eq fun _ => rfl
   · exact (iteFn (notFn hbit) hcons1 hcons0).of_eq fun _ => rfl
 
-private theorem xorStep_length (β : Bool) (w : Fin 3 → List Bool) :
-    (xorStep β w).length = (w 1).length + 1 := by
-  rw [xorStep]
-  rcases hc : ((bif β then notBit else id)
-      (bitAt ((w 2).drop (false :: w 0).length) (w 2))) with _ | ⟨d, z⟩
-  · simp
-  · cases d <;> simp
-
 private theorem recNotation_xor (a b : List Bool) :
     recNotation (fun _ : Fin 1 → List Bool => ([] : List Bool)) (xorStep false)
       (xorStep true) a (fun _ => b) = xorSuffix a b := by

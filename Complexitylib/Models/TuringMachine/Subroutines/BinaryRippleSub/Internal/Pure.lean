@@ -29,12 +29,6 @@ namespace BinaryRippleSub
 def boolValue (bit : Bool) : ℕ :=
   if bit then 1 else 0
 
-private theorem fullSub_value (borrow lhs rhs : Bool) :
-    boolValue lhs + 2 * boolValue (borrowBit borrow lhs rhs) =
-      boolValue rhs + boolValue borrow + boolValue (diffBit borrow lhs rhs) := by
-  cases borrow <;> cases lhs <;> cases rhs <;>
-    simp [boolValue, borrowBit, diffBit]
-
 private theorem scan_value_step
     (borrow lhsBit rhsBit tailBorrow : Bool)
     (lhs rhs tailValue width : ℕ)

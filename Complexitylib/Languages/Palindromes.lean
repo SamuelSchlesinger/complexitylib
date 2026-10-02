@@ -215,23 +215,6 @@ private theorem palindromesTM_step_start
 -- Small helpers
 -- ════════════════════════════════════════════════════════════════════════
 
-/-- Writing any symbol from `Γw` preserves the "no ▷ at cells ≥ 1" invariant. -/
-private theorem palindromes_writeAndMove_preserves_nonStart
-    (t : Tape) (s : Γw) (d : Dir3)
-    (hinv : ∀ j ≥ 1, t.cells j ≠ Γ.start) :
-    ∀ j ≥ 1, (t.writeAndMove (s : Γ) d).cells j ≠ Γ.start := by
-  intro j hj
-  simp only [Tape.writeAndMove, Tape.move_cells, Tape.write]
-  split
-  · exact hinv j hj
-  · by_cases hjh : j = t.head
-    · subst hjh
-      simp only [Function.update_self]
-      cases s <;> simp [Γw.toΓ]
-    · show Function.update t.cells t.head s.toΓ j ≠ Γ.start
-      rw [Function.update_of_ne hjh]
-      exact hinv j hj
-
 /-- `Tape.init` at a position ≥ 1 is never `Γ.start`. -/
 private theorem palindromes_initTape_ns (l : List Γ)
     (hl : ∀ b ∈ l, b ≠ Γ.start) (j : ℕ) (hj : j ≥ 1) :
@@ -266,15 +249,6 @@ private theorem Tape.init_read_past_end (x : List Bool) :
     (Tape.init (x.map Γ.ofBool)).cells (x.length + 1) = Γ.blank := by
   simp [Tape.init]
 
-/-- Reading `Tape.init (x.map Γ.ofBool)` at cell `i+1` for `i ≥ x.length` gives `□`. -/
-private theorem Tape.init_read_past (x : List Bool) (i : ℕ) (hi : x.length ≤ i) :
-    (Tape.init (x.map Γ.ofBool)).cells (i + 1) = Γ.blank := by
-  have hmap_len : (x.map Γ.ofBool).length = x.length := by simp
-  have hi' : (x.map Γ.ofBool).length ≤ i := by rw [hmap_len]; exact hi
-  have hnone : (x.map Γ.ofBool)[i]? = none := List.getElem?_eq_none hi'
-  simp only [Tape.init, show i + 1 ≠ 0 from by omega, ↓reduceIte,
-    Nat.add_sub_cancel, hnone, Option.getD_none]
-
 -- ════════════════════════════════════════════════════════════════════════
 -- Copy phase: invariants
 -- ════════════════════════════════════════════════════════════════════════
@@ -298,21 +272,6 @@ structure CopyInv (c : Cfg 1 palindromesTM.Q) (x : List Bool) (k : ℕ) : Prop w
 
 namespace CopyInv
 variable {c : Cfg 1 palindromesTM.Q} {x : List Bool} {k : ℕ}
-
-private theorem input_ns (inv : CopyInv c x k) :
-    ∀ j, j ≥ 1 → c.input.cells j ≠ Γ.start := by
-  intro j hj; rw [inv.ic]
-  exact palindromes_initTape_ns _ (palindromes_map_ofBool_ns x) j hj
-
-/-- Work cells 1.. are never ▷. -/
-private theorem work_ns (inv : CopyInv c x k) :
-    ∀ j, j ≥ 1 → (c.work 0).cells j ≠ Γ.start := by
-  intro j hj
-  by_cases hjk : j ≤ k
-  · rw [inv.wcopy j hj hjk]
-    exact palindromes_initTape_ns _ (palindromes_map_ofBool_ns x) j hj
-  · push Not at hjk
-    rw [inv.wblank j hjk]; decide
 
 private theorem read_bit (inv : CopyInv c x k) (hk : k < x.length) :
     c.input.read = Γ.ofBool (x[k]'hk) := by
@@ -365,15 +324,6 @@ private theorem input_ns (inv : RewindInv c x j) :
   intro i hi; rw [inv.ic]
   exact palindromes_initTape_ns _ (palindromes_map_ofBool_ns x) i hi
 
-private theorem work_ns (inv : RewindInv c x j) :
-    ∀ i, i ≥ 1 → (c.work 0).cells i ≠ Γ.start := by
-  intro i hi
-  by_cases hix : i ≤ x.length
-  · rw [inv.wcopy i hi hix]
-    exact palindromes_initTape_ns _ (palindromes_map_ofBool_ns x) i hi
-  · push Not at hix
-    rw [inv.wblank i hix]; decide
-
 private theorem work_read (inv : RewindInv c x j) :
     (c.work 0).read = Γ.blank := by
   simp only [Tape.read, inv.wh]
@@ -410,20 +360,6 @@ structure CompareInv (c : Cfg 1 palindromesTM.Q) (x : List Bool) (k : ℕ) : Pro
 namespace CompareInv
 variable {c : Cfg 1 palindromesTM.Q} {x : List Bool} {k : ℕ}
 
-private theorem input_ns (inv : CompareInv c x k) :
-    ∀ i, i ≥ 1 → c.input.cells i ≠ Γ.start := by
-  intro i hi; rw [inv.ic]
-  exact palindromes_initTape_ns _ (palindromes_map_ofBool_ns x) i hi
-
-private theorem work_ns (inv : CompareInv c x k) :
-    ∀ i, i ≥ 1 → (c.work 0).cells i ≠ Γ.start := by
-  intro i hi
-  by_cases hix : i ≤ x.length
-  · rw [inv.wcopy i hi hix]
-    exact palindromes_initTape_ns _ (palindromes_map_ofBool_ns x) i hi
-  · push Not at hix
-    rw [inv.wblank i hix]; decide
-
 private theorem output_read_ne_start (inv : CompareInv c x k) :
     c.output.read ≠ Γ.start := by
   simp only [Tape.read, inv.oh]; exact inv.ons
@@ -454,13 +390,6 @@ private theorem read_work_bit (inv : CompareInv c x k) (hk : k < x.length) :
   have heq : x.length - k - 1 + 1 = x.length - k := by omega
   rw [heq] at hinit
   rw [hwcopy, hinit]
-
-/-- When k = x.length, work reads `▷`. -/
-private theorem read_work_start (inv : CompareInv c x x.length) :
-    (c.work 0).read = Γ.start := by
-  simp only [Tape.read, inv.wh]
-  have : x.length - x.length = 0 := by omega
-  rw [this]; exact inv.wstart
 
 end CompareInv
 

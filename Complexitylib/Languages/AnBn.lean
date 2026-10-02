@@ -277,11 +277,6 @@ private theorem writeAndMove_preserves_nonStart (t : Tape) (s : Γw) (d : Dir3)
       rw [Function.update_of_ne hjh]
       exact hinv j hj
 
-/-- `readBackWrite.toΓ` is either `Γ.blank` (if read was `▷`) or the read symbol. -/
-private theorem readBackWrite_toΓ_cases (g : Γ) :
-    (readBackWrite g).toΓ = Γ.blank ∨ (readBackWrite g).toΓ = g := by
-  cases g <;> simp [readBackWrite, Γw.toΓ]
-
 -- ════════════════════════════════════════════════════════════════════════
 -- Expected output function
 -- ════════════════════════════════════════════════════════════════════════
@@ -358,13 +353,6 @@ private theorem read_blank (inv : ScanInv c x x.length h) : c.input.read = Γ.bl
   simp only [Tape.read, inv.ih, inv.ic]
   show (Tape.init (x.map Γ.ofBool)).cells (x.length + 1) = Γ.blank
   simp [Tape.init]
-
-/-- Input cells are never ▷ at positions ≥ 1. -/
-private theorem input_ns (inv : ScanInv c x k h) :
-    ∀ j, j ≥ 1 → c.input.cells j ≠ Γ.start := by
-  intro j hj
-  rw [inv.ic]
-  exact Tape.init_ns _ (map_ofBool_ns x) j hj
 
 /-- Work reads ▷ iff the work head is at 0. -/
 private theorem work_read_start_iff (inv : ScanInv c x k h) :
@@ -753,10 +741,6 @@ private theorem anbnExpected_reject (h : ℕ) (rest : List Bool) :
   induction rest generalizing h with
   | nil => rfl
   | cons _ rest' ih => simp [anbnExpected, ih]
-
-/-- After pop transition from `scanZeros` or `scanOnes` + `true`-bit + `h+1` → `scanOnes`. -/
-private theorem anbnExpected_pop_scanZeros (h : ℕ) (rest : List Bool) :
-    anbnExpected .scanZeros (h + 1) (true :: rest) = anbnExpected .scanOnes h rest := rfl
 
 /-- **Main scan invariant**: from state `s ∈ {scanZeros, scanOnes}` with
     remaining input `rest` and work head `h`, the TM halts in `rest.length + 1`

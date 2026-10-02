@@ -2117,10 +2117,6 @@ private theorem read_inputBitStoreFrom (start target : ℕ)
               ite_eq_left (by omega : start ≤ target)]
             simp [hsub]
 
-private theorem read_inputBitStoreFrom_zero (input : List Bool) :
-    read (inputBitStoreFrom 1 input) 0 = 0 := by
-  simp [read_inputBitStoreFrom]
-
 private theorem read_programInitialStore (input : List Bool) (target : ℕ) :
     read (programInitialStore input) target = initRegs input target := by
   rw [programInitialStore, RegisterStore.read_write]
