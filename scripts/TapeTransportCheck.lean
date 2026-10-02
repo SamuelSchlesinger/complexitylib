@@ -12,7 +12,7 @@ public import Complexitylib.Models.TuringMachine.Combinators.ApplyDecide
 /-!
 # Exact tape-layout transport regression examples
 
-Run with `lake env lean scripts/TapeTransportCheck.lean`.
+Run with `lake build --wfail TapeTransportCheck`.
 The kernel checks zero-work-tape machines, empty layouts, initial marker bounces,
 halted/time-zero configurations, nonblank parked frames, arbitrary evolving frames,
 virtual-input invariants, exact output routing, and reflection of every reachable prefix.

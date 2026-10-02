@@ -14,3 +14,17 @@ rev = "2a4389ba8d47778cafdd79f522f0b17b623b18b7"
 
 [[lean_lib]]
 name = "Complexitylib"
+
+# Keep each API regression in its own import environment and cache its build.
+[[lean_lib]]
+name = "ApiChecks"
+srcDir = "scripts"
+roots = [
+  "VerifierApiCheck",
+  "SATGuessVerifyApiCheck",
+  "TapeTransportCheck",
+  "NTMTraceTransportCheck",
+  "StackEncodingCheck",
+  "PairBuildApiCheck",
+  "PairBuildCompatibilityCheck",
+]

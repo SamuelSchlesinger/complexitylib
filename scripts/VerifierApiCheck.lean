@@ -13,7 +13,7 @@ public import Complexitylib.Classes.P.Pairing
 /-!
 # Public-only verifier API regression examples
 
-Run with `lake env lean scripts/VerifierApiCheck.lean`.
+Run with `lake build --wfail VerifierApiCheck`.
 These examples exercise linear and zero polynomial witness bounds, including
 empty inputs/certificates, a rejecting verifier, and malformed pair encodings.
 No client imports an `Internal` module or a SAT theorem.

@@ -17,29 +17,27 @@ blueprint node, add `\lean{...}` and `\leanok` to that node in the same change.
 ## Build
 
 ```bash
-lake build --wfail
-lake build --wfail Complexitylib.Classes.P.Cobham.Validation
-lake build --wfail Complexitylib.Models.TuringMachine.SingleTape.Validation
-lake build --wfail Complexitylib.Models.TuringMachine.Repetition.Validation
-lake build --wfail Complexitylib.Circuits.Encoding.Validation
-lake build --wfail Complexitylib.SAT.Tseitin.Machine.Validation
+lake build --wfail Complexitylib \
+  Complexitylib.Classes.P.Cobham.Validation \
+  Complexitylib.Models.TuringMachine.SingleTape.Validation \
+  Complexitylib.Models.TuringMachine.Repetition.Validation \
+  Complexitylib.Circuits.Encoding.Validation \
+  Complexitylib.SAT.Tseitin.Machine.Validation \
+  ApiChecks runLinter
 ```
 
-Always verify all six commands pass before considering a change complete.
-The latter five run executable regression guards that are intentionally kept
-out of the public import graph.
+Always verify the library, all five executable validation roots, and the
+seven isolated `ApiChecks` modules pass before considering a change complete.
+One invocation shares Lake's dependency-graph work across the targets and
+builds the upstream `runLinter` executable needed below. Validation and API
+regressions remain outside the public import graph.
 
 Quality gates (also run in CI; see CONTRIBUTING.md):
 
 ```bash
 python3 scripts/lint_style.py        # headers, module docs, 100-col, _root_, imports, native_decide
 python3 -m unittest discover -s scripts -p 'test_*.py'  # maintenance scripts
-lake exe runLinter Complexitylib \
-  Complexitylib.Classes.P.Cobham.Validation \
-  Complexitylib.Models.TuringMachine.SingleTape.Validation \
-  Complexitylib.Models.TuringMachine.Repetition.Validation \
-  Complexitylib.Circuits.Encoding.Validation \
-  Complexitylib.SAT.Tseitin.Machine.Validation  # env linters, including private graphs
+lake env python3 scripts/lint_environment.py  # same roots/checks, separate processes
 lake env lean scripts/AxiomGuard.lean  # every project declaration on std axioms only
 lake env lean scripts/BlueprintCheck.lean  # blueprint links, \leanok markers, node kinds, labels
 ```

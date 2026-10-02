@@ -12,7 +12,7 @@ public import Complexitylib.Classes.Containments.IPSubsetPSPACE
 /-!
 # Exact stack-encoding regression examples
 
-Run with `lake env lean scripts/StackEncodingCheck.lean`.
+Run with `lake build --wfail StackEncodingCheck`.
 Only public modules are imported. The kernel checks the neutral API, empty
 frames, ordering, unchanged total projections, and both consumers' transparent
 constructor equations and quantitative state bounds. Return encodings stay
