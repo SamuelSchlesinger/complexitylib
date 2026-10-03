@@ -285,6 +285,51 @@ density limits, so the generalized first-message argument retains the
 as the parity result. This is an extension of Korten's method; his Theorem 3
 states the parity case.
 
+## Seeded extractor improvements
+
+Follow-ups to the recursive construction of
+[Chattopadhyay, Goodman, and Liao](https://eccc.weizmann.ac.il/report/2021/075/).
+The [cutwidth guide](docs/algebraic/cutwidth-lower-bound.md) records the
+current component guarantees and remaining hard-family obligations.
+Prioritize sharper entropy statements and finite constants before replacing
+the construction. The unchecked items below are proof and API targets.
+
+- [ ] **Expose the stronger entropy guarantee.** The generic near-halving
+  theorem `nearHalvingBlockOutputBits_lower` already proves that the full
+  output has at least `7/8` of the scheduled input entropy threshold. Expose
+  that guarantee alongside the Gamma specialization, which advertises `b`
+  output bits at entropy `2b`. Prove finite bounds for its actual threshold
+  `gammaBlockInputEntropy b`, then formalize
+  `gammaBlockInputEntropy b / b → 9/8` with real-valued division. This limit
+  is a deduction from the rounded formulas, not yet a checked theorem.
+  Keep the full output length and the truncated Gamma output distinct.
+- [ ] **Tighten field rounding and propagate the constants.** Prove the
+  candidate improvement
+  `sparseFieldBits u T ≤ 3 * ((u + 1) * T)` for `0 < T`, replacing the
+  current factor-six estimate by comparing with the preceding point of
+  the `2 * 3^s` grid. Recalculate the one-shot seed bound, recursive reserve,
+  depth offset, and padded seed budget where this improves them. Preserve
+  explicit finite validity conditions and zero-input behavior; reductions
+  to the current `2^27` seed coefficient must follow checked bounds.
+- [ ] **Provide a general extractor interface.** Expose input length,
+  entropy threshold, output length, and error independently, using integer
+  `e` for error `2^(-e)`. Build on `nearHalvingBlockExtractor_dyadic`, which
+  already permits variable error, instead of requiring callers to use the
+  `8b, 2b, b, 1/4` specialization. State the valid finite parameter range,
+  retained-seed guarantee, exact seed width, and uniform `FP` evaluator
+  together; preserve the Gamma interface as a convenient instance.
+- [ ] **Reduce seed length through a different construction.** First
+  formalize the present schedule's obstruction: with depth `h`, rate
+  `u = 16*(h+1)`, and local exponent `E = h+4`, its internal seeds alone
+  use at least `h * (u+1) * (h+5)` bits. Since `h` grows like `log b`,
+  improving constants alone cannot remove the cubic-logarithmic cost.
+  Investigate a different recursion or condenser/extractor ingredient for
+  quadratic or logarithmic seed length. The ordinary-extractor benchmark
+  is [Guruswami–Umans–Vadhan, Theorem 5.12](https://salil.seas.harvard.edu/sites/g/files/omnuum4266/files/salil/files/acm2009.pdf):
+  at these constant-rate, constant-error parameters, `O(log b)` seed bits
+  suffice. Track retained-seed strength and fixed-seed linearity separately;
+  a replacement must preserve whichever properties its consumers require.
+
 ## Descriptive complexity expansion
 
 The expansion prompted by Senellart and Gnatenko's September 2026 paper is
