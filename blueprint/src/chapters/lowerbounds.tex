@@ -4940,6 +4940,60 @@ establishes the proposed coefficient-three regime without that assumption.
   discrepancy once, while retaining all of the right variable.
 \end{proof}
 
+\begin{definition}[Actual merging after selected observations and a prefix]
+  \label{def:lowerbounds-algebraic-smooth-merging}
+  \lean{Algebraic.Cutwidth.Extractor.SmoothMergingTranscript,
+    Algebraic.Cutwidth.Extractor.smoothMergingTranscript,
+    Algebraic.Cutwidth.Extractor.smoothMergingSeedWeight,
+    Algebraic.Cutwidth.Extractor.smoothTwoSidedExtractionWeight}
+  \leanok
+  \uses{def:lowerbounds-algebraic-two-sided-laws}
+  From the original factored law, retain
+  $H=((Z,U(Z,A)),Q(Z,A))$. The right seed $Y(H,B)$ and right
+  observation $V(H,B)$ may depend on this entire transcript.
+  The extraction law keeps $H$, the complete original right variable
+  $B$, and a leak $W(H,V(H,B),A)$ alongside $E(X(Z,A),Y(H,B))$.
+  Both $Q$ and $W$ are evaluated on the original left variable.
+\end{definition}
+
+\begin{theorem}[Smooth-source two-sided merging]
+  \label{thm:lowerbounds-algebraic-smooth-merging}
+  \lean{Algebraic.Cutwidth.Extractor.smoothMergingSeedWeight_probability,
+    Algebraic.Cutwidth.Extractor.smoothTwoSidedExtractionWeight_probability,
+    Algebraic.Cutwidth.Extractor.WeightedStrongSeededExtractor.smooth_two_sided_dist_le,
+    Algebraic.Cutwidth.Extractor.smoothMergingSeedWeight_prefix_dist,
+    Algebraic.Cutwidth.Extractor.WeightedStrongSeededExtractor.smooth_two_sided_dist_le_of_prefix_seed}
+  \leanok
+  \uses{def:lowerbounds-algebraic-smooth-merging,
+    thm:lowerbounds-algebraic-two-sided-leakage,
+    thm:lowerbounds-algebraic-factored-repair,
+    thm:lowerbounds-algebraic-observed-transcript}
+  Let the original factors be probability laws and let $E$ be a
+  threshold-$K$ strong extractor of nonnegative error $\varepsilon$, with
+  nonempty seed and output alphabets. Suppose $(Z,U,X)$ is within
+  $\rho$ of its actual $(Z,U)$ marginal times an independent uniform $X$,
+  and $(H,V,Y)$ has analogous seed discrepancy at most $\delta$.
+  The actual retained extraction law has error at most
+  \[
+    \varepsilon+\delta+\rho+K\,|W|\,|Q|/|X|.
+  \]
+  No pointwise conditional source cap or repaired witness is assumed.
+  When $V,Y$ depend only on $(Z,Q)$, their joint seed discrepancy is
+  exactly unchanged by retaining $U$, so the seed premise needs only
+  $(Z,Q,V)$. This is the smooth-source consumer for
+  Chattopadhyay--Liao Theorem~6.1, not yet the complete doubling round.
+\end{theorem}
+\begin{proof}
+  \leanok
+  Observe $U$, then repair the honest source coordinate to uniform
+  while preserving the entire original conditional left variable.
+  Observing the actual $Q$ gives joint envelope total $|Q|/|X|$.
+  Apply two-sided merging. The original $U,Q,B,W$ marginal is exact,
+  so transfer costs the old distance once. If the seed uses only
+  $(Z,Q)$, finite weighted averaging sums out the independent extra
+  left observation, including null rows.
+\end{proof}
+
 \begin{definition}[The actual independence-merging output law]
   \label{def:lowerbounds-algebraic-independence-merging}
   \lean{Algebraic.Cutwidth.Extractor.independenceMergingWeight}
@@ -5233,8 +5287,8 @@ establishes the proposed coefficient-three regime without that assumption.
   requires a source meeting this mass bound. For $e\le L$, depth
   $h=\lceil\log_2(t+1)\rceil+64$ also gives output width at least
   $2^{62}L+(2t+2)2^{24}L+e$.
-  These are finite statistical statements; the matched runtime below
-  retains its separate guard $h\le64$.
+  The logarithmic-depth runtime below implements the depth choice
+  $h=\lceil\log_2(t+1)\rceil+64$ with polynomially many blocks in $t$.
 \end{theorem}
 \begin{proof}
   \leanok
@@ -5313,6 +5367,59 @@ establishes the proposed coefficient-three regime without that assumption.
   seed width through a bounded numerical-state loop, then use the full
   scheduled-program certificate. The seed prefix identity proves canonical
   agreement and independence from the appended suffix.
+\end{proof}
+
+\begin{definition}[The total logarithmic-depth matched runtime]
+  \label{def:lowerbounds-algebraic-matched-growing-runtime}
+  \lean{Algebraic.Cutwidth.Extractor.growingMatchedBlockDepth,
+    Algebraic.Cutwidth.Extractor.GrowingMatchedBlockRuntimeValid,
+    Algebraic.Cutwidth.Extractor.growingMatchedBlockExtractorRuntime,
+    Algebraic.Cutwidth.Extractor.growingMatchedBlockExtractorEval}
+  \leanok
+  \uses{def:lowerbounds-algebraic-matched-extractor,
+    def:lowerbounds-algebraic-scheduled-program}
+  A unary runtime parameter $t$ selects
+  $h=\lceil\log_2(t+1)\rceil+64$. Test the finite conditions of
+  Theorem~\ref{thm:lowerbounds-algebraic-matched-growing}, then run the
+  actual scheduled program with its exact seed prefix. Invalid
+  parameters return the empty word. The paired interface stores
+  the source and seed words, followed by unary $t,L,e$.
+\end{definition}
+
+\begin{theorem}[Uniform polynomial time at the growing depth]
+  \label{thm:lowerbounds-algebraic-matched-growing-runtime}
+  \lean{Algebraic.Cutwidth.Extractor.growingMatchedBlockDepth_pow_le,
+    Algebraic.Cutwidth.Extractor.growingMatchedBlockDepth_pow_four_le,
+    Algebraic.Cutwidth.Extractor.growingMatchedBlockDepth_unaryFn,
+    Algebraic.Cutwidth.Extractor.growingMatchedBlockDepth_pow_unaryFn,
+    Algebraic.Cutwidth.Extractor.growingMatchedBlockRuntimeValid_fpPred,
+    Algebraic.Cutwidth.Extractor.growingMatchedBlockExtractorRuntime_of_valid,
+    Algebraic.Cutwidth.Extractor.growingMatchedBlockExtractorRuntime_of_not_valid,
+    Algebraic.Cutwidth.Extractor.growingMatchedBlockExtractorRuntime_length,
+    Algebraic.Cutwidth.Extractor.growingMatchedBlockExtractorRuntime_length_le,
+    Algebraic.Cutwidth.Extractor.growingMatchedBlockExtractorRuntime_mem_FP,
+    Algebraic.Cutwidth.Extractor.growingMatchedBlockExtractorEval_pair,
+    Algebraic.Cutwidth.Extractor.growingMatchedBlockExtractorEval_mem_FP,
+    Algebraic.Cutwidth.Extractor.growingMatchedBlockExtractorEval_length_le,
+    Algebraic.Cutwidth.Extractor.growingMatchedBlockExtractorRuntime_eq_matchedBlockExtractor,
+    Algebraic.Cutwidth.Extractor.growingMatchedBlockExtractorRuntime_append_eq_matchedBlockExtractor}
+  \leanok
+  \uses{def:lowerbounds-algebraic-matched-growing-runtime,
+    thm:lowerbounds-algebraic-matched-growing,
+    thm:lowerbounds-algebraic-scheduled-program}
+  The complete runtime belongs uniformly to $\mathrm{FP}$, since
+  $2^h\le2^{65}(t+1)$ and $4^h\le(2^{65}(t+1))^2$.
+  On valid canonical inputs it computes exactly the actual matched
+  Boolean extractor, with any trailing seed suffix ignored.
+  The paired evaluator's output has length at most
+  $2^{65}(|z|+1)^2$ on every input string $z$.
+\end{theorem}
+\begin{proof}
+  \leanok
+  Bound the rounded power before compiling the schedule. Use the
+  complete numerical-state and payload bounds of the scheduled program,
+  then its exact seed-prefix and Boolean-output identities. No
+  unrestricted variable exponent or unbounded iteration is compiled.
 \end{proof}
 
 \begin{definition}[The concrete look-ahead and advice-bit step]
@@ -6617,9 +6724,9 @@ establishes the proposed coefficient-three regime without that assumption.
     2^{(t+1)r_0}\sum_z\mu(z),\qquad
     2^{(t+1)(d_0+r_0+d_1)}\sum_z\xi(z),
   \]
-  respectively. These are exact execution and counting identities,
-  with no component security premise. The complete pairwise
-  second-row guarantee and subsequent subset doubling remain open.
+  respectively. These exact execution and counting identities feed
+  the complete pairwise first-phase guarantee below; the subsequent
+  subset-doubling construction remains separate.
 \end{theorem}
 \begin{proof}
   \leanok
@@ -6630,6 +6737,317 @@ establishes the proposed coefficient-three regime without that assumption.
   of $w$-bit words, and the first right message has alphabet size
   $(2^{d_0+r_0})^{t+1}$. The matched extractor's exact XOR law
   identifies every side-local formula with the actual program.
+\end{proof}
+
+\begin{definition}[The actual pair laws and full first-phase error]
+  \label{def:lowerbounds-algebraic-affine-phase-one-pair}
+  \lean{Algebraic.Cutwidth.Extractor.affinePhaseOneSecondSeedWeight,
+    Algebraic.Cutwidth.Extractor.affinePhaseOneLeftPairWeight,
+    Algebraic.Cutwidth.Extractor.affinePhaseOnePairWeight,
+    Algebraic.Cutwidth.Extractor.affinePhaseOneError}
+  \leanok
+  \uses{def:lowerbounds-algebraic-affine-phase-one}
+  For one tampered index $i$, the second-seed law retains the first
+  right message, complete original left state, and tampered advice output.
+  The final pair laws retain the entire executed transcript, original
+  right state, and corresponding tampered final value. One law contains
+  the original-left extraction contributions; the other contains the
+  actual masked program outputs. Set
+  $r_0=2^{64}L_0$, $r=2^hL_1$, $F=2^{2h+14}L_1$, and $M=\sum\mu$.
+  Their complete error budget is
+  \[
+    2^{-e_r}+2^{-e_0}+2^{-e_1^*}
+      +2^{2^{142}L_0}M+2^{F+r+(t+1)r_0}M,
+  \]
+  where $e_1^*$ is the requested error exponent of the advice call,
+  whose internal exponent is selected by its checked error schedule.
+\end{definition}
+
+\begin{theorem}[The actual advice-generated second seed]
+  \label{thm:lowerbounds-algebraic-affine-phase-one-second}
+  \lean{Algebraic.Cutwidth.Extractor.affinePhaseOneSecondSeedWeight_eq_alternating,
+    Algebraic.Cutwidth.Extractor.affinePhaseOneSecondSeedWeight_probability,
+    Algebraic.Cutwidth.Extractor.affinePhaseOne_second_seed_dist_le}
+  \leanok
+  \uses{def:lowerbounds-algebraic-affine-phase-one-pair,
+    thm:lowerbounds-algebraic-affine-phase-one-initial,
+    thm:lowerbounds-algebraic-alternating-advice}
+  Suppose the original factors are normalized, the honest right word
+  is conditionally uniform, and a nonnegative original-left envelope
+  has total $M$. For one tampering with unequal advice of the same
+  length, assume the finite advice guards and original-right entropy
+  reserve after all first right messages. The actual second-seed law
+  has error at most $2^{-e_0}+2^{2^{142}L_0}M+2^{-e_1^*}$.
+  No intermediate seed certificate is supplied.
+\end{theorem}
+\begin{proof}
+  \leanok
+  Identify the actual advice call after the right observation, apply
+  the original-input first-seed bound, and use the perturbed-seed
+  advice theorem with the reversed source roles. The observation's
+  full alphabet cost is discharged by the explicit source reserve.
+\end{proof}
+
+\begin{theorem}[Final pairwise merging in the first phase]
+  \label{thm:lowerbounds-algebraic-affine-phase-one-final}
+  \lean{Algebraic.Cutwidth.Extractor.affinePhaseOnePair_dist_le_left,
+    Algebraic.Cutwidth.Extractor.affinePhaseOneLeftPairWeight_probability,
+    Algebraic.Cutwidth.Extractor.affinePhaseOnePairWeight_probability,
+    Algebraic.Cutwidth.Extractor.affinePhaseOneLeftPair_dist_le,
+    Algebraic.Cutwidth.Extractor.affinePhaseOnePair_dist_le}
+  \leanok
+  \uses{def:lowerbounds-algebraic-affine-phase-one-pair,
+    thm:lowerbounds-algebraic-affine-phase-one-transcript,
+    thm:lowerbounds-algebraic-matched-growing,
+    thm:lowerbounds-algebraic-two-sided-leakage}
+  Under the growing-depth budget, if the actual second-seed pair has
+  error $\delta$, both final pair laws have error at most
+  $2^{-e_r}+\delta+2^{F+r+(t+1)r_0}M$.
+  The estimate retains the complete executed transcript and original
+  right state, as well as the indicated tampered final value.
+\end{theorem}
+\begin{proof}
+  \leanok
+  The original-left envelope pays for the first-output family.
+  Two-sided merging pays for one tampered final output. Source linearity
+  identifies the masked output with a right-state-dependent XOR
+  translation, preserving the corresponding uniform target exactly.
+\end{proof}
+
+\begin{theorem}[Complete pairwise first phase from original inputs]
+  \label{thm:lowerbounds-algebraic-affine-phase-one-extraction}
+  \lean{Algebraic.Cutwidth.Extractor.affinePhaseOne_left_pair_dist_le,
+    Algebraic.Cutwidth.Extractor.affinePhaseOne_pair_dist_le}
+  \leanok
+  \uses{thm:lowerbounds-algebraic-affine-phase-one-second,
+    thm:lowerbounds-algebraic-affine-phase-one-final}
+  From the original normalized factors, a conditionally uniform honest
+  right input, original-left envelope, fixed unequal equal-length advice,
+  and the displayed finite component guards and reserves, both actual
+  final pair laws satisfy the complete error budget above.
+  This proves the pairwise first phase of Chattopadhyay--Liao
+  Theorem~6.1, printed p.23. Joint security against larger tampering
+  subsets still requires the later doubling rounds.
+\end{theorem}
+\begin{proof}
+  \leanok
+  Compose the proved first-seed, advice-generated second-seed, and
+  final extraction estimates. Rewrite the exact alphabet sizes as
+  binary exponents. Every security premise concerns the original source.
+\end{proof}
+
+\begin{theorem}[Finite dyadic reserves for the complete first phase]
+  \label{thm:lowerbounds-algebraic-affine-phase-one-dyadic}
+  \lean{Algebraic.Cutwidth.Extractor.affinePhaseOneError_dyadic_le}
+  \leanok
+  \uses{def:lowerbounds-algebraic-affine-phase-one-pair}
+  Set all three local error targets to $e+3$. If $M\le2^{-k}$ and
+  \[
+    2^{142}L_0+e+3\le k,\qquad
+    F+r+(t+1)r_0+e+3\le k,
+  \]
+  then the complete first-phase error is at most $2^{-e}$.
+  These are conservative finite sufficient reserves; a nonvacuous
+  application still needs an original source meeting the mass bound.
+\end{theorem}
+\begin{proof}
+  \leanok
+  Each of the three local errors and two source-mass contributions
+  is at most $2^{-(e+3)}$. Their sum is bounded by $2^{-e}$.
+\end{proof}
+
+\begin{definition}[An explicit chooser for the complete first phase]
+  \label{def:lowerbounds-algebraic-affine-phase-one-parameters}
+  \lean{Algebraic.Cutwidth.Extractor.affinePhaseOneBase,
+    Algebraic.Cutwidth.Extractor.affinePhaseOneScale,
+    Algebraic.Cutwidth.Extractor.affinePhaseOneInitialScale,
+    Algebraic.Cutwidth.Extractor.affinePhaseOneRightBits,
+    Algebraic.Cutwidth.Extractor.affinePhaseOneLocalError,
+    Algebraic.Cutwidth.Extractor.affinePhaseOneSourceEntropy}
+  \leanok
+  \uses{def:lowerbounds-algebraic-affine-phase-one-pair,
+    def:lowerbounds-algebraic-matched-growing-runtime}
+  For source width $n$, tampering count $t$, advice length $a$, and
+  target error exponent $s$, set
+  \[
+    B=a+s+\lceil\log_2(n+1)\rceil+\lceil\log_2(t+1)\rceil+256,
+  \]
+  \[
+    L_1=2^{20}B^2,\quad L_0=2^{90}(a+1)L_1,\quad
+    d=2^{160}(t+1)(a+1)BL_1.
+  \]
+  Use $h=\lceil\log_2(t+1)\rceil+64$, local target $e=s+3$, and
+  \[
+    k=2^{142}L_0+2^{2h+14}L_1+2^hL_1+(t+1)2^{64}L_0+e.
+  \]
+  The advice call uses its checked internal error schedule for target
+  $e$. These explicit conservative choices do not assert the paper's
+  sharp constants or universal capacity $k\le n$.
+\end{definition}
+
+\begin{theorem}[Checked finite guards and uniform parameter generation]
+  \label{thm:lowerbounds-algebraic-affine-phase-one-parameters}
+  \lean{Algebraic.Cutwidth.Extractor.affinePhaseOneParameters_right_log,
+    Algebraic.Cutwidth.Extractor.affinePhaseOneParameters_scale_log,
+    Algebraic.Cutwidth.Extractor.affinePhaseOneParameters_initial_length,
+    Algebraic.Cutwidth.Extractor.affinePhaseOneParameters_initial_room,
+    Algebraic.Cutwidth.Extractor.affinePhaseOneParameters_initial_error,
+    Algebraic.Cutwidth.Extractor.affinePhaseOneParameters_growing_guard,
+    Algebraic.Cutwidth.Extractor.affinePhaseOneParameters_advice_guard,
+    Algebraic.Cutwidth.Extractor.affinePhaseOneParameters_output_size,
+    Algebraic.Cutwidth.Extractor.affinePhaseOneParameters_seed_width,
+    Algebraic.Cutwidth.Extractor.affinePhaseOneParameters_source_budget,
+    Algebraic.Cutwidth.Extractor.affinePhaseOneParameters_prefix_size,
+    Algebraic.Cutwidth.Extractor.affinePhaseOneParameters_initial_reserve,
+    Algebraic.Cutwidth.Extractor.affinePhaseOneParameters_final_reserve,
+    Algebraic.Cutwidth.Extractor.affinePhaseOneParameters_entropy_le,
+    Algebraic.Cutwidth.Extractor.affinePhaseOneBase_unaryFn,
+    Algebraic.Cutwidth.Extractor.affinePhaseOneScale_unaryFn,
+    Algebraic.Cutwidth.Extractor.affinePhaseOneInitialScale_unaryFn,
+    Algebraic.Cutwidth.Extractor.affinePhaseOneRightBits_unaryFn,
+    Algebraic.Cutwidth.Extractor.affinePhaseOneLocalError_unaryFn,
+    Algebraic.Cutwidth.Extractor.affinePhaseOneSourceEntropy_unaryFn}
+  \leanok
+  \uses{def:lowerbounds-algebraic-affine-phase-one-parameters,
+    thm:lowerbounds-algebraic-affine-phase-one-dyadic,
+    thm:lowerbounds-algebraic-matched-growing-runtime}
+  Every numerical guard of the initial extraction, advice call, and
+  final extraction holds for the chosen parameters. The right width
+  contains the initial seed prefix and pays the complete first
+  right-message family plus advice reserve. The chosen left entropy
+  pays both dyadic source charges. All six chooser values have total
+  uniform polynomial-time unary generators, without a source-capacity
+  or guard promise.
+  The finite bound $k\le2^{256}(t+1)^2(a+1)B^2$ can be used to
+  discharge source capacity in concrete applications.
+\end{theorem}
+\begin{proof}
+  \leanok
+  Bound the logarithms of the polynomially enlarged widths in terms
+  of $B$, then use the fixed scale factors to discharge the guards.
+  The two left reserves are summands of $k$. The logarithmic depth has
+  polynomially bounded powers, so registered unary arithmetic computes
+  every chosen value on all inputs.
+\end{proof}
+
+\begin{theorem}[The actual pairwise guarantee at the chosen parameters]
+  \label{thm:lowerbounds-algebraic-affine-phase-one-selected}
+  \lean{Algebraic.Cutwidth.Extractor.affinePhaseOne_left_pair_parameters_dist_le,
+    Algebraic.Cutwidth.Extractor.affinePhaseOne_pair_parameters_dist_le}
+  \leanok
+  \uses{thm:lowerbounds-algebraic-affine-phase-one-extraction,
+    thm:lowerbounds-algebraic-affine-phase-one-dyadic,
+    thm:lowerbounds-algebraic-affine-phase-one-parameters}
+  Use the named chooser at $(n,t,a,s)$. Suppose the original law has
+  normalized factors given $Z$, the honest right word is conditionally
+  uniform at the selected width $d$, and the original-left envelope
+  has total at most $2^{-k}$. For any selected tampered index whose
+  fixed advice and the honest advice both have length $a$ and differ,
+  both actual final pair laws have distance at most $2^{-s}$ from
+  their actual retained marginal times uniform output.
+  No numerical guard, intermediate seed estimate, or repaired source
+  is a premise. The original source still must satisfy the chosen
+  entropy bound; capacity is not claimed for every $n$.
+\end{theorem}
+\begin{proof}
+  \leanok
+  Instantiate the complete original-input estimate with every proved
+  chooser guard. The two explicit source reserves and three local
+  target exponents give the finite dyadic error bound.
+\end{proof}
+
+\begin{definition}[The complete three-call first-phase string program]
+  \label{def:lowerbounds-algebraic-affine-phase-one-program}
+  \lean{Algebraic.Cutwidth.Extractor.affinePhaseOneFirstSeedWord,
+    Algebraic.Cutwidth.Extractor.affinePhaseOneRuntime,
+    Algebraic.Cutwidth.Extractor.affinePhaseOneEval}
+  \leanok
+  \uses{def:lowerbounds-algebraic-affine-phase-one,
+    def:lowerbounds-algebraic-matched-runtime,
+    def:lowerbounds-algebraic-matched-growing-runtime,
+    def:lowerbounds-algebraic-advice-program}
+  False-complete the first seed prefix, perform the first depth-64
+  extraction, run the actual advice program with reversed input roles,
+  and feed its output to the growing-depth final extraction on the
+  same supplied source word. The paired evaluator reads three data words and
+  six unary numerical words. Each component keeps its total behavior
+  on invalid inputs.
+\end{definition}
+
+\begin{theorem}[Exact uniform polynomial-time first-phase evaluation]
+  \label{thm:lowerbounds-algebraic-affine-phase-one-program}
+  \lean{Algebraic.Cutwidth.Extractor.affinePhaseOneFirstSeedWord_length,
+    Algebraic.Cutwidth.Extractor.affinePhaseOneFirstSeed_ofFn,
+    Algebraic.Cutwidth.Extractor.affinePhaseOneRuntime_eq_affinePhaseOneOutput,
+    Algebraic.Cutwidth.Extractor.affinePhaseOneRuntime_length,
+    Algebraic.Cutwidth.Extractor.affinePhaseOneRuntime_length_le,
+    Algebraic.Cutwidth.Extractor.affinePhaseOneFirstSeedWord_mem_FP,
+    Algebraic.Cutwidth.Extractor.affinePhaseOneRuntime_mem_FP,
+    Algebraic.Cutwidth.Extractor.affinePhaseOneEval_pair,
+    Algebraic.Cutwidth.Extractor.affinePhaseOneEval_mem_FP,
+    Algebraic.Cutwidth.Extractor.affinePhaseOneEval_length_le}
+  \leanok
+  \uses{def:lowerbounds-algebraic-affine-phase-one-program,
+    thm:lowerbounds-algebraic-matched-runtime,
+    thm:lowerbounds-algebraic-matched-growing-runtime,
+    thm:lowerbounds-algebraic-advice-program}
+  The runtime and its single paired evaluator belong uniformly to
+  $\mathrm{FP}$ on every string. Under the three component guards,
+  canonical words compute exactly the semantic first-phase output at
+  $h=\lceil\log_2(t+1)\rceil+64$, with no statistical premise.
+  The paired output length is at most $2^{65}(|z|+1)^2$.
+  Its exact output width is $2^hL_1$ when the final growing guard
+  holds, and zero otherwise.
+\end{theorem}
+\begin{proof}
+  \leanok
+  Compose the three registered runtime certificates and exact output
+  equations. Both supplied input words remain available throughout.
+  Prefix padding agrees with the semantic seed even for short words,
+  and the growing final call supplies the unconditional output bound.
+\end{proof}
+
+\begin{definition}[The selected first-phase evaluator]
+  \label{def:lowerbounds-algebraic-affine-phase-one-selected-program}
+  \lean{Algebraic.Cutwidth.Extractor.affinePhaseOneSelectedRuntime,
+    Algebraic.Cutwidth.Extractor.affinePhaseOneSelectedEval}
+  \leanok
+  \uses{def:lowerbounds-algebraic-affine-phase-one-program,
+    def:lowerbounds-algebraic-affine-phase-one-parameters}
+  Derive $n$ and $a$ from the supplied source and advice word lengths.
+  With unary $t,s$, compute the complete chooser, truncate or
+  false-complete the right word to its chosen width $d$, and run
+  all three actual calls. The paired input stores source, right,
+  and advice words followed by the two unary parameter words.
+  No source-entropy or capacity test is performed.
+\end{definition}
+
+\begin{theorem}[One total polynomial-time selected first phase]
+  \label{thm:lowerbounds-algebraic-affine-phase-one-selected-program}
+  \lean{Algebraic.Cutwidth.Extractor.affinePhaseOneSelectedRuntime_length,
+    Algebraic.Cutwidth.Extractor.affinePhaseOneSelectedRuntime_length_le,
+    Algebraic.Cutwidth.Extractor.affinePhaseOneSelectedRuntime_eq,
+    Algebraic.Cutwidth.Extractor.affinePhaseOneSelectedRuntime_mem_FP,
+    Algebraic.Cutwidth.Extractor.affinePhaseOneSelectedEval_pair,
+    Algebraic.Cutwidth.Extractor.affinePhaseOneSelectedEval_eq,
+    Algebraic.Cutwidth.Extractor.affinePhaseOneSelectedEval_mem_FP}
+  \leanok
+  \uses{def:lowerbounds-algebraic-affine-phase-one-selected-program,
+    thm:lowerbounds-algebraic-affine-phase-one-program,
+    thm:lowerbounds-algebraic-affine-phase-one-parameters}
+  The single paired evaluator belongs to $\mathrm{FP}$ on every
+  encoded string, including malformed data and infeasible entropy
+  requests. Its output always has the chosen length $2^hL_1$.
+  Canonical source and right-input words compute exactly the selected
+  semantic first phase, with no numerical guard or source premise.
+  Statistical security remains the separate original-source theorem
+  above.
+\end{theorem}
+\begin{proof}
+  \leanok
+  Compose the total unary chooser certificates, right-word padding,
+  and full runtime certificate. The finite chooser discharges each
+  canonical correctness guard and the final output-length guard.
 \end{proof}
 
 \begin{theorem}[Extraction with an approximately independent seed]
@@ -7943,12 +8361,12 @@ establishes the proposed coefficient-three regime without that assumption.
 
 The fixed-family logarithmic-seed primitive and the ordinary Gamma
 linear-output parameters are now supplied by actual recursive maps.
-The actual affine first-phase programs, observed-call composition, and
-finite growing-depth statistical bounds are now supplied. The first
-phase's full pairwise second-row guarantee, later subset doubling,
-growing-depth runtime integration, and complete affine conversion remain
-open, as do the parity estimates and final uniform polynomial-time sumset
-hard family.
+The actual pairwise first phase, its finite chooser and dyadic reserves,
+and its selected total polynomial-time evaluator are now supplied.
+A smooth-source merging consumer is available for the next stage. Actual
+subset-doubling rounds and their induction remain open, as do the full
+affine conversion, sumset/amplification composition, parity estimates, and
+asymptotic construction of the final uniform polynomial-time hard family.
 
 \begin{theorem}[Cutwidth bound for rectangle-free families]
   \label{thm:lowerbounds-algebraic-cutwidth}

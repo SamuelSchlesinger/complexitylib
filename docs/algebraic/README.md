@@ -298,21 +298,35 @@ and actual tampered output exactly. `Advice.Extraction.Alternating` then
 handles the source/seed role reversal after observing a right-side message,
 charging its alphabet size to the source envelope.
 
-The first phase of the
+The complete pairwise first phase of the
 [Chattopadhyay–Liao conversion, Theorem 6.1](https://arxiv.org/html/2110.12652v1#S6)
-is now defined using the actual linear extractor, advice program, and final
-linear extraction. Its first seed estimate is proved from the original
-uniform right input and left envelope, retaining every tampered prefix
-and mask contribution. Exact transcript factors and envelope totals are
-also proved for all three observations, including normalized null rows.
+is now proved for the actual linear extractor, advice program, and final
+linear extraction. It starts from the original normalized factors, a
+uniform honest right input, the left mass envelope, and unequal advice.
+The actual output is close to uniform while retaining the complete
+executed transcript, original right state, and one tampered output.
+The original-left contributions satisfy the same bound, and explicit
+finite source reserves give any dyadic error target. Exact transcript
+factors and envelope totals include normalized null rows.
+The first-phase chooser now discharges every numerical component guard
+and reserve, with total polynomial-time generation of all chosen values.
+The selected theorem gives error `2^-target` from the original source
+hypotheses and its chosen mass bound; the source still must meet that
+entropy requirement.
 `Matched.Growing` proves statistical bounds at variable depth under an
 explicit finite seed budget, and `Matched.Affine` retains
-the entire correlated mask state. The matched runtime certificate still
-requires depth at most 64; the growing-depth extension is statistical only.
+the entire correlated mask state. `Matched.Growing.Program` now supplies
+one total polynomial-time evaluator at depth `clog₂(t+1)+64`, including
+all parameter generation and exact agreement on canonical inputs.
+`PhaseOne.Program` composes all three actual calls into a total polynomial-time
+evaluator, with exact canonical agreement under their finite component guards.
+Its selected wrapper computes every chooser value and normalizes the right
+word, so its canonical agreement has no numerical or statistical premise.
+`Merging.Smooth` constructs the conditional repair needed for the next
+stage, preserving original observations and charging the old distance once.
 
-The remaining work includes the first phase's full pairwise second-row
-guarantee, later subset doubling and the complete affine conversion,
-growing-depth runtime integration, sumset and amplification composition
+The remaining work includes actual subset-doubling rounds and their
+induction for the complete affine conversion, sumset and amplification composition
 with its parity estimates, and the asymptotic parameters and uniform-machine
 construction of the final hard family.
 The final unconditional `(4-ε)n` lower bound for a uniform `P` family remains

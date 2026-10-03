@@ -68,7 +68,8 @@ private theorem scheduleNumbers_unaryFn {initial h Q E count : List Bool → Nat
     exact entropy.of_eq fun z => by
       simp only [state, encodeScheduledBlockState, pairFst_pair, pairSnd_pair, List.length_replicate]
 
-private theorem scheduledSeedBits_unaryFn {n h Q E ell : List Bool → Nat}
+/-- Bounded schedule iteration computes the exact seed width at any certified depth. -/
+theorem scheduledSeedBits_unaryFn {n h Q E ell : List Bool → Nat}
     (hn : UnaryFn n) (hh : UnaryFn h)
     (hentropy : UnaryFn fun z => recursiveBlockEntropy (h z) (Q z) 0)
     (hE : UnaryFn E) (hell : UnaryFn ell)

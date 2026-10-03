@@ -682,9 +682,15 @@ for later merging at `h=clog 2 (t+1)+64`. `Matched.Affine` proves the same
 actual program's retained-law estimate for an honest source XOR a mask
 carried by the full right state. Its error is `2^-e+δ+K*∑μ`, with
 `K=2^(2^(2*h+14)*L)` and original seed discrepancy `δ`; depth 64 has the
-specialized entropy reserve `2^142*L`. These are statistical extensions.
-The current `Matched.Program` guard still requires `h≤64`, so its uniform
-runtime certificate does not yet cover the growing-depth calls.
+specialized entropy reserve `2^142*L`.
+`Matched.Growing.Program` supplies a total uniform `FP` evaluator for
+`h=clog₂(t+1)+64`, where `t` is a runtime unary input. It proves
+`2^h≤2^65*(t+1)` and a corresponding quadratic bound on `4^h`, so both
+the block loop and complete parameter generation have polynomial bounds.
+The runtime checks the displayed finite guard, returns the empty word on
+invalid parameters, and agrees exactly with the actual matched extractor
+on canonical inputs, including arbitrary trailing seed bits. Its paired
+evaluator has output length at most `2^65*(input.length+1)^2`.
 
 `CorrelationBreaker.FlipFlop.Program` defines and computes the concrete
 three-call look-ahead and eight-call advice-bit step of
@@ -913,8 +919,94 @@ joint envelopes of totals `∑μ` and `∑ξ` become envelopes of exact totals
 `2^((t+1)*r₀)*∑μ` on the left and
 `2^((t+1)*(d₀+r₀+d₁))*∑ξ` on the right after the full transcript.
 The factors retain the original latent states and normalize even null
-rows. These are execution and leakage-counting identities, separate from
-the pending pairwise statistical guarantee for the final extracted rows.
+rows.
+
+`PhaseOne.Second` derives the actual advice-generated seed estimate from
+these original inputs, with no intermediate security premise. For any one
+tampered execution with unequal advice of the same length, its error is
+`2^-e₀ + 2^(2^142*L₀)*∑μ + 2^-target`. The finite advice guards pay for
+every observed first right message and for the seed input width.
+
+`PhaseOne.Final` merges this pair into the actual growing-depth final
+extraction. `PhaseOne.Extraction` exposes both the original-left and masked
+output guarantees, retaining the complete executed transcript, original
+right state, and the corresponding tampered final output. Write
+`r=2^h*L₁`, `r₀=2^64*L₀`, and `F=2^(2*h+14)*L₁`. The complete error is
+
+```text
+2^-er + 2^-e₀ + 2^-target
+  + 2^(2^142*L₀)*∑μ + 2^(F+r+(t+1)*r₀)*∑μ.
+```
+
+`affinePhaseOneError_dyadic_le` bounds it by `2^-target` when all three
+local error exponents are `target+3`, the original mass total is at most
+`2^-k`, and both `2^142*L₀+target+3≤k` and
+`F+r+(t+1)*r₀+target+3≤k`. These are finite sufficient reserves, with
+source capacity still required for nonvacuous use. The theorem gives a
+pairwise first phase, not joint security against all tamperings.
+
+`PhaseOne.Parameters` chooses all finite values from source width `n`,
+tampering count `t`, advice length `a`, and target exponent `s`:
+
+```text
+B  = a+s+clog₂(n+1)+clog₂(t+1)+256
+L₁ = 2^20*B^2
+L₀ = 2^90*(a+1)*L₁
+d  = 2^160*(t+1)*(a+1)*B*L₁
+h  = clog₂(t+1)+64
+e  = s+3
+k  = 2^142*L₀ + 2^(2*h+14)*L₁ + 2^h*L₁ + (t+1)*2^64*L₀ + e.
+```
+
+The initial and final calls use error exponent `e`; the advice call uses
+`adviceErrorExponent a e`. All component guards, right-source/prefix
+budgets, and both left-source dyadic reserves are proved for these values.
+`Parameters.Unary` certifies total polynomial-time generation of all six
+chooser definitions, including `k`. These deliberately conservative
+constants are deductions for the actual library programs. They do not
+claim the paper's sharp parameters or that `k≤n` for every input size.
+The checked bound `affinePhaseOneParameters_entropy_le` gives
+`k≤2^256*(t+1)^2*(a+1)*B^2`, which can discharge capacity in a chosen finite
+application without evaluating the nested powers.
+`PhaseOne.Extraction.Parameters` proves both actual pair laws have error
+at most `2^-s` when the original envelope total is at most `2^-k`, the
+honest right word is conditionally uniform at the selected width `d`,
+and the honest and selected tampered fixed advice words have length `a`
+and differ. Only original probability/source/advice hypotheses remain;
+no component guard or intermediate security witness is supplied.
+
+`PhaseOne.Program` runs all three actual calls on runtime source, right-input,
+and advice words, with six unary numerical parameters. It false-completes the
+first seed prefix and rereads both original words for the later calls.
+`affinePhaseOneRuntime_eq_affinePhaseOneOutput` proves exact canonical
+agreement at `h=clog₂(t+1)+64` under the three finite component guards,
+with no entropy or probability assumptions. The runtime and its single
+paired evaluator are total `FP` functions; the encoded output length is
+at most `2^65*(input.length+1)^2`, including malformed inputs. Each
+component retains its own total invalid-input behavior, and the final
+component's guard alone determines whether the output length is zero.
+`PhaseOne.Program.Parameters` supplies the complete selected evaluator:
+it derives `n` and `a` from the actual source and advice word lengths,
+computes every chooser value from these and unary `t,s`, and truncates or
+false-completes the right word to `d` bits. Its paired codec is
+`pair (pair source (pair right advice)) (pair tamperingWord targetWord)`.
+`affinePhaseOneSelectedEval_mem_FP` certifies one total polynomial-time
+program on every encoded string, and `affinePhaseOneSelectedEval_eq`
+identifies its canonical output with the selected semantic first phase
+without any guard, entropy, or source-capacity premise. The runtime always
+returns exactly `2^h*L₁` bits; the statistical theorem separately requires
+the original source assumptions stated above.
+
+`Strong.Weighted.Merging.Smooth` supplies the consumer for the next stage.
+If the original honest left value is within `ρ` of uniform jointly with
+`(Z,U)`, repair that coordinate while preserving the complete original
+left state. Observe the actual original prefix `Q`, then apply two-sided
+merging. The actual output retains `(Z,U,Q)`, full original right state,
+and the original extra leak `W`, with bound
+`ε+δ+ρ+K*|W|*|Q|/|X|`. No repaired source or pointwise conditional cap is
+assumed. When the right seed and right observation use only `(Z,Q)`, an
+exact averaging identity removes `U` from the seed-error premise. This
+consumer does not yet implement the subset-doubling round or induction.
 
 The one-shot primitive alone has finite seed cost of order `ell+e+log n`;
 the checked recursion supplies the larger polylogarithmic output with
@@ -980,10 +1072,10 @@ proved to give exactly the original semantic Gamma output.
 
 The standard advice correlation breaker and its selected total runtime
 are proved with the finite parameters above. The affine conversion now
-has actual first-phase programs and local retained-law composition tools.
-Its full pairwise second-row guarantee and later subset-doubling argument
-remain to be proved, as does runtime integration for growing-depth matched
-calls. The remaining route also includes the sumset reduction and
+has the complete actual pairwise first-phase guarantee, finite dyadic
+reserves, growing-depth matched runtime, and a smooth-source merging
+consumer. Actual later subset-doubling rounds and their induction remain
+to be proved. The remaining route also includes the sumset reduction and
 amplification with their parity estimates, and the asymptotic parameter
 and uniform-machine composition for a final `P` hard family with sublinear
 log-threshold. The unconditional `(4-ε)n` endpoint remains incomplete.

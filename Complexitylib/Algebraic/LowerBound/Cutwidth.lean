@@ -133,6 +133,7 @@ public import Complexitylib.Algebraic.LowerBound.Cutwidth.Extractor.Strong.Weigh
 public import Complexitylib.Algebraic.LowerBound.Cutwidth.Extractor.Strong.Weighted.Leakage
 public import Complexitylib.Algebraic.LowerBound.Cutwidth.Extractor.Strong.Weighted.Perturbation
 public import Complexitylib.Algebraic.LowerBound.Cutwidth.Extractor.Strong.Weighted.Merging
+public import Complexitylib.Algebraic.LowerBound.Cutwidth.Extractor.Strong.Weighted.Merging.Smooth
 public import
   Complexitylib.Algebraic.LowerBound.Cutwidth.Extractor.Strong.Weighted.Merging.Independence
 public import Complexitylib.Algebraic.LowerBound.Cutwidth.Extractor.Strong.Weighted.Coupling
@@ -198,6 +199,8 @@ public import
 public import
   Complexitylib.Algebraic.LowerBound.Cutwidth.Extractor.Strong.Block.Recursion.Scheduled.Matched.Growing
 public import
+  Complexitylib.Algebraic.LowerBound.Cutwidth.Extractor.Strong.Block.Recursion.Scheduled.Matched.Growing.Program
+public import
   Complexitylib.Algebraic.LowerBound.Cutwidth.Extractor.Strong.Block.Recursion.Scheduled.Matched.Affine
 public import
   Complexitylib.Algebraic.LowerBound.Cutwidth.Extractor.Strong.Block.Recursion.Scheduled.Matched.Program
@@ -246,6 +249,24 @@ public import
   Complexitylib.Algebraic.LowerBound.Cutwidth.Extractor.CorrelationBreaker.Affine.PhaseOne.Initial
 public import
   Complexitylib.Algebraic.LowerBound.Cutwidth.Extractor.CorrelationBreaker.Affine.PhaseOne.Transcript
+public import
+  Complexitylib.Algebraic.LowerBound.Cutwidth.Extractor.CorrelationBreaker.Affine.PhaseOne.Second
+public import
+  Complexitylib.Algebraic.LowerBound.Cutwidth.Extractor.CorrelationBreaker.Affine.PhaseOne.Final
+public import
+  Complexitylib.Algebraic.LowerBound.Cutwidth.Extractor.CorrelationBreaker.Affine.PhaseOne.Extraction
+public import
+  Complexitylib.Algebraic.LowerBound.Cutwidth.Extractor.CorrelationBreaker.Affine.PhaseOne.Extraction.Bounds
+public import
+  Complexitylib.Algebraic.LowerBound.Cutwidth.Extractor.CorrelationBreaker.Affine.PhaseOne.Extraction.Parameters
+public import
+  Complexitylib.Algebraic.LowerBound.Cutwidth.Extractor.CorrelationBreaker.Affine.PhaseOne.Parameters
+public import
+  Complexitylib.Algebraic.LowerBound.Cutwidth.Extractor.CorrelationBreaker.Affine.PhaseOne.Parameters.Unary
+public import
+  Complexitylib.Algebraic.LowerBound.Cutwidth.Extractor.CorrelationBreaker.Affine.PhaseOne.Program
+public import
+  Complexitylib.Algebraic.LowerBound.Cutwidth.Extractor.CorrelationBreaker.Affine.PhaseOne.Program.Parameters
 public import Complexitylib.Algebraic.LowerBound.Cutwidth.Extractor.Strong.Block.Recursion.NearHalving
 public import
   Complexitylib.Algebraic.LowerBound.Cutwidth.Extractor.Strong.Block.Recursion.NearHalving.Parameters
@@ -417,9 +438,10 @@ providing finite parameters for matching the short alternating calls.
 the full padded seed in its strong guarantee. Its `Program` layer gives a total
 uniform polynomial-time runtime and canonical agreement, including arbitrary seed tails.
 `Matched.Growing` supplies the statistical guarantee at variable depth under an explicit
-depth/error/logarithm budget. `Matched.Affine` retains the full correlated right state
-when the source is XORed with its mask. The matched runtime guard still requires
-depth at most 64; the growing-depth statement adds no runtime certificate.
+depth/error/logarithm budget. Its `Program` layer gives a total polynomial-time evaluator
+at depth `clog 2 (t+1)+64`, with polynomial block count in the unary parameter `t`, exact
+vector agreement, and ignored seed tails. `Matched.Affine` retains the full correlated
+right state when the source is XORed with its mask.
 `CorrelationBreaker.FlipFlop.Program` composes the actual three-call look-ahead and
 eight-call advice-bit step, with exact vector semantics and registered `polytime` proofs.
 Its `LookAhead` layer specializes the retained two-round statistical guarantee to these
@@ -459,6 +481,22 @@ Its `Initial` theorem derives the first extracted seed estimate from the origina
 uniform right input and left envelope, retaining every first right message.
 Its `Transcript` theorems give exact original-law factors and envelope totals for
 all three observations, including normalized null rows.
+`Second` derives the advice-generated seed guarantee from those original hypotheses.
+`Final` and `Extraction` prove the complete actual first phase's pairwise guarantee,
+retaining the executed transcript, original right state, and one tampered output.
+The original-left contributions satisfy the same bound for later merging, and finite
+source reserves give any dyadic error target. No intermediate security witness is assumed.
+`PhaseOne.Parameters` supplies all finite component guards and entropy reserves with a
+total explicit chooser; its unary generators are uniformly polynomial-time.
+`Extraction.Parameters` proves the actual pairwise error `2^-target` from the original
+source hypotheses and chosen mass bound, with no remaining numerical guard premise.
+`PhaseOne.Program` computes all three calls in one total polynomial-time evaluator.
+Canonical agreement needs the three finite component guards, with no statistical premises.
+Its `Parameters` wrapper computes the full chooser and normalizes the right word;
+canonical agreement then has no numerical or source-capacity premise.
+`Strong.Weighted.Merging.Smooth` constructs a conditional uniform-coordinate repair,
+preserving all original left observations and charging its distance once. It provides
+the smooth-source consumer needed by the next subset-doubling stage.
 `NearHalving` uses a rate increasing with depth and a near-halving entropy schedule.
 Its rounded parameters give an actual extractor on `8*b` bits at entropy `2*b`,
 with `b` output bits, error `1/4`, and seed length at most a cubic logarithm,
@@ -467,10 +505,10 @@ the complete bit program with this statistical map, including unused seed paddin
 `Gamma.Padded` reads this same total polynomial-time program on a seed whose
 width is the explicit cubic-logarithmic budget; the entire seed is uniform and
 retained in the strong guarantee.
-The first phase's pairwise second-row guarantee, later subset doubling, growing-depth
-runtime integration, and full affine conversion remain open. Sumset/parity estimates
-and composition into the final uniform hard family are still necessary for a lower
-bound on a concrete language in `P`.
+Later subset-doubling rounds and their induction are still needed for the full affine
+conversion. Sumset/amplification composition, parity estimates, and asymptotic composition
+into the final uniform hard family remain necessary for a lower bound on a concrete
+language in `P`.
 -/
 
 @[expose] public section
