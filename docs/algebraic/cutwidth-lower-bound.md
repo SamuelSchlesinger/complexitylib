@@ -1006,7 +1006,78 @@ and the original extra leak `W`, with bound
 `ε+δ+ρ+K*|W|*|Q|/|X|`. No repaired source or pointwise conditional cap is
 assumed. When the right seed and right observation use only `(Z,Q)`, an
 exact averaging identity removes `U` from the seed-error premise. This
-consumer does not yet implement the subset-doubling round or induction.
+consumer is now specialized by `Smooth.Independence` to overlapping
+sets `S,T` of tamperings. It retains `(Z,Q)`, full original right state,
+and every actual tampered output in `S∪T`, with bound
+`ε+δ+ρ+K*|Out|^|S|*|Q|/|X|`. The seed discrepancy is measured after the
+actual prefix observation; no repaired-source witness or conditional
+source cap is supplied.
+
+`CorrelationBreaker.Affine.Round` now defines and proves the exact
+four-call round from the second phase of
+[Chattopadhyay–Liao, Theorem 6.1](https://arxiv.org/abs/2110.12652).
+Writing the old actual long row as its left contribution XOR its right
+mask, the program extracts a seed from the original right word using
+the row prefix, extracts a short row, rereads the original right word
+with that short row, then extracts the next long row from the unchanged
+original affine input `X=A XOR B`. The proof separately tracks its
+left-only contribution `A` and right mask `B`. All four calls use the
+actual matched extractors.
+
+The transcript first observes right prefix masks, then actual prefixes,
+then the first right seeds and short-row mask contributions, then actual
+short rows, and finally the second right seeds. Exact factorization
+preserves both original latent states and normalizes null conditional
+rows. If `C` is the cardinality of the entire honest/tampered short-message
+family, the final original-left envelope total is multiplied by `C^2`
+and the original-right total by `C^4`; the second right extraction uses
+the earlier right total `C^3`.
+
+`Round.Extraction` exposes `affineRound_left_union_dist_le`,
+`affineRound_union_dist_le`, and `affineRound_next_union_dist_le`.
+Given normalized original factors, nonnegative joint point-mass envelopes
+for the original honest sources, the finite extractor guards, and old
+left-row discrepancies `ρS,ρT` against `S,T`, these theorems bound the
+actual next left row, masked output, and next conditional left-row law
+against `S∪T`. The full-output laws retain the complete executed transcript
+and original right state. The sets may overlap. Every intermediate seed
+bound is derived from the preceding actual call.
+
+For `c=2^24*L`, `m=2^h*L`, `k24=2^62*L`, `kh=2^(2*h+14)*L`,
+`s=|S|`, `u=|S∪T|`, and original envelope totals `α,β`, the named bound is
+
+```text
+affineRoundError = 4*2^-e + ρS + ρT
+  + 2^(k24+(s+t+1)*c)*β
+  + 2^(k24+(s+t+1)*c)/2^m
+  + 2^(k24+(u+3*(t+1))*c)*β
+  + 2^(kh+u*m+2*(t+1)*c)*α.
+```
+
+`affineRoundError_dyadic_le` reduces this to `ρS+ρT+8*2^-e` when
+`α≤2^-kx`, `β≤2^-ky` and the four finite reserves hold:
+
+```text
+k24+(s+t+1)*c+e ≤ ky,
+k24+(s+t+1)*c+e ≤ m,
+k24+(u+3*(t+1))*c+e ≤ ky,
+kh+u*m+2*(t+1)*c+e ≤ kx.
+```
+
+`exists_union_of_card_le_two_mul` supplies the finite subset partition
+needed to turn a bound for sets of size at most `k` into a one-round
+bound for sets of size at most `2*k`. The full repeated-round invariant
+and a global schedule discharging all successive reserves remain open.
+
+`Round.Program` gives one total `FP` evaluator for all four actual calls,
+with exact canonical agreement at `h=clog₂(t+1)+64` under the component
+guards. It accepts unary `t,L,e` and three arbitrary data words; malformed
+or invalid inputs remain covered by its polynomial-time certificate.
+`affineRoundEval_length_le` bounds its output by
+`2^65*(encodedInput.length+1)^2`. `Round.Parameters` proves that the
+existing first-phase chooser satisfies the execution guards and gives
+canonical agreement with no additional numerical premise. These runtime
+bounds do not discharge the statistical reserves for iterating the round.
 
 The one-shot primitive alone has finite seed cost of order `ell+e+log n`;
 the checked recursion supplies the larger polylogarithmic output with
@@ -1072,10 +1143,12 @@ proved to give exactly the original semantic Gamma output.
 
 The standard advice correlation breaker and its selected total runtime
 are proved with the finite parameters above. The affine conversion now
-has the complete actual pairwise first-phase guarantee, finite dyadic
-reserves, growing-depth matched runtime, and a smooth-source merging
-consumer. Actual later subset-doubling rounds and their induction remain
-to be proved. The remaining route also includes the sumset reduction and
+has the complete actual pairwise first-phase guarantee and one actual
+subset-union round, with finite error accounting, original-source envelope
+transports, and total polynomial-time runtimes. The full repeated-round
+induction, its global parameter schedule, and the completed affine
+correlation-breaker theorem remain to be proved. The remaining route also
+includes the sumset reduction and
 amplification with their parity estimates, and the asymptotic parameter
 and uniform-machine composition for a final `P` hard family with sublinear
 log-threshold. The unconditional `(4-ε)n` endpoint remains incomplete.

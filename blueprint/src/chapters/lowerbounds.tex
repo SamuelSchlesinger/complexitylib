@@ -4981,7 +4981,8 @@ establishes the proposed coefficient-three regime without that assumption.
   When $V,Y$ depend only on $(Z,Q)$, their joint seed discrepancy is
   exactly unchanged by retaining $U$, so the seed premise needs only
   $(Z,Q,V)$. This is the smooth-source consumer for
-  Chattopadhyay--Liao Theorem~6.1, not yet the complete doubling round.
+  Chattopadhyay--Liao Theorem~6.1; the actual one-round specialization
+  is proved below.
 \end{theorem}
 \begin{proof}
   \leanok
@@ -7050,6 +7051,400 @@ establishes the proposed coefficient-three regime without that assumption.
   canonical correctness guard and the final output-length guard.
 \end{proof}
 
+\begin{theorem}[Conditional uniformity under actual observations]
+  \label{thm:lowerbounds-algebraic-transcript-distance}
+  \lean{Algebraic.Cutwidth.Extractor.weightDist_uniformSecond_map_output_le,
+    Algebraic.Cutwidth.Extractor.observedSeedWeight_image_dist_le,
+    Algebraic.Cutwidth.Extractor.observedSeedWeight_transform_dist_le,
+    Algebraic.Cutwidth.Extractor.observedSeedWeight_observe_other_dist}
+  \leanok
+  \uses{thm:lowerbounds-algebraic-conditional-distance,
+    thm:lowerbounds-algebraic-observed-transcript}
+  Balanced output projections and transcript-dependent output bijections
+  preserve or contract distance from the actual retained marginal times
+  uniform. In an original factored law, observing an independent opposite
+  side leaves the averaged discrepancy exactly unchanged. The equality
+  requires nonnegative transcript weights and normalized opposite kernels;
+  it includes zero-mass observations.
+\end{theorem}
+\begin{proof}
+  \leanok
+  Push forward both the actual law and its conditional-uniform comparison.
+  For the opposite-side observation, sum its normalized message law on
+  each original transcript row.
+\end{proof}
+
+\begin{definition}[Alternating extraction with selected tampered outputs]
+  \label{def:lowerbounds-algebraic-alternating-copies}
+  \lean{Algebraic.Cutwidth.Extractor.alternatingCopiesWeight}
+  \leanok
+  \uses{def:lowerbounds-algebraic-two-sided-laws}
+  Read all left seeds and right source copies from the original factored
+  sample. Apply the same extractor to each pair, retaining the original
+  transcript, every executed left seed, and the tampered outputs indexed
+  by $S$, alongside the honest output.
+\end{definition}
+
+\begin{theorem}[An actual alternating call retains the selected copies]
+  \label{thm:lowerbounds-algebraic-alternating-copies}
+  \lean{Algebraic.Cutwidth.Extractor.alternatingCopiesWeight_probability,
+    Algebraic.Cutwidth.Extractor.alternatingCopiesWeight_eq_observed,
+    Algebraic.Cutwidth.Extractor.WeightedStrongSeededExtractor.alternating_copies_dist_le}
+  \leanok
+  \uses{def:lowerbounds-algebraic-alternating-copies,
+    thm:lowerbounds-algebraic-two-sided-leakage}
+  For normalized original factors, a threshold-$K$ strong extractor of
+  nonnegative error $\varepsilon$ and nonempty seed/output alphabets,
+  suppose the honest left seed has error $\delta$ against its copies in
+  $S$. If a nonnegative joint envelope $\mu(z)$ bounds the original
+  honest right source, the actual call has error at most
+  $\varepsilon+\delta+K|\mathrm{Out}|^{|S|}\sum_z\mu(z)$.
+  The law is exactly the observed seed law after all executed left seeds
+  are fixed, so it supplies the next alternating call.
+\end{theorem}
+\begin{proof}
+  \leanok
+  Regard the selected tampered outputs as left-dependent finite leakage
+  after swapping the two original factors. Sum over the original opposite
+  state to identify the next observed law.
+\end{proof}
+
+\begin{definition}[Smooth independence merging on overlapping subsets]
+  \label{def:lowerbounds-algebraic-smooth-independence}
+  \lean{Algebraic.Cutwidth.Extractor.smoothIndependenceSourceWeight,
+    Algebraic.Cutwidth.Extractor.smoothIndependenceSeedWeight,
+    Algebraic.Cutwidth.Extractor.smoothIndependenceMergingWeight}
+  \leanok
+  \uses{def:lowerbounds-algebraic-smooth-merging}
+  Let the original left state determine $X,X_1,\ldots,X_t$ and an actual
+  prefix $Q$. The right state determines its seed family after $(Z,Q)$ is
+  fixed. The source comparison retains $(Z,X_T)$; the seed comparison
+  retains $(Z,Q,Y_S)$. The extraction law is the direct original-law image
+  retaining $(Z,Q)$, complete original right state $B$, and all actual
+  tampered outputs in $S\cup T$.
+\end{definition}
+
+\begin{theorem}[Actual smooth independence merging]
+  \label{thm:lowerbounds-algebraic-smooth-independence}
+  \lean{Algebraic.Cutwidth.Extractor.smoothIndependenceSourceWeight_eq_map,
+    Algebraic.Cutwidth.Extractor.smoothIndependenceSeedWeight_eq_map,
+    Algebraic.Cutwidth.Extractor.smoothIndependenceMergingWeight_probability,
+    Algebraic.Cutwidth.Extractor.WeightedStrongSeededExtractor.smooth_independence_merging_dist_le}
+  \leanok
+  \uses{def:lowerbounds-algebraic-smooth-independence,
+    thm:lowerbounds-algebraic-smooth-merging}
+  With normalized original factors and a threshold-$K$ strong extractor
+  of nonnegative error $\varepsilon$ and nonempty seed/output alphabets,
+  source discrepancy $\rho$ and actual prefix-conditioned seed discrepancy
+  $\delta$ imply error at most
+  \[
+    \varepsilon+\delta+\rho+
+      K|\mathrm{Out}|^{|S|}|Q|/|X|.
+  \]
+  The subsets may overlap. No conditional point-mass cap or repaired-source
+  witness is required.
+\end{theorem}
+\begin{proof}
+  \leanok
+  Use $X_T$ as the original left observation and the outputs on $S$ as
+  leakage in smooth merging. Retain the stored $S$ output on overlaps;
+  reconstruct the remaining $T$ outputs from $X_T$ and the full right
+  state. This deterministic projection introduces no additional error.
+\end{proof}
+
+\begin{definition}[The actual four-call affine round and its transcript]
+  \label{def:lowerbounds-algebraic-affine-round}
+  \lean{Algebraic.Cutwidth.Extractor.affineRoundPrefix,
+    Algebraic.Cutwidth.Extractor.affineRoundMiddleSeed,
+    Algebraic.Cutwidth.Extractor.affineRoundMiddleOutput,
+    Algebraic.Cutwidth.Extractor.affineRoundFinalSeed,
+    Algebraic.Cutwidth.Extractor.affineRoundOutput,
+    Algebraic.Cutwidth.Extractor.AffineRoundShortMessages,
+    Algebraic.Cutwidth.Extractor.affineRoundTranscript,
+    Algebraic.Cutwidth.Extractor.affineRoundTranscriptWeight,
+    Algebraic.Cutwidth.Extractor.affineRoundTranscriptLeft,
+    Algebraic.Cutwidth.Extractor.affineRoundTranscriptRight}
+  \leanok
+  \uses{def:lowerbounds-algebraic-matched-extractor,
+    def:lowerbounds-algebraic-observed-transcript}
+  Starting with a long row, use its short prefix to extract from the
+  original right word, use that seed to extract a short row, reread the
+  original right word with this short row, then extract the next long row
+  from the unchanged original affine input $X=A\mathbin{\oplus}B$.
+  The proof tracks its left contribution and right mask separately.
+  All calls are actual matched extractors.
+  The transcript observes right prefix masks, actual prefixes, the first
+  right seeds and short-row mask contributions, actual short rows, then
+  the second right seeds. This is the round in Chattopadhyay--Liao,
+  Theorem~6.1, printed pp.23--25.
+\end{definition}
+
+\begin{theorem}[Exact factorization of the executed affine round]
+  \label{thm:lowerbounds-algebraic-affine-round-factors}
+  \lean{Algebraic.Cutwidth.Extractor.affineRoundPrefixLeftMessage_eq,
+    Algebraic.Cutwidth.Extractor.affineRoundMiddleSeedRight_eq,
+    Algebraic.Cutwidth.Extractor.affineRoundMiddleLeftMessage_eq,
+    Algebraic.Cutwidth.Extractor.affineRoundFinalSeedRight_eq,
+    Algebraic.Cutwidth.Extractor.affineRoundOutput_eq_xor,
+    Algebraic.Cutwidth.Extractor.affineRoundPrefixMask_factored,
+    Algebraic.Cutwidth.Extractor.affineRoundPrefix_factored,
+    Algebraic.Cutwidth.Extractor.affineRoundMiddleRight_factored,
+    Algebraic.Cutwidth.Extractor.affineRoundMiddle_factored,
+    Algebraic.Cutwidth.Extractor.affineRoundTranscript_factored,
+    Algebraic.Cutwidth.Extractor.affineRoundTranscript_probability}
+  \leanok
+  \uses{def:lowerbounds-algebraic-affine-round,
+    thm:lowerbounds-algebraic-observed-transcript,
+    thm:lowerbounds-algebraic-matched-extractor}
+  For normalized original factors, each stage is exactly the original
+  joint law with its actual observations appended. Both original latent
+  states survive in the conditional kernels, which are normalized even
+  on null rows. Linearity identifies the short and final actual rows
+  with the XOR of their original-left and original-right contributions.
+\end{theorem}
+\begin{proof}
+  \leanok
+  Alternate deterministic right and left observations. False-completed
+  prefixes preserve XOR, as do the fixed-seed matched extractors.
+\end{proof}
+
+\begin{theorem}[Source envelopes survive the complete affine round]
+  \label{thm:lowerbounds-algebraic-affine-round-envelopes}
+  \lean{Algebraic.Cutwidth.Extractor.affineRoundMiddle_right_envelope,
+    Algebraic.Cutwidth.Extractor.affineRoundTranscript_left_envelope,
+    Algebraic.Cutwidth.Extractor.affineRoundTranscript_right_envelope,
+    Algebraic.Cutwidth.Extractor.affineRoundMiddleRightEnvelope_sum,
+    Algebraic.Cutwidth.Extractor.affineRoundTranscriptLeftEnvelope_sum,
+    Algebraic.Cutwidth.Extractor.affineRoundTranscriptRightEnvelope_sum,
+    Algebraic.Cutwidth.Extractor.affineRoundTranscriptLeftEnvelope_nonnegative,
+    Algebraic.Cutwidth.Extractor.affineRoundTranscriptRightEnvelope_nonnegative,
+    Algebraic.Cutwidth.Extractor.card_affineRoundShortMessages}
+  \leanok
+  \uses{thm:lowerbounds-algebraic-affine-round-factors}
+  If $C$ is the cardinality of the entire honest/tampered short-message
+  family, original nonnegative joint source envelopes with totals
+  $\alpha,\beta$ acquire final totals $C^2\alpha,C^4\beta$.
+  Before the final right extraction its envelope total is $C^3\beta$.
+  Opposite-side observations preserve totals exactly; observations of
+  the source side pay the corresponding finite message alphabet.
+\end{theorem}
+\begin{proof}
+  \leanok
+  Apply the exact conditional-kernel point-mass identities at every
+  observation. Sum normalized opposite messages, including zero-mass rows.
+\end{proof}
+
+\begin{definition}[Actual intermediate and final retained-subset laws]
+  \label{def:lowerbounds-algebraic-affine-round-laws}
+  \lean{Algebraic.Cutwidth.Extractor.affineRoundLeftRowsWeight,
+    Algebraic.Cutwidth.Extractor.affineRoundPrefixSeedWeight,
+    Algebraic.Cutwidth.Extractor.affineRoundMiddleSeedWeight,
+    Algebraic.Cutwidth.Extractor.affineRoundMiddleLeftRowsWeight,
+    Algebraic.Cutwidth.Extractor.affineRoundMiddleRowsWeight,
+    Algebraic.Cutwidth.Extractor.affineRoundMiddleSeedInputWeight,
+    Algebraic.Cutwidth.Extractor.affineRoundFinalSeedWeight,
+    Algebraic.Cutwidth.Extractor.affineRoundLeftSubsetWeight,
+    Algebraic.Cutwidth.Extractor.affineRoundSubsetWeight}
+  \leanok
+  \uses{def:lowerbounds-algebraic-affine-round}
+  Each law reads only actual original inputs and executed calls. The
+  final left and masked output laws retain the complete transcript,
+  original right state, and selected tampered outputs. Intermediate
+  seed laws are the exact conditional marginals needed by the next call;
+  no security property or replacement-source witness is a definition.
+\end{definition}
+
+\begin{theorem}[The four actual calls compose through retained seed laws]
+  \label{thm:lowerbounds-algebraic-affine-round-stages}
+  \lean{Algebraic.Cutwidth.Extractor.affineRoundPrefix_uniform,
+    Algebraic.Cutwidth.Extractor.affineRoundPrefixSeed_dist_le,
+    Algebraic.Cutwidth.Extractor.affineRoundMiddleSeed_dist_le,
+    Algebraic.Cutwidth.Extractor.affineRound_middle_left_dist_le,
+    Algebraic.Cutwidth.Extractor.affineRound_middle_dist_le,
+    Algebraic.Cutwidth.Extractor.affineRoundMiddleSeedInputWeight_eq_map,
+    Algebraic.Cutwidth.Extractor.affineRound_middle_seed_input_dist_le,
+    Algebraic.Cutwidth.Extractor.affineRoundFinalSeed_dist_le,
+    Algebraic.Cutwidth.Extractor.affineRoundLeftSubset_dist_le,
+    Algebraic.Cutwidth.Extractor.affineRoundSubset_dist_le,
+    Algebraic.Cutwidth.Extractor.affineRoundNextLeftRows_eq_map,
+    Algebraic.Cutwidth.Extractor.affineRoundNextLeftRows_dist_le}
+  \leanok
+  \uses{def:lowerbounds-algebraic-affine-round-laws,
+    thm:lowerbounds-algebraic-transcript-distance,
+    thm:lowerbounds-algebraic-alternating-copies,
+    thm:lowerbounds-algebraic-smooth-independence,
+    thm:lowerbounds-algebraic-affine-round-envelopes,
+    thm:lowerbounds-algebraic-matched-growing}
+  Under the relevant finite matched-extractor guards, the old-row
+  discrepancy controls the actual first right seed. Smooth merging
+  combines the two selected subsets in the actual short row. The second
+  right extraction uses that exact seed-input law and the original-right
+  envelope. The last call rereads the original affine input; its left
+  contribution is bounded using the original-left envelope. Masking with
+  retained right contributions and taking the next-left marginal add no
+  error. These individual implications compose in the theorem below.
+\end{theorem}
+\begin{proof}
+  \leanok
+  Observe right prefix masks without changing the averaged old-left
+  discrepancy, then use balanced prefix transport and alternating
+  extraction. Apply smooth independence merging to the original actual
+  prefix, append the complete right messages, and use fibrewise XOR.
+  Recover a final seed by the next alternating call and finish with
+  source-envelope extraction, retaining the executed transcript throughout.
+\end{proof}
+
+\begin{definition}[Exact finite error of one subset-union round]
+  \label{def:lowerbounds-algebraic-affine-round-error}
+  \lean{Algebraic.Cutwidth.Extractor.affineRoundError}
+  \leanok
+  \uses{def:lowerbounds-algebraic-affine-round-laws}
+  Put $c=2^{24}L$, $m=2^hL$, $k_{24}=2^{62}L$, and
+  $k_h=2^{2h+14}L$. For $s=|S|$, $u=|S\cup T|$ and original source
+  envelope totals $\alpha,\beta$, define
+  \begin{align*}
+    \mathcal E={}&4\cdot2^{-e}+\rho_S+\rho_T
+      +2^{k_{24}+(s+t+1)c}\beta
+      +\frac{2^{k_{24}+(s+t+1)c}}{2^m}\\
+      &+2^{k_{24}+(u+3(t+1))c}\beta
+      +2^{k_h+um+2(t+1)c}\alpha.
+  \end{align*}
+\end{definition}
+
+\begin{theorem}[One actual round merges two subset guarantees]
+  \label{thm:lowerbounds-algebraic-affine-round-extraction}
+  \lean{Algebraic.Cutwidth.Extractor.affineRound_left_union_dist_le,
+    Algebraic.Cutwidth.Extractor.affineRound_union_dist_le,
+    Algebraic.Cutwidth.Extractor.affineRound_next_union_dist_le}
+  \leanok
+  \uses{thm:lowerbounds-algebraic-affine-round-stages,
+    def:lowerbounds-algebraic-affine-round-error}
+  Let the original sources have normalized factors given $Z$ and
+  nonnegative joint point-mass envelopes of totals $\alpha,\beta$.
+  Assume $c\le m$, the three input log-lengths are at most $L$, $64\le L$,
+  $e+26\le L$, $e+h+2\le L$, and
+  \[
+    (h+1)(e+2h+\lceil\log_2(L+1)\rceil+4)\le L.
+  \]
+  If the old honest left row has discrepancies $\rho_S,\rho_T$ against
+  the respective tampered subsets, the actual next output has error at
+  most $\mathcal E$, retaining the complete executed transcript, full
+  original right state, and all actual outputs in $S\cup T$.
+  The same bound holds for original-left contributions and for the new
+  conditional left-row law. The sets may overlap. No intermediate seed,
+  repaired source, primitive extractor, or security witness is supplied.
+\end{theorem}
+\begin{proof}
+  \leanok
+  Compose all four preceding actual-law implications and substitute the
+  exact original-source envelope totals. Deterministic marginal projection
+  exposes the next left-row invariant.
+\end{proof}
+
+\begin{theorem}[Four finite reserves give a dyadic round bound]
+  \label{thm:lowerbounds-algebraic-affine-round-dyadic}
+  \lean{Algebraic.Cutwidth.Extractor.affineRoundError_dyadic_le}
+  \leanok
+  \uses{def:lowerbounds-algebraic-affine-round-error}
+  If $\alpha\le2^{-k_x}$, $\beta\le2^{-k_y}$ and
+  \begin{align*}
+    k_{24}+(s+t+1)c+e&\le k_y, &
+    k_{24}+(s+t+1)c+e&\le m,\\
+    k_{24}+(u+3(t+1))c+e&\le k_y, &
+    k_h+um+2(t+1)c+e&\le k_x,
+  \end{align*}
+  then $\mathcal E\le\rho_S+\rho_T+8\cdot2^{-e}$.
+  The reserve assumptions are explicit finite inequalities, not an
+  asserted global iteration schedule.
+\end{theorem}
+\begin{proof}
+  \leanok
+  Each source or old-row charge is at most one local error. Add these
+  four charges to the four actual extractor errors.
+\end{proof}
+
+\begin{theorem}[Finite subsets split at twice the capacity]
+  \label{thm:lowerbounds-algebraic-affine-round-subset}
+  \lean{Algebraic.Cutwidth.Extractor.exists_union_of_card_le_two_mul}
+  \leanok
+  If $|U|\le2k$, there exist disjoint $S,T\subseteq U$ with
+  $S\cup T=U$ and $|S|,|T|\le k$, including $k=0$.
+  This supplies the finite combinatorial split for a doubling update;
+  it does not itself iterate the probabilistic invariant.
+\end{theorem}
+\begin{proof}
+  \leanok
+  Choose a subset of size $\min(k,|U|)$ and take its complement in $U$.
+\end{proof}
+
+\begin{definition}[One total evaluator for the actual affine round]
+  \label{def:lowerbounds-algebraic-affine-round-program}
+  \lean{Algebraic.Cutwidth.Extractor.affineRoundPrefixWord,
+    Algebraic.Cutwidth.Extractor.affineRoundRuntime,
+    Algebraic.Cutwidth.Extractor.affineRoundEval}
+  \leanok
+  \uses{def:lowerbounds-algebraic-affine-round,
+    def:lowerbounds-algebraic-matched-growing-runtime}
+  Decode
+  $\operatorname{pair}(\operatorname{pair}(x,\operatorname{pair}(y,w)),
+    \operatorname{pair}(t_{\rm word},
+      \operatorname{pair}(L_{\rm word},e_{\rm word})))$.
+  The three parameter-word lengths specify $t,L,e$. False-complete the
+  old row's short prefix and execute the four component string programs,
+  rereading the original source words. The final depth is
+  $h=\lceil\log_2(t+1)\rceil+64$.
+\end{definition}
+
+\begin{theorem}[Uniform round runtime and exact semantic agreement]
+  \label{thm:lowerbounds-algebraic-affine-round-program}
+  \lean{Algebraic.Cutwidth.Extractor.affineRoundPrefixWord_length,
+    Algebraic.Cutwidth.Extractor.affineRoundPrefix_ofFn,
+    Algebraic.Cutwidth.Extractor.affineRoundRuntime_eq_affineRoundOutput,
+    Algebraic.Cutwidth.Extractor.affineRoundRuntime_length,
+    Algebraic.Cutwidth.Extractor.affineRoundRuntime_length_le,
+    Algebraic.Cutwidth.Extractor.affineRoundPrefixWord_mem_FP,
+    Algebraic.Cutwidth.Extractor.affineRoundRuntime_mem_FP,
+    Algebraic.Cutwidth.Extractor.affineRoundEval_pair,
+    Algebraic.Cutwidth.Extractor.affineRoundEval_mem_FP,
+    Algebraic.Cutwidth.Extractor.affineRoundEval_length_le}
+  \leanok
+  \uses{def:lowerbounds-algebraic-affine-round-program,
+    thm:lowerbounds-algebraic-matched-runtime,
+    thm:lowerbounds-algebraic-matched-growing-runtime}
+  The single evaluator is uniformly polynomial-time on all encoded
+  inputs, including malformed strings and invalid parameters. Its output
+  length is at most $2^{65}(|z|+1)^2$. Under the component guards, canonical
+  source and row words produce exactly the serialized semantic round.
+  Neither polynomial time nor this equality assumes source entropy or
+  statistical independence.
+\end{theorem}
+\begin{proof}
+  \leanok
+  Compose the registered component certificates and prefix operation.
+  Each short word is bounded by $c$, while the growing final call supplies
+  the unconditional quadratic bound and canonical semantic identity.
+\end{proof}
+
+\begin{theorem}[The first-phase chooser also supplies round execution guards]
+  \label{thm:lowerbounds-algebraic-affine-round-parameters}
+  \lean{Algebraic.Cutwidth.Extractor.affineRoundParameters_right_guard,
+    Algebraic.Cutwidth.Extractor.affineRoundParameters_row_guard,
+    Algebraic.Cutwidth.Extractor.affineRoundParameters_runtime_eq}
+  \leanok
+  \uses{thm:lowerbounds-algebraic-affine-phase-one-parameters,
+    thm:lowerbounds-algebraic-affine-round-program}
+  At every tuple selected by the existing first-phase chooser, the right
+  source and complete long row satisfy the short-call guards. The round
+  runtime therefore agrees with its canonical semantic program without
+  additional numerical premises. This theorem concerns execution widths;
+  it does not supply the successive statistical reserves for full iteration.
+\end{theorem}
+\begin{proof}
+  \leanok
+  Apply the finite chooser bounds to the component log-length and
+  growing-seed budgets, then use the checked four-call runtime identity.
+\end{proof}
+
 \begin{theorem}[Extraction with an approximately independent seed]
   \label{thm:lowerbounds-algebraic-perturbed-seed}
   \lean{Algebraic.Cutwidth.Extractor.WeightedStrongSeededExtractor.perturbed_seed_dist_le,
@@ -8363,10 +8758,12 @@ The fixed-family logarithmic-seed primitive and the ordinary Gamma
 linear-output parameters are now supplied by actual recursive maps.
 The actual pairwise first phase, its finite chooser and dyadic reserves,
 and its selected total polynomial-time evaluator are now supplied.
-A smooth-source merging consumer is available for the next stage. Actual
-subset-doubling rounds and their induction remain open, as do the full
-affine conversion, sumset/amplification composition, parity estimates, and
-asymptotic construction of the final uniform polynomial-time hard family.
+An actual subset-union round now has complete retained-law error accounting,
+source-envelope transport, finite dyadic reserves, and a total polynomial-time
+evaluator. The repeated-round induction and its global parameter schedule
+remain open, as do the completed affine correlation breaker,
+sumset/amplification composition, parity estimates, and asymptotic
+construction of the final uniform polynomial-time hard family.
 
 \begin{theorem}[Cutwidth bound for rectangle-free families]
   \label{thm:lowerbounds-algebraic-cutwidth}
