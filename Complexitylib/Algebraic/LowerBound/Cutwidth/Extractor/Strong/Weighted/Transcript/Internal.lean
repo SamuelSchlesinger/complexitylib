@@ -11,7 +11,8 @@ import Complexitylib.Algebraic.LowerBound.Cutwidth.Extractor.Strong.Weighted.Pro
 import Complexitylib.Algebraic.LowerBound.Cutwidth.Extractor.Strong.Weighted.Mixture
 import Mathlib.Tactic.Ring
 
-/-!+# Exact finite factorization after an observation
+/-!
+# Exact finite factorization after an observation
 
 Multiplying an observation's marginal by its conditional row recovers the
 original mass, including null rows. Deterministic maps retaining both

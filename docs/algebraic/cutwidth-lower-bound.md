@@ -343,6 +343,12 @@ event, with a uniform completion on null events. The unchanged right kernel
 and these new factors give exactly the original joint law with the message
 retained. The symmetric rule and a left message followed by an adaptive
 right message are also proved, preserving both original side variables.
+`Transcript.Envelope` supplies the exact source-mass identities behind the
+entropy bookkeeping. A message with alphabet `U` computed from the source
+multiplies the total joint envelope by `card U`. A message from the independent
+opposite side scales each envelope row by that message's probability and
+preserves its total. A source message followed by an adaptive opposite-side
+message therefore pays only `card U`, including null rows.
 
 `Strong.Weighted.Conditional.Transport` proves that a bijection of the
 output depending on its retained tag preserves distance from uniform
@@ -364,6 +370,29 @@ the retained-law estimate used by the first affine extraction step in CL
 Theorem 6.1. Matching its parameters and transcript budgets, the
 correlation-breaker call, and the evolving alternating/doubling guarantees
 remain open.
+
+`Strong.Weighted.Alternating` proves the next local transition. Reveal a
+right-side message `V`, then use a seed computed from the left state and
+that message to extract from the right source. The original normalized
+sides are independent given `Z`, and the next seed is `δ`-close to uniform
+jointly with `(Z,V)`, retaining its actual marginal. The output retains the
+entire left state and the message. Its error is `ε + δ + K*∑μ` for a joint
+message-and-source envelope, or `ε + δ + K*card V*∑μ` for an original
+source envelope. The proof updates the actual transcript and swaps the
+factored sides, so the incoming seed discrepancy is charged once.
+`affine_alternating_dist_le` obtains that seed from an actual first affine
+extraction call: the revealed right message consists of its seed and its
+extracted mask. The two-call law uses both original sources and retains
+the complete left state. The resulting bound includes both extractor
+errors and both explicit entropy budgets. This supplies a local transition;
+the full tampering-set induction and parameter allocation remain open.
+
+`Strong.Weighted.Perturbation` separately handles a seed approximately
+uniform jointly with the source and tag. It proves error
+`ε + 2δ + K*∑μ` while retaining the actual tag-and-seed marginal.
+Comparing with the independent-seed reference marginal costs only one
+`δ`; returning to the actual marginal can cost the second. These are
+finite stability bounds derived from leakage and deterministic contraction.
 
 `Strong.Block` defines a block source by prefix-mass inequalities,
 `K*p(prefix, next)≤p(prefix)`. Prefixes and normalized mixtures preserve
@@ -605,6 +634,16 @@ strong-extraction guarantee with the entire Boolean seed retained, requiring
 only `clog 2 (n+1) ≤ L` and `h ≤ L`. The statistical statement needs no
 caller-supplied finite-field instances: the codec and Boolean output
 equivalences preserve the normalized joint guarantee exactly.
+
+`Scheduled.BoundedDepth` supplies conservative finite parameters for the
+short alternating calls in a correlation breaker. If `clog 2 (n+1) ≤ L`,
+`64 ≤ L`, `h ≤ 64`, and `E ≤ L`, the actual scheduled seed has at most
+`2^24*L` bits. With reserve `4096*(L+E+1)`, depths 24 and 64 have entropy-bit
+thresholds at most `2^62*L` and `2^142*L`, respectively, whenever
+`1 ≤ L` and `E ≤ L`. Their exact output lengths are `2^24*L` and `2^64*L`.
+These bounds permit matching finite seed/output widths at variable error;
+the flattening and padding adapter, its runtime wrapper, and the
+correlation-breaker algorithm and correctness proof remain to be supplied.
 
 The one-shot primitive alone has finite seed cost of order `ell+e+log n`;
 the checked recursion supplies the larger polylogarithmic output with

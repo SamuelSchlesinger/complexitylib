@@ -5147,6 +5147,154 @@ establishes the proposed coefficient-three regime without that assumption.
   extraction, preserving the actual full right-side marginal.
 \end{proof}
 
+\begin{theorem}[Finite parameters at bounded extraction depth]
+  \label{thm:lowerbounds-algebraic-bounded-depth}
+  \lean{Algebraic.Cutwidth.Extractor.scheduledBlockSeedBits_boundedDepth_le,
+    Algebraic.Cutwidth.Extractor.recursiveBlockEntropy_depth24_le,
+    Algebraic.Cutwidth.Extractor.recursiveBlockEntropy_depth64_le}
+  \leanok
+  \uses{thm:lowerbounds-algebraic-scheduled-boolean}
+  If $\lceil\log_2(n+1)\rceil\le L$, $64\le L$, $h\le64$, and $E\le L$,
+  the actual scheduled extractor with reserve $4096(L+E+1)$ and leaf
+  output width $L$ has seed length at most $2^{24}L$. For $1\le L$ and
+  $E\le L$, its source entropy in bits is at most $2^{62}L$ at depth 24,
+  and at most $2^{142}L$ at depth 64. These are conservative finite bounds
+  on the existing construction, supporting successive calls with matched
+  seed and output widths; they assert no correlation-breaker guarantee.
+\end{theorem}
+\begin{proof}
+  \leanok
+  Bound the existing seed formula using $h+1\le65$ and
+  $\lceil\log_2(L+E+1)\rceil\le L+E$.
+  Substitute the reserve in the exact initial entropy $4^hQ$ for each
+  of the two fixed depths and use $L+E+1\le3L$.
+\end{proof}
+
+\begin{theorem}[Source envelopes after transcript messages]
+  \label{thm:lowerbounds-algebraic-transcript-envelopes}
+  \lean{Algebraic.Cutwidth.Extractor.observedTranscriptWeight_nonnegative,
+    Algebraic.Cutwidth.Extractor.observedTranscript_left_source_eq,
+    Algebraic.Cutwidth.Extractor.observedTranscript_left_envelope,
+    Algebraic.Cutwidth.Extractor.observedTranscript_left_envelope_sum,
+    Algebraic.Cutwidth.Extractor.observedTranscript_right_envelope,
+    Algebraic.Cutwidth.Extractor.observedTranscript_right_envelope_sum,
+    Algebraic.Cutwidth.Extractor.observedTranscript_left_right_envelope,
+    Algebraic.Cutwidth.Extractor.observedTranscript_left_right_envelope_sum}
+  \leanok
+  \uses{thm:lowerbounds-algebraic-observed-transcript}
+  Suppose the original law factors into nonnegative left and right kernels
+  given $Z$, and $\mu(z)$ bounds each original joint mass of the left source
+  with transcript $z$. A left message in $U$ admits the envelope
+  $\mu'(z,u)=\mu(z)$, of total $|U|\sum_z\mu(z)$. A right message
+  admits $\mu'(z,v)=\mu(z)\Pr[V=v\mid z]$, whose total is unchanged
+  when the right kernels have mass one. A left message followed by an
+  adaptive right message pays only the factor $|U|$. The updated source
+  masses are exactly the original joint message-and-source masses;
+  no positive-probability or per-row entropy premise is required.
+\end{theorem}
+\begin{proof}
+  \leanok
+  Sum the exact transcript-weight times conditional-kernel identity over
+  each source fiber. Refining a nonnegative event can only reduce mass.
+  The opposite side's conditional message probabilities sum to one.
+\end{proof}
+
+\begin{definition}[Actual alternating extraction laws]
+  \label{def:lowerbounds-algebraic-alternating-laws}
+  \lean{Algebraic.Cutwidth.Extractor.alternatingSeedWeight,
+    Algebraic.Cutwidth.Extractor.alternatingExtractionWeight,
+    Algebraic.Cutwidth.Extractor.affineAlternatingWeight}
+  \leanok
+  \uses{def:lowerbounds-algebraic-two-sided-laws}
+  From the original factored law of $(Z,A,B)$, reveal $v(Z,B)$ and
+  compute a seed $s(Z,v(Z,B),A)$. Alternating extraction applies $E$
+  to the right source and this seed, retaining $(Z,v(Z,B),A)$.
+  The affine two-call law instead obtains that seed by applying a first
+  extractor to the combined left source and right mask. It retains the
+  whole left state and the first call's seed and extracted mask.
+\end{definition}
+
+\begin{theorem}[Alternating extraction retaining the opposite source]
+  \label{thm:lowerbounds-algebraic-alternating-extraction}
+  \lean{Algebraic.Cutwidth.Extractor.alternatingExtractionWeight_probability,
+    Algebraic.Cutwidth.Extractor.WeightedStrongSeededExtractor.alternating_joint_dist_le,
+    Algebraic.Cutwidth.Extractor.WeightedStrongSeededExtractor.alternating_dist_le}
+  \leanok
+  \uses{def:lowerbounds-algebraic-alternating-laws,
+    thm:lowerbounds-algebraic-transcript-envelopes,
+    thm:lowerbounds-algebraic-affine-initialization}
+  Let the original factors be probability laws and let $E$ have threshold
+  $K$ and nonnegative error $\varepsilon$, with nonempty seed and output
+  alphabets. Suppose the actual seed is $\delta$-close to uniform jointly
+  with $(Z,V)$, and $\mu(z,v)\ge0$ bounds the joint right-source masses
+  with that transcript. Then the actual alternating output, with all of
+  $(Z,V,A)$ retained, has distance at most
+  $\varepsilon+\delta+K\sum_{z,v}\mu(z,v)$ from its actual retained
+  marginal with uniform output. An original source envelope $\mu(z)$
+  instead gives $\varepsilon+\delta+K|V|\sum_z\mu(z)$.
+\end{theorem}
+\begin{proof}
+  \leanok
+  Update the transcript by the right message and swap the two sides of
+  its exact factored law. The envelope identity gives the new source cap.
+  Apply retained extraction; both the next seed and output laws are
+  deterministic images of the original distribution. Only one copy of
+  the incoming seed discrepancy is charged.
+\end{proof}
+
+\begin{theorem}[An affine extraction seeds the next alternating call]
+  \label{thm:lowerbounds-algebraic-affine-alternation}
+  \lean{Algebraic.Cutwidth.Extractor.affineAlternatingWeight_probability,
+    Algebraic.Cutwidth.Extractor.WeightedStrongSeededExtractor.affine_alternating_dist_le}
+  \leanok
+  \uses{thm:lowerbounds-algebraic-alternating-extraction,
+    thm:lowerbounds-algebraic-affine-initialization}
+  Let the first extractor $E:X\times S\to M$ have threshold $K$ and
+  error $\varepsilon$, and the second $F:Y\times M\to O$ threshold
+  $L$ and error $\eta$, both nonnegative. Suppose fixed-mask output
+  transport is an equivalence determined by the extracted mask, the
+  original factors are normalized, the left and right joint source
+  envelopes are nonnegative $\mu,\nu$, and the first seed is
+  $\delta$-close to uniform jointly with $Z$. For nonempty seed and output
+  alphabets, the actual two-call law has distance at most
+  \[
+    \eta+\varepsilon+\delta+K\sum_z\mu(z)
+      +L|S\times M|\sum_z\nu(z)
+  \]
+  from its actual retained marginal with uniform final output. It retains
+  the complete left state, first seed, and extracted right mask.
+\end{theorem}
+\begin{proof}
+  \leanok
+  Reveal the first seed and its extracted mask. The first actual output
+  is now a function of the left state and this transcript. Project its
+  retained affine guarantee to obtain the next seed bound and apply the
+  alternating transition. The right-message alphabet is exactly $S\times M$.
+\end{proof}
+
+\begin{theorem}[Extraction with an approximately independent seed]
+  \label{thm:lowerbounds-algebraic-perturbed-seed}
+  \lean{Algebraic.Cutwidth.Extractor.WeightedStrongSeededExtractor.perturbed_seed_dist_le,
+    Algebraic.Cutwidth.Extractor.WeightedStrongSeededExtractor.perturbed_seed_reference_dist_le}
+  \leanok
+  \uses{thm:lowerbounds-algebraic-average-leakage,
+    thm:lowerbounds-algebraic-conditional-distance}
+  Let $p$ be the normalized law of $(T,X,S)$ with joint source masses
+  bounded by nonnegative $\mu(t)$, and let $E$ be a threshold-$K$ strong
+  extractor of nonnegative error $\varepsilon$. If
+  $d(p,U_2p)\le\delta$, extraction retaining the actual $(T,S)$ marginal
+  has error at most $\varepsilon+2\delta+K\sum_t\mu(t)$.
+  Comparing instead with the uniformized output law for the independent-seed
+  reference $U_2p$ costs only $\varepsilon+\delta+K\sum_t\mu(t)$.
+\end{theorem}
+\begin{proof}
+  \leanok
+  Apply average leakage to the source marginal with a fresh uniform seed.
+  Deterministic contraction transfers to the actual input law at cost
+  $\delta$. Uniformizing the output contracts distance, so restoring the
+  actual retained marginal costs at most one further $\delta$.
+\end{proof}
+
 \begin{theorem}[Head and tail structure of block sources]
   \label{thm:lowerbounds-algebraic-block-conditioning}
   \lean{Algebraic.Cutwidth.Extractor.IsBlockSource.exists_head_tail,

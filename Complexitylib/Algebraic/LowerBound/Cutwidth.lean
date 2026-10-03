@@ -114,9 +114,13 @@ public import Complexitylib.Algebraic.LowerBound.Cutwidth.Extractor.Strong.Weigh
 public import
   Complexitylib.Algebraic.LowerBound.Cutwidth.Extractor.Strong.Weighted.Conditional.Transport
 public import Complexitylib.Algebraic.LowerBound.Cutwidth.Extractor.Strong.Weighted.Transcript
+public import
+  Complexitylib.Algebraic.LowerBound.Cutwidth.Extractor.Strong.Weighted.Transcript.Envelope
 public import Complexitylib.Algebraic.LowerBound.Cutwidth.Extractor.Strong.Weighted.Affine
+public import Complexitylib.Algebraic.LowerBound.Cutwidth.Extractor.Strong.Weighted.Alternating
 public import Complexitylib.Algebraic.LowerBound.Cutwidth.Extractor.Strong.Weighted.Expectation
 public import Complexitylib.Algebraic.LowerBound.Cutwidth.Extractor.Strong.Weighted.Leakage
+public import Complexitylib.Algebraic.LowerBound.Cutwidth.Extractor.Strong.Weighted.Perturbation
 public import Complexitylib.Algebraic.LowerBound.Cutwidth.Extractor.Strong.Weighted.Merging
 public import
   Complexitylib.Algebraic.LowerBound.Cutwidth.Extractor.Strong.Weighted.Merging.Independence
@@ -174,6 +178,8 @@ public import
   Complexitylib.Algebraic.LowerBound.Cutwidth.Extractor.Strong.Block.Recursion.Scheduled.Boolean
 public import
   Complexitylib.Algebraic.LowerBound.Cutwidth.Extractor.Strong.Block.Recursion.Scheduled.Affine
+public import
+  Complexitylib.Algebraic.LowerBound.Cutwidth.Extractor.Strong.Block.Recursion.Scheduled.BoundedDepth
 public import Complexitylib.Algebraic.LowerBound.Cutwidth.Extractor.Strong.Block.Recursion.NearHalving
 public import
   Complexitylib.Algebraic.LowerBound.Cutwidth.Extractor.Strong.Block.Recursion.NearHalving.Parameters
@@ -272,6 +278,7 @@ and lossless condensation to these weights with the same error.
 `Strong.Weighted.Conditional` completes null rows and retains the actual side-information law.
 Its `Transport` layer preserves conditional distance under tag-dependent output bijections.
 `Strong.Weighted.Transcript` factors the actual law after left, right, or adaptive observations.
+Its `Envelope` layer charges only source-side messages against the average entropy budget.
 `Coupling.Conditional` replaces a marginal at its exact average distance while retaining
 the transcript and the other coordinate jointly.
 `Strong.Weighted.Leakage` bounds extraction error using an average joint-mass envelope;
@@ -282,6 +289,10 @@ observation, retaining the entire right variable and charging its seed error onc
 `2*epsilon+delta` under the explicit average-envelope budget.
 `Strong.Weighted.Affine` extracts from a source combined with a correlated right mask,
 retaining the full right state whenever fixed-mask output transport is bijective.
+`Strong.Weighted.Alternating` switches extraction sides after a message and composes
+an actual affine extraction with the next call, retaining the entire opposite source.
+`Strong.Weighted.Perturbation` handles seeds close to jointly independent uniform seeds,
+including the extra distance needed to retain the actual tag-and-seed marginal.
 `Strong.Block.Splitting` repairs a two-block source with a quantified error.
 `Strong.Block` supplies the general prefix-based block-source invariant.
 `Strong.Block.Splitting.Iterated` splits every dependent pair into successive
@@ -321,6 +332,8 @@ and seeds, with the strong-extraction guarantee and fixed-seed XOR law. Its publ
 statistical statements require no field enumeration instances.
 `Scheduled.Affine` applies this actual program to a source XOR a correlated right mask,
 with the full right state retained and an explicit average-entropy error budget.
+`Scheduled.BoundedDepth` bounds its actual seed width and entropy at fixed depths,
+providing finite parameters for matching the short alternating calls.
 `NearHalving` uses a rate increasing with depth and a near-halving entropy schedule.
 Its rounded parameters give an actual extractor on `8*b` bits at entropy `2*b`,
 with `b` output bits, error `1/4`, and seed length at most a cubic logarithm,
