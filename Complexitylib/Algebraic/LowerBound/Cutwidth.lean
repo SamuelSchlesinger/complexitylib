@@ -111,12 +111,18 @@ public import Complexitylib.Algebraic.LowerBound.Cutwidth.Extractor.Strong.Weigh
 public import Complexitylib.Algebraic.LowerBound.Cutwidth.Extractor.Strong.Weighted.SeedPadding
 public import Complexitylib.Algebraic.LowerBound.Cutwidth.Extractor.Strong.Weighted.Probability
 public import Complexitylib.Algebraic.LowerBound.Cutwidth.Extractor.Strong.Weighted.Conditional
+public import
+  Complexitylib.Algebraic.LowerBound.Cutwidth.Extractor.Strong.Weighted.Conditional.Transport
+public import Complexitylib.Algebraic.LowerBound.Cutwidth.Extractor.Strong.Weighted.Transcript
+public import Complexitylib.Algebraic.LowerBound.Cutwidth.Extractor.Strong.Weighted.Affine
 public import Complexitylib.Algebraic.LowerBound.Cutwidth.Extractor.Strong.Weighted.Expectation
 public import Complexitylib.Algebraic.LowerBound.Cutwidth.Extractor.Strong.Weighted.Leakage
 public import Complexitylib.Algebraic.LowerBound.Cutwidth.Extractor.Strong.Weighted.Merging
 public import
   Complexitylib.Algebraic.LowerBound.Cutwidth.Extractor.Strong.Weighted.Merging.Independence
 public import Complexitylib.Algebraic.LowerBound.Cutwidth.Extractor.Strong.Weighted.Coupling
+public import
+  Complexitylib.Algebraic.LowerBound.Cutwidth.Extractor.Strong.Weighted.Coupling.Conditional
 public import Complexitylib.Algebraic.LowerBound.Cutwidth.Extractor.Strong.Weighted.Condenser
 public import Complexitylib.Algebraic.LowerBound.Cutwidth.Extractor.Strong.Weighted.Condenser.Identity
 public import
@@ -166,6 +172,8 @@ public import
   Complexitylib.Algebraic.LowerBound.Cutwidth.Extractor.Strong.Block.Recursion.Scheduled.Program.Family
 public import
   Complexitylib.Algebraic.LowerBound.Cutwidth.Extractor.Strong.Block.Recursion.Scheduled.Boolean
+public import
+  Complexitylib.Algebraic.LowerBound.Cutwidth.Extractor.Strong.Block.Recursion.Scheduled.Affine
 public import Complexitylib.Algebraic.LowerBound.Cutwidth.Extractor.Strong.Block.Recursion.NearHalving
 public import
   Complexitylib.Algebraic.LowerBound.Cutwidth.Extractor.Strong.Block.Recursion.NearHalving.Parameters
@@ -262,12 +270,18 @@ into exact-size flat sources. `Strong.Weighted` extends both extraction
 and lossless condensation to these weights with the same error.
 `Strong.Weighted.Coupling` repairs a marginal while retaining correlations.
 `Strong.Weighted.Conditional` completes null rows and retains the actual side-information law.
+Its `Transport` layer preserves conditional distance under tag-dependent output bijections.
+`Strong.Weighted.Transcript` factors the actual law after left, right, or adaptive observations.
+`Coupling.Conditional` replaces a marginal at its exact average distance while retaining
+the transcript and the other coordinate jointly.
 `Strong.Weighted.Leakage` bounds extraction error using an average joint-mass envelope;
 individual conditional sources need not all retain the extractor's entropy threshold.
 `Strong.Weighted.Merging` combines this with a seed close to uniform given a right-side
 observation, retaining the entire right variable and charging its seed error once.
 `Merging.Independence` merges two possibly overlapping tampering sets with error
 `2*epsilon+delta` under the explicit average-envelope budget.
+`Strong.Weighted.Affine` extracts from a source combined with a correlated right mask,
+retaining the full right state whenever fixed-mask output transport is bijective.
 `Strong.Block.Splitting` repairs a two-block source with a quantified error.
 `Strong.Block` supplies the general prefix-based block-source invariant.
 `Strong.Block.Splitting.Iterated` splits every dependent pair into successive
@@ -305,6 +319,8 @@ family and proves eventual agreement on all source inputs and canonical seeds.
 `Scheduled.Boolean` supplies the actual program on fixed-length Boolean sources
 and seeds, with the strong-extraction guarantee and fixed-seed XOR law. Its public
 statistical statements require no field enumeration instances.
+`Scheduled.Affine` applies this actual program to a source XOR a correlated right mask,
+with the full right state retained and an explicit average-entropy error budget.
 `NearHalving` uses a rate increasing with depth and a near-halving entropy schedule.
 Its rounded parameters give an actual extractor on `8*b` bits at entropy `2*b`,
 with `b` output bits, error `1/4`, and seed length at most a cubic logarithm,

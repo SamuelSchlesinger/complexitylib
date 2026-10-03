@@ -4989,6 +4989,164 @@ establishes the proposed coefficient-three regime without that assumption.
   distance. The numerical budget gives the stated final error.
 \end{proof}
 
+\begin{definition}[Transcript updates after deterministic messages]
+  \label{def:lowerbounds-algebraic-observed-transcript}
+  \lean{Algebraic.Cutwidth.Extractor.observedTranscriptWeight,
+    Algebraic.Cutwidth.Extractor.observedTranscriptKernel}
+  \leanok
+  \uses{def:lowerbounds-algebraic-conditional-weights,
+    def:lowerbounds-algebraic-two-sided-laws}
+  Given transcript law $w(z)$, source kernel $p_z(a)$, and deterministic
+  message $f(z,a)$, the new transcript law is
+  $w'(z,u)=w(z)\Pr[f(z,A)=u\mid z]$. Its updated source kernel is the
+  conditional law of $A$ on that message, completed uniformly on null
+  rows. Both original source coordinates remain available after updating.
+\end{definition}
+
+\begin{theorem}[Exact factorization after adaptive observations]
+  \label{thm:lowerbounds-algebraic-observed-transcript}
+  \lean{Algebraic.Cutwidth.Extractor.factoredWeight_probability,
+    Algebraic.Cutwidth.Extractor.observedTranscriptWeight_probability,
+    Algebraic.Cutwidth.Extractor.observedTranscriptKernel_probability,
+    Algebraic.Cutwidth.Extractor.observedTranscriptWeight_mul_kernel,
+    Algebraic.Cutwidth.Extractor.factoredWeight_observe_left,
+    Algebraic.Cutwidth.Extractor.factoredWeight_observe_right,
+    Algebraic.Cutwidth.Extractor.factoredWeight_observe_left_right,
+    Algebraic.Cutwidth.Extractor.observedTranscript_left_right_probability}
+  \leanok
+  \uses{def:lowerbounds-algebraic-observed-transcript,
+    thm:lowerbounds-algebraic-conditional-distance}
+  A left-side observation updates its conditional kernel while preserving
+  the right kernel; a right-side observation has the symmetric property.
+  The resulting factored law is exactly the pushforward of the original
+  law retaining the message and both original side variables. Every
+  updated kernel and transcript is normalized. A left message followed
+  by a right message depending on that first message has the same exact
+  factorization. These rules include null observation rows and formalize
+  the deterministic-conditioning step of Chattopadhyay--Liao, Lemma~3.25.
+\end{theorem}
+\begin{proof}
+  \leanok
+  Multiplying the updated kernel by its transcript weight recovers the
+  original joint mass on the observed event and is zero elsewhere.
+  Finite pushforward sums then identify the complete factored law.
+  Compose the two exact pushforwards for the adaptive observation.
+\end{proof}
+
+\begin{theorem}[Marginal replacement preserving an external transcript]
+  \label{thm:lowerbounds-algebraic-conditional-coupling}
+  \lean{Algebraic.Cutwidth.Extractor.exists_conditional_marginal_replacement_kernel,
+    Algebraic.Cutwidth.Extractor.exists_conditional_joint_marginal_replacement}
+  \leanok
+  \uses{thm:lowerbounds-algebraic-weighted-coupling,
+    thm:lowerbounds-algebraic-conditional-distance}
+  Let $p$ be a probability law of $(Z,A,B)$ and let $q$ be a probability
+  law of $(Z,A')$ with the same $Z$ marginal. There is a coupling
+  preserving the complete original $(Z,A,B)$ law, giving $(Z,A')$ law
+  $q$, and satisfying
+  $\Pr[A\ne A']=d(p_{ZA},q)$. Its kernel makes $A'$ independent of
+  $B$ given $(Z,A)$, including null rows. The projected law $p'$ of
+  $(Z,A',B)$ preserves $(Z,B)$ jointly and satisfies
+  $d(p,p')=d(p_{ZA},q)$. No per-transcript error bound is required.
+\end{theorem}
+\begin{proof}
+  \leanok
+  Normalize each transcript row, lift a maximal marginal coupling
+  through its original conditional kernel, and multiply by the common
+  transcript mass. Summing exact row disagreements gives the global
+  joint marginal distance. Projection gives the upper bound on joint
+  distance; marginal contraction gives the matching lower bound.
+\end{proof}
+
+\begin{theorem}[Tag-dependent output bijections preserve uniformity distance]
+  \label{thm:lowerbounds-algebraic-output-bijections}
+  \lean{Algebraic.Cutwidth.Extractor.mapWeight_uniformSecond_fiberEquiv,
+    Algebraic.Cutwidth.Extractor.weightDist_uniformSecond_fiberEquiv,
+    Algebraic.Cutwidth.Extractor.mapWeight_uniformSecond_add_right,
+    Algebraic.Cutwidth.Extractor.weightDist_uniformSecond_add_right}
+  \leanok
+  \uses{thm:lowerbounds-algebraic-conditional-distance}
+  For arbitrary finite real weights $p(a,b)$ and output equivalences
+  $e_a:B\simeq C$, the map $(a,b)\mapsto(a,e_a(b))$ commutes with
+  uniformizing the output and preserves the exact distance $d(p,U_2p)$.
+  Adding a tag-dependent mask in a finite additive group is a special case.
+  The statements require neither normalization nor nonnegative weights.
+\end{theorem}
+\begin{proof}
+  \leanok
+  Each fiber bijection preserves its cardinality and uniform law, while
+  the first marginal is unchanged. Apply deterministic contraction in
+  both directions of the complete tagged equivalence.
+\end{proof}
+
+\begin{definition}[Retained affine extraction laws]
+  \label{def:lowerbounds-algebraic-affine-initialization}
+  \lean{Algebraic.Cutwidth.Extractor.retainedSeedWeight,
+    Algebraic.Cutwidth.Extractor.retainedExtractionWeight,
+    Algebraic.Cutwidth.Extractor.affineExtractionWeight}
+  \leanok
+  \uses{def:lowerbounds-algebraic-two-sided-laws}
+  Sample $(Z,A,B)$ from a factored law. A left source $x(Z,A)$ and
+  right seed $y(Z,B)$ give the retained law of
+  $(Z,B,E(x(Z,A),y(Z,B)))$. The affine version first combines the
+  left source with a right mask $m(Z,B)$ using a specified operation,
+  and applies the same extractor and actual seed. Both are deterministic
+  images of the original factored law and retain the whole right variable.
+\end{definition}
+
+\begin{theorem}[Affine initial extraction with complete right information]
+  \label{thm:lowerbounds-algebraic-affine-initialization}
+  \lean{Algebraic.Cutwidth.Extractor.retainedExtractionWeight_probability,
+    Algebraic.Cutwidth.Extractor.affineExtractionWeight_probability,
+    Algebraic.Cutwidth.Extractor.affineExtractionWeight_eq_map,
+    Algebraic.Cutwidth.Extractor.WeightedStrongSeededExtractor.retained_dist_le,
+    Algebraic.Cutwidth.Extractor.WeightedStrongSeededExtractor.affine_dist_le}
+  \leanok
+  \uses{def:lowerbounds-algebraic-affine-initialization,
+    thm:lowerbounds-algebraic-two-sided-leakage,
+    thm:lowerbounds-algebraic-output-bijections}
+  Let the factor laws be normalized and $E$ be a threshold-$K$ strong
+  extractor of nonnegative error $\varepsilon$, with nonempty seed and
+  output alphabets. Suppose $\mu(z)\ge0$ bounds every joint source mass
+  $\Pr[Z=z,x(Z,A)=x]$, and $(Z,y(Z,B))$ is within $\delta$ of its
+  actual transcript law with a fresh uniform seed. Retained extraction
+  has distance at most $\varepsilon+\delta+K\sum_z\mu(z)$ from its
+  actual $(Z,B)$ marginal with independent uniform output. The same bound
+  holds on the combined input whenever each fixed mask and seed acts
+  bijectively on the extractor output. The mask may be correlated
+  arbitrarily with the seed.
+\end{theorem}
+\begin{proof}
+  \leanok
+  Specialize two-sided leakage to singleton observation and leakage
+  alphabets, retaining all of $B$. For the masked input, the extractor's
+  equivariance identifies its actual law with a tagged output bijection
+  of the unmasked law. Exact distance preservation adds no error.
+\end{proof}
+
+\begin{theorem}[The actual scheduled program on a Boolean affine source]
+  \label{thm:lowerbounds-algebraic-scheduled-affine-initialization}
+  \lean{Algebraic.Cutwidth.Extractor.scheduledBlockBooleanExtractor_affine_dist_le,
+    Algebraic.Cutwidth.Extractor.scheduledBlockBooleanExtractor_dyadic_affine_dist_le}
+  \leanok
+  \uses{thm:lowerbounds-algebraic-affine-initialization,
+    thm:lowerbounds-algebraic-scheduled-boolean}
+  The actual scheduled Boolean extractor, under its proved finite
+  budget and reserve conditions, has the affine retained-law guarantee
+  with error $\varepsilon_{\rm schedule}+\delta+K\sum\mu$ on a left
+  source XOR a right mask. The explicit dyadic schedule gives
+  $\varepsilon_{\rm schedule}=2^{-e}$. These are the same bit programs
+  and exact Boolean seed widths already supplied by the uniform runtime
+  construction. No extractor or finite-field instance is a caller premise.
+\end{theorem}
+\begin{proof}
+  \leanok
+  Use the proved weighted extraction guarantee and fixed-seed XOR law
+  of the actual program. Coordinatewise XOR with the mask output is
+  an involution on the complete block-output tuple. Apply affine initial
+  extraction, preserving the actual full right-side marginal.
+\end{proof}
+
 \begin{theorem}[Head and tail structure of block sources]
   \label{thm:lowerbounds-algebraic-block-conditioning}
   \lean{Algebraic.Cutwidth.Extractor.IsBlockSource.exists_head_tail,

@@ -282,7 +282,14 @@ records conditional independence of the replacement from the second
 coordinate given the first, including rows of mass zero. This is the finite
 coupling ingredient of
 [CGL Lemma 4.19, which credits Li's 2015 Lemma 3.20](https://eccc.weizmann.ac.il/report/2021/075/download/).
-The extension over an external conditioning variable remains to be proved.
+`Strong.Weighted.Coupling.Conditional` extends this construction across an
+external transcript. The target law of `(Z,A')` must have the original `Z`
+marginal. The coupling preserves the whole original `(Z,A,B)` law and has
+disagreement exactly equal to the joint marginal distance. Its kernel makes
+`A'` independent of `B` given `(Z,A)`. Projecting to `(Z,A',B)` preserves
+`(Z,B)` jointly, with full joint distance exactly the original marginal
+distance. These are average identities, including null transcript rows;
+individual rows need not have small error.
 
 `Strong.Weighted.Conditional` defines normalized conditional rows, completing
 null rows uniformly, and `uniformSecondWeight`, which replaces the output
@@ -328,6 +335,35 @@ conditioned on `Z,Y_S`. Writing `Wᵢ=E(Xᵢ,Yᵢ)`, the actual conclusion retai
 `ε`. The sets may overlap. For `m`-bit outputs the leakage factor is
 `2^(m*card(S))`; the formal contract uses the explicit joint-mass budget
 in place of logarithmic average conditional min-entropy notation.
+
+`Strong.Weighted.Transcript` formalizes the deterministic-observation rule
+of CL Lemma 3.25. After observing a left-side message `f(Z,A)`, the transcript
+weight is `w(z)*Pr[f(z,A)=u | z]` and its left kernel is normalized on that
+event, with a uniform completion on null events. The unchanged right kernel
+and these new factors give exactly the original joint law with the message
+retained. The symmetric rule and a left message followed by an adaptive
+right message are also proved, preserving both original side variables.
+
+`Strong.Weighted.Conditional.Transport` proves that a bijection of the
+output depending on its retained tag preserves distance from uniform
+exactly. `Strong.Weighted.Affine` applies this to a source combined with a
+right-side mask. If a fixed mask acts bijectively on each fixed-seed
+extractor output, the actual extraction law retains the full right state
+with error `ε + δ + K*∑z μ(z)`. Here `μ(z)` bounds each joint source mass
+and `δ` is the seed's joint distance from uniform given `Z`; no separate
+bound for every transcript row is assumed.
+
+`Strong.Block.Recursion.Scheduled.Affine` supplies this guarantee for the
+actual Boolean extractor program on a left source XOR a correlated right
+mask. Its fixed-seed XOR identity discharges the output-bijection premise,
+and the checked extractor theorem discharges the extraction premise.
+Both the general finite schedule and the explicit error-`2^-e` schedule
+retain every right-side value and use the exact Boolean seed width,
+without caller-provided extractors or finite-field instances. This proves
+the retained-law estimate used by the first affine extraction step in CL
+Theorem 6.1. Matching its parameters and transcript budgets, the
+correlation-breaker call, and the evolving alternating/doubling guarantees
+remain open.
 
 `Strong.Block` defines a block source by prefix-mass inequalities,
 `K*p(prefix, next)≤p(prefix)`. Prefixes and normalized mixtures preserve
