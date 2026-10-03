@@ -51,6 +51,13 @@ example : (fun z : List Bool =>
 example : UnaryFn (fun z => z.length ^ 3 + 2 * z.length + 1) := by
   polytime
 
+-- Rounding to a variable-base power has a bilinear bound, including bases 0 and 1.
+example (b n : List Bool → ℕ) (hb : UnaryFn b) (hn : UnaryFn n) :
+    UnaryFn (fun z => b z ^ Nat.clog (b z) (n z)) := by
+  fail_if_success (clear hb; polytime)
+  fail_if_success (clear hn; polytime)
+  polytime
+
 example (n : List Bool → ℕ) (hn : (fun z => List.replicate (n z) true) ∈ FP) :
     UnaryFn (fun z => n z + 1) := by
   polytime

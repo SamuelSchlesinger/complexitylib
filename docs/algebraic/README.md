@@ -80,7 +80,7 @@ Choose an entry point for the task:
   arguments and native size bounds for functions with two exceptional inputs;
 - `import Complexitylib.Algebraic.LowerBound.Cutwidth` for the `(4 - ε) n` lower bound over
   the full binary basis; see the [cutwidth guide](cutwidth-lower-bound.md)
-  for its two black-box hypotheses;
+  for the remaining hard-family assumption;
 - `import Complexitylib.Algebraic.LowerBound.Nechiporuk` for the `Ω(n² / log n)` formula
   lower bound for the same rectangle-free functions; see the
   [Nechiporuk guide](nechiporuk-lower-bound.md);
@@ -126,80 +126,147 @@ models and their charged operations are explicit in the theorem statements.
 The AC0 development has a detailed [theory map](ac0-theory-map.md).
 
 `Algebraic.LowerBound.Cutwidth` proves that a rectangle-free Boolean function
-with `log₂ K(n) = o(n)` for its rectangle threshold and at least
-`2 ^ (n - 2)` accepting inputs
-needs more than `(4 - ε) n` gates over the full binary basis `B₂`, for every
-`ε > 0` and all large `n`. The cubic bisection bound `(1/6 + ξ) h`
-and the existence of such a hard family are explicit hypotheses of
-`Cutwidth.eventually_lt_size_of_bisectionBound_of_log_sublinear`; the library
-adds no axioms. `Cutwidth.Extractor` proves the transfer from flat-source
-sumset extraction, but does not construct the extractor family.
-The graph prerequisites now include boundary transitions and the complete
-endpoint induction for subcubic graphs, using logarithmic-width tree
-decompositions and concatenation. The assembly of both sides of a balanced
-cut and the asymptotic bisection-to-pathwidth reduction are proved. The
-sharp cubic bisection theorem remains the graph obligation.
-The local improvement work now includes exact cut changes, the five helpful
-configurations used before normalization, accumulation, and logarithmic-cost
-rebalancing through the endpoint decomposition. The finite and asymptotic
-local-to-global reductions are proved. The bounded local helpful-set lemma
-is the remaining graph step.
-For normalized sides, the red/black suppression and lifting identities and
-a bound on the size of a black tree component are proved. The red/black
-development also constructs positive sets from small components and thin
-paths, with an explicit `8 M + 1` bound for the latter. The weighted-tree
-light-pair lemma and local compensation for restoring deleted edges are
-also proved. Excluding helpful sets of at most eleven vertices now supplies
-the neighbor needed for a normalization edge switch. Both switches are now
-constructed, with degree and cut preservation and local reverse extensions
-of at most two or four vertices. The first normalization phase is complete:
-it either finds a helpful set of at most 33 vertices or eliminates all
-boundary edges, with a factor-three transfer back to the original graph.
-The second phase is also complete: it eliminates three-boundary-neighbor
-vertices with a factor-five reverse bound. Together, the phases either find
-a helpful set of at most 165 vertices or normalize the side with a
-factor-fifteen transfer. Cycle selection is proved for a supplied family
-of degree-two regions, with the number isolated bounded by the original
-cycle rank. Simultaneous restoration also has a uniform size bound.
-`RedBlack.PathSystem` now constructs the thin-path family from eligible
-degree-two vertices and their actual red attachments to small components.
-It supplies spanning paths and distinct boundary choices, and instantiates
-cycle selection. Each thin region with one chosen attachment has at most
-`3 M` vertices, giving restoration factor `1 + 9 M` in a subcubic graph.
-Full isolation preserves connectivity among outside vertices.
-`BridgeQuotient` contracts the pieces between surviving boundaries to a
-forest, preserving the connecting edges bijectively; every component is
-a tree. `PathSuppression` identifies and removes the thin-region vertices.
-`PathSystem.exists_core_forest` constructs the forest on the remaining core
-pieces with exact original black reachability, retaining the restoration
-and cycle-rank bounds. With eligible vertices of degree exactly two,
-`PathSystem.exists_counted_core_forest` proves that core edges plus shaded
-paths equal the original number of thin paths. The suppression theorem
-also gives a bijection from removed degree-two vertices to edges, with
-their original neighbor pairs. The initial attachment marks total exactly
-two per shaded path. The isolation and core-forest constructions reserve
-additional cycle rank for each untouched small cyclic component, so
-doubly marked components and small cyclic components share one rank bound.
-Endpoint marks also total two per shaded path, stay outside the eligible
-set, and record the exact outside degree loss. Restoration adds at most
-`3 M` vertices per endpoint mark on the witness. A closed core set that
-absorbs an entire nonempty region boundary now yields a positive witness
-after simultaneous restoration, with the same factor `1 + 9 M` in a
-subcubic graph. Applying this to adjacent core pieces, preservation through
-weighted-tree reorganization, and the final counting argument remain open.
-The [cutwidth guide](cutwidth-lower-bound.md) describes the argument and
-its hypotheses. Two corollaries share the assembly: the same bound for
-nondeterministic circuits with arbitrarily many witness bits
-(`Cutwidth.nondet_eventually_lt_size_of_log_sublinear`), and an average-case
-form for balanced functions with polynomial threshold, where circuits of size `(4 - ε) n`
-agree with the
-function on at most `(1/2 + 3ν) 2 ^ n + 2 ^ ((1 - ε/24) n)` inputs
-(`Cutwidth.eventually_card_agree_le_of_pathwidthBound`, see the
-[average-case note](average-case-cutwidth.md)). `Algebraic.LowerBound.Nechiporuk` proves that the same
+family with `log₂ K(n) = o(n)` and at least `2 ^ (n - 2)` accepting inputs
+needs more than `(4 - ε) n` gates over the full binary basis, for every
+`ε > 0` and all large `n` (`Cutwidth.eventually_lt_size_of_rectangleFree`).
+The sharp cubic bisection and pathwidth bounds are proved. The remaining
+hypothesis is the hard family: a uniform polynomial-time sumset family
+meeting the eventual threshold still has to be constructed in Lean.
+
+The graph proof uses boundary normalization, connected clusters, and red-edge
+incidence counting to find bounded helpful sets. Lifting and reversing the
+first normalization phase gives size at most `36 M (1 + 3 M)` when
+`4 ≤ 3ξM`; accumulation and rebalancing prove the Monien–Preis bisection
+conclusion. The Fomin–Høie reduction then gives cubic pathwidth. The
+connected-cluster replacement for marked-tree reorganization was developed
+in this formalization. The thin-path, weighted core, and restoration
+infrastructure remains available independently.
+
+`Cutwidth.Extractor` transfers flat-source sumset extraction to the
+hard-family properties. Balanced padding permits any fixed error below
+`1/2` at twice the threshold and preserves any supplied `FP` evaluator.
+`Extractor.SourceReduction` proves that the specified low-order parity bounds
+on sufficiently many good source fixings imply extraction with error `35/72`.
+This includes normalized moment bounds, majority robustness, and averaging
+over fixings. The finite extractor-to-sampler conversion, amplification,
+and simultaneous parity-coordinate selection are also proved. The concrete
+condenser polynomial map has checked degree and linearity invariants, plus
+finite neighbor expansion and seed-preserving flat lossless condensation
+for a supplied irreducible modulus. Exact subset averaging extends the
+guarantee to all larger flat supports. An explicit binary trinomial family
+has checked irreducibility, quotient cardinality, a noncube root, and a
+fixed-width coefficient codec. Addition, multiplication, remainder, bounded
+modular squaring, blockwise Horner evaluation, and trinomial generation have
+uniform `FP` evaluators. The complete encoded condenser uses checked
+extension-field packing and computes exactly the polynomial map, with
+injective source encoding at every fixed length within capacity and
+source linearity for each seed. Its flat-source and mixture guarantees now
+apply to the actual program. An explicit unary parameter schedule proves
+error at most `2^-e`, seed width at most `6(u+1)T`, and output width at most
+`(1+1/u)k+b`, where `T=e+clog₂(9(n+1)(k+1))+1`, `b` is the seed width,
+and `u>0`. A single `FP` evaluator includes this parameter generation.
+The next checked layer is a concrete one-shot strong linear extractor.
+`Extractor.Strong` tests the joint seed-output distribution; `Hashing` proves
+the sharp finite leftover-hash bound, and multiplication followed by a
+coefficient prefix supplies a universal linear hash with a uniform `FP`
+evaluator. Exact coordinate serialization and mixture-aware composition
+connect this hash to the scheduled condenser. For every flat `n`-bit support
+of size at least `2^(ell+2e)`, `decodedOneShotExtractor_flat` gives `ell` output
+bits and error at most `2^-e`, retaining both independent seeds. The actual
+program has exact output length, preserves source XOR for fixed seeds, and
+has one uniform `FP` evaluator including parameter generation.
+
+The same guarantee now holds for every normalized source with point masses
+at most `2^(-(ell+2e))`. An exact decomposition into flat supports uses
+Mathlib's Birkhoff--von Neumann theorem, formalized by Bhavik Mehta. The
+scheduled condenser likewise preserves the cap `2^-k` on a seedwise ideal
+output with error `2^-e`. Finite coupling, marginal replacement, two-block
+repair, and a general block-source invariant are also checked. These supply
+the probability layers needed when intermediate conditional sources are
+nonuniform. Shared-seed block condensation is now proved as well: applying
+the same strong condenser to `t` dependent blocks with one uniform seed
+gives a seed-conditioned block source with joint error at most `t*δ`, where
+`δ` is the condenser error. The result specializes to the actual scheduled
+condenser and to strong block extraction against uniform joint output.
+Multiblock splitting is also checked: a threshold-`2^k` block source on `t`
+pairs has a split law within distance `t*2^-e` of a threshold-`2^s` source
+on `2t` successive half-blocks, when each half has `2^m` values, `s≤m`,
+and `m+s+e≤k`.
+The pairs can be dependent, and splitting uses no new randomness.
+A seed-family corollary retains earlier seeds with the same joint error.
+
+The finite recursive composition is now defined and checked. Each level
+adds one fresh seed, applies a shared-seed condenser, and splits its pair
+outputs. The proof carries the joint approximation through all levels;
+it does not assume a small error at every individual seed. Joining an
+initial condenser and a final block extractor gives an actual strong
+extractor from supplied components satisfying the finite entropy budgets.
+For `h` levels with local error `2^-E`, its total error is at most
+`(3*2^h-1)*2^-E`; `E=e+h+2` suffices for error `2^-e`. Seed cardinalities
+multiply once per level, so power-of-two seed widths add.
+The recursive maps preserve fixed-seed additivity when their components do.
+The actual scheduled condenser now has a checked representation as two equal
+Boolean-vector halves. Its output length is even, so this representation
+preserves the entropy threshold, error, and rate without padding.
+An explicit sufficient inequality now supplies a level's two entropy
+conditions. The actual shared-seed block-level program also has a uniform
+`FP` certificate and exact fixed-width tuple semantics.
+Its output is proved equal to the statistical condense-and-split map.
+The scheduled extractor now instantiates every component at actual rounded
+widths. It uses a factor-four entropy recurrence and an explicit leaf reserve;
+its strong guarantee, fixed-seed XOR law, and finite total seed bound are checked.
+
+The asymptotic family fixes natural `a,e`, takes `L=clog 2 (n+1)` and
+`h=a*clog 2 (L+1)`, and eventually extracts with error at most `2^-e`.
+Its actual entropy threshold in bits is `o(n)`, its actual seed length is
+eventually at most `16384L`, and its output lies between `L^(a+1)` and
+`2^a*(L+1)^(a+1)`. Thus the shared-seed recursion supplies any fixed
+polylogarithmic output power with logarithmic seed length. These bounds
+are proved for the rounded construction, with `a,e` fixed before the limit.
+
+One total `FP` evaluator now generates all parameters, runs the initial
+condenser and every block level, and extracts the leaves. It clips a runtime
+requested depth to `L`; the family's requested depth is eventually unchanged.
+The independent bound `4^depth≤4*(n+1)^2` certifies parameter generation
+even on inputs that cannot meet the statistical entropy premise. A canonical
+seed codec identifies the full field-seed tuple with every word of the exact
+seed length, without enumeration. On those words, the complete program
+computes exactly the statistical extractor's output, serialized in block order.
+For each fixed `a,e`, `polylogBlockExtractorProgram` is one `FP` string
+function of the source and seed word, with proved eventual agreement with
+the entire family on every source input and canonical seed.
+The Boolean interface reads the actual program's output and proves strong
+extraction with the complete uniformly sampled Boolean seed, together with
+fixed-seed XOR linearity. It requires no caller-supplied field instances.
+
+This follows the condense-then-hash and recursive steps of
+[Chattopadhyay--Goodman--Liao, Lemma 4.9 and Theorem 5.6](https://eccc.weizmann.ac.il/report/2021/075/download/),
+with a coarser entropy schedule than CGL's theorem. A separate near-halving
+schedule now supplies the ordinary extractor `Γ`: for all sufficiently large
+`b`, it takes `8b` source bits with entropy at least `2b`, returns `b` bits
+with error at most `1/4`, and uses at most `2^27*(clog 2 (b+1))^3` seed bits.
+The finite guard and every rounded reserve inequality are proved for the
+actual construction. Its complete bit program has exact semantic correctness,
+including arbitrary trailing seed bits. Padding to the displayed budget
+preserves the strong guarantee with the whole seed retained.
+`gammaBlockExtractorEval` is one total `FP` string function, and its exact
+all-size output agrees with `gammaBlockPaddedExtractor` on the displayed
+seed budget. The extraction guarantee uses the proved eventual size guard.
+The affine correlation breaker, its internal extractor requirements, parity
+estimates, and composition into the final uniform hard family still need
+construction and proof.
+The [cutwidth guide](cutwidth-lower-bound.md) gives the exact remaining
+construction obligations and source credits.
+
+The same lower bound holds for nondeterministic circuits with arbitrarily
+many witness bits (`Cutwidth.nondet_eventually_lt_size_of_rectangleFree`).
+For balanced functions with polynomial threshold, circuits of size
+`(4 - ε) n` agree on at most `(1/2 + 3ν) 2 ^ n + 2 ^ ((1 - ε/24) n)` inputs
+(`Cutwidth.eventually_card_agree_le_of_balanced`; see the
+[average-case note](average-case-cutwidth.md)).
+`Algebraic.LowerBound.Nechiporuk` proves that the same rectangle-free
 functions need `Ω(n² / log n)` leaves in any formula over the full binary
-basis, by Nechiporuk's subfunction counting; rectangle-freeness gives the
-maximal subfunction count on every block simultaneously. The
-[Nechiporuk guide](nechiporuk-lower-bound.md) has the details.
+basis. The [Nechiporuk guide](nechiporuk-lower-bound.md) has the details.
 `Algebraic.LowerBound.KarchmerWigderson` provides the communication-game
 view of De Morgan formulas, the Karchmer–Wigderson theorem, the composition
 `f ⋄ g` with its elementary depth and size bounds, and the

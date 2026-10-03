@@ -28,7 +28,8 @@ telescopes to the factor-five bound independently of the sequence length.
 Combining with `BoundaryNormalization` completes both phases for any cubic
 graph: either there is a helpful set of at most 165 vertices, or all moved
 sets in a normalized graph transfer back with a factor-fifteen bound.
-The normalized red/black helpful-set theorem remains a separate obligation.
+The connected-cluster proof in `Helpful` needs only the first phase;
+this stronger normalization remains available for the thin-path arguments.
 
 Source: Burkhard Monien and Robert Preis, *Upper bounds on the bisection
 width of 3- and 4-regular graphs*, Journal of Discrete Algorithms 4 (2006),

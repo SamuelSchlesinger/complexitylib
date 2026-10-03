@@ -10,19 +10,19 @@ public import Mathlib.Combinatorics.SimpleGraph.DegreeSum
 public import Mathlib.Analysis.SpecialFunctions.Log.Base
 
 /-!
-# Path decompositions and the pathwidth hypothesis
+# Path decompositions and the cubic pathwidth bound
 
 A path decomposition of a simple graph is a sequence of bags covering every
 vertex and every edge, in which the bags containing a fixed vertex are
 consecutive. Its width is one less than the largest bag.
 
-`PathwidthBound ξ N₀` is the pathwidth theorem for cubic graphs, taken as a
-hypothesis: every simple 3-regular graph on more than `N₀` vertices has a path
+`PathwidthBound ξ N₀` states the pathwidth bound for cubic graphs:
+every simple 3-regular graph on more than `N₀` vertices has a path
 decomposition of width at most `(1/6 + ξ) h`, where `h` is the number of
 vertices. Together with the compression and median-ordering arguments it
 yields the graph-ordering hypothesis `Multigraph.OrderingBound`.
-`PathDecomposition.Bisection` proves it from the cubic bisection hypothesis;
-the sharp Monien–Preis bisection theorem remains unformalized.
+`PathDecomposition.Bisection` proves it from a cubic bisection bound, and
+`Bisection.Helpful` supplies the sharp bound for every positive slack.
 
 The cut of a vertex set in a simple graph, `SimpleGraph.cutFinset`, is the set
 of edges with exactly one endpoint in the set.
@@ -59,7 +59,7 @@ def PathDecomposition.trivial [Fintype W] : PathDecomposition H where
   edge_mem := fun _ _ _ => ⟨0, Finset.mem_univ _, Finset.mem_univ _⟩
   consecutive := fun _ _ _ _ _ _ _ _ => Finset.mem_univ _
 
-/-- The pathwidth hypothesis for cubic graphs with slack `ξ` and threshold
+/-- The pathwidth bound for cubic graphs with slack `ξ` and threshold
 `N₀`: every simple 3-regular graph on `h > N₀` vertices has a path
 decomposition all of whose bags have at most `(1/6 + ξ) h + 1` vertices. -/
 def PathwidthBound (ξ : ℝ) (N₀ : Nat) : Prop :=

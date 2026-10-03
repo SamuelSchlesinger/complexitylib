@@ -53,7 +53,7 @@ example, `z ↦ |z| / 3` is polynomial-time by
 - `UnaryFn.sum`, `UnaryFn.count`, `UnaryFn.find`, `UnaryFn.bmax`,
   `UnaryFn.iterate` — loops
 - `UnaryFn.div`, `UnaryFn.mod`, `UnaryFn.powMin`, `UnaryFn.pow_of_le`,
-  `UnaryFn.size`, `UnaryFn.log`, `UnaryFn.clog`
+  `UnaryFn.size`, `UnaryFn.log`, `UnaryFn.clog`, `UnaryFn.pow_clog`
 -/
 
 public section
@@ -353,5 +353,12 @@ theorem UnaryFn.clog (hb : UnaryFn b) (hf : UnaryFn f) :
       (FPPred.lt (hb.lift.powMin UnaryFn.index hf.lift) hf.lift))).of_eq fun z => by
     simp only [pairFst_pair, pairSnd_pair, List.length_replicate]
     exact (clog_eq_card_filter_range _ _).symm
+
+/-- Rounding a polynomial-time number up to a power of a polynomial-time base
+is polynomial-time: the result is at most the base times the target plus one. -/
+theorem UnaryFn.pow_clog (hb : UnaryFn b) (hf : UnaryFn f) :
+    UnaryFn fun z => b z ^ Nat.clog (b z) (f z) :=
+  hb.pow_of_le (hb.clog hf) ((hb.mul hf).add (UnaryFn.const 1))
+    fun z => pow_clog_le_mul_add_one (b z) (f z)
 
 end Complexity

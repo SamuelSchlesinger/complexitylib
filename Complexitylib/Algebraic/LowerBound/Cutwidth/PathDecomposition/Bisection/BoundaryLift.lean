@@ -22,9 +22,9 @@ The original edges between vertices of `S \ C` are black.
 For an interior set `X`, the lift adds every boundary vertex adjacent to it.
 Its helpfulness equals its internal red edges minus its external black
 edges. Different boundary vertices are counted separately, even when they
-represent parallel red edges. The normalization to these hypotheses and
-the existence of a uniformly bounded positive red/black witness remain
-separate obligations.
+represent parallel red edges. `BoundaryNormalization` supplies these
+hypotheses, and `RedBlack.Clusters` proves the bounded positive-witness
+theorem. `Helpful` composes the three steps.
 -/
 
 @[expose] public section

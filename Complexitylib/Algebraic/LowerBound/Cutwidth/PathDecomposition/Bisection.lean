@@ -17,9 +17,9 @@ the decompositions of its sides and their boundary graph concatenate with
 the explicit finite bound below. For balanced cuts, every positive linear
 slack absorbs the logarithmic remainder.
 
-The Monien–Preis theorem asserting `BisectionBound ξ N₀` for every positive
-`ξ` and some `N₀` remains unproved. The elementary instance with slack
-`4/3` verifies the contract but does not provide the sharp coefficient.
+`Bisection.Helpful` proves the Monien–Preis theorem asserting
+`BisectionBound ξ N₀` for every positive `ξ` and some `N₀`, then applies
+this reduction to obtain the sharp pathwidth bound.
 -/
 
 @[expose] public section

@@ -16,9 +16,11 @@ Zero-padding the two sides of a coordinate rectangle gives independent flat
 sources whose XOR is the glued input. Flat-source sumset extraction therefore
 implies `Balanced`, then rectangle-freeness and the accepting-input bound.
 These are the combinatorial bridges for the extractor route in Ryan Williams's
-September 2026 working note. The extractor construction and the cubic
-bisection theorem remain separate proof obligations; the pathwidth reduction
-from bisection is proved.
+September 2026 working note. The cubic bisection and pathwidth theorems are
+proved. The new deterministic, nondeterministic, and average-case endpoints
+instantiate these graph bounds, leaving the extractor family as the remaining
+application obligation. The generic interfaces with explicit graph bounds
+are retained.
 -/
 
 @[expose] public section
@@ -190,7 +192,7 @@ theorem eventually_hard_of_flatSumsetExtractor
 
 /-- The extractor route to the coefficient-four lower bound. Only
 sublinear source entropy is needed, with any fixed error at most one quarter.
-The extractor construction and the graph-ordering theorem remain hypotheses. -/
+This generic interface keeps the graph-ordering bound as an explicit parameter. -/
 theorem eventually_lt_size_of_flatSumsetExtractor
     (order : ∀ η : ℝ, 0 < η → ∃ C : ℝ, Multigraph.OrderingBound η C)
     (f : ∀ n, Cslib.BooleanFunction n) (K : Nat → Nat) {ν : ℝ} (hν : ν ≤ 1 / 4)
@@ -221,9 +223,8 @@ theorem eventually_lt_size_of_pathwidthBound_of_flatSumsetExtractor
   have := Multigraph.orderingBound_of_pathwidthBound (by positivity) hN₀
   rwa [show 2 * (η / 2) = η by ring] at this
 
-/-- The extractor route with the cubic bisection theorem as the remaining
-graph hypothesis. The extraction-to-rectangle and bisection-to-pathwidth
-reductions are both proved. -/
+/-- The generic extractor route with an explicit cubic bisection bound.
+The extraction-to-rectangle and bisection-to-pathwidth reductions are proved. -/
 theorem eventually_lt_size_of_bisectionBound_of_flatSumsetExtractor
     (bisection : ∀ ξ : ℝ, 0 < ξ → ∃ N₀ : Nat, BisectionBound ξ N₀)
     (f : ∀ n, Cslib.BooleanFunction n) (K : Nat → Nat) {ν : ℝ} (hν : ν ≤ 1 / 4)
@@ -249,6 +250,47 @@ theorem nondet_eventually_lt_size_of_flatSumsetExtractor
   have hard := eventually_hard_of_flatSumsetExtractor hν hK extract
   exact nondet_eventually_lt_size_of_log_sublinear order f K hK
     (hard.mono fun _ h => h.2) (hard.mono fun _ h => h.1) hε
+
+/-- Flat sumset extraction at sublinear source entropy gives the deterministic
+coefficient-four lower bound with all graph bounds instantiated. -/
+theorem eventually_lt_size_of_flatSumsetExtractor_of_log_sublinear
+    (f : ∀ n, Cslib.BooleanFunction n) (K : Nat → Nat) {ν : ℝ} (hν : ν ≤ 1 / 4)
+    (hK : (fun n => Real.logb 2 (K n)) =o[Filter.atTop] (fun n => (n : ℝ)))
+    (extract : ∀ᶠ n in Filter.atTop, FlatSumsetExtractor (f n) (K n) ν)
+    {ε : ℝ} (hε : 0 < ε) :
+    ∀ᶠ n in Filter.atTop, ∀ circuit : Circuit Binary.signature n 1,
+      circuit.Computes Binary.interpretation (fun x _ => f n x) →
+        (4 - ε) * n < circuit.size := by
+  have hard := eventually_hard_of_flatSumsetExtractor hν hK extract
+  exact eventually_lt_size_of_rectangleFree f K hK
+    (hard.mono fun _ h => h.2) (hard.mono fun _ h => h.1) hε
+
+/-- Flat sumset extraction at sublinear source entropy gives the same lower
+bound with unrestricted nondeterministic witnesses and no graph hypothesis. -/
+theorem nondet_eventually_lt_size_of_flatSumsetExtractor_of_log_sublinear
+    (f : ∀ n, Cslib.BooleanFunction n) (K : Nat → Nat) {ν : ℝ} (hν : ν ≤ 1 / 4)
+    (hK : (fun n => Real.logb 2 (K n)) =o[Filter.atTop] (fun n => (n : ℝ)))
+    (extract : ∀ᶠ n in Filter.atTop, FlatSumsetExtractor (f n) (K n) ν)
+    {ε : ℝ} (hε : 0 < ε) :
+    ∀ᶠ n in Filter.atTop, ∀ (m : Nat) (circuit : Circuit Binary.signature (n + m) 1),
+      NondetComputes circuit (f n) → (4 - ε) * n < circuit.size := by
+  have hard := eventually_hard_of_flatSumsetExtractor hν hK extract
+  exact nondet_eventually_lt_size_of_rectangleFree f K hK
+    (hard.mono fun _ h => h.2) (hard.mono fun _ h => h.1) hε
+
+/-- Polynomial-threshold flat sumset extraction gives the average-case
+agreement bound using the proved graph theorems. -/
+theorem eventually_card_agree_le_of_flatSumsetExtractor
+    (f : ∀ n, Cslib.BooleanFunction n) (K : Nat → Nat) (c : Nat) {ν : ℝ} (hν : 0 ≤ ν)
+    (hK : ∀ᶠ n in Filter.atTop, K n ≤ n ^ c)
+    (extract : ∀ᶠ n in Filter.atTop, FlatSumsetExtractor (f n) (K n) ν)
+    {ε : ℝ} (hε : 0 < ε) :
+    ∀ᶠ n in Filter.atTop, ∀ circuit : Circuit Binary.signature n 1,
+      (circuit.size : ℝ) ≤ (4 - ε) * n →
+        ((Finset.univ.filter fun x => circuit.eval Binary.interpretation x 0 = f n x).card : ℝ) ≤
+          (1 / 2 + 3 * ν) * 2 ^ n + (2 : ℝ) ^ ((1 - ε / 24) * n) :=
+  eventually_card_agree_le_of_balanced f K c hν hK
+    (extract.mono fun _ h => h.balanced) hε
 
 end Cutwidth
 end Algebraic

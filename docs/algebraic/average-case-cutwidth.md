@@ -2,10 +2,11 @@
 
 **Status.** Paper proof, written before formalization; formalized on
 2026-09-26 in `Algebraic.LowerBound.Cutwidth.{Direction, Balanced, AverageCase}`
-with no `sorry` and only the standard axioms. The formal statement is
-`Cutwidth.eventually_card_agree_le_of_pathwidthBound` (pathwidth hypothesis)
-and `Cutwidth.eventually_card_agree_le` (ordering hypothesis), with fixed-`n`
-core `card_agree_le_of_bounds`; see the section *Formal statement* at the end.
+with no `sorry` and only the standard axioms. The public entry point
+`Cutwidth.eventually_card_agree_le_of_balanced` now uses the proved cubic
+graph bounds. The generic variants `eventually_card_agree_le_of_pathwidthBound`
+and `eventually_card_agree_le` remain available, with fixed-`n` core
+`card_agree_le_of_bounds`; see the section *Formal statement* at the end.
 Every step below is stated in the vocabulary of `Algebraic.LowerBound.Cutwidth`
 so that the Lean development can be read against it line by line. The claim is *not* a consequence of the worst-case
 cut-counting lemma: inputs whose past set is still small at a node sit in thin
@@ -23,8 +24,44 @@ A function `f : {0,1}ⁿ → {0,1}` is `(K, ν)`-balanced when for every split
 Li's sumset extractor with error `ν` is `(n^c, ν)`-balanced for the same
 reason it is rectangle-free: a rectangle with both sides at least `K = n^c`
 is the XOR of two independent sources of min-entropy `c log n`.
+The uniform family satisfying this hypothesis remains a construction
+obligation in Lean. The checked seeded primitives now include a one-shot
+strong linear extractor and a complete shared-seed block recursion. For
+fixed natural `a,e`, take `L=clog 2 (n+1)` and `h=a*clog 2 (L+1)`.
+The actual recursive family eventually extracts with error `2^-e`, its
+entropy threshold in bits is `o(n)`, its seed length is eventually at most `16384L`,
+and its output lies between `L^(a+1)` and `2^a*(L+1)^(a+1)`.
+These bounds use the rounded component widths and retained seeds. The
+constant-rate schedule follows CGL's recursive method with a coarser
+entropy bound than their theorem.
 
-**Theorem (average case).** Assume the graph-ordering hypothesis. Let `f n`
+The entire runtime program has a uniform `FP` certificate, including
+parameter generation, initial condensation, all block levels, and leaf
+extraction. It clips requested depth to `L`, which eventually leaves the
+fixed family's depth unchanged. An exact seed-word codec uses no field
+enumeration, and the complete program computes exactly the statistical
+extractor's output on canonical seed words. For each fixed `a,e`, one `FP`
+string function has proved eventual agreement with the entire family for
+all source inputs and canonical seeds. The Boolean interface uses the
+actual program directly: its strong
+seeded guarantee and fixed-seed XOR law require no caller-supplied field
+instances. A separate near-halving schedule now constructs the ordinary
+extractor `Γ`: eventually it returns `b` bits from `8b` source bits at
+entropy `2b`, error `1/4`, and seed length at most `2^27*(clog 2 (b+1))^3`.
+The actual rounded parameters, retained-seed guarantee, and exact runtime
+semantics are checked. One total `FP` evaluator computes the Boolean family
+on a seed padded to that explicit budget, with the entire seed uniformly
+sampled and retained in the strong guarantee. The affine correlation breaker,
+its internal extractor requirements, the parity estimates, and the final
+uniform sumset family remain construction obligations.
+The [cutwidth guide](cutwidth-lower-bound.md) records the exact checked
+interfaces and credits the GUV and CGL constructions. The seeded result
+does not establish the polynomial support threshold and quantitative balance
+on every large rectangle required by this average-case theorem. Exact global
+balance from the proved padding operation alone does not establish those
+properties either.
+
+**Theorem (average case).** Let `ν ≥ 0` and let `f n`
 be `(K n, ν)`-balanced with `K n ≤ n^c`. Then for every `ε > 0` there is
 `δ > 0` such that for all large `n`, every circuit `g` with at most
 `(4 − ε) n` gates satisfies
@@ -116,15 +153,14 @@ and `|f⁻¹(1)| ≥ (1/2 − ν) 2ⁿ` by balance on the whole cube (split at
 
     agreement ≤ (1/2 + 3ν) 2ⁿ + 4(K − 1) 2^{n − δ n + 4} ≤ (1/2 + 3ν) 2ⁿ + 2^{(1 − δ/2) n}
 
-for large `n`, using `K ≤ n^c`. The output-is-an-input case has `g` a
-literal, which agrees with `f` on at most `(1/2 + ν) 2ⁿ + 2K 2^{n−1}/2^{...}`;
-more simply, a literal is a large rectangle pair and balance applies directly.
+for large `n`, using `K ≤ n^c`. The output-is-an-input case follows from
+`card_agree_le_of_dependsOnlyOn`, since a literal depends on one coordinate.
 
-## What the Lean development needs
+## Formalized components
 
-1. `Balanced f K ν` (`Rectangle.lean`), and `card_accepting_ge` from balance
+1. `Balanced f K ν` (`Balanced.lean`), and `card_accepting_bounds_of_balanced` from balance
    on the whole cube.
-2. `Wiring.trace_agree_of_agree_backward`: Lemma 1, by strong induction on
+2. `Wiring.trace_eq_of_agree_backward`: Lemma 1, by strong induction on
    the wire index, reusing `eq_firstOut_of_satisfies` and `eq_trace_of_satisfies`.
 3. `Network.card_accepting_inter_le` (Lemma 3) for a network with unique
    satisfying assignments and the two determination properties as
@@ -140,8 +176,7 @@ more simply, a literal is a large rectangle pair and balance applies directly.
 The Lean theorem is slightly sharper than the sketch above and fixes the
 constants:
 
-    theorem eventually_card_agree_le_of_pathwidthBound
-        (pathwidth : ∀ ξ > 0, ∃ N₀, PathwidthBound ξ N₀)
+    theorem eventually_card_agree_le_of_balanced
         (f : ∀ n, BooleanFunction n) (K : ℕ → ℕ) (c : ℕ) (hν : 0 ≤ ν)
         (hK : ∀ᶠ n, K n ≤ n ^ c) (hbal : ∀ᶠ n, Balanced (f n) (K n) ν) (hε : 0 < ε) :
         ∀ᶠ n, ∀ circuit : Circuit Binary.signature n 1, circuit.size ≤ (4 - ε) n →
@@ -164,7 +199,7 @@ How the sketch maps to the modules:
 | few inputs read | `card_agree_le_of_dependsOnlyOn` (subcube refinement by `⌈log₂ K⌉` free coordinates) |
 | whole-cube balance | `card_accepting_bounds_of_balanced` |
 | numeric core | `thin_mass_le` |
-| assembly | `card_agree_eq`, `card_agree_le_of_bounds`, `eventually_card_agree_le`, `eventually_card_agree_le_of_pathwidthBound` |
+| assembly | `card_agree_eq`, `card_agree_le_of_bounds`, `eventually_card_agree_le`, `eventually_card_agree_le_of_pathwidthBound`, `eventually_card_agree_le_of_balanced` |
 
 The one-sided count is stated for an arbitrary constraint network with
 unique satisfying assignments and the two determination properties, so a

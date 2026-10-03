@@ -14,7 +14,9 @@ public import Complexitylib.Algebraic.LowerBound.Cutwidth.FourN
 
 A circuit with at most `(4 - ε) n` gates agrees with a `(K, ν)`-balanced
 function on at most `(1/2 + 3ν) 2ⁿ + 2^{(1 - ε/24) n}` inputs, for `K`
-polynomial and `n` large, under the graph-ordering hypothesis.
+polynomial and `n` large. `eventually_card_agree_le_of_balanced` uses the
+proved graph bounds; its remaining application obligation is a family with
+the stated balance property. The generic graph-ordering interface is retained.
 
 This does not follow from the worst-case cut-counting lemma: an input whose
 past set is still small at a vertex lies in a thin rectangle, on which a
@@ -771,6 +773,20 @@ theorem eventually_card_agree_le_of_pathwidthBound
   refine ⟨N₀ + 9, ?_⟩
   have := Multigraph.orderingBound_of_pathwidthBound (by positivity) hN₀
   rwa [show 2 * (η / 2) = η by ring] at this
+
+/-- Polynomial-threshold balance gives the average-case coefficient-four
+bound using the proved cubic bisection and pathwidth theorems. -/
+theorem eventually_card_agree_le_of_balanced
+    (f : ∀ n, Cslib.BooleanFunction n) (K : Nat → Nat) (c : Nat) {ν : ℝ} (hν : 0 ≤ ν)
+    (hK : ∀ᶠ n in atTop, K n ≤ n ^ c)
+    (hbal : ∀ᶠ n in atTop, Balanced (f n) (K n) ν)
+    {ε : ℝ} (hε : 0 < ε) :
+    ∀ᶠ n in atTop, ∀ circuit : Circuit Binary.signature n 1,
+      (circuit.size : ℝ) ≤ (4 - ε) * n →
+        ((Finset.univ.filter fun x => circuit.eval Binary.interpretation x 0 = f n x).card : ℝ) ≤
+          (1 / 2 + 3 * ν) * 2 ^ n + (2 : ℝ) ^ ((1 - ε / 24) * n) :=
+  eventually_card_agree_le_of_pathwidthBound (fun _ h => exists_pathwidthBound h)
+    f K c hν hK hbal hε
 
 end Cutwidth
 end Algebraic

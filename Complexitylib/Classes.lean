@@ -16,6 +16,13 @@ public import Complexitylib.Classes.PropertyDensity
 public import Complexitylib.Classes.SharpP
 public import Complexitylib.Classes.Negligible
 public import Complexitylib.Classes.P
+public import Complexitylib.Classes.P.BitPolynomial
+public import Complexitylib.Classes.P.BitPolynomial.Addition
+public import Complexitylib.Classes.P.BitPolynomial.Remainder
+public import Complexitylib.Classes.P.BitPolynomial.Frobenius
+public import Complexitylib.Classes.P.BitPolynomial.BlockEval
+public import Complexitylib.Classes.P.BitPolynomial.Trinomial
+public import Complexitylib.Classes.P.BitPolynomial.Transpose
 public import Complexitylib.Classes.Promise
 public import Complexitylib.Classes.Promise.CircuitSize
 public import Complexitylib.Classes.PPoly

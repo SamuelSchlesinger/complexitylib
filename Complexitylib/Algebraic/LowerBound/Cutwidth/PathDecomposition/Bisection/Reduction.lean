@@ -13,10 +13,10 @@ import Complexitylib.Algebraic.LowerBound.Cutwidth.PathDecomposition.Bisection.R
 /-!
 # Reducing the sharp cubic bisection theorem to bounded helpful sets
 
-The accumulation and rebalancing steps are proved. What remains is Monien
-and Preis's local helpful-set lemma: for every positive slack, a side with
-cut density above `1/3` plus that slack contains a helpful set of uniformly
-bounded size. The bound may depend on the slack but not on the graph.
+The accumulation and rebalancing steps reduce sharp bisection to a local
+helpful-set lemma: for every positive slack, a side with cut density above
+`1/3` plus that slack contains a helpful set of uniformly bounded size.
+`Bisection.Helpful` proves that local lemma and instantiates this reduction.
 
 The finite theorem displays the size threshold needed by this reduction.
 Its logarithmic remainder is absorbed in any positive asymptotic slack.
@@ -42,8 +42,8 @@ theorem exists_bisection_of_helpful {W : Type} [Fintype W] (H : SimpleGraph W)
   Internal.exists_bisection_of_helpful H regular hξ M budget find
 
 /-- A uniform bounded helpful-set lemma at positive slack implies the sharp
-asymptotic bisection bound at that same slack. The local lemma is the sole
-unproved input in this graph reduction. -/
+asymptotic bisection bound at that same slack. `Bisection.Helpful` supplies
+the local lemma with an explicit size bound. -/
 theorem exists_bisectionBound_of_helpful {ξ : ℝ} (hξ : 0 < ξ) (M : Nat)
     (find : ∀ (W : Type) [Fintype W] [DecidableEq W] (H : SimpleGraph W)
       [DecidableRel H.Adj], H.IsRegularOfDegree 3 →

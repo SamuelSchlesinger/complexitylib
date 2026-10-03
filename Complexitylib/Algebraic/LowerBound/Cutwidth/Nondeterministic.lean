@@ -19,11 +19,14 @@ forgotten network (`Network.forget`) with the same multigraph. The excess of
 the wiring graph is the number of reachable gates minus the number of
 reachable inputs, ordinary and witness alike, which is at most the number of
 gates minus the number of ordinary inputs read. Hence the same bound holds:
-nondeterminism does not reduce the size below `(4 - ε) n` for any
-rectangle-free family with the hypotheses of `eventually_lt_size`. The bound
+nondeterminism does not reduce the size below `(4 - ε) n` for any dense
+rectangle-free family with sublinear logarithmic threshold. The bound
 `Wiring.card_vertex_le_two_mul_size` makes the graph size independent of the
 number of declared inputs, so the witness count `m` is unrestricted.
-`nondet_eventually_lt_size_of_log_sublinear` only needs `log₂ K(n) = o(n)`.
+`nondet_eventually_lt_size_of_rectangleFree` instantiates the proved graph
+bounds and only needs `log₂ K(n) = o(n)`, rectangle-freeness, and the
+accepting-input bound. Constructing a family with these properties remains
+the application obligation. The generic graph-ordering interfaces are retained.
 
 The proof organization, the threshold-edge charging, the extractor
 application, and the graph restoration argument of the deterministic bound
@@ -317,6 +320,23 @@ theorem nondet_eventually_lt_size_of_pathwidthBound
   refine ⟨N₀ + 9, ?_⟩
   have := Multigraph.orderingBound_of_pathwidthBound (by positivity) hN₀
   rwa [show 2 * (η / 2) = η by ring] at this
+
+/-- A dense rectangle-free family with sublinear logarithmic threshold
+requires more than `(4 - ε) n` gates even with arbitrarily many witness
+inputs. All graph bounds are instantiated by the proved cubic theorem. -/
+theorem nondet_eventually_lt_size_of_rectangleFree
+    (f : ∀ n, Cslib.BooleanFunction n) (K : Nat → Nat)
+    (hK : (fun n => Real.logb 2 (K n)) =o[atTop] (fun n => (n : ℝ)))
+    (hacc : ∀ᶠ n in atTop, 2 ^ (n - 2) ≤ (accepting (f n)).card)
+    (hrect : ∀ᶠ n in atTop, RectangleFree (f n) (K n))
+    {ε : ℝ} (hε : 0 < ε) :
+    ∀ᶠ n in atTop, ∀ (m : Nat) (circuit : Circuit Binary.signature (n + m) 1),
+      NondetComputes circuit (f n) → (4 - ε) * n < circuit.size := by
+  refine nondet_eventually_lt_size_of_log_sublinear (fun η hη => ?_) f K hK hacc hrect hε
+  obtain ⟨N₀, bound⟩ := exists_pathwidthBound (ξ := η / 2) (by positivity)
+  refine ⟨N₀ + 9, ?_⟩
+  have order := Multigraph.orderingBound_of_pathwidthBound (by positivity) bound
+  rwa [show 2 * (η / 2) = η by ring] at order
 
 end Cutwidth
 end Algebraic

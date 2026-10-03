@@ -8,29 +8,24 @@ module
 public import Complexitylib.Algebraic.LowerBound.Cutwidth.Wiring
 public import Complexitylib.Algebraic.LowerBound.Cutwidth.Expansion
 public import Complexitylib.Algebraic.LowerBound.Cutwidth.Asymptotics
-public import Complexitylib.Algebraic.LowerBound.Cutwidth.PathDecomposition.Bisection
+public import Complexitylib.Algebraic.LowerBound.Cutwidth.PathDecomposition.Bisection.Helpful
 
 /-!
 # The `(4 - ε) n` lower bound
 
-Assembling the cut-counting lemma, the wiring graph, and the graph-ordering
-hypothesis gives the circuit lower bound. A `K`-rectangle-free function with
+Assembling the cut-counting lemma, the wiring graph, and the proved cubic
+bisection and pathwidth bounds gives the circuit lower bound. A `K`-rectangle-free function with
 at least `2 ^ (n - 2)` accepting inputs and `log₂ K = o(n)` needs more than
 `(4 - ε) n` gates over the full binary basis, for every `ε > 0` and all
 sufficiently large `n`. Polynomial thresholds are a special case.
 
-Two statements enter as hypotheses rather than being proved here:
+`eventually_lt_size_of_rectangleFree` has no graph hypothesis. Its remaining
+application obligation is a family `f n` with `log₂ K(n) = o(n)` satisfying
+`RectangleFree` and the accepting-input bound.
 
-* `Multigraph.OrderingBound η C` for every `η > 0` and some `C`, the
-  graph-ordering hypothesis on multigraphs of maximum degree three, which
-  `eventually_lt_size_of_pathwidthBound` derives from the pathwidth
-  hypothesis `PathwidthBound` for simple cubic graphs, now derived from
-  `BisectionBound` by the checked Fomin–Høie reduction;
-* a family `f n` with `log₂ K(n) = o(n)` satisfying `RectangleFree` and the
-  accepting-input bound.
-
-The general theorem is `eventually_lt_size_of_log_sublinear`, with fixed-`n`
-core `lt_size_of_log_bounds`. The original `eventually_lt_size` and
+The generic graph-ordering interface remains
+`eventually_lt_size_of_log_sublinear`, with fixed-`n` core
+`lt_size_of_log_bounds`. The original `eventually_lt_size` and
 `lt_size_of_bounds` specialize these to polynomial thresholds.
 
 The proof organization, the threshold-edge charging, the application of a
@@ -527,6 +522,21 @@ theorem eventually_lt_size_of_pathwidthBound
   refine ⟨N₀ + 9, ?_⟩
   have := Multigraph.orderingBound_of_pathwidthBound (by positivity) hN₀
   rwa [show 2 * (η / 2) = η by ring] at this
+
+/-- A dense rectangle-free family with sublinear logarithmic threshold has
+the coefficient-four circuit lower bound. The graph bounds are proved;
+only the stated hard-family properties remain to be supplied. -/
+theorem eventually_lt_size_of_rectangleFree
+    (f : ∀ n, Cslib.BooleanFunction n) (K : Nat → Nat)
+    (hK : (fun n => Real.logb 2 (K n)) =o[atTop] (fun n => (n : ℝ)))
+    (hacc : ∀ᶠ n in atTop, 2 ^ (n - 2) ≤ (accepting (f n)).card)
+    (hrect : ∀ᶠ n in atTop, RectangleFree (f n) (K n))
+    {ε : ℝ} (hε : 0 < ε) :
+    ∀ᶠ n in atTop, ∀ circuit : Circuit Binary.signature n 1,
+      circuit.Computes Binary.interpretation (fun x _ => f n x) →
+        (4 - ε) * n < circuit.size :=
+  eventually_lt_size_of_bisectionBound_of_log_sublinear
+    (fun _ h => Bisection.exists_bisectionBound h) f K hK hacc hrect hε
 
 end Cutwidth
 end Algebraic

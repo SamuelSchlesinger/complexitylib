@@ -110,4 +110,21 @@ theorem log_eq_card_filter_range (b n : ℕ) :
   · rw [Nat.log_of_left_le_one (by omega)]
     simp [hb]
 
+/-- Rounding up to a power stays below a bilinear bound, including bases zero
+and one and target zero. This bounds the unary output of power rounding. -/
+theorem pow_clog_le_mul_add_one (b n : ℕ) : b ^ Nat.clog b n ≤ b * n + 1 := by
+  by_cases hb : 1 < b
+  · by_cases hn : 1 < n
+    · have exponent : (Nat.clog b n).pred + 1 = Nat.clog b n :=
+        Nat.succ_pred_eq_of_pos (Nat.clog_pos hb hn)
+      calc
+        b ^ Nat.clog b n = b ^ (Nat.clog b n).pred * b := by
+          rw [← pow_succ, exponent]
+        _ ≤ n * b := Nat.mul_le_mul_right b (Nat.pow_pred_clog_lt_self hb hn).le
+        _ ≤ b * n + 1 := by simpa only [Nat.mul_comm] using Nat.le_succ (n * b)
+    · rw [Nat.clog_of_right_le_one (Nat.le_of_not_gt hn), pow_zero]
+      exact Nat.le_add_left 1 (b * n)
+  · rw [Nat.clog_of_left_le_one (Nat.le_of_not_gt hb), pow_zero]
+    exact Nat.le_add_left 1 (b * n)
+
 end Complexity

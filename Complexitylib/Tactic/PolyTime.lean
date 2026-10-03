@@ -159,7 +159,7 @@ attribute [aesop safe apply (transparency := reducible) (rule_sets := [Complexit
   cons_rule lenEqFlag_rule polyRulerFn_mem_FP emptyFlagFn_mem_FP dropOneFn_mem_FP
   UnaryFn.replicate_mem_FP UnaryFn.add UnaryFn.mul UnaryFn.pow_const
   UnaryFn.sub UnaryFn.min UnaryFn.max UnaryFn.div UnaryFn.mod UnaryFn.size
-  UnaryFn.log UnaryFn.clog
+  UnaryFn.log UnaryFn.clog UnaryFn.pow_clog
   FPPred.le FPPred.lt FPPred.eq FPPred.and FPPred.or FPPred.not
   take_mem_FP drop_mem_FP getBit_mem_FP FPPred.getBit
   UnaryFn.ite FPPred.ite_mem_FP FPPred.flag_mem_FP
