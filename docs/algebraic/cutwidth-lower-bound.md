@@ -707,6 +707,21 @@ pays for four short outputs, and the right envelope pays for the initial
 state pair. `FixedTampering` proves the next extraction and refresh when
 the tampered seed is an arbitrary function of the left source and transcript.
 These statements derive their seed estimates from the actual computations.
+`FixedTampering.Second` extends this to the second look-ahead output,
+retaining both honest outputs and the tampered refresh. Its observation
+lemma proves that revealing a normalized left-only message preserves the
+average original right-seed discrepancy exactly, including null rows.
+
+`UniformRefresh` handles either selected refresh from a whole honest state
+with joint error `ρ`, keeping the common history and full left state.
+The tampered state may remain arbitrarily correlated with the honest state.
+No current-state entropy cap is required. For strong extractors with
+thresholds `K_W,K_Q,K_R` and errors `ε_W,ε_Q,ε_R`, its bound is
+`ε_R+2ε_W+ε_Q+2ρ+K_W*(1+D²)*∑μ+K_Q*S²/C+K_R*C²*O*∑ξ`, where
+`S,D,C,O` are the initial-seed, short-output, state, and refresh-output
+cardinalities. Here `μ,ξ` bound the original left and right source masses.
+The final tampered refresh is unobserved in this law, as required before
+the first differing advice bit.
 
 `FlipFlop.Opposite.False` composes these steps into the complete actual
 honest-zero/tampered-one execution. It retains both full look-ahead histories,
@@ -718,7 +733,32 @@ Writing `D=2^(2^24*L)`, `C=2^(2^64*L)`, `K=2^(2^62*L)`,
 `2ρ+4ε+K*(1+D²)*D⁴*∑μ+K*D²/C+J*C⁵*∑ν`.
 The approximate refreshed state is repaired in the proof, with its distance
 charged explicitly; the theorem concerns the original deterministic program.
-The other opposite-bit orientation and the preservation case remain open.
+
+`FlipFlop.Opposite.True` proves the complete honest-one/tampered-zero
+execution with the same retained variables. In addition to the original
+left and right source envelopes `μ,ξ`, it assumes an original honest-state
+envelope `ν`. Its first honest refresh, retaining the tampered refresh, has
+error `ρ=4ε+δ+K*(1+D²)*∑μ+K*D²*∑ν+J*C³*∑ξ`. The final bound is
+`2ρ+2ε+K*D⁵*∑μ+J*C⁵*∑ξ`. Repair preserves the original sources and
+fixes the tampered refreshed state in the transcript before the final pass.
+These two orientations specialize
+[Chattopadhyay--Goyal--Li Algorithm 1 and Lemma 6.8](https://arxiv.org/pdf/1505.00107)
+to the actual matched-width programs with conservative finite error bounds.
+
+`FlipFlop.Transcript` gives an exact factorization for arbitrary advice
+bits. The two histories retain both pairs of right states and all eight
+short outputs. Both final outputs become right-only maps of the original
+source kernels. Before observing either final output, the total original
+source envelopes grow by exactly `D⁸` on the left and `C⁴` on the right.
+All conditional kernels are normalized, including null observations.
+
+`FlipFlop.Preservation.Half` handles either honest and tampered refresh
+selection when the incoming tampered state is fixed by the old transcript.
+It retains the full common history, selected tampered refresh, and original
+left state. From whole honest-state error `ρ` and original envelopes `μ,ξ`,
+the bound is `4ε+2ρ+K*D*(1+D²)*∑μ+K*D²/C+J*C²*∑ξ` for all four
+selection pairs. Composing two such halves and closing the induction across
+advice positions remain unfinished.
 
 `CorrelationBreaker.Advice` initializes from the right-source prefix and
 folds the concrete step over the advice bits in order, preserving both

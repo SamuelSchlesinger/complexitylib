@@ -125,6 +125,10 @@ public import
   Complexitylib.Algebraic.LowerBound.Cutwidth.Extractor.Strong.Weighted.LookAhead.Refresh
 public import
   Complexitylib.Algebraic.LowerBound.Cutwidth.Extractor.Strong.Weighted.LookAhead.FixedTampering
+public import
+  Complexitylib.Algebraic.LowerBound.Cutwidth.Extractor.Strong.Weighted.LookAhead.FixedTampering.Second
+public import
+  Complexitylib.Algebraic.LowerBound.Cutwidth.Extractor.Strong.Weighted.LookAhead.UniformRefresh
 public import Complexitylib.Algebraic.LowerBound.Cutwidth.Extractor.Strong.Weighted.Expectation
 public import Complexitylib.Algebraic.LowerBound.Cutwidth.Extractor.Strong.Weighted.Leakage
 public import Complexitylib.Algebraic.LowerBound.Cutwidth.Extractor.Strong.Weighted.Perturbation
@@ -201,6 +205,12 @@ public import
   Complexitylib.Algebraic.LowerBound.Cutwidth.Extractor.CorrelationBreaker.FlipFlop.UniformState
 public import
   Complexitylib.Algebraic.LowerBound.Cutwidth.Extractor.CorrelationBreaker.FlipFlop.Opposite.False
+public import
+  Complexitylib.Algebraic.LowerBound.Cutwidth.Extractor.CorrelationBreaker.FlipFlop.Opposite.True
+public import
+  Complexitylib.Algebraic.LowerBound.Cutwidth.Extractor.CorrelationBreaker.FlipFlop.Transcript
+public import
+  Complexitylib.Algebraic.LowerBound.Cutwidth.Extractor.CorrelationBreaker.FlipFlop.Preservation.Half
 public import Complexitylib.Algebraic.LowerBound.Cutwidth.Extractor.CorrelationBreaker.Advice
 public import
   Complexitylib.Algebraic.LowerBound.Cutwidth.Extractor.CorrelationBreaker.Advice.Program
@@ -323,7 +333,11 @@ retaining the complete right state and both first outputs with explicit entropy 
 Its `UniformState` layer derives the next look-ahead from a nearly uniform refreshed
 state. `Refresh` proves both first refresh estimates with exact transcript factors and
 original-source envelopes. `FixedTampering` handles a left-only tampered seed in the
-next extraction and refresh, retaining the original left source.
+next extraction and refresh, retaining the original left source. Its `Second` layer
+handles the second look-ahead output and proves that a normalized left observation
+preserves the original average seed discrepancy exactly. `UniformRefresh` handles
+either selected refresh from whole-state uniformity, with arbitrary correlated
+tampering and no pointwise current-state entropy premise.
 `Strong.Weighted.Perturbation` handles seeds close to jointly independent uniform seeds,
 including the extra distance needed to retain the actual tag-and-seed marginal.
 `Strong.Block.Splitting` repairs a two-block source with a quantified error.
@@ -378,6 +392,13 @@ Its `UniformState` layer instantiates the repaired-state estimate for the actual
 `FlipFlop.Opposite.False` proves the complete honest-zero/tampered-one execution
 from original source envelopes and the initial seed error, retaining both histories,
 the tampered final output, and the full original left state.
+`Opposite.True` proves the other orientation from the original source and current-state
+envelopes and prefix error. `Transcript` factors the actual pair of executions for
+arbitrary advice bits into normalized original-source kernels. It gives exact envelope
+growth of `D^8` on the left and `C^4` on the right, before observing final outputs.
+`Preservation.Half` proves either selected refresh, retaining either tampered refresh,
+when the incoming tampered state is fixed by the transcript. Its premises are whole-state
+honest uniformity and the original source envelopes, with no current-state entropy cap.
 `CorrelationBreaker.Advice.Program` computes the complete advice fold and a final
 left-source extraction. Its uniform `FP` proof bounds the entire encoded loop state;
 the statistical invariant across advice positions remains a separate obligation.

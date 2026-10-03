@@ -5646,6 +5646,78 @@ establishes the proposed coefficient-three regime without that assumption.
   call. Charge each message to its source's original envelope.
 \end{proof}
 
+\begin{theorem}[Second-output refresh with a fixed-side tampered seed]
+  \label{thm:lowerbounds-algebraic-fixed-tampering-second}
+  \lean{Algebraic.Cutwidth.Extractor.retainedSeedWeight_observe_left_dist,
+    Algebraic.Cutwidth.Extractor.fixedTamperingSecondRefreshWeight_probability,
+    Algebraic.Cutwidth.Extractor.WeightedStrongSeededExtractor.fixedTampering_second_dist_le}
+  \leanok
+  \uses{thm:lowerbounds-algebraic-fixed-tampering-refresh,
+    thm:lowerbounds-algebraic-lookahead-extraction}
+  A normalized left-only observation preserves the average original
+  right-seed discrepancy exactly, including zero-mass observations.
+  Let $v(Z,A)\in M$ be a left-only tampered seed. Refreshing from the
+  actual second look-ahead output, while retaining $Z,v,q$, both honest
+  look-ahead outputs, $R(y',v)$, and the full left state, has error at most
+  \[
+    \varepsilon_R+2\varepsilon_W+\varepsilon_Q+\delta+
+      K_W|M|(1+|M|^2)\sum\mu_X+
+      K_Q|S|^2\sum\mu_q+K_R|Q||O|\sum\mu_Y.
+  \]
+  All three envelopes and the prefix error $\delta$ concern the original
+  factored law. This is a finite component of Chattopadhyay--Goyal--Li's
+  already-distinct-advice analysis.
+\end{theorem}
+\begin{proof}
+  \leanok
+  Reveal $v$ without changing the average seed error, apply two-round
+  extraction, and observe the right state and tampered refresh before
+  alternating to the original right source. The full left state and
+  original right state reconstruct the retained honest history.
+\end{proof}
+
+\begin{definition}[Either selected look-ahead refresh]
+  \label{def:lowerbounds-algebraic-uniform-refresh}
+  \lean{Algebraic.Cutwidth.Extractor.lookAheadSelectedRefreshWeight}
+  \leanok
+  \uses{def:lowerbounds-algebraic-lookahead-refresh}
+  Run the actual honest and tampered look-ahead computations and refresh
+  the original right source using either honest output. Retain the full
+  common history and original left state. The tampered final refresh is
+  unobserved; the two current right states may coincide.
+\end{definition}
+
+\begin{theorem}[Either refresh from a nearly uniform honest state]
+  \label{thm:lowerbounds-algebraic-uniform-refresh}
+  \lean{Algebraic.Cutwidth.Extractor.lookAheadSelectedRefreshWeight_probability,
+    Algebraic.Cutwidth.Extractor.lookAheadSelectedRefreshWeight_eq_factored,
+    Algebraic.Cutwidth.Extractor.lookAheadSelectedRefreshWeight_retainedSeed,
+    Algebraic.Cutwidth.Extractor.WeightedStrongSeededExtractor.lookAhead_uniformRefresh_dist_le}
+  \leanok
+  \uses{def:lowerbounds-algebraic-uniform-refresh,
+    thm:lowerbounds-algebraic-lookahead-refresh,
+    thm:lowerbounds-algebraic-factored-repair}
+  Suppose the honest right state is $\rho$-close to uniform given $Z$,
+  and the initial-seed map sends uniform states to uniform seeds. For
+  either refresh selection, the actual retained law has error at most
+  \[
+    \varepsilon_R+2\varepsilon_W+\varepsilon_Q+2\rho+
+      K_W(1+|M|^2)\sum\mu_X+
+      K_Q|S|^2/|Q|+K_R|Q|^2|O|\sum\mu_Y.
+  \]
+  Only the original left and right source envelopes are assumed. The
+  law is normalized and factors through the exact common transcript;
+  dropping the left state gives the refreshed seed law over that transcript.
+  This supplies the single-refresh step before advice first differs in
+  Chattopadhyay--Goyal--Li Algorithm 2 and Claim 6.11.
+\end{theorem}
+\begin{proof}
+  \leanok
+  Repair the honest state while preserving the original right-source
+  marginal. Apply the selected-refresh estimate with exact uniform cap
+  $w(z)/|Q|$ and transfer the complete retained law back at cost $2\rho$.
+\end{proof}
+
 \begin{definition}[The actual complete opposite-advice execution law]
   \label{def:lowerbounds-algebraic-opposite-flipflop}
   \lean{Algebraic.Cutwidth.Extractor.FlipFlopOppositeTranscript,
@@ -5684,8 +5756,8 @@ establishes the proposed coefficient-three regime without that assumption.
   \]
   The tampered inputs may be arbitrarily correlated within each side.
   There is no entropy premise on the initial right state and no supplied
-  intermediate-seed or extractor guarantee. The other opposite-bit case
-  and the invariant across advice positions remain separate obligations.
+  intermediate-seed or extractor guarantee. The invariant across advice
+  positions remains a separate obligation.
 \end{theorem}
 \begin{proof}
   \leanok
@@ -5694,6 +5766,130 @@ establishes the proposed coefficient-three regime without that assumption.
   Apply the tampered second-output refresh theorem with a uniform repaired
   state and its balanced prefix. Substitute the exact envelope totals and
   transport the complete deterministic continuation back at cost $2\rho$.
+\end{proof}
+
+\begin{theorem}[Complete honest-one and tampered-zero extraction]
+  \label{thm:lowerbounds-algebraic-opposite-flipflop-true}
+  \lean{Algebraic.Cutwidth.Extractor.flipFlopOpposite_true_dist_le}
+  \leanok
+  \uses{def:lowerbounds-algebraic-opposite-flipflop,
+    thm:lowerbounds-algebraic-lookahead-refresh,
+    thm:lowerbounds-algebraic-fixed-tampering-refresh,
+    thm:lowerbounds-algebraic-factored-repair,
+    thm:lowerbounds-algebraic-matched-extractor}
+  Under the common size guard, take normalized original factors with
+  left-source, honest-state, and right-source envelopes $\mu,\nu,\xi$,
+  and original prefix error $\delta$. With $K,J,D,C,\varepsilon$ as
+  above, set
+  \[
+    \rho=4\varepsilon+\delta+K(1+D^2)\sum\mu+
+      KD^2\sum\nu+JC^3\sum\xi.
+  \]
+  The full actual honest-one/tampered-zero law has error at most
+  \[
+    2\rho+2\varepsilon+KD^5\sum\mu+JC^5\sum\xi,
+  \]
+  retaining both complete histories, the tampered final output, and the
+  original left state. This completes the two opposite-bit orientations
+  of Chattopadhyay--Goyal--Li Algorithm 1 and Lemma 6.8 for these programs.
+\end{theorem}
+\begin{proof}
+  \leanok
+  Bound the honest first refresh while retaining the tampered refresh.
+  Fix that tampered coordinate in the transcript and repair the honest
+  coordinate. The next tampered seed is then left-only, so the fixed-side
+  refresh theorem applies. Charge $2\rho$ to return to the actual law.
+\end{proof}
+
+\begin{definition}[The complete transcript for arbitrary advice bits]
+  \label{def:lowerbounds-algebraic-flipflop-transcript}
+  \lean{Algebraic.Cutwidth.Extractor.FlipFlopFirstTranscript,
+    Algebraic.Cutwidth.Extractor.FlipFlopTranscript,
+    Algebraic.Cutwidth.Extractor.flipFlopTranscript,
+    Algebraic.Cutwidth.Extractor.flipFlopTranscriptWeight,
+    Algebraic.Cutwidth.Extractor.flipFlopTranscriptLeft,
+    Algebraic.Cutwidth.Extractor.flipFlopTranscriptRight,
+    Algebraic.Cutwidth.Extractor.flipFlopHonestOutput,
+    Algebraic.Cutwidth.Extractor.flipFlopTamperedOutput,
+    Algebraic.Cutwidth.Extractor.flipFlopTranscriptLeftEnvelope,
+    Algebraic.Cutwidth.Extractor.flipFlopTranscriptRightEnvelope}
+  \leanok
+  \uses{def:lowerbounds-algebraic-flipflop-program,
+    def:lowerbounds-algebraic-lookahead-refresh}
+  For arbitrary honest and tampered advice bits, record both pairs of
+  right states and all eight short look-ahead outputs. Leave both final
+  outputs unobserved. Each becomes a right-only map after fixing this
+  transcript. The factors condition the original sources successively
+  on the two actual look-ahead histories.
+\end{definition}
+
+\begin{theorem}[Exact full-transcript factors and source envelopes]
+  \label{thm:lowerbounds-algebraic-flipflop-transcript}
+  \lean{Algebraic.Cutwidth.Extractor.flipFlopFirst_probability,
+    Algebraic.Cutwidth.Extractor.flipFlopTranscript_probability,
+    Algebraic.Cutwidth.Extractor.flipFlopTranscript_factored,
+    Algebraic.Cutwidth.Extractor.flipFlopHonestOutput_eq_step,
+    Algebraic.Cutwidth.Extractor.flipFlopTamperedOutput_eq_step,
+    Algebraic.Cutwidth.Extractor.flipFlopTranscript_opposite,
+    Algebraic.Cutwidth.Extractor.flipFlopTranscript_left_envelope,
+    Algebraic.Cutwidth.Extractor.flipFlopTranscript_right_envelope,
+    Algebraic.Cutwidth.Extractor.flipFlopTranscriptLeftEnvelope_sum,
+    Algebraic.Cutwidth.Extractor.flipFlopTranscriptRightEnvelope_sum}
+  \leanok
+  \uses{def:lowerbounds-algebraic-flipflop-transcript,
+    thm:lowerbounds-algebraic-lookahead-refresh}
+  The actual transcript and original sources have an exact factored law,
+  with normalized kernels even at null observations. Both right-only
+  outputs equal their actual advice-bit programs. For opposite bits,
+  appending the tampered final output gives the opposite-advice transcript.
+  Original source envelopes update explicitly, with total masses exactly
+  $D^8\sum\mu_X$ on the left and $C^4\sum\mu_Y$ on the right.
+\end{theorem}
+\begin{proof}
+  \leanok
+  Compose the two common-transcript factorizations. Each four-output left
+  message costs $D^4$ to its envelope, and each right-state pair costs
+  $C^2$ to its envelope. Opposite-side message probabilities sum to one.
+\end{proof}
+
+\begin{definition}[A selected half-step with fixed tampered input]
+  \label{def:lowerbounds-algebraic-flipflop-preservation-half}
+  \lean{Algebraic.Cutwidth.Extractor.flipFlopHalfWeight}
+  \leanok
+  \uses{def:lowerbounds-algebraic-flipflop-program,
+    def:lowerbounds-algebraic-lookahead-refresh}
+  Run both look-aheads and both selected refreshes, assuming the old
+  transcript fixes the tampered right input. Retain the full common
+  look-ahead history, selected tampered refresh, and original left state.
+  Each selection bit chooses its second short output exactly when true.
+\end{definition}
+
+\begin{theorem}[Preserving uniformity through a selected half-step]
+  \label{thm:lowerbounds-algebraic-flipflop-preservation-half}
+  \lean{Algebraic.Cutwidth.Extractor.flipFlopHalfWeight_probability,
+    Algebraic.Cutwidth.Extractor.flipFlopHalf_dist_le}
+  \leanok
+  \uses{def:lowerbounds-algebraic-flipflop-preservation-half,
+    thm:lowerbounds-algebraic-fixed-tampering-refresh,
+    thm:lowerbounds-algebraic-fixed-tampering-second,
+    thm:lowerbounds-algebraic-factored-repair,
+    thm:lowerbounds-algebraic-matched-extractor}
+  Under the common size guard, original source envelopes $\mu,\xi$,
+  normalized factors, and whole honest-state error $\rho$ given the old
+  transcript, the actual selected half-step has error at most
+  \[
+    4\varepsilon+2\rho+KD(1+D^2)\sum\mu+KD^2/C+JC^2\sum\xi.
+  \]
+  All four selection pairs satisfy this bound; no pointwise entropy
+  premise on the current honest state is needed. Composing two halves
+  and iterating across the advice string remain separate obligations.
+\end{theorem}
+\begin{proof}
+  \leanok
+  Repair the honest state with exact uniform cap, preserving the original
+  right source. The fixed tampered input makes either selected tampered
+  seed left-only. Apply the corresponding first- or second-output refresh
+  theorem and transfer the complete law back at cost $2\rho$.
 \end{proof}
 
 \begin{definition}[The complete advice fold and final extraction]
