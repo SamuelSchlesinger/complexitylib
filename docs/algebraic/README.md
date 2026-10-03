@@ -252,9 +252,47 @@ preserves the strong guarantee with the whole seed retained.
 `gammaBlockExtractorEval` is one total `FP` string function, and its exact
 all-size output agrees with `gammaBlockPaddedExtractor` on the displayed
 seed budget. The extraction guarantee uses the proved eventual size guard.
-The affine correlation breaker, its internal extractor requirements, parity
-estimates, and composition into the final uniform hard family still need
-construction and proof.
+
+The actual common-scale extractor calls now support a complete advice-bit
+step and advice fold with a total `FP` evaluator. The finite probability
+proof covers the weak phase before advice differs, both orientations of
+the first unequal bit, and preservation afterward. Its exact transcript
+induction tracks the executed programs, normalized factors of the original
+sources, and source-envelope growth `D^(8i)` and `C^(5i)`. Once advice has
+differed, the transcript fixes the tampered current state; the stronger
+step estimates retain that state and the full original left state. No
+intermediate uniformity guarantee is supplied by the caller.
+`adviceCorrelationBreaker_dist_le` completes the actual strong-output
+theorem: for normalized conditionally independent source factors, a
+conditionally uniform honest right input, and the stated average left
+mass bound, unequal fixed advice words of equal length give a nearly
+uniform honest output retaining the original tag, entire original right
+state, and actual tampered output. The dyadic corollary proves error at
+most `2^-target` from its explicit finite entropy reserves.
+
+This follows [Chattopadhyay--Goyal--Li, Algorithm 2 and Lemma 6.9](https://arxiv.org/pdf/1505.00107).
+The implemented program also performs one final depth-24 extraction from
+the original left source. The checked finite accounting conservatively
+amplifies errors by `4^a` across `a` advice bits. The explicit choices
+`e=target+2a+clog 2 (a+1)+10`,
+`L=1024*(a+target+out+clog 2 (n+1)+256)`, and
+`m=2^150*(a+1)*L` satisfy the actual program guards and all entropy reserves.
+Nonvacuous use still requires `m≤n` and a source meeting the stated mass bound.
+Output truncation preserves the strong guarantee at any requested width
+within the final output, retaining the truncated tampered output.
+The selected-parameter theorem combines these pieces into an actual
+`out`-bit program guarantee with error `2^-target`, assuming only the
+normalized factored source, uniform honest right input, left mass bound,
+and fixed unequal advice words of length `a`. All finite guards and
+reserve inequalities are discharged by the chooser.
+These conservative constants are our deductions; they do not reproduce
+the paper's sharper parameter bounds.
+
+The next steps are the standard-to-affine correlation-breaker reduction,
+sumset and amplification composition with its parity estimates, and the
+asymptotic parameters and uniform-machine construction of the final hard family.
+The final unconditional `(4-ε)n` lower bound for a uniform `P` family remains
+incomplete.
 The [cutwidth guide](cutwidth-lower-bound.md) gives the exact remaining
 construction obligations and source credits.
 

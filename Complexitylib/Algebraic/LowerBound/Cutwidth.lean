@@ -208,12 +208,28 @@ public import
 public import
   Complexitylib.Algebraic.LowerBound.Cutwidth.Extractor.CorrelationBreaker.FlipFlop.Opposite.True
 public import
+  Complexitylib.Algebraic.LowerBound.Cutwidth.Extractor.CorrelationBreaker.FlipFlop.Opposite.UniformState
+public import
   Complexitylib.Algebraic.LowerBound.Cutwidth.Extractor.CorrelationBreaker.FlipFlop.Transcript
 public import
+  Complexitylib.Algebraic.LowerBound.Cutwidth.Extractor.CorrelationBreaker.FlipFlop.Transcript.Output
+public import
   Complexitylib.Algebraic.LowerBound.Cutwidth.Extractor.CorrelationBreaker.FlipFlop.Preservation.Half
+public import
+  Complexitylib.Algebraic.LowerBound.Cutwidth.Extractor.CorrelationBreaker.FlipFlop.Preservation.Weak
+public import
+  Complexitylib.Algebraic.LowerBound.Cutwidth.Extractor.CorrelationBreaker.FlipFlop.Preservation.Step
 public import Complexitylib.Algebraic.LowerBound.Cutwidth.Extractor.CorrelationBreaker.Advice
 public import
   Complexitylib.Algebraic.LowerBound.Cutwidth.Extractor.CorrelationBreaker.Advice.Program
+public import
+  Complexitylib.Algebraic.LowerBound.Cutwidth.Extractor.CorrelationBreaker.Advice.Parameters
+public import
+  Complexitylib.Algebraic.LowerBound.Cutwidth.Extractor.CorrelationBreaker.Advice.Extraction
+public import
+  Complexitylib.Algebraic.LowerBound.Cutwidth.Extractor.CorrelationBreaker.Advice.Extraction.Parameters
+public import
+  Complexitylib.Algebraic.LowerBound.Cutwidth.Extractor.CorrelationBreaker.Advice.Truncation
 public import Complexitylib.Algebraic.LowerBound.Cutwidth.Extractor.Strong.Block.Recursion.NearHalving
 public import
   Complexitylib.Algebraic.LowerBound.Cutwidth.Extractor.Strong.Block.Recursion.NearHalving.Parameters
@@ -399,9 +415,19 @@ growth of `D^8` on the left and `C^4` on the right, before observing final outpu
 `Preservation.Half` proves either selected refresh, retaining either tampered refresh,
 when the incoming tampered state is fixed by the transcript. Its premises are whole-state
 honest uniformity and the original source envelopes, with no current-state entropy cap.
+`Opposite.UniformState` supplies the first differing advice bit from whole-state uniformity.
+`Preservation.Weak` and `Preservation.Step` cover complete steps before and after that
+difference. `Transcript.Output` identifies their exact original-law factors, including
+the tampered final state in the separated phase.
 `CorrelationBreaker.Advice.Program` computes the complete advice fold and a final
-left-source extraction. Its uniform `FP` proof bounds the entire encoded loop state;
-the statistical invariant across advice positions remains a separate obligation.
+left-source extraction. Its uniform `FP` proof bounds the entire encoded loop state.
+`Advice.Extraction` constructs the complete invariant from the original sources and
+proves a strong finite bound for unequal equal-length advice, retaining the original
+right state and actual tampered output. Its explicit entropy reserve and local error
+schedule give any dyadic target. `Advice.Parameters` checks all finite program guards
+and reserves; `Advice.Truncation` preserves the guarantee for shorter requested outputs.
+`Advice.Extraction.Parameters` combines them into the actual requested-width guarantee
+with every numerical side condition discharged by the chooser.
 `NearHalving` uses a rate increasing with depth and a near-halving entropy schedule.
 Its rounded parameters give an actual extractor on `8*b` bits at entropy `2*b`,
 with `b` output bits, error `1/4`, and seed length at most a cubic logarithm,

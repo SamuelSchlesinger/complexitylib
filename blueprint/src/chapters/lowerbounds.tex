@@ -5294,8 +5294,7 @@ establishes the proposed coefficient-three regime without that assumption.
   logarithms of both source lengths plus one and of $2^{64}L+1$, every
   canonical input computes exactly the vector step for either advice bit.
   Its output always has at most $2^{64}L$ bits, including invalid inputs.
-  The opposite-advice statistical guarantee is a separate obligation;
-  the full advice runtime is formalized below.
+  The complete step estimates and full advice runtime are formalized below.
 \end{theorem}
 \begin{proof}
   \leanok
@@ -5757,7 +5756,7 @@ establishes the proposed coefficient-three regime without that assumption.
   The tampered inputs may be arbitrarily correlated within each side.
   There is no entropy premise on the initial right state and no supplied
   intermediate-seed or extractor guarantee. The invariant across advice
-  positions remains a separate obligation.
+  positions is constructed below.
 \end{theorem}
 \begin{proof}
   \leanok
@@ -5881,8 +5880,8 @@ establishes the proposed coefficient-three regime without that assumption.
     4\varepsilon+2\rho+KD(1+D^2)\sum\mu+KD^2/C+JC^2\sum\xi.
   \]
   All four selection pairs satisfy this bound; no pointwise entropy
-  premise on the current honest state is needed. Composing two halves
-  and iterating across the advice string remain separate obligations.
+  premise on the current honest state is needed. The complete step and
+  advice-prefix induction below compose these estimates.
 \end{theorem}
 \begin{proof}
   \leanok
@@ -5890,6 +5889,108 @@ establishes the proposed coefficient-three regime without that assumption.
   right source. The fixed tampered input makes either selected tampered
   seed left-only. Apply the corresponding first- or second-output refresh
   theorem and transfer the complete law back at cost $2\rho$.
+\end{proof}
+
+\begin{theorem}[Exact factors after observing the tampered final state]
+  \label{thm:lowerbounds-algebraic-flipflop-observed}
+  \lean{Algebraic.Cutwidth.Extractor.flipFlopObserved_probability,
+    Algebraic.Cutwidth.Extractor.flipFlopObserved_factored,
+    Algebraic.Cutwidth.Extractor.flipFlopOutputWeight_retainedSeed,
+    Algebraic.Cutwidth.Extractor.flipFlopObservedOutputWeight_retainedSeed,
+    Algebraic.Cutwidth.Extractor.flipFlopObservedOutputWeight_opposite,
+    Algebraic.Cutwidth.Extractor.flipFlopObserved_left_envelope,
+    Algebraic.Cutwidth.Extractor.flipFlopObserved_right_envelope,
+    Algebraic.Cutwidth.Extractor.flipFlopObservedLeftEnvelope_sum,
+    Algebraic.Cutwidth.Extractor.flipFlopObservedRightEnvelope_sum}
+  \leanok
+  \uses{thm:lowerbounds-algebraic-flipflop-transcript}
+  Appending the actual final tampered state to the common transcript
+  preserves exact normalized factors of the original sources, including
+  null observations. Its original-source envelope totals are
+  $D^8\sum\mu_X$ and $C^5\sum\mu_Y$. The honest output is right-only
+  over those factors. Dropping the full left state gives exactly the
+  honest-state law needed for the next advice bit. For opposite bits,
+  the observed output law is the previously defined opposite-advice law.
+\end{theorem}
+\begin{proof}
+  \leanok
+  Observe one additional right-only $C$-valued coordinate. The original
+  left envelope is unchanged in total; the right envelope pays another
+  factor $C$. Deterministic projection identifies both next-state laws.
+\end{proof}
+
+\begin{theorem}[A complete weak step before advice differs]
+  \label{thm:lowerbounds-algebraic-flipflop-weak}
+  \lean{Algebraic.Cutwidth.Extractor.flipFlopOutput_weak_dist_le}
+  \leanok
+  \uses{thm:lowerbounds-algebraic-uniform-refresh,
+    thm:lowerbounds-algebraic-flipflop-observed}
+  Under the common size guard and normalized original factors, suppose
+  the honest state is $\rho$-close to uniform given $Z$. Let the
+  nonnegative original $X/Y$ envelope totals be $\alpha,\beta$.
+  For arbitrary current advice bits and correlated tampered state, the
+  complete actual step, retaining both histories and the full left state
+  but leaving the final tampered output unobserved, has error at most
+  \[
+    4\rho+12\varepsilon+K(1+D^2)(2+D^4)\alpha+
+      3KD^2/C+J(2C^3+C^5)\beta.
+  \]
+  Only the incoming whole-state discrepancy and original source
+  envelopes are assumed; the intermediate discrepancy is derived.
+\end{theorem}
+\begin{proof}
+  \leanok
+  Apply the selected-refresh theorem twice, using the exact first-history
+  factors and their original-source envelopes for the second pass.
+\end{proof}
+
+\begin{theorem}[Either opposite bit from a nearly uniform whole state]
+  \label{thm:lowerbounds-algebraic-flipflop-opposite-uniform}
+  \lean{Algebraic.Cutwidth.Extractor.flipFlopOpposite_uniformState_dist_le}
+  \leanok
+  \uses{thm:lowerbounds-algebraic-opposite-flipflop-false,
+    thm:lowerbounds-algebraic-opposite-flipflop-true,
+    thm:lowerbounds-algebraic-factored-repair}
+  With the same normalized factors, source envelopes, and whole-state
+  discrepancy, either honest bit against its opposite has error at most
+  \[
+    2\rho+10\varepsilon+K(1+D^2)(2+D^4)\alpha+
+      2KD^2/C+J(2C^3+C^5)\beta.
+  \]
+  This law retains both complete histories, the actual tampered final
+  output, and the full original left state. There is no pointwise cap
+  premise on the incoming honest state or a supplied repaired invariant.
+\end{theorem}
+\begin{proof}
+  \leanok
+  In the zero branch, project the original whole-state guarantee through
+  the balanced prefix map. In the one branch, repair the incoming state
+  while preserving both original source envelopes, apply the capped-state
+  result, and return to the actual retained law at cost $2\rho$.
+\end{proof}
+
+\begin{theorem}[A complete step after advice has differed]
+  \label{thm:lowerbounds-algebraic-flipflop-preservation-step}
+  \lean{Algebraic.Cutwidth.Extractor.flipFlopStep_preservation_dist_le}
+  \leanok
+  \uses{thm:lowerbounds-algebraic-flipflop-preservation-half,
+    thm:lowerbounds-algebraic-flipflop-observed}
+  Suppose in addition that the old transcript fixes the incoming
+  tampered state. For arbitrary current advice bits, the complete actual
+  step retaining both histories, the tampered final output, and the
+  original left state has error at most
+  \[
+    4\rho+12\varepsilon+KD(1+D^2)(2+D^4)\alpha+
+      3KD^2/C+J(2C^2+C^5)\beta.
+  \]
+  Both refreshes reread the original right source. The second half uses
+  a derived first-refresh guarantee rather than a new independence premise.
+\end{theorem}
+\begin{proof}
+  \leanok
+  Compose the two half-step estimates with complementary selection bits.
+  Observing the first tampered refresh gives envelope factors $D^4,C^3$;
+  the second application then produces the displayed finite bound.
 \end{proof}
 
 \begin{definition}[The complete advice fold and final extraction]
@@ -5933,8 +6034,8 @@ establishes the proposed coefficient-three regime without that assumption.
   iteration, including those after advice exhaustion, has encoded length
   at most
   $4|x|+2|y|+2L+2e+2|\alpha|+2^{64}L+12$.
-  Polynomial time requires no size or statistical promise. The statistical
-  invariant across advice positions remains a separate obligation.
+  Polynomial time requires no size or statistical promise. The separate
+  probability induction below tracks this same executed fold.
 \end{theorem}
 \begin{proof}
   \leanok
@@ -5942,6 +6043,289 @@ establishes the proposed coefficient-three regime without that assumption.
   Bound every component of the encoded state and apply bounded-iteration
   closure. Registered \texttt{polytime} rules compose the loop with the
   final extraction and total input decoder.
+\end{proof}
+
+\begin{definition}[An exact original-law invariant for an advice prefix]
+  \label{def:lowerbounds-algebraic-advice-invariant}
+  \lean{Algebraic.Cutwidth.Extractor.Internal.AdviceInvariant,
+    Algebraic.Cutwidth.Extractor.Internal.AdviceInvariant.initial}
+  \leanok
+  \uses{def:lowerbounds-algebraic-advice-program,
+    thm:lowerbounds-algebraic-flipflop-observed}
+  The proof witness records a finite deterministic transcript of the
+  original sample, its exact normalized left and right kernels, and
+  pointwise equality of both current states with the executed programs.
+  It bounds the original-source envelope totals by $\alpha,\beta$ and
+  the honest-state discrepancy given the transcript by $\rho$.
+  Once the advice prefixes differ, the transcript fixes the tampered
+  current state. Normalized original factors, nonnegative source envelopes,
+  and an initial whole-state discrepancy construct the empty-prefix witness.
+  This is internal proof data, not a security premise for the eventual
+  public correlation-breaker theorem.
+\end{definition}
+
+\begin{definition}[The conservative advice error recurrence]
+  \label{def:lowerbounds-algebraic-advice-recurrence}
+  \lean{Algebraic.Cutwidth.Extractor.Internal.adviceStepError,
+    Algebraic.Cutwidth.Extractor.Internal.adviceChainError}
+  \leanok
+  \uses{thm:lowerbounds-algebraic-flipflop-weak,
+    thm:lowerbounds-algebraic-flipflop-opposite-uniform,
+    thm:lowerbounds-algebraic-flipflop-preservation-step}
+  For $K,J,D,C,\varepsilon$ as above, put
+  \[
+    \Phi(\rho,\alpha,\beta)=4\rho+12\varepsilon+
+      KD(1+D^2)(2+D^4)\alpha+3KD^2/C+J(2C^3+C^5)\beta.
+  \]
+  Set $\rho_0=\rho$ and
+  $\rho_{i+1}=\Phi(\rho_i,D^{8i}\alpha,C^{5i}\beta)$.
+  The common update conservatively covers all three step estimates.
+\end{definition}
+
+\begin{theorem}[The exact invariant through the actual advice fold]
+  \label{thm:lowerbounds-algebraic-advice-invariant}
+  \lean{Algebraic.Cutwidth.Extractor.Internal.AdviceInvariant.step,
+    Algebraic.Cutwidth.Extractor.Internal.AdviceInvariant.iterate}
+  \leanok
+  \uses{def:lowerbounds-algebraic-advice-invariant,
+    def:lowerbounds-algebraic-advice-recurrence}
+  Under the common size guard, an initial invariant extends through any
+  list of paired advice bits. At length $a$, both current states equal
+  their actual folds, the envelope totals are bounded by
+  $D^{8a}\alpha,C^{5a}\beta$, and the whole-state error is at most
+  $\rho_a$. The separated condition holds if it held initially or the
+  two processed advice words differ. In that phase, the transcript fixes
+  the actual tampered state. Every prefix retains exact factors of the
+  original sample, including null conditional rows.
+\end{theorem}
+\begin{proof}
+  \leanok
+  Before separation use the weak step. At the first unequal pair use
+  opposite-advice extraction, then use full-step preservation thereafter.
+  Appending the actual tampered state gives the next exact factors. Induct
+  from the last paired bit and use the program's append identity.
+  This follows the two-phase structure of Chattopadhyay--Goyal--Li,
+  \href{https://arxiv.org/pdf/1505.00107}{Algorithm 2 and Lemma 6.9},
+  with the displayed conservative error update.
+\end{proof}
+
+\begin{theorem}[Closed finite advice error and entropy reserves]
+  \label{thm:lowerbounds-algebraic-advice-error-bounds}
+  \lean{Algebraic.Cutwidth.Extractor.Internal.adviceStepError_mono,
+    Algebraic.Cutwidth.Extractor.Internal.adviceStepError_nonneg,
+    Algebraic.Cutwidth.Extractor.Internal.adviceChainError_le,
+    Algebraic.Cutwidth.Extractor.Internal.adviceChainError_final_le,
+    Algebraic.Cutwidth.Extractor.Internal.adviceChainError_fixedReserve_dyadic_le}
+  \leanok
+  \uses{def:lowerbounds-algebraic-advice-recurrence}
+  The update is monotone and preserves nonnegative inputs. For
+  $\rho_0=0$ and nonnegative $\alpha,\beta$,
+  \[
+    \rho_a\le a4^a\bigl[12\varepsilon+3KD^2/C+
+      6KD^{8a+7}\alpha+3JC^{5a+5}\beta\bigr].
+  \]
+  Write $d=2^{24}L$ and $c=2^{64}L$. If
+  $\alpha\le2^{-k_X}$, $\beta\le2^{-k_Y}$ and
+  \[
+    2^{62}L+2d+e\le c,\qquad
+    2^{62}L+(8a+7)d+e\le k_X,\qquad
+    2^{142}L+(5a+5)c+e\le k_Y,
+  \]
+  then $\rho_a+\varepsilon+KD^{8a+1}\alpha
+    \le(24a4^a+2)2^{-e}$.
+  Equal reserves $k_X=k_Y=2^{150}(a+1)L$ suffice when $e\le L$.
+  Choosing $e=t+2a+\lceil\log_2(a+1)\rceil+10$ bounds this expression
+  by $2^{-t}$. This is finite arithmetic for the recurrence and the
+  extra final left extraction; it does not assume a program-security witness.
+\end{theorem}
+\begin{proof}
+  \leanok
+  Bound the left and right coefficients by $6D^7$ and $3C^5$ and use
+  the final-depth envelope powers throughout the factor-four recurrence.
+  Each reserve term is at most $\varepsilon$. The logarithmic rounding
+  in $e$ absorbs $24a4^a+2$, including the zero-length case.
+\end{proof}
+
+\begin{definition}[Explicit total advice parameters]
+  \label{def:lowerbounds-algebraic-advice-parameters}
+  \lean{Algebraic.Cutwidth.Extractor.adviceErrorExponent,
+    Algebraic.Cutwidth.Extractor.adviceScale,
+    Algebraic.Cutwidth.Extractor.adviceSourceEntropy}
+  \leanok
+  For left input length $n$, advice length $a$, target exponent $t$, and
+  requested output $o$, set
+  \[
+    e=t+2a+\lceil\log_2(a+1)\rceil+10,\qquad
+    L=1024\bigl(a+t+o+\lceil\log_2(n+1)\rceil+256\bigr),\qquad
+    m=2^{150}(a+1)L.
+  \]
+  The total chooser uses $m$ both as source entropy reserve and intended
+  right-source length. Capacity $m\le n$ remains an explicit condition.
+\end{definition}
+
+\begin{theorem}[Finite guards and reserves for the explicit chooser]
+  \label{thm:lowerbounds-algebraic-advice-parameters}
+  \lean{Algebraic.Cutwidth.Extractor.adviceParameters_sizeGuard,
+    Algebraic.Cutwidth.Extractor.adviceParameters_error_le,
+    Algebraic.Cutwidth.Extractor.adviceParameters_stateWidth_le,
+    Algebraic.Cutwidth.Extractor.adviceParameters_output_le,
+    Algebraic.Cutwidth.Extractor.adviceParameters_state_reserve,
+    Algebraic.Cutwidth.Extractor.adviceParameters_left_reserve,
+    Algebraic.Cutwidth.Extractor.adviceParameters_right_reserve,
+    Algebraic.Cutwidth.Extractor.adviceParameters_left_reserve_of_capacity}
+  \leanok
+  \uses{def:lowerbounds-algebraic-advice-parameters,
+    thm:lowerbounds-algebraic-advice-error-bounds}
+  With $d=2^{24}L$ and $c=2^{64}L$, the chosen parameters satisfy the common program guard,
+  $e\le L$, $c\le m$, $o\le d$, and all three displayed entropy
+  reserves with $k_X=k_Y=m$. These facts hold for every natural input.
+  When $m\le n$, the left reserve also fits in the original input width.
+  Neither this capacity condition nor the required source entropy is
+  asserted for arbitrary $n$. These constants and the conservative
+  $4^a$ amplification are our finite deductions, not the sharper
+  parameter bounds of the source construction.
+\end{theorem}
+\begin{proof}
+  \leanok
+  Bound $\lceil\log_2(2^r(a+1)1024b+1)\rceil$ by $r+a+b+11$.
+  The chosen scale then covers both source widths and the refreshed
+  state. Apply the checked entropy reserve inequalities from $e\le L$.
+\end{proof}
+
+\begin{definition}[The actual retained law of the complete advice construction]
+  \label{def:lowerbounds-algebraic-advice-extraction}
+  \lean{Algebraic.Cutwidth.Extractor.adviceCorrelationBreakerWeight,
+    Algebraic.Cutwidth.Extractor.adviceCorrelationBreakerError}
+  \leanok
+  \uses{def:lowerbounds-algebraic-advice-program,
+    def:lowerbounds-algebraic-advice-recurrence}
+  Run both actual advice programs on the original factored sample
+  $(Z,B,A)$. The retained law is $((Z,B,W'),W)$, where $W,W'$ are
+  the honest and tampered outputs after the additional final extraction.
+  Thus the whole original right state remains, including both right
+  inputs when these are arbitrary functions of $(Z,B)$.
+  For advice length $a$ and original left-envelope total $\alpha$, define
+  \[
+    \mathcal E(m,L,e,a,\alpha)=\varepsilon+
+      a4^a\bigl[12\varepsilon+3KD^2/C+
+        6KD^{8a+7}\alpha+3JC^{5a+5}2^{-m}\bigr]
+      +KD^{8a+1}\alpha.
+  \]
+\end{definition}
+
+\begin{theorem}[Strong extraction by the complete actual advice chain]
+  \label{thm:lowerbounds-algebraic-advice-extraction}
+  \lean{Algebraic.Cutwidth.Extractor.adviceCorrelationBreaker_dist_le}
+  \leanok
+  \uses{def:lowerbounds-algebraic-advice-extraction,
+    thm:lowerbounds-algebraic-advice-invariant,
+    thm:lowerbounds-algebraic-advice-error-bounds,
+    thm:lowerbounds-algebraic-two-sided-leakage}
+  Assume the common size guard, $c\le m$, normalized factors $w,l,r$,
+  and nonnegative envelope $\mu$ satisfying
+  $w(z)\Pr[x(z,A)=x_0\mid z]\le\mu(z)$.
+  The honest $m$-bit right input is uniform on every conditional row.
+  Honest and tampered inputs on each side are arbitrary functions of
+  the same original state; the two sides are independent given $Z$.
+  For two fixed unequal advice words of the same length $a$, the actual
+  law $((Z,B,W'),W)$ is within
+  $\mathcal E(m,L,e,a,\sum_z\mu(z))$ of its exact retained marginal
+  with a fresh uniform honest output.
+  No intermediate factorization, repaired seed, or security invariant is
+  supplied as a theorem hypothesis.
+\end{theorem}
+\begin{proof}
+  \leanok
+  The initial prefix of the uniform right input gives zero state error.
+  Construct the initial invariant and iterate it through the actual paired
+  advice. Unequal words force the separated phase. Apply the extra final
+  left-source extraction while retaining the full original right state
+  and actual tampered output, then substitute the finite recurrence bound.
+\end{proof}
+
+\begin{corollary}[A finite dyadic guarantee for the complete advice chain]
+  \label{cor:lowerbounds-algebraic-advice-extraction-dyadic}
+  \lean{Algebraic.Cutwidth.Extractor.adviceCorrelationBreaker_dyadic_dist_le}
+  \leanok
+  \uses{thm:lowerbounds-algebraic-advice-extraction,
+    thm:lowerbounds-algebraic-advice-error-bounds}
+  Under the preceding source, advice, and size hypotheses, set
+  $e=t+2a+\lceil\log_2(a+1)\rceil+10$. If
+  \[
+    \sum_z\mu(z)\le2^{-2^{150}(a+1)L},\qquad
+    2^{150}(a+1)L\le m,
+  \]
+  the actual complete program has retained-law error at most $2^{-t}$.
+  The finite program guard uses this chosen local error exponent.
+\end{corollary}
+\begin{proof}
+  \leanok
+  Conditional uniformity gives original right-envelope total $2^{-m}$.
+  Apply the three checked reserves and the conservative dyadic error budget.
+\end{proof}
+
+\begin{definition}[A requested output prefix of the actual advice program]
+  \label{def:lowerbounds-algebraic-advice-truncation}
+  \lean{Algebraic.Cutwidth.Extractor.adviceOutputPrefix,
+    Algebraic.Cutwidth.Extractor.adviceTruncatedCorrelationBreaker,
+    Algebraic.Cutwidth.Extractor.adviceTruncatedCorrelationBreakerWeight}
+  \leanok
+  \uses{def:lowerbounds-algebraic-advice-extraction}
+  Return the first $o$ coordinates of each actual output, completing
+  positions beyond the full width $d$ by false. Retain the original
+  $(Z,B)$ and the truncated tampered output. This is a total definition
+  for all widths; the uniformity guarantee below concerns $o\le d$.
+\end{definition}
+
+\begin{theorem}[Exact output truncation preserves the retained-law error]
+  \label{thm:lowerbounds-algebraic-advice-truncation}
+  \lean{Algebraic.Cutwidth.Extractor.adviceOutputPrefix_eq_of_le,
+    Algebraic.Cutwidth.Extractor.adviceOutputPrefix_self,
+    Algebraic.Cutwidth.Extractor.adviceOutputPrefix_apply_of_ge,
+    Algebraic.Cutwidth.Extractor.adviceOutputPrefix_uniform,
+    Algebraic.Cutwidth.Extractor.adviceTruncatedCorrelationBreakerWeight_eq_map,
+    Algebraic.Cutwidth.Extractor.adviceTruncatedCorrelationBreakerWeight_probability,
+    Algebraic.Cutwidth.Extractor.adviceTruncatedCorrelationBreakerWeight_dist_le}
+  \leanok
+  \uses{def:lowerbounds-algebraic-advice-truncation}
+  For $o\le d$, the prefix of a uniform full output is uniform on $o$
+  bits. Simultaneously truncating honest and tampered outputs cannot
+  increase the distance to the actual retained marginal times a uniform
+  honest output. The raw finite-weight comparison requires no new source
+  assumptions, and normalized input factors give a normalized truncated law.
+\end{theorem}
+\begin{proof}
+  \leanok
+  Split uniform Boolean words into prefix and suffix coordinates. Apply
+  deterministic contraction first to the honest output and then to the
+  tampered coordinate in the retained tag.
+\end{proof}
+
+\begin{corollary}[The actual requested output at the selected finite parameters]
+  \label{cor:lowerbounds-algebraic-advice-selected-extraction}
+  \lean{Algebraic.Cutwidth.Extractor.adviceTruncatedCorrelationBreaker_parameters_dist_le}
+  \leanok
+  \uses{thm:lowerbounds-algebraic-advice-parameters,
+    cor:lowerbounds-algebraic-advice-extraction-dyadic,
+    thm:lowerbounds-algebraic-advice-truncation}
+  Choose $e,L,m$ from $n,a,t,o$ as above. Let the original law have
+  normalized left and right factors given $Z$, with a nonnegative
+  honest-left joint point-mass envelope $\mu$ of total at most $2^{-m}$.
+  Suppose the honest right input is conditionally uniform on $m$ bits.
+  For any two fixed unequal advice words of length $a$, the actual
+  $o$-bit truncated program output has error at most $2^{-t}$, retaining
+  the original $(Z,B)$ and the actual truncated tampered output.
+  No size guard, reserve inequality, field instance, primitive extractor,
+  or intermediate security witness is supplied by the caller.
+  The source hypotheses govern feasibility; the theorem does not assert
+  the reserve fits every left-input width. A selected-parameter runtime
+  entry point and the later asymptotic family composition are separate layers.
+\end{corollary}
+\begin{proof}
+  \leanok
+  Discharge the dyadic theorem's program guards, state width, and entropy
+  reserves with the total chooser. Apply the exact prefix contraction at
+  the chooser's proved output-width bound.
 \end{proof}
 
 \begin{theorem}[Extraction with an approximately independent seed]

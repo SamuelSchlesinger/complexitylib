@@ -757,8 +757,21 @@ selection when the incoming tampered state is fixed by the old transcript.
 It retains the full common history, selected tampered refresh, and original
 left state. From whole honest-state error `ρ` and original envelopes `μ,ξ`,
 the bound is `4ε+2ρ+K*D*(1+D²)*∑μ+K*D²/C+J*C²*∑ξ` for all four
-selection pairs. Composing two such halves and closing the induction across
-advice positions remain unfinished.
+selection pairs. `Preservation.Step` now composes both halves, retaining
+the actual final tampered state. `Opposite.UniformState` covers both
+orientations at the first unequal advice bit with no original state-cap
+premise. `Preservation.Weak` covers a complete step before that point,
+leaving the final tampered output unobserved. All three bounds derive the
+intermediate state guarantees from the actual program.
+
+`Transcript.Output` proves the exact factors after observing the tampered
+final state: the original envelope totals grow by `D⁸` and `C⁵`. The
+`AdviceInvariant` induction retains these normalized factors, the original
+sample, and pointwise agreement with both executed advice folds. Before
+the first unequal bit it uses weak extraction; afterward the transcript
+fixes the tampered state and the stronger preservation bound applies.
+Thus the invariant is constructed at every prefix, with envelope bounds
+`D^(8i)*α` and `C^(5i)*β` from initial totals `α,β`.
 
 `CorrelationBreaker.Advice` initializes from the right-source prefix and
 folds the concrete step over the advice bits in order, preserving both
@@ -769,9 +782,62 @@ that finishing call is additional to Algorithm 2. The total string runtime
 agrees with this vector construction under the common size guard and is
 uniformly polynomial-time for arbitrary inputs and advice lengths. Its
 loop proof bounds the complete encoding, including both sources, unary
-parameters, remaining advice, and current state. The opposite-advice and
-preservation estimates must still be composed into a statistical invariant
-across the complete advice chain.
+parameters, remaining advice, and current state.
+
+`Advice.Extraction` proves `adviceCorrelationBreaker_dist_le` for that
+actual complete program. The original source law has
+normalized left and right factors given a shared tag `Z`; the honest
+right input is uniform on every row. The original honest left input has
+a nonnegative joint point-mass envelope `μ`. Honest and tampered inputs
+may be arbitrary functions of the same state on their respective side.
+For two fixed, unequal advice words of equal length, the honest output
+is close to uniform while retaining `Z`, the entire original right state,
+and the actual tampered output. The proof constructs the initial state
+from the uniform right-source prefix, iterates the exact invariant, then
+performs the extra final left-source extraction. There is no caller-supplied
+intermediate security witness.
+
+The common error recurrence conservatively multiplies incoming error by
+four. For advice length `a`, zero initial error, and original envelope
+totals `α,β`, its checked bound is
+
+```text
+a*4^a * [12ε + 3KD²/C + 6KD^(8a+7)α + 3JC^(5a+5)β].
+```
+
+The final extraction adds `ε+KD^(8a+1)α`. The public dyadic theorem
+`adviceCorrelationBreaker_dyadic_dist_le` pays all these terms with local
+exponent `e=target+2a+clog 2 (a+1)+10` and entropy reserve
+`M=2^150*(a+1)*L`: it assumes `∑μ≤2^-M`, uniform honest right length
+`m≥M`, and the finite size guard, and proves error at most `2^-target`.
+The separate explicit chooser takes
+
+```text
+L = 1024*(a+target+out+clog 2 (n+1)+256),
+m = M = 2^150*(a+1)*L.
+```
+
+`Advice.Parameters` proves every required size guard and entropy reserve,
+including room for `out` output bits. `Advice.Truncation` returns exactly
+that requested prefix and proves that truncating both honest and tampered
+outputs preserves the bound while retaining the original right state.
+Its statistical statement requires `out≤2^24*L`; the total definition
+fills positions beyond the full output width with false. Nonvacuous use
+of the chosen source threshold still requires `m≤n` and a source meeting
+the stated mass bound. These are conservative finite parameters for the
+complete standard advice correlation breaker, rather than the sharper
+parameters of the source construction.
+
+`adviceTruncatedCorrelationBreaker_parameters_dist_le` combines the actual
+chain, chooser, and truncation. For two fixed unequal advice words of
+length `a`, it returns the requested `out` bits with error `2^-target`,
+retaining the original tag, whole original right state, and actual truncated
+tampered output. Its hypotheses are exactly the normalized factored source,
+uniform honest right input, and left joint envelope with total at most
+`2^-m`; there is no supplied program guard, reserve, primitive extractor,
+field instance, or intermediate witness. The existing uniform `FP` program
+accepts parameters explicitly. Packaging the chooser and output prefix
+into a selected-parameter runtime entry point remains separate.
 
 The one-shot primitive alone has finite seed cost of order `ell+e+log n`;
 the checked recursion supplies the larger polylogarithmic output with
@@ -835,9 +901,12 @@ ordinary flat guarantees hold for every source at threshold `2^(2b)`,
 with all bits of the padded seed uniformly sampled. The padding prefix is
 proved to give exactly the original semantic Gamma output.
 
-The affine correlation breaker, its internal extractor parameters, the
-required parity estimates, and the final uniform `P` hard family with
-sublinear log-threshold remain open.
+The standard advice correlation breaker is now proved with the finite
+parameters above. The remaining route must turn it into the required
+affine correlation breaker, assemble the sumset reduction and amplification
+with their parity estimates, and prove the asymptotic parameter and
+uniform-machine composition for a final `P` hard family with sublinear
+log-threshold. The unconditional `(4-ε)n` endpoint remains incomplete.
 
 ## The graph theorem is proved
 
