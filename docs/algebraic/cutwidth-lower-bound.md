@@ -66,7 +66,9 @@ logarithmic seed length and arbitrary fixed polylogarithmic output. The
 ordinary short-seed extractor `Γ` now also has its separate linear-output
 parameters: for all sufficiently large `b`, it extracts `b` bits from `8b`
 input bits with entropy at least `2b`, error at most `1/4`, and a seed of
-at most `2^27*(clog 2 (b+1))^3` bits. The affine correlation breaker,
+at most `2^27*(clog 2 (b+1))^3` bits. The finite independence-merging
+lemma is proved with the exact retained variables and an average leakage
+budget, as described below. The affine correlation breaker,
 including its internal extractor requirements, and the fixed source-reduction
 map with its parity estimates still need construction and proof, together
 with their uniform polynomial-time composition in Complexitylib's machine model.
@@ -281,6 +283,51 @@ coordinate given the first, including rows of mass zero. This is the finite
 coupling ingredient of
 [CGL Lemma 4.19, which credits Li's 2015 Lemma 3.20](https://eccc.weizmann.ac.il/report/2021/075/download/).
 The extension over an external conditioning variable remains to be proved.
+
+`Strong.Weighted.Conditional` defines normalized conditional rows, completing
+null rows uniformly, and `uniformSecondWeight`, which replaces the output
+by independent uniform randomness while preserving its actual side-information
+marginal. Distance from this law is exactly the average conditional distance.
+Observing or forgetting part of the side information cannot increase it.
+`Strong.Weighted.Expectation` proves the sharp change-of-measure bound:
+every statistic in `[0,1]` changes by at most total variation between
+equal-mass laws. It also identifies strong extraction with a retained-seed
+distance bound.
+
+`WeightedStrongSeededExtractor.leakage_dist_le` gives the finite average
+leakage estimate. For a normalized joint source `p(tag,x)` and nonnegative
+envelopes `p(tag,x) ≤ μ(tag)`, a threshold-`K` extractor with error `ε ≥ 0` has
+distance at most `ε + K*∑tag μ(tag)` from a uniform output, retaining both
+the complete tag and the independent uniform seed. Individual normalized
+rows may violate the extractor cap. Their total mass is controlled by the
+joint envelopes, and null rows contribute zero. This is the finite
+average conditional-entropy step used in
+[Chattopadhyay–Liao, Lemma 3.26](https://arxiv.org/pdf/2110.12652),
+which credits Chattopadhyay–Goodman–Liao and ideas from
+Chattopadhyay–Li (2016).
+
+`Strong.Weighted.Merging` proves the two-sided version. Given a transcript
+`Z`, the complete left and right variables `A,B` have independent laws.
+The source `X` and initial observation `U` depend on the left side; the
+seed `Y` and observation `V` depend on the right. An extra leak `L` may
+depend on `Z,V,A`. If `μ(z,u)` bounds each joint mass
+`Pr[Z=z,U=u,X=x]`, and `(Z,V,Y)` is `δ`-close to its actual `(Z,V)` law
+with a fresh uniform seed, then extraction retains `(Z,B,U,L)` with error
+at most `ε + δ + K*card(L)*∑μ`. The comparison preserves the actual
+retained marginal. Both seed laws average the same statistic in `[0,1]`,
+so the seed discrepancy costs exactly one `δ`. This theorem uses a
+joint-mass envelope and permits low-entropy conditional rows.
+
+`Strong.Weighted.Merging.Independence` specializes this to the finite
+form of CL Lemma 3.26. The left variable contains `X,X₁,…,Xₜ`; the right
+contains `Y,Y₁,…,Yₜ`. For arbitrary sets `S,T`, the hypothesis bounds the
+joint source masses after observing `Z,X_T` and bounds the seed distance
+conditioned on `Z,Y_S`. Writing `Wᵢ=E(Xᵢ,Yᵢ)`, the actual conclusion retains
+`Z,Y,Y₁,…,Yₜ,W_(S∪T)` alongside `E(X,Y)`. Its error is
+`ε + δ + K*card(Out)^card(S)*∑μ`, or `2ε+δ` when the last term is at most
+`ε`. The sets may overlap. For `m`-bit outputs the leakage factor is
+`2^(m*card(S))`; the formal contract uses the explicit joint-mass budget
+in place of logarithmic average conditional min-entropy notation.
 
 `Strong.Block` defines a block source by prefix-mass inequalities,
 `K*p(prefix, next)≤p(prefix)`. Prefixes and normalized mixtures preserve

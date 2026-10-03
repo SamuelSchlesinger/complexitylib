@@ -110,6 +110,12 @@ public import Complexitylib.Algebraic.LowerBound.Cutwidth.Extractor.Strong.Weigh
 public import Complexitylib.Algebraic.LowerBound.Cutwidth.Extractor.Strong.Weighted.Projection
 public import Complexitylib.Algebraic.LowerBound.Cutwidth.Extractor.Strong.Weighted.SeedPadding
 public import Complexitylib.Algebraic.LowerBound.Cutwidth.Extractor.Strong.Weighted.Probability
+public import Complexitylib.Algebraic.LowerBound.Cutwidth.Extractor.Strong.Weighted.Conditional
+public import Complexitylib.Algebraic.LowerBound.Cutwidth.Extractor.Strong.Weighted.Expectation
+public import Complexitylib.Algebraic.LowerBound.Cutwidth.Extractor.Strong.Weighted.Leakage
+public import Complexitylib.Algebraic.LowerBound.Cutwidth.Extractor.Strong.Weighted.Merging
+public import
+  Complexitylib.Algebraic.LowerBound.Cutwidth.Extractor.Strong.Weighted.Merging.Independence
 public import Complexitylib.Algebraic.LowerBound.Cutwidth.Extractor.Strong.Weighted.Coupling
 public import Complexitylib.Algebraic.LowerBound.Cutwidth.Extractor.Strong.Weighted.Condenser
 public import Complexitylib.Algebraic.LowerBound.Cutwidth.Extractor.Strong.Weighted.Condenser.Identity
@@ -254,7 +260,14 @@ extracting `ell` bits with error `2^(-e)` from sources of min-entropy at
 least `ell + 2*e`. `Strong.FlatMixture` decomposes arbitrary capped weights
 into exact-size flat sources. `Strong.Weighted` extends both extraction
 and lossless condensation to these weights with the same error.
-`Strong.Weighted.Coupling` repairs a marginal while retaining correlations;
+`Strong.Weighted.Coupling` repairs a marginal while retaining correlations.
+`Strong.Weighted.Conditional` completes null rows and retains the actual side-information law.
+`Strong.Weighted.Leakage` bounds extraction error using an average joint-mass envelope;
+individual conditional sources need not all retain the extractor's entropy threshold.
+`Strong.Weighted.Merging` combines this with a seed close to uniform given a right-side
+observation, retaining the entire right variable and charging its seed error once.
+`Merging.Independence` merges two possibly overlapping tampering sets with error
+`2*epsilon+delta` under the explicit average-envelope budget.
 `Strong.Block.Splitting` repairs a two-block source with a quantified error.
 `Strong.Block` supplies the general prefix-based block-source invariant.
 `Strong.Block.Splitting.Iterated` splits every dependent pair into successive

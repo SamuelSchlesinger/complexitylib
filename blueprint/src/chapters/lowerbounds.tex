@@ -4798,6 +4798,197 @@ establishes the proposed coefficient-three regime without that assumption.
   inequality. Uniform-seed averaging uses coefficient $1/|\mathrm{Seed}|$.
 \end{proof}
 
+\begin{definition}[Conditional weights and independent uniform extension]
+  \label{def:lowerbounds-algebraic-conditional-weights}
+  \lean{Algebraic.Cutwidth.Extractor.conditionalWeight,
+    Algebraic.Cutwidth.Extractor.uniformExtensionWeight,
+    Algebraic.Cutwidth.Extractor.uniformSecondWeight}
+  \leanok
+  \uses{def:lowerbounds-algebraic-probability-weights}
+  For a joint law $p(a,b)$ with first marginal $p_A(a)$, its conditional
+  row is $p(a,b)/p_A(a)$ when $p_A(a)\ne0$ and uniform otherwise.
+  Uniform extension appends independent uniform randomness to a supplied
+  first-coordinate law. Write $U_2p(a,b)=p_A(a)/|B|$ for the law retaining
+  the actual first marginal and uniformizing its second coordinate.
+\end{definition}
+
+\begin{theorem}[Exact conditional distance and processing side information]
+  \label{thm:lowerbounds-algebraic-conditional-distance}
+  \lean{Algebraic.Cutwidth.Extractor.conditionalWeight_factor,
+    Algebraic.Cutwidth.Extractor.IsProbabilityWeight.conditionalWeight,
+    Algebraic.Cutwidth.Extractor.IsProbabilityWeight.uniformSecond,
+    Algebraic.Cutwidth.Extractor.weightDist_uniformSecond_eq,
+    Algebraic.Cutwidth.Extractor.weightDist_uniformSecond_tagged,
+    Algebraic.Cutwidth.Extractor.firstWeight_map_fiber,
+    Algebraic.Cutwidth.Extractor.weightDist_uniformSecond_map_first_le}
+  \leanok
+  \uses{def:lowerbounds-algebraic-conditional-weights,
+    thm:lowerbounds-algebraic-tagged-distance}
+  On a nonempty second alphabet, conditional rows of a probability law
+  are normalized, including null rows. Multiplying each row by its
+  marginal recovers the original law, and
+  \[
+    d(p,U_2p)=\sum_a p_A(a)d(p(\cdot\mid a),U_B).
+  \]
+  Processing the second coordinate within each row leaves the first
+  marginal unchanged. Deterministically processing the retained first
+  coordinate cannot increase distance from an independent uniform output.
+\end{theorem}
+\begin{proof}
+  \leanok
+  A nonnegative zero-mass row vanishes pointwise. On positive rows cancel
+  the marginal, then use exact tagged-distance averaging. Uniformization
+  commutes with deterministic processing of the first coordinate, so
+  contraction proves the last claim.
+\end{proof}
+
+\begin{theorem}[Sharp bounded expectations and strong extraction in distance]
+  \label{thm:lowerbounds-algebraic-bounded-expectations}
+  \lean{Algebraic.Cutwidth.Extractor.weightExpectation_sub_le_dist,
+    Algebraic.Cutwidth.Extractor.WeightedStrongSeededExtractor.dist_le,
+    Algebraic.Cutwidth.Extractor.weightedStrongSeededExtractor_iff_dist_le}
+  \leanok
+  \uses{thm:lowerbounds-algebraic-weight-distance,
+    def:lowerbounds-algebraic-weighted-strong}
+  For equal-mass real weights $p,q$ and $0\le f\le1$,
+  $|\sum_xp(x)f(x)-\sum_xq(x)f(x)|\le d(p,q)$.
+  On nonempty seed and output alphabets, the weighted strong-extractor
+  test contract is equivalent to distance at most $\varepsilon$ from the
+  independent uniform seed-output law for every normalized capped source.
+\end{theorem}
+\begin{proof}
+  \leanok
+  The positive and negative parts of $p-q$ have equal total mass, each
+  equal to its total variation. A statistic in $[0,1]$ is bounded by
+  these parts. The extractor equivalence uses the equal-mass finite-test
+  characterization of total variation.
+\end{proof}
+
+\begin{theorem}[Strong extraction with an average leakage budget]
+  \label{thm:lowerbounds-algebraic-average-leakage}
+  \lean{Algebraic.Cutwidth.Extractor.WeightedStrongSeededExtractor.leakage_dist_le,
+    Algebraic.Cutwidth.Extractor.WeightedStrongSeededExtractor.leakage_average_dist_le}
+  \leanok
+  \uses{thm:lowerbounds-algebraic-conditional-distance,
+    thm:lowerbounds-algebraic-bounded-expectations}
+  Let $E$ be a weighted strong extractor with threshold $K$ and
+  nonnegative error $\varepsilon$, on nonempty seed and output alphabets.
+  If $p(t,x)$ is a probability law and $0\le p(t,x)\le\mu(t)$, extraction
+  from $x$ with an independent uniform seed has distance at most
+  $\varepsilon+K\sum_t\mu(t)$ from uniform, retaining both the entire
+  tag $t$ and the seed. No cap on every conditional row is assumed.
+  This is the finite average-entropy step in Chattopadhyay--Liao,
+  Lemma~3.26, which credits Chattopadhyay--Goodman--Liao and ideas from
+  Chattopadhyay--Li (2016).
+\end{theorem}
+\begin{proof}
+  \leanok
+  A positive row with $K\mu(t)\le p_T(t)$ satisfies the extractor's
+  conditional cap. Other rows have total mass at most
+  $K\sum_t\mu(t)$ and contribute distance at most their mass. Null
+  rows contribute zero. Sum the row distances and average over the seed.
+\end{proof}
+
+\begin{definition}[Factored sources and two-sided extraction laws]
+  \label{def:lowerbounds-algebraic-two-sided-laws}
+  \lean{Algebraic.Cutwidth.Extractor.factoredWeight,
+    Algebraic.Cutwidth.Extractor.observedSeedWeight,
+    Algebraic.Cutwidth.Extractor.leakageSourceWeight,
+    Algebraic.Cutwidth.Extractor.twoSidedExtractionWeight}
+  \leanok
+  \uses{def:lowerbounds-algebraic-conditional-weights}
+  A shared transcript has law $w(z)$, and the left and right variables
+  have conditionally independent laws $l_z(a),r_z(b)$. The source
+  $x(z,a)$ and observation $u(z,a)$ depend on the left side; the seed
+  $y(z,b)$ and observation $v(z,b)$ depend on the right. A further
+  finite leak $L(z,v,a)$ may depend on the left variable and the right
+  observation together. The actual output law retains
+  $(z,b,u(z,a),L(z,v(z,b),a))$ alongside $E(x(z,a),y(z,b))$.
+\end{definition}
+
+\begin{theorem}[Extraction with two-sided finite leakage]
+  \label{thm:lowerbounds-algebraic-two-sided-leakage}
+  \lean{Algebraic.Cutwidth.Extractor.twoSidedExtractionWeight_eq_map,
+    Algebraic.Cutwidth.Extractor.twoSidedExtractionWeight_probability,
+    Algebraic.Cutwidth.Extractor.WeightedStrongSeededExtractor.two_sided_leakage_dist_le,
+    Algebraic.Cutwidth.Extractor.WeightedStrongSeededExtractor.two_sided_leakage_dist_le_of_budget}
+  \leanok
+  \uses{def:lowerbounds-algebraic-two-sided-laws,
+    thm:lowerbounds-algebraic-average-leakage,
+    thm:lowerbounds-algebraic-bounded-expectations}
+  Let $w,l_z,r_z$ be probability laws and $E$ a threshold-$K$ strong
+  extractor of nonnegative error $\varepsilon$, with nonempty seed and
+  output alphabets. Suppose a nonnegative envelope $\mu(z,u)$ bounds
+  $\Pr[Z=z,U=u,X=x]$ for every $x$, and the law of $(Z,V,Y)$ is within
+  $\delta$ of its actual $(Z,V)$ marginal with an independent uniform
+  seed. The actual retained extraction law has distance at most
+  \[
+    \varepsilon+\delta+K|\mathcal L|\sum_{z,u}\mu(z,u)
+  \]
+  from its actual retained marginal with an independent uniform output,
+  where $\mathcal L$ is the extra leak's alphabet. A bound
+  $K|\mathcal L|\sum\mu\le\rho$ gives error $\varepsilon+\delta+\rho$.
+\end{theorem}
+\begin{proof}
+  \leanok
+  For the independent uniform seed, apply the average leakage theorem
+  with tag $(z,v,u,L)$. Refining an event reduces its point mass;
+  averaging over $v$ leaves envelope total $|\mathcal L|\sum\mu$.
+  Conditional independence expresses both actual and uniform-seed
+  distances as expectations of the same $[0,1]$-valued row statistic.
+  The bounded-expectation inequality therefore charges the seed
+  discrepancy once, while retaining all of the right variable.
+\end{proof}
+
+\begin{definition}[The actual independence-merging output law]
+  \label{def:lowerbounds-algebraic-independence-merging}
+  \lean{Algebraic.Cutwidth.Extractor.independenceMergingWeight}
+  \leanok
+  \uses{def:lowerbounds-algebraic-two-sided-laws}
+  Given transcript $Z$, let the entire left tuple
+  $(X,X_1,\ldots,X_t)$ be independent of the entire right tuple
+  $(Y,Y_1,\ldots,Y_t)$. For index sets $S,T\subseteq[t]$, the actual
+  law applies $E$ to each source-seed pair and retains
+  $(Z,Y,Y_1,\ldots,Y_t,(E(X_i,Y_i))_{i\in S\cup T})$ alongside
+  $E(X,Y)$. It is the deterministic image of the factored source law,
+  and $S,T$ may overlap.
+\end{definition}
+
+\begin{theorem}[Finite independence merging with the average entropy budget]
+  \label{thm:lowerbounds-algebraic-independence-merging}
+  \lean{Algebraic.Cutwidth.Extractor.WeightedStrongSeededExtractor.independence_merging_dist_le,
+    Algebraic.Cutwidth.Extractor.WeightedStrongSeededExtractor.independence_merging_dist_le_of_budget}
+  \leanok
+  \uses{def:lowerbounds-algebraic-independence-merging,
+    thm:lowerbounds-algebraic-two-sided-leakage,
+    thm:lowerbounds-algebraic-conditional-distance}
+  Let the transcript and both conditional tuple laws be normalized, and
+  let $E$ be a threshold-$K$ strong extractor of nonnegative error
+  $\varepsilon$, with nonempty seed and output alphabets. Suppose
+  $\mu(z,u)\ge0$ bounds every joint mass
+  $\Pr[Z=z,X_T=u,X=x]$, and $(Z,Y_S,Y)$ is within $\delta$ of its
+  actual $(Z,Y_S)$ marginal with an independent uniform seed.
+  The independence-merging law is within
+  \[
+    \varepsilon+\delta+K|\mathrm{Out}|^{|S|}\sum_{z,u}\mu(z,u)
+  \]
+  of its actual retained marginal with a fresh independent uniform
+  output. If the last term is at most $\varepsilon$, the error is
+  $2\varepsilon+\delta$. This is the finite envelope form of
+  Chattopadhyay--Liao, Lemma~3.26; the envelope total expresses the
+  average conditional guessing budget without logarithms.
+\end{theorem}
+\begin{proof}
+  \leanok
+  Apply two-sided leakage with $U=X_T$, $V=Y_S$, and the extra leak
+  $(E(X_i,Y_i))_{i\in S}$, whose alphabet has size
+  $|\mathrm{Out}|^{|S|}$. The retained source copies $X_T$ and all
+  right-side seeds recover every remaining output indexed by $T$.
+  On overlaps use the already retained $S$ output. Processing side
+  information preserves the actual uniform comparison and contracts
+  distance. The numerical budget gives the stated final error.
+\end{proof}
+
 \begin{theorem}[Head and tail structure of block sources]
   \label{thm:lowerbounds-algebraic-block-conditioning}
   \lean{Algebraic.Cutwidth.Extractor.IsBlockSource.exists_head_tail,
