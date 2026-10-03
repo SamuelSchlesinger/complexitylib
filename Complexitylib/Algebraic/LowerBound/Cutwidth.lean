@@ -118,6 +118,7 @@ public import
   Complexitylib.Algebraic.LowerBound.Cutwidth.Extractor.Strong.Weighted.Transcript.Envelope
 public import Complexitylib.Algebraic.LowerBound.Cutwidth.Extractor.Strong.Weighted.Affine
 public import Complexitylib.Algebraic.LowerBound.Cutwidth.Extractor.Strong.Weighted.Alternating
+public import Complexitylib.Algebraic.LowerBound.Cutwidth.Extractor.Strong.Weighted.LookAhead
 public import Complexitylib.Algebraic.LowerBound.Cutwidth.Extractor.Strong.Weighted.Expectation
 public import Complexitylib.Algebraic.LowerBound.Cutwidth.Extractor.Strong.Weighted.Leakage
 public import Complexitylib.Algebraic.LowerBound.Cutwidth.Extractor.Strong.Weighted.Perturbation
@@ -180,6 +181,14 @@ public import
   Complexitylib.Algebraic.LowerBound.Cutwidth.Extractor.Strong.Block.Recursion.Scheduled.Affine
 public import
   Complexitylib.Algebraic.LowerBound.Cutwidth.Extractor.Strong.Block.Recursion.Scheduled.BoundedDepth
+public import
+  Complexitylib.Algebraic.LowerBound.Cutwidth.Extractor.Strong.Block.Recursion.Scheduled.Matched
+public import
+  Complexitylib.Algebraic.LowerBound.Cutwidth.Extractor.Strong.Block.Recursion.Scheduled.Matched.Program
+public import
+  Complexitylib.Algebraic.LowerBound.Cutwidth.Extractor.CorrelationBreaker.FlipFlop.Program
+public import
+  Complexitylib.Algebraic.LowerBound.Cutwidth.Extractor.CorrelationBreaker.FlipFlop.LookAhead
 public import Complexitylib.Algebraic.LowerBound.Cutwidth.Extractor.Strong.Block.Recursion.NearHalving
 public import
   Complexitylib.Algebraic.LowerBound.Cutwidth.Extractor.Strong.Block.Recursion.NearHalving.Parameters
@@ -291,6 +300,8 @@ observation, retaining the entire right variable and charging its seed error onc
 retaining the full right state whenever fixed-mask output transport is bijective.
 `Strong.Weighted.Alternating` switches extraction sides after a message and composes
 an actual affine extraction with the next call, retaining the entire opposite source.
+`Strong.Weighted.LookAhead` proves the actual two-round, one-tampering transition,
+retaining the complete right state and both first outputs with explicit entropy charges.
 `Strong.Weighted.Perturbation` handles seeds close to jointly independent uniform seeds,
 including the extra distance needed to retain the actual tag-and-seed marginal.
 `Strong.Block.Splitting` repairs a two-block source with a quantified error.
@@ -334,6 +345,13 @@ statistical statements require no field enumeration instances.
 with the full right state retained and an explicit average-entropy error budget.
 `Scheduled.BoundedDepth` bounds its actual seed width and entropy at fixed depths,
 providing finite parameters for matching the short alternating calls.
+`Scheduled.Matched` runs the actual bit program with those matched widths, retaining
+the full padded seed in its strong guarantee. Its `Program` layer gives a total
+uniform polynomial-time runtime and canonical agreement, including arbitrary seed tails.
+`CorrelationBreaker.FlipFlop.Program` composes the actual three-call look-ahead and
+eight-call advice-bit step, with exact vector semantics and registered `polytime` proofs.
+Its `LookAhead` layer specializes the retained two-round statistical guarantee to these
+actual calls without supplied extractors or an intermediate-seed hypothesis.
 `NearHalving` uses a rate increasing with depth and a near-halving entropy schedule.
 Its rounded parameters give an actual extractor on `8*b` bits at entropy `2*b`,
 with `b` output bits, error `1/4`, and seed length at most a cubic logarithm,

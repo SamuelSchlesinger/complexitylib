@@ -387,6 +387,19 @@ the complete left state. The resulting bound includes both extractor
 errors and both explicit entropy budgets. This supplies a local transition;
 the full tampering-set induction and parameter allocation remain open.
 
+`Strong.Weighted.LookAhead` now derives both honest seed transitions in the
+actual two-round, one-tampering computation. Write `s1=prefix(q)`,
+`r1=W(x,s1)`, `s2=QExt(q,r1)`, and `r2=W(x,s2)`, with the same calls on
+arbitrarily correlated tampered inputs. The final law retains the entire
+right state and both first outputs. If the original seed has joint error
+`δ`, the left/right extractor errors are `ε,η`, and their thresholds are
+`K,J`, the bound is
+`2ε+η+δ+K*(1+card(Mid×Mid))*∑μ+J*card(Seed×Seed)*∑ν`.
+Only the original source envelopes and seed error are premises; the
+second seed estimate follows from the actual calls. This is the two-round
+argument of [Chattopadhyay–Goyal–Li, Lemma 6.5 and Claim 6.6](https://arxiv.org/pdf/1505.00107),
+with explicit average entropy accounting that includes null transcripts.
+
 `Strong.Weighted.Perturbation` separately handles a seed approximately
 uniform jointly with the source and tag. It proves error
 `ε + 2δ + K*∑μ` while retaining the actual tag-and-seed marginal.
@@ -641,9 +654,36 @@ short alternating calls in a correlation breaker. If `clog 2 (n+1) ≤ L`,
 `2^24*L` bits. With reserve `4096*(L+E+1)`, depths 24 and 64 have entropy-bit
 thresholds at most `2^62*L` and `2^142*L`, respectively, whenever
 `1 ≤ L` and `E ≤ L`. Their exact output lengths are `2^24*L` and `2^64*L`.
-These bounds permit matching finite seed/output widths at variable error;
-the flattening and padding adapter, its runtime wrapper, and the
-correlation-breaker algorithm and correctness proof remain to be supplied.
+`Scheduled.Matched` packages these widths into `matchedBlockExtractor`:
+its padded seed has `2^24*L` bits and its flat output has `2^h*L` bits.
+Only the prescribed seed prefix enters the actual bit program; the entire
+padded seed remains retained in the strong guarantee. For `E=e+h+2≤L`,
+the error is `2^-e`. The exact XOR law holds for every parameter choice.
+`Matched.Program` supplies one total uniform `FP` evaluator, including
+generation of all parameters and the exact seed cut. Invalid parameters
+return the empty word; canonical valid inputs compute the vector extractor
+exactly, even with an arbitrary extra seed suffix.
+
+`CorrelationBreaker.FlipFlop.Program` defines and computes the concrete
+three-call look-ahead and eight-call advice-bit step of
+[CGL Algorithm 1](https://arxiv.org/pdf/1505.00107). The two refresh calls
+use depth 64 on the original full right source. All other calls use depth
+24, so their output fits the common seed width. The two advice choices
+select opposite look-ahead outputs at the refreshes. Exact runtime/vector
+agreement is proved for a common scale satisfying `e+66≤L` and the
+ceiling-log bounds for both original source lengths and the intermediate
+state width `2^64*L`. Registered `polytime` certificates cover the complete
+step, variable parameters, and conditional choices. The opposite-bit
+statistical guarantee, preservation case, and full advice iteration remain
+to be proved before this becomes a correlation breaker.
+
+`FlipFlop.LookAhead` connects the actual three-call program to the checked
+two-round probability argument. Its second output is close to uniform
+retaining the full right state and honest/tampered first outputs, with
+error `3*2^-e+δ+K*(1+M)*∑μ+K*M*∑ν`, where `K=2^(2^62*L)` and
+`M=2^(2*2^24*L)`. The statement assumes the original joint source envelopes
+and seed-prefix error `δ`; it derives the intermediate-seed guarantee
+from the actual computation.
 
 The one-shot primitive alone has finite seed cost of order `ell+e+log n`;
 the checked recursion supplies the larger polylogarithmic output with

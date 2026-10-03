@@ -5170,6 +5170,141 @@ establishes the proposed coefficient-three regime without that assumption.
   of the two fixed depths and use $L+E+1\le3L$.
 \end{proof}
 
+\begin{definition}[An actual extractor with matched seed and output widths]
+  \label{def:lowerbounds-algebraic-matched-extractor}
+  \lean{Algebraic.Cutwidth.Extractor.matchedBlockSeedBits,
+    Algebraic.Cutwidth.Extractor.matchedBlockOutputBits,
+    Algebraic.Cutwidth.Extractor.matchedBlockExtractor}
+  \leanok
+  \uses{def:lowerbounds-algebraic-scheduled-program}
+  Set $d=2^{24}L$ and output width $2^hL$.
+  On Boolean vectors of source width $n$ and seed width $d$, run the
+  scheduled bit program with $E=e+h+2$ and reserve $4096(L+E+1)$.
+  Feed exactly its prescribed seed prefix, completed by zero bits when
+  necessary, and read the actual output in flat block order.
+\end{definition}
+
+\begin{theorem}[Strong extraction with the entire padded seed retained]
+  \label{thm:lowerbounds-algebraic-matched-extractor}
+  \lean{Algebraic.Cutwidth.Extractor.matchedBlockExtractor_ofFn,
+    Algebraic.Cutwidth.Extractor.matchedBlockExtractor_ofFn_take,
+    Algebraic.Cutwidth.Extractor.matchedBlockExtractor_xor,
+    Algebraic.Cutwidth.Extractor.matchedBlockExtractor_seedBits_le,
+    Algebraic.Cutwidth.Extractor.matchedBlockExtractor_weighted,
+    Algebraic.Cutwidth.Extractor.matchedBlockExtractor_depth24,
+    Algebraic.Cutwidth.Extractor.matchedBlockExtractor_depth64}
+  \leanok
+  \uses{def:lowerbounds-algebraic-matched-extractor,
+    thm:lowerbounds-algebraic-bounded-depth,
+    thm:lowerbounds-algebraic-scheduled-boolean}
+  Suppose $\lceil\log_2(n+1)\rceil\le L$, $64\le L$, $h\le64$, and
+  $e+h+2\le L$. The prescribed seed fits within $d$ bits, and the actual
+  extractor has strong error $2^{-e}$ at its exact scheduled entropy
+  threshold, retaining all $d$ seed bits. At depths 24 and 64 the source
+  entropy may be weakened to $2^{62}L$ and $2^{142}L$ bits respectively.
+  Fixed-seed source XOR becomes coordinatewise output XOR for all parameters.
+\end{theorem}
+\begin{proof}
+  \leanok
+  Identify the raw bit output with the scheduled Boolean tuple, flatten
+  by a coordinate equivalence, and pad the seed while retaining its
+  unused suffix. Apply the finite depth bounds to the exact entropy formula.
+\end{proof}
+
+\begin{definition}[The total matched-width runtime]
+  \label{def:lowerbounds-algebraic-matched-runtime}
+  \lean{Algebraic.Cutwidth.Extractor.MatchedBlockRuntimeValid,
+    Algebraic.Cutwidth.Extractor.matchedBlockExtractorRuntime,
+    Algebraic.Cutwidth.Extractor.matchedBlockExtractorEval}
+  \leanok
+  \uses{def:lowerbounds-algebraic-matched-extractor}
+  Test the four finite conditions above before generating the schedule.
+  A valid call cuts the supplied seed word to the exact schedule width and
+  runs the bit program; an invalid call returns the empty word. A paired
+  input supplies the source, seed, and unary depth, scale, and error.
+\end{definition}
+
+\begin{theorem}[Uniform polynomial-time matched extraction]
+  \label{thm:lowerbounds-algebraic-matched-runtime}
+  \lean{Algebraic.Cutwidth.Extractor.matchedBlockExtractorRuntime_of_valid,
+    Algebraic.Cutwidth.Extractor.matchedBlockExtractorRuntime_of_not_valid,
+    Algebraic.Cutwidth.Extractor.matchedBlockExtractorRuntime_length,
+    Algebraic.Cutwidth.Extractor.matchedBlockExtractorRuntime_length_le,
+    Algebraic.Cutwidth.Extractor.matchedBlockRuntimeValid_fpPred,
+    Algebraic.Cutwidth.Extractor.matchedBlockExtractorRuntime_mem_FP,
+    Algebraic.Cutwidth.Extractor.matchedBlockExtractorEval_pair,
+    Algebraic.Cutwidth.Extractor.matchedBlockExtractorEval_mem_FP,
+    Algebraic.Cutwidth.Extractor.matchedBlockExtractorRuntime_eq_matchedBlockExtractor,
+    Algebraic.Cutwidth.Extractor.matchedBlockExtractorRuntime_append_eq_matchedBlockExtractor}
+  \leanok
+  \uses{def:lowerbounds-algebraic-matched-runtime,
+    thm:lowerbounds-algebraic-matched-extractor,
+    thm:lowerbounds-algebraic-scheduled-program}
+  The total evaluator is uniformly polynomial-time, including its guard,
+  numerical schedule, exact seed width, and all payload computations.
+  Every output has length at most $2^{64}L$. Canonical valid inputs
+  compute exactly the matched Boolean extractor, even when an arbitrary
+  suffix is appended to the padded seed word.
+\end{theorem}
+\begin{proof}
+  \leanok
+  Compile a schedule with depth bounded by 64 and a scale covering its
+  source length; prove equality on the accepted branch. Generate the exact
+  seed width through a bounded numerical-state loop, then use the full
+  scheduled-program certificate. The seed prefix identity proves canonical
+  agreement and independence from the appended suffix.
+\end{proof}
+
+\begin{definition}[The concrete look-ahead and advice-bit step]
+  \label{def:lowerbounds-algebraic-flipflop-program}
+  \lean{Algebraic.Cutwidth.Extractor.flipFlopSeedPrefix,
+    Algebraic.Cutwidth.Extractor.flipFlopLookAhead,
+    Algebraic.Cutwidth.Extractor.flipFlopStep,
+    Algebraic.Cutwidth.Extractor.FlipFlopSizeGuard,
+    Algebraic.Cutwidth.Extractor.flipFlopLookAheadRuntime,
+    Algebraic.Cutwidth.Extractor.flipFlopStepRuntime,
+    Algebraic.Cutwidth.Extractor.flipFlopStepEval}
+  \leanok
+  \uses{def:lowerbounds-algebraic-matched-runtime}
+  Use the actual depth-24 extractor for $W$ and $Q$, and the actual
+  depth-64 extractor $R$ for refreshing from the original right source $y$.
+  A look-ahead returns $(r_1,r_2)$ from
+  $s_1=\operatorname{prefix}_d(q)$, $r_1=W(x,s_1)$,
+  $s_2=Q(q,r_1)$, $r_2=W(x,s_2)$.
+  For advice zero, refresh with $R(y,r_1)$, perform another look-ahead,
+  and return $R(y,\bar r_2)$; for advice one, use $r_2$ and $\bar r_1$.
+  This is Chattopadhyay--Goyal--Li Algorithm 1, with all eight calls explicit.
+\end{definition}
+
+\begin{theorem}[Correct polynomial-time evaluation of the advice-bit step]
+  \label{thm:lowerbounds-algebraic-flipflop-program}
+  \lean{Algebraic.Cutwidth.Extractor.flipFlopSeedPrefix_ofFn,
+    Algebraic.Cutwidth.Extractor.flipFlopLookAheadRuntime_eq,
+    Algebraic.Cutwidth.Extractor.flipFlopStepRuntime_eq,
+    Algebraic.Cutwidth.Extractor.flipFlopStepRuntime_length_le,
+    Algebraic.Cutwidth.Extractor.flipFlopLookAheadRuntime_mem_FP,
+    Algebraic.Cutwidth.Extractor.flipFlopStepRuntime_mem_FP,
+    Algebraic.Cutwidth.Extractor.flipFlopStepEval_pair,
+    Algebraic.Cutwidth.Extractor.flipFlopStepEval_mem_FP}
+  \leanok
+  \uses{def:lowerbounds-algebraic-flipflop-program,
+    thm:lowerbounds-algebraic-matched-runtime}
+  The single string evaluator is uniformly polynomial-time in all words
+  and unary parameters. If $e+66\le L$ and $L$ bounds the ceiling
+  logarithms of both source lengths plus one and of $2^{64}L+1$, every
+  canonical input computes exactly the vector step for either advice bit.
+  Its output always has at most $2^{64}L$ bits, including invalid inputs.
+  The opposite-advice statistical guarantee and the full advice loop are
+  separate obligations.
+\end{theorem}
+\begin{proof}
+  \leanok
+  Compose the exact matched-runtime identities along the three and eight
+  calls. The common scale discharges each local guard. Registered
+  \texttt{polytime} rules prove closure through pairing, slicing, and
+  the two bit-dependent choices. The final refresh supplies the size bound.
+\end{proof}
+
 \begin{theorem}[Source envelopes after transcript messages]
   \label{thm:lowerbounds-algebraic-transcript-envelopes}
   \lean{Algebraic.Cutwidth.Extractor.observedTranscriptWeight_nonnegative,
@@ -5270,6 +5405,93 @@ establishes the proposed coefficient-three regime without that assumption.
   is now a function of the left state and this transcript. Project its
   retained affine guarantee to obtain the next seed bound and apply the
   alternating transition. The right-message alphabet is exactly $S\times M$.
+\end{proof}
+
+\begin{definition}[Actual tampered two-round look-ahead laws]
+  \label{def:lowerbounds-algebraic-lookahead-laws}
+  \lean{Algebraic.Cutwidth.Extractor.lookAheadSeedWeight,
+    Algebraic.Cutwidth.Extractor.lookAheadExtractionWeight}
+  \leanok
+  \uses{def:lowerbounds-algebraic-alternating-laws}
+  From the original law $w(z)l_z(a)r_z(b)$ compute
+  $s_1=p(q)$, $r_1=W(x,s_1)$, $s_2=Q(q,r_1)$, and $r_2=W(x,s_2)$,
+  and the same calls on arbitrarily correlated tampered values $x',q'$.
+  The seed law retains $z,s_1,s_1',a$ alongside $s_2$.
+  The output law retains $z,b,r_1,r_1'$ alongside $r_2$.
+\end{definition}
+
+\begin{theorem}[Two-round extraction with the tampered transcript retained]
+  \label{thm:lowerbounds-algebraic-lookahead-extraction}
+  \lean{Algebraic.Cutwidth.Extractor.lookAheadSeedWeight_probability,
+    Algebraic.Cutwidth.Extractor.lookAheadExtractionWeight_probability,
+    Algebraic.Cutwidth.Extractor.WeightedStrongSeededExtractor.lookAhead_seed_dist_le,
+    Algebraic.Cutwidth.Extractor.WeightedStrongSeededExtractor.lookAhead_dist_le,
+    Algebraic.Cutwidth.Extractor.WeightedStrongSeededExtractor.lookAhead_dist_le_of_budget}
+  \leanok
+  \uses{def:lowerbounds-algebraic-lookahead-laws,
+    thm:lowerbounds-algebraic-alternating-extraction,
+    thm:lowerbounds-algebraic-transcript-envelopes}
+  Assume normalized factored sides, nonnegative original joint source
+  envelopes $\mu(z),\nu(z)$, and initial honest-seed discrepancy $\delta$
+  jointly with $Z$. Let $W:X\times S\to M$ and $Q:Q_0\times M\to S$
+  have thresholds $K,J$ and nonnegative errors $\varepsilon,\eta$.
+  The actual final law differs from its retained marginal with an
+  independent uniform final output by at most
+  \[
+    2\varepsilon+\eta+\delta+
+    K(1+|M\times M|)\sum_z\mu(z)+J|S\times S|\sum_z\nu(z).
+  \]
+  The retained variables determine both initial and both second seeds.
+  No tampered seed is assumed uniform, and no per-transcript entropy
+  bound is required. This formalizes the two-round case of
+  Chattopadhyay--Goyal--Li Lemma 6.5 and Claim 6.6 with explicit losses.
+\end{theorem}
+\begin{proof}
+  \leanok
+  Extract $r_1$ retaining the full right state. Observe $(s_1,s_1')$ on
+  the right, switch sides, and derive the second honest seed estimate.
+  Observe $(r_1,r_1')$ on the left, then extract the final left output.
+  Exact transcript factorizations and average envelope sums charge the
+  two message alphabets and include null rows without case assumptions.
+\end{proof}
+
+\begin{definition}[The actual matched look-ahead output law]
+  \label{def:lowerbounds-algebraic-concrete-lookahead}
+  \lean{Algebraic.Cutwidth.Extractor.flipFlopLookAheadWeight}
+  \leanok
+  \uses{def:lowerbounds-algebraic-flipflop-program,
+    def:lowerbounds-algebraic-lookahead-laws}
+  Push the original factored source law through the concrete three-call
+  look-ahead. Retain $z$, the full right state, and both honest and tampered
+  first outputs alongside the honest second output.
+\end{definition}
+
+\begin{theorem}[The actual matched program satisfies the two-round bound]
+  \label{thm:lowerbounds-algebraic-concrete-lookahead}
+  \lean{Algebraic.Cutwidth.Extractor.flipFlopLookAheadWeight_eq,
+    Algebraic.Cutwidth.Extractor.flipFlopLookAheadWeight_probability,
+    Algebraic.Cutwidth.Extractor.flipFlopLookAhead_dist_le}
+  \leanok
+  \uses{def:lowerbounds-algebraic-concrete-lookahead,
+    thm:lowerbounds-algebraic-lookahead-extraction,
+    thm:lowerbounds-algebraic-matched-extractor}
+  Suppose $L\ge64$, $e+26\le L$, and $L$ bounds the ceiling logarithms
+  of $n+1$ and $2^{64}L+1$. Under the original normalized factored-source,
+  joint-envelope, and seed-prefix hypotheses of the two-round theorem,
+  the actual matched program has distance at most
+  \[
+    3\cdot2^{-e}+\delta+K(1+M)\sum_z\mu(z)+KM\sum_z\nu(z),
+    \qquad K=2^{2^{62}L},\quad M=2^{2\cdot2^{24}L}.
+  \]
+  Both the honest and tampered inputs may be arbitrarily correlated
+  within each side. No extractor or intermediate-seed guarantee is
+  supplied as a premise.
+\end{theorem}
+\begin{proof}
+  \leanok
+  Identify the direct program pushforward with the generic look-ahead law.
+  Instantiate both extractor calls with the matched depth-24 certificate,
+  including the separate source-log bound for the right state.
 \end{proof}
 
 \begin{theorem}[Extraction with an approximately independent seed]
