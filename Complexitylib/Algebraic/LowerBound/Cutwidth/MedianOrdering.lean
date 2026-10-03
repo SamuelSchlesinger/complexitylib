@@ -64,9 +64,9 @@ theorem bagN_consecutive {w : W} {i j k : Nat} (hij : i ≤ j) (hjk : j ≤ k)
   simp only [bagN, hi', hj', hk', ↓reduceDIte] at hi hk ⊢
   exact D.consecutive w ⟨i, hi'⟩ ⟨j, hj'⟩ ⟨k, hk'⟩ hij hjk hi hk
 
-/-- A bag containing both endpoints of an edge; `0` for non-edges. -/
+/-- The first bag containing both endpoints of an edge; `0` if none exists. -/
 noncomputable def bagOf (e : Sym2 W) : Nat :=
-  if h : ∃ i : Fin D.length, ∀ a ∈ e, a ∈ D.bag i then (Classical.choose h).val else 0
+  if h : ∃ i : Nat, ∀ a ∈ e, a ∈ bagN H D i then Nat.find h else 0
 
 omit [DecidableRel H.Adj] in
 theorem mem_bagN_bagOf {e : Sym2 W} (he : e ∈ H.edgeSet) {a : W} (ha : a ∈ e) :
@@ -74,11 +74,23 @@ theorem mem_bagN_bagOf {e : Sym2 W} (he : e ∈ H.edgeSet) {a : W} (ha : a ∈ e
   induction e using Sym2.ind with
   | _ u v =>
     obtain ⟨i, hu, hv⟩ := D.edge_mem u v he
-    have h : ∃ i : Fin D.length, ∀ a ∈ s(u, v), a ∈ D.bag i :=
-      ⟨i, fun a ha => by rcases Sym2.mem_iff.mp ha with rfl | rfl <;> assumption⟩
-    have spec := Classical.choose_spec h a ha
-    simp only [bagOf, h, ↓reduceDIte, bagN, (Classical.choose h).isLt, Fin.eta]
-    exact spec
+    have h : ∃ j : Nat, ∀ a ∈ s(u, v), a ∈ bagN H D j := by
+      refine ⟨i.val, ?_⟩
+      intro a ha
+      simp only [bagN, i.isLt, ↓reduceDIte, Fin.eta]
+      rcases Sym2.mem_iff.mp ha with rfl | rfl <;> assumption
+    simp only [bagOf, h, ↓reduceDIte]
+    exact Nat.find_spec h a ha
+
+omit [DecidableRel H.Adj] in
+/-- An edge is placed no later than any bag containing both endpoints. -/
+theorem bagOf_le {e : Sym2 W} (i : Fin D.length)
+    (he : ∀ a ∈ e, a ∈ D.bag i) : bagOf H D e ≤ i.val := by
+  have hi : ∀ a ∈ e, a ∈ bagN H D i.val := by
+    simpa only [bagN, i.isLt, ↓reduceDIte, Fin.eta] using he
+  have h : ∃ j : Nat, ∀ a ∈ e, a ∈ bagN H D j := ⟨i.val, hi⟩
+  simp only [bagOf, h, ↓reduceDIte]
+  exact Nat.find_min' h hi
 
 /-! ### Edge positions -/
 
@@ -271,32 +283,15 @@ theorem theta_le_of_key_le {w w' : W} (h : key H D regular w ≤ key H D regular
     theta H D regular w ≤ theta H D regular w' :=
   digit_le_of_le (Fintype.equivFin W w').isLt h
 
-/-- **The median ordering bound.** Every prefix of the key ordering has a cut of
-at most `p + 2` edges when all bags have at most `p + 1` vertices. -/
-theorem card_cutFinset_key_lt_le {p : Nat} (hbag : ∀ i, (D.bag i).card ≤ p + 1) (t : Nat) :
-    (H.cutFinset (Finset.univ.filter fun w => key H D regular w < t)).card ≤ p + 2 := by
-  set L := Finset.univ.filter fun w => key H D regular w < t with hL
-  rcases L.eq_empty_or_nonempty with hempty | hne
-  · have : H.cutFinset L = ∅ := by
-      ext e
-      simp only [Finset.notMem_empty, iff_false]
-      intro he
-      obtain ⟨_, a, _, _, ha, _⟩ := (H.mem_cutFinset).mp he
-      rw [hempty] at ha
-      exact Finset.notMem_empty a ha
-    rw [this, Finset.card_empty]
-    exact Nat.zero_le _
-  obtain ⟨v, hvL, hvmax⟩ := Finset.exists_max_image L (key H D regular) hne
-  set θ₀ := theta H D regular v with hθ₀
-  set j₀ := bagOf H D (median H D regular v) with hj₀
-  have inL_theta : ∀ a ∈ L, theta H D regular a ≤ θ₀ :=
-    fun a ha => theta_le_of_key_le H D regular (hvmax a ha)
-  have outL_theta : ∀ b, b ∉ L → θ₀ ≤ theta H D regular b := by
-    intro b hb
-    apply theta_le_of_key_le
-    have h₁ : key H D regular v < t := (Finset.mem_filter.mp hvL).2
-    have h₂ : ¬ key H D regular b < t := fun h => hb (Finset.mem_filter.mpr ⟨Finset.mem_univ _, h⟩)
-    omega
+/-- A cut straddling a median position has at most one more edge than
+that position's bag. Only this bag, rather than the whole decomposition,
+needs a size bound. -/
+theorem card_cutFinset_le_bag (L : Finset W) (v : W)
+    (inL_theta : ∀ a ∈ L, theta H D regular a ≤ theta H D regular v)
+    (outL_theta : ∀ b, b ∉ L → theta H D regular v ≤ theta H D regular b) :
+    (H.cutFinset L).card ≤ (bagN H D (bagOf H D (median H D regular v))).card + 1 := by
+  set θ₀ := theta H D regular v
+  set j₀ := bagOf H D (median H D regular v)
   -- The endpoints of a crossing edge inside and outside `L`.
   choose inEnd outEnd hends using
     fun (e : Sym2 W) (he : e ∈ H.cutFinset L) => ((H.mem_cutFinset).mp he).2
@@ -400,9 +395,35 @@ theorem card_cutFinset_key_lt_le {p : Nat} (hbag : ∀ i, (D.bag i).card ≤ p +
     _ ≤ (bagN H D j₀).card + 1 := by
         gcongr
         exact Finset.card_image_le
-    _ ≤ p + 2 := by
-        have := card_bagN_le H D hbag j₀
-        omega
+
+/-- **The median ordering bound.** Every prefix of the key ordering has a cut of
+at most `p + 2` edges when all bags have at most `p + 1` vertices. -/
+theorem card_cutFinset_key_lt_le {p : Nat} (hbag : ∀ i, (D.bag i).card ≤ p + 1) (t : Nat) :
+    (H.cutFinset (Finset.univ.filter fun w => key H D regular w < t)).card ≤ p + 2 := by
+  set L := Finset.univ.filter fun w => key H D regular w < t with hL
+  rcases L.eq_empty_or_nonempty with hempty | hne
+  · have : H.cutFinset L = ∅ := by
+      ext e
+      simp only [Finset.notMem_empty, iff_false]
+      intro he
+      obtain ⟨_, a, _, _, ha, _⟩ := (H.mem_cutFinset).mp he
+      rw [hempty] at ha
+      exact Finset.notMem_empty a ha
+    rw [this, Finset.card_empty]
+    exact Nat.zero_le _
+  obtain ⟨v, hvL, hvmax⟩ := Finset.exists_max_image L (key H D regular) hne
+  set θ₀ := theta H D regular v with hθ₀
+  have inL_theta : ∀ a ∈ L, theta H D regular a ≤ θ₀ :=
+    fun a ha => theta_le_of_key_le H D regular (hvmax a ha)
+  have outL_theta : ∀ b, b ∉ L → θ₀ ≤ theta H D regular b := by
+    intro b hb
+    apply theta_le_of_key_le
+    have h₁ : key H D regular v < t := (Finset.mem_filter.mp hvL).2
+    have h₂ : ¬ key H D regular b < t := fun h => hb (Finset.mem_filter.mpr ⟨Finset.mem_univ _, h⟩)
+    omega
+  exact (card_cutFinset_le_bag H D regular L v inL_theta outL_theta).trans (by
+    have := card_bagN_le H D hbag (bagOf H D (median H D regular v))
+    lia)
 
 end MedianOrdering
 

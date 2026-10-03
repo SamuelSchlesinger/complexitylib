@@ -753,6 +753,38 @@ theorem card_reachableGate_le : Fintype.card (ReachableGate p out) ≤ s := by
 theorem card_read_le : (read p out).card ≤ n := by
   simpa using Finset.card_le_univ (read p out)
 
+/-- Every signal except the output feeds a slot. Charging its signal vertex
+and copy vertices to those slots bounds the graph by twice the number of
+reachable gates plus one, independently of the declared input count. -/
+theorem card_vertex_le_two_mul_reachableGate :
+    Fintype.card (Vertex p out) ≤ 2 * Fintype.card (ReachableGate p out) + 1 := by
+  let output : Signal p out := ⟨Wire.gate out, Reach.out⟩
+  have localBound (w : Signal p out) :
+      1 + (fanout p out w - 1) ≤ fanout p out w + if w = output then 1 else 0 := by
+    by_cases hw : w = output
+    · simp only [hw, ite_true]
+      lia
+    · have hpos := fanout_pos p out w (fun h => hw (Subtype.ext h))
+      simp only [hw, ite_false, add_zero]
+      lia
+  have total : ∑ w : Signal p out, fanout p out w = Fintype.card (Slot p out) := by
+    rw [← Finset.card_univ, Finset.card_eq_sum_card_fiberwise
+      (f := slotSignal p out) (t := Finset.univ) (fun _ _ => Finset.mem_univ _)]
+    rfl
+  calc Fintype.card (Vertex p out)
+      = ∑ w : Signal p out, (1 + (fanout p out w - 1)) := by
+          simp [Fintype.card_sum, Fintype.card_sigma, Finset.sum_add_distrib]
+    _ ≤ ∑ w : Signal p out, (fanout p out w + if w = output then 1 else 0) :=
+      Finset.sum_le_sum fun w _ => localBound w
+    _ = Fintype.card (Slot p out) + 1 := by simp [Finset.sum_add_distrib, total]
+    _ = 2 * Fintype.card (ReachableGate p out) + 1 := by rw [card_slot]
+
+/-- The wiring graph has at most `2 s + 1` vertices, even when most declared
+inputs are unused or the circuit has arbitrarily many witness inputs. -/
+theorem card_vertex_le_two_mul_size : Fintype.card (Vertex p out) ≤ 2 * s + 1 :=
+  (card_vertex_le_two_mul_reachableGate p out).trans
+    (Nat.add_le_add_right (Nat.mul_le_mul_left 2 (card_reachableGate_le p out)) 1)
+
 /-- The vertex count is at most `n + 3 s`. -/
 theorem card_vertex_le : Fintype.card (Vertex p out) ≤ n + 3 * s := by
   have h₁ := card_edge_add_card_signal p out

@@ -126,16 +126,73 @@ models and their charged operations are explicit in the theorem statements.
 The AC0 development has a detailed [theory map](ac0-theory-map.md).
 
 `Algebraic.LowerBound.Cutwidth` proves that a rectangle-free Boolean function
-with polynomial rectangle threshold and at least `2 ^ (n - 2)` accepting inputs
+with `log₂ K(n) = o(n)` for its rectangle threshold and at least
+`2 ^ (n - 2)` accepting inputs
 needs more than `(4 - ε) n` gates over the full binary basis `B₂`, for every
-`ε > 0` and all large `n`. The pathwidth bound `(1/6 + ξ) h` for simple cubic
-graphs and the existence of such a hard family are explicit hypotheses of
-`Cutwidth.eventually_lt_size_of_pathwidthBound`; the library adds no axioms.
+`ε > 0` and all large `n`. The cubic bisection bound `(1/6 + ξ) h`
+and the existence of such a hard family are explicit hypotheses of
+`Cutwidth.eventually_lt_size_of_bisectionBound_of_log_sublinear`; the library
+adds no axioms. `Cutwidth.Extractor` proves the transfer from flat-source
+sumset extraction, but does not construct the extractor family.
+The graph prerequisites now include boundary transitions and the complete
+endpoint induction for subcubic graphs, using logarithmic-width tree
+decompositions and concatenation. The assembly of both sides of a balanced
+cut and the asymptotic bisection-to-pathwidth reduction are proved. The
+sharp cubic bisection theorem remains the graph obligation.
+The local improvement work now includes exact cut changes, the five helpful
+configurations used before normalization, accumulation, and logarithmic-cost
+rebalancing through the endpoint decomposition. The finite and asymptotic
+local-to-global reductions are proved. The bounded local helpful-set lemma
+is the remaining graph step.
+For normalized sides, the red/black suppression and lifting identities and
+a bound on the size of a black tree component are proved. The red/black
+development also constructs positive sets from small components and thin
+paths, with an explicit `8 M + 1` bound for the latter. The weighted-tree
+light-pair lemma and local compensation for restoring deleted edges are
+also proved. Excluding helpful sets of at most eleven vertices now supplies
+the neighbor needed for a normalization edge switch. Both switches are now
+constructed, with degree and cut preservation and local reverse extensions
+of at most two or four vertices. The first normalization phase is complete:
+it either finds a helpful set of at most 33 vertices or eliminates all
+boundary edges, with a factor-three transfer back to the original graph.
+The second phase is also complete: it eliminates three-boundary-neighbor
+vertices with a factor-five reverse bound. Together, the phases either find
+a helpful set of at most 165 vertices or normalize the side with a
+factor-fifteen transfer. Cycle selection is proved for a supplied family
+of degree-two regions, with the number isolated bounded by the original
+cycle rank. Simultaneous restoration also has a uniform size bound.
+`RedBlack.PathSystem` now constructs the thin-path family from eligible
+degree-two vertices and their actual red attachments to small components.
+It supplies spanning paths and distinct boundary choices, and instantiates
+cycle selection. Each thin region with one chosen attachment has at most
+`3 M` vertices, giving restoration factor `1 + 9 M` in a subcubic graph.
+Full isolation preserves connectivity among outside vertices.
+`BridgeQuotient` contracts the pieces between surviving boundaries to a
+forest, preserving the connecting edges bijectively; every component is
+a tree. `PathSuppression` identifies and removes the thin-region vertices.
+`PathSystem.exists_core_forest` constructs the forest on the remaining core
+pieces with exact original black reachability, retaining the restoration
+and cycle-rank bounds. With eligible vertices of degree exactly two,
+`PathSystem.exists_counted_core_forest` proves that core edges plus shaded
+paths equal the original number of thin paths. The suppression theorem
+also gives a bijection from removed degree-two vertices to edges, with
+their original neighbor pairs. The initial attachment marks total exactly
+two per shaded path. The isolation and core-forest constructions reserve
+additional cycle rank for each untouched small cyclic component, so
+doubly marked components and small cyclic components share one rank bound.
+Endpoint marks also total two per shaded path, stay outside the eligible
+set, and record the exact outside degree loss. Restoration adds at most
+`3 M` vertices per endpoint mark on the witness. A closed core set that
+absorbs an entire nonempty region boundary now yields a positive witness
+after simultaneous restoration, with the same factor `1 + 9 M` in a
+subcubic graph. Applying this to adjacent core pieces, preservation through
+weighted-tree reorganization, and the final counting argument remain open.
 The [cutwidth guide](cutwidth-lower-bound.md) describes the argument and
 its hypotheses. Two corollaries share the assembly: the same bound for
-nondeterministic circuits with at most `n` witness bits
-(`Cutwidth.nondet_eventually_lt_size_of_pathwidthBound`), and an average-case
-form for balanced functions, where circuits of size `(4 - ε) n` agree with the
+nondeterministic circuits with arbitrarily many witness bits
+(`Cutwidth.nondet_eventually_lt_size_of_log_sublinear`), and an average-case
+form for balanced functions with polynomial threshold, where circuits of size `(4 - ε) n`
+agree with the
 function on at most `(1/2 + 3ν) 2 ^ n + 2 ^ ((1 - ε/24) n)` inputs
 (`Cutwidth.eventually_card_agree_le_of_pathwidthBound`, see the
 [average-case note](average-case-cutwidth.md)). `Algebraic.LowerBound.Nechiporuk` proves that the same

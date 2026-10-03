@@ -21,6 +21,8 @@ hypothesis: every simple 3-regular graph on more than `N₀` vertices has a path
 decomposition of width at most `(1/6 + ξ) h`, where `h` is the number of
 vertices. Together with the compression and median-ordering arguments it
 yields the graph-ordering hypothesis `Multigraph.OrderingBound`.
+`PathDecomposition.Bisection` proves it from the cubic bisection hypothesis;
+the sharp Monien–Preis bisection theorem remains unformalized.
 
 The cut of a vertex set in a simple graph, `SimpleGraph.cutFinset`, is the set
 of edges with exactly one endpoint in the set.

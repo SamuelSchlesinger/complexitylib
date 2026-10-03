@@ -713,6 +713,1654 @@ establishes the proposed coefficient-three regime without that assumption.
   through its own disjoint set of resources.
 \end{proof}
 
+\begin{definition}[Prescribed endpoint bags]
+  \label{def:lowerbounds-algebraic-path-endpoint}
+  \lean{Algebraic.Cutwidth.PathDecomposition.EndsAt,
+    Algebraic.Cutwidth.PathDecomposition.StartsAt,
+    Algebraic.Cutwidth.PathDecomposition.reverse,
+    Algebraic.Cutwidth.PathDecomposition.trivial_endsAt}
+  \leanok
+  A path decomposition ends at $X$ if it has a last bag and that bag is
+  exactly $X$; it starts at $X$ if its first bag is exactly $X$.
+  Reversal exchanges the endpoint roles. The one-bag decomposition ends
+  at the full vertex set.
+\end{definition}
+
+\begin{theorem}[Restoring a boundary vertex]
+  \label{thm:lowerbounds-algebraic-endpoint-restore}
+  \lean{Algebraic.Cutwidth.PathDecomposition.EndsAt.exists_subset,
+    Algebraic.Cutwidth.PathDecomposition.exists_endsAt_of_delete}
+  \leanok
+  \uses{def:lowerbounds-algebraic-path-endpoint}
+  Let $v\in Y$, $X\subseteq Y$, and suppose all neighbors of $v$ lie in
+  $Y$. A path decomposition of $H-v$ ending at $Y\setminus\{v\}$ with
+  bags of size at most $b$ extends to one of $H$ ending at $X$, provided
+  $|Y|\le b$. This supplies the deletion cases in Fomin and H{\o}ie's
+  endpoint induction.
+\end{theorem}
+\begin{proof}
+  \leanok
+  Append $Y$, then $X$. All incident edges are covered, and every old
+  vertex in an appended bag was already present in the previous last bag.
+\end{proof}
+
+\begin{theorem}[Structural reduction for a large boundary]
+  \label{thm:lowerbounds-algebraic-boundary-reduction}
+  \lean{Algebraic.Cutwidth.boundary_reduction,
+    Algebraic.Cutwidth.complement_card_edges_lt,
+    Algebraic.Cutwidth.exists_tree_component_of_card_edgeFinset_lt}
+  \leanok
+  In a finite graph of maximum degree three, if $|V|<3|X|$, then some
+  vertex of $X$ has at most one neighbor outside $X$, or $H-X$ has a
+  connected component that is a tree.
+\end{theorem}
+\begin{proof}
+  \leanok
+  Otherwise the cut has at least $2|X|$ edges. Degree counting gives
+  $2|E(H-X)|+2|X|\le 3|V\setminus X|$, hence an edge deficit in $H-X$.
+  If every component contained a cycle, each would have at least as many
+  edges as vertices, contradicting that deficit.
+\end{proof}
+
+\begin{theorem}[Small tree components from a linear edge deficit]
+  \label{thm:lowerbounds-algebraic-small-tree-component}
+  \lean{Algebraic.Cutwidth.exists_small_tree_component_of_edge_deficit}
+  \leanok
+  In a finite simple graph, if $(M+1)|E|<M|V|$, some connected
+  component is a tree with at most $M$ vertices. No degree bound is needed.
+\end{theorem}
+\begin{proof}
+  \leanok
+  Suppose every tree component has more than $M$ vertices. For a tree
+  component with $v$ vertices and $e=v-1$ edges, $Mv\le(M+1)e$.
+  For a component containing a cycle, $v\le e$ gives the same inequality.
+  Summing over the components contradicts the assumed deficit.
+\end{proof}
+
+\begin{theorem}[Transition between cut boundaries]
+  \label{thm:lowerbounds-algebraic-boundary-transition}
+  \lean{Algebraic.Cutwidth.PathDecomposition.exists_between_of_crossing}
+  \leanok
+  Let $H$ be a finite simple graph and $S$ a set of vertices such that every
+  vertex has a neighbor across the cut $(S,S^c)$. If the cut contains $b$
+  edges, $H$ has a path decomposition with first bag $S$, last bag $S^c$,
+  and every bag of size at most $b+1$. This is the boundary transition used
+  in Fomin and H{\o}ie's proof of the pathwidth bound for cubic graphs;
+  this transition itself does not require a degree bound.
+\end{theorem}
+\begin{proof}
+  \leanok
+  Scan the vertices of $S$, introducing their neighbors in $S^c$ before
+  forgetting them. Charge each introduced right vertex to an edge from an
+  already scanned left vertex, and each remaining left vertex to an edge
+  from itself. The charges are disjoint except for the current left vertex,
+  which accounts for the extra one. Edges within each side are covered by
+  its endpoint bag.
+\end{proof}
+
+\begin{theorem}[Tree centroid]
+  \label{thm:lowerbounds-algebraic-tree-centroid}
+  \lean{Algebraic.Cutwidth.exists_tree_centroid}
+  \leanok
+  Every finite tree on $n$ vertices has a vertex whose deletion leaves
+  connected components of at most $n/2$ vertices.
+\end{theorem}
+\begin{proof}
+  \leanok
+  Choose a vertex minimizing the sum of distances to all vertices. Moving
+  into a component larger than half the tree decreases the distances to
+  its vertices by one and increases every other distance by at most one,
+  contradicting minimality. Uniqueness of paths proves the distance change.
+\end{proof}
+
+\begin{theorem}[Logarithmic tree and forest decompositions]
+  \label{thm:lowerbounds-algebraic-tree-decomposition}
+  \lean{Algebraic.Cutwidth.PathDecomposition.exists_tree_of_card_le_pow,
+    Algebraic.Cutwidth.PathDecomposition.exists_tree,
+    Algebraic.Cutwidth.PathDecomposition.exists_forest,
+    Algebraic.Cutwidth.PathDecomposition.exists_of_components,
+    Algebraic.Cutwidth.PathDecomposition.exists_addVertex}
+  \leanok
+  \uses{thm:lowerbounds-algebraic-tree-centroid}
+  A tree with at most $2^k$ vertices has a path decomposition with bags of
+  size at most $k+1$. In particular, every tree or forest on $n$ vertices
+  has bags of size at most $\lceil\log_2 n\rceil+1$, with the logarithmic
+  term defined to be zero when $n=0$. This elementary bound suffices for
+  the tree component in Fomin and H{\o}ie's endpoint induction.
+\end{theorem}
+\begin{proof}
+  \leanok
+  Recurse on the components left by a centroid, concatenate their
+  decompositions, and insert the centroid into every bag. Append its
+  singleton to cover also the one-vertex case. Each recursion halves the
+  component size and adds at most one vertex per bag. For forests,
+  concatenate the tree decompositions without increasing their bag sizes.
+\end{proof}
+
+\begin{theorem}[Concatenation along a boundary]
+  \label{thm:lowerbounds-algebraic-endpoint-glue}
+  \lean{Algebraic.Cutwidth.PathDecomposition.exists_glue,
+    Algebraic.Cutwidth.PathDecomposition.exists_glue_embeddings,
+    Algebraic.Cutwidth.PathDecomposition.exists_pad,
+    Algebraic.Cutwidth.PathDecomposition.exists_attach,
+    Algebraic.Cutwidth.PathDecomposition.EndsAt.reverse,
+    Algebraic.Cutwidth.PathDecomposition.StartsAt.reverse}
+  \leanok
+  \uses{def:lowerbounds-algebraic-path-endpoint}
+  Suppose two induced graphs together cover every vertex and edge, and
+  their adjoining endpoint bags contain every shared vertex. Their
+  decompositions concatenate without enlarging any bag. In particular,
+  an induced subgraph with bag bound $c$ can be attached along a boundary
+  $X$ to a decomposition of the rest ending at $X$: the new decomposition
+  ends at $X$ and has bag bound $\max\{b,|X|+c\}$, where $b$ was the bound
+  for the rest. Every edge leaving the attached subgraph must meet $X$.
+\end{theorem}
+\begin{proof}
+  \leanok
+  Shared vertices persist through the join because they lie in both
+  adjoining bags. For attachment, add $X$ to each subgraph bag and put
+  $X$ at both ends before concatenating.
+\end{proof}
+
+\begin{theorem}[Prescribed endpoints in subcubic graphs]
+  \label{thm:lowerbounds-algebraic-subcubic-endpoint}
+  \lean{Algebraic.Cutwidth.PathDecomposition.exists_subcubic_endsAt}
+  \leanok
+  \uses{thm:lowerbounds-algebraic-endpoint-restore,
+    thm:lowerbounds-algebraic-boundary-reduction,
+    thm:lowerbounds-algebraic-tree-decomposition,
+    thm:lowerbounds-algebraic-endpoint-glue}
+  Every graph of maximum degree three on $n$ vertices has a path
+  decomposition ending at any prescribed set $X$, with bags of size at most
+  \[
+    \max\{|X|,\lfloor n/3\rfloor+1\}+\lceil\log_2 n\rceil+1.
+  \]
+  The logarithmic term is zero for $n=0$. This proves the endpoint lemma
+  in Fomin and H{\o}ie's argument with an elementary logarithmic remainder.
+  It does not require the bisection theorem.
+\end{theorem}
+\begin{proof}
+  \leanok
+  For a nonempty graph, enlarge $X$ to a boundary $Y$ of size
+  $\max\{|X|,\lfloor n/3\rfloor+1\}$. If a boundary vertex has at most
+  one outside neighbor, delete it, recurse with that neighbor added to
+  the boundary, and restore the vertex. Otherwise the complement of $Y$
+  has a tree component. Delete the component, recurse, and attach its
+  logarithmic-width decomposition after adding $Y$ to its bags. Both
+  recursions reduce the number of vertices, and concatenation preserves
+  the bound on the remaining graph. Finally append $X$.
+\end{proof}
+
+\begin{definition}[Cubic bisection hypothesis]
+  \label{def:lowerbounds-algebraic-bisection}
+  \lean{Algebraic.Cutwidth.BisectionBound}
+  \leanok
+  The predicate $\mathrm{BisectionBound}(\xi,N_0)$ says that every simple
+  $3$-regular graph on $n>N_0$ vertices has a cut $(S,S^c)$ with
+  $||S|-|S^c||\le 1$ and at most $(1/6+\xi)n$ crossing edges. The
+  Monien--Preis theorem asserting this for every $\xi>0$ and some $N_0$
+  remains unformalized.
+\end{definition}
+
+\begin{definition}[Helpfulness of a vertex move]
+  \label{def:lowerbounds-algebraic-helpfulness}
+  \lean{Algebraic.Cutwidth.helpfulness}
+  \leanok
+  Write $\partial S$ for the edges crossing the vertex cut $(S,S^c)$.
+  The helpfulness of flipping a vertex set $X$ is the signed integer
+  \[
+    h_S(X)=|\partial X\cap\partial S|-|\partial X\setminus\partial S|.
+  \]
+  For $X\subseteq S$, this is the helpfulness in Monien and Preis's
+  bisection argument: crossing edges removed minus internal edges made
+  crossing by moving $X$ to the other side.
+\end{definition}
+
+\begin{theorem}[Exact accounting and minimum bisections]
+  \label{thm:lowerbounds-algebraic-cut-improvement}
+  \lean{Algebraic.Cutwidth.cutFinset_symmDiff,
+    Algebraic.Cutwidth.helpfulness_eq_sub,
+    Algebraic.Cutwidth.helpfulness_add,
+    Algebraic.Cutwidth.Bisection.exists_min_cut_of_card,
+    Algebraic.Cutwidth.Bisection.exists_min_bisection,
+    Algebraic.Cutwidth.Bisection.two_moves_le_zero,
+    Algebraic.Cutwidth.abs_helpfulness_le_mul_card}
+  \leanok
+  \uses{def:lowerbounds-algebraic-helpfulness}
+  The helpfulness is exactly
+  $h_S(X)=|\partial S|-|\partial(S\mathbin{\triangle}X)|$, and
+  successive moves have additive helpfulness. A minimum cut exists at
+  each prescribed side cardinality, and a minimum balanced cut exists
+  also for graphs of odd order. At a minimum cut $S$, if $X\subseteq S$,
+  $Y\subseteq(S\setminus X)^c$, and $|X|=|Y|$, then
+  \[
+    h_S(X)+h_{(S\setminus X)^c}(Y)\le 0.
+  \]
+  If all vertices of $X$ have degree at most $d$, then
+  $|h_S(X)|\le d|X|$.
+\end{theorem}
+\begin{proof}
+  \leanok
+  Flipping $X$ toggles exactly the edges of $\partial X$.
+  Subtracting the cardinalities gives the signed identity, which
+  telescopes for successive moves. Minimize over the finite family of
+  cuts with the chosen cardinality; complementing a cut handles either
+  orientation of an odd balanced partition. The equally sized second
+  move restores the cardinality, so positive total helpfulness would
+  contradict minimality. At most the edges incident to $X$ can change.
+\end{proof}
+
+\begin{theorem}[Degree accounting and local helpful sets]
+  \label{thm:lowerbounds-algebraic-local-helpful}
+  \lean{Algebraic.Cutwidth.degree_sum_cut,
+    Algebraic.Cutwidth.helpfulness_eq_degree_sum,
+    Algebraic.Cutwidth.one_le_helpfulness_singleton,
+    Algebraic.Cutwidth.card_sub_two_le_helpfulness,
+    Algebraic.Cutwidth.one_le_helpfulness_of_connected_boundary}
+  \leanok
+  \uses{def:lowerbounds-algebraic-helpfulness}
+  For $X\subseteq S$, let $d_{S^c}(v)$ count the neighbors of $v$ outside
+  $S$. Then
+  \[
+    h_S(X)=2\sum_{v\in X}d_{S^c}(v)+2|E(H[X])|-\sum_{v\in X}\deg(v).
+  \]
+  In a graph of maximum degree three, a vertex with two crossing edges
+  is at least $1$-helpful. A connected set $X$ of boundary vertices has
+  $h_S(X)\ge |X|-2$; thus three or more connected boundary vertices
+  form a helpful set. These include the first two local cases of
+  Monien--Preis's bounded helpful-set lemma.
+\end{theorem}
+\begin{proof}
+  \leanok
+  The degree sum on $X$ counts its internal edges twice and its crossing
+  edges once. The helpfulness formula follows by separating edges going
+  outside $S$. For connected boundary vertices, each summand
+  $d_{S^c}(v)$ is at least one, there are at least $|X|-1$ internal
+  edges, and the degree sum is at most $3|X|$.
+\end{proof}
+
+\begin{definition}[Boundary lift and internal red edges]
+  \label{def:lowerbounds-algebraic-boundary-lift}
+  \lean{Algebraic.Cutwidth.Bisection.boundaryLift,
+    Algebraic.Cutwidth.Bisection.sharedBoundary}
+  \leanok
+  Let $C$ be the vertex boundary of a side $S$ and let $X\subseteq S\setminus C$.
+  The lift of $X$ is $X$ together with all vertices of $C$ adjacent to $X$.
+  The shared boundary consists of those vertices of $C$ with at least two
+  neighbors in $X$. When $C$ is independent and each of its vertices has
+  one outside neighbor in a cubic graph, each vertex of $C$ represents a
+  red edge between its two interior neighbors. The shared boundary counts
+  internal red edges, preserving parallel edges as distinct boundary vertices.
+\end{definition}
+
+\begin{theorem}[Lifting a positive red/black witness]
+  \label{thm:lowerbounds-algebraic-boundary-lift}
+  \lean{Algebraic.Cutwidth.Bisection.boundaryLift_subset,
+    Algebraic.Cutwidth.Bisection.card_boundaryLift_le,
+    Algebraic.Cutwidth.Bisection.helpfulness_boundaryLift,
+    Algebraic.Cutwidth.Bisection.exists_helpful_set_of_red_surplus}
+  \leanok
+  \uses{def:lowerbounds-algebraic-boundary-lift,
+    thm:lowerbounds-algebraic-local-helpful}
+  Under the normalized boundary hypotheses above, the lift $Y$ of $X$
+  lies in $S$, has $|Y|\le4|X|$, and satisfies
+  \[
+    h_S(Y)=|\mathrm{sharedBoundary}(X)|-
+      |\partial X\setminus\partial C|.
+  \]
+  Thus more internal red edges than external black edges give a
+  $1$-helpful set. This proves the lifting step of Monien--Preis's
+  bounded helpful-set argument; it does not assume or prove that such
+  a positive witness exists.
+\end{theorem}
+\begin{proof}
+  \leanok
+  Every selected interior vertex contributes minus its remaining black
+  neighbors. An attached boundary vertex contributes zero if it has one
+  selected neighbor and one if it has two. Sum these contributions.
+  Each selected vertex has at most three adjacent boundary vertices,
+  giving the size bound.
+\end{proof}
+
+\begin{theorem}[Red density and a small black tree component]
+  \label{thm:lowerbounds-algebraic-red-density}
+  \lean{Algebraic.Cutwidth.Bisection.card_cutBoundary_eq_cut,
+    Algebraic.Cutwidth.Bisection.card_boundary_interior_neighbors,
+    Algebraic.Cutwidth.Bisection.card_interior_neighbors,
+    Algebraic.Cutwidth.Bisection.boundary_red_density,
+    Algebraic.Cutwidth.Bisection.card_interior_edges,
+    Algebraic.Cutwidth.Bisection.exists_small_interior_tree_component}
+  \leanok
+  \uses{def:lowerbounds-algebraic-boundary-lift,
+    thm:lowerbounds-algebraic-small-tree-component}
+  In a normalized cubic side, put $D=S\setminus C$ and let $B$ be
+  the edges induced by $D$. Then $|C|=|\partial S|$ and
+  $2|B|+2|C|=3|D|$. If $|\partial S|>(1/3+\xi)|S|$ with $\xi>0$,
+  then $|C|>(1/2+3\xi/2)|D|$. Consequently the black graph has a
+  tree component of at most $M$ vertices whenever $(M+1)3\xi/2\ge1$.
+  This component need not itself be a positive red/black witness.
+\end{theorem}
+\begin{proof}
+  \leanok
+  Every boundary vertex has two interior neighbors, and every interior
+  vertex has total red-plus-black degree three. Double counting gives
+  the identities. The density inequality uses $|S|=|C|+|D|$.
+  Hence $|B|<(1-3\xi/2)|D|$, which gives
+  $(M+1)|B|<M|D|$ under the stated budget.
+\end{proof}
+
+\begin{theorem}[Growing helpful sets through boundary neighbors]
+  \label{thm:lowerbounds-algebraic-helpful-growth}
+  \lean{Algebraic.Cutwidth.helpfulness_insert,
+    Algebraic.Cutwidth.Bisection.helpfulness_union_boundary,
+    Algebraic.Cutwidth.Bisection.helpfulness_union_boundaryLift_of_closed,
+    Algebraic.Cutwidth.Bisection.exists_helpful_extension_of_neighbor_types}
+  \leanok
+  \uses{thm:lowerbounds-algebraic-local-helpful,
+    def:lowerbounds-algebraic-boundary-lift}
+  In a subcubic graph, adjoining boundary vertices adjacent to a moved
+  set increases its helpfulness by at least one per new vertex.
+  More generally, let $X\subseteq S$ and $Z\subseteq S\setminus C$.
+  Suppose every neighbor of $Z$ lies in $X\cup Z\cup C$, and an edge
+  joins $X$ to $Z\setminus X$. Then adjoining the boundary lift of $Z$
+  increases helpfulness by at least one.
+
+  Consequently, suppose $h_S(X)\ge0$ and an interior vertex $v\notin X$
+  is adjacent to $X$. If every neighbor of $v$ outside $X$ either belongs
+  to $C$ or is an interior vertex with at least two boundary neighbors,
+  there is a helpful set of at most $|X|+7$ vertices.
+\end{theorem}
+\begin{proof}
+  \leanok
+  Adding a vertex contributes its singleton helpfulness plus twice its
+  number of neighbors already selected. For the closure statement, write
+  helpfulness as a sum over selected vertices of twice their number of
+  neighbors outside $S$ minus their number of neighbors outside the
+  selected set. New interior vertices have no remaining external neighbors;
+  new boundary vertices contribute nonnegatively. Old contributions cannot
+  decrease, and the attaching edge increases one of them strictly.
+  For the last claim, include $v$, its interior neighbors outside $X$,
+  and their boundary neighbors. At most two neighbors of $v$ lie outside
+  $X$, and each adds at most three vertices including itself. Together
+  with $v$, at most seven vertices are added.
+\end{proof}
+
+\begin{theorem}[The remaining small helpful configurations]
+  \label{thm:lowerbounds-algebraic-normalization-configurations}
+  \lean{Algebraic.Cutwidth.Bisection.nonneg_helpfulness_boundary_pair,
+    Algebraic.Cutwidth.Bisection.nonneg_helpfulness_boundary_star,
+    Algebraic.Cutwidth.Bisection.exists_helpful_of_boundary_pair_three_neighbors,
+    Algebraic.Cutwidth.Bisection.exists_helpful_of_shared_boundary_neighbor,
+    Algebraic.Cutwidth.Bisection.exists_helpful_of_boundary_neighbor_configuration}
+  \leanok
+  \uses{thm:lowerbounds-algebraic-helpful-growth}
+  Write $D_3$ for the interior vertices with three boundary neighbors.
+  The remaining local configurations in Monien--Preis's normalization
+  argument give the following helpful sets in a subcubic graph:
+  \begin{itemize}
+    \item A boundary edge with one endpoint adjacent to $D_3$ gives
+      a set of at most five vertices.
+    \item Two distinct $D_3$ vertices sharing a boundary neighbor give
+      a set of at most seven vertices.
+    \item Let an interior vertex $v$ be adjacent to $c\in C$, where
+      $c$ also has a boundary neighbor or a $D_3$ neighbor distinct from $v$.
+      If every other neighbor of $v$ belongs to $C$ or is an interior
+      vertex with at least two boundary neighbors, a helpful set of
+      at most eleven vertices exists.
+  \end{itemize}
+  Boundary neighborhoods may overlap.
+\end{theorem}
+\begin{proof}
+  \leanok
+  A boundary edge is nonnegative in helpfulness, as is a $D_3$ vertex
+  together with its three neighbors. Adding a $D_3$ vertex and its
+  neighbors to a set containing one of those neighbors adds at most
+  three vertices and improves helpfulness by at least one. This proves
+  the five- and seven-vertex cases. In the last case, start from the
+  boundary edge or the four-vertex star and apply the seven-vertex
+  extension bound. Repeated neighbors reduce the size and improve the
+  helpfulness accounting.
+\end{proof}
+
+\begin{theorem}[The neighbor needed for a normalization switch]
+  \label{thm:lowerbounds-algebraic-switch-neighbor}
+  \lean{Algebraic.Cutwidth.Bisection.exists_switch_neighbor,
+    Algebraic.Cutwidth.Bisection.outside_eq_one_of_no_small_helpful,
+    Algebraic.Cutwidth.Bisection.boundary_degree_le_one_of_no_small_helpful}
+  \leanok
+  \uses{thm:lowerbounds-algebraic-normalization-configurations,
+    thm:lowerbounds-algebraic-local-helpful}
+  If no helpful subset of $S$ has at most eleven vertices, every boundary
+  vertex has exactly one neighbor outside $S$ and at most one neighbor
+  within $C$. Suppose an interior vertex $v$ is adjacent to $c\in C$,
+  and $c$ has either a boundary neighbor or a $D_3$ neighbor distinct
+  from $v$. Then $v$ has another neighbor $p\in S\setminus C$ with at
+  most one boundary neighbor.
+  These are the local prerequisites for Monien--Preis's edge switches.
+  Both phases and their combined reverse bounds are formalized below.
+\end{theorem}
+\begin{proof}
+  \leanok
+  Two outside neighbors would give a helpful singleton. Two boundary
+  neighbors would give three connected boundary vertices. If every other
+  neighbor of $v$ had one of the types in the eleven-vertex configuration,
+  that configuration would supply a forbidden helpful set. An interior
+  vertex has no neighbors outside $S$, so the remaining neighbor has
+  the required type.
+\end{proof}
+
+\begin{definition}[A valid edge switch]
+  \label{def:lowerbounds-algebraic-edge-switch}
+  \lean{Algebraic.Cutwidth.Bisection.Switchable,
+    Algebraic.Cutwidth.Bisection.switchEdges}
+  \leanok
+  Four distinct vertices $a,b,c,d$ form a valid switch when $ab$ and
+  $cd$ are edges and $ac$ and $bd$ are absent. The switched graph
+  deletes $ab,cd$ and adds $ac,bd$.
+\end{definition}
+
+\begin{theorem}[Invariants and helpfulness of one switch]
+  \label{thm:lowerbounds-algebraic-edge-switch-invariants}
+  \lean{Algebraic.Cutwidth.Bisection.switchEdges_degree,
+    Algebraic.Cutwidth.Bisection.switchEdges_regular,
+    Algebraic.Cutwidth.Bisection.switchEdges_cut,
+    Algebraic.Cutwidth.Bisection.switchEdges_neighbors_outside,
+    Algebraic.Cutwidth.Bisection.switchEdges_boundary,
+    Algebraic.Cutwidth.Bisection.helpfulness_switchEdges}
+  \leanok
+  \uses{def:lowerbounds-algebraic-edge-switch,
+    thm:lowerbounds-algebraic-helpful-growth}
+  A valid switch preserves every degree. If all endpoints lie in $S$,
+  it preserves the cut of $S$, every vertex's neighbors outside $S$,
+  and the boundary vertex set. For $X\subseteq S$, let $\chi$ be its
+  membership indicator. The helpfulness in the switched graph satisfies
+  \[
+    h'_S(X)=h_S(X)+2(\chi(a)-\chi(d))(\chi(c)-\chi(b)).
+  \]
+\end{theorem}
+\begin{proof}
+  \leanok
+  Each endpoint exchanges one old neighbor for one new neighbor, and
+  all changed edges lie within $S$. In the neighbor-sum expression for
+  helpfulness, only the four endpoints change. Sum their contributions
+  to obtain the indicator formula.
+\end{proof}
+
+\begin{theorem}[Existence of the two normalization switches]
+  \label{thm:lowerbounds-algebraic-edge-switch-existence}
+  \lean{Algebraic.Cutwidth.Bisection.exists_boundary_switch,
+    Algebraic.Cutwidth.Bisection.exists_three_neighbor_switch}
+  \leanok
+  \uses{def:lowerbounds-algebraic-edge-switch,
+    thm:lowerbounds-algebraic-switch-neighbor,
+    thm:lowerbounds-algebraic-normalization-configurations}
+  In a cubic graph with no helpful subset of $S$ of size at most eleven,
+  a boundary edge $ab$ admits a valid switch $a,b,c,d$. So does an edge
+  $ab$ with $a$ an interior vertex having three boundary neighbors and
+  $b\in C$. In both cases $bc$ is an edge, $c,d\in S\setminus C$,
+  $c$ has at most two boundary neighbors, and $d$ has at most one.
+\end{theorem}
+\begin{proof}
+  \leanok
+  Vertex $b$ has one outside neighbor and two inside neighbors. Let $c$
+  be its inside neighbor other than $a$. The five- and seven-vertex
+  configurations rule out the forbidden types of $c$. The switching-neighbor
+  lemma supplies $d$. Degree counting excludes $bd$. In the first case,
+  an existing $ac$ would make the boundary edge together with $c$ helpful;
+  in the second case, all neighbors of $a$ are boundary vertices, so $ac$
+  is absent. The vertex types and adjacencies establish distinctness.
+\end{proof}
+
+\begin{theorem}[Local reverse transfer through a switch]
+  \label{thm:lowerbounds-algebraic-edge-switch-restoration}
+  \lean{Algebraic.Cutwidth.Bisection.helpfulness_reverse_switch_le,
+    Algebraic.Cutwidth.Bisection.exists_restore_boundary_switch,
+    Algebraic.Cutwidth.Bisection.exists_restore_three_neighbor_switch}
+  \leanok
+  \uses{thm:lowerbounds-algebraic-edge-switch-invariants,
+    thm:lowerbounds-algebraic-helpful-growth}
+  Reversing a valid normalization switch transfers any $X\subseteq S$
+  to a superset $Y\subseteq S$ with $h_S(Y)\ge h'_S(X)$. At most two
+  vertices are added for a boundary-pair switch and at most four for a
+  three-boundary-neighbor switch. If $Y\ne X$, both $a,b$ belong to $Y$
+  and exactly one belonged to $X$.
+  This is a bound for one switch. Both phases receive combined bounds below.
+\end{theorem}
+\begin{proof}
+  \leanok
+  The indicator formula loses two units on reversal only when $X$
+  selects exactly $a,c$ or exactly $b,d$ among the endpoints. In the first
+  case add $b$: its outside edge and two selected neighbors gain at
+  least three. In the second case add $a,c$ for a boundary-pair switch.
+  For the other switch also add the boundary neighbors of $a$; $b$ is
+  already selected, so at most four new vertices suffice. Each step gains
+  at least the two units lost. In all other cases reversal does not
+  decrease helpfulness; the exact formula also allows an increase.
+\end{proof}
+
+\begin{theorem}[Boundary-edge normalization with a uniform reverse bound]
+  \label{thm:lowerbounds-algebraic-boundary-normalization}
+  \lean{Algebraic.Cutwidth.Bisection.exists_independent_boundary_or_small_helpful}
+  \leanok
+  \uses{thm:lowerbounds-algebraic-edge-switch-existence,
+    thm:lowerbounds-algebraic-edge-switch-invariants,
+    thm:lowerbounds-algebraic-edge-switch-restoration,
+    thm:lowerbounds-algebraic-switch-neighbor}
+  For a side $S$ of any cubic graph $H$, either a helpful subset of
+  $S$ has at most 33 vertices, or there is a cubic graph $G$ on the same
+  vertices with the same cut and boundary $C$. In $G$, the boundary is
+  independent and every boundary vertex has one outside neighbor.
+  Moreover, every $X\subseteq S$ admits $X\subseteq Y\subseteq S$ with
+  $|Y|\le3|X|$ and $h^H_S(Y)\ge h^G_S(X)$.
+  This completes the first normalization phase. The next phase eliminates
+  interior vertices with three boundary neighbors.
+\end{theorem}
+\begin{proof}
+  \leanok
+  If a helpful set of size at most eleven already exists, stop.
+  Otherwise the original boundary graph is a matching. Repeatedly
+  apply the first switch; each removes exactly one boundary edge, so
+  induction on their number terminates. Stop early if a helpful set
+  of at most eleven vertices appears.
+
+  For the reverse transfer, complete pairs in the original matching.
+  Fix the closure $U$ of the initially selected boundary vertices under
+  their original partners. This set has size at most $2|X\cap C|$.
+  The local restoration adds only the two endpoints of the restored
+  boundary edge and possibly one interior vertex, so selected boundary
+  vertices remain in $U$. Every nontrivial extension adds at least one
+  boundary vertex and at most two vertices in total. Thus
+  \[
+    |Y|+2|X\cap C|\le |X|+2|Y\cap C|
+  \]
+  telescopes over the entire reverse sequence. Since
+  $|Y\cap C|\le |U|\le2|X\cap C|$, this gives $|Y|\le3|X|$.
+  An early eleven-vertex witness therefore lifts to at most 33 vertices.
+\end{proof}
+
+\begin{theorem}[Eliminating three-boundary-neighbor vertices]
+  \label{thm:lowerbounds-algebraic-neighbor-normalization}
+  \lean{Algebraic.Cutwidth.Bisection.exists_no_three_neighbors_or_small_helpful}
+  \leanok
+  \uses{thm:lowerbounds-algebraic-edge-switch-existence,
+    thm:lowerbounds-algebraic-edge-switch-invariants,
+    thm:lowerbounds-algebraic-edge-switch-restoration,
+    thm:lowerbounds-algebraic-normalization-configurations}
+  Suppose the boundary $C$ of a side $S$ in a cubic graph $H$ is independent.
+  Either a helpful subset of $S$ has at most 55 vertices, or there is a
+  cubic graph $G$ on the same vertices with the same cut and boundary,
+  independent boundary vertices, one outside neighbor per boundary vertex,
+  and at most two boundary neighbors per interior vertex.
+  Every $X\subseteq S$ admits $X\subseteq Y\subseteq S$ with
+  $|Y|\le5|X|$ and $h^H_S(Y)\ge h^G_S(X)$.
+\end{theorem}
+\begin{proof}
+  \leanok
+  Stop if a helpful set of at most eleven vertices already exists.
+  Otherwise the original three-neighbor stars are disjoint: a shared
+  boundary neighbor would give a helpful set of at most seven vertices.
+  Let $A$ be the original centers, and $P\subseteq A$ those already
+  processed. Each processed center retains two of its original boundary
+  neighbors; each unprocessed center retains three. All other interior
+  vertices have at most two. The second switch processes a fresh center
+  $a$, and its endpoint $d$, having at most one boundary neighbor, cannot
+  be in $A$. The boundary remains independent. Induction on $|A\setminus P|$
+  therefore terminates, stopping early if a small helpful set appears.
+
+  Write $B(P)=\bigcup_{a\in P}(N_H(a)\cap C)$ and define
+  \[
+    \Phi_P(X)=|X|+4|X\cap B(P)|+|X\cap P|\le5|X|.
+  \]
+  The last inequality uses $B(P)\subseteq C$ and $P\cap C=\varnothing$.
+  When a switch is reversed, its extension $Y$ satisfies
+  $\Phi_P(Y)\le\Phi_{P\cup\{a\}}(X)$. If $a$ was selected, removing
+  its one credit pays for the added boundary vertex $b$. In the other
+  exceptional case $b$ was selected, and removing its four credits pays
+  for all added vertices. The added interior vertex $c$ cannot be an
+  original center: its edge to $b$ would put $b$ in two original stars.
+  Thus the extension selects no earlier center or boundary vertex of
+  another original star. In all other cases no extension is needed.
+  The potential inequalities telescope to $|Y|\le5|X|$, while local
+  helpfulness inequalities compose. An early eleven-vertex witness lifts
+  to at most 55 vertices.
+\end{proof}
+
+\begin{theorem}[Complete normalization with a uniform reverse bound]
+  \label{thm:lowerbounds-algebraic-complete-normalization}
+  \lean{Algebraic.Cutwidth.Bisection.exists_normalization_or_small_helpful}
+  \leanok
+  \uses{thm:lowerbounds-algebraic-boundary-normalization,
+    thm:lowerbounds-algebraic-neighbor-normalization}
+  For any side $S$ of a cubic graph $H$, either a helpful subset of $S$
+  has at most 165 vertices, or there is a cubic graph $G$ with the same
+  cut and boundary $C$, independent boundary vertices, one outside neighbor
+  per boundary vertex, and at most two boundary neighbors per interior vertex.
+  Every $X\subseteq S$ admits $X\subseteq Y\subseteq S$ with
+  $|Y|\le15|X|$ and $h^H_S(Y)\ge h^G_S(X)$.
+\end{theorem}
+\begin{proof}
+  \leanok
+  Apply boundary-edge normalization, then eliminate three-neighbor vertices.
+  The reverse size factors multiply to $3\cdot5=15$. The first phase's
+  early witness has size at most 33; the second phase's early witness lifts
+  to at most $3\cdot55=165$ vertices. Both phases preserve the cut and boundary.
+\end{proof}
+
+\begin{definition}[Positive red/black sets]
+  \label{def:lowerbounds-algebraic-red-black}
+  \lean{Algebraic.Cutwidth.Bisection.RedBlack.internalEdges,
+    Algebraic.Cutwidth.Bisection.RedBlack.Positive}
+  \leanok
+  Let $B$ be a simple black graph and $R$ a red multigraph on the same
+  finite vertex set. A set $X$ is positive if its internal red edges
+  outnumber its external black edges. Red edges retain distinct identities.
+\end{definition}
+
+\begin{definition}[Boundary suppression]
+  \label{def:lowerbounds-algebraic-suppression}
+  \lean{Algebraic.Cutwidth.Bisection.BoundarySuppression}
+  \leanok
+  \uses{def:lowerbounds-algebraic-boundary-lift}
+  A boundary suppression has interior vertex set $D=S\setminus C$,
+  red edge set $C$, no red loops, and red incidence exactly when a boundary
+  vertex is adjacent to the corresponding interior vertex in the original graph.
+\end{definition}
+
+\begin{theorem}[Constructing and transferring through the suppressed graph]
+  \label{thm:lowerbounds-algebraic-suppression}
+  \lean{Algebraic.Cutwidth.Bisection.exists_boundarySuppression,
+    Algebraic.Cutwidth.Bisection.boundaryInterior_cut_card,
+    Algebraic.Cutwidth.Bisection.BoundarySuppression.red_degree,
+    Algebraic.Cutwidth.Bisection.BoundarySuppression.degree_sum,
+    Algebraic.Cutwidth.Bisection.BoundarySuppression.internalEdges_card,
+    Algebraic.Cutwidth.Bisection.BoundarySuppression.exists_helpful_set_of_positive}
+  \leanok
+  \uses{def:lowerbounds-algebraic-suppression,
+    def:lowerbounds-algebraic-red-black,
+    thm:lowerbounds-algebraic-boundary-lift}
+  For a normalized side of a cubic graph, a boundary suppression exists.
+  Its red and black degrees sum to three at each interior vertex.
+  Internal red edges count shared boundary vertices, and the black cut of
+  $X$ has size $|\partial X\setminus\partial C|$ in the original graph.
+  Consequently a positive set of $k$ vertices gives a $1$-helpful move
+  of at most $4k$ vertices. The preceding normalization theorem supplies
+  the required boundary hypotheses unless a uniformly small helpful set
+  already exists.
+\end{theorem}
+\begin{proof}
+  \leanok
+  Choose the two distinct interior neighbors of every boundary vertex
+  as its red endpoints. Incidence bijections prove the degree and edge
+  counts. Sum the original neighbors remaining outside the chosen interior
+  set to identify the black cut, then apply the boundary-lift identity.
+\end{proof}
+
+\begin{theorem}[Positive sets from small components]
+  \label{thm:lowerbounds-algebraic-red-black-components}
+  \lean{Algebraic.Cutwidth.Bisection.RedBlack.exists_positive_of_component_edge,
+    Algebraic.Cutwidth.Bisection.RedBlack.exists_positive_of_attachments,
+    Algebraic.Cutwidth.Bisection.RedBlack.card_cut_le_two_of_connected}
+  \leanok
+  \uses{def:lowerbounds-algebraic-red-black}
+  A red edge joining two black components of at most $M$ vertices gives
+  a positive set of at most $2M$ vertices; the components may coincide.
+  More generally, attach sets with empty black cuts to a set $P$ along
+  distinct red edges. If these red edges outnumber the black cut of $P$,
+  their union with $P$ is positive. If each of the $k$ attached sets has
+  at most $M$ vertices, the size is at most $|P|+Mk$.
+  In particular, three attachments suffice when $P$ is connected and all
+  its vertices have black degree at most two.
+\end{theorem}
+\begin{proof}
+  \leanok
+  Adding sets with empty black cuts cannot increase the black cut, while
+  each distinct attaching edge becomes internal and red. A connected set
+  of black degree at most two has at least $|P|-1$ internal black edges;
+  degree counting bounds its external black edges by two.
+\end{proof}
+
+\begin{theorem}[A bounded positive set from a thin black walk]
+  \label{thm:lowerbounds-algebraic-red-black-thin-walk}
+  \lean{Algebraic.Cutwidth.Bisection.RedBlack.exists_adjacent_pair_le_three_average,
+    Algebraic.Cutwidth.Bisection.RedBlack.exists_three_close_positions,
+    Algebraic.Cutwidth.Bisection.RedBlack.exists_positive_of_thin_walk}
+  \leanok
+  \uses{thm:lowerbounds-algebraic-red-black-components}
+  Let a black walk have length $\ell$, black degree at most two at all
+  its vertices, and $m\ge3$ distinct red attachments indexed in order
+  along the walk. Suppose $\ell\le Mm$, and each attachment reaches a
+  set with empty black cut and at most $M$ vertices. Then a positive
+  set of at most $8M+1$ vertices exists. This formalizes the thin-path
+  witness construction in Monien--Preis's core lemma.
+\end{theorem}
+\begin{proof}
+  \leanok
+  Among at least two nonnegative integer weights, some adjacent pair
+  sums to at most three times their average: otherwise summing all
+  adjacent pairs contradicts twice the total weight (the two-weight case
+  is immediate). Apply this to the gaps between attachment positions.
+  Three consecutive attachments have span at most $3\ell/(m-1)\le5M$.
+  Their connecting subwalk has at most $5M+1$ vertices and at most two
+  external black edges. Add the three attached sets to obtain the bound
+  $8M+1$ and at least three internal red edges.
+\end{proof}
+
+\begin{theorem}[A forest weight inequality]
+  \label{thm:lowerbounds-algebraic-forest-weight}
+  \lean{Algebraic.Cutwidth.Bisection.WeightedTree.sum_nonneg_of_leaf_nonneg,
+    Algebraic.Cutwidth.Bisection.WeightedTree.exists_adjacent_pair_lt_of_sum_lt}
+  \leanok
+  In a finite forest, assign real weights to vertices. If every leaf and
+  isolated vertex has nonnegative weight, and the endpoint weights of
+  every edge sum to a nonnegative value, then the total weight is
+  nonnegative. Consequently, if leaves and isolated vertices weigh at
+  least $A$ but the total weight is less than $A$ times the number of
+  vertices, some adjacent pair has weight less than $2A$.
+\end{theorem}
+\begin{proof}
+  \leanok
+  Choose a vertex $l$ of degree at most one. If it has a neighbor $p$ of
+  negative weight, remove both: their combined weight is nonnegative,
+  and every newly exposed leaf is adjacent to $p$, hence has nonnegative
+  weight. Otherwise remove $l$ alone; any newly exposed leaf was its
+  nonnegative neighbor. Induction proves the claim. Subtract $A$ from
+  every vertex weight to obtain the shifted version.
+\end{proof}
+
+\begin{theorem}[A light adjacent pair in a weighted tree]
+  \label{thm:lowerbounds-algebraic-weighted-tree-pair}
+  \lean{Algebraic.Cutwidth.Bisection.WeightedTree.exists_adjacent_pair_le}
+  \leanok
+  \uses{thm:lowerbounds-algebraic-forest-weight}
+  Let a tree on $n\ge2$ vertices have nonnegative integer weights of
+  total $W$. Suppose each leaf $l$ satisfies $W\le(n-1)w(l)$.
+  Then an edge $uv$ satisfies $(n-1)(w(u)+w(v))\le2W$.
+  This is Monien--Preis's weighted-tree lemma with denominators cleared.
+\end{theorem}
+\begin{proof}
+  \leanok
+  If $W=0$, every weight is zero and any edge works. Otherwise set
+  $A=W/(n-1)$. Leaves weigh at least $A$ and $W<An$, so the forest
+  inequality gives an adjacent pair of weight less than $2A$.
+  Clear the positive denominator and weaken to a non-strict inequality.
+\end{proof}
+
+\begin{theorem}[Local restoration of deleted black edges]
+  \label{thm:lowerbounds-algebraic-red-black-restoration}
+  \lean{Algebraic.Cutwidth.Bisection.RedBlack.positive_restore_cut,
+    Algebraic.Cutwidth.Bisection.RedBlack.positive_restore_two_boundary}
+  \leanok
+  \uses{def:lowerbounds-algebraic-red-black}
+  Write $R(Y)$ for the red edges internal to $Y$, and $\partial Y$
+  for its black cut in $B$. Suppose $X$ is positive after deleting
+  $\partial A$ from $B$, the overlap $X\cap A$ has empty black cut,
+  and
+  \[
+    |\partial A\setminus\partial X|\le|R(A)\setminus R(X)|.
+  \]
+  Then $X\cup A$ is positive in $B$. In particular, it suffices that
+  $|\partial A|\le2$, at least one of these boundary edges belongs
+  to $\partial X$, and $A$ contains a red edge not already internal
+  to $X$. This proves a local compensation step in Monien--Preis's
+  argument. The next result bounds simultaneous restoration of a family.
+\end{theorem}
+\begin{proof}
+  \leanok
+  The empty-cut overlap implies
+  $\partial(X\cup A)=\partial X\mathbin{\triangle}\partial A$.
+  Thus the restored cut has the modified cut size of $X$ plus
+  $|\partial A\setminus\partial X|$ edges. The union retains all
+  internal red edges of $X$ and adds those in $R(A)\setminus R(X)$.
+  The budget inequality preserves strict positivity.
+\end{proof}
+
+\begin{definition}[A family of restorable regions]
+  \label{def:lowerbounds-algebraic-restoration-family}
+  \lean{Algebraic.Cutwidth.Bisection.RedBlack.RestorationFamily,
+    Algebraic.Cutwidth.Bisection.RedBlack.RestorationFamily.deletedEdges,
+    Algebraic.Cutwidth.Bisection.RedBlack.RestorationFamily.deletedGraph,
+    Algebraic.Cutwidth.Bisection.RedBlack.boundaryMarks,
+    Algebraic.Cutwidth.Bisection.RedBlack.RestorationFamily.endpointMarks}
+  \leanok
+  \uses{def:lowerbounds-algebraic-red-black}
+  A restoration family consists of pairwise disjoint regions $P_i$ with
+  $|\partial_B P_i|\le2$, attached sets $A_i$ with empty black cut,
+  and a designated red edge between $P_i$ and $A_i$. Every $P_i$ is
+  disjoint from every $A_j$; the attached sets may overlap one another.
+  Its deleted graph is $B$ with all cuts $\partial_B P_i$ removed.
+  Each boundary edge gives one endpoint mark to its endpoint outside
+  $P_i$. The family's endpoint marks sum these contributions, retaining
+  multiplicities at a shared outside vertex.
+  These are the data used to restore a supplied family of isolated paths.
+\end{definition}
+
+\begin{theorem}[Endpoint marks count cut incidences and lost degrees]
+  \label{thm:lowerbounds-algebraic-endpoint-marks}
+  \lean{Algebraic.Cutwidth.Bisection.RedBlack.degree_boundaryMarks,
+    Algebraic.Cutwidth.Bisection.RedBlack.boundaryMarks_apply,
+    Algebraic.Cutwidth.Bisection.RedBlack.sum_boundaryMarks,
+    Algebraic.Cutwidth.Bisection.RedBlack.RestorationFamily.degree_endpointMarks,
+    Algebraic.Cutwidth.Bisection.RedBlack.RestorationFamily.sum_endpointMarks,
+    Algebraic.Cutwidth.Bisection.RedBlack.RestorationFamily.endpointMarks_apply,
+    Algebraic.Cutwidth.Bisection.RedBlack.RestorationFamily.degree_deletedGraph_add_endpointMarks}
+  \leanok
+  \uses{def:lowerbounds-algebraic-restoration-family}
+  For one region, total endpoint marks equal its cut size. For a restoration
+  family, write $m(v)$ for its endpoint marks and $H$ for its deleted graph.
+  At every vertex $v$ outside all regions,
+  \[
+    \deg_H(v)+m(v)=\deg_B(v).
+  \]
+  If $X$ avoids all regions, then
+  \[
+    \sum_{v\in X}m(v)=\sum_i|\partial_B P_i\cap\partial_B X|.
+  \]
+\end{theorem}
+\begin{proof}
+  \leanok
+  Each cut edge has exactly one outside endpoint. A mark lies on $X$
+  exactly when that edge also crosses $X$. At a vertex outside all regions,
+  distinct regions contribute distinct incident edges, by disjointness.
+  Their union is the incident deleted-edge set. Partition the original
+  incidence set into its deleted and retained edges to get the degree identity.
+\end{proof}
+
+\begin{theorem}[Simultaneous restoration with a uniform size bound]
+  \label{thm:lowerbounds-algebraic-family-restoration}
+  \lean{Algebraic.Cutwidth.Bisection.RedBlack.RestorationFamily.exists_positive_restore,
+    Algebraic.Cutwidth.Bisection.RedBlack.RestorationFamily.exists_positive_restore_by_marks,
+    Algebraic.Cutwidth.Bisection.RedBlack.RestorationFamily.exists_positive_restore_of_degree}
+  \leanok
+  \uses{def:lowerbounds-algebraic-restoration-family,
+    thm:lowerbounds-algebraic-endpoint-marks}
+  Suppose $X$ is positive in the deleted graph of a restoration family,
+  avoids every region $P_i$, and $|P_i\cup A_i|\le L$ for every $i$.
+  There is a positive set $Y\supseteq X$ in the original graph with
+  \[
+    |Y|\le |X|+L|\partial_B X|.
+  \]
+  If every vertex of $X$ has black degree at most $d$, then
+  $|Y|\le(1+dL)|X|$. In particular, $d=3$ and $L=4M$ give
+  $(1+12M)|X|$, independently of the total number of isolated regions.
+  Attached sets may overlap $X$ arbitrarily.
+  The mark-based version gives a witness satisfying
+  \[
+    |Y|\le |X|+L\sum_{v\in X}m(v),
+  \]
+  charging only endpoint marks on the original witness.
+\end{theorem}
+\begin{proof}
+  \leanok
+  Select exactly the indices $i$ for which
+  $\partial_B P_i\cap\partial_B X$ is nonempty, and add their regions
+  and attachments. Each selected region leaves at most one of its two
+  boundary edges outside $X$. Each also supplies a distinct new internal
+  red edge: its endpoint in $P_i$ was outside $X$, and disjointness prevents
+  two designated red edges from coinciding.
+
+  A black edge crossing the enlarged set either already crossed $X$
+  and was not deleted, or belongs to the remaining boundary of a selected
+  region. Closed attachments add no crossing edges. Thus at most one
+  new black crossing per selected region is paid for by its new red edge,
+  preserving positivity. Since $X$ avoids all pairwise disjoint regions,
+  the sets $\partial_B P_i\cap\partial_B X$ are pairwise disjoint.
+  The number of selected indices is at most $|\partial_B X|$, giving
+  the size bound. Summing degrees over $X$ gives the final inequality.
+  Alternatively, each selected region contributes at least one cut
+  incidence on $X$, hence at least one endpoint mark there. This bounds
+  the number of added regions by the mark sum.
+\end{proof}
+
+\begin{theorem}[A positive witness from a closed core set]
+  \label{thm:lowerbounds-algebraic-closed-core-positive}
+  \lean{Algebraic.Cutwidth.Bisection.RedBlack.RestorationFamily.exists_positive_of_closed_core,
+    Algebraic.Cutwidth.Bisection.RedBlack.RestorationFamily.exists_positive_of_closed_core_of_degree}
+  \leanok
+  \uses{def:lowerbounds-algebraic-restoration-family,
+    thm:lowerbounds-algebraic-family-restoration}
+  Suppose $X$ avoids all regions of a restoration family, has empty black
+  cut after their boundaries are deleted, and $|P_i\cup A_i|\le L$ for
+  every $i$. If some region has nonempty boundary entirely contained in
+  $\partial_B X$, there is a positive set $Y\supseteq X$ in the original
+  graph with
+  \[
+    |Y|\le |X|+L|\partial_B X|.
+  \]
+  If the black degree on $X$ is at most $d$, the bound is
+  $|Y|\le(1+dL)|X|$. In particular, a core set of size at most $2M$
+  with $d=3$ and $L=3M$ gives a witness of size at most $2M(1+9M)$.
+\end{theorem}
+\begin{proof}
+  \leanok
+  Add every region whose boundary meets $\partial_B X$, together with
+  its chosen closed attachment. Every added region contributes a distinct
+  internal red edge and leaves at most one black boundary edge. The
+  specified region leaves none, since its whole boundary meets $X$.
+  As $X$ has no surviving black cut, the final black cut is strictly
+  smaller than the number of added internal red edges. The same counting
+  as in simultaneous restoration gives the size bound.
+\end{proof}
+
+\begin{theorem}[Deleting designated edges to bridges]
+  \label{thm:lowerbounds-algebraic-cycle-edge-selection}
+  \lean{Algebraic.Cutwidth.Bisection.RedBlack.exists_delete_to_bridges}
+  \leanok
+  Let $T\subseteq E(B)$ be designated edges of a finite simple graph.
+  There is $F\subseteq T$ such that $B-F$ has exactly the same
+  reachability relation as $B$, every edge of $T\setminus F$ is a bridge
+  in $B-F$, and
+  \[
+    |F|+|V|\le |E(B)|+c(B),
+  \]
+  where $c(B)$ is the number of connected components. Thus the number
+  deleted is at most the original cycle rank.
+\end{theorem}
+\begin{proof}
+  \leanok
+  Choose a largest subset of $T$ whose deletion preserves reachability.
+  Any retained designated non-bridge could also be deleted, contradicting
+  maximality. Each component of the remaining graph has at least one fewer
+  edge than vertices. Sum over components, use the unchanged component
+  count, and account for the $|F|$ deleted edges.
+\end{proof}
+
+\begin{theorem}[Reserving rank for untouched cyclic components]
+  \label{thm:lowerbounds-algebraic-cycle-rank-reserve}
+  \lean{Algebraic.Cutwidth.Bisection.RedBlack.card_vertices_add_cyclic_le,
+    Algebraic.Cutwidth.Bisection.RedBlack.card_removed_add_untouched_cyclic_le}
+  \leanok
+  Let $F\subseteq E(B)$ have reachability-preserving deletion. Let
+  $\mathcal C$ be any collection of original connected components,
+  each containing a cycle and having all its internal edges retained.
+  Then
+  \[
+    |F|+|\mathcal C|+|V|\le |E(B)|+c(B).
+  \]
+  In particular, the deleted edges and the untouched cyclic components
+  share one cycle-rank budget.
+\end{theorem}
+\begin{proof}
+  \leanok
+  A connected graph has at least one fewer edge than vertices, with
+  equality only for a tree. Each cyclic component therefore supplies
+  one additional edge. Sum these inequalities over components using
+  the degree-sum identity. Reachability-preserving deletion identifies
+  the old and new components with equal supports, and untouched internal
+  edges preserve each designated cycle. Account for the deleted edges.
+\end{proof}
+
+\begin{theorem}[Isolating regions to eliminate cycles through them]
+  \label{thm:lowerbounds-algebraic-cycle-region-selection}
+  \lean{Algebraic.Cutwidth.Bisection.RedBlack.cycle_contains_boundary_of_meets_region,
+    Algebraic.Cutwidth.Bisection.RedBlack.exists_isolate_regions_without_cycles}
+  \leanok
+  \uses{thm:lowerbounds-algebraic-cycle-edge-selection}
+  Let $P_i$ be connected regions whose vertices have black degree at most
+  two. Choose a boundary edge $e_i\in\partial_B P_i$ for each region,
+  with all chosen edges distinct. Some set $J$ of at most the original
+  cycle rank many indices satisfies both of the following: deleting only
+  $\{e_i:i\in J\}$ preserves reachability, and deleting all cuts
+  $\bigcup_{i\in J}\partial_B P_i$ leaves no cycle meeting any $P_i$.
+  This selects regions for a supplied thin-path system. The construction
+  below instantiates it; the later marked-tree reorganization remains open.
+\end{theorem}
+\begin{proof}
+  \leanok
+  At a degree-two vertex on a cycle, both incident edges belong to the
+  cycle. Propagate this fact through a connected region: a cycle meeting
+  it contains every boundary edge. Apply the preceding theorem to the
+  chosen edges. A cycle in the resulting graph can contain none of them:
+  each is deleted or is a bridge. It therefore avoids every region.
+  Deleting the remaining boundary edges of the selected regions cannot
+  create a cycle. Injectivity of the chosen edges identifies the number
+  of selected regions with the number of selected edges.
+\end{proof}
+
+\begin{theorem}[Connectivity outside the isolated regions]
+  \label{thm:lowerbounds-algebraic-isolation-core-connectivity}
+  \lean{Algebraic.Cutwidth.Bisection.RedBlack.reachable_after_isolating}
+  \leanok
+  \uses{thm:lowerbounds-algebraic-cycle-region-selection}
+  Let $P_i$ have at most two black boundary edges, and choose one boundary
+  edge $e_i$ for each selected index $i\in J$. Suppose deleting the chosen
+  edges preserves reachability. Then deleting the full cuts of the selected
+  regions preserves reachability between any two vertices outside
+  $\bigcup_{i\in J}P_i$. Disjointness of the regions is not needed.
+\end{theorem}
+\begin{proof}
+  \leanok
+  After deleting the chosen edges, each selected region has at most one
+  boundary edge left. A simple path between outside vertices cannot cross
+  that boundary: entering and leaving would repeat its sole edge. Choose
+  a simple path in the graph after the chosen-edge deletions. It avoids
+  every remaining selected boundary and therefore survives full isolation.
+\end{proof}
+
+\begin{definition}[The component quotient across designated edges]
+  \label{def:lowerbounds-algebraic-bridge-quotient}
+  \lean{Algebraic.Cutwidth.Bisection.RedBlack.BridgeQuotient.graph,
+    Algebraic.Cutwidth.Bisection.RedBlack.BridgeQuotient.ofRegions}
+  \leanok
+  Delete designated edges $F$ and take the connected components of $B-F$
+  as quotient vertices. Two distinct components are adjacent when an
+  original black edge joins them. The region-boundary quotient designates
+  the union of all black cuts of a supplied region family.
+\end{definition}
+
+\begin{theorem}[Faithful forest quotients across bridges]
+  \label{thm:lowerbounds-algebraic-bridge-quotient}
+  \lean{Algebraic.Cutwidth.Bisection.RedBlack.BridgeQuotient.reachable_project,
+    Algebraic.Cutwidth.Bisection.RedBlack.BridgeQuotient.reachable_iff,
+    Algebraic.Cutwidth.Bisection.RedBlack.BridgeQuotient.connected,
+    Algebraic.Cutwidth.Bisection.RedBlack.BridgeQuotient.edge_image,
+    Algebraic.Cutwidth.Bisection.RedBlack.BridgeQuotient.edge_map_injOn,
+    Algebraic.Cutwidth.Bisection.RedBlack.BridgeQuotient.edge_ncard,
+    Algebraic.Cutwidth.Bisection.RedBlack.BridgeQuotient.isAcyclic,
+    Algebraic.Cutwidth.Bisection.RedBlack.BridgeQuotient.isTree,
+    Algebraic.Cutwidth.Bisection.RedBlack.BridgeQuotient.component_isTree,
+    Algebraic.Cutwidth.Bisection.RedBlack.BridgeQuotient.isBridge_of_mem_region_cut,
+    Algebraic.Cutwidth.Bisection.RedBlack.BridgeQuotient.ofRegions_isAcyclic,
+    Algebraic.Cutwidth.Bisection.RedBlack.BridgeQuotient.ofRegions_component_isTree}
+  \leanok
+  \uses{def:lowerbounds-algebraic-bridge-quotient}
+  Quotient reachability is exactly original reachability between any
+  representatives. If every designated actual edge is a bridge, the
+  quotient is a forest and every component is a tree. The designated
+  actual edges map bijectively to quotient edges: none becomes a loop
+  and distinct edges do not merge. In particular, the quotient has
+  $|F\cap E(B)|$ edges. If every cycle avoids a region family, its
+  region-boundary quotient is a forest.
+\end{theorem}
+\begin{proof}
+  \leanok
+  Project original walks, collapsing steps within a component; lift
+  quotient walks using paths through each connected contracted piece.
+  A quotient path avoiding the image of a designated bridge would lift
+  to an original path avoiding that bridge, a contradiction. Thus every
+  quotient edge is a bridge. The same lifting argument rules out a
+  collapsed bridge or two bridges with the same quotient endpoints.
+  Finally, every surviving boundary edge of a region avoided by all
+  cycles is a bridge, so the general result applies to region boundaries.
+\end{proof}
+
+\begin{theorem}[Region vertices and their quotient degrees]
+  \label{thm:lowerbounds-algebraic-quotient-region-vertices}
+  \lean{Algebraic.Cutwidth.Bisection.RedBlack.BridgeQuotient.induce_delete_region_cuts,
+    Algebraic.Cutwidth.Bisection.RedBlack.BridgeQuotient.exists_region_embedding,
+    Algebraic.Cutwidth.Bisection.RedBlack.BridgeQuotient.ncard_neighborSet_le_cut,
+    Algebraic.Cutwidth.Bisection.RedBlack.BridgeQuotient.ncard_neighborSet_eq_cut}
+  \leanok
+  \uses{def:lowerbounds-algebraic-bridge-quotient}
+  Deleting any subset of the boundaries of pairwise disjoint regions
+  preserves the induced graph inside each region. If the regions are
+  connected, deleting all their boundaries makes each region exactly
+  one connected component, hence one distinct vertex of the quotient.
+  Every quotient vertex has degree at most the black cut of its support.
+  If the designated actual edges are bridges, this bound is an equality.
+\end{theorem}
+\begin{proof}
+  \leanok
+  An edge internal to one region crosses no disjoint region. After all
+  boundaries are deleted, internal connectivity and the empty cut identify
+  the region with one component. Different regions give different components.
+  For each neighbor of a quotient vertex, choose an original connecting
+  edge. Distinct neighbors give distinct edges in the component's cut.
+  Conversely, every boundary edge goes to another quotient vertex. When
+  these edges are bridges, injectivity of the edge projection ensures
+  that distinct boundary edges give distinct neighbors.
+\end{proof}
+
+\begin{definition}[Path suppression and the core graph]
+  \label{def:lowerbounds-algebraic-path-suppression}
+  \lean{Algebraic.Cutwidth.Bisection.RedBlack.PathSuppression.graph,
+    Algebraic.Cutwidth.Bisection.RedBlack.PathSuppression.coreGraph}
+  \leanok
+  \uses{def:lowerbounds-algebraic-bridge-quotient}
+  Suppress a vertex set $S$ by retaining vertices outside $S$, keeping
+  their original edges, and adding an edge between distinct vertices
+  joined by a two-edge path through $S$. The core graph suppresses the
+  designated region vertices of the region-boundary quotient.
+\end{definition}
+
+\begin{theorem}[Suppressing path vertices preserves forests and connectivity]
+  \label{thm:lowerbounds-algebraic-path-suppression}
+  \lean{Algebraic.Cutwidth.Bisection.RedBlack.PathSuppression.reachable_iff,
+    Algebraic.Cutwidth.Bisection.RedBlack.PathSuppression.connected,
+    Algebraic.Cutwidth.Bisection.RedBlack.PathSuppression.isAcyclic,
+    Algebraic.Cutwidth.Bisection.RedBlack.PathSuppression.isTree}
+  \leanok
+  \uses{def:lowerbounds-algebraic-path-suppression,
+    thm:lowerbounds-algebraic-bridge-quotient}
+  Suppressing an independent set preserves reachability between surviving
+  vertices. Suppressing vertices of degree at most two in a forest leaves
+  a forest. Consequently, suppressing an independent set of such vertices
+  in a tree leaves a tree whenever at least one vertex survives. Isolated
+  vertices and leaves are allowed among the suppressed vertices.
+\end{theorem}
+\begin{proof}
+  \leanok
+  Assign each removed vertex with a surviving neighbor to one such
+  neighbor, and fix surviving vertices. Lift new edges to one- or two-edge
+  original paths and project original walks through this assignment.
+  Independence ensures reachability survives projection.
+  Contract edges whose assigned endpoints agree. Distinct surviving
+  vertices remain in distinct contracted components, and the degree-two
+  bound makes each new edge an edge of this bridge quotient. Thus the
+  suppressed graph embeds into a forest.
+\end{proof}
+
+\begin{theorem}[Counting edges after path suppression]
+  \label{thm:lowerbounds-algebraic-path-suppression-count}
+  \lean{Algebraic.Cutwidth.Bisection.RedBlack.PathSuppression.exists_connection_equiv,
+    Algebraic.Cutwidth.Bisection.RedBlack.PathSuppression.edge_ncard_eq_degree_two}
+  \leanok
+  \uses{def:lowerbounds-algebraic-path-suppression}
+  In a finite forest, suppose both $S$ and its complement are independent,
+  and every vertex of $S$ has degree at most two. There is a bijection
+  from the degree-two vertices of $S$ to the edges of the suppressed graph.
+  The edge corresponding to a removed vertex joins its two original
+  neighbors. Isolated vertices and leaves contribute no edge.
+\end{theorem}
+\begin{proof}
+  \leanok
+  A degree-two vertex has two distinct neighbors outside $S$.
+  Two removed vertices cannot have the same neighbor pair: that would
+  give two different simple paths between the same endpoints in a forest.
+  Every surviving edge comes from such a pair, since there are no original
+  edges inside the complement of $S$.
+\end{proof}
+
+\begin{theorem}[The forest on the core pieces]
+  \label{thm:lowerbounds-algebraic-core-forest}
+  \lean{Algebraic.Cutwidth.Bisection.RedBlack.PathSuppression.exists_core_forest}
+  \leanok
+  \uses{thm:lowerbounds-algebraic-quotient-region-vertices,
+    thm:lowerbounds-algebraic-bridge-quotient,
+    thm:lowerbounds-algebraic-path-suppression,
+    thm:lowerbounds-algebraic-path-suppression-count}
+  Let the regions be connected, pairwise disjoint, with no black edges
+  between distinct regions, and with at most two boundary edges each.
+  If every black cycle avoids the regions, identifying and suppressing
+  their quotient vertices produces a forest on the remaining pieces.
+  Reachability between these core pieces is exactly original reachability
+  between their representative vertices.
+  The number of core edges equals the number of regions with exactly
+  two boundary edges.
+\end{theorem}
+\begin{proof}
+  \leanok
+  The region vertices are independent in the boundary quotient and have
+  degree at most two. The quotient is a forest because cycles avoid the
+  regions. Apply path suppression, then compose its reachability equivalence
+  with that of the component quotient.
+  The complementary core vertices are also independent in the boundary
+  quotient: each quotient edge crosses some region boundary. Exact
+  quotient degrees and the preceding bijection give the edge count.
+\end{proof}
+
+\begin{definition}[The canonical thin-path system]
+  \label{def:lowerbounds-algebraic-thin-path-system}
+  \lean{Algebraic.Cutwidth.Bisection.RedBlack.PathSystem.region,
+    Algebraic.Cutwidth.Bisection.RedBlack.PathSystem.attachmentEdges,
+    Algebraic.Cutwidth.Bisection.RedBlack.PathSystem.attachmentComponent,
+    Algebraic.Cutwidth.Bisection.RedBlack.PathSystem.attachment,
+    Algebraic.Cutwidth.Bisection.RedBlack.PathSystem.thinComponents}
+  \leanok
+  Given eligible vertices $U$, the regions are the connected components
+  of $B[U]$, viewed as subsets of the original vertex set. For a region
+  $P$, let $A_M(P)$ be the distinct red edges joining $P$ to an original
+  black component of at most $M$ vertices. For each such edge choose its
+  attached small component, preferring the second endpoint when both
+  orientations qualify. A region is thin if $|P|\le M|A_M(P)|$.
+\end{definition}
+
+\begin{theorem}[Paths and boundaries of the canonical regions]
+  \label{thm:lowerbounds-algebraic-region-paths}
+  \lean{Algebraic.Cutwidth.Bisection.RedBlack.PathSystem.region_subset,
+    Algebraic.Cutwidth.Bisection.RedBlack.PathSystem.region_connected,
+    Algebraic.Cutwidth.Bisection.RedBlack.PathSystem.exists_mem_region,
+    Algebraic.Cutwidth.Bisection.RedBlack.PathSystem.region_disjoint,
+    Algebraic.Cutwidth.Bisection.RedBlack.PathSystem.eq_of_adj,
+    Algebraic.Cutwidth.Bisection.RedBlack.PathSystem.cut_disjoint,
+    Algebraic.Cutwidth.Bisection.RedBlack.PathSystem.exists_distinct_boundary_edges,
+    Algebraic.Cutwidth.Bisection.RedBlack.PathSystem.exists_spanning_path_in_region,
+    Algebraic.Cutwidth.Bisection.RedBlack.PathSystem.region_spanning_path,
+    Algebraic.Cutwidth.Bisection.RedBlack.PathSystem.card_cut_le_two,
+    Algebraic.Cutwidth.Bisection.RedBlack.PathSystem.card_cut_eq_zero_or_two,
+    Algebraic.Cutwidth.Bisection.RedBlack.PathSystem.region_isTree}
+  \leanok
+  \uses{def:lowerbounds-algebraic-thin-path-system,
+    thm:lowerbounds-algebraic-red-black-components}
+  The regions partition $U$, with no black edges between distinct regions;
+  their boundary cuts are pairwise disjoint. If every eligible vertex has
+  black degree at most two, every region has a spanning simple path and
+  at most two boundary edges. A region with nonempty boundary is a tree.
+  If the ambient degrees are exactly two, its boundary size is zero or two.
+  Every subfamily with nonempty cuts admits distinct choices of boundary edges.
+\end{theorem}
+\begin{proof}
+  \leanok
+  Induced connected components give the partition and separation.
+  A longest simple path in a finite connected graph of maximum degree two
+  spans the graph: an external neighbor at an endpoint would extend it,
+  and each internal vertex already has two path neighbors. Thus its support
+  is closed under adjacency and connectivity forces it to be all vertices.
+  Apply this to each induced region. Connectedness and the degree-sum
+  identity give the boundary bound; a nonempty boundary forces exactly
+  $|P|-1$ internal edges, while degree exactly two makes the cut size even.
+\end{proof}
+
+\begin{theorem}[Thin regions without supplied path orderings]
+  \label{thm:lowerbounds-algebraic-thin-region-witness}
+  \lean{Algebraic.Cutwidth.Bisection.RedBlack.PathSystem.exists_positive_of_thin_region,
+    Algebraic.Cutwidth.Bisection.RedBlack.PathSystem.thin_component_bounds,
+    Algebraic.Cutwidth.Bisection.RedBlack.PathSystem.card_cut_thin_eq_two}
+  \leanok
+  \uses{thm:lowerbounds-algebraic-region-paths,
+    thm:lowerbounds-algebraic-red-black-thin-walk}
+  A connected degree-two region $P$ with $m\ge3$ distinct red attachments
+  to closed sets of size at most $M$, and $|P|\le Mm$, gives a positive
+  set of at most $8M+1$ vertices. No walk or attachment ordering is assumed.
+  Consequently, if no positive set of that size exists, every canonical
+  thin region has one or two red attachments, at most $2M$ vertices, and
+  a nonempty black boundary.
+  With ambient degree exactly two, that boundary has exactly two edges.
+\end{theorem}
+\begin{proof}
+  \leanok
+  Construct a spanning simple path, choose the position of each attachment,
+  and sort the distinct red edges by these positions. Equal positions are
+  allowed. The existing thin-walk theorem applies since the path length
+  is $|P|-1$. Thinness and nonemptiness force at least one attachment;
+  excluding three attachments bounds $|P|$ by $2M$. A closed thin region
+  together with one small attachment would itself be a positive set of
+  at most $3M$ vertices, so its boundary cannot be empty.
+\end{proof}
+
+\begin{definition}[Attachment marks and the reserved cycle budget]
+  \label{def:lowerbounds-algebraic-thin-path-marks}
+  \lean{Algebraic.Cutwidth.Bisection.RedBlack.PathSystem.attachmentMarks,
+    Algebraic.Cutwidth.Bisection.RedBlack.PathSystem.SmallCycleBudget}
+  \leanok
+  \uses{def:lowerbounds-algebraic-thin-path-system}
+  For each shaded thin path $P$ and each of its $\alpha(P)$ red
+  attachments, give $3-\alpha(P)$ marks to the attached small component.
+  Marks are a finite map to natural numbers, so repeated targets retain
+  their multiplicities. A count $k$ satisfies the reserved cycle budget
+  when, for every collection $\mathcal C$ of original cyclic components
+  of size at most $M$,
+  \[
+    k+|\mathcal C|+|V|\le |E(B)|+c(B).
+  \]
+\end{definition}
+
+\begin{theorem}[Counting the initial attachment marks]
+  \label{thm:lowerbounds-algebraic-thin-path-marks}
+  \lean{Algebraic.Cutwidth.Bisection.RedBlack.PathSystem.attachmentMarks_apply,
+    Algebraic.Cutwidth.Bisection.RedBlack.PathSystem.attachmentMarks_eq_zero_of_large,
+    Algebraic.Cutwidth.Bisection.RedBlack.PathSystem.degree_attachmentMarks,
+    Algebraic.Cutwidth.Bisection.RedBlack.PathSystem.card_doublyMarked_le,
+    Algebraic.Cutwidth.Bisection.RedBlack.PathSystem.smallCycleBudget,
+    Algebraic.Cutwidth.Bisection.RedBlack.PathSystem.smallCycleBudget_of_doublyMarked}
+  \leanok
+  \uses{def:lowerbounds-algebraic-thin-path-marks,
+    thm:lowerbounds-algebraic-thin-region-witness,
+    thm:lowerbounds-algebraic-cycle-rank-reserve}
+  Suppose eligible vertices have degree at most two and there is no
+  positive set of size at most $8M+1$. Shading a subfamily $J$ assigns
+  exactly $2|J|$ attachment marks, all to original components of size
+  at most $M$. Any collection $\mathcal D$ of components with at least
+  two marks satisfies $|\mathcal D|\le |J|$.
+
+  Suppose also that eligible vertices lie in original components larger
+  than $M$, and deleting distinct designated boundary edges of $J$
+  preserves reachability. Then $|J|$ satisfies the reserved cycle budget.
+  Consequently, for any collection $\mathcal C$ of small cyclic components,
+  \[
+    |\mathcal D|+|\mathcal C|+|V|\le |E(B)|+c(B).
+  \]
+  This counts the initial shading step. Preservation through later color
+  swaps and leaf reorganization is a separate obligation.
+\end{theorem}
+\begin{proof}
+  \leanok
+  Each thin path has $\alpha(P)\in\{1,2\}$, and
+  $\alpha(P)(3-\alpha(P))=2$. Sum the finite mark map; counting
+  multiplicities makes the identity hold even when targets coincide.
+  Each doubly marked component consumes at least two marks. A boundary
+  edge of a thin region touches its large original component, so no such
+  edge is internal to a small component. The cycle-rank reserve theorem
+  applies to the designated deletions and every small cyclic component.
+\end{proof}
+
+\begin{theorem}[Constructing and isolating the thin-path family]
+  \label{thm:lowerbounds-algebraic-constructed-thin-family}
+  \lean{Algebraic.Cutwidth.Bisection.RedBlack.PathSystem.exists_isolated_family}
+  \leanok
+  \uses{def:lowerbounds-algebraic-restoration-family,
+    thm:lowerbounds-algebraic-thin-region-witness,
+    thm:lowerbounds-algebraic-cycle-region-selection,
+    thm:lowerbounds-algebraic-thin-path-marks,
+    thm:lowerbounds-algebraic-isolation-core-connectivity,
+    thm:lowerbounds-algebraic-bridge-quotient}
+  Suppose every eligible vertex has black degree at most two and lies in
+  an original black component larger than $M$. If no positive set of at
+  most $8M+1$ vertices exists, the canonical thin regions form a restoration
+  family with one chosen small attachment each, and
+  $|P_i\cup A_i|\le3M$. Choose distinct boundary edges and isolate some
+  subfamily $J$, with
+  \[
+    |J|+|V|\le |E(B)|+c(B).
+  \]
+  The stronger reserved cycle budget holds as well: each original small
+  cyclic component reserves another unit in this inequality.
+  Deleting its chosen single edges preserves reachability. Deleting its
+  full cuts preserves reachability among outside vertices and leaves no
+  cycle meeting any thin region. The resulting region-boundary quotient
+  is a forest, with every connected component a tree. The simultaneous
+  restoration theorem applies with $L=3M$, hence with factor $1+9M$ in
+  a subcubic black graph for witnesses avoiding the isolated regions.
+  The following theorem completes the suppression of the thin-path
+  vertices. Preserving marks through weighted-tree reorganization and the
+  final density contradiction in Monien--Preis's core argument remain unproved.
+\end{theorem}
+\begin{proof}
+  \leanok
+  Choose one of the one or two attachments of each thin region. Large
+  original components containing eligible vertices are disjoint from every
+  chosen small component, giving all region--attachment separations.
+  The region and attachment sizes are at most $2M$ and $M$ respectively.
+  Disjoint cuts give injective boundary choices, so the preceding cycle
+  selection theorem applies to this constructed restoration family.
+  Apply the core-connectivity theorem to the full-cut deletion, and the
+  bridge-quotient theorem to the surviving boundaries of all thin regions.
+  The designated deletions leave small original components untouched,
+  giving the stronger cycle budget from the preceding mark theorem.
+\end{proof}
+
+\begin{theorem}[The core forest of the constructed thin paths]
+  \label{thm:lowerbounds-algebraic-constructed-core-forest}
+  \lean{Algebraic.Cutwidth.Bisection.RedBlack.PathSystem.exists_core_forest}
+  \leanok
+  \uses{thm:lowerbounds-algebraic-constructed-thin-family,
+    thm:lowerbounds-algebraic-isolation-core-connectivity,
+    thm:lowerbounds-algebraic-core-forest}
+  Under the hypotheses of the constructed thin-family theorem, identify
+  all thin regions in the boundary quotient after isolation and suppress
+  their vertices. The resulting core graph is a forest, and reachability
+  between its vertices agrees with reachability between their representatives
+  in the original black graph. The $3M$ restoration bound per region and
+  attachment and the original cycle-rank bound on isolated regions are retained.
+  This includes the reserve for every original small cyclic component.
+\end{theorem}
+\begin{proof}
+  \leanok
+  Isolation deletes no internal edge of any region, so the regions remain
+  connected and separated and their boundaries still have size at most two.
+  Apply the preceding core-forest construction. A core representative belongs
+  to none of the thin regions, so the outside-connectivity theorem upgrades
+  reachability in the graph after isolation to original black reachability.
+\end{proof}
+
+\begin{theorem}[Counting the surviving thin paths]
+  \label{thm:lowerbounds-algebraic-constructed-core-count}
+  \lean{Algebraic.Cutwidth.Bisection.RedBlack.RestorationFamily.cut_deletedGraph_restrict,
+    Algebraic.Cutwidth.Bisection.RedBlack.PathSystem.exists_counted_core_forest}
+  \leanok
+  \uses{thm:lowerbounds-algebraic-constructed-core-forest,
+    thm:lowerbounds-algebraic-path-suppression-count,
+    thm:lowerbounds-algebraic-thin-region-witness}
+  Under the hypotheses of the constructed thin-family theorem, suppose
+  eligible vertices have black degree exactly two. If $\mathcal P$ is the
+  original thin-path family, $J$ is the selected shaded subfamily, and
+  $T$ is the constructed core forest, then
+  \[
+    |E(T)|+|J|=|\mathcal P|.
+  \]
+  The same construction retains the restoration bound, original
+  reachability between core representatives, and the cycle-rank bound
+  $|J|+|V|\le |E(B)|+c(B)$.
+  The stronger reserve for original small cyclic components is retained too.
+\end{theorem}
+\begin{proof}
+  \leanok
+  A thin region has a nonempty boundary. Since all its vertices have
+  ambient degree two, that boundary has exactly two edges. The boundaries
+  of distinct regions are disjoint. Isolating $J$ therefore empties
+  precisely its cuts and preserves every other region's cut. The core
+  edge count is consequently the number of unshaded regions. Partition
+  the original thin-path family into its shaded and unshaded members.
+\end{proof}
+
+\begin{theorem}[Endpoint marks of the constructed thin paths]
+  \label{thm:lowerbounds-algebraic-constructed-endpoint-marks}
+  \lean{Algebraic.Cutwidth.Bisection.RedBlack.PathSystem.degree_endpointMarks,
+    Algebraic.Cutwidth.Bisection.RedBlack.PathSystem.endpointMarks_eq_zero_of_mem,
+    Algebraic.Cutwidth.Bisection.RedBlack.PathSystem.degree_isolated_add_endpointMarks,
+    Algebraic.Cutwidth.Bisection.RedBlack.PathSystem.newly_degree_two_marked}
+  \leanok
+  \uses{thm:lowerbounds-algebraic-constructed-thin-family,
+    thm:lowerbounds-algebraic-endpoint-marks,
+    thm:lowerbounds-algebraic-family-restoration}
+  For the constructed restoration family and shaded subfamily $J$, endpoint
+  marks vanish on every eligible vertex. If eligible vertices have ambient
+  degree exactly two, their total is $2|J|$. At every ineligible vertex,
+  remaining degree plus endpoint marks equals original degree. Consequently,
+  a degree-three vertex made degree two by isolation receives exactly one mark.
+  It cannot become a new unmarked degree-two path vertex.
+
+  For a positive witness $X$ avoiding the shaded regions, the original graph
+  has a positive witness $Y\supseteq X$ with
+  \[
+    |Y|\le |X|+3M\sum_{v\in X}m(v).
+  \]
+  These are the endpoint invariants of the initial shading step. Preservation
+  through later color swaps and leaf reorganization remains unproved.
+\end{theorem}
+\begin{proof}
+  \leanok
+  Every thin region has two boundary edges, giving two outside marks.
+  An eligible vertex adjacent to a vertex of a canonical region belongs
+  to the same induced component. Thus no boundary edge can mark an eligible
+  vertex. Apply the general degree identity outside the eligible set.
+  A degree-three vertex was ineligible, and a drop to degree two gives one mark.
+  The constructed family has region-plus-attachment size at most $3M$,
+  so the mark-based restoration theorem gives the stated witness bound.
+\end{proof}
+
+\begin{theorem}[Accumulating bounded helpful sets]
+  \label{thm:lowerbounds-algebraic-helpful-amplification}
+  \lean{Algebraic.Cutwidth.Bisection.exists_helpful_set_of_margin}
+  \leanok
+  \uses{thm:lowerbounds-algebraic-cut-improvement}
+  Let $a\ge 0$ and let $M,k$ be natural numbers. Suppose
+  $|\partial S|>a|S|+k$, and every $T\subseteq S$ with
+  $|\partial T|>a|T|$ contains a set of at most $M$ vertices of
+  helpfulness at least one. Then some $X\subseteq S$ has
+  $|X|\le kM$ and $h_S(X)\ge k$. This proves the accumulation step in
+  Monien--Preis's argument; the general bounded local helpful-set lemma
+  is still a hypothesis.
+\end{theorem}
+\begin{proof}
+  \leanok
+  Until the total helpfulness reaches $k$, the remaining side has cut
+  size greater than $|\partial S|-k>a|S|$, hence greater than $a$
+  times its own cardinality. Apply the local lemma, remove its helpful
+  set, and add the gain. At most $k$ moves are needed, and their sets
+  are disjoint. Each contributes at most $M$ vertices.
+\end{proof}
+
+\begin{theorem}[Prescribed-size subsets and logarithmic-cost rebalancing]
+  \label{thm:lowerbounds-algebraic-rebalancing}
+  \lean{Algebraic.Cutwidth.Bisection.exists_subset_cut_le,
+    Algebraic.Cutwidth.Bisection.exists_rebalancing_set,
+    Algebraic.Cutwidth.MedianOrdering.card_cutFinset_le_bag}
+  \leanok
+  \uses{thm:lowerbounds-algebraic-subcubic-endpoint,
+    thm:lowerbounds-algebraic-cut-improvement}
+  In a cubic graph, every side $S$ and $0\le r\le |S|$ admit a subset
+  $T\subseteq S$ of size $r$ with
+  \[
+    |\partial T|\le
+    \max\{ |\partial S|,\lfloor |S|/3\rfloor+1\}
+      +\lceil\log_2|S|\rceil+2.
+  \]
+  Consequently, if $|S|<3|\partial S|$, every prescribed move size
+  $k\le |S|$ has a witness $X\subseteq S$ with
+  $h_S(X)\ge-\lceil\log_2|S|\rceil-2$.
+  No bisection hypothesis or connectivity assumption is used.
+  The ceiling logarithm is interpreted as zero at zero.
+\end{theorem}
+\begin{proof}
+  \leanok
+  Delete vertices with at least two outside neighbors while the side is
+  larger than the requested subset; each deletion decreases the cut.
+  Once each remaining vertex has two internal neighbors, take its induced
+  graph's prescribed-endpoint decomposition ending at the cut boundary.
+  Extend it by one bag containing that boundary and the other side.
+  Place edges in their first available bags. Every vertex on the chosen
+  side has its median edge before the final bag; every other vertex has
+  its median in the final bag. An initial segment of any prescribed
+  cardinality is therefore contained in the chosen side. The median
+  charging argument bounds its cut by one more than an earlier bag.
+  For the move, take $X=S\setminus T$ with $|T|=|S|-k$ and use the exact
+  helpfulness identity. The density condition absorbs the maximum.
+\end{proof}
+
+\begin{theorem}[Sharp bisection from bounded helpful sets]
+  \label{thm:lowerbounds-algebraic-helpful-reduction}
+  \lean{Algebraic.Cutwidth.Bisection.exists_bisection_of_helpful,
+    Algebraic.Cutwidth.Bisection.exists_bisectionBound_of_helpful}
+  \leanok
+  \uses{thm:lowerbounds-algebraic-helpful-amplification,
+    thm:lowerbounds-algebraic-rebalancing,
+    def:lowerbounds-algebraic-bisection}
+  Fix $\xi>0$. Suppose every side with cut density greater than
+  $1/3+\xi$ contains a set of at most $M$ vertices of helpfulness at
+  least one. A cubic graph on $n$ vertices has a bisection of size at most
+  $(1/6+\xi)n$ whenever
+  \[
+    (M+3)(\lceil\log_2 n\rceil+4)<\xi n.
+  \]
+  A graph-independent $M$ therefore gives
+  $\mathrm{BisectionBound}(\xi,N_0)$ for some $N_0$.
+  The bounded local helpful-set lemma remains a hypothesis.
+\end{theorem}
+\begin{proof}
+  \leanok
+  Start from a minimum cut with one side of size $\lfloor n/2\rfloor$.
+  If its size exceeds the bound, accumulate helpfulness
+  $k=\lceil\log_2 n\rceil+3$ using at most $kM$ vertices.
+  From the enlarged opposite side, select a subset of its original
+  cardinality using the preceding theorem. The original-cut term of
+  its maximum is paid by the accumulated gain; the side-size term is
+  below the original cut by the displayed size condition. This restores
+  balance with a strictly smaller cut, contradicting minimality.
+  The maximum also handles overshoot of the accumulated gain.
+  Finally, a fixed multiple of the logarithm is sublinear.
+\end{proof}
+
+\begin{theorem}[A coarse bisection bound]
+  \label{thm:lowerbounds-algebraic-bisection-coarse}
+  \lean{Algebraic.Cutwidth.bisectionBound_coarse}
+  \leanok
+  \uses{def:lowerbounds-algebraic-bisection}
+  The predicate $\mathrm{BisectionBound}(4/3,0)$ holds. This checks the
+  bisection contract with a coarse constant and does not prove the sharp
+  theorem for arbitrarily small positive slack.
+\end{theorem}
+\begin{proof}
+  \leanok
+  Choose any $\lfloor n/2\rfloor$ vertices. The cut has at most all
+  $3n/2$ edges of the cubic graph, by the degree-sum formula.
+\end{proof}
+
+\begin{theorem}[Path decomposition from a balanced cut]
+  \label{thm:lowerbounds-algebraic-bisection-assembly}
+  \lean{Algebraic.Cutwidth.PathDecomposition.exists_of_cut,
+    Algebraic.Cutwidth.PathDecomposition.exists_of_balanced_cut,
+    Algebraic.Cutwidth.card_cutBoundary_le,
+    Algebraic.Cutwidth.card_cutFinset_induce_le}
+  \leanok
+  \uses{thm:lowerbounds-algebraic-subcubic-endpoint,
+    thm:lowerbounds-algebraic-boundary-transition,
+    thm:lowerbounds-algebraic-endpoint-glue}
+  If a graph of maximum degree three on $n$ vertices has a balanced cut
+  with $b$ crossing edges, it has a path decomposition with bags of size
+  at most
+  \[
+    \max\{b,\lfloor(n+1)/6\rfloor+1\}+\lceil\log_2 n\rceil+1.
+  \]
+  For an arbitrary cut, replace $\lfloor(n+1)/6\rfloor$ by
+  $\lfloor\max\{|S|,|S^c|\}/3\rfloor$. The logarithmic term is zero
+  for $n=0$.
+\end{theorem}
+\begin{proof}
+  \leanok
+  Each vertex boundary has at most $b$ vertices. Apply the prescribed
+  endpoint theorem to both induced sides and reverse the second
+  decomposition. Between them put the decomposition on the two vertex
+  boundaries, with bags of size at most $b+1$. The adjoining bags contain
+  all shared vertices, so concatenation preserves the bag-size bound.
+\end{proof}
+
+\begin{theorem}[Cubic pathwidth from bisection]
+  \label{thm:lowerbounds-algebraic-bisection-pathwidth}
+  \lean{Algebraic.Cutwidth.BisectionBound.exists_pathwidthBound,
+    Algebraic.Cutwidth.pathwidthBound_of_bisectionBound}
+  \leanok
+  \uses{def:lowerbounds-algebraic-bisection,
+    thm:lowerbounds-algebraic-bisection-assembly}
+  If $\xi\ge 0$, $\delta>0$, and $\mathrm{BisectionBound}(\xi,N_0)$
+  holds, then $\mathrm{PathwidthBound}(\xi+\delta,N_1)$ holds for some
+  $N_1$. Consequently the sharp asymptotic cubic bisection theorem implies
+  the sharp asymptotic cubic pathwidth theorem. This proves the reduction
+  of Fomin and H{\o}ie; the Monien--Preis bisection theorem remains a
+  hypothesis.
+\end{theorem}
+\begin{proof}
+  \leanok
+  For all sufficiently large $n$, the ceiling logarithm plus two is less
+  than $\delta n$. Absorb the finite assembly's remainder in that slack.
+  For the universally quantified conclusion, allocate half the target
+  slack to the bisection and half to the remainder.
+\end{proof}
+
+\begin{definition}[Flat-source sumset extraction]
+  \label{def:lowerbounds-algebraic-sumset-extractor}
+  \lean{Algebraic.Cutwidth.FlatSumsetExtractor,
+    Algebraic.Cutwidth.flatSumsetExtractor_singleBit}
+  \leanok
+  A Boolean function $f$ on $n$ bits is a flat-source sumset extractor with
+  threshold $K$ and error $\nu$ when, for all sets $P,Q\subseteq\{0,1\}^n$
+  of cardinality at least $K$, the fraction of pairs $(x,y)\in P\times Q$
+  with $f(x\oplus y)=1$ lies in $[1/2-\nu,1/2+\nu]$. Source pairs are
+  counted with multiplicity even when their sums coincide. On one bit, the
+  identity function has threshold $2$ and error zero. This finite example
+  does not give an asymptotic family.
+\end{definition}
+
+\begin{theorem}[Sumset extraction supplies the hard-family properties]
+  \label{thm:lowerbounds-algebraic-extractor-hardness}
+  \lean{Algebraic.Cutwidth.FlatSumsetExtractor.balanced,
+    Algebraic.Cutwidth.eventually_hard_of_flatSumsetExtractor}
+  \leanok
+  \uses{def:lowerbounds-algebraic-sumset-extractor}
+  Suppose $\nu\le 1/4$, $\log_2 K(n)=o(n)$, and eventually $f_n$ is a
+  flat-source sumset extractor with threshold $K(n)$ and error $\nu$.
+  Then eventually $f_n$ is $K(n)$-rectangle-free and accepts at least
+  $2^{n-2}$ inputs. More generally, flat-source extraction implies balance
+  on all coordinate rectangles at the same threshold and error.
+\end{theorem}
+\begin{proof}
+  \leanok
+  Zero-pad the two rectangle sides on complementary coordinates; XOR
+  recovers their glued input, with each source pair retained. An all-one
+  rectangle contradicts error below $1/2$. Apply balance to the full cube,
+  splitting its coordinates into nearly equal halves, for the density bound.
+  Sublinear source entropy ensures that both halves support enough inputs.
+\end{proof}
+
 \begin{theorem}[Cutwidth bound, conditional]
   \label{thm:lowerbounds-algebraic-cutwidth}
   \lean{Algebraic.Cutwidth.eventually_lt_size_of_pathwidthBound}
@@ -727,7 +2375,10 @@ establishes the proposed coefficient-three regime without that assumption.
   binary gates, every gate counted), for every $\varepsilon > 0$ and all large
   $n$. The pathwidth bound is an explicit
   hypothesis of the theorem. It is the published theorem of Fomin and H{\o}ie
-  on the pathwidth of cubic graphs, which is not formalized here. As for
+  on the pathwidth of cubic graphs. Its reduction to the Monien--Preis
+  bisection theorem is formalized in
+  Theorem~\ref{thm:lowerbounds-algebraic-bisection-pathwidth}; the bisection
+  theorem remains unformalized. As for
   Theorem~\ref{thm:lowerbounds-algebraic-nechiporuk}, no explicit
   rectangle-free family is formalized, so this is a conditional statement
   about any such family. The argument follows Ryan Williams's private working
@@ -741,17 +2392,48 @@ establishes the proposed coefficient-three regime without that assumption.
   count the rectangles cut at each position.
 \end{proof}
 
+\begin{theorem}[Subexponential-threshold cutwidth bound, conditional]
+  \label{thm:lowerbounds-algebraic-cutwidth-subexponential}
+  \lean{Algebraic.Cutwidth.eventually_lt_size_of_pathwidthBound_of_log_sublinear,
+    Algebraic.Cutwidth.eventually_lt_size_of_pathwidthBound_of_flatSumsetExtractor,
+    Algebraic.Cutwidth.eventually_lt_size_of_bisectionBound_of_log_sublinear,
+    Algebraic.Cutwidth.eventually_lt_size_of_bisectionBound_of_flatSumsetExtractor}
+  \leanok
+  \uses{thm:lowerbounds-algebraic-cutwidth,
+    thm:lowerbounds-algebraic-extractor-hardness,
+    thm:lowerbounds-algebraic-bisection-pathwidth}
+  The polynomial threshold in Theorem~\ref{thm:lowerbounds-algebraic-cutwidth}
+  can be replaced by $\log_2 K(n)=o(n)$. In particular, a family of flat-source
+  sumset extractors with this threshold and fixed error at most $1/4$
+  satisfies the same circuit lower bound, assuming the cubic bisection
+  theorem, which now supplies the pathwidth theorem through a checked
+  reduction. The explicit extractor construction and its polynomial-time
+  evaluation remain unformalized. Li's Theorem 7.13 (2023) provides
+  logarithmic source entropy; Chattopadhyay and Liao (2021) already provide
+  polylogarithmic source entropy, which is sufficient for this version.
+\end{theorem}
+\begin{proof}
+  \leanok
+  Keep the terms involving $\log_2 K$ in the finite counting inequality.
+  The loss is $O(\log n+\log K)=o(n)$, so the coefficient remains four.
+\end{proof}
+
 \begin{theorem}[Cutwidth bound for nondeterministic circuits, conditional]
   \label{thm:lowerbounds-algebraic-cutwidth-nondet}
-  \lean{Algebraic.Cutwidth.nondet_eventually_lt_size_of_pathwidthBound}
+  \lean{Algebraic.Cutwidth.nondet_eventually_lt_size_of_pathwidthBound,
+    Algebraic.Cutwidth.nondet_eventually_lt_size_of_log_sublinear,
+    Algebraic.Cutwidth.nondet_eventually_lt_size_of_flatSumsetExtractor}
   \leanok
-  \uses{thm:lowerbounds-algebraic-cutwidth}
+  \uses{thm:lowerbounds-algebraic-cutwidth,
+    thm:lowerbounds-algebraic-cutwidth-subexponential}
   Under the hypotheses of Theorem~\ref{thm:lowerbounds-algebraic-cutwidth},
   the same bound holds for nondeterministic circuits: for every
   $\varepsilon > 0$ and all large $n$, every circuit on $n + m$ inputs with
-  $m \le n$ whose accepted inputs $x$ are exactly those with some witness $y$
+  arbitrary $m$, whose accepted inputs $x$ are exactly those with some witness $y$
   making the output $1$ has more than $(4 - \varepsilon)n$ gates.
-  Nondeterminism does not reduce the size below this bound.
+  Nondeterminism does not reduce the size below this bound. The subexponential
+  threshold of Theorem~\ref{thm:lowerbounds-algebraic-cutwidth-subexponential}
+  is also sufficient.
 \end{theorem}
 \begin{proof}
   \leanok
@@ -760,7 +2442,9 @@ establishes the proposed coefficient-three regime without that assumption.
   leaves a network with the same multigraph computing the existential
   projection. The excess of the wiring graph counts every reachable input,
   ordinary or witness, so it is at most the gate count minus the ordinary
-  inputs read, and the deterministic assembly applies unchanged.
+  inputs read. Every signal except the output feeds a slot; charging signals
+  and copy vertices to slots gives at most $2s+1$ wiring vertices, independent
+  of the declared witness count. The deterministic assembly then applies.
 \end{proof}
 
 \begin{theorem}[Average-case cutwidth bound, conditional]

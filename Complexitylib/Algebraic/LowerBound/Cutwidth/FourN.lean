@@ -7,31 +7,31 @@ Authors: Samuel Schlesinger
 module
 public import Complexitylib.Algebraic.LowerBound.Cutwidth.Wiring
 public import Complexitylib.Algebraic.LowerBound.Cutwidth.Expansion
-public import Cslib.Foundations.Data.Nat.Asymptotics
-public import Mathlib.Analysis.SpecialFunctions.Log.Basic
-public import Mathlib.Analysis.SpecialFunctions.Pow.Real
-public import Mathlib.Analysis.Asymptotics.Defs
+public import Complexitylib.Algebraic.LowerBound.Cutwidth.Asymptotics
+public import Complexitylib.Algebraic.LowerBound.Cutwidth.PathDecomposition.Bisection
 
 /-!
 # The `(4 - ε) n` lower bound
 
 Assembling the cut-counting lemma, the wiring graph, and the graph-ordering
 hypothesis gives the circuit lower bound. A `K`-rectangle-free function with
-at least `2 ^ (n - 2)` accepting inputs and `K` polynomial in `n` needs more
-than `(4 - ε) n` gates over the full binary basis, for every `ε > 0` and all
-sufficiently large `n`.
+at least `2 ^ (n - 2)` accepting inputs and `log₂ K = o(n)` needs more than
+`(4 - ε) n` gates over the full binary basis, for every `ε > 0` and all
+sufficiently large `n`. Polynomial thresholds are a special case.
 
 Two statements enter as hypotheses rather than being proved here:
 
 * `Multigraph.OrderingBound η C` for every `η > 0` and some `C`, the
   graph-ordering hypothesis on multigraphs of maximum degree three, which
   `eventually_lt_size_of_pathwidthBound` derives from the pathwidth
-  hypothesis `PathwidthBound` for simple cubic graphs;
-* a family `f n` with threshold `K n ≤ n ^ c` satisfying `RectangleFree` and
-  the accepting-input bound.
+  hypothesis `PathwidthBound` for simple cubic graphs, now derived from
+  `BisectionBound` by the checked Fomin–Høie reduction;
+* a family `f n` with `log₂ K(n) = o(n)` satisfying `RectangleFree` and the
+  accepting-input bound.
 
-The main theorem is `eventually_lt_size`. The fixed-`n` core is
-`lt_size_of_bounds`, whose numeric hypotheses are discharged asymptotically.
+The general theorem is `eventually_lt_size_of_log_sublinear`, with fixed-`n`
+core `lt_size_of_log_bounds`. The original `eventually_lt_size` and
+`lt_size_of_bounds` specialize these to polynomial thresholds.
 
 The proof organization, the threshold-edge charging, the application of a
 sumset extractor as the hard family, and the merge-tree restoration argument
@@ -154,53 +154,17 @@ theorem card_accepting_le_of_orderingBound {η C : ℝ} (hη : 0 ≤ η) (hC : 0
         apply mul_le_mul (mul_le_mul hV hexp (by positivity) (by positivity)) hK'
           (by positivity) (by positivity)
 
-/-- Every fixed multiple of the binary logarithm, plus a constant, is
-eventually below every positive multiple of the input. -/
-theorem eventually_mul_logb_add_lt (A B : ℝ) {δ : ℝ} (hδ : 0 < δ) :
-    ∀ᶠ n : Nat in atTop, A * Real.logb 2 n + B < δ * n := by
-  have hlog : (fun n : Nat => Real.log n) =o[atTop] (fun n : Nat => (n : ℝ)) :=
-    Real.isLittleO_log_id_atTop.comp_tendsto tendsto_natCast_atTop_atTop
-  have hlog2 : 0 < Real.log 2 := Real.log_pos one_lt_two
-  obtain ⟨m, hm⟩ := exists_nat_gt (2 * |A| / (δ * Real.log 2))
-  have key := (Asymptotics.isLittleO_iff_nat_mul_le.mp hlog) m
-  obtain ⟨N, hN⟩ := exists_nat_gt (2 * B / δ)
-  filter_upwards [key, eventually_ge_atTop 1, eventually_ge_atTop N] with n hn hn1 hnN
-  have hn1' : (1 : ℝ) ≤ n := by exact_mod_cast hn1
-  have hlogn : 0 ≤ Real.log n := Real.log_nonneg hn1'
-  rw [Real.norm_of_nonneg hlogn, Real.norm_of_nonneg (by positivity)] at hn
-  have hmA : 2 * |A| < m * (δ * Real.log 2) := by
-    rwa [div_lt_iff₀ (by positivity)] at hm
-  have h₁ : 2 * (A * Real.logb 2 n) ≤ δ * n := by
-    rw [Real.logb]
-    have step : 2 * A * Real.log n ≤ (m * (δ * Real.log 2)) * Real.log n := by
-      apply mul_le_mul_of_nonneg_right _ hlogn
-      have := le_abs_self A
-      linarith
-    have step' : (m * (δ * Real.log 2)) * Real.log n ≤ δ * Real.log 2 * n := by
-      have : (m : ℝ) * Real.log n ≤ n := hn
-      calc (m * (δ * Real.log 2)) * Real.log n = δ * Real.log 2 * (m * Real.log n) := by ring
-        _ ≤ δ * Real.log 2 * n := mul_le_mul_of_nonneg_left this (by positivity)
-    have : 2 * A * Real.log n ≤ δ * Real.log 2 * n := step.trans step'
-    calc 2 * (A * (Real.log n / Real.log 2)) = (2 * A * Real.log n) / Real.log 2 := by ring
-      _ ≤ (δ * Real.log 2 * n) / Real.log 2 := by gcongr
-      _ = δ * n := by field_simp
-  have h₂ : 2 * B < δ * n := by
-    have hnN' : (N : ℝ) ≤ n := by exact_mod_cast hnN
-    rw [div_lt_iff₀ hδ] at hN
-    nlinarith
-  linarith
-
 /-- **The numeric core.** A `K`-rectangle-free function with at least
 `2 ^ (n - 2)` accepting inputs cannot satisfy the accepting-input bound of
 the cut-counting lemma for a circuit with `s ≤ (4 - 18 η) n` gates reading
 `n'` inputs, when `n - n' < ⌈log₂ K⌉` and `n` is large enough. The bound is
 taken as a hypothesis so that the deterministic and nondeterministic
 assemblies share this argument. -/
-theorem false_of_accepting_bound {η C : ℝ} (hη : 0 < η) (hη1 : η ≤ 1 / 18) (hC : 0 ≤ C)
-    {n : Nat} (hn : 2 ≤ n) {f : Cslib.BooleanFunction n} {K c : Nat} (hK : K ≤ n ^ c)
+theorem false_of_accepting_bound_of_log {η C : ℝ} (hη : 0 < η) (hη1 : η ≤ 1 / 18)
+    (hC : 0 ≤ C) {n : Nat} (hn : 2 ≤ n) {f : Cslib.BooleanFunction n} {K : Nat}
     (hacc : 2 ^ (n - 2) ≤ (accepting f).card) (hK1 : 1 < K)
-    (hpow : 8 * n ^ (2 * c) ≤ 2 ^ n)
-    (hlog : (4 + 3 * c) * Real.logb 2 n + (C + 22) < 3 * η * n)
+    (hbig : 2 * K ^ 2 ≤ 2 ^ (n - 2))
+    (hlog : 4 * Real.logb 2 n + 3 * Real.logb 2 K + (C + 22) < 3 * η * n)
     {s n' : Nat} (hs : (s : ℝ) ≤ (4 - 18 * η) * n) (hn'le : n' ≤ n)
     (hread : n - n' < Nat.clog 2 K)
     {Vb : ℝ} (hVpos : 0 < Vb) (hVb : Vb ≤ 16 * n)
@@ -208,40 +172,22 @@ theorem false_of_accepting_bound {η C : ℝ} (hη : 0 < η) (hη1 : η ≤ 1 / 
       ((accepting f).card : ℝ) ≤ Vb * (2 : ℝ) ^ ((1 / 3 + η) * max ((s : ℝ) - n') 0 +
         3 * Real.logb 2 Vb + C + 3) * K ^ 2) : False := by
   have hacc_pos : 0 < (accepting f).card := lt_of_lt_of_le (Nat.two_pow_pos _) hacc
-  have hpow' : 2 ^ n = 4 * 2 ^ (n - 2) := by
-    calc 2 ^ n = 2 ^ (n - 2 + 2) := by rw [Nat.sub_add_cancel hn]
-      _ = 4 * 2 ^ (n - 2) := by rw [pow_add]; ring
-  have hbig : 2 * K ^ 2 ≤ 2 ^ (n - 2) := by
-    have : K ^ 2 ≤ n ^ (2 * c) := by
-      rw [mul_comm, pow_mul]
-      exact Nat.pow_le_pow_left hK 2
-    omega
   set k := Nat.clog 2 K with hk_def
-  have hk1 : 1 ≤ k := Nat.clog_pos one_lt_two hK1
   have hlow : 2 ^ (k - 1) < K := Nat.pow_pred_clog_lt_self one_lt_two hK1
-  have hn1 : (1 : ℝ) ≤ n := by exact_mod_cast (by omega : 1 ≤ n)
+  have hn1 : (1 : ℝ) ≤ n := by exact_mod_cast (by lia : 1 ≤ n)
   have hlogn : 0 ≤ Real.logb 2 n := Real.logb_nonneg one_lt_two hn1
-  have hkR : (k : ℝ) < c * Real.logb 2 n + 1 := by
-    have h₁ : ((2 : ℝ) ^ (k - 1)) < (n : ℝ) ^ c := by
-      have : (2 ^ (k - 1) : Nat) < n ^ c := hlow.trans_le hK
-      exact_mod_cast this
-    have h₂ := (Real.logb_lt_logb one_lt_two (by positivity) h₁)
-    rw [Real.logb_pow, Real.logb_pow, Real.logb_self_eq_one one_lt_two, mul_one] at h₂
-    have : ((k - 1 : Nat) : ℝ) = (k : ℝ) - 1 := by
-      rw [Nat.cast_sub hk1]
-      simp
-    linarith
-  have hlogK : Real.logb 2 K ≤ c * Real.logb 2 n := by
-    have h := (Real.logb_le_logb one_lt_two (by exact_mod_cast (by omega : 0 < K))
-      (by positivity)).mpr (show (K : ℝ) ≤ (n : ℝ) ^ c by exact_mod_cast hK)
-    rwa [Real.logb_pow] at h
+  have hlogK : 0 ≤ Real.logb 2 K :=
+    Real.logb_nonneg one_lt_two (by exact_mod_cast hK1.le)
+  have hkR : (k : ℝ) < Real.logb 2 K + 1 := by
+    rw [hk_def, ← Real.natCeil_logb_natCast 2 K]
+    exact Nat.ceil_lt_add_one hlogK
   rcases bound with small | large
   · -- Few inputs are read: the count is below `K ^ 2`, contradicting the accepting bound.
-    have h₁ : 2 ^ (n - n') ≤ 2 ^ (k - 1) := Nat.pow_le_pow_right two_pos (by omega)
+    have h₁ : 2 ^ (n - n') ≤ 2 ^ (k - 1) := Nat.pow_le_pow_right two_pos (by lia)
     have h₂ : (accepting f).card < K * K :=
       small.trans_le ((Nat.mul_le_mul_left K h₁).trans (Nat.mul_le_mul_left K hlow.le))
     have : K * K = K ^ 2 := by ring
-    omega
+    lia
   · -- The main case: compare exponents.
     have hreadR : (n : ℝ) - n' < k := by
       have : n - n' < k := hread
@@ -252,7 +198,7 @@ theorem false_of_accepting_bound {η C : ℝ} (hη : 0 < η) (hη1 : η ≤ 1 / 
       · linarith
       · nlinarith
     have hprod : (1 / 3 + η) * max ((s : ℝ) - n') 0 ≤
-        (1 - 3 * η) * n + (c * Real.logb 2 n + 1) / 2 := by
+        (1 - 3 * η) * n + (Real.logb 2 K + 1) / 2 := by
       have h₁ := mul_le_mul_of_nonneg_left hmax (by linarith : (0 : ℝ) ≤ 1 / 3 + η)
       have hk0 : (0 : ℝ) ≤ k := by positivity
       have h₂ : (1 / 3 + η) * k ≤ k / 2 := by nlinarith
@@ -268,7 +214,7 @@ theorem false_of_accepting_bound {η C : ℝ} (hη : 0 < η) (hη1 : η ≤ 1 / 
             ring
     -- Take binary logarithms of the main inequality.
     have hM : ((accepting f).card : ℝ) > 0 := by exact_mod_cast hacc_pos
-    have hKpos : (0 : ℝ) < K := by exact_mod_cast (by omega : 0 < K)
+    have hKpos : (0 : ℝ) < K := by exact_mod_cast (by lia : 0 < K)
     have hSpos : (0 : ℝ) < Vb := hVpos
     set X : ℝ := (1 / 3 + η) * max ((s : ℝ) - n') 0 + 3 * Real.logb 2 Vb + C + 3
       with hX
@@ -286,16 +232,45 @@ theorem false_of_accepting_bound {η C : ℝ} (hη : 0 < η) (hη1 : η ≤ 1 / 
     have hexp := (Real.rpow_le_rpow_left_iff one_lt_two).mp (hlower.trans hupper)
     linarith
 
-/-- **The fixed-`n` core of the lower bound.** With the graph-ordering
-hypothesis for slack `η ≤ 1/18`, a `K`-rectangle-free function with at least
-`2 ^ (n - 2)` accepting inputs and `K ≤ n ^ c` needs more than `(4 - 18 η) n`
-binary gates, once `n` satisfies two explicit numeric conditions. -/
-theorem lt_size_of_bounds {η C : ℝ} (hη : 0 < η) (hη1 : η ≤ 1 / 18) (hC : 0 ≤ C)
-    (order : Multigraph.OrderingBound η C)
+/-- The polynomial-threshold numeric core follows from the logarithmic core;
+this preserves the original deterministic and nondeterministic interface. -/
+theorem false_of_accepting_bound {η C : ℝ} (hη : 0 < η) (hη1 : η ≤ 1 / 18) (hC : 0 ≤ C)
     {n : Nat} (hn : 2 ≤ n) {f : Cslib.BooleanFunction n} {K c : Nat} (hK : K ≤ n ^ c)
-    (hacc : 2 ^ (n - 2) ≤ (accepting f).card) (hrect : RectangleFree f K)
+    (hacc : 2 ^ (n - 2) ≤ (accepting f).card) (hK1 : 1 < K)
     (hpow : 8 * n ^ (2 * c) ≤ 2 ^ n)
     (hlog : (4 + 3 * c) * Real.logb 2 n + (C + 22) < 3 * η * n)
+    {s n' : Nat} (hs : (s : ℝ) ≤ (4 - 18 * η) * n) (hn'le : n' ≤ n)
+    (hread : n - n' < Nat.clog 2 K)
+    {Vb : ℝ} (hVpos : 0 < Vb) (hVb : Vb ≤ 16 * n)
+    (bound : (accepting f).card < K * 2 ^ (n - n') ∨
+      ((accepting f).card : ℝ) ≤ Vb * (2 : ℝ) ^ ((1 / 3 + η) * max ((s : ℝ) - n') 0 +
+        3 * Real.logb 2 Vb + C + 3) * K ^ 2) : False := by
+  have hpow' : 2 ^ n = 4 * 2 ^ (n - 2) := by
+    calc 2 ^ n = 2 ^ (n - 2 + 2) := by rw [Nat.sub_add_cancel hn]
+      _ = 4 * 2 ^ (n - 2) := by rw [pow_add]; ring
+  have hbig : 2 * K ^ 2 ≤ 2 ^ (n - 2) := by
+    have : K ^ 2 ≤ n ^ (2 * c) := by
+      rw [mul_comm, pow_mul]
+      exact Nat.pow_le_pow_left hK 2
+    lia
+  have hlogK : Real.logb 2 K ≤ c * Real.logb 2 n := by
+    have h := (Real.logb_le_logb one_lt_two (by exact_mod_cast (by lia : 0 < K))
+      (by positivity)).mpr (show (K : ℝ) ≤ (n : ℝ) ^ c by exact_mod_cast hK)
+    rwa [Real.logb_pow] at h
+  exact false_of_accepting_bound_of_log hη hη1 hC hn hacc hK1 hbig
+    (by linarith) hs hn'le hread hVpos hVb bound
+
+/-- **The fixed-`n` core of the lower bound.** With the graph-ordering
+hypothesis for slack `η ≤ 1/18`, a `K`-rectangle-free function with at least
+`2 ^ (n - 2)` accepting inputs needs more than `(4 - 18 η) n` binary gates,
+provided its threshold and the logarithmic overhead satisfy the stated
+numeric conditions. No polynomial-threshold assumption is needed. -/
+theorem lt_size_of_log_bounds {η C : ℝ} (hη : 0 < η) (hη1 : η ≤ 1 / 18) (hC : 0 ≤ C)
+    (order : Multigraph.OrderingBound η C)
+    {n : Nat} (hn : 2 ≤ n) {f : Cslib.BooleanFunction n} {K : Nat}
+    (hacc : 2 ^ (n - 2) ≤ (accepting f).card) (hrect : RectangleFree f K)
+    (hbig : 2 * K ^ 2 ≤ 2 ^ (n - 2))
+    (hlog : 4 * Real.logb 2 n + 3 * Real.logb 2 K + (C + 22) < 3 * η * n)
     (circuit : Circuit Binary.signature n 1)
     (computes : circuit.Computes Binary.interpretation fun x _ => f x) :
     (4 - 18 * η) * n < circuit.size := by
@@ -306,29 +281,14 @@ theorem lt_size_of_bounds {η C : ℝ} (hη : 0 < η) (hη1 : η ≤ 1 / 18) (hC
   have hacc_pos : 0 < (accepting f).card := lt_of_lt_of_le (Nat.two_pow_pos _) hacc
   obtain ⟨x₀, hx₀⟩ := Finset.card_pos.mp hacc_pos
   have hK1 : 1 < K := hrect.one_lt (mem_accepting.mp hx₀)
-  have hpow' : 2 ^ n = 4 * 2 ^ (n - 2) := by
-    calc 2 ^ n = 2 ^ (n - 2 + 2) := by rw [Nat.sub_add_cancel hn]
-      _ = 4 * 2 ^ (n - 2) := by rw [pow_add]; ring
-  have hbig : 2 * K ^ 2 ≤ 2 ^ (n - 2) := by
-    have : K ^ 2 ≤ n ^ (2 * c) := by
-      rw [mul_comm, pow_mul]
-      exact Nat.pow_le_pow_left hK 2
-    omega
   set k := Nat.clog 2 K with hk_def
-  have hk1 : 1 ≤ k := Nat.clog_pos one_lt_two hK1
-  have hlow : 2 ^ (k - 1) < K := Nat.pow_pred_clog_lt_self one_lt_two hK1
-  have hn1 : (1 : ℝ) ≤ n := by exact_mod_cast (by omega : 1 ≤ n)
+  have hn1 : (1 : ℝ) ≤ n := by exact_mod_cast (by lia : 1 ≤ n)
   have hlogn : 0 ≤ Real.logb 2 n := Real.logb_nonneg one_lt_two hn1
-  have hkR : (k : ℝ) < c * Real.logb 2 n + 1 := by
-    have h₁ : ((2 : ℝ) ^ (k - 1)) < (n : ℝ) ^ c := by
-      have : (2 ^ (k - 1) : Nat) < n ^ c := hlow.trans_le hK
-      exact_mod_cast this
-    have h₂ := (Real.logb_lt_logb one_lt_two (by positivity) h₁)
-    rw [Real.logb_pow, Real.logb_pow, Real.logb_self_eq_one one_lt_two, mul_one] at h₂
-    have : ((k - 1 : Nat) : ℝ) = (k : ℝ) - 1 := by
-      rw [Nat.cast_sub hk1]
-      simp
-    linarith
+  have hlogK : 0 ≤ Real.logb 2 K :=
+    Real.logb_nonneg one_lt_two (by exact_mod_cast hK1.le)
+  have hkR : (k : ℝ) < Real.logb 2 K + 1 := by
+    rw [hk_def, ← Real.natCeil_logb_natCast 2 K]
+    exact Nat.ceil_lt_add_one hlogK
   -- The circuit's output wire.
   obtain ⟨g, hg⟩ : ∃ g, outputs 0 = g := ⟨_, rfl⟩
   have eval_eq : ∀ x, f x = program.trace Binary.interpretation x g := by
@@ -350,9 +310,9 @@ theorem lt_size_of_bounds {η C : ℝ} (hη : 0 < η) (hη1 : η ≤ 1 / 18) (hC
       exact agree j (Finset.mem_singleton_self j)
     have := support {j} hR
     rw [Finset.card_singleton] at this
-    have h' : ((n - 1 : Nat) : ℝ) < k := by exact_mod_cast (by omega : n - 1 < k)
-    rw [Nat.cast_sub (by omega), Nat.cast_one] at h'
-    linarith
+    have h' : ((n - 1 : Nat) : ℝ) < k := by exact_mod_cast (by lia : n - 1 < k)
+    rw [Nat.cast_sub (by lia), Nat.cast_one] at h'
+    nlinarith
   | gate out =>
     intro eval_eq
     set p := program with hp
@@ -372,8 +332,131 @@ theorem lt_size_of_bounds {η C : ℝ} (hη : 0 < η) (hη1 : η ≤ 1 / 18) (hC
     have hVb : ((n : ℝ) + 3 * s) ≤ 16 * n := by
       have hs' : (s : ℝ) ≤ (4 - 18 * η) * n := hs
       nlinarith
-    exact false_of_accepting_bound hη hη1 hC hn hK hacc' hK1 hpow hlog hs hn'le hread
+    exact false_of_accepting_bound_of_log hη hη1 hC hn hacc' hK1 hbig hlog hs hn'le hread
       (by positivity) hVb (card_accepting_le_of_orderingBound hη.le hC order p out hK1 hrect')
+
+/-- The original polynomial-threshold circuit bound, obtained by bounding
+the logarithm of the threshold in `lt_size_of_log_bounds`. -/
+theorem lt_size_of_bounds {η C : ℝ} (hη : 0 < η) (hη1 : η ≤ 1 / 18) (hC : 0 ≤ C)
+    (order : Multigraph.OrderingBound η C)
+    {n : Nat} (hn : 2 ≤ n) {f : Cslib.BooleanFunction n} {K c : Nat} (hK : K ≤ n ^ c)
+    (hacc : 2 ^ (n - 2) ≤ (accepting f).card) (hrect : RectangleFree f K)
+    (hpow : 8 * n ^ (2 * c) ≤ 2 ^ n)
+    (hlog : (4 + 3 * c) * Real.logb 2 n + (C + 22) < 3 * η * n)
+    (circuit : Circuit Binary.signature n 1)
+    (computes : circuit.Computes Binary.interpretation fun x _ => f x) :
+    (4 - 18 * η) * n < circuit.size := by
+  have hacc_pos : 0 < (accepting f).card := lt_of_lt_of_le (Nat.two_pow_pos _) hacc
+  obtain ⟨x, hx⟩ := Finset.card_pos.mp hacc_pos
+  have hK1 : 1 < K := hrect.one_lt (mem_accepting.mp hx)
+  have hpow' : 2 ^ n = 4 * 2 ^ (n - 2) := by
+    calc 2 ^ n = 2 ^ (n - 2 + 2) := by rw [Nat.sub_add_cancel hn]
+      _ = 4 * 2 ^ (n - 2) := by rw [pow_add]; ring
+  have hbig : 2 * K ^ 2 ≤ 2 ^ (n - 2) := by
+    have : K ^ 2 ≤ n ^ (2 * c) := by
+      rw [mul_comm, pow_mul]
+      exact Nat.pow_le_pow_left hK 2
+    lia
+  have hlogK : Real.logb 2 K ≤ c * Real.logb 2 n := by
+    have h := (Real.logb_le_logb one_lt_two (by exact_mod_cast (by lia : 0 < K))
+      (by positivity)).mpr (show (K : ℝ) ≤ (n : ℝ) ^ c by exact_mod_cast hK)
+    rwa [Real.logb_pow] at h
+  exact lt_size_of_log_bounds hη hη1 hC order hn hacc hrect hbig
+    (by linarith) circuit computes
+
+/-- A sublinear logarithmic threshold eventually satisfies the finite
+square bound needed to recover almost all input coordinates. -/
+theorem eventually_two_mul_sq_le_pow_of_log {K : Nat → Nat}
+    (hK : (fun n => Real.logb 2 (K n)) =o[atTop] (fun n => (n : ℝ))) :
+    ∀ᶠ n in atTop, 2 * K n ^ 2 ≤ 2 ^ (n - 2) := by
+  filter_upwards [hK.def (by norm_num : (0 : ℝ) < 1 / 4), eventually_ge_atTop 6]
+    with n hlog hn
+  by_cases hzero : K n = 0
+  · simp [hzero]
+  have hpos : (0 : ℝ) < K n := by exact_mod_cast Nat.pos_of_ne_zero hzero
+  have hlogK : Real.logb 2 (K n) ≤ (n : ℝ) / 4 := by
+    have h := (le_abs_self (Real.logb 2 (K n))).trans
+      (by simpa only [Real.norm_eq_abs, abs_of_nonneg (Nat.cast_nonneg (α := ℝ) n)] using hlog)
+    linarith
+  have hlogs : Real.logb 2 (2 * (K n : ℝ) ^ 2) ≤ Real.logb 2 ((2 : ℝ) ^ (n - 2)) := by
+    rw [Real.logb_mul (by norm_num) (by positivity), Real.logb_pow, Real.logb_pow,
+      Real.logb_self_eq_one one_lt_two, mul_one]
+    rw [Nat.cast_sub (by lia : 2 ≤ n)]
+    push_cast
+    have hnR : (6 : ℝ) ≤ n := by exact_mod_cast hn
+    linarith
+  have h := (Real.logb_le_logb one_lt_two (by positivity) (by positivity)).mp hlogs
+  exact_mod_cast h
+
+/-- A subexponential threshold fits in either half of the input cube for
+all sufficiently large input lengths. -/
+theorem eventually_le_pow_half_of_log {K : Nat → Nat}
+    (hK : (fun n => Real.logb 2 (K n)) =o[atTop] (fun n => (n : ℝ))) :
+    ∀ᶠ n in atTop, K n ≤ 2 ^ (n / 2) := by
+  filter_upwards [eventually_two_mul_sq_le_pow_of_log hK] with n hn
+  have hp : 2 ^ (n - 2) ≤ (2 ^ (n / 2)) ^ 2 := by
+    rw [← pow_mul]
+    exact Nat.pow_le_pow_right two_pos (by lia)
+  have hsq : K n ^ 2 ≤ (2 ^ (n / 2)) ^ 2 := (by lia : K n ^ 2 ≤ 2 ^ (n - 2)).trans hp
+  exact (Nat.pow_le_pow_iff_left (by norm_num : 2 ≠ 0)).mp hsq
+
+/-- **Subexponential-threshold circuit bound.** The coefficient four only
+needs `log₂ K(n) = o(n)`; the threshold itself need not be polynomial.
+The graph-ordering theorem and the hard-family properties are still explicit
+hypotheses. -/
+theorem eventually_lt_size_of_log_sublinear
+    (order : ∀ η : ℝ, 0 < η → ∃ C : ℝ, Multigraph.OrderingBound η C)
+    (f : ∀ n, Cslib.BooleanFunction n) (K : Nat → Nat)
+    (hK : (fun n => Real.logb 2 (K n)) =o[atTop] (fun n => (n : ℝ)))
+    (hacc : ∀ᶠ n in atTop, 2 ^ (n - 2) ≤ (accepting (f n)).card)
+    (hrect : ∀ᶠ n in atTop, RectangleFree (f n) (K n))
+    {ε : ℝ} (hε : 0 < ε) :
+    ∀ᶠ n in atTop, ∀ circuit : Circuit Binary.signature n 1,
+      circuit.Computes Binary.interpretation (fun x _ => f n x) →
+        (4 - ε) * n < circuit.size := by
+  let η := min ε 1 / 18
+  have hη : 0 < η := by dsimp [η]; positivity
+  have hη1 : η ≤ 1 / 18 := by dsimp [η]; linarith [min_le_right ε 1]
+  obtain ⟨C, hC⟩ := order η hη
+  have order' : Multigraph.OrderingBound η (max C 0) := hC.mono (le_max_left _ _)
+  have hlog := eventually_mul_logb_add_lt 4 (max C 0 + 22)
+    (by positivity : 0 < 3 * η / 2)
+  filter_upwards [hacc, hrect, hlog, hK.def (by positivity : 0 < η / 2),
+    eventually_two_mul_sq_le_pow_of_log hK, eventually_ge_atTop 2]
+    with n haccn hrectn hlogn hKn hbign hn
+  intro circuit computes
+  have hlogK : Real.logb 2 (K n) ≤ η / 2 * n :=
+    (le_abs_self _).trans
+      (by simpa only [Real.norm_eq_abs, abs_of_nonneg (Nat.cast_nonneg (α := ℝ) n)] using hKn)
+  have key := lt_size_of_log_bounds hη hη1 (le_max_right C 0) order' hn
+    haccn hrectn hbign (by linarith) circuit computes
+  have : (4 - ε) * n ≤ (4 - 18 * η) * n := by
+    apply mul_le_mul_of_nonneg_right _ (by positivity)
+    dsimp [η]
+    linarith [min_le_left ε 1]
+  exact this.trans_lt key
+
+/-- Polynomial thresholds have sublinear binary logarithms. This includes
+the value zero, whose real logarithm is defined to be zero. -/
+theorem logb_isLittleO_of_eventually_le_pow {K : Nat → Nat} {c : Nat}
+    (hK : ∀ᶠ n in atTop, K n ≤ n ^ c) :
+    (fun n => Real.logb 2 (K n)) =o[atTop] (fun n => (n : ℝ)) := by
+  apply Asymptotics.IsLittleO.of_bound
+  intro δ hδ
+  filter_upwards [hK, eventually_mul_logb_add_lt c 0 hδ, eventually_ge_atTop 1]
+    with n hKn hlog hn
+  by_cases hzero : K n = 0
+  · simp only [hzero, Nat.cast_zero, Real.logb_zero, norm_zero]
+    positivity
+  have hpos : (0 : ℝ) < K n := by exact_mod_cast Nat.pos_of_ne_zero hzero
+  have hnonneg : 0 ≤ Real.logb 2 (K n) :=
+    Real.logb_nonneg one_lt_two (by exact_mod_cast Nat.one_le_iff_ne_zero.mpr hzero)
+  have hbound : Real.logb 2 (K n) ≤ c * Real.logb 2 n := by
+    have h := (Real.logb_le_logb one_lt_two hpos (by positivity)).mpr
+      (show (K n : ℝ) ≤ (n : ℝ) ^ c by exact_mod_cast hKn)
+    rwa [Real.logb_pow] at h
+  rw [Real.norm_of_nonneg hnonneg, Real.norm_of_nonneg (Nat.cast_nonneg n)]
+  linarith
 
 /-- **Theorem 1.** Assume the graph-ordering lemma for every slack `η > 0` and
 a family of functions `f n` that is `K n`-rectangle-free with `K n ≤ n ^ c`
@@ -390,29 +473,40 @@ theorem eventually_lt_size
     ∀ᶠ n in atTop, ∀ circuit : Circuit Binary.signature n 1,
       circuit.Computes Binary.interpretation (fun x _ => f n x) →
         (4 - ε) * n < circuit.size := by
-  set ε' := min ε 1 with hε'
-  have hε'pos : 0 < ε' := lt_min hε one_pos
-  have hε'le : ε' ≤ ε := min_le_left _ _
-  set η := ε' / 18 with hη
-  have hηpos : 0 < η := by positivity
-  have hη1 : η ≤ 1 / 18 := by
-    have : ε' ≤ 1 := min_le_right _ _
-    rw [hη]
-    linarith
-  obtain ⟨C, hC⟩ := order η hηpos
-  have order' : Multigraph.OrderingBound η (max C 0) := hC.mono (le_max_left _ _)
-  have hlog := eventually_mul_logb_add_lt (4 + 3 * c) (max C 0 + 22) (by positivity : 0 < 3 * η)
-  have hpow := Nat.eventually_mul_pow_le_pow 8 (2 * c) one_lt_two
-  filter_upwards [hK, hacc, hrect, hlog, hpow, eventually_ge_atTop 2] with n hKn haccn
-    hrectn hlogn hpown hn2
-  intro circuit computes
-  have key := lt_size_of_bounds hηpos hη1 (le_max_right C 0) order' hn2 hKn haccn hrectn hpown
-    hlogn circuit computes
-  have : (4 - ε) * n ≤ (4 - 18 * η) * n := by
-    apply mul_le_mul_of_nonneg_right _ (by positivity)
-    rw [hη]
-    linarith
-  linarith
+  exact eventually_lt_size_of_log_sublinear order f K
+    (logb_isLittleO_of_eventually_le_pow hK) hacc hrect hε
+
+/-- The subexponential-threshold lower bound from the cubic pathwidth theorem. -/
+theorem eventually_lt_size_of_pathwidthBound_of_log_sublinear
+    (pathwidth : ∀ ξ : ℝ, 0 < ξ → ∃ N₀ : Nat, PathwidthBound ξ N₀)
+    (f : ∀ n, Cslib.BooleanFunction n) (K : Nat → Nat)
+    (hK : (fun n => Real.logb 2 (K n)) =o[atTop] (fun n => (n : ℝ)))
+    (hacc : ∀ᶠ n in atTop, 2 ^ (n - 2) ≤ (accepting (f n)).card)
+    (hrect : ∀ᶠ n in atTop, RectangleFree (f n) (K n))
+    {ε : ℝ} (hε : 0 < ε) :
+    ∀ᶠ n in atTop, ∀ circuit : Circuit Binary.signature n 1,
+      circuit.Computes Binary.interpretation (fun x _ => f n x) →
+        (4 - ε) * n < circuit.size := by
+  refine eventually_lt_size_of_log_sublinear (fun η hη => ?_) f K hK hacc hrect hε
+  obtain ⟨N₀, hN₀⟩ := pathwidth (η / 2) (by positivity)
+  refine ⟨N₀ + 9, ?_⟩
+  have := Multigraph.orderingBound_of_pathwidthBound (by positivity) hN₀
+  rwa [show 2 * (η / 2) = η by ring] at this
+
+/-- The coefficient-four lower bound with only the cubic bisection theorem
+and the hard-family properties as hypotheses. The pathwidth reduction is proved. -/
+theorem eventually_lt_size_of_bisectionBound_of_log_sublinear
+    (bisection : ∀ ξ : ℝ, 0 < ξ → ∃ N₀ : Nat, BisectionBound ξ N₀)
+    (f : ∀ n, Cslib.BooleanFunction n) (K : Nat → Nat)
+    (hK : (fun n => Real.logb 2 (K n)) =o[atTop] (fun n => (n : ℝ)))
+    (hacc : ∀ᶠ n in atTop, 2 ^ (n - 2) ≤ (accepting (f n)).card)
+    (hrect : ∀ᶠ n in atTop, RectangleFree (f n) (K n))
+    {ε : ℝ} (hε : 0 < ε) :
+    ∀ᶠ n in atTop, ∀ circuit : Circuit Binary.signature n 1,
+      circuit.Computes Binary.interpretation (fun x _ => f n x) →
+        (4 - ε) * n < circuit.size :=
+  eventually_lt_size_of_pathwidthBound_of_log_sublinear
+    (pathwidthBound_of_bisectionBound bisection) f K hK hacc hrect hε
 
 /-- **Theorem 1 from the pathwidth hypothesis.** The graph-ordering hypothesis
 is replaced by the pathwidth bound for simple cubic graphs: for every `ξ > 0`
