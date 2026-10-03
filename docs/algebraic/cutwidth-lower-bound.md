@@ -673,9 +673,8 @@ select opposite look-ahead outputs at the refreshes. Exact runtime/vector
 agreement is proved for a common scale satisfying `e+66≤L` and the
 ceiling-log bounds for both original source lengths and the intermediate
 state width `2^64*L`. Registered `polytime` certificates cover the complete
-step, variable parameters, and conditional choices. The opposite-bit
-statistical guarantee, preservation case, and full advice iteration remain
-to be proved before this becomes a correlation breaker.
+step, variable parameters, and conditional choices. Statistical estimates
+for its component calls are proved separately from the runtime.
 
 `FlipFlop.LookAhead` connects the actual three-call program to the checked
 two-round probability argument. Its second output is close to uniform
@@ -684,6 +683,55 @@ error `3*2^-e+δ+K*(1+M)*∑μ+K*M*∑ν`, where `K=2^(2^62*L)` and
 `M=2^(2*2^24*L)`. The statement assumes the original joint source envelopes
 and seed-prefix error `δ`; it derives the intermediate-seed guarantee
 from the actual computation.
+
+`Strong.Weighted.Coupling.Factored` repairs a nearly uniform right-state
+coordinate at exactly its joint distance from uniform given the transcript.
+The original left and right sources keep their full joint law. The new
+coordinate is uniform given the transcript and may remain correlated with
+the original right source. Transferring a later guarantee to the actual
+law costs at most twice the repair distance, or once when the retained
+marginal is proved unchanged.
+
+`FlipFlop.UniformState` applies this repair to the actual matched look-ahead.
+If the whole input state has joint error `ρ`, its bound is
+`3*2^-e+2ρ+K*(1+M)*∑μ+K*M/C`, where `C=2^(2^64*L)` and `K,M` are as
+above. There is no pointwise entropy premise for the approximately uniform
+state. The prefix of an exactly uniform state is proved uniform.
+
+`Strong.Weighted.LookAhead.Refresh` derives both first-refresh estimates
+from the original prefix error and source envelopes. The transcript records
+both initial states and all four first look-ahead outputs; the second-output
+refresh also retains the tampered refresh seeded by its first output.
+Exact factorizations preserve conditional independence. The left envelope
+pays for four short outputs, and the right envelope pays for the initial
+state pair. `FixedTampering` proves the next extraction and refresh when
+the tampered seed is an arbitrary function of the left source and transcript.
+These statements derive their seed estimates from the actual computations.
+
+`FlipFlop.Opposite.False` composes these steps into the complete actual
+honest-zero/tampered-one execution. It retains both full look-ahead histories,
+both refreshed states, the tampered final output, and the original left state.
+Only the original source envelopes and initial prefix error are assumed.
+Writing `D=2^(2^24*L)`, `C=2^(2^64*L)`, `K=2^(2^62*L)`,
+`J=2^(2^142*L)`, and `ε=2^-e`, its first-refresh error is
+`ρ=2ε+δ+K*∑μ+J*C²*∑ν`. The final bound is
+`2ρ+4ε+K*(1+D²)*D⁴*∑μ+K*D²/C+J*C⁵*∑ν`.
+The approximate refreshed state is repaired in the proof, with its distance
+charged explicitly; the theorem concerns the original deterministic program.
+The other opposite-bit orientation and the preservation case remain open.
+
+`CorrelationBreaker.Advice` initializes from the right-source prefix and
+folds the concrete step over the advice bits in order, preserving both
+original sources. This is the loop in
+[Chattopadhyay--Goyal--Li Algorithm 2](https://arxiv.org/pdf/1505.00107).
+`adviceCorrelationBreaker` adds a final depth-24 left-source extraction;
+that finishing call is additional to Algorithm 2. The total string runtime
+agrees with this vector construction under the common size guard and is
+uniformly polynomial-time for arbitrary inputs and advice lengths. Its
+loop proof bounds the complete encoding, including both sources, unary
+parameters, remaining advice, and current state. The opposite-advice and
+preservation estimates must still be composed into a statistical invariant
+across the complete advice chain.
 
 The one-shot primitive alone has finite seed cost of order `ell+e+log n`;
 the checked recursion supplies the larger polylogarithmic output with

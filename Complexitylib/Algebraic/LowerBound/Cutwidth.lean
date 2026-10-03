@@ -119,6 +119,12 @@ public import
 public import Complexitylib.Algebraic.LowerBound.Cutwidth.Extractor.Strong.Weighted.Affine
 public import Complexitylib.Algebraic.LowerBound.Cutwidth.Extractor.Strong.Weighted.Alternating
 public import Complexitylib.Algebraic.LowerBound.Cutwidth.Extractor.Strong.Weighted.LookAhead
+public import
+  Complexitylib.Algebraic.LowerBound.Cutwidth.Extractor.Strong.Weighted.LookAhead.UniformState
+public import
+  Complexitylib.Algebraic.LowerBound.Cutwidth.Extractor.Strong.Weighted.LookAhead.Refresh
+public import
+  Complexitylib.Algebraic.LowerBound.Cutwidth.Extractor.Strong.Weighted.LookAhead.FixedTampering
 public import Complexitylib.Algebraic.LowerBound.Cutwidth.Extractor.Strong.Weighted.Expectation
 public import Complexitylib.Algebraic.LowerBound.Cutwidth.Extractor.Strong.Weighted.Leakage
 public import Complexitylib.Algebraic.LowerBound.Cutwidth.Extractor.Strong.Weighted.Perturbation
@@ -128,6 +134,8 @@ public import
 public import Complexitylib.Algebraic.LowerBound.Cutwidth.Extractor.Strong.Weighted.Coupling
 public import
   Complexitylib.Algebraic.LowerBound.Cutwidth.Extractor.Strong.Weighted.Coupling.Conditional
+public import
+  Complexitylib.Algebraic.LowerBound.Cutwidth.Extractor.Strong.Weighted.Coupling.Factored
 public import Complexitylib.Algebraic.LowerBound.Cutwidth.Extractor.Strong.Weighted.Condenser
 public import Complexitylib.Algebraic.LowerBound.Cutwidth.Extractor.Strong.Weighted.Condenser.Identity
 public import
@@ -189,6 +197,13 @@ public import
   Complexitylib.Algebraic.LowerBound.Cutwidth.Extractor.CorrelationBreaker.FlipFlop.Program
 public import
   Complexitylib.Algebraic.LowerBound.Cutwidth.Extractor.CorrelationBreaker.FlipFlop.LookAhead
+public import
+  Complexitylib.Algebraic.LowerBound.Cutwidth.Extractor.CorrelationBreaker.FlipFlop.UniformState
+public import
+  Complexitylib.Algebraic.LowerBound.Cutwidth.Extractor.CorrelationBreaker.FlipFlop.Opposite.False
+public import Complexitylib.Algebraic.LowerBound.Cutwidth.Extractor.CorrelationBreaker.Advice
+public import
+  Complexitylib.Algebraic.LowerBound.Cutwidth.Extractor.CorrelationBreaker.Advice.Program
 public import Complexitylib.Algebraic.LowerBound.Cutwidth.Extractor.Strong.Block.Recursion.NearHalving
 public import
   Complexitylib.Algebraic.LowerBound.Cutwidth.Extractor.Strong.Block.Recursion.NearHalving.Parameters
@@ -290,6 +305,9 @@ Its `Transport` layer preserves conditional distance under tag-dependent output 
 Its `Envelope` layer charges only source-side messages against the average entropy budget.
 `Coupling.Conditional` replaces a marginal at its exact average distance while retaining
 the transcript and the other coordinate jointly.
+`Coupling.Factored` repairs a distinguished right state to uniform while preserving
+both original sources and the factored law. Continuation costs one repair distance
+when the retained marginal is preserved, and at most two otherwise.
 `Strong.Weighted.Leakage` bounds extraction error using an average joint-mass envelope;
 individual conditional sources need not all retain the extractor's entropy threshold.
 `Strong.Weighted.Merging` combines this with a seed close to uniform given a right-side
@@ -302,6 +320,10 @@ retaining the full right state whenever fixed-mask output transport is bijective
 an actual affine extraction with the next call, retaining the entire opposite source.
 `Strong.Weighted.LookAhead` proves the actual two-round, one-tampering transition,
 retaining the complete right state and both first outputs with explicit entropy charges.
+Its `UniformState` layer derives the next look-ahead from a nearly uniform refreshed
+state. `Refresh` proves both first refresh estimates with exact transcript factors and
+original-source envelopes. `FixedTampering` handles a left-only tampered seed in the
+next extraction and refresh, retaining the original left source.
 `Strong.Weighted.Perturbation` handles seeds close to jointly independent uniform seeds,
 including the extra distance needed to retain the actual tag-and-seed marginal.
 `Strong.Block.Splitting` repairs a two-block source with a quantified error.
@@ -352,6 +374,13 @@ uniform polynomial-time runtime and canonical agreement, including arbitrary see
 eight-call advice-bit step, with exact vector semantics and registered `polytime` proofs.
 Its `LookAhead` layer specializes the retained two-round statistical guarantee to these
 actual calls without supplied extractors or an intermediate-seed hypothesis.
+Its `UniformState` layer instantiates the repaired-state estimate for the actual program.
+`FlipFlop.Opposite.False` proves the complete honest-zero/tampered-one execution
+from original source envelopes and the initial seed error, retaining both histories,
+the tampered final output, and the full original left state.
+`CorrelationBreaker.Advice.Program` computes the complete advice fold and a final
+left-source extraction. Its uniform `FP` proof bounds the entire encoded loop state;
+the statistical invariant across advice positions remains a separate obligation.
 `NearHalving` uses a rate increasing with depth and a near-halving entropy schedule.
 Its rounded parameters give an actual extractor on `8*b` bits at entropy `2*b`,
 with `b` output bits, error `1/4`, and seed length at most a cubic logarithm,

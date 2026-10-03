@@ -5294,8 +5294,8 @@ establishes the proposed coefficient-three regime without that assumption.
   logarithms of both source lengths plus one and of $2^{64}L+1$, every
   canonical input computes exactly the vector step for either advice bit.
   Its output always has at most $2^{64}L$ bits, including invalid inputs.
-  The opposite-advice statistical guarantee and the full advice loop are
-  separate obligations.
+  The opposite-advice statistical guarantee is a separate obligation;
+  the full advice runtime is formalized below.
 \end{theorem}
 \begin{proof}
   \leanok
@@ -5492,6 +5492,260 @@ establishes the proposed coefficient-three regime without that assumption.
   Identify the direct program pushforward with the generic look-ahead law.
   Instantiate both extractor calls with the matched depth-24 certificate,
   including the separate source-log bound for the right state.
+\end{proof}
+
+\begin{theorem}[Uniform coordinate repair preserving the original sources]
+  \label{thm:lowerbounds-algebraic-factored-repair}
+  \lean{Algebraic.Cutwidth.Extractor.rightCoordinateLift_probability,
+    Algebraic.Cutwidth.Extractor.factoredWeight_rightCoordinateLift,
+    Algebraic.Cutwidth.Extractor.exists_factored_uniform_right_repair,
+    Algebraic.Cutwidth.Extractor.rightCoordinateRepair_source_eq,
+    Algebraic.Cutwidth.Extractor.factoredWeight_forget_right_eq,
+    Algebraic.Cutwidth.Extractor.weightDist_uniformSecond_le_of_dist,
+    Algebraic.Cutwidth.Extractor.weightDist_uniformSecond_le_of_dist_of_same_first}
+  \leanok
+  \uses{thm:lowerbounds-algebraic-weighted-coupling,
+    thm:lowerbounds-algebraic-conditional-distance}
+  For a normalized factored law $w(z)l_z(a)r_z(b)$ and right coordinate
+  $q(z,b)\in Q$, there is a normalized replacement kernel on $(B,Q)$.
+  Its $B$ marginal is unchanged and its $Q$ marginal is uniform given $Z$.
+  The full factored replacement has distance exactly
+  $d((Z,q),(Z,U_Q))$ from the original deterministic lift.
+  The entire original $(Z,A,B)$ law and all source envelopes are preserved.
+  The new $Q$ coordinate may remain correlated with $B$.
+  Transferring conditional uniformity through a later deterministic map
+  costs at most twice this repair distance, or once if its retained
+  marginal is unchanged.
+\end{theorem}
+\begin{proof}
+  \leanok
+  Apply finite marginal replacement to each normalized right row, keeping
+  its original right coordinate. Average the exact row distances against
+  $w$. Deterministic contraction and the triangle inequality give the
+  continuation bounds, including null rows and empty alphabets.
+\end{proof}
+
+\begin{theorem}[Look-ahead from a nearly uniform right state]
+  \label{thm:lowerbounds-algebraic-lookahead-uniform-state}
+  \lean{Algebraic.Cutwidth.Extractor.retainedSeedWeight_image_dist_le,
+    Algebraic.Cutwidth.Extractor.retainedSeedWeight_uniform_image,
+    Algebraic.Cutwidth.Extractor.retainedSeedWeight_uniform_image_dist,
+    Algebraic.Cutwidth.Extractor.WeightedStrongSeededExtractor.lookAhead_uniformState_dist_le,
+    Algebraic.Cutwidth.Extractor.flipFlopSeedPrefix_uniform,
+    Algebraic.Cutwidth.Extractor.flipFlopLookAhead_uniformState_dist_le}
+  \leanok
+  \uses{thm:lowerbounds-algebraic-factored-repair,
+    thm:lowerbounds-algebraic-lookahead-extraction,
+    thm:lowerbounds-algebraic-concrete-lookahead}
+  Suppose the whole right state is $\rho$-close to uniform jointly with
+  $Z$, and its initial-seed map sends uniform states to uniform seeds.
+  Under the original left-source envelope $\mu$, the actual two-round law
+  retaining the original right state and both first outputs has error
+  \[
+    2\varepsilon+\eta+2\rho+
+    K(1+|M|^2)\sum_z\mu(z)+J|S|^2/|Q|.
+  \]
+  No pointwise entropy bound for the approximately uniform state is needed.
+  For the actual matched program, the prefix map is balanced and the bound
+  is $3\cdot2^{-e}+2\rho+K(1+D^2)\sum_z\mu(z)+KD^2/C$, where
+  $K=2^{2^{62}L}$, $D=2^{2^{24}L}$, and $C=2^{2^{64}L}$, under the
+  same finite scale conditions as the concrete two-round theorem.
+\end{theorem}
+\begin{proof}
+  \leanok
+  Repair the distinguished state, use envelope $w(z)/|Q|$ and an exactly
+  uniform initial seed, then apply two-round extraction. Project away the
+  auxiliary repaired coordinate and transfer back at cost $2\rho$.
+  A Boolean coordinate-splitting equivalence proves prefix uniformity.
+\end{proof}
+
+\begin{definition}[The common look-ahead transcript and actual refresh laws]
+  \label{def:lowerbounds-algebraic-lookahead-refresh}
+  \lean{Algebraic.Cutwidth.Extractor.LookAheadBaseTranscript,
+    Algebraic.Cutwidth.Extractor.lookAheadBaseWeight,
+    Algebraic.Cutwidth.Extractor.lookAheadBaseLeft,
+    Algebraic.Cutwidth.Extractor.lookAheadBaseRight,
+    Algebraic.Cutwidth.Extractor.lookAheadBaseLeftEnvelope,
+    Algebraic.Cutwidth.Extractor.lookAheadBaseRightEnvelope,
+    Algebraic.Cutwidth.Extractor.lookAheadFirstRefreshWeight,
+    Algebraic.Cutwidth.Extractor.lookAheadTamperedRefreshWeight}
+  \leanok
+  \uses{def:lowerbounds-algebraic-lookahead-laws}
+  The common transcript records $Z$, both initial right states, and all
+  four honest and tampered look-ahead outputs. The first refresh applies
+  $R(y,r_1)$, retaining this transcript and the full left state.
+  The second-output refresh applies $R(y,r_2)$ and additionally retains
+  $R(y',r_1')$. Both laws are direct images of the original factored law.
+\end{definition}
+
+\begin{theorem}[Refresh estimates and exact source envelopes]
+  \label{thm:lowerbounds-algebraic-lookahead-refresh}
+  \lean{Algebraic.Cutwidth.Extractor.lookAheadBase_factored,
+    Algebraic.Cutwidth.Extractor.lookAheadBase_probability,
+    Algebraic.Cutwidth.Extractor.lookAheadBase_left_envelope,
+    Algebraic.Cutwidth.Extractor.lookAheadBase_right_envelope,
+    Algebraic.Cutwidth.Extractor.lookAheadBaseLeftEnvelope_sum,
+    Algebraic.Cutwidth.Extractor.lookAheadBaseRightEnvelope_sum,
+    Algebraic.Cutwidth.Extractor.lookAheadFirstRefreshWeight_retainedSeed,
+    Algebraic.Cutwidth.Extractor.lookAheadTamperedRefresh_factored,
+    Algebraic.Cutwidth.Extractor.WeightedStrongSeededExtractor.lookAhead_first_refresh_dist_le,
+    Algebraic.Cutwidth.Extractor.WeightedStrongSeededExtractor.lookAhead_tampered_refresh_dist_le}
+  \leanok
+  \uses{def:lowerbounds-algebraic-lookahead-refresh,
+    thm:lowerbounds-algebraic-lookahead-extraction,
+    thm:lowerbounds-algebraic-transcript-envelopes}
+  Let $C,D,O$ be the cardinalities of the right state, look-ahead output,
+  and refresh output. Write $K_W,K_R$ for the first and refresh thresholds,
+  $\varepsilon_W,\varepsilon_R$ for their errors, and $\mu_X,\mu_Y$
+  for original source envelopes. From the original seed error $\delta$,
+  the first refresh has error at most
+  \[
+    \varepsilon_R+\varepsilon_W+\delta+
+      K_W\sum\mu_X+K_RC^2\sum\mu_Y.
+  \]
+  If $E_{\mathrm{LA}}$ is the original two-round bound, the second-output
+  refresh retaining the tampered refresh has error at most
+  $\varepsilon_R+E_{\mathrm{LA}}+K_RC^2O\sum\mu_Y$.
+  The common transcript admits exact normalized left and right kernels;
+  their original-source envelope totals are $D^4\sum\mu_X$ and
+  $C^2\sum\mu_Y$ respectively.
+\end{theorem}
+\begin{proof}
+  \leanok
+  Observe the right state pair, derive the appropriate seed estimate from
+  the actual first call or look-ahead, and alternate back to the right
+  source. Append the remaining left messages using the retained full left
+  state. Exact observation identities give the factorization and envelopes.
+\end{proof}
+
+\begin{theorem}[Refresh with a fixed-side tampered seed]
+  \label{thm:lowerbounds-algebraic-fixed-tampering-refresh}
+  \lean{Algebraic.Cutwidth.Extractor.fixedTampering_factored_eq_map,
+    Algebraic.Cutwidth.Extractor.fixedTampering_factors_probability,
+    Algebraic.Cutwidth.Extractor.fixedTamperingRefreshWeight_probability,
+    Algebraic.Cutwidth.Extractor.fixedTamperingRefreshWeight_eq_factored,
+    Algebraic.Cutwidth.Extractor.WeightedStrongSeededExtractor.fixedTampering_dist_le,
+    Algebraic.Cutwidth.Extractor.WeightedStrongSeededExtractor.fixedTampering_dist_le_of_budget}
+  \leanok
+  \uses{thm:lowerbounds-algebraic-alternating-extraction,
+    thm:lowerbounds-algebraic-transcript-envelopes}
+  Let $v(Z,A)\in M$ be an arbitrary left-only tampered seed.
+  The actual output $R(y,W(x,p(q)))$, retaining the full left state,
+  $Z,v,q,R(y',v)$, and $W(x,p(q))$, has error at most
+  \[
+    \varepsilon_R+\varepsilon_W+\delta+
+      K_W|M|\sum\mu_X+K_R|Q||O|\sum\mu_Y.
+  \]
+  Its only seed hypothesis is the original joint error $\delta$.
+  The retained law has an exact normalized transcript factorization.
+\end{theorem}
+\begin{proof}
+  \leanok
+  Reveal the left leak, extract retaining the whole right state, and
+  reveal the right state and tampered refresh before the final alternating
+  call. Charge each message to its source's original envelope.
+\end{proof}
+
+\begin{definition}[The actual complete opposite-advice execution law]
+  \label{def:lowerbounds-algebraic-opposite-flipflop}
+  \lean{Algebraic.Cutwidth.Extractor.FlipFlopOppositeTranscript,
+    Algebraic.Cutwidth.Extractor.flipFlopOppositeTranscript,
+    Algebraic.Cutwidth.Extractor.flipFlopOppositeWeight}
+  \leanok
+  \uses{def:lowerbounds-algebraic-flipflop-program,
+    def:lowerbounds-algebraic-lookahead-refresh}
+  Apply the concrete eight-call step to both original source pairs with
+  opposite advice bits. Retain the original transcript, both initial and
+  refreshed states, all eight look-ahead outputs, the tampered final output,
+  and the full original left state. The honest final output and this
+  transcript are a direct image of the original factored source law.
+\end{definition}
+
+\begin{theorem}[Complete honest-zero and tampered-one extraction]
+  \label{thm:lowerbounds-algebraic-opposite-flipflop-false}
+  \lean{Algebraic.Cutwidth.Extractor.flipFlopOpposite_false_dist_le}
+  \leanok
+  \uses{def:lowerbounds-algebraic-opposite-flipflop,
+    thm:lowerbounds-algebraic-lookahead-refresh,
+    thm:lowerbounds-algebraic-factored-repair,
+    thm:lowerbounds-algebraic-matched-extractor}
+  Under the common flip-flop size guard, suppose the original law factors
+  into normalized sides given $Z$, with original left and right source
+  envelopes $\mu,\nu$, and initial prefix error $\delta$. Let
+  \[
+    K=2^{2^{62}L},\quad J=2^{2^{142}L},\quad
+    D=2^{2^{24}L},\quad C=2^{2^{64}L},\quad \varepsilon=2^{-e},
+  \]
+  and set $\rho=2\varepsilon+\delta+K\sum\mu+JC^2\sum\nu$.
+  For honest advice zero and tampered advice one, the full actual law has
+  distance from its retained marginal with uniform honest output at most
+  \[
+    2\rho+4\varepsilon+K(1+D^2)D^4\sum\mu+KD^2/C+JC^5\sum\nu.
+  \]
+  The tampered inputs may be arbitrarily correlated within each side.
+  There is no entropy premise on the initial right state and no supplied
+  intermediate-seed or extractor guarantee. The other opposite-bit case
+  and the invariant across advice positions remain separate obligations.
+\end{theorem}
+\begin{proof}
+  \leanok
+  Derive the first-refresh bound and observe the exact common transcript.
+  Repair the refreshed coordinate while preserving both original sources.
+  Apply the tampered second-output refresh theorem with a uniform repaired
+  state and its balanced prefix. Substitute the exact envelope totals and
+  transport the complete deterministic continuation back at cost $2\rho$.
+\end{proof}
+
+\begin{definition}[The complete advice fold and final extraction]
+  \label{def:lowerbounds-algebraic-advice-program}
+  \lean{Algebraic.Cutwidth.Extractor.adviceInitialState,
+    Algebraic.Cutwidth.Extractor.adviceFold,
+    Algebraic.Cutwidth.Extractor.adviceCorrelationBreaker,
+    Algebraic.Cutwidth.Extractor.AdviceRunState,
+    Algebraic.Cutwidth.Extractor.adviceCorrelationBreakerRuntime,
+    Algebraic.Cutwidth.Extractor.adviceCorrelationBreakerEval}
+  \leanok
+  \uses{def:lowerbounds-algebraic-flipflop-program}
+  Initialize the right state from a prefix of $y$, completed with false
+  bits when short. Fold the actual flip-flop step over the advice bits
+  in their given order, holding $x,y$ fixed. This is the loop in
+  Chattopadhyay--Goyal--Li Algorithm 2. The present construction additionally
+  applies the depth-24 extractor to $x$ using the final state's seed prefix.
+  The encoded runtime stores the sources, unary parameters, remaining
+  advice, and current state explicitly.
+\end{definition}
+
+\begin{theorem}[Correct polynomial-time evaluation of the advice construction]
+  \label{thm:lowerbounds-algebraic-advice-program}
+  \lean{Algebraic.Cutwidth.Extractor.adviceFold_nil,
+    Algebraic.Cutwidth.Extractor.adviceFold_cons,
+    Algebraic.Cutwidth.Extractor.adviceFold_append,
+    Algebraic.Cutwidth.Extractor.encodeAdviceRunState_length,
+    Algebraic.Cutwidth.Extractor.adviceRun_length_le,
+    Algebraic.Cutwidth.Extractor.adviceRun_eq_adviceFold,
+    Algebraic.Cutwidth.Extractor.adviceCorrelationBreakerRuntime_eq,
+    Algebraic.Cutwidth.Extractor.adviceRunStepEval_mem_FP,
+    Algebraic.Cutwidth.Extractor.adviceRun_encoded_mem_FP,
+    Algebraic.Cutwidth.Extractor.adviceCorrelationBreakerRuntime_mem_FP,
+    Algebraic.Cutwidth.Extractor.adviceCorrelationBreakerEval_mem_FP}
+  \leanok
+  \uses{def:lowerbounds-algebraic-advice-program,
+    thm:lowerbounds-algebraic-flipflop-program}
+  One total string program evaluates the complete construction uniformly
+  in both sources, unary parameters, and advice length. Under the common
+  flip-flop size guard it agrees with the vector construction. Every
+  iteration, including those after advice exhaustion, has encoded length
+  at most
+  $4|x|+2|y|+2L+2e+2|\alpha|+2^{64}L+12$.
+  Polynomial time requires no size or statistical promise. The statistical
+  invariant across advice positions remains a separate obligation.
+\end{theorem}
+\begin{proof}
+  \leanok
+  Induct through the left-to-right fold using exact step correctness.
+  Bound every component of the encoded state and apply bounded-iteration
+  closure. Registered \texttt{polytime} rules compose the loop with the
+  final extraction and total input decoder.
 \end{proof}
 
 \begin{theorem}[Extraction with an approximately independent seed]
