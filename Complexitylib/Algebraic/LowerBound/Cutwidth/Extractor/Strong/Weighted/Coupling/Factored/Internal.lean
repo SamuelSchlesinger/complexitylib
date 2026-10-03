@@ -62,6 +62,26 @@ private theorem uniform_right_row {B Q : Type*} [Fintype B] [Fintype Q]
       exact congrArg (fun s : ℝ => s / 2) (e.symm.sum_comp (fun u => |p u - p' u|))
     rw [same, distance, first]
 
+theorem exists_factored_uniform_right_repair_rows {Z A B Q : Type*}
+    [Fintype Z] [Fintype A] [Fintype B] [Fintype Q]
+    (w : Z → ℝ) (l : Z → A → ℝ) (r : Z → B → ℝ) (q : Z → B → Q)
+    (hw : IsProbabilityWeight w) (hl : ∀ z, IsProbabilityWeight (l z))
+    (hr : ∀ z, IsProbabilityWeight (r z)) :
+    ∃ r' : Z → B × Q → ℝ, (∀ z, IsProbabilityWeight (r' z)) ∧
+      (∀ z, mapWeight Prod.fst (r' z) = r z) ∧
+      (∀ z, mapWeight Prod.snd (r' z) = uniformWeight Q) ∧
+      weightDist (factoredWeight w l (rightCoordinateLift r q)) (factoredWeight w l r') =
+        weightDist (retainedSeedWeight w r q)
+          (uniformSecondWeight (retainedSeedWeight w r q)) := by
+  choose r' probability first second distance using fun z => uniform_right_row (r z) (q z) (hr z)
+  refine ⟨r', probability, first, second, ?_⟩
+  rw [factoredWeight_dist_right w l _ _ hw.1 hl,
+      retainedSeedWeight_dist_eq_sum w r q hw.1 hr]
+  apply Finset.sum_congr rfl
+  intro z _
+  rw [show rightCoordinateLift r q z = mapWeight (fun b => (b, q z b)) (r z) from rfl,
+      distance]
+
 theorem exists_factored_uniform_right_repair {Z A B Q : Type*}
     [Fintype Z] [Fintype A] [Fintype B] [Fintype Q]
     (w : Z → ℝ) (l : Z → A → ℝ) (r : Z → B → ℝ) (q : Z → B → Q)
@@ -73,17 +93,8 @@ theorem exists_factored_uniform_right_repair {Z A B Q : Type*}
       weightDist (factoredWeight w l (rightCoordinateLift r q)) (factoredWeight w l r') =
         weightDist (retainedSeedWeight w r q)
           (uniformSecondWeight (retainedSeedWeight w r q)) := by
-  choose r' probability first second distance using fun z => uniform_right_row (r z) (q z) (hr z)
-  refine ⟨r', probability, ?_, ?_, ?_⟩
-  · intro z b
-    rw [first]
-  · intro z u
-    rw [second]
-  · rw [factoredWeight_dist_right w l _ _ hw.1 hl,
-      retainedSeedWeight_dist_eq_sum w r q hw.1 hr]
-    apply Finset.sum_congr rfl
-    intro z _
-    rw [show rightCoordinateLift r q z = mapWeight (fun b => (b, q z b)) (r z) from rfl,
-      distance]
+  obtain ⟨r', probability, first, second, distance⟩ :=
+    exists_factored_uniform_right_repair_rows w l r q hw hl hr
+  exact ⟨r', probability, fun z b => by rw [first], fun z u => by rw [second], distance⟩
 
 end Algebraic.Cutwidth.Extractor.Internal

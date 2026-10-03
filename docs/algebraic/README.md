@@ -288,9 +288,33 @@ reserve inequalities are discharged by the chooser.
 These conservative constants are our deductions; they do not reproduce
 the paper's sharper parameter bounds.
 
-The next steps are the standard-to-affine correlation-breaker reduction,
-sumset and amplification composition with its parity estimates, and the
-asymptotic parameters and uniform-machine construction of the final hard family.
+`Advice.Extraction.Program` now computes the chooser, normalizes the right
+word by taking its selected prefix with false completion, and returns the
+requested output in one total `FP` evaluator. Its exact canonical agreement
+uses no entropy or statistical premise. `Advice.Extraction.Perturbed`
+allows an honest right input jointly within `ρ` of uniform given the tag
+and adds only `ρ` to the error: repair preserves the original right state
+and actual tampered output exactly. `Advice.Extraction.Alternating` then
+handles the source/seed role reversal after observing a right-side message,
+charging its alphabet size to the source envelope.
+
+The first phase of the
+[Chattopadhyay–Liao conversion, Theorem 6.1](https://arxiv.org/html/2110.12652v1#S6)
+is now defined using the actual linear extractor, advice program, and final
+linear extraction. Its first seed estimate is proved from the original
+uniform right input and left envelope, retaining every tampered prefix
+and mask contribution. Exact transcript factors and envelope totals are
+also proved for all three observations, including normalized null rows.
+`Matched.Growing` proves statistical bounds at variable depth under an
+explicit finite seed budget, and `Matched.Affine` retains
+the entire correlated mask state. The matched runtime certificate still
+requires depth at most 64; the growing-depth extension is statistical only.
+
+The remaining work includes the first phase's full pairwise second-row
+guarantee, later subset doubling and the complete affine conversion,
+growing-depth runtime integration, sumset and amplification composition
+with its parity estimates, and the asymptotic parameters and uniform-machine
+construction of the final hard family.
 The final unconditional `(4-ε)n` lower bound for a uniform `P` family remains
 incomplete.
 The [cutwidth guide](cutwidth-lower-bound.md) gives the exact remaining

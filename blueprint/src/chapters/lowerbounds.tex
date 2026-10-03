@@ -5211,6 +5211,66 @@ establishes the proposed coefficient-three regime without that assumption.
   unused suffix. Apply the finite depth bounds to the exact entropy formula.
 \end{proof}
 
+\begin{theorem}[Matched extraction at growing depth]
+  \label{thm:lowerbounds-algebraic-matched-growing}
+  \lean{Algebraic.Cutwidth.Extractor.matchedBlockExtractor_growing_seedBits_le,
+    Algebraic.Cutwidth.Extractor.recursiveBlockEntropy_growing_le,
+    Algebraic.Cutwidth.Extractor.matchedBlockExtractor_growing_weighted,
+    Algebraic.Cutwidth.Extractor.matchedBlockExtractor_growing,
+    Algebraic.Cutwidth.Extractor.matchedBlockOutputBits_merging_reserve}
+  \leanok
+  \uses{def:lowerbounds-algebraic-matched-extractor,
+    thm:lowerbounds-algebraic-scheduled-boolean}
+  Suppose
+  \[
+    \lceil\log_2(n+1)\rceil\le L,\qquad e+h+2\le L,\qquad
+    (h+1)(e+2h+\lceil\log_2(L+1)\rceil+4)\le L.
+  \]
+  The actual matched extractor at depth $h$ has seed width $2^{24}L$,
+  output width $2^hL$, and strong error $2^{-e}$ at its exact scheduled
+  entropy threshold, retaining the entire padded seed. Its entropy
+  requirement may be weakened to $2^{2h+14}L$ bits. Nonvacuous use still
+  requires a source meeting this mass bound. For $e\le L$, depth
+  $h=\lceil\log_2(t+1)\rceil+64$ also gives output width at least
+  $2^{62}L+(2t+2)2^{24}L+e$.
+  These are finite statistical statements; the matched runtime below
+  retains its separate guard $h\le64$.
+\end{theorem}
+\begin{proof}
+  \leanok
+  Bound the exact scheduled seed formula by the displayed depth budget,
+  then use retained-seed padding. Bound the reserve in the initial
+  entropy $4^hQ$. The ceiling-logarithm inequality gives the final
+  output-width reserve.
+\end{proof}
+
+\begin{theorem}[Matched extraction with a correlated right mask]
+  \label{thm:lowerbounds-algebraic-matched-affine}
+  \lean{Algebraic.Cutwidth.Extractor.matchedBlockExtractor_depth64_affine_dist_le,
+    Algebraic.Cutwidth.Extractor.matchedBlockExtractor_growing_affine_dist_le}
+  \leanok
+  \uses{thm:lowerbounds-algebraic-matched-growing,
+    thm:lowerbounds-algebraic-matched-extractor,
+    thm:lowerbounds-algebraic-affine-initialization}
+  Let the original law factor into normalized left and right kernels
+  given $Z$, with a nonnegative honest-left joint envelope $\mu$ and
+  right-derived seed discrepancy at most $\delta$. XOR the source with
+  an arbitrary mask from the complete right state. Under the preceding
+  growing-depth budget, the actual matched output retains that state
+  and has distance from independent uniform output at most
+  \[
+    2^{-e}+\delta+2^{\,2^{2h+14}L}\sum_z\mu(z).
+  \]
+  At depth 64, the bounded-depth conditions give the same estimate
+  with threshold $2^{\,2^{142}L}$.
+\end{theorem}
+\begin{proof}
+  \leanok
+  The actual fixed-seed XOR identity makes the mask an output translation
+  depending only on the retained right state. Apply the finite affine
+  extraction theorem to the corresponding checked matched extractor.
+\end{proof}
+
 \begin{definition}[The total matched-width runtime]
   \label{def:lowerbounds-algebraic-matched-runtime}
   \lean{Algebraic.Cutwidth.Extractor.MatchedBlockRuntimeValid,
@@ -6318,14 +6378,258 @@ establishes the proposed coefficient-three regime without that assumption.
   No size guard, reserve inequality, field instance, primitive extractor,
   or intermediate security witness is supplied by the caller.
   The source hypotheses govern feasibility; the theorem does not assert
-  the reserve fits every left-input width. A selected-parameter runtime
-  entry point and the later asymptotic family composition are separate layers.
+  the reserve fits every left-input width. The selected runtime is
+  certified below; later asymptotic family composition remains separate.
 \end{corollary}
 \begin{proof}
   \leanok
   Discharge the dyadic theorem's program guards, state width, and entropy
   reserves with the total chooser. Apply the exact prefix contraction at
   the chooser's proved output-width bound.
+\end{proof}
+
+\begin{definition}[One total selected-parameter advice evaluator]
+  \label{def:lowerbounds-algebraic-advice-selected-runtime}
+  \lean{Algebraic.Cutwidth.Extractor.adviceSelectedRightWord,
+    Algebraic.Cutwidth.Extractor.adviceSelectedCorrelationBreakerRuntime,
+    Algebraic.Cutwidth.Extractor.adviceSelectedCorrelationBreakerEval}
+  \leanok
+  \uses{def:lowerbounds-algebraic-advice-program,
+    def:lowerbounds-algebraic-advice-parameters,
+    def:lowerbounds-algebraic-advice-truncation}
+  Decode
+  $\operatorname{pair}(\operatorname{pair}(x,y),
+    \operatorname{pair}(\alpha,\operatorname{pair}(t_{\rm word},o_{\rm word})))$.
+  The last two word lengths are the target and output parameters.
+  Compute the selected $e,L,m$, normalize $y$ to its first $m$ bits
+  with false completion, then execute the actual advice program and
+  return its requested output prefix. Zero requested width returns immediately.
+\end{definition}
+
+\begin{theorem}[Uniform runtime and exact selected-program agreement]
+  \label{thm:lowerbounds-algebraic-advice-selected-runtime}
+  \lean{Algebraic.Cutwidth.Extractor.adviceErrorExponent_unaryFn,
+    Algebraic.Cutwidth.Extractor.adviceScale_unaryFn,
+    Algebraic.Cutwidth.Extractor.adviceSourceEntropy_unaryFn,
+    Algebraic.Cutwidth.Extractor.adviceSelectedRightWord_length,
+    Algebraic.Cutwidth.Extractor.adviceSelectedRightWord_eq,
+    Algebraic.Cutwidth.Extractor.adviceSelectedRightWord_mem_FP,
+    Algebraic.Cutwidth.Extractor.adviceSelectedCorrelationBreakerRuntime_zero,
+    Algebraic.Cutwidth.Extractor.adviceSelectedCorrelationBreakerRuntime_length,
+    Algebraic.Cutwidth.Extractor.adviceSelectedCorrelationBreakerRuntime_eq,
+    Algebraic.Cutwidth.Extractor.adviceSelectedCorrelationBreakerRun_length_le,
+    Algebraic.Cutwidth.Extractor.adviceSelectedCorrelationBreakerRuntime_mem_FP,
+    Algebraic.Cutwidth.Extractor.adviceSelectedCorrelationBreakerEval_pair,
+    Algebraic.Cutwidth.Extractor.adviceSelectedCorrelationBreakerEval_eq,
+    Algebraic.Cutwidth.Extractor.adviceSelectedCorrelationBreakerEval_length,
+    Algebraic.Cutwidth.Extractor.adviceSelectedCorrelationBreakerEval_length_le,
+    Algebraic.Cutwidth.Extractor.adviceSelectedCorrelationBreakerEval_mem_FP}
+  \leanok
+  \uses{def:lowerbounds-algebraic-advice-selected-runtime,
+    thm:lowerbounds-algebraic-advice-program,
+    thm:lowerbounds-algebraic-advice-parameters}
+  This one string function is uniformly polynomial-time in both source
+  words, advice, and unary target/output requests. Its output length is
+  exactly the decoded request, even for malformed pairs. On canonical
+  $n$-bit left and selected $m$-bit right words it equals the serialized
+  selected truncated correlation breaker, with no statistical hypothesis.
+  At every iteration the complete encoding has length at most
+  \[
+    4n+2m+2L+2e+2a+2^{64}L+12.
+  \]
+\end{theorem}
+\begin{proof}
+  \leanok
+  Compile the total arithmetic chooser and right-word normalization.
+  Apply the bounded complete advice runtime and the output-prefix
+  certificate. Canonical word lengths identify the same parameters
+  and semantic program as the selected statistical theorem.
+\end{proof}
+
+\begin{theorem}[The actual advice breaker on a nearly uniform right input]
+  \label{thm:lowerbounds-algebraic-advice-perturbed}
+  \lean{Algebraic.Cutwidth.Extractor.exists_factored_uniform_right_repair_rows,
+    Algebraic.Cutwidth.Extractor.adviceCorrelationBreaker_perturbed_dist_le,
+    Algebraic.Cutwidth.Extractor.adviceCorrelationBreaker_perturbed_dyadic_dist_le}
+  \leanok
+  \uses{thm:lowerbounds-algebraic-advice-extraction,
+    cor:lowerbounds-algebraic-advice-extraction-dyadic,
+    thm:lowerbounds-algebraic-factored-repair}
+  Keep the original normalized factored source, left envelope, size
+  guards, and unequal equal-length advice hypotheses. Replace exact
+  right-input uniformity by distance at most $\rho$ from uniform
+  jointly with $Z$. The actual complete program has error at most
+  $\rho+\mathcal E(a,\sum_z\mu(z))$, and at most $\rho+2^{-t}$
+  under the dyadic reserves. It retains the original $Z$, full right
+  state, and actual tampered final output.
+\end{theorem}
+\begin{proof}
+  \leanok
+  Construct a uniform right-coordinate repair preserving the original
+  right marginal on every row, including null transcript rows. The
+  original left kernel and tampered program are unchanged. Project
+  away the repaired coordinate after applying the exact-uniform
+  theorem. The actual retained marginal is equal before and after
+  repair, so the transfer charges $\rho$ only once.
+\end{proof}
+
+\begin{definition}[An observed alternating advice call]
+  \label{def:lowerbounds-algebraic-alternating-advice}
+  \lean{Algebraic.Cutwidth.Extractor.alternatingAdviceWeight}
+  \leanok
+  \uses{def:lowerbounds-algebraic-advice-extraction,
+    def:lowerbounds-algebraic-alternating-laws}
+  Observe a right-side message $V$. Feed the original right-side
+  source and the resulting left-side seed to the actual advice
+  program. Retain the observation, original tag, complete original
+  left state, and actual tampered output.
+\end{definition}
+
+\begin{theorem}[Source/seed reversal with an observed message]
+  \label{thm:lowerbounds-algebraic-alternating-advice}
+  \lean{Algebraic.Cutwidth.Extractor.alternatingAdviceWeight_eq_factored,
+    Algebraic.Cutwidth.Extractor.alternatingAdviceWeight_probability,
+    Algebraic.Cutwidth.Extractor.alternatingAdvice_dyadic_dist_le}
+  \leanok
+  \uses{def:lowerbounds-algebraic-alternating-advice,
+    thm:lowerbounds-algebraic-advice-perturbed,
+    thm:lowerbounds-algebraic-transcript-envelopes}
+  Suppose the original source law factors given $Z$ and all factors
+  are normalized. A nonnegative joint envelope $\mu$ for the
+  right-side honest source becomes an envelope of total
+  $|V|\sum_z\mu(z)$ after the observation. Under the advice program's
+  finite dyadic guards and reserves, and actual alternating-seed
+  discrepancy at most $\rho$, the retained output has error at most
+  $\rho+2^{-t}$. The preceding seed estimate remains a premise of
+  this local composition theorem.
+\end{theorem}
+\begin{proof}
+  \leanok
+  Condition the original right factor on its observed message,
+  preserving normalized null-row kernels. Swap the factored source
+  roles and apply the preceding perturbed-right-input theorem with
+  the exact observed envelope.
+\end{proof}
+
+\begin{definition}[The actual first phase of the affine conversion]
+  \label{def:lowerbounds-algebraic-affine-phase-one}
+  \lean{Algebraic.Cutwidth.Extractor.AffinePhaseOneCopies,
+    Algebraic.Cutwidth.Extractor.affinePhaseOneFirstSeed,
+    Algebraic.Cutwidth.Extractor.affinePhaseOneFirstOutput,
+    Algebraic.Cutwidth.Extractor.affinePhaseOneSecondSeed,
+    Algebraic.Cutwidth.Extractor.affinePhaseOneOutput,
+    Algebraic.Cutwidth.Extractor.affinePhaseOneRightMessage,
+    Algebraic.Cutwidth.Extractor.affinePhaseOneTranscript,
+    Algebraic.Cutwidth.Extractor.affinePhaseOneTranscriptWeight,
+    Algebraic.Cutwidth.Extractor.affinePhaseOneTranscriptLeft,
+    Algebraic.Cutwidth.Extractor.affinePhaseOneTranscriptRight,
+    Algebraic.Cutwidth.Extractor.affinePhaseOneTranscriptLeftEnvelope,
+    Algebraic.Cutwidth.Extractor.affinePhaseOneTranscriptRightEnvelope}
+  \leanok
+  \uses{def:lowerbounds-algebraic-matched-extractor,
+    def:lowerbounds-algebraic-advice-program,
+    def:lowerbounds-algebraic-observed-transcript}
+  Follow the three-stage first phase of Chattopadhyay--Liao,
+  Theorem~6.1, \url{https://arxiv.org/abs/2110.12652}.
+  On the same masked source $X=A+B$, first extract linearly with a
+  prefix of the right input, run the actual advice breaker with the
+  source/seed roles reversed, and extract linearly again using its output.
+  Index the honest execution by $\mathsf{none}$ and the $t$ tampered
+  executions by $\mathsf{some}(i)$.
+  The transcript records all initial prefixes and mask contributions,
+  all first extraction outputs, then all advice outputs. It retains
+  the original latent variables in its factored representation.
+  These total definitions alone assert no statistical guarantee.
+\end{definition}
+
+\begin{theorem}[The actual first extracted seed in the affine phase]
+  \label{thm:lowerbounds-algebraic-affine-phase-one-initial}
+  \lean{Algebraic.Cutwidth.Extractor.affinePhaseOneFirstSeed_uniform,
+    Algebraic.Cutwidth.Extractor.affinePhaseOne_initial_seed_dist_le}
+  \leanok
+  \uses{def:lowerbounds-algebraic-affine-phase-one,
+    thm:lowerbounds-algebraic-matched-affine,
+    def:lowerbounds-algebraic-alternating-laws}
+  Let the original law have normalized factors given $Z$, a
+  nonnegative honest-left joint envelope $\mu$, and a conditionally
+  uniform honest right word of length $d$. Assume
+  \[
+    \lceil\log_2(n+1)\rceil\le L_0,\quad 64\le L_0,\quad
+    e_0+66\le L_0,\quad 2^{24}L_0\le d.
+  \]
+  The honest seed prefix is uniform. The actual first masked
+  extraction, retaining $Z$ and every honest/tampered initial prefix
+  and mask contribution, has distance from uniform at most
+  \[
+    2^{-e_0}+2^{\,2^{142}L_0}\sum_z\mu(z).
+  \]
+  No intermediate seed certificate is a premise.
+\end{theorem}
+\begin{proof}
+  \leanok
+  A sufficiently long uniform word has a balanced prefix. Apply the
+  actual depth-64 affine extraction theorem while retaining the
+  entire original right state. Project this state onto the complete
+  first right message and use the exact fixed-seed XOR identity.
+\end{proof}
+
+\begin{theorem}[Exact first-phase factors and envelope accounting]
+  \label{thm:lowerbounds-algebraic-affine-phase-one-transcript}
+  \lean{Algebraic.Cutwidth.Extractor.affinePhaseOneFirstOutput_xor,
+    Algebraic.Cutwidth.Extractor.affinePhaseOneFirstLeft_eq,
+    Algebraic.Cutwidth.Extractor.affinePhaseOneSecondRight_eq,
+    Algebraic.Cutwidth.Extractor.affinePhaseOneOutput_eq_xor,
+    Algebraic.Cutwidth.Extractor.affinePhaseOneRight_probability,
+    Algebraic.Cutwidth.Extractor.affinePhaseOneLeft_probability,
+    Algebraic.Cutwidth.Extractor.affinePhaseOneTranscript_probability,
+    Algebraic.Cutwidth.Extractor.affinePhaseOneRight_factored,
+    Algebraic.Cutwidth.Extractor.affinePhaseOneLeft_factored,
+    Algebraic.Cutwidth.Extractor.affinePhaseOneTranscript_factored,
+    Algebraic.Cutwidth.Extractor.affinePhaseOneRight_left_envelope,
+    Algebraic.Cutwidth.Extractor.affinePhaseOneRight_right_envelope,
+    Algebraic.Cutwidth.Extractor.affinePhaseOneLeft_left_envelope,
+    Algebraic.Cutwidth.Extractor.affinePhaseOneLeft_right_envelope,
+    Algebraic.Cutwidth.Extractor.affinePhaseOneTranscript_left_envelope,
+    Algebraic.Cutwidth.Extractor.affinePhaseOneTranscript_right_envelope,
+    Algebraic.Cutwidth.Extractor.affinePhaseOneRightLeftEnvelope_sum,
+    Algebraic.Cutwidth.Extractor.affinePhaseOneLeftEnvelope_sum,
+    Algebraic.Cutwidth.Extractor.affinePhaseOneRightEnvelope_sum,
+    Algebraic.Cutwidth.Extractor.affinePhaseOneTranscriptLeftEnvelope_sum,
+    Algebraic.Cutwidth.Extractor.affinePhaseOneTranscriptRightEnvelope_sum,
+    Algebraic.Cutwidth.Extractor.affinePhaseOneTranscriptLeftEnvelope_nonnegative,
+    Algebraic.Cutwidth.Extractor.affinePhaseOneTranscriptRightEnvelope_nonnegative,
+    Algebraic.Cutwidth.Extractor.card_affinePhaseOneCopies,
+    Algebraic.Cutwidth.Extractor.card_affinePhaseOneRightMessage}
+  \leanok
+  \uses{def:lowerbounds-algebraic-affine-phase-one,
+    thm:lowerbounds-algebraic-observed-transcript,
+    thm:lowerbounds-algebraic-transcript-envelopes,
+    thm:lowerbounds-algebraic-matched-extractor}
+  For normalized original factors, each of the three observations
+  has an exact factorization retaining the original left and right
+  states. All conditional kernels are normalized, including null
+  rows. The actual first and final extraction outputs are the XOR
+  of their corresponding side-local contributions.
+  Write $d_0=2^{24}L_0$, $r_0=2^{64}L_0$, and $d_1=2^{24}L_1$.
+  Nonnegative original source envelopes $\mu,\xi$ become envelopes
+  with exact totals
+  \[
+    2^{(t+1)r_0}\sum_z\mu(z),\qquad
+    2^{(t+1)(d_0+r_0+d_1)}\sum_z\xi(z),
+  \]
+  respectively. These are exact execution and counting identities,
+  with no component security premise. The complete pairwise
+  second-row guarantee and subsequent subset doubling remain open.
+\end{theorem}
+\begin{proof}
+  \leanok
+  Alternate the existing right-, left-, and right-observation
+  identities on the original factors. Opposite-side observations
+  preserve envelope totals; own-side observations copy the envelope
+  across the message alphabet. There are $(2^w)^{t+1}$ families
+  of $w$-bit words, and the first right message has alphabet size
+  $(2^{d_0+r_0})^{t+1}$. The matched extractor's exact XOR law
+  identifies every side-local formula with the actual program.
 \end{proof}
 
 \begin{theorem}[Extraction with an approximately independent seed]
@@ -7639,9 +7943,12 @@ establishes the proposed coefficient-three regime without that assumption.
 
 The fixed-family logarithmic-seed primitive and the ordinary Gamma
 linear-output parameters are now supplied by actual recursive maps.
-The affine correlation breaker, its internal extractor requirements,
-parity estimates, and the final uniform polynomial-time sumset hard family
-remain open.
+The actual affine first-phase programs, observed-call composition, and
+finite growing-depth statistical bounds are now supplied. The first
+phase's full pairwise second-row guarantee, later subset doubling,
+growing-depth runtime integration, and complete affine conversion remain
+open, as do the parity estimates and final uniform polynomial-time sumset
+hard family.
 
 \begin{theorem}[Cutwidth bound for rectangle-free families]
   \label{thm:lowerbounds-algebraic-cutwidth}

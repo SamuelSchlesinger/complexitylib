@@ -81,6 +81,20 @@ theorem factoredWeight_forget_right_eq {Z A B Q : Type*}
   Internal.factoredWeight_forget_right_eq w l r r' same
 
 /-- A uniform coordinate repair preserves both original sources at exactly the joint seed error. -/
+theorem exists_factored_uniform_right_repair_rows {Z A B Q : Type*}
+    [Fintype Z] [Fintype A] [Fintype B] [Fintype Q]
+    (w : Z → ℝ) (l : Z → A → ℝ) (r : Z → B → ℝ) (q : Z → B → Q)
+    (hw : IsProbabilityWeight w) (hl : ∀ z, IsProbabilityWeight (l z))
+    (hr : ∀ z, IsProbabilityWeight (r z)) :
+    ∃ r' : Z → B × Q → ℝ, (∀ z, IsProbabilityWeight (r' z)) ∧
+      (∀ z, mapWeight Prod.fst (r' z) = r z) ∧
+      (∀ z, mapWeight Prod.snd (r' z) = uniformWeight Q) ∧
+      weightDist (factoredWeight w l (rightCoordinateLift r q)) (factoredWeight w l r') =
+        weightDist (retainedSeedWeight w r q)
+          (uniformSecondWeight (retainedSeedWeight w r q)) :=
+  Internal.exists_factored_uniform_right_repair_rows w l r q hw hl hr
+
+/-- The same repair has the corresponding weighted marginal identities on every row. -/
 theorem exists_factored_uniform_right_repair {Z A B Q : Type*}
     [Fintype Z] [Fintype A] [Fintype B] [Fintype Q]
     (w : Z → ℝ) (l : Z → A → ℝ) (r : Z → B → ℝ) (q : Z → B → Q)

@@ -664,6 +664,28 @@ generation of all parameters and the exact seed cut. Invalid parameters
 return the empty word; canonical valid inputs compute the vector extractor
 exactly, even with an arbitrary extra seed suffix.
 
+`Matched.Growing` removes the fixed depth bound from the statistical
+theorem when the parameters satisfy
+
+```text
+clog 2 (n+1) ≤ L,
+e+h+2 ≤ L,
+(h+1)*(e+2*h+clog 2 (L+1)+4) ≤ L.
+```
+
+The same actual extractor retains its complete `2^24*L`-bit padded seed,
+outputs `2^h*L` bits, and has error `2^-e`. Its entropy threshold can be
+bounded by `2^(2*h+14)*L` bits. A source must still meet this mass bound;
+the numerical budget alone does not guarantee source capacity.
+`matchedBlockOutputBits_merging_reserve` supplies the finite width needed
+for later merging at `h=clog 2 (t+1)+64`. `Matched.Affine` proves the same
+actual program's retained-law estimate for an honest source XOR a mask
+carried by the full right state. Its error is `2^-e+δ+K*∑μ`, with
+`K=2^(2^(2*h+14)*L)` and original seed discrepancy `δ`; depth 64 has the
+specialized entropy reserve `2^142*L`. These are statistical extensions.
+The current `Matched.Program` guard still requires `h≤64`, so its uniform
+runtime certificate does not yet cover the growing-depth calls.
+
 `CorrelationBreaker.FlipFlop.Program` defines and computes the concrete
 three-call look-ahead and eight-call advice-bit step of
 [CGL Algorithm 1](https://arxiv.org/pdf/1505.00107). The two refresh calls
@@ -835,9 +857,64 @@ retaining the original tag, whole original right state, and actual truncated
 tampered output. Its hypotheses are exactly the normalized factored source,
 uniform honest right input, and left joint envelope with total at most
 `2^-m`; there is no supplied program guard, reserve, primitive extractor,
-field instance, or intermediate witness. The existing uniform `FP` program
-accepts parameters explicitly. Packaging the chooser and output prefix
-into a selected-parameter runtime entry point remains separate.
+field instance, or intermediate witness.
+
+`Advice.Extraction.Program` packages the chooser and output prefix into
+`adviceSelectedCorrelationBreakerEval`, one total uniform `FP` function on
+`pair (pair x y) (pair advice (pair targetWord outWord))`. The target and
+output request are the lengths of their words. It computes `L,e,m`, takes
+the first `m` bits of the right input with false completion, and runs the
+actual chain and requested prefix. The output has exactly the requested
+length, including zero and malformed inputs. Canonical right words of
+length `m` compute exactly `adviceTruncatedCorrelationBreaker` at the
+selected parameters, without statistical premises. The complete encoded
+loop bound includes the left source, normalized right word, all parameters,
+remaining advice, and current state.
+
+`Advice.Extraction.Perturbed` weakens the honest right-input assumption
+to joint distance at most `ρ` from uniform given the original tag. The
+actual program then has error at most `ρ+2^-target` under the same finite
+dyadic reserves. Its proof constructs a uniform-coordinate repair that
+preserves both original source factors and the actual tampered program.
+Because the retained marginal `(Z, full right state, tampered output)` is
+unchanged, transfer costs `ρ` once. This is an average joint-distance
+premise, with no per-row uniformity or repaired witness supplied.
+
+`Advice.Extraction.Alternating` observes a right-side message `V`, then
+runs the same advice program with the original right side as source and
+the original left side as seed provider. The actual law retains the
+observation, original tag, complete original left state, and tampered
+output. A source envelope of total `∑μ` pays `|V|*∑μ`, and the seed's
+joint discrepancy contributes once. This composition theorem requires
+the preceding seed estimate; it does not assume that observing a message
+preserves uniformity automatically.
+
+`CorrelationBreaker.Affine.PhaseOne` defines the three actual calls from
+[Chattopadhyay–Liao Theorem 6.1](https://arxiv.org/html/2110.12652v1#S6):
+linear extraction from the masked left source using a right-input prefix,
+the advice program with reversed source/seed roles, then a second linear
+extraction from that same masked source. The honest and all `t` tampered
+executions are indexed together. The transcript observes every initial
+prefix and mask contribution on the right, every first output on the
+left, and every advice output on the right. Both original latent
+variables are retained by the factored representation.
+
+`PhaseOne.Initial` proves uniformity of the first seed prefix whenever
+`matchedBlockSeedBits L₀≤d`. From a conditionally uniform honest right
+input and the original left envelope `μ`, the actual first masked output
+has error at most `2^-e₀+2^(2^142*L₀)*∑μ`, retaining every honest/tampered
+prefix and first mask contribution. The depth-64 length and error guards
+are explicit; there is no supplied intermediate seed estimate.
+
+`PhaseOne.Transcript` identifies the original-law pushforward with its
+three successive normalized factors and proves the actual XOR equations.
+Write `d₀=2^24*L₀`, `r₀=2^64*L₀`, and `d₁=2^24*L₁`. Original nonnegative
+joint envelopes of totals `∑μ` and `∑ξ` become envelopes of exact totals
+`2^((t+1)*r₀)*∑μ` on the left and
+`2^((t+1)*(d₀+r₀+d₁))*∑ξ` on the right after the full transcript.
+The factors retain the original latent states and normalize even null
+rows. These are execution and leakage-counting identities, separate from
+the pending pairwise statistical guarantee for the final extracted rows.
 
 The one-shot primitive alone has finite seed cost of order `ell+e+log n`;
 the checked recursion supplies the larger polylogarithmic output with
@@ -901,11 +978,14 @@ ordinary flat guarantees hold for every source at threshold `2^(2b)`,
 with all bits of the padded seed uniformly sampled. The padding prefix is
 proved to give exactly the original semantic Gamma output.
 
-The standard advice correlation breaker is now proved with the finite
-parameters above. The remaining route must turn it into the required
-affine correlation breaker, assemble the sumset reduction and amplification
-with their parity estimates, and prove the asymptotic parameter and
-uniform-machine composition for a final `P` hard family with sublinear
+The standard advice correlation breaker and its selected total runtime
+are proved with the finite parameters above. The affine conversion now
+has actual first-phase programs and local retained-law composition tools.
+Its full pairwise second-row guarantee and later subset-doubling argument
+remain to be proved, as does runtime integration for growing-depth matched
+calls. The remaining route also includes the sumset reduction and
+amplification with their parity estimates, and the asymptotic parameter
+and uniform-machine composition for a final `P` hard family with sublinear
 log-threshold. The unconditional `(4-ε)n` endpoint remains incomplete.
 
 ## The graph theorem is proved

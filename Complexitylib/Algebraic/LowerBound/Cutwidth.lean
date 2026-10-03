@@ -196,6 +196,10 @@ public import
 public import
   Complexitylib.Algebraic.LowerBound.Cutwidth.Extractor.Strong.Block.Recursion.Scheduled.Matched
 public import
+  Complexitylib.Algebraic.LowerBound.Cutwidth.Extractor.Strong.Block.Recursion.Scheduled.Matched.Growing
+public import
+  Complexitylib.Algebraic.LowerBound.Cutwidth.Extractor.Strong.Block.Recursion.Scheduled.Matched.Affine
+public import
   Complexitylib.Algebraic.LowerBound.Cutwidth.Extractor.Strong.Block.Recursion.Scheduled.Matched.Program
 public import
   Complexitylib.Algebraic.LowerBound.Cutwidth.Extractor.CorrelationBreaker.FlipFlop.Program
@@ -229,7 +233,19 @@ public import
 public import
   Complexitylib.Algebraic.LowerBound.Cutwidth.Extractor.CorrelationBreaker.Advice.Extraction.Parameters
 public import
+  Complexitylib.Algebraic.LowerBound.Cutwidth.Extractor.CorrelationBreaker.Advice.Extraction.Program
+public import
+  Complexitylib.Algebraic.LowerBound.Cutwidth.Extractor.CorrelationBreaker.Advice.Extraction.Perturbed
+public import
+  Complexitylib.Algebraic.LowerBound.Cutwidth.Extractor.CorrelationBreaker.Advice.Extraction.Alternating
+public import
   Complexitylib.Algebraic.LowerBound.Cutwidth.Extractor.CorrelationBreaker.Advice.Truncation
+public import
+  Complexitylib.Algebraic.LowerBound.Cutwidth.Extractor.CorrelationBreaker.Affine.PhaseOne.Defs
+public import
+  Complexitylib.Algebraic.LowerBound.Cutwidth.Extractor.CorrelationBreaker.Affine.PhaseOne.Initial
+public import
+  Complexitylib.Algebraic.LowerBound.Cutwidth.Extractor.CorrelationBreaker.Affine.PhaseOne.Transcript
 public import Complexitylib.Algebraic.LowerBound.Cutwidth.Extractor.Strong.Block.Recursion.NearHalving
 public import
   Complexitylib.Algebraic.LowerBound.Cutwidth.Extractor.Strong.Block.Recursion.NearHalving.Parameters
@@ -400,6 +416,10 @@ providing finite parameters for matching the short alternating calls.
 `Scheduled.Matched` runs the actual bit program with those matched widths, retaining
 the full padded seed in its strong guarantee. Its `Program` layer gives a total
 uniform polynomial-time runtime and canonical agreement, including arbitrary seed tails.
+`Matched.Growing` supplies the statistical guarantee at variable depth under an explicit
+depth/error/logarithm budget. `Matched.Affine` retains the full correlated right state
+when the source is XORed with its mask. The matched runtime guard still requires
+depth at most 64; the growing-depth statement adds no runtime certificate.
 `CorrelationBreaker.FlipFlop.Program` composes the actual three-call look-ahead and
 eight-call advice-bit step, with exact vector semantics and registered `polytime` proofs.
 Its `LookAhead` layer specializes the retained two-round statistical guarantee to these
@@ -428,6 +448,17 @@ schedule give any dyadic target. `Advice.Parameters` checks all finite program g
 and reserves; `Advice.Truncation` preserves the guarantee for shorter requested outputs.
 `Advice.Extraction.Parameters` combines them into the actual requested-width guarantee
 with every numerical side condition discharged by the chooser.
+`Advice.Extraction.Program` computes that chooser and requested output in one total
+polynomial-time evaluator, with exact agreement on canonical source words.
+`Advice.Extraction.Perturbed` allows a jointly near-uniform honest right input and
+charges its discrepancy once because the actual retained marginal is preserved.
+`Advice.Extraction.Alternating` swaps source sides after a right observation, paying
+its alphabet size in the source envelope and requiring the preceding seed estimate.
+`Affine.PhaseOne` defines the actual three-call first phase and its complete transcript.
+Its `Initial` theorem derives the first extracted seed estimate from the original
+uniform right input and left envelope, retaining every first right message.
+Its `Transcript` theorems give exact original-law factors and envelope totals for
+all three observations, including normalized null rows.
 `NearHalving` uses a rate increasing with depth and a near-halving entropy schedule.
 Its rounded parameters give an actual extractor on `8*b` bits at entropy `2*b`,
 with `b` output bits, error `1/4`, and seed length at most a cubic logarithm,
@@ -436,8 +467,9 @@ the complete bit program with this statistical map, including unused seed paddin
 `Gamma.Padded` reads this same total polynomial-time program on a seed whose
 width is the explicit cubic-logarithmic budget; the entire seed is uniform and
 retained in the strong guarantee.
-The affine correlation breaker, its internal extractor requirements, parity estimates,
-and composition into the final uniform hard family remain necessary for a lower
+The first phase's pairwise second-row guarantee, later subset doubling, growing-depth
+runtime integration, and full affine conversion remain open. Sumset/parity estimates
+and composition into the final uniform hard family are still necessary for a lower
 bound on a concrete language in `P`.
 -/
 

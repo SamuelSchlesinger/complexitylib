@@ -117,15 +117,15 @@ theorem matchedBlockExtractor_seedBits_le (n h L e : Nat)
       matchedBlockSeedBits L :=
   scheduledBlockSeedBits_boundedDepth_le n L (e + h + 2) h length room depth error
 
-theorem matchedBlockExtractor_weighted (n h L e : Nat)
-    (length : Nat.clog 2 (n + 1) ≤ L) (room : 64 ≤ L)
-    (depth : h ≤ 64) (error : e + h + 2 ≤ L) :
+theorem matchedBlockExtractor_weighted_of_seedBits_le (n h L e : Nat)
+    (length : Nat.clog 2 (n + 1) ≤ L) (depth : h ≤ L)
+    (size : scheduledBlockSeedBits n h (recursiveBlockReserve L (e + h + 2))
+      (e + h + 2) L ≤ matchedBlockSeedBits L) :
     WeightedStrongSeededExtractor (matchedBlockExtractor n h L e)
       (2 ^ recursiveBlockEntropy h (recursiveBlockReserve L (e + h + 2)) 0)
       (((2 : ℝ) ^ e)⁻¹) := by
-  have extract := (scheduledBlockBooleanExtractor_dyadic n h L e length (depth.trans room)).equiv
+  have extract := (scheduledBlockBooleanExtractor_dyadic n h L e length depth).equiv
     (Equiv.refl _) (matchedOutputEquiv h L)
-  have size := matchedBlockExtractor_seedBits_le n h L e length room depth error
   have same : matchedBlockExtractor n h L e = fun x seed => matchedOutputEquiv h L
       (scheduledBlockBooleanExtractor n h (recursiveBlockReserve L (e + h + 2))
         (e + h + 2) L x (fun i => seed (Fin.castLE size i))) := by
@@ -133,6 +133,15 @@ theorem matchedBlockExtractor_weighted (n h L e : Nat)
     rw [matchedBlockExtractor_eq_output, matched_exactSeed_eq seed size]
   rw [same]
   exact extract.padSeed size
+
+theorem matchedBlockExtractor_weighted (n h L e : Nat)
+    (length : Nat.clog 2 (n + 1) ≤ L) (room : 64 ≤ L)
+    (depth : h ≤ 64) (error : e + h + 2 ≤ L) :
+    WeightedStrongSeededExtractor (matchedBlockExtractor n h L e)
+      (2 ^ recursiveBlockEntropy h (recursiveBlockReserve L (e + h + 2)) 0)
+      (((2 : ℝ) ^ e)⁻¹) :=
+  matchedBlockExtractor_weighted_of_seedBits_le n h L e length (depth.trans room)
+    (matchedBlockExtractor_seedBits_le n h L e length room depth error)
 
 theorem matchedBlockExtractor_depth24 (n L e : Nat)
     (length : Nat.clog 2 (n + 1) ≤ L) (room : 64 ≤ L) (error : e + 24 + 2 ≤ L) :

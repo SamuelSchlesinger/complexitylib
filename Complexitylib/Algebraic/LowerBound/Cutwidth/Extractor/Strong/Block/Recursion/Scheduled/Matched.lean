@@ -69,6 +69,16 @@ theorem matchedBlockExtractor_seedBits_le (n h L e : Nat)
       matchedBlockSeedBits L :=
   Internal.matchedBlockExtractor_seedBits_le n h L e length room depth error
 
+/-- Any proved seed budget gives the actual padded program's strong guarantee. -/
+theorem matchedBlockExtractor_weighted_of_seedBits_le (n h L e : Nat)
+    (length : Nat.clog 2 (n + 1) ≤ L) (depth : h ≤ L)
+    (size : scheduledBlockSeedBits n h (recursiveBlockReserve L (e + h + 2))
+      (e + h + 2) L ≤ matchedBlockSeedBits L) :
+    WeightedStrongSeededExtractor (matchedBlockExtractor n h L e)
+      (2 ^ recursiveBlockEntropy h (recursiveBlockReserve L (e + h + 2)) 0)
+      (((2 : ℝ) ^ e)⁻¹) :=
+  Internal.matchedBlockExtractor_weighted_of_seedBits_le n h L e length depth size
+
 /-- Strong extraction retains all padded seed bits at the exact scheduled entropy threshold. -/
 theorem matchedBlockExtractor_weighted (n h L e : Nat)
     (length : Nat.clog 2 (n + 1) ≤ L) (room : 64 ≤ L)
