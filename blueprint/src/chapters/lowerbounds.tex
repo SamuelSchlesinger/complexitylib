@@ -7445,6 +7445,316 @@ establishes the proposed coefficient-three regime without that assumption.
   growing-seed budgets, then use the checked four-call runtime identity.
 \end{proof}
 
+\begin{definition}[Actual affine iteration and the retained-subset invariant]
+  \label{def:lowerbounds-algebraic-affine-iteration}
+  \lean{Algebraic.Cutwidth.Extractor.AffineRowInvariant,
+    Algebraic.Cutwidth.Extractor.affineIterationError,
+    Algebraic.Cutwidth.Extractor.affineRoundsOutput,
+    Algebraic.Cutwidth.Extractor.AffineIterationTranscript,
+    Algebraic.Cutwidth.Extractor.AffineIterationState,
+    Algebraic.Cutwidth.Extractor.AffineIterationState.next,
+    Algebraic.Cutwidth.Extractor.AffineIterationState.iterate,
+    Algebraic.Cutwidth.Extractor.AffineIterationState.transcript,
+    Algebraic.Cutwidth.Extractor.AffineIterationState.leftEnvelope,
+    Algebraic.Cutwidth.Extractor.AffineIterationState.rightEnvelope,
+    Algebraic.Cutwidth.Extractor.affinePhaseOneIterationState,
+    Algebraic.Cutwidth.Extractor.affinePhaseOneIterationLift}
+  \leanok
+  \uses{def:lowerbounds-algebraic-affine-round,
+    def:lowerbounds-algebraic-affine-round-laws}
+  An actual state consists of the transcript weight, normalized-factor
+  candidates, unchanged original source maps, and left/right row
+  contributions. It carries no extraction certificate. Each transition
+  executes the five observations of one round and lifts the original
+  source maps along the old-transcript projection. The invariant at
+  capacity $k$ and error $\rho$ bounds the honest left row's discrepancy
+  from uniform while retaining every subset of at most $k$ tampered rows.
+\end{definition}
+
+\begin{theorem}[The first phase initializes every empty or singleton subset]
+  \label{thm:lowerbounds-algebraic-affine-phase-one-subsets}
+  \lean{Algebraic.Cutwidth.Extractor.affinePhaseOneLeftRowsWeight_eq_map_pair,
+    Algebraic.Cutwidth.Extractor.affinePhaseOneLeftRowsWeight_dist_le_pair,
+    Algebraic.Cutwidth.Extractor.affinePhaseOne_left_subset_dist_le,
+    Algebraic.Cutwidth.Extractor.affinePhaseOne_left_subset_parameters_dist_le}
+  \leanok
+  \uses{thm:lowerbounds-algebraic-affine-phase-one-parameters,
+    def:lowerbounds-algebraic-affine-iteration}
+  Suppose $t>0$, every tampered advice word has the honest advice length
+  and differs from it, and the original-source hypotheses of the first
+  phase hold. Its actual left-row law obeys the same first-phase error
+  bound against every set $S$ with $|S|\le1$, including the empty set.
+\end{theorem}
+\begin{proof}
+  \leanok
+  Choose an index $i$ with $S\subseteq\{i\}$. Drop the retained right
+  state from the pairwise law and map its tampered output into the
+  $S$-indexed family. Contraction of discrepancy gives the bound. The
+  positive tampering count supplies an index when $S$ is empty.
+\end{proof}
+
+\begin{theorem}[One actual round doubles the invariant capacity]
+  \label{thm:lowerbounds-algebraic-affine-round-invariant}
+  \lean{Algebraic.Cutwidth.Extractor.AffineRowInvariant.mono,
+    Algebraic.Cutwidth.Extractor.affineRound_doubles_invariant}
+  \leanok
+  \uses{def:lowerbounds-algebraic-affine-iteration,
+    thm:lowerbounds-algebraic-affine-round-subset,
+    thm:lowerbounds-algebraic-affine-round-extraction,
+    thm:lowerbounds-algebraic-affine-round-dyadic}
+  Under the original normalized-factor hypotheses, source envelopes,
+  execution guards, and the four finite reserves with subset cardinalities
+  bounded by $t$, an invariant of capacity $k$ and error $\rho$ implies
+  the actual next-state invariant of capacity $2k$ and error
+  $2\rho+8\cdot2^{-e}$.
+\end{theorem}
+\begin{proof}
+  \leanok
+  Split every requested set of size at most $2k$ into two sets of size
+  at most $k$. Apply the actual round union bound and the uniform finite
+  reserves, then identify the next conditional left-row law.
+\end{proof}
+
+\begin{theorem}[Exact factors and source envelopes through all actual rounds]
+  \label{thm:lowerbounds-algebraic-affine-iteration-factors}
+  \lean{Algebraic.Cutwidth.Extractor.AffineIterationState.iterate_probability,
+    Algebraic.Cutwidth.Extractor.AffineIterationState.iterate_source,
+    Algebraic.Cutwidth.Extractor.AffineIterationState.iterate_mask,
+    Algebraic.Cutwidth.Extractor.AffineIterationState.iterate_rightWords,
+    Algebraic.Cutwidth.Extractor.AffineIterationState.iterate_factored,
+    Algebraic.Cutwidth.Extractor.AffineIterationState.iterate_rows_eq,
+    Algebraic.Cutwidth.Extractor.AffineIterationState.leftEnvelope_cap,
+    Algebraic.Cutwidth.Extractor.AffineIterationState.rightEnvelope_cap,
+    Algebraic.Cutwidth.Extractor.AffineIterationState.leftEnvelope_sum,
+    Algebraic.Cutwidth.Extractor.AffineIterationState.rightEnvelope_sum}
+  \leanok
+  \uses{def:lowerbounds-algebraic-affine-iteration,
+    thm:lowerbounds-algebraic-affine-round-factors,
+    thm:lowerbounds-algebraic-affine-round-envelopes}
+  Every iterated state has normalized factors, including null rows, and
+  its factored law is the pushforward of the original law along the
+  actual transcript. The XOR of its row contributions equals the actual
+  deterministic row iteration, reading the same original source words.
+  Original source envelopes persist; after $i$ rounds their total masses
+  are exactly $C^{2i}\sum\mu$ and $C^{4i}\sum\nu$, respectively, where
+  $C$ is the full short-message alphabet cardinality.
+\end{theorem}
+\begin{proof}
+  \leanok
+  Induct on the number of executed rounds, using exact one-round
+  factorization, pointwise execution identities, and envelope transport.
+\end{proof}
+
+\begin{theorem}[Actual initialization connects the complete program to its factored law]
+  \label{thm:lowerbounds-algebraic-affine-iteration-initial}
+  \lean{Algebraic.Cutwidth.Extractor.affinePhaseOneIterationState_probability,
+    Algebraic.Cutwidth.Extractor.affinePhaseOneIterationState_factored,
+    Algebraic.Cutwidth.Extractor.affinePhaseOneIterationState_leftRowsWeight_eq,
+    Algebraic.Cutwidth.Extractor.affinePhaseOneIterationState_left_envelope,
+    Algebraic.Cutwidth.Extractor.affinePhaseOneIterationState_right_envelope,
+    Algebraic.Cutwidth.Extractor.affinePhaseOneIterationState_iterate_factored,
+    Algebraic.Cutwidth.Extractor.affinePhaseOneIterationState_iterate_rows_eq,
+    Algebraic.Cutwidth.Extractor.affinePhaseOneIterationState_subsetWeight_eq}
+  \leanok
+  \uses{thm:lowerbounds-algebraic-affine-phase-one-transcript,
+    thm:lowerbounds-algebraic-affine-iteration-factors}
+  Initializing with the actual first-phase factors gives normalized
+  kernels, the exact first-phase left-row law, and the original source
+  envelopes with their exact transcript losses. Every subsequent factored
+  law is the image of the original source law along the executed complete
+  transcript. Each actual masked output is the complete affine program
+  on its original source, its specified right word, and its advice.
+\end{theorem}
+\begin{proof}
+  \leanok
+  Package the three first-phase observation stages and apply their
+  factorization and envelope theorems. Compose this image with the actual
+  round iteration. Pointwise XOR identities identify every retained
+  output before applying the resulting exact law identity.
+\end{proof}
+
+\begin{theorem}[The invariant follows every actual round and bounds masked outputs]
+  \label{thm:lowerbounds-algebraic-affine-iteration-invariant}
+  \lean{Algebraic.Cutwidth.Extractor.affineIterationError_succ,
+    Algebraic.Cutwidth.Extractor.AffineIterationState.iterate_invariant,
+    Algebraic.Cutwidth.Extractor.AffineIterationState.leftSubsetWeight_dist_eq,
+    Algebraic.Cutwidth.Extractor.AffineIterationState.subsetWeight_dist_le}
+  \leanok
+  \uses{thm:lowerbounds-algebraic-affine-round-invariant,
+    thm:lowerbounds-algebraic-affine-iteration-factors}
+  From an initial invariant of capacity $k$ and error $\rho_0$, original
+  source envelopes, and scalar reserves for every round, the actual state
+  after $i$ rounds has capacity $2^ik$ and error
+  $\rho_i=2^i\rho_0+8(2^i-1)2^{-e}$.
+  The same error bounds the actual XOR outputs while retaining the
+  complete executed transcript, the original right state, and any subset
+  of at most $2^ik$ tampered outputs.
+\end{theorem}
+\begin{proof}
+  \leanok
+  Induct with the doubling theorem, obtaining each round's envelopes
+  from the original ones and the exact mass identities. Append the
+  conditionally independent right state without changing the discrepancy.
+  The honest right mask is a fiberwise XOR bijection, and masking the
+  retained tampered outputs only processes the retained coordinates.
+\end{proof}
+
+\begin{definition}[A finite global schedule for the affine iteration]
+  \label{def:lowerbounds-algebraic-affine-iteration-parameters}
+  \lean{Algebraic.Cutwidth.Extractor.affineIterationRounds,
+    Algebraic.Cutwidth.Extractor.affineIterationTarget,
+    Algebraic.Cutwidth.Extractor.affineIterationSourceEntropy,
+    Algebraic.Cutwidth.Extractor.affineIterationInitialLeftLoss,
+    Algebraic.Cutwidth.Extractor.affineIterationInitialRightLoss,
+    Algebraic.Cutwidth.Extractor.affineIterationMessageBits,
+    Algebraic.Cutwidth.Extractor.affineIterationLeftEntropy,
+    Algebraic.Cutwidth.Extractor.affineIterationRightEntropy}
+  \leanok
+  \uses{def:lowerbounds-algebraic-affine-phase-one-parameters}
+  Set $R=\lceil\log_2(t+1)\rceil$ and
+  $\sigma=\mathrm{target}+R+1$. Evaluate the unchanged first-phase chooser
+  at $\sigma$, writing its widths as $L_0,L,D$, its original-left entropy
+  reserve as $\kappa$, and its local error exponent as $e=\sigma+3$.
+  The original-left reserve for the complete construction is $2\kappa$.
+  Write $m_0=2^{64}L_0$, $c_0=2^{24}L_0$, and $c=2^{24}L$.
+  The initial transcript losses are $A_x=(t+1)m_0$ and
+  $A_y=(t+1)(c_0+m_0+c)$; one short-message family costs $M=(t+1)c$ bits.
+  The remaining source entropies before round $i$ are
+  $2\kappa-A_x-2iM$ and $D-A_y-4iM$.
+\end{definition}
+
+\begin{theorem}[The global schedule pays every actual round and the final error]
+  \label{thm:lowerbounds-algebraic-affine-iteration-parameters}
+  \lean{Algebraic.Cutwidth.Extractor.affineIterationRounds_cover,
+    Algebraic.Cutwidth.Extractor.affineIterationParameters_left_budget,
+    Algebraic.Cutwidth.Extractor.affineIterationParameters_right_budget,
+    Algebraic.Cutwidth.Extractor.affineIterationParameters_first_reserve,
+    Algebraic.Cutwidth.Extractor.affineIterationParameters_merge_reserve,
+    Algebraic.Cutwidth.Extractor.affineIterationParameters_recover_reserve,
+    Algebraic.Cutwidth.Extractor.affineIterationParameters_final_reserve,
+    Algebraic.Cutwidth.Extractor.affineIterationParameters_left_mass,
+    Algebraic.Cutwidth.Extractor.affineIterationParameters_right_mass,
+    Algebraic.Cutwidth.Extractor.affineIterationParameters_error_budget,
+    Algebraic.Cutwidth.Extractor.affineIterationParameters_entropy_le}
+  \leanok
+  \uses{def:lowerbounds-algebraic-affine-iteration-parameters,
+    thm:lowerbounds-algebraic-affine-phase-one-parameters,
+    thm:lowerbounds-algebraic-affine-round-dyadic}
+  The remaining entropies are nonnegative through all $R$ rounds. At
+  every $i<R$ they satisfy all four worst-case reserves from the actual
+  doubling theorem. Exact dyadic identities give the propagated masses
+  after the initial transcript and all prior round messages.
+  The error recurrence satisfies
+  \[
+    2^R2^{-\sigma}+8(2^R-1)2^{-e}\le2^{-\mathrm{target}}.
+  \]
+  Moreover, if $B$ is the first-phase chooser base at $\sigma$, then
+  $2\kappa\le2^{257}(t+1)^2(a+1)B^2$. These finite bounds do not assume
+  that every input length can support this entropy.
+\end{theorem}
+\begin{proof}
+  \leanok
+  The sixty-four spare depth levels pay the retained long outputs and
+  repeated short messages. The original right width has an additional
+  base factor paying its complete observation budget. Subtract only
+  earlier observations to obtain each current round's reserves. The
+  doubled original-left budget also pays initialization. Expanding the
+  geometric error recurrence and using $e=\sigma+3$ gives the final bound.
+\end{proof}
+
+\begin{definition}[The complete actual affine construction and its string evaluator]
+  \label{def:lowerbounds-algebraic-affine-construction}
+  \lean{Algebraic.Cutwidth.Extractor.affineCorrelationBreaker,
+    Algebraic.Cutwidth.Extractor.affineCorrelationBreakerWeight,
+    Algebraic.Cutwidth.Extractor.affineCorrelationBreakerSelected,
+    Algebraic.Cutwidth.Extractor.affineRoundsRuntime,
+    Algebraic.Cutwidth.Extractor.affineRoundsContextWord,
+    Algebraic.Cutwidth.Extractor.affineRoundsStepEval,
+    Algebraic.Cutwidth.Extractor.affineCorrelationBreakerRuntime,
+    Algebraic.Cutwidth.Extractor.affineCorrelationBreakerSelectedRuntime,
+    Algebraic.Cutwidth.Extractor.affineCorrelationBreakerSelectedEval}
+  \leanok
+  \uses{def:lowerbounds-algebraic-affine-phase-one,
+    def:lowerbounds-algebraic-affine-iteration,
+    def:lowerbounds-algebraic-affine-round-program}
+  Execute the actual first phase and then the actual four-call round
+  repeatedly, always on the same original source words. The selected
+  construction runs $R=\lceil\log_2(t+1)\rceil$ rounds and uses the
+  first-phase chooser at target $\sigma=\mathrm{target}+R+1$.
+  Its retained law is the direct image of the original factored source
+  law, keeping the original tag, full right state, and selected tampered
+  outputs alongside the honest output.
+  The selected string evaluator computes these parameters and normalizes
+  the original right word before running the construction.
+\end{definition}
+
+\begin{theorem}[One uniform program computes the complete affine construction]
+  \label{thm:lowerbounds-algebraic-affine-construction-program}
+  \lean{Algebraic.Cutwidth.Extractor.affineRoundsStepEval_iterate,
+    Algebraic.Cutwidth.Extractor.affineRoundsState_length_le,
+    Algebraic.Cutwidth.Extractor.affineRoundsRuntime_eq_affineRoundsOutput,
+    Algebraic.Cutwidth.Extractor.affineRoundsRuntime_mem_FP,
+    Algebraic.Cutwidth.Extractor.affineCorrelationBreakerRuntime_eq,
+    Algebraic.Cutwidth.Extractor.affineCorrelationBreakerRuntime_mem_FP,
+    Algebraic.Cutwidth.Extractor.affineCorrelationBreakerSelectedRuntime_length,
+    Algebraic.Cutwidth.Extractor.affineCorrelationBreakerSelectedEval_eq,
+    Algebraic.Cutwidth.Extractor.affineCorrelationBreakerSelectedEval_mem_FP}
+  \leanok
+  \uses{def:lowerbounds-algebraic-affine-construction,
+    thm:lowerbounds-algebraic-affine-phase-one-program,
+    thm:lowerbounds-algebraic-affine-round-parameters}
+  A unary number of actual rounds has one total uniform $\mathrm{FP}$
+  evaluator. The selected complete evaluator agrees exactly with the
+  serialized semantic construction, with all execution guards discharged.
+  Its output length is $2^hL$, where $h=\lceil\log_2(t+1)\rceil+64$ and
+  $L$ is the selected scale. Polynomial time holds on all strings and
+  imposes no statistical or source-feasibility premise.
+\end{theorem}
+\begin{proof}
+  \leanok
+  Encode the immutable context $c$ containing both original sources and
+  all unary round parameters, and pair it with the evolving row. Every
+  complete state has length at most
+  $2|c|+2+|w_0|+2^{65}(t+1)L$, including the initial state and invalid
+  parameters. This bound supplies polynomial-time iteration. Compose
+  with the actual first phase and unary parameter computation; canonical
+  agreement follows by induction using the one-round execution identity.
+\end{proof}
+
+\begin{theorem}[The complete actual affine construction breaks all tampering correlations]
+  \label{thm:lowerbounds-algebraic-affine-construction-extraction}
+  \lean{Algebraic.Cutwidth.Extractor.affineCorrelationBreakerWeight_probability,
+    Algebraic.Cutwidth.Extractor.affineCorrelationBreaker_parameters_dist_le}
+  \leanok
+  \uses{def:lowerbounds-algebraic-affine-construction,
+    thm:lowerbounds-algebraic-affine-phase-one-subsets,
+    thm:lowerbounds-algebraic-affine-iteration-initial,
+    thm:lowerbounds-algebraic-affine-iteration-invariant,
+    thm:lowerbounds-algebraic-affine-iteration-parameters}
+  Let $t>0$ and use the selected finite parameters. Suppose the original
+  tag and two conditional factors are normalized, the honest right word
+  is uniform at every original tag, and the original left-word joint
+  masses have a nonnegative envelope $\mu$ with
+  $\sum_z\mu(z)\le2^{-2\kappa}$. Let all advice words have length $a$,
+  with every tampered advice different from the honest advice.
+  Then the actual honest output is within $2^{-\mathrm{target}}$ of
+  uniform while retaining the original tag, the full original right
+  state, and every actual tampered output. The same bound holds for
+  every subset of the tamperings. All calls use the same original affine
+  input, and the theorem requires no intermediate seed, row-invariant,
+  or numerical-guard hypothesis.
+\end{theorem}
+\begin{proof}
+  \leanok
+  The actual first phase initializes capacity one at error $2^{-\sigma}$.
+  Its exact transcript envelopes and the chosen finite reserves supply
+  the actual induction through $R$ rounds. Since $t\le2^R$, its final
+  invariant covers every tampering set, and the chosen error recurrence
+  is at most $2^{-\mathrm{target}}$. Append the original right state,
+  apply the known XOR masks, identify the complete executed program,
+  and discard only the intermediate transcript by contraction.
+\end{proof}
+
 \begin{theorem}[Extraction with an approximately independent seed]
   \label{thm:lowerbounds-algebraic-perturbed-seed}
   \lean{Algebraic.Cutwidth.Extractor.WeightedStrongSeededExtractor.perturbed_seed_dist_le,
@@ -8756,14 +9066,13 @@ establishes the proposed coefficient-three regime without that assumption.
 
 The fixed-family logarithmic-seed primitive and the ordinary Gamma
 linear-output parameters are now supplied by actual recursive maps.
-The actual pairwise first phase, its finite chooser and dyadic reserves,
-and its selected total polynomial-time evaluator are now supplied.
-An actual subset-union round now has complete retained-law error accounting,
-source-envelope transport, finite dyadic reserves, and a total polynomial-time
-evaluator. The repeated-round induction and its global parameter schedule
-remain open, as do the completed affine correlation breaker,
-sumset/amplification composition, parity estimates, and asymptotic
-construction of the final uniform polynomial-time hard family.
+The complete actual affine correlation breaker now has an original-source
+security theorem for every positive tampering count, explicit finite
+parameters and dyadic error, and a total uniform polynomial-time evaluator.
+The actual first phase initializes the repeated-round invariant, whose
+entropy losses and error are discharged by the chosen global schedule.
+The sumset/amplification composition, parity estimates, and asymptotic
+construction of the final uniform polynomial-time hard family remain open.
 
 \begin{theorem}[Cutwidth bound for rectangle-free families]
   \label{thm:lowerbounds-algebraic-cutwidth}

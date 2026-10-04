@@ -68,10 +68,11 @@ parameters: for all sufficiently large `b`, it extracts `b` bits from `8b`
 input bits with entropy at least `2b`, error at most `1/4`, and a seed of
 at most `2^27*(clog 2 (b+1))^3` bits. The finite independence-merging
 lemma is proved with the exact retained variables and an average leakage
-budget, as described below. The affine correlation breaker,
-including its internal extractor requirements, and the fixed source-reduction
-map with its parity estimates still need construction and proof, together
-with their uniform polynomial-time composition in Complexitylib's machine model.
+budget, as described below. The complete affine correlation breaker now
+has a checked original-source guarantee for every positive tampering count,
+explicit finite parameters, and one total uniform polynomial-time evaluator.
+The fixed source-reduction map with its parity estimates and the final
+sumset/amplification composition still need construction and proof.
 The final analytic implication is proved in `Extractor.SourceReduction`.
 For every qualifying pair of flat sources `P, Q`, suppose at least half
 of the fixings in `Q` leave `m > 0` good output coordinates whose nonempty
@@ -1065,9 +1066,13 @@ kh+u*m+2*(t+1)*c+e ≤ kx.
 ```
 
 `exists_union_of_card_le_two_mul` supplies the finite subset partition
-needed to turn a bound for sets of size at most `k` into a one-round
-bound for sets of size at most `2*k`. The full repeated-round invariant
-and a global schedule discharging all successive reserves remain open.
+needed for `affineRound_doubles_invariant`: an actual left-row invariant
+against every set of size at most `k`, with error `ρ`, becomes the same
+invariant at the actual next transcript against sets of size at most
+`2*k`, with error `2*ρ+8*2^-e`. Empty subsets and arbitrary tampering counts
+are included. `PhaseOne.Subset` initializes capacity one from the actual
+pairwise first-phase theorem for positive `t`; projection handles both
+empty and singleton sets.
 
 `Round.Program` gives one total `FP` evaluator for all four actual calls,
 with exact canonical agreement at `h=clog₂(t+1)+64` under the component
@@ -1078,6 +1083,53 @@ or invalid inputs remain covered by its polynomial-time certificate.
 existing first-phase chooser satisfies the execution guards and gives
 canonical agreement with no additional numerical premise. These runtime
 bounds do not discharge the statistical reserves for iterating the round.
+
+`Affine.Iteration` executes these actual rounds on the original latent
+variables. Every iterated transcript has normalized factors, including
+null rows, and an exact pushforward identity from the original law. Its
+row contributions XOR to the actual deterministic iteration. The original
+source maps never change, and envelope totals after `i` rounds are exactly
+`C^(2*i)*Σμ` and `C^(4*i)*Σν`, where `C=2^((t+1)*2^24*L)` is the full
+short-message alphabet cardinality.
+
+`Iteration.Parameters` supplies a finite schedule for all rounds. Set
+`R=clog 2 (t+1)`, `σ=target+R+1`, and use the unchanged first-phase chooser
+at `σ`, with original-left reserve `2*κ` and local exponent `e=σ+3`.
+If `Ax=(t+1)*2^64*L0`, `Ay=(t+1)*(2^24*L0+2^64*L0+2^24*L)`, and
+`M=(t+1)*2^24*L`, the remaining source entropies before round `i` are
+`2*κ-Ax-2*i*M` and `D-Ay-4*i*M`. The checked global bounds make every
+subtraction valid and discharge all four reserves for every `i<R`.
+The full error recurrence is
+`ρi=2^i*ρ0+8*(2^i-1)*2^-e`; with `ρ0=2^-σ`, its final value is at most
+`2^-target`. The complete source reserve remains bounded by
+`2^257*(t+1)^2*(a+1)*B^2`, where `B` is the original chooser base at `σ`.
+This is a finite reserve bound; source feasibility for every input length
+is not asserted.
+
+`Affine.Program` provides one total uniform polynomial-time evaluator for
+the complete deterministic construction: the first phase followed by
+`R=clog 2 (t+1)` actual rounds. It evaluates the first-phase chooser at
+`σ=target+R+1` and rereads the same original source words throughout.
+`affineCorrelationBreakerSelectedEval_eq` gives canonical semantic
+agreement with all execution guards discharged; its `mem_FP` theorem
+includes parameter computation and malformed inputs. The bounded-loop
+proof pays for the entire encoded state, not just the evolving row:
+`2*context.length+2+initialRow.length+2^65*(t+1)*L`, where `context` contains
+both original source words and all unary round parameters.
+
+`affineCorrelationBreaker_parameters_dist_le` completes the statistical
+assembly. For positive `t`, normalized original factors, a uniform honest
+right word at each original tag, an original-left joint point-mass envelope
+with total at most `2^(-2*κ)`, and equal-length advice differing from the
+honest advice, it gives total variation at most `2^-target`. The retained
+law is the direct original-law image under the actual complete program:
+it keeps the original tag, full original right state, and every tampered
+output in any requested subset, including all tamperings. The theorem
+supplies every intermediate seed guarantee, initializes the actual row
+invariant, and discharges every numerical reserve. It implements the
+strong affine contract of
+[Chattopadhyay–Liao, Definitions 1.8 and 5.2, Theorem 6.1](https://arxiv.org/abs/2110.12652),
+with the conservative finite schedule above.
 
 The one-shot primitive alone has finite seed cost of order `ell+e+log n`;
 the checked recursion supplies the larger polylogarithmic output with
@@ -1141,15 +1193,12 @@ ordinary flat guarantees hold for every source at threshold `2^(2b)`,
 with all bits of the padded seed uniformly sampled. The padding prefix is
 proved to give exactly the original semantic Gamma output.
 
-The standard advice correlation breaker and its selected total runtime
-are proved with the finite parameters above. The affine conversion now
-has the complete actual pairwise first-phase guarantee and one actual
-subset-union round, with finite error accounting, original-source envelope
-transports, and total polynomial-time runtimes. The full repeated-round
-induction, its global parameter schedule, and the completed affine
-correlation-breaker theorem remain to be proved. The remaining route also
-includes the sumset reduction and
-amplification with their parity estimates, and the asymptotic parameter
+The standard advice correlation breaker and the complete actual affine
+correlation breaker are proved with explicit finite parameters and total
+uniform polynomial-time evaluators. The affine theorem covers all tamperings
+from the original-source hypotheses, using the executed first phase and
+all repeated rounds. The remaining route is the sumset reduction and
+amplification with their parity estimates, followed by asymptotic parameter
 and uniform-machine composition for a final `P` hard family with sublinear
 log-threshold. The unconditional `(4-ε)n` endpoint remains incomplete.
 

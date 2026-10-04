@@ -51,9 +51,11 @@ entropy `2b`, error `1/4`, and seed length at most `2^27*(clog 2 (b+1))^3`.
 The actual rounded parameters, retained-seed guarantee, and exact runtime
 semantics are checked. One total `FP` evaluator computes the Boolean family
 on a seed padded to that explicit budget, with the entire seed uniformly
-sampled and retained in the strong guarantee. The affine correlation breaker,
-its internal extractor requirements, the parity estimates, and the final
-uniform sumset family remain construction obligations.
+sampled and retained in the strong guarantee. The complete affine correlation
+breaker now has an original-source theorem for all positive tampering counts,
+explicit finite parameters, and a total uniform polynomial-time evaluator.
+The source reduction, its parity estimates, and the final uniform sumset
+family remain construction obligations.
 The [cutwidth guide](cutwidth-lower-bound.md) records the exact checked
 interfaces and credits the GUV and CGL constructions. The seeded result
 does not establish the polynomial support threshold and quantitative balance

@@ -22,9 +22,10 @@ half. Balanced padding supplies the density needed by the circuit theorem.
 
 The intended source reduction is Chattopadhyay and Liao, *Extractors for Sum
 of Two Sources* (2021), Lemma 5.4 through equation (5). Its linear sampler
-and affine correlation breaker must still be constructed and proved to
-supply these parity bounds. This module proves the implication from that
-target to extraction, not the existence or uniform evaluation of `reduce`.
+must still be constructed and composed with the now-checked affine
+correlation breaker to supply these parity bounds. This module proves the
+implication from that target to extraction, not the existence or uniform
+evaluation of `reduce`.
 -/
 
 public section
