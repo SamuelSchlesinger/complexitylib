@@ -57,8 +57,10 @@ only on `ε`, not on the fields, the basis or the signature. In particular
 `GF(2) = ZMod 2`, in any basis, needs more than `(2 + 1/(2 κ_E) - ε) n` binary gates; such
 bases exist (`nonempty_basis_galoisField`).
 
-*Prior art.* An earlier linear lower bound for this kind of multiplication is due to Lamagna and
-Savage; whether the coefficient here is new is under literature check.
+*Prior art.* Earlier lower bounds for this multiplication count only the multiplications of
+bilinear or quadratic algorithms; we know of no earlier bound on the number of gates over the
+full binary basis. The coefficient is not claimed to be a record for explicit functions with
+`2 n` inputs and `n` outputs in general.
 -/
 
 @[expose] public section
