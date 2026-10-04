@@ -54,6 +54,7 @@ public import Complexitylib.Algebraic.LowerBound.Cutwidth.AverageCase
 public import Complexitylib.Algebraic.LowerBound.Cutwidth.SingleCut
 public import Complexitylib.Algebraic.LowerBound.Cutwidth.MultiOutput.Ordering
 public import Complexitylib.Algebraic.LowerBound.Cutwidth.MultiOutput.Rank
+public import Complexitylib.Algebraic.LowerBound.Cutwidth.MultiOutput.TotallyRegular
 public import Complexitylib.Algebraic.LowerBound.Cutwidth.Extractor
 public import Complexitylib.Algebraic.LowerBound.Cutwidth.Extractor.Padding
 public import Complexitylib.Algebraic.LowerBound.Cutwidth.Extractor.Padding.Asymptotics
@@ -344,6 +345,10 @@ signals, component by component.
 `MultiOutput.Rank` bounds the signals crossing any split of a circuit computing
 a linear map `x ↦ M x` over a finite field below by
 `rank M[Y_T, X_S] + rank M[Y_S, X_T]`.
+`MultiOutput.TotallyRegular` combines the two: a fan-in-two circuit over a
+finite field computing a totally regular `N × N` map, such as an explicit
+Cauchy matrix over `ZMod q`, has more than `(1 + 1/(2 κ_E) - ε) N ≥ (41/9 - ε) N`
+gates for all large `N`.
 
 `Bisection.Helpful` completes the graph theorem. Its proof uses the first
 boundary normalization phase, a partition into bounded connected clusters,
