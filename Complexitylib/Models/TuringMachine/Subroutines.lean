@@ -28,8 +28,6 @@ statements are re-exported by focused surface modules when needed.
 - `TM.copyInputToWorkTM` — copy input tape contents to a work tape
 - `TM.copyInputToOutputTM` — copy input tape contents to the output tape
 - `TM.copyWorkToWorkTM` — copy one work tape's contents to another
-- `TM.compareWorkTapesTM` — an unverified, unused cell-by-cell comparison of two
-  work tapes; it overwrites work-tape cells and its own verdict (see its docstring)
 -/
 
 
@@ -412,79 +410,6 @@ def copyWorkToWorkTM (src dst : Fin n) : TM n where
         · split
           · rfl
           · exact idleDir_right_of_start hwi
-    | .done => exact rightOfStart_allIdle iHead wHeads oHead
-
--- ════════════════════════════════════════════════════════════════════════
--- compareWorkTapesTM: unverified, destructive cell-by-cell comparison
--- ════════════════════════════════════════════════════════════════════════
-
-/-- State space of `compareWorkTapesTM`: compare cells while both tapes agree,
-ending in `matchDone` (equal) or `mismatch` (unequal) before halting. -/
-inductive ComparePhase where
-  | comparing | mismatch | matchDone | done
-  deriving DecidableEq
-
-instance : Fintype ComparePhase where
-  elems := {.comparing, .mismatch, .matchDone, .done}
-  complete := fun x => by cases x <;> simp
-
-/-- Intended to compare work tapes `idx₁` and `idx₂` cell by cell; no theorem
-    about it is proved and nothing in the library uses it. Both heads advance
-    right together while the symbols agree. The comparison ends when both
-    read `Γ.blank`, writing `Γ.one` under the output head, or at the first
-    disagreement, writing `Γ.zero`.
-
-    The machine is destructive. Each agreeing step writes `□` under the head
-    of every other work tape and under the output head. The step that ends
-    the comparison writes `□` under every work-tape head, so at a
-    disagreement it erases the differing cell of both compared tapes. The
-    following halting step writes `□` under every work-tape head and under
-    the output head; with the output head on cell 1 this overwrites the
-    verdict, so output cell 1 ends `□`. -/
-def compareWorkTapesTM (idx₁ idx₂ : Fin n) : TM n where
-  Q := ComparePhase
-  qstart := .comparing
-  qhalt := .done
-  δ := fun state iHead wHeads oHead =>
-    match state with
-    | .comparing =>
-      if wHeads idx₁ = Γ.blank ∧ wHeads idx₂ = Γ.blank then
-        (.matchDone, fun _ => .blank, .one,
-         idleDir iHead, fun i => idleDir (wHeads i), idleDir oHead)
-      else if wHeads idx₁ = wHeads idx₂ then
-        (.comparing,
-         fun i => if i = idx₁ then readBackWrite (wHeads idx₁)
-                  else if i = idx₂ then readBackWrite (wHeads idx₂)
-                  else .blank,
-         .blank, idleDir iHead,
-         fun i => if i = idx₁ then Dir3.right
-                  else if i = idx₂ then Dir3.right
-                  else idleDir (wHeads i),
-         idleDir oHead)
-      else
-        (.mismatch, fun _ => .blank, .zero,
-         idleDir iHead, fun i => idleDir (wHeads i), idleDir oHead)
-    | .mismatch => allIdle .done iHead wHeads oHead
-    | .matchDone => allIdle .done iHead wHeads oHead
-    | .done => allIdle .done iHead wHeads oHead
-  δ_right_of_start := by
-    intro state iHead wHeads oHead
-    match state with
-    | .comparing =>
-      dsimp only []; split
-      · exact ⟨idleDir_right_of_start, fun _ => idleDir_right_of_start,
-               idleDir_right_of_start⟩
-      · split
-        · refine ⟨idleDir_right_of_start, ?_, idleDir_right_of_start⟩
-          intro i hwi; simp only []; split
-          · rfl
-          · split
-            · rfl
-            · exact idleDir_right_of_start hwi
-        · exact ⟨idleDir_right_of_start, fun _ => idleDir_right_of_start,
-                 idleDir_right_of_start⟩
-    | .mismatch => exact rightOfStart_allIdle iHead wHeads oHead
-    | .matchDone => exact rightOfStart_allIdle iHead wHeads oHead
     | .done => exact rightOfStart_allIdle iHead wHeads oHead
 
 end TM
