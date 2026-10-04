@@ -23,7 +23,9 @@ namespace Complexity.Shallow
 def Symmetric {n : ℕ} (f : BitString n → Bool) : Prop :=
   ∀ x y, weight x = weight y → f x = f y
 
-/-- Majority with ties accepted, as in the source paper. -/
+/-- Majority with ties accepted, as in the source paper. Unlike the strict
+`Complexity.majority` (`2 · popCount > k`) used for error amplification and the
+Karchmer–Wigderson majority bounds, a tie (`n = 2 · weight x`) returns `true`. -/
 def majority {n : ℕ} (x : BitString n) : Bool := decide (n ≤ 2 * weight x)
 
 /-- Majority depends only on Hamming weight. -/
