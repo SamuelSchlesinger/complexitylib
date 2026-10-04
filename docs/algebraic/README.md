@@ -85,7 +85,8 @@ Choose an entry point for the task:
   for the same bound on the explicit polynomial-time family; see the
   [cutwidth guide](cutwidth-lower-bound.md);
 - `import Complexitylib.Algebraic.LowerBound.Nechiporuk` for the `Ω(n² / log n)` formula
-  lower bound for the same rectangle-free functions; see the
+  lower bound for rectangle-free functions with a polynomial threshold `K ≤ n^c`, a special
+  case of the cutwidth hypotheses that excludes the explicit family; see the
   [Nechiporuk guide](nechiporuk-lower-bound.md);
 - `import Complexitylib.Algebraic.LowerBound.KarchmerWigderson` for Karchmer–Wigderson
   games, the theorem identifying formula depth and size with protocol depth
@@ -349,9 +350,12 @@ For balanced functions with polynomial threshold, circuits of size
 `(4 - ε) n` agree on at most `(1/2 + 3ν) 2 ^ n + 2 ^ ((1 - ε/24) n)` inputs
 (`Cutwidth.eventually_card_agree_le_of_balanced`; see the
 [average-case note](average-case-cutwidth.md)).
-`Algebraic.LowerBound.Nechiporuk` proves that the same rectangle-free
-functions need `Ω(n² / log n)` leaves in any formula over the full binary
-basis. The [Nechiporuk guide](nechiporuk-lower-bound.md) has the details.
+`Algebraic.LowerBound.Nechiporuk` proves that rectangle-free functions with
+a polynomial threshold `K(n) ≤ n^c`, the polynomial-threshold case of the
+circuit-bound hypotheses, need `Ω(n² / log n)` leaves in any formula over the
+full binary basis. The explicit family above is only shown to have
+`log₂ K = o(n)`, so no formula bound is proved for it. The
+[Nechiporuk guide](nechiporuk-lower-bound.md) has the details.
 `Algebraic.LowerBound.KarchmerWigderson` provides the communication-game
 view of De Morgan formulas, the Karchmer–Wigderson theorem, the composition
 `f ⋄ g` with its elementary depth and size bounds, and the

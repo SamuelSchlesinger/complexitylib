@@ -1,9 +1,15 @@
 # Nechiporuk's bound for rectangle-free functions
 
 `Algebraic.LowerBound.Nechiporuk` proves a superlinear formula lower bound
-for the same rectangle-free functions that drive the
-[cutwidth circuit bound](cutwidth-lower-bound.md): every formula over the
-full binary basis computing such a function has `Ω(n² / log n)` leaves.
+for rectangle-free functions with a polynomial rectangle threshold `K ≤ n^c`:
+every formula over the full binary basis computing such a function has
+`Ω(n² / log n)` leaves. This is the polynomial-threshold case of the
+hypotheses of the [cutwidth circuit bound](cutwidth-lower-bound.md), which
+needs only `log₂ K = o(n)`. The explicit family
+`Cutwidth.Extractor.sourceReductionHardFamily` is only shown to have a
+subexponential threshold (`log₂ K = o(n)`, from
+`sourceReductionFamilyEntropy_isLittleO`), so this theorem gives no formula
+bound for it.
 
 ## The model
 
@@ -24,10 +30,11 @@ theorem eventually_sq_le_leaves (f : ∀ n, Cslib.BooleanFunction n) (K : Nat �
       (n : ℝ) ^ 2 ≤ 64 * (c + 3) * Real.logb 2 n * F.leaves
 ```
 
-The hypotheses are the same hard-family hypotheses as in the circuit bound.
-No graph-theoretic hypothesis is needed. The exact finite version is
-`leaves_lower_bound'`: with `8 K ≤ 2 ^ b`, every formula computing the
-function satisfies `(n − b)(n − 2b − 1) ≤ 4 b · leaves`.
+The hypotheses are the polynomial-threshold case of the circuit-bound
+hypotheses: `hK` asks for `K n ≤ n ^ c`, whereas the circuit bound only asks
+for `log₂ K(n) = o(n)`. No graph-theoretic hypothesis is needed. The exact
+finite version is `leaves_lower_bound'`: with `8 K ≤ 2 ^ b`, every formula
+computing the function satisfies `(n − b)(n − 2b − 1) ≤ 4 b · leaves`.
 
 ## The argument
 
@@ -66,7 +73,7 @@ most the leaf size. With `b = O(log n)` this is `Ω(n² / log n)` leaves.
 Nechiporuk's method is the classical route to `n² / log n` formula bounds,
 and Andreev's function gives more (`n^(3 − o(1))`) by other means. The
 point here is that rectangle-freeness makes a function Nechiporuk-maximal on
-every block at once, rather than for one chosen partition, and that the same
-hypothesis serves both the circuit and the formula bound. The method does
-not extend to circuits, where the subfunction count on a block is only
-bounded by an exponential in the whole circuit size.
+every block at once, rather than for one chosen partition, and that with a
+polynomial threshold the same hypothesis serves both the circuit and the
+formula bound. The method does not extend to circuits, where the subfunction
+count on a block is only bounded by an exponential in the whole circuit size.
