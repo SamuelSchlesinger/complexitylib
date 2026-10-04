@@ -24,9 +24,18 @@ semantics and time and space resource consumption.
 - `Prog.ComputesInTimeAndSpace` - this defines the complexity notion for the RTM computation model,
     based on `Data` values.
 - `Prog.ComputesBoolFunInTimeAndSpace` - the complexity notion transferred to functions on binary
-    strings, this making it compatible to all other computation models.
+    strings, so that it can be compared with other computation models.
 - `ComputableInOTime` - generic time-complexity in the RTM model
 - `ComputableInOSpace` - generic space-complexity in the RTM model
+
+## Cost model
+
+`var` and `fn` cost the size of the value or closure they produce, in both time and space,
+where a closure's size counts only the environment entries its body references. Every closure
+application (`app`, each of the two applications in `elim`'s cons branch, and each `while_`
+iteration) costs one time unit on top of evaluating the closure's body, so beta reduction is
+never free (`AppSem.one_le_time`). The cost model is intended to be polynomially related to
+that of multi-tape Turing machines, but no simulation theorem in either direction is proved yet.
 -/
 
 
@@ -40,8 +49,9 @@ namespace RoseTreeMachine
 abbrev TapeIndex := ℕ
 
 /--
-Prog is the syntax representation of a functional language that has a resource consumption
-model which is compatible to that of a Turing machine.
+Prog is the syntax representation of a functional language with a resource consumption model
+(`ProgSem`) that is intended to be polynomially related to that of a Turing machine; no
+simulation theorem relating the two models is proved yet.
 The data structure it operates on is a rose tree (`Data`). The advantage of this data structure
 is that the majority of lean data types have a direct encoding.
 -/
@@ -196,7 +206,8 @@ lemma closureSize.go_le_sum (body : Prog) (depth : ℕ) (env : List Value) :
 mutual
 /-- Semantics of `Prog` including time and space resource bounds.
 `ProgSem σ p x t s` means that on environment `σ`, the program `p` evaluates to the value
-`x` and uses `t` time and `s` space. -/
+`x` and uses `t` time and `s` space. Every closure application, made through `AppSem`, costs
+one time unit in addition to the cost of the closure's body. -/
 inductive ProgSem : (List Value) → Prog → Value → ℕ → ℕ → Prop
   | var :
       ProgSem σ (.var i) (σ[i]?.getD Value.empty)
@@ -251,19 +262,20 @@ inductive ProgSem : (List Value) → Prog → Value → ℕ → ℕ → Prop
       ProgSem σ (.app fn arg) r (t_f + t_a + t_b) (s_f + s_a + s_b)
 
 /-- Application of a value to an argument value. `AppSem f v r t s` means that applying the
-closure `f` to the argument `v` yields `r` using `t` time and `s` space. Only closures can be
-applied; applying a first-order value has no derivation (the program is stuck). -/
+closure `f` to the argument `v` yields `r` using `t` time and `s` space. The application itself
+costs one time unit, charged on top of the body's time; space is the body's space. Only closures
+can be applied; applying a first-order value has no derivation (the program is stuck). -/
 inductive AppSem : Value → Value → Value → ℕ → ℕ → Prop
   | mk (h_body : ProgSem (σ ++ [v]) body r t s) :
-      AppSem (.closure body σ) v r t s
+      AppSem (.closure body σ) v r (t + 1) s
 
 /-- Iterates the closure `bodyVal` of a `while_` loop, threading the accumulator.
 `WhileSem bodyVal acc r t s` means that, starting from accumulator `acc`, repeatedly applying
 `bodyVal` to the current accumulator eventually yields result `r` using `t` time and `s` space.
 Before each iteration the halting condition is checked on the current accumulator: iteration
 terminates (with the accumulator as result) when `acc` is empty or its head is empty.
-Otherwise `bodyVal` is applied and its result becomes the new accumulator. Non-terminating
-loops simply have no derivation. -/
+Otherwise `bodyVal` is applied, at a cost of one time unit plus the body's time (see `AppSem`),
+and its result becomes the new accumulator. Non-terminating loops simply have no derivation. -/
 inductive WhileSem : Value → Data → Data → ℕ → ℕ → Prop
   | halt
       (h_stop : acc.asList.head?.getD (Data.l []) = Data.l []) :
@@ -274,6 +286,11 @@ inductive WhileSem : Value → Data → Data → ℕ → ℕ → Prop
       (h_rest : WhileSem bodyVal v r t_r s_r) :
       WhileSem bodyVal acc r (t_b + t_r) (max s_b s_r)
 end
+
+/-- Every closure application costs at least one time unit, so beta reduction is never free. -/
+lemma AppSem.one_le_time {f v r : Value} {t s : ℕ} (h : AppSem f v r t s) : 1 ≤ t := by
+  cases h
+  omega
 
 /-- Producing a value costs at least its size, in both time and space. This holds because every
 `ProgSem` derivation either reads/builds the value directly (charging its size) or returns a
