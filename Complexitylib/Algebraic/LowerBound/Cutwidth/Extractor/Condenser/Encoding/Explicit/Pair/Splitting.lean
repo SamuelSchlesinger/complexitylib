@@ -23,8 +23,9 @@ These are arithmetic deductions for our sparse parameter choice. The two
 target inequalities are the entropy requirements of the splitting step in
 Chattopadhyay--Goodman--Liao, Corollary 5.4 of *Affine Extractors for Almost
 Logarithmic Entropy*, <https://eccc.weizmann.ac.il/report/2021/075/>.
-This layer establishes one finite level's budget; choosing a recursive
-sequence and bounding its total seed length remain separate.
+This layer establishes one finite level's budget; `Recursion.Scheduled`
+chooses the recursive sequence and bounds its total seed length
+(`eventually_polylogBlockSeedBits_le`).
 -/
 
 public section

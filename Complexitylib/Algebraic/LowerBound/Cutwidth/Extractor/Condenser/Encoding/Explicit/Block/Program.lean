@@ -25,8 +25,8 @@ and zero blocks.
 
 The underlying algebraic map and parameter source credits remain in
 `Condenser.Polynomial` and `Parameters.Sparse`. This certifies one level only.
-Iterating levels still requires a uniform numerical schedule and polynomial
-bounds on all intermediate payloads, block counts, and numerical operands.
+`Recursion.Scheduled.Program` iterates the levels under a uniform numerical
+schedule (`scheduledBlockExtractorEval_mem_FP`).
 -/
 
 public section

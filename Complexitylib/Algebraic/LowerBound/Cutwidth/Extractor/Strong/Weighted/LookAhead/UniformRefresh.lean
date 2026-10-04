@@ -33,8 +33,8 @@ This supplies a single refresh step for the advice-chain analysis of
 Chattopadhyay--Goyal--Li, *Non-Malleable Extractors and Codes, with their Many
 Tampered Extensions*, Algorithm 2 and Claim 6.11, printed pp.31--32:
 <https://arxiv.org/pdf/1505.00107>. The finite repair and explicit average
-error estimate are the deductions formalized here; iterating the advice
-chain remains a separate theorem.
+error estimate are the deductions formalized here; `adviceCorrelationBreaker_dist_le`
+iterates the advice chain.
 -/
 
 public section

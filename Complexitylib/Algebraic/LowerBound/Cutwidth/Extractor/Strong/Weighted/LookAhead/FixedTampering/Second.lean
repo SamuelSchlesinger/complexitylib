@@ -34,8 +34,8 @@ Chattopadhyay--Goyal--Li, *Non-Malleable Extractors and Codes, with their Many
 Tampered Extensions*, Algorithm 1, Lemma 6.5 and Claim 6.6, printed pp.25--29:
 <https://arxiv.org/abs/1505.00107>. It uses the finite two-sided leakage estimate
 underlying Chattopadhyay--Liao (2021), Lemma 3.26:
-<https://arxiv.org/abs/2110.12652>. The complete advice-chain invariant is a
-separate composition obligation.
+<https://arxiv.org/abs/2110.12652>. The complete advice-chain invariant is
+proved in `Advice.Extraction` (`adviceCorrelationBreaker_dist_le`).
 -/
 
 public section

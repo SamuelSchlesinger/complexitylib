@@ -31,8 +31,8 @@ with their Many Tampered Extensions*, Algorithm 1 and the look-ahead
 analysis in Lemma 6.5 and Claim 6.6, printed pp.25--29:
 <https://arxiv.org/abs/1505.00107>. It uses the finite two-sided leakage
 estimate underlying Chattopadhyay--Liao (2021), Lemma 3.26:
-<https://arxiv.org/abs/2110.12652>. The complete flip-flop guarantee is a
-separate composition obligation.
+<https://arxiv.org/abs/2110.12652>. `FlipFlop.Opposite.False` and
+`FlipFlop.Opposite.True` compose the complete flip-flop guarantee.
 -/
 
 public section
