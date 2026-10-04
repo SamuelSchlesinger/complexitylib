@@ -1,4 +1,4 @@
-# The `(4 - ε) n` cutwidth lower bound
+# The cutwidth lower bound: `(1 + π(3 + 2√2)/6 − ε) n`
 
 `Algebraic.LowerBound.Cutwidth` proves a circuit lower bound over the full
 binary basis `B₂`: every gate computes any of the sixteen functions of two
@@ -10,21 +10,30 @@ The circuit proof follows Ryan Williams's private working note
 *A (4 − ε)n lower bound for Boolean circuits* (September 2026), using the
 circuit-to-read-once compiler from Samuel Schlesinger's counting note.
 The graph and extractor sources, and the alternative connected-cluster
-argument developed in this formalization, are identified below.
+argument developed in this formalization, are identified below. The Gaussian
+layout that lowers the graph-ordering coefficient below `1/3` was developed in
+this formalization; see [Gaussian layouts](#gaussian-layouts-ordering-coefficient-below-13).
 
 ## Statement
 
-`Algebraic.Cutwidth.sourceReductionHardFamily_eventually_lt_size` proves the
-bound for the single concrete family `Extractor.sourceReductionHardFamily`:
+`Algebraic.Cutwidth.sourceReductionHardFamily_eventually_lt_size_gaussian`
+proves the bound for the single concrete family
+`Extractor.sourceReductionHardFamily`:
 
 ```lean
-theorem sourceReductionHardFamily_eventually_lt_size
+theorem sourceReductionHardFamily_eventually_lt_size_gaussian
     {ε : ℝ} (hε : 0 < ε) :
     ∀ᶠ n in Filter.atTop, ∀ circuit : Circuit Binary.signature n 1,
       circuit.Computes Binary.interpretation
         (fun x _ => Extractor.sourceReductionHardFamily n x) →
-          (4 - ε) * n < circuit.size
+          (1 + Real.pi * (3 + 2 * Real.sqrt 2) / 6 - ε) * n < circuit.size
 ```
+
+The coefficient `1 + π(3 + 2√2)/6` is about `4.0517`.
+`sourceReductionHardFamily_eventually_lt_eightyOne_div_twenty_size` states the
+rational weakening `(81/20 − ε) n`, and
+`sourceReductionHardFamily_eventually_lt_size` keeps the coefficient-four
+statement `(4 − ε) n` obtained from the cubic pathwidth bound.
 
 There is no graph, extractor, entropy, or hard-family hypothesis.
 `Extractor.sourceReductionHardEval_mem_FP` certifies one total uniform
@@ -50,7 +59,10 @@ theorem eventually_lt_size_of_rectangleFree
 ```
 
 The family and threshold are fixed before `ε`. Only `log₂ K(n) = o(n)`
-is required; polynomial thresholds are a special case. The older entry
+is required; polynomial thresholds are a special case. Its Gaussian
+counterpart `eventually_lt_size_of_rectangleFree_gaussian` (module
+`Algebraic.LowerBound.Cutwidth.Gaussian`) has the same hypotheses and the
+coefficient `1 + π(3 + 2√2)/6`. The older entry
 points with explicit bisection, pathwidth, or ordering bounds remain available.
 The library proves those graph bounds and adds no axioms.
 
@@ -74,6 +86,52 @@ nondeterministic circuits. The cubic core of a final compression has at most
 has `p = 1/6`. `sourceReductionHardFamily_eventually_lt_size_of_orderingBound`
 transports any such coefficient to the same concrete family, and
 `sourceReductionHardFamily_eventually_lt_size` is its case `A = 1/3`.
+The Gaussian layout supplies `A = (6/π)(3 − 2√2)`, and its rational weakening
+`A = 20/61 < 1/3` (`Multigraph.exists_orderingBound_twenty_div_sixtyOne`)
+gives `81/20`.
+
+## Gaussian layouts: ordering coefficient below `1/3`
+
+The bisection route cannot beat `1/6` for cubic pathwidth: the Fomin–Høie
+assembly `PathDecomposition.exists_of_balanced_cut` charges each side
+`|side|/3`. `Algebraic.LowerBound.Cutwidth.Gaussian.Layout` instead orders the
+cubic core directly and controls every prefix cut.
+
+* **Kernel** (`Gaussian.Kernel`). For a decay rate `q` and radius `R`, the row
+  of `v` is `a_v(z) = q ^ dist(v, z)` within distance `R` and `0` beyond, and
+  `â_v` is its normalization. In every graph of maximum degree three, spheres
+  have at most `3 · 2 ^ d` vertices (`card_sphere_le`), and adjacent rows have
+  correlation at least `2q/(1+q²) − 3 (2q²)^R` (`sum_unitKernel_mul_ge`). The
+  pointwise inequality `xy ≥ κ (x² + y²)/2`, `κ = 2q/(1+q²)`, holds whenever
+  the two distances are both within the radius, because they differ by at most
+  one; only the truncation sphere contributes a defect. No girth hypothesis is
+  needed.
+* **Crossings** (`Gaussian.Edge`). With `ω` standard Gaussian, a threshold
+  separates the scores `⟨α, ω⟩` and `⟨β, ω⟩` of equal-norm vectors with
+  probability at most `(2/π) ‖β − α‖ / ‖α + β‖` (`gaussPi_between_le`):
+  `⟨α + β, ω⟩` and `⟨β − α, ω⟩` are uncorrelated jointly Gaussian, hence
+  independent; condition on the second, bound the density of the first, and
+  use `E|N(0,1)| = √(2/π)`. For unit rows with correlation `ρ` this is
+  `(2/π) √((1 − ρ)/(1 + ρ))`, at every threshold.
+* **Locality** (`Gaussian.SecondMoment`). Each event depends only on the
+  coordinates in a kernel ball, and each ball meets boundedly many others, so
+  every count of events has variance `O(h)` and Chebyshev's inequality applies
+  (`pi_real_deviation_le`).
+* **Assembly** (`Gaussian.Layout`). Fix thresholds `−T + iδ`. Every prefix of
+  the score order lies between two consecutive threshold sets or inside a tail,
+  so its cut is at most a threshold cut plus three times a window count, or
+  three times a tail count. With probability `1 − O(1/h)` all `2M + 2` counts
+  are within `εh` of their means, so one sample bounds every prefix at once.
+  Letting `q ↑ 1/√2` and `R → ∞`, the correlation tends to `2√2/3`, where
+  `√((1 − ρ)/(1 + ρ)) = 3 − 2√2`; the three halves edges per vertex give the
+  cutwidth coefficient `c = (3/π)(3 − 2√2) ≈ 0.16384`
+  (`Gaussian.exists_key_cutFinset_le`, `exists_cutwidthBound_gaussian`).
+
+The ordering coefficient is `A = 2c = (6/π)(3 − 2√2) ≈ 0.32768`
+(`Multigraph.exists_orderingBound_gaussian`), and `1 + 1/A = 1 + π(3 + 2√2)/6`
+because `(3 − 2√2)(3 + 2√2) = 1`. The bound `(2/π) tan(θ/2)` used for the
+crossing probability is slightly weaker than the exact `θ/π`,
+`θ = arccos ρ`, which would give `1 + π/(3 arccos(2√2/3)) ≈ 4.0815`.
 
 ## Instantiating the family hypothesis
 
@@ -1415,6 +1473,7 @@ route are not prerequisites for this proof.
 | Compression | `Multigraph.Compression` in `Algebraic.LowerBound.Cutwidth.Compression`: merging adjacent blocks until the quotient is simple and 3-regular, with `quotient_isRegularOfDegree` and the excess bound `card_blocks_add_le`. |
 | Median ordering | `MedianOrdering.card_cutFinset_key_lt_le` in `Algebraic.LowerBound.Cutwidth.MedianOrdering`: a path decomposition with bags of size at most `p + 1` gives a vertex ordering of a cubic graph with prefix cuts at most `p + 2`. |
 | Expansion | `Compression.exists_linearOrder` and `Multigraph.orderingBound_of_pathwidthBound` in `Algebraic.LowerBound.Cutwidth.Expansion`: `PathwidthBound p ξ N₀` implies `OrderingBound (2 p) (2 ξ) (N₀ + 9)`. `Multigraph.orderingBound_of_cutwidthBound` orders the quotient by a cutwidth key instead: `CutwidthBound c ξ N₀` implies `OrderingBound (2 c) (2 ξ) (N₀ + 8)`. `cutwidthBound_of_pathwidthBound` converts a pathwidth bound to a cutwidth bound with the same coefficient. |
+| Gaussian layout | `Gaussian.sum_unitKernel_mul_ge`, `Gaussian.gaussPi_between_le`, `Gaussian.pi_real_deviation_le`, and `Gaussian.exists_key_cutFinset_le` in `Algebraic.LowerBound.Cutwidth.Gaussian`: every large simple cubic graph has prefix cuts at most `((3/π)(3 − 2√2) + ξ) h`; `exists_cutwidthBound_gaussian` and `Multigraph.exists_orderingBound_gaussian` give the ordering coefficient `(6/π)(3 − 2√2)`, at most `20/61`. |
 | Assembly | `lt_size_of_orderingBound` and `eventually_lt_size_of_orderingBound` in `Algebraic.LowerBound.Cutwidth.FourN` give the coefficient `1 + 1/A` from any ordering coefficient `A > 0`; `lt_size_of_log_bounds` and `eventually_lt_size_of_rectangleFree` are the coefficient-four case and handle subexponential thresholds; the original polynomial-threshold entry points remain available. |
 | Extraction | `FlatSumsetExtractor.balanced`, `FlatSumsetExtractor.rectangleFree`, `FlatSumsetExtractor.card_accepting_ge`, and `eventually_hard_of_flatSumsetExtractor` in `Algebraic.LowerBound.Cutwidth.Extractor`. |
 | Balanced padding | `FlatSumsetExtractor.balancePad_rectangleFree` doubles the threshold for any error below `1/2`; `card_accepting_balancePad` proves exact balance and `balancePadEval_mem_FP` preserves any supplied `FP` evaluator. `eventually_lt_size_balancePad_of_flatSumsetExtractor` and its nondeterministic counterpart give the lower bound at the full padded length. |

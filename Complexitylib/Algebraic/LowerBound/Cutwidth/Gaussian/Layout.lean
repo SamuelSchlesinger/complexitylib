@@ -42,4 +42,19 @@ theorem exists_key_cutFinset_le {ξ : ℝ} (hξ : 0 < ξ) :
           (gaussianCutwidthCoefficient + ξ) * Fintype.card W :=
   Internal.exists_key_bound hξ
 
+/-- The Gaussian cutwidth coefficient is positive. -/
+theorem gaussianCutwidthCoefficient_pos : 0 < gaussianCutwidthCoefficient :=
+  Internal.gaussianCutwidthCoefficient_pos
+
+/-- The doubled coefficient `(6/π)(3 - 2√2)` is the graph-ordering coefficient; it is at
+most `20/61`, hence below `1/3`. -/
+theorem two_mul_gaussianCutwidthCoefficient_le : 2 * gaussianCutwidthCoefficient ≤ 20 / 61 :=
+  Internal.two_mul_gaussianCutwidthCoefficient_le
+
+/-- The circuit coefficient `1 + 1/A` of the Gaussian ordering coefficient
+`A = 2 (3/π)(3 - 2√2)` equals `1 + π(3 + 2√2)/6 ≈ 4.0517`. -/
+theorem one_add_inv_two_mul_gaussianCutwidthCoefficient :
+    1 + 1 / (2 * gaussianCutwidthCoefficient) = 1 + Real.pi * (3 + 2 * Real.sqrt 2) / 6 :=
+  Internal.one_add_inv_two_mul_gaussianCutwidthCoefficient
+
 end Algebraic.Cutwidth.Gaussian

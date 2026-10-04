@@ -330,6 +330,46 @@ the construction. The unchecked items below are proof and API targets.
   suffice. Track retained-seed strength and fixed-seed linearity separately;
   a replacement must preserve whichever properties its consumers require.
 
+## Cutwidth coefficient improvements
+
+The circuit coefficient is `1 + 1/A` for any graph-ordering coefficient `A > 0`
+(`eventually_lt_size_of_orderingBound`); a cubic cutwidth or pathwidth
+coefficient `c` gives `A = 2c` (`eventually_lt_size_of_cutwidthBound`,
+`eventually_lt_size_of_pathwidthCoefficient`). The Gaussian distance-kernel layout
+proves `c = (3/π)(3 - 2√2)`, so the explicit family needs more than
+`(1 + π(3 + 2√2)/6 - ε) n ≈ (4.0517 - ε) n` gates
+(`sourceReductionHardFamily_eventually_lt_size_gaussian`). The items below are
+unreviewed proof candidates. Each must prove its graph lemma for every large cubic
+graph, controlling all prefixes of one ordering simultaneously, before its constant
+is used; until then it enters only through the conditional coefficient theorems.
+Keep the threshold hypothesis `log₂ K = o(n)`; better extractor entropy does not
+change the leading coefficient. Rectangle peeling extends the bound to the
+average case without improving it, and neither the prefix-halving gain of AVOID
+nor affine-aware counting is known to add to it.
+
+- [ ] **Exact crossing probability.** Replace the bound `(2/π) tan(θ/2)` by
+  Sheppard's `θ/π`, `θ = arccos ρ`, at every threshold. This needs the angle law
+  of the planar Gaussian and the maximization of the crossing probability at
+  threshold zero, and gives `1 + π/(3 arccos(2√2/3)) ≈ 4.0815`.
+- [ ] **Charge frontier vertices instead of crossing edges.** A processed vertex
+  with several unprocessed neighbours is charged once. The candidate
+  `pw(H) ≤ 0.1403 |V(H)| + O(1)` goes through the median-order conversion, not
+  the Gaussian ordering itself, giving `A = 1403/5000` and `L ≈ 4.5638`.
+  Obligations: a Gaussian-star comparison, a positive-threshold correction, and
+  simultaneous control of all prefixes.
+- [ ] **Two-sided sweeps.** Sweep negative edges by their larger score and positive
+  edges by their smaller score, joined through the sign-crossing graph. The
+  combinatorial target is a terminal path-decomposition lemma for subcubic graphs:
+  with `h₃` degree-three vertices and disjoint terminal sets `U, V` of degree at
+  most two, first and last bags `U, V` and width
+  `max(|U|, |V|) + h₃/2 + ⌈log₂(h + 1)⌉ + 3`. The target coefficient is
+  `p = (3/(4π)) arccos(5/6)`, `L = 1 + 2π/(3 arccos(5/6)) ≈ 4.5760`, and needs the
+  universal all-prefix theorem with arbitrary positive slack, not a bisection
+  estimate.
+- [ ] **Rigidity and local repair.** Audit the four-star distance-kernel rigidity
+  lemma first. A compactness argument would give some fixed improvement `δ > 0`
+  over the two-sided coefficient, but no numerical `δ` is established.
+
 ## Descriptive complexity expansion
 
 The expansion prompted by Senellart and Gnatenko's September 2026 paper is
