@@ -836,6 +836,7 @@ these facts are stated in the chapter on encodings
 \begin{lemma}[Guess and verify]
   \label{lem:polytime-guess-verify}
   \lean{Complexity.mem_NP_of_poly_witness, Complexity.mem_NP_of_linear_witness,
+    Complexity.NP.mem_NP_of_linear_witness,
     Complexity.SAT.language_mem_NP_of_linear_witness_verifierP_direct}
   \leanok
   \uses{def:NP, def:P, def:pair, def:pairlang}
@@ -862,9 +863,10 @@ these facts are stated in the chapter on encodings
   checks the original verifier on the unpadded pair and checks that the ruler
   is long enough, which is in $\cc{P}$ by intersection and a length-comparison
   verdict function, and the language is pulled back along the padding map.
-  The polynomial statement and the first linear one live in
-  \texttt{Classes/NP/Internal/GuessVerify.lean}, the relational one in
-  \texttt{SAT/Internal/LinearGuessVerify.lean}.
+  The polynomial statement is in \texttt{Classes/NP/Verifier.lean} and both
+  linear ones in \texttt{Classes/NP/Verifier/Linear.lean};
+  \texttt{SAT/Internal/LinearGuessVerify.lean} keeps an older relational form
+  proved through a $\mathrm{SAT}$-specialized guess-and-verify machine.
 \end{proof}
 
 \begin{theorem}[$\cc{FNP}$ witnesses give $\cc{NP}$]
@@ -1103,14 +1105,14 @@ these facts are stated in the chapter on encodings
 \end{theorem}
 \begin{proof}
   \leanok
+  \uses{lem:polytime-guess-verify}
   Unary variable indices give $\max \mathrm{var}(\varphi) \le |z|$, so a
   satisfying assignment can be truncated to length at most $|z| + 1$; this
   makes $z \in \mathrm{SAT}$ equivalent to the existence of a witness. The
   three-work-tape deterministic verifier parses the formula and evaluates it
-  at the witness, and a $\mathrm{SAT}$-specialized guess-and-verify machine
-  turns it into a nondeterministic decider. This proof is independent of the
-  generic finite-verifier compiler used in
-  Lemma~\ref{lem:polytime-guess-verify}.
+  at the witness, so the pair language is in $\cc{P}$, and the relational
+  linear case of Lemma~\ref{lem:polytime-guess-verify}, which runs the generic
+  finite-verifier compiler, gives $\mathrm{SAT} \in \cc{NP}$.
 \end{proof}
 
 \begin{theorem}[Cook--Levin]
@@ -1303,22 +1305,17 @@ these facts are stated in the chapter on encodings
 
 \section{Open directions}
 
-Two refactors do not fit as nodes.
+One refactor does not fit as a node.
 
 \begin{itemize}
   \item \textbf{Re-proving bespoke machines through Cobham.} The
-    $\mathrm{SAT}$ verifier and guess-and-verify machine behind
-    Theorem~\ref{thm:polytime-sat-np} take roughly 10.5 thousand lines, the
+    $\mathrm{SAT}$ verifier behind Theorem~\ref{thm:polytime-sat-np} and the
+    older $\mathrm{SAT}$-specialized guess-and-verify machine take roughly
+    10.5 thousand lines, the
     Cook--Levin emitter and its assembly about 6.8 thousand, and the Tseitin
     transducer of Lemma~\ref{lem:polytime-tseitin} about 5 thousand. With the
     loops of Lemma~\ref{lem:polytime-fp-combinators} and the streaming folds of
     Lemma~\ref{lem:polytime-fp-streaming}, each should become
     a short Cobham program plus a correctness proof about ordinary Lean
     functions, as already done for the Sipser--Lautemann matrix verdict.
-  \item \textbf{Surface placement.} Lemma~\ref{lem:polytime-guess-verify}
-    (\texttt{mem\_NP\_of\_poly\_witness} and \texttt{mem\_NP\_of\_linear\_witness})
-    lives in \texttt{Classes/NP/Internal} and its relational linear form in
-    \texttt{SAT/Internal}; these are general tools and belong in a surface
-    module under \texttt{Classes/NP}, as Lemma~\ref{lem:polytime-iterate}
-    now has one in \texttt{Classes/P/Iterate}.
 \end{itemize}
