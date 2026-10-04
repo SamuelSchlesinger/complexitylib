@@ -12,7 +12,8 @@ public import Complexitylib.Algebraic.LinearAlgebra.Tensor.Defs
 
 Proofs behind `Complexitylib.Algebraic.LinearAlgebra.Tensor.BorderRank`: the algebra of
 `RankLE` (sums, scalar multiples, monotonicity, existence of a decomposition), its transport
-along `map` and `subtensor`, and the corresponding closure arguments for `BorderRankLE`.
+along `map` and `subtensor`, the composition of maps (`map_map`, proved on outer products), and
+the corresponding closure arguments for `BorderRankLE`.
 -/
 
 @[expose] public section
@@ -136,7 +137,32 @@ theorem continuous_map : Continuous (map X Y Z : Tensor3 α β γ → Tensor3 α
   unfold map
   fun_prop
 
+theorem map_diagonal [DecidableEq α] [DecidableEq β] [DecidableEq γ] (a : α → ℂ) (b : β → ℂ)
+    (c : γ → ℂ) (T : Tensor3 α β γ) :
+    map (diagonal a) (diagonal b) (diagonal c) T = fun i j k => a i * b j * c k * T i j k := by
+  funext i j k
+  simp [map, diagonal_apply, ite_mul]
+
+theorem map_one [DecidableEq α] [DecidableEq β] [DecidableEq γ] (T : Tensor3 α β γ) :
+    map 1 1 1 T = T := by
+  rw [← diagonal_one, ← diagonal_one, ← diagonal_one, map_diagonal]
+  funext i j k
+  simp
+
 end Map
+
+section MapMap
+
+variable [Fintype α] [Fintype β] [Fintype γ] [Fintype α'] [Fintype β'] [Fintype γ']
+variable {α'' β'' γ'' : Type*}
+
+theorem map_map (X : Matrix α' α ℂ) (Y : Matrix β' β ℂ) (Z : Matrix γ' γ ℂ)
+    (X' : Matrix α'' α' ℂ) (Y' : Matrix β'' β' ℂ) (Z' : Matrix γ'' γ' ℂ) (T : Tensor3 α β γ) :
+    map X' Y' Z' (map X Y Z T) = map (X' * X) (Y' * Y) (Z' * Z) T := by
+  obtain ⟨u, v, w, rfl⟩ := rankLE_card_mul_card T
+  simp only [map_finset_sum, map_outer, Matrix.mulVec_mulVec]
+
+end MapMap
 
 section Subtensor
 

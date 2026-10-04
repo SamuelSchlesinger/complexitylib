@@ -22,9 +22,9 @@ For 3-tensors `T : Tensor3 α β γ` (see `Complexitylib.Algebraic.LinearAlgebra
   of tensors (`isClosed_setOf_borderRankLE`). `borderRank` is attained, and
   `borderRank T ≤ tensorRank T`.
 * **Linear maps on the factors.** `map X Y Z` sends outer products to outer products
-  (`map_outer`), is additive and continuous, so it preserves `RankLE` and `BorderRankLE`: rank
-  and border rank do not increase under `X ⊗ Y ⊗ Z` (`tensorRank_map_le`,
-  `borderRank_map_le`). Taking `Y = Z = 1` gives restriction or projection along the first
+  (`map_outer`), is additive and continuous, and composes as matrices multiply (`map_map`), so
+  it preserves `RankLE` and `BorderRankLE`: rank and border rank do not increase under
+  `X ⊗ Y ⊗ Z` (`tensorRank_map_le`, `borderRank_map_le`). Taking `Y = Z = 1` gives restriction or projection along the first
   factor by any linear map `ℂ^α → ℂ^α'`.
 * **Reindexing.** `subtensor` (deleting, permuting, or repeating slices in any factor) also
   preserves `RankLE` and `BorderRankLE`.
@@ -172,6 +172,24 @@ theorem map_sum {ι : Type*} (s : Finset ι) (T : ι → Tensor3 α β γ) :
 
 theorem continuous_map : Continuous (map X Y Z : Tensor3 α β γ → Tensor3 α' β' γ') :=
   Internal.continuous_map X Y Z
+
+/-- Diagonal matrices scale the coordinates. -/
+theorem map_diagonal [DecidableEq α] [DecidableEq β] [DecidableEq γ] (a : α → ℂ) (b : β → ℂ)
+    (c : γ → ℂ) (T : Tensor3 α β γ) :
+    map (Matrix.diagonal a) (Matrix.diagonal b) (Matrix.diagonal c) T =
+      fun i j k => a i * b j * c k * T i j k :=
+  Internal.map_diagonal a b c T
+
+/-- The identity maps fix every tensor. -/
+theorem map_one [DecidableEq α] [DecidableEq β] [DecidableEq γ] (T : Tensor3 α β γ) :
+    map 1 1 1 T = T :=
+  Internal.map_one T
+
+/-- Applying `X ⊗ Y ⊗ Z` and then `X' ⊗ Y' ⊗ Z'` is applying `X'X ⊗ Y'Y ⊗ Z'Z`. -/
+theorem map_map [Fintype α'] [Fintype β'] [Fintype γ'] {α'' β'' γ'' : Type*}
+    (X' : Matrix α'' α' ℂ) (Y' : Matrix β'' β' ℂ) (Z' : Matrix γ'' γ' ℂ) (T : Tensor3 α β γ) :
+    map X' Y' Z' (map X Y Z T) = map (X' * X) (Y' * Y) (Z' * Z) T :=
+  Internal.map_map X Y Z X' Y' Z' T
 
 /-- Linear maps on the factors do not increase rank. -/
 theorem RankLE.map {T : Tensor3 α β γ} {r : ℕ} (h : T.RankLE r) : (map X Y Z T).RankLE r :=
