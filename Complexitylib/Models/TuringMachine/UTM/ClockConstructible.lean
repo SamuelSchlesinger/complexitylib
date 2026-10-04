@@ -15,7 +15,8 @@ public import Mathlib.Tactic.Ring.RingNF
 `TM.ClockConstructible g` is the constructibility hypothesis used by the
 proved time hierarchy theorem in `Complexitylib.Classes.Hierarchy`: an
 8-tape machine can write the unary clock `regTape (g n)` on work tape 6 in time
-`O(g n + n)`, ghost-preserving the rest of the diagonalizer's tape layout.
+`O(g n + n)`, ghost-preserving the input and the other work tapes of the
+diagonalizer's tape layout and keeping the output tape `▷`-clean and parked.
 
 Contents:
 
@@ -82,7 +83,8 @@ private theorem outF_read_ne_start {out : Tape} (h : outF out) :
     theorem. `g` is clock-constructible if some 8-tape machine, started on
     input `x` in the diagonalizer's tape layout, writes the unary register
     `regTape (g |x|)` on work tape 6 within `C * (g |x| + |x| + 1)` steps,
-    disturbing nothing else.
+    preserving the input and every other work tape and leaving the output
+    tape `▷`-clean with its head at cell 1.
 
     The definition is deliberately **layout-pinned** rather than maximally
     general: the diagonalizer `D` is an 8-tape machine whose UTM phases run
@@ -107,8 +109,10 @@ private theorem outF_read_ne_start {out : Tape} (h : outF out) :
       (`transitionInput` forces the input head to ≥ 1 at every phase
       boundary, so a head-0 input can never reach a mid-sequence phase) —
       and is returned to cell 1 (needed to chain clock phases sequentially);
-    * the output tape must be `▷`-clean with head parked at cell 1, and is
-      returned in the same state (clock machines never write the output).
+    * the output tape must be `▷`-clean with head parked at cell 1, and must
+      again be `▷`-clean with head at cell 1 at the end; its contents are not
+      otherwise constrained (the clock machines built here never write the
+      output, but the definition does not require this).
 -/
 def ClockConstructible (g : ℕ → ℕ) : Prop :=
   ∃ (tm : TM 8) (C : ℕ),

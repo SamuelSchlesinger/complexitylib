@@ -17,7 +17,10 @@ compatibility. They preserve arbitrary non-marker extra tapes with the source's
 unchanged time bound; the clocked UTM uses them to pin tape 6 while running a
 six-tape phase.
 
-The clock machines below are both `TM 7`, acting on work tape 6 (`clkT`),
+The module also defines two standalone clock machines. They are not part of
+the clocked universal machine, whose loop uses the frontier-parked variants
+`decFrontierTM` and `orZeroTM` from `UTM/Internal/ClockFrontier.lean`; nothing
+in the library uses them. Both are `TM 7`, acting on work tape 6 (`clkT`),
 which holds a unary counter (`1`s on cells `1..v`, head parked at 1):
    - `decClockTM` — scan right to the last mark, blank it, rewind to
      cell 1; a zero counter is left unchanged. Spec: `decClockTM_hoareTime`
@@ -84,7 +87,9 @@ instance : Fintype ClockPhase where
 /-- **Decrement the clock**: scan right over the marks on tape `clkT`,
     erase the last one, rewind to cell 1. From `v` marks to `v - 1` marks
     in at most `2v + 6` steps; every other tape idles throughout (and is
-    exactly preserved while parked). The zero clock is left unchanged. -/
+    exactly preserved while parked). The zero clock is left unchanged.
+    Standalone: the clocked universal machine uses `decFrontierTM`
+    instead. -/
 def decClockTM : TM 7 where
   Q := ClockPhase
   qstart := .scan
@@ -672,7 +677,8 @@ instance : Fintype ZeroTestPhase where
 /-- **Clock zero test**: read clock cell 1 (head parked at 1) and write
     the verdict to the real output cell 1 — `1` if it is blank (the
     counter is zero), else `0` — leaving the output head at cell 1;
-    then halt. Every work tape and the input tape idle. -/
+    then halt. Every work tape and the input tape idle. Standalone: the
+    clocked universal machine uses `orZeroTM` instead. -/
 def zeroTestTM : TM 7 where
   Q := ZeroTestPhase
   qstart := .test

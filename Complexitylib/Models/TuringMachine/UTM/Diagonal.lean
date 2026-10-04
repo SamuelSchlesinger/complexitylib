@@ -26,8 +26,10 @@ theorem. On input `x` it:
    the unary clock `regTape (g |x|)` on work tape 6 (the abstract
    clock-constructibility witness `clk`), runs the clocked universal
    machine on the self-pair (`retargetInput clockedUtmTM`), and finally
-   **negates** output cell 1 (`negOutTM`) — accepting exactly when the
-   simulated machine does *not* accept within `g |x|` steps.
+   **negates** output cell 1 (`negOutTM`). If the simulated machine halts
+   within `g |x|` steps, `D` accepts exactly when that run's output cell 1
+   is not `1`; if it is still running after `g |x|` steps, the clocked
+   machine's timeout sentinel `1` is negated and `D` rejects (outputs `0`).
 
 ## Main definitions
 
@@ -77,9 +79,9 @@ open UTMBody
 
 /-- The body of `ClockConstructible`, with the machine and constant
     exposed: `tm` writes the unary clock `regTape (g |x|)` on work tape 6
-    within `C * (g |x| + |x| + 1)` steps, framing the rest of the
-    diagonalizer's tape layout. See `ClockConstructible` for the design
-    discussion. -/
+    within `C * (g |x| + |x| + 1)` steps, preserving the input and the other
+    work tapes and leaving the output tape `▷`-clean with its head at cell 1.
+    See `ClockConstructible` for the design discussion. -/
 def ClockWitness (tm : TM 8) (C : ℕ) (g : ℕ → ℕ) : Prop :=
   ∀ (x : List Bool) (work₀ : Fin 8 → Tape),
     (∀ i, 1 ≤ (work₀ i).head ∧ (work₀ i).read ≠ Γ.start) →

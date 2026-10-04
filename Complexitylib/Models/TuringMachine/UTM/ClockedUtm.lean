@@ -36,9 +36,13 @@ with the unary clock `V` preloaded on the clock tape (`clkT`):
 * `clockedUtmTM_hoareTime_timeout` — if the interpreted machine is still
   running after `V ≥ 1` steps, output cell 1 holds the sentinel `Γ.one`;
 
-both within `clockedUtmTime α x V` steps from the started tapes
-`clockedUtmPre α x V` (the shape delivered by the diagonalizer's
-`retargetInput` mid-sequence).
+both for a description `α` satisfying `TerminatedRegion α`, within
+`clockedUtmTime α x V` steps from the started tapes `clockedUtmPre α x V`:
+input `pair α x` with its head at cell 1, the six UTM tapes blank with heads
+at cell 1, the clock tape equal to `regTape V`, and the output tape blank
+with its head at cell 1. The diagonalizer's clock witness leaves the output
+tape only `▷`-clean, so `UTM/Diagonal.lean` re-derives both triples for that
+weaker output precondition rather than applying these directly.
 -/
 
 

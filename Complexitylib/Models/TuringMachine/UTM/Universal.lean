@@ -18,8 +18,9 @@ public import Complexitylib.Models.TuringMachine.Deterministic
   region side condition, satisfied by every canonical encoding), if the
   interpreted machine decides `L` in time `T`, then the fixed machine
   `utmTM` decides membership of `x` from the input `pair α x` within
-  `utmTime α (T |x|) |x|` steps — **linear in `T` with per-description
-  constants**.
+  `utmTime α (T |x|) |x|` steps — **linear in `T` and `|x|`**: a
+  per-description multiple of `T`, plus `4 |x|` for parsing the input, plus a
+  per-description constant.
 * `utmTM_universal` — one fixed six-work-tape machine universally simulates
   *every* multi-tape decider: for each `TM k` deciding `L` in time `T`
   there is a description `α` such that `utmTM` decides `L`'s membership
@@ -35,8 +36,10 @@ namespace Complexity
 namespace TM.UTMBody
 
 /-- Total running time of the universal machine on `pair α x` when the
-    simulated machine halts within `T` steps (`n = |x|`). Linear in `T`;
-    all other dependence is on the description alone. -/
+    simulated machine halts within `T` steps (`n = |x|`). Linear in `T`
+    and `n`: the coefficient of `T` and the additive constant depend on the
+    description alone, and `n` enters only through the term
+    `4 * (2 * α.length + 2 + n)` for parsing the input `pair α x`. -/
 @[expose]
 def utmTime (α : List Bool) (T n : ℕ) : ℕ :=
   4 * (2 * α.length + 2 + n) + 4 * (groupPairs α).length + 25 +
