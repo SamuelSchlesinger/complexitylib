@@ -25,8 +25,8 @@ equal to that entropy. Balanced padding therefore gives the circuit bound
 `1 + 1/A` for every graph-ordering coefficient `A > 0`, and shifting the
 eventual statement measures it at every sufficiently large full input length.
 The proved ordering bound with `A = 1/3` gives the coefficient four, and the
-Gaussian edge-score bound with `A = 2(3/π)(√2 - 1)/√(5 + 2√2)` gives
-`1 + π(√2 + 1)√(5 + 2√2)/6`; its rational weakening `A = 2/7` gives `9/2`.
+Gaussian edge-score bound with `A = (3/π) arccos ((1 + 2√2)/4)` gives
+`1 + π/(3 arccos((1 + 2√2)/4))`; its rational weakening `A = 9/32` gives `41/9`.
 -/
 
 public section
@@ -76,21 +76,21 @@ theorem sourceReductionHardFamily_eventually_lt_size {ε : ℝ} (hε : 0 < ε) :
 theorem sourceReductionHardFamily_eventually_lt_size_gaussian {ε : ℝ} (hε : 0 < ε) :
     ∀ᶠ n in atTop, ∀ circuit : Circuit Binary.signature n 1,
       circuit.Computes Binary.interpretation (fun x _ => sourceReductionHardFamily n x) →
-        (1 + Real.pi * (Real.sqrt 2 + 1) * Real.sqrt (5 + 2 * Real.sqrt 2) / 6 - ε) * n <
+        (1 + Real.pi / (3 * Real.arccos ((1 + 2 * Real.sqrt 2) / 4)) - ε) * n <
           circuit.size := by
   have bound := sourceReductionHardFamily_eventually_lt_size_of_orderingBound
     (mul_pos two_pos Gaussian.frontierCoefficient_pos)
     Multigraph.exists_orderingBound_frontier hε
   rwa [Gaussian.one_add_inv_two_mul_frontierCoefficient] at bound
 
-theorem sourceReductionHardFamily_eventually_lt_size_nine_div_two {ε : ℝ} (hε : 0 < ε) :
+theorem sourceReductionHardFamily_eventually_lt_size_fortyOne_div_nine {ε : ℝ} (hε : 0 < ε) :
     ∀ᶠ n in atTop, ∀ circuit : Circuit Binary.signature n 1,
       circuit.Computes Binary.interpretation (fun x _ => sourceReductionHardFamily n x) →
-        (9 / 2 - ε) * n < circuit.size := by
+        (41 / 9 - ε) * n < circuit.size := by
   filter_upwards [sourceReductionHardFamily_eventually_lt_size_of_orderingBound
-    (by norm_num : (0 : ℝ) < 2 / 7) Multigraph.exists_orderingBound_two_div_seven hε]
+    (by norm_num : (0 : ℝ) < 9 / 32) Multigraph.exists_orderingBound_nine_div_thirtyTwo hε]
     with n hn circuit computes
   have := hn circuit computes
-  rwa [show (1 : ℝ) + 1 / (2 / 7) = 9 / 2 by norm_num] at this
+  rwa [show (1 : ℝ) + 1 / (9 / 32) = 41 / 9 by norm_num] at this
 
 end Algebraic.Cutwidth.Extractor.Internal

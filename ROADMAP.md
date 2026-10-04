@@ -337,9 +337,9 @@ The circuit coefficient is `1 + 1/A` for any graph-ordering coefficient `A > 0`
 coefficient `c` gives `A = 2c` (`eventually_lt_size_of_cutwidthBound`,
 `eventually_lt_size_of_pathwidthCoefficient`). The Gaussian distance-kernel layout
 proves the cutwidth coefficient `c = (3/π)(3 - 2√2)`, and the Gaussian edge-score
-decomposition proves the pathwidth coefficient `p = (3/π)(√2 - 1)/√(5 + 2√2) ≈ 0.14137`,
+decomposition proves the pathwidth coefficient `p = (3/(2π)) arccos ((1 + 2√2)/4) ≈ 0.14035`,
 so the explicit family needs more than
-`(1 + π(√2 + 1)√(5 + 2√2)/6 - ε) n ≈ (4.5368 - ε) n` gates
+`(1 + π/(3 arccos((1 + 2√2)/4)) - ε) n ≈ (4.5625 - ε) n` gates
 (`sourceReductionHardFamily_eventually_lt_size_gaussian`). The unchecked items below
 are unreviewed proof candidates. Each must prove its graph lemma for every large cubic
 graph, controlling all prefixes of one ordering simultaneously, before its constant
@@ -353,14 +353,22 @@ nor affine-aware counting is known to add to it.
   decompositions (`Gaussian.exists_frontier_pathwidthBound`): scoring each edge by
   its normalized endpoint sum makes every threshold a pairwise event, so the
   Gaussian-star comparison reduces to the vector inequality
-  `‖Σ y_e‖ ≥ ⟨Σ y_e, x_v⟩` and concavity of `tanHalf`, with no positive-threshold
+  `‖Σ y_e‖ ≥ ⟨Σ y_e, x_v⟩` and concavity of `arccos`, with no positive-threshold
   correction.
-- [ ] **Exact crossing probability.** Replace the bound `(2/π) tan(θ/2)` by
-  Sheppard's `θ/π`, `θ = arccos ρ`, at every threshold. This needs the angle law
-  of the planar Gaussian and the maximization of the crossing probability at
-  threshold zero (already proved for the bound in use). With concavity of `arccos`
-  on `[0, 1]` it lifts the edge-score coefficient to
-  `p = (3/(2π)) arccos((1 + 2√2)/4) ≈ 0.14035`, `L ≈ 4.5625`.
+- [x] **Exact crossing probability.** Done (`gaussPi_between_le_arccos`): Sheppard's
+  `arccos ρ / π` bounds the crossing probability at every threshold, giving
+  `p = (3/(2π)) arccos((1 + 2√2)/4) ≈ 0.14035` and `L ≈ 4.5625`.
+- [ ] **Nonlinear smoothing of edge keys.** Every factor-of-iid *linear* Gaussian edge
+  key has adjacent-edge correlation at most `(1 + 2√2)/4` on the cubic tree (the top of the
+  line-graph spectrum), so `0.14035` is optimal among linear keys. Monte Carlo on the tree
+  suggests that nonlinear local smoothing beats it: replacing each edge key by the median of
+  itself and its four neighbours gives about `0.1346`, and iterating a trimmed mean of the
+  five keys gives `0.1344, 0.1319, 0.1305, 0.1294` after one to four rounds (that is,
+  `L ≈ 4.86`). Ordering each gate of a fan-out-two core by the median of its three signal
+  scores and counting crossing signals gives about `0.1312` per core vertex. These are
+  numerical observations only; a proof needs bounds on nonlinear functionals of correlated
+  Gaussians that hold in every cubic graph, which none of the current pairwise arguments
+  provide.
 - [ ] **Two-sided sweeps.** Sweep negative edges by their larger score and positive
   edges by their smaller score, joined through the sign-crossing graph. The
   combinatorial target is a terminal path-decomposition lemma for subcubic graphs:

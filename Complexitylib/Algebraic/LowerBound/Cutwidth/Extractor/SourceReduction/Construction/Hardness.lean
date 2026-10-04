@@ -17,7 +17,7 @@ import
 # Explicit deterministic circuit lower bounds above four
 
 The fixed family `sourceReductionHardFamily` requires more than
-`(1 + π(√2 + 1)√(5 + 2√2)/6 - ε) * n ≈ (4.5368 - ε) * n` binary gates at every
+`(1 + π/(3 arccos((1 + 2√2)/4)) - ε) * n ≈ (4.5625 - ε) * n` binary gates at every
 sufficiently large input length, for every positive `ε`. No extractor,
 entropy, or graph premise remains. `Construction.Uniform` supplies the single
 polynomial-time evaluator and its exact agreement with this same family.
@@ -26,8 +26,8 @@ The same family needs more than `(1 + 1/A - ε) * n` gates whenever the
 graph-ordering hypothesis `Multigraph.OrderingBound A η C` holds for some
 `A > 0` at every positive slack. The cubic pathwidth bound gives `A = 1/3`
 and the coefficient four; the Gaussian edge-score decomposition (`Cutwidth.Gaussian`)
-gives `A = 2(3/π)(√2 - 1)/√(5 + 2√2) ≈ 0.28274`, and its rational weakening `A = 2/7`
-gives the coefficient `9/2`.
+gives `A = (3/π) arccos ((1 + 2√2)/4) ≈ 0.28070`, and its rational weakening `A = 9/32`
+gives the coefficient `41/9`.
 -/
 
 public section
@@ -56,23 +56,23 @@ theorem sourceReductionHardFamily_eventually_lt_size {ε : ℝ} (hε : 0 < ε) :
 
 /-- **The Gaussian bound for the explicit family.** Every full-binary-basis circuit for the
 fixed uniformly computable hard family has more than
-`(1 + π(√2 + 1)√(5 + 2√2)/6 - ε) n ≈ (4.5368 - ε) n` gates at every sufficiently large full
+`(1 + π/(3 arccos((1 + 2√2)/4)) - ε) n ≈ (4.5625 - ε) n` gates at every sufficiently large full
 input length, for every positive `ε`. -/
 theorem sourceReductionHardFamily_eventually_lt_size_gaussian {ε : ℝ} (hε : 0 < ε) :
     ∀ᶠ n in Filter.atTop, ∀ circuit : Circuit Binary.signature n 1,
       circuit.Computes Binary.interpretation
         (fun x _ => Extractor.sourceReductionHardFamily n x) →
-        (1 + Real.pi * (Real.sqrt 2 + 1) * Real.sqrt (5 + 2 * Real.sqrt 2) / 6 - ε) * n <
+        (1 + Real.pi / (3 * Real.arccos ((1 + 2 * Real.sqrt 2) / 4)) - ε) * n <
           circuit.size :=
   Extractor.Internal.sourceReductionHardFamily_eventually_lt_size_gaussian hε
 
-/-- **The rational coefficient `9/2`.** The rational ordering coefficient `2/7` gives the
-explicit family a `(9/2 - ε) n` lower bound at its full input length. -/
-theorem sourceReductionHardFamily_eventually_lt_size_nine_div_two {ε : ℝ} (hε : 0 < ε) :
+/-- **The rational coefficient `41/9`.** The rational ordering coefficient `9/32` gives the
+explicit family a `(41/9 - ε) n` lower bound at its full input length. -/
+theorem sourceReductionHardFamily_eventually_lt_size_fortyOne_div_nine {ε : ℝ} (hε : 0 < ε) :
     ∀ᶠ n in Filter.atTop, ∀ circuit : Circuit Binary.signature n 1,
       circuit.Computes Binary.interpretation
         (fun x _ => Extractor.sourceReductionHardFamily n x) →
-        (9 / 2 - ε) * n < circuit.size :=
-  Extractor.Internal.sourceReductionHardFamily_eventually_lt_size_nine_div_two hε
+        (41 / 9 - ε) * n < circuit.size :=
+  Extractor.Internal.sourceReductionHardFamily_eventually_lt_size_fortyOne_div_nine hε
 
 end Algebraic.Cutwidth

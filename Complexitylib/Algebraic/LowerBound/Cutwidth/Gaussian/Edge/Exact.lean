@@ -6,7 +6,7 @@ Authors: Samuel Schlesinger
 
 module
 public import Complexitylib.Algebraic.LowerBound.Cutwidth.Gaussian.Edge
-public import Complexitylib.Algebraic.LowerBound.Cutwidth.Gaussian.Frontier.Star
+public import Complexitylib.Algebraic.LowerBound.Cutwidth.Gaussian.Frontier.Star.Defs
 public import Mathlib.Analysis.SpecialFunctions.Trigonometric.Arctan
 public import Mathlib.Analysis.SpecialFunctions.Trigonometric.Inverse
 import Complexitylib.Algebraic.LowerBound.Cutwidth.Gaussian.Edge.Exact.Internal

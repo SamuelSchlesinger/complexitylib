@@ -8,16 +8,18 @@ module
 public import Complexitylib.Algebraic.LowerBound.Cutwidth.Gaussian.Frontier.Internal.Vector
 public import Complexitylib.Algebraic.LowerBound.Cutwidth.Gaussian.Frontier.Order
 public import Complexitylib.Algebraic.LowerBound.Cutwidth.Gaussian.Frontier.Star
+public import Complexitylib.Algebraic.LowerBound.Cutwidth.Gaussian.Frontier.Arccos
+public import Complexitylib.Algebraic.LowerBound.Cutwidth.Gaussian.Edge.Exact
 public import Complexitylib.Algebraic.LowerBound.Cutwidth.Gaussian.Layout.Internal.Expectation
 
 /-!
 # Expected straddling vertices of the edge-score order
 
-A threshold separates two Gaussian edge scores with probability at most
-`(2/π) tanHalf ρ'`, where `ρ'` is the correlation of the edge vectors. The three edge vectors
+A threshold separates two Gaussian edge scores with probability at most `arccos ρ' / π`
+(Sheppard's bound), where `ρ'` is the correlation of the edge vectors. The three edge vectors
 at a vertex are within correlation `√((1 + ρ₀)/2)` of the vertex row, so the star inequality
-bounds their summed crossing ratios. A straddling vertex has at least four separated ordered
-pairs, so it straddles a threshold with probability at most `(3/π) tanHalf ((1 + 3ρ₀)/4)`.
+bounds their summed angles. A straddling vertex has at least four separated ordered pairs,
+so it straddles a threshold with probability at most `(3/(2π)) arccos ((1 + 3ρ₀)/4)`.
 -/
 
 @[expose] public section
@@ -29,21 +31,7 @@ open scoped Classical
 
 /-- The per-vertex straddling bound for edge correlations at least `ρ₀`. -/
 noncomputable def frontierBound (ρ₀ : ℝ) : ℝ :=
-  3 / Real.pi * tanHalf ((1 + 3 * ρ₀) / 4)
-
-/-- A threshold separates two unit Gaussian forms with probability at most
-`(2/π) tanHalf` of their correlation. -/
-theorem gaussPi_between_le_tanHalf {ι : Type} [Fintype ι] {α β : ι → ℝ}
-    (hα : ∑ i, α i ^ 2 = 1) (hβ : ∑ i, β i ^ 2 = 1) (hx : -1 < ∑ i, α i * β i) (t : ℝ) :
-    (gaussPi ι).real {ω | Between t (form α ω) (form β ω)} ≤
-      2 / Real.pi * tanHalf (∑ i, α i * β i) := by
-  set x := ∑ i, α i * β i
-  have hplus : ∑ i, (α i + β i) ^ 2 = 2 * (1 + x) := by rw [sum_add_sq, hα, hβ]; ring
-  have hminus : ∑ i, (β i - α i) ^ 2 = 2 * (1 - x) := by rw [sum_sub_sq, hα, hβ]; ring
-  refine (gaussPi_between_le α β (by rw [hα, hβ]) (by rw [hplus]; linarith) t).trans_eq ?_
-  rw [hplus, hminus, Real.sqrt_mul (by norm_num), Real.sqrt_mul (by norm_num),
-    mul_div_mul_left _ _ (Real.sqrt_pos.mpr (by norm_num : (0 : ℝ) < 2)).ne']
-  rfl
+  3 / (2 * Real.pi) * Real.arccos ((1 + 3 * ρ₀) / 4)
 
 variable {W : Type} [Fintype W] [DecidableEq W] (H : SimpleGraph W) [DecidableRel H.Adj]
 
@@ -137,21 +125,21 @@ theorem measureReal_straddleEvent_le (regular : H.IsRegularOfDegree 3) {q : ℝ}
   -- Each separated pair, then the star inequality.
   have each : ∀ e ∈ s, ∀ e' ∈ s.erase e,
       (gaussPi W).real {ω | Between t (edgeScore H q R ω e) (edgeScore H q R ω e')} ≤
-        2 / Real.pi * tanHalf (∑ z, edgeVector H q R e z * edgeVector H q R e' z) :=
-    fun e he e' he' => gaussPi_between_le_tanHalf (star e he).1
+        Real.arccos (∑ z, edgeVector H q R e z * edgeVector H q R e' z) / Real.pi :=
+    fun e he e' he' => gaussPi_between_le_arccos (star e he).1
       (star e' (Finset.mem_of_mem_erase he')).1 (pair e he e' (Finset.mem_of_mem_erase he')) t
-  have hsum := sum_tanHalf_star_le hxv s hs (fun e => edgeVector H q R e)
+  have hsum := sum_arccos_star_le hxv s hs (fun e => edgeVector H q R e)
     (fun e he => (star e he).1) hκ78 (fun e he => (star e he).2)
   calc 1 / 4 * ∑ e ∈ s, ∑ e' ∈ s.erase e,
         (gaussPi W).real {ω | Between t (edgeScore H q R ω e) (edgeScore H q R ω e')}
       ≤ 1 / 4 * ∑ e ∈ s, ∑ e' ∈ s.erase e,
-          2 / Real.pi * tanHalf (∑ z, edgeVector H q R e z * edgeVector H q R e' z) := by
+          Real.arccos (∑ z, edgeVector H q R e z * edgeVector H q R e' z) / Real.pi := by
         gcongr with e he e' he'
         exact each e he e' he'
-    _ = 1 / 4 * (2 / Real.pi) * ∑ e ∈ s, ∑ e' ∈ s.erase e,
-          tanHalf (∑ z, edgeVector H q R e z * edgeVector H q R e' z) := by
-        simp only [← Finset.mul_sum]; ring
-    _ ≤ 1 / 4 * (2 / Real.pi) * (6 * tanHalf ((3 * κ ^ 2 - 1) / 2)) := by
+    _ = 1 / 4 / Real.pi * ∑ e ∈ s, ∑ e' ∈ s.erase e,
+          Real.arccos (∑ z, edgeVector H q R e z * edgeVector H q R e' z) := by
+        simp only [div_eq_mul_inv, ← Finset.sum_mul]; ring
+    _ ≤ 1 / 4 / Real.pi * (6 * Real.arccos ((3 * κ ^ 2 - 1) / 2)) := by
         gcongr
     _ = frontierBound ρ₀ := by
         rw [hκsq, frontierBound, show (3 * ((1 + ρ₀) / 2) - 1) / 2 = (1 + 3 * ρ₀) / 4 by ring]

@@ -15,7 +15,7 @@ import Mathlib.Analysis.Real.Pi.Bounds
 
 For fixed parameters, a good sample exists once the cubic graph is large. As the edge
 correlation target increases to `2√2/3`, the per-vertex straddling bound
-`(3/π) tanHalf ((1 + 3ρ₀)/4)` decreases to `(3/π)(√2 - 1)/√(5 + 2√2)`; a fine grid with
+`(3/(2π)) arccos ((1 + 3ρ₀)/4)` decreases to `(3/(2π)) arccos ((1 + 2√2)/4)`; a fine grid with
 small deviations brings every bag within any positive slack of that coefficient.
 -/
 
@@ -39,73 +39,71 @@ theorem exists_frontier_of_parameters {q : ℝ} (hq0 : 0 ≤ q) (R : ℕ) {ρ₀
   obtain ⟨D, hD⟩ := exists_good_frontier_sample H regular hq0 R hρ₀ hρ hT hε hM large'
   exact ⟨D, fun k => (hD k).trans_eq (by ring)⟩
 
-theorem continuousAt_tanHalf {x : ℝ} (hx : -1 < x) : ContinuousAt tanHalf x := by
-  unfold tanHalf
-  refine ContinuousAt.div ?_ ?_ (Real.sqrt_pos.mpr (by linarith)).ne'
-  · exact (Real.continuous_sqrt.comp (continuous_const.sub continuous_id)).continuousAt
-  · exact (Real.continuous_sqrt.comp (continuous_const.add continuous_id)).continuousAt
-
-theorem tanHalf_frontier_limit :
-    tanHalf ((1 + 3 * (2 * Real.sqrt 2 / 3)) / 4) =
-      (Real.sqrt 2 - 1) / Real.sqrt (5 + 2 * Real.sqrt 2) := by
-  have h2 : Real.sqrt 2 ^ 2 = 2 := Real.sq_sqrt (by norm_num)
-  have hge : 1 ≤ Real.sqrt 2 := by
-    rw [show (1 : ℝ) = Real.sqrt 1 by simp]
-    exact Real.sqrt_le_sqrt (by norm_num)
-  have hminus : 1 - (1 + 3 * (2 * Real.sqrt 2 / 3)) / 4 = (Real.sqrt 2 - 1) ^ 2 / 4 := by
-    ring_nf; rw [h2]; ring
-  have hplus : 1 + (1 + 3 * (2 * Real.sqrt 2 / 3)) / 4 = (5 + 2 * Real.sqrt 2) / 4 := by ring
-  unfold tanHalf
-  rw [hminus, hplus, Real.sqrt_div' _ (by norm_num), Real.sqrt_div' _ (by norm_num),
-    Real.sqrt_sq (by linarith),
-    div_div_div_cancel_right₀ (Real.sqrt_pos.mpr (by norm_num : (0 : ℝ) < 4)).ne']
-
 theorem frontierCoefficient_eq :
-    frontierCoefficient = 3 / Real.pi * tanHalf ((1 + 3 * (2 * Real.sqrt 2 / 3)) / 4) := by
-  rw [tanHalf_frontier_limit, frontierCoefficient]
+    frontierCoefficient =
+      3 / (2 * Real.pi) * Real.arccos ((1 + 3 * (2 * Real.sqrt 2 / 3)) / 4) := by
+  rw [frontierCoefficient]
+  congr 2
+  ring
 
 theorem frontierCoefficient_ge : 1 / 20 ≤ frontierCoefficient := by
-  have hsqrt : (7 : ℝ) / 5 < Real.sqrt 2 := (Real.lt_sqrt (by norm_num)).mpr (by norm_num)
-  have hsqrt' : Real.sqrt 2 < 3 / 2 := (Real.sqrt_lt' (by norm_num)).mpr (by norm_num)
-  have hden : Real.sqrt (5 + 2 * Real.sqrt 2) ≤ 3 :=
-    (Real.sqrt_le_left (by norm_num)).mpr (by nlinarith)
-  have hden0 : 0 < Real.sqrt (5 + 2 * Real.sqrt 2) := Real.sqrt_pos.mpr (by positivity)
+  have hsqrt : Real.sqrt 2 < 71 / 50 := (Real.sqrt_lt' (by norm_num)).mpr (by norm_num)
+  have hpi4 := Real.pi_le_four
+  have hθ : Real.pi / 30 ≤ Real.arccos ((1 + 2 * Real.sqrt 2) / 4) := by
+    have hcos : (1 + 2 * Real.sqrt 2) / 4 ≤ Real.cos (Real.pi / 30) := by
+      have := Real.one_sub_sq_div_two_le_cos (x := Real.pi / 30)
+      have hsq : (Real.pi / 30) ^ 2 ≤ (4 / 30) ^ 2 := by gcongr
+      linarith
+    calc Real.pi / 30 = Real.arccos (Real.cos (Real.pi / 30)) :=
+          (Real.arccos_cos (by positivity) (by linarith [Real.pi_pos])).symm
+      _ ≤ _ := Real.arccos_le_arccos hcos
   unfold frontierCoefficient
-  rw [div_mul_div_comm, le_div_iff₀ (by positivity)]
-  nlinarith [Real.pi_le_four, Real.pi_pos]
+  rw [div_mul_eq_mul_div, le_div_iff₀ (by positivity)]
+  nlinarith [Real.pi_pos]
 
 theorem frontierCoefficient_pos : 0 < frontierCoefficient :=
   lt_of_lt_of_le (by norm_num) frontierCoefficient_ge
 
+theorem arccos_frontier_pos : 0 < Real.arccos ((1 + 2 * Real.sqrt 2) / 4) := by
+  have hsqrt : Real.sqrt 2 < 3 / 2 := (Real.sqrt_lt' (by norm_num)).mpr (by norm_num)
+  exact Real.arccos_pos.mpr (by linarith)
+
 /-- The circuit coefficient `1 + 1/(2p)` of the frontier coefficient `p`. -/
 theorem one_add_inv_two_mul_frontierCoefficient :
     1 + 1 / (2 * frontierCoefficient) =
-      1 + Real.pi * (Real.sqrt 2 + 1) * Real.sqrt (5 + 2 * Real.sqrt 2) / 6 := by
-  have h2 : Real.sqrt 2 ^ 2 = 2 := Real.sq_sqrt (by norm_num)
-  have hlo : (7 : ℝ) / 5 < Real.sqrt 2 := (Real.lt_sqrt (by norm_num)).mpr (by norm_num)
-  have hs : 0 < Real.sqrt (5 + 2 * Real.sqrt 2) := Real.sqrt_pos.mpr (by positivity)
-  have hne : Real.sqrt 2 - 1 ≠ 0 := by linarith
+      1 + Real.pi / (3 * Real.arccos ((1 + 2 * Real.sqrt 2) / 4)) := by
+  have h := arccos_frontier_pos
   unfold frontierCoefficient
   congr 1
   field_simp
-  nlinarith [h2]
 
-/-- The frontier ordering coefficient `2p` is at most `2/7`. -/
-theorem two_mul_frontierCoefficient_le : 2 * frontierCoefficient ≤ 2 / 7 := by
-  have h2 : Real.sqrt 2 ^ 2 = 2 := Real.sq_sqrt (by norm_num)
-  have hhi : Real.sqrt 2 < 141422 / 100000 := (Real.sqrt_lt' (by norm_num)).mpr (by norm_num)
+/-- The frontier ordering coefficient `2p` is at most `9/32`. -/
+theorem two_mul_frontierCoefficient_le : 2 * frontierCoefficient ≤ 9 / 32 := by
   have hlo : (141421 : ℝ) / 100000 < Real.sqrt 2 :=
     (Real.lt_sqrt (by norm_num)).mpr (by norm_num)
-  set s := Real.sqrt (5 + 2 * Real.sqrt 2) with hs
-  have hs2 : s ^ 2 = 5 + 2 * Real.sqrt 2 := Real.sq_sqrt (by positivity)
-  have hs0 : 0 < s := Real.sqrt_pos.mpr (by positivity)
-  have hslo : (27979 : ℝ) / 10000 ≤ s := by nlinarith
-  have hpi := Real.pi_gt_d2
+  have hpi := Real.pi_gt_d4
+  have hpi' := Real.pi_lt_d4
+  set θ := 3 * Real.pi / 32 with hθ
+  have hθ0 : 0 ≤ θ := by positivity
+  have hθ1 : θ ≤ 1 := by rw [hθ]; linarith
+  have hθlo : 0.29451 ≤ θ := by rw [hθ]; linarith
+  have hθhi : θ ≤ 0.29453 := by rw [hθ]; linarith
+  have hcosθ : Real.cos θ ≤ (1 + 2 * Real.sqrt 2) / 4 := by
+    have hb := Real.cos_bound (x := θ) (by rw [abs_of_nonneg hθ0]; exact hθ1)
+    rw [abs_of_nonneg hθ0] at hb
+    have h2 : θ ^ 2 ≥ 0.29451 ^ 2 := by gcongr
+    have h4 : θ ^ 4 ≤ 0.29453 ^ 4 := by gcongr
+    nlinarith [(abs_sub_le_iff.mp hb).1]
+  have harc : Real.arccos ((1 + 2 * Real.sqrt 2) / 4) ≤ θ :=
+    (Real.arccos_le_arccos hcosθ).trans_eq
+      (Real.arccos_cos hθ0 (by rw [hθ]; linarith [Real.pi_pos]))
   unfold frontierCoefficient
-  rw [← hs, show 2 * (3 / Real.pi * ((Real.sqrt 2 - 1) / s)) =
-    6 * (Real.sqrt 2 - 1) / (Real.pi * s) by field_simp; ring,
-    div_le_div_iff₀ (by positivity) (by norm_num)]
-  nlinarith
+  rw [hθ] at harc
+  have : 2 * (3 / (2 * Real.pi) * Real.arccos ((1 + 2 * Real.sqrt 2) / 4)) =
+      3 * Real.arccos ((1 + 2 * Real.sqrt 2) / 4) / Real.pi := by
+    field_simp
+  rw [this, div_le_iff₀ Real.pi_pos]
+  linarith
 
 /-- **Parameters.** For every positive slack some admissible parameters bring the
 edge-score bound within that slack of the frontier coefficient. -/
@@ -117,10 +115,9 @@ theorem exists_frontier_parameters {ξ : ℝ} (hξ : 0 < ξ) :
   have hsqrt_lo : (7 : ℝ) / 5 < Real.sqrt 2 := (Real.lt_sqrt (by norm_num)).mpr (by norm_num)
   have hsqrt_hi : Real.sqrt 2 < 3 / 2 := (Real.sqrt_lt' (by norm_num)).mpr (by norm_num)
   -- A correlation target `ρ₀ < g` with nearly optimal straddling bound.
-  have harg : -1 < (1 + 3 * g) / 4 := by rw [hg]; linarith
   obtain ⟨η, hη, hcont⟩ := Metric.continuousAt_iff.mp
-    ((continuousAt_tanHalf harg).comp (f := fun ρ : ℝ => (1 + 3 * ρ) / 4)
-      (by fun_prop)) (Real.pi * ξ / 12) (by positivity)
+    ((Real.continuous_arccos.comp (by fun_prop : Continuous fun ρ : ℝ => (1 + 3 * ρ) / 4)
+      ).continuousAt (x := g)) (Real.pi * ξ / 6) (by positivity)
   set ρ₀ := g - min η (1 / 4) / 2 with hρ₀
   have hmin : 0 < min η (1 / 4) := lt_min hη (by norm_num)
   have hρ₀g : ρ₀ < g := by rw [hρ₀]; linarith
@@ -135,12 +132,12 @@ theorem exists_frontier_parameters {ξ : ℝ} (hξ : 0 < ξ) :
     have hle := (le_abs_self _).trans this.le
     rw [frontierBound, frontierCoefficient_eq, ← hg]
     have hpi : 0 < Real.pi := Real.pi_pos
-    have : 3 / Real.pi * tanHalf ((1 + 3 * ρ₀) / 4) ≤
-        3 / Real.pi * (tanHalf ((1 + 3 * g) / 4) + Real.pi * ξ / 12) := by
+    have : 3 / (2 * Real.pi) * Real.arccos ((1 + 3 * ρ₀) / 4) ≤
+        3 / (2 * Real.pi) * (Real.arccos ((1 + 3 * g) / 4) + Real.pi * ξ / 6) := by
       gcongr
       linarith
     calc _ ≤ _ := this
-      _ = 3 / Real.pi * tanHalf ((1 + 3 * g) / 4) + ξ / 4 := by field_simp; ring
+      _ = 3 / (2 * Real.pi) * Real.arccos ((1 + 3 * g) / 4) + ξ / 4 := by field_simp; ring
   obtain ⟨q, R, hq0, hρ⟩ := exists_decay_radius hρ₀g
   -- The grid and the deviation slack.
   set ε := min (ξ / 12) (1 / 100) with hε

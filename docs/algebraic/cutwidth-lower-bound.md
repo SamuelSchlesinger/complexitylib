@@ -1,4 +1,4 @@
-# The cutwidth lower bound: `(1 + π(√2 + 1)√(5 + 2√2)/6 − ε) n`
+# The cutwidth lower bound: `(1 + π/(3 arccos((1 + 2√2)/4)) − ε) n`
 
 `Algebraic.LowerBound.Cutwidth` proves a circuit lower bound over the full
 binary basis `B₂`: every gate computes any of the sixteen functions of two
@@ -38,9 +38,9 @@ theorem sourceReductionHardFamily_eventually_lt_size_gaussian
             circuit.size
 ```
 
-The coefficient `1 + π(√2 + 1)√(5 + 2√2)/6` is about `4.5368`.
-`sourceReductionHardFamily_eventually_lt_size_nine_div_two` states the rational
-weakening `(9/2 − ε) n`, and
+The coefficient `1 + π/(3 arccos((1 + 2√2)/4))` is about `4.5625`.
+`sourceReductionHardFamily_eventually_lt_size_fortyOne_div_nine` states the rational
+weakening `(41/9 − ε) n`, and
 `sourceReductionHardFamily_eventually_lt_size` keeps the coefficient-four
 statement `(4 − ε) n` obtained from the cubic pathwidth bound.
 
@@ -71,7 +71,7 @@ The family and threshold are fixed before `ε`. Only `log₂ K(n) = o(n)`
 is required; polynomial thresholds are a special case. Its Gaussian
 counterpart `eventually_lt_size_of_rectangleFree_gaussian` (module
 `Algebraic.LowerBound.Cutwidth.Gaussian`) has the same hypotheses and the
-coefficient `1 + π(√2 + 1)√(5 + 2√2)/6`. The older entry
+coefficient `1 + π/(3 arccos((1 + 2√2)/4))`. The older entry
 points with explicit bisection, pathwidth, or ordering bounds remain available.
 The library proves those graph bounds and adds no axioms.
 
@@ -96,9 +96,9 @@ has `p = 1/6`. `sourceReductionHardFamily_eventually_lt_size_of_orderingBound`
 transports any such coefficient to the same concrete family, and
 `sourceReductionHardFamily_eventually_lt_size` is its case `A = 1/3`.
 The Gaussian cutwidth layout supplies `A = (6/π)(3 − 2√2) ≈ 0.32768`, and the
-Gaussian edge-score decomposition supplies `A = 2p ≈ 0.28274` with
-`p = (3/π)(√2 − 1)/√(5 + 2√2)`; its rational weakening `A = 2/7`
-(`Multigraph.exists_orderingBound_two_div_seven`) gives `9/2`.
+Gaussian edge-score decomposition supplies `A = 2p ≈ 0.28070` with
+`p = (3/(2π)) arccos ((1 + 2√2)/4)`; its rational weakening `A = 9/32`
+(`Multigraph.exists_orderingBound_nine_div_thirtyTwo`) gives `41/9`.
 
 ## Gaussian layouts: ordering coefficient below `1/3`
 
@@ -158,16 +158,18 @@ charged at most a quarter of its separated ordered edge pairs
 
 The edge vectors at `v` have correlation `√((1 + ρ)/2)` with `x_v`, where `ρ` is the
 kernel correlation of the edge. Since `‖Σ y_e‖ ≥ ⟨Σ y_e, x_v⟩`, their pairwise
-correlations average at least `(1 + 3ρ₀)/4`, and `tanHalf x = √(1 − x)/√(1 + x)` is concave
-on `[1/2, 1]` (`sum_tanHalf_star_le`). Each pair is separated with probability at most
-`(2/π) tanHalf` of its correlation, so a vertex straddles a threshold with probability at
-most `(3/π) tanHalf ((1 + 3ρ₀)/4)`. The grid, locality, and second-moment argument are as
+correlations average at least `(1 + 3ρ₀)/4`, and `arccos` is concave on `[0, 1]`
+(`sum_arccos_star_le`). By Sheppard's bound (`gaussPi_between_le_arccos`) a pair with
+correlation `ρ'` is separated by any threshold with probability at most `arccos ρ'/π`: the
+sum and difference of two equal-norm Gaussian forms are independent, the one-dimensional
+Anderson inequality moves the threshold to zero, and the planar angle law
+`P(|Z₁| ≤ k |Z₂|) = (2/π) arctan k` gives the angle. So a vertex straddles a threshold with
+probability at most `(3/(2π)) arccos ((1 + 3ρ₀)/4)`. The grid, locality, and second-moment argument are as
 for the cutwidth layout. With `ρ₀ → 2√2/3`, every large cubic graph has pathwidth at most
-`(p + ξ) h` with `p = (3/π)(√2 − 1)/√(5 + 2√2) ≈ 0.14137`
+`(p + ξ) h` with `p = (3/(2π)) arccos ((1 + 2√2)/4) ≈ 0.14035`
 (`Gaussian.exists_frontier_pathwidthBound`). The median ordering turns this into the
-ordering coefficient `2p ≈ 0.28274 ≤ 2/7` and the circuit coefficient
-`1 + π(√2 + 1)√(5 + 2√2)/6 ≈ 4.5368`. With Sheppard's exact crossing probability the same
-decomposition would give `p = (3/(2π)) arccos((1 + 2√2)/4) ≈ 0.14035` and `L ≈ 4.5625`.
+ordering coefficient `2p ≈ 0.28070 ≤ 9/32` and the circuit coefficient
+`1 + π/(3 arccos((1 + 2√2)/4)) ≈ 4.5625`.
 
 ## Instantiating the family hypothesis
 
@@ -1510,7 +1512,7 @@ route are not prerequisites for this proof.
 | Median ordering | `MedianOrdering.card_cutFinset_key_lt_le` in `Algebraic.LowerBound.Cutwidth.MedianOrdering`: a path decomposition with bags of size at most `p + 1` gives a vertex ordering of a cubic graph with prefix cuts at most `p + 2`. |
 | Expansion | `Compression.exists_linearOrder` and `Multigraph.orderingBound_of_pathwidthBound` in `Algebraic.LowerBound.Cutwidth.Expansion`: `PathwidthBound p ξ N₀` implies `OrderingBound (2 p) (2 ξ) (N₀ + 9)`. `Multigraph.orderingBound_of_cutwidthBound` orders the quotient by a cutwidth key instead: `CutwidthBound c ξ N₀` implies `OrderingBound (2 c) (2 ξ) (N₀ + 8)`. `cutwidthBound_of_pathwidthBound` converts a pathwidth bound to a cutwidth bound with the same coefficient. |
 | Gaussian layout | `Gaussian.sum_unitKernel_mul_ge`, `Gaussian.gaussPi_between_le`, `Gaussian.pi_deviation_le`, and `Gaussian.exists_cutwidthBound` in `Algebraic.LowerBound.Cutwidth.Gaussian`: every large simple cubic graph has prefix cuts at most `((3/π)(3 − 2√2) + ξ) h`; `Multigraph.exists_orderingBound_gaussian` gives the ordering coefficient `(6/π)(3 − 2√2)`, at most `20/61`. |
-| Gaussian pathwidth | `Gaussian.sum_tanHalf_star_le`, `Gaussian.exists_pathDecomposition_of_edgeScore`, and `Gaussian.exists_frontier_pathwidthBound` in `Algebraic.LowerBound.Cutwidth.Gaussian`: every large simple cubic graph has pathwidth at most `((3/π)(√2 − 1)/√(5 + 2√2) + ξ) h`; `Multigraph.exists_orderingBound_frontier` gives the ordering coefficient `2(3/π)(√2 − 1)/√(5 + 2√2) ≤ 2/7`. |
+| Gaussian pathwidth | `Gaussian.gaussPi_between_le_arccos`, `Gaussian.sum_arccos_star_le`, `Gaussian.exists_pathDecomposition_of_edgeScore`, and `Gaussian.exists_frontier_pathwidthBound` in `Algebraic.LowerBound.Cutwidth.Gaussian`: every large simple cubic graph has pathwidth at most `((3/(2π)) arccos ((1 + 2√2)/4) + ξ) h`; `Multigraph.exists_orderingBound_frontier` gives the ordering coefficient `(3/π) arccos ((1 + 2√2)/4) ≤ 9/32`. |
 | Assembly | `lt_size_of_orderingBound` and `eventually_lt_size_of_orderingBound` in `Algebraic.LowerBound.Cutwidth.FourN` give the coefficient `1 + 1/A` from any ordering coefficient `A > 0`; `lt_size_of_log_bounds` and `eventually_lt_size_of_rectangleFree` are the coefficient-four case and handle subexponential thresholds; the original polynomial-threshold entry points remain available. |
 | Extraction | `FlatSumsetExtractor.balanced`, `FlatSumsetExtractor.rectangleFree`, `FlatSumsetExtractor.card_accepting_ge`, and `eventually_hard_of_flatSumsetExtractor` in `Algebraic.LowerBound.Cutwidth.Extractor`. |
 | Balanced padding | `FlatSumsetExtractor.balancePad_rectangleFree` doubles the threshold for any error below `1/2`; `card_accepting_balancePad` proves exact balance and `balancePadEval_mem_FP` preserves any supplied `FP` evaluator. `eventually_lt_size_balancePad_of_flatSumsetExtractor` and its nondeterministic counterpart give the lower bound at the full padded length. |

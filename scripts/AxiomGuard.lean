@@ -143,10 +143,10 @@ def headlineTheorems : List Name := [
   `Algebraic.Cutwidth.Multigraph.exists_orderingBound_twenty_div_sixtyOne,
   `Algebraic.Cutwidth.eventually_lt_size_of_rectangleFree_gaussian,
   `Algebraic.Cutwidth.sourceReductionHardFamily_eventually_lt_size_gaussian,
-  `Algebraic.Cutwidth.sourceReductionHardFamily_eventually_lt_size_nine_div_two,
+  `Algebraic.Cutwidth.sourceReductionHardFamily_eventually_lt_size_fortyOne_div_nine,
   `Algebraic.Cutwidth.Gaussian.exists_frontier_pathwidthBound,
   `Algebraic.Cutwidth.Multigraph.exists_orderingBound_frontier,
-  `Algebraic.Cutwidth.Multigraph.exists_orderingBound_two_div_seven,
+  `Algebraic.Cutwidth.Multigraph.exists_orderingBound_nine_div_thirtyTwo,
   -- Korten's top-down parity lower bounds and the majority extension
   `Complexity.KarchmerWigderson.parity_communication_lower_bound,
   `Complexity.Circuit.parity_wire_lower_bound,
