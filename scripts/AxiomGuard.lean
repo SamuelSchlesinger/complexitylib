@@ -40,8 +40,13 @@ rename smoke test; it does not determine the scope of the axiom audit.
 - **Transitive dependencies.** The axioms of a declaration are collected
   through every constant it uses, including constants from Mathlib and CSLib,
   so a nonstandard axiom anywhere below a library declaration is reported.
-  `sorry` (`sorryAx`) and `native_decide` (`Lean.ofReduceBool`) are caught
-  this way when a declaration depends on them.
+  `sorry` (`sorryAx`) is caught this way when a declaration depends on it.
+  On the pinned toolchain (Lean v4.35.0-rc3) native evaluation no longer goes
+  through `Lean.ofReduceBool`: `native_decide`, `decide +native`, and `bv_decide`
+  each add an auxiliary axiom asserting the evaluated result, named like
+  `t._native.native_decide.ax_1_1` (`_native.decide`, `_native.bv_decide`).
+  It is not allowlisted, so both the axiom and every declaration depending
+  on it are reported.
 - **Trusts the `.olean` files.** The audit reads declarations as the build
   stored them. It does not re-check them independently in the kernel, as a
   tool such as `lean4checker` would.
@@ -52,8 +57,9 @@ rename smoke test; it does not determine the scope of the axiom audit.
 - **Does not see `example`s or `#guard`s.** Neither adds a constant to the
   environment. The executable validation modules close some `example`s with
   `native_decide` and run `#guard`s, as regression tests that trust the
-  compiler; no declaration can depend on them. `scripts/lint_style.py` rejects
-  `native_decide` in every other `.lean` file.
+  compiler; an `example` keeps no auxiliary axiom, and no declaration can
+  depend on it. `scripts/lint_style.py` rejects native evaluation in every
+  other `.lean` file.
 -/
 
 open Lean
