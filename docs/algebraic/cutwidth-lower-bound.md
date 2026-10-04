@@ -34,7 +34,7 @@ theorem sourceReductionHardFamily_eventually_lt_size_gaussian
     ∀ᶠ n in Filter.atTop, ∀ circuit : Circuit Binary.signature n 1,
       circuit.Computes Binary.interpretation
         (fun x _ => Extractor.sourceReductionHardFamily n x) →
-          (1 + Real.pi * (Real.sqrt 2 + 1) * Real.sqrt (5 + 2 * Real.sqrt 2) / 6 - ε) * n <
+          (1 + Real.pi / (3 * Real.arccos ((1 + 2 * Real.sqrt 2) / 4)) - ε) * n <
             circuit.size
 ```
 
