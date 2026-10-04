@@ -50,9 +50,10 @@ abbrev graph : Vocabulary := ofRel 2
     one binary relation E and two constants s, t. -/
 abbrev graphST : Vocabulary := ⟨1, fun _ => 2, 2⟩
 
-/-- The vocabulary used for binary-string examples: one unary relation `S`
-    (the "1-bit" predicate). This legacy name does not itself add order symbols;
-    `Vocabulary.withOrder` in the `Numerical` module supplies strict order. -/
+/-- The vocabulary used for binary-string examples. Despite its legacy name, it
+    is exactly `ofRel 1`: one unary relation `S` (the "1-bit" predicate) and no
+    order, successor, or constant symbols. `Vocabulary.withOrder` in the
+    `Numerical` module adds a strict order. -/
 abbrev stringBuiltinOrder : Vocabulary := ofRel 1
 
 theorem graph_isRelational : graph.IsRelational := rfl

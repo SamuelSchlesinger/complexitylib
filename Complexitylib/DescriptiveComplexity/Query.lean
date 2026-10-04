@@ -11,10 +11,10 @@ public import Complexitylib.DescriptiveComplexity.Isomorphism
   # Boolean Queries
 
   A boolean query over vocabulary V is a property of finite V-structures.
-  A query is order-independent if isomorphic structures give the same answer
-  (Immerman, Chapter 1). The theorem that first-order sentences define
-  order-independent queries is cited as Immerman Proposition 1.16
-  (`Sentence.orderIndependent`).
+  A query is order-independent if it is invariant under isomorphism: isomorphic
+  structures give the same answer (Immerman, Chapter 1). The theorem that
+  first-order sentences define order-independent queries is cited as Immerman
+  Proposition 1.16 (`Sentence.orderIndependent`).
 -/
 
 
@@ -31,9 +31,11 @@ namespace BooleanQuery
 
 variable {V : Vocabulary}
 
-/-- A boolean query is order-independent if isomorphic structures satisfy
-    the same query. This is the key notion: a query defined by a logic is
-    "legitimate" only if it is order-independent. -/
+/-- A boolean query is order-independent if it is invariant under isomorphism:
+    isomorphic structures satisfy it equally. Despite the name, nothing here
+    refers to an ordering of the universe. `Iso` preserves every relation of
+    `V`, so when `V` contains an order symbol only order-preserving
+    isomorphisms are quantified. -/
 def IsOrderIndependent (Q : BooleanQuery V) : Prop :=
   ∀ {A B : FinStruct V}, Nonempty (Iso A B) → (Q A ↔ Q B)
 

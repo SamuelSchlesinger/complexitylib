@@ -41,8 +41,10 @@ including malformed inputs.
 - `FOInterpretation.apply` — the induced structure map, with `apply_idInterp`.
 - `FOReduces` — first-order reducibility between Boolean queries, with reflexivity
   and transitivity.
-- `FOInterpretation.IsQuantifierFree`, `FOProjReduces` — first-order projections,
-  with `FOInterpretation.IsQuantifierFree.comp`, `FOProjReduces.toFOReduces`, and
+- `FOInterpretation.IsQuantifierFree`, `FOProjReduces` — reductions by a
+  quantifier-free interpretation on the same universe, a coarse form of
+  first-order projections (coarser than Immerman's, as described above), with
+  `FOInterpretation.IsQuantifierFree.comp`, `FOProjReduces.toFOReduces`, and
   reflexivity/transitivity.
 -/
 
