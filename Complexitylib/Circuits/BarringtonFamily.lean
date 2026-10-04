@@ -9,15 +9,18 @@ public import Complexitylib.Circuits.BarringtonLength
 public import Mathlib.Data.Nat.Log
 
 /-!
-# Barrington at the family level: `NC¹ ⊆` polynomial-size width-`5` branching programs
+# Barrington for log-depth formula families: polynomial-length width-`5` programs
 
 `Circuits/BarringtonLength.lean` proves the textbook per-formula bound
 `barrington_representation_depth_four` (a formula of depth `d` compiles to a
 width-`5` program of length `≤ 4^d`). This module lifts that to *families*: a
-family of formulas of logarithmic depth
-(`NC¹`) is computed, formula by formula, by a family of width-`5` permutation
-branching programs of **polynomial** length. That is the class-level polynomial-size
-direction of Barrington's characterization, in the nonuniform (per-length) setting.
+family of formulas of logarithmic depth is computed, formula by formula, by a
+family of width-`5` permutation branching programs of **polynomial** length.
+That is the polynomial-size direction of Barrington's characterization, in the
+nonuniform (per-length) setting, for untyped `FormulaFamily` syntax
+(`ℕ → BoolFormula`). It is not stated for the library's `NC1` class; the
+class-level results are `NC1_subset_Width5BP` (in
+`Circuits/CircuitFormula/Family.lean`) and `barrington_equivalence`.
 
 The families here range over the same `ℕ → Bool` assignments the Barrington
 development already uses, so `FormulaFamily.logDepth_polyLength_bp` follows by
@@ -65,11 +68,14 @@ def FormulaFamily := ℕ → BoolFormula
 def FormulaFamily.LogDepth (F : FormulaFamily) : Prop :=
   ∃ c, ∀ n, (F n).depth ≤ c * Nat.log 2 n + c
 
-/-- **Barrington, family level: `NC¹ ⊆` polynomial-size width-`5` branching
-    programs.** A logarithmic-depth formula family is computed, formula by formula,
-    by a family of width-`5` permutation branching programs whose length is bounded
-    by a fixed polynomial `C·(n+1)^p` in the input length — with each program
-    evaluating to a nonidentity `5`-cycle exactly when its formula is true. -/
+/-- **Barrington, family level: log-depth formula families ⊆ polynomial-size
+    width-`5` branching programs.** A logarithmic-depth formula family is computed,
+    formula by formula, by a family of width-`5` permutation branching programs
+    whose length is bounded by a fixed polynomial `C·(n+1)^p` in the input length —
+    with each program evaluating to a nonidentity `5`-cycle exactly when its
+    formula is true, on every total assignment `ℕ → Bool`. The hypothesis is
+    `FormulaFamily.LogDepth`, not membership in the `NC1` class; for that, see
+    `NC1_subset_Width5BP` and `barrington_equivalence`. -/
 theorem FormulaFamily.logDepth_polyLength_bp (F : FormulaFamily) (hF : F.LogDepth) :
     ∃ (R : ℕ → BP 5) (S : ℕ → Perm (Fin 5)) (C p : ℕ),
       (∀ n, S n ≠ 1) ∧

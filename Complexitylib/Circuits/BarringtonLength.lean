@@ -137,7 +137,8 @@ theorem barringtonBound_le (φ : BoolFormula) : barringtonBound φ ≤ 13 ^ φ.s
 /-- The construction bound is also dominated by `17 ^ (depth φ)`. Because depth is
     the `NC¹` measure, this is the load-bearing bound: a formula of depth
     `d = O(log n)` compiles to a width-`5` program of length `17^d = poly(n)` — the
-    `NC¹ ⊆` polynomial-size width-`5` branching programs direction of Barrington. -/
+    log-depth formulas ⊆ polynomial-size width-`5` branching programs direction of
+    Barrington. -/
 theorem barringtonBound_le_pow_depth (φ : BoolFormula) : barringtonBound φ ≤ 17 ^ φ.depth := by
   induction φ with
   | var i => simp [barringtonBound, BoolFormula.depth]
