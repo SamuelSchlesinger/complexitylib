@@ -735,7 +735,11 @@ open direction.
   together with those $\cc{FP}$ builders and the premise that every query of
   the plan has finite complexity on $M$.
   Then $\cc{P} = \cc{NP}$. Equivalently, if $\cc{P} \neq \cc{NP}$, then (i),
-  (iii) and each form of (iv) rule out (ii).
+  (iii) and each form of (iv) rule out (ii). Hypothesis (iv) needs clocks that
+  leave room to print the paired output: it forces $2n + 2 \le p(p(n))$ for
+  every $n$ (the solver form even $2n + 2 \le p(n)$), so it fails for slow
+  admissible clocks such as $p = \mathrm{id}$, where the theorem is vacuous
+  (Lemma~\ref{lem:avg-slow-clock-estimator}).
 \end{theorem}
 \begin{proof}
   \leanok
@@ -755,10 +759,16 @@ open direction.
 
   An earlier formalization demanded finite minima at every instance, an
   estimator correct on every instance, and (inside SoI) a finite joint
-  complexity at every clock $t \ge |x| + |y|$. All three are unsatisfiable (no
-  machine prints a nonempty string in zero steps,
+  complexity at every clock $t \ge |x| + |y|$. These are unsatisfiable for
+  every clock (no machine prints a nonempty string in zero steps,
   Lemma~\ref{lem:avg-no-full-estimator}, and the output-length bound of
-  Definition~\ref{def:avg-soi}), and the current statements avoid all three.
+  Definition~\ref{def:avg-soi}), and the current statements drop them. The
+  query-restricted hypothesis (iv) remains unsatisfiable for slow admissible
+  clocks (Lemma~\ref{lem:avg-slow-clock-estimator}). Ignoring efficiency, an
+  estimator correct on the plan's queries exists exactly when $M$ prints the
+  output $z$ of every query $(z, 1^s)$ of the plan within $p(s)$ steps (the
+  complexity at clock $p(s)$ is then such an estimator); the finiteness premise
+  of the solver form says that $M$ prints $z$ within $s$ steps.
   No instance of hypothesis (i) for concrete universal machines is constructed
   yet.
 \end{proof}

@@ -13,12 +13,12 @@ public import Complexitylib.Metacomplexity.MINCKT.Gap.Multiplicative
 # The multiplicative-hardness consequence of conditional MinKT SoI
 
 This module composes the complete finite spine of Hirahara's conditional MinKT
-argument. An admissible primitive clock supplies a polynomial slack-amplified
-gap clock, an operational condition-first compiler supplies the paired upper
-chain, and one ordinary estimator, correct on the plan's own queries, plus
-time-bounded symmetry of information supplies the conditional estimator. If the induced threshold
-language is in `P`, NP-hardness of the corresponding multiplicative gap forces
-`P = NP`.
+argument. An admissible primitive clock `p` (the theorems' `clock`) supplies a
+polynomial slack-amplified gap clock, an operational condition-first compiler
+supplies the paired upper chain, and one ordinary estimator, correct on the
+plan's own queries, plus time-bounded symmetry of information supplies the
+conditional estimator. If the induced threshold language is in `P`, NP-hardness
+of the corresponding multiplicative gap forces `P = NP`.
 
 Every remaining research obligation stays explicit in the theorem statement;
 in particular, this result does not assert the SoI hypothesis, a concrete
@@ -28,9 +28,22 @@ describes nothing), so the theorems here are not vacuous on that account; the
 remaining hypotheses are what constrain the machines.
 
 The estimator is required to be correct only on the plan's paired and
-condition-only queries, whose clocks dominate their output lengths. Correctness
-on every instance cannot hold for these ordinary parameters
-(`not_satisfiesBounds_ordinaryParameters`).
+condition-only queries. Correctness on every instance cannot hold for these
+ordinary parameters (`not_satisfiesBounds_ordinaryParameters`).
+
+Even on the plan's queries, correctness needs clocks that leave room to print
+the paired output. For `t' = max(t, |x| + |y|)`, the paired query asks for
+`pair x y`, of length `2|x| + |y| + 2`, at source clock `p(t')` and transformed
+clock `p(p(t'))`, while admissibility bounds `p` from below only by
+`t ≤ p(t)`. The estimator hypothesis forces `2n + 2 ≤ p(p(n))` for every `n`
+(`two_mul_add_two_le_clock_clock_of_satisfiesBoundsOn`), and the solver forms'
+finiteness premise forces `2n + 2 ≤ p(n)`
+(`two_mul_add_two_le_clock_of_forall_ne_top`). Both fail for slow admissible
+clocks such as `id` (`isAdmissibleClock_id`, `not_satisfiesBoundsOn_plan_id`),
+where every theorem below is vacuous. The estimator hypothesis can be met
+exactly when the ordinary machine prints every plan query's output within that
+query's transformed clock: the transformed-clock complexity itself is then a
+correct, though not necessarily efficient, estimator.
 -/
 
 
@@ -54,7 +67,10 @@ slack-amplified SoI reduction.
 The clock admissibility hypothesis proves that the final conditional clock is
 both widening and polynomially bounded. Only widening is needed to construct
 the promise; the polynomial bound remains available as part of the public
-parameter theorem. -/
+parameter theorem. Admissibility does not make `hestimate` satisfiable:
+`hestimate` forces `2n + 2 ≤ clock (clock n)`
+(`two_mul_add_two_le_clock_clock_of_satisfiesBoundsOn`), which fails at the
+admissible clock `id` (`not_satisfiesBoundsOn_plan_id`). -/
 theorem P_eq_NP_of_multiplicative_hard_of_SoI
     {ordinaryTapes conditionalTapes : ℕ}
     {clock : ℕ → ℕ} (additive compilerLoss : ℕ)
@@ -161,9 +177,12 @@ an `FP` solver for logarithmic GapMINKT.
 The bounded threshold sweep supplies both the Fact 3.4 estimator sandwich and
 the encoded estimator consumed by the two-query conditional reduction. The
 threshold sweep needs every query of the plan to have finite ordinary
-complexity; that is the explicit premise `hfinite`. It holds when the ordinary
-machine can print strings within the queries' clocks, which dominate their
-output lengths. -/
+complexity at its own source clock; that is the explicit premise `hfinite`,
+which says exactly that the ordinary machine prints every plan query's output
+within that clock. The paired query asks for `pair x y`, of length
+`2|x| + |y| + 2`, within `clock (max t (|x| + |y|))` steps, so `hfinite` forces
+`2n + 2 ≤ clock n` for every `n` (`two_mul_add_two_le_clock_of_forall_ne_top`)
+and fails for slow admissible clocks such as `id`. -/
 theorem P_eq_NP_of_multiplicative_hard_of_SoI_of_logarithmic_solver
     {ordinaryTapes conditionalTapes : ℕ}
     {clock : ℕ → ℕ} (additive compilerLoss : ℕ)
