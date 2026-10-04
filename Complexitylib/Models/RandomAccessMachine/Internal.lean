@@ -25,7 +25,8 @@ This module proves the structural facts about `RAM.run`, `RAM.logTimeUpto`,
   time (`unitTimeUpto_le_logTimeUpto`).
 * **Finite support**: the register file has finite support along any run from
   a finitely-supported start (`run_finiteSupport`), which is what makes the
-  `finsum`-based space measure `RAM.Cfg.space` a genuine finite sum.
+  `finsum`-based space measures `RAM.Cfg.space` and `RAM.Cfg.workSpace`
+  genuine finite sums.
 
 Not intended for human audit: the definitions in `Defs.lean` and the theorem
 statements in the surface module carry the mathematical content.
@@ -276,6 +277,27 @@ theorem run_finiteSupport (fuel : ℕ) (c : Cfg)
 theorem run_initCfg_finiteSupport (fuel : ℕ) (x : List Bool) :
     (Function.support (run P fuel (initCfg x)).regs).Finite :=
   run_finiteSupport P fuel (initCfg x) (initRegs_finiteSupport x)
+
+/-! ### Work space -/
+
+/-- The initial configuration uses no work space: every register still holds
+    its input value. -/
+@[simp] theorem Cfg.workSpace_initCfg (x : List Bool) : (initCfg x).workSpace x = 0 := by
+  simp [Cfg.workSpace, initCfg]
+
+/-- Only registers whose content differs from the initial register file are
+    charged, so along any run from an initial configuration the work-space
+    summand has finite support: `RAM.Cfg.workSpace` is a genuine finite sum. -/
+theorem run_initCfg_workSpace_finiteSupport (fuel : ℕ) (x : List Bool) :
+    (Function.support fun i =>
+      if (run P fuel (initCfg x)).regs i = initRegs x i then 0
+      else bitlen i + bitlen ((run P fuel (initCfg x)).regs i)).Finite := by
+  apply ((run_initCfg_finiteSupport P fuel x).union (initRegs_finiteSupport x)).subset
+  intro i hi
+  simp only [Function.mem_support, ne_eq] at hi
+  by_contra hnot
+  simp only [Set.mem_union, Function.mem_support, ne_eq, not_or, not_not] at hnot
+  exact hi (ite_eq_left (hnot.1.trans hnot.2.symm))
 
 end RAM
 

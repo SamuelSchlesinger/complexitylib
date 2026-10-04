@@ -30,7 +30,8 @@ def DTIME (T : ℕ → ℕ) : Set Language :=
   {L | ∃ (P : Program) (f : ℕ → ℕ), P.DecidesInTime L f ∧ f =O T}
 
 /-- `RAM.DSPACE(S)` is the class of languages decided by a RAM in logarithmic
-space `O(S(n))`. -/
+work space `O(S(n))`. Registers still holding their input value are free (see
+`RAM.Cfg.workSpace`), as the read-only input tape is for `DSPACE`. -/
 def DSPACE (S : ℕ → ℕ) : Set Language :=
   {L | ∃ (P : Program) (f : ℕ → ℕ), P.DecidesInSpace L f ∧ f =O S}
 

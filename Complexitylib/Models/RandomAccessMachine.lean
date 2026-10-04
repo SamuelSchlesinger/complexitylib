@@ -81,8 +81,15 @@ proved in `…/Internal`; the soundness of the cost convention is established in
 ## Main definitions
 
 - `RAM.Instr`, `RAM.Program`, `RAM.Cfg`, `RAM.step`, `RAM.run` — the model
-- `RAM.logTimeUpto`, `RAM.unitTimeUpto`, `RAM.spaceUpto` — the resource measures
+- `RAM.logTimeUpto`, `RAM.unitTimeUpto` — logarithmic time and step count
+- `RAM.workSpaceUpto` — peak work space: registers are charged address plus
+  content bits only while they differ from their initial value, so the
+  unmodified input is free, as the read-only input tape is for Turing machines
+- `RAM.spaceUpto` — peak input-inclusive register footprint, the absolute
+  measure preserved by the structured compiler and reported by the
+  TM-to-RAM simulation
 - `RAM.Program.DecidesInTime`, `RAM.Program.DecidesInSpace` — deciding a language
+  (in logarithmic time, respectively in work space)
 - `RAM.DTIME`, `RAM.DSPACE`, `RAM.P` — the RAM time/space classes, over the same
   `Language = Set (List Bool)` interface as the Turing-machine classes `DTIME`,
   `DSPACE`, so the two families are directly comparable
@@ -99,7 +106,12 @@ proved in `…/Internal`; the soundness of the cost convention is established in
   logarithmic time (every step costs `≥ 1`).
 - `RAM.Program.DecidesInTime.mono` — deciding is monotone in the time bound.
 - `RAM.run_initCfg_finiteSupport` — the register file keeps finite support
-  along any run, so the space measure `RAM.Cfg.space` is a genuine finite sum.
+  along any run, so the space measure `RAM.Cfg.space` is a genuine finite sum;
+  `RAM.run_initCfg_workSpace_finiteSupport` gives the same for
+  `RAM.Cfg.workSpace`.
+- `RAM.Cfg.workSpace_initCfg` and `RAM.univ_mem_DSPACE` — the input is not
+  charged: the initial configuration uses no work space, and a one-instruction
+  program decides a language in constant work space.
 - `RAM.TMConfig.decode_encode` — the explicit bounded TM-configuration layout
   in RAM registers decodes exactly; registers beyond the state/head/cell blocks
   are zero.
@@ -260,6 +272,12 @@ proved in `…/Internal`; the soundness of the cost convention is established in
 
 The RAM shares the library's `Language` interface, so `RAM.DTIME`/`RAM.DSPACE`
 and the Turing-machine classes `DTIME`/`DSPACE` speak about the same objects.
+Both space measures leave the input free: `TM.DecidesInSpace` does not charge
+the read-only input tape, and `RAM.Program.DecidesInSpace` does not charge a
+register while it still holds its input value (Cook–Reckhow keep the input on
+a separate read-only device; Slot–van Emde Boas, *The problem of space
+invariance for sequential machines*, Inform. and Comput. 77 (1988), charge the
+address and content bits of the registers in use).
 The classical two-way simulation bounds that make the models polynomially
 equivalent are (Cook–Reckhow, *Time bounded random access machines*, JCSS 7
 (1973), 354–375; van Emde Boas, *Machine models and simulations*, Handbook of
@@ -365,6 +383,30 @@ theorem rejectProg_decides : rejectProg.DecidesInTime (∅ : Language) (fun _ =>
     counterpart of `univ_mem_DTIME`). -/
 theorem empty_mem_DTIME : (∅ : Language) ∈ DTIME (fun _ => 2) :=
   ⟨rejectProg, (fun _ => 2), rejectProg_decides, BigO.refl _⟩
+
+/-- `acceptProg` decides the universal language in constant work space. Its
+    single write changes only register `0`, charged at most
+    `bitlen 0 + bitlen 1 = 1`; the input registers it never touches are free. -/
+theorem acceptProg_decidesInSpace :
+    acceptProg.DecidesInSpace Set.univ (fun _ => 1) := by
+  intro x
+  refine ⟨1, rfl, ?_, fun _ => rfl, fun hx => absurd (Set.mem_univ x) hx⟩
+  have hnh : ¬ Halted acceptProg (initCfg x) := by
+    simp [Halted, curInstr, acceptProg, initCfg]
+  have hstep : step acceptProg (initCfg x) =
+      { pc := 1, regs := Function.update (initRegs x) 0 1 } := rfl
+  show workSpaceUpto acceptProg x (0 + 1) (initCfg x) ≤ 1
+  rw [workSpaceUpto, ite_eq_right hnh, workSpaceUpto, Cfg.workSpace_initCfg, hstep]
+  refine max_le (Nat.zero_le _) ?_
+  unfold Cfg.workSpace
+  rw [finsum_eq_single _ 0 fun i hi => by simp [Function.update_of_ne hi]]
+  split <;> simp [bitlen]
+
+/-- The universal language is in `RAM.DSPACE` at a constant bound: since the
+    input is not charged, RAM space classes below the input length are not
+    trivially empty. -/
+theorem univ_mem_DSPACE : Set.univ ∈ DSPACE (fun _ => 1) :=
+  ⟨acceptProg, (fun _ => 1), acceptProg_decidesInSpace, BigO.refl _⟩
 
 end RAM
 

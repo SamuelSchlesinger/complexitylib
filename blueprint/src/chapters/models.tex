@@ -709,7 +709,7 @@ depend on the Turing-machine conventions.
 
 \begin{definition}[Random access machine]
   \label{def:models-ram}
-  \lean{Complexity.RAM.Instr, Complexity.RAM.Program, Complexity.RAM.Cfg, Complexity.RAM.step, Complexity.RAM.run, Complexity.RAM.initCfg, Complexity.RAM.Instr.logCost, Complexity.RAM.logTimeUpto, Complexity.RAM.unitTimeUpto, Complexity.RAM.spaceUpto}
+  \lean{Complexity.RAM.Instr, Complexity.RAM.Program, Complexity.RAM.Cfg, Complexity.RAM.step, Complexity.RAM.run, Complexity.RAM.initCfg, Complexity.RAM.Instr.logCost, Complexity.RAM.logTimeUpto, Complexity.RAM.unitTimeUpto, Complexity.RAM.Cfg.workSpace, Complexity.RAM.workSpaceUpto, Complexity.RAM.spaceUpto}
   \leanok
   A program is a list of instructions over registers $R_0, R_1, \dots$ holding
   natural numbers: immediate load, $\mathrm{add}$, truncated $\mathrm{sub}$,
@@ -725,9 +725,14 @@ depend on the Turing-machine conventions.
   conditional jump; nothing more for $\mathrm{jmp}$ and $\mathrm{halt}$.
   Register indices and jump targets written in the program are not charged.
   The logarithmic time of a run is the total cost of its non-halted steps, and
-  its unit time is the number of those steps. Space is the peak, over the
-  configurations visited, of the total bit length of the addresses and
-  contents of the nonzero registers.
+  its unit time is the number of those steps. The work space of a
+  configuration on input $x$ is the total bit length of the addresses and
+  contents of the registers whose content differs from its initial value, so
+  registers still holding the input are free, as the read-only input tape is
+  for Turing machines; an overwritten input register is charged like any other.
+  The space of a run is the peak work space over the configurations visited.
+  The input-inclusive footprint, over all nonzero registers, is also recorded
+  for compiled code.
 \end{definition}
 
 \begin{definition}[RAM deciders and classes]
@@ -737,7 +742,7 @@ depend on the Turing-machine conventions.
   \uses{def:models-ram, def:language}
   A program decides $L$ in time $T$ if on every input $x$ it halts after
   logarithmic cost at most $T(|x|)$ with $R_0 = 1$ if $x \in L$ and $R_0 = 0$
-  otherwise; deciding in space $S$ bounds peak space instead. Then
+  otherwise; deciding in space $S$ bounds the peak work space instead. Then
   $\cc{DTIME}_{\mathrm{RAM}}(T)$ and $\cc{DSPACE}_{\mathrm{RAM}}(S)$ are the
   languages decided in time $O(T)$ and space $O(S)$, and
   $\cc{P}_{\mathrm{RAM}} = \bigcup_k \cc{DTIME}_{\mathrm{RAM}}(n^k)$.

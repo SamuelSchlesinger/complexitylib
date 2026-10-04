@@ -56,16 +56,30 @@ two-way simulation bounds are recorded in the surface module
 - `RAM.bitlen` — the length function `l(v) = Nat.size v` (number of bits)
 - `RAM.Instr.logCost` — the logarithmic cost of one instruction in a state
 - `RAM.logTimeUpto`, `RAM.unitTimeUpto` — accumulated log-cost / step count
-- `RAM.Cfg.space`, `RAM.spaceUpto` — logarithmic-cost space
+- `RAM.Cfg.space`, `RAM.spaceUpto` — logarithmic-cost register footprint
 - `RAM.initCfg` — input convention (length in `R₀`, bits in `R₁ … Rₙ`)
+- `RAM.Cfg.workSpace`, `RAM.workSpaceUpto` — logarithmic-cost work space,
+  which leaves registers still holding their input value free
 - `RAM.Program.DecidesInTime`, `RAM.Program.DecidesInSpace` — deciding a
-  `Language` with the verdict read from `R₀`, mirroring `TM.DecidesInTime`
+  `Language` with the verdict read from `R₀`, mirroring `TM.DecidesInTime` and
+  `TM.DecidesInSpace`
 
 ## Design notes
 
 - **Register file `ℕ → ℕ`**: total and computable, so programs are executable
   witnesses (`#eval`-able). Only finitely many registers are ever nonzero along
-  a run; this finite-support invariant makes the space measure well defined.
+  a run; this finite-support invariant makes the space measures well defined.
+- **Space excludes the unmodified input**: `RAM.Program.DecidesInSpace` bounds
+  `RAM.workSpaceUpto`, which charges a register its address bits plus content
+  bits only while its content differs from its initial value. The input
+  registers are therefore free until overwritten, as the read-only input tape
+  is for `TM.DecidesInSpace`, and space bounds below the input length are
+  meaningful. This follows the literature: Cook–Reckhow keep the input on a
+  separate read-only device, and Slot–van Emde Boas (*The problem of space
+  invariance for sequential machines*, Inform. and Comput. 77 (1988), 93–122)
+  charge the address and content bits of the registers in use. The
+  input-inclusive footprint `RAM.spaceUpto` remains the measure that the
+  structured compiler preserves exactly and the TM-to-RAM simulation reports.
 - **`bitlen v = Nat.size v`**: the number of binary digits, with `bitlen 0 = 0`,
   `bitlen 1 = 1`, `bitlen (2^k) = k + 1`. Instruction costs add `1` so that each
   step costs `≥ 1` regardless of operand sizes.
@@ -204,16 +218,21 @@ def unitTimeUpto (P : Program) : ℕ → Cfg → ℕ
   | 0, _ => 0
   | fuel + 1, c => if Halted P c then 0 else 1 + unitTimeUpto P fuel (step P c)
 
-/-- The logarithmic **space content** of a configuration: the total number of
-    bits needed to name and store every nonzero register — for each nonzero
+/-- The logarithmic **register footprint** of a configuration: the total number
+    of bits needed to name and store every nonzero register — for each nonzero
     register `i`, its address bits `bitlen i` plus its content bits
     `bitlen (regs i)`. Registers holding `0` are free. The `finsum` is finite
     exactly when the register file has finite support, which is an invariant of
-    every run started from `initCfg` (`run_finiteSupport`). -/
+    every run started from `initCfg` (`run_finiteSupport`).
+
+    The footprint includes the input registers. Deciding in space is measured by
+    `Cfg.workSpace`, which leaves registers still holding their input value
+    free; the footprint is the absolute measure used to account for compiled
+    code that runs from an arbitrary store. -/
 noncomputable def Cfg.space (c : Cfg) : ℕ :=
   ∑ᶠ i, (if c.regs i = 0 then 0 else bitlen i + bitlen (c.regs i))
 
-/-- Peak logarithmic space over a fuel-bounded run: the maximum space content of
+/-- Peak register footprint over a fuel-bounded run: the maximum `Cfg.space` of
     any configuration visited (including the halted one). -/
 noncomputable def spaceUpto (P : Program) : ℕ → Cfg → ℕ
   | 0, c => c.space
@@ -234,6 +253,29 @@ def initRegs (x : List Bool) : ℕ → ℕ := fun i =>
 /-- The initial configuration on input `x`: program counter `0`, registers set by
     `initRegs`. -/
 def initCfg (x : List Bool) : Cfg := { pc := 0, regs := initRegs x }
+
+/-- The logarithmic **work space** of a configuration on input `x`. As in
+    `Cfg.space`, a register `i` is charged its address bits `bitlen i` plus its
+    content bits `bitlen (regs i)`, but only while its content differs from its
+    initial value `initRegs x i`. Registers still holding their input value —
+    the length register `R₀` and the bit registers `R₁ … R_{|x|}` until they are
+    overwritten, and every other register while it holds `0` — are free; an
+    overwritten input register is charged like any other register.
+
+    The `finsum` is finite whenever the register file has finite support, which
+    holds along every run from `initCfg x`
+    (`run_initCfg_workSpace_finiteSupport`). See the module docstring for the
+    convention and its sources. -/
+noncomputable def Cfg.workSpace (x : List Bool) (c : Cfg) : ℕ :=
+  ∑ᶠ i, (if c.regs i = initRegs x i then 0 else bitlen i + bitlen (c.regs i))
+
+/-- Peak work space over a fuel-bounded run on input `x`: the maximum
+    `Cfg.workSpace x` of any configuration visited (including the halted one). -/
+noncomputable def workSpaceUpto (P : Program) (x : List Bool) : ℕ → Cfg → ℕ
+  | 0, c => c.workSpace x
+  | fuel + 1, c =>
+    if Halted P c then c.workSpace x
+    else max (c.workSpace x) (workSpaceUpto P x fuel (step P c))
 
 /-- A program *halts within `fuel` steps* on `c` when the fuel-bounded run
     reaches a halted configuration. -/
@@ -257,12 +299,14 @@ def Program.DecidesInTime (P : Program) (L : Language) (T : ℕ → ℕ) : Prop 
     (x ∉ L → (run P fuel (initCfg x)).verdict = 0)
 
 /-- `P` decides `L` within logarithmic space `S(n)`: on every input `x`, the run
-    halts with the correct verdict and peak space at most `S |x|`. Mirrors
-    `TM.DecidesInSpace`. -/
+    halts with the correct verdict and peak work space (`workSpaceUpto`) at most
+    `S |x|`. Registers still holding their input value are free, so, as for
+    `TM.DecidesInSpace`, reading the input costs nothing beyond the addresses
+    used to reach it. -/
 def Program.DecidesInSpace (P : Program) (L : Language) (S : ℕ → ℕ) : Prop :=
   ∀ x, ∃ fuel,
     Halted P (run P fuel (initCfg x)) ∧
-    spaceUpto P fuel (initCfg x) ≤ S x.length ∧
+    workSpaceUpto P x fuel (initCfg x) ≤ S x.length ∧
     (x ∈ L → (run P fuel (initCfg x)).verdict = 1) ∧
     (x ∉ L → (run P fuel (initCfg x)).verdict = 0)
 
