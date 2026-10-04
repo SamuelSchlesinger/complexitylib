@@ -56,7 +56,8 @@ section LinearAlgebra
 
 variable {F : Type*} [Field F]
 
-/-- **Sylvester's rank inequality.** -/
+/-- **Sylvester's rank inequality.** For a matrix `B` with columns indexed by `κ` and a matrix
+`V` with rows indexed by `κ`, `rank B + rank V ≤ rank (B V) + |κ|`. -/
 theorem rank_add_rank_le_rank_mul_add_card {ι κ μ : Type*} [Fintype κ] [Fintype μ]
     (B : Matrix ι κ F) (V : Matrix κ μ F) :
     B.rank + V.rank ≤ (B * V).rank + Fintype.card κ := by

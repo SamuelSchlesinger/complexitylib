@@ -45,7 +45,7 @@ holding all `N` inputs.
 **The asymptotic bound** (`eventually_lt_size_of_quadForm`). With the edge-score ordering
 coefficient `A = 2 κ_E`, where `κ_E = Gaussian.frontierCoefficient ≈ 0.14035`, for every `ε > 0`
 and all large `N`, every such circuit has more than `(1 + 1/(4 κ_E) - ε) N` gates, the
-coefficient being `1 + π/(6 arccos((1 + 2√2)/4)) ≈ 2.7813`; as `2 κ_E ≤ 9/32`, also more than
+coefficient being `1 + π/(6 arccos((1 + 2√2)/4)) ≈ 2.7812`; as `2 κ_E ≤ 9/32`, also more than
 `(25/9 - ε) N` gates (`eventually_lt_size_of_quadForm_twentyFive_div_nine`). The threshold
 depends only on `ε`, not on the field, the matrix or the signature.
 
@@ -198,7 +198,7 @@ theorem eventually_lt_size_of_quadForm_of_orderingBound {A : ℝ} (hA : 0 < A)
 every circuit over a finite field, over any signature with fan-in at most two, computing the
 quadratic form of an `N × N` matrix `M` with `M + Mᵀ` totally regular has more than
 `(1 + 1/(4 κ_E) - ε) N` gates, where `κ_E = Gaussian.frontierCoefficient`; the coefficient is
-`1 + π/(6 arccos((1 + 2√2)/4)) ≈ 2.7813`. -/
+`1 + π/(6 arccos((1 + 2√2)/4)) ≈ 2.7812`. -/
 theorem eventually_lt_size_of_quadForm {ε : ℝ} (hε : 0 < ε) :
     ∀ᶠ N : Nat in atTop, ∀ (F : Type u) [Field F] [Fintype F] [DecidableEq F]
       (M : Matrix (Fin N) (Fin N) F), TotallyRegular (M + Mᵀ) →

@@ -10488,6 +10488,136 @@ Theorem~\ref{thm:lowerbounds-algebraic-explicit-four-n}.
   is $O(\log N)$.
 \end{proof}
 
+\begin{definition}[Quadratic forms and a Hankel Cauchy matrix]
+  \label{def:lowerbounds-algebraic-quadratic-form}
+  \lean{Algebraic.Cutwidth.MultiOutput.quadForm,
+    Algebraic.Cutwidth.MultiOutput.hankelCauchyZMod}
+  \leanok
+  The quadratic form of a square matrix $M$ is $x\mapsto x^{\mathsf T}Mx$.
+  Over $\mathbb{Z}/q$, the $N\times N$ Hankel Cauchy matrix has entries
+  $1/(i+j+2)$ for $0\le i,j<N$.
+\end{definition}
+
+\begin{theorem}[Rank-cut bound for quadratic forms]
+  \label{thm:lowerbounds-algebraic-quadratic-rank-cut}
+  \lean{Algebraic.Cutwidth.MultiOutput.trace_add_trace_eq_trace_mix_add_trace_mix,
+    Algebraic.Cutwidth.MultiOutput.quadForm_add_quadForm_eq,
+    Algebraic.Cutwidth.MultiOutput.card_mul_card_le_of_dotProduct_mulVec_eq_zero,
+    Algebraic.Cutwidth.MultiOutput.blockRank_add_transpose_le_of_trace,
+    Algebraic.Cutwidth.MultiOutput.blockRank_add_transpose_le}
+  \leanok
+  \uses{def:lowerbounds-algebraic-quadratic-form,
+    def:lowerbounds-algebraic-multi-output,
+    lem:lowerbounds-algebraic-single-cut-fibres}
+  Let a circuit over a finite field $F$, over any signature, compute the
+  quadratic form of an $N\times N$ matrix $M$, and let $H=M+M^{\mathsf T}$.
+  For every split $S$ of its wires, with complement $T$, forward signals $A$,
+  backward signals $B$, and inputs $X_S$ and $X_T$ on the two sides,
+  \[
+    \operatorname{rank} H[X_S, X_T] \le |A| + |B| .
+  \]
+\end{theorem}
+\begin{proof}
+  \leanok
+  The inputs with a fixed boundary key form a product $P_S\times P_T$ of
+  left and right parts
+  (Lemma~\ref{lem:lowerbounds-algebraic-single-cut-fibres}). Mixing two
+  members of a class only exchanges the values of a wire on one side of the
+  split, so the mixed second difference
+  $f(x_S,x_T)-f(x'_S,x_T)-f(x_S,x'_T)+f(x'_S,x'_T)$ of the output vanishes
+  on the class, wherever the output lies. For a quadratic form the pure
+  terms cancel and this difference is the cross term
+  $(x_S-x'_S)^{\mathsf T}H[X_S,X_T](x_T-x'_T)$. So for $l,l'\in P_S$ and
+  $r,r'\in P_T$, $(l-l')^{\mathsf T}H[X_S,X_T](r-r')=0$. Let $V$ have the
+  columns $r-r_0$ for a fixed $r_0\in P_T$; then $P_T$ embeds in the column
+  space of $V$, the differences $l-l_0$ lie in the kernel of
+  $(H[X_S,X_T]V)^{\mathsf T}$, and by Sylvester's rank inequality
+  $|P_S|\,|P_T|\le|F|^{|X_S|-\operatorname{rank}(H[X_S,X_T]V)+\operatorname{rank}V}
+  \le|F|^{N-\operatorname{rank}H[X_S,X_T]}$. Summing over the at most
+  $|F|^{|A|+|B|}$ classes gives $|F|^N\le|F|^{|A|+|B|}\,
+  |F|^{N-\operatorname{rank}H[X_S,X_T]}$.
+\end{proof}
+
+\begin{lemma}[A symmetric totally regular Cauchy matrix]
+  \label{lem:lowerbounds-algebraic-hankel-cauchy}
+  \lean{Algebraic.Cutwidth.MultiOutput.totallyRegular_add_transpose,
+    Algebraic.Cutwidth.MultiOutput.hankelCauchyZMod_eq_cauchy,
+    Algebraic.Cutwidth.MultiOutput.totallyRegular_hankelCauchyZMod,
+    Algebraic.Cutwidth.MultiOutput.totallyRegular_hankelCauchyZMod_add_transpose}
+  \leanok
+  \uses{def:lowerbounds-algebraic-quadratic-form,
+    lem:lowerbounds-algebraic-cauchy}
+  If $M$ is symmetric and totally regular and $2\ne0$ in the field, then
+  $M+M^{\mathsf T}$ is totally regular. For a prime $q>2N$ the Hankel Cauchy
+  matrix over $\mathbb{Z}/q$ is the Cauchy matrix with nodes $x_i=i+1$ and
+  $y_j=-(j+1)$, so it and its symmetrization are totally regular.
+\end{lemma}
+\begin{proof}
+  \leanok
+  For symmetric $M$, $M+M^{\mathsf T}=2M$, and a square block of $2M$ has
+  determinant $2^k$ times that of $M$. The nodes $x_i$ are distinct, the
+  $y_j$ are distinct, and $x_i-y_j=i+j+2$ is nonzero modulo $q$ since
+  $0<i+j+2\le2N<q$; as $q$ is odd, $2\ne0$.
+\end{proof}
+
+\begin{theorem}[Quadratic forms need $(1+1/(4p)-\varepsilon)N$ gates]
+  \label{thm:lowerbounds-algebraic-quadratic}
+  \lean{Algebraic.Cutwidth.MultiOutput.input_mem_component_of_quadForm,
+    Algebraic.Cutwidth.MultiOutput.half_le_of_quadForm,
+    Algebraic.Cutwidth.MultiOutput.eventually_lt_size_of_quadForm_of_orderingBound,
+    Algebraic.Cutwidth.MultiOutput.eventually_lt_size_of_quadForm,
+    Algebraic.Cutwidth.MultiOutput.eventually_lt_size_of_quadForm_twentyFive_div_nine,
+    Algebraic.Cutwidth.MultiOutput.eventually_lt_size_hankelCauchyZMod}
+  \leanok
+  \uses{thm:lowerbounds-algebraic-multi-output-ordering,
+    thm:lowerbounds-algebraic-quadratic-rank-cut,
+    lem:lowerbounds-algebraic-cauchy,
+    lem:lowerbounds-algebraic-hankel-cauchy,
+    thm:lowerbounds-algebraic-gaussian-coefficient}
+  Let a circuit over a finite field $F$, over any signature with fan-in at
+  most two (so with arbitrary functions $F\times F\to F$, unary functions,
+  and constants as gates, which covers arithmetic circuits over $F$), compute
+  with $s$ gates the quadratic form of an $N\times N$ matrix $M$ such that
+  $M+M^{\mathsf T}$ is totally regular. Under
+  $\mathrm{OrderingBound}(A,\eta,C)$ with $A+\eta\ge0$,
+  \[
+    \lfloor N/2\rfloor \le (A+\eta)\max\{s-N,0\} + 3\log_2(N+3s) + C .
+  \]
+  Consequently, if the ordering hypothesis holds with coefficient $A>0$ at
+  every positive slack, then for every $\varepsilon>0$ and all large $N$,
+  independently of the field, the matrix, and the signature, every such
+  circuit has more than $(1+1/(2A)-\varepsilon)N$ gates. With the Gaussian
+  pathwidth coefficient $p$ of
+  Theorem~\ref{thm:lowerbounds-algebraic-gaussian-coefficient} and $A=2p$
+  this is $(1+1/(4p)-\varepsilon)N\approx(2.7812-\varepsilon)N$, and as
+  $2p\le9/32$ it is more than $(25/9-\varepsilon)N$; in particular for the
+  quadratic form of the Hankel Cauchy matrix over $\mathbb{Z}/q$ with $q>2N$
+  prime.
+
+  For context, no superlinear lower bound is known for general arithmetic
+  circuits computing an explicit polynomial of constant degree; Ramya and
+  Shastri (arXiv:2509.11322, 2025) prove $\Omega(n\log n)$ for planar
+  circuits computing totally regular bilinear forms.
+\end{theorem}
+\begin{proof}
+  \leanok
+  The component of an input wire is closed, so it is crossed by no signal,
+  and by the rank-cut bound
+  (Theorem~\ref{thm:lowerbounds-algebraic-quadratic-rank-cut}) the block of
+  $M+M^{\mathsf T}$ between its inputs and the other inputs has rank zero;
+  by total regularity the component contains every input. Along the ranking
+  of Theorem~\ref{thm:lowerbounds-algebraic-multi-output-ordering}, the
+  number of inputs in a prefix grows by at most one per wire, so the prefix
+  ending at some input holds exactly $\lfloor N/2\rfloor$ inputs. Its block
+  has rank at least $\min\{\lfloor N/2\rfloor,\lceil N/2\rceil\}=\lfloor
+  N/2\rfloor$ (Lemma~\ref{lem:lowerbounds-algebraic-cauchy}), and the prefix
+  is charged to the component containing all $N$ inputs and at most $s$
+  gates. For the asymptotic form, assume at most $(1+1/(2A)-\varepsilon)N$
+  gates, choose $\eta=A^2\varepsilon$, and compare with
+  $\lfloor N/2\rfloor\ge(N-1)/2$: the cycle term is at most
+  $(1/2-A\varepsilon/2)N$, and the logarithmic term is $O(\log N)$.
+\end{proof}
+
 \begin{definition}[The KRW conjecture]
   \label{def:lowerbounds-algebraic-krw}
   \lean{Algebraic.KW.NonConstant, Algebraic.KW.KRWDepthWith,

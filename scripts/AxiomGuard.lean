@@ -176,6 +176,13 @@ def headlineTheorems : List Name := [
   `Algebraic.Cutwidth.MultiOutput.eventually_lt_size_of_totallyRegular,
   `Algebraic.Cutwidth.MultiOutput.eventually_lt_size_of_totallyRegular_fortyOne_div_nine,
   `Algebraic.Cutwidth.MultiOutput.eventually_lt_size_cauchyZMod,
+  -- Quadratic forms: the rank-cut bound and the (25/9 - ε) N gate bound
+  `Algebraic.Cutwidth.MultiOutput.blockRank_add_transpose_le,
+  `Algebraic.Cutwidth.MultiOutput.totallyRegular_hankelCauchyZMod_add_transpose,
+  `Algebraic.Cutwidth.MultiOutput.half_le_of_quadForm,
+  `Algebraic.Cutwidth.MultiOutput.eventually_lt_size_of_quadForm,
+  `Algebraic.Cutwidth.MultiOutput.eventually_lt_size_of_quadForm_twentyFive_div_nine,
+  `Algebraic.Cutwidth.MultiOutput.eventually_lt_size_hankelCauchyZMod,
   -- Border rank: lower semicontinuity of matrix rank and the Koszul-flattening bound
   `Matrix.isClosed_setOf_rank_le,
   `Algebraic.Tensor3.rank_wedgeMatrix,
