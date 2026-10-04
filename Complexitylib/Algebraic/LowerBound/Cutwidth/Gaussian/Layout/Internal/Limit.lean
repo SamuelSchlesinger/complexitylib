@@ -114,6 +114,37 @@ theorem two_mul_cutwidthCoefficient_le : 2 * cutwidthCoefficient ≤ 20 / 61 := 
   rw [this, div_le_div_iff₀ Real.pi_pos (by norm_num)]
   nlinarith
 
+/-- **Decay rate and radius.** Every correlation target below `2√2/3` is met by the
+truncated kernel for some decay rate `q < 1/√2` and some radius. -/
+theorem exists_decay_radius {ρ₀ : ℝ} (hρ₀g : ρ₀ < 2 * Real.sqrt 2 / 3) :
+    ∃ (q : ℝ) (R : ℕ), 0 ≤ q ∧ ρ₀ ≤ 2 * q / (1 + q ^ 2) - 3 * (2 * q ^ 2) ^ R := by
+  set g : ℝ := 2 * Real.sqrt 2 / 3 with hg
+  -- A decay rate `q < 1/√2` whose correlation exceeds the target.
+  set q₀ : ℝ := Real.sqrt 2 / 2 with hq₀
+  have hq₀pos : 0 < q₀ := by positivity
+  obtain ⟨δ, hδ, hκ⟩ := Metric.continuousAt_iff.mp continuous_correlation.continuousAt
+    ((g - ρ₀) / 2) (by linarith)
+  set q := q₀ - min δ q₀ / 2 with hq
+  have hminq : 0 < min δ q₀ := lt_min hδ hq₀pos
+  have hq0 : 0 ≤ q := by rw [hq]; linarith [min_le_right δ q₀]
+  have hqq₀ : q < q₀ := by rw [hq]; linarith
+  have hκq : g - (g - ρ₀) / 2 < 2 * q / (1 + q ^ 2) := by
+    have hdist : dist q q₀ < δ := by
+      rw [Real.dist_eq, hq, abs_of_neg (by linarith)]
+      linarith [min_le_left δ q₀]
+    have := hκ hdist
+    rw [Real.dist_eq, hq₀, correlation_limit, ← hg] at this
+    linarith [neg_abs_le (2 * q / (1 + q ^ 2) - g)]
+  -- A truncation radius with small boundary error.
+  have hdecay : 2 * q ^ 2 < 1 := by
+    have h2 : Real.sqrt 2 ^ 2 = 2 := Real.sq_sqrt (by norm_num)
+    have : q ^ 2 < q₀ ^ 2 := by gcongr
+    rw [hq₀, div_pow, h2] at this
+    linarith
+  obtain ⟨R, hR⟩ := exists_pow_lt_of_lt_one (by linarith : 0 < (g - ρ₀) / 6) hdecay
+  have hρ : ρ₀ ≤ 2 * q / (1 + q ^ 2) - 3 * (2 * q ^ 2) ^ R := by linarith
+  exact ⟨q, R, hq0, hρ⟩
+
 /-- **Parameters.** For every positive slack some admissible parameters bring the layout
 bound within that slack of `(3/π)(3 - 2√2)`. -/
 theorem exists_parameters {ξ : ℝ} (hξ : 0 < ξ) :
@@ -139,30 +170,7 @@ theorem exists_parameters {ξ : ℝ} (hξ : 0 < ξ) :
     have := hcont hdist
     rw [Real.dist_eq, crossRatio_limit] at this
     linarith [le_abs_self (crossRatio ρ₀ - (3 - 2 * Real.sqrt 2))]
-  -- A decay rate `q < 1/√2` whose correlation exceeds the target.
-  set q₀ : ℝ := Real.sqrt 2 / 2 with hq₀
-  have hq₀pos : 0 < q₀ := by positivity
-  obtain ⟨δ, hδ, hκ⟩ := Metric.continuousAt_iff.mp continuous_correlation.continuousAt
-    ((g - ρ₀) / 2) (by linarith)
-  set q := q₀ - min δ q₀ / 2 with hq
-  have hminq : 0 < min δ q₀ := lt_min hδ hq₀pos
-  have hq0 : 0 ≤ q := by rw [hq]; linarith [min_le_right δ q₀]
-  have hqq₀ : q < q₀ := by rw [hq]; linarith
-  have hκq : g - (g - ρ₀) / 2 < 2 * q / (1 + q ^ 2) := by
-    have hdist : dist q q₀ < δ := by
-      rw [Real.dist_eq, hq, abs_of_neg (by linarith)]
-      linarith [min_le_left δ q₀]
-    have := hκ hdist
-    rw [Real.dist_eq, hq₀, correlation_limit, ← hg] at this
-    linarith [neg_abs_le (2 * q / (1 + q ^ 2) - g)]
-  -- A truncation radius with small boundary error.
-  have hdecay : 2 * q ^ 2 < 1 := by
-    have h2 : Real.sqrt 2 ^ 2 = 2 := Real.sq_sqrt (by norm_num)
-    have : q ^ 2 < q₀ ^ 2 := by gcongr
-    rw [hq₀, div_pow, h2] at this
-    linarith
-  obtain ⟨R, hR⟩ := exists_pow_lt_of_lt_one (by linarith : 0 < (g - ρ₀) / 6) hdecay
-  have hρ : ρ₀ ≤ 2 * q / (1 + q ^ 2) - 3 * (2 * q ^ 2) ^ R := by linarith
+  obtain ⟨q, R, hq0, hρ⟩ := exists_decay_radius hρ₀g
   -- The grid and the deviation slack.
   set ε := min (ξ / 16) (1 / 100) with hε
   have hεpos : 0 < ε := lt_min (by positivity) (by norm_num)
