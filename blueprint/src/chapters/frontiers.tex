@@ -13,9 +13,11 @@ with the Koszul-flattening lower bound
 the weighted Landsberg--Micha{\l}ek tensors (Theorem~\ref{thm:frontiers-cluster-koszul})
 and its paired-cluster certificate (Theorem~\ref{thm:frontiers-paired-koszul}),
 border substitution for tight tensors
-(Theorem~\ref{thm:frontiers-border-substitution}), and the deletion game that turns a
+(Theorem~\ref{thm:frontiers-border-substitution}), the deletion game that turns a
 paired-cluster bound into a border-rank bound
-(Theorem~\ref{thm:frontiers-deletion-game}). Where related infrastructure exists
+(Theorem~\ref{thm:frontiers-deletion-game}), and the explicit border-rank bound
+$(7/3 - \varepsilon)m$ they combine into
+(Theorem~\ref{thm:frontiers-explicit-border-rank}). Where related infrastructure exists
 elsewhere, it is named as a starting point, not as progress toward the target.
 
 \section{Hardness of approximation}
@@ -379,8 +381,9 @@ families, degree bounds, projections and the classes below are not formalized.
 \end{proof}
 
 Tensors give a second algebraic model. The foundations below are formalized for
-coordinate tensors over $\mathbb{C}$; the explicit lower bounds they are meant for
-are not.
+coordinate tensors over $\mathbb{C}$, and so is the explicit lower bound they lead to:
+border rank at least $(7/3 - \varepsilon)m$ for the weighted Landsberg--Micha{\l}ek
+tensors (Theorem~\ref{thm:frontiers-explicit-border-rank}).
 
 \begin{definition}[Tensor rank and border rank]
   \label{def:frontiers-border-rank}
@@ -557,9 +560,10 @@ are not.
   only $\underline{\mathbf{R}}(T) \ge \frac{2p+1}{p+1} (m - s)$, below $2m$. Border
   substitution (Theorem~\ref{thm:frontiers-border-substitution}), the paired-cluster bound
   (Theorem~\ref{thm:frontiers-paired-koszul} and Corollary~\ref{cor:frontiers-paired-phi}),
-  and the counting argument (Theorem~\ref{thm:frontiers-deletion-game}) are formalized;
-  choosing $2p + 1$ surviving slices with distinct $p$-subset sums inside a good block, which
-  would connect the paired-cluster bound to the counting argument, is not.
+  the counting argument (Theorem~\ref{thm:frontiers-deletion-game}), and the choice of
+  $2p + 1$ surviving slices with distinct $p$-subset sums inside a good block
+  (Lemma~\ref{lem:frontiers-greedy-subset-sums}), which connects them, are formalized; together
+  they give Theorem~\ref{thm:frontiers-explicit-border-rank}.
 \end{theorem}
 \begin{proof}
   \leanok
@@ -863,12 +867,14 @@ are not.
   satisfies the paired-cluster hypothesis, then $\underline{\mathbf{R}}(T)$ is at least the
   same bound.
 
-  This is the global, combinatorial step of a program for explicit tensors of border rank
-  $(7/3 - o(1))m$. Koszul flattenings of paired clusters of $2p + 1$ slices are meant to
-  supply the paired-cluster hypothesis with $D = (2p + 1)/(p + 1)$ and $E = O(pL)$, which
-  would give $(7/3 - 2/(3(p + 1)))m - O(pL + Rm/L)$, hence about $(19/9)m$ at $p = 2$.
-  The theorem is conditional: it assumes the paired-cluster hypothesis, and deriving that
-  hypothesis for an explicit tensor is a separate step that is not formalized here.
+  This is the global, combinatorial step of the bound $(7/3 - o(1))m$ for explicit tensors.
+  The theorem takes the paired-cluster hypothesis as an assumption. For the weighted
+  Landsberg--Micha{\l}ek tensors, Koszul flattenings of paired clusters of $2p + 1$ slices
+  (Corollary~\ref{cor:frontiers-paired-phi}), with clusters chosen greedily
+  (Lemma~\ref{lem:frontiers-greedy-subset-sums}), supply it with $D = (2p + 1)/(p + 1)$,
+  $E = 8(p + 1)L$ and $R = 3^{2p} + 1$. This gives
+  $(7/3 - 2/(3(p + 1)))m - O(pL + Rm/L)$, hence $(19/9 - o(1))m$ at $p = 2$
+  (Theorem~\ref{thm:frontiers-explicit-border-rank}).
 \end{theorem}
 \begin{proof}
   \leanok
@@ -891,6 +897,116 @@ are not.
   (Theorem~\ref{thm:frontiers-border-substitution}) gives an ordering with
   $q + \underline{\mathbf{R}}(T|_{S_q}) \le \underline{\mathbf{R}}(T)$ for every
   $q \le m$.
+\end{proof}
+
+\begin{lemma}[Greedy distinct subset sums]
+  \label{lem:frontiers-greedy-subset-sums}
+  \lean{Algebraic.exists_strictMono_injective_sum,
+    Algebraic.Tensor3.exists_strictMono_cluster,
+    Algebraic.Tensor3.exists_strictMono_cluster_posBlock,
+    Algebraic.Tensor3.exists_strictMono_cluster_negBlock}
+  \leanok
+  \uses{def:frontiers-lm-tensor, def:frontiers-deletion-game}
+  A finite set $A \subseteq \mathbb{Z}$ with more than $3^n$ elements contains integers
+  $x_0 < \dots < x_n$ whose subset sums $\sum_{t \in I} x_t$, over
+  $I \subseteq \{0, \dots, n\}$, are pairwise distinct. Consequently, if at least
+  $3^{2p} + 1$ slices of a set $S$ lie in one positive (negative) block of length $L$, then
+  $2p + 1$ of them, in increasing order, form a cluster whose offsets have pairwise distinct
+  subset sums, lie in $[1, k]$ (in $[-k, -1]$), and have diameter at most $L - 1$.
+\end{lemma}
+\begin{proof}
+  \leanok
+  Choose $x_0, x_1, \dots$ greedily, keeping the invariant that no combination
+  $\sum_t \varepsilon_t x_t$ with $\varepsilon_t \in \{-1, 0, 1\}$, not all zero, vanishes;
+  this is equivalent to distinct subset sums. After $i \le n$ choices the signed sums
+  $\sum_t \varepsilon_t x_t$ take at most $3^i < |A|$ values, so some $a \in A$ avoids them.
+  A vanishing combination of $x_0, \dots, x_{i-1}, a$ has coefficient $0$ on $a$, and then
+  vanishes by the invariant, or coefficient $\pm 1$, which would make $a$ a signed sum.
+  Sorting the chosen set keeps its subset sums distinct. For a cluster, apply this to the
+  offsets of the slices of $S$ in the block, which are at most $L$ consecutive integers of one
+  sign. A greedy choice that only keeps the $p$-subset sums distinct can get stuck.
+\end{proof}
+
+\begin{lemma}[Tightness of the weighted Landsberg--Micha{\l}ek tensors]
+  \label{lem:frontiers-lm-tight}
+  \lean{Algebraic.Tensor3.tight_weightedLMTensor, Algebraic.Tensor3.weightedLMTensor_ne_zero}
+  \leanok
+  \uses{def:frontiers-lm-tensor, def:frontiers-tight}
+  The weighted Landsberg--Micha{\l}ek tensor is tight, with weights $\tau_A(a) = a - k$,
+  $\tau_B(j) = j$ and $\tau_C(\ell) = -\ell$, and all of its $A$-slices are nonzero.
+\end{lemma}
+\begin{proof}
+  \leanok
+  Its support lies on $\ell = j + (a - k)$. Slice $a$ has the nonzero entry
+  $2^{2^{am + j}}$ at $j = k - a$, $\ell = 0$ when $a \le k$, and at $j = 0$,
+  $\ell = a - k$ otherwise.
+\end{proof}
+
+\begin{definition}[The paired-cluster Koszul bound]
+  \label{def:frontiers-paired-koszul-bound}
+  \lean{Algebraic.Tensor3.PairedKoszulBound}
+  \leanok
+  \uses{def:frontiers-lm-tensor, def:frontiers-deletion-game, def:frontiers-tight}
+  Let $T$ be the weighted Landsberg--Micha{\l}ek tensor and $m = 2k + 1$. The property
+  $\mathrm{PK}(k, p, L, E)$ says: for every set $S$ of slices and every two clusters $c^+$
+  and $c^-$ of $2p + 1$ slices of $S$ in increasing order, each with pairwise distinct
+  $p$-subset sums of offsets and diameter at most $L$, with the offsets of $c^+$ in $[1, k]$
+  and those of $c^-$ in $[-k, -1]$, and with medians $r$ and $-s$,
+  \[
+    \frac{2p + 1}{p + 1} \bigl(\Phi_m(r, s) - E\bigr) \le \underline{\mathbf{R}}(T|_S).
+  \]
+  It is the interface between the paired-cluster certificate and the deletion game.
+\end{definition}
+
+\begin{theorem}[Explicit border-rank lower bound]
+  \label{thm:frontiers-explicit-border-rank}
+  \lean{Algebraic.Tensor3.pairedKoszulBound,
+    Algebraic.Tensor3.PairedKoszulBound.pairedClusterBound,
+    Algebraic.Tensor3.PairedKoszulBound.le_borderRank_weightedLMTensor,
+    Algebraic.Tensor3.le_borderRank_weightedLMTensor,
+    Algebraic.Tensor3.eventually_sub_mul_le_borderRank_weightedLMTensor,
+    Algebraic.Tensor3.eventually_nineteen_div_nine_sub_mul_le_borderRank_weightedLMTensor,
+    Algebraic.Tensor3.eventually_twentyOne_div_ten_mul_le_borderRank_weightedLMTensor,
+    Algebraic.Tensor3.eventually_seven_div_three_sub_mul_le_borderRank_weightedLMTensor}
+  \leanok
+  \uses{def:frontiers-paired-koszul-bound, cor:frontiers-paired-phi,
+    lem:frontiers-greedy-subset-sums, lem:frontiers-lm-tight, thm:frontiers-deletion-game}
+  Let $T_k$ be the weighted Landsberg--Micha{\l}ek tensor and $m = 2k + 1$. For $p \ge 1$
+  and $3^{2p} + 1 \le L \le k$,
+  \[
+    \underline{\mathbf{R}}(T_k) \ge \Bigl(\frac{7}{3} - \frac{2}{3(p + 1)}\Bigr) m
+      - \Bigl(16(p + 1)L + \frac{(3^{2p} + 1)m}{L} + 2\Bigr).
+  \]
+  Hence for every $p \ge 1$ and $\delta > 0$,
+  $\underline{\mathbf{R}}(T_k) \ge (7/3 - 2/(3(p + 1)) - \delta)m$ for all large $k$. At
+  $p = 2$ this is $(19/9 - \delta)m$, so $\underline{\mathbf{R}}(T_k) \ge (21/10)m$ for all
+  large $k$; and for every $\varepsilon > 0$,
+  $\underline{\mathbf{R}}(T_k) \ge (7/3 - \varepsilon)m$ for all large $k$. The family $T_k$
+  is the same for every $p$ and $\varepsilon$. More generally, $\mathrm{PK}(k, p, L, E)$
+  alone gives the finite bound with $DE + 8L$ in place of $16(p + 1)L$, where
+  $D = (2p + 1)/(p + 1)$.
+
+  The entries $2^{2^{am + j}}$ of $T_k$ are explicit integers of doubly exponential size. A
+  periodic labeling with entries of constant size is a known refinement, since the label
+  condition only needs distinct labels within the column span, at most $pL$, of one block;
+  it is not done here. For comparison, Landsberg and Micha{\l}ek, \emph{Towards finding hay
+  in a haystack}, Theory of Computing 21(13), 2025, prove $2.02m$ for their family.
+\end{theorem}
+\begin{proof}
+  \leanok
+  Corollary~\ref{cor:frontiers-paired-phi} is $\mathrm{PK}(k, p, L, 8(p + 1)L)$. Let a
+  positive and a negative block each keep at least $R = 3^{2p} + 1$ slices of $S$.
+  Lemma~\ref{lem:frontiers-greedy-subset-sums} gives a cluster in each, and their median
+  slices witness the paired-cluster hypothesis of Definition~\ref{def:frontiers-deletion-game}
+  for $S \mapsto \underline{\mathbf{R}}(T_k|_S)$, with $D = (2p + 1)/(p + 1)$ and
+  $E = 8(p + 1)L$. The tensor is tight with nonzero slices
+  (Lemma~\ref{lem:frontiers-lm-tight}), and $D \ge 3/2$ since $p \ge 1$, so
+  Theorem~\ref{thm:frontiers-deletion-game} gives
+  $\underline{\mathbf{R}}(T_k) \ge (1 + 2D/3)m - DE - (8L + Rm/L + 2)$, where
+  $1 + 2D/3 = 7/3 - 2/(3(p + 1))$ and $DE = 8(2p + 1)L$. For the asymptotic bound fix
+  $L \ge \max(R, 2R/\delta)$: then $Rm/L \le \delta m/2$, and the constant
+  $16(p + 1)L + 2$ is at most $\delta m/2$ for large $k$. For $7/3 - \varepsilon$ choose
+  $p$ with $2/(3(p + 1)) < \varepsilon$ and $\delta = \varepsilon - 2/(3(p + 1))$.
 \end{proof}
 
 \section{Fine-grained and parameterized complexity}
