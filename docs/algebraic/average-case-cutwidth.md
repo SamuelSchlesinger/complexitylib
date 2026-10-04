@@ -58,7 +58,8 @@ Its complete leakage and bad-seed bound is also proved, together with the
 component-parity estimate for linear sampler values and the actual XOR
 reduction's absolute-bias identity. The global sampler composition, the
 simultaneous low-order parity bounds, and a final uniform sumset family
-(`Extractor.sourceReductionHardFamily`, error `35/72`) are proved as well.
+(`Extractor.sourceReductionFamily`, error `35/72`, balanced by padding as
+`sourceReductionHardFamily`) are proved as well.
 The [cutwidth guide](cutwidth-lower-bound.md) records the exact checked
 interfaces and credits the GUV and CGL constructions. That family does not
 satisfy this average-case theorem: its threshold is only subexponential
