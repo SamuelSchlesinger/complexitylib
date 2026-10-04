@@ -314,6 +314,7 @@ public import Complexitylib.Algebraic.LowerBound.Cutwidth.Gaussian.Frontier.Star
 public import Complexitylib.Algebraic.LowerBound.Cutwidth.Gaussian.Frontier.Order
 public import Complexitylib.Algebraic.LowerBound.Cutwidth.Gaussian.Frontier
 public import Complexitylib.Algebraic.LowerBound.Cutwidth.Gaussian.Frontier.Arccos
+public import Complexitylib.Algebraic.LowerBound.Cutwidth.Gaussian.Edge.Exact
 public import Complexitylib.Algebraic.LowerBound.Cutwidth.Gaussian
 
 /-!
