@@ -113,8 +113,8 @@ def gateOf : (w : Wire n g) → w.IsGate → Fin g
   | .input _, h => False.elim h
 
 /-- A gate wire of a continued program's second part is a gate. -/
-theorem IsGate.appendWire {w : Wire k g₂} (h : w.IsGate) (feed : Fin k → Wire n g₁) :
-    (Program.appendWire feed w).IsGate := by
+theorem IsGate.appendedWire {w : Wire k g₂} (h : w.IsGate) (feed : Fin k → Wire n g₁) :
+    (Program.appendedWire feed w).IsGate := by
   cases w with
   | input i => exact False.elim h
   | gate j => trivial
@@ -145,7 +145,7 @@ theorem GatedOutputs.size_pos [NeZero m] {c : Circuit σ n m} (h : c.GatedOutput
 them: its outputs are gates after the inner circuit's gates. -/
 theorem GatedOutputs.comp {d : Circuit σ m p} (hd : d.GatedOutputs) (c : Circuit σ n m) :
     (d.comp c).GatedOutputs :=
-  fun o => (hd o).appendWire c.outputs
+  fun o => (hd o).appendedWire c.outputs
 
 /-- **Parallel composition keeps gated outputs** when both circuits have
 them. -/
@@ -154,11 +154,11 @@ theorem GatedOutputs.append {c : Circuit σ n m} {d : Circuit σ n p}
   intro o
   induction o using Fin.addCases with
   | left o =>
-    simp only [Circuit.append, Fin.append_left, Wire.isGate_castAdd]
+    simp only [Circuit.append, Fin.append_left, Function.comp_apply, Wire.isGate_castAdd]
     exact hc o
   | right o =>
-    simp only [Circuit.append, Fin.append_right]
-    exact (hd o).appendWire Wire.input
+    simp only [Circuit.append, Fin.append_right, Function.comp_apply]
+    exact (hd o).appendedWire Wire.input
 
 /-- The number of outputs of `c` that forward an original input instead of a
 gate. -/

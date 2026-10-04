@@ -6,6 +6,7 @@ Authors: Samuel Schlesinger
 
 module
 public import Complexitylib.Algebraic.Homomorphism
+public import Complexitylib.Cslib.Circuit.Wire
 public import Cslib.Computability.Circuit.Program
 
 /-!

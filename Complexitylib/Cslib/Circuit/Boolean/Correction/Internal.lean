@@ -6,6 +6,7 @@ Authors: Samuel Schlesinger
 module
 
 public import Complexitylib.Cslib.Circuit.Boolean.Correction.Defs
+import Complexitylib.Cslib.Circuit.Boolean.Synthesis
 import Complexitylib.Cslib.Circuit.Synthesis
 
 /-!
@@ -37,7 +38,9 @@ theorem complexity_xor_le (f g : BooleanFunction n) :
   have finish : Synthesis interpretation (inputs n ∪ ({f} ∪ {g}))
       {fun x => Bool.xor (f x) (g x)} 4 :=
     Synthesis.xor_of_mem (by simp) (by simp)
-  simpa [sf, sg] using ((hf'.union hg').trans finish).complexity_le
+  have bound := ((hf'.union hg').trans finish).complexity_le
+  unfold single at bound
+  simpa [sf, sg] using bound
 
 theorem scalar_complexity_le (f g : BooleanFunction n) :
     complexity interpretation (fun x (_ : Fin 1) => f x) ≤

@@ -6,7 +6,7 @@ Authors: Samuel Schlesinger
 
 module
 public import Complexitylib.Algebraic.Program
-public import Cslib.Computability.Circuit.Dependency
+public import Complexitylib.Cslib.Circuit.Dependency
 
 /-!
 # Single cuts of a straight-line program

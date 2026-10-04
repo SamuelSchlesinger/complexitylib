@@ -43,7 +43,7 @@ theorem exists_interpolating_circuit (ε : ℝ) (positive : 0 < ε) :
   let f : (Fin (2 * p) → Bool) → Bool :=
     fun x => if hx : x ∈ domain then labels ⟨x, hx⟩ else false
   obtain ⟨c, correct, size⟩ := exists_computesOn_size_eq_complexityOn
-    (I := interpretation) (s := (domain : Set _)) (f := fun x (_ : Fin 1) => f x)
+    (I := interpretation) (S := (domain : Set _)) (f := fun x (_ : Fin 1) => f x)
   refine ⟨c, ?_, ?_⟩
   · rw [size]
     exact after p hp domain small f

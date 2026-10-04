@@ -6,6 +6,7 @@ Authors: Samuel Schlesinger
 
 module
 public import Mathlib.Data.Finset.Card
+import Mathlib.Data.Finset.Basic
 
 /-!
 # Splitting a bounded finite subset into two smaller parts

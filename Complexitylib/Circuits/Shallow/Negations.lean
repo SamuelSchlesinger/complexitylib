@@ -46,7 +46,7 @@ theorem ProgramInputNegationsOnly.append {n g h : ℕ}
     refine ⟨ih hq.1, fun i hi => ?_⟩
     obtain ⟨j, hj⟩ := hq.2 i hi
     refine ⟨j, ?_⟩
-    change Program.appendWire Wire.input (l.wires i) = Wire.input j
+    change Program.appendedWire Wire.input (l.wires i) = Wire.input j
     rw [hj]
     rfl
 

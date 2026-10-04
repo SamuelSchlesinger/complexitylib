@@ -527,7 +527,7 @@ theorem toTM_decides [DecidableEq S] [Fintype S] (M : Turing.MultiTapeTM k Bool 
       (toTM M).halted c' ∧ (x ∈ L → c'.output.cells 1 = Γ.one) ∧
       (x ∉ L → c'.output.cells 1 = Γ.zero) := by
   obtain ⟨t', ht', s', -, hc⟩ := hM x
-  obtain ⟨u, hu, hun, hmin⟩ := M.exists_minimal_halting_time (initD M x) t' hc.1
+  obtain ⟨u, hu, hun, hmin⟩ := Turing.MultiTapeTM.exists_haltsAt (tm := M) (cfg := initD M x) hc.1
   obtain ⟨v, rfl⟩ : ∃ v, u = v + 1 := by
     rcases u with _ | v
     · exact absurd hun (by simp [Turing.MultiTapeTM.runFrom])

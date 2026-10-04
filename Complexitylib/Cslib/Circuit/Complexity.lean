@@ -11,8 +11,9 @@ import Mathlib.Algebra.BigOperators.Fin
 /-!
 # Natural-valued circuit complexity on a support
 
-Convenient forms of the support-complexity calculus over complete bases,
-including a bound obtained by synthesizing the output coordinates separately.
+Convenient forms of the support-complexity calculus over complete bases: an
+empty output family is free, and a bound obtained by synthesizing the output
+coordinates separately.
 -/
 
 @[expose] public section
@@ -20,27 +21,7 @@ including a bound obtained by synthesizing the output coordinates separately.
 namespace Cslib.Circuits
 
 variable {σ : Signature} {U : Type} {n m : ℕ} {I : Interpretation σ U}
-variable [I.IsComplete] {s : Set (Fin n → U)} {f g : (Fin n → U) → Fin m → U}
-
-/-- A circuit correct on the support bounds its natural-valued complexity. -/
-theorem complexityOn_le_of_computesOn (c : Circuit σ n m) (hc : c.ComputesOn I s f) :
-    complexityOn I s f ≤ c.size := by
-  have h := ecomplexityOn_le_of_computesOn c hc
-  rw [← natCast_complexityOn] at h
-  exact_mod_cast h
-
-/-- The minimum size of a circuit correct on a support is attained. -/
-theorem exists_computesOn_size_eq_complexityOn :
-    ∃ c : Circuit σ n m, c.ComputesOn I s f ∧ c.size = complexityOn I s f := by
-  obtain ⟨c, hc, hs⟩ := exists_computesOn_size_eq_ecomplexityOn
-    (ecomplexityOn_ne_top_iff.mp (ecomplexityOn_ne_top (I := I) (S := s) (f := f)))
-  exact ⟨c, hc, by exact_mod_cast hs.trans natCast_complexityOn.symm⟩
-
-/-- Equal targets on the required support have equal complexity. -/
-theorem complexityOn_congr (h : Set.EqOn f g s) : complexityOn I s f = complexityOn I s g := by
-  have equal := ecomplexityOn_congr (I := I) h
-  rw [← natCast_complexityOn, ← natCast_complexityOn] at equal
-  exact_mod_cast equal
+variable [I.IsComplete] {s : Set (Fin n → U)}
 
 /-- An empty output family needs no gates, on any support. -/
 @[simp] theorem complexityOn_empty (f : (Fin n → U) → Fin 0 → U) :

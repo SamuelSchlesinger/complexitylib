@@ -5,12 +5,12 @@ defaultTargets = ["Complexitylib"]
 [[require]]
 name = "mathlib"
 scope = "leanprover-community"
-rev = "c55e6e786f49471c72fbddbec5415808896aec1e"
+rev = "728a93eeff833da3173895bb0575752fdc24edb0"
 
 [[require]]
 name = "cslib"
-git = "https://github.com/SamuelSchlesinger/cslib"
-rev = "2a4389ba8d47778cafdd79f522f0b17b623b18b7"
+git = "https://github.com/leanprover/cslib"
+rev = "311d27ad8458b61e9b7461fc83a480e4be97aef2"
 
 [[lean_lib]]
 name = "Complexitylib"

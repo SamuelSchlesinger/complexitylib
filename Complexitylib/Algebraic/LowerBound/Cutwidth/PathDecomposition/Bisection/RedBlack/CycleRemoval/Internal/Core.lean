@@ -52,7 +52,7 @@ theorem trail_avoids_cut_of_card_le_one {P : Finset V} (one : (B.cutFinset P).ca
   have separated {w : V} (hw : w ∉ P) : ¬ (B.deleteEdges {s(a, b)}).Reachable w a := by
     intro reaches
     exact hw (mem_of_reachable_of_cut_empty _ closed reaches.symm ha)
-  have avoided := trail.not_mem_edges_of_not_reachable
+  have avoided := trail.notMem_edges_of_not_reachable
     (x := b) (y := a) (by simpa only [Sym2.eq_swap] using separated hu)
     (by simpa only [Sym2.eq_swap] using separated hv)
   simpa only [Sym2.eq_swap] using avoided

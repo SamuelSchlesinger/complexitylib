@@ -5,6 +5,7 @@ Authors: Samuel Schlesinger
 -/
 
 module
+public import Complexitylib.Cslib.Circuit.Wire
 public import Cslib.Computability.Circuit.Basic
 public import Complexitylib.Algebraic.Cost
 public import Complexitylib.Algebraic.Fin

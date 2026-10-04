@@ -7,6 +7,7 @@ module
 
 public import Complexitylib.Circuits.SparseSynthesis.Internal.Filter
 public import Complexitylib.Circuits.SparseSynthesis.Internal.PartialTable
+import Complexitylib.Cslib.Circuit.Boolean.Synthesis
 
 /-!
 # Partial synthesis after hashing
@@ -87,7 +88,7 @@ theorem exists_partialFinite {n k l : ℕ} (domain : Finset (BitString n))
     rw [hc x]
     funext j
     have hx' : x ∈ domain := hx
-    simp only [errors, Finset.mem_filter, hx', true_and]
+    simp only [single_apply, errors, Finset.mem_filter, hx', true_and]
     cases approx.eval interpretation x 0 <;> cases f x <;> simp
   · have tableSize : partialTableBudget k l K image.card ≤
         partialTableBudget k l K domain.card := by

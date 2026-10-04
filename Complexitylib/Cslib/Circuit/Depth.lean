@@ -32,36 +32,35 @@ theorem Program.wireDepths_append_castAdd (p : Program σ n g)
     (p.append feed q).wireDepths (w.castAdd h) = p.wireDepths w := by
   induction q with
   | empty => cases w <;> rfl
-  | gate q l ih =>
-    rw [Program.castAdd_succ_eq_castSucc]
-    exact (Program.wireDepths_gate_castSucc _ _ _).trans ih
+  | gate q l ih => cases w <;> exact (Program.wireDepths_gate_castSucc _ _ _).trans ih
 
 /-- A continuation fed by primary inputs retains its own wire depths. -/
 theorem Program.wireDepths_append_input (p : Program σ n g) (select : Fin k → Fin n)
     (q : Program σ k h) (w : Wire k h) :
     (p.append (Wire.input ∘ select) q).wireDepths
-      (Program.appendWire (Wire.input ∘ select) w) = q.wireDepths w := by
+      (Program.appendedWire (Wire.input ∘ select) w) = q.wireDepths w := by
   induction q with
   | empty => cases w with
     | input i => rfl
     | gate j => exact j.elim0
   | @gate h q l ih =>
-    induction w using Wire.lastCases with
-    | last =>
-      rw [Program.appendWire_last]
-      dsimp only [Program.append]
-      simp only [Program.wireDepths, Program.depths, Wire.elim, Fin.lastCases_last]
-      rw [@Fin.lastCases_last (g + h) (fun _ => ℕ)]
-      unfold Line.depth Line.mapWires
-      change (Fin.foldl (σ.Arity l.op) (fun depth i => max depth
-        ((p.append (Wire.input ∘ select) q).wireDepths
-          (Program.appendWire (Wire.input ∘ select) (l.wires i)))) 0).succ = _
-      simp only [ih]
-      rfl
-    | castSucc w =>
-      rw [Program.appendWire_castSucc]
-      exact (Program.wireDepths_gate_castSucc _ _ _).trans
-        ((ih w).trans (Program.wireDepths_gate_castSucc _ _ _).symm)
+    cases w with
+    | input i => exact Program.wireDepths_append_castAdd p _ (q.gate l) (Wire.input (select i))
+    | gate j =>
+      refine Fin.lastCases ?_ (fun j => ?_) j
+      · change (p.append (Wire.input ∘ select) (q.gate l)).wireDepths
+          (Wire.gate (Fin.last (g + h))) = _
+        dsimp only [Program.append]
+        simp only [Program.wireDepths, Program.depths, Wire.elim, Fin.lastCases_last]
+        rw [@Fin.lastCases_last (g + h) (fun _ => ℕ)]
+        unfold Line.depth Line.mapWires
+        change (Fin.foldl (σ.Arity l.op) (fun depth i => max depth
+          ((p.append (Wire.input ∘ select) q).wireDepths
+            (Program.appendedWire (Wire.input ∘ select) (l.wires i)))) 0).succ = _
+        simp only [ih]
+        rfl
+      · exact (Program.wireDepths_gate_castSucc _ _ (.gate (Fin.natAdd _ j))).trans
+          ((ih (.gate j)).trans (Program.wireDepths_gate_castSucc q l (.gate j)).symm)
 
 /-- The circuit depth is bounded exactly when every output depth is bounded. -/
 theorem Circuit.depth_le_iff (c : Circuit σ n m) (d : ℕ) :

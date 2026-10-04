@@ -57,7 +57,7 @@ theorem exists_partialTable {k l : ℕ} (domain : Finset (Fin (k + l) → Bool))
     rw [hc x]
     funext j
     apply Bool.eq_iff_iff.mpr
-    simp only [decide_eq_true_eq]
+    simp only [single_apply, decide_eq_true_eq]
     have inRow : columnAt x ∈ rowDomain domain (rowAt x) := by simpa [rowDomain] using hx
     constructor
     · rintro ⟨b, hb⟩

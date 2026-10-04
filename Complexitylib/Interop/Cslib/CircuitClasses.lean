@@ -7,7 +7,7 @@ Authors: Samuel Schlesinger
 module
 public import Complexitylib.Interop.Cslib.Circuit
 public import Complexitylib.Asymptotics
-public import Cslib.Computability.Circuit.Boolean.Family
+public import Complexitylib.Cslib.Circuit.Boolean.Family
 import Complexitylib.Classes.PPoly
 import Complexitylib.Circuits.Family
 import Cslib.Computability.Circuit.Boolean.Lupanov
@@ -55,17 +55,17 @@ absorbs the extra output gate of `Circuit.ofCslib`.
 
 CSLib's circuit families and the classes `Cslib.Circuits.Boolean.SIZE` and
 `Cslib.Circuits.Boolean.PPoly` (with their family-level Lupanov and Shannon
-bounds and `Cslib.Circuits.Boolean.exists_not_mem_PPoly`), together with
-`Language.slice`, are not yet in upstream CSLib. They are pending CSLib work by
-this library's author, pinned here from the integration branch of the
-`SamuelSchlesinger/cslib` fork. The comparisons with them in this file are
-therefore consistency checks against those definitions, not corroboration by
-independently reviewed ones, and they may need revisiting if the definitions
-change before merging. The counting argument behind the hard language,
-`Cslib.Circuits.Boolean.Shannon.exists_hard_function`, is merged upstream
-(CSLib PR #891), but the pinned version restates it for the bundled circuit
-size `Circuit.size` of the pending CSLib PR #949, so the statement used here is
-itself part of the pending work.
+bounds and `Cslib.Circuits.Boolean.exists_not_mem_PPoly`) are not in upstream
+CSLib. They are CSLib-namespaced work by this library's author, carried in
+`Complexitylib.Cslib.Circuit.Family` and
+`Complexitylib.Cslib.Circuit.Boolean.Family`. The comparisons with them in this
+file are therefore consistency checks against those definitions, not
+corroboration by independently reviewed ones, and they may need revisiting if
+the definitions change before they are upstreamed. `Language.slice` (CSLib PR
+#954), the bundled circuit size `Circuit.size` (CSLib PR #949), and the
+counting argument behind the hard language,
+`Cslib.Circuits.Boolean.Shannon.exists_hard_function` (CSLib PR #891, restated
+for the bundled size), are merged upstream.
 -/
 
 
@@ -147,7 +147,7 @@ theorem exists_cslib_of_mem_SIZE {L : Language} {s : ℕ → ℕ} (hL : L ∈ SI
   rcases n with _ | m
   · obtain ⟨c, hc, hg⟩ :=
       (Synthesis.const (n := 0) (s := inputs 0) (decide ([] ∈ L))).exists_circuit
-    exact ⟨c, by omega, fun x => (hc x).trans (by simp)⟩
+    exact ⟨c, by omega, fun x => (hc x).trans (by funext; simp)⟩
   · obtain ⟨c, hg, hc⟩ := Circuit.exists_cslib_of_sizeComplexity
       fun x : BitString (m + 1) => decide (List.ofFn x ∈ L)
     rw [sliceSizeComplexity_succ] at h
@@ -177,10 +177,9 @@ theorem slice_eq_decide (L : Language) (n : ℕ) :
 /-- **Our `SIZE` inside CSLib's.** A language with fan-in-two AND/OR circuits of
 size `s(n)` has De Morgan circuits of size `n + 2 s(n) + 1`.
 
-`Cslib.Circuits.Boolean.SIZE` comes from the author's pending CSLib work, pinned
-from the integration branch of the `SamuelSchlesinger/cslib` fork, so this
-inclusion is a consistency check with that definition (see the module
-docstring). -/
+`Cslib.Circuits.Boolean.SIZE` is the author's work outside upstream CSLib,
+carried in `Complexitylib.Cslib.Circuit.Boolean.Family`, so this inclusion is a
+consistency check with that definition (see the module docstring). -/
 theorem SIZE_subset_cslib_SIZE (s : ℕ → ℕ) :
     SIZE s ⊆ Cslib.Circuits.Boolean.SIZE fun n => n + 2 * s n + 1 := by
   intro L hL
@@ -190,10 +189,9 @@ theorem SIZE_subset_cslib_SIZE (s : ℕ → ℕ) :
 /-- **CSLib's `SIZE` inside ours.** A language with De Morgan circuits of size
 `s(n)` has fan-in-two AND/OR circuits of size `s(n) + 1`.
 
-`Cslib.Circuits.Boolean.SIZE` comes from the author's pending CSLib work, pinned
-from the integration branch of the `SamuelSchlesinger/cslib` fork, so this
-inclusion is a consistency check with that definition (see the module
-docstring). -/
+`Cslib.Circuits.Boolean.SIZE` is the author's work outside upstream CSLib,
+carried in `Complexitylib.Cslib.Circuit.Boolean.Family`, so this inclusion is a
+consistency check with that definition (see the module docstring). -/
 theorem cslib_SIZE_subset_SIZE (s : ℕ → ℕ) :
     Cslib.Circuits.Boolean.SIZE s ⊆ SIZE fun n => s n + 1 := by
   rintro L ⟨F, hF, hsize⟩
@@ -218,10 +216,10 @@ two size measures agree up to `n + 2s + 1`, and CSLib's bounds `n ^ k + k` are
 cofinal among polynomials.
 
 `Cslib.Circuits.Boolean.PPoly` and the `Cslib.Circuits.Boolean.SIZE` classes it
-is built from come from the author's pending CSLib work, pinned from the
-integration branch of the `SamuelSchlesinger/cslib` fork and not yet reviewed
-upstream. The equality is therefore a consistency check between this library's
-`PPoly` and those definitions (see the module docstring). -/
+is built from are the author's work outside upstream CSLib, carried in
+`Complexitylib.Cslib.Circuit.Boolean.Family` and not reviewed upstream. The
+equality is therefore a consistency check between this library's `PPoly` and
+those definitions (see the module docstring). -/
 theorem PPoly_eq_cslib_PPoly : PPoly = Cslib.Circuits.Boolean.PPoly := by
   apply Set.Subset.antisymm
   · intro L hL
@@ -238,12 +236,11 @@ theorem PPoly_eq_cslib_PPoly : PPoly = Cslib.Circuits.Boolean.PPoly := by
 /-- **Some language is not in `P/poly`.** This is CSLib's
 `Cslib.Circuits.Boolean.exists_not_mem_PPoly`, through `PPoly_eq_cslib_PPoly`.
 
-That theorem and `Cslib.Circuits.Boolean.PPoly` come from the author's pending
-CSLib work, pinned from the integration branch of the `SamuelSchlesinger/cslib`
-fork. The counting argument underneath,
-`Cslib.Circuits.Boolean.Shannon.exists_hard_function`, is merged upstream, but
-the pinned version is restated for the bundled circuit size of the pending CSLib
-PR #949 (see the module docstring). -/
+That theorem and `Cslib.Circuits.Boolean.PPoly` are the author's work outside
+upstream CSLib, carried in `Complexitylib.Cslib.Circuit.Boolean.Family`. The
+counting argument underneath,
+`Cslib.Circuits.Boolean.Shannon.exists_hard_function`, is merged upstream (see
+the module docstring). -/
 theorem exists_not_mem_PPoly : ∃ L : Language, L ∉ PPoly := by
   rw [PPoly_eq_cslib_PPoly]
   exact Cslib.Circuits.Boolean.exists_not_mem_PPoly

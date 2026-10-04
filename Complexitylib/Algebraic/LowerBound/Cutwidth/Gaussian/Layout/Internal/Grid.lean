@@ -8,7 +8,7 @@ module
 public import Complexitylib.Algebraic.LowerBound.Cutwidth.Gaussian.Layout.Defs
 public import Complexitylib.Algebraic.LowerBound.Cutwidth.PathDecomposition
 public import Mathlib.Data.Fintype.EquivFin
-public import Mathlib.Data.Prod.Lex
+public import Mathlib.Order.Prod.Lex.Basic
 import Complexitylib.Algebraic.LowerBound.Cutwidth.PathDecomposition.CutBoundary
 
 /-!

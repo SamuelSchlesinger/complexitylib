@@ -88,7 +88,7 @@ theorem existsRequestCollisionCut
     have := cutBad membership
     simp [bad] at this
   have cutCard : cut.eraseNone.card = cut.card :=
-    Finset.card_eraseNone_of_not_mem noneNotInCut
+    Finset.card_eraseNone_of_notMem noneNotInCut
   have enoughCut : size ≤ cut.eraseNone.card := by
     have badCard : bad.card = (badRequests sets occupied assignment).card := by
       simp [bad]

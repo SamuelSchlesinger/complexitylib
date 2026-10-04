@@ -12,6 +12,7 @@ public import Mathlib.Data.Nat.Bitwise
 public import Mathlib.Algebra.Order.Sub.Basic
 public import Mathlib.Tactic.Ring.RingNF
 public import Std.Tactic.BVDecide.Normalize.Bool
+import Batteries.Data.Nat.Bitwise
 
 /-! # Internal helpers for Valiant's Depth Reduction Lemma
 

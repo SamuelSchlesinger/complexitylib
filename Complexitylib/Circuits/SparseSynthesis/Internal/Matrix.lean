@@ -5,7 +5,7 @@ Authors: Samuel Schlesinger
 -/
 module
 
-public import Cslib.Computability.Circuit.Boolean.Complexity
+public import Complexitylib.Cslib.Circuit.Boolean.Complexity
 public import Mathlib.Data.Fintype.EquivFin
 public import Mathlib.Algebra.BigOperators.Fin
 import Mathlib.Tactic

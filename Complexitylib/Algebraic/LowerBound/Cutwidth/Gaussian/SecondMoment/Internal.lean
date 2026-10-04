@@ -28,7 +28,7 @@ open MeasureTheory ProbabilityTheory
 theorem memLp_indicator_one {α : Type*} [MeasurableSpace α] {ν : Measure α}
     [IsFiniteMeasure ν] {s : Set α} (hs : MeasurableSet s) :
     MemLp (s.indicator fun _ => (1 : ℝ)) 2 ν :=
-  memLp_indicator_const 2 hs 1 (Or.inr (measure_ne_top ν s))
+  memLp_indicator_const 2 hs.nullMeasurableSet 1 (Or.inr (measure_ne_top ν s))
 
 /-- Two unit indicators have covariance at most one under a probability measure. -/
 theorem covariance_indicator_le_one {α : Type*} [MeasurableSpace α] {ν : Measure α}

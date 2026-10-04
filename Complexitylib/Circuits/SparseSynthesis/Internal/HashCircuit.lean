@@ -6,7 +6,8 @@ Authors: Samuel Schlesinger
 module
 
 public import Complexitylib.Classes.Randomized.Hashing.Affine
-public import Cslib.Computability.Circuit.Boolean.Complexity
+public import Complexitylib.Cslib.Circuit.Boolean.Complexity
+import Complexitylib.Cslib.Circuit.Boolean.Synthesis
 import Mathlib.Tactic
 
 /-!

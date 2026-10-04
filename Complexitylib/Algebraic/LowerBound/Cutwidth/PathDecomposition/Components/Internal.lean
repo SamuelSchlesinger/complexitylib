@@ -8,7 +8,7 @@ module
 public import Complexitylib.Algebraic.LowerBound.Cutwidth.PathDecomposition
 public import Mathlib.Combinatorics.SimpleGraph.Connectivity.Connected
 public import Mathlib.Data.Finset.Sort
-public import Mathlib.Data.Sigma.Order
+public import Mathlib.Order.Sigma
 
 /-!
 # Joining decompositions of connected components

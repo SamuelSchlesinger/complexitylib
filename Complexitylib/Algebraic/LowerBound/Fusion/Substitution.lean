@@ -72,7 +72,7 @@ theorem programAtoms_append
   | empty => simp [Cslib.Circuits.Program.append]
   | @gate g continuation line inductionHypothesis =>
       have lastAtom :
-          lineAtom (line.mapWires (Cslib.Circuits.Program.appendWire feed))
+          lineAtom (line.mapWires (Cslib.Circuits.Program.appendedWire feed))
               (ambient.append feed continuation) interpretation input =
             lineAtom line continuation interpretation
               (ambient.trace interpretation input ∘ feed) := by
@@ -81,7 +81,7 @@ theorem programAtoms_append
             simp only [lineAtom, Line.mapWires]
             congr 1
             funext argument
-            exact Cslib.Circuits.Program.trace_append_appendWire ambient feed interpretation
+            exact Cslib.Circuits.Program.trace_append_appendedWire ambient feed interpretation
               input continuation (wires argument)
       simp [Cslib.Circuits.Program.append, programAtoms_gate, inductionHypothesis,
         lastAtom, List.append_assoc]

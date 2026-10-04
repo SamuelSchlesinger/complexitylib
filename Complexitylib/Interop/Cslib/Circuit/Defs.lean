@@ -5,6 +5,7 @@ Authors: Samuel Schlesinger
 -/
 
 module
+public import Complexitylib.Cslib.Circuit.Wire
 public import Cslib.Computability.Circuit.Boolean.Basic
 public import Complexitylib.Circuits.AndOrNot.Defs
 public import Mathlib.Data.Fin.VecNotation

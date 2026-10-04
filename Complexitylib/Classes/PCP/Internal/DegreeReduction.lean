@@ -8,6 +8,7 @@ public import Complexitylib.Classes.PCP.Internal.ConstraintGraph
 public import Complexitylib.Classes.PCP.Internal.NumEnc
 public import Complexitylib.Classes.PCP.Internal.Expander
 public import Complexitylib.Classes.PCP.Internal.RegCSP
+public import Mathlib.Data.Finset.Sort
 
 /-!
 # Degree reduction

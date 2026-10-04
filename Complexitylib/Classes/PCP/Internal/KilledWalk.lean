@@ -199,7 +199,7 @@ theorem card_le_stopAt {T q : ℕ} {m : ℕ} (hm : m ≤ T) :
       have hsame : (Finset.univ.filter fun c : Fin T → Fin q => k + 1 ≤ stopAt c)
           = (Finset.univ.filter fun c : Fin T → Fin q => k < stopAt c) := by
         ext c
-        simp
+        simp [Nat.add_one_le_iff]
       rw [hsame, card_lt_stopAt hk]
       congr 1
 

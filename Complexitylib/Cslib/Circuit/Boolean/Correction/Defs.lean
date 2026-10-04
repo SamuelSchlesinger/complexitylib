@@ -5,8 +5,8 @@ Authors: Samuel Schlesinger
 -/
 module
 
-public import Cslib.Computability.Circuit.Boolean.Complexity
-public import Cslib.Computability.Circuit.RelativeComplexity
+public import Complexitylib.Cslib.Circuit.Boolean.Complexity
+public import Complexitylib.Cslib.Circuit.RelativeComplexity
 public import Complexitylib.Cslib.Circuit.Complexity
 public import Mathlib.Data.Finset.Sort
 public import Mathlib.Data.Fintype.Pi

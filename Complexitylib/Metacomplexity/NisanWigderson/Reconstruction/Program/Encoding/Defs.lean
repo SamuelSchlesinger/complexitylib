@@ -8,8 +8,8 @@ module
 public import Complexitylib.Metacomplexity.BooleanDependency.Encoding.Defs
 public import Complexitylib.Metacomplexity.NisanWigderson.Reconstruction.Program.Defs
 public import Complexitylib.Mathlib.NatBits
-public import Mathlib.Data.Sigma.Order
-public import Mathlib.Data.Sum.Order
+public import Mathlib.Order.Sigma
+public import Mathlib.Order.Sum.Order
 
 /-!
 # Bit encoding of explicit NW reconstruction programs -- definitions

@@ -5,6 +5,7 @@ Authors: Samuel Schlesinger, OpenAI
 -/
 
 module
+public import Complexitylib.Cslib.Circuit.Wire
 public import Cslib.Computability.Circuit.Basic
 public import Mathlib.Data.Finset.Basic
 
