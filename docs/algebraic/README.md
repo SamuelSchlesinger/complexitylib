@@ -347,8 +347,11 @@ above `2^(4.6·10^13)`.
 The [cutwidth guide](cutwidth-lower-bound.md) records the exact theorem,
 parameter guarantees, and source credits.
 
-The same lower bound holds for nondeterministic circuits with arbitrarily
-many witness bits (`Cutwidth.nondet_eventually_lt_size_of_rectangleFree`).
+For rectangle-free families, the coefficient-four and Gaussian bounds also
+hold for nondeterministic circuits with arbitrarily many witness bits
+(`Cutwidth.nondet_eventually_lt_size_of_rectangleFree` and
+`Cutwidth.nondet_eventually_lt_size_of_rectangleFree_gaussian`); no
+nondeterministic corollary is stated for the explicit family.
 For balanced functions with polynomial threshold, circuits of size
 `(4 - ε) n` agree on at most `(1/2 + 3ν) 2 ^ n + 2 ^ ((1 - ε/24) n)` inputs
 (`Cutwidth.eventually_card_agree_le_of_balanced`; see the

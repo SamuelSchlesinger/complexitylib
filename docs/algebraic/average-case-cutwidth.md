@@ -57,14 +57,15 @@ explicit finite parameters, and a total uniform polynomial-time evaluator.
 Its complete leakage and bad-seed bound is also proved, together with the
 component-parity estimate for linear sampler values and the actual XOR
 reduction's absolute-bias identity. The global sampler composition, the
-simultaneous low-order parity bounds, and the final uniform sumset family
-remain construction obligations.
+simultaneous low-order parity bounds, and a final uniform sumset family
+(`Extractor.sourceReductionHardFamily`, error `35/72`) are proved as well.
 The [cutwidth guide](cutwidth-lower-bound.md) records the exact checked
-interfaces and credits the GUV and CGL constructions. The seeded result
-does not establish the polynomial support threshold and quantitative balance
-on every large rectangle required by this average-case theorem. Exact global
-balance from the proved padding operation alone does not establish those
-properties either.
+interfaces and credits the GUV and CGL constructions. That family does not
+satisfy this average-case theorem: its threshold is only subexponential
+(`log₂ K = o(n)`), not polynomial, and with its error `35/72` as `ν` the bound
+`(1/2 + 3ν) 2ⁿ` exceeds `2ⁿ`, so it would be vacuous. Exact global balance
+from the proved padding operation does not establish quantitative balance on
+every large rectangle either.
 
 **Theorem (average case).** Let `ν ≥ 0` and let `f n`
 be `(K n, ν)`-balanced with `K n ≤ n^c`. Then for every `ε > 0` there is
