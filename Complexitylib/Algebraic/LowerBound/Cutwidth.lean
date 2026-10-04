@@ -313,6 +313,8 @@ public import Complexitylib.Algebraic.LowerBound.Cutwidth.Gaussian.Layout
 public import Complexitylib.Algebraic.LowerBound.Cutwidth.Gaussian.Frontier.Star
 public import Complexitylib.Algebraic.LowerBound.Cutwidth.Gaussian.Frontier.Order
 public import Complexitylib.Algebraic.LowerBound.Cutwidth.Gaussian.Band.Order
+public import Complexitylib.Algebraic.LowerBound.Cutwidth.Gaussian.Band.Defs
+public import Complexitylib.Algebraic.LowerBound.Cutwidth.Gaussian.Band
 public import Complexitylib.Algebraic.LowerBound.Cutwidth.Gaussian.Frontier
 public import Complexitylib.Algebraic.LowerBound.Cutwidth.Gaussian.Frontier.Arccos
 public import Complexitylib.Algebraic.LowerBound.Cutwidth.Gaussian.Edge.Exact
