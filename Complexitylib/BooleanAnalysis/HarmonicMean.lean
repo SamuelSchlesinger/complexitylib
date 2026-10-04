@@ -27,9 +27,12 @@ projected patterns. Zero entries give harmonic mean zero, as in the paper.
 dimension zero. `harmonicTransform_good_probability` supplies the intermediate
 1/4-sampling estimate in the proof of Lemma 10, using a density bound `B` in
 place of `2 ^ k`. The sparse-sampling conclusion and pattern count of Lemma 10
-are proved in `Complexitylib.BooleanAnalysis.LightPatterns`.
-The top-down communication and circuit lower bounds of Theorem 3 remain open
-formalization work.
+are proved in `Complexitylib.BooleanAnalysis.LightPatterns`, which feeds the
+mirror-set argument of `Complexitylib.BooleanAnalysis.MirrorSets`. The top-down
+communication and circuit lower bounds of Theorem 3 are
+`Complexity.KarchmerWigderson.parity_communication_lower_bound` and
+`Complexity.Circuit.parity_wire_lower_bound` in
+`Complexitylib.Circuits.KarchmerWigderson.TopDown`.
 -/
 
 public section

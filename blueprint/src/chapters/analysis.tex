@@ -3,14 +3,18 @@
 
 This chapter covers the Fourier analysis of Boolean functions, following
 O'Donnell's \emph{Analysis of Boolean Functions}. These tools are aimed at
-small-depth circuit lower bounds and at property testing. So far only the
-property-testing side is used elsewhere in the library: the BLR soundness
-theorem is used by the Hadamard tester in the PCP development. Everything
-formalized here lives in \texttt{Complexitylib.BooleanAnalysis} (the
-\texttt{FourierExpansion} surface, with \texttt{FourierExpansion.Defs} and
-\texttt{FourierExpansion.Internal}, and the \texttt{PolynomialCorrelation}
-development). The following Fourier results are formalized: the parity
-basis, the Fourier expansion, Plancherel and Parseval, the degree
+small-depth circuit lower bounds and at property testing. Two parts are used
+elsewhere in the library: the BLR soundness theorem is used by the Hadamard
+tester in the PCP development, and Korten's developments of
+Section~\ref{sec:analysis-harmonic} feed the top-down parity lower bounds of
+Section~\ref{sec:lowerbounds-topdown-parity}. Everything formalized here lives
+in \texttt{Complexitylib.BooleanAnalysis}: the \texttt{FourierExpansion}
+surface (with \texttt{FourierExpansion.Defs} and
+\texttt{FourierExpansion.Internal}), the \texttt{PolynomialCorrelation}
+development, and Korten's \texttt{HarmonicMean}, \texttt{Bernoulli},
+\texttt{LightPatterns}, \texttt{Fibers}, \texttt{CoordinateSampling}, and
+\texttt{MirrorSets} modules. The following Fourier results are formalized:
+the parity basis, the Fourier expansion, Plancherel and Parseval, the degree
 decomposition, the BLR linearity test with soundness and local correction, the
 spectral definitions and basic identities of noise stability, noise
 sensitivity, the noise operator, derivatives, and influence (O'Donnell,

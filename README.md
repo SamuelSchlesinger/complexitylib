@@ -105,7 +105,7 @@ each with its own entry module:
 | Complexity classes | `Complexitylib.Classes` | `P`, `NP`, `BPP`, `PSPACE`, and friends; containments, closure properties, reductions, and the time-hierarchy theorem |
 | SAT | `Complexitylib.SAT` | CNF semantics and encoding, a verified SAT verifier, and the Cook–Levin theorem: `SAT` is NP-complete |
 | Circuits | `Complexitylib.Circuits` | Boolean circuits with size and depth, circuit families, `P/poly`, normal forms, and classical lower bounds |
-| Boolean analysis | `Complexitylib.BooleanAnalysis` | Fourier expansion, noise stability, and influence for Boolean functions |
+| Boolean analysis | `Complexitylib.BooleanAnalysis` | Fourier expansion, noise stability, and influence for Boolean functions; exponential correlation bounds against low-degree binary polynomials; Korten's harmonic-mean transform and mirror sets for top-down lower bounds |
 | Descriptive complexity | `Complexitylib.DescriptiveComplexity` | Finite structures, first- and second-order logic, definability, and model checking |
 | Languages | `Complexitylib.Languages` | Concrete decidable languages exercising the machine API end to end |
 | Mathlib prelude | `Complexitylib.Mathlib` | Extensions to Mathlib types in their home namespaces; candidates for upstreaming |
