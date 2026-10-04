@@ -194,7 +194,7 @@ theorem eventually_hard_of_flatSumsetExtractor
 sublinear source entropy is needed, with any fixed error at most one quarter.
 This generic interface keeps the graph-ordering bound as an explicit parameter. -/
 theorem eventually_lt_size_of_flatSumsetExtractor
-    (order : ∀ η : ℝ, 0 < η → ∃ C : ℝ, Multigraph.OrderingBound η C)
+    (order : ∀ η : ℝ, 0 < η → ∃ C : ℝ, Multigraph.OrderingBound (1 / 3) η C)
     (f : ∀ n, Cslib.BooleanFunction n) (K : Nat → Nat) {ν : ℝ} (hν : ν ≤ 1 / 4)
     (hK : (fun n => Real.logb 2 (K n)) =o[Filter.atTop] (fun n => (n : ℝ)))
     (extract : ∀ᶠ n in Filter.atTop, FlatSumsetExtractor (f n) (K n) ν)
@@ -209,19 +209,16 @@ theorem eventually_lt_size_of_flatSumsetExtractor
 /-- The extractor-to-circuit bridge with the cubic pathwidth
 theorem as its graph-theoretic prerequisite. -/
 theorem eventually_lt_size_of_pathwidthBound_of_flatSumsetExtractor
-    (pathwidth : ∀ ξ : ℝ, 0 < ξ → ∃ N₀ : Nat, PathwidthBound ξ N₀)
+    (pathwidth : ∀ ξ : ℝ, 0 < ξ → ∃ N₀ : Nat, PathwidthBound (1 / 6) ξ N₀)
     (f : ∀ n, Cslib.BooleanFunction n) (K : Nat → Nat) {ν : ℝ} (hν : ν ≤ 1 / 4)
     (hK : (fun n => Real.logb 2 (K n)) =o[Filter.atTop] (fun n => (n : ℝ)))
     (extract : ∀ᶠ n in Filter.atTop, FlatSumsetExtractor (f n) (K n) ν)
     {ε : ℝ} (hε : 0 < ε) :
     ∀ᶠ n in Filter.atTop, ∀ circuit : Circuit Binary.signature n 1,
       circuit.Computes Binary.interpretation (fun x _ => f n x) →
-        (4 - ε) * n < circuit.size := by
-  refine eventually_lt_size_of_flatSumsetExtractor (fun η hη => ?_) f K hν hK extract hε
-  obtain ⟨N₀, hN₀⟩ := pathwidth (η / 2) (by positivity)
-  refine ⟨N₀ + 9, ?_⟩
-  have := Multigraph.orderingBound_of_pathwidthBound (by positivity) hN₀
-  rwa [show 2 * (η / 2) = η by ring] at this
+        (4 - ε) * n < circuit.size :=
+  eventually_lt_size_of_flatSumsetExtractor
+    (Multigraph.exists_orderingBound_one_third_of_pathwidthBound pathwidth) f K hν hK extract hε
 
 /-- The generic extractor route with an explicit cubic bisection bound.
 The extraction-to-rectangle and bisection-to-pathwidth reductions are proved. -/
@@ -240,7 +237,7 @@ theorem eventually_lt_size_of_bisectionBound_of_flatSumsetExtractor
 /-- Flat sumset extraction also gives the coefficient-four lower bound
 against nondeterministic circuits with arbitrarily many witness inputs. -/
 theorem nondet_eventually_lt_size_of_flatSumsetExtractor
-    (order : ∀ η : ℝ, 0 < η → ∃ C : ℝ, Multigraph.OrderingBound η C)
+    (order : ∀ η : ℝ, 0 < η → ∃ C : ℝ, Multigraph.OrderingBound (1 / 3) η C)
     (f : ∀ n, Cslib.BooleanFunction n) (K : Nat → Nat) {ν : ℝ} (hν : ν ≤ 1 / 4)
     (hK : (fun n => Real.logb 2 (K n)) =o[Filter.atTop] (fun n => (n : ℝ)))
     (extract : ∀ᶠ n in Filter.atTop, FlatSumsetExtractor (f n) (K n) ν)

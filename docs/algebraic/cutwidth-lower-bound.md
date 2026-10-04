@@ -54,6 +54,27 @@ is required; polynomial thresholds are a special case. The older entry
 points with explicit bisection, pathwidth, or ordering bounds remain available.
 The library proves those graph bounds and adds no axioms.
 
+### The coefficient as a function of the graph ordering
+
+The coefficient four is `1 + 1/A` for the graph-ordering coefficient
+`A = 1/3`. `Multigraph.OrderingBound A η C` states that every connected
+loopless multigraph of maximum degree three with `N` vertices and `M` edges
+has a vertex ordering whose prefix cuts have at most
+`(A + η)(M − N)⁺ + 3 log₂ N + C` edges. The counting argument is proved for
+every `A > 0`: if the ordering hypothesis holds for every slack `η > 0`, then
+`eventually_lt_size_of_orderingBound` gives more than `(1 + 1/A − ε) n` gates
+under the hypotheses of `eventually_lt_size_of_rectangleFree`, and
+`nondet_eventually_lt_size_of_orderingBound` gives the same for
+nondeterministic circuits. The cubic core of a final compression has at most
+`2 (M − N)⁺` vertices, so a cubic cutwidth bound `CutwidthBound c ξ N₀`
+(prefix cuts at most `(c + ξ) h`) or pathwidth bound `PathwidthBound p ξ N₀`
+(bags at most `(p + ξ) h + 1`) at every positive slack gives `A = 2c` or
+`A = 2p` (`eventually_lt_size_of_cutwidthBound`,
+`eventually_lt_size_of_pathwidthCoefficient`). The proved Fomin–Høie bound
+has `p = 1/6`. `sourceReductionHardFamily_eventually_lt_size_of_orderingBound`
+transports any such coefficient to the same concrete family, and
+`sourceReductionHardFamily_eventually_lt_size` is its case `A = 1/3`.
+
 ## Instantiating the family hypothesis
 
 A *one-rectangle* of `f` is a product `P × Q`, for a split of the coordinates
@@ -1365,7 +1386,7 @@ route are not prerequisites for this proof.
 | Endpoint assembly | `PathDecomposition.exists_glue` concatenates induced decompositions whose adjoining bags contain every shared vertex. `exists_pad` and `exists_attach` add a subgraph along a fixed boundary. |
 | Subcubic endpoints | `PathDecomposition.exists_subcubic_endsAt` completes the endpoint induction for every prescribed `X`, with bags of size at most `max X.card (n / 3 + 1) + Nat.clog 2 n + 1`. No bisection hypothesis is needed for this lemma. |
 | Bisection assembly | `PathDecomposition.exists_of_cut` joins both sides through their boundary graph. `exists_of_balanced_cut` gives bags of size at most `max b ((n + 1) / 6 + 1) + Nat.clog 2 n + 1`, where `b` is the cut size. |
-| Bisection to pathwidth | `BisectionBound.exists_pathwidthBound` turns `BisectionBound ξ N₀` into `PathwidthBound (ξ + δ) N₁` for `ξ ≥ 0` and `δ > 0`. `pathwidthBound_of_bisectionBound` preserves the quantification over every positive slack. |
+| Bisection to pathwidth | `BisectionBound.exists_pathwidthBound` turns `BisectionBound ξ N₀` into `PathwidthBound (1 / 6) (ξ + δ) N₁` for `ξ ≥ 0` and `δ > 0`. `pathwidthBound_of_bisectionBound` preserves the quantification over every positive slack. |
 | Cut improvement | `helpfulness_eq_sub`, `helpfulness_add`, and `Bisection.two_moves_le_zero` give exact accounting for the two moves. `Bisection.exists_min_bisection` provides a minimum balanced cut, including odd graph orders. |
 | Local helpful sets | `helpfulness_eq_degree_sum` counts outside neighbors and internal edges. `one_le_helpfulness_singleton` covers a subcubic vertex with two crossing edges; `one_le_helpfulness_of_connected_boundary` covers three or more connected boundary vertices. |
 | Normalization configurations | `Bisection.exists_helpful_of_boundary_pair_three_neighbors`, `exists_helpful_of_shared_boundary_neighbor`, and `exists_helpful_of_boundary_neighbor_configuration` construct the remaining witnesses with bounds five, seven, and eleven. `helpfulness_union_boundaryLift_of_closed` supplies the common closure argument. |
@@ -1393,8 +1414,8 @@ route are not prerequisites for this proof.
 | Local-to-global reduction | `Bisection.exists_bisection_of_helpful` and `exists_bisectionBound_of_helpful` derive the finite and asymptotic sharp bisection bounds from the bounded local helpful-set lemma alone. They use a gain of `Nat.clog 2 n + 3`; the maximum in the rebalancing bound handles overshoot. |
 | Compression | `Multigraph.Compression` in `Algebraic.LowerBound.Cutwidth.Compression`: merging adjacent blocks until the quotient is simple and 3-regular, with `quotient_isRegularOfDegree` and the excess bound `card_blocks_add_le`. |
 | Median ordering | `MedianOrdering.card_cutFinset_key_lt_le` in `Algebraic.LowerBound.Cutwidth.MedianOrdering`: a path decomposition with bags of size at most `p + 1` gives a vertex ordering of a cubic graph with prefix cuts at most `p + 2`. |
-| Expansion | `Compression.exists_linearOrder` and `Multigraph.orderingBound_of_pathwidthBound` in `Algebraic.LowerBound.Cutwidth.Expansion`: `PathwidthBound ξ N₀` implies `OrderingBound (2 ξ) (N₀ + 9)`. |
-| Assembly | `lt_size_of_log_bounds` and `eventually_lt_size_of_rectangleFree` in `Algebraic.LowerBound.Cutwidth.FourN` handle subexponential thresholds; the original polynomial-threshold entry points remain available. |
+| Expansion | `Compression.exists_linearOrder` and `Multigraph.orderingBound_of_pathwidthBound` in `Algebraic.LowerBound.Cutwidth.Expansion`: `PathwidthBound p ξ N₀` implies `OrderingBound (2 p) (2 ξ) (N₀ + 9)`. `Multigraph.orderingBound_of_cutwidthBound` orders the quotient by a cutwidth key instead: `CutwidthBound c ξ N₀` implies `OrderingBound (2 c) (2 ξ) (N₀ + 8)`. `cutwidthBound_of_pathwidthBound` converts a pathwidth bound to a cutwidth bound with the same coefficient. |
+| Assembly | `lt_size_of_orderingBound` and `eventually_lt_size_of_orderingBound` in `Algebraic.LowerBound.Cutwidth.FourN` give the coefficient `1 + 1/A` from any ordering coefficient `A > 0`; `lt_size_of_log_bounds` and `eventually_lt_size_of_rectangleFree` are the coefficient-four case and handle subexponential thresholds; the original polynomial-threshold entry points remain available. |
 | Extraction | `FlatSumsetExtractor.balanced`, `FlatSumsetExtractor.rectangleFree`, `FlatSumsetExtractor.card_accepting_ge`, and `eventually_hard_of_flatSumsetExtractor` in `Algebraic.LowerBound.Cutwidth.Extractor`. |
 | Balanced padding | `FlatSumsetExtractor.balancePad_rectangleFree` doubles the threshold for any error below `1/2`; `card_accepting_balancePad` proves exact balance and `balancePadEval_mem_FP` preserves any supplied `FP` evaluator. `eventually_lt_size_balancePad_of_flatSumsetExtractor` and its nondeterministic counterpart give the lower bound at the full padded length. |
 | Majority components | `Extractor.majorityEval_mem_FP` and the margin lemmas prove evaluation and robustness. `signSum_first_moment` through `signSum_fourth_moment` derive raw moment bounds from `ParityBiasBound`. `fourthMoment_positive_tail_of_approx` and its negative counterpart give tail mass at least `1/36` from approximate normalized moment bounds. |
@@ -1471,16 +1492,19 @@ Listing the vertices block by block in that order, each block in its own
 order, every lower set is a union of whole blocks plus a prefix of one block.
 Its cut is at most the quotient cut of the block prefix plus the prefix
 boundary of the partial block, giving
-`(1/6 + ξ) h + N₀ + 2 + 3 ⌈log₂ N⌉ + 3 ≤ (1/3 + 2ξ)(M − N)⁺ + 3 log₂ N + N₀ + 9`.
+`(p + ξ) h + N₀ + 2 + 3 ⌈log₂ N⌉ + 3 ≤ (2p + 2ξ)(M − N)⁺ + 3 log₂ N + N₀ + 9`
+for a pathwidth coefficient `p`; the proved `p = 1/6` gives `1/3 + 2ξ`.
 
 ### The assembly
 
-With `η = min(ε, 1) / 18` and `k = ⌈log₂ K⌉`, a circuit with
-`s ≤ (4 − ε) n` gates whose output is a gate reads more than `n − k` inputs,
-so the cut bound is at most `(1/3 + η)((3 − ε) n + k) + O(log n)`. Comparing
-`2 ^ (n − 2)` accepted inputs with `|V| · 2 ^ (w + 3) · K ²` gives
-`ε n / 6 ≤ O(log n + log K)`, which fails for large `n` under the sublinear
-logarithm hypothesis. A circuit whose output is an
+For an ordering coefficient `A > 0`, let `θ = min(ε, 1/A)`,
+`η = A² θ / 2`, and `k = ⌈log₂ K⌉`. A circuit with `s ≤ (1 + 1/A − θ) n`
+gates whose output is a gate reads more than `n − k` inputs, so the cut bound
+is at most `(A + η)((1/A − θ) n + k) + O(log n)`, and
+`(A + η)(1/A − θ) ≤ 1 − A θ / 2`. Comparing `2 ^ (n − 2)` accepted inputs
+with `|V| · 2 ^ (w + 3) · K ²` gives `A θ n / 2 ≤ O(log n + log K)`, which
+fails for large `n` under the sublinear logarithm hypothesis. For `A = 1/3`
+this is the coefficient-four bound. A circuit whose output is an
 input wire depends on one coordinate and is excluded by the support lemma.
 The asymptotic conditions are discharged by `eventually_mul_logb_add_lt`
 (`log₂ n = o(n)`) and the source-entropy hypothesis. The polynomial-threshold

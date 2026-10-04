@@ -18,6 +18,9 @@ than `(4 - ε)` times its padded input length in gates, for every positive
 `ε` and all sufficiently large inputs. The same result holds for
 nondeterministic circuits with unrestricted witness lengths. The extractor
 family remains an assumption; all graph bounds and padding steps are proved.
+With the graph-ordering hypothesis for a general coefficient `A > 0` in place
+of the proved bound, the same padded family needs more than `(1 + 1/A - ε)`
+times its padded input length in gates.
 -/
 
 @[expose] public section
@@ -51,5 +54,35 @@ theorem nondet_eventually_lt_size_balancePad_of_flatSumsetExtractor
       NondetComputes circuit (balancePad (f n)) → (4 - ε) * (n + 1) < circuit.size :=
   Extractor.Internal.nondet_eventually_lt_size_balancePad_of_flatSumsetExtractor
     f K hν positive hK extract hε
+
+/-- Balanced padding with a general graph-ordering coefficient: if the
+ordering hypothesis holds with coefficient `A > 0` for every positive slack,
+the same padded family needs more than `(1 + 1/A - ε) (n + 1)` gates. -/
+theorem eventually_lt_size_balancePad_of_flatSumsetExtractor_of_orderingBound {A : ℝ}
+    (hA : 0 < A) (order : ∀ η : ℝ, 0 < η → ∃ C : ℝ, Multigraph.OrderingBound A η C)
+    (f : ∀ n, Cslib.BooleanFunction n) (K : Nat → Nat) {ν : ℝ} (hν : ν < 1 / 2)
+    (positive : ∀ᶠ n in Filter.atTop, 0 < K n)
+    (hK : (fun n => Real.logb 2 (K n)) =o[Filter.atTop] (fun n => (n : ℝ)))
+    (extract : ∀ᶠ n in Filter.atTop, FlatSumsetExtractor (f n) (K n) ν)
+    {ε : ℝ} (hε : 0 < ε) :
+    ∀ᶠ n in Filter.atTop, ∀ circuit : Circuit Binary.signature (n + 1) 1,
+      circuit.Computes Binary.interpretation (fun x _ => balancePad (f n) x) →
+        (1 + 1 / A - ε) * (n + 1) < circuit.size :=
+  Extractor.Internal.eventually_lt_size_balancePad_of_flatSumsetExtractor_of_orderingBound
+    hA order f K hν positive hK extract hε
+
+/-- The nondeterministic padded bound with a general graph-ordering
+coefficient `A > 0`, for any number of witness inputs. -/
+theorem nondet_eventually_lt_size_balancePad_of_flatSumsetExtractor_of_orderingBound {A : ℝ}
+    (hA : 0 < A) (order : ∀ η : ℝ, 0 < η → ∃ C : ℝ, Multigraph.OrderingBound A η C)
+    (f : ∀ n, Cslib.BooleanFunction n) (K : Nat → Nat) {ν : ℝ} (hν : ν < 1 / 2)
+    (positive : ∀ᶠ n in Filter.atTop, 0 < K n)
+    (hK : (fun n => Real.logb 2 (K n)) =o[Filter.atTop] (fun n => (n : ℝ)))
+    (extract : ∀ᶠ n in Filter.atTop, FlatSumsetExtractor (f n) (K n) ν)
+    {ε : ℝ} (hε : 0 < ε) :
+    ∀ᶠ n in Filter.atTop, ∀ (m : Nat) (circuit : Circuit Binary.signature (n + 1 + m) 1),
+      NondetComputes circuit (balancePad (f n)) → (1 + 1 / A - ε) * (n + 1) < circuit.size :=
+  Extractor.Internal.nondet_eventually_lt_size_balancePad_of_flatSumsetExtractor_of_orderingBound
+    hA order f K hν positive hK extract hε
 
 end Algebraic.Cutwidth

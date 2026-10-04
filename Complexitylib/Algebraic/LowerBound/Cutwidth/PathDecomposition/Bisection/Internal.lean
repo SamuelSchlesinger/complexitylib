@@ -108,7 +108,7 @@ theorem bisectionBound_coarse : BisectionBound (4 / 3) 0 := by
 
 theorem exists_pathwidthBound {ξ δ : ℝ} {N₀ : Nat}
     (bisection : BisectionBound ξ N₀) (hξ : 0 ≤ ξ) (hδ : 0 < δ) :
-    ∃ N₁ : Nat, PathwidthBound (ξ + δ) N₁ := by
+    ∃ N₁ : Nat, PathwidthBound (1 / 6) (ξ + δ) N₁ := by
   obtain ⟨N, hN⟩ := Filter.eventually_atTop.mp (eventually_clog_add_lt 2 hδ)
   refine ⟨max N₀ N, ?_⟩
   intro W _ _ H _ regular large

@@ -132,6 +132,11 @@ def headlineTheorems : List Name := [
   `Algebraic.Cutwidth.Extractor.sourceReductionHardLanguage_mem_P,
   `Algebraic.Cutwidth.Extractor.sourceReductionHardEval_mem_FP,
   `Algebraic.Cutwidth.sourceReductionHardFamily_eventually_lt_size,
+  -- The same family and the cutwidth bound for a general graph-ordering coefficient
+  `Algebraic.Cutwidth.sourceReductionHardFamily_eventually_lt_size_of_orderingBound,
+  `Algebraic.Cutwidth.eventually_lt_size_of_orderingBound,
+  `Algebraic.Cutwidth.eventually_lt_size_of_cutwidthBound,
+  `Algebraic.Cutwidth.Multigraph.orderingBound_of_cutwidthBound,
   -- Korten's top-down parity lower bounds and the majority extension
   `Complexity.KarchmerWigderson.parity_communication_lower_bound,
   `Complexity.Circuit.parity_wire_lower_bound,

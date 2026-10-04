@@ -16,16 +16,21 @@ A path decomposition of a simple graph is a sequence of bags covering every
 vertex and every edge, in which the bags containing a fixed vertex are
 consecutive. Its width is one less than the largest bag.
 
-`PathwidthBound ξ N₀` states the pathwidth bound for cubic graphs:
-every simple 3-regular graph on more than `N₀` vertices has a path
-decomposition of width at most `(1/6 + ξ) h`, where `h` is the number of
+`PathwidthBound p ξ N₀` states a pathwidth bound with coefficient `p` for
+cubic graphs: every simple 3-regular graph on more than `N₀` vertices has a
+path decomposition of width at most `(p + ξ) h`, where `h` is the number of
 vertices. Together with the compression and median-ordering arguments it
-yields the graph-ordering hypothesis `Multigraph.OrderingBound`.
-`PathDecomposition.Bisection` proves it from a cubic bisection bound, and
-`Bisection.Helpful` supplies the sharp bound for every positive slack.
+yields the graph-ordering hypothesis `Multigraph.OrderingBound (2 p)`.
+`PathDecomposition.Bisection` proves the bound with `p = 1/6` from a cubic
+bisection bound, and `Bisection.Helpful` supplies the sharp bound for every
+positive slack.
 
 The cut of a vertex set in a simple graph, `SimpleGraph.cutFinset`, is the set
-of edges with exactly one endpoint in the set.
+of edges with exactly one endpoint in the set. `CutwidthBound c ξ N₀` states a
+cutwidth bound with coefficient `c` for cubic graphs: every simple 3-regular
+graph on more than `N₀` vertices has a vertex ordering all of whose prefix
+cuts have at most `(c + ξ) h` edges. It yields `Multigraph.OrderingBound (2 c)`
+directly, without a path decomposition.
 -/
 
 @[expose] public section
@@ -59,13 +64,14 @@ def PathDecomposition.trivial [Fintype W] : PathDecomposition H where
   edge_mem := fun _ _ _ => ⟨0, Finset.mem_univ _, Finset.mem_univ _⟩
   consecutive := fun _ _ _ _ _ _ _ _ => Finset.mem_univ _
 
-/-- The pathwidth bound for cubic graphs with slack `ξ` and threshold
-`N₀`: every simple 3-regular graph on `h > N₀` vertices has a path
-decomposition all of whose bags have at most `(1/6 + ξ) h + 1` vertices. -/
-def PathwidthBound (ξ : ℝ) (N₀ : Nat) : Prop :=
+/-- The pathwidth bound for cubic graphs with coefficient `p`, slack `ξ`, and
+threshold `N₀`: every simple 3-regular graph on `h > N₀` vertices has a path
+decomposition all of whose bags have at most `(p + ξ) h + 1` vertices. The
+Fomin–Høie bound has `p = 1/6`. -/
+def PathwidthBound (p ξ : ℝ) (N₀ : Nat) : Prop :=
   ∀ (W : Type) [Fintype W] [DecidableEq W] (H : SimpleGraph W) [DecidableRel H.Adj],
     H.IsRegularOfDegree 3 → N₀ < Fintype.card W →
-    ∃ D : PathDecomposition H, ∀ i, ((D.bag i).card : ℝ) ≤ (1 / 6 + ξ) * Fintype.card W + 1
+    ∃ D : PathDecomposition H, ∀ i, ((D.bag i).card : ℝ) ≤ (p + ξ) * Fintype.card W + 1
 
 section Cut
 
@@ -103,6 +109,17 @@ theorem _root_.SimpleGraph.cutFinset_eq_empty_of_subsingleton [Subsingleton W] (
   exact hb (Subsingleton.elim a b ▸ ha)
 
 end Cut
+
+/-- The cutwidth bound for cubic graphs with coefficient `c`, slack `ξ`, and
+threshold `N₀`: every simple 3-regular graph on `h > N₀` vertices has an
+injective vertex key all of whose prefixes `{w | key w < t}` are crossed by at
+most `(c + ξ) h` edges. -/
+def CutwidthBound (c ξ : ℝ) (N₀ : Nat) : Prop :=
+  ∀ (W : Type) [Fintype W] [DecidableEq W] (H : SimpleGraph W) [DecidableRel H.Adj],
+    H.IsRegularOfDegree 3 → N₀ < Fintype.card W →
+    ∃ key : W → Nat, Function.Injective key ∧
+      ∀ t : Nat, ((H.cutFinset (Finset.univ.filter fun w => key w < t)).card : ℝ) ≤
+        (c + ξ) * Fintype.card W
 
 end Cutwidth
 end Algebraic

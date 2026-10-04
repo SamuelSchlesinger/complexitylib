@@ -64,14 +64,14 @@ theorem BisectionBound.mono {ξ ξ' : ℝ} {N₀ N₁ : Nat} (h : BisectionBound
 logarithmic remainder. The bisection theorem is the only graph hypothesis. -/
 theorem BisectionBound.exists_pathwidthBound {ξ δ : ℝ} {N₀ : Nat}
     (bisection : BisectionBound ξ N₀) (hξ : 0 ≤ ξ) (hδ : 0 < δ) :
-    ∃ N₁ : Nat, PathwidthBound (ξ + δ) N₁ :=
+    ∃ N₁ : Nat, PathwidthBound (1 / 6) (ξ + δ) N₁ :=
   PathDecomposition.Internal.exists_pathwidthBound bisection hξ hδ
 
 /-- The sharp asymptotic bisection theorem implies the sharp asymptotic
 cubic pathwidth theorem. Half the slack pays for the logarithmic remainder. -/
 theorem pathwidthBound_of_bisectionBound
     (bisection : ∀ ξ : ℝ, 0 < ξ → ∃ N₀ : Nat, BisectionBound ξ N₀) :
-    ∀ ξ : ℝ, 0 < ξ → ∃ N₁ : Nat, PathwidthBound ξ N₁ := by
+    ∀ ξ : ℝ, 0 < ξ → ∃ N₁ : Nat, PathwidthBound (1 / 6) ξ N₁ := by
   intro ξ hξ
   obtain ⟨N₀, cut⟩ := bisection (ξ / 2) (by positivity)
   obtain ⟨N₁, bound⟩ := cut.exists_pathwidthBound (by positivity) (δ := ξ / 2) (by positivity)

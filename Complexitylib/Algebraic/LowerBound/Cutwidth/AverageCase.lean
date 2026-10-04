@@ -558,7 +558,7 @@ with a `(K, ν)`-balanced function, `K ≤ n ^ c`, on at most
 `(1/2 + 3ν) 2ⁿ + 2 ^ ((1 - ε/24) n)` inputs, once `n` satisfies an explicit
 logarithmic condition. -/
 theorem card_agree_le_of_bounds {ε η C : ℝ} (hε : 0 < ε) (hε4 : ε ≤ 4) (hη : 0 ≤ η)
-    (hη1 : η ≤ ε / 36) (hC : 0 ≤ C) (order : Multigraph.OrderingBound η C)
+    (hη1 : η ≤ ε / 36) (hC : 0 ≤ C) (order : Multigraph.OrderingBound (1 / 3) η C)
     {n : Nat} (hn : 2 ≤ n) {f : Cslib.BooleanFunction n} {K c : Nat} (hK : K ≤ n ^ c)
     {ν : ℝ} (hν : 0 ≤ ν) (hbal : Balanced f K ν)
     (hlog : (2 * c + 3) * Real.logb 2 n + (C + 24) < ε * n / 24)
@@ -727,7 +727,7 @@ for all large `n`. Then for every `ε > 0` and all sufficiently large `n`,
 every binary circuit with at most `(4 - ε) n` gates agrees with `f n` on at
 most `(1/2 + 3ν) 2ⁿ + 2 ^ ((1 - ε/24) n)` inputs. -/
 theorem eventually_card_agree_le
-    (order : ∀ η : ℝ, 0 < η → ∃ C : ℝ, Multigraph.OrderingBound η C)
+    (order : ∀ η : ℝ, 0 < η → ∃ C : ℝ, Multigraph.OrderingBound (1 / 3) η C)
     (f : ∀ n, Cslib.BooleanFunction n) (K : Nat → Nat) (c : Nat) {ν : ℝ} (hν : 0 ≤ ν)
     (hK : ∀ᶠ n in atTop, K n ≤ n ^ c)
     (hbal : ∀ᶠ n in atTop, Balanced (f n) (K n) ν)
@@ -738,7 +738,8 @@ theorem eventually_card_agree_le
           (1 / 2 + 3 * ν) * 2 ^ n + (2 : ℝ) ^ ((1 - ε / 24) * n) := by
   rcases le_or_gt ε 4 with hε4 | hε4
   · obtain ⟨C, hC⟩ := order (ε / 36) (by positivity)
-    have order' : Multigraph.OrderingBound (ε / 36) (max C 0) := hC.mono (le_max_left _ _)
+    have order' : Multigraph.OrderingBound (1 / 3) (ε / 36) (max C 0) :=
+      hC.mono le_rfl (le_max_left _ _)
     have hlog := eventually_mul_logb_add_lt (2 * c + 3) (max C 0 + 24)
       (by positivity : 0 < ε / 24)
     filter_upwards [hK, hbal, hlog, eventually_ge_atTop 2] with n hKn hbaln hlogn hn2
@@ -759,7 +760,7 @@ theorem eventually_card_agree_le
 
 /-- **The average case from the pathwidth hypothesis.** -/
 theorem eventually_card_agree_le_of_pathwidthBound
-    (pathwidth : ∀ ξ : ℝ, 0 < ξ → ∃ N₀ : Nat, PathwidthBound ξ N₀)
+    (pathwidth : ∀ ξ : ℝ, 0 < ξ → ∃ N₀ : Nat, PathwidthBound (1 / 6) ξ N₀)
     (f : ∀ n, Cslib.BooleanFunction n) (K : Nat → Nat) (c : Nat) {ν : ℝ} (hν : 0 ≤ ν)
     (hK : ∀ᶠ n in atTop, K n ≤ n ^ c)
     (hbal : ∀ᶠ n in atTop, Balanced (f n) (K n) ν)
@@ -767,12 +768,9 @@ theorem eventually_card_agree_le_of_pathwidthBound
     ∀ᶠ n in atTop, ∀ circuit : Circuit Binary.signature n 1,
       (circuit.size : ℝ) ≤ (4 - ε) * n →
         ((Finset.univ.filter fun x => circuit.eval Binary.interpretation x 0 = f n x).card : ℝ) ≤
-          (1 / 2 + 3 * ν) * 2 ^ n + (2 : ℝ) ^ ((1 - ε / 24) * n) := by
-  refine eventually_card_agree_le (fun η hη => ?_) f K c hν hK hbal hε
-  obtain ⟨N₀, hN₀⟩ := pathwidth (η / 2) (by positivity)
-  refine ⟨N₀ + 9, ?_⟩
-  have := Multigraph.orderingBound_of_pathwidthBound (by positivity) hN₀
-  rwa [show 2 * (η / 2) = η by ring] at this
+          (1 / 2 + 3 * ν) * 2 ^ n + (2 : ℝ) ^ ((1 - ε / 24) * n) :=
+  eventually_card_agree_le (Multigraph.exists_orderingBound_one_third_of_pathwidthBound pathwidth)
+    f K c hν hK hbal hε
 
 /-- Polynomial-threshold balance gives the average-case coefficient-four
 bound using the proved cubic bisection and pathwidth theorems. -/

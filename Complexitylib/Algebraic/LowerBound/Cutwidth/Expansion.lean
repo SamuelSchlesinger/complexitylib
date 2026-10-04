@@ -19,8 +19,13 @@ bounded by the quotient cut of the block prefix plus the boundary of the
 partial block, which the compression invariant keeps logarithmic.
 
 `orderingBound_of_pathwidthBound` combines compression, the pathwidth
-hypothesis, the median ordering, and this expansion: `PathwidthBound ξ N₀`
-implies `Multigraph.OrderingBound (2 ξ) (N₀ + 9)`.
+hypothesis, the median ordering, and this expansion: `PathwidthBound p ξ N₀`
+implies `Multigraph.OrderingBound (2 p) (2 ξ) (N₀ + 9)`. The factor two is the
+cubic core: the quotient of a final compression has `h ≤ 2 (M - N)⁺` vertices.
+`orderingBound_of_cutwidthBound` orders the quotient directly by a cutwidth
+key instead: `CutwidthBound c ξ N₀` implies
+`Multigraph.OrderingBound (2 c) (2 ξ) (N₀ + 8)`. A pathwidth bound also gives
+a cutwidth bound with the same coefficient (`cutwidthBound_of_pathwidthBound`).
 -/
 
 @[expose] public section
@@ -242,15 +247,16 @@ theorem exists_linearOrder (final : ¬ c.Mergeable) (keyH : ↥c.blocks → Nat)
 
 end Compression
 
-/-- **The graph-ordering bound from the pathwidth hypothesis.** -/
-theorem orderingBound_of_pathwidthBound {ξ : ℝ} (hξ : 0 ≤ ξ) {N₀ : Nat}
-    (FH : PathwidthBound ξ N₀) : Multigraph.OrderingBound (2 * ξ) (N₀ + 9) := by
+/-- **The graph-ordering bound from the pathwidth hypothesis.** A pathwidth
+bound with coefficient `p` gives an ordering bound with coefficient `2 p`. -/
+theorem orderingBound_of_pathwidthBound {p ξ : ℝ} (hpξ : 0 ≤ p + ξ) {N₀ : Nat}
+    (FH : PathwidthBound p ξ N₀) : Multigraph.OrderingBound (2 * p) (2 * ξ) (N₀ + 9) := by
   intro V E _ _ G _ degree connected
   obtain ⟨c, final⟩ := Compression.exists_not_mergeable degree
   have hcard : Fintype.card ↥c.blocks = c.blocks.card := Fintype.card_coe _
   have hlog := clog_le_logb_add_one (Fintype.card V)
   have hmax : (0 : ℝ) ≤ max ((Fintype.card E : ℝ) - Fintype.card V) 0 := le_max_right _ _
-  have hcoef : (0 : ℝ) ≤ 1 / 3 + 2 * ξ := by linarith
+  have hcoef : (0 : ℝ) ≤ 2 * p + 2 * ξ := by linarith
   rcases Nat.lt_or_ge c.blocks.card 2 with hsmall | htwo
   · -- At most one block: the quotient has no edges.
     have hsub : Subsingleton ↥c.blocks :=
@@ -267,43 +273,169 @@ theorem orderingBound_of_pathwidthBound {ξ : ℝ} (hξ : 0 ≤ ξ) {N₀ : Nat}
     have regular := c.quotient_isRegularOfDegree final connected htwo
     have hexcess := c.card_blocks_add_le final connected htwo
     set h := c.blocks.card with hh
-    set p := ⌊(1 / 6 + ξ) * (h : ℝ)⌋₊ + N₀ with hp
-    have hhR : (0 : ℝ) ≤ (1 / 6 + ξ) * (h : ℝ) := by positivity
-    obtain ⟨D, hD⟩ : ∃ D : PathDecomposition c.quotient, ∀ i, (D.bag i).card ≤ p + 1 := by
+    set w := ⌊(p + ξ) * (h : ℝ)⌋₊ + N₀ with hw
+    have hhR : (0 : ℝ) ≤ (p + ξ) * (h : ℝ) := by positivity
+    obtain ⟨D, hD⟩ : ∃ D : PathDecomposition c.quotient, ∀ i, (D.bag i).card ≤ w + 1 := by
       by_cases hN₀ : N₀ < h
       · obtain ⟨D, hD⟩ := FH ↥c.blocks c.quotient regular (hcard ▸ hN₀)
         refine ⟨D, fun i => ?_⟩
         have := hD i
         rw [hcard] at this
-        have hfloor : (D.bag i).card ≤ ⌊(1 / 6 + ξ) * (h : ℝ) + 1⌋₊ := Nat.le_floor this
+        have hfloor : (D.bag i).card ≤ ⌊(p + ξ) * (h : ℝ) + 1⌋₊ := Nat.le_floor this
         rw [Nat.floor_add_one hhR] at hfloor
         omega
       · refine ⟨PathDecomposition.trivial _, fun i => ?_⟩
-        show (Finset.univ : Finset ↥c.blocks).card ≤ p + 1
+        show (Finset.univ : Finset ↥c.blocks).card ≤ w + 1
         rw [Finset.card_univ, hcard]
         omega
     obtain ⟨inst, hcut⟩ := c.exists_linearOrder final (MedianOrdering.key c.quotient D regular)
-      (MedianOrdering.key_injective c.quotient D regular) (X := p + 2)
+      (MedianOrdering.key_injective c.quotient D regular) (X := w + 2)
       (fun q => MedianOrdering.card_cutFinset_key_lt_le c.quotient D regular hD q)
     refine ⟨inst, fun L hL => ?_⟩
     have := hcut L hL
-    have hR : ((G.cut L).card : ℝ) ≤ (p : ℝ) + 2 + 3 * (Nat.clog 2 (Fintype.card V) : ℝ) + 3 := by
+    have hR : ((G.cut L).card : ℝ) ≤ (w : ℝ) + 2 + 3 * (Nat.clog 2 (Fintype.card V) : ℝ) + 3 := by
       exact_mod_cast this
-    have hpR : (p : ℝ) ≤ (1 / 6 + ξ) * (h : ℝ) + N₀ := by
-      rw [hp]
+    have hwR : (w : ℝ) ≤ (p + ξ) * (h : ℝ) + N₀ := by
+      rw [hw]
       push_cast
       linarith [Nat.floor_le hhR]
     have hhle : (h : ℝ) ≤ 2 * max ((Fintype.card E : ℝ) - Fintype.card V) 0 := by
       have : (h : ℝ) + 2 * Fintype.card V ≤ 2 * Fintype.card E := by exact_mod_cast hexcess
       have := le_max_left ((Fintype.card E : ℝ) - Fintype.card V) 0
       linarith
-    have key : (1 / 6 + ξ) * (h : ℝ) ≤ (1 / 3 + 2 * ξ) * max ((Fintype.card E : ℝ) - Fintype.card V) 0 := by
-      calc (1 / 6 + ξ) * (h : ℝ) ≤ (1 / 6 + ξ) * (2 * max ((Fintype.card E : ℝ) - Fintype.card V) 0) :=
-            mul_le_mul_of_nonneg_left hhle (by linarith)
-        _ = (1 / 3 + 2 * ξ) * max ((Fintype.card E : ℝ) - Fintype.card V) 0 := by ring
+    have key : (p + ξ) * (h : ℝ) ≤
+        (2 * p + 2 * ξ) * max ((Fintype.card E : ℝ) - Fintype.card V) 0 := by
+      calc (p + ξ) * (h : ℝ) ≤
+            (p + ξ) * (2 * max ((Fintype.card E : ℝ) - Fintype.card V) 0) :=
+            mul_le_mul_of_nonneg_left hhle hpξ
+        _ = (2 * p + 2 * ξ) * max ((Fintype.card E : ℝ) - Fintype.card V) 0 := by ring
     linarith
 
+/-- **The graph-ordering bound from a cutwidth hypothesis.** A cutwidth bound
+with coefficient `c` orders the cubic quotient of a final compression
+directly, giving an ordering bound with coefficient `2 c`. A quotient with at
+most `N₀` blocks is ordered by the median ordering of its one-bag
+decomposition, whose prefix cuts have at most `N₀ + 2` edges. -/
+theorem orderingBound_of_cutwidthBound {c ξ : ℝ} (hcξ : 0 ≤ c + ξ) {N₀ : Nat}
+    (CW : CutwidthBound c ξ N₀) : Multigraph.OrderingBound (2 * c) (2 * ξ) (N₀ + 8) := by
+  intro V E _ _ G _ degree connected
+  obtain ⟨comp, final⟩ := Compression.exists_not_mergeable degree
+  have hcard : Fintype.card ↥comp.blocks = comp.blocks.card := Fintype.card_coe _
+  have hlog := clog_le_logb_add_one (Fintype.card V)
+  have hmax : (0 : ℝ) ≤ max ((Fintype.card E : ℝ) - Fintype.card V) 0 := le_max_right _ _
+  have hcoef : (0 : ℝ) ≤ 2 * c + 2 * ξ := by linarith
+  rcases Nat.lt_or_ge comp.blocks.card 2 with hsmall | htwo
+  · -- At most one block: the quotient has no edges.
+    have hsub : Subsingleton ↥comp.blocks :=
+      Fintype.card_le_one_iff_subsingleton.mp (by omega)
+    obtain ⟨inst, hcut⟩ := comp.exists_linearOrder final (fun _ => 0)
+      (fun a b _ => Subsingleton.elim a b) (X := 0)
+      (fun q => by rw [comp.quotient.cutFinset_eq_empty_of_subsingleton]; simp)
+    refine ⟨inst, fun L hL => ?_⟩
+    have := hcut L hL
+    have hR : ((G.cut L).card : ℝ) ≤ 0 + 3 * (Nat.clog 2 (Fintype.card V) : ℝ) + 3 := by
+      exact_mod_cast this
+    nlinarith
+  · -- At least two blocks: the quotient is a simple cubic graph.
+    have regular := comp.quotient_isRegularOfDegree final connected htwo
+    have hexcess := comp.card_blocks_add_le final connected htwo
+    set h := comp.blocks.card with hh
+    set w := ⌊(c + ξ) * (h : ℝ)⌋₊ + N₀ + 2 with hw
+    have hhR : (0 : ℝ) ≤ (c + ξ) * (h : ℝ) := by positivity
+    obtain ⟨key, injective, hkey⟩ : ∃ key : ↥comp.blocks → Nat, Function.Injective key ∧
+        ∀ q, (comp.quotient.cutFinset (Finset.univ.filter fun B => key B < q)).card ≤ w := by
+      by_cases hN₀ : N₀ < h
+      · obtain ⟨key, injective, hkey⟩ := CW ↥comp.blocks comp.quotient regular (hcard ▸ hN₀)
+        refine ⟨key, injective, fun q => ?_⟩
+        have := hkey q
+        rw [hcard] at this
+        have hfloor := Nat.le_floor this
+        omega
+      · let D := PathDecomposition.trivial comp.quotient
+        have hD : ∀ i, (D.bag i).card ≤ N₀ + 1 := by
+          intro i
+          show (Finset.univ : Finset ↥comp.blocks).card ≤ N₀ + 1
+          rw [Finset.card_univ, hcard]
+          omega
+        refine ⟨MedianOrdering.key comp.quotient D regular,
+          MedianOrdering.key_injective comp.quotient D regular, fun q => ?_⟩
+        have := MedianOrdering.card_cutFinset_key_lt_le comp.quotient D regular hD q
+        omega
+    obtain ⟨inst, hcut⟩ := comp.exists_linearOrder final key injective (X := w) hkey
+    refine ⟨inst, fun L hL => ?_⟩
+    have := hcut L hL
+    have hR : ((G.cut L).card : ℝ) ≤ (w : ℝ) + 3 * (Nat.clog 2 (Fintype.card V) : ℝ) + 3 := by
+      exact_mod_cast this
+    have hwR : (w : ℝ) ≤ (c + ξ) * (h : ℝ) + N₀ + 2 := by
+      rw [hw]
+      push_cast
+      linarith [Nat.floor_le hhR]
+    have hhle : (h : ℝ) ≤ 2 * max ((Fintype.card E : ℝ) - Fintype.card V) 0 := by
+      have : (h : ℝ) + 2 * Fintype.card V ≤ 2 * Fintype.card E := by exact_mod_cast hexcess
+      have := le_max_left ((Fintype.card E : ℝ) - Fintype.card V) 0
+      linarith
+    have key : (c + ξ) * (h : ℝ) ≤
+        (2 * c + 2 * ξ) * max ((Fintype.card E : ℝ) - Fintype.card V) 0 := by
+      calc (c + ξ) * (h : ℝ) ≤
+            (c + ξ) * (2 * max ((Fintype.card E : ℝ) - Fintype.card V) 0) :=
+            mul_le_mul_of_nonneg_left hhle hcξ
+        _ = (2 * c + 2 * ξ) * max ((Fintype.card E : ℝ) - Fintype.card V) 0 := by ring
+    linarith
+
+/-- A pathwidth bound with coefficient `p` at every positive slack gives the
+graph-ordering hypothesis with coefficient `2 p` at every positive slack. -/
+theorem exists_orderingBound_of_pathwidthBound {p : ℝ} (hp : 0 ≤ p)
+    (pathwidth : ∀ ξ : ℝ, 0 < ξ → ∃ N₀ : Nat, PathwidthBound p ξ N₀) :
+    ∀ η : ℝ, 0 < η → ∃ C : ℝ, Multigraph.OrderingBound (2 * p) η C := by
+  intro η hη
+  obtain ⟨N₀, bound⟩ := pathwidth (η / 2) (by positivity)
+  refine ⟨N₀ + 9, ?_⟩
+  have := orderingBound_of_pathwidthBound (by linarith) bound
+  rwa [show 2 * (η / 2) = η by ring] at this
+
+/-- A cutwidth bound with coefficient `c` at every positive slack gives the
+graph-ordering hypothesis with coefficient `2 c` at every positive slack. -/
+theorem exists_orderingBound_of_cutwidthBound {c : ℝ} (hc : 0 ≤ c)
+    (cutwidth : ∀ ξ : ℝ, 0 < ξ → ∃ N₀ : Nat, CutwidthBound c ξ N₀) :
+    ∀ η : ℝ, 0 < η → ∃ C : ℝ, Multigraph.OrderingBound (2 * c) η C := by
+  intro η hη
+  obtain ⟨N₀, bound⟩ := cutwidth (η / 2) (by positivity)
+  refine ⟨N₀ + 8, ?_⟩
+  have := orderingBound_of_cutwidthBound (by linarith) bound
+  rwa [show 2 * (η / 2) = η by ring] at this
+
 end Multigraph
+
+/-- A pathwidth bound gives a cutwidth bound with the same coefficient. The
+median ordering of a path decomposition has prefix cuts at most one more than
+its bag sizes, and the two extra edges cost `2 / (N₀ + 1)` per vertex above the
+threshold. -/
+theorem cutwidthBound_of_pathwidthBound {p ξ : ℝ} {N₀ : Nat} (PW : PathwidthBound p ξ N₀) :
+    CutwidthBound p (ξ + 2 / (N₀ + 1)) N₀ := by
+  intro W _ _ H _ regular large
+  obtain ⟨D, hD⟩ := PW W H regular large
+  set h := Fintype.card W with hh
+  obtain ⟨w₀⟩ : Nonempty W := Fintype.card_pos_iff.mp (by omega)
+  obtain ⟨i₀, hi₀⟩ := D.vertex_mem w₀
+  have hone : (1 : ℝ) ≤ (D.bag i₀).card := by
+    exact_mod_cast Finset.card_pos.mpr ⟨w₀, hi₀⟩
+  have hnonneg : (0 : ℝ) ≤ (p + ξ) * h := by linarith [hD i₀]
+  have hbag : ∀ i, (D.bag i).card ≤ ⌊(p + ξ) * (h : ℝ)⌋₊ + 1 := by
+    intro i
+    have := Nat.le_floor (hD i)
+    rwa [Nat.floor_add_one hnonneg] at this
+  refine ⟨MedianOrdering.key H D regular, MedianOrdering.key_injective H D regular, fun t => ?_⟩
+  have hcut : ((H.cutFinset (Finset.univ.filter fun w => MedianOrdering.key H D regular w < t)).card
+      : ℝ) ≤ (⌊(p + ξ) * (h : ℝ)⌋₊ : ℝ) + 2 := by
+    exact_mod_cast MedianOrdering.card_cutFinset_key_lt_le H D regular hbag t
+  have hfloor := Nat.floor_le hnonneg
+  have hlarge : (N₀ : ℝ) + 1 ≤ h := by exact_mod_cast large
+  have htwo : (2 : ℝ) ≤ 2 / (N₀ + 1) * h := by
+    rw [div_mul_eq_mul_div, le_div_iff₀ (by positivity)]
+    linarith
+  have hsplit : (p + (ξ + 2 / (N₀ + 1))) * (h : ℝ) = (p + ξ) * h + 2 / (N₀ + 1) * h := by ring
+  rw [hsplit]
+  linarith
 
 end Cutwidth
 end Algebraic

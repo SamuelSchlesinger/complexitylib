@@ -65,8 +65,10 @@ theorem exists_bisectionBound {ξ : ℝ} (hξ : 0 < ξ) : ∃ N₀ : ℕ, Bisect
 end Bisection
 
 /-- **The Fomin–Høie cubic pathwidth bound.** Every positive slack admits
-the corresponding asymptotic bound for simple cubic graphs. -/
-theorem exists_pathwidthBound {ξ : ℝ} (hξ : 0 < ξ) : ∃ N₀ : ℕ, PathwidthBound ξ N₀ :=
+the corresponding asymptotic bound, with coefficient `1/6`, for simple cubic
+graphs. -/
+theorem exists_pathwidthBound {ξ : ℝ} (hξ : 0 < ξ) :
+    ∃ N₀ : ℕ, PathwidthBound (1 / 6) ξ N₀ :=
   pathwidthBound_of_bisectionBound (fun _ h => Bisection.exists_bisectionBound h) ξ hξ
 
 end Algebraic.Cutwidth

@@ -19,11 +19,14 @@ ordering, the *cut after* a vertex is the set of edges with exactly one
 endpoint among the vertices up to it; these are exactly the cuts of the lower
 sets of the order.
 
-`OrderingBound η C` is the graph-ordering hypothesis: every connected
-loopless multigraph of maximum degree three has a vertex ordering whose
-prefix cuts have at most `(1/3 + η) (M - N)⁺ + 3 log₂ N + C` edges, where `N`
-and `M` are the numbers of vertices and edges. The lower bound takes this
-statement as a hypothesis; it is not proved in this development.
+`OrderingBound A η C` is the graph-ordering hypothesis with coefficient `A`:
+every connected loopless multigraph of maximum degree three has a vertex
+ordering whose prefix cuts have at most `(A + η) (M - N)⁺ + 3 log₂ N + C`
+edges, where `N` and `M` are the numbers of vertices and edges. The circuit
+lower bound takes this statement as a hypothesis and yields the coefficient
+`1 + 1/A`. `Expansion` proves it for `A = 2 p` from a cubic pathwidth bound
+with coefficient `p`, and for `A = 2 c` from a cubic cutwidth bound with
+coefficient `c`; the Monien–Preis and Fomin–Høie bounds give `A = 1/3`.
 -/
 
 @[expose] public section
@@ -125,16 +128,17 @@ def CutsAtMost (L : Set (Finset V)) (w : Nat) : Prop :=
 
 end Finite
 
-/-- The graph-ordering hypothesis with slack `η` and additive constant `C`:
-every connected loopless multigraph of maximum degree three has a linear
-vertex ordering all of whose lower-set cuts have at most
-`(1/3 + η) (M - N)⁺ + 3 log₂ N + C` edges. -/
-def OrderingBound (η C : ℝ) : Prop :=
+/-- The graph-ordering hypothesis with coefficient `A`, slack `η`, and
+additive constant `C`: every connected loopless multigraph of maximum degree
+three has a linear vertex ordering all of whose lower-set cuts have at most
+`(A + η) (M - N)⁺ + 3 log₂ N + C` edges, where `N` and `M` are the numbers
+of vertices and edges. -/
+def OrderingBound (A η C : ℝ) : Prop :=
   ∀ (V E : Type) [Fintype V] [Fintype E] (G : Multigraph V E),
     G.Loopless → G.MaxDegreeLE 3 → G.Connected →
     ∃ _ : LinearOrder V, ∀ L : Finset V, IsLowerSet (L : Set V) →
       ((G.cut L).card : ℝ) ≤
-        (1 / 3 + η) * max ((Fintype.card E : ℝ) - Fintype.card V) 0 +
+        (A + η) * max ((Fintype.card E : ℝ) - Fintype.card V) 0 +
           3 * Real.logb 2 (Fintype.card V) + C
 
 end Multigraph

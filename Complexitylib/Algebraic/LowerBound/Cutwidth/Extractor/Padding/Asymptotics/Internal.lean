@@ -15,7 +15,8 @@ import Complexitylib.Algebraic.LowerBound.Cutwidth.Extractor.Padding
 Doubling a source threshold and shifting its index preserve a sublinear
 binary logarithm. At each positive length, the padded extractor gives a
 rectangle-free function accepting exactly half the inputs. The graph-free
-circuit theorems therefore apply to one fixed padded family.
+circuit theorems therefore apply to one fixed padded family, as do the
+theorems with a general graph-ordering coefficient.
 -/
 
 @[expose] public section
@@ -73,6 +74,39 @@ private theorem eventually_hard_paddedFamily
     · exact hnExtract.balancePad_rectangleFree hn hν
     · rw [paddedFamily, card_accepting_balancePad]
       exact Nat.pow_le_pow_right two_pos (by lia)
+
+theorem eventually_lt_size_balancePad_of_flatSumsetExtractor_of_orderingBound {A : ℝ}
+    (hA : 0 < A) (order : ∀ η : ℝ, 0 < η → ∃ C : ℝ, Multigraph.OrderingBound A η C)
+    (f : ∀ n, Cslib.BooleanFunction n) (K : Nat → Nat) {ν : ℝ} (hν : ν < 1 / 2)
+    (positive : ∀ᶠ n in atTop, 0 < K n)
+    (hK : (fun n => Real.logb 2 (K n)) =o[atTop] (fun n => (n : ℝ)))
+    (extract : ∀ᶠ n in atTop, FlatSumsetExtractor (f n) (K n) ν)
+    {ε : ℝ} (hε : 0 < ε) :
+    ∀ᶠ n in atTop, ∀ circuit : Circuit Binary.signature (n + 1) 1,
+      circuit.Computes Binary.interpretation (fun x _ => balancePad (f n) x) →
+        (1 + 1 / A - ε) * (n + 1) < circuit.size := by
+  have hard := eventually_hard_paddedFamily f K hν positive extract
+  have bound := eventually_lt_size_of_orderingBound hA order (paddedFamily f)
+    (fun n => 2 * K (n - 1)) (logb_two_mul_shift_isLittleO hK) (hard.mono fun _ h => h.2)
+    (hard.mono fun _ h => h.1) hε
+  filter_upwards [(tendsto_add_atTop_nat 1).eventually bound] with n hn
+  simpa only [paddedFamily, Nat.cast_add, Nat.cast_one] using hn
+
+theorem nondet_eventually_lt_size_balancePad_of_flatSumsetExtractor_of_orderingBound {A : ℝ}
+    (hA : 0 < A) (order : ∀ η : ℝ, 0 < η → ∃ C : ℝ, Multigraph.OrderingBound A η C)
+    (f : ∀ n, Cslib.BooleanFunction n) (K : Nat → Nat) {ν : ℝ} (hν : ν < 1 / 2)
+    (positive : ∀ᶠ n in atTop, 0 < K n)
+    (hK : (fun n => Real.logb 2 (K n)) =o[atTop] (fun n => (n : ℝ)))
+    (extract : ∀ᶠ n in atTop, FlatSumsetExtractor (f n) (K n) ν)
+    {ε : ℝ} (hε : 0 < ε) :
+    ∀ᶠ n in atTop, ∀ (m : Nat) (circuit : Circuit Binary.signature (n + 1 + m) 1),
+      NondetComputes circuit (balancePad (f n)) → (1 + 1 / A - ε) * (n + 1) < circuit.size := by
+  have hard := eventually_hard_paddedFamily f K hν positive extract
+  have bound := nondet_eventually_lt_size_of_orderingBound hA order (paddedFamily f)
+    (fun n => 2 * K (n - 1)) (logb_two_mul_shift_isLittleO hK)
+    (hard.mono fun _ h => h.2) (hard.mono fun _ h => h.1) hε
+  filter_upwards [(tendsto_add_atTop_nat 1).eventually bound] with n hn
+  simpa only [paddedFamily, Nat.cast_add, Nat.cast_one] using hn
 
 theorem eventually_lt_size_balancePad_of_flatSumsetExtractor
     (f : ∀ n, Cslib.BooleanFunction n) (K : Nat → Nat) {ν : ℝ} (hν : ν < 1 / 2)

@@ -26,7 +26,10 @@ number of declared inputs, so the witness count `m` is unrestricted.
 `nondet_eventually_lt_size_of_rectangleFree` instantiates the proved graph
 bounds and only needs `log₂ K(n) = o(n)`, rectangle-freeness, and the
 accepting-input bound. Constructing a family with these properties remains
-the application obligation. The generic graph-ordering interfaces are retained.
+the application obligation. The generic graph-ordering interfaces are retained;
+as in the deterministic case, an ordering coefficient `A > 0` gives the
+circuit coefficient `1 + 1/A` (`nondet_eventually_lt_size_of_orderingBound`),
+and a cubic cutwidth coefficient `c` gives `1 + 1/(2c)`.
 
 The proof organization, the threshold-edge charging, the extractor
 application, and the graph restoration argument of the deterministic bound
@@ -74,20 +77,20 @@ theorem forget_network_computes {n m s : Nat} (p : Program Binary.signature (n +
 /-- The nondeterministic version of the circuit-level bound: the ordinary
 inputs read are those of the forgotten network, and the excess of the wiring
 graph is at most `s` minus their number. -/
-theorem nondet_card_accepting_le_of_orderingBound {η C : ℝ} (hη : 0 ≤ η) (hC : 0 ≤ C)
-    (order : Multigraph.OrderingBound η C)
+theorem nondet_card_accepting_le_of_orderingBound {A η C : ℝ} (hAη : 0 ≤ A + η)
+    (hC : 0 ≤ C) (order : Multigraph.OrderingBound A η C)
     {n m s : Nat} (p : Program Binary.signature (n + m) s) (out : Fin s) {K : Nat} (hK : 1 < K)
     (hrect : RectangleFree (nondetGateFunction p out) K) :
     (accepting (nondetGateFunction p out)).card <
         K * 2 ^ (n - (Wiring.network p out).forget.read.card) ∨
       ((accepting (nondetGateFunction p out)).card : ℝ) ≤
-        (2 * s + 1) * (2 : ℝ) ^ ((1 / 3 + η) *
+        (2 * s + 1) * (2 : ℝ) ^ ((A + η) *
           max ((s : ℝ) - (Wiring.network p out).forget.read.card) 0 +
           3 * Real.logb 2 (2 * s + 1) + C + 3) * K ^ 2 := by
   obtain ⟨inst, hcut⟩ := order (Wiring.Vertex p out) (Wiring.Edge p out)
     (Wiring.network p out).toMultigraph (Wiring.loopless p out)
     (Wiring.maxDegreeLE_three p out) (Wiring.connected p out)
-  set bound : ℝ := (1 / 3 + η) *
+  set bound : ℝ := (A + η) *
       max ((Fintype.card (Wiring.Edge p out) : ℝ) - Fintype.card (Wiring.Vertex p out)) 0 +
     3 * Real.logb 2 (Fintype.card (Wiring.Vertex p out)) + C with hbound_def
   have hVpos : (0 : ℝ) < Fintype.card (Wiring.Vertex p out) := by
@@ -95,7 +98,7 @@ theorem nondet_card_accepting_le_of_orderingBound {η C : ℝ} (hη : 0 ≤ η) 
   have hlogV : 0 ≤ Real.logb 2 (Fintype.card (Wiring.Vertex p out)) :=
     Real.logb_nonneg one_lt_two (by exact_mod_cast Fintype.card_pos)
   have bound_nonneg : 0 ≤ bound := by
-    have : 0 ≤ (1 / 3 + η) *
+    have : 0 ≤ (A + η) *
         max ((Fintype.card (Wiring.Edge p out) : ℝ) - Fintype.card (Wiring.Vertex p out)) 0 :=
       mul_nonneg (by linarith) (le_max_right _ _)
     linarith
@@ -115,17 +118,17 @@ theorem nondet_card_accepting_le_of_orderingBound {η C : ℝ} (hη : 0 ≤ η) 
     have h₂ : ((Wiring.network p out).forget.read.card : ℝ) ≤ (Wiring.read p out).card := by
       exact_mod_cast (Wiring.network p out).card_forget_read_le
     linarith
-  have hbound : bound ≤ (1 / 3 + η) * max ((s : ℝ) - (Wiring.network p out).forget.read.card) 0 +
+  have hbound : bound ≤ (A + η) * max ((s : ℝ) - (Wiring.network p out).forget.read.card) 0 +
       3 * Real.logb 2 (2 * s + 1) + C := by
-    have h₁ : (1 / 3 + η) *
+    have h₁ : (A + η) *
         max ((Fintype.card (Wiring.Edge p out) : ℝ) - Fintype.card (Wiring.Vertex p out)) 0 ≤
-        (1 / 3 + η) * max ((s : ℝ) - (Wiring.network p out).forget.read.card) 0 :=
+        (A + η) * max ((s : ℝ) - (Wiring.network p out).forget.read.card) 0 :=
       mul_le_mul_of_nonneg_left (max_le_max hdiff le_rfl) (by linarith)
     have h₂ : Real.logb 2 (Fintype.card (Wiring.Vertex p out)) ≤ Real.logb 2 (2 * s + 1) :=
       (Real.logb_le_logb one_lt_two hVpos (hVpos.trans_le hV)).mpr hV
     linarith
   have hexp : ((2 : ℝ) ^ (⌊bound⌋₊ + 3) : ℝ) ≤
-      (2 : ℝ) ^ ((1 / 3 + η) * max ((s : ℝ) - (Wiring.network p out).forget.read.card) 0 +
+      (2 : ℝ) ^ ((A + η) * max ((s : ℝ) - (Wiring.network p out).forget.read.card) 0 +
         3 * Real.logb 2 (2 * s + 1) + C + 3) := by
     rw [← Real.rpow_natCast]
     apply Real.rpow_le_rpow_of_exponent_le one_le_two
@@ -137,25 +140,27 @@ theorem nondet_card_accepting_le_of_orderingBound {η C : ℝ} (hη : 0 ≤ η) 
   calc ((accepting (nondetGateFunction p out)).card : ℝ)
       ≤ (Fintype.card (Wiring.Vertex p out) : ℝ) * (2 : ℝ) ^ (⌊bound⌋₊ + 3) *
           ((K - 1 : Nat) : ℝ) ^ 2 := by exact_mod_cast h
-    _ ≤ (2 * s + 1) * (2 : ℝ) ^ ((1 / 3 + η) *
+    _ ≤ (2 * s + 1) * (2 : ℝ) ^ ((A + η) *
           max ((s : ℝ) - (Wiring.network p out).forget.read.card) 0 +
           3 * Real.logb 2 (2 * s + 1) + C + 3) * K ^ 2 := by
         apply mul_le_mul (mul_le_mul hV hexp (by positivity) (by positivity)) hK'
           (by positivity) (by positivity)
 
-/-- **The fixed-`n` core for nondeterministic circuits.** The logarithmic
-conditions are those of `lt_size_of_log_bounds`. The number of witness inputs
-is unrestricted: only the reachable graph, with at most `2 s + 1` vertices,
-enters the counting argument. -/
-theorem nondet_lt_size_of_log_bounds {η C : ℝ} (hη : 0 < η) (hη1 : η ≤ 1 / 18) (hC : 0 ≤ C)
-    (order : Multigraph.OrderingBound η C)
+/-- **The fixed-`n` nondeterministic core with a general ordering
+coefficient.** The hypotheses are those of `lt_size_of_orderingBound`. The
+number of witness inputs is unrestricted: only the reachable graph, with at
+most `2 s + 1` vertices, enters the counting argument. -/
+theorem nondet_lt_size_of_orderingBound {A η θ C : ℝ} (hA : 0 < A) (hη : 0 ≤ η)
+    (hηθ : η ≤ A ^ 2 * θ / 2) (hθA : θ ≤ 1 / A) (hC : 0 ≤ C)
+    (order : Multigraph.OrderingBound A η C)
     {n : Nat} (hn : 2 ≤ n) {f : Cslib.BooleanFunction n} {K : Nat}
     (hacc : 2 ^ (n - 2) ≤ (accepting f).card) (hrect : RectangleFree f K)
     (hbig : 2 * K ^ 2 ≤ 2 ^ (n - 2))
-    (hlog : 4 * Real.logb 2 n + 3 * Real.logb 2 K + (C + 22) < 3 * η * n)
+    (hlog : (A + η + 2) * Real.logb 2 K + 4 * Real.logb 2 n +
+      (A + η + 4 * Real.logb 2 (4 + 3 / A) + C + 5) < A * θ / 2 * n)
     {m : Nat} (circuit : Circuit Binary.signature (n + m) 1)
     (computes : NondetComputes circuit f) :
-    (4 - 18 * η) * n < circuit.size := by
+    (1 + 1 / A - θ) * n < circuit.size := by
   have feq := computes.eq_nondetFunction
   by_contra hs
   rw [not_lt] at hs
@@ -167,6 +172,10 @@ theorem nondet_lt_size_of_log_bounds {η C : ℝ} (hη : 0 < η) (hη1 : η ≤ 
     have : K ≤ 2 ^ (n - 2) := by nlinarith
     have : Nat.clog 2 K ≤ n - 2 := (Nat.clog_le_iff_le_pow one_lt_two).mpr this
     omega
+  have hθ : 0 ≤ θ := by
+    by_contra hθ
+    have : A ^ 2 * θ < 0 := mul_neg_of_pos_of_neg (by positivity) (lt_of_not_ge hθ)
+    linarith
   -- The circuit's output wire.
   obtain ⟨g, hg⟩ : ∃ g, circuit.outputs 0 = g := ⟨_, rfl⟩
   have eval_eq : ∀ z, circuit.eval Binary.interpretation z 0 =
@@ -222,16 +231,45 @@ theorem nondet_lt_size_of_log_bounds {η C : ℝ} (hη : 0 < η) (hη1 : η ≤ 
       exact support _ (by rw [feq']; exact hR)
     have hn'le : n' ≤ n := by
       simpa using Finset.card_le_univ (Wiring.network p out).forget.read
-    have hs' : (circuit.size : ℝ) ≤ (4 - 18 * η) * n := hs
+    have hs' : (circuit.size : ℝ) ≤ (1 + 1 / A - θ) * n := hs
     have hnR : (2 : ℝ) ≤ n := by exact_mod_cast hn
-    have hVb : ((2 : ℝ) * circuit.size + 1) ≤ 16 * n := by nlinarith
-    exact false_of_accepting_bound_of_log hη hη1 hC hn hacc' hK1 hbig hlog hs' hn'le hread
-      (by positivity) hVb (nondet_card_accepting_le_of_orderingBound hη.le hC order p out hK1 hrect')
+    have hVb : ((2 : ℝ) * circuit.size + 1) ≤ (4 + 3 / A) * n := by
+      have hA' : 0 ≤ 1 / A := by positivity
+      have h₁ : (1 + 1 / A - θ) * (n : ℝ) ≤ (1 + 1 / A) * n :=
+        mul_le_mul_of_nonneg_right (by linarith) (by positivity)
+      have h₂ : 0 ≤ 1 / A * n := by positivity
+      have h₃ : (4 + 3 / A) * (n : ℝ) = 2 * ((1 + 1 / A) * n) + 2 * n + 1 / A * n := by ring
+      linarith
+    exact false_of_accepting_bound_of_log_coefficient hA hη hηθ hθA hn hacc' hK1 hbig hlog hs'
+      hn'le hread (by positivity) hVb
+      (nondet_card_accepting_le_of_orderingBound (by linarith) hC order p out hK1 hrect')
+
+/-- **The fixed-`n` core for nondeterministic circuits.** The logarithmic
+conditions are those of `lt_size_of_log_bounds`. The number of witness inputs
+is unrestricted: only the reachable graph, with at most `2 s + 1` vertices,
+enters the counting argument. -/
+theorem nondet_lt_size_of_log_bounds {η C : ℝ} (hη : 0 < η) (hη1 : η ≤ 1 / 18) (hC : 0 ≤ C)
+    (order : Multigraph.OrderingBound (1 / 3) η C)
+    {n : Nat} (hn : 2 ≤ n) {f : Cslib.BooleanFunction n} {K : Nat}
+    (hacc : 2 ^ (n - 2) ≤ (accepting f).card) (hrect : RectangleFree f K)
+    (hbig : 2 * K ^ 2 ≤ 2 ^ (n - 2))
+    (hlog : 4 * Real.logb 2 n + 3 * Real.logb 2 K + (C + 22) < 3 * η * n)
+    {m : Nat} (circuit : Circuit Binary.signature (n + m) 1)
+    (computes : NondetComputes circuit f) :
+    (4 - 18 * η) * n < circuit.size := by
+  obtain ⟨x₀, hx₀⟩ := Finset.card_pos.mp (lt_of_lt_of_le (Nat.two_pow_pos _) hacc)
+  have hK1 : 1 < K := hrect.one_lt (mem_accepting.mp hx₀)
+  have hlogK : 0 ≤ Real.logb 2 K :=
+    Real.logb_nonneg one_lt_two (by exact_mod_cast hK1.le)
+  have key := nondet_lt_size_of_orderingBound (A := 1 / 3) (θ := 18 * η) (by norm_num) hη.le
+    (le_of_eq (by ring)) (by norm_num; linarith) hC order hn hacc hrect hbig
+    (log_condition_one_third hη1 hlogK hlog) circuit computes
+  rwa [show (1 : ℝ) + 1 / (1 / 3) - 18 * η = 4 - 18 * η by ring] at key
 
 /-- The polynomial-threshold nondeterministic bound with an arbitrary
 number of witness inputs. -/
 theorem nondet_lt_size_of_bounds {η C : ℝ} (hη : 0 < η) (hη1 : η ≤ 1 / 18) (hC : 0 ≤ C)
-    (order : Multigraph.OrderingBound η C)
+    (order : Multigraph.OrderingBound (1 / 3) η C)
     {n : Nat} (hn : 2 ≤ n) {f : Cslib.BooleanFunction n} {K c : Nat} (hK : K ≤ n ^ c)
     (hacc : 2 ^ (n - 2) ≤ (accepting f).card) (hrect : RectangleFree f K)
     (hpow : 8 * n ^ (2 * c) ≤ 2 ^ n)
@@ -256,10 +294,82 @@ theorem nondet_lt_size_of_bounds {η C : ℝ} (hη : 0 < η) (hη1 : η ≤ 1 / 
   exact nondet_lt_size_of_log_bounds hη hη1 hC order hn hacc hrect hbig
     (by linarith) circuit computes
 
+/-- **Nondeterministic circuits with a general ordering coefficient.** Under
+the hypotheses of `eventually_lt_size_of_orderingBound`, for every `ε > 0` and
+all sufficiently large `n`, every circuit on `n + m` inputs that computes
+`f n` nondeterministically has more than `(1 + 1/A - ε) n` gates, uniformly
+over every number `m` of witness inputs. -/
+theorem nondet_eventually_lt_size_of_orderingBound {A : ℝ} (hA : 0 < A)
+    (order : ∀ η : ℝ, 0 < η → ∃ C : ℝ, Multigraph.OrderingBound A η C)
+    (f : ∀ n, Cslib.BooleanFunction n) (K : Nat → Nat)
+    (hK : (fun n => Real.logb 2 (K n)) =o[atTop] (fun n => (n : ℝ)))
+    (hacc : ∀ᶠ n in atTop, 2 ^ (n - 2) ≤ (accepting (f n)).card)
+    (hrect : ∀ᶠ n in atTop, RectangleFree (f n) (K n))
+    {ε : ℝ} (hε : 0 < ε) :
+    ∀ᶠ n in atTop, ∀ (m : Nat) (circuit : Circuit Binary.signature (n + m) 1),
+      NondetComputes circuit (f n) → (1 + 1 / A - ε) * n < circuit.size := by
+  obtain ⟨θ, hθ, hθA, hθε⟩ : ∃ θ : ℝ, 0 < θ ∧ θ ≤ 1 / A ∧ θ ≤ ε :=
+    ⟨min ε (1 / A), lt_min hε (by positivity), min_le_right _ _, min_le_left _ _⟩
+  obtain ⟨η, hη, hηθ⟩ : ∃ η : ℝ, 0 < η ∧ η = A ^ 2 * θ / 2 := ⟨_, by positivity, rfl⟩
+  obtain ⟨C, hC⟩ := order η hη
+  have order' : Multigraph.OrderingBound A η (max C 0) := hC.mono le_rfl (le_max_left _ _)
+  have hAη : 0 < A + η + 2 := by positivity
+  have hlog := eventually_mul_logb_add_lt 4
+    (A + η + 4 * Real.logb 2 (4 + 3 / A) + max C 0 + 5) (by positivity : 0 < A * θ / 4)
+  filter_upwards [hacc, hrect, hlog, hK.def (by positivity : 0 < A * θ / (4 * (A + η + 2))),
+    eventually_two_mul_sq_le_pow_of_log hK, eventually_ge_atTop 2]
+    with n haccn hrectn hlogn hKn hbign hn
+  intro m circuit computes
+  have hlogK : Real.logb 2 (K n) ≤ A * θ / (4 * (A + η + 2)) * n :=
+    (le_abs_self _).trans
+      (by simpa only [Real.norm_eq_abs, abs_of_nonneg (Nat.cast_nonneg (α := ℝ) n)] using hKn)
+  have hlogK' : (A + η + 2) * Real.logb 2 (K n) ≤ A * θ / 4 * n := by
+    calc (A + η + 2) * Real.logb 2 (K n) ≤
+          (A + η + 2) * (A * θ / (4 * (A + η + 2)) * n) :=
+          mul_le_mul_of_nonneg_left hlogK hAη.le
+      _ = A * θ / 4 * n := by
+          field_simp
+  have key := nondet_lt_size_of_orderingBound hA hη.le hηθ.le hθA (le_max_right C 0) order' hn
+    haccn hrectn hbign (by linarith) circuit computes
+  have : (1 + 1 / A - ε) * n ≤ (1 + 1 / A - θ) * n :=
+    mul_le_mul_of_nonneg_right (by linarith) (by positivity)
+  exact this.trans_lt key
+
+/-- **Nondeterministic circuits from a cubic cutwidth bound.** A cutwidth
+coefficient `c > 0` at every positive slack gives the nondeterministic
+coefficient `1 + 1/(2c)`. -/
+theorem nondet_eventually_lt_size_of_cutwidthBound {c : ℝ} (hc : 0 < c)
+    (cutwidth : ∀ ξ : ℝ, 0 < ξ → ∃ N₀ : Nat, CutwidthBound c ξ N₀)
+    (f : ∀ n, Cslib.BooleanFunction n) (K : Nat → Nat)
+    (hK : (fun n => Real.logb 2 (K n)) =o[atTop] (fun n => (n : ℝ)))
+    (hacc : ∀ᶠ n in atTop, 2 ^ (n - 2) ≤ (accepting (f n)).card)
+    (hrect : ∀ᶠ n in atTop, RectangleFree (f n) (K n))
+    {ε : ℝ} (hε : 0 < ε) :
+    ∀ᶠ n in atTop, ∀ (m : Nat) (circuit : Circuit Binary.signature (n + m) 1),
+      NondetComputes circuit (f n) → (1 + 1 / (2 * c) - ε) * n < circuit.size :=
+  nondet_eventually_lt_size_of_orderingBound (by positivity)
+    (Multigraph.exists_orderingBound_of_cutwidthBound hc.le cutwidth) f K hK hacc hrect hε
+
+/-- **Nondeterministic circuits from a cubic pathwidth bound with coefficient
+`p`.** A pathwidth coefficient `p > 0` at every positive slack gives the
+nondeterministic coefficient `1 + 1/(2p)`. -/
+theorem nondet_eventually_lt_size_of_pathwidthCoefficient {p : ℝ} (hp : 0 < p)
+    (pathwidth : ∀ ξ : ℝ, 0 < ξ → ∃ N₀ : Nat, PathwidthBound p ξ N₀)
+    (f : ∀ n, Cslib.BooleanFunction n) (K : Nat → Nat)
+    (hK : (fun n => Real.logb 2 (K n)) =o[atTop] (fun n => (n : ℝ)))
+    (hacc : ∀ᶠ n in atTop, 2 ^ (n - 2) ≤ (accepting (f n)).card)
+    (hrect : ∀ᶠ n in atTop, RectangleFree (f n) (K n))
+    {ε : ℝ} (hε : 0 < ε) :
+    ∀ᶠ n in atTop, ∀ (m : Nat) (circuit : Circuit Binary.signature (n + m) 1),
+      NondetComputes circuit (f n) → (1 + 1 / (2 * p) - ε) * n < circuit.size :=
+  nondet_eventually_lt_size_of_orderingBound (by positivity)
+    (Multigraph.exists_orderingBound_of_pathwidthBound hp.le pathwidth) f K hK hacc hrect hε
+
 /-- Sublinear source entropy suffices for the nondeterministic coefficient-four
-bound, uniformly over every number of witness inputs. -/
+bound, uniformly over every number of witness inputs. This is
+`nondet_eventually_lt_size_of_orderingBound` at `A = 1/3`. -/
 theorem nondet_eventually_lt_size_of_log_sublinear
-    (order : ∀ η : ℝ, 0 < η → ∃ C : ℝ, Multigraph.OrderingBound η C)
+    (order : ∀ η : ℝ, 0 < η → ∃ C : ℝ, Multigraph.OrderingBound (1 / 3) η C)
     (f : ∀ n, Cslib.BooleanFunction n) (K : Nat → Nat)
     (hK : (fun n => Real.logb 2 (K n)) =o[atTop] (fun n => (n : ℝ)))
     (hacc : ∀ᶠ n in atTop, 2 ^ (n - 2) ≤ (accepting (f n)).card)
@@ -267,34 +377,17 @@ theorem nondet_eventually_lt_size_of_log_sublinear
     {ε : ℝ} (hε : 0 < ε) :
     ∀ᶠ n in atTop, ∀ (m : Nat) (circuit : Circuit Binary.signature (n + m) 1),
       NondetComputes circuit (f n) → (4 - ε) * n < circuit.size := by
-  let η := min ε 1 / 18
-  have hη : 0 < η := by dsimp [η]; positivity
-  have hη1 : η ≤ 1 / 18 := by dsimp [η]; linarith [min_le_right ε 1]
-  obtain ⟨C, hC⟩ := order η hη
-  have order' : Multigraph.OrderingBound η (max C 0) := hC.mono (le_max_left _ _)
-  have hlog := eventually_mul_logb_add_lt 4 (max C 0 + 22)
-    (by positivity : 0 < 3 * η / 2)
-  filter_upwards [hacc, hrect, hlog, hK.def (by positivity : 0 < η / 2),
-    eventually_two_mul_sq_le_pow_of_log hK, eventually_ge_atTop 2]
-    with n haccn hrectn hlogn hKn hbign hn
-  intro m circuit computes
-  have hlogK : Real.logb 2 (K n) ≤ η / 2 * n :=
-    (le_abs_self _).trans
-      (by simpa only [Real.norm_eq_abs, abs_of_nonneg (Nat.cast_nonneg (α := ℝ) n)] using hKn)
-  have key := nondet_lt_size_of_log_bounds hη hη1 (le_max_right C 0) order' hn
-    haccn hrectn hbign (by linarith) circuit computes
-  have : (4 - ε) * n ≤ (4 - 18 * η) * n := by
-    apply mul_le_mul_of_nonneg_right _ (by positivity)
-    dsimp [η]
-    linarith [min_le_left ε 1]
-  exact this.trans_lt key
+  filter_upwards [nondet_eventually_lt_size_of_orderingBound (by norm_num) order f K hK hacc
+    hrect hε] with n hn m circuit computes
+  have := hn m circuit computes
+  rwa [show (1 : ℝ) + 1 / (1 / 3) = 4 by norm_num] at this
 
 /-- **Nondeterministic circuits.** Under the graph-ordering hypothesis and the
 hypotheses of `eventually_lt_size` on the family `f n`, for every `ε > 0` and
 all sufficiently large `n`, every circuit on `n + m` inputs that
 computes `f n` nondeterministically has more than `(4 - ε) n` gates. -/
 theorem nondet_eventually_lt_size
-    (order : ∀ η : ℝ, 0 < η → ∃ C : ℝ, Multigraph.OrderingBound η C)
+    (order : ∀ η : ℝ, 0 < η → ∃ C : ℝ, Multigraph.OrderingBound (1 / 3) η C)
     (f : ∀ n, Cslib.BooleanFunction n) (K : Nat → Nat) (c : Nat)
     (hK : ∀ᶠ n in atTop, K n ≤ n ^ c)
     (hacc : ∀ᶠ n in atTop, 2 ^ (n - 2) ≤ (accepting (f n)).card)
@@ -307,19 +400,16 @@ theorem nondet_eventually_lt_size
 
 /-- **Nondeterministic circuits from the pathwidth hypothesis.** -/
 theorem nondet_eventually_lt_size_of_pathwidthBound
-    (pathwidth : ∀ ξ : ℝ, 0 < ξ → ∃ N₀ : Nat, PathwidthBound ξ N₀)
+    (pathwidth : ∀ ξ : ℝ, 0 < ξ → ∃ N₀ : Nat, PathwidthBound (1 / 6) ξ N₀)
     (f : ∀ n, Cslib.BooleanFunction n) (K : Nat → Nat) (c : Nat)
     (hK : ∀ᶠ n in atTop, K n ≤ n ^ c)
     (hacc : ∀ᶠ n in atTop, 2 ^ (n - 2) ≤ (accepting (f n)).card)
     (hrect : ∀ᶠ n in atTop, RectangleFree (f n) (K n))
     {ε : ℝ} (hε : 0 < ε) :
     ∀ᶠ n in atTop, ∀ (m : Nat) (circuit : Circuit Binary.signature (n + m) 1),
-      NondetComputes circuit (f n) → (4 - ε) * n < circuit.size := by
-  refine nondet_eventually_lt_size (fun η hη => ?_) f K c hK hacc hrect hε
-  obtain ⟨N₀, hN₀⟩ := pathwidth (η / 2) (by positivity)
-  refine ⟨N₀ + 9, ?_⟩
-  have := Multigraph.orderingBound_of_pathwidthBound (by positivity) hN₀
-  rwa [show 2 * (η / 2) = η by ring] at this
+      NondetComputes circuit (f n) → (4 - ε) * n < circuit.size :=
+  nondet_eventually_lt_size (Multigraph.exists_orderingBound_one_third_of_pathwidthBound pathwidth)
+    f K c hK hacc hrect hε
 
 /-- A dense rectangle-free family with sublinear logarithmic threshold
 requires more than `(4 - ε) n` gates even with arbitrarily many witness
@@ -331,12 +421,9 @@ theorem nondet_eventually_lt_size_of_rectangleFree
     (hrect : ∀ᶠ n in atTop, RectangleFree (f n) (K n))
     {ε : ℝ} (hε : 0 < ε) :
     ∀ᶠ n in atTop, ∀ (m : Nat) (circuit : Circuit Binary.signature (n + m) 1),
-      NondetComputes circuit (f n) → (4 - ε) * n < circuit.size := by
-  refine nondet_eventually_lt_size_of_log_sublinear (fun η hη => ?_) f K hK hacc hrect hε
-  obtain ⟨N₀, bound⟩ := exists_pathwidthBound (ξ := η / 2) (by positivity)
-  refine ⟨N₀ + 9, ?_⟩
-  have order := Multigraph.orderingBound_of_pathwidthBound (by positivity) bound
-  rwa [show 2 * (η / 2) = η by ring] at order
+      NondetComputes circuit (f n) → (4 - ε) * n < circuit.size :=
+  nondet_eventually_lt_size_of_log_sublinear Multigraph.exists_orderingBound_one_third
+    f K hK hacc hrect hε
 
 end Cutwidth
 end Algebraic

@@ -2455,6 +2455,25 @@ establishes the proposed coefficient-three regime without that assumption.
   all shared vertices, so concatenation preserves the bag-size bound.
 \end{proof}
 
+\begin{definition}[Cubic pathwidth, cutwidth, and graph-ordering bounds]
+  \label{def:lowerbounds-algebraic-ordering-hypotheses}
+  \lean{Algebraic.Cutwidth.PathwidthBound,
+    Algebraic.Cutwidth.CutwidthBound,
+    Algebraic.Cutwidth.Multigraph.OrderingBound}
+  \leanok
+  For a coefficient $p$, a slack $\xi$, and a threshold $N_0$, the predicate
+  $\mathrm{PathwidthBound}(p,\xi,N_0)$ says that every simple $3$-regular
+  graph on $h>N_0$ vertices has a path decomposition with bags of at most
+  $(p+\xi)h+1$ vertices. The predicate $\mathrm{CutwidthBound}(c,\xi,N_0)$
+  says that every such graph has an injective vertex key all of whose
+  prefixes are crossed by at most $(c+\xi)h$ edges. For a coefficient $A$,
+  a slack $\eta$, and a constant $C$, the graph-ordering hypothesis
+  $\mathrm{OrderingBound}(A,\eta,C)$ says that every connected loopless
+  multigraph of maximum degree three with $N$ vertices and $M$ edges has a
+  vertex ordering all of whose prefix cuts have at most
+  $(A+\eta)\max\{M-N,0\}+3\log_2 N+C$ edges.
+\end{definition}
+
 \begin{theorem}[Cubic pathwidth from bisection]
   \label{thm:lowerbounds-algebraic-bisection-pathwidth}
   \lean{Algebraic.Cutwidth.BisectionBound.exists_pathwidthBound,
@@ -2462,14 +2481,16 @@ establishes the proposed coefficient-three regime without that assumption.
     Algebraic.Cutwidth.exists_pathwidthBound}
   \leanok
   \uses{def:lowerbounds-algebraic-bisection,
+    def:lowerbounds-algebraic-ordering-hypotheses,
     thm:lowerbounds-algebraic-bisection-assembly,
     thm:lowerbounds-algebraic-sharp-bisection}
   If $\xi\ge 0$, $\delta>0$, and $\mathrm{BisectionBound}(\xi,N_0)$
-  holds, then $\mathrm{PathwidthBound}(\xi+\delta,N_1)$ holds for some
+  holds, then $\mathrm{PathwidthBound}(1/6,\xi+\delta,N_1)$ holds for some
   $N_1$. Consequently the sharp asymptotic cubic bisection theorem implies
   the sharp asymptotic cubic pathwidth theorem. This proves the reduction
   of Fomin and H{\o}ie. Instantiating the proved sharp bisection theorem
-  gives $\mathrm{PathwidthBound}(\xi,N_0)$ for some $N_0$ at every $\xi>0$.
+  gives $\mathrm{PathwidthBound}(1/6,\xi,N_0)$ for some $N_0$ at every
+  $\xi>0$.
 \end{theorem}
 \begin{proof}
   \leanok
@@ -2477,6 +2498,34 @@ establishes the proposed coefficient-three regime without that assumption.
   than $\delta n$. Absorb the finite assembly's remainder in that slack.
   For the universally quantified conclusion, allocate half the target
   slack to the bisection and half to the remainder.
+\end{proof}
+
+\begin{theorem}[Graph-ordering bounds from cubic pathwidth and cutwidth]
+  \label{thm:lowerbounds-algebraic-ordering-bound}
+  \lean{Algebraic.Cutwidth.Multigraph.orderingBound_of_pathwidthBound,
+    Algebraic.Cutwidth.Multigraph.orderingBound_of_cutwidthBound,
+    Algebraic.Cutwidth.cutwidthBound_of_pathwidthBound,
+    Algebraic.Cutwidth.Multigraph.exists_orderingBound_one_third}
+  \leanok
+  \uses{def:lowerbounds-algebraic-ordering-hypotheses,
+    thm:lowerbounds-algebraic-bisection-pathwidth}
+  If $p+\xi\ge0$, then $\mathrm{PathwidthBound}(p,\xi,N_0)$ implies
+  $\mathrm{OrderingBound}(2p,2\xi,N_0+9)$. If $c+\xi\ge0$, then
+  $\mathrm{CutwidthBound}(c,\xi,N_0)$ implies
+  $\mathrm{OrderingBound}(2c,2\xi,N_0+8)$. A pathwidth bound also gives
+  $\mathrm{CutwidthBound}(p,\xi+2/(N_0+1),N_0)$. With the proved pathwidth
+  coefficient $1/6$, for every $\eta>0$ some $C$ satisfies
+  $\mathrm{OrderingBound}(1/3,\eta,C)$.
+\end{theorem}
+\begin{proof}
+  \leanok
+  Merge blocks of the multigraph until no merge applies. If at least two
+  blocks remain, the quotient is a simple cubic graph on $h$ blocks with
+  $h\le 2\max\{M-N,0\}$. Order it by the median edge positions of a path
+  decomposition, which cut at most one edge more than a bag holds, or by
+  the cutwidth key; a quotient with at most $N_0$ blocks uses its one-bag
+  decomposition. Listing each block's vertices in its recorded order adds
+  at most $3\lceil\log_2 N\rceil+3$ edges to every prefix cut.
 \end{proof}
 
 \begin{definition}[Flat-source sumset extraction]
@@ -8104,6 +8153,27 @@ establishes the proposed coefficient-three regime without that assumption.
   to the full input length.
 \end{proof}
 
+\begin{theorem}[The concrete family under a general ordering coefficient]
+  \label{thm:lowerbounds-algebraic-explicit-coefficient}
+  \lean{Algebraic.Cutwidth.sourceReductionHardFamily_eventually_lt_size_of_orderingBound}
+  \leanok
+  \uses{thm:lowerbounds-algebraic-uniform-hard-family,
+    thm:lowerbounds-algebraic-cutwidth-coefficient}
+  Let $A>0$, and suppose that for every $\eta>0$ some $C$ satisfies
+  $\mathrm{OrderingBound}(A,\eta,C)$. For every $\varepsilon>0$ and all
+  sufficiently large $n$, every circuit computing
+  $\mathrm{sourceReductionHardFamily}(n)$ has more than
+  $(1+1/A-\varepsilon)n$ gates, with $n$ the full input length. The family
+  is the one of Theorem~\ref{thm:lowerbounds-algebraic-explicit-four-n},
+  which is the case $A=1/3$.
+\end{theorem}
+\begin{proof}
+  \leanok
+  Apply the general-coefficient padded theorem at fixed error $35/72$,
+  then shift its eventual statement from the unpadded index to the full
+  input length.
+\end{proof}
+
 \begin{theorem}[Extraction with an approximately independent seed]
   \label{thm:lowerbounds-algebraic-perturbed-seed}
   \lean{Algebraic.Cutwidth.Extractor.WeightedStrongSeededExtractor.perturbed_seed_dist_le,
@@ -9506,6 +9576,42 @@ Theorem~\ref{thm:lowerbounds-algebraic-explicit-four-n}.
   inputs read. Every signal except the output feeds a slot; charging signals
   and copy vertices to slots gives at most $2s+1$ wiring vertices, independent
   of the declared witness count. The deterministic assembly then applies.
+\end{proof}
+
+\begin{theorem}[Cutwidth bound with a general ordering coefficient]
+  \label{thm:lowerbounds-algebraic-cutwidth-coefficient}
+  \lean{Algebraic.Cutwidth.eventually_lt_size_of_orderingBound,
+    Algebraic.Cutwidth.eventually_lt_size_of_cutwidthBound,
+    Algebraic.Cutwidth.eventually_lt_size_of_pathwidthCoefficient,
+    Algebraic.Cutwidth.nondet_eventually_lt_size_of_orderingBound,
+    Algebraic.Cutwidth.nondet_eventually_lt_size_of_cutwidthBound,
+    Algebraic.Cutwidth.nondet_eventually_lt_size_of_pathwidthCoefficient,
+    Algebraic.Cutwidth.eventually_lt_size_balancePad_of_flatSumsetExtractor_of_orderingBound,
+    Algebraic.Cutwidth.nondet_eventually_lt_size_balancePad_of_flatSumsetExtractor_of_orderingBound}
+  \leanok
+  \uses{thm:lowerbounds-algebraic-ordering-bound,
+    thm:lowerbounds-algebraic-cutwidth-subexponential,
+    thm:lowerbounds-algebraic-cutwidth-nondet,
+    thm:lowerbounds-algebraic-padded-hardness}
+  Let $A>0$, and suppose that for every $\eta>0$ some $C$ satisfies
+  $\mathrm{OrderingBound}(A,\eta,C)$. Every family as in
+  Theorem~\ref{thm:lowerbounds-algebraic-cutwidth-subexponential} then needs
+  more than $(1+1/A-\varepsilon)n$ gates, for deterministic circuits and for
+  nondeterministic circuits with arbitrarily many witness inputs, for every
+  $\varepsilon>0$ and all large $n$. The balanced padding of
+  Theorem~\ref{thm:lowerbounds-algebraic-padded-hardness} needs more than
+  $(1+1/A-\varepsilon)(n+1)$ gates. A cubic cutwidth or pathwidth
+  coefficient $c>0$ at every positive slack gives the circuit coefficient
+  $1+1/(2c)$. The coefficient-four theorems are the case $A=1/3$.
+\end{theorem}
+\begin{proof}
+  \leanok
+  Let $\theta=\min\{\varepsilon,1/A\}$ and use the ordering slack
+  $\eta=A^2\theta/2$. A circuit with at most $(1+1/A-\theta)n$ gates that
+  reads more than $n-k$ inputs, $k=\lceil\log_2K\rceil$, has excess at most
+  $(1/A-\theta)n+k$, and $(A+\eta)(1/A-\theta)\le1-A\theta/2$. Comparing
+  the $2^{n-2}$ accepted inputs with the cut-counting bound leaves
+  $A\theta n/2\le O(\log n+\log K)$, which fails for all large $n$.
 \end{proof}
 
 \begin{theorem}[Average-case cutwidth bound for balanced families]
