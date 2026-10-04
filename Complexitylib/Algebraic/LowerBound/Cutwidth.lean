@@ -358,6 +358,13 @@ signals, so a fan-in-two circuit over a finite field computing such a form with
 `M + Mᵀ` totally regular, such as the Hankel Cauchy matrix `1 / (i + j + 2)` over
 `ZMod q`, has more than `(1 + 1/(4 κ_E) - ε) N ≥ (25/9 - ε) N` gates for all
 large `N`.
+`MultiOutput.Restrict` restricts the fibre bound to product domains and to the
+inputs with some coordinates fixed. `MultiOutput.FieldMul` applies it to
+multiplication in a degree-`n` extension of a finite field, written in a basis:
+fixing one factor makes it linear, and averaging over the fixed factor shows
+that a fan-in-two circuit over any signature has more than
+`(2 + 1/(2 κ_E) - ε) n ≥ (50/9 - ε) n` gates for all large `n`, in particular for
+`GF(2 ^ n)` over the full binary basis.
 
 `Bisection.Helpful` completes the graph theorem. Its proof uses the first
 boundary normalization phase, a partition into bounded connected clusters,

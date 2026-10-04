@@ -10618,6 +10618,148 @@ Theorem~\ref{thm:lowerbounds-algebraic-explicit-four-n}.
   $(1/2-A\varepsilon/2)N$, and the logarithmic term is $O(\log N)$.
 \end{proof}
 
+\begin{theorem}[Restricted rank-cut bound]
+  \label{thm:lowerbounds-algebraic-restricted-rank-cut}
+  \lean{Algebraic.Cutwidth.MultiOutput.card_le_of_fibres_of_mix_of_trace,
+    Algebraic.Cutwidth.MultiOutput.card_piFinset_le_of_fibres,
+    Algebraic.Cutwidth.MultiOutput.supportedKernel,
+    Algebraic.Cutwidth.MultiOutput.card_supportedKernel_le,
+    Algebraic.Cutwidth.MultiOutput.card_pow_le_supportedKernel,
+    Algebraic.Cutwidth.MultiOutput.card_pow_le_supportedKernel_of_trace,
+    Algebraic.Cutwidth.MultiOutput.apply_eq_zero_of_closed_of_trace}
+  \leanok
+  \uses{thm:lowerbounds-algebraic-rank-cut,
+    lem:lowerbounds-algebraic-single-cut-fibres}
+  Let a circuit over any signature with values in a finite set $U$ compute
+  $f\colon U^n\to U^m$, and let $S$ be a split of its wires with forward
+  signals $A$ and backward signals $B$. If $D=D_0\times\dots\times D_{n-1}$
+  is a coordinatewise product domain, every left fibre taken within $D$ has
+  at most $D_T$ elements, and every right fibre within $D$ at most $D_S$,
+  then $|D|\le|U|^{|A|+|B|}D_TD_S$; the same holds for every set of inputs
+  closed under mixing.
+
+  Now let $U$ be a finite abelian group, $J$ a set of free coordinates and
+  $z_0$ a base point, and suppose that $f(z')-f(z)=g(z'-z)$ whenever $z$ and
+  $z'$ agree with $z_0$ outside $J$. For sets $P$ of coordinates and $Q$ of
+  outputs, let $\ker_g(P,Q)$ be the set of vectors supported on $P$ whose
+  image under $g$ vanishes on $Q$. With $X_S$ and $X_T$ the free inputs in
+  $S$ and outside $S$, and $Y_S$ and $Y_T$ the outputs carried in $S$ and
+  outside $S$,
+  \[
+    |U|^{|J|} \le |U|^{|A|+|B|}\,|\ker_g(X_S,Y_T)|\,|\ker_g(X_T,Y_S)| .
+  \]
+  For a linear $g$ this is the rank-cut bound of
+  Theorem~\ref{thm:lowerbounds-algebraic-rank-cut} restricted to the free
+  inputs. If $S$ is crossed by no signal, both kernels are full: $g$ maps
+  vectors supported on $X_S$ to vectors vanishing on $Y_T$, and vectors
+  supported on $X_T$ to vectors vanishing on $Y_S$.
+\end{theorem}
+\begin{proof}
+  \leanok
+  The proof of the rank-cut bound only mixes two inputs with equal boundary
+  keys, and the mixture of two members of a product domain lies in it. So
+  the inputs in the domain with a fixed key form a product of left and right
+  parts (Lemma~\ref{lem:lowerbounds-algebraic-single-cut-fibres}), the left
+  parts embed into the left fibre, within the domain, of any member, and
+  summing over the at most $|U|^{|A|+|B|}$ keys bounds the domain. The
+  inputs agreeing with $z_0$ outside $J$ form a product domain with
+  $|U|^{|J|}$ members, and subtracting the base point maps a left fibre
+  injectively into $\ker_g(X_S,Y_T)$, and a right fibre into
+  $\ker_g(X_T,Y_S)$. A kernel has at most $|U|^{|P|}$ members, and
+  $|X_S|+|X_T|=|J|$; without crossing signals the bound forces both
+  kernels to have exactly that many.
+\end{proof}
+
+\begin{definition}[Multiplication in coordinates]
+  \label{def:lowerbounds-algebraic-field-mul}
+  \lean{Algebraic.Cutwidth.MultiOutput.fieldMul}
+  \leanok
+  Let $K$ be an algebra over $F$ with a basis $b_0,\dots,b_{n-1}$.
+  Multiplication in $K$, written in coordinates, is the map
+  $F^{n+n}\to F^n$ sending the coordinates $x$ and $y$ of two elements to
+  the coordinates of their product
+  $\bigl(\sum_i x_ib_i\bigr)\bigl(\sum_j y_jb_j\bigr)$. The first $n$
+  inputs are the coordinates of the first factor and the last $n$ inputs
+  those of the second.
+\end{definition}
+
+\begin{theorem}[Multiplication in a degree-$n$ extension needs $(2+1/(2p)-\varepsilon)n$ gates]
+  \label{thm:lowerbounds-algebraic-field-mul}
+  \lean{Algebraic.Cutwidth.MultiOutput.fieldMul_append_equivFun,
+    Algebraic.Cutwidth.MultiOutput.mem_component_of_fieldMul,
+    Algebraic.Cutwidth.MultiOutput.le_add_two_of_fieldMul,
+    Algebraic.Cutwidth.MultiOutput.sub_two_le_of_fieldMul,
+    Algebraic.Cutwidth.MultiOutput.eventually_lt_size_of_fieldMul_of_orderingBound,
+    Algebraic.Cutwidth.MultiOutput.eventually_lt_size_of_fieldMul,
+    Algebraic.Cutwidth.MultiOutput.eventually_lt_size_of_fieldMul_fifty_div_nine,
+    Algebraic.Cutwidth.MultiOutput.nonempty_basis_galoisField,
+    Algebraic.Cutwidth.MultiOutput.eventually_lt_size_galoisField,
+    Algebraic.Cutwidth.MultiOutput.eventually_lt_size_galoisField_fifty_div_nine}
+  \leanok
+  \uses{def:lowerbounds-algebraic-field-mul,
+    thm:lowerbounds-algebraic-restricted-rank-cut,
+    thm:lowerbounds-algebraic-multi-output-ordering,
+    thm:lowerbounds-algebraic-gaussian-coefficient}
+  Let $K$ be a finite field of degree $n$ over a finite field $F$, with any
+  basis, and let a circuit over $F$, over any signature with fan-in at most
+  two (so with arbitrary functions $F\times F\to F$, unary functions, and
+  constants as gates), compute multiplication in $K$ in coordinates with $s$
+  gates. Every split of its wires holding $a$ inputs of the first factor and
+  $n-a$ outputs is crossed by at least $n-2$ signals, and all inputs and
+  outputs lie in one component of the wire graph. Under
+  $\mathrm{OrderingBound}(A,\eta,C)$ with $A+\eta\ge0$,
+  \[
+    n - 2 \le (A+\eta)\max\{s-2n,0\} + 3\log_2(2n+3s) + C .
+  \]
+  Consequently, if the ordering hypothesis holds with coefficient $A>0$ at
+  every positive slack, then for every $\varepsilon>0$ and all large $n$,
+  independently of the fields, the basis, and the signature, every such
+  circuit has more than $(2+1/A-\varepsilon)n$ gates. With the Gaussian
+  pathwidth coefficient $p$ of
+  Theorem~\ref{thm:lowerbounds-algebraic-gaussian-coefficient} this is
+  $(2+1/(2p)-\varepsilon)n\approx(5.5625-\varepsilon)n$, and as $2p\le9/32$
+  it is more than $(50/9-\varepsilon)n$. In particular, multiplication in
+  $\mathrm{GF}(2^n)$ over $\mathrm{GF}(2)$, in any basis, needs more than
+  $(2+1/(2p)-\varepsilon)n$ gates over the full binary basis.
+
+  Earlier lower bounds for this multiplication count only the
+  multiplications of bilinear or quadratic algorithms; we know of no earlier
+  bound on the number of gates over the full binary basis. The coefficient
+  is not claimed to be a record for explicit functions with $2n$ inputs and
+  $n$ outputs in general.
+\end{theorem}
+\begin{proof}
+  \leanok
+  Fixing the second factor $y$ makes the map linear in $x$: it is
+  multiplication by $y$. By
+  Theorem~\ref{thm:lowerbounds-algebraic-restricted-rank-cut} on the inputs
+  with second factor $y$, a split $S$ satisfies
+  $|F|^n\le|F|^{|A|+|B|}k_1(y)k_2(y)$, where $k_1(y)$ and $k_2(y)$ are the
+  sizes of the kernels of the blocks of multiplication by $y$ with columns
+  $X_S$ and rows $Y_T$, and with columns $X_T$ and rows $Y_S$. Sum a kernel
+  with columns $P$ and rows $Q$ over all $y$: the zero vector lies in every
+  kernel, and for a nonzero $u$ the map $y\mapsto uy$ is a bijection of $K$,
+  so exactly $|F|^{n-|Q|}$ values of $y$ put $u$ in the kernel. The sum is
+  at most $|F|^n+|F|^{|P|+n-|Q|}\le2|F|^n$ when $|P|\le|Q|$. If $S$ holds
+  $a$ inputs of the first factor and $n-a$ outputs, both blocks have
+  $|P|=|Q|$, so some $y$ has $k_1(y)+k_2(y)\le4$, hence $k_1(y)k_2(y)\le
+  4\le|F|^2$ and $n\le|A|+|B|+2$.
+
+  The component of an output is crossed by no signal, so both kernels are
+  full for every $y$. Since $b_j\cdot b_j^{-1}b_i=b_i$, a suitable $y$ makes
+  any entry of the block nonzero; hence the component holds every input of
+  the first factor and every output, and, fixing $x$ instead of $y$, every
+  input of the second factor. The outputs are distinct wires (take $y=1$)
+  and none is an input of the first factor (take $y=0$), so along the
+  ranking of Theorem~\ref{thm:lowerbounds-algebraic-multi-output-ordering}
+  the number of first-factor inputs and outputs in a prefix grows by at most
+  one per wire, and some prefix ending at one of them holds exactly $n$. It
+  is charged to the component holding all $2n$ inputs and at most $s$
+  gates. For the asymptotic form, assume at most $(2+1/A-\varepsilon)n$
+  gates, choose $\eta=A^2\varepsilon/2$, and compare: the cycle term is at
+  most $(1-A\varepsilon/2)n$, and the logarithmic term is $O(\log n)$.
+\end{proof}
+
 \begin{definition}[The KRW conjecture]
   \label{def:lowerbounds-algebraic-krw}
   \lean{Algebraic.KW.NonConstant, Algebraic.KW.KRWDepthWith,

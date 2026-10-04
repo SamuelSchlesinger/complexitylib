@@ -114,7 +114,7 @@ theorem card_le_of_fibres_of_mix (hZ : ∀ x ∈ Z, ∀ x' ∈ Z, mix S x x' ∈
 
 omit [Fintype U] [DecidableEq U] in
 /-- Coordinatewise products are closed under mixing. -/
-theorem mix_mem_piFinset [DecidableEq U] (D : Fin n → Finset U) {x x' : Fin n → U}
+theorem mix_mem_piFinset (D : Fin n → Finset U) {x x' : Fin n → U}
     (hx : x ∈ Fintype.piFinset D) (hx' : x' ∈ Fintype.piFinset D) :
     mix S x x' ∈ Fintype.piFinset D := by
   rw [Fintype.mem_piFinset] at hx hx' ⊢

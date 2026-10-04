@@ -29,14 +29,16 @@ the first factor and `n - a` outputs is crossed by at least `n - 2` signals. Fix
 factor `y` makes the map linear in `x`, so the restricted rank-cut bound
 (`MultiOutput.card_pow_le_supportedKernel`) applies to the blocks
 `M_y[Y_T, X_S]` and `M_y[Y_S, X_T]` of multiplication by `y`. Averaged over `y`, a block with
-`|X| ≤ |Y|` has a kernel of average size below `2`: a nonzero vector `u` lies in the kernel for
-a `|F| ^ -|Y|` fraction of the `y`, since `y ↦ y · u` is a bijection of `K`. So some `y` makes
-both blocks nearly of full rank.
+`|X| ≤ |Y|` has a kernel of average size at most `2`: a nonzero vector `u` lies in the kernel
+for a `|F| ^ -|Y|` fraction of the `y`, since `y ↦ y · u` is a bijection of `K`. So some `y`
+makes both kernels number at most `4` together, and both blocks are nearly of full rank.
 
 **One component** (`mem_component_of_fieldMul`). The component of an output is crossed by no
-signal, so the same blocks vanish on it for every fixed factor; as `y = (b j)⁻¹ b i` makes the
-entry `(i, j)` nonzero, the component holds every input of the first factor and every output,
-and by fixing `x` instead, every input of the second factor.
+signal, so for every fixed factor the blocks between its inputs and the outputs outside it,
+and between the inputs outside it and its outputs, vanish
+(`MultiOutput.apply_eq_zero_of_closed_of_trace`). As `y = (b j)⁻¹ b i` makes the entry
+`(i, j)` nonzero, the component holds every input of the first factor and every output, and by
+fixing `x` instead, every input of the second factor.
 
 **The finite bound** (`sub_two_le_of_fieldMul`). Under the graph-ordering hypothesis for
 coefficient `A`, slack `η` and constant `C`, a circuit of size `s` has

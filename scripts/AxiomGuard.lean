@@ -188,6 +188,14 @@ def headlineTheorems : List Name := [
   `Algebraic.Tensor3.rank_wedgeMatrix,
   `Algebraic.Tensor3.rank_koszulFlattening_le_borderRank_mul,
   `Algebraic.Tensor3.not_borderRankLE_of_lt_rank_koszulFlattening,
+  -- Multiplication in finite fields: restricted rank-cut bound and the (5.5625 - o(1)) n bound
+  `Algebraic.Cutwidth.MultiOutput.card_piFinset_le_of_fibres,
+  `Algebraic.Cutwidth.MultiOutput.card_pow_le_supportedKernel,
+  `Algebraic.Cutwidth.MultiOutput.le_add_two_of_fieldMul,
+  `Algebraic.Cutwidth.MultiOutput.sub_two_le_of_fieldMul,
+  `Algebraic.Cutwidth.MultiOutput.eventually_lt_size_of_fieldMul,
+  `Algebraic.Cutwidth.MultiOutput.eventually_lt_size_of_fieldMul_fifty_div_nine,
+  `Algebraic.Cutwidth.MultiOutput.eventually_lt_size_galoisField,
   -- Korten's top-down parity lower bounds and the majority extension
   `Complexity.KarchmerWigderson.parity_communication_lower_bound,
   `Complexity.Circuit.parity_wire_lower_bound,
