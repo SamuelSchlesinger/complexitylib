@@ -9735,6 +9735,27 @@ Theorem~\ref{thm:lowerbounds-algebraic-explicit-four-n}.
   $2\arctan\tan(\theta/2)=\theta$ finish the computation.
 \end{proof}
 
+\begin{lemma}[Crossings away from the median]
+  \label{lem:lowerbounds-algebraic-gaussian-decay}
+  \lean{Algebraic.Cutwidth.Gaussian.prod_gaussianReal_abs_sub_le_abs_exp,
+    Algebraic.Cutwidth.Gaussian.gaussPi_between_le_arctan_exp,
+    Algebraic.Cutwidth.Gaussian.gaussPi_between_le_exp_arccos}
+  \leanok
+  \uses{lem:lowerbounds-algebraic-gaussian-sheppard}
+  For unit vectors $\alpha,\beta$ with $\langle\alpha,\beta\rangle=\rho>-1$ and every
+  threshold $t$, the threshold separates $\langle\alpha,\omega\rangle$ and
+  $\langle\beta,\omega\rangle$ with probability at most
+  $e^{-t^2/2}\arccos(\rho)/\pi$.
+\end{lemma}
+\begin{proof}
+  \leanok
+  Write the sum and difference forms in polar coordinates $(R,\psi)$ after rescaling. At
+  radius $R$ a separating threshold forces $R\ge|t|$ and puts $|\psi|$ within half the angle
+  $\arccos\rho$ of $\arccos(t/R)$, because the cosine is decreasing on $[0,\pi]$. So each
+  circle contributes angle at most $2\arccos\rho$, and the radial tail
+  $\int_{|t|}^\infty Re^{-R^2/2}\,dR=e^{-t^2/2}$ supplies the factor.
+\end{proof}
+
 \begin{lemma}[Angles in a star]
   \label{lem:lowerbounds-algebraic-gaussian-arccos-star}
   \lean{Algebraic.Cutwidth.Gaussian.sum_arccos_le,
