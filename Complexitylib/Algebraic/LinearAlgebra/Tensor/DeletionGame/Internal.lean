@@ -86,7 +86,7 @@ theorem two_mul_card_filter_phi_le {k : ℕ} {s T : ℤ} (hs : 0 ≤ s)
 
 /-! ### Blocks -/
 
-section Blocks
+section Sides
 
 variable {α : Type*} [Fintype α]
 
@@ -310,7 +310,7 @@ theorem le_sub_card_add_of_lost [DecidableEq α] {k L R : ℕ} {D E V : ℝ} {f 
   rw [hV]
   nlinarith
 
-end Blocks
+end Sides
 
 /-! ### Offsets -/
 
