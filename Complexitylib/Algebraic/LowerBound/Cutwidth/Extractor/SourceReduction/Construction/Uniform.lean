@@ -49,7 +49,10 @@ theorem sourceReductionFamilyEval_ofFn (n : Nat) (x : Fin n → Bool) :
 @[polytime] theorem sourceReductionFamilyEval_mem_FP : sourceReductionFamilyEval ∈ Complexity.FP :=
   Internal.sourceReductionFamilyEval_mem_FP
 
-/-- Eventually the computed family equals the actual finite sumset construction exactly. -/
+/-- Eventually the computed family equals the actual finite sumset construction exactly.
+The proof needs the candidate cap `n + 1` to be inactive, and the cap binds at every positive
+length with `log₂ (n + 1) < 2 ^ 27 * 70 ^ 3 ≈ 4.6 * 10 ^ 13`. The threshold here, which every
+circuit bound for the hard family inherits, therefore exceeds `2 ^ (4.6 * 10 ^ 13)`. -/
 theorem sourceReductionFamily_eventually_eq :
     ∀ᶠ n : Nat in atTop,
       sourceReductionFamily n = sourceReductionExtractor n (sourceReductionFamilyScale n) :=
@@ -82,7 +85,10 @@ theorem sourceReductionHardEval_ofFn (n : Nat) (x : Fin n → Bool) :
     sourceReductionHardEval (List.ofFn x) = [sourceReductionHardFamily n x] :=
   Internal.sourceReductionHardEval_ofFn n x
 
-/-- The final balanced family has an unconditional uniform polynomial-time evaluator. -/
+/-- The final balanced family has an unconditional uniform polynomial-time evaluator.
+The polynomial has enormous degree: on an input of length `n + 1` the evaluator enumerates
+`(2 ^ clog₂ (n + 1)) ^ (2 ^ 27) ≥ (n + 1) ^ (2 ^ 27)` outer coordinates, so its degree is at
+least `2 ^ 27 ≈ 1.3 * 10 ^ 8`. -/
 @[polytime] theorem sourceReductionHardEval_mem_FP : sourceReductionHardEval ∈ Complexity.FP :=
   Internal.sourceReductionHardEval_mem_FP
 
@@ -91,7 +97,8 @@ theorem mem_sourceReductionHardLanguage_ofFn (n : Nat) (x : Fin n → Bool) :
     List.ofFn x ∈ sourceReductionHardLanguage ↔ sourceReductionHardFamily n x = true :=
   Internal.mem_sourceReductionHardLanguage_ofFn n x
 
-/-- The concrete hard language has a deterministic polynomial-time decider. -/
+/-- The concrete hard language has a deterministic polynomial-time decider. The decider runs
+`sourceReductionHardEval`, so its polynomial also has degree at least `2 ^ 27`. -/
 theorem sourceReductionHardLanguage_mem_P : sourceReductionHardLanguage ∈ Complexity.P :=
   Internal.sourceReductionHardLanguage_mem_P
 

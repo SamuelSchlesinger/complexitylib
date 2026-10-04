@@ -52,6 +52,17 @@ Boolean slice with that evaluator, including length zero.
 language in `P`. The family is fixed before `ε`, and `n` is its full input
 length, including the fresh balancing bit.
 
+Both the complexity and the hardness claims are asymptotic, with enormous
+constants. On `n` unpadded bits the evaluator enumerates
+`(2^clog₂(n+1))^(2^27) ≥ (n+1)^(2^27)` outer coordinates, so the polynomial
+behind `FP` and `P` has degree at least `2^27 ≈ 1.3·10^8`. The proof
+identifies the computed family with the extractor only where the candidate
+cap `n + 1` is inactive. With `L = clog₂(n+1)` that needs
+`2^27 · clog₂(2^24 L + 1)^3 ≤ log₂(n+1)`, which for positive `n` means
+`log₂(n+1) ≥ 2^27 · 70^3 ≈ 4.6·10^13`. Every circuit bound for this family,
+the Gaussian, `41/9`, and coefficient-four forms alike, is therefore
+established only beyond an implicit threshold above `2^(4.6·10^13)`.
+
 The general theorem is `Algebraic.Cutwidth.eventually_lt_size_of_rectangleFree`
 in `Algebraic.LowerBound.Cutwidth.FourN`:
 

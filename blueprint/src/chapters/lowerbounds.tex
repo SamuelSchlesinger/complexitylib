@@ -8124,6 +8124,12 @@ establishes the proposed coefficient-three regime without that assumption.
   Eventual cap inactivity transfers the statistical theorem to this
   same evaluator. Apply the checked balanced-padding and decision-function
   bridges.
+
+  The constants are enormous: the polynomial has degree at least
+  $2^{27}\approx 1.3\cdot 10^{8}$, and the cap is inactive at a positive
+  length only once $\log_2(n+1)\ge 2^{27}\cdot 70^{3}\approx 4.6\cdot 10^{13}$.
+  Every circuit bound for this family is therefore purely asymptotic, with
+  an implicit threshold above $2^{4.6\cdot 10^{13}}$.
 \end{proof}
 
 \begin{theorem}[A concrete polynomial-time family needs more than $(4-\varepsilon)n$ gates]

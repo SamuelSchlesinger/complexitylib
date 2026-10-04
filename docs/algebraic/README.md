@@ -341,6 +341,9 @@ fixed concrete family over the full binary basis;
 `Cutwidth.sourceReductionHardFamily_eventually_lt_size` keeps the
 coefficient-four case. The bound uses its full input length, and
 `Extractor.sourceReductionHardLanguage_mem_P` proves the language is in `P`.
+Both results are purely asymptotic: the polynomial has degree at least `2^27`,
+and the proof certifies the circuit bounds only beyond an implicit threshold
+above `2^(4.6·10^13)`.
 The [cutwidth guide](cutwidth-lower-bound.md) records the exact theorem,
 parameter guarantees, and source credits.
 
