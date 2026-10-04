@@ -16,11 +16,13 @@ import Complexitylib.Algebraic.LinearAlgebra.Tensor.Substitution.Internal
 Let `T ∈ A ⊗ B ⊗ C` with `A = ℂ^α`. Border substitution lowers the border rank by deleting
 `A`-slices: if `T` has border rank at most `r + 1`, then projecting `A` along a suitable line
 gives border rank at most `r`. For a tight tensor the line can be taken to be a coordinate axis,
-so that the projection zeroes one slice. This is the coordinate-hyperplane form of Landsberg and
-Michałek, *Towards finding hay in a haystack* (Theory of Computing 2025), Proposition 2.3,
-obtained from a one-parameter-subgroup limit instead of the Borel fixed-point theorem. The
-restrictions `T(q)` of their filtrations are the slice restrictions `Tensor3.restrictSlices`
-(see `Complexitylib.Algebraic.LinearAlgebra.Tensor.Substitution.Defs`).
+so that the projection zeroes one slice. Iterating gives the coordinate-subspace form of
+Landsberg and Michałek, *Towards finding hay in a haystack* (Theory of Computing 2025),
+Proposition 2.3, by a one-parameter-subgroup limit instead of the Borel fixed-point theorem. Here
+tightness (`Tensor3.Tight`) asks only the weights on `A` to be injective, and nonzero slices
+replace `A`-conciseness; their restrictions `T(q)` to coordinate subspaces of `A^*` are the
+slice restrictions `Tensor3.restrictSlices` (see
+`Complexitylib.Algebraic.LinearAlgebra.Tensor.Substitution.Defs`).
 
 * **Only the kernel matters** (`Tensor3.BorderRankLE.map_of_ker`). If `(P ⊗ Y ⊗ Z) T` has border
   rank at most `ρ` and `ker P ⊆ ker P'`, then so does `(P' ⊗ Y ⊗ Z) T`, since `P' = G P`.
@@ -29,17 +31,20 @@ restrictions `T(q)` of their filtrations are the slice restrictions `Tensor3.res
   most `r`, where `orthProj u` is the orthogonal projection onto `u^⊥`. No conciseness is
   assumed.
 * **Torus limit** (`Tensor3.Tight.exists_borderRankLE_restrictSlices_erase`). If `T` is tight
-  and `(orthProj u ⊗ 1 ⊗ 1) T` has border rank at most `ρ` with `u ≠ 0`, then for the `i` in the
-  support of `u` minimizing the weight `τA i`, `T` with slice `i` zeroed has border rank at most
-  `ρ`.
+  and `(orthProj u ⊗ 1 ⊗ 1) T` has border rank at most `ρ` with `u ≠ 0`, then for some `i` in
+  the support of `u` (the proof uses the one minimizing the weight `τA i`), `T` with slice `i`
+  zeroed has border rank at most `ρ`.
 * **One deletion** (`Tensor3.Tight.exists_mem_borderRankLE_restrictSlices_erase`). If `T` is
   tight, `S` is nonempty, and `T` restricted to the slices in `S` has border rank at most
   `r + 1`, then deleting some `i ∈ S` leaves border rank at most `r`.
-* **Deletion order** (`Tensor3.Tight.exists_list_borderRankLE_restrictSlices_sdiff`). Iterating:
-  some ordering `l` of `S₀` has border rank at most `r - q` after deleting its first `q`
-  elements, for every `q`. If every slice in `S₀` is nonzero, then `card S₀ ≤ r`
+* **Deletion order** (`Tensor3.Tight.exists_list_borderRankLE_restrictSlices_sdiff`). For some
+  ordering `l` of `S₀`, deleting the first `q` elements of `l` leaves border rank at most
+  `r - q` (truncated subtraction), for every `q`. If every slice in `S₀` is nonzero, then `card S₀ ≤ r`
   (`Tensor3.Tight.card_le_of_borderRankLE_restrictSlices`), so for a tight tensor all of whose
-  `A`-slices are nonzero, `card α ≤ borderRank T` (`Tensor3.Tight.card_le_borderRank`).
+  `A`-slices are nonzero, `card α ≤ borderRank T` (`Tensor3.Tight.card_le_borderRank`). In
+  terms of `borderRank`, `q + borderRank T(q) ≤ borderRank T(0)` along the ordering
+  (`Tensor3.Tight.exists_list_add_borderRank_le`), which is Proposition 2.3 for filtrations by
+  coordinate subspaces.
 * **Lower-bound form** (`Tensor3.Tight.not_borderRankLE_restrictSlices_of_forall_list`). If `LB`
   is a lower bound for the border rank of every restriction to a subset of `S₀`, and every
   ordering of `S₀` has a stage `q` where `q + LB` of the surviving slices exceeds `r`, then the
@@ -194,6 +199,17 @@ theorem Tight.card_le_borderRank {T : Tensor3 α β γ} (hT : T.Tight) (h : ∀ 
   have := hT.card_le_of_borderRankLE_restrictSlices (S := univ) (fun i _ => h i)
     (by rw [restrictSlices_univ]; exact borderRankLE_borderRank T)
   simpa using this
+
+/-- **Border substitution for tight tensors, filtration form** (the coordinate form of Landsberg
+and Michałek, Proposition 2.3). If `T` is tight and every slice in `S₀` is nonzero, then some
+ordering `l` of `S₀` satisfies `q + borderRank T(q) ≤ borderRank T(0)` for every `q ≤ card S₀`,
+where `T(q)` is `T` restricted to `S₀` minus the first `q` elements of `l`. -/
+theorem Tight.exists_list_add_borderRank_le {T : Tensor3 α β γ} (hT : T.Tight) {S₀ : Finset α}
+    (hS : ∀ i ∈ S₀, T i ≠ 0) :
+    ∃ l : List α, l.Nodup ∧ l.toFinset = S₀ ∧ ∀ q ≤ S₀.card,
+      q + (T.restrictSlices (S₀ \ (l.take q).toFinset)).borderRank ≤
+        (T.restrictSlices S₀).borderRank :=
+  Internal.exists_list_add_borderRank_le hT hS
 
 /-- **Border substitution for tight tensors, lower-bound form.** Let `T` be tight with every
 slice in `S₀` nonzero, and let `LB S` be a lower bound for the border rank of `T` restricted to

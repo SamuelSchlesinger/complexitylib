@@ -426,6 +426,18 @@ theorem card_le_of_borderRankLE_restrictSlices {T : Tensor3 α β γ} (hT : T.Ti
   have := congrFun (congrFun (congrFun h0 i) j) k
   simpa [Tensor3.restrictSlices, hi] using this
 
+theorem exists_list_add_borderRank_le {T : Tensor3 α β γ} (hT : T.Tight) {S₀ : Finset α}
+    (hS : ∀ i ∈ S₀, T i ≠ 0) :
+    ∃ l : List α, l.Nodup ∧ l.toFinset = S₀ ∧ ∀ q ≤ S₀.card,
+      q + (T.restrictSlices (S₀ \ (l.take q).toFinset)).borderRank ≤
+        (T.restrictSlices S₀).borderRank := by
+  have hr := borderRankLE_borderRank (T.restrictSlices S₀)
+  have hcard := card_le_of_borderRankLE_restrictSlices hT hS hr
+  obtain ⟨l, hl, hlS, hq⟩ := exists_list_borderRankLE_restrictSlices_sdiff hT S₀ hr
+  refine ⟨l, hl, hlS, fun q hq' => ?_⟩
+  have := borderRank_le_iff.mpr (hq q)
+  omega
+
 theorem not_borderRankLE_restrictSlices_of_forall_list {T : Tensor3 α β γ} (hT : T.Tight)
     {S₀ : Finset α} (hS : ∀ i ∈ S₀, T i ≠ 0) {r : ℕ} (LB : Finset α → ℕ)
     (hLB : ∀ S ⊆ S₀, ∀ ρ, (T.restrictSlices S).BorderRankLE ρ → LB S ≤ ρ)
