@@ -16,8 +16,8 @@ Every `N`-superconcentrator (`Multigraph.Superconcentrator`) has at least
 `(2 + π/(3 arccos((1 + 2√2)/4)) - ε) N ≈ (5.5625 - ε) N` edges for all large `N`. The constant
 is `2 + 1/(2p)` for the Gaussian edge-score pathwidth coefficient
 `p = (3/(2π)) arccos((1 + 2√2)/4)`. Lev and Valiant (*Size bounds for superconcentrators*,
-1983) proved `5 N` by the same argument with the cubic pathwidth coefficient `1/6`, which this
-file recovers as `eventually_five_sub_mul_le_card_edges`.
+Theoretical Computer Science, 1983) proved `5 N`. The same argument with the cubic pathwidth
+coefficient `1/6` recovers that bound as `eventually_five_sub_mul_le_card_edges`.
 
 The argument has three steps.
 
