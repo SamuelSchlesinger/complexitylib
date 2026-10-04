@@ -127,6 +127,14 @@ Completed results include Shannon counting, the De Morgan parity lower bound,
 AC0 parity separation, monotone Boolean CLIQUE, monotone arithmetic clique
 support bounds, Hessian rank, and Waring and rectangle bounds. Restricted
 models and their charged operations are explicit in the theorem statements.
+For the arithmetic clique polynomial over a zero-sum-free semiring without zero
+divisors, Schnorr's `choose n k - 1` addition bound has no further hypothesis, but the
+multiplication, total-gate, and size bounds
+(`Fusion.Arithmetic.Progress.Separated.Clique.circuit_multiplication_lowerBound`,
+`circuit_gate_lowerBound`, `circuit_size_lowerBound`, and their central-layer
+forms) assume the circuit-local promise `MultiplicationSupportWidthAtMost … width`:
+both inputs of every multiplication gate have at most `width` support
+monomials. They then give at least `⌈choose n k / width²⌉` multiplications.
 The AC0 development has a detailed [theory map](ac0-theory-map.md).
 
 `Algebraic.LowerBound.Cutwidth` proves that a rectangle-free Boolean function
