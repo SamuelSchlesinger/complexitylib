@@ -310,6 +310,7 @@ public import Complexitylib.Algebraic.LowerBound.Cutwidth.Gaussian.Kernel
 public import Complexitylib.Algebraic.LowerBound.Cutwidth.Gaussian.Edge
 public import Complexitylib.Algebraic.LowerBound.Cutwidth.Gaussian.SecondMoment
 public import Complexitylib.Algebraic.LowerBound.Cutwidth.Gaussian.Layout
+public import Complexitylib.Algebraic.LowerBound.Cutwidth.Gaussian.Frontier.Star
 public import Complexitylib.Algebraic.LowerBound.Cutwidth.Gaussian
 
 /-!
