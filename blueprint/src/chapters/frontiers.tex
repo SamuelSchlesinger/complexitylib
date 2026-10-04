@@ -672,6 +672,107 @@ are not.
   is impossible while $S_q$ contains a nonzero slice; hence $|S_0| \le r$.
 \end{proof}
 
+\begin{definition}[Blocks, widths, and the paired-cluster hypothesis]
+  \label{def:frontiers-deletion-game}
+  \lean{Algebraic.Tensor3.DeletionGame.offset, Algebraic.Tensor3.DeletionGame.sideBlock,
+    Algebraic.Tensor3.DeletionGame.posBlock, Algebraic.Tensor3.DeletionGame.negBlock,
+    Algebraic.Tensor3.DeletionGame.phi, Algebraic.Tensor3.DeletionGame.PairedClusterBound}
+  \leanok
+  \uses{def:frontiers-tight}
+  Index $m = 2k + 1$ slices by their offsets $-k, \dots, k$. For a block length $L \ge 1$,
+  the $i$-th positive block consists of the slices with offset in $[iL + 1, (i + 1)L]$ and
+  the $i$-th negative block of those with offset in $[-(i + 1)L, -(iL + 1)]$; the offsets
+  $1, \dots, k$ of each sign split into runs of length $L$, the last possibly shorter. A
+  block $B$ is \emph{good} for a set $S$ of surviving slices if $|S \cap B| \ge R$. The
+  width of a positive cluster at offset $r$ paired with a negative cluster at offset $-s$
+  is
+  \[
+    \Phi_n(r, s) = \max\{n - r,\ n - s,\ r + s,\ 2 \min(r + s, n - r - s)\}.
+  \]
+  A function $\mathrm{LB}$ on sets of slices satisfies the \emph{paired-cluster hypothesis}
+  with constants $D$ and $E$ if, whenever a positive block and a negative block are both
+  good for $S$, some offsets $r$ in the positive block and $-s$ in the negative block
+  satisfy $D (\Phi_m(r, s) - E) \le \mathrm{LB}(S)$.
+\end{definition}
+
+\begin{lemma}[Two-interval lemma]
+  \label{lem:frontiers-two-interval}
+  \lean{Algebraic.Tensor3.DeletionGame.phi_comm,
+    Algebraic.Tensor3.DeletionGame.two_mul_le_three_mul_phi,
+    Algebraic.Tensor3.DeletionGame.phi_le_add,
+    Algebraic.Tensor3.DeletionGame.filter_phi_le_subset,
+    Algebraic.Tensor3.DeletionGame.two_mul_card_filter_phi_le}
+  \leanok
+  \uses{def:frontiers-deletion-game}
+  $\Phi_n$ is symmetric, $2$-Lipschitz in each argument, and at least $2n/3$. Let
+  $n = 2k + 1$, and let $s \ge 0$ and $T$ be integers with $2n \le 3T + 3$. The integers
+  $r \in [1, k]$ with $\Phi_n(r, s) \le T$ lie in the two intervals
+  $[n - T, \lfloor T/2 \rfloor - s]$ and $[\lceil n - T/2 \rceil - s, \min(k, T - s)]$, and
+  there are at most $(3T - 2n + 3)/2$ of them.
+\end{lemma}
+\begin{proof}
+  \leanok
+  Since $(n - r) + (n - s) + (r + s) = 2n$, $\Phi_n \ge 2n/3$. The bound
+  $\Phi_n(r, s) \le T$ forces $r \ge n - T$, $r + s \le T$, and either $2(r + s) \le T$ or
+  $2(n - r - s) \le T$, which gives the two intervals. If the first is empty, the second
+  has at most $3T/2 - n + 1$ points. Otherwise $s \le 3T/2 - n$, and the second interval,
+  capped at $k$, has at most $T/2 + s - k$ points, for a total of at most
+  $2T - n - k + 1 \le 3T/2 - n + 3/2$ when $T \le n$. When $T \ge n$ the bound is at least
+  $k$.
+\end{proof}
+
+\begin{theorem}[The deletion game]
+  \label{thm:frontiers-deletion-game}
+  \lean{Algebraic.Tensor3.DeletionGame.le_sub_card_add_of_lost,
+    Algebraic.Tensor3.DeletionGame.PairedClusterBound.exists_stage,
+    Algebraic.Tensor3.DeletionGame.PairedClusterBound.mono,
+    Algebraic.Tensor3.Tight.le_borderRank_of_pairedClusterBound,
+    Algebraic.Tensor3.Tight.not_borderRankLE_of_pairedClusterBound}
+  \leanok
+  \uses{def:frontiers-deletion-game, lem:frontiers-two-interval,
+    thm:frontiers-border-substitution}
+  Let $m = 2k + 1$, $1 \le R \le L \le k$ and $D \ge 3/2$, and let $\mathrm{LB}$ satisfy
+  the paired-cluster hypothesis with constants $D$ and $E$. Then for every ordering of the
+  $m$ slices some stage $q \le m$ satisfies
+  \[
+    q + \mathrm{LB}(S_q) \ge \Bigl(1 + \frac{2D}{3}\Bigr) m - DE
+      - \Bigl(8L + \frac{Rm}{L} + 2\Bigr),
+  \]
+  where $S_q$ is the set of slices left after deleting the first $q$. Consequently, if $T$
+  is tight with $m$ nonzero $A$-slices and $S \mapsto \underline{\mathbf{R}}(T|_S)$
+  satisfies the paired-cluster hypothesis, then $\underline{\mathbf{R}}(T)$ is at least the
+  same bound.
+
+  This is the global, combinatorial step of a program for explicit tensors of border rank
+  $(7/3 - o(1))m$. Koszul flattenings of paired clusters of $2p + 1$ slices are meant to
+  supply the paired-cluster hypothesis with $D = (2p + 1)/(p + 1)$ and $E = O(pL)$, which
+  would give $(7/3 - 2/(3(p + 1)))m - O(pL + Rm/L)$, hence about $(19/9)m$ at $p = 2$.
+  The theorem is conditional: it assumes the paired-cluster hypothesis, and deriving that
+  hypothesis for an explicit tensor is a separate step that is not formalized here.
+\end{theorem}
+\begin{proof}
+  \leanok
+  Let $S_q$ be the survivors after $q$ deletions. Before any deletion the first block of
+  each sign has $L \ge R$ slices, so both signs have a good block; after all $m$ deletions
+  neither has. At the last stage $q$ at which both signs have a good block, the next
+  deletion removes one slice and leaves one sign without a good block. Say it is the
+  negative sign; otherwise exchange the signs, using $\Phi_m(r, s) = \Phi_m(s, r)$. Then
+  $S_q$ has at most $(R - 1)(k/L + 1) + 1$ negative slices. Fix a good negative block
+  $B^-$ for $S_q$ and write $\mathrm{LB}(S_q) = D(T - E)$. Each good positive block $B$
+  pairs with $B^-$ to give offsets $r_B \in B$ and $-s_B \in B^-$ with
+  $\Phi_m(r_B, s_B) \le T$, so in particular $T \ge 2m/3$. All $s_B$ lie within $L$ of one
+  $s_0$, and every surviving offset $r$ of $B$ lies within $L$ of $r_B$, so
+  $\Phi_m(r, s_0) \le T + 4L$. By the two-interval lemma at most
+  $(3(T + 4L) - 2m + 3)/2$ slices survive in good positive blocks. The other positive
+  blocks hold at most $R - 1$ survivors each, and offset $0$ at most one. Hence
+  $q = m - |S_q| \ge 2m - 3T/2 - O(L + Rm/L)$ and
+  $q + \mathrm{LB}(S_q) \ge 2m + (D - 3/2)T - DE - O(L + Rm/L)$, which is at least the
+  stated bound because $D \ge 3/2$ and $T \ge 2m/3$. For the tensor, border substitution
+  (Theorem~\ref{thm:frontiers-border-substitution}) gives an ordering with
+  $q + \underline{\mathbf{R}}(T|_{S_q}) \le \underline{\mathbf{R}}(T)$ for every
+  $q \le m$.
+\end{proof}
+
 \section{Fine-grained and parameterized complexity}
 
 \begin{theorem}[SETH implies quadratic hardness of Orthogonal Vectors]
