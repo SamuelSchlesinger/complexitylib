@@ -9965,6 +9965,108 @@ Theorem~\ref{thm:lowerbounds-algebraic-explicit-four-n}.
   Taylor bound for the cosine at $3\pi/32$.
 \end{proof}
 
+\begin{definition}[Superconcentrator]
+  \label{def:lowerbounds-algebraic-superconcentrator}
+  \lean{Algebraic.Cutwidth.Multigraph.DirAdj,
+    Algebraic.Cutwidth.Multigraph.IsDirWalk,
+    Algebraic.Cutwidth.Multigraph.inDegree,
+    Algebraic.Cutwidth.Multigraph.Superconcentrator}
+  \leanok
+  Direct every edge of a multigraph from its first to its second endpoint. A directed walk
+  is a list of vertices in which each vertex is joined to the next by an edge directed towards
+  it. A multigraph with distinct vertices $i_1,\dots,i_N$ (inputs) and $o_1,\dots,o_N$
+  (outputs), $2N$ in all, is an $N$-superconcentrator when for every $k$, all $k$-sets $X$ of
+  inputs and $Y$ of outputs are joined by $k$ vertex-disjoint directed walks from $X$ to $Y$.
+  Every path is a walk, so this includes superconcentrators defined with paths.
+\end{definition}
+
+\begin{lemma}[Superconcentrator cut lemma]
+  \label{lem:lowerbounds-algebraic-superconcentrator-cut}
+  \lean{Algebraic.Cutwidth.Multigraph.Superconcentrator.exists_le_card_cut}
+  \leanok
+  \uses{def:lowerbounds-algebraic-superconcentrator}
+  Every linear order of the vertices of an $N$-superconcentrator has a lower set whose cut has
+  at least $N$ edges.
+\end{lemma}
+\begin{proof}
+  \leanok
+  Take a lower set $S$ containing exactly $N$ of the $2N$ terminals, say $a$ inputs and $N-a$
+  outputs; its complement contains $N-a$ inputs and $a$ outputs. The superconcentrator joins
+  the $a$ inputs in $S$ to the $a$ outputs outside $S$ by vertex-disjoint directed walks, each
+  of which leaves $S$ along an edge directed out of $S$, and the $N-a$ inputs outside $S$ to
+  the $N-a$ outputs in $S$, each entering along an edge directed into $S$. Walks of one family
+  are vertex-disjoint, so their crossing edges are distinct, and an edge directed out of $S$
+  is not directed into it. No Menger theorem is needed.
+\end{proof}
+
+\begin{theorem}[Superconcentrators need $(5.5625-o(1))N$ edges]
+  \label{thm:lowerbounds-algebraic-superconcentrator}
+  \lean{Algebraic.Cutwidth.Multigraph.Superconcentrator.le_of_orderingBound,
+    Algebraic.Cutwidth.Multigraph.Superconcentrator.le_of_orderingBound_of_connected,
+    Algebraic.Cutwidth.Multigraph.Superconcentrator.eventually_le_card_edges_of_orderingBound,
+    Algebraic.Cutwidth.Multigraph.Superconcentrator.eventually_le_card_edges,
+    Algebraic.Cutwidth.Multigraph.Superconcentrator.eventually_fifty_div_nine_sub_mul_le_card_edges,
+    Algebraic.Cutwidth.Multigraph.Superconcentrator.eventually_five_sub_mul_le_card_edges}
+  \leanok
+  \uses{def:lowerbounds-algebraic-superconcentrator,
+    lem:lowerbounds-algebraic-superconcentrator-cut,
+    def:lowerbounds-algebraic-ordering-hypotheses,
+    thm:lowerbounds-algebraic-ordering-bound,
+    thm:lowerbounds-algebraic-gaussian-coefficient}
+  Assume $\mathrm{OrderingBound}(A,\eta,C)$ with $A+\eta\ge0$. Every $N$-superconcentrator
+  with $N>0$ and $M$ edges satisfies
+  $N\le(A+\eta)\max\{M-2N,0\}+3\log_2(2M)+C$, and a connected one with $V$ vertices satisfies
+  $N\le(A+\eta)\max\{M-V,0\}+3\log_2(2M)+C$. Hence if $A>0$ and every $\eta>0$ admits such a
+  $C$, then for every $\varepsilon>0$ and all large $N$ every $N$-superconcentrator has at
+  least $(2+1/A-\varepsilon)N$ edges. With the edge-score coefficient
+  $A=2p$, $p=\tfrac{3}{2\pi}\arccos\tfrac{1+2\sqrt2}{4}$, this is
+  $\bigl(2+\pi/(3\arccos\tfrac{1+2\sqrt2}{4})-\varepsilon\bigr)N\approx(5.5625-\varepsilon)N$
+  edges, and at least $(50/9-\varepsilon)N$ since $2p\le9/32$. The coefficient $A=1/3$ of the
+  Fomin--H{\o}ie bound gives $(5-\varepsilon)N$, the bound of Lev and Valiant
+  (\emph{Size bounds for superconcentrators}, 1983), whose argument this is.
+\end{theorem}
+\begin{proof}
+  \leanok
+  Every input reaches every output, so all terminals lie in one undirected component. Replace
+  each vertex of that component by a directed path with one vertex per end of an edge with
+  its tail in the component, the ends of entering edges first. Each path vertex meets at most
+  two path edges and one original edge, no edge is a loop, the result is connected, and its
+  edges minus vertices are the component's. A directed walk enters a vertex at an entering
+  end, from which its path reaches every leaving end, so vertex-disjoint walks lift to
+  vertex-disjoint walks; with each input at the first vertex of its path and each output at
+  the last, the result is a superconcentrator. Its ordering has prefix cuts of at most
+  $(A+\eta)\max\{M'-V',0\}+3\log_2V'+C$ edges, and one has at least $N$ by
+  Lemma~\ref{lem:lowerbounds-algebraic-superconcentrator-cut}. Here $M'-V'\le M-2N$, since
+  the component contains the $2N$ terminals, and $V'\le2M$. If $M<(2+1/A-\varepsilon)N$, then
+  at slack $\eta=A^2\varepsilon/2$ the right side is at most
+  $(1-A\varepsilon/2)N+O(\log N)$, which is less than $N$ for large $N$.
+\end{proof}
+
+\begin{corollary}[Superconcentrators of in-degree two]
+  \label{cor:lowerbounds-algebraic-superconcentrator-in-degree}
+  \lean{Algebraic.Cutwidth.Multigraph.Superconcentrator.le_of_orderingBound_of_inDegree,
+    Algebraic.Cutwidth.Multigraph.Superconcentrator.eventually_le_card_vertices_of_orderingBound,
+    Algebraic.Cutwidth.Multigraph.Superconcentrator.eventually_le_card_vertices}
+  \leanok
+  \uses{thm:lowerbounds-algebraic-superconcentrator}
+  Let the inputs have in-degree zero and every vertex in-degree at most two. Under the
+  hypotheses of Theorem~\ref{thm:lowerbounds-algebraic-superconcentrator}, for every
+  $\varepsilon>0$ and all large $N$ every such $N$-superconcentrator has at least
+  $(1+1/A-\varepsilon)N$ vertices that are not inputs. This is $(4-\varepsilon)N$ for
+  $A=1/3$, the corresponding bound of Lev and Valiant, and
+  $\bigl(1+\pi/(3\arccos\tfrac{1+2\sqrt2}{4})-\varepsilon\bigr)N\approx(4.5625-\varepsilon)N$
+  for the edge-score coefficient.
+\end{corollary}
+\begin{proof}
+  \leanok
+  Count in the component of the terminals. Its edges enter non-input vertices, at most two
+  each; if $S$ is the set of non-input vertices met by an edge of the component, the
+  component has at most $2|S|$ edges and at least $N+|S|$ vertices. Its edges minus vertices
+  is therefore at most $|S|-N\le(V-N)-N$, and it has at most $2(V-N)$ edges, so the argument
+  of Theorem~\ref{thm:lowerbounds-algebraic-superconcentrator} applies with $(V-N)-N$ in place
+  of $M-2N$.
+\end{proof}
+
 \begin{theorem}[The concrete family under a general ordering coefficient]
   \label{thm:lowerbounds-algebraic-explicit-coefficient}
   \lean{Algebraic.Cutwidth.sourceReductionHardFamily_eventually_lt_size_of_orderingBound}

@@ -163,6 +163,12 @@ def headlineTheorems : List Name := [
   `Algebraic.Cutwidth.sourceReductionHardFamily_eventually_lt_size_of_bandSubcritical,
   (`Algebraic.Cutwidth).str
     "sourceReductionHardFamily_eventually_lt_size_twentyThree_div_five_of_bandSubcritical",
+  -- Superconcentrators: the cut lemma and the (5.5625 - o(1)) N edge bound
+  `Algebraic.Cutwidth.Multigraph.Superconcentrator.exists_le_card_cut,
+  `Algebraic.Cutwidth.Multigraph.Superconcentrator.eventually_le_card_edges_of_orderingBound,
+  `Algebraic.Cutwidth.Multigraph.Superconcentrator.eventually_le_card_edges,
+  `Algebraic.Cutwidth.Multigraph.Superconcentrator.eventually_fifty_div_nine_sub_mul_le_card_edges,
+  `Algebraic.Cutwidth.Multigraph.Superconcentrator.eventually_le_card_vertices,
   -- Korten's top-down parity lower bounds and the majority extension
   `Complexity.KarchmerWigderson.parity_communication_lower_bound,
   `Complexity.Circuit.parity_wire_lower_bound,
