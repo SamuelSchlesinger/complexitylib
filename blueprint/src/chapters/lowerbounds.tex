@@ -10074,6 +10074,118 @@ Theorem~\ref{thm:lowerbounds-algebraic-explicit-four-n}.
   inputs are constant on subcubes, which balance handles directly.
 \end{proof}
 
+\begin{definition}[Signals across a single cut]
+  \label{def:lowerbounds-algebraic-single-cut}
+  \lean{Algebraic.Cutwidth.SingleCut.inputsIn,
+    Algebraic.Cutwidth.SingleCut.forward,
+    Algebraic.Cutwidth.SingleCut.backward,
+    Algebraic.Cutwidth.SingleCut.boundaryKey,
+    Algebraic.Cutwidth.SingleCut.mix,
+    Algebraic.Cutwidth.SingleCut.leftParts,
+    Algebraic.Cutwidth.SingleCut.rightParts}
+  \leanok
+  Split the wires of a straight-line program, its inputs and its gates, into
+  a set $S$ and its complement $\bar S$, and let $i$ be the number of inputs
+  in $S$. The forward signals $A$ are the wires in $S$ read by some gate in
+  $\bar S$, and the backward signals $B$ are the wires in $\bar S$ read by
+  some gate in $S$. A signal is the value of one wire, counted once however
+  many gates read it. The boundary key of an input $x$ is the pair $(a, b)$
+  of the values of the signals in $A$ and in $B$. Mixing $x$ and $x'$ takes
+  the coordinates of $x$ whose input wires lie in $S$ and the remaining
+  coordinates of $x'$. For a set $Z$ of inputs and a key $\sigma$, the left
+  and right parts $L_\sigma$ and $R_\sigma$ are the restrictions of the
+  members of $Z$ with key $\sigma$ to the inputs in $S$ and in $\bar S$.
+\end{definition}
+
+\begin{lemma}[Product fibres of a single cut]
+  \label{lem:lowerbounds-algebraic-single-cut-fibres}
+  \lean{Algebraic.Cutwidth.SingleCut.trace_mix,
+    Algebraic.Cutwidth.SingleCut.trace_eq_of_agree_backward,
+    Algebraic.Cutwidth.SingleCut.trace_eq_of_agree_forward,
+    Algebraic.Cutwidth.SingleCut.boundaryKey_eq_of_leftPart_eq,
+    Algebraic.Cutwidth.SingleCut.boundaryKey_eq_of_rightPart_eq,
+    Algebraic.Cutwidth.SingleCut.card_filter_boundaryKey_eq,
+    Algebraic.Cutwidth.SingleCut.card_image_boundaryKey_le,
+    Algebraic.Cutwidth.SingleCut.sum_card_leftParts_le,
+    Algebraic.Cutwidth.SingleCut.sum_card_rightParts_le}
+  \leanok
+  \uses{def:lowerbounds-algebraic-single-cut}
+  Fix a program over any signature, with values in any type $U$, and any
+  number of outputs. If $x$ and $x'$ have the same boundary key, the mixed
+  input takes the values of $x$ on every wire of $S$ and those of $x'$ on
+  every wire of $\bar S$. The inputs in $S$ and the values on $B$ determine
+  the values on all of $S$; symmetrically, the inputs in $\bar S$ and the
+  values on $A$ determine the values on all of $\bar S$. Consequently, if $Z$
+  is closed under mixing inputs with equal keys, then the members of $Z$ with
+  key $\sigma$ correspond bijectively to $L_\sigma \times R_\sigma$; for a
+  fixed $b$ the sets $L_{(a, b)}$ are pairwise disjoint, so
+  $\sum_\sigma |L_\sigma| \le |U|^{i + |B|}$, and symmetrically
+  $\sum_\sigma |R_\sigma| \le |U|^{n - i + |A|}$. There are at most
+  $|U|^{|A| + |B|}$ keys.
+\end{lemma}
+\begin{proof}
+  \leanok
+  Induct over the wires in program order. A gate in $S$ reads wires of $S$,
+  where the values agree by induction, and backward signals, whose values are
+  part of the key; a gate in $\bar S$ is symmetric. Restricting to the inputs
+  in $S$ and in $\bar S$ is injective, and mixing shows that every pair of a
+  left part and a right part of key $\sigma$ is realized. Two inputs with the
+  same left part and the same $b$ have the same $a$ by determination, which
+  gives the disjointness.
+\end{proof}
+
+\begin{theorem}[Single-cut criterion]
+  \label{thm:lowerbounds-algebraic-single-cut}
+  \lean{Algebraic.Cutwidth.SingleCut.card_accepting_le_of_trace,
+    Algebraic.Cutwidth.SingleCut.card_accepting_le,
+    Algebraic.Cutwidth.SingleCut.card_accepting_lt}
+  \leanok
+  \uses{lem:lowerbounds-algebraic-single-cut-fibres}
+  Let a single-output circuit over any basis with Boolean values compute a
+  $K$-rectangle-free function $f$ on $n$ inputs (as in
+  Theorem~\ref{thm:lowerbounds-algebraic-nechiporuk}). Then for every split
+  of its wires into $S$ and $\bar S$,
+  \[
+    |f^{-1}(1)| \le (K - 1)\left(2^{i + |B|} + 2^{n - i + |A|}\right)
+      < K\left(2^{i + |B|} + 2^{n - i + |A|}\right).
+  \]
+\end{theorem}
+\begin{proof}
+  \leanok
+  The accepted inputs are closed under mixing inputs with equal keys, because
+  the output wire lies on one side and the mixed input copies that side. So
+  the accepted inputs with key $\sigma$ form the one-rectangle
+  $L_\sigma \times R_\sigma$, one of whose sides has fewer than $K$ elements;
+  hence it has at most $(K - 1)(|L_\sigma| + |R_\sigma|)$ points. Summing
+  over $\sigma$ and applying the partition bounds of
+  Lemma~\ref{lem:lowerbounds-algebraic-single-cut-fibres} gives the bound.
+  A rectangle-free threshold is positive, which gives the strict form.
+\end{proof}
+
+\begin{corollary}[Single-cut bound for dense rectangle-free functions]
+  \label{cor:lowerbounds-algebraic-single-cut}
+  \lean{Algebraic.Cutwidth.SingleCut.le_max_add_clog,
+    Algebraic.Cutwidth.SingleCut.sub_logb_lt_max,
+    Algebraic.Cutwidth.SingleCut.exists_prefix_le}
+  \leanok
+  \uses{thm:lowerbounds-algebraic-single-cut}
+  If moreover $f$ has at least $2^{n - 2}$ accepting inputs, then every split
+  satisfies $n \le \max(i + |B|, n - i + |A|) + \lceil \log_2 K \rceil + 2$,
+  and hence $\max(i + |B|, n - i + |A|) > n - \log_2 K - 3$. In particular,
+  for every injective ranking of the wires some prefix, the wires ranked
+  below a threshold, is crossed by at least
+  $\lfloor n/2 \rfloor - \lceil \log_2 K \rceil - 2$ forward and backward
+  signals.
+\end{corollary}
+\begin{proof}
+  \leanok
+  Bound $K \le 2^{\lceil \log_2 K \rceil}$ and both powers by
+  $2^{\max(i + |B|, n - i + |A|)}$ and compare exponents. Adding the wires in
+  rank order changes the number of inputs in the prefix by at most one at a
+  time, so some prefix contains exactly $\lfloor n/2 \rfloor$ inputs; for it
+  $\max(i + |B|, n - i + |A|) \le \lceil n/2 \rceil + |A| + |B|$.
+\end{proof}
+
 \begin{definition}[The KRW conjecture]
   \label{def:lowerbounds-algebraic-krw}
   \lean{Algebraic.KW.NonConstant, Algebraic.KW.KRWDepthWith,
