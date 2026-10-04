@@ -47,8 +47,8 @@ and removed the former shrink-only baselines, so keep the tree clean. Suppress
 a genuinely-intended env-lint with a documented inline `@[nolint …]` on the
 declaration — never a project-level baseline.
 
-Never use `native_decide` (or `decide +native`) outside the executable
-validation modules. `lint_style.py` rejects it in every `.lean` file except
+Never use `native_decide` (or `decide +native`, `bv_decide`, `bv_check`)
+outside the executable validation modules. `lint_style.py` rejects it in every `.lean` file except
 files named `Validation.lean` outside the public import graph, where it closes
 `example`s used as regression tests. The axiom guard's scope and limits (it
 trusts the `.olean` files, allows `Classical.choice`, and cannot see

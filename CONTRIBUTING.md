@@ -141,7 +141,8 @@ Aggregation files (`Complexitylib.lean`, `Models.lean`, …) contain only
 - Prefer Mathlib's existing types and lemmas over custom ones.
 - Every `set_option maxHeartbeats` (or similar escape hatch) needs an adjacent
   comment justifying it.
-- No `native_decide` (nor `decide +native`): proofs are checked by the kernel.
+- No `native_decide` (nor `decide +native`, `bv_decide`, or `bv_check`):
+  proofs are checked by the kernel.
   The only exception is the executable validation modules (files named
   `Validation.lean` outside the public import graph), which may close
   `example`s with it as regression tests. `scripts/lint_style.py` enforces
@@ -179,7 +180,8 @@ The last five are the quality gates:
   ensures every module belongs to the root or one of the required
   validation-only build graphs. Across every `.lean` file of the repository
   (including `scripts/`), it rejects `native_decide`, `decide +native`,
-  `native := true`, and direct uses of `ofReduceBool`/`ofReduceNat` in code,
+  `native := true`, `bv_decide`, `bv_check`, and direct uses of
+  `ofReduceBool`/`ofReduceNat` in code,
   ignoring comments and strings; the only exempt files are those named
   `Validation.lean` outside the public import graph. It is a hard gate: any
   violation fails the run.

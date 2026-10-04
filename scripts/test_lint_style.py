@@ -26,6 +26,10 @@ class NativeEvaluationTests(unittest.TestCase):
             "Lean.ofReduceBool value proof",
             "Lean.ofReduceNat value proof",
             "-- permitted comment\nexample : True := by native_decide",
+            "example (x : BitVec 4) : x + 0 = x := by bv_decide",
+            "example (x : BitVec 4) : x + 0 = x := by bv_decide?",
+            "example (x : BitVec 4) : x + 0 = x := by bv_decide (config := {})",
+            'example (x : BitVec 4) : x + 0 = x := by bv_check "proof.lrat"',
         ):
             with self.subTest(source=text):
                 self.assertTrue(native_evaluation(text))
@@ -40,6 +44,12 @@ class NativeEvaluationTests(unittest.TestCase):
             "def native_method := 0",
             "native := false",
             "native_/- comment -/decide",
+            "-- bv_decide\nexample : True := by trivial",
+            'def text := "bv_decide; bv_check"',
+            "def bv_decide_count := 0",
+            "example (x : BitVec 4) : x + 0 = x := by bv_normalize",
+            "example (x : BitVec 4) : x + 0 = x := by bv_omega",
+            "bv_/- comment -/decide",
         ):
             with self.subTest(source=text):
                 self.assertFalse(native_evaluation(text))
@@ -50,7 +60,7 @@ class NativeEvaluationTests(unittest.TestCase):
             lexer.assert_not_called()
 
     def test_split_markers_cannot_appear_after_lexing(self):
-        for marker in ("native", "ofReduceBool", "ofReduceNat"):
+        for marker in lint_style.NATIVE_MARKERS:
             for index in range(1, len(marker)):
                 for separator in ('/- comment -/', '-- comment\n', '"literal"',
                                   "'x'", '/-', '"'):
@@ -64,7 +74,8 @@ class NativeEvaluationTests(unittest.TestCase):
         # comments, literals, and all spellings without rescanning the library.
         fragments = (
             "native", "native_decide", "+native", ":=", "true", "false",
-            "ofReduceBool", "ofReduceNat", "x", " ", "\n", "'n'", "_",
+            "ofReduceBool", "ofReduceNat", "bv_decide", "bv_check", "bv_", "decide",
+            "x", " ", "\n", "'n'", "_",
             "/- native_decide /- nested -/ -/", "-- ofReduceBool\n",
             '"native := true"', '"escaped \\\" +native"', "/-", "-/",
         )

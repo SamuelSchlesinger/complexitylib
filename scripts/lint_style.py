@@ -21,8 +21,9 @@ Checks every `.lean` file under `Complexitylib/` (and the root
 and every `.lean` file of the repository outside hidden directories such as
 `.lake/` (so also `scripts/*.lean`) for:
 
-  nativeDecide — no `native_decide`, `decide +native`, `native := true`, or
-                 direct `ofReduceBool`/`ofReduceNat` in code (comments and
+  nativeDecide — no `native_decide`, `decide +native`, `native := true`,
+                 `bv_decide`, `bv_check`, or direct
+                 `ofReduceBool`/`ofReduceNat` in code (comments and
                  string literals are ignored). The only exemption is a file
                  named `Validation.lean` outside the public `Complexitylib`
                  import graph: the executable validation modules use
@@ -72,11 +73,17 @@ URL_RE = re.compile(r"https?://")
 MODULE_NAME_RE = re.compile(r"[A-Za-z_][A-Za-z0-9_]*(?:\.[A-Za-z_][A-Za-z0-9_]*)*")
 NON_PUBLIC_COMPONENTS = {"Internal", "Validation"}
 # Evaluation by the compiler instead of the kernel: `native_decide`, its
-# `decide +native` and `native := true` spellings, and the axioms they use.
+# `decide +native` and `native := true` spellings, `bv_decide` and `bv_check`
+# (which evaluate their reflected SAT certificate check the same way), and
+# `ofReduceBool`/`ofReduceNat`, the axioms earlier Lean versions used for them.
 NATIVE_RE = re.compile(
     r"\bnative_decide\b|\+native\b|\bnative\s*:=\s*true\b"
+    r"|\bbv_decide\b|\bbv_check\b"
     r"|\bofReduceBool\b|\bofReduceNat\b"
 )
+# Every `NATIVE_RE` match contains one of these, so files without any of them
+# need not be lexed.
+NATIVE_MARKERS = ("native", "bv_decide", "bv_check", "ofReduceBool", "ofReduceNat")
 # A character literal such as `'a'`, `'\n'` or `'\u{3b1}'`.
 CHAR_LITERAL_RE = re.compile(r"'(?:\\[^'\n]+|[^'\\\n])'")
 VALIDATION_FILE = "Validation.lean"
@@ -181,7 +188,7 @@ def uses_native_evaluation(path: Path) -> bool:
     # Blanking comments and literals cannot introduce any of these spellings.
     # Most files contain none, so avoid scanning their entire bodies in Python.
     # Keep the full lexer/regex check for candidates, including commented tokens.
-    if not any(token in text for token in ("native", "ofReduceBool", "ofReduceNat")):
+    if not any(token in text for token in NATIVE_MARKERS):
         return False
     return NATIVE_RE.search(lean_code(text)) is not None
 
