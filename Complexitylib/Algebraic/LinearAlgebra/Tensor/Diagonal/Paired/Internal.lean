@@ -7,6 +7,7 @@ Authors: Samuel Schlesinger
 module
 public import Complexitylib.Algebraic.LinearAlgebra.Tensor.Diagonal
 public import Complexitylib.Algebraic.LinearAlgebra.Tensor.Substitution
+public import Complexitylib.Algebraic.LinearAlgebra.Tensor.DeletionGame.Defs
 public import Mathlib.LinearAlgebra.Matrix.Block
 import Complexitylib.Algebraic.LinearAlgebra.Tensor.Diagonal.Internal
 
@@ -411,5 +412,265 @@ theorem choose_mul_le_rank_pair (oP oN : Fin (2 * p + 1) → ℤ)
   omega
 
 end Pair
+
+section Maps
+
+variable {α α' β β' γ γ' : Type*} [Fintype α] [Fintype β] [Fintype γ]
+
+theorem map_add_left (X X' : Matrix α' α ℂ) (Y : Matrix β' β ℂ) (Z : Matrix γ' γ ℂ)
+    (T : Tensor3 α β γ) : map (X + X') Y Z T = map X Y Z T + map X' Y Z T := by
+  ext i j l
+  simp only [map, Matrix.add_apply, Pi.add_apply, add_mul, Finset.sum_add_distrib]
+
+variable [DecidableEq α] [DecidableEq β] [DecidableEq γ]
+
+theorem map_add_selectSlices_map_diagonal (cP cN : α' → α) (d : α → ℂ)
+    (hdP : ∀ t, d (cP t) = 1) (hdN : ∀ t, d (cN t) = 1) (T : Tensor3 α β γ) :
+    map (selectSlices cP + selectSlices cN) 1 1
+        (map (Matrix.diagonal d) (1 : Matrix β β ℂ) (1 : Matrix γ γ ℂ) T) =
+      map (selectSlices cP + selectSlices cN) (1 : Matrix β β ℂ) (1 : Matrix γ γ ℂ) T := by
+  rw [map_add_left, map_add_left, map_selectSlices_map_diagonal cP d hdP,
+    map_selectSlices_map_diagonal cN d hdN]
+
+end Maps
+
+section Cluster
+
+variable {k p : ℕ}
+
+local notation "𝟙" => (1 : Matrix (Fin (2 * k + 1)) (Fin (2 * k + 1)) ℂ)
+
+theorem map_add_selectSlices_weightedLMTensor (cP cN : Fin (2 * p + 1) → Fin (2 * k + 1)) :
+    map (selectSlices cP + selectSlices cN) 𝟙 𝟙 (weightedLMTensor k) =
+      weightedShifts (clusterOffsets k cP) (fun t j => lmWeight k (cP t) j) +
+        weightedShifts (clusterOffsets k cN) (fun t j => lmWeight k (cN t) j) := by
+  rw [map_add_left, weightedLMTensor, map_selectSlices_lmTensor, map_selectSlices_lmTensor]
+
+theorem monotone_clusterOffsets {c : Fin (2 * p + 1) → Fin (2 * k + 1)} (hc : StrictMono c) :
+    Monotone (clusterOffsets k c) := fun a b hab => by
+  have : (c a : ℕ) ≤ c b := hc.monotone hab
+  simp only [clusterOffsets]
+  omega
+
+theorem label_injective {c : Fin (2 * p + 1) → Fin (2 * k + 1)} (hc : Function.Injective c)
+    (t t' : Fin (2 * p + 1)) (j j' : Fin (2 * k + 1))
+    (h : (c t : ℕ) * (2 * k + 1) + j = (c t' : ℕ) * (2 * k + 1) + j') : t = t' ∧ j = j' := by
+  obtain ⟨h1, h2⟩ := Diagonal.code_injective j.2 j'.2 h
+  exact ⟨hc (Fin.ext h1), Fin.ext h2⟩
+
+/-- **The paired certificate for the weighted Landsberg–Michałek tensor.** -/
+theorem choose_mul_le_rank_pair_weightedLMTensor (cP cN : Fin (2 * p + 1) → Fin (2 * k + 1))
+    (hcP : StrictMono cP) (hcN : StrictMono cN) (hP : k < (cP 0 : ℕ))
+    (hN : (cN (Fin.last (2 * p)) : ℕ) < k) {r s L : ℕ}
+    (hr : (cP ⟨p, by omega⟩ : ℕ) = k + r) (hs : (cN ⟨p, by omega⟩ : ℕ) + s = k)
+    (hLP : (cP (Fin.last (2 * p)) : ℕ) ≤ cP 0 + L)
+    (hLN : (cN (Fin.last (2 * p)) : ℕ) ≤ cN 0 + L)
+    (hoP : Set.InjOn (fun I : Finset (Fin (2 * p + 1)) => ∑ t ∈ I, clusterOffsets k cP t)
+      {I | I.card = p})
+    (hoN : Set.InjOn (fun I : Finset (Fin (2 * p + 1)) => ∑ t ∈ I, clusterOffsets k cN t)
+      {I | I.card = p}) :
+    (2 * p + 1).choose p * (r + s + min s (2 * k + 1 - r - (r + s)) +
+        min r (2 * k + 1 - s - (r + s)) - 8 * ((p + 1) * L)) ≤
+      (koszulFlattening p
+        (map (selectSlices cP + selectSlices cN) 𝟙 𝟙 (weightedLMTensor k))).rank := by
+  rw [map_add_selectSlices_weightedLMTensor]
+  refine choose_mul_le_rank_pair _ _ _ _ (fun t j => (cP t : ℕ) * (2 * k + 1) + j)
+    (fun t j => (cN t : ℕ) * (2 * k + 1) + j) hoP hoN
+    (fun t j => Diagonal.lmWeight_eq _ _) (fun t j => Diagonal.lmWeight_eq _ _)
+    (fun t t' j j' _ h => label_injective hcP.injective t t' j j' h)
+    (fun t t' j j' _ h => label_injective hcN.injective t t' j j' h) ?_
+    (monotone_clusterOffsets hcP) (monotone_clusterOffsets hcN) ?_ ?_ ?_ ?_ ?_
+  · intro t
+    have h1 : (cP 0 : ℕ) ≤ cP t := hcP.monotone (Fin.zero_le t)
+    have h2 : (cN t : ℕ) ≤ cN (Fin.last _) := hcN.monotone (Fin.le_last t)
+    simp only [clusterOffsets]
+    omega
+  · simp only [clusterOffsets]
+    omega
+  · simp only [clusterOffsets]
+    omega
+  · simp only [clusterOffsets]
+    omega
+  · simp only [clusterOffsets]
+    omega
+  · have := (cP ⟨p, by omega⟩).2
+    omega
+
+theorem choose_mul_le_borderRank_mul_map_diagonal_pair
+    (cP cN : Fin (2 * p + 1) → Fin (2 * k + 1))
+    (hcP : StrictMono cP) (hcN : StrictMono cN) (hP : k < (cP 0 : ℕ))
+    (hN : (cN (Fin.last (2 * p)) : ℕ) < k) {r s L : ℕ}
+    (hr : (cP ⟨p, by omega⟩ : ℕ) = k + r) (hs : (cN ⟨p, by omega⟩ : ℕ) + s = k)
+    (hLP : (cP (Fin.last (2 * p)) : ℕ) ≤ cP 0 + L)
+    (hLN : (cN (Fin.last (2 * p)) : ℕ) ≤ cN 0 + L)
+    (hoP : Set.InjOn (fun I : Finset (Fin (2 * p + 1)) => ∑ t ∈ I, clusterOffsets k cP t)
+      {I | I.card = p})
+    (hoN : Set.InjOn (fun I : Finset (Fin (2 * p + 1)) => ∑ t ∈ I, clusterOffsets k cN t)
+      {I | I.card = p})
+    (d : Fin (2 * k + 1) → ℂ) (hdP : ∀ t, d (cP t) = 1) (hdN : ∀ t, d (cN t) = 1) :
+    (2 * p + 1).choose p * (r + s + min s (2 * k + 1 - r - (r + s)) +
+        min r (2 * k + 1 - s - (r + s)) - 8 * ((p + 1) * L)) ≤
+      (map (Matrix.diagonal d) 𝟙 𝟙 (weightedLMTensor k)).borderRank * (2 * p).choose p := by
+  have h := BorderRankLE.rank_koszulFlattening_map_le p (selectSlices cP + selectSlices cN) 𝟙 𝟙
+    (borderRankLE_borderRank (map (Matrix.diagonal d) 𝟙 𝟙 (weightedLMTensor k)))
+  rw [map_add_selectSlices_map_diagonal cP cN d hdP hdN] at h
+  simp only [Fintype.card_fin, Nat.add_sub_cancel] at h
+  exact (choose_mul_le_rank_pair_weightedLMTensor cP cN hcP hcN hP hN hr hs hLP hLN hoP
+    hoN).trans h
+
+theorem choose_mul_le_borderRank_mul_restrictSlices_pair
+    (cP cN : Fin (2 * p + 1) → Fin (2 * k + 1))
+    (hcP : StrictMono cP) (hcN : StrictMono cN) (hP : k < (cP 0 : ℕ))
+    (hN : (cN (Fin.last (2 * p)) : ℕ) < k) {r s L : ℕ}
+    (hr : (cP ⟨p, by omega⟩ : ℕ) = k + r) (hs : (cN ⟨p, by omega⟩ : ℕ) + s = k)
+    (hLP : (cP (Fin.last (2 * p)) : ℕ) ≤ cP 0 + L)
+    (hLN : (cN (Fin.last (2 * p)) : ℕ) ≤ cN 0 + L)
+    (hoP : Set.InjOn (fun I : Finset (Fin (2 * p + 1)) => ∑ t ∈ I, clusterOffsets k cP t)
+      {I | I.card = p})
+    (hoN : Set.InjOn (fun I : Finset (Fin (2 * p + 1)) => ∑ t ∈ I, clusterOffsets k cN t)
+      {I | I.card = p})
+    (S : Finset (Fin (2 * k + 1))) (hSP : ∀ t, cP t ∈ S) (hSN : ∀ t, cN t ∈ S) :
+    (2 * p + 1).choose p * (r + s + min s (2 * k + 1 - r - (r + s)) +
+        min r (2 * k + 1 - s - (r + s)) - 8 * ((p + 1) * L)) ≤
+      ((weightedLMTensor k).restrictSlices S).borderRank * (2 * p).choose p := by
+  rw [restrictSlices_eq_map]
+  exact choose_mul_le_borderRank_mul_map_diagonal_pair cP cN hcP hcN hP hN hr hs hLP hLN hoP hoN
+    _ (fun t => by simp [hSP t]) (fun t => by simp [hSN t])
+
+/-- The single-cluster bound on a restricted tensor, with the spread bounded by the median:
+`(2p+1).choose p * (2k + 1 - (|median| + p L)) ≤ borderRank * (2p).choose p`, over `ℤ`. -/
+theorem choose_mul_sub_le_borderRank_mul_restrictSlices_single
+    (c : Fin (2 * p + 1) → Fin (2 * k + 1)) (hc : StrictMono c) {L : ℕ}
+    (hL : (c (Fin.last (2 * p)) : ℤ) - c 0 ≤ L)
+    (ho : Set.InjOn (fun I : Finset (Fin (2 * p + 1)) => ∑ t ∈ I, clusterOffsets k c t)
+      {I | I.card = p})
+    (S : Finset (Fin (2 * k + 1))) (hS : ∀ t, c t ∈ S) :
+    ((2 * p + 1).choose p : ℤ) * (2 * k + 1 - (|(c ⟨p, by omega⟩ : ℤ) - k| + p * L)) ≤
+      ((weightedLMTensor k).restrictSlices S).borderRank * (2 * p).choose p := by
+  have h := choose_mul_le_borderRank_mul_map_diagonal_weightedLMTensor c hc.injective ho
+    (fun i => if i ∈ S then 1 else 0) (fun t => by simp [hS t])
+  rw [← restrictSlices_eq_map] at h
+  have hsp := sumSpread_clusterOffsets_le c hc.monotone hL
+  have hC : (0 : ℤ) ≤ (2 * p + 1).choose p := by positivity
+  have h' : ((2 * p + 1).choose p : ℤ) * ((2 * k + 1 - sumSpread p (clusterOffsets k c) : ℕ) : ℤ)
+      ≤ ((weightedLMTensor k).restrictSlices S).borderRank * (2 * p).choose p := by
+    exact_mod_cast h
+  refine le_trans (mul_le_mul_of_nonneg_left ?_ hC) h'
+  omega
+
+/-- **The combined bound, over `ℤ`.** -/
+theorem choose_mul_phi_sub_le_borderRank_mul (S : Finset (Fin (2 * k + 1)))
+    (cP cN : Fin (2 * p + 1) → Fin (2 * k + 1)) (hcP : StrictMono cP) (hcN : StrictMono cN)
+    (hSP : ∀ t, cP t ∈ S) (hSN : ∀ t, cN t ∈ S) {L : ℕ}
+    (hoP : Set.InjOn (fun I : Finset (Fin (2 * p + 1)) => ∑ t ∈ I, clusterOffsets k cP t)
+      {I | I.card = p})
+    (hoN : Set.InjOn (fun I : Finset (Fin (2 * p + 1)) => ∑ t ∈ I, clusterOffsets k cN t)
+      {I | I.card = p})
+    (hLP : clusterOffsets k cP ⟨2 * p, by omega⟩ - clusterOffsets k cP 0 ≤ L)
+    (hLN : clusterOffsets k cN ⟨2 * p, by omega⟩ - clusterOffsets k cN 0 ≤ L)
+    (hP : ∀ t, 1 ≤ clusterOffsets k cP t ∧ clusterOffsets k cP t ≤ k)
+    (hN : ∀ t, -(k : ℤ) ≤ clusterOffsets k cN t ∧ clusterOffsets k cN t ≤ -1) :
+    ((2 * p + 1).choose p : ℤ) * (DeletionGame.phi (2 * k + 1)
+        (clusterOffsets k cP ⟨p, by omega⟩) (-clusterOffsets k cN ⟨p, by omega⟩) -
+          8 * (p + 1) * L) ≤
+      ((weightedLMTensor k).restrictSlices S).borderRank * (2 * p).choose p := by
+  have hlast : Fin.last (2 * p) = ⟨2 * p, by omega⟩ := rfl
+  simp only [clusterOffsets] at hLP hLN hP hN ⊢
+  have hP0 := hP 0
+  have hN0 := hN (Fin.last (2 * p))
+  have hPp := hP ⟨p, by omega⟩
+  have hNp := hN ⟨p, by omega⟩
+  rw [hlast] at hN0
+  -- The medians `r` and `-s` as natural numbers.
+  obtain ⟨r, hr⟩ : ∃ r : ℕ, (cP ⟨p, by omega⟩ : ℕ) = k + r :=
+    ⟨(cP ⟨p, by omega⟩ : ℕ) - k, by omega⟩
+  obtain ⟨s, hs⟩ : ∃ s : ℕ, (cN ⟨p, by omega⟩ : ℕ) + s = k :=
+    ⟨k - (cN ⟨p, by omega⟩ : ℕ), by omega⟩
+  have hpair := choose_mul_le_borderRank_mul_restrictSlices_pair cP cN hcP hcN (by omega)
+    (by rw [hlast]; omega) hr hs (L := L) (by rw [hlast]; omega) (by rw [hlast]; omega) hoP hoN
+    S hSP hSN
+  have hsP := choose_mul_sub_le_borderRank_mul_restrictSlices_single cP hcP (L := L)
+    (by rw [hlast]; omega) hoP S hSP
+  have hsN := choose_mul_sub_le_borderRank_mul_restrictSlices_single cN hcN (L := L)
+    (by rw [hlast]; omega) hoN S hSN
+  set B : ℤ := ((((weightedLMTensor k).restrictSlices S).borderRank : ℕ) : ℤ) *
+    (((2 * p).choose p : ℕ) : ℤ) with hB
+  set C : ℤ := (((2 * p + 1).choose p : ℕ) : ℤ) with hC
+  have hC0 : 0 ≤ C := by positivity
+  have hpair' : C * ((r + s + min s (2 * k + 1 - r - (r + s)) +
+      min r (2 * k + 1 - s - (r + s)) - 8 * ((p + 1) * L) : ℕ) : ℤ) ≤ B := by
+    rw [hC, hB]
+    exact_mod_cast hpair
+  obtain ⟨F, hF⟩ : ∃ F : ℕ, F = p * L := ⟨_, rfl⟩
+  have hFz : ((p : ℤ) * L) = F := by rw [hF]; push_cast; ring
+  have hE : (8 : ℤ) * (p + 1) * L = 8 * F + 8 * L := by rw [← hFz]; ring
+  have hE' : 8 * ((p + 1) * L) = 8 * F + 8 * L := by rw [hF]; ring
+  rw [hE'] at hpair'
+  rw [hFz] at hsP hsN
+  rw [hE, DeletionGame.phi]
+  have hr' : ((cP ⟨p, by omega⟩ : ℕ) : ℤ) - k = r := by omega
+  have hs' : -(((cN ⟨p, by omega⟩ : ℕ) : ℤ) - k) = s := by omega
+  rw [hr', hs']
+  have habsP : |((cP ⟨p, by omega⟩ : ℕ) : ℤ) - k| = r := by rw [hr']; exact abs_of_nonneg (by omega)
+  have habsN : |((cN ⟨p, by omega⟩ : ℕ) : ℤ) - k| = s := by
+    rw [abs_of_nonpos (by omega)]
+    omega
+  rw [habsP] at hsP
+  rw [habsN] at hsN
+  -- One of the three bounds dominates `Φ - E`.
+  have hcases : (max (max (2 * (k : ℤ) + 1 - r) (2 * k + 1 - s))
+        (max ((r : ℤ) + s) (2 * min ((r : ℤ) + s) (2 * k + 1 - r - s))) - (8 * F + 8 * L) ≤
+        2 * k + 1 - (r + F)) ∨
+      (max (max (2 * (k : ℤ) + 1 - r) (2 * k + 1 - s))
+        (max ((r : ℤ) + s) (2 * min ((r : ℤ) + s) (2 * k + 1 - r - s))) - (8 * F + 8 * L) ≤
+        2 * k + 1 - (s + F)) ∨
+      (max (max (2 * (k : ℤ) + 1 - r) (2 * k + 1 - s))
+        (max ((r : ℤ) + s) (2 * min ((r : ℤ) + s) (2 * k + 1 - r - s))) - (8 * F + 8 * L) ≤
+        ((r + s + min s (2 * k + 1 - r - (r + s)) + min r (2 * k + 1 - s - (r + s)) -
+          (8 * F + 8 * L) : ℕ) : ℤ)) := by
+    omega
+  rcases hcases with h | h | h
+  · exact le_trans (mul_le_mul_of_nonneg_left h hC0) hsP
+  · exact le_trans (mul_le_mul_of_nonneg_left h hC0) hsN
+  · exact le_trans (mul_le_mul_of_nonneg_left h hC0) hpair'
+
+/-- `(2p+1) / (p+1) = (2p+1).choose p / (2p).choose p`. -/
+theorem div_eq_choose_div_choose :
+    ((2 * p + 1 : ℝ) / (p + 1)) = ((2 * p + 1).choose p : ℝ) / (2 * p).choose p := by
+  have hD : (0 : ℝ) < (2 * p).choose p := by exact_mod_cast Nat.choose_pos (by omega)
+  rw [div_eq_div_iff (by positivity) hD.ne']
+  have h := Nat.choose_mul_succ_eq (2 * p) p
+  rw [show 2 * p + 1 - p = p + 1 by omega] at h
+  have h' : ((2 * p).choose p : ℝ) * (2 * p + 1) = ((2 * p + 1).choose p : ℝ) * (p + 1) := by
+    exact_mod_cast h
+  linarith
+
+/-- **The combined bound.** -/
+theorem div_mul_phi_sub_le_borderRank (S : Finset (Fin (2 * k + 1)))
+    (cP cN : Fin (2 * p + 1) → Fin (2 * k + 1)) (hcP : StrictMono cP) (hcN : StrictMono cN)
+    (hSP : ∀ t, cP t ∈ S) (hSN : ∀ t, cN t ∈ S) {L : ℕ}
+    (hoP : Set.InjOn (fun I : Finset (Fin (2 * p + 1)) => ∑ t ∈ I, clusterOffsets k cP t)
+      {I | I.card = p})
+    (hoN : Set.InjOn (fun I : Finset (Fin (2 * p + 1)) => ∑ t ∈ I, clusterOffsets k cN t)
+      {I | I.card = p})
+    (hLP : clusterOffsets k cP ⟨2 * p, by omega⟩ - clusterOffsets k cP 0 ≤ L)
+    (hLN : clusterOffsets k cN ⟨2 * p, by omega⟩ - clusterOffsets k cN 0 ≤ L)
+    (hP : ∀ t, 1 ≤ clusterOffsets k cP t ∧ clusterOffsets k cP t ≤ k)
+    (hN : ∀ t, -(k : ℤ) ≤ clusterOffsets k cN t ∧ clusterOffsets k cN t ≤ -1) :
+    ((2 * p + 1 : ℝ) / (p + 1)) * ((DeletionGame.phi (2 * k + 1)
+        (clusterOffsets k cP ⟨p, by omega⟩) (-clusterOffsets k cN ⟨p, by omega⟩) : ℝ) -
+          8 * (p + 1) * L) ≤
+      ((weightedLMTensor k).restrictSlices S).borderRank := by
+  have h := choose_mul_phi_sub_le_borderRank_mul S cP cN hcP hcN hSP hSN hoP hoN hLP hLN hP hN
+  have hD : (0 : ℝ) < (2 * p).choose p := by exact_mod_cast Nat.choose_pos (by omega)
+  have h' : ((2 * p + 1).choose p : ℝ) * ((DeletionGame.phi (2 * k + 1)
+      (clusterOffsets k cP ⟨p, by omega⟩) (-clusterOffsets k cN ⟨p, by omega⟩) : ℝ) -
+        8 * (p + 1) * L) ≤
+      ((weightedLMTensor k).restrictSlices S).borderRank * (2 * p).choose p := by
+    exact_mod_cast h
+  rw [div_eq_choose_div_choose, div_mul_eq_mul_div, div_le_iff₀ hD]
+  exact h'
+
+end Cluster
 
 end Algebraic.Tensor3.Internal.Paired

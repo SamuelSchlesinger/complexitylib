@@ -95,6 +95,7 @@ public import Complexitylib.Algebraic.LinearAlgebra.Tensor.Koszul
 public import Complexitylib.Algebraic.LinearAlgebra.Tensor.Substitution
 public import Complexitylib.Algebraic.LinearAlgebra.Tensor.Diagonal
 public import Complexitylib.Algebraic.LinearAlgebra.Tensor.DeletionGame
+public import Complexitylib.Algebraic.LinearAlgebra.Tensor.Diagonal.Paired
 
 /-!
 # Algebraic circuits
