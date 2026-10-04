@@ -321,6 +321,7 @@ public import Complexitylib.Algebraic.LowerBound.Cutwidth.Gaussian.Frontier.Arcc
 public import Complexitylib.Algebraic.LowerBound.Cutwidth.Gaussian.Edge.Exact
 public import Complexitylib.Algebraic.LowerBound.Cutwidth.Gaussian.Edge.Decay
 public import Complexitylib.Algebraic.LowerBound.Cutwidth.Gaussian
+public import Complexitylib.Algebraic.LowerBound.Cutwidth.Superconcentrator
 
 /-!
 # The cutwidth lower bound
@@ -531,6 +532,9 @@ eventual numerical guards. Its uniform layer bounds every enumeration loop and
 provides one total polynomial-time evaluator for a fixed balanced family.
 `SourceReduction.Construction.Hardness` proves the unconditional `(4-ε)n`
 lower bound for that family, measured at the full input length; its language is in `P`.
+`Superconcentrator` applies the graph-ordering hypothesis to superconcentrators: every
+`N`-superconcentrator has at least `(2 + 1/A - ε) N` edges, about `5.5625 N` for the
+edge-score coefficient, improving the `5 N` of Lev and Valiant.
 -/
 
 @[expose] public section
