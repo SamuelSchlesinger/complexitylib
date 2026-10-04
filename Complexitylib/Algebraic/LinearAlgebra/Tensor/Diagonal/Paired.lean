@@ -38,7 +38,8 @@ Koszul flattening is the sum of theirs (`Tensor3.koszulFlattening_map_add_left`)
 `W = r + s + min s (n - r - z) + min r (n - s - z)`
 
 (`Tensor3.choose_mul_le_rank_koszulFlattening_pairedClusters`, truncated subtraction), and
-`W ≥ max z (2 min z (n - z))`. No lower bound on `r` or `s` is needed. By the Koszul-flattening
+`W ≥ max z (2 min z (n - z))` (`Tensor3.max_le_pairedWidth`). No lower bound on `r` or `s` is
+needed. By the Koszul-flattening
 bound after the paired projection, the same quantity is at most `borderRank T' * (2p).choose p`
 for `T'` the tensor `T` with some slices outside both clusters zeroed
 (`Tensor3.choose_mul_le_borderRank_mul_map_diagonal_pairedClusters`,
