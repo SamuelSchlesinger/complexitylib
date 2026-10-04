@@ -205,6 +205,17 @@ def headlineTheorems : List Name := [
   `Algebraic.Tensor3.Tight.card_le_borderRank,
   `Algebraic.Tensor3.Tight.exists_list_add_borderRank_le,
   `Algebraic.Tensor3.Tight.not_borderRankLE_restrictSlices_of_forall_list,
+  -- Border rank: the single-cluster Koszul certificate for weighted L–M tensors
+  `Algebraic.sum_mul_two_pow_ne_zero,
+  `Matrix.det_ne_zero_of_two_pow_two_pow,
+  `Matrix.card_mul_card_le_rank_of_det_blocks_ne_zero,
+  `Algebraic.Tensor3.choose_mul_le_rank_koszulFlattening_weightedShifts,
+  `Algebraic.Tensor3.choose_mul_le_rank_koszulFlattening_lmTensor,
+  `Algebraic.Tensor3.choose_mul_le_rank_koszulFlattening_weightedLMTensor,
+  `Algebraic.Tensor3.choose_mul_le_borderRank_mul_map_diagonal_weightedLMTensor,
+  `Algebraic.Tensor3.not_borderRankLE_map_diagonal_weightedLMTensor,
+  `Algebraic.Tensor3.choose_mul_le_borderRank_mul_weightedLMTensor,
+  `Algebraic.Tensor3.sumSpread_clusterOffsets_le,
   -- Korten's top-down parity lower bounds and the majority extension
   `Complexity.KarchmerWigderson.parity_communication_lower_bound,
   `Complexity.Circuit.parity_wire_lower_bound,

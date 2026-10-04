@@ -9,8 +9,10 @@ general Karchmer--Wigderson theorem, with its protocol model: the imported
 algebraic-circuits library proves it (Definition~\ref{def:frontiers-kw-protocol}
 and Theorem~\ref{thm:frontiers-kw-general}), and the foundations of border rank
 with the Koszul-flattening lower bound
-(Theorem~\ref{thm:frontiers-koszul-flattening}) and border substitution for tight
-tensors (Theorem~\ref{thm:frontiers-border-substitution}). Where related infrastructure exists
+(Theorem~\ref{thm:frontiers-koszul-flattening}), its single-cluster certificate for
+the weighted Landsberg--Micha{\l}ek tensors (Theorem~\ref{thm:frontiers-cluster-koszul}),
+and border substitution for tight tensors
+(Theorem~\ref{thm:frontiers-border-substitution}). Where related infrastructure exists
 elsewhere, it is named as a starting point, not as progress toward the target.
 
 \section{Hardness of approximation}
@@ -466,6 +468,108 @@ are not.
   submatrix when $u_{i_0} \ne 0$. The flattening of $u \otimes v \otimes w$ factors
   through this map, the flattening is linear in $T$, and matrix rank is subadditive and
   lower semicontinuous.
+\end{proof}
+
+\begin{lemma}[Nonsingular minors from dominant weights]
+  \label{lem:frontiers-dominant-minors}
+  \lean{Algebraic.sum_mul_two_pow_ne_zero, Matrix.det_ne_zero_of_two_pow_two_pow,
+    Matrix.card_mul_card_le_rank_of_det_blocks_ne_zero}
+  \leanok
+  \uses{lem:frontiers-rank-minors}
+  A nonempty sum $\sum_x \pm 2^{E_x}$ with pairwise distinct exponents is nonzero. Let $M$
+  be a square matrix over a commutative ring of characteristic zero whose nonzero entries
+  are $\pm 2^{2^{L_{ij}}}$, with labels $L_{ij}$ pairwise distinct on the nonzero entries.
+  If the nonzero entries contain a perfect matching, then $\det M \ne 0$. A minor of a
+  matrix $A$ that is block diagonal, with $|\beta|$ nonsingular blocks of size $|\iota|$,
+  gives $\operatorname{rank} A \ge |\iota| \cdot |\beta|$.
+\end{lemma}
+\begin{proof}
+  \leanok
+  In the sum, every term except the one with the least exponent $E_0$ is divisible by
+  $2^{E_0 + 1}$. In the Leibniz expansion of $\det M$, a permutation $\sigma$ supported on
+  the nonzero entries contributes $\pm 2^{E(\sigma)}$ with
+  $E(\sigma) = \sum_j 2^{L_{\sigma(j) j}}$, the binary number whose set bits are the labels
+  used by $\sigma$. These labels determine the pairs $(\sigma(j), j)$, so the exponents are
+  pairwise distinct. A block-diagonal minor has determinant the product of the block
+  determinants.
+\end{proof}
+
+\begin{definition}[Weighted Landsberg--Micha{\l}ek tensors and clusters]
+  \label{def:frontiers-lm-tensor}
+  \lean{Algebraic.Tensor3.weightedShifts, Algebraic.Tensor3.lmTensor,
+    Algebraic.Tensor3.lmWeight, Algebraic.Tensor3.weightedLMTensor,
+    Algebraic.Tensor3.selectSlices, Algebraic.Tensor3.clusterOffsets,
+    Algebraic.Tensor3.sumSpread}
+  \leanok
+  \uses{def:frontiers-border-rank}
+  Let $m = 2k + 1$. For coefficients $\gamma$, the tensor
+  $T_k(\gamma) = \sum_{i, j} \gamma_{i, j}\, a_i \otimes b_j \otimes c_{i + j}$ in
+  $\mathbb{C}^m \otimes \mathbb{C}^m \otimes \mathbb{C}^m$, with $i \in [-k, k]$ and
+  $j, i + j \in [0, m)$, is the family of Landsberg and Micha{\l}ek, \emph{Towards finding
+  hay in a haystack}, Theory of Computing, 2025, (1.1): its slice $i$ is a weighted shift
+  matrix supported on the diagonal of offset $i$. The weighted tensor has the explicit
+  coefficients $\gamma_{a, j} = 2^{2^{a m + j}}$, where $a = i + k$. A cluster is a choice
+  of $2p + 1$ slices, with offsets $o_0, \dots, o_{2p}$; projecting the first factor onto
+  them gives the cluster tensor, with $2p + 1$ slices. The spread of the offsets is the
+  largest minus the smallest of the sums $\sum_{t \in K} o_t$ over the subsets $K$ of size
+  $p$ or $p + 1$.
+\end{definition}
+
+\begin{lemma}[Spread of a cluster]
+  \label{lem:frontiers-cluster-spread}
+  \lean{Algebraic.Tensor3.sumSpread_le, Algebraic.Tensor3.sumSpread_clusterOffsets_le}
+  \leanok
+  \uses{def:frontiers-lm-tensor}
+  If $o_0 \le \dots \le o_{2p}$ and $o_{2p} - o_0 \le L$, then the spread is at most
+  $|o_p| + pL$.
+\end{lemma}
+\begin{proof}
+  \leanok
+  Compare each sum with $|K|\, o_p$: the at most $p$ elements of $K$ above the median add
+  at most $p (o_{2p} - o_p)$, the at most $p$ elements below it subtract at most
+  $p (o_p - o_0)$, and the sizes of two subsets differ by at most one.
+\end{proof}
+
+\begin{theorem}[Single-cluster Koszul certificate]
+  \label{thm:frontiers-cluster-koszul}
+  \lean{Algebraic.Tensor3.choose_mul_le_rank_koszulFlattening_weightedShifts,
+    Algebraic.Tensor3.choose_mul_le_rank_koszulFlattening_lmTensor,
+    Algebraic.Tensor3.choose_mul_le_rank_koszulFlattening_weightedLMTensor,
+    Algebraic.Tensor3.map_selectSlices_map_diagonal,
+    Algebraic.Tensor3.choose_mul_le_borderRank_mul_map_diagonal_weightedLMTensor,
+    Algebraic.Tensor3.not_borderRankLE_map_diagonal_weightedLMTensor,
+    Algebraic.Tensor3.choose_mul_le_borderRank_mul_weightedLMTensor}
+  \leanok
+  \uses{def:frontiers-lm-tensor, thm:frontiers-koszul-flattening,
+    lem:frontiers-dominant-minors}
+  Let a cluster of $2p + 1$ distinct slices of the weighted Landsberg--Micha{\l}ek tensor
+  $T$ have offsets with pairwise distinct $p$-subset sums and spread $s$. Then the Koszul
+  flattening $U_A^{\wedge p}$ of the cluster tensor $U$ has rank at least
+  $\binom{2p+1}{p} (m - s)$, so
+  $\binom{2p+1}{p} (m - s) \le \underline{\mathbf{R}}(T') \binom{2p}{p}$ for $T' = T$ and
+  for every tensor $T'$ obtained from $T$ by zeroing some slices outside the cluster. The rank
+  bound holds for any coefficients $2^{2^{e}}$ whose labels $e$ are distinct on positions
+  of the cluster whose columns differ by at most $s$. This is the single-cluster lemma of the
+  program for border rank $(7/3 - o(1)) m$ in the Landsberg--Micha{\l}ek setting. It gives
+  only $\underline{\mathbf{R}}(T) \ge \frac{2p+1}{p+1} (m - s)$, below $2m$. Border
+  substitution is formalized as Theorem~\ref{thm:frontiers-border-substitution}; the
+  paired-cluster bound and the counting argument are not.
+\end{theorem}
+\begin{proof}
+  \leanok
+  A nonzero entry in column $(I, j)$ and row $(J, \ell)$ of $U_A^{\wedge p}$ has
+  $J = I \cup \{t\}$, $t \notin I$, and $\ell = j + o_t$, so
+  $w = j - \sum_I o = \ell - \sum_J o$ is preserved. For each of the $m - s$ shifts $w$
+  with $w + \sum_K o \in [0, m)$ for all subsets $K$ of size $p$ or $p + 1$, take the
+  columns $(I, w + \sum_I o)$ and the rows $(\sigma(I), w + \sum_{\sigma(I)} o)$, where
+  $\sigma$ is a bijection from $p$-subsets to $(p+1)$-subsets with $I \subseteq \sigma(I)$.
+  It exists by Hall's theorem, since the inclusion graph is $(p+1)$-regular on both sides.
+  The resulting minor is block diagonal. In each block, the entries are $0$ or
+  $\pm 2^{2^{e}}$, distinct subset sums make the labels distinct, and $\sigma$ is a perfect
+  matching of the nonzero entries, so the block is nonsingular by
+  Lemma~\ref{lem:frontiers-dominant-minors}. The border-rank bounds follow from
+  Theorem~\ref{thm:frontiers-koszul-flattening} after projecting onto the $2p + 1$ cluster
+  slices, which sends $T$ and each such $T'$ to $U$.
 \end{proof}
 
 \begin{definition}[Tight tensors and slice restrictions]
