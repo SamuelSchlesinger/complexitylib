@@ -155,7 +155,12 @@ def inversePolynomialFailure (c n : ℕ) : ℚ :=
   1 / (Nat.max 1 n : ℚ) ^ c
 
 /-- Errorless average-case polynomial time: for every inverse-polynomial
-failure target, a polynomial-time errorless heuristic meets that target. -/
+failure target, a polynomial-time errorless heuristic meets that target.
+
+The heuristic never sees the slice index `n`, and its time is polynomial in the
+sample length `|x|`. A `FiniteEnsemble` may draw samples much shorter than `n`,
+and then this is stricter than the textbook time bound polynomial in `n`; a
+future `DistNP` should require samples of length polynomially related to `n`. -/
 def AvgP : Set DistributionalProblem :=
   ⋂ c : ℕ, AvgPAt (inversePolynomialFailure c)
 

@@ -81,7 +81,12 @@ open direction.
   for $n \ge 1$ and $1$ at $n = 0$: for each $c$ there is a possibly different
   polynomial-time errorless heuristic meeting $\delta_c$. This is not the
   single-scheme formulation in which the heuristic receives $1/\delta$ as an
-  input; relating the two is part of Definition~\ref{def:avg-heurp}.
+  input; relating the two is part of Definition~\ref{def:avg-heurp}. The
+  heuristic does not receive $n$, and its time is polynomial in the sample
+  length $|x|$; since samples need not have length $n$, this is stricter than
+  the textbook bound polynomial in $n$ when samples are much shorter than $n$,
+  so Definition~\ref{def:avg-distnp} should require samples of length
+  polynomially related to $n$.
 \end{definition}
 
 \begin{proposition}[Basic facts about errorless heuristics]
