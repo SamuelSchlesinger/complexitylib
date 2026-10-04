@@ -28,7 +28,8 @@ statements are re-exported by focused surface modules when needed.
 - `TM.copyInputToWorkTM` — copy input tape contents to a work tape
 - `TM.copyInputToOutputTM` — copy input tape contents to the output tape
 - `TM.copyWorkToWorkTM` — copy one work tape's contents to another
-- `TM.compareWorkTapesTM` — compare two work tapes cell by cell
+- `TM.compareWorkTapesTM` — an unverified, unused cell-by-cell comparison of two
+  work tapes; it overwrites work-tape cells and its own verdict (see its docstring)
 -/
 
 
@@ -414,7 +415,7 @@ def copyWorkToWorkTM (src dst : Fin n) : TM n where
     | .done => exact rightOfStart_allIdle iHead wHeads oHead
 
 -- ════════════════════════════════════════════════════════════════════════
--- compareWorkTapesTM: compare two work tapes cell by cell
+-- compareWorkTapesTM: unverified, destructive cell-by-cell comparison
 -- ════════════════════════════════════════════════════════════════════════
 
 /-- State space of `compareWorkTapesTM`: compare cells while both tapes agree,
@@ -427,10 +428,19 @@ instance : Fintype ComparePhase where
   elems := {.comparing, .mismatch, .matchDone, .done}
   complete := fun x => by cases x <;> simp
 
-/-- Compare work tapes `idx₁` and `idx₂` cell by cell.
-    Both advance right together. Stops when both read `Γ.blank`.
-    Writes `Γ.one` to output if match, `Γ.zero` if mismatch.
-    Assumes output head is at cell 1. -/
+/-- Intended to compare work tapes `idx₁` and `idx₂` cell by cell; no theorem
+    about it is proved and nothing in the library uses it. Both heads advance
+    right together while the symbols agree. The comparison ends when both
+    read `Γ.blank`, writing `Γ.one` under the output head, or at the first
+    disagreement, writing `Γ.zero`.
+
+    The machine is destructive. Each agreeing step writes `□` under the head
+    of every other work tape and under the output head. The step that ends
+    the comparison writes `□` under every work-tape head, so at a
+    disagreement it erases the differing cell of both compared tapes. The
+    following halting step writes `□` under every work-tape head and under
+    the output head; with the output head on cell 1 this overwrites the
+    verdict, so output cell 1 ends `□`. -/
 def compareWorkTapesTM (idx₁ idx₂ : Fin n) : TM n where
   Q := ComparePhase
   qstart := .comparing
