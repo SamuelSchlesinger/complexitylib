@@ -10288,6 +10288,206 @@ Theorem~\ref{thm:lowerbounds-algebraic-explicit-four-n}.
   $\max(i + |B|, n - i + |A|) \le \lceil n/2 \rceil + |A| + |B|$.
 \end{proof}
 
+\begin{definition}[Components and multi-output splits]
+  \label{def:lowerbounds-algebraic-multi-output}
+  \lean{Algebraic.Cutwidth.MultiOutput.Linked,
+    Algebraic.Cutwidth.MultiOutput.component,
+    Algebraic.Cutwidth.MultiOutput.gatesIn,
+    Algebraic.Cutwidth.MultiOutput.prefixUpTo,
+    Algebraic.Cutwidth.MultiOutput.prefixBelow,
+    Algebraic.Cutwidth.MultiOutput.outputsIn,
+    Algebraic.Cutwidth.MultiOutput.leftFibre,
+    Algebraic.Cutwidth.MultiOutput.rightFibre,
+    Algebraic.Cutwidth.MultiOutput.blockRank}
+  \leanok
+  \uses{def:lowerbounds-algebraic-single-cut}
+  Two wires of a straight-line program are linked when one is a gate reading
+  the other; the components of the resulting undirected wire graph are its
+  connected components. For a ranking of the wires, the prefix up to a wire
+  $w$ consists of the wires ranked at most as high as $w$. For designated
+  output wires and a split $S$ of the wires with complement $T$, let $X_S$
+  and $X_T$ be the inputs placed in $S$ and in $T$, and $Y_S$ and $Y_T$ the
+  outputs whose wires lie in $S$ and in $T$. For a function $f$ and an input
+  $x$, the left fibre of $x$ is the set of inputs that agree with $x$ on
+  $X_T$ and on which $f$ agrees with $f(x)$ on $Y_T$; the right fibre is
+  defined symmetrically. For a matrix $M$, $M[Y, X]$ is its block with rows
+  $Y$ and columns $X$.
+\end{definition}
+
+\begin{theorem}[Transferring graph orderings to multi-output programs]
+  \label{thm:lowerbounds-algebraic-multi-output-ordering}
+  \lean{Algebraic.Cutwidth.MultiOutput.exists_rank,
+    Algebraic.Cutwidth.MultiOutput.exists_rank_of_connected,
+    Algebraic.Cutwidth.MultiOutput.component_closed,
+    Algebraic.Cutwidth.MultiOutput.forward_union_of_closed,
+    Algebraic.Cutwidth.MultiOutput.backward_union_of_closed,
+    Algebraic.Cutwidth.MultiOutput.orderingBound_nonneg}
+  \leanok
+  \uses{def:lowerbounds-algebraic-multi-output,
+    def:lowerbounds-algebraic-ordering-hypotheses}
+  Let a straight-line program over any signature, with any value type and
+  any designated outputs, have $n$ inputs, $s$ gates, and fan-in at most
+  two, and suppose $\mathrm{OrderingBound}(A,\eta,C)$ with $A+\eta\ge0$.
+  Then some injective ranking of the wires, with ranks below $n+s$, has the
+  following property: for every wire $w$, the prefix up to $w$ is crossed
+  by at most
+  \[
+    (A+\eta)\max\{g-i,0\} + 3\log_2(n+3s) + C
+  \]
+  forward and backward signals, where $g$ and $i$ are the numbers of gates
+  and inputs in the component of $w$. If the wire graph is connected, every
+  prefix is crossed by at most $(A+\eta)\max\{s-n,0\}+3\log_2(n+3s)+C$
+  signals.
+\end{theorem}
+\begin{proof}
+  \leanok
+  For each component, build the subcubic wire graph: a vertex per wire, and
+  $f-1$ copy vertices routing a signal read by $f\ge2$ argument slots, with
+  the slots and the copy edges as edges. It is loopless, of maximum degree
+  three, and connected, and its edge excess is at most $g-i$; apply the
+  ordering hypothesis and order the wires of the component by their
+  vertices. The edges carrying one signal form a tree joining its wire to
+  every gate reading it, so a signal crossing a split of the wires crosses
+  the corresponding cut with an edge of its own, and distinct signals use
+  distinct edges. Lay out the components one after another. A component is
+  closed under reading, so earlier components contribute no crossing
+  signals, and the prefix up to $w$ is charged to a lower-set cut of the
+  wire graph of the component of $w$.
+\end{proof}
+
+\begin{theorem}[Rank-cut bound]
+  \label{thm:lowerbounds-algebraic-rank-cut}
+  \lean{Algebraic.Cutwidth.MultiOutput.card_pow_le_of_fibres,
+    Algebraic.Cutwidth.MultiOutput.card_pow_le_of_fibres_of_trace,
+    Algebraic.Cutwidth.MultiOutput.card_leftFibre_le,
+    Algebraic.Cutwidth.MultiOutput.card_rightFibre_le,
+    Algebraic.Cutwidth.MultiOutput.blockRank_add_blockRank_le,
+    Algebraic.Cutwidth.MultiOutput.blockRank_add_blockRank_le_of_trace}
+  \leanok
+  \uses{def:lowerbounds-algebraic-multi-output,
+    lem:lowerbounds-algebraic-single-cut-fibres}
+  Let a circuit over any signature with values in a finite set $U$ compute
+  $f\colon U^n\to U^m$. If, for a split $S$ with forward signals $A$ and
+  backward signals $B$, every left fibre has at most $D_T$ elements and
+  every right fibre at most $D_S$, then $|U|^n\le|U|^{|A|+|B|}D_TD_S$. In
+  particular, if a circuit with values in a finite field computes the linear
+  map $x\mapsto Mx$, with arbitrary gate functions, then every split
+  satisfies
+  \[
+    \operatorname{rank} M[Y_T, X_S] + \operatorname{rank} M[Y_S, X_T]
+      \le |A| + |B|.
+  \]
+\end{theorem}
+\begin{proof}
+  \leanok
+  The inputs with a fixed boundary key form a product $L\times R$ of left
+  and right parts (Lemma~\ref{lem:lowerbounds-algebraic-single-cut-fibres}).
+  Mixing a member of the fibre into a fixed member $x_0$ on $X_T$ keeps the
+  outputs in $Y_T$, so $L$ embeds into the left fibre of $x_0$, and
+  symmetrically $R$ embeds into its right fibre; sum over the at most
+  $|U|^{|A|+|B|}$ keys. For a linear map, a left fibre minus its base point
+  lies in the kernel of $M[Y_T,X_S]$, which has $|F|^{|X_S|-r_1}$ elements;
+  symmetrically for right fibres, and comparing exponents gives
+  $r_1+r_2\le|A|+|B|$.
+\end{proof}
+
+\begin{definition}[Totally regular and Cauchy matrices]
+  \label{def:lowerbounds-algebraic-totally-regular}
+  \lean{Algebraic.Cutwidth.MultiOutput.TotallyRegular,
+    Algebraic.Cutwidth.MultiOutput.cauchy,
+    Algebraic.Cutwidth.MultiOutput.cauchyZMod}
+  \leanok
+  A matrix over a field is totally regular when every square submatrix is
+  nonsingular. The Cauchy matrix of nodes $x_i$ and $y_j$ has entries
+  $1/(x_i-y_j)$; over $\mathbb{Z}/q$, the explicit family takes $x_i=i$ and
+  $y_j=N+j$ for $0\le i,j<N$.
+\end{definition}
+
+\begin{lemma}[Cauchy matrices are totally regular]
+  \label{lem:lowerbounds-algebraic-cauchy}
+  \lean{Algebraic.Cutwidth.MultiOutput.TotallyRegular.min_card_le_blockRank,
+    Algebraic.Cutwidth.MultiOutput.det_cauchy_ne_zero,
+    Algebraic.Cutwidth.MultiOutput.totallyRegular_cauchy,
+    Algebraic.Cutwidth.MultiOutput.totallyRegular_cauchyZMod}
+  \leanok
+  \uses{def:lowerbounds-algebraic-totally-regular,
+    def:lowerbounds-algebraic-multi-output}
+  Every block of a totally regular matrix has rank at least the smaller of
+  its dimensions. A Cauchy matrix with distinct $x_i$, distinct $y_j$, and
+  $x_i\ne y_j$ for all $i$ and $j$ is totally regular. In particular the
+  explicit family over $\mathbb{Z}/q$ is totally regular for every prime
+  $q\ge2N$.
+\end{lemma}
+\begin{proof}
+  \leanok
+  A block contains a square block of the smaller dimension, which is
+  nonsingular. Every square submatrix of a Cauchy matrix is a Cauchy
+  matrix, so it suffices that a square Cauchy matrix has trivial kernel.
+  If $\sum_j v_j/(x_i-y_j)=0$ for all $i$, the Lagrange interpolant through
+  the points $(y_j, v_j/w_j)$, with $w_j=\prod_{l\ne j}(y_j-y_l)^{-1}$ the
+  barycentric weights, has the first barycentric form
+  $\prod_l(x-y_l)\sum_j v_j/(x-y_j)$ away from the nodes, so it vanishes at
+  every $x_i$. Its degree is below the number of nodes, so it is zero, and
+  then every $v_j$ is zero. For the explicit family the nodes $0,\dots,2N-1$
+  are distinct modulo $q$.
+\end{proof}
+
+\begin{theorem}[Totally regular maps need $(1+1/(2p)-\varepsilon)N$ gates]
+  \label{thm:lowerbounds-algebraic-totally-regular}
+  \lean{Algebraic.Cutwidth.MultiOutput.sub_one_le_of_totallyRegular,
+    Algebraic.Cutwidth.MultiOutput.eventually_lt_size_of_totallyRegular_of_orderingBound,
+    Algebraic.Cutwidth.MultiOutput.eventually_lt_size_of_totallyRegular,
+    Algebraic.Cutwidth.MultiOutput.eventually_lt_size_of_totallyRegular_fortyOne_div_nine,
+    Algebraic.Cutwidth.MultiOutput.eventually_lt_size_cauchyZMod}
+  \leanok
+  \uses{thm:lowerbounds-algebraic-multi-output-ordering,
+    thm:lowerbounds-algebraic-rank-cut,
+    lem:lowerbounds-algebraic-cauchy,
+    thm:lowerbounds-algebraic-gaussian-coefficient}
+  Let a circuit over a finite field $F$, over any signature with fan-in at
+  most two (so with arbitrary functions $F\times F\to F$, unary functions,
+  and constants as gates), compute the linear map of a totally regular
+  $N\times N$ matrix with $s$ gates. Under $\mathrm{OrderingBound}(A,\eta,C)$
+  with $A+\eta\ge0$,
+  \[
+    N - 1 \le (A+\eta)\max\{s-N,0\} + 3\log_2(N+3s) + C .
+  \]
+  Consequently, if the ordering hypothesis holds with coefficient $A>0$ at
+  every positive slack, then for every $\varepsilon>0$ and all large $N$,
+  independently of the field and the signature, every such circuit has more
+  than $(1+1/A-\varepsilon)N$ gates. With the Gaussian pathwidth
+  coefficient $p=\tfrac{3}{2\pi}\arccos\tfrac{1+2\sqrt2}{4}$ of
+  Theorem~\ref{thm:lowerbounds-algebraic-gaussian-coefficient} this is
+  $(1+1/(2p)-\varepsilon)N\approx(4.5625-\varepsilon)N$, and as $2p\le9/32$
+  it is more than $(41/9-\varepsilon)N$; in particular for the explicit
+  Cauchy family over $\mathbb{Z}/q$ with $q\ge2N$ prime.
+
+  The graph of a circuit computing a totally regular map is a
+  superconcentrator whatever its gate functions (Valiant), so the same bound
+  also follows from
+  Corollary~\ref{cor:lowerbounds-algebraic-superconcentrator-in-degree}. The
+  proof here goes through the rank-cut bound instead, which applies to linear
+  maps that are not totally regular as well.
+\end{theorem}
+\begin{proof}
+  \leanok
+  Distinct outputs lie on distinct wires, since two outputs on one wire would
+  give equal rows and a singular $2\times2$ block. The component of an output
+  is closed, so it is crossed by no signal, and the rank-cut bound forces
+  every input and every output into it. Along the ranking of
+  Theorem~\ref{thm:lowerbounds-algebraic-multi-output-ordering}, the number
+  of inputs plus outputs in a prefix grows by at most two per wire, so some
+  prefix ending at an input or output contains $N$ or $N+1$ of them; an
+  output carried by an input wire counts twice. For that prefix the two
+  blocks of the rank-cut bound have full rank by
+  Lemma~\ref{lem:lowerbounds-algebraic-cauchy}, with ranks summing to at
+  least $N-1$, and the prefix is charged to the component containing all
+  $N$ inputs and at most $s$ gates. For the asymptotic form, assume at most
+  $(1+1/A-\varepsilon)N$ gates, choose $\eta=A^2\varepsilon/2$, and compare:
+  the cycle term is at most $(1-A\varepsilon/2)N$, and the logarithmic term
+  is $O(\log N)$.
+\end{proof}
+
 \begin{definition}[The KRW conjecture]
   \label{def:lowerbounds-algebraic-krw}
   \lean{Algebraic.KW.NonConstant, Algebraic.KW.KRWDepthWith,

@@ -118,7 +118,7 @@ variable {F : Type*} [Field F] [Fintype F] [DecidableEq F]
 
 omit [DecidableEq F] in
 /-- The kernel of a matrix over a finite field has `|F| ^ (width - rank)` elements. -/
-theorem card_filter_mem_ker {ι κ : Type} [Fintype ι] [Fintype κ] [DecidableEq ι]
+theorem card_filter_mem_ker {ι κ : Type} [Fintype ι] [DecidableEq ι]
     (B : Matrix κ ι F) [DecidablePred (· ∈ LinearMap.ker B.mulVecLin)] :
     (Finset.univ.filter fun v => v ∈ LinearMap.ker B.mulVecLin).card =
       Fintype.card F ^ (Fintype.card ι - B.rank) := by

@@ -64,7 +64,7 @@ theorem min_card_le_blockRank {m n : Nat} {M : Matrix (Fin m) (Fin n) F} (hM : T
 
 /-- A circuit computing a totally regular square map carries distinct outputs on distinct
 wires. -/
-theorem outputs_injective {n s N : Nat} [DecidableEq F] {M : Matrix (Fin N) (Fin N) F}
+theorem outputs_injective {n s N : Nat} {M : Matrix (Fin N) (Fin N) F}
     (hM : TotallyRegular M) (p : Program σ n s) (I : Interpretation σ F)
     (out : Fin N → Wire n s) {f : (Fin n → F) → Fin N → F}
     (hf : ∀ x i, p.trace I x (out i) = f x i) (hfM : ∀ i i', (∀ x, f x i = f x i') →

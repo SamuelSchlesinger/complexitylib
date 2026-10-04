@@ -169,6 +169,13 @@ def headlineTheorems : List Name := [
   `Algebraic.Cutwidth.Multigraph.Superconcentrator.eventually_le_card_edges,
   `Algebraic.Cutwidth.Multigraph.Superconcentrator.eventually_fifty_div_nine_sub_mul_le_card_edges,
   `Algebraic.Cutwidth.Multigraph.Superconcentrator.eventually_le_card_vertices,
+  -- Multi-output circuits: ordering transfer, rank-cut bound, totally regular linear maps
+  `Algebraic.Cutwidth.MultiOutput.exists_rank,
+  `Algebraic.Cutwidth.MultiOutput.blockRank_add_blockRank_le,
+  `Algebraic.Cutwidth.MultiOutput.totallyRegular_cauchyZMod,
+  `Algebraic.Cutwidth.MultiOutput.eventually_lt_size_of_totallyRegular,
+  `Algebraic.Cutwidth.MultiOutput.eventually_lt_size_of_totallyRegular_fortyOne_div_nine,
+  `Algebraic.Cutwidth.MultiOutput.eventually_lt_size_cauchyZMod,
   -- Korten's top-down parity lower bounds and the majority extension
   `Complexity.KarchmerWigderson.parity_communication_lower_bound,
   `Complexity.Circuit.parity_wire_lower_bound,
