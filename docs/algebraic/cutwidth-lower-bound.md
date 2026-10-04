@@ -1131,6 +1131,33 @@ strong affine contract of
 [Chattopadhyay–Liao, Definitions 1.8 and 5.2, Theorem 6.1](https://arxiv.org/abs/2110.12652),
 with the conservative finite schedule above.
 
+`SourceReduction.Leakage` proves the next step, the finite leakage and
+bad-seed theorem of Chattopadhyay–Liao, Lemma 5.3. For the actual selected
+affine construction, reveal one `d`-bit source observation for each of the
+`t + 1` calls. `affineLeakageSourceEntropy` pays the complete affine
+reserve plus exactly `(t + 1)d` bits. The original source is normalized
+and has point masses at most the reciprocal of this dyadic threshold;
+no conditional source or security witness is supplied.
+
+`affineLeakageOutputWeight_average_dist_le` allows both the shift and
+every tampered base seed to depend arbitrarily on the honest base seed.
+It proves average total variation at most `2^-target`, retaining all
+actual tampered outputs. `affineLeakageBadSeeds_parameters_card_le`
+therefore bounds the bad-seed fraction by `2^-target / gamma` for every
+positive `gamma`, simultaneously over all such choices. The proof uses
+exact source conditioning, including normalized zero-mass rows, and
+projects only the leakage transcript. The entire leakage reserve is at
+most `2^258*(t+1)^2*(a+1)*Base^3` for the boosted common base.
+
+`affineLeakage_linear_parameters` then supplies the component-parity
+bound `2*gamma` whenever a linear sampler's distinguished seed escapes
+that same small bad set, at any chosen output coordinate. The actual
+XOR reduction is `affineSourceReduction`; its parity-bias identity shows
+that grouping component bits into output coordinates preserves absolute
+bias. These statements cover a selected bundle of calls. The global
+sampler, indexing of every low-order parity test, and quantitative
+composition with `SourceReduction.Selection` still need to be supplied.
+
 The one-shot primitive alone has finite seed cost of order `ell+e+log n`;
 the checked recursion supplies the larger polylogarithmic output with
 logarithmic total seed length.
@@ -1197,8 +1224,9 @@ The standard advice correlation breaker and the complete actual affine
 correlation breaker are proved with explicit finite parameters and total
 uniform polynomial-time evaluators. The affine theorem covers all tamperings
 from the original-source hypotheses, using the executed first phase and
-all repeated rounds. The remaining route is the sumset reduction and
-amplification with their parity estimates, followed by asymptotic parameter
+all repeated rounds. Its leakage and bad-seed theorem and the linear-sampler
+component-parity estimate are also proved. The remaining route is the global
+sampler and sumset-reduction composition, followed by asymptotic parameter
 and uniform-machine composition for a final `P` hard family with sublinear
 log-threshold. The unconditional `(4-ε)n` endpoint remains incomplete.
 

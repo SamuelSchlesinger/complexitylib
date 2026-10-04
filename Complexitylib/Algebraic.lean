@@ -74,6 +74,9 @@ public import Complexitylib.Algebraic.LowerBound.Cutwidth.Extractor.CorrelationB
 public import Complexitylib.Algebraic.LowerBound.Cutwidth.Extractor.CorrelationBreaker.Affine.Iteration.Parameters
 public import Complexitylib.Algebraic.LowerBound.Cutwidth.Extractor.CorrelationBreaker.Affine.Iteration.Program
 public import Complexitylib.Algebraic.LowerBound.Cutwidth.Extractor.CorrelationBreaker.Affine.Program
+public import Complexitylib.Algebraic.LowerBound.Cutwidth.Extractor.SourceReduction.Leakage.Linear.Selected
+public import Complexitylib.Algebraic.LowerBound.Cutwidth.Extractor.SourceReduction.Leakage.Parity
+public import Complexitylib.Algebraic.LowerBound.Cutwidth.Extractor.SourceReduction.Reduction
 
 /-!
 # Algebraic circuits

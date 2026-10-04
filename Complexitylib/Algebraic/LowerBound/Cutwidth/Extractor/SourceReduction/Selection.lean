@@ -18,8 +18,10 @@ once. At each retained fixing, keep the coordinates with a candidate outside
 that test. This is the selection step after equation (5) in Chattopadhyay and
 Liao, *Extractors for Sum of Two Sources* (2021), Lemma 5.4.
 
-The parity estimate is an explicit premise: an affine correlation breaker and
-linearity of the sampler must still establish it for the actual XOR reduction.
+The parity estimate is an explicit premise of this selection theorem.
+`SourceReduction.Leakage.Linear.Selected` proves the corresponding estimate
+for a selected bundle of actual affine calls. Indexing the bundles for every
+small parity test and composing the global sampler remain separate steps.
 The conclusion retains a `1 - δ` fraction of second-source fixings and
 discards at most a `2ε` fraction of coordinates at each one. A subsequent
 majority application must check positivity and the moment and margin budgets.

@@ -17,7 +17,8 @@ If each such test and each of `C` candidates excludes at most an `η` fraction
 of seeds, their union excludes at most an `A^t * C * η` fraction. This is
 the union-bound step of Chattopadhyay and Liao, *Extractors for Sum of Two
 Sources* (2021), Lemma 5.4, before equation (5) is used on good sampler outputs.
-The affine correlation breaker must still supply the individual seed bounds.
+`SourceReduction.Leakage` supplies the individual seed bounds from the actual
+selected affine correlation breaker after paying the complete leakage reserve.
 -/
 
 public section

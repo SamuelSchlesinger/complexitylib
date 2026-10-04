@@ -21,9 +21,11 @@ moment and majority arguments then give error `35/72`, strictly below one
 half. Balanced padding supplies the density needed by the circuit theorem.
 
 The intended source reduction is Chattopadhyay and Liao, *Extractors for Sum
-of Two Sources* (2021), Lemma 5.4 through equation (5). Its linear sampler
-must still be constructed and composed with the now-checked affine
-correlation breaker to supply these parity bounds. This module proves the
+of Two Sources* (2021), Lemma 5.4 through equation (5). `SourceReduction.Leakage`
+now derives the bad-seed bound from the actual affine correlation breaker;
+its linear-sampler corollary bounds the component parity at escaping seeds.
+The global linear sampler must still be constructed and composed with these
+per-test estimates to supply the selected parity bounds. This module proves the
 implication from that target to extraction, not the existence or uniform
 evaluation of `reduce`.
 -/

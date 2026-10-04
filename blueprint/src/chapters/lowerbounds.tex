@@ -2901,8 +2901,9 @@ establishes the proposed coefficient-three regime without that assumption.
   parity-bias bound $\beta$. This selection theorem places no sign or
   probability assumptions on the first-source weights or coordinates;
   those remain hypotheses of the majority theorem. In the intended
-  application the still-unproved correlation-breaker estimate and sampler
-  linearity must supply the stated seed-escape implication.
+  application, the actual leakage and linearity estimate below supplies
+  the component-call bound. Indexing every test and composing the global
+  sampler must still supply this selection theorem's seed-escape premise.
 \end{theorem}
 \begin{proof}
   \leanok
@@ -7753,6 +7754,113 @@ establishes the proposed coefficient-three regime without that assumption.
   is at most $2^{-\mathrm{target}}$. Append the original right state,
   apply the known XOR masks, identify the complete executed program,
   and discard only the intermediate transcript by contraction.
+\end{proof}
+
+\begin{definition}[Actual affine outputs with deterministic seed leakage]
+  \label{def:lowerbounds-algebraic-affine-leakage}
+  \lean{Algebraic.Cutwidth.Extractor.affineLeakageOutputWeight,
+    Algebraic.Cutwidth.Extractor.affineLeakageBadSeeds,
+    Algebraic.Cutwidth.Extractor.affineLeakageSourceEntropy}
+  \leanok
+  \uses{def:lowerbounds-algebraic-affine-construction}
+  Write $F$ for the complete selected affine construction, with seed width
+  $d$, source reserve $k$, and error $2^{-q}$. Fix advice
+  $\alpha_0,\ldots,\alpha_t$ and deterministic source observations
+  $L_0,\ldots,L_t$ of width $d$.
+  The actual leaky law retains all
+  $F(A+b,y_i\oplus L_i(A),\alpha_i)$ for $i>0$, together with the honest
+  output $F(A+b,y\oplus L_0(A),\alpha_0)$.
+  An honest seed is bad at threshold $\gamma$ if some shift and tampered
+  seed tuple give conditional-uniformity distance greater than $\gamma$.
+  The complete leakage reserve is $k+(t+1)d$.
+\end{definition}
+
+\begin{theorem}[The actual affine construction has few leaky bad seeds]
+  \label{thm:lowerbounds-algebraic-affine-leakage}
+  \lean{Algebraic.Cutwidth.Extractor.affineLeakageOutputWeight_probability,
+    Algebraic.Cutwidth.Extractor.affineLeakageOutputWeight_average_dist_le,
+    Algebraic.Cutwidth.Extractor.affineLeakageBadSeeds_parameters_card_le,
+    Algebraic.Cutwidth.Extractor.affineLeakageBadSeeds_card_le,
+    Algebraic.Cutwidth.Extractor.not_mem_affineLeakageBadSeeds,
+    Algebraic.Cutwidth.Extractor.affineLeakageSourceEntropy_le}
+  \leanok
+  \uses{def:lowerbounds-algebraic-affine-leakage,
+    thm:lowerbounds-algebraic-affine-construction-extraction}
+  Suppose $t>0$, $\gamma>0$, the original source is normalized with point
+  masses at most $2^{-(k+(t+1)d)}$, and all advice has length $a$, with
+  the honest advice distinct from every tampered advice. For every shift
+  and tampered-seed tuple chosen as functions of the honest base seed,
+  the average actual leaky-output distance is at most $2^{-q}$.
+  Consequently the bad-seed fraction is at most $2^{-q}/\gamma$.
+  The full leakage reserve is at most
+  $2^{258}(t+1)^2(a+1)B^3$, for the boosted common parameter base $B$.
+\end{theorem}
+\begin{proof}
+  \leanok
+  Following Chattopadhyay--Liao, Lemma~5.3, reveal the complete tuple of
+  leakage observations. The conditional source kernel and the uniform
+  base seed give an exact factorization, including zero-mass transcripts.
+  Its joint source envelope sums to at most $2^{-k}$. XOR with each fixed
+  honest leakage word preserves uniformity, so the actual affine theorem
+  applies. Forgetting the leakage tag gives the exact base-seed average.
+  Choose adversarial witnesses separately at each bad seed and bound
+  their number by the nonnegative average.
+\end{proof}
+
+\begin{theorem}[Actual linear-sampler calls have small parity bias]
+  \label{thm:lowerbounds-algebraic-affine-leakage-parity}
+  \lean{Algebraic.Cutwidth.Extractor.weightSign_mul_le_dist,
+    Algebraic.Cutwidth.Extractor.weightSign_xor_le_dist,
+    Algebraic.Cutwidth.Extractor.mapWeight_uniform_bool_coordinate,
+    Algebraic.Cutwidth.Extractor.affineLeakage_sign_mul_le_of_not_mem_badSeeds,
+    Algebraic.Cutwidth.Extractor.affineLeakage_coordinate_sign_le_of_not_mem_badSeeds,
+    Algebraic.Cutwidth.Extractor.affineLeakage_linear_parity_le,
+    Algebraic.Cutwidth.Extractor.affineLeakage_linear_parameters}
+  \leanok
+  \uses{thm:lowerbounds-algebraic-affine-leakage}
+  Let the selected sampler maps be linear in the original source.
+  Fix a second summand $b$ and any coordinate of the affine output.
+  If the honest sampler value at $b$ escapes the actual bad set, the
+  absolute sign bias of the complete selected component parity is at
+  most $2\gamma$. The actual selected construction supplies both this
+  estimate and the preceding bad-set cardinality bound from the
+  original source hypotheses alone.
+\end{theorem}
+\begin{proof}
+  \leanok
+  A coordinate of a uniform Boolean word is uniform. Its sign has zero
+  mean even after multiplication by any bounded statistic of the
+  retained tampered outputs. Twice total variation bounds the remaining
+  expectation. Use the product of tampered signs as that statistic.
+  Source linearity identifies all leaky calls with their actual sampler
+  calls, as in Chattopadhyay--Liao, Lemma~5.4, equation~(5).
+\end{proof}
+
+\begin{definition}[The deterministic XOR source reduction]
+  \label{def:lowerbounds-algebraic-affine-source-reduction}
+  \lean{Algebraic.Cutwidth.Extractor.affineSourceReduction}
+  \leanok
+  At each outer coordinate, XOR all component bits obtained by applying
+  the correlation breaker to the same original source, the sampler's
+  candidate seed, and the candidate advice. This is a deterministic map;
+  statistical and runtime guarantees are separate statements.
+\end{definition}
+
+\begin{theorem}[Grouping component bits preserves absolute parity bias]
+  \label{thm:lowerbounds-algebraic-affine-source-reduction-parity}
+  \lean{Algebraic.Cutwidth.Extractor.affineSourceReduction_parity_bias_eq}
+  \leanok
+  \uses{def:lowerbounds-algebraic-affine-source-reduction}
+  For every finite outer-coordinate set and every weighted input law,
+  the absolute bias of the reduction's sign product equals that of the
+  full component-call sign product. This includes zero candidates and
+  the empty coordinate set.
+\end{theorem}
+\begin{proof}
+  \leanok
+  With true represented by $+1$, XOR of $C$ bits contributes the
+  product of their signs times $(-1)^{C+1}$. The resulting constant
+  factor has absolute value one for every outer parity.
 \end{proof}
 
 \begin{theorem}[Extraction with an approximately independent seed]

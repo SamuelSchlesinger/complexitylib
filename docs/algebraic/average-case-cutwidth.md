@@ -54,8 +54,11 @@ on a seed padded to that explicit budget, with the entire seed uniformly
 sampled and retained in the strong guarantee. The complete affine correlation
 breaker now has an original-source theorem for all positive tampering counts,
 explicit finite parameters, and a total uniform polynomial-time evaluator.
-The source reduction, its parity estimates, and the final uniform sumset
-family remain construction obligations.
+Its complete leakage and bad-seed bound is also proved, together with the
+component-parity estimate for linear sampler values and the actual XOR
+reduction's absolute-bias identity. The global sampler composition, the
+simultaneous low-order parity bounds, and the final uniform sumset family
+remain construction obligations.
 The [cutwidth guide](cutwidth-lower-bound.md) records the exact checked
 interfaces and credits the GUV and CGL constructions. The seeded result
 does not establish the polynomial support threshold and quantitative balance
