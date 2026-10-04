@@ -33,7 +33,9 @@ rename smoke test; it does not determine the scope of the axiom audit.
   the root `Complexitylib` import and the executable validation modules, which
   are imported explicitly above because they are intentionally absent from the
   public import graph. The `buildImport` check of `scripts/lint_style.py` keeps
-  every module reachable from one of these imports. Declarations are selected
+  every module reachable from one of its `BUILD_ROOTS`, and
+  `scripts/test_build_roots.py` checks that this file imports each of them.
+  Declarations are selected
   by module of origin, not by name, so private and generated declarations and
   the library's extensions in foreign namespaces such as `Digraph`, `Nat`, and
   `Cslib.Circuits` are covered.

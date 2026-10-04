@@ -187,7 +187,9 @@ The last five are the quality gates:
   violation fails the run.
 - **`python3 -m unittest discover …`** checks the maintenance scripts, including
   that the documentation cache retains dependency analysis while excluding
-  project declarations, removed modules, and rendered output.
+  project declarations, removed modules, and rendered output, and that the axiom
+  guard's imports and the build commands here, in `AGENTS.md`, and in CI name
+  every build root of `scripts/lint_style.py`.
 - **`scripts/lint_environment.py`**, run under `lake env`, invokes the same
   upstream `runLinter` executable on the public root and each of the five
   validation-only graphs in a separate process. All default and slow
