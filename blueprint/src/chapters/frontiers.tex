@@ -10,7 +10,8 @@ algebraic-circuits library proves it (Definition~\ref{def:frontiers-kw-protocol}
 and Theorem~\ref{thm:frontiers-kw-general}), and the foundations of border rank
 with the Koszul-flattening lower bound
 (Theorem~\ref{thm:frontiers-koszul-flattening}), its single-cluster certificate for
-the weighted Landsberg--Micha{\l}ek tensors (Theorem~\ref{thm:frontiers-cluster-koszul}),
+the weighted Landsberg--Micha{\l}ek tensors (Theorem~\ref{thm:frontiers-cluster-koszul})
+and its paired-cluster certificate (Theorem~\ref{thm:frontiers-paired-koszul}),
 border substitution for tight tensors
 (Theorem~\ref{thm:frontiers-border-substitution}), and the deletion game that turns a
 paired-cluster bound into a border-rank bound
@@ -554,8 +555,11 @@ are not.
   of the cluster whose columns differ by at most $s$. This is the single-cluster lemma of the
   program for border rank $(7/3 - o(1)) m$ in the Landsberg--Micha{\l}ek setting. It gives
   only $\underline{\mathbf{R}}(T) \ge \frac{2p+1}{p+1} (m - s)$, below $2m$. Border
-  substitution is formalized as Theorem~\ref{thm:frontiers-border-substitution}; the
-  paired-cluster bound and the counting argument are not.
+  substitution (Theorem~\ref{thm:frontiers-border-substitution}), the paired-cluster bound
+  (Theorem~\ref{thm:frontiers-paired-koszul} and Corollary~\ref{cor:frontiers-paired-phi}),
+  and the counting argument (Theorem~\ref{thm:frontiers-deletion-game}) are formalized;
+  choosing $2p + 1$ surviving slices with distinct $p$-subset sums inside a good block, which
+  would connect the paired-cluster bound to the counting argument, is not.
 \end{theorem}
 \begin{proof}
   \leanok
@@ -572,6 +576,120 @@ are not.
   Lemma~\ref{lem:frontiers-dominant-minors}. The border-rank bounds follow from
   Theorem~\ref{thm:frontiers-koszul-flattening} after projecting onto the $2p + 1$ cluster
   slices, which sends $T$ and each such $T'$ to $U$.
+\end{proof}
+
+\begin{lemma}[Block-triangular minors]
+  \label{lem:frontiers-block-triangular-minors}
+  \lean{Matrix.card_mul_card_le_rank_of_det_blocks_ne_zero_of_lt}
+  \leanok
+  \uses{lem:frontiers-dominant-minors}
+  Choose rows $f(i, b)$ and columns $g(i, b)$ of a matrix $A$ over a field, for $i \in \iota$
+  within each block $b \in \beta$, and a linear order on the blocks. If every entry from the
+  rows of a block to the columns of an earlier block vanishes, and every square block
+  $(A_{f(i, b), g(i', b)})_{i, i'}$ is nonsingular, then
+  $\operatorname{rank} A \ge |\iota| \cdot |\beta|$.
+\end{lemma}
+\begin{proof}
+  \leanok
+  The minor on all the chosen rows and columns is block triangular, so its determinant is
+  the product of the block determinants.
+\end{proof}
+
+\begin{theorem}[Paired-cluster Koszul certificate]
+  \label{thm:frontiers-paired-koszul}
+  \lean{Algebraic.Tensor3.choose_mul_card_le_rank_koszulFlattening_weightedShifts_of_shifts,
+    Algebraic.Tensor3.choose_mul_card_le_rank_koszulFlattening_sum_weightedShifts,
+    Algebraic.Tensor3.choose_mul_le_rank_koszulFlattening_add_weightedShifts,
+    Algebraic.Tensor3.map_add_selectSlices_weightedLMTensor,
+    Algebraic.Tensor3.map_add_selectSlices_map_diagonal,
+    Algebraic.Tensor3.koszulFlattening_map_add_left,
+    Algebraic.Tensor3.choose_mul_le_rank_koszulFlattening_pairedClusters,
+    Algebraic.Tensor3.choose_mul_le_borderRank_mul_map_diagonal_pairedClusters,
+    Algebraic.Tensor3.choose_mul_le_borderRank_mul_restrictSlices_pairedClusters,
+    Algebraic.Tensor3.max_le_pairedWidth}
+  \leanok
+  \uses{thm:frontiers-cluster-koszul, lem:frontiers-cluster-spread,
+    lem:frontiers-block-triangular-minors, def:frontiers-tight}
+  Let $T$ be the weighted Landsberg--Micha{\l}ek tensor with $n = m = 2k + 1$. Let a
+  \emph{positive cluster} be $2p + 1$ slices with increasing offsets
+  $o^+_0 < \dots < o^+_{2p}$ in $[1, k]$, and a \emph{negative cluster} $2p + 1$ slices with
+  increasing offsets $o^-_t$ in $[-k, -1]$, each with diameter at most $L$ and pairwise
+  distinct $p$-subset sums, and with medians $o^+_p = r$ and $o^-_p = -s$. The paired
+  projection $A \to \mathbb{C}^{2p+1}$ sends both $a_{c^+_t}$ and $a_{c^-_t}$ to $e_t$, so it
+  maps $T$ to the sum $V = V^+ + V^-$ of the two cluster tensors, and
+  $V_A^{\wedge p} = (V^+)_A^{\wedge p} + (V^-)_A^{\wedge p}$. With $z = r + s$ and
+  \[
+    W = z + \min(s, n - r - z)^+ + \min(r, n - s - z)^+
+      \ \ge\ \max\{z,\ 2 \min(z, n - z)\},
+  \]
+  the Koszul flattening has rank at least $\binom{2p+1}{p} (W - 8(p + 1)L)$, so
+  $\binom{2p+1}{p} (W - 8(p + 1)L) \le \underline{\mathbf{R}}(T') \binom{2p}{p}$ for every
+  tensor $T'$ obtained from $T$ by zeroing slices outside both clusters. No lower bound on
+  $r$ or $s$ is needed. More generally, clusters of weighted shifts identified slice by
+  slice give a minor of rank $\binom{2p+1}{p}$ times the number of single-cluster blocks
+  chosen, provided no entry goes from a later block to an earlier one.
+\end{theorem}
+\begin{proof}
+  \leanok
+  Index columns by positions $j$ and rows by $\ell$ in $[0, n)$. A single-cluster block of
+  shift $w$ (Theorem~\ref{thm:frontiers-cluster-koszul}) uses the columns
+  $(I, w + \sum_I o)$ and the rows $(\sigma(I), w + \sum_{\sigma(I)} o)$. For offsets with
+  median $\rho$ and diameter $L$ every sum $\sum_K o$ lies within $pL$ of $|K| \rho$, so the
+  columns of the block lie within $pL$ of a center $x$ and its rows within $pL$ of
+  $x + \rho$. A positive column at $x$ meets rows within $(2p + 1)L$ of $x + r$ (through the
+  positive slices) and of $x - s$ (through the negative ones); a negative column meets rows
+  near $x - s$ and $x + r$.
+
+  Take the blocks whose centers lie in four tiles, each shrunk by $\mu = (p + 1)L$ at both
+  ends and cut to fit in $[0, n)$: positive blocks with centers in $P_1 = [0, s)$ and
+  $P_2 = [z, z + s)$, whose rows lie in $[r, z)$ and $[z + r, 2z)$, and negative blocks with
+  centers in $N_1 = [s, z)$ and $N_2 = [z + s, 2z)$, whose rows lie in $[0, r)$ and
+  $[z, z + r)$. The positive system ($P_1 \cup P_2$) and the negative system
+  ($N_1 \cup N_2$) never meet. A positive column of $P_1$ meets only its own block, one of
+  $P_2$ its own block and rows of $P_1$ (shift $-s$); a negative column of $N_2$ meets only
+  its own block, one of $N_1$ its own block and rows of $N_2$ (shift $+r$); everything else
+  falls outside the chosen rows, because tiles of opposite signs are $2\mu > (2p + 1)L$
+  apart. In the order $P_1 < P_2 < N_2 < N_1$ the minor is block triangular
+  (Lemma~\ref{lem:frontiers-block-triangular-minors}). Within one block the slices of the
+  other cluster contribute nothing, since $o^+_t \ne o^-_t$, so the diagonal block is a
+  nonsingular single-cluster block; blocks of the same cluster with different shifts do
+  not meet through that cluster, since the shift is preserved. The tiles have widths $s$,
+  $\min(s, n - r - z)^+$, $\min(r, n - s - z)^+$ and $r$, each less $2\mu$. When
+  $2z \le n$ both tiles fit and $W = 2z$; when $2z > n$ the second tile is cut by $n$ and
+  $W \ge 2(n - z)$. The border-rank bounds follow from
+  Theorem~\ref{thm:frontiers-koszul-flattening} after the paired projection, which sends
+  each such $T'$ to $V$.
+
+  The original sketch of this step built a tile of side $z$ and repeated it in a square of
+  side $2z$, claiming that the interactions between the two copies run in one direction.
+  For the partition into copies they do not; the decomposition above, which separates the
+  positive and negative systems and orders each one, replaces that argument and needs no
+  auxiliary square of side $2z$.
+\end{proof}
+
+\begin{corollary}[Combined paired-cluster bound]
+  \label{cor:frontiers-paired-phi}
+  \lean{Algebraic.Tensor3.choose_mul_phi_sub_le_borderRank_mul_restrictSlices,
+    Algebraic.Tensor3.div_mul_phi_sub_le_borderRank_restrictSlices}
+  \leanok
+  \uses{thm:frontiers-paired-koszul, thm:frontiers-cluster-koszul,
+    lem:frontiers-cluster-spread, def:frontiers-deletion-game}
+  For clusters as in Theorem~\ref{thm:frontiers-paired-koszul} inside a set $S$ of slices,
+  with medians $r$ and $-s$,
+  \[
+    \frac{2p + 1}{p + 1} \bigl(\Phi_n(r, s) - 8(p + 1)L\bigr)
+      \le \underline{\mathbf{R}}(T|_S),
+  \]
+  where $\Phi_n$ is the width of Definition~\ref{def:frontiers-deletion-game}. There is no
+  condition on $k$, $p$, $L$, $r$, or $s$.
+\end{corollary}
+\begin{proof}
+  \leanok
+  The spread of each cluster is at most its $|{\rm median}| + pL$
+  (Lemma~\ref{lem:frontiers-cluster-spread}), so the single-cluster certificate gives the
+  terms $n - r$ and $n - s$ with loss $pL$; Theorem~\ref{thm:frontiers-paired-koszul} gives
+  $r + s$ and $2 \min(r + s, n - r - s)$ with loss $8(p + 1)L$. Finally
+  $(p + 1) \binom{2p+1}{p} = (2p + 1) \binom{2p}{p}$.
 \end{proof}
 
 \begin{definition}[Tight tensors and slice restrictions]

@@ -216,6 +216,16 @@ def headlineTheorems : List Name := [
   `Algebraic.Tensor3.not_borderRankLE_map_diagonal_weightedLMTensor,
   `Algebraic.Tensor3.choose_mul_le_borderRank_mul_weightedLMTensor,
   `Algebraic.Tensor3.sumSpread_clusterOffsets_le,
+  -- Border rank: the paired-cluster Koszul certificate (two tiles) for weighted L–M tensors
+  `Matrix.card_mul_card_le_rank_of_det_blocks_ne_zero_of_lt,
+  `Algebraic.Tensor3.choose_mul_card_le_rank_koszulFlattening_weightedShifts_of_shifts,
+  `Algebraic.Tensor3.choose_mul_card_le_rank_koszulFlattening_sum_weightedShifts,
+  `Algebraic.Tensor3.choose_mul_le_rank_koszulFlattening_add_weightedShifts,
+  `Algebraic.Tensor3.choose_mul_le_rank_koszulFlattening_pairedClusters,
+  `Algebraic.Tensor3.choose_mul_le_borderRank_mul_map_diagonal_pairedClusters,
+  `Algebraic.Tensor3.choose_mul_le_borderRank_mul_restrictSlices_pairedClusters,
+  `Algebraic.Tensor3.choose_mul_phi_sub_le_borderRank_mul_restrictSlices,
+  `Algebraic.Tensor3.div_mul_phi_sub_le_borderRank_restrictSlices,
   -- The deletion game: the global step of the 7/3 border-rank program (conditional on the
   -- paired-cluster hypothesis `DeletionGame.PairedClusterBound`)
   `Algebraic.Tensor3.DeletionGame.two_mul_card_filter_phi_le,
