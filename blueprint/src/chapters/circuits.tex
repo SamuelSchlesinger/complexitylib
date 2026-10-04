@@ -299,10 +299,11 @@ to shared gates requires additional definitions and theorems.
   CSLib's $\cc{SIZE}(n + 2s + 1)$, and CSLib's $\cc{SIZE}(s)$ lies in
   $\cc{SIZE}(s + 1)$.
 
-  CSLib's Boolean $\cc{SIZE}$ and $\cc{P/poly}$ (at most $s(n)$ De Morgan gates
-  at every length $n$, and $\bigcup_k \cc{SIZE}(n^k + k)$) are pending CSLib
-  work by this library's author, not yet in upstream CSLib; the library builds
-  them from the pinned integration branch. The equality of the two
+  The Boolean $\cc{SIZE}$ and $\cc{P/poly}$ in CSLib's namespace (at most
+  $s(n)$ De Morgan gates at every length $n$, and
+  $\bigcup_k \cc{SIZE}(n^k + k)$) are work by this library's author that is
+  not in upstream CSLib; the library carries them in
+  \texttt{Complexitylib/Cslib}. The equality of the two
   $\cc{P/poly}$ classes is therefore a consistency check between two
   definitions by the same author, not corroboration by an independently
   reviewed upstream definition.
@@ -332,8 +333,9 @@ to shared gates requires additional definitions and theorems.
   some language lies outside its $\cc{P/poly}$: by Shannon's counting argument
   some language has, at every large length $n$, no De Morgan circuit with at
   most $2^n / n$ gates, and every bound $n^k + k$ falls below $2^n / n$ for
-  large $n$. That theorem, like CSLib's $\cc{P/poly}$, comes from the pending
-  CSLib work described in Theorem~\ref{thm:circuits-cslib}.
+  large $n$. That theorem, like CSLib's $\cc{P/poly}$, comes from the
+  author's work outside upstream CSLib described in
+  Theorem~\ref{thm:circuits-cslib}.
 \end{proof}
 
 \begin{theorem}[Depth in CSLib's circuit model]

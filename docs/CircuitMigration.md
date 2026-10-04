@@ -24,10 +24,16 @@ Steps 2.3 onward are open unless a commit on `circuit-migration` says
 otherwise. `ROADMAP.md` item 7 gives the phases; this note is the detailed
 plan for phases 2 and 3.
 
-CSLib is pinned to commit `2a4389b` of the `complexitylib-integration` branch
+CSLib is pinned to commit `311d27ad` of `leanprover/cslib` `main`, which
+contains the merged circuit PRs #949, #952, #954, #955 and #957. Steps 0–2.2
+were built against commit `2a4389b` of the `complexitylib-integration` branch
 of `SamuelSchlesinger/cslib` (tagged `complexitylib-2a4389b` so it stays
-reachable), which integrates the pending CSLib circuit PRs until they land
-upstream.
+reachable). The fork modules that upstream does not have (relative
+complexity, circuit families with `SIZE` and `P/poly`, completeness of the De
+Morgan basis, circuit dependencies) and the fork-only lemmas the library uses
+(`Wire.index`, `Program.lines_wires_lt`, the ordered synthesis rules,
+`Synthesis.xor_of_mem`) now live in `Complexitylib/Cslib/Circuit` under their
+`Cslib.Circuits` namespaces.
 
 The design redefines Complexitylib's measures and `CircuitFamily` over CSLib
 circuits on `Basis.signature`. On single-output circuits, the invariant
@@ -58,10 +64,10 @@ Paths are relative to the repository root.
 | F2 | `boundedAndOr k`, `unboundedAndOr` and `threshold` allow fan-in 0 (constants), but a zero-input circuit still costs 1 gate and has depth 1, while the typed family charges 0 at n = 0. | `Circuits/AndOrNot/Defs.lean`, `Circuits/Threshold/Defs.lean` |
 | F3 | Typed output gates are sinks: wires are `Fin (N+G)`, and outputs are separate gates. `toStraightLine` puts the outputs on the last M lines (`outputs o := .gate (Fin.natAdd G o)`, `size := G + M`). | `Circuits/Basic.lean:109`, `Circuits/StraightLine/Defs.lean` |
 | F4 | CSLib `Line.depth = succ (foldl max wireDepths)` with input depth 0. This is the same shape as typed `outputDepth = 1 + foldl max wireDepth`. | CSLib `Program.lean:160`; `Basic.lean:192` |
-| F5 | `Circuit.comp` maps outer outputs through `appendWire`, which sends `.gate j` to `.gate (natAdd _ j)`. `Circuit.append` maps gates to gates. So both preserve gating when the outer circuit (for `comp`) or both circuits (for `append`) are gated. | CSLib `Composition.lean:119,131` |
+| F5 | `Circuit.comp` maps outer outputs through `appendedWire` (`appendWire` on the fork), which sends `.gate j` to `.gate (natAdd _ j)`. `Circuit.append` maps gates to gates. So both preserve gating when the outer circuit (for `comp`) or both circuits (for `append`) are gated. | CSLib `Composition.lean:119,131` |
 | F6 | Only two `CompleteBasis` instances exist: `andOr2` (`Internal/Simulation.lean:1026`, derived from `unboundedAndOr`) and `unboundedAndOr` (`Internal/AndOrNot.lean:457`). `CompleteBasis` is multi-output. | `Basic.lean:218` |
-| F7 | Duplicates to remove:<br>• `Complexity.StraightLine.ofLines` equals `Complexity.Program.ofLines` (`Interop/Cslib/CircuitDepth.lean:121`).<br>• `Complexity.Circuit.ofCslibWire` equals CSLib `Wire.index` (same two cases).<br>• `Complexity.Program.lines_wires_lt` (`Interop/Cslib/Circuit/Defs.lean:109`) restates CSLib `Program.lines_wires_lt` in `index` form. | as cited |
-| F9 | The CSLib pin `SamuelSchlesinger/cslib@2a4389ba` is the head of the remote branch `complexitylib-integration` (checked with `git ls-remote`). The docbuild manifest already pins the same rev and CLAUDE.md documents the fork, so CI can fetch it. | `lakefile.toml`, `docbuild/lake-manifest.json` |
+| F7 | Duplicates to remove:<br>• `Complexity.StraightLine.ofLines` equals `Complexity.Program.ofLines` (`Interop/Cslib/CircuitDepth.lean:121`).<br>• `Complexity.Circuit.ofCslibWire` equals `Wire.index` (same two cases; from the fork, now in `Complexitylib/Cslib/Circuit/Wire.lean`).<br>• `Complexity.Program.lines_wires_lt` (`Interop/Cslib/Circuit/Defs.lean:109`) restates `Program.lines_wires_lt` (same file) in `index` form. | as cited |
+| F9 | The CSLib pin is `leanprover/cslib@311d27ad` (upstream `main`, 4 October 2026). The docbuild manifest pins the same rev and AGENTS.md documents it, so CI can fetch it. (When this plan was written, the pin was `SamuelSchlesinger/cslib@2a4389ba`, the head of the fork branch `complexitylib-integration`.) | `lakefile.toml`, `docbuild/lake-manifest.json` |
 | F10 | Nothing outside `Basic.lean` unfolds `realizationSizes` or `sizeComplexity`. Consumers use only the API lemmas. `PPoly_eq_iUnion_SIZE` is `rfl`, and `mem_PPoly_iff` has 7 uses. | `grep` |
 | F11 | `CircuitFamily` is built by structure literal in 9 files: BasisHom/Defs, PPoly/{Advice,Unrolling,Uniform/Unrolling}/Defs, Uniform/Unrolling/Padded, Randomized/PPoly/Defs, and Interop/Cslib/{Circuit, CircuitClasses, CircuitDepth}. `internalGateCount` is used in BasisHom/Defs and PPoly/Oracle/Inlining/Defs. | `grep` |
 | F12 | Pinned names:<br>• **AxiomGuard:** `shannon_lower_bound_circuit`, `shannon_sizeComplexity`, `shannon_upper_bound`, `Circuit.card_essentialInputs_le_mul_size`, `sizeComplexity_xorBool_ge`, `P_subset_UniformPPoly`, `UniformPPoly_eq_P`.<br>• **Blueprint, in addition:** `SIZE`, `SIZEWithBasis`, `PPoly`, `mem_PPoly_iff`, `P_subset_PPoly`, `BPP_subset_PPoly`, `PPoly_subset_PAdvice`, `NC1_subset_Width5BP`, `NC1_subset_FormulaNC1`, `schnorr_lower_bound_circuit`, `Schnorr.xorBool`, `essentialInputs`, `MCSP.Instance`, `CircuitCode.{encodeCircuit, evalCode, evalCode_encodeCircuit, encodeCircuit_length_le_size}`, `Circuit.outputAC0Formula{,_spec}`. | `scripts/AxiomGuard.lean`, `blueprint/src/chapters/*.tex` |
@@ -130,7 +136,7 @@ def Circuit.totalFanIn (c : Circuit σ n m) : ℕ := c.program.totalFanIn
 Dedupes (F7):
 - delete `Complexity.StraightLine.ofLines` (use `Program.ofLines`);
 - delete `Complexity.Circuit.ofCslibWire` and `toCslibWire` (use `Wire.index`, with `ofCslibWire w = w.index` by `cases w <;> rfl` as the migration lemma);
-- delete `Complexity.Program.lines_wires_lt` (use CSLib's).
+- delete `Complexity.Program.lines_wires_lt` (use `Cslib.Circuits.Program.lines_wires_lt` from `Complexitylib/Cslib/Circuit/Wire.lean`).
 
 ### 2.3 Converse translation, copy gates, finiteness (commits 2.3 and 2.4; namespace `Complexity`)
 
@@ -505,7 +511,7 @@ The shims keep every other area green. Order and dependencies:
 | Gating friction for CSLib-built circuits | medium | closure lemmas (`comp`, `append`); `StraightLine.gated`; `sizeComplexity_le_of_computes` (`max 1`) |
 | Explicit constants: Shannon (N ≥ 6, 5N) and ShannonUpper (N ≥ 16, 18·2^N/N); CSLib's results are eventual | medium | keep the CircDesc and ShannonUpper proofs until the explicit CSLib count exists. Porting via an explicit `Lupanov.synthesis` instance is plausible; adopt-cslib's claimed check at N = 16 (46017 ≤ 73727) needs re-verifying. |
 | `Synthesis` is a Prop (F14) | medium | computable builders for Defs-level consumers |
-| CSLib integration-branch churn (#949, #952, #955, #957, #954, #950 may rename `size`, `comp`, `ecomplexityOn`) | medium | use the CSLib API directly only in `Complexitylib/Cslib`, StraightLine, Size and Family; budget one re-sync |
+| CSLib API churn (#949, #952, #954, #955 and #957 have merged upstream; the re-sync from the fork renamed `appendWire` to `appendedWire` and moved the fork-only modules into `Complexitylib/Cslib`) | low | use the CSLib API directly only in `Complexitylib/Cslib`, StraightLine, Size and Family |
 | Name ambiguity under `open Cslib.Circuits` inside `namespace Complexity` (`Circuit`, `Circuit.Computes`, which also exists typed in `Family/Defs.lean`, `CircuitFamily`, `BitString`) | low-medium | fully qualify `Cslib.Circuits.Circuit` until phase 4 |
 | `WithTop ℕ` vs `ℕ∞` in the `ecomplexity` lemmas | low | state them with an `ℕ∞` ascription and bridge by `show` |
 | Env linter `unusedArguments` | low | drop `NeZero` from the three measures; keep the documented nolint on `sizeComplexity` |

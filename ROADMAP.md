@@ -146,15 +146,17 @@ In order. Each item says why it matters and roughly how large it is.
    2026), already works in this model. The detailed plan for phases 2 and 3
    is `docs/CircuitMigration.md`.
 
-   The migration targets CSLib's circuit API as it will be once the author's
-   pending circuit work lands, built meanwhile from an integration branch:
-   bundled gate counts (#949), sequential and parallel composition (#952),
-   complexity on a support (#955), inductive wires (#957), language slices
-   (#954), counting via involutions (#950), and the unsubmitted relative
-   complexity, circuit families with `SIZE` and `P/poly`, and Redkin's exact
-   parity complexity `4(n - 1)`. CSLib's own `SIZE` and `PPoly` (De Morgan,
-   as in Arora and Barak) then become the reference classes. Each phase lands
-   with public statements unchanged:
+   The migration targets upstream CSLib's circuit API, which now includes the
+   author's merged circuit work: bundled gate counts (#949), sequential and
+   parallel composition (#952), complexity on a support (#955), inductive
+   wires (#957), and language slices (#954). The CSLib circuit modules that
+   are not upstream (relative complexity, circuit families with `SIZE` and
+   `P/poly`, completeness of the De Morgan basis, circuit dependencies) are
+   carried in `Complexitylib/Cslib` under their CSLib namespaces; counting via
+   involutions (#950) and Redkin's exact parity complexity `4(n - 1)` are not
+   in the build. CSLib's `SIZE` and `PPoly` (De Morgan, as in Arora and
+   Barak) then become the reference classes. Each phase lands with public
+   statements unchanged:
    1. **Signatures and the correspondence.** `Basis.signature` and
       `Basis.interpretation` for every basis (done), and translations between
       typed circuits and straight-line programs over them. The forward

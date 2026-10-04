@@ -43,8 +43,9 @@ depends on `sorry` or a custom axiom:
   regular languages are in `L`. Our circuits and CSLib's De Morgan circuits
   translate into each other with linear overhead, which characterizes `P/poly`
   in CSLib's model, shows it equal to the Boolean `P/poly` of the author's
-  pending CSLib work, and brings Lupanov's `(1 + ε) 2ⁿ / n` upper bound into
-  this library.
+  CSLib circuit families (carried in `Complexitylib/Cslib` until they are
+  upstreamed), and brings Lupanov's `(1 + ε) 2ⁿ / n` upper bound into this
+  library.
 - **Algebraic circuits:** the algebraic-circuits library, imported as
   `Complexitylib/Algebraic`, adds, in its own circuit and formula models, the
   `3(n - 1)` De Morgan parity bound, parity ∉ AC⁰ by Håstad's switching lemma,

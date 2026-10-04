@@ -6,7 +6,7 @@
 > evidence (`AlgebraicTests`, `scripts/check_imports.py`, `scripts/build_docs.sh`)
 > refer to that repository; the test suite and scripts were not imported. In
 > Complexitylib every file of the library has been converted to Lean's module
-> system, it builds against the pinned CSLib fork described in the
+> system, it builds against the CSLib commit pinned in the
 > [guide](README.md), and it is checked by Complexitylib's gates
 > (`lake build --wfail`, `lake exe runLinter Complexitylib`,
 > `scripts/AxiomGuard.lean`, and `scripts/lint_style.py`).

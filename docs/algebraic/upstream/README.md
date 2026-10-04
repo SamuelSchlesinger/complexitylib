@@ -5,7 +5,7 @@ library's cost module, now
 [`Complexitylib/Algebraic/Cost.lean`](../../../Complexitylib/Algebraic/Cost.lean),
 against CSLib commit `91ab23c78b12e6c9d6fe747fa3f55c2771dd376e`, checked on
 2026-09-15 in the standalone algebraic-circuits repository. The module has
-since been ported to the API of Complexitylib's pinned CSLib fork, so the
+since been ported to the circuit API of Complexitylib's pinned CSLib, so the
 patch reflects its earlier form. It is a review artifact; no pull request has
 been opened.
 

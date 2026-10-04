@@ -251,14 +251,15 @@ See CONTRIBUTING.md. Use `<type>(<scope>): <summary>` format with imperative moo
 ## Dependencies
 
 - **Lean**: `leanprover/lean4:v4.35.0-rc3` (see `lean-toolchain`)
-- **Mathlib**: commit `c55e6e78` (see `lakefile.toml`) — pinned to match the pinned cslib
+- **Mathlib**: commit `728a93ee` (see `lakefile.toml`) — pinned to match the pinned cslib
   commit's `lake-manifest.json` so the foundations can be rebased onto
   [cslib](https://github.com/leanprover/cslib)
-- **cslib**: commit `2a4389ba` of the `complexitylib-integration` branch of the author's fork
-  (`SamuelSchlesinger/cslib`, see `lakefile.toml`), which integrates the pending CSLib circuit PRs
-  until they land upstream; afterwards pin a `leanprover/cslib` commit again. Pinned by commit
-  `rev`, never a branch. Its Mathlib pin must equal ours, so a cslib bump dictates the Mathlib and
-  toolchain bump. cslib ships no olean cache; Lake compiles only the cslib modules we import.
+- **cslib**: commit `311d27ad` of [leanprover/cslib](https://github.com/leanprover/cslib) (see
+  `lakefile.toml`). Pinned by commit `rev`, never a branch. Its Mathlib pin must equal ours, so a
+  cslib bump dictates the Mathlib and toolchain bump. cslib ships no olean cache; Lake compiles
+  only the cslib modules we import. CSLib circuit modules that are not upstream yet (relative
+  complexity, circuit families with `SIZE` and `P/poly`, completeness of the De Morgan basis,
+  circuit dependencies) live in `Complexitylib/Cslib/` under their `Cslib.*` namespaces.
 
 When updating any of the three, all must be updated in lockstep: pick the cslib commit first, then
 take its `lean-toolchain` and Mathlib `rev`. The `docbuild/` subproject pins the same toolchain

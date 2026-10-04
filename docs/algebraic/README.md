@@ -10,9 +10,9 @@
 > `3998dc4` plus uncommitted changes that move it to Complexitylib's Lean, Mathlib,
 > and CSLib pins), converted to Lean's module system with minimal edits and no
 > changes to theorem statements. Later changes in Complexitylib alter statements
-> only where needed: the port to the pinned CSLib fork (a circuit's gate count is
-> now its `size` field rather than a type index, and wires are CSLib's inductive
-> `Wire`), and a faithful restatement of the KRW conjecture (see the
+> only where needed: the port to CSLib's bundled gate counts and inductive wires
+> (a circuit's gate count is now its `size` field rather than a type index, and
+> wires are CSLib's inductive `Wire`), and a faithful restatement of the KRW conjecture (see the
 > [Karchmer–Wigderson guide](karchmer-wigderson.md)). The standalone repository's
 > regression suite (`AlgebraicTests`), import checker, research notes, and
 > documentation scripts were not imported. It keeps its MIT license
@@ -30,17 +30,15 @@ The signatures, interpretations, homomorphisms, wires, programs, and circuits
 come from `Cslib.Computability.Circuit`. The `Algebraic` core imports re-export
 these types and their operations, so native CSLib circuits work directly with
 the library's constructions and lower bounds. Complexitylib's `lakefile.toml`
-pins CSLib to commit `2a4389ba8d47778cafdd79f522f0b17b623b18b7`, the head of
-the `complexitylib-integration` branch of the author's fork
-(`SamuelSchlesinger/cslib`), with its matching Lean (`v4.35.0-rc3`) and Mathlib
-versions. That branch contains upstream `main` at
-`94ea80f41a5678fce997a004f0d8d12dbe47cc4b`, which includes the merged
+pins CSLib to commit `311d27ad8458b61e9b7461fc83a480e4be97aef2` of
+`leanprover/cslib` `main`, with its matching Lean (`v4.35.0-rc3`) and Mathlib
+versions. That commit includes the merged
 [Shannon #891](https://github.com/leanprover/cslib/pull/891) and
 [Lupanov #890](https://github.com/leanprover/cslib/pull/890) circuit
-developments, and integrates pending CSLib circuit pull requests, among them
-bundled gate counts ([#949](https://github.com/leanprover/cslib/pull/949)) and
-inductive wires ([#957](https://github.com/leanprover/cslib/pull/957)). The pin
-returns to a `leanprover/cslib` commit once that work lands.
+developments, bundled gate counts ([#949](https://github.com/leanprover/cslib/pull/949)),
+and inductive wires ([#957](https://github.com/leanprover/cslib/pull/957)).
+CSLib circuit modules that upstream does not have, such as circuit
+dependencies, live in Complexitylib under `Complexitylib/Cslib/`.
 
 - A `Signature` describes operation symbols and their arities, while an
   `Interpretation` assigns them concrete meaning.
