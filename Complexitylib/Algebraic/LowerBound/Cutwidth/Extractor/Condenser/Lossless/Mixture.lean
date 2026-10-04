@@ -22,8 +22,9 @@ supports as an explicit mixture of witnesses. Each component is uniform on
 exactly `K` outputs conditional on each seed; its support may depend on the
 component and seed. The mixture keeps the original uniform seed.
 
-These are finite averaging identities. General decomposition of arbitrary
-capped weights into flat sources remains a separate theorem. Empty seed
+These are finite averaging identities. The decomposition of arbitrary
+capped weights into flat sources is `exists_flat_mixture_of_capped_weights`
+in `Strong.FlatMixture`. Empty seed
 types retain the zero convention of `seededTestProb`.
 -/
 

@@ -27,8 +27,11 @@ Original source envelopes remain valid throughout. Their total masses
 are multiplied by the short-message alphabet to powers twice and four
 times the number of rounds. These exact laws support the iteration in
 Chattopadhyay--Liao, *Extractors for Sum of Two Sources*, Theorem 6.1,
-printed pp.23--25: <https://arxiv.org/abs/2110.12652>. Statistical subset
-invariants, parameter choices, and uniform runtime bounds are separate.
+printed pp.23--25: <https://arxiv.org/abs/2110.12652>. The statistical
+subset invariants and parameter choices are proved in `Iteration.Extraction`
+and `Iteration.Parameters` (`affineCorrelationBreaker_parameters_dist_le`),
+and the uniform runtime in `Affine.Program`
+(`affineCorrelationBreakerSelectedEval_mem_FP`).
 -/
 
 public section

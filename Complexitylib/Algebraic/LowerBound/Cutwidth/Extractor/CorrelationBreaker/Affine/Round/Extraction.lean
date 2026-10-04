@@ -26,8 +26,9 @@ derived from the actual preceding call.
 The next-left-row marginal exposes the same invariant at the new transcript.
 The sets may overlap. This is the finite subset-union step of
 Chattopadhyay--Liao, *Extractors for Sum of Two Sources*, Theorem 6.1:
-<https://arxiv.org/abs/2110.12652>. Full iteration and its parameter schedule
-are separate obligations.
+<https://arxiv.org/abs/2110.12652>. The full iteration and its parameter
+schedule are proved in `Affine.Iteration.Extraction`
+(`affineCorrelationBreaker_parameters_dist_le`).
 -/
 
 public section

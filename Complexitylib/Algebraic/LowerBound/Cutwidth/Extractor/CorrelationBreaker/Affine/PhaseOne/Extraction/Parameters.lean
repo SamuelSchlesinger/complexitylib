@@ -27,8 +27,9 @@ retain the complete executed transcript and original right state.
 The first-phase pattern is from Chattopadhyay--Liao,
 *Extractors for Sum of Two Sources*, Theorem 6.1,
 <https://arxiv.org/pdf/2110.12652>. The parameters here are deliberately
-conservative. This establishes the pairwise initial guarantee; the later
-subset-doubling induction is still required for joint affine security.
+conservative. This establishes the pairwise initial guarantee; the
+subset-doubling rounds of `Affine.Round` and `Affine.Iteration` upgrade it to
+joint affine security (`affineCorrelationBreaker_parameters_dist_le`).
 -/
 
 public section

@@ -24,8 +24,8 @@ A larger flat support is close to an explicit mixture of conditional
 field size; no error-below-one premise is needed. These finite results
 combine Guruswami--Umans--Vadhan's polynomial expansion with the checked
 uniform evaluator and explicit modulus construction. They concern uniform
-finite supports, with parameter-growth bounds and extractor composition
-remaining separate obligations.
+finite supports; the parameter-growth bounds are in `Parameters.Explicit`, and
+the composition into a strong extractor is `Strong.OneShot`.
 -/
 
 public section

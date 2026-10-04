@@ -23,8 +23,9 @@ The interpolation proof assumes the supplied modulus has degree at least two.
 For degree-one moduli and a nonempty coordinate tuple, a separate count gives
 exactly one field's worth of neighbors per source. `Lossless.Polynomial`
 supplies the flat-source distributional consequence. Uniform field and modulus
-selection, an encoded evaluator, and extension to weighted sources are separate
-obligations.
+selection and the encoded evaluator are in `Encoding.Explicit`; flat lossless
+witnesses extend to capped weighted sources by
+`weightedStrongSeededCondenser_of_flat_injections`.
 -/
 
 public section

@@ -26,8 +26,9 @@ compose without resampling either source or imposing seed-mask independence.
 
 These finite estimates support the alternating-extraction transitions in Chattopadhyay--Liao,
 *Extractors for Sum of Two Sources*, Theorem 6.1, printed pp.23--25:
-<https://arxiv.org/pdf/2110.12652>. The full tampering-set induction and its
-parameter budgets are additional obligations.
+<https://arxiv.org/pdf/2110.12652>. The advice correlation breaker's
+flip-flop rounds use these transitions; its full tampering-set induction and
+parameter budgets are `adviceCorrelationBreaker_dist_le`.
 -/
 
 public section
