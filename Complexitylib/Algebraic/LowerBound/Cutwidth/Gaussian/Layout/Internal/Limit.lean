@@ -7,6 +7,7 @@ Authors: Samuel Schlesinger
 module
 public import Complexitylib.Algebraic.LowerBound.Cutwidth.Gaussian.Layout.Internal.Assembly
 import Complexitylib.Algebraic.LowerBound.Cutwidth.Gaussian.Layout.Internal.Grid
+import Mathlib.Analysis.Real.Pi.Bounds
 
 /-!
 # Choosing the layout parameters
@@ -86,6 +87,32 @@ theorem gaussianCutwidthCoefficient_ge : 3 / 40 ≤ gaussianCutwidthCoefficient 
   unfold gaussianCutwidthCoefficient
   rw [div_mul_eq_mul_div, le_div_iff₀ Real.pi_pos]
   nlinarith [Real.pi_le_four]
+
+theorem gaussianCutwidthCoefficient_pos : 0 < gaussianCutwidthCoefficient :=
+  lt_of_lt_of_le (by norm_num) gaussianCutwidthCoefficient_ge
+
+/-- The circuit coefficient of the Gaussian ordering coefficient `2c`. -/
+theorem one_add_inv_two_mul_gaussianCutwidthCoefficient :
+    1 + 1 / (2 * gaussianCutwidthCoefficient) = 1 + Real.pi * (3 + 2 * Real.sqrt 2) / 6 := by
+  have h2 : Real.sqrt 2 ^ 2 = 2 := Real.sq_sqrt (by norm_num)
+  have hsqrt : Real.sqrt 2 < 3 / 2 := (Real.sqrt_lt' (by norm_num)).mpr (by norm_num)
+  have hne : 3 - 2 * Real.sqrt 2 ≠ 0 := by linarith
+  unfold gaussianCutwidthCoefficient
+  congr 1
+  field_simp
+  nlinarith [h2]
+
+/-- The Gaussian ordering coefficient is at most `20/61`. -/
+theorem two_mul_gaussianCutwidthCoefficient_le : 2 * gaussianCutwidthCoefficient ≤ 20 / 61 := by
+  have hsqrt : (141421 : ℝ) / 100000 < Real.sqrt 2 :=
+    (Real.lt_sqrt (by norm_num)).mpr (by norm_num)
+  have hpi := Real.pi_gt_d4
+  unfold gaussianCutwidthCoefficient
+  have : 2 * (3 / Real.pi * (3 - 2 * Real.sqrt 2)) = 6 * (3 - 2 * Real.sqrt 2) / Real.pi := by
+    field_simp
+    ring
+  rw [this, div_le_div_iff₀ Real.pi_pos (by norm_num)]
+  nlinarith
 
 /-- **Parameters.** For every positive slack some admissible parameters bring the layout
 bound within that slack of `(3/π)(3 - 2√2)`. -/
