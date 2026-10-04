@@ -100,34 +100,76 @@ theorem card_filter_exists_mem_le (F : Finset (Sym2 W)) :
     simpa using hw
 
 open scoped Classical in
-/-- Every vertex with an edge scoring at most `t` and an edge scoring at least `t` is
-counted by a tail or by one threshold of the grid. -/
-theorem card_filter_edgeScore_le (score : Sym2 W → ℝ) {a δ : ℝ} (hδ : 0 < δ) (M : ℕ) {B : ℝ}
-    (low : 2 * ((H.edgeFinset.filter fun e => score e < a).card : ℝ) ≤ B)
-    (high : 2 * ((H.edgeFinset.filter fun e => a + M * δ ≤ score e).card : ℝ) ≤ B)
+/-- Below `a`: a vertex with an edge scoring at most `t < a` is an endpoint of an edge scoring
+below `a`. -/
+theorem card_filter_edgeScore_le_of_lt (score : Sym2 W → ℝ) {a t : ℝ} (ht : t < a) :
+    ((Finset.univ.filter fun v => (∃ e ∈ H.edgeFinset, v ∈ e ∧ score e ≤ t) ∧
+      ∃ e ∈ H.edgeFinset, v ∈ e ∧ t ≤ score e).card : ℝ) ≤
+      2 * ((H.edgeFinset.filter fun e => score e < a).card : ℝ) := by
+  have hsub : (Finset.univ.filter fun v => (∃ e ∈ H.edgeFinset, v ∈ e ∧ score e ≤ t) ∧
+      ∃ e ∈ H.edgeFinset, v ∈ e ∧ t ≤ score e) ⊆
+      Finset.univ.filter fun v => ∃ e ∈ H.edgeFinset.filter fun e => score e < a, v ∈ e := by
+    intro v hv
+    obtain ⟨⟨e, he, hv, hle⟩, -⟩ := (Finset.mem_filter.mp hv).2
+    exact Finset.mem_filter.mpr ⟨Finset.mem_univ _, e,
+      Finset.mem_filter.mpr ⟨he, hle.trans_lt ht⟩, hv⟩
+  exact_mod_cast (Finset.card_le_card hsub).trans (card_filter_exists_mem_le _)
+
+open scoped Classical in
+/-- At or above `b`: a vertex with an edge scoring at least `t ≥ b` is an endpoint of an edge
+scoring at least `b`. -/
+theorem card_filter_edgeScore_le_of_ge (score : Sym2 W → ℝ) {b t : ℝ} (ht : b ≤ t) :
+    ((Finset.univ.filter fun v => (∃ e ∈ H.edgeFinset, v ∈ e ∧ score e ≤ t) ∧
+      ∃ e ∈ H.edgeFinset, v ∈ e ∧ t ≤ score e).card : ℝ) ≤
+      2 * ((H.edgeFinset.filter fun e => b ≤ score e).card : ℝ) := by
+  have hsub : (Finset.univ.filter fun v => (∃ e ∈ H.edgeFinset, v ∈ e ∧ score e ≤ t) ∧
+      ∃ e ∈ H.edgeFinset, v ∈ e ∧ t ≤ score e) ⊆
+      Finset.univ.filter fun v => ∃ e ∈ H.edgeFinset.filter fun e => b ≤ score e, v ∈ e := by
+    intro v hv
+    obtain ⟨-, e, he, hv, hle⟩ := (Finset.mem_filter.mp hv).2
+    exact Finset.mem_filter.mpr ⟨Finset.mem_univ _, e,
+      Finset.mem_filter.mpr ⟨he, ht.trans hle⟩, hv⟩
+  exact_mod_cast (Finset.card_le_card hsub).trans (card_filter_exists_mem_le _)
+
+open scoped Classical in
+/-- In a window `u ≤ t < u'`: a vertex with an edge scoring at most `t` and an edge scoring at
+least `t` straddles `u` or is an endpoint of an edge scoring in `[u, u')`. -/
+theorem card_filter_edgeScore_le_window (score : Sym2 W → ℝ) {u t u' : ℝ} (hu : u ≤ t)
+    (hu' : t < u') :
+    ((Finset.univ.filter fun v => (∃ e ∈ H.edgeFinset, v ∈ e ∧ score e ≤ t) ∧
+      ∃ e ∈ H.edgeFinset, v ∈ e ∧ t ≤ score e).card : ℝ) ≤
+      ((Finset.univ.filter fun v => EdgeStraddles H score u v).card : ℝ) +
+        2 * ((H.edgeFinset.filter fun e => u ≤ score e ∧ score e < u').card : ℝ) := by
+  set S := Finset.univ.filter fun v => (∃ e ∈ H.edgeFinset, v ∈ e ∧ score e ≤ t) ∧
+    ∃ e ∈ H.edgeFinset, v ∈ e ∧ t ≤ score e
+  set F := H.edgeFinset.filter fun e => u ≤ score e ∧ score e < u'
+  set X := Finset.univ.filter fun v => EdgeStraddles H score u v
+  have hsub : S ⊆ X ∪ Finset.univ.filter fun v => ∃ e ∈ F, v ∈ e := by
+    intro v hv
+    obtain ⟨⟨e, he, hve, hle⟩, e', he', hve', hle'⟩ := (Finset.mem_filter.mp hv).2
+    rw [Finset.mem_union]
+    by_cases hlt : score e < u
+    · exact Or.inl (Finset.mem_filter.mpr ⟨Finset.mem_univ _, e,
+        (mem_incidenceFinset_iff H).mpr ⟨he, hve⟩, hlt, e',
+        (mem_incidenceFinset_iff H).mpr ⟨he', hve'⟩, hu.trans hle'⟩)
+    · exact Or.inr (Finset.mem_filter.mpr ⟨Finset.mem_univ _, e,
+        Finset.mem_filter.mpr ⟨he, not_lt.mp hlt, hle.trans_lt hu'⟩, hve⟩)
+  have hcard := (Finset.card_le_card hsub).trans (Finset.card_union_le _ _)
+  have hF := card_filter_exists_mem_le F
+  exact_mod_cast hcard.trans (by omega)
+
+open scoped Classical in
+/-- Inside a grid `a + i δ`, `i ≤ M`: if every threshold has few straddling vertices and few
+edges in the following window, then so does every `t ∈ [a, a + M δ)`. -/
+theorem card_filter_edgeScore_le_of_grid (score : Sym2 W → ℝ) {a δ : ℝ} (hδ : 0 < δ) (M : ℕ)
+    {B : ℝ}
     (mid : ∀ i < M,
       ((Finset.univ.filter fun v => EdgeStraddles H score (a + i * δ) v).card : ℝ) +
         2 * ((H.edgeFinset.filter fun e =>
           a + i * δ ≤ score e ∧ score e < a + (i + 1) * δ).card : ℝ) ≤ B)
-    (t : ℝ) :
+    {t : ℝ} (ha : a ≤ t) (ht : t < a + M * δ) :
     ((Finset.univ.filter fun v => (∃ e ∈ H.edgeFinset, v ∈ e ∧ score e ≤ t) ∧
       ∃ e ∈ H.edgeFinset, v ∈ e ∧ t ≤ score e).card : ℝ) ≤ B := by
-  set S := Finset.univ.filter fun v => (∃ e ∈ H.edgeFinset, v ∈ e ∧ score e ≤ t) ∧
-    ∃ e ∈ H.edgeFinset, v ∈ e ∧ t ≤ score e
-  have endpoints : ∀ F : Finset (Sym2 W), S ⊆ (Finset.univ.filter fun v => ∃ e ∈ F, v ∈ e) →
-      (S.card : ℝ) ≤ 2 * F.card := fun F hsub => by
-    exact_mod_cast (Finset.card_le_card hsub).trans (card_filter_exists_mem_le F)
-  by_cases hlow : t < a
-  · refine (endpoints _ fun v hv => ?_).trans low
-    obtain ⟨⟨e, he, hv, hle⟩, -⟩ := (Finset.mem_filter.mp hv).2
-    exact Finset.mem_filter.mpr ⟨Finset.mem_univ _, e,
-      Finset.mem_filter.mpr ⟨he, hle.trans_lt hlow⟩, hv⟩
-  by_cases hhigh : a + M * δ ≤ t
-  · refine (endpoints _ fun v hv => ?_).trans high
-    obtain ⟨-, e, he, hv, hle⟩ := (Finset.mem_filter.mp hv).2
-    exact Finset.mem_filter.mpr ⟨Finset.mem_univ _, e,
-      Finset.mem_filter.mpr ⟨he, hhigh.trans hle⟩, hv⟩
-  push Not at hlow hhigh
   -- `t` lies in the window of the threshold `a + i δ`.
   set i := ⌊(t - a) / δ⌋₊
   have hq : 0 ≤ (t - a) / δ := div_nonneg (by linarith) hδ.le
@@ -142,36 +184,37 @@ theorem card_filter_edgeScore_le (score : Sym2 W → ℝ) {a δ : ℝ} (hδ : 0 
     push Not at hge
     have : (M : ℝ) * δ ≤ i * δ := by gcongr
     linarith
-  set F := H.edgeFinset.filter fun e => a + i * δ ≤ score e ∧ score e < a + (i + 1) * δ
-  set X := Finset.univ.filter fun v => EdgeStraddles H score (a + i * δ) v
-  have hsub : S ⊆ X ∪ Finset.univ.filter fun v => ∃ e ∈ F, v ∈ e := by
-    intro v hv
-    obtain ⟨⟨e, he, hve, hle⟩, e', he', hve', hle'⟩ := (Finset.mem_filter.mp hv).2
-    rw [Finset.mem_union]
-    by_cases hlt : score e < a + i * δ
-    · refine Or.inl (Finset.mem_filter.mpr ⟨Finset.mem_univ _, e,
-        (mem_incidenceFinset_iff H).mpr ⟨he, hve⟩, hlt, e',
-        (mem_incidenceFinset_iff H).mpr ⟨he', hve'⟩, by linarith⟩)
-    · refine Or.inr (Finset.mem_filter.mpr ⟨Finset.mem_univ _, e,
-        Finset.mem_filter.mpr ⟨he, not_lt.mp hlt, by linarith⟩, hve⟩)
-  have hcard := (Finset.card_le_card hsub).trans (Finset.card_union_le _ _)
-  have hF := card_filter_exists_mem_le F
-  calc (S.card : ℝ) ≤ X.card + 2 * F.card := by exact_mod_cast hcard.trans (by omega)
-    _ ≤ B := mid i hiM
+  exact (card_filter_edgeScore_le_window H score (by linarith) (by linarith)).trans (mid i hiM)
 
 open scoped Classical in
-/-- **Edge-score path decomposition.** Listing the edges of a cubic graph by score, bag `k`
-holds the vertices with edges at positions on both sides of `k`. Every bag has at most `B`
-vertices. -/
-theorem exists_pathDecomposition_of_edgeScore (regular : H.IsRegularOfDegree 3)
-    (score : Sym2 W → ℝ) {a δ : ℝ} (hδ : 0 < δ) (M : ℕ) {B : ℝ}
+/-- Every vertex with an edge scoring at most `t` and an edge scoring at least `t` is
+counted by a tail or by one threshold of the grid. -/
+theorem card_filter_edgeScore_le (score : Sym2 W → ℝ) {a δ : ℝ} (hδ : 0 < δ) (M : ℕ) {B : ℝ}
     (low : 2 * ((H.edgeFinset.filter fun e => score e < a).card : ℝ) ≤ B)
     (high : 2 * ((H.edgeFinset.filter fun e => a + M * δ ≤ score e).card : ℝ) ≤ B)
     (mid : ∀ i < M,
       ((Finset.univ.filter fun v => EdgeStraddles H score (a + i * δ) v).card : ℝ) +
         2 * ((H.edgeFinset.filter fun e =>
-          a + i * δ ≤ score e ∧ score e < a + (i + 1) * δ).card : ℝ) ≤ B) :
-    ∃ D : PathDecomposition H, ∀ k, ((D.bag k).card : ℝ) ≤ B := by
+          a + i * δ ≤ score e ∧ score e < a + (i + 1) * δ).card : ℝ) ≤ B)
+    (t : ℝ) :
+    ((Finset.univ.filter fun v => (∃ e ∈ H.edgeFinset, v ∈ e ∧ score e ≤ t) ∧
+      ∃ e ∈ H.edgeFinset, v ∈ e ∧ t ≤ score e).card : ℝ) ≤ B := by
+  by_cases hlow : t < a
+  · exact (card_filter_edgeScore_le_of_lt H score hlow).trans low
+  by_cases hhigh : a + M * δ ≤ t
+  · exact (card_filter_edgeScore_le_of_ge H score hhigh).trans high
+  push Not at hlow hhigh
+  exact card_filter_edgeScore_le_of_grid H score hδ M mid hlow hhigh
+
+open scoped Classical in
+/-- **Score-order path decomposition.** List the edges of a cubic graph in nondecreasing score
+order and let bag `k` hold the vertices with an incident edge at a position at most `k` and
+another at a position at least `k`. Each bag lies inside the vertices with an edge scoring at
+most `t` and an edge scoring at least `t`, where `t` is the score of the `k`-th edge. -/
+theorem exists_pathDecomposition_subset_edgeScore (regular : H.IsRegularOfDegree 3)
+    (score : Sym2 W → ℝ) :
+    ∃ D : PathDecomposition H, ∀ k, ∃ t : ℝ, D.bag k ⊆ Finset.univ.filter fun v =>
+      (∃ e ∈ H.edgeFinset, v ∈ e ∧ score e ≤ t) ∧ ∃ e ∈ H.edgeFinset, v ∈ e ∧ t ≤ score e := by
   -- List the edges in nondecreasing score order.
   set l := H.edgeFinset.toList.mergeSort fun e e' => decide (score e ≤ score e') with hl
   have mem_l : ∀ e, e ∈ l ↔ e ∈ H.edgeFinset := fun e => by
@@ -211,12 +254,29 @@ theorem exists_pathDecomposition_of_edgeScore (regular : H.IsRegularOfDegree 3)
     exact Finset.mem_filter.mpr ⟨Finset.mem_univ _, i₁, j₂, hi₁.trans hij, hjk.trans hj₂,
       hv₁, hv₂⟩
   · intro k
-    refine le_trans ?_ (card_filter_edgeScore_le H score hδ M low high mid (score l[k]))
-    gcongr
-    intro v hv
+    refine ⟨score l[k], fun v hv => ?_⟩
     obtain ⟨i, j, hik, hkj, hvi, hvj⟩ := (Finset.mem_filter.mp hv).2
     exact Finset.mem_filter.mpr ⟨Finset.mem_univ _,
       ⟨l[i], (mem_l _).mp (List.getElem_mem _), hvi, mono i k hik⟩,
       l[j], (mem_l _).mp (List.getElem_mem _), hvj, mono k j hkj⟩
+
+open scoped Classical in
+/-- **Edge-score path decomposition.** Listing the edges of a cubic graph by score, bag `k`
+holds the vertices with edges at positions on both sides of `k`. Every bag has at most `B`
+vertices. -/
+theorem exists_pathDecomposition_of_edgeScore (regular : H.IsRegularOfDegree 3)
+    (score : Sym2 W → ℝ) {a δ : ℝ} (hδ : 0 < δ) (M : ℕ) {B : ℝ}
+    (low : 2 * ((H.edgeFinset.filter fun e => score e < a).card : ℝ) ≤ B)
+    (high : 2 * ((H.edgeFinset.filter fun e => a + M * δ ≤ score e).card : ℝ) ≤ B)
+    (mid : ∀ i < M,
+      ((Finset.univ.filter fun v => EdgeStraddles H score (a + i * δ) v).card : ℝ) +
+        2 * ((H.edgeFinset.filter fun e =>
+          a + i * δ ≤ score e ∧ score e < a + (i + 1) * δ).card : ℝ) ≤ B) :
+    ∃ D : PathDecomposition H, ∀ k, ((D.bag k).card : ℝ) ≤ B := by
+  obtain ⟨D, hD⟩ := exists_pathDecomposition_subset_edgeScore H regular score
+  refine ⟨D, fun k => ?_⟩
+  obtain ⟨t, ht⟩ := hD k
+  exact le_trans (by exact_mod_cast Finset.card_le_card ht)
+    (card_filter_edgeScore_le H score hδ M low high mid t)
 
 end Algebraic.Cutwidth.Gaussian.Internal
