@@ -307,6 +307,7 @@ public import Complexitylib.Algebraic.LowerBound.Cutwidth.Extractor.Strong.OneSh
 public import Complexitylib.Algebraic.LowerBound.Cutwidth.Extractor.Strong.OneShot.Block
 public import Complexitylib.Algebraic.LowerBound.Cutwidth.Extractor.Strong.OneShot.Block.Program
 public import Complexitylib.Algebraic.LowerBound.Cutwidth.Gaussian.Kernel
+public import Complexitylib.Algebraic.LowerBound.Cutwidth.Gaussian.Edge
 
 /-!
 # The cutwidth lower bound
