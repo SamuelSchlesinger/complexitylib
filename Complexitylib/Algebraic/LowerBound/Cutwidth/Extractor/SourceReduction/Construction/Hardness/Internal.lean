@@ -9,6 +9,8 @@ public import
   Complexitylib.Algebraic.LowerBound.Cutwidth.Extractor.SourceReduction.Construction.Uniform.Defs
 public import Complexitylib.Algebraic.Basis.Binary
 public import Complexitylib.Algebraic.LowerBound.Cutwidth.Multigraph
+public import Complexitylib.Algebraic.LowerBound.Cutwidth.Gaussian.Band.Defs
+public import Complexitylib.Algebraic.LowerBound.Cutwidth.Gaussian.Frontier.Defs
 public import Mathlib.Order.Filter.AtTopBot.Defs
 import
   Complexitylib.Algebraic.LowerBound.Cutwidth.Extractor.SourceReduction.Construction.Uniform
@@ -27,6 +29,9 @@ eventual statement measures it at every sufficiently large full input length.
 The proved ordering bound with `A = 1/3` gives the coefficient four, and the
 Gaussian edge-score bound with `A = (3/π) arccos ((1 + 2√2)/4)` gives
 `1 + π/(3 arccos((1 + 2√2)/4))`; its rational weakening `A = 9/32` gives `41/9`.
+Conditionally on subcritical band clusters (`Gaussian.BandSubcritical`), the band-jump bound
+with `A = 2 exp (-c²/2) p` gives `1 + 1/A`, and its rational weakening `A = 5/18` at
+`c = 4/25` gives `23/5`.
 -/
 
 public section
@@ -92,5 +97,30 @@ theorem sourceReductionHardFamily_eventually_lt_size_fortyOne_div_nine {ε : ℝ
     with n hn circuit computes
   have := hn circuit computes
   rwa [show (1 : ℝ) + 1 / (9 / 32) = 41 / 9 by norm_num] at this
+
+theorem sourceReductionHardFamily_eventually_lt_size_of_bandSubcritical {c : ℝ} (hc : 0 < c)
+    (hband : ∀ (q : ℝ) (R : ℕ), 0 ≤ q → 2 * q ^ 2 < 1 → Gaussian.BandSubcritical q R c)
+    {ε : ℝ} (hε : 0 < ε) :
+    ∀ᶠ n in atTop, ∀ circuit : Circuit Binary.signature n 1,
+      circuit.Computes Binary.interpretation (fun x _ => sourceReductionHardFamily n x) →
+        (1 + 1 / (2 * (Real.exp (-(c ^ 2) / 2) * Gaussian.frontierCoefficient)) - ε) * n <
+          circuit.size :=
+  sourceReductionHardFamily_eventually_lt_size_of_orderingBound
+    (mul_pos two_pos (mul_pos (Real.exp_pos _) Gaussian.frontierCoefficient_pos))
+    (Multigraph.exists_orderingBound_band hc hband) hε
+
+theorem sourceReductionHardFamily_eventually_lt_size_twentyThree_div_five_of_band
+    (hband : ∀ (q : ℝ) (R : ℕ), 0 ≤ q → 2 * q ^ 2 < 1 →
+      Gaussian.BandSubcritical q R (4 / 25))
+    {ε : ℝ} (hε : 0 < ε) :
+    ∀ᶠ n in atTop, ∀ circuit : Circuit Binary.signature n 1,
+      circuit.Computes Binary.interpretation (fun x _ => sourceReductionHardFamily n x) →
+        (23 / 5 - ε) * n < circuit.size := by
+  filter_upwards [sourceReductionHardFamily_eventually_lt_size_of_orderingBound
+    (by norm_num : (0 : ℝ) < 5 / 18)
+    (Multigraph.exists_orderingBound_five_div_eighteen_of_bandSubcritical hband) hε]
+    with n hn circuit computes
+  have := hn circuit computes
+  rwa [show (1 : ℝ) + 1 / (5 / 18) = 23 / 5 by norm_num] at this
 
 end Algebraic.Cutwidth.Extractor.Internal

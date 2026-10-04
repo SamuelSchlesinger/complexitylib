@@ -9,6 +9,8 @@ public import
   Complexitylib.Algebraic.LowerBound.Cutwidth.Extractor.SourceReduction.Construction.Uniform.Defs
 public import Complexitylib.Algebraic.Basis.Binary
 public import Complexitylib.Algebraic.LowerBound.Cutwidth.Multigraph
+public import Complexitylib.Algebraic.LowerBound.Cutwidth.Gaussian.Band.Defs
+public import Complexitylib.Algebraic.LowerBound.Cutwidth.Gaussian.Frontier.Defs
 public import Mathlib.Order.Filter.AtTopBot.Defs
 import
   Complexitylib.Algebraic.LowerBound.Cutwidth.Extractor.SourceReduction.Construction.Hardness.Internal
@@ -28,6 +30,12 @@ graph-ordering hypothesis `Multigraph.OrderingBound A η C` holds for some
 and the coefficient four; the Gaussian edge-score decomposition (`Cutwidth.Gaussian`)
 gives `A = (3/π) arccos ((1 + 2√2)/4) ≈ 0.28070`, and its rational weakening `A = 9/32`
 gives the coefficient `41/9`.
+
+Two further bounds are conditional on the open percolation hypothesis
+`Gaussian.BandSubcritical` (subcritical band clusters of the Gaussian edge-score field), which
+is a premise of the theorems and not an axiom. Under it the band-jump decomposition
+(`Gaussian.Band`) gives `A = 2 exp (-c²/2) p` with `p` the frontier coefficient, and at
+`c = 4/25` its rational weakening `A = 5/18` gives the coefficient `23/5`.
 -/
 
 public section
@@ -74,5 +82,36 @@ theorem sourceReductionHardFamily_eventually_lt_size_fortyOne_div_nine {ε : ℝ
         (fun x _ => Extractor.sourceReductionHardFamily n x) →
         (41 / 9 - ε) * n < circuit.size :=
   Extractor.Internal.sourceReductionHardFamily_eventually_lt_size_fortyOne_div_nine hε
+
+/-- **The band-jump bound for the explicit family** (conditional). If the band clusters of the
+Gaussian edge-score field are subcritical (`Gaussian.BandSubcritical q R c` for every decay rate
+`q < 1/√2` and radius `R`), every full-binary-basis circuit for the fixed uniformly computable
+hard family has more than `(1 + 1/(2 exp (-c²/2) p) - ε) n` gates at every sufficiently large
+full input length, where `p = (3/(2π)) arccos ((1 + 2√2)/4)`. -/
+theorem sourceReductionHardFamily_eventually_lt_size_of_bandSubcritical {c : ℝ} (hc : 0 < c)
+    (hband : ∀ (q : ℝ) (R : ℕ), 0 ≤ q → 2 * q ^ 2 < 1 → Gaussian.BandSubcritical q R c)
+    {ε : ℝ} (hε : 0 < ε) :
+    ∀ᶠ n in Filter.atTop, ∀ circuit : Circuit Binary.signature n 1,
+      circuit.Computes Binary.interpretation
+        (fun x _ => Extractor.sourceReductionHardFamily n x) →
+        (1 + 1 / (2 * (Real.exp (-(c ^ 2) / 2) * Gaussian.frontierCoefficient)) - ε) * n <
+          circuit.size :=
+  Extractor.Internal.sourceReductionHardFamily_eventually_lt_size_of_bandSubcritical hc hband hε
+
+/-- **The coefficient `23/5` for the explicit family** (conditional). If the band clusters of the
+Gaussian edge-score field in the band `[-4/25, 4/25)` are subcritical
+(`Gaussian.BandSubcritical q R (4/25)` for every decay rate `q < 1/√2` and radius `R`), every
+full-binary-basis circuit for the fixed uniformly computable hard family has more than
+`(23/5 - ε) n` gates at every sufficiently large full input length. -/
+theorem sourceReductionHardFamily_eventually_lt_size_twentyThree_div_five_of_bandSubcritical
+    (hband : ∀ (q : ℝ) (R : ℕ), 0 ≤ q → 2 * q ^ 2 < 1 →
+      Gaussian.BandSubcritical q R (4 / 25))
+    {ε : ℝ} (hε : 0 < ε) :
+    ∀ᶠ n in Filter.atTop, ∀ circuit : Circuit Binary.signature n 1,
+      circuit.Computes Binary.interpretation
+        (fun x _ => Extractor.sourceReductionHardFamily n x) →
+        (23 / 5 - ε) * n < circuit.size :=
+  Extractor.Internal.sourceReductionHardFamily_eventually_lt_size_twentyThree_div_five_of_band
+    hband hε
 
 end Algebraic.Cutwidth
