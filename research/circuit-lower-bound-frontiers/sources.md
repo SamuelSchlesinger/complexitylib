@@ -463,6 +463,33 @@ Robert Robere. *KRW Composition Theorems via Lifting*. arXiv:2007.02740v3,
 
 [Primary source](https://doi.org/10.1007/s00037-024-00250-7).
 
+<a id="roychowdhury-orlitsky-siu94"></a>
+
+## roychowdhury-orlitsky-siu94
+
+Vwani P. Roychowdhury, Alon Orlitsky, and Kai-Yeung Siu.
+*Lower Bounds on Threshold and Related Circuits via Communication Complexity*.
+IEEE Transactions on Information Theory 40(2), 467–474, 1994.
+DOI: 10.1109/18.312169. Published full text inspected October 4, 2026;
+Sections III–IV give gatewise communication/rectangle arguments for arbitrary-depth
+circuits. The July 1992 Purdue report is an earlier version.
+
+[Primary source](https://doi.org/10.1109/18.312169).
+[Inspected published paper](https://static1.squarespace.com/static/55bd6f4de4b01afc98144e62/t/576875946b8f5b9dff9ae119/1466463640398/Lower%2BBounds%2Bon%2BThreshold%2Band%2BRelated%2BCircuits%2Bvia%2BCommunication%2BComplexity.pdf).
+
+<a id="amano-tarui08"></a>
+
+## amano-tarui08
+
+Kazuyuki Amano and Jun Tarui. *A Well-Mixed Function with Circuit Complexity
+5n ±o(n): Tightness of the Lachish-Raz-Type Bounds*. TAMC 2008, LNCS 4978,
+342–350. DOI: 10.1007/978-3-540-79228-4_30. Publisher abstract and bibliography
+inspected October 4, 2026; full text was not inspected. The abstract explicitly
+states an `(n-o(n))`-mixed function with U2 complexity `5n+o(n)`, establishing
+the limitation of mixedness alone for a coefficient above five.
+
+[Primary source](https://doi.org/10.1007/978-3-540-79228-4_30).
+
 <a id="sakai-etal19"></a>
 
 ## sakai-etal19
@@ -474,6 +501,63 @@ Takayuki Sakai, Kazuhisa Seto, Suguru Tamaki, and Junichi Teruyama.
   82:1–82:16, DOI: 10.4230/LIPIcs.MFCS.2016.82. Sources checked October 4, 2026.
 
 [Primary source](https://doi.org/10.1016/j.jcss.2019.04.004).
+
+<a id="carlet24-inverse"></a>
+
+## carlet24-inverse
+
+Claude Carlet. *On the vector subspaces of F_(2^n) over which the multiplicative
+inverse function sums to zero*. Designs, Codes and Cryptography, published online
+2024. DOI: 10.1007/s10623-024-01531-6. Section 4, Theorem 1, inspected October 4,
+2026: the reciprocal sum over every affine subspace avoiding zero is nonzero.
+Used to credit the affine geometry of inversion; the circuit-count deduction
+and scaling-defect argument are separately proved in the repository.
+
+[Primary source](https://doi.org/10.1007/s10623-024-01531-6).
+
+<a id="ballet-pieltant18"></a>
+
+## ballet-pieltant18
+
+Stéphane Ballet and Julia Pieltant. *Tower of algebraic function fields with maximal
+Hasse--Witt invariant and tensor rank of multiplication in any extension of F2 and F3*.
+Journal of Pure and Applied Algebra 222(5), 1069-1086 (2018).
+DOI: 10.1016/j.jpaa.2017.06.007. Author manuscript inspected October 4, 2026:
+equation (1) gives the bilinear decomposition and Theorem 1.6 states the uniform
+linear upper bound in the extension degree, following the Chudnovsky--Chudnovsky
+method. Used for gate-model upper bounds in the future-direction audit; the Boolean
+translation and inversion norm recursion are deductions in our note, not claims
+attributed to this paper or Lean-checked theorems.
+
+[Primary manuscript](https://arxiv.org/pdf/1409.3440),
+[journal publication](https://doi.org/10.1016/j.jpaa.2017.06.007).
+
+<a id="cklm17"></a>
+
+## cklm17
+
+Arkadev Chattopadhyay, Michal Koucký, Bruno Loff, and Sagnik Mukhopadhyay.
+*Simulation Beats Richness: New Data-Structure Lower Bounds*. ECCC TR17-170,
+2017. Theorem 5.17 and its proof, printed pp. 34-35, establish MOD3
+equidistribution on affine subspaces of sublinear codimension. Inspected
+October 4, 2026; used for the obstruction to constant-cost affine restrictions.
+
+[Primary report](https://eccc.weizmann.ac.il/report/2017/170/),
+[primary manuscript](https://eccc.weizmann.ac.il/report/2017/170/download/).
+
+<a id="cgpt06"></a>
+
+## cgpt06
+
+Arkadev Chattopadhyay, Navin Goyal, Pavel Pudlák, and Denis Thérien.
+*Lower bounds for circuits with MOD_m gates*. FOCS 2006, pp. 709-718.
+DOI: 10.1109/FOCS.2006.46. Author manuscript inspected October 4, 2026.
+Theorem 1 concerns linear unit-gate bounds at unrestricted depth in the
+pure MOD_m basis; Theorem 3 concerns superlinear wire bounds at constant depth.
+Neither covers the mixed AND/OR/XOR/MOD3 basis.
+
+[DOI](https://doi.org/10.1109/FOCS.2006.46),
+[author manuscript](https://users.math.cas.cz/~pudlak/cgpt.pdf).
 
 <a id="shannon48"></a>
 

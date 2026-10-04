@@ -10220,6 +10220,482 @@ Theorem~\ref{thm:lowerbounds-algebraic-explicit-four-n}.
   Apply the proved Gaussian ordering coefficient.
 \end{proof}
 
+\begin{definition}[Exact capacity of a mixed aggregate circuit]
+  \label{def:lowerbounds-algebraic-aggregate-capacity}
+  \lean{Algebraic.Aggregate.Capacity.capacity,
+    Algebraic.Aggregate.Capacity.realCapacity,
+    Algebraic.Cutwidth.Aggregate.OneWaySummary}
+  \leanok
+  \uses{def:lowerbounds-algebraic-aggregate-budget}
+  If a mixed circuit has $s$ binary gates and special registers $M_j$, its exact
+  capacity is $B=s+\sum_j\log_2|M_j|$. The integral version rounds each logarithm
+  upward. These capacities have no guessed-output term. A one-way summary for a
+  coordinate split depends only on the sending coordinates and determines the
+  output for every assignment to the remaining coordinates.
+\end{definition}
+
+\begin{theorem}[One-way capacity bound without a sparse-gate hypothesis]
+  \label{thm:lowerbounds-algebraic-aggregate-capacity-finite}
+  \lean{Algebraic.Cutwidth.Aggregate.card_accepting_le_of_oneWay,
+    Algebraic.Cutwidth.Aggregate.input_le_capacity_of_oneWay,
+    Algebraic.Cutwidth.Aggregate.input_le_capacity_of_circuit,
+    Algebraic.Cutwidth.Aggregate.input_le_logCard_of_circuit,
+    Algebraic.Aggregate.Capacity.logb_card_key_eq_realCapacity}
+  \leanok
+  \uses{def:lowerbounds-algebraic-aggregate-capacity}
+  Every mixed aggregate circuit computing a $K$-rectangle-free function with at
+  least $2^{n-2}$ accepting inputs has
+  \[
+    n\le B+2\lceil\log_2 K\rceil+7.
+  \]
+  No bound is imposed on the number, placement, or fan-in of special gates.
+\end{theorem}
+\begin{proof}
+  \leanok
+  Give the receiving party $\lceil\log_2K\rceil+3$ input coordinates. The sender
+  supplies each special gate's aggregate over its own primary-input slots and at
+  most one bit per binary gate. The receiver reconstructs all internal gates
+  topologically. A further bit handles a directly designated primary output.
+  Small row classes have fewer than $K$ rows, while large row classes accept fewer
+  than $K$ receiving assignments. Counting both classes and taking logarithms gives
+  the bound. This is a classical communication-complexity argument, in the tradition
+  of Roychowdhury--Orlitsky--Siu (1994).
+\end{proof}
+
+\begin{theorem}[Whole-basis lower bounds for the fixed explicit family]
+  \label{thm:lowerbounds-algebraic-aggregate-capacity-explicit}
+  \lean{Algebraic.Cutwidth.Aggregate.sourceReductionHardFamily_eventually_lt_realCapacity,
+    Algebraic.Cutwidth.Aggregate.sourceReductionHardFamily_eventually_lt_capacity,
+    Algebraic.Cutwidth.Aggregate.sourceReductionHardFamily_eventually_lt_size_of_register_card,
+    Algebraic.Cutwidth.Aggregate.sourceReductionHardFamily_eventually_lt_size_two_state}
+  \leanok
+  \uses{thm:lowerbounds-algebraic-aggregate-capacity-finite,
+    thm:lowerbounds-algebraic-uniform-hard-family}
+  For every $\varepsilon>0$, all sufficiently large mixed circuits computing the
+  same fixed polynomial-time family have $B>(1-\varepsilon)n$. If all special
+  registers have at most $r\ge2$ states, they have more than
+  $(1/\log_2r-\varepsilon)n$ gates. In particular arbitrary numbers of two-state
+  aggregates, together with the full binary basis, require more than
+  $(1-\varepsilon)n$ gates. Depth, fanout, repeated slots, and special-to-special
+  wiring remain unrestricted.
+\end{theorem}
+\begin{proof}
+  \leanok
+  The rectangle threshold has sublinear logarithm. Absorb the finite remainder
+  in positive linear slack, and bound exact capacity by $g\log_2r$ for $g$ gates.
+\end{proof}
+
+\begin{theorem}[Two-sided hardness and a monochromatic coset obstruction]
+  \label{thm:lowerbounds-algebraic-aggregate-capacity-polarity}
+  \lean{Algebraic.Cutwidth.RectangleFree.coordinateEquiv,
+    Algebraic.Cutwidth.RectangleFree.not_balancePad,
+    Algebraic.Cutwidth.FlatSumsetDisperser.card_lt_of_monochromatic_coset,
+    Algebraic.Cutwidth.Aggregate.family_eventually_sumsetDisperser,
+    Algebraic.Cutwidth.Aggregate.family_eventually_rectangleFree_both}
+  \leanok
+  \uses{thm:lowerbounds-algebraic-uniform-hard-family}
+  The fixed balanced family eventually has both output colors rectangle-free at
+  the same threshold, and is a flat sumset disperser at that threshold. If $V$ is
+  XOR-closed and $f$ is constant on a translate $a+V$, then $|V|<K$ for every
+  $K$-flat sumset disperser $f$.
+\end{theorem}
+\begin{proof}
+  \leanok
+  Flipping the balancing bit negates the output and preserves rectangles. For the
+  coset obstruction, apply sumset dispersion to $a+V$ and $V$: all their XOR sums
+  lie in the same monochromatic translate.
+\end{proof}
+
+\begin{definition}[Signed unbounded AND/OR/XOR circuits]
+  \label{def:lowerbounds-algebraic-geometry-model}
+  \lean{Algebraic.Aggregate.Geometry.Op,
+    Algebraic.Aggregate.Geometry.signature,
+    Algebraic.Aggregate.Geometry.interpretation,
+    Algebraic.Aggregate.Geometry.multiPrimary,
+    Algebraic.Aggregate.Geometry.multiCount,
+    Algebraic.Aggregate.Geometry.size_binaryCircuit,
+    Algebraic.Aggregate.Geometry.eval_binaryCircuit}
+  \leanok
+  A gate is either an affine Boolean function
+  $b\oplus\bigoplus_i a_i z_i$, or an optionally negated conjunction
+  $b\oplus\bigwedge_i[z_i=p_i]$, with arbitrary finite arity and Boolean
+  parameters. Every gate costs one. The existing acyclic circuit model allows
+  arbitrary depth, fanout, and repeated wires, including opposite literals of
+  the same wire. This basis contains unbounded AND, OR, and XOR, constants,
+  and every binary Boolean operation; binary normalization preserves gate count
+  and outputs. For a circuit with $g$ gates, let $h_2$ count conjunction-form
+  gates whose slots directly read at least two distinct primary-input variables.
+  This is a syntactic count and requires no independence of the values read.
+\end{definition}
+
+\begin{theorem}[Affine restrictions with paired gate charges]
+  \label{thm:lowerbounds-algebraic-geometry-pairing}
+  \lean{Algebraic.Aggregate.Geometry.exists_affine_restriction,
+    Algebraic.Aggregate.Geometry.exists_monochromatic_affine,
+    Algebraic.Aggregate.Geometry.two_mul_input_le_size_add_multi}
+  \leanok
+  \uses{def:lowerbounds-algebraic-geometry-model,
+    thm:lowerbounds-algebraic-aggregate-capacity-polarity}
+  Every signed unbounded AND/OR/XOR circuit on $n$ inputs has a nonempty
+  monochromatic affine subspace $S$ of codimension $d$ satisfying
+  \[
+    2^d|S|=2^n,\qquad 2d\le g+h_2+2.
+  \]
+  Consequently, if its output is a $K$-flat sumset disperser, then
+  \[
+    2n\le g+h_2+2\lceil\log_2K\rceil.
+  \]
+\end{theorem}
+\begin{proof}
+  \leanok
+  Process gates topologically, keeping every processed output affine on the
+  current subspace. For a non-affine conjunction with a nonconstant internal
+  predecessor, one affine equation fixes that predecessor to a controlling
+  value and makes both gates permanently constant. If every internal predecessor
+  is constant, a non-affine conjunction must have at least two distinct primary
+  inputs; charge one equation to this gate and its $h_2$ mark. Thus each equation
+  is paid for by two newly constant gates or by one such gate and one mark.
+  A final equation fixes the designated output if necessary. The coset
+  obstruction gives $|S|<K$, yielding the displayed gate inequality.
+\end{proof}
+
+\begin{definition}[The pairing and entropy coefficient]
+  \label{def:lowerbounds-algebraic-geometry-coefficient}
+  \lean{Algebraic.Cutwidth.Aggregate.Geometry.Entropy.bitSaving,
+    Algebraic.Cutwidth.Aggregate.Geometry.Entropy.bitSaving_eq,
+    Algebraic.Cutwidth.Aggregate.Geometry.pairRetention,
+    Algebraic.Cutwidth.Aggregate.Geometry.gateCoefficient}
+  \leanok
+  Write $H_2(p)=-p\log_2p-(1-p)\log_2(1-p)$ and define
+  \[
+    c=1-H_2(1/4),\qquad
+    \alpha(n,k)=\frac{(n-k-1)(n-k-2)}{n(n-1)},\qquad
+    \gamma=\frac{1+2c}{1+c}\approx1.15876032857.
+  \]
+  When $k+3\le n$, the factor $\alpha(n,k)$ is the probability that two designated
+  distinct primary variables both lie on a uniformly chosen sending side of
+  size $n-k-1$. The constant $c$ measures the information saving from a Boolean
+  message whose probability of being true is at most one quarter.
+\end{definition}
+
+\begin{theorem}[The finite pairing and entropy inequality]
+  \label{thm:lowerbounds-algebraic-geometry-finite}
+  \lean{Algebraic.Cutwidth.Aggregate.Geometry.input_le_size_of_entropy,
+    Algebraic.Cutwidth.Aggregate.Geometry.size_lowerBound_of_sumsetDisperser}
+  \leanok
+  \uses{def:lowerbounds-algebraic-geometry-model,
+    def:lowerbounds-algebraic-geometry-coefficient,
+    thm:lowerbounds-algebraic-geometry-pairing}
+  Let a signed unbounded AND/OR/XOR circuit with $g$ gates compute a
+  $K$-flat sumset disperser on $n$ inputs. Assume $K>0$, set
+  $k=\lceil\log_2K\rceil$, and suppose $k+3\le n$. With
+  $\delta=c\alpha(n,k)$, its gate count satisfies
+  \[
+    (1+2\delta)n-2\delta k-k-2-\log_2K\le(1+\delta)g.
+  \]
+\end{theorem}
+\begin{proof}
+  \leanok
+  The sender supplies one partial parity or signed-conjunction bit per gate,
+  with one extra bit for a possible primary output; the receiver reconstructs
+  the circuit. Giving the receiver $k+1$ coordinates makes every message fibre
+  smaller than $K$ by two-sided rectangle-freeness. Designate a pair of distinct
+  primary variables at each of the $h_2$ gates. Averaging retains at least
+  $\alpha(n,k)h_2$ pairs on the sending side, each giving a quarter-biased message.
+  Weighted counting, without assuming independence of message coordinates, gives
+  $g\ge n-k-2-\log_2K+\delta h_2$. Combine this with
+  $g+h_2\ge2n-2k$ from affine pairing.
+\end{proof}
+
+\begin{theorem}[The explicit family needs more than $(\gamma-\varepsilon)n$ signed gates]
+  \label{thm:lowerbounds-algebraic-geometry-explicit}
+  \lean{Algebraic.Cutwidth.Aggregate.Geometry.sourceReductionHardFamily_eventually_lt_size,
+    Algebraic.Cutwidth.Aggregate.Geometry.one_lt_gateCoefficient,
+    Algebraic.Cutwidth.Aggregate.Geometry.gateCoefficient_lt_two}
+  \leanok
+  \uses{thm:lowerbounds-algebraic-geometry-finite,
+    thm:lowerbounds-algebraic-aggregate-capacity-polarity,
+    thm:lowerbounds-algebraic-uniform-hard-family}
+  For every $\varepsilon>0$ and all sufficiently large $n$, every signed
+  unbounded AND/OR/XOR circuit computing the fixed polynomial-time family
+  $\mathrm{sourceReductionHardFamily}(n)$ has more than
+  $(\gamma-\varepsilon)n$ gates, where $1<\gamma<2$ is the exact coefficient
+  above. There is no sparsity, depth, fanout, or fan-in hypothesis. This theorem
+  concerns the signed affine/conjunction basis, not all finite-monoid gates.
+\end{theorem}
+\begin{proof}
+  \leanok
+  The family's sumset threshold has $\log_2K(n)=o(n)$, hence $k=o(n)$ and
+  $\alpha(n,k)\to1$. Divide the finite inequality by $(1+\delta)n$ and absorb
+  its sublinear remainder in $\varepsilon$. The argument combines affine
+  restrictions in the tradition of Demenkov--Kulikov with communication
+  accounting in the tradition of Roychowdhury--Orlitsky--Siu. Formal verification
+  establishes the stated model and bound; historical priority and the strongest
+  previously published coefficient for this exact basis remain unresolved.
+\end{proof}
+
+\begin{definition}[The joint conjunction-message coefficient]
+  \label{def:lowerbounds-algebraic-geometry-joint-coefficient}
+  \lean{Algebraic.Cutwidth.Aggregate.Geometry.Joint.quarterEntropy,
+    Algebraic.Cutwidth.Aggregate.Geometry.Joint.overlapPenalty,
+    Algebraic.Cutwidth.Aggregate.Geometry.Joint.gateSaving,
+    Algebraic.Cutwidth.Aggregate.Geometry.Joint.gateCoefficient}
+  \leanok
+  With binary entropy measured in bits, set
+  \[
+    h=H_2(1/4),\qquad \beta=h-\tfrac34,\qquad \rho=h-\tfrac12,
+    \qquad C_* = \frac{h+3/4}{h+1/2}=1.19065368005\ldots.
+  \]
+  Here $\beta>0$ charges distinct primary variables, while $\rho>0$ is the
+  gate saving in the joint message bound.
+\end{definition}
+
+\begin{theorem}[The finite joint-message inequality]
+  \label{thm:lowerbounds-algebraic-geometry-joint-finite}
+  \lean{Algebraic.Cutwidth.Aggregate.Geometry.Entropy.Graph.input_le_cost_of_fibres,
+    Algebraic.Cutwidth.Aggregate.Geometry.Joint.input_le_size_of_entropy,
+    Algebraic.Cutwidth.Aggregate.Geometry.Joint.size_lowerBound_of_sumsetDisperser}
+  \leanok
+  \uses{def:lowerbounds-algebraic-geometry-joint-coefficient,
+    thm:lowerbounds-algebraic-geometry-pairing,
+    def:lowerbounds-algebraic-geometry-coefficient}
+  Let a signed unbounded AND/OR/XOR circuit compute a $K$-flat sumset disperser,
+  where $K>0$, $k=\lceil\log_2K\rceil$, and $k+3\le n$.
+  With $d=\rho\alpha(n,k)$, its gate count satisfies
+  \[
+    (1-\beta+2d)n-2dk-(1-\beta)(k+1)-1-\log_2K\le(1+d)g.
+  \]
+\end{theorem}
+\begin{proof}
+  \leanok
+  For $m$ signed two-variable conjunctions using $v$ primary variables,
+  a normalized joint message weight has average coding cost at most
+  $m(3/2-h)+\beta v$ bits. Insert the support-graph edges in any order:
+  an edge with zero, one, or two previously used endpoints costs at most
+  $h$, $3/4$, or $3/2-h$ bits respectively. Conditional tables on at most
+  four independent bits establish all signed cases, including parallel edges
+  and triangles. Contradictory conjunctions have constant summaries; summaries
+  using at least three variables cost at most $H_2(1/8)\le3/2-h$.
+  Thus the actual sending-side message costs at most
+  $g+1-\rho m+\beta(n-k-1)$ bits. Pair averaging retains
+  $m\ge\alpha(n,k)h_2$, while rectangle freeness bounds every message fibre.
+  Combine the resulting inequality with $g+h_2\ge2n-2k$.
+\end{proof}
+
+\begin{theorem}[The explicit family attains the stronger joint-message coefficient]
+  \label{thm:lowerbounds-algebraic-geometry-joint-explicit}
+  \lean{Algebraic.Cutwidth.Aggregate.Geometry.Joint.sourceReductionHardFamily_eventually_lt_size,
+    Algebraic.Cutwidth.Aggregate.Geometry.Joint.old_gateCoefficient_lt}
+  \leanok
+  \uses{thm:lowerbounds-algebraic-geometry-joint-finite,
+    thm:lowerbounds-algebraic-uniform-hard-family}
+  For every $\varepsilon>0$, all sufficiently large input lengths require
+  more than $(C_*-\varepsilon)n$ signed unbounded AND/OR/XOR gates to compute
+  the same fixed polynomial-time Boolean family. The exact constant $C_*$ is
+  strictly larger than the previous separate-coordinate coefficient $\gamma$.
+  There are no depth, fanout, fan-in, placement, or sparsity restrictions.
+\end{theorem}
+\begin{proof}
+  \leanok
+  The existing family's logarithmic threshold is sublinear, so $k=o(n)$ and
+  $\alpha(n,k)\to1$. Normalize the finite inequality and absorb the vanishing
+  remainder. The limiting ratio is
+  $(1-\beta+2\rho)/(1+\rho)=C_*$. The strict improvement is equivalent to
+  $h(h-3/4)>0$, established by exact logarithmic inequalities.
+\end{proof}
+
+\begin{theorem}[Shared primary controls improve the affine charge]
+  \label{thm:lowerbounds-algebraic-geometry-shared-controls}
+  \lean{Algebraic.Aggregate.Geometry.Shared.exists_pairing_two_mul_le,
+    Algebraic.Aggregate.Geometry.Shared.PrimaryPairing.exists_affine_restriction,
+    Algebraic.Aggregate.Geometry.Shared.seven_mul_input_add_two_mul_exactTwo_le}
+  \leanok
+  \uses{thm:lowerbounds-algebraic-geometry-pairing}
+  Let $t$ count conjunction gates with exactly two distinct direct primary
+  inputs, and $h_2$ those with at least two. Every circuit computing a
+  $K$-flat sumset disperser satisfies
+  \[
+    7n+2t\le4g+4h_2+8\lceil\log_2K\rceil.
+  \]
+  No gate placement, fan-in, fanout, or depth restriction is imposed.
+\end{theorem}
+\begin{proof}
+  \leanok
+  Choose a maximal gate-disjoint pairing of intersecting two-primary supports.
+  If it contains $p$ pairs, the remaining supports are disjoint, so
+  $2t\le n+4p$. Fix one common primary coordinate per pair when necessary.
+  Each independent equation makes a distinct gate constant, and both primary
+  products in the pair become affine. Run the affine restriction procedure
+  from this initial flat, subtracting the initially constant gates from its
+  charge. It yields $2n+p\le g+h_2+2\lceil\log_2K\rceil$.
+  Eliminate $p$ with the matching inequality.
+\end{proof}
+
+\begin{definition}[The shared-control coefficient]
+  \label{def:lowerbounds-algebraic-geometry-shared-coefficient}
+  \lean{Algebraic.Cutwidth.Aggregate.Geometry.Shared.wideEntropy,
+    Algebraic.Cutwidth.Aggregate.Geometry.Shared.wideSaving,
+    Algebraic.Cutwidth.Aggregate.Geometry.Shared.gateCoefficient}
+  \leanok
+  Write $h=H_2(1/4)$ and $r=1-H_2(1/8)$. The shared-control coefficient is
+  $C_{\mathrm s}=(3-h+3r)/(2+2r)$.
+\end{definition}
+
+\begin{theorem}[The explicit family attains the shared-control coefficient]
+  \label{thm:lowerbounds-algebraic-geometry-shared-explicit}
+  \lean{Algebraic.Cutwidth.Aggregate.Geometry.Shared.size_lowerBound_of_sumsetDisperser,
+    Algebraic.Cutwidth.Aggregate.Geometry.Shared.old_gateCoefficient_lt,
+    Algebraic.Cutwidth.Aggregate.Geometry.Shared.sourceReductionHardFamily_eventually_lt_size}
+  \leanok
+  \uses{def:lowerbounds-algebraic-geometry-shared-coefficient,
+    thm:lowerbounds-algebraic-geometry-shared-controls,
+    thm:lowerbounds-algebraic-geometry-joint-explicit}
+  Put $h=H_2(1/4)$ and $r=1-H_2(1/8)$. The same fixed explicit Boolean family
+  requires more than $(C_{\mathrm s}-\varepsilon)n$ gates eventually, for every
+  $\varepsilon>0$, over the same whole signed unbounded AND/OR/XOR basis, where
+  \[
+    C_{\mathrm s}=\frac{3-h+3r}{2+2r}=1.22148505965\ldots.
+  \]
+  This coefficient strictly exceeds the preceding joint-message coefficient.
+\end{theorem}
+\begin{proof}
+  \leanok
+  Keep separate information costs for exact-two-primary gates and gates using at
+  least three primary variables. The latter cost at most $H_2(1/8)$ bits each.
+  Averaging a chosen triple for each gate retains a common fraction tending to one
+  when Bob receives $\lceil\log_2K\rceil+1=o(n)$ coordinates. Combine this finite
+  information inequality with both the original affine count and the shared-control
+  count. Exact logarithmic comparisons give positive multipliers eliminating both
+  gate classes. Normalize by $n$; the threshold losses vanish.
+\end{proof}
+
+\begin{theorem}[Multioutput affine restrictions and output counting]
+  \label{thm:lowerbounds-algebraic-geometry-multioutput}
+  \lean{Algebraic.Aggregate.Geometry.input_add_multiCount_le_size,
+    Algebraic.Aggregate.Geometry.three_mul_input_le_two_mul_size}
+  \leanok
+  \uses{def:lowerbounds-algebraic-geometry-model,
+    thm:lowerbounds-algebraic-geometry-pairing}
+  Let an $n$-input, $n$-output signed unbounded AND/OR/XOR circuit compute
+  a permutation whose coordinates are not primary projections. Suppose every
+  affine flat on which all output coordinates are affine has size at most
+  $2^r$. Then its gate count satisfies
+  \[
+    3n\le 2g+2r.
+  \]
+\end{theorem}
+\begin{proof}
+  \leanok
+  Bijectivity makes the output coordinates distinct and balanced. A conjunction
+  gate reading two distinct primary inputs has one output fibre of size at most
+  $2^{n-2}$, so it cannot be a balanced output. Thus the $n$ distinct output
+  gates lie outside the $h_2$ gates, giving $g\ge n+h_2$. The affine restriction
+  invariant before fixing an output gives $g+h_2\ge2n-2r$. Add the inequalities.
+\end{proof}
+
+\begin{definition}[Independent nonaffine output components]
+  \label{def:lowerbounds-algebraic-geometry-nonlinear-rank}
+  \lean{Algebraic.Aggregate.Geometry.affineFunctions,
+    Algebraic.Aggregate.Geometry.NonaffineComponents,
+    Algebraic.Aggregate.Geometry.conjunctionCount}
+  \leanok
+  The affine functions of the primary input bits form a submodule of all
+  $\mathbf F_2$-valued functions. A Boolean map has independent nonaffine
+  components when every nonzero linear combination of its output coordinates
+  lies outside this submodule. Write $q$ for the number of conjunction operations
+  in a signed unbounded AND/OR/XOR circuit.
+\end{definition}
+
+\begin{theorem}[Nonlinear generators bound output rank]
+  \label{thm:lowerbounds-algebraic-geometry-nonlinear-rank}
+  \lean{Algebraic.Aggregate.Geometry.NonaffineComponents.output_le_conjunctionCount}
+  \leanok
+  \uses{def:lowerbounds-algebraic-geometry-nonlinear-rank,
+    def:lowerbounds-algebraic-geometry-model}
+  A circuit with $m$ independent nonaffine output components contains at least
+  $m$ conjunction gates. Gate arity, depth, fanout, and reuse of nonlinear
+  intermediate functions are unrestricted.
+\end{theorem}
+\begin{proof}
+  \leanok
+  Pass to the vector space of functions modulo the affine primary functions.
+  Every affine gate is a linear combination of earlier gate values in this
+  quotient. Induction on the actual acyclic program therefore places all output
+  classes in the span of the $q$ conjunction classes. Independence gives $m\le q$.
+\end{proof}
+
+\begin{definition}[Binary-field inversion in linear coordinates]
+  \label{def:lowerbounds-algebraic-geometry-inversion}
+  \lean{Algebraic.Aggregate.Geometry.Inversion.encode,
+    Algebraic.Aggregate.Geometry.Inversion.inverseFunction}
+  \leanok
+  Let $K$ be a binary field and fix a linear isomorphism
+  $e:\mathbf F_2^n\longrightarrow K$. The Boolean map $I_e$ encodes its input
+  using $e$, takes the multiplicative inverse in $K$ with $0^{-1}=0$, and
+  decodes all $n$ output bits in the same basis.
+\end{definition}
+
+\begin{theorem}[A three-halves bound for binary-field inversion]
+  \label{thm:lowerbounds-algebraic-geometry-inversion}
+  \lean{Algebraic.Aggregate.Geometry.Inversion.three_mul_input_le_two_mul_size}
+  \leanok
+  \uses{def:lowerbounds-algebraic-geometry-inversion,
+    thm:lowerbounds-algebraic-geometry-multioutput}
+  For every $n\ge3$ and every linear coordinate basis, any signed unbounded
+  AND/OR/XOR circuit computing all $n$ output bits of $I_e$ satisfies
+  \[
+    3n\le2g+4,
+    \qquad\text{equivalently}\qquad g\ge\tfrac32n-2.
+  \]
+  Depth, fan-in, and fanout are unrestricted, and each scalar Boolean gate
+  costs one. There is no supplied hardness hypothesis.
+\end{theorem}
+\begin{proof}
+  \leanok
+  Inversion is a permutation. The reciprocal ternary identity in characteristic
+  two shows that every simultaneous affine restriction has at most four points.
+  A nonzero additive defect, scaled by arbitrary field elements, shows that
+  no nonzero additive component of inversion can be additive when $|K|>4$;
+  in particular no output is a primary projection. Apply the preceding
+  theorem with $r=2$. The reciprocal identity is a special case of the
+  nonvanishing affine-subspace sums studied by Claude Carlet,
+  \emph{On the vector subspaces of $\mathbf F_{2^n}$ over which the
+  multiplicative inverse function sums to zero} (2024),
+  \href{https://doi.org/10.1007/s10623-024-01531-6}{doi:10.1007/s10623-024-01531-6}.
+  The circuit deduction is formalized here; historical priority is not asserted.
+\end{proof}
+
+\begin{theorem}[Output rank and entropy strengthen binary-field inversion]
+  \label{thm:lowerbounds-algebraic-geometry-inversion-entropy}
+  \lean{Algebraic.Aggregate.Geometry.entropy_mul_size_lower_bound,
+    Algebraic.Aggregate.Geometry.Inversion.inverseFunction_nonaffineComponents,
+    Algebraic.Aggregate.Geometry.Inversion.entropy_mul_size_lower_bound,
+    Algebraic.Aggregate.Geometry.Inversion.gateCoefficient_mul_sub_constantPenalty_le_size,
+    Algebraic.Aggregate.Geometry.Inversion.three_halves_lt_gateCoefficient}
+  \leanok
+  \uses{thm:lowerbounds-algebraic-geometry-nonlinear-rank,
+    thm:lowerbounds-algebraic-geometry-inversion}
+  Put $c=1-H_2(1/4)$. Under the same assumptions as the inversion theorem,
+  \[
+    (2+c)g\ge(3+2c)n-4c,
+    \qquad
+    g\ge\frac{3+2c}{2+c}n-\frac{4c}{2+c}.
+  \]
+  The leading coefficient is $1.54311234736\ldots>3/2$; the additive penalty is
+  $0.34489877887\ldots$. The field, basis, and circuit assumptions are unchanged.
+\end{theorem}
+\begin{proof}
+  \leanok
+  The scaling-defect argument excludes every affine nonzero output component,
+  so the nonlinear-generator count is at least $n$. Let $o$ count conjunction
+  output gates. Distinct outputs imply $g\ge2n-o$. A balanced conjunction with a
+  primary literal must equal a signed primary literal; thus all $o$ conjunction
+  outputs have constant primary summaries. The full primary-message vector is
+  injective, and the $h_2$ marked summaries are quarter-biased, giving
+  $n\le g-o-ch_2$. Hence $2g\ge3n+ch_2$. Combine with
+  $g+h_2\ge2n-4$ and divide by $2+c>0$.
+\end{proof}
+
 \begin{theorem}[Conditional: the concrete family needs more than $(23/5-\varepsilon)n$ gates]
   \label{thm:lowerbounds-algebraic-explicit-band}
   \lean{Algebraic.Cutwidth.Multigraph.exists_orderingBound_band,

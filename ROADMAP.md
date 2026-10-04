@@ -361,6 +361,61 @@ symmetric predicates. The conclusion counts total gates and retains the existing
 polynomial-time family; it does not improve the binary-only coefficient or cover an
 unrestricted number of special gates.
 
+A separate whole-basis theorem now removes that sparsity condition at a smaller
+coefficient (`Aggregate.sourceReductionHardFamily_eventually_lt_realCapacity`).
+Its exact capacity is `B = ordinaryCount + Σ log₂ |M_j|`, with no output guesses or
+per-register rounding, and it proves `B > (1-ε)n` eventually. Register cardinalities
+at most `r ≥ 2` give more than `(1/log₂ r-ε)n` gates; in particular B2 plus arbitrarily
+many two-state AND/OR/parity aggregates retains a coefficient of one. The finite
+bound is `n ≤ B + 2 ceil(log₂ K) + 7`. This uses classical one-way communication
+accounting, credited to Roychowdhury–Orlitsky–Siu, rather than the cubic ordering bound.
+The fixed family's two-sided rectangle and sumset-disperser properties are also
+exposed in `Aggregate.Capacity.Polarity`.
+
+Affine pairing and biased-message counting now improve the whole-basis coefficient
+for signed unbounded AND/OR/XOR circuits, including every binary Boolean operation:
+`Aggregate.Geometry.sourceReductionHardFamily_eventually_lt_size` proves
+`(C-ε)n < size`, where `C=(1+2c)/(1+c)=1.15876032857...` and
+`c=1-H₂(1/4)`. There is no depth, fanout, fan-in, or sparse-gate assumption. The
+checked pairing lemma gives `2n ≤ g+h₂+2 ceil(log₂ K)`, where `h₂` counts conjunctions
+with two distinct direct primary variables. Those same gates incur an entropy
+deficit in the actual one-way protocol; exact subset averaging combines the counts.
+Both the circuit geometry and the explicit-family asymptotics are checked.
+Joint counting now strengthens this to
+`Aggregate.Geometry.Joint.sourceReductionHardFamily_eventually_lt_size`, with
+`C=(H₂(1/4)+3/4)/(H₂(1/4)+1/2)=1.19065368005...` and the same unrestricted basis
+and fixed Boolean family. A graph of two-variable conjunction summaries receives
+conditional costs according to whether a new edge has zero, one, or two already
+used endpoints. Exact tables on at most four bits handle every sign pattern;
+larger conjunctions and contradictions only decrease the required cost.
+
+Shared primary controls improve the coefficient again to `1.22148505965...`
+(`Geometry.Shared.sourceReductionHardFamily_eventually_lt_size`). A maximal pairing
+of intersecting two-primary conjunctions pays extra affine restrictions by making
+distinct gates constant. Retaining the stronger one-eighth bias for wide conjunctions
+and averaging designated triples combines the two counts. The exact coefficient is
+`(3-h+3r)/(2+2r)`, where `h=H₂(1/4)` and `r=1-H₂(1/8)`; strict improvement is proved.
+
+There is also a natural multioutput target: for every linear coordinate basis of
+a field of size `2^n`, computing all bits of inversion (with `0⁻¹=0`) requires
+`(3+2c)n-4c ≤ (2+c)g` gates in this basis when `n≥3`, with `c=1-H₂(1/4)`
+(`Geometry.Inversion`). Thus the coefficient is `1.54311234736...`, strengthening
+the retained `3n ≤ 2g+4` theorem. Independent output components modulo affine
+primary functions require at least `n` conjunction generators. Balanced nonliteral
+conjunction outputs have constant primary summaries, while multiple-primary
+conjunctions have biased summaries. These information savings combine with the
+four-point affine restriction obstruction. The field properties and circuit
+deduction are proved. This slice does
+not construct a canonical uniform family of fields and bases or prove a new
+machine-runtime bound for its evaluator.
+See the [geometry note](research/circuit-lower-bound-frontiers/larger-gates/geometry.md),
+[pairing proof](research/circuit-lower-bound-frontiers/larger-gates/pairing.md), and
+[follow-up audit](research/circuit-lower-bound-frontiers/larger-gates/followup-audit.md).
+Historical priority is unresolved. The next targets are joint finite-state savings
+for broader gate bases and an amortized U2 equality-case theorem. A MOD3 gate need
+not become constant under one affine equation, and a three-successor U2 interface
+can retain all its inputs; the audit records exact obstructions to those local shortcuts.
+
 - [x] **Charge frontier vertices instead of crossing edges.** Done by edge-score
   decompositions (`Gaussian.exists_frontier_pathwidthBound`): scoring each edge by
   its normalized endpoint sum makes every threshold a pairwise event, so the

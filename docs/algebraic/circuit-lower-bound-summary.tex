@@ -1,0 +1,372 @@
+% Compile from the repository root:
+% latexmk -pdf -interaction=nonstopmode -halt-on-error \
+%   -outdir=output/pdf docs/algebraic/circuit-lower-bound-summary.tex
+% Both docs/algebraic/ and output/pdf/ are two levels below the repository root.
+% Override RepoRoot when building a version with published source links.
+\documentclass[11pt]{article}
+\usepackage[letterpaper,margin=0.76in]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern,microtype}
+\usepackage{amsmath,amssymb,booktabs,tabularx,array,enumitem,xcolor}
+\usepackage[colorlinks=true,linkcolor=blue!45!black,urlcolor=blue!45!black]{hyperref}
+\hypersetup{pdftitle={Circuit lower bounds: a Lean-linked draft summary},
+  pdfauthor={Samuel Schlesinger}}
+\providecommand{\RepoRoot}{../../}
+\newcommand{\repolink}[2]{\href{\RepoRoot#1}{#2}}
+\newcommand{\leanlink}[2]{\repolink{Complexitylib/Algebraic/LowerBound/Cutwidth/#1}{#2}}
+\newcommand{\method}{\textit{Core idea.}\ }
+\newcommand{\Btwo}{\mathsf{B}_2}
+\newcommand{\little}[1]{o(#1)}
+\newcolumntype{Y}{>{\raggedright\arraybackslash}X}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{5pt}
+\setlist[itemize]{leftmargin=1.3em,itemsep=3pt,topsep=3pt}
+\setlength{\emergencystretch}{2em}
+\raggedbottom
+
+\begin{document}
+\begin{center}
+  {\Large\bfseries Circuit lower bounds}\par\vspace{3pt}
+  {\large A Lean-linked draft summary}\par\vspace{4pt}
+  {\small Samuel Schlesinger \quad $\cdot$ \quad 4 October 2026}
+\end{center}
+
+This note records the proved scope of the cutwidth program and its aggregate-gate
+extensions. The linked results are kernel-checked or direct specializations;
+conditional statements retain explicit unproved premises, and paper-only deductions
+are marked separately. Historical priority is a separate question; this is not a
+claim that every entry is a new literature record. Lean links resolve to files
+in the accompanying repository checkout.
+
+\section*{1. The explicit Boolean family and the binary bounds}
+
+For $n\geq1$, the fixed family is
+\[
+  f_n(b,x)=b\oplus E_{n-1}(x),\qquad x\in\{0,1\}^{n-1}.
+\]
+Here $E_m$ is the actual deterministic evaluator implementing the
+\href{https://arxiv.org/abs/2110.12652}{Chattopadhyay--Liao sumset-extractor strategy}
+(Lemma 5.4 and the proof of Theorem 2), with the library's conservative parameters.
+Schematically, it takes a majority of XORs of affine-correlation-breaker calls,
+whose seeds come from a sampler and whose advice encodes the enumeration indices.
+The total evaluator caps candidate enumeration; this cap is eventually inactive.
+The fresh bit $b$ makes the family exactly balanced at every positive length.
+
+One uniform evaluator and membership in $\mathsf P$ are proved. Its polynomial
+degree and the onset of the asymptotic guarantee are enormous. The useful
+property is that, eventually, some $K_n$ with $\log_2K_n=\little n$ satisfies,
+for every $P,Q\subseteq\{0,1\}^n$,
+\[
+  |P|,|Q|\geq K_n
+  \quad\Longrightarrow\quad
+  \{f_n(p\oplus q):p\in P,\ q\in Q\}=\{0,1\}.
+\]
+\textit{Lean:}
+\leanlink{Extractor/SourceReduction/Construction/Uniform/Defs.lean}{family definition},
+\leanlink{Extractor/SourceReduction/Construction/Uniform.lean}{uniformity and balancing},
+\leanlink{Aggregate/Capacity/Polarity.lean}{sumset dispersion}.
+
+Write $g$ for the number of gates and set
+\[
+ L=1+\frac{\pi}{3\arccos((1+2\sqrt2)/4)}=4.5624976789\ldots.
+\]
+The notation $g\geq an-\little n$ abbreviates: for every $\varepsilon>0$,
+all sufficiently large $n$ require more than $(a-\varepsilon)n$ gates.
+Boolean circuits are finite acyclic circuits with arbitrary depth, fanout and
+repeated slots. Every gate costs one; $n$ includes the balancing bit.
+
+\begin{tabularx}{\linewidth}{@{}p{0.20\linewidth}Yp{0.20\linewidth}@{}}
+\toprule
+Model & Signature and restrictions & Bound for $f_n$ \\
+\midrule
+Deterministic & $\Btwo$: all sixteen binary Boolean functions; no further restriction.
+  & $g\geq Ln-\little n$ \\[4pt]
+Nondeterministic & $\Btwo$ on $n$ ordinary inputs and any number of existential witness
+  inputs; the bound counts ordinary inputs only.
+  & $g\geq Ln-\little n$ \\
+\bottomrule
+\end{tabularx}
+
+\method A narrow layout of the cubic core of a small circuit forces accepting
+rectangles excluded by the hard family; existentially projecting witnesses
+preserves the counting argument.
+The Gaussian edge-score layout supplies the coefficient $L$.
+\textit{Lean:}
+\leanlink{Extractor/SourceReduction/Construction/Hardness.lean}{explicit binary theorem},
+\leanlink{Gaussian.lean}{Gaussian and nondeterministic theorems}.
+The nondeterministic specialization uses the checked
+\leanlink{Aggregate/Family.lean}{density and rectangle properties}.
+The older coefficients $4$ and $41/9$ are weaker corollaries.
+
+\newpage
+\section*{2. Unbounded gates: sparse and whole-basis results}
+
+\textbf{Finite aggregate signature.}
+Besides $\Btwo$, a special gate $j$ may compute
+\[
+  h_j\!\left(\prod_i\phi_{ji}(y_i)\right),
+  \qquad \phi_{ji}:\{0,1\}\to M_j,\quad h_j:M_j\to\{0,1\},
+\]
+where $M_j$ is any finite commutative monoid. The slot maps and Boolean readout
+are arbitrary. Fan-in and placement are unrestricted, including connections
+between special gates. Let $q$ count special gates and $s_2$ count binary gates,
+so $g=s_2+q$, and write $B=s_2+\sum_j\log_2|M_j|$ for exact state capacity.
+This signature includes AND, OR, parity and modular counting;
+larger registers also cover symmetric predicates and finite weighted counters.
+
+\begin{tabularx}{\linewidth}{@{}p{0.19\linewidth}Yp{0.25\linewidth}@{}}
+\toprule
+Result & Restriction & Bound for the same $f_n$ \\
+\midrule
+Sparse extension & $D=q+\sum_j\lceil\log_2|M_j|\rceil=\little n$.
+  & $g\geq Ln-\little n$ \\[5pt]
+Exact capacity & None on the number or sizes of the registers.
+  & $B\geq n-\little n$ \\[5pt]
+Bounded states & $|M_j|\leq r$ for fixed $r\geq2$; no sparsity requirement.
+  & $g\geq n/\log_2r-\little n$ \\
+\bottomrule
+\end{tabularx}
+
+\textit{Sparse method.} Guess special outputs and retain their finite aggregate
+states across cuts, using outgoing-transition counting to pay only $D$ extra bits.
+The condition $D=\little n$ is a circuit restriction, not an unproved hypothesis.
+\textit{Lean:} \leanlink{Aggregate/Hardness.lean}{aggregate hardness}.
+
+\textit{Capacity method.} Alice sends the aggregate of direct primary-input
+contributions to each gate; Bob evaluates the circuit, while rectangle hardness
+forces nearly $n$ bits of total message capacity.
+Bounding each register by $r$ states gives the gate-count corollary.
+\textit{Lean:} \leanlink{Aggregate/Capacity/Hardness.lean}{capacity and bounded-state bounds}.
+For example, $r=3$ gives $g\geq0.6309297536\ldots n-\little n$.
+
+\medskip
+\textbf{The full signed AND/OR/XOR basis.}
+For every finite arity $r$, allow either operation
+\[
+ b\oplus\bigoplus_{i=1}^r(a_i\wedge y_i),
+ \qquad
+ b\oplus\bigwedge_{i=1}^r[y_i=p_i],
+ \qquad a_i,b,p_i\in\{0,1\}.
+\]
+Thus all affine Boolean gates and optionally complemented signed conjunctions
+cost one gate. This includes unbounded AND, OR and XOR and every binary Boolean
+operation. There is no sparsity, fan-in, depth or placement restriction.
+Define binary entropy by $H_2(t)=-t\log_2t-(1-t)\log_2(1-t)$, and let
+\[
+ h=H_2(1/4),\quad r=1-H_2(1/8),\quad
+ C=\frac{3-h+3r}{2+2r}=1.22148505965\ldots.
+ \qquad\boxed{g\geq Cn-\little n.}
+\]
+\method Shared primary inputs allow one affine restriction to simplify two
+conjunctions. A maximal pairing supplies an extra geometric saving; joint entropy
+handles two-variable summaries, and stronger bias handles wider conjunctions.
+This improves the retained coefficients $1.19065368005\ldots$ and
+$1.158760328\ldots$. There are no unresolved hypotheses. The basis does not include
+MOD$_3$ or majority.
+\textit{Lean:}
+\leanlink{Aggregate/Geometry/Defs.lean}{signature},
+\leanlink{Aggregate/Geometry/Model.lean}{one-gate embedding of $\Btwo$},
+\leanlink{Aggregate/Geometry/Affine/Shared.lean}{shared primary controls},
+\leanlink{Aggregate/Geometry/Joint/SharedMessage.lean}{joint information bound},
+\leanlink{Aggregate/Geometry/Shared/LowerBound.lean}{finite combination},
+\leanlink{Aggregate/Geometry/Shared/Hardness.lean}{explicit-family bound}.
+
+\newpage
+\section*{3. A natural multi-output target: finite-field inversion}
+
+Fix $n\geq3$, a field $K$ of $2^n$ elements, and any supplied linear coordinate
+isomorphism $e:\mathbb F_2^n\longrightarrow K$. Define
+\[
+ I_e(x)=e^{-1}\!\left(e(x)^{-1}\right),\qquad 0^{-1}=0.
+\]
+Put $c=1-H_2(1/4)$. A circuit computing \emph{all $n$ output bits} satisfies
+\[
+ \boxed{\quad g\geq\frac{3+2c}{2+c}n-\frac{4c}{2+c}
+   =1.54311234736\ldots n-0.34489877887\ldots.\quad}
+\]
+This strengthens the retained theorem $g\geq\tfrac32n-2$.
+Every scalar Boolean gate has unit cost, including unbounded signed AND, OR and
+XOR; the basis includes all of $\Btwo$. Depth, fanout, fan-in and gate placement
+are unrestricted. The bound concerns all coordinates together, not an individual
+coordinate or a circuit with field-arithmetic operations as gates.
+
+\textbf{Three costs combine.}
+\begin{itemize}
+\item \emph{Affine restrictions.} Every affine subspace on which all inverse
+  coordinates are affine has at most four points. A zero-avoiding affine plane
+  has a nonzero sum of reciprocals, obstructing larger affine restrictions.
+  If $h_2$ counts conjunctions with at least two distinct direct primary inputs,
+  affine pairing therefore gives $g+h_2\geq2n-4$.
+\item \emph{Independent nonlinear components.} Every nonzero XOR of inverse
+  coordinates is nonaffine in the primary bits. Modulo affine primary functions,
+  conjunction outputs span all circuit outputs, so there must be at least $n$
+  conjunction gates. If $o$ of the distinct output gates are conjunctions, the
+  remaining $n-o$ output gates give $g\geq2n-o$.
+\item \emph{Information.} Inversion is a permutation, so the full primary-message
+  vector is injective. A balanced nonliteral conjunction output cannot contain a
+  direct primary literal; its primary summary is constant. Removing these $o$
+  messages and accounting for the quarter-biased $h_2$ messages gives
+  $n\leq g-o-ch_2$.
+\end{itemize}
+The last two inequalities imply $2g\geq3n+ch_2$. Eliminating $h_2$ with the first
+proves $(2+c)g\geq(3+2c)n-4c$. All inversion properties are proved directly;
+there is no supplied extractor, dispersion, or hardness hypothesis.
+
+\textit{Lean:}
+\leanlink{Aggregate/Geometry/Inversion.lean}{finite inversion bounds},
+\leanlink{Aggregate/Geometry/Inversion/Parameters.lean}{exact constants},
+\leanlink{Aggregate/Geometry/Inversion/Field.lean}{reciprocal identities},
+\leanlink{Aggregate/Geometry/Inversion/Components.lean}{nonaffine components},
+\leanlink{Aggregate/Geometry/Multioutput/Rank.lean}{nonlinear-generator rank},
+\leanlink{Aggregate/Geometry/Multioutput/Entropy.lean}{output information bound}.
+
+\textbf{Uniformity boundary.}
+The theorem accepts every supplied field and linear basis. This slice does not
+formalize a canonical choice for each $n$, or a uniform polynomial-time evaluator
+for that choice. The scalar family retains its separate checked uniform-$\mathsf P$
+theorem.
+
+\textbf{Source credit.}
+The reciprocal-sum geometry is classical; see Claude Carlet,
+\href{https://doi.org/10.1007/s10623-024-01531-6}{\emph{On the vector subspaces of
+$\mathbb F_{2^n}$ over which the multiplicative inverse function sums to zero}},
+\emph{Designs, Codes and Cryptography} 93 (2025), 1237--1254.
+The circuit deduction is separate; no literature-priority claim is made here.
+
+\newpage
+\section*{4. Other explicit targets and graph consequences}
+
+The field-valued circuit results below allow \emph{arbitrary} functions of at
+most two field symbols, including unary functions and constants. They impose no
+arithmetic-gate, linear-circuit or bilinear-circuit restriction. The finite base
+field may vary with the dimension. Size counts gates on field symbols, not bits,
+except when the base field is $\mathbb F_2$.
+
+\begin{tabularx}{\linewidth}{@{}p{0.22\linewidth}Yp{0.25\linewidth}@{}}
+\toprule
+Target & Function condition and dimensions & Gate lower bound \\
+\midrule
+Linear map $x\mapsto Mx$
+  & $N$ inputs and $N$ outputs; every square submatrix of $M$ is nonsingular.
+  & $LN-\little N$ \\[5pt]
+Quadratic form $x^{\mathsf T}Mx$
+  & $N$ inputs, one output; every square submatrix of $M+M^{\mathsf T}$ is nonsingular.
+  & $\frac{L+1}{2}N-\little N$ \\[5pt]
+Field multiplication
+  & Degree-$m$ extension in any basis; $2m$ inputs and $m$ outputs.
+  & $(L+1)m-\little m$ \\
+\bottomrule
+\end{tabularx}
+
+\textbf{Linear maps.} Explicit Cauchy matrices over $\mathbb F_q$, for primes
+$q\geq2N$, satisfy the stated condition (total regularity).
+\method Full-rank matrix blocks require about $N$ signals across a
+terminal-balanced cut, opposing the small-circuit layout bound.
+\textit{Lean:} \leanlink{MultiOutput/TotallyRegular.lean}{totally regular maps and Cauchy examples}.
+
+\textbf{Quadratic forms.} Explicit symmetric Hankel Cauchy matrices over prime
+fields $q>2N$ satisfy the polarization condition. The coefficient is
+$(L+1)/2=2.7812488395\ldots$.
+\method Vanishing mixed second differences on boundary rectangles force
+orthogonality through the cross-block matrix, giving a rank obstruction.
+\textit{Lean:} \leanlink{MultiOutput/Quadratic.lean}{quadratic forms and Hankel Cauchy examples}.
+
+\textbf{Multiplication.} In particular, multiplication in $\mathbb F_{2^m}$ in
+any basis requires $5.5624976789\ldots m-\little m$ full-binary-basis gates.
+There are $2m$ input bits, so the coefficient per total input bit is
+$2.7812488395\ldots$.
+\method Fixing one factor and averaging the resulting linear multiplication
+maps forces nearly full-rank blocks across a cut.
+\textit{Lean:} \leanlink{MultiOutput/FieldMul.lean}{finite-field and binary multiplication}.
+
+All three results are unconditional for the stated target classes.
+The exact constants for the explicit Cauchy examples follow from the general
+theorems; their separately named explicit corollaries use the weaker rational
+constants $41/9$ and $25/9$.
+
+\medskip
+\textbf{Superconcentrators.} An $N$-superconcentrator has $2N$ distinct designated
+input and output vertices and routes any equally sized sets of its $N$ inputs
+and $N$ outputs by vertex-disjoint directed walks.
+For finite directed multigraphs, with no acyclicity assumption, the checked bounds are
+\[
+ \#\text{edges}\geq(L+1)N-\little N;
+ \qquad
+ \#\text{non-input vertices}\geq LN-\little N
+\]
+where only the second bound requires input indegree zero and indegree at most
+two everywhere. These are graph bounds, not additional gate signatures.
+\method Routing forces $N$ edges across a terminal-balanced cut; degree
+reduction then brings the graph under the improved cubic ordering theorem.
+\textit{Lean:} \leanlink{Superconcentrator.lean}{edge and vertex bounds}.
+
+\newpage
+\section*{5. Conditional statements and remaining boundaries}
+
+\textbf{Gaussian-band improvement: an open graph hypothesis.}
+For $w>0$, assume \leanlink{Gaussian/Band/Defs.lean}{\texttt{BandSubcritical}}
+for every kernel decay $q\geq0$ with $2q^2<1$ and every truncation radius $R$.
+It says, uniformly over all finite simple cubic graphs, that the expected
+fraction of vertices in large components of the edge-score band $[-w,w)$
+tends to zero as the allowed component size grows. Then $\Btwo$ circuits for
+the same explicit $f_n$, with no further restriction, satisfy
+\[
+  g\geq\bigl[1+(L-1)e^{w^2/2}\bigr]n-\little n.
+\]
+At $w=4/25$, the coefficient is $4.6083907382\ldots$, with a named rational
+weakening $23/5=4.6$. The implication is checked; uniform band subcriticality
+is not proved.
+\method Small band components allow jumps through the Gaussian layout,
+reducing its frontier cost.
+\textit{Lean:} \leanlink{Extractor/SourceReduction/Construction/Hardness.lean}{conditional explicit-family bounds}.
+
+\textbf{Average case: stronger assumptions on the target.}
+Suppose a Boolean family $h_n$ is within $\nu\geq0$ of balanced on every
+coordinate rectangle whose two sides have size at least $K_n$, where
+$K_n\leq n^a$ for a fixed $a$. For every fixed $\varepsilon>0$ and all
+sufficiently large $n$, every $\Btwo$ circuit of size at most $(4-\varepsilon)n$
+has uniform-input agreement at most
+\[
+  \Pr_x[\mathcal C(x)=h_n(x)]
+  \leq\frac12+3\nu+2^{-\varepsilon n/24}.
+\]
+Thus any fixed advantage above $3\nu$ requires $4n-\little n$ gates.
+The required quantitative rectangle balance has not been supplied for our
+concrete $f_n$; exact global balance alone is insufficient.
+\method Directional cut accounting controls rectangle multiplicities and hence
+prediction advantage.
+\textit{Lean:} \leanlink{AverageCase.lean}{average-case theorem}.
+
+\textbf{Paper deductions, not separately formalized results.}
+For the same $f_n$, the research notes additionally establish:
+\begin{itemize}
+\item $\Btwo$ plus $q$ parity gates: if $2q\leq(1/3-\delta)n$ for fixed
+  $\delta>0$, then $g\geq Ln-(4L-3)q-\little n$; the method is sharper
+  aggregate-register accounting.
+\item The sparse aggregate bound survives a free invertible affine change of
+  exactly $n$ input coordinates; the method is affine invariance of sumset
+  dispersion, without free internal affine gates.
+\item In the signed AND/OR/XOR basis, $g\geq2n-\little n$ if every nonlinear
+  gate has no direct primary-input slot; if instead no nonlinear gate has
+  exactly one distinct direct primary input, $g\geq(2-h)n-\little n$.
+  Both separate nonlinear restriction costs from input-information costs.
+\end{itemize}
+\textit{Notes:}
+\repolink{research/circuit-lower-bound-frontiers/larger-gates/aggregate-proof.md}{aggregate transfer},
+\repolink{research/circuit-lower-bound-frontiers/larger-gates/geometry.md}{placement deductions}.
+No improvement beyond $5n$ for $\mathsf U_2$ is established here.
+
+\smallskip
+{\small\textbf{Attribution.}
+The cutwidth architecture follows Ryan Williams's private working note and
+Samuel Schlesinger's circuit compiler. Gaussian-process antecedents include
+\href{https://arxiv.org/abs/1305.3977}{Cs\'oka--Gerencs\'er--Harangi--Vir\'ag}.
+Affine restriction and gatewise communication have classical antecedents in
+\href{https://eccc.weizmann.ac.il/report/2011/026/}{Demenkov--Kulikov} and
+\href{https://doi.org/10.1109/18.312169}{Roychowdhury--Orlitsky--Siu}; in particular
+the capacity row is not presented as a new communication technique.
+See the \repolink{docs/algebraic/cutwidth-lower-bound.md}{source guide} for the
+graph, extractor and superconcentrator provenance and the distinction between
+borrowed ingredients and deductions developed in this project.}
+
+\end{document}

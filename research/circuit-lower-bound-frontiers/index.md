@@ -1,10 +1,13 @@
 # Research directions beyond the cubic core circuit lower bound
 
-Ten independent research authors pursued stronger unrestricted bounds and larger restricted
-models. The main outcome is a set of explicit proof targets, several proved paper deductions,
-and counterexamples that rule out attractive shortcuts. **No improved unrestricted coefficient
-is proved here.** The most developed extension preserves the current coefficient when sparse
-unbounded-fan-in aggregate gates are added. Historical novelty of the deductions is unverified.
+Ten independent research authors pursued stronger circuit bounds and larger gate models.
+The resulting corpus contains checked Lean extensions, paper deductions, explicit proof targets,
+and counterexamples. Sparse finite commutative-monoid gates preserve the current coefficient;
+unlimited signed unbounded AND/OR/XOR gates admit a checked coefficient
+`C=1.22148505965...` for the same explicit family. Binary-field inversion also has a
+checked `1.54311234736...*n-O(1)` bound for all `n` outputs over that unbounded Boolean basis.
+**No stronger B2 leading coefficient
+is established here.** Historical priority of these deductions remains unresolved.
 
 ## Starting point and attribution
 
@@ -25,18 +28,22 @@ and [coefficient ledger](transfer-ledger.md).
 
 The guide credits Ryan Williams's private working note, Schlesinger's counting note, and the
 identified graph and extractor sources [complexitylib26][complexitylib26]. This corpus extends
-that framework on paper; it does not establish independent priority for the baseline or its
+that framework through formalized results and paper deductions; it does not establish
+independent priority for the baseline or its
 extensions. Earlier research includes graph-theoretic methods and semantic depth reduction,
 not only gate elimination; the [dated precursor audit](barriers-perspective/index.md) gives
 precise scopes [valiant77][valiant77], [golovnev-kulikov-williams21][golovnev-kulikov-williams21].
 
-## Concrete deductions worth developing
+## Checked extensions and paper deductions
 
-These have arguments in the linked notes. They remain outside the Lean library.
+The first three rows are checked in Lean. The other rows remain paper deductions with the
+qualifications stated below and in their linked notes.
 
 | Deduction | Exact enlargement or consequence | Main qualification |
 | --- | --- | --- |
-| [Sparse aggregate gates](larger-gates/aggregate-proof.md) | Same `L` for arbitrary-depth B2 circuits augmented by aggregate gates with total register budget `D=o(n)`; includes `o(n)` fixed-MOD gates. | Polynomial wire/description budget. Signed integer weights cost their aggregate range, not just the number of gates. |
+| [Sparse aggregate gates](larger-gates/aggregate-proof.md) | Checked: same `L` for total gates in arbitrary-depth B2 circuits augmented by finite commutative-monoid gates with budget `D=o(n)`; includes `o(n)` fixed-MOD gates. | No reversibility or wire-count premise. Signed integer weights cost their aggregate range, not just the number of gates. |
+| [Unlimited signed AND/OR/XOR](larger-gates/joint-next.md) | Checked: more than `(C-epsilon)n` gates, where `C=(3-h+3r)/(2+2r)=1.22148505965...`, `h=H2(1/4)`, and `r=1-H2(1/8)`, for the same explicit family. | No sparsity, depth, fan-in, or fanout restriction. Every B2 gate has a one-gate normal form in this basis; this does not strengthen the binary-only coefficient. |
+| [Binary-field inversion](larger-gates/geometry.md#9-a-natural-multioutput-target-binary-field-inversion) | Checked: `(2+c)g >= (3+2c)n-4c`, with `c=1-H2(1/4)`, hence coefficient `1.54311234736...`, for all `n` inverse coordinates, `n>=3`. | Same unbounded scalar Boolean basis; every linear field basis is allowed. A canonical uniform field/basis construction and evaluator runtime are not formalized in this slice. |
 | [A linear parity budget](larger-gates/aggregate-proof.md) | For `q` unbounded-fan-in parity gates and total `S=s+q`, `S >= L*n-(1+4/A)q-o(n)` when `2q <= (1/3-delta)n` for fixed `delta>0`. In particular `q<=0.01n` gives `S >= (4.409997772-o(1))n`. | Lower coefficient in a larger model; this does not improve the unrestricted B2 coefficient. |
 | [Free invertible affine input basis](hard-functions/index.md) | Same `L` even if a circuit chooses any free invertible affine change of all `n` input coordinates. | Exactly `n` transformed inputs; no free internal XOR gates or unlimited extra linear forms. A closure deduction from the source extractor. |
 | [Unstructured DNNF hardness](branch-decompositions/index.md) | The current dense rectangle-free family needs binary DNNFs of size `2^(n-o(n))`, even with varying decompositions and DAG sharing. | A tree-based circuit compiler must pay for the joint interface of sibling regions. No improved universal compiler is proved. |
@@ -44,13 +51,23 @@ These have arguments in the linked notes. They remain outside the Lean library.
 
 For the aggregate extension, the idea is to guess special-gate outputs, summarize their input
 contributions with small registers, and use rectangle-freeness to force nearly all inputs into
-one ordinary-circuit component. Reversible register updates preserve the counting argument.
-The precise charge is `D=q+sum_j ceil(log2 R_j)`, where `R_j` bounds the j-th aggregate range.
-For this sumset-derived hard family, the extension also allows a free invertible
-affine input basis: the affine transport preserves exactly the density and rectangle-freeness hypotheses used by the proof.
-The [proof](larger-gates/aggregate-proof.md) includes the component argument, compiler,
-transition count, and uniform asymptotic quantifiers. An independent adversarial review and
-finite frontier implementation checked this argument; neither substitutes for formalization.
+one ordinary-circuit component. Counting outgoing transition keys handles noninvertible
+monoids without recovering previous accumulator values. The precise charge is
+`D=q+sum_j ceil(log2 |M_j|)`, where `M_j` is the j-th finite monoid. The checked theorem
+requires neither reversibility nor a polynomial wire budget. The
+[proof](larger-gates/aggregate-proof.md) links the formalized component argument, compiler,
+transition count, and uniform asymptotic quantifiers. The free invertible affine-input
+extension remains a paper deduction: affine transport preserves the density and
+rectangle-freeness hypotheses used by the argument.
+
+The unlimited AND/OR/XOR theorem uses a different combination. An actual one-way circuit
+protocol yields small message fibres; designated primary-input pairs expose biased message
+bits. [Affine pairing](larger-gates/pairing.md) constructs a monochromatic affine restriction,
+and the [entropy argument](larger-gates/entropy.md) combines the two inequalities without
+double-counting their gate savings. The stronger joint bound additionally charges
+correlations along the graph of shared primary inputs. See the [geometry overview](larger-gates/geometry.md) and
+[independent follow-up audit](larger-gates/followup-audit.md), including the U2 and MOD3
+obstructions. A linear bound for this stronger basis is not itself a superlinear B2 bound.
 
 ## Ranked next research tasks
 
@@ -98,8 +115,8 @@ not an estimated probability of success.
    loss could enlarge the latter regime. These are distinct tasks with distinct hard families.
    [Tree route](branch-decompositions/index.md), [lifting route](communication-lifting/index.md).
 
-The sparse aggregate theorem is the strongest candidate for the next *formalization* project.
-The first two tasks above are the most substantial changes to what the unrestricted proof
+The sparse aggregate and signed AND/OR/XOR geometry theorems are now formalized.
+The first two tasks above remain substantial changes to what the unrestricted B2 proof
 measures. They should be pursued separately until one accounting inequality justifies combining
 savings; the [ledger](transfer-ledger.md) explains why coefficient gains do not simply add.
 
@@ -112,7 +129,7 @@ savings; the [ledger](transfer-ledger.md) explains why coefficient gains do not 
 | [Branch decompositions](branch-decompositions/index.md) | DNNF counting and exact tree compiler; sibling-interface cost. |
 | [Multicut and composition](multicut-composition/index.md) | Adaptive charging and reuse accounting; parity transcripts refute naive aggregation. |
 | [Algorithms](algorithms/index.md) | Whole-recursion cost/error inequalities; exact requirements for algorithmic transfers. |
-| [Larger gates](larger-gates/index.md) | Sparse aggregate-gate proof and comparison with restricted powerful-gate models. |
+| [Larger gates](larger-gates/index.md) | Checked sparse finite-monoid transfer and unlimited signed AND/OR/XOR geometry bound; comparisons and obstructions. |
 | [Communication and lifting](communication-lifting/index.md) | DAG and preprocessing simulations; an equality-cover trap. |
 | [Hard-function robustness](hard-functions/index.md) | Affine-basis extension; directional and multioutput obstructions. |
 | [Graph perspective](graph-perspective/index.md) | Global cover potential, cycle-deletion obstruction, CNF-implicant target. |
@@ -149,10 +166,11 @@ reachability with
 - [Graph identities and parity CNFs](graph-perspective/data/check_obstructions.py).
 - [Adaptivity and resolution witnesses](barriers-perspective/data/check_obstructions.py).
 
-The unchanged Lean baseline passed the full repository build, validation roots, API checks,
+The original Lean baseline passed the full repository build, validation roots, API checks,
 style and environment linters, maintenance tests, axiom guard, and blueprint checker;
-[recorded results](data/repository-checks.txt) specify what was run. Those gates do not check
-the new paper deductions in this corpus.
+[recorded results](data/repository-checks.txt) specify that historical run. The formalized
+aggregate and geometry extensions now have their own Lean theorem files; those earlier
+recorded gates do not certify subsequent changes or the remaining paper deductions.
 
 ## Known Limitations
 
@@ -164,13 +182,14 @@ the local consistency checks on 2026-10-04. Some publisher endpoints restricted 
 matching primary metadata and author manuscripts supplied the corresponding evidence.
 This was not an independent full proof check of every cited theorem.
 
-The new deductions have not been formalized in Lean. Finite exhaustive and randomized
-checks validate the stated small constructions, not universal inequalities or asymptotic
-lower bounds. Independent agent
+Formalization status is stated separately for each extension above. Finite exhaustive and
+randomized checks validate the stated small constructions, not the remaining universal
+paper inequalities or asymptotic claims. Independent agent
 reviews can share blind spots. Literature priority remains unresolved; sources credited for a
 mechanism are not automatically sources for the extensions proposed here. The inherited
-hard-function construction may have enormous eventual thresholds. No remote publication or
-change to the public Lean API is part of this research pass.
+hard-function construction may have enormous eventual thresholds. These results establish
+neither a stronger B2 leading coefficient nor historical priority for their mechanisms or
+combination.
 
 [complexitylib26]: sources.md#complexitylib26
 [valiant77]: sources.md#valiant77

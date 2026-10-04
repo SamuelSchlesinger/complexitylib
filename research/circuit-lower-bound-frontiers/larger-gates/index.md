@@ -1,7 +1,9 @@
 # Larger gates through small aggregate interfaces
 
 [Research index](../index.md) · [Transfer ledger](../transfer-ledger.md) ·
-[Formalized transfer and paper extensions](aggregate-proof.md)
+[Formalized transfer and paper extensions](aggregate-proof.md) ·
+[Whole-basis capacity and geometry](geometry.md) · [Affine pairing](pairing.md) ·
+[Entropy combination](entropy.md) · [U2 and MOD3 audit](followup-audit.md)
 
 ## Finding and status
 
@@ -24,7 +26,47 @@ outgoing keys, so it never needs to recover a previous accumulator. Historical p
 remains unresolved. The affine-input extension and fixed linear parity tradeoff below
 remain unformalized paper deductions.
 
-The target remains the **same full-input-length family in P** from the
+There is also a checked theorem with **no sparsity restriction**:
+[`Capacity/Hardness.lean`](../../../Complexitylib/Algebraic/LowerBound/Cutwidth/Aggregate/Capacity/Hardness.lean)
+proves `ordinaryCount + sum_j log2 |M_j| > (1-epsilon)n` for the same fixed family.
+This exact capacity does not round each register or guess gate outputs. If every
+special register has at most `r>=2` states, the gate coefficient is `1/log2 r`;
+two-state gates give coefficient one. The one-way communication mechanism is
+classical [roychowdhury-orlitsky-siu94][roychowdhury-orlitsky-siu94]. The
+[geometry note](geometry.md) explains the input-information/nonlinearity overlap.
+That overlap is now resolved for signed unbounded AND/OR/XOR by the checked
+[pairing](pairing.md) and [entropy](entropy.md) combination:
+[`Geometry/Shared/Hardness.lean`](../../../Complexitylib/Algebraic/LowerBound/Cutwidth/Aggregate/Geometry/Shared/Hardness.lean)
+proves more than `(C-epsilon)n` gates for the same explicit family, where
+`C=(3-h+3r)/(2+2r)=1.22148505965...`, `h=H_binary(1/4)`, and `r=1-H_binary(1/8)`.
+Shared primary controls and the stronger bias of wide conjunctions improve the joint
+coefficient `1.19065368005...`; that theorem and the earlier separate-coordinate
+coefficient `1.15876032857...` are retained.
+Every binary Boolean gate has an arity-preserving one-gate normal form in this basis.
+The number, placement, fan-in, fanout, and depth of unbounded gates are unrestricted.
+This is a checked whole-basis result, not a new binary-only coefficient. The
+[independent audit](followup-audit.md) gives the finite inequality and concrete
+U2/MOD3 obstructions; historical priority of the combination remains unresolved.
+
+A natural multioutput result is also checked: binary-field inversion in any linear
+coordinate basis requires `(2+c)g >= (3+2c)n-4c`, with `c=1-H2(1/4)`,
+when computing all `n` output bits. The coefficient is `1.54311234736...`,
+for `n>=3`, over the same scalar Boolean basis. The field hardness properties are
+proved in [`Geometry/Inversion.lean`](../../../Complexitylib/Algebraic/LowerBound/Cutwidth/Aggregate/Geometry/Inversion.lean)
+and its dependencies. This does not add a uniform field/basis construction or runtime
+theorem. See [the joint and inversion arguments](geometry.md#8-joint-conjunction-messages-improve-the-scalar-coefficient).
+
+The [shared primary control proof](joint-next.md) records the checked scalar
+coefficient and exact finite inequality. The separate [MOD3 barriers](mod3-barrier.md)
+are paper proofs showing why adding unlimited MOD3 gates requires a different potential;
+they do not establish a new lower bound for that enlarged basis.
+The [future-direction audit](joint-next.md#future-directions-coefficient-improvement-and-a-superlinear-spike)
+records an unformalized `1.234566814...` candidate, an exact repeated-charging
+obstruction to summing cuts, linear upper bounds excluding Gold and infinitely
+many inversion lengths as superlinear targets, and a concrete unproved
+restriction lemma that would yield `Omega(n log n)` gates.
+
+The scalar target remains the **same full-input-length family in P** from the
 [current guide](../../../docs/algebraic/cutwidth-lower-bound.md), including its balancing
 bit and large asymptotic threshold. There is no padding or conversion to an NEXP target.
 The graph theorem, extractor, and original rectangle-counting mechanism are borrowed
@@ -265,4 +307,5 @@ consequence is claimed.
 [kumar23]: ../sources.md#kumar23
 [kumar25]: ../sources.md#kumar25
 [li-yang22]: ../sources.md#li-yang22
+[roychowdhury-orlitsky-siu94]: ../sources.md#roychowdhury-orlitsky-siu94
 [sakai-etal19]: ../sources.md#sakai-etal19
