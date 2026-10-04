@@ -97,6 +97,7 @@ public import Complexitylib.Algebraic.LinearAlgebra.Tensor.Diagonal
 public import Complexitylib.Algebraic.LinearAlgebra.Tensor.DeletionGame
 public import Complexitylib.Algebraic.LinearAlgebra.Tensor.Diagonal.Paired
 public import Complexitylib.Algebraic.LinearAlgebra.Tensor.Explicit
+public import Complexitylib.Algebraic.LinearAlgebra.Tensor.Periodic
 
 /-!
 # Algebraic circuits

@@ -23,6 +23,10 @@ public import Mathlib.Data.Fintype.Powerset
   `a (2k+1) + j` is an injective code of the position `(a, j)`.
 * `Tensor3.weightedLMTensor k` is the Landsberg–Michałek tensor `T_k(lmWeight k)` with these
   doubly exponential weights.
+* `Tensor3.periodicWeight k A M a j = 2^{2^{(a mod A) M + (j mod M)}}` are periodic
+  coefficients: the exponent codes the position `(a, j)` only modulo `(A, M)`, so it lies below
+  `A M` whatever `k` is. `Tensor3.periodicLMTensor k A M` is `T_k(periodicWeight k A M)`; its
+  entries lie in the set `{0} ∪ {2^{2^e} : e < A M}`, which does not depend on `k`.
 * `Tensor3.selectSlices c` is the matrix of the linear map `ℂ^α → ℂ^{α'}` keeping the coordinates
   `c t`; applied to the first factor, `map (selectSlices c) 1 1 T` keeps the slices `c t` of `T`.
   For a strictly increasing `c : Fin (2p+1) → Fin (2k+1)` (a *cluster* of slices) it projects
@@ -68,6 +72,20 @@ def lmWeight (k : ℕ) (a j : Fin (2 * k + 1)) : ℂ :=
 `2^{2^{a (2k+1) + j}}` if `ℓ = j + (a - k)` and `0` otherwise. -/
 def weightedLMTensor (k : ℕ) : Tensor3 (Fin (2 * k + 1)) (Fin (2 * k + 1)) (Fin (2 * k + 1)) :=
   lmTensor k (lmWeight k)
+
+/-- Periodic doubly exponential coefficients `2^{2^{(a mod A) M + (j mod M)}}`. The exponent
+codes the position `(a, j)` modulo `(A, M)`: it separates two positions whose slices differ by
+less than `A` and whose columns differ by less than `M`, and it is less than `A M` when
+`A, M > 0`, whatever `k` is. -/
+def periodicWeight (k A M : ℕ) (a j : Fin (2 * k + 1)) : ℂ :=
+  ((2 ^ 2 ^ ((a : ℕ) % A * M + (j : ℕ) % M) : ℕ) : ℂ)
+
+/-- The periodic Landsberg–Michałek tensor `T_k(periodicWeight k A M)`: its `(a, j, ℓ)`
+coordinate is `2^{2^{(a mod A) M + (j mod M)}}` if `ℓ = j + (a - k)` and `0` otherwise. For
+fixed `A` and `M` its entries come from a finite set independent of `k`. -/
+def periodicLMTensor (k A M : ℕ) :
+    Tensor3 (Fin (2 * k + 1)) (Fin (2 * k + 1)) (Fin (2 * k + 1)) :=
+  lmTensor k (periodicWeight k A M)
 
 /-- The matrix of the linear map `ℂ^α → ℂ^{α'}` that keeps the coordinates `c t`: its `(t, a)`
 entry is `1` if `a = c t` and `0` otherwise. -/
