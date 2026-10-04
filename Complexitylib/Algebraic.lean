@@ -90,6 +90,7 @@ public import Complexitylib.Algebraic.LowerBound.Cutwidth.Extractor.SourceReduct
 public import Complexitylib.Algebraic.LowerBound.Cutwidth.Extractor.SourceReduction.Construction.Hardness
 public import Complexitylib.Algebraic.LinearAlgebra.MatrixRank
 public import Complexitylib.Algebraic.LinearAlgebra.Tensor.BorderRank
+public import Complexitylib.Algebraic.LinearAlgebra.Tensor.Koszul
 
 /-!
 # Algebraic circuits
