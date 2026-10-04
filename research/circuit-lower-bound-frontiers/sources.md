@@ -25,7 +25,7 @@ Boaz Barak, Mark Braverman, Xi Chen, and Anup Rao,
 
 ## bova16
 
-Simone Bova, Florent Capelli, Stefan Mengel, Friedrich Slivovsky, Knowledge Compilation Meets Communication Complexity, IJCAI 2016, pp. 1008–1014; Theorems 1 and 6 The inspected preliminary version is [A Strongly Exponential Separation of DNNFs from CNF Formulas](https://arxiv.org/abs/1411.1995v3), arXiv:1411.1995v3, 2015-02-19; its Theorem 5 supplies the bounded-degree expander graph-CNF bound. The [author publication page](https://researchers.lille.inria.fr/~fcapelli/index_en.html) identifies it as a preliminary version of the IJCAI paper. The corpus padding obstruction is a separate deduction.
+Simone Bova, Florent Capelli, Stefan Mengel, Friedrich Slivovsky, Knowledge Compilation Meets Communication Complexity, IJCAI 2016, pp. 1008–1014; Theorems 1 and 6. The inspected preliminary version is [A Strongly Exponential Separation of DNNFs from CNF Formulas](https://arxiv.org/abs/1411.1995v3), arXiv:1411.1995v3, 2015-02-19; its Theorem 5 supplies the bounded-degree expander graph-CNF bound. The [author publication page](https://researchers.lille.inria.fr/~fcapelli/index_en.html) identifies it as a preliminary version of the IJCAI paper. The corpus padding obstruction is a separate deduction.
 
 [Primary source](https://www.ijcai.org/Proceedings/16/Papers/147.pdf).
 

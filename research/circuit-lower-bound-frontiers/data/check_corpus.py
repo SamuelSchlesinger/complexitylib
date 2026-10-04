@@ -2,6 +2,7 @@
 """Validates: local Markdown links, document reachability, and canonical citations."""
 
 from pathlib import Path
+import hashlib
 import re
 import sys
 from urllib.parse import unquote, urlsplit
@@ -41,6 +42,12 @@ def main():
     if len(anchors) != len(anchors_list):
         errors.append("sources.md: duplicate bibliography anchors")
     used = set()
+    snapshot = ROOT / "graph-perspective/data/realization-source.txt"
+    expected_digest = "280af8fd79953606c1092b348bbf256c4c7cbdbe2513b716d598e06f8fcd91be"
+    if hashlib.sha256(snapshot.read_bytes()).hexdigest() != expected_digest:
+        errors.append("realization-source.txt: snapshot digest mismatch")
+    if expected_digest not in source_text:
+        errors.append("sources.md: snapshot digest missing")
 
     for path in documents:
         text = prose(path.read_text())

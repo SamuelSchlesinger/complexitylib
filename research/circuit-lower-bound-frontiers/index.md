@@ -47,8 +47,7 @@ contributions with small registers, and use rectangle-freeness to force nearly a
 one ordinary-circuit component. Reversible register updates preserve the counting argument.
 The precise charge is `D=q+sum_j ceil(log2 R_j)`, where `R_j` bounds the j-th aggregate range.
 For this sumset-derived hard family, the extension also allows a free invertible
-affine input basis: the affine transport
-preserves exactly the density and rectangle-freeness hypotheses used by the proof.
+affine input basis: the affine transport preserves exactly the density and rectangle-freeness hypotheses used by the proof.
 The [proof](larger-gates/aggregate-proof.md) includes the component argument, compiler,
 transition count, and uniform asymptotic quantifiers. An independent adversarial review and
 finite frontier implementation checked this argument; neither substitutes for formalization.
@@ -133,7 +132,8 @@ python3 research/circuit-lower-bound-frontiers/data/audit.py
 ```
 
 The [audit runner](data/audit.py) re-executes and compares all twelve numerical/finite artifacts,
-then checks canonical citations, local links, and Markdown reachability with
+then checks canonical citations, local links, source snapshot integrity, and Markdown
+reachability with
 [check_corpus.py](data/check_corpus.py). Python 3 and NumPy are required. The artifacts are:
 
 - [Coefficient arithmetic](data/transfer_coefficients.py).
@@ -157,9 +157,16 @@ the new paper deductions in this corpus.
 ## Known Limitations
 
 Whole-corpus mathematical, coherence, source, and skeptical expert reviews have been
-completed, with substantive findings corrected and rechecked. A final source-identifier
-audit is pending. The new deductions have not been formalized in Lean. Finite exhaustive and randomized checks validate the stated
-small constructions, not universal inequalities or asymptotic lower bounds. Independent agent
+completed, with substantive findings corrected and rechecked. The final factual audit
+found no remaining error or substantive gap in its checked scope. All twelve artifacts
+reproduced exactly; fourteen Markdown documents and fifty-two canonical sources passed
+the local consistency checks on 2026-10-04. Some publisher endpoints restricted access;
+matching primary metadata and author manuscripts supplied the corresponding evidence.
+This was not an independent full proof check of every cited theorem.
+
+The new deductions have not been formalized in Lean. Finite exhaustive and randomized
+checks validate the stated small constructions, not universal inequalities or asymptotic
+lower bounds. Independent agent
 reviews can share blind spots. Literature priority remains unresolved; sources credited for a
 mechanism are not automatically sources for the extensions proposed here. The inherited
 hard-function construction may have enormous eventual thresholds. No remote publication or
