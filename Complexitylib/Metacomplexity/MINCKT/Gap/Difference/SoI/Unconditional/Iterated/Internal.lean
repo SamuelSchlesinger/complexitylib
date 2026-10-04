@@ -117,6 +117,11 @@ theorem IsRegularClock.conditionalParameters_widening_internal
   exact (by omega : time ≤ time + outputLength + conditionLength) |>.trans
     (clockIterate_dominates_internal hclock.dominates 4 _)
 
+theorem isAdmissibleClock_id_internal : IsAdmissibleClock id where
+  monotone := monotone_id
+  dominates := fun _ => le_rfl
+  polynomiallyBounded := ⟨1, 1, fun time => by simp⟩
+
 theorem not_satisfiesBounds_ordinaryParameters_internal {tapes : ℕ}
     (machine : TM tapes) (clock : ℕ → ℕ)
     (estimate : GapMINKT.Logarithmic.Estimator) :

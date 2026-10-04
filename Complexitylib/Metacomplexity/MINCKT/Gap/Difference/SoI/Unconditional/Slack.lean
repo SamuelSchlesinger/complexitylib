@@ -125,6 +125,41 @@ theorem IsRegularClock.compatible_of_pairComposition
         (logarithmicSoILoss clock additive) :=
   Slack.IsRegularClock.compatible_of_pairComposition_internal hclock hsupports
 
+/-- Estimator correctness on the plan's queries forces the clock to leave room
+to print the paired output. For `x = 1^n`, `y = []`, and `t = 0`, the paired
+query asks for `pair x y`, of length `2n + 2`, and the upper half of the
+sandwich needs a program printing it within the transformed clock `p(p(n))`;
+a run of `s` steps prints at most `s` output bits. -/
+theorem two_mul_add_two_le_clock_clock_of_satisfiesBoundsOn
+    {tapes : ℕ} {machine : TM tapes} {clock : ℕ → ℕ} {compilerLoss : ℕ}
+    {estimate : GapMINKT.Logarithmic.Estimator}
+    (hestimate : estimate.SatisfiesBoundsOn machine (ordinaryParameters clock)
+      (plan clock compilerLoss).IsEstimatorQuery) (length : ℕ) :
+    2 * length + 2 ≤ clock (clock length) :=
+  two_mul_add_two_le_clock_clock_of_satisfiesBoundsOn_internal hestimate length
+
+/-- Finite ordinary complexity on every plan query forces `2n + 2 ≤ p(n)`: the
+paired query for `x = 1^n`, `y = []`, and `t = 0` asks for `pair x y`, of
+length `2n + 2`, within its source clock `p(n)`. -/
+theorem two_mul_add_two_le_clock_of_forall_ne_top
+    {tapes : ℕ} {machine : TM tapes} {clock : ℕ → ℕ} {compilerLoss : ℕ}
+    (hfinite : ∀ query : MINKT.Instance,
+      (plan clock compilerLoss).IsEstimatorQuery query →
+      machine.timeBoundedKolmogorovComplexity query.output query.time ≠ ⊤)
+    (length : ℕ) :
+    2 * length + 2 ≤ clock length :=
+  two_mul_add_two_le_clock_of_forall_ne_top_internal hfinite length
+
+/-- At the admissible clock `id` (`isAdmissibleClock_id`), no estimator is
+correct on the plan's queries, for any machine and compiler loss: the paired
+query for `x = y = []` and `t = 0` asks for the two-bit output `pair [] []`
+within zero steps. -/
+theorem not_satisfiesBoundsOn_plan_id {tapes : ℕ} (machine : TM tapes)
+    (compilerLoss : ℕ) (estimate : GapMINKT.Logarithmic.Estimator) :
+    ¬ estimate.SatisfiesBoundsOn machine (ordinaryParameters id)
+      (plan id compilerLoss).IsEstimatorQuery :=
+  not_satisfiesBoundsOn_plan_id_internal machine compilerLoss estimate
+
 end Slack
 
 end Iterated

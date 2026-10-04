@@ -670,6 +670,32 @@ open direction.
   $p(0)$ steps, so it stays blank.
 \end{proof}
 
+\begin{lemma}[Slow admissible clocks defeat the plan's estimator queries]
+  \label{lem:avg-slow-clock-estimator}
+  \lean{Complexity.GapMINCKT.DifferenceEstimator.Unconditional.Iterated.isAdmissibleClock_id,
+    Complexity.GapMINCKT.DifferenceEstimator.Unconditional.Iterated.Slack.two_mul_add_two_le_clock_clock_of_satisfiesBoundsOn,
+    Complexity.GapMINCKT.DifferenceEstimator.Unconditional.Iterated.Slack.two_mul_add_two_le_clock_of_forall_ne_top,
+    Complexity.GapMINCKT.DifferenceEstimator.Unconditional.Iterated.Slack.not_satisfiesBoundsOn_plan_id}
+  \leanok
+  \uses{def:avg-gapminkt-log}
+  Fix a machine $U$ and a function $p \colon \mathbb{N} \to \mathbb{N}$, and
+  let the plan of Theorem~\ref{thm:avg-soi-collapse} query
+  $(\mathrm{pair}(x,y), 1^{p(t')})$ and $(y, 1^{p^3(t')})$, where $t' =
+  \max(t, |x|+|y|)$. If an estimator satisfies Fact~3.4's sandwich for $U$ at
+  the ordinary clock $(n, t) \mapsto p(t)$ on the plan's queries, then $2n + 2
+  \le p(p(n))$ for every $n$. If every query of the plan has finite complexity
+  on $U$ at its own clock, then $2n + 2 \le p(n)$ for every $n$. The identity
+  is monotone, satisfies $p(t) \ge t$ and is polynomially bounded, yet at $p =
+  \mathrm{id}$ no estimator satisfies the sandwich on the plan's queries.
+\end{lemma}
+\begin{proof}
+  \leanok
+  For $x = 1^n$, $y$ empty and $t = 0$, the paired query asks for
+  $\mathrm{pair}(x, y)$, of length $2n + 2$, at source clock $p(n)$ and
+  transformed clock $p(p(n))$; a run of $s$ steps prints at most $s$ output
+  bits.
+\end{proof}
+
 \begin{theorem}[Conditional collapse from symmetry of information]
   \label{thm:avg-soi-collapse}
   \lean{Complexity.GapMINCKT.DifferenceEstimator.Unconditional.Iterated.Slack.P_eq_NP_of_multiplicative_hard_of_SoI,

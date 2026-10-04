@@ -124,6 +124,13 @@ theorem IsRegularClock.conditionalParameters_widening
     (conditionalParameters clock).IsWidening :=
   hclock.conditionalParameters_widening_internal
 
+/-- The identity is an admissible primitive clock. Admissibility asks only for
+monotonicity, `t ≤ p(t)`, and a polynomial bound, which do not ensure that the
+plan's clocks leave room to print its paired outputs
+(`Slack.not_satisfiesBoundsOn_plan_id`). -/
+theorem isAdmissibleClock_id : IsAdmissibleClock id :=
+  isAdmissibleClock_id_internal
+
 /-- The full-domain estimator sandwich is unsatisfiable for the iterated
 plan's ordinary parameters: their transformed clock ignores output length, so at
 source time `0` no machine prints a string longer than `clock 0`. The

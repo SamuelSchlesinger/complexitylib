@@ -7,6 +7,8 @@ Authors: Samuel Schlesinger
 module
 public import Complexitylib.Metacomplexity.MINCKT.Gap.Difference.SoI.Unconditional.Slack.Defs
 public import Complexitylib.Metacomplexity.MINCKT.Gap.Difference.SoI.Unconditional.Iterated.Internal
+import Complexitylib.Metacomplexity.Kolmogorov.Internal
+import Complexitylib.Models.TuringMachine.OutputBounds
 
 /-!
 # Explicit slack amplification -- proof internals
@@ -199,6 +201,68 @@ theorem IsRegularClock.compatible_of_pairComposition_internal
         (logarithmicSoILoss clock additive) :=
   Slack.IsRegularClock.compatible_internal hclock
     hsupports.pair_upper_internal
+
+theorem length_le_of_timeBoundedKolmogorovComplexity_ne_top_internal
+    {tapes : ℕ} {machine : TM tapes} {output : List Bool} {time : ℕ}
+    (hfinite : machine.timeBoundedKolmogorovComplexity output time ≠ ⊤) :
+    output.length ≤ time := by
+  by_contra hlt
+  apply hfinite
+  rw [TM.timeBoundedKolmogorovComplexity_eq_top_iff_internal]
+  rintro ⟨program, c, steps, hsteps, hrun, -, hout⟩
+  have hlength := TM.output_length_le_of_reachesIn hrun hout
+  omega
+
+theorem pairInput_replicate_internal (clock : ℕ → ℕ)
+    (compilerLoss length : ℕ) :
+    (plan clock compilerLoss).pairInput ⟨List.replicate length true, [], 0⟩ =
+      ⟨pair (List.replicate length true) [], clock length⟩ := by
+  simp [Plan.pairInput, plan, Iterated.plan, clockIterate, paddedTime]
+
+theorem pairInput_replicate_isEstimatorQuery_internal (clock : ℕ → ℕ)
+    (compilerLoss length : ℕ) :
+    (plan clock compilerLoss).IsEstimatorQuery
+      ⟨pair (List.replicate length true) [], clock length⟩ :=
+  ⟨⟨List.replicate length true, [], 0⟩,
+    Or.inl (pairInput_replicate_internal clock compilerLoss length).symm⟩
+
+theorem two_mul_add_two_le_clock_clock_of_satisfiesBoundsOn_internal
+    {tapes : ℕ} {machine : TM tapes} {clock : ℕ → ℕ} {compilerLoss : ℕ}
+    {estimate : GapMINKT.Logarithmic.Estimator}
+    (hestimate : estimate.SatisfiesBoundsOn machine (ordinaryParameters clock)
+      (plan clock compilerLoss).IsEstimatorQuery) (length : ℕ) :
+    2 * length + 2 ≤ clock (clock length) := by
+  have hupper := (hestimate _
+    (pairInput_replicate_isEstimatorQuery_internal clock compilerLoss length)).2
+  have hfinite : machine.timeBoundedKolmogorovComplexity
+      (pair (List.replicate length true) []) (clock (clock length)) ≠ ⊤ := by
+    intro htop
+    change machine.timeBoundedKolmogorovComplexity
+      (pair (List.replicate length true) []) (clock (clock length)) ≤ _ at hupper
+    rw [htop] at hupper
+    exact WithTop.not_top_le_coe _ hupper
+  simpa [pair_length] using
+    length_le_of_timeBoundedKolmogorovComplexity_ne_top_internal hfinite
+
+theorem two_mul_add_two_le_clock_of_forall_ne_top_internal
+    {tapes : ℕ} {machine : TM tapes} {clock : ℕ → ℕ} {compilerLoss : ℕ}
+    (hfinite : ∀ query : MINKT.Instance,
+      (plan clock compilerLoss).IsEstimatorQuery query →
+      machine.timeBoundedKolmogorovComplexity query.output query.time ≠ ⊤)
+    (length : ℕ) :
+    2 * length + 2 ≤ clock length := by
+  simpa [pair_length] using
+    length_le_of_timeBoundedKolmogorovComplexity_ne_top_internal (hfinite _
+      (pairInput_replicate_isEstimatorQuery_internal clock compilerLoss length))
+
+theorem not_satisfiesBoundsOn_plan_id_internal {tapes : ℕ}
+    (machine : TM tapes) (compilerLoss : ℕ)
+    (estimate : GapMINKT.Logarithmic.Estimator) :
+    ¬ estimate.SatisfiesBoundsOn machine (ordinaryParameters id)
+      (plan id compilerLoss).IsEstimatorQuery := fun hestimate => by
+  have hclock :=
+    two_mul_add_two_le_clock_clock_of_satisfiesBoundsOn_internal hestimate 0
+  simp at hclock
 
 end Slack
 
