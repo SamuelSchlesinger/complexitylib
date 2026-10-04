@@ -9,6 +9,7 @@ public import Complexitylib.Algebraic.LowerBound.Cutwidth.Gaussian.Frontier.Inte
 public import Complexitylib.Algebraic.LowerBound.Cutwidth.Gaussian.Frontier.Order
 public import Complexitylib.Algebraic.LowerBound.Cutwidth.Gaussian.Frontier.Star
 public import Complexitylib.Algebraic.LowerBound.Cutwidth.Gaussian.Frontier.Arccos
+public import Complexitylib.Algebraic.LowerBound.Cutwidth.Gaussian.Edge.Decay
 public import Complexitylib.Algebraic.LowerBound.Cutwidth.Gaussian.Edge.Exact
 public import Complexitylib.Algebraic.LowerBound.Cutwidth.Gaussian.Layout.Internal.Expectation
 
@@ -20,6 +21,7 @@ A threshold separates two Gaussian edge scores with probability at most `arccos 
 at a vertex are within correlation `√((1 + ρ₀)/2)` of the vertex row, so the star inequality
 bounds their summed angles. A straddling vertex has at least four separated ordered pairs,
 so it straddles a threshold with probability at most `(3/(2π)) arccos ((1 + 3ρ₀)/4)`.
+The threshold-decay crossing bound multiplies this by `exp (-t²/2)` at the threshold `t`.
 -/
 
 @[expose] public section
@@ -57,11 +59,18 @@ theorem edgeVector_star (degree : ∀ v, H.degree v ≤ 3) {q : ℝ} (hq0 : 0 �
   rw [sum_edgeVector_mul H hpos]
   exact Real.sqrt_le_sqrt (by linarith)
 
-/-- **Straddling probability.** -/
-theorem measureReal_straddleEvent_le (regular : H.IsRegularOfDegree 3) {q : ℝ} (hq0 : 0 ≤ q)
-    {R : ℕ} {ρ₀ : ℝ} (hρ₀ : 17 / 32 ≤ ρ₀)
-    (hρ : ρ₀ ≤ 2 * q / (1 + q ^ 2) - 3 * (2 * q ^ 2) ^ R) (t : ℝ) (v : W) :
-    (gaussPi W).real (straddleEvent H q R t v) ≤ frontierBound ρ₀ := by
+/-- **Straddling probability from a crossing bound.** If at the threshold `t` every pair of
+unit forms with correlation `ρ' > -1` is separated with probability at most
+`m · arccos ρ' / π`, then a vertex straddles `t` with probability at most
+`m · frontierBound ρ₀`. -/
+theorem measureReal_straddleEvent_le_of_crossing (regular : H.IsRegularOfDegree 3) {q : ℝ}
+    (hq0 : 0 ≤ q) {R : ℕ} {ρ₀ : ℝ} (hρ₀ : 17 / 32 ≤ ρ₀)
+    (hρ : ρ₀ ≤ 2 * q / (1 + q ^ 2) - 3 * (2 * q ^ 2) ^ R) (t : ℝ) (v : W) {m : ℝ} (hm : 0 ≤ m)
+    (crossing : ∀ {α β : W → ℝ}, ∑ z, α z ^ 2 = 1 → ∑ z, β z ^ 2 = 1 →
+      -1 < ∑ z, α z * β z →
+      (gaussPi W).real {ω | Between t (form α ω) (form β ω)} ≤
+        m * (Real.arccos (∑ z, α z * β z) / Real.pi)) :
+    (gaussPi W).real (straddleEvent H q R t v) ≤ m * frontierBound ρ₀ := by
   have degree : ∀ v, H.degree v ≤ 3 := fun v => (regular.degree_eq v).le
   set κ := Real.sqrt ((1 + ρ₀) / 2) with hκ
   have hκ78 : 7 / 8 ≤ κ := by
@@ -125,24 +134,41 @@ theorem measureReal_straddleEvent_le (regular : H.IsRegularOfDegree 3) {q : ℝ}
   -- Each separated pair, then the star inequality.
   have each : ∀ e ∈ s, ∀ e' ∈ s.erase e,
       (gaussPi W).real {ω | Between t (edgeScore H q R ω e) (edgeScore H q R ω e')} ≤
-        Real.arccos (∑ z, edgeVector H q R e z * edgeVector H q R e' z) / Real.pi :=
-    fun e he e' he' => gaussPi_between_le_arccos (star e he).1
-      (star e' (Finset.mem_of_mem_erase he')).1 (pair e he e' (Finset.mem_of_mem_erase he')) t
+        m * (Real.arccos (∑ z, edgeVector H q R e z * edgeVector H q R e' z) / Real.pi) :=
+    fun e he e' he' => crossing (star e he).1
+      (star e' (Finset.mem_of_mem_erase he')).1 (pair e he e' (Finset.mem_of_mem_erase he'))
   have hsum := sum_arccos_star_le hxv s hs (fun e => edgeVector H q R e)
     (fun e he => (star e he).1) hκ78 (fun e he => (star e he).2)
   calc 1 / 4 * ∑ e ∈ s, ∑ e' ∈ s.erase e,
         (gaussPi W).real {ω | Between t (edgeScore H q R ω e) (edgeScore H q R ω e')}
       ≤ 1 / 4 * ∑ e ∈ s, ∑ e' ∈ s.erase e,
-          Real.arccos (∑ z, edgeVector H q R e z * edgeVector H q R e' z) / Real.pi := by
+          m * (Real.arccos (∑ z, edgeVector H q R e z * edgeVector H q R e' z) / Real.pi) := by
         gcongr with e he e' he'
         exact each e he e' he'
-    _ = 1 / 4 / Real.pi * ∑ e ∈ s, ∑ e' ∈ s.erase e,
+    _ = m * (1 / 4 / Real.pi) * ∑ e ∈ s, ∑ e' ∈ s.erase e,
           Real.arccos (∑ z, edgeVector H q R e z * edgeVector H q R e' z) := by
-        simp only [div_eq_mul_inv, ← Finset.sum_mul]; ring
-    _ ≤ 1 / 4 / Real.pi * (6 * Real.arccos ((3 * κ ^ 2 - 1) / 2)) := by
+        simp only [div_eq_mul_inv, ← Finset.mul_sum, ← Finset.sum_mul]; ring
+    _ ≤ m * (1 / 4 / Real.pi) * (6 * Real.arccos ((3 * κ ^ 2 - 1) / 2)) := by
         gcongr
-    _ = frontierBound ρ₀ := by
+    _ = m * frontierBound ρ₀ := by
         rw [hκsq, frontierBound, show (3 * ((1 + ρ₀) / 2) - 1) / 2 = (1 + 3 * ρ₀) / 4 by ring]
         ring
+
+/-- **Straddling probability.** -/
+theorem measureReal_straddleEvent_le (regular : H.IsRegularOfDegree 3) {q : ℝ} (hq0 : 0 ≤ q)
+    {R : ℕ} {ρ₀ : ℝ} (hρ₀ : 17 / 32 ≤ ρ₀)
+    (hρ : ρ₀ ≤ 2 * q / (1 + q ^ 2) - 3 * (2 * q ^ 2) ^ R) (t : ℝ) (v : W) :
+    (gaussPi W).real (straddleEvent H q R t v) ≤ frontierBound ρ₀ := by
+  simpa using measureReal_straddleEvent_le_of_crossing H regular hq0 hρ₀ hρ t v zero_le_one
+    fun hα hβ hx => by simpa using gaussPi_between_le_arccos hα hβ hx t
+
+/-- **Straddling probability away from the median.** A vertex straddles the threshold `t`
+with probability at most `exp (-t²/2) · frontierBound ρ₀`. -/
+theorem measureReal_straddleEvent_le_exp (regular : H.IsRegularOfDegree 3) {q : ℝ}
+    (hq0 : 0 ≤ q) {R : ℕ} {ρ₀ : ℝ} (hρ₀ : 17 / 32 ≤ ρ₀)
+    (hρ : ρ₀ ≤ 2 * q / (1 + q ^ 2) - 3 * (2 * q ^ 2) ^ R) (t : ℝ) (v : W) :
+    (gaussPi W).real (straddleEvent H q R t v) ≤ Real.exp (-(t ^ 2) / 2) * frontierBound ρ₀ :=
+  measureReal_straddleEvent_le_of_crossing H regular hq0 hρ₀ hρ t v (Real.exp_pos _).le
+    fun hα hβ hx => gaussPi_between_le_exp_arccos hα hβ hx t
 
 end Algebraic.Cutwidth.Gaussian.Internal
