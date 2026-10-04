@@ -9808,6 +9808,35 @@ Theorem~\ref{thm:lowerbounds-algebraic-explicit-four-n}.
   the threshold below the bag's score, or is an endpoint of an edge in the window.
 \end{proof}
 
+\begin{lemma}[Jumping the median band]
+  \label{lem:lowerbounds-algebraic-gaussian-band-order}
+  \lean{Algebraic.Cutwidth.Gaussian.exists_pathDecomposition_subset_edgeScore,
+    Algebraic.Cutwidth.Gaussian.card_filter_edgeScore_le_window,
+    Algebraic.Cutwidth.Gaussian.card_filter_edgeScore_le_of_grid,
+    Algebraic.Cutwidth.Gaussian.card_filter_edgeScore_le_of_grids,
+    Algebraic.Cutwidth.Gaussian.exists_pathDecomposition_of_bandJump}
+  \leanok
+  \uses{lem:lowerbounds-algebraic-gaussian-edge-order}
+  Score the edges of a simple cubic graph and fix $c>0$. Call an edge low, band or high
+  as its score lies below $-c$, in $[-c,c)$, or at least $c$, and split the band edges into
+  blocks so that two band edges at a common vertex share a block. List the low edges by
+  score, then the blocks one at a time in increasing order of the number of their vertices
+  with a high edge minus the number with a low edge, then the high edges by score. Every bag
+  of the resulting path decomposition has at most
+  $\max(S(-c),S(c))+|V_j|$ vertices for some block $j$, or at most the number of vertices
+  with incident scores on both sides of a threshold outside $[-c,c)$. Here $S(t)$ counts
+  the vertices whose edge scores straddle $t$ and $V_j$ the vertices of block $j$.
+\end{lemma}
+\begin{proof}
+  \leanok
+  Give each block a common score inside $(-c,c)$, increasing with its imbalance, and use the
+  edge-score decomposition of the modified scores. Between blocks a bag holds the band-free
+  vertices with low and high edges, the vertices of finished blocks with a high edge, and
+  those of unstarted blocks with a low edge. Every vertex lies in at most one block, so
+  $S(-c)$ and $S(c)$ split into these sets, and processing blocks in order of imbalance keeps
+  the middle count below $\max(S(-c),S(c))$ by an exchange argument.
+\end{proof}
+
 \begin{theorem}[Gaussian cubic pathwidth]
   \label{thm:lowerbounds-algebraic-gaussian-pathwidth}
   \lean{Algebraic.Cutwidth.Gaussian.frontierCoefficient,
