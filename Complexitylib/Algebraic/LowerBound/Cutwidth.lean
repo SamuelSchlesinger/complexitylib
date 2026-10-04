@@ -52,6 +52,7 @@ public import Complexitylib.Algebraic.LowerBound.Cutwidth.Direction
 public import Complexitylib.Algebraic.LowerBound.Cutwidth.Balanced
 public import Complexitylib.Algebraic.LowerBound.Cutwidth.AverageCase
 public import Complexitylib.Algebraic.LowerBound.Cutwidth.SingleCut
+public import Complexitylib.Algebraic.LowerBound.Cutwidth.MultiOutput.Ordering
 public import Complexitylib.Algebraic.LowerBound.Cutwidth.Extractor
 public import Complexitylib.Algebraic.LowerBound.Cutwidth.Extractor.Padding
 public import Complexitylib.Algebraic.LowerBound.Cutwidth.Extractor.Padding.Asymptotics
@@ -335,6 +336,10 @@ inputs; `AverageCase` gives the agreement bound for balanced functions.
 crossed by `|A|` forward and `|B|` backward signals with `i` inputs on one side,
 bounds the accepted inputs of a `K`-rectangle-free function by
 `K (2 ^ (i + |B|) + 2 ^ (n - i + |A|))`.
+`MultiOutput.Ordering` transfers the graph-ordering hypothesis to programs over
+any signature with fan-in two and any number of outputs: a ranking of the wires
+whose prefixes are crossed by at most `(A + η) (s - n)⁺ + O(log (n + s))`
+signals, component by component.
 
 `Bisection.Helpful` completes the graph theorem. Its proof uses the first
 boundary normalization phase, a partition into bounded connected clusters,
