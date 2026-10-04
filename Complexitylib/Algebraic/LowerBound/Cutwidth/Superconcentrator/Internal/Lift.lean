@@ -90,7 +90,7 @@ theorem reflTransGen_of_slots_pos {r w : V} (hw : 0 < slots G (compEdges G r) w)
     exact he.2 ▸ reflTransGen_snd_of_mem_compEdges he.1
 
 /-- The split graph of a component is connected. -/
-theorem split_connected [Fintype V] {r : V} (hr : 0 < slots G (compEdges G r) r) :
+theorem split_connected {r : V} (hr : 0 < slots G (compEdges G r) r) :
     (split G (compEdges G r)).Connected := by
   set K := compEdges G r
   let ρ : SplitVertex G K := ⟨r, ⟨0, hr⟩⟩
