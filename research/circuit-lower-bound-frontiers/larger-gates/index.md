@@ -17,7 +17,7 @@ The crucial additional lemma is that rectangle-freeness forces an almost-spannin
 component after deletion. Disconnected components cannot simply be ignored when using
 the `s - n` excess. The linked paper argument has passed an independent adversarial
 mathematical review relative to the repository baseline. It is not a checked Lean
-theorem or a priority claim; the whole-corpus review remains separate.
+theorem or a priority claim; the root overview records the whole-corpus reviews.
 
 The target remains the **same full-input-length family in P** from the
 [current guide](../../../docs/algebraic/cutwidth-lower-bound.md), including its balancing
@@ -240,8 +240,9 @@ and exact integer sums work because their updates can be inverted.
 **Stop rule:** stop claiming this route preserves `L` if the total exact aggregate
 budget is `Omega(n)`, if local state updates have uncharged large inverse fibers, or
 if circuit-to-network translation inserts `Theta(W)` charged output structure.
-Complete the whole-corpus review and the unresolved prior-best comparison before
-considering a Lean implementation. No Williams-engine consequence is claimed.
+The next formalization step is the aggregate rectangle-cover lemma. Resolve the
+prior-best comparison before claiming historical novelty. No Williams-engine
+consequence is claimed.
 
 [chen-santhanam-srinivasan18]: ../sources.md#chen-santhanam-srinivasan18
 [grewal-kumar25]: ../sources.md#grewal-kumar25

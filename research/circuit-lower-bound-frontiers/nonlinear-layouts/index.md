@@ -171,10 +171,11 @@ the packing argument above deliberately accounts for them.
 `c_R = sqrt(pi/2) 2^(-(D_R+1))`. Already `D_R` is `5,29,125,509,2045`
 for radii `0,1,2,3,4`. This gives a positive uniform band for each fixed radius,
 but no common positive band as `R` grows. Its `c_R^2` gain decays doubly
-exponentially in `R`. With the stated kernel estimate, the correlation deficit
-cannot decay that fast: minimizing `rho* - 2q/(1+q^2) + 3(2q^2)^R`
-forces `q` toward `1/sqrt(2)` while also making the truncation defect small.
-Consequently this packing certificate does not establish `exp(-c_R^2/2)p_R < p`.
+exponentially in `R`. The displayed kernel estimate also has a truncation deficit;
+this note supplies no comparison showing that the band gain dominates that deficit.
+In particular the packing certificate alone does not establish
+`exp(-c_R^2/2)p_R < p`. This is a limitation of the proof supplied here, not a
+proved impossibility theorem for every fixed-radius choice.
 
 **Open target and exact implication:** prove for one fixed `c > 0` a uniform
 path estimate `Pr(all ell edges in band) <= C lambda^ell`, `lambda < 1/2`,

@@ -84,7 +84,7 @@ def quadratic_fibers():
                 translated = {x ^ zeros[0] for x in zeros}
                 assert all(x ^ y in translated for x in translated for y in translated)
     print("Quadratic: all 16384 ordered two-output maps on 3 bits, all 7 directions;")
-    print(f"  derivative-zero fiber sizes: {dict(sorted(sizes.items()))}; affine dimension >=1.")
+    print(f"  derivative-zero fiber sizes: {dict(sorted(sizes.items()))}; nonempty fibers have affine dimension >=1.")
 
 
 def graph_scalarization():

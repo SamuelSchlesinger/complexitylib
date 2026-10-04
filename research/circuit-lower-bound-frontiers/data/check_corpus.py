@@ -65,6 +65,9 @@ def main():
             target = urlsplit(raw.strip("<>"))
             if target.scheme or target.netloc:
                 continue
+            if Path(unquote(target.path)).is_absolute():
+                errors.append(f"{relative}: nonportable absolute local link {raw}")
+                continue
             destination = (path.parent / unquote(target.path)).resolve() if target.path else path
             if not destination.exists():
                 errors.append(f"{relative}: missing local target {raw}")

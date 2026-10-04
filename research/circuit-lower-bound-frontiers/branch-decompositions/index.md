@@ -1,8 +1,8 @@
 # Branch decompositions: an exact compiler and its price
 
-Status: bounded author pass, 2026-10-04. Two proposals; neither claims a new
+Status: reviewed research note, 2026-10-04. Two proposals; neither claims a new
 unrestricted-circuit lower-bound coefficient. The deductions below have written
-proofs and finite checks, not Lean proofs or independent mathematical review.
+proofs, independent agent reviews, and finite checks; they are not Lean proofs.
 Novelty of the sharpened cardinality argument is **unverified**.
 
 The baseline is full `B₂`, repeated input slots, unrestricted fanout, internal
@@ -137,6 +137,8 @@ explicit conversion; the present tree has *vertices*, not graph edges, as leaves
 a symbolic function `D[U,σ]` on the input variables owned in `U`: existence of
 internal edge bits satisfying its checks and agreeing with `σ`.
 At a leaf this function is `0`, `1`, `x`, or `¬x`; local-check rejection gives `0`.
+For a leaf owning `x`, represent its constant-true function by `τ_x=x∨¬x`,
+so its syntactic scope remains `{x}`. Use `1` only for an ownerless leaf.
 At a merge `P=U∪V`, for each parent boundary `σ`, form
 
 ```text
@@ -146,12 +148,15 @@ D[P,σ] = OR_(τ on E(U,V))
 
 Gluing witnesses proves (4) in both directions. Ownership makes each AND
 decomposable; the partition tree fixes its structure. Discard zero terms;
-simplify empty-scope constants. Every remaining state has its entire owned
-scope, so OR is smooth. Suppress graph-tree leaves with no input owner to obtain
+simplify only empty-scope constants, preserving owned tautologies. Every nonzero
+state then has its entire owned syntactic scope, so OR is smooth. Unsatisfiable
+states are represented by `0` and omitted from parent terms. Suppress graph-tree leaves with no input owner to obtain
 a vtree for the remaining variables; discarded constants do not add gates.
 There is at most one AND per assignment to `δU∪δV`; binarizing each parent OR
 uses fewer additional nodes than its number of terms. With shared literals
-and constants, then tautologies for unread variables, this gives exactly
+and constants, shared `τ_x` nodes, then tautologies for unread variables, this gives
+the bound below: the `4n+2` budget covers two literals and one tautology per
+variable, at most `n` conjunctions to restore unread variables, and two constants.
 
 ```text
 S ≤ 2 Σ_(merges t) 2^w_t + 4n + 2 ≤ 2(N-1)2^W + 4n + 2.   (5)
@@ -220,7 +225,9 @@ networks exhibited 195 overlapping merge terms; deterministic circuits had none.
 It checks contexts and 1,785 charged frontiers for 256 four-variable smooth
 shared DNNFs, including parity and a multiplexer table. All assertions pass.
 These are small checks of formulas and implementation, not asymptotic evidence.
-The script does not implement or test smoothing; its overhead is proved above.
+The script tracks semantic owner scopes; it does not generate syntactic NNF scopes
+or test smoothing. Owned tautologies and smoothing overhead are justified in the
+paper construction above.
 The primary sources below were freshly retrieved; no strongest-known or broad
 breakthrough claim follows from this bounded search.
 

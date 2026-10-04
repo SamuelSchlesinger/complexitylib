@@ -4,7 +4,8 @@
 
 This is a paper-level deduction from the repository's stated graph ordering theorem.
 It has passed an independent adversarial paper review relative to that baseline; it has
-not been formalized, and the whole-corpus review remains separate. Every additional
+not been formalized. Whole-corpus mathematical and source reviews are recorded in
+the root overview. Every additional
 semantic and counting obligation is given below. Symbols follow the parent note.
 
 ## Contract
@@ -26,6 +27,14 @@ is known. Set `D = q + sum_j ceil(log2 R_j)` and assume `K>=2`.
 The function `f` has at least `2^(n-2)` accepting inputs and is `K`-rectangle-free:
 every one-rectangle across every partition of the input coordinates has a side of
 cardinality strictly below `K`. Set `k=ceil(log2 K)` and `r=D+k+2`.
+
+For the repository's sumset-derived hard family, the
+[affine transport deduction](../hard-functions/index.md) supplies these same two
+function hypotheses, with the same threshold uniformly over every invertible affine
+basis. Coordinate rectangle-freeness alone does not imply affine invariance. Consequently this theorem also permits a free choice of exactly `n` affine
+input coordinates before the augmented circuit. The aggregate budget is measured on
+those transformed signals; it does not charge the input matrix or permit free internal
+linear gates. This composes hypotheses, not lower-bound coefficients.
 
 ## 1. Conditioning special outputs
 
@@ -182,7 +191,7 @@ Since `q<=D=o(n)`, total gate size `s+q` has the same leading lower bound.
 No theorem for unrestricted threshold bit lengths follows: `D` is an explicit premise,
 not a quantity this proof bounds for every gate. A universal budget-reducing restriction
 preserving enough hard inputs is the first unproved extension. Formal verification of
-this paper deduction, whole-corpus review, and its exact historical priority remain open.
+this paper deduction and its exact historical priority remain open.
 
 
 ## 8. Fixed-slack linear parity budget

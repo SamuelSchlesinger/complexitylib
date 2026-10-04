@@ -46,6 +46,9 @@ For the aggregate extension, the idea is to guess special-gate outputs, summariz
 contributions with small registers, and use rectangle-freeness to force nearly all inputs into
 one ordinary-circuit component. Reversible register updates preserve the counting argument.
 The precise charge is `D=q+sum_j ceil(log2 R_j)`, where `R_j` bounds the j-th aggregate range.
+For this sumset-derived hard family, the extension also allows a free invertible
+affine input basis: the affine transport
+preserves exactly the density and rectangle-freeness hypotheses used by the proof.
 The [proof](larger-gates/aggregate-proof.md) includes the component argument, compiler,
 transition count, and uniform asymptotic quantifiers. An independent adversarial review and
 finite frontier implementation checked this argument; neither substitutes for formalization.
@@ -58,7 +61,8 @@ not an estimated probability of success.
 1. **Global covers by conditioned networks.** Charge
    `Z=sum_leaf N_leaf*2^(width_leaf)` over an exact accepting cover. The existing counting
    theorem already proves `|acc(f)|<=9K^2 Z`. A universal
-   `log2 Z<=(s-n)_+/4+o(n)` would yield **coefficient five**. This changes the resource from
+   `log2 Z<=(s-m)_+/4+o(n)`, with `m` the number of essential inputs, would yield
+   **coefficient five**, since the hard family has `m=n-o(n)`. This changes the resource from
    one worst frontier to the total cost of a whole decomposition, allowing component savings
    and semantic propagation to cooperate. The next step is one reduction rule with a valid
    recurrence across *every* resulting branch. Raw cycle deletion alone provably cannot pay
@@ -152,8 +156,9 @@ the new paper deductions in this corpus.
 
 ## Known Limitations
 
-Whole-corpus mathematical, coherence, and source reviews are in progress. The new deductions
-have not been formalized in Lean. Finite exhaustive and randomized checks validate the stated
+Whole-corpus mathematical, coherence, source, and skeptical expert reviews have been
+completed, with substantive findings corrected and rechecked. A final source-identifier
+audit is pending. The new deductions have not been formalized in Lean. Finite exhaustive and randomized checks validate the stated
 small constructions, not universal inequalities or asymptotic lower bounds. Independent agent
 reviews can share blind spots. Literature priority remains unresolved; sources credited for a
 mechanism are not automatically sources for the extensions proposed here. The inherited

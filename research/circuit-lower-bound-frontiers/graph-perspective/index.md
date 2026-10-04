@@ -8,6 +8,8 @@ checks are finite evidence. Novelty, including that of the deductions, is unveri
 
 The model throughout is single-output Boolean circuits over all sixteen binary functions,
 with unrestricted fanout and internal-gate size `s`, on the original `n` input bits.
+Write `m` for the number of essential input coordinates of the computed function;
+unused declared inputs are not a circuit resource saving.
 The [baseline guide](../../../docs/algebraic/cutwidth-lower-bound.md) has
 `alpha0 = (3/pi) arccos((1+2 sqrt(2))/4) = 0.280701937272...` and coefficient
 `1+1/alpha0 = 4.56249...`; see the [transfer ledger](../transfer-ledger.md).
@@ -80,12 +82,31 @@ it does not import an unproved branching-program or DNNF hardness statement.
 
 **Universal quantitative contract, open.** For every fixed `C>0` and every `epsilon>0`,
 all sufficiently large `n` and every circuit with `s<=Cn` admit an exact leaf cover with
-`Z <= 2^((1/4+epsilon)*(s-n)_+ + epsilon*n)`. Leaf sizes, guards, restoration, and
+`Z <= 2^((1/4+epsilon)*(s-m)_+ + epsilon*n)`. Leaf sizes, guards, restoration, and
 branch multiplicity are included in `Z`. Existential construction suffices for the
 nonuniform circuit lower bound; an algorithmic consequence also needs discovery costs.
+For a nonempty `K`-rectangle-free function, `n-m<2k` with `k=ceil(log2 K)`:
+otherwise fix the essential coordinates at one accepting input and split the ignored
+coordinates into two sets of at least `k` bits, producing a forbidden rectangle.
+Thus the current family has `m=n-o(n)`; `(s-m)_+ <= (s-n)_+ +2k` preserves the
+coefficient-five implication. Retain ignored ports using independent free input-edge
+components, costing `O(n)` vertices and constant extra width.
+
+**Rejected stronger contract.** Subtracting declared `n` for *every* circuit is false.
+Bounded-degree expander graph CNFs `AND_{uv in E}(x_u OR x_v)` have linear B2
+circuits but require exponential DNNF size [bova16][bova16]. Pad such a circuit with
+unused declared inputs until `n=s`. A leaf network of width `w` has an
+`O(N*2^w)`-transition program labeled by conjunctions of the owned input literals.
+Serializing the possibly multiple ports per vertex gives a literal read-once
+nondeterministic program of `O(n*N*2^w)` transitions. Converting each
+query into `(x AND child1) OR (NOT x AND child0)` is decomposable, since queried
+variables never occur later; epsilon choices become ORs. The union cover therefore
+has a DNNF of `O(nZ)` nodes. Restricting dummy inputs preserves that DNNF upper bound,
+so `Z` must be exponential in `n`, contradicting the former target with arbitrarily
+small `epsilon` and `(s-n)_+=0`. The essential-support correction is necessary.
 
 One useful sufficient certificate is a finite conditioning tree with potential `Phi`.
-At its root require `Phi <= (s-n)_+/4+o(n)`; at every branch require
+At its root require `Phi <= (s-m)_+/4+o(n)`; at every branch require
 `sum_child 2^(Phi_child) <= 2^(Phi_parent)`; at a terminal require
 `log2 N_l+w_l <= Phi_l`. Induction gives `Z<=2^(Phi_root)`.
 For a block of `k` binary guesses the branch test sums over all retained assignments.
@@ -219,3 +240,5 @@ compiler, a universal separator bound, a new circuit lower bound, or literature 
 [golovnev-kulikov-williams21]: ../sources.md#golovnev-kulikov-williams21
 [local-realization]: ../sources.md#local-realization
 [valiant77]: ../sources.md#valiant77
+
+[bova16]: ../sources.md#bova16

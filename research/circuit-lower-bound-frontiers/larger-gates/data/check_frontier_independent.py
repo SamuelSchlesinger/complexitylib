@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Claim checked: finite exact frontier-register semantics and state accounting.
+"""Validates: finite exact frontier-register semantics and state accounting.
 
 Independent of check_backdoors.py; no corpus imports or third-party dependencies.
 Checks direct-vs-frontier acceptance, state widths, and <=8 incoming transitions.
@@ -117,7 +117,7 @@ for _ in range(180):
             gs.append((typ,slots,param))
     cases.append((n,gs,rng.randrange(n+len(gs))))
 results=[run(*c) for c in cases]
-print('Claim checked: finite exact frontier-register semantics and state accounting.')
+print('Validates: finite exact frontier-register semantics and state accounting.')
 print('seed=991734; circuits=',len(cases),'vertices processed=',sum(x[0] for x in results),'max observed incoming labeled transitions=',max(x[1] for x in results))
 print('PASS: exhaustive original-vs-frontier acceptance; signed/mod register widths; <=8 predecessor transitions; arbitrary output wires, vertex orders, zero-arity special gates, and zero-input components')
 

@@ -114,8 +114,11 @@ would give `alpha=A-(1-h2(q))gamma`. As `eta` tends to zero sufficiently slowly 
 
 This names a checkable layout-restricted class; it does **not** show that a natural larger
 basis/depth class automatically has such an order. Bounded input occurrence `Delta` in a
-nonlinear bottom layer helps only locally: among `m` exposed bottom gates, greedy matching
-finds at least `m/(2Delta-1)` with disjoint input pairs. It does not force `m` to be large
+nonlinear bottom layer helps only locally: count only exposed nonaffine bottom gates
+whose two operands are distinct original input coordinates. Among `m` such eligible
+gates, greedy matching finds at least `m/(2Delta-1)` with disjoint input pairs.
+Repeated-slot gates such as `AND(x,x)` are ineligible: their output need not have
+the required one-quarter bias. It does not force `m` to be large
 on each bottleneck cut. Arbitrary circuits above that layer may hide every such signal.
 Even many nonlinear gates do not suffice: input distributions at deep gates may be uniform,
 dependent, or almost constant, and can change after conditioning.

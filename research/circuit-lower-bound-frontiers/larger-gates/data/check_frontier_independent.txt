@@ -1,4 +1,4 @@
-Claim checked: finite exact frontier-register semantics and state accounting.
+Validates: finite exact frontier-register semantics and state accounting.
 seed=991734; circuits= 181 vertices processed= 815 max observed incoming labeled transitions= 3
 PASS: exhaustive original-vs-frontier acceptance; signed/mod register widths; <=8 predecessor transitions; arbitrary output wires, vertex orders, zero-arity special gates, and zero-input components
 Limits: finite compiler checks only; no asymptotic hardness or novelty certification.

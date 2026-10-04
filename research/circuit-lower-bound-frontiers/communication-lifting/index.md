@@ -92,7 +92,7 @@ agreement on the first `N−1` bits forces disagreement on the last. There are
 Equality of long labels is free in this semantic model; charging its evaluation
 would define a different model requiring a new circuit compiler.
 This does not refute equality-DAG research for **monotone** interpolation
-[folwarczny22][folwarczny22]. For `f(z)=z_1`, `x=01`, `y=10`, terminal `0` in this construction
+[folwarczny22][folwarczny22]. With zero-based coordinates, for `f(z_0,z_1)=z_1`, `x=01`, `y=10`, terminal `0` in this construction
 has the wrong direction. **Stop rule:** reject any unrestricted KW route whose
 feasible-set family contains these equality sets at constant node cost.
 

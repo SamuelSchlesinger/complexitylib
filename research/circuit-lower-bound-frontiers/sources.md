@@ -17,15 +17,15 @@ Antoine Amarilli, Florent Capelli, Mikaël Monet, Pierre Senellart, Connecting K
 Boaz Barak, Mark Braverman, Xi Chen, and Anup Rao,
   *How to Compress Interactive Communication*, author-hosted manuscript dated
   15 October 2010, 40 pages; Definitions 1.1–1.2 and introduction checked.
-  The cited item is this primary manuscript, rather than an unchecked journal version.
+  The cited item is this primary manuscript, rather than an unchecked journal version. Version of record: SIAM Journal on Computing 42(3), 1327–1363 (2013), DOI 10.1137/100811969. The previously inspected manuscript is [available here](https://mbraverm.princeton.edu/files/directsum.pdf); manuscript theorem numbering is retained where stated.
 
-[Primary source](https://mbraverm.princeton.edu/files/directsum.pdf).
+[Primary source](https://doi.org/10.1137/100811969).
 
 <a id="bova16"></a>
 
 ## bova16
 
-Simone Bova, Florent Capelli, Stefan Mengel, Friedrich Slivovsky, Knowledge Compilation Meets Communication Complexity, IJCAI 2016, pp. 1008–1014; Theorems 1 and 6
+Simone Bova, Florent Capelli, Stefan Mengel, Friedrich Slivovsky, Knowledge Compilation Meets Communication Complexity, IJCAI 2016, pp. 1008–1014; Theorems 1 and 6 The inspected preliminary version is [A Strongly Exponential Separation of DNNFs from CNF Formulas](https://arxiv.org/abs/1411.1995v3), arXiv:1411.1995v3, 2015-02-19; its Theorem 5 supplies the bounded-degree expander graph-CNF bound. The [author publication page](https://researchers.lille.inria.fr/~fcapelli/index_en.html) identifies it as a preliminary version of the IJCAI paper. The corpus padding obstruction is a separate deduction.
 
 [Primary source](https://www.ijcai.org/Proceedings/16/Papers/147.pdf).
 
@@ -35,9 +35,9 @@ Simone Bova, Florent Capelli, Stefan Mengel, Friedrich Slivovsky, Knowledge Comp
 
 Mark Braverman, *Interactive information complexity*,
   ECCC TR11-123 (15 September 2011), 41-page preprint, §4, Theorem 4.2.
-  Cite this inspected version for the exact task/distribution statement.
+  Cite this inspected version for the exact task/distribution statement. Version of record: SIAM Journal on Computing 44(6), 1698–1739 (2015), DOI 10.1137/130938517. The previously inspected manuscript is [available here](https://eccc.weizmann.ac.il/report/2011/123/download/); manuscript theorem numbering is retained where stated. The 2017 SIAM Review article is a reprint of this work.
 
-[Primary source](https://eccc.weizmann.ac.il/report/2011/123/download/).
+[Primary source](https://doi.org/10.1137/130938517).
 
 <a id="bryant86"></a>
 
@@ -104,9 +104,9 @@ Ruiwen Chen, Rahul Santhanam, and Srikanth
 
 Lijie Chen, Shuichi Hirahara, Igor C. Oliveira, Ján Pich,
   Ninad Rajgopal, and Rahul Santhanam. *Beyond Natural Proofs: Hardness Magnification
-  and Locality*. arXiv:1911.08297v1, 2019-11-19. Theorem 2 and Section 1.1(B).
+  and Locality*. arXiv:1911.08297v1, 2019-11-19. Theorem 2 and Section 1.1(B). Version of record: Journal of the ACM 69(4), article 25 (2022), DOI 10.1145/3538391. The previously inspected manuscript is [available here](https://arxiv.org/abs/1911.08297); manuscript theorem numbering is retained where stated.
 
-[Primary source](https://arxiv.org/abs/1911.08297).
+[Primary source](https://doi.org/10.1145/3538391).
 
 <a id="chukhin25"></a>
 
@@ -122,11 +122,9 @@ STACS 2025, LIPIcs 327, article 26. DOI: 10.4230/LIPIcs.STACS.2025.26.
 
 ## cjsw22
 
-Lijie Chen, Ce Jin, Rahul Santhanam, and Ryan Williams.
-  *Constructive Separations and Their Consequences*. FOCS 2021; arXiv:2203.14379v1,
-  2022-03-27. The arXiv abstract and author record were inspected.
+Lijie Chen, Ce Jin, Rahul Santhanam, and Ryan Williams. *Constructive Separations and Their Consequences*. TheoretiCS 3 (2024), published 2024-02-15, DOI 10.46298/theoretics.24.3. Conference precursor: FOCS 2021. Historical preprint: [arXiv:2203.14379v1](https://arxiv.org/abs/2203.14379v1), 2022-03-27; current version v5, 2024-02-14. Publisher metadata and current abstract verified 2026-10-04; historical v1 references do not imply that the unversioned URL serves v1.
 
-[Primary source](https://arxiv.org/abs/2203.14379).
+[Primary source](https://doi.org/10.46298/theoretics.24.3).
 
 <a id="complexitylib26"></a>
 
@@ -163,7 +161,7 @@ Lijie Chen, Avishay Tal, and Yichuan Wang. *Super-quadratic Lower
 ## darwiche02
 
 Adnan Darwiche, *A Compiler for Deterministic, Decomposable Negation
-  Normal Form*, AAAI 2002, pp. 627–634. Primary proceedings PDF linked above;
+  Normal Form*, AAAI 2002, pp. 627–634. Primary proceedings PDF
   retrieved 2026-10-04. Used for the counting/compilation distinction and precedent.
 
 [Primary source](https://cdn.aaai.org/AAAI/2002/AAAI02-094.pdf).
@@ -269,8 +267,7 @@ Serge Gaspers and Gregory B. Sorkin,
 ## golovnev-gurumukhani26
 
 Alexander Golovnev and Mohit Gurumukhani. *Sumset Structure in Local
-  Computation*. ECCC TR26-195, 2026-09-19. Theorem 1, Definitions 3.1–3.3,
-  and Sections 2.2–2.3. Retrieved report and PDF; preprint status only is asserted.
+  Computation*. ECCC TR26-195, 2026-09-19. Theorems 1–3, Definitions 3.1–3.3, Lemma 7.1, and Sections 2.2–2.4. Retrieved report and PDF; preprint status only is asserted.
 
 [Primary source](https://eccc.weizmann.ac.il/report/2026/195/).
 
@@ -292,9 +289,9 @@ Alexander Golovnev,
 Anna Gál and Robert Robere, *Lower Bounds for (Non-monotone) Comparator
   Circuits*, ECCC TR19-128 (24 September 2019), 15-page preprint;
   §1.2 discussion of Nechiporuk and disjoint resource accounting checked.
-  All four external primary PDFs freshly retrieved on 2026-10-04.
+  The ECCC PDF was retrieved on 2026-10-04. Version of record: ITCS 2020, LIPIcs 151, 58:1–58:13, DOI 10.4230/LIPIcs.ITCS.2020.58. The previously inspected manuscript is [available here](https://eccc.weizmann.ac.il/report/2019/128/download/); manuscript theorem numbering is retained where stated.
 
-[Primary source](https://eccc.weizmann.ac.il/report/2019/128/download/).
+[Primary source](https://doi.org/10.4230/LIPIcs.ITCS.2020.58).
 
 <a id="grewal-kumar25"></a>
 
@@ -322,8 +319,7 @@ Svyatoslav Gryaznov, Pavel Pudlák, and Navid Talebanfard,
 
 Wassily Hoeffding, “Probability Inequalities for Sums of Bounded Random
   Variables,” *JASA* 58(301), 13–30 (1963). DOI: 10.1080/01621459.1963.10500830.
-  Publisher metadata and abstract retrieved 2026-10-04; inequality specialization proved above
-  except for the standard bounded-sum tail inequality.
+  Publisher metadata and abstract retrieved 2026-10-04; the semantic-interface note derives its specialization from the standard bounded-sum tail inequality.
 
 [Primary source](https://doi.org/10.1080/01621459.1963.10500830).
 
@@ -402,12 +398,9 @@ Xin Li, *Two Source Extractors for Asymptotically Optimal Entropy,
 
 ## local-realization
 
-Samuel Schlesinger, local research note,
-  *Cubic kernels with critical supplied-circuit budgets*, sibling checkout
-  `understanding-nondeterminism/research/structural/realization.md`, inspected October 4,
-  2026. Unpublished project argument; publication priority is not asserted.
+Samuel Schlesinger. *Cubic kernels with critical supplied-circuit budgets*. Unpublished local project note, snapshotted 2026-10-04 from `understanding-nondeterminism/research/structural/realization.md`. The linked plain-text snapshot preserves its exact bytes, including original relative cross-references; those refer to the original project. SHA-256: `280af8fd79953606c1092b348bbf256c4c7cbdbe2513b716d598e06f8fcd91be`. This is a local proof candidate, not a published or Lean-verified result; priority is unverified.
 
-[Primary source](/Users/samuelschlesinger/projects/complexity/understanding-nondeterminism/research/structural/realization.md).
+[Primary source](graph-perspective/data/realization-source.txt).
 
 <a id="lovett22"></a>
 
@@ -466,9 +459,9 @@ HTML full text: Theorems 10–11, Lemma 20, and final proof inspected.
 
 Susanna F. de Rezende, Or Meir, Jakob Nordström, Toniann Pitassi,
 Robert Robere. *KRW Composition Theorems via Lifting*. arXiv:2007.02740v3,
-7 May 2025; ICALP 2020 precursor. Theorems 1.5 and 4.1 and Section 7 inspected.
+7 May 2025; FOCS 2020 precursor. Theorems 1.5 and 4.1 and Section 7 inspected. Published version: *Computational Complexity* 33, article 4 (2024), DOI [10.1007/s00037-024-00250-7](https://doi.org/10.1007/s00037-024-00250-7); conference precursor FOCS 2020, pp. 43–49, DOI [10.1109/FOCS46700.2020.00013](https://doi.org/10.1109/FOCS46700.2020.00013). The inspected arXiv v3 retains its own theorem numbering. [Inspected arXiv v3](https://arxiv.org/html/2007.02740v3).
 
-[Primary source](https://arxiv.org/html/2007.02740v3).
+[Primary source](https://doi.org/10.1007/s00037-024-00250-7).
 
 <a id="sakai-etal19"></a>
 
