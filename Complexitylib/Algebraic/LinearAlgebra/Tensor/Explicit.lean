@@ -23,9 +23,10 @@ size. The tensor does not depend on `p`, so letting `p` grow gives border rank a
 *Towards finding hay in a haystack* (Theory of Computing 21(13), 2025), prove `2.02 m` for
 their family.
 
-* **Tightness** (`Tensor3.tight_weightedLMTensor`, `Tensor3.weightedLMTensor_ne_zero`). The
-  support of `weightedLMTensor k` is on `ℓ = j + (a - k)`, so it is tight with weights
-  `τA a = a - k`, `τB j = j`, `τC ℓ = -ℓ`, and every slice is nonzero.
+* **Tightness** (`Tensor3.tight_lmTensor`, `Tensor3.lmTensor_ne_zero`,
+  `Tensor3.tight_weightedLMTensor`, `Tensor3.weightedLMTensor_ne_zero`). The support of every
+  `T_k(γ)` is on `ℓ = j + (a - k)`, so it is tight with weights `τA a = a - k`, `τB j = j`,
+  `τC ℓ = -ℓ`, and every slice is nonzero when the coefficients are.
 * **Greedy distinct subset sums** (`exists_strictMono_injective_sum`). A finite set `A ⊆ ℤ` with
   more than `3^n` elements contains a strictly increasing `x : Fin (n + 1) → ℤ` all of whose
   subset sums are distinct. Greedily, keep the invariant that no nontrivial combination
@@ -40,20 +41,29 @@ their family.
   certificate `Tensor3.div_mul_phi_sub_le_borderRank_restrictSlices` is the property
   `Tensor3.PairedKoszulBound k p L E` of
   `Complexitylib.Algebraic.LinearAlgebra.Tensor.Explicit.Defs` with `E = 8 (p + 1) L`.
-* **The deletion-game hypothesis** (`Tensor3.PairedKoszulBound.pairedClusterBound`). With the
-  greedy clusters and their median slices, `PairedKoszulBound k p L E` gives the hypothesis
+* **The deletion-game hypothesis** (`Tensor3.PairedKoszulBoundOn.pairedClusterBound`,
+  `Tensor3.PairedKoszulBound.pairedClusterBound`). With the greedy clusters and their median
+  slices, `PairedKoszulBoundOn T p L E` gives the hypothesis
   `DeletionGame.PairedClusterBound k L R D E` of the deletion game for the border ranks of the
-  slice restrictions, with `D = (2p + 1) / (p + 1)` and any `R ≥ 3^{2p} + 1`.
-* **The finite bound** (`Tensor3.PairedKoszulBound.le_borderRank_weightedLMTensor`,
-  `Tensor3.le_borderRank_weightedLMTensor`). For `p ≥ 1` (so that `D ≥ 3/2`) and
+  slice restrictions of `T`, with `D = (2p + 1) / (p + 1)` and any `R ≥ 3^{2p} + 1`.
+* **The finite bound** (`Tensor3.PairedKoszulBoundOn.le_borderRank`,
+  `Tensor3.PairedKoszulBound.le_borderRank_weightedLMTensor`,
+  `Tensor3.le_borderRank_weightedLMTensor`). For a tight tensor `T` with nonzero slices,
+  `p ≥ 1` (so that `D ≥ 3/2`) and
   `3^{2p} + 1 ≤ L ≤ k`, the deletion game with border substitution
   (`Tensor3.Tight.le_borderRank_of_pairedClusterBound`) gives
-  `borderRank (weightedLMTensor k) ≥ (7/3 - 2 / (3 (p + 1))) m - D E - (8 L + R m / L + 2)`
+  `borderRank T ≥ (7/3 - 2 / (3 (p + 1))) m - D E - (8 L + R m / L + 2)`
   with `R = 3^{2p} + 1`, since `1 + 2D/3 = 7/3 - 2 / (3 (p + 1))`. With `E = 8 (p + 1) L`,
   `D E + 8 L = 16 (p + 1) L`.
 * **The asymptotic bounds** (`Tensor3.eventually_sub_mul_le_borderRank_weightedLMTensor` and
   its corollaries). Fix `L ≥ 2 R / δ`, so that `R m / L ≤ δ m / 2`; the other errors are
   `O(L) = O(1)`.
+
+The coefficients of `weightedLMTensor k` grow with `k` because their labels `a (2k + 1) + j`
+are distinct on all positions. The certificates only need labels distinct within a window of
+`L` slices and `p L` columns, so the same bounds hold for the periodic tensors
+`Tensor3.periodicLMTensor k A M` with `A > L` and `M > p L`, whose entries come from a finite
+set independent of `k` (`Complexitylib.Algebraic.LinearAlgebra.Tensor.Periodic`).
 -/
 
 @[expose] public section
@@ -79,6 +89,17 @@ open Finset Filter
 variable {k p : ℕ}
 
 /-! ### Tightness -/
+
+/-- The Landsberg–Michałek tensor `T_k(γ)` is tight, for any coefficients `γ`, with weights
+`τA a = a - k`, `τB j = j`, and `τC ℓ = -ℓ`: its support lies on `ℓ = j + (a - k)`. -/
+theorem tight_lmTensor (k : ℕ) (γ : Fin (2 * k + 1) → Fin (2 * k + 1) → ℂ) :
+    (lmTensor k γ).Tight :=
+  Internal.Explicit.tight_lmTensor k γ
+
+/-- If every coefficient of `T_k(γ)` is nonzero, every slice of `T_k(γ)` is nonzero. -/
+theorem lmTensor_ne_zero (k : ℕ) {γ : Fin (2 * k + 1) → Fin (2 * k + 1) → ℂ}
+    (hγ : ∀ a j, γ a j ≠ 0) (a : Fin (2 * k + 1)) : lmTensor k γ a ≠ 0 :=
+  Internal.Explicit.lmTensor_ne_zero k hγ a
 
 /-- The weighted Landsberg–Michałek tensor is tight, with weights `τA a = a - k`, `τB j = j`,
 and `τC ℓ = -ℓ`: its support lies on `ℓ = j + (a - k)`. -/
@@ -126,6 +147,31 @@ theorem exists_strictMono_cluster_negBlock (S : Finset (Fin (2 * k + 1))) {L i :
   Internal.Explicit.exists_cluster_negBlock S hS
 
 /-! ### The paired-cluster Koszul bound -/
+
+/-- **The paired-cluster Koszul bound gives the hypothesis of the deletion game**, for any
+tensor `T` with `2k + 1` slices. If `PairedKoszulBoundOn T p L E` holds and
+`R ≥ 3^{2p} + 1`, then the border ranks of the slice restrictions of `T` satisfy
+`DeletionGame.PairedClusterBound` with `D = (2p + 1) / (p + 1)`: the median slices of greedy
+clusters in two good blocks are the witnesses. -/
+theorem PairedKoszulBoundOn.pairedClusterBound {β γ : Type*}
+    {T : Tensor3 (Fin (2 * k + 1)) β γ} {L R : ℕ} {E : ℝ} (h : PairedKoszulBoundOn T p L E)
+    (hR : 3 ^ (2 * p) + 1 ≤ R) :
+    DeletionGame.PairedClusterBound k L R ((2 * p + 1 : ℝ) / (p + 1)) E
+      fun S => (T.restrictSlices S).borderRank :=
+  Internal.Explicit.pairedClusterBound_on h hR
+
+/-- **The border-rank bound from `PairedKoszulBoundOn`, finite form.** Let `T` be a tight tensor
+with `2k + 1` nonzero slices satisfying `PairedKoszulBoundOn T p L E`, with `p ≥ 1` and
+`3^{2p} + 1 ≤ L ≤ k`. With `m = 2k + 1` and `D = (2p + 1) / (p + 1)`,
+`borderRank T ≥ (7/3 - 2 / (3 (p + 1))) m - D E - (8 L + (3^{2p} + 1) m / L + 2)`. -/
+theorem PairedKoszulBoundOn.le_borderRank {β γ : Type*} [Fintype β] [Fintype γ] [DecidableEq β]
+    [DecidableEq γ] {T : Tensor3 (Fin (2 * k + 1)) β γ} {L : ℕ} {E : ℝ}
+    (h : PairedKoszulBoundOn T p L E) (hT : T.Tight) (hT0 : ∀ a, T a ≠ 0) (hp : 1 ≤ p)
+    (hL : 3 ^ (2 * p) + 1 ≤ L) (hLk : L ≤ k) :
+    (7 / 3 - 2 / (3 * (p + 1))) * (2 * k + 1 : ℝ) - (2 * p + 1) / (p + 1) * E -
+        (8 * L + (3 ^ (2 * p) + 1) * (2 * k + 1) / L + 2) ≤
+      T.borderRank :=
+  Internal.Explicit.le_borderRank_of_pairedKoszulBoundOn hT hT0 h hp hL hLk
 
 /-- **The paired-cluster Koszul bound gives the hypothesis of the deletion game.** If
 `PairedKoszulBound k p L E` holds and `R ≥ 3^{2p} + 1`, then the border ranks of the slice
