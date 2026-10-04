@@ -51,6 +51,7 @@ public import Complexitylib.Algebraic.LowerBound.Cutwidth.Nondeterministic
 public import Complexitylib.Algebraic.LowerBound.Cutwidth.Direction
 public import Complexitylib.Algebraic.LowerBound.Cutwidth.Balanced
 public import Complexitylib.Algebraic.LowerBound.Cutwidth.AverageCase
+public import Complexitylib.Algebraic.LowerBound.Cutwidth.SingleCut
 public import Complexitylib.Algebraic.LowerBound.Cutwidth.Extractor
 public import Complexitylib.Algebraic.LowerBound.Cutwidth.Extractor.Padding
 public import Complexitylib.Algebraic.LowerBound.Cutwidth.Extractor.Padding.Asymptotics
@@ -329,6 +330,10 @@ functions over the full binary basis. `FourN` combines cut counting, circuit
 wiring, compression, and the proved sharp cubic bisection and pathwidth
 bounds. `Nondeterministic` extends the conclusion to arbitrarily many witness
 inputs; `AverageCase` gives the agreement bound for balanced functions.
+`SingleCut` proves the single-cut criterion: one split of a circuit's wires,
+crossed by `|A|` forward and `|B|` backward signals with `i` inputs on one side,
+bounds the accepted inputs of a `K`-rectangle-free function by
+`K (2 ^ (i + |B|) + 2 ^ (n - i + |A|))`.
 
 `Bisection.Helpful` completes the graph theorem. Its proof uses the first
 boundary normalization phase, a partition into bounded connected clusters,
