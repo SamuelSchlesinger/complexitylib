@@ -20,15 +20,18 @@ Proofs behind `Complexitylib.Algebraic.LinearAlgebra.Tensor.Diagonal`.
   `p`-subsets to the `(p + 1)`-subsets with `I ⊆ σ I`, by Hall's theorem; the inclusion graph is
   `(p + 1)`-regular on both sides, so Hall's condition follows by double counting.
 * **Entries.** The `((J, ℓ), (I, j))` entry of the Koszul flattening of `weightedShifts o g` is
-  `wedgeCoeff J I t * g t j` when `J = insert t I` with `t ∉ I` and `ℓ = j + o t`, and `0` when
-  `J` is not of this form.
-* **Certificate.** `choose_mul_le_rank_of_bounds`: if all sums over subsets of size `p` or
-  `p + 1` lie in `[lo, lo + D]`, the block `i : Fin (m - D)` uses the shift `w = i - lo`, the
-  columns `(I, w + ∑_I o)` and the rows `(σ I, w + ∑_{σ I} o)`. Entries between different blocks
-  vanish because `w` is preserved, and each block is nonsingular by
+  `wedgeCoeff J I t * g t j` when `J = insert t I` with `t ∉ I` and `ℓ = j + o t`, and `0`
+  otherwise (`koszulFlattening_weightedShifts_eq_zero`).
+* **One block.** `det_submatrix_shift_ne_zero`: for a shift `w`, the minor with columns
+  `(I, w + ∑_I o)` and rows `(σ I, w + ∑_{σ I} o)` is nonsingular by
   `Matrix.det_ne_zero_of_two_pow_two_pow` with the identity permutation as the perfect matching:
   the entry in row `σ I`, column `I'` has the label `e t (w + ∑_{I'} o)`, where `t` is the
   element with `σ I = insert t I'` (`insertedElt`).
+* **A window of blocks.** `choose_mul_card_le_rank_of_shifts`: for pairwise distinct shifts
+  `w q` whose positions lie in `[0, m)`, entries between different blocks vanish because `w` is
+  preserved, so the blocks form a block-diagonal minor. `choose_mul_le_rank_of_bounds` is the
+  case where all sums over subsets of size `p` or `p + 1` lie in `[lo, lo + D]` and the shifts
+  are `w = i - lo` for `i : Fin (m - D)`.
 * **Spread.** `exists_bounds` produces `lo` with `D = sumSpread p o`; `sumSpread_le` compares
   each sum with the median: the elements above the median add at most `p (o (2p) - r)`, those
   below subtract at most `p (r - o 0)`, and the sizes differ by at most one.
@@ -117,6 +120,19 @@ theorem koszulFlattening_weightedShifts_apply [LinearOrder α] [Fintype α] {m p
     koszulFlattening p (weightedShifts o g) (J, ℓ) (I, j) =
       ∑ t, wedgeCoeff J.1 I.1 t * if (ℓ : ℤ) = j + o t then g t j else 0 :=
   rfl
+
+/-- An entry of the Koszul flattening of weighted shifts in row `(J, ℓ)` and column `(I, j)`
+vanishes unless `ℓ = j + o t` for the element `t ∉ I` with `insert t I = J`. -/
+theorem koszulFlattening_weightedShifts_eq_zero [LinearOrder α] [Fintype α] {m p : ℕ}
+    (o : α → ℤ) (g : α → Fin m → ℂ) (J : {J : Finset α // J.card = p + 1}) (ℓ : Fin m)
+    (I : {I : Finset α // I.card = p}) (j : Fin m)
+    (h : ∀ t, t ∉ I.1 → insert t I.1 = J.1 → (ℓ : ℤ) ≠ j + o t) :
+    koszulFlattening p (weightedShifts o g) (J, ℓ) (I, j) = 0 := by
+  rw [koszulFlattening_weightedShifts_apply]
+  by_cases hex : ∃ t, t ∉ I.1 ∧ insert t I.1 = J.1
+  · obtain ⟨t, ht, hJ⟩ := hex
+    rw [sum_wedgeCoeff_mul_of_insert hJ, ite_eq_right (h t ht hJ), mul_zero]
+  · exact sum_wedgeCoeff_mul_of_not_exists hex _
 
 section Matching
 
@@ -210,6 +226,117 @@ theorem insertedElt_eq [Nonempty α] [DecidableEq α] {J I : Finset α} {t : α}
 
 variable {p m : ℕ}
 
+/-- **A block of the single-cluster minor is nonsingular.** Let the `p`-subset sums of `o` be
+pairwise distinct and differ by at most `D`, and let the weights be `2^{2^{e t j}}` with labels
+`e` injective on positions at distance at most `D`. For a bijection `σ` from the `p`-subsets to
+the `(p + 1)`-subsets with `I ⊆ σ I` and a shift `w`, the minor with rows
+`(σ I, w + ∑_{σ I} o)` and columns `(I, w + ∑_I o)` has nonzero determinant. -/
+theorem det_submatrix_shift_ne_zero (o : Fin (2 * p + 1) → ℤ)
+    (g : Fin (2 * p + 1) → Fin m → ℂ) (e : Fin (2 * p + 1) → Fin m → ℕ)
+    (ho : Set.InjOn (fun I : Finset (Fin (2 * p + 1)) => ∑ t ∈ I, o t) {I | I.card = p})
+    (hg : ∀ t j, g t j = 2 ^ 2 ^ e t j) (D : ℕ)
+    (hD : ∀ I I' : Finset (Fin (2 * p + 1)), I.card = p → I'.card = p →
+      ∑ t ∈ I, o t - ∑ t ∈ I', o t ≤ D)
+    (he : ∀ t t' (j j' : Fin m), |(j : ℤ) - j'| ≤ D → e t j = e t' j' → t = t' ∧ j = j')
+    (σ : {I : Finset (Fin (2 * p + 1)) // I.card = p} ≃
+      {J : Finset (Fin (2 * p + 1)) // J.card = p + 1})
+    (hσ : ∀ I, I.1 ⊆ (σ I).1) (w : ℤ) (ℓ j : {I : Finset (Fin (2 * p + 1)) // I.card = p} → Fin m)
+    (hℓ : ∀ I, (ℓ I : ℤ) = w + ∑ t ∈ (σ I).1, o t) (hj : ∀ I, (j I : ℤ) = w + ∑ t ∈ I.1, o t) :
+    ((koszulFlattening p (weightedShifts o g)).submatrix (fun I => (σ I, ℓ I))
+      (fun I => (I, j I))).det ≠ 0 := by
+  classical
+  set B := (koszulFlattening p (weightedShifts o g)).submatrix (fun I => (σ I, ℓ I))
+    (fun I => (I, j I)) with hB
+  let L : {I : Finset (Fin (2 * p + 1)) // I.card = p} →
+      {I : Finset (Fin (2 * p + 1)) // I.card = p} → ℕ :=
+    fun I I' => e (insertedElt (σ I).1 I'.1) (j I')
+  have hsum_insert : ∀ (J I : Finset (Fin (2 * p + 1))) (t : Fin (2 * p + 1)), t ∉ I →
+      insert t I = J → ∑ x ∈ J, o x = ∑ x ∈ I, o x + o t := by
+    intro J I t ht hJ
+    rw [← hJ, sum_insert ht, add_comm]
+  have hentry : ∀ I I' t, t ∉ I'.1 → insert t I'.1 = (σ I).1 →
+      B I I' = (-1) ^ (I'.1.filter (· < t)).card * 2 ^ 2 ^ L I I' := by
+    intro I I' t ht hJ
+    simp only [B, Matrix.submatrix_apply]
+    rw [koszulFlattening_weightedShifts_apply, sum_wedgeCoeff_mul_of_insert hJ,
+      wedgeCoeff_of_insert ht hJ, ite_eq_left, hg]
+    · simp only [L, insertedElt_eq ht hJ]
+    · rw [hℓ, hj, hsum_insert _ _ t ht hJ]
+      ring
+  have hsupp : ∀ I I', B I I' ≠ 0 → ∃ t, t ∉ I'.1 ∧ insert t I'.1 = (σ I).1 := by
+    intro I I' h
+    by_contra h'
+    apply h
+    simp only [B, Matrix.submatrix_apply]
+    rw [koszulFlattening_weightedShifts_apply, sum_wedgeCoeff_mul_of_not_exists h']
+  apply Matrix.det_ne_zero_of_two_pow_two_pow B L
+  · intro I I' h
+    obtain ⟨t, ht, hJ⟩ := hsupp I I' h
+    rw [hentry I I' t ht hJ]
+    rcases neg_one_pow_eq_or ℂ (I'.1.filter (· < t)).card with h1 | h1 <;> rw [h1] <;> simp
+  · intro I₁ I₁' I₂ I₂' h₁ h₂ hL
+    obtain ⟨t₁, ht₁, hJ₁⟩ := hsupp I₁ I₁' h₁
+    obtain ⟨t₂, ht₂, hJ₂⟩ := hsupp I₂ I₂' h₂
+    simp only [L, insertedElt_eq ht₁ hJ₁, insertedElt_eq ht₂ hJ₂] at hL
+    have hwin : |((j I₁' : ℕ) : ℤ) - (j I₂' : ℕ)| ≤ D := by
+      have h1 := hD _ _ I₁'.2 I₂'.2
+      have h2 := hD _ _ I₂'.2 I₁'.2
+      rw [hj, hj, abs_le]
+      constructor <;> linarith
+    obtain ⟨htt, hjj⟩ := he _ _ _ _ hwin hL
+    have hsum : ∑ x ∈ I₁'.1, o x = ∑ x ∈ I₂'.1, o x := by
+      have := congrArg (fun j : Fin m => ((j : ℕ) : ℤ)) hjj
+      simp only [hj] at this
+      linarith
+    have hI' : I₁' = I₂' := Subtype.ext (ho I₁'.2 I₂'.2 hsum)
+    subst hI' htt
+    refine ⟨σ.injective (Subtype.ext ?_), rfl⟩
+    rw [← hJ₁, ← hJ₂]
+  · intro I
+    obtain ⟨t, ht, hJ⟩ := Finset.exists_eq_insert_iff.mpr ⟨hσ I, by rw [I.2, (σ I).2]⟩
+    rw [Equiv.refl_apply, hentry I I t ht hJ]
+    exact mul_ne_zero (pow_ne_zero _ (by norm_num)) (pow_ne_zero _ two_ne_zero)
+
+/-- **The single-cluster certificate on a window of shifts.** Under the hypotheses of
+`det_submatrix_shift_ne_zero`, let `w : Q → ℤ` be pairwise distinct shifts whose positions
+`w q + ∑_K o` lie in `[0, m)` for all subsets `K` of size `p` or `p + 1`. The blocks of the
+shifts `w q` form a block-diagonal minor, so the Koszul flattening has rank at least
+`(2p+1).choose p * card Q`. -/
+theorem choose_mul_card_le_rank_of_shifts (o : Fin (2 * p + 1) → ℤ)
+    (g : Fin (2 * p + 1) → Fin m → ℂ) (e : Fin (2 * p + 1) → Fin m → ℕ)
+    (ho : Set.InjOn (fun I : Finset (Fin (2 * p + 1)) => ∑ t ∈ I, o t) {I | I.card = p})
+    (hg : ∀ t j, g t j = 2 ^ 2 ^ e t j) (D : ℕ)
+    (hD : ∀ I I' : Finset (Fin (2 * p + 1)), I.card = p → I'.card = p →
+      ∑ t ∈ I, o t - ∑ t ∈ I', o t ≤ D)
+    (he : ∀ t t' (j j' : Fin m), |(j : ℤ) - j'| ≤ D → e t j = e t' j' → t = t' ∧ j = j')
+    {Q : Type*} [Fintype Q] [DecidableEq Q] (w : Q → ℤ) (hw : Function.Injective w)
+    (hrange : ∀ q (K : Finset (Fin (2 * p + 1))), K.card = p ∨ K.card = p + 1 →
+      0 ≤ w q + ∑ t ∈ K, o t ∧ w q + ∑ t ∈ K, o t < m) :
+    (2 * p + 1).choose p * Fintype.card Q ≤ (koszulFlattening p (weightedShifts o g)).rank := by
+  classical
+  obtain ⟨σ, hσ⟩ := exists_equiv_subset (α := Fin (2 * p + 1)) (p := p) (by simp)
+  let pos : Q → (K : Finset (Fin (2 * p + 1))) → (K.card = p ∨ K.card = p + 1) → Fin m :=
+    fun q K hK => ⟨(w q + ∑ t ∈ K, o t).toNat, by have := hrange q K hK; omega⟩
+  have hpos : ∀ q K hK, ((pos q K hK : ℕ) : ℤ) = w q + ∑ t ∈ K, o t := by
+    intro q K hK
+    have := hrange q K hK
+    simp only [pos]
+    omega
+  have key := Matrix.card_mul_card_le_rank_of_det_blocks_ne_zero
+    (koszulFlattening p (weightedShifts o g))
+    (fun I q => (σ I, pos q (σ I).1 (Or.inr (σ I).2)))
+    (fun I q => (I, pos q I.1 (Or.inl I.2))) ?_ ?_
+  · simpa using key
+  · intro I I' q q' hqq
+    apply koszulFlattening_weightedShifts_eq_zero
+    intro t ht hJ heq
+    simp only [hpos] at heq
+    rw [← hJ, sum_insert ht] at heq
+    exact hqq (hw (by linarith))
+  · intro q
+    exact det_submatrix_shift_ne_zero o g e ho hg D hD he σ hσ (w q) _ _
+      (fun I => hpos q _ (Or.inr (σ I).2)) (fun I => hpos q _ (Or.inl I.2))
+
 /-- **The single-cluster certificate, with explicit bounds on the subset sums.** If every sum
 `∑_{t ∈ K} o t` over a subset `K` of size `p` or `p + 1` lies in `[lo, lo + D]`, the `p`-subset
 sums are pairwise distinct, and the weights are `2^{2^{e t j}}` with labels `e` that are
@@ -223,89 +350,15 @@ theorem choose_mul_le_rank_of_bounds (o : Fin (2 * p + 1) → ℤ) (g : Fin (2 *
       lo ≤ ∑ t ∈ K, o t ∧ ∑ t ∈ K, o t ≤ lo + D)
     (he : ∀ t t' (j j' : Fin m), |(j : ℤ) - j'| ≤ D → e t j = e t' j' → t = t' ∧ j = j') :
     (2 * p + 1).choose p * (m - D) ≤ (koszulFlattening p (weightedShifts o g)).rank := by
-  classical
-  obtain ⟨σ, hσ⟩ := exists_equiv_subset (α := Fin (2 * p + 1)) (p := p) (by simp)
-  let pos : (K : Finset (Fin (2 * p + 1))) → (K.card = p ∨ K.card = p + 1) → Fin (m - D) →
-      Fin m :=
-    fun K hK i => ⟨((i : ℤ) - lo + ∑ t ∈ K, o t).toNat, by have := hlo K hK; have := i.2; omega⟩
-  have hpos : ∀ K hK i, ((pos K hK i : ℕ) : ℤ) = (i : ℤ) - lo + ∑ t ∈ K, o t := by
-    intro K hK i
-    have := hlo K hK
-    simp only [pos]
-    omega
-  let rowf : {I : Finset (Fin (2 * p + 1)) // I.card = p} → Fin (m - D) →
-      {J : Finset (Fin (2 * p + 1)) // J.card = p + 1} × Fin m :=
-    fun I i => (σ I, pos (σ I).1 (Or.inr (σ I).2) i)
-  let colf : {I : Finset (Fin (2 * p + 1)) // I.card = p} → Fin (m - D) →
-      {I : Finset (Fin (2 * p + 1)) // I.card = p} × Fin m :=
-    fun I i => (I, pos I.1 (Or.inl I.2) i)
-  have hsum_insert : ∀ (J I : Finset (Fin (2 * p + 1))) (t : Fin (2 * p + 1)), t ∉ I →
-      insert t I = J → ∑ x ∈ J, o x = ∑ x ∈ I, o x + o t := by
-    intro J I t ht hJ
-    rw [← hJ, sum_insert ht, add_comm]
-  have key := Matrix.card_mul_card_le_rank_of_det_blocks_ne_zero
-    (koszulFlattening p (weightedShifts o g)) rowf colf ?hoff ?hdet
-  · simpa using key
-  case hoff =>
-    intro I I' i i' hii
-    simp only [rowf, colf]
-    rw [koszulFlattening_weightedShifts_apply]
-    refine Finset.sum_eq_zero fun t _ => ?_
-    by_cases hw : t ∉ I'.1 ∧ insert t I'.1 = (σ I).1
-    · rw [ite_eq_right, mul_zero]
-      intro heq
-      rw [hpos _ (Or.inr (σ I).2), hpos _ (Or.inl I'.2), hsum_insert _ _ t hw.1 hw.2] at heq
-      exact hii (Fin.ext (by omega))
-    · rw [wedgeCoeff, ite_eq_right hw, zero_mul]
-  case hdet =>
-    intro i
-    set B := (koszulFlattening p (weightedShifts o g)).submatrix (rowf · i) (colf · i) with hB
-    let L : {I : Finset (Fin (2 * p + 1)) // I.card = p} →
-        {I : Finset (Fin (2 * p + 1)) // I.card = p} → ℕ :=
-      fun I I' => e (insertedElt (σ I).1 I'.1) (pos I'.1 (Or.inl I'.2) i)
-    have hentry : ∀ I I' t, t ∉ I'.1 → insert t I'.1 = (σ I).1 →
-        B I I' = (-1) ^ (I'.1.filter (· < t)).card * 2 ^ 2 ^ L I I' := by
-      intro I I' t ht hJ
-      simp only [B, Matrix.submatrix_apply, rowf, colf]
-      rw [koszulFlattening_weightedShifts_apply, sum_wedgeCoeff_mul_of_insert hJ,
-        wedgeCoeff_of_insert ht hJ, ite_eq_left, hg]
-      · simp only [L, insertedElt_eq ht hJ]
-      · rw [hpos _ (Or.inr (σ I).2), hpos _ (Or.inl I'.2), hsum_insert _ _ t ht hJ]
-        ring
-    have hsupp : ∀ I I', B I I' ≠ 0 → ∃ t, t ∉ I'.1 ∧ insert t I'.1 = (σ I).1 := by
-      intro I I' h
-      by_contra h'
-      apply h
-      simp only [B, Matrix.submatrix_apply, rowf, colf]
-      rw [koszulFlattening_weightedShifts_apply, sum_wedgeCoeff_mul_of_not_exists h']
-    apply Matrix.det_ne_zero_of_two_pow_two_pow B L
-    · intro I I' h
-      obtain ⟨t, ht, hJ⟩ := hsupp I I' h
-      rw [hentry I I' t ht hJ]
-      rcases neg_one_pow_eq_or ℂ (I'.1.filter (· < t)).card with h1 | h1 <;> rw [h1] <;> simp
-    · intro I₁ I₁' I₂ I₂' h₁ h₂ hL
-      obtain ⟨t₁, ht₁, hJ₁⟩ := hsupp I₁ I₁' h₁
-      obtain ⟨t₂, ht₂, hJ₂⟩ := hsupp I₂ I₂' h₂
-      simp only [L, insertedElt_eq ht₁ hJ₁, insertedElt_eq ht₂ hJ₂] at hL
-      have hb₁ := hlo I₁'.1 (Or.inl I₁'.2)
-      have hb₂ := hlo I₂'.1 (Or.inl I₂'.2)
-      have hwin : |((pos I₁'.1 (Or.inl I₁'.2) i : ℕ) : ℤ) - (pos I₂'.1 (Or.inl I₂'.2) i : ℕ)| ≤
-          D := by
-        rw [hpos _ (Or.inl I₁'.2), hpos _ (Or.inl I₂'.2), abs_le]
-        constructor <;> linarith
-      obtain ⟨htt, hjj⟩ := he _ _ _ _ hwin hL
-      have hsum : ∑ x ∈ I₁'.1, o x = ∑ x ∈ I₂'.1, o x := by
-        have := congrArg (fun j : Fin m => ((j : ℕ) : ℤ)) hjj
-        simp only [hpos] at this
-        linarith
-      have hI' : I₁' = I₂' := Subtype.ext (ho I₁'.2 I₂'.2 hsum)
-      subst hI' htt
-      refine ⟨σ.injective (Subtype.ext ?_), rfl⟩
-      rw [← hJ₁, ← hJ₂]
-    · intro I
-      obtain ⟨t, ht, hJ⟩ := Finset.exists_eq_insert_iff.mpr ⟨hσ I, by rw [I.2, (σ I).2]⟩
-      rw [Equiv.refl_apply, hentry I I t ht hJ]
-      exact mul_ne_zero (pow_ne_zero _ (by norm_num)) (pow_ne_zero _ two_ne_zero)
+  have h := choose_mul_card_le_rank_of_shifts o g e ho hg D
+    (fun I I' hI hI' => by
+      have := hlo I (Or.inl hI)
+      have := hlo I' (Or.inl hI')
+      linarith)
+    he (Q := Fin (m - D)) (fun i => (i : ℤ) - lo)
+    (fun i i' h => Fin.ext (by simp only at h; omega))
+    (fun i K hK => by have := hlo K hK; have := i.2; constructor <;> omega)
+  simpa using h
 
 theorem le_sumSpread [Fintype α] (o : α → ℤ) {K K' : Finset α}
     (hK : K.card = p ∨ K.card = p + 1) (hK' : K'.card = p ∨ K'.card = p + 1) :
