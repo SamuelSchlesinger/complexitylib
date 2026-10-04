@@ -93,6 +93,7 @@ public import Complexitylib.Algebraic.LinearAlgebra.NonsingularMinor
 public import Complexitylib.Algebraic.LinearAlgebra.Tensor.BorderRank
 public import Complexitylib.Algebraic.LinearAlgebra.Tensor.Koszul
 public import Complexitylib.Algebraic.LinearAlgebra.Tensor.Substitution
+public import Complexitylib.Algebraic.LinearAlgebra.Tensor.Diagonal
 
 /-!
 # Algebraic circuits
