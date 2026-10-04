@@ -56,6 +56,7 @@ public import Complexitylib.Algebraic.LowerBound.Cutwidth.MultiOutput.Ordering
 public import Complexitylib.Algebraic.LowerBound.Cutwidth.MultiOutput.Rank
 public import Complexitylib.Algebraic.LowerBound.Cutwidth.MultiOutput.TotallyRegular
 public import Complexitylib.Algebraic.LowerBound.Cutwidth.MultiOutput.Quadratic
+public import Complexitylib.Algebraic.LowerBound.Cutwidth.MultiOutput.Restrict
 public import Complexitylib.Algebraic.LowerBound.Cutwidth.Extractor
 public import Complexitylib.Algebraic.LowerBound.Cutwidth.Extractor.Padding
 public import Complexitylib.Algebraic.LowerBound.Cutwidth.Extractor.Padding.Asymptotics
