@@ -21,7 +21,9 @@ weights at leaves and isolated vertices, together with nonnegative sums
 across edges, force a nonnegative total. Shifting weights by a threshold
 then gives a light adjacent pair whenever the total lies below that threshold
 times the number of vertices. `RedBlack.Restoration` handles one local
-edge-restoration step; the global tree reorganization remains unproved.
+edge-restoration step. Monien and Preis's global tree reorganization is not
+formalized: `RedBlack.Clusters` proves their red/black lemma by bounded
+connected partitions instead, and `Bisection.exists_bisectionBound` uses it.
 -/
 
 @[expose] public section

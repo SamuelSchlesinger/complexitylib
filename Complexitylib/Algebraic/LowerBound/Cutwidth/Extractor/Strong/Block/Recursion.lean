@@ -21,9 +21,9 @@ the explicit sum `recursiveBlockError`. No bound for each individual seed
 is assumed. All local condenser and entropy hypotheses concern only levels
 strictly below `n`.
 
-The seed-cardinality formula counts each level's seed once. A concrete
-short-seed parameter schedule and a uniform encoded evaluator remain to be
-supplied before this finite recursion yields the intended asymptotic extractor.
+The seed-cardinality formula counts each level's seed once. `Recursion.Scheduled`
+supplies a concrete short-seed parameter schedule (`eventually_polylogBlockExtractor`)
+and a uniform encoded evaluator (`scheduledBlockExtractorEval_mem_FP`).
 -/
 
 public section

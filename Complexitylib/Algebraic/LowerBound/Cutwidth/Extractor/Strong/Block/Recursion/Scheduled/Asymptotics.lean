@@ -27,8 +27,9 @@ method of Chattopadhyay--Goodman--Liao, Theorem 5.6 of *Affine Extractors
 for Almost Logarithmic Entropy*, <https://eccc.weizmann.ac.il/report/2021/075/>.
 This constant-rate schedule has its own coarser entropy bound. The limit
 estimates use Cslib's natural exponential-versus-polynomial theorem and
-Mathlib's logarithm and little-o APIs. A uniform encoded evaluator for the
-complete variable-depth family remains a separate construction.
+Mathlib's logarithm and little-o APIs. `Scheduled.Program` gives a uniform
+encoded evaluator for the complete variable-depth family
+(`scheduledBlockExtractorEval_mem_FP`).
 -/
 
 public section

@@ -12,8 +12,8 @@ import Complexitylib.Algebraic.LowerBound.Cutwidth.Extractor.Moments.Internal
 # Low-order sign-sum moments from parity bias
 
 The bounds hold for finite weighted averages. Nonnegative weights of mass one
-specialize them to finite probability distributions. Deriving the parity-bias
-hypothesis from a sumset source remains a separate source-reduction theorem.
+specialize them to finite probability distributions. `SourceReduction.Tests`
+derives the parity-bias hypothesis for the actual source reduction.
 -/
 
 public section

@@ -25,7 +25,8 @@ bound includes both original sources, both parameters, remaining advice,
 and the right state. No validity promise is needed for polynomial time.
 
 These results establish the algorithm and its runtime. The statistical
-chain invariant and a correlation-breaking guarantee remain separate.
+chain invariant and the correlation-breaking guarantee are proved in
+`Advice.Extraction` (`adviceCorrelationBreaker_dist_le`).
 -/
 
 public section

@@ -14,7 +14,8 @@ import Complexitylib.Algebraic.LowerBound.Cutwidth.Extractor.CorrelationBreaker.
 
 The concrete chain processes advice in its given order and preserves its
 original sources. These algebraic laws do not supply the statistical chain
-invariant needed for correlation breaking.
+invariant needed for correlation breaking; `Advice.Extraction` proves that
+guarantee (`adviceCorrelationBreaker_dist_le`).
 -/
 
 public section

@@ -20,8 +20,9 @@ The actual three-call look-ahead and eight-call step agree exactly with
 their Boolean-vector definitions at the stated common scale. Their total
 string evaluators have registered `polytime` certificates with variable
 source words, shared scale, error exponent, and advice bit. These results
-certify the concrete computation and its cost; the opposite-bit statistical
-guarantee and full advice iteration are separate obligations.
+certify the concrete computation and its cost. `Opposite.False` and
+`Opposite.True` prove the opposite-bit statistical guarantee, and
+`Advice.Extraction` the full advice iteration (`adviceCorrelationBreaker_dist_le`).
 -/
 
 public section

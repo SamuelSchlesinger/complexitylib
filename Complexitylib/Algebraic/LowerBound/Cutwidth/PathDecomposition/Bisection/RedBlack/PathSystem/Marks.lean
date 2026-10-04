@@ -29,8 +29,8 @@ thin-path family.
 
 The constructed isolation and core-forest theorems retain the stronger
 cycle budget. These statements count the initial shading step. Preservation
-through the later color swaps and leaf reorganization remains a separate
-obligation.
+through the later color swaps and leaf reorganization is not formalized;
+`RedBlack.Clusters` proves the red/black lemma by another route.
 
 Source: Burkhard Monien and Robert Preis, *Upper bounds on the bisection
 width of 3- and 4-regular graphs*, Journal of Discrete Algorithms 4 (2006),

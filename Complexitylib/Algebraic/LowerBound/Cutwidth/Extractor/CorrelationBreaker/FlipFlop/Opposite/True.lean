@@ -36,7 +36,8 @@ terms, without any independent refreshed-source assumption.
 This is the second advice orientation of Chattopadhyay--Goyal--Li's Algorithm 1
 and Lemma 6.8, Section 6.3, <https://arxiv.org/pdf/1505.00107>. The matched-width
 programs and conservative finite error accounting are this library's checked
-specialization. Propagation through a complete advice chain is separate.
+specialization. `Advice.Extraction` proves the complete advice-chain guarantee
+(`adviceCorrelationBreaker_dist_le`).
 -/
 
 public section

@@ -26,8 +26,9 @@ regions to isolate in a supplied degree-two family and excludes all cycles
 through that family. `PathSystem` constructs the family from eligible
 vertices and their actual red attachments. Its initial attachment marks
 and their shared budget with small cyclic components are counted exactly.
-Preserving marks through the tree reorganization and the final density
-count remain to be formalized.
+Preserving marks through the tree reorganization is not formalized:
+`RedBlack.Clusters` proves the red/black density lemma by bounded connected
+partitions instead, and `Bisection.exists_bisectionBound` uses it.
 These constructions also apply after black-edge deletions; they do not
 require cubic regularity.
 -/

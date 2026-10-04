@@ -24,8 +24,8 @@ one final extraction error per leaf. Giving every local error exponent
 `e+n+2` bounds the total by `2^(-e)`. These are finite statistical statements
 for supplied components in the recursion of Chattopadhyay--Goodman--Liao,
 Theorem 5.6 of *Affine Extractors for Almost Logarithmic Entropy*,
-<https://eccc.weizmann.ac.il/report/2021/075/>. A concrete short-seed schedule
-and a uniform encoded evaluator remain separate.
+<https://eccc.weizmann.ac.il/report/2021/075/>. `Recursion.Scheduled` supplies a
+concrete short-seed schedule and a uniform encoded evaluator.
 -/
 
 public section

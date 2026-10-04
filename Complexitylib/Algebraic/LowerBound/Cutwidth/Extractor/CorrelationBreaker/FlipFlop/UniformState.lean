@@ -26,7 +26,8 @@ Chattopadhyay--Goyal--Li, *Non-Malleable Extractors and Codes, with their Many
 Tampered Extensions*, Lemma 6.8: <https://arxiv.org/pdf/1505.00107>.
 The theorem instantiates both extractor calls with the actual scheduled
 programs and gives an explicit finite bound. The complete opposite-advice
-and iterated correlation-breaking guarantees are separate obligations.
+and iterated correlation-breaking guarantees are proved in `Opposite.UniformState`
+and `Advice.Extraction` (`adviceCorrelationBreaker_dist_le`).
 -/
 
 public section

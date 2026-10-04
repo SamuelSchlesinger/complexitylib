@@ -17,9 +17,9 @@ satisfy the quartic certificate in `FourthMoment`. Each tail beyond one eighth
 of the square root of `m` has weighted mass at least `1/36`.
 
 This normalization is a direct deduction from the checked moment bounds and
-quartic estimate. Deriving parity bias from the source reduction of
-Chattopadhyay and Liao, *Extractors for Sum of Two Sources* (2021), Lemma 5.4,
-equation (5), remains a separate theorem.
+quartic estimate. `SourceReduction.Tests` derives parity bias from the source
+reduction of Chattopadhyay and Liao, *Extractors for Sum of Two Sources* (2021),
+Lemma 5.4, equation (5).
 -/
 
 public section

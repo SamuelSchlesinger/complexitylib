@@ -22,8 +22,9 @@ arbitrarily on the good coordinates. Strict majority returns false on ties.
 
 This composes the sign-sum tail certificate with the deterministic margin
 bound for the final majority stage in Chattopadhyay and Liao, *Extractors
-for Sum of Two Sources* (2021), Lemma 5.4. Obtaining the parity-bias bound
-from a sumset source remains a separate construction obligation.
+for Sum of Two Sources* (2021), Lemma 5.4. `SourceReduction.Tests` obtains the
+parity-bias bound for the actual reduction, and `SourceReduction.Construction`
+applies this theorem to it.
 -/
 
 @[expose] public section

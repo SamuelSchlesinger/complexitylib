@@ -34,8 +34,9 @@ All four pairs of selection bits share the displayed conservative bound.
 
 This finite half-step is a component of preservation after advice strings
 have differed in Chattopadhyay--Goyal--Li, Algorithm 1 and Lemma 6.8,
-Section 6.3: <https://arxiv.org/pdf/1505.00107>. The two-half composition and
-complete advice-chain guarantee remain separate theorems.
+Section 6.3: <https://arxiv.org/pdf/1505.00107>. `Preservation.Step` composes the
+two halves, and `Advice.Extraction` proves the complete advice-chain guarantee
+(`adviceCorrelationBreaker_dist_le`).
 -/
 
 public section

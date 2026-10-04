@@ -29,7 +29,8 @@ For black degree at most three and region-plus-attachment size at most `4 M`,
 the bound is `(1 + 12 M) |X|`. Thus an `O(M)` witness remains `O(M²)` after
 all paths are restored, as required in Monien and Preis's cycle-removal
 argument. `PathSystem` constructs the thin family with `L = 3 M`, giving
-the factor `1 + 9 M`. Tree reorganization remains a separate obligation.
+the factor `1 + 9 M`. Tree reorganization is not formalized; `RedBlack.Clusters`
+proves the red/black lemma by another route.
 
 Source: Burkhard Monien and Robert Preis, *Upper bounds on the bisection
 width of 3- and 4-regular graphs*, Journal of Discrete Algorithms 4 (2006),

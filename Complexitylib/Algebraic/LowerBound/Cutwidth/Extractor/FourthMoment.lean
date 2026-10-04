@@ -25,7 +25,8 @@ The intended source reduction is Chattopadhyay and Liao, *Extractors for Sum
 of Two Sources* (2021), Lemma 5.4. The quartic estimate here is a direct
 calculation. `Moments` bounds raw sign-sum moments from parity bias, and
 `Moments.Tails` supplies the normalization used by `Majority.Probability`.
-Constructing the source reduction that supplies these parity bounds remains open.
+`SourceReduction.Construction` constructs the source reduction that supplies
+these parity bounds (`sourceReductionExtractor_flat`).
 -/
 
 public section

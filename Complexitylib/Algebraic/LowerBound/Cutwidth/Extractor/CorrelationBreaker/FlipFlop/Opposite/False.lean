@@ -36,8 +36,9 @@ symbolic, with no enumeration of their large Boolean alphabets.
 This proves one advice orientation in Chattopadhyay--Goyal--Li's Algorithm 1
 and Lemma 6.8, Section 6.3, <https://arxiv.org/pdf/1505.00107>. The common-scale
 implementation and this conservative finite accounting are the checked
-specialization here. The other orientation is proved in `Opposite.True`;
-advice-chain induction remains a separate obligation.
+specialization here. The other orientation is proved in `Opposite.True`.
+`Advice.Extraction` proves the complete advice-chain guarantee
+(`adviceCorrelationBreaker_dist_le`).
 -/
 
 public section

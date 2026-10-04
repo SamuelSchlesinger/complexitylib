@@ -28,9 +28,9 @@ guards; no sampler, security, or parity estimate is assumed.
 This formalizes the finite composition in Chattopadhyay--Liao, *Extractors
 for Sum of Two Sources*, Lemma 5.4 and the proof of Theorem 2:
 <https://arxiv.org/abs/2110.12652>. The source threshold is the maximum of
-the actual affine leakage and growing matched-sampler reserves. Proving
-an eventual sublinear entropy bound and uniformly evaluating the complete
-family remain separate from this finite theorem.
+the actual affine leakage and growing matched-sampler reserves. The eventual
+sublinear entropy bound and uniform evaluation of the complete family are
+proved separately, in `Construction.Asymptotics` and `Construction.Uniform`.
 -/
 
 public section

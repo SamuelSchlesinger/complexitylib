@@ -32,8 +32,8 @@ for the displayed average entropy and error losses.
 This is the weak continuation needed before the first unequal advice bit
 in Chattopadhyay--Goyal--Li, Algorithm 2 and Claim 6.11, printed pp.31--32:
 <https://arxiv.org/pdf/1505.00107>. The conservative finite error estimate
-is the deduction formalized here. The full advice-chain induction and its
-final strong-extraction step remain separate obligations.
+is the deduction formalized here. `Advice.Extraction` completes the advice-chain
+induction and its final strong-extraction step (`adviceCorrelationBreaker_dist_le`).
 -/
 
 public section

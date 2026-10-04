@@ -33,8 +33,9 @@ This supplies cycle selection for a given thin-path system in Monien and
 Preis's proof. `PathSystem` constructs and instantiates that system.
 `BridgeQuotient` contracts the pieces between surviving boundaries to a
 forest. `PathSystem.Marks` counts the initial attachment marks and reserves
-rank for small cyclic components. Preserving these invariants through the
-weighted-tree reorganization remains a separate obligation.
+rank for small cyclic components. Monien and Preis's weighted-tree
+reorganization is not formalized; `RedBlack.Clusters` proves the red/black
+lemma by another route.
 -/
 
 @[expose] public section

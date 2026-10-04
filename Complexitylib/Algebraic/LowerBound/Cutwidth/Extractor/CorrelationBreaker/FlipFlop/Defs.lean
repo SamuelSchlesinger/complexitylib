@@ -22,7 +22,9 @@ Both refresh calls read the original right source `y`. The intermediate
 right state is used only by the middle call of each look-ahead. Each step
 therefore makes eight extractor calls, with the advice bit choosing opposite
 look-ahead outputs at the two refreshes. The definitions are total for all
-parameters. A correlation-breaking guarantee requires a separate proof.
+parameters. `Opposite.False` and `Opposite.True` prove the one-step guarantee,
+and `Advice.Extraction` proves the complete advice-chain guarantee
+(`adviceCorrelationBreaker_dist_le`).
 -/
 
 @[expose] public section

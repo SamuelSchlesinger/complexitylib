@@ -18,9 +18,9 @@ implies `Balanced`, then rectangle-freeness and the accepting-input bound.
 These are the combinatorial bridges for the extractor route in Ryan Williams's
 September 2026 working note. The cubic bisection and pathwidth theorems are
 proved. The new deterministic, nondeterministic, and average-case endpoints
-instantiate these graph bounds, leaving the extractor family as the remaining
-application obligation. The generic interfaces with explicit graph bounds
-are retained.
+instantiate these graph bounds. `SourceReduction.Construction.Hardness`
+supplies an explicit extractor family and proves its deterministic bounds.
+The generic interfaces with explicit graph bounds are retained.
 -/
 
 @[expose] public section

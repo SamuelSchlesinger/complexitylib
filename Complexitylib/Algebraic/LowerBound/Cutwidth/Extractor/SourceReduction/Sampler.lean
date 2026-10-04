@@ -25,8 +25,9 @@ guards concern the concrete numerical parameters. XOR-linearity holds at
 every size, independently of those statistical guards. The construction
 implements the amplification used in Chattopadhyay--Liao, *Extractors for
 Sum of Two Sources*, Lemma 5.4 and Appendix A, proof of Lemma 3.17:
-<https://arxiv.org/abs/2110.12652>. Selecting an eventual parameter family
-and enumerating its outer coordinates remain separate steps.
+<https://arxiv.org/abs/2110.12652>. `Construction.Asymptotics` and
+`Construction.Uniform` select the eventual parameter family and enumerate its
+outer coordinates.
 -/
 
 public section

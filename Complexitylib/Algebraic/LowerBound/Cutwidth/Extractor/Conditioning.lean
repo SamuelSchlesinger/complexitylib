@@ -19,8 +19,8 @@ when their XOR values coincide. This finite step connects the majority
 analysis to the sumset-extraction contract.
 
 The intended source reduction is Chattopadhyay and Liao, *Extractors for Sum
-of Two Sources* (2021), Lemma 5.4. Constructing its sampler and correlation
-breaker, and proving that they supply the good fixings, are separate tasks.
+of Two Sources* (2021), Lemma 5.4. Its sampler and correlation breaker are
+constructed, and shown to supply the good fixings, in `SourceReduction`.
 -/
 
 public section

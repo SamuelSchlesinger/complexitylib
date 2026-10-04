@@ -22,8 +22,8 @@ In Monien and Preis's red/black argument, cycles avoid all thin regions
 after cycle removal. Every surviving region-boundary edge is therefore a
 bridge, so contracting the pieces between those boundaries gives a forest.
 This supplies the contraction step. `PathSuppression` removes the thin-path
-vertices from the quotient; mark accounting and weighted-tree reorganization
-remain separate steps.
+vertices from the quotient. The weighted-tree reorganization is not formalized;
+`RedBlack.Clusters` proves the red/black lemma by another route.
 -/
 
 @[expose] public section

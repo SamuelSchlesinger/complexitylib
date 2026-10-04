@@ -25,9 +25,11 @@ rectangle-free family with sublinear logarithmic threshold. The bound
 number of declared inputs, so the witness count `m` is unrestricted.
 `nondet_eventually_lt_size_of_rectangleFree` instantiates the proved graph
 bounds and only needs `log₂ K(n) = o(n)`, rectangle-freeness, and the
-accepting-input bound. Constructing a family with these properties remains
-the application obligation. The generic graph-ordering interfaces are retained;
-as in the deterministic case, an ordering coefficient `A > 0` gives the
+accepting-input bound. The explicit family `Extractor.sourceReductionHardFamily`
+meets these hypotheses through balanced padding, but no nondeterministic
+corollary for it is stated; `SourceReduction.Construction.Hardness` states its
+deterministic bounds. The generic graph-ordering interfaces are retained; as
+in the deterministic case, an ordering coefficient `A > 0` gives the
 circuit coefficient `1 + 1/A` (`nondet_eventually_lt_size_of_orderingBound`),
 and a cubic cutwidth coefficient `c` gives `1 + 1/(2c)`.
 

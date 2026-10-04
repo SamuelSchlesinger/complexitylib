@@ -24,7 +24,8 @@ This is the construction strategy of Chattopadhyay--Liao, *Extractors for
 Sum of Two Sources*, Lemma 5.4 and the proof of Theorem 2:
 <https://arxiv.org/abs/2110.12652>. Its parameters use the library's
 conservative matched and Gamma extractors. Eventual entropy bounds and
-uniform evaluation of the complete family are separate obligations.
+uniform evaluation of the complete family are proved in
+`Construction.Asymptotics` and `Construction.Uniform`.
 -/
 
 @[expose] public section

@@ -34,7 +34,7 @@ This is the finite preservation step after advice strings first differ in
 Chattopadhyay--Goyal--Li Algorithm 2 and Lemma 6.9, Section 6.3:
 <https://arxiv.org/pdf/1505.00107>. It uses this library's matched-width
 programs and conservative finite error accounting. The complete induction
-through arbitrary advice words is a separate theorem.
+through arbitrary advice words is `adviceCorrelationBreaker_dist_le`.
 -/
 
 public section

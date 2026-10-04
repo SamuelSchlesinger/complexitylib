@@ -23,7 +23,8 @@ A subcubic vertex with two crossing edges is helpful. More generally, a
 connected set of boundary vertices has helpfulness at least its size minus
 two. `Bisection.LocalConfigurations` proves the remaining small configurations
 used before normalization. `Bisection.Rebalancing` supplies the rebalancing step. The bounded
-local helpful-set lemma needed for the sharp bisection theorem remains unproved.
+local helpful-set lemma needed for the sharp bisection theorem is
+`Bisection.exists_bounded_helpful` in `Bisection.Helpful`.
 -/
 
 @[expose] public section

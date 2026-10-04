@@ -43,9 +43,9 @@ stronger budget reserving cycle rank for small cyclic components. The marks
 on small attachments total exactly two per shaded path, so doubly marked
 components fit within the same budget. Endpoint marks total two per shaded
 path as well, lie outside the eligible set, and record the exact degree
-loss there. Restoration charges only marks on the witness. Preserving these facts through the
-weighted-tree reorganization and deriving the final density contradiction
-remain separate steps.
+loss there. Restoration charges only marks on the witness. The weighted-tree
+reorganization and the final density contradiction of this route are not
+formalized; `RedBlack.Clusters` proves the red/black lemma by another route.
 -/
 
 @[expose] public section

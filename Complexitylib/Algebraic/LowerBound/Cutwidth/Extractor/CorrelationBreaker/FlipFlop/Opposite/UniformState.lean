@@ -35,8 +35,8 @@ The degree-six factor `(1 + D^2) * (2 + D^4)` covers both branch losses.
 Every extraction call is the actual scheduled matched-width Boolean
 program. This finite statement combines the two advice orientations of
 Chattopadhyay--Goyal--Li, Algorithm 1 and Lemma 6.8, Section 6.3:
-<https://arxiv.org/pdf/1505.00107>. Advice-chain induction is a separate
-composition obligation.
+<https://arxiv.org/pdf/1505.00107>. `Advice.Extraction` proves the complete
+advice-chain guarantee (`adviceCorrelationBreaker_dist_le`).
 -/
 
 public section

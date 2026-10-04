@@ -24,8 +24,8 @@ direction without logarithms or rounding.
 
 The sampler conclusion covers arbitrary finite probability sources. This
 module proves the conversion. `Sampler.Amplification` supplies the finite
-somewhere-sampler amplification; the short-seed linear extractor and covering
-neighbor map still require construction.
+somewhere-sampler amplification. `SourceReduction.Sampler` applies both to the
+actual matched extractor, with the padded `Γ` extractor as the neighbor map.
 -/
 
 public section

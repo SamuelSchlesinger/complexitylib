@@ -22,9 +22,10 @@ https://arxiv.org/abs/2110.12652. Seeded extraction also gives the needed
 coverage by testing the full neighbor image. This permits a constant-error
 extractor to supply the neighbor map when its seed count is affordable.
 
-The theorems prove these implications. An explicit neighbor map with the
-required parameters and a uniform polynomial-time evaluator remains a separate
-construction obligation.
+The theorems prove these implications. `SourceReduction.Sampler` instantiates
+them with the padded `Γ` extractor as an explicit neighbor map
+(`amplifiedMatchedSampler_somewhereSampler`); its evaluator is polynomial-time
+(`gammaBlockExtractorRuntime_mem_FP`).
 -/
 
 public section
