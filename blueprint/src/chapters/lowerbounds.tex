@@ -10112,6 +10112,114 @@ Theorem~\ref{thm:lowerbounds-algebraic-explicit-four-n}.
   $A=9/32$, for which $1+1/A=41/9$.
 \end{proof}
 
+\begin{definition}[Finite commutative aggregate gates and their budget]
+  \label{def:lowerbounds-algebraic-aggregate-budget}
+  \lean{Algebraic.Aggregate.Op, Algebraic.Aggregate.signature,
+    Algebraic.Aggregate.interpretation, Algebraic.Aggregate.budget,
+    Algebraic.Cutwidth.AggregateNetwork}
+  \leanok
+  A mixed circuit contains arbitrary binary Boolean gates and special gates of the form
+  $h_j(\prod_i \phi_{ji}(z_i))$, where $M_j$ is a finite commutative monoid,
+  $\phi_{ji}:\{0,1\}\to M_j$ is a slot-dependent contribution, and
+  $h_j:M_j\to\{0,1\}$ is arbitrary. Fan-in, fanout, depth, repeated slots, and
+  special-to-special connections are unrestricted. For the actual $q$ special
+  occurrences, define
+  \[
+    D=q+\sum_{j=1}^q\lceil\log_2 |M_j|\rceil.
+  \]
+  This counts one output-guess bit and one aggregate register per occurrence.
+  An aggregate network adds local monoid contributions and a final predicate of
+  their product to the Boolean wire constraints of a graph network.
+\end{definition}
+
+\begin{theorem}[Outgoing-transition counting for aggregate networks]
+  \label{thm:lowerbounds-algebraic-aggregate-count}
+  \lean{Algebraic.Cutwidth.AggregateNetwork.card_accepting_le,
+    Algebraic.Cutwidth.AggregateNetwork.card_accepting_le_of_read_eq_univ}
+  \leanok
+  \uses{def:lowerbounds-algebraic-aggregate-budget}
+  Let a degree-at-most-three aggregate network with vertex set $V$, finite
+  commutative monoid $M$, and cutwidth at most $w$ compute a $K$-rectangle-free
+  function on $n$ inputs, where $K>1$. If its input ports read $n'$ coordinates,
+  its number of accepting inputs is at most
+  \[
+    |M|(K-1)2^{n-n'}+|V|2^{w+3}|M|(K-1)^2.
+  \]
+  If all coordinates are read, this is at most
+  $(|V|2^{w+3}+1)|M|(K-1)^2$.
+\end{theorem}
+\begin{proof}
+  \leanok
+  Charge the first large past set to the previous frontier values, previous
+  aggregate, and incident edge bits. This outgoing key determines the next
+  aggregate without inverting multiplication. Rectangle-freeness bounds the
+  two input fibres. Terminal states with small past sets contribute the first
+  term. Thus neither cancellation nor inverse operations are needed.
+\end{proof}
+
+\begin{theorem}[A large component and a dense accepting slice]
+  \label{thm:lowerbounds-algebraic-aggregate-component}
+  \lean{Algebraic.Cutwidth.Aggregate.exists_large_component,
+    Algebraic.Cutwidth.Aggregate.card_restriction_le,
+    Algebraic.Cutwidth.Aggregate.sliceBound_of_circuit}
+  \leanok
+  \uses{def:lowerbounds-algebraic-aggregate-budget,
+    thm:lowerbounds-algebraic-aggregate-count}
+  Suppose the mixed circuit's output is $K$-rectangle-free and accepts at
+  least $2^{n-2}$ inputs. Set $r=D+\lceil\log_2 K\rceil+3$ and assume $3r\le n$.
+  After guessing special outputs and erasing special incoming slots, some
+  connected component contains more than $n-r$ input coordinates.
+  Fixing the other coordinates preserves rectangle-freeness and can preserve
+  the accepting density. The resulting $m$-input restriction satisfies
+  \[
+    2^{m-2}\le
+    \left((n+3g)2^{(A+\eta)\max(g-m,0)+3\log_2(n+3g)+C+3}+1\right)
+       2^{D+1}K^2,
+  \]
+  whenever $\mathrm{OrderingBound}(A,\eta,C)$ holds, $A+\eta\ge0$, and $C\ge0$;
+  here $g$ counts all circuit gates.
+\end{theorem}
+\begin{proof}
+  \leanok
+  Every union of components has a mixing key consisting of the guessed
+  outputs and its partial aggregates, with at most $2^D$ values. A balanced
+  union would contradict rectangle-freeness and density. A greedy union
+  argument therefore gives the large component. Its observed signals compile
+  to a subcubic network without extra edges, including observations of sinks.
+  One additional two-state register checks the designated output. Apply the
+  aggregate count to each guessed computation and sum over the guesses.
+\end{proof}
+
+\begin{theorem}[The explicit lower bound survives sublinear aggregate budgets]
+  \label{thm:lowerbounds-algebraic-aggregate-explicit}
+  \lean{Algebraic.Cutwidth.Aggregate.sourceReductionHardFamily_eventually_lt_size_of_orderingBound,
+    Algebraic.Cutwidth.Aggregate.sourceReductionHardFamily_eventually_lt_size_gaussian,
+    Algebraic.Cutwidth.Aggregate.sourceReductionHardFamily_eventually_lt_size_fortyOne_div_nine}
+  \leanok
+  \uses{thm:lowerbounds-algebraic-aggregate-component,
+    thm:lowerbounds-algebraic-uniform-hard-family,
+    thm:lowerbounds-algebraic-gaussian-coefficient}
+  Fix a budget bound $D(n)=o(n)$. For every $\varepsilon>0$ and all sufficiently
+  large $n$, every mixed circuit of budget at most $D(n)$ computing the same
+  fixed polynomial-time family $\mathrm{sourceReductionHardFamily}(n)$ has
+  more than
+  \[
+    \left(1+\frac{\pi}{3\arccos((1+2\sqrt2)/4)}-\varepsilon\right)n
+    \approx(4.5625-\varepsilon)n
+  \]
+  total gates. In particular it has more than $(41/9-\varepsilon)n$ gates.
+  More generally the coefficient is $1+1/A$ for every $A>0$ with the ordering
+  bound at all positive slacks. No invertibility or unproved graph assumption
+  remains in the Gaussian specialization.
+\end{theorem}
+\begin{proof}
+  \leanok
+  The fixed balanced family has a rectangle threshold with
+  $\log_2 K(n)=o(n)$. Taking logarithms of the dense-slice bound leaves an
+  $O(D+\log K+\log n)$ remainder, absorbed by any positive linear slack.
+  Apply the proved Gaussian ordering coefficient.
+\end{proof}
+
 \begin{theorem}[Conditional: the concrete family needs more than $(23/5-\varepsilon)n$ gates]
   \label{thm:lowerbounds-algebraic-explicit-band}
   \lean{Algebraic.Cutwidth.Multigraph.exists_orderingBound_band,

@@ -46,6 +46,7 @@ public import Complexitylib.Algebraic.LowerBound.Cutwidth.MedianOrdering
 public import Complexitylib.Algebraic.LowerBound.Cutwidth.Compression
 public import Complexitylib.Algebraic.LowerBound.Cutwidth.Expansion
 public import Complexitylib.Algebraic.LowerBound.Cutwidth.FourN
+public import Complexitylib.Algebraic.LowerBound.Cutwidth.Aggregate
 public import Complexitylib.Algebraic.LowerBound.Cutwidth.Forget
 public import Complexitylib.Algebraic.LowerBound.Cutwidth.Nondeterministic
 public import Complexitylib.Algebraic.LowerBound.Cutwidth.Direction
@@ -562,6 +563,11 @@ eventual numerical guards. Its uniform layer bounds every enumeration loop and
 provides one total polynomial-time evaluator for a fixed balanced family.
 `SourceReduction.Construction.Hardness` proves the unconditional `(4-ε)n`
 lower bound for that family, measured at the full input length; its language is in `P`.
+`Aggregate` preserves the Gaussian coefficient, about `4.5625`, for binary circuits
+augmented by arbitrary finite commutative-monoid gates with sublinear total budget.
+The budget counts one output-guess bit and the ceiling logarithm of the register
+cardinality per special occurrence. It includes noninvertible AND, OR, and capped
+counting, as well as modular and symmetric gates.
 `Superconcentrator` applies the graph-ordering hypothesis to superconcentrators: every
 `N`-superconcentrator has at least `(2 + 1/A - ε) N` edges, about `5.5625 N` for the
 edge-score coefficient, improving the `5 N` of Lev and Valiant.

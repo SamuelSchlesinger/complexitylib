@@ -349,6 +349,16 @@ change the leading coefficient. Rectangle peeling extends the bound to the
 average case without improving it, and neither the prefix-halving gain of AVOID
 nor affine-aware counting is known to add to it.
 
+The same coefficient now holds for binary circuits augmented with arbitrary finite
+commutative-monoid gates, provided their actual occurrence budget
+`D = q + Σ ceil(log₂ |M_j|)` is `o(n)`
+(`Aggregate.sourceReductionHardFamily_eventually_lt_size_gaussian`). Outgoing-transition
+counting removes the need for invertible updates. The checked gate instances include
+AND, OR, weighted modular gates, capped nonnegative weighted thresholds, and arbitrary
+symmetric predicates. The conclusion counts total gates and retains the existing fixed
+polynomial-time family; it does not improve the binary-only coefficient or cover an
+unrestricted number of special gates.
+
 - [x] **Charge frontier vertices instead of crossing edges.** Done by edge-score
   decompositions (`Gaussian.exists_frontier_pathwidthBound`): scoring each edge by
   its normalized endpoint sum makes every threshold a pairwise event, so the
