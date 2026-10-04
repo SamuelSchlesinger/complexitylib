@@ -63,8 +63,10 @@ the position list is produced by the `FP` function and carries no hidden
 information.
 
 The proof is a finite string; a position beyond its end reads as `false`. This
-is no restriction, as the verifier's positions are polynomially many bits long,
-so a proof of length `q n · 2 ^ r n` suffices, matching the usual convention.
+is no restriction: on an input of length `n` at most `q n · 2 ^ r n` positions
+are ever queried, each polynomially many bits long and hence below
+`2 ^ poly(n)`, so a finite proof extending to the largest queried position
+supplies every bit the verifier can read.
 
 Completeness `1` and soundness `1/2` are hard-wired, following the
 `PCP[r, q]` convention rather than the `2/3`–`1/3` of
