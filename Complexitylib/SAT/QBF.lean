@@ -12,8 +12,10 @@ public import Std.Tactic.BVDecide.Normalize.Bool
 # Quantified Boolean formulas
 
 Syntax and semantics of **quantified Boolean formulas (QBF)** — the canonical
-PSPACE object, and the target of the TQBF PSPACE-completeness theorem and the
-`IP = PSPACE` development.
+PSPACE object, and the intended object of planned work on the TQBF
+PSPACE-completeness theorem and `PSPACE ⊆ IP`. Neither theorem is formalized:
+`IP_eq_PSPACE_of` takes `PSPACE ⊆ IP` as the explicit hypothesis
+`PSPACESubsetIP`.
 
 A `QBF` is a Boolean formula over variables `x_i` (`i : ℕ`) closed under `¬`, `∧`,
 `∨`, and the quantifiers `∃ x_i` and `∀ x_i`. Semantics are given by
