@@ -336,10 +336,12 @@ The circuit coefficient is `1 + 1/A` for any graph-ordering coefficient `A > 0`
 (`eventually_lt_size_of_orderingBound`); a cubic cutwidth or pathwidth
 coefficient `c` gives `A = 2c` (`eventually_lt_size_of_cutwidthBound`,
 `eventually_lt_size_of_pathwidthCoefficient`). The Gaussian distance-kernel layout
-proves `c = (3/π)(3 - 2√2)`, so the explicit family needs more than
-`(1 + π(3 + 2√2)/6 - ε) n ≈ (4.0517 - ε) n` gates
-(`sourceReductionHardFamily_eventually_lt_size_gaussian`). The items below are
-unreviewed proof candidates. Each must prove its graph lemma for every large cubic
+proves the cutwidth coefficient `c = (3/π)(3 - 2√2)`, and the Gaussian edge-score
+decomposition proves the pathwidth coefficient `p = (3/π)(√2 - 1)/√(5 + 2√2) ≈ 0.14137`,
+so the explicit family needs more than
+`(1 + π(√2 + 1)√(5 + 2√2)/6 - ε) n ≈ (4.5368 - ε) n` gates
+(`sourceReductionHardFamily_eventually_lt_size_gaussian`). The unchecked items below
+are unreviewed proof candidates. Each must prove its graph lemma for every large cubic
 graph, controlling all prefixes of one ordering simultaneously, before its constant
 is used; until then it enters only through the conditional coefficient theorems.
 Keep the threshold hypothesis `log₂ K = o(n)`; better extractor entropy does not
@@ -347,16 +349,18 @@ change the leading coefficient. Rectangle peeling extends the bound to the
 average case without improving it, and neither the prefix-halving gain of AVOID
 nor affine-aware counting is known to add to it.
 
+- [x] **Charge frontier vertices instead of crossing edges.** Done by edge-score
+  decompositions (`Gaussian.exists_frontier_pathwidthBound`): scoring each edge by
+  its normalized endpoint sum makes every threshold a pairwise event, so the
+  Gaussian-star comparison reduces to the vector inequality
+  `‖Σ y_e‖ ≥ ⟨Σ y_e, x_v⟩` and concavity of `tanHalf`, with no positive-threshold
+  correction.
 - [ ] **Exact crossing probability.** Replace the bound `(2/π) tan(θ/2)` by
   Sheppard's `θ/π`, `θ = arccos ρ`, at every threshold. This needs the angle law
   of the planar Gaussian and the maximization of the crossing probability at
-  threshold zero, and gives `1 + π/(3 arccos(2√2/3)) ≈ 4.0815`.
-- [ ] **Charge frontier vertices instead of crossing edges.** A processed vertex
-  with several unprocessed neighbours is charged once. The candidate
-  `pw(H) ≤ 0.1403 |V(H)| + O(1)` goes through the median-order conversion, not
-  the Gaussian ordering itself, giving `A = 1403/5000` and `L ≈ 4.5638`.
-  Obligations: a Gaussian-star comparison, a positive-threshold correction, and
-  simultaneous control of all prefixes.
+  threshold zero (already proved for the bound in use). With concavity of `arccos`
+  on `[0, 1]` it lifts the edge-score coefficient to
+  `p = (3/(2π)) arccos((1 + 2√2)/4) ≈ 0.14035`, `L ≈ 4.5625`.
 - [ ] **Two-sided sweeps.** Sweep negative edges by their larger score and positive
   edges by their smaller score, joined through the sign-crossing graph. The
   combinatorial target is a terminal path-decomposition lemma for subcubic graphs:

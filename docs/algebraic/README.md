@@ -79,7 +79,7 @@ Choose an entry point for the task:
 - `import Complexitylib.Algebraic.Basis.DeMorgan.PairIndicator` for support/read-once
   arguments and native size bounds for functions with two exceptional inputs;
 - `import Complexitylib.Algebraic.LowerBound.Cutwidth` for the
-  `(1 + π(3 + 2√2)/6 - ε) n ≈ (4.0517 - ε) n` lower bound for dense rectangle-free
+  `(1 + π(√2 + 1)√(5 + 2√2)/6 - ε) n ≈ (4.5368 - ε) n` lower bound for dense rectangle-free
   families over the full binary basis, and
   `import Complexitylib.Algebraic.LowerBound.Cutwidth.Extractor.SourceReduction.Construction.Hardness`
   for the same bound on the explicit polynomial-time family; see the
@@ -132,10 +132,10 @@ The AC0 development has a detailed [theory map](ac0-theory-map.md).
 family with `log₂ K(n) = o(n)` and at least `2 ^ (n - 2)` accepting inputs
 needs more than `(4 - ε) n` gates over the full binary basis, for every
 `ε > 0` and all large `n` (`Cutwidth.eventually_lt_size_of_rectangleFree`).
-The sharp cubic bisection and pathwidth bounds are proved. Ordering the cubic
-core by Gaussian distance-kernel scores improves the graph-ordering coefficient
-from `1/3` to `(6/π)(3 - 2√2) ≈ 0.32768`, so the same families need more than
-`(1 + π(3 + 2√2)/6 - ε) n ≈ (4.0517 - ε) n` gates
+The sharp cubic bisection and pathwidth bounds are proved. Decomposing the cubic
+core by Gaussian distance-kernel edge scores improves its pathwidth coefficient
+from `1/6` to `(3/π)(√2 - 1)/√(5 + 2√2) ≈ 0.14137`, so the same families need more
+than `(1 + π(√2 + 1)√(5 + 2√2)/6 - ε) n ≈ (4.5368 - ε) n` gates
 (`Cutwidth.eventually_lt_size_of_rectangleFree_gaussian`).
 
 The graph proof uses boundary normalization, connected clusters, and red-edge
@@ -335,7 +335,7 @@ tests, and majority composition are proved. The actual source entropy is
 sublinear, both sampler guards hold eventually, and bounded enumeration
 supplies one uniform polynomial-time evaluator at every input length.
 `Cutwidth.sourceReductionHardFamily_eventually_lt_size_gaussian` proves the
-unconditional `(1 + π(3 + 2√2)/6 - ε) n ≈ (4.0517 - ε) n` lower bound for this
+unconditional `(1 + π(√2 + 1)√(5 + 2√2)/6 - ε) n ≈ (4.5368 - ε) n` lower bound for this
 fixed concrete family over the full binary basis;
 `Cutwidth.sourceReductionHardFamily_eventually_lt_size` keeps the
 coefficient-four case. The bound uses its full input length, and

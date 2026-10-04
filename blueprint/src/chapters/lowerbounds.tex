@@ -9706,34 +9706,120 @@ Theorem~\ref{thm:lowerbounds-algebraic-explicit-four-n}.
   $\sqrt{(1-\rho_0)/(1+\rho_0)}=3-2\sqrt2$.
 \end{proof}
 
+\begin{lemma}[Crossing ratios in a star]
+  \label{lem:lowerbounds-algebraic-gaussian-star}
+  \lean{Algebraic.Cutwidth.Gaussian.tanHalf,
+    Algebraic.Cutwidth.Gaussian.le_inner_of_le_inner,
+    Algebraic.Cutwidth.Gaussian.sum_inner_ordered_pairs_ge,
+    Algebraic.Cutwidth.Gaussian.sum_tanHalf_le,
+    Algebraic.Cutwidth.Gaussian.sum_tanHalf_star_le}
+  \leanok
+  Let $\operatorname{tanhalf}(x)=\sqrt{1-x}/\sqrt{1+x}$, so that $\operatorname{tanhalf}(\cos\theta)=\tan(\theta/2)$.
+  If unit vectors $y_1,\dots,y_n$ satisfy $\langle y_j,x\rangle\ge\kappa\ge0$ for a
+  unit vector $x$, then $\sum_{j\ne j'}\langle y_j,y_{j'}\rangle\ge n^2\kappa^2-n$ and
+  each $\langle y_j,y_{j'}\rangle\ge4\kappa-3$. The function $\operatorname{tanhalf}$ is concave on
+  $[1/2,1]$. Consequently, for three such vectors with $\kappa\ge7/8$,
+  $\sum_{j\ne j'}\operatorname{tanhalf}(\langle y_j,y_{j'}\rangle)\le6\,\operatorname{tanhalf}\bigl((3\kappa^2-1)/2\bigr)$.
+\end{lemma}
+\begin{proof}
+  \leanok
+  Expand $\lVert\sum_j y_j\rVert^2\ge\langle\sum_j y_j,x\rangle^2$, and sum the
+  squares $(y-2x+y')^2\ge0$. On $[1/2,1]$, with $y=\operatorname{tanhalf}(x)$ and
+  $y_0=\operatorname{tanhalf}(x_0)$, the tangent inequality reduces to the polynomial identity
+  $(y-y_0)^2(1-y_0^2-2y_0y)\ge0$.
+\end{proof}
+
+\begin{lemma}[Edge-score path decompositions]
+  \label{lem:lowerbounds-algebraic-gaussian-edge-order}
+  \lean{Algebraic.Cutwidth.Gaussian.EdgeStraddles,
+    Algebraic.Cutwidth.Gaussian.indicator_edgeStraddles_le,
+    Algebraic.Cutwidth.Gaussian.exists_pathDecomposition_of_edgeScore}
+  \leanok
+  \uses{def:lowerbounds-algebraic-ordering-hypotheses}
+  List the edges of a simple cubic graph by a real score, and keep each vertex in
+  the bags between its first and last incident edge. A vertex in the bag of an
+  edge of score $t$ has incident edges scoring at most and at least $t$. With
+  thresholds $a+i\delta$, if both tails hold few edges and every threshold has few
+  vertices whose edge scores straddle it and few edges in the following window, every
+  bag is small. A straddling vertex has at least four separated ordered pairs of
+  incident edges.
+\end{lemma}
+\begin{proof}
+  \leanok
+  Sort the edges with a stable merge sort. A bag vertex lies in a tail, straddles
+  the threshold below the bag's score, or is an endpoint of an edge in the window.
+\end{proof}
+
+\begin{theorem}[Gaussian cubic pathwidth]
+  \label{thm:lowerbounds-algebraic-gaussian-pathwidth}
+  \lean{Algebraic.Cutwidth.Gaussian.frontierCoefficient,
+    Algebraic.Cutwidth.Gaussian.exists_frontier_pathwidthBound,
+    Algebraic.Cutwidth.Gaussian.frontierCoefficient_pos,
+    Algebraic.Cutwidth.Gaussian.two_mul_frontierCoefficient_le,
+    Algebraic.Cutwidth.Gaussian.one_add_inv_two_mul_frontierCoefficient}
+  \leanok
+  \uses{lem:lowerbounds-algebraic-gaussian-correlation,
+    lem:lowerbounds-algebraic-gaussian-crossing,
+    lem:lowerbounds-algebraic-gaussian-second-moment,
+    lem:lowerbounds-algebraic-gaussian-star,
+    lem:lowerbounds-algebraic-gaussian-edge-order}
+  For every $\xi>0$, every sufficiently large simple cubic graph on $h$ vertices
+  has a path decomposition with bags of at most
+  $\bigl(\tfrac{3}{\pi}(\sqrt2-1)/\sqrt{5+2\sqrt2}+\xi\bigr)h+1$ vertices. The
+  coefficient is about $0.14137$, well below the $1/6$ of the Fomin--H{\o}ie bound;
+  twice it is at most $2/7$.
+\end{theorem}
+\begin{proof}
+  \leanok
+  Give each edge $uv$ the unit vector $y_{uv}=(\hat a_u+\hat a_v)/\lVert\hat a_u+\hat a_v\rVert$
+  and the score $\langle y_{uv},\omega\rangle$, and decompose by edge scores. If
+  adjacent kernel rows have correlation at least $\rho_0$, the edge vectors at a
+  vertex have correlation at least $\kappa=\sqrt{(1+\rho_0)/2}$ with its row. A
+  threshold separates two edge scores with probability at most
+  $(2/\pi)\operatorname{tanhalf}$ of their correlation, so by the star lemma a vertex straddles a
+  threshold with probability at most $\tfrac{3}{\pi}\operatorname{tanhalf}\bigl((1+3\rho_0)/4\bigr)$.
+  The grid, locality, and second-moment argument of
+  Theorem~\ref{thm:lowerbounds-algebraic-gaussian-cutwidth} control every bag of one
+  sample. As $\rho_0\to2\sqrt2/3$,
+  $\operatorname{tanhalf}\bigl((1+2\sqrt2)/4\bigr)=(\sqrt2-1)/\sqrt{5+2\sqrt2}$.
+\end{proof}
+
 \begin{theorem}[Circuit coefficient from Gaussian layouts]
   \label{thm:lowerbounds-algebraic-gaussian-coefficient}
   \lean{Algebraic.Cutwidth.Multigraph.exists_orderingBound_gaussian,
     Algebraic.Cutwidth.Multigraph.exists_orderingBound_twenty_div_sixtyOne,
     Algebraic.Cutwidth.Gaussian.two_mul_cutwidthCoefficient_le,
     Algebraic.Cutwidth.Gaussian.one_add_inv_two_mul_cutwidthCoefficient,
+    Algebraic.Cutwidth.Multigraph.exists_orderingBound_frontier,
+    Algebraic.Cutwidth.Multigraph.exists_orderingBound_two_div_seven,
     Algebraic.Cutwidth.eventually_lt_size_of_rectangleFree_gaussian,
     Algebraic.Cutwidth.nondet_eventually_lt_size_of_rectangleFree_gaussian}
   \leanok
   \uses{thm:lowerbounds-algebraic-gaussian-cutwidth,
+    thm:lowerbounds-algebraic-gaussian-pathwidth,
     thm:lowerbounds-algebraic-ordering-bound,
     thm:lowerbounds-algebraic-cutwidth-coefficient}
   For every $\eta>0$ some $C$ satisfies
-  $\mathrm{OrderingBound}\bigl(\tfrac{6}{\pi}(3-2\sqrt2),\eta,C\bigr)$; the
-  coefficient is about $0.32768$, at most $20/61<1/3$. Every family as in
+  $\mathrm{OrderingBound}\bigl(\tfrac{6}{\pi}(3-2\sqrt2),\eta,C\bigr)$, from the
+  Gaussian cutwidth layout, and some $C$ satisfies
+  $\mathrm{OrderingBound}(2p,\eta,C)$ with
+  $p=\tfrac{3}{\pi}(\sqrt2-1)/\sqrt{5+2\sqrt2}$, from the Gaussian pathwidth
+  decomposition; these coefficients are about $0.32768\le20/61$ and
+  $0.28274\le2/7$. Every family as in
   Theorem~\ref{thm:lowerbounds-algebraic-cutwidth-subexponential} therefore
-  needs more than $\bigl(1+\pi(3+2\sqrt2)/6-\varepsilon\bigr)n$ gates, about
-  $(4.0517-\varepsilon)n$, for deterministic circuits and for
+  needs more than $\bigl(1+\pi(\sqrt2+1)\sqrt{5+2\sqrt2}/6-\varepsilon\bigr)n$ gates,
+  about $(4.5368-\varepsilon)n$, for deterministic circuits and for
   nondeterministic circuits with arbitrarily many witness inputs.
 \end{theorem}
 \begin{proof}
   \leanok
-  Apply the cutwidth-to-ordering transport to
-  Theorem~\ref{thm:lowerbounds-algebraic-gaussian-cutwidth} and the general
-  coefficient theorem with $c=\tfrac{3}{\pi}(3-2\sqrt2)$. Since
-  $(3-2\sqrt2)(3+2\sqrt2)=1$, the coefficient $1+1/(2c)$ equals
-  $1+\pi(3+2\sqrt2)/6$. The comparison $2c\le20/61$ needs only
-  $\sqrt2>1.41421$ and $\pi>3.1415$.
+  Apply the cutwidth-to-ordering and pathwidth-to-ordering transports to
+  Theorems~\ref{thm:lowerbounds-algebraic-gaussian-cutwidth}
+  and~\ref{thm:lowerbounds-algebraic-gaussian-pathwidth}, and the general
+  coefficient theorem with the pathwidth coefficient $p$. Since
+  $(\sqrt2-1)(\sqrt2+1)=1$, the coefficient $1+1/(2p)$ equals
+  $1+\pi(\sqrt2+1)\sqrt{5+2\sqrt2}/6$. The comparisons with $20/61$ and $2/7$
+  need only rational bounds on $\sqrt2$ and $\pi$.
 \end{proof}
 
 \begin{theorem}[The concrete family under a general ordering coefficient]
@@ -9757,18 +9843,18 @@ Theorem~\ref{thm:lowerbounds-algebraic-explicit-four-n}.
   input length.
 \end{proof}
 
-\begin{theorem}[The concrete family needs more than $(4.05-\varepsilon)n$ gates]
+\begin{theorem}[The concrete family needs more than $(4.5-\varepsilon)n$ gates]
   \label{thm:lowerbounds-algebraic-explicit-gaussian}
   \lean{Algebraic.Cutwidth.sourceReductionHardFamily_eventually_lt_size_gaussian,
-    Algebraic.Cutwidth.sourceReductionHardFamily_eventually_lt_size_eightyOne_div_twenty}
+    Algebraic.Cutwidth.sourceReductionHardFamily_eventually_lt_size_nine_div_two}
   \leanok
   \uses{thm:lowerbounds-algebraic-explicit-coefficient,
     thm:lowerbounds-algebraic-gaussian-coefficient}
   For every $\varepsilon>0$ and all sufficiently large $n$, every circuit
   computing $\mathrm{sourceReductionHardFamily}(n)$ over the full binary
-  basis has more than $\bigl(1+\pi(3+2\sqrt2)/6-\varepsilon\bigr)n$ gates,
-  about $(4.0517-\varepsilon)n$, with $n$ the full input length. In
-  particular it has more than $(81/20-\varepsilon)n$ gates. The family, its
+  basis has more than $\bigl(1+\pi(\sqrt2+1)\sqrt{5+2\sqrt2}/6-\varepsilon\bigr)n$
+  gates, about $(4.5368-\varepsilon)n$, with $n$ the full input length. In
+  particular it has more than $(9/2-\varepsilon)n$ gates. The family, its
   polynomial-time evaluator, and the basis are those of
   Theorem~\ref{thm:lowerbounds-algebraic-explicit-four-n}; no hypothesis
   remains.
@@ -9776,8 +9862,9 @@ Theorem~\ref{thm:lowerbounds-algebraic-explicit-four-n}.
 \begin{proof}
   \leanok
   Apply Theorem~\ref{thm:lowerbounds-algebraic-explicit-coefficient} with
-  the Gaussian ordering coefficient $A=\tfrac{6}{\pi}(3-2\sqrt2)$, or with
-  its rational weakening $A=20/61$, for which $1+1/A=81/20$.
+  the Gaussian ordering coefficient
+  $A=\tfrac{6}{\pi}(\sqrt2-1)/\sqrt{5+2\sqrt2}$, or with its rational weakening
+  $A=2/7$, for which $1+1/A=9/2$.
 \end{proof}
 
 \begin{theorem}[Average-case cutwidth bound for balanced families]
