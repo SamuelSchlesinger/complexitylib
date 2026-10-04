@@ -82,32 +82,32 @@ theorem correlation_limit :
   field_simp
   ring
 
-theorem gaussianCutwidthCoefficient_ge : 3 / 40 ≤ gaussianCutwidthCoefficient := by
+theorem cutwidthCoefficient_ge : 3 / 40 ≤ cutwidthCoefficient := by
   have hsqrt : Real.sqrt 2 < 29 / 20 := (Real.sqrt_lt' (by norm_num)).mpr (by norm_num)
-  unfold gaussianCutwidthCoefficient
+  unfold cutwidthCoefficient
   rw [div_mul_eq_mul_div, le_div_iff₀ Real.pi_pos]
   nlinarith [Real.pi_le_four]
 
-theorem gaussianCutwidthCoefficient_pos : 0 < gaussianCutwidthCoefficient :=
-  lt_of_lt_of_le (by norm_num) gaussianCutwidthCoefficient_ge
+theorem cutwidthCoefficient_pos : 0 < cutwidthCoefficient :=
+  lt_of_lt_of_le (by norm_num) cutwidthCoefficient_ge
 
 /-- The circuit coefficient of the Gaussian ordering coefficient `2c`. -/
-theorem one_add_inv_two_mul_gaussianCutwidthCoefficient :
-    1 + 1 / (2 * gaussianCutwidthCoefficient) = 1 + Real.pi * (3 + 2 * Real.sqrt 2) / 6 := by
+theorem one_add_inv_two_mul_cutwidthCoefficient :
+    1 + 1 / (2 * cutwidthCoefficient) = 1 + Real.pi * (3 + 2 * Real.sqrt 2) / 6 := by
   have h2 : Real.sqrt 2 ^ 2 = 2 := Real.sq_sqrt (by norm_num)
   have hsqrt : Real.sqrt 2 < 3 / 2 := (Real.sqrt_lt' (by norm_num)).mpr (by norm_num)
   have hne : 3 - 2 * Real.sqrt 2 ≠ 0 := by linarith
-  unfold gaussianCutwidthCoefficient
+  unfold cutwidthCoefficient
   congr 1
   field_simp
   nlinarith [h2]
 
 /-- The Gaussian ordering coefficient is at most `20/61`. -/
-theorem two_mul_gaussianCutwidthCoefficient_le : 2 * gaussianCutwidthCoefficient ≤ 20 / 61 := by
+theorem two_mul_cutwidthCoefficient_le : 2 * cutwidthCoefficient ≤ 20 / 61 := by
   have hsqrt : (141421 : ℝ) / 100000 < Real.sqrt 2 :=
     (Real.lt_sqrt (by norm_num)).mpr (by norm_num)
   have hpi := Real.pi_gt_d4
-  unfold gaussianCutwidthCoefficient
+  unfold cutwidthCoefficient
   have : 2 * (3 / Real.pi * (3 - 2 * Real.sqrt 2)) = 6 * (3 - 2 * Real.sqrt 2) / Real.pi := by
     field_simp
     ring
@@ -119,7 +119,7 @@ bound within that slack of `(3/π)(3 - 2√2)`. -/
 theorem exists_parameters {ξ : ℝ} (hξ : 0 < ξ) :
     ∃ (q : ℝ) (R : ℕ) (ρ₀ T ε : ℝ) (M : ℕ), 0 ≤ q ∧ -1 < ρ₀ ∧
       ρ₀ ≤ 2 * q / (1 + q ^ 2) - 3 * (2 * q ^ 2) ^ R ∧ 0 < T ∧ 0 < ε ∧ 0 < M ∧
-      layoutBound ρ₀ T ε M ≤ gaussianCutwidthCoefficient + ξ := by
+      layoutBound ρ₀ T ε M ≤ cutwidthCoefficient + ξ := by
   set g : ℝ := 2 * Real.sqrt 2 / 3 with hg
   have hsqrt_lt : Real.sqrt 2 < 3 / 2 := (Real.sqrt_lt' (by norm_num)).mpr (by norm_num)
   have hsqrt_pos : 0 < Real.sqrt 2 := Real.sqrt_pos.mpr (by norm_num)
@@ -171,15 +171,15 @@ theorem exists_parameters {ξ : ℝ} (hξ : 0 < ξ) :
   have hMR : 120 / ξ ≤ M := by
     rw [hM]; push_cast; linarith [Nat.le_ceil (120 / ξ)]
   refine ⟨q, R, ρ₀, 10, ε, M, hq0, hρ₀low, hρ, by norm_num, hεpos, hMpos, ?_⟩
-  have hcoef := gaussianCutwidthCoefficient_ge
+  have hcoef := cutwidthCoefficient_ge
   have hMpos' : (0 : ℝ) < M := by exact_mod_cast hMpos
   unfold layoutBound
   refine max_le ?_ ?_
   · have : ε ≤ 1 / 100 := min_le_right _ _
     linarith
   · have hεξ : ε ≤ ξ / 16 := min_le_left _ _
-    have hcross : 3 / 2 * crossBound ρ₀ ≤ gaussianCutwidthCoefficient + ξ / 2 := by
-      rw [crossBound_eq, gaussianCutwidthCoefficient]
+    have hcross : 3 / 2 * crossBound ρ₀ ≤ cutwidthCoefficient + ξ / 2 := by
+      rw [crossBound_eq, cutwidthCoefficient]
       have : 3 / 2 * (2 / Real.pi * crossRatio ρ₀) = 3 / Real.pi * crossRatio ρ₀ := by ring
       rw [this]
       calc 3 / Real.pi * crossRatio ρ₀ ≤
@@ -208,7 +208,7 @@ theorem exists_key_bound {ξ : ℝ} (hξ : 0 < ξ) :
       [DecidableRel H.Adj], H.IsRegularOfDegree 3 → N₀ < Fintype.card W →
       ∃ key : W → ℕ, Function.Injective key ∧ ∀ t : ℕ,
         ((H.cutFinset (Finset.univ.filter fun w => key w < t)).card : ℝ) ≤
-          (gaussianCutwidthCoefficient + ξ) * Fintype.card W := by
+          (cutwidthCoefficient + ξ) * Fintype.card W := by
   obtain ⟨q, R, ρ₀, T, ε, M, hq0, hρ₀, hρ, hT, hε, hM, hbound⟩ := exists_parameters hξ
   obtain ⟨N₀, hN₀⟩ := exists_key_of_parameters hq0 R hρ₀ hρ hT hε hM
   refine ⟨N₀, fun W _ _ H _ regular large => ?_⟩

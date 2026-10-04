@@ -29,6 +29,10 @@ Three probability bounds for linear forms in independent standard Gaussians.
 
 namespace Algebraic.Cutwidth.Gaussian
 
+/-- A Gaussian form is a measurable function of the sample. -/
+theorem measurable_form {ι : Type} [Fintype ι] (α : ι → ℝ) : Measurable (form α) :=
+  Internal.measurable_form α
+
 open MeasureTheory ProbabilityTheory
 
 /-- **Threshold crossing.** For coefficient vectors of equal norm whose sum is

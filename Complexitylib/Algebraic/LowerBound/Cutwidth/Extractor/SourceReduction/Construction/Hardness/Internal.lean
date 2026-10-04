@@ -78,11 +78,11 @@ theorem sourceReductionHardFamily_eventually_lt_size_gaussian {ε : ℝ} (hε : 
       circuit.Computes Binary.interpretation (fun x _ => sourceReductionHardFamily n x) →
         (1 + Real.pi * (3 + 2 * Real.sqrt 2) / 6 - ε) * n < circuit.size := by
   have bound := sourceReductionHardFamily_eventually_lt_size_of_orderingBound
-    (mul_pos two_pos Gaussian.gaussianCutwidthCoefficient_pos)
+    (mul_pos two_pos Gaussian.cutwidthCoefficient_pos)
     Multigraph.exists_orderingBound_gaussian hε
-  rwa [Gaussian.one_add_inv_two_mul_gaussianCutwidthCoefficient] at bound
+  rwa [Gaussian.one_add_inv_two_mul_cutwidthCoefficient] at bound
 
-theorem sourceReductionHardFamily_eventually_lt_eightyOne_div_twenty_size {ε : ℝ}
+theorem sourceReductionHardFamily_eventually_lt_size_eightyOne_div_twenty {ε : ℝ}
     (hε : 0 < ε) :
     ∀ᶠ n in atTop, ∀ circuit : Circuit Binary.signature n 1,
       circuit.Computes Binary.interpretation (fun x _ => sourceReductionHardFamily n x) →

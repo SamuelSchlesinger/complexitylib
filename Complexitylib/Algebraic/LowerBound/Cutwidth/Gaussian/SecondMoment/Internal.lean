@@ -5,7 +5,6 @@ Authors: Samuel Schlesinger
 -/
 
 module
-public import Complexitylib.Algebraic.LowerBound.Cutwidth.Gaussian.SecondMoment.Defs
 public import Mathlib.MeasureTheory.Constructions.Pi
 public import Mathlib.Probability.Independence.Basic
 public import Mathlib.Probability.Moments.Variance

@@ -7,7 +7,7 @@ Authors: Samuel Schlesinger
 module
 public import Complexitylib.Algebraic.LowerBound.Cutwidth.Gaussian.Layout.Internal.Expectation
 public import Complexitylib.Algebraic.LowerBound.Cutwidth.Gaussian.Layout.Defs
-import Complexitylib.Algebraic.LowerBound.Cutwidth.Gaussian.Layout.Internal.Grid
+public import Complexitylib.Algebraic.LowerBound.Cutwidth.Gaussian.Layout.Internal.Grid
 
 /-!
 # A good Gaussian sample
@@ -35,7 +35,7 @@ variable {W : Type} [Fintype W] [DecidableEq W] (H : SimpleGraph W) [DecidableRe
 omit [DecidableEq W] [DecidableRel H.Adj] in
 theorem measurableSet_scoreEvent (q : ℝ) (R : ℕ) {p : ℝ → Prop}
     (hp : MeasurableSet {x | p x}) (v : W) : MeasurableSet (scoreEvent H q R p v) :=
-  form_measurable (unitKernel H q R v) hp
+  Gaussian.measurable_form (unitKernel H q R v) hp
 
 omit [DecidableEq W] in
 theorem card_edgeFinset_of_regular (regular : H.IsRegularOfDegree 3) :
@@ -95,15 +95,15 @@ theorem exists_good_sample (regular : H.IsRegularOfDegree 3) {q : ℝ} (hq0 : 0 
   -- Deviation probabilities.
   have edgeDev : ∀ i, P.real (deviation H.edgeFinset (cross i) c) ≤
       H.edgeFinset.card * Dn / c ^ 2 := fun i =>
-    pi_real_deviation_le (fun _ => gaussianReal 0 1) H.edgeFinset (cross i) (edgeSupport H R)
+    pi_deviation_le (fun _ => gaussianReal 0 1) H.edgeFinset (cross i) (edgeSupport H R)
       (fun e _ => measurableSet_crossEvent H q R (thr i) e)
       (fun e _ => dependsOn_crossEvent H q R (thr i) e)
       (fun e he => card_filter_not_disjoint_edgeSupport_le H degree R he) hcpos
   have vertexDev : ∀ (A : W → Set (W → ℝ)), (∀ v, MeasurableSet (A v)) →
-      (∀ v, DependsOn (ball H v R) (A v)) →
+      (∀ v, DependsOn (· ∈ A v) (ball H v R : Set W)) →
       P.real (deviation Finset.univ A c) ≤ h * Dn / c ^ 2 := by
     intro A hA hdep
-    have := pi_real_deviation_le (fun _ : W => gaussianReal 0 1) Finset.univ A
+    have := pi_deviation_le (fun _ : W => gaussianReal 0 1) Finset.univ A
       (fun v => ball H v R) (fun v _ => hA v) (fun v _ => hdep v)
       (fun v _ => card_filter_not_disjoint_ball_le H degree R v) hcpos
     rw [Finset.card_univ] at this

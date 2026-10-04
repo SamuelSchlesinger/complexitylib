@@ -8153,49 +8153,7 @@ establishes the proposed coefficient-three regime without that assumption.
   to the full input length.
 \end{proof}
 
-\begin{theorem}[The concrete family under a general ordering coefficient]
-  \label{thm:lowerbounds-algebraic-explicit-coefficient}
-  \lean{Algebraic.Cutwidth.sourceReductionHardFamily_eventually_lt_size_of_orderingBound}
-  \leanok
-  \uses{thm:lowerbounds-algebraic-uniform-hard-family,
-    thm:lowerbounds-algebraic-cutwidth-coefficient}
-  Let $A>0$, and suppose that for every $\eta>0$ some $C$ satisfies
-  $\mathrm{OrderingBound}(A,\eta,C)$. For every $\varepsilon>0$ and all
-  sufficiently large $n$, every circuit computing
-  $\mathrm{sourceReductionHardFamily}(n)$ has more than
-  $(1+1/A-\varepsilon)n$ gates, with $n$ the full input length. The family
-  is the one of Theorem~\ref{thm:lowerbounds-algebraic-explicit-four-n},
-  which is the case $A=1/3$.
-\end{theorem}
-\begin{proof}
-  \leanok
-  Apply the general-coefficient padded theorem at fixed error $35/72$,
-  then shift its eventual statement from the unpadded index to the full
-  input length.
-\end{proof}
 
-\begin{theorem}[The concrete family needs more than $(4.05-\varepsilon)n$ gates]
-  \label{thm:lowerbounds-algebraic-explicit-gaussian}
-  \lean{Algebraic.Cutwidth.sourceReductionHardFamily_eventually_lt_size_gaussian,
-    Algebraic.Cutwidth.sourceReductionHardFamily_eventually_lt_eightyOne_div_twenty_size}
-  \leanok
-  \uses{thm:lowerbounds-algebraic-explicit-coefficient,
-    thm:lowerbounds-algebraic-gaussian-coefficient}
-  For every $\varepsilon>0$ and all sufficiently large $n$, every circuit
-  computing $\mathrm{sourceReductionHardFamily}(n)$ over the full binary
-  basis has more than $\bigl(1+\pi(3+2\sqrt2)/6-\varepsilon\bigr)n$ gates,
-  about $(4.0517-\varepsilon)n$, with $n$ the full input length. In
-  particular it has more than $(81/20-\varepsilon)n$ gates. The family, its
-  polynomial-time evaluator, and the basis are those of
-  Theorem~\ref{thm:lowerbounds-algebraic-explicit-four-n}; no hypothesis
-  remains.
-\end{theorem}
-\begin{proof}
-  \leanok
-  Apply Theorem~\ref{thm:lowerbounds-algebraic-explicit-coefficient} with
-  the Gaussian ordering coefficient $A=\tfrac{6}{\pi}(3-2\sqrt2)$, or with
-  its rational weakening $A=20/61$, for which $1+1/A=81/20$.
-\end{proof}
 
 \begin{theorem}[Extraction with an approximately independent seed]
   \label{thm:lowerbounds-algebraic-perturbed-seed}
@@ -9703,10 +9661,8 @@ Theorem~\ref{thm:lowerbounds-algebraic-explicit-four-n}.
 
 \begin{lemma}[Second moment for local events]
   \label{lem:lowerbounds-algebraic-gaussian-second-moment}
-  \lean{Algebraic.Cutwidth.Gaussian.DependsOn,
-    Algebraic.Cutwidth.Gaussian.pi_variance_sum_indicator_le,
-    Algebraic.Cutwidth.Gaussian.pi_deviation_le,
-    Algebraic.Cutwidth.Gaussian.pi_real_deviation_le}
+  \lean{Algebraic.Cutwidth.Gaussian.pi_variance_sum_indicator_le,
+    Algebraic.Cutwidth.Gaussian.pi_deviation_le}
   \leanok
   Under a product of probability measures, let each event of a finite
   family depend only on a finite set of coordinates, each set meeting at
@@ -9723,8 +9679,8 @@ Theorem~\ref{thm:lowerbounds-algebraic-explicit-four-n}.
 
 \begin{theorem}[Gaussian cubic cutwidth]
   \label{thm:lowerbounds-algebraic-gaussian-cutwidth}
-  \lean{Algebraic.Cutwidth.Gaussian.gaussianCutwidthCoefficient,
-    Algebraic.Cutwidth.Gaussian.exists_key_cutFinset_le}
+  \lean{Algebraic.Cutwidth.Gaussian.cutwidthCoefficient,
+    Algebraic.Cutwidth.Gaussian.exists_cutwidthBound}
   \leanok
   \uses{lem:lowerbounds-algebraic-gaussian-correlation,
     lem:lowerbounds-algebraic-gaussian-crossing,
@@ -9752,11 +9708,10 @@ Theorem~\ref{thm:lowerbounds-algebraic-explicit-four-n}.
 
 \begin{theorem}[Circuit coefficient from Gaussian layouts]
   \label{thm:lowerbounds-algebraic-gaussian-coefficient}
-  \lean{Algebraic.Cutwidth.exists_cutwidthBound_gaussian,
-    Algebraic.Cutwidth.Multigraph.exists_orderingBound_gaussian,
+  \lean{Algebraic.Cutwidth.Multigraph.exists_orderingBound_gaussian,
     Algebraic.Cutwidth.Multigraph.exists_orderingBound_twenty_div_sixtyOne,
-    Algebraic.Cutwidth.Gaussian.two_mul_gaussianCutwidthCoefficient_le,
-    Algebraic.Cutwidth.Gaussian.one_add_inv_two_mul_gaussianCutwidthCoefficient,
+    Algebraic.Cutwidth.Gaussian.two_mul_cutwidthCoefficient_le,
+    Algebraic.Cutwidth.Gaussian.one_add_inv_two_mul_cutwidthCoefficient,
     Algebraic.Cutwidth.eventually_lt_size_of_rectangleFree_gaussian,
     Algebraic.Cutwidth.nondet_eventually_lt_size_of_rectangleFree_gaussian}
   \leanok
@@ -9779,6 +9734,50 @@ Theorem~\ref{thm:lowerbounds-algebraic-explicit-four-n}.
   $(3-2\sqrt2)(3+2\sqrt2)=1$, the coefficient $1+1/(2c)$ equals
   $1+\pi(3+2\sqrt2)/6$. The comparison $2c\le20/61$ needs only
   $\sqrt2>1.41421$ and $\pi>3.1415$.
+\end{proof}
+
+\begin{theorem}[The concrete family under a general ordering coefficient]
+  \label{thm:lowerbounds-algebraic-explicit-coefficient}
+  \lean{Algebraic.Cutwidth.sourceReductionHardFamily_eventually_lt_size_of_orderingBound}
+  \leanok
+  \uses{thm:lowerbounds-algebraic-uniform-hard-family,
+    thm:lowerbounds-algebraic-cutwidth-coefficient}
+  Let $A>0$, and suppose that for every $\eta>0$ some $C$ satisfies
+  $\mathrm{OrderingBound}(A,\eta,C)$. For every $\varepsilon>0$ and all
+  sufficiently large $n$, every circuit computing
+  $\mathrm{sourceReductionHardFamily}(n)$ has more than
+  $(1+1/A-\varepsilon)n$ gates, with $n$ the full input length. The family
+  is the one of Theorem~\ref{thm:lowerbounds-algebraic-explicit-four-n},
+  which is the case $A=1/3$.
+\end{theorem}
+\begin{proof}
+  \leanok
+  Apply the general-coefficient padded theorem at fixed error $35/72$,
+  then shift its eventual statement from the unpadded index to the full
+  input length.
+\end{proof}
+
+\begin{theorem}[The concrete family needs more than $(4.05-\varepsilon)n$ gates]
+  \label{thm:lowerbounds-algebraic-explicit-gaussian}
+  \lean{Algebraic.Cutwidth.sourceReductionHardFamily_eventually_lt_size_gaussian,
+    Algebraic.Cutwidth.sourceReductionHardFamily_eventually_lt_size_eightyOne_div_twenty}
+  \leanok
+  \uses{thm:lowerbounds-algebraic-explicit-coefficient,
+    thm:lowerbounds-algebraic-gaussian-coefficient}
+  For every $\varepsilon>0$ and all sufficiently large $n$, every circuit
+  computing $\mathrm{sourceReductionHardFamily}(n)$ over the full binary
+  basis has more than $\bigl(1+\pi(3+2\sqrt2)/6-\varepsilon\bigr)n$ gates,
+  about $(4.0517-\varepsilon)n$, with $n$ the full input length. In
+  particular it has more than $(81/20-\varepsilon)n$ gates. The family, its
+  polynomial-time evaluator, and the basis are those of
+  Theorem~\ref{thm:lowerbounds-algebraic-explicit-four-n}; no hypothesis
+  remains.
+\end{theorem}
+\begin{proof}
+  \leanok
+  Apply Theorem~\ref{thm:lowerbounds-algebraic-explicit-coefficient} with
+  the Gaussian ordering coefficient $A=\tfrac{6}{\pi}(3-2\sqrt2)$, or with
+  its rational weakening $A=20/61$, for which $1+1/A=81/20$.
 \end{proof}
 
 \begin{theorem}[Average-case cutwidth bound for balanced families]

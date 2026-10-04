@@ -31,10 +31,6 @@ variable {W : Type} [Fintype W] [DecidableEq W] (H : SimpleGraph W) [DecidableRe
 noncomputable def score (q : ℝ) (R : ℕ) (ω : W → ℝ) (v : W) : ℝ :=
   form (unitKernel H q R v) ω
 
-theorem form_measurable {ι : Type} [Fintype ι] (α : ι → ℝ) : Measurable (form α) := by
-  unfold form
-  fun_prop
-
 theorem form_congr {ι : Type} [Fintype ι] {α : ι → ℝ} {S : Finset ι}
     (hα : ∀ i ∉ S, α i = 0) {ω ω' : ι → ℝ} (h : ∀ i ∈ S, ω i = ω' i) :
     form α ω = form α ω' := by
@@ -95,11 +91,11 @@ theorem measurableSet_crossEvent (q : ℝ) (R : ℕ) (t : ℝ) (e : Sym2 W) :
     MeasurableSet (crossEvent H q R t e) := by
   induction e using Sym2.ind with
   | _ u v =>
-    exact measurableSet_between (form_measurable _) (form_measurable _) t
+    exact measurableSet_between (Gaussian.measurable_form _) (Gaussian.measurable_form _) t
 
 omit [DecidableRel H.Adj] in
 theorem dependsOn_crossEvent (q : ℝ) (R : ℕ) (t : ℝ) (e : Sym2 W) :
-    DependsOn (edgeSupport H R e) (crossEvent H q R t e) := by
+    DependsOn (· ∈ crossEvent H q R t e) (edgeSupport H R e : Set W) := by
   induction e using Sym2.ind with
   | _ u v =>
     intro ω ω' h
@@ -112,7 +108,7 @@ def scoreEvent (q : ℝ) (R : ℕ) (p : ℝ → Prop) (v : W) : Set (W → ℝ) 
 
 omit [DecidableEq W] [DecidableRel H.Adj] in
 theorem dependsOn_scoreEvent (q : ℝ) (R : ℕ) (p : ℝ → Prop) (v : W) :
-    DependsOn (ball H v R) (scoreEvent H q R p v) := by
+    DependsOn (· ∈ scoreEvent H q R p v) (ball H v R : Set W) := by
   intro ω ω' h
   simp only [scoreEvent, Set.mem_ofPred_eq]
   rw [score_congr H le_rfl h]

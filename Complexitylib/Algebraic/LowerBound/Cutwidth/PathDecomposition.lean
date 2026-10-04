@@ -30,7 +30,7 @@ of edges with exactly one endpoint in the set. `CutwidthBound c ξ N₀` states 
 cutwidth bound with coefficient `c` for cubic graphs: every simple 3-regular
 graph on more than `N₀` vertices has a vertex ordering all of whose prefix
 cuts have at most `(c + ξ) h` edges. It yields `Multigraph.OrderingBound (2 c)`
-directly, without a path decomposition.
+by ordering the cubic core with the key itself instead of a median ordering.
 -/
 
 @[expose] public section

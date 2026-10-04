@@ -79,8 +79,11 @@ Choose an entry point for the task:
 - `import Complexitylib.Algebraic.Basis.DeMorgan.PairIndicator` for support/read-once
   arguments and native size bounds for functions with two exceptional inputs;
 - `import Complexitylib.Algebraic.LowerBound.Cutwidth` for the
-  `(1 + π(3 + 2√2)/6 - ε) n ≈ (4.0517 - ε) n` lower bound over the full binary basis; see
-  the [cutwidth guide](cutwidth-lower-bound.md);
+  `(1 + π(3 + 2√2)/6 - ε) n ≈ (4.0517 - ε) n` lower bound for dense rectangle-free
+  families over the full binary basis, and
+  `import Complexitylib.Algebraic.LowerBound.Cutwidth.Extractor.SourceReduction.Construction.Hardness`
+  for the same bound on the explicit polynomial-time family; see the
+  [cutwidth guide](cutwidth-lower-bound.md);
 - `import Complexitylib.Algebraic.LowerBound.Nechiporuk` for the `Ω(n² / log n)` formula
   lower bound for the same rectangle-free functions; see the
   [Nechiporuk guide](nechiporuk-lower-bound.md);

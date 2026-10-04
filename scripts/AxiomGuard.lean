@@ -138,12 +138,12 @@ def headlineTheorems : List Name := [
   `Algebraic.Cutwidth.eventually_lt_size_of_cutwidthBound,
   `Algebraic.Cutwidth.Multigraph.orderingBound_of_cutwidthBound,
   -- Gaussian layouts: ordering coefficient (6/π)(3 - 2√2) < 1/3 and the explicit family
-  `Algebraic.Cutwidth.exists_cutwidthBound_gaussian,
+  `Algebraic.Cutwidth.Gaussian.exists_cutwidthBound,
   `Algebraic.Cutwidth.Multigraph.exists_orderingBound_gaussian,
   `Algebraic.Cutwidth.Multigraph.exists_orderingBound_twenty_div_sixtyOne,
   `Algebraic.Cutwidth.eventually_lt_size_of_rectangleFree_gaussian,
   `Algebraic.Cutwidth.sourceReductionHardFamily_eventually_lt_size_gaussian,
-  `Algebraic.Cutwidth.sourceReductionHardFamily_eventually_lt_eightyOne_div_twenty_size,
+  `Algebraic.Cutwidth.sourceReductionHardFamily_eventually_lt_size_eightyOne_div_twenty,
   -- Korten's top-down parity lower bounds and the majority extension
   `Complexity.KarchmerWigderson.parity_communication_lower_bound,
   `Complexity.Circuit.parity_wire_lower_bound,

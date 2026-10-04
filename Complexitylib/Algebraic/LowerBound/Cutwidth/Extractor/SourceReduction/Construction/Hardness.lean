@@ -67,12 +67,12 @@ theorem sourceReductionHardFamily_eventually_lt_size_gaussian {ε : ℝ} (hε : 
 
 /-- **A rational coefficient above four.** The rational ordering coefficient `20/61 < 1/3`
 gives the explicit family a `(81/20 - ε) n` lower bound at its full input length. -/
-theorem sourceReductionHardFamily_eventually_lt_eightyOne_div_twenty_size {ε : ℝ}
+theorem sourceReductionHardFamily_eventually_lt_size_eightyOne_div_twenty {ε : ℝ}
     (hε : 0 < ε) :
     ∀ᶠ n in Filter.atTop, ∀ circuit : Circuit Binary.signature n 1,
       circuit.Computes Binary.interpretation
         (fun x _ => Extractor.sourceReductionHardFamily n x) →
         (81 / 20 - ε) * n < circuit.size :=
-  Extractor.Internal.sourceReductionHardFamily_eventually_lt_eightyOne_div_twenty_size hε
+  Extractor.Internal.sourceReductionHardFamily_eventually_lt_size_eightyOne_div_twenty hε
 
 end Algebraic.Cutwidth
