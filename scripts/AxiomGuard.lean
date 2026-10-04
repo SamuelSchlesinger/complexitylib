@@ -196,6 +196,15 @@ def headlineTheorems : List Name := [
   `Algebraic.Cutwidth.MultiOutput.eventually_lt_size_of_fieldMul,
   `Algebraic.Cutwidth.MultiOutput.eventually_lt_size_of_fieldMul_fifty_div_nine,
   `Algebraic.Cutwidth.MultiOutput.eventually_lt_size_galoisField,
+  -- Border substitution for tight tensors (coordinate form of Landsberg-Michałek Prop. 2.3)
+  `Algebraic.Tensor3.BorderRankLE.map_of_ker,
+  `Algebraic.Tensor3.BorderRankLE.exists_map_orthProj,
+  `Algebraic.Tensor3.Tight.exists_borderRankLE_restrictSlices_erase,
+  `Algebraic.Tensor3.Tight.exists_mem_borderRankLE_restrictSlices_erase,
+  `Algebraic.Tensor3.Tight.exists_list_borderRankLE_restrictSlices_sdiff,
+  `Algebraic.Tensor3.Tight.card_le_borderRank,
+  `Algebraic.Tensor3.Tight.exists_list_add_borderRank_le,
+  `Algebraic.Tensor3.Tight.not_borderRankLE_restrictSlices_of_forall_list,
   -- Korten's top-down parity lower bounds and the majority extension
   `Complexity.KarchmerWigderson.parity_communication_lower_bound,
   `Complexity.Circuit.parity_wire_lower_bound,

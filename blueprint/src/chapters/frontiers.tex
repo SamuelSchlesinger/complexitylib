@@ -9,7 +9,8 @@ general Karchmer--Wigderson theorem, with its protocol model: the imported
 algebraic-circuits library proves it (Definition~\ref{def:frontiers-kw-protocol}
 and Theorem~\ref{thm:frontiers-kw-general}), and the foundations of border rank
 with the Koszul-flattening lower bound
-(Theorem~\ref{thm:frontiers-koszul-flattening}). Where related infrastructure exists
+(Theorem~\ref{thm:frontiers-koszul-flattening}) and border substitution for tight
+tensors (Theorem~\ref{thm:frontiers-border-substitution}). Where related infrastructure exists
 elsewhere, it is named as a starting point, not as progress toward the target.
 
 \section{Hardness of approximation}
@@ -467,24 +468,104 @@ are not.
   lower semicontinuous.
 \end{proof}
 
+\begin{definition}[Tight tensors and slice restrictions]
+  \label{def:frontiers-tight}
+  \lean{Algebraic.Tensor3.Tight, Algebraic.Tensor3.restrictSlices,
+    Algebraic.Tensor3.orthProj}
+  \leanok
+  \uses{def:frontiers-border-rank}
+  A tensor $T \in A \otimes B \otimes C$ is \emph{tight} if there are weights
+  $\tau_A \colon \alpha \to \mathbb{Z}$, $\tau_B \colon \beta \to \mathbb{Z}$,
+  $\tau_C \colon \gamma \to \mathbb{Z}$ with $\tau_A$ injective and
+  $\tau_A(i) + \tau_B(j) + \tau_C(k) = 0$ whenever $T_{ijk} \ne 0$. Landsberg and
+  Micha{\l}ek (Definition~2.2) also ask $\tau_B$ and $\tau_C$ to be injective, so a
+  tensor that is tight in their sense, in its tight basis, is tight here. For
+  $S \subseteq \alpha$, $T|_S$ keeps the slices $T_i$ with $i \in S$ and zeroes the
+  others: the restriction of $T$ to $\operatorname{span}\{a_i^* : i \in S\} \subseteq A^*$
+  (their Definition~2.1), kept inside $A \otimes B \otimes C$. For $u \in A$,
+  $\Pi_u = 1 - (u^* u)^{-1} u u^*$ is the orthogonal projection onto $u^\perp$.
+\end{definition}
+
+\begin{lemma}[Border substitution, one step]
+  \label{lem:frontiers-border-substitution-step}
+  \lean{Algebraic.Tensor3.BorderRankLE.map_of_ker,
+    Algebraic.Tensor3.BorderRankLE.exists_map_orthProj,
+    Algebraic.Tensor3.BorderRankLE.exists_map_orthProj_of_ne_zero}
+  \leanok
+  \uses{def:frontiers-tight, lem:frontiers-border-rank-basic}
+  If $\underline{\mathbf{R}}(T) \le r + 1$ and $A \ne 0$, then
+  $\underline{\mathbf{R}}((\Pi_u \otimes 1 \otimes 1) T) \le r$ for some $u \ne 0$; no
+  conciseness is assumed. Moreover, a bound on
+  $\underline{\mathbf{R}}((P \otimes Y \otimes Z) T)$ depends on $P$ only through its
+  kernel: it passes to every $P'$ with $\ker P \subseteq \ker P'$.
+\end{lemma}
+\begin{proof}
+  \leanok
+  Write $T$ as a limit of $T_n = \sum_{s=0}^{r} u_{n,s} \otimes v_{n,s} \otimes w_{n,s}$.
+  A unit vector $\hat u_n$ on the line of $u_{n,0}$ makes $\Pi_{\hat u_n}$ kill the first
+  summand, so $(\Pi_{\hat u_n} \otimes 1 \otimes 1) T_n$ has rank at most $r$. A
+  subsequence of $\hat u_n$ converges on the compact unit sphere to some $u$, and
+  $(u, S) \mapsto (\Pi_u \otimes 1 \otimes 1) S$ is continuous at $u \ne 0$. If
+  $\ker P \subseteq \ker P'$, then $P' = G P$ for a matrix $G$, and $G \otimes 1 \otimes 1$
+  does not increase border rank.
+\end{proof}
+
+\begin{lemma}[Torus limit for tight tensors]
+  \label{lem:frontiers-torus-limit}
+  \lean{Algebraic.Tensor3.Tight.exists_borderRankLE_restrictSlices_erase}
+  \leanok
+  \uses{lem:frontiers-border-substitution-step}
+  Let $T$ be tight and $u \ne 0$ with
+  $\underline{\mathbf{R}}((\Pi_u \otimes 1 \otimes 1) T) \le \rho$. Then
+  $\underline{\mathbf{R}}(T|_{\alpha \setminus \{i\}}) \le \rho$ for some $i$ with
+  $u_i \ne 0$.
+\end{lemma}
+\begin{proof}
+  \leanok
+  Let $i_0$ minimize $\tau_A$ on the support of $u$ and
+  $\lambda(t) = \operatorname{diag}(t^{\tau_A(i) - \tau_A(i_0)})$. Tightness makes $T$
+  invariant under $\lambda(t) \otimes \mu(t) \otimes \nu(t)$ for suitable diagonal
+  $\mu, \nu$, so conjugating and using that only the kernel matters gives the same bound
+  for the projection along $\lambda(t) u$, for every $t \ne 0$. As $t \to 0$,
+  $\lambda(t) u \to u_{i_0} a_{i_0}$, because $\tau_A(i) > \tau_A(i_0)$ for every other
+  $i$ in the support ($\tau_A$ is injective). The directions $v \ne 0$ satisfying the
+  bound form a closed subset of $A \setminus \{0\}$, and $\Pi_{a_{i_0}}$ has the same kernel
+  as the map that zeroes slice $i_0$. This one-parameter-subgroup limit replaces the Borel
+  fixed-point theorem used by Landsberg and Micha{\l}ek.
+\end{proof}
+
 \begin{theorem}[Border substitution for tight tensors]
   \label{thm:frontiers-border-substitution}
-  \uses{def:frontiers-border-rank}
-  \notready
-  Let $T \in A \otimes B \otimes C$ be tight and $A$-concise, expressed in a tight basis.
-  Among the filtrations $A_1^* \subset \dots \subset A_{\dim A - 1}^* \subset A^*$ with
-  $\dim A_f^* = f$ and each $A_f^*$ spanned by tight basis elements, some filtration
-  satisfies $\underline{\mathbf{R}}(T) \ge \max_q \bigl(q +
-  \underline{\mathbf{R}}(T|_{A_{\dim A - q}^* \otimes B^* \otimes C^*})\bigr)$
-  (Landsberg and Micha{\l}ek, Proposition~2.3).
+  \lean{Algebraic.Tensor3.Tight.exists_mem_borderRankLE_restrictSlices_erase,
+    Algebraic.Tensor3.Tight.exists_list_borderRankLE_restrictSlices_sdiff,
+    Algebraic.Tensor3.Tight.card_le_of_borderRankLE_restrictSlices,
+    Algebraic.Tensor3.Tight.card_le_borderRank,
+    Algebraic.Tensor3.Tight.exists_list_add_borderRank_le,
+    Algebraic.Tensor3.Tight.not_borderRankLE_restrictSlices_of_forall_list}
+  \leanok
+  \uses{lem:frontiers-torus-limit}
+  Let $T$ be tight and $S_0 \subseteq \alpha$ with
+  $\underline{\mathbf{R}}(T|_{S_0}) \le r$. Then some ordering $i_1, \dots, i_{|S_0|}$
+  of $S_0$ satisfies $\underline{\mathbf{R}}(T|_{S_q}) \le r - q$ for every $q$, where
+  $S_q = S_0 \setminus \{i_1, \dots, i_q\}$. If the slices $T_i$, $i \in S_0$, are
+  nonzero, then $|S_0| \le r$; taking $r = \underline{\mathbf{R}}(T|_{S_0})$, some
+  ordering satisfies
+  $\underline{\mathbf{R}}(T|_{S_0}) \ge q + \underline{\mathbf{R}}(T|_{S_q})$ for every
+  $q \le |S_0|$. For $S_0 = \alpha$ this is the conclusion of Landsberg and
+  Micha{\l}ek, Proposition~2.3, for the filtration $A_{\dim A - q}^* =
+  \operatorname{span}\{a_i^* : i \in S_q\}$ by tight basis elements, with nonzero slices in
+  place of $A$-conciseness and only $\tau_A$ required to be injective. Consequently, if
+  every ordering of $S_0$ has a stage $q$ at which $q$ plus a lower bound for
+  $\underline{\mathbf{R}}(T|_{S_q})$ exceeds $r$, then
+  $\underline{\mathbf{R}}(T|_{S_0}) > r$.
 \end{theorem}
 \begin{proof}
-  Combine the border substitution inequality
-  $\underline{\mathbf{R}}(T) \ge \min_{A_f^*} \bigl(\dim A - f +
-  \underline{\mathbf{R}}(T|_{A_f^*})\bigr)$ with the Borel fixed point theorem for the
-  torus that fixes a tight tensor. First step: the inequality itself, for which the
-  restrictions are the maps $X \otimes 1 \otimes 1$ of
-  Definition~\ref{def:frontiers-border-rank}.
+  \leanok
+  Apply Lemma~\ref{lem:frontiers-border-substitution-step} and then
+  Lemma~\ref{lem:frontiers-torus-limit} to the tight tensor $T|_S$. If the zeroed slice
+  lies outside $S$, the bound already holds for $T|_S$ and deleting any element of $S$
+  keeps it. Iterating gives the ordering. Once the bound reaches $0$, $T|_{S_q} = 0$, which
+  is impossible while $S_q$ contains a nonzero slice; hence $|S_0| \le r$.
 \end{proof}
 
 \section{Fine-grained and parameterized complexity}
