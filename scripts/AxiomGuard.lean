@@ -233,6 +233,19 @@ def headlineTheorems : List Name := [
   `Algebraic.Tensor3.DeletionGame.PairedClusterBound.exists_stage,
   `Algebraic.Tensor3.Tight.le_borderRank_of_pairedClusterBound,
   `Algebraic.Tensor3.Tight.not_borderRankLE_of_pairedClusterBound,
+  -- The explicit border-rank bound for the weighted L–M tensors (conditional on the
+  -- paired-cluster Koszul hypothesis `PairedKoszulBound`)
+  `Algebraic.exists_strictMono_injective_sum,
+  `Algebraic.Tensor3.tight_weightedLMTensor,
+  `Algebraic.Tensor3.weightedLMTensor_ne_zero,
+  `Algebraic.Tensor3.exists_strictMono_cluster_posBlock,
+  `Algebraic.Tensor3.exists_strictMono_cluster_negBlock,
+  `Algebraic.Tensor3.PairedKoszulBound.pairedClusterBound,
+  `Algebraic.Tensor3.PairedKoszulBound.le_borderRank_weightedLMTensor,
+  `Algebraic.Tensor3.eventually_sub_mul_le_borderRank_weightedLMTensor,
+  `Algebraic.Tensor3.eventually_nineteen_div_nine_sub_mul_le_borderRank_weightedLMTensor,
+  `Algebraic.Tensor3.eventually_twentyOne_div_ten_mul_le_borderRank_weightedLMTensor,
+  `Algebraic.Tensor3.eventually_seven_div_three_sub_mul_le_borderRank_weightedLMTensor,
   -- Korten's top-down parity lower bounds and the majority extension
   `Complexity.KarchmerWigderson.parity_communication_lower_bound,
   `Complexity.Circuit.parity_wire_lower_bound,
