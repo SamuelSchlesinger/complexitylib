@@ -1,0 +1,12 @@
+Validates: finite affine transport, quadratic fibers, and scalarization obstructions.
+Affine: n=3 K=3; 22 distinct exact-K sumsets;
+  56 dispersers x 168 invertible matrices x 8 shifts
+  = 75264 transported disperser/density checks passed.
+Padding: all 256 three-bit functions balanced; 4096 derivatives equal 1.
+Quadratic: all 16384 ordered two-output maps on 3 bits, all 7 directions;
+  derivative-zero fiber sizes: {0: 37632, 2: 43008, 4: 32256, 8: 1792}; affine dimension >=1.
+Graph scalarization: all 256 maps F:{0,1}^2->{0,1}^2;
+  each balanced graph predicate has a 4 x 2 one-rectangle; 2048 points checked.
+Accounting: 3-gate multiplexer checked on all 8 inputs;
+  rank-2 four-bit code indicator: density 1/4, one AND after free affine basis.
+Scope: finite identities only; no asymptotic hardness or compiler assertion tested.

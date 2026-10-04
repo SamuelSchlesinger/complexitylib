@@ -1,0 +1,16 @@
+seed=20261004
+mixed circuits checked=123; component-union covers checked=1526
+exact guessed semantics, one-sided sum covers, degree<=3, excess=s-n-t: PASS
+giant-component composition cases=63196: PASS
+comparison threshold: half_bits=1, distinct residuals=2
+comparison threshold: half_bits=2, distinct residuals=4
+comparison threshold: half_bits=3, distinct residuals=8
+comparison threshold: half_bits=4, distinct residuals=16
+comparison threshold: half_bits=5, distinct residuals=32
+comparison threshold: half_bits=6, distinct residuals=64
+comparison threshold: half_bits=7, distinct residuals=128
+comparison threshold: half_bits=8, distinct residuals=256
+one-gate parity n=8: balanced one-rectangle sides=8x8
+A=0.280701937; target coefficient 1+1/A=4.562497679
+leading D-loss coefficient 1+2/A=8.124995358
+Limits: finite semantics/accounting checks only; no asymptotic proof or priority claim.

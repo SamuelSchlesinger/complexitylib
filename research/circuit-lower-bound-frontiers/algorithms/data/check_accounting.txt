@@ -1,0 +1,154 @@
+Validates: finite branching mass and weighted whole-tree accounting; no coverage theorem.
+{
+  "seed": 20261004,
+  "A_gaussian": 0.280701937272,
+  "symmetric_gate_deletion_threshold": 4.562497678925,
+  "abstract_branch_profiles": [
+    {
+      "gate_deletions": [
+        4,
+        4
+      ],
+      "mean": 4.0,
+      "mass_ratio": 1.115657493477,
+      "contracts": false
+    },
+    {
+      "gate_deletions": [
+        5,
+        5
+      ],
+      "mean": 5.0,
+      "mass_ratio": 0.918398538263,
+      "contracts": true
+    },
+    {
+      "gate_deletions": [
+        1,
+        9
+      ],
+      "mean": 5.0,
+      "mass_ratio": 1.210863968771,
+      "contracts": false
+    },
+    {
+      "gate_deletions": [
+        2,
+        8
+      ],
+      "mean": 5.0,
+      "mass_ratio": 1.079344952754,
+      "contracts": false
+    }
+  ],
+  "parity": [
+    {
+      "inputs": 3,
+      "satisfying_by_first_bit": [
+        2,
+        2
+      ],
+      "surplus_mass_ratio": 2
+    },
+    {
+      "inputs": 4,
+      "satisfying_by_first_bit": [
+        4,
+        4
+      ],
+      "surplus_mass_ratio": 2
+    },
+    {
+      "inputs": 5,
+      "satisfying_by_first_bit": [
+        8,
+        8
+      ],
+      "surplus_mass_ratio": 2
+    },
+    {
+      "inputs": 6,
+      "satisfying_by_first_bit": [
+        16,
+        16
+      ],
+      "surplus_mass_ratio": 2
+    },
+    {
+      "inputs": 7,
+      "satisfying_by_first_bit": [
+        32,
+        32
+      ],
+      "surplus_mass_ratio": 2
+    },
+    {
+      "inputs": 8,
+      "satisfying_by_first_bit": [
+        64,
+        64
+      ],
+      "surplus_mass_ratio": 2
+    },
+    {
+      "inputs": 9,
+      "satisfying_by_first_bit": [
+        128,
+        128
+      ],
+      "surplus_mass_ratio": 2
+    },
+    {
+      "inputs": 10,
+      "satisfying_by_first_bit": [
+        256,
+        256
+      ],
+      "surplus_mass_ratio": 2
+    },
+    {
+      "inputs": 11,
+      "satisfying_by_first_bit": [
+        512,
+        512
+      ],
+      "surplus_mass_ratio": 2
+    },
+    {
+      "inputs": 12,
+      "satisfying_by_first_bit": [
+        1024,
+        1024
+      ],
+      "surplus_mass_ratio": 2
+    }
+  ],
+  "selector_accounting": [
+    {
+      "B_inputs": 4,
+      "B_gates": 3,
+      "mean_deleted_gates": 2.5,
+      "mass_ratio": 2.0
+    },
+    {
+      "B_inputs": 4,
+      "B_gates": 20,
+      "mean_deleted_gates": 11.0,
+      "mass_ratio": 1.036602019637
+    },
+    {
+      "B_inputs": 10,
+      "B_gates": 100,
+      "mean_deleted_gates": 51.0,
+      "mass_ratio": 1.000000020442
+    }
+  ],
+  "weighted_CAPP": {
+    "direct_seed_evaluations": 28,
+    "weighted_seed_evaluations": "28",
+    "weighted_error_bound": "3/32"
+  },
+  "hybrid_exponent_checks": 1373592,
+  "random_budget_trees": 1000,
+  "total_tree_nodes": 47062
+}

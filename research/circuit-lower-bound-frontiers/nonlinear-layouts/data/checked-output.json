@@ -1,0 +1,71 @@
+{
+  "Validates": "finite exact median truth table; relaxation and trimmed-mean obstructions",
+  "seed": 20261004,
+  "binary_truth_table": {
+    "assignments": 512,
+    "old_mixed": 384,
+    "new_mixed": 216,
+    "repaired": 168,
+    "created": 0
+  },
+  "continuous_interval_trials": 100000,
+  "k33_relaxation": {
+    "rho": 0.9428090415820635,
+    "star_correlation": 0.9571067811865476,
+    "left_vertex_frontier_probability": 0.14035096863582364,
+    "graph_average_frontier_probability": 0.07017548431791182,
+    "median_update": "identically the identity; exact three-copy reason",
+    "actual_distance_kernel": false
+  },
+  "trimmed_mean_counterexample": {
+    "root": [
+      -1,
+      -1,
+      -1
+    ],
+    "external_pairs": [
+      [
+        10,
+        10
+      ],
+      [
+        -10,
+        -10
+      ],
+      [
+        -10,
+        -10
+      ]
+    ],
+    "updated": [
+      2.6666666666666665,
+      -4.0,
+      -4.0
+    ],
+    "threshold": 0
+  },
+  "conditional_targets": [
+    {
+      "delta": 0,
+      "pathwidth_coefficient": 0.14035096863582364,
+      "circuit_coefficient": 4.56249767892502
+    },
+    {
+      "delta": 0.001,
+      "pathwidth_coefficient": 0.13935096863582364,
+      "circuit_coefficient": 4.588062608353212
+    },
+    {
+      "delta": 0.005,
+      "pathwidth_coefficient": 0.13535096863582363,
+      "circuit_coefficient": 4.694099902197996
+    }
+  ],
+  "tiny_band_dependency_degrees": {
+    "0": 5,
+    "1": 29,
+    "2": 125,
+    "3": 509,
+    "4": 2045
+  }
+}

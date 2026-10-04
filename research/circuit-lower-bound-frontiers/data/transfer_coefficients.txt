@@ -1,0 +1,8 @@
+Gaussian p = 0.1403509686
+Gaussian A = 0.2807019373
+Gaussian L = 4.5624976789
+Target L = 4: p <= 0.1666666667
+Target L = 4.6: p <= 0.1388888889
+Target L = 5: p <= 0.1250000000
+Target L = 6: p <= 0.1000000000
+Target L = 10: p <= 0.0555555556

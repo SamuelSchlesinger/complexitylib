@@ -1,0 +1,22 @@
+Validates: the unchanged Lean baseline used by this research passes repository gates.
+Baseline commit: 3f11aef0a13125dfa3d76be664fdf2836e1f06ce
+Date: 2026-10-04
+
+PASS: lake build --wfail Complexitylib Complexitylib.Classes.P.Cobham.Validation
+      Complexitylib.Models.TuringMachine.SingleTape.Validation
+      Complexitylib.Models.TuringMachine.Repetition.Validation
+      Complexitylib.Circuits.Encoding.Validation
+      Complexitylib.SAT.Tseitin.Machine.Validation ApiChecks runLinter
+      Build completed successfully (7294 jobs).
+PASS: python3 scripts/lint_style.py
+PASS: python3 -m unittest discover -s scripts -p 'test_*.py' (25 tests)
+PASS: lake env python3 scripts/lint_environment.py
+PASS: lake env lean scripts/AxiomGuard.lean
+      88869 declarations, including 65234 theorems and 0 project axioms,
+      from 3298 Complexitylib modules use only standard axioms.
+PASS: lake env lean scripts/BlueprintCheck.lean
+      1133 nodes and 3901 Lean references in 18 files are consistent.
+
+These checks validate the existing formal baseline. They do not formalize or prove
+the new research proposals. No Lean, blueprint, roadmap, or build configuration
+files were changed by the authoring agents.

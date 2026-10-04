@@ -1,0 +1,10 @@
+nonlinear tables: 8; disjoint triples checked: 512
+smooth compiler: 64 circuits, 384 layouts/filter runs, 3072 inputs
+smooth compiler: exact retained-input semantics and unique accepting paths passed
+asymptotic saving per exposed nonlinear output: 0.188721876 bits
+finite k=64, q=5/16: log2 typical support=54.917822565, mass=0.900722044
+shared operand k=8: all-zero mass=0.501953125, iid prediction=0.100112915
+multiplexer m=4: accepting data support=15, distinct residuals=16, rectangle cover=4
+rank obstructions: inner-product GF(2) rank=2, cover=3; cycle real rank=3, cover=4
+adaptive entropy: max fixed-cut H=0.834030845, H(T_I|I)=8.000000000
+status: all finite checks passed; no universal layout or coefficient theorem tested

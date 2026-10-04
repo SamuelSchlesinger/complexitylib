@@ -1,0 +1,11 @@
+Validates: finite dual-rail, equality-DAG, and monotone restriction identities.
+Method: exhaustive enumeration; no randomness; not a lower-bound proof.
+All 16 binary gates: largest two-rail AND/OR cost = 6
+Equality DAG n=1: 2 nonconstant functions, 2 input pairs, at most 1 nodes: PASS
+Equality DAG n=2: 14 nonconstant functions, 48 input pairs, at most 3 nodes: PASS
+Equality DAG n=3: 254 nonconstant functions, 3584 input pairs, at most 5 nodes: PASS
+Restriction identity n=1: 3 monotone functions, 6 function/support pairs, 12 evaluations: PASS
+Restriction identity n=2: 6 monotone functions, 24 function/support pairs, 96 evaluations: PASS
+Restriction identity n=3: 20 monotone functions, 160 function/support pairs, 1280 evaluations: PASS
+Restriction identity n=4: 168 monotone functions, 2688 function/support pairs, 43008 evaluations: PASS
+Directed-leaf falsifier: f(z)=z[1], x=01, y=10, output 0 is wrong: PASS

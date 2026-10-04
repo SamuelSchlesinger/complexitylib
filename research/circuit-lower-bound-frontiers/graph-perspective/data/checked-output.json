@@ -1,0 +1,71 @@
+{
+  "Validates": "Finite cycle-deletion identities, cubic orientation, and entropy examples",
+  "balanced_separator_sufficient_bits_per_cycle": 0.109649031364,
+  "bipolar_orientation_checks": 73,
+  "block_parity_cnf_cover_truth_table_checks": 336,
+  "current_alpha": 0.280701937272,
+  "depth_reduction_coefficient_if_alpha_offset_one_quarter_rho_one": 5,
+  "depth_reduction_coefficient_if_alpha_s_one_fifth_rho_one": 5,
+  "edge_deletion_identity_checks": 72768,
+  "entropy_examples": [
+    {
+      "block_length": 2,
+      "proved_upper_bound": 1.72134752,
+      "shannon_bits": 1.622556249,
+      "signals": 2,
+      "support_log2": 2
+    },
+    {
+      "block_length": 4,
+      "proved_upper_bound": 1.36067376,
+      "shannon_bits": 1.349160266,
+      "signals": 4,
+      "support_log2": 4
+    },
+    {
+      "block_length": 8,
+      "proved_upper_bound": 0.59016844,
+      "shannon_bits": 0.5899921,
+      "signals": 16,
+      "support_log2": 16
+    },
+    {
+      "block_length": 16,
+      "proved_upper_bound": 0.068135528,
+      "shannon_bits": 0.068135485,
+      "signals": 256,
+      "support_log2": 256
+    },
+    {
+      "block_length": 32,
+      "proved_upper_bound": 0.000510295,
+      "shannon_bits": 0.000510295,
+      "signals": 65536,
+      "support_log2": 65536
+    }
+  ],
+  "extra_graphs": [
+    "cube",
+    "Petersen"
+  ],
+  "labeled_connected_cubic_graphs": {
+    "4": 1,
+    "6": 70
+  },
+  "max_cycle_drop_by_deleted_vertices": {
+    "1": 2,
+    "2": 4,
+    "3": 6,
+    "4": 6,
+    "5": 6,
+    "6": 6,
+    "7": 6,
+    "8": 6,
+    "9": 6
+  },
+  "pure_vertex_branch_factor_lower_bound_alpha_quarter": 1.414213562373,
+  "scope": "Finite obstructions only; no universal compiler established",
+  "target_alpha": 0.25,
+  "vertex_deletion_identity_checks": 5630,
+  "vertex_deletions_with_multiple_components": 1343
+}

@@ -1,0 +1,20 @@
+{
+  "seed": 20261004,
+  "exhaustive_four_vertex_graph_tree_pairs": 960,
+  "triangle": {
+    "b": 2,
+    "W": 3,
+    "W_over_b": 1.5
+  },
+  "random_constraint_networks": 64,
+  "nondeterministic_merge_overlaps_observed": 195,
+  "full_binary_basis_circuit_tree_tests": 288,
+  "smooth_shared_DNNF_context_and_frontier_tests": 256,
+  "charged_frontiers_checked": 1785,
+  "baseline_A": 0.2807019372716472,
+  "baseline_L": 4.562497678925021,
+  "carving_beta_must_be_less_than": 0.1871346248477648,
+  "cubic_carving_c_must_be_less_than": 0.0935673124238824,
+  "all_assertions_passed": true,
+  "limitations": "Finite tests only; no universal graph bound or novelty claim."
+}

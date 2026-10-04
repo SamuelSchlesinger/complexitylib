@@ -1,0 +1,24 @@
+Finite multicut audit; exhaustive named cases, random audit seed=20261004
+parity_chain: n gates excess selected_cuts joint_entropy_on_acceptance
+  4 3 -1 2 2.0
+  6 5 -1 4 4.0
+  8 7 -1 6 6.0
+  10 9 -1 8 8.0
+  12 11 -1 10 10.0
+repeated_parity: n sum_leave_one_out_information chain_information
+  2 2.0 1.0
+  4 4.0 1.0
+  8 8.0 1.0
+  12 12.0 1.0
+multiplexer: q branches sum_restricted_demands H(output) H(selector,output)
+  1 2 2.0 1.0 2.0
+  2 4 4.0 1.0 3.0
+  3 8 8.0 1.0 4.0
+shared_XOR_outputs: m=5 k=4; gates cone_sum reuse_penalty H(outputs)
+  8 20 12 4.0
+disjoint_parity_outputs: m=3 k=4; input_bits gates H(outputs)
+  12 8 4.0
+B2 transcript chain audits passed: 200
+baseline: alpha=0.280701937272, coefficient=4.562497678925
+conditional coefficient-5 target: alpha=0.25, rho=1, offset=s-n
+ALL ASSERTIONS PASSED; no compiler or asymptotic hardness claim checked

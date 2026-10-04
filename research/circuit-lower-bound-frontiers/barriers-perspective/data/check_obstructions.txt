@@ -1,0 +1,49 @@
+Validates: finite multiplexer adaptivity and K4 Tseitin representation obstructions.
+{
+  "multiplexer": [
+    {
+      "address_bits": 1,
+      "input_bits": 3,
+      "all_inputs_essential": true,
+      "adaptive_depth_upper_bound": 2,
+      "oblivious_1_local_depth_exact": 3,
+      "assignments_checked": 8
+    },
+    {
+      "address_bits": 2,
+      "input_bits": 6,
+      "all_inputs_essential": true,
+      "adaptive_depth_upper_bound": 3,
+      "oblivious_1_local_depth_exact": 6,
+      "assignments_checked": 64
+    },
+    {
+      "address_bits": 3,
+      "input_bits": 11,
+      "all_inputs_essential": true,
+      "adaptive_depth_upper_bound": 4,
+      "oblivious_1_local_depth_exact": 11,
+      "assignments_checked": 2048
+    }
+  ],
+  "k4_tseitin": {
+    "vertices": 4,
+    "edge_variables": 6,
+    "charges": [
+      1,
+      0,
+      0,
+      0
+    ],
+    "clauses": 16,
+    "initial_width": 3,
+    "assignments_checked": 64,
+    "xor_satisfying_assignments": 0,
+    "and_satisfying_assignments_same_graph": 4,
+    "minimum_resolution_width": 4,
+    "width3_saturation_clauses": 16,
+    "width4_clauses_before_refutation": 473,
+    "direct_binary_cnf_gates": 47,
+    "semantic_constant_zero_gates": 1
+  }
+}
