@@ -10,14 +10,18 @@ public import Complexitylib.Algebraic.LinearAlgebra.Tensor.Diagonal.Defs
 public import Complexitylib.Algebraic.LinearAlgebra.Tensor.Substitution.Defs
 
 /-!
-# The paired-cluster Koszul hypothesis
+# The paired-cluster Koszul bound
 
 The explicit border-rank lower bound for the weighted Landsberg–Michałek tensors
 `Tensor3.weightedLMTensor k` (`Complexitylib.Algebraic.LinearAlgebra.Tensor.Explicit`) combines
 border substitution, the deletion game, and a greedy choice of clusters with one local input:
 a Koszul-flattening bound for a *pair* of clusters of `2p + 1` slices, one with positive and one
-with negative offsets. That input is proved separately; here it is stated as the hypothesis
-`Tensor3.PairedKoszulBound k p L E`, on which the final theorems are conditional.
+with negative offsets. This file states that input as the property
+`Tensor3.PairedKoszulBound k p L E`, the interface between the paired-cluster certificate and
+the assembly. The certificate
+(`Tensor3.div_mul_phi_sub_le_borderRank_restrictSlices`, in
+`Complexitylib.Algebraic.LinearAlgebra.Tensor.Diagonal.Paired`) proves it with
+`E = 8 (p + 1) L` for all `k`, `p`, and `L` (`Tensor3.pairedKoszulBound`).
 
 `PairedKoszulBound k p L E` says: for every set `S` of slices of `weightedLMTensor k` and every
 two strictly increasing clusters `c⁺, c⁻ : Fin (2p+1) → Fin (2k+1)` such that
@@ -31,8 +35,7 @@ two strictly increasing clusters `c⁺, c⁻ : Fin (2p+1) → Fin (2k+1)` such t
 
 the slice restriction of `weightedLMTensor k` to `S` has border rank at least
 `(2p + 1) / (p + 1) * (Φ_{2k+1}(r, s) - E)`, where `r = c⁺ p - k` and `-s = c⁻ p - k` are the
-median offsets and `Φ` is `DeletionGame.phi`. The Koszul certificate for paired clusters is
-meant to give this with `E = O(p L)`.
+median offsets and `Φ` is `DeletionGame.phi`.
 -/
 
 @[expose] public section
@@ -41,7 +44,7 @@ namespace Algebraic.Tensor3
 
 open Finset
 
-/-- **The paired-cluster Koszul hypothesis** for `weightedLMTensor k`, clusters of `2p + 1`
+/-- **The paired-cluster Koszul bound** for `weightedLMTensor k`, clusters of `2p + 1`
 slices, cluster diameter `L`, and error `E`. For every set `S` of slices and every two strictly
 increasing clusters `cp` (positive offsets in `[1, k]`) and `cn` (negative offsets in
 `[-k, -1]`) inside `S`, each with pairwise distinct `p`-subset sums of offsets and with diameter

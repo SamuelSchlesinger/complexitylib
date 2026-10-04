@@ -7,6 +7,7 @@ Authors: Samuel Schlesinger
 module
 public import Complexitylib.Algebraic.LinearAlgebra.Tensor.Explicit.Defs
 public import Complexitylib.Algebraic.LinearAlgebra.Tensor.DeletionGame
+public import Complexitylib.Algebraic.LinearAlgebra.Tensor.Diagonal.Paired
 public import Mathlib.Data.Fintype.BigOperators
 public import Mathlib.Data.Finset.Sort
 public import Mathlib.Order.Filter.AtTopBot.Basic
@@ -37,6 +38,9 @@ Proofs behind `Complexitylib.Algebraic.LinearAlgebra.Tensor.Explicit`.
 * **Arithmetic.** `1 + 2D/3 = 7/3 - 2 / (3 (p + 1))`, and `D ≥ 3/2` iff `p ≥ 1`. For the
   asymptotic form choose `L ≥ 2 R / δ`, so that `R m / L ≤ δ m / 2`, and then `k` so large that
   the constant `D E + 8 L + 2` is at most `δ m / 2`.
+* **The unconditional bounds.** The paired-cluster certificate
+  `Tensor3.div_mul_phi_sub_le_borderRank_restrictSlices` is `PairedKoszulBound k p L E` with
+  `E = 8 (p + 1) L`, for all `k`, `p`, `L`; then `D E = 8 (2p + 1) L`.
 -/
 
 @[expose] public section
@@ -264,7 +268,8 @@ theorem one_add_two_mul_div_three (p : ℕ) :
   field_simp
   ring
 
-theorem le_borderRank {L : ℕ} {E : ℝ} (h : PairedKoszulBound k p L E) (hp : 1 ≤ p)
+theorem le_borderRank_of_pairedKoszulBound {L : ℕ} {E : ℝ} (h : PairedKoszulBound k p L E)
+    (hp : 1 ≤ p)
     (hL : 3 ^ (2 * p) + 1 ≤ L) (hLk : L ≤ k) :
     (7 / 3 - 2 / (3 * (p + 1))) * (2 * k + 1 : ℝ) - (2 * p + 1) / (p + 1) * E -
         (8 * L + (3 ^ (2 * p) + 1) * (2 * k + 1) / L + 2) ≤
@@ -276,7 +281,7 @@ theorem le_borderRank {L : ℕ} {E : ℝ} (h : PairedKoszulBound k p L E) (hp : 
   push_cast at this
   exact this
 
-theorem eventually_le_borderRank (hp : 1 ≤ p)
+theorem eventually_le_borderRank_of_pairedKoszulBound (hp : 1 ≤ p)
     (h : ∀ᶠ L : ℕ in atTop, ∃ c : ℝ, ∀ᶠ k : ℕ in atTop,
       PairedKoszulBound k p L (c * (p + 1) * L))
     {δ : ℝ} (hδ : 0 < δ) :
@@ -296,7 +301,7 @@ theorem eventually_le_borderRank (hp : 1 ≤ p)
   set E : ℝ := c * (p + 1) * L
   obtain ⟨K, hK⟩ := exists_nat_ge (2 * (D * E + 8 * L + 2) / δ)
   filter_upwards [hc, eventually_ge_atTop (max K L)] with k hk hkK
-  have hb := le_borderRank hk hp hRL (le_of_max_le_right hkK)
+  have hb := le_borderRank_of_pairedKoszulBound hk hp hRL (le_of_max_le_right hkK)
   have hk1 : (K : ℝ) ≤ 2 * k + 1 := by
     have : (K : ℝ) ≤ k := by exact_mod_cast le_of_max_le_left hkK
     linarith
@@ -312,45 +317,50 @@ theorem eventually_le_borderRank (hp : 1 ≤ p)
   rw [← hRc] at hb
   linarith
 
-theorem eventually_nineteen_div_nine
-    (h : ∀ᶠ L : ℕ in atTop, ∃ c : ℝ, ∀ᶠ k : ℕ in atTop, PairedKoszulBound k 2 L (c * 3 * L))
-    {δ : ℝ} (hδ : 0 < δ) :
+/-! ### The unconditional bounds -/
+
+theorem pairedKoszulBound (k p L : ℕ) : PairedKoszulBound k p L (8 * (p + 1) * L) :=
+  fun S cp cn hcp hcn hSP hSN hoP hoN hLP hLN hP hN =>
+    div_mul_phi_sub_le_borderRank_restrictSlices S cp cn hcp hcn hSP hSN hoP hoN hLP hLN hP hN
+
+theorem le_borderRank {L : ℕ} (hp : 1 ≤ p) (hL : 3 ^ (2 * p) + 1 ≤ L) (hLk : L ≤ k) :
+    (7 / 3 - 2 / (3 * (p + 1))) * (2 * k + 1 : ℝ) -
+        (16 * (p + 1) * L + (3 ^ (2 * p) + 1) * (2 * k + 1) / L + 2) ≤
+      (weightedLMTensor k).borderRank := by
+  have h := le_borderRank_of_pairedKoszulBound (pairedKoszulBound k p L) hp hL hLk
+  have hDE : (2 * p + 1 : ℝ) / (p + 1) * (8 * (p + 1) * L) = 8 * (2 * p + 1) * L := by
+    rw [div_mul_eq_mul_div, div_eq_iff (by positivity)]
+    ring
+  linarith
+
+theorem eventually_le_borderRank (hp : 1 ≤ p) {δ : ℝ} (hδ : 0 < δ) :
+    ∀ᶠ k : ℕ in atTop, (7 / 3 - 2 / (3 * (p + 1)) - δ) * (2 * k + 1 : ℝ) ≤
+      (weightedLMTensor k).borderRank :=
+  eventually_le_borderRank_of_pairedKoszulBound hp
+    (Eventually.of_forall fun L => ⟨8, Eventually.of_forall fun k => pairedKoszulBound k p L⟩) hδ
+
+theorem eventually_nineteen_div_nine {δ : ℝ} (hδ : 0 < δ) :
     ∀ᶠ k : ℕ in atTop, (19 / 9 - δ) * (2 * k + 1 : ℝ) ≤ (weightedLMTensor k).borderRank := by
-  have h' : ∀ᶠ L : ℕ in atTop, ∃ c : ℝ, ∀ᶠ k : ℕ in atTop,
-      PairedKoszulBound k 2 L (c * ((2 : ℕ) + 1 : ℝ) * L) := by
-    have e : ((2 : ℕ) + 1 : ℝ) = 3 := by norm_num
-    simpa only [e] using h
-  filter_upwards [eventually_le_borderRank (p := 2) (by norm_num) h' hδ] with k hk
+  filter_upwards [eventually_le_borderRank (p := 2) (by norm_num) hδ] with k hk
   convert hk using 2
   norm_num
 
-theorem eventually_twentyOne_div_ten
-    (h : ∀ᶠ L : ℕ in atTop, ∃ c : ℝ, ∀ᶠ k : ℕ in atTop, PairedKoszulBound k 2 L (c * 3 * L)) :
+theorem eventually_twentyOne_div_ten :
     ∀ᶠ k : ℕ in atTop, (21 / 10 : ℝ) * (2 * k + 1) ≤ (weightedLMTensor k).borderRank := by
-  filter_upwards [eventually_nineteen_div_nine h (δ := 1 / 90) (by norm_num)] with k hk
+  filter_upwards [eventually_nineteen_div_nine (δ := 1 / 90) (by norm_num)] with k hk
   convert hk using 2
   norm_num
 
-theorem eventually_seven_div_three_of_lt (hp : 1 ≤ p)
-    (h : ∀ᶠ L : ℕ in atTop, ∃ c : ℝ, ∀ᶠ k : ℕ in atTop,
-      PairedKoszulBound k p L (c * (p + 1) * L))
-    {ε : ℝ} (hε : 2 / (3 * (p + 1)) < ε) :
-    ∀ᶠ k : ℕ in atTop, (7 / 3 - ε) * (2 * k + 1 : ℝ) ≤ (weightedLMTensor k).borderRank := by
-  filter_upwards [eventually_le_borderRank hp h (sub_pos.2 hε)] with k hk
-  convert hk using 2
-  ring
-
-theorem eventually_seven_div_three
-    (h : ∀ p : ℕ, 1 ≤ p → ∀ᶠ L : ℕ in atTop, ∃ c : ℝ, ∀ᶠ k : ℕ in atTop,
-      PairedKoszulBound k p L (c * (p + 1) * L))
-    {ε : ℝ} (hε : 0 < ε) :
+theorem eventually_seven_div_three {ε : ℝ} (hε : 0 < ε) :
     ∀ᶠ k : ℕ in atTop, (7 / 3 - ε) * (2 * k + 1 : ℝ) ≤ (weightedLMTensor k).borderRank := by
   obtain ⟨p, hp⟩ := exists_nat_gt (1 / ε)
-  have hp1 : 1 ≤ p + 1 := le_add_self
-  refine eventually_seven_div_three_of_lt hp1 (h (p + 1) hp1) ?_
-  have := (div_lt_iff₀ hε).1 hp
-  rw [div_lt_iff₀ (by positivity)]
-  push_cast
-  nlinarith
+  have hlt : 2 / (3 * ((p + 1 : ℕ) + 1 : ℝ)) < ε := by
+    have := (div_lt_iff₀ hε).1 hp
+    rw [div_lt_iff₀ (by positivity)]
+    push_cast
+    nlinarith
+  filter_upwards [eventually_le_borderRank (p := p + 1) le_add_self (sub_pos.2 hlt)] with k hk
+  convert hk using 2
+  ring
 
 end Algebraic.Tensor3.Internal.Explicit

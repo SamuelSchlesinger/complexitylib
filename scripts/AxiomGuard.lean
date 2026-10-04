@@ -233,8 +233,7 @@ def headlineTheorems : List Name := [
   `Algebraic.Tensor3.DeletionGame.PairedClusterBound.exists_stage,
   `Algebraic.Tensor3.Tight.le_borderRank_of_pairedClusterBound,
   `Algebraic.Tensor3.Tight.not_borderRankLE_of_pairedClusterBound,
-  -- The explicit border-rank bound for the weighted L–M tensors (conditional on the
-  -- paired-cluster Koszul hypothesis `PairedKoszulBound`)
+  -- The explicit border-rank bound (7/3 - ε) m for the weighted L–M tensors
   `Algebraic.exists_strictMono_injective_sum,
   `Algebraic.Tensor3.tight_weightedLMTensor,
   `Algebraic.Tensor3.weightedLMTensor_ne_zero,
@@ -242,6 +241,8 @@ def headlineTheorems : List Name := [
   `Algebraic.Tensor3.exists_strictMono_cluster_negBlock,
   `Algebraic.Tensor3.PairedKoszulBound.pairedClusterBound,
   `Algebraic.Tensor3.PairedKoszulBound.le_borderRank_weightedLMTensor,
+  `Algebraic.Tensor3.pairedKoszulBound,
+  `Algebraic.Tensor3.le_borderRank_weightedLMTensor,
   `Algebraic.Tensor3.eventually_sub_mul_le_borderRank_weightedLMTensor,
   `Algebraic.Tensor3.eventually_nineteen_div_nine_sub_mul_le_borderRank_weightedLMTensor,
   `Algebraic.Tensor3.eventually_twentyOne_div_ten_mul_le_borderRank_weightedLMTensor,
