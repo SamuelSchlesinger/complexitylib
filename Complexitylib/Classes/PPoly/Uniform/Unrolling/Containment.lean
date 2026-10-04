@@ -12,8 +12,9 @@ public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Containment.Internal
 
 This module packages the verified log-space tableau serializer into the
 machines-to-circuits direction of uniform P/poly. The conditional seams remain
-available for alternate serializers, while the canonical padded serializer
-discharges them unconditionally.
+available for alternate serializers. The canonical padded serializer discharges
+the padded seam at a normalized horizon; no theorem discharges the unpadded
+`directUnrollingCode` seam.
 
 ## Main results
 
@@ -34,7 +35,11 @@ namespace Complexity
 namespace TM
 
 /-- A polynomial-time decider belongs to uniform P/poly whenever its direct
-unrolling code map is computable in logarithmic space. -/
+unrolling code map is computable in logarithmic space.
+
+The hypothesis `hgen` is not known for this unpadded code; the verified
+generator targets `paddedDirectUnrollingCode`, and
+`TM.DecidesInTime.mem_UniformPPoly` is the unconditional result. -/
 theorem DecidesInTime.mem_UniformPPoly_of_directUnrollingCode_mem_FL
     {tm : TM k} {L : Language} (q : Polynomial ℕ)
     (hdec : tm.DecidesInTime L q.eval)
@@ -57,7 +62,11 @@ end TM
 
 /-- If every polynomial-horizon direct unrolling code map belongs to `FL`,
 then every language in `P` has a logspace-uniform polynomial-size circuit
-family. -/
+family.
+
+The hypothesis `hgen` is not known for the unpadded code; the unconditional
+containment `P_subset_UniformPPoly` (and `UniformPPoly_eq_P`) goes through the
+padded code instead. -/
 theorem P_subset_UniformPPoly_of_directUnrollingCode_mem_FL
     (hgen : ∀ {k : ℕ} (tm : TM k) (q : Polynomial ℕ),
       (fun x : List Bool => tm.directUnrollingCode q.eval x.length) ∈ FL) :

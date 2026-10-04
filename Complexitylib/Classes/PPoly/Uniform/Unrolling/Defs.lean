@@ -20,7 +20,11 @@ For a deterministic machine, the embedded NTM ignores every choice bit.  At
 positive input lengths this module therefore reuses primary input wire zero for
 all choice positions and leaves the ordinary data wires in place.  The resulting
 typed circuit is reconstructed directly from `acceptanceRawCircuit`, so erasing
-it recovers exactly the raw list that a streaming generator will emit.
+it recovers exactly that raw list.
+
+The verified log-space generator (`TM.paddedDirectUnrollingCode_mem_FL`) emits
+`TM.paddedDirectUnrollingCode`, which pads this raw list to a closed gate bound.
+No theorem places the unpadded `TM.directUnrollingCode` map in `FL`.
 -/
 
 
@@ -49,7 +53,9 @@ noncomputable def directUnrollingRawCircuit (tm : TM k) (f : ℕ → ℕ)
 
 /-- Total tagged code specification for the direct family.  The zero-length
 case is the explicit answer bit; every positive case is the literal raw
-tableau encoding that the future streaming transducer must produce. -/
+tableau encoding.  The verified log-space generator emits the padded
+`TM.paddedDirectUnrollingCode` instead; this unpadded map is not known to be
+in `FL`. -/
 noncomputable def directUnrollingCode (tm : TM k) (f : ℕ → ℕ) :
     ℕ → List Bool
   | 0 => [false, CircuitUnrolling.boundedAcceptanceBit tm.toNTM (f 0)

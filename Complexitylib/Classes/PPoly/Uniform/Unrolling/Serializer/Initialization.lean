@@ -16,8 +16,9 @@ the direct deterministic initialization fragment. Its variable indices are
 natural numbers; machine states and symbols occur only as fixed finite
 parameters or in proof adapters.
 
-The final equality is intentionally literal equality of raw gate lists. It
-does not yet construct a Turing machine that emits those gates.
+The final equality is intentionally literal equality of raw gate lists. This
+module constructs no machine; the initialization phase of the verified
+padded-code generator emits those gates.
 
 ## Main results
 

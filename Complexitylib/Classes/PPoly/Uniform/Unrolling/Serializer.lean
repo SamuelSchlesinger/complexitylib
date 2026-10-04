@@ -22,8 +22,9 @@ backward through source members and reference the preceding connector. For a
 compiled batch, copy indices move forward and reconstruct each delayed formula
 output from a prefix-size sum.
 
-These are proof-level schedule identities, not yet a Turing-machine serializer.
-They isolate the exact arithmetic that the later finite controller must realize.
+These are proof-level schedule identities, not a Turing-machine serializer.
+They isolate the exact arithmetic that the verified log-space generator for the
+padded direct-unrolling code (`TM.paddedDirectUnrollingCode_mem_FL`) realizes.
 
 ## Main results
 

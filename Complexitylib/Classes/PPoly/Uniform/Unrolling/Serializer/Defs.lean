@@ -12,9 +12,10 @@ public import Complexitylib.Circuits.Encoding.Fragment.Defs
 
 This definitions layer isolates two variable-length pieces of raw formula
 compilation as schedules driven only by natural-number counters and a numeric
-size oracle. A future Turing-machine serializer can recompute that oracle from
-its fixed formula templates; it never needs to store a `BoolFormula`, a raw
-circuit, or a run-time syntax stack.
+size oracle. The verified log-space generator for the padded direct-unrolling
+code (`TM.paddedDirectUnrollingCode_mem_FL`) emits these schedules from
+natural-number registers; it never stores a `BoolFormula`, a raw circuit, or a
+run-time syntax stack.
 
 The right-fold schedule counts connector ranks upward while visiting source
 members in reverse order. The batch-copy schedule counts source formulas

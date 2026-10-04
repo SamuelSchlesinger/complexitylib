@@ -15,9 +15,10 @@ This module exposes the base-independent gate count of one packed transition
 layer and closed forms for the configuration base, first unused wire, and gate
 count after any canonical deterministic trace prefix.
 
-These are pure structural facts about the direct-unrolling circuit. They are
-intended to be consumed by an append-only log-space serializer without making
-that serializer reproduce the recursive `TraceBuild` arithmetic at run time.
+These are pure structural facts about the direct-unrolling circuit. The
+append-only log-space generator for the padded code
+(`TM.paddedDirectUnrollingCode_mem_FL`) consumes them, so it need not reproduce
+the recursive `TraceBuild` arithmetic at run time.
 
 ## Main results
 

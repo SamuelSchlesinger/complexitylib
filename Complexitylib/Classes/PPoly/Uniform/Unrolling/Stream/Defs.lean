@@ -10,10 +10,12 @@ public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Defs
 /-!
 # Streamable deterministic unrolling arithmetic — definitions
 
-This definitions layer isolates the numeric data needed by a future streaming
-serializer. Formula tree sizes do not depend on the absolute wire numbers stored
-at their leaves, so one canonical choice of incoming bases determines the size
-of every transition formula and of every packed transition layer.
+This definitions layer isolates the numeric data used by the verified streaming
+generator for the padded direct-unrolling code
+(`TM.paddedDirectUnrollingCode_mem_FL`). Formula tree sizes do not depend on
+the absolute wire numbers stored at their leaves, so one canonical choice of
+incoming bases determines the size of every transition formula and of every
+packed transition layer.
 
 The direct deterministic prefix build fixes the primary-wire layout used by
 `TM.directUnrollingRawCircuit`. It remains a proof-level circuit construction;

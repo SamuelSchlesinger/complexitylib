@@ -14,8 +14,9 @@ public import Complexitylib.Classes.PPoly.Uniform.Unrolling.Internal
 This module exposes a deterministic tableau family whose positive members are
 reconstructed directly from `acceptanceRawCircuit`.  Its circuit code is exactly
 the encoding of that raw gate list, avoiding the repeated typed hardwiring used
-by the older nonuniform family.  This is the code target for the log-space
-uniformity emitter.
+by the older nonuniform family.  The verified log-space uniformity generator
+targets its regularly padded extension, `TM.paddedDirectUnrollingCode`; no
+theorem places this unpadded code map in `FL`.
 
 ## Main results
 
