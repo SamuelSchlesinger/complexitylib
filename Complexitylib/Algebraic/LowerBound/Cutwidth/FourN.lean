@@ -180,6 +180,12 @@ theorem card_accepting_le_of_orderingBound {A η C : ℝ} (hAη : 0 ≤ A + η) 
         apply mul_le_mul (mul_le_mul hV hexp (by positivity) (by positivity)) hK'
           (by positivity) (by positivity)
 
+/-- The slack conditions of the general cores force a nonnegative circuit
+slack: an ordering slack `0 ≤ η ≤ A² θ / 2` with `A > 0` gives `0 ≤ θ`. -/
+theorem circuit_slack_nonneg {A η θ : ℝ} (hA : 0 < A) (hη : 0 ≤ η)
+    (hηθ : η ≤ A ^ 2 * θ / 2) : 0 ≤ θ :=
+  nonneg_of_mul_nonneg_right (by linarith : 0 ≤ A ^ 2 * θ) (by positivity)
+
 /-- **The numeric core with a general ordering coefficient.** Let `A > 0`
 be the ordering coefficient, `θ ≤ 1/A` the circuit slack, and
 `0 ≤ η ≤ A² θ / 2` the ordering slack. A `K`-rectangle-free function with at
@@ -222,10 +228,7 @@ theorem false_of_accepting_bound_of_log_coefficient {A η θ C M : ℝ} (hA : 0 
       have : n - n' < k := hread
       have : ((n - n' : Nat) : ℝ) < k := by exact_mod_cast this
       rwa [Nat.cast_sub hn'le] at this
-    have hθ : 0 ≤ θ := by
-      by_contra hθ
-      have : A ^ 2 * θ < 0 := mul_neg_of_pos_of_neg (by positivity) (lt_of_not_ge hθ)
-      linarith
+    have hθ := circuit_slack_nonneg hA hη hηθ
     have hAη : 0 ≤ A + η := by linarith
     -- The excess is at most `(1/A - θ) n + k`.
     have hmax : max ((s : ℝ) - n') 0 ≤ (1 / A - θ) * n + k := by
@@ -286,7 +289,7 @@ the cut-counting lemma for a circuit with `s ≤ (4 - 18 η) n` gates reading
 `n'` inputs, when `n - n' < ⌈log₂ K⌉` and `n` is large enough. This is the
 general core at coefficient `A = 1/3` with `θ = 18 η`. -/
 theorem false_of_accepting_bound_of_log {η C : ℝ} (hη : 0 < η) (hη1 : η ≤ 1 / 18)
-    (_hC : 0 ≤ C) {n : Nat} (hn : 2 ≤ n) {f : Cslib.BooleanFunction n} {K : Nat}
+    {n : Nat} (hn : 2 ≤ n) {f : Cslib.BooleanFunction n} {K : Nat}
     (hacc : 2 ^ (n - 2) ≤ (accepting f).card) (hK1 : 1 < K)
     (hbig : 2 * K ^ 2 ≤ 2 ^ (n - 2))
     (hlog : 4 * Real.logb 2 n + 3 * Real.logb 2 K + (C + 22) < 3 * η * n)
@@ -312,7 +315,7 @@ theorem false_of_accepting_bound_of_log {η C : ℝ} (hη : 0 < η) (hη1 : η �
 
 /-- The polynomial-threshold numeric core follows from the logarithmic core;
 this preserves the original deterministic and nondeterministic interface. -/
-theorem false_of_accepting_bound {η C : ℝ} (hη : 0 < η) (hη1 : η ≤ 1 / 18) (hC : 0 ≤ C)
+theorem false_of_accepting_bound {η C : ℝ} (hη : 0 < η) (hη1 : η ≤ 1 / 18)
     {n : Nat} (hn : 2 ≤ n) {f : Cslib.BooleanFunction n} {K c : Nat} (hK : K ≤ n ^ c)
     (hacc : 2 ^ (n - 2) ≤ (accepting f).card) (hK1 : 1 < K)
     (hpow : 8 * n ^ (2 * c) ≤ 2 ^ n)
@@ -335,7 +338,7 @@ theorem false_of_accepting_bound {η C : ℝ} (hη : 0 < η) (hη1 : η ≤ 1 / 
     have h := (Real.logb_le_logb one_lt_two (by exact_mod_cast (by lia : 0 < K))
       (by positivity)).mpr (show (K : ℝ) ≤ (n : ℝ) ^ c by exact_mod_cast hK)
     rwa [Real.logb_pow] at h
-  exact false_of_accepting_bound_of_log hη hη1 hC hn hacc hK1 hbig
+  exact false_of_accepting_bound_of_log hη hη1 hn hacc hK1 hbig
     (by linarith) hs hn'le hread hVpos hVb bound
 
 /-- **The fixed-`n` core with a general ordering coefficient.** With the
@@ -369,10 +372,7 @@ theorem lt_size_of_orderingBound {A η θ C : ℝ} (hA : 0 < A) (hη : 0 ≤ η)
   have hkR : (k : ℝ) < Real.logb 2 K + 1 := by
     rw [hk_def, ← Real.natCeil_logb_natCast 2 K]
     exact Nat.ceil_lt_add_one hlogK
-  have hθ : 0 ≤ θ := by
-    by_contra hθ
-    have : A ^ 2 * θ < 0 := mul_neg_of_pos_of_neg (by positivity) (lt_of_not_ge hθ)
-    linarith
+  have hθ := circuit_slack_nonneg hA hη hηθ
   have hAθ : A * θ ≤ 1 := by
     have := mul_le_mul_of_nonneg_left hθA hA.le
     rwa [mul_one_div_cancel hA.ne'] at this
@@ -538,6 +538,40 @@ theorem eventually_le_pow_half_of_log {K : Nat → Nat}
   have hsq : K n ^ 2 ≤ (2 ^ (n / 2)) ^ 2 := (by lia : K n ^ 2 ≤ 2 ^ (n - 2)).trans hp
   exact (Nat.pow_le_pow_iff_left (by norm_num : 2 ≠ 0)).mp hsq
 
+/-- **Slack selection for the general asymptotic bounds.** Given the
+graph-ordering hypothesis with coefficient `A > 0` at every positive slack, a
+threshold with `log₂ K(n) = o(n)`, and `ε > 0`, some circuit slack
+`θ ≤ min(ε, 1/A)`, ordering slack `η`, and constant `C ≥ 0` satisfy the
+hypotheses of the general fixed-`n` cores, and their logarithmic condition
+holds for all sufficiently large `n`. -/
+theorem exists_slack_eventually_log_condition {A : ℝ} (hA : 0 < A)
+    (order : ∀ η : ℝ, 0 < η → ∃ C : ℝ, Multigraph.OrderingBound A η C) (K : Nat → Nat)
+    (hK : (fun n => Real.logb 2 (K n)) =o[atTop] (fun n => (n : ℝ))) {ε : ℝ} (hε : 0 < ε) :
+    ∃ θ η C : ℝ, 0 ≤ η ∧ η ≤ A ^ 2 * θ / 2 ∧ θ ≤ 1 / A ∧ θ ≤ ε ∧ 0 ≤ C ∧
+      Multigraph.OrderingBound A η C ∧
+      ∀ᶠ n : Nat in atTop, (A + η + 2) * Real.logb 2 (K n) + 4 * Real.logb 2 n +
+        (A + η + 4 * Real.logb 2 (4 + 3 / A) + C + 5) < A * θ / 2 * n := by
+  obtain ⟨θ, hθ, hθA, hθε⟩ : ∃ θ : ℝ, 0 < θ ∧ θ ≤ 1 / A ∧ θ ≤ ε :=
+    ⟨min ε (1 / A), lt_min hε (by positivity), min_le_right _ _, min_le_left _ _⟩
+  obtain ⟨η, hη, hηθ⟩ : ∃ η : ℝ, 0 < η ∧ η = A ^ 2 * θ / 2 := ⟨_, by positivity, rfl⟩
+  obtain ⟨C, hC⟩ := order η hη
+  refine ⟨θ, η, max C 0, hη.le, hηθ.le, hθA, hθε, le_max_right C 0,
+    hC.mono le_rfl (le_max_left _ _), ?_⟩
+  have hAη : 0 < A + η + 2 := by positivity
+  filter_upwards [eventually_mul_logb_add_lt 4
+      (A + η + 4 * Real.logb 2 (4 + 3 / A) + max C 0 + 5) (by positivity : 0 < A * θ / 4),
+    hK.def (by positivity : 0 < A * θ / (4 * (A + η + 2)))] with n hlogn hKn
+  have hlogK : Real.logb 2 (K n) ≤ A * θ / (4 * (A + η + 2)) * n :=
+    (le_abs_self _).trans
+      (by simpa only [Real.norm_eq_abs, abs_of_nonneg (Nat.cast_nonneg (α := ℝ) n)] using hKn)
+  have hlogK' : (A + η + 2) * Real.logb 2 (K n) ≤ A * θ / 4 * n := by
+    calc (A + η + 2) * Real.logb 2 (K n) ≤
+          (A + η + 2) * (A * θ / (4 * (A + η + 2)) * n) :=
+          mul_le_mul_of_nonneg_left hlogK hAη.le
+      _ = A * θ / 4 * n := by
+          field_simp
+  linarith
+
 /-- **The circuit bound with a general ordering coefficient.** Assume the
 graph-ordering hypothesis with coefficient `A > 0` for every slack `η > 0`,
 and a family `f n` that is `K n`-rectangle-free with `log₂ K(n) = o(n)` and
@@ -554,29 +588,12 @@ theorem eventually_lt_size_of_orderingBound {A : ℝ} (hA : 0 < A)
     ∀ᶠ n in atTop, ∀ circuit : Circuit Binary.signature n 1,
       circuit.Computes Binary.interpretation (fun x _ => f n x) →
         (1 + 1 / A - ε) * n < circuit.size := by
-  obtain ⟨θ, hθ, hθA, hθε⟩ : ∃ θ : ℝ, 0 < θ ∧ θ ≤ 1 / A ∧ θ ≤ ε :=
-    ⟨min ε (1 / A), lt_min hε (by positivity), min_le_right _ _, min_le_left _ _⟩
-  obtain ⟨η, hη, hηθ⟩ : ∃ η : ℝ, 0 < η ∧ η = A ^ 2 * θ / 2 := ⟨_, by positivity, rfl⟩
-  obtain ⟨C, hC⟩ := order η hη
-  have order' : Multigraph.OrderingBound A η (max C 0) := hC.mono le_rfl (le_max_left _ _)
-  have hAη : 0 < A + η + 2 := by positivity
-  have hlog := eventually_mul_logb_add_lt 4
-    (A + η + 4 * Real.logb 2 (4 + 3 / A) + max C 0 + 5) (by positivity : 0 < A * θ / 4)
-  filter_upwards [hacc, hrect, hlog, hK.def (by positivity : 0 < A * θ / (4 * (A + η + 2))),
-    eventually_two_mul_sq_le_pow_of_log hK, eventually_ge_atTop 2]
-    with n haccn hrectn hlogn hKn hbign hn
-  intro circuit computes
-  have hlogK : Real.logb 2 (K n) ≤ A * θ / (4 * (A + η + 2)) * n :=
-    (le_abs_self _).trans
-      (by simpa only [Real.norm_eq_abs, abs_of_nonneg (Nat.cast_nonneg (α := ℝ) n)] using hKn)
-  have hlogK' : (A + η + 2) * Real.logb 2 (K n) ≤ A * θ / 4 * n := by
-    calc (A + η + 2) * Real.logb 2 (K n) ≤
-          (A + η + 2) * (A * θ / (4 * (A + η + 2)) * n) :=
-          mul_le_mul_of_nonneg_left hlogK hAη.le
-      _ = A * θ / 4 * n := by
-          field_simp
-  have key := lt_size_of_orderingBound hA hη.le hηθ.le hθA (le_max_right C 0) order' hn
-    haccn hrectn hbign (by linarith) circuit computes
+  obtain ⟨θ, η, C, hη, hηθ, hθA, hθε, hC, order', hlog⟩ :=
+    exists_slack_eventually_log_condition hA order K hK hε
+  filter_upwards [hacc, hrect, hlog, eventually_two_mul_sq_le_pow_of_log hK, eventually_ge_atTop 2]
+    with n haccn hrectn hlogn hbign hn circuit computes
+  have key := lt_size_of_orderingBound hA hη hηθ hθA hC order' hn haccn hrectn hbign hlogn
+    circuit computes
   have : (1 + 1 / A - ε) * n ≤ (1 + 1 / A - θ) * n :=
     mul_le_mul_of_nonneg_right (by linarith) (by positivity)
   exact this.trans_lt key

@@ -172,10 +172,7 @@ theorem nondet_lt_size_of_orderingBound {A η θ C : ℝ} (hA : 0 < A) (hη : 0 
     have : K ≤ 2 ^ (n - 2) := by nlinarith
     have : Nat.clog 2 K ≤ n - 2 := (Nat.clog_le_iff_le_pow one_lt_two).mpr this
     omega
-  have hθ : 0 ≤ θ := by
-    by_contra hθ
-    have : A ^ 2 * θ < 0 := mul_neg_of_pos_of_neg (by positivity) (lt_of_not_ge hθ)
-    linarith
+  have hθ := circuit_slack_nonneg hA hη hηθ
   -- The circuit's output wire.
   obtain ⟨g, hg⟩ : ∃ g, circuit.outputs 0 = g := ⟨_, rfl⟩
   have eval_eq : ∀ z, circuit.eval Binary.interpretation z 0 =
@@ -308,29 +305,12 @@ theorem nondet_eventually_lt_size_of_orderingBound {A : ℝ} (hA : 0 < A)
     {ε : ℝ} (hε : 0 < ε) :
     ∀ᶠ n in atTop, ∀ (m : Nat) (circuit : Circuit Binary.signature (n + m) 1),
       NondetComputes circuit (f n) → (1 + 1 / A - ε) * n < circuit.size := by
-  obtain ⟨θ, hθ, hθA, hθε⟩ : ∃ θ : ℝ, 0 < θ ∧ θ ≤ 1 / A ∧ θ ≤ ε :=
-    ⟨min ε (1 / A), lt_min hε (by positivity), min_le_right _ _, min_le_left _ _⟩
-  obtain ⟨η, hη, hηθ⟩ : ∃ η : ℝ, 0 < η ∧ η = A ^ 2 * θ / 2 := ⟨_, by positivity, rfl⟩
-  obtain ⟨C, hC⟩ := order η hη
-  have order' : Multigraph.OrderingBound A η (max C 0) := hC.mono le_rfl (le_max_left _ _)
-  have hAη : 0 < A + η + 2 := by positivity
-  have hlog := eventually_mul_logb_add_lt 4
-    (A + η + 4 * Real.logb 2 (4 + 3 / A) + max C 0 + 5) (by positivity : 0 < A * θ / 4)
-  filter_upwards [hacc, hrect, hlog, hK.def (by positivity : 0 < A * θ / (4 * (A + η + 2))),
-    eventually_two_mul_sq_le_pow_of_log hK, eventually_ge_atTop 2]
-    with n haccn hrectn hlogn hKn hbign hn
-  intro m circuit computes
-  have hlogK : Real.logb 2 (K n) ≤ A * θ / (4 * (A + η + 2)) * n :=
-    (le_abs_self _).trans
-      (by simpa only [Real.norm_eq_abs, abs_of_nonneg (Nat.cast_nonneg (α := ℝ) n)] using hKn)
-  have hlogK' : (A + η + 2) * Real.logb 2 (K n) ≤ A * θ / 4 * n := by
-    calc (A + η + 2) * Real.logb 2 (K n) ≤
-          (A + η + 2) * (A * θ / (4 * (A + η + 2)) * n) :=
-          mul_le_mul_of_nonneg_left hlogK hAη.le
-      _ = A * θ / 4 * n := by
-          field_simp
-  have key := nondet_lt_size_of_orderingBound hA hη.le hηθ.le hθA (le_max_right C 0) order' hn
-    haccn hrectn hbign (by linarith) circuit computes
+  obtain ⟨θ, η, C, hη, hηθ, hθA, hθε, hC, order', hlog⟩ :=
+    exists_slack_eventually_log_condition hA order K hK hε
+  filter_upwards [hacc, hrect, hlog, eventually_two_mul_sq_le_pow_of_log hK, eventually_ge_atTop 2]
+    with n haccn hrectn hlogn hbign hn m circuit computes
+  have key := nondet_lt_size_of_orderingBound hA hη hηθ hθA hC order' hn haccn hrectn hbign hlogn
+    circuit computes
   have : (1 + 1 / A - ε) * n ≤ (1 + 1 / A - θ) * n :=
     mul_le_mul_of_nonneg_right (by linarith) (by positivity)
   exact this.trans_lt key
