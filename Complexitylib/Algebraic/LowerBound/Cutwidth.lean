@@ -53,6 +53,7 @@ public import Complexitylib.Algebraic.LowerBound.Cutwidth.Balanced
 public import Complexitylib.Algebraic.LowerBound.Cutwidth.AverageCase
 public import Complexitylib.Algebraic.LowerBound.Cutwidth.SingleCut
 public import Complexitylib.Algebraic.LowerBound.Cutwidth.MultiOutput.Ordering
+public import Complexitylib.Algebraic.LowerBound.Cutwidth.MultiOutput.Rank
 public import Complexitylib.Algebraic.LowerBound.Cutwidth.Extractor
 public import Complexitylib.Algebraic.LowerBound.Cutwidth.Extractor.Padding
 public import Complexitylib.Algebraic.LowerBound.Cutwidth.Extractor.Padding.Asymptotics
@@ -340,6 +341,9 @@ bounds the accepted inputs of a `K`-rectangle-free function by
 any signature with fan-in two and any number of outputs: a ranking of the wires
 whose prefixes are crossed by at most `(A + η) (s - n)⁺ + O(log (n + s))`
 signals, component by component.
+`MultiOutput.Rank` bounds the signals crossing any split of a circuit computing
+a linear map `x ↦ M x` over a finite field below by
+`rank M[Y_T, X_S] + rank M[Y_S, X_T]`.
 
 `Bisection.Helpful` completes the graph theorem. Its proof uses the first
 boundary normalization phase, a partition into bounded connected clusters,
