@@ -9871,6 +9871,62 @@ Theorem~\ref{thm:lowerbounds-algebraic-explicit-four-n}.
   sample, and $\rho_0\to2\sqrt2/3$.
 \end{proof}
 
+\begin{definition}[Subcritical band clusters]
+  \label{def:lowerbounds-algebraic-gaussian-band-subcritical}
+  \lean{Algebraic.Cutwidth.Gaussian.bandGraph,
+    Algebraic.Cutwidth.Gaussian.bigBandEvent,
+    Algebraic.Cutwidth.Gaussian.BandSubcritical}
+  \leanok
+  \uses{def:lowerbounds-algebraic-gaussian-kernel}
+  Give each edge $uv$ of a finite simple graph the Gaussian edge score
+  $\langle y_{uv},\omega\rangle$ with
+  $y_{uv}=(\hat a_u+\hat a_v)/\lVert\hat a_u+\hat a_v\rVert$, built from the kernel with decay
+  rate $q$ and radius $R$. For $c>0$ the band graph keeps the edges scoring in $[-c,c)$, and
+  the band cluster of a vertex is its connected component in the band graph. The band
+  hypothesis $\mathrm{BandSubcritical}(q,R,c)$ says that for every $\varepsilon>0$ some $K$
+  makes the expected number of vertices whose band cluster has more than $K$ vertices at most
+  $\varepsilon h$ on every simple cubic graph with $h$ vertices. This is an open percolation
+  hypothesis, not a theorem of the library: it asserts that the band clusters of the
+  edge-score field are subcritical uniformly over cubic graphs. Numerically it holds on the
+  infinite cubic tree for $c<0.1826$, which appears to be the worst case.
+\end{definition}
+
+\begin{theorem}[Band-jump cubic pathwidth, conditional on the band hypothesis]
+  \label{thm:lowerbounds-algebraic-gaussian-band-pathwidth}
+  \lean{Algebraic.Cutwidth.Gaussian.exists_band_pathwidthBound,
+    Algebraic.Cutwidth.Gaussian.two_mul_exp_mul_frontierCoefficient_le}
+  \leanok
+  \uses{def:lowerbounds-algebraic-gaussian-band-subcritical,
+    lem:lowerbounds-algebraic-gaussian-band-order,
+    lem:lowerbounds-algebraic-gaussian-decay,
+    lem:lowerbounds-algebraic-gaussian-second-moment,
+    thm:lowerbounds-algebraic-gaussian-pathwidth}
+  This result is conditional on the open band hypothesis of
+  Definition~\ref{def:lowerbounds-algebraic-gaussian-band-subcritical}. Let $c>0$ and assume
+  $\mathrm{BandSubcritical}(q,R,c)$ for every decay rate $0\le q<1/\sqrt2$ and every radius
+  $R$. Then for every $\xi>0$, every sufficiently large simple cubic graph on $h$ vertices has
+  a path decomposition with bags of at most $\bigl(e^{-c^2/2}p+\xi\bigr)h+1$ vertices, where
+  $p=\tfrac{3}{2\pi}\arccos\tfrac{1+2\sqrt2}{4}$. Unconditionally, $2e^{-c^2/2}p\le5/18$ at
+  $c=4/25$.
+\end{theorem}
+\begin{proof}
+  \leanok
+  Use the band-jump order of Lemma~\ref{lem:lowerbounds-algebraic-gaussian-band-order} for the
+  edge scores of one Gaussian sample, with the band clusters as blocks. Every threshold $t$ of
+  a low grid on $[-T,-c]$ or a high grid on $[c,T]$ has $|t|\ge c$, so by
+  Lemma~\ref{lem:lowerbounds-algebraic-gaussian-decay} and the angle bound of
+  Theorem~\ref{thm:lowerbounds-algebraic-gaussian-pathwidth} a vertex straddles it with
+  probability at most $e^{-c^2/2}\tfrac{3}{2\pi}\arccos\bigl((1+3\rho_0)/4\bigr)$; the
+  second-moment bound of Lemma~\ref{lem:lowerbounds-algebraic-gaussian-second-moment} controls
+  the grids and tails of one sample. Inside the band a bag also holds the vertices of one
+  block. They lie in one band cluster, so there are at most $K$ of them, or they all lie in
+  clusters of more than $K$ vertices; by the hypothesis and Markov's inequality the latter
+  number less than $2\eta h$ with probability at least $1/2$. The cluster event is measurable
+  because it depends only on the finitely many band indicators. Taking $K\le\varepsilon h$
+  and $\rho_0\to2\sqrt2/3$ gives the coefficient. At $c=4/25$ use $2p\le9/32$ and
+  $e^{-8/625}\le80/81$, which follows from $e^{x}\ge1+x$.
+\end{proof}
+
 \begin{theorem}[Circuit coefficient from Gaussian layouts]
   \label{thm:lowerbounds-algebraic-gaussian-coefficient}
   \lean{Algebraic.Cutwidth.Multigraph.exists_orderingBound_gaussian,
@@ -9952,6 +10008,36 @@ Theorem~\ref{thm:lowerbounds-algebraic-explicit-four-n}.
   the Gaussian ordering coefficient
   $A=\tfrac{3}{\pi}\arccos\tfrac{1+2\sqrt2}{4}$, or with its rational weakening
   $A=9/32$, for which $1+1/A=41/9$.
+\end{proof}
+
+\begin{theorem}[Conditional: the concrete family needs more than $(23/5-\varepsilon)n$ gates]
+  \label{thm:lowerbounds-algebraic-explicit-band}
+  \lean{Algebraic.Cutwidth.Multigraph.exists_orderingBound_band,
+    Algebraic.Cutwidth.Multigraph.exists_orderingBound_five_div_eighteen_of_bandSubcritical,
+    Algebraic.Cutwidth.sourceReductionHardFamily_eventually_lt_size_of_bandSubcritical,
+    Algebraic.Cutwidth.sourceReductionHardFamily_eventually_lt_size_twentyThree_div_five_of_bandSubcritical}
+  \leanok
+  \uses{thm:lowerbounds-algebraic-gaussian-band-pathwidth,
+    thm:lowerbounds-algebraic-ordering-bound,
+    thm:lowerbounds-algebraic-explicit-coefficient}
+  This result is conditional on the open band hypothesis of
+  Definition~\ref{def:lowerbounds-algebraic-gaussian-band-subcritical}. Let $c>0$ and assume
+  $\mathrm{BandSubcritical}(q,R,c)$ for every decay rate $0\le q<1/\sqrt2$ and every radius
+  $R$, and let $p=\tfrac{3}{2\pi}\arccos\tfrac{1+2\sqrt2}{4}$. Then for every $\eta>0$ some $C$
+  satisfies $\mathrm{OrderingBound}(2e^{-c^2/2}p,\eta,C)$, and for every $\varepsilon>0$ and
+  all sufficiently large $n$, every circuit computing $\mathrm{sourceReductionHardFamily}(n)$
+  over the full binary basis has more than $\bigl(1+1/(2e^{-c^2/2}p)-\varepsilon\bigr)n$ gates,
+  with $n$ the full input length. If the hypothesis holds at $c=4/25$, the ordering
+  coefficient is at most $5/18$ and every such circuit has more than $(23/5-\varepsilon)n$
+  gates.
+\end{theorem}
+\begin{proof}
+  \leanok
+  Apply the pathwidth-to-ordering transport of
+  Theorem~\ref{thm:lowerbounds-algebraic-ordering-bound} to
+  Theorem~\ref{thm:lowerbounds-algebraic-gaussian-band-pathwidth}, then
+  Theorem~\ref{thm:lowerbounds-algebraic-explicit-coefficient} with $A=2e^{-c^2/2}p$, or with
+  its rational weakening $A=5/18$ at $c=4/25$, for which $1+1/A=23/5$.
 \end{proof}
 
 \begin{theorem}[Average-case cutwidth bound for balanced families]

@@ -155,6 +155,14 @@ def headlineTheorems : List Name := [
   `Algebraic.Cutwidth.Gaussian.exists_frontier_pathwidthBound,
   `Algebraic.Cutwidth.Multigraph.exists_orderingBound_frontier,
   `Algebraic.Cutwidth.Multigraph.exists_orderingBound_nine_div_thirtyTwo,
+  -- Band-jump bounds, conditional on the open premise `Gaussian.BandSubcritical` (not an axiom)
+  `Algebraic.Cutwidth.Gaussian.exists_band_pathwidthBound,
+  `Algebraic.Cutwidth.Gaussian.two_mul_exp_mul_frontierCoefficient_le,
+  `Algebraic.Cutwidth.Multigraph.exists_orderingBound_band,
+  `Algebraic.Cutwidth.Multigraph.exists_orderingBound_five_div_eighteen_of_bandSubcritical,
+  `Algebraic.Cutwidth.sourceReductionHardFamily_eventually_lt_size_of_bandSubcritical,
+  (`Algebraic.Cutwidth).str
+    "sourceReductionHardFamily_eventually_lt_size_twentyThree_div_five_of_bandSubcritical",
   -- Korten's top-down parity lower bounds and the majority extension
   `Complexity.KarchmerWigderson.parity_communication_lower_bound,
   `Complexity.Circuit.parity_wire_lower_bound,
