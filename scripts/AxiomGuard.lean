@@ -216,6 +216,13 @@ def headlineTheorems : List Name := [
   `Algebraic.Tensor3.not_borderRankLE_map_diagonal_weightedLMTensor,
   `Algebraic.Tensor3.choose_mul_le_borderRank_mul_weightedLMTensor,
   `Algebraic.Tensor3.sumSpread_clusterOffsets_le,
+  -- The deletion game: the global step of the 7/3 border-rank program (conditional on the
+  -- paired-cluster hypothesis `DeletionGame.PairedClusterBound`)
+  `Algebraic.Tensor3.DeletionGame.two_mul_card_filter_phi_le,
+  `Algebraic.Tensor3.DeletionGame.le_sub_card_add_of_lost,
+  `Algebraic.Tensor3.DeletionGame.PairedClusterBound.exists_stage,
+  `Algebraic.Tensor3.Tight.le_borderRank_of_pairedClusterBound,
+  `Algebraic.Tensor3.Tight.not_borderRankLE_of_pairedClusterBound,
   -- Korten's top-down parity lower bounds and the majority extension
   `Complexity.KarchmerWigderson.parity_communication_lower_bound,
   `Complexity.Circuit.parity_wire_lower_bound,
