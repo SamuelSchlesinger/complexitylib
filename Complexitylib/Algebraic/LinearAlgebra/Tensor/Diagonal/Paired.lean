@@ -53,6 +53,19 @@ for every set `S` of slices containing both clusters
 (`Tensor3.div_mul_phi_sub_le_borderRank_restrictSlices`; over `ℤ` with the denominator cleared,
 `Tensor3.choose_mul_phi_sub_le_borderRank_mul_restrictSlices`).
 
+## Labels in a window
+
+Only the labels inside one single-cluster block matter: the diagonal blocks of the minor are
+single-cluster blocks, whose columns differ by at most the `p`-subset spread, at most `p L`
+(`Tensor3.subsetSumSpread_le`). So all of the above holds for `T_k(γ)` with
+`γ a j = 2^{2^{e a j}}` whenever the labels `e` separate positions `(a, j)`, `(a', j')` with
+`|a - a'| ≤ L` and `|j - j'| ≤ p L`
+(`Tensor3.choose_mul_le_rank_koszulFlattening_pairedClusters_lmTensor`,
+`Tensor3.div_mul_phi_sub_le_borderRank_restrictSlices_lmTensor`). The global labels
+`a (2k + 1) + j` of `weightedLMTensor k` separate all positions; periodic labels
+(`Tensor3.periodicLMTensor`) separate the positions of a window and keep the entries in a
+finite set independent of `k`.
+
 ## The proof: two tiles
 
 Index the columns of the Koszul flattening by positions `j` and the rows by `ℓ`, both in
@@ -144,7 +157,8 @@ variable {p m : ℕ}
 
 /-- **The single-cluster certificate on a window of shifts.** Let the offsets `o` of `2p + 1`
 slices have pairwise distinct `p`-subset sums and the weights be `g t j = 2^{2^{e t j}}` with
-labels `e` injective on positions whose columns differ by at most `sumSpread p o`. For pairwise
+labels `e` injective on positions whose columns differ by at most `subsetSumSpread p o`. For
+pairwise
 distinct shifts `w q` whose positions `w q + ∑_{t ∈ K} o t` lie in `[0, m)` for all subsets `K`
 of size `p` or `p + 1`, the Koszul flattening of `weightedShifts o g` has rank at least
 `(2p+1).choose p * card Q`: the columns `(I, w q + ∑_I o)` and rows `(σ I, w q + ∑_{σ I} o)`
@@ -153,15 +167,14 @@ theorem choose_mul_card_le_rank_koszulFlattening_weightedShifts_of_shifts
     (o : Fin (2 * p + 1) → ℤ) (g : Fin (2 * p + 1) → Fin m → ℂ) (e : Fin (2 * p + 1) → Fin m → ℕ)
     (ho : Set.InjOn (fun I : Finset (Fin (2 * p + 1)) => ∑ t ∈ I, o t) {I | I.card = p})
     (hg : ∀ t j, g t j = 2 ^ 2 ^ e t j)
-    (he : ∀ t t' (j j' : Fin m), |(j : ℤ) - j'| ≤ sumSpread p o → e t j = e t' j' →
+    (he : ∀ t t' (j j' : Fin m), |(j : ℤ) - j'| ≤ subsetSumSpread p o → e t j = e t' j' →
       t = t' ∧ j = j')
     {Q : Type*} [Fintype Q] [DecidableEq Q] (w : Q → ℤ) (hw : Function.Injective w)
     (hrange : ∀ q (K : Finset (Fin (2 * p + 1))), K.card = p ∨ K.card = p + 1 →
       0 ≤ w q + ∑ t ∈ K, o t ∧ w q + ∑ t ∈ K, o t < m) :
     (2 * p + 1).choose p * Fintype.card Q ≤ (koszulFlattening p (weightedShifts o g)).rank :=
   Internal.Diagonal.choose_mul_card_le_rank_of_shifts o g e ho hg _
-    (fun _ _ hI hI' => Internal.Diagonal.le_sumSpread o (Or.inl hI) (Or.inl hI')) he w hw
-    hrange
+    (fun _ _ hI hI' => Internal.Diagonal.le_subsetSumSpread o hI hI') he w hw hrange
 
 /-- **Several clusters on one slice space.** Let `o b` (`b : κ`) be offsets of `2p + 1` slices
 with pairwise distinct `p`-subset sums and weights `g b t j = 2^{2^{e b t j}}` as in
@@ -177,7 +190,7 @@ theorem choose_mul_card_le_rank_koszulFlattening_sum_weightedShifts {κ : Type*}
     (e : κ → Fin (2 * p + 1) → Fin m → ℕ)
     (ho : ∀ b, Set.InjOn (fun I : Finset (Fin (2 * p + 1)) => ∑ t ∈ I, o b t) {I | I.card = p})
     (hg : ∀ b t j, g b t j = 2 ^ 2 ^ e b t j)
-    (he : ∀ b t t' (j j' : Fin m), |(j : ℤ) - j'| ≤ sumSpread p (o b) →
+    (he : ∀ b t t' (j j' : Fin m), |(j : ℤ) - j'| ≤ subsetSumSpread p (o b) →
       e b t j = e b t' j' → t = t' ∧ j = j')
     (hinj : ∀ t, Function.Injective fun b => o b t)
     {Q : Type*} [Fintype Q] [DecidableEq Q] (c : Q → κ) (w : Q → ℤ) (v : Q → ℕ)
@@ -194,19 +207,20 @@ theorem choose_mul_card_le_rank_koszulFlattening_sum_weightedShifts {κ : Type*}
 /-- **The two-tile certificate for weighted shifts.** Let `oP` and `oN` be monotone offsets of
 `2p + 1` slices with medians `oP p = r` and `oN p = -s`, diameters at most `L`, pairwise
 distinct `p`-subset sums, and `oP t ≠ oN t` for every `t`, and let the weights be `2^{2^{e}}`
-with labels as in the single-cluster certificate. If `r + s ≤ m`, the Koszul flattening of
+with labels injective on positions whose columns differ by at most `p L` (which bounds the
+`p`-subset spread). If `r + s ≤ m`, the Koszul flattening of
 `weightedShifts oP gP + weightedShifts oN gN` has rank at least `(2p+1).choose p` times
 `r + s + min s (m - r - (r + s)) + min r (m - s - (r + s)) - 8 (p + 1) L`. -/
 theorem choose_mul_le_rank_koszulFlattening_add_weightedShifts (oP oN : Fin (2 * p + 1) → ℤ)
     (gP gN : Fin (2 * p + 1) → Fin m → ℂ) (eP eN : Fin (2 * p + 1) → Fin m → ℕ)
     (hoP : Set.InjOn (fun I : Finset (Fin (2 * p + 1)) => ∑ t ∈ I, oP t) {I | I.card = p})
     (hoN : Set.InjOn (fun I : Finset (Fin (2 * p + 1)) => ∑ t ∈ I, oN t) {I | I.card = p})
-    (hgP : ∀ t j, gP t j = 2 ^ 2 ^ eP t j) (hgN : ∀ t j, gN t j = 2 ^ 2 ^ eN t j)
-    (heP : ∀ t t' (j j' : Fin m), |(j : ℤ) - j'| ≤ sumSpread p oP → eP t j = eP t' j' →
+    (hgP : ∀ t j, gP t j = 2 ^ 2 ^ eP t j) (hgN : ∀ t j, gN t j = 2 ^ 2 ^ eN t j) {L : ℕ}
+    (heP : ∀ t t' (j j' : Fin m), |(j : ℤ) - j'| ≤ p * L → eP t j = eP t' j' →
       t = t' ∧ j = j')
-    (heN : ∀ t t' (j j' : Fin m), |(j : ℤ) - j'| ≤ sumSpread p oN → eN t j = eN t' j' →
+    (heN : ∀ t t' (j j' : Fin m), |(j : ℤ) - j'| ≤ p * L → eN t j = eN t' j' →
       t = t' ∧ j = j')
-    (hPN : ∀ t, oP t ≠ oN t) (hmP : Monotone oP) (hmN : Monotone oN) {r s L : ℕ}
+    (hPN : ∀ t, oP t ≠ oN t) (hmP : Monotone oP) (hmN : Monotone oN) {r s : ℕ}
     (hr : oP ⟨p, by omega⟩ = r) (hs : oN ⟨p, by omega⟩ = -s)
     (hLP : oP (Fin.last (2 * p)) - oP 0 ≤ L) (hLN : oN (Fin.last (2 * p)) - oN 0 ≤ L)
     (hrs : r + s ≤ m) :
@@ -233,6 +247,42 @@ theorem map_add_selectSlices_weightedLMTensor (cP cN : Fin (2 * p + 1) → Fin (
       weightedShifts (clusterOffsets k cP) (fun t j => lmWeight k (cP t) j) +
         weightedShifts (clusterOffsets k cN) (fun t j => lmWeight k (cN t) j) :=
   Internal.Paired.map_add_selectSlices_weightedLMTensor cP cN
+
+/-- **The paired projection of `T_k(γ)`.** Summing the slices `cP t` and `cN t` of `T_k(γ)`
+gives the sum of the two cluster tensors. -/
+theorem map_add_selectSlices_lmTensor (γ : Fin (2 * k + 1) → Fin (2 * k + 1) → ℂ)
+    (cP cN : Fin (2 * p + 1) → Fin (2 * k + 1)) :
+    map (selectSlices cP + selectSlices cN) 𝟙 𝟙 (lmTensor k γ) =
+      weightedShifts (clusterOffsets k cP) (fun t j => γ (cP t) j) +
+        weightedShifts (clusterOffsets k cN) (fun t j => γ (cN t) j) :=
+  Internal.Paired.map_add_selectSlices_lmTensor γ cP cN
+
+/-- **The paired-cluster Koszul certificate for `T_k(γ)` with window labels.** Let
+`γ a j = 2^{2^{e a j}}` with labels `e` that separate positions `(a, j)`, `(a', j')` with
+`|a - a'| ≤ L` and `|j - j'| ≤ p L`. Under the hypotheses of
+`choose_mul_le_rank_koszulFlattening_pairedClusters`, the Koszul flattening of the paired
+projection of `T_k(γ)` has rank at least `(2p+1).choose p * (W - 8 (p + 1) L)`, where
+`W = r + s + min s (2k + 1 - r - (r + s)) + min r (2k + 1 - s - (r + s))`. -/
+theorem choose_mul_le_rank_koszulFlattening_pairedClusters_lmTensor
+    (γ : Fin (2 * k + 1) → Fin (2 * k + 1) → ℂ) (e : Fin (2 * k + 1) → Fin (2 * k + 1) → ℕ)
+    (hγ : ∀ a j, γ a j = 2 ^ 2 ^ e a j) {L : ℕ}
+    (he : ∀ a a' j j' : Fin (2 * k + 1), |(a : ℤ) - a'| ≤ L → |(j : ℤ) - j'| ≤ p * L →
+      e a j = e a' j' → a = a' ∧ j = j')
+    (cP cN : Fin (2 * p + 1) → Fin (2 * k + 1)) (hcP : StrictMono cP) (hcN : StrictMono cN)
+    (hP : k < (cP 0 : ℕ)) (hN : (cN (Fin.last (2 * p)) : ℕ) < k) {r s : ℕ}
+    (hr : (cP ⟨p, by omega⟩ : ℕ) = k + r) (hs : (cN ⟨p, by omega⟩ : ℕ) + s = k)
+    (hLP : (cP (Fin.last (2 * p)) : ℕ) ≤ cP 0 + L)
+    (hLN : (cN (Fin.last (2 * p)) : ℕ) ≤ cN 0 + L)
+    (hoP : Set.InjOn (fun I : Finset (Fin (2 * p + 1)) => ∑ t ∈ I, clusterOffsets k cP t)
+      {I | I.card = p})
+    (hoN : Set.InjOn (fun I : Finset (Fin (2 * p + 1)) => ∑ t ∈ I, clusterOffsets k cN t)
+      {I | I.card = p}) :
+    (2 * p + 1).choose p * (r + s + min s (2 * k + 1 - r - (r + s)) +
+        min r (2 * k + 1 - s - (r + s)) - 8 * ((p + 1) * L)) ≤
+      (koszulFlattening p
+        (map (selectSlices cP + selectSlices cN) 𝟙 𝟙 (lmTensor k γ))).rank :=
+  Internal.Paired.choose_mul_le_rank_pair_lmTensor γ e hγ he cP cN hcP hcN hP hN hr hs hLP hLN
+    hoP hoN
 
 /-- **The paired-cluster Koszul certificate.** Let `cP` be a strictly monotone positive cluster
 (`cP 0 > k`) with median offset `cP p - k = r`, and `cN` a strictly monotone negative cluster
@@ -356,6 +406,63 @@ theorem div_mul_phi_sub_le_borderRank_restrictSlices (S : Finset (Fin (2 * k + 1
           8 * (p + 1) * L) ≤
       ((weightedLMTensor k).restrictSlices S).borderRank :=
   Internal.Paired.div_mul_phi_sub_le_borderRank S cP cN hcP hcN hSP hSN hoP hoN hLP hLN hP hN
+
+/-- **The combined paired-cluster bound for `T_k(γ)` with window labels, denominator
+cleared.** Let `γ a j = 2^{2^{e a j}}` with labels `e` that separate positions `(a, j)`,
+`(a', j')` with `|a - a'| ≤ L` and `|j - j'| ≤ p L`. Under the hypotheses of
+`choose_mul_phi_sub_le_borderRank_mul_restrictSlices`,
+`(2p+1).choose p * (Φ_{2k+1}(r, s) - 8 (p + 1) L) ≤ borderRank (T_k(γ) restricted to S) *
+(2p).choose p`. -/
+theorem choose_mul_phi_sub_le_borderRank_mul_restrictSlices_lmTensor
+    (γ : Fin (2 * k + 1) → Fin (2 * k + 1) → ℂ) (e : Fin (2 * k + 1) → Fin (2 * k + 1) → ℕ)
+    (hγ : ∀ a j, γ a j = 2 ^ 2 ^ e a j) (S : Finset (Fin (2 * k + 1)))
+    (cP cN : Fin (2 * p + 1) → Fin (2 * k + 1)) (hcP : StrictMono cP) (hcN : StrictMono cN)
+    (hSP : ∀ t, cP t ∈ S) (hSN : ∀ t, cN t ∈ S) {L : ℕ}
+    (he : ∀ a a' j j' : Fin (2 * k + 1), |(a : ℤ) - a'| ≤ L → |(j : ℤ) - j'| ≤ p * L →
+      e a j = e a' j' → a = a' ∧ j = j')
+    (hoP : Set.InjOn (fun I : Finset (Fin (2 * p + 1)) => ∑ t ∈ I, clusterOffsets k cP t)
+      {I | I.card = p})
+    (hoN : Set.InjOn (fun I : Finset (Fin (2 * p + 1)) => ∑ t ∈ I, clusterOffsets k cN t)
+      {I | I.card = p})
+    (hLP : clusterOffsets k cP ⟨2 * p, by omega⟩ - clusterOffsets k cP 0 ≤ L)
+    (hLN : clusterOffsets k cN ⟨2 * p, by omega⟩ - clusterOffsets k cN 0 ≤ L)
+    (hP : ∀ t, 1 ≤ clusterOffsets k cP t ∧ clusterOffsets k cP t ≤ k)
+    (hN : ∀ t, -(k : ℤ) ≤ clusterOffsets k cN t ∧ clusterOffsets k cN t ≤ -1) :
+    ((2 * p + 1).choose p : ℤ) * (DeletionGame.phi (2 * k + 1)
+        (clusterOffsets k cP ⟨p, by omega⟩) (-clusterOffsets k cN ⟨p, by omega⟩) -
+          8 * (p + 1) * L) ≤
+      ((lmTensor k γ).restrictSlices S).borderRank * (2 * p).choose p :=
+  Internal.Paired.choose_mul_phi_sub_le_borderRank_mul_lmTensor γ e hγ S cP cN hcP hcN hSP hSN
+    he hoP hoN hLP hLN hP hN
+
+/-- **The combined paired-cluster bound for `T_k(γ)` with window labels.** Let
+`γ a j = 2^{2^{e a j}}` with labels `e` that separate positions `(a, j)`, `(a', j')` with
+`|a - a'| ≤ L` and `|j - j'| ≤ p L`. Under the hypotheses of
+`div_mul_phi_sub_le_borderRank_restrictSlices`,
+`(2p+1)/(p+1) * (Φ_{2k+1}(r, s) - 8 (p + 1) L) ≤ borderRank (T_k(γ) restricted to S)`. The
+labels need not be distinct outside the window, so they can be periodic
+(`Tensor3.periodicLMTensor`). -/
+theorem div_mul_phi_sub_le_borderRank_restrictSlices_lmTensor
+    (γ : Fin (2 * k + 1) → Fin (2 * k + 1) → ℂ) (e : Fin (2 * k + 1) → Fin (2 * k + 1) → ℕ)
+    (hγ : ∀ a j, γ a j = 2 ^ 2 ^ e a j) (S : Finset (Fin (2 * k + 1)))
+    (cP cN : Fin (2 * p + 1) → Fin (2 * k + 1)) (hcP : StrictMono cP) (hcN : StrictMono cN)
+    (hSP : ∀ t, cP t ∈ S) (hSN : ∀ t, cN t ∈ S) {L : ℕ}
+    (he : ∀ a a' j j' : Fin (2 * k + 1), |(a : ℤ) - a'| ≤ L → |(j : ℤ) - j'| ≤ p * L →
+      e a j = e a' j' → a = a' ∧ j = j')
+    (hoP : Set.InjOn (fun I : Finset (Fin (2 * p + 1)) => ∑ t ∈ I, clusterOffsets k cP t)
+      {I | I.card = p})
+    (hoN : Set.InjOn (fun I : Finset (Fin (2 * p + 1)) => ∑ t ∈ I, clusterOffsets k cN t)
+      {I | I.card = p})
+    (hLP : clusterOffsets k cP ⟨2 * p, by omega⟩ - clusterOffsets k cP 0 ≤ L)
+    (hLN : clusterOffsets k cN ⟨2 * p, by omega⟩ - clusterOffsets k cN 0 ≤ L)
+    (hP : ∀ t, 1 ≤ clusterOffsets k cP t ∧ clusterOffsets k cP t ≤ k)
+    (hN : ∀ t, -(k : ℤ) ≤ clusterOffsets k cN t ∧ clusterOffsets k cN t ≤ -1) :
+    ((2 * p + 1 : ℝ) / (p + 1)) * ((DeletionGame.phi (2 * k + 1)
+        (clusterOffsets k cP ⟨p, by omega⟩) (-clusterOffsets k cN ⟨p, by omega⟩) : ℝ) -
+          8 * (p + 1) * L) ≤
+      ((lmTensor k γ).restrictSlices S).borderRank :=
+  Internal.Paired.div_mul_phi_sub_le_borderRank_lmTensor γ e hγ S cP cN hcP hcN hSP hSN he hoP
+    hoN hLP hLN hP hN
 
 end Cluster
 

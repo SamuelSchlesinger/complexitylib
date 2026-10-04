@@ -337,24 +337,34 @@ theorem choose_mul_card_le_rank_of_shifts (o : Fin (2 * p + 1) → ℤ)
     exact det_submatrix_shift_ne_zero o g e ho hg D hD he σ hσ (w q) _ _
       (fun I => hpos q _ (Or.inr (σ I).2)) (fun I => hpos q _ (Or.inl I.2))
 
+/-- The difference of two `p`-subset sums is at most `subsetSumSpread p o`. -/
+theorem le_subsetSumSpread [Fintype α] (o : α → ℤ) {I I' : Finset α} (hI : I.card = p)
+    (hI' : I'.card = p) : ∑ t ∈ I, o t - ∑ t ∈ I', o t ≤ subsetSumSpread p o := by
+  have h := Finset.le_sup (f := fun II : Finset α × Finset α =>
+    (∑ t ∈ II.1, o t - ∑ t ∈ II.2, o t).toNat)
+    (mem_product.mpr ⟨by simp [hI], by simp [hI']⟩ :
+      (I, I') ∈ (univ.filter fun I : Finset α => I.card = p) ×ˢ
+        (univ.filter fun I : Finset α => I.card = p))
+  have h' : ((∑ t ∈ I, o t - ∑ t ∈ I', o t).toNat : ℤ) ≤ subsetSumSpread p o := by
+    exact_mod_cast h
+  omega
+
 /-- **The single-cluster certificate, with explicit bounds on the subset sums.** If every sum
 `∑_{t ∈ K} o t` over a subset `K` of size `p` or `p + 1` lies in `[lo, lo + D]`, the `p`-subset
 sums are pairwise distinct, and the weights are `2^{2^{e t j}}` with labels `e` that are
-injective on positions at distance at most `D`, then the Koszul flattening has rank at least
-`(2p+1).choose p * (m - D)`. -/
+injective on positions at distance at most `subsetSumSpread p o`, then the Koszul flattening has
+rank at least `(2p+1).choose p * (m - D)`. -/
 theorem choose_mul_le_rank_of_bounds (o : Fin (2 * p + 1) → ℤ) (g : Fin (2 * p + 1) → Fin m → ℂ)
     (e : Fin (2 * p + 1) → Fin m → ℕ)
     (ho : Set.InjOn (fun I : Finset (Fin (2 * p + 1)) => ∑ t ∈ I, o t) {I | I.card = p})
     (hg : ∀ t j, g t j = 2 ^ 2 ^ e t j) (lo : ℤ) (D : ℕ)
     (hlo : ∀ K : Finset (Fin (2 * p + 1)), K.card = p ∨ K.card = p + 1 →
       lo ≤ ∑ t ∈ K, o t ∧ ∑ t ∈ K, o t ≤ lo + D)
-    (he : ∀ t t' (j j' : Fin m), |(j : ℤ) - j'| ≤ D → e t j = e t' j' → t = t' ∧ j = j') :
+    (he : ∀ t t' (j j' : Fin m), |(j : ℤ) - j'| ≤ subsetSumSpread p o → e t j = e t' j' →
+      t = t' ∧ j = j') :
     (2 * p + 1).choose p * (m - D) ≤ (koszulFlattening p (weightedShifts o g)).rank := by
-  have h := choose_mul_card_le_rank_of_shifts o g e ho hg D
-    (fun I I' hI hI' => by
-      have := hlo I (Or.inl hI)
-      have := hlo I' (Or.inl hI')
-      linarith)
+  have h := choose_mul_card_le_rank_of_shifts o g e ho hg (subsetSumSpread p o)
+    (fun I I' hI hI' => le_subsetSumSpread o hI hI')
     he (Q := Fin (m - D)) (fun i => (i : ℤ) - lo)
     (fun i i' h => Fin.ext (by simp only at h; omega))
     (fun i K hK => by have := hlo K hK; have := i.2; constructor <;> omega)
@@ -385,12 +395,22 @@ theorem exists_bounds (o : Fin (2 * p + 1) → ℤ) :
   have := le_sumSpread o hK hKmin'
   omega
 
+/-- The spread of the `p`-subset sums is at most the spread over subsets of size `p` or
+`p + 1`. -/
+theorem subsetSumSpread_le_sumSpread [Fintype α] (o : α → ℤ) :
+    subsetSumSpread p o ≤ sumSpread p o := by
+  refine Finset.sup_le fun II hII => ?_
+  obtain ⟨hI, hI'⟩ := mem_product.mp hII
+  simp only [mem_filter, mem_univ, true_and] at hI hI'
+  have := le_sumSpread (p := p) o (Or.inl hI) (Or.inl hI')
+  omega
+
 /-- **The single-cluster certificate.** -/
 theorem choose_mul_le_rank (o : Fin (2 * p + 1) → ℤ) (g : Fin (2 * p + 1) → Fin m → ℂ)
     (e : Fin (2 * p + 1) → Fin m → ℕ)
     (ho : Set.InjOn (fun I : Finset (Fin (2 * p + 1)) => ∑ t ∈ I, o t) {I | I.card = p})
     (hg : ∀ t j, g t j = 2 ^ 2 ^ e t j)
-    (he : ∀ t t' (j j' : Fin m), |(j : ℤ) - j'| ≤ sumSpread p o → e t j = e t' j' →
+    (he : ∀ t t' (j j' : Fin m), |(j : ℤ) - j'| ≤ subsetSumSpread p o → e t j = e t' j' →
       t = t' ∧ j = j') :
     (2 * p + 1).choose p * (m - sumSpread p o) ≤
       (koszulFlattening p (weightedShifts o g)).rank := by
@@ -490,14 +510,53 @@ theorem sumSpread_le (o : Fin (2 * p + 1) → ℤ) (ho : Monotone o) {L : ℤ}
     exact_mod_cast hle
   omega
 
+theorem monotone_clusterOffsets {k : ℕ} {c : Fin (2 * p + 1) → Fin (2 * k + 1)}
+    (hc : Monotone c) : Monotone (clusterOffsets k c) := fun a b hab => by
+  have : (c a : ℕ) ≤ c b := hc hab
+  simp only [clusterOffsets]
+  omega
+
 theorem sumSpread_clusterOffsets_le {k : ℕ} (c : Fin (2 * p + 1) → Fin (2 * k + 1))
     (hc : Monotone c) {L : ℤ} (hL : (c (Fin.last (2 * p)) : ℤ) - c 0 ≤ L) :
-    (sumSpread p (clusterOffsets k c) : ℤ) ≤ |(c ⟨p, by omega⟩ : ℤ) - k| + p * L := by
-  have ho : Monotone (clusterOffsets k c) := fun a b hab => by
-    have : (c a : ℕ) ≤ c b := hc hab
-    simp only [clusterOffsets]
-    omega
-  exact sumSpread_le _ ho (by simp only [clusterOffsets]; omega)
+    (sumSpread p (clusterOffsets k c) : ℤ) ≤ |(c ⟨p, by omega⟩ : ℤ) - k| + p * L :=
+  sumSpread_le _ (monotone_clusterOffsets hc) (by simp only [clusterOffsets]; omega)
+
+/-- For monotone offsets with diameter at most `L`, two `p`-subset sums differ by at most
+`p L`: one is at most `p o (2p)`, the other at least `p o 0`. -/
+theorem sum_sub_sum_le_mul (o : Fin (2 * p + 1) → ℤ) (ho : Monotone o) {L : ℤ}
+    (hL : o (Fin.last (2 * p)) - o 0 ≤ L) {I I' : Finset (Fin (2 * p + 1))}
+    (hI : I.card = p) (hI' : I'.card = p) :
+    ∑ t ∈ I, o t - ∑ t ∈ I', o t ≤ p * L := by
+  have h1 : ∑ t ∈ I, o t ≤ I.card • o (Fin.last (2 * p)) :=
+    Finset.sum_le_card_nsmul I o _ fun t _ => ho (Fin.le_last t)
+  have h2 : I'.card • o 0 ≤ ∑ t ∈ I', o t :=
+    Finset.card_nsmul_le_sum I' o _ fun t _ => ho (Fin.zero_le t)
+  rw [hI, nsmul_eq_mul] at h1
+  rw [hI', nsmul_eq_mul] at h2
+  have : (p : ℤ) * (o (Fin.last (2 * p)) - o 0) ≤ p * L :=
+    mul_le_mul_of_nonneg_left hL (by positivity)
+  linarith
+
+/-- **The `p`-subset spread of a cluster.** For monotone offsets with diameter
+`o (2p) - o 0 ≤ L`, the `p`-subset sums spread over at most `p L`, whatever the median. -/
+theorem subsetSumSpread_le (o : Fin (2 * p + 1) → ℤ) (ho : Monotone o) {L : ℤ}
+    (hL : o (Fin.last (2 * p)) - o 0 ≤ L) : (subsetSumSpread p o : ℤ) ≤ p * L := by
+  have hL0 : 0 ≤ L := by
+    have := ho (Fin.zero_le (Fin.last (2 * p)))
+    linarith
+  have hpL : (0 : ℤ) ≤ p * L := by positivity
+  have hle : subsetSumSpread p o ≤ ((p : ℤ) * L).toNat := by
+    refine Finset.sup_le fun II hII => ?_
+    obtain ⟨hI, hI'⟩ := mem_product.mp hII
+    simp only [mem_filter, mem_univ, true_and] at hI hI'
+    exact Int.toNat_le_toNat (sum_sub_sum_le_mul o ho hL hI hI')
+  have : ((subsetSumSpread p o : ℕ) : ℤ) ≤ (((p : ℤ) * L).toNat : ℤ) := by exact_mod_cast hle
+  omega
+
+theorem subsetSumSpread_clusterOffsets_le {k : ℕ} (c : Fin (2 * p + 1) → Fin (2 * k + 1))
+    (hc : Monotone c) {L : ℤ} (hL : (c (Fin.last (2 * p)) : ℤ) - c 0 ≤ L) :
+    (subsetSumSpread p (clusterOffsets k c) : ℤ) ≤ p * L :=
+  subsetSumSpread_le _ (monotone_clusterOffsets hc) (by simp only [clusterOffsets]; omega)
 
 end Spread
 
@@ -512,7 +571,8 @@ theorem le_rank_lmTensor_cluster (γ : Fin (2 * k + 1) → Fin (2 * k + 1) → �
     (c : Fin (2 * p + 1) → Fin (2 * k + 1))
     (ho : Set.InjOn (fun I : Finset (Fin (2 * p + 1)) => ∑ t ∈ I, clusterOffsets k c t)
       {I | I.card = p})
-    (he : ∀ t t' (j j' : Fin (2 * k + 1)), |(j : ℤ) - j'| ≤ sumSpread p (clusterOffsets k c) →
+    (he : ∀ t t' (j j' : Fin (2 * k + 1)),
+      |(j : ℤ) - j'| ≤ subsetSumSpread p (clusterOffsets k c) →
       e (c t) j = e (c t') j' → t = t' ∧ j = j') :
     (2 * p + 1).choose p * (2 * k + 1 - sumSpread p (clusterOffsets k c)) ≤
       (koszulFlattening p (map (selectSlices c) 𝟙 𝟙 (lmTensor k γ))).rank := by
@@ -528,6 +588,35 @@ theorem code_injective {m a a' j j' : ℕ} (hj : j < m) (hj' : j' < m)
     Nat.div_eq_of_lt hj', Nat.add_mul_mod_self_right, Nat.mod_eq_of_lt hj,
     Nat.mod_eq_of_lt hj'] at hdiv hmod
   omega
+
+/-- **Window labels on a cluster.** If the labels `e` separate positions whose slices differ by
+at most `L` and whose columns differ by at most `p L`, they separate the positions of a strictly
+monotone cluster of diameter at most `L` whose columns differ by at most `p L`. -/
+theorem cluster_labels_of_window (e : Fin (2 * k + 1) → Fin (2 * k + 1) → ℕ) {L : ℕ}
+    (he : ∀ a a' j j' : Fin (2 * k + 1), |(a : ℤ) - a'| ≤ L → |(j : ℤ) - j'| ≤ p * L →
+      e a j = e a' j' → a = a' ∧ j = j')
+    {c : Fin (2 * p + 1) → Fin (2 * k + 1)} (hc : StrictMono c)
+    (hL : (c (Fin.last (2 * p)) : ℤ) - c 0 ≤ L) (t t' : Fin (2 * p + 1))
+    (j j' : Fin (2 * k + 1)) (hj : |(j : ℤ) - j'| ≤ p * L)
+    (h : e (c t) j = e (c t') j') : t = t' ∧ j = j' := by
+  have h0t : (c 0 : ℕ) ≤ c t := hc.monotone (Fin.zero_le t)
+  have h0t' : (c 0 : ℕ) ≤ c t' := hc.monotone (Fin.zero_le t')
+  have hlt : (c t : ℕ) ≤ c (Fin.last _) := hc.monotone (Fin.le_last t)
+  have hlt' : (c t' : ℕ) ≤ c (Fin.last _) := hc.monotone (Fin.le_last t')
+  obtain ⟨hcc, hjj⟩ := he (c t) (c t') j j' (by rw [abs_le]; constructor <;> omega) hj h
+  exact ⟨hc.injective hcc, hjj⟩
+
+/-- Window labels satisfy the label condition of the single-cluster certificate for every
+strictly monotone cluster of diameter at most `L`, whose `p`-subset spread is at most `p L`. -/
+theorem cluster_labels_of_window_subsetSumSpread (e : Fin (2 * k + 1) → Fin (2 * k + 1) → ℕ)
+    {L : ℕ} (he : ∀ a a' j j' : Fin (2 * k + 1), |(a : ℤ) - a'| ≤ L → |(j : ℤ) - j'| ≤ p * L →
+      e a j = e a' j' → a = a' ∧ j = j')
+    {c : Fin (2 * p + 1) → Fin (2 * k + 1)} (hc : StrictMono c)
+    (hL : (c (Fin.last (2 * p)) : ℤ) - c 0 ≤ L) (t t' : Fin (2 * p + 1))
+    (j j' : Fin (2 * k + 1)) (hj : |(j : ℤ) - j'| ≤ subsetSumSpread p (clusterOffsets k c))
+    (h : e (c t) j = e (c t') j') : t = t' ∧ j = j' :=
+  cluster_labels_of_window e he hc hL t t' j j'
+    (hj.trans (subsetSumSpread_clusterOffsets_le c hc.monotone hL)) h
 
 theorem lmWeight_eq (a j : Fin (2 * k + 1)) :
     lmWeight k a j = 2 ^ 2 ^ ((a : ℕ) * (2 * k + 1) + j) := by
@@ -563,7 +652,8 @@ theorem choose_mul_le_borderRank_mul_lmTensor (γ : Fin (2 * k + 1) → Fin (2 *
     (c : Fin (2 * p + 1) → Fin (2 * k + 1))
     (ho : Set.InjOn (fun I : Finset (Fin (2 * p + 1)) => ∑ t ∈ I, clusterOffsets k c t)
       {I | I.card = p})
-    (he : ∀ t t' (j j' : Fin (2 * k + 1)), |(j : ℤ) - j'| ≤ sumSpread p (clusterOffsets k c) →
+    (he : ∀ t t' (j j' : Fin (2 * k + 1)),
+      |(j : ℤ) - j'| ≤ subsetSumSpread p (clusterOffsets k c) →
       e (c t) j = e (c t') j' → t = t' ∧ j = j')
     (d : Fin (2 * k + 1) → ℂ) (hd : ∀ t, d (c t) = 1) :
     (2 * p + 1).choose p * (2 * k + 1 - sumSpread p (clusterOffsets k c)) ≤

@@ -30,6 +30,10 @@ public import Mathlib.Data.Fintype.Powerset
 * `Tensor3.clusterOffsets k c t = c t - k` are the offsets of the slices of a cluster.
 * `Tensor3.sumSpread p o` is the spread of the sums `∑_{t ∈ K} o t` over the subsets `K` of size
   `p` or `p + 1`: the largest minus the smallest of these sums.
+* `Tensor3.subsetSumSpread p o` is the spread of the sums `∑_{t ∈ I} o t` over the subsets `I` of
+  size `p` only. It is at most `sumSpread p o`, and at most `p L` for monotone offsets of
+  diameter `L`, whatever their median. The labels of the weights need only be distinct on
+  positions whose columns differ by at most `subsetSumSpread p o`.
 
 The Koszul-flattening bound for cluster tensors is in
 `Complexitylib.Algebraic.LinearAlgebra.Tensor.Diagonal`.
@@ -85,5 +89,13 @@ sums `∑_{t ∈ K} o t`. -/
 def sumSpread [Fintype α] (p : ℕ) (o : α → ℤ) : ℕ :=
   (adjacentSubsets (α := α) p ×ˢ adjacentSubsets p).sup fun KK =>
     (∑ t ∈ KK.1, o t - ∑ t ∈ KK.2, o t).toNat
+
+/-- The spread of the `p`-subset sums of `o`: the largest value of
+`∑_{t ∈ I} o t - ∑_{t ∈ I'} o t` over subsets `I`, `I'` of size `p`. In one block of the
+single-cluster minor the columns `w + ∑_{t ∈ I} o t` lie in a window of this length. -/
+def subsetSumSpread [Fintype α] (p : ℕ) (o : α → ℤ) : ℕ :=
+  ((univ.filter fun I : Finset α => I.card = p) ×ˢ
+      (univ.filter fun I : Finset α => I.card = p)).sup fun II =>
+    (∑ t ∈ II.1, o t - ∑ t ∈ II.2, o t).toNat
 
 end Algebraic.Tensor3

@@ -27,8 +27,8 @@ supported on the diagonal `ℓ = j + o t`. Suppose that
 
 * the sums `∑_{t ∈ I} o t` over the `p`-subsets `I` of `Fin (2p+1)` are pairwise distinct, and
 * the coefficients are `γ a j = 2^{2^{e a j}}` with labels `e (c t) j` that are injective on
-  positions `(t, j)` whose columns `j` differ by at most the spread `sumSpread p o` of the sums
-  `∑_{t ∈ K} o t` over subsets of size `p` or `p + 1`.
+  positions `(t, j)` whose columns `j` differ by at most the spread `subsetSumSpread p o` of the
+  `p`-subset sums `∑_{t ∈ I} o t`.
 
 Then the Koszul flattening `T_A^{∧p}` of the cluster tensor has rank at least
 `(2p+1).choose p * (m - sumSpread p o)`
@@ -46,7 +46,12 @@ onto the cluster gives the same cluster tensor (`Tensor3.map_selectSlices_map_di
 
 For monotone offsets with median `r = o p` and diameter `o (2p) - o 0 ≤ L`, the spread is at
 most `|r| + p L` (`Tensor3.sumSpread_le`, `Tensor3.sumSpread_clusterOffsets_le`), whatever the
-signs of the offsets.
+signs of the offsets. The window of the labels is smaller: the `p`-subset spread is at most
+`p L`, independent of the median (`Tensor3.subsetSumSpread_le`,
+`Tensor3.subsetSumSpread_clusterOffsets_le`), and at most `sumSpread p o`
+(`Tensor3.subsetSumSpread_le_sumSpread`). So labels need only be distinct on positions whose
+columns differ by at most `p L`, which allows labels periodic in the column, with entries of
+size independent of `m` (`Tensor3.periodicLMTensor`).
 
 ## The proof
 
@@ -59,10 +64,11 @@ signs of the offsets.
   graph exists by Hall's theorem, since the graph is `(p + 1)`-regular on both sides. By the
   grading the minor is block diagonal
   (`Matrix.card_mul_card_le_rank_of_det_blocks_ne_zero`).
-* **Blocks.** A block entry is `0` or `±2^{2^{e (c t) (w + ∑_I o)}}` for `J = I ∪ {t}`. Distinct
-  `p`-subset sums make these labels distinct within a block, and the diagonal of `σ` is nonzero,
-  so the block determinant is a nonempty sum `∑ ±2^{E}` with distinct exponents `E`, which is
-  nonzero (`Matrix.det_ne_zero_of_two_pow_two_pow`).
+* **Blocks.** A block entry is `0` or `±2^{2^{e (c t) (w + ∑_I o)}}` for `J = I ∪ {t}`. Its
+  columns `w + ∑_I o` differ by at most `subsetSumSpread p o`, so the label condition and
+  distinct `p`-subset sums make these labels distinct within a block, and the diagonal of `σ` is
+  nonzero, so the block determinant is a nonempty sum `∑ ±2^{E}` with distinct exponents `E`,
+  which is nonzero (`Matrix.det_ne_zero_of_two_pow_two_pow`).
 -/
 
 @[expose] public section
@@ -123,18 +129,43 @@ theorem sumSpread_clusterOffsets_le {k : ℕ} (c : Fin (2 * p + 1) → Fin (2 * 
     (sumSpread p (clusterOffsets k c) : ℤ) ≤ |(c ⟨p, by omega⟩ : ℤ) - k| + p * L :=
   Internal.Diagonal.sumSpread_clusterOffsets_le c hc hL
 
+/-- The difference of two `p`-subset sums is at most the `p`-subset spread. -/
+theorem sub_le_subsetSumSpread [Fintype α] (o : α → ℤ) {I I' : Finset α} (hI : I.card = p)
+    (hI' : I'.card = p) : ∑ t ∈ I, o t - ∑ t ∈ I', o t ≤ subsetSumSpread p o :=
+  Internal.Diagonal.le_subsetSumSpread o hI hI'
+
+/-- The `p`-subset spread is at most the spread over subsets of size `p` or `p + 1`. -/
+theorem subsetSumSpread_le_sumSpread [Fintype α] (o : α → ℤ) :
+    subsetSumSpread p o ≤ sumSpread p o :=
+  Internal.Diagonal.subsetSumSpread_le_sumSpread o
+
+/-- **The `p`-subset spread of a cluster.** For monotone offsets `o` with diameter
+`o (2p) - o 0 ≤ L`, the `p`-subset sums spread over at most `p L`, whatever the median. -/
+theorem subsetSumSpread_le (o : Fin (2 * p + 1) → ℤ) (ho : Monotone o) {L : ℤ}
+    (hL : o (Fin.last (2 * p)) - o 0 ≤ L) :
+    (subsetSumSpread p o : ℤ) ≤ p * L :=
+  Internal.Diagonal.subsetSumSpread_le o ho hL
+
+/-- **The `p`-subset spread of a cluster of slices.** For a monotone cluster `c` with diameter
+`c (2p) - c 0 ≤ L`, the `p`-subset spread of its offsets is at most `p L`. -/
+theorem subsetSumSpread_clusterOffsets_le {k : ℕ} (c : Fin (2 * p + 1) → Fin (2 * k + 1))
+    (hc : Monotone c) {L : ℤ} (hL : (c (Fin.last (2 * p)) : ℤ) - c 0 ≤ L) :
+    (subsetSumSpread p (clusterOffsets k c) : ℤ) ≤ p * L :=
+  Internal.Diagonal.subsetSumSpread_clusterOffsets_le c hc hL
+
 end Spread
 
 /-- **The single-cluster Koszul certificate for weighted shifts.** Let `o` be offsets of
 `2p + 1` slices whose `p`-subset sums are pairwise distinct, and let the weights be
 `g t j = 2^{2^{e t j}}` with labels `e` that are injective on positions whose columns differ
-by at most `sumSpread p o`. Then the Koszul flattening `T_A^{∧p}` of `weightedShifts o g` has
-rank at least `(2p+1).choose p * (m - sumSpread p o)`. -/
+by at most the `p`-subset spread `subsetSumSpread p o` (at most `sumSpread p o`). Then the
+Koszul flattening `T_A^{∧p}` of `weightedShifts o g` has rank at least
+`(2p+1).choose p * (m - sumSpread p o)`. -/
 theorem choose_mul_le_rank_koszulFlattening_weightedShifts {p m : ℕ} (o : Fin (2 * p + 1) → ℤ)
     (g : Fin (2 * p + 1) → Fin m → ℂ) (e : Fin (2 * p + 1) → Fin m → ℕ)
     (ho : Set.InjOn (fun I : Finset (Fin (2 * p + 1)) => ∑ t ∈ I, o t) {I | I.card = p})
     (hg : ∀ t j, g t j = 2 ^ 2 ^ e t j)
-    (he : ∀ t t' (j j' : Fin m), |(j : ℤ) - j'| ≤ sumSpread p o → e t j = e t' j' →
+    (he : ∀ t t' (j j' : Fin m), |(j : ℤ) - j'| ≤ subsetSumSpread p o → e t j = e t' j' →
       t = t' ∧ j = j') :
     (2 * p + 1).choose p * (m - sumSpread p o) ≤
       (koszulFlattening p (weightedShifts o g)).rank :=
@@ -165,7 +196,7 @@ theorem lmWeight_eq (a j : Fin (2 * k + 1)) :
 /-- **The single-cluster Koszul certificate for `T_k(γ)`.** Let `c` select `2p + 1` slices of
 `T_k(γ)` whose offsets `c t - k` have pairwise distinct `p`-subset sums, and let
 `γ a j = 2^{2^{e a j}}` with labels `e (c t) j` injective on positions whose columns differ by
-at most the spread. Then the Koszul flattening of the cluster tensor
+at most the `p`-subset spread. Then the Koszul flattening of the cluster tensor
 `map (selectSlices c) 1 1 T_k(γ)` has rank at least
 `(2p+1).choose p * (2k + 1 - sumSpread p (clusterOffsets k c))`. -/
 theorem choose_mul_le_rank_koszulFlattening_lmTensor
@@ -173,7 +204,8 @@ theorem choose_mul_le_rank_koszulFlattening_lmTensor
     (hγ : ∀ a j, γ a j = 2 ^ 2 ^ e a j) (c : Fin (2 * p + 1) → Fin (2 * k + 1))
     (ho : Set.InjOn (fun I : Finset (Fin (2 * p + 1)) => ∑ t ∈ I, clusterOffsets k c t)
       {I | I.card = p})
-    (he : ∀ t t' (j j' : Fin (2 * k + 1)), |(j : ℤ) - j'| ≤ sumSpread p (clusterOffsets k c) →
+    (he : ∀ t t' (j j' : Fin (2 * k + 1)),
+      |(j : ℤ) - j'| ≤ subsetSumSpread p (clusterOffsets k c) →
       e (c t) j = e (c t') j' → t = t' ∧ j = j') :
     (2 * p + 1).choose p * (2 * k + 1 - sumSpread p (clusterOffsets k c)) ≤
       (koszulFlattening p (map (selectSlices c) 𝟙 𝟙 (lmTensor k γ))).rank :=
@@ -201,7 +233,8 @@ theorem choose_mul_le_borderRank_mul_map_diagonal_lmTensor
     (hγ : ∀ a j, γ a j = 2 ^ 2 ^ e a j) (c : Fin (2 * p + 1) → Fin (2 * k + 1))
     (ho : Set.InjOn (fun I : Finset (Fin (2 * p + 1)) => ∑ t ∈ I, clusterOffsets k c t)
       {I | I.card = p})
-    (he : ∀ t t' (j j' : Fin (2 * k + 1)), |(j : ℤ) - j'| ≤ sumSpread p (clusterOffsets k c) →
+    (he : ∀ t t' (j j' : Fin (2 * k + 1)),
+      |(j : ℤ) - j'| ≤ subsetSumSpread p (clusterOffsets k c) →
       e (c t) j = e (c t') j' → t = t' ∧ j = j')
     (d : Fin (2 * k + 1) → ℂ) (hd : ∀ t, d (c t) = 1) :
     (2 * p + 1).choose p * (2 * k + 1 - sumSpread p (clusterOffsets k c)) ≤
