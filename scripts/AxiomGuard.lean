@@ -128,6 +128,10 @@ def headlineTheorems : List Name := [
   `Complexity.shannon_upper_bound,
   `Complexity.Circuit.card_essentialInputs_le_mul_size,
   `Complexity.sizeComplexity_xorBool_ge,
+  -- The concrete uniform polynomial-time coefficient-four hard family
+  `Algebraic.Cutwidth.Extractor.sourceReductionHardLanguage_mem_P,
+  `Algebraic.Cutwidth.Extractor.sourceReductionHardEval_mem_FP,
+  `Algebraic.Cutwidth.sourceReductionHardFamily_eventually_lt_size,
   -- Korten's top-down parity lower bounds and the majority extension
   `Complexity.KarchmerWigderson.parity_communication_lower_bound,
   `Complexity.Circuit.parity_wire_lower_bound,

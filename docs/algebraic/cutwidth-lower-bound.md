@@ -14,6 +14,26 @@ argument developed in this formalization, are identified below.
 
 ## Statement
 
+`Algebraic.Cutwidth.sourceReductionHardFamily_eventually_lt_size` proves the
+bound for the single concrete family `Extractor.sourceReductionHardFamily`:
+
+```lean
+theorem sourceReductionHardFamily_eventually_lt_size
+    {ε : ℝ} (hε : 0 < ε) :
+    ∀ᶠ n in Filter.atTop, ∀ circuit : Circuit Binary.signature n 1,
+      circuit.Computes Binary.interpretation
+        (fun x _ => Extractor.sourceReductionHardFamily n x) →
+          (4 - ε) * n < circuit.size
+```
+
+There is no graph, extractor, entropy, or hard-family hypothesis.
+`Extractor.sourceReductionHardEval_mem_FP` certifies one total uniform
+polynomial-time evaluator; `sourceReductionHardEval_ofFn` identifies every
+Boolean slice with that evaluator, including length zero.
+`sourceReductionHardLanguage_mem_P` proves membership of the corresponding
+language in `P`. The family is fixed before `ε`, and `n` is its full input
+length, including the fresh balancing bit.
+
 The general theorem is `Algebraic.Cutwidth.eventually_lt_size_of_rectangleFree`
 in `Algebraic.LowerBound.Cutwidth.FourN`:
 
@@ -34,15 +54,16 @@ is required; polynomial thresholds are a special case. The older entry
 points with explicit bisection, pathwidth, or ordering bounds remain available.
 The library proves those graph bounds and adds no axioms.
 
-## The remaining family hypothesis
+## Instantiating the family hypothesis
 
 A *one-rectangle* of `f` is a product `P × Q`, for a split of the coordinates
 into `U` and its complement, on which `f` is identically `1`. The function is
 `K`-rectangle-free when every one-rectangle under every split has a side with
 fewer than `K` elements. The theorem assumes such a family with
 `log₂ K(n) = o(n)` and at least `2 ^ (n - 2)` accepting inputs.
-This is a checked theorem about every qualifying family; a particular
-polynomial-time family has yet to be constructed in Lean.
+The general theorem applies to every qualifying family. The concrete
+`sourceReductionHardFamily` now supplies one such uniform polynomial-time
+family, using the actual extractor composition described below.
 
 `Cutwidth.Extractor` proves the bridge from flat-source sumset extraction.
 `FlatSumsetExtractor` counts independent source pairs with multiplicity,
@@ -56,7 +77,7 @@ nondeterministic counterpart check the full asymptotic bridge: the padded
 family needs more than `(4 - ε) (n + 1)` gates at its full input length,
 assuming an eventually positive threshold with `log₂ K(n) = o(n)`.
 
-The explicit construction remains substantial.
+The construction uses conservative parameters.
 [Xin Li, Theorem 7.13 (2023)](https://arxiv.org/abs/2303.06802v2) gives a
 polynomial support threshold. The weaker requirement here also admits the
 polylogarithmic source entropy of
@@ -71,8 +92,11 @@ lemma is proved with the exact retained variables and an average leakage
 budget, as described below. The complete affine correlation breaker now
 has a checked original-source guarantee for every positive tampering count,
 explicit finite parameters, and one total uniform polynomial-time evaluator.
-The fixed source-reduction map with its parity estimates and the final
-sumset/amplification composition still need construction and proof.
+The actual source-reduction map, its parity estimates, and its finite
+sumset/amplification composition are now proved in
+`SourceReduction.Construction`. `Construction.Asymptotics` proves its
+numerical sampler guards eventually and its source entropy sublinear;
+`Construction.Uniform` supplies the complete uniform family.
 The final analytic implication is proved in `Extractor.SourceReduction`.
 For every qualifying pair of flat sources `P, Q`, suppose at least half
 of the fixings in `Q` leave `m > 0` good output coordinates whose nonempty
@@ -83,7 +107,7 @@ The good coordinates may depend on the source pair and fixing; the reduction
 itself must be a single fixed function of the XOR input. Raw moment bounds,
 normalization, the quartic tail certificate, majority robustness, and
 averaging over fixings are all checked. The majority evaluator belongs to
-`FP`. Supplying the hypothesized parity bounds remains the construction task.
+`FP`. The concrete finite construction now supplies these parity bounds.
 
 `Extractor.Sampler` also proves the finite extractor-to-sampler conversion
 used in that construction, for arbitrary source probability weights.
@@ -99,9 +123,10 @@ a somewhere sampler with the same source threshold and failure probability.
 Seeded extraction itself supplies that neighbor-coverage guarantee.
 `SourceReduction.BadSeeds` and `SourceReduction.Selection` count all low-order
 parity tests, combine their excluded seeds, and select the good fixings and
-coordinates. The individual parity estimates from the correlation breaker
-are still explicit hypotheses; a failure bound of `1/2` is used directly
-on good fixings, before any approximation by a different source distribution.
+coordinates. The general selection theorem takes individual parity estimates
+as premises; `SourceReduction.Tests` now proves them from the actual affine
+construction. A failure bound of `1/2` is used directly on good fixings,
+before any approximation by a different source distribution.
 
 `Condenser.Polynomial` defines the modular-squaring map underlying the
 Guruswami--Umans--Vadhan condenser, with the characteristic-power exponent
@@ -1154,9 +1179,61 @@ bound `2*gamma` whenever a linear sampler's distinguished seed escapes
 that same small bad set, at any chosen output coordinate. The actual
 XOR reduction is `affineSourceReduction`; its parity-bias identity shows
 that grouping component bits into output coordinates preserves absolute
-bias. These statements cover a selected bundle of calls. The global
-sampler, indexing of every low-order parity test, and quantitative
-composition with `SourceReduction.Selection` still need to be supplied.
+bias. `SourceReduction.Tests` indexes every nonempty parity of at most four
+outer coordinates into one fixed breaker with `t = 4*C - 1` tamperings.
+It chooses the honest outer coordinate before the candidate and second
+source fixing. Unused proof-side slots have zero leakage and same-length
+advice different from the honest advice; the parity mask ignores them.
+The resulting estimate bounds the actual XOR reduction at every fixing.
+
+`SourceReduction.Sampler` composes the actual growing-depth matched extractor
+at error `1/16` with the actual padded Gamma neighbor map. For
+`b = 2^24*L` and requested output width `d`, it has outer width `8b`,
+candidate width `s = gammaBlockSeedBudget b`, source entropy
+`2^(2*(clog 2 (d+1)+64)+14)*L+1`, test allowance `2^(-5b)`, and failure
+probability `1/2`. Only the explicit growing-matched and Gamma numerical
+guards are assumed. Its source XOR-linearity is unconditional. One total
+uniform `FP` evaluator implements each sampled position and always returns
+exactly `d` bits, including at invalid parameters.
+
+The complete finite construction uses `N = 2^(8b)`, `C = 2^s`, injective
+binary advice of length `a = 8b+s`, and target exponent `q = 54b+s+10`.
+The bad-test threshold is `gamma = 2^(-(17b+10))`. The exact identity
+`N^4*C*(2^(-q)/gamma) = 2^(-5b)` pays the common-test union bound.
+Every selected set meets `100*m^2*(2*gamma) <= 1`, and, for `b >= 5`,
+the discard allowance gives `m > 0` and `N-m <= sqrt(m)/8`.
+
+`sourceReductionExtractor_flat` proves that the majority of this actual
+XOR reduction extracts at error `35/72`, with source threshold `2^k`,
+where `k` is the maximum of the actual affine leakage and sampler reserves.
+The only premises are `L > 0` and the two numerical sampler guards. No
+sampler, affine-security, parity-bias, or source-dependent construction is
+supplied by the caller. This closes the finite composition of
+Chattopadhyay--Liao Lemma 5.4 and the majority argument. The subsequent
+asymptotic and uniform layers supply the remaining choices.
+
+Set `L = clog 2 (n+1)` and `r = clog 2 (L+1)+1`. The actual Gamma candidate
+width satisfies `s <= 2^41*r^3`; its full count remains `C = 2^s`.
+The checked finite bounds give growing depth at most `2^42*r^3`, matched
+guard overhead at most `2^90*r^6`, and complete source entropy at most
+`2^(2^44*r^3)`. Exponentiating a fixed polynomial in the iterated logarithm
+is still `o(n)`. Consequently both numerical guards eventually hold,
+`k = o(n)`, and the source threshold is eventually feasible within the
+input cube. This construction does not claim a polynomial support threshold
+or the sharper entropy parameters of Li's theorem.
+
+`sourceReductionRuntime` implements the actual binary enumeration, sampler,
+affine calls, XOR, and majority, with its two counts supplied in unary.
+Its execution theorem needs only exact counts and the growing sampler guard;
+its `FP` theorem is unconditional. The length-indexed evaluator generates
+the outer count exactly as `(2^clog 2 (n+1))^(2^27)` and caps the candidate
+count at `n+1`. The actual candidate count is `o(n)`, so the cap is
+eventually inactive. The affine seed width is computed from the supplied
+count, keeping the entire program polynomial-time even before that point.
+The resulting fixed family eventually equals the finite semantic extractor.
+Balanced padding preserves `FP` and is exactly balanced at every positive
+length. `Construction.Hardness` applies the proved cutwidth theorem and
+shifts to the full padded length to obtain the displayed unconditional bound.
 
 The one-shot primitive alone has finite seed cost of order `ell+e+log n`;
 the checked recursion supplies the larger polylogarithmic output with
@@ -1225,10 +1302,11 @@ correlation breaker are proved with explicit finite parameters and total
 uniform polynomial-time evaluators. The affine theorem covers all tamperings
 from the original-source hypotheses, using the executed first phase and
 all repeated rounds. Its leakage and bad-seed theorem and the linear-sampler
-component-parity estimate are also proved. The remaining route is the global
-sampler and sumset-reduction composition, followed by asymptotic parameter
-and uniform-machine composition for a final `P` hard family with sublinear
-log-threshold. The unconditional `(4-ε)n` endpoint remains incomplete.
+component-parity estimate are also proved. The actual global sampler,
+fixed-test indexing, majority composition, asymptotic parameters, and uniform
+bounded enumeration complete the construction of a concrete `P` hard family
+with sublinear log-threshold. The deterministic `(4-ε)n` endpoint is
+`sourceReductionHardFamily_eventually_lt_size`.
 
 ## The graph theorem is proved
 

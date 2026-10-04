@@ -505,10 +505,13 @@ the complete bit program with this statistical map, including unused seed paddin
 `Gamma.Padded` reads this same total polynomial-time program on a seed whose
 width is the explicit cubic-logarithmic budget; the entire seed is uniform and
 retained in the strong guarantee.
-Later subset-doubling rounds and their induction are still needed for the full affine
-conversion. Sumset/amplification composition, parity estimates, and asymptotic composition
-into the final uniform hard family remain necessary for a lower bound on a concrete
-language in `P`.
+`Affine.Iteration` and its selected parameters complete the actual subset-doubling
+induction. `SourceReduction.Construction` composes the actual sampler, fixed affine
+tests, XOR, and majority. Its asymptotic layer proves sublinear source entropy and
+eventual numerical guards. Its uniform layer bounds every enumeration loop and
+provides one total polynomial-time evaluator for a fixed balanced family.
+`SourceReduction.Construction.Hardness` proves the unconditional `(4-ε)n`
+lower bound for that family, measured at the full input length; its language is in `P`.
 -/
 
 @[expose] public section

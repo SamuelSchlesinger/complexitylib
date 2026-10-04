@@ -21,7 +21,9 @@ sufficiently large `n`. Polynomial thresholds are a special case.
 
 `eventually_lt_size_of_rectangleFree` has no graph hypothesis. Its remaining
 application obligation is a family `f n` with `log₂ K(n) = o(n)` satisfying
-`RectangleFree` and the accepting-input bound.
+`RectangleFree` and the accepting-input bound. The downstream module
+`Extractor.SourceReduction.Construction.Hardness` supplies a concrete uniform
+polynomial-time family and proves its unconditional coefficient-four lower bound.
 
 The generic graph-ordering interface remains
 `eventually_lt_size_of_log_sublinear`, with fixed-`n` core

@@ -325,14 +325,16 @@ word, so its canonical agreement has no numerical or statistical premise.
 `Merging.Smooth` constructs the conditional repair needed for the next
 stage, preserving original observations and charging the old distance once.
 
-The remaining work includes actual subset-doubling rounds and their
-induction for the complete affine conversion, sumset and amplification composition
-with its parity estimates, and the asymptotic parameters and uniform-machine
-construction of the final hard family.
-The final unconditional `(4-ε)n` lower bound for a uniform `P` family remains
-incomplete.
-The [cutwidth guide](cutwidth-lower-bound.md) gives the exact remaining
-construction obligations and source credits.
+The complete affine conversion, actual amplified sampler, fixed-family parity
+tests, and majority composition are proved. The actual source entropy is
+sublinear, both sampler guards hold eventually, and bounded enumeration
+supplies one uniform polynomial-time evaluator at every input length.
+`Cutwidth.sourceReductionHardFamily_eventually_lt_size` proves the
+unconditional `(4-ε)n` lower bound for this fixed concrete family over the
+full binary basis. The bound uses its full input length, and
+`Extractor.sourceReductionHardLanguage_mem_P` proves the language is in `P`.
+The [cutwidth guide](cutwidth-lower-bound.md) records the exact theorem,
+parameter guarantees, and source credits.
 
 The same lower bound holds for nondeterministic circuits with arbitrarily
 many witness bits (`Cutwidth.nondet_eventually_lt_size_of_rectangleFree`).

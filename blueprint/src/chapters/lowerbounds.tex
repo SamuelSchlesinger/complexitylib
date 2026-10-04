@@ -255,8 +255,8 @@ chapter.
   computing the length-$n$ member satisfies
   $n^2 \le 64(c + 3)\log_2 n \cdot L$, where $L$ counts variable leaves and
   constants are free; that is, it has at least $n^2 / (64(c + 3)\log_2 n)$
-  variable leaves. This is a conditional statement about any such family: no
-  explicit rectangle-free family is formalized.
+  variable leaves. This statement requires a polynomial rectangle threshold;
+  the later explicit circuit family has a checked subexponential threshold.
 \end{theorem}
 \begin{proof}
   \leanok
@@ -2566,7 +2566,8 @@ establishes the proposed coefficient-three regime without that assumption.
   $\varepsilon>0$ and all large $n$, its balanced padding requires more
   than $(4-\varepsilon)(n+1)$ gates, including for nondeterministic circuits
   with arbitrarily many witness inputs. The family is fixed before
-  $\varepsilon$; an explicit family remains to be constructed.
+  $\varepsilon$. The concrete family below instantiates the deterministic
+  conclusion.
 \end{theorem}
 \begin{proof}
   \leanok
@@ -2638,7 +2639,7 @@ establishes the proposed coefficient-three regime without that assumption.
     \mathbb E S^4\le3m^2+m^4\delta.
   \]
   These are algebraic consequences of low-order parity bias. Producing
-  that bias from an actual sumset source remains a construction obligation.
+  that bias from an actual sumset source is supplied by the construction below.
 \end{theorem}
 \begin{proof}
   \leanok
@@ -2664,7 +2665,7 @@ establishes the proposed coefficient-three regime without that assumption.
   vanish, the second is one, and the fourth is at most three.
   This is a finite analytic component of the Chattopadhyay--Liao
   constant-error route; the source reduction and extractor primitives
-  remain separate construction obligations.
+  are supplied by the subsequent construction.
 \end{theorem}
 \begin{proof}
   \leanok
@@ -7863,6 +7864,246 @@ establishes the proposed coefficient-three regime without that assumption.
   factor has absolute value one for every outer parity.
 \end{proof}
 
+\begin{definition}[The actual amplified linear sampler]
+  \label{def:lowerbounds-algebraic-amplified-matched-sampler}
+  \lean{Algebraic.Cutwidth.Extractor.amplifiedMatchedSampler,
+    Algebraic.Cutwidth.Extractor.amplifiedMatchedSamplerEntropy,
+    Algebraic.Cutwidth.Extractor.amplifiedMatchedSamplerRuntime,
+    Algebraic.Cutwidth.Extractor.amplifiedMatchedSamplerEval,
+    Algebraic.Cutwidth.Extractor.sourceReductionIndexEquiv,
+    Algebraic.Cutwidth.Extractor.sourceReductionAdvice}
+  \leanok
+  \uses{def:lowerbounds-algebraic-gamma-padded,
+    def:lowerbounds-algebraic-matched-growing-runtime}
+  Set $b=2^{24}L$ and $h=\lceil\log_2(d+1)\rceil+64$.
+  For an outer word of width $8b$ and candidate word of width
+  $s=\mathrm{gammaBlockSeedBudget}(b)$, use the actual padded Gamma
+  output as the seed of the actual growing matched extractor at error
+  $1/16$. Read its first $d$ bits, completing with false bits if needed.
+  Little-endian binary codes enumerate the outer and candidate words;
+  concatenating the codes gives injective advice of length $8b+s$.
+\end{definition}
+
+\begin{theorem}[Sampling and uniform evaluation of the actual composition]
+  \label{thm:lowerbounds-algebraic-amplified-matched-sampler}
+  \lean{Algebraic.Cutwidth.Extractor.amplifiedMatchedSampler_somewhereSampler,
+    Algebraic.Cutwidth.Extractor.amplifiedMatchedSampler_xor,
+    Algebraic.Cutwidth.Extractor.amplifiedMatchedSampler_output_capacity,
+    Algebraic.Cutwidth.Extractor.amplifiedMatchedSamplerRuntime_length,
+    Algebraic.Cutwidth.Extractor.amplifiedMatchedSamplerRuntime_eq_amplifiedMatchedSampler,
+    Algebraic.Cutwidth.Extractor.amplifiedMatchedSamplerRuntime_mem_FP,
+    Algebraic.Cutwidth.Extractor.amplifiedMatchedSamplerEval_mem_FP,
+    Algebraic.Cutwidth.Extractor.SomewhereSampler.reindex}
+  \leanok
+  \uses{def:lowerbounds-algebraic-amplified-matched-sampler,
+    thm:lowerbounds-algebraic-matched-growing,
+    thm:lowerbounds-algebraic-gamma-padded,
+    thm:lowerbounds-algebraic-sampler-amplification}
+  Under $L>0$ and the growing-matched and Gamma numerical guards, the
+  actual composition is a somewhere sampler with source threshold
+  $2^{2^{2h+14}L+1}$, test allowance $2^{-5b}$, and failure $1/2$.
+  At every fixed pair of indices it preserves source XOR, without any
+  parameter guard. Its single total evaluator belongs to $\mathrm{FP}$
+  and returns exactly $d$ bits on every input. Under the growing guard
+  it agrees with the semantic sampler; binary reindexing preserves the
+  sampling guarantee.
+\end{theorem}
+\begin{proof}
+  \leanok
+  Truncate the growing matched extractor, convert it to a sampler using
+  one extra source-entropy bit, and apply Gamma's $3/4$ neighbor coverage.
+  The exact amplification budget is
+  $2^{2b}\le 2\cdot2^{-5b}\cdot2^{8b}$. Compose the two actual runtimes,
+  truncate and complete their output, and use their uniform certificates.
+\end{proof}
+
+\begin{theorem}[One fixed affine breaker supplies every small parity test]
+  \label{thm:lowerbounds-algebraic-fixed-affine-tests}
+  \lean{Algebraic.Cutwidth.Extractor.affineSourceReduction_exists_tests}
+  \leanok
+  \uses{thm:lowerbounds-algebraic-affine-leakage-parity,
+    thm:lowerbounds-algebraic-affine-source-reduction-parity}
+  Fix $C>0$, advice length $a>0$, target exponent $q$, and
+  $\gamma>0$. Use the same actual affine breaker with $4C-1$
+  tamperings for every parity test. For a normalized original source
+  satisfying its complete leakage cap, any source-linear sampler and
+  injective length-$a$ advice give bad-seed sets of relative size at
+  most $2^{-q}/\gamma$. Every nonempty parity on at most four outer
+  coordinates has a distinguished coordinate, chosen before the
+  candidate and second summand. If that candidate seed escapes the
+  corresponding bad set, the actual XOR-reduction parity has absolute
+  sign expectation at most $2\gamma$ at every second-source fixing.
+\end{theorem}
+\begin{proof}
+  \leanok
+  Embed all real calls except the honest call into the $4C-1$ slots.
+  Fill unused slots with zero leakage and same-length advice obtained
+  by flipping the honest advice's first bit. Apply the actual leakage
+  theorem with the product of only the real tampered signs as its
+  bounded mask. Linearity and the XOR grouping identity identify the
+  original reduction. No unused output enters its parity.
+\end{proof}
+
+\begin{definition}[The actual finite sumset extractor]
+  \label{def:lowerbounds-algebraic-finite-sumset-construction}
+  \lean{Algebraic.Cutwidth.Extractor.sourceReductionSeedBits,
+    Algebraic.Cutwidth.Extractor.sourceReductionEntropy,
+    Algebraic.Cutwidth.Extractor.sourceReductionSampler,
+    Algebraic.Cutwidth.Extractor.sourceReductionOutput,
+    Algebraic.Cutwidth.Extractor.sourceReductionExtractor}
+  \leanok
+  \uses{def:lowerbounds-algebraic-amplified-matched-sampler,
+    def:lowerbounds-algebraic-affine-source-reduction}
+  Set $N=2^{8b}$, $C=2^s$, $a=8b+s$, $q=54b+s+10$, and
+  $\gamma=2^{-(17b+10)}$. Let $d$ be the selected seed width of the
+  fixed affine breaker with $4C-1$ tamperings. Use the actual enumerated
+  sampler at width $d$ and the binary advice above, XOR the $C$ calls
+  at each of the $N$ outer coordinates, and take their strict majority.
+  The source entropy $k$ is the maximum of the actual affine leakage
+  reserve and the amplified sampler reserve.
+\end{definition}
+
+\begin{theorem}[The actual finite construction extracts]
+  \label{thm:lowerbounds-algebraic-finite-sumset-construction}
+  \lean{Algebraic.Cutwidth.Extractor.sourceReductionExtractor_flat,
+    Algebraic.Cutwidth.Extractor.sourceReduction_union_budget,
+    Algebraic.Cutwidth.Extractor.sourceReduction_moment_budget,
+    Algebraic.Cutwidth.Extractor.sourceReduction_majority_guards}
+  \leanok
+  \uses{def:lowerbounds-algebraic-finite-sumset-construction,
+    thm:lowerbounds-algebraic-amplified-matched-sampler,
+    thm:lowerbounds-algebraic-fixed-affine-tests,
+    thm:lowerbounds-algebraic-parity-selection,
+    thm:lowerbounds-algebraic-extractor-parity-target}
+  For $L>0$ and the two numerical sampler guards, the actual finite
+  construction is a flat-source sumset extractor with threshold $2^k$
+  and error $35/72$. No extractor, sampler, affine-security, or parity
+  estimate is a hypothesis.
+\end{theorem}
+\begin{proof}
+  \leanok
+  The exact identity $N^4 C\,2^{-q}/\gamma=2^{-5b}$ pays for all
+  small parity tests. Apply the actual sampler and select good
+  coordinates on at least half the second-source fixings. The finite
+  budgets give $100m^2(2\gamma)\le1$, $m>0$, and
+  $N-m\le\sqrt m/8$; here $L>0$ implies $b\ge5$.
+  Apply the checked moment and majority theorem to these actual parities.
+\end{proof}
+
+\begin{theorem}[The actual family has eventual guards and sublinear entropy]
+  \label{thm:lowerbounds-algebraic-sumset-construction-asymptotics}
+  \lean{Algebraic.Cutwidth.Extractor.sourceReductionCandidateCount_isLittleO,
+    Algebraic.Cutwidth.Extractor.eventually_sourceReductionCandidateCount_le,
+    Algebraic.Cutwidth.Extractor.sourceReductionEntropy_isLittleO,
+    Algebraic.Cutwidth.Extractor.eventually_sourceReductionEntropy_le,
+    Algebraic.Cutwidth.Extractor.eventually_sourceReduction_guards,
+    Algebraic.Cutwidth.Extractor.eventually_sourceReductionExtractor_flat}
+  \leanok
+  \uses{thm:lowerbounds-algebraic-finite-sumset-construction}
+  Set $L=\lceil\log_2(n+1)\rceil$. The actual candidate count is $o(n)$,
+  the complete source entropy $k(n)$ is $o(n)$, and both numerical
+  sampler guards eventually hold. Consequently the same fixed finite
+  construction is eventually a sumset extractor at threshold $2^{k(n)}$
+  and error $35/72$, with $k(n)\le n$ eventually.
+\end{theorem}
+\begin{proof}
+  \leanok
+  Write $r=\lceil\log_2(L+1)\rceil+1$. The actual candidate seed width
+  is at most $2^{41}r^3$, the growing depth at most $2^{42}r^3$, the
+  matched guard overhead at most $2^{90}r^6$, and the full source entropy
+  at most $2^{2^{44}r^3}$. A fixed polynomial in $\log L$ is $o(L)$;
+  exponentiating a fixed polynomial in the iterated logarithm is $o(n)$.
+  Transfer Gamma's eventual guard along $2^{24}L\to\infty$.
+  The full candidate count is retained throughout.
+\end{proof}
+
+\begin{definition}[Bounded evaluation and the single balanced hard family]
+  \label{def:lowerbounds-algebraic-uniform-hard-family}
+  \lean{Algebraic.Cutwidth.Extractor.sourceReductionRuntime,
+    Algebraic.Cutwidth.Extractor.sourceReductionEval,
+    Algebraic.Cutwidth.Extractor.sourceReductionFamilyScale,
+    Algebraic.Cutwidth.Extractor.sourceReductionBoundedCandidates,
+    Algebraic.Cutwidth.Extractor.sourceReductionFamilyEval,
+    Algebraic.Cutwidth.Extractor.sourceReductionFamily,
+    Algebraic.Cutwidth.Extractor.sourceReductionHardEval,
+    Algebraic.Cutwidth.Extractor.sourceReductionHardFamily,
+    Algebraic.Cutwidth.Extractor.sourceReductionHardLanguage}
+  \leanok
+  \uses{def:lowerbounds-algebraic-finite-sumset-construction,
+    def:lowerbounds-algebraic-extractor-padding}
+  The runtime takes unary scale and enumeration counts and executes
+  the actual sampler and affine calls, then XOR and majority.
+  The length-indexed evaluator uses $L=\lceil\log_2(n+1)\rceil$, the
+  exact outer count, and candidate count $\min(C,n+1)$. Its Boolean
+  family is the unique output bit. XOR with a fresh first input bit
+  gives the balanced hard evaluator, family, and accepted language.
+\end{definition}
+
+\begin{theorem}[The same computed family is polynomial-time and eventually extracts]
+  \label{thm:lowerbounds-algebraic-uniform-hard-family}
+  \lean{Algebraic.Cutwidth.Extractor.sourceReductionRuntime_eq,
+    Algebraic.Cutwidth.Extractor.sourceReductionRuntime_mem_FP,
+    Algebraic.Cutwidth.Extractor.sourceReductionFamilyEval_mem_FP,
+    Algebraic.Cutwidth.Extractor.sourceReductionFamily_eventually_eq,
+    Algebraic.Cutwidth.Extractor.sourceReductionFamily_eventually_flat,
+    Algebraic.Cutwidth.Extractor.sourceReductionFamilyEntropy_isLittleO,
+    Algebraic.Cutwidth.Extractor.sourceReductionHardFamily_succ,
+    Algebraic.Cutwidth.Extractor.sourceReductionHardFamily_card_accepting,
+    Algebraic.Cutwidth.Extractor.sourceReductionHardEval_ofFn,
+    Algebraic.Cutwidth.Extractor.sourceReductionHardEval_mem_FP,
+    Algebraic.Cutwidth.Extractor.mem_sourceReductionHardLanguage_ofFn,
+    Algebraic.Cutwidth.Extractor.sourceReductionHardLanguage_mem_P}
+  \leanok
+  \uses{def:lowerbounds-algebraic-uniform-hard-family,
+    thm:lowerbounds-algebraic-sumset-construction-asymptotics,
+    thm:lowerbounds-algebraic-extractor-padding}
+  Both evaluators belong to $\mathrm{FP}$ and compute their stated
+  Boolean families at every length, including zero. The candidate cap
+  is eventually inactive, so the unpadded computed family eventually
+  equals the actual finite extractor with error $35/72$ and sublinear
+  source entropy. The padded family is exactly balanced at every
+  positive length, and its language belongs to $P$.
+\end{theorem}
+\begin{proof}
+  \leanok
+  The exact outer count is
+  $(2^{\lceil\log_2(n+1)\rceil})^{2^{27}}$, so unary computation of
+  rounded powers and fixed powers supplies its polynomial-time bound.
+  Capped powers supply the candidate count on every input. Compose
+  the certified runtimes over both bounded loops; source linearity and
+  the canonical execution equations identify every actual call.
+  Eventual cap inactivity transfers the statistical theorem to this
+  same evaluator. Apply the checked balanced-padding and decision-function
+  bridges.
+\end{proof}
+
+\begin{theorem}[A concrete polynomial-time family needs more than $(4-\varepsilon)n$ gates]
+  \label{thm:lowerbounds-algebraic-explicit-four-n}
+  \lean{Algebraic.Cutwidth.sourceReductionHardFamily_eventually_lt_size}
+  \leanok
+  \uses{thm:lowerbounds-algebraic-uniform-hard-family,
+    thm:lowerbounds-algebraic-padded-hardness}
+  For every $\varepsilon>0$ and all sufficiently large $n$, every
+  circuit computing the fixed family
+  $\mathrm{sourceReductionHardFamily}(n)$ has more than
+  $(4-\varepsilon)n$ gates. The basis contains all sixteen binary
+  Boolean operations, repeated input slots and unrestricted fan-out
+  are permitted, and every gate is counted. The family is fixed before
+  $\varepsilon$, belongs to $P$, and $n$ is the full padded input length.
+  No graph, extractor, entropy, or hard-family hypothesis remains.
+  The circuit argument follows Ryan Williams's September 2026 working
+  note and the author's circuit-to-read-once compiler; the constructed
+  family uses Chattopadhyay--Liao's extractor route with the library's
+  conservative finite parameters.
+\end{theorem}
+\begin{proof}
+  \leanok
+  The dyadic support threshold has binary logarithm exactly $k(n)=o(n)$.
+  Apply the checked balanced-padding cutwidth theorem at fixed error
+  $35/72<1/2$, then shift its eventual statement from the unpadded index
+  to the full input length.
+\end{proof}
+
 \begin{theorem}[Extraction with an approximately independent seed]
   \label{thm:lowerbounds-algebraic-perturbed-seed}
   \lean{Algebraic.Cutwidth.Extractor.WeightedStrongSeededExtractor.perturbed_seed_dist_le,
@@ -9179,8 +9420,10 @@ security theorem for every positive tampering count, explicit finite
 parameters and dyadic error, and a total uniform polynomial-time evaluator.
 The actual first phase initializes the repeated-round invariant, whose
 entropy losses and error are discharged by the chosen global schedule.
-The sumset/amplification composition, parity estimates, and asymptotic
-construction of the final uniform polynomial-time hard family remain open.
+The actual sumset/amplification composition and fixed-family parity estimates
+are proved above. Their eventual sublinear entropy and bounded uniform evaluator
+give the concrete polynomial-time family in
+Theorem~\ref{thm:lowerbounds-algebraic-explicit-four-n}.
 
 \begin{theorem}[Cutwidth bound for rectangle-free families]
   \label{thm:lowerbounds-algebraic-cutwidth}
@@ -9194,8 +9437,10 @@ construction of the final uniform polynomial-time hard family remain open.
   than $(4-\varepsilon)n$ gates over the full binary basis (all sixteen
   binary gates, every gate counted), for every $\varepsilon>0$ and all large
   $n$. The cubic graph bounds are proved, so the theorem has no graph
-  hypothesis. No explicit rectangle-free family is formalized; the theorem
-  applies to every family satisfying the displayed properties.
+  hypothesis. This reusable theorem applies to every family satisfying
+  the displayed properties. The concrete family of
+  Theorem~\ref{thm:lowerbounds-algebraic-explicit-four-n} uses its
+  subexponential-threshold form.
   The circuit argument follows Ryan Williams's private working note of
   September 2026, combining the rectangle bound for read-once programs
   with the circuit-to-read-once compiler of the author's counting note.
@@ -9221,8 +9466,8 @@ construction of the final uniform polynomial-time hard family remain open.
   can be replaced by $\log_2 K(n)=o(n)$. In particular, a family of flat-source
   sumset extractors with this threshold and fixed error at most $1/4$
   satisfies the same circuit lower bound with no graph hypothesis.
-  The final explicit sumset family and its uniform polynomial-time
-  evaluation remain unformalized. Li's Theorem 7.13 (2023) provides
+  The explicit sumset family and its uniform polynomial-time evaluation
+  are supplied above with sublinear source entropy. Li's Theorem 7.13 (2023) provides
   logarithmic source entropy; Chattopadhyay and Liao (2021) already provide
   polylogarithmic source entropy, which is sufficient for this version.
 \end{theorem}

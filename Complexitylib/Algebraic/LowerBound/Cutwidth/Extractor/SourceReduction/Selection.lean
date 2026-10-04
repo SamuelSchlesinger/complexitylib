@@ -19,9 +19,9 @@ that test. This is the selection step after equation (5) in Chattopadhyay and
 Liao, *Extractors for Sum of Two Sources* (2021), Lemma 5.4.
 
 The parity estimate is an explicit premise of this selection theorem.
-`SourceReduction.Leakage.Linear.Selected` proves the corresponding estimate
-for a selected bundle of actual affine calls. Indexing the bundles for every
-small parity test and composing the global sampler remain separate steps.
+`SourceReduction.Tests` supplies it for every small parity using one fixed
+actual affine breaker. `SourceReduction.Construction` composes those tests
+with the actual amplified sampler and discharges the finite budgets.
 The conclusion retains a `1 - δ` fraction of second-source fixings and
 discards at most a `2ε` fraction of coordinates at each one. A subsequent
 majority application must check positivity and the moment and margin budgets.
