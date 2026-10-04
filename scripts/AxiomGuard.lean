@@ -176,6 +176,11 @@ def headlineTheorems : List Name := [
   `Algebraic.Cutwidth.MultiOutput.eventually_lt_size_of_totallyRegular,
   `Algebraic.Cutwidth.MultiOutput.eventually_lt_size_of_totallyRegular_fortyOne_div_nine,
   `Algebraic.Cutwidth.MultiOutput.eventually_lt_size_cauchyZMod,
+  -- Border rank: lower semicontinuity of matrix rank and the Koszul-flattening bound
+  `Matrix.isClosed_setOf_rank_le,
+  `Algebraic.Tensor3.rank_wedgeMatrix,
+  `Algebraic.Tensor3.rank_koszulFlattening_le_borderRank_mul,
+  `Algebraic.Tensor3.not_borderRankLE_of_lt_rank_koszulFlattening,
   -- Korten's top-down parity lower bounds and the majority extension
   `Complexity.KarchmerWigderson.parity_communication_lower_bound,
   `Complexity.Circuit.parity_wire_lower_bound,

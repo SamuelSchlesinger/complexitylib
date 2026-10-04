@@ -4,10 +4,12 @@
 This chapter records areas the library does not yet cover. For each it names one
 precise target, what the target would build on, and a first step. Most nodes
 below are not formalized, and most of those are not yet ready: stating them in
-Lean needs a definition the library does not have. The exception is the
+Lean needs a definition the library does not have. The exceptions are the
 general Karchmer--Wigderson theorem, with its protocol model: the imported
 algebraic-circuits library proves it (Definition~\ref{def:frontiers-kw-protocol}
-and Theorem~\ref{thm:frontiers-kw-general}). Where related infrastructure exists
+and Theorem~\ref{thm:frontiers-kw-general}), and the foundations of border rank
+with the Koszul-flattening lower bound
+(Theorem~\ref{thm:frontiers-koszul-flattening}). Where related infrastructure exists
 elsewhere, it is named as a starting point, not as progress toward the target.
 
 \section{Hardness of approximation}
@@ -368,6 +370,121 @@ families, degree bounds, projections and the classes below are not formalized.
   degree bounds, and $p$-projections. The Boolean counterpart,
   $\#\cc{P}$-completeness of the $0/1$ permanent, would connect to the existing
   class $\#\cc{P}$ (Definition~\ref{def:sharpP}).
+\end{proof}
+
+Tensors give a second algebraic model. The foundations below are formalized for
+coordinate tensors over $\mathbb{C}$; the explicit lower bounds they are meant for
+are not.
+
+\begin{definition}[Tensor rank and border rank]
+  \label{def:frontiers-border-rank}
+  \lean{Algebraic.Tensor3, Algebraic.Tensor3.outer, Algebraic.Tensor3.RankLE,
+    Algebraic.Tensor3.tensorRank, Algebraic.Tensor3.BorderRankLE,
+    Algebraic.Tensor3.borderRank, Algebraic.Tensor3.map}
+  \leanok
+  A tensor $T \in A \otimes B \otimes C$, with $A = \mathbb{C}^\alpha$,
+  $B = \mathbb{C}^\beta$, $C = \mathbb{C}^\gamma$ for finite $\alpha, \beta, \gamma$, is
+  given by its coordinates $T_{ijk}$. It has rank at most $r$ if it is a sum of $r$ outer
+  products $u \otimes v \otimes w$, and border rank at most $r$ if it lies in the closure
+  of the set of tensors of rank at most $r$; $\mathbf{R}(T)$ and
+  $\underline{\mathbf{R}}(T)$ are the least such $r$. Matrices $X, Y, Z$ act on the three
+  factors by $X \otimes Y \otimes Z$.
+\end{definition}
+
+\begin{lemma}[Basic properties of border rank]
+  \label{lem:frontiers-border-rank-basic}
+  \lean{Algebraic.Tensor3.RankLE.borderRankLE, Algebraic.Tensor3.BorderRankLE.mono,
+    Algebraic.Tensor3.BorderRankLE.add, Algebraic.Tensor3.isClosed_setOf_borderRankLE,
+    Algebraic.Tensor3.BorderRankLE.map, Algebraic.Tensor3.BorderRankLE.subtensor,
+    Algebraic.Tensor3.borderRank_le_tensorRank, Algebraic.Tensor3.borderRank_map_le}
+  \leanok
+  \uses{def:frontiers-border-rank}
+  $\underline{\mathbf{R}}(T) \le \mathbf{R}(T)$; border rank is subadditive; and neither
+  rank nor border rank increases under $X \otimes Y \otimes Z$ or under deleting or
+  permuting slices in any factor.
+\end{lemma}
+\begin{proof}
+  \leanok
+  $X \otimes Y \otimes Z$ maps outer products to outer products and is continuous, so it
+  maps the closure of the rank-$r$ tensors into itself.
+\end{proof}
+
+\begin{lemma}[Rank by minors and its lower semicontinuity]
+  \label{lem:frontiers-rank-minors}
+  \lean{Matrix.le_rank_iff_exists_det_submatrix_ne_zero,
+    Matrix.rank_le_iff_forall_det_submatrix_eq_zero, Matrix.isClosed_setOf_rank_le,
+    Matrix.lowerSemicontinuous_rank, Matrix.rank_add_rank_le_rank_fromBlocks_zero₂₁,
+    Matrix.rank_le_rank_submatrix_add}
+  \leanok
+  A matrix over a field has rank at least $k$ if and only if some $k \times k$ minor is
+  nonzero. Hence the matrices of rank at most $r$ form a closed set, the rank of a block
+  upper-triangular matrix is at least the sum of the ranks of its diagonal blocks, and
+  deleting $d$ rows and $e$ columns lowers the rank by at most $d + e$.
+\end{lemma}
+\begin{proof}
+  \leanok
+  Choose $k$ independent rows, then $k$ independent columns of the resulting
+  $k \times n$ matrix. The vanishing of all $(r+1)$-minors is a closed condition.
+\end{proof}
+
+\begin{definition}[Koszul flattening]
+  \label{def:frontiers-koszul-flattening}
+  \lean{Algebraic.Tensor3.wedgeCoeff, Algebraic.Tensor3.wedgeMatrix,
+    Algebraic.Tensor3.koszulFlattening}
+  \leanok
+  \uses{def:frontiers-border-rank}
+  Order the basis $a_i$ of $A$ and let $e_I = a_{i_1} \wedge \dots \wedge a_{i_p}$ for
+  $I = \{i_1 < \dots < i_p\}$, so that
+  $a_i \wedge e_I = (-1)^{|\{x \in I : x < i\}|} e_{I \cup \{i\}}$ for $i \notin I$. The
+  Koszul flattening $T_A^{\wedge p} \colon \Lambda^p A \otimes B^* \to
+  \Lambda^{p+1} A \otimes C$ sends $e_I \otimes b_j^*$ to
+  $\sum_{i,k} T_{ijk} (a_i \wedge e_I) \otimes c_k$ (Landsberg and Micha{\l}ek,
+  \emph{Towards finding hay in a haystack}, Theory of Computing, 2025, Section~4.1).
+\end{definition}
+
+\begin{theorem}[Koszul-flattening lower bound]
+  \label{thm:frontiers-koszul-flattening}
+  \lean{Algebraic.Tensor3.rank_wedgeMatrix,
+    Algebraic.Tensor3.rank_koszulFlattening_outer_le,
+    Algebraic.Tensor3.BorderRankLE.rank_koszulFlattening_le,
+    Algebraic.Tensor3.rank_koszulFlattening_le_borderRank_mul,
+    Algebraic.Tensor3.not_borderRankLE_of_lt_rank_koszulFlattening,
+    Algebraic.Tensor3.BorderRankLE.rank_koszulFlattening_map_le}
+  \leanok
+  \uses{def:frontiers-koszul-flattening, lem:frontiers-border-rank-basic,
+    lem:frontiers-rank-minors}
+  For every $p$, $\operatorname{rank} T_A^{\wedge p} \le
+  \underline{\mathbf{R}}(T) \binom{\dim A - 1}{p}$. Applied after a projection
+  $A \to A'$, the same holds with $\dim A'$ in place of $\dim A$.
+\end{theorem}
+\begin{proof}
+  \leanok
+  For $u \ne 0$ the map $X \mapsto u \wedge X$ on $\Lambda^p A$ has rank
+  $\binom{\dim A - 1}{p}$: the composite of two such maps vanishes, and the rows
+  $K \cup \{i_0\}$ and columns $K$ with $i_0 \notin K$ give an invertible diagonal
+  submatrix when $u_{i_0} \ne 0$. The flattening of $u \otimes v \otimes w$ factors
+  through this map, the flattening is linear in $T$, and matrix rank is subadditive and
+  lower semicontinuous.
+\end{proof}
+
+\begin{theorem}[Border substitution for tight tensors]
+  \label{thm:frontiers-border-substitution}
+  \uses{def:frontiers-border-rank}
+  \notready
+  Let $T \in A \otimes B \otimes C$ be tight and $A$-concise, expressed in a tight basis.
+  Among the filtrations $A_1^* \subset \dots \subset A_{\dim A - 1}^* \subset A^*$ with
+  $\dim A_f^* = f$ and each $A_f^*$ spanned by tight basis elements, some filtration
+  satisfies $\underline{\mathbf{R}}(T) \ge \max_q \bigl(q +
+  \underline{\mathbf{R}}(T|_{A_{\dim A - q}^* \otimes B^* \otimes C^*})\bigr)$
+  (Landsberg and Micha{\l}ek, Proposition~2.3).
+\end{theorem}
+\begin{proof}
+  Combine the border substitution inequality
+  $\underline{\mathbf{R}}(T) \ge \min_{A_f^*} \bigl(\dim A - f +
+  \underline{\mathbf{R}}(T|_{A_f^*})\bigr)$ with the Borel fixed point theorem for the
+  torus that fixes a tight tensor. First step: the inequality itself, for which the
+  restrictions are the maps $X \otimes 1 \otimes 1$ of
+  Definition~\ref{def:frontiers-border-rank}.
 \end{proof}
 
 \section{Fine-grained and parameterized complexity}
