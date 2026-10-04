@@ -22,7 +22,8 @@ positive advertised time bound.
 
 ## Main results
 
-- `TM.retargetInputStarted_computesVirtual_exact` — exact saved-start time
+- `TM.retargetInputStarted_computesVirtual_exact` — time bound crediting the saved first
+  transition
 - `TM.retargetInputStarted_computesVirtual` — same-time virtual computation
 - `TM.retargetInputStarted_decidesVirtual` — same-time virtual decision
 - `TM.retargetInputStarted_hoareTime` — Hoare form for phase composition
@@ -60,8 +61,9 @@ theorem retargetInputStartedCfg_eq_retargetWrap (M : TM k)
       retargetWrap M realInput (startedCfg M y hne) :=
   retargetInputStartedCfg_eq_retargetWrap_internal M y realInput hne
 
-/-- Exact virtual-input computation seam. A nondegenerate source run saves its
-first transition; an initially halted source uses zero transitions. -/
+/-- Virtual-input computation seam crediting the saved first transition: the
+wrapper's run time plus one is at most the source's bound `T |y|`. For an
+initially halted source the credit is zero. -/
 theorem retargetInputStarted_computesVirtual_exact (M : TM k)
     {f : List Bool → List Bool} {T : ℕ → ℕ}
     (hcomp : M.ComputesInTime f T) (y : List Bool) (realInput : Tape) :

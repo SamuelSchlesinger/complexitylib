@@ -485,7 +485,7 @@ private theorem forRegTM_loop_run (inp₀ : Tape) (w : ℕ → Fin n → Tape)
 /-- **`forRegTM` Hoare rule.** Given a fuel register holding `v` (whose tape the
     iteration-indexed ghost family `w` never changes) and a body spec carrying
     `w i / ys i` to `w (i+1) / ys (i+1)`, the loop carries `w 0 / ys 0` to
-    `w v / ys v` in at most `v·(b_iter + 2) + v + 3` steps. -/
+    `w v / ys v` in at most `v·(b_iter + 2) + v + 2` steps. -/
 theorem forRegTM_hoareTime (body : TM n) (r : Fin n) (v : ℕ) (inp₀ : Tape)
     (w : ℕ → Fin n → Tape) (ys : ℕ → List Bool) (b_iter : ℕ)
     (hinp₀ : Parked inp₀)

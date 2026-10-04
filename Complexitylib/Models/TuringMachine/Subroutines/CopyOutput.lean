@@ -12,7 +12,7 @@ public import Complexitylib.Models.TuringMachine.Subroutines.Internal.CopyOutput
 # Input-to-output copy subroutine
 
 Public correctness theorem for `TM.copyInputToOutputTM`. The machine copies
-its Boolean input verbatim to its output tape in the exact linear bound
+its Boolean input verbatim to its output tape within the linear bound
 `|x| + 2`, without using the contents of its fixed work-tape bank.
 
 ## Main result
@@ -29,7 +29,7 @@ namespace Complexity
 namespace TM
 
 /-- The input-to-output copy machine computes the identity function within
-the exact linear time bound `m + 2`. -/
+the linear time bound `m + 2`. -/
 theorem copyInputToOutputTM_computesInTime (n : ℕ) :
     (copyInputToOutputTM (n := n)).ComputesInTime id (fun m => m + 2) := by
   exact copyInputToOutputTM_computesInTime_internal n

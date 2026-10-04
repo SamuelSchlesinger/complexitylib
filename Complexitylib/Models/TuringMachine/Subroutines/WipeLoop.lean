@@ -13,8 +13,9 @@ public import Complexitylib.Models.TuringMachine.Subroutines.WipeStep
 
 `TM.forRegTM` drives a body an exact number of times off a dedicated unary fuel
 register. Running `TM.wipeStepTM` through it, fueled by a register holding `v`
-marks unrelated to any targeted tape's content, blanks the leading `v` cells of
-every target whatever was there.
+marks unrelated to any targeted tape's content, blanks the `v` cells starting at
+each target's head, whatever was there (cells `1 … v` when the head is parked at
+cell `1`; see `TM.wipedTape_cells_of_head_one`).
 
 ## Main results
 
@@ -159,9 +160,10 @@ theorem regIterCells_parked (v i : ℕ) : Parked (⟨i + 2, regCells v⟩ : Tape
   · split <;> decide
 
 /-- **The wipe loop.** Fueled by a register at `r` holding `v` marks (`r`
-disjoint from `targets`), `forRegTM (wipeStepTM targets) r` blanks the leading
-`v` cells of every tape in `targets`, leaving every other tape — including the
-fuel register itself — exactly as it was. -/
+disjoint from `targets`), `forRegTM (wipeStepTM targets) r` turns every tape in
+`targets` into `wipedTape` of it: the `v` cells starting at its head are blanked
+and the head ends `v` cells further right. Every other tape — including the fuel
+register itself — is left exactly as it was. -/
 theorem wipeLoop_hoareTime {n : ℕ} (targets : List (Fin n)) (r : Fin n)
     (hr : r ∉ targets) (v : ℕ) (inp₀ : Tape) (work₀ : Fin n → Tape)
     (hinp₀ : Parked inp₀)

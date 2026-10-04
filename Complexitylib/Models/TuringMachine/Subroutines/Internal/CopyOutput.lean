@@ -12,10 +12,10 @@ public import Complexitylib.Models.TuringMachine.Combinators.Internal.Generic
 /-!
 # Input-to-output copy correctness
 
-Exact simulation proof for `TM.copyInputToOutputTM`. Starting from the initial
+Simulation proof for `TM.copyInputToOutputTM`. Starting from the initial
 configuration on `x`, the machine skips the two left-end markers, copies one
-Boolean symbol per step, and halts at the first input blank after exactly
-`|x| + 2` steps with output `x`.
+Boolean symbol per step, and halts at the first input blank after `|x| + 2`
+steps with output `x`; the exported theorem records `m + 2` as an upper bound.
 
 The public theorem is stated in
 `Complexitylib.Models.TuringMachine.Subroutines.CopyOutput`.
@@ -139,8 +139,8 @@ private theorem copyInputToOutputTM_loop {n : ℕ} (x : List Bool) :
 
 /-! ## Initial-configuration correctness -/
 
-/-- Internal implementation theorem: the copy machine computes identity in
-the exact linear bound `m + 2`. -/
+/-- Internal implementation theorem: the copy machine computes identity within
+the linear bound `m + 2`. -/
 theorem copyInputToOutputTM_computesInTime_internal (n : ℕ) :
     (copyInputToOutputTM (n := n)).ComputesInTime id (fun m => m + 2) := by
   intro x

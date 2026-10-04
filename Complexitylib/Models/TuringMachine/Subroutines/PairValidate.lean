@@ -15,7 +15,7 @@ public import Complexitylib.Models.TuringMachine.Subroutines.PairValidate.Intern
 
 `pairValidateTM` is a total finite-state recognizer for the image of the
 library's self-delimiting `pair` codec. It rejects every malformed outer input
-and runs in exactly the generic scanner budget `n + 2`.
+and runs within the generic scanner budget `n + 2`.
 
 This complements `pairSplitCoreTM`: validate first when arbitrary input strings
 need rejecting semantics, then rewind and use the canonical splitter to stage
@@ -72,7 +72,7 @@ theorem pairValidateTM_decidesInTime :
   pairValidateTM_decidesInTime_internal
 
 /-- Adding arbitrary unused work tapes preserves the validator's language and
-exact linear time bound. This is the form used by larger machine pipelines. -/
+linear time bound `n + 2`. This is the form used by larger machine pipelines. -/
 theorem pairValidateTM_lift_decidesInTime (workTapes : ℕ) :
     (pairValidateTM.liftTM workTapes).DecidesInTime
       validPairEncoding (fun n => n + 2) :=

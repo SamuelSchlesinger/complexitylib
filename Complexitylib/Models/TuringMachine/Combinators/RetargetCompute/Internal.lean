@@ -100,9 +100,9 @@ private theorem computes_eq_nil_of_qstart_eq_qhalt (M : TM k)
       simp [hy, Tape.init] at hcell
       exact (False.elim ((Γ.ofBool_ne_blank bit) hcell.symm))
 
-/-- Exact virtual-input computation seam. The result time omits the source's
-first transition when that transition exists; an initially halted source uses
-zero steps. -/
+/-- Virtual-input computation seam crediting the saved first transition: the
+wrapper's run time plus one is at most the source's bound `T |y|`. For an
+initially halted source the credit is zero (the wrapper takes zero steps). -/
 theorem retargetInputStarted_computesVirtual_exact_internal (M : TM k)
     {f : List Bool → List Bool} {T : ℕ → ℕ}
     (hcomp : M.ComputesInTime f T) (y : List Bool) (realInput : Tape) :

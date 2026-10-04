@@ -28,7 +28,8 @@ subsequent behaviour is the source machine's, one step later.
 - `NTM.delayNTM` — the source machine with its first choice deferred by one step
 - `NTM.delayNTM_trace_embed` — after the delay, the two machines run in lockstep
 - `NTM.delayNTM_trace_two_initCfg` — two steps of the delayed machine reproduce one of the source
-- `NTM.delayNTM_allPathsHaltIn` — the delay costs two steps
+- `NTM.delayNTM_allPathsHaltIn` — halting within `f |x|` gives halting within `f |x| + 2`
+  (an upper bound; the delayed run lags the source by one step)
 - `NTM.delayNTM_acceptCount` — the delay doubles the count of accepting paths
 -/
 
@@ -214,8 +215,9 @@ theorem delayNTM_trace_two_initCfg (tm : NTM n) (x : List Bool)
   rfl
 
 
-/-- **A whole run of the delayed machine, from its initial configuration.** Two extra steps buy
-one step of the source machine, and thereafter the two run in lockstep. -/
+/-- **A whole run of the delayed machine, from its initial configuration.** The delayed machine's
+first two steps buy one step of the source machine, and thereafter the two run in lockstep, so
+the delayed run lags the source's by exactly one step. -/
 theorem delayNTM_trace_initCfg (tm : NTM n) (x : List Bool)
     (hne : tm.qstart ≠ tm.qhalt) (T : ℕ) (ch : Fin (T + 2) → Bool) :
     (delayNTM tm).trace (T + 2) ch ((delayNTM tm).initCfg x)
@@ -224,8 +226,9 @@ theorem delayNTM_trace_initCfg (tm : NTM n) (x : List Bool)
     NTM.trace_succ tm T (Fin.tail ch) (tm.initCfg x)]
   rfl
 
-/-- **The delay costs two steps.** Every path of the source machine that halts within `f |x|`
-steps has its delayed counterpart halted within `f |x| + 2`. -/
+/-- **The delay costs at most two steps.** Every path of the source machine that halts within
+`f |x|` steps has its delayed counterpart halted within `f |x| + 2`. The bound is not tight: by
+`delayNTM_trace_initCfg` the delayed run lags the source's by one step. -/
 theorem delayNTM_allPathsHaltIn (tm : NTM n) {f : ℕ → ℕ}
     (hall : tm.AllPathsHaltIn f) (hne : tm.qstart ≠ tm.qhalt) :
     (delayNTM tm).AllPathsHaltIn (fun m => f m + 2) := by

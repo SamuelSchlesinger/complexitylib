@@ -14,7 +14,7 @@ public import Complexitylib.Models.TuringMachine.Subroutines.PairValidate.Defs
 # Pair-encoding validator — proof internals
 
 The finite-state fold is related to `unpair?`, then the generic scanner
-correctness theorem supplies the executable machine proof and exact time bound.
+correctness theorem supplies the executable machine proof and the `n + 2` time bound.
 -/
 
 
@@ -54,8 +54,8 @@ theorem pairValidateAccept_fold_eq_true_iff_internal (bits : List Bool) :
   rw [pairValidate_fold_correct]
   rfl
 
-/-- The finite-state pair validator decides all well-formed pair encodings in
-the generic scanner's exact `n + 2` time bound. -/
+/-- The finite-state pair validator decides all well-formed pair encodings
+within the generic scanner's `n + 2` time bound. -/
 theorem pairValidateTM_decidesInTime_internal :
     pairValidateTM.DecidesInTime validPairEncoding (fun n => n + 2) := by
   apply scannerTM_decidesInTime .next pairValidateStep pairValidateAccept
