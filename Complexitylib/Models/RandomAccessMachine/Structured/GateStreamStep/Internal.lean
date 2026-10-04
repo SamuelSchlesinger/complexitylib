@@ -362,7 +362,7 @@ theorem marshal_ready_internal {gateStart nextPointer remaining base : ℕ}
   · exact marshal_base hparsed
   · intro index hindex
     rw [marshal_high store (base + index)]
-    · exact hparsed.wire_eq index
+    · exact hparsed.wire_eq index hindex
     · have hbase := hparsed.base_ge
       omega
 
@@ -808,9 +808,9 @@ private theorem decoders_internal {gateStart base : ℕ} {gate : CircuitCode.Raw
         have hcode := hready.memo_before_code
         simp only [spillRemainingReg] at hbase
         omega
-    · intro index
+    · intro index hindex
       rw [hpreserved (base + index)]
-      · exact hready.wire_eq index
+      · exact hready.wire_eq index hindex
       · have hbase := hready.base_ge
         simp only [spillRemainingReg] at hbase
         omega
@@ -1019,6 +1019,85 @@ theorem routine_exec_internal {gateStart base : ℕ}
   obtain ⟨cost, space, hexec⟩ := hexec
   exact ⟨final, cost, space, hexec, hfinalPointer, hfinalRemaining,
     hfinalBase, hfinalCount, hfinalAppended, hfinalWires, hfinalCode⟩
+
+theorem readyStore_ready_internal {gateStart base : ℕ}
+    (gate : CircuitCode.RawGate) (tail wires : List Bool)
+    (hbase : spillRemainingReg < base)
+    (hcode : base + wires.length < gateStart) :
+    Ready gateStart base gate tail wires
+      (readyStore gateStart base gate tail wires) := by
+  have hregs : ∀ index, base ≤ index →
+      index ≠ UnaryDecode.pointerReg ∧ index ≠ UnaryDecode.remainingReg ∧
+        index ≠ memoBaseReg ∧ index ≠ wireCountMetaReg := by
+    intro index hindex
+    simp only [spillRemainingReg] at hbase
+    simp only [UnaryDecode.pointerReg, UnaryDecode.remainingReg, memoBaseReg,
+      wireCountMetaReg]
+    omega
+  constructor
+  · exact hbase
+  · exact hcode
+  · simp [readyStore]
+  · simp [readyStore, UnaryDecode.pointerReg, UnaryDecode.remainingReg]
+  · simp [readyStore, UnaryDecode.pointerReg, UnaryDecode.remainingReg,
+      memoBaseReg]
+  · simp [readyStore, UnaryDecode.pointerReg, UnaryDecode.remainingReg,
+      memoBaseReg, wireCountMetaReg]
+  · intro delta
+    obtain ⟨h2, h3, h7, h8⟩ := hregs (gateStart + delta) (by omega)
+    simp [readyStore, h2, h3, h7, h8]
+  · intro index hindex
+    obtain ⟨h2, h3, h7, h8⟩ := hregs (base + index) (by omega)
+    have hgate : ¬ gateStart ≤ base + index := by omega
+    simp [readyStore, h2, h3, h7, h8, hgate]
+
+theorem readyStore_envelope_internal {gateStart base : ℕ}
+    (gate : CircuitCode.RawGate) (tail wires : List Bool)
+    (hbase : spillRemainingReg < base)
+    (hcode : base + wires.length < gateStart) :
+    StoreEnvelope (codeEnd gateStart gate tail) (codeEnd gateStart gate tail)
+      (readyStore gateStart base gate tail wires) := by
+  simp only [spillRemainingReg] at hbase
+  have hbits : ∀ (bits : List Bool) (i : ℕ),
+      (match bits[i]? with
+        | some bit => Input.bitValue bit
+        | none => 0) ≤ 1 := by
+    intro bits i
+    cases bits[i]? with
+    | none => simp
+    | some bit => cases bit <;> simp
+  have hend : gateStart ≤ codeEnd gateStart gate tail := by
+    simp only [codeEnd]
+    omega
+  constructor
+  · intro index hnonzero
+    simp only [codeEnd]
+    unfold readyStore at hnonzero
+    split_ifs at hnonzero with h2 h3 h7 h8 hgate hmemo
+    · simp only [UnaryDecode.pointerReg] at h2
+      omega
+    · simp only [UnaryDecode.remainingReg] at h3
+      omega
+    · simp only [memoBaseReg] at h7
+      omega
+    · simp only [wireCountMetaReg] at h8
+      omega
+    · by_contra hlt
+      rw [List.getElem?_eq_none (by omega)] at hnonzero
+      exact hnonzero rfl
+    · omega
+    · exact absurd rfl hnonzero
+  · intro index
+    unfold readyStore
+    split_ifs
+    · exact hend
+    · simp only [codeEnd]
+      omega
+    · omega
+    · omega
+    · exact (hbits _ _).trans (by omega)
+    · exact (hbits _ _).trans (by omega)
+    · omega
 
 end GateStreamStep
 

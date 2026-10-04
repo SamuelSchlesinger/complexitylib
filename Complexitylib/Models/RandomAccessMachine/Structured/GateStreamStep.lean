@@ -15,6 +15,10 @@ public import Complexitylib.Models.RandomAccessMachine.Structured
 This module exposes the split-layout gate routine used by the serialized-circuit
 experiment. Code and mutable memo occupy disjoint regions, so the exact same
 routine can be invoked again at the returned cursor.
+
+The calling convention `Ready` constrains only the occupied memo cells, the
+parser registers, and the code region; `ready_readyStore` exhibits a store
+meeting it, together with the store envelope, for every gate, tail, and memo.
 -/
 
 
@@ -27,6 +31,22 @@ namespace RAM
 namespace Structured
 
 namespace GateStreamStep
+
+/-- The calling convention is satisfiable for every gate, unread tail, and
+memo: whenever the memo lies above the continuation cells and below the code,
+the canonical `readyStore` satisfies `Ready` and the store envelope required by
+`routine_correct` and `compiled_correct`. In particular both theorems apply to
+AND and OR gates with arbitrary references and negation bits. -/
+theorem ready_readyStore {gateStart base : ℕ} (gate : CircuitCode.RawGate)
+    (tail wires : List Bool) (hbase : spillRemainingReg < base)
+    (hcode : base + wires.length < gateStart) :
+    Ready gateStart base gate tail wires
+        (readyStore gateStart base gate tail wires) ∧
+      Internal.StoreEnvelope (codeEnd gateStart gate tail)
+        (codeEnd gateStart gate tail)
+        (readyStore gateStart base gate tail wires) :=
+  ⟨readyStore_ready_internal gate tail wires hbase hcode,
+    readyStore_envelope_internal gate tail wires hbase hcode⟩
 
 /-- Consume and evaluate one gate while preserving the unread code tail and
 advancing the independent mutable memo. -/

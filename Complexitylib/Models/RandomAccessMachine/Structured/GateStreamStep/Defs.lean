@@ -154,12 +154,33 @@ structure Ready (gateStart base : ℕ) (gate : CircuitCode.RawGate)
       match (codeBits gate tail)[delta]? with
       | some bit => Input.bitValue bit
       | none => 0
-  /-- Existing memo contents. -/
-  wire_eq : ∀ index,
+  /-- Existing memo contents. Only the `wires.length` occupied cells are
+  constrained; the append cell and the gap below the code are arbitrary. -/
+  wire_eq : ∀ index, index < wires.length →
     store (base + index) =
       match wires[index]? with
       | some bit => Input.bitValue bit
       | none => 0
+
+/-- A canonical store in the `Ready` layout: the parser cursor and memo
+metadata registers, the memo bits from `base`, and the current gate followed by
+its unread tail from `gateStart`. Every other register is zero. The surface
+theorem `ready_readyStore` shows that it satisfies `Ready` for every gate. -/
+def readyStore (gateStart base : ℕ) (gate : CircuitCode.RawGate)
+    (tail wires : List Bool) : Store := fun index =>
+  if index = UnaryDecode.pointerReg then gateStart
+  else if index = UnaryDecode.remainingReg then (codeBits gate tail).length
+  else if index = memoBaseReg then base
+  else if index = wireCountMetaReg then wires.length
+  else if gateStart ≤ index then
+    match (codeBits gate tail)[index - gateStart]? with
+    | some bit => Input.bitValue bit
+    | none => 0
+  else if base ≤ index then
+    match wires[index - base]? with
+    | some bit => Input.bitValue bit
+    | none => 0
+  else 0
 
 /-- Calling convention immediately before `marshalOps`, after both references
 have been decoded successfully. -/
@@ -193,8 +214,8 @@ structure Parsed (gateStart nextPointer remaining base : ℕ)
   negated0_eq : store (gateStart + 1) = Input.bitValue gate.negated₀
   /-- Second-negation header bit. -/
   negated1_eq : store (gateStart + 2) = Input.bitValue gate.negated₁
-  /-- Existing memo contents. -/
-  wire_eq : ∀ index,
+  /-- Existing memo contents, constrained only on the occupied cells. -/
+  wire_eq : ∀ index, index < wires.length →
     store (base + index) =
       match wires[index]? with
       | some bit => Input.bitValue bit

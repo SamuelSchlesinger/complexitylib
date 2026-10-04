@@ -251,7 +251,9 @@ proved in `…/Internal`; the soundness of the cost convention is established in
 - `RAM.Structured.GateStreamStep.compiled_correct` — the bounded split-layout
   admission test: one routine consumes a gate from an arbitrary unread stream,
   advances a separate memo, preserves the tail, and transfers its exact source
-  execution and resource measurements to concrete RAM execution.
+  execution and resource measurements to concrete RAM execution;
+  `GateStreamStep.ready_readyStore` shows its calling convention holds for
+  every gate, tail, and memo.
 
 ## Relationship to the Turing-machine models
 
