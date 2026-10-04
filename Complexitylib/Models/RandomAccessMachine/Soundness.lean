@@ -20,9 +20,11 @@ number has `2 ^ k + 1` binary digits, so any Turing machine needs at least
 stronger than Turing time, and the two models are **not** polynomially
 equivalent.
 
-`RAM.logGap_squaring` proves exactly this gap for the squaring program family
-`RAM.sqProg`: on the same run, the unit time is `k + 1` while the logarithmic
-time (`RAM.logTimeUpto`, which charges each instruction the bit-length of the
+`RAM.logGap_squaring` proves exactly this gap for the concrete squaring program
+family `RAM.sqProg`, whose only literal is the constant `2`: on the same run
+from the all-zero configuration `RAM.sqStart`, register `1` reaches
+`2 ^ (2 ^ k)` and the unit time is `k + 1`, while the logarithmic time
+(`RAM.logTimeUpto`, which charges each instruction the bit-length of the
 numbers it manipulates) is at least `2 ^ k`. This is why the library adopts the
 logarithmic cost measure and never the unit-cost one — the difference is not a
 convention but the boundary between a sound Turing-equivalent model and a
@@ -129,33 +131,52 @@ private theorem sqRun_not_halted {k : ℕ} {j : ℕ} (hj : j ≤ k) :
   | succ j => rw [sqProg_getElem_succ (by omega)]; decide
 
 /-- The **unit-vs-logarithmic gap** for the squaring family. On the run of the
-    `k`-fold squaring program `sqProg k` for `k + 1` steps:
+    `k`-fold squaring program `sqProg k` from the all-zero configuration
+    `sqStart` for `k + 1` steps:
 
     * the machine halts;
+    * register `1` holds `2 ^ (2 ^ k)`, a number with `2 ^ k + 1` bits;
     * the **unit** time is `k + 1` (linear in `k`);
     * the **logarithmic** time is at least `2 ^ k` (exponential in `k`).
 
+    The only literal in `sqProg k` is the constant `2` of its first `imm`, so
+    the large value is produced by the `k` multiplications rather than loaded.
     Hence any complexity measure based on unit cost differs super-polynomially
     from logarithmic cost, and only the logarithmic measure is polynomially
     related to Turing-machine time. This is the formal justification for the
     library's cost convention. -/
-theorem logGap_squaring {k : ℕ} (hk : 1 ≤ k) :
-    ∃ (P : Program) (c : Cfg),
-      Halted P (run P (k + 1) c) ∧
-      unitTimeUpto P (k + 1) c = k + 1 ∧
-      2 ^ k ≤ logTimeUpto P (k + 1) c := by
-  obtain ⟨m, rfl⟩ : ∃ m, k = m + 1 := ⟨k - 1, by omega⟩
-  refine ⟨sqProg (m + 1), sqStart, ?_, ?_, ?_⟩
-  · -- Halted after m + 2 steps: program counter reaches the end.
-    rw [sqRun (m + 1) (le_refl _)]
-    show curInstr (sqProg (m + 1)) (sqCfg (m + 1)) = Instr.halt
+theorem logGap_squaring (k : ℕ) :
+    Halted (sqProg k) (run (sqProg k) (k + 1) sqStart) ∧
+      (run (sqProg k) (k + 1) sqStart).regs 1 = 2 ^ 2 ^ k ∧
+      unitTimeUpto (sqProg k) (k + 1) sqStart = k + 1 ∧
+      2 ^ k ≤ logTimeUpto (sqProg k) (k + 1) sqStart := by
+  refine ⟨?_, ?_, ?_, ?_⟩
+  · -- Halted after k + 1 steps: program counter reaches the end.
+    rw [sqRun k (le_refl _)]
+    show curInstr (sqProg k) (sqCfg k) = Instr.halt
     unfold curInstr
-    have hlen : (sqProg (m + 1)).length ≤ m + 2 := by rw [sqProg_length]
-    rw [show (sqCfg (m + 1)).pc = m + 2 from rfl, List.getElem?_eq_none hlen]
+    have hlen : (sqProg k).length ≤ k + 1 := by rw [sqProg_length]
+    rw [show (sqCfg k).pc = k + 1 from rfl, List.getElem?_eq_none hlen]
     rfl
-  · -- Unit time is exactly the fuel: no halt in the first m + 2 steps.
+  · -- Register 1 holds the k-th iterated square of 2.
+    rw [sqRun k (le_refl _)]
+    simp [sqCfg]
+  · -- Unit time is exactly the fuel: no halt in the first k + 1 steps.
     exact unitTimeUpto_eq_of_not_halted _ _ _ (fun j hj => sqRun_not_halted (by omega))
-  · -- Logarithmic time is at least 2 ^ (m + 1): the final squaring step alone
+  cases k with
+  | zero =>
+    -- One step: the initial `imm 1 2` alone costs `bitlen 2 + 1 = 3`.
+    have hcur : curInstr (sqProg 0) sqStart = Instr.imm 1 2 := by
+      unfold curInstr; rw [show sqStart.pc = 0 from rfl, sqProg_getElem_zero]; rfl
+    have hnh : ¬ Halted (sqProg 0) sqStart := by
+      unfold Halted; rw [hcur]; decide
+    rw [show (0 + 1 : ℕ) = 0 + 1 from rfl, logTimeUpto_succ, ite_eq_right hnh,
+      logTimeUpto_zero, Nat.add_zero]
+    unfold stepLogCost
+    rw [hcur]
+    simp [Instr.logCost]
+  | succ m =>
+    -- Logarithmic time is at least 2 ^ (m + 1): the final squaring step alone
     -- costs at least the bit-length of 2 ^ (2 ^ (m + 1)) = 2 ^ (m + 1) + 1.
     have hsplit : logTimeUpto (sqProg (m + 1)) (m + 1 + 1) sqStart =
         logTimeUpto (sqProg (m + 1)) (m + 1) sqStart +

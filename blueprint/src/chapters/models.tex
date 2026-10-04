@@ -748,14 +748,16 @@ depend on the Turing-machine conventions.
   \lean{Complexity.RAM.logGap_squaring}
   \leanok
   \uses{def:models-ram}
-  For every $k \ge 1$ there are a program and a configuration whose run halts
-  after $k + 1$ steps, with unit time exactly $k + 1$ and logarithmic time at
-  least $2^k$.
+  For every $k$, the program that loads the constant $2$ into $R_1$ and then
+  executes $R_1 := R_1 \cdot R_1$ $k$ times, run from the all-zero
+  configuration, halts after $k + 1$ steps with $R_1 = 2^{2^k}$, unit time
+  exactly $k + 1$, and logarithmic time at least $2^k$.
 \end{theorem}
 \begin{proof}
   \leanok
-  Load $2$ into a register and square it $k$ times; the last multiplication
-  writes $2^{2^k}$, which has $2^k + 1$ bits.
+  After $j + 1$ steps $R_1 = 2^{2^j}$. For $k \ge 1$ the last multiplication
+  writes $2^{2^k}$, which has $2^k + 1$ bits; for $k = 0$ the single load
+  costs $3$.
 \end{proof}
 
 \begin{theorem}[Turing machines to RAMs]

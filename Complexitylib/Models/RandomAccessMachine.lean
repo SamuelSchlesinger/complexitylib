@@ -89,11 +89,12 @@ proved in `…/Internal`; the soundness of the cost convention is established in
 
 ## Main results
 
-- `RAM.logGap_squaring` — the **soundness theorem**: the squaring program family
-  has unit time `k + 1` but logarithmic time at least `2 ^ k`, so unit cost is
-  super-polynomially stronger than logarithmic cost. This is the formal reason
-  the library measures RAM time logarithmically and only then compares it to
-  Turing time.
+- `RAM.logGap_squaring` — the **soundness theorem**: the squaring program
+  `RAM.sqProg k` (load the literal `2`, then square it `k` times) builds
+  `2 ^ (2 ^ k)` with unit time `k + 1` but logarithmic time at least `2 ^ k`,
+  so unit cost is super-polynomially stronger than logarithmic cost. This is
+  the formal reason the library measures RAM time logarithmically and only then
+  compares it to Turing time.
 - `RAM.unitTimeUpto_le_logTimeUpto` — the step count is always at most the
   logarithmic time (every step costs `≥ 1`).
 - `RAM.Program.DecidesInTime.mono` — deciding is monotone in the time bound.
@@ -271,17 +272,18 @@ Theoretical Computer Science A, 1990):
 
 Both overheads are polynomial, so `RAM.DTIME` and `DTIME` yield the *same*
 polynomial-time class: `RAM-P = P`. Under the **unit-cost** measure the
-RAM → TM direction fails — `RAM.logGap_squaring` exhibits a program whose
-unit-time is linear but whose output already needs exponentially many Turing
-steps to write — which is precisely why the model is defined with logarithmic
-cost. The bounded dense transition block is proved end to end, including
-selected actions, nested dispatch, concrete compilation, and explicit resource
-bounds. That block is a bounded program family: its register layout depends on
-the tape window, so it cannot by itself witness `RAM.DTIME`, whose program must
-be fixed. The uniform replacement now has a fixed sparse interleaved
-representation, checked runtime address/loading and action/dispatch layers, a
-fixed compiled loop that follows an arbitrary exact halting TM run, and a
-checked public-ABI marshaller and verdict extractor. The remaining TM-to-RAM
+RAM → TM direction fails — by `RAM.logGap_squaring`, the squaring program
+`RAM.sqProg k` builds `2 ^ (2 ^ k)` in `k + 1` unit-cost steps, while a Turing
+machine needs at least `2 ^ k` steps merely to write its binary digits — which
+is precisely why the model is defined with logarithmic cost. The bounded dense
+transition block is proved end to end, including selected actions, nested
+dispatch, concrete compilation, and explicit resource bounds. That block is a
+bounded program family: its register layout depends on the tape window, so it
+cannot by itself witness `RAM.DTIME`, whose program must be fixed. The uniform
+replacement now has a fixed sparse interleaved representation, checked runtime
+address/loading and action/dispatch layers, a fixed compiled loop that follows
+an arbitrary exact halting TM run, and a checked public-ABI marshaller and
+verdict extractor. The remaining TM-to-RAM
 work is now narrower: the repeated sparse core and complete public
 marshaller/extractor share a concrete envelope, a linear-times-word-width cost
 theorem, and a checked logarithmic word-width bound. The fixed compiled program
