@@ -24,9 +24,10 @@ public import Mathlib.Data.Fintype.Powerset
 * `Tensor3.weightedLMTensor k` is the Landsberg–Michałek tensor `T_k(lmWeight k)` with these
   doubly exponential weights.
 * `Tensor3.periodicWeight k A M a j = 2^{2^{(a mod A) M + (j mod M)}}` are periodic
-  coefficients: the exponent codes the position `(a, j)` only modulo `(A, M)`, so it lies below
-  `A M` whatever `k` is. `Tensor3.periodicLMTensor k A M` is `T_k(periodicWeight k A M)`; its
-  entries lie in the set `{0} ∪ {2^{2^e} : e < A M}`, which does not depend on `k`.
+  coefficients: the exponent codes the position `(a, j)` only modulo `(A, M)`, so for
+  `A, M > 0` it lies below `A M` whatever `k` is. `Tensor3.periodicLMTensor k A M` is
+  `T_k(periodicWeight k A M)`; for `A, M > 0` its entries lie in the set
+  `{0} ∪ {2^{2^e} : e < A M}`, which does not depend on `k`.
 * `Tensor3.selectSlices c` is the matrix of the linear map `ℂ^α → ℂ^{α'}` keeping the coordinates
   `c t`; applied to the first factor, `map (selectSlices c) 1 1 T` keeps the slices `c t` of `T`.
   For a strictly increasing `c : Fin (2p+1) → Fin (2k+1)` (a *cluster* of slices) it projects
@@ -82,7 +83,7 @@ def periodicWeight (k A M : ℕ) (a j : Fin (2 * k + 1)) : ℂ :=
 
 /-- The periodic Landsberg–Michałek tensor `T_k(periodicWeight k A M)`: its `(a, j, ℓ)`
 coordinate is `2^{2^{(a mod A) M + (j mod M)}}` if `ℓ = j + (a - k)` and `0` otherwise. For
-fixed `A` and `M` its entries come from a finite set independent of `k`. -/
+fixed `A, M > 0` its entries come from a finite set independent of `k`. -/
 def periodicLMTensor (k A M : ℕ) :
     Tensor3 (Fin (2 * k + 1)) (Fin (2 * k + 1)) (Fin (2 * k + 1)) :=
   lmTensor k (periodicWeight k A M)

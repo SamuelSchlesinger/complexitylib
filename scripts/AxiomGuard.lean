@@ -216,6 +216,9 @@ def headlineTheorems : List Name := [
   `Algebraic.Tensor3.not_borderRankLE_map_diagonal_weightedLMTensor,
   `Algebraic.Tensor3.choose_mul_le_borderRank_mul_weightedLMTensor,
   `Algebraic.Tensor3.sumSpread_clusterOffsets_le,
+  `Algebraic.Tensor3.subsetSumSpread_le_sumSpread,
+  `Algebraic.Tensor3.subsetSumSpread_le,
+  `Algebraic.Tensor3.subsetSumSpread_clusterOffsets_le,
   -- Border rank: the paired-cluster Koszul certificate (two tiles) for weighted L–M tensors
   `Matrix.card_mul_card_le_rank_of_det_blocks_ne_zero_of_lt,
   `Algebraic.Tensor3.choose_mul_card_le_rank_koszulFlattening_weightedShifts_of_shifts,
@@ -226,6 +229,9 @@ def headlineTheorems : List Name := [
   `Algebraic.Tensor3.choose_mul_le_borderRank_mul_restrictSlices_pairedClusters,
   `Algebraic.Tensor3.choose_mul_phi_sub_le_borderRank_mul_restrictSlices,
   `Algebraic.Tensor3.div_mul_phi_sub_le_borderRank_restrictSlices,
+  `Algebraic.Tensor3.choose_mul_le_rank_koszulFlattening_pairedClusters_lmTensor,
+  `Algebraic.Tensor3.choose_mul_phi_sub_le_borderRank_mul_restrictSlices_lmTensor,
+  `Algebraic.Tensor3.div_mul_phi_sub_le_borderRank_restrictSlices_lmTensor,
   -- The deletion game: the global step of the 7/3 border-rank program (conditional on the
   -- paired-cluster hypothesis `DeletionGame.PairedClusterBound`)
   `Algebraic.Tensor3.DeletionGame.two_mul_card_filter_phi_le,
@@ -235,10 +241,14 @@ def headlineTheorems : List Name := [
   `Algebraic.Tensor3.Tight.not_borderRankLE_of_pairedClusterBound,
   -- The explicit border-rank bound (7/3 - ε) m for the weighted L–M tensors
   `Algebraic.exists_strictMono_injective_sum,
+  `Algebraic.Tensor3.tight_lmTensor,
+  `Algebraic.Tensor3.lmTensor_ne_zero,
   `Algebraic.Tensor3.tight_weightedLMTensor,
   `Algebraic.Tensor3.weightedLMTensor_ne_zero,
   `Algebraic.Tensor3.exists_strictMono_cluster_posBlock,
   `Algebraic.Tensor3.exists_strictMono_cluster_negBlock,
+  `Algebraic.Tensor3.PairedKoszulBoundOn.pairedClusterBound,
+  `Algebraic.Tensor3.PairedKoszulBoundOn.le_borderRank,
   `Algebraic.Tensor3.PairedKoszulBound.pairedClusterBound,
   `Algebraic.Tensor3.PairedKoszulBound.le_borderRank_weightedLMTensor,
   `Algebraic.Tensor3.pairedKoszulBound,
@@ -247,6 +257,17 @@ def headlineTheorems : List Name := [
   `Algebraic.Tensor3.eventually_nineteen_div_nine_sub_mul_le_borderRank_weightedLMTensor,
   `Algebraic.Tensor3.eventually_twentyOne_div_ten_mul_le_borderRank_weightedLMTensor,
   `Algebraic.Tensor3.eventually_seven_div_three_sub_mul_le_borderRank_weightedLMTensor,
+  -- The same bounds for periodic L–M tensors, with entries from a fixed finite set
+  `Algebraic.Tensor3.periodicLMTensor_apply_mem,
+  `Algebraic.Tensor3.tight_periodicLMTensor,
+  `Algebraic.Tensor3.periodicLMTensor_ne_zero,
+  `Algebraic.Tensor3.pairedKoszulBoundOn_periodicLMTensor,
+  `Algebraic.Tensor3.le_borderRank_periodicLMTensor,
+  `Algebraic.Tensor3.eventually_sub_mul_le_borderRank_periodicLMTensor,
+  `Algebraic.Tensor3.exists_eventually_sub_mul_le_borderRank_periodicLMTensor,
+  `Algebraic.Tensor3.eventually_twentyOne_div_ten_mul_le_borderRank_periodicLMTensor,
+  `Algebraic.Tensor3.exists_eventually_twentyOne_div_ten_mul_le_borderRank_periodicLMTensor,
+  `Algebraic.Tensor3.exists_eventually_seven_div_three_sub_mul_le_borderRank_periodicLMTensor,
   -- Korten's top-down parity lower bounds and the majority extension
   `Complexity.KarchmerWigderson.parity_communication_lower_bound,
   `Complexity.Circuit.parity_wire_lower_bound,
