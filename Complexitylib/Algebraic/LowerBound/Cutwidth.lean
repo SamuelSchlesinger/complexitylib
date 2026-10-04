@@ -55,6 +55,7 @@ public import Complexitylib.Algebraic.LowerBound.Cutwidth.SingleCut
 public import Complexitylib.Algebraic.LowerBound.Cutwidth.MultiOutput.Ordering
 public import Complexitylib.Algebraic.LowerBound.Cutwidth.MultiOutput.Rank
 public import Complexitylib.Algebraic.LowerBound.Cutwidth.MultiOutput.TotallyRegular
+public import Complexitylib.Algebraic.LowerBound.Cutwidth.MultiOutput.Quadratic
 public import Complexitylib.Algebraic.LowerBound.Cutwidth.Extractor
 public import Complexitylib.Algebraic.LowerBound.Cutwidth.Extractor.Padding
 public import Complexitylib.Algebraic.LowerBound.Cutwidth.Extractor.Padding.Asymptotics
@@ -349,6 +350,12 @@ a linear map `x ↦ M x` over a finite field below by
 finite field computing a totally regular `N × N` map, such as an explicit
 Cauchy matrix over `ZMod q`, has more than `(1 + 1/(2 κ_E) - ε) N ≥ (41/9 - ε) N`
 gates for all large `N`.
+`MultiOutput.Quadratic` proves the single-output analogue for quadratic forms
+`x ↦ xᵀ M x`: every split is crossed by at least `rank (M + Mᵀ)[X_S, X_T]`
+signals, so a fan-in-two circuit over a finite field computing such a form with
+`M + Mᵀ` totally regular, such as the Hankel Cauchy matrix `1 / (i + j + 2)` over
+`ZMod q`, has more than `(1 + 1/(4 κ_E) - ε) N ≥ (25/9 - ε) N` gates for all
+large `N`.
 
 `Bisection.Helpful` completes the graph theorem. Its proof uses the first
 boundary normalization phase, a partition into bounded connected clusters,
