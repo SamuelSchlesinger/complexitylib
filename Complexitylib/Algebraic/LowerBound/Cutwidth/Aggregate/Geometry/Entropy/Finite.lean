@@ -65,6 +65,18 @@ def WeightBound.mono {X Y : Type*} [Fintype X] [Fintype Y]
       exact le_trans (mul_le_mul_of_nonpos_left hab
         (neg_nonpos.mpr (Nat.cast_nonneg _))) bound.log_bound }
 
+/-- Reuse a weight when changing the message only increases its pointwise weight. -/
+def WeightBound.ofPointwiseWeightLE {X Y : Type*} [Fintype X] [Fintype Y]
+    {key : X → Y} {cost : ℝ} (bound : WeightBound key cost) (next : X → Y)
+    (increase : ∀ x, bound.weight (key x) ≤ bound.weight (next x)) :
+    WeightBound next cost where
+  weight := bound.weight
+  nonneg := bound.nonneg
+  mass := bound.mass
+  positive x := lt_of_lt_of_le (bound.positive x) (increase x)
+  log_bound := le_trans bound.log_bound
+    (Finset.sum_le_sum fun x _ => Real.log_le_log (bound.positive x) (increase x))
+
 /-- Increasing a conditional cost preserves its certificate. -/
 def ConditionalWeightBound.mono {X Y Z : Type*} [Fintype X] [Fintype Y]
     {key : X → Y} {parent : X → Z} {a b : ℝ}

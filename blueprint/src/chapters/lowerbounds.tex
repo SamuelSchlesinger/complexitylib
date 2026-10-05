@@ -10610,6 +10610,36 @@ Theorem~\ref{thm:lowerbounds-algebraic-explicit-four-n}.
   gate saving in the joint message bound.
 \end{definition}
 
+\begin{theorem}[An exact overlap cap for actual Boolean features]
+  \label{thm:lowerbounds-algebraic-geometry-actual-pair-entropy}
+  \lean{Algebraic.Cutwidth.Aggregate.Geometry.Entropy.pairEntropyCost,
+    Algebraic.Cutwidth.Aggregate.Geometry.Entropy.SignedEdge.dominatedPairWeightBound,
+    Algebraic.Cutwidth.Aggregate.Geometry.Entropy.pairEntropySaving_pos}
+  \leanok
+  Let $A_1,A_2$ be signed conjunctions on two distinct primary coordinates
+  each, with intersecting supports, under uniform independent primary bits.
+  Suppose Boolean features $Y_i$ satisfy $Y_i\le A_i$ pointwise. The features
+  may otherwise depend arbitrarily on all primary coordinates. There is a
+  normalized finite weight certificate for $(Y_1,Y_2)$ of natural-log cost
+  \[
+    J=3\log 2-\tfrac58\log 5
+      =H(5/8,1/8,1/8,1/8).
+  \]
+  The saving $2H(1/4,3/4)-J$ is strictly positive. Constant false features
+  are allowed, so this is not a positive lower bound on mutual information.
+\end{theorem}
+\begin{proof}
+  \leanok
+  For compatible literal patterns, use weights $(5/8,1/8,1/8,1/8)$ in
+  the order $(00,01,10,11)$. For incompatible patterns, use
+  $(1/2,1/4,1/4,0)$, whose cost is at most $J$. Exact two- and three-bit
+  truth tables cover equal supports and one-coordinate intersections.
+  Both weights increase when either Boolean coordinate changes from true
+  to false. Replacing $A_i$ by any dominated $Y_i$ therefore preserves the
+  average logarithmic weight bound, even when the extra predicates depend
+  on every primary bit. The strict saving reduces to $3^{12}<2^8 5^5$.
+\end{proof}
+
 \begin{theorem}[The finite joint-message inequality]
   \label{thm:lowerbounds-algebraic-geometry-joint-finite}
   \lean{Algebraic.Cutwidth.Aggregate.Geometry.Entropy.Graph.input_le_cost_of_fibres,
