@@ -73,6 +73,7 @@ public import Complexitylib.Circuits.EssentialInput
 public import Complexitylib.Circuits.Shannon
 public import Complexitylib.Circuits.Shallow
 public import Complexitylib.Circuits.LowerBound
+public import Complexitylib.Circuits.Frontier
 public import Complexitylib.Circuits.Schnorr
 public import Complexitylib.Circuits.DepthClasses
 public import Complexitylib.Circuits.AC0
@@ -270,6 +271,8 @@ Theorem modules (re-export definitions + main results):
 * `Complexitylib.Circuits.Shallow` — the Lecomte--Ramakrishnan shallow-circuit
   upper bound for symmetric functions, directly in CSLib's circuit model
 * `Complexitylib.Circuits.LowerBound` — gate elimination lower bound
+* `Complexitylib.Circuits.Frontier` — the frontier method: circuit lower bounds from
+  graph layouts over any finite alphabet, basis, and fan-in
 * `Complexitylib.Circuits.Schnorr` — Schnorr's XOR lower bound
 * `Complexitylib.Circuits.Nondeterminism` — nondeterministic quantification complexity bounds
 * `Complexitylib.Circuits.Valiant` — Valiant's depth reduction lemma for digraphs
