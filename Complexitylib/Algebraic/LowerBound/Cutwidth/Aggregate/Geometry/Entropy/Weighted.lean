@@ -133,6 +133,33 @@ theorem sum_log_bitWeight_ge {X : Type*} [Fintype X] (bit : X → Bool)
     simp only [↓reduceIte, biasSaving, entropy]
     nlinarith [mul_nonneg (sub_nonneg.mpr hb) (sub_nonneg.mpr logs)]
 
+/-- A product log weight charges every biased coordinate without assuming independence. -/
+theorem sum_log_messageWeight_ge {X ι : Type*} [Fintype X] [Fintype ι]
+    (key : X → (ι → Bool)) (biased : Finset ι) (rare : ι → Bool)
+    (bias : ∀ i ∈ biased,
+      4 * (Finset.univ.filter fun x => key x i = rare i).card ≤ Fintype.card X) :
+    -(Fintype.card X : ℝ) * (Fintype.card ι * Real.log 2 -
+      biased.card * biasSaving) ≤
+      ∑ x, Real.log (messageWeight (fun i => decide (i ∈ biased)) rare (key x)) := by
+  let tag (i : ι) : Bool := decide (i ∈ biased)
+  let weight := messageWeight tag rare
+  have hh := Finset.sum_le_sum (s := Finset.univ) fun i _ =>
+    sum_log_bitWeight_ge (fun x => key x i) (rare i) (tag i)
+      (fun hi => bias i (by simpa [tag] using hi))
+  have logs (x : X) : Real.log (weight (key x)) =
+      ∑ i, Real.log (bitWeight (tag i) (rare i) (key x i)) :=
+    Real.log_prod fun i _ => (bitWeight_pos _ _ _).ne'
+  change -(Fintype.card X : ℝ) * (Fintype.card ι * Real.log 2 -
+    biased.card * biasSaving) ≤ ∑ x, Real.log (weight (key x))
+  simp_rw [logs]
+  rw [Finset.sum_comm]
+  convert hh using 1
+  simp only [Finset.sum_add_distrib, Finset.sum_const, Finset.card_univ,
+    nsmul_eq_mul, tag, decide_eq_true_eq]
+  rw [Finset.sum_ite_mem]
+  simp only [Finset.sum_const, nsmul_eq_mul, Finset.univ_inter]
+  ring
+
 /-- A product distribution yields the exact entropy saving without independence assumptions. -/
 theorem log_card_le_of_fibres_and_bias {X ι : Type*} [Fintype X] [Nonempty X]
     [Fintype ι] (key : X → (ι → Bool)) (biased : Finset ι) (rare : ι → Bool)
@@ -155,22 +182,7 @@ theorem log_card_le_of_fibres_and_bias {X ι : Type*} [Fintype X] [Nonempty X]
   have upper := sum_log_le_of_sum_le (fun x => weight (key x))
     (fun x => messageWeight_pos tag rare _) (div_pos hKR hN)
     (by simpa only [mul_div_cancel₀ _ hN.ne'] using mass)
-  have lower : -(Fintype.card X : ℝ) * (Fintype.card ι * Real.log 2 -
-      biased.card * biasSaving) ≤ ∑ x, Real.log (weight (key x)) := by
-    have hh := Finset.sum_le_sum (s := Finset.univ) fun i _ =>
-      sum_log_bitWeight_ge (fun x => key x i) (rare i) (tag i)
-        (fun hi => bias i (by simpa [tag] using hi))
-    have logs (x : X) : Real.log (weight (key x)) =
-        ∑ i, Real.log (bitWeight (tag i) (rare i) (key x i)) :=
-      Real.log_prod fun i _ => (bitWeight_pos _ _ _).ne'
-    simp_rw [logs]
-    rw [Finset.sum_comm]
-    convert hh using 1
-    simp only [Finset.sum_add_distrib, Finset.sum_const, Finset.card_univ,
-      nsmul_eq_mul, tag, decide_eq_true_eq]
-    rw [Finset.sum_ite_mem]
-    simp only [Finset.sum_const, nsmul_eq_mul, Finset.univ_inter]
-    ring
+  have lower := sum_log_messageWeight_ge key biased rare bias
   rw [Real.log_div hKR.ne' hN.ne'] at upper
   nlinarith
 
