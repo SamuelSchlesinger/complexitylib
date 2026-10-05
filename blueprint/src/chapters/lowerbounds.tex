@@ -9482,12 +9482,110 @@ are proved above. Their eventual sublinear entropy and bounded uniform evaluator
 give the concrete polynomial-time family in
 Theorem~\ref{thm:lowerbounds-algebraic-explicit-four-n}.
 
+\begin{definition}[Constraint networks, realized patterns, and determining sets]
+  \label{def:lowerbounds-algebraic-network}
+  \lean{Algebraic.Cutwidth.Network,
+    Algebraic.Cutwidth.Network.Computes,
+    Algebraic.Cutwidth.Network.pastSet,
+    Algebraic.Cutwidth.Network.futureSet,
+    Algebraic.Cutwidth.Network.realized,
+    Algebraic.Cutwidth.Network.Determines,
+    Algebraic.Cutwidth.Network.charged}
+  \leanok
+  A \emph{constraint network} on $n$ variables is a multigraph whose vertices
+  carry local checks on the bits written on their incident edges, with a port
+  (a vertex and an incident edge) for every variable it reads. It computes
+  $f$ when the accepted inputs are exactly those admitting an edge assignment
+  that satisfies every check and carries the input on every port. For a
+  prefix $L$ of a vertex ordering and a cut assignment $\sigma$, the
+  \emph{past set} consists of the assignments to the variables read in $L$
+  that extend to an edge assignment satisfying the checks of $L$ and agreeing
+  with $\sigma$ on the cut; the \emph{future set} is defined symmetrically.
+  The patterns \emph{realized} on an edge set $C$ are the restrictions to $C$
+  of satisfying edge assignments. A subset $T$ \emph{determines} $C$ when two
+  satisfying assignments that agree on $T$ agree on $C$. The edges
+  \emph{charged} at a vertex are the cut before it and its incident edges.
+\end{definition}
+
+\begin{lemma}[Cut counting]
+  \label{lem:lowerbounds-algebraic-cut-counting}
+  \lean{Algebraic.Cutwidth.Network.accepted_of_mem_pastSet_of_mem_futureSet,
+    Algebraic.Cutwidth.Network.card_realized_le_of_determines,
+    Algebraic.Cutwidth.Network.card_accepting_le_of_realized,
+    Algebraic.Cutwidth.Network.card_accepting_le}
+  \leanok
+  \uses{def:lowerbounds-algebraic-network}
+  Let a network compute a $K$-rectangle-free function $f$, $K>1$, and fix a
+  vertex ordering. If a subset $T\subseteq C$ determines $C$, at most
+  $2^{|T|}$ patterns are realized on $C$. If at most $P$ patterns are
+  realized on the edges charged at every vertex, then either the final past
+  set is small, so that fewer than $K\cdot 2^{n-n'}$ inputs are accepted,
+  where $n'$ variables are read, or
+  \[
+    |f^{-1}(1)| \le |V|\cdot P\cdot (K-1)^2 .
+  \]
+  With every prefix cut of size at most $w$ and every degree at most three,
+  $P=2^{w+3}$ is admissible.
+\end{lemma}
+\begin{proof}
+  \leanok
+  Gluing a past and a future assignment of one cut assignment yields an
+  accepted input, so the past and future sets form a one-rectangle and one
+  of them has fewer than $K$ elements. Charge every accepted input to the
+  first vertex at which the past set of its satisfying assignment reaches
+  size $K$; the past set before that vertex and the future set after it are
+  both small. The key of an input is that vertex and the realized pattern on
+  its charged edges, which contain both cuts and the ports read at the
+  vertex, so at most $(K-1)^2$ inputs share a key and there are at most
+  $|V|\cdot P$ keys. Restriction to a determining subset is injective on
+  realized patterns.
+\end{proof}
+
+\begin{lemma}[The wiring network and its generators]
+  \label{lem:lowerbounds-algebraic-wiring-generators}
+  \lean{Algebraic.Cutwidth.Wiring.network_computes,
+    Algebraic.Cutwidth.Wiring.maxDegreeLE_three,
+    Algebraic.Cutwidth.Wiring.connected,
+    Algebraic.Cutwidth.Wiring.card_vertex_le_two_mul_size,
+    Algebraic.Cutwidth.Wiring.card_edge_sub_card_vertex,
+    Algebraic.Cutwidth.Wiring.determines_of_generators,
+    Algebraic.Cutwidth.Wiring.card_realized_le_two_pow_generators,
+    Algebraic.Cutwidth.Wiring.card_accepting_le_of_generators}
+  \leanok
+  \uses{def:lowerbounds-algebraic-network,
+    lem:lowerbounds-algebraic-cut-counting}
+  The wiring network of a circuit over the full binary basis has a vertex for
+  every wire with a path to the output and, for a signal feeding $f\ge2$
+  slots, $f-1$ copy vertices of degree three; gate vertices check their
+  operation, the output gate checks the value $1$, and copy vertices check
+  agreement. It computes the circuit's function, is connected with maximum
+  degree three, has at most $2s+1$ vertices, and its edges minus vertices
+  equal the reachable gates minus the reachable inputs. Call a signal carried
+  by an edge set $C$ a \emph{generator} of $C$ unless it is a gate both of
+  whose argument signals are carried by $C$. One edge of $C$ per generator
+  determines $C$, so at most $2^{|\mathrm{generators}(C)|}$ patterns are
+  realized on $C$, and the cut-counting bound holds with $P=2^{w}$ whenever
+  the edges charged at every vertex have at most $w$ generators. No layout
+  theorem bounding generators is proved; the assembly below charges edges.
+\end{lemma}
+\begin{proof}
+  \leanok
+  Under a satisfying assignment every edge of one signal carries the bit of
+  the signal's first outgoing edge, by the copy checks. Induct along the
+  program order: a generator's bit is fixed by its chosen edge, and a
+  determined gate carries its operation applied to two bits that already
+  agree. The counting statements are instances of
+  Lemma~\ref{lem:lowerbounds-algebraic-cut-counting}.
+\end{proof}
+
 \begin{theorem}[Cutwidth bound for rectangle-free families]
   \label{thm:lowerbounds-algebraic-cutwidth}
   \lean{Algebraic.Cutwidth.eventually_lt_size_of_pathwidthBound,
     Algebraic.Cutwidth.eventually_lt_size_of_rectangleFree}
   \leanok
-  \uses{thm:lowerbounds-algebraic-bisection-pathwidth}
+  \uses{thm:lowerbounds-algebraic-bisection-pathwidth,
+    lem:lowerbounds-algebraic-cut-counting,
+    lem:lowerbounds-algebraic-wiring-generators}
   Every rectangle-free Boolean function family with polynomial rectangle
   threshold and at least $2^{n-2}$ accepting inputs, as in
   Theorem~\ref{thm:lowerbounds-algebraic-nechiporuk}, needs circuits of more

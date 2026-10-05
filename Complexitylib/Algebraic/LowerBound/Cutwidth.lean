@@ -9,6 +9,7 @@ public import Complexitylib.Algebraic.LowerBound.Cutwidth.Rectangle
 public import Complexitylib.Algebraic.LowerBound.Cutwidth.Multigraph
 public import Complexitylib.Algebraic.LowerBound.Cutwidth.Network
 public import Complexitylib.Algebraic.LowerBound.Cutwidth.Wiring
+public import Complexitylib.Algebraic.LowerBound.Cutwidth.Wiring.Signals
 public import Complexitylib.Algebraic.LowerBound.Cutwidth.PathDecomposition
 public import Complexitylib.Algebraic.LowerBound.Cutwidth.PathDecomposition.Boundary
 public import Complexitylib.Algebraic.LowerBound.Cutwidth.PathDecomposition.Operations

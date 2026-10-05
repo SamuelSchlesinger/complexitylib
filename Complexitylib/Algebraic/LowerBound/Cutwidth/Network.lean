@@ -23,9 +23,15 @@ part of the network remembers. The past assignments consistent with a cut
 assignment and the future assignments consistent with it form a one-rectangle
 of `f` (`accepted_of_mem_pastSet_of_mem_futureSet`). Charging every accepted
 input to the first vertex at which its past set becomes large, the
-cut-counting lemma `card_accepting_le` bounds the number of accepted inputs of
-a `K`-rectangle-free function by `|V| · 2 ^ (w + 3) · (K - 1) ^ 2`, where `w`
-bounds every prefix cut and each vertex has at most three incident edges.
+cut-counting lemma `card_accepting_le_of_realized` bounds the number of
+accepted inputs of a `K`-rectangle-free function by `|V| · P · (K - 1) ^ 2`,
+where `P` bounds the number of bit patterns that satisfying assignments
+realize on the cut before a vertex together with its incident edges
+(`realized`). A subset of those edges that determines the rest under every
+satisfying assignment (`Determines`) bounds the patterns by a power of two
+(`card_realized_le_of_determines`). Taking all edges, the classical form
+`card_accepting_le` charges `2 ^ (w + 3)`, where `w` bounds every prefix cut
+and each vertex has at most three incident edges.
 -/
 
 @[expose] public section
@@ -89,6 +95,22 @@ theorem mem_past {L : Finset V} {j : Fin n} :
 @[simp] theorem past_univ [Fintype V] : N.past Finset.univ = N.read := by
   ext j
   simp [mem_past]
+
+/-- `T` determines `C`: two satisfying assignments that agree on `T` agree on `C`. -/
+def Determines (C T : Finset E) : Prop :=
+  ∀ ⦃x α⦄, N.Satisfies x α → ∀ ⦃y β⦄, N.Satisfies y β →
+    (∀ e ∈ T, α e = β e) → ∀ e ∈ C, α e = β e
+
+theorem determines_self (C : Finset E) : N.Determines C C :=
+  fun _ _ _ _ _ _ h => h
+
+theorem Determines.anti {C C' T : Finset E} (h : N.Determines C T) (hC : C' ⊆ C) :
+    N.Determines C' T :=
+  fun _ _ hα _ _ hβ hT e he => h hα hβ hT e (hC he)
+
+theorem Determines.mono {C T T' : Finset E} (h : N.Determines C T) (hT : T ⊆ T') :
+    N.Determines C T' :=
+  fun _ _ hα _ _ hβ hT' e he => h hα hβ (fun e' he' => hT' e' (hT he')) e he
 
 section Finite
 
@@ -230,6 +252,46 @@ theorem card_accepting_lt_of_card_pastSet_univ_lt {f : Cslib.BooleanFunction n}
     _ < K * 2 ^ (n - N.read.card) :=
         Nat.mul_lt_mul_of_pos_right small (Nat.two_pow_pos _)
 
+/-! ## Realized patterns -/
+
+/-- The bit patterns on `C` realized by satisfying assignments, each extended by
+`false` off `C`. -/
+noncomputable def realized (C : Finset E) : Finset (E → Bool) :=
+  Finset.univ.filter fun τ => ∃ x α, N.Satisfies x α ∧ ∀ e, τ e = if e ∈ C then α e else false
+
+omit [Fintype V] in
+theorem mem_realized {C : Finset E} {τ : E → Bool} :
+    τ ∈ N.realized C ↔ ∃ x α, N.Satisfies x α ∧ ∀ e, τ e = if e ∈ C then α e else false := by
+  rw [realized, Finset.mem_filter, and_iff_right (Finset.mem_univ _)]
+
+omit [Fintype V] in
+/-- A determining subset of `C` bounds the patterns realized on `C`: restriction
+to `T` is injective on them. -/
+theorem card_realized_le_of_determines {C T : Finset E} (hT : T ⊆ C)
+    (h : N.Determines C T) : (N.realized C).card ≤ 2 ^ T.card := by
+  let ψ : (E → Bool) → (↥T → Bool) := fun τ e => τ e
+  have inj : Set.InjOn ψ ↑(N.realized C) := by
+    intro τ hτ τ' hτ' heq
+    obtain ⟨x, α, hα, hτ⟩ := N.mem_realized.mp (Finset.mem_coe.mp hτ)
+    obtain ⟨y, β, hβ, hτ'⟩ := N.mem_realized.mp (Finset.mem_coe.mp hτ')
+    have agreeT : ∀ e ∈ T, α e = β e := by
+      intro e he
+      simpa [ψ, hτ e, hτ' e, hT he] using congrFun heq ⟨e, he⟩
+    funext e
+    rw [hτ e, hτ' e]
+    by_cases he : e ∈ C
+    · simp only [he, ↓reduceIte]
+      exact h hα hβ agreeT e he
+    · simp only [he, ↓reduceIte]
+  calc (N.realized C).card ≤ (Finset.univ : Finset (↥T → Bool)).card :=
+        Finset.card_le_card_of_injOn ψ (fun _ _ => Finset.mem_univ _) inj
+    _ = 2 ^ T.card := by rw [Finset.card_univ, Fintype.card_fun, Fintype.card_bool, Fintype.card_coe]
+
+omit [Fintype V] in
+/-- At most `2 ^ |C|` patterns are realized on `C`. -/
+theorem card_realized_le (C : Finset E) : (N.realized C).card ≤ 2 ^ C.card :=
+  N.card_realized_le_of_determines subset_rfl (N.determines_self C)
+
 section Ordered
 
 variable [LinearOrder V]
@@ -294,19 +356,38 @@ theorem cut_upto_subset (v : V) : N.cut (upto v) ⊆ N.cut (below v) ∪ N.edges
   rw [lt_iff_le_and_ne, lt_iff_le_and_ne]
   tauto
 
+/-- The edges charged at a vertex: the cut before it and its incident edges. -/
+noncomputable def charged (v : V) : Finset E := N.cut (below v) ∪ N.edgesAt v
+
+theorem cut_below_subset_charged (v : V) : N.cut (below v) ⊆ N.charged v :=
+  Finset.subset_union_left
+
+theorem cut_upto_subset_charged (v : V) : N.cut (upto v) ⊆ N.charged v :=
+  N.cut_upto_subset v
+
+theorem edgesAt_subset_charged (v : V) : N.edgesAt v ⊆ N.charged v :=
+  Finset.subset_union_right
+
+/-- With prefix cuts of size at most `w` and degrees at most three, at most
+`w + 3` edges are charged at any vertex. -/
+theorem card_charged_le {v : V} {w : Nat} (hdeg : N.MaxDegreeLE 3)
+    (hw : (N.cut (below v)).card ≤ w) : (N.charged v).card ≤ w + 3 :=
+  (Finset.card_union_le _ _).trans (add_le_add hw (hdeg v))
+
 end Ordered
 
-/-- **The cut-counting lemma.** For a network computing a `K`-rectangle-free
-function, with every vertex of degree at most three and every prefix cut of
-the ordering of size at most `w`, either the final past set is small, so that
-fewer than `K · 2 ^ (n - |read|)` inputs are accepted, or at most
-`|V| · 2 ^ (w + 3) · (K - 1) ^ 2` inputs are accepted. -/
-theorem card_accepting_le [LinearOrder V] [Nonempty V]
-    {f : Cslib.BooleanFunction n} (hf : N.Computes f) (hdeg : N.MaxDegreeLE 3)
-    {w : Nat} (hw : ∀ v, (N.cut (below v)).card ≤ w)
+/-- **The cut-counting lemma, charged by realized patterns.** For a network
+computing a `K`-rectangle-free function and a vertex ordering, suppose that
+satisfying assignments realize at most `P` bit patterns on the cut before any
+vertex together with that vertex's incident edges. Then either the final past
+set is small, so that fewer than `K · 2 ^ (n - |read|)` inputs are accepted, or
+at most `|V| · P · (K - 1) ^ 2` inputs are accepted. -/
+theorem card_accepting_le_of_realized [LinearOrder V] [Nonempty V]
+    {f : Cslib.BooleanFunction n} (hf : N.Computes f) {P : Nat}
+    (hP : ∀ v, (N.realized (N.charged v)).card ≤ P)
     {K : Nat} (hK : 1 < K) (hrect : RectangleFree f K) :
     (accepting f).card < K * 2 ^ (n - N.read.card) ∨
-      (accepting f).card ≤ Fintype.card V * 2 ^ (w + 3) * (K - 1) ^ 2 := by
+      (accepting f).card ≤ Fintype.card V * P * (K - 1) ^ 2 := by
   have choice : ∀ x ∈ accepting f, ∃ α, N.Satisfies x α :=
     fun x hx => (hf x).mp (mem_accepting.mp hx)
   choose! α hα using choice
@@ -359,11 +440,9 @@ theorem card_accepting_le [LinearOrder V] [Nonempty V]
     · exact h
   -- The edges whose bits determine the charge: the cut before the first vertex
   -- and the edges incident to it.
-  let D : V → Finset E := fun v => N.cut (below v) ∪ N.edgesAt v
-  have D_card : ∀ v, (D v).card ≤ w + 3 := fun v =>
-    (Finset.card_union_le _ _).trans (add_le_add (hw v) (hdeg v))
-  have cut_upto_subset_D : ∀ v, N.cut (upto v) ⊆ D v := fun v => N.cut_upto_subset v
-  have cut_below_subset_D : ∀ v, N.cut (below v) ⊆ D v := fun v => Finset.subset_union_left
+  let D : V → Finset E := N.charged
+  have cut_upto_subset_D : ∀ v, N.cut (upto v) ⊆ D v := N.cut_upto_subset_charged
+  have cut_below_subset_D : ∀ v, N.cut (below v) ⊆ D v := N.cut_below_subset_charged
   let key : (Fin n → Bool) → V × (E → Bool) := fun x =>
     (first x, fun e => if e ∈ D (first x) then α x e else false)
   -- Inputs with the same key are determined by a past and a future assignment.
@@ -417,7 +496,7 @@ theorem card_accepting_le [LinearOrder V] [Nonempty V]
           intro hlt
           exact h₁ (N.mem_past.mpr ⟨hj, mem_below.mpr hlt⟩)
         have hedge : N.portEdge j ∈ D v :=
-          Finset.mem_union_right _ (N.mem_edgesAt.mpr (hv ▸ N.port_incident j hj))
+          N.edgesAt_subset_charged v (N.mem_edgesAt.mpr (hv ▸ N.port_incident j hj))
         rw [← (hα x hxacc).2 j hj, ← (hα y hyacc).2 j hj, agree x hx _ hedge, agree y hy _ hedge]
       · exact congrFun hfuture ⟨j, Finset.mem_compl.mpr h₂⟩
     calc F.card ≤ (N.pastSet (below v) (α x₁) ×ˢ N.futureSet (upto v) (α x₁)).card :=
@@ -429,38 +508,45 @@ theorem card_accepting_le [LinearOrder V] [Nonempty V]
           · exact Nat.le_sub_one_of_lt (hv₁ ▸ below_small x₁ hx₁acc)
           · exact Nat.le_sub_one_of_lt (hv₁ ▸ future_small x₁ hx₁acc)
       _ = (K - 1) ^ 2 := (sq _).symm
-  -- Keys are determined by a vertex and the bits on at most `w + 3` edges.
-  have image_card : ((accepting f).image key).card ≤ Fintype.card V * 2 ^ (w + 3) := by
-    let ψ : V × (E → Bool) → Σ v : V, (↥(D v) → Bool) := fun vτ => ⟨vτ.1, fun e => vτ.2 e⟩
+  -- Keys are a vertex and a pattern realized on its charged edges.
+  have image_card : ((accepting f).image key).card ≤ Fintype.card V * P := by
+    let ψ : V × (E → Bool) → Σ _ : V, (E → Bool) := fun vτ => ⟨vτ.1, vτ.2⟩
     have inj : Set.InjOn ψ ((accepting f).image key) := by
-      rintro ⟨v, τ⟩ hmem ⟨v', τ'⟩ hmem' heq
+      rintro ⟨v, τ⟩ _ ⟨v', τ'⟩ _ heq
       simp only [ψ, Sigma.mk.inj_iff] at heq
       obtain ⟨rfl, hτ⟩ := heq
-      have hτ' := eq_of_heq hτ
-      obtain ⟨x, _, hx⟩ := Finset.mem_image.mp hmem
-      obtain ⟨y, _, hy⟩ := Finset.mem_image.mp hmem'
-      simp only [key, Prod.mk.injEq] at hx hy
-      obtain ⟨hxv, hxτ⟩ := hx
-      obtain ⟨hyv, hyτ⟩ := hy
-      refine Prod.ext rfl ?_
-      funext e
-      by_cases he : e ∈ D v
-      · exact congrFun hτ' ⟨e, he⟩
-      · rw [← hxτ, ← hyτ]
-        simp [hxv, hyv, he]
+      rw [eq_of_heq hτ]
+    have maps : Set.MapsTo ψ ↑((accepting f).image key)
+        ↑((Finset.univ : Finset V).sigma fun v => N.realized (D v)) := by
+      intro κ hκ
+      obtain ⟨x, hx, rfl⟩ := Finset.mem_image.mp (Finset.mem_coe.mp hκ)
+      rw [Finset.mem_coe, Finset.mem_sigma]
+      exact ⟨Finset.mem_univ _, N.mem_realized.mpr ⟨x, α x, hα x hx, fun _ => rfl⟩⟩
     calc ((accepting f).image key).card
-        ≤ (Finset.univ : Finset (Σ v : V, (↥(D v) → Bool))).card :=
-          Finset.card_le_card_of_injOn ψ (fun _ _ => Finset.mem_univ _) inj
-      _ = ∑ v : V, 2 ^ (D v).card := by
-          rw [Finset.card_univ, Fintype.card_sigma]
-          simp [Fintype.card_bool]
-      _ ≤ ∑ _v : V, 2 ^ (w + 3) :=
-          Finset.sum_le_sum fun v _ => Nat.pow_le_pow_right two_pos (D_card v)
-      _ = Fintype.card V * 2 ^ (w + 3) := by simp [Finset.sum_const, Finset.card_univ]
+        ≤ ((Finset.univ : Finset V).sigma fun v => N.realized (D v)).card :=
+          Finset.card_le_card_of_injOn ψ maps inj
+      _ = ∑ v : V, (N.realized (D v)).card := Finset.card_sigma _ _
+      _ ≤ ∑ _v : V, P := Finset.sum_le_sum fun v _ => hP v
+      _ = Fintype.card V * P := by simp [Finset.sum_const, Finset.card_univ]
   calc (accepting f).card ≤ (K - 1) ^ 2 * ((accepting f).image key).card :=
         Finset.card_le_mul_card_image _ _ fiber
-    _ ≤ (K - 1) ^ 2 * (Fintype.card V * 2 ^ (w + 3)) := Nat.mul_le_mul_left _ image_card
-    _ = Fintype.card V * 2 ^ (w + 3) * (K - 1) ^ 2 := by ring
+    _ ≤ (K - 1) ^ 2 * (Fintype.card V * P) := Nat.mul_le_mul_left _ image_card
+    _ = Fintype.card V * P * (K - 1) ^ 2 := by ring
+
+/-- **The cut-counting lemma.** For a network computing a `K`-rectangle-free
+function, with every vertex of degree at most three and every prefix cut of
+the ordering of size at most `w`, either the final past set is small, so that
+fewer than `K · 2 ^ (n - |read|)` inputs are accepted, or at most
+`|V| · 2 ^ (w + 3) · (K - 1) ^ 2` inputs are accepted. -/
+theorem card_accepting_le [LinearOrder V] [Nonempty V]
+    {f : Cslib.BooleanFunction n} (hf : N.Computes f) (hdeg : N.MaxDegreeLE 3)
+    {w : Nat} (hw : ∀ v, (N.cut (below v)).card ≤ w)
+    {K : Nat} (hK : 1 < K) (hrect : RectangleFree f K) :
+    (accepting f).card < K * 2 ^ (n - N.read.card) ∨
+      (accepting f).card ≤ Fintype.card V * 2 ^ (w + 3) * (K - 1) ^ 2 :=
+  N.card_accepting_le_of_realized hf (P := 2 ^ (w + 3)) (fun v =>
+    (N.card_realized_le _).trans (Nat.pow_le_pow_right two_pos
+      (N.card_charged_le hdeg (hw v)))) hK hrect
 
 end Finite
 

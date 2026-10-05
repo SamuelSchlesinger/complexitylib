@@ -1484,7 +1484,8 @@ route are not prerequisites for this proof.
 
 | Step | Formal development |
 | --- | --- |
-| Cut counting | `Network.card_accepting_le` in `Algebraic.LowerBound.Cutwidth.Network`: for `1 < K`, a network of cutwidth `w` and maximum degree three computing a `K`-rectangle-free function either accepts fewer than `K · 2 ^ (n − n')` inputs, where `n'` inputs are read, or accepts at most `|V| · 2 ^ (w + 3) · (K − 1)²` inputs. |
+| Cut counting | `Network.card_accepting_le_of_realized` in `Algebraic.LowerBound.Cutwidth.Network`: for `1 < K`, a network computing a `K`-rectangle-free function, with a vertex ordering on whose charged edge sets (`Network.charged`: the cut before a vertex and its incident edges) satisfying assignments realize at most `P` bit patterns (`Network.realized`), either accepts fewer than `K · 2 ^ (n − n')` inputs, where `n'` inputs are read, or accepts at most `|V| · P · (K − 1)²` inputs. A subset determining the charged edges (`Network.Determines`) bounds the patterns by a power of two (`card_realized_le_of_determines`). `Network.card_accepting_le` is the case `P = 2 ^ (w + 3)` for cutwidth `w` and maximum degree three. |
+| Signal generators | `Wiring.determines_of_generators`, `Wiring.card_realized_le_two_pow_generators`, and `Wiring.card_accepting_le_of_generators` in `Algebraic.LowerBound.Cutwidth.Wiring.Signals`: in the wiring network, one edge per generator of an edge set determines it, where a carried signal is a generator unless it is a gate both of whose argument signals are carried by the set; so a vertex ordering whose charged edge sets have at most `w` generators gives the bound with `P = 2 ^ w`. No layout theorem bounding generators is proved; the assembly charges edges. |
 | Wiring graph | `Wiring.network`, `Wiring.network_computes`, `Wiring.loopless`, `Wiring.maxDegreeLE_three`, `Wiring.connected`, and the counts `Wiring.card_edge_sub_card_vertex`, `Wiring.card_vertex_le_two_mul_size` in `Algebraic.LowerBound.Cutwidth.Wiring`. In particular, `|V| ≤ 2s + 1` independently of the declared input count. |
 | Boundary transition | `PathDecomposition.exists_between_of_crossing`: the induced graph on the two cut boundaries has a path decomposition starting and ending with the respective boundaries, with bags of size at most the number of crossing edges plus one. |
 | Endpoint deletion | `PathDecomposition.exists_endsAt_of_delete` restores a deleted boundary vertex once all its neighbors are in the terminal bag, then appends the prescribed endpoint subset. |
@@ -1553,6 +1554,22 @@ whole vertex set consists of the accepted inputs restricted to the read
 variables. If that set is smaller than `K`, the lemma returns the bound
 `K · 2 ^ (n − n')` for `n'` read variables instead; the assembly rules this
 case out with the support lemma.
+
+The formal lemma charges a vertex by the number of bit patterns that
+satisfying assignments realize on its charged edges, not by their number:
+the keys are restrictions of actual satisfying assignments, so any subset of
+the charged edges that determines the rest bounds the keys by a power of two.
+Counting every edge gives the classical `2 ^ (w + 3)`. In the wiring network
+all edges of one signal carry the same bit, and a gate both of whose argument
+signals cross the cut carries a function of their bits, so one edge per
+*generator* determines the charged set and the bound holds with
+`2 ^ (generators)` in place of `2 ^ (w + 3)`
+(`Wiring.card_accepting_le_of_generators`). Using this requires a layout
+theorem that bounds the generators of every prefix cut of one ordering, in
+place of the edge bound `(2p + 2ξ)(M − N)⁺ + O(log N)` below; none is proved,
+and the hardness side cannot supply the gain, since at the charging vertex the
+realized pattern already determines the input up to `(K − 1)²` choices and no
+cut realizes more than `2 ^ n` patterns.
 
 ### The wiring graph
 

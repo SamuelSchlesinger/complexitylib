@@ -351,6 +351,26 @@ change the leading coefficient. Rectangle peeling extends the bound to the
 average case without improving it, and neither the prefix-halving gain of AVOID
 nor affine-aware counting is known to add to it.
 
+The cut-counting lemma now charges a vertex by the bit patterns that satisfying
+assignments realize on its charged edges (`Network.card_accepting_le_of_realized`,
+with `Network.realized`, `Network.Determines`, and `Network.charged`); counting
+every edge, `2 ^ (w + 3)`, is the special case `Network.card_accepting_le`. In the
+wiring network one edge per *generator* determines a cut, where a carried signal
+is a generator unless it is a gate both of whose argument signals are carried by
+the same cut, so `Wiring.card_accepting_le_of_generators` charges `2 ^ (generators)`
+(`Algebraic.LowerBound.Cutwidth.Wiring.Signals`). The hardness side of the
+argument is saturated: at the charging vertex the realized pattern determines the
+input up to `(K - 1)²` choices on each side, and no cut realizes more than `2 ^ n`
+patterns, so every gain in the leading coefficient must come from the layout side.
+Charging edges has a ceiling. Random cubic graphs have bisection width at least
+`0.103295 h` ([Lichev and Mitsche](https://arxiv.org/abs/2009.00598), improving
+Kostochka and Melnikov's `0.101 h`), and `MedianOrdering` gives cutwidth at most
+pathwidth plus two on cubic graphs, so no universal cubic pathwidth coefficient is
+below `0.1032`; the edge-charged assembly therefore cannot certify a circuit
+coefficient above `1 + 1/0.2066 ≈ 5.84`, and realistic estimates of the random
+cubic bisection constant put the practical limit lower. A coefficient of five or
+more needs generator charging or a different compiler.
+
 The same coefficient now holds for binary circuits augmented with arbitrary finite
 commutative-monoid gates, provided their actual occurrence budget
 `D = q + Σ ceil(log₂ |M_j|)` is `o(n)`
@@ -395,6 +415,18 @@ of intersecting two-primary conjunctions pays extra affine restrictions by makin
 distinct gates constant. Retaining the stronger one-eighth bias for wide conjunctions
 and averaging designated triples combines the two counts. The exact coefficient is
 `(3-h+3r)/(2+2r)`, where `h=H₂(1/4)` and `r=1-H₂(1/8)`; strict improvement is proved.
+
+Large majority fibers improve both coefficients again
+(`Aggregate.Geometry.Fiber.sourceReductionHardFamily_eventually_lt_size` and
+`Aggregate.Geometry.Inversion.fiberCoefficient_mul_sub_penalty_le_size`): the fixed
+explicit family needs more than `(C_F - ε)n` signed unbounded AND/OR/XOR gates with
+`C_F = (1 + c/2 + 7r/4 + ℓ)/(1 + r + ℓ) ≈ 1.2364849888`, where `c = 1-H₂(1/4)`,
+`r = 1-H₂(1/8)`, and `ℓ = r/(2 log₂(3/2))`, and all coordinates of binary-field
+inversion in any supplied linear basis need at least `C_I n - P_I` gates for `n ≥ 3`,
+with `C_I ≈ 1.5644077959` and `P_I ≈ 0.5640721944`. Disjoint signed-pair majority
+fibers are counted and combined with the residual-message bound, both entropy
+bounds, and the affine geometry. The earlier `1.22148505965...` and
+`1.54311234736...` theorems below remain checked but are no longer the best.
 
 There is also a natural multioutput target: for every linear coordinate basis of
 a field of size `2^n`, computing all bits of inversion (with `0⁻¹=0`) requires
@@ -445,6 +477,20 @@ can retain all its inputs; the audit records exact obstructions to those local s
   `p = (3/(4π)) arccos(5/6)`, `L = 1 + 2π/(3 arccos(5/6)) ≈ 4.5760`, and needs the
   universal all-prefix theorem with arbitrary positive slack, not a bisection
   estimate.
+- [ ] **Signal and generator layouts.** Prove an ordering theorem for the wiring
+  network that bounds the generators of every charged edge set by
+  `(A' + ξ)(s − n) + O(log)`; `Wiring.card_accepting_le_of_generators` then gives the
+  coefficient `1 + 1/A'`, and the compression, median-ordering, and `FourN` assembly
+  must be redone for the generator count. With vertex kernel scores and the pairwise
+  arccos bound, a fan-out-two signal crosses a threshold exactly when its three gate
+  endpoints are not on one side, so on fan-out-two cores the linear-key constant is
+  `A' = (3/(2π)) arccos(5/6) ≈ 0.2796`, the two-sided-sweep constant above
+  (`L ≈ 4.576`); this needs a distance-two kernel correlation lemma (limit `5/6`)
+  beside `sum_unitKernel_mul_ge`, and a uniform treatment of mixed fan-outs. Monte
+  Carlo on random fan-in-two circuits at `s = 4.5 n`, laid out through the actual
+  compression with median-of-edge-score orderings and finite kernels, puts signal
+  counting about ten percent and generator counting about fifteen percent below edge
+  counting in the same ordering; these are relative observations with no proof.
 - [ ] **Rigidity and local repair.** Audit the four-star distance-kernel rigidity
   lemma first. A compactness argument would give some fixed improvement `δ > 0`
   over the two-sided coefficient, but no numerical `δ` is established.

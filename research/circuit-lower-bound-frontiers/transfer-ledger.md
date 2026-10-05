@@ -27,6 +27,25 @@ The target must control every prefix of one ordering on every sufficiently large
 actual compiler's image, with arbitrarily small positive slack. A bisection, a random-graph
 statement, or an improvement at a single threshold does not supply this contract.
 
+## Saturation of the hardness side and the edge-charging ceiling
+
+The counting lemma is now stated for realized cut patterns
+(`Network.card_accepting_le_of_realized`): at the charging vertex the pattern on the charged
+edges determines the accepted input up to `(K-1)^2` choices, so the maximum over vertices of
+the realized patterns must exceed `2^(n-o(n))`. No cut realizes more than `2^n` patterns, since
+every pattern is a function of the input. Within this compiler the hardness side is therefore
+saturated: changing the family, the threshold `K`, or the acceptance density cannot move the
+leading coefficient, and every gain must lower the charge per unit of excess `s-n`.
+
+Charging edges has a floor. Random cubic graphs have bisection width at least `0.103295 h`
+[lichev-mitsche23][lichev-mitsche23], the middle cut of any ordering is a bisection, and the
+median ordering gives cutwidth at most pathwidth plus two on cubic graphs, so no universal
+cubic pathwidth coefficient is below `0.1032`. The edge-charged transfer `L = 1 + 1/(2p)` is
+thus capped at about `5.84`, and numerical estimates of the random cubic bisection constant
+put the practical cap lower. Charging generators instead of edges
+(`Wiring.card_accepting_le_of_generators`) is sound and removes this particular cap, but no
+layout theorem for generators is proved; the roadmap records the open target.
+
 ## Changing the compiler and hardness measure
 
 Suppose an exact representation compiler has size at most
@@ -127,3 +146,5 @@ gate extensions; semantic equivalence supplies no short proof by itself.
 [transfer_coefficients.py](data/transfer_coefficients.py) computes the numerical conversion;
 [its output](data/transfer_coefficients.txt) contains arithmetic only. It does not validate
 any candidate graph inequality or circuit compiler.
+
+[lichev-mitsche23]: sources.md#lichev-mitsche23
