@@ -4,8 +4,8 @@ Parallel research passes pursued stronger circuit bounds and larger gate models.
 The resulting corpus contains checked Lean extensions, paper deductions, explicit proof targets,
 and counterexamples. Sparse finite commutative-monoid gates preserve the current coefficient;
 unlimited signed unbounded AND/OR/XOR gates admit a checked coefficient
-`C=1.22148505965...` for the same explicit family. Binary-field inversion also has a
-checked `1.54311234736...*n-O(1)` bound for all `n` outputs over that unbounded Boolean basis.
+`C_F=1.2364849888...` for the same explicit family. Binary-field inversion also has a
+checked `1.5644077959...*n-O(1)` bound for all `n` outputs over that unbounded Boolean basis.
 **No stronger B2 leading coefficient
 is established here.** Historical priority of these deductions remains unresolved.
 
@@ -42,8 +42,8 @@ qualifications stated below and in their linked notes.
 | Deduction | Exact enlargement or consequence | Main qualification |
 | --- | --- | --- |
 | [Sparse aggregate gates](larger-gates/aggregate-proof.md) | Checked: same `L` for total gates in arbitrary-depth B2 circuits augmented by finite commutative-monoid gates with budget `D=o(n)`; includes `o(n)` fixed-MOD gates. | No reversibility or wire-count premise. Signed integer weights cost their aggregate range, not just the number of gates. |
-| [Unlimited signed AND/OR/XOR](larger-gates/joint-next.md) | Checked: more than `(C-epsilon)n` gates, where `C=(3-h+3r)/(2+2r)=1.22148505965...`, `h=H2(1/4)`, and `r=1-H2(1/8)`, for the same explicit family. | No sparsity, depth, fan-in, or fanout restriction. Every B2 gate has a one-gate normal form in this basis; this does not strengthen the binary-only coefficient. |
-| [Binary-field inversion](larger-gates/geometry.md#9-a-natural-multioutput-target-binary-field-inversion) | Checked: `(2+c)g >= (3+2c)n-4c`, with `c=1-H2(1/4)`, hence coefficient `1.54311234736...`, for all `n` inverse coordinates, `n>=3`. | Same unbounded scalar Boolean basis; every linear field basis is allowed. A canonical uniform field/basis construction and evaluator runtime are not formalized in this slice. |
+| [Unlimited signed AND/OR/XOR](larger-gates/joint-next.md#large-majority-fibers-improve-both-coefficients) | Checked: more than `(C_F-epsilon)n` gates, where `C_F=(1+c/2+7r/4+ell)/(1+r+ell)=1.2364849888...`, `c=1-H2(1/4)`, `r=1-H2(1/8)`, and `ell=r/(2 log2(3/2))`, for the same explicit family; the earlier `1.22148505965...` shared-control theorem remains checked. | No sparsity, depth, fan-in, or fanout restriction. Every B2 gate has a one-gate normal form in this basis; this does not strengthen the binary-only coefficient. |
+| [Binary-field inversion](larger-gates/geometry.md#9-a-natural-multioutput-target-binary-field-inversion) | Checked: `C_I*n-P_I <= g` with `C_I=(3+c/2+7r/4+3ell)/(2+r+2ell)=1.5644077959...` and `P_I=4r/(2+r+2ell)=0.5640721944...`, for all `n` inverse coordinates, `n>=3`; the earlier `(2+c)g >= (3+2c)n-4c` bound (coefficient `1.54311234736...`) remains checked. | Same unbounded scalar Boolean basis; every linear field basis is allowed. A canonical uniform field/basis construction and evaluator runtime are not formalized in this slice. |
 | [A linear parity budget](larger-gates/aggregate-proof.md) | For `q` unbounded-fan-in parity gates and total `S=s+q`, `S >= L*n-(1+4/A)q-o(n)` when `2q <= (1/3-delta)n` for fixed `delta>0`. In particular `q<=0.01n` gives `S >= (4.409997772-o(1))n`. | Lower coefficient in a larger model; this does not improve the unrestricted B2 coefficient. |
 | [Free invertible affine input basis](hard-functions/index.md) | Same `L` even if a circuit chooses any free invertible affine change of all `n` input coordinates. | Exactly `n` transformed inputs; no free internal XOR gates or unlimited extra linear forms. A closure deduction from the source extractor. |
 | [Unstructured DNNF hardness](branch-decompositions/index.md) | The current dense rectangle-free family needs binary DNNFs of size `2^(n-o(n))`, even with varying decompositions and DAG sharing. | A tree-based circuit compiler must pay for the joint interface of sibling regions. No improved universal compiler is proved. |
@@ -210,8 +210,8 @@ recorded gates do not certify subsequent changes or the remaining paper deductio
 
 Whole-corpus mathematical, coherence, source, and skeptical expert reviews have been
 completed, with substantive findings corrected and rechecked. The final factual audit
-found no remaining error or substantive gap in its checked scope. All twelve artifacts
-reproduced exactly; fourteen Markdown documents and fifty-two canonical sources passed
+found no remaining error or substantive gap in its checked scope. All thirteen artifacts
+reproduced exactly; twenty Markdown documents and sixty-nine canonical sources passed
 the local consistency checks on 2026-10-04. Some publisher endpoints restricted access;
 matching primary metadata and author manuscripts supplied the corresponding evidence.
 This was not an independent full proof check of every cited theorem.

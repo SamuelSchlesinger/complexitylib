@@ -86,6 +86,69 @@ coefficient `1 + π/(3 arccos((1 + 2√2)/4))`. The older entry
 points with explicit bisection, pathwidth, or ordering bounds remain available.
 The library proves those graph bounds and adds no axioms.
 
+### Unbounded-gate extensions
+
+The same fixed Boolean family retains coefficient `L ≈ 4.5625` with finite
+commutative aggregate gates whenever their joint contributions factor through a
+finite monoid `M` with `2 ceil(log₂ |M|)=o(n)`. One state guesses every special
+output and one checks their joint aggregate. This permits arbitrary dependencies
+between special gates and imposes no bound on their number. The local homomorphic
+factorization must recover the full registers, not merely their Boolean readouts.
+See [Compressed/Hardness.lean](../../Complexitylib/Algebraic/LowerBound/Cutwidth/Aggregate/Compressed/Hardness.lean).
+
+For one common prime modulus `p`, a canonical factorization has exactly `p^r`
+states, where `r` is the rank of the full matrix of wire contributions, including
+both values of every wire. Thus `2r ceil(log₂ p)=o(n)` suffices; the modulus may
+vary between circuits. See [ModularHardness.lean](../../Complexitylib/Algebraic/LowerBound/Cutwidth/Aggregate/Compressed/ModularHardness.lean).
+
+Without any budget restriction, signed unbounded AND/OR/XOR circuits computing
+the scalar family require `(1.2453914029…-ε)n` gates eventually. The same basis
+requires at least `1.5659486596… n - 0.6016050397…` gates for all coordinates of
+binary-field inversion, in every supplied linear basis and dimension `n≥3`.
+These decimal values abbreviate exact logarithmic constants. The new step bounds
+residual-message entropy inside large disjoint majority fibers: distinct literal
+assignments have probability at most `(2/3)^d`, giving conditional two- and
+three-literal savings. It combines with the same pairing's affine restriction.
+See [Conditional/Hardness.lean](../../Complexitylib/Algebraic/LowerBound/Cutwidth/Aggregate/Geometry/Fiber/Conditional/Hardness.lean)
+and [Conditional/Inversion.lean](../../Complexitylib/Algebraic/LowerBound/Cutwidth/Aggregate/Geometry/Fiber/Conditional/Inversion.lean).
+Historical novelty of these extensions is not established by the formalization.
+
+### Polynomial gates and explicit rational linear maps
+
+The coefficient `L = 1 + π/(3 arccos((1 + 2√2)/4))` also holds for polynomial
+circuits computing all coordinates of a totally regular `n × n` linear map.
+Every gate has at most two input slots; its polynomial degree and coefficients
+are unrestricted, as are circuit depth and fanout. The theorem holds over every
+field, with a threshold uniform over fields, matrices, and gate polynomials.
+See [Polynomial.lean](../../Complexitylib/Algebraic/LowerBound/Cutwidth/MultiOutput/Polynomial.lean).
+
+An explicit target over Q, R, or C is the Cauchy matrix
+`M(i,j) = 1 / (i - (n+j))`, for `0 ≤ i,j < n`. These are the same rational entries
+in each field. For every `ε>0`, all sufficiently large members require more than
+`(L-ε)n` polynomial gates. Coefficients built into a gate are free; explicit
+nullary gate occurrences count in this polynomial theorem's `Circuit.size`.
+See [Cauchy.lean](../../Complexitylib/Algebraic/LowerBound/Cutwidth/MultiOutput/Polynomial/Cauchy.lean).
+
+For ordinary arithmetic circuits, the same bound counts only additions and
+multiplications: arbitrary constant gates are free. The checked compiler absorbs
+constant inputs into polynomial coefficients and emits exactly one gate per
+arithmetic operation. No extra output gate is needed because each target row is
+nonconstant. See [Arithmetic.lean](../../Complexitylib/Algebraic/LowerBound/Cutwidth/MultiOutput/Polynomial/Arithmetic.lean).
+
+Over infinite fields, formal differentiation at zero assigns a coefficient row
+to each original wire. A gate's row lies in the span of its argument rows,
+including when those arguments have nonzero constant terms. Across a cut,
+output rows on one side restricted to inputs on the other lie in the span of
+the crossing signals. Matrix rank replaces finite-state counting. Over finite
+fields, the existing counting theorem supplies the same rank-cut inequality.
+The layout and asymptotic arguments are shared with the earlier theorem.
+
+Valiant's totally regular matrix method and Lev--Valiant's classical `4n-o(n)`
+superconcentrator baseline precede this transfer. See the
+[source and model audit](../../research/circuit-lower-bound-frontiers/transfer-ledger.md#transfers-to-other-circuit-models-audited-next-steps)
+for the distinction from known superlinear bounds for algebraic entries in large
+number fields; no general arithmetic-record claim is made.
+
 ### The coefficient as a function of the graph ordering
 
 The coefficient four is `1 + 1/A` for the graph-ordering coefficient
@@ -1484,7 +1547,8 @@ route are not prerequisites for this proof.
 
 | Step | Formal development |
 | --- | --- |
-| Cut counting | `Network.card_accepting_le` in `Algebraic.LowerBound.Cutwidth.Network`: for `1 < K`, a network of cutwidth `w` and maximum degree three computing a `K`-rectangle-free function either accepts fewer than `K · 2 ^ (n − n')` inputs, where `n'` inputs are read, or accepts at most `|V| · 2 ^ (w + 3) · (K − 1)²` inputs. |
+| Cut counting | `Network.card_accepting_le_of_realized` in `Algebraic.LowerBound.Cutwidth.Network`: for `1 < K`, a network computing a `K`-rectangle-free function, with a vertex ordering on whose charged edge sets (`Network.charged`: the cut before a vertex and its incident edges) satisfying assignments realize at most `P` bit patterns (`Network.realized`), either accepts fewer than `K · 2 ^ (n − n')` inputs, where `n'` inputs are read, or accepts at most `|V| · P · (K − 1)²` inputs. A subset determining the charged edges (`Network.Determines`) bounds the patterns by a power of two (`card_realized_le_of_determines`). `Network.card_accepting_le` is the case `P = 2 ^ (w + 3)` for cutwidth `w` and maximum degree three. |
+| Signal generators | `Wiring.determines_of_generators`, `Wiring.card_realized_le_two_pow_generators`, and `Wiring.card_accepting_le_of_generators` in `Algebraic.LowerBound.Cutwidth.Wiring.Signals`: in the wiring network, one edge per generator of an edge set determines it, where a carried signal is a generator unless it is a gate both of whose argument signals are carried by the set; so a vertex ordering whose charged edge sets have at most `w` generators gives the bound with `P = 2 ^ w`. No layout theorem bounding generators is proved; the assembly charges edges. |
 | Wiring graph | `Wiring.network`, `Wiring.network_computes`, `Wiring.loopless`, `Wiring.maxDegreeLE_three`, `Wiring.connected`, and the counts `Wiring.card_edge_sub_card_vertex`, `Wiring.card_vertex_le_two_mul_size` in `Algebraic.LowerBound.Cutwidth.Wiring`. In particular, `|V| ≤ 2s + 1` independently of the declared input count. |
 | Boundary transition | `PathDecomposition.exists_between_of_crossing`: the induced graph on the two cut boundaries has a path decomposition starting and ending with the respective boundaries, with bags of size at most the number of crossing edges plus one. |
 | Endpoint deletion | `PathDecomposition.exists_endsAt_of_delete` restores a deleted boundary vertex once all its neighbors are in the terminal bag, then appends the prescribed endpoint subset. |
@@ -1553,6 +1617,22 @@ whole vertex set consists of the accepted inputs restricted to the read
 variables. If that set is smaller than `K`, the lemma returns the bound
 `K · 2 ^ (n − n')` for `n'` read variables instead; the assembly rules this
 case out with the support lemma.
+
+The formal lemma charges a vertex by the number of bit patterns that
+satisfying assignments realize on its charged edges, not by their number:
+the keys are restrictions of actual satisfying assignments, so any subset of
+the charged edges that determines the rest bounds the keys by a power of two.
+Counting every edge gives the classical `2 ^ (w + 3)`. In the wiring network
+all edges of one signal carry the same bit, and a gate both of whose argument
+signals cross the cut carries a function of their bits, so one edge per
+*generator* determines the charged set and the bound holds with
+`2 ^ (generators)` in place of `2 ^ (w + 3)`
+(`Wiring.card_accepting_le_of_generators`). Using this requires a layout
+theorem that bounds the generators of every prefix cut of one ordering, in
+place of the edge bound `(2p + 2ξ)(M − N)⁺ + O(log N)` below; none is proved,
+and the hardness side cannot supply the gain, since at the charging vertex the
+realized pattern already determines the input up to `(K − 1)²` choices and no
+cut realizes more than `2 ^ n` patterns.
 
 ### The wiring graph
 

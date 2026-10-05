@@ -414,6 +414,18 @@ Xin Li, *Two Source Extractors for Asymptotically Optimal Entropy,
 
 [Primary source](https://arxiv.org/html/2303.06802v2).
 
+<a id="lichev-mitsche23"></a>
+
+## lichev-mitsche23
+
+Lyuben Lichev and Dieter Mitsche. *On the minimum bisection of random 3-regular
+graphs*. Electronic Journal of Combinatorics 30(2), P2.40, 2023; arXiv:2009.00598.
+The abstract states the lower bound `0.103295 n` on the bisection width of random
+cubic graphs, improving the earlier `0.101 n` bound of Kostochka and Mel'nikov;
+arXiv abstract page inspected 2026-10-04.
+
+[Primary source](https://arxiv.org/abs/2009.00598).
+
 <a id="local-realization"></a>
 
 ## local-realization

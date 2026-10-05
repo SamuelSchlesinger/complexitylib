@@ -351,6 +351,26 @@ change the leading coefficient. Rectangle peeling extends the bound to the
 average case without improving it, and neither the prefix-halving gain of AVOID
 nor affine-aware counting is known to add to it.
 
+The cut-counting lemma now charges a vertex by the bit patterns that satisfying
+assignments realize on its charged edges (`Network.card_accepting_le_of_realized`,
+with `Network.realized`, `Network.Determines`, and `Network.charged`); counting
+every edge, `2 ^ (w + 3)`, is the special case `Network.card_accepting_le`. In the
+wiring network one edge per *generator* determines a cut, where a carried signal
+is a generator unless it is a gate both of whose argument signals are carried by
+the same cut, so `Wiring.card_accepting_le_of_generators` charges `2 ^ (generators)`
+(`Algebraic.LowerBound.Cutwidth.Wiring.Signals`). The hardness side of the
+argument is saturated: at the charging vertex the realized pattern determines the
+input up to `(K - 1)²` choices on each side, and no cut realizes more than `2 ^ n`
+patterns, so every gain in the leading coefficient must come from the layout side.
+Charging edges has a ceiling. Random cubic graphs have bisection width at least
+`0.103295 h` ([Lichev and Mitsche](https://arxiv.org/abs/2009.00598), improving
+Kostochka and Melnikov's `0.101 h`), and `MedianOrdering` gives cutwidth at most
+pathwidth plus two on cubic graphs, so no universal cubic pathwidth coefficient is
+below `0.1032`; the edge-charged assembly therefore cannot certify a circuit
+coefficient above `1 + 1/0.2066 ≈ 5.84`, and realistic estimates of the random
+cubic bisection constant put the practical limit lower. A coefficient of five or
+more needs generator charging or a different compiler.
+
 The same coefficient now holds for binary circuits augmented with arbitrary finite
 commutative-monoid gates, provided their actual occurrence budget
 `D = q + Σ ceil(log₂ |M_j|)` is `o(n)`
@@ -360,6 +380,19 @@ AND, OR, weighted modular gates, capped nonnegative weighted thresholds, and arb
 symmetric predicates. The conclusion counts total gates and retains the existing fixed
 polynomial-time family; it does not improve the binary-only coefficient or cover an
 unrestricted number of special gates.
+
+Joint compression now replaces the occurrence budget by
+`D = 2 ceil(log₂ |M|)` whenever every local contribution to the vector of special
+registers factors through one finite commutative monoid `M`
+(`Aggregate.Compressed.sourceReductionHardFamily_eventually_lt_size_gaussian`).
+One state guesses all special outputs and another accumulates their simultaneous
+check. The number of special gates and their dependencies are unrestricted; the
+factorization and sublinear joint budget are the hypotheses. The submonoid generated
+by all local contributions supplies a canonical instance. For a common prime
+modulus `p`, the actual contribution matrix gives an automatic factorization with
+exactly `p^rank` states and budget at most `2 rank ceil(log₂ p)`.
+Thus sublinear rank suffices for fixed `p`, even with linearly many MOD gates.
+This strengthens the scope of the sparse-aggregate theorem, not its coefficient.
 
 A separate whole-basis theorem now removes that sparsity condition at a smaller
 coefficient (`Aggregate.sourceReductionHardFamily_eventually_lt_realCapacity`).
@@ -395,6 +428,34 @@ of intersecting two-primary conjunctions pays extra affine restrictions by makin
 distinct gates constant. Retaining the stronger one-eighth bias for wide conjunctions
 and averaging designated triples combines the two counts. The exact coefficient is
 `(3-h+3r)/(2+2r)`, where `h=H₂(1/4)` and `r=1-H₂(1/8)`; strict improvement is proved.
+
+Large majority fibers improve both coefficients again
+(`Aggregate.Geometry.Fiber.sourceReductionHardFamily_eventually_lt_size` and
+`Aggregate.Geometry.Inversion.fiberCoefficient_mul_sub_penalty_le_size`): the fixed
+explicit family needs more than `(C_F - ε)n` signed unbounded AND/OR/XOR gates with
+`C_F = (1 + c/2 + 7r/4 + ℓ)/(1 + r + ℓ) ≈ 1.2364849888`, where `c = 1-H₂(1/4)`,
+`r = 1-H₂(1/8)`, and `ℓ = r/(2 log₂(3/2))`, and all coordinates of binary-field
+inversion in any supplied linear basis need at least `C_I n - P_I` gates for `n ≥ 3`,
+with `C_I ≈ 1.5644077959` and `P_I ≈ 0.5640721944`. Disjoint signed-pair majority
+fibers are counted and combined with the residual-message bound, both entropy
+bounds, and the affine geometry. The earlier `1.22148505965...` and
+`1.54311234736...` theorems below remain checked but are no longer the best.
+
+Conditioning the residual-message entropy on those same majority fibers now gives
+`C ≈ 1.2453914029` for the fixed scalar family
+(`Geometry.Fiber.Conditional.sourceReductionHardFamily_eventually_lt_size`) and
+`I n - P` for binary-field inversion, with `I ≈ 1.5659486596` and
+`P ≈ 0.6016050397`
+(`Geometry.Inversion.conditionalFiberCoefficient_mul_sub_penalty_le_size`).
+In the product of three-point pair fibers, any prescribed `d` distinct coordinates
+have probability at most `(2/3)^d`. Thus surviving two- and three-literal summaries
+save `1-H₂(4/9)` and `1-H₂(8/27)` bits. Entropy subadditivity needs no independence
+between summaries. The same pairing and weighted receiver cut combine this with
+both earlier entropy inequalities and affine geometry. The new inversion bound
+has a stronger leading coefficient and a larger additive penalty; keep both
+finite inequalities. All circuit assumptions and target families are unchanged.
+An open next step is sharper joint entropy inside these conditioned fibers, with
+every overlap charged against the same geometric pairing.
 
 There is also a natural multioutput target: for every linear coordinate basis of
 a field of size `2^n`, computing all bits of inversion (with `0⁻¹=0`) requires
@@ -445,9 +506,64 @@ can retain all its inputs; the audit records exact obstructions to those local s
   `p = (3/(4π)) arccos(5/6)`, `L = 1 + 2π/(3 arccos(5/6)) ≈ 4.5760`, and needs the
   universal all-prefix theorem with arbitrary positive slack, not a bisection
   estimate.
+- [ ] **Signal and generator layouts.** Prove an ordering theorem for the wiring
+  network that bounds the generators of every charged edge set by
+  `(A' + ξ)(s − n) + O(log)`; `Wiring.card_accepting_le_of_generators` then gives the
+  coefficient `1 + 1/A'`, and the compression, median-ordering, and `FourN` assembly
+  must be redone for the generator count. Linear Gaussian keys do not supply the
+  gain. Giving all edges of one signal a single class score makes copy vertices free
+  but charges a gate `(3/(2π)) arccos ((3κ² − 1)/2)` by `sum_arccos_star_le`, where
+  `κ` is the inner product of its class scores with its own row: `κ = ρ` for a copy
+  class scored by the copy row and `κ = √((1 + ρ)/2)` for a single edge, giving
+  `0.1404`, `0.198`, `0.2425`, `0.2796` for a gate meeting `0, 1, 2, 3` copy classes
+  (with the averaged bound), against the frontier's `0.1404 (1 + k/3)` for the gate
+  plus its share of the copies. Only a gate meeting three copy classes gains, by
+  `0.0012`, and every mixed gate loses. Mixed gates are unavoidable: `∑ fan-out = 2s`
+  over `n + s − 1` signals forces at least `2n − 2` fan-out-one signals when fan-outs
+  are at most two, hence at least `n − 2` singleton gate-to-gate classes in the core,
+  so no uniform cubic constant below the frontier's follows from class scores. The
+  generator saving needs nonlinear keys or a joint-event bound in the frontier
+  ordering. Monte Carlo on random fan-in-two circuits at `s = 4.5 n`, laid out through
+  the actual compression with median-of-edge-score orderings and finite kernels, puts
+  signal counting about ten percent and generator counting about fifteen percent below
+  edge counting in the same ordering; these are relative observations with no proof.
 - [ ] **Rigidity and local repair.** Audit the four-star distance-kernel rigidity
   lemma first. A compactness argument would give some fixed improvement `δ > 0`
   over the two-sided coefficient, but no numerical `δ` is established.
+
+The arithmetic bridge is now checked in `MultiOutput.Polynomial`: arbitrary
+fan-in-two polynomial gates computing any totally regular linear map over any
+field require `(4.5625-ε)N` gates eventually. Formal differentiation at zero
+gives a local linear realization on the original wires over infinite fields;
+finite fields use the existing counting bound. A new field-independent rank-cut
+lemma feeds the same layout proof, preserving the gate count without a separate
+Menger theorem. Degree, coefficients, depth, and fanout are unrestricted.
+`Polynomial.Cauchy` supplies the explicit rational-node matrix
+`M(i,j)=1/(i-(N+j))` over every characteristic-zero field, including Q, R, and C.
+`Polynomial.Arithmetic` proves the same lower bound for additions and
+multiplications with arbitrary constant gates free: its constant-absorption
+compiler emits exactly one polynomial gate per arithmetic operation.
+Lev--Valiant supplies the classical `4N-o(N)` superconcentrator baseline;
+no broader arithmetic record claim is made. The
+[transfer audit](research/circuit-lower-bound-frontiers/transfer-ledger.md#transfers-to-other-circuit-models-audited-next-steps)
+records why finite-alphabet, arbitrary higher fan-in, continuous, quantum, and
+randomized variants need separate hypotheses or compiler arguments. Continuous
+gates via invariance of domain and rational gates regular near a base point are
+natural next bridges; neither extension is currently formalized.
+
+## Uniform tensor families
+
+`Algebraic.Tensor3.Dissociated` now defines one computable tensor family at every
+ambient dimension `m`, independent of approximation parameters. Its complex
+border rank is at least `(7/3-ε)m` eventually for every `ε>0`; in particular it
+is eventually at least `17m/8`. Every integer coefficient uses at most `m+1`
+binary digits. A bounded search chooses the periodic paired-cluster parameters
+subject to both coefficient-size and finite-rank-error guards, and zero padding
+handles even dimensions. This strengthens the motivating distinct-subset-sums
+PDF's target with a different family, reusing the checked paired-cluster theorem.
+The next steps are a machine-level polynomial-time evaluator and an explicit
+convergence rate. Computability and polynomial output size alone are not an FP
+certificate, and neither of those remaining statements is claimed proved.
 
 ## Descriptive complexity expansion
 
