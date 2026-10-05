@@ -11134,6 +11134,68 @@ Theorem~\ref{thm:lowerbounds-algebraic-explicit-four-n}.
   by $3n,2g$, and the four-point affine obstruction supplies the penalty $P$.
 \end{proof}
 
+\begin{lemma}[Inversion's actual nonlinear-feature budget]
+  \label{lem:lowerbounds-algebraic-geometry-inversion-features}
+  \lean{Algebraic.Aggregate.Geometry.output_affine_conjunction_representation,
+    Algebraic.Aggregate.Geometry.Inversion.input_add_feature_bias_le_conjunctionCount}
+  \leanok
+  \uses{def:lowerbounds-algebraic-geometry-nonlinear-rank,
+    def:lowerbounds-algebraic-geometry-inversion}
+  Every output of a signed unbounded AND/OR/XOR circuit is an affine function
+  of the primary bits plus a linear combination of its actual conjunction
+  gate outputs. Suppose the circuit computes all coordinates of inversion
+  in any supplied binary-field basis. Let $N$ count conjunction gates and
+  let $m$ count those reading at least two distinct primary coordinates.
+  With $c=1-H_2(1/4)$,
+  \[
+    N\ge n+cm-\log_2 5.
+  \]
+  No independence, fan-in, fanout, depth, or nonlinear-reuse restriction is imposed.
+\end{lemma}
+\begin{proof}
+  \leanok
+  Apply the gate-span induction to the sum of the affine subspace and the
+  range of the linear-combination map on actual conjunction functions.
+  Assemble the output representations in the field basis to obtain
+  $I(x)+Ax+a=D(h(x))$. Inversion's classical differential-uniformity bound
+  gives at most $q+4(q-1)$ ordered collisions for this affine residual,
+  with $q=2^n$. Equality of feature vectors implies equality of residuals,
+  so their average fibre size is at most five. The weighted logarithmic
+  collision inequality charges every quarter-biased feature. Each of the
+  $m$ marked actual conjunction outputs has a rare Boolean value occurring
+  on at most one quarter of the cube, even with repeated or internal wires.
+\end{proof}
+
+\begin{theorem}[Nonlinear features strengthen binary-field inversion]
+  \label{thm:lowerbounds-algebraic-geometry-inversion-feature-bound}
+  \lean{Algebraic.Aggregate.Geometry.Inversion.feature_entropy_mul_size_lower_bound,
+    Algebraic.Aggregate.Geometry.Inversion.featureCoefficient_mul_sub_penalty_le_size}
+  \leanok
+  \uses{lem:lowerbounds-algebraic-geometry-inversion-features,
+    thm:lowerbounds-algebraic-geometry-inversion-entropy}
+  Let $K$ be a finite field over $\mathbf F_2$ with a supplied linear
+  isomorphism $e:\mathbf F_2^n\longrightarrow K$, where $n\ge3$.
+  Every signed unbounded AND/OR/XOR circuit computing all inversion
+  coordinates satisfies
+  \[
+    (2+2c)g\ge(3+4c)n-\log_2 5-8c,
+    \qquad c=1-H_2(1/4).
+  \]
+  Equivalently, its gate count is at least
+  $1.5793801642\ldots n-1.6116903280\ldots$.
+  This gives a larger leading coefficient than the majority-fibre bound;
+  both finite inequalities remain available with their different penalties.
+\end{theorem}
+\begin{proof}
+  \leanok
+  Let $o$ count conjunction output gates. Distinct designated outputs give
+  $n+N\le g+o$, while their constant primary summaries and the biased
+  internal summaries give $n\le g-o-cm$. Hence
+  $2g\ge2n+N+cm\ge3n+2cm-\log_2 5$.
+  The affine-restriction inequality $2n\le g+m+4$ eliminates $m$.
+  Divide by $2+2c>0$ for the normalized gate bound.
+\end{proof}
+
 \begin{definition}[Full Hamming residue modulo three]
   \label{def:lowerbounds-algebraic-modthree-residue}
   \lean{Algebraic.BooleanCube.ModThree.bit,
