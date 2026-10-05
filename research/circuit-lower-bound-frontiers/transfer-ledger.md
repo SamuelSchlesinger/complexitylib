@@ -141,6 +141,80 @@ separator yielded a proof with `log2 U(c,n)<=(rho-delta(c))*n+o_c(n)` for every 
 The unproved requirement is this circuit-to-proof compiler, including arbitrary
 gate extensions; semantic equivalence supplies no short proof by itself.
 
+## Transfers to other circuit models: audited next steps
+
+The layout, interface bound, and target hardness must use compatible resources.
+The existing network proof checks local consistency of edge labels in an arbitrary
+vertex order; that order need not be topological. A deterministic evaluation
+algorithm following the order is therefore not an automatic consequence.
+
+For a finite alphabet of size `q`, the analogous state count is `q^w`. The same
+coefficient is a plausible transfer with a dense target having rectangle threshold
+`K=q^{o(n)}`, after proving the corresponding alphabet-valued network lemma. This
+does not by itself construct a suitable family for each alphabet. Totally regular
+finite-field linear maps already have a separate checked multioutput transfer.
+For arbitrary fan-in `k`, the identity `E-V=(k-1)s-n` does not supply a cubic
+compiler. A general `k`-argument gate cannot necessarily be simulated by `k-1`
+binary gates over the same alphabet: even three-input majority needs more than
+two binary Boolean gates. The proposed coefficient `L/(k-1)` needs another proof.
+
+The polynomial-gate transfer is now Lean-checked in
+[`MultiOutput/Polynomial.lean`](../../Complexitylib/Algebraic/LowerBound/Cutwidth/MultiOutput/Polynomial.lean).
+It covers every field and any totally regular linear target, with coefficient
+`L ≈ 4.5625`, unrestricted degree and coefficients, and at most two input slots
+per gate. Over infinite fields, formal derivatives at zero give one local
+coefficient row on each original wire, with a gate row in the span of its
+argument rows. The computed linear target identifies the output rows. Restricting
+rows to one side of a cut puts the exterior outputs in the span of the crossing
+signals. Their ranks are therefore bounded by the crossing counts, and the same
+layout proof applies. Finite fields use the earlier cardinality argument, since
+functional equality there need not imply equality of formal polynomials.
+The formal proof uses this rank-cut route directly, avoiding a separate Menger
+theorem. A superconcentrator separator argument is an equivalent mathematical
+route: fewer than `k` separator values cannot carry a rank-`k` submatrix.
+The standard arithmetic corollary also makes arbitrary constant nodes free:
+[`Polynomial/Arithmetic.lean`](../../Complexitylib/Algebraic/LowerBound/Cutwidth/MultiOutput/Polynomial/Arithmetic.lean)
+absorbs each constant reference into the receiving polynomial and emits exactly
+one gate for each original addition or multiplication. Nonconstant target rows
+ensure that output selection requires no extra constant gates.
+Over the reals, continuous gates admit an alternative separator proof: after
+fixing the other inputs, an invertible output submatrix forces the separator map
+to be a continuous injection from `R^k` to `R^r`; invariance of domain excludes
+`r<k`. No derivative is required for this variant.
+
+The classical superconcentrator baseline is already `4N-o(N)`: Lev's
+[1980 thesis, abstract and Chapter 3](https://era.ed.ac.uk/server/api/core/bitstreams/6187e3d4-5e72-43a7-a9c8-0d2a58374b88/content)
+states the indegree-two superconcentrator bound and its consequence for additions
+in prime-order Fourier transforms; see also Lev--Valiant,
+[*Size bounds for superconcentrators* (1983)](https://doi.org/10.1016/0304-3975(83)90105-6).
+This comparison is not a claim about every succinct algebraic matrix family.
+[Lokam, Section 2.5, Corollaries 2.26--2.27](https://www.cs.toronto.edu/~toni/Courses/CommComplexity/Papers/lokam-book.pdf)
+gives quadratic and almost-quadratic unrestricted-depth arithmetic lower bounds
+for roots-of-unity and square-root-of-prime matrices. Those constructions use
+number fields of exponential degree; Lokam explicitly distinguishes them from
+the stronger notion of explicitness for small number fields. Our Cauchy entries
+are rational. Establishing priority for this Cauchy coefficient needs a broader
+literature audit. Arbitrary gates on an infinite set lack the rank/dimension
+obstruction: pairing encodings can hide many coordinates in one value.
+
+For quantum circuits, tensor-network cuts bound Schmidt ranks, but a layout cut
+is not automatically the desired bipartition of physical inputs or outputs.
+Two-output quantum gates also change the graph accounting. An all-partition
+rank condition and a global charging theorem are missing; a Boolean switch-time
+analogue is not currently proved here.
+
+The nondeterministic network theorem already handles an arbitrary number of
+witness inputs by forgetting their ports, rather than treating them as hard
+coordinates. Randomized bounded-error circuits require the average-case version:
+averaging over coin strings fixes one deterministic circuit with at least the
+same average agreement. Rectangle-freeness alone is insufficient for this step;
+the quantitative balanced-rectangle hypothesis and its error margin must hold.
+
+Finally, majority does have a finite aggregate: a capped count uses `O(d)` states
+for fan-in `d`. Its logarithmic budget is `O(log d)`, so the aggregate theorem
+applies when the total budget is `o(n)`. The claim that majority gives no transfer
+is too strong. Unlimited large majority gates remain outside this conclusion.
+
 ## Validation
 
 [transfer_coefficients.py](data/transfer_coefficients.py) computes the numerical conversion;

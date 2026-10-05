@@ -1091,6 +1091,61 @@ tensors (Theorem~\ref{thm:frontiers-explicit-border-rank}).
   $M = pL + 1$; for $(21/10)m$ take $p = 2$ and $\delta = 1/90$, so $19/9 - \delta = 21/10$.
 \end{proof}
 
+\begin{definition}[A single size-dependent periodic tensor family]
+  \label{def:frontiers-dissociated-uniform-tensor}
+  \lean{Algebraic.Tensor3.Dissociated.Admissible,
+    Algebraic.Tensor3.Dissociated.order,
+    Algebraic.Tensor3.Dissociated.entry,
+    Algebraic.Tensor3.Dissociated.tensor}
+  \leanok
+  \uses{def:frontiers-periodic-lm-tensor}
+  For an odd core dimension $d=2k+1$, set $L_p=(p+1)(3^{2p}+1)$,
+  $A_p=L_p+1$, and $M_p=pL_p+1$. Search the integers
+  $1\le p\le\lfloor\log_2d\rfloor$ for the largest satisfying
+  \[
+    L_p\le k,\quad A_pM_p\le\lfloor\log_2d\rfloor,\quad
+    (p+1)(16(p+1)L_p+2)\le d.
+  \]
+  Use the periodic tensor with periods $(A_p,M_p)$, or the zero tensor if
+  no candidate exists. At ambient dimension $m$, choose
+  $k=\lfloor(m-1)/2\rfloor$ and pad the odd core by zeros. This defines one
+  computable nonnegative-integer-entry family $T_m$, independent of any
+  requested approximation parameter.
+\end{definition}
+
+\begin{theorem}[Uniform border rank with linear coefficient bit length]
+  \label{thm:frontiers-dissociated-uniform-border-rank}
+  \lean{Algebraic.Tensor3.Dissociated.order_tendsto,
+    Algebraic.Tensor3.Dissociated.entry_size_le,
+    Algebraic.Tensor3.Dissociated.sum_entry_size_le,
+    Algebraic.Tensor3.Dissociated.eventually_sub_mul_le_borderRank,
+    Algebraic.Tensor3.Dissociated.eventually_seventeen_div_eight_mul_le_borderRank}
+  \leanok
+  \uses{def:frontiers-dissociated-uniform-tensor,
+    thm:frontiers-periodic-border-rank}
+  Each coordinate of $T_m$ has at most $m+1$ binary digits; the complete dense
+  array has at most $m^3(m+1)$ coefficient bits. For every $\varepsilon>0$,
+  eventually in all integer dimensions $m$,
+  \[
+    \underline{\mathbf R}_{\mathbb C}(T_m)\ge(7/3-\varepsilon)m.
+  \]
+  In particular, eventually $\underline{\mathbf R}_{\mathbb C}(T_m)\ge17m/8$.
+  This formalizes a stronger bound than the motivating research note
+  \emph{Distinct subset sums and explicit tensor border rank}, Revision~2,
+  using the library's paired-cluster construction rather than that note's
+  outer-prime slices. A polynomial-time machine implementation and an explicit
+  convergence rate in $m$ are not asserted here.
+\end{theorem}
+\begin{proof}
+  \leanok
+  Every fixed positive $p$ eventually passes all three guards, so the selected
+  order tends to infinity. The periodic finite bound and the last guard give
+  $(7/3-8/(3(p+1)))d$ for the core rank. Restriction to the core bounds the
+  padded tensor's border rank from below; $d\ge m-1$ absorbs the padding loss.
+  The period-product guard bounds the exponent code by $\log_2d$, so an entry
+  $2^{2^e}$ has at most $m+1$ bits. Sum over the $m^3$ coordinates.
+\end{proof}
+
 \section{Fine-grained and parameterized complexity}
 
 \begin{theorem}[SETH implies quadratic hardness of Orthogonal Vectors]

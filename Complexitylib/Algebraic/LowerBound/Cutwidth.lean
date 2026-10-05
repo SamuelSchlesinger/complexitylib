@@ -57,6 +57,9 @@ public import Complexitylib.Algebraic.LowerBound.Cutwidth.SingleCut
 public import Complexitylib.Algebraic.LowerBound.Cutwidth.MultiOutput.Ordering
 public import Complexitylib.Algebraic.LowerBound.Cutwidth.MultiOutput.Rank
 public import Complexitylib.Algebraic.LowerBound.Cutwidth.MultiOutput.TotallyRegular
+public import Complexitylib.Algebraic.LowerBound.Cutwidth.MultiOutput.Polynomial
+public import Complexitylib.Algebraic.LowerBound.Cutwidth.MultiOutput.Polynomial.Arithmetic
+public import Complexitylib.Algebraic.LowerBound.Cutwidth.MultiOutput.Polynomial.Cauchy
 public import Complexitylib.Algebraic.LowerBound.Cutwidth.MultiOutput.Quadratic
 public import Complexitylib.Algebraic.LowerBound.Cutwidth.MultiOutput.Restrict
 public import Complexitylib.Algebraic.LowerBound.Cutwidth.MultiOutput.FieldMul

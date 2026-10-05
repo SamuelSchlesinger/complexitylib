@@ -97,10 +97,6 @@ theorem exists_cross (g : Nat → Nat) (hzero : g 0 = 0) {h : Nat} (hh : 1 ≤ h
 
 /-! ## The finite bound -/
 
-section Finite
-
-variable [Fintype F] [DecidableEq F]
-
 theorem card_inputsIn_prefixBelow_succ_le {n s : Nat} (rank : Wire n s → Nat)
     (hrank : Function.Injective rank) (t : Nat) :
     (inputsIn (prefixBelow rank (t + 1))).card ≤ (inputsIn (prefixBelow rank t)).card + 1 := by
@@ -138,14 +134,17 @@ theorem card_outputsIn_prefixBelow_succ_le {n s m : Nat} (rank : Wire n s → Na
   exact (Finset.card_le_card hsub).trans ((Finset.card_union_le _ _).trans
     (Nat.add_le_add_left hone _))
 
-/-- **The finite bound for totally regular maps.** A fan-in-two program over any signature
-whose wires `out` carry a totally regular linear map on `N` inputs has
-`N - 1 ≤ (A + η) (s - N)⁺ + 3 log₂ (N + 3 s) + C`. -/
-theorem sub_one_le_of_totallyRegular {A η C : ℝ} (hAη : 0 ≤ A + η)
+/-- The layout bound needs only distinct output wires and the rank inequality at each cut.
+No finiteness assumption on the coefficient field enters this graph argument. -/
+theorem sub_one_le_of_rank_cuts {A η C : ℝ} (hAη : 0 ≤ A + η)
     (order : Multigraph.OrderingBound A η C) {N s : Nat} (p : Program σ N s)
-    (hp : p.FanInAtMost 2) (I : Interpretation σ F) (out : Fin N → Wire N s)
+    (hp : p.FanInAtMost 2) (out : Fin N → Wire N s)
     {M : Matrix (Fin N) (Fin N) F} (hM : TotallyRegular M)
-    (hf : ∀ x i, p.trace I x (out i) = (M *ᵥ x) i) :
+    (hout : Function.Injective out)
+    (cuts : ∀ S : Finset (Wire N s),
+      blockRank M (outputsIn out S)ᶜ (inputsIn S) +
+        blockRank M (outputsIn out S) (inputsIn S)ᶜ ≤
+          (forward p S).card + (backward p S).card) :
     (N : ℝ) - 1 ≤ (A + η) * max ((s : ℝ) - N) 0 + 3 * Real.logb 2 (N + 3 * s) + C := by
   have hC := orderingBound_nonneg order
   have hlog : 0 ≤ Real.logb 2 ((N : ℝ) + 3 * s) := by
@@ -158,16 +157,11 @@ theorem sub_one_le_of_totallyRegular {A η C : ℝ} (hAη : 0 ≤ A + η)
   · subst hN
     simp only [Nat.cast_zero] at hmax0 hlog ⊢
     linarith
-  -- Distinct outputs.
-  have hout : Function.Injective out := by
-    refine outputs_injective hM p I out hf fun i i' hii' j => ?_
-    have := hii' (Pi.single j 1)
-    simpa [Matrix.mulVec_single_one] using this
   -- All inputs and outputs lie in the component of the first output.
   set i₀ : Fin N := ⟨0, hN⟩
   set W₀ := component p (out i₀) with hW₀
   have hclosed := component_closed p (out i₀)
-  have hzero := blockRank_add_blockRank_le_of_trace p I out M hf W₀
+  have hzero := cuts W₀
   rw [forward_eq_empty_of_closed hclosed, backward_eq_empty_of_closed hclosed] at hzero
   simp only [Finset.card_empty, add_zero, Nat.le_zero, Nat.add_eq_zero_iff] at hzero
   have hY : i₀ ∈ outputsIn out W₀ := by
@@ -254,7 +248,7 @@ theorem sub_one_le_of_totallyRegular {A η C : ℝ} (hAη : 0 ≤ A + η)
   have hcomp : component p w = W₀ := component_eq_of_mem hwW
   -- The rank lower bound at the prefix.
   set S := prefixBelow rank (t + 1) with hS
-  have hcut := blockRank_add_blockRank_le_of_trace p I out M hf S
+  have hcut := cuts S
   have hmin₁ := min_card_le_blockRank hM (outputsIn out S)ᶜ (inputsIn S)
   have hmin₂ := min_card_le_blockRank hM (outputsIn out S) (inputsIn S)ᶜ
   have hYcS : (outputsIn out S)ᶜ.card = N - (outputsIn out S).card := by
@@ -281,19 +275,37 @@ theorem sub_one_le_of_totallyRegular {A η C : ℝ} (hAη : 0 ≤ A + η)
     simpa using this
   linarith
 
-end Finite
+/-- **The finite bound for totally regular maps.** A fan-in-two program over any signature
+whose wires `out` carry a totally regular linear map on `N` inputs has
+`N - 1 ≤ (A + η) (s - N)⁺ + 3 log₂ (N + 3 s) + C`. -/
+theorem sub_one_le_of_totallyRegular [Fintype F] [DecidableEq F] {A η C : ℝ}
+    (hAη : 0 ≤ A + η) (order : Multigraph.OrderingBound A η C) {N s : Nat}
+    (p : Program σ N s) (hp : p.FanInAtMost 2) (I : Interpretation σ F)
+    (out : Fin N → Wire N s) {M : Matrix (Fin N) (Fin N) F} (hM : TotallyRegular M)
+    (hf : ∀ x i, p.trace I x (out i) = (M *ᵥ x) i) :
+    (N : ℝ) - 1 ≤ (A + η) * max ((s : ℝ) - N) 0 + 3 * Real.logb 2 (N + 3 * s) + C := by
+  have hout : Function.Injective out := by
+    refine outputs_injective hM p I out hf fun i i' hii' j => ?_
+    have := hii' (Pi.single j 1)
+    simpa [Matrix.mulVec_single_one] using this
+  exact sub_one_le_of_rank_cuts hAη order p hp out hM hout
+    (blockRank_add_blockRank_le_of_trace p I out M hf)
 
 /-! ## Asymptotics -/
 
 universe u v
 
-/-- **The asymptotic bound for totally regular maps** with a general ordering coefficient. -/
-theorem eventually_lt_size_of_orderingBound {A : ℝ} (hA : 0 < A)
+/-- The asymptotic layout transfer is uniform over all fields satisfying the rank-cut bound. -/
+theorem eventually_lt_size_of_rank_cuts {A : ℝ} (hA : 0 < A)
     (order : ∀ η : ℝ, 0 < η → ∃ C : ℝ, Multigraph.OrderingBound A η C) {ε : ℝ} (hε : 0 < ε) :
-    ∀ᶠ N : Nat in atTop, ∀ (F : Type u) [Field F] [Fintype F] [DecidableEq F]
+    ∀ᶠ N : Nat in atTop, ∀ (F : Type u) [Field F]
       (M : Matrix (Fin N) (Fin N) F), TotallyRegular M →
-      ∀ (σ : Signature.{v}) (I : Interpretation σ F) (c : Circuit σ N N),
-        c.FanInAtMost 2 → c.Computes I (fun x => M *ᵥ x) →
+      ∀ (σ : Signature.{v}) (c : Circuit σ N N),
+        c.FanInAtMost 2 → Function.Injective c.outputs →
+        (∀ S : Finset (Wire N c.size),
+          blockRank M (outputsIn c.outputs S)ᶜ (inputsIn S) +
+            blockRank M (outputsIn c.outputs S) (inputsIn S)ᶜ ≤
+              (forward c.program S).card + (backward c.program S).card) →
           (1 + 1 / A - ε) * N < c.size := by
   set ε' := min ε (1 / A) with hε'
   have hε'pos : 0 < ε' := lt_min hε (by positivity)
@@ -307,13 +319,12 @@ theorem eventually_lt_size_of_orderingBound {A : ℝ} (hA : 0 < A)
   have hBpos : 0 < B := by positivity
   filter_upwards [eventually_mul_logb_add_lt 3 (3 * Real.logb 2 B + C + 1)
     (show 0 < A * ε' / 2 by positivity), eventually_ge_atTop 1] with N hlog hN1
-  intro F _ _ _ M hM σ I c hfan hc
+  intro F _ M hM σ c hfan hout cuts
   by_contra hs
   rw [not_lt] at hs
   have hs' : (c.size : ℝ) ≤ (1 + 1 / A - ε') * N :=
     hs.trans (mul_le_mul_of_nonneg_right (by linarith) (by positivity))
-  have core := sub_one_le_of_totallyRegular hAη hC c.program hfan I c.outputs hM
-    (fun x i => congrFun (hc x) i)
+  have core := sub_one_le_of_rank_cuts hAη hC c.program hfan c.outputs hM hout cuts
   have hN1' : (1 : ℝ) ≤ N := by exact_mod_cast hN1
   -- The cycle-rank term.
   have hrest : 0 ≤ (1 / A - ε') * N := mul_nonneg (by linarith) (by positivity)
@@ -348,6 +359,23 @@ theorem eventually_lt_size_of_orderingBound {A : ℝ} (hA : 0 < A)
       _ = Real.logb 2 B + Real.logb 2 N := Real.logb_mul hBpos.ne' (by positivity)
   have hsplit : (1 - A * ε' / 2) * (N : ℝ) = N - A * ε' / 2 * N := by ring
   linarith
+
+/-- **The asymptotic bound for totally regular maps** with a general ordering coefficient. -/
+theorem eventually_lt_size_of_orderingBound {A : ℝ} (hA : 0 < A)
+    (order : ∀ η : ℝ, 0 < η → ∃ C : ℝ, Multigraph.OrderingBound A η C) {ε : ℝ} (hε : 0 < ε) :
+    ∀ᶠ N : Nat in atTop, ∀ (F : Type u) [Field F] [Fintype F] [DecidableEq F]
+      (M : Matrix (Fin N) (Fin N) F), TotallyRegular M →
+      ∀ (σ : Signature.{v}) (I : Interpretation σ F) (c : Circuit σ N N),
+        c.FanInAtMost 2 → c.Computes I (fun x => M *ᵥ x) →
+          (1 + 1 / A - ε) * N < c.size := by
+  filter_upwards [eventually_lt_size_of_rank_cuts.{u, v} hA order hε] with N bound
+  intro F _ _ _ M hM σ I c hfan hc
+  have hf : ∀ x i, c.program.trace I x (c.outputs i) = (M *ᵥ x) i :=
+    fun x i => congrFun (hc x) i
+  apply bound F M hM σ c hfan
+  · refine outputs_injective hM c.program I c.outputs hf fun i i' hii' j => ?_
+    simpa [Matrix.mulVec_single_one] using hii' (Pi.single j 1)
+  · exact blockRank_add_blockRank_le_of_trace c.program I c.outputs M hf
 
 /-! ## Cauchy matrices -/
 

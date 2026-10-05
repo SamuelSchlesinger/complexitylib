@@ -381,6 +381,19 @@ symmetric predicates. The conclusion counts total gates and retains the existing
 polynomial-time family; it does not improve the binary-only coefficient or cover an
 unrestricted number of special gates.
 
+Joint compression now replaces the occurrence budget by
+`D = 2 ceil(log₂ |M|)` whenever every local contribution to the vector of special
+registers factors through one finite commutative monoid `M`
+(`Aggregate.Compressed.sourceReductionHardFamily_eventually_lt_size_gaussian`).
+One state guesses all special outputs and another accumulates their simultaneous
+check. The number of special gates and their dependencies are unrestricted; the
+factorization and sublinear joint budget are the hypotheses. The submonoid generated
+by all local contributions supplies a canonical instance. For a common prime
+modulus `p`, the actual contribution matrix gives an automatic factorization with
+exactly `p^rank` states and budget at most `2 rank ceil(log₂ p)`.
+Thus sublinear rank suffices for fixed `p`, even with linearly many MOD gates.
+This strengthens the scope of the sparse-aggregate theorem, not its coefficient.
+
 A separate whole-basis theorem now removes that sparsity condition at a smaller
 coefficient (`Aggregate.sourceReductionHardFamily_eventually_lt_realCapacity`).
 Its exact capacity is `B = ordinaryCount + Σ log₂ |M_j|`, with no output guesses or
@@ -427,6 +440,22 @@ with `C_I ≈ 1.5644077959` and `P_I ≈ 0.5640721944`. Disjoint signed-pair maj
 fibers are counted and combined with the residual-message bound, both entropy
 bounds, and the affine geometry. The earlier `1.22148505965...` and
 `1.54311234736...` theorems below remain checked but are no longer the best.
+
+Conditioning the residual-message entropy on those same majority fibers now gives
+`C ≈ 1.2453914029` for the fixed scalar family
+(`Geometry.Fiber.Conditional.sourceReductionHardFamily_eventually_lt_size`) and
+`I n - P` for binary-field inversion, with `I ≈ 1.5659486596` and
+`P ≈ 0.6016050397`
+(`Geometry.Inversion.conditionalFiberCoefficient_mul_sub_penalty_le_size`).
+In the product of three-point pair fibers, any prescribed `d` distinct coordinates
+have probability at most `(2/3)^d`. Thus surviving two- and three-literal summaries
+save `1-H₂(4/9)` and `1-H₂(8/27)` bits. Entropy subadditivity needs no independence
+between summaries. The same pairing and weighted receiver cut combine this with
+both earlier entropy inequalities and affine geometry. The new inversion bound
+has a stronger leading coefficient and a larger additive penalty; keep both
+finite inequalities. All circuit assumptions and target families are unchanged.
+An open next step is sharper joint entropy inside these conditioned fibers, with
+every overlap charged against the same geometric pairing.
 
 There is also a natural multioutput target: for every linear coordinate basis of
 a field of size `2^n`, computing all bits of inversion (with `0⁻¹=0`) requires
@@ -501,6 +530,40 @@ can retain all its inputs; the audit records exact obstructions to those local s
 - [ ] **Rigidity and local repair.** Audit the four-star distance-kernel rigidity
   lemma first. A compactness argument would give some fixed improvement `δ > 0`
   over the two-sided coefficient, but no numerical `δ` is established.
+
+The arithmetic bridge is now checked in `MultiOutput.Polynomial`: arbitrary
+fan-in-two polynomial gates computing any totally regular linear map over any
+field require `(4.5625-ε)N` gates eventually. Formal differentiation at zero
+gives a local linear realization on the original wires over infinite fields;
+finite fields use the existing counting bound. A new field-independent rank-cut
+lemma feeds the same layout proof, preserving the gate count without a separate
+Menger theorem. Degree, coefficients, depth, and fanout are unrestricted.
+`Polynomial.Cauchy` supplies the explicit rational-node matrix
+`M(i,j)=1/(i-(N+j))` over every characteristic-zero field, including Q, R, and C.
+`Polynomial.Arithmetic` proves the same lower bound for additions and
+multiplications with arbitrary constant gates free: its constant-absorption
+compiler emits exactly one polynomial gate per arithmetic operation.
+Lev--Valiant supplies the classical `4N-o(N)` superconcentrator baseline;
+no broader arithmetic record claim is made. The
+[transfer audit](research/circuit-lower-bound-frontiers/transfer-ledger.md#transfers-to-other-circuit-models-audited-next-steps)
+records why finite-alphabet, arbitrary higher fan-in, continuous, quantum, and
+randomized variants need separate hypotheses or compiler arguments. Continuous
+gates via invariance of domain and rational gates regular near a base point are
+natural next bridges; neither extension is currently formalized.
+
+## Uniform tensor families
+
+`Algebraic.Tensor3.Dissociated` now defines one computable tensor family at every
+ambient dimension `m`, independent of approximation parameters. Its complex
+border rank is at least `(7/3-ε)m` eventually for every `ε>0`; in particular it
+is eventually at least `17m/8`. Every integer coefficient uses at most `m+1`
+binary digits. A bounded search chooses the periodic paired-cluster parameters
+subject to both coefficient-size and finite-rank-error guards, and zero padding
+handles even dimensions. This strengthens the motivating distinct-subset-sums
+PDF's target with a different family, reusing the checked paired-cluster theorem.
+The next steps are a machine-level polynomial-time evaluator and an explicit
+convergence rate. Computability and polynomial output size alone are not an FP
+certificate, and neither of those remaining statements is claimed proved.
 
 ## Descriptive complexity expansion
 

@@ -86,6 +86,69 @@ coefficient `1 + π/(3 arccos((1 + 2√2)/4))`. The older entry
 points with explicit bisection, pathwidth, or ordering bounds remain available.
 The library proves those graph bounds and adds no axioms.
 
+### Unbounded-gate extensions
+
+The same fixed Boolean family retains coefficient `L ≈ 4.5625` with finite
+commutative aggregate gates whenever their joint contributions factor through a
+finite monoid `M` with `2 ceil(log₂ |M|)=o(n)`. One state guesses every special
+output and one checks their joint aggregate. This permits arbitrary dependencies
+between special gates and imposes no bound on their number. The local homomorphic
+factorization must recover the full registers, not merely their Boolean readouts.
+See [Compressed/Hardness.lean](../../Complexitylib/Algebraic/LowerBound/Cutwidth/Aggregate/Compressed/Hardness.lean).
+
+For one common prime modulus `p`, a canonical factorization has exactly `p^r`
+states, where `r` is the rank of the full matrix of wire contributions, including
+both values of every wire. Thus `2r ceil(log₂ p)=o(n)` suffices; the modulus may
+vary between circuits. See [ModularHardness.lean](../../Complexitylib/Algebraic/LowerBound/Cutwidth/Aggregate/Compressed/ModularHardness.lean).
+
+Without any budget restriction, signed unbounded AND/OR/XOR circuits computing
+the scalar family require `(1.2453914029…-ε)n` gates eventually. The same basis
+requires at least `1.5659486596… n - 0.6016050397…` gates for all coordinates of
+binary-field inversion, in every supplied linear basis and dimension `n≥3`.
+These decimal values abbreviate exact logarithmic constants. The new step bounds
+residual-message entropy inside large disjoint majority fibers: distinct literal
+assignments have probability at most `(2/3)^d`, giving conditional two- and
+three-literal savings. It combines with the same pairing's affine restriction.
+See [Conditional/Hardness.lean](../../Complexitylib/Algebraic/LowerBound/Cutwidth/Aggregate/Geometry/Fiber/Conditional/Hardness.lean)
+and [Conditional/Inversion.lean](../../Complexitylib/Algebraic/LowerBound/Cutwidth/Aggregate/Geometry/Fiber/Conditional/Inversion.lean).
+Historical novelty of these extensions is not established by the formalization.
+
+### Polynomial gates and explicit rational linear maps
+
+The coefficient `L = 1 + π/(3 arccos((1 + 2√2)/4))` also holds for polynomial
+circuits computing all coordinates of a totally regular `n × n` linear map.
+Every gate has at most two input slots; its polynomial degree and coefficients
+are unrestricted, as are circuit depth and fanout. The theorem holds over every
+field, with a threshold uniform over fields, matrices, and gate polynomials.
+See [Polynomial.lean](../../Complexitylib/Algebraic/LowerBound/Cutwidth/MultiOutput/Polynomial.lean).
+
+An explicit target over Q, R, or C is the Cauchy matrix
+`M(i,j) = 1 / (i - (n+j))`, for `0 ≤ i,j < n`. These are the same rational entries
+in each field. For every `ε>0`, all sufficiently large members require more than
+`(L-ε)n` polynomial gates. Coefficients built into a gate are free; explicit
+nullary gate occurrences count in this polynomial theorem's `Circuit.size`.
+See [Cauchy.lean](../../Complexitylib/Algebraic/LowerBound/Cutwidth/MultiOutput/Polynomial/Cauchy.lean).
+
+For ordinary arithmetic circuits, the same bound counts only additions and
+multiplications: arbitrary constant gates are free. The checked compiler absorbs
+constant inputs into polynomial coefficients and emits exactly one gate per
+arithmetic operation. No extra output gate is needed because each target row is
+nonconstant. See [Arithmetic.lean](../../Complexitylib/Algebraic/LowerBound/Cutwidth/MultiOutput/Polynomial/Arithmetic.lean).
+
+Over infinite fields, formal differentiation at zero assigns a coefficient row
+to each original wire. A gate's row lies in the span of its argument rows,
+including when those arguments have nonzero constant terms. Across a cut,
+output rows on one side restricted to inputs on the other lie in the span of
+the crossing signals. Matrix rank replaces finite-state counting. Over finite
+fields, the existing counting theorem supplies the same rank-cut inequality.
+The layout and asymptotic arguments are shared with the earlier theorem.
+
+Valiant's totally regular matrix method and Lev--Valiant's classical `4n-o(n)`
+superconcentrator baseline precede this transfer. See the
+[source and model audit](../../research/circuit-lower-bound-frontiers/transfer-ledger.md#transfers-to-other-circuit-models-audited-next-steps)
+for the distinction from known superlinear bounds for algebraic entries in large
+number fields; no general arithmetic-record claim is made.
+
 ### The coefficient as a function of the graph ordering
 
 The coefficient four is `1 + 1/A` for the graph-ordering coefficient
