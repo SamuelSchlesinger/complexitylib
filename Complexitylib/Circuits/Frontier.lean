@@ -26,6 +26,7 @@ public import Complexitylib.Circuits.Frontier.Boundary.Code
 public import Complexitylib.Circuits.Frontier.AverageCase.Pruning
 public import Complexitylib.Circuits.Frontier.Tree.Network
 public import Complexitylib.Circuits.Frontier.Layouts.Local
+public import Complexitylib.Circuits.Frontier.Explicit
 
 /-!
 # The frontier method
