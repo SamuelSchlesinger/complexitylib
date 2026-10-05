@@ -481,16 +481,23 @@ can retain all its inputs; the audit records exact obstructions to those local s
   network that bounds the generators of every charged edge set by
   `(A' + ξ)(s − n) + O(log)`; `Wiring.card_accepting_le_of_generators` then gives the
   coefficient `1 + 1/A'`, and the compression, median-ordering, and `FourN` assembly
-  must be redone for the generator count. With vertex kernel scores and the pairwise
-  arccos bound, a fan-out-two signal crosses a threshold exactly when its three gate
-  endpoints are not on one side, so on fan-out-two cores the linear-key constant is
-  `A' = (3/(2π)) arccos(5/6) ≈ 0.2796`, the two-sided-sweep constant above
-  (`L ≈ 4.576`); this needs a distance-two kernel correlation lemma (limit `5/6`)
-  beside `sum_unitKernel_mul_ge`, and a uniform treatment of mixed fan-outs. Monte
-  Carlo on random fan-in-two circuits at `s = 4.5 n`, laid out through the actual
-  compression with median-of-edge-score orderings and finite kernels, puts signal
-  counting about ten percent and generator counting about fifteen percent below edge
-  counting in the same ordering; these are relative observations with no proof.
+  must be redone for the generator count. Linear Gaussian keys do not supply the
+  gain. Giving all edges of one signal a single class score makes copy vertices free
+  but charges a gate `(3/(2π)) arccos ((3κ² − 1)/2)` by `sum_arccos_star_le`, where
+  `κ` is the inner product of its class scores with its own row: `κ = ρ` for a copy
+  class scored by the copy row and `κ = √((1 + ρ)/2)` for a single edge, giving
+  `0.1404`, `0.198`, `0.2425`, `0.2796` for a gate meeting `0, 1, 2, 3` copy classes
+  (with the averaged bound), against the frontier's `0.1404 (1 + k/3)` for the gate
+  plus its share of the copies. Only a gate meeting three copy classes gains, by
+  `0.0012`, and every mixed gate loses. Mixed gates are unavoidable: `∑ fan-out = 2s`
+  over `n + s − 1` signals forces at least `2n − 2` fan-out-one signals when fan-outs
+  are at most two, hence at least `n − 2` singleton gate-to-gate classes in the core,
+  so no uniform cubic constant below the frontier's follows from class scores. The
+  generator saving needs nonlinear keys or a joint-event bound in the frontier
+  ordering. Monte Carlo on random fan-in-two circuits at `s = 4.5 n`, laid out through
+  the actual compression with median-of-edge-score orderings and finite kernels, puts
+  signal counting about ten percent and generator counting about fifteen percent below
+  edge counting in the same ordering; these are relative observations with no proof.
 - [ ] **Rigidity and local repair.** Audit the four-star distance-kernel rigidity
   lemma first. A compactness argument would give some fixed improvement `δ > 0`
   over the two-sided coefficient, but no numerical `δ` is established.
