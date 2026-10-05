@@ -188,6 +188,118 @@ If leaves preserve disjoint accepted subsets with masses `a_l`, the natural aggr
 potential is `log2(sum_l E_l)-log2(sum_l a_l)`; every restriction and discarded mass must
 be charged before using this ratio. No recursive decrease theorem is supplied here.
 
+## Superlinear spike: affine coordinates and one efficient accepting region
+
+The [superlinear ledger](../transfer-ledger.md#the-superlinear-contract-one-family-every-constant)
+requires a saving for every fixed size/input ratio on one fixed P family. Two paper
+deductions enlarge the representation target without weakening that requirement.
+Neither supplies the missing compiler for general circuits.
+
+**Allow a different affine basis in each cover region.** Represent each accepting
+subfunction as `g_j(x)=D_j(T_j^(-1)(x))`, where T_j is an invertible affine map and
+D_j is a DNNF using those independent coordinates. Require `g_j<=f` and
+`OR_j g_j=f`; different regions may overlap and choose different bases.
+A rectangle in that basis maps to `A+B` in the original coordinates, with both
+support cardinalities preserved. Thus full sumset dispersion, already available
+for our fixed family, preserves the DNNF mass bound from the
+[tree-interface argument](../branch-decompositions/index.md):
+
+```
+|g_j^-1(1)| <= 2*((2n+1)*S_j+4n)*(K-1)^3.
+```
+
+Summing gives total representation size `2^(n-o(n))` when f has constant acceptance
+density and `log K=o(n)`. This permits global affine simplifications, but does not
+permit incompatible bases at arbitrary internal DNNF nodes without a gluing proof.
+
+**A concrete exact quadratic terminal.** For arbitrary quadratic forms q_1,...,q_r
+and arbitrary H on r bits, `H(q_1,...,q_r)` has an affine-coordinate DNNF of size
+
+```
+O(n * 2^(n-floor(n/(r+1))+r)).
+```
+
+To prove this, greedily construct a common totally isotropic subspace U for their
+r alternating polar forms. A t-dimensional isotropic space imposes at most rt
+linear orthogonality constraints. While `n>(r+1)t`, the common orthogonal space
+contains a new vector, so `dim U>=floor(n/(r+1))`. In a basis extending U, fix
+the complementary coordinates. All q_i then become affine on U. A read-once
+decision diagram tracks their r accumulated parities using at most `2^r` states
+per coordinate. Conjoin each cofactor with its complementary-coordinate assignment
+and take their disjunction. This is decomposable and gives the stated size.
+Equivalently, every nonempty fiber of the r affine forms contains a constant flat
+of dimension at least `dim U-r`; the terminal is already incompatible with a
+strong affine disperser when r is constant and n is large.
+
+The proof is a paper deduction; novelty is not asserted. The unrestricted obstacle
+is the cost of preserving nonlinear consistency equations. Freezing t reused
+nonlinear outputs creates `2^t` sectors but retains t defining quadratic equations
+plus an output condition. Naively applying this terminal costs exponent
+`n+2t+1-floor(n/(t+2))`, which gives no saving at `t=Theta(n)`.
+Dropping the equations changes the function, and using signed cancellation changes
+the representation model. A useful next theorem must recover the cost of these
+equations through genuine semantic dependence or a jointly paid interface.
+
+**One efficient accepting region could suffice.** It is enough to find a nonzero
+subfunction g<=f with an affine-coordinate DNNF of size S and
+`log2|g^-1(1)|-log2(poly(n)*S)>=delta(c)*n`. The mass bound forbids this for the
+same hard family, even if g retains an exponentially small fraction of acceptance.
+Thus the compiler need not necessarily cover every branch. Conversely, a
+monochromatic product P times Q in one affine basis has a DNNF of size
+`O(n)(|P|+|Q|)` by separately enumerating its two sides; if both sides have
+`2^(delta*n)` elements, it supplies such an efficient region.
+
+A crisp **unproved** sufficient target is therefore: every dense size-cn B2
+function has a monochromatic affine-coordinate product with both sides of size
+`2^(delta(c)*n)`, for some positive delta(c). Proving this for every c would give
+an unrestricted superlinear lower bound for our existing family. A first test should
+retain reused nonlinear equations and measure acceptance mass relative to their
+actual representation cost. Parity, selectors, and globally mixed quadratic forms
+are necessary sanity tests; the quadratic terminal handles the last of these.
+
+## Global structure, algebra, and shared semantic proofs
+
+**Minimum-circuit observability (paper lemma).** Among minimum-size B2 circuits,
+minimize the number of nonlinear gates. At each nonlinear gate, all four parent
+patterns must occur on inputs where flipping that gate and recomputing the entire
+suffix changes the output. Otherwise an affine binary function agrees on its at
+most three observable patterns and replaces it at the same size. These witnesses
+need not be frequent or compatible across gates. Simultaneous replacements can
+unmask previously unobservable changes; their costs cannot be added without a new theorem.
+
+**A precise global bottleneck target (unproved).** In some invertible affine input
+basis, write `f(u,v)=H(M(u),v)`, with a coordinates in u and b message bits.
+Acceptance density at least 1/4 gives an accepting product with side sizes at least
+`2^(a-b-2)` and `2^(n-a-b-2)`. A universal guarantee
+`b<=min(a,n-a)-delta(c)*n` for every size-cn candidate would therefore contradict
+our same fixed sumset-disperser family for every c. No graph separator or depth
+assumption supplies this semantic factorization.
+
+**Semantic rank strengthens only the restricted algebraic route (paper deduction).**
+The [MOD3 freezing tradeoff](../larger-gates/mod3-barrier.md) can use the dimension r
+of nonterminal conjunction functions modulo affine functions in place of their count:
+topologically select a basis and spend at most one affine equation per independent
+output. Thus `(r+1)*log2(h+2)^2>=c*n`. The affine MOD3 geometry is Lean-checked;
+this refinement and the probabilistic-polynomial transfer remain paper proofs.
+Constant live memory cannot replace r: a two-bit sequential MOD3 register has
+O(n) gates but its n-1 nontrivial prefix predicates are independent modulo affine
+functions. A nonaffine escape needs a target-preserving degree-d embedding of an
+m-dimensional cube with `m/d^2 >> log2(n)^2`, not merely a large nonlinear fiber.
+
+**Lifting and proof complexity must retain sharing.** A B2 circuit gives an O(s+n)-node
+rectangle-certified Karchmer--Wigderson protocol DAG by tracking a gate and the
+orientation of its unequal values. Depth and tree-size lower bounds do not bound
+these shared nodes. Dual-rail monotone simulation requires hardness for every
+separator on the valid-rail promise, not one chosen extension off that promise.
+Similarly, an unsatisfiable width-k CNF with M clauses has an ordinary query DAG
+of size `O(M*2^k)` that scans for a falsified clause: resolution hardness cannot be
+transferred after dropping the certified node domains. See the [lifting audit](../communication-lifting/index.md).
+Gate definitions also do not prove candidate equivalence cheaply. An evaluator
+for a hard unsatisfiable CNF and the constant-zero circuit already demonstrate
+that the equivalence can contain a hard refutation. The [ledger](../transfer-ledger.md#alternative-superlinear-bridges)
+states the missing converse-interpolation contract; a semantic DAG avoids this
+proof obligation only by moving the lower-bound problem to a stronger representation.
+
 ## Evidence, literature status, and stopping decision
 
 [The stdlib validator](data/validate.py), with [fixed output](data/output.txt), checks all

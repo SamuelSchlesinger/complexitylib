@@ -10569,6 +10569,136 @@ Theorem~\ref{thm:lowerbounds-algebraic-explicit-four-n}.
   gate classes. Normalize by $n$; the threshold losses vanish.
 \end{proof}
 
+\begin{lemma}[Exact size of a simultaneous majority event]
+  \label{lem:lowerbounds-algebraic-geometry-majority-count}
+  \lean{Algebraic.Cutwidth.Aggregate.Geometry.Fiber.card_majorityInputs,
+    Algebraic.Cutwidth.Aggregate.Geometry.Fiber.two_mul_card_le}
+  \leanok
+  Let $s$ signed two-variable conjunctions have pairwise disjoint endpoints
+  among $a$ Boolean coordinates. The number of inputs on which every conjunction
+  is false equals
+  \[
+    3^s2^{a-2s},\qquad 2s\le a.
+  \]
+\end{lemma}
+\begin{proof}
+  \leanok
+  Each pair has exactly three false assignments. Disjoint endpoints identify
+  the majority event with the product of these three-element choices and the
+  unrestricted assignments on the unused coordinates.
+\end{proof}
+
+\begin{lemma}[Residual-message counting on the majority event]
+  \label{lem:lowerbounds-algebraic-geometry-majority-message}
+  \lean{Algebraic.Cutwidth.Aggregate.Geometry.Fiber.log_card_le_of_fibers,
+    Algebraic.Cutwidth.Aggregate.Geometry.Fiber.log_card_le_of_boolean_fibers,
+    Algebraic.Cutwidth.Aggregate.Geometry.Fiber.card_residual_fiber_le}
+  \leanok
+  \uses{lem:lowerbounds-algebraic-geometry-majority-count}
+  Let a finite message map from these $a$ input coordinates to an alphabet $Y$
+  have fibres of size at most $K>0$ on the majority event. Then
+  \[
+    a+(\log_2 3-2)s\le\log_2|Y|+\log_2K.
+  \]
+  In particular, an $r$-bit residual message has $\log_2|Y|=r$.
+  Removing message coordinates that are fixed on the event preserves the
+  original full-message fibre bound.
+\end{lemma}
+\begin{proof}
+  \leanok
+  Partition the majority event by its residual messages and compare its exact
+  cardinality with $|Y|K$. Take base-two logarithms. The residual messages need
+  not be independent.
+\end{proof}
+
+\begin{definition}[Majority-fiber interpolation constants]
+  \label{def:lowerbounds-algebraic-geometry-fiber-coefficients}
+  \lean{Algebraic.Cutwidth.Aggregate.Geometry.Fiber.messageLoss,
+    Algebraic.Cutwidth.Aggregate.Geometry.Fiber.fiberWeight,
+    Algebraic.Cutwidth.Aggregate.Geometry.Fiber.separateWeight,
+    Algebraic.Cutwidth.Aggregate.Geometry.Fiber.jointWeight,
+    Algebraic.Cutwidth.Aggregate.Geometry.Fiber.scalarNumerator,
+    Algebraic.Cutwidth.Aggregate.Geometry.Fiber.scalarDenominator,
+    Algebraic.Cutwidth.Aggregate.Geometry.Fiber.gateCoefficient,
+    Algebraic.Cutwidth.Aggregate.Geometry.Fiber.inversionNumerator,
+    Algebraic.Cutwidth.Aggregate.Geometry.Fiber.inversionDenominator,
+    Algebraic.Cutwidth.Aggregate.Geometry.Fiber.inversionCoefficient,
+    Algebraic.Cutwidth.Aggregate.Geometry.Fiber.inversionPenalty}
+  \leanok
+  \uses{def:lowerbounds-algebraic-geometry-joint-coefficient,
+    def:lowerbounds-algebraic-geometry-shared-coefficient}
+  Put $c=1-H_2(1/4)$, $r=1-H_2(1/8)$, $\rho=H_2(1/4)-1/2$, and
+  $\beta=H_2(1/4)-3/4$. Define
+  \[
+    \gamma_{\mathrm F}=\log_2(3/2),\quad
+    \ell=\frac{r}{2\gamma_{\mathrm F}},\quad
+    \mu=\frac{\rho-r/2}{\rho-c},\quad
+    \nu=\frac{r/2-c}{\rho-c}.
+  \]
+  The scalar and inversion constants are the exact ratios
+  \[
+  \begin{aligned}
+    N_{\mathrm s}&=1+c/2+7r/4+\ell,&D_{\mathrm s}&=1+r+\ell,
+      &C_{\mathrm F}&=N_{\mathrm s}/D_{\mathrm s},\\
+    N_{\mathrm i}&=3+c/2+7r/4+3\ell,&D_{\mathrm i}&=2+r+2\ell,
+      &C_{\mathrm I}&=N_{\mathrm i}/D_{\mathrm i},
+  \end{aligned}
+  \]
+  with inversion penalty $P_{\mathrm I}=4r/D_{\mathrm i}$. Their decimal
+  approximations are $C_{\mathrm F}\approx1.2364849888$,
+  $C_{\mathrm I}\approx1.5644077959$, and
+  $P_{\mathrm I}\approx0.5640721944$.
+\end{definition}
+
+\begin{lemma}[Positive interpolation and exact cancellation]
+  \label{lem:lowerbounds-algebraic-geometry-fiber-weights}
+  \lean{Algebraic.Cutwidth.Aggregate.Geometry.Fiber.messageLoss_pos,
+    Algebraic.Cutwidth.Aggregate.Geometry.Fiber.fiberWeight_pos,
+    Algebraic.Cutwidth.Aggregate.Geometry.Fiber.separateWeight_pos,
+    Algebraic.Cutwidth.Aggregate.Geometry.Fiber.jointWeight_pos,
+    Algebraic.Cutwidth.Aggregate.Geometry.Fiber.separateWeight_add_jointWeight,
+    Algebraic.Cutwidth.Aggregate.Geometry.Fiber.weighted_saving,
+    Algebraic.Cutwidth.Aggregate.Geometry.Fiber.jointWeight_mul_overlapPenalty,
+    Algebraic.Cutwidth.Aggregate.Geometry.Fiber.fiberWeight_mul_messageLoss}
+  \leanok
+  \uses{def:lowerbounds-algebraic-geometry-fiber-coefficients}
+  The four constants $\gamma_{\mathrm F},\ell,\mu,\nu$ are positive, and
+  \[
+    \mu+\nu=1,\qquad \mu c+\nu\rho=r/2,\qquad
+    \nu\beta=(r/2-c)/2,\qquad \ell\gamma_{\mathrm F}=r/2.
+  \]
+\end{lemma}
+\begin{proof}
+  \leanok
+  Exact logarithmic comparisons give $c<r/2<\rho$; the first follows from
+  $3^{12}<7^7$. The identities are field arithmetic with positive denominators.
+\end{proof}
+
+\begin{theorem}[The explicit family attains the majority-fiber coefficient]
+  \label{thm:lowerbounds-algebraic-geometry-fiber-explicit}
+  \lean{Algebraic.Cutwidth.Aggregate.Geometry.Fiber.sourceReductionHardFamily_eventually_lt_size}
+  \leanok
+  \uses{lem:lowerbounds-algebraic-geometry-majority-message,
+    lem:lowerbounds-algebraic-geometry-fiber-weights,
+    thm:lowerbounds-algebraic-geometry-shared-controls,
+    thm:lowerbounds-algebraic-uniform-hard-family}
+  For every $\varepsilon>0$, every sufficiently large member of the same fixed
+  polynomial-time Boolean family requires more than
+  $(C_{\mathrm F}-\varepsilon)n$ gates over the whole signed unbounded
+  AND/OR/XOR basis. Depth, fan-in, fanout, repetitions, and gate placement are
+  unrestricted. The earlier scalar coefficients remain separate proved results.
+\end{theorem}
+\begin{proof}
+  \leanok
+  Use one maximal primary-support pairing in all inequalities. The unpaired
+  exact-two supports are disjoint. Their majority event saves
+  $\gamma_{\mathrm F}$ bits per retained support, while each coordinate given
+  to the receiver destroys at most one such support. Combine marginal entropy,
+  joint entropy, majority counting, and shared-control affine geometry with
+  weights $\mu,\nu,\ell,r$, retaining the finite cut-retention factors. The
+  gate-class counts cancel. Normalize by $n$ and use $\log_2K(n)=o(n)$.
+\end{proof}
+
 \begin{theorem}[Multioutput affine restrictions and output counting]
   \label{thm:lowerbounds-algebraic-geometry-multioutput}
   \lean{Algebraic.Aggregate.Geometry.input_add_multiCount_le_size,
@@ -10695,6 +10825,101 @@ Theorem~\ref{thm:lowerbounds-algebraic-explicit-four-n}.
   $n\le g-o-ch_2$. Hence $2g\ge3n+ch_2$. Combine with
   $g+h_2\ge2n-4$ and divide by $2+c>0$.
 \end{proof}
+
+\begin{theorem}[Majority fibers strengthen binary-field inversion]
+  \label{thm:lowerbounds-algebraic-geometry-inversion-fiber}
+  \lean{Algebraic.Aggregate.Geometry.Inversion.fiberCoefficient_mul_sub_penalty_le_size}
+  \leanok
+  \uses{def:lowerbounds-algebraic-geometry-fiber-coefficients,
+    lem:lowerbounds-algebraic-geometry-majority-message,
+    thm:lowerbounds-algebraic-geometry-inversion-entropy}
+  Let $K$ be a finite field over $\mathbf F_2$ with a supplied linear
+  isomorphism $e:\mathbf F_2^n\longrightarrow K$, where $n\ge3$.
+  Every signed unbounded AND/OR/XOR circuit computing all $n$ coordinates
+  of inversion $I_e$, with $0^{-1}=0$, satisfies
+  \[
+    g\ge C_{\mathrm I}n-P_{\mathrm I}.
+  \]
+  Here $C_{\mathrm I}\approx1.5644077959$ and
+  $P_{\mathrm I}\approx0.5640721944$; the exact constants are the logarithmic
+  ratios defined above. Depth,
+  fan-in, fanout, repeated literals, and nonlinear reuse are unrestricted.
+  All target hardness properties are proved; no uniform field/basis
+  construction or evaluator complexity is asserted by this theorem.
+\end{theorem}
+\begin{proof}
+  \leanok
+  In a nonliteral permutation, conjunction output summaries are constant true
+  and the full primary message is injective. Remove these output coordinates
+  and the constant false coordinates of the disjoint majority event. With $o$
+  conjunction outputs and $t-2p$ unmatched gates, this gives
+  $n+\gamma_{\mathrm F}(t-2p)\le g-o$. Independent nonaffine output components
+  and distinct designated outputs give $2n\le g+o$. Combine these with both
+  entropy bounds and the shared affine restriction. Inversion has at most
+  four points in every simultaneous affine-output flat, giving the exact
+  finite penalty $4r/D_{\mathrm i}$.
+\end{proof}
+
+\begin{definition}[Full Hamming residue modulo three]
+  \label{def:lowerbounds-algebraic-modthree-residue}
+  \lean{Algebraic.BooleanCube.ModThree.bit,
+    Algebraic.BooleanCube.ModThree.residue}
+  \leanok
+  For $x\in\mathbf F_2^n$, let $w_3(x)\in\mathbf F_3$ be its Hamming weight
+  modulo three, interpreting each binary coordinate as zero or one.
+  This is the full three-valued residue, not a Boolean residue predicate.
+\end{definition}
+
+\begin{theorem}[Constant-residue affine flats have at most half dimension]
+  \label{thm:lowerbounds-algebraic-modthree-half-dimension}
+  \lean{Algebraic.BooleanCube.ModThree.two_mul_finrank_le_of_constant,
+    Algebraic.BooleanCube.ModThree.two_mul_finrank_submodule_le,
+    Algebraic.BooleanCube.ModThree.exists_kernel_residue_ne,
+    Algebraic.BooleanCube.ModThree.exists_supported_kernel_residue_ne}
+  \leanok
+  \uses{def:lowerbounds-algebraic-modthree-residue}
+  If $w_3$ is constant on an affine flat $a+V\subseteq\mathbf F_2^n$, then
+  $2\dim V\le n$. Consequently, for any $q$ binary linear equations and any
+  coordinate block $B$ with $|B|>2q$, there is a homogeneous solution supported
+  in $B$ that changes the residue at any prescribed base point.
+\end{theorem}
+\begin{proof}
+  \leanok
+  Write the affine coordinates as $a_i+\ell_i(u)$. Over $\mathbf F_3$, their
+  sign characters are linearly independent when the linear forms are distinct.
+  Constant full residue forces the signed multiplicity of each nonzero form
+  to vanish, so every such form occurs at least twice. Injectivity requires at
+  least $\dim V$ distinct nonzero forms. For the supported conclusion, restrict
+  the equations to $B$ and apply rank--nullity.
+\end{proof}
+
+\begin{theorem}[A signed MOD3 cube in every binary affine solution coset]
+  \label{thm:lowerbounds-algebraic-modthree-cube}
+  \lean{Algebraic.BooleanCube.ModThree.exists_affineCube_of_disjoint_blocks,
+    Algebraic.BooleanCube.ModThree.exists_signed_cube}
+  \leanok
+  \uses{thm:lowerbounds-algebraic-modthree-half-dimension}
+  For every linear map $R:\mathbf F_2^n\to\mathbf F_2^q$ and every base point
+  $a$, put $r=\lfloor n/(2q+1)\rfloor$. There are an injective linear map
+  $L:\mathbf F_2^r\to\mathbf F_2^n$ and signs $\delta_j\in\{1,-1\}$ such that
+  $RL=0$ and, for every $z\in\mathbf F_2^r$,
+  \[
+    w_3(a+Lz)=w_3(a)+\sum_{j=1}^r\delta_j z_j\quad\text{in }\mathbf F_3,
+  \]
+  with each $z_j$ interpreted as zero or one.
+\end{theorem}
+\begin{proof}
+  \leanok
+  Partition $r(2q+1)$ coordinates into $r$ disjoint blocks. The preceding
+  theorem supplies a residue-changing kernel direction in every block.
+  Their disjoint supports give injectivity and additive residue changes.
+  Every nonzero element of $\mathbf F_3$ is $1$ or $-1$.
+\end{proof}
+
+The geometric statements above are checked ingredients for a restricted-circuit
+research direction. Circuit freezing, probabilistic polynomial approximation,
+and the Razborov--Smolensky degree lower bound are not formalized by these nodes;
+no superlinear unrestricted circuit theorem follows from them alone.
 
 \begin{theorem}[Conditional: the concrete family needs more than $(23/5-\varepsilon)n$ gates]
   \label{thm:lowerbounds-algebraic-explicit-band}

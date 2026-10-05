@@ -6,6 +6,7 @@ Authors: Samuel Schlesinger
 
 module
 public import Complexitylib.Algebraic.Core
+public import Complexitylib.Algebraic.BooleanCube.ModThree.Cube
 public import Complexitylib.Algebraic.Basis.Arithmetic
 public import Complexitylib.Algebraic.Basis.Arithmetic.Expression
 public import Complexitylib.Algebraic.Basis.Arithmetic.Power

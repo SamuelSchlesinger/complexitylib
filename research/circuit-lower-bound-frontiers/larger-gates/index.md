@@ -34,37 +34,67 @@ special register has at most `r>=2` states, the gate coefficient is `1/log2 r`;
 two-state gates give coefficient one. The one-way communication mechanism is
 classical [roychowdhury-orlitsky-siu94][roychowdhury-orlitsky-siu94]. The
 [geometry note](geometry.md) explains the input-information/nonlinearity overlap.
-That overlap is now resolved for signed unbounded AND/OR/XOR by the checked
-[pairing](pairing.md) and [entropy](entropy.md) combination:
-[`Geometry/Shared/Hardness.lean`](../../../Complexitylib/Algebraic/LowerBound/Cutwidth/Aggregate/Geometry/Shared/Hardness.lean)
-proves more than `(C-epsilon)n` gates for the same explicit family, where
-`C=(3-h+3r)/(2+2r)=1.22148505965...`, `h=H_binary(1/4)`, and `r=1-H_binary(1/8)`.
-Shared primary controls and the stronger bias of wide conjunctions improve the joint
-coefficient `1.19065368005...`; that theorem and the earlier separate-coordinate
-coefficient `1.15876032857...` are retained.
-Every binary Boolean gate has an arity-preserving one-gate normal form in this basis.
-The number, placement, fan-in, fanout, and depth of unbounded gates are unrestricted.
-This is a checked whole-basis result, not a new binary-only coefficient. The
-[independent audit](followup-audit.md) gives the finite inequality and concrete
-U2/MOD3 obstructions; historical priority of the combination remains unresolved.
+That overlap is resolved for signed unbounded AND/OR/XOR by the checked
+[pairing](pairing.md), [entropy](entropy.md), and
+[large-majority-fiber](joint-next.md#large-majority-fibers-improve-both-coefficients) arguments.
+The latest scalar theorem is
+[`Geometry/Fiber/Hardness.lean`](../../../Complexitylib/Algebraic/LowerBound/Cutwidth/Aggregate/Geometry/Fiber/Hardness.lean):
+for every `epsilon>0`, the same fixed explicit family needs more than
+`(C_F-epsilon)n` gates, where
 
-A natural multioutput result is also checked: binary-field inversion in any linear
-coordinate basis requires `(2+c)g >= (3+2c)n-4c`, with `c=1-H2(1/4)`,
-when computing all `n` output bits. The coefficient is `1.54311234736...`,
-for `n>=3`, over the same scalar Boolean basis. The field hardness properties are
-proved in [`Geometry/Inversion.lean`](../../../Complexitylib/Algebraic/LowerBound/Cutwidth/Aggregate/Geometry/Inversion.lean)
-and its dependencies. This does not add a uniform field/basis construction or runtime
-theorem. See [the joint and inversion arguments](geometry.md#8-joint-conjunction-messages-improve-the-scalar-coefficient).
+```
+c = 1-H2(1/4),  r = 1-H2(1/8),
+gamma = log2(3/2),  ell = r/(2*gamma),
+C_F = (1+c/2+7r/4+ell)/(1+r+ell) ≈ 1.2364849888
+```
 
-The [shared primary control proof](joint-next.md) records the checked scalar
-coefficient and exact finite inequality. The separate [MOD3 barriers](mod3-barrier.md)
-are paper proofs showing why adding unlimited MOD3 gates requires a different potential;
-they do not establish a new lower bound for that enlarged basis.
-The [future-direction audit](joint-next.md#future-directions-coefficient-improvement-and-a-superlinear-spike)
-records an unformalized `1.234566814...` candidate, an exact repeated-charging
-obstruction to summing cuts, linear upper bounds excluding Gold and infinitely
-many inversion lengths as superlinear targets, and a concrete unproved
-restriction lemma that would yield `Omega(n log n)` gates.
+The former shared-control coefficient `1.22148505965...`, joint-message
+coefficient `1.19065368005...`, and separate-coordinate coefficient
+`1.15876032857...` remain checked results. Every binary Boolean gate has an
+arity-preserving one-gate normal form in this basis. The number, placement,
+fan-in, fanout, and depth of unbounded gates are unrestricted. This is a
+whole-basis gate bound; historical priority for its exact coefficient remains
+unresolved.
+
+For all `n>=3`, binary-field inversion in any supplied linear coordinate basis,
+with all `n` output bits requested, satisfies the stronger exact bound
+
+```
+C_I*n - P_I <= g,
+C_I = (3+c/2+7r/4+3ell)/(2+r+2ell) ≈ 1.5644077959,
+P_I = 4r/(2+r+2ell) ≈ 0.5640721944
+```
+
+This is proved in
+[`Geometry/Fiber/Inversion.lean`](../../../Complexitylib/Algebraic/LowerBound/Cutwidth/Aggregate/Geometry/Fiber/Inversion.lean).
+The earlier `1.54311234736...` and `3/2` inversion bounds remain available.
+The field hardness properties are proved in
+[`Geometry/Inversion.lean`](../../../Complexitylib/Algebraic/LowerBound/Cutwidth/Aggregate/Geometry/Inversion.lean)
+and its dependencies; no unresolved hardness hypothesis or circuit restriction
+is added. These results quantify over a supplied field and linear basis; they
+do not supply a uniform field/basis construction or runtime theorem.
+The displayed decimals approximate exact logarithmic constants.
+
+The [joint and fiber note](joint-next.md) gives the mechanism, exact constants,
+and checked Lean links. The separate [MOD3 barriers](mod3-barrier.md) explain
+why unlimited MOD3 gates require a different potential; they do not establish
+a new bound for that enlarged basis. The
+[future-direction audit](joint-next.md#future-directions-coefficient-improvement-and-a-superlinear-spike)
+retains a separate unproved matching proposal, possible degree-profile refinements,
+an exact repeated-charging obstruction to summing cuts, and upper bounds ruling
+out some proposed superlinear targets. The unrestricted superlinear spike remains
+open; higher linear coefficients do not resolve it.
+The [first superlinear spike](joint-next.md#first-superlinear-spike-results-and-boundaries)
+supplies paper deductions under explicit structural restrictions. The
+[nonterminal-conjunction tradeoff](mod3-barrier.md#5-a-positive-use-few-conjunctions-feeding-later-conjunctions)
+is `(q+1)log2(h+2)^2 >= c*n` for MOD3 and for exact integer multiplication
+and division; it excludes polynomial size when `q=o(n/log^2 n)`. A separate
+determinant transfer combines syntactic multilinearity and limited nonlinear
+reuse with Raz's classical formula bound. The MOD3 half-dimension and signed-cube
+lemmas are Lean-checked in
+[`ModThree/Cube.lean`](../../../Complexitylib/Algebraic/BooleanCube/ModThree/Cube.lean).
+Neither complete circuit tradeoff is yet Lean-formalized or an unrestricted
+superlinear result.
 
 The scalar target remains the **same full-input-length family in P** from the
 [current guide](../../../docs/algebraic/cutwidth-lower-bound.md), including its balancing
@@ -73,6 +103,103 @@ The graph theorem, extractor, and original rectangle-counting mechanism are borr
 from that guide, which credits Williams's private note and Schlesinger's compiler.
 The aggregate extension and component argument are checked deductions developed here;
 the explicit extractor construction is due to Chattopadhyay–Liao.
+
+## Earlier unbounded-fan-in gate bounds: signature comparison
+
+Unrestricted-depth gate lower bounds for unbounded-fan-in bases predate this project.
+The following comparison was added after the user's literature table on October 4,
+2026. Roychowdhury--Orlitsky--Siu was already credited above; the parity bounds
+were missing from our earlier comparison. These rows count gates, not wires.
+
+| Source and target | Gate basis, unrestricted depth | Lower bound | Relation to our theorem |
+| --- | --- | --- | --- |
+| Wegener (1991), parity | U-infinity: arbitrary signed conjunctions, with free negations | `2n-1` | Excludes XOR gates. |
+| Kombarov (2021), parity | Same U-infinity basis | `(19/9)n-O(1)` | Stronger parity coefficient in that smaller basis. |
+| Kombarov (2022 conference abstract), parity | Same U-infinity basis | `(17/8)n-O(1)` | The primary two-page conference record states `2.125n+C`; its full proof was not audited here. |
+| Roychowdhury--Orlitsky--Siu (1994), inner product on n total bits | Arbitrary-weight threshold gates | `n/4` | Different gate basis; their paper credits an earlier result of Groeger--Turan. |
+| Consequence of the preceding row, inner product | Majority and NOT | At least `n/4` | A threshold subclass, not an independent stronger theorem. |
+
+Sources: [wegener91][wegener91], [kombarov21][kombarov21],
+[kombarov22][kombarov22], [roychowdhury-orlitsky-siu94][roychowdhury-orlitsky-siu94].
+
+Our signed unbounded AND/OR/XOR basis includes every U-infinity gate and also
+unbounded parity: parity itself takes one gate. Consequently the U-infinity
+coefficients do not transfer to our basis, while our `C_F*n-o(n)` theorem
+uses a different explicit scalar family. The checked inversion coefficient
+`C_I≈1.5644077959` additionally concerns all n output bits, not a scalar parity target.
+Neither coefficient is a numerical improvement on the displayed parity records.
+
+Arbitrary threshold gates and our gates are incomparable as unit-cost primitives:
+XOR of two bits is not a threshold function, whereas majority of three bits is
+neither affine nor a signed conjunction. The sharper checked whole-basis theorem does not apply to arbitrary threshold
+circuits; the weaker classical-method corollary below does. The methods also differ: the parity papers
+use gate-elimination arguments; threshold communication is a classical antecedent
+of our message-counting argument. This comparison does not settle novelty of our
+specific coefficient, and must not be described as the first linear lower bound
+for unbounded-fan-in circuits.
+
+An especially close predecessor is Hromkovic's 1985 *Linear lower bounds on
+unbounded fan-in Boolean circuits* [hromkovic85][hromkovic85]. ROS94 credits it with
+linear bounds for commutative, associative gates; Hromkovic's own later survey
+confirms the CA-circuit model and communication method. We have not obtained the
+original theorem's precise signature, negation convention, target, or coefficient.
+It may directly overlap the AND/OR/XOR model. Until those details are checked,
+priority of the exact signed AND/OR/XOR coefficients and model extension remains
+unresolved. This is a substantive gap in the historical comparison.
+
+## A larger threshold/parity basis: a classical-method deduction
+
+**Status:** independently audited paper deduction, not Lean-formalized; no claim
+of historical novelty. The same fixed scalar family requires `n/2-o(n)` gates
+over arbitrary mixtures of unbounded real-weight threshold and parity gates,
+with arbitrary depth, fanout, signs, and repetitions. This basis contains the
+checked signed AND/OR/XOR basis but the coefficient is weaker.
+
+Partition the primary coordinates into two balanced sets. On a rectangle `P x Q`
+where all preceding gate outputs are constant, the next threshold has the form
+`[A(p)+B(q)>=t]`. Choose medians `a,b`. If `a+b>=t`, retain the upper halves;
+otherwise retain the lower halves. Each side retains at least its ceiling-half,
+and the gate is constant on their product. For a parity gate, retain a largest
+fiber of its local parity on each side. Earlier gate values remain fixed.
+
+After `g` topological steps both sides have size at least
+`2^(floor(n/2)-g)`. A primary-wire output may require one extra halving step.
+The family's two-sided rectangle exclusion at threshold `K_n=2^o(n)` therefore
+gives the safe finite inequality
+
+```
+g+1 > floor(n/2) - ceil(log2 K_n).
+```
+
+This is the classical monochromatic-rectangle induction of
+[roychowdhury-orlitsky-siu94][roychowdhury-orlitsky-siu94], Section IV, with a parity
+fiber step and separate tracking of the two side sizes. Their literal triangular-
+gate theorem excludes XOR. The threshold score decomposition here requires
+**disjoint coordinate blocks**; it is not asserted for arbitrary overlapping XOR
+sumsets. The family's stronger sumset property includes the rectangles used here.
+
+This coefficient is already an elementary consequence of older explicit targets:
+Barak--Rao--Shaltiel--Wigderson (STOC 2006) [brsw06][brsw06] construct polynomial-time
+two-source dispersers on two `m`-bit blocks with entropy threshold `m^o(1)`.
+The same mixed-gate induction gives `m-m^o(1)=n/2-n^o(1)` gates at total input
+length `n=2m`. Their paper does not state this circuit deduction. We did not
+locate the exact mixed-basis theorem for our fixed Chattopadhyay--Liao family,
+but absence from this bounded search is not a priority claim. We record a
+classical-method instantiation, not a new threshold lower-bound technique.
+
+The sharper signed AND/OR/XOR coefficients do not follow from this argument, even with only
+`o(n)` exceptional thresholds. One majority gate on `2m+1` bits needs codimension
+at least `m+1` to become constant on an affine flat: a dimension-`d` binary affine
+flat contains vectors of weight at least `d` and at most `2m+1-d`, by setting
+independent pivot coordinates. Either constant majority value forces `d<=m`.
+Median restrictions preserve arbitrary rectangles, not the uniform affine geometry
+needed for our sharper conjunction entropy bounds.
+
+A safe simulation corollary retains the signed AND/OR/XOR coefficient when the exceptional gates have
+`d_j` distinct predecessor signals and `sum_j 2^d_j=o(n)`. Replace each threshold
+by at most `2^d_j` signed DNF terms and one OR; relative to the replaced gate,
+the size increase is at most `2^d_j`. This does not cover arbitrary fan-in solely
+from a sublinear number of thresholds.
 
 ## Examples of the finite-monoid model
 
@@ -308,4 +435,10 @@ consequence is claimed.
 [kumar25]: ../sources.md#kumar25
 [li-yang22]: ../sources.md#li-yang22
 [roychowdhury-orlitsky-siu94]: ../sources.md#roychowdhury-orlitsky-siu94
+[wegener91]: ../sources.md#wegener91
+[kombarov21]: ../sources.md#kombarov21
+[kombarov22]: ../sources.md#kombarov22
+[hromkovic85]: ../sources.md#hromkovic85
 [sakai-etal19]: ../sources.md#sakai-etal19
+
+[brsw06]: ../sources.md#brsw06

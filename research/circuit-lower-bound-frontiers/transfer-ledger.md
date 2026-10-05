@@ -59,6 +59,69 @@ requiring a SAT algorithm on every polynomial-size circuit. A lower bound for NE
 different outcome from a stronger explicit-P linear coefficient. Both can be valuable,
 but their function classes and quantifiers must remain visible.
 
+## The superlinear contract: one family, every constant
+
+The new spike targets one fixed polynomial-time family `f_n` and the statement
+
+```
+for every c > 0, eventually every circuit for f_n has more than c*n gates.
+```
+
+Depth and fanout remain unrestricted. The primary basis is B2; the stronger signed
+unbounded AND/OR/XOR basis is a separate target. An FP vector target is permitted only
+with `O(n)` output bits, and must be identified as such. No unconditional unrestricted
+superlinear theorem is established by this spike.
+
+For a representation model in which this same family needs `2^(n-o(n))` size, the
+following compiler statement would suffice:
+
+```
+for every fixed c, there is delta(c)>0 such that every size-c*n circuit
+has a whole-function representation of size <= 2^((1-delta(c))*n+o_c(n)).
+```
+
+The remainder may depend on `c`; this is harmless because each constant is fixed
+before taking the eventual input-length threshold. The proof is direct: choose
+the two remainders smaller than `delta(c)*n/3` and compare representation sizes.
+Neither a quantitative rate for `delta(c)` nor a fast compiler is needed for this
+existential lower-bound transfer. An algorithmic consequence would additionally
+need construction time and a usable uniform rate.
+
+This identifies the necessary change from the current fixed-slope compiler.
+Improving one positive constant `alpha` in `alpha*(s-n)` only improves a linear
+coefficient; it does not supply the displayed deficit for every `c`.
+For example, a hypothetical exponent `n*(1-exp(-s/n))` would retain a positive
+deficit at every fixed ratio, whereas `min(n,alpha*(s-n))` eventually loses it.
+The former is an illustrative target, not an estimate proved for any compiler here.
+
+The family quantifiers matter independently of the compiler. A collection of
+statements `for every c there exists f_c in P with lower bound c*n` is not yet one
+P family with a superlinear lower bound. In particular, evaluating `f_c` in time
+`n^(e(c))` with unbounded `e(c)` does not become polynomial time merely by letting
+`c=c(n)` tend to infinity slowly. A positive diagonal construction needs an evaluator
+with one fixed polynomial exponent, plus effective scheduling of its parameter costs
+and lower-bound thresholds; or a direct proof for one existing uniform family.
+Padding increases the denominator in the desired gate/input ratio and must be charged.
+
+The search and the Lean work now run concurrently. Concrete lemmas from a restricted
+candidate can be formalized while the research workers test these unrestricted
+contracts. A checked ingredient, a conditional transfer, a finite counterexample,
+and a completed circuit lower bound remain distinct deliverables.
+
+## Alternative superlinear bridges
+
+The [amplification and transport note](hard-functions/index.md#amplification-and-transport-exact-escape-conditions)
+specifies overlap extraction, fixed-width iteration, hardness concentration, and
+sublogarithmic transport loss. Each must preserve one fixed polynomial evaluator,
+charge the entire input length, and charge reused gates once. For lifting, the
+actual shared protocol-DAG lower bound Q(m) must satisfy `Q(m)/N(m)->infinity`
+after the input gadget enlarges the problem to N(m) bits; a tree bound is insufficient.
+For converse interpolation, a fixed contradiction with proof lower bound
+`log2 L(n)>=rho*n-o(n)` would suffice if every size-cn candidate for its fixed P
+separator yielded a proof with `log2 U(c,n)<=(rho-delta(c))*n+o_c(n)` for every c.
+The unproved requirement is this circuit-to-proof compiler, including arbitrary
+gate extensions; semantic equivalence supplies no short proof by itself.
+
 ## Validation
 
 [transfer_coefficients.py](data/transfer_coefficients.py) computes the numerical conversion;

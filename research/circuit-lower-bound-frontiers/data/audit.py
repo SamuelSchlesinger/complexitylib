@@ -21,6 +21,7 @@ CASES = [
     ("algorithms/data/check_accounting.py", "algorithms/data/check_accounting.txt"),
     ("larger-gates/data/check_backdoors.py", "larger-gates/data/check_backdoors.txt"),
     ("larger-gates/data/check_frontier_independent.py", "larger-gates/data/check_frontier_independent.txt"),
+    ("larger-gates/superlinear_checks.py", "larger-gates/data/superlinear_checks.txt"),
     ("communication-lifting/data/check_transfers.py", "communication-lifting/data/check_transfers.txt"),
     ("hard-functions/data/check_robustness.py", "hard-functions/data/check_robustness.txt"),
     ("graph-perspective/data/check_obstructions.py", "graph-perspective/data/checked-output.json"),

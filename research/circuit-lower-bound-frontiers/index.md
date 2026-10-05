@@ -1,6 +1,6 @@
 # Research directions beyond the cubic core circuit lower bound
 
-Ten independent research authors pursued stronger circuit bounds and larger gate models.
+Parallel research passes pursued stronger circuit bounds and larger gate models.
 The resulting corpus contains checked Lean extensions, paper deductions, explicit proof targets,
 and counterexamples. Sparse finite commutative-monoid gates preserve the current coefficient;
 unlimited signed unbounded AND/OR/XOR gates admit a checked coefficient
@@ -69,7 +69,40 @@ correlations along the graph of shared primary inputs. See the [geometry overvie
 [independent follow-up audit](larger-gates/followup-audit.md), including the U2 and MOD3
 obstructions. A linear bound for this stronger basis is not itself a superlinear B2 bound.
 
-## Ranked next research tasks
+## Broad unrestricted-superlinear spike
+
+The broader spike targets **one fixed P family with size/input ratio tending to infinity**,
+with arbitrary depth and fanout; B2 is primary and signed unbounded AND/OR/XOR is a
+separate stronger target. O(n)-output FP targets are labeled as vectors. The nine
+completed investigations below ran in successive research waves, not as nine or
+twelve simultaneously independent agents. They establish no unrestricted superlinear bound.
+The [ledger](transfer-ledger.md#the-superlinear-contract-one-family-every-constant)
+keeps the fixed-family and fixed-polynomial-exponent requirements explicit.
+
+| Lane | Concrete result or falsifier | Smallest unresolved bridge |
+| --- | --- | --- |
+| 1. [Whole-circuit semantic compiler](semantic-interfaces/index.md#superlinear-spike-affine-coordinates-and-one-efficient-accepting-region) | Paper: affine-coordinate DNNF hardness and a common-isotropic quadratic terminal. | An efficient accepting region for every fixed cn, with nonlinear consistency equations paid. |
+| 2. [Nonlinear algebra](hard-functions/index.md#superlinear-spike-nonlinear-generation-and-a-projection-counterexample) | Paper: O(log n) nonlinear gates can create quadratic-projection rank n-2. | A normalization charging higher-degree intermediates, plus an explicit hard output space. |
+| 3. [Amplification](hard-functions/index.md#amplification-and-transport-exact-escape-conditions) | Fixed scalar composition stays linear; affine-plane overlap has O(n) outputs. | Sublinear reuse loss for line restrictions, or additive growth under fixed-width iteration. |
+| 4. [Common-program transport](hard-functions/index.md#amplification-and-transport-exact-escape-conditions) | B2 shift target; fixed-order low-weight tests and unbounded XOR both defeat naive transfers. | Sublogarithmic average congestion loss for one program computing all offsets. |
+| 5. [Global minimum-circuit structure](semantic-interfaces/index.md#global-structure-algebra-and-shared-semantic-proofs) | Paper: every irreducible nonlinear B2 gate has four observable parent patterns. | Compatible global witness packing or a small semantic bottleneck after an affine basis change. |
+| 6. [Probabilistic algebra](semantic-interfaces/index.md#global-structure-algebra-and-shared-semantic-proofs) | Paper: cumulative semantic rank can replace nonterminal gate count; constant live memory cannot. | Target-preserving low-degree parametrizations or a universal alternative when rank is large. |
+| 7. [Magnification](hard-functions/index.md#amplification-and-transport-exact-escape-conditions) | Gap-MCSP has huge monochromatic NO subcubes; standard magnification does not consume our coefficient. | A cheaper exact small-output factorization with a total P readout. |
+| 8. [Communication lifting](semantic-interfaces/index.md#global-structure-algebra-and-shared-semantic-proofs) | Circuit reuse becomes protocol-DAG reuse; promise separators cannot be replaced by a chosen extension. | Superlinear hardness in the actual certified DAG model after input blow-up. |
+| 9. [Semantic proof complexity](transfer-ledger.md#alternative-superlinear-bridges) | Gate definitions do not certify candidate equivalence; interpolation runs in the opposite direction. | A target-specific converse compiler, or a direct lower bound for semantic gate-disagreement DAGs. |
+
+Additional cross-cutting work supplies [finite falsification](larger-gates/superlinear_checks.py),
+the [fixed-P uniformity audit](transfer-ledger.md), and [integer-carry targets](larger-gates/joint-next.md).
+These support the research lanes rather than supplying three additional independent agents.
+
+## Further coefficient and restricted-model tasks
+
+The [first superlinear spike](larger-gates/joint-next.md#first-superlinear-spike-results-and-boundaries)
+develops two restricted-circuit paper proofs and screens alternative targets.
+Its main geometric lemma preserves a MOD3 subproblem after affine freezing and is
+now Lean-checked. The resulting probabilistic-polynomial gate tradeoff and its integer
+multiplication/division transfers remain paper deductions; see the
+[status boundary](larger-gates/mod3-barrier.md).
 
 The ranking favors a precise implication and a decisive next step. It is a research judgment,
 not an estimated probability of success.
@@ -148,7 +181,7 @@ Each route includes runnable finite checks and saved outputs. From the repositor
 python3 research/circuit-lower-bound-frontiers/data/audit.py
 ```
 
-The [audit runner](data/audit.py) re-executes and compares all twelve numerical/finite artifacts,
+The [audit runner](data/audit.py) re-executes and compares all thirteen numerical/finite artifacts,
 then checks canonical citations, local links, source snapshot integrity, and Markdown
 reachability with
 [check_corpus.py](data/check_corpus.py). Python 3 and NumPy are required. The artifacts are:
@@ -161,6 +194,7 @@ reachability with
 - [Algorithmic recurrences](algorithms/data/check_accounting.py).
 - [Aggregate components](larger-gates/data/check_backdoors.py) and the
   [independently implemented frontier verifier](larger-gates/data/check_frontier_independent.py).
+- [Superlinear-spike affine-block and arithmetic-readout checks](larger-gates/superlinear_checks.py).
 - [Communication transfers](communication-lifting/data/check_transfers.py).
 - [Affine and multioutput checks](hard-functions/data/check_robustness.py).
 - [Graph identities and parity CNFs](graph-perspective/data/check_obstructions.py).

@@ -1,10 +1,14 @@
-# Shared primary controls after the joint-message bound
+# Shared primary controls and large majority fibers
 
-**Status:** the full actual-circuit deduction and explicit-family asymptotics are
-now checked in [Shared/Hardness.lean](../../../Complexitylib/Algebraic/LowerBound/Cutwidth/Aggregate/Geometry/Shared/Hardness.lean).
+**Status:** the majority-fiber refinement gives scalar coefficient
+`C_F≈1.2364849888` and inversion coefficient `C_I≈1.5644077959` in
+[Fiber/Hardness.lean](../../../Complexitylib/Algebraic/LowerBound/Cutwidth/Aggregate/Geometry/Fiber/Hardness.lean)
+and [Fiber/Inversion.lean](../../../Complexitylib/Algebraic/LowerBound/Cutwidth/Aggregate/Geometry/Fiber/Inversion.lean).
+The earlier full actual-circuit deduction and explicit-family asymptotics remain
+checked in [Shared/Hardness.lean](../../../Complexitylib/Algebraic/LowerBound/Cutwidth/Aggregate/Geometry/Shared/Hardness.lean).
 The affine restriction and matching layers are checked in
 [Affine/Shared.lean](../../../Complexitylib/Algebraic/LowerBound/Cutwidth/Aggregate/Geometry/Affine/Shared.lean).
-The coefficient is `1.22148505965...`, strictly improving the prior
+Its coefficient is `1.22148505965...`, strictly improving the prior
 `1.19065368005...` bound for the same unrestricted scalar signature. This note
 makes no historical priority claim. It uses the same actual circuit semantics and
 explicit sumset-disperser family as the
@@ -127,8 +131,8 @@ The extremal values allowed by these inequalities have `t=n/2`, `p=0`, and
 `w=(1.5-C)n`. Thus the unresolved interaction has moved: the two-primary supports
 form a matching, while the wide conjunctions must interact with that matching.
 The inequalities do not assert that circuits realizing these values compute the
-hard family. Exploiting this remaining interaction could improve the coefficient
-again; no such additional improvement is claimed here.
+hard family. The large-majority-fiber refinement below exploits these disjoint
+supports to obtain a stronger constraint.
 
 ## Exact checked finite formula
 
@@ -147,6 +151,104 @@ one when `k=o(n)`, and `Shared.old_gateCoefficient_lt` proves the improvement by
 exact logarithmic inequalities. The complete scalar theorem has no fan-in, fanout,
 depth, placement, or sparsity assumption.
 
+## Large majority fibers improve both coefficients
+
+The refinement keeps the same signature: every gate is an arbitrary Boolean
+affine function or an optionally negated signed conjunction. Each gate costs
+one; depth, fan-in, fanout, repeated literals, and nonlinear intermediate values
+remain unrestricted. The scalar target is the same balanced explicit family in P.
+
+Suppose `s` selected signed pairs have disjoint endpoints among `a` independent
+primary coordinates. Their simultaneous false event has exactly
+
+```
+3^s * 2^(a-2s)
+```
+
+assignments. Each pair allows three of its four assignments and the unused
+coordinates are free. The actual conjunction summaries can contain extra
+literals or contradictions: being true implies their selected pair is true,
+so these actual summaries are all false on this event. Removing those `s`
+message coordinates leaves at most `2^(g+1-s)` messages, including the possible
+primary-output bit. If every full-message fiber has size at most `K`, then
+
+```
+a + gamma*s <= g+1+log2 K,    gamma=log2(3/2).
+```
+
+Only the selected pairs are independent; no independence of the residual
+messages is assumed. The exact count and generic finite-alphabet/logarithmic
+bounds are checked in
+[Fiber/Counting.lean](../../../Complexitylib/Algebraic/LowerBound/Cutwidth/Aggregate/Geometry/Fiber/Counting.lean).
+[Fiber/Message.lean](../../../Complexitylib/Algebraic/LowerBound/Cutwidth/Aggregate/Geometry/Fiber/Message.lean)
+justifies removing the frozen coordinates, and
+[Fiber/OneWay.lean](../../../Complexitylib/Algebraic/LowerBound/Cutwidth/Aggregate/Geometry/Fiber/OneWay.lean)
+applies this to actual circuit messages. The original `t-2p` unmatched supports
+lose at most one retained pair per coordinate given to the receiver.
+
+Write `c=1-H2(1/4)` and retain `r,rho,beta` above. Define the exact positive weights
+
+```
+mu=(rho-r/2)/(rho-c),  nu=(r/2-c)/(rho-c),
+ell=r/(2*gamma).
+```
+
+They satisfy `mu+nu=1`, `mu*c+nu*rho=r/2`,
+`nu*beta=(r/2-c)/2`, and `ell*gamma=r/2`. These identities and positivity
+are proved using exact logarithmic inequalities in
+[Fiber/Parameters.lean](../../../Complexitylib/Algebraic/LowerBound/Cutwidth/Aggregate/Geometry/Fiber/Parameters.lean).
+Combine the marginal and joint entropy inequalities with weights `mu,nu`,
+the majority inequality with weight `ell`, and shared-control geometry with
+weight `r`. The same pairing is used throughout. The `t,w,p` terms cancel,
+giving the limiting scalar coefficient
+
+```
+N_s=1+c/2+7r/4+ell,  D_s=1+r+ell,
+C_F=N_s/D_s≈1.2364849888
+```
+
+[Fiber/LowerBound.lean](../../../Complexitylib/Algebraic/LowerBound/Cutwidth/Aggregate/Geometry/Fiber/LowerBound.lean)
+contains the exact finite inequality, retaining the receiving-side losses and
+the triple-retention factor. In
+[Fiber/Hardness.lean](../../../Complexitylib/Algebraic/LowerBound/Cutwidth/Aggregate/Geometry/Fiber/Hardness.lean),
+the fixed family's `log2 K=o(n)` absorbs those losses: every `epsilon>0`
+eventually gives more than `(C_F-epsilon)n` gates. The earlier coefficients
+`1.158760...`, `1.190653...`, and `1.221485...` remain proved results.
+
+For a bijective `n`-output circuit with nonliteral coordinates, its full primary
+message is injective. Each designated conjunction output has an empty primary
+support and hence a constant true summary. If `o` counts these output gates,
+remove those coordinates as well as the disjoint false summaries to obtain
+
+```
+n+gamma*(t-2p) <= g-o.
+```
+
+Independent nonaffine output components supply at least `n` conjunction gates;
+counting distinct outputs then gives `2g>=3n+gamma*(t-2p)`. This additional
+independence hypothesis is essential for the second inequality: an invertible
+linear map may have nonliteral coordinates and no conjunction gates. The
+actual-message proofs are in
+[Fiber/Multioutput.lean](../../../Complexitylib/Algebraic/LowerBound/Cutwidth/Aggregate/Geometry/Fiber/Multioutput.lean).
+
+The same weighted combination with both permutation entropy bounds gives
+
+```
+N_i=3+c/2+7r/4+3ell,  D_i=2+r+2ell,
+C_I=N_i/D_i≈1.5644077959,
+P_I=4r/D_i≈0.5640721944,
+g >= C_I*n-P_I.
+```
+
+[Fiber/Inversion.lean](../../../Complexitylib/Algebraic/LowerBound/Cutwidth/Aggregate/Geometry/Fiber/Inversion.lean)
+proves this for binary-field inversion with `0^-1=0`, every supplied linear
+coordinate basis, and every `n>=3`, with all `n` output bits required. Its
+permutation, component-independence, and at-most-four-point affine-flat facts
+are proved in the existing inversion development. There is no new circuit
+restriction or unresolved hardness assumption. The older `1.543112...` inversion
+bound is retained. Decimal values here approximate the exact constants; this
+result does not supply a uniform field/basis construction or evaluator theorem.
+
 ## Future directions: coefficient improvement and a superlinear spike
 
 The checkpoint above is Lean-checked. Everything in this section is a paper
@@ -157,7 +259,7 @@ depth and fanout. A scalar target must retain an explicit polynomial-time
 evaluator. Multioutput targets must state their input and output lengths
 separately; adding outputs is not itself a superlinear lower bound.
 
-### A nearer coefficient target
+### An earlier matching proposal, still unproved
 
 Allow a matched pair to contain one exact-two-primary conjunction and one
 arbitrary multiple-primary conjunction sharing a primary variable. Write `x`
@@ -188,9 +290,13 @@ Their crossover is `t=n/2`. Eliminating `t,w` gives the candidate coefficient
 [7r+3+c*(r+3)/2]/(5r+3) = 1.23456681405843...
 ```
 
-The finite matching, message, and error lemmas must be checked before this
-number can be promoted to the result inventory. This is a continuation of the
-linear-bound program, separate from the superlinear spike.
+The finite matching, message, and error lemmas remain unproved. Its proposed
+`1.234566814...` coefficient is now below the checked majority-fiber coefficient,
+so it is retained as a possible structural ingredient rather than an improvement
+claim. A fuller primary-support degree profile might combine its two/wide
+matching with the majority event and sharper wide-message costs. No degree-profile
+inequality or resulting stronger coefficient is established here. This direction
+remains separate from the unrestricted superlinear spike.
 
 ### Why simply adding cuts or restrictions fails
 
@@ -283,4 +389,113 @@ restricted theorem explicitly separate from the arbitrary-depth objective.
 Neither wire lower bounds, repeated charges to the same gates, nor unproved
 direct-sum additivity meet the target.
 
+## First superlinear spike: results and boundaries
+
+The spike produced two source-derived **paper proofs for restricted circuits**.
+Neither is a new Lean theorem or an unrestricted superlinear lower bound.
+The first gives the most direct next formalization target.
+
+### Preserve a hard modular subproblem after affine freezing
+
+For signed unbounded AND/OR/XOR circuits, let `h` count conjunctions and `q`
+count conjunctions that feed a later conjunction through affine gates. The
+[complete proof](mod3-barrier.md#5-a-positive-use-few-conjunctions-feeding-later-conjunctions)
+gives, for some absolute `c>0`,
+
+```
+(q+1)*(log2(h+2))^2 >= c*n.
+```
+
+It applies to MOD3 on `n` bits, and to exact integer multiplication and unsigned
+quotient division with two `n`-bit operands. The latter targets use a quadratic
+readout of two original output bits after approximation; their original `q`
+is preserved. All fan-in, fanout, signs, and total depth are unrestricted, but
+`q` is a substantive structural restriction. In particular, `q<=sqrt(n)` forces
+`2^{Omega(n^(1/4))}` gates, while `q=o(n/log^2 n)` rules out polynomial size.
+The class permits growing nonlinear depth and is not asserted to contain every
+constant-depth circuit.
+
+The new geometric step in this deduction is explicit: every affine flat of
+codimension at most `q` contains a disjoint-support affine cube of dimension
+`floor(n/(2q+1))` on which Hamming weight modulo three becomes a signed modular
+sum. This retains a concrete hard problem after freezing the `q` designated
+outputs. The final low-degree obstruction is the classical
+Razborov--Smolensky method, credited in the linked proof. Priority for the
+combined parameter tradeoff remains unresolved.
+
+### A separate route: syntactic multilinearity and limited nonlinear reuse
+
+Take the scalar explicit polynomial-time function `det_m` over `F2`, on
+`N=m^2` input bits. Start with the same signed unbounded Boolean gate basis,
+normalize repeated slots, and impose **syntactic multilinearity**: the sets
+of primary ancestors of distinct input slots of every conjunction are disjoint.
+This is a strong restriction on subcircuits, not the fact that every Boolean
+function has a multilinear representative.
+
+Collapse affine gates symbolically into affine forms in primary inputs and
+conjunction-output symbols. The forms at each conjunction input, and at the
+final output, are ports. Reduce coefficients modulo two. Draw one dependency
+edge for each occurrence of a conjunction-output symbol in a port, retaining
+multiple edges for different ports of the same receiving gate. Let `kappa`
+be the maximum number of vertices with at least two outgoing port edges along
+any path to the output. Affine sharing is unrestricted; nonlinear sharing
+through an affine intermediary is still counted.
+
+For `g` original gates there are at most `P=g(N+g)+1` ports. The resulting
+function has a binary multilinear arithmetic formula over `F2` with at most
+
+```
+C*(g+1)*(N+g+1)^2 * P^kappa
+```
+
+nodes, for an absolute constant `C`. To prove this, unroll only the conjunction
+dependency graph. Each conjunction has at most `P^kappa` copies: its paths to
+the output form a tree of branching at most `P` and branching height at most
+`kappa`. Expanding each copied conjunction and its affine input forms into
+binary operations costs `O((N+g+1)^2)` nodes. Disjoint primary supports make
+every product formally multilinear; signs are handled by adding one. No
+Boolean reduction `x^2=x` is used to repair a nonmultilinear arithmetic formula.
+
+A multilinear polynomial agreeing with the determinant on the Boolean cube
+equals it formally: apply induction to the difference `A+x_N*B` at `x_N=0,1`.
+Raz's any-field formula lower bound [raz-multilinear04][raz-multilinear04]
+therefore gives an absolute `a>0` with
+
+```
+a*(log N)^2 <= log C + log(g+1) + 2log(N+g+1)
+              + kappa*log(g(N+g)+1).
+```
+
+Thus `kappa=o(log N)` forces `g=N^{omega(1)}`. For example,
+`kappa<=loglog N` forces `g>=exp(Omega(log^2 N/loglog N))`.
+Bounding the total number of reused conjunction outputs also bounds `kappa`.
+The class is nonempty: the determinant's Leibniz formula satisfies the
+restrictions. Raz supplies the hard-function theorem; the compiler above is
+an elementary transfer with no novelty claim. Removing either disjoint
+supports or the reuse restriction requires another argument.
+
+### What remains promising for unrestricted circuits
+
+Integer multiplication and division survive the upper-bound screening done
+in this spike. The linear finite-field multiplication construction uses
+characteristic-two linear forms; it does not implement integer carries for
+free. This is not an exhaustive claim that no linear construction exists.
+Nor are these functions automatic replacements for an affine disperser:
+fixing one multiplication operand to zero makes the function constant on a
+half-dimensional affine flat. A restriction argument must preserve a suitable
+admissible set of inputs, rather than quantify over all such flats.
+
+Addressing alone also does not amplify hardness here. A `2^k`-bit table indexed
+by `k` parity address bits has a circuit with those `k` affine gates, one signed
+conjunction per table entry, and one OR: at most `2^k+k+1` gates. Any proposed
+addressing target must get its difficulty from something beyond this lookup.
+
+The affine-block lemma and signed-cube construction are now Lean-checked in
+[`ModThree/Cube.lean`](../../../Complexitylib/Algebraic/BooleanCube/ModThree/Cube.lean).
+The next formalization step is the circuit-freezing and approximation transfer;
+the research step is a new potential for the `q=Theta(n)` regime.
+The first spike changes what survives a restriction; it does not yet solve
+how to charge many unrestricted nonlinear stages without reusing the same work.
+
+[raz-multilinear04]: ../sources.md#raz-multilinear04
 [ballet-pieltant18]: ../sources.md#ballet-pieltant18

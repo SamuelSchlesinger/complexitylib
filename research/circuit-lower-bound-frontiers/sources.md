@@ -58,6 +58,26 @@ Eli Ben-Sasson and Avi Wigderson. *Short Proofs Are Narrow—Resolution
 
 [Primary source](https://people.inf.ethz.ch/emo/SatSem05/Papers/BensassonWidgerson01.pdf).
 
+<a id="brsw06"></a>
+
+## brsw06
+
+Boaz Barak, Anup Rao, Ronen Shaltiel, and Avi Wigderson.
+*2-Source Dispersers for Sub-Polynomial Entropy and Ramsey Graphs Beating the
+Frankl-Wilson Construction*. STOC 2006, pp. 671–680.
+DOI: 10.1145/1132516.1132611. Author-hosted proceedings paper inspected
+October 4, 2026; Definition 1.3 and Theorem 2.1 give a polynomial-time
+two-source Boolean disperser on two `m`-bit blocks with entropy `m^o(1)`.
+Combining it with the classical rectangle induction and the elementary parity
+fiber step yields an `n/2-o(n)` mixed threshold/parity gate bound at total
+input length `n=2m`. This circuit deduction is not a theorem located in that
+paper. It shows that the coefficient and an explicit P target already follow
+from older ingredients; no priority claim for our fixed-family instantiation
+is made.
+
+[Primary source](https://homes.cs.washington.edu/~anuprao/pubs/fp60-barak.pdf).
+[Author publication record](https://www.math.ias.edu/avi/node/906).
+
 <a id="cdj26"></a>
 
 ## cdj26
@@ -472,7 +492,16 @@ Vwani P. Roychowdhury, Alon Orlitsky, and Kai-Yeung Siu.
 IEEE Transactions on Information Theory 40(2), 467–474, 1994.
 DOI: 10.1109/18.312169. Published full text inspected October 4, 2026;
 Sections III–IV give gatewise communication/rectangle arguments for arbitrary-depth
-circuits. The July 1992 Purdue report is an earlier version.
+circuits. The July 1992 Purdue report is an earlier version. Section IV, Theorem 4,
+iteratively fixes triangular gates on large monochromatic rectangles; Example 4
+gives `n/4` gates for inner product on `n` total inputs. Arbitrary real-weight
+threshold gates are triangular, but parity gates are not: the two-bit XOR matrix
+is an excluded checkerboard. The mixed threshold/parity induction in our note
+adds the elementary local-parity-fiber step and tracks both side sizes. It is
+labeled a classical-method corollary, not a new lower-bound technique or a
+literal restatement of their theorem. The exact Chattopadhyay–Liao-family
+mixed-basis statement was not located in the bounded literature audit;
+absence from that search does not establish novelty. See also [brsw06](#brsw06).
 
 [Primary source](https://doi.org/10.1109/18.312169).
 [Inspected published paper](https://static1.squarespace.com/static/55bd6f4de4b01afc98144e62/t/576875946b8f5b9dff9ae119/1466463640398/Lower%2BBounds%2Bon%2BThreshold%2Band%2BRelated%2BCircuits%2Bvia%2BCommunication%2BComplexity.pdf).
@@ -514,6 +543,50 @@ Used to credit the affine geometry of inversion; the circuit-count deduction
 and scaling-defect argument are separately proved in the repository.
 
 [Primary source](https://doi.org/10.1007/s10623-024-01531-6).
+
+<a id="smolensky87"></a>
+
+## smolensky87
+
+Roman Smolensky. *Algebraic Methods in the Theory of Lower Bounds for Boolean
+Circuit Complexity*. STOC 1987, pp. 77-82. DOI: 10.1145/28395.28404.
+Primary manuscript inspected October 4, 2026. Lemma 1 supplies the random
+polynomial approximation method; the later algebraic argument gives the
+characteristic-mismatch obstruction. The nonterminal-conjunction parameter,
+affine-block construction, and integer readout deductions in our note are not
+attributed to this paper.
+
+[Primary manuscript](https://people.cs.umass.edu/~immerman/cs601/Smolensky.pdf),
+[publication](https://doi.org/10.1145/28395.28404).
+
+<a id="bhowmick-lovett15"></a>
+
+## bhowmick-lovett15
+
+Abhishek Bhowmick and Shachar Lovett. *Nonclassical Polynomials as a Barrier to
+Polynomial Lower Bounds*. CCC 2015, LIPIcs 33, pp. 72-87.
+DOI: 10.4230/LIPIcs.CCC.2015.72. Section 1.2, inspected October 4, 2026,
+records the classical bound on MOD3 agreement by characteristic-two degree-d
+polynomials, with attribution to Razborov and Smolensky. Used only for that
+classical approximation-degree statement.
+
+[Primary paper](https://drops.dagstuhl.de/storage/00lipics/lipics-vol033-ccc2015/LIPIcs.CCC.2015.72/LIPIcs.CCC.2015.72.pdf).
+
+<a id="raz-multilinear04"></a>
+
+## raz-multilinear04
+
+Ran Raz. *Multi-Linear Formulas for Permanent and Determinant are of
+Super-Polynomial Size*. ECCC TR03-067 (2003), STOC 2004, pp. 633-641;
+Journal of the ACM 56(2) (2009), DOI: 10.1145/1502793.1502797.
+Primary manuscript inspected October 4, 2026. Printed pp. 2-4 give the
+any-field determinant bound, the node-count convention for binary formulas,
+and multilinearity definitions. Our affine-closure and nonlinear-reuse
+compiler is a separate elementary deduction, not a claim of new determinant
+hardness.
+
+[Primary manuscript](https://eccc.weizmann.ac.il/report/2003/067/download/),
+[publication](https://doi.org/10.1145/1502793.1502797).
 
 <a id="ballet-pieltant18"></a>
 
@@ -559,6 +632,30 @@ Neither covers the mixed AND/OR/XOR/MOD3 basis.
 [DOI](https://doi.org/10.1109/FOCS.2006.46),
 [author manuscript](https://users.math.cas.cz/~pudlak/cgpt.pdf).
 
+<a id="boyar-find18"></a>
+
+## boyar-find18
+
+Joan Boyar and Magnus Gausdal Find. *Multiplicative Complexity of Vector Valued
+Boolean Functions*. Theoretical Computer Science 720 (2018), 36--46.
+The arXiv v3 manuscript, pp. 4--8, distinguishes unrestricted binary XOR-AND,
+quadratic, bilinear, and unbounded-product circuits; checked October 4, 2026.
+Its discussion of quadratic optimality is a dated source statement.
+
+[Primary manuscript](https://arxiv.org/pdf/1407.6169).
+
+<a id="egow18"></a>
+
+## egow18
+
+Klim Efremenko, Ankit Garg, Rafael Oliveira, and Avi Wigderson.
+*Barriers for Rank Methods in Arithmetic Complexity*. ITCS 2018; arXiv:1710.09502.
+The abstract's limitation on rank-method lower bounds for order-three tensors
+is used only for that framework, not as a barrier to every circuit argument.
+Checked October 4, 2026.
+
+[Primary manuscript](https://arxiv.org/abs/1710.09502).
+
 <a id="shannon48"></a>
 
 ## shannon48
@@ -578,6 +675,65 @@ Leslie G. Valiant, *Graph-Theoretic Arguments in Low-Level
   Primary paper hosted at Princeton checked October 4, 2026.
 
 [Primary source](https://www.cs.princeton.edu/courses/archive/spr08/cos598D/valiantrigidity.pdf).
+
+<a id="hromkovic85"></a>
+
+## hromkovic85
+
+Juraj Hromkovic. *Linear lower bounds on unbounded fan-in Boolean circuits*.
+Information Processing Letters 21(2) (1985), 71--74.
+DOI: 10.1016/0020-0190(85)90035-3. Bibliographic record checked October 4, 2026.
+The original article was not accessible in this audit, so its exact signature,
+negation convention, target, and coefficient remain unverified. ROS94's
+introduction credits it with linear gate bounds for commutative, associative
+functions. Hromkovic's own *Lower bound techniques for VLSI algorithms*,
+Section 6.2, printed pp. 16--17, confirms the CA-circuit model and the
+communication method, without supplying those missing details. His joint 1992
+area-complexity paper, printed p. 287, confirms unbounded fan-in and fanout.
+This is a close predecessor requiring resolution before a priority claim.
+
+[Publisher record](https://doi.org/10.1016/0020-0190(85)90035-3),
+[author's survey](https://real-eod.mtak.hu/2142/1/SZTAKITanulmanyok_185.pdf),
+[later joint paper](https://istina.msu.ru/media/publications/articles/e0f/617/3238652/LowerBoundsOnTheAreaComplexity.pdf).
+
+<a id="wegener91"></a>
+
+## wegener91
+
+Ingo Wegener. *The complexity of the parity function in unbounded fan-in,
+unbounded depth circuits*. Theoretical Computer Science 85(1) (1991), 155--170.
+DOI: 10.1016/0304-3975(91)90052-4. Section 4 defines U-infinity with free
+negations; Theorem 4.1 states the `2n-1` gate lower bound. Primary indexed
+paper text and publisher record checked October 4, 2026; full PDF retrieval timed out.
+
+[Publisher record](https://doi.org/10.1016/0304-3975(91)90052-4),
+[primary paper mirror](https://www.paradise.caltech.edu/ist4/lectures/AON%20circuit%20for%20parity%20Wegener%201991.pdf).
+
+<a id="kombarov21"></a>
+
+## kombarov21
+
+Yu. A. Kombarov. *Lower bound of circuit complexity of parity function in a basis
+of unbounded fan-in*. Moscow University Mathematics Bulletin 76(6) (2021),
+266--270; Russian original, Vestnik Moskov. Univ. Ser. 1, no. 6, 48--51.
+The primary record states the U-infinity basis and coefficient `19/9`.
+Checked October 4, 2026.
+
+[Primary journal record](https://www.mathnet.ru/php/archive.phtml?jrnid=vmumm&option_lang=eng&paperid=4439&wshow=paper).
+
+<a id="kombarov22"></a>
+
+## kombarov22
+
+Yu. A. Kombarov. *Improvement of circuit complexity lower bound for parity
+function in one infinite basis*. Academician O. B. Lupanov XIV International
+Scientific Seminar, June 20--25, 2022, pp. 75--76.
+DOI: 10.20948/dms-2022-14. Primary conference abstract states `2.125n+C`
+for generalized conjunction gates. Checked October 4, 2026; PDF retrieval timed out.
+This is distinct from the 38-page collection article with DOI 10.20948/mvk-2022-81.
+
+[Primary conference record](https://library.keldysh.ru/prep_vw.asp?lg=e&pid=9780),
+[conference text](https://keldysh.ru/dms/2022/dms-2022-14-kombarov.pdf).
 
 <a id="williams13"></a>
 
