@@ -7,6 +7,7 @@ Authors: Samuel Schlesinger
 module
 public import Complexitylib.Algebraic.LowerBound.Cutwidth.Aggregate.Geometry.Inversion.Collisions
 public import Complexitylib.Algebraic.LowerBound.Cutwidth.Aggregate.Geometry.Inversion.Components
+public import Complexitylib.Algebraic.LowerBound.Cutwidth.Aggregate.Geometry.Inversion.Features
 public import Complexitylib.Algebraic.LowerBound.Cutwidth.Aggregate.Geometry.Inversion.Parameters
 public import Complexitylib.Algebraic.LowerBound.Cutwidth.Aggregate.Geometry.Multioutput.LowerBound
 
@@ -19,6 +20,8 @@ size restriction is `n ≥ 3`; the permutation, nonprojection, and affine-restri
 properties are proved for inversion itself, not assumed as hardness hypotheses.
 The entropy and output-rank refinement has leading coefficient
 `(3 + 2c)/(2 + c)`, approximately 1.543112, where `c = 1 - H₂(1/4)`.
+The actual nonlinear-feature budget further gives leading coefficient
+`(3 + 4c)/(2 + 2c)`, approximately 1.579380, with its explicit additive penalty.
 -/
 
 @[expose] public section
