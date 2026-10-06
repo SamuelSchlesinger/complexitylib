@@ -211,6 +211,17 @@ def headlineTheorems : List Name := [
   `Algebraic.Cutwidth.Multigraph.Hyperconcentrator.exists_le_card_cut,
   `Algebraic.Cutwidth.Multigraph.Hyperconcentrator.eventually_le_card_edges,
   `Algebraic.Cutwidth.Multigraph.Hyperconcentrator.eventually_le_card_vertices,
+  -- ε-halvers: token conservation, connectivity, and the (1 + κ (1 - 2ε)/2 - o(1)) n bound
+  `Algebraic.Cutwidth.ComparatorNetwork.eval_comp,
+  `Algebraic.Cutwidth.ComparatorNetwork.sub_le_card_cut,
+  `Algebraic.Cutwidth.ComparatorNetwork.IsHalver.wireGraph_connected,
+  `Algebraic.Cutwidth.ComparatorNetwork.IsHalver.exists_le_card_cut,
+  `Algebraic.Cutwidth.ComparatorNetwork.IsHalver.le_of_orderingBound,
+  `Algebraic.Cutwidth.ComparatorNetwork.eventually_le_size_of_isHalver,
+  (`Algebraic.Cutwidth.ComparatorNetwork).str
+    "eventually_one_add_sixteen_div_nine_mul_le_size_of_isHalver",
+  (`Algebraic.Cutwidth.ComparatorNetwork).str
+    "eventually_one_add_three_div_two_mul_le_size_of_isHalver",
   -- The frontier method: any alphabet, basis, and fan-in, with constant gates free
   `Complexity.Frontier.Sweep.ncard_le,
   `Complexity.Frontier.lowerBound,

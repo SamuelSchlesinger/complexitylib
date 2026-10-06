@@ -10603,6 +10603,180 @@ Theorem~\ref{thm:lowerbounds-algebraic-explicit-four-n}.
   $\lfloor N/2\rfloor/A\ge N/(2A)-1/(2A)$; the asymptotic bound follows as for concentrators.
 \end{proof}
 
+\begin{definition}[Comparator networks and $\varepsilon$-halvers]
+  \label{def:lowerbounds-algebraic-halver}
+  \lean{Algebraic.Cutwidth.ComparatorNetwork,
+    Algebraic.Cutwidth.ComparatorNetwork.apply,
+    Algebraic.Cutwidth.ComparatorNetwork.state,
+    Algebraic.Cutwidth.ComparatorNetwork.eval,
+    Algebraic.Cutwidth.ComparatorNetwork.IsHalver,
+    Algebraic.Cutwidth.ComparatorNetwork.eval_comp}
+  \leanok
+  A comparator network on $n$ wires with $s$ comparators applies its comparators in the order
+  $0,1,\dots,s-1$. Comparator $c$ acts on two distinct wires $p_c$ and $q_c$, not necessarily
+  with $p_c<q_c$: it puts the smaller of their two values on $p_c$ and the larger on $q_c$, and
+  leaves the other wires unchanged. The network acts on values in any linear order, and it
+  commutes with monotone maps. The bottom half $B$ is the set of wires $w<\lfloor n/2\rfloor$
+  and the top half $T$ the set of the others. The network is an $\varepsilon$-halver when for
+  every input $x\in\{0,1\}^n$ with $k\le n/2$ ones, at most $\varepsilon k$ ones of the output
+  lie in $B$, and for every input with $k\le n/2$ zeros, at most $\varepsilon k$ zeros of the
+  output lie in $T$. For even $n$ this is the $0$-$1$ form of the $\varepsilon$-halvers of Ajtai,
+  Koml\'os and Szemer\'edi (\emph{Sorting in $c\log n$ parallel steps}, Combinatorica, 1983): by
+  the commutation with monotone maps, it is equivalent to asking, for every input with distinct
+  values and every $k\le n/2$, that at most $\varepsilon k$ of the $k$ largest inputs end in $B$
+  and at most $\varepsilon k$ of the $k$ smallest in $T$.
+\end{definition}
+
+\begin{definition}[The wire graph of a comparator network]
+  \label{def:lowerbounds-algebraic-halver-wire-graph}
+  \lean{Algebraic.Cutwidth.WireVertex,
+    Algebraic.Cutwidth.WireEdge,
+    Algebraic.Cutwidth.ComparatorNetwork.sideWire,
+    Algebraic.Cutwidth.ComparatorNetwork.lastStop,
+    Algebraic.Cutwidth.ComparatorNetwork.wireGraph}
+  \leanok
+  \uses{def:lowerbounds-algebraic-halver, def:lowerbounds-algebraic-superconcentrator}
+  The wire graph of a comparator network on $n$ wires with $s$ comparators is a directed
+  multigraph. Its vertices are an input and an output terminal for every wire and, for every
+  comparator $c$, its two ends $c_p$ on $p_c$ and $c_q$ on $q_c$. Its edges are the wire
+  segments, which follow each wire from its input terminal through the ends of the comparators
+  acting on it, in order, to its output terminal, and for every comparator a link from $c_p$ to
+  $c_q$.
+\end{definition}
+
+\begin{lemma}[The wire graph]
+  \label{lem:lowerbounds-algebraic-halver-wire-graph}
+  \lean{Algebraic.Cutwidth.ComparatorNetwork.card_wireVertex,
+    Algebraic.Cutwidth.ComparatorNetwork.card_wireEdge,
+    Algebraic.Cutwidth.ComparatorNetwork.wireGraph_loopless,
+    Algebraic.Cutwidth.ComparatorNetwork.wireGraph_maxDegreeLE}
+  \leanok
+  \uses{def:lowerbounds-algebraic-halver-wire-graph}
+  The wire graph of a comparator network on $n$ wires with $s$ comparators is loopless, has
+  maximum degree three, $2n+2s$ vertices and $n+3s$ edges; its edges minus vertices are $s-n$.
+\end{lemma}
+\begin{proof}
+  \leanok
+  Number the input terminals $0$, the ends of comparator $c$ by $c+1$, and the output terminals
+  by $s+1$. Every wire segment enters a vertex of a larger number on the same wire, so there are
+  no loops. Two segments leaving one vertex lie on its wire, and if one entered a comparator
+  before the other, the other would leave a vertex numbered after that comparator. So at most
+  one segment leaves each vertex, at most one enters it, and at most one link meets it.
+  There are $n$ segments into output terminals, $2s$ into comparator ends, and $s$ links.
+\end{proof}
+
+\begin{lemma}[Token conservation]
+  \label{lem:lowerbounds-algebraic-halver-tokens}
+  \lean{Algebraic.Cutwidth.ComparatorNetwork.sub_le_card_cut}
+  \leanok
+  \uses{def:lowerbounds-algebraic-halver-wire-graph}
+  For a vertex set $L$ of the wire graph and an input $x\in\{0,1\}^n$, let $\mathrm{net}_x(L)$
+  be the number of ones of $x$ at input terminals in $L$ minus the number of ones of the output
+  at output terminals in $L$. For all inputs $x$ and $x'$, the cut of $L$ has at least
+  $\mathrm{net}_x(L)-\mathrm{net}_{x'}(L)$ edges.
+\end{lemma}
+\begin{proof}
+  \leanok
+  On input $x$, let a wire segment carry the value of its wire, and the link of comparator $c$
+  carry $1$ exactly when the value on $p_c$ before $c$ is $1$ and the value on $q_c$ is $0$:
+  the one that moves. The flow is conserved at every comparator end, so the flow out of $L$
+  minus the flow into $L$ is $\mathrm{net}_x(L)$. Formally, the number of wires carrying $1$
+  whose last vertex before time $t$ lies in $L$ changes at comparator $t$ by minus the net flow
+  out of $L$ along its two incoming segments and its link, and the sum telescopes. Each edge
+  carries at most one token, so the edges leaving $L$ number at least $\mathrm{net}_x(L)$, and
+  those entering $L$ at least $-\mathrm{net}_{x'}(L)$.
+\end{proof}
+
+\begin{lemma}[The wire graph of a halver is connected]
+  \label{lem:lowerbounds-algebraic-halver-connected}
+  \lean{Algebraic.Cutwidth.ComparatorNetwork.IsHalver.eq_empty_or_eq_univ_of_closed,
+    Algebraic.Cutwidth.ComparatorNetwork.IsHalver.wireGraph_connected,
+    Algebraic.Cutwidth.ComparatorNetwork.IsHalver.le_add_one}
+  \leanok
+  \uses{def:lowerbounds-algebraic-halver,
+    lem:lowerbounds-algebraic-halver-wire-graph}
+  Let $\varepsilon<1/2$. In an $\varepsilon$-halver, every set of wires closed under the
+  comparators (each comparator has both wires in it or neither) is empty or all wires. Hence
+  the wire graph is connected, and the halver has at least $n-1$ comparators.
+\end{lemma}
+\begin{proof}
+  \leanok
+  A closed set $S$ of $0<k\le n/2$ wires keeps its indicator input fixed, and so does its
+  complement. With ones exactly on $S$, at most $\varepsilon k$ of its wires lie in $B$; with
+  zeros exactly on $S$, at most $\varepsilon k$ lie in $T$; so $k\le2\varepsilon k$, a
+  contradiction. If $S$ has more than $n/2$ wires, apply this to its complement. Every vertex of
+  the wire graph is joined to the input terminal of its wire, and the link of a comparator
+  joins its two wires, so the wires joined to a fixed input terminal form a nonempty closed set.
+  A connected graph has at least its number of vertices minus one edges:
+  $n+3s\ge2n+2s-1$.
+\end{proof}
+
+\begin{lemma}[Halver cut lemma]
+  \label{lem:lowerbounds-algebraic-halver-cut}
+  \lean{Algebraic.Cutwidth.ComparatorNetwork.IsHalver.exists_le_card_cut}
+  \leanok
+  \uses{def:lowerbounds-algebraic-halver,
+    lem:lowerbounds-algebraic-halver-tokens}
+  Every linear order of the vertices of the wire graph of an $\varepsilon$-halver has a lower set
+  whose cut has at least $(1-2\varepsilon)\lfloor n/2\rfloor$ edges.
+\end{lemma}
+\begin{proof}
+  \leanok
+  Let $h=\lfloor n/2\rfloor$, take a lower set $L$ containing exactly $h$ input terminals, and
+  let $\tau$ output terminals of wires in $T$ lie in $L$. With ones exactly on the inputs in
+  $L$, at most $\varepsilon h$ ones end in $B$, so at most $\varepsilon h+\tau$ ones end at
+  output terminals in $L$ and $\mathrm{net}\ge h-\varepsilon h-\tau$. With zeros exactly on the
+  inputs in $L$, at most $\varepsilon h$ zeros end in $T$, so at least $\tau-\varepsilon h$ ones
+  end at output terminals in $L$ and $\mathrm{net}\le\varepsilon h-\tau$. By
+  Lemma~\ref{lem:lowerbounds-algebraic-halver-tokens} the cut has at least
+  $(1-2\varepsilon)h$ edges.
+\end{proof}
+
+\begin{theorem}[$\varepsilon$-halvers need $(1+\kappa(1-2\varepsilon)/2-o(1))n$ comparators]
+  \label{thm:lowerbounds-algebraic-halver}
+  \lean{Algebraic.Cutwidth.ComparatorNetwork.IsHalver.le_of_orderingBound,
+    Algebraic.Cutwidth.ComparatorNetwork.eventually_le_size_of_isHalver_of_orderingBound,
+    Algebraic.Cutwidth.ComparatorNetwork.eventually_le_size_of_isHalver,
+    Algebraic.Cutwidth.ComparatorNetwork.eventually_one_add_sixteen_div_nine_mul_le_size_of_isHalver,
+    Algebraic.Cutwidth.ComparatorNetwork.eventually_one_add_three_div_two_mul_le_size_of_isHalver}
+  \leanok
+  \uses{def:lowerbounds-algebraic-halver,
+    lem:lowerbounds-algebraic-halver-wire-graph,
+    lem:lowerbounds-algebraic-halver-connected,
+    lem:lowerbounds-algebraic-halver-cut,
+    def:lowerbounds-algebraic-ordering-hypotheses,
+    thm:lowerbounds-algebraic-ordering-bound,
+    thm:lowerbounds-algebraic-gaussian-coefficient,
+    thm:lowerbounds-algebraic-superconcentrator}
+  Assume $\mathrm{OrderingBound}(A,\eta,C)$ and $\varepsilon<1/2$. Every $\varepsilon$-halver on
+  $n$ wires with $s$ comparators satisfies
+  $(1-2\varepsilon)\lfloor n/2\rfloor\le(A+\eta)\max\{s-n,0\}+3\log_2(2n+2s)+C$. Hence if $A>0$
+  and every $\eta>0$ admits such a $C$, then for every $0\le\varepsilon<1/2$, every $\delta>0$,
+  and all large $n$, every $\varepsilon$-halver on $n$ wires has at least
+  $(1+(1-2\varepsilon)/(2A)-\delta)n$ comparators. With the edge-score coefficient $A=2p$ this
+  is $(1+\kappa(1-2\varepsilon)/2-\delta)n$ comparators, where
+  $\kappa=\pi/(3\arccos\tfrac{1+2\sqrt2}{4})\approx3.5625$: about $2.78n$ as
+  $\varepsilon\to0$ and $2.43n$ at $\varepsilon=1/10$. With $2p\le9/32$ it is at least
+  $(1+16(1-2\varepsilon)/9-\delta)n$, and the coefficient $A=1/3$ gives
+  $(1+3(1-2\varepsilon)/2-\delta)n$. Ajtai, Koml\'os and Szemer\'edi build $\varepsilon$-halvers
+  of linear size from expanders, and Paterson (\emph{Improved sorting networks with $O(\log N)$
+  depth}, Algorithmica, 1990) and Seiferas (\emph{Sorting networks of logarithmic depth, further
+  simplified}, Algorithmica, 2009) analyse their constructions; we found no size lower bound for
+  $\varepsilon$-halvers beyond the trivial $n-1$ of
+  Lemma~\ref{lem:lowerbounds-algebraic-halver-connected}.
+\end{theorem}
+\begin{proof}
+  \leanok
+  The wire graph is connected, loopless, and of maximum degree three, with $2n+2s$ vertices
+  and $n+3s$ edges, so its ordering has prefix cuts of at most
+  $(A+\eta)\max\{s-n,0\}+3\log_2(2n+2s)+C$ edges, and one of them has at least
+  $(1-2\varepsilon)\lfloor n/2\rfloor$ by Lemma~\ref{lem:lowerbounds-algebraic-halver-cut}.
+  The asymptotic bound follows from the numeric lemma of
+  Theorem~\ref{thm:lowerbounds-algebraic-superconcentrator} with $Q=n+s$, baseline $2n$, the
+  baseline $s\ge n-1$ of Lemma~\ref{lem:lowerbounds-algebraic-halver-connected}, and
+  $\lfloor n/2\rfloor\ge(n-1)/2$.
+\end{proof}
+
 \begin{theorem}[The concrete family under a general ordering coefficient]
   \label{thm:lowerbounds-algebraic-explicit-coefficient}
   \lean{Algebraic.Cutwidth.sourceReductionHardFamily_eventually_lt_size_of_orderingBound}
