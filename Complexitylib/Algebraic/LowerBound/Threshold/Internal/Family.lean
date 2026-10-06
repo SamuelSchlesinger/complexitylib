@@ -8,8 +8,7 @@ module
 public import Complexitylib.Algebraic.LowerBound.Threshold.Defs
 public import Complexitylib.Algebraic.LowerBound.Cutwidth.Extractor.Padding.Defs
 public import Complexitylib.Algebraic.LowerBound.Cutwidth.Aggregate.Family
-import Complexitylib.Algebraic.LowerBound.Cutwidth.Extractor.Padding
-import Complexitylib.Algebraic.LowerBound.Cutwidth.Extractor.SourceReduction.Construction.Uniform
+import Complexitylib.Algebraic.LowerBound.Cutwidth.Aggregate.Capacity.Polarity
 import Mathlib.Tactic.Linarith
 import Mathlib.Tactic.Ring
 
@@ -19,7 +18,8 @@ import Mathlib.Tactic.Ring
 A two-sided flat sumset disperser has both values on every rectangle with large sides: embed the
 first side as `glue p 0` and the second as `glue 0 q`, whose sums are `glue p q`. The explicit
 family `sourceReductionHardFamily` is the balanced padding of an extractor with error
-`35/72 < 1/2`, so it is eventually a two-sided disperser, hence two-sided rectangle-free, at the
+`35/72 < 1/2`, so it is eventually a two-sided disperser
+(`Aggregate.family_eventually_sumsetDisperser`), hence two-sided rectangle-free, at the
 threshold `Aggregate.familyThreshold n = 2 ^ k(n)` with `k(n) = o(n)`.
 -/
 
@@ -71,18 +71,13 @@ theorem familyThreshold_eq_two_pow (n : ℕ) :
     Aggregate.familyThreshold n = 2 ^ familyLogThreshold n := by
   rw [Aggregate.familyThreshold, familyLogThreshold, pow_succ, mul_comm]
 
-/-- The explicit family is eventually two-sided rectangle-free at `familyThreshold n`. -/
+/-- The explicit family is eventually two-sided rectangle-free at `familyThreshold n`, from its
+sumset dispersion (`Aggregate.family_eventually_sumsetDisperser`). -/
 theorem sourceReductionHardFamily_twoSidedRectangleFree_internal :
     ∀ᶠ n in atTop, TwoSidedRectangleFree (Extractor.sourceReductionHardFamily n)
-      (Aggregate.familyThreshold n) := by
-  filter_upwards [(tendsto_sub_atTop_nat 1).eventually
-      Extractor.sourceReductionFamily_eventually_flat, eventually_ge_atTop 1]
-    with n extract positive
-  obtain ⟨m, rfl⟩ : ∃ m, n = m + 1 := ⟨n - 1, by omega⟩
-  simp only [Nat.add_sub_cancel] at extract
-  rw [Extractor.sourceReductionHardFamily_succ, Aggregate.familyThreshold, Nat.add_sub_cancel]
-  exact twoSidedRectangleFree_of_flatSumsetDisperser_internal
-    (extract.disperser (by positivity) (by norm_num)).balancePad
+      (Aggregate.familyThreshold n) :=
+  Aggregate.family_eventually_sumsetDisperser.mono fun _ disperse =>
+    twoSidedRectangleFree_of_flatSumsetDisperser_internal disperse
 
 /-- The logarithmic threshold is eventually below every positive multiple of `n`, with room for
 the additive constants of the capacity bounds. -/
