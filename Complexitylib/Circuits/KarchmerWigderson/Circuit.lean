@@ -28,4 +28,12 @@ theorem exists_roundProtocol {N M G : ℕ} [NeZero N] [NeZero M]
     ∃ P : KarchmerWigderson.RoundProtocol (Fin N) (Fin c.totalFanIn) d,
       P.SolvesKW (fun x => c.eval x j) := exists_roundProtocol_internal c d hd j
 
+/-- A depth-`d` unbounded AND/OR circuit with `N` inputs and `G` internal gates
+gives a general KW protocol with at most `d` messages, each drawn from an
+alphabet of size `2 * (N + G)` encoding a wire and its negation flag. -/
+theorem exists_roundProtocol_of_gates {N M G : ℕ} [NeZero N] [NeZero M]
+    (c : Circuit Basis.unboundedAndOr N M G) (d : ℕ) (hd : c.depth ≤ d) (j : Fin M) :
+    ∃ P : KarchmerWigderson.RoundProtocol (Fin N) (Fin (2 * (N + G))) d,
+      P.SolvesKW (fun x => c.eval x j) := exists_roundProtocol_of_gates_internal c d hd j
+
 end Complexity.Circuit

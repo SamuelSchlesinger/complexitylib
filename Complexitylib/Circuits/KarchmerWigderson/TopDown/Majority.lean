@@ -97,4 +97,24 @@ theorem majority_wire_lower_bound (rounds : ℕ) (hrounds : 2 ≤ rounds) :
       (2 : ℝ) ^ (ε * (n : ℝ) ^ (((rounds - 1 : ℕ) : ℝ)⁻¹)) < c.totalFanIn :=
   majority_wire_lower_bound_internal rounds hrounds
 
+/-- Every sufficiently large strict-majority circuit of fixed depth at most `d ≥ 2`
+satisfies `2^(epsilon*n^(1/(d-1))) < 2 * (n + g)`, where `g` is the number of
+internal gates. -/
+theorem majority_gate_size_lower_bound (rounds : ℕ) (hrounds : 2 ≤ rounds) :
+    ∃ ε : ℝ, 0 < ε ∧ ∃ n0 : ℕ, ∀ n : ℕ, n0 ≤ n → ∀ [NeZero n] (g : ℕ)
+      (c : Circuit Basis.unboundedAndOr n 1 g), c.depth ≤ rounds →
+      (∀ x, c.eval x 0 = majority x) →
+      (2 : ℝ) ^ (ε * (n : ℝ) ^ (((rounds - 1 : ℕ) : ℝ)⁻¹)) < 2 * (n + g) :=
+  majority_gate_size_lower_bound_internal rounds hrounds
+
+/-- For any fixed depth bound `rounds` and polynomial parameters `k, C`, all
+sufficiently large unbounded AND/OR circuits of depth at most `rounds`
+computing strict majority require more than `C * n ^ k + C` internal gates. -/
+theorem majority_superpolynomial_gates (rounds k C : ℕ) :
+    ∃ n0 : ℕ, ∀ n : ℕ, n0 ≤ n → ∀ [NeZero n] (g : ℕ)
+      (c : Circuit Basis.unboundedAndOr n 1 g), c.depth ≤ rounds →
+      (∀ x, c.eval x 0 = majority x) →
+      C * n ^ k + C < g :=
+  majority_superpolynomial_gates_internal rounds k C
+
 end Complexity.Circuit
