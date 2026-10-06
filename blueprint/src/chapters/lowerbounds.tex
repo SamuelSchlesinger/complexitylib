@@ -13252,6 +13252,54 @@ signals, codes, pruned transitions, and trees of regions.
   generators for $\cc{AC}^0$ would build on it.
 \end{proof}
 
+\section{Polynomial approximation and $\cc{AC}^0[3]$}
+\label{sec:lowerbounds-smolensky}
+
+Smolensky's method approximates circuits with $\mathrm{MOD}_3$ gates by
+low-degree polynomials over $\mathbb{F}_3 = \mathbb{Z}/3$ and shows that parity
+has no such approximation (Razborov--Smolensky). The formalization works with
+functions $\{0,1\}^n \to \mathbb{F}_3$ instead of formal polynomials, and it
+replaces the random choice of the OR approximators by exact counting over all
+choices.
+
+\begin{definition}[Low-degree functions over $\mathbb{F}_3$]
+  \label{def:lowerbounds-smolensky-low-degree}
+  \lean{Complexity.Smolensky.bitVal, Complexity.Smolensky.monomial,
+    Complexity.Smolensky.lowDegree}
+  \leanok
+  \uses{def:bitstring}
+  Read each bit as $0$ or $1$ in $\mathbb{F}_3$. The monomial of a set
+  $S \subseteq [n]$ is the function $x \mapsto \prod_{i \in S} x_i$, and a
+  function $\{0,1\}^n \to \mathbb{F}_3$ has degree at most $D$ when it is an
+  $\mathbb{F}_3$-linear combination of monomials of sets of size at most $D$.
+\end{definition}
+
+\begin{theorem}[Smolensky's approximation]
+  \label{thm:lowerbounds-smolensky-approximation}
+  \lean{Complexity.Smolensky.exists_lowDegree_approx}
+  \leanok
+  \uses{def:lowerbounds-smolensky-low-degree, def:circuits-ACC}
+  Let $C$ be a single-output circuit over the AND/OR/$\mathrm{MOD}_3$ basis with
+  $n \ge 1$ inputs and depth at most $d$, and let $\ell \ge 1$. Some function
+  $P$ of degree at most $(2\ell)^d$ satisfies
+  $\#\{x : P(x) \ne C(x)\} \cdot 2^\ell \le \mathrm{size}(C) \cdot 2^n$, where
+  $C(x)$ is read in $\mathbb{F}_3$.
+\end{theorem}
+\begin{proof}
+  \leanok
+  A $\mathrm{MOD}_3$ gate on $u_1, \dots, u_m$ is exactly $(\sum_i u_i)^2$. An OR
+  gate is approximated by $1 - \prod_{j < \ell} (1 - (\sum_{i \in T_j} u_i)^2)$
+  for subsets $T_1, \dots, T_\ell$ of its inputs, and an AND gate by De Morgan
+  duality; each multiplies degrees by at most $2\ell$. If $u \ne 0$ and
+  $u_k = 1$, pairing each subset $S$ with $S \mathbin{\triangle} \{k\}$ shows that
+  at most half the subsets have $\sum_{i \in S} u_i = 0$, so at most a
+  $2^{-\ell}$ fraction of the tuples err at $u$; if $u = 0$ none err. Counting
+  pairs of a tuple and an input, some tuple errs on at most $2^{n - \ell}$
+  inputs, evaluated on the gate's true input vector. Fix such a tuple at every
+  gate and compose along the circuit: the result is correct at every input at
+  which every gate approximator is.
+\end{proof}
+
 \section{Monotone circuits}
 \label{sec:lowerbounds-monotone}
 

@@ -79,6 +79,7 @@ public import Complexitylib.Circuits.Frontier
 public import Complexitylib.Circuits.Schnorr
 public import Complexitylib.Circuits.DepthClasses
 public import Complexitylib.Circuits.AC0
+public import Complexitylib.Circuits.Smolensky
 public import Complexitylib.Circuits.Nondeterminism
 public import Complexitylib.Circuits.Hardwiring
 public import Complexitylib.Circuits.Unrolling
@@ -270,6 +271,8 @@ Public modules (definitions a reviewer should read):
   negation-normal formulas, circuit normalization, exact restrictions,
   width-sensitive switching, finite staged iteration, the exact parity
   counting obstruction, parity outside `AC0`, and `AC0 ⊂ TC0`
+* `Complexitylib.Circuits.Smolensky.Defs` — `Smolensky.monomial` and
+  `Smolensky.lowDegree`, low-degree functions `{0,1}^n → ZMod 3`
 * `Complexitylib.Circuits.Nondeterminism.Defs` — `existsQuantify`, `forallQuantify`
 * `Complexitylib.Circuits.Hardwiring` — exact-size prefix hardwiring
 * `Complexitylib.Circuits.Unrolling` — bounded machine-configuration layouts,
@@ -286,6 +289,8 @@ Theorem modules (re-export definitions + main results):
 * `Complexitylib.Circuits.Frontier` — the frontier method: circuit lower bounds from
   graph layouts over any finite alphabet, basis, and fan-in
 * `Complexitylib.Circuits.Schnorr` — Schnorr's XOR lower bound
+* `Complexitylib.Circuits.Smolensky` — Smolensky's approximation of
+  AND/OR/`MOD_3` circuits by low-degree functions over `ZMod 3`
 * `Complexitylib.Circuits.Nondeterminism` — nondeterministic quantification complexity bounds
 * `Complexitylib.Circuits.Valiant` — Valiant's depth reduction lemma for digraphs
 * `Complexitylib.Circuits.StraightLine` — typed circuits as CSLib straight-line programs, with
