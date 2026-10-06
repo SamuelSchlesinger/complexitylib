@@ -34,7 +34,8 @@ public import Mathlib.LinearAlgebra.FiniteDimensional.Lemmas
   (`blockRank_add_transpose_le_of_sum`).
 * *Symmetric Cauchy matrices* (`totallyRegular_hankelCauchyZMod_add_transpose`): `M + Mᵀ = 2 M`
   for symmetric `M`, and scaling a square block by `2 ≠ 0` keeps it nonsingular.
-* *The finite bound* (`half_le_of_quadForm`): the component of an input wire is closed, so the
+* *The finite bound* (`half_le_of_quadForm_rank_cuts`, for any field given the rank-cut bound
+  at every split, and `half_le_of_quadForm`): the component of an input wire is closed, so the
   rank-cut bound and total regularity put every input into it
   (`input_mem_component_of_quadForm`). Along the ranking of `MultiOutput.exists_rank`, the
   number of inputs in a prefix grows by at most one per wire, so the prefix ending at some input
@@ -434,20 +435,22 @@ end Symmetric
 
 /-! ## The finite bound -/
 
-section Finite
+section RankCuts
 
-variable {F : Type*} [Field F] [Fintype F] [DecidableEq F]
+variable {F : Type*} [Field F]
 
-/-- **All inputs lie in one component.** If `M + Mᵀ` is totally regular, the component of an
-input wire contains every input: it is closed, hence crossed by no signal, so by the rank-cut
-bound its inputs form a block of rank zero. -/
-theorem input_mem_component_of_quadForm (p : Program σ n s) (I : Interpretation σ F)
-    (out : Wire n s) {M : Matrix (Fin n) (Fin n) F} (hM : TotallyRegular (M + Mᵀ))
-    (hf : ∀ x, p.trace I x out = quadForm M x) (j j' : Fin n) :
-    Wire.input j' ∈ component p (Wire.input j) := by
+/-- **All inputs lie in one component.** If `M + Mᵀ` is totally regular and every split of a
+program obeys the rank-cut bound for `M + Mᵀ`, the component of an input wire contains every
+input: it is closed, hence crossed by no signal, so its inputs form a block of rank zero. -/
+theorem input_mem_component_of_quadForm_rank_cuts (p : Program σ n s)
+    {M : Matrix (Fin n) (Fin n) F}
+    (hM : TotallyRegular (M + Mᵀ))
+    (hcut : ∀ S : Finset (Wire n s),
+      blockRank (M + Mᵀ) (inputsIn S) (inputsIn S)ᶜ ≤ (forward p S).card + (backward p S).card)
+    (j j' : Fin n) : Wire.input j' ∈ component p (Wire.input j) := by
   set W := component p (Wire.input j)
   have hclosed := component_closed p (Wire.input j)
-  have hzero := blockRank_add_transpose_le p I out M hf W
+  have hzero := hcut W
   rw [forward_eq_empty_of_closed hclosed, backward_eq_empty_of_closed hclosed] at hzero
   have hmin := min_card_le_blockRank hM (inputsIn W) (inputsIn W)ᶜ
   have hjW : j ∈ inputsIn W := mem_inputsIn.mpr (mem_component_self p _)
@@ -460,14 +463,14 @@ theorem input_mem_component_of_quadForm (p : Program σ n s) (I : Interpretation
   rw [Finset.card_eq_zero.mp hcompl] at hmem
   exact Finset.notMem_empty _ hmem
 
-/-- **The finite bound for quadratic forms.** A fan-in-two program over any signature whose
-wire `out` carries the quadratic form of `M`, with `M + Mᵀ` totally regular, has
+/-- **The finite bound from rank cuts.** A fan-in-two program over any signature and any field
+whose splits all obey the rank-cut bound for `M + Mᵀ`, with `M + Mᵀ` totally regular, has
 `⌊N/2⌋ ≤ (A + η) (s - N)⁺ + 3 log₂ (N + 3 s) + C`. -/
-theorem half_le_of_quadForm {A η C : ℝ} (hAη : 0 ≤ A + η)
+theorem half_le_of_quadForm_rank_cuts {A η C : ℝ} (hAη : 0 ≤ A + η)
     (order : Multigraph.OrderingBound A η C) {N s : Nat} (p : Program σ N s)
-    (hp : p.FanInAtMost 2) (I : Interpretation σ F) (out : Wire N s)
-    {M : Matrix (Fin N) (Fin N) F} (hM : TotallyRegular (M + Mᵀ))
-    (hf : ∀ x, p.trace I x out = quadForm M x) :
+    (hp : p.FanInAtMost 2) {M : Matrix (Fin N) (Fin N) F} (hM : TotallyRegular (M + Mᵀ))
+    (hcut : ∀ S : Finset (Wire N s),
+      blockRank (M + Mᵀ) (inputsIn S) (inputsIn S)ᶜ ≤ (forward p S).card + (backward p S).card) :
     ((N / 2 : Nat) : ℝ) ≤ (A + η) * max ((s : ℝ) - N) 0 + 3 * Real.logb 2 (N + 3 * s) + C := by
   have hC := orderingBound_nonneg order
   have hlog : 0 ≤ Real.logb 2 ((N : ℝ) + 3 * s) := by
@@ -517,7 +520,7 @@ theorem half_le_of_quadForm {A η C : ℝ} (hAη : 0 ≤ A + η)
     omega
   -- The lower bound at the prefix.
   set S := prefixBelow rank (t + 1) with hS
-  have hcut := blockRank_add_transpose_le p I out M hf S
+  have hcutS := hcut S
   have hmin := min_card_le_blockRank hM (inputsIn S) (inputsIn S)ᶜ
   have hXc : (inputsIn S)ᶜ.card = N - N / 2 := by
     rw [Finset.card_compl, Fintype.card_fin, hτeq]
@@ -531,7 +534,7 @@ theorem half_le_of_quadForm {A η C : ℝ} (hAη : 0 ≤ A + η)
     have : inputsIn (component p (Wire.input j₀)) = Finset.univ := by
       ext j
       simp only [mem_inputsIn, Finset.mem_univ, iff_true]
-      exact input_mem_component_of_quadForm p I out hM hf j₀ j
+      exact input_mem_component_of_quadForm_rank_cuts p hM hcut j₀ j
     rw [this, Finset.card_univ, Fintype.card_fin]
   rw [← hprefix, hinputs] at hupper
   have hgates : ((gatesIn (component p (Wire.input j₀))).card : ℝ) ≤ s := by
@@ -544,19 +547,49 @@ theorem half_le_of_quadForm {A η C : ℝ} (hAη : 0 ≤ A + η)
     exact_mod_cast hlower
   linarith
 
+end RankCuts
+
+section Finite
+
+variable {F : Type*} [Field F] [Fintype F] [DecidableEq F]
+
+/-- **All inputs lie in one component.** If `M + Mᵀ` is totally regular, the component of an
+input wire contains every input: it is closed, hence crossed by no signal, so by the rank-cut
+bound its inputs form a block of rank zero. -/
+theorem input_mem_component_of_quadForm (p : Program σ n s) (I : Interpretation σ F)
+    (out : Wire n s) {M : Matrix (Fin n) (Fin n) F} (hM : TotallyRegular (M + Mᵀ))
+    (hf : ∀ x, p.trace I x out = quadForm M x) (j j' : Fin n) :
+    Wire.input j' ∈ component p (Wire.input j) :=
+  input_mem_component_of_quadForm_rank_cuts p hM (blockRank_add_transpose_le p I out M hf) j j'
+
+/-- **The finite bound for quadratic forms.** A fan-in-two program over any signature whose
+wire `out` carries the quadratic form of `M`, with `M + Mᵀ` totally regular, has
+`⌊N/2⌋ ≤ (A + η) (s - N)⁺ + 3 log₂ (N + 3 s) + C`. -/
+theorem half_le_of_quadForm {A η C : ℝ} (hAη : 0 ≤ A + η)
+    (order : Multigraph.OrderingBound A η C) {N s : Nat} (p : Program σ N s)
+    (hp : p.FanInAtMost 2) (I : Interpretation σ F) (out : Wire N s)
+    {M : Matrix (Fin N) (Fin N) F} (hM : TotallyRegular (M + Mᵀ))
+    (hf : ∀ x, p.trace I x out = quadForm M x) :
+    ((N / 2 : Nat) : ℝ) ≤ (A + η) * max ((s : ℝ) - N) 0 + 3 * Real.logb 2 (N + 3 * s) + C :=
+  half_le_of_quadForm_rank_cuts hAη order p hp hM (blockRank_add_transpose_le p I out M hf)
+
 end Finite
 
 /-! ## Asymptotics -/
 
 universe u v
 
-/-- **The asymptotic bound for quadratic forms** with a general ordering coefficient. -/
-theorem eventually_lt_size_of_quadForm_of_orderingBound {A : ℝ} (hA : 0 < A)
+/-- **The asymptotic bound from rank cuts.** If the graph-ordering hypothesis holds with
+coefficient `A > 0` for every positive slack, then for every `ε > 0` and all large `N`, every
+fan-in-two single-output circuit over any field whose splits obey the rank-cut bound for a
+totally regular `M + Mᵀ` has more than `(1 + 1/(2A) - ε) N` gates. -/
+theorem eventually_lt_size_of_quadForm_rank_cuts {A : ℝ} (hA : 0 < A)
     (order : ∀ η : ℝ, 0 < η → ∃ C : ℝ, Multigraph.OrderingBound A η C) {ε : ℝ} (hε : 0 < ε) :
-    ∀ᶠ N : Nat in atTop, ∀ (F : Type u) [Field F] [Fintype F] [DecidableEq F]
+    ∀ᶠ N : Nat in atTop, ∀ (F : Type u) [Field F]
       (M : Matrix (Fin N) (Fin N) F), TotallyRegular (M + Mᵀ) →
-      ∀ (σ : Signature.{v}) (I : Interpretation σ F) (c : Circuit σ N 1),
-        c.FanInAtMost 2 → c.Computes I (fun x _ => quadForm M x) →
+      ∀ (σ : Signature.{v}) (c : Circuit σ N 1), c.FanInAtMost 2 →
+        (∀ S : Finset (Wire N c.size), blockRank (M + Mᵀ) (inputsIn S) (inputsIn S)ᶜ ≤
+          (forward c.program S).card + (backward c.program S).card) →
           (1 + 1 / (2 * A) - ε) * N < c.size := by
   set ε' := min ε (1 / (2 * A)) with hε'
   have hε'pos : 0 < ε' := lt_min hε (by positivity)
@@ -570,13 +603,12 @@ theorem eventually_lt_size_of_quadForm_of_orderingBound {A : ℝ} (hA : 0 < A)
   have hBpos : 0 < B := by positivity
   filter_upwards [eventually_mul_logb_add_lt 3 (3 * Real.logb 2 B + C + 1)
     (show 0 < A * ε' / 2 by positivity), eventually_ge_atTop 1] with N hlog hN1
-  intro F _ _ _ M hM σ I c hfan hc
+  intro F _ M hM σ c hfan hcut
   by_contra hs
   rw [not_lt] at hs
   have hs' : (c.size : ℝ) ≤ (1 + 1 / (2 * A) - ε') * N :=
     hs.trans (mul_le_mul_of_nonneg_right (by linarith) (by positivity))
-  have core := half_le_of_quadForm hAη hC c.program hfan I (c.outputs 0) hM
-    (fun x => congrFun (hc x) 0)
+  have core := half_le_of_quadForm_rank_cuts hAη hC c.program hfan hM hcut
   have hN1' : (1 : ℝ) ≤ N := by exact_mod_cast hN1
   -- `⌊N/2⌋ ≥ (N - 1)/2`.
   have hhalf : ((N : ℝ) - 1) / 2 ≤ ((N / 2 : Nat) : ℝ) := by
@@ -616,5 +648,18 @@ theorem eventually_lt_size_of_quadForm_of_orderingBound {A : ℝ} (hA : 0 < A)
       _ = Real.logb 2 B + Real.logb 2 N := Real.logb_mul hBpos.ne' (by positivity)
   have hsplit : (1 / 2 - A * ε' / 2) * (N : ℝ) = N / 2 - A * ε' / 2 * N := by ring
   linarith
+
+/-- **The asymptotic bound for quadratic forms** with a general ordering coefficient. -/
+theorem eventually_lt_size_of_quadForm_of_orderingBound {A : ℝ} (hA : 0 < A)
+    (order : ∀ η : ℝ, 0 < η → ∃ C : ℝ, Multigraph.OrderingBound A η C) {ε : ℝ} (hε : 0 < ε) :
+    ∀ᶠ N : Nat in atTop, ∀ (F : Type u) [Field F] [Fintype F] [DecidableEq F]
+      (M : Matrix (Fin N) (Fin N) F), TotallyRegular (M + Mᵀ) →
+      ∀ (σ : Signature.{v}) (I : Interpretation σ F) (c : Circuit σ N 1),
+        c.FanInAtMost 2 → c.Computes I (fun x _ => quadForm M x) →
+          (1 + 1 / (2 * A) - ε) * N < c.size := by
+  filter_upwards [eventually_lt_size_of_quadForm_rank_cuts.{u, v} hA order hε] with N hN
+  intro F _ _ _ M hM σ I c hfan hc
+  exact hN F M hM σ c hfan
+    (blockRank_add_transpose_le c.program I (c.outputs 0) M fun x => congrFun (hc x) 0)
 
 end Algebraic.Cutwidth.MultiOutput.Internal

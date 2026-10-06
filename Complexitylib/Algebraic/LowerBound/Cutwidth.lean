@@ -67,6 +67,7 @@ public import Complexitylib.Algebraic.LowerBound.Cutwidth.MultiOutput.MatMul.Tri
 public import Complexitylib.Algebraic.LowerBound.Cutwidth.MultiOutput.MatMul
 public import Complexitylib.Algebraic.LowerBound.Cutwidth.MultiOutput.Taylor
 public import Complexitylib.Algebraic.LowerBound.Cutwidth.MultiOutput.PolyMul
+public import Complexitylib.Algebraic.LowerBound.Cutwidth.MultiOutput.Quadratic.Polynomial
 public import Complexitylib.Algebraic.LowerBound.Cutwidth.Extractor
 public import Complexitylib.Algebraic.LowerBound.Cutwidth.Extractor.Padding
 public import Complexitylib.Algebraic.LowerBound.Cutwidth.Extractor.Padding.Asymptotics
@@ -401,6 +402,10 @@ formally computing the product of two polynomials with `n` coefficients has
 more than `(2 + 1/(2 κ_E) - ε) n ≥ (50/9 - ε) n` gates for all large `n`; the
 same holds for arithmetic circuits over infinite fields with free constants and
 for arbitrary gates over `ZMod q`, `q > 2n` prime.
+`MultiOutput.Quadratic.Polynomial` transfers the quadratic-form bound to
+polynomial gates over every field: the Hessian of `xᵀ M x` is `M + Mᵀ`, so the
+same `(25/9 - ε) N` bound holds, for example for `xᵀ (1 / (i + j + 2)) x` over
+every field of characteristic zero.
 
 `Bisection.Helpful` completes the graph theorem. Its proof uses the first
 boundary normalization phase, a partition into bounded connected clusters,

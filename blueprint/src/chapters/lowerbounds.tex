@@ -12446,6 +12446,53 @@ no superlinear unrestricted circuit theorem follows from them alone.
   $(1/2-A\varepsilon/2)N$, and the logarithmic term is $O(\log N)$.
 \end{proof}
 
+\begin{theorem}[Quadratic forms over every field]
+  \label{thm:lowerbounds-algebraic-quadratic-polynomial}
+  \lean{Algebraic.Cutwidth.MultiOutput.quadFormPolynomial,
+    Algebraic.Cutwidth.MultiOutput.hankelCauchyCharZero,
+    Algebraic.Cutwidth.MultiOutput.quadForm_eq_eval,
+    Algebraic.Cutwidth.MultiOutput.hessian_quadFormPolynomial,
+    Algebraic.Cutwidth.MultiOutput.blockRank_add_transpose_le_of_formallyComputes,
+    Algebraic.Cutwidth.MultiOutput.half_le_of_formal_quadForm,
+    Algebraic.Cutwidth.MultiOutput.eventually_lt_size_of_formal_quadForm,
+    Algebraic.Cutwidth.MultiOutput.eventually_lt_size_of_formal_quadForm_twentyFive_div_nine,
+    Algebraic.Cutwidth.MultiOutput.eventually_lt_size_of_quadForm_of_infinite,
+    Algebraic.Cutwidth.MultiOutput.totallyRegular_hankelCauchyCharZero_add_transpose,
+    Algebraic.Cutwidth.MultiOutput.eventually_lt_size_hankelCauchyCharZero}
+  \leanok
+  \uses{thm:lowerbounds-algebraic-quadratic,
+    thm:lowerbounds-algebraic-taylor-rank,
+    lem:lowerbounds-algebraic-taylor-formal,
+    lem:lowerbounds-algebraic-cauchy}
+  Let a circuit with polynomial gates of fan-in at most two over any field,
+  of any degree and with any coefficients, formally compute the quadratic
+  form $\sum_{i,j}M_{ij}x_ix_j$ of an $N\times N$ matrix $M$ such that
+  $M+M^{\mathsf T}$ is totally regular. Every split of its wires obeys the
+  rank-cut bound $\operatorname{rank}(M+M^{\mathsf T})[X_S,X_T]\le|A|+|B|$, so
+  the finite and asymptotic bounds of
+  Theorem~\ref{thm:lowerbounds-algebraic-quadratic} hold: for every
+  $\varepsilon>0$ and all large $N$, independently of the field, the matrix,
+  and the gate polynomials, the circuit has more than
+  $(1+1/(4p)-\varepsilon)N\ge(25/9-\varepsilon)N$ gates. Over an infinite
+  field the same holds for circuits computing the quadratic function. Over
+  every field of characteristic zero the Hankel Cauchy matrix
+  $(1/(i+j+2))$ and its symmetrization are totally regular, so its quadratic
+  form needs more than $(25/9-\varepsilon)N$ polynomial gates over
+  $\mathbb{Q}$, $\mathbb{R}$, or $\mathbb{C}$.
+\end{theorem}
+\begin{proof}
+  \leanok
+  The Hessian of $\sum_{i,j}M_{ij}x_ix_j$ is $M+M^{\mathsf T}$ at every point,
+  so the Hessian consequence of the Taylor cut lemma
+  (Theorem~\ref{thm:lowerbounds-algebraic-taylor-rank}) gives the rank-cut
+  bound. The proof of Theorem~\ref{thm:lowerbounds-algebraic-quadratic} uses
+  only this bound and the graph ordering. In characteristic zero the Hankel
+  Cauchy matrix is the Cauchy matrix with the distinct nodes $i+1$ and
+  $-(j+1)$, whose differences $i+j+2$ are nonzero
+  (Lemma~\ref{lem:lowerbounds-algebraic-cauchy}); it is symmetric and
+  $2\ne0$.
+\end{proof}
+
 \begin{theorem}[Restricted rank-cut bound]
   \label{thm:lowerbounds-algebraic-restricted-rank-cut}
   \lean{Algebraic.Cutwidth.MultiOutput.card_le_of_fibres_of_mix_of_trace,

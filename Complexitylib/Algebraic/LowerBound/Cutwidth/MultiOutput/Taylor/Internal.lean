@@ -101,6 +101,30 @@ theorem aeval_jet (P : MvPolynomial (Fin n) K) (a v u : Fin n → L) :
 
 end Jet
 
+/-- **The second derivatives of a product of two variables.** `∂ₖ ∂ₗ (Xₚ X_q)` is the number of
+ways to match `(l, k)` with `(p, q)` or `(q, p)`. -/
+theorem aeval_pderiv_pderiv_X_mul_X {R : Type*} [CommRing R] [Algebra K R] (a : Fin n → R)
+    (p q k l : Fin n) :
+    aeval a (pderiv k (pderiv l (X p * X q : MvPolynomial (Fin n) K))) =
+      (if l = p ∧ k = q then 1 else 0) + (if l = q ∧ k = p then 1 else 0) := by
+  have h₁ : pderiv l (X p * X q : MvPolynomial (Fin n) K) =
+      C (if q = l then 1 else 0) * X p + C (if p = l then 1 else 0) * X q := by
+    rw [Derivation.leibniz, pderiv_X, pderiv_X, Pi.single_apply, Pi.single_apply, smul_eq_mul,
+      smul_eq_mul]
+    split_ifs <;> simp [mul_comm]
+  have h₂ : ∀ r : Fin n, aeval a (pderiv k (X r : MvPolynomial (Fin n) K)) =
+      if r = k then 1 else 0 := by
+    intro r
+    rw [pderiv_X, Pi.single_apply]
+    split_ifs <;> simp
+  have h₃ : ∀ u v w z : Fin n,
+      algebraMap K R (if u = v then 1 else 0) * (if w = z then 1 else 0) =
+        if v = u ∧ z = w then 1 else 0 := by
+    intro u v w z
+    by_cases h : u = v <;> by_cases h' : w = z <;> simp [h, h', eq_comm]
+  rw [h₁, map_add, pderiv_C_mul, pderiv_C_mul, map_add, map_mul, map_mul, h₂, h₂, aeval_C,
+    aeval_C, add_comm, h₃, h₃]
+
 /-! ## Formal evaluation -/
 
 section Formal

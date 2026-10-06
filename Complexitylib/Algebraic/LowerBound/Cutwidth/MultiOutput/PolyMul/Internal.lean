@@ -7,6 +7,7 @@ Authors: Samuel Schlesinger
 module
 public import Complexitylib.Algebraic.LowerBound.Cutwidth.MultiOutput.PolyMul.Defs
 public import Complexitylib.Algebraic.LowerBound.Cutwidth.MultiOutput.Taylor
+public import Complexitylib.Algebraic.LowerBound.Cutwidth.MultiOutput.Taylor.Internal
 public import Complexitylib.Algebraic.LowerBound.Cutwidth.MultiOutput.Quadratic.Internal
 public import Mathlib.Algebra.Order.Rearrangement
 public import Mathlib.Data.Fin.Tuple.Sort
@@ -235,15 +236,7 @@ section Hessian
 
 open MvPolynomial
 
-variable {K L : Type*} [CommRing K] [Field L] [Algebra K L] {N : ℕ}
-
-theorem aeval_pderiv_pderiv_X_mul_X (a : Fin N → L) {p q : Fin N} (hpq : p ≠ q) (k l : Fin N) :
-    aeval a (pderiv k (pderiv l (X p * X q : MvPolynomial (Fin N) K))) =
-      (if l = p ∧ k = q then 1 else 0) + (if l = q ∧ k = p then 1 else 0) := by
-  have hqp := hpq.symm
-  simp only [Derivation.leibniz, pderiv_X, smul_eq_mul, map_add, Pi.single_apply]
-  rcases eq_or_ne l p with rfl | hlp <;> rcases eq_or_ne l q with rfl | hlq <;>
-    rcases eq_or_ne k l with rfl | hkl <;> simp_all [eq_comm]
+variable {K L : Type*} [CommRing K] [Field L] [Algebra K L]
 
 theorem aeval_pderiv_pderiv_polyMulPolynomial (a : Fin (n + n) → L) (m : Fin (2 * n - 1))
     (k l : Fin (n + n)) :
@@ -255,7 +248,7 @@ theorem aeval_pderiv_pderiv_polyMulPolynomial (a : Fin (n + n) → L) (m : Fin (
   refine Finset.sum_congr rfl fun i _ => Finset.sum_congr rfl fun j _ => ?_
   by_cases h : (i : ℕ) + j = m
   · simp only [h, ↓reduceIte]
-    exact aeval_pderiv_pderiv_X_mul_X a (castAdd_ne_natAdd i j) k l
+    exact Taylor.Internal.aeval_pderiv_pderiv_X_mul_X a _ _ k l
   · simp [h]
 
 /-- **The Hessian of a weighted sum of the outputs.** For every point, the Hessian of

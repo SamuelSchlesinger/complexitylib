@@ -324,6 +324,12 @@ def headlineTheorems : List Name := [
   `Algebraic.Cutwidth.MultiOutput.eventually_lt_arithmeticCost_of_polyMul,
   `Algebraic.Cutwidth.MultiOutput.eventually_lt_arithmeticCost_of_polyMul_formal,
   `Algebraic.Cutwidth.MultiOutput.eventually_lt_size_of_polyMul_zmod,
+  -- Quadratic forms: the (25/9 - ε) N bound for polynomial gates over every field
+  `Algebraic.Cutwidth.MultiOutput.blockRank_add_transpose_le_of_formallyComputes,
+  `Algebraic.Cutwidth.MultiOutput.eventually_lt_size_of_formal_quadForm,
+  `Algebraic.Cutwidth.MultiOutput.eventually_lt_size_of_formal_quadForm_twentyFive_div_nine,
+  `Algebraic.Cutwidth.MultiOutput.eventually_lt_size_of_quadForm_of_infinite,
+  `Algebraic.Cutwidth.MultiOutput.eventually_lt_size_hankelCauchyCharZero,
   -- Border substitution for tight tensors (coordinate form of Landsberg-Michałek Prop. 2.3)
   `Algebraic.Tensor3.BorderRankLE.map_of_ker,
   `Algebraic.Tensor3.BorderRankLE.exists_map_orthProj,
