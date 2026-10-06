@@ -563,4 +563,260 @@ theorem sub_le_card_cut (x x' : Fin n → Bool) (L : Finset (WireVertex n s)) :
   rw [hcut]
   linarith
 
+/-! ### Connectivity -/
+
+/-- Every vertex is joined to the input terminal of its wire. -/
+theorem reflTransGen_input_wire (v : WireVertex n s) :
+    ReflTransGen N.wireGraph.Adj v (.input (wire N v)) := by
+  suffices ∀ k, ∀ v : WireVertex n s, rank v = k →
+      ReflTransGen N.wireGraph.Adj v (.input (wire N v)) from this _ v rfl
+  intro k
+  induction k using Nat.strong_induction_on with
+  | _ k ih =>
+    intro v hv
+    cases v with
+    | input w => exact .refl
+    | output w =>
+      have hadj : N.wireGraph.Adj (.output w) (N.lastStop w s) :=
+        ⟨.last w, Or.inr ⟨rfl, rfl⟩⟩
+      have hr := rank_lastStop_le N w s
+      have := ih _ (by simp only [rank] at hv; omega) (N.lastStop w s) rfl
+      rw [wire_lastStop] at this
+      exact .head hadj this
+    | gate c b =>
+      have hadj : N.wireGraph.Adj (.gate c b) (N.lastStop (N.sideWire c b) c) :=
+        ⟨.into c b, Or.inr ⟨rfl, rfl⟩⟩
+      have hr := rank_lastStop_le N (N.sideWire c b) c
+      have := ih _ (by simp only [rank] at hv; omega) (N.lastStop (N.sideWire c b) c) rfl
+      rw [wire_lastStop] at this
+      exact .head hadj this
+
+/-- The link of a comparator joins its two wires. -/
+theorem reflTransGen_minWire_maxWire (c : Fin s) :
+    ReflTransGen N.wireGraph.Adj (.input (N.minWire c)) (.input (N.maxWire c)) := by
+  have h₁ : ReflTransGen N.wireGraph.Adj (.input (N.minWire c)) (.gate c false) :=
+    reflTransGen_adj_symm (reflTransGen_input_wire N (.gate c false))
+  have h₂ : N.wireGraph.Adj (.gate c false) (.gate c true) := ⟨.link c, Or.inl ⟨rfl, rfl⟩⟩
+  exact (h₁.tail h₂).trans (reflTransGen_input_wire N (.gate c true))
+
+/-- **Small closed sets of wires are empty.** If `N` is an `ε`-halver with `ε < 1/2` and a set
+`S` of at most `n/2` wires is closed under the comparators, it is empty: the indicator input of
+`S` and that of its complement are fixed by the network, and they would put at most `ε |S|` of
+the wires of `S` in each half. -/
+theorem eq_empty_of_closed {ε : ℝ} (hN : N.IsHalver ε) (hε : ε < 1 / 2) {S : Finset (Fin n)}
+    (hS : ∀ c, N.minWire c ∈ S ↔ N.maxWire c ∈ S) (hk : S.card ≤ n / 2) : S = ∅ := by
+  set x : Fin n → Bool := fun w => decide (w ∈ S) with hx
+  set y : Fin n → Bool := fun w => decide (w ∉ S) with hy
+  have hxe : N.eval x = x := eval_eq_self N x fun c => by simp [x, hS c]
+  have hye : N.eval y = y := eval_eq_self N y fun c => by simp [y, hS c]
+  have hxc : (Finset.univ.filter fun w => x w = true) = S := by
+    ext w
+    simp [x]
+  have hyc : (Finset.univ.filter fun w => y w = false) = S := by
+    ext w
+    simp [y]
+  have h₁ := (hN x).1 (by rw [hxc]; exact hk)
+  have h₂ := (hN y).2 (by rw [hyc]; exact hk)
+  rw [hxc, hxe] at h₁
+  rw [hyc, hye] at h₂
+  have hsub : S ⊆
+      (Finset.univ.filter fun w : Fin n => (w : ℕ) < n / 2 ∧ x w = true) ∪
+        (Finset.univ.filter fun w : Fin n => n / 2 ≤ (w : ℕ) ∧ y w = false) := by
+    intro w hw
+    simp only [Finset.mem_union, Finset.mem_filter, Finset.mem_univ, true_and, x, y,
+      decide_eq_true_eq, decide_eq_false_iff_not, not_not]
+    by_cases hlt : (w : ℕ) < n / 2
+    · exact Or.inl ⟨hlt, hw⟩
+    · exact Or.inr ⟨by omega, hw⟩
+  have hcard := (Finset.card_le_card hsub).trans (Finset.card_union_le _ _)
+  have hcard' : (S.card : ℝ) ≤
+      ((Finset.univ.filter fun w : Fin n => (w : ℕ) < n / 2 ∧ x w = true).card : ℝ) +
+        (Finset.univ.filter fun w : Fin n => n / 2 ≤ (w : ℕ) ∧ y w = false).card := by
+    exact_mod_cast hcard
+  have hk0 : (S.card : ℝ) ≤ 0 := by
+    have : (0 : ℝ) ≤ S.card := Nat.cast_nonneg _
+    nlinarith
+  exact Finset.card_eq_zero.1 (by exact_mod_cast le_antisymm hk0 (Nat.cast_nonneg _))
+
+/-- **Lemma 8: closed sets of wires are trivial.** If `N` is an `ε`-halver with `ε < 1/2`, every
+set of wires closed under the comparators is empty or all wires. -/
+theorem eq_empty_or_eq_univ_of_closed {ε : ℝ} (hN : N.IsHalver ε) (hε : ε < 1 / 2)
+    {S : Finset (Fin n)} (hS : ∀ c, N.minWire c ∈ S ↔ N.maxWire c ∈ S) :
+    S = ∅ ∨ S = Finset.univ := by
+  by_cases hk : S.card ≤ n / 2
+  · exact Or.inl (eq_empty_of_closed N hN hε hS hk)
+  · right
+    have hc : Sᶜ.card ≤ n / 2 := by
+      rw [Finset.card_compl, Fintype.card_fin]
+      omega
+    have := eq_empty_of_closed N hN hε (S := Sᶜ) (fun c => by
+      simp only [Finset.mem_compl]
+      exact not_congr (hS c)) hc
+    exact Finset.compl_eq_empty_iff _ |>.1 this
+
+/-- **The wire graph of an `ε`-halver with `ε < 1/2` is connected.** -/
+theorem wireGraph_connected {ε : ℝ} (hN : N.IsHalver ε) (hε : ε < 1 / 2) :
+    N.wireGraph.Connected := by
+  intro u v
+  set w₀ := wire N u
+  set S := Finset.univ.filter fun w => ReflTransGen N.wireGraph.Adj (.input w) (.input w₀)
+  have hS : ∀ c, N.minWire c ∈ S ↔ N.maxWire c ∈ S := fun c => by
+    simp only [S, Finset.mem_filter, Finset.mem_univ, true_and]
+    exact ⟨fun h => (reflTransGen_adj_symm (reflTransGen_minWire_maxWire N c)).trans h,
+      fun h => (reflTransGen_minWire_maxWire N c).trans h⟩
+  have hw₀ : w₀ ∈ S := Finset.mem_filter.2 ⟨Finset.mem_univ _, .refl⟩
+  have hall : ∀ w, ReflTransGen N.wireGraph.Adj (.input w) (.input w₀) := by
+    rcases eq_empty_or_eq_univ_of_closed N hN hε hS with h | h
+    · rw [h] at hw₀
+      exact absurd hw₀ (Finset.notMem_empty _)
+    · intro w
+      have : w ∈ S := h ▸ Finset.mem_univ w
+      simpa [S] using this
+  have hv := (reflTransGen_input_wire N v).trans (hall (wire N v))
+  exact (reflTransGen_input_wire N u).trans (reflTransGen_adj_symm hv)
+
+/-- **The edge baseline.** An `ε`-halver with `ε < 1/2` on `n` wires has at least `n - 1`
+comparators: its wire graph is connected. -/
+theorem le_add_one {ε : ℝ} (hN : N.IsHalver ε) (hε : ε < 1 / 2) : n ≤ s + 1 := by
+  have := Superconcentrator.Internal.card_le_card_add_one_of_connected
+    (wireGraph_connected N hN hε)
+  rw [card_wireVertex, card_wireEdge] at this
+  omega
+
+/-! ### The cut lemma and the bounds -/
+
+/-- **The cut lemma for halvers.** Every linear order of the vertices of the wire graph of an
+`ε`-halver has a lower set whose cut has at least `(1 - 2 ε) ⌊n/2⌋` edges. -/
+theorem exists_le_card_cut {ε : ℝ} (hN : N.IsHalver ε) [LinearOrder (WireVertex n s)] :
+    ∃ L : Finset (WireVertex n s), IsLowerSet (L : Set (WireVertex n s)) ∧
+      (1 - 2 * ε) * ((n / 2 : ℕ) : ℝ) ≤ (N.wireGraph.cut L).card := by
+  have hinj : Function.Injective (WireVertex.input : Fin n → WireVertex n s) :=
+    fun _ _ h => WireVertex.input.inj h
+  obtain ⟨L, hL, hcard⟩ := Superconcentrator.Internal.exists_isLowerSet_card_filter
+    (Finset.univ.image (WireVertex.input : Fin n → WireVertex n s)) (k := n / 2)
+    (by rw [Finset.card_image_of_injective _ hinj, Finset.card_univ, Fintype.card_fin]; omega)
+  refine ⟨L, hL, ?_⟩
+  set h := n / 2 with hh
+  set I := Finset.univ.filter fun w : Fin n => WireVertex.input w ∈ L with hI
+  have hIcard : I.card = h := by
+    rw [← hcard, ← Finset.card_image_of_injective I hinj]
+    congr 1
+    ext v
+    simp only [Finset.mem_image, Finset.mem_filter, Finset.mem_univ, true_and, I]
+    constructor
+    · rintro ⟨w, hw, rfl⟩
+      exact ⟨⟨w, rfl⟩, hw⟩
+    · rintro ⟨⟨w, rfl⟩, hw⟩
+      exact ⟨w, hw, rfl⟩
+  set x : Fin n → Bool := fun w => decide (WireVertex.input w ∈ L) with hx
+  set x' : Fin n → Bool := fun w => decide (WireVertex.input w ∉ L) with hx'
+  have hcons := sub_le_card_cut N x x' L
+  have hin : (Finset.univ.filter fun w => WireVertex.input w ∈ L ∧ x w = true) = I := by
+    ext w
+    simp [x, I]
+  have hin' : (Finset.univ.filter fun w => WireVertex.input w ∈ L ∧ x' w = true) = ∅ := by
+    ext w
+    simp [x']
+  have hxc : (Finset.univ.filter fun w => x w = true) = I := by
+    ext w
+    simp [x, I]
+  have hxc' : (Finset.univ.filter fun w => x' w = false) = I := by
+    ext w
+    simp [x', I]
+  rw [hin, hin', Finset.card_empty, hIcard] at hcons
+  have h₁ := (hN x).1 (by rw [hxc, hIcard])
+  have h₂ := (hN x').2 (by rw [hxc', hIcard])
+  rw [hxc, hIcard] at h₁
+  rw [hxc', hIcard] at h₂
+  -- `τ` top output terminals lie in `L`
+  set τ := (Finset.univ.filter fun w : Fin n => n / 2 ≤ (w : ℕ) ∧
+    WireVertex.output w ∈ L).card with hτ
+  have ha : (Finset.univ.filter fun w => WireVertex.output w ∈ L ∧ N.eval x w = true).card ≤
+      (Finset.univ.filter fun w : Fin n => (w : ℕ) < n / 2 ∧ N.eval x w = true).card + τ := by
+    refine (Finset.card_le_card fun w hw => ?_).trans (Finset.card_union_le _ _)
+    simp only [Finset.mem_filter, Finset.mem_univ, true_and, Finset.mem_union] at hw ⊢
+    by_cases hlt : (w : ℕ) < n / 2
+    · exact Or.inl ⟨hlt, hw.2⟩
+    · exact Or.inr ⟨by omega, hw.1⟩
+  have hb : τ ≤ (Finset.univ.filter fun w => WireVertex.output w ∈ L ∧ N.eval x' w = true).card +
+      (Finset.univ.filter fun w : Fin n => n / 2 ≤ (w : ℕ) ∧ N.eval x' w = false).card := by
+    refine (Finset.card_le_card fun w hw => ?_).trans (Finset.card_union_le _ _)
+    simp only [Finset.mem_filter, Finset.mem_univ, true_and, Finset.mem_union] at hw ⊢
+    cases hev : N.eval x' w
+    · exact Or.inr ⟨hw.1, rfl⟩
+    · exact Or.inl ⟨hw.2, rfl⟩
+  have hcons' : ((h : ℤ) : ℝ) -
+      ((Finset.univ.filter fun w => WireVertex.output w ∈ L ∧ N.eval x w = true).card : ℝ) -
+      (0 - ((Finset.univ.filter fun w => WireVertex.output w ∈ L ∧
+        N.eval x' w = true).card : ℝ)) ≤ (N.wireGraph.cut L).card := by
+    have := (Int.cast_le (R := ℝ)).2 hcons
+    push_cast at this
+    simpa using this
+  have ha' : ((Finset.univ.filter fun w => WireVertex.output w ∈ L ∧
+      N.eval x w = true).card : ℝ) ≤
+      ((Finset.univ.filter fun w : Fin n => (w : ℕ) < n / 2 ∧ N.eval x w = true).card : ℝ) +
+        τ := by exact_mod_cast ha
+  have hb' : (τ : ℝ) ≤ ((Finset.univ.filter fun w => WireVertex.output w ∈ L ∧
+      N.eval x' w = true).card : ℝ) +
+      ((Finset.univ.filter fun w : Fin n => n / 2 ≤ (w : ℕ) ∧ N.eval x' w = false).card : ℝ) := by
+    exact_mod_cast hb
+  push_cast at hcons'
+  linarith
+
+/-- **The finite bound.** Under the graph-ordering hypothesis `OrderingBound A η C`, an
+`ε`-halver with `ε < 1/2` on `n` wires with `s` comparators satisfies
+`(1 - 2 ε) ⌊n/2⌋ ≤ (A + η) (s - n)⁺ + 3 log₂ (2 n + 2 s) + C`. -/
+theorem le_of_orderingBound {A η C ε : ℝ} (hord : OrderingBound A η C) (hN : N.IsHalver ε)
+    (hε : ε < 1 / 2) :
+    (1 - 2 * ε) * ((n / 2 : ℕ) : ℝ) ≤
+      (A + η) * max ((s : ℝ) - n) 0 + 3 * Real.logb 2 (2 * n + 2 * s) + C := by
+  obtain ⟨inst, bound⟩ := hord _ _ N.wireGraph (wireGraph_loopless N)
+    (wireGraph_maxDegreeLE N) (wireGraph_connected N hN hε)
+  obtain ⟨L, hL, hcut⟩ := @exists_le_card_cut _ _ N _ hN inst
+  have hb := bound L hL
+  rw [card_wireEdge, card_wireVertex] at hb
+  push_cast at hb
+  rw [show (n : ℝ) + 3 * s - (2 * n + 2 * s) = s - n by ring] at hb
+  linarith
+
+/-- **The asymptotic bound for a general ordering coefficient.** -/
+theorem eventually_le_size_of_orderingBound {A : ℝ} (hA : 0 < A)
+    (hord : ∀ η : ℝ, 0 < η → ∃ C : ℝ, OrderingBound A η C) {ε δ : ℝ} (hε₀ : 0 ≤ ε)
+    (hε : ε < 1 / 2) (hδ : 0 < δ) :
+    ∀ᶠ n : ℕ in atTop, ∀ (s : ℕ) (N : ComparatorNetwork n s), N.IsHalver ε →
+      (1 + (1 - 2 * ε) / (2 * A) - δ) * n ≤ s := by
+  obtain ⟨C, hC⟩ := hord (A ^ 2 * (δ / 2) / 2) (by positivity)
+  filter_upwards [Superconcentrator.Internal.eventually_le_of_bound_of_baseline hA
+    (half_pos hδ) (D := 2) (B := 2) (by norm_num) (by norm_num) C,
+    eventually_ge_atTop ⌈(1 - 2 * ε) / (2 * A) / (δ / 2)⌉₊] with n hn hnδ
+  intro s N hN
+  have hb := le_of_orderingBound N hC hN hε
+  have hbase := le_add_one N hN hε
+  have h0 : (0 : ℝ) ≤ 1 - 2 * ε := by linarith
+  have hhalf : ((n : ℝ) - 1) / 2 ≤ ((n / 2 : ℕ) : ℝ) := by
+    have : n ≤ 2 * (n / 2) + 1 := by omega
+    have : (n : ℝ) ≤ 2 * ((n / 2 : ℕ) : ℝ) + 1 := by exact_mod_cast this
+    linarith
+  have hle : ((n / 2 : ℕ) : ℝ) ≤ n := by exact_mod_cast Nat.div_le_self n 2
+  have key := hn ((1 - 2 * ε) * ((n / 2 : ℕ) : ℝ)) (2 * n) (n + s) (by positivity)
+    (by nlinarith) le_rfl
+    (by
+      have : (n : ℝ) ≤ s + 1 := by exact_mod_cast hbase
+      linarith)
+    (by positivity)
+    (by
+      rw [show (n : ℝ) + s - 2 * n = s - n by ring,
+        show (2 : ℝ) * (n + s) = 2 * n + 2 * s by ring]
+      exact hb)
+  set κ := (1 - 2 * ε) / (2 * A) with hκ
+  have hκ0 : 0 ≤ κ := by positivity
+  have hκn : κ ≤ δ / 2 * n := by
+    have : κ / (δ / 2) ≤ n := (Nat.le_ceil _).trans (by exact_mod_cast hnδ)
+    rwa [div_le_iff₀ (half_pos hδ), mul_comm] at this
+  have hdiv : κ * ((n : ℝ) - 1) ≤ (1 - 2 * ε) * ((n / 2 : ℕ) : ℝ) / A := by
+    rw [hκ, div_mul_eq_mul_div, div_le_div_iff₀ (by positivity) hA]
+    have : 0 ≤ A * (1 - 2 * ε) := mul_nonneg hA.le h0
+    nlinarith
+  nlinarith
+
 end Algebraic.Cutwidth.Halver.Internal
