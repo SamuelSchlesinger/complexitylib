@@ -64,6 +64,7 @@ public import Complexitylib.Algebraic.LowerBound.Cutwidth.MultiOutput.Quadratic
 public import Complexitylib.Algebraic.LowerBound.Cutwidth.MultiOutput.Restrict
 public import Complexitylib.Algebraic.LowerBound.Cutwidth.MultiOutput.FieldMul
 public import Complexitylib.Algebraic.LowerBound.Cutwidth.MultiOutput.MatMul.Tripartite
+public import Complexitylib.Algebraic.LowerBound.Cutwidth.MultiOutput.MatMul
 public import Complexitylib.Algebraic.LowerBound.Cutwidth.Extractor
 public import Complexitylib.Algebraic.LowerBound.Cutwidth.Extractor.Padding
 public import Complexitylib.Algebraic.LowerBound.Cutwidth.Extractor.Padding.Asymptotics
@@ -374,7 +375,13 @@ that a fan-in-two circuit over any signature has more than
 `GF(2 ^ n)` over the full binary basis.
 `MultiOutput.MatMul.Tripartite` proves the charging combinatorics of the terminal
 graph of `n × n` matrix multiplication, the complete tripartite graph on the
-three index sets, and the threshold prefix of a ranking.
+three index sets, and the threshold prefix of a ranking. `MultiOutput.MatMul`
+bounds each of the three charges of a split by its crossing signals, through the
+restricted rank-cut bound with one factor fixed and the rank-cut bound for the
+Hessian of a combination of the outputs, so a fan-in-two circuit over any finite
+field computing the `n × n` matrix product has more than
+`(2 + 1/(4 κ_E) - ε) n² ≥ (34/9 - ε) n²` gates for all large `n`, in particular
+over the full binary basis for the product over `GF(2)`.
 
 `Bisection.Helpful` completes the graph theorem. Its proof uses the first
 boundary normalization phase, a partition into bounded connected clusters,
