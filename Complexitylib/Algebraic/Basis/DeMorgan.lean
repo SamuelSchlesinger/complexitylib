@@ -16,7 +16,7 @@ negation, and binary conjunction and disjunction. The circuit representation
 has free wire outputs; identity remains useful only when a proof explicitly
 materializes an output as a final program gate. `binaryCost` implements the
 standard gate-elimination cost model in which only the binary gates are
-charged.
+charged. `andCost` and `notCost` count the AND gates and the NOT gates.
 -/
 
 @[expose] public section
@@ -92,6 +92,32 @@ def standardCost : OperationCost signature
 @[simp] theorem standardCost_not : standardCost .not = 1 := rfl
 @[simp] theorem standardCost_and : standardCost .and = 1 := rfl
 @[simp] theorem standardCost_or : standardCost .or = 1 := rfl
+
+/-- Charge AND gates and treat every other gate as free; the De Morgan analogue
+of `AndOr.andCost`. -/
+def andCost : OperationCost signature
+  | .and => 1
+  | .false | .true | .id | .not | .or => 0
+
+@[simp] theorem andCost_false : andCost .false = 0 := rfl
+@[simp] theorem andCost_true : andCost .true = 0 := rfl
+@[simp] theorem andCost_id : andCost .id = 0 := rfl
+@[simp] theorem andCost_not : andCost .not = 0 := rfl
+@[simp] theorem andCost_and : andCost .and = 1 := rfl
+@[simp] theorem andCost_or : andCost .or = 0 := rfl
+
+/-- Charge NOT gates and treat every other gate as free, so that a circuit's
+cost is its number of negations. -/
+def notCost : OperationCost signature
+  | .not => 1
+  | .false | .true | .id | .and | .or => 0
+
+@[simp] theorem notCost_false : notCost .false = 0 := rfl
+@[simp] theorem notCost_true : notCost .true = 0 := rfl
+@[simp] theorem notCost_id : notCost .id = 0 := rfl
+@[simp] theorem notCost_not : notCost .not = 1 := rfl
+@[simp] theorem notCost_and : notCost .and = 0 := rfl
+@[simp] theorem notCost_or : notCost .or = 0 := rfl
 
 end DeMorgan
 end Algebraic

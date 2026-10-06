@@ -48,20 +48,8 @@ theorem mul_mul_le_andCost {N M I J K : Nat}
     (computes : ∀ (a : Fin N → Bool) i j,
       circuit.eval AndOr.boolInterpretation a (z i j) =
         decide (∃ k, a (x i k) = true ∧ a (y k j) = true)) :
-    I * J * K ≤ circuit.cost AndOr.andCost := by
-  let L : Internal.Layout N I J K :=
-    { x := x
-      y := y
-      x_inj := fun h => by
-        have := distinct (a₁ := Sum.inl (_, _)) (a₂ := Sum.inl (_, _)) h
-        simpa using this
-      y_inj := fun h => by
-        have := distinct (a₁ := Sum.inr (_, _)) (a₂ := Sum.inr (_, _)) h
-        simpa using this
-      x_ne_y := fun i k k' j h => by
-        have := distinct (a₁ := Sum.inl (i, k)) (a₂ := Sum.inr (k', j)) h
-        simp at this }
-  exact Internal.mul_mul_le_andCost L z circuit computes
+    I * J * K ≤ circuit.cost AndOr.andCost :=
+  Internal.mul_mul_le_andCost (.ofInjective x y distinct) z circuit computes
 
 /-- The input carrying entry `(i, k)` of the left `n × n` matrix: the first
 `n * n` inputs, in row-major order. -/
