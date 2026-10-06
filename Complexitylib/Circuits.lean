@@ -56,6 +56,7 @@ public import Complexitylib.Circuits.NormalForm.Operations
 public import Complexitylib.Circuits.NormalForm.Restriction
 public import Complexitylib.Circuits.KCNF.Basic
 public import Complexitylib.Circuits.KCNF.Coding
+public import Complexitylib.Circuits.KCNF.SubcubeFree
 public import Complexitylib.Circuits.AndOrNot
 public import Complexitylib.Circuits.AndOrMod.Defs
 public import Complexitylib.Circuits.BasisHom
