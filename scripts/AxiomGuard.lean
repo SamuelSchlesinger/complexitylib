@@ -152,6 +152,17 @@ def headlineTheorems : List Name := [
   -- Monotone CLIQUE needs more than 2^√k binary AND/OR gates when k ≤ n^(1/4)
   `Algebraic.Monotone.Clique.Asymptotic.twoPow_two_mul_sqrt_lt_circuitSize,
   `Algebraic.Monotone.Clique.Asymptotic.rpow_sqrt_lt_circuitSize,
+  -- Monotone Boolean matrix product: n^3 AND gates, and |T| for a partial product
+  `Algebraic.Monotone.MatrixProduct.cube_le_andCost,
+  `Algebraic.Monotone.MatrixProduct.card_le_andCost,
+  -- Boolean matrix product with t NOT gates: n * (n / 2^t)^2 AND gates
+  `Algebraic.Monotone.MatrixProduct.NegationLimited.div_mul_div_mul_le_andCost,
+  `Algebraic.Monotone.MatrixProduct.NegationLimited.mul_div_sq_le_andCost,
+  `Algebraic.Monotone.MatrixProduct.NegationLimited.cube_le_four_pow_mul_andCost,
+  `Algebraic.Monotone.MatrixProduct.NegationLimited.mul_logb_sub_one_lt_notCost,
+  -- ... and n^3 - |S| * n AND gates when every NOT gate reads only the inputs in S
+  `Algebraic.Monotone.MatrixProduct.NegationLimited.mul_mul_le_andCost_add,
+  `Algebraic.Monotone.MatrixProduct.NegationLimited.cube_sub_le_andCost,
   -- The concrete uniform polynomial-time coefficient-four hard family
   `Algebraic.Cutwidth.Extractor.sourceReductionHardLanguage_mem_P,
   `Algebraic.Cutwidth.Extractor.sourceReductionHardEval_mem_FP,

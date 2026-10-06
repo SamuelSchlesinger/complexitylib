@@ -14847,6 +14847,134 @@ choices.
   $O(n^{\log_2 7})$ gates through integer matrix multiplication.
 \end{proof}
 
+\begin{theorem}[Monotone partial Boolean matrix product]
+  \label{thm:lowerbounds-monotone-partial-matrix}
+  \lean{Algebraic.Monotone.MatrixProduct.card_le_andCost}
+  \leanok
+  \uses{thm:lowerbounds-monotone-matrix}
+  Consider a circuit over the imported library's De Morgan signature (Boolean
+  constants, identity, NOT, and fan-in-two AND and OR gates, with unbounded
+  fan-out) that has no NOT gate, in which the entries $x_{ik}$ of an
+  $I \times K$ matrix and $y_{kj}$ of a $K \times J$ matrix are distinct inputs
+  (other inputs may be present). Let $T$ be any set of triples $(i, k, j)$. If,
+  for all $i$ and $j$, some output computes
+  $\bigvee_{k : (i, k, j) \in T} x_{ik} \wedge y_{kj}$ (other outputs are
+  unconstrained), then the circuit has at least $|T|$ AND gates. Every AND gate
+  of the circuit is counted, used or not; OR, constant, and identity gates are
+  free. Taking $T = \{(i, k, j) : (i, k) \in E_X,\ (k, j) \in E_Y\}$ gives the
+  product of matrices with prescribed supports $E_X$ and $E_Y$; taking all
+  triples gives the bound $IJK$ of
+  Theorem~\ref{thm:lowerbounds-monotone-matrix} for monotone circuits with
+  constants.
+\end{theorem}
+\begin{proof}
+  \leanok
+  The staged argument of Theorem~\ref{thm:lowerbounds-monotone-matrix} never
+  uses the shape of $T$. Stage $k$ turns the outputs into the product over the
+  triples of $T$ of type at least $k$, so the output for $(i, j)$ has the prime
+  implicant $x_{ik} y_{kj}$ at stage $k$ for every $(i, k, j) \in T$, and a
+  creator exists. A constant, an identity, or an OR gate has a prime implicant
+  only if one of its arguments has it, so every creator is an AND gate, and the
+  arguments that creators are distinct are unchanged. In Lean the AND/OR bound
+  of Theorem~\ref{thm:lowerbounds-monotone-matrix} is derived from this one by
+  compiling AND/OR circuits gate by gate into the De Morgan signature.
+\end{proof}
+
+\begin{theorem}[Boolean matrix product with few negations]
+  \label{thm:lowerbounds-negation-limited-matrix}
+  \lean{Algebraic.Monotone.MatrixProduct.NegationLimited.div_mul_div_mul_le_andCost,
+    Algebraic.Monotone.MatrixProduct.NegationLimited.mul_div_sq_le_andCost,
+    Algebraic.Monotone.MatrixProduct.NegationLimited.cube_le_four_pow_mul_andCost,
+    Algebraic.Monotone.MatrixProduct.NegationLimited.mul_logb_sub_one_lt_notCost}
+  \leanok
+  \uses{thm:lowerbounds-monotone-matrix}
+  Consider a circuit over the imported library's De Morgan signature (Boolean
+  constants, identity, NOT, and fan-in-two AND and OR gates, with unbounded
+  fan-out) in which the entries $x_{ik}$ of an $I \times K$ matrix and $y_{kj}$
+  of a $K \times J$ matrix are distinct inputs (other inputs may be present),
+  and suppose that, for all $i$ and $j$, some output computes
+  $\bigvee_k x_{ik} \wedge y_{kj}$ on every input (other outputs are
+  unconstrained). If the circuit has at most $t$ NOT gates, it has at least
+  $\lfloor I / 2^t \rfloor \lfloor J / 2^t \rfloor K$ AND gates; every NOT and
+  every AND gate of the circuit is counted, used or not, and OR, constant, and
+  identity gates are free. For $t = 0$ this is the monotone bound $IJK$. The
+  bound holds for all $I$, $J$, $K$, and $t$. In particular, a circuit with the
+  entries of two $n \times n$ matrices on its $2n^2$ inputs and their Boolean
+  product on its $n^2$ outputs, all in row-major order, with at most $t$ NOT
+  gates has at least $n \lfloor n / 2^t \rfloor^2$ AND gates, and at least
+  $n^3 / 4^{t + 1}$ of them when $2^t \le n$. Consequently, for $n \ge 1$ and
+  every real $\varepsilon \le 2$, if such a circuit has fewer than
+  $n^{3 - \varepsilon}$ AND gates, it has more than
+  $(\varepsilon / 2) \log_2 n - 1$ NOT gates.
+
+  We know of no published lower bound for the Boolean matrix product by
+  circuits with a bounded number of NOT gates. The monotone bound $n^3$ is due
+  to Pratt, Paterson, and Mehlhorn--Galil; by Markov and Fischer,
+  $\lceil \log_2 (N + 1) \rceil$ NOT gates suffice for every function of $N$
+  inputs, with polynomial overhead in Fischer's construction; and Jukna
+  (\emph{Information Processing Letters}, 2004) uses a similar direct-sum
+  restriction for an explicit multi-output function needing
+  $\log n - O(\log \log n)$ NOT gates.
+\end{theorem}
+\begin{proof}
+  \leanok
+  \uses{thm:lowerbounds-monotone-partial-matrix}
+  Induction on $t$. With no NOT gate, apply
+  Theorem~\ref{thm:lowerbounds-monotone-partial-matrix} to all triples.
+  Otherwise let $G$ be the first NOT gate in program order; every wire before
+  it computes a monotone function, in particular the argument $h$ of $G$. Let
+  $F$ consist of the rows $i < \lfloor I/2 \rfloor$ of $x$ and the columns
+  $j < \lfloor J/2 \rfloor$ of $y$, and let $c = h(\mathbf 1_F)$. If $c = 0$, every
+  input that vanishes outside $F$ lies below $\mathbf 1_F$, so setting the
+  inputs outside $F$ to $0$ makes $h$, hence $G$, constant; if $c = 1$, every
+  input that is $1$ on $F$ lies above $\mathbf 1_F$, so setting the inputs of
+  $F$ to $1$ makes $G$ constant. An entry $z_{ij}$ reads only row $i$ of $x$
+  and column $j$ of $y$, so the product of the first
+  $\lfloor I/2 \rfloor$ rows and $\lfloor J/2 \rfloor$ columns (if $c = 0$),
+  or of the next ones (if $c = 1$), is still computed, by a circuit in which
+  $G$ is replaced by a constant gate and the fixed inputs by a shared constant
+  gate. It has one NOT gate fewer and the same AND gates, and
+  $\lfloor \lfloor I/2 \rfloor / 2^{t - 1} \rfloor = \lfloor I / 2^t \rfloor$.
+  For the square case, $n \le 2^{t + 1} \lfloor n / 2^t \rfloor$ when
+  $2^t \le n$; and if $\#\mathrm{AND} < n^{3 - \varepsilon}$, then either
+  $2^t \le n$ and $n^\varepsilon < 4^{t + 1}$, or $\log_2 n < t$.
+\end{proof}
+
+\begin{theorem}[Boolean matrix product with negations of few variables]
+  \label{thm:lowerbounds-negation-local-matrix}
+  \lean{Algebraic.Monotone.MatrixProduct.NegationLimited.mul_mul_le_andCost_add,
+    Algebraic.Monotone.MatrixProduct.NegationLimited.cube_sub_le_andCost,
+    Algebraic.Monotone.MatrixProduct.NegationLimited.mul_mul_le_andCost_add_of_monotone_or_dependsOnlyOn,
+    Algebraic.Monotone.MatrixProduct.NegationLimited.cube_sub_le_andCost_of_monotone_or_dependsOnlyOn}
+  \leanok
+  \uses{thm:lowerbounds-monotone-matrix}
+  Consider a circuit over the imported library's De Morgan signature computing
+  the Boolean product of an $I \times K$ and a $K \times J$ matrix whose
+  entries are distinct inputs, as in
+  Theorem~\ref{thm:lowerbounds-negation-limited-matrix}, and a set $S$ of
+  inputs. If the function computed by every NOT gate depends only on the
+  inputs in $S$, the circuit has at least $IJK - |S| \max(I, J)$ AND gates
+  (every AND gate counted, used or not; all other gates free), and in the
+  square row-major case at least $n^3 - |S|\, n$. The same holds when every
+  gate that computes a non-monotone function depends only on the inputs in
+  $S$.
+\end{theorem}
+\begin{proof}
+  \leanok
+  \uses{thm:lowerbounds-monotone-partial-matrix}
+  Setting the inputs of $S$ to $0$ makes every NOT gate constant. Replacing
+  the NOT gates by constant gates and the inputs of $S$ by a shared constant
+  gate gives a circuit without NOT gates and with the same AND gates computing
+  the product over the triples $(i, k, j)$ with $x_{ik}, y_{kj} \notin S$. An
+  input lies in at most $\max(I, J)$ triples, so at least
+  $IJK - |S| \max(I, J)$ remain, and
+  Theorem~\ref{thm:lowerbounds-monotone-partial-matrix} applies. For the second
+  form, let a NOT gate compute $\neg h$. If $\neg h$ is not monotone, it
+  depends only on $S$. Otherwise $h$ is antitone; if $h$ is an input or a gate
+  computing a monotone function, it is also monotone, hence constant, and if
+  it is a gate computing a non-monotone function, it depends only on $S$.
+\end{proof}
+
 \begin{lemma}[Sunflower lemma]
   \label{lem:lowerbounds-sunflower}
   \lean{Algebraic.Sunflower.containsSunflower_of_uniform,
