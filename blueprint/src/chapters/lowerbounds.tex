@@ -13005,6 +13005,46 @@ no superlinear unrestricted circuit theorem follows from them alone.
   $(2+1/(2A)-\varepsilon)n^2$ gates and choose $\eta=A^2\varepsilon$: the
   cycle term is at most $(1/2-A\varepsilon/2)n^2$, while the loss $4n$ and
   the logarithmic term $O(\log n)$ are $o(n^2)$.
+
+\begin{theorem}[Multiplication in $\mathrm{GF}(2^n)$ needs $2n-1$ conjunction gates]
+  \label{thm:lowerbounds-algebraic-field-mul-conjunctions}
+  \lean{Algebraic.Aggregate.Geometry.FieldMul.boolFieldMul,
+    Algebraic.Aggregate.Geometry.AffineFlat.exists_direction,
+    Algebraic.Aggregate.Geometry.FieldMul.polarForm_ker_eq_bot,
+    Algebraic.Aggregate.Geometry.FieldMul.boolFieldMul_nonaffineOnFlats,
+    Algebraic.Aggregate.Geometry.FieldMul.two_mul_input_le_conjunctionCount_add_one}
+  \leanok
+  \uses{def:lowerbounds-algebraic-field-mul,
+    thm:lowerbounds-algebraic-geometry-restriction-rank}
+  Let $K$ be a field of degree $n\ge1$ over $\mathrm{GF}(2)$ with any basis,
+  and read multiplication in coordinates as a Boolean map with $2n$ inputs and
+  $n$ outputs. No nonzero component of it is affine on an affine flat with
+  $2^{n+1}$ points, and every signed unbounded AND/OR/XOR circuit computing it
+  has at least $2n-1$ conjunction gates. XOR gates of every fan-in are not
+  counted, so this also bounds the number of unbounded-fan-in AND/OR gates in
+  circuits with free XOR; fan-in, fanout, depth, and nonlinear reuse are
+  unrestricted. The bound is attained for $n=1$ and, by Karatsuba's three
+  products, for $n=2$.
+
+  The value $2n-1$ is the classical lower bound on the bilinear rank of
+  multiplication in a degree-$n$ extension. Here it holds for the
+  conjunction gates of arbitrary circuits, which need not compute bilinear
+  products. We know of no earlier bound above $n$ on the AND gates of
+  general free-XOR circuits for this multiplication.
+\end{theorem}
+\begin{proof}
+  \leanok
+  In prime-field coordinates every affine flat is a translate $a+U$ of a
+  subspace with $2^{\dim U}$ points. A nonzero component is $\ell(xy)$ for a
+  nonzero linear functional $\ell$ on $K$. It preserves ternary sums at
+  $a+u$, $a$, $a+w$ exactly when the polar form
+  $B((x,y),(x',y'))=\ell(xy'+x'y)$ vanishes at $(u,w)$, so it is affine on
+  $a+U$ only if $U$ is totally isotropic for $B$. If $x\ne0$ then
+  $t\mapsto\ell(xt)$ is nonzero, so $B$ is nondegenerate on the
+  $2n$-dimensional input space, and the dimension formula for orthogonal
+  complements gives $\dim U\le n$. Apply
+  Theorem~\ref{thm:lowerbounds-algebraic-geometry-restriction-rank} with $n$
+  outputs, $2n$ inputs, and $D=n+1$.
 \end{proof}
 
 \begin{definition}[Polynomial gates over commutative algebras]
