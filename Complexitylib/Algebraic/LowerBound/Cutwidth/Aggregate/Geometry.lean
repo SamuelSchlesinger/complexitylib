@@ -8,6 +8,7 @@ module
 public import Complexitylib.Algebraic.LowerBound.Cutwidth.Aggregate.Geometry.Model
 public import Complexitylib.Algebraic.LowerBound.Cutwidth.Aggregate.Geometry.Affine.Shared
 public import Complexitylib.Algebraic.LowerBound.Cutwidth.Aggregate.Geometry.Hardness
+public import Complexitylib.Algebraic.LowerBound.Cutwidth.Aggregate.Geometry.Gold.Properties
 public import Complexitylib.Algebraic.LowerBound.Cutwidth.Aggregate.Geometry.Inversion
 public import Complexitylib.Algebraic.LowerBound.Cutwidth.Aggregate.Geometry.Multioutput.RestrictionRank
 public import Complexitylib.Algebraic.LowerBound.Cutwidth.Aggregate.Geometry.Joint.Hardness
