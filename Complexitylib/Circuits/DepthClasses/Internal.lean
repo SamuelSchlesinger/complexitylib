@@ -86,6 +86,31 @@ theorem AC_subset_TC_internal (i : ℕ) :
           Basis.andOrToThresholdHom F) n]
     exact hdepth n
 
+theorem ACMod_mono_internal (m : ℕ) {i j : ℕ} (hij : i ≤ j) :
+    ACMod m i ⊆ ACMod m j := by
+  rintro f ⟨F, c, hcomputes, hsize, hdepth⟩
+  refine ⟨F, c, hcomputes, hsize, F.depthBoundedBy_mono hdepth ?_⟩
+  exact fun n => polylogDepth_mono_exponent_internal hij c n
+
+theorem AC_subset_ACMod_internal (m i : ℕ) :
+    AC i ⊆ ACMod m i := by
+  rintro f ⟨F, c, hcomputes, hsize, hdepth⟩
+  let modFamily := F.mapBasis (Basis.andOrToAndOrModHom m)
+  refine ⟨modFamily, c, ?_, ?_, ?_⟩
+  · exact (CircuitFamily.function_mapBasis
+      (Basis.andOrToAndOrModHom m) F).trans hcomputes
+  · obtain ⟨polynomial, hpolynomial⟩ := hsize
+    refine ⟨polynomial, fun n => ?_⟩
+    rw [show modFamily.size n = F.size n by
+      exact congrFun
+        (CircuitFamily.size_mapBasis (Basis.andOrToAndOrModHom m) F) n]
+    exact hpolynomial n
+  · intro n
+    rw [show modFamily.depth n = F.depth n by
+      exact congrFun
+        (CircuitFamily.depth_mapBasis (Basis.andOrToAndOrModHom m) F) n]
+    exact hdepth n
+
 theorem mem_NC1_iff_internal {f : BoolFunFamily} :
     f ∈ NC1 ↔
       ∃ (F : CircuitFamily Basis.andOr2) (c : ℕ),
@@ -120,6 +145,20 @@ theorem mem_TC0_iff_internal {f : BoolFunFamily} :
         F.Computes f ∧ F.PolynomialSize ∧
           F.DepthBoundedBy (fun _ => c) := by
   simp only [TC0, TC, Set.mem_ofPred_eq]
+  constructor
+  · rintro ⟨F, c, hcomputes, hsize, hdepth⟩
+    exact ⟨F, c, hcomputes, hsize, fun n => by
+      simpa only [polylogDepth_zero_internal] using hdepth n⟩
+  · rintro ⟨F, c, hcomputes, hsize, hdepth⟩
+    exact ⟨F, c, hcomputes, hsize, fun n => by
+      simpa only [polylogDepth_zero_internal] using hdepth n⟩
+
+theorem mem_AC0Mod_iff_internal {m : ℕ} {f : BoolFunFamily} :
+    f ∈ AC0Mod m ↔
+      ∃ (F : CircuitFamily (Basis.unboundedAndOrMod m)) (c : ℕ),
+        F.Computes f ∧ F.PolynomialSize ∧
+          F.DepthBoundedBy (fun _ => c) := by
+  simp only [AC0Mod, ACMod, Set.mem_ofPred_eq]
   constructor
   · rintro ⟨F, c, hcomputes, hsize, hdepth⟩
     exact ⟨F, c, hcomputes, hsize, fun n => by

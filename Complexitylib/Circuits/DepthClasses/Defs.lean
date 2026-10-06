@@ -5,6 +5,7 @@ Authors: Samuel Schlesinger
 -/
 
 module
+public import Complexitylib.Circuits.AndOrMod.Defs
 public import Complexitylib.Circuits.AndOrNot.Defs
 public import Complexitylib.Circuits.Family.Defs
 public import Complexitylib.Circuits.Threshold.Defs
@@ -19,7 +20,8 @@ input is represented by `CircuitFamily.emptyOutput` rather than omitted.
 
 `NC i` uses fan-in-two AND/OR circuits, while `AC i` uses unbounded-fan-in
 AND/OR circuits. Both require polynomial size and depth
-`O((log n + 1)^i)` in an explicit pointwise form.
+`O((log n + 1)^i)` in an explicit pointwise form. `ACMod m i` (`AC^i[m]`) adds
+unbounded-fan-in `MOD_m` gates to `AC i`.
 -/
 
 
@@ -64,6 +66,15 @@ def TC (i : ℕ) : Set BoolFunFamily :=
     F.Computes f ∧ F.PolynomialSize ∧
       F.DepthBoundedBy (polylogDepth i c)}
 
+/-- **`AC^i[m]`**, in its nonuniform circuit-family form: polynomial-size
+circuits of unbounded-fan-in AND, OR, and `MOD_m` gates of depth
+`O((log n + 1)^i)`. A `MOD_m` gate outputs `true` exactly when the number of
+its true inputs is not divisible by `m`. -/
+def ACMod (m i : ℕ) : Set BoolFunFamily :=
+  {f | ∃ (F : CircuitFamily (Basis.unboundedAndOrMod m)) (c : ℕ),
+    F.Computes f ∧ F.PolynomialSize ∧
+      F.DepthBoundedBy (polylogDepth i c)}
+
 /-- Constant-depth, polynomial-size bounded-fan-in circuits. -/
 def NC0 : Set BoolFunFamily := NC 0
 
@@ -75,5 +86,9 @@ def AC0 : Set BoolFunFamily := AC 0
 
 /-- Constant-depth, polynomial-size threshold circuits. -/
 def TC0 : Set BoolFunFamily := TC 0
+
+/-- **`AC^0[m]`**: constant-depth, polynomial-size circuits of
+unbounded-fan-in AND, OR, and `MOD_m` gates. -/
+def AC0Mod (m : ℕ) : Set BoolFunFamily := ACMod m 0
 
 end Complexity

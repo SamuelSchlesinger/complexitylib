@@ -850,6 +850,20 @@ than computing the output of a deterministic run.
   like $\cc{AC}^i$ over this basis.
 \end{definition}
 
+\begin{definition}[$\cc{AC}^i[m]$]
+  \label{def:circuits-ACC}
+  \lean{Complexity.AndOrModOp, Complexity.AndOrModOp.eval,
+    Complexity.Basis.unboundedAndOrMod, Complexity.ACMod, Complexity.AC0Mod}
+  \leanok
+  \uses{def:NC-AC}
+  For $m \in \mathbb{N}$, the AND/OR/$\mathrm{MOD}_m$ basis has AND, OR and
+  $\mathrm{MOD}_m$ gates of any fan-in, with the free negation flags on their
+  inputs. A $\mathrm{MOD}_m$ gate outputs $1$ when the number of its inputs
+  equal to $1$ is not divisible by $m$; since negations are free, the
+  complementary convention defines the same classes. $\cc{AC}^i[m]$ is defined
+  like $\cc{AC}^i$ over this basis, and $\cc{AC}^0[m]$ is the case $i = 0$.
+\end{definition}
+
 \begin{proposition}[Depth hierarchies]
   \label{prop:circuits-depth-classes}
   \lean{Complexity.NC_mono, Complexity.AC_mono, Complexity.TC_mono,
@@ -868,6 +882,25 @@ than computing the output of a deterministic run.
   $\cc{AC}^i \subseteq \cc{TC}^i$, transport circuits along the embedding of
   AND and OR gates as threshold gates, which preserves semantics, size and
   depth exactly.
+\end{proof}
+
+\begin{proposition}[Adding $\mathrm{MOD}_m$ gates]
+  \label{prop:circuits-ac-subset-acc}
+  \lean{Complexity.Basis.andOrToAndOrModHom, Complexity.ACMod_mono,
+    Complexity.AC_subset_ACMod, Complexity.AC0_subset_AC0Mod, Complexity.mem_AC0Mod_iff}
+  \leanok
+  \uses{def:circuits-ACC, prop:circuits-depth-classes}
+  For $i \le j$, $\cc{AC}^i[m] \subseteq \cc{AC}^j[m]$. For every $i$ and $m$,
+  $\cc{AC}^i \subseteq \cc{AC}^i[m]$; in particular
+  $\cc{AC}^0 \subseteq \cc{AC}^0[m]$. A family is in $\cc{AC}^0[m]$ exactly
+  when a polynomial-size AND/OR/$\mathrm{MOD}_m$ circuit family of constant
+  depth computes it.
+\end{proposition}
+\begin{proof}
+  \leanok
+  Monotonicity is monotonicity of the depth envelope. Every AND or OR gate is
+  an AND/OR/$\mathrm{MOD}_m$ gate with the same semantics, so circuits transport
+  along this embedding with the same size and depth.
 \end{proof}
 
 \begin{proposition}[Interleaving]

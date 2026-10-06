@@ -55,6 +55,7 @@ public import Complexitylib.Circuits.NormalForm
 public import Complexitylib.Circuits.NormalForm.Operations
 public import Complexitylib.Circuits.NormalForm.Restriction
 public import Complexitylib.Circuits.AndOrNot
+public import Complexitylib.Circuits.AndOrMod.Defs
 public import Complexitylib.Circuits.BasisHom
 public import Complexitylib.Circuits.Threshold
 public import Complexitylib.Circuits.Threshold.Parity
@@ -240,6 +241,8 @@ Public modules (definitions a reviewer should read):
   `Basis.boundedAndOr`, `Basis.andOr2`
 * `Complexitylib.Circuits.AndOrNot` — functional completeness and a semantic,
   total-fan-in size bound for compiling unbounded AND/OR to fan-in two
+* `Complexitylib.Circuits.AndOrMod.Defs` — `AndOrModOp`,
+  `Basis.unboundedAndOrMod` (unbounded AND, OR, and `MOD_m` gates)
 * `Complexitylib.Circuits.BasisHom` — exact semantics-, size-, depth-, and
   topology-preserving circuit transport between compatible bases
 * `Complexitylib.Circuits.Threshold` — unweighted threshold gates, strict
@@ -261,7 +264,8 @@ Public modules (definitions a reviewer should read):
 * `Complexitylib.Circuits.XOR` — `Schnorr.xorBool` (N-input parity)
 * `Complexitylib.Circuits.EssentialInput` — `IsEssentialInput`, `essentialInputs`
 * `Complexitylib.Circuits.DepthClasses` — `DEPTH`, the nonuniform `NC`, `AC`,
-  and `TC` hierarchies, and the aliases `NC0`, `NC1`, `AC0`, and `TC0`
+  `ACMod`, and `TC` hierarchies, and the aliases `NC0`, `NC1`, `AC0`,
+  `AC0Mod`, and `TC0`
 * `Complexitylib.Circuits.AC0` — the `AC0` class plus finite nonuniform
   negation-normal formulas, circuit normalization, exact restrictions,
   width-sensitive switching, finite staged iteration, the exact parity
