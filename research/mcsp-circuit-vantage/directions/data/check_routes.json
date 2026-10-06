@@ -1,0 +1,90 @@
+{
+  "nested_equality": [
+    {
+      "gates": 5,
+      "m": 2,
+      "unit_demand": 2,
+      "unit_max_load": 1,
+      "weighted_ratio": "2"
+    },
+    {
+      "gates": 11,
+      "m": 4,
+      "unit_demand": 8,
+      "unit_max_load": 2,
+      "weighted_ratio": "4"
+    },
+    {
+      "gates": 23,
+      "m": 8,
+      "unit_demand": 24,
+      "unit_max_load": 3,
+      "weighted_ratio": "8"
+    },
+    {
+      "gates": 47,
+      "m": 16,
+      "unit_demand": 64,
+      "unit_max_load": 4,
+      "weighted_ratio": "16"
+    },
+    {
+      "gates": 95,
+      "m": 32,
+      "unit_demand": 160,
+      "unit_max_load": 5,
+      "weighted_ratio": "32"
+    },
+    {
+      "gates": 191,
+      "m": 64,
+      "unit_demand": 384,
+      "unit_max_load": 6,
+      "weighted_ratio": "64"
+    },
+    {
+      "gates": 383,
+      "m": 128,
+      "unit_demand": 896,
+      "unit_max_load": 7,
+      "weighted_ratio": "128"
+    },
+    {
+      "gates": 767,
+      "m": 256,
+      "unit_demand": 2048,
+      "unit_max_load": 8,
+      "weighted_ratio": "256"
+    }
+  ],
+  "repeated_anchors": {
+    "cases": [
+      {
+        "N": 8,
+        "anchors": 8,
+        "arity": 3,
+        "blocks": 2,
+        "khrapchenko_witness_measure": "8"
+      },
+      {
+        "N": 16,
+        "anchors": 8,
+        "arity": 4,
+        "blocks": 4,
+        "khrapchenko_witness_measure": "16"
+      }
+    ],
+    "cofactor_assignments": 131328,
+    "zero_cost_counterexample": "selector, with zero anchor on its false cofactor"
+  },
+  "singleton_capacity": {
+    "maps_8_to_4": 65536,
+    "max_singleton_fibers": 3,
+    "pairs_of_context_maps_4_to_2": 256
+  },
+  "sparse_NO_cubes": {
+    "NO_cube_points_checked": 34304,
+    "outer_dimension": 6,
+    "sparse_sets": 2080
+  }
+}

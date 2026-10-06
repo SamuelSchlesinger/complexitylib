@@ -1,0 +1,8 @@
+n=2^j; N=2^n; R=N*n^(log2(n))
+j | log2(R/N) | log2(R/(N*n^4)) | extra exponent over N
+4 | 16 | 0 | 1
+8 | 64 | 32 | 1/4
+16 | 256 | 192 | 1/256
+32 | 1024 | 896 | 1/4194304
+64 | 4096 | 3840 | 1/4503599627370496
+PASS: exact scale identities and finite parameter comparisons

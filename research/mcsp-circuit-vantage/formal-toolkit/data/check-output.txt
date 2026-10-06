@@ -1,0 +1,182 @@
+Audited source snapshot: b030149cd09f755bfead55f473d670f0880eedb0
+Check: imports existing artifacts; no rebuild or full repository gates.
+Declaration checks: 32
+Axiom reports: 9
+Compiler exit: 0
+
+Algebraic.MCSP.mcspScalar.{u_1} {σ : Cslib.Circuits.Signature} (interpretation : Cslib.Circuits.Interpretation σ Bool)
+  (n s : ℕ) : Algebraic.ScalarFunction Bool (2 ^ n)
+Algebraic.MCSP.mcspCostScalar.{u_1} {σ : Cslib.Circuits.Signature}
+  (interpretation : Cslib.Circuits.Interpretation σ Bool) (cost : Algebraic.OperationCost σ) (n s : ℕ) :
+  Algebraic.ScalarFunction Bool (2 ^ n)
+Algebraic.MCSP.card_yesSet_le_sharpBudget.{u_1} {σ : Cslib.Circuits.Signature} [Fintype σ.Op]
+  (interpretation : Cslib.Circuits.Interpretation σ Bool) (n s : ℕ) :
+  (Algebraic.MCSP.yesSet interpretation n s).card ≤ σ.sharpBudget n 1 s
+Algebraic.MCSP.mcspCostScalar_deMorgan_essentialAt {n s : ℕ} {tt₀ tt₁ : Fin (2 ^ n) → Bool}
+  (hne :
+    Algebraic.MCSP.mcspCostScalar Algebraic.DeMorgan.interpretation Algebraic.DeMorgan.binaryCost n s tt₀ ≠
+      Algebraic.MCSP.mcspCostScalar Algebraic.DeMorgan.interpretation Algebraic.DeMorgan.binaryCost n s tt₁)
+  (i : Fin (2 ^ n)) :
+  Algebraic.EssentialAt
+    (Algebraic.MCSP.mcspCostScalar Algebraic.DeMorgan.interpretation Algebraic.DeMorgan.binaryCost n s) i
+Algebraic.MCSP.mcspScalar_binary_comp_tableTranslate {n s : ℕ} (hs : 1 ≤ s) (a : Fin n → Bool)
+  (tt : Fin (2 ^ n) → Bool) :
+  Algebraic.MCSP.mcspScalar Algebraic.Binary.interpretation n s (tt ∘ ⇑(Algebraic.MCSP.tableTranslate a)) =
+    Algebraic.MCSP.mcspScalar Algebraic.Binary.interpretation n s tt
+Algebraic.MCSP.mcspTarget_binary_size_lower_bound.{u_1} {σ : Cslib.Circuits.Signature}
+  {interpretation : Cslib.Circuits.Interpretation σ Bool} {n s : ℕ} (hs : 1 ≤ s) {tt₀ tt₁ : Fin (2 ^ n) → Bool}
+  (hne :
+    Algebraic.MCSP.mcspScalar Algebraic.Binary.interpretation n s tt₀ ≠
+      Algebraic.MCSP.mcspScalar Algebraic.Binary.interpretation n s tt₁)
+  (c : Cslib.Circuits.Circuit σ (2 ^ n) 1) (hfan : c.FanInAtMost 2)
+  (hcomp : c.ComputesWith interpretation (Algebraic.MCSP.mcspTarget Algebraic.Binary.interpretation n s)) :
+  2 ^ n ≤ c.size + 1
+Algebraic.MCSP.mcspCostTarget_deMorgan_binaryCost_lower_bound {n s : ℕ} {tt₀ tt₁ : Fin (2 ^ n) → Bool}
+  (hne :
+    Algebraic.MCSP.mcspCostScalar Algebraic.DeMorgan.interpretation Algebraic.DeMorgan.binaryCost n s tt₀ ≠
+      Algebraic.MCSP.mcspCostScalar Algebraic.DeMorgan.interpretation Algebraic.DeMorgan.binaryCost n s tt₁)
+  (c : Cslib.Circuits.Circuit Algebraic.DeMorgan.signature (2 ^ n) 1)
+  (hcomp :
+    c.ComputesWith Algebraic.DeMorgan.interpretation
+      (Algebraic.MCSP.mcspCostTarget Algebraic.DeMorgan.interpretation Algebraic.DeMorgan.binaryCost n s)) :
+  2 ^ n ≤ c.cost Algebraic.DeMorgan.binaryCost + 1
+Algebraic.MCSP.costComplexity_muxTarget_self {n : ℕ} (u : Algebraic.Target Bool n 1) :
+  Cslib.Circuits.Circuit.costComplexity Algebraic.DeMorgan.interpretation Algebraic.DeMorgan.binaryCost
+      (Algebraic.MCSP.muxTarget u u) =
+    Cslib.Circuits.Circuit.costComplexity Algebraic.DeMorgan.interpretation Algebraic.DeMorgan.binaryCost u
+Algebraic.MCSP.costComplexity_muxTarget_ge_add_one {n : ℕ} {u₀ u₁ : Algebraic.Target Bool n 1} (hne : u₀ ≠ u₁)
+  (hpos :
+    1 ≤ Cslib.Circuits.Circuit.costComplexity Algebraic.DeMorgan.interpretation Algebraic.DeMorgan.binaryCost u₀ ∨
+      1 ≤ Cslib.Circuits.Circuit.costComplexity Algebraic.DeMorgan.interpretation Algebraic.DeMorgan.binaryCost u₁) :
+  Cslib.Circuits.Circuit.costComplexity Algebraic.DeMorgan.interpretation Algebraic.DeMorgan.binaryCost u₀ + 1 ≤
+      Cslib.Circuits.Circuit.costComplexity Algebraic.DeMorgan.interpretation Algebraic.DeMorgan.binaryCost
+        (Algebraic.MCSP.muxTarget u₀ u₁) ∧
+    Cslib.Circuits.Circuit.costComplexity Algebraic.DeMorgan.interpretation Algebraic.DeMorgan.binaryCost u₁ + 1 ≤
+      Cslib.Circuits.Circuit.costComplexity Algebraic.DeMorgan.interpretation Algebraic.DeMorgan.binaryCost
+        (Algebraic.MCSP.muxTarget u₀ u₁)
+Algebraic.MCSP.mcspCostScalar_pairTruthTable_left_eq_true_iff {n s : ℕ} (hs : 1 ≤ s) {tt : Fin (2 ^ n) → Bool}
+  (htt : tt ∈ Algebraic.MCSP.exactCostSet Algebraic.DeMorgan.interpretation Algebraic.DeMorgan.binaryCost n s)
+  (tt' : Fin (2 ^ n) → Bool) :
+  Algebraic.MCSP.mcspCostScalar Algebraic.DeMorgan.interpretation Algebraic.DeMorgan.binaryCost (n + 1) s
+        (Algebraic.MCSP.pairTruthTable tt' tt) =
+      true ↔
+    tt' = tt
+Algebraic.MCSP.mcspCostScalar_pairTruthTable_right_eq_true_iff {n s : ℕ} (hs : 1 ≤ s) {tt : Fin (2 ^ n) → Bool}
+  (htt : tt ∈ Algebraic.MCSP.exactCostSet Algebraic.DeMorgan.interpretation Algebraic.DeMorgan.binaryCost n s)
+  (tt' : Fin (2 ^ n) → Bool) :
+  Algebraic.MCSP.mcspCostScalar Algebraic.DeMorgan.interpretation Algebraic.DeMorgan.binaryCost (n + 1) s
+        (Algebraic.MCSP.pairTruthTable tt tt') =
+      true ↔
+    tt' = tt
+Algebraic.MCSP.mcsp_singleCut_card_exactCostSet_le.{u_1} {σ : Cslib.Circuits.Signature}
+  {interpretation : Cslib.Circuits.Interpretation σ Bool} {n s : ℕ} (hs : 1 ≤ s)
+  (c : Cslib.Circuits.Circuit σ (2 ^ (n + 1)) 1)
+  (hc :
+    c.ComputesWith interpretation
+      (Algebraic.MCSP.mcspCostTarget Algebraic.DeMorgan.interpretation Algebraic.DeMorgan.binaryCost (n + 1) s))
+  (S : Finset (Cslib.Circuits.Wire (2 ^ (n + 1)) c.size))
+  (hS : ∀ (j : Fin (2 ^ (n + 1))), Cslib.Circuits.Wire.input j ∈ S ↔ ↑j < 2 ^ n) :
+  (Algebraic.MCSP.exactCostSet Algebraic.DeMorgan.interpretation Algebraic.DeMorgan.binaryCost n s).card ≤
+    2 ^
+      ((Algebraic.Cutwidth.SingleCut.forward c.program S).card +
+        (Algebraic.Cutwidth.SingleCut.backward c.program S).card)
+Algebraic.MCSP.sensitiveCoordinates_mcsp_pairTruthTable_eq_univ {n s : ℕ} (hs : 1 ≤ s) {tt : Fin (2 ^ n) → Bool}
+  (htt : tt ∈ Algebraic.MCSP.exactCostSet Algebraic.DeMorgan.interpretation Algebraic.DeMorgan.binaryCost n s) :
+  Algebraic.KW.sensitiveCoordinates
+      (Algebraic.MCSP.mcspCostScalar Algebraic.DeMorgan.interpretation Algebraic.DeMorgan.binaryCost (n + 1) s)
+      (Algebraic.MCSP.pairTruthTable tt tt) =
+    Finset.univ
+Algebraic.MCSP.mcsp_formula_leaves_lower_bound {n s : ℕ} (hs : 1 ≤ s) {tt : Fin (2 ^ n) → Bool}
+  (htt : tt ∈ Algebraic.MCSP.exactCostSet Algebraic.DeMorgan.interpretation Algebraic.DeMorgan.binaryCost n s)
+  {F : Algebraic.KW.Formula (2 ^ (n + 1))}
+  (hF :
+    F.Computes
+      (Algebraic.MCSP.mcspCostScalar Algebraic.DeMorgan.interpretation Algebraic.DeMorgan.binaryCost (n + 1) s)) :
+  2 ^ (n + 1) ≤ F.leaves
+Algebraic.MCSP.mcsp_sharedGateCount_cost_lower_bound {n s k : ℕ} (hs : 1 ≤ s) {tt : Fin (2 ^ n) → Bool}
+  (htt : tt ∈ Algebraic.MCSP.exactCostSet Algebraic.DeMorgan.interpretation Algebraic.DeMorgan.binaryCost n s)
+  (c : Cslib.Circuits.Circuit Algebraic.DeMorgan.signature (2 ^ (n + 1)) 1)
+  (hc :
+    c.ComputesWith Algebraic.DeMorgan.interpretation
+      (Algebraic.MCSP.mcspCostTarget Algebraic.DeMorgan.interpretation Algebraic.DeMorgan.binaryCost (n + 1) s))
+  (hk : Algebraic.KW.sharedGateCount c ≤ k) : 2 ^ (n + 1) ≤ (k + 1) * (c.cost Algebraic.DeMorgan.binaryCost + k + 1)
+Algebraic.MCSP.mcsp_binaryFormula_leavesIn_leftBlock_lower_bound {n s : ℕ} (hs : 1 ≤ s) (Y₀ : Finset (Fin (2 ^ n)))
+  {F : Algebraic.Binary.Formula (2 ^ (n + 1))}
+  (hF :
+    F.eval = Algebraic.MCSP.mcspCostScalar Algebraic.DeMorgan.interpretation Algebraic.DeMorgan.binaryCost (n + 1) s) :
+  (Finset.image (Algebraic.MCSP.restrictTo Y₀)
+        (Algebraic.MCSP.exactCostSet Algebraic.DeMorgan.interpretation Algebraic.DeMorgan.binaryCost n s)).card ≤
+    2 * 16 ^ Algebraic.Binary.Formula.leavesIn (Algebraic.MCSP.leftBlock Y₀) F
+Algebraic.MCSP.exactCostSet_deMorgan_one_nonempty (n : ℕ) :
+  (Algebraic.MCSP.exactCostSet Algebraic.DeMorgan.interpretation Algebraic.DeMorgan.binaryCost (n + 2) 1).Nonempty
+Algebraic.MCSP.mcspCostTarget_deMorgan_one_size_lower_bound.{u_1} {σ : Cslib.Circuits.Signature}
+  {interpretation : Cslib.Circuits.Interpretation σ Bool} (n : ℕ) (c : Cslib.Circuits.Circuit σ (2 ^ (n + 3)) 1)
+  (hfan : c.FanInAtMost 2)
+  (hcomp :
+    c.ComputesWith interpretation
+      (Algebraic.MCSP.mcspCostTarget Algebraic.DeMorgan.interpretation Algebraic.DeMorgan.binaryCost (n + 3) 1)) :
+  2 ^ (n + 3) ≤ c.size + 1
+Complexity.MCSP.Instance.length_encode (inst : Complexity.MCSP.Instance) :
+  inst.encode.length = 2 ^ inst.arity + 2 * inst.arity.size + 2 * inst.threshold.size + 4
+Complexity.MCSP.mem_encode_iff_sizeComplexity_le (inst : Complexity.MCSP.Instance) [NeZero inst.arity] :
+  inst.encode ∈ Complexity.MCSP ↔
+    Complexity.Circuit.sizeComplexity Complexity.Basis.andOr2 inst.function ≤ inst.threshold
+Complexity.MCSP.mem_atThreshold_encode_iff (threshold : ℕ → ℕ) (inst : Complexity.MCSP.Instance) :
+  inst.encode ∈ Complexity.MCSP.atThreshold threshold ↔ inst.threshold = threshold inst.arity ∧ inst.HasCircuitAtMost
+Complexity.MCSP.mem_rawAtThreshold_tableBits_iff (threshold : ℕ → ℕ) (inst : Complexity.MCSP.Instance) :
+  inst.tableBits ∈ Complexity.MCSP.rawAtThreshold threshold ↔ inst.minimumSize ≤ threshold inst.arity
+Complexity.MCSP.shannon_threshold_window (arity : ℕ) (harity : 16 ≤ arity) :
+  (∃ f, (Complexity.MCSP.Instance.ofFunction arity (2 ^ arity / (5 * arity)) f).encode ∉ Complexity.MCSP) ∧
+    ∀ (f : Complexity.BitString arity → Bool),
+      (Complexity.MCSP.Instance.ofFunction arity (18 * 2 ^ arity / arity) f).encode ∈ Complexity.MCSP
+Complexity.MCSP.rawWitnessRelation_polyBalanced : Complexity.PolyBalanced Complexity.MCSP.RawWitnessRelation
+Complexity.GapMCSP.rawSliceProblem_mapReducesVia_rawToCanonical (parameters : Complexity.GapMCSP.SliceParameters)
+  (hgap : parameters.IsGap) :
+  (Complexity.GapMCSP.rawSliceProblem parameters hgap).MapReducesVia (Complexity.GapMCSP.sliceProblem parameters hgap)
+    (Complexity.MCSP.rawToCanonical parameters.yesThreshold)
+Complexity.Circuit.size_toStraightLine {B : Complexity.Basis} {N M G : ℕ} [NeZero N] [NeZero M]
+  (c : Complexity.Circuit B N M G) : c.toStraightLine.size = c.size
+Complexity.SchnorrDeMorgan.Translation.cost_eq {N s : ℕ}
+  {p : Cslib.Circuits.Program Complexity.Basis.andOr2.signature N s} (self : Complexity.SchnorrDeMorgan.Translation p) :
+  Cslib.Circuits.Program.cost Algebraic.DeMorgan.binaryCost self.result = s
+Complexity.Frontier.RectangleFree.{u_1, u_2} {ι : Type u_1} {U : Type u_2} (S : Set (ι → U)) (K : ℕ) : Prop
+Complexity.Frontier.lowerBound_gaussian.{u, v} {U : Type u} [Finite U] [Nontrivial U] (S : (n : ℕ) → Set (Fin n → U))
+  (K : ℕ → ℕ) (hfree : ∀ᶠ (n : ℕ) in Filter.atTop, Complexity.Frontier.RectangleFree (S n) (K n))
+  (hK : (fun n => Real.log ↑(K n)) =o[Filter.atTop] fun n => ↑n)
+  (hdense : (fun n => ↑n * Real.log ↑(Nat.card U) - Real.log ↑(S n).ncard) =o[Filter.atTop] fun n => ↑n) {ε : ℝ}
+  (hε : 0 < ε) :
+  ∀ᶠ (n : ℕ) in Filter.atTop,
+    ∀ (σ : Cslib.Circuits.Signature) (I : Cslib.Circuits.Interpretation σ U) (Acc : Set U)
+      (c : Cslib.Circuits.Circuit σ n 1),
+      c.FanInAtMost 2 →
+        Complexity.Frontier.Decides c I Acc (S n) →
+          (1 + Real.pi / (3 * Real.arccos ((1 + 2 * √2) / 4)) - ε) * ↑n < ↑c.innerSize
+Complexity.Frontier.sourceReductionHardFamily_lt_innerSize_gaussian.{v} {ε : ℝ} (hε : 0 < ε) :
+  ∀ᶠ (n : ℕ) in Filter.atTop,
+    ∀ (σ : Cslib.Circuits.Signature) (I : Cslib.Circuits.Interpretation σ Bool) (Acc : Set Bool)
+      (c : Cslib.Circuits.Circuit σ n 1),
+      c.FanInAtMost 2 →
+        Complexity.Frontier.Decides c I Acc {x | Algebraic.Cutwidth.Extractor.sourceReductionHardFamily n x = true} →
+          (1 + Real.pi / (3 * Real.arccos ((1 + 2 * √2) / 4)) - ε) * ↑n < ↑c.innerSize
+Complexity.GapMCSP.Magnification.DenominatorConstant.HasMagnificationLowerBoundHypothesis
+  (constant : Complexity.GapMCSP.Magnification.DenominatorConstant) : Prop
+Complexity.GapMCSP.Magnification.AntiCheckerLemma.hasGenerators_of_hasApproximateCounterFamilies :
+  Complexity.GapMCSP.Magnification.AntiCheckerLemma.HasApproximateCounterFamilies →
+    Complexity.GapMCSP.Magnification.AntiCheckerLemma.HasGenerators
+'Algebraic.MCSP.mcspTarget_binary_size_lower_bound' depends on axioms: [propext, Classical.choice, Quot.sound]
+'Algebraic.MCSP.mcspCostTarget_deMorgan_binaryCost_lower_bound' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'Algebraic.MCSP.costComplexity_muxTarget_ge_add_one' depends on axioms: [propext, Classical.choice, Quot.sound]
+'Algebraic.MCSP.mcspCostScalar_pairTruthTable_left_eq_true_iff' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'Algebraic.MCSP.mcsp_singleCut_card_exactCostSet_le' depends on axioms: [propext, Classical.choice, Quot.sound]
+'Algebraic.MCSP.mcsp_formula_leaves_lower_bound' depends on axioms: [propext, Classical.choice, Quot.sound]
+'Algebraic.MCSP.mcsp_sharedGateCount_cost_lower_bound' depends on axioms: [propext, Classical.choice, Quot.sound]
+'Complexity.Frontier.sourceReductionHardFamily_lt_innerSize_gaussian' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'Complexity.GapMCSP.Magnification.AntiCheckerLemma.hasGenerators_of_hasApproximateCounterFamilies' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]

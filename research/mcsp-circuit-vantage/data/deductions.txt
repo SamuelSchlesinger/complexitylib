@@ -1,0 +1,16 @@
+Absent-pattern lemma: 589 exhaustive family/coordinate cases passed (N <= 3).
+B2 count bound B=(s+1)(n+s)[16(n+s)^2]^s; d=floor(log2 B)+1, s=n^2:
+  n=16: N=2^16, d=5181, NO-cube dimension=2^16-5181
+  n=32: N=2^32, d=24687, NO-cube dimension=2^32-24687
+  n=64: N=2^64, d=114896, NO-cube dimension=2^64-114896
+  n=128: N=2^128, d=524684, NO-cube dimension=2^128-524684
+Nested AND regions: Q=sum of contained gate counts, M=max gate multiplicity:
+  leaves=2: S=1, Q=1, M=1, Q/M<=S
+  leaves=4: S=3, Q=5, M=2, Q/M<=S
+  leaves=8: S=7, Q=17, M=3, Q/M<=S
+  leaves=16: S=15, Q=49, M=4, Q/M<=S
+  leaves=32: S=31, Q=129, M=5, Q/M<=S
+  leaves=64: S=63, Q=321, M=6, Q/M<=S
+  leaves=128: S=127, Q=769, M=7, Q/M<=S
+  leaves=256: S=255, Q=1793, M=8, Q/M<=S
+Repeated-anchor neighbor measure: 546 cases passed (block width <= 3).
