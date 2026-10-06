@@ -56,6 +56,7 @@ public import Complexitylib.Algebraic.LowerBound.Fusion
 public import Complexitylib.Algebraic.LowerBound.Monotone.Clique.Exponential
 public import Complexitylib.Algebraic.LowerBound.Monotone.MatrixProduct
 public import Complexitylib.Algebraic.LowerBound.Monotone.MatrixProduct.Partial
+public import Complexitylib.Algebraic.LowerBound.Monotone.MatrixProduct.NegationLimited
 public import Complexitylib.Algebraic.LowerBound.Monotone.Clique.Asymptotic
 public import Complexitylib.Algebraic.LowerBound.Cutwidth
 public import Complexitylib.Algebraic.LowerBound.Nechiporuk

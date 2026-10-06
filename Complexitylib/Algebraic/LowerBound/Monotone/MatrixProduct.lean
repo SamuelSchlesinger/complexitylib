@@ -65,6 +65,22 @@ def rightEntry (n : Nat) (k j : Fin n) : Fin (n * n + n * n) :=
 def productEntry (n : Nat) (i j : Fin n) : Fin (n * n) :=
   finProdFinEquiv (i, j)
 
+/-- The row-major layout puts the entries of both matrices at distinct inputs. -/
+theorem entry_injective (n : Nat) :
+    Function.Injective (Sum.elim (Function.uncurry (leftEntry n))
+      (Function.uncurry (rightEntry n))) := by
+  rintro (⟨i, k⟩ | ⟨k, j⟩) (⟨i', k'⟩ | ⟨k', j'⟩) h <;>
+    simp only [Sum.elim_inl, Sum.elim_inr, Function.uncurry_apply_pair, leftEntry,
+      rightEntry, Fin.ext_iff, Fin.val_castAdd, Fin.val_natAdd] at h
+  · have := finProdFinEquiv.injective (Fin.ext h)
+    simp_all
+  · have := (finProdFinEquiv (i, k)).isLt
+    omega
+  · have := (finProdFinEquiv (i', k')).isLt
+    omega
+  · have := finProdFinEquiv.injective (Fin.ext (Nat.add_left_cancel h))
+    simp_all
+
 /-- **Monotone Boolean matrix product, square case.** An AND/OR circuit computing
 the Boolean product of two `n × n` matrices has at least `n ^ 3` AND gates. -/
 theorem cube_le_andCost (n : Nat) (circuit : Circuit AndOr.signature (n * n + n * n) (n * n))
@@ -72,22 +88,9 @@ theorem cube_le_andCost (n : Nat) (circuit : Circuit AndOr.signature (n * n + n 
       circuit.eval AndOr.boolInterpretation a (productEntry n i j) =
         decide (∃ k, a (leftEntry n i k) = true ∧ a (rightEntry n k j) = true)) :
     n ^ 3 ≤ circuit.cost AndOr.andCost := by
-  have distinct :
-      Function.Injective (Sum.elim (Function.uncurry (leftEntry n))
-        (Function.uncurry (rightEntry n))) := by
-    rintro (⟨i, k⟩ | ⟨k, j⟩) (⟨i', k'⟩ | ⟨k', j'⟩) h <;>
-      simp only [Sum.elim_inl, Sum.elim_inr, Function.uncurry_apply_pair, leftEntry,
-        rightEntry, Fin.ext_iff, Fin.val_castAdd, Fin.val_natAdd] at h
-    · have := finProdFinEquiv.injective (Fin.ext h)
-      simp_all
-    · have := (finProdFinEquiv (i, k)).isLt
-      omega
-    · have := (finProdFinEquiv (i', k')).isLt
-      omega
-    · have := finProdFinEquiv.injective (Fin.ext (Nat.add_left_cancel h))
-      simp_all
   simpa [pow_succ, Nat.mul_assoc] using
-    mul_mul_le_andCost (leftEntry n) (rightEntry n) distinct (productEntry n) circuit computes
+    mul_mul_le_andCost (leftEntry n) (rightEntry n) (entry_injective n) (productEntry n)
+      circuit computes
 
 end MatrixProduct
 end Monotone
