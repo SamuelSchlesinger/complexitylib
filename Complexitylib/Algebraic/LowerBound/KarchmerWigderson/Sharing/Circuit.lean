@@ -32,7 +32,9 @@ a circuit computing the parity of `n ≥ 1` bits in which at most `k` gates have
 two has `n² ≤ (k + 1) · (cost + k + 1)`, where `cost` counts the AND and OR gates
 (`parity_sq_le_cost`). It has at least `C · n` AND and OR gates when `(k + 1) · (C + 1) ≤ n`
 (`mul_le_cost_of_parity`), and a family of such circuits with `k(n) = o(n)` gates of fan-out at
-least two has superlinear cost (`isLittleO_cost_of_parity`).
+least two has superlinear cost (`isLittleO_cost_of_parity`). Analogous quadratic and superlinear
+bounds hold for threshold and majority circuits (`threshold_mul_le_cost`, `majority_mul_le_cost`,
+`majority_sq_le_cost_of_odd`, `mul_le_cost_of_majority`, `isLittleO_cost_of_majority`).
 -/
 
 @[expose] public section
@@ -495,6 +497,93 @@ theorem isLittleO_cost_of_parity {k : ℕ → ℕ}
     (fun n : ℕ => (n : ℝ)) =o[Filter.atTop] fun n => ((c n).cost DeMorgan.binaryCost : ℝ) :=
   isLittleO_of_forall_mul_le hk fun n _ hkn =>
     mul_le_cost_of_parity hkn (c n) (computes n) (hshared n)
+
+/-! ### Threshold and majority -/
+
+/-- Single-output circuit target for the `t`-threshold function on `n` bits. -/
+abbrev thresholdTarget (n t : Nat) : Target Bool n 1 := fun x _ => threshold t x
+
+/-- Single-output circuit target for the strict majority function on `n` bits. -/
+abbrev majorityTarget (n : Nat) : Target Bool n 1 := fun x _ => majority x
+
+/-- **Threshold functions in De Morgan circuits with few shared gates.** For `1 ≤ t ≤ n`, every
+De Morgan circuit computing `threshold t` in which at most `k` gates have fan-out at least two
+satisfies `(n + 1 - t) · t ≤ (k + 1) · (cost + k + 1)`, where `cost` counts its AND and OR
+gates. -/
+theorem threshold_mul_le_cost {t k : Nat} (ht : 1 ≤ t) (htn : t ≤ n)
+    (c : Circuit DeMorgan.signature n 1)
+    (computes : c.ComputesWith DeMorgan.interpretation (thresholdTarget n t))
+    (hk : sharedGateCount c ≤ k) :
+    (n + 1 - t) * t ≤ (k + 1) * (c.cost DeMorgan.binaryCost + k + 1) := by
+  obtain ⟨k', P, hk', hP, hgates⟩ := exists_sharedProgram_of_circuit c computes
+  calc (n + 1 - t) * t ≤ (k' + 1) * (P.gates + k' + 1) :=
+        SharedProgram.threshold_mul_le_gates ht htn hP
+    _ ≤ (k + 1) * (c.cost DeMorgan.binaryCost + k + 1) :=
+        Nat.mul_le_mul (by omega) (by omega)
+
+/-- **Majority in De Morgan circuits with few shared gates.** Every De Morgan circuit computing
+strict majority of `n ≥ 1` bits in which at most `k` gates have fan-out at least two satisfies
+`(n - ⌊n/2⌋) · (⌊n/2⌋ + 1) ≤ (k + 1) · (cost + k + 1)`, where `cost` counts its AND and OR
+gates. -/
+theorem majority_mul_le_cost {k : Nat} (hn : 1 ≤ n)
+    (c : Circuit DeMorgan.signature n 1)
+    (computes : c.ComputesWith DeMorgan.interpretation (majorityTarget n))
+    (hk : sharedGateCount c ≤ k) :
+    (n - n / 2) * (n / 2 + 1) ≤ (k + 1) * (c.cost DeMorgan.binaryCost + k + 1) := by
+  obtain ⟨k', P, hk', hP, hgates⟩ := exists_sharedProgram_of_circuit c computes
+  calc (n - n / 2) * (n / 2 + 1) ≤ (k' + 1) * (P.gates + k' + 1) :=
+        SharedProgram.majority_mul_le_gates hn hP
+    _ ≤ (k + 1) * (c.cost DeMorgan.binaryCost + k + 1) :=
+        Nat.mul_le_mul (by omega) (by omega)
+
+/-- **Odd-input majority in De Morgan circuits with few shared gates.** For odd `n`, every
+De Morgan circuit computing strict majority of `n` bits in which at most `k` gates have fan-out
+at least two satisfies `(⌊n/2⌋ + 1)² ≤ (k + 1) · (cost + k + 1)`. -/
+theorem majority_sq_le_cost_of_odd {k : Nat} (hodd : Odd n)
+    (c : Circuit DeMorgan.signature n 1)
+    (computes : c.ComputesWith DeMorgan.interpretation (majorityTarget n))
+    (hk : sharedGateCount c ≤ k) :
+    (n / 2 + 1) ^ 2 ≤ (k + 1) * (c.cost DeMorgan.binaryCost + k + 1) := by
+  obtain ⟨m, rfl⟩ := hodd
+  have h1 : (2 * m + 1) / 2 = m := by omega
+  have h2 : 2 * m + 1 - m = m + 1 := by omega
+  have hsub : (2 * m + 1 - (2 * m + 1) / 2) * ((2 * m + 1) / 2 + 1) =
+      ((2 * m + 1) / 2 + 1) ^ 2 := by
+    rw [h1, h2, sq]
+  rw [← hsub]
+  exact majority_mul_le_cost (by omega) c computes hk
+
+/-- **Superlinear cost for majority with few shared gates.** If `(k + 1) · (C + 1) ≤ m`,
+every De Morgan circuit computing the majority of `2 * m + 1` bits in which at most `k` gates have
+fan-out at least two has at least `C · m` AND and OR gates. -/
+theorem mul_le_cost_of_majority {m k C : Nat} (hkm : (k + 1) * (C + 1) ≤ m)
+    (c : Circuit DeMorgan.signature (2 * m + 1) 1)
+    (computes : c.ComputesWith DeMorgan.interpretation (majorityTarget (2 * m + 1)))
+    (hk : sharedGateCount c ≤ k) : C * m ≤ c.cost DeMorgan.binaryCost := by
+  have hodd : Odd (2 * m + 1) := ⟨m, rfl⟩
+  have hsq := majority_sq_le_cost_of_odd hodd c computes hk
+  have hdiv : (2 * m + 1) / 2 + 1 = m + 1 := by omega
+  rw [hdiv] at hsq
+  have h : (k + 1) * ((m + 1) * (C + 1)) ≤ (k + 1) * (c.cost DeMorgan.binaryCost + k + 1) :=
+    calc (k + 1) * ((m + 1) * (C + 1)) = (m + 1) * ((k + 1) * (C + 1)) := by ring
+      _ ≤ (m + 1) * (m + 1) := Nat.mul_le_mul_left _ (by omega)
+      _ = (m + 1) ^ 2 := (sq (m + 1)).symm
+      _ ≤ _ := hsq
+  have h' := Nat.le_of_mul_le_mul_left h (Nat.succ_pos k)
+  nlinarith
+
+/-- **Majority needs superlinear De Morgan circuits when `o(m)` gates have fan-out at least
+two.** If `k m = o(m)` and, for every `m`, `c m` is a De Morgan circuit computing the
+majority of `2 * m + 1` bits in which at most `k m` gates have fan-out at least two, then the
+number of AND and OR gates of `c m` grows faster than `m`. -/
+theorem isLittleO_cost_of_majority {k : ℕ → ℕ}
+    (hk : (fun m => (k m : ℝ)) =o[Filter.atTop] fun m : ℕ => (m : ℝ))
+    (c : (m : ℕ) → Circuit DeMorgan.signature (2 * m + 1) 1)
+    (computes : ∀ m, (c m).ComputesWith DeMorgan.interpretation (majorityTarget (2 * m + 1)))
+    (hshared : ∀ m, sharedGateCount (c m) ≤ k m) :
+    (fun m : ℕ => (m : ℝ)) =o[Filter.atTop] fun m => ((c m).cost DeMorgan.binaryCost : ℝ) :=
+  isLittleO_of_forall_mul_le hk fun m _ hkm =>
+    mul_le_cost_of_majority hkm (c m) (computes m) (hshared m)
 
 end KW
 end Algebraic

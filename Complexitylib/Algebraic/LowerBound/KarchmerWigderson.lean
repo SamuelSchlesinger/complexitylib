@@ -10,6 +10,7 @@ public import Complexitylib.Algebraic.LowerBound.KarchmerWigderson.Composition
 public import Complexitylib.Algebraic.LowerBound.KarchmerWigderson.Khrapchenko
 public import Complexitylib.Algebraic.LowerBound.KarchmerWigderson.Sharing
 public import Complexitylib.Algebraic.LowerBound.KarchmerWigderson.Sharing.Circuit
+public import Complexitylib.Algebraic.LowerBound.KarchmerWigderson.Sharing.Extended
 public import Complexitylib.Algebraic.LowerBound.KarchmerWigderson.Sharing.UpperBound
 
 /-!
