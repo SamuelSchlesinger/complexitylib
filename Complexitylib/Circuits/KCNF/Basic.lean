@@ -131,4 +131,31 @@ theorem CNF.mem_solutions_toClauseSet (φ : CNF N) (x : BitString N) :
     x ∈ φ.toClauseSet.solutions ↔ φ.eval x = true := by
   rw [ClauseSet.mem_solutions, CNF.sat_toClauseSet_iff]
 
+/-- The CNF of a clause set accepts exactly its solutions. -/
+theorem ClauseSet.eval_toCNF_eq_true_iff (ψ : ClauseSet N) (x : BitString N) :
+    ψ.toCNF.eval x = true ↔ ψ.Sat x := by
+  simp only [ClauseSet.toCNF, CNF.eval, List.all_map, List.all_eq_true, Function.comp_apply,
+    Finset.mem_toList, List.any_eq_true, ClauseSet.Sat]
+
+/-- The CNF of a clause set is no wider than its widest clause. -/
+theorem ClauseSet.width_toCNF_le {ψ : ClauseSet N} {k : ℕ} (hk : ∀ C ∈ ψ, C.card ≤ k) :
+    ψ.toCNF.width ≤ k := by
+  rw [CNF.width_le_iff]
+  intro clause hclause
+  simp only [ClauseSet.toCNF, List.mem_map, Finset.mem_toList] at hclause
+  obtain ⟨C, hC, rfl⟩ := hclause
+  rw [Finset.length_toList]
+  exact hk C hC
+
+/-- The CNF of a clause set has as many clauses mentioning `v` as the clause set. -/
+theorem ClauseSet.occurrences_toCNF (ψ : ClauseSet N) (v : Fin N) :
+    ψ.toCNF.occurrences v = ψ.occurrences v := by
+  classical
+  simp only [CNF.occurrences, ClauseSet.toCNF, List.countP_map, ClauseSet.occurrences]
+  rw [List.countP_eq_length_filter, ← List.toFinset_card_of_nodup
+    ((Finset.nodup_toList ψ).filter _)]
+  congr 1
+  ext C
+  simp [Finset.mem_toList]
+
 end Complexity

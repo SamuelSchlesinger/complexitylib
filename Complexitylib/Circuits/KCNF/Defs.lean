@@ -23,6 +23,8 @@ Impagliazzo, Paturi and Zane. `CNF.toClauseSet` converts a CNF, preserving its s
 ## Main definitions
 
 * `ClauseSet.Sat`, `ClauseSet.solutions`: satisfaction and the solution set.
+* `ClauseSet.toCNF`, `CNF.occurrences`: a CNF listing the clauses of a clause set, and the
+  number of clauses of a CNF that mention a variable.
 * `ClauseSet.occurrences`, `ClauseSet.neighbors`: the number of clauses mentioning a variable,
   and the neighbours of a variable in the co-occurrence graph (two distinct variables are
   adjacent when some clause mentions both).
@@ -92,6 +94,14 @@ end ClauseSet
 /-- The clause set of a CNF: each clause becomes the set of its literals. -/
 def CNF.toClauseSet (φ : CNF N) : ClauseSet N :=
   (φ.clauses.map List.toFinset).toFinset
+
+/-- A CNF with the clauses of a clause set, listed in some order. -/
+noncomputable def ClauseSet.toCNF (ψ : ClauseSet N) : CNF N :=
+  ⟨ψ.toList.map Finset.toList⟩
+
+/-- The number of clauses of a CNF (counted with multiplicity) that mention the variable `v`. -/
+def CNF.occurrences (φ : CNF N) (v : Fin N) : ℕ :=
+  φ.clauses.countP fun clause => decide (∃ l ∈ clause, l.var = v)
 
 /-- `x ⊕ e_T`: flip the coordinates of `x` in `T`. -/
 def BitString.flipOn (x : BitString N) (T : Finset (Fin N)) : BitString N :=
