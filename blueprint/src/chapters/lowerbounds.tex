@@ -13192,14 +13192,23 @@ signals, codes, pruned transitions, and trees of regions.
 
 \begin{lemma}[Parity in $\cc{TC}^0$]
   \label{lem:lowerbounds-parity-tc0}
+  \lean{Complexity.Circuit.thresholdParity, Complexity.Circuit.eval_thresholdParity,
+    Complexity.Circuit.size_thresholdParity, Complexity.Circuit.depth_thresholdParity_le,
+    Complexity.CircuitFamily.thresholdParity, Complexity.xorBool_mem_TC0}
+  \leanok
   \uses{def:circuits-TC, def:lowerbounds-parity}
-  The parity family is in $\cc{TC}^0$.
+  For $N \ge 1$, a threshold circuit with $N$ internal gates, one output gate,
+  and depth at most two computes $N$-bit parity. Hence the parity family is in
+  $\cc{TC}^0$.
 \end{lemma}
 \begin{proof}
-  For each odd $k \le N$, the conjunction of the threshold gates
-  ``at least $k$ ones'' and ``not at least $k + 1$ ones'' detects exactly $k$
-  ones; parity is the disjunction of these, a depth-three circuit of linear
-  size.
+  \leanok
+  For $1 \le j \le N$ let $T_j$ be the threshold gate ``at least $j$ ones''
+  over all inputs. The output gate reads $T_j$ for odd $j$ and $\neg T_j$ for
+  even $j$. If the input has $w$ ones, exactly
+  $\lfloor N/2 \rfloor + (w \bmod 2)$ of these signed inputs are true, so the
+  output threshold $\lfloor N/2 \rfloor + 1$ computes parity. The empty input
+  has its answer, false, stored separately.
 \end{proof}
 
 \begin{corollary}

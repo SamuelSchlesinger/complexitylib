@@ -57,6 +57,7 @@ public import Complexitylib.Circuits.NormalForm.Restriction
 public import Complexitylib.Circuits.AndOrNot
 public import Complexitylib.Circuits.BasisHom
 public import Complexitylib.Circuits.Threshold
+public import Complexitylib.Circuits.Threshold.Parity
 public import Complexitylib.Circuits.Monotone
 public import Complexitylib.Circuits.KarchmerWigderson
 public import Complexitylib.Circuits.KarchmerWigderson.Circuit
@@ -238,6 +239,8 @@ Public modules (definitions a reviewer should read):
   topology-preserving circuit transport between compatible bases
 * `Complexitylib.Circuits.Threshold` — unweighted threshold gates, strict
   majority, and exact unbounded-AND/OR simulation
+* `Complexitylib.Circuits.Threshold.Parity` — depth-two threshold circuits for
+  parity and parity in `TC0`
 * `Complexitylib.Circuits.Monotone` — typed monotone formulas, locality,
   monotonicity, and essential-input leaf lower bounds
 * `Complexitylib.Circuits.KarchmerWigderson` — rectangle-indexed deterministic
