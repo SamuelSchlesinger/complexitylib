@@ -148,15 +148,22 @@ The existing network proof checks local consistency of edge labels in an arbitra
 vertex order; that order need not be topological. A deterministic evaluation
 algorithm following the order is therefore not an automatic consequence.
 
-For a finite alphabet of size `q`, the analogous state count is `q^w`. The same
-coefficient is a plausible transfer with a dense target having rectangle threshold
-`K=q^{o(n)}`, after proving the corresponding alphabet-valued network lemma. This
-does not by itself construct a suitable family for each alphabet. Totally regular
-finite-field linear maps already have a separate checked multioutput transfer.
+For a finite alphabet of size `q`, the analogous state count is `q^w`. The
+alphabet-valued network lemma is now checked in the
+[frontier method](frontier-method/index.md): `Complexity.Frontier.lowerBound_gaussian`
+gives the same coefficient `L` for dense targets with rectangle threshold
+`K=q^{o(n)}` over any finite alphabet, any basis, and any accepting set, counting only
+gates of positive arity. This does not by itself construct a suitable family for each
+alphabet; the explicit Boolean family is covered over every Boolean basis. Totally
+regular finite-field linear maps also have a separate checked multioutput transfer.
 For arbitrary fan-in `k`, the identity `E-V=(k-1)s-n` does not supply a cubic
 compiler. A general `k`-argument gate cannot necessarily be simulated by `k-1`
 binary gates over the same alphabet: even three-input majority needs more than
-two binary Boolean gates. The proposed coefficient `L/(k-1)` needs another proof.
+two binary Boolean gates. The frontier method instead compiles fan-in `k` into a
+network of maximum degree `k+1` with cycle rank at most `(k-1)s+1-n`, and a spanning
+tree layout in every fixed degree (`Complexity.Frontier.layoutBound_one`) gives the
+checked bound `(k-1)s > (2-epsilon)n`. The proposed coefficient `L/(k-1)` needs a
+layout coefficient below one in degree `k+1`, which is open.
 
 The polynomial-gate transfer is now Lean-checked in
 [`MultiOutput/Polynomial.lean`](../../Complexitylib/Algebraic/LowerBound/Cutwidth/MultiOutput/Polynomial.lean).

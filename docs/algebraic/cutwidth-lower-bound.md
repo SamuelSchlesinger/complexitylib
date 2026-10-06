@@ -174,6 +174,32 @@ Gaussian edge-score decomposition supplies `A = 2p ≈ 0.28070` with
 `p = (3/(2π)) arccos ((1 + 2√2)/4)`; its rational weakening `A = 9/32`
 (`Multigraph.exists_orderingBound_nine_div_thirtyTwo`) gives `41/9`.
 
+### Any alphabet, basis, and fan-in: the frontier method
+
+`Complexitylib.Circuits.Frontier` (namespace `Complexity.Frontier`) proves the same bound in
+a general form. Circuits may be over any finite alphabet `U`, any CSLib signature and
+interpretation, and any accepting set, with fan-in `r`; only gates of positive arity are
+counted (`Cslib.Circuits.Circuit.innerSize`), so constant gates are free. A program of
+fan-in `r` compiles into an exact constraint network of maximum degree `r + 1` whose cycle
+rank plus the number of inputs it reads is at most `(r − 1) s + 1`
+(`Frontier.Compiler.cycleRank_add_ncard_read_le`). The layout hypothesis
+`Frontier.LayoutBound d A` bounds prefix cuts by `(A + η) β₁ + η |V| + C`, and
+`Frontier.lowerBound` gives `(r − 1) s > (1 + 1/A − ε) n` for dense rectangle-free sets
+with `log K = o(n)`. `Frontier.LayoutBound.of_orderingBound` turns the ordering bound above
+into `LayoutBound 3 A`, so the Gaussian coefficient carries over
+(`Frontier.lowerBound_gaussian`). A spanning-tree layout gives `LayoutBound d 1` in every
+degree (`Frontier.layoutBound_one`), hence `(r − 1) s > (2 − ε) n` for every fan-in.
+
+The concrete family satisfies the frontier hypotheses
+(`Frontier.sourceReductionHardFamily_frontierHypotheses`), so it inherits these bounds over
+every Boolean basis, for verifier circuits, and with sublinear monoid-aggregate gates
+(`Frontier.sourceReductionHardFamily_lt_innerSize_gaussian` and its siblings). Weighted
+peeling also bounds the agreement of the unpadded extractor with every circuit below
+`(L − ε) n` gates by `71/72 + 2^(−γ n)` (`Frontier.sourceReductionFamily_agreement_le`).
+The blueprint section *The frontier method* states every result, and the
+[research note](../../research/circuit-lower-bound-frontiers/frontier-method/index.md)
+records the refinements that still need supply theorems.
+
 ## Gaussian layouts: ordering coefficient below `1/3`
 
 The formalized bisection-to-pathwidth assembly cannot give a coefficient below

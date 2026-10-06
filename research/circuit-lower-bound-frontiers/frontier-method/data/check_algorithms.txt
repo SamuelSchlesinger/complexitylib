@@ -1,0 +1,3 @@
+Counting: 243 raw/signal layout comparisons, 235 strict signal savings, 44 ledger circuits matched exhaustive evaluation.
+Conditional expectations: exact local moments matched full enumeration at every choice; the potential decreased and all final deviations met the bound.
+Weighted frontier: 32 disjoint rectangles; asymmetric thresholds, exact deletion, charges, nonuniform weights, and shared error budgets passed.

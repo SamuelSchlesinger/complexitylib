@@ -12077,6 +12077,455 @@ no superlinear unrestricted circuit theorem follows from them alone.
   depth form and the size form false for every $c$.
 \end{definition}
 
+\section{The frontier method}
+\label{sec:lowerbounds-frontier}
+
+The cutwidth argument above is stated for Boolean circuits over the full binary
+basis. The frontier method (namespace \texttt{Complexity.Frontier}) proves the
+same bound in a general form: circuits over any finite alphabet $U$ with
+$|U|\ge2$, over any basis (a CSLib signature with an interpretation on $U$),
+with any accepting set $\mathrm{Acc}\subseteq U$, and with fan-in $r\ge2$. Only
+gates of positive arity are counted (\texttt{Circuit.innerSize}), so constant
+gates are free. The graph-theoretic input is a layout hypothesis measured by
+the cycle rank, and the Gaussian ordering bound of
+Theorem~\ref{thm:lowerbounds-algebraic-gaussian-coefficient} supplies it for
+fan-in two. The same frontiers give bounds for linear maps, aggregate gates,
+verifier circuits, and the average case, and they refine the counting by
+signals, codes, pruned transitions, and trees of regions.
+
+\begin{definition}[Rectangle-free sets and sweeps]
+  \label{def:lowerbounds-frontier-sweep}
+  \lean{Complexity.Frontier.rectangle, Complexity.Frontier.RectangleFree,
+    Complexity.Frontier.Sweep, Complexity.Frontier.Sweep.Coherent}
+  \leanok
+  For a set of coordinates $X\subseteq\iota$, the rectangle with sides
+  $A\subseteq U^X$ and $B\subseteq U^{X^c}$ consists of the inputs whose part on
+  $X$ lies in $A$ and whose part on $X^c$ lies in $B$. A set $S\subseteq U^\iota$
+  is $K$-rectangle-free when every rectangle contained in $S$, for every $X$, has
+  a side with fewer than $K$ elements. A sweep of $S$ reveals coordinates over
+  $T$ steps, from none to all, and sends at each step a message such that inputs
+  of $S$ with the same message can exchange their unrevealed parts and remain in
+  $S$. A sweep is coherent when such an exchange also keeps the message, and
+  every other message equals that of one of the two inputs.
+\end{definition}
+
+\begin{lemma}[Frontier counting lemma]
+  \label{lem:lowerbounds-frontier-counting}
+  \lean{Complexity.Frontier.Sweep.ncard_le,
+    Complexity.Frontier.Sweep.ncard_le_of_small_sides,
+    Complexity.Frontier.RectangleFree.pow_ncard_compl_lt}
+  \leanok
+  \uses{def:lowerbounds-frontier-sweep}
+  If $S$ is $K$-rectangle-free with $|S|\ge K$, then for every sweep of $S$,
+  \[
+    |S| \le (K-1)^2 \sum_{t<T} \bigl|\{(m_t(x), m_{t+1}(x), x|_{\text{new}_t}) : x\in S\}\bigr|,
+  \]
+  where $m_t$ is the message at step $t$ and $x|_{\text{new}_t}$ the newly
+  revealed coordinates. An asymmetric form allows different thresholds on the two
+  sides. A $K$-rectangle-free set depending only on the coordinates $R$ satisfies
+  $|U|^{|R^c|}<K$ or $|S|<|U|^{|R^c|}K$.
+\end{lemma}
+\begin{proof}
+  \leanok
+  Charge each input of $S$ to the first step at which its peers' revealed parts
+  number at least $K$. At that step the peers form a rectangle, so their
+  unrevealed parts number fewer than $K$, and the revealed parts at the previous
+  step numbered fewer than $K$; each transition is therefore charged at most
+  $(K-1)^2$ times.
+\end{proof}
+
+\begin{definition}[The layout hypothesis]
+  \label{def:lowerbounds-frontier-layout-bound}
+  \lean{Complexity.Frontier.Multigraph, Complexity.Frontier.Multigraph.cycleRank,
+    Complexity.Frontier.Layout, Complexity.Frontier.LayoutBound}
+  \leanok
+  The cycle rank of a multigraph is $\beta_1=|E|+1-|V|$, truncated at zero. A layout
+  numbers the vertices $0,\dots,|V|-1$. The layout hypothesis
+  $\mathrm{LB}_d(A)$ says that for every $\eta>0$ some $C$ bounds, for every
+  connected loopless multigraph of maximum degree $d$, some layout all of whose
+  initial segments are crossed by at most $(A+\eta)\beta_1+\eta|V|+C$ edges.
+\end{definition}
+
+\begin{definition}[Constraint networks over an alphabet]
+  \label{def:lowerbounds-frontier-network}
+  \lean{Complexity.Frontier.Network, Complexity.Frontier.Network.frontierSweep}
+  \leanok
+  \uses{def:lowerbounds-frontier-layout-bound, def:lowerbounds-frontier-sweep}
+  A network over $U$ is a multigraph whose edges carry values in $U$, with a
+  local check at each vertex that sees the values of its incident edges and of
+  the inputs read at that vertex; each input is read by at most one vertex. It
+  accepts the inputs for which some edge assignment passes every check. A layout
+  sweeps the accepted set: the message at step $t$ is the assignment on the edges
+  crossing the first $t$ vertices.
+\end{definition}
+
+\begin{lemma}[Separator lemma and network counting]
+  \label{lem:lowerbounds-frontier-network-counting}
+  \lean{Complexity.Frontier.Network.Satisfies.splice,
+    Complexity.Frontier.Network.ncard_accepted_le}
+  \leanok
+  \uses{def:lowerbounds-frontier-network, lem:lowerbounds-frontier-counting}
+  Two satisfying assignments that agree on the cut of a vertex set $L$ splice
+  into a satisfying assignment of the spliced input. Hence a $K$-rectangle-free
+  accepted set has at most
+  $(K-1)^2\bigl(|V|\,|U|^{w+d+m}+|U|^{\text{unread}}\bigr)$ elements when some
+  layout has width $w$, the maximum degree is $d$, and every vertex reads at most
+  $m$ inputs.
+\end{lemma}
+\begin{proof}
+  \leanok
+  Splice vertex by vertex: each check sees only edges on one side of the cut or
+  edges of the cut itself. Apply Lemma~\ref{lem:lowerbounds-frontier-counting} to
+  the frontier sweep, whose transitions are determined by the edge values at two
+  adjacent frontiers and the inputs read at the new vertex; unread inputs are
+  revealed in one final step.
+\end{proof}
+
+\begin{theorem}[Compiling circuits of fan-in $r$]
+  \label{thm:lowerbounds-frontier-compiler}
+  \lean{Cslib.Circuits.Circuit.innerSize, Complexity.Frontier.Compiler.network,
+    Complexity.Frontier.Compiler.accepted_network,
+    Complexity.Frontier.Compiler.maxDegreeLE,
+    Complexity.Frontier.Compiler.card_vertex_le,
+    Complexity.Frontier.Compiler.cycleRank_add_ncard_read_le}
+  \leanok
+  \uses{def:lowerbounds-frontier-network}
+  A straight-line program of fan-in at most $r$ over any basis on $U$, with any
+  family of outputs and accepting sets, compiles into an exact network of
+  maximum degree $r+1$: signals, one junction per consumer, and output
+  vertices. It accepts exactly the inputs whose outputs lie in their accepting
+  sets, it has at most $2rs+3|O|$ vertices, and when it is connected its cycle
+  rank plus the number of inputs it reads is at most $(r-1)s+1$, where $s$ counts
+  the reachable gates of positive arity.
+\end{theorem}
+\begin{proof}
+  \leanok
+  Each gate checks its operation against the junctions feeding it, and each
+  junction chain copies one signal. An edge count over slots, junctions, and
+  gates gives the cycle rank; constant gates have no slots and contribute
+  nothing.
+\end{proof}
+
+\begin{theorem}[The frontier lower bound]
+  \label{thm:lowerbounds-frontier-main}
+  \lean{Complexity.Frontier.Decides, Complexity.Frontier.exists_graph_of_decides,
+    Complexity.Frontier.eventually_lt_of_demand, Complexity.Frontier.lowerBound,
+    Complexity.Frontier.lowerBound_fanInTwo}
+  \leanok
+  \uses{lem:lowerbounds-frontier-network-counting, thm:lowerbounds-frontier-compiler,
+    def:lowerbounds-frontier-layout-bound}
+  Let $r\ge2$, $A>0$, and assume $\mathrm{LB}_{r+1}(A)$. Let
+  $S_n\subseteq U^n$ be $K_n$-rectangle-free with $\log K_n=o(n)$ and
+  $n\log|U|-\log|S_n|=o(n)$. Then for every $\varepsilon>0$ and all large $n$,
+  every circuit of fan-in at most $r$ deciding $S_n$, over any basis on $U$ and
+  with any accepting set, has $s$ gates of positive arity with
+  $(r-1)s>(1+1/A-\varepsilon)n$.
+\end{theorem}
+\begin{proof}
+  \leanok
+  The support lemma forces all but $\log_{|U|}K$ inputs to be read, so the
+  compiled network has cycle rank at most $(r-1)s-n+o(n)$. Every layout has width
+  at least $\log_{|U|}|S_n|-o(n)=n-o(n)$ by
+  Lemma~\ref{lem:lowerbounds-frontier-network-counting}, while
+  $\mathrm{LB}_{r+1}(A)$ supplies a layout of width at most
+  $(A+\eta)\beta_1+\eta|V|+C$. The comparison of demand and supply fails for
+  small $\eta$ and large $n$ unless $(r-1)s>(1+1/A-\varepsilon)n$.
+\end{proof}
+
+\begin{theorem}[Layout bounds]
+  \label{thm:lowerbounds-frontier-layouts}
+  \lean{Complexity.Frontier.LayoutBound.of_orderingBound,
+    Complexity.Frontier.layoutBound_gaussian,
+    Complexity.Frontier.layoutBound_one_third,
+    Complexity.Frontier.Multigraph.Compression,
+    Complexity.Frontier.Multigraph.exists_layout_cycleRank,
+    Complexity.Frontier.layoutBound_one}
+  \leanok
+  \uses{def:lowerbounds-frontier-layout-bound,
+    thm:lowerbounds-algebraic-gaussian-coefficient}
+  The ordering hypothesis of the cutwidth development at every positive slack
+  gives $\mathrm{LB}_3$ with the same coefficient; hence $\mathrm{LB}_3(2p)$
+  with $p=\tfrac{3}{2\pi}\arccos\tfrac{1+2\sqrt2}{4}$, and $\mathrm{LB}_3(1/3)$.
+  In every maximum degree $d$, every connected multigraph has a layout of width
+  at most $\beta_1+d\lfloor\log_2|V|\rfloor$, so $\mathrm{LB}_d(1)$ holds.
+\end{theorem}
+\begin{proof}
+  \leanok
+  Number the vertices in the given order; $(|E|-|V|)^+\le\beta_1$ and
+  $3\log_2|V|\le\eta|V|+K$. For general degree, merge the blocks of a
+  degree-$d$ compression along a spanning tree: a prefix of a merged block is a
+  prefix of its larger part or that part followed by a prefix of a part at most
+  half as large, so tree layouts have width $d\lfloor\log_2|V|\rfloor$, and each
+  of the $\beta_1$ edges outside the tree adds one to every cut.
+\end{proof}
+
+\begin{theorem}[Unconditional bounds for dense rectangle-free sets]
+  \label{thm:lowerbounds-frontier-unconditional}
+  \lean{Complexity.Frontier.lowerBound_gaussian, Complexity.Frontier.lowerBound_four,
+    Complexity.Frontier.lowerBound_all_fanIn}
+  \leanok
+  \uses{thm:lowerbounds-frontier-main, thm:lowerbounds-frontier-layouts}
+  Under the hypotheses on $S_n$ of Theorem~\ref{thm:lowerbounds-frontier-main},
+  every circuit of fan-in two deciding $S_n$, over any basis on $U$, has more
+  than $\bigl(1+\pi/(3\arccos\tfrac{1+2\sqrt2}{4})-\varepsilon\bigr)n\approx
+  (4.5625-\varepsilon)n$ gates of positive arity, in particular more than
+  $(4-\varepsilon)n$; and for every fixed fan-in $r\ge2$, $(r-1)s>(2-\varepsilon)n$.
+\end{theorem}
+\begin{proof}
+  \leanok
+  Instantiate Theorem~\ref{thm:lowerbounds-frontier-main} with the layout
+  bounds of Theorem~\ref{thm:lowerbounds-frontier-layouts}.
+\end{proof}
+
+\begin{theorem}[The explicit family over any basis and fan-in]
+  \label{thm:lowerbounds-frontier-explicit}
+  \lean{Complexity.Frontier.rectangleFree_setOf,
+    Complexity.Frontier.sourceReductionHardFamily_frontierHypotheses,
+    Complexity.Frontier.sourceReductionHardFamily_lt_innerSize_gaussian,
+    Complexity.Frontier.sourceReductionHardFamily_lt_innerSize_all_fanIn,
+    Complexity.Frontier.sourceReductionHardFamily_lt_innerSize_nondeterministic,
+    Complexity.Frontier.sourceReductionHardFamily_lt_innerGates_aggregate,
+    Complexity.Frontier.flatSumsetBias_of_flatSumsetExtractor,
+    Complexity.Frontier.sourceReductionFamily_agreement_le}
+  \leanok
+  \uses{thm:lowerbounds-algebraic-explicit-four-n,
+    thm:lowerbounds-frontier-unconditional, thm:lowerbounds-frontier-nondeterministic,
+    thm:lowerbounds-frontier-ledger, thm:lowerbounds-frontier-average-case}
+  The accepted sets of the polynomial-time family
+  $\mathrm{sourceReductionHardFamily}$ of
+  Theorem~\ref{thm:lowerbounds-algebraic-explicit-four-n} satisfy the hypotheses
+  of Theorem~\ref{thm:lowerbounds-frontier-main}. Hence, for every
+  $\varepsilon>0$ and all large $n$: every circuit of fan-in two deciding it,
+  over any basis on $\{0,1\}$ and with any accepting set, has more than
+  $\bigl(1+\pi/(3\arccos\tfrac{1+2\sqrt2}{4})-\varepsilon\bigr)n$ gates of
+  positive arity; for every fan-in $r\ge2$, $(r-1)s>(2-\varepsilon)n$; the
+  Gaussian bound holds for verifier circuits over any basis, uniformly in the
+  number of witness inputs; and it holds for circuits with special gates of
+  unbounded fan-in aggregating in a finite commutative monoid with $o(n)$ bits
+  of total state, counting only the ordinary gates. Moreover the unpadded
+  extractor, with error $35/72$, agrees with every circuit of fan-in two over any
+  basis with at most $\bigl(1+\pi/(3\arccos\tfrac{1+2\sqrt2}{4})-\varepsilon\bigr)n$
+  gates of positive arity on at most a $71/72+2^{-\gamma n}$ fraction of inputs,
+  for some $\gamma>0$.
+\end{theorem}
+\begin{proof}
+  \leanok
+  Boolean rectangle-freeness of the cutwidth development is rectangle-freeness
+  of the accepted set. Balanced padding of the eventually flat extractor is
+  $2K$-rectangle-free with $\log K=o(n)$, and it accepts exactly half the cube,
+  so the density deficit is $\log2$. Apply
+  Theorems~\ref{thm:lowerbounds-frontier-unconditional},
+  \ref{thm:lowerbounds-frontier-nondeterministic},
+  and~\ref{thm:lowerbounds-frontier-ledger}. An extractor with error $\nu$ has
+  signed sumset bias $2\nu$, so
+  Theorem~\ref{thm:lowerbounds-frontier-average-case} applies with
+  $b_n=35/72$.
+\end{proof}
+
+\begin{theorem}[Sumset dispersers over an additive alphabet]
+  \label{thm:lowerbounds-frontier-sumset-disperser}
+  \lean{Complexity.Frontier.SumsetDisperser,
+    Complexity.Frontier.SumsetDisperser.rectangleFree,
+    Complexity.Frontier.lowerBound_sumsetDisperser}
+  \leanok
+  \uses{thm:lowerbounds-frontier-unconditional}
+  A function on $U^n$, for a finite alphabet with an addition and zero, that takes
+  both values on $A+B$ whenever $|A|,|B|\ge K$ has $K$-rectangle-free fibres. If
+  such dispersers have $\log K_n=o(n)$ and accept a fixed fraction $\delta>0$ of
+  $U^n$, every circuit of fan-in two deciding them, over any basis, has more
+  than $\bigl(1+\pi/(3\arccos\tfrac{1+2\sqrt2}{4})-\varepsilon\bigr)n$ gates.
+\end{theorem}
+\begin{proof}
+  \leanok
+  A rectangle with large sides, padded by zero on the opposite coordinates, gives
+  sets $A$ and $B$ whose sumset is the rectangle. A fixed density fraction makes
+  the density deficit constant.
+\end{proof}
+
+\begin{theorem}[Verifier circuits]
+  \label{thm:lowerbounds-frontier-nondeterministic}
+  \lean{Complexity.Frontier.Network.hide, Complexity.Frontier.Network.accepted_hide,
+    Complexity.Frontier.NondeterministicDecides,
+    Complexity.Frontier.lowerBound_nondeterministic,
+    Complexity.Frontier.lowerBound_nondeterministic_gaussian}
+  \leanok
+  \uses{thm:lowerbounds-frontier-main, thm:lowerbounds-frontier-layouts}
+  Theorem~\ref{thm:lowerbounds-frontier-main} holds for circuits on $n+k$
+  inputs, with arbitrary $k$, that accept $x$ exactly when some witness $y$ makes
+  the output accept, uniformly in $k$; for fan-in two the Gaussian coefficient
+  holds. Witness inputs are not counted in $n$; every gate of positive arity is
+  counted.
+\end{theorem}
+\begin{proof}
+  \leanok
+  Hiding an input moves its existential quantifier into the local check of the
+  vertex that reads it, which preserves the network and its acceptance. The exact
+  counting argument never uses uniqueness of satisfying assignments.
+\end{proof}
+
+\begin{theorem}[Linear maps and arithmetic circuits]
+  \label{thm:lowerbounds-frontier-linear}
+  \lean{Complexity.Frontier.TotallyRegular, Complexity.Frontier.totallyRegular_cauchy,
+    Complexity.Frontier.exists_affine_circuit, Complexity.Frontier.lowerBound_linear,
+    Complexity.Frontier.linear_finite_gaussian,
+    Complexity.Frontier.linear_polynomial_gaussian,
+    Complexity.Frontier.arith_cauchy_gaussian, Complexity.Frontier.cauchyZMod_gaussian}
+  \leanok
+  \uses{thm:lowerbounds-frontier-main, thm:lowerbounds-frontier-layouts}
+  Under $\mathrm{LB}_{r+1}(A)$, every circuit of fan-in at most $r$ with linear
+  capacity computing $x\mapsto Mx$ for a totally regular $N\times N$ matrix has
+  $(r-1)s>(1+1/A-\varepsilon)N$, counting gates of positive arity. With the
+  Gaussian coefficient: over finite fields for every basis of fan-in two; over
+  infinite fields for every basis of polynomial operations, via a dual-number
+  linearization that produces an affine circuit of the same size, inner size, and
+  fan-in; for arithmetic circuits computing the Cauchy map over every field of
+  characteristic zero; and for the Cauchy map over $\mathbb{Z}/q$ for every prime
+  $q\ge2N$, over any basis.
+\end{theorem}
+\begin{proof}
+  \leanok
+  Every layout of the compiled network passes a vertex set that reads inputs $X$
+  and holds outputs $Y$ with $|X|+|Y|=N$. Splicing shows that the blocks
+  $M[Y,X^c]$ and $M[Y^c,X]$ see the input only through the values on the cut, and
+  total regularity makes both nonsingular, so those values determine the input;
+  linear capacity then forces at least $N$ cut edges. Over infinite fields the
+  polynomial gates are replaced by their first-order Taylor expansions at a base
+  point, computed over the dual numbers.
+\end{proof}
+
+\begin{theorem}[Ledgers for gates of unbounded fan-in]
+  \label{thm:lowerbounds-frontier-ledger}
+  \lean{Complexity.Frontier.Ledger, Complexity.Frontier.Ledger.total_run_eq_iff,
+    Complexity.Frontier.Aggregates,
+    Complexity.Frontier.LayoutBound.exists_layout_componentwise,
+    Complexity.Frontier.lowerBound_ledger, Complexity.Frontier.lowerBound_aggregate,
+    Complexity.Frontier.lowerBound_aggregate_gaussian}
+  \leanok
+  \uses{thm:lowerbounds-frontier-main, thm:lowerbounds-frontier-layouts}
+  Under the hypotheses of Theorem~\ref{thm:lowerbounds-frontier-main}, let the
+  special gates of a circuit, of any fan-in, have a ledger in a finite commutative
+  monoid $M$ with $\log|M|\le\beta(n)=o(n)$: each wire contributes an element of
+  $M$ according to its value, and each special gate is read off the product. Then
+  the ordinary gates of positive arity, of fan-in at most $r$, satisfy
+  $(r-1)s>(1+1/A-\varepsilon)n$. Gates aggregating in one monoid $T$, such as
+  AND, OR, parity, and counting modulo a fixed number, have a ledger in
+  $T^{\text{special}}$.
+\end{theorem}
+\begin{proof}
+  \leanok
+  Guess the special outputs, replace the special gates by placeholders, and lay
+  out the erased program one connected component after another, carrying the
+  product of contributions in the messages; a guess is consistent exactly when the
+  ledger total confirms it. The counting lemma finds a component that reads almost
+  every input and whose layout is wide, up to $2\log|M|$, and its cycle rank gives
+  the comparison of demand and supply.
+\end{proof}
+
+\begin{theorem}[Average-case hardness]
+  \label{thm:lowerbounds-frontier-average-case}
+  \lean{Complexity.Frontier.Sweep.abs_sumOn_le_of_budget,
+    Complexity.Frontier.RectangleBias, Complexity.Frontier.agreement,
+    Complexity.Frontier.averageCase, Complexity.Frontier.averageCase_abs,
+    Complexity.Frontier.averageCase_gaussian, Complexity.Frontier.FlatSumsetBias,
+    Complexity.Frontier.FlatSumsetBias.rectangleBias,
+    Complexity.Frontier.averageCase_sumset}
+  \leanok
+  \uses{lem:lowerbounds-frontier-counting, thm:lowerbounds-frontier-layouts}
+  For a coherent sweep, a weight bounded by $a$ whose sum over every rectangle
+  with sides at least $K_L$ and $K_R$ is paid by a nonnegative budget satisfies
+  $|\sum_S w|\le\sum_S\mathrm{cost}+a(K_L-1)(K_R-1)T$, where $T$ counts the
+  transitions. Consequently, if $f_n$ has bias at most $2b_n$ on every coordinate
+  rectangle with both sides at least $K_n$, with $\log K_n=o(n)$, then under
+  $\mathrm{LB}_3(A)$ every Boolean circuit of fan-in two over any basis with at
+  most $(1+1/A-\varepsilon)n$ gates of positive arity agrees with $f_n$ on at most
+  a $1/2+b_n+2^{-\gamma n}$ fraction of inputs, for any $\gamma<\min(1,A\varepsilon)$;
+  the same bound holds for the absolute correlation. For the Gaussian coefficient
+  and for flat-source sumset extractors with error $b_n$, some $\gamma>0$ works.
+\end{theorem}
+\begin{proof}
+  \leanok
+  Peel thick rectangles of peers, which the budget pays for, and delete their
+  message classes; coherence keeps the remaining sweep a sweep. The thin remainder
+  pays the maximum atom per transition. Apply this to both output classes of the
+  circuit along a Gaussian layout.
+\end{proof}
+
+\begin{theorem}[Signal capacity, linear syndromes, and transition codes]
+  \label{thm:lowerbounds-frontier-boundary}
+  \lean{Complexity.Frontier.Compiler.signalCut_eq_hypergraph_cut,
+    Complexity.Frontier.Compiler.signalCut_submodular,
+    Complexity.Frontier.Compiler.ncard_accepted_le_signals,
+    Complexity.Frontier.LinearBoundary.ncard_syndromes,
+    Complexity.Frontier.LinearBoundary.ncard_syndromes_le_states,
+    Complexity.Frontier.Sweep.transitionCount_le_codes,
+    Complexity.Frontier.Sweep.abs_sumOn_le_codes,
+    Complexity.Frontier.Sweep.transitionCount_le_linear_codes}
+  \leanok
+  \uses{thm:lowerbounds-frontier-compiler, lem:lowerbounds-frontier-counting,
+    thm:lowerbounds-frontier-average-case}
+  The distinct signals crossing a cut of the compiled network are exactly the
+  cut of its signal hypergraph, and their number is a symmetric submodular
+  function of the cut; counting may charge distinct signals instead of edges.
+  For a linear system $Lx+Ry=0$ over a finite field $F$, the feasible syndromes
+  number exactly $|F|^{\operatorname{rank}L+\operatorname{rank}R-\operatorname{rank}[L\,R]}$.
+  Any finite code that determines the transitions on $S$ bounds the transition
+  count, in both the exact and the weighted counting lemmas.
+\end{theorem}
+\begin{proof}
+  \leanok
+  Each signal's occurrences form a connected subgraph, so a signal crosses a cut
+  exactly when its hyperedge does. The feasible syndromes form
+  $\operatorname{im}L\cap\operatorname{im}R$. A determining code surjects onto the
+  transitions it determines.
+\end{proof}
+
+\begin{theorem}[Pruning and trees of regions]
+  \label{thm:lowerbounds-frontier-pruning-tree}
+  \lean{Complexity.Frontier.Sweep.abs_sumOn_le_pruned,
+    Complexity.Frontier.agreement_le_pruned_sweeps,
+    Complexity.Frontier.RegionTree, Complexity.Frontier.TreeFrontier,
+    Complexity.Frontier.TreeFrontier.abs_sumOn_le_of_budget,
+    Complexity.Frontier.Network.abs_sumOn_accepted_le_tree}
+  \leanok
+  \uses{thm:lowerbounds-frontier-average-case}
+  Restricting a coherent sweep with nested revealed sets to the inputs whose
+  transitions all lie in chosen sets preserves splicing; the discarded inputs are
+  paid by a union bound, and discarding probability mass $\delta$ costs at most
+  $\delta/2$ in agreement. On a binary tree of regions, weighted peeling has
+  residual factor $(K-1)^3$ per joint merge record. For a network with unique
+  satisfying assignments that reads every input, a laminar decomposition gives
+  such a tree, whose exponent at a node is the size of the union of its cut and
+  its two children's cuts plus the inputs read locally.
+\end{theorem}
+\begin{proof}
+  \leanok
+  Retained inputs that agree on a message splice into retained inputs, since
+  every transition of a splice is a transition of one of its two parents. For
+  trees, charge each input to a node of minimal rank whose interior is large but
+  whose children's interiors are small.
+\end{proof}
+
+\begin{theorem}[Independent median updates]
+  \label{thm:lowerbounds-frontier-local}
+  \lean{Complexity.Frontier.Multigraph.cutSize_eq_add_gain,
+    Complexity.Frontier.Multigraph.cutSize_lt_of_local,
+    Complexity.Frontier.LocalLayout.improve,
+    Complexity.Frontier.LocalLayout.cutSize_improve_cubic_le}
+  \leanok
+  \uses{def:lowerbounds-frontier-layout-bound}
+  Changing the colours of an independent set of vertices changes the size of a
+  cut by the sum of the local gains, and strictly decreases it when one selected
+  vertex improves. In a cubic multigraph, replacing the keys of an independent set
+  by the median of their neighbours' keys does not increase the number of edges
+  crossing any threshold.
+\end{theorem}
+\begin{proof}
+  \leanok
+  No edge joins two selected vertices, so the edges at distinct selected vertices
+  are disjoint. At every threshold the median agrees with a majority of the three
+  neighbours.
+\end{proof}
+
 \section{Essential inputs and gate elimination}
 \label{sec:lowerbounds-gate-elimination}
 

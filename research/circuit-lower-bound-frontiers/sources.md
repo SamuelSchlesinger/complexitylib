@@ -354,6 +354,17 @@ we use the safe `4p^w` restriction bound, including small `w`, not the abstract'
 
 [Primary source](https://web.vu.lt/mif/s.jukna/ftp/negwidth-rev.pdf).
 
+<a id="kashyap08"></a>
+
+## kashyap08
+
+Navin Kashyap, *Matroid Pathwidth and Code Trellis Complexity*, arXiv:0705.1384.
+  Cited, as in the frontier-method notes, as the precedent relating the trellis state
+  complexity of a linear code to the pathwidth of its matroid; theorem numbers were not
+  re-inspected for this corpus.
+
+[Primary source](https://arxiv.org/abs/0705.1384).
+
 <a id="krw95"></a>
 
 ## krw95

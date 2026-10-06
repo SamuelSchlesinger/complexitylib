@@ -351,6 +351,23 @@ change the leading coefficient. Rectangle peeling extends the bound to the
 average case without improving it, and neither the prefix-halving gain of AVOID
 nor affine-aware counting is known to add to it.
 
+The frontier method (`Complexity.Frontier`, from the-frontier-method `373e009`) restates
+this argument in general form: circuits over any finite alphabet, any basis, and any
+accepting set, with fan-in `r`, counting only gates of positive arity against the cycle
+rank under the layout hypothesis `LayoutBound (r + 1) A`. `LayoutBound.of_orderingBound`
+transfers the Gaussian ordering bound, so the explicit family needs more than
+`(4.5625 - ε) n` gates of positive arity over every Boolean basis with constants free,
+and `(r - 1) s > (2 - ε) n` for every fan-in `r` from spanning-tree layouts
+(`Frontier.sourceReductionHardFamily_lt_innerSize_gaussian`, `..._all_fanIn`). Weighted
+peeling gives the average case at the same coefficient; the explicit extractor, with
+error `35/72`, agrees with every such circuit on at most a `71/72 + 2^(-γ n)` fraction
+(`Frontier.sourceReductionFamily_agreement_le`). The development also checks signal
+hypergraph cuts and their submodularity, exact linear syndrome counts, transition codes,
+pruning, trees of regions, monoid ledgers, linear maps with dual-number linearization,
+and independent median updates; the
+[research note](research/circuit-lower-bound-frontiers/frontier-method/index.md) records
+what each refinement still needs.
+
 The cut-counting lemma now charges a vertex by the bit patterns that satisfying
 assignments realize on its charged edges (`Network.card_accepting_le_of_realized`,
 with `Network.realized`, `Network.Determines`, and `Network.charged`); counting
@@ -530,6 +547,25 @@ can retain all its inputs; the audit records exact obstructions to those local s
 - [ ] **Rigidity and local repair.** Audit the four-star distance-kernel rigidity
   lemma first. A compactness argument would give some fixed improvement `δ > 0`
   over the two-sided coefficient, but no numerical `δ` is established.
+- [ ] **Consolidate the Boolean pipeline onto `Complexity.Frontier`.** The Boolean
+  wiring network, `FourN`, `Nondeterministic`, `Forget`, and `AverageCase` are special
+  cases of the frontier method at `U = Bool`, `r = 2`. Derive their public theorems from
+  the general ones, then retire the duplicated network and counting layers. The cubic
+  `Compression` is the degree-three case of the frontier method's degree-generic one.
+  Keep `OrderingBound`, whose logarithmic error is sharper than `LayoutBound`'s, as the
+  interface to the Gaussian layouts.
+- [ ] **Layout coefficients below one in degree `d ≥ 4`.** `layoutBound_one` gives
+  `(r - 1) s > (2 - ε) n` for fan-in `r ≥ 3`. Expanding high-degree vertices into
+  subcubic port trees, applying the cubic layout bound, and projecting the order back
+  needs a congestion bound for the projection, together with size, degree,
+  connectivity, and cycle-rank preservation, on the irregular graphs the compiler
+  produces.
+- [ ] **Capacity supply theorems.** The frontier method's counting inequalities accept
+  distinct signals, any determining transition code, pruned transition sets with a
+  tail budget, and joint merge boundaries of a tree of regions. Each needs a universal
+  layout or decomposition theorem with a smaller coefficient on compiled networks; the
+  independent median update needs a quantitative gain uniform over cubic graphs and
+  thresholds.
 
 The arithmetic bridge is now checked in `MultiOutput.Polynomial`: arbitrary
 fan-in-two polynomial gates computing any totally regular linear map over any

@@ -26,6 +26,7 @@ CASES = [
     ("hard-functions/data/check_robustness.py", "hard-functions/data/check_robustness.txt"),
     ("graph-perspective/data/check_obstructions.py", "graph-perspective/data/checked-output.json"),
     ("barriers-perspective/data/check_obstructions.py", "barriers-perspective/data/check_obstructions.txt"),
+    ("frontier-method/data/check_algorithms.py", "frontier-method/data/check_algorithms.txt"),
 ]
 
 
