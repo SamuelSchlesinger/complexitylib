@@ -10459,6 +10459,83 @@ Theorem~\ref{thm:lowerbounds-algebraic-explicit-four-n}.
   or $\min(m,n-m)>A(\varepsilon n-1)$ exceeds the logarithmic term, or $M<n+m-1$.
 \end{proof}
 
+\begin{definition}[Hyperconcentrator]
+  \label{def:lowerbounds-algebraic-hyperconcentrator}
+  \lean{Algebraic.Cutwidth.Multigraph.Hyperconcentrator,
+    Algebraic.Cutwidth.Multigraph.Superconcentrator.hyperconcentrator}
+  \leanok
+  \uses{def:lowerbounds-algebraic-superconcentrator}
+  A multigraph with distinct vertices $i_1,\dots,i_N$ (inputs) and $o_1,\dots,o_N$ (outputs),
+  $2N$ in all, is an $N$-hyperconcentrator when for every $k$, every set of $k$ inputs is joined
+  to the first $k$ outputs $o_1,\dots,o_k$ by $k$ vertex-disjoint directed walks. The walks may
+  pass through other inputs and outputs, and every path is a walk, so this includes
+  hyperconcentrators defined with paths. Every superconcentrator is a hyperconcentrator.
+  Parallel edges are counted separately.
+\end{definition}
+
+\begin{lemma}[Hyperconcentrator cut lemma]
+  \label{lem:lowerbounds-algebraic-hyperconcentrator-cut}
+  \lean{Algebraic.Cutwidth.Multigraph.Hyperconcentrator.exists_le_card_cut}
+  \leanok
+  \uses{def:lowerbounds-algebraic-hyperconcentrator}
+  Every linear order of the vertices of an $N$-hyperconcentrator has a lower set whose cut has
+  at least $\lfloor N/2\rfloor$ edges.
+\end{lemma}
+\begin{proof}
+  \leanok
+  Let $h=\lfloor N/2\rfloor$, take a lower set $S$ containing exactly $h$ inputs, and let $c$ of
+  $o_1,\dots,o_h$ lie in $S$. The $h$ inputs in $S$ are joined to $o_1,\dots,o_h$ by
+  vertex-disjoint walks, and the $h-c$ of them ending outside $S$ leave it along distinct edges
+  directed out of $S$. The $N-h\ge h$ inputs outside $S$ are joined to $o_1,\dots,o_{N-h}$, among
+  them $o_1,\dots,o_h$, and the $c$ walks ending in $S$ enter it along distinct edges directed
+  into $S$. So the cut of $S$ has at least $h$ edges.
+\end{proof}
+
+\begin{theorem}[Hyperconcentrators need $(3.78-o(1))N$ edges]
+  \label{thm:lowerbounds-algebraic-hyperconcentrator}
+  \lean{Algebraic.Cutwidth.Multigraph.Hyperconcentrator.le_of_orderingBound,
+    Algebraic.Cutwidth.Multigraph.Hyperconcentrator.le_of_orderingBound_of_inDegree,
+    Algebraic.Cutwidth.Multigraph.Hyperconcentrator.eventually_le_card_edges_of_orderingBound,
+    Algebraic.Cutwidth.Multigraph.Hyperconcentrator.eventually_le_card_vertices_of_orderingBound,
+    Algebraic.Cutwidth.Multigraph.Hyperconcentrator.eventually_le_card_edges,
+    Algebraic.Cutwidth.Multigraph.Hyperconcentrator.eventually_thirtyFour_div_nine_sub_mul_le_card_edges,
+    Algebraic.Cutwidth.Multigraph.Hyperconcentrator.eventually_le_card_vertices,
+    Algebraic.Cutwidth.Multigraph.Hyperconcentrator.eventually_twentyFive_div_nine_sub_mul_le_card_vertices,
+    Algebraic.Cutwidth.Multigraph.Hyperconcentrator.eventually_seven_div_two_sub_mul_le_card_edges}
+  \leanok
+  \uses{def:lowerbounds-algebraic-hyperconcentrator,
+    lem:lowerbounds-algebraic-hyperconcentrator-cut,
+    def:lowerbounds-algebraic-ordering-hypotheses,
+    thm:lowerbounds-algebraic-ordering-bound,
+    thm:lowerbounds-algebraic-gaussian-coefficient,
+    thm:lowerbounds-algebraic-superconcentrator,
+    cor:lowerbounds-algebraic-superconcentrator-in-degree}
+  Assume $\mathrm{OrderingBound}(A,\eta,C)$ with $A+\eta\ge0$. Every $N$-hyperconcentrator with
+  $N>0$ and $M$ edges satisfies $\lfloor N/2\rfloor\le(A+\eta)\max\{M-2N,0\}+3\log_2(2M)+C$;
+  if its inputs have in-degree zero and its vertices in-degree at most two, then with $V$
+  vertices also $\lfloor N/2\rfloor\le(A+\eta)\max\{(V-N)-N,0\}+3\log_2(4(V-N))+C$. Hence if
+  $A>0$ and every $\eta>0$ admits such a $C$, then for every $\varepsilon>0$ and all large $N$
+  every $N$-hyperconcentrator has at least $(2+1/(2A)-\varepsilon)N$ edges, and at least
+  $(1+1/(2A)-\varepsilon)N$ non-input vertices under the degree conditions. With the edge-score
+  coefficient $A=2p$ these are $(2+\kappa/2-\varepsilon)N\approx(3.78-\varepsilon)N$ edges, at
+  least $(34/9-\varepsilon)N$, and $(1+\kappa/2-\varepsilon)N\approx(2.78-\varepsilon)N$
+  non-input vertices, at least $(25/9-\varepsilon)N$, where
+  $\kappa=\pi/(3\arccos\tfrac{1+2\sqrt2}{4})$. The coefficient $A=1/3$ gives
+  $(7/2-\varepsilon)N$ edges.
+\end{theorem}
+\begin{proof}
+  \leanok
+  Every input reaches $o_1$ and every output is reached, so all terminals lie in one undirected
+  component and each has an edge of the component at it. Splitting the component as in
+  Theorem~\ref{thm:lowerbounds-algebraic-superconcentrator} gives a connected loopless
+  hyperconcentrator of maximum degree three whose edges minus vertices are at most $M-2N$, with
+  at most $2M$ vertices; its ordering has a prefix cut with at least $\lfloor N/2\rfloor$ edges
+  by Lemma~\ref{lem:lowerbounds-algebraic-hyperconcentrator-cut}. Under the degree conditions
+  the count of Corollary~\ref{cor:lowerbounds-algebraic-superconcentrator-in-degree} bounds the
+  edges minus vertices by $(V-N)-N$. The connected split graph gives $M\ge2N-1$, and
+  $\lfloor N/2\rfloor/A\ge N/(2A)-1/(2A)$; the asymptotic bound follows as for concentrators.
+\end{proof}
+
 \begin{theorem}[The concrete family under a general ordering coefficient]
   \label{thm:lowerbounds-algebraic-explicit-coefficient}
   \lean{Algebraic.Cutwidth.sourceReductionHardFamily_eventually_lt_size_of_orderingBound}

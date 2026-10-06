@@ -192,6 +192,11 @@ def headlineTheorems : List Name := [
   `Algebraic.Cutwidth.Multigraph.Concentrator.eventually_le_card_edges_half,
   (`Algebraic.Cutwidth.Multigraph.Concentrator).str
     "eventually_fiftyNine_div_eighteen_sub_mul_le_card_edges",
+  -- Hyperconcentrators: the cut lemma and the (3.78 - o(1)) N edge bound
+  `Algebraic.Cutwidth.Multigraph.Superconcentrator.hyperconcentrator,
+  `Algebraic.Cutwidth.Multigraph.Hyperconcentrator.exists_le_card_cut,
+  `Algebraic.Cutwidth.Multigraph.Hyperconcentrator.eventually_le_card_edges,
+  `Algebraic.Cutwidth.Multigraph.Hyperconcentrator.eventually_le_card_vertices,
   -- The frontier method: any alphabet, basis, and fan-in, with constant gates free
   `Complexity.Frontier.Sweep.ncard_le,
   `Complexity.Frontier.lowerBound,
