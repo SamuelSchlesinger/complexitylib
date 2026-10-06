@@ -63,6 +63,13 @@ open Filter Multigraph
 
 variable {n s : ℕ}
 
+/-- **The network commutes with monotone maps.** For a monotone `f`, evaluating on `f ∘ x` gives
+`f` applied to the output on `x`. Taking `f` a threshold map to `Bool`, this is the `0`-`1`
+principle behind the `0`-`1` form of the halver property. -/
+theorem eval_comp (N : ComparatorNetwork n s) {α β : Type*} [LinearOrder α] [LinearOrder β]
+    {f : α → β} (hf : Monotone f) (x : Fin n → α) : N.eval (f ∘ x) = f ∘ N.eval x :=
+  Halver.Internal.eval_comp N hf x
+
 /-- The wire graph has `2 n + 2 s` vertices: two terminals per wire and two ends per
 comparator. -/
 theorem card_wireVertex : Fintype.card (WireVertex n s) = 2 * n + 2 * s :=

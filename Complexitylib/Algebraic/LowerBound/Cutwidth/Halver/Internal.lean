@@ -100,6 +100,32 @@ theorem eval_eq_self (x : Fin n → α) (h : ∀ c, x (N.minWire c) = x (N.maxWi
       · simp [ComparatorNetwork.state, ht, ih]
   exact this s
 
+/-- Comparators commute with monotone maps. -/
+theorem apply_comp {β : Type*} [LinearOrder β] {f : α → β} (hf : Monotone f) (c : Fin s)
+    (x : Fin n → α) : N.apply c (f ∘ x) = f ∘ N.apply c x := by
+  funext w
+  simp only [ComparatorNetwork.apply, Function.comp_apply]
+  split_ifs
+  · exact (hf.map_min).symm
+  · exact (hf.map_max).symm
+  · rfl
+
+/-- **The network commutes with monotone maps.** -/
+theorem eval_comp {β : Type*} [LinearOrder β] {f : α → β} (hf : Monotone f) (x : Fin n → α) :
+    N.eval (f ∘ x) = f ∘ N.eval x := by
+  have : ∀ t, N.state (f ∘ x) t = f ∘ N.state x t := by
+    intro t
+    induction t with
+    | zero => rfl
+    | succ t ih =>
+      by_cases ht : t < s
+      · have h₁ := state_succ N (f ∘ x) ⟨t, ht⟩
+        have h₂ := state_succ N x ⟨t, ht⟩
+        simp only at h₁ h₂
+        rw [h₁, h₂, ih, apply_comp N hf]
+      · simp [ComparatorNetwork.state, ht, ih]
+  exact this s
+
 end Evaluation
 
 /-! ### Stops along a wire -/
