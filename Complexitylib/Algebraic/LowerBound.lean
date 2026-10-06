@@ -61,6 +61,7 @@ public import Complexitylib.Algebraic.LowerBound.Monotone.Clique.Asymptotic
 public import Complexitylib.Algebraic.LowerBound.Cutwidth
 public import Complexitylib.Algebraic.LowerBound.Nechiporuk
 public import Complexitylib.Algebraic.LowerBound.KarchmerWigderson
+public import Complexitylib.Algebraic.LowerBound.MCSP
 
 /-!
 # Circuit lower bounds
