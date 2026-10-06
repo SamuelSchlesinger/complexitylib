@@ -7,6 +7,7 @@ Authors: Samuel Schlesinger
 module
 public import Complexitylib.Algebraic.LowerBound.Threshold.Defs
 import Complexitylib.Algebraic.LowerBound.Threshold.Internal.Corollaries
+import Complexitylib.Algebraic.LowerBound.Threshold.Internal.Activation
 import Mathlib.Tactic.Ring
 
 /-!
@@ -47,6 +48,10 @@ coordinates, every rectangle on which `f` is constant has a side with fewer than
 * `TwoSidedRectangleFree.two_pow_lt_of_multilevel`,
   `TwoSidedRectangleFree.two_pow_sub_lt_of_multilevel` (C2′): if `f = F(⟨w, x⟩)` for a function
   `F` with `T` transitions, `2ⁿ < 4 K² · max 1 (4T)`, and `T > 2 ^ (n - 2k - 4)`.
+* `TwoSidedRectangleFree.two_pow_lt_of_activations` (C4, mixed gate costs): in an
+  `ActivationProgram` whose input-reading gate `j` has an activation changing at most `T j`
+  times, `2ⁿ < 4 K² · ∏ⱼ max 1 (4 T j)`; a threshold gate costs `4`, an exact-threshold or
+  interval gate `8`, and gates reading only gates are free.
 
 The explicit polynomial-time family `sourceReductionHardFamily` is two-sided rectangle-free with
 `log₂ K = o(n)`; the asymptotic bounds for it are in
@@ -112,6 +117,13 @@ theorem changesAtMost_evalFrom (C : Program n s) (fixed : Finset (Fin s)) (η : 
   changesAtMost_of_piecesAtMost_internal (C.piecesAtMost_evalFrom_internal fixed η slope)
 
 end Program
+
+/-- **Gate semantics of activation programs.** Gate `j` applies its activation to its weighted
+input sum plus the weighted values of the earlier gates. -/
+theorem ActivationProgram.eval_eq (C : ActivationProgram n s) (x : Fin n → Bool) (j : Fin s) :
+    C.eval x j = C.activation j (weightedSum (C.inputWeight j) x + ∑ k : Fin s,
+      if k < j then C.gateWeight j k * (C.eval x k).toNat else 0) :=
+  C.eval_eq_internal x j
 
 namespace TwoSidedRectangleFree
 
@@ -203,6 +215,15 @@ theorem two_pow_sub_lt_of_multilevel (hf : TwoSidedRectangleFree f K) {k : ℕ}
     (hfF : ∀ x, f x = F (weightedSum w x)) (hn : 2 * k + 4 ≤ n) :
     2 ^ (n - (2 * k + 4)) < T :=
   two_pow_sub_lt_of_multilevel_internal hf hK w F hF hfF hn
+
+/-- **C4: mixed gate costs.** In an activation program computing `f` whose input-reading gate
+`j` has an activation changing at most `T j` times, `2ⁿ < 4 K² · ∏ⱼ max 1 (4 T j)`, the product
+ranging over the input-reading gates; gates reading only gates are free. -/
+theorem two_pow_lt_of_activations (hf : TwoSidedRectangleFree f K) {C : ActivationProgram n s}
+    (hC : C.Computes f) (T : Fin s → ℕ)
+    (hT : ∀ j ∈ C.inputGates, ChangesAtMost (C.activation j) (T j)) :
+    2 ^ n < 4 * K ^ 2 * ∏ j ∈ C.inputGates, max 1 (4 * T j) :=
+  two_pow_lt_of_activations_internal hf hC T hT
 
 end TwoSidedRectangleFree
 

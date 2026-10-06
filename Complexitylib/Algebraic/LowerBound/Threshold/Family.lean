@@ -31,6 +31,9 @@ sufficiently large `n`:
   consecutive runs along single directions, `s_in + 2B > (1 - ε) n`.
 * `sourceReductionHardFamily_lt_transitions` (C2′): every representation `F(⟨w, x⟩)` of the
   family by a function `F : ℝ → Bool` with `T` transitions has `T > 2 ^ ((1 - ε) n)`.
+* `sourceReductionHardFamily_lt_sum_logb` (C4): in every activation program computing the family
+  whose input-reading gate `j` changes at most `T j` times, the input-reading gates carry more
+  than `(1 - ε) n` bits `log₂ max 1 (4 T j)` in total.
 
 For comparison, Roychowdhury, Orlitsky, and Siu (*IEEE Trans. Inf. Theory* 40(2), 1994) and
 Gröger and Turán prove that inner product mod 2 needs about `n / 4` gates in threshold circuits
@@ -130,5 +133,21 @@ theorem sourceReductionHardFamily_lt_transitions (hε : 0 < ε) :
         push_cast
         rfl
     _ < T := by exact_mod_cast h
+
+/-- **C4 for the explicit family.** For every `ε > 0` and all large `n`, every activation program
+computing `sourceReductionHardFamily n` whose input-reading gate `j` has an activation changing
+at most `T j` times satisfies `∑ⱼ log₂ (max 1 (4 T j)) > (1 - ε) n`, the sum ranging over the
+input-reading gates. A threshold gate contributes `2`. -/
+theorem sourceReductionHardFamily_lt_sum_logb (hε : 0 < ε) :
+    ∀ᶠ n in atTop, ∀ (s : ℕ) (C : ActivationProgram n s) (T : Fin s → ℕ),
+      (∀ j ∈ C.inputGates, ChangesAtMost (C.activation j) (T j)) →
+      C.Computes (Extractor.sourceReductionHardFamily n) →
+        (1 - ε) * n < ∑ j ∈ C.inputGates, Real.logb 2 ((max 1 (4 * T j) : ℕ) : ℝ) := by
+  filter_upwards [sourceReductionHardFamily_twoSidedRectangleFree,
+    eventually_two_mul_familyLogThreshold_add_four_le hε] with n hfree hlog s C T hT hC
+  have h := lt_add_logb_of_two_pow_lt (familyThreshold_eq_two_pow n)
+    (hfree.two_pow_lt_of_activations hC T hT)
+  rw [Nat.cast_prod, Real.logb_prod _ _ fun j _ => by positivity] at h
+  linarith
 
 end Algebraic.Threshold

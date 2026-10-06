@@ -11,6 +11,7 @@ public import Complexitylib.Algebraic.LowerBound.Cutwidth.Aggregate.Family
 import Complexitylib.Algebraic.LowerBound.Cutwidth.Extractor.Padding
 import Complexitylib.Algebraic.LowerBound.Cutwidth.Extractor.SourceReduction.Construction.Uniform
 import Mathlib.Tactic.Linarith
+import Mathlib.Tactic.Ring
 
 /-!
 # Two-sided rectangle-freeness of the explicit family
@@ -95,6 +96,25 @@ theorem eventually_two_mul_familyLogThreshold_add_four_le {δ : ℝ} (hδ : 0 < 
   rw [hk, Real.norm_of_nonneg (Nat.cast_nonneg _), Real.norm_of_nonneg (Nat.cast_nonneg _)]
     at hlog
   simp only [zero_mul, zero_add] at hconst
+  linarith
+
+/-- Binary logarithms of a capacity bound `2ⁿ < 4 K² P` with `K = 2 ^ k`. -/
+theorem lt_add_logb_of_two_pow_lt {n k K P : ℕ} (hK : K = 2 ^ k)
+    (h : 2 ^ n < 4 * K ^ 2 * P) : (n : ℝ) < 2 * k + 2 + Real.logb 2 P := by
+  have hP : 0 < P := by
+    rcases Nat.eq_zero_or_pos P with h0 | h0
+    · simp [h0] at h
+    · exact h0
+  have hR : (2 : ℝ) ^ n < 2 ^ (2 * k + 2) * P := by
+    have : 4 * K ^ 2 * P = 2 ^ (2 * k + 2) * P := by
+      rw [hK, ← pow_mul, pow_add, mul_comm k 2]
+      ring
+    rw [this] at h
+    exact_mod_cast h
+  have hlog := Real.logb_lt_logb one_lt_two (by positivity) hR
+  rw [Real.logb_mul (by positivity) (by positivity), Real.logb_pow, Real.logb_pow,
+    Real.logb_self_eq_one one_lt_two] at hlog
+  push_cast at hlog
   linarith
 
 end Algebraic.Threshold

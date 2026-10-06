@@ -45,6 +45,11 @@ other gates receive arbitrary real input contributions in place of their weighte
 the ordinary evaluation `Program.eval` overrides nothing and uses the true weighted sums. The
 override form expresses a run of gates as a function of one real parameter.
 
+`ActivationProgram n s` replaces the threshold of each gate by an arbitrary activation
+`ℝ → Bool` applied to the weighted sum of its inputs and earlier gates. A threshold gate is the
+activation `t ↦ [t + bias ≥ 0]`, which changes once; exact-threshold, interval, symmetric, and
+modular gates on weighted sums change finitely often, at mixed costs.
+
 ## Block decompositions
 
 A `BlockDecomposition f H` presents `f` as the output of a sequence of histories
@@ -150,6 +155,41 @@ noncomputable def DirectionRuns.size {C : Program n s} {B : ℕ} (R : C.Directio
   (C.inputGates.filter fun j => R.run j = i).card
 
 end Program
+
+/-- A straight-line program of `s` gates with arbitrary activations on `n` Boolean inputs: gate
+`j` outputs `activation j (∑ i, inputWeight j i * x i + ∑_{k < j} gateWeight j k * (gate k))`.
+Weights are arbitrary reals; depth and fan-out are unrestricted. -/
+structure ActivationProgram (n s : ℕ) where
+  /-- The weight of input `i` in gate `j` (`inputWeight j i`). -/
+  inputWeight : Fin s → Fin n → ℝ
+  /-- The weight of gate `k` in gate `j` (`gateWeight j k`); only the entries with `k < j` are
+  read. -/
+  gateWeight : Fin s → Fin s → ℝ
+  /-- The activation of gate `j`, applied to its weighted sum. -/
+  activation : Fin s → ℝ → Bool
+  /-- The output gate. -/
+  output : Fin s
+
+namespace ActivationProgram
+
+variable {s : ℕ}
+
+/-- The gate values of the program on the input `x`. -/
+noncomputable def eval (C : ActivationProgram n s) (x : Fin n → Bool) (j : Fin s) : Bool :=
+  C.activation j (weightedSum (C.inputWeight j) x + ∑ k : Fin s,
+    if _h : k < j then C.gateWeight j k * (C.eval x k).toNat else 0)
+termination_by j
+
+/-- The program computes `f` at its output gate. -/
+def Computes (C : ActivationProgram n s) (f : Cslib.BooleanFunction n) : Prop :=
+  ∀ x, C.eval x C.output = f x
+
+open scoped Classical in
+/-- The input-reading gates: those with a nonzero input weight vector. -/
+noncomputable def inputGates (C : ActivationProgram n s) : Finset (Fin s) :=
+  Finset.univ.filter fun j => C.inputWeight j ≠ 0
+
+end ActivationProgram
 
 /-- The kind of a block in a block decomposition. -/
 inductive BlockKind
