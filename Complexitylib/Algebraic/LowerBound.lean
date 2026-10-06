@@ -54,6 +54,7 @@ public import Complexitylib.Algebraic.LowerBound.GateElimination
 public import Complexitylib.Algebraic.LowerBound.Approximation
 public import Complexitylib.Algebraic.LowerBound.Fusion
 public import Complexitylib.Algebraic.LowerBound.Monotone.Clique.Exponential
+public import Complexitylib.Algebraic.LowerBound.Monotone.MatrixProduct
 public import Complexitylib.Algebraic.LowerBound.Cutwidth
 public import Complexitylib.Algebraic.LowerBound.Nechiporuk
 public import Complexitylib.Algebraic.LowerBound.KarchmerWigderson

@@ -13265,16 +13265,45 @@ signals, codes, pruned transitions, and trees of regions.
 \begin{theorem}[Monotone Boolean matrix product]
   \label{thm:lowerbounds-monotone-matrix}
   \uses{def:lowerbounds-monotone-circuit}
-  \notready
-  Every monotone fan-in-two circuit computing the product of two
-  $n \times n$ Boolean matrices has at least $n^3$ AND gates.
+  \lean{Algebraic.Monotone.MatrixProduct.mul_mul_le_andCost,
+    Algebraic.Monotone.MatrixProduct.cube_le_andCost}
+  \leanok
+  Consider a circuit over the imported library's binary AND/OR signature
+  (fan-in-two AND and OR gates, no constants and no negations) in which the
+  entries $x_{ik}$ of an $I \times K$ matrix and $y_{kj}$ of a $K \times J$
+  matrix are distinct inputs (other inputs may be present). If, for all $i$
+  and $j$, some output computes $\bigvee_k x_{ik} \wedge y_{kj}$ (other outputs
+  are unconstrained), then the circuit has at least $IJK$ AND gates. Every AND
+  gate of the circuit is counted, used or not, and OR gates are free. In
+  particular, a circuit with the entries of two $n \times n$ matrices on its
+  $2n^2$ inputs and their Boolean product on its $n^2$ outputs, all in
+  row-major order, has at least $n^3$ AND gates. The schoolbook circuit, with
+  exactly $IJK$ AND gates, shows the bound is tight; neither this nor the
+  companion lower bound of $IJ(K - 1)$ OR gates (Paterson; Mehlhorn--Galil)
+  is formalized.
 \end{theorem}
 \begin{proof}
-  Each product $x_{ik} y_{kj}$ is a prime implicant of output $(i, j)$, and a
-  monotone circuit must realize each of the $n^3$ of them at a distinct AND
-  gate (Pratt; Paterson; Mehlhorn--Galil). The bound is monotone-specific:
-  circuits with negation compute the product with $O(n^{\log_2 7})$ gates
-  through integer matrix multiplication.
+  \leanok
+  Following Wegener (\emph{The Complexity of Boolean Functions}, Theorem~6.8.1,
+  after Paterson and Mehlhorn--Galil), call $x_{ik}$ and $y_{kj}$ the variables
+  of type $k$, and re-evaluate the same circuit in stages $k = 1, \dots, K$.
+  Stage $k$ sets the variables of type below $k$ ($x$ to $1$, $y$ to $0$), so
+  the outputs become the product over the types from $k$ on, and forces to the
+  constant $1$ every gate that was constant $1$ under this restriction at the
+  previous stage, or whose function accepts each of two distinct type-$k$
+  variables on its own. Forcing keeps the outputs: below an input rejected by
+  an output lies a rejected input that sets at most one type-$k$ variable to
+  $0$, and every forced gate is already $1$ there. Call a gate a creator of $(i, k, j)$
+  if its stage-$k$ function has the prime implicant $x_{ik} y_{kj}$ and neither
+  argument's function has it. The output for $(i, j)$ has this prime implicant,
+  so a creator exists; it is an AND gate one of whose arguments has the
+  implicant $x_{ik}$ and the other $y_{kj}$. Two triples of one stage cannot
+  share a creator, since an argument of it would have two type-$k$ implicants
+  of length one and would have been forced. A creator at stage $k$ is not one
+  at a later stage, where its argument with the implicant $x_{ik}$ is
+  constant $1$. So the creators are $IJK$ distinct AND gates. The bound is
+  monotone-specific: circuits with negation compute the product with
+  $O(n^{\log_2 7})$ gates through integer matrix multiplication.
 \end{proof}
 
 \begin{lemma}[Sunflower lemma]
