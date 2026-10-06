@@ -37,19 +37,24 @@ gates (`exists_sharedProgram_of_circuit`) yields both:
 - **Global bounded-sharing lower bounds** (`sum_le_size_of_computes`,
   `size_lower_bound`, `size_lower_bound'`, `eventually_sq_le_size`,
   `isLittleO_size_of_rectangleFree`) when total shared fan-out
-  `sharedFanOut c` is sublinear in `n`.
+  `sharedFanOut c` is sublinear in `n`. The asymptotic ones follow from their
+  active-block counterparts, since every block sees at most `sharedFanOut c`
+  active shared fan-out.
 - **Active-block bounded-sharing lower bounds** (`SharedProgram.block_bound_active`,
   `SharedProgram.sum_le_of_computes_active`, `sum_le_size_of_computes_active`,
   `size_lower_bound_active`, `size_lower_bound_active'`,
   `eventually_sq_le_size_active`, `eventually_sq_le_size_of_gateBlockSpan_le`,
   `isLittleO_size_of_rectangleFree_active`), where a shared gate only
   contributes on blocks `Y` that intersect its syntactic input cone
-  (`activeSharedGateCount c Y`, `activeSharedFanOut c Y`). Because summing
+  (`activeSharedGateCount c Y`, `activeSharedFanOut c Y`). Summing
   `activeSharedFanOut c (Y i)` over blocks weights each shared gate by its
-  `gateBlockSpan` rather than the total number of blocks (`sum_activeSharedFanOut`),
-  circuits whose shared gates have bounded block-span admit **superlinear**
-  total shared fan-out up to `o(n² / log n)` while still requiring
-  `Ω(n² / log n)` gates.
+  `gateBlockSpan` rather than the total number of blocks (`sum_activeSharedFanOut`).
+  If the input cone of every shared gate meets at most `span` of the logarithmic
+  blocks, so that each shared gate depends on `O(span · log n)` inputs, the total
+  shared fan-out may be superlinear, up to `O(n² / (span · log n))`, while
+  `Ω(n² / log n)` gates are still required
+  (`eventually_sq_le_size_of_gateBlockSpan_le`). This locality restriction is
+  essential: shared gates whose cones meet many blocks are charged on each of them.
 -/
 
 @[expose] public section
@@ -204,6 +209,51 @@ theorem natLog_le_logb (m : Nat) : (Nat.log 2 m : ℝ) ≤ Real.logb 2 m := by
     have := (Real.logb_le_logb one_lt_two (by positivity) (by exact_mod_cast hm)).mpr h
     rwa [Real.logb_pow, Real.logb_self_eq_one one_lt_two, mul_one] at this
 
+/-- The logarithmic block size `3 + c * (Nat.log 2 n + 1)` used in Nechiporuk's asymptotic lower
+bounds for `K n`-rectangle-free functions with `K n ≤ n ^ c`. -/
+def nechiporukBlockSize (c n : Nat) : Nat :=
+  3 + c * (Nat.log 2 n + 1)
+
+private theorem nechiporukBlockSize_pos (c n : Nat) : 0 < nechiporukBlockSize c n := by
+  rw [nechiporukBlockSize]
+  omega
+
+/-- Blocks of size `nechiporukBlockSize c n` clear the threshold `log₂ (8 K)` when `K ≤ n ^ c`. -/
+private theorem eight_mul_le_two_pow_nechiporukBlockSize {K c n : Nat} (hK : K ≤ n ^ c) :
+    8 * K ≤ 2 ^ nechiporukBlockSize c n := by
+  have hn : n ≤ 2 ^ (Nat.log 2 n + 1) := (Nat.lt_pow_succ_log_self one_lt_two n).le
+  calc 8 * K ≤ 8 * n ^ c := Nat.mul_le_mul_left _ hK
+    _ ≤ 8 * (2 ^ (Nat.log 2 n + 1)) ^ c := Nat.mul_le_mul_left _ (Nat.pow_le_pow_left hn c)
+    _ = 2 ^ nechiporukBlockSize c n := by
+        rw [nechiporukBlockSize, ← pow_mul, pow_add, show (8 : Nat) = 2 ^ 3 by norm_num,
+          Nat.mul_comm (Nat.log 2 n + 1) c]
+
+private theorem nechiporukBlockSize_le {c n : Nat} (hn : 4 ≤ n) :
+    nechiporukBlockSize c n ≤ 2 * (c + 3) * Nat.log 2 n := by
+  have hlog2 : 2 ≤ Nat.log 2 n := Nat.le_log_of_pow_le one_lt_two (by omega)
+  rw [nechiporukBlockSize]
+  have : c * (Nat.log 2 n + 1) ≤ 2 * c * Nat.log 2 n := by nlinarith
+  nlinarith
+
+private theorem mul_nechiporukBlockSize_le {c n M : Nat} (hn : 4 ≤ n)
+    (h : 16 * (c + 3) * M * Nat.log 2 n ≤ n) : 8 * M * nechiporukBlockSize c n ≤ n :=
+  calc 8 * M * nechiporukBlockSize c n
+      ≤ 8 * M * (2 * (c + 3) * Nat.log 2 n) := Nat.mul_le_mul_left _ (nechiporukBlockSize_le hn)
+    _ = 16 * (c + 3) * M * Nat.log 2 n := by ring
+    _ ≤ n := h
+
+/-- Convert `n² ≤ 32 b · X` with the Nechiporuk block size `b` into the real-logarithm form. -/
+private theorem sq_le_logb_of_sq_le {c n : Nat} (hn : 4 ≤ n) {X : ℝ} (hX : 0 ≤ X)
+    (h : (n : ℝ) ^ 2 ≤ 32 * nechiporukBlockSize c n * X) :
+    (n : ℝ) ^ 2 ≤ 64 * (c + 3) * Real.logb 2 n * X := by
+  have hbR : (nechiporukBlockSize c n : ℝ) ≤ 2 * (c + 3) * Nat.log 2 n := by
+    exact_mod_cast nechiporukBlockSize_le hn
+  have hlogR := natLog_le_logb n
+  calc (n : ℝ) ^ 2 ≤ 32 * nechiporukBlockSize c n * X := h
+    _ ≤ 32 * (2 * (c + 3) * Nat.log 2 n) * X := by gcongr
+    _ ≤ 32 * (2 * (c + 3) * Real.logb 2 n) * X := by gcongr
+    _ = 64 * (c + 3) * Real.logb 2 n * X := by ring
+
 /-- **Formula size `Ω(n² / log n)` for rectangle-free families.** For a family
 that is `K n`-rectangle-free with `K n ≤ n ^ c` and at least `2 ^ (n - 2)`
 accepting inputs, every formula over the full binary basis computing `f n`
@@ -214,30 +264,15 @@ theorem eventually_sq_le_leaves (f : ∀ n, Cslib.BooleanFunction n) (K : Nat �
     (hrect : ∀ᶠ n in atTop, RectangleFree (f n) (K n)) :
     ∀ᶠ n in atTop, ∀ F : Formula n, F.Computes (f n) →
       (n : ℝ) ^ 2 ≤ 64 * (c + 3) * Real.logb 2 n * F.leaves := by
-  have hlog := Nat.eventually_mul_log_le (16 * (c + 3)) one_lt_two
+  have hlog := Nat.eventually_mul_log_le (16 * (c + 3) * 1) one_lt_two
   filter_upwards [hK, hacc, hrect, hlog, eventually_ge_atTop 4] with n hKn haccn hrectn hlogn hn4
   intro F hF
-  -- The block size.
-  set b := 3 + c * (Nat.log 2 n + 1) with hb
-  have hb0 : 0 < b := by omega
-  have hlog2 : 2 ≤ Nat.log 2 n := by
-    have : 2 ^ 2 ≤ n := by omega
-    exact Nat.le_log_of_pow_le one_lt_two this
-  have hbK : 8 * K n ≤ 2 ^ b := by
-    have hn : n ≤ 2 ^ (Nat.log 2 n + 1) := (Nat.lt_pow_succ_log_self one_lt_two n).le
-    calc 8 * K n ≤ 8 * n ^ c := Nat.mul_le_mul_left _ hKn
-      _ ≤ 8 * (2 ^ (Nat.log 2 n + 1)) ^ c := Nat.mul_le_mul_left _ (Nat.pow_le_pow_left hn c)
-      _ = 2 ^ b := by
-          rw [hb, ← pow_mul, pow_add, show (8 : Nat) = 2 ^ 3 by norm_num,
-            Nat.mul_comm (Nat.log 2 n + 1) c]
-  have hble : b ≤ 2 * (c + 3) * Nat.log 2 n := by
-    have : c * (Nat.log 2 n + 1) ≤ 2 * c * Nat.log 2 n := by nlinarith
-    nlinarith
+  set b := nechiporukBlockSize c n with hb
   have h8b : 8 * b ≤ n := by
-    calc 8 * b ≤ 8 * (2 * (c + 3) * Nat.log 2 n) := Nat.mul_le_mul_left _ hble
-      _ = 16 * (c + 3) * Nat.log 2 n := by ring
-      _ ≤ n := hlogn
-  have main := leaves_lower_bound' hrectn haccn hb0 hbK F hF
+    have := mul_nechiporukBlockSize_le (M := 1) hn4 hlogn
+    omega
+  have main := leaves_lower_bound' hrectn haccn (nechiporukBlockSize_pos c n)
+    (eight_mul_le_two_pow_nechiporukBlockSize hKn) F hF
   -- (n - b)(n - 2b - 1) ≥ 3 n² / 8, so 3 n² ≤ 32 b · leaves.
   have h₁ : 3 * n ≤ 4 * (n - b) := by omega
   have h₂ : n ≤ 2 * (n - 2 * b - 1) := by omega
@@ -246,17 +281,10 @@ theorem eventually_sq_le_leaves (f : ∀ n, Cslib.BooleanFunction n) (K : Nat �
       _ = 8 * ((n - b) * (n - 2 * b - 1)) := by ring
       _ ≤ 8 * (4 * b * F.leaves) := Nat.mul_le_mul_left _ main
       _ = 32 * b * F.leaves := by ring
-  have h₄ : (n : ℝ) ^ 2 ≤ 32 * b * F.leaves := by
-    have : ((3 * n * n : Nat) : ℝ) ≤ ((32 * b * F.leaves : Nat) : ℝ) := by exact_mod_cast h₃
-    push_cast at this
-    nlinarith
-  have hbR : (b : ℝ) ≤ 2 * (c + 3) * Nat.log 2 n := by exact_mod_cast hble
-  have hlogR := natLog_le_logb n
-  have hleaves : (0 : ℝ) ≤ F.leaves := by positivity
-  calc (n : ℝ) ^ 2 ≤ 32 * b * F.leaves := h₄
-    _ ≤ 32 * (2 * (c + 3) * Nat.log 2 n) * F.leaves := by gcongr
-    _ ≤ 32 * (2 * (c + 3) * Real.logb 2 n) * F.leaves := by gcongr
-    _ = 64 * (c + 3) * Real.logb 2 n * F.leaves := by ring
+  refine sq_le_logb_of_sq_le hn4 (by positivity) ?_
+  have : ((3 * n * n : Nat) : ℝ) ≤ ((32 * b * F.leaves : Nat) : ℝ) := by exact_mod_cast h₃
+  push_cast at this
+  nlinarith
 
 /-! ### Programs and circuits with shared gates -/
 
@@ -549,10 +577,49 @@ theorem size_lower_bound' {f : Cslib.BooleanFunction n} {K b k s : Nat}
     _ ≤ b * (4 * (c.size + k + 1)) := Nat.mul_le_mul_left _ h₁
     _ = 4 * b * (c.size + k + 1) := by ring
 
-/-- The logarithmic block size `3 + c * (Nat.log 2 n + 1)` used in Nechiporuk's asymptotic lower
-bounds for `K n`-rectangle-free functions with `K n ≤ n ^ c`. -/
-def nechiporukBlockSize (c n : Nat) : Nat :=
-  3 + c * (Nat.log 2 n + 1)
+/-- The common core of the active-block asymptotic bounds: with the logarithmic block size
+`b = nechiporukBlockSize c n` and `8 b ≤ n`, an active shared fan-out budget
+`20 b · ∑ i, activeSharedFanOut cir (block n b i) ≤ n²` forces `n² ≤ 32 b · (2 · cir.size + 1)`. -/
+private theorem sq_le_size_of_activeSharedFanOut {f : Cslib.BooleanFunction n} {K c : Nat}
+    (hrect : RectangleFree f K) (hacc : 2 ^ (n - 2) ≤ (accepting f).card)
+    (hK : K ≤ n ^ c) (h8b : 8 * nechiporukBlockSize c n ≤ n)
+    (cir : Circuit Binary.signature n 1)
+    (hcir : cir.ComputesWith Binary.interpretation fun x _ => f x)
+    (hact : 20 * nechiporukBlockSize c n *
+      (∑ i, activeSharedFanOut cir (block n (nechiporukBlockSize c n) i)) ≤ n * n) :
+    n * n ≤ 32 * nechiporukBlockSize c n * (2 * cir.size + 1) := by
+  have main := size_lower_bound_active' hrect hacc (nechiporukBlockSize_pos c n)
+    (eight_mul_le_two_pow_nechiporukBlockSize hK) cir hcir
+  have hb0 := nechiporukBlockSize_pos c n
+  set b := nechiporukBlockSize c n
+  have hksize := sharedGateCount_le_size cir
+  set A := ∑ i, activeSharedFanOut cir (block n b i)
+  have h₁ : 3 * n ≤ 4 * (n - b) := by omega
+  have h₂ : 2 * n ≤ 4 * (n - 2 * b - 1) := by omega
+  have h₃ : 6 * (n * n) ≤ 4 * (n * n) + 64 * b * (2 * cir.size + 1) := by
+    calc 6 * (n * n)
+        = (3 * n) * (2 * n) := by ring
+      _ ≤ (4 * (n - b)) * (4 * (n - 2 * b - 1)) := Nat.mul_le_mul h₁ h₂
+      _ = 16 * ((n - b) * (n - 2 * b - 1)) := by ring
+      _ ≤ 16 * (5 * b * A + 4 * b * (cir.size + KW.sharedGateCount cir + 1)) :=
+          Nat.mul_le_mul_left _ main
+      _ = 4 * (20 * b * A) + 64 * b * (cir.size + KW.sharedGateCount cir + 1) := by ring
+      _ ≤ 4 * (n * n) + 64 * b * (2 * cir.size + 1) :=
+          Nat.add_le_add (Nat.mul_le_mul_left _ hact)
+            (Nat.mul_le_mul_left _ (by omega))
+  nlinarith
+
+/-- A shared fan-out bound `sharedFanOut cir ≤ s` with `20 s ≤ n` gives the active shared fan-out
+budget `20 b · ∑ i, activeSharedFanOut cir (block n b i) ≤ n²` for every block size `b`. -/
+private theorem twenty_mul_sum_activeSharedFanOut_le {b s : Nat} (hs : 20 * s ≤ n)
+    (cir : Circuit Binary.signature n 1) (hfan : sharedFanOut cir ≤ s) :
+    20 * b * (∑ i, activeSharedFanOut cir (block n b i)) ≤ n * n :=
+  calc 20 * b * (∑ i, activeSharedFanOut cir (block n b i))
+      ≤ 20 * b * ((n / b) * s) :=
+        Nat.mul_le_mul_left _ ((sum_activeSharedFanOut_le cir (block n b)).trans
+          (Nat.mul_le_mul_left _ hfan))
+    _ = (b * (n / b)) * (20 * s) := by ring
+    _ ≤ n * n := Nat.mul_le_mul (Nat.mul_div_le n b) hs
 
 /-- **Active-block `Ω(n² / log n)` circuit lower bound for rectangle-free families.**
 For a family that is `K n`-rectangle-free with `K n ≤ n ^ c` and at least `2 ^ (n - 2)`
@@ -569,65 +636,33 @@ theorem eventually_sq_le_size_active (f : ∀ n, Cslib.BooleanFunction n) (K : N
       20 * nechiporukBlockSize c n *
         (∑ i, activeSharedFanOut cir (block n (nechiporukBlockSize c n) i)) ≤ n * n →
       (n : ℝ) ^ 2 ≤ 64 * (c + 3) * Real.logb 2 n * (2 * cir.size + 1) := by
-  have hlog := Nat.eventually_mul_log_le (16 * (c + 3)) one_lt_two
+  have hlog := Nat.eventually_mul_log_le (16 * (c + 3) * 1) one_lt_two
   filter_upwards [hK, hacc, hrect, hlog, eventually_ge_atTop 4] with
     n hKn haccn hrectn hlogn hn4
   intro cir hcir hact
-  set b := nechiporukBlockSize c n with hb
-  have hb0 : 0 < b := by rw [hb, nechiporukBlockSize]; omega
-  have hlog2 : 2 ≤ Nat.log 2 n := by
-    have : 2 ^ 2 ≤ n := by omega
-    exact Nat.le_log_of_pow_le one_lt_two this
-  have hbK : 8 * K n ≤ 2 ^ b := by
-    have hn : n ≤ 2 ^ (Nat.log 2 n + 1) := (Nat.lt_pow_succ_log_self one_lt_two n).le
-    calc 8 * K n ≤ 8 * n ^ c := Nat.mul_le_mul_left _ hKn
-      _ ≤ 8 * (2 ^ (Nat.log 2 n + 1)) ^ c := Nat.mul_le_mul_left _ (Nat.pow_le_pow_left hn c)
-      _ = 2 ^ b := by
-          rw [hb, nechiporukBlockSize, ← pow_mul, pow_add, show (8 : Nat) = 2 ^ 3 by norm_num,
-            Nat.mul_comm (Nat.log 2 n + 1) c]
-  have hble : b ≤ 2 * (c + 3) * Nat.log 2 n := by
-    rw [hb, nechiporukBlockSize]
-    have : c * (Nat.log 2 n + 1) ≤ 2 * c * Nat.log 2 n := by nlinarith
-    nlinarith
-  have h8b : 8 * b ≤ n := by
-    calc 8 * b ≤ 8 * (2 * (c + 3) * Nat.log 2 n) := Nat.mul_le_mul_left _ hble
-      _ = 16 * (c + 3) * Nat.log 2 n := by ring
-      _ ≤ n := hlogn
-  have main := size_lower_bound_active' hrectn haccn hb0 hbK cir hcir
-  have hksize := sharedGateCount_le_size cir
-  set A := ∑ i, activeSharedFanOut cir (block n b i)
-  have h₁ : 3 * n ≤ 4 * (n - b) := by omega
-  have h₂ : 2 * n ≤ 4 * (n - 2 * b - 1) := by omega
-  have h₃ : 6 * (n * n) ≤ 4 * (n * n) + 64 * b * (2 * cir.size + 1) := by
-    calc 6 * (n * n)
-        = (3 * n) * (2 * n) := by ring
-      _ ≤ (4 * (n - b)) * (4 * (n - 2 * b - 1)) := Nat.mul_le_mul h₁ h₂
-      _ = 16 * ((n - b) * (n - 2 * b - 1)) := by ring
-      _ ≤ 16 * (5 * b * A + 4 * b * (cir.size + KW.sharedGateCount cir + 1)) :=
-          Nat.mul_le_mul_left _ main
-      _ = 4 * (20 * b * A) + 64 * b * (cir.size + KW.sharedGateCount cir + 1) := by ring
-      _ ≤ 4 * (n * n) + 64 * b * (2 * cir.size + 1) :=
-          Nat.add_le_add (Nat.mul_le_mul_left _ hact)
-            (Nat.mul_le_mul_left _ (by omega))
-  have h₄ : n * n ≤ 32 * b * (2 * cir.size + 1) := by nlinarith
-  have h₅ : (n : ℝ) ^ 2 ≤ 32 * b * (2 * cir.size + 1) := by
-    have : ((n * n : Nat) : ℝ) ≤ ((32 * b * (2 * cir.size + 1) : Nat) : ℝ) := by
-      exact_mod_cast h₄
-    push_cast at this
-    nlinarith
-  have hbR : (b : ℝ) ≤ 2 * (c + 3) * Nat.log 2 n := by exact_mod_cast hble
-  have hlogR := natLog_le_logb n
-  have hsize : (0 : ℝ) ≤ (2 * cir.size + 1 : ℝ) := by positivity
-  calc (n : ℝ) ^ 2 ≤ 32 * b * (2 * cir.size + 1) := h₅
-    _ ≤ 32 * (2 * (c + 3) * Nat.log 2 n) * (2 * cir.size + 1) := by gcongr
-    _ ≤ 32 * (2 * (c + 3) * Real.logb 2 n) * (2 * cir.size + 1) := by gcongr
-    _ = 64 * (c + 3) * Real.logb 2 n * (2 * cir.size + 1) := by ring
+  have h8b : 8 * nechiporukBlockSize c n ≤ n := by
+    have := mul_nechiporukBlockSize_le (M := 1) hn4 hlogn
+    omega
+  have h := sq_le_size_of_activeSharedFanOut hrectn haccn hKn h8b cir hcir hact
+  refine sq_le_logb_of_sq_le hn4 (by positivity) ?_
+  have : ((n * n : Nat) : ℝ) ≤ ((32 * nechiporukBlockSize c n * (2 * cir.size + 1) : Nat) : ℝ) := by
+    exact_mod_cast h
+  push_cast at this
+  nlinarith
 
-/-- **Bounded-block-span `Ω(n² / log n)` circuit lower bound with superlinear shared fan-out.**
-If every shared gate of `cir` is active on at most `span n` of the logarithmic Nechiporuk blocks
-and `40 (c + 3) log₂ n · span n · s n ≤ n²` (so for bounded block-span `span n = O(1)`, the total
-shared fan-out `s n` may be **superlinear** up to `Θ(n² / log n)`), then
-`n² ≤ 64 (c + 3) log₂ n · (2 · cir.size + 1)` for all large `n`. -/
+/-- **Bounded-block-span `Ω(n² / log n)` circuit lower bound.** Let
+`b = nechiporukBlockSize c n = 3 + c (⌊log₂ n⌋ + 1)` be the logarithmic Nechiporuk block size and
+suppose every shared gate of `cir` is active on at most `span n` of the `n / b` consecutive blocks
+`block n b i`. Then the syntactic input cone of each shared gate lies inside at most `span n`
+blocks together with the fewer than `b` trailing coordinates outside every block, so every shared
+gate depends on fewer than `(span n + 1) · b = O(span n · log n)` inputs. Under this locality
+restriction, if `sharedFanOut cir ≤ s n` and `40 (c + 3) log₂ n · span n · s n ≤ n²`, then
+`n² ≤ 64 (c + 3) log₂ n · (2 · cir.size + 1)` for all large `n`.
+
+For `span n = O(1)` the total shared fan-out `s n` may thus be superlinear, up to
+`Θ(n² / log n)`, but only for shared gates of logarithmic input-cone size; the hypothesis
+excludes shared gates whose cones meet many blocks, and the theorem says nothing about
+circuits with such gates beyond `eventually_sq_le_size_active`. -/
 theorem eventually_sq_le_size_of_gateBlockSpan_le (f : ∀ n, Cslib.BooleanFunction n)
     (K span s : Nat → Nat) (c : Nat)
     (hK : ∀ᶠ n in atTop, K n ≤ n ^ c)
@@ -645,13 +680,7 @@ theorem eventually_sq_le_size_of_gateBlockSpan_le (f : ∀ n, Cslib.BooleanFunct
   intro cir hcir hfan hgate
   apply hmain cir hcir
   set b := nechiporukBlockSize c n with hb
-  have hlog2 : 2 ≤ Nat.log 2 n := by
-    have : 2 ^ 2 ≤ n := by omega
-    exact Nat.le_log_of_pow_le one_lt_two this
-  have hble : b ≤ 2 * (c + 3) * Nat.log 2 n := by
-    rw [hb, nechiporukBlockSize]
-    have : c * (Nat.log 2 n + 1) ≤ 2 * c * Nat.log 2 n := by nlinarith
-    nlinarith
+  have hble : b ≤ 2 * (c + 3) * Nat.log 2 n := nechiporukBlockSize_le hn4
   have hsum : ∑ i, activeSharedFanOut cir (block n b i) ≤ span n * s n :=
     (sum_activeSharedFanOut_le_of_gateBlockSpan_le cir (block n b) hgate).trans
       (Nat.mul_le_mul_left _ hfan)
@@ -674,59 +703,23 @@ theorem eventually_mul_le_size_of_rectangleFree_active (f : ∀ n, Cslib.Boolean
       20 * nechiporukBlockSize c n *
         (∑ i, activeSharedFanOut cir (block n (nechiporukBlockSize c n) i)) ≤ n * n →
       M * n ≤ cir.size := by
-  have hlog := Nat.eventually_mul_log_le (128 * (c + 3) * (M + 1)) one_lt_two
+  have hlog := Nat.eventually_mul_log_le (16 * (c + 3) * (8 * (M + 1))) one_lt_two
   filter_upwards [hK, hacc, hrect, hlog, eventually_ge_atTop 4] with
     n hKn haccn hrectn hlogn hn4
   intro cir hcir hact
-  set b := nechiporukBlockSize c n with hb
-  have hb0 : 0 < b := by rw [hb, nechiporukBlockSize]; omega
-  have hlog2 : 2 ≤ Nat.log 2 n := by
-    have : 2 ^ 2 ≤ n := by omega
-    exact Nat.le_log_of_pow_le one_lt_two this
-  have hbK : 8 * K n ≤ 2 ^ b := by
-    have hn : n ≤ 2 ^ (Nat.log 2 n + 1) := (Nat.lt_pow_succ_log_self one_lt_two n).le
-    calc 8 * K n ≤ 8 * n ^ c := Nat.mul_le_mul_left _ hKn
-      _ ≤ 8 * (2 ^ (Nat.log 2 n + 1)) ^ c := Nat.mul_le_mul_left _ (Nat.pow_le_pow_left hn c)
-      _ = 2 ^ b := by
-          rw [hb, nechiporukBlockSize, ← pow_mul, pow_add, show (8 : Nat) = 2 ^ 3 by norm_num,
-            Nat.mul_comm (Nat.log 2 n + 1) c]
-  have hble : b ≤ 2 * (c + 3) * Nat.log 2 n := by
-    rw [hb, nechiporukBlockSize]
-    have : c * (Nat.log 2 n + 1) ≤ 2 * c * Nat.log 2 n := by nlinarith
-    nlinarith
-  have h8b : 8 * b ≤ n := by
-    calc 8 * b ≤ 8 * (2 * (c + 3) * Nat.log 2 n) := Nat.mul_le_mul_left _ hble
-      _ = 16 * (c + 3) * Nat.log 2 n := by ring
-      _ ≤ 128 * (c + 3) * (M + 1) * Nat.log 2 n := by nlinarith
-      _ ≤ n := hlogn
-  have main := size_lower_bound_active' hrectn haccn hb0 hbK cir hcir
-  have hksize := sharedGateCount_le_size cir
-  set A := ∑ i, activeSharedFanOut cir (block n b i)
-  have h₁ : 3 * n ≤ 4 * (n - b) := by omega
-  have h₂ : 2 * n ≤ 4 * (n - 2 * b - 1) := by omega
-  have h₃ : 6 * (n * n) ≤ 4 * (n * n) + 64 * b * (2 * cir.size + 1) := by
-    calc 6 * (n * n)
-        = (3 * n) * (2 * n) := by ring
-      _ ≤ (4 * (n - b)) * (4 * (n - 2 * b - 1)) := Nat.mul_le_mul h₁ h₂
-      _ = 16 * ((n - b) * (n - 2 * b - 1)) := by ring
-      _ ≤ 16 * (5 * b * A + 4 * b * (cir.size + KW.sharedGateCount cir + 1)) :=
-          Nat.mul_le_mul_left _ main
-      _ = 4 * (20 * b * A) + 64 * b * (cir.size + KW.sharedGateCount cir + 1) := by ring
-      _ ≤ 4 * (n * n) + 64 * b * (2 * cir.size + 1) :=
-          Nat.add_le_add (Nat.mul_le_mul_left _ hact)
-            (Nat.mul_le_mul_left _ (by omega))
-  have h₄ : n * n ≤ 32 * b * (2 * cir.size + 1) := by nlinarith
-  have h64b : 64 * b * (M + 1) ≤ n := by
-    calc 64 * b * (M + 1)
-        ≤ 64 * (2 * (c + 3) * Nat.log 2 n) * (M + 1) :=
-          Nat.mul_le_mul_right _ (Nat.mul_le_mul_left _ hble)
-      _ = 128 * (c + 3) * (M + 1) * Nat.log 2 n := by ring
-      _ ≤ n := hlogn
+  have h64b := mul_nechiporukBlockSize_le hn4 hlogn
+  set b := nechiporukBlockSize c n
+  have h8b : 8 * b ≤ n :=
+    calc 8 * b = 8 * 1 * b := by ring
+      _ ≤ 8 * (8 * (M + 1)) * b :=
+          Nat.mul_le_mul_right _ (Nat.mul_le_mul_left _ (by omega))
+      _ ≤ n := h64b
+  have h₄ := sq_le_size_of_activeSharedFanOut hrectn haccn hKn h8b cir hcir hact
   have h₅ : n * (2 * (M + 1) * n) ≤ n * (2 * cir.size + 1) := by
     calc n * (2 * (M + 1) * n)
         = 2 * (M + 1) * (n * n) := by ring
       _ ≤ 2 * (M + 1) * (32 * b * (2 * cir.size + 1)) := Nat.mul_le_mul_left _ h₄
-      _ = (64 * b * (M + 1)) * (2 * cir.size + 1) := by ring
+      _ = (8 * (8 * (M + 1)) * b) * (2 * cir.size + 1) := by ring
       _ ≤ n * (2 * cir.size + 1) := Nat.mul_le_mul_right _ h64b
   have h₆ : 2 * (M + 1) * n ≤ 2 * cir.size + 1 :=
     Nat.le_of_mul_le_mul_left h₅ (by omega)
@@ -770,7 +763,9 @@ theorem isLittleO_size_of_rectangleFree_active (f : ∀ n, Cslib.BooleanFunction
 For a family that is `K n`-rectangle-free with `K n ≤ n ^ c` and at least `2 ^ (n - 2)`
 accepting inputs, every full-binary-basis circuit `cir` computing `f n` with
 `sharedFanOut cir ≤ s n` (where `20 · s n ≤ n` eventually) satisfies
-`n² ≤ 128 (c + 3) log₂ n · (cir.size + s n + 1)` for all large `n`. -/
+`n² ≤ 128 (c + 3) log₂ n · (cir.size + s n + 1)` for all large `n`. Only the reuse of computed
+gate outputs is bounded: the size is unrestricted and inputs may be read any number of times, so
+`s = 0` is the formula case, while general circuits (shared fan-out `Θ(size)`) are not covered. -/
 theorem eventually_sq_le_size (f : ∀ n, Cslib.BooleanFunction n) (K s : Nat → Nat) (c : Nat)
     (hK : ∀ᶠ n in atTop, K n ≤ n ^ c)
     (hacc : ∀ᶠ n in atTop, 2 ^ (n - 2) ≤ (accepting (f n)).card)
@@ -780,51 +775,18 @@ theorem eventually_sq_le_size (f : ∀ n, Cslib.BooleanFunction n) (K s : Nat �
       cir.ComputesWith Binary.interpretation (fun x _ => f n x) →
       sharedFanOut cir ≤ s n →
       (n : ℝ) ^ 2 ≤ 128 * (c + 3) * Real.logb 2 n * (cir.size + s n + 1) := by
-  have hlog := Nat.eventually_mul_log_le (16 * (c + 3)) one_lt_two
-  filter_upwards [hK, hacc, hrect, hs, hlog, eventually_ge_atTop 4] with
-    n hKn haccn hrectn hsn hlogn hn4
+  filter_upwards [eventually_sq_le_size_active f K c hK hacc hrect, hs,
+    eventually_ge_atTop 4] with n hmain hsn hn4
   intro cir hcir hfan
-  set b := 3 + c * (Nat.log 2 n + 1) with hb
-  have hb0 : 0 < b := by omega
-  have hlog2 : 2 ≤ Nat.log 2 n := by
-    have : 2 ^ 2 ≤ n := by omega
-    exact Nat.le_log_of_pow_le one_lt_two this
-  have hbK : 8 * K n ≤ 2 ^ b := by
-    have hn : n ≤ 2 ^ (Nat.log 2 n + 1) := (Nat.lt_pow_succ_log_self one_lt_two n).le
-    calc 8 * K n ≤ 8 * n ^ c := Nat.mul_le_mul_left _ hKn
-      _ ≤ 8 * (2 ^ (Nat.log 2 n + 1)) ^ c := Nat.mul_le_mul_left _ (Nat.pow_le_pow_left hn c)
-      _ = 2 ^ b := by
-          rw [hb, ← pow_mul, pow_add, show (8 : Nat) = 2 ^ 3 by norm_num,
-            Nat.mul_comm (Nat.log 2 n + 1) c]
-  have hble : b ≤ 2 * (c + 3) * Nat.log 2 n := by
-    have : c * (Nat.log 2 n + 1) ≤ 2 * c * Nat.log 2 n := by nlinarith
-    nlinarith
-  have h8b : 8 * b ≤ n := by
-    calc 8 * b ≤ 8 * (2 * (c + 3) * Nat.log 2 n) := Nat.mul_le_mul_left _ hble
-      _ = 16 * (c + 3) * Nat.log 2 n := by ring
-      _ ≤ n := hlogn
-  have hk : KW.sharedGateCount cir ≤ s n :=
-    (sharedGateCount_le_sharedFanOut cir).trans hfan
-  have main := size_lower_bound' hrectn haccn hb0 hbK cir hcir hk hfan
-  have h₁ : 3 * n ≤ 4 * (n - b) := by omega
-  have h₂ : n ≤ 4 * (n - 2 * b - 1 - s n - 4 * s n) := by omega
-  have h₃ : 3 * n * n ≤ 64 * b * (cir.size + s n + 1) := by
-    calc 3 * n * n
-        ≤ 4 * (n - b) * (4 * (n - 2 * b - 1 - s n - 4 * s n)) := Nat.mul_le_mul h₁ h₂
-      _ = 16 * ((n - b) * (n - 2 * b - 1 - s n - 4 * s n)) := by ring
-      _ ≤ 16 * (4 * b * (cir.size + s n + 1)) := Nat.mul_le_mul_left _ main
-      _ = 64 * b * (cir.size + s n + 1) := by ring
-  have h₄ : (n : ℝ) ^ 2 ≤ 64 * b * (cir.size + s n + 1) := by
-    have : ((3 * n * n : Nat) : ℝ) ≤ ((64 * b * (cir.size + s n + 1) : Nat) : ℝ) := by
-      exact_mod_cast h₃
-    push_cast at this
-    nlinarith
-  have hbR : (b : ℝ) ≤ 2 * (c + 3) * Nat.log 2 n := by exact_mod_cast hble
-  have hlogR := natLog_le_logb n
-  have hsize : (0 : ℝ) ≤ (cir.size + s n + 1 : ℝ) := by positivity
-  calc (n : ℝ) ^ 2 ≤ 64 * b * (cir.size + s n + 1) := h₄
-    _ ≤ 64 * (2 * (c + 3) * Nat.log 2 n) * (cir.size + s n + 1) := by gcongr
-    _ ≤ 64 * (2 * (c + 3) * Real.logb 2 n) * (cir.size + s n + 1) := by gcongr
+  have h := hmain cir hcir (twenty_mul_sum_activeSharedFanOut_le hsn cir hfan)
+  have hlog : (0 : ℝ) ≤ Real.logb 2 n :=
+    Real.logb_nonneg one_lt_two (by exact_mod_cast (by omega : 1 ≤ n))
+  have hcoef : (0 : ℝ) ≤ 64 * (c + 3) * Real.logb 2 n :=
+    mul_nonneg (by positivity) hlog
+  have hsR : (0 : ℝ) ≤ s n := by positivity
+  calc (n : ℝ) ^ 2 ≤ 64 * (c + 3) * Real.logb 2 n * (2 * cir.size + 1) := h
+    _ ≤ 64 * (c + 3) * Real.logb 2 n * (2 * (cir.size + s n + 1)) :=
+        mul_le_mul_of_nonneg_left (by linarith) hcoef
     _ = 128 * (c + 3) * Real.logb 2 n * (cir.size + s n + 1) := by ring
 
 /-- For any multiplier `M`, a rectangle-free family with `20 · s n ≤ n` eventually requires at
@@ -839,57 +801,10 @@ theorem eventually_mul_le_size_of_rectangleFree (f : ∀ n, Cslib.BooleanFunctio
       cir.ComputesWith Binary.interpretation (fun x _ => f n x) →
       sharedFanOut cir ≤ s n →
       M * n ≤ cir.size := by
-  have hlog := Nat.eventually_mul_log_le (128 * (c + 3) * (M + 2)) one_lt_two
-  filter_upwards [hK, hacc, hrect, hs, hlog, eventually_ge_atTop 4] with
-    n hKn haccn hrectn hsn hlogn hn4
+  filter_upwards [eventually_mul_le_size_of_rectangleFree_active f K c hK hacc hrect M, hs] with
+    n hmain hsn
   intro cir hcir hfan
-  set b := 3 + c * (Nat.log 2 n + 1) with hb
-  have hb0 : 0 < b := by omega
-  have hlog2 : 2 ≤ Nat.log 2 n := by
-    have : 2 ^ 2 ≤ n := by omega
-    exact Nat.le_log_of_pow_le one_lt_two this
-  have hbK : 8 * K n ≤ 2 ^ b := by
-    have hn : n ≤ 2 ^ (Nat.log 2 n + 1) := (Nat.lt_pow_succ_log_self one_lt_two n).le
-    calc 8 * K n ≤ 8 * n ^ c := Nat.mul_le_mul_left _ hKn
-      _ ≤ 8 * (2 ^ (Nat.log 2 n + 1)) ^ c := Nat.mul_le_mul_left _ (Nat.pow_le_pow_left hn c)
-      _ = 2 ^ b := by
-          rw [hb, ← pow_mul, pow_add, show (8 : Nat) = 2 ^ 3 by norm_num,
-            Nat.mul_comm (Nat.log 2 n + 1) c]
-  have hble : b ≤ 2 * (c + 3) * Nat.log 2 n := by
-    have : c * (Nat.log 2 n + 1) ≤ 2 * c * Nat.log 2 n := by nlinarith
-    nlinarith
-  have h8b : 8 * b ≤ n := by
-    calc 8 * b ≤ 8 * (2 * (c + 3) * Nat.log 2 n) := Nat.mul_le_mul_left _ hble
-      _ = 16 * (c + 3) * Nat.log 2 n := by ring
-      _ ≤ 128 * (c + 3) * (M + 2) * Nat.log 2 n := by nlinarith
-      _ ≤ n := hlogn
-  have hk : KW.sharedGateCount cir ≤ s n :=
-    (sharedGateCount_le_sharedFanOut cir).trans hfan
-  have main := size_lower_bound' hrectn haccn hb0 hbK cir hcir hk hfan
-  have h₁ : 3 * n ≤ 4 * (n - b) := by omega
-  have h₂ : n ≤ 4 * (n - 2 * b - 1 - s n - 4 * s n) := by omega
-  have h₃ : 3 * n * n ≤ 64 * b * (cir.size + s n + 1) := by
-    calc 3 * n * n
-        ≤ 4 * (n - b) * (4 * (n - 2 * b - 1 - s n - 4 * s n)) := Nat.mul_le_mul h₁ h₂
-      _ = 16 * ((n - b) * (n - 2 * b - 1 - s n - 4 * s n)) := by ring
-      _ ≤ 16 * (4 * b * (cir.size + s n + 1)) := Nat.mul_le_mul_left _ main
-      _ = 64 * b * (cir.size + s n + 1) := by ring
-  have h64b : 64 * b * (M + 2) ≤ n := by
-    calc 64 * b * (M + 2)
-        ≤ 64 * (2 * (c + 3) * Nat.log 2 n) * (M + 2) :=
-          Nat.mul_le_mul_right _ (Nat.mul_le_mul_left _ hble)
-      _ = 128 * (c + 3) * (M + 2) * Nat.log 2 n := by ring
-      _ ≤ n := hlogn
-  have h₄ : n * (3 * (M + 2) * n) ≤ n * (3 * (cir.size + s n + 1)) := by
-    calc n * (3 * (M + 2) * n)
-        = (M + 2) * (3 * n * n) := by ring
-      _ ≤ (M + 2) * (64 * b * (cir.size + s n + 1)) := Nat.mul_le_mul_left _ h₃
-      _ = (64 * b * (M + 2)) * (cir.size + s n + 1) := by ring
-      _ ≤ n * (cir.size + s n + 1) := Nat.mul_le_mul_right _ h64b
-      _ ≤ n * (3 * (cir.size + s n + 1)) := Nat.mul_le_mul_left _ (by omega)
-  have h₅ : 3 * (M + 2) * n ≤ 3 * (cir.size + s n + 1) :=
-    Nat.le_of_mul_le_mul_left h₄ (by omega)
-  nlinarith
+  exact hmain cir hcir (twenty_mul_sum_activeSharedFanOut_le hsn cir hfan)
 
 /-- **Rectangle-free families need superlinear full-binary-basis circuits when `sharedFanOut =
 o(n)`.** If `s n = o(n)` and `cir n` is a family of circuits over `Binary.signature` computing a
@@ -914,23 +829,8 @@ theorem isLittleO_size_of_rectangleFree (f : ∀ n, Cslib.BooleanFunction n)
         _ ≤ 20 * (1 / 20 * n) := by gcongr
         _ = n := by ring
     exact_mod_cast hR
-  rw [Asymptotics.isLittleO_iff]
-  intro ε hε
-  obtain ⟨M, hM⟩ := exists_nat_ge (1 / ε)
-  have hMpos : 0 < M := by
-    have : (0 : ℝ) < 1 / ε := by positivity
-    have : (0 : ℝ) < M := this.trans_le hM
-    exact_mod_cast this
-  filter_upwards [eventually_mul_le_size_of_rectangleFree f K s c hK hacc hrect hs20 M] with
-    n hmain
-  simp only [Real.norm_natCast]
-  have hsize : (M * n : ℝ) ≤ (cir n).size := by
-    exact_mod_cast hmain (cir n) (hcir n) (hfan n)
-  have hM' : (M : ℝ)⁻¹ ≤ ε := by
-    rw [inv_le_comm₀ (by positivity) hε]
-    simpa [one_div] using hM
-  calc (n : ℝ) = (M : ℝ)⁻¹ * (M * n) := by field_simp
-    _ ≤ ε * (cir n).size := by gcongr
+  exact isLittleO_size_of_rectangleFree_active f K c hK hacc hrect cir hcir
+    (hs20.mono fun n hsn => twenty_mul_sum_activeSharedFanOut_le hsn (cir n) (hfan n))
 
 end Nechiporuk
 end Algebraic
