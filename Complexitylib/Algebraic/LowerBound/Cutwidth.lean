@@ -63,6 +63,7 @@ public import Complexitylib.Algebraic.LowerBound.Cutwidth.MultiOutput.Polynomial
 public import Complexitylib.Algebraic.LowerBound.Cutwidth.MultiOutput.Quadratic
 public import Complexitylib.Algebraic.LowerBound.Cutwidth.MultiOutput.Restrict
 public import Complexitylib.Algebraic.LowerBound.Cutwidth.MultiOutput.FieldMul
+public import Complexitylib.Algebraic.LowerBound.Cutwidth.MultiOutput.MatMul.Tripartite
 public import Complexitylib.Algebraic.LowerBound.Cutwidth.Extractor
 public import Complexitylib.Algebraic.LowerBound.Cutwidth.Extractor.Padding
 public import Complexitylib.Algebraic.LowerBound.Cutwidth.Extractor.Padding.Asymptotics
@@ -362,7 +363,8 @@ gates for all large `N`.
 signals, so a fan-in-two circuit over a finite field computing such a form with
 `M + Mᵀ` totally regular, such as the Hankel Cauchy matrix `1 / (i + j + 2)` over
 `ZMod q`, has more than `(1 + 1/(4 κ_E) - ε) N ≥ (25/9 - ε) N` gates for all
-large `N`.
+large `N`. The rank-cut bound also holds when a combination of several outputs
+is the quadratic form.
 `MultiOutput.Restrict` restricts the fibre bound to product domains and to the
 inputs with some coordinates fixed. `MultiOutput.FieldMul` applies it to
 multiplication in a degree-`n` extension of a finite field, written in a basis:
@@ -370,6 +372,9 @@ fixing one factor makes it linear, and averaging over the fixed factor shows
 that a fan-in-two circuit over any signature has more than
 `(2 + 1/(2 κ_E) - ε) n ≥ (50/9 - ε) n` gates for all large `n`, in particular for
 `GF(2 ^ n)` over the full binary basis.
+`MultiOutput.MatMul.Tripartite` proves the charging combinatorics of the terminal
+graph of `n × n` matrix multiplication, the complete tripartite graph on the
+three index sets, and the threshold prefix of a ranking.
 
 `Bisection.Helpful` completes the graph theorem. Its proof uses the first
 boundary normalization phase, a partition into bounded connected clusters,
