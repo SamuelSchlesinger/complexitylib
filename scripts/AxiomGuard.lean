@@ -136,6 +136,10 @@ def headlineTheorems : List Name := [
   `Complexity.shannon_upper_bound,
   `Complexity.Circuit.card_essentialInputs_le_mul_size,
   `Complexity.sizeComplexity_xorBool_ge,
+  -- Parity separates AC0 from TC0
+  `Complexity.xorBool_not_mem_AC0,
+  `Complexity.xorBool_mem_TC0,
+  `Complexity.AC0_ssubset_TC0,
   -- The concrete uniform polynomial-time coefficient-four hard family
   `Algebraic.Cutwidth.Extractor.sourceReductionHardLanguage_mem_P,
   `Algebraic.Cutwidth.Extractor.sourceReductionHardEval_mem_FP,

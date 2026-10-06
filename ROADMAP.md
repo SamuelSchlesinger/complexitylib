@@ -180,9 +180,10 @@ In order. Each item says why it matters and roughly how large it is.
         multiplexer, majority, about 12.7k lines of `Fin (N + G)` offset
         arithmetic) become algebraic-circuits' substitution, restriction, and
         translation, plus CSLib's synthesis calculus.
-      - AC⁰: derive parity ∉ AC⁰ for our classes from algebraic-circuits'
-        Håstad development and retire the superseded normalization and
-        switching internals.
+      - AC⁰: parity ∉ AC⁰ for our classes is proved (`xorBool_not_mem_AC0`)
+        from the library's own normalization and switching internals.
+        Reconcile them with algebraic-circuits' Håstad development and retire
+        whichever is superseded.
       - NC¹: port the circuit-to-formula unfolding used by
         `NC1_subset_Width5BP`.
       - MCSP and the other consumers of `sizeComplexity` and composition.

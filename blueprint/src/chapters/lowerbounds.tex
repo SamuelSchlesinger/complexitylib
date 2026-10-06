@@ -8,16 +8,14 @@ complexity of an $N$-bit function up to a constant factor, the essential-input
 bound and Schnorr's $2N - 1$ bound for parity, Valiant's depth-reduction lemma,
 Spira's formula balancing, the monotone Karchmer--Wigderson correspondence, and
 the soundness of resolution. For $\cc{AC}^0$ it proves a finite, width-sensitive
-switching lemma, iterates it through arbitrary depth-bounded formulas, and
-derives a finite counting obstruction for every formula computing parity. All
-of these results are finite or nonuniform. The next target is the family-level
-theorem that parity is not in $\cc{AC}^0$ as defined in this library. Circuits
-are already normalized to formulas
-(Theorem~\ref{thm:lowerbounds-ac0-normalization}), so what remains is
-arithmetic on top of the finite obstruction (roadmap track L4). Beyond it, the
-plan covers monotone circuit lower bounds, pseudorandom restrictions, and
-resolution size and width lower bounds leading to the pigeonhole principle and
-to Cook--Reckhow proof systems (roadmap track L5).
+switching lemma, iterates it through arbitrary depth-bounded formulas, derives a
+finite counting obstruction for every formula computing parity, and concludes
+that parity is not in $\cc{AC}^0$ as defined in this library, so that
+$\cc{AC}^0 \subsetneq \cc{TC}^0$. All of these results are finite or
+nonuniform. Beyond them, the plan covers Håstad's quantitative size bound for
+the circuits of this library, monotone circuit lower bounds, pseudorandom
+restrictions, and resolution size and width lower bounds leading to the
+pigeonhole principle and to Cook--Reckhow proof systems (roadmap track L5).
 Section~\ref{sec:lowerbounds-algebraic} collects the results of the imported
 algebraic-circuits library: parity bounds in the De Morgan basis and in its own
 $\cc{AC}^0$ model (including parity outside that model's $\cc{AC}^0$ and an
@@ -183,8 +181,9 @@ chapter.
   constant AND/OR depth (negations add no depth), computes parity at every
   input length. The same holds when negation gates may occur anywhere in the
   circuits. This is stated for the imported library's own $\cc{AC}^0$ model;
-  deriving Theorem~\ref{thm:lowerbounds-parity-not-ac0} for $\cc{AC}^0$ as
-  defined here from it is part of the consolidation plan.
+  Theorem~\ref{thm:lowerbounds-parity-not-ac0} proves the statement for
+  $\cc{AC}^0$ as defined here independently, through this library's own
+  normalization and switching lemmas.
 \end{theorem}
 \begin{proof}
   \leanok
@@ -13159,18 +13158,26 @@ signals, codes, pruned transitions, and trees of regions.
 
 \begin{theorem}[Parity is not in $\cc{AC}^0$]
   \label{thm:lowerbounds-parity-not-ac0}
+  \lean{Complexity.xorBool_not_mem_AC0}
+  \leanok
   \uses{def:NC-AC, def:lowerbounds-parity}
-  The parity family is not in $\cc{AC}^0$. The analogous statement for the
-  imported library's $\cc{AC}^0$ model is
-  Theorem~\ref{thm:lowerbounds-algebraic-parity-ac0}; this one, for
-  $\cc{AC}^0$ as defined in this library, is not yet formalized.
+  The parity family is not in $\cc{AC}^0$: no family of polynomial-size,
+  constant-depth, unbounded-fan-in AND/OR circuits, with negations free on gate
+  inputs, computes $N$-bit parity at every input length $N$. The analogous
+  statement for the imported library's $\cc{AC}^0$ model is
+  Theorem~\ref{thm:lowerbounds-algebraic-parity-ac0}.
 \end{theorem}
 \begin{proof}
+  \leanok
   \uses{thm:lowerbounds-ac0-normalization, thm:lowerbounds-parity-obstruction}
-  Normalize a constant-depth polynomial-size family into formulas of constant
-  depth $d$ and polynomial size, then choose $q$ and $s$ as powers of $N$ so
-  that the inequality of Theorem~\ref{thm:lowerbounds-parity-obstruction}
-  fails for large $N$.
+  Suppose a family of depth at most $c$ and size at most $a N^k + a$ computes
+  parity. At every length $N \ge 1$, normalization gives a parity formula of
+  depth at most $c$ and size at most $B N^K$, where $B = (3 + 4a)^{c+1}$ and
+  $K = (k + 1)(c + 1)$. Apply Theorem~\ref{thm:lowerbounds-parity-obstruction}
+  with $d = c + 1$ stages, $s = (d + 1)K + d + 1$, $q = m$, and $N = m^{d+1}$,
+  where $m = 2B\,3^d(4(s+1))^s + 2s\,3^d + 1$. Dividing by
+  $((2q+1)^{N-1})^d$ and using $(2m+1)^d \le 3^d m^d$, each of the two terms
+  on the right is less than half of the left side, so the inequality fails.
 \end{proof}
 
 \begin{theorem}[Håstad's size bound]
@@ -13213,13 +13220,17 @@ signals, codes, pruned transitions, and trees of regions.
 
 \begin{corollary}
   \label{cor:lowerbounds-ac0-ne-tc0}
+  \lean{Complexity.AC0_ssubset_TC0}
+  \leanok
   \uses{def:NC-AC, def:circuits-TC}
   $\cc{AC}^0 \subsetneq \cc{TC}^0$.
 \end{corollary}
 \begin{proof}
+  \leanok
   \uses{prop:circuits-depth-classes, thm:lowerbounds-parity-not-ac0,
     lem:lowerbounds-parity-tc0}
-  $\cc{AC}^0 \subseteq \cc{TC}^0$ is formalized, and parity separates them.
+  $\cc{AC}^0 \subseteq \cc{TC}^0$, and parity is in $\cc{TC}^0$ but not in
+  $\cc{AC}^0$.
 \end{proof}
 
 \begin{theorem}[Pseudorandom switching lemma]

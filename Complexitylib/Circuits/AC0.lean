@@ -16,6 +16,7 @@ public import Complexitylib.Circuits.AC0.Switching.Collection
 public import Complexitylib.Circuits.AC0.Switching.Parity
 public import Complexitylib.Circuits.AC0.Iteration
 public import Complexitylib.Circuits.AC0.Parity
+public import Complexitylib.Circuits.AC0.Separation
 
 /-!
 # The class AC⁰
@@ -42,7 +43,8 @@ decision-tree lower bound for parity under arbitrary finite restrictions are
 all connected in exact cardinality form. A staged compiler iterates this layer
 through arbitrary finite depth-bounded formulas, with exact semantics, an exact
 first-moment identity for surviving variables, and a division-free counting
-obstruction for every finite formula computing parity. The remaining separation
-step is the family-level arithmetic specialization proving nonuniform parity is
-not in `AC0`.
+obstruction for every finite formula computing parity. Instantiating that
+obstruction at one explicit large input length proves that nonuniform parity is
+not in `AC0` (`xorBool_not_mem_AC0`); with the depth-two threshold circuits for
+parity, `AC0 ⊂ TC0` (`AC0_ssubset_TC0`).
 -/

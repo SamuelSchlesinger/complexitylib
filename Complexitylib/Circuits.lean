@@ -172,6 +172,11 @@ function, with `⊤` for an unrealizable function. The natural-valued
   decision-tree lower bound for parity yield a division-free finite counting
   inequality for every depth-bounded unbounded AND/OR formula computing parity.
 
+* **Parity separates `AC0` from `TC0`** (`xorBool_not_mem_AC0`,
+  `xorBool_mem_TC0`, `AC0_ssubset_TC0`): parity is not computed by any
+  polynomial-size constant-depth unbounded AND/OR family, but depth-two
+  threshold circuits of size `N + 1` compute it, so `AC0 ⊂ TC0`.
+
 ## Module structure
 
 Public modules (definitions a reviewer should read):
@@ -259,8 +264,8 @@ Public modules (definitions a reviewer should read):
   and `TC` hierarchies, and the aliases `NC0`, `NC1`, `AC0`, and `TC0`
 * `Complexitylib.Circuits.AC0` — the `AC0` class plus finite nonuniform
   negation-normal formulas, circuit normalization, exact restrictions,
-  width-sensitive switching, finite staged iteration, and the exact parity
-  counting obstruction
+  width-sensitive switching, finite staged iteration, the exact parity
+  counting obstruction, parity outside `AC0`, and `AC0 ⊂ TC0`
 * `Complexitylib.Circuits.Nondeterminism.Defs` — `existsQuantify`, `forallQuantify`
 * `Complexitylib.Circuits.Hardwiring` — exact-size prefix hardwiring
 * `Complexitylib.Circuits.Unrolling` — bounded machine-configuration layouts,
