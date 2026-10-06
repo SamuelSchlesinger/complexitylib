@@ -87,6 +87,37 @@ end FanOut
 
 /-! ### Occurrences and substitution of a variable -/
 
+section InsertVal
+
+variable {N : Nat}
+
+/-- Insert the value `b` at position `N` of `y`, moving the later entries up by one. -/
+def insertVal {d : Nat} (y : Fin (N + d) → Bool) (b : Bool) : Fin (N + 1 + d) → Bool :=
+  fun i => if h : i.val < N then y ⟨i.val, by omega⟩
+    else if h' : i.val = N then b else y ⟨i.val - 1, by omega⟩
+
+/-- `Fin.snoc` on Boolean vectors, entry by entry. -/
+private theorem snoc_apply {m : Nat} (y : Fin m → Bool) (g : Bool) (i : Fin (m + 1)) :
+    Fin.snoc (α := fun _ => Bool) y g i = if h : i.val < m then y ⟨i.val, h⟩ else g := by
+  refine Fin.lastCases ?_ (fun j => ?_) i
+  · simp
+  · simp
+
+theorem insertVal_zero (y : Fin N → Bool) (b : Bool) :
+    insertVal (d := 0) y b = Fin.snoc y b := by
+  funext i
+  rw [snoc_apply (m := N)]
+  unfold insertVal
+  split_ifs <;> first | rfl | omega
+
+theorem insertVal_snoc {d : Nat} (y : Fin (N + d) → Bool) (g b : Bool) :
+    insertVal (d := d + 1) (Fin.snoc y g) b = Fin.snoc (insertVal y b) g := by
+  funext i
+  simp only [insertVal, snoc_apply, Nat.add_eq]
+  split_ifs <;> first | rfl | omega
+
+end InsertVal
+
 namespace Formula
 
 variable {N M : Nat}
@@ -117,11 +148,6 @@ def substVarMap (φ : Formula N) (d : Nat) (i : Fin (N + 1 + d)) : Formula (N + 
   if h : i.val < N then lit ⟨i.val, by omega⟩ true
   else if h' : i.val = N then φ.mapIndex (Fin.castLE (by omega))
   else lit ⟨i.val - 1, by omega⟩ true
-
-/-- Insert the value `b` at position `N` of `y`, moving the later entries up by one. -/
-def insertVal {d : Nat} (y : Fin (N + d) → Bool) (b : Bool) : Fin (N + 1 + d) → Bool :=
-  fun i => if h : i.val < N then y ⟨i.val, by omega⟩
-    else if h' : i.val = N then b else y ⟨i.val - 1, by omega⟩
 
 theorem gates_subst_substVarMap (φ : Formula N) (d : Nat) :
     ∀ F : Formula (N + 1 + d), (F.subst (substVarMap φ d)).gates = F.gates + F.occ N * φ.gates
@@ -165,26 +191,6 @@ theorem eval_subst_substVarMap (φ : Formula N) (d : Nat) (F : Formula (N + 1 + 
   unfold substVarMap insertVal
   split_ifs <;> simp [Function.comp_def]
 
-/-- `Fin.snoc` on Boolean vectors, entry by entry. -/
-theorem snoc_apply {m : Nat} (y : Fin m → Bool) (g : Bool) (i : Fin (m + 1)) :
-    Fin.snoc (α := fun _ => Bool) y g i = if h : i.val < m then y ⟨i.val, h⟩ else g := by
-  refine Fin.lastCases ?_ (fun j => ?_) i
-  · simp
-  · simp
-
-theorem insertVal_zero (y : Fin N → Bool) (b : Bool) :
-    insertVal (d := 0) y b = Fin.snoc y b := by
-  funext i
-  rw [snoc_apply (m := N)]
-  unfold insertVal
-  split_ifs <;> first | rfl | omega
-
-theorem insertVal_snoc {d : Nat} (y : Fin (N + d) → Bool) (g b : Bool) :
-    insertVal (d := d + 1) (Fin.snoc y g) b = Fin.snoc (insertVal y b) g := by
-  funext i
-  simp only [insertVal, snoc_apply, Nat.add_eq]
-  split_ifs <;> first | rfl | omega
-
 end Formula
 
 namespace SharedProgram
@@ -216,7 +222,7 @@ def substVar (φ : Formula N) : {d k : Nat} → SharedProgram (N + 1 + d) k → 
 theorem eval_substVar (φ : Formula N) : ∀ {d k : Nat} (P : SharedProgram (N + 1 + d) k)
     (y : Fin (N + d) → Bool),
     (substVar φ P).eval y =
-      P.eval (Formula.insertVal y (φ.eval fun j => y (Fin.castLE (by omega) j)))
+      P.eval (insertVal y (φ.eval fun j => y (Fin.castLE (by omega) j)))
   | d, _, output F, y => by
     rw [substVar, eval_output, Formula.eval_subst_substVarMap, eval_output]
   | d, _, share G P, y => by
@@ -224,16 +230,16 @@ theorem eval_substVar (φ : Formula N) : ∀ {d k : Nat} (P : SharedProgram (N +
       Formula.eval_subst_substVarMap]
     congr 1
     have hφ : (φ.eval fun j => Fin.snoc (α := fun _ => Bool) y
-        (G.eval (Formula.insertVal y (φ.eval fun j => y (Fin.castLE (by omega) j))))
+        (G.eval (insertVal y (φ.eval fun j => y (Fin.castLE (by omega) j))))
           (Fin.castLE (by omega) j)) = φ.eval fun j => y (Fin.castLE (by omega) j) := by
       congr 1
       funext j
-      rw [Formula.snoc_apply (m := N + d)]
+      rw [snoc_apply (m := N + d)]
       simp only [Fin.val_castLE]
       split_ifs with h
       · rfl
       · omega
-    rw [hφ, Formula.insertVal_snoc]
+    rw [hφ, insertVal_snoc]
 
 theorem gates_substVar (φ : Formula N) : ∀ {d k : Nat} (P : SharedProgram (N + 1 + d) k),
     (substVar φ P).gates = P.gates + P.occ N * φ.gates
@@ -406,7 +412,7 @@ theorem exists_sharedProgram_of_program {n : Nat} (f : Cslib.BooleanFunction n) 
         (fun g => u g.castSucc + argUses line g)
         (SharedProgram.substVar (lineFormula line) (d := 0) Q)
         (fun x => by
-          rw [SharedProgram.eval_substVar, Formula.insertVal_zero]
+          rw [SharedProgram.eval_substVar, insertVal_zero]
           change Q.eval (Fin.snoc (wireValues p x) ((lineFormula line).eval (wireValues p x))) = _
           rw [← wireValues_gate]
           exact hQ x)
