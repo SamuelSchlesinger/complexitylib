@@ -450,6 +450,33 @@ chapter.
   this rectangle bound, with $X \le s + k + 1$.
 \end{proof}
 
+\begin{proposition}[Parity with few shared gates: upper bound]
+  \label{prop:lowerbounds-algebraic-khrapchenko-shared-upper}
+  \lean{Algebraic.KW.SharedProgram.exists_parity_mul_gates_le,
+    Algebraic.KW.SharedProgram.exists_parity_mul_gates_le_of_lt}
+  \leanok
+  \uses{thm:lowerbounds-algebraic-khrapchenko-shared}
+  For all $n$ and $k$, some $k$-shared program of
+  Theorem~\ref{thm:lowerbounds-algebraic-khrapchenko-shared} computes the
+  parity of $n$ bits with $s$ AND and OR gates, where
+  $(k + 1) s \le 4(n + k)^2 + 3k(k + 1)$; if $k < n$ then
+  $(k + 1) s \le 19 n^2$. With the lower bound
+  $n^2 \le (k + 1)(s + k + 1)$, the minimum number of gates is
+  $\Theta(n^2/(k + 1))$ whenever $2(k + 1)^2 \le n^2$.
+\end{proposition}
+\begin{proof}
+  \leanok
+  Cut the inputs into $k + 1$ blocks of $m = \lceil n/(k + 1) \rceil$
+  consecutive bits. Share the parity of the first block, then, for each of the
+  next $k - 1$ blocks, the exclusive or of the last shared value with the
+  parity of the block, and output the exclusive or of the last shared value
+  with the parity of the last block. A balanced formula for the parity of $m$
+  bits has at most $2m^2$ gates, and
+  $z \oplus \varphi = (z \wedge \neg\varphi) \vee (\neg z \wedge \varphi)$ uses
+  $\varphi$ and its De Morgan dual, so $s \le 2m^2 + k(4m^2 + 3)$, and
+  $(k + 1) m \le n + k$.
+\end{proof}
+
 \begin{theorem}[Polynomial circuit size hierarchy]
   \label{thm:lowerbounds-algebraic-hierarchy}
   \lean{Algebraic.DeMorgan.polynomialSize_ssubset}

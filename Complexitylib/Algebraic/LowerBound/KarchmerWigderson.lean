@@ -9,6 +9,7 @@ public import Complexitylib.Algebraic.LowerBound.KarchmerWigderson.Basic
 public import Complexitylib.Algebraic.LowerBound.KarchmerWigderson.Composition
 public import Complexitylib.Algebraic.LowerBound.KarchmerWigderson.Khrapchenko
 public import Complexitylib.Algebraic.LowerBound.KarchmerWigderson.Sharing
+public import Complexitylib.Algebraic.LowerBound.KarchmerWigderson.Sharing.UpperBound
 
 /-!
 # Karchmer–Wigderson games and the KRW conjecture
@@ -18,7 +19,7 @@ theorem identifying formula depth and size with protocol depth and size (for
 `n ≥ 1` input bits), the composition of Boolean functions with its elementary bounds, the
 statement of the Karchmer–Raz–Wigderson conjecture, Khrapchenko's quadratic lower bounds
 for parity, threshold functions and majority, and their extension to circuits in which at
-most `k` gates have fan-out at least two.
+most `k` gates have fan-out at least two, with a matching upper bound for parity.
 -/
 
 @[expose] public section
