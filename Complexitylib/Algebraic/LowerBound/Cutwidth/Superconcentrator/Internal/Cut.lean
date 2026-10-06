@@ -94,15 +94,37 @@ theorem card_outCut_add_card_outCut_compl_le [Fintype E] (L : Finset V) :
   have := Finset.card_le_card hsub
   rwa [Finset.card_union_of_disjoint hdisj] at this
 
-/-- **One walk family.** If `X` and `Y` are equally large, the inputs in `X` lie in `L`, and
-the outputs in `Y` lie outside `L`, then at least `|X|` edges are directed out of `L`. -/
-theorem card_le_card_cross [Fintype E] {N : ℕ} {input output : Fin N → V}
-    (h : G.Superconcentrator input output) (L : Set V) {X Y : Finset (Fin N)}
-    (hXY : X.card = Y.card) (hX : ∀ i ∈ X, input i ∈ L) (hY : ∀ j ∈ Y, output j ∉ L) :
+/-! ### Families of vertex-disjoint walks -/
+
+/-- The first vertex of a directed walk lies on it. -/
+theorem mem_of_isDirWalk_left {p : List V} {u v : V} (h : G.IsDirWalk p u v) : u ∈ p :=
+  List.mem_of_mem_head? h.1
+
+/-- The last vertex of a directed walk lies on it. -/
+theorem mem_of_isDirWalk_right {p : List V} {u v : V} (h : G.IsDirWalk p u v) : v ∈ p :=
+  List.mem_of_mem_getLast? h.2.1
+
+/-- **Disjoint walks end apart.** Vertex-disjoint directed walks ending at the outputs
+`output (target i)` of an injective labelling have distinct targets. -/
+theorem injOn_target_of_walks {ι κ : Type*} {X : Finset ι} {walk : ι → List V} {src : ι → V}
+    {output : κ → V} {target : ι → κ}
+    (hwalk : ∀ i ∈ X, G.IsDirWalk (walk i) (src i) (output (target i)))
+    (hdisj : ∀ i ∈ X, ∀ j ∈ X, i ≠ j → (walk i).Disjoint (walk j)) :
+    Set.InjOn target X := by
+  intro i hi j hj hij
+  by_contra hne
+  exact hdisj i hi j hj hne (mem_of_isDirWalk_right (hwalk i hi))
+    (by rw [hij]; exact mem_of_isDirWalk_right (hwalk j hj))
+
+/-- **Disjoint walks leave along distinct edges.** If vertex-disjoint directed walks indexed by
+`X` start in `L` and end outside `L`, then at least `|X|` edges are directed out of `L`. -/
+theorem card_le_card_outCut_of_walks [Fintype E] {ι : Type*} (L : Set V) {X : Finset ι}
+    {walk : ι → List V} {src dst : ι → V} (hwalk : ∀ i ∈ X, G.IsDirWalk (walk i) (src i) (dst i))
+    (hdisj : ∀ i ∈ X, ∀ j ∈ X, i ≠ j → (walk i).Disjoint (walk j))
+    (hsrc : ∀ i ∈ X, src i ∈ L) (hdst : ∀ i ∈ X, dst i ∉ L) :
     X.card ≤ (outCut G L).card := by
-  obtain ⟨target, walk, hwalk, hdisj⟩ := h.exists_walks X Y hXY
   have H : ∀ i ∈ X, ∃ e, G.fst e ∈ walk i ∧ G.fst e ∈ L ∧ G.snd e ∉ L := fun i hi =>
-    exists_cross_of_isDirWalk (hwalk i hi).2 (hX i hi) (hY _ (hwalk i hi).1)
+    exists_cross_of_isDirWalk (hwalk i hi) (hsrc i hi) (hdst i hi)
   rcases X.eq_empty_or_nonempty with hX0 | ⟨i₀, hi₀⟩
   · simp [hX0]
   have : Nonempty E := ⟨(H i₀ hi₀).choose⟩
@@ -112,36 +134,34 @@ theorem card_le_card_cross [Fintype E] {N : ℕ} {input output : Fin N → V}
   · by_contra hne
     exact hdisj i hi j hj hne (hf i hi).1 (hij ▸ (hf j hj).1)
 
-/-- **The cut lemma.** Every linear order of the vertices of an `N`-superconcentrator has a
-lower set whose cut has at least `N` edges. -/
-theorem exists_le_card_cut [Fintype V] [Fintype E] [LinearOrder V] {N : ℕ}
-    {input output : Fin N → V} (h : G.Superconcentrator input output) :
-    ∃ L : Finset V, IsLowerSet (L : Set V) ∧ N ≤ (G.cut L).card := by
-  rcases Nat.eq_zero_or_pos N with rfl | hN
-  · exact ⟨∅, by simpa using isLowerSet_empty, Nat.zero_le _⟩
-  set T : Finset V := Finset.univ.image input ∪ Finset.univ.image output with hTdef
-  have hdisjT : Disjoint (Finset.univ.image input) (Finset.univ.image output) := by
-    rw [Finset.disjoint_left]
-    simp only [Finset.mem_image, Finset.mem_univ, true_and]
-    rintro _ ⟨i, rfl⟩ ⟨j, hj⟩
-    exact h.input_ne_output i j hj.symm
-  have hT : T.card = 2 * N := by
-    rw [hTdef, Finset.card_union_of_disjoint hdisjT,
-      Finset.card_image_of_injective _ h.input_injective,
-      Finset.card_image_of_injective _ h.output_injective, Finset.card_univ, Fintype.card_fin]
-    ring
-  set f := T.orderEmbOfFin hT
-  set t := f ⟨N, by omega⟩
-  set L : Finset V := Finset.univ.filter (· < t) with hLdef
-  refine ⟨L, ?_, ?_⟩
-  · intro a b hba ha
-    simp only [hLdef, Finset.coe_filter, Finset.mem_univ, true_and] at ha ⊢
-    exact lt_of_le_of_lt hba ha
-  -- exactly `N` terminals lie in `L`
-  have hTL : (T.filter (· ∈ L)).card = N := by
-    have : T.filter (· ∈ L) = (Finset.Iio (⟨N, by omega⟩ : Fin (2 * N))).map f.toEmbedding := by
+/-- **One walk family.** If `X` and `Y` are equally large, the inputs in `X` lie in `L`, and
+the outputs in `Y` lie outside `L`, then at least `|X|` edges are directed out of `L`. -/
+theorem card_le_card_cross [Fintype E] {N : ℕ} {input output : Fin N → V}
+    (h : G.Superconcentrator input output) (L : Set V) {X Y : Finset (Fin N)}
+    (hXY : X.card = Y.card) (hX : ∀ i ∈ X, input i ∈ L) (hY : ∀ j ∈ Y, output j ∉ L) :
+    X.card ≤ (outCut G L).card := by
+  obtain ⟨target, walk, hwalk, hdisj⟩ := h.exists_walks X Y hXY
+  exact card_le_card_outCut_of_walks L (fun i hi => (hwalk i hi).2) hdisj hX
+    fun i hi => hY _ (hwalk i hi).1
+
+/-! ### Lower sets with a prescribed number of chosen vertices -/
+
+/-- **Prefixes of a chosen set.** In a linear order, for every `k` at most the size of a set
+`T`, some lower set contains exactly `k` elements of `T`. -/
+theorem exists_isLowerSet_card_filter [Fintype V] [LinearOrder V] (T : Finset V) {k : ℕ}
+    (hk : k ≤ T.card) :
+    ∃ L : Finset V, IsLowerSet (L : Set V) ∧ (T.filter (· ∈ L)).card = k := by
+  rcases hk.lt_or_eq with hk | rfl
+  · set f := T.orderEmbOfFin rfl
+    set t := f ⟨k, hk⟩
+    refine ⟨Finset.univ.filter (· < t), ?_, ?_⟩
+    · intro a b hba ha
+      simp only [Finset.coe_filter, Finset.mem_univ, true_and] at ha ⊢
+      exact lt_of_le_of_lt hba ha
+    have : T.filter (· ∈ Finset.univ.filter (· < t)) =
+        (Finset.Iio (⟨k, hk⟩ : Fin T.card)).map f.toEmbedding := by
       ext x
-      simp only [Finset.mem_filter, hLdef, Finset.mem_univ, true_and, Finset.mem_map,
+      simp only [Finset.mem_filter, Finset.mem_univ, true_and, Finset.mem_map,
         Finset.mem_Iio, RelEmbedding.coe_toEmbedding]
       constructor
       · rintro ⟨hxT, hxt⟩
@@ -153,6 +173,26 @@ theorem exists_le_card_cut [Fintype V] [Fintype E] [LinearOrder V] {N : ℕ}
         have : f i ∈ Set.range f := ⟨i, rfl⟩
         rwa [Finset.range_orderEmbOfFin] at this
     rw [this, Finset.card_map, Fin.card_Iio]
+  · exact ⟨Finset.univ, by simpa using isLowerSet_univ, by simp⟩
+
+/-- **The cut lemma.** Every linear order of the vertices of an `N`-superconcentrator has a
+lower set whose cut has at least `N` edges. -/
+theorem exists_le_card_cut [Fintype V] [Fintype E] [LinearOrder V] {N : ℕ}
+    {input output : Fin N → V} (h : G.Superconcentrator input output) :
+    ∃ L : Finset V, IsLowerSet (L : Set V) ∧ N ≤ (G.cut L).card := by
+  set T : Finset V := Finset.univ.image input ∪ Finset.univ.image output with hTdef
+  have hdisjT : Disjoint (Finset.univ.image input) (Finset.univ.image output) := by
+    rw [Finset.disjoint_left]
+    simp only [Finset.mem_image, Finset.mem_univ, true_and]
+    rintro _ ⟨i, rfl⟩ ⟨j, hj⟩
+    exact h.input_ne_output i j hj.symm
+  have hT : T.card = 2 * N := by
+    rw [hTdef, Finset.card_union_of_disjoint hdisjT,
+      Finset.card_image_of_injective _ h.input_injective,
+      Finset.card_image_of_injective _ h.output_injective, Finset.card_univ, Fintype.card_fin]
+    ring
+  obtain ⟨L, hL, hTL⟩ := exists_isLowerSet_card_filter T (k := N) (by omega)
+  refine ⟨L, hL, ?_⟩
   set X := Finset.univ.filter fun i => input i ∈ L
   set X' := Finset.univ.filter fun i => input i ∉ L
   set Y := Finset.univ.filter fun j => output j ∉ L

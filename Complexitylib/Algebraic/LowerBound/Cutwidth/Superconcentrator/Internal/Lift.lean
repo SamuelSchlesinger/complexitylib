@@ -16,10 +16,12 @@ undirected walk to `r` crosses from path to path along kept edges. Every directe
 the component lifts to a directed walk of the split graph from any entering slot of its first
 vertex to the last slot of its last vertex, staying in the paths of the vertices of the walk.
 
-All terminals of a superconcentrator lie in the component of its first input, each input has
-a kept edge leaving it, and each output a kept edge entering it. Placing every input at the
-first slot of its path and every output at the last slot, the split graph is again a
-superconcentrator.
+Lifting each walk of a vertex-disjoint family from the first slot of its first vertex to the
+last slot of its last vertex gives a vertex-disjoint family of the split graph
+(`exists_lift_walks`). All terminals of a superconcentrator lie in the component of its first
+input, each input has a kept edge leaving it, and each output a kept edge entering it. Placing
+every input at the first slot of its path and every output at the last slot, the split graph
+is again a superconcentrator.
 -/
 
 @[expose] public section
@@ -165,6 +167,53 @@ theorem reflTransGen_lift {r : V} (P : Set V) :
         omega) (by rw [hy, List.getLast_cons_cons]) hlast
     exact h₁.trans (ReflTransGen.head h₂ h₃)
 
+/-- **Lifting one walk.** A directed walk from `u` to `v` in the component of `r`, where `u`
+and `v` have slots, lifts to a directed walk of the split graph from the first slot of `u` to
+the last slot of `v` that stays in the paths of the vertices of the walk. -/
+theorem exists_lift_isDirWalk {r : V} {p : List V} {u v : V} (h : G.IsDirWalk p u v)
+    (hr : ReflTransGen G.Adj u r) (hu : 0 < slots G (compEdges G r) u)
+    (hv : 0 < slots G (compEdges G r) v) :
+    ∃ q : List (SplitVertex G (compEdges G r)),
+      (split G (compEdges G r)).IsDirWalk q ⟨u, ⟨0, hu⟩⟩
+          ⟨v, ⟨slots G (compEdges G r) v - 1, Nat.sub_lt hv one_pos⟩⟩ ∧
+        ∀ z ∈ q, z.1 ∈ p := by
+  obtain ⟨l, hl, hc, hlast⟩ := exists_eq_cons_of_isDirWalk h
+  have hR := reflTransGen_lift {z | z ∈ p} u l hc hr
+    (fun z hz => by show z ∈ p; rw [hl]; exact hz) ⟨u, ⟨0, hu⟩⟩
+    ⟨v, ⟨slots G (compEdges G r) v - 1, Nat.sub_lt hv one_pos⟩⟩ rfl (Nat.zero_le _) hlast.symm
+    (by show slots G (compEdges G r) v - 1 + 1 = slots G (compEdges G r) v; omega)
+  obtain ⟨l', hc', hlast'⟩ := List.exists_isChain_cons_of_relationReflTransGen hR
+  refine ⟨⟨u, ⟨0, hu⟩⟩ :: l', ?_, ?_⟩
+  · have := isDirWalk_of_isChain (hc'.imp fun _ _ hab => hab.1)
+    rwa [hlast'] at this
+  · exact List.IsChain.induction (fun z => z.1 ∈ p) _ hc'
+      (fun _ _ hab _ => hab.2.2) (fun _ => by show u ∈ p; rw [hl]; simp)
+
+/-- **Lifting a family of vertex-disjoint walks.** Let all terminals `input i` lie in the
+component of `r`, and let every `input i` and every `output j` have a slot. Vertex-disjoint
+directed walks from `input i` to `output (target i)` lift to vertex-disjoint directed walks of
+the split graph from the first slot of `input i` to the last slot of `output (target i)`. -/
+theorem exists_lift_walks {ι κ : Type*} {r : V} {input : ι → V} {output : κ → V}
+    (hr : ∀ i, ReflTransGen G.Adj (input i) r)
+    (hin : ∀ i, 0 < slots G (compEdges G r) (input i))
+    (hout : ∀ j, 0 < slots G (compEdges G r) (output j)) {X : Finset ι} {target : ι → κ}
+    {walk : ι → List V}
+    (hwalk : ∀ i ∈ X, G.IsDirWalk (walk i) (input i) (output (target i)))
+    (hdisj : ∀ i ∈ X, ∀ j ∈ X, i ≠ j → (walk i).Disjoint (walk j)) :
+    ∃ walk' : ι → List (SplitVertex G (compEdges G r)),
+      (∀ i ∈ X, (split G (compEdges G r)).IsDirWalk (walk' i) ⟨input i, ⟨0, hin i⟩⟩
+          ⟨output (target i), ⟨slots G (compEdges G r) (output (target i)) - 1,
+            Nat.sub_lt (hout (target i)) one_pos⟩⟩) ∧
+        ∀ i ∈ X, ∀ j ∈ X, i ≠ j → (walk' i).Disjoint (walk' j) := by
+  have H : ∀ i ∈ X, ∃ q : List (SplitVertex G (compEdges G r)),
+      (split G (compEdges G r)).IsDirWalk q ⟨input i, ⟨0, hin i⟩⟩
+          ⟨output (target i), ⟨slots G (compEdges G r) (output (target i)) - 1,
+            Nat.sub_lt (hout (target i)) one_pos⟩⟩ ∧ ∀ z ∈ q, z.1 ∈ walk i :=
+    fun i hi => exists_lift_isDirWalk (hwalk i hi) (hr i) (hin i) (hout (target i))
+  choose! walk' hwalk' using H
+  exact ⟨walk', fun i hi => (hwalk' i hi).1, fun i hi j hj hij z hzi hzj =>
+    hdisj i hi j hj hij ((hwalk' i hi).2 z hzi) ((hwalk' j hj).2 z hzj)⟩
+
 /-- **The split graph of a superconcentrator.** If all inputs lie in the component of `r`,
 every input has a slot, and every output has a slot, then the split graph of the component is
 a superconcentrator with inputs at first slots and outputs at last slots. -/
@@ -173,40 +222,15 @@ theorem split_superconcentrator {N : ℕ} {input output : Fin N → V}
     (hin : ∀ i, 0 < slots G (compEdges G r) (input i))
     (hout : ∀ j, 0 < slots G (compEdges G r) (output j)) :
     (split G (compEdges G r)).Superconcentrator (fun i => ⟨input i, ⟨0, hin i⟩⟩)
-      (fun j => ⟨output j, ⟨slots G (compEdges G r) (output j) - 1, by
-        have := hout j
-        omega⟩⟩) where
+      (fun j => ⟨output j, ⟨slots G (compEdges G r) (output j) - 1,
+        Nat.sub_lt (hout j) one_pos⟩⟩) where
   input_injective _ _ hij := h.input_injective (sigma_fin_eq_iff.1 hij).1
   output_injective _ _ hij := h.output_injective (sigma_fin_eq_iff.1 hij).1
   input_ne_output i j hij := h.input_ne_output i j (sigma_fin_eq_iff.1 hij).1
   exists_walks X Y hXY := by
     obtain ⟨target, walk, hwalk, hdisj⟩ := h.exists_walks X Y hXY
-    have H : ∀ i ∈ X, ∃ p : List (SplitVertex G (compEdges G r)),
-        (split G (compEdges G r)).IsDirWalk p ⟨input i, ⟨0, hin i⟩⟩
-          ⟨output (target i), ⟨slots G (compEdges G r) (output (target i)) - 1, by
-            have := hout (target i)
-            omega⟩⟩ ∧ ∀ z ∈ p, z.1 ∈ walk i := by
-      intro i hi
-      obtain ⟨l, hl, hc, hlast⟩ := exists_eq_cons_of_isDirWalk (hwalk i hi).2
-      have hR := reflTransGen_lift {z | z ∈ walk i} (input i) l hc (hr i)
-        (fun z hz => by show z ∈ walk i; rw [hl]; exact hz) ⟨input i, ⟨0, hin i⟩⟩
-        ⟨output (target i), ⟨slots G (compEdges G r) (output (target i)) - 1, by
-          have := hout (target i)
-          omega⟩⟩ rfl (Nat.zero_le _) hlast.symm
-        (by
-          have := hout (target i)
-          show slots G (compEdges G r) (output (target i)) - 1 + 1 =
-            slots G (compEdges G r) (output (target i))
-          omega)
-      obtain ⟨l', hc', hlast'⟩ := List.exists_isChain_cons_of_relationReflTransGen hR
-      refine ⟨⟨input i, ⟨0, hin i⟩⟩ :: l', ?_, ?_⟩
-      · have := isDirWalk_of_isChain (hc'.imp fun _ _ hab => hab.1)
-        rwa [hlast'] at this
-      · exact List.IsChain.induction (fun z => z.1 ∈ walk i) _ hc'
-          (fun _ _ hab _ => hab.2.2) (fun _ => by show input i ∈ walk i; rw [hl]; simp)
-    choose! walk' hwalk' using H
-    exact ⟨target, walk', fun i hi => ⟨(hwalk i hi).1, (hwalk' i hi).1⟩,
-      fun i hi j hj hij z hzi hzj =>
-        hdisj i hi j hj hij ((hwalk' i hi).2 z hzi) ((hwalk' j hj).2 z hzj)⟩
+    obtain ⟨walk', hwalk', hdisj'⟩ := exists_lift_walks hr hin hout (X := X) (target := target)
+      (fun i hi => (hwalk i hi).2) hdisj
+    exact ⟨target, walk', fun i hi => ⟨(hwalk i hi).1, hwalk' i hi⟩, hdisj'⟩
 
 end Algebraic.Cutwidth.Superconcentrator.Internal
