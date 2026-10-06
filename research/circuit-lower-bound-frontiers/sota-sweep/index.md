@@ -134,10 +134,26 @@ Concrete next steps left open by this sweep, roughly in order of expected payoff
   binary `[2m, m]` codes in which every `m` columns have rank `(1 − τ)m`); the best explicit
   construction known has rank about `n/105`. Beyond `2.781n` needs several cuts or bias bounds
   for rectangles of size between `2^{n/3}` and `2^{n/2}`.
-- **U2 past `5n`.** Links need a lower bound on co-straddling (joint events of four to six
-  Gaussian scores); merging each copy with one consumer and placing the block at its information
-  median gives a deterministic `≈ 4.68n` only. A dichotomy (cyclic, correlated regions already have
-  cheap cuts; tree-like regions admit tree-value link bounds) is unexplored.
+- **U2 past `5n`.** Two routes were tried.
+  - *Layouts.* Links need a lower bound on co-straddling (joint events of four to six Gaussian
+    scores); merging each copy with one consumer and placing the block at its information median
+    gives a deterministic `≈ 4.68n` only. A dichotomy (cyclic, correlated regions already have cheap
+    cuts; tree-like regions admit tree-value link bounds) is unexplored.
+  - *Gate elimination.* The right target property is a one-sided directional affine disperser
+    (`f(x) ⊕ f(x+a)` not identically zero on any large affine flat): it is exactly the class on which
+    the hypotheses of the Iwama–Lachish–Morizumi–Raz `5n − o(n)` proof survive affine
+    substitutions, so Li–Zhong's explicit directional dispersers (CCC 2024) get `5n − o(n)`. The
+    Amano–Tarui `5n + o(n)` barrier does not apply to such functions (their function is constant on
+    an affine flat of codimension `O(n/log² n)`). Sumset dispersion alone does not imply the
+    hypothesis (a sumset disperser may ignore a variable). A *parity link* (a variable fed with an
+    affine node into an XOR gadget whose output feeds another) allows a substitution removing six
+    gates, so circuits built from XOR chains, like Amano–Tarui's, need about `5.5n` for these
+    functions (Paper). What remains is one local configuration — a degree-three variable whose
+    killed gates' successors pass constants through — where every single affine substitution removes
+    at most five gates nearby; a proof of `(5 + δ)n` must exclude circuits dominated by it
+    semantically (Conjecture: a gadget dichotomy). No function-level barrier is known: one would need
+    a linear-size directional disperser of sublinear dimension, which Golovnev–Hirsch–Knop–Kulikov
+    list as open.
 - **Matrix and polynomial multiplication.** For arithmetic matrix multiplication, the full jet
   measure (Jacobian plus restricted Hessian rank) appears to reach `(1 − o(1))n²` on every chain
   tried, which would give the `5.5625n²` ceiling of cut methods (Conjecture); an arbitrary-gate
