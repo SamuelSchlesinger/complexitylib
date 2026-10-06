@@ -8,6 +8,7 @@ module
 public import Complexitylib.Algebraic.Basis.DeMorgan
 public import Complexitylib.Algebraic.LowerBound.Monotone.MatrixProduct
 public import Complexitylib.Algebraic.Semantics
+public import Mathlib.Analysis.SpecialFunctions.Log.Base
 import Complexitylib.Algebraic.LowerBound.Monotone.MatrixProduct.NegationLimited.Internal
 import Mathlib.Tactic.Ring
 
@@ -36,11 +37,16 @@ with constants), and it contains the AND/OR circuits of `cube_le_andCost`.
   bound `I * J * K`.
 * `mul_div_sq_le_andCost`: in the square case, `n * ⌊n / 2 ^ t⌋ ^ 2` AND gates.
 * `cube_le_four_pow_mul_andCost`: if `2 ^ t ≤ n`, then
-  `n ^ 3 ≤ 4 ^ (t + 1) * #AND`; so a circuit with fewer than `n ^ (3 - ε)` AND
-  gates has more than `(ε / 2) * log₂ n - 1` NOT gates.
+  `n ^ 3 ≤ 4 ^ (t + 1) * #AND`.
+* `mul_logb_sub_one_lt_notCost`: a circuit with fewer than `n ^ (3 - ε)` AND
+  gates, `ε ≤ 2`, has more than `(ε / 2) * log₂ n - 1` NOT gates.
 * `mul_mul_le_andCost_add`, `cube_sub_le_andCost`: if every NOT gate computes a
   function of the inputs in a fixed set `S`, the circuit has at least
   `I * J * K - |S| * max I J` AND gates, `n ^ 3 - |S| * n` in the square case.
+* `mul_mul_le_andCost_add_of_monotone_or_dependsOnlyOn`,
+  `cube_sub_le_andCost_of_monotone_or_dependsOnlyOn`: the same bounds when
+  every gate computing a non-monotone function depends only on the inputs in
+  `S`; then so does every NOT gate.
 
 ## Proof
 
@@ -177,6 +183,82 @@ theorem cube_sub_le_andCost (n : Nat)
     (productEntry n) circuit computes S localized
   rw [max_self, show n * n * n = n ^ 3 by ring] at this
   omega
+
+/-- **Boolean matrix product with non-monotone gates of few variables.** If
+every gate of a De Morgan circuit computing the product of an `I × K` matrix and
+a `K × J` matrix, laid out at distinct inputs, computes a monotone function or a
+function of the inputs in `S`, the circuit has at least
+`I * J * K - |S| * max I J` AND gates. -/
+theorem mul_mul_le_andCost_add_of_monotone_or_dependsOnlyOn {N M I J K : Nat}
+    (x : Fin I → Fin K → Fin N) (y : Fin K → Fin J → Fin N)
+    (distinct : Function.Injective (Sum.elim (Function.uncurry x) (Function.uncurry y)))
+    (z : Fin I → Fin J → Fin M) (circuit : Circuit DeMorgan.signature N M)
+    (computes : ∀ (a : Fin N → Bool) i j,
+      circuit.eval DeMorgan.interpretation a (z i j) =
+        decide (∃ k, a (x i k) = true ∧ a (y k j) = true))
+    (S : Finset (Fin N))
+    (localized : ∀ G, Monotone (circuit.program.gateFunction DeMorgan.interpretation G) ∨
+      DependsOnlyOn (circuit.program.gateFunction DeMorgan.interpretation G) S) :
+    I * J * K ≤ circuit.cost DeMorgan.andCost + S.card * max I J :=
+  mul_mul_le_andCost_add x y distinct z circuit computes S
+    (Internal.dependsOnlyOn_of_not circuit S localized)
+
+/-- **Square Boolean matrix product with non-monotone gates of few variables.**
+If every gate of a De Morgan circuit computing the Boolean product of two
+`n × n` matrices, in the row-major layout of `cube_le_andCost`, computes a
+monotone function or a function of the inputs in `S`, the circuit has at least
+`n ^ 3 - |S| * n` AND gates. -/
+theorem cube_sub_le_andCost_of_monotone_or_dependsOnlyOn (n : Nat)
+    (circuit : Circuit DeMorgan.signature (n * n + n * n) (n * n))
+    (computes : ∀ (a : Fin (n * n + n * n) → Bool) i j,
+      circuit.eval DeMorgan.interpretation a (productEntry n i j) =
+        decide (∃ k, a (leftEntry n i k) = true ∧ a (rightEntry n k j) = true))
+    (S : Finset (Fin (n * n + n * n)))
+    (localized : ∀ G, Monotone (circuit.program.gateFunction DeMorgan.interpretation G) ∨
+      DependsOnlyOn (circuit.program.gateFunction DeMorgan.interpretation G) S) :
+    n ^ 3 - S.card * n ≤ circuit.cost DeMorgan.andCost :=
+  cube_sub_le_andCost n circuit computes S (Internal.dependsOnlyOn_of_not circuit S localized)
+
+/-- **Negations needed for a sub-cubic product, logarithmic form.** If a De
+Morgan circuit computing the Boolean product of two `n × n` matrices, `n ≥ 1`,
+in the row-major layout of `cube_le_andCost`, has fewer than `n ^ (3 - ε)` AND
+gates for some `ε ≤ 2`, then it has more than `(ε / 2) * log₂ n - 1` NOT
+gates. -/
+theorem mul_logb_sub_one_lt_notCost (n : Nat) (hn : 1 ≤ n) {ε : ℝ} (hε : ε ≤ 2)
+    (circuit : Circuit DeMorgan.signature (n * n + n * n) (n * n))
+    (computes : ∀ (a : Fin (n * n + n * n) → Bool) i j,
+      circuit.eval DeMorgan.interpretation a (productEntry n i j) =
+        decide (∃ k, a (leftEntry n i k) = true ∧ a (rightEntry n k j) = true))
+    (subcubic : (circuit.cost DeMorgan.andCost : ℝ) < (n : ℝ) ^ (3 - ε)) :
+    ε / 2 * Real.logb 2 n - 1 < circuit.cost DeMorgan.notCost := by
+  set t := circuit.cost DeMorgan.notCost
+  have hn0 : (0 : ℝ) < n := by exact_mod_cast hn
+  have hL0 : 0 ≤ Real.logb 2 n := Real.logb_nonneg one_lt_two (by exact_mod_cast hn)
+  have ht0 : (0 : ℝ) ≤ t := t.cast_nonneg
+  by_cases hlarge : 2 ^ t ≤ n
+  · have hcube : ((n ^ 3 : Nat) : ℝ) ≤ ((4 ^ (t + 1) * circuit.cost DeMorgan.andCost : Nat) : ℝ) :=
+      by exact_mod_cast cube_le_four_pow_mul_andCost n t circuit le_rfl computes hlarge
+    push_cast at hcube
+    have hsplit : (n : ℝ) ^ 3 = (n : ℝ) ^ ε * (n : ℝ) ^ (3 - ε) := by
+      rw [← Real.rpow_add hn0, add_sub_cancel, ← Real.rpow_natCast]
+      norm_num
+    have hpos : 0 < (n : ℝ) ^ (3 - ε) := Real.rpow_pos_of_pos hn0 _
+    have h4 : (n : ℝ) ^ ε < 4 ^ (t + 1) := by
+      have : (n : ℝ) ^ ε * (n : ℝ) ^ (3 - ε) < 4 ^ (t + 1) * (n : ℝ) ^ (3 - ε) := by
+        rw [← hsplit]
+        exact lt_of_le_of_lt hcube (mul_lt_mul_of_pos_left subcubic (by positivity))
+      exact lt_of_mul_lt_mul_right this hpos.le
+    have hlog := Real.logb_lt_logb one_lt_two (Real.rpow_pos_of_pos hn0 ε) h4
+    rw [Real.logb_rpow_eq_mul_logb_of_pos hn0,
+      show (4 : ℝ) ^ (t + 1) = 2 ^ (2 * (t + 1)) by rw [pow_mul]; norm_num,
+      Real.logb_pow, Real.logb_self_eq_one one_lt_two] at hlog
+    push_cast at hlog
+    linarith
+  · have hlt : Real.logb 2 n < t := by
+      have := Real.logb_lt_logb one_lt_two hn0
+        (show (n : ℝ) < 2 ^ t by exact_mod_cast Nat.lt_of_not_le hlarge)
+      rwa [Real.logb_pow, Real.logb_self_eq_one one_lt_two, mul_one] at this
+    nlinarith
 
 end NegationLimited
 end MatrixProduct

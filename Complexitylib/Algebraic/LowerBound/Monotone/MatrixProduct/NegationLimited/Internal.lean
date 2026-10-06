@@ -511,6 +511,56 @@ theorem mul_mul_le_andCost_add (L : Layout N I J K) (z : Fin I → Fin J → Fin
   have hT : I * J * K ≤ T.card + S.card * max I J := mul_mul_le_card_add L S
   omega
 
+/-! ### Non-monotone gates of few variables -/
+
+/-- A function on assignments that is both monotone and antitone is constant. -/
+theorem eq_bot_of_monotone_of_antitone {f : (Fin N → Bool) → Bool} (hm : Monotone f)
+    (ha : Antitone f) (a : Fin N → Bool) : f a = f ⊥ :=
+  le_antisymm (ha bot_le) (hm bot_le)
+
+/-- If every gate computing a non-monotone function depends only on the inputs
+in `S`, so does every NOT gate. -/
+theorem dependsOnlyOn_of_not (C : Circuit DeMorgan.signature N M) (S : Finset (Fin N))
+    (localized : ∀ G, Monotone (C.program.gateFunction DeMorgan.interpretation G) ∨
+      DependsOnlyOn (C.program.gateFunction DeMorgan.interpretation G) S)
+    (G : Fin C.size) (hG : (C.program.lines G).op = .not) :
+    DependsOnlyOn (C.program.gateFunction DeMorgan.interpretation G) S := by
+  obtain ⟨w, hneg⟩ : ∃ w, ∀ a, C.program.gateFunction DeMorgan.interpretation G a =
+      !C.program.trace DeMorgan.interpretation a w :=
+    ⟨(C.program.lines G).wires ⟨0, by rw [hG]; decide⟩, fun a => by
+      rw [← Program.trace_gateWire, trace_gate, interpretation_of_not _ hG]⟩
+  have hconst : ∀ f : (Fin N → Bool) → Bool, (∀ a, f a = f ⊥) → DependsOnlyOn f S :=
+    fun f hf a b _ => by rw [hf a, hf b]
+  rcases localized G with hmono | hdep
+  · have hanti : Antitone fun a => C.program.trace DeMorgan.interpretation a w := by
+      intro a b hab
+      have := hmono hab
+      rw [hneg, hneg] at this
+      show C.program.trace DeMorgan.interpretation b w ≤ C.program.trace DeMorgan.interpretation a w
+      revert this
+      generalize C.program.trace DeMorgan.interpretation a w = p
+      generalize C.program.trace DeMorgan.interpretation b w = q
+      cases p <;> cases q <;> simp
+    cases w with
+    | input v =>
+        have h := eq_bot_of_monotone_of_antitone
+          (f := fun a => C.program.trace DeMorgan.interpretation a (Wire.input v))
+          (fun a b hab => hab v) hanti
+        exact hconst _ fun a => by
+          rw [hneg, hneg]
+          exact congrArg Bool.not (h a)
+    | gate G' =>
+        rcases localized G' with hm' | hd'
+        · have h := eq_bot_of_monotone_of_antitone
+            (f := fun a => C.program.trace DeMorgan.interpretation a (Wire.gate G')) hm' hanti
+          exact hconst _ fun a => by
+            rw [hneg, hneg]
+            exact congrArg Bool.not (h a)
+        · intro a b hab
+          rw [hneg, hneg]
+          exact congrArg Bool.not (hd' a b hab)
+  · exact hdep
+
 end
 
 end Internal
