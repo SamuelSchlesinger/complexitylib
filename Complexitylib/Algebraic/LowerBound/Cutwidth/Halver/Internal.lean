@@ -1,0 +1,428 @@
+/-
+Copyright (c) 2026 Samuel Schlesinger. All rights reserved.
+Released under MIT license as described in the file Complexitylib/Algebraic/LICENSE.
+Authors: Samuel Schlesinger
+-/
+
+module
+public import Complexitylib.Algebraic.LowerBound.Cutwidth.Halver.Defs
+public import Complexitylib.Algebraic.LowerBound.Cutwidth.Superconcentrator.Internal.Bound
+
+/-!
+# Proofs for ε-halvers
+
+Let `N` be a comparator network on `n` wires with `s` comparators.
+
+* **The wire graph.** Number the vertices by time: input terminals `0`, the ends of comparator
+  `c` by `c + 1`, and output terminals by `s + 1` (`rank`). Every wire segment leaves
+  `lastStop w t`, of rank at most `t`, and enters a vertex of rank `t + 1` on the same wire, so the
+  graph is loopless. Two wire segments leaving the same vertex lie on the same wire, and if one
+  entered a comparator before the other, the later one would leave a vertex of larger rank. So at
+  most one wire segment leaves each vertex, at most one enters it, and at most one link meets it:
+  the maximum degree is three. There are `2 n + 2 s` vertices and `n + 3 s` edges.
+* **Token conservation** (`sub_le_card_cut`). On input `x ∈ {0, 1}ⁿ`, a wire segment carries
+  the value of its wire, and the link of a comparator carries `1` when its `minWire` input is `1`
+  and its `maxWire` input is `0`: the one that moves. For a vertex set `L`, the potential at time
+  `t` is the number of wires carrying `1` whose last vertex before `t` lies in `L`. Comparator
+  `t` changes it by minus the net flow out of `L` along its two incoming segments and its link,
+  so summing over all edges, the net flow out of `L` is the number of ones at input terminals in
+  `L` minus the number at output terminals in `L`. Every edge leaving `L` carries at most one
+  token and every edge entering it at least none, so for any two inputs `x` and `x'` the cut of
+  `L` has at least `net x - net x'` edges.
+* **Connectivity** (`wireGraph_connected`). Every vertex is joined to the input terminal of its
+  wire, and the link of a comparator joins its two wires. If a set of wires closed under the
+  comparators held `0 < k ≤ n/2` wires, the indicator input of the set, and of its complement,
+  would be fixed by the network, and an `ε`-halver with `ε < 1/2` would put at most `ε k` of its
+  wires in each half.
+* **The cut lemma** (`exists_le_card_cut`). In a linear order of the vertices take the lower set
+  `L` with exactly `h = ⌊n/2⌋` input terminals, and let `τ` top output terminals lie in `L`. With
+  ones on the inputs in `L`, at most `ε h` ones end in the bottom half, so `net ≥ h - τ - ε h`;
+  with zeros on the inputs in `L`, at most `ε h` zeros end in the top half, so `net ≤ ε h - τ`.
+  So the cut of `L` has at least `(1 - 2 ε) h` edges.
+-/
+
+@[expose] public section
+
+open scoped Classical
+
+namespace Algebraic.Cutwidth.Halver.Internal
+
+open ComparatorNetwork Multigraph Relation Filter
+
+variable {n s : ℕ} (N : ComparatorNetwork n s)
+
+/-! ### Evaluation -/
+
+section Evaluation
+
+variable {α : Type*} [LinearOrder α]
+
+theorem state_succ (x : Fin n → α) (c : Fin s) :
+    N.state x (c + 1) = N.apply c (N.state x c) := by
+  simp [ComparatorNetwork.state, c.isLt]
+
+theorem apply_minWire (c : Fin s) (x : Fin n → α) :
+    N.apply c x (N.minWire c) = min (x (N.minWire c)) (x (N.maxWire c)) := by
+  simp [ComparatorNetwork.apply]
+
+theorem apply_maxWire (c : Fin s) (x : Fin n → α) :
+    N.apply c x (N.maxWire c) = max (x (N.minWire c)) (x (N.maxWire c)) := by
+  simp [ComparatorNetwork.apply, Ne.symm (N.minWire_ne_maxWire c)]
+
+theorem apply_of_ne (c : Fin s) (x : Fin n → α) {w : Fin n} (h₁ : N.minWire c ≠ w)
+    (h₂ : N.maxWire c ≠ w) : N.apply c x w = x w := by
+  simp [ComparatorNetwork.apply, Ne.symm h₁, Ne.symm h₂]
+
+/-- A comparator whose two wires carry the same value changes nothing. -/
+theorem apply_eq_self (c : Fin s) (x : Fin n → α) (h : x (N.minWire c) = x (N.maxWire c)) :
+    N.apply c x = x := by
+  funext w
+  by_cases h₁ : w = N.minWire c
+  · subst h₁
+    rw [apply_minWire, h, min_self]
+  · by_cases h₂ : w = N.maxWire c
+    · subst h₂
+      rw [apply_maxWire, h, max_self]
+    · exact apply_of_ne N c x (Ne.symm h₁) (Ne.symm h₂)
+
+/-- An input on which every comparator sees two equal values is fixed by the network. -/
+theorem eval_eq_self (x : Fin n → α) (h : ∀ c, x (N.minWire c) = x (N.maxWire c)) :
+    N.eval x = x := by
+  have : ∀ t, N.state x t = x := by
+    intro t
+    induction t with
+    | zero => rfl
+    | succ t ih =>
+      by_cases ht : t < s
+      · have := state_succ N x ⟨t, ht⟩
+        simp only at this
+        rw [this, ih, apply_eq_self N _ x (h _)]
+      · simp [ComparatorNetwork.state, ht, ih]
+  exact this s
+
+end Evaluation
+
+/-! ### Stops along a wire -/
+
+/-- The comparators before time `t` acting on wire `w`. -/
+def touchSet (w : Fin n) (t : ℕ) : Finset (Fin s) :=
+  Finset.univ.filter fun c : Fin s => (c : ℕ) < t ∧ (N.minWire c = w ∨ N.maxWire c = w)
+
+theorem mem_touchSet {w : Fin n} {t : ℕ} {c : Fin s} :
+    c ∈ touchSet N w t ↔ (c : ℕ) < t ∧ (N.minWire c = w ∨ N.maxWire c = w) := by
+  simp [touchSet]
+
+theorem lastStop_eq (w : Fin n) (t : ℕ) :
+    N.lastStop w t = if h : (touchSet N w t).Nonempty then
+      .gate ((touchSet N w t).max' h) (decide (N.maxWire ((touchSet N w t).max' h) = w))
+    else .input w := by
+  unfold ComparatorNetwork.lastStop touchSet
+  congr
+
+/-- The time of a vertex: `0` for input terminals, `c + 1` for the ends of comparator `c`, and
+`s + 1` for output terminals. -/
+def rank : WireVertex n s → ℕ
+  | .input _ => 0
+  | .gate c _ => c + 1
+  | .output _ => s + 1
+
+/-- The wire of a vertex. -/
+def wire : WireVertex n s → Fin n
+  | .input w => w
+  | .output w => w
+  | .gate c b => N.sideWire c b
+
+theorem sideWire_false (c : Fin s) : N.sideWire c false = N.minWire c := rfl
+
+theorem sideWire_true (c : Fin s) : N.sideWire c true = N.maxWire c := rfl
+
+/-- The wire on side `decide (maxWire c = w)` of a comparator acting on `w` is `w`. -/
+theorem sideWire_decide {c : Fin s} {w : Fin n} (h : N.minWire c = w ∨ N.maxWire c = w) :
+    N.sideWire c (decide (N.maxWire c = w)) = w := by
+  by_cases hw : N.maxWire c = w
+  · simp [hw, sideWire_true]
+  · simp only [hw, decide_false, sideWire_false]
+    exact h.resolve_right hw
+
+/-- The two sides of a comparator lie on distinct wires. -/
+theorem sideWire_injective (c : Fin s) : Function.Injective (N.sideWire c) := by
+  intro b b' h
+  cases b <;> cases b'
+  · rfl
+  · exact absurd h (N.minWire_ne_maxWire c)
+  · exact absurd h.symm (N.minWire_ne_maxWire c)
+  · rfl
+
+theorem rank_lastStop_le (w : Fin n) (t : ℕ) : rank (N.lastStop w t) ≤ t := by
+  rw [lastStop_eq]
+  split_ifs with h
+  · have := (mem_touchSet N).1 ((touchSet N w t).max'_mem h)
+    simp only [rank]
+    omega
+  · simp [rank]
+
+theorem le_rank_lastStop {w : Fin n} {t : ℕ} {c : Fin s} (hc : (c : ℕ) < t)
+    (hw : N.minWire c = w ∨ N.maxWire c = w) : (c : ℕ) + 1 ≤ rank (N.lastStop w t) := by
+  have hmem : c ∈ touchSet N w t := (mem_touchSet N).2 ⟨hc, hw⟩
+  rw [lastStop_eq, dite_eq_left ⟨c, hmem⟩]
+  have := (touchSet N w t).le_max' c hmem
+  simp only [rank]
+  exact Nat.succ_le_succ (Fin.le_def.1 this)
+
+theorem wire_lastStop (w : Fin n) (t : ℕ) : wire N (N.lastStop w t) = w := by
+  rw [lastStop_eq]
+  split_ifs with h
+  · exact sideWire_decide N ((mem_touchSet N).1 ((touchSet N w t).max'_mem h)).2
+  · rfl
+
+theorem lastStop_zero (w : Fin n) : N.lastStop w 0 = .input w := by
+  rw [lastStop_eq, dite_eq_right]
+  rintro ⟨c, hc⟩
+  exact absurd ((mem_touchSet N).1 hc).1 (Nat.not_lt_zero _)
+
+theorem lastStop_succ_of_touch {w : Fin n} (c : Fin s) (hw : N.minWire c = w ∨ N.maxWire c = w) :
+    N.lastStop w (c + 1) = .gate c (decide (N.maxWire c = w)) := by
+  have hmem : c ∈ touchSet N w (c + 1) := (mem_touchSet N).2 ⟨Nat.lt_succ_self _, hw⟩
+  have hmax : (touchSet N w (c + 1)).max' ⟨c, hmem⟩ = c := by
+    refine le_antisymm ((touchSet N w (c + 1)).max'_le _ _ fun y hy => ?_)
+      ((touchSet N w (c + 1)).le_max' c hmem)
+    have := ((mem_touchSet N).1 hy).1
+    exact Fin.le_def.2 (by omega)
+  rw [lastStop_eq, dite_eq_left ⟨c, hmem⟩, hmax]
+
+theorem lastStop_succ_of_not_touch {w : Fin n} (c : Fin s) (h₁ : N.minWire c ≠ w)
+    (h₂ : N.maxWire c ≠ w) : N.lastStop w (c + 1) = N.lastStop w c := by
+  have : touchSet N w (c + 1) = touchSet N w c := by
+    ext y
+    simp only [mem_touchSet]
+    constructor
+    · rintro ⟨hy, hyw⟩
+      refine ⟨lt_of_le_of_ne (Nat.lt_succ_iff.1 hy) fun hyc => ?_, hyw⟩
+      have : y = c := Fin.ext hyc
+      subst this
+      exact hyw.elim h₁ h₂
+    · rintro ⟨hy, hyw⟩
+      exact ⟨by omega, hyw⟩
+  rw [lastStop_eq, lastStop_eq, this]
+
+/-! ### The wire graph -/
+
+theorem wireGraph_fst_last (w : Fin n) : N.wireGraph.fst (.last w) = N.lastStop w s := rfl
+
+theorem wireGraph_fst_into (c : Fin s) (b : Bool) :
+    N.wireGraph.fst (.into c b) = N.lastStop (N.sideWire c b) c := rfl
+
+theorem wireGraph_fst_link (c : Fin s) : N.wireGraph.fst (.link c) = .gate c false := rfl
+
+theorem wireGraph_snd_last (w : Fin n) : N.wireGraph.snd (.last w) = .output w := rfl
+
+theorem wireGraph_snd_into (c : Fin s) (b : Bool) :
+    N.wireGraph.snd (.into c b) = .gate c b := rfl
+
+theorem wireGraph_snd_link (c : Fin s) : N.wireGraph.snd (.link c) = .gate c true := rfl
+
+/-- The wire graph has no loops. -/
+theorem wireGraph_loopless : N.wireGraph.Loopless := by
+  intro e
+  cases e with
+  | last w =>
+    intro h
+    have := rank_lastStop_le N w s
+    rw [wireGraph_fst_last, wireGraph_snd_last] at h
+    rw [h] at this
+    simp [rank] at this
+  | into c b =>
+    intro h
+    have := rank_lastStop_le N (N.sideWire c b) c
+    rw [wireGraph_fst_into, wireGraph_snd_into] at h
+    rw [h] at this
+    simp [rank] at this
+  | link c =>
+    intro h
+    simp [wireGraph_fst_link, wireGraph_snd_link] at h
+
+/-- The wire of a wire segment. -/
+def segWire : WireEdge n s → Fin n
+  | .last w => w
+  | .into c b => N.sideWire c b
+  | .link c => N.minWire c
+
+/-- The time at which a wire segment ends. -/
+def segTime : WireEdge n s → ℕ
+  | .last _ => s
+  | .into c _ => c
+  | .link c => c
+
+/-- A wire segment, as opposed to a link. -/
+def IsSegment : WireEdge n s → Prop
+  | .link _ => False
+  | _ => True
+
+theorem fst_eq_lastStop {e : WireEdge n s} (he : IsSegment e) :
+    N.wireGraph.fst e = N.lastStop (segWire N e) (segTime e) := by
+  cases e with
+  | last w => rfl
+  | into c b => rfl
+  | link c => exact he.elim
+
+/-- A wire segment ending at time `t < s` enters a comparator acting on its wire. -/
+theorem exists_touch_of_segTime_lt {e : WireEdge n s} (he : IsSegment e) (ht : segTime e < s) :
+    ∃ c : Fin s, (c : ℕ) = segTime e ∧
+      (N.minWire c = segWire N e ∨ N.maxWire c = segWire N e) := by
+  cases e with
+  | last w => exact absurd ht (lt_irrefl _)
+  | into c b =>
+    refine ⟨c, rfl, ?_⟩
+    cases b
+    · exact Or.inl rfl
+    · exact Or.inr rfl
+  | link c => exact he.elim
+
+/-- Two wire segments ending at the same time on the same wire are equal. -/
+theorem eq_of_segWire_eq_of_segTime_eq {e e' : WireEdge n s} (he : IsSegment e)
+    (he' : IsSegment e') (hw : segWire N e = segWire N e') (ht : segTime e = segTime e') :
+    e = e' := by
+  cases e with
+  | last w =>
+    cases e' with
+    | last w' => exact congrArg _ hw
+    | into c' b' => exact absurd ht (by simp [segTime]; omega)
+    | link c' => exact he'.elim
+  | into c b =>
+    cases e' with
+    | last w' => exact absurd ht (by simp [segTime]; omega)
+    | into c' b' =>
+      have hc : c = c' := Fin.ext ht
+      subst hc
+      rw [sideWire_injective N c hw]
+    | link c' => exact he'.elim
+  | link c => exact he.elim
+
+/-- **At most one wire segment leaves a vertex.** -/
+theorem eq_of_fst_eq {e e' : WireEdge n s} (he : IsSegment e) (he' : IsSegment e')
+    (h : N.wireGraph.fst e = N.wireGraph.fst e') : e = e' := by
+  rw [fst_eq_lastStop N he, fst_eq_lastStop N he'] at h
+  have hw : segWire N e = segWire N e' := by
+    rw [← wire_lastStop N (segWire N e) (segTime e), h, wire_lastStop]
+  -- a segment ending earlier enters a comparator before the other segment starts
+  have key : ∀ {e e' : WireEdge n s}, IsSegment e → IsSegment e' →
+      segWire N e = segWire N e' →
+      N.lastStop (segWire N e) (segTime e) = N.lastStop (segWire N e') (segTime e') →
+      ¬ segTime e < segTime e' := by
+    intro e e' he he' hw h hlt
+    have hs : segTime e' ≤ s := by
+      cases e' with
+      | last w => exact le_rfl
+      | into c b => exact c.isLt.le
+      | link c => exact he'.elim
+    obtain ⟨c, hc, htouch⟩ := exists_touch_of_segTime_lt N he (by omega)
+    have h₁ := rank_lastStop_le N (segWire N e) (segTime e)
+    have h₂ := le_rank_lastStop N (t := segTime e') (by omega) (hw ▸ htouch)
+    rw [h] at h₁
+    omega
+  have ht : segTime e = segTime e' := by
+    rcases lt_trichotomy (segTime e) (segTime e') with hlt | heq | hgt
+    · exact absurd hlt (key he he' hw h)
+    · exact heq
+    · exact absurd hgt (key he' he hw.symm h.symm)
+  exact eq_of_segWire_eq_of_segTime_eq N he he' hw ht
+
+/-- **At most one wire segment enters a vertex.** -/
+theorem eq_of_snd_eq {e e' : WireEdge n s} (he : IsSegment e) (he' : IsSegment e')
+    (h : N.wireGraph.snd e = N.wireGraph.snd e') : e = e' := by
+  cases e with
+  | last w =>
+    cases e' with
+    | last w' => simpa [wireGraph_snd_last] using h
+    | into c' b' => simp [wireGraph_snd_last, wireGraph_snd_into] at h
+    | link c' => exact he'.elim
+  | into c b =>
+    cases e' with
+    | last w' => simp [wireGraph_snd_last, wireGraph_snd_into] at h
+    | into c' b' =>
+      simp only [wireGraph_snd_into, WireVertex.gate.injEq] at h
+      rw [h.1, h.2]
+    | link c' => exact he'.elim
+  | link c => exact he.elim
+
+/-- **The wire graph has maximum degree three.** -/
+theorem wireGraph_maxDegreeLE : N.wireGraph.MaxDegreeLE 3 := by
+  intro v
+  set A := Finset.univ.filter fun e => IsSegment e ∧ N.wireGraph.fst e = v
+  set B := Finset.univ.filter fun e => IsSegment e ∧ N.wireGraph.snd e = v
+  set C := Finset.univ.filter fun e : WireEdge n s =>
+    ¬ IsSegment e ∧ (N.wireGraph.fst e = v ∨ N.wireGraph.snd e = v)
+  have hsub : N.wireGraph.edgesAt v ⊆ A ∪ B ∪ C := by
+    intro e he
+    rw [mem_edgesAt] at he
+    simp only [Finset.mem_union, Finset.mem_filter, Finset.mem_univ, true_and, A, B, C]
+    by_cases hs : IsSegment e
+    · rcases he with he | he
+      · exact Or.inl (Or.inl ⟨hs, he⟩)
+      · exact Or.inl (Or.inr ⟨hs, he⟩)
+    · exact Or.inr ⟨hs, he⟩
+  have hA : A.card ≤ 1 := Finset.card_le_one.2 fun e he e' he' => by
+    simp only [A, Finset.mem_filter, Finset.mem_univ, true_and] at he he'
+    exact eq_of_fst_eq N he.1 he'.1 (he.2.trans he'.2.symm)
+  have hB : B.card ≤ 1 := Finset.card_le_one.2 fun e he e' he' => by
+    simp only [B, Finset.mem_filter, Finset.mem_univ, true_and] at he he'
+    exact eq_of_snd_eq N he.1 he'.1 (he.2.trans he'.2.symm)
+  have hC : C.card ≤ 1 := Finset.card_le_one.2 fun e he e' he' => by
+    simp only [C, Finset.mem_filter, Finset.mem_univ, true_and] at he he'
+    cases e with
+    | last w => exact absurd trivial he.1
+    | into c b => exact absurd trivial he.1
+    | link c =>
+      cases e' with
+      | last w => exact absurd trivial he'.1
+      | into c b => exact absurd trivial he'.1
+      | link c' =>
+        simp only [wireGraph_fst_link, wireGraph_snd_link] at he he'
+        congr 1
+        rcases he.2 with h | h <;> rcases he'.2 with h' | h' <;>
+          simpa using h.trans h'.symm
+  have := Finset.card_le_card hsub
+  have := Finset.card_union_le (A ∪ B) C
+  have := Finset.card_union_le A B
+  unfold degree
+  omega
+
+/-! ### Counting vertices and edges -/
+
+/-- The vertices as a sum type. -/
+def vertexEquiv : WireVertex n s ≃ Fin n ⊕ Fin n ⊕ (Fin s × Bool) where
+  toFun
+    | .input w => .inl w
+    | .output w => .inr (.inl w)
+    | .gate c b => .inr (.inr (c, b))
+  invFun
+    | .inl w => .input w
+    | .inr (.inl w) => .output w
+    | .inr (.inr (c, b)) => .gate c b
+  left_inv v := by cases v <;> rfl
+  right_inv v := by rcases v with w | w | ⟨c, b⟩ <;> rfl
+
+/-- The edges as a sum type. -/
+def edgeEquiv : WireEdge n s ≃ Fin n ⊕ (Fin s × Bool) ⊕ Fin s where
+  toFun
+    | .last w => .inl w
+    | .into c b => .inr (.inl (c, b))
+    | .link c => .inr (.inr c)
+  invFun
+    | .inl w => .last w
+    | .inr (.inl (c, b)) => .into c b
+    | .inr (.inr c) => .link c
+  left_inv e := by cases e <;> rfl
+  right_inv e := by rcases e with w | ⟨c, b⟩ | c <;> rfl
+
+theorem card_wireVertex : Fintype.card (WireVertex n s) = 2 * n + 2 * s := by
+  rw [Fintype.card_congr vertexEquiv]
+  simp only [Fintype.card_sum, Fintype.card_prod, Fintype.card_fin, Fintype.card_bool]
+  ring
+
+theorem card_wireEdge : Fintype.card (WireEdge n s) = n + 3 * s := by
+  rw [Fintype.card_congr edgeEquiv]
+  simp only [Fintype.card_sum, Fintype.card_prod, Fintype.card_fin, Fintype.card_bool]
+  ring
+
+end Algebraic.Cutwidth.Halver.Internal
