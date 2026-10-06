@@ -127,6 +127,27 @@ theorem card_le_of_mem_step {ψ : ClauseSet N} (hψ : ¬ Sparse θ ψ) {k : ℕ}
     C.card ≤ k :=
   card_le_of_mem_child hθ (choice_chooseBranch hψ).1 hk hC
 
+/-- Every clause of a child is contained in a clause of its parent. -/
+theorem refines_step {ψ : ClauseSet N} (hψ : ¬ Sparse θ ψ) {b : Bool} {C : Finset (Literal N)}
+    (hC : C ∈ step θ ψ b) : ∃ D ∈ ψ, C ⊆ D := by
+  rcases mem_union.mp (child_subset _ _ _ _ hC) with hC | hC
+  · exact ⟨C, hC, subset_rfl⟩
+  · obtain ⟨D, hD, hCD⟩ := exists_flower_ssuperset hθ (choice_chooseBranch hψ).1 hC
+    exact ⟨D, flower_subset _ _ _ hD, hCD.subset⟩
+
+/-- Every clause reached by following branches is contained in a clause of the start. -/
+theorem refines_walkSeq {n : ℕ} {ψ : ClauseSet N} {f : ℕ → Bool} {C : Finset (Literal N)}
+    (hC : C ∈ walkSeq θ n ψ f) : ∃ D ∈ ψ, C ⊆ D := by
+  induction n generalizing ψ f C with
+  | zero => exact ⟨C, hC, subset_rfl⟩
+  | succ n ih =>
+    unfold walkSeq at hC
+    split_ifs at hC with hsparse
+    · exact ⟨C, hC, subset_rfl⟩
+    · obtain ⟨D, hD, hCD⟩ := ih hC
+      obtain ⟨E, hE, hDE⟩ := refines_step hθ hsparse hD
+      exact ⟨E, hE, hCD.trans hDE⟩
+
 /-- **Covering.** Every solution of a clause set reaches a leaf of which it is a solution. -/
 theorem exists_isLeafWord_sat (ψ : ClauseSet N) {x : BitString N} (hx : ψ.Sat x) :
     ∃ w, IsLeafWord θ ψ w ∧ (walk θ ψ w).Sat x := by

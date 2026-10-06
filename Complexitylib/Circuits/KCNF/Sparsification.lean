@@ -6,7 +6,7 @@ Authors: Samuel Schlesinger
 module
 
 public import Complexitylib.Circuits.KCNF.Basic
-import Complexitylib.Circuits.KCNF.Internal.Sparsification.Tree
+import Complexitylib.Circuits.KCNF.Internal.Sparsification.Bounds
 
 /-!
 # The sparsification lemma

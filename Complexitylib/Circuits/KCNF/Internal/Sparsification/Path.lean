@@ -62,24 +62,29 @@ theorem Refines.trans {α β γ : ClauseSet N} (h₁ : Refines α β) (h₂ : Re
   obtain ⟨c, hc, hbc⟩ := h₂ b hb
   exact ⟨c, hc, hab.trans hbc⟩
 
+/-- In a sparse clause set, at most `θ (c - 1)` clauses of size `c ≥ 1` contain a given
+literal. -/
+theorem card_flower_singleton_le_of_sparse {θ : ℕ → ℕ} (hθ : ∀ j, 1 ≤ θ j) {ψ : ClauseSet N}
+    (hsparse : Sparse θ ψ) {c : ℕ} (hc : 1 ≤ c) (l : Literal N) :
+    (flower ψ c {l}).card ≤ θ (c - 1) := by
+  by_cases hc2 : 2 ≤ c
+  · have hnot := hsparse c {l}
+    simp only [Heavy, card_singleton, le_refl, true_and, not_and, not_le] at hnot
+    exact (hnot (by omega)).le
+  · have hc1 : c = 1 := by omega
+    subst hc1
+    refine (card_le_card (t := {{l}}) fun C hC => ?_).trans ?_
+    · obtain ⟨-, hcard, hl⟩ := mem_flower.mp hC
+      rw [mem_singleton]
+      exact (eq_of_subset_of_card_le hl (by rw [hcard, card_singleton])).symm
+    · rw [card_singleton]
+      exact hθ 0
+
 /-- At most `2 N θ (c - 1)` clauses of size `c ≥ 1` survive in a sparse clause set. -/
 theorem card_filter_card_eq_le_of_sparse {θ : ℕ → ℕ} (hθ : ∀ j, 1 ≤ θ j) {ψ : ClauseSet N}
     (hsparse : Sparse θ ψ) {c : ℕ} (hc : 1 ≤ c) :
     (ψ.filter (·.card = c)).card ≤ 2 * N * θ (c - 1) := by
-  have hflower : ∀ l : Literal N, (flower ψ c {l}).card ≤ θ (c - 1) := by
-    intro l
-    by_cases hc2 : 2 ≤ c
-    · have hnot := hsparse c {l}
-      simp only [Heavy, card_singleton, le_refl, true_and, not_and, not_le] at hnot
-      exact (hnot (by omega)).le
-    · have hc1 : c = 1 := by omega
-      subst hc1
-      refine (card_le_card (t := {{l}}) fun C hC => ?_).trans ?_
-      · obtain ⟨-, hcard, hl⟩ := mem_flower.mp hC
-        rw [mem_singleton]
-        exact (eq_of_subset_of_card_le hl (by rw [hcard, card_singleton])).symm
-      · rw [card_singleton]
-        exact hθ 0
+  have hflower := card_flower_singleton_le_of_sparse hθ hsparse hc
   have hsub : ψ.filter (·.card = c) ⊆ univ.biUnion fun l : Literal N => flower ψ c {l} := by
     intro C hC
     obtain ⟨hCψ, hcard⟩ := mem_filter.mp hC
