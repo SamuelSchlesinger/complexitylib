@@ -140,6 +140,9 @@ def headlineTheorems : List Name := [
   `Complexity.xorBool_not_mem_AC0,
   `Complexity.xorBool_mem_TC0,
   `Complexity.AC0_ssubset_TC0,
+  -- Razborov–Smolensky: parity is not in AC0[3]
+  `Complexity.Smolensky.parity_size_lower_bound,
+  `Complexity.xorBool_not_mem_AC0Mod_three,
   -- The concrete uniform polynomial-time coefficient-four hard family
   `Algebraic.Cutwidth.Extractor.sourceReductionHardLanguage_mem_P,
   `Algebraic.Cutwidth.Extractor.sourceReductionHardEval_mem_FP,

@@ -13339,6 +13339,56 @@ choices.
   $10 (t + 1) \binom{n}{\lfloor n/2 \rfloor} \le 2^n$.
 \end{proof}
 
+\begin{theorem}[Razborov--Smolensky size bound]
+  \label{thm:lowerbounds-smolensky}
+  \lean{Complexity.Smolensky.parity_counting_bound,
+    Complexity.Smolensky.parity_size_lower_bound}
+  \leanok
+  \uses{def:circuits-ACC, def:lowerbounds-parity}
+  Let $C$ be a single-output circuit over the AND/OR/$\mathrm{MOD}_3$ basis with
+  $n \ge 1$ inputs and depth at most $d$ that computes $n$-bit parity. For
+  every $\ell \ge 1$,
+  \[ 2^\ell \cdot 2^n \le
+     2^\ell \cdot \#\{S \subseteq [n] : |S| \le \lfloor n/2 \rfloor + (2\ell)^d\}
+     + \mathrm{size}(C) \cdot 2^n , \]
+  and for every $\ell$ with $(40 \ell)^{2d} \le n$,
+  $5 \cdot \mathrm{size}(C) \ge 2 \cdot 2^\ell$. Taking
+  $\ell = \lfloor n^{1/(2d)}/40 \rfloor$ gives
+  $\mathrm{size}(C) \ge 2^{\Omega(n^{1/(2d)})}$; this asymptotic reading is
+  not a separate formal statement.
+\end{theorem}
+\begin{proof}
+  \leanok
+  \uses{thm:lowerbounds-smolensky-approximation, thm:lowerbounds-smolensky-parity,
+    lem:lowerbounds-smolensky-binomial}
+  The approximation of Theorem~\ref{thm:lowerbounds-smolensky-approximation}
+  agrees with parity on all but $\mathrm{size}(C) \cdot 2^{n-\ell}$ inputs, and
+  Theorem~\ref{thm:lowerbounds-smolensky-parity} bounds the agreement. If
+  $(40\ell)^{2d} \le n$ and $d \ge 1$, then $100((2\ell)^d + 1)^2 \le n + 1$,
+  and Lemma~\ref{lem:lowerbounds-smolensky-binomial} bounds the number of
+  subsets by $\tfrac{6}{10} \cdot 2^n$.
+\end{proof}
+
+\begin{theorem}[Parity is not in $\cc{AC}^0[3]$]
+  \label{thm:lowerbounds-parity-not-acc3}
+  \lean{Complexity.xorBool_not_mem_AC0Mod_three}
+  \leanok
+  \uses{def:circuits-ACC, def:lowerbounds-parity}
+  The parity family is not in $\cc{AC}^0[3]$. Since
+  $\cc{AC}^0 \subseteq \cc{AC}^0[3]$
+  (Proposition~\ref{prop:circuits-ac-subset-acc}), it is not in $\cc{AC}^0$
+  either; that consequence is not stated separately here.
+\end{theorem}
+\begin{proof}
+  \leanok
+  \uses{thm:lowerbounds-smolensky, prop:circuits-ac-subset-acc}
+  If a family of size at most $p(n)$ for a polynomial $p$ and depth at most $c$
+  computed parity, then at length $n = (40\ell)^{2c}$
+  Theorem~\ref{thm:lowerbounds-smolensky} would give
+  $2 \cdot 2^\ell \le 5\, p((40\ell)^{2c})$ for every $\ell \ge 1$, which fails
+  for large $\ell$.
+\end{proof}
+
 \section{Monotone circuits}
 \label{sec:lowerbounds-monotone}
 

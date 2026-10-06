@@ -6,31 +6,36 @@ Authors: Samuel Schlesinger
 
 module
 public import Complexitylib.Circuits.Smolensky.Defs
-public import Complexitylib.Circuits.Smolensky.Internal.Circuit
-public import Complexitylib.Circuits.Smolensky.Internal.Parity
-public import Complexitylib.Circuits.Smolensky.Internal.Binomial
+public import Complexitylib.Circuits.Smolensky.Internal.Bound
 
 /-!
-# Smolensky's polynomial approximation
+# The Razborov–Smolensky lower bound
 
-Smolensky's lower bound approximates circuits with `MOD_3` gates by low-degree
-functions over `ZMod 3` (`Smolensky.lowDegree`, functions `{0,1}^n → ZMod 3` in
-place of formal polynomials) and shows that parity has no such approximation:
-
-1. `Smolensky.exists_lowDegree_approx`: with a fixed choice of `ℓ` subsets per
-   OR or AND gate, a depth-`d` circuit agrees with a function of degree at most
-   `(2ℓ)^d` on all but `size · 2^n / 2^ℓ` inputs. The random choices of the
-   usual proof are replaced by exact double counting over all tuples of subsets.
-2. `Smolensky.card_agree_xorBool_le`: a function of degree at most `D` agrees
-   with parity on at most as many inputs as there are subsets of at most
-   `n / 2 + D` coordinates.
-3. `Smolensky.ten_mul_card_le`: when `100 (t + 1)² ≤ n + 1`, at most `6/10` of all
-   subsets have at most `n / 2 + t` coordinates.
+Parity is not computed by constant-depth, polynomial-size circuits of
+unbounded-fan-in AND, OR, and `MOD_3` gates (`xorBool_not_mem_AC0Mod_three`).
+The finite form is an explicit size–depth tradeoff
+(`Smolensky.parity_size_lower_bound`): a circuit of depth at most `d` computing
+`n`-bit parity has size at least `(2/5) · 2^ℓ` whenever `(40ℓ)^{2d} ≤ n`. Taking
+`ℓ = ⌊n^{1/(2d)} / 40⌋`, the size is `2^{Ω(n^{1/(2d)})}`.
 
 The circuits are the library's typed circuits over `Basis.unboundedAndOrMod 3`:
 a `MOD_3` gate outputs `true` exactly when the number of its true inputs is not
 divisible by `3`, negations are free per-input flags, the size `G + 1` counts the
 internal gates and the output gate, and the depth counts the output gate.
+
+The proof is Smolensky's approximation method over `ZMod 3`, with functions
+`{0,1}^n → ZMod 3` in place of formal polynomials (`Smolensky.lowDegree`):
+
+1. `Smolensky.exists_lowDegree_approx`: with a fixed choice of `ℓ` subsets of
+   the inputs of each OR or AND gate, a depth-`d` circuit agrees with a function
+   of degree at most `(2ℓ)^d` on all but `size · 2^n / 2^ℓ` inputs. The random
+   choices of the usual proof are replaced by exact double counting over all
+   tuples of subsets.
+2. `Smolensky.card_agree_xorBool_le`: a function of degree at most `D` agrees
+   with parity on at most as many inputs as there are subsets of at most
+   `n / 2 + D` coordinates.
+3. `Smolensky.ten_mul_card_le`: when `100 (t + 1)² ≤ n + 1`, at most `6/10` of all
+   subsets have at most `n / 2 + t` coordinates.
 -/
 
 
@@ -68,6 +73,35 @@ theorem ten_mul_card_le (n t : ℕ) (h : 100 * (t + 1) ^ 2 ≤ n + 1) :
       6 * 2 ^ n :=
   ten_mul_card_le_internal n t h
 
+/-- **Razborov–Smolensky, counting form.** If an AND/OR/`MOD_3` circuit of depth
+at most `d` computes `n`-bit parity, then for every `ℓ ≥ 1`,
+`2^ℓ · 2^n ≤ 2^ℓ · #{S ⊆ Fin n : |S| ≤ n / 2 + (2ℓ)^d} + size · 2^n`. -/
+theorem parity_counting_bound {n G d ℓ : ℕ} [NeZero n]
+    (C : Circuit (Basis.unboundedAndOrMod 3) n 1 G)
+    (hcomputes : C.Computes (Schnorr.xorBool n)) (hdepth : C.depth ≤ d) (hℓ : 1 ≤ ℓ) :
+    2 ^ ℓ * 2 ^ n ≤
+      2 ^ ℓ * (Finset.univ.filter fun S : Finset (Fin n) =>
+          S.card ≤ n / 2 + (2 * ℓ) ^ d).card +
+        C.size * 2 ^ n :=
+  parity_counting_bound_internal C hcomputes hdepth hℓ
+
+/-- **Razborov–Smolensky size–depth tradeoff.** If an AND/OR/`MOD_3` circuit of
+depth at most `d` computes `n`-bit parity and `(40ℓ)^{2d} ≤ n`, then its size is
+at least `(2/5) · 2^ℓ`. With `ℓ = ⌊n^{1/(2d)} / 40⌋` this is
+`size ≥ 2^{Ω(n^{1/(2d)})}`. -/
+theorem parity_size_lower_bound {n G d ℓ : ℕ} [NeZero n]
+    (C : Circuit (Basis.unboundedAndOrMod 3) n 1 G)
+    (hcomputes : C.Computes (Schnorr.xorBool n)) (hdepth : C.depth ≤ d)
+    (hn : (40 * ℓ) ^ (2 * d) ≤ n) :
+    2 * 2 ^ ℓ ≤ 5 * C.size :=
+  two_mul_two_pow_le_size_internal C hcomputes hdepth hn
+
 end Smolensky
+
+/-- **Parity is not in `AC0[3]`** (Razborov–Smolensky): no polynomial-size,
+constant-depth family of unbounded-fan-in AND/OR/`MOD_3` circuits computes the
+parity family. -/
+theorem xorBool_not_mem_AC0Mod_three : Schnorr.xorBool ∉ AC0Mod 3 :=
+  Smolensky.xorBool_not_mem_AC0Mod_three_internal
 
 end Complexity

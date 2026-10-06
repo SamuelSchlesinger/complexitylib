@@ -65,8 +65,9 @@ hardwiring and its advice corollary live in
 
 **Circuit lower bounds.** Shannon's counting bound, gate-elimination
 (`Circuit.card_essentialInputs_le_mul_size`), Schnorr's XOR bound
-(`Complexity.sizeComplexity_xorBool_ge`), and Valiant's depth reduction
-(`Complexity.Valiant.depth_reduction`).
+(`Complexity.sizeComplexity_xorBool_ge`), Valiant's depth reduction
+(`Complexity.Valiant.depth_reduction`), and the Razborov–Smolensky bound: parity
+is not in `AC0[3]` (`Complexity.xorBool_not_mem_AC0Mod_three`).
 
 **Barrington's theorem.** `Complexity.barrington_equivalence` identifies
 logarithmic-depth Boolean formula families with polynomial-length width-`5`

@@ -178,6 +178,11 @@ function, with `⊤` for an unrealizable function. The natural-valued
   `xorBool_mem_TC0`, `AC0_ssubset_TC0`): parity is not computed by any
   polynomial-size constant-depth unbounded AND/OR family, but depth-two
   threshold circuits of size `N + 1` compute it, so `AC0 ⊂ TC0`.
+* **Razborov–Smolensky** (`xorBool_not_mem_AC0Mod_three`,
+  `Smolensky.parity_size_lower_bound`): parity is not in `AC0[3]`; a depth-`d`
+  AND/OR/`MOD_3` circuit computing `n`-bit parity has size at least
+  `(2/5) · 2^ℓ` whenever `(40ℓ)^{2d} ≤ n`, by approximation with low-degree
+  functions over `ZMod 3`.
 
 ## Module structure
 
@@ -289,9 +294,8 @@ Theorem modules (re-export definitions + main results):
 * `Complexitylib.Circuits.Frontier` — the frontier method: circuit lower bounds from
   graph layouts over any finite alphabet, basis, and fan-in
 * `Complexitylib.Circuits.Schnorr` — Schnorr's XOR lower bound
-* `Complexitylib.Circuits.Smolensky` — Smolensky's approximation of
-  AND/OR/`MOD_3` circuits by low-degree functions over `ZMod 3`, and the
-  hardness of approximating parity
+* `Complexitylib.Circuits.Smolensky` — the Razborov–Smolensky lower bound for
+  `AC0[3]`
 * `Complexitylib.Circuits.Nondeterminism` — nondeterministic quantification complexity bounds
 * `Complexitylib.Circuits.Valiant` — Valiant's depth reduction lemma for digraphs
 * `Complexitylib.Circuits.StraightLine` — typed circuits as CSLib straight-line programs, with
