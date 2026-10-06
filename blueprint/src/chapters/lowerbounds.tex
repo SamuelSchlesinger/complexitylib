@@ -15644,6 +15644,310 @@ when $k$ divides $n$, shows that $1/k$ cannot be improved.
   accept half of the cube. On inputs of positive length it is
   $f(x)=g(x_1,\dots,x_{n-1})\oplus x_0$, so flipping $x_0$ exchanges accepted and
   rejected inputs: the rejected sets have the same size and no larger subcubes.
+
+\section{Threshold circuits of unbounded depth}
+\label{sec:lowerbounds-threshold-capacity}
+
+This section bounds the number of input-reading gates of weighted threshold
+circuits of arbitrary depth by a one-dimensional capacity argument. Fix a
+two-sided rectangle-free function and a split of its inputs into sides $A$ and
+$B$. A gate whose input weights lie along one direction $w$ sees the first side
+$p$ only through the real number $\langle w_A,p\rangle$, so sorting the first
+side by this number and cutting it into groups makes the gate a function of the
+second side on a large subrectangle. Each input-reading threshold gate costs two
+bits of the rectangle, one on each side, so about $n/2$ such gates are needed
+before the rectangle becomes small. The development is in
+\texttt{Complexitylib/Algebraic/LowerBound/Threshold}.
+
+\begin{definition}[Weighted threshold programs]
+  \label{def:lowerbounds-threshold-program}
+  \lean{Algebraic.Threshold.weightedSum, Algebraic.Threshold.Program,
+    Algebraic.Threshold.Program.evalFrom, Algebraic.Threshold.Program.eval,
+    Algebraic.Threshold.Program.Computes, Algebraic.Threshold.Program.inputGates,
+    Algebraic.Threshold.Program.eval_eq}
+  \leanok
+  A weighted threshold program with $n$ inputs and $s$ gates assigns to each gate
+  $j$ a real input weight vector $w_j\in\mathbb{R}^n$, real weights $u_{jk}$ on the
+  earlier gates $k<j$, and a real bias $c_j$, and designates an output gate. On
+  $x\in\{0,1\}^n$, gate $j$ outputs $1$ exactly when
+  $\langle w_j,x\rangle+\sum_{k<j}u_{jk}g_k(x)+c_j\ge0$, Booleans entering the sums
+  as $0$ and $1$. The weights are arbitrary reals (integer weights are a special
+  case), and depth, fan-in, and fan-out are unrestricted. The program computes $f$
+  when its output gate equals $f$ on every input. A gate is \emph{input-reading}
+  when $w_j\ne0$; $s_{\mathrm{in}}$ denotes the number of input-reading gates, and
+  gates that read only other gates are not counted. The evaluation with overrides
+  sets the gates of a set $F$ to given values and feeds every other gate $j$ a real
+  number $z_j$ in place of $\langle w_j,x\rangle$; the ordinary evaluation
+  overrides nothing.
+\end{definition}
+
+\begin{definition}[Activation programs]
+  \label{def:lowerbounds-threshold-activation}
+  \lean{Algebraic.Threshold.ActivationProgram, Algebraic.Threshold.ActivationProgram.eval,
+    Algebraic.Threshold.ActivationProgram.Computes,
+    Algebraic.Threshold.ActivationProgram.inputGates,
+    Algebraic.Threshold.ActivationProgram.eval_eq}
+  \leanok
+  An activation program has the same wiring and real weights as a weighted
+  threshold program, but gate $j$ outputs
+  $\phi_j\bigl(\langle w_j,x\rangle+\sum_{k<j}u_{jk}g_k(x)\bigr)$ for an arbitrary
+  activation $\phi_j:\mathbb{R}\to\{0,1\}$. A threshold gate is the activation
+  $t\mapsto[t+c_j\ge0]$; input-reading gates are those with $w_j\ne0$.
+\end{definition}
+
+\begin{definition}[Two-sided rectangle-freeness and change counts]
+  \label{def:lowerbounds-threshold-rectangle-changes}
+  \lean{Algebraic.Threshold.TwoSidedRectangleFree, Algebraic.Threshold.ChangesAtMost,
+    Algebraic.Threshold.PiecesAtMost}
+  \leanok
+  A function $f:\{0,1\}^n\to\{0,1\}$ is \emph{two-sided $K$-rectangle-free} if for
+  every split $[n]=A\sqcup B$, balanced or not, and all $P\subseteq\{0,1\}^A$ and
+  $Q\subseteq\{0,1\}^B$ such that $f$ is constant on $P\times Q$ (with either
+  value), $|P|<K$ or $|Q|<K$. A function $\Psi:\mathbb{R}\to Y$ \emph{changes at
+  most $T$ times} if along every nondecreasing sequence $z_0\le z_1\le\cdots$ of
+  reals, every set of positions $i$ with $\Psi(z_i)\ne\Psi(z_{i+1})$ has at most $T$
+  elements; this is the discrete form of having at most $T+1$ interval pieces. It
+  \emph{has at most $M$ pieces} if it is constant on the level sets of a monotone
+  map $\pi:\mathbb{R}\to\{0,\dots,M-1\}$.
+\end{definition}
+
+\begin{definition}[Block decompositions and direction runs]
+  \label{def:lowerbounds-threshold-blocks}
+  \lean{Algebraic.Threshold.BlockKind, Algebraic.Threshold.BlockKind.cost,
+    Algebraic.Threshold.BlockKind.Step, Algebraic.Threshold.BlockDecomposition,
+    Algebraic.Threshold.BlockDecomposition.cost,
+    Algebraic.Threshold.Program.DirectionRuns,
+    Algebraic.Threshold.Program.DirectionRuns.size}
+  \leanok
+  \uses{def:lowerbounds-threshold-program, def:lowerbounds-threshold-rectangle-changes}
+  A block decomposition of $f$ is a sequence of histories $h_0,\dots,h_m$ on
+  $\{0,1\}^n$, with $h_0$ constant and $f$ a function of $h_m$, in which each step
+  is either \emph{one-dimensional with $T$ changes},
+  $h_{i+1}(x)=\Phi(h_i(x),\langle w,x\rangle)$ for a weight vector $w$ and a map
+  $\Phi$ such that every $\Phi(\eta,\cdot)$ changes at most $T$ times, or a
+  \emph{summary with $V$ values}: for every split $(A,B)$,
+  $h_{i+1}(p,q)=\Phi(h_i(p,q),\sigma(p),q)$ for some $\sigma$ with at most $V$
+  values. Its cost is the product of $4T$ over the one-dimensional steps with
+  $T\ge1$ and of $V$ over the summary steps. A split of a weighted threshold
+  program into $B$ direction runs numbers its gates monotonically by
+  $\{0,\dots,B-1\}$ and assigns each run $i$ a direction $d_i\in\mathbb{R}^n$ such
+  that the input weight vector of every gate is a real multiple of the direction
+  of its run; $r_i$ is the number of input-reading gates of run $i$.
+\end{definition}
+
+\begin{lemma}[Sorted groups]
+  \label{lem:lowerbounds-threshold-sorted-groups}
+  \lean{Algebraic.Threshold.ChangesAtMost.card_nonconstant_groups_le,
+    Algebraic.Threshold.exists_sorted_group,
+    Algebraic.Threshold.PiecesAtMost.changesAtMost}
+  \leanok
+  \uses{def:lowerbounds-threshold-rectangle-changes}
+  Cut the positions $0,1,2,\dots$ into consecutive groups of $L$. If $\Psi$ changes
+  at most $T$ times, then along every nondecreasing sequence $z$ the map
+  $i\mapsto\Psi(z_i)$ is nonconstant on at most $T$ of the groups. Consequently,
+  let $P$ and $Q$ be finite sets, $\alpha$ a real key on $P$, $G\ge1$, and $\Psi_q$
+  for $q\in Q$ functions changing at most $T$ times. Sort $P$ by $\alpha$ and cut it
+  into $G$ consecutive groups of $\lfloor|P|/G\rfloor$ elements. For some group
+  $P'$ there is $Q_{\mathrm{bad}}\subseteq Q$ with $G|Q_{\mathrm{bad}}|\le T|Q|$
+  such that $p\mapsto\Psi_q(\alpha(p))$ is constant on $P'$ for every
+  $q\in Q\setminus Q_{\mathrm{bad}}$. A function with at most $M$ pieces changes at
+  most $M-1$ times.
+\end{lemma}
+\begin{proof}
+  \leanok
+  A group on which the sequence is nonconstant contains a change position, and
+  distinct groups contain distinct positions. Sorting $P$ by $\alpha$ (by merge
+  sort) gives a nondecreasing sequence of keys, so each $\Psi_q$ is nonconstant on
+  at most $T$ groups. Double counting the pairs of a group and a $q$ for which
+  $\Psi_q\circ\alpha$ is nonconstant on the group, the sum over the $G$ groups is at
+  most $T|Q|$, so some group is bad for at most $T|Q|/G$ of the $q$. For pieces,
+  the rank $\pi(z_{i+1})$ strictly increases from one change position to the next
+  and lies in $\{1,\dots,M-1\}$.
+\end{proof}
+
+\begin{lemma}[Pieces of a run of threshold gates]
+  \label{lem:lowerbounds-threshold-run-pieces}
+  \lean{Algebraic.Threshold.Program.piecesAtMost_evalFrom,
+    Algebraic.Threshold.Program.changesAtMost_evalFrom}
+  \leanok
+  \uses{def:lowerbounds-threshold-program, def:lowerbounds-threshold-rectangle-changes}
+  Fix the values of the gates of a set $F$ and feed every other gate $j$ the input
+  contribution $\lambda_j t$ for one real parameter $t$, so that gate $j$ is
+  $[\lambda_j t+\sum_{k<j}u_{jk}g_k+c_j\ge0]$. As a function of $t$, the vector of
+  all gate values has at most $2^{r'}$ pieces, hence changes at most $2^{r'}-1$
+  times, where $r'$ is the number of gates outside $F$ with $\lambda_j\ne0$.
+\end{lemma}
+\begin{proof}
+  \leanok
+  Induction over the gates in order. On a piece of the earlier gates, gate $j$ is
+  $[\lambda_j t+c\ge0]$ for one constant $c$: constant if $\lambda_j=0$ or
+  $j\in F$, and otherwise monotone in $t$, splitting the piece into at most two
+  intervals. The new rank is twice the old rank plus the gate value, negated when
+  $\lambda_j<0$.
+\end{proof}
+
+\begin{theorem}[One-dimensional capacity]
+  \label{thm:lowerbounds-threshold-capacity}
+  \lean{Algebraic.Threshold.TwoSidedRectangleFree.two_pow_lt_mul_cost,
+    Algebraic.Threshold.TwoSidedRectangleFree.two_pow_lt_of_directionRuns}
+  \leanok
+  \uses{def:lowerbounds-threshold-blocks, lem:lowerbounds-threshold-sorted-groups,
+    lem:lowerbounds-threshold-run-pieces}
+  If $f$ is two-sided $K$-rectangle-free, every block decomposition of $f$ has
+  $2^n<4K^2\cdot\mathrm{cost}$. With $K\le2^k$ this says
+  $\prod_{i\in I_1}4T_i\prod_{i\in I_2}V_i>2^{n-2k-2}$, where $I_1$ consists of the
+  one-dimensional blocks with $T_i\ge1$ and $I_2$ of the summary blocks. In
+  particular, if a weighted threshold program computing $f$ is split into $B$
+  direction runs with $r_i$ input-reading gates in run $i$, then
+  $2^n<4K^2\prod_ic_i$, where $c_i=4(2^{r_i}-1)$ if $r_i\ge1$ and $c_i=1$
+  otherwise.
+\end{theorem}
+\begin{proof}
+  \leanok
+  Suppose $4K^2\cdot\mathrm{cost}\le2^n$. Write the cost of each block as a
+  first-side factor ($2T$ for a one-dimensional block with $T\ge1$, $V$ for a
+  summary block, $1$ otherwise) times a second-side factor ($2$ for a
+  one-dimensional block with $T\ge1$, $1$ otherwise), with products $D_P$ and $D_Q$.
+  Let $a=\lceil\log_2(KD_P)\rceil$, so that $KD_P\le2^a<2KD_P$ and hence
+  $2KD_Q\le2^{n-a}$, and choose $A$ with $|A|=a$. Start from $P=\{0,1\}^A$ and
+  $Q=\{0,1\}^B$, keeping the invariant that the current history is a function of
+  $q$ alone on $P\times Q$. For a one-dimensional block,
+  $\langle w,(p,q)\rangle=\alpha(p)+\beta(q)$, so the next history is
+  $\Psi_q(\alpha(p))$ with $\Psi_q(t)=\Phi(h(q),t+\beta(q))$; apply the
+  sorted-groups lemma with $2T$ groups and delete the bad $q$, at most half of $Q$.
+  For a summary block keep the largest fiber of $\sigma$. At the end $f$ is a
+  function of $q$ on $P\times Q$; its majority value on at least half of $Q$ gives
+  a monochromatic rectangle with $|P|\ge\lfloor2^a/D_P\rfloor\ge K$ and
+  $|Q|\ge\lfloor2^{n-a}/(2D_Q)\rfloor\ge K$, a contradiction. For direction runs,
+  the history after $i$ runs holds the values of the gates of the first $i$ runs,
+  and given the earlier gates, run $i$ is a run of threshold gates in
+  $t=\langle d_i,x\rangle$, which changes at most $2^{r_i}-1$ times by
+  Lemma~\ref{lem:lowerbounds-threshold-run-pieces}.
+\end{proof}
+
+\begin{corollary}[Input-reading gates of threshold circuits]
+  \label{cor:lowerbounds-threshold-gate-bounds}
+  \lean{Algebraic.Threshold.TwoSidedRectangleFree.two_pow_lt_four_pow_inputGates,
+    Algebraic.Threshold.TwoSidedRectangleFree.lt_two_mul_add_two_mul_inputGates,
+    Algebraic.Threshold.TwoSidedRectangleFree.two_pow_lt_of_direction,
+    Algebraic.Threshold.TwoSidedRectangleFree.lt_of_direction,
+    Algebraic.Threshold.TwoSidedRectangleFree.two_pow_lt_of_runs,
+    Algebraic.Threshold.TwoSidedRectangleFree.lt_of_runs}
+  \leanok
+  \uses{thm:lowerbounds-threshold-capacity}
+  Let $f$ be two-sided $K$-rectangle-free with $K\le2^k$, and let a weighted
+  threshold program with $s_{\mathrm{in}}$ input-reading gates compute $f$. Then:
+  \begin{enumerate}
+    \item (C1) $2^n<4K^2\cdot4^{s_{\mathrm{in}}}$, so $n<2k+2+2s_{\mathrm{in}}$;
+    \item (C2) if every input weight vector is a real multiple of one vector,
+      $2^n<16K^2\cdot2^{s_{\mathrm{in}}}$, so $n<2k+4+s_{\mathrm{in}}$;
+    \item (C3) if the gates split into $B$ direction runs,
+      $2^n<4K^2\cdot4^B\cdot2^{s_{\mathrm{in}}}$, so $n<2k+2+2B+s_{\mathrm{in}}$.
+  \end{enumerate}
+\end{corollary}
+\begin{proof}
+  \leanok
+  A run with $r$ input-reading gates costs at most $4^r$ and at most $4\cdot2^r$,
+  and the numbers of input-reading gates of the runs sum to $s_{\mathrm{in}}$. For
+  (C1) split the program into single-gate runs; for (C2) use one run.
+\end{proof}
+
+\begin{corollary}[Multilevel thresholds and mixed gate costs]
+  \label{cor:lowerbounds-threshold-multilevel-mixed}
+  \lean{Algebraic.Threshold.TwoSidedRectangleFree.two_pow_lt_of_multilevel,
+    Algebraic.Threshold.TwoSidedRectangleFree.two_pow_sub_lt_of_multilevel,
+    Algebraic.Threshold.TwoSidedRectangleFree.two_pow_lt_of_activations}
+  \leanok
+  \uses{thm:lowerbounds-threshold-capacity, def:lowerbounds-threshold-activation}
+  Let $f$ be two-sided $K$-rectangle-free with $K\le2^k$. (C2$'$) If
+  $f(x)=F(\langle w,x\rangle)$ for a function $F:\mathbb{R}\to\{0,1\}$ changing at
+  most $T$ times, then $2^n<4K^2\max(1,4T)$, and $T>2^{n-2k-4}$ when $2k+4\le n$.
+  (C4) If an activation program computes $f$ and the activation of each
+  input-reading gate $j$ changes at most $T_j$ times, then
+  $2^n<4K^2\prod_j\max(1,4T_j)$, the product ranging over the input-reading gates.
+\end{corollary}
+\begin{proof}
+  \leanok
+  A multilevel representation is a block decomposition with one one-dimensional
+  block. In an activation program every gate is its own block: given the earlier
+  gates, an input-reading gate $j$ is $\phi_j(t+c)$ in $t=\langle w_j,x\rangle$ for
+  a constant $c$, and a gate reading no input is a function of the earlier gates.
+\end{proof}
+
+\begin{theorem}[The explicit family is two-sided rectangle-free]
+  \label{thm:lowerbounds-threshold-family-rectangle}
+  \lean{Algebraic.Threshold.twoSidedRectangleFree_of_flatSumsetDisperser,
+    Algebraic.Threshold.sourceReductionHardFamily_twoSidedRectangleFree,
+    Algebraic.Cutwidth.Aggregate.familyThreshold,
+    Algebraic.Cutwidth.Aggregate.familyThreshold_log_isLittleO}
+  \leanok
+  \uses{def:lowerbounds-threshold-rectangle-changes,
+    def:lowerbounds-algebraic-extractor-padding,
+    thm:lowerbounds-algebraic-aggregate-capacity-polarity}
+  A two-sided flat sumset disperser at threshold $K$ is two-sided
+  $K$-rectangle-free. Hence, for all sufficiently large $n$, the fixed
+  polynomial-time family $\mathrm{sourceReductionHardFamily}(n)$ is two-sided
+  $K(n)$-rectangle-free under every split of its inputs, balanced or not, where
+  $K(n)=2^{k(n)}$ and $k(n)=o(n)$ is one more than the source entropy of the
+  unpadded extractor at length $n-1$.
+\end{theorem}
+\begin{proof}
+  \leanok
+  Embed $P$ as the inputs $(p,0)$ and $Q$ as the inputs $(0,q)$. These sets have
+  the same sizes, and their XOR sums are exactly the glued inputs $(p,q)$, so
+  dispersion gives both values on $P\times Q$. The family is eventually such a
+  disperser at $K(n)$
+  (Theorem~\ref{thm:lowerbounds-algebraic-aggregate-capacity-polarity}).
+\end{proof}
+
+\begin{theorem}[Threshold circuits for the explicit family]
+  \label{thm:lowerbounds-threshold-family-bounds}
+  \lean{Algebraic.Threshold.sourceReductionHardFamily_lt_inputGates,
+    Algebraic.Threshold.sourceReductionHardFamily_lt_inputGates_of_direction,
+    Algebraic.Threshold.sourceReductionHardFamily_lt_inputGates_add_runs,
+    Algebraic.Threshold.sourceReductionHardFamily_lt_transitions,
+    Algebraic.Threshold.sourceReductionHardFamily_lt_sum_logb}
+  \leanok
+  \uses{thm:lowerbounds-threshold-family-rectangle,
+    cor:lowerbounds-threshold-gate-bounds,
+    cor:lowerbounds-threshold-multilevel-mixed}
+  For every $\varepsilon>0$ and all sufficiently large $n$, the fixed
+  polynomial-time family $\mathrm{sourceReductionHardFamily}(n)$ satisfies:
+  \begin{enumerate}
+    \item (C1) every weighted threshold program with real weights, of any depth,
+      fan-in, and fan-out, computing it has more than $(1/2-\varepsilon)n$
+      input-reading gates; gates reading only other gates are free;
+    \item (C2) if all its input weight vectors are real multiples of one vector, it
+      has more than $(1-\varepsilon)n$ input-reading gates;
+    \item (C3) if its gates split into $B$ consecutive runs along single
+      directions, $s_{\mathrm{in}}+2B>(1-\varepsilon)n$; so a program whose
+      input-reading gates switch direction $B$ times has
+      $s_{\mathrm{in}}>n-o(n)-2B$;
+    \item (C2$'$) every representation $F(\langle w,x\rangle)$ of the family with
+      $F:\mathbb{R}\to\{0,1\}$ changing at most $T$ times has
+      $T>2^{(1-\varepsilon)n}$, so multilevel threshold representations need
+      $2^{n-o(n)}$ levels;
+    \item (C4) every activation program computing it whose input-reading gate $j$
+      changes at most $T_j$ times has $\sum_j\log_2\max(1,4T_j)>(1-\varepsilon)n$,
+      the sum ranging over the input-reading gates.
+  \end{enumerate}
+
+  For comparison, Roychowdhury, Orlitsky, and Siu (\emph{IEEE Trans.\ Inf.\
+  Theory} 40(2), 1994) and Gr\"oger and Tur\'an prove that inner product mod $2$
+  needs about $n/4$ gates in threshold circuits of unbounded depth, and Kane and
+  Williams (STOC 2016) prove superlinear gate and superquadratic wire lower bounds
+  for threshold circuits of depth two and three. A literature search in October
+  2026 found no explicit function proved to need $(1/2+\varepsilon)n$ gates in
+  threshold circuits of unrestricted depth; this has not been checked
+  exhaustively. As
+  for every bound on this family, the threshold on $n$ is enormous
+  (Theorem~\ref{thm:lowerbounds-algebraic-uniform-hard-family}).
+\end{theorem}
+\begin{proof}
+  \leanok
+  Apply the corollaries with $K(n)=2^{k(n)}$ and absorb $2k(n)+4=o(n)$ in the
+  slack $\varepsilon n$. For C2$'$ use the slack $\min(\varepsilon,1)\,n$, which
+  also gives $2k(n)+4\le n$.
 \end{proof}
 
 \section{Polynomial approximation and $\cc{AC}^0[3]$}

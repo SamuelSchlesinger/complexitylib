@@ -209,6 +209,24 @@ def headlineTheorems : List Name := [
   -- ... and n^3 - |S| * n AND gates when every NOT gate reads only the inputs in S
   `Algebraic.Monotone.MatrixProduct.NegationLimited.mul_mul_le_andCost_add,
   `Algebraic.Monotone.MatrixProduct.NegationLimited.cube_sub_le_andCost,
+  -- One-dimensional capacity of threshold circuits of unbounded depth (Theorem U)
+  `Algebraic.Threshold.exists_sorted_group,
+  `Algebraic.Threshold.Program.piecesAtMost_evalFrom,
+  `Algebraic.Threshold.TwoSidedRectangleFree.two_pow_lt_mul_cost,
+  `Algebraic.Threshold.TwoSidedRectangleFree.two_pow_lt_of_directionRuns,
+  -- ... C1-C4 for every two-sided rectangle-free function
+  `Algebraic.Threshold.TwoSidedRectangleFree.two_pow_lt_four_pow_inputGates,
+  `Algebraic.Threshold.TwoSidedRectangleFree.two_pow_lt_of_direction,
+  `Algebraic.Threshold.TwoSidedRectangleFree.two_pow_lt_of_runs,
+  `Algebraic.Threshold.TwoSidedRectangleFree.two_pow_lt_of_multilevel,
+  `Algebraic.Threshold.TwoSidedRectangleFree.two_pow_lt_of_activations,
+  -- ... and for the explicit family: (1/2 - ε)n input-reading threshold gates, etc.
+  `Algebraic.Threshold.sourceReductionHardFamily_twoSidedRectangleFree,
+  `Algebraic.Threshold.sourceReductionHardFamily_lt_inputGates,
+  `Algebraic.Threshold.sourceReductionHardFamily_lt_inputGates_of_direction,
+  `Algebraic.Threshold.sourceReductionHardFamily_lt_inputGates_add_runs,
+  `Algebraic.Threshold.sourceReductionHardFamily_lt_transitions,
+  `Algebraic.Threshold.sourceReductionHardFamily_lt_sum_logb,
   -- The concrete uniform polynomial-time coefficient-four hard family
   `Algebraic.Cutwidth.Extractor.sourceReductionHardLanguage_mem_P,
   `Algebraic.Cutwidth.Extractor.sourceReductionHardEval_mem_FP,
