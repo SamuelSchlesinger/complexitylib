@@ -13,7 +13,7 @@ public import Complexitylib.Algebraic.LowerBound.Counting.Shannon
 public import Complexitylib.Algebraic.LowerBound.Hierarchy
 public import Complexitylib.Algebraic.LowerBound.FanIn
 public import Complexitylib.Algebraic.LowerBound.GateElimination.DeMorganXor
-public import Complexitylib.Algebraic.LowerBound.Monotone.Clique.Exponential
+public import Complexitylib.Algebraic.LowerBound.Monotone.Clique.Asymptotic
 public import Complexitylib.Algebraic.LowerBound.Fusion.Cyclic.Complete
 public import Complexitylib.Algebraic.LowerBound.Fusion.SumOfTerms.Rectangle
 
@@ -64,6 +64,11 @@ export Fusion.SumOfTerms.Rectangle (diagonal_lowerBound)
 export Monotone.Clique.Exponential
   (powSelf_lt_circuitSize
    twoPow_lt_circuitSize)
+
+export Monotone.Clique.Asymptotic
+  (sixtyFourPow_lt_circuitSize
+   twoPow_two_mul_sqrt_lt_circuitSize
+   rpow_sqrt_lt_circuitSize)
 
 export AC0
   (parity_not_computable

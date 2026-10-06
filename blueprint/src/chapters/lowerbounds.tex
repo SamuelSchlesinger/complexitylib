@@ -19,7 +19,8 @@ pigeonhole principle and to Cook--Reckhow proof systems (roadmap track L5).
 Section~\ref{sec:lowerbounds-algebraic} collects the results of the imported
 algebraic-circuits library: parity bounds in the De Morgan basis and in its own
 $\cc{AC}^0$ model (including parity outside that model's $\cc{AC}^0$ and an
-explicit Håstad-type size bound), monotone CLIQUE at explicit parameters,
+explicit Håstad-type size bound), monotone CLIQUE (more than $2^{\sqrt{k}}$
+gates for $1025 \le k \le n^{1/4}$),
 Nechiporuk's formula bound, Karchmer--Wigderson, a circuit-size hierarchy,
 conditional complexity, algebraic lower bounds, and mass production; the
 imported sunflower lemma appears in Section~\ref{sec:lowerbounds-monotone}. Its
@@ -239,6 +240,38 @@ chapter.
   \uses{lem:lowerbounds-sunflower}
   Razborov's method of approximations, with the sunflower lemma bounding the
   error introduced at each gate.
+\end{proof}
+
+\begin{theorem}[Monotone CLIQUE, general parameters]
+  \label{thm:lowerbounds-algebraic-clique-sqrt}
+  \lean{Algebraic.Monotone.Clique.Asymptotic.sixtyFourPow_lt_circuitSize,
+    Algebraic.Monotone.Clique.Asymptotic.twoPow_two_mul_sqrt_lt_circuitSize,
+    Algebraic.Monotone.Clique.Asymptotic.rpow_sqrt_lt_circuitSize}
+  \leanok
+  Consider circuits over the imported library's binary AND/OR signature, as in
+  Theorem~\ref{thm:lowerbounds-algebraic-clique}, whose inputs are the
+  $\binom{n}{2}$ edge variables of an $n$-vertex graph. If $w \ge 16$,
+  $4w^2 \le k - 1$, and $64 w^6 k \le n$, then every such circuit computing
+  $k$-CLIQUE has more than $64^w$ gates. Consequently, if $1025 \le k$ and
+  $k \le n^{1/4}$ (that is, $k^4 \le n$), then every such circuit computing
+  $k$-CLIQUE has more than $2^{2 \lfloor \sqrt{k} \rfloor}$ gates, and hence
+  more than $2^{\sqrt{k}}$ gates.
+\end{theorem}
+\begin{proof}
+  \leanok
+  \uses{lem:lowerbounds-sunflower}
+  Apply the finite approximation dichotomy behind
+  Theorem~\ref{thm:lowerbounds-algebraic-clique} with width $w$ and $w^2$
+  petals. The sunflower bound $(w + 1)\,w!\,(w^2 - 1)^w$ on the size of an
+  approximator is at most $F = (w + 1)\,w^{3w}$. Positive side: since
+  $64 w^6 k \le n$, the $k$-sets containing a fixed $(w + 1)$-set form at
+  most a $(64 w^6)^{-(w + 1)}$ fraction of all $k$-sets, and
+  $F^2\, 64^w < (64 w^6)^{w + 1}$. Negative side: since $4w^2 \le k - 1$,
+  plucking a sunflower with $w^2$ petals errs on at most a $4^{-w^2}$ fraction
+  of the colorings with $k - 1$ colors, and $6F^2\, 64^w < 4^{w^2}$ because
+  $128 w^6 \le 4^w$ and $6(w + 1)^2 < 2^w$ for $w \ge 16$. For the general
+  bound take $w = \lfloor \lfloor \sqrt{k - 1} \rfloor / 2 \rfloor$, so that
+  $4w^2 \le k - 1$, $64 w^6 k \le k^4$, and $6w \ge 2 \lfloor \sqrt{k} \rfloor$.
 \end{proof}
 
 \begin{theorem}[Nechiporuk]
@@ -13470,11 +13503,14 @@ choices.
   There is $\varepsilon > 0$ such that for all $k \le n^{1/4}$, every monotone
   circuit deciding whether an $n$-vertex graph, given by its adjacency bits,
   contains a $k$-clique has size at least $2^{\varepsilon \sqrt{k}}$
-  (Razborov; Alon--Boppana; Arora--Barak Theorem~14.7). Only a weaker bound at
-  special parameters, in the imported library's model, is formalized:
-  Theorem~\ref{thm:lowerbounds-algebraic-clique} gives more than
-  $2^{t \cdot 2^t}$ gates for $k = 2^{4t}$ and $n = 2^{20t}$, $t \ge 4$, which
-  for large $t$ is below $2^{\varepsilon \sqrt{k}} = 2^{\varepsilon 4^t}$.
+  (Razborov; Alon--Boppana; Arora--Barak Theorem~14.7). This is formalized
+  only in the imported library's model and only for $k \ge 1025$:
+  Theorem~\ref{thm:lowerbounds-algebraic-clique-sqrt} gives more than
+  $2^{\sqrt{k}}$ gates, that is $\varepsilon = 1$, whenever
+  $1025 \le k \le n^{1/4}$, for circuits over that library's binary AND/OR
+  signature without constants, every gate counted. Transferring the bound to
+  the monotone circuits of Definition~\ref{def:lowerbounds-monotone-circuit},
+  and the cases $k < 1025$, remain open.
 \end{theorem}
 \begin{proof}
   \uses{lem:lowerbounds-sunflower}
