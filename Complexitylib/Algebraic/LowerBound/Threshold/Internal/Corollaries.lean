@@ -125,4 +125,33 @@ theorem two_pow_lt_of_multilevel_internal (hf : TwoSidedRectangleFree f K) (w : 
   have h := two_pow_lt_mul_cost_internal hf (multilevelDecomposition w F hF hfF)
   simpa [BlockDecomposition.cost, multilevelDecomposition, cost_oneDim_eq_max] using h
 
+/-- Binary logarithms of a capacity bound with `K ≤ 2 ^ k` and `X ≤ 2 ^ e`. -/
+theorem lt_of_two_pow_lt_mul {n k K X e : ℕ} (hK : K ≤ 2 ^ k) (hX : X ≤ 2 ^ e)
+    (h : 2 ^ n < 4 * K ^ 2 * X) : n < 2 * k + 2 + e := by
+  have hle : 4 * K ^ 2 * X ≤ 2 ^ (2 * k + 2 + e) := by
+    calc 4 * K ^ 2 * X ≤ 4 * (2 ^ k) ^ 2 * 2 ^ e :=
+          Nat.mul_le_mul (Nat.mul_le_mul_left _ (Nat.pow_le_pow_left hK _)) hX
+      _ = 2 ^ (2 * k + 2 + e) := by
+          rw [pow_add, pow_add, ← pow_mul, mul_comm k 2]
+          ring
+  exact (Nat.pow_lt_pow_iff_right (by norm_num)).mp (h.trans_le hle)
+
+theorem two_pow_sub_lt_of_multilevel_internal (hf : TwoSidedRectangleFree f K) {k : ℕ}
+    (hK : K ≤ 2 ^ k) (w : Fin n → ℝ) (F : ℝ → Bool) {T : ℕ} (hF : ChangesAtMost F T)
+    (hfF : ∀ x, f x = F (weightedSum w x)) (hn : 2 * k + 4 ≤ n) :
+    2 ^ (n - (2 * k + 4)) < T := by
+  have h := two_pow_lt_of_multilevel_internal hf w F hF hfF
+  by_contra hT
+  push Not at hT
+  have hX : max 1 (4 * T) ≤ 2 ^ (n - (2 * k + 2)) := by
+    have h1 : 1 ≤ 2 ^ (n - (2 * k + 2)) := Nat.one_le_two_pow
+    have h2 : 4 * T ≤ 2 ^ (n - (2 * k + 2)) := by
+      have : 2 ^ (n - (2 * k + 2)) = 4 * 2 ^ (n - (2 * k + 4)) := by
+        rw [show n - (2 * k + 2) = (n - (2 * k + 4)) + 2 by omega, pow_add]
+        ring
+      omega
+    exact max_le h1 h2
+  have := lt_of_two_pow_lt_mul hK hX h
+  omega
+
 end Algebraic.Threshold
