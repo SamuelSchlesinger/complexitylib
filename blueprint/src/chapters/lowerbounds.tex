@@ -384,6 +384,72 @@ chapter.
   count multiplies by four when $n$ doubles.
 \end{proof}
 
+\begin{theorem}[Khrapchenko's bound with few shared gates]
+  \label{thm:lowerbounds-algebraic-khrapchenko-shared}
+  \lean{Algebraic.KW.SharedProgram.sq_card_edges_le,
+    Algebraic.KW.SharedProgram.parity_sq_le_gates,
+    Algebraic.KW.SharedProgram.mul_le_gates_of_parity,
+    Algebraic.KW.SharedProgram.isLittleO_gates_of_parity,
+    Algebraic.KW.SharedProgram.threshold_mul_le_gates,
+    Algebraic.KW.SharedProgram.majority_mul_le_gates}
+  \leanok
+  \uses{thm:lowerbounds-algebraic-khrapchenko}
+  A \emph{$k$-shared program} on $n$ inputs is a sequence of $k + 1$ De Morgan
+  formulas of Theorem~\ref{thm:lowerbounds-algebraic-kw}, $G_1, \dots, G_k, F$,
+  where $G_j$ reads the inputs and the values $z_1, \dots, z_{j-1}$ of the
+  earlier formulas and $F$ reads the inputs and $z_1, \dots, z_k$; the program
+  computes the value of $F$. The leaves are literals $x_i$, $\neg x_i$, $z_j$,
+  $\neg z_j$ and constants, and a shared value may be read any number of times.
+  Unfolding the formulas gives a circuit of fan-in-two AND and OR gates, with
+  negations free on wires, in which only the $k$ roots of $G_1, \dots, G_k$ can
+  have fan-out at least two; conversely, cutting such a circuit with at most $k$
+  gates of fan-out at least two at those gates gives a $k$-shared program with
+  the same AND and OR gates. This correspondence is a remark: the formal
+  statements are about $k$-shared programs. Let $s$ be the number of AND and OR
+  gates of the program and $X$ its number of leaves reading an input, a literal
+  $x_i$ or $\neg x_i$, so $X \le s + k + 1$.
+
+  If a $k$-shared program is $1$ on a set $A$ of inputs and $0$ on a set $B$,
+  and $E$ is the set of pairs in $A \times B$ at Hamming distance one, then
+  $|E|^2 \le (k + 1) \cdot X \cdot |A| \cdot |B|$. For $k = 0$ this is
+  Theorem~\ref{thm:lowerbounds-algebraic-khrapchenko}. Consequently, for all
+  $n \ge 1$ and $k$, every $k$-shared program computing the parity of $n$ bits
+  satisfies $n^2 \le (k + 1)(s + k + 1)$, that is, it has at least
+  $n^2/(k + 1) - (k + 1)$ AND and OR gates. If $(k + 1)(C + 1) \le n$ for a
+  natural number $C$, then $s \ge C n$; so if $k(n) = o(n)$ and, for every $n$,
+  a $k(n)$-shared program computes the parity of $n$ bits with $s(n)$ gates,
+  then $n = o(s(n))$. For $1 \le t \le n$, a $k$-shared program computing ``at
+  least $t$ of the $n$ inputs are $1$'' satisfies
+  $t(n + 1 - t) \le (k + 1)(s + k + 1)$, and one computing strict majority of
+  $n \ge 1$ inputs satisfies
+  $(n - \lfloor n/2 \rfloor)(\lfloor n/2 \rfloor + 1) \le (k + 1)(s + k + 1)$.
+
+  Unfolding every shared gate into a formula, which is the folklore argument,
+  gives only $X \ge L(f)/2^k$ for the formula size $L(f)$, which is superlinear
+  only when $k < \log_2 n$. We found no reference for a bound depending
+  linearly on $k$; the Russian literature on circuits with bounded branching
+  has not been checked.
+\end{theorem}
+\begin{proof}
+  \leanok
+  \uses{cor:lowerbounds-algebraic-khrapchenko-parity}
+  Call an edge \emph{uncut} when its endpoints agree on every shared value
+  computed so far. Khrapchenko's induction, run on a formula over the inputs
+  and the shared values, gives $|E'|^2 \le X' \cdot |A| \cdot |B|$ for its
+  uncut edges $E'$, where $X'$ counts only the formula's input literals: a
+  literal on $z_j$ separates only pairs that $z_j$ cuts. For a shared formula
+  $G$, an uncut edge on which $G$ is constant stays uncut for the rest of the
+  program; the others lie in $\{G = 1\} \times \{G = 0\}$, where $G$ separates
+  them, or in $\{G = 0\} \times \{G = 1\}$, where the De Morgan dual of $G$
+  does, and by the Cauchy--Schwarz inequality the two rectangles together
+  contain at most $\sqrt{X_G \, |A| \, |B|}$ such edges. Every edge is cut by
+  the output, so $|E| \le \sum_j \sqrt{X_j \, |A| \, |B|}$ over the $k + 1$
+  formulas, and the Cauchy--Schwarz inequality gives the factor $k + 1$. The
+  corollaries repeat the computations of
+  Corollary~\ref{cor:lowerbounds-algebraic-khrapchenko-parity}, which use only
+  this rectangle bound, with $X \le s + k + 1$.
+\end{proof}
+
 \begin{theorem}[Polynomial circuit size hierarchy]
   \label{thm:lowerbounds-algebraic-hierarchy}
   \lean{Algebraic.DeMorgan.polynomialSize_ssubset}

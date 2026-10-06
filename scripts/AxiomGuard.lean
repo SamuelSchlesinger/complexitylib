@@ -143,6 +143,10 @@ def headlineTheorems : List Name := [
   -- Razborov–Smolensky: parity is not in AC0[3]
   `Complexity.Smolensky.parity_size_lower_bound,
   `Complexity.xorBool_not_mem_AC0Mod_three,
+  -- Khrapchenko with k shared gates: parity needs n²/(k+1) - (k+1) AND/OR gates
+  `Algebraic.KW.SharedProgram.sq_card_edges_le,
+  `Algebraic.KW.SharedProgram.parity_sq_le_gates,
+  `Algebraic.KW.SharedProgram.isLittleO_gates_of_parity,
   -- Monotone CLIQUE needs more than 2^√k binary AND/OR gates when k ≤ n^(1/4)
   `Algebraic.Monotone.Clique.Asymptotic.twoPow_two_mul_sqrt_lt_circuitSize,
   `Algebraic.Monotone.Clique.Asymptotic.rpow_sqrt_lt_circuitSize,
