@@ -8,6 +8,8 @@ module
 public import Complexitylib.Circuits.Frontier.Main
 public import Complexitylib.Circuits.Frontier.Nondeterministic
 public import Complexitylib.Circuits.Frontier.Ledger.Main
+public import Complexitylib.Circuits.Frontier.AverageCase.Extractor
+public import Complexitylib.Algebraic.LowerBound.Cutwidth.Extractor.Defs
 public import Complexitylib.Algebraic.LowerBound.Cutwidth.Rectangle
 public import
   Complexitylib.Algebraic.LowerBound.Cutwidth.Extractor.SourceReduction.Construction.Uniform.Defs
@@ -34,6 +36,13 @@ So every general lower bound of `Complexity.Frontier` applies to this explicit f
   verifier circuits over any basis, uniformly in the number of witness inputs.
 * `sourceReductionHardFamily_lt_innerGates_aggregate`: the Gaussian coefficient with
   sublinearly many monoid-aggregate gates of unbounded fan-in, which are not counted.
+
+The unpadded extractor `Algebraic.Cutwidth.Extractor.sourceReductionFamily`, which is also
+uniformly polynomial-time computable, has signed sumset bias `2 · 35/72`
+(`flatSumsetBias_of_flatSumsetExtractor`). The weighted frontier bound then gives explicit
+average-case hardness (`sourceReductionFamily_agreement_le`): every circuit of fan-in two over
+any basis with at most `(L - ε) n` gates of positive arity agrees with it on at most a
+`71/72 + 2^(-γ n)` fraction of inputs.
 
 The cutwidth development proves the first bound for the full binary basis, counting every gate
 (`Algebraic.Cutwidth.sourceReductionHardFamily_eventually_lt_size_gaussian`).
@@ -138,6 +147,41 @@ theorem sourceReductionHardFamily_frontierHypotheses :
     rw [Real.log_pow]
     ring
 
+/-- Signed sums of Boolean signs count the accepted elements twice, minus everything. -/
+private theorem sum_boolSign {β : Type*} (T : Finset β) (g : β → Bool) :
+    ∑ z ∈ T, boolSign (g z) = 2 * ((T.filter fun z => g z = true).card : ℝ) - T.card := by
+  have hsplit := Finset.card_filter_add_card_filter_not (s := T) (p := fun z => g z = true)
+  simp only [boolSign, Finset.sum_ite, Finset.sum_const, nsmul_eq_mul, mul_one, mul_neg]
+  have : ((T.filter fun z => ¬ g z = true).card : ℝ) =
+      T.card - (T.filter fun z => g z = true).card := by
+    rw [← hsplit]; push_cast; ring
+  simp only [Bool.not_eq_true] at this ⊢
+  rw [this]
+  ring
+
+/-- **Extractors have small signed sumset bias.** A flat-source sumset extractor with error
+`ν` has signed sumset bias `2 ν`. -/
+theorem flatSumsetBias_of_flatSumsetExtractor {n K : ℕ} {f : Cslib.BooleanFunction n} {ν : ℝ}
+    (h : Algebraic.Cutwidth.FlatSumsetExtractor f K ν) : FlatSumsetBias f K (2 * ν) := by
+  classical
+  intro A B hA hB
+  set P := (Set.toFinite A).toFinset
+  set Q := (Set.toFinite B).toFinset
+  have hPA : P.card = A.ncard := (Set.ncard_eq_toFinset_card A).symm
+  have hQB : Q.card = B.ncard := (Set.ncard_eq_toFinset_card B).symm
+  obtain ⟨hlo, hhi⟩ := h P Q (hPA ▸ hA) (hQB ▸ hB)
+  have hsum : sumOn (fun x => sumOn (fun y => boolSign (f (xorInputs x y))) B) A =
+      2 * ((Algebraic.Cutwidth.sumsetOnes f P Q).card : ℝ) - P.card * Q.card := by
+    simp only [sumOn]
+    rw [← Finset.sum_product' (s := P) (t := Q)
+      (f := fun x y => boolSign (f (xorInputs x y))), sum_boolSign, Finset.card_product]
+    simp only [Algebraic.Cutwidth.sumsetOnes, Nat.cast_mul]
+    rfl
+  rw [hsum, ← hPA, ← hQB]
+  push_cast
+  rw [abs_le]
+  constructor <;> nlinarith
+
 variable {ε : ℝ}
 
 universe v
@@ -195,5 +239,48 @@ theorem sourceReductionHardFamily_lt_innerGates_aggregate {β : ℕ → ℝ}
             (erase special c.program).innerGates.card := by
   obtain ⟨K, hfree, hK, hdense⟩ := sourceReductionHardFamily_frontierHypotheses
   exact lowerBound_aggregate_gaussian _ K hfree hK hdense hβ hε
+
+/-- **Average-case hardness of the explicit extractor.** For every `ε > 0` there is `γ > 0`
+such that for all large `n`, every circuit of fan-in two, over any basis on `Bool`, with at most
+`(L - ε) n` gates of positive arity agrees with the explicit extractor on at most a
+`71/72 + 2^(-γ n)` fraction of inputs, where `L = 1 + π/(3 arccos ((1 + 2√2)/4)) ≈ 4.5625`. -/
+theorem sourceReductionFamily_agreement_le (hε : 0 < ε) :
+    ∃ γ : ℝ, 0 < γ ∧ ∀ᶠ n in atTop,
+      ∀ (σ : Signature.{v}) (I : Interpretation σ Bool) (c : Cslib.Circuits.Circuit σ n 1),
+        c.FanInAtMost 2 →
+        (c.innerSize : ℝ) ≤
+          (1 + Real.pi / (3 * Real.arccos ((1 + 2 * Real.sqrt 2) / 4)) - ε) * n →
+        agreement (Algebraic.Cutwidth.Extractor.sourceReductionFamily n)
+          (fun x => c.eval I x 0) ≤ 71 / 72 + (2 : ℝ) ^ (-γ * n) := by
+  let E : ℕ → ℕ := fun m => Algebraic.Cutwidth.Extractor.sourceReductionEntropy m
+    (Algebraic.Cutwidth.Extractor.sourceReductionFamilyScale m)
+  have hlog : (fun n => Real.log ((2 * 2 ^ E n : ℕ) : ℝ)) =o[atTop] (fun n => (n : ℝ)) := by
+    have hconst : (fun _ : ℕ => Real.log 2) =o[atTop] (fun n => (n : ℝ)) :=
+      (isLittleO_const_id_atTop (Real.log 2)).comp_tendsto tendsto_natCast_atTop_atTop
+    refine (hconst.add
+      (Algebraic.Cutwidth.Extractor.sourceReductionFamilyEntropy_isLittleO.const_mul_left
+        (Real.log 2))).congr_left fun n => ?_
+    simp only [Nat.cast_mul, Nat.cast_ofNat, Nat.cast_pow]
+    rw [Real.log_mul two_ne_zero (by positivity), Real.log_pow]
+    ring
+  have hbias : ∀ᶠ n in atTop,
+      FlatSumsetBias (Algebraic.Cutwidth.Extractor.sourceReductionFamily n)
+        (2 * 2 ^ E n) (2 * (35 / 72)) := by
+    filter_upwards [Algebraic.Cutwidth.Extractor.sourceReductionFamily_eventually_flat] with n hn
+    refine flatSumsetBias_of_flatSumsetExtractor fun P Q hP hQ => hn P Q ?_ ?_
+    · exact le_trans (Nat.le_mul_of_pos_left _ two_pos) hP
+    · exact le_trans (Nat.le_mul_of_pos_left _ two_pos) hQ
+  obtain ⟨γ, hγ, h⟩ := averageCase_sumset hε
+    (fun n => Algebraic.Cutwidth.Extractor.sourceReductionFamily n)
+    (fun n => 2 * 2 ^ E n) (fun _ => 35 / 72)
+    (Eventually.of_forall fun n => by
+      have : 1 ≤ 2 ^ E n := Nat.one_le_two_pow
+      lia)
+    hlog (Eventually.of_forall fun _ => by norm_num) hbias
+  refine ⟨γ, hγ, ?_⟩
+  filter_upwards [h] with n hn σ I c hfan hsize
+  have := hn σ I c hfan hsize
+  norm_num at this ⊢
+  linarith
 
 end Complexity.Frontier
