@@ -24,7 +24,7 @@ bound with the average number of forced variables in the exponent.
 For a clause set of width `k`, every isolated direction `i` of a solution `x` has a clause whose
 only true literal under `x` is on `i`; then `i` is forced whenever `σ` places `i` after the other
 variables of that clause, which happens for at least a `1/k` fraction of the orders
-(`card_filter_lastIn_mul_card`).
+(`card_lastIn_mul_card`).
 -/
 
 @[expose] public section
