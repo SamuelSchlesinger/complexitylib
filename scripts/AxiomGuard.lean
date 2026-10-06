@@ -147,6 +147,8 @@ def headlineTheorems : List Name := [
   `Algebraic.KW.SharedProgram.sq_card_edges_le,
   `Algebraic.KW.SharedProgram.parity_sq_le_gates,
   `Algebraic.KW.SharedProgram.isLittleO_gates_of_parity,
+  `Algebraic.KW.parity_sq_le_cost,
+  `Algebraic.KW.isLittleO_cost_of_parity,
   -- Monotone CLIQUE needs more than 2^√k binary AND/OR gates when k ≤ n^(1/4)
   `Algebraic.Monotone.Clique.Asymptotic.twoPow_two_mul_sqrt_lt_circuitSize,
   `Algebraic.Monotone.Clique.Asymptotic.rpow_sqrt_lt_circuitSize,

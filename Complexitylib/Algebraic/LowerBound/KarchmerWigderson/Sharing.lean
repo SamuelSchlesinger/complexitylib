@@ -17,11 +17,12 @@ formula also reads the values of the earlier ones: `share G P` computes the form
 appends its value to the inputs as a new last variable, and continues with `P`, and
 `output F` returns the value of the formula `F`. A shared value is read through literals of
 either sign, any number of times. Unfolded, this is a circuit of fan-in-two AND and OR gates
-with negations free on wires in which only the `k` shared gates can have fan-out at least two,
-and cutting such a circuit at its gates of fan-out at least two gives a program with the same
-AND and OR gates; that correspondence is not formalized here. `SharedProgram.gates` counts the
-AND and OR gates and `SharedProgram.inputLeaves` the literal leaves that read an input rather
-than a shared value.
+with negations free on wires in which only the `k` shared gates can have fan-out at least two.
+Conversely, cutting a circuit at its gates of fan-out at least two gives a program with the same
+AND and OR gates; `KarchmerWigderson.Sharing.Circuit` proves this for the library's De Morgan
+circuits (`exists_sharedProgram_of_circuit`) and transfers the bounds below to them.
+`SharedProgram.gates` counts the AND and OR gates and `SharedProgram.inputLeaves` the literal
+leaves that read an input rather than a shared value.
 
 **Theorem.** If a program with `k` shared gates is `1` on `A` and `0` on `B`, and `X` is its
 number of input leaves, then `|edges A B|² ≤ (k + 1) · X · |A| · |B|`
@@ -72,6 +73,19 @@ def gates : Formula N → Nat
   | const _ => 0
   | and l r => l.gates + r.gates + 1
   | or l r => l.gates + r.gates + 1
+
+@[simp] theorem gates_neg : ∀ F : Formula N, F.neg.gates = F.gates
+  | lit _ _ => rfl
+  | const _ => rfl
+  | and l r => by simp [neg, gates, gates_neg l, gates_neg r]
+  | or l r => by simp [neg, gates, gates_neg l, gates_neg r]
+
+@[simp] theorem gates_mapIndex {M : Nat} (φ : Fin N → Fin M) :
+    ∀ F : Formula N, (F.mapIndex φ).gates = F.gates
+  | lit _ _ => rfl
+  | const _ => rfl
+  | and l r => by simp [mapIndex, gates, gates_mapIndex φ l, gates_mapIndex φ r]
+  | or l r => by simp [mapIndex, gates, gates_mapIndex φ l, gates_mapIndex φ r]
 
 theorem leaves_eq_gates_add_one : ∀ F : Formula N, F.leaves = F.gates + 1
   | lit _ _ => rfl
@@ -330,6 +344,30 @@ theorem Formula.sq_card_uncutEdges_le (val : (Fin n → Bool) → Fin N → Bool
       _ = (l.inputLeaves n + r.inputLeaves n) * ((A.filter fun x => l.eval (val x) = true).card +
           (A.filter fun x => ¬ l.eval (val x) = true).card) * B.card := by ring
 
+/-- **Superlinearity from a quantitative bound.** If `k n = o(n)` and `C · n ≤ s n` whenever
+`(k n + 1) · (C + 1) ≤ n`, then `n = o(s n)`. -/
+theorem isLittleO_of_forall_mul_le {k s : ℕ → ℕ}
+    (hk : (fun n => (k n : ℝ)) =o[Filter.atTop] fun n : ℕ => (n : ℝ))
+    (h : ∀ n C, (k n + 1) * (C + 1) ≤ n → C * n ≤ s n) :
+    (fun n : ℕ => (n : ℝ)) =o[Filter.atTop] fun n => (s n : ℝ) := by
+  rw [Asymptotics.isLittleO_iff]
+  intro c hc
+  obtain ⟨C, hC⟩ := exists_nat_ge (1 / c)
+  have hε : (0 : ℝ) < 1 / (2 * (C + 1)) := by positivity
+  filter_upwards [hk.bound hε, Filter.eventually_ge_atTop (2 * (C + 1))] with n hkn hn
+  simp only [Real.norm_natCast] at hkn ⊢
+  have hkn' : 2 * (C + 1) * k n ≤ n := by
+    have h : ((2 * (C + 1) * k n : ℕ) : ℝ) ≤ n :=
+      calc ((2 * (C + 1) * k n : ℕ) : ℝ) = 2 * (C + 1) * (k n : ℝ) := by push_cast; ring
+        _ ≤ 2 * (C + 1) * (1 / (2 * (C + 1)) * n) := by gcongr
+        _ = n := by field_simp
+    exact_mod_cast h
+  have hs : (C * n : ℝ) ≤ s n := by
+    exact_mod_cast h n C (by nlinarith)
+  calc (n : ℝ) = c * (1 / c * n) := by field_simp
+    _ ≤ c * (C * n) := by gcongr
+    _ ≤ c * s n := by gcongr
+
 namespace SharedProgram
 
 /-- **Khrapchenko's theorem for programs, with shared variables.** Let `val` extend each input
@@ -481,24 +519,8 @@ theorem isLittleO_gates_of_parity {k : ℕ → ℕ}
     (hk : (fun n => (k n : ℝ)) =o[Filter.atTop] fun n : ℕ => (n : ℝ))
     (P : (n : ℕ) → SharedProgram n (k n))
     (hP : ∀ n, (P n).Computes GateElimination.Xor.parity) :
-    (fun n : ℕ => (n : ℝ)) =o[Filter.atTop] fun n => ((P n).gates : ℝ) := by
-  rw [Asymptotics.isLittleO_iff]
-  intro c hc
-  obtain ⟨C, hC⟩ := exists_nat_ge (1 / c)
-  have hε : (0 : ℝ) < 1 / (2 * (C + 1)) := by positivity
-  filter_upwards [hk.bound hε, Filter.eventually_ge_atTop (2 * (C + 1))] with n hkn hn
-  simp only [Real.norm_natCast] at hkn ⊢
-  have hkn' : 2 * (C + 1) * k n ≤ n := by
-    have h : ((2 * (C + 1) * k n : ℕ) : ℝ) ≤ n :=
-      calc ((2 * (C + 1) * k n : ℕ) : ℝ) = 2 * (C + 1) * (k n : ℝ) := by push_cast; ring
-        _ ≤ 2 * (C + 1) * (1 / (2 * (C + 1)) * n) := by gcongr
-        _ = n := by field_simp
-    exact_mod_cast h
-  have hgates : (C * n : ℝ) ≤ (P n).gates := by
-    exact_mod_cast mul_le_gates_of_parity (C := C) (by nlinarith) (hP n)
-  calc (n : ℝ) = c * (1 / c * n) := by field_simp
-    _ ≤ c * (C * n) := by gcongr
-    _ ≤ c * (P n).gates := by gcongr
+    (fun n : ℕ => (n : ℝ)) =o[Filter.atTop] fun n => ((P n).gates : ℝ) :=
+  isLittleO_of_forall_mul_le hk fun n _ hkn => mul_le_gates_of_parity hkn (hP n)
 
 end SharedProgram
 

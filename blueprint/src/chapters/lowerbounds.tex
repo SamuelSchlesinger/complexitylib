@@ -391,7 +391,9 @@ chapter.
     Algebraic.KW.SharedProgram.mul_le_gates_of_parity,
     Algebraic.KW.SharedProgram.isLittleO_gates_of_parity,
     Algebraic.KW.SharedProgram.threshold_mul_le_gates,
-    Algebraic.KW.SharedProgram.majority_mul_le_gates}
+    Algebraic.KW.SharedProgram.majority_mul_le_gates,
+    Algebraic.KW.exists_sharedProgram_of_circuit, Algebraic.KW.parity_sq_le_cost,
+    Algebraic.KW.mul_le_cost_of_parity, Algebraic.KW.isLittleO_cost_of_parity}
   \leanok
   \uses{thm:lowerbounds-algebraic-khrapchenko}
   A \emph{$k$-shared program} on $n$ inputs is a sequence of $k + 1$ De Morgan
@@ -402,24 +404,33 @@ chapter.
   $\neg z_j$ and constants, and a shared value may be read any number of times.
   Unfolding the formulas gives a circuit of fan-in-two AND and OR gates, with
   negations free on wires, in which only the $k$ roots of $G_1, \dots, G_k$ can
-  have fan-out at least two; conversely, cutting such a circuit with at most $k$
-  gates of fan-out at least two at those gates gives a $k$-shared program with
-  the same AND and OR gates. This correspondence is a remark: the formal
-  statements are about $k$-shared programs. Let $s$ be the number of AND and OR
-  gates of the program and $X$ its number of leaves reading an input, a literal
-  $x_i$ or $\neg x_i$, so $X \le s + k + 1$.
+  have fan-out at least two. Let $s$ be the number of AND and OR gates of the
+  program and $X$ its number of leaves reading an input, a literal $x_i$ or
+  $\neg x_i$, so $X \le s + k + 1$.
+
+  Conversely, consider a single-output circuit over the imported library's
+  De Morgan basis (Boolean constants, identity, NOT, and binary AND and OR
+  gates). The fan-out of a gate is the number of argument slots of gates that
+  read it plus the number of outputs equal to it; every gate of fan-out at least
+  two counts, whatever its operation; and the cost counts only the AND and OR
+  gates, as in the gate-elimination bound. If such a circuit computes $f$ and
+  at most $k$ of its gates have fan-out at least two, then some $k'$-shared
+  program with $k' \le k$ computes $f$ with $s$ at most the circuit's cost.
 
   If a $k$-shared program is $1$ on a set $A$ of inputs and $0$ on a set $B$,
   and $E$ is the set of pairs in $A \times B$ at Hamming distance one, then
   $|E|^2 \le (k + 1) \cdot X \cdot |A| \cdot |B|$. For $k = 0$ this is
   Theorem~\ref{thm:lowerbounds-algebraic-khrapchenko}. Consequently, for all
-  $n \ge 1$ and $k$, every $k$-shared program computing the parity of $n$ bits
-  satisfies $n^2 \le (k + 1)(s + k + 1)$, that is, it has at least
-  $n^2/(k + 1) - (k + 1)$ AND and OR gates. If $(k + 1)(C + 1) \le n$ for a
-  natural number $C$, then $s \ge C n$; so if $k(n) = o(n)$ and, for every $n$,
-  a $k(n)$-shared program computes the parity of $n$ bits with $s(n)$ gates,
-  then $n = o(s(n))$. For $1 \le t \le n$, a $k$-shared program computing ``at
-  least $t$ of the $n$ inputs are $1$'' satisfies
+  $n \ge 1$ and $k$, every $k$-shared program, and every De Morgan circuit as
+  above in which at most $k$ gates have fan-out at least two, computing the
+  parity of $n$ bits satisfies $n^2 \le (k + 1)(s + k + 1)$, where $s$ is its
+  number of AND and OR gates; that is, it has at least $n^2/(k + 1) - (k + 1)$
+  AND and OR gates. If $(k + 1)(C + 1) \le n$ for a natural number $C$, then
+  $s \ge C n$. So if $k(n) = o(n)$ and, for every $n$, a $k(n)$-shared program
+  or a De Morgan circuit with at most $k(n)$ gates of fan-out at least two
+  computes the parity of $n$ bits with $s(n)$ AND and OR gates, then
+  $n = o(s(n))$. For $1 \le t \le n$, a $k$-shared program computing ``at least
+  $t$ of the $n$ inputs are $1$'' satisfies
   $t(n + 1 - t) \le (k + 1)(s + k + 1)$, and one computing strict majority of
   $n \ge 1$ inputs satisfies
   $(n - \lfloor n/2 \rfloor)(\lfloor n/2 \rfloor + 1) \le (k + 1)(s + k + 1)$.
@@ -448,6 +459,14 @@ chapter.
   corollaries repeat the computations of
   Corollary~\ref{cor:lowerbounds-algebraic-khrapchenko-parity}, which use only
   this rectangle bound, with $X \le s + k + 1$.
+
+  A circuit becomes a program from its last gate down, over variables for all
+  its wires; initially the program outputs the literal of the output wire. A
+  gate of fan-out at least two becomes a shared formula whose value is exactly
+  the variable of its wire. Any other gate's formula is substituted for its
+  variable, which occurs at most once, so the substitution adds only the gate's
+  own cost, and every earlier gate still occurs at most as often as its
+  fan-out.
 \end{proof}
 
 \begin{proposition}[Parity with few shared gates: upper bound]

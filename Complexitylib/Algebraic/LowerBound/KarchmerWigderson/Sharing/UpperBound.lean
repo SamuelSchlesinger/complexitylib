@@ -36,20 +36,7 @@ open GateElimination.Xor
 
 namespace Formula
 
-variable {n N : Nat}
-
-@[simp] theorem gates_neg : ∀ F : Formula n, F.neg.gates = F.gates
-  | lit _ _ => rfl
-  | const _ => rfl
-  | and l r => by simp [neg, gates, gates_neg l, gates_neg r]
-  | or l r => by simp [neg, gates, gates_neg l, gates_neg r]
-
-@[simp] theorem gates_mapIndex (φ : Fin n → Fin N) :
-    ∀ F : Formula n, (F.mapIndex φ).gates = F.gates
-  | lit _ _ => rfl
-  | const _ => rfl
-  | and l r => by simp [mapIndex, gates, gates_mapIndex φ l, gates_mapIndex φ r]
-  | or l r => by simp [mapIndex, gates, gates_mapIndex φ l, gates_mapIndex φ r]
+variable {n : Nat}
 
 @[simp] theorem gates_xor (L R : Formula n) : (L.xor R).gates = 2 * (L.gates + R.gates) + 3 := by
   simp only [xor, gates, gates_neg]
