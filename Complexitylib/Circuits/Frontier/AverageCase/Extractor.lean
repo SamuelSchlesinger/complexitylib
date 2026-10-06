@@ -50,6 +50,36 @@ def FlatSumsetBias [Finite ι] (f : (ι → Bool) → Bool) (K : ℕ) (bias : �
     |sumOn (fun x => sumOn (fun y => boolSign (f (xorInputs x y))) B) A| ≤
       bias * (A.ncard * B.ncard : ℕ)
 
+/-- Sumset bias survives an injective affine change of input coordinates. The two
+independent sources are mapped separately, putting the translation in the first one.
+This permits affine preparation of a circuit without changing the target's bias bound. -/
+theorem FlatSumsetBias.affine_pullback {κ : Type*} [Finite ι] [Finite κ]
+    {f : (ι → Bool) → Bool} {K : ℕ} {bias : ℝ}
+    (hf : FlatSumsetBias f K bias) (L : (κ → Bool) → (ι → Bool))
+    (hL : Function.Injective L)
+    (hadd : ∀ x y, L (xorInputs x y) = xorInputs (L x) (L y)) (a : ι → Bool) :
+    FlatSumsetBias (fun x => f (xorInputs a (L x))) K bias := by
+  let T := fun x => xorInputs a (L x)
+  have hT : Function.Injective T := by
+    intro x y h
+    apply hL
+    funext i
+    have hi := congrFun h i
+    simpa [T, xorInputs] using hi
+  intro A B hA hB
+  have H := hf (T '' A) (L '' B)
+    (by rwa [ncard_image_of_injective _ hT])
+    (by rwa [ncard_image_of_injective _ hL])
+  rw [sumOn_image _ _ hT] at H
+  simp_rw [sumOn_image _ _ hL] at H
+  rw [ncard_image_of_injective _ hT, ncard_image_of_injective _ hL] at H
+  have heq : ∀ x y, xorInputs (T x) (L y) = xorInputs a (L (xorInputs x y)) := by
+    intro x y
+    rw [hadd]
+    funext i
+    simp [T, xorInputs]
+  simpa only [heq] using H
+
 /-- A Boolean partial input, extended by `false` outside its coordinates. -/
 private noncomputable def xorPad (X : Set ι) (a : X → Bool) : ι → Bool :=
   open Classical in fun i => if h : i ∈ X then a ⟨i, h⟩ else false

@@ -12506,7 +12506,8 @@ signals, codes, pruned transitions, and trees of regions.
     Complexity.Frontier.averageCase_gaussian, Complexity.Frontier.FlatSumsetBias,
     Complexity.Frontier.FlatSumsetBias.rectangleBias,
     Complexity.Frontier.averageCase_sumset,
-    Complexity.Frontier.averageCase_sumset_polynomial}
+    Complexity.Frontier.averageCase_sumset_polynomial,
+    Complexity.Frontier.FlatSumsetBias.affine_pullback}
   \leanok
   \uses{lem:lowerbounds-frontier-counting, thm:lowerbounds-frontier-layouts}
   For a coherent sweep, a weight bounded by $a$ whose sum over every rectangle
@@ -12520,6 +12521,8 @@ signals, codes, pruned transitions, and trees of regions.
   the same bound holds for the absolute correlation. For the Gaussian coefficient
   and for flat-source sumset extractors with error $b_n$, some $\gamma>0$ works.
   Extractor error at most $Cn^{-a}$ gives agreement at most $1/2+(C+1)n^{-a}$.
+  Sumset bias is preserved by every injective affine change of the input
+  coordinates.
 \end{theorem}
 \begin{proof}
   \leanok
@@ -12538,7 +12541,9 @@ signals, codes, pruned transitions, and trees of regions.
     Complexity.Frontier.LinearBoundary.ncard_syndromes_le_states,
     Complexity.Frontier.Sweep.transitionCount_le_codes,
     Complexity.Frontier.Sweep.abs_sumOn_le_codes,
-    Complexity.Frontier.Sweep.transitionCount_le_linear_codes}
+    Complexity.Frontier.Sweep.transitionCount_le_linear_codes,
+    Complexity.Frontier.LinearBoundary.joint_eq,
+    Complexity.Frontier.LinearBoundary.finrank_joint}
   \leanok
   \uses{thm:lowerbounds-frontier-compiler, lem:lowerbounds-frontier-counting,
     thm:lowerbounds-frontier-average-case}
@@ -12548,13 +12553,17 @@ signals, codes, pruned transitions, and trees of regions.
   For a linear system $Lx+Ry=0$ over a finite field $F$, the feasible syndromes
   number exactly $|F|^{\operatorname{rank}L+\operatorname{rank}R-\operatorname{rank}[L\,R]}$.
   Any finite code that determines the transitions on $S$ bounds the transition
-  count, in both the exact and the weighted counting lemmas.
+  count, in both the exact and the weighted counting lemmas. For subspaces
+  $P\le U$ and $Q\le V$ of linear observations, encoding the exposed observations
+  together with the shared information $U\cap V$ costs
+  $\dim(U+Q)+\dim(V+P)-\dim(U+V)$, not the sum of the separate ranks.
 \end{theorem}
 \begin{proof}
   \leanok
   Each signal's occurrences form a connected subgraph, so a signal crosses a cut
   exactly when its hyperedge does. The feasible syndromes form
-  $\operatorname{im}L\cap\operatorname{im}R$. A determining code surjects onto the
+  $\operatorname{im}L\cap\operatorname{im}R$, and the joint code is the
+  modular-law identity $(U\cap V)+(P+Q)=(U+Q)\cap(V+P)$. A determining code surjects onto the
   transitions it determines.
 \end{proof}
 
@@ -12589,8 +12598,11 @@ signals, codes, pruned transitions, and trees of regions.
   \lean{Complexity.Frontier.Sweep.cappedCapacity, Complexity.Frontier.Sweep.rootCapacity,
     Complexity.Frontier.Sweep.abs_sumOn_le_capped,
     Complexity.Frontier.Sweep.cappedCapacity_le_root,
+    Complexity.Frontier.Sweep.momentCapacity,
+    Complexity.Frontier.Sweep.cappedCapacity_le_moment,
     Complexity.Frontier.agreement_le_capped_sweeps,
     Complexity.Frontier.agreement_le_root_sweeps,
+    Complexity.Frontier.agreement_le_moment_sweeps,
     Complexity.Frontier.Communication.rootPotential_le}
   \leanok
   \uses{thm:lowerbounds-frontier-pruning-tree}
@@ -12599,14 +12611,15 @@ signals, codes, pruned transitions, and trees of regions.
   predictor $g$ with coherent nested sweeps of its two output classes and a target
   of rectangle bias $2b$, agreement is at most
   $1/2+b+\tfrac12\sum\min(\lambda,p)$ over the unconditional transition masses $p$,
-  with $\lambda=(K-1)^2/|U|^n$, and at most $1/2+b+\tfrac12\sqrt\lambda\sum\sqrt p$.
+  with $\lambda=(K-1)^2/|U|^n$, and at most
+  $1/2+b+\tfrac12\lambda^{1-\theta}\sum p^\theta$ for every $0\le\theta\le1$.
   A potential satisfying local square-root inequalities along an encoding bounds
   the sum of square roots of codeword masses by its value at the root.
 \end{theorem}
 \begin{proof}
   \leanok
   Keep exactly the transitions of mass at least $\lambda$ and apply the pruning
-  bound; $\min(\lambda,p)\le\sqrt{\lambda p}$. The potential inequalities
+  bound; $\min(\lambda,p)\le\lambda^{1-\theta}p^\theta$. The potential inequalities
   telescope level by level, since each child has one parent.
 \end{proof}
 
@@ -12626,6 +12639,30 @@ signals, codes, pruned transitions, and trees of regions.
   A node and all contexts of its occurrences in accepting certificates form a
   rectangle. Descend a certificate to the cardinality threshold and charge the
   input to the union edge or product node reached there.
+\end{proof}
+
+\begin{theorem}[Additive generators]
+  \label{thm:lowerbounds-frontier-additive}
+  \lean{Complexity.Frontier.SumsetFree, Complexity.Frontier.SumsetDisperser.sumsetFree,
+    Complexity.Frontier.SumsetFree.ncard_lt_of_stable, Complexity.Frontier.AdditiveSweep,
+    Complexity.Frontier.AdditiveSweep.ncard_le,
+    Complexity.Frontier.AdditiveSweep.transitionCount_le_codes}
+  \leanok
+  \uses{lem:lowerbounds-frontier-counting, thm:lowerbounds-frontier-sumset-disperser}
+  A subset $S$ of an additive monoid is $K$-sumset-free when it contains no sumset
+  $A+B$ with $|A|,|B|\ge K$; the fibres of a sumset disperser are sumset-free.
+  An additive sweep describes each input as the sum of a past and a future part,
+  built by adding emitted labels, so that past and future parts of inputs with the
+  same message can be recombined within $S$; labels may overlap and paths need not
+  be unique. If $S$ is $K$-sumset-free with $K\ge2$ and $|S|\ge K$, then
+  $|S|\le(K-1)^2$ times the number of transitions, and any code determining the
+  transitions may replace them.
+\end{theorem}
+\begin{proof}
+  \leanok
+  As in Lemma~\ref{lem:lowerbounds-frontier-counting}: the past and future parts of
+  the peers at a step form a sumset inside $S$, so one side has fewer than $K$
+  elements; charge each input to the first step at which its past side is large.
 \end{proof}
 
 \begin{theorem}[Independent median updates]

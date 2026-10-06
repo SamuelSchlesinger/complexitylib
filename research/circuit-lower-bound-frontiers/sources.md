@@ -293,6 +293,18 @@ Serge Gaspers and Gregory B. Sorkin,
 
 [Primary source](https://arxiv.org/pdf/1404.0753v2).
 
+<a id="gkst16"></a>
+
+## gkst16
+
+Alexander Golovnev, Alexander S. Kulikov, Alexander V. Smal, and Suguru Tamaki,
+  *Circuit Size Lower Bounds and #SAT Upper Bounds Through a General Framework*, MFCS 2016,
+  LIPIcs 58, 45; DOI 10.4230/LIPIcs.MFCS.2016.45. Cited, as in the frontier-method
+  restriction note, for the measure and substitution framework; theorem numbers were not
+  re-inspected for this corpus.
+
+[Primary source](https://drops.dagstuhl.de/entities/document/10.4230/LIPIcs.MFCS.2016.45).
+
 <a id="golovnev-gurumukhani26"></a>
 
 ## golovnev-gurumukhani26
@@ -353,6 +365,17 @@ Wassily Hoeffding, “Probability Inequalities for Sums of Bounded Random
   Publisher metadata and abstract retrieved 2026-10-04; the semantic-interface note derives its specialization from the standard bounded-sum tail inequality.
 
 [Primary source](https://doi.org/10.1080/01621459.1963.10500830).
+
+<a id="jukna-minkowski"></a>
+
+## jukna-minkowski
+
+Stasys Jukna, author web page on Minkowski circuits, with the lower bounds of Gashkov and
+  of Gashkov and Sergeev and his content-propagation proof, and their primary references.
+  Cited, as in the frontier-method additive note, for antecedents of the thin-sumset
+  threshold technique; the page was not re-inspected for this corpus.
+
+[Primary source](https://web.vu.lt/mif/s.jukna/boolean/minkowski.html).
 
 <a id="jukna-lingas22"></a>
 

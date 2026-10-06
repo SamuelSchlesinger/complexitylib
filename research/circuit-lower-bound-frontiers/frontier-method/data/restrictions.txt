@@ -1,0 +1,10 @@
+Normalization: 160 full truth tables, 1402 restrictions; 0 safe-rule instances checked.
+Fractional branch factors: (3,5) fails at the exact quarter coefficient and passes the stated nearby-coefficient certificate.
+Layered fanout patterns: 1728 safe-rule circuits checked.
+Exact-only restriction rule: 2160 circuits have a paid chosen branch.
+High input fanout: 80 additional full truth tables and branch bounds checked.
+Affine preparation: 112 affine maps checked on their entire domains.
+Graphic affine interfaces: degree 2, 3, and 4 defect formulas checked.
+Adaptive leaf averaging: four moment parameters and unequal depths checked.
+Local-rule core: {'inputs': 10, 'gates': 49, 'drops': {0: (1, 1), 1: (1, 1), 2: (1, 1), 3: (1, 1), 4: (1, 1), 5: (1, 1), 6: (1, 1), 7: (1, 1), 8: (1, 1), 9: (1, 1)}}
+Core affine interface: 10 signals, rank 9, one special parity gate after a change of basis.

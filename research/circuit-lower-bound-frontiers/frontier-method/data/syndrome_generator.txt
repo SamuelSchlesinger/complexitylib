@@ -1,0 +1,5 @@
+Syndrome generator: 24 coded circuits, 48 arbitrary layouts matched truth-table supports and budgets in three state models; joint rank improved on separated signal/syndrome peaks in 38 layouts.
+Joint profiles: 1024 affine splits matched direct state counts, observation-map rank, and the two enlarged row-space ranks.
+Graphic profiles: 320 edge bipartitions matched exact syndrome cardinalities; 2560 exposed-boundary profiles matched the joint cycle formula.
+Overlap guard: two correlated bits cost one; anchored graphic interface has full rank and its nonlinear suffix matches direct evaluation.
+Constraint-removal guard: omitting the syndrome creates two false accepted inputs.

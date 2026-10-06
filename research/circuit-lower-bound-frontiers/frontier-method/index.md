@@ -1,6 +1,6 @@
 # The frontier method: checked refinements and remaining targets
 
-**Status (2026-10-05, synced at the-frontier-method `53e2105`): the refinements below are
+**Status (2026-10-05, synced at the-frontier-method `d81d97a`): the refinements below are
 Lean-checked in `Complexity.Frontier`; none asserts a smaller universal cubic layout
 coefficient.** The universal binary-circuit
 coefficient remains `L = 1 + pi / (3 arccos((1 + 2 sqrt(2))/4)) = 4.562497...`.
@@ -35,9 +35,46 @@ at most `1/2 + b + (1/2) sum min(lambda, p)` over unconditional transition masse
 `lambda = (K-1)^2/2^n`. `Sweep.cappedCapacity_le_root` and `agreement_le_root_sweeps`
 replace the support size by a square-root moment, an order-`1/2` Renyi entropy, with no
 independence assumption, and `Communication.rootPotential_le` certifies that moment by
-conditional local potentials along one transition's encoding. The
-[communication note](communication.md) gives the derivation, an obstruction to the
-Shannon-entropy shortcut, and the gate-level supply theorem still needed.
+conditional local potentials along one transition's encoding.
+`Sweep.cappedCapacity_le_moment` and `agreement_le_moment_sweeps` extend this to every
+fractional moment `0 <= theta <= 1`. The [communication note](communication.md) gives the
+derivation, an obstruction to the Shannon-entropy shortcut, and the gate-level supply
+theorem still needed; the [restriction note](restrictions.md) uses moments close to one
+for adaptive restriction trees, and `FlatSumsetBias.affine_pullback` lets a circuit be
+prepared by an injective affine change of inputs without changing the target's bias.
+
+## Additive generators and the target of five
+
+`AdditiveSweep.ncard_le` proves `|S| <= (K-1)^2 D` for additive splicing data over a
+finite monoid when `S` is `K`-sumset-free, `K >= 2`, and `|S| >= K`.
+`SumsetDisperser.sumsetFree` supplies the hard fibers. Labels can have overlapping
+supports, and no uniqueness of accepting paths is required.
+`AdditiveSweep.transitionCount_le_codes` allows any finite encoding determining the
+complete transition.
+
+The [affine-interface compiler](additive.md) emits vectors in the original input space
+while enforcing all affine constraints in one syndrome register. It charges the exact
+feasible-syndrome dimension at each cut, together with the suffix boundary in the same
+layout. This compiler is a paper proof with finite executable checks; it is not an
+end-to-end Lean circuit theorem. The global-syndrome version gives `4.781248...n-o(n)` for
+circuits with a cubic edge-parity prefix and arbitrary nonlinear continuation, conditional
+on computing the hard family. This architecture bound leaves the unrestricted coefficient
+unchanged.
+
+`LinearBoundary.joint_eq` and `finrank_joint` check the subspace identity for encoding
+visible linear observations together with shared information. The
+[joint-code refinement](joint.md) applies it to interface values and a syndrome, avoiding a
+second charge for their overlap. Its code and graphic-cycle formulas are paper proofs with
+direct finite checks; the compiler instantiation is not claimed as formally verified.
+
+For the exact five target, [paid restrictions](restrictions.md) can preserve the potential
+`5d-s` using just one branch. What remains is a restriction-or-terminal theorem covering
+every residual circuit, with terminal additive transition exponent at most
+`(s-d)/4+o(d)`. Separately small graph and code widths do not suffice: their common
+ordering must meet the budget. The notes credit the Minkowski-circuit and code-trellis
+antecedents and do not claim a weighted additive-peeling theorem or historical priority.
+The finite checks are [restrictions.py](data/restrictions.py) and
+[syndrome_generator.py](data/syndrome_generator.py).
 
 ## Signals, hypergraphs, and codes
 

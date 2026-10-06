@@ -7,6 +7,7 @@ module
 
 public import Complexitylib.Circuits.Frontier.AverageCase.Pruning
 public import Mathlib.Analysis.Real.Sqrt
+public import Mathlib.Analysis.SpecialFunctions.Pow.Real
 
 /-!
 # Transition capacity from the distribution of traces
@@ -136,6 +137,45 @@ theorem cappedCapacity_le_root {w : (ι → U) → ℝ} (hw : ∀ x, 0 ≤ w x)
 
 end Sweep
 
+/-- The capped charge is bounded by any fractional moment, not just the square root.
+The endpoints are included; entropy applications use `0 < θ < 1`. -/
+theorem min_le_rpow_mul_rpow {c m θ : ℝ} (hc : 0 ≤ c) (hm : 0 ≤ m)
+    (hθ : 0 ≤ θ) (hθ1 : θ ≤ 1) : min c m ≤ c ^ (1 - θ) * m ^ θ := by
+  have hη : 0 ≤ 1 - θ := sub_nonneg.mpr hθ1
+  have heq (x : ℝ) (hx : 0 ≤ x) : x ^ (1 - θ) * x ^ θ = x := by
+    rw [← Real.rpow_add' hx (by linarith : 1 - θ + θ ≠ 0)]
+    simp
+  rcases le_total c m with h | h
+  · calc
+      min c m = c := min_eq_left h
+      _ = c ^ (1 - θ) * c ^ θ := (heq c hc).symm
+      _ ≤ _ := mul_le_mul_of_nonneg_left (Real.rpow_le_rpow hc h hθ)
+        (Real.rpow_nonneg hc _)
+  · calc
+      min c m = m := min_eq_right h
+      _ = m ^ (1 - θ) * m ^ θ := (heq m hm).symm
+      _ ≤ _ := mul_le_mul_of_nonneg_right (Real.rpow_le_rpow hm h hη)
+        (Real.rpow_nonneg hm _)
+
+namespace Sweep
+
+variable [Finite ι] [Finite U] {S : Set (ι → U)} (P : Sweep S M)
+
+/-- Sum of the `θ`-powers of the transition fiber weights. -/
+noncomputable def momentCapacity (w : (ι → U) → ℝ) (θ : ℝ) : ℝ :=
+  ∑ t ∈ Finset.range P.length, ∑ e ∈ (toFinite (P.transition t '' S)).toFinset,
+    (sumOn w {x ∈ S | P.transition t x = e}) ^ θ
+
+theorem cappedCapacity_le_moment {w : (ι → U) → ℝ} (hw : ∀ x, 0 ≤ w x)
+    {c θ : ℝ} (hc : 0 ≤ c) (hθ : 0 ≤ θ) (hθ1 : θ ≤ 1) :
+    P.cappedCapacity w c ≤ c ^ (1 - θ) * P.momentCapacity w θ := by
+  unfold cappedCapacity momentCapacity
+  simp only [Finset.mul_sum]
+  exact Finset.sum_le_sum fun _ _ => Finset.sum_le_sum fun _ _ =>
+    min_le_rpow_mul_rpow hc (sumOn_nonneg hw _) hθ hθ1
+
+end Sweep
+
 /-- Capped transition masses of both output classes control prediction agreement. -/
 theorem agreement_le_capped_sweeps [Finite ι] [Finite U] [Nonempty U]
     {f g : (ι → U) → Bool} {K : ℕ} {β : ℝ}
@@ -172,5 +212,27 @@ theorem agreement_le_root_sweeps [Finite ι] [Finite U] [Nonempty U]
   rw [mul_add]
   exact add_le_add ((P true).cappedCapacity_le_root (fun _ => zero_le_one) (by positivity))
     ((P false).cappedCapacity_le_root (fun _ => zero_le_one) (by positivity))
+
+/-- Arbitrary fractional moments bound agreement. Parameters close to one allow
+restriction-tree accounting to use average measure drops with arbitrarily small slack. -/
+theorem agreement_le_moment_sweeps [Finite ι] [Finite U] [Nonempty U]
+    {f g : (ι → U) → Bool} {K : ℕ} {β θ : ℝ}
+    (hf : RectangleBias f K β) (hK : 1 < K) (hβ : 0 ≤ β)
+    (hθ : 0 ≤ θ) (hθ1 : θ ≤ 1)
+    {Msg : Bool → Type*} (P : ∀ b, Sweep {x | g x = b} (Msg b))
+    (hP : ∀ b, (P b).Coherent) (hmono : ∀ b, Monotone (P b).revealed)
+    (hL : ∀ b, 0 < (P b).length) :
+    agreement f g ≤ (1 + β) / 2 +
+      (((K - 1) ^ 2 : ℕ) : ℝ) ^ (1 - θ) *
+        ((P true).momentCapacity (fun _ => 1) θ +
+          (P false).momentCapacity (fun _ => 1) θ) /
+      (2 * Nat.card (ι → U)) := by
+  apply (agreement_le_capped_sweeps hf hK hβ P hP hmono hL).trans
+  apply add_le_add le_rfl
+  apply div_le_div_of_nonneg_right _ (by positivity)
+  rw [mul_add]
+  exact add_le_add
+    ((P true).cappedCapacity_le_moment (fun _ => zero_le_one) (by positivity) hθ hθ1)
+    ((P false).cappedCapacity_le_moment (fun _ => zero_le_one) (by positivity) hθ hθ1)
 
 end Complexity.Frontier

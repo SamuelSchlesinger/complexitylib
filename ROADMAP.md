@@ -368,8 +368,9 @@ peeling gives the average case at the same coefficient; the explicit extractor, 
 error `35/72`, agrees with every such circuit on at most a `71/72 + 2^(-γ n)` fraction
 (`Frontier.sourceReductionFamily_agreement_le`). The development also checks signal
 hypergraph cuts and their submodularity, exact linear syndrome counts, transition codes,
-pruning, distribution-sensitive transition masses and square-root moments, trees of
-regions, decomposable union/product DAGs, mixed input-output fibers and MDS maps, monoid
+pruning, distribution-sensitive transition masses and fractional moments, trees of
+regions, decomposable union/product DAGs, additive generators with sumset-free thresholds
+and joint linear information, mixed input-output fibers and MDS maps, monoid
 ledgers, linear maps with dual-number linearization, polynomially small average-case
 advantage from polynomially small extractor error, and independent median updates; the
 [research note](research/circuit-lower-bound-frontiers/frontier-method/index.md) records

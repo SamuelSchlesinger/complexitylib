@@ -1,6 +1,6 @@
 # Communication and distribution-sensitive frontier capacity
 
-Mirrored from the frontier-method research notes at `53e2105`; Lean names are in the
+Mirrored from the frontier-method research notes at `d81d97a`; Lean names are in the
 namespace `Complexity.Frontier` (see the [frontier-method note](index.md)).
 This investigation starts from the paper at commit `dea9d2ed9450`. It proves a
 distribution-sensitive charging bound and conditional potential interface. It does
@@ -70,9 +70,19 @@ min(lambda, p) <= lambda^(1-theta) p^theta,
 error <= (1/2) lambda^(1-theta) sum_t 2^((1-theta) H_theta(Z_t)).
 ```
 
-This extension is not formalized; the checked moment endpoint is `theta = 1/2`.
-Taking theta close to one can give better coefficients for biased independent
-sources, at the expense of the exponential remainder's rate.
+The unnormalized fractional-moment inequality is now checked as
+`Sweep.cappedCapacity_le_moment` and `agreement_le_moment_sweeps`; the entropy
+formula above is its logarithmic restatement. Taking theta close to one can give
+better coefficients for biased independent sources and for restriction-tree
+accounting, at the expense of the exponential remainder's rate. The
+[restriction continuation](restrictions.md) derives that accounting and tests
+concrete structural reductions, without claiming a universal improvement.
+The [additive continuation](additive.md) supplies a different exact-demand interface:
+sumset hardness permits overlapping vector labels. A coded affine prefix can then be
+checked by one syndrome, with a layout-dependent rank cost. Its remaining target is a
+common ordering that makes the suffix boundary and syndrome cheap simultaneously.
+The [joint-code refinement](joint.md) also removes overlap between visible interface
+signals and the syndrome itself; it gives a smaller target for that common ordering.
 
 ## Where amortization enters
 
@@ -196,7 +206,7 @@ Run [check_communication.py](data/check_communication.py):
   independent copies of communication problems. That theorem does not supply the circuit
   prefix-potential bound required here.
 
-The capped and square-root bounds and finite conditional telescoping are checked
+The capped and fractional-moment bounds and finite conditional telescoping are checked
 in Lean. The entropy restatements, shared-selector calculation, and special
 conditional-probability examples are paper proofs with finite checks. A stronger
 unrestricted circuit lower bound remains open in this investigation.

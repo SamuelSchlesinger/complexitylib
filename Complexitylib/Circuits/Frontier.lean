@@ -16,6 +16,7 @@ public import Complexitylib.Circuits.Frontier.LowerBound
 public import Complexitylib.Circuits.Frontier.Layouts
 public import Complexitylib.Circuits.Frontier.Main
 public import Complexitylib.Circuits.Frontier.Extractor
+public import Complexitylib.Circuits.Frontier.AdditiveSweep
 public import Complexitylib.Circuits.Frontier.Linear.Main
 public import Complexitylib.Circuits.Frontier.Components
 public import Complexitylib.Circuits.Frontier.Ledger.Main
@@ -23,6 +24,7 @@ public import Complexitylib.Circuits.Frontier.Nondeterministic
 public import Complexitylib.Circuits.Frontier.Signals
 public import Complexitylib.Circuits.Frontier.AverageCase.Extractor
 public import Complexitylib.Circuits.Frontier.Boundary.Code
+public import Complexitylib.Circuits.Frontier.Boundary.Joint
 public import Complexitylib.Circuits.Frontier.AverageCase.Pruning
 public import Complexitylib.Circuits.Frontier.Boundary.Communication
 public import Complexitylib.Circuits.Frontier.Tree.Network
@@ -42,6 +44,9 @@ A circuit lower bound from graph layouts, in independent pieces:
   lemma. `Frontier.Extractor`: sumset dispersers have rectangle-free fibers.
 * `Frontier.Sweep`: abstract splicing messages and the frontier counting lemma
   `Frontier.Sweep.ncard_le`. No graphs or circuits appear.
+* `Frontier.AdditiveSweep`: sumset-free sets require large additive generators;
+  emitted vectors can overlap in their coordinate supports. Finite transition codes
+  can charge one determined syndrome update rather than two independent states.
 * `Frontier.Multigraph` and `Frontier.Network`: layouts, the layout hypothesis
   `Frontier.LayoutBound`, constraint networks, the separator lemma, and the sweep of a network
   along a layout.
@@ -66,6 +71,8 @@ A circuit lower bound from graph layouts, in independent pieces:
   Polynomially small sumset bias gives polynomially small agreement advantage.
 * `Frontier.Boundary`: hypergraph signal boundaries, exact linear syndrome states, and
   transition codes; mixed input-output fiber demand and nonlinear MDS lower bounds.
+  `Frontier.Boundary.Joint`: joint ranks of shared linear information and visible
+  observations, avoiding independent charges for overlapping information.
   `Frontier.Decomposable`: threshold counting for smooth union/product DAGs with
   overlapping certificates. `Frontier.AverageCase.Pruning`: transition deletion with an
   explicit tail budget. `Frontier.Tree`: weighted peeling on trees of regions, with joint

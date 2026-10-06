@@ -211,6 +211,13 @@ def headlineTheorems : List Name := [
   `Complexity.Frontier.Communication.rootPotential_le,
   `Complexity.Frontier.Decomposable.ncard_le,
   `Complexity.Frontier.averageCase_sumset_polynomial,
+  `Complexity.Frontier.SumsetDisperser.sumsetFree,
+  `Complexity.Frontier.AdditiveSweep.ncard_le,
+  `Complexity.Frontier.AdditiveSweep.transitionCount_le_codes,
+  `Complexity.Frontier.FlatSumsetBias.affine_pullback,
+  `Complexity.Frontier.LinearBoundary.finrank_joint,
+  `Complexity.Frontier.Sweep.cappedCapacity_le_moment,
+  `Complexity.Frontier.agreement_le_moment_sweeps,
   -- The frontier method applied to the explicit family
   `Complexity.Frontier.sourceReductionHardFamily_lt_innerSize_gaussian,
   `Complexity.Frontier.sourceReductionHardFamily_lt_innerSize_all_fanIn,

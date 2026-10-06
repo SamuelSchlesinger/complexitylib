@@ -28,6 +28,8 @@ CASES = [
     ("barriers-perspective/data/check_obstructions.py", "barriers-perspective/data/check_obstructions.txt"),
     ("frontier-method/data/check_algorithms.py", "frontier-method/data/check_algorithms.txt"),
     ("frontier-method/data/check_communication.py", "frontier-method/data/check_communication.txt"),
+    ("frontier-method/data/restrictions.py", "frontier-method/data/restrictions.txt"),
+    ("frontier-method/data/syndrome_generator.py", "frontier-method/data/syndrome_generator.txt"),
 ]
 
 

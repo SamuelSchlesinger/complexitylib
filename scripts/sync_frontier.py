@@ -133,7 +133,43 @@ PATCHES = [
     ("Complexitylib/Circuits/Frontier/Layouts/MultiGraph.lean",
      "theorem card_edges_le [Fintype V] [Finite E] {d : ℕ}",
      "theorem card_edges_le [Fintype V] {d : ℕ}"),
+    ('Complexitylib/Circuits/Frontier/AdditiveSweep.lean',
+     "theorem ncard_pastSide_length [Finite G] {x : G} (hx : x ∈ S) :",
+     "theorem ncard_pastSide_length {x : G} (hx : x ∈ S) :"),
     # Missing docstrings (environment `docBlame` linter).
+    ('Complexitylib/Circuits/Frontier/AdditiveSweep.lean',
+     "  length : ℕ\n  past : ℕ → G → G\n  future : ℕ → G → G\n  emit : ℕ → G → G\n"
+     "  message : ℕ → G → M\n",
+     "  /-- The number of steps. -/\n  length : ℕ\n"
+     "  /-- The contribution of the steps before `t`. -/\n  past : ℕ → G → G\n"
+     "  /-- The contribution of the steps from `t` on. -/\n  future : ℕ → G → G\n"
+     "  /-- The label emitted at step `t`. -/\n  emit : ℕ → G → G\n"
+     "  /-- The message at time `t`, possibly depending on the whole input. -/\n"
+     "  message : ℕ → G → M\n"),
+    ('Complexitylib/Circuits/Frontier/AdditiveSweep.lean',
+     "def peers (t : ℕ) (x : G) : Set G :=",
+     "/-- The inputs of `S` sending the same message at time `t` as `x`. -/\n"
+     "def peers (t : ℕ) (x : G) : Set G :="),
+    ('Complexitylib/Circuits/Frontier/AdditiveSweep.lean',
+     "def pastSide (t : ℕ) (x : G) : Set G :=",
+     "/-- The past contributions of the peers of `x` at time `t`. -/\n"
+     "def pastSide (t : ℕ) (x : G) : Set G :="),
+    ('Complexitylib/Circuits/Frontier/AdditiveSweep.lean',
+     "def futureSide (t : ℕ) (x : G) : Set G :=",
+     "/-- The future contributions of the peers of `x` at time `t`. -/\n"
+     "def futureSide (t : ℕ) (x : G) : Set G :="),
+    ('Complexitylib/Circuits/Frontier/AdditiveSweep.lean',
+     "def transition (t : ℕ) (x : G) : M × M × G :=",
+     "/-- The step from time `t`: the old message, the new message, and the emitted label. -/\n"
+     "def transition (t : ℕ) (x : G) : M × M × G :="),
+    ('Complexitylib/Circuits/Frontier/AdditiveSweep.lean',
+     "noncomputable def transitionCount : ℕ :=",
+     "/-- The number of distinct transitions realized by `S`, summed over all steps. -/\n"
+     "noncomputable def transitionCount : ℕ :="),
+    ('Complexitylib/Circuits/Frontier/AdditiveSweep.lean',
+     "noncomputable def chargeTime (K : ℕ) (x : G) : ℕ :=",
+     "/-- The first time at which the past contributions of the peers of `x` number at least\n"
+     "`K`. -/\nnoncomputable def chargeTime (K : ℕ) (x : G) : ℕ :="),
     ("Complexitylib/Circuits/Frontier/Decomposable.lean",
      "structure Decomposable (ι U N : Type*) where\n  scope : N → Set ι\n  root : N\n",
      "structure Decomposable (ι U N : Type*) where\n"
