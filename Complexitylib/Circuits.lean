@@ -290,7 +290,8 @@ Theorem modules (re-export definitions + main results):
   graph layouts over any finite alphabet, basis, and fan-in
 * `Complexitylib.Circuits.Schnorr` — Schnorr's XOR lower bound
 * `Complexitylib.Circuits.Smolensky` — Smolensky's approximation of
-  AND/OR/`MOD_3` circuits by low-degree functions over `ZMod 3`
+  AND/OR/`MOD_3` circuits by low-degree functions over `ZMod 3`, and the
+  hardness of approximating parity
 * `Complexitylib.Circuits.Nondeterminism` — nondeterministic quantification complexity bounds
 * `Complexitylib.Circuits.Valiant` — Valiant's depth reduction lemma for digraphs
 * `Complexitylib.Circuits.StraightLine` — typed circuits as CSLib straight-line programs, with

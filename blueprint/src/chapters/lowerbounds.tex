@@ -13300,6 +13300,45 @@ choices.
   which every gate approximator is.
 \end{proof}
 
+\begin{theorem}[Parity is hard to approximate]
+  \label{thm:lowerbounds-smolensky-parity}
+  \lean{Complexity.Smolensky.card_agree_xorBool_le}
+  \leanok
+  \uses{def:lowerbounds-smolensky-low-degree, def:lowerbounds-parity}
+  A function of degree at most $D$ agrees with $n$-bit parity, read in
+  $\mathbb{F}_3$, on at most
+  $\#\{S \subseteq [n] : |S| \le \lfloor n/2 \rfloor + D\}$ inputs.
+\end{theorem}
+\begin{proof}
+  \leanok
+  Put $y_i = 1 + x_i \in \{1, -1\}$, so that $\prod_i y_i = 1 + \oplus(x)$ and
+  $y_i^2 = 1$. On the set $G$ where $P$ agrees with parity, $1 + P$ agrees with
+  $\prod_i y_i$, so every $y$-monomial $y_S$ with $|S| > \lfloor n/2 \rfloor$
+  equals $(1 + P)\, y_{[n] \setminus S}$ there, of degree at most
+  $D + \lfloor n/2 \rfloor$. The $y$-monomials span all functions, because point
+  indicators have degree at most $n$ and every $x$-monomial expands into
+  $y$-monomials. Hence every function $G \to \mathbb{F}_3$ is the restriction of
+  a function of degree at most $\lfloor n/2 \rfloor + D$, and comparing
+  cardinalities, $3^{|G|}$ is at most $3$ to the number of such monomials.
+\end{proof}
+
+\begin{lemma}[Binomial estimate]
+  \label{lem:lowerbounds-smolensky-binomial}
+  \lean{Complexity.Smolensky.ten_mul_card_le}
+  \leanok
+  If $100 (t + 1)^2 \le n + 1$, then
+  $10 \cdot \#\{S \subseteq [n] : |S| \le \lfloor n/2 \rfloor + t\} \le 6 \cdot 2^n$.
+\end{lemma}
+\begin{proof}
+  \leanok
+  By complementation at most $2^{n-1}$ subsets have $2|S| < n$, and the others
+  counted have one of at most $t + 1$ sizes, each with at most
+  $\binom{n}{\lfloor n/2 \rfloor}$ subsets. Induction on $m$ gives
+  $\binom{2m}{m}^2 (2m + 1) \le 16^m$, hence
+  $\binom{n}{\lfloor n/2 \rfloor}^2 (n + 1) \le 4^n$ and
+  $10 (t + 1) \binom{n}{\lfloor n/2 \rfloor} \le 2^n$.
+\end{proof}
+
 \section{Monotone circuits}
 \label{sec:lowerbounds-monotone}
 
