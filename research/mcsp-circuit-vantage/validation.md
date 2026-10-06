@@ -35,3 +35,11 @@ and its randomized-refuter consequence, and separated frontier witness search
 from gate elimination. Prior local notes are now archived with checked hashes
 instead of an unverifiable commit identity. The complete corpus audit passed
 again after these revisions.
+
+The second combined-lens review and the second expert mathematical review found
+no remaining errors, in-scope gaps, or polish findings. Both reran the complete
+corpus audit. A separate post-convergence fabrication audit freshly checked all
+13 external paper entries, the revised theorem statements, data attributions,
+and archived local-note hashes; it also reported zero findings and reproduced
+all artifacts. These are bounded reviews of the stated corpus, not an exhaustive
+literature search or a proof of the open MCSP lower-bound claims.

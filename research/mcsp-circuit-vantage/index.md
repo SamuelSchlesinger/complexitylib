@@ -112,7 +112,9 @@ These checks establish the stated formal and finite results, not the open bound.
   theorems remain planned at the audited snapshot.
 - The literature pass is selected for these transfers, not an exhaustive
   priority audit. Exact, gap, partial, probabilistic, and uniform variants differ.
-- Independent review is in progress; final findings will be incorporated.
+- Two independent review passes and a final primary-source audit found no
+  unresolved errors or in-scope gaps. This does not settle the open lower bound
+  or establish historical priority; see the [validation record](validation.md).
 
 ## Sources
 
