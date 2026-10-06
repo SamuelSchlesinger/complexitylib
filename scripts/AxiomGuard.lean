@@ -310,6 +310,10 @@ def headlineTheorems : List Name := [
   `Algebraic.Cutwidth.MultiOutput.eventually_lt_size_of_matMul,
   `Algebraic.Cutwidth.MultiOutput.eventually_lt_size_of_matMul_thirtyFour_div_nine,
   `Algebraic.Cutwidth.MultiOutput.eventually_lt_size_matMul_zmod_two,
+  -- The Taylor cut lemma: Jacobian and Hessian rank cuts for polynomial gates over every field
+  `Algebraic.Cutwidth.MultiOutput.Taylor.exists_cut,
+  `Algebraic.Cutwidth.MultiOutput.Taylor.blockRank_jacobian_add_blockRank_le,
+  `Algebraic.Cutwidth.MultiOutput.Taylor.blockRank_hessian_le,
   -- Border substitution for tight tensors (coordinate form of Landsberg-Michałek Prop. 2.3)
   `Algebraic.Tensor3.BorderRankLE.map_of_ker,
   `Algebraic.Tensor3.BorderRankLE.exists_map_orthProj,

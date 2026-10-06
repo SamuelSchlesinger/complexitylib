@@ -12810,6 +12810,130 @@ no superlinear unrestricted circuit theorem follows from them alone.
   the logarithmic term $O(\log n)$ are $o(n^2)$.
 \end{proof}
 
+\begin{definition}[Polynomial gates over commutative algebras]
+  \label{def:lowerbounds-algebraic-taylor-formal}
+  \lean{Algebraic.Cutwidth.MultiOutput.Taylor.algebraInterpretation,
+    Algebraic.Cutwidth.MultiOutput.Taylor.wirePolynomial,
+    Algebraic.Cutwidth.MultiOutput.Taylor.FormallyComputes,
+    Algebraic.Cutwidth.MultiOutput.Taylor.jacobian,
+    Algebraic.Cutwidth.MultiOutput.Taylor.hessian}
+  \leanok
+  \uses{def:lowerbounds-algebraic-multi-output,
+    def:lowerbounds-algebraic-polynomial-realization}
+  Let every operation of a signature carry a polynomial in its argument
+  slots with coefficients in a commutative ring $K$, of any degree. Over
+  every commutative $K$-algebra $A$ the program is evaluated by substituting
+  the arguments of each gate into its polynomial. The wire polynomial
+  $f_w\in K[X_0,\dots,X_{n-1}]$ of a wire $w$ is its value over the
+  polynomial ring at the variables, and a circuit \emph{formally computes}
+  polynomials $f_o$ when its output $o$ carries $f_o$. For a $K$-algebra $L$
+  and $a\in L^n$, the Jacobian of a family of polynomials and the Hessian of
+  one polynomial at $a$ are the matrices of their formal first and second
+  partial derivatives evaluated at $a$.
+\end{definition}
+
+\begin{lemma}[Formal and functional computation]
+  \label{lem:lowerbounds-algebraic-taylor-formal}
+  \lean{Algebraic.Cutwidth.MultiOutput.Taylor.trace_eq_aeval_wirePolynomial,
+    Algebraic.Cutwidth.MultiOutput.Taylor.FormallyComputes.computes,
+    Algebraic.Cutwidth.MultiOutput.Taylor.formallyComputes_of_computes}
+  \leanok
+  \uses{def:lowerbounds-algebraic-taylor-formal}
+  Over every commutative $K$-algebra a wire carries its wire polynomial
+  evaluated at the input, so a circuit formally computing polynomials
+  computes them as functions over every such algebra. Conversely, over an
+  infinite field, a circuit whose operations are polynomial functions and
+  which computes polynomial functions formally computes those polynomials,
+  for the polynomials chosen to represent its operations.
+\end{lemma}
+\begin{proof}
+  \leanok
+  Evaluation at a point is an algebra homomorphism out of the polynomial
+  ring, and algebra homomorphisms commute with substitution into the gate
+  polynomials, hence with the whole program. Over an infinite field a
+  polynomial is determined by its values.
+\end{proof}
+
+\begin{theorem}[The Taylor cut lemma]
+  \label{thm:lowerbounds-algebraic-taylor-cut}
+  \lean{Algebraic.Cutwidth.MultiOutput.Taylor.exists_cut}
+  \leanok
+  \uses{def:lowerbounds-algebraic-taylor-formal,
+    lem:lowerbounds-algebraic-taylor-formal,
+    lem:lowerbounds-algebraic-single-cut-fibres,
+    thm:lowerbounds-algebraic-quadratic-rank-cut}
+  Let a program have polynomial gates with coefficients in a commutative
+  ring $K$, let $L$ be a field that is a $K$-algebra, let $a\in L^n$, and let
+  $S$ be a split of the wires with complement $T$, forward signals $A$,
+  backward signals $B$, and inputs $X_S$ and $X_T$ on the two sides. There
+  are subspaces $V$ of vectors supported on $X_S$ and $W$ of vectors
+  supported on $X_T$, with $\dim V+\dim W\ge n-|A|-|B|$, such that
+  \begin{enumerate}
+    \item[(a)] $\nabla f_t(a)\cdot v=0$ for every $v\in V$ and every wire $t$ of $T$;
+    \item[(b)] $\nabla f_s(a)\cdot u=0$ for every $u\in W$ and every wire $s$ of $S$;
+    \item[(c)] $v^{\mathsf T}\,\nabla^2 f_w(a)\,u=0$ for all $v\in V$, $u\in W$, and
+      every wire $w$.
+  \end{enumerate}
+\end{theorem}
+\begin{proof}
+  \leanok
+  Evaluate the program over $L[s,t]=L[s][t]$ with $s^2=t^2=0$. The
+  first-order Taylor expansion over dual numbers, applied twice, shows that
+  at $a+sv+tu$ every wire carries
+  $f(a)+s\,\nabla f(a)\cdot v+t\,\nabla f(a)\cdot u+st\,v^{\mathsf T}\nabla^2
+  f(a)\,u$. Let $Z$ be the directions along which no crossing wire moves to
+  first order; it is cut out by at most $|A|+|B|$ linear equations. For
+  $\delta\in Z$ the jets $a+s\delta$ and $a$ agree on every crossing wire,
+  so they have the same boundary key, and cut and paste
+  (Lemma~\ref{lem:lowerbounds-algebraic-single-cut-fibres}) between them
+  shows, on the coefficient of $s$, that the part of $\delta$ on $X_S$ moves
+  the wires of $S$ as $\delta$ does and fixes those of $T$, and symmetrically
+  for the part on $X_T$. So both parts lie in $Z$; let $V$ and $W$ be the
+  sets of these parts, so that $Z\subseteq V+W$, and (a) and (b) hold. For
+  $v\in V$ and $u\in W$ the jets $a+sv$ and $a+tu$ agree on every crossing
+  wire, their mixtures are $a+sv+tu$ and $a$, and the vanishing mixed second
+  difference
+  (Theorem~\ref{thm:lowerbounds-algebraic-quadratic-rank-cut}) gives (c) on
+  the coefficient of $st$.
+\end{proof}
+
+\begin{theorem}[Rank consequences of the Taylor cut lemma]
+  \label{thm:lowerbounds-algebraic-taylor-rank}
+  \lean{Algebraic.Cutwidth.MultiOutput.Taylor.blockRank_jacobian_add_blockRank_le_of_trace,
+    Algebraic.Cutwidth.MultiOutput.Taylor.blockRank_jacobian_add_blockRank_le,
+    Algebraic.Cutwidth.MultiOutput.Taylor.blockRank_hessian_le_of_trace,
+    Algebraic.Cutwidth.MultiOutput.Taylor.blockRank_hessian_le}
+  \leanok
+  \uses{thm:lowerbounds-algebraic-taylor-cut}
+  In the setting of Theorem~\ref{thm:lowerbounds-algebraic-taylor-cut}, let
+  $O_S$ and $O_T$ be the outputs carried in $S$ and in $T$, and $J$ the
+  Jacobian of the outputs at $a$. Then
+  \[
+    \operatorname{rank}J[O_T,X_S]+\operatorname{rank}J[O_S,X_T]\le|A|+|B| ,
+  \]
+  and for all coefficients $\mu_o\in L$ the Hessian
+  $H=\sum_o\mu_o\nabla^2f_o(a)$ of the combination $\sum_o\mu_of_o$ satisfies
+  $\operatorname{rank}H[X_S,X_T]\le|A|+|B|$. Both hold over every field,
+  with the point and the coefficients in any field extension, for gate
+  polynomials of any degree, arity, and coefficients.
+
+  The rank of a Hessian block as a bound on the information two parties
+  must exchange to evaluate a function of their joint inputs is due to
+  Abelson (\emph{Lower bounds on information transfer in distributed
+  computations}, J.~ACM 27, 1980); here it is applied at every cut of a
+  circuit.
+\end{theorem}
+\begin{proof}
+  \leanok
+  Restricted to its support, $V$ lies in the kernel of $J[O_T,X_S]$ by (a),
+  and $W$ in that of $J[O_S,X_T]$ by (b). By (c) the restrictions of $V$ and
+  $W$ are orthogonal through $H[X_S,X_T]$: for matrices $R_V$ and $C_W$ whose
+  rows and columns are bases of $V$ and $W$, $R_VH[X_S,X_T]C_W=0$, and
+  Sylvester's rank inequality applied twice gives
+  $\dim V+\dim W+\operatorname{rank}H[X_S,X_T]\le n$. Compare with
+  $\dim V+\dim W\ge n-|A|-|B|$.
+\end{proof}
+
 \begin{definition}[The KRW conjecture]
   \label{def:lowerbounds-algebraic-krw}
   \lean{Algebraic.KW.NonConstant, Algebraic.KW.KRWDepthWith,

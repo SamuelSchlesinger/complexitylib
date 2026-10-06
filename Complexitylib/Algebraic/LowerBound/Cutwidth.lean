@@ -65,6 +65,7 @@ public import Complexitylib.Algebraic.LowerBound.Cutwidth.MultiOutput.Restrict
 public import Complexitylib.Algebraic.LowerBound.Cutwidth.MultiOutput.FieldMul
 public import Complexitylib.Algebraic.LowerBound.Cutwidth.MultiOutput.MatMul.Tripartite
 public import Complexitylib.Algebraic.LowerBound.Cutwidth.MultiOutput.MatMul
+public import Complexitylib.Algebraic.LowerBound.Cutwidth.MultiOutput.Taylor
 public import Complexitylib.Algebraic.LowerBound.Cutwidth.Extractor
 public import Complexitylib.Algebraic.LowerBound.Cutwidth.Extractor.Padding
 public import Complexitylib.Algebraic.LowerBound.Cutwidth.Extractor.Padding.Asymptotics
@@ -386,6 +387,12 @@ Hessian of a combination of the outputs, so a fan-in-two circuit over any finite
 field computing the `n × n` matrix product has more than
 `(2 + 1/(4 κ_E) - ε) n² ≥ (34/9 - ε) n²` gates for all large `n`, in particular
 over the full binary basis for the product over `GF(2)`.
+`MultiOutput.Taylor` proves the algebraic counterpart for polynomial gates over
+every field: evaluating the circuit over `L[s, t]/(s², t²)` at `a + s v + t u`,
+cut and paste shows that every split is crossed by at least
+`rank J[O_T, X_S] + rank J[O_S, X_T]` signals, `J` the Jacobian of the outputs at
+any point, and by at least `rank H[X_S, X_T]` signals, `H` the Hessian of any
+linear combination of the outputs.
 
 `Bisection.Helpful` completes the graph theorem. Its proof uses the first
 boundary normalization phase, a partition into bounded connected clusters,
