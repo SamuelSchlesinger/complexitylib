@@ -1,0 +1,194 @@
+# Interface charge, gate multiplicity, and a saturation example
+
+Parent: [computation after sharing](index.md).
+
+## Charge theorem
+
+Let $C$ be a circuit with $S$ gates. Choose any finite family of genuine
+interfaces satisfying [the capacity theorem](interface-capacity.md).
+For interface $i$, let $p_i$ be the original block size, $d_i$ its raw
+bypasses, $h_i=p_i-d_i$, $r_i$ the computed output count, and $b_i$ the
+number of distinct unfixed incoming context sources, counting a source
+once across both polarities of complemented wires. Only interfaces
+with $1\leq r_i<h_i$ are used below. Set
+
+\[
+\ell_i=h_i-r_i+1\leq b_i.
+\]
+
+There are two useful ways to realize the context count as gate charges.
+
+**Source charges.** If every context signal is a computed gate output,
+put $a_i(v)=1$ for its source gate and zero otherwise. Count a signal
+once even if it enters the module on several wires. Then
+$\sum_v a_i(v)=b_i$. An outside raw input is not a gate; it must be
+fixed using the cofactor lemma or treated by receiver charges.
+
+**Receiver charges.** For each distinct incoming context signal choose
+one actual wire carrying it into the region. Charge the receiving gate.
+Let $a_i(v)$ count the chosen wires entering gate $v$. Once more
+$\sum_v a_i(v)=b_i$. Here $0\leq a_i(v)\leq k$, so arbitrary fan-out is
+handled without treating wire transport as a new gate. Raw outside
+inputs are allowed because their chosen wires have gate receivers.
+
+For either convention, choose weights $\lambda_i\geq0$ and define
+
+\[
+Q=\sum_i\lambda_i\ell_i,\qquad
+M=\max_{v\in C}\sum_i\lambda_i a_i(v).
+\]
+
+**Theorem.** If $Q>0$, then $M>0$ and $S\geq Q/M$.
+
+**Proof.** Every relevant sum is finite, so
+
+\[
+Q\leq\sum_i\lambda_i\sum_v a_i(v)
+ =\sum_v\sum_i\lambda_i a_i(v)\leq SM.
+\]
+
+The first inequality is precisely the capacity theorem; the last is
+precisely the multiplicity bound. No disjointness of gates or contexts
+was assumed. $\square$
+
+For source charges, a fan-out bound $D$ on computed gates and a family
+of disjoint regions imply $M\leq D$ for unit weights. With unrestricted
+fan-out this conclusion is unavailable. For receiver charges, if each
+gate belongs to at most $D$ regions then $M\leq kD$. It is the chosen
+regions' overlap, rather than fan-out alone, that matters in that form.
+
+The $r_i$ output gates can also be charged. For source charges they are
+disjoint from that interface's incoming source gates, giving local
+boundary demand $b_i+r_i\geq h_i+1$. Their repeated roles across different
+interfaces must still enter $M$. Adding output gates does not authorize
+adding the resulting lower bound to a separate lower bound that charges
+the same gates.
+
+**Internal-region charges.** The capacity proof also gives, for a region
+whose gates all reach designated outputs within that region,
+
+\[
+|V_i|\geq t_i:=
+\max\left\{r_i,
+\left\lceil\frac{2h_i-2r_i+1}{k-1}\right\rceil\right\}.
+\]
+
+Charge each gate of $V_i$ once. The same double count gives
+$S\geq Q_{\rm in}/M_{\rm in}$, where
+$Q_{\rm in}=\sum_i\lambda_it_i$ and
+$M_{\rm in}=\max_v\sum_{i:v\in V_i}\lambda_i$. This direct gate charge
+is often stronger, but overlapping regions still reuse its gates.
+
+## An explicit linear-size saturation example
+
+Let $m=2^L$, with original inputs
+$x_1,\ldots,x_m,y_1,\ldots,y_m,t$. Use binary gates
+
+\[
+g_j=y_j\oplus t,\qquad e_j=\mathbf1[x_j=g_j],\qquad
+F_m=\bigwedge_{j=1}^m e_j,
+\]
+
+and a balanced binary AND tree. There are
+
+\[
+m+m+(m-1)=3m-1
+\]
+
+gates on $2m+1$ original input bits. All gate functions belong to the
+full binary basis.
+
+For each dyadic block $B$ of $x$ coordinates of size $p=2^j$, let its
+module consist of the $p$ equality gates $e_a$ and their AND subtree.
+Its single output is that subtree root. There are no raw block bypasses.
+Its exact incoming context tuple is $(g_a)_{a\in B}$, with $p$ computed
+signals and realizable image $\{0,1\}^p$.
+
+For every labeling $\beta$ of $B$, set $t=0$, $y_a=\beta_a$ on $B$,
+and $x_a=y_a=0$ off $B$. Then $F_m$ restricted to $B$ is exactly the
+minterm $\mathbf1[x_B=\beta]$. Thus every module satisfies the required
+cofactor property, and the capacity bound is an equality:
+
+\[
+r=1,\quad d=0,\quad b=p,\quad\ell=p.
+\]
+
+Use all dyadic blocks of sizes $2,4,\ldots,m$. Each scale partitions
+the $m$ distinguished inputs, so
+
+\[
+Q=\sum_{j=1}^L (m/2^j)2^j=mL.
+\]
+
+Each context gate $g_a$ occurs once at every scale, hence source
+multiplicity $M=L$. Each chosen incoming context wire enters $e_a$,
+also once at every scale, hence receiver multiplicity $M=L$. Therefore
+
+\[
+Q/M=m=\tfrac12\bigl((2m+1)-1\bigr),
+\]
+
+which is linear in the actual input count. Ignoring $M$ would falsely
+prove a superlinear lower bound for the displayed linear-size circuit.
+
+**Reweighting does not fix this family.** For arbitrary nonnegative
+weights on these modules, let $\mu_a$ be the weighted number of selected
+blocks containing coordinate $a$. Then
+
+\[
+Q=\sum_B\lambda_B|B|=\sum_{a=1}^m\mu_a
+\leq m\max_a\mu_a=mM.
+\]
+
+Thus no choice of weights or subfamily gives $Q/M>m$ under either charge
+convention. Every capacity demand is already paid by the same pool of
+$m$ context gates or the same pool of $m$ receiving equality gates.
+
+For the stronger internal-region charges, a block of size $p$ contains
+exactly $2p-1$ gates and meets (4) of the capacity lemma with equality.
+For all scales with unit weights,
+
+\[
+Q_{\rm in}=\sum_{j=1}^L(m/2^j)(2^{j+1}-1)
+          =2mL-m+1,
+\qquad M_{\rm in}=L.
+\]
+
+The ratio is $2m-(m-1)/L$, still linear. For arbitrary weights, all
+regions lie in the same pool of $2m-1$ equality and AND gates and each
+local demand equals its region's actual size. Therefore
+$Q_{\rm in}\leq(2m-1)M_{\rm in}$. Reweighting this stronger charge cannot
+give a superlinear result either.
+
+This function is not a substitute for MCSP: its YES set has
+$2^{m+1}$ members, and it does not satisfy the project's isolation
+property for every arbitrary small set of its $2m+1$ coordinates. It
+is an obstruction to the proposed inference from *these actual
+interface minterms* to an unbounded reuse penalty.
+
+## An intermediate superlinear milestone
+
+At $q=\lfloor n/2\rfloor$ and $L=\lfloor\log_2q\rfloor$, a family of
+one-output modules without raw bypasses for every dyadic input block
+of size at most $2^L$ would force $Q=NL$. To prove an intermediate
+$\omega(N)$ lower bound by the receiver form, it is enough to show that
+one can choose the regions and their incoming-wire representatives so
+that $M=o(L)$. A constant bound would give $\Omega(N\log\log N)$.
+The strengthened isolation range $q=\Theta(n^2)$ still gives only
+$L=\Theta(\log n)=\Theta(\log\log N)$ dyadic scales. Even this constant
+multiplicity improvement would therefore fall short of the active
+magnification target, which excludes every fixed power of $\log N$
+as an overhead on $N$.
+
+This is a statement about **every circuit computing MCSP**, including
+circuits whose hidden block coordinates have large fan-out. It must use
+a property of MCSP beyond the minterms of the selected interfaces.
+Neither minimal gate count nor deleting redundant gates by itself
+establishes such a statement. Circuit sharing is compatible with all
+the equalities in the saturation example.
+
+Two alternatives would also constitute new progress: prove that any
+failure to find these modules already costs $N\,\omega(1)$ distinct
+gates, or prove a stronger MCSP cofactor family whose capacity demand
+exceeds the minterm demand by an unbounded factor while controlling its
+gate multiplicity. Neither alternative is established here.

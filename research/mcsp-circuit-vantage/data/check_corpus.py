@@ -6,6 +6,7 @@ Fenced examples and inline code are excluded from prose citation matching.
 """
 
 from pathlib import Path
+import hashlib
 import re
 import sys
 from urllib.parse import unquote, urlsplit
@@ -37,6 +38,16 @@ def main():
     sources = ROOT / "sources.md"
     anchors_list = re.findall(r'<a\s+(?:id|name)="([^"]+)"\s*>', sources.read_text())
     anchors = set(anchors_list)
+    for snapshot, digest in {
+        "sources/interface-capacity.txt":
+            "e1cd0af68b1f1a678236dcef0280806fa17eb9627d92d8d8dbfb97a861fc7246",
+        "sources/charging.txt":
+            "71d2a06374ac4693aa6a52881f6c15ead3c7a93bc508d2522945b80c90f2943f",
+    }.items():
+        if hashlib.sha256((ROOT / snapshot).read_bytes()).hexdigest() != digest:
+            errors.append(f"Source snapshot changed: {snapshot}")
+        if digest not in sources.read_text():
+            errors.append(f"Source snapshot digest missing from bibliography: {snapshot}")
     if len(anchors_list) != len(anchors):
         errors.append("sources.md: duplicate anchors")
     used = set()

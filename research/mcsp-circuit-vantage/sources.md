@@ -22,6 +22,9 @@ Samuel Schlesinger and contributors. *Complexitylib*,
   selects CSLib `311d27ad8458b61e9b7461fc83a480e4be97aef2` and Mathlib
   `728a93eeff833da3173895bb0575752fdc24edb0`; `lean-toolchain` selects
   `leanprover/lean4:v4.35.0-rc3`.
+  The [cutwidth guide](../../docs/algebraic/cutwidth-lower-bound.md) records
+  underlying source credits, including Ryan Williams's private working note,
+  Schlesinger's counting note, and the graph-layout and extractor literature.
 
 <a id="cklm20"></a>
 
@@ -111,10 +114,15 @@ Halley Goldberg, Mandar Juvekar, Valentine Kabanets. *Non-Levin NP-Hardness of
 ## optimality26
 
 Samuel Schlesinger, *MCSP optimal-circuit structure research*,
-  2026, local research notes, snapshot `1a4a09000f1797117e3e8d066d561f08016f8889`.
-  [Interface capacity](/Users/samuelschlesinger/projects/complexity/structure-from-optimality/research/sharing/interface-capacity.md)
-  and [gate charging](/Users/samuelschlesinger/projects/complexity/structure-from-optimality/research/sharing/charging.md).
-  Their proofs were re-read here; the projection-set extension above is a paper deduction.
+  local research notes read on 2026-10-06 in
+  `/Users/samuelschlesinger/projects/complexity/structure-from-optimality/research/sharing/`.
+  Exact inspected files are archived here as [interface capacity](sources/interface-capacity.txt)
+  and [gate charging](sources/charging.txt). SHA-256, respectively:
+  `e1cd0af68b1f1a678236dcef0280806fa17eb9627d92d8d8dbfb97a861fc7246` and
+  `71d2a06374ac4693aa6a52881f6c15ead3c7a93bc508d2522945b80c90f2943f`.
+  The corpus checker verifies these byte-level snapshots. The original Git
+  provenance is not locally available; no unverified commit identity is asserted.
+  The projection-set extension in the new exploration is a paper deduction.
 
 <a id="cdj26-refute"></a>
 

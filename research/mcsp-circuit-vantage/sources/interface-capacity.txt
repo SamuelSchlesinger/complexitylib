@@ -1,0 +1,195 @@
+# Sharp minterm capacity of a multibit interface
+
+Parent: [computation after sharing](index.md).
+
+## Statement on the actual input domain
+
+Let $x\in\{0,1\}^p$ be a block of original inputs and let $w$ denote all
+other original inputs. They vary independently. A fixed assignment to
+some coordinates of $w$ is allowed. Suppose
+
+\[
+F(x,w)=D\bigl(x_P,G(x,z(w)),w\bigr),                     \tag{1}
+\]
+
+where $P$ is a set of $d$ coordinates, $G$ has $r$ output bits, and
+$z(w)$ is a tuple of $b$ signals independent of $x$. Put
+
+\[
+Z=\{z(w):w\text{ is allowed}\},\quad R=|Z|,\quad h=p-d.
+\]
+
+The decoder can use every outside input $w$. In particular, it need not
+be the same Boolean function of the interface under different choices
+of $w$. The tuple $z$ ranges over its actual image $Z$, not over an
+assumed independent cube.
+
+Assume that for each $\beta\in\{0,1\}^p$ there is an allowed
+$w_\beta$ with
+
+\[
+F(x,w_\beta)=\mathbf1[x=\beta]\quad\text{for every }x.   \tag{2}
+\]
+
+**Theorem.** If $1\leq r<h$, then
+
+\[
+R\geq\left\lceil\frac{2^h}{2^r-1}\right\rceil,
+\qquad b\geq h-r+1.                                    \tag{3}
+\]
+
+If $h>0,r=0$, (1)–(2) are impossible. If $r\geq h$, there is no positive
+lower bound on $b$ from these hypotheses: the interface can preserve all
+remaining hidden coordinates. If $h=0$, all block inputs bypass and no
+interface is required.
+
+## Proof
+
+Fix a bypass value $a\in\{0,1\}^d$. Write $u$ for the remaining $h$
+coordinates. For each $z\in Z$ define
+
+\[
+g_{z,a}:\{0,1\}^h\longrightarrow\{0,1\}^r,
+\qquad g_{z,a}(u)=G((a,u),z).
+\]
+
+For a target $\beta=(a,u)$, take the outside assignment in (2).
+If another $u'\ne u$ had
+$g_{z(w_\beta),a}(u')=g_{z(w_\beta),a}(u)$, both the bypass value and
+computed interface would agree. The decoder receives the same $w_\beta$
+on both inputs, contradicting (2). Thus $u$ is a singleton fiber of
+$g_{z(w_\beta),a}$.
+
+For a map from $D_0=2^h$ points to $C_0=2^r<D_0$ labels, there are at
+most $C_0-1$ singleton fibers. Having $C_0$ would use every output label
+once, leaving at least one domain point with no label. Therefore
+
+\[
+\{0,1\}^h
+ \subseteq\bigcup_{z\in Z}\operatorname{Sing}(g_{z,a}),
+\qquad
+2^h\leq\sum_{z\in Z}|\operatorname{Sing}(g_{z,a})|
+\leq R(2^r-1).
+\]
+
+As $R\leq2^b$, this implies $2^h<2^{b+r}$ and hence
+$b+r\geq h+1$. For $r=0$, the map is constant on at least two points
+and has no singleton fibers. The other boundary cases have the
+coordinate-preserving constructions stated above. $\square$
+
+The exact singleton sets can be used instead of the uniform bound:
+for every bypass value $a$, they must cover all $2^h$ points. A smaller
+realizable image or fewer singleton fibers only strengthens the test.
+
+## Sharpness at the level of maps
+
+For $1\leq r<h$, partition the $2^h$ hidden assignments into
+
+\[
+R_* = \left\lceil2^h/(2^r-1)\right\rceil
+\]
+
+groups, each of size at most $2^r-1$. For the context associated with a
+group, map its members injectively into distinct nonzero output labels,
+and map every remaining assignment to the zero label. Its singleton
+fibers contain the entire chosen group. The complement has at least two
+points, so there is no problem with the zero label becoming a selected
+target.
+
+Use the same groups separately within each bypass fiber. For a desired
+target, the outside data chooses its group, bypass value, and nonzero
+label. A decoder testing that bypass value and label realizes the
+target's minterm. Thus exactly $R_*$ contexts suffice. The context can
+be encoded in $b=\lceil\log_2 R_*\rceil=h-r+1$ bits, with unused context
+codes excluded from the realizable image.
+
+This is sharpness of an information bound. It does not assert small
+circuits for arbitrary chosen groups. A simple integer-sharp circuit
+example with no bypass uses equality: split $x=(u,v)$ with
+$|u|=p-r+1$, $|v|=r-1$, take context $z$ of length $|u|$, and transmit
+
+\[
+G(x,z)=\bigl(\mathbf1[u=z],\ v_1\oplus z_1,\ldots,
+v_{r-1}\oplus z_1\bigr).
+\]
+
+The decoder knows $z$ and can test any desired $v$. Each context gives
+$2^{r-1}$ singleton targets, covering the hidden cube across contexts.
+All interface outputs are gate outputs; no $v_j$ is an uncounted raw
+bypass. Over the full binary basis this uses $2(p-r+1)-1+(r-1)$ gates
+inside the module. This proves that the integer inequality itself can
+be tight in a linear-size computation.
+
+## When a circuit region supplies the factorization
+
+For an actual gate region, list every outgoing computed signal and every
+raw block input available outside the region. These give $r$ and $d$.
+List every incoming signal other than block inputs or fixed constants.
+The listed signals must be independent of the block to serve as $z(w)$.
+Count distinct source vertices, absorbing known wire complements into
+$G$ or $D$; two polarities of one source are not two independent bits.
+No path carrying additional block information to the decoder may be
+omitted. A region with a path that exits and returns through a claimed
+outside context generally fails this independence requirement.
+
+If the outside raw inputs entering the region are first fixed, the
+[MCSP local-isolation lemma](../../mcsp_structure.md) gives (2) provided
+the number of fixed raw positions plus $p$ is at most its parameter $q$.
+Only the remaining computed incoming signals then contribute to $b$.
+Alternatively, leave incoming raw inputs variable and include them in
+$z$; the minterm premise then needs just $p\leq q$. Those raw sources
+cannot be charged as computed gates, but their receiving gates can be
+charged as in [the charge theorem](charging.md).
+
+## Internal gate cost with arbitrary sharing
+
+Suppose the region contains $s_0$ gates, its $r$ distinct designated
+outputs are gate outputs, and every gate in the region reaches one of
+those outputs within the region. Every one of the $h$ hidden inputs must
+enter the region, since otherwise (2) fails. Each of the $b$ context
+sources enters by definition. Every nondesignated gate has an outgoing
+wire within the region. Counting those distinct wire sources gives at
+least $h+b+s_0-r$ incoming gate wires, whereas fan-in bounds them by
+$ks_0$. Hence
+
+\[
+(k-1)s_0\geq h+b-r.
+\]
+
+When $1\leq r<h$, the capacity theorem therefore yields
+
+\[
+s_0\geq
+\max\left\{r,
+\left\lceil\frac{2h-2r+1}{k-1}\right\rceil\right\}.    \tag{4}
+\]
+
+This counts distinct gates inside the region and permits arbitrary
+internal sharing. For binary gates, no bypasses, and one output,
+$s_0\geq2p-1$. The equality modules in [the saturation
+example](charging.md) meet this bound exactly. Overlapping regions still
+require the multiplicity calculation in that document before their
+internal gate lower bounds can be summed.
+
+## Complete prefixes and conditional domains
+
+For a topological prefix $Y=H(X)$, the suffix is evaluated on the graph
+$\{(X,H(X)):X\in\{0,1\}^N\}$. Its prefix-output coordinates are not
+independent extra inputs. If the suffix still receives every original
+input $X$, then a block of $p$ inputs has $d=p$ in (1). The capacity
+theorem is deliberately vacuous in this case.
+
+Fixing $Y=y$ instead restricts $X$ to $H^{-1}(y)$. Equation (2) is a
+statement about full subcubes of original inputs and does not imply
+that every target remains available on these fibers. A minimal
+counterexample is the promise $x=w$. On this promise the constant
+function $1$, using no interface bits, looks like a singleton acceptance
+set in $x$ for each fixed $w$. The allowed domain is already a singleton;
+the full-cube minterm premise is false. The counting proof cannot be
+applied to the apparent conditional singleton.
+
+In relative complexity $C(F\mid H)$ with free original inputs, a prefix
+can still save work, and the residual circuit can still require many
+gates. This lemma alone cannot certify that residual cost. It requires
+an actual hidden-input interface or a separately proved theorem about
+the conditional domain.

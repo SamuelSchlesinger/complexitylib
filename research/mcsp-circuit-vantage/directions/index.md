@@ -110,7 +110,7 @@ unbounded number of syntactically free NOT gates. For other fixed finite
 binary bases, analogous counting changes constants; exact repetition is not
 being transferred to those bases. For `s=0`, retain the separate `O(log n)` term.
 
-**Paper deduction: missing patterns.** For any nonempty set `Y⊆{0,1}^N`,
+**Paper deduction: missing patterns.** For `Y⊆{0,1}^N` with `0<|Y|<2^N`,
 choose `t=floor(log₂|Y|)+1≤N`. Its projection on any chosen `t` coordinates
 has fewer than `2^t` patterns. Fix a missing pattern and leave all other
 coordinates free. This is a NO cube of dimension `D=N-t`.
@@ -187,6 +187,9 @@ size-`S` class with error below `1-2^(H-N)` therefore excludes MCSP from
 that class. This is the local-PRG mechanism of Cheraghchi, Kabanets, Lu,
 and Myrisiotis [cklm20][cklm20]. Turning the repository's linear hard family
 into the necessary generator and inner-cost guarantee is a separate open step.
+The library also supplies a constant-error average-case bound for its unpadded
+extractor. The [constructive companion](constructive.md) derives a randomized
+refuter and compares that bound with the stronger NW reconstruction requirements.
 
 ## 3. A many-interface route with its reuse cost exposed
 

@@ -14,3 +14,4 @@ Nested AND regions: Q=sum of contained gate counts, M=max gate multiplicity:
   leaves=128: S=127, Q=769, M=7, Q/M<=S
   leaves=256: S=255, Q=1793, M=8, Q/M<=S
 Repeated-anchor neighbor measure: 546 cases passed (block width <= 3).
+Refuter sampling: (143/144)^(144k) <= 2^(-k) for k=1,...,16.

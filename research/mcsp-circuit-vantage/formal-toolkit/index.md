@@ -208,6 +208,30 @@ the rectangle and density hypotheses for MCSP. The
 [roadmap](../../../ROADMAP.md#L354) discusses the coefficient and preserved
 `log K = o(N)` condition; its stronger coefficient is not an MCSP theorem.
 
+There is also a checked average-case statement for the **unpadded** family.
+[`Complexity.Frontier.sourceReductionFamily_agreement_le`](../../../Complexitylib/Circuits/Frontier/Explicit.lean#L191)
+states that for every `epsilon > 0` there is `gamma > 0` such that, for all
+sufficiently large `m`, every circuit over any Boolean basis with fan-in at
+most two and `innerSize ≤ (L-epsilon)m` agrees with
+`Algebraic.Cutwidth.Extractor.sourceReductionFamily m` on at most
+`71/72 + 2^(-gamma*m)` of the uniform input cube. Here `m` is this family's
+input length; `innerSize` counts positive-arity gates, including unary gates,
+and excludes nullary gates. The bound is for the unpadded extractor, whereas
+the preceding exact-computation theorem uses the balanced
+`sourceReductionHardFamily`. [complexitylib26][complexitylib26]
+
+The [uniform construction](../../../Complexitylib/Algebraic/LowerBound/Cutwidth/Extractor/SourceReduction/Construction/Uniform.lean#L39)
+also proves `sourceReductionFamilyEval_ofFn` and
+`sourceReductionFamilyEval_mem_FP`: one total polynomial-time evaluator returns
+the unpadded family's bit at every length. Its balanced companion has the
+analogous `sourceReductionHardEval_ofFn` and `sourceReductionHardEval_mem_FP`
+theorems. `sourceReductionHardFamily_succ` identifies the family on `m+1`
+inputs with `balancePad (sourceReductionFamily m)`, which XORs a fresh bit
+with the original output; `sourceReductionHardFamily_card_accepting` gives
+exact balance. These evaluator and agreement contracts supply useful
+ingredients, but no MCSP generator's inner-cost or fooling guarantee.
+[complexitylib26][complexitylib26]
+
 ## The magnification formalization boundary
 
 The selected canonical-basis **gap** interface has checked parameters

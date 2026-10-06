@@ -178,8 +178,9 @@ Here NO tables have distance at least `N^{1-ε}` from every size-`s` table. For 
 promise relaxation, including when `s=n²`. At `ε=1` it becomes exact decision, but the displayed
 outer threshold becomes `N^{2+δ}`, not near-linear. [am25][am25]
 
-Their Theorem 32 gives one-sided probabilistic formula lower bounds `N^{2ε-δ}` for the distance
-promise when `n^d<=s(n)<=2^{o(n)}`, for an unspecified absolute `d`. It does not specify `d=2`.
+Their Theorem 32 gives one-sided probabilistic formula lower bounds `N^{2ε-δ}` for `0<ε,δ≤1`
+for the distance promise when `n^d<=s(n)<=2^{o(n)}`, for an unspecified absolute `d`.
+It does not specify `d=2`.
 The authors suggest their uniform approach may avoid localization; this is not an unconditional
 lower bound for exact `M[n,n²]`. [am25][am25]
 

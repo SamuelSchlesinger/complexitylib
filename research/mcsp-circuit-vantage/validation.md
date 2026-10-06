@@ -26,3 +26,12 @@ superlinear MCSP lower bound.
 
 The [audit runner](data/audit.py) is the reproducible check for this corpus;
 repository-wide gates use the commands in `AGENTS.md`.
+
+The first independent review checked the mathematical transfers, all validation
+artifacts, and primary-source statements. Revisions made the missing-pattern
+lemma's proper-subset premise explicit, restored the parameter range in the
+probabilistic formula result, added the checked raw-family average-case theorem
+and its randomized-refuter consequence, and separated frontier witness search
+from gate elimination. Prior local notes are now archived with checked hashes
+instead of an unverifiable commit identity. The complete corpus audit passed
+again after these revisions.

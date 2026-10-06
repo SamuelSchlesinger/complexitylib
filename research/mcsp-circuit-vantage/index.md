@@ -25,6 +25,7 @@ alone does not establish priority or an unstated model translation.
 | Every coordinate of a nonconstant MCSP slice is essential, under the stated symmetry conventions. | Existing checked theorems give `N-1` outer binary gates. |
 | Fix one selector block to an exact positive-cost De Morgan target. A completion of no greater cost must repeat it in every block. | New checked research theorem. The resulting restriction is a minterm, with a linear-size circuit. |
 | Repeated anchors give a one-flip Khrapchenko witness of measure at most `2N`, and exactly `N` with at least four blocks. | Paper deduction and finite checks; this limits that witness construction, not every formula method. |
+| The raw extractor family has constant average-case error against circuits below the Gaussian linear threshold. | Existing checked agreement bound. It yields a polynomial-time randomized counterexample finder by sampling; a paper deduction, not an outer MCSP refuter. |
 | For `s log(n+s)=o(N)`, YES tables are sparse and the NO set contains a cube of dimension `N-o(N)`. | Paper counting deduction. The YES density and the complement's rectangle-freeness each fail a different frontier premise. |
 | Rich exact-cost projections force information across a genuine circuit interface. | A paper capacity inequality accounts for raw-input bypasses and independent context. Formalizing it is the recommended next bounded step. |
 | Interface demands imply `S≥Q/M`, with `M` the maximum repeated charge to a gate. | An equality circuit shows why one cannot discard this multiplicity. |
@@ -55,6 +56,8 @@ is unproved. [mmw19][mmw19]
    consequences of the library, test plausible routes against counterexamples,
    and state the strongest defensible next MCSP-specific lemmas. Prioritize
    mathematical arguments over a generic survey or implementation roadmap.
+   The [constructive companion](directions/constructive.md) separates random
+   counterexample finding, deterministic refutation, and local-PRG transfer.
 
 ## Open questions for this exploration
 
@@ -87,6 +90,7 @@ is unproved. [mmw19][mmw19]
 - [Additional checks](data/check_deductions.py) and
   [expected output](data/deductions.txt): small coordinate projections,
   description-length scales, nested charges, and repeated-anchor neighbors.
+  It also checks the elementary failure-probability calculation for sampling.
 - [Scale checks](literature/data/check_scales.py) and
   [expected output](literature/data/check_scales.txt): magnification arithmetic.
 - [Corpus checker](data/check_corpus.py): local links and canonical citations.

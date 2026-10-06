@@ -6,6 +6,7 @@ an asymptotic circuit lower bound. Uses only the Python standard library.
 """
 
 from itertools import combinations
+from fractions import Fraction
 
 
 def project(word, coordinates):
@@ -99,8 +100,18 @@ def check_repeated_anchor_neighbors():
     print(f"Repeated-anchor neighbor measure: {cases} cases passed (block width <= 3).")
 
 
+def check_refuter_samples():
+    # Once the raw-family agreement error term is at most 1/144, the
+    # probability that one independent sample misses an error is at most 143/144.
+    for accuracy_bits in range(1, 17):
+        failure = Fraction(143, 144) ** (144 * accuracy_bits)
+        assert failure <= Fraction(1, 1 << accuracy_bits)
+    print("Refuter sampling: (143/144)^(144k) <= 2^(-k) for k=1,...,16.")
+
+
 if __name__ == "__main__":
     check_absent_patterns()
     check_counting_scales()
     check_nested_charges()
     check_repeated_anchor_neighbors()
+    check_refuter_samples()
