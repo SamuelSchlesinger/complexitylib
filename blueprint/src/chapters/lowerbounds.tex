@@ -287,6 +287,60 @@ chapter.
   player holding an accepted input.
 \end{proof}
 
+\begin{theorem}[Khrapchenko]
+  \label{thm:lowerbounds-algebraic-khrapchenko}
+  \lean{Algebraic.KW.Formula.sq_card_edges_le,
+    Algebraic.KW.Formula.mul_le_leaves_of_neighbours,
+    Algebraic.KW.leaves_ge_of_sensitive}
+  \leanok
+  \uses{thm:lowerbounds-algebraic-kw}
+  In the De Morgan formulas of Theorem~\ref{thm:lowerbounds-algebraic-kw}
+  (leaves counted, constants included), let a formula be $1$ on a set $A$ of
+  inputs and $0$ on a set $B$, and let $E$ be the set of pairs in $A \times B$
+  at Hamming distance one. Then $|E|^2 \le L \cdot |A| \cdot |B|$, where $L$ is
+  the number of leaves. Consequently, if $A$ and $B$ are nonempty, every input
+  of $A$ has at least $s_1$ neighbours in $B$, and every input of $B$ has at
+  least $s_0$ neighbours in $A$, then $L \ge s_0 s_1$; in particular this holds
+  with $A = f^{-1}(1)$ and $B = f^{-1}(0)$ when every one-input of $f$ is
+  sensitive on at least $s_1$ coordinates and every zero-input on at least
+  $s_0$.
+\end{theorem}
+\begin{proof}
+  \leanok
+  Induction on the formula. A literal separates only along its own
+  coordinate, so its edges form a partial matching and $|E| \le
+  \min(|A|, |B|)$. A constant leaf has $A$ or $B$ empty. An AND gate splits
+  $B$ by which child rejects, an OR gate splits $A$ by which child accepts,
+  and the Cauchy--Schwarz inequality
+  $(r_1 + r_2)^2/(b_1 + b_2) \le r_1^2/b_1 + r_2^2/b_2$ makes the measure
+  $|E|^2/(|A||B|)$ subadditive.
+\end{proof}
+
+\begin{corollary}[Formula size of parity, threshold, and majority]
+  \label{cor:lowerbounds-algebraic-khrapchenko-parity}
+  \lean{Algebraic.KW.parity_sq_le_leaves, Algebraic.KW.formulaSize_parity_two_pow,
+    Algebraic.KW.threshold_mul_le_leaves, Algebraic.KW.majority_mul_le_leaves}
+  \leanok
+  \uses{thm:lowerbounds-algebraic-khrapchenko}
+  Every De Morgan formula computing the parity of $n \ge 1$ bits has at least
+  $n^2$ leaves, and for $n = 2^k$ the minimum number of leaves is exactly
+  $n^2$. For $1 \le k \le n$, every De Morgan formula computing the threshold
+  function ``at least $k$ of the $n$ inputs are $1$'' has at least
+  $k (n + 1 - k)$ leaves; for strict majority ($k = \lfloor n/2 \rfloor + 1$,
+  ties rejected) this is $(n - \lfloor n/2 \rfloor)(\lfloor n/2 \rfloor + 1)$,
+  which equals $((n + 1)/2)^2$ for odd $n$.
+\end{corollary}
+\begin{proof}
+  \leanok
+  Parity is sensitive to every coordinate at every input. For thresholds take
+  $A$ the inputs of weight $k$ and $B$ those of weight $k - 1$: each input of
+  $A$ has $k$ neighbours in $B$ and each input of $B$ has $n + 1 - k$
+  neighbours in $A$. The matching upper bound for parity splits the inputs in
+  half and uses $x \oplus y = (x \wedge \neg y) \vee (\neg x \wedge y)$, with
+  negated subformulas obtained by De Morgan duality at no cost, so the leaf
+  count multiplies by four when $n$ doubles.
+\end{proof}
+
 \begin{theorem}[Polynomial circuit size hierarchy]
   \label{thm:lowerbounds-algebraic-hierarchy}
   \lean{Algebraic.DeMorgan.polynomialSize_ssubset}
