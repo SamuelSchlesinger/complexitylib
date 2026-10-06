@@ -76,6 +76,7 @@ public import Complexitylib.Circuits.Shannon
 public import Complexitylib.Circuits.Shallow
 public import Complexitylib.Circuits.LowerBound
 public import Complexitylib.Circuits.Frontier
+public import Complexitylib.Circuits.Correlation
 public import Complexitylib.Circuits.Schnorr
 public import Complexitylib.Circuits.DepthClasses
 public import Complexitylib.Circuits.AC0
@@ -278,6 +279,9 @@ Public modules (definitions a reviewer should read):
   counting obstruction, parity outside `AC0`, and `AC0 ⊂ TC0`
 * `Complexitylib.Circuits.Smolensky.Defs` — `Smolensky.monomial` and
   `Smolensky.lowDegree`, low-degree functions `{0,1}^n → ZMod 3`
+* `Complexitylib.Circuits.Correlation.Defs` — `Correlation.correlation`, quadratic forms
+  over `GF(2)` (`Correlation.quadForm`, `Correlation.bilinForm`), block and cut ranks, and
+  submatrix-robust matrices
 * `Complexitylib.Circuits.Nondeterminism.Defs` — `existsQuantify`, `forallQuantify`
 * `Complexitylib.Circuits.Hardwiring` — exact-size prefix hardwiring
 * `Complexitylib.Circuits.Unrolling` — bounded machine-configuration layouts,
@@ -293,6 +297,8 @@ Theorem modules (re-export definitions + main results):
 * `Complexitylib.Circuits.LowerBound` — gate elimination lower bound
 * `Complexitylib.Circuits.Frontier` — the frontier method: circuit lower bounds from
   graph layouts over any finite alphabet, basis, and fan-in
+* `Complexitylib.Circuits.Correlation` — correlation of circuits with quadratic forms over
+  `GF(2)` through rectangle classes
 * `Complexitylib.Circuits.Schnorr` — Schnorr's XOR lower bound
 * `Complexitylib.Circuits.Smolensky` — the Razborov–Smolensky lower bound for
   `AC0[3]`
