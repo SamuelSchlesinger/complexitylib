@@ -12783,6 +12783,179 @@ signals, codes, pruned transitions, and trees of regions.
   neighbours.
 \end{proof}
 
+\subsection{Exponentially small correlation}
+\label{sec:lowerbounds-frontier-correlation}
+
+The rectangles of the frontier method also give exponentially small
+correlation, not only bounded agreement, against quadratic forms over
+$\mathbb{F}_2$ (namespace \texttt{Complexity.Correlation}). The circuit model,
+the gate count, and the agreement measure are those of
+Theorem~\ref{thm:lowerbounds-frontier-average-case}, so the bounds are directly
+comparable. With $A=2p\approx0.2807$ the Gaussian coefficient of
+Theorem~\ref{thm:lowerbounds-frontier-layouts}, put $c^*=1+1/(2A)\approx2.78125$
+and $L=1+1/A\approx4.5625$. The best previously published average-case bounds
+for circuits over the full binary basis are $2.5n$ (Chen and Kabanets, COCOON
+2015, for an explicit affine extractor) and $2.6n$ (Golovnev, Kulikov, Smal, and
+Tamaki, MFCS 2016, for non-explicit quadratic extractors).
+
+\begin{definition}[Quadratic forms, cut ranks, and correlation]
+  \label{def:lowerbounds-correlation-quadratic}
+  \lean{Complexity.Correlation.correlation, Complexity.Correlation.quadForm,
+    Complexity.Correlation.blockRank, Complexity.Correlation.cutRank,
+    Complexity.Correlation.SubmatrixRobust, Complexity.Correlation.robustDeficiency,
+    Complexity.Correlation.bilinForm, Complexity.Correlation.bipartiteMatrix}
+  \leanok
+  \uses{def:lowerbounds-frontier-sweep}
+  The correlation of Boolean functions $f$ and $g$ is
+  $|\Pr[f=g]-\Pr[f\ne g]|=|2\,\mathrm{agreement}(f,g)-1|$. A square matrix $Q$
+  over $\mathbb{F}_2$ defines the quadratic form $f_Q(x)=\sum_{i,j}Q_{ij}x_ix_j$.
+  The rank of a block of a matrix is the dimension of the span of its rows, and
+  the cut rank $\rho_Q(U)$ is the rank of the block of $Q+Q^{\mathsf T}$ with rows
+  $U$ and columns $U^c$. A matrix is submatrix-robust with deficiency $t$ when
+  every square block with $k$ rows has rank at least $k-t$. On inputs of length
+  $n$, with $x$ the first $\lfloor n/2\rfloor$ coordinates and $y$ the next
+  $\lfloor n/2\rfloor$, the bilinear form $x^{\mathsf T}Ry$ is the quadratic form
+  of the matrix with $R$ in the block with rows $x$ and columns $y$.
+\end{definition}
+
+\begin{lemma}[Lindsey's lemma on rectangle classes]
+  \label{lem:lowerbounds-correlation-lindsey}
+  \lean{Complexity.Correlation.sq_sum_bilinear_mul_two_pow_rank_le,
+    Complexity.Correlation.sq_sum_boolSign_quadForm_mul_le,
+    Complexity.Correlation.correlation_sq_mul_two_pow_cutRank_le}
+  \leanok
+  \uses{def:lowerbounds-correlation-quadratic}
+  For every rectangle $R$ for a cut $X$ of the $n$ coordinates,
+  $\bigl(\sum_{x\in R}(-1)^{f_Q(x)}\bigr)^2\,2^{\rho_Q(X)}\le|R|\,2^n$.
+  Consequently, if a predictor $g$ is constant on the classes of a map into a
+  finite set $M$ and every class is a rectangle for $X$, then
+  $\mathrm{corr}(f_Q,g)^2\,2^{\rho_Q(X)}\le|M|$.
+\end{lemma}
+\begin{proof}
+  \leanok
+  On a rectangle, $f_Q(p,q)=f_1(p)+f_2(q)+p^{\mathsf T}Bq$ with $B$ the block of
+  $Q+Q^{\mathsf T}$. Cauchy--Schwarz over $p$, character orthogonality
+  $\sum_p(-1)^{p\cdot v}=2^{|X|}[v=0]$, and the fibre count
+  $|\{q':Bq'=Bq\}|=2^{|X^c|-\operatorname{rank}B}$ give the first bound;
+  Cauchy--Schwarz over the classes gives the second.
+\end{proof}
+
+\begin{theorem}[Finite correlation bounds for circuits]
+  \label{thm:lowerbounds-correlation-finite}
+  \lean{Complexity.Correlation.correlation_sq_le_of_unread,
+    Complexity.Correlation.correlation_sq_le_of_layout,
+    Complexity.Correlation.ncard_le_cutRank_add_of_bisection,
+    Complexity.Correlation.exists_ncard_readIn_eq}
+  \leanok
+  \uses{lem:lowerbounds-correlation-lindsey, lem:lowerbounds-frontier-network-counting,
+    thm:lowerbounds-frontier-compiler}
+  Let every set of $\lfloor n/2\rfloor$ coordinates have cut rank at least
+  $\lfloor n/2\rfloor-e$, and let $C$ be a single-output circuit over any basis on
+  $\{0,1\}$. If $C$ leaves at least $k\le\lfloor n/2\rfloor$ inputs unread, then
+  $\mathrm{corr}(f_Q,C)^2\le2^{1+e-k}$. If $C$ reads at least $\lfloor n/2\rfloor$
+  inputs and its compiled constraint network has a layout all of whose frontiers
+  have at most $w$ edges, then $\mathrm{corr}(f_Q,C)^2\le2^{1+w+e-\lfloor n/2\rfloor}$.
+\end{theorem}
+\begin{proof}
+  \leanok
+  The cut ranks of sets of fewer coordinates are at least their size minus $e$,
+  since deleting a row lowers a rank by at most one. A circuit that ignores a set
+  $D$ of inputs has two output classes, each a rectangle for $D$. Along a layout,
+  each vertex reads at most one input, so some initial segment reads exactly
+  $\lfloor n/2\rfloor$ inputs; by the separator lemma, the inputs with a given
+  output and given values on that frontier form a rectangle for the inputs read,
+  and there are at most $2\cdot2^w$ of them. Apply
+  Lemma~\ref{lem:lowerbounds-correlation-lindsey}.
+\end{proof}
+
+\begin{theorem}[Exponentially small correlation for quadratic forms of large cut rank]
+  \label{thm:lowerbounds-correlation-asymptotic}
+  \lean{Complexity.Correlation.eventually_correlation_le,
+    Complexity.Correlation.eventually_correlation_le_of_isLittleO,
+    Complexity.Correlation.eventually_correlation_le_gaussian}
+  \leanok
+  \uses{thm:lowerbounds-correlation-finite, def:lowerbounds-frontier-layout-bound,
+    thm:lowerbounds-frontier-layouts}
+  Assume $A>0$ and $\mathrm{LB}_3(A)$, and let $Q_n$ be $n\times n$ matrices over
+  $\mathbb{F}_2$ such that for all large $n$ every set of $\lfloor n/2\rfloor$
+  coordinates has cut rank at least $\lfloor n/2\rfloor-\tau n$. Then for every
+  $c\ge1/2$ and every $\gamma<(c^*-c)/(2L)-\tau/2$, where $c^*=1+1/(2A)$ and
+  $L=1+1/A$, for all large $n$ every circuit of fan-in two over any basis with at
+  most $cn$ gates of positive arity has correlation at most $2^{-\gamma n}$ with
+  $f_{Q_n}$. If the deficiency is $o(n)$ instead of $\tau n$, every
+  $\gamma<(c^*-c)/(2L)$ works; for the Gaussian coefficient,
+  $c^*=1+\pi/(6\arccos((1+2\sqrt2)/4))$ and $L=1+\pi/(3\arccos((1+2\sqrt2)/4))$.
+  (For $c<1/2$ apply the bound with $c=1/2$.)
+\end{theorem}
+\begin{proof}
+  \leanok
+  Put $\theta=(1/2-A(c-1))/(1+A)$, so that $A(c-1+\theta)-1/2=-\theta$ and
+  $(c^*-c)/(2L)=\theta/2$. With at least $\theta n$ unread inputs the first finite
+  bound gives exponent $-(\theta-\tau)n+O(1)$. With fewer, the compiled network
+  has cycle rank at most $(c-1+\theta)n+1$ and at most $4cn+3$ vertices, so
+  $\mathrm{LB}_3(A)$ supplies a layout of width at most
+  $(A+\eta)(c-1+\theta)n+5c\eta n+O_\eta(1)$, and the second finite bound gives the
+  same exponent up to $O(\eta)n$. Choose $\eta$ small.
+\end{proof}
+
+\begin{lemma}[Submatrix-robust matrices exist]
+  \label{lem:lowerbounds-correlation-robust}
+  \lean{Complexity.Correlation.card_spannedBy_mul_le,
+    Complexity.Correlation.exists_submatrixRobust_of_lt,
+    Complexity.Correlation.exists_submatrixRobust}
+  \leanok
+  \uses{def:lowerbounds-correlation-quadratic}
+  If $3m<(t+1)^2$, some $m\times m$ matrix over $\mathbb{F}_2$ is
+  submatrix-robust with deficiency $t$. In particular $t=2\lfloor\sqrt m\rfloor+1$
+  works for every $m$.
+\end{lemma}
+\begin{proof}
+  \leanok
+  A $k\times k$ block of rank $r$ has $r$ columns spanning the others. Given
+  their positions, a matrix is determined by the coefficients expressing the
+  other $k-r$ columns and by its entries outside the remaining $k\times(k-r)$
+  block, so at most $2^{r(k-r)}2^{m^2-k(k-r)}=2^{m^2-(k-r)^2}$ matrices arise.
+  Summing over the at most $2^k$ positions, at most $2^k\,2^{m^2-(t+1)^2}$
+  matrices have a block of rank below $k-t$ on a given pair of $k$-sets of rows
+  and columns. A union bound over fewer than $4^m$ pairs leaves fewer than
+  $2^{m^2}$ bad matrices when $3m<(t+1)^2$.
+\end{proof}
+
+\begin{theorem}[Exponentially small correlation below $2.78n$ gates]
+  \label{thm:lowerbounds-correlation-explicit}
+  \lean{Complexity.Correlation.robustMatrix, Complexity.Correlation.hardForm,
+    Complexity.Correlation.half_le_cutRank_hardMatrix,
+    Complexity.Correlation.eventually_correlation_hardForm_le,
+    Complexity.Correlation.exists_eventually_correlation_hardForm_le}
+  \leanok
+  \uses{thm:lowerbounds-correlation-asymptotic, lem:lowerbounds-correlation-robust}
+  Fix, for every $m$, a submatrix-robust $m\times m$ matrix $R_m$ with deficiency
+  $2\lfloor\sqrt m\rfloor+1$, and let $h_n=x^{\mathsf T}R_{\lfloor n/2\rfloor}y$.
+  Every set of $\lfloor n/2\rfloor$ coordinates has cut rank at least
+  $\lfloor n/2\rfloor-O(\sqrt n)$ in $h_n$. Hence for every $c\ge1/2$ and every
+  $\gamma<(c^*-c)/(2L)$, for all large $n$ every circuit of fan-in two over any
+  basis with at most $cn$ gates of positive arity has correlation at most
+  $2^{-\gamma n}$ with $h_n$. In particular some fixed $\gamma>0$ works for all
+  circuits with at most $2.77n$ gates of positive arity, beyond the previous
+  $2.5n$ and $2.6n$. In Lean, $R_m$ is chosen by \texttt{Classical.choose}.
+  Taking instead the lexicographically first robust matrix makes the family
+  computable in $\cc{E}^{\cc{NP}}$: whether some robust matrix extends a given
+  prefix is one $\cc{NP}$ query of length $2^{O(n)}$ (guess the matrix and check
+  its fewer than $4^{n/2}$ pairs of row and column sets), so the matrix is found
+  bit by bit in time $2^{O(n)}$. This uniformity is a remark about the
+  construction and is not formalized.
+\end{theorem}
+\begin{proof}
+  \leanok
+  The block of the polar matrix at a cut $U$ contains, on disjoint columns, the
+  block of $R$ with rows $x\cap U$ and columns $y\setminus U$ and the transpose of
+  the block with rows $x\setminus U$ and columns $y\cap U$; their ranks add. When
+  $|U|=\lfloor n/2\rfloor$, their smaller sides sum to at least
+  $\lfloor n/2\rfloor-1$, and robustness costs $2t$. Apply
+  Theorem~\ref{thm:lowerbounds-correlation-asymptotic} with the Gaussian
+  coefficient; $2.77<c^*$ because $2p\le9/32$.
+\end{proof}
+
 \section{Essential inputs and gate elimination}
 \label{sec:lowerbounds-gate-elimination}
 
