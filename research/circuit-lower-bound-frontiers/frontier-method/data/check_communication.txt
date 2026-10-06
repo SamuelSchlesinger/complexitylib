@@ -1,0 +1,4 @@
+Compiled traces: 512 exact cap/pruning/moment checks; 354 strict savings over the unpruned budget (no asymptotic claim).
+Codebook optimization: 1280 exhaustive comparisons passed.
+Conditional moments: 80 dependent-source escort identities and path budgets passed.
+Shared selector, k=12: Shannon=6.9984 bits, Renyi(1/2)=11.0440, 99%-support=4015/4096; independent AND outputs have Renyi(1/2)=10.7996.

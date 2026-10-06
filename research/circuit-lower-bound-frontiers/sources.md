@@ -21,6 +21,17 @@ Boaz Barak, Mark Braverman, Xi Chen, and Anup Rao,
 
 [Primary source](https://doi.org/10.1137/100811969).
 
+<a id="braverman-rao11"></a>
+
+## braverman-rao11
+
+Mark Braverman and Anup Rao, *Information Equals Amortized Communication*, 2011;
+  arXiv:1106.3595. Cited, as in the frontier-method communication note, for amortization
+  across independent copies of communication problems; theorem numbers were not
+  re-inspected for this corpus.
+
+[Primary source](https://arxiv.org/abs/1106.3595).
+
 <a id="bova16"></a>
 
 ## bova16
@@ -485,6 +496,16 @@ Igor L. Markov and Yaoyun Shi, Simulating Quantum Computation by Contracting Ten
 Knot Pipatsrisawat and Adnan Darwiche, New Compilation Languages Based on Structured Decomposability, AAAI 2008, pp. 517–522
 
 [Primary source](https://cdn.aaai.org/AAAI/2008/AAAI08-082.pdf).
+
+<a id="renner-wolf04"></a>
+
+## renner-wolf04
+
+Renato Renner and Stefan Wolf, *Smooth Renyi Entropy and Applications*, ISIT 2004.
+  Cited, as in the frontier-method communication note, for the source-coding context of
+  smooth Renyi entropy; theorem numbers were not re-inspected for this corpus.
+
+[Primary source](https://crypto.ethz.ch/publications/RenWol04a.html).
 
 <a id="rezende-vinyals25"></a>
 

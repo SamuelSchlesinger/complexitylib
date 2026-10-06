@@ -12087,9 +12087,10 @@ $|U|\ge2$, over any basis (a CSLib signature with an interpretation on $U$),
 with any accepting set $\mathrm{Acc}\subseteq U$, and with fan-in $r\ge2$. Only
 gates of positive arity are counted (\texttt{Circuit.innerSize}), so constant
 gates are free. The graph-theoretic input is a layout hypothesis measured by
-the cycle rank, and the Gaussian ordering bound of
-Theorem~\ref{thm:lowerbounds-algebraic-gaussian-coefficient} supplies it for
-fan-in two. The same frontiers give bounds for linear maps, aggregate gates,
+the cycle rank. Gaussian layouts supply it in every fixed degree, and for fan-in
+two the coefficient is that of
+Theorem~\ref{thm:lowerbounds-algebraic-gaussian-coefficient}. The development is
+mirrored from a separate formalization by \texttt{scripts/sync\_frontier.py}. The same frontiers give bounds for linear maps, aggregate gates,
 verifier circuits, and the average case, and they refine the counting by
 signals, codes, pruned transitions, and trees of regions.
 
@@ -12236,22 +12237,29 @@ signals, codes, pruned transitions, and trees of regions.
   \label{thm:lowerbounds-frontier-layouts}
   \lean{Complexity.Frontier.LayoutBound.of_orderingBound,
     Complexity.Frontier.layoutBound_gaussian,
+    Complexity.Frontier.layoutBound_of_orderingBound_frontier,
+    Complexity.Frontier.gaussianCoefficient_eq_frontierCoefficient,
     Complexity.Frontier.layoutBound_one_third,
     Complexity.Frontier.Multigraph.Compression,
     Complexity.Frontier.Multigraph.exists_layout_cycleRank,
     Complexity.Frontier.layoutBound_one}
   \leanok
   \uses{def:lowerbounds-frontier-layout-bound,
-    thm:lowerbounds-algebraic-gaussian-coefficient}
-  The ordering hypothesis of the cutwidth development at every positive slack
-  gives $\mathrm{LB}_3$ with the same coefficient; hence $\mathrm{LB}_3(2p)$
-  with $p=\tfrac{3}{2\pi}\arccos\tfrac{1+2\sqrt2}{4}$, and $\mathrm{LB}_3(1/3)$.
+    thm:lowerbounds-algebraic-gaussian-coefficient,
+    thm:lowerbounds-algebraic-gaussian-pathwidth}
+  $\mathrm{LB}_3(2p)$ holds with $p=\tfrac{3}{2\pi}\arccos\tfrac{1+2\sqrt2}{4}$,
+  hence $\mathrm{LB}_3(1/3)$; $p$ is the coefficient of
+  Theorem~\ref{thm:lowerbounds-algebraic-gaussian-pathwidth}. The ordering
+  hypothesis of the cutwidth development at every positive slack also gives
+  $\mathrm{LB}_3$ with the same coefficient.
   In every maximum degree $d$, every connected multigraph has a layout of width
   at most $\beta_1+d\lfloor\log_2|V|\rfloor$, so $\mathrm{LB}_d(1)$ holds.
 \end{theorem}
 \begin{proof}
   \leanok
-  Number the vertices in the given order; $(|E|-|V|)^+\le\beta_1$ and
+  Order the vertices of the cubic core by median Gaussian edge scores, as in
+  Theorem~\ref{thm:lowerbounds-algebraic-gaussian-pathwidth}, and expand the core.
+  For the transfer, number the vertices in the given order; $(|E|-|V|)^+\le\beta_1$ and
   $3\log_2|V|\le\eta|V|+K$. For general degree, merge the blocks of a
   degree-$d$ compression along a spanning tree: a prefix of a merged block is a
   prefix of its larger part or that part followed by a prefix of a part at most
@@ -12259,22 +12267,54 @@ signals, codes, pruned transitions, and trees of regions.
   of the $\beta_1$ edges outside the tree adds one to every cut.
 \end{proof}
 
+\begin{theorem}[Gaussian layouts in every degree]
+  \label{thm:lowerbounds-frontier-degree-layouts}
+  \lean{Complexity.Frontier.Gaussian.vertexLayout_bound,
+    Complexity.Frontier.Gaussian.multigraph_vertexLayout_bound,
+    Complexity.Frontier.Multigraph.Compression.Terminal.multi_edge_bound,
+    Complexity.Frontier.Gaussian.degreeCoefficient,
+    Complexity.Frontier.Gaussian.degreeCoefficient_lt_three_quarters,
+    Complexity.Frontier.layoutBound_degree, Complexity.Frontier.layoutBound_two_fifths}
+  \leanok
+  \uses{def:lowerbounds-frontier-layout-bound, thm:lowerbounds-frontier-layouts}
+  For every fixed $d\ge2$, loopless multigraphs of maximum degree $d$ have layouts
+  of width at most $\gamma_d|E|+o(|V|)$, where
+  $\gamma_d=\arccos(2\sqrt{d-1}/d)/\pi$. Consequently $\mathrm{LB}_d(A_d)$ holds for
+  every $d\ge3$, with $A_d=\tfrac{3d}{2d-3}\gamma_d<3/4$, and $A_4=2/5$.
+\end{theorem}
+\begin{proof}
+  \leanok
+  Score each vertex by a Gaussian form of its normalized truncated distance-kernel
+  row and sort; adjacent rows have correlation at least $2\sqrt{d-1}/d-o(1)$, so
+  Sheppard's bound gives the crossing probability $\gamma_d$ per edge, and
+  bounded-radius second moments control a grid of thresholds, windows, and tails
+  at once. Terminal block compression keeps parallel edges, has degrees between
+  three and $d$, and adjacent degree sums at least $d+3$, so its $m$ edges satisfy
+  $(2d-3)m\le3d\beta_1$.
+\end{proof}
+
 \begin{theorem}[Unconditional bounds for dense rectangle-free sets]
   \label{thm:lowerbounds-frontier-unconditional}
   \lean{Complexity.Frontier.lowerBound_gaussian, Complexity.Frontier.lowerBound_four,
-    Complexity.Frontier.lowerBound_all_fanIn}
+    Complexity.Frontier.lowerBound_all_fanIn, Complexity.Frontier.lowerBound_degree,
+    Complexity.Frontier.lowerBound_fanInThree}
   \leanok
-  \uses{thm:lowerbounds-frontier-main, thm:lowerbounds-frontier-layouts}
+  \uses{thm:lowerbounds-frontier-main, thm:lowerbounds-frontier-layouts,
+    thm:lowerbounds-frontier-degree-layouts}
   Under the hypotheses on $S_n$ of Theorem~\ref{thm:lowerbounds-frontier-main},
   every circuit of fan-in two deciding $S_n$, over any basis on $U$, has more
   than $\bigl(1+\pi/(3\arccos\tfrac{1+2\sqrt2}{4})-\varepsilon\bigr)n\approx
   (4.5625-\varepsilon)n$ gates of positive arity, in particular more than
-  $(4-\varepsilon)n$; and for every fixed fan-in $r\ge2$, $(r-1)s>(2-\varepsilon)n$.
+  $(4-\varepsilon)n$. For every fixed fan-in $r\ge2$,
+  $(r-1)s>(1+1/A_{r+1}-\varepsilon)n$ with $A_d<3/4$, so circuits of fan-in three
+  need more than $(7/4-\varepsilon)n$ gates; the spanning-tree bound gives the
+  simpler $(r-1)s>(2-\varepsilon)n$.
 \end{theorem}
 \begin{proof}
   \leanok
   Instantiate Theorem~\ref{thm:lowerbounds-frontier-main} with the layout
-  bounds of Theorem~\ref{thm:lowerbounds-frontier-layouts}.
+  bounds of Theorems~\ref{thm:lowerbounds-frontier-layouts}
+  and~\ref{thm:lowerbounds-frontier-degree-layouts}; $1+1/(2/5)=7/2$.
 \end{proof}
 
 \begin{theorem}[The explicit family over any basis and fan-in]
@@ -12283,6 +12323,8 @@ signals, codes, pruned transitions, and trees of regions.
     Complexity.Frontier.sourceReductionHardFamily_frontierHypotheses,
     Complexity.Frontier.sourceReductionHardFamily_lt_innerSize_gaussian,
     Complexity.Frontier.sourceReductionHardFamily_lt_innerSize_all_fanIn,
+    Complexity.Frontier.sourceReductionHardFamily_lt_innerSize_degree,
+    Complexity.Frontier.sourceReductionHardFamily_lt_innerSize_fanInThree,
     Complexity.Frontier.sourceReductionHardFamily_lt_innerSize_nondeterministic,
     Complexity.Frontier.sourceReductionHardFamily_lt_innerGates_aggregate,
     Complexity.Frontier.flatSumsetBias_of_flatSumsetExtractor,
@@ -12298,7 +12340,8 @@ signals, codes, pruned transitions, and trees of regions.
   $\varepsilon>0$ and all large $n$: every circuit of fan-in two deciding it,
   over any basis on $\{0,1\}$ and with any accepting set, has more than
   $\bigl(1+\pi/(3\arccos\tfrac{1+2\sqrt2}{4})-\varepsilon\bigr)n$ gates of
-  positive arity; for every fan-in $r\ge2$, $(r-1)s>(2-\varepsilon)n$; the
+  positive arity; for every fan-in $r\ge2$, $(r-1)s>(1+1/A_{r+1}-\varepsilon)n$,
+  in particular $(7/4-\varepsilon)n$ gates at fan-in three; the
   Gaussian bound holds for verifier circuits over any basis, uniformly in the
   number of witness inputs; and it holds for circuits with special gates of
   unbounded fan-in aggregating in a finite commutative monoid with $o(n)$ bits
@@ -12369,9 +12412,13 @@ signals, codes, pruned transitions, and trees of regions.
     Complexity.Frontier.exists_affine_circuit, Complexity.Frontier.lowerBound_linear,
     Complexity.Frontier.linear_finite_gaussian,
     Complexity.Frontier.linear_polynomial_gaussian,
-    Complexity.Frontier.arith_cauchy_gaussian, Complexity.Frontier.cauchyZMod_gaussian}
+    Complexity.Frontier.arith_cauchy_gaussian, Complexity.Frontier.cauchyZMod_gaussian,
+    Complexity.Frontier.linear_finite_degree, Complexity.Frontier.linear_polynomial_degree,
+    Complexity.Frontier.linear_finite_fanInThree,
+    Complexity.Frontier.linear_polynomial_fanInThree}
   \leanok
-  \uses{thm:lowerbounds-frontier-main, thm:lowerbounds-frontier-layouts}
+  \uses{thm:lowerbounds-frontier-main, thm:lowerbounds-frontier-layouts,
+    thm:lowerbounds-frontier-degree-layouts}
   Under $\mathrm{LB}_{r+1}(A)$, every circuit of fan-in at most $r$ with linear
   capacity computing $x\mapsto Mx$ for a totally regular $N\times N$ matrix has
   $(r-1)s>(1+1/A-\varepsilon)N$, counting gates of positive arity. With the
@@ -12380,7 +12427,9 @@ signals, codes, pruned transitions, and trees of regions.
   linearization that produces an affine circuit of the same size, inner size, and
   fan-in; for arithmetic circuits computing the Cauchy map over every field of
   characteristic zero; and for the Cauchy map over $\mathbb{Z}/q$ for every prime
-  $q\ge2N$, over any basis.
+  $q\ge2N$, over any basis. Over finite fields, and over infinite fields with
+  polynomial operations, every fixed fan-in $r$ gives
+  $(r-1)s>(1+1/A_{r+1}-\varepsilon)N$, and fan-in three gives $(7/4-\varepsilon)N$.
 \end{theorem}
 \begin{proof}
   \leanok
@@ -12391,6 +12440,34 @@ signals, codes, pruned transitions, and trees of regions.
   linear capacity then forces at least $N$ cut edges. Over infinite fields the
   polynomial gates are replaced by their first-order Taylor expansions at a base
   point, computed over the dual numbers.
+\end{proof}
+
+\begin{theorem}[Mixed fibers and MDS maps]
+  \label{thm:lowerbounds-frontier-mds}
+  \lean{Complexity.Frontier.OutputSplicing.card_le,
+    Complexity.Frontier.Compiler.pow_le_cutSignals_mul_fibers,
+    Complexity.Frontier.IsMDS, Complexity.Frontier.TotallyRegular.isMDS,
+    Complexity.Frontier.IsMDS.permute, Complexity.Frontier.lowerBound_mds,
+    Complexity.Frontier.mds_gaussian, Complexity.Frontier.mds_degree}
+  \leanok
+  \uses{thm:lowerbounds-frontier-linear, thm:lowerbounds-frontier-degree-layouts}
+  For any map and any split of its inputs and outputs, the number of inputs is at
+  most the number of used boundary messages times the largest fibres of the two
+  complementary mixed observations; in a compiled circuit the messages are the
+  distinct signals crossing a cut. A map $F:U^N\to U^N$ is MDS when any $N$
+  coordinates of its graph code $(x,F(x))$ determine $x$. Under
+  $\mathrm{LB}_{r+1}(A)$, every circuit of fan-in at most $r$ over any basis
+  computing an MDS map over any finite alphabet satisfies
+  $(r-1)s>(1+1/A-\varepsilon)N$, uniformly in the alphabet; hence the Gaussian
+  coefficients at fan-in two and in every fixed degree. Totally regular linear
+  maps are MDS, and the MDS property survives coordinatewise permutations of the
+  alphabet.
+\end{theorem}
+\begin{proof}
+  \leanok
+  Every layout passes a set of vertices reading $|X|$ inputs and holding $|Y|$
+  outputs with $|X|+|Y|=N$; the MDS property makes both mixed fibres singletons,
+  so at least $N$ symbols cross that cut.
 \end{proof}
 
 \begin{theorem}[Ledgers for gates of unbounded fan-in]
@@ -12428,7 +12505,8 @@ signals, codes, pruned transitions, and trees of regions.
     Complexity.Frontier.averageCase, Complexity.Frontier.averageCase_abs,
     Complexity.Frontier.averageCase_gaussian, Complexity.Frontier.FlatSumsetBias,
     Complexity.Frontier.FlatSumsetBias.rectangleBias,
-    Complexity.Frontier.averageCase_sumset}
+    Complexity.Frontier.averageCase_sumset,
+    Complexity.Frontier.averageCase_sumset_polynomial}
   \leanok
   \uses{lem:lowerbounds-frontier-counting, thm:lowerbounds-frontier-layouts}
   For a coherent sweep, a weight bounded by $a$ whose sum over every rectangle
@@ -12441,6 +12519,7 @@ signals, codes, pruned transitions, and trees of regions.
   a $1/2+b_n+2^{-\gamma n}$ fraction of inputs, for any $\gamma<\min(1,A\varepsilon)$;
   the same bound holds for the absolute correlation. For the Gaussian coefficient
   and for flat-source sumset extractors with error $b_n$, some $\gamma>0$ works.
+  Extractor error at most $Cn^{-a}$ gives agreement at most $1/2+(C+1)n^{-a}$.
 \end{theorem}
 \begin{proof}
   \leanok
@@ -12503,6 +12582,50 @@ signals, codes, pruned transitions, and trees of regions.
   every transition of a splice is a transition of one of its two parents. For
   trees, charge each input to a node of minimal rank whose interior is large but
   whose children's interiors are small.
+\end{proof}
+
+\begin{theorem}[Distribution-sensitive capacity]
+  \label{thm:lowerbounds-frontier-capacity}
+  \lean{Complexity.Frontier.Sweep.cappedCapacity, Complexity.Frontier.Sweep.rootCapacity,
+    Complexity.Frontier.Sweep.abs_sumOn_le_capped,
+    Complexity.Frontier.Sweep.cappedCapacity_le_root,
+    Complexity.Frontier.agreement_le_capped_sweeps,
+    Complexity.Frontier.agreement_le_root_sweeps,
+    Complexity.Frontier.Communication.rootPotential_le}
+  \leanok
+  \uses{thm:lowerbounds-frontier-pruning-tree}
+  In the weighted counting lemma each transition may be charged the smaller of its
+  frontier allowance and the absolute weight of the inputs using it. For a
+  predictor $g$ with coherent nested sweeps of its two output classes and a target
+  of rectangle bias $2b$, agreement is at most
+  $1/2+b+\tfrac12\sum\min(\lambda,p)$ over the unconditional transition masses $p$,
+  with $\lambda=(K-1)^2/|U|^n$, and at most $1/2+b+\tfrac12\sqrt\lambda\sum\sqrt p$.
+  A potential satisfying local square-root inequalities along an encoding bounds
+  the sum of square roots of codeword masses by its value at the root.
+\end{theorem}
+\begin{proof}
+  \leanok
+  Keep exactly the transitions of mass at least $\lambda$ and apply the pruning
+  bound; $\min(\lambda,p)\le\sqrt{\lambda p}$. The potential inequalities
+  telescope level by level, since each child has one parent.
+\end{proof}
+
+\begin{theorem}[Decomposable representations]
+  \label{thm:lowerbounds-frontier-decomposable}
+  \lean{Complexity.Frontier.Decomposable, Complexity.Frontier.Decomposable.ncard_le}
+  \leanok
+  \uses{lem:lowerbounds-frontier-counting}
+  Let a smooth decomposable DAG have unions on a common scope, products on disjoint
+  scopes, and leaves with at most one assignment, with no determinism or unique
+  certificate assumed. If its accepted set is $K$-rectangle-free with at least $K$
+  elements, $K\ge2$, then it has at most $(K-1)^2e+(K-1)^3p$ elements, where $e$
+  counts union edges and $p$ product nodes.
+\end{theorem}
+\begin{proof}
+  \leanok
+  A node and all contexts of its occurrences in accepting certificates form a
+  rectangle. Descend a certificate to the cardinality threshold and charge the
+  input to the union edge or product node reached there.
 \end{proof}
 
 \begin{theorem}[Independent median updates]

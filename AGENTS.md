@@ -115,6 +115,15 @@ same file are acceptable.
   extensions, and a scoped style-lint exemption until the consolidation plan
   in `ROADMAP.md` (item 7) migrates it. It keeps its MIT license
   (`Complexitylib/Algebraic/LICENSE`), so its files carry the MIT header.
+- **The frontier method is mirrored**: `Complexitylib/Circuits/Frontier/`,
+  `Complexitylib/Cslib/Circuit/Upstream.lean`, and `Complexitylib/Mathlib/Frontier/` are
+  generated from the-frontier-method by `scripts/sync_frontier.py <checkout> [rev]`. Do not
+  edit them by hand: change upstream, or add an anchored entry to the script's `RENAMES` or
+  `PATCHES` (for example, a fix for a new environment lint), then rerun it. Only
+  `Frontier/Cutwidth.lean` and `Frontier/Explicit.lean`, which connect the mirror to the
+  cutwidth development, are maintained here. In those files and others that import the
+  `Algebraic` modules, write `Cslib.Circuits.Circuit`, since `Circuit` resolves to the typed
+  `Complexity.Circuit`.
 - **Never shadow a root namespace**: an inner `namespace TM` block inside
   another namespace (e.g. producing `SAT.TM`) shadows the real `TM.*` API and
   forces `_root_.` escapes — the style linter rejects `_root_.` outside the

@@ -176,8 +176,9 @@ Gaussian edge-score decomposition supplies `A = 2p ≈ 0.28070` with
 
 ### Any alphabet, basis, and fan-in: the frontier method
 
-`Complexitylib.Circuits.Frontier` (namespace `Complexity.Frontier`) proves the same bound in
-a general form. Circuits may be over any finite alphabet `U`, any CSLib signature and
+`Complexitylib.Circuits.Frontier` (namespace `Complexity.Frontier`, mirrored from the
+frontier-method development by `scripts/sync_frontier.py`) proves the same bound in a general
+form. Circuits may be over any finite alphabet `U`, any CSLib signature and
 interpretation, and any accepting set, with fan-in `r`; only gates of positive arity are
 counted (`Cslib.Circuits.Circuit.innerSize`), so constant gates are free. A program of
 fan-in `r` compiles into an exact constraint network of maximum degree `r + 1` whose cycle
@@ -186,14 +187,19 @@ rank plus the number of inputs it reads is at most `(r − 1) s + 1`
 `Frontier.LayoutBound d A` bounds prefix cuts by `(A + η) β₁ + η |V| + C`, and
 `Frontier.lowerBound` gives `(r − 1) s > (1 + 1/A − ε) n` for dense rectangle-free sets
 with `log K = o(n)`. `Frontier.LayoutBound.of_orderingBound` turns the ordering bound above
-into `LayoutBound 3 A`, so the Gaussian coefficient carries over
-(`Frontier.lowerBound_gaussian`). A spanning-tree layout gives `LayoutBound d 1` in every
-degree (`Frontier.layoutBound_one`), hence `(r − 1) s > (2 − ε) n` for every fan-in.
+into `LayoutBound 3 A`, and the mirrored development also proves the Gaussian coefficient
+itself (`Frontier.lowerBound_gaussian`, `Frontier.gaussianCoefficient_eq_frontierCoefficient`).
+Gaussian vertex layouts give `LayoutBound d A_d` in every degree, with
+`A_d = 3d/(2d − 3) · arccos(2√(d − 1)/d)/π < 3/4` and `A_4 = 2/5`
+(`Frontier.layoutBound_degree`), hence `(r − 1) s > (1 + 1/A_(r+1) − ε) n` for every fan-in
+and `(7/4 − ε) n` gates at fan-in three (`Frontier.lowerBound_degree`,
+`Frontier.lowerBound_fanInThree`).
 
 The concrete family satisfies the frontier hypotheses
 (`Frontier.sourceReductionHardFamily_frontierHypotheses`), so it inherits these bounds over
 every Boolean basis, for verifier circuits, and with sublinear monoid-aggregate gates
-(`Frontier.sourceReductionHardFamily_lt_innerSize_gaussian` and its siblings). Weighted
+(`Frontier.sourceReductionHardFamily_lt_innerSize_gaussian`, `..._degree`, `..._fanInThree`,
+and siblings). Weighted
 peeling also bounds the agreement of the unpadded extractor with every circuit below
 `(L − ε) n` gates by `71/72 + 2^(−γ n)` (`Frontier.sourceReductionFamily_agreement_le`).
 The blueprint section *The frontier method* states every result, and the

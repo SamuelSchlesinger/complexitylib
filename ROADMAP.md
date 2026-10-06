@@ -357,14 +357,21 @@ accepting set, with fan-in `r`, counting only gates of positive arity against th
 rank under the layout hypothesis `LayoutBound (r + 1) A`. `LayoutBound.of_orderingBound`
 transfers the Gaussian ordering bound, so the explicit family needs more than
 `(4.5625 - ε) n` gates of positive arity over every Boolean basis with constants free,
-and `(r - 1) s > (2 - ε) n` for every fan-in `r` from spanning-tree layouts
-(`Frontier.sourceReductionHardFamily_lt_innerSize_gaussian`, `..._all_fanIn`). Weighted
+and `(r - 1) s > (1 + 1/A_(r+1) - ε) n` for every fan-in `r` from Gaussian vertex layouts
+in degree `d`, with `A_d = 3d/(2d - 3) · arccos(2√(d - 1)/d)/π < 3/4` and `A_4 = 2/5`, so
+`(7/4 - ε) n` gates at fan-in three (`Frontier.sourceReductionHardFamily_lt_innerSize_gaussian`,
+`..._degree`, `..._fanInThree`). The mirror is refreshed by `scripts/sync_frontier.py`; it
+keeps upstream's degree-generic Gaussian proof alongside the cubic one here, and
+`Frontier.gaussianCoefficient_eq_frontierCoefficient` checks that the binary coefficients
+agree. Weighted
 peeling gives the average case at the same coefficient; the explicit extractor, with
 error `35/72`, agrees with every such circuit on at most a `71/72 + 2^(-γ n)` fraction
 (`Frontier.sourceReductionFamily_agreement_le`). The development also checks signal
 hypergraph cuts and their submodularity, exact linear syndrome counts, transition codes,
-pruning, trees of regions, monoid ledgers, linear maps with dual-number linearization,
-and independent median updates; the
+pruning, distribution-sensitive transition masses and square-root moments, trees of
+regions, decomposable union/product DAGs, mixed input-output fibers and MDS maps, monoid
+ledgers, linear maps with dual-number linearization, polynomially small average-case
+advantage from polynomially small extractor error, and independent median updates; the
 [research note](research/circuit-lower-bound-frontiers/frontier-method/index.md) records
 what each refinement still needs.
 
@@ -551,15 +558,17 @@ can retain all its inputs; the audit records exact obstructions to those local s
   wiring network, `FourN`, `Nondeterministic`, `Forget`, and `AverageCase` are special
   cases of the frontier method at `U = Bool`, `r = 2`. Derive their public theorems from
   the general ones, then retire the duplicated network and counting layers. The cubic
-  `Compression` is the degree-three case of the frontier method's degree-generic one.
-  Keep `OrderingBound`, whose logarithmic error is sharper than `LayoutBound`'s, as the
-  interface to the Gaussian layouts.
-- [ ] **Layout coefficients below one in degree `d ≥ 4`.** `layoutBound_one` gives
-  `(r - 1) s > (2 - ε) n` for fan-in `r ≥ 3`. Expanding high-degree vertices into
-  subcubic port trees, applying the cubic layout bound, and projecting the order back
-  needs a congestion bound for the projection, together with size, degree,
-  connectivity, and cycle-rank preservation, on the irregular graphs the compiler
-  produces.
+  `Compression` is the degree-three case of the mirrored degree-generic one, and the
+  kernel, crossing, second-moment, and star lemmas of `Cutwidth.Gaussian` duplicate the
+  mirrored ones, whose kernels are also degree-generic; the band-jump and vertex-score
+  layouts still use the cubic copies. Keep `OrderingBound`, whose logarithmic error is
+  sharper than `LayoutBound`'s, as the interface to them.
+- [x] **Layout coefficients below one in degree `d ≥ 4`.** Done upstream and mirrored:
+  Gaussian vertex layouts on multigraphs with parallel edges give `LayoutBound d A_d`
+  with `A_d < 3/4` (`Frontier.layoutBound_degree`), `A_4 = 2/5`
+  (`Frontier.layoutBound_two_fifths`), and `(7/4 - ε) n` at fan-in three. Open: whether a
+  joint degree/correlation analysis, joint signal routing, or subcubic port-tree
+  projection improves `A_d`.
 - [ ] **Capacity supply theorems.** The frontier method's counting inequalities accept
   distinct signals, any determining transition code, pruned transition sets with a
   tail budget, and joint merge boundaries of a tree of regions. Each needs a universal

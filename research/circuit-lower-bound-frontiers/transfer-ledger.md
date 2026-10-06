@@ -160,10 +160,11 @@ For arbitrary fan-in `k`, the identity `E-V=(k-1)s-n` does not supply a cubic
 compiler. A general `k`-argument gate cannot necessarily be simulated by `k-1`
 binary gates over the same alphabet: even three-input majority needs more than
 two binary Boolean gates. The frontier method instead compiles fan-in `k` into a
-network of maximum degree `k+1` with cycle rank at most `(k-1)s+1-n`, and a spanning
-tree layout in every fixed degree (`Complexity.Frontier.layoutBound_one`) gives the
-checked bound `(k-1)s > (2-epsilon)n`. The proposed coefficient `L/(k-1)` needs a
-layout coefficient below one in degree `k+1`, which is open.
+network of maximum degree `k+1` with cycle rank at most `(k-1)s+1-n`. Gaussian vertex
+layouts in every fixed degree (`Complexity.Frontier.layoutBound_degree`) give the checked
+bound `(k-1)s > (1+1/a_(k+1)-epsilon)n` with `a_d < 3/4` and `a_4 = 2/5`, hence
+`(7/4-epsilon)n` gates at fan-in three; spanning trees give the simpler `(2-epsilon)n`.
+The proposed coefficient `L/(k-1)` needs `a_(k+1)` at the binary level, which is open.
 
 The polynomial-gate transfer is now Lean-checked in
 [`MultiOutput/Polynomial.lean`](../../Complexitylib/Algebraic/LowerBound/Cutwidth/MultiOutput/Polynomial.lean).
