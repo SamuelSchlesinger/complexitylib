@@ -134,6 +134,65 @@ theorem card_le_card_outCut_of_walks [Fintype E] {ι : Type*} (L : Set V) {X : F
   · by_contra hne
     exact hdisj i hi j hj hne (hf i hi).1 (hij ▸ (hf j hj).1)
 
+/-- **Disjoint walks onto a set of outputs.** If vertex-disjoint walks indexed by `X` end at
+outputs with labels in `Y`, and `Y` has at most `|X|` labels, then every label in `Y` is the
+target of one of the walks. -/
+theorem exists_target_eq_of_walks {ι κ : Type*} {X : Finset ι} {Y : Finset κ}
+    {walk : ι → List V} {src : ι → V} {output : κ → V} {target : ι → κ}
+    (hwalk : ∀ i ∈ X, G.IsDirWalk (walk i) (src i) (output (target i)))
+    (hdisj : ∀ i ∈ X, ∀ j ∈ X, i ≠ j → (walk i).Disjoint (walk j))
+    (hY : ∀ i ∈ X, target i ∈ Y) (hcard : Y.card ≤ X.card) {j : κ} (hj : j ∈ Y) :
+    ∃ i ∈ X, target i = j := by
+  have himg : X.image target = Y := Finset.eq_of_subset_of_card_le
+    (fun j hj => by
+      obtain ⟨i, hi, rfl⟩ := Finset.mem_image.1 hj
+      exact hY i hi)
+    (by rw [Finset.card_image_of_injOn (injOn_target_of_walks hwalk hdisj)]; exact hcard)
+  exact Finset.mem_image.1 (himg ▸ hj)
+
+/-- **Walks leaving `L`.** If vertex-disjoint walks indexed by `X` start in `L` and end at
+outputs with labels in `Y`, then `|X|` is at most the number of edges directed out of `L` plus
+the number of labels in `Y` whose outputs lie in `L`. -/
+theorem card_le_card_outCut_add_card_filter [Fintype E] {ι κ : Type*} (L : Set V)
+    {X : Finset ι} {Y : Finset κ} {walk : ι → List V} {src : ι → V} {output : κ → V}
+    {target : ι → κ} (hwalk : ∀ i ∈ X, G.IsDirWalk (walk i) (src i) (output (target i)))
+    (hdisj : ∀ i ∈ X, ∀ j ∈ X, i ≠ j → (walk i).Disjoint (walk j))
+    (hsrc : ∀ i ∈ X, src i ∈ L) (hY : ∀ i ∈ X, target i ∈ Y) :
+    X.card ≤ (outCut G L).card + (Y.filter fun j => output j ∈ L).card := by
+  have hin : (X.filter fun i => output (target i) ∈ L).card ≤
+      (Y.filter fun j => output j ∈ L).card := by
+    refine Finset.card_le_card_of_injOn target (fun i hi => ?_)
+      ((injOn_target_of_walks hwalk hdisj).mono (Finset.filter_subset _ _))
+    simp only [Finset.coe_filter, Set.mem_ofPred_eq] at hi ⊢
+    exact ⟨hY i hi.1, hi.2⟩
+  have hout : (X.filter fun i => output (target i) ∉ L).card ≤ (outCut G L).card :=
+    card_le_card_outCut_of_walks L (fun i hi => hwalk i (Finset.mem_of_mem_filter i hi))
+      (fun i hi j hj => hdisj i (Finset.mem_of_mem_filter i hi) j (Finset.mem_of_mem_filter j hj))
+      (fun i hi => hsrc i (Finset.mem_of_mem_filter i hi)) fun i hi => (Finset.mem_filter.1 hi).2
+  have := Finset.card_filter_add_card_filter_not (s := X) fun i => output (target i) ∈ L
+  omega
+
+/-- **Walks entering `L`.** If vertex-disjoint walks indexed by `X` start outside `L` and end at
+outputs with labels in `Y`, and `Y` has at most `|X|` labels, then at least as many edges are
+directed into `L` as there are labels in `Y` whose outputs lie in `L`. -/
+theorem card_filter_le_card_outCut_compl [Fintype E] {ι κ : Type*} (L : Set V)
+    {X : Finset ι} {Y : Finset κ} {walk : ι → List V} {src : ι → V} {output : κ → V}
+    {target : ι → κ} (hwalk : ∀ i ∈ X, G.IsDirWalk (walk i) (src i) (output (target i)))
+    (hdisj : ∀ i ∈ X, ∀ j ∈ X, i ≠ j → (walk i).Disjoint (walk j))
+    (hsrc : ∀ i ∈ X, src i ∉ L) (hY : ∀ i ∈ X, target i ∈ Y) (hcard : Y.card ≤ X.card) :
+    (Y.filter fun j => output j ∈ L).card ≤ (outCut G Lᶜ).card := by
+  set X' := X.filter fun i => output (target i) ∈ L
+  have hsub : Y.filter (fun j => output j ∈ L) ⊆ X'.image target := by
+    intro j hj
+    rw [Finset.mem_filter] at hj
+    obtain ⟨i, hi, rfl⟩ := exists_target_eq_of_walks hwalk hdisj hY hcard hj.1
+    exact Finset.mem_image.2 ⟨i, Finset.mem_filter.2 ⟨hi, hj.2⟩, rfl⟩
+  refine (Finset.card_le_card hsub).trans (Finset.card_image_le.trans ?_)
+  exact card_le_card_outCut_of_walks Lᶜ (fun i hi => hwalk i (Finset.mem_of_mem_filter i hi))
+    (fun i hi j hj => hdisj i (Finset.mem_of_mem_filter i hi) j (Finset.mem_of_mem_filter j hj))
+    (fun i hi => hsrc i (Finset.mem_of_mem_filter i hi))
+    fun i hi => by simpa using (Finset.mem_filter.1 hi).2
+
 /-- **One walk family.** If `X` and `Y` are equally large, the inputs in `X` lie in `L`, and
 the outputs in `Y` lie outside `L`, then at least `|X|` edges are directed out of `L`. -/
 theorem card_le_card_cross [Fintype E] {N : ℕ} {input output : Fin N → V}

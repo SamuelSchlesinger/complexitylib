@@ -335,6 +335,7 @@ public import Complexitylib.Algebraic.LowerBound.Cutwidth.Gaussian.Edge.Exact
 public import Complexitylib.Algebraic.LowerBound.Cutwidth.Gaussian.Edge.Decay
 public import Complexitylib.Algebraic.LowerBound.Cutwidth.Gaussian
 public import Complexitylib.Algebraic.LowerBound.Cutwidth.Superconcentrator
+public import Complexitylib.Algebraic.LowerBound.Cutwidth.Concentrator
 
 /-!
 # The cutwidth lower bound

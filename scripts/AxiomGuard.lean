@@ -185,6 +185,13 @@ def headlineTheorems : List Name := [
   `Algebraic.Cutwidth.Multigraph.Superconcentrator.eventually_le_card_edges,
   `Algebraic.Cutwidth.Multigraph.Superconcentrator.eventually_fifty_div_nine_sub_mul_le_card_edges,
   `Algebraic.Cutwidth.Multigraph.Superconcentrator.eventually_le_card_vertices,
+  -- Concentrators: the cut lemma and the n + m + (3.5625 - o(1)) min(m, n - m) edge bound
+  `Algebraic.Cutwidth.Multigraph.Concentrator.exists_le_card_cut,
+  `Algebraic.Cutwidth.Multigraph.Concentrator.le_of_orderingBound,
+  `Algebraic.Cutwidth.Multigraph.Concentrator.eventually_le_card_edges,
+  `Algebraic.Cutwidth.Multigraph.Concentrator.eventually_le_card_edges_half,
+  (`Algebraic.Cutwidth.Multigraph.Concentrator).str
+    "eventually_fiftyNine_div_eighteen_sub_mul_le_card_edges",
   -- The frontier method: any alphabet, basis, and fan-in, with constant gates free
   `Complexity.Frontier.Sweep.ncard_le,
   `Complexity.Frontier.lowerBound,
