@@ -147,6 +147,16 @@ def headlineTheorems : List Name := [
   `Complexity.Smolensky.parity_size_lower_bound,
   `Complexity.xorBool_not_mem_AC0Mod_three,
   `Complexity.not_TC0_subset_AC0Mod_three,
+  -- PPZ coding lemma, IPZ sparsification, and Σ₃^k ≥ 2^((1/k - o(1)) n) for subcube dispersers
+  `Complexity.ClauseSet.sum_two_rpow_average_card_forced_le,
+  `Complexity.ClauseSet.sum_two_rpow_card_isolatedDirections_div_le,
+  `Complexity.ClauseSet.sparsification,
+  `Complexity.CNF.sparsification,
+  `Complexity.ClauseSet.card_solutions_le_of_neighbors,
+  `Complexity.CNF.card_accepting_le_of_not_containsSubcube,
+  `Complexity.eventually_two_rpow_le_sigmaThreeSize,
+  `Complexity.sourceReductionHardFamily_two_rpow_le_sigmaThreeSize,
+  `Complexity.sourceReductionHardFamily_two_rpow_le_piThreeSize,
   -- Khrapchenko with k shared gates: parity needs n²/(k+1) - (k+1) AND/OR gates
   `Algebraic.KW.SharedProgram.sq_card_edges_le,
   `Algebraic.KW.SharedProgram.parity_sq_le_gates,

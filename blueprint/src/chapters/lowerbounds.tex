@@ -15387,6 +15387,265 @@ Tamaki, MFCS 2016, for non-explicit quadratic extractors).
   generators for $\cc{AC}^0$ would build on it.
 \end{proof}
 
+\subsection{Depth-three circuits and subcube dispersers}
+\label{sec:lowerbounds-depth-three}
+
+A $\Sigma_3^k$ formula is an OR of $k$-CNFs. Paturi, Pudl\'ak and Zane's
+satisfiability coding lemma shows that parity needs $\Sigma_3^k$ size about
+$2^{n/k}$. The development below proves the same exponent for every dense
+\emph{subcube disperser}: a function whose accepted inputs contain no subcube of
+dimension $o(n)$. It combines the coding lemma with the sparsification lemma of
+Impagliazzo, Paturi and Zane. For comparison, Frankl, Gryaznov and Talebanfard
+(ITCS 2022) prove $\Sigma_3^3 \ge 2^{0.064n}$ and $\Sigma_3^k \ge 2^{n/(10k)}$
+for affine dispersers through the switching lemma. A subcube is an affine
+subspace, so dense affine dispersers for sublinear dimension are subcube
+dispersers, and the bound below has exponent $1/k - o(1)$ for them. Parity,
+which accepts no subcube of dimension one and is the OR of $2^{n/k-1}$ $k$-CNFs
+when $k$ divides $n$, shows that $1/k$ cannot be improved.
+
+\begin{definition}[Clause sets, subcubes, and isolation]
+  \label{def:lowerbounds-clause-sets}
+  \lean{Complexity.ClauseSet, Complexity.ClauseSet.Sat, Complexity.ClauseSet.solutions,
+    Complexity.CNF.toClauseSet, Complexity.ClauseSet.toCNF, Complexity.ClauseSet.occurrences,
+    Complexity.CNF.occurrences, Complexity.ClauseSet.neighbors, Complexity.BitString.flipOn,
+    Complexity.ContainsSubcube, Complexity.isolatedDirections}
+  \leanok
+  \uses{def:lowerbounds-normal-forms}
+  A clause set over $N$ variables is a finite set of clauses, each a finite set
+  of literals; $x$ satisfies it when every clause has a true literal, and
+  $\mathrm{sol}(\psi)$ is its set of solutions. A CNF has the clause set of its
+  clauses, and a clause set is listed as a CNF; both translations preserve the
+  accepted inputs and do not increase the width. The occurrences of a variable
+  are the clauses that mention it (for a CNF, counted with multiplicity). Two
+  distinct variables are neighbours in the co-occurrence graph when some clause
+  mentions both. For $T\subseteq[N]$, $x\oplus e_T$ flips the coordinates in
+  $T$. A set $S$ contains a subcube of dimension $d$ when some $a$ and some set
+  $J$ of $d$ coordinates have $a\oplus e_T\in S$ for every $T\subseteq J$. The
+  isolated directions of $x$ in $S$ are the $i$ with $x\oplus e_i\notin S$.
+\end{definition}
+
+\begin{definition}[The PPZ decoder]
+  \label{def:lowerbounds-ppz-decoder}
+  \lean{Complexity.ClauseSet.forced, Complexity.ClauseSet.decodeValue,
+    Complexity.ClauseSet.decodeUpTo, Complexity.ClauseSet.decode}
+  \leanok
+  \uses{def:lowerbounds-clause-sets}
+  Fix a clause set $\psi$ and an order $\sigma$ of the variables, a permutation
+  placing $v$ at position $\sigma(v)$. On input $y$ the decoder processes the
+  variables in this order. At $v$, if some clause has a literal on $v$ and all
+  its other literals are on earlier variables and false under the values already
+  decoded, it sets $v$ to satisfy such a literal (positive if some such literal is
+  positive); otherwise it sets $v := y_v$. The forced variables
+  $\mathrm{forced}_\sigma(x)$ are those at which the first rule fires on input
+  $y = x$.
+\end{definition}
+
+\begin{lemma}[Satisfiability coding lemma, decoder form]
+  \label{lem:lowerbounds-ppz-coding}
+  \lean{Complexity.ClauseSet.decode_eq_of_agree,
+    Complexity.ClauseSet.sum_two_pow_card_forced_le,
+    Complexity.ClauseSet.sum_two_rpow_average_card_forced_le,
+    Complexity.ClauseSet.card_isolatedDirections_mul_factorial_le,
+    Complexity.ClauseSet.sum_two_rpow_card_isolatedDirections_div_le}
+  \leanok
+  \uses{def:lowerbounds-ppz-decoder}
+  Let $x$ be a solution of $\psi$. On every input that agrees with $x$ outside
+  $\mathrm{forced}_\sigma(x)$ the decoder outputs $x$, so
+  $\sum_{x\in\mathrm{sol}(\psi)} 2^{|\mathrm{forced}_\sigma(x)|}\le 2^N$ for every
+  order $\sigma$. With $E(x)$ the average of $|\mathrm{forced}_\sigma(x)|$ over all
+  $N!$ orders, $\sum_{x} 2^{E(x)}\le 2^N$. If every clause has at most $k$
+  literals and $x$ has $\iota(x)$ isolated directions in $\mathrm{sol}(\psi)$, then
+  $\iota(x)\cdot N!\le k\sum_\sigma|\mathrm{forced}_\sigma(x)|$, and so, for
+  $k\ge1$, $\sum_{x\in\mathrm{sol}(\psi)} 2^{\iota(x)/k}\le 2^N$.
+\end{lemma}
+\begin{proof}
+  \leanok
+  Induction along $\sigma$: before $v$ the decoder holds $x$, the first rule
+  fires at $v$ on the decoded values exactly when it fires on $x$, and then every
+  forcing literal is the unique true literal of its clause under $x$. So the sets
+  of inputs agreeing with distinct solutions off their forced variables are
+  disjoint, and each has $2^{|\mathrm{forced}_\sigma(x)|}$ elements. Average over
+  the orders with Jensen's inequality for $t\mapsto 2^t$. If $i$ is isolated, a
+  clause falsified by $x\oplus e_i$ has its literal on $i$ as its only true
+  literal under $x$; $i$ is forced whenever $\sigma$ places $i$ after the other
+  variables of that clause, which happens for exactly a $1/|V|\ge1/k$ fraction of
+  the orders, $V$ the variables of the clause, by the symmetry
+  $\sigma\mapsto\sigma\circ(i\;j)$.
+\end{proof}
+
+\begin{theorem}[Sparsification lemma]
+  \label{thm:lowerbounds-sparsification}
+  \lean{Complexity.ClauseSet.sparsification, Complexity.CNF.sparsification}
+  \leanok
+  \uses{def:lowerbounds-clause-sets}
+  For every $k$ and $\varepsilon>0$ there is $c$ such that every CNF $\varphi$ of
+  width at most $k$ over $N$ variables has a list of at most $2^{\varepsilon N}$
+  CNFs of width at most $k$, in each of which every variable occurs in at most $c$
+  clauses, such that each of them accepts only inputs that $\varphi$ accepts and
+  every input that $\varphi$ accepts is accepted by one of them. The same holds
+  for clause sets (Impagliazzo, Paturi and Zane, JCSS 2001).
+\end{theorem}
+\begin{proof}
+  \leanok
+  Follow Calabro, Impagliazzo and Paturi (CCC 2006; Calabro's thesis, Chapter 5).
+  A set $H$ of $h\ge1$ literals is a heavy heart for size $c>h$ when at least
+  $\theta_{c-h}$ clauses of size $c$ contain it. While there is one, choose $c$
+  smallest and then $h$ largest, and branch: add the clause $H$, or add every
+  petal $C\setminus H$; reduce by removing clauses that strictly contain others.
+  The potential $\sum_C 2^{|C|}$ decreases, so every solution reaches a sparse
+  leaf containing it. Along a branch, introduced clauses are new and distinct,
+  so the length is at most their number. Fewer than $2\theta_{c-h}$ new clauses of
+  size $c$ containing a fixed clause of size $h$ are present at any node (taking
+  the first node containing them all, a larger heart would contradict the
+  choice), and a sparse leaf has at most $2N\theta_{c-1}$ clauses of size $c$; so
+  at most $2N\theta_{c-1}+\sum_{h<c}2\theta_{c-h}I_h$ clauses of size $c$ are
+  introduced, $I_h$ the number of size $h$. With $X=2k\alpha$ and
+  $\theta_j=\alpha X^{2j-1}$ this is at most $NX^{2c-1}$, so branches have length
+  at most $\Lambda=NkX^{2k}$ and at most $(k-1)N/\alpha$ petal steps. A leaf is
+  determined by the positions of its petal steps, so there are at most
+  $\sum_{j\le\rho}\binom{\Lambda}{j}\le e^{\Lambda/T}T^{\rho}$ leaves for every
+  $T\ge1$, which is at most $2^{\varepsilon N}$ for $T=MkX^{2k}$ and $\alpha$
+  large. In a sparse leaf every literal is in at most $\sum_{c<k}\theta_c$
+  clauses.
+\end{proof}
+
+\begin{lemma}[Moves]
+  \label{lem:lowerbounds-moves}
+  \lean{Complexity.ClauseSet.flipOn_mem_solutions_of_closed,
+    Complexity.ClauseSet.flipOn_biUnion_mem_solutions_of_separated}
+  \leanok
+  \uses{def:lowerbounds-clause-sets}
+  Let $x$ be a solution of $\psi$. If $x\oplus e_T$ is a solution, $T'\subseteq T$,
+  and no clause mentions both a variable of $T'$ and one of $T\setminus T'$,
+  then $x\oplus e_{T'}$ is a solution; in particular every connected component of
+  a move in the co-occurrence graph is a move. If $x\oplus e_{T_j}$ is a solution
+  for each $j\in s$ and no clause mentions variables of two of the $T_j$, then
+  $x\oplus e_{\bigcup_{j\in J}T_j}$ is a solution for every $J\subseteq s$.
+\end{lemma}
+\begin{proof}
+  \leanok
+  Each clause agrees, on its variables, with $x$ or with one moved solution.
+\end{proof}
+
+\begin{lemma}[Local far-isolation]
+  \label{lem:lowerbounds-far-isolation}
+  \lean{Complexity.ClauseSet.card_compl_isolatedDirections_le,
+    Complexity.ClauseSet.card_neighbors_le_occurrences_mul}
+  \leanok
+  \uses{lem:lowerbounds-moves}
+  If every variable has at most $\Delta$ neighbours in the co-occurrence graph of
+  $\psi$ and $\mathrm{sol}(\psi)$ contains no subcube of dimension $D$, then every
+  solution has at most $(D-1)(\Delta+1)$ non-isolated directions. In a clause set
+  of width $k$, a variable occurring in $c$ clauses has at most $c(k-1)$
+  neighbours.
+\end{lemma}
+\begin{proof}
+  \leanok
+  A largest set of pairwise non-adjacent non-isolated directions spans a subcube
+  of solutions by Lemma~\ref{lem:lowerbounds-moves}, so it has fewer than $D$
+  elements, and every non-isolated direction lies in its closed neighbourhood.
+\end{proof}
+
+\begin{theorem}[Subcube-free $k$-CNFs have few solutions]
+  \label{thm:lowerbounds-subcube-free-kcnf}
+  \lean{Complexity.ClauseSet.card_solutions_le_of_neighbors,
+    Complexity.ClauseSet.card_solutions_le_of_not_containsSubcube,
+    Complexity.CNF.card_accepting_le_of_not_containsSubcube}
+  \leanok
+  \uses{lem:lowerbounds-ppz-coding, thm:lowerbounds-sparsification,
+    lem:lowerbounds-far-isolation}
+  If every clause of $\psi$ has at most $k\ge1$ literals, every variable has at
+  most $\Delta$ neighbours, and $\mathrm{sol}(\psi)$ contains no subcube of
+  dimension $D$, then
+  $|\mathrm{sol}(\psi)|\le 2^{(1-1/k)N+(D-1)(\Delta+1)/k}$. Consequently, for every
+  $k\ge1$ and $\varepsilon>0$ there is $C\ge0$ such that every CNF of width at most
+  $k$ over $N$ variables whose accepted inputs contain no subcube of dimension $D$
+  accepts at most $2^{(1-1/k+\varepsilon)N+CD}$ inputs; the same holds for clause
+  sets.
+\end{theorem}
+\begin{proof}
+  \leanok
+  Every solution has at least $N-(D-1)(\Delta+1)$ isolated directions
+  (Lemma~\ref{lem:lowerbounds-far-isolation}), and
+  $\sum_x2^{\iota(x)/k}\le2^N$ (Lemma~\ref{lem:lowerbounds-ppz-coding}). In
+  general, sparsify with $\varepsilon$
+  (Theorem~\ref{thm:lowerbounds-sparsification}): each of the at most
+  $2^{\varepsilon N}$ pieces has degree at most $c(k-1)$ and only solutions of the
+  original, so no subcube of dimension $D$; take $C=(c(k-1)+1)/k$.
+\end{proof}
+
+\begin{definition}[$\Sigma_3^k$ and $\Pi_3^k$ formulas]
+  \label{def:lowerbounds-depth-three}
+  \lean{Complexity.IsSigmaThree, Complexity.IsPiThree, Complexity.sigmaThreeSize,
+    Complexity.piThreeSize}
+  \leanok
+  \uses{def:lowerbounds-normal-forms}
+  A $\Sigma_3^k$ formula for $f\colon\{0,1\}^N\to\{0,1\}$ is a list of CNFs, each
+  of width at most $k$, whose OR computes $f$; a $\Pi_3^k$ formula is a list of
+  DNFs of width at most $k$ whose AND computes $f$. $\Sigma_3^k(f)$ and
+  $\Pi_3^k(f)$ are the least lengths of such lists (the top fan-in), which every
+  reasonable size measure of these formulas bounds from above.
+\end{definition}
+
+\begin{theorem}[Depth-three lower bounds for subcube dispersers]
+  \label{thm:lowerbounds-depth-three-dispersers}
+  \lean{Complexity.exists_isSigmaThree, Complexity.exists_isSigmaThree_length_eq_sigmaThreeSize,
+    Complexity.sigmaThreeSize_le_length, Complexity.isPiThree_iff_isSigmaThree_map_neg,
+    Complexity.piThreeSize_eq_sigmaThreeSize_not, Complexity.IsSigmaThree.card_accepting_le,
+    Complexity.card_accepting_le_sigmaThreeSize,
+    Complexity.eventually_two_rpow_le_sigmaThreeSize,
+    Complexity.eventually_two_rpow_le_piThreeSize,
+    Complexity.not_containsSubcube_of_rectangleFree,
+    Complexity.eventually_two_rpow_le_sigmaThreeSize_of_rectangleFree}
+  \leanok
+  \uses{def:lowerbounds-depth-three, thm:lowerbounds-subcube-free-kcnf,
+    def:lowerbounds-frontier-sweep}
+  For $k\ge1$, $\Sigma_3^k(f)$ is attained, and $\Pi_3^k(f)=\Sigma_3^k(\neg f)$.
+  For every $k\ge1$ and $\varepsilon>0$ there is $C\ge0$ such that every $f$ whose
+  accepted inputs contain no subcube of dimension $D$ has
+  $|f^{-1}(1)|\le\Sigma_3^k(f)\,2^{(1-1/k+\varepsilon)N+CD}$. Hence, for a family
+  $f_n$ whose accepted sets eventually contain no subcube of dimension
+  $D_n=o(n)$ and have $n\log2-\log|f_n^{-1}(1)|=o(n)$, for every $k\ge1$ and
+  $\varepsilon>0$, eventually $\Sigma_3^k(f_n)\ge2^{(1/k-\varepsilon)n}$; under
+  the same hypotheses on the rejected sets, eventually
+  $\Pi_3^k(f_n)\ge2^{(1/k-\varepsilon)n}$. A $K$-rectangle-free set contains no
+  subcube of dimension $2m$ when $K\le2^m$, so the $\Sigma_3^k$ bound holds for
+  every family that is eventually $K_n$-rectangle-free with $\log K_n=o(n)$ and
+  has density deficit $o(n)$.
+\end{theorem}
+\begin{proof}
+  \leanok
+  The OR of the minterms of $f^{-1}(1)$ is a $\Sigma_3^1$ formula; De Morgan
+  duality exchanges the two kinds of formulas. Each CNF of a $\Sigma_3^k$ formula
+  for $f$ accepts only inputs of $f$, so it contains no subcube of dimension $D$,
+  and Theorem~\ref{thm:lowerbounds-subcube-free-kcnf} bounds what it accepts. In
+  the asymptotic bound apply this with $\varepsilon/3$, using $CD_n\le\varepsilon
+  n/3$ and $|f_n^{-1}(1)|\ge2^{(1-\varepsilon/3)n}$ for large $n$. A subcube of
+  dimension $2m$ with free coordinates $J_1\sqcup J_2$, $|J_1|=|J_2|=m$, contains
+  the rectangle for the cut $J_1$ whose sides are the $2^m$ restrictions of its
+  points to $J_1$ and to its complement.
+\end{proof}
+
+\begin{corollary}[An explicit function in $\cc{P}$]
+  \label{cor:lowerbounds-depth-three-explicit}
+  \lean{Complexity.sourceReductionHardFamily_two_rpow_le_sigmaThreeSize,
+    Complexity.sourceReductionHardFamily_two_rpow_le_piThreeSize}
+  \leanok
+  \uses{thm:lowerbounds-depth-three-dispersers, thm:lowerbounds-frontier-explicit}
+  For the polynomial-time family $\mathrm{sourceReductionHardFamily}$ of
+  Theorem~\ref{thm:lowerbounds-frontier-explicit}, for every $k\ge1$ and
+  $\varepsilon>0$ and all large $n$, every OR of CNFs of width at most $k$ and
+  every AND of DNFs of width at most $k$ computing it has at least
+  $2^{(1/k-\varepsilon)n}$ CNFs, respectively DNFs.
+\end{corollary}
+\begin{proof}
+  \leanok
+  Its accepted sets are eventually $K$-rectangle-free with $\log K=o(n)$ and
+  accept half of the cube. On inputs of positive length it is
+  $f(x)=g(x_1,\dots,x_{n-1})\oplus x_0$, so flipping $x_0$ exchanges accepted and
+  rejected inputs: the rejected sets have the same size and no larger subcubes.
+\end{proof}
+
 \section{Polynomial approximation and $\cc{AC}^0[3]$}
 \label{sec:lowerbounds-smolensky}
 
