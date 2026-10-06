@@ -7,7 +7,6 @@ Authors: Samuel Schlesinger
 module
 public import Complexitylib.Circuits.KarchmerWigderson.TopDown.Defs
 public import Complexitylib.Circuits.KarchmerWigderson.TopDown.Internal.Wires
-import Complexitylib.Circuits.KarchmerWigderson.TopDown.Majority.Internal.Bounds
 
 /-!
 # Korten's top-down communication adversary
@@ -21,6 +20,12 @@ for a protocol with at most `d+1` messages. Parity initialization then proves
 the communication lower bound and its exponential wire corollary in Theorem 3 of
 Oliver Korten, *Top-Down Lower Bounds for All Depths*, ECCC TR26-221 (2026),
 https://eccc.weizmann.ac.il/report/2026/221/.
+
+The gate-count protocol of `Circuit.exists_roundProtocol_of_gates` turns the same
+communication bound into `parity_gate_size_lower_bound`
+(`2^(ε n^(1/(rounds-1))) < 2(n + g)` for `g` internal gates) and hence
+`parity_superpolynomial_gates`: at every fixed depth, parity needs more than
+`C * n^k + C` internal gates for all sufficiently large `n`.
 -/
 
 public section
@@ -114,30 +119,16 @@ theorem parity_wire_lower_bound (rounds : ℕ) (hrounds : 2 ≤ rounds) :
       (2 : ℝ) ^ (ε * (n : ℝ) ^ (((rounds - 1 : ℕ) : ℝ)⁻¹)) < c.totalFanIn :=
   parity_wire_lower_bound_internal rounds hrounds
 
-/-- Every sufficiently large parity circuit of fixed depth at most `d ≥ 2`
-satisfies `2^(epsilon*n^(1/(d-1))) < 2 * (n + g)`, where `g` is the number of
-internal gates. -/
+/-- Gate-count form of Korten's Theorem 3. For every fixed depth bound
+`rounds ≥ 2`, all sufficiently large parity circuits over the unbounded De Morgan
+basis with `g` internal gates satisfy `2^(epsilon*n^(1/(rounds-1))) < 2 * (n + g)`.
+The constant depends only on `rounds`. -/
 theorem parity_gate_size_lower_bound (rounds : ℕ) (hrounds : 2 ≤ rounds) :
     ∃ ε : ℝ, 0 < ε ∧ ∃ n0 : ℕ, ∀ n : ℕ, n0 ≤ n → ∀ [NeZero n] (g : ℕ)
       (c : Circuit Basis.unboundedAndOr n 1 g), c.depth ≤ rounds →
       (∀ x, c.eval x 0 = Schnorr.xorBool n x) →
-      (2 : ℝ) ^ (ε * (n : ℝ) ^ (((rounds - 1 : ℕ) : ℝ)⁻¹)) < 2 * (n + g) := by
-  obtain ⟨ε, hε, n0, hcomm⟩ :=
-    KarchmerWigderson.parity_communication_lower_bound_internal.{0} rounds hrounds
-  refine ⟨ε, hε, n0, ?_⟩
-  intro n hn _ g c hdepth hcompute
-  by_contra hsmall
-  have hsize : ((2 * (n + g) : ℕ) : ℝ) ≤ (2 : ℝ) ^
-      (ε * (n : ℝ) ^ (((rounds - 1 : ℕ) : ℝ)⁻¹)) := by
-    push_cast
-    exact le_of_not_gt hsmall
-  obtain ⟨P, hP⟩ := exists_roundProtocol_of_gates c rounds hdepth 0
-  have hcost := hcomm n hn (M := Fin (2 * (n + g)))
-    (ε * (n : ℝ) ^ (((rounds - 1 : ℕ) : ℝ)⁻¹))
-    (mul_nonneg hε.le (Real.rpow_nonneg (by positivity) _)) (by simpa using hsize) le_rfl P
-  apply hcost
-  have he : (fun x => c.eval x 0) = Schnorr.xorBool n := funext hcompute
-  rwa [he] at hP
+      (2 : ℝ) ^ (ε * (n : ℝ) ^ (((rounds - 1 : ℕ) : ℝ)⁻¹)) < 2 * (n + g) :=
+  parity_gate_size_lower_bound_internal rounds hrounds
 
 /-- For any fixed depth bound `rounds` and polynomial parameters `k, C`, all
 sufficiently large unbounded AND/OR circuits of depth at most `rounds`
@@ -146,22 +137,7 @@ theorem parity_superpolynomial_gates (rounds k C : ℕ) :
     ∃ n0 : ℕ, ∀ n : ℕ, n0 ≤ n → ∀ [NeZero n] (g : ℕ)
       (c : Circuit Basis.unboundedAndOr n 1 g), c.depth ≤ rounds →
       (∀ x, c.eval x 0 = Schnorr.xorBool n x) →
-      C * n ^ k + C < g := by
-  let r := max rounds 2
-  have hr2 : 2 ≤ r := le_max_right rounds 2
-  obtain ⟨ε, hε, n1, hgate⟩ := parity_gate_size_lower_bound r hr2
-  have hexp : (0 : ℝ) < ((r - 1 : ℕ) : ℝ)⁻¹ := by
-    have : 0 < r - 1 := by omega
-    positivity
-  obtain ⟨n2, hpoly⟩ := eventually_poly_le_two_rpow_internal hexp hε k C
-  refine ⟨max n1 n2, ?_⟩
-  intro n hn _ g c hdepth hcompute
-  by_contra hle
-  have hg : g ≤ C * n ^ k + C := le_of_not_gt hle
-  have hlow := hgate n (le_of_max_le_left hn) g c (hdepth.trans (le_max_left rounds 2)) hcompute
-  have hup := hpoly n (le_of_max_le_right hn)
-  have hcast : (2 : ℝ) * ((n : ℝ) + (g : ℝ)) ≤ ((2 * (n + (C * n ^ k + C)) : ℕ) : ℝ) := by
-    exact_mod_cast (show 2 * (n + g) ≤ 2 * (n + (C * n ^ k + C)) by omega)
-  linarith
+      C * n ^ k + C < g :=
+  parity_superpolynomial_gates_internal rounds k C
 
 end Complexity.Circuit

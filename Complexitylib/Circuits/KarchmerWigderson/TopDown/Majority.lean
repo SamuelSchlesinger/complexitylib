@@ -22,6 +22,12 @@ for All Depths*, ECCC TR26-221 (2026),
 https://eccc.weizmann.ac.il/report/2026/221/. The majority predicate is the
 library's strict majority: ties are false, and both odd and even arities
 are covered. The circuit basis is unbounded AND/OR with free input negations.
+
+Besides the wire bound `majority_wire_lower_bound`, the gate-count protocol of
+`Circuit.exists_roundProtocol_of_gates` gives `majority_gate_size_lower_bound`
+(`2^(ε n^(1/(rounds-1))) < 2(n + g)` for `g` internal gates) and
+`majority_superpolynomial_gates`: at every fixed depth, strict majority needs more
+than `C * n^k + C` internal gates for all sufficiently large `n`.
 -/
 
 public section
@@ -87,8 +93,8 @@ end Complexity.KarchmerWigderson
 
 namespace Complexity.Circuit
 
-/-- Every sufficiently large strict-majority circuit of fixed depth at most `d ≥ 2`
-has more than `2^(epsilon*n^(1/(d-1)))` input-wire occurrences.
+/-- Every sufficiently large strict-majority circuit of depth at most `rounds ≥ 2`
+has more than `2^(epsilon*n^(1/(rounds-1)))` input-wire occurrences.
 Both odd and even input arities are covered, and per-input negations are free. -/
 theorem majority_wire_lower_bound (rounds : ℕ) (hrounds : 2 ≤ rounds) :
     ∃ ε : ℝ, 0 < ε ∧ ∃ n0 : ℕ, ∀ n : ℕ, n0 ≤ n → ∀ [NeZero n] (g : ℕ)
@@ -97,9 +103,9 @@ theorem majority_wire_lower_bound (rounds : ℕ) (hrounds : 2 ≤ rounds) :
       (2 : ℝ) ^ (ε * (n : ℝ) ^ (((rounds - 1 : ℕ) : ℝ)⁻¹)) < c.totalFanIn :=
   majority_wire_lower_bound_internal rounds hrounds
 
-/-- Every sufficiently large strict-majority circuit of fixed depth at most `d ≥ 2`
-satisfies `2^(epsilon*n^(1/(d-1))) < 2 * (n + g)`, where `g` is the number of
-internal gates. -/
+/-- Every sufficiently large strict-majority circuit of depth at most `rounds ≥ 2`
+with `g` internal gates satisfies `2^(epsilon*n^(1/(rounds-1))) < 2 * (n + g)`.
+The constant depends only on `rounds`. -/
 theorem majority_gate_size_lower_bound (rounds : ℕ) (hrounds : 2 ≤ rounds) :
     ∃ ε : ℝ, 0 < ε ∧ ∃ n0 : ℕ, ∀ n : ℕ, n0 ≤ n → ∀ [NeZero n] (g : ℕ)
       (c : Circuit Basis.unboundedAndOr n 1 g), c.depth ≤ rounds →

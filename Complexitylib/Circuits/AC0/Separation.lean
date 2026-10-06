@@ -6,16 +6,16 @@ Authors: Samuel Schlesinger
 
 module
 public import Complexitylib.Circuits.DepthClasses
-public import Complexitylib.Circuits.KarchmerWigderson.TopDown.Majority
 public import Complexitylib.Circuits.Smolensky
 public import Complexitylib.Circuits.Threshold.Parity
 public import Complexitylib.Circuits.XOR
 public import Complexitylib.Circuits.AC0.Separation.Internal
+public import Complexitylib.Circuits.AC0.Separation.Internal.Majority
 
 /-!
 # Separations for `AC0`, `AC0[3]`, and `TC0`
 
-The parity family `Schnorr.xorBool` and the majority family `majority` are not
+The parity family `Schnorr.xorBool` and the strict-majority family `majority` are not
 in the library's nonuniform `AC0`: no family of polynomial-size, constant-depth,
 unbounded-fan-in AND/OR circuits with free negation on gate inputs computes
 either family at every input length.
@@ -24,8 +24,9 @@ For parity, the proof normalizes each circuit to a negation-normal formula of no
 larger depth and polynomial size (`Circuit.outputAC0Formula_spec`) and
 contradicts the finite iterated-switching obstruction
 (`AC0Formula.parity_counting_obstruction`) at one explicit large input length.
-For majority, the proof applies the top-down Karchmer–Wigderson gate-count lower
-bound (`Circuit.majority_superpolynomial_gates`).
+For strict majority (`majority_not_mem_AC0`), the proof applies the top-down
+Karchmer–Wigderson gate-count lower bound (`Circuit.majority_superpolynomial_gates`);
+it lives in `Complexitylib.Circuits.AC0.Separation.Internal.Majority`.
 
 Since parity is in `TC0` (`xorBool_mem_TC0`), `AC0 ⊆ TC0` is strict, and since
 parity is not in `AC0[3]` (`xorBool_not_mem_AC0Mod_three`), `TC0` is not
@@ -42,22 +43,11 @@ unbounded-fan-in AND/OR circuits computes the parity family. -/
 theorem xorBool_not_mem_AC0 : Schnorr.xorBool ∉ AC0 :=
   xorBool_not_mem_AC0_internal
 
-/-- **Majority is not in `AC0`.** No polynomial-size, constant-depth family of
-unbounded-fan-in AND/OR circuits computes the majority family. -/
-theorem majority_not_mem_AC0 : (fun _ => majority) ∉ AC0 := by
-  intro hmem
-  obtain ⟨F, c, hcomputes, ⟨p, hp⟩, hdepth⟩ := mem_AC0_iff.mp hmem
-  obtain ⟨C, N, hbound⟩ := BigO.exists_nat_bound (BigO.of_polynomial_bound p hp)
-  obtain ⟨n₀, hn₀⟩ := Circuit.majority_superpolynomial_gates c p.natDegree C
-  let m := max n₀ N
-  have hdepth_m : (F.circuit (m + 1)).depth ≤ c := hdepth (m + 1)
-  have heval_m : ∀ x : BitString (m + 1), (F.circuit (m + 1)).eval x 0 = majority x :=
-    fun x => hcomputes.apply (m + 1) x
-  have hlt := hn₀ (m + 1) (by omega) (F.internalGateCount (m + 1))
-    (F.circuit (m + 1)) hdepth_m heval_m
-  have hsize_m : F.internalGateCount (m + 1) + 1 ≤ C * (m + 1) ^ p.natDegree :=
-    hbound (m + 1) (by omega)
-  omega
+/-- **Strict majority is not in `AC0`.** No polynomial-size, constant-depth family
+of unbounded-fan-in AND/OR circuits computes the strict-majority family
+`majority` (ties are rejected), at either parity of input length. -/
+theorem majority_not_mem_AC0 : (fun _ => majority) ∉ AC0 :=
+  majority_not_mem_AC0_internal
 
 /-- **`AC0` is strictly contained in `TC0`**, as nonuniform classes of Boolean
 function families. Parity separates them. -/

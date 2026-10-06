@@ -362,6 +362,28 @@ theorem exists_input_protocol_of_gates_internal (c : Circuit Basis.unboundedAndO
   rw [hx, hy]
   decide
 
+/-- One gate layer of the gate-count translation: if every input wire of `g`
+has a `d`-message protocol over wire-literal codes, so does the gate itself with
+one more message. -/
+private theorem exists_gate_protocol_of_gates (c : Circuit Basis.unboundedAndOr N M G) {d : ℕ}
+    (g : Gate Basis.unboundedAndOr (N + G))
+    (hwire : ∀ i, ∃ P : RoundProtocol (Fin N) (Fin (2 * (N + G))) d,
+      P.SolvesKW (fun x => c.wireValue x (g.inputs i))) :
+    ∃ P : RoundProtocol (Fin N) (Fin (2 * (N + G))) (d + 1),
+      P.SolvesKW (fun x => AndOrOp.eval g.op g.fanIn
+        (fun i => (g.negated i).xor (c.wireValue x (g.inputs i)))) := by
+  let code (i : Fin g.fanIn) : Fin (2 * (N + G)) :=
+    codeOfWire (g.inputs i) (g.negated i)
+  have hchild (i : Fin g.fanIn) :
+      ∃ P : RoundProtocol (Fin N) (Fin (2 * (N + G))) d,
+        P.SolvesKW (codeLiteral c (code i)) := by
+    obtain ⟨P, hP⟩ := hwire i
+    simpa only [code, codeLiteral_codeOfWire] using
+      RoundProtocol.exists_negated_internal hP (g.negated i)
+  obtain ⟨P, hP⟩ := RoundProtocol.exists_coded_gate_protocol_internal (0 : Fin N)
+    g.op code (codeLiteral c) hchild
+  exact ⟨P, by simpa only [code, codeLiteral_codeOfWire_apply] using hP⟩
+
 theorem exists_wire_protocol_of_gates_internal (c : Circuit Basis.unboundedAndOr N M G) (d : ℕ)
     (w : Fin (N + G)) (hw : c.wireDepth w ≤ d) :
     ∃ P : RoundProtocol (Fin N) (Fin (2 * (N + G))) d,
@@ -379,23 +401,15 @@ theorem exists_wire_protocol_of_gates_internal (c : Circuit Basis.unboundedAndOr
     let g := c.gates j
     rw [c.wireDepth_of_not_lt w hi] at hw
     change 1 + Fin.foldl g.fanIn (fun acc i => max acc (c.wireDepth (g.inputs i))) 0 ≤ d + 1 at hw
-    let code (i : Fin g.fanIn) : Fin (2 * (N + G)) :=
-      codeOfWire (g.inputs i) (g.negated i)
-    have hchild (i : Fin g.fanIn) :
-        ∃ P : RoundProtocol (Fin N) (Fin (2 * (N + G))) d,
-          P.SolvesKW (codeLiteral c (code i)) := by
-      have hmax := Algebraic.Fin.le_foldl_max (fun i => c.wireDepth (g.inputs i)) 0 i
-      obtain ⟨P, hP⟩ := ih (g.inputs i) (by omega)
-      simpa only [code, codeLiteral_codeOfWire] using
-        RoundProtocol.exists_negated_internal hP (g.negated i)
-    obtain ⟨P, hP⟩ := RoundProtocol.exists_coded_gate_protocol_internal (0 : Fin N)
-      g.op code (codeLiteral c) hchild
+    obtain ⟨P, hP⟩ := exists_gate_protocol_of_gates c g fun i =>
+      ih (g.inputs i)
+        (by have := Algebraic.Fin.le_foldl_max (fun i => c.wireDepth (g.inputs i)) 0 i; omega)
     refine ⟨P, ?_⟩
     have he : (fun x => c.wireValue x w) =
-        (fun x => AndOrOp.eval g.op g.fanIn (fun i => codeLiteral c (code i) x)) := by
+        (fun x => AndOrOp.eval g.op g.fanIn
+          (fun i => (g.negated i).xor (c.wireValue x (g.inputs i)))) := by
       funext x
       rw [c.wireValue_of_not_lt x w hi]
-      simp only [code, codeLiteral_codeOfWire_apply]
       rfl
     rw [he]
     exact hP
@@ -414,25 +428,10 @@ theorem exists_roundProtocol_of_gates_internal (c : Circuit Basis.unboundedAndOr
   | succ d =>
     change 1 + Fin.foldl g.fanIn (fun acc i => max acc (c.wireDepth (g.inputs i))) 0 ≤
       d + 1 at hdepth
-    let code (i : Fin g.fanIn) : Fin (2 * (N + G)) :=
-      codeOfWire (g.inputs i) (g.negated i)
-    have hchild (i : Fin g.fanIn) :
-        ∃ P : RoundProtocol (Fin N) (Fin (2 * (N + G))) d,
-          P.SolvesKW (codeLiteral c (code i)) := by
-      have hmax := Algebraic.Fin.le_foldl_max (fun i => c.wireDepth (g.inputs i)) 0 i
-      obtain ⟨P, hP⟩ := exists_wire_protocol_of_gates_internal c d (g.inputs i) (by omega)
-      simpa only [code, codeLiteral_codeOfWire] using
-        RoundProtocol.exists_negated_internal hP (g.negated i)
-    obtain ⟨P, hP⟩ := RoundProtocol.exists_coded_gate_protocol_internal (0 : Fin N)
-      g.op code (codeLiteral c) hchild
-    refine ⟨P, ?_⟩
-    have he : (fun x => c.eval x j) =
-        (fun x => AndOrOp.eval g.op g.fanIn (fun i => codeLiteral c (code i) x)) := by
-      funext x
-      simp only [code, codeLiteral_codeOfWire_apply]
-      rfl
-    rw [he]
-    exact hP
+    obtain ⟨P, hP⟩ := exists_gate_protocol_of_gates c g fun i =>
+      exists_wire_protocol_of_gates_internal c d (g.inputs i)
+        (by have := Algebraic.Fin.le_foldl_max (fun i => c.wireDepth (g.inputs i)) 0 i; omega)
+    exact ⟨P, hP⟩
 
 end Circuit
 end Complexity
