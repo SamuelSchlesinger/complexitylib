@@ -236,6 +236,15 @@ def headlineTheorems : List Name := [
   `Complexity.Frontier.sourceReductionHardFamily_lt_innerSize_nondeterministic,
   `Complexity.Frontier.sourceReductionHardFamily_lt_innerGates_aggregate,
   `Complexity.Frontier.sourceReductionFamily_agreement_le,
+  -- Exponentially small correlation with quadratic forms below 2.78n gates
+  `Complexity.Correlation.correlation_sq_mul_two_pow_cutRank_le,
+  `Complexity.Correlation.correlation_sq_le_of_unread,
+  `Complexity.Correlation.correlation_sq_le_of_layout,
+  `Complexity.Correlation.eventually_correlation_le,
+  `Complexity.Correlation.eventually_correlation_le_gaussian,
+  `Complexity.Correlation.exists_submatrixRobust,
+  `Complexity.Correlation.eventually_correlation_hardForm_le,
+  `Complexity.Correlation.exists_eventually_correlation_hardForm_le,
   -- Multi-output circuits: ordering transfer, rank-cut bound, totally regular linear maps
   `Algebraic.Cutwidth.MultiOutput.exists_rank,
   `Algebraic.Cutwidth.MultiOutput.blockRank_add_blockRank_le,
