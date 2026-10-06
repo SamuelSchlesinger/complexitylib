@@ -10459,6 +10459,73 @@ Theorem~\ref{thm:lowerbounds-algebraic-explicit-four-n}.
   or $\min(m,n-m)>A(\varepsilon n-1)$ exceeds the logarithmic term, or $M<n+m-1$.
 \end{proof}
 
+\begin{definition}[Acyclic multigraphs]
+  \label{def:lowerbounds-algebraic-acyclic}
+  \lean{Algebraic.Cutwidth.Multigraph.Acyclic,
+    Algebraic.Cutwidth.Multigraph.acyclic_iff_forall_not_transGen}
+  \leanok
+  \uses{def:lowerbounds-algebraic-superconcentrator}
+  A multigraph is acyclic when some numbering of its vertices increases strictly along every
+  edge, from its first endpoint to its second. A finite multigraph is acyclic exactly when no
+  vertex reaches itself along a directed walk of positive length.
+\end{definition}
+
+\begin{lemma}[Eliminating an input of an acyclic concentrator]
+  \label{lem:lowerbounds-algebraic-concentrator-elimination}
+  \lean{Algebraic.Cutwidth.Multigraph.Concentrator.exists_eliminate}
+  \leanok
+  \uses{def:lowerbounds-algebraic-concentrator, def:lowerbounds-algebraic-acyclic}
+  Let $G$ be an acyclic $(n+1,m)$-concentrator whose inputs have in-degree zero, with
+  $2\le m\le n$. Removing at least two edges of $G$ and replacing its inputs leaves an acyclic
+  $(n,m)$-concentrator on the same vertices and outputs whose inputs have in-degree zero.
+\end{lemma}
+\begin{proof}
+  \leanok
+  Walks from inputs visit a vertex of in-degree zero only at their start. Every input has an
+  edge leaving it. If some input has two, remove its edges and drop it. Otherwise every input
+  $x$ has one edge, to its head, and distinct inputs have distinct heads, as two inputs with a
+  common head cannot be routed together. If the head $u$ of some input $x$ is entered only by
+  the edge from $x$, then $u$ is neither an input nor an output (every output is reached from
+  $m$ inputs other than $x$); remove that edge and make $u$ an input in place of $x$, whose walks
+  continue from $u$. Otherwise let $w$ be a first non-input vertex at an edge in a topological
+  order. Edges entering $w$ come from inputs whose head is $w$, so there is at most one, and then
+  $w$ would be a head entered only by it; so no edge enters $w$, $w$ is no output, and its edges
+  can be removed. The last two steps keep the number of inputs and remove an edge, so induction
+  on the number of edges concludes.
+\end{proof}
+
+\begin{theorem}[Acyclic concentrators need $2n+(2.5625-o(1))\min(m,n-m)$ edges]
+  \label{thm:lowerbounds-algebraic-acyclic-concentrator}
+  \lean{Algebraic.Cutwidth.Multigraph.Concentrator.le_of_orderingBound_of_acyclic,
+    Algebraic.Cutwidth.Multigraph.Concentrator.two_mul_le_card_edges_add_min,
+    Algebraic.Cutwidth.Multigraph.Concentrator.eventually_le_card_edges_of_acyclic_of_orderingBound,
+    Algebraic.Cutwidth.Multigraph.Concentrator.eventually_le_card_edges_of_acyclic,
+    Algebraic.Cutwidth.Multigraph.Concentrator.eventually_two_mul_add_two_mul_le_card_edges_of_acyclic}
+  \leanok
+  \uses{lem:lowerbounds-algebraic-concentrator-elimination,
+    thm:lowerbounds-algebraic-concentrator}
+  Let $G$ be an acyclic $(n,m)$-concentrator with $M$ edges whose inputs have in-degree zero,
+  with $2\le m<n$, and $h=\min(m,n-m)$. Then $M\ge2n-h-1$, and under
+  $\mathrm{OrderingBound}(A,\eta,C)$ with $A+\eta\ge0$,
+  $h\le(A+\eta)\max\{M-(2n-h),0\}+3\log_2(2M)+C$. Hence if $A>0$ and every $\eta>0$ admits such
+  a $C$, then for every $\varepsilon>0$ and all large $n$, uniformly in $m$, every such $G$ has
+  at least $2n+(1/A-1)h-\varepsilon n$ edges: with the edge-score coefficient
+  $2n+(\kappa-1)h-\varepsilon n$, $\kappa=\pi/(3\arccos\tfrac{1+2\sqrt2}{4})\approx3.5625$, and
+  with $A=1/3$, $2n+2h-\varepsilon n$. For $m\ge n/2$ this is
+  Theorem~\ref{thm:lowerbounds-algebraic-concentrator}; for $m<n/2$ it is larger, about $2.64n$
+  rather than $2.14n$ at $m=n/4$, and it exceeds Pinsker's $2n-2$ whenever $h$ grows linearly.
+\end{theorem}
+\begin{proof}
+  \leanok
+  For $m\ge n/2$ apply Theorem~\ref{thm:lowerbounds-algebraic-concentrator}, as
+  $n+m=2n-h$. For $m<n/2$, eliminate $n-2m$ inputs by
+  Lemma~\ref{lem:lowerbounds-algebraic-concentrator-elimination}, removing at least $2(n-2m)$
+  edges, and apply Theorem~\ref{thm:lowerbounds-algebraic-concentrator} to the resulting
+  $(2m,m)$-concentrator with $M'\le M-2(n-2m)$ edges: $m\le(A+\eta)\max\{M'-3m,0\}+3\log_2(2M')+C$
+  with $M'-3m\le M-(2n-m)$, and $M'\ge3m-1$ gives $M\ge2n-m-1$. The asymptotic form follows as
+  for Theorem~\ref{thm:lowerbounds-algebraic-concentrator}.
+\end{proof}
+
 \begin{definition}[Hyperconcentrator]
   \label{def:lowerbounds-algebraic-hyperconcentrator}
   \lean{Algebraic.Cutwidth.Multigraph.Hyperconcentrator,

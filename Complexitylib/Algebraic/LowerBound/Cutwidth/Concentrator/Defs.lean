@@ -20,6 +20,10 @@ by vertex-disjoint directed walks, one from each input of `X`. The outputs are n
 The walks are not required to be paths, and they may pass through other inputs and outputs.
 Every path is a walk, so a graph that is a concentrator in the usual sense, with paths, is one
 in this sense, and lower bounds for this notion apply to it.
+
+A multigraph is *acyclic* (`Multigraph.Acyclic`) when its vertices can be numbered so that every
+edge leads from a lower to a higher number: a topological order. For finite multigraphs this
+holds exactly when there is no directed cycle.
 -/
 
 @[expose] public section
@@ -46,5 +50,10 @@ structure Concentrator {n m : ℕ} (input : Fin n → V) (output : Fin m → V) 
     ∃ (target : Fin n → Fin m) (walk : Fin n → List V),
       (∀ i ∈ X, G.IsDirWalk (walk i) (input i) (output (target i))) ∧
         ∀ i ∈ X, ∀ j ∈ X, i ≠ j → (walk i).Disjoint (walk j)
+
+/-- `G` is acyclic: some numbering of the vertices increases strictly along every edge, from its
+first endpoint to its second. -/
+def Acyclic : Prop :=
+  ∃ rank : V → ℕ, ∀ e, rank (G.fst e) < rank (G.snd e)
 
 end Algebraic.Cutwidth.Multigraph

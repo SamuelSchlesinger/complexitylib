@@ -192,6 +192,9 @@ def headlineTheorems : List Name := [
   `Algebraic.Cutwidth.Multigraph.Concentrator.eventually_le_card_edges_half,
   (`Algebraic.Cutwidth.Multigraph.Concentrator).str
     "eventually_fiftyNine_div_eighteen_sub_mul_le_card_edges",
+  `Algebraic.Cutwidth.Multigraph.acyclic_iff_forall_not_transGen,
+  `Algebraic.Cutwidth.Multigraph.Concentrator.exists_eliminate,
+  `Algebraic.Cutwidth.Multigraph.Concentrator.eventually_le_card_edges_of_acyclic,
   -- Hyperconcentrators: the cut lemma and the (3.78 - o(1)) N edge bound
   `Algebraic.Cutwidth.Multigraph.Superconcentrator.hyperconcentrator,
   `Algebraic.Cutwidth.Multigraph.Hyperconcentrator.exists_le_card_cut,

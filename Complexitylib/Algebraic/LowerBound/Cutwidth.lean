@@ -336,6 +336,7 @@ public import Complexitylib.Algebraic.LowerBound.Cutwidth.Gaussian.Edge.Decay
 public import Complexitylib.Algebraic.LowerBound.Cutwidth.Gaussian
 public import Complexitylib.Algebraic.LowerBound.Cutwidth.Superconcentrator
 public import Complexitylib.Algebraic.LowerBound.Cutwidth.Concentrator
+public import Complexitylib.Algebraic.LowerBound.Cutwidth.Concentrator.Acyclic
 public import Complexitylib.Algebraic.LowerBound.Cutwidth.Hyperconcentrator
 public import Complexitylib.Algebraic.LowerBound.Cutwidth.MultiOutput.DFT
 
