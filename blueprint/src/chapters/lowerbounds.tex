@@ -152,7 +152,7 @@ charges only conjunctions and disjunctions, while the hierarchy counts every
 gate; its $\cc{AC}^0$ circuits have unbounded fan-in, with negations free and
 adding no depth; mass production charges negations, conjunctions, and
 disjunctions but not constants or identities. Each node names its model and
-what it counts. Nechiporuk's bound and Karchmer--Wigderson are stated for the
+what it counts. Nechiporuk's formula bound and Karchmer--Wigderson are stated for the
 imported library's formula types, not for circuits, and the Waring bound is an
 identity of polynomials with no circuit in its statement. Conditional complexity is defined in this library,
 although it lives in CSLib's namespace. The consolidation plan in
@@ -305,6 +305,70 @@ chapter.
   \leanok
   Count subfunctions on each block of a partition of the inputs;
   rectangle-freeness forces the maximal number on every block at once.
+\end{proof}
+
+\begin{theorem}[Nechiporuk for circuits with local shared gates]
+  \label{thm:lowerbounds-algebraic-nechiporuk-blockspan}
+  \lean{Algebraic.Nechiporuk.exists_sharedProgram_of_circuit,
+    Algebraic.Nechiporuk.eventually_sq_le_size_active,
+    Algebraic.Nechiporuk.eventually_mul_le_size_of_rectangleFree_active,
+    Algebraic.Nechiporuk.isLittleO_size_of_rectangleFree_active,
+    Algebraic.Nechiporuk.eventually_sq_le_size_of_gateBlockSpan_le}
+  \leanok
+  \uses{thm:lowerbounds-algebraic-nechiporuk}
+  Under the hypotheses of Theorem~\ref{thm:lowerbounds-algebraic-nechiporuk},
+  split the inputs into consecutive blocks of size
+  $b = 3 + c(\lfloor\log_2 n\rfloor + 1)$, and consider single-output circuits
+  over the full binary basis; a shared gate is a gate of fan-out at least two.
+  If the shared gates whose input cone meets a block have total fan-out
+  $a_i$ on block $i$, and $20\,b\sum_i a_i \le n^2$, then for all large $n$,
+  $n^2 \le 64(c+3)\log_2 n\,(2\,\mathrm{size} + 1)$, and under this budget the
+  size is superlinear. In particular, suppose every shared gate has a
+  syntactic input cone meeting at most $\mathrm{span}(n)$ blocks, so that it
+  depends on fewer than $(\mathrm{span}(n) + 1)\,b = O(\mathrm{span}(n)\log n)$
+  inputs, and that the total fan-out $s(n)$ of the shared gates satisfies
+  $40(c+3)\lfloor\log_2 n\rfloor\cdot\mathrm{span}(n)\cdot s(n) \le n^2$. Then
+  the same bound holds. For $\mathrm{span}(n) = O(1)$ this allows superlinear
+  shared fan-out, up to $\Theta(n^2/\log n)$, but only from shared gates with
+  logarithmic-size input cones.
+\end{theorem}
+\begin{proof}
+  \leanok
+  Cut the circuit at its shared gates to obtain a sequence of formulas in
+  which each shared value is a fresh variable. On a block of inputs, a shared
+  formula with no leaf in the current block is constant once the outside
+  inputs are fixed, so only shared gates whose cone meets the block enter the
+  subfunction count of Theorem~\ref{thm:lowerbounds-algebraic-nechiporuk}.
+  Summed over the blocks, each shared gate is charged its fan-out times the
+  number of blocks its cone meets, which is at most
+  $\mathrm{span}(n)\,s(n)$ in total.
+\end{proof}
+
+\begin{corollary}[Nechiporuk for circuits with sublinear shared fan-out]
+  \label{cor:lowerbounds-algebraic-nechiporuk-shared}
+  \lean{Algebraic.Nechiporuk.eventually_sq_le_size,
+    Algebraic.Nechiporuk.eventually_mul_le_size_of_rectangleFree,
+    Algebraic.Nechiporuk.isLittleO_size_of_rectangleFree}
+  \leanok
+  \uses{thm:lowerbounds-algebraic-nechiporuk-blockspan}
+  Under the hypotheses of Theorem~\ref{thm:lowerbounds-algebraic-nechiporuk},
+  if $20\,s(n) \le n$ for all large $n$, then every single-output
+  full-binary-basis circuit computing the length-$n$ member whose shared gates
+  have total fan-out at most $s(n)$ satisfies
+  $n^2 \le 128(c+3)\log_2 n\,(\mathrm{size} + s(n) + 1)$. If $s(n) = o(n)$,
+  such circuits have superlinear size. Only the reuse of computed gate outputs
+  is restricted: the size is unrestricted and input variables may be read any
+  number of times. With $s = 0$ this is the formula bound of
+  Theorem~\ref{thm:lowerbounds-algebraic-nechiporuk}; it does not apply to
+  general circuits, whose shared fan-out is typically proportional to their
+  size.
+\end{corollary}
+\begin{proof}
+  \leanok
+  Every block sees at most the total shared fan-out, so with $n/b$ blocks the
+  active budget of
+  Theorem~\ref{thm:lowerbounds-algebraic-nechiporuk-blockspan} is at most
+  $20\,b\,(n/b)\,s(n) \le n^2$.
 \end{proof}
 
 \begin{theorem}[Karchmer--Wigderson]
@@ -469,6 +533,44 @@ chapter.
   fan-out.
 \end{proof}
 
+\begin{theorem}[Khrapchenko's bound with shared gates and XOR gates]
+  \label{thm:lowerbounds-algebraic-khrapchenko-shared-xor}
+  \lean{Algebraic.KW.Extended.exists_sharedProgram_of_circuit,
+    Algebraic.KW.Extended.khrapchenkoBound_of_circuit,
+    Algebraic.KW.Extended.sq_card_edges_le_cost,
+    Algebraic.KW.Extended.parity_sq_le_cost,
+    Algebraic.KW.Extended.mul_le_cost_of_parity,
+    Algebraic.KW.Extended.isLittleO_cost_of_parity,
+    Algebraic.KW.Extended.threshold_mul_le_cost,
+    Algebraic.KW.Extended.majority_mul_le_cost,
+    Algebraic.KW.Extended.majority_sq_le_cost_of_odd,
+    Algebraic.KW.Extended.mul_le_cost_of_majority,
+    Algebraic.KW.Extended.mul_le_cost_of_majority_of_four_mul_le,
+    Algebraic.KW.Extended.isLittleO_cost_of_majority}
+  \leanok
+  \uses{thm:lowerbounds-algebraic-khrapchenko-shared}
+  Extend the De Morgan basis by binary XOR and EQUIV gates. If a single-output
+  circuit over this basis computes $f$, has $c$ AND and OR gates, at most $r$
+  XOR and EQUIV gates, and at most $k$ gates of fan-out at least two, then some
+  $K$-shared program with $K \le k + 2r$ computes $f$ with at most
+  $c + k + 2r + 1$ leaves reading an input. Hence
+  $|E(A,B)|^2 \le (k + 2r + 1)(c + k + 2r + 1)\,|A|\,|B|$ whenever $f$ is $1$ on
+  $A$ and $0$ on $B$; in particular parity needs
+  $n^2 \le (k + 2r + 1)(c + k + 2r + 1)$, with analogous bounds for threshold
+  functions and majority, and if $k(n) = o(n)$ and $r(n) = o(n)$ then circuits
+  for parity or majority have $\omega(n)$ AND and OR gates.
+\end{theorem}
+\begin{proof}
+  \leanok
+  Process the gates from the last one down as for De Morgan circuits. An XOR
+  or EQUIV gate of any fan-out becomes two shared values, the gate's two
+  arguments, followed by the four-leaf formula
+  $(z_1 \wedge \neg z_2) \vee (\neg z_1 \wedge z_2)$ or
+  $(z_1 \wedge z_2) \vee (\neg z_1 \wedge \neg z_2)$ substituted for the gate;
+  its leaves read only shared values, so it adds no input leaf and two shared
+  values. The bounds then follow from Khrapchenko's bound for shared programs.
+\end{proof}
+
 \begin{proposition}[Parity with few shared gates: upper bound]
   \label{prop:lowerbounds-algebraic-khrapchenko-shared-upper}
   \lean{Algebraic.KW.SharedProgram.exists_parity_mul_gates_le,
@@ -494,6 +596,125 @@ chapter.
   $z \oplus \varphi = (z \wedge \neg\varphi) \vee (\neg z \wedge \varphi)$ uses
   $\varphi$ and its De Morgan dual, so $s \le 2m^2 + k(4m^2 + 3)$, and
   $(k + 1) m \le n + k$.
+\end{proof}
+
+\begin{definition}[$\cc{MCSP}$ as a Boolean function, algebraic model]
+  \label{def:lowerbounds-algebraic-mcsp}
+  \lean{Algebraic.MCSP.inputEquiv, Algebraic.MCSP.pairTruthTable,
+    Algebraic.MCSP.mcspScalar, Algebraic.MCSP.mcspCostScalar,
+    Algebraic.MCSP.exactCostSet}
+  \leanok
+  \uses{def:meta-mcsp}
+  For fixed $n$ and $s$, $\cc{MCSP}_{n,s}$ is the Boolean function on $N = 2^n$
+  truth-table bits that accepts exactly the truth tables whose (weighted)
+  circuit complexity over a given signature is at most $s$. Truth tables are
+  indexed big-endian: the first input bit selects the lower or upper half, and
+  pairing two $2^n$-bit tables gives the table of the multiplexer on the first
+  bit. This differs from the language $\cc{MCSP}$ of
+  Definition~\ref{def:meta-mcsp}, which uses encoded instances, the
+  library's AND/OR basis, and little-endian indexing. The main cost model is
+  the imported De Morgan signature with only AND and OR charged.
+\end{definition}
+
+\begin{theorem}[Every truth-table bit of $\cc{MCSP}$ is essential]
+  \label{thm:lowerbounds-algebraic-mcsp-essential}
+  \lean{Algebraic.MCSP.mcspCostTarget_deMorgan_inputSupport_eq_univ,
+    Algebraic.MCSP.mcspCostTarget_deMorgan_binaryCost_lower_bound,
+    Algebraic.MCSP.mcspCostTarget_deMorgan_size_lower_bound,
+    Algebraic.MCSP.mcspTarget_binary_inputSupport_eq_univ,
+    Algebraic.MCSP.mcspTarget_binary_size_lower_bound}
+  \leanok
+  \uses{def:lowerbounds-algebraic-mcsp}
+  Suppose $\cc{MCSP}_{n,s}$ (De Morgan AND/OR cost, or full binary basis
+  gate count with $s \ge 1$) is non-constant. Then every circuit computing
+  it reads all $2^n$ inputs. Hence every fan-in-two circuit computing it has
+  at least $2^n - 1$ gates, and every De Morgan circuit computing the De Morgan
+  variant has at least $2^n - 1$ AND and OR gates.
+\end{theorem}
+\begin{proof}
+  \leanok
+  Flipping input variables permutes the truth-table coordinates transitively
+  and preserves complexity (negations are free, or are absorbed into binary
+  gates). A non-constant function that is invariant under a transitive group
+  of coordinate permutations depends on every coordinate. Then apply the
+  frontier bounds on the input support.
+\end{proof}
+
+\begin{theorem}[Exact-complexity subcube repetition]
+  \label{thm:lowerbounds-algebraic-mcsp-subcube}
+  \lean{Algebraic.MCSP.costComplexity_muxTarget_self,
+    Algebraic.MCSP.costComplexity_muxTarget_ge_add_one,
+    Algebraic.MCSP.mcspCostScalar_pairTruthTable_left_eq_true_iff,
+    Algebraic.MCSP.mcspCostScalar_pairTruthTable_right_eq_true_iff}
+  \leanok
+  \uses{def:lowerbounds-algebraic-mcsp}
+  In the De Morgan AND/OR cost model, the multiplexer of $u$ with itself on a
+  fresh first variable has the same complexity as $u$. If $u_0 \ne u_1$ and
+  one of them has positive complexity, the multiplexer of $u_0$ and $u_1$ has
+  complexity strictly greater than both. Consequently, if $T$ has complexity
+  exactly $s \ge 1$, the pair $(T', T)$ (and likewise $(T, T')$) is a yes
+  instance of $\cc{MCSP}_{n+1,s}$ if and only if $T' = T$.
+\end{theorem}
+\begin{proof}
+  \leanok
+  Restrict the first variable. If $u_0 \ne u_1$, some charged gate reads the
+  first variable, and fixing it eliminates that gate.
+\end{proof}
+
+\begin{theorem}[Non-vacuity and hypothesis-free $\cc{MCSP}$ bounds]
+  \label{thm:lowerbounds-algebraic-mcsp-nonvacuity}
+  \lean{Algebraic.MCSP.costComplexity_andTarget,
+    Algebraic.MCSP.exactCostSet_deMorgan_one_nonempty,
+    Algebraic.MCSP.mcspCostScalar_deMorgan_succ_ne_of_mem_exactCostSet,
+    Algebraic.MCSP.mcspCostTarget_deMorgan_binaryCost_lower_bound_of_mem_exactCostSet,
+    Algebraic.MCSP.mcspCostTarget_deMorgan_one_binaryCost_lower_bound,
+    Algebraic.MCSP.mcspCostTarget_deMorgan_one_size_lower_bound,
+    Algebraic.MCSP.mcsp_one_formula_leaves_lower_bound}
+  \leanok
+  \uses{thm:lowerbounds-algebraic-mcsp-essential,
+    thm:lowerbounds-algebraic-mcsp-subcube}
+  The conjunction of two variables has De Morgan AND/OR complexity exactly
+  $1$. If some $2^n$-bit truth table has complexity exactly $s \ge 1$, then
+  $\cc{MCSP}_{n+1,s}$ in this model is non-constant. In particular, for
+  $N = 2^{n+3}$, every De Morgan circuit computing $\cc{MCSP}_{n+3,1}$ has at
+  least $N - 1$ AND and OR gates. Every fan-in-two circuit, over any basis,
+  has at least $N - 1$ gates. Every De Morgan formula has at least $N$ leaves.
+\end{theorem}
+\begin{proof}
+  \leanok
+  One gate suffices. Both variables are essential, and a circuit reads at
+  most one more input than its cost. For $T$ of complexity $s$, the pair
+  $(T, T)$ is accepted and $(\lnot T, T)$ is rejected.
+\end{proof}
+
+\begin{theorem}[Communication, formula, and sharing bounds for $\cc{MCSP}$]
+  \label{thm:lowerbounds-algebraic-mcsp-formula}
+  \lean{Algebraic.MCSP.mcsp_singleCut_card_exactCostSet_le,
+    Algebraic.MCSP.khrapchenkoBound_mcsp_lower_bound,
+    Algebraic.MCSP.mcsp_formula_leaves_lower_bound,
+    Algebraic.MCSP.mcsp_sharedGateCount_cost_lower_bound,
+    Algebraic.MCSP.mcsp_card_image_restrictTo_le_subfunctions_leftBlock,
+    Algebraic.MCSP.mcsp_binaryFormula_leavesIn_leftHalf_lower_bound}
+  \leanok
+  \uses{thm:lowerbounds-algebraic-mcsp-subcube}
+  Let $E$ be the set of $2^n$-bit truth tables of De Morgan AND/OR
+  complexity exactly $s \ge 1$, and suppose $E$ is nonempty. Write
+  $N = 2^{n+1}$. For any circuit computing $\cc{MCSP}_{n+1,s}$, every wire cut
+  separating the two halves of the truth table carries at least $\log_2 |E|$
+  bits. Every De Morgan formula computing it has at least $N$ leaves. A De
+  Morgan circuit with at most $k$ shared gates satisfies
+  $N \le (k+1)(\mathrm{cost} + k + 1)$. Every binary formula $F$ satisfies
+  $|E| \le 2 \cdot 16^{\ell}$, where $\ell$ is the number of leaves of $F$ in
+  the left half. All of these bounds are at most linear in $N$.
+\end{theorem}
+\begin{proof}
+  \leanok
+  \uses{thm:lowerbounds-algebraic-khrapchenko-shared,
+    thm:lowerbounds-algebraic-nechiporuk}
+  The diagonal tables $(T, T)$ for $T \in E$ are yes instances whose one-bit
+  flips are all no instances, and mixing two diagonals across the halves
+  gives a no instance. Apply the single-cut, Khrapchenko, and Nechiporuk
+  arguments.
 \end{proof}
 
 \begin{theorem}[Polynomial circuit size hierarchy]
@@ -12268,7 +12489,15 @@ no superlinear unrestricted circuit theorem follows from them alone.
     Algebraic.Cutwidth.MultiOutput.card_leftFibre_le,
     Algebraic.Cutwidth.MultiOutput.card_rightFibre_le,
     Algebraic.Cutwidth.MultiOutput.blockRank_add_blockRank_le,
-    Algebraic.Cutwidth.MultiOutput.blockRank_add_blockRank_le_of_trace}
+    Algebraic.Cutwidth.MultiOutput.blockRank_add_blockRank_le_of_trace,
+    Algebraic.Cutwidth.MultiOutput.card_pow_inputsIn_le_of_leftFibre,
+    Algebraic.Cutwidth.MultiOutput.card_pow_inputsIn_le_of_leftFibre_of_trace,
+    Algebraic.Cutwidth.MultiOutput.card_pow_compl_inputsIn_le_of_rightFibre,
+    Algebraic.Cutwidth.MultiOutput.card_pow_compl_inputsIn_le_of_rightFibre_of_trace,
+    Algebraic.Cutwidth.MultiOutput.blockRank_le_forward,
+    Algebraic.Cutwidth.MultiOutput.blockRank_le_forward_of_trace,
+    Algebraic.Cutwidth.MultiOutput.blockRank_le_backward,
+    Algebraic.Cutwidth.MultiOutput.blockRank_le_backward_of_trace}
   \leanok
   \uses{def:lowerbounds-algebraic-multi-output,
     lem:lowerbounds-algebraic-single-cut-fibres}
@@ -12283,6 +12512,9 @@ no superlinear unrestricted circuit theorem follows from them alone.
     \operatorname{rank} M[Y_T, X_S] + \operatorname{rank} M[Y_S, X_T]
       \le |A| + |B|.
   \]
+  Each side is bounded separately: $|U|^{|X_S|}\le|U|^{|A|}D_T$ and
+  $|U|^{|X_T|}\le|U|^{|B|}D_S$, so $\operatorname{rank} M[Y_T,X_S]\le|A|$
+  and $\operatorname{rank} M[Y_S,X_T]\le|B|$.
 \end{theorem}
 \begin{proof}
   \leanok
@@ -12294,7 +12526,9 @@ no superlinear unrestricted circuit theorem follows from them alone.
   $|U|^{|A|+|B|}$ keys. For a linear map, a left fibre minus its base point
   lies in the kernel of $M[Y_T,X_S]$, which has $|F|^{|X_S|-r_1}$ elements;
   symmetrically for right fibres, and comparing exponents gives
-  $r_1+r_2\le|A|+|B|$.
+  $r_1+r_2\le|A|+|B|$. For the one-sided bounds, vary only the inputs in
+  $X_S$ (respectively $X_T$): then only the forward (respectively backward)
+  signals can change.
 \end{proof}
 
 \begin{definition}[Totally regular and Cauchy matrices]
@@ -12393,6 +12627,39 @@ no superlinear unrestricted circuit theorem follows from them alone.
   $(1+1/A-\varepsilon)N$ gates, choose $\eta=A^2\varepsilon/2$, and compare:
   the cycle term is at most $(1-A\varepsilon/2)N$, and the logarithmic term
   is $O(\log N)$.
+\end{proof}
+
+\begin{theorem}[Rectangular totally regular maps need $m+(1/(2p)-\varepsilon)N$ gates]
+  \label{thm:lowerbounds-algebraic-totally-regular-rect}
+  \lean{Algebraic.Cutwidth.MultiOutput.TotallyRegular.submatrix_rows,
+    Algebraic.Cutwidth.MultiOutput.sub_one_le_of_totallyRegular_rect,
+    Algebraic.Cutwidth.MultiOutput.eventually_lt_size_of_totallyRegular_rect_of_orderingBound,
+    Algebraic.Cutwidth.MultiOutput.eventually_lt_size_of_totallyRegular_rect,
+    Algebraic.Cutwidth.MultiOutput.eventually_lt_size_of_totallyRegular_rect_thirtyTwo_div_nine}
+  \leanok
+  \uses{thm:lowerbounds-algebraic-totally-regular, lem:lowerbounds-algebraic-cauchy}
+  Row submatrices of totally regular matrices are totally regular. Let $M$ be
+  an $m\times N$ totally regular matrix over a finite field with $N\le m$, and
+  let a circuit over any signature with fan-in at most two compute
+  $x\mapsto Mx$ with $s$ gates. Under $\mathrm{OrderingBound}(A,\eta,C)$ with
+  $A+\eta\ge0$,
+  \[
+    N-1 \le (A+\eta)\max\{s-m,0\} + 3\log_2(N+3s) + C .
+  \]
+  If the ordering hypothesis holds with coefficient $A>0$ at every positive
+  slack, then for every $\varepsilon>0$ and all large $N$, uniformly in
+  $m\ge N$, the field and the signature, every such circuit has more than
+  $m+(1/A-\varepsilon)N$ gates; with $A=2p$ this is
+  $m+(1/(2p)-\varepsilon)N$, and more than $m+(32/9-\varepsilon)N$.
+\end{theorem}
+\begin{proof}
+  \leanok
+  For $N\ge2$ distinct rows of $M$ differ (a $2\times2$ minor is
+  nonsingular), so the $m$ outputs lie on distinct wires. Repeatedly delete
+  the last gate, dropping the at most one output it carries together with its
+  row of $M$. After $m-N$ steps a circuit with $s-(m-N)$ gates computes an
+  $N\times N$ totally regular row submatrix, and
+  Theorem~\ref{thm:lowerbounds-algebraic-totally-regular} applies.
 \end{proof}
 
 \begin{definition}[Local linear realizations and polynomial gates]
@@ -12824,7 +13091,13 @@ no superlinear unrestricted circuit theorem follows from them alone.
     Algebraic.Cutwidth.MultiOutput.card_supportedKernel_le,
     Algebraic.Cutwidth.MultiOutput.card_pow_le_supportedKernel,
     Algebraic.Cutwidth.MultiOutput.card_pow_le_supportedKernel_of_trace,
-    Algebraic.Cutwidth.MultiOutput.apply_eq_zero_of_closed_of_trace}
+    Algebraic.Cutwidth.MultiOutput.apply_eq_zero_of_closed_of_trace,
+    Algebraic.Cutwidth.MultiOutput.card_pow_le_supportedKernel_forward,
+    Algebraic.Cutwidth.MultiOutput.card_pow_le_supportedKernel_forward_of_trace,
+    Algebraic.Cutwidth.MultiOutput.card_pow_le_supportedKernel_backward,
+    Algebraic.Cutwidth.MultiOutput.card_pow_le_supportedKernel_backward_of_trace,
+    Algebraic.Cutwidth.MultiOutput.apply_eq_zero_of_forward_eq_empty_of_trace,
+    Algebraic.Cutwidth.MultiOutput.apply_eq_zero_of_backward_eq_empty_of_trace}
   \leanok
   \uses{thm:lowerbounds-algebraic-rank-cut,
     lem:lowerbounds-algebraic-single-cut-fibres}
@@ -12844,13 +13117,16 @@ no superlinear unrestricted circuit theorem follows from them alone.
   $S$ and outside $S$, and $Y_S$ and $Y_T$ the outputs carried in $S$ and
   outside $S$,
   \[
-    |U|^{|J|} \le |U|^{|A|+|B|}\,|\ker_g(X_S,Y_T)|\,|\ker_g(X_T,Y_S)| .
+    |U|^{|J|} \le |U|^{|A|+|B|}\,|\ker_g(X_S,Y_T)|\,|\ker_g(X_T,Y_S)| ,
   \]
+  and in fact $|U|^{|X_S|}\le|U|^{|A|}\,|\ker_g(X_S,Y_T)|$ and
+  $|U|^{|X_T|}\le|U|^{|B|}\,|\ker_g(X_T,Y_S)|$ separately.
   For a linear $g$ this is the rank-cut bound of
   Theorem~\ref{thm:lowerbounds-algebraic-rank-cut} restricted to the free
-  inputs. If $S$ is crossed by no signal, both kernels are full: $g$ maps
-  vectors supported on $X_S$ to vectors vanishing on $Y_T$, and vectors
-  supported on $X_T$ to vectors vanishing on $Y_S$.
+  inputs. If $S$ is crossed by no forward signal, $\ker_g(X_S,Y_T)$ is full:
+  $g$ maps vectors supported on $X_S$ to vectors vanishing on $Y_T$; if it
+  is crossed by no backward signal, $g$ maps vectors supported on $X_T$ to
+  vectors vanishing on $Y_S$. These two facts need no finiteness of $U$.
 \end{theorem}
 \begin{proof}
   \leanok
@@ -13061,13 +13337,17 @@ no superlinear unrestricted circuit theorem follows from them alone.
   \lean{Algebraic.Cutwidth.MultiOutput.terminal_injective_of_matMul,
     Algebraic.Cutwidth.MultiOutput.mem_component_of_matMul,
     Algebraic.Cutwidth.MultiOutput.charges_le_of_matMul_of_totallyRegular,
-    Algebraic.Cutwidth.MultiOutput.charges_le_add_of_matMul}
+    Algebraic.Cutwidth.MultiOutput.charges_le_add_of_matMul,
+    Algebraic.Cutwidth.MultiOutput.charges_le_of_matMul_polynomial}
   \leanok
   \uses{def:lowerbounds-algebraic-mat-mul-terminal-graph,
     thm:lowerbounds-algebraic-restricted-rank-cut,
     thm:lowerbounds-algebraic-quadratic-rank-cut,
     lem:lowerbounds-algebraic-cauchy,
-    thm:lowerbounds-algebraic-multi-output-ordering}
+    thm:lowerbounds-algebraic-multi-output-ordering,
+    thm:lowerbounds-algebraic-taylor-rank,
+    lem:lowerbounds-algebraic-taylor-formal,
+    lem:lowerbounds-algebraic-poly-mul-hessian}
   Let a circuit over a finite field $F$, over any signature, compute
   $n\times n$ matrix multiplication. Its $3n^2$ terminals lie on distinct
   wires, and if $n\ge1$ they all lie in the component of the output
@@ -13079,7 +13359,9 @@ no superlinear unrestricted circuit theorem follows from them alone.
   \[
     R_I,\ R_J,\ R_K \le |A| + |B| ;
   \]
-  over every finite field, $R_I,R_J,R_K\le|A|+|B|+4n$.
+  over every finite field, $R_I,R_J,R_K\le|A|+|B|+4n$. For a circuit with
+  polynomial gates formally computing the product over any field $K$,
+  $R_I,R_J,R_K\le|A|+|B|$.
 \end{theorem}
 \begin{proof}
   \leanok
@@ -13179,6 +13461,7 @@ no superlinear unrestricted circuit theorem follows from them alone.
   $(2+1/(2A)-\varepsilon)n^2$ gates and choose $\eta=A^2\varepsilon$: the
   cycle term is at most $(1/2-A\varepsilon/2)n^2$, while the loss $4n$ and
   the logarithmic term $O(\log n)$ are $o(n^2)$.
+\end{proof}
 
 \begin{theorem}[Multiplication in $\mathrm{GF}(2^n)$ needs $2n-1$ conjunction gates]
   \label{thm:lowerbounds-algebraic-field-mul-conjunctions}
@@ -13272,7 +13555,8 @@ no superlinear unrestricted circuit theorem follows from them alone.
 
 \begin{theorem}[The Taylor cut lemma]
   \label{thm:lowerbounds-algebraic-taylor-cut}
-  \lean{Algebraic.Cutwidth.MultiOutput.Taylor.exists_cut}
+  \lean{Algebraic.Cutwidth.MultiOutput.Taylor.exists_cut,
+    Algebraic.Cutwidth.MultiOutput.Taylor.exists_cut_directed}
   \leanok
   \uses{def:lowerbounds-algebraic-taylor-formal,
     lem:lowerbounds-algebraic-taylor-formal,
@@ -13283,7 +13567,8 @@ no superlinear unrestricted circuit theorem follows from them alone.
   $S$ be a split of the wires with complement $T$, forward signals $A$,
   backward signals $B$, and inputs $X_S$ and $X_T$ on the two sides. There
   are subspaces $V$ of vectors supported on $X_S$ and $W$ of vectors
-  supported on $X_T$, with $\dim V+\dim W\ge n-|A|-|B|$, such that
+  supported on $X_T$, with $\dim V+\dim W\ge n-|A|-|B|$, in fact
+  $|X_S|\le\dim V+|A|$ and $|X_T|\le\dim W+|B|$ separately, such that
   \begin{enumerate}
     \item[(a)] $\nabla f_t(a)\cdot v=0$ for every $v\in V$ and every wire $t$ of $T$;
     \item[(b)] $\nabla f_s(a)\cdot u=0$ for every $u\in W$ and every wire $s$ of $S$;
@@ -13318,7 +13603,13 @@ no superlinear unrestricted circuit theorem follows from them alone.
   \lean{Algebraic.Cutwidth.MultiOutput.Taylor.blockRank_jacobian_add_blockRank_le_of_trace,
     Algebraic.Cutwidth.MultiOutput.Taylor.blockRank_jacobian_add_blockRank_le,
     Algebraic.Cutwidth.MultiOutput.Taylor.blockRank_hessian_le_of_trace,
-    Algebraic.Cutwidth.MultiOutput.Taylor.blockRank_hessian_le}
+    Algebraic.Cutwidth.MultiOutput.Taylor.blockRank_hessian_le,
+    Algebraic.Cutwidth.MultiOutput.Taylor.blockRank_jacobian_le_forward,
+    Algebraic.Cutwidth.MultiOutput.Taylor.blockRank_jacobian_le_forward_of_trace,
+    Algebraic.Cutwidth.MultiOutput.Taylor.blockRank_jacobian_le_backward,
+    Algebraic.Cutwidth.MultiOutput.Taylor.blockRank_jacobian_le_backward_of_trace,
+    Algebraic.Cutwidth.MultiOutput.Taylor.rank_fromBlocks_hessian_jacobian_le,
+    Algebraic.Cutwidth.MultiOutput.Taylor.rank_fromBlocks_hessian_jacobian_le_of_trace}
   \leanok
   \uses{thm:lowerbounds-algebraic-taylor-cut}
   In the setting of Theorem~\ref{thm:lowerbounds-algebraic-taylor-cut}, let
@@ -13327,9 +13618,16 @@ no superlinear unrestricted circuit theorem follows from them alone.
   \[
     \operatorname{rank}J[O_T,X_S]+\operatorname{rank}J[O_S,X_T]\le|A|+|B| ,
   \]
-  and for all coefficients $\mu_o\in L$ the Hessian
+  and in fact $\operatorname{rank}J[O_T,X_S]\le|A|$ and
+  $\operatorname{rank}J[O_S,X_T]\le|B|$ separately. For all coefficients
+  $\mu_o\in L$ the Hessian
   $H=\sum_o\mu_o\nabla^2f_o(a)$ of the combination $\sum_o\mu_of_o$ satisfies
-  $\operatorname{rank}H[X_S,X_T]\le|A|+|B|$. Both hold over every field,
+  $\operatorname{rank}H[X_S,X_T]\le|A|+|B|$, and more strongly
+  \[
+    \operatorname{rank}\begin{pmatrix}H[X_S,X_T] & J[O_T,X_S]^{\mathsf T}\\
+      J[O_S,X_T] & 0\end{pmatrix}\le|A|+|B| .
+  \]
+  All of these hold over every field,
   with the point and the coefficients in any field extension, for gate
   polynomials of any degree, arity, and coefficients.
 
@@ -13347,7 +13645,8 @@ no superlinear unrestricted circuit theorem follows from them alone.
   rows and columns are bases of $V$ and $W$, $R_VH[X_S,X_T]C_W=0$, and
   Sylvester's rank inequality applied twice gives
   $\dim V+\dim W+\operatorname{rank}H[X_S,X_T]\le n$. Compare with
-  $\dim V+\dim W\ge n-|A|-|B|$.
+  $\dim V+\dim W\ge n-|A|-|B|$. The one-sided and combined bounds use the
+  directed form $|X_S|\le\dim V+|A|$, $|X_T|\le\dim W+|B|$ of the cut lemma.
 \end{proof}
 
 \begin{definition}[Polynomial multiplication]
@@ -13425,7 +13724,11 @@ no superlinear unrestricted circuit theorem follows from them alone.
     Algebraic.Cutwidth.MultiOutput.polyMul_nonconstant,
     Algebraic.Cutwidth.MultiOutput.eventually_lt_arithmeticCost_of_polyMul,
     Algebraic.Cutwidth.MultiOutput.eventually_lt_arithmeticCost_of_polyMul_formal,
-    Algebraic.Cutwidth.MultiOutput.eventually_lt_size_of_polyMul_zmod}
+    Algebraic.Cutwidth.MultiOutput.eventually_lt_size_of_polyMul_zmod,
+    Algebraic.Cutwidth.MultiOutput.eventually_lt_size_of_polyMul_of_infinite_fifty_div_nine,
+    Algebraic.Cutwidth.MultiOutput.eventually_lt_arithmeticCost_of_polyMul_fifty_div_nine,
+    Algebraic.Cutwidth.MultiOutput.eventually_lt_arithmeticCost_of_polyMul_formal_fifty_div_nine,
+    Algebraic.Cutwidth.MultiOutput.eventually_lt_size_of_polyMul_zmod_fifty_div_nine}
   \leanok
   \uses{def:lowerbounds-algebraic-poly-mul,
     lem:lowerbounds-algebraic-poly-mul-hessian,
@@ -13497,6 +13800,56 @@ no superlinear unrestricted circuit theorem follows from them alone.
   (Theorem~\ref{thm:lowerbounds-algebraic-arithmetic-free-constants}). An
   arithmetic circuit formally computing polynomial multiplication over $K$
   computes it as a function over the infinite field $K(t)$.
+\end{proof}
+
+\begin{theorem}[Matrix multiplication over every field]
+  \label{thm:lowerbounds-algebraic-mat-mul-polynomial}
+  \lean{Algebraic.Cutwidth.MultiOutput.half_sq_le_of_matMul_polynomial,
+    Algebraic.Cutwidth.MultiOutput.eventually_lt_size_of_matMul_polynomial_of_orderingBound,
+    Algebraic.Cutwidth.MultiOutput.eventually_lt_size_of_matMul_polynomial,
+    Algebraic.Cutwidth.MultiOutput.eventually_lt_size_of_matMul_polynomial_thirtyFour_div_nine,
+    Algebraic.Cutwidth.MultiOutput.eventually_lt_size_of_matMul_of_infinite,
+    Algebraic.Cutwidth.MultiOutput.eventually_lt_size_of_matMul_of_infinite_thirtyFour_div_nine,
+    Algebraic.Cutwidth.MultiOutput.matMul_nonconstant,
+    Algebraic.Cutwidth.MultiOutput.eventually_lt_arithmeticCost_of_matMul,
+    Algebraic.Cutwidth.MultiOutput.eventually_lt_arithmeticCost_of_matMul_thirtyFour_div_nine,
+    Algebraic.Cutwidth.MultiOutput.eventually_lt_arithmeticCost_of_matMul_formal,
+    Algebraic.Cutwidth.MultiOutput.eventually_lt_arithmeticCost_of_matMul_formal_thirtyFour_div_nine}
+  \leanok
+  \uses{def:lowerbounds-algebraic-mat-mul,
+    thm:lowerbounds-algebraic-mat-mul-charges,
+    lem:lowerbounds-algebraic-mat-mul-charging,
+    thm:lowerbounds-algebraic-taylor-rank,
+    lem:lowerbounds-algebraic-taylor-formal,
+    lem:lowerbounds-algebraic-poly-mul-hessian,
+    thm:lowerbounds-algebraic-multi-output-ordering,
+    thm:lowerbounds-algebraic-gaussian-coefficient,
+    thm:lowerbounds-algebraic-arithmetic-free-constants}
+  Let a circuit with polynomial gates of fan-in at most two, of any degree and
+  with any coefficients, formally compute the $n\times n$ matrix product over a
+  field $K$ with $s$ gates. Under $\mathrm{OrderingBound}(A,\eta,C)$ with
+  $A+\eta\ge0$,
+  \[
+    \frac{n^2-1}{2} \le (A+\eta)\max\{s-2n^2,0\} + 3\log_2(2n^2+3s) + C ,
+  \]
+  so it has more than $(2+1/(4p)-\varepsilon)n^2>(34/9-\varepsilon)n^2$ gates
+  for all large $n$, with $p$ the Gaussian pathwidth coefficient of
+  Theorem~\ref{thm:lowerbounds-algebraic-gaussian-coefficient}. The same holds
+  for such circuits computing the product function over an infinite field. It
+  also holds for the number of additions and multiplications, with constants
+  free, of arithmetic circuits computing it, formally over every field or as a
+  function over an infinite field.
+\end{theorem}
+\begin{proof}
+  \leanok
+  Evaluate over $K(t)$ with the generic Hankel matrix $M=(t^{(i+j)^2})$, which
+  is totally regular
+  (Lemma~\ref{lem:lowerbounds-algebraic-poly-mul-hessian}). The charges $R_I$
+  and $R_K$ are bounded by the one-sided Jacobian bounds of
+  Theorem~\ref{thm:lowerbounds-algebraic-taylor-rank} at $(0,M)$ and $(M,0)$,
+  and $R_J$ by its Hessian bound for $\sum_{ik}M_{ik}C_{ik}$. So the loss is
+  $L=0$, and the charging argument proceeds as in
+  Theorem~\ref{thm:lowerbounds-algebraic-mat-mul}.
 \end{proof}
 
 \begin{definition}[The KRW conjecture]
@@ -14356,17 +14709,23 @@ Tamaki, MFCS 2016, for non-explicit quadratic extractors).
 
 \begin{theorem}[Schnorr]
   \label{thm:lowerbounds-schnorr}
-  \lean{Complexity.schnorr_lower_bound_circuit, Complexity.sizeComplexity_xorBool_ge}
+  \lean{Complexity.schnorr_lower_bound_circuit, Complexity.sizeComplexity_xorBool_ge,
+    Complexity.parity_size_ge_three_mul, Complexity.sizeComplexity_xorBool_ge_three_mul}
   \leanok
   \uses{def:lowerbounds-parity, def:circuits-size-complexity}
   Every fan-in-two AND/OR circuit computing $N$-bit parity or its complement,
   $N \ge 1$, has size at least $2N - 1$, that is, at least $2(N - 1)$ internal
-  gates. Hence $\mathrm{size}(\oplus_N) \ge 2N - 1$.
+  gates, and in fact size at least $3(N - 1)$. Hence
+  $\mathrm{size}(\oplus_N) \ge \max(2N - 1, 3(N - 1))$.
 \end{theorem}
 \begin{proof}
   \leanok
+  \uses{thm:lowerbounds-algebraic-xor}
   Gate elimination: fixing a well-chosen input removes at least two gates and
-  leaves parity or its complement on one fewer input.
+  leaves parity or its complement on one fewer input. For $3(N-1)$, translate
+  the circuit into a straight-line De Morgan program whose charged binary-gate
+  cost equals its size, and apply the three-gate elimination theorem for parity
+  of the imported algebraic-circuits library.
 \end{proof}
 
 \section{Depth, formulas, and communication}
@@ -14810,6 +15169,23 @@ Tamaki, MFCS 2016, for non-explicit quadratic extractors).
   $\cc{AC}^0$.
 \end{proof}
 
+\begin{theorem}[Strict majority is not in $\cc{AC}^0$]
+  \label{thm:lowerbounds-majority-not-ac0}
+  \lean{Complexity.majority_not_mem_AC0}
+  \leanok
+  \uses{def:NC-AC, def:encodings-majority}
+  The strict-majority family, with ties false, is not in $\cc{AC}^0$: no family
+  of polynomial-size, constant-depth, unbounded-fan-in AND/OR circuits, with
+  negations free on gate inputs, computes it at every input length.
+\end{theorem}
+\begin{proof}
+  \leanok
+  \uses{thm:lowerbounds-majority-topdown}
+  A family of depth at most $c$ and polynomial size has at most $Cn^k$
+  internal gates for large $n$, contradicting the superpolynomial gate bound of
+  Theorem~\ref{thm:lowerbounds-majority-topdown} at depth $c$.
+\end{proof}
+
 \begin{theorem}[Pseudorandom switching lemma]
   \label{thm:lowerbounds-pseudorandom-restrictions}
   \uses{thm:lowerbounds-switching}
@@ -14965,6 +15341,19 @@ choices.
   Theorem~\ref{thm:lowerbounds-smolensky} would give
   $2 \cdot 2^\ell \le 5\, p((40\ell)^{2c})$ for every $\ell \ge 1$, which fails
   for large $\ell$.
+\end{proof}
+
+\begin{corollary}
+  \label{cor:lowerbounds-tc0-not-subset-acc3}
+  \lean{Complexity.not_TC0_subset_AC0Mod_three}
+  \leanok
+  \uses{def:circuits-TC, def:circuits-ACC}
+  $\cc{TC}^0 \not\subseteq \cc{AC}^0[3]$.
+\end{corollary}
+\begin{proof}
+  \leanok
+  \uses{lem:lowerbounds-parity-tc0, thm:lowerbounds-parity-not-acc3}
+  Parity is in $\cc{TC}^0$ but not in $\cc{AC}^0[3]$.
 \end{proof}
 
 \section{Monotone circuits}
@@ -15440,7 +15829,8 @@ choices.
 
 \begin{theorem}[Circuits give bounded-round protocols]
   \label{thm:lowerbounds-circuit-round-protocol}
-  \lean{Complexity.Circuit.exists_roundProtocol}
+  \lean{Complexity.Circuit.exists_roundProtocol,
+    Complexity.Circuit.exists_roundProtocol_of_gates}
   \leanok
   \uses{def:circuit, def:circuits-bases, def:lowerbounds-round-protocol,
     lem:lowerbounds-round-swap, lem:circuits-dependency-graph}
@@ -15450,6 +15840,9 @@ choices.
   This is the circuit-to-protocol direction of the Karchmer--Wigderson
   correspondence in Korten's Lemma~1. The wire count includes every
   gate-input occurrence, including output gates and repeated wires.
+  Alternatively, the messages may be drawn from an alphabet of size
+  $2(n + g)$, where $n$ is the number of inputs and $g$ the number of internal
+  gates: each message names a wire together with its negation flag.
 \end{theorem}
 \begin{proof}
   \leanok
@@ -15457,12 +15850,16 @@ choices.
   child; for AND, Alice selects a false child. Negated inputs swap the
   players. Each gate's fan-in is at most the total wire count. Empty
   gates have an empty KW relation, so an arbitrary coordinate suffices.
+  For the gate-count alphabet, the message sent at a gate is the chosen input
+  wire and its negation flag, which determines the child subprotocol.
 \end{proof}
 
 \begin{theorem}[Korten's top-down lower bound, Theorem 3]
   \label{thm:lowerbounds-korten-topdown}
   \lean{Complexity.KarchmerWigderson.parity_communication_lower_bound,
-    Complexity.Circuit.parity_wire_lower_bound}
+    Complexity.Circuit.parity_wire_lower_bound,
+    Complexity.Circuit.parity_gate_size_lower_bound,
+    Complexity.Circuit.parity_superpolynomial_gates}
   \leanok
   \uses{thm:lowerbounds-parity-topdown-finite,
     thm:lowerbounds-circuit-round-protocol}
@@ -15472,6 +15869,10 @@ choices.
   $\varepsilon_d n^{1/(d-1)}$ bits in each message. Consequently, a depth-$d$
   unbounded-fan-in De Morgan circuit for parity has more than
   $2^{\varepsilon_d n^{1/(d-1)}}$ wires.
+  With $g$ internal gates, also $2^{\varepsilon_d n^{1/(d-1)}} < 2(n + g)$;
+  in particular, for every fixed $d$ and polynomial $Cn^k + C$, all
+  sufficiently large depth-$d$ circuits for parity have more than $Cn^k + C$
+  internal gates.
   The analytic prerequisites of this top-down proof are in
   Section~\ref{sec:analysis-harmonic}.
 \end{theorem}
@@ -15483,6 +15884,9 @@ choices.
   Apply the finite parity obstruction. For the wire conclusion, a
   circuit with at most $2^{\varepsilon_d n^{1/t}}$ wires would give a
   protocol contradicting the communication conclusion.
+  The gate conclusion is the same argument with the alphabet of size
+  $2(n+g)$, and $2(n + Cn^k + C) \le n^{k+2} \le 2^{\varepsilon_d n^{1/(d-1)}}$
+  for large $n$ gives the superpolynomial form.
 \end{proof}
 
 \subsection{Majority extension}
@@ -15560,7 +15964,9 @@ allows the same adversary to prove the majority bound.
 \begin{theorem}[Top-down majority lower bounds]
   \label{thm:lowerbounds-majority-topdown}
   \lean{Complexity.KarchmerWigderson.majority_communication_lower_bound,
-    Complexity.Circuit.majority_wire_lower_bound}
+    Complexity.Circuit.majority_wire_lower_bound,
+    Complexity.Circuit.majority_gate_size_lower_bound,
+    Complexity.Circuit.majority_superpolynomial_gates}
   \leanok
   \uses{thm:lowerbounds-majority-topdown-finite,
     thm:lowerbounds-circuit-round-protocol}
@@ -15570,6 +15976,9 @@ allows the same adversary to prove the majority bound.
   bits per message. Consequently, every depth-at-most-$d$ unbounded-fan-in
   De Morgan circuit for strict majority has more than
   $2^{\varepsilon_d n^{1/(d-1)}}$ wires. This covers both even and odd $n$.
+  With $g$ internal gates, also $2^{\varepsilon_d n^{1/(d-1)}} < 2(n + g)$, so
+  at every fixed depth strict majority needs more than $Cn^k + C$ internal
+  gates for all sufficiently large $n$.
 \end{theorem}
 \begin{proof}
   \leanok
@@ -15578,4 +15987,6 @@ allows the same adversary to prove the majority bound.
   If also $m\le\varepsilon_d n^{1/t}$, then
   $C(m+K(n))\le n^{1/t}/64$, implying the finite obstruction.
   Apply the circuit-to-protocol theorem for the wire conclusion.
+  The gate-count alphabet of size $2(n+g)$ gives the gate conclusions as for
+  parity.
 \end{proof}

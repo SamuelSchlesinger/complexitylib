@@ -46,6 +46,7 @@ majority extension, including its initialization lemmas.
 | Theorem 3, communication | `KarchmerWigderson.parity_communication_lower_bound` | Proved for every fixed number of rounds at least two |
 | Lemma 1, circuit-to-protocol direction | `Circuit.exists_roundProtocol` | Proved for unbounded AND/OR circuits with free input negations |
 | Theorem 3, wires | `Circuit.parity_wire_lower_bound` | Proved for the library's circuit depth and total input-wire count |
+| Gate-count corollaries (not in the paper) | `Circuit.exists_roundProtocol_of_gates`, `Circuit.parity_gate_size_lower_bound`, `Circuit.parity_superpolynomial_gates` | Proved with the alphabet `Fin (2 * (n + g))` |
 
 Analytic declarations above are in `Complexity.BooleanAnalysis`. The other
 names are under `Complexity`; `RoundProtocol` abbreviates
@@ -172,6 +173,14 @@ internal gate count `g` and free negation flags on gate inputs.
 wires, and unused internal gates. The circuit model requires a nonzero
 input count, which is automatic in the sufficiently-large-`n` regime.
 
+`Circuit.exists_roundProtocol_of_gates` uses instead the alphabet
+`Fin (2 * (n + g))`, one symbol per wire and negation flag. The same argument
+gives `Circuit.parity_gate_size_lower_bound`,
+`2^(epsilon_d*n^(1/(d-1))) < 2*(n+g)`, and since every polynomial is eventually
+below `2^(epsilon*n^r)` for `r > 0`, `Circuit.parity_superpolynomial_gates`:
+at each fixed depth, parity needs more than `C*n^k + C` internal gates for
+all large `n`.
+
 The proof follows the paper's harmonic-mean, light-pattern, mirror-set,
 and top-down adversary route. It does not invoke the existing
 random-restriction parity lower bound. All statements are proved in Lean
@@ -210,6 +219,9 @@ at least `2^(-128)`. This proves bilateral density limits with parameters
 | Finite protocol obstruction | `KarchmerWigderson.RoundProtocol.not_solves_majority_finite` |
 | Communication lower bound | `KarchmerWigderson.majority_communication_lower_bound` |
 | Wire lower bound | `Circuit.majority_wire_lower_bound` |
+| Gate lower bound | `Circuit.majority_gate_size_lower_bound` |
+| Superpolynomial gates at fixed depth | `Circuit.majority_superpolynomial_gates` |
+| Strict majority is not in `AC0` | `majority_not_mem_AC0` |
 
 All names in this table are under `Complexity`. For `d >= 2` messages, put
 `t = d-1` and `C_d = 32768*194^t`. The finite obstruction is

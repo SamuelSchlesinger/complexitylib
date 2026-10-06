@@ -175,7 +175,10 @@ In order. Each item says why it matters and roughly how large it is.
       - Counting and gate elimination: Shannon's and Schnorr's bounds follow
         from CSLib's counting and algebraic-circuits' `3(n - 1)` parity bound,
         and the essential-input bound from `Circuit.essential_le_size`. The
-        internal counting model (`CircDesc`) is deleted.
+        `3(N - 1)` bound for `Basis.andOr2` circuits is already derived through
+        the algebraic library (`parity_size_ge_three_mul`); only the `2N - 1`
+        `CircDesc` proof remains to retire, after which the internal counting
+        model (`CircDesc`) is deleted.
       - Builders (composition, hardwiring, projections, reindexing,
         multiplexer, majority, about 12.7k lines of `Fin (N + G)` offset
         arithmetic) become algebraic-circuits' substitution, restriction, and
@@ -183,7 +186,9 @@ In order. Each item says why it matters and roughly how large it is.
       - AC⁰: parity ∉ AC⁰ for our classes is proved (`xorBool_not_mem_AC0`)
         from the library's own normalization and switching internals.
         Reconcile them with algebraic-circuits' Håstad development and retire
-        whichever is superseded.
+        whichever is superseded. Strict majority ∉ AC⁰ (`majority_not_mem_AC0`)
+        follows from the top-down gate bound, and `not_TC0_subset_AC0Mod_three`
+        from Razborov–Smolensky.
       - NC¹: port the circuit-to-formula unfolding used by
         `NC1_subset_Width5BP`.
       - MCSP and the other consumers of `sizeComplexity` and composition.
@@ -275,18 +280,23 @@ bilateral parity initialization, explicit finite obstruction, and
 `parity_communication_lower_bound` with exponent `1/(d-1)`.
 The circuit-to-protocol translation gives `Circuit.parity_wire_lower_bound`
 for unbounded AND/OR circuits with free input negations and the existing
-`totalFanIn` wire count. The source-to-declaration map, model conventions,
-and explicit constants are in [`docs/TopDownLowerBounds.md`](docs/TopDownLowerBounds.md).
+`totalFanIn` wire count. `Circuit.exists_roundProtocol_of_gates` gives the same
+translation with an alphabet of size `2 * (n + g)` (a wire and its negation
+flag), which yields `Circuit.parity_gate_size_lower_bound` and, at every fixed
+depth, `Circuit.parity_superpolynomial_gates`. The source-to-declaration map,
+model conventions, and explicit constants are in
+[`docs/TopDownLowerBounds.md`](docs/TopDownLowerBounds.md).
 
 `Circuits.KarchmerWigderson.TopDown.Majority` extends this argument to strict
 majority, including even input lengths with ties false. The two adjacent
 Hamming layers have logarithmic deficit and at least half their coordinates
 lead to the other layer by a single-bit flip. Sparse sampling gives bilateral
 density limits, so the generalized first-message argument retains the
-`1/(d-1)` exponent. The checked `majority_communication_lower_bound` and
-`Circuit.majority_wire_lower_bound` use the same protocol and circuit models
-as the parity result. This is an extension of Korten's method; his Theorem 3
-states the parity case.
+`1/(d-1)` exponent. The checked `majority_communication_lower_bound`,
+`Circuit.majority_wire_lower_bound`, `Circuit.majority_gate_size_lower_bound`,
+and `Circuit.majority_superpolynomial_gates` use the same protocol and circuit
+models as the parity result; the last gives `majority_not_mem_AC0`. This is an
+extension of Korten's method; his Theorem 3 states the parity case.
 
 ## Seeded extractor improvements
 
