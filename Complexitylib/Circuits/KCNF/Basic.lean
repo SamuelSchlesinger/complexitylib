@@ -67,6 +67,25 @@ theorem flipOn_apply_of_not_mem {x : BitString N} {T : Finset (Fin N)} {i : Fin 
   funext i
   simp
 
+/-- Two flips agree at every coordinate that lies in both sets or in neither. -/
+theorem flipOn_apply_eq_of_iff {x : BitString N} {T U : Finset (Fin N)} {i : Fin N}
+    (h : i ∈ T ↔ i ∈ U) : x.flipOn T i = x.flipOn U i := by
+  by_cases hi : i ∈ T
+  · rw [flipOn_apply_of_mem hi, flipOn_apply_of_mem (h.mp hi)]
+  · rw [flipOn_apply_of_not_mem hi, flipOn_apply_of_not_mem fun hU => hi (h.mpr hU)]
+
+/-- Flipping twice is the identity. -/
+@[simp] theorem flipOn_flipOn (x : BitString N) (T : Finset (Fin N)) :
+    (x.flipOn T).flipOn T = x := by
+  funext i
+  by_cases h : i ∈ T <;> simp [h]
+
+/-- Flips commute. -/
+theorem flipOn_comm (x : BitString N) (T U : Finset (Fin N)) :
+    (x.flipOn T).flipOn U = (x.flipOn U).flipOn T := by
+  funext i
+  by_cases hT : i ∈ T <;> by_cases hU : i ∈ U <;> simp [hT, hU]
+
 /-- `x ↦ x ⊕ e_T` is injective in `T`. -/
 theorem flipOn_injective (x : BitString N) : Function.Injective x.flipOn := by
   intro T T' h

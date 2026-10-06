@@ -50,13 +50,6 @@ theorem sat_of_agree {ψ : ClauseSet N} {w : BitString N}
   refine ⟨l, hl, ?_⟩
   simpa only [Literal.eval, hagree l hl] using htrue
 
-theorem flipOn_apply_eq_of_iff {x : BitString N} {T U : Finset (Fin N)} {i : Fin N}
-    (h : i ∈ T ↔ i ∈ U) : x.flipOn T i = x.flipOn U i := by
-  by_cases hi : i ∈ T
-  · rw [BitString.flipOn_apply_of_mem hi, BitString.flipOn_apply_of_mem (h.mp hi)]
-  · rw [BitString.flipOn_apply_of_not_mem hi,
-      BitString.flipOn_apply_of_not_mem fun hU => hi (h.mpr hU)]
-
 /-- **Lemma 3 (a).** If `x ⊕ e_T` is a solution and no clause meets both `T' ⊆ T` and `T \ T'`,
 then `x ⊕ e_{T'}` is a solution. In particular every connected component of a move in the
 co-occurrence graph is a move. -/
@@ -66,7 +59,8 @@ theorem flipOn_mem_of_closed {ψ : ClauseSet N} {x : BitString N} {T T' : Finset
     x.flipOn T' ∈ ψ.solutions := by
   refine sat_of_agree fun C hC => ?_
   by_cases hmeet : Meets C T'
-  · refine ⟨x.flipOn T, hT, fun l hl => flipOn_apply_eq_of_iff ⟨fun hlT => ?_, fun h => hsub h⟩⟩
+  · refine ⟨x.flipOn T, hT, fun l hl =>
+      BitString.flipOn_apply_eq_of_iff ⟨fun hlT => ?_, fun h => hsub h⟩⟩
     by_contra hlT'
     exact hclosed C hC hmeet ⟨l, hl, mem_sdiff.mpr ⟨hlT, hlT'⟩⟩
   · refine ⟨x, hx, fun l hl => ?_⟩
@@ -83,7 +77,7 @@ theorem flipOn_biUnion_mem_of_separated {ι : Type*} {ψ : ClauseSet N}
   refine sat_of_agree fun C hC => ?_
   by_cases hmeet : ∃ j ∈ J, Meets C (T j)
   · obtain ⟨j, hj, hjmeet⟩ := hmeet
-    refine ⟨x.flipOn (T j), hmove j (hJ hj), fun l hl => flipOn_apply_eq_of_iff ?_⟩
+    refine ⟨x.flipOn (T j), hmove j (hJ hj), fun l hl => BitString.flipOn_apply_eq_of_iff ?_⟩
     constructor
     · exact fun h => mem_biUnion.mpr ⟨j, hj, h⟩
     · intro h
