@@ -17,13 +17,13 @@ import Mathlib.Tactic.Linarith
 
 This file proves the discrete one-dimensional lemmas of the capacity method.
 
-* `PiecesAtMost.changesAtMost`: a function with at most `M` pieces changes at most `M - 1`
+* `changesAtMost_of_piecesAtMost_internal`: a function with at most `M` pieces changes at most `M - 1`
   times along every nondecreasing sequence.
-* `ChangesAtMost.card_nonconstant_groups_le`: cut the positions into consecutive groups of `L`;
+* `card_nonconstant_groups_le_internal`: cut the positions into consecutive groups of `L`;
   a function with at most `T` changes along a nondecreasing sequence is nonconstant on at most
   `T` groups, since every such group contains a change position, and distinct groups contain
   distinct positions.
-* `exists_sorted_group` (Lemma 1): sort `P` by a real key `α` and cut it into `G` consecutive
+* `exists_sorted_group_internal` (Lemma 1): sort `P` by a real key `α` and cut it into `G` consecutive
   groups of `⌊|P| / G⌋` elements. If each `Ψ q` changes at most `T` times, double counting gives
   a group on which at most `T |Q| / G` of the functions `p ↦ Ψ q (α p)` are nonconstant.
 -/
@@ -55,7 +55,7 @@ theorem PiecesAtMost.comp {γ : Type*} {Φ : ℝ → β} {M : ℕ} (h : PiecesAt
   exact ⟨π, mono, lt, fun t t' e => by simp only [fac t t' e]⟩
 
 /-- A function with at most `M` pieces changes at most `M - 1` times. -/
-theorem PiecesAtMost.changesAtMost {Φ : ℝ → β} {M : ℕ} (h : PiecesAtMost Φ M) :
+theorem changesAtMost_of_piecesAtMost_internal {Φ : ℝ → β} {M : ℕ} (h : PiecesAtMost Φ M) :
     ChangesAtMost Φ (M - 1) := by
   obtain ⟨π, mono, lt, fac⟩ := h
   intro z hz S hS
@@ -95,7 +95,7 @@ open scoped Classical in
 /-- **Each function is nonconstant on few groups.** Cut the positions into consecutive groups
 of `L`. A function with at most `T` changes along the nondecreasing sequence `z` is nonconstant
 on at most `T` of the first `G` groups. -/
-theorem ChangesAtMost.card_nonconstant_groups_le {Ψ : ℝ → β} {T : ℕ} (h : ChangesAtMost Ψ T)
+theorem card_nonconstant_groups_le_internal {Ψ : ℝ → β} {T : ℕ} (h : ChangesAtMost Ψ T)
     {z : ℕ → ℝ} (hz : Monotone z) (L G : ℕ) :
     ((Finset.range G).filter fun g =>
       ∃ j < L, ∃ j' < L, Ψ (z (g * L + j)) ≠ Ψ (z (g * L + j'))).card ≤ T := by
@@ -157,7 +157,7 @@ private theorem exists_sorted_list {ι : Type*} (P : Finset ι) (α : ι → ℝ
 groups of `⌊|P| / G⌋` elements. If every `Ψ q` changes at most `T` times, some group `P'` is
 such that the functions `p ↦ Ψ q (α p)` are constant on `P'` for every `q ∈ Q` outside a set
 `Qbad` with `G |Qbad| ≤ T |Q|`. -/
-theorem exists_sorted_group {ι κ : Type*} (P : Finset ι) (Q : Finset κ) (α : ι → ℝ)
+theorem exists_sorted_group_internal {ι κ : Type*} (P : Finset ι) (Q : Finset κ) (α : ι → ℝ)
     (Ψ : κ → ℝ → β) {T G : ℕ} (hG : 0 < G) (hΨ : ∀ q ∈ Q, ChangesAtMost (Ψ q) T) :
     ∃ P' ⊆ P, ∃ Qbad ⊆ Q, P.card / G ≤ P'.card ∧ G * Qbad.card ≤ T * Q.card ∧
       ∀ q ∈ Q, q ∉ Qbad → ∀ p ∈ P', ∀ p' ∈ P', Ψ q (α p) = Ψ q (α p') := by
@@ -206,7 +206,7 @@ theorem exists_sorted_group {ι κ : Type*} (P : Finset ι) (Q : Finset κ) (α 
   let bad : ℕ → κ → Prop := fun g q =>
     ∃ j < L, ∃ j' < L, Ψ q (z (g * L + j)) ≠ Ψ q (z (g * L + j'))
   have hcount : ∀ q ∈ Q, ((Finset.range G).filter fun g => bad g q).card ≤ T :=
-    fun q hq => (hΨ q hq).card_nonconstant_groups_le hz L G
+    fun q hq => card_nonconstant_groups_le_internal (hΨ q hq) hz L G
   have hsum : ∑ g ∈ Finset.range G, (Q.filter fun q => bad g q).card ≤ T * Q.card := by
     have := Finset.sum_card_bipartiteAbove_eq_sum_card_bipartiteBelow
       (s := Finset.range G) (t := Q) bad

@@ -121,7 +121,7 @@ theorem reachable_succ (D : BlockDecomposition f H) (U : Finset (Fin n)) {i NP N
       intro p hp q hq
       rw [hnext, hη p hp q hq, weightedSum_glue]
     obtain ⟨P', hP', Qbad, hQbad, hcardP, hcardQ, hconst⟩ :=
-      exists_sorted_group P Q α Ψ hG (fun q _ => (hΦ (η q)).comp_add_const (β q))
+      exists_sorted_group_internal P Q α Ψ hG (fun q _ => (hΦ (η q)).comp_add_const (β q))
     refine ⟨P', Q.filter (· ∉ Qbad),
       fun q => if h : P'.Nonempty then Ψ q (α h.choose) else Ψ q 0, ?_, ?_, ?_⟩
     · exact (Nat.div_le_div_right hP).trans hcardP
@@ -201,7 +201,7 @@ theorem not_reachable {K : ℕ} (hf : TwoSidedRectangleFree f K) (D : BlockDecom
 
 /-- **Theorem U (one-dimensional capacity).** If `f` is two-sided `K`-rectangle-free, every
 block decomposition of `f` has `2ⁿ < 4 K² · cost`. -/
-theorem two_pow_lt_mul_cost {K : ℕ} (hf : TwoSidedRectangleFree f K)
+theorem two_pow_lt_mul_cost_internal {K : ℕ} (hf : TwoSidedRectangleFree f K)
     (D : BlockDecomposition f H) : 2 ^ n < 4 * K ^ 2 * D.cost := by
   by_contra hle
   push Not at hle

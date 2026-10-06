@@ -14,7 +14,7 @@ import Mathlib.Tactic.Ring
 
 * `Program.evalFrom_eq_eval`: overriding gates by their true values and feeding the other gates
   their true weighted input sums recovers the ordinary evaluation.
-* `Program.piecesAtMost_evalFrom` (Lemma 2): if every unfixed gate `j` receives the input
+* `Program.piecesAtMost_evalFrom_internal` (Lemma 2): if every unfixed gate `j` receives the input
   contribution `slope j * t`, the gate values have at most `2 ^ r` pieces as functions of `t`,
   where `r` counts the unfixed gates with `slope j ≠ 0`. Induction over the gates: on each piece
   of the earlier gates, the next gate is `[slope * t + c ≥ 0]` for one constant `c`, which is
@@ -44,7 +44,7 @@ theorem evalFrom_eq (fixed : Finset (Fin s)) (η : Fin s → Bool) (z : Fin s �
   rw [evalFrom]
   simp only [dite_eq_ite]
 
-theorem eval_eq (x : Fin n → Bool) (j : Fin s) :
+theorem eval_eq_internal (x : Fin n → Bool) (j : Fin s) :
     C.eval x j = decide (0 ≤ weightedSum (C.inputWeight j) x + (∑ k : Fin s,
         if k < j then C.gateWeight j k * (C.eval x k).toNat else 0) + C.bias j) := by
   rw [eval, evalFrom_eq]
@@ -62,7 +62,7 @@ theorem evalFrom_eq_eval {fixed : Finset (Fin s)} {η : Fin s → Bool} {z : Fin
   by_cases hj : j ∈ fixed
   · rw [evalFrom_eq, ite_eq_left hj]
     exact hfix j le_rfl hj
-  · rw [evalFrom_eq, ite_eq_right hj, eval_eq, hz j le_rfl hj]
+  · rw [evalFrom_eq, ite_eq_right hj, eval_eq_internal, hz j le_rfl hj]
     have hsum : (∑ k : Fin s,
         if k < j then C.gateWeight j k * (C.evalFrom fixed η z k).toNat else 0) =
         ∑ k : Fin s, if k < j then C.gateWeight j k * (C.eval x k).toNat else 0 := by
@@ -269,7 +269,7 @@ open scoped Classical in
 /-- **Lemma 2 (pieces of a run).** If every gate outside `fixed` receives the input contribution
 `slope j * t`, the gate values have at most `2 ^ r` pieces as functions of `t`, where `r` counts
 the gates outside `fixed` with a nonzero slope. -/
-theorem piecesAtMost_evalFrom (fixed : Finset (Fin s)) (η : Fin s → Bool)
+theorem piecesAtMost_evalFrom_internal (fixed : Finset (Fin s)) (η : Fin s → Bool)
     (slope : Fin s → ℝ) :
     PiecesAtMost (fun t => C.evalFrom fixed η (fun j => slope j * t))
       (2 ^ (Finset.univ.filter fun j => j ∉ fixed ∧ slope j ≠ 0).card) := by
@@ -315,7 +315,7 @@ theorem DirectionRuns.weightedSum_eq (R : C.DirectionRuns B) {i : ℕ} {j : Fin 
 
 /-- The block decomposition of a program along a split into direction runs: the history after
 `i` blocks holds the values of the gates of the first `i` runs. -/
-noncomputable def DirectionRuns.toBlockDecomposition {f : Cslib.BooleanFunction n}
+@[expose] noncomputable def DirectionRuns.toBlockDecomposition {f : Cslib.BooleanFunction n}
     (R : C.DirectionRuns B) (hC : C.Computes f) : BlockDecomposition f (Fin s → Bool) where
   length := B
   kind i := .oneDim (2 ^ R.size i - 1)
@@ -330,7 +330,7 @@ noncomputable def DirectionRuns.toBlockDecomposition {f : Cslib.BooleanFunction 
     refine ⟨R.dir i, fun η t j => if R.run j < i + 1 then
       C.evalFrom fixed η (fun k => R.slope i k * t) j else false, ?_, ?_⟩
     · intro η
-      have hp := (C.piecesAtMost_evalFrom fixed η (R.slope i)).comp
+      have hp := (C.piecesAtMost_evalFrom_internal fixed η (R.slope i)).comp
         (fun v j => if R.run j < i + 1 then v j else false)
       have hcount : (Finset.univ.filter fun j => j ∉ fixed ∧ R.slope i j ≠ 0).card ≤
           R.size i := by
@@ -343,7 +343,7 @@ noncomputable def DirectionRuns.toBlockDecomposition {f : Cslib.BooleanFunction 
           by_contra hc
           exact hs (by simp [DirectionRuns.slope, hc])
         simp [inputGates, hc.1, hc.2]
-      have := (hp.mono (Nat.pow_le_pow_right two_pos hcount)).changesAtMost
+      have := changesAtMost_of_piecesAtMost_internal (hp.mono (Nat.pow_le_pow_right two_pos hcount))
       exact this
     · intro x
       funext j
@@ -364,6 +364,12 @@ noncomputable def DirectionRuns.toBlockDecomposition {f : Cslib.BooleanFunction 
   output_history x := by
     simp only [R.run_lt, ite_true]
     exact hC x
+
+theorem DirectionRuns.toBlockDecomposition_cost {f : Cslib.BooleanFunction n}
+    (R : C.DirectionRuns B) (hC : C.Computes f) :
+    (R.toBlockDecomposition hC).cost =
+      ∏ i ∈ Finset.range B, (BlockKind.oneDim (2 ^ R.size i - 1)).cost :=
+  rfl
 
 end Program
 
