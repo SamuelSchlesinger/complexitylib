@@ -31,7 +31,10 @@ difference `f(x_S, x_T) - f(x'_S, x_T) - f(x_S, x'_T) + f(x'_S, x'_T)` vanishes
 `D_S` and `D_T` of the two parts are orthogonal through `H[X_S, X_T]`, which forces
 `dim D_S + dim D_T ≤ N - rank H[X_S, X_T]` (`card_mul_card_le_of_dotProduct_mulVec_eq_zero`,
 via Sylvester's rank inequality). Every class thus has at most `|F| ^ (N - r)` inputs, and there
-are at most `|F| ^ (|A| + |B|)` classes.
+are at most `|F| ^ (|A| + |B|)` classes. The argument only uses that the mixed second
+difference vanishes, so it applies verbatim to a circuit with several outputs whose combination
+`∑ o, coeff o · f_o` is a quadratic form (`blockRank_add_transpose_le_of_sum`): the difference
+vanishes on every class for each output wire, hence for the combination.
 
 **The finite bound** (`half_le_of_quadForm`). If `H` is totally regular, then with the
 graph-ordering hypothesis for coefficient `A`, slack `η` and constant `C`, a circuit of size `s`
@@ -118,6 +121,31 @@ theorem blockRank_add_transpose_le {c : Circuit σ n 1} {I : Interpretation σ F
     blockRank (M + Mᵀ) (inputsIn S) (inputsIn S)ᶜ ≤
       (forward c.program S).card + (backward c.program S).card :=
   Internal.blockRank_add_transpose_le c.program I (c.outputs 0) M (fun x => congrFun (hc x) 0) S
+
+/-- **The rank-cut bound for a combination of outputs, for a program.** If the combination
+`∑ o, coeff o · out o` of output wires of a program carries the quadratic form of `M`, every
+split `S` has `rank (M + Mᵀ)[X_S, X_T] ≤ |A| + |B|`. -/
+theorem blockRank_add_transpose_le_of_sum_of_trace {m : Nat} (p : Program σ n s)
+    (I : Interpretation σ F) (out : Fin m → Wire n s) (coeff : Fin m → F)
+    (M : Matrix (Fin n) (Fin n) F) (hf : ∀ x, ∑ o, coeff o * p.trace I x (out o) = quadForm M x)
+    (S : Finset (Wire n s)) :
+    blockRank (M + Mᵀ) (inputsIn S) (inputsIn S)ᶜ ≤ (forward p S).card + (backward p S).card :=
+  Internal.blockRank_add_transpose_le_of_sum p I out coeff M hf S
+
+/-- **The rank-cut bound for a combination of outputs.** If a circuit with values in a finite
+field, over any signature, computes `f` with several outputs and the combination
+`x ↦ ∑ o, coeff o · f x o` is the quadratic form of `M`, then every set `S` of its wires has
+`rank (M + Mᵀ)[X_S, X_T] ≤ |A| + |B|`. -/
+theorem blockRank_add_transpose_le_of_sum {m : Nat} {c : Circuit σ n m} {I : Interpretation σ F}
+    {f : (Fin n → F) → Fin m → F} (hc : c.Computes I f) (coeff : Fin m → F)
+    (M : Matrix (Fin n) (Fin n) F) (hf : ∀ x, ∑ o, coeff o * f x o = quadForm M x)
+    (S : Finset (Wire n c.size)) :
+    blockRank (M + Mᵀ) (inputsIn S) (inputsIn S)ᶜ ≤
+      (forward c.program S).card + (backward c.program S).card :=
+  Internal.blockRank_add_transpose_le_of_sum c.program I c.outputs coeff M
+    (fun x => by
+      rw [← hf x]
+      exact Finset.sum_congr rfl fun o _ => by rw [← congrFun (hc x) o]; rfl) S
 
 /-- **All inputs lie in one component.** If a circuit computes the quadratic form of `M` and
 `M + Mᵀ` is totally regular, the component of any input wire contains every input. -/

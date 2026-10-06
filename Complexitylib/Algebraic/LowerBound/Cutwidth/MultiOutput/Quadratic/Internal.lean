@@ -28,7 +28,10 @@ public import Mathlib.LinearAlgebra.FiniteDimensional.Lemmas
 * *The rank-cut bound* (`blockRank_add_transpose_le`): on a class of equal boundary keys,
   mixing two members realizes any left part with any right part (`SingleCut.mix_mem_filter`),
   so the parts satisfy the hypothesis of the product-class bound; summing over the at most
-  `|F| ^ (|A| + |B|)` classes and comparing exponents gives `rank ≤ |A| + |B|`.
+  `|F| ^ (|A| + |B|)` classes and comparing exponents gives `rank ≤ |A| + |B|`. Only the
+  vanishing of the mixed second difference is used (`blockRank_add_transpose_le_of_mix`), so the
+  bound also holds when a combination of several output wires is the quadratic form
+  (`blockRank_add_transpose_le_of_sum`).
 * *Symmetric Cauchy matrices* (`totallyRegular_hankelCauchyZMod_add_transpose`): `M + Mᵀ = 2 M`
   for symmetric `M`, and scaling a square block by `2 ≠ 0` keeps it nonsingular.
 * *The finite bound* (`half_le_of_quadForm`): the component of an input wire is closed, so the
@@ -236,12 +239,14 @@ section RankCut
 
 variable {F : Type*} [Field F] [Fintype F] [DecidableEq F]
 
-/-- **Classes are isotropic.** On the inputs with a given boundary key, any two left parts and
-any two right parts satisfy `(l - l')ᵀ (M + Mᵀ)[X_S, X_T] (r - r') = 0`, when a wire carries
-the quadratic form of `M`. -/
-theorem dotProduct_mulVec_eq_zero_of_mem_parts (p : Program σ n s) (I : Interpretation σ F)
-    (out : Wire n s) (M : Matrix (Fin n) (Fin n) F) (hf : ∀ x, p.trace I x out = quadForm M x)
-    (S : Finset (Wire n s)) {κ : (↥(forward p S) → F) × (↥(backward p S) → F)}
+/-- **Classes are isotropic.** If the quadratic form of `M` is additive under mixing inputs with
+equal boundary keys, then on the inputs with a given key any two left parts and any two right
+parts satisfy `(l - l')ᵀ (M + Mᵀ)[X_S, X_T] (r - r') = 0`. -/
+theorem dotProduct_mulVec_eq_zero_of_mix (p : Program σ n s) (I : Interpretation σ F)
+    (M : Matrix (Fin n) (Fin n) F) (S : Finset (Wire n s))
+    (hmix : ∀ x x', boundaryKey p I S x = boundaryKey p I S x' →
+      quadForm M x + quadForm M x' = quadForm M (mix S x x') + quadForm M (mix S x' x))
+    {κ : (↥(forward p S) → F) × (↥(backward p S) → F)}
     {l l' : ↥(inputsIn S) → F} (hl : l ∈ leftParts p I S Finset.univ κ)
     (hl' : l' ∈ leftParts p I S Finset.univ κ) {r r' : ↥(inputsIn S)ᶜ → F}
     (hr : r ∈ rightParts p I S Finset.univ κ) (hr' : r' ∈ rightParts p I S Finset.univ κ) :
@@ -258,18 +263,33 @@ theorem dotProduct_mulVec_eq_zero_of_mem_parts (p : Program σ n s) (I : Interpr
   have hu' := mix_mem_filter p I hZ hx' hy'
   have hkey : boundaryKey p I S (mix S x y) = boundaryKey p I S (mix S x' y') :=
     (Finset.mem_filter.mp hu).2.trans (Finset.mem_filter.mp hu').2.symm
-  have h₁ := trace_add_trace_eq_trace_mix_add_trace_mix p I hkey out
-  rw [hf, hf, hf, hf] at h₁
+  have h₁ := hmix _ _ hkey
   have h₂ := quadForm_add_quadForm_eq M S (mix S x y) (mix S x' y')
   rw [leftPart_mix, leftPart_mix, rightPart_mix, rightPart_mix] at h₂
   linear_combination h₁ - h₂
 
-/-- **The rank-cut bound for quadratic forms.** If the wire `out` of a program over a finite
-field carries the quadratic form of `M`, then every split `S` has
+/-- **Classes are isotropic.** On the inputs with a given boundary key, any two left parts and
+any two right parts satisfy `(l - l')ᵀ (M + Mᵀ)[X_S, X_T] (r - r') = 0`, when a wire carries
+the quadratic form of `M`. -/
+theorem dotProduct_mulVec_eq_zero_of_mem_parts (p : Program σ n s) (I : Interpretation σ F)
+    (out : Wire n s) (M : Matrix (Fin n) (Fin n) F) (hf : ∀ x, p.trace I x out = quadForm M x)
+    (S : Finset (Wire n s)) {κ : (↥(forward p S) → F) × (↥(backward p S) → F)}
+    {l l' : ↥(inputsIn S) → F} (hl : l ∈ leftParts p I S Finset.univ κ)
+    (hl' : l' ∈ leftParts p I S Finset.univ κ) {r r' : ↥(inputsIn S)ᶜ → F}
+    (hr : r ∈ rightParts p I S Finset.univ κ) (hr' : r' ∈ rightParts p I S Finset.univ κ) :
+    (l - l') ⬝ᵥ ((M + Mᵀ).submatrix (fun i : ↥(inputsIn S) => (i : Fin n))
+      (fun j : ↥(inputsIn S)ᶜ => (j : Fin n)) *ᵥ (r - r')) = 0 :=
+  dotProduct_mulVec_eq_zero_of_mix p I M S (fun x x' h => by
+    rw [← hf, ← hf, ← hf, ← hf]
+    exact trace_add_trace_eq_trace_mix_add_trace_mix p I h out) hl hl' hr hr'
+
+/-- **The rank-cut bound for quadratic forms additive under mixing.** If the quadratic form of
+`M` is additive under mixing inputs with equal boundary keys for the split `S`, then
 `rank (M + Mᵀ)[X_S, X_T] ≤ |A| + |B|`. -/
-theorem blockRank_add_transpose_le (p : Program σ n s) (I : Interpretation σ F) (out : Wire n s)
-    (M : Matrix (Fin n) (Fin n) F) (hf : ∀ x, p.trace I x out = quadForm M x)
-    (S : Finset (Wire n s)) :
+theorem blockRank_add_transpose_le_of_mix (p : Program σ n s) (I : Interpretation σ F)
+    (M : Matrix (Fin n) (Fin n) F) (S : Finset (Wire n s))
+    (hmix : ∀ x x', boundaryKey p I S x = boundaryKey p I S x' →
+      quadForm M x + quadForm M x' = quadForm M (mix S x x') + quadForm M (mix S x' x)) :
     blockRank (M + Mᵀ) (inputsIn S) (inputsIn S)ᶜ ≤ (forward p S).card + (backward p S).card := by
   set B := (M + Mᵀ).submatrix (fun i : ↥(inputsIn S) => (i : Fin n))
     (fun j : ↥(inputsIn S)ᶜ => (j : Fin n)) with hB
@@ -283,7 +303,7 @@ theorem blockRank_add_transpose_le (p : Program σ n s) (I : Interpretation σ F
     intro κ
     have := card_mul_card_le_of_dotProduct_mulVec_eq_zero B (leftParts p I S Finset.univ κ)
       (rightParts p I S Finset.univ κ) fun l hl l' hl' r hr r' hr' =>
-        dotProduct_mulVec_eq_zero_of_mem_parts p I out M hf S hl hl' hr hr'
+        dotProduct_mulVec_eq_zero_of_mix p I M S hmix hl hl' hr hr'
     rwa [hcard] at this
   have h : Fintype.card F ^ n ≤
       Fintype.card F ^ ((forward p S).card + (backward p S).card) *
@@ -307,6 +327,30 @@ theorem blockRank_add_transpose_le (p : Program σ n s) (I : Interpretation σ F
   have hrank : B.rank ≤ n := (Matrix.rank_le_card_width B).trans (by omega)
   change B.rank ≤ _
   omega
+
+/-- **The rank-cut bound for quadratic forms.** If the wire `out` of a program over a finite
+field carries the quadratic form of `M`, then every split `S` has
+`rank (M + Mᵀ)[X_S, X_T] ≤ |A| + |B|`. -/
+theorem blockRank_add_transpose_le (p : Program σ n s) (I : Interpretation σ F) (out : Wire n s)
+    (M : Matrix (Fin n) (Fin n) F) (hf : ∀ x, p.trace I x out = quadForm M x)
+    (S : Finset (Wire n s)) :
+    blockRank (M + Mᵀ) (inputsIn S) (inputsIn S)ᶜ ≤ (forward p S).card + (backward p S).card :=
+  blockRank_add_transpose_le_of_mix p I M S fun x x' h => by
+    rw [← hf, ← hf, ← hf, ← hf]
+    exact trace_add_trace_eq_trace_mix_add_trace_mix p I h out
+
+/-- **The rank-cut bound for a combination of outputs.** If the combination
+`∑ o, coeff o · out o` of output wires of a program over a finite field is the quadratic form of
+`M`, then every split `S` has `rank (M + Mᵀ)[X_S, X_T] ≤ |A| + |B|`: the mixed second difference
+vanishes on every class for each output wire, hence for the combination. -/
+theorem blockRank_add_transpose_le_of_sum {m : Nat} (p : Program σ n s) (I : Interpretation σ F)
+    (out : Fin m → Wire n s) (coeff : Fin m → F) (M : Matrix (Fin n) (Fin n) F)
+    (hf : ∀ x, ∑ o, coeff o * p.trace I x (out o) = quadForm M x) (S : Finset (Wire n s)) :
+    blockRank (M + Mᵀ) (inputsIn S) (inputsIn S)ᶜ ≤ (forward p S).card + (backward p S).card :=
+  blockRank_add_transpose_le_of_mix p I M S fun x x' h => by
+    rw [← hf, ← hf, ← hf, ← hf, ← Finset.sum_add_distrib, ← Finset.sum_add_distrib]
+    refine Finset.sum_congr rfl fun o _ => ?_
+    rw [← mul_add, ← mul_add, trace_add_trace_eq_trace_mix_add_trace_mix p I h (out o)]
 
 end RankCut
 
