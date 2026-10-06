@@ -126,6 +126,22 @@ section Cut
 
 variable {L : Type*} [Field L] [Algebra K L]
 
+/-- **The directed Taylor cut lemma.** For every set `S` of wires of a program with polynomial
+gates and every point `a`, there are subspaces `V` of directions on the inputs in `S` and `W` of
+directions on the other inputs, with `|X_S| ≤ dim V + |forward S|` and
+`|X_T| ≤ dim W + |backward S|` separately, such that every direction of `V` fixes every wire
+outside `S` to first order, every direction of `W` fixes every wire in `S` to first order, and
+the Hessian of every wire pairs `V` with `W` to zero. -/
+theorem exists_cut_directed (p : Program σ n s) (S : Finset (Wire n s)) (a : Fin n → L) :
+    ∃ V W : Submodule L (Fin n → L),
+      (∀ v ∈ V, ∀ j, j ∉ inputsIn S → v j = 0) ∧ (∀ u ∈ W, ∀ j ∈ inputsIn S, u j = 0) ∧
+      (inputsIn S).card ≤ finrank L V + (forward p S).card ∧
+      (inputsIn S)ᶜ.card ≤ finrank L W + (backward p S).card ∧
+      (∀ v ∈ V, ∀ w, w ∉ S → (jacobian (wirePolynomial P p) a *ᵥ v) w = 0) ∧
+      (∀ u ∈ W, ∀ w ∈ S, (jacobian (wirePolynomial P p) a *ᵥ u) w = 0) ∧
+      ∀ v ∈ V, ∀ u ∈ W, ∀ w, v ⬝ᵥ (hessian (wirePolynomial P p w) a *ᵥ u) = 0 :=
+  Internal.exists_cut_directed P p S a
+
 /-- **The Taylor cut lemma.** For every set `S` of wires of a program with polynomial gates and
 every point `a`, there are subspaces `V` of directions on the inputs in `S` and `W` of
 directions on the other inputs, of total dimension at least `n - |forward S| - |backward S|`,
@@ -141,6 +157,23 @@ theorem exists_cut (p : Program σ n s) (S : Finset (Wire n s)) (a : Fin n → L
       ∀ v ∈ V, ∀ u ∈ W, ∀ w, v ⬝ᵥ (hessian (wirePolynomial P p w) a *ᵥ u) = 0 :=
   Internal.exists_cut P p S a
 
+/-- **The forward Jacobian consequence, for a program.** The block of the Jacobian of the outputs
+at `a`, from the inputs in `S` to the outputs outside `S`, has rank at most `|forward S|`. -/
+theorem blockRank_jacobian_le_forward_of_trace (p : Program σ n s)
+    (out : Fin m → Wire n s) (S : Finset (Wire n s)) (a : Fin n → L) :
+    blockRank (jacobian (fun o => wirePolynomial P p (out o)) a) (outputsIn out S)ᶜ
+      (inputsIn S) ≤ (forward p S).card :=
+  Internal.blockRank_jacobian_le_forward P p S a out
+
+/-- **The backward Jacobian consequence, for a program.** Symmetrically, the block of the
+Jacobian of the outputs at `a`, from the inputs outside `S` to the outputs in `S`, has rank at
+most `|backward S|`. -/
+theorem blockRank_jacobian_le_backward_of_trace (p : Program σ n s)
+    (out : Fin m → Wire n s) (S : Finset (Wire n s)) (a : Fin n → L) :
+    blockRank (jacobian (fun o => wirePolynomial P p (out o)) a) (outputsIn out S)
+      (inputsIn S)ᶜ ≤ (backward p S).card :=
+  Internal.blockRank_jacobian_le_backward P p S a out
+
 /-- **The Jacobian consequence, for a program.** The blocks of the Jacobian of the outputs at
 `a`, from the inputs in `S` to the outputs outside `S` and from the other inputs to the outputs
 in `S`, have ranks summing to at most `|forward S| + |backward S|`. -/
@@ -152,6 +185,23 @@ theorem blockRank_jacobian_add_blockRank_le_of_trace (p : Program σ n s)
         (inputsIn S)ᶜ ≤
         (forward p S).card + (backward p S).card :=
   Internal.blockRank_jacobian_add_blockRank_le P p S a out
+
+/-- **The forward Jacobian consequence.** For a circuit with polynomial gates, every set `S` of
+its wires and every point `a`, the Jacobian `J` of the outputs at `a` satisfies
+`rank J[O_T, X_S] ≤ |forward S|`. -/
+theorem blockRank_jacobian_le_forward (c : Circuit σ n m) (S : Finset (Wire n c.size))
+    (a : Fin n → L) :
+    blockRank (jacobian (fun o => wirePolynomial P c.program (c.outputs o)) a)
+      (outputsIn c.outputs S)ᶜ (inputsIn S) ≤ (forward c.program S).card :=
+  Internal.blockRank_jacobian_le_forward P c.program S a c.outputs
+
+/-- **The backward Jacobian consequence.** Symmetrically, for a circuit with polynomial gates,
+`rank J[O_S, X_T] ≤ |backward S|`. -/
+theorem blockRank_jacobian_le_backward (c : Circuit σ n m) (S : Finset (Wire n c.size))
+    (a : Fin n → L) :
+    blockRank (jacobian (fun o => wirePolynomial P c.program (c.outputs o)) a)
+      (outputsIn c.outputs S) (inputsIn S)ᶜ ≤ (backward c.program S).card :=
+  Internal.blockRank_jacobian_le_backward P c.program S a c.outputs
 
 /-- **The Jacobian consequence.** For a circuit with polynomial gates, every set `S` of its
 wires and every point `a`, the Jacobian `J` of the outputs at `a` satisfies
@@ -184,6 +234,42 @@ theorem blockRank_hessian_le (c : Circuit σ n m) (S : Finset (Wire n c.size)) (
         (inputsIn S)ᶜ ≤
       (forward c.program S).card + (backward c.program S).card :=
   Internal.blockRank_hessian_le P c.program S a c.outputs μ
+
+/-- **The unified first-and-second-order jet cut bound, for a program.** At every point `a` and
+for every combination `H = ∑ₒ μₒ ∇² fₒ(a)` of the output Hessians, the combined block matrix
+formed by `H[X_S, X_T]`, `J[O_T, X_S]ᵀ`, and `J[O_S, X_T]` has rank at most
+`|forward S| + |backward S|`. -/
+theorem rank_fromBlocks_hessian_jacobian_le_of_trace (p : Program σ n s)
+    (out : Fin m → Wire n s) (S : Finset (Wire n s)) (a : Fin n → L) (μ : Fin m → L) :
+    (Matrix.fromBlocks
+      ((∑ o, μ o • hessian (wirePolynomial P p (out o)) a).submatrix
+        (fun i : ↥(inputsIn S) => (i : Fin n)) (fun j : ↥(inputsIn S)ᶜ => (j : Fin n)))
+      ((jacobian (fun o => wirePolynomial P p (out o)) a).submatrix
+        (fun o : ↥(outputsIn out S)ᶜ => (o : Fin m))
+        (fun i : ↥(inputsIn S) => (i : Fin n))).transpose
+      ((jacobian (fun o => wirePolynomial P p (out o)) a).submatrix
+        (fun o : ↥(outputsIn out S) => (o : Fin m))
+        (fun j : ↥(inputsIn S)ᶜ => (j : Fin n)))
+      0).rank ≤ (forward p S).card + (backward p S).card :=
+  Internal.rank_fromBlocks_hessian_jacobian_le P p S a out μ
+
+/-- **The unified first-and-second-order jet cut bound.** For a circuit with polynomial gates,
+every set `S` of its wires, every point `a` and all coefficients `μ`, the combined block matrix
+formed by `H[X_S, X_T]`, `J[O_T, X_S]ᵀ`, and `J[O_S, X_T]` has rank at most
+`|forward S| + |backward S|`. -/
+theorem rank_fromBlocks_hessian_jacobian_le (c : Circuit σ n m) (S : Finset (Wire n c.size))
+    (a : Fin n → L) (μ : Fin m → L) :
+    (Matrix.fromBlocks
+      ((∑ o, μ o • hessian (wirePolynomial P c.program (c.outputs o)) a).submatrix
+        (fun i : ↥(inputsIn S) => (i : Fin n)) (fun j : ↥(inputsIn S)ᶜ => (j : Fin n)))
+      ((jacobian (fun o => wirePolynomial P c.program (c.outputs o)) a).submatrix
+        (fun o : ↥(outputsIn c.outputs S)ᶜ => (o : Fin m))
+        (fun i : ↥(inputsIn S) => (i : Fin n))).transpose
+      ((jacobian (fun o => wirePolynomial P c.program (c.outputs o)) a).submatrix
+        (fun o : ↥(outputsIn c.outputs S) => (o : Fin m))
+        (fun j : ↥(inputsIn S)ᶜ => (j : Fin n)))
+      0).rank ≤ (forward c.program S).card + (backward c.program S).card :=
+  Internal.rank_fromBlocks_hessian_jacobian_le P c.program S a c.outputs μ
 
 end Cut
 

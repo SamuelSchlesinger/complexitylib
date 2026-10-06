@@ -82,6 +82,96 @@ theorem card_rightParts_le (x₀ : Fin n → U) :
     rw [← hf, ← hf, trace_mix p I hfwd hbwd, ite_eq_left hout]
 
 include hf in
+/-- **The forward fibre bound.** If every left fibre has at most `DT` elements, then
+`|U| ^ |X_S| ≤ |U| ^ |A| · DT`, using only the forward signals `A = forward p S`. -/
+theorem card_pow_inputsIn_le_of_leftFibre [Nonempty U] {DT : Nat}
+    (hT : ∀ x, (leftFibre out f S x).card ≤ DT) :
+    Fintype.card U ^ (inputsIn S).card ≤ Fintype.card U ^ (forward p S).card * DT := by
+  classical
+  let x₀ : Fin n → U := fun _ => Classical.arbitrary U
+  let φ : (↥(inputsIn S) → U) → (Fin n → U) :=
+    fun l j => if hj : j ∈ inputsIn S then l ⟨j, hj⟩ else x₀ j
+  have hφ_inj : Function.Injective φ := fun l l' h => by
+    funext ⟨j, hj⟩
+    have := congrFun h j
+    simp only [φ, hj, ↓reduceDIte] at this
+    exact this
+  let Z := (Finset.univ : Finset (↥(inputsIn S) → U)).image φ
+  have hZ_card : Z.card = Fintype.card U ^ (inputsIn S).card := by
+    rw [Finset.card_image_of_injective _ hφ_inj, Finset.card_univ, Fintype.card_fun,
+      Fintype.card_coe]
+  let key : (Fin n → U) → (↥(forward p S) → U) := fun x => (boundaryKey p I S x).1
+  rw [← hZ_card, Finset.card_eq_sum_card_image key Z]
+  refine (Finset.sum_le_sum (g := fun _ => DT) fun κ hκ => ?_).trans ?_
+  · obtain ⟨x₁, hx₁, rfl⟩ := Finset.mem_image.mp hκ
+    refine (Finset.card_le_card fun x hx => ?_).trans (hT x₁)
+    simp only [Finset.mem_filter] at hx
+    obtain ⟨hxZ, hkey⟩ := hx
+    obtain ⟨l, -, rfl⟩ := Finset.mem_image.mp hxZ
+    obtain ⟨l₁, -, rfl⟩ := Finset.mem_image.mp hx₁
+    simp only [leftFibre, Finset.mem_filter, Finset.mem_univ, true_and]
+    have h_off : ∀ j, j ∉ inputsIn S → φ l j = φ l₁ j := fun j hj => by
+      simp [φ, hj]
+    refine ⟨h_off, fun i hi => ?_⟩
+    have hout : out i ∉ S := by simpa [outputsIn] using hi
+    have h_fwd : ∀ w ∈ forward p S, p.trace I (φ l) w = p.trace I (φ l₁) w :=
+      fun w hw => congrFun hkey ⟨w, hw⟩
+    rw [← hf, ← hf]
+    exact trace_eq_of_agree_forward p I h_off h_fwd (out i) hout
+  · rw [Finset.sum_const, smul_eq_mul]
+    refine Nat.mul_le_mul_right DT ?_
+    calc (Z.image key).card
+        ≤ (Finset.univ : Finset (↥(forward p S) → U)).card :=
+          Finset.card_le_univ _
+      _ = Fintype.card U ^ (forward p S).card := by
+          rw [Finset.card_univ, Fintype.card_fun, Fintype.card_coe]
+
+include hf in
+/-- **The backward fibre bound.** Symmetrically, if every right fibre has at most `DS` elements,
+then `|U| ^ |X_T| ≤ |U| ^ |B| · DS`, using only the backward signals `B = backward p S`. -/
+theorem card_pow_compl_inputsIn_le_of_rightFibre [Nonempty U] {DS : Nat}
+    (hS : ∀ x, (rightFibre out f S x).card ≤ DS) :
+    Fintype.card U ^ (inputsIn S)ᶜ.card ≤ Fintype.card U ^ (backward p S).card * DS := by
+  classical
+  let x₀ : Fin n → U := fun _ => Classical.arbitrary U
+  let ψ : (↥(inputsIn S)ᶜ → U) → (Fin n → U) :=
+    fun r j => if hj : j ∈ (inputsIn S)ᶜ then r ⟨j, hj⟩ else x₀ j
+  have hψ_inj : Function.Injective ψ := fun r r' h => by
+    funext ⟨j, hj⟩
+    have := congrFun h j
+    simp only [ψ, hj, ↓reduceDIte] at this
+    exact this
+  let Z := (Finset.univ : Finset (↥(inputsIn S)ᶜ → U)).image ψ
+  have hZ_card : Z.card = Fintype.card U ^ (inputsIn S)ᶜ.card := by
+    rw [Finset.card_image_of_injective _ hψ_inj, Finset.card_univ, Fintype.card_fun,
+      Fintype.card_coe]
+  let key : (Fin n → U) → (↥(backward p S) → U) := fun x => (boundaryKey p I S x).2
+  rw [← hZ_card, Finset.card_eq_sum_card_image key Z]
+  refine (Finset.sum_le_sum (g := fun _ => DS) fun κ hκ => ?_).trans ?_
+  · obtain ⟨x₁, hx₁, rfl⟩ := Finset.mem_image.mp hκ
+    refine (Finset.card_le_card fun x hx => ?_).trans (hS x₁)
+    simp only [Finset.mem_filter] at hx
+    obtain ⟨hxZ, hkey⟩ := hx
+    obtain ⟨r, -, rfl⟩ := Finset.mem_image.mp hxZ
+    obtain ⟨r₁, -, rfl⟩ := Finset.mem_image.mp hx₁
+    simp only [rightFibre, Finset.mem_filter, Finset.mem_univ, true_and]
+    have h_inS : ∀ j ∈ inputsIn S, ψ r j = ψ r₁ j := fun j hj => by
+      simp [ψ, hj]
+    refine ⟨h_inS, fun i hi => ?_⟩
+    have hout : out i ∈ S := by simpa [outputsIn] using hi
+    have h_bwd : ∀ w ∈ backward p S, p.trace I (ψ r) w = p.trace I (ψ r₁) w :=
+      fun w hw => congrFun hkey ⟨w, hw⟩
+    rw [← hf, ← hf]
+    exact trace_eq_of_agree_backward p I h_inS h_bwd (out i) hout
+  · rw [Finset.sum_const, smul_eq_mul]
+    refine Nat.mul_le_mul_right DS ?_
+    calc (Z.image key).card
+        ≤ (Finset.univ : Finset (↥(backward p S) → U)).card :=
+          Finset.card_le_univ _
+      _ = Fintype.card U ^ (backward p S).card := by
+          rw [Finset.card_univ, Fintype.card_fun, Fintype.card_coe]
+
+include hf in
 /-- **The general fibre bound.** If every left fibre has at most `DT` elements and every right
 fibre at most `DS`, then `|U| ^ n ≤ |U| ^ (|A| + |B|) · DT · DS`. -/
 theorem card_pow_le_of_fibres {DT DS : Nat} (hT : ∀ x, (leftFibre out f S x).card ≤ DT)
@@ -225,25 +315,43 @@ theorem card_rightFibre_le (out : Fin m → Wire n s) (M : Matrix (Fin m) (Fin n
         rw [card_filter_mem_ker, Fintype.card_coe]
         rfl
 
+/-- **The forward rank-cut bound for a program.** If the wires `out` carry the linear map
+`x ↦ M x`, then for every split `S`, `rank M[Y_T, X_S] ≤ |A|`, where `A = forward p S`. -/
+theorem blockRank_le_forward (p : Program σ n s) (I : Interpretation σ F)
+    (out : Fin m → Wire n s) (M : Matrix (Fin m) (Fin n) F)
+    (hf : ∀ x i, p.trace I x (out i) = (M *ᵥ x) i) (S : Finset (Wire n s)) :
+    blockRank M (outputsIn out S)ᶜ (inputsIn S) ≤ (forward p S).card := by
+  have h := card_pow_inputsIn_le_of_leftFibre p I out (fun x => M *ᵥ x) hf S
+    (card_leftFibre_le out M S)
+  have hr₁ : blockRank M (outputsIn out S)ᶜ (inputsIn S) ≤ (inputsIn S).card :=
+    (Matrix.rank_le_card_width _).trans (Fintype.card_coe _).le
+  rw [← pow_add] at h
+  have := (Nat.pow_le_pow_iff_right (Fintype.one_lt_card (α := F))).mp h
+  omega
+
+/-- **The backward rank-cut bound for a program.** Symmetrically, if the wires `out` carry the
+linear map `x ↦ M x`, then for every split `S`, `rank M[Y_S, X_T] ≤ |B|`, where
+`B = backward p S`. -/
+theorem blockRank_le_backward (p : Program σ n s) (I : Interpretation σ F)
+    (out : Fin m → Wire n s) (M : Matrix (Fin m) (Fin n) F)
+    (hf : ∀ x i, p.trace I x (out i) = (M *ᵥ x) i) (S : Finset (Wire n s)) :
+    blockRank M (outputsIn out S) (inputsIn S)ᶜ ≤ (backward p S).card := by
+  have h := card_pow_compl_inputsIn_le_of_rightFibre p I out (fun x => M *ᵥ x) hf S
+    (card_rightFibre_le out M S)
+  have hr₂ : blockRank M (outputsIn out S) (inputsIn S)ᶜ ≤ (inputsIn S)ᶜ.card :=
+    (Matrix.rank_le_card_width _).trans (Fintype.card_coe _).le
+  rw [← pow_add] at h
+  have := (Nat.pow_le_pow_iff_right (Fintype.one_lt_card (α := F))).mp h
+  omega
+
 /-- **The rank-cut bound for a program.** If the wires `out` carry the linear map `x ↦ M x`,
 then for every split `S`, `rank M[Y_T, X_S] + rank M[Y_S, X_T] ≤ |A| + |B|`. -/
 theorem blockRank_add_blockRank_le (p : Program σ n s) (I : Interpretation σ F)
     (out : Fin m → Wire n s) (M : Matrix (Fin m) (Fin n) F)
     (hf : ∀ x i, p.trace I x (out i) = (M *ᵥ x) i) (S : Finset (Wire n s)) :
     blockRank M (outputsIn out S)ᶜ (inputsIn S) + blockRank M (outputsIn out S) (inputsIn S)ᶜ ≤
-      (forward p S).card + (backward p S).card := by
-  have h := card_pow_le_of_fibres p I out (fun x => M *ᵥ x) hf S
-    (card_leftFibre_le out M S) (card_rightFibre_le out M S)
-  have hr₁ : blockRank M (outputsIn out S)ᶜ (inputsIn S) ≤ (inputsIn S).card :=
-    (Matrix.rank_le_card_width _).trans (Fintype.card_coe _).le
-  have hr₂ : blockRank M (outputsIn out S) (inputsIn S)ᶜ ≤ (inputsIn S)ᶜ.card :=
-    (Matrix.rank_le_card_width _).trans (Fintype.card_coe _).le
-  have hcompl : (inputsIn S)ᶜ.card = n - (inputsIn S).card := by
-    rw [Finset.card_compl, Fintype.card_fin]
-  have hi : (inputsIn S).card ≤ n := by simpa using Finset.card_le_univ (inputsIn S)
-  rw [← pow_add, ← pow_add] at h
-  have := (Nat.pow_le_pow_iff_right (Fintype.one_lt_card (α := F))).mp h
-  omega
+      (forward p S).card + (backward p S).card :=
+  Nat.add_le_add (blockRank_le_forward p I out M hf S) (blockRank_le_backward p I out M hf S)
 
 end Linear
 

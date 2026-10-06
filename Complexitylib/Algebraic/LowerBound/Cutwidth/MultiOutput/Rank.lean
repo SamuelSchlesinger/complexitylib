@@ -47,6 +47,26 @@ section General
 
 variable {U : Type*} [Fintype U] [DecidableEq U]
 
+/-- **The forward fibre bound for a program.** If the wires `out` of a program carry `f` and
+every left fibre has at most `DT` elements, then `|U| ^ |X_S| ≤ |U| ^ |A| · DT`, using only
+the forward signals `A = forward p S`. -/
+theorem card_pow_inputsIn_le_of_leftFibre_of_trace [Nonempty U] (p : Program σ n s)
+    (I : Interpretation σ U) (out : Fin m → Wire n s) {f : (Fin n → U) → Fin m → U}
+    (hf : ∀ x i, p.trace I x (out i) = f x i) (S : Finset (Wire n s)) {DT : Nat}
+    (hT : ∀ x, (leftFibre out f S x).card ≤ DT) :
+    Fintype.card U ^ (inputsIn S).card ≤ Fintype.card U ^ (forward p S).card * DT :=
+  Internal.card_pow_inputsIn_le_of_leftFibre p I out f hf S hT
+
+/-- **The backward fibre bound for a program.** Symmetrically, if every right fibre has at most
+`DS` elements, then `|U| ^ |X_T| ≤ |U| ^ |B| · DS`, using only the backward signals
+`B = backward p S`. -/
+theorem card_pow_compl_inputsIn_le_of_rightFibre_of_trace [Nonempty U] (p : Program σ n s)
+    (I : Interpretation σ U) (out : Fin m → Wire n s) {f : (Fin n → U) → Fin m → U}
+    (hf : ∀ x i, p.trace I x (out i) = f x i) (S : Finset (Wire n s)) {DS : Nat}
+    (hS : ∀ x, (rightFibre out f S x).card ≤ DS) :
+    Fintype.card U ^ (inputsIn S)ᶜ.card ≤ Fintype.card U ^ (backward p S).card * DS :=
+  Internal.card_pow_compl_inputsIn_le_of_rightFibre p I out f hf S hS
+
 /-- **The fibre bound for a program.** If the wires `out` of a program carry `f`, every left
 fibre has at most `DT` elements and every right fibre at most `DS`, then
 `|U| ^ n ≤ |U| ^ (|A| + |B|) · DT · DS`. -/
@@ -57,6 +77,26 @@ theorem card_pow_le_of_fibres_of_trace (p : Program σ n s) (I : Interpretation 
     Fintype.card U ^ n ≤
       Fintype.card U ^ ((forward p S).card + (backward p S).card) * (DT * DS) :=
   Internal.card_pow_le_of_fibres p I out f hf S hT hS
+
+/-- **The forward fibre bound.** If a circuit computes `f` and every left fibre of a split has
+at most `DT` elements, then `|U| ^ |X_S| ≤ |U| ^ |A| · DT`. -/
+theorem card_pow_inputsIn_le_of_leftFibre [Nonempty U] {c : Circuit σ n m}
+    {I : Interpretation σ U} {f : (Fin n → U) → Fin m → U} (hc : c.Computes I f)
+    (S : Finset (Wire n c.size)) {DT : Nat}
+    (hT : ∀ x, (leftFibre c.outputs f S x).card ≤ DT) :
+    Fintype.card U ^ (inputsIn S).card ≤ Fintype.card U ^ (forward c.program S).card * DT :=
+  Internal.card_pow_inputsIn_le_of_leftFibre c.program I c.outputs f
+    (fun x i => congrFun (hc x) i) S hT
+
+/-- **The backward fibre bound.** Symmetrically, if every right fibre of a split has at most
+`DS` elements, then `|U| ^ |X_T| ≤ |U| ^ |B| · DS`. -/
+theorem card_pow_compl_inputsIn_le_of_rightFibre [Nonempty U] {c : Circuit σ n m}
+    {I : Interpretation σ U} {f : (Fin n → U) → Fin m → U} (hc : c.Computes I f)
+    (S : Finset (Wire n c.size)) {DS : Nat}
+    (hS : ∀ x, (rightFibre c.outputs f S x).card ≤ DS) :
+    Fintype.card U ^ (inputsIn S)ᶜ.card ≤ Fintype.card U ^ (backward c.program S).card * DS :=
+  Internal.card_pow_compl_inputsIn_le_of_rightFibre c.program I c.outputs f
+    (fun x i => congrFun (hc x) i) S hS
 
 /-- **The fibre bound.** If a circuit computes `f`, every left fibre of a split has at most
 `DT` elements and every right fibre at most `DS`, then
@@ -94,6 +134,22 @@ theorem card_rightFibre_le (out : Fin m → Wire n s) (M : Matrix (Fin m) (Fin n
       Fintype.card F ^ ((inputsIn S)ᶜ.card - blockRank M (outputsIn out S) (inputsIn S)ᶜ) :=
   Internal.card_rightFibre_le out M S x
 
+/-- **The forward rank-cut bound for a program.** If the wires `out` of a program carry the
+linear map `x ↦ M x`, every split `S` has `rank M[Y_T, X_S] ≤ |A|`, where `A = forward p S`. -/
+theorem blockRank_le_forward_of_trace (p : Program σ n s) (I : Interpretation σ F)
+    (out : Fin m → Wire n s) (M : Matrix (Fin m) (Fin n) F)
+    (hf : ∀ x i, p.trace I x (out i) = (M *ᵥ x) i) (S : Finset (Wire n s)) :
+    blockRank M (outputsIn out S)ᶜ (inputsIn S) ≤ (forward p S).card :=
+  Internal.blockRank_le_forward p I out M hf S
+
+/-- **The backward rank-cut bound for a program.** Symmetrically, every split `S` has
+`rank M[Y_S, X_T] ≤ |B|`, where `B = backward p S`. -/
+theorem blockRank_le_backward_of_trace (p : Program σ n s) (I : Interpretation σ F)
+    (out : Fin m → Wire n s) (M : Matrix (Fin m) (Fin n) F)
+    (hf : ∀ x i, p.trace I x (out i) = (M *ᵥ x) i) (S : Finset (Wire n s)) :
+    blockRank M (outputsIn out S) (inputsIn S)ᶜ ≤ (backward p S).card :=
+  Internal.blockRank_le_backward p I out M hf S
+
 /-- **The rank-cut bound for a program.** If the wires `out` of a program carry the linear map
 `x ↦ M x`, every split `S` has `rank M[Y_T, X_S] + rank M[Y_S, X_T] ≤ |A| + |B|`. -/
 theorem blockRank_add_blockRank_le_of_trace (p : Program σ n s) (I : Interpretation σ F)
@@ -102,6 +158,23 @@ theorem blockRank_add_blockRank_le_of_trace (p : Program σ n s) (I : Interpreta
     blockRank M (outputsIn out S)ᶜ (inputsIn S) + blockRank M (outputsIn out S) (inputsIn S)ᶜ ≤
       (forward p S).card + (backward p S).card :=
   Internal.blockRank_add_blockRank_le p I out M hf S
+
+/-- **The forward rank-cut bound.** If a circuit with values in a finite field, over any
+signature, computes the linear map `x ↦ M x`, then every set `S` of its wires has
+`rank M[Y_T, X_S] ≤ |A|`, where `A = forward c.program S`. -/
+theorem blockRank_le_forward {c : Circuit σ n m} {I : Interpretation σ F}
+    {M : Matrix (Fin m) (Fin n) F} (hc : c.Computes I fun x => M *ᵥ x)
+    (S : Finset (Wire n c.size)) :
+    blockRank M (outputsIn c.outputs S)ᶜ (inputsIn S) ≤ (forward c.program S).card :=
+  Internal.blockRank_le_forward c.program I c.outputs M (fun x i => congrFun (hc x) i) S
+
+/-- **The backward rank-cut bound.** Symmetrically, every set `S` of its wires has
+`rank M[Y_S, X_T] ≤ |B|`, where `B = backward c.program S`. -/
+theorem blockRank_le_backward {c : Circuit σ n m} {I : Interpretation σ F}
+    {M : Matrix (Fin m) (Fin n) F} (hc : c.Computes I fun x => M *ᵥ x)
+    (S : Finset (Wire n c.size)) :
+    blockRank M (outputsIn c.outputs S) (inputsIn S)ᶜ ≤ (backward c.program S).card :=
+  Internal.blockRank_le_backward c.program I c.outputs M (fun x i => congrFun (hc x) i) S
 
 /-- **The rank-cut bound.** If a circuit with values in a finite field, over any signature,
 computes the linear map `x ↦ M x`, then every set `S` of its wires has

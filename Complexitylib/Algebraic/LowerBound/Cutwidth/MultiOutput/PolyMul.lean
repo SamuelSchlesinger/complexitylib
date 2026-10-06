@@ -205,18 +205,20 @@ theorem eventually_lt_size_of_polyMul {ε : ℝ} (hε : 0 < ε) :
   eventually_lt_size_of_polyMul_of_orderingBound
     (mul_pos two_pos Gaussian.frontierCoefficient_pos) Multigraph.exists_orderingBound_frontier hε
 
+private theorem fifty_div_nine_le : (50 / 9 : ℝ) ≤ 2 + 1 / (2 * Gaussian.frontierCoefficient) := by
+  have hpos : 0 < 2 * Gaussian.frontierCoefficient :=
+    mul_pos two_pos Gaussian.frontierCoefficient_pos
+  have := one_div_le_one_div_of_le hpos Gaussian.two_mul_frontierCoefficient_le
+  norm_num at this ⊢
+  linarith
+
 /-- **Polynomial multiplication needs `(50/9 - ε) n` polynomial gates over every field.** -/
 theorem eventually_lt_size_of_polyMul_fifty_div_nine {ε : ℝ} (hε : 0 < ε) :
     ∀ᶠ n : ℕ in atTop, ∀ (K : Type u) [Field K] (σ : Signature.{v})
       (P : (op : σ.Op) → MvPolynomial (Fin (σ.Arity op)) K) (c : Circuit σ (n + n) (2 * n - 1)),
         c.FanInAtMost 2 → Taylor.FormallyComputes P c (polyMulPolynomial K n) →
           (50 / 9 - ε) * n < c.size := by
-  have hcoef : (50 / 9 : ℝ) ≤ 2 + 1 / (2 * Gaussian.frontierCoefficient) := by
-    have hpos : 0 < 2 * Gaussian.frontierCoefficient :=
-      mul_pos two_pos Gaussian.frontierCoefficient_pos
-    have := one_div_le_one_div_of_le hpos Gaussian.two_mul_frontierCoefficient_le
-    norm_num at this ⊢
-    linarith
+  have hcoef := fifty_div_nine_le
   filter_upwards [eventually_lt_size_of_polyMul.{u, v} hε] with n hn
   intro K _ σ P c hfan hc
   refine lt_of_le_of_lt ?_ (hn K σ P c hfan hc)
@@ -236,6 +238,18 @@ theorem eventually_lt_size_of_polyMul_of_infinite {ε : ℝ} (hε : 0 < ε) :
   refine hn K σ hI.gatePolynomial c hfan (Taylor.formallyComputes_of_computes hI fun x => ?_)
   funext m
   rw [hc x, polyMul_eq_eval]
+
+/-- **Polynomial multiplication over an infinite field needs `(50/9 - ε) n` polynomial gates.** -/
+theorem eventually_lt_size_of_polyMul_of_infinite_fifty_div_nine {ε : ℝ} (hε : 0 < ε) :
+    ∀ᶠ n : ℕ in atTop, ∀ (K : Type u) [Field K] [Infinite K] (σ : Signature.{v})
+      (I : Interpretation σ K), Polynomial.IsPolynomial I →
+      ∀ c : Circuit σ (n + n) (2 * n - 1), c.FanInAtMost 2 → c.Computes I (polyMul n) →
+          (50 / 9 - ε) * n < c.size := by
+  have hcoef := fifty_div_nine_le
+  filter_upwards [eventually_lt_size_of_polyMul_of_infinite.{u, v} hε] with n hn
+  intro K _ _ σ I hI c hfan hc
+  refine lt_of_le_of_lt ?_ (hn K σ I hI c hfan hc)
+  exact mul_le_mul_of_nonneg_right (by linarith) (Nat.cast_nonneg n)
 
 /-- Every output of polynomial multiplication is a nonconstant function. -/
 theorem polyMul_nonconstant {K : Type*} [Field K] (m : Fin (2 * n - 1)) :
@@ -263,6 +277,18 @@ theorem eventually_lt_arithmeticCost_of_polyMul {ε : ℝ} (hε : 0 < ε) :
     Polynomial.isPolynomial_interpretation d fan fun x => (agrees x).trans (hc x)
   rwa [size] at result
 
+/-- **Arithmetic circuits with free constants need `(50/9 - ε) n` operations.** -/
+theorem eventually_lt_arithmeticCost_of_polyMul_fifty_div_nine {ε : ℝ} (hε : 0 < ε) :
+    ∀ᶠ n : ℕ in atTop, ∀ (K : Type u) [Field K] [Infinite K] (Kc : Type v) (constant : Kc → K)
+      (c : Circuit (Arithmetic.signature Kc) (n + n) (2 * n - 1)),
+        c.Computes (Arithmetic.interpretation constant) (polyMul n) →
+          (50 / 9 - ε) * n < c.cost Arithmetic.gateCost := by
+  have hcoef := fifty_div_nine_le
+  filter_upwards [eventually_lt_arithmeticCost_of_polyMul.{u, v} hε] with n hn
+  intro K _ _ Kc constant c hc
+  refine lt_of_le_of_lt ?_ (hn K Kc constant c hc)
+  exact mul_le_mul_of_nonneg_right (by linarith) (Nat.cast_nonneg n)
+
 /-- **Arithmetic circuits with free constants over every field.** For every `ε > 0` and all
 large `n`, over every field `K`, every circuit of additions, multiplications and constants of
 `K` formally computing polynomial multiplication performs more than
@@ -285,6 +311,18 @@ theorem eventually_lt_arithmeticCost_of_polyMul_formal {ε : ℝ} (hε : 0 < ε)
   funext m
   exact (polyMul_eq_aeval x m).symm
 
+/-- **Arithmetic circuits with free constants over every field need `(50/9 - ε) n` operations.** -/
+theorem eventually_lt_arithmeticCost_of_polyMul_formal_fifty_div_nine {ε : ℝ} (hε : 0 < ε) :
+    ∀ᶠ n : ℕ in atTop, ∀ (K : Type u) [Field K] (Kc : Type v) (constant : Kc → K)
+      (c : Circuit (Arithmetic.signature Kc) (n + n) (2 * n - 1)),
+        Taylor.FormallyComputes (Taylor.arithmeticPolynomial constant) c (polyMulPolynomial K n) →
+          (50 / 9 - ε) * n < c.cost Arithmetic.gateCost := by
+  have hcoef := fifty_div_nine_le
+  filter_upwards [eventually_lt_arithmeticCost_of_polyMul_formal.{u, v} hε] with n hn
+  intro K _ Kc constant c hc
+  refine lt_of_le_of_lt ?_ (hn K Kc constant c hc)
+  exact mul_le_mul_of_nonneg_right (by linarith) (Nat.cast_nonneg n)
+
 /-- **Arbitrary gates over `ZMod q`.** For every `ε > 0` and all large `n`, for every prime
 `q > 2n`, every circuit over `ZMod q`, over any signature with fan-in at most two (so with
 arbitrary functions `ZMod q × ZMod q → ZMod q` as gates), computing polynomial multiplication
@@ -299,5 +337,17 @@ theorem eventually_lt_size_of_polyMul_zmod {ε : ℝ} (hε : 0 < ε) :
     with n hn
   intro q _ hq σ I c hfan hc
   exact hn c.size fun η C hAη hC => le_of_polyMul_zmod hAη hC q hq hfan hc
+
+/-- **Arbitrary gates over `ZMod q` need `(50/9 - ε) n` gates.** -/
+theorem eventually_lt_size_of_polyMul_zmod_fifty_div_nine {ε : ℝ} (hε : 0 < ε) :
+    ∀ᶠ n : ℕ in atTop, ∀ (q : ℕ) [Fact q.Prime], 2 * n < q →
+      ∀ (σ : Signature.{v}) (I : Interpretation σ (ZMod q)) (c : Circuit σ (n + n) (2 * n - 1)),
+        c.FanInAtMost 2 → c.Computes I (polyMul n) →
+          (50 / 9 - ε) * n < c.size := by
+  have hcoef := fifty_div_nine_le
+  filter_upwards [eventually_lt_size_of_polyMul_zmod.{v} hε] with n hn
+  intro q _ hq σ I c hfan hc
+  refine lt_of_le_of_lt ?_ (hn q hq σ I c hfan hc)
+  exact mul_le_mul_of_nonneg_right (by linarith) (Nat.cast_nonneg n)
 
 end Algebraic.Cutwidth.MultiOutput

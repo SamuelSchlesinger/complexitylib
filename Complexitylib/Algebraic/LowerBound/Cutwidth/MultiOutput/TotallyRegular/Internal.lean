@@ -27,6 +27,13 @@ public import Mathlib.Algebra.Field.ZMod
   `N + 1` of them. For that prefix the two blocks have ranks summing to at least `N - 1`, and
   the prefix is charged to the component holding all inputs, which gives
   `N - 1 ≤ (A + η) (s - N)⁺ + 3 log₂ (N + 3 s) + C` (`sub_one_le_of_totallyRegular`).
+* For a rectangular `m × N` totally regular matrix with `2 ≤ N ≤ m`, the `m` output wires are
+  still distinct (`outputs_injective_rect`), so peeling the last gate and at most one output
+  wire seated on it `m - N` times leaves a program with `s - (m - N)` gates computing an `N × N`
+  totally regular row-submatrix (`exists_square_of_totallyRegular_rect`). This gives the
+  rectangular finite bound `N - 1 ≤ (A + η) (s - m)⁺ + 3 log₂ (N + 3 s) + C`
+  (`sub_one_le_of_totallyRegular_rect`) and the asymptotic lower bound
+  `m + (1 / A - ε) N < s` (`eventually_lt_size_of_orderingBound_rect`).
 * Cauchy matrices are totally regular (`totallyRegular_cauchy`): a kernel vector `v` of a square
   Cauchy matrix makes the interpolant through `(y j, v j / w j)`, with `w` the barycentric
   weights, vanish at every `x i`; it has degree below the number of nodes, so it is zero, and
@@ -82,6 +89,101 @@ theorem outputs_injective {n s N : Nat} {M : Matrix (Fin N) (Fin N) F}
   simp only [Matrix.submatrix_apply, Matrix.cons_val_zero, Matrix.cons_val_one]
   rw [hrow i, hrow i']
   ring
+
+/-- Any injective selection of rows of a totally regular matrix is totally regular. -/
+theorem TotallyRegular.submatrix_rows {m m' n : Nat} {M : Matrix (Fin m) (Fin n) F}
+    (hM : TotallyRegular M) {r : Fin m' → Fin m} (hr : Function.Injective r) :
+    TotallyRegular (M.submatrix r id) := by
+  intro k r' c' hr' hc'
+  rw [Matrix.submatrix_submatrix]
+  exact hM k (r ∘ r') c' (hr.comp hr') hc'
+
+/-- A circuit computing a totally regular map on `N ≥ 2` inputs carries distinct outputs on
+distinct wires. -/
+theorem outputs_injective_rect {m N s : Nat} (hN : 2 ≤ N) {M : Matrix (Fin m) (Fin N) F}
+    (hM : TotallyRegular M) (p : Program σ N s) (I : Interpretation σ F)
+    (out : Fin m → Wire N s) (hf : ∀ x i, p.trace I x (out i) = (M *ᵥ x) i) :
+    Function.Injective out := by
+  intro i i' h
+  by_contra hne
+  have hrow : ∀ j, M i j = M i' j := fun j => by
+    have h₁ := hf (Pi.single j 1) i
+    have h₂ := hf (Pi.single j 1) i'
+    rw [h] at h₁
+    simpa [Matrix.mulVec_single_one] using h₁.symm.trans h₂
+  have hrinj : Function.Injective ![i, i'] := by
+    intro a b hab
+    fin_cases a <;> fin_cases b <;> simp_all [eq_comm]
+  let c : Fin 2 → Fin N := ![⟨0, by omega⟩, ⟨1, by omega⟩]
+  have hcinj : Function.Injective c := by
+    intro a b hab
+    fin_cases a <;> fin_cases b <;> simp_all [c, Fin.ext_iff]
+  have hdet := hM 2 ![i, i'] c hrinj hcinj
+  apply hdet
+  rw [Matrix.det_fin_two]
+  simp only [Matrix.submatrix_apply, Matrix.cons_val_zero, Matrix.cons_val_one]
+  rw [hrow (c 0), hrow (c 1)]
+  ring
+
+/-- Every wire of `p.gate line` other than the last gate comes from `p`. -/
+def unlast {n s : Nat} (w : Wire n (s + 1)) (hw : w ≠ Wire.gate (Fin.last s)) : Wire n s :=
+  Wire.lastCases (motive := fun w => w ≠ Wire.gate (Fin.last s) → Wire n s)
+    (fun h => absurd rfl h) (fun w₀ _ => w₀) w hw
+
+@[simp] theorem castSucc_unlast {n s : Nat} (w : Wire n (s + 1))
+    (hw : w ≠ Wire.gate (Fin.last s)) : (unlast w hw).castSucc = w := by
+  induction w using Wire.lastCases with
+  | last => exact absurd rfl hw
+  | castSucc w₀ => simp [unlast]
+
+theorem trace_unlast {n s : Nat} {U : Type*} (p : Program σ n s) (line : Line σ n s)
+    (I : Interpretation σ U) (x : Fin n → U) (w : Wire n (s + 1))
+    (hw : w ≠ Wire.gate (Fin.last s)) :
+    p.trace I x (unlast w hw) = (p.gate line).trace I x w := by
+  rw [← p.trace_gate_castSucc line I x (unlast w hw), castSucc_unlast]
+
+/-- Peeling `m - N` gates from a program computing a rectangular `m × N` totally regular map
+leaves a program with `s - (m - N)` gates computing an `N × N` totally regular submatrix. -/
+theorem exists_square_of_totallyRegular_rect {N m s : Nat} (hN : 2 ≤ N) (hNm : N ≤ m)
+    (p : Program σ N s) (hp : p.FanInAtMost 2) (I : Interpretation σ F)
+    (out : Fin m → Wire N s) {M : Matrix (Fin m) (Fin N) F} (hM : TotallyRegular M)
+    (hf : ∀ x i, p.trace I x (out i) = (M *ᵥ x) i) :
+    ∃ (s' : Nat) (p' : Program σ N s') (out' : Fin N → Wire N s')
+      (M' : Matrix (Fin N) (Fin N) F),
+      s' + (m - N) = s ∧ p'.FanInAtMost 2 ∧ TotallyRegular M' ∧
+        ∀ x i, p'.trace I x (out' i) = (M' *ᵥ x) i := by
+  induction m generalizing s with
+  | zero => omega
+  | succ m ih =>
+    by_cases hEq : N = m + 1
+    · subst hEq
+      exact ⟨s, p, out, M, by omega, hp, hM, hf⟩
+    · have hNm' : N ≤ m := by omega
+      have hout := outputs_injective_rect hN hM p I out hf
+      cases p with
+      | empty =>
+        have hcard := Fintype.card_le_of_injective out hout
+        simp only [Fintype.card_fin, Wire.card, add_zero] at hcard
+        omega
+      | @gate s₀ p₀ line =>
+        classical
+        obtain ⟨i₀, hne⟩ : ∃ i₀ : Fin (m + 1),
+            ∀ i : Fin m, out (i₀.succAbove i) ≠ Wire.gate (Fin.last s₀) := by
+          by_cases hlast : ∃ i₀ : Fin (m + 1), out i₀ = Wire.gate (Fin.last s₀)
+          · obtain ⟨i₀, hi₀⟩ := hlast
+            exact ⟨i₀, fun i h => Fin.succAbove_ne i₀ i (hout (h.trans hi₀.symm))⟩
+          · push Not at hlast
+            exact ⟨0, fun i => hlast _⟩
+        let out₀ : Fin m → Wire N s₀ := fun i => unlast (out (i₀.succAbove i)) (hne i)
+        let M₀ : Matrix (Fin m) (Fin N) F := M.submatrix i₀.succAbove id
+        have hM₀ : TotallyRegular M₀ :=
+          TotallyRegular.submatrix_rows hM (Fin.succAbove_right_injective)
+        have hf₀ : ∀ x i, p₀.trace I x (out₀ i) = (M₀ *ᵥ x) i := fun x i => by
+          change p₀.trace I x (unlast (out (i₀.succAbove i)) (hne i)) = _
+          rw [trace_unlast, hf]
+          rfl
+        obtain ⟨s', p', out', M', hs', hp', hM', hf'⟩ := ih hNm' p₀ hp.1 out₀ hM₀ hf₀
+        exact ⟨s', p', out', M', by omega, hp', hM', hf'⟩
 
 /-! ## A discrete intermediate value step -/
 
@@ -291,6 +393,39 @@ theorem sub_one_le_of_totallyRegular [Fintype F] [DecidableEq F] {A η C : ℝ}
   exact sub_one_le_of_rank_cuts hAη order p hp out hM hout
     (blockRank_add_blockRank_le_of_trace p I out M hf)
 
+/-- **The finite bound for rectangular totally regular maps.** A fan-in-two program over any
+signature whose wires `out` carry an `m × N` totally regular linear map with `N ≤ m` has
+`N - 1 ≤ (A + η) (s - m)⁺ + 3 log₂ (N + 3 s) + C`. -/
+theorem sub_one_le_of_totallyRegular_rect [Fintype F] [DecidableEq F] {A η C : ℝ}
+    (hAη : 0 ≤ A + η) (order : Multigraph.OrderingBound A η C) {N m s : Nat} (hNm : N ≤ m)
+    (p : Program σ N s) (hp : p.FanInAtMost 2) (I : Interpretation σ F)
+    (out : Fin m → Wire N s) {M : Matrix (Fin m) (Fin N) F} (hM : TotallyRegular M)
+    (hf : ∀ x i, p.trace I x (out i) = (M *ᵥ x) i) :
+    (N : ℝ) - 1 ≤ (A + η) * max ((s : ℝ) - m) 0 + 3 * Real.logb 2 (N + 3 * s) + C := by
+  by_cases hN : 2 ≤ N
+  · obtain ⟨s', p', out', M', hs', hp', hM', hf'⟩ :=
+      exists_square_of_totallyRegular_rect hN hNm p hp I out hM hf
+    have hsq := sub_one_le_of_totallyRegular hAη order p' hp' I out' hM' hf'
+    have hsum : (s' : ℝ) + m = (s : ℝ) + N := by
+      exact_mod_cast (by omega : s' + m = s + N)
+    have hsub : (s' : ℝ) - N = (s : ℝ) - m := by linarith
+    have hNpos : (0 : ℝ) < N := by exact_mod_cast (by omega : 0 < N)
+    have hlogle : Real.logb 2 ((N : ℝ) + 3 * s') ≤ Real.logb 2 ((N : ℝ) + 3 * s) := by
+      refine (Real.logb_le_logb one_lt_two (by positivity) (by positivity)).mpr ?_
+      have hsle : (s' : ℝ) ≤ s := by exact_mod_cast (by omega : s' ≤ s)
+      linarith
+    rw [hsub] at hsq
+    linarith
+  · have hC := orderingBound_nonneg order
+    have hlog : 0 ≤ Real.logb 2 ((N : ℝ) + 3 * s) := by
+      rcases Nat.eq_zero_or_pos (N + 3 * s) with h | h
+      · have : ((N : ℝ) + 3 * s) = 0 := by exact_mod_cast h
+        rw [this, Real.logb_zero]
+      · exact Real.logb_nonneg one_lt_two (by exact_mod_cast h)
+    have hmax0 : 0 ≤ (A + η) * max ((s : ℝ) - m) 0 := mul_nonneg hAη (le_max_right _ _)
+    have hN1 : (N : ℝ) ≤ 1 := by exact_mod_cast (by omega : N ≤ 1)
+    linarith
+
 /-! ## Asymptotics -/
 
 universe u v
@@ -376,6 +511,30 @@ theorem eventually_lt_size_of_orderingBound {A : ℝ} (hA : 0 < A)
   · refine outputs_injective hM c.program I c.outputs hf fun i i' hii' j => ?_
     simpa [Matrix.mulVec_single_one] using hii' (Pi.single j 1)
   · exact blockRank_add_blockRank_le_of_trace c.program I c.outputs M hf
+
+/-- **The asymptotic bound for rectangular totally regular maps** with a general ordering
+coefficient. -/
+theorem eventually_lt_size_of_orderingBound_rect {A : ℝ} (hA : 0 < A)
+    (order : ∀ η : ℝ, 0 < η → ∃ C : ℝ, Multigraph.OrderingBound A η C) {ε : ℝ} (hε : 0 < ε) :
+    ∀ᶠ N : Nat in atTop, ∀ {m : Nat}, N ≤ m →
+      ∀ (F : Type u) [Field F] [Fintype F] [DecidableEq F]
+        (M : Matrix (Fin m) (Fin N) F), TotallyRegular M →
+        ∀ (σ : Signature.{v}) (I : Interpretation σ F) (c : Circuit σ N m),
+          c.FanInAtMost 2 → c.Computes I (fun x => M *ᵥ x) →
+            (m : ℝ) + (1 / A - ε) * N < c.size := by
+  filter_upwards [eventually_lt_size_of_orderingBound.{u, v} hA order hε,
+    eventually_ge_atTop 2] with N bound hN2
+  intro m hNm F _ _ _ M hM σ I c hfan hc
+  have hf : ∀ x i, c.program.trace I x (c.outputs i) = (M *ᵥ x) i :=
+    fun x i => congrFun (hc x) i
+  obtain ⟨s', p', out', M', hs', hp', hM', hf'⟩ :=
+    exists_square_of_totallyRegular_rect hN2 hNm c.program hfan I c.outputs hM hf
+  let c' : Circuit σ N N := ⟨p', out'⟩
+  have hc' : c'.Computes I (fun x => M' *ᵥ x) := fun x => funext (hf' x)
+  have hlt : (1 + 1 / A - ε) * (N : ℝ) < (s' : ℝ) := bound F M' hM' σ I c' hp' hc'
+  have hsum : (s' : ℝ) + m = (c.size : ℝ) + N := by
+    exact_mod_cast (by omega : s' + m = c.size + N)
+  linarith
 
 /-! ## Cauchy matrices -/
 

@@ -310,6 +310,151 @@ def mixRight : (Fin n → L) →ₗ[L] (Fin n → L) where
     simp only [mix, Pi.smul_apply, RingHom.id_apply]
     split_ifs <;> simp
 
+/-- Zero-extension of vectors on `X` to `Fin n → L`. -/
+def extendSub (X : Finset (Fin n)) : (↥X → L) →ₗ[L] (Fin n → L) where
+  toFun v j := if hj : j ∈ X then v ⟨j, hj⟩ else 0
+  map_add' v v' := by
+    funext j
+    simp only [Pi.add_apply]
+    split_ifs <;> simp
+  map_smul' c v := by
+    funext j
+    simp only [Pi.smul_apply, RingHom.id_apply]
+    split_ifs <;> simp
+
+theorem extendSub_injective (X : Finset (Fin n)) :
+    Function.Injective (extendSub X : (↥X → L) →ₗ[L] (Fin n → L)) := fun v v' h => by
+  funext ⟨j, hj⟩
+  simpa [extendSub, hj] using congrFun h j
+
+/-- **One-sided forward determination.** A direction supported on `inputsIn S` that fixes the
+forward signals to first order fixes every wire outside `S` to first order. -/
+theorem jacobian_mulVec_eq_zero_of_forward {v : Fin n → L}
+    (hvS : ∀ j, j ∉ inputsIn S → v j = 0)
+    (hfwd : ∀ c ∈ forward p S, (jacobian (wirePolynomial P p) a *ᵥ v) c = 0)
+    {w : Wire n s} (hw : w ∉ S) :
+    (jacobian (wirePolynomial P p) a *ᵥ v) w = 0 := by
+  have hin : ∀ j, j ∉ inputsIn S → jet a v 0 j = jet a 0 0 j := fun j hj => by
+    simp [jet, hvS j hj]
+  have hfw : ∀ c ∈ forward p S,
+      p.trace (algebraInterpretation P (DualNumber (DualNumber L))) (jet a v 0) c =
+        p.trace (algebraInterpretation P (DualNumber (DualNumber L))) (jet a 0 0) c :=
+    fun c hc => by simp [trace_jet, hfwd c hc]
+  have h := trace_eq_of_agree_forward p _ hin hfw w hw
+  have h' := congrArg (fun z : DualNumber (DualNumber L) => z.fst.snd) h
+  simpa [trace_jet] using h'
+
+/-- **One-sided backward determination.** Symmetrically, a direction supported outside
+`inputsIn S` that fixes the backward signals to first order fixes every wire in `S` to first
+order. -/
+theorem jacobian_mulVec_eq_zero_of_backward {u : Fin n → L}
+    (huS : ∀ j ∈ inputsIn S, u j = 0)
+    (hbwd : ∀ c ∈ backward p S, (jacobian (wirePolynomial P p) a *ᵥ u) c = 0)
+    {w : Wire n s} (hw : w ∈ S) :
+    (jacobian (wirePolynomial P p) a *ᵥ u) w = 0 := by
+  have hin : ∀ j ∈ inputsIn S, jet a 0 u j = jet a 0 0 j := fun j hj => by
+    simp [jet, huS j hj]
+  have hbw : ∀ c ∈ backward p S,
+      p.trace (algebraInterpretation P (DualNumber (DualNumber L))) (jet a 0 u) c =
+        p.trace (algebraInterpretation P (DualNumber (DualNumber L))) (jet a 0 0) c :=
+    fun c hc => by simp [trace_jet, hbwd c hc]
+  have h := trace_eq_of_agree_backward p _ hin hbw w hw
+  have h' := congrArg (fun z : DualNumber (DualNumber L) => z.snd.fst) h
+  simpa [trace_jet] using h'
+
+omit [CommRing K] [Algebra K L] in
+/-- The subspace of directions on `X` annihilated by the rows `C` of `M`, extended by zero
+outside `X`. -/
+noncomputable def matSubKer {α : Type*} (M : Matrix α (Fin n) L) (X : Finset (Fin n))
+    (C : Finset α) : Submodule L (Fin n → L) :=
+  (LinearMap.ker (M.submatrix
+    (fun c : ↥C => (c : α)) (fun j : ↥X => (j : Fin n))).mulVecLin).map (extendSub X)
+
+omit [CommRing K] [Algebra K L] in
+theorem support_of_mem_matSubKer {α : Type*} {M : Matrix α (Fin n) L} {X : Finset (Fin n)}
+    {C : Finset α} {v : Fin n → L} (hv : v ∈ matSubKer M X C) {j : Fin n} (hj : j ∉ X) :
+    v j = 0 := by
+  rcases hv with ⟨v₀, -, rfl⟩
+  simp [extendSub, hj]
+
+omit [CommRing K] [Algebra K L] in
+theorem mulVec_eq_zero_of_mem_matSubKer {α : Type*} {M : Matrix α (Fin n) L} {X : Finset (Fin n)}
+    {C : Finset α} {v : Fin n → L} (hv : v ∈ matSubKer M X C) {c : α} (hc : c ∈ C) :
+    (M *ᵥ v) c = 0 := by
+  rcases Submodule.mem_map.mp hv with ⟨v₀, hv₀, rfl⟩
+  rw [LinearMap.mem_ker, Matrix.mulVecLin_apply] at hv₀
+  have hc0 := congrFun hv₀ ⟨c, hc⟩
+  simp only [Pi.zero_apply, mulVec, dotProduct, submatrix_apply] at hc0 ⊢
+  have hsum : ∑ j : ↥X, M c j * extendSub X v₀ j = ∑ j, M c j * extendSub X v₀ j := by
+    rw [Finset.sum_coe_sort X (fun j => M c j * extendSub X v₀ j)]
+    exact Finset.sum_subset (Finset.subset_univ X) fun j _ hj => by simp [extendSub, hj]
+  rw [← hsum, ← hc0]
+  refine Finset.sum_congr rfl fun j _ => ?_
+  simp [extendSub, j.2]
+
+omit [CommRing K] [Algebra K L] in
+theorem card_le_finrank_matSubKer_add_rank {α : Type*} (M : Matrix α (Fin n) L)
+    (X : Finset (Fin n)) (C : Finset α) :
+    X.card ≤ finrank L (matSubKer M X C) +
+      (M.submatrix (fun c : ↥C => (c : α)) (fun j : ↥X => (j : Fin n))).rank := by
+  set B := M.submatrix (fun c : ↥C => (c : α)) (fun j : ↥X => (j : Fin n))
+  have hinj : Function.Injective (extendSub X ∘ₗ (LinearMap.ker B.mulVecLin).subtype) :=
+    (extendSub_injective X).comp (Submodule.subtype_injective _)
+  have hmap : finrank L (matSubKer M X C) = finrank L (LinearMap.ker B.mulVecLin) := by
+    rw [← LinearMap.finrank_range_of_inj hinj, LinearMap.range_comp, Submodule.range_subtype]
+    rfl
+  have hker := MultiOutput.Internal.finrank_ker_mulVecLin B
+  rw [Fintype.card_coe] at hker
+  omega
+
+omit [CommRing K] [Algebra K L] in
+theorem card_le_finrank_matSubKer_add {α : Type*} (M : Matrix α (Fin n) L)
+    (X : Finset (Fin n)) (C : Finset α) :
+    X.card ≤ finrank L (matSubKer M X C) + C.card := by
+  have h₁ := card_le_finrank_matSubKer_add_rank M X C
+  have h₂ := Matrix.rank_le_card_height
+    (M.submatrix (fun c : ↥C => (c : α)) (fun j : ↥X => (j : Fin n)))
+  rw [Fintype.card_coe] at h₂
+  omega
+
+/-- **The directed Taylor cut lemma.** There are subspaces `V` of directions on the inputs in `S`
+and `W` of directions on the other inputs, with `|X_S| ≤ dim V + |forward S|` and
+`|X_T| ≤ dim W + |backward S|` separately, such that `V` fixes every wire outside `S` and `W`
+every wire in `S` to first order, and the Hessian of every wire pairs `V` with `W` to zero. -/
+theorem exists_cut_directed : ∃ V W : Submodule L (Fin n → L),
+    (∀ v ∈ V, ∀ j, j ∉ inputsIn S → v j = 0) ∧ (∀ u ∈ W, ∀ j ∈ inputsIn S, u j = 0) ∧
+    (inputsIn S).card ≤ finrank L V + (forward p S).card ∧
+    (inputsIn S)ᶜ.card ≤ finrank L W + (backward p S).card ∧
+    (∀ v ∈ V, ∀ w, w ∉ S → (jacobian (wirePolynomial P p) a *ᵥ v) w = 0) ∧
+    (∀ u ∈ W, ∀ w ∈ S, (jacobian (wirePolynomial P p) a *ᵥ u) w = 0) ∧
+    ∀ v ∈ V, ∀ u ∈ W, ∀ w, v ⬝ᵥ (hessian (wirePolynomial P p w) a *ᵥ u) = 0 := by
+  let V := matSubKer (jacobian (wirePolynomial P p) a) (inputsIn S) (forward p S)
+  let W := matSubKer (jacobian (wirePolynomial P p) a) (inputsIn S)ᶜ (backward p S)
+  have hV_supp : ∀ v ∈ V, ∀ j, j ∉ inputsIn S → v j = 0 :=
+    fun _ hv _ hj => support_of_mem_matSubKer hv hj
+  have hW_supp : ∀ u ∈ W, ∀ j ∈ inputsIn S, u j = 0 :=
+    fun _ hu _ hj => support_of_mem_matSubKer hu (by simpa using hj)
+  have hJV : ∀ v ∈ V, ∀ w, w ∉ S → (jacobian (wirePolynomial P p) a *ᵥ v) w = 0 :=
+    fun v hv _ hw => jacobian_mulVec_eq_zero_of_forward P p S a (hV_supp v hv)
+      (fun _ hc => mulVec_eq_zero_of_mem_matSubKer hv hc) hw
+  have hJW : ∀ u ∈ W, ∀ w ∈ S, (jacobian (wirePolynomial P p) a *ᵥ u) w = 0 :=
+    fun u hu _ hw => jacobian_mulVec_eq_zero_of_backward P p S a (hW_supp u hu)
+      (fun _ hc => mulVec_eq_zero_of_mem_matSubKer hu hc) hw
+  refine ⟨V, W, hV_supp, hW_supp, card_le_finrank_matSubKer_add _ (inputsIn S) (forward p S),
+    card_le_finrank_matSubKer_add _ (inputsIn S)ᶜ (backward p S), hJV, hJW, ?_⟩
+  intro v hv u hu w
+  have hv_ker : v ∈ cutKernel P p S a := (mem_cutKernel P p S a).mpr fun c hc => by
+    rcases Finset.mem_union.mp hc with hcf | hcb
+    · exact mulVec_eq_zero_of_mem_matSubKer hv hcf
+    · exact hJV v hv c (mem_backward.mp hcb).1
+  have hu_ker : u ∈ cutKernel P p S a := (mem_cutKernel P p S a).mpr fun c hc => by
+    rcases Finset.mem_union.mp hc with hcf | hcb
+    · exact hJW u hu c (mem_forward.mp hcf).1
+    · exact mulVec_eq_zero_of_mem_matSubKer hu hcb
+  exact dotProduct_hessian_mulVec_eq_zero P p S a hv_ker hu_ker
+    (fun j hj => hV_supp v hv j (mem_inputsIn.not.mpr hj))
+    (fun j hj => hW_supp u hu j (mem_inputsIn.mpr hj)) w
+
 /-- **The Taylor cut lemma.** There are subspaces `V` of directions on the inputs in `S` and `W`
 of directions on the other inputs, of total dimension at least `n` minus the number of crossing
 signals, such that `V` fixes every wire outside `S` and `W` every wire in `S` to first order,
@@ -320,50 +465,10 @@ theorem exists_cut : ∃ V W : Submodule L (Fin n → L),
     (∀ v ∈ V, ∀ w, w ∉ S → (jacobian (wirePolynomial P p) a *ᵥ v) w = 0) ∧
     (∀ u ∈ W, ∀ w ∈ S, (jacobian (wirePolynomial P p) a *ᵥ u) w = 0) ∧
     ∀ v ∈ V, ∀ u ∈ W, ∀ w, v ⬝ᵥ (hessian (wirePolynomial P p w) a *ᵥ u) = 0 := by
-  set Z := cutKernel P p S a
-  have hZ : ∀ δ ∈ Z, mix S δ 0 ∈ Z ∧ mix S 0 δ ∈ Z := by
-    intro δ hδ
-    refine ⟨(mem_cutKernel P p S a).mpr fun c hc => ?_, (mem_cutKernel P p S a).mpr fun c hc => ?_⟩
-    · rw [jacobian_mulVec_mix_left P p S a hδ]
-      split_ifs
-      · exact (mem_cutKernel P p S a).mp hδ c hc
-      · rfl
-    · rw [jacobian_mulVec_mix_right P p S a hδ]
-      split_ifs
-      · rfl
-      · exact (mem_cutKernel P p S a).mp hδ c hc
-  refine ⟨Z.map (mixLeft S), Z.map (mixRight S), ?_, ?_, ?_, ?_, ?_, ?_⟩
-  · rintro _ ⟨δ, -, rfl⟩ j hj
-    simp [mixLeft, mix, mem_inputsIn.not.mp hj]
-  · rintro _ ⟨δ, -, rfl⟩ j hj
-    simp [mixRight, mix, mem_inputsIn.mp hj]
-  · have hle : Z ≤ Z.map (mixLeft S) ⊔ Z.map (mixRight S) := by
-      intro δ hδ
-      have hsum : mixLeft S δ + mixRight S δ = δ := by
-        funext j
-        simp only [mixLeft, mixRight, LinearMap.coe_mk, AddHom.coe_mk, Pi.add_apply, mix]
-        split_ifs <;> simp
-      rw [← hsum]
-      exact Submodule.add_mem_sup ⟨δ, hδ, rfl⟩ ⟨δ, hδ, rfl⟩
-    have h₁ := Submodule.finrank_mono hle
-    have h₂ := Submodule.finrank_add_le_finrank_add_finrank (Z.map (mixLeft S))
-      (Z.map (mixRight S))
-    have h₃ : n ≤ finrank L Z + ((forward p S).card + (backward p S).card) :=
-      le_finrank_cutKernel_add P p S a
-    omega
-  · rintro _ ⟨δ, hδ, rfl⟩ w hw
-    change (jacobian (wirePolynomial P p) a *ᵥ mix S δ 0) w = 0
-    rw [jacobian_mulVec_mix_left P p S a hδ]
-    simp [hw]
-  · rintro _ ⟨δ, hδ, rfl⟩ w hw
-    change (jacobian (wirePolynomial P p) a *ᵥ mix S 0 δ) w = 0
-    rw [jacobian_mulVec_mix_right P p S a hδ]
-    simp [hw]
-  · rintro _ ⟨δ, hδ, rfl⟩ _ ⟨δ', hδ', rfl⟩ w
-    refine dotProduct_hessian_mulVec_eq_zero P p S a (hZ δ hδ).1 (hZ δ' hδ').2 (fun j hj => ?_)
-      (fun j hj => ?_) w
-    · simp [mix, hj]
-    · simp [mix, hj]
+  obtain ⟨V, W, hV, hW, hdimV, hdimW, hJV, hJW, hH⟩ := exists_cut_directed P p S a
+  have hcompl : (inputsIn S).card + (inputsIn S)ᶜ.card = n := by
+    rw [Finset.card_add_card_compl, Fintype.card_fin]
+  exact ⟨V, W, hV, hW, by omega, hJV, hJW, hH⟩
 
 end Cut
 
@@ -404,6 +509,62 @@ theorem finrank_add_finrank_add_rank_le {ι κ : Type*} [Fintype ι] [Fintype κ
   have h₁ := MultiOutput.Internal.rank_add_rank_le_rank_mul_add_card RV B
   have h₂ := MultiOutput.Internal.rank_add_rank_le_rank_mul_add_card (RV * B) CW
   rw [hzero, Matrix.rank_zero] at h₂
+  omega
+
+/-- **Orthogonal subspaces with side conditions.** If `J₁` annihilates `V`, `J₂` annihilates `W`,
+and `V` and `W` are orthogonal through `B`, then
+`dim V + dim W + rank (fromBlocks B J₁ᵀ J₂ 0) ≤ |ι| + |κ|`. -/
+theorem finrank_add_finrank_add_rank_fromBlocks_le
+    {ι κ α β : Type*} [Fintype ι] [Fintype κ] [Fintype α] [Fintype β]
+    (B : Matrix ι κ L) (J₁ : Matrix α ι L) (J₂ : Matrix β κ L)
+    (V : Submodule L (ι → L)) (W : Submodule L (κ → L))
+    (hV : ∀ v ∈ V, J₁ *ᵥ v = 0) (hW : ∀ u ∈ W, J₂ *ᵥ u = 0)
+    (hB : ∀ v ∈ V, ∀ u ∈ W, v ⬝ᵥ (B *ᵥ u) = 0) :
+    finrank L V + finrank L W + (Matrix.fromBlocks B J₁.transpose J₂ 0).rank ≤
+      Fintype.card ι + Fintype.card κ := by
+  let pairL : (↥V × (β → L)) →ₗ[L] (ι ⊕ β → L) :=
+    { toFun := fun p => Sum.elim p.1.1 p.2
+      map_add' := fun p q => by funext x; cases x <;> rfl
+      map_smul' := fun c p => by funext x; cases x <;> rfl }
+  let pairR : (↥W × (α → L)) →ₗ[L] (κ ⊕ α → L) :=
+    { toFun := fun p => Sum.elim p.1.1 p.2
+      map_add' := fun p q => by funext x; cases x <;> rfl
+      map_smul' := fun c p => by funext x; cases x <;> rfl }
+  have hL_inj : Function.Injective pairL := fun p q h =>
+    Prod.ext (Subtype.ext (funext fun i => congrFun h (Sum.inl i)))
+      (funext fun b => congrFun h (Sum.inr b))
+  have hR_inj : Function.Injective pairR := fun p q h =>
+    Prod.ext (Subtype.ext (funext fun j => congrFun h (Sum.inl j)))
+      (funext fun a => congrFun h (Sum.inr a))
+  set V' := LinearMap.range pairL
+  set W' := LinearMap.range pairR
+  have hdimV' : finrank L V' = finrank L V + Fintype.card β := by
+    rw [LinearMap.finrank_range_of_inj hL_inj, Module.finrank_prod,
+      Module.finrank_fintype_fun_eq_card]
+  have hdimW' : finrank L W' = finrank L W + Fintype.card α := by
+    rw [LinearMap.finrank_range_of_inj hR_inj, Module.finrank_prod,
+      Module.finrank_fintype_fun_eq_card]
+  have horth : ∀ v' ∈ V', ∀ u' ∈ W',
+      v' ⬝ᵥ (Matrix.fromBlocks B J₁.transpose J₂ 0 *ᵥ u') = 0 := by
+    rintro _ ⟨⟨⟨v, hv⟩, y⟩, rfl⟩ _ ⟨⟨⟨u, hu⟩, z⟩, rfl⟩
+    simp only [pairL, pairR, LinearMap.coe_mk, AddHom.coe_mk, dotProduct, mulVec,
+      Fintype.sum_sum_type, Sum.elim_inl, Sum.elim_inr, fromBlocks_apply₁₁, fromBlocks_apply₁₂,
+      fromBlocks_apply₂₁, fromBlocks_apply₂₂, transpose_apply, Matrix.zero_apply, zero_mul,
+      Finset.sum_const_zero, add_zero]
+    have h₁ : ∑ i : ι, v i * (∑ j : κ, B i j * u j + ∑ a : α, J₁ a i * z a) =
+        v ⬝ᵥ (B *ᵥ u) + ∑ a : α, z a * (J₁ *ᵥ v) a := by
+      simp_rw [mul_add, Finset.sum_add_distrib]
+      congr 1
+      simp_rw [Finset.mul_sum]
+      rw [Finset.sum_comm]
+      refine Finset.sum_congr rfl fun a _ => ?_
+      simp only [mulVec, dotProduct, Finset.mul_sum]
+      refine Finset.sum_congr rfl fun i _ => by ring
+    have h₂ : (∑ b : β, y b * ∑ j : κ, J₂ b j * u j) = ∑ b : β, y b * (J₂ *ᵥ u) b := rfl
+    rw [h₁, h₂, hB v hv u hu, hV v hv, hW u hu]
+    simp
+  have h := finrank_add_finrank_add_rank_le (Matrix.fromBlocks B J₁.transpose J₂ 0) V' W' horth
+  rw [hdimV', hdimW', Fintype.card_sum, Fintype.card_sum] at h
   omega
 
 end LinearAlgebra
@@ -467,6 +628,31 @@ variable [Algebra K L] (P : (op : σ.Op) → MvPolynomial (Fin (σ.Arity op)) K)
 theorem card_inputsIn_add_card_compl : (inputsIn S).card + (inputsIn S)ᶜ.card = n := by
   rw [Finset.card_add_card_compl, Fintype.card_fin]
 
+/-- **The forward Jacobian consequence.** At every point, the block of the Jacobian of the outputs
+from the inputs in `S` to the outputs outside `S` has rank at most `|forward p S|`. -/
+theorem blockRank_jacobian_le_forward (out : Fin m → Wire n s) :
+    blockRank (jacobian (fun o => wirePolynomial P p (out o)) a) (outputsIn out S)ᶜ
+      (inputsIn S) ≤ (forward p S).card := by
+  obtain ⟨V, _, hV, -, hdimV, -, hJV, -, -⟩ := exists_cut_directed P p S a
+  have h₁ := finrank_add_blockRank_le (jacobian (fun o => wirePolynomial P p (out o)) a)
+    (outputsIn out S)ᶜ (inputsIn S) V hV fun v hv o ho => by
+      have hout : out o ∉ S := by simpa [outputsIn] using ho
+      exact hJV v hv (out o) hout
+  omega
+
+/-- **The backward Jacobian consequence.** Symmetrically, the block of the Jacobian of the outputs
+from the inputs outside `S` to the outputs in `S` has rank at most `|backward p S|`. -/
+theorem blockRank_jacobian_le_backward (out : Fin m → Wire n s) :
+    blockRank (jacobian (fun o => wirePolynomial P p (out o)) a) (outputsIn out S)
+      (inputsIn S)ᶜ ≤ (backward p S).card := by
+  obtain ⟨_, W, -, hW, -, hdimW, -, hJW, -⟩ := exists_cut_directed P p S a
+  have h₂ := finrank_add_blockRank_le (jacobian (fun o => wirePolynomial P p (out o)) a)
+    (outputsIn out S) (inputsIn S)ᶜ W (fun u hu j hj => hW u hu j (by simpa using hj))
+    fun u hu o ho => by
+      have hout : out o ∈ S := by simpa [outputsIn] using ho
+      exact hJW u hu (out o) hout
+  omega
+
 /-- **The Jacobian consequence.** At every point, the blocks of the Jacobian of the outputs
 from the inputs in `S` to the outputs outside `S`, and from the other inputs to the outputs in
 `S`, have ranks summing to at most the number of crossing signals. -/
@@ -475,18 +661,32 @@ theorem blockRank_jacobian_add_blockRank_le (out : Fin m → Wire n s) :
         (inputsIn S) +
       blockRank (jacobian (fun o => wirePolynomial P p (out o)) a) (outputsIn out S)
         (inputsIn S)ᶜ ≤
-        (forward p S).card + (backward p S).card := by
-  obtain ⟨V, W, hV, hW, hdim, hJV, hJW, -⟩ := exists_cut P p S a
-  have h₁ := finrank_add_blockRank_le (jacobian (fun o => wirePolynomial P p (out o)) a)
-    (outputsIn out S)ᶜ (inputsIn S) V hV fun v hv o ho => by
-      have hout : out o ∉ S := by simpa [outputsIn] using ho
-      exact hJV v hv (out o) hout
-  have h₂ := finrank_add_blockRank_le (jacobian (fun o => wirePolynomial P p (out o)) a)
-    (outputsIn out S) (inputsIn S)ᶜ W (fun u hu j hj => hW u hu j (by simpa using hj))
-    fun u hu o ho => by
-      have hout : out o ∈ S := by simpa [outputsIn] using ho
-      exact hJW u hu (out o) hout
-  have h₃ := card_inputsIn_add_card_compl S
+        (forward p S).card + (backward p S).card :=
+  Nat.add_le_add (blockRank_jacobian_le_forward P p S a out)
+    (blockRank_jacobian_le_backward P p S a out)
+
+theorem blockRank_le_of_orthogonal (H : Matrix (Fin n) (Fin n) L)
+    (hH_orth : ∀ v u, (∀ w, v ⬝ᵥ (hessian (wirePolynomial P p w) a *ᵥ u) = 0) →
+      v ⬝ᵥ (H *ᵥ u) = 0) :
+    blockRank H (inputsIn S) (inputsIn S)ᶜ ≤ (forward p S).card + (backward p S).card := by
+  obtain ⟨V, W, hV, hW, hdim, -, -, hH⟩ := exists_cut P p S a
+  set X := inputsIn S
+  set B := H.submatrix (fun i : ↥X => (i : Fin n)) (fun j : ↥Xᶜ => (j : Fin n))
+  have hW' : ∀ u ∈ W, ∀ j, j ∉ Xᶜ → u j = 0 := fun u hu j hj => hW u hu j (by simpa using hj)
+  have horth : ∀ v ∈ V.map (LinearMap.funLeft L L (Subtype.val : ↥X → Fin n)),
+      ∀ u ∈ W.map (LinearMap.funLeft L L (Subtype.val : ↥Xᶜ → Fin n)), v ⬝ᵥ (B *ᵥ u) = 0 := by
+    rintro _ ⟨v, hv, rfl⟩ _ ⟨u, hu, rfl⟩
+    rw [← hH_orth v u (hH v hv u hu)]
+    simp only [B, dotProduct, mulVec, LinearMap.funLeft_apply, Matrix.submatrix_apply]
+    rw [sum_subtype_of_support (X := X) (fun i => v i * ∑ j : ↥Xᶜ, H i j * u j)
+      fun i hi => by rw [hV v hv i hi, zero_mul]]
+    refine Finset.sum_congr rfl fun i _ => ?_
+    rw [sum_subtype_of_support (X := Xᶜ) (fun j => H i j * u j)
+      fun j hj => by rw [hW' u hu j hj, mul_zero]]
+  have h₁ := finrank_add_finrank_add_rank_le B _ _ horth
+  rw [finrank_map_funLeft V X hV, finrank_map_funLeft W Xᶜ hW', Fintype.card_coe,
+    Fintype.card_coe, card_inputsIn_add_card_compl S] at h₁
+  change B.rank ≤ _
   omega
 
 /-- **The Hessian consequence.** At every point and for every combination `∑ₒ cₒ fₒ` of the
@@ -494,12 +694,51 @@ outputs, the block of its Hessian between the inputs in `S` and the other inputs
 most the number of crossing signals. -/
 theorem blockRank_hessian_le (out : Fin m → Wire n s) (c : Fin m → L) :
     blockRank (∑ o, c o • hessian (wirePolynomial P p (out o)) a) (inputsIn S) (inputsIn S)ᶜ ≤
-      (forward p S).card + (backward p S).card := by
-  obtain ⟨V, W, hV, hW, hdim, -, -, hH⟩ := exists_cut P p S a
+      (forward p S).card + (backward p S).card :=
+  blockRank_le_of_orthogonal P p S a _ fun v u h => by
+    simp [Matrix.sum_mulVec, dotProduct_sum, Matrix.smul_mulVec, dotProduct_smul, h]
+
+/-- **The unified first-and-second-order jet cut bound.** At every point `a` and for every
+combination `H = ∑ₒ cₒ ∇² fₒ(a)` of the output Hessians, the combined block matrix formed by
+`H[X_S, X_T]`, `J[O_T, X_S]ᵀ`, and `J[O_S, X_T]` has rank at most `|forward p S| + |backward p S|`. -/
+theorem rank_fromBlocks_hessian_jacobian_le (out : Fin m → Wire n s) (c : Fin m → L) :
+    (Matrix.fromBlocks
+      ((∑ o, c o • hessian (wirePolynomial P p (out o)) a).submatrix
+        (fun i : ↥(inputsIn S) => (i : Fin n)) (fun j : ↥(inputsIn S)ᶜ => (j : Fin n)))
+      ((jacobian (fun o => wirePolynomial P p (out o)) a).submatrix
+        (fun o : ↥(outputsIn out S)ᶜ => (o : Fin m))
+        (fun i : ↥(inputsIn S) => (i : Fin n))).transpose
+      ((jacobian (fun o => wirePolynomial P p (out o)) a).submatrix
+        (fun o : ↥(outputsIn out S) => (o : Fin m))
+        (fun j : ↥(inputsIn S)ᶜ => (j : Fin n)))
+      0).rank ≤ (forward p S).card + (backward p S).card := by
+  obtain ⟨V, W, hV, hW, hdim, hJV, hJW, hH⟩ := exists_cut P p S a
   set H := ∑ o, c o • hessian (wirePolynomial P p (out o)) a
+  set J := jacobian (fun o => wirePolynomial P p (out o)) a
   set X := inputsIn S
+  set Y := outputsIn out S
   set B := H.submatrix (fun i : ↥X => (i : Fin n)) (fun j : ↥Xᶜ => (j : Fin n))
+  set J₁ := J.submatrix (fun o : ↥Yᶜ => (o : Fin m)) (fun i : ↥X => (i : Fin n))
+  set J₂ := J.submatrix (fun o : ↥Y => (o : Fin m)) (fun j : ↥Xᶜ => (j : Fin n))
   have hW' : ∀ u ∈ W, ∀ j, j ∉ Xᶜ → u j = 0 := fun u hu j hj => hW u hu j (by simpa using hj)
+  have hV_J₁ : ∀ v' ∈ V.map (LinearMap.funLeft L L (Subtype.val : ↥X → Fin n)), J₁ *ᵥ v' = 0 := by
+    rintro _ ⟨v, hv, rfl⟩
+    funext o
+    have hout : out o.1 ∉ S := by simpa [Y, outputsIn] using Finset.mem_compl.mp o.2
+    have hJo : (J *ᵥ v) o.1 = 0 := hJV v hv (out o.1) hout
+    have hsum := sum_subtype_of_support (X := X) (fun j => J o.1 j * v j)
+      fun j hj => by rw [hV v hv j hj, mul_zero]
+    rw [Pi.zero_apply, ← hJo]
+    simpa [J₁, mulVec, dotProduct, LinearMap.funLeft_apply] using hsum
+  have hW_J₂ : ∀ u' ∈ W.map (LinearMap.funLeft L L (Subtype.val : ↥Xᶜ → Fin n)), J₂ *ᵥ u' = 0 := by
+    rintro _ ⟨u, hu, rfl⟩
+    funext o
+    have hout : out o.1 ∈ S := by simpa [Y, outputsIn] using o.2
+    have hJo : (J *ᵥ u) o.1 = 0 := hJW u hu (out o.1) hout
+    have hsum := sum_subtype_of_support (X := Xᶜ) (fun j => J o.1 j * u j)
+      fun j hj => by rw [hW' u hu j hj, mul_zero]
+    rw [Pi.zero_apply, ← hJo]
+    simpa [J₂, mulVec, dotProduct, LinearMap.funLeft_apply] using hsum
   have horth : ∀ v ∈ V.map (LinearMap.funLeft L L (Subtype.val : ↥X → Fin n)),
       ∀ u ∈ W.map (LinearMap.funLeft L L (Subtype.val : ↥Xᶜ → Fin n)), v ⬝ᵥ (B *ᵥ u) = 0 := by
     rintro _ ⟨v, hv, rfl⟩ _ ⟨u, hu, rfl⟩
@@ -514,10 +753,9 @@ theorem blockRank_hessian_le (out : Fin m → Wire n s) (c : Fin m → L) :
     refine Finset.sum_congr rfl fun i _ => ?_
     rw [sum_subtype_of_support (X := Xᶜ) (fun j => H i j * u j)
       fun j hj => by rw [hW' u hu j hj, mul_zero]]
-  have h₁ := finrank_add_finrank_add_rank_le B _ _ horth
+  have h₁ := finrank_add_finrank_add_rank_fromBlocks_le B J₁ J₂ _ _ hV_J₁ hW_J₂ horth
   rw [finrank_map_funLeft V X hV, finrank_map_funLeft W Xᶜ hW', Fintype.card_coe,
     Fintype.card_coe, card_inputsIn_add_card_compl S] at h₁
-  change B.rank ≤ _
   omega
 
 end Rank

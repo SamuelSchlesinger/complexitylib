@@ -94,6 +94,38 @@ theorem card_supportedKernel_le (g : (Fin n → U) → Fin m → U) (P : Finset 
     (Q : Finset (Fin m)) : (supportedKernel g P Q).card ≤ Fintype.card U ^ P.card :=
   Internal.card_supportedKernel_le g P Q
 
+/-- **The forward restricted rank-cut bound, kernel form, for a program.** If the wires `out`
+of a program carry `f`, and on the inputs agreeing with `z₀` off `J` the function changes by
+`g d` when its input changes by `d`, then every split `S` satisfies
+`|U| ^ |X_S| ≤ |U| ^ |A| · |supportedKernel g X_S Y_T|`, using only the forward signals
+`A = forward p S`. -/
+theorem card_pow_le_supportedKernel_forward_of_trace (p : Program σ n s) (I : Interpretation σ U)
+    (out : Fin m → Wire n s) {f : (Fin n → U) → Fin m → U}
+    (hf : ∀ x i, p.trace I x (out i) = f x i) (S : Finset (Wire n s)) (J : Finset (Fin n))
+    (z₀ : Fin n → U) (g : (Fin n → U) → Fin m → U)
+    (hg : ∀ z z' : Fin n → U, (∀ k, k ∉ J → z k = z₀ k) → (∀ k, k ∉ J → z' k = z₀ k) →
+      f z' - f z = g (z' - z)) :
+    Fintype.card U ^ (inputsIn S ∩ J).card ≤
+      Fintype.card U ^ (forward p S).card *
+        (supportedKernel g (inputsIn S ∩ J) (outputsIn out S)ᶜ).card :=
+  Internal.card_pow_le_supportedKernel_forward (p := p) (I := I) (out := out) (f := f) hf S J z₀ g
+    hg
+
+/-- **The backward restricted rank-cut bound, kernel form, for a program.** Symmetrically,
+`|U| ^ |X_T| ≤ |U| ^ |B| · |supportedKernel g X_T Y_S|`, using only the backward signals
+`B = backward p S`. -/
+theorem card_pow_le_supportedKernel_backward_of_trace (p : Program σ n s) (I : Interpretation σ U)
+    (out : Fin m → Wire n s) {f : (Fin n → U) → Fin m → U}
+    (hf : ∀ x i, p.trace I x (out i) = f x i) (S : Finset (Wire n s)) (J : Finset (Fin n))
+    (z₀ : Fin n → U) (g : (Fin n → U) → Fin m → U)
+    (hg : ∀ z z' : Fin n → U, (∀ k, k ∉ J → z k = z₀ k) → (∀ k, k ∉ J → z' k = z₀ k) →
+      f z' - f z = g (z' - z)) :
+    Fintype.card U ^ ((inputsIn S)ᶜ ∩ J).card ≤
+      Fintype.card U ^ (backward p S).card *
+        (supportedKernel g ((inputsIn S)ᶜ ∩ J) (outputsIn out S)).card :=
+  Internal.card_pow_le_supportedKernel_backward (p := p) (I := I) (out := out) (f := f) hf S J z₀
+    g hg
+
 /-- **The restricted rank-cut bound, kernel form, for a program.** If the wires `out` of a
 program carry `f`, and on the inputs agreeing with `z₀` off `J` the function changes by `g d`
 when its input changes by `d`, then every split `S` satisfies
@@ -112,6 +144,34 @@ theorem card_pow_le_supportedKernel_of_trace (p : Program σ n s) (I : Interpret
           (supportedKernel g ((inputsIn S)ᶜ ∩ J) (outputsIn out S)).card) :=
   Internal.card_pow_le_supportedKernel (p := p) (I := I) (out := out) (f := f) hf S J z₀ g hg
 
+/-- **The forward restricted rank-cut bound, kernel form.** If a circuit computes `f`, and on
+the inputs agreeing with `z₀` off `J` the function changes by `g d` when its input changes by
+`d`, then every split `S` of its wires satisfies
+`|U| ^ |X_S| ≤ |U| ^ |A| · |supportedKernel g X_S Y_T|`. -/
+theorem card_pow_le_supportedKernel_forward {c : Circuit σ n m} {I : Interpretation σ U}
+    {f : (Fin n → U) → Fin m → U} (hc : c.Computes I f) (S : Finset (Wire n c.size))
+    (J : Finset (Fin n)) (z₀ : Fin n → U) (g : (Fin n → U) → Fin m → U)
+    (hg : ∀ z z' : Fin n → U, (∀ k, k ∉ J → z k = z₀ k) → (∀ k, k ∉ J → z' k = z₀ k) →
+      f z' - f z = g (z' - z)) :
+    Fintype.card U ^ (inputsIn S ∩ J).card ≤
+      Fintype.card U ^ (forward c.program S).card *
+        (supportedKernel g (inputsIn S ∩ J) (outputsIn c.outputs S)ᶜ).card :=
+  Internal.card_pow_le_supportedKernel_forward (p := c.program) (I := I) (out := c.outputs)
+    (f := f) (fun x i => congrFun (hc x) i) S J z₀ g hg
+
+/-- **The backward restricted rank-cut bound, kernel form.** Symmetrically,
+`|U| ^ |X_T| ≤ |U| ^ |B| · |supportedKernel g X_T Y_S|`. -/
+theorem card_pow_le_supportedKernel_backward {c : Circuit σ n m} {I : Interpretation σ U}
+    {f : (Fin n → U) → Fin m → U} (hc : c.Computes I f) (S : Finset (Wire n c.size))
+    (J : Finset (Fin n)) (z₀ : Fin n → U) (g : (Fin n → U) → Fin m → U)
+    (hg : ∀ z z' : Fin n → U, (∀ k, k ∉ J → z k = z₀ k) → (∀ k, k ∉ J → z' k = z₀ k) →
+      f z' - f z = g (z' - z)) :
+    Fintype.card U ^ ((inputsIn S)ᶜ ∩ J).card ≤
+      Fintype.card U ^ (backward c.program S).card *
+        (supportedKernel g ((inputsIn S)ᶜ ∩ J) (outputsIn c.outputs S)).card :=
+  Internal.card_pow_le_supportedKernel_backward (p := c.program) (I := I) (out := c.outputs)
+    (f := f) (fun x i => congrFun (hc x) i) S J z₀ g hg
+
 /-- **The restricted rank-cut bound, kernel form.** If a circuit computes `f`, and on the
 inputs agreeing with `z₀` off `J` the function changes by `g d` when its input changes by `d`,
 then every split `S` of its wires satisfies
@@ -127,6 +187,40 @@ theorem card_pow_le_supportedKernel {c : Circuit σ n m} {I : Interpretation σ 
           (supportedKernel g ((inputsIn S)ᶜ ∩ J) (outputsIn c.outputs S)).card) :=
   Internal.card_pow_le_supportedKernel (p := c.program) (I := I) (out := c.outputs) (f := f)
     (fun x i => congrFun (hc x) i) S J z₀ g hg
+
+omit [Fintype U] [DecidableEq U] in
+/-- **Zero forward cut separates left inputs from outside outputs.** If a split `S` has no
+forward signals, `g` maps every vector supported on the free inputs in `S` to a vector
+vanishing on the outputs carried outside `S`. -/
+theorem apply_eq_zero_of_forward_eq_empty_of_trace (p : Program σ n s) (I : Interpretation σ U)
+    (out : Fin m → Wire n s) {f : (Fin n → U) → Fin m → U}
+    (hf : ∀ x i, p.trace I x (out i) = f x i) (S : Finset (Wire n s)) (J : Finset (Fin n))
+    (z₀ : Fin n → U) (g : (Fin n → U) → Fin m → U)
+    (hg : ∀ z z' : Fin n → U, (∀ k, k ∉ J → z k = z₀ k) → (∀ k, k ∉ J → z' k = z₀ k) →
+      f z' - f z = g (z' - z))
+    (hfwd : forward p S = ∅) :
+    ∀ d : Fin n → U, (∀ k, k ∉ inputsIn S ∩ J → d k = 0) →
+      ∀ i, i ∉ outputsIn out S → g d i = 0 :=
+  fun _ hd _ hi =>
+    Internal.apply_eq_zero_of_forward_eq_empty (p := p) (I := I) (out := out) (f := f) hf S J z₀
+      g hg hfwd hd hi
+
+omit [Fintype U] [DecidableEq U] in
+/-- **Zero backward cut separates outside inputs from inside outputs.** Symmetrically, if a
+split `S` has no backward signals, `g` maps every vector supported on the free inputs outside
+`S` to a vector vanishing on the outputs carried in `S`. -/
+theorem apply_eq_zero_of_backward_eq_empty_of_trace (p : Program σ n s) (I : Interpretation σ U)
+    (out : Fin m → Wire n s) {f : (Fin n → U) → Fin m → U}
+    (hf : ∀ x i, p.trace I x (out i) = f x i) (S : Finset (Wire n s)) (J : Finset (Fin n))
+    (z₀ : Fin n → U) (g : (Fin n → U) → Fin m → U)
+    (hg : ∀ z z' : Fin n → U, (∀ k, k ∉ J → z k = z₀ k) → (∀ k, k ∉ J → z' k = z₀ k) →
+      f z' - f z = g (z' - z))
+    (hbwd : backward p S = ∅) :
+    ∀ d : Fin n → U, (∀ k, k ∉ (inputsIn S)ᶜ ∩ J → d k = 0) →
+      ∀ i ∈ outputsIn out S, g d i = 0 :=
+  fun _ hd _ hi =>
+    Internal.apply_eq_zero_of_backward_eq_empty (p := p) (I := I) (out := out) (f := f) hf S J z₀
+      g hg hbwd hd hi
 
 /-- **Closed sets separate.** If the wires `out` of a program carry `f`, the function changes
 by `g d` when its input changes by `d` on the inputs agreeing with `z₀` off `J`, and a split
