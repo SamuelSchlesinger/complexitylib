@@ -66,6 +66,7 @@ public import Complexitylib.Algebraic.LowerBound.Cutwidth.MultiOutput.FieldMul
 public import Complexitylib.Algebraic.LowerBound.Cutwidth.MultiOutput.MatMul.Tripartite
 public import Complexitylib.Algebraic.LowerBound.Cutwidth.MultiOutput.MatMul
 public import Complexitylib.Algebraic.LowerBound.Cutwidth.MultiOutput.Taylor
+public import Complexitylib.Algebraic.LowerBound.Cutwidth.MultiOutput.PolyMul
 public import Complexitylib.Algebraic.LowerBound.Cutwidth.Extractor
 public import Complexitylib.Algebraic.LowerBound.Cutwidth.Extractor.Padding
 public import Complexitylib.Algebraic.LowerBound.Cutwidth.Extractor.Padding.Asymptotics
@@ -393,6 +394,13 @@ cut and paste shows that every split is crossed by at least
 `rank J[O_T, X_S] + rank J[O_S, X_T]` signals, `J` the Jacobian of the outputs at
 any point, and by at least `rank H[X_S, X_T]` signals, `H` the Hessian of any
 linear combination of the outputs.
+`MultiOutput.PolyMul` applies the Hessian bound to polynomial multiplication
+with Hankel weights `t ^ (m²)` over `K(t)`, totally regular in every
+characteristic: a fan-in-two circuit with polynomial gates over any field
+formally computing the product of two polynomials with `n` coefficients has
+more than `(2 + 1/(2 κ_E) - ε) n ≥ (50/9 - ε) n` gates for all large `n`; the
+same holds for arithmetic circuits over infinite fields with free constants and
+for arbitrary gates over `ZMod q`, `q > 2n` prime.
 
 `Bisection.Helpful` completes the graph theorem. Its proof uses the first
 boundary normalization phase, a partition into bounded connected clusters,

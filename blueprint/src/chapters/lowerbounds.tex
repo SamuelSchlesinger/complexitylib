@@ -12326,7 +12326,8 @@ no superlinear unrestricted circuit theorem follows from them alone.
     Algebraic.Cutwidth.MultiOutput.blockRank_add_transpose_le_of_trace,
     Algebraic.Cutwidth.MultiOutput.blockRank_add_transpose_le,
     Algebraic.Cutwidth.MultiOutput.blockRank_add_transpose_le_of_sum_of_trace,
-    Algebraic.Cutwidth.MultiOutput.blockRank_add_transpose_le_of_sum}
+    Algebraic.Cutwidth.MultiOutput.blockRank_add_transpose_le_of_sum,
+    Algebraic.Cutwidth.MultiOutput.blockRank_add_transpose_le_of_mix}
   \leanok
   \uses{def:lowerbounds-algebraic-quadratic-form,
     def:lowerbounds-algebraic-multi-output,
@@ -12932,6 +12933,150 @@ no superlinear unrestricted circuit theorem follows from them alone.
   Sylvester's rank inequality applied twice gives
   $\dim V+\dim W+\operatorname{rank}H[X_S,X_T]\le n$. Compare with
   $\dim V+\dim W\ge n-|A|-|B|$.
+\end{proof}
+
+\begin{definition}[Polynomial multiplication]
+  \label{def:lowerbounds-algebraic-poly-mul}
+  \lean{Algebraic.Cutwidth.MultiOutput.polyMul,
+    Algebraic.Cutwidth.MultiOutput.polyMulPolynomial,
+    Algebraic.Cutwidth.MultiOutput.hankel,
+    Algebraic.Cutwidth.MultiOutput.crossMatrix,
+    Algebraic.Cutwidth.MultiOutput.firstIn,
+    Algebraic.Cutwidth.MultiOutput.secondIn}
+  \leanok
+  \uses{def:lowerbounds-algebraic-multi-output}
+  Polynomial multiplication maps the coefficients $x_0,\dots,x_{n-1}$ and
+  $y_0,\dots,y_{n-1}$ of two polynomials of degree below $n$, the first and
+  the last $n$ inputs, to the $2n-1$ coefficients
+  $z_m=\sum_{i+j=m}x_iy_j$, $0\le m\le 2n-2$, of their product; each $z_m$ is
+  also a polynomial in the $2n$ inputs. For weights $\mu$, the Hankel matrix
+  of $\mu$ is the $n\times n$ matrix $\Lambda=(\mu(i+j))$, and
+  $\left(\begin{smallmatrix}0&\Lambda\\\Lambda^{\mathsf T}&0\end{smallmatrix}\right)$
+  is indexed by the inputs, the $x$ first. For a set $X$ of inputs,
+  $X\cap x$ and $X\cap y$ are the coefficients of the two factors whose
+  inputs lie in $X$.
+\end{definition}
+
+\begin{lemma}[The Hessian of polynomial multiplication and a generic Hankel matrix]
+  \label{lem:lowerbounds-algebraic-poly-mul-hessian}
+  \lean{Algebraic.Cutwidth.MultiOutput.polyMul_append_eq_coeff,
+    Algebraic.Cutwidth.MultiOutput.polyMul_eq_eval,
+    Algebraic.Cutwidth.MultiOutput.sum_smul_hessian_polyMulPolynomial,
+    Algebraic.Cutwidth.MultiOutput.totallyRegular_genericHankel,
+    Algebraic.Cutwidth.MultiOutput.min_add_min_le_blockRank_crossMatrix}
+  \leanok
+  \uses{def:lowerbounds-algebraic-poly-mul,
+    def:lowerbounds-algebraic-taylor-formal}
+  At every point, the Hessian of $\sum_m\mu(m)z_m$ is
+  $\left(\begin{smallmatrix}0&\Lambda\\\Lambda^{\mathsf T}&0\end{smallmatrix}\right)$
+  for the Hankel matrix $\Lambda$ of $\mu$. Over the field $K(t)$ of rational
+  functions, in every characteristic, the Hankel matrix $(t^{(i+j)^2})$ is
+  totally regular. If $\Lambda$ is totally regular, the block of
+  $\left(\begin{smallmatrix}0&\Lambda\\\Lambda^{\mathsf T}&0\end{smallmatrix}\right)$
+  with rows $X$ and columns $X^{\mathsf c}$ has rank at least
+  $\min\{|X\cap x|,|X^{\mathsf c}\cap y|\}+\min\{|X\cap y|,|X^{\mathsf c}\cap x|\}$.
+\end{lemma}
+\begin{proof}
+  \leanok
+  The only nonzero second derivatives of $x_iy_j$ are those in $x_i$ and
+  $y_j$, equal to one. For a square minor of $(t^{(i+j)^2})$ with increasing
+  rows $r$ and columns $c$, the term of a permutation $\pi$ in the Leibniz
+  expansion is $\pm t^{E(\pi)}$ with
+  $E(\pi)=\sum_a(r_{\pi(a)}+c_a)^2=\sum_ar_a^2+\sum_ac_a^2+2\sum_ar_{\pi(a)}c_a$.
+  By the rearrangement inequality and its equality case, only the identity
+  attains the largest $E$, so $t^{E(\mathrm{id})}$ has coefficient one and the
+  minor is nonzero; arbitrary rows and columns are sorted by permutations,
+  which change a minor by a sign. For the block, choose
+  $k_1=\min\{|X\cap x|,|X^{\mathsf c}\cap y|\}$ rows in $X\cap x$ with as many
+  columns in $X^{\mathsf c}\cap y$, and
+  $k_2=\min\{|X\cap y|,|X^{\mathsf c}\cap x|\}$ rows in $X\cap y$ with as many
+  columns in $X^{\mathsf c}\cap x$. The resulting square block is block
+  diagonal, with a square block of $\Lambda$ and one of $\Lambda^{\mathsf T}$,
+  both nonsingular.
+\end{proof}
+
+\begin{theorem}[Polynomial multiplication needs $(2+1/(2p)-\varepsilon)n$ gates over every field]
+  \label{thm:lowerbounds-algebraic-poly-mul}
+  \lean{Algebraic.Cutwidth.MultiOutput.min_add_min_le_of_polyMul,
+    Algebraic.Cutwidth.MultiOutput.min_add_min_le_of_polyMul_zmod,
+    Algebraic.Cutwidth.MultiOutput.blockRank_add_transpose_le_of_sum,
+    Algebraic.Cutwidth.MultiOutput.le_of_polyMul,
+    Algebraic.Cutwidth.MultiOutput.le_of_polyMul_zmod,
+    Algebraic.Cutwidth.MultiOutput.eventually_lt_size_of_polyMul_of_orderingBound,
+    Algebraic.Cutwidth.MultiOutput.eventually_lt_size_of_polyMul,
+    Algebraic.Cutwidth.MultiOutput.eventually_lt_size_of_polyMul_fifty_div_nine,
+    Algebraic.Cutwidth.MultiOutput.eventually_lt_size_of_polyMul_of_infinite,
+    Algebraic.Cutwidth.MultiOutput.polyMul_nonconstant,
+    Algebraic.Cutwidth.MultiOutput.eventually_lt_arithmeticCost_of_polyMul,
+    Algebraic.Cutwidth.MultiOutput.eventually_lt_size_of_polyMul_zmod}
+  \leanok
+  \uses{def:lowerbounds-algebraic-poly-mul,
+    lem:lowerbounds-algebraic-poly-mul-hessian,
+    thm:lowerbounds-algebraic-taylor-rank,
+    lem:lowerbounds-algebraic-taylor-formal,
+    thm:lowerbounds-algebraic-quadratic-rank-cut,
+    lem:lowerbounds-algebraic-hankel-cauchy,
+    thm:lowerbounds-algebraic-multi-output-ordering,
+    thm:lowerbounds-algebraic-gaussian-coefficient,
+    thm:lowerbounds-algebraic-arithmetic-free-constants}
+  Let a circuit with polynomial gates of fan-in at most two over a field $K$,
+  of any degree and with any coefficients, formally compute polynomial
+  multiplication with $s$ gates. Every split $S$ of its wires, with inputs
+  $X_S$ and $X_T$ on the two sides, is crossed by at least
+  $\min\{|X_S\cap x|,|X_T\cap y|\}+\min\{|X_S\cap y|,|X_T\cap x|\}$ signals.
+  Under $\mathrm{OrderingBound}(A,\eta,C)$ with $A+\eta\ge0$,
+  \[
+    n \le (A+\eta)\max\{s-2n,0\} + 3\log_2(2n+3s) + C .
+  \]
+  Consequently, if the ordering hypothesis holds with coefficient $A>0$ at
+  every positive slack, then for every $\varepsilon>0$ and all large $n$,
+  independently of the field, the signature, and the gate polynomials, every
+  such circuit has more than $(2+1/A-\varepsilon)n$ gates; with the Gaussian
+  pathwidth coefficient $p$ of
+  Theorem~\ref{thm:lowerbounds-algebraic-gaussian-coefficient} and $A=2p$
+  this is $(2+1/(2p)-\varepsilon)n\approx(5.5625-\varepsilon)n$, and more than
+  $(50/9-\varepsilon)n$. The same bounds hold for circuits with polynomial
+  gates computing the polynomial function over an infinite field, for the
+  number of additions and multiplications of arithmetic circuits over an
+  infinite field with arbitrary constants free, and for circuits over
+  $\mathbb{Z}/q$, $q>2n$ prime, with arbitrary gate functions of fan-in at
+  most two.
+
+  Earlier lower bounds for polynomial multiplication count multiplications:
+  Kaminski and Bshouty (\emph{Multiplicative complexity of polynomial
+  multiplication over finite fields}, J.~ACM 36, 1989) prove that bilinear
+  algorithms over a fixed finite field need $3n-o(n)$ multiplications, while
+  over fields with at least $2n-2$ elements $2n-1$ multiplications suffice;
+  read as bounds on the total number of operations they give about $4n$. The
+  coefficient is not claimed to be a record beyond this comparison.
+\end{theorem}
+\begin{proof}
+  \leanok
+  For the cut bound, apply the Hessian consequence of the Taylor cut lemma
+  (Theorem~\ref{thm:lowerbounds-algebraic-taylor-rank}) over $K(t)$ with the
+  weights $\mu(m)=t^{m^2}$: the block $H[X_S,X_T]$ of the Hessian of
+  $\sum_m\mu(m)z_m$ has rank at most the number of crossing signals, and by
+  Lemma~\ref{lem:lowerbounds-algebraic-poly-mul-hessian} at least the stated
+  sum. Over $\mathbb{Z}/q$ take $\mu(m)=1/(m+2)$: every output has vanishing
+  mixed second differences on the classes of equal boundary keys, hence so
+  does $\sum_m\mu(m)z_m=x^{\mathsf T}\Lambda y$ with $\Lambda$ the Hankel Cauchy
+  matrix, and the counting rank-cut bound of
+  Theorem~\ref{thm:lowerbounds-algebraic-quadratic-rank-cut} applies, with
+  $\Lambda$ totally regular by
+  Lemma~\ref{lem:lowerbounds-algebraic-hankel-cauchy}. The component of the
+  first input is crossed by no signal, so the cut bound puts every input
+  into it. Along the ranking of
+  Theorem~\ref{thm:lowerbounds-algebraic-multi-output-ordering}, the number of
+  inputs in a prefix grows by at most one per wire, so the prefix ending at a
+  suitable input holds exactly $n$ inputs, $a$ of the first factor and $n-a$
+  of the second, and is crossed by at least $\min\{a,a\}+\min\{n-a,n-a\}=n$
+  signals; it is charged to the component holding all $2n$ inputs and at
+  most $s$ gates. For the asymptotic form, assume at most
+  $(2+1/A-\varepsilon)n$ gates, choose $\eta=A^2\varepsilon/2$, and compare.
+  Over an infinite field a polynomial is determined by its values
+  (Lemma~\ref{lem:lowerbounds-algebraic-taylor-formal}), and every output is
+  nonconstant, so constant gates can be absorbed into the coefficients
+  (Theorem~\ref{thm:lowerbounds-algebraic-arithmetic-free-constants}).
 \end{proof}
 
 \begin{definition}[The KRW conjecture]

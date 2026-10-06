@@ -314,6 +314,15 @@ def headlineTheorems : List Name := [
   `Algebraic.Cutwidth.MultiOutput.Taylor.exists_cut,
   `Algebraic.Cutwidth.MultiOutput.Taylor.blockRank_jacobian_add_blockRank_le,
   `Algebraic.Cutwidth.MultiOutput.Taylor.blockRank_hessian_le,
+  -- Polynomial multiplication: the (5.5625 - o(1)) n bound over every field
+  `Algebraic.Cutwidth.MultiOutput.totallyRegular_genericHankel,
+  `Algebraic.Cutwidth.MultiOutput.min_add_min_le_of_polyMul,
+  `Algebraic.Cutwidth.MultiOutput.min_add_min_le_of_polyMul_zmod,
+  `Algebraic.Cutwidth.MultiOutput.eventually_lt_size_of_polyMul,
+  `Algebraic.Cutwidth.MultiOutput.eventually_lt_size_of_polyMul_fifty_div_nine,
+  `Algebraic.Cutwidth.MultiOutput.eventually_lt_size_of_polyMul_of_infinite,
+  `Algebraic.Cutwidth.MultiOutput.eventually_lt_arithmeticCost_of_polyMul,
+  `Algebraic.Cutwidth.MultiOutput.eventually_lt_size_of_polyMul_zmod,
   -- Border substitution for tight tensors (coordinate form of Landsberg-Michałek Prop. 2.3)
   `Algebraic.Tensor3.BorderRankLE.map_of_ker,
   `Algebraic.Tensor3.BorderRankLE.exists_map_orthProj,

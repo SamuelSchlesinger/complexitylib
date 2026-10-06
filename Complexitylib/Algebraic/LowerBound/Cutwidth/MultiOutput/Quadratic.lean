@@ -111,6 +111,18 @@ theorem blockRank_add_transpose_le_of_trace (p : Program σ n s) (I : Interpreta
     blockRank (M + Mᵀ) (inputsIn S) (inputsIn S)ᶜ ≤ (forward p S).card + (backward p S).card :=
   Internal.blockRank_add_transpose_le p I out M hf S
 
+/-- **The rank-cut bound for quadratic forms with vanishing mixed second differences.** If the
+quadratic form of `M` satisfies `q x + q x' = q (mix S x x') + q (mix S x' x)` whenever `x` and
+`x'` have the same boundary key for the split `S` of a program over a finite field (as the value
+of every wire does, by `trace_add_trace_eq_trace_mix_add_trace_mix`, and so does every linear
+combination of wire values), then `rank (M + Mᵀ)[X_S, X_T] ≤ |A| + |B|`. -/
+theorem blockRank_add_transpose_le_of_mix (p : Program σ n s) (I : Interpretation σ F)
+    (M : Matrix (Fin n) (Fin n) F) (S : Finset (Wire n s))
+    (hmix : ∀ x x', boundaryKey p I S x = boundaryKey p I S x' →
+      quadForm M x + quadForm M x' = quadForm M (mix S x x') + quadForm M (mix S x' x)) :
+    blockRank (M + Mᵀ) (inputsIn S) (inputsIn S)ᶜ ≤ (forward p S).card + (backward p S).card :=
+  Internal.blockRank_add_transpose_le_of_mix p I M S hmix
+
 /-- **The rank-cut bound for quadratic forms.** If a circuit with values in a finite field, over
 any signature, computes the quadratic form `x ↦ xᵀ M x`, then every set `S` of its wires has
 `rank (M + Mᵀ)[X_S, X_T] ≤ |A| + |B|`, where `X_S` and `X_T` are the inputs in `S` and outside
