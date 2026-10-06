@@ -171,6 +171,14 @@ theorem polyMul_eq_eval {K : Type*} [CommSemiring K] (z : Fin (n + n) → K) (m 
   refine Finset.sum_congr rfl fun i _ => Finset.sum_congr rfl fun j _ => ?_
   split_ifs <;> simp
 
+/-- Over every commutative algebra, polynomial multiplication evaluates its polynomials. -/
+theorem polyMul_eq_aeval {K A : Type*} [CommSemiring K] [CommSemiring A] [Algebra K A]
+    (z : Fin (n + n) → A) (m : Fin (2 * n - 1)) :
+    polyMul n z m = MvPolynomial.aeval z (polyMulPolynomial K n m) := by
+  simp only [polyMul, polyMulPolynomial, map_sum]
+  refine Finset.sum_congr rfl fun i _ => Finset.sum_congr rfl fun j _ => ?_
+  split_ifs <;> simp
+
 /-- Polynomial multiplication computes the coefficients of the product of two polynomials. -/
 theorem polyMul_append_eq_coeff {R : Type*} [CommSemiring R] (x y : Fin n → R)
     (m : Fin (2 * n - 1)) :

@@ -80,7 +80,8 @@ theorem trace_eq_aeval_wirePolynomial {A : Type*} [CommSemiring A] [Algebra K A]
 
 /-- A circuit formally computing polynomials computes them as functions over every commutative
 `K`-algebra. -/
-theorem FormallyComputes.computes {c : Circuit σ n m} {f : Fin m → MvPolynomial (Fin n) K}
+theorem FormallyComputes.computes {P : (op : σ.Op) → MvPolynomial (Fin (σ.Arity op)) K}
+    {c : Circuit σ n m} {f : Fin m → MvPolynomial (Fin n) K}
     (hc : FormallyComputes P c f) (A : Type*) [CommSemiring A] [Algebra K A] :
     c.Computes (algebraInterpretation P A) fun x o => aeval x (f o) := by
   intro x
@@ -100,6 +101,24 @@ theorem formallyComputes_of_computes {F : Type*} [Field F] [Infinite F]
   intro x
   have h := Polynomial.Internal.wirePolynomial_eval hI c.program x (c.outputs o)
   exact h.trans (congrFun (hc x) o)
+
+/-- Over every commutative `K`-algebra, the arithmetic gate polynomials interpret addition,
+multiplication and the constants mapped into the algebra. -/
+theorem algebraInterpretation_arithmeticPolynomial {Kc : Type*} (constant : Kc → K)
+    (A : Type*) [CommSemiring A] [Algebra K A] :
+    algebraInterpretation (arithmeticPolynomial constant) A =
+      Arithmetic.interpretation fun k => algebraMap K A (constant k) := by
+  funext op x
+  cases op with
+  | add =>
+    have h : ∀ y : Fin 2 → A, aeval y (X 0 + X 1 : MvPolynomial (Fin 2) K) = y 0 + y 1 :=
+      fun y => by simp
+    exact h x
+  | mul =>
+    have h : ∀ y : Fin 2 → A, aeval y (X 0 * X 1 : MvPolynomial (Fin 2) K) = y 0 * y 1 :=
+      fun y => by simp
+    exact h x
+  | constant k => exact aeval_C _ _
 
 /-! ## The cut lemma -/
 

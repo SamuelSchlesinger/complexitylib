@@ -54,8 +54,10 @@ gate polynomials. The bound holds
 * for formal computation with polynomial gates over every field (`eventually_lt_size_of_polyMul`),
 * for computation of the polynomial function with polynomial gates over every infinite field
   (`eventually_lt_size_of_polyMul_of_infinite`),
-* for the number of additions and multiplications of arithmetic circuits over every infinite
-  field, with arbitrary constants free (`eventually_lt_arithmeticCost_of_polyMul`), and
+* for the number of additions and multiplications of arithmetic circuits, with arbitrary
+  constants free, computing the polynomial function over every infinite field
+  (`eventually_lt_arithmeticCost_of_polyMul`) or formally computing the polynomials over every
+  field (`eventually_lt_arithmeticCost_of_polyMul_formal`), and
 * for circuits with arbitrary gates of fan-in at most two over `ZMod q` for every prime
   `q > 2n` (`eventually_lt_size_of_polyMul_zmod`).
 
@@ -93,6 +95,12 @@ theorem polyMul_append_eq_coeff {R : Type*} [CommSemiring R] (x y : Fin n → R)
 theorem polyMul_eq_eval {K : Type*} [CommSemiring K] (z : Fin (n + n) → K)
     (m : Fin (2 * n - 1)) : polyMul n z m = MvPolynomial.eval z (polyMulPolynomial K n m) :=
   PolyMul.Internal.polyMul_eq_eval z m
+
+/-- Over every commutative algebra, polynomial multiplication evaluates its polynomials. -/
+theorem polyMul_eq_aeval {K A : Type*} [CommSemiring K] [CommSemiring A] [Algebra K A]
+    (z : Fin (n + n) → A) (m : Fin (2 * n - 1)) :
+    polyMul n z m = MvPolynomial.aeval z (polyMulPolynomial K n m) :=
+  PolyMul.Internal.polyMul_eq_aeval z m
 
 /-- **The Hessian of a weighted sum of the outputs.** At every point, the Hessian of
 `∑ₘ μ m z_m` is `[[0, Λ], [Λᵀ, 0]]` for the Hankel matrix `Λ = (μ (i + j))`. -/
@@ -254,6 +262,28 @@ theorem eventually_lt_arithmeticCost_of_polyMul {ε : ℝ} (hε : 0 < ε) :
   have result := bound K (Polynomial.signature K) (Polynomial.interpretation K)
     Polynomial.isPolynomial_interpretation d fan fun x => (agrees x).trans (hc x)
   rwa [size] at result
+
+/-- **Arithmetic circuits with free constants over every field.** For every `ε > 0` and all
+large `n`, over every field `K`, every circuit of additions, multiplications and constants of
+`K` formally computing polynomial multiplication performs more than
+`(2 + 1/(2 κ_E) - ε) n` additions and multiplications; constants are free. The circuit run over
+the infinite field `K(t)` computes polynomial multiplication there. -/
+theorem eventually_lt_arithmeticCost_of_polyMul_formal {ε : ℝ} (hε : 0 < ε) :
+    ∀ᶠ n : ℕ in atTop, ∀ (K : Type u) [Field K] (Kc : Type v) (constant : Kc → K)
+      (c : Circuit (Arithmetic.signature Kc) (n + n) (2 * n - 1)),
+        Taylor.FormallyComputes (Taylor.arithmeticPolynomial constant) c (polyMulPolynomial K n) →
+          (2 + 1 / (2 * Gaussian.frontierCoefficient) - ε) * n <
+            c.cost Arithmetic.gateCost := by
+  filter_upwards [eventually_lt_arithmeticCost_of_polyMul.{u, v} hε] with n bound
+  intro K _ Kc constant c hc
+  have : Infinite (RatFunc K) :=
+    Infinite.of_injective _ (RatFunc.algebraMap_injective K)
+  refine bound (RatFunc K) Kc (fun k => algebraMap K (RatFunc K) (constant k)) c fun x => ?_
+  have h := hc.computes (RatFunc K)
+  rw [Taylor.algebraInterpretation_arithmeticPolynomial] at h
+  rw [h x]
+  funext m
+  exact (polyMul_eq_aeval x m).symm
 
 /-- **Arbitrary gates over `ZMod q`.** For every `ε > 0` and all large `n`, for every prime
 `q > 2n`, every circuit over `ZMod q`, over any signature with fan-in at most two (so with

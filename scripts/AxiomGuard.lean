@@ -322,6 +322,7 @@ def headlineTheorems : List Name := [
   `Algebraic.Cutwidth.MultiOutput.eventually_lt_size_of_polyMul_fifty_div_nine,
   `Algebraic.Cutwidth.MultiOutput.eventually_lt_size_of_polyMul_of_infinite,
   `Algebraic.Cutwidth.MultiOutput.eventually_lt_arithmeticCost_of_polyMul,
+  `Algebraic.Cutwidth.MultiOutput.eventually_lt_arithmeticCost_of_polyMul_formal,
   `Algebraic.Cutwidth.MultiOutput.eventually_lt_size_of_polyMul_zmod,
   -- Border substitution for tight tensors (coordinate form of Landsberg-Michałek Prop. 2.3)
   `Algebraic.Tensor3.BorderRankLE.map_of_ker,

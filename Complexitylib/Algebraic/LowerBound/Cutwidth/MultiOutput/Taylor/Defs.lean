@@ -6,6 +6,7 @@ Authors: Samuel Schlesinger
 
 module
 public import Complexitylib.Algebraic.Circuit
+public import Complexitylib.Algebraic.Basis.Arithmetic
 public import Complexitylib.Algebraic.LowerBound.Cutwidth.MultiOutput.Defs
 public import Mathlib.Algebra.MvPolynomial.PDeriv
 
@@ -23,6 +24,8 @@ polynomial. This file fixes the notation for that formal semantics.
 * `FormallyComputes P c f`: every output wire of `c` carries the polynomial `f o`. This is the
   usual notion of an arithmetic circuit computing a polynomial; over an infinite field it agrees
   with computing the polynomial function.
+* `arithmeticPolynomial constant`: the gate polynomials `X₀ + X₁`, `X₀ X₁` and the constants
+  of arithmetic circuits (`Arithmetic.signature`).
 * `jacobian f a` and `hessian g a`: the matrices of first partial derivatives of a family of
   polynomials and of second partial derivatives of one polynomial, evaluated at a point `a` of
   a `K`-algebra `L`.
@@ -53,6 +56,15 @@ noncomputable def wirePolynomial (P : (op : σ.Op) → MvPolynomial (Fin (σ.Ari
 def FormallyComputes (P : (op : σ.Op) → MvPolynomial (Fin (σ.Arity op)) K)
     (c : Circuit σ n m) (f : Fin m → MvPolynomial (Fin n) K) : Prop :=
   ∀ o, wirePolynomial P c.program (c.outputs o) = f o
+
+/-- The gate polynomials of arithmetic circuits: addition is `X₀ + X₁`, multiplication is
+`X₀ X₁`, and a constant symbol is the constant polynomial of its value. -/
+noncomputable def arithmeticPolynomial {Kc : Type*} (constant : Kc → K) :
+    (op : (Arithmetic.signature Kc).Op) →
+      MvPolynomial (Fin ((Arithmetic.signature Kc).Arity op)) K
+  | .add => (MvPolynomial.X (0 : Fin 2) + MvPolynomial.X (1 : Fin 2) : MvPolynomial (Fin 2) K)
+  | .mul => (MvPolynomial.X (0 : Fin 2) * MvPolynomial.X (1 : Fin 2) : MvPolynomial (Fin 2) K)
+  | .constant c => MvPolynomial.C (constant c)
 
 /-- The Jacobian matrix of a family of polynomials at a point `a`: the entry in row `o` and
 column `j` is `∂ f o / ∂ X j` evaluated at `a`. -/

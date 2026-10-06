@@ -12816,6 +12816,7 @@ no superlinear unrestricted circuit theorem follows from them alone.
   \lean{Algebraic.Cutwidth.MultiOutput.Taylor.algebraInterpretation,
     Algebraic.Cutwidth.MultiOutput.Taylor.wirePolynomial,
     Algebraic.Cutwidth.MultiOutput.Taylor.FormallyComputes,
+    Algebraic.Cutwidth.MultiOutput.Taylor.arithmeticPolynomial,
     Algebraic.Cutwidth.MultiOutput.Taylor.jacobian,
     Algebraic.Cutwidth.MultiOutput.Taylor.hessian}
   \leanok
@@ -12830,14 +12831,16 @@ no superlinear unrestricted circuit theorem follows from them alone.
   polynomials $f_o$ when its output $o$ carries $f_o$. For a $K$-algebra $L$
   and $a\in L^n$, the Jacobian of a family of polynomials and the Hessian of
   one polynomial at $a$ are the matrices of their formal first and second
-  partial derivatives evaluated at $a$.
+  partial derivatives evaluated at $a$. Arithmetic circuits have the gate
+  polynomials $X_0+X_1$, $X_0X_1$, and the constants.
 \end{definition}
 
 \begin{lemma}[Formal and functional computation]
   \label{lem:lowerbounds-algebraic-taylor-formal}
   \lean{Algebraic.Cutwidth.MultiOutput.Taylor.trace_eq_aeval_wirePolynomial,
     Algebraic.Cutwidth.MultiOutput.Taylor.FormallyComputes.computes,
-    Algebraic.Cutwidth.MultiOutput.Taylor.formallyComputes_of_computes}
+    Algebraic.Cutwidth.MultiOutput.Taylor.formallyComputes_of_computes,
+    Algebraic.Cutwidth.MultiOutput.Taylor.algebraInterpretation_arithmeticPolynomial}
   \leanok
   \uses{def:lowerbounds-algebraic-taylor-formal}
   Over every commutative $K$-algebra a wire carries its wire polynomial
@@ -12845,7 +12848,9 @@ no superlinear unrestricted circuit theorem follows from them alone.
   computes them as functions over every such algebra. Conversely, over an
   infinite field, a circuit whose operations are polynomial functions and
   which computes polynomial functions formally computes those polynomials,
-  for the polynomials chosen to represent its operations.
+  for the polynomials chosen to represent its operations. Over every
+  commutative $K$-algebra, the arithmetic gate polynomials interpret addition,
+  multiplication, and the constants mapped into the algebra.
 \end{lemma}
 \begin{proof}
   \leanok
@@ -12961,6 +12966,7 @@ no superlinear unrestricted circuit theorem follows from them alone.
   \label{lem:lowerbounds-algebraic-poly-mul-hessian}
   \lean{Algebraic.Cutwidth.MultiOutput.polyMul_append_eq_coeff,
     Algebraic.Cutwidth.MultiOutput.polyMul_eq_eval,
+    Algebraic.Cutwidth.MultiOutput.polyMul_eq_aeval,
     Algebraic.Cutwidth.MultiOutput.sum_smul_hessian_polyMulPolynomial,
     Algebraic.Cutwidth.MultiOutput.totallyRegular_genericHankel,
     Algebraic.Cutwidth.MultiOutput.min_add_min_le_blockRank_crossMatrix}
@@ -13008,6 +13014,7 @@ no superlinear unrestricted circuit theorem follows from them alone.
     Algebraic.Cutwidth.MultiOutput.eventually_lt_size_of_polyMul_of_infinite,
     Algebraic.Cutwidth.MultiOutput.polyMul_nonconstant,
     Algebraic.Cutwidth.MultiOutput.eventually_lt_arithmeticCost_of_polyMul,
+    Algebraic.Cutwidth.MultiOutput.eventually_lt_arithmeticCost_of_polyMul_formal,
     Algebraic.Cutwidth.MultiOutput.eventually_lt_size_of_polyMul_zmod}
   \leanok
   \uses{def:lowerbounds-algebraic-poly-mul,
@@ -13036,11 +13043,12 @@ no superlinear unrestricted circuit theorem follows from them alone.
   Theorem~\ref{thm:lowerbounds-algebraic-gaussian-coefficient} and $A=2p$
   this is $(2+1/(2p)-\varepsilon)n\approx(5.5625-\varepsilon)n$, and more than
   $(50/9-\varepsilon)n$. The same bounds hold for circuits with polynomial
-  gates computing the polynomial function over an infinite field, for the
-  number of additions and multiplications of arithmetic circuits over an
-  infinite field with arbitrary constants free, and for circuits over
-  $\mathbb{Z}/q$, $q>2n$ prime, with arbitrary gate functions of fan-in at
-  most two.
+  gates computing the polynomial function over an infinite field; for the
+  number of additions and multiplications, with arbitrary constants free, of
+  arithmetic circuits formally computing polynomial multiplication over any
+  field or computing it as a function over an infinite field; and for
+  circuits over $\mathbb{Z}/q$, $q>2n$ prime, with arbitrary gate functions of
+  fan-in at most two.
 
   Earlier lower bounds for polynomial multiplication count multiplications:
   Kaminski and Bshouty (\emph{Multiplicative complexity of polynomial
@@ -13076,7 +13084,9 @@ no superlinear unrestricted circuit theorem follows from them alone.
   Over an infinite field a polynomial is determined by its values
   (Lemma~\ref{lem:lowerbounds-algebraic-taylor-formal}), and every output is
   nonconstant, so constant gates can be absorbed into the coefficients
-  (Theorem~\ref{thm:lowerbounds-algebraic-arithmetic-free-constants}).
+  (Theorem~\ref{thm:lowerbounds-algebraic-arithmetic-free-constants}). An
+  arithmetic circuit formally computing polynomial multiplication over $K$
+  computes it as a function over the infinite field $K(t)$.
 \end{proof}
 
 \begin{definition}[The KRW conjecture]
