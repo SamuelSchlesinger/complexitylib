@@ -425,4 +425,142 @@ theorem card_wireEdge : Fintype.card (WireEdge n s) = n + 3 * s := by
   simp only [Fintype.card_sum, Fintype.card_prod, Fintype.card_fin, Fintype.card_bool]
   ring
 
+/-! ### Token conservation -/
+
+/-- `1` on vertices in `L` and `0` elsewhere. -/
+def ind (L : Finset (WireVertex n s)) (v : WireVertex n s) : ℤ :=
+  if v ∈ L then 1 else 0
+
+/-- The tokens carried by an edge on input `x`: the value of its wire for a wire segment, and for
+the link of a comparator `1` exactly when its `minWire` input is `1` and its `maxWire` input `0`.
+-/
+def flow (x : Fin n → Bool) : WireEdge n s → ℤ
+  | .last w => (N.eval x w).toNat
+  | .into c b => (N.state x c (N.sideWire c b)).toNat
+  | .link c => (N.state x c (N.minWire c) && !N.state x c (N.maxWire c)).toNat
+
+theorem flow_nonneg (x : Fin n → Bool) (e : WireEdge n s) : 0 ≤ flow N x e := by
+  cases e <;> simp [flow]
+
+theorem flow_le_one (x : Fin n → Bool) (e : WireEdge n s) : flow N x e ≤ 1 := by
+  cases e <;> simp only [flow] <;> exact_mod_cast Bool.toNat_le _
+
+/-- The net flow out of `L` along the edge `e`. -/
+def crossing (x : Fin n → Bool) (L : Finset (WireVertex n s)) (e : WireEdge n s) : ℤ :=
+  flow N x e * (ind L (N.wireGraph.fst e) - ind L (N.wireGraph.snd e))
+
+/-- The number of wires carrying `1` at time `t` whose last vertex before time `t` lies in `L`. -/
+def potential (x : Fin n → Bool) (L : Finset (WireVertex n s)) (t : ℕ) : ℤ :=
+  ∑ w, ind L (N.lastStop w t) * (N.state x t w).toNat
+
+/-- **Conservation at a comparator.** Comparator `c` lowers the potential by the net flow out of
+`L` along its two incoming segments and its link. -/
+theorem potential_sub_potential_succ (x : Fin n → Bool) (L : Finset (WireVertex n s))
+    (c : Fin s) :
+    potential N x L c - potential N x L (c + 1) =
+      crossing N x L (.into c false) + crossing N x L (.into c true) +
+        crossing N x L (.link c) := by
+  have hne := N.minWire_ne_maxWire c
+  unfold potential
+  rw [← Finset.sum_sub_distrib, Fintype.sum_eq_add (N.minWire c) (N.maxWire c) hne]
+  · rw [state_succ, apply_minWire, apply_maxWire,
+      lastStop_succ_of_touch N c (Or.inl rfl), lastStop_succ_of_touch N c (Or.inr rfl)]
+    simp only [decide_true, show decide (N.maxWire c = N.minWire c) = false from
+      decide_eq_false (Ne.symm hne), crossing, flow, wireGraph_fst_into, wireGraph_snd_into,
+      wireGraph_fst_link, wireGraph_snd_link, sideWire_false, sideWire_true]
+    generalize ind L (N.lastStop (N.minWire c) c) = p
+    generalize ind L (N.lastStop (N.maxWire c) c) = q
+    generalize ind L (.gate c false) = p'
+    generalize ind L (.gate c true) = q'
+    cases N.state x c (N.minWire c) <;> cases N.state x c (N.maxWire c)
+    · simp
+    · simp
+    · simp
+      ring
+    · simp
+  · rintro w ⟨h₁, h₂⟩
+    rw [state_succ, apply_of_ne N c _ (Ne.symm h₁) (Ne.symm h₂),
+      lastStop_succ_of_not_touch N c (Ne.symm h₁) (Ne.symm h₂), sub_self]
+
+/-- **Token conservation.** The net flow out of `L` is the number of ones at input terminals in
+`L` minus the number at output terminals in `L`. -/
+theorem sum_crossing (x : Fin n → Bool) (L : Finset (WireVertex n s)) :
+    ∑ e, crossing N x L e =
+      ∑ w, ind L (.input w) * (x w).toNat - ∑ w, ind L (.output w) * (N.eval x w).toNat := by
+  rw [← Equiv.sum_comp edgeEquiv.symm, Fintype.sum_sum_type, Fintype.sum_sum_type,
+    Fintype.sum_prod_type]
+  simp only [edgeEquiv, Equiv.coe_fn_symm_mk, Fintype.sum_bool]
+  have htel : ∑ c : Fin s, (crossing N x L (.into c true) + crossing N x L (.into c false)) +
+      ∑ c : Fin s, crossing N x L (.link c) = potential N x L 0 - potential N x L s := by
+    rw [← Finset.sum_add_distrib]
+    have := Fin.sum_univ_eq_sum_range
+      (fun t => potential N x L t - potential N x L (t + 1)) s
+    rw [Finset.sum_range_sub'] at this
+    rw [← this]
+    refine Finset.sum_congr rfl fun c _ => ?_
+    rw [potential_sub_potential_succ]
+    ring
+  have hlast : ∑ w, crossing N x L (.last w) =
+      potential N x L s - ∑ w, ind L (.output w) * (N.eval x w).toNat := by
+    unfold potential
+    rw [← Finset.sum_sub_distrib]
+    refine Finset.sum_congr rfl fun w _ => ?_
+    simp only [crossing, flow, wireGraph_fst_last, wireGraph_snd_last, ComparatorNetwork.eval]
+    ring
+  have hzero : potential N x L 0 = ∑ w, ind L (.input w) * (x w).toNat := by
+    unfold potential
+    refine Finset.sum_congr rfl fun w _ => ?_
+    rw [lastStop_zero]
+    rfl
+  linarith
+
+/-- Counting the wires with a one whose terminal lies in `L`. -/
+theorem sum_ind_mul_toNat (L : Finset (WireVertex n s)) (P : Fin n → WireVertex n s)
+    (y : Fin n → Bool) :
+    ∑ w, ind L (P w) * (y w).toNat =
+      ((Finset.univ.filter fun w => P w ∈ L ∧ y w = true).card : ℤ) := by
+  rw [Finset.card_filter]
+  push_cast
+  refine Finset.sum_congr rfl fun w _ => ?_
+  unfold ind
+  by_cases h : P w ∈ L <;> cases y w <;> simp [h]
+
+/-- One edge carries a net flow of at most one token across `L`, in either direction. -/
+theorem crossing_sub_crossing_le (x x' : Fin n → Bool) (L : Finset (WireVertex n s))
+    (e : WireEdge n s) :
+    crossing N x L e - crossing N x' L e ≤
+      if N.wireGraph.fst e ∈ L ↔ N.wireGraph.snd e ∈ L then 0 else 1 := by
+  have h₁ := flow_nonneg N x e
+  have h₂ := flow_le_one N x e
+  have h₃ := flow_nonneg N x' e
+  have h₄ := flow_le_one N x' e
+  unfold crossing ind
+  by_cases hf : N.wireGraph.fst e ∈ L <;> by_cases hs : N.wireGraph.snd e ∈ L <;>
+    simp [hf, hs] <;> linarith
+
+/-- **The cut bound of token conservation.** For any two inputs `x` and `x'` and any vertex set
+`L`, the cut of `L` has at least `net x - net x'` edges, where `net y` is the number of ones of
+`y` at input terminals in `L` minus the number of ones of `N.eval y` at output terminals in
+`L`. -/
+theorem sub_le_card_cut (x x' : Fin n → Bool) (L : Finset (WireVertex n s)) :
+    (((Finset.univ.filter fun w => .input w ∈ L ∧ x w = true).card : ℤ) -
+        (Finset.univ.filter fun w => .output w ∈ L ∧ N.eval x w = true).card) -
+      (((Finset.univ.filter fun w => .input w ∈ L ∧ x' w = true).card : ℤ) -
+        (Finset.univ.filter fun w => .output w ∈ L ∧ N.eval x' w = true).card) ≤
+      (N.wireGraph.cut L).card := by
+  have hsum : ∑ e, (crossing N x L e - crossing N x' L e) ≤
+      ∑ e, (if N.wireGraph.fst e ∈ L ↔ N.wireGraph.snd e ∈ L then (0 : ℤ) else 1) :=
+    Finset.sum_le_sum fun e _ => crossing_sub_crossing_le N x x' L e
+  have hcut : ((N.wireGraph.cut L).card : ℤ) =
+      ∑ e, (if N.wireGraph.fst e ∈ L ↔ N.wireGraph.snd e ∈ L then (0 : ℤ) else 1) := by
+    unfold Multigraph.cut
+    rw [Finset.card_filter]
+    push_cast
+    refine Finset.sum_congr rfl fun e _ => ?_
+    by_cases h : N.wireGraph.fst e ∈ L ↔ N.wireGraph.snd e ∈ L <;> simp [h]
+  rw [Finset.sum_sub_distrib, sum_crossing, sum_crossing, sum_ind_mul_toNat, sum_ind_mul_toNat,
+    sum_ind_mul_toNat, sum_ind_mul_toNat] at hsum
+  rw [hcut]
+  linarith
+
 end Algebraic.Cutwidth.Halver.Internal
