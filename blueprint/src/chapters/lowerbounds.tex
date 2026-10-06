@@ -12043,6 +12043,106 @@ no superlinear unrestricted circuit theorem follows from them alone.
   Apply the same argument to the complementary cut.
 \end{proof}
 
+\begin{definition}[The discrete Fourier transform matrix]
+  \label{def:lowerbounds-algebraic-dft}
+  \lean{Algebraic.Cutwidth.MultiOutput.dft}
+  \leanok
+  \uses{def:lowerbounds-algebraic-multi-output}
+  For an element $\omega$ of a field and $N\in\mathbb{N}$, the Fourier matrix is
+  $F_N=(\omega^{rc})_{0\le r,c<N}$, with rows $r$ the outputs and columns $c$ the inputs. When
+  $\omega$ is a primitive $N$-th root of unity, $x\mapsto F_Nx$ is the $N$-point discrete Fourier
+  transform: over $\mathbb{C}$ with $\omega=e^{2\pi i/N}$ the classical DFT, for $N=2^k$ the
+  map computed by the fast Fourier transform, and over $\mathbb{Z}/q$ with $N\mid q-1$ a
+  number-theoretic transform.
+\end{definition}
+
+\begin{lemma}[Half cuts of Vandermonde and Fourier matrices]
+  \label{lem:lowerbounds-algebraic-dft-half-cut}
+  \lean{Algebraic.Cutwidth.MultiOutput.le_blockRank_add_blockRank_vandermonde,
+    Algebraic.Cutwidth.MultiOutput.le_blockRank_add_blockRank_dft}
+  \leanok
+  \uses{def:lowerbounds-algebraic-dft, def:lowerbounds-algebraic-multi-output}
+  Let $M=(x_c^{\,r})_{0\le r,c<N}$ for distinct nodes $x_c$ of a field. For every set $X$ of $h$
+  columns with $2h\le N$ and every set $Y$ of rows,
+  \[
+    h\le\operatorname{rank}M[Y^c,X]+\operatorname{rank}M[Y,X^c].
+  \]
+  In particular, for a primitive $N$-th root of unity $\omega$ the Fourier matrix $F_N$, with
+  nodes $\omega^c$, satisfies this for $h=\lfloor N/2\rfloor$.
+\end{lemma}
+\begin{proof}
+  \leanok
+  On a set $C$ of columns, the rows $r<|C|$ of $M$ are linearly independent: a vanishing
+  combination $\sum_rg_rx_c^{\,r}$ is a polynomial of degree below $|C|$ with the $|C|$ distinct
+  roots $x_c$, $c\in C$. So $M[Y^c,X]$ has rank at least the number of rows $r<h$ outside $Y$,
+  and $M[Y,X^c]$, with $N-h\ge h$ columns, has rank at least the number of rows $r<N-h$ in $Y$,
+  hence at least the number of rows $r<h$ in $Y$. The two counts add up to $h$.
+\end{proof}
+
+\begin{theorem}[The Fourier transform needs $(2.78-o(1))N$ gates]
+  \label{thm:lowerbounds-algebraic-dft}
+  \lean{Algebraic.Cutwidth.MultiOutput.half_le_of_dft,
+    Algebraic.Cutwidth.MultiOutput.Linear.Realization.half_le_of_dft,
+    Algebraic.Cutwidth.MultiOutput.Linear.eventually_lt_size_dft_of_orderingBound,
+    Algebraic.Cutwidth.MultiOutput.Linear.eventually_lt_size_dft,
+    Algebraic.Cutwidth.MultiOutput.Linear.eventually_lt_size_dft_twentyFive_div_nine,
+    Algebraic.Cutwidth.MultiOutput.Linear.eventually_lt_size_complexDFT,
+    Algebraic.Cutwidth.MultiOutput.Linear.eventually_lt_size_fft,
+    Algebraic.Cutwidth.MultiOutput.eventually_lt_size_dft_of_orderingBound,
+    Algebraic.Cutwidth.MultiOutput.eventually_lt_size_dft,
+    Algebraic.Cutwidth.MultiOutput.eventually_lt_size_dft_twentyFive_div_nine,
+    Algebraic.Cutwidth.MultiOutput.exists_isPrimitiveRoot_zmod,
+    Algebraic.Cutwidth.MultiOutput.eventually_lt_size_ntt}
+  \leanok
+  \uses{def:lowerbounds-algebraic-dft,
+    lem:lowerbounds-algebraic-dft-half-cut,
+    thm:lowerbounds-algebraic-multi-output-ordering,
+    thm:lowerbounds-algebraic-rank-cut,
+    lem:lowerbounds-algebraic-linear-realization-cut,
+    thm:lowerbounds-algebraic-gaussian-coefficient}
+  Let $\omega$ be a primitive $N$-th root of unity in a field $F$, for any $N$. Consider a
+  fan-in-two circuit with $s$ gates computing $x\mapsto F_Nx$ which is either linear over $F$
+  (it has a local linear realization: each gate computes a linear combination of its arguments,
+  with arbitrary coefficients) or, when $F$ is finite, has arbitrary gates $F\times F\to F$.
+  Under $\mathrm{OrderingBound}(A,\eta,C)$ with $A+\eta\ge0$,
+  \[
+    \lfloor N/2\rfloor\le(A+\eta)\max\{s-N,0\}+3\log_2(N+3s)+C .
+  \]
+  Consequently, if the ordering hypothesis holds with coefficient $A>0$ at every positive slack,
+  then for every $\varepsilon>0$ and all large $N$, independently of the field, the root of
+  unity, and the signature, every such circuit has more than $(1+1/(2A)-\varepsilon)N$ gates.
+  With the edge-score coefficient $A=2p$ this is
+  $(1+\kappa/2-\varepsilon)N\approx(2.78-\varepsilon)N$, with
+  $\kappa=\pi/(3\arccos\tfrac{1+2\sqrt2}{4})$, and more than $(25/9-\varepsilon)N$. This applies
+  to the complex DFT with $\omega=e^{2\pi i/N}$, including $N=2^k$, and to number-theoretic
+  transforms over $\mathbb{Z}/q$ for a prime $q$ with $N\mid q-1$, where a primitive $N$-th root
+  of unity exists.
+
+  Valiant (1975) observed that a linear circuit computing the Fourier transform is a
+  hyperconcentrator (Definition~\ref{def:lowerbounds-algebraic-hyperconcentrator}). For prime
+  $N$ every minor of the complex Fourier matrix is nonsingular (Chebotar\"ev), so such circuits
+  are superconcentrators, and Lev and Valiant (1983) derived $4N-o(N)$ additions. For general $N$
+  Lokam (\emph{Complexity lower bounds using linear algebra}, 2009) and Ailon (arXiv:1403.1307)
+  record no superlinear lower bound for unrestricted linear circuits; the bound here is linear.
+\end{theorem}
+\begin{proof}
+  \leanok
+  The Fourier matrix is not totally regular (for $N=4$, rows and columns $\{0,2\}$ give a
+  singular block), so Theorem~\ref{thm:lowerbounds-algebraic-totally-regular} does not apply.
+  The rank-cut inequality holds at every split, by
+  Theorem~\ref{thm:lowerbounds-algebraic-rank-cut} for finite fields and by
+  Lemma~\ref{lem:lowerbounds-algebraic-linear-realization-cut} for linear circuits. The
+  component of the wire of output $0$, whose row has no zero entry, is closed and so crossed by
+  no signal; the rank-cut inequality then puts every input into it. Along the ranking of
+  Theorem~\ref{thm:lowerbounds-algebraic-multi-output-ordering}, the number of inputs in a
+  prefix grows by at most one per wire, so the prefix ending at some input holds exactly
+  $\lfloor N/2\rfloor$ inputs. By Lemma~\ref{lem:lowerbounds-algebraic-dft-half-cut} it is
+  crossed by at least $\lfloor N/2\rfloor$ signals, and it is charged to the component holding
+  all $N$ inputs and at most $s$ gates. For the asymptotic form, assume at most
+  $(1+1/(2A)-\varepsilon)N$ gates and choose $\eta=A^2\varepsilon$: the cycle term is at most
+  $(1/2-A\varepsilon/2)N$, and the logarithmic term is $O(\log N)$.
+\end{proof}
+
 \begin{lemma}[Formal differentiation preserves the circuit graph]
   \label{lem:lowerbounds-algebraic-polynomial-linearization}
   \lean{Algebraic.Cutwidth.MultiOutput.Polynomial.realization,

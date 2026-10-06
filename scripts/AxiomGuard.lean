@@ -270,6 +270,12 @@ def headlineTheorems : List Name := [
   `Algebraic.Cutwidth.MultiOutput.eventually_lt_size_of_totallyRegular,
   `Algebraic.Cutwidth.MultiOutput.eventually_lt_size_of_totallyRegular_fortyOne_div_nine,
   `Algebraic.Cutwidth.MultiOutput.eventually_lt_size_cauchyZMod,
+  -- The discrete Fourier transform: half cuts and the (2.78 - o(1)) N gate bound
+  `Algebraic.Cutwidth.MultiOutput.le_blockRank_add_blockRank_dft,
+  `Algebraic.Cutwidth.MultiOutput.Linear.eventually_lt_size_dft,
+  `Algebraic.Cutwidth.MultiOutput.Linear.eventually_lt_size_fft,
+  `Algebraic.Cutwidth.MultiOutput.eventually_lt_size_dft,
+  `Algebraic.Cutwidth.MultiOutput.eventually_lt_size_ntt,
   -- Quadratic forms: the rank-cut bound and the (25/9 - ε) N gate bound
   `Algebraic.Cutwidth.MultiOutput.blockRank_add_transpose_le,
   `Algebraic.Cutwidth.MultiOutput.totallyRegular_hankelCauchyZMod_add_transpose,
