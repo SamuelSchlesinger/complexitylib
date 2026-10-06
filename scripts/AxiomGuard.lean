@@ -402,6 +402,15 @@ def headlineTheorems : List Name := [
   `Algebraic.Tensor3.eventually_twentyOne_div_ten_mul_le_borderRank_periodicLMTensor,
   `Algebraic.Tensor3.exists_eventually_twentyOne_div_ten_mul_le_borderRank_periodicLMTensor,
   `Algebraic.Tensor3.exists_eventually_seven_div_three_sub_mul_le_borderRank_periodicLMTensor,
+  -- Restriction–rank conjunction bound; the Gold map x ↦ x³ over GF(2ⁿ), n odd
+  `Algebraic.Aggregate.Geometry.NonaffineOnFlats.output_add_input_le_conjunctionCount_add,
+  `Algebraic.Aggregate.Geometry.conjunctionCount_entropy_mul_size_lower_bound,
+  `Algebraic.Aggregate.Geometry.Gold.goldFunction_nonaffineOnFlats,
+  `Algebraic.Aggregate.Geometry.Gold.card_flat_le_two,
+  `Algebraic.Aggregate.Geometry.Gold.three_mul_input_le_two_mul_conjunctionCount_add_three,
+  `Algebraic.Aggregate.Geometry.Gold.entropy_mul_size_lower_bound,
+  `Algebraic.Aggregate.Geometry.Gold.gateCoefficient_mul_sub_constantPenalty_le_size,
+  `Algebraic.Aggregate.Geometry.Gold.exists_gateCoefficient_sub_mul_lt_size,
   -- Korten's top-down parity lower bounds and the majority extension
   `Complexity.KarchmerWigderson.parity_communication_lower_bound,
   `Complexity.Circuit.parity_wire_lower_bound,
