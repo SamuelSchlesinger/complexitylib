@@ -30,6 +30,14 @@ every De Morgan formula for parity on `n ≥ 1` bits has at least `n²` leaves
 function "at least `k` ones" needs `k · (n + 1 - k)` leaves for `1 ≤ k ≤ n`
 (`threshold_mul_le_leaves`), so strict majority needs `((n + 1) / 2)²` leaves for odd
 `n` (`majority_mul_le_leaves`).
+
+These corollaries use only the rectangle bound `|edges A B|² ≤ M · |A| · |B|` for sets `A`
+of one-inputs and `B` of zero-inputs of `f` (`KhrapchenkoBound f M`). They are proved for
+every such `M` (`KhrapchenkoBound.mul_le_of_sensitive`, `KhrapchenkoBound.parity_sq_le`,
+`KhrapchenkoBound.threshold_mul_le`, `KhrapchenkoBound.majority_mul_le`) and specialized to
+formulas, where `M` is the number of leaves (`Formula.khrapchenkoBound`), so other models
+that satisfy the rectangle bound inherit them.
+
 Splitting the inputs in half gives formulas with exactly `4 ^ k` leaves for
 parity on `2 ^ k` bits, so `formulaSize parity = n²` when `n` is a power of two
 (`formulaSize_parity_two_pow`).
@@ -258,6 +266,20 @@ theorem Formula.sq_card_edges_le_of_computes {F : Formula n} {f : Cslib.BooleanF
     ⟨fun x hx => (hF x).trans (Finset.mem_filter.mp hx).2,
       fun y hy => (hF y).trans (Finset.mem_filter.mp hy).2⟩
 
+/-- `M` bounds the Khrapchenko measure of `f`: for every set `A` of one-inputs and every
+set `B` of zero-inputs of `f`, `|edges A B|² ≤ M · |A| · |B|`. A formula computing `f`
+gives this bound with `M` its number of leaves (`Formula.khrapchenkoBound`); the
+corollaries below depend only on this bound, not on the model of computation. -/
+def KhrapchenkoBound (f : Cslib.BooleanFunction n) (M : Nat) : Prop :=
+  ∀ A B : Finset (Fin n → Bool), (∀ x ∈ A, f x = true) → (∀ y ∈ B, f y = false) →
+    (edges A B).card ^ 2 ≤ M * A.card * B.card
+
+/-- Khrapchenko's theorem as a bound on the measure of the computed function. -/
+theorem Formula.khrapchenkoBound {F : Formula n} {f : Cslib.BooleanFunction n}
+    (hF : F.Computes f) : KhrapchenkoBound f F.leaves :=
+  fun A B hA hB => F.sq_card_edges_le A B
+    ⟨fun x hx => (hF x).trans (hA x hx), fun y hy => (hF y).trans (hB y hy)⟩
+
 /-! ### Neighbour counts -/
 
 /-- The coordinates at which flipping `x` lands in `S`. -/
@@ -304,14 +326,13 @@ theorem card_edges_comm (A B : Finset (Fin n → Bool)) :
     simp only [edges, Finset.mem_filter, Finset.mem_product] at hp ⊢
     exact ⟨⟨hp.1.2, hp.1.1⟩, by rw [diff_comm, hp.2]⟩
 
-/-- **Khrapchenko's bound from neighbour counts.** If a formula separates nonempty
-`A` from nonempty `B`, every input of `A` has at least `s₁` neighbours in `B`, and
-every input of `B` has at least `s₀` neighbours in `A`, the formula has at least
-`s₀ · s₁` leaves. -/
-theorem Formula.mul_le_leaves_of_neighbours {F : Formula n} {A B : Finset (Fin n → Bool)}
-    {s₀ s₁ : Nat} (hF : F.Separates A B) (hA : A.Nonempty) (hB : B.Nonempty)
+/-- **Neighbour counts against a measure bound.** If `|edges A B|² ≤ M · |A| · |B|` for
+nonempty `A` and `B`, every input of `A` has at least `s₁` neighbours in `B`, and every
+input of `B` has at least `s₀` neighbours in `A`, then `s₀ · s₁ ≤ M`. -/
+theorem mul_le_of_neighbours {A B : Finset (Fin n → Bool)} {s₀ s₁ M : Nat}
+    (hE : (edges A B).card ^ 2 ≤ M * A.card * B.card) (hA : A.Nonempty) (hB : B.Nonempty)
     (h₁ : ∀ x ∈ A, s₁ ≤ (neighbours B x).card) (h₀ : ∀ y ∈ B, s₀ ≤ (neighbours A y).card) :
-    s₀ * s₁ ≤ F.leaves := by
+    s₀ * s₁ ≤ M := by
   have hEA : s₁ * A.card ≤ (edges A B).card := by
     refine le_trans ?_ (sum_card_neighbours_le_card_edges A B)
     rw [mul_comm, ← smul_eq_mul, ← Finset.sum_const]
@@ -321,13 +342,23 @@ theorem Formula.mul_le_leaves_of_neighbours {F : Formula n} {A B : Finset (Fin n
       (card_edges_comm A B).le)
     rw [mul_comm, ← smul_eq_mul, ← Finset.sum_const]
     exact Finset.sum_le_sum h₀
-  have hprod : (s₀ * s₁) * (A.card * B.card) ≤ F.leaves * (A.card * B.card) := by
+  have hprod : (s₀ * s₁) * (A.card * B.card) ≤ M * (A.card * B.card) := by
     calc (s₀ * s₁) * (A.card * B.card) = (s₁ * A.card) * (s₀ * B.card) := by ring
       _ ≤ (edges A B).card * (edges A B).card := Nat.mul_le_mul hEA hEB
       _ = (edges A B).card ^ 2 := (sq _).symm
-      _ ≤ F.leaves * A.card * B.card := F.sq_card_edges_le A B hF
-      _ = F.leaves * (A.card * B.card) := by ring
+      _ ≤ M * A.card * B.card := hE
+      _ = M * (A.card * B.card) := by ring
   exact Nat.le_of_mul_le_mul_right hprod (Nat.mul_pos hA.card_pos hB.card_pos)
+
+/-- **Khrapchenko's bound from neighbour counts.** If a formula separates nonempty
+`A` from nonempty `B`, every input of `A` has at least `s₁` neighbours in `B`, and
+every input of `B` has at least `s₀` neighbours in `A`, the formula has at least
+`s₀ · s₁` leaves. -/
+theorem Formula.mul_le_leaves_of_neighbours {F : Formula n} {A B : Finset (Fin n → Bool)}
+    {s₀ s₁ : Nat} (hF : F.Separates A B) (hA : A.Nonempty) (hB : B.Nonempty)
+    (h₁ : ∀ x ∈ A, s₁ ≤ (neighbours B x).card) (h₀ : ∀ y ∈ B, s₀ ≤ (neighbours A y).card) :
+    s₀ * s₁ ≤ F.leaves :=
+  mul_le_of_neighbours (F.sq_card_edges_le A B hF) hA hB h₁ h₀
 
 /-! ### Sensitive functions -/
 
@@ -336,14 +367,13 @@ def sensitiveCoordinates (f : Cslib.BooleanFunction n) (x : Fin n → Bool) :
     Finset (Fin n) :=
   Finset.univ.filter fun i => f (flip x i) ≠ f x
 
-/-- **Khrapchenko's bound for sensitive functions.** If every one-input of `f` is
-sensitive on at least `s₁` coordinates, every zero-input on at least `s₀`, and `f`
-takes both values, every De Morgan formula for `f` has at least `s₀ · s₁` leaves. -/
-theorem leaves_ge_of_sensitive {f : Cslib.BooleanFunction n} {s₀ s₁ : Nat}
-    (hone : ∃ x, f x = true) (hzero : ∃ y, f y = false)
+/-- **Sensitivity against a measure bound.** If every one-input of `f` is sensitive on at
+least `s₁` coordinates, every zero-input on at least `s₀`, and `f` takes both values, then
+every bound `M` on the Khrapchenko measure of `f` satisfies `s₀ · s₁ ≤ M`. -/
+theorem KhrapchenkoBound.mul_le_of_sensitive {f : Cslib.BooleanFunction n} {s₀ s₁ M : Nat}
+    (hM : KhrapchenkoBound f M) (hone : ∃ x, f x = true) (hzero : ∃ y, f y = false)
     (h₁ : ∀ x, f x = true → s₁ ≤ (sensitiveCoordinates f x).card)
-    (h₀ : ∀ y, f y = false → s₀ ≤ (sensitiveCoordinates f y).card)
-    {F : Formula n} (hF : F.Computes f) : s₀ * s₁ ≤ F.leaves := by
+    (h₀ : ∀ y, f y = false → s₀ ≤ (sensitiveCoordinates f y).card) : s₀ * s₁ ≤ M := by
   have hsens : ∀ b x, f x = b →
       sensitiveCoordinates f x = neighbours (Finset.univ.filter fun y => f y = !b) x := by
     intro b x hx
@@ -351,10 +381,9 @@ theorem leaves_ge_of_sensitive {f : Cslib.BooleanFunction n} {s₀ s₁ : Nat}
     simp only [sensitiveCoordinates, neighbours, Finset.mem_filter, Finset.mem_univ, true_and,
       hx]
     cases b <;> cases f (flip x i) <;> simp
-  refine F.mul_le_leaves_of_neighbours (A := Finset.univ.filter fun x => f x = true)
+  refine mul_le_of_neighbours (A := Finset.univ.filter fun x => f x = true)
     (B := Finset.univ.filter fun y => f y = false)
-    ⟨fun x hx => (hF x).trans (Finset.mem_filter.mp hx).2,
-      fun y hy => (hF y).trans (Finset.mem_filter.mp hy).2⟩
+    (hM _ _ (fun x hx => (Finset.mem_filter.mp hx).2) fun y hy => (Finset.mem_filter.mp hy).2)
     (by obtain ⟨x, hx⟩ := hone; exact ⟨x, by simp [hx]⟩)
     (by obtain ⟨y, hy⟩ := hzero; exact ⟨y, by simp [hy]⟩)
     (fun x hx => ?_) (fun y hy => ?_)
@@ -362,6 +391,16 @@ theorem leaves_ge_of_sensitive {f : Cslib.BooleanFunction n} {s₀ s₁ : Nat}
     simpa only [hsens true x hx', Bool.not_true] using h₁ x hx'
   · have hy' := (Finset.mem_filter.mp hy).2
     simpa only [hsens false y hy', Bool.not_false] using h₀ y hy'
+
+/-- **Khrapchenko's bound for sensitive functions.** If every one-input of `f` is
+sensitive on at least `s₁` coordinates, every zero-input on at least `s₀`, and `f`
+takes both values, every De Morgan formula for `f` has at least `s₀ · s₁` leaves. -/
+theorem leaves_ge_of_sensitive {f : Cslib.BooleanFunction n} {s₀ s₁ : Nat}
+    (hone : ∃ x, f x = true) (hzero : ∃ y, f y = false)
+    (h₁ : ∀ x, f x = true → s₁ ≤ (sensitiveCoordinates f x).card)
+    (h₀ : ∀ y, f y = false → s₀ ≤ (sensitiveCoordinates f y).card)
+    {F : Formula n} (hF : F.Computes f) : s₀ * s₁ ≤ F.leaves :=
+  (Formula.khrapchenkoBound hF).mul_le_of_sensitive hone hzero h₁ h₀
 
 /-! ### Parity -/
 
@@ -379,18 +418,24 @@ theorem sensitiveCoordinates_parity (x : Fin n → Bool) :
   ext i
   simp [sensitiveCoordinates, parity_flip]
 
-/-- **Khrapchenko's bound for parity.** Every De Morgan formula computing the
-parity of `n ≥ 1` bits has at least `n²` leaves. -/
-theorem parity_sq_le_leaves [NeZero n] {F : Formula n}
-    (hF : F.Computes GateElimination.Xor.parity) : n ^ 2 ≤ F.leaves := by
+/-- **Parity against a measure bound.** Every bound on the Khrapchenko measure of the
+parity of `n ≥ 1` bits is at least `n²`. -/
+theorem KhrapchenkoBound.parity_sq_le [NeZero n] {M : Nat}
+    (hM : KhrapchenkoBound (GateElimination.Xor.parity (n := n)) M) : n ^ 2 ≤ M := by
   have hzero : GateElimination.Xor.parity (fun _ : Fin n => false) = false :=
     Finset.sum_eq_zero fun _ _ => rfl
   have hone : GateElimination.Xor.parity (flip (fun _ : Fin n => false) 0) = true := by
     rw [parity_flip, hzero]; rfl
-  have := leaves_ge_of_sensitive (s₀ := n) (s₁ := n) ⟨_, hone⟩ ⟨_, hzero⟩
+  have := hM.mul_le_of_sensitive (s₀ := n) (s₁ := n) ⟨_, hone⟩ ⟨_, hzero⟩
     (fun x _ => by simp [sensitiveCoordinates_parity])
-    (fun y _ => by simp [sensitiveCoordinates_parity]) hF
+    (fun y _ => by simp [sensitiveCoordinates_parity])
   simpa [sq] using this
+
+/-- **Khrapchenko's bound for parity.** Every De Morgan formula computing the
+parity of `n ≥ 1` bits has at least `n²` leaves. -/
+theorem parity_sq_le_leaves [NeZero n] {F : Formula n}
+    (hF : F.Computes GateElimination.Xor.parity) : n ^ 2 ≤ F.leaves :=
+  (Formula.khrapchenkoBound hF).parity_sq_le
 
 theorem le_formulaSize_parity [NeZero n] :
     ((n ^ 2 : Nat) : ℕ∞) ≤ formulaSize (GateElimination.Xor.parity (n := n)) :=
@@ -443,21 +488,19 @@ theorem weight_prefixOnes {k : Nat} (hk : k ≤ n) : weight (prefixOnes (n := n)
   rw [Fin.card_filter_val_lt]
   omega
 
-/-- **Khrapchenko's bound for threshold functions.** For `1 ≤ k ≤ n`, every De Morgan
-formula computing "at least `k` of `n` inputs are one" has at least `k · (n + 1 - k)`
-leaves: the inputs of weight `k` and `k - 1` form the rectangle. -/
-theorem threshold_mul_le_leaves {k : Nat} (hk : 1 ≤ k) (hkn : k ≤ n) {F : Formula n}
-    (hF : F.Computes (threshold k)) : (n + 1 - k) * k ≤ F.leaves := by
+/-- **Threshold functions against a measure bound.** For `1 ≤ k ≤ n`, every bound on the
+Khrapchenko measure of "at least `k` of `n` inputs are one" is at least `k · (n + 1 - k)`:
+the inputs of weight `k` and `k - 1` form the rectangle. -/
+theorem KhrapchenkoBound.threshold_mul_le {k M : Nat} (hk : 1 ≤ k) (hkn : k ≤ n)
+    (hM : KhrapchenkoBound (threshold (n := n) k) M) : (n + 1 - k) * k ≤ M := by
   set A := Finset.univ.filter fun x : Fin n → Bool => weight x = k
   set B := Finset.univ.filter fun y : Fin n → Bool => weight y = k - 1
-  refine F.mul_le_leaves_of_neighbours (A := A) (B := B)
-    ⟨fun x hx => by
-      rw [hF x]
-      simp only [threshold, (Finset.mem_filter.mp hx).2, le_refl, decide_true],
-    fun y hy => by
-      rw [hF y]
-      simp only [threshold, (Finset.mem_filter.mp hy).2, decide_eq_false_iff_not]
-      omega⟩
+  refine mul_le_of_neighbours (A := A) (B := B)
+    (hM A B (fun x hx => by
+      simp only [threshold, (Finset.mem_filter.mp hx).2, le_refl, decide_true])
+      fun y hy => by
+        simp only [threshold, (Finset.mem_filter.mp hy).2, decide_eq_false_iff_not]
+        omega)
     ⟨prefixOnes k, by simp [A, weight_prefixOnes hkn]⟩
     ⟨prefixOnes (k - 1), by simp [B, weight_prefixOnes (by omega : k - 1 ≤ n)]⟩
     (fun x hx => ?_) (fun y hy => ?_)
@@ -500,13 +543,26 @@ theorem threshold_mul_le_leaves {k : Nat} (hk : 1 ≤ k) (hkn : k ≤ n) {F : Fo
       · have := weight_flip_of_true hyi
         omega
 
+/-- **Khrapchenko's bound for threshold functions.** For `1 ≤ k ≤ n`, every De Morgan
+formula computing "at least `k` of `n` inputs are one" has at least `k · (n + 1 - k)`
+leaves: the inputs of weight `k` and `k - 1` form the rectangle. -/
+theorem threshold_mul_le_leaves {k : Nat} (hk : 1 ≤ k) (hkn : k ≤ n) {F : Formula n}
+    (hF : F.Computes (threshold k)) : (n + 1 - k) * k ≤ F.leaves :=
+  (Formula.khrapchenkoBound hF).threshold_mul_le hk hkn
+
+/-- **Majority against a measure bound.** For `n ≥ 1`, every bound on the Khrapchenko
+measure of strict majority of `n` inputs is at least `(n - ⌊n/2⌋) · (⌊n/2⌋ + 1)`. -/
+theorem KhrapchenkoBound.majority_mul_le {M : Nat} (hn : 1 ≤ n)
+    (hM : KhrapchenkoBound (majority (n := n)) M) : (n - n / 2) * (n / 2 + 1) ≤ M := by
+  have := KhrapchenkoBound.threshold_mul_le (k := n / 2 + 1) (by omega) (by omega) hM
+  rwa [show n + 1 - (n / 2 + 1) = n - n / 2 by omega] at this
+
 /-- **Khrapchenko's bound for majority.** Every De Morgan formula computing strict
 majority of `n ≥ 1` inputs has at least `(n - ⌊n/2⌋) · (⌊n/2⌋ + 1)` leaves, which is
 `((n + 1)/2)²` for odd `n`. -/
 theorem majority_mul_le_leaves (hn : 1 ≤ n) {F : Formula n} (hF : F.Computes majority) :
-    (n - n / 2) * (n / 2 + 1) ≤ F.leaves := by
-  have := threshold_mul_le_leaves (k := n / 2 + 1) (by omega) (by omega) hF
-  rwa [show n + 1 - (n / 2 + 1) = n - n / 2 by omega] at this
+    (n - n / 2) * (n / 2 + 1) ≤ F.leaves :=
+  (Formula.khrapchenkoBound hF).majority_mul_le hn
 
 /-! ### A matching upper bound at powers of two -/
 
