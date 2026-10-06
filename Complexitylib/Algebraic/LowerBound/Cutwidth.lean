@@ -341,6 +341,7 @@ public import Complexitylib.Algebraic.LowerBound.Cutwidth.Superconcentrator
 public import Complexitylib.Algebraic.LowerBound.Cutwidth.Concentrator
 public import Complexitylib.Algebraic.LowerBound.Cutwidth.Concentrator.Acyclic
 public import Complexitylib.Algebraic.LowerBound.Cutwidth.Hyperconcentrator
+public import Complexitylib.Algebraic.LowerBound.Cutwidth.Halver
 public import Complexitylib.Algebraic.LowerBound.Cutwidth.MultiOutput.DFT
 
 /-!
