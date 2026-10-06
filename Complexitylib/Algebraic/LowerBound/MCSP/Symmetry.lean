@@ -8,6 +8,8 @@ module
 public import Complexitylib.Algebraic.Basis.Binary
 public import Complexitylib.Algebraic.Basis.DeMorgan.Residual
 public import Complexitylib.Algebraic.BooleanCube
+public import Complexitylib.Algebraic.Complexity.RelativeSupport
+public import Complexitylib.Algebraic.LowerBound.FanIn.Size
 public import Complexitylib.Algebraic.LowerBound.MCSP.Defs
 public import Complexitylib.Algebraic.Parallel
 public import Complexitylib.Algebraic.Support
@@ -23,7 +25,7 @@ transitively on `Fin (2 ^ n)`.
    precomposing a target with `xorTranslate a` preserves `Circuit.costComplexity
    DeMorgan.interpretation DeMorgan.binaryCost` for every `a : Fin n → Bool`. Consequently,
    `mcspCostScalar DeMorgan.interpretation DeMorgan.binaryCost n s` is invariant under
-   `tableTranslate a` for all `s ≥ 0`.
+   `tableTranslate a` for every `s`.
 2. **Invariance of `Binary` (`B₂`) gate complexity**: Absorbing input negations into the
    16 binary gate operations of `Binary.signature` preserves `Program.size` and `Circuit.size`
    whenever the output wire is a gate, and uses at most 1 gate when the output wire is an input.
@@ -32,8 +34,17 @@ transitively on `Fin (2 ^ n)`.
 3. **All coordinates are essential**: Any non-constant function on `Fin N → Bool` that is
    invariant under a transitive family of coordinate permutations depends essentially on every
    coordinate `i : Fin N`. In particular, whenever `mcspCostScalar` or `mcspScalar` is
-   non-trivial, every truth-table bit is essential, forcing `c.inputSupport = Finset.univ` and
-   yielding unconditional `2 ^ (n - 1)` circuit size / binary-cost lower bounds.
+   non-constant (hypothesis `hne`), every truth-table bit is essential, forcing
+   `c.inputSupport = Finset.univ`. The frontier bounds `Circuit.card_inputSupport_le_size` and
+   `Circuit.card_inputSupport_le_cost` then give `2 ^ n ≤ c.size + 1` for fan-in-2 circuits and
+   `2 ^ n ≤ c.cost DeMorgan.binaryCost + 1` for De Morgan circuits.
+
+The non-constancy hypothesis is discharged for the De Morgan predicate in
+`Complexitylib.Algebraic.LowerBound.MCSP.NonVacuity`, which shows that
+`mcspCostScalar DeMorgan.interpretation DeMorgan.binaryCost (n + 1) s` is non-constant whenever
+some truth table has exact `binaryCost` complexity `s ≥ 1`, and exhibits such a table for `s = 1`.
+For the `Binary` predicate `mcspScalar Binary.interpretation n s`, non-constancy remains a
+hypothesis.
 -/
 
 @[expose] public section
@@ -57,16 +68,19 @@ def xorTranslate {n : Nat} (a : Fin n → Bool) : (Fin n → Bool) ≃ (Fin n �
     dsimp only
     cases x i <;> cases a i <;> rfl
 
+/-- Coordinate `i` of `xorTranslate a x` is `xor (x i) (a i)`. -/
 @[simp]
 theorem xorTranslate_apply {n : Nat} (a x : Fin n → Bool) (i : Fin n) :
     xorTranslate a x i = xor (x i) (a i) :=
   rfl
 
+/-- `xorTranslate a` is an involution. -/
 @[simp]
 theorem xorTranslate_symm {n : Nat} (a : Fin n → Bool) :
     (xorTranslate a).symm = xorTranslate a :=
   rfl
 
+/-- Applying `xorTranslate a` twice is the identity. -/
 @[simp]
 theorem xorTranslate_self {n : Nat} (a x : Fin n → Bool) :
     xorTranslate a (xorTranslate a x) = x :=
@@ -76,21 +90,25 @@ theorem xorTranslate_self {n : Nat} (a x : Fin n → Bool) :
 def tableTranslate {n : Nat} (a : Fin n → Bool) : Equiv.Perm (Fin (2 ^ n)) :=
   (inputEquiv n).symm.trans ((xorTranslate a).trans (inputEquiv n))
 
+/-- `tableTranslate a` is an involution. -/
 @[simp]
 theorem tableTranslate_symm {n : Nat} (a : Fin n → Bool) :
     (tableTranslate a).symm = tableTranslate a :=
   rfl
 
+/-- `tableTranslate a` maps the index of `x` to the index of `xorTranslate a x`. -/
 @[simp]
 theorem tableTranslate_inputEquiv {n : Nat} (a x : Fin n → Bool) :
     tableTranslate a (inputEquiv n x) = inputEquiv n (xorTranslate a x) := by
   simp [tableTranslate]
 
+/-- Decoding a translated index translates the decoded input. -/
 @[simp]
 theorem inputEquiv_symm_tableTranslate {n : Nat} (a : Fin n → Bool) (i : Fin (2 ^ n)) :
     (inputEquiv n).symm (tableTranslate a i) = xorTranslate a ((inputEquiv n).symm i) := by
   simp [tableTranslate]
 
+/-- Applying `tableTranslate a` twice is the identity. -/
 @[simp]
 theorem tableTranslate_self {n : Nat} (a : Fin n → Bool) (i : Fin (2 ^ n)) :
     tableTranslate a (tableTranslate a i) = i :=
@@ -131,6 +149,7 @@ def deMorganLiteralCircuit {n : Nat} (i : Fin n) (neg : Bool) :
     { program := Program.empty
       outputs := fun _ => Wire.input i }
 
+/-- `deMorganLiteralCircuit i neg` computes `x ↦ xor (x i) neg`. -/
 @[simp]
 theorem eval_deMorganLiteralCircuit {n : Nat} (i : Fin n) (neg : Bool)
     (x : Fin n → Bool) (o : Fin 1) :
@@ -141,6 +160,7 @@ theorem eval_deMorganLiteralCircuit {n : Nat} (i : Fin n) (neg : Bool)
   | true =>
       rfl
 
+/-- `deMorganLiteralCircuit i neg` has zero `binaryCost`. -/
 @[simp]
 theorem cost_deMorganLiteralCircuit {n : Nat} (i : Fin n) (neg : Bool) :
     (deMorganLiteralCircuit i neg).cost DeMorgan.binaryCost = 0 := by
@@ -151,12 +171,14 @@ def deMorganXorTranslateCircuit {n : Nat} (a : Fin n → Bool) :
     Circuit DeMorgan.signature n n :=
   Circuit.parallelFin n (fun i => deMorganLiteralCircuit i (a i))
 
+/-- `deMorganXorTranslateCircuit a` computes `xorTranslate a`. -/
 @[simp]
 theorem eval_deMorganXorTranslateCircuit {n : Nat} (a x : Fin n → Bool) :
     (deMorganXorTranslateCircuit a).eval DeMorgan.interpretation x = xorTranslate a x := by
   funext i
   simp [deMorganXorTranslateCircuit]
 
+/-- `deMorganXorTranslateCircuit a` has zero `binaryCost`. -/
 @[simp]
 theorem cost_deMorganXorTranslateCircuit {n : Nat} (a : Fin n → Bool) :
     (deMorganXorTranslateCircuit a).cost DeMorgan.binaryCost = 0 := by
@@ -202,11 +224,13 @@ gate wires are unmasked. -/
 def wireXorMask {n g : Nat} (a : Fin n → Bool) : Wire n g → Bool :=
   Wire.elim a (fun _ => false)
 
+/-- The mask of input wire `i` is `a i`. -/
 @[simp]
 theorem wireXorMask_input {n g : Nat} (a : Fin n → Bool) (i : Fin n) :
     wireXorMask (g := g) a (Wire.input i) = a i :=
   rfl
 
+/-- Gate wires are unmasked. -/
 @[simp]
 theorem wireXorMask_gate {n g : Nat} (a : Fin n → Bool) (j : Fin g) :
     wireXorMask a (Wire.gate j) = false :=
@@ -234,6 +258,7 @@ def negateInputsBinaryProgram {n : Nat} (a : Fin n → Bool) :
   | _, .empty => .empty
   | _, .gate p line => .gate (negateInputsBinaryProgram a p) (negateInputsBinaryLine a line)
 
+/-- `negateInputsBinaryProgram a p` evaluates `p` on the translated input `xorTranslate a x`. -/
 theorem eval_negateInputsBinaryProgram {n g : Nat} (a : Fin n → Bool)
     (p : Program Binary.signature n g) (x : Fin n → Bool) :
     (negateInputsBinaryProgram a p).eval Binary.interpretation x =
@@ -362,286 +387,35 @@ theorem essentialAt_all_of_tableTranslate_invariant {n : Nat} {V : Type*}
   rw [← ha]
   exact EssentialAt.perm (hinv a) hess₀
 
-/-! ## Structural input-support bounds for fan-in-2 and De Morgan circuits -/
+/-- If every coordinate is essential for a scalar function `F`, then every circuit (in any basis)
+computing a single-output target `T` with `T x 0 = F x` reads every input. -/
+theorem inputSupport_eq_univ_of_forall_essentialAt {σ : Signature}
+    {interpretation : Interpretation σ Bool} {N : Nat} {F : (Fin N → Bool) → Bool}
+    {T : Target Bool N 1} (hT : ∀ x, T x 0 = F x)
+    (hess : ∀ i, EssentialAt F i) {c : Circuit σ N 1}
+    (hcomp : c.ComputesWith interpretation T) :
+    c.inputSupport = Finset.univ := by
+  ext i
+  simp only [Finset.mem_univ, iff_true]
+  obtain ⟨left, right, hagree, hdiff⟩ := hess i
+  have hess_target : EssentialAt T i :=
+    ⟨left, right, hagree, fun heq => hdiff (by rw [← hT, ← hT, heq])⟩
+  exact hess_target.mem_support hcomp.dependsOnlyOn
 
-/-- Singleton-or-empty filter of a wire's input support. -/
-noncomputable def smallWireSupport {σ : Signature} {N g : Nat}
-    (p : Program σ N g) (w : Wire N g) : Finset (Fin N) := by
-  classical
-  exact if (p.wireSupport w).card ≤ 1 then p.wireSupport w else ∅
+/-! ## Input-support bounds for De Morgan circuits -/
 
-theorem card_smallWireSupport_le_one {σ : Signature} {N g : Nat}
-    (p : Program σ N g) (w : Wire N g) :
-    (smallWireSupport p w).card ≤ 1 := by
-  classical
-  unfold smallWireSupport
-  split_ifs with h
-  · exact h
-  · simp
+/-- Every De Morgan operation has arity at most its `binaryCost` plus one, so the weighted
+frontier bound `Circuit.card_inputSupport_le_cost` applies to `DeMorgan.binaryCost`. -/
+theorem deMorgan_arity_le_binaryCost_add_one (op : DeMorgan.signature.Op) :
+    DeMorgan.signature.Arity op ≤ DeMorgan.binaryCost op + 1 := by
+  cases op <;> decide
 
-theorem card_inputSupport_smallWireSupport_le_arity {σ : Signature} {N g : Nat}
-    (p : Program σ N g) (line : Line σ N g) :
-    (line.inputSupport (smallWireSupport p)).card ≤ σ.Arity line.op := by
-  classical
-  calc
-    (line.inputSupport (smallWireSupport p)).card
-        ≤ ∑ k : Fin (σ.Arity line.op), (smallWireSupport p (line.wires k)).card :=
-      Finset.card_biUnion_le
-    _ ≤ ∑ _k : Fin (σ.Arity line.op), 1 :=
-      Finset.sum_le_sum fun k _ => card_smallWireSupport_le_one p (line.wires k)
-    _ = σ.Arity line.op := by simp
+/-- A De Morgan circuit with `m` outputs reads at most `m + c.cost DeMorgan.binaryCost` inputs. -/
+theorem card_inputSupport_le_binaryCost {N m : Nat} (c : Circuit DeMorgan.signature N m) :
+    c.inputSupport.card ≤ m + c.cost DeMorgan.binaryCost :=
+  c.card_inputSupport_le_cost DeMorgan.binaryCost deMorgan_arity_le_binaryCost_add_one
 
-/-- Inputs accumulated at gates of `p` from single-input wire supports. -/
-noncomputable def accumulatedSupport {σ : Signature} {N : Nat} :
-    {g : Nat} → Program σ N g → Finset (Fin N)
-  | _, .empty => ∅
-  | _, .gate q line => accumulatedSupport q ∪ line.inputSupport (smallWireSupport q)
-
-theorem wireSupport_subset_accumulatedSupport_union {σ : Signature} {N g : Nat}
-    (p : Program σ N g) (w : Wire N g) :
-    p.wireSupport w ⊆ accumulatedSupport p ∪ smallWireSupport p w := by
-  classical
-  induction p with
-  | empty =>
-      cases w with
-      | input i =>
-          simp [smallWireSupport]
-      | gate k => exact Fin.elim0 k
-  | @gate g q line ih =>
-      by_cases hcard : ((q.gate line).wireSupport w).card ≤ 1
-      · intro x hx
-        exact Finset.mem_union_right _ (by simpa [smallWireSupport, hcard] using hx)
-      · induction w using Wire.lastCases with
-        | castSucc w₀ =>
-            have hcard₀ : ¬ (q.wireSupport w₀).card ≤ 1 := by
-              simpa using hcard
-            intro x hx
-            have hx₀ : x ∈ q.wireSupport w₀ := by simpa using hx
-            have hsub := ih w₀ hx₀
-            simp only [smallWireSupport, hcard₀, ↓reduceIte, Finset.union_empty] at hsub
-            exact Finset.mem_union_left _ (Finset.mem_union_left _ hsub)
-        | last =>
-            intro x hx
-            rw [Program.wireSupport_gate_last, Line.mem_inputSupport] at hx
-            obtain ⟨arg, harg⟩ := hx
-            have hsub := ih (line.wires arg) harg
-            rcases Finset.mem_union.mp hsub with hacc | hsmall
-            · exact Finset.mem_union_left _ (Finset.mem_union_left _ hacc)
-            · exact Finset.mem_union_left _
-                (Finset.mem_union_right _ (Line.mem_inputSupport.mpr ⟨arg, hsmall⟩))
-
-theorem card_accumulatedSupport_le_two_mul_size {σ : Signature} {N g : Nat}
-    (p : Program σ N g) (hfan : p.FanInAtMost 2) :
-    (accumulatedSupport p).card ≤ 2 * g := by
-  classical
-  induction p with
-  | empty => simp [accumulatedSupport]
-  | @gate g q line ih =>
-      obtain ⟨hfan_q, harity⟩ := hfan
-      calc
-        (accumulatedSupport (q.gate line)).card
-            ≤ (accumulatedSupport q).card +
-                (line.inputSupport (smallWireSupport q)).card :=
-          Finset.card_union_le _ _
-        _ ≤ 2 * g + σ.Arity line.op :=
-          Nat.add_le_add (ih hfan_q) (card_inputSupport_smallWireSupport_le_arity q line)
-        _ ≤ 2 * g + 2 := Nat.add_le_add_left harity (2 * g)
-        _ = 2 * (g + 1) := by omega
-
-/-- For any single-output circuit of fan-in at most 2, `c.inputSupport.card ≤ 2 * c.size + 1`,
-and `c.inputSupport.card ≤ 2 * c.size` whenever `2 ≤ c.inputSupport.card`. -/
-theorem card_inputSupport_le_two_mul_size {σ : Signature} {N : Nat}
-    (c : Circuit σ N 1) (hfan : c.FanInAtMost 2)
-    (htwo : 2 ≤ c.inputSupport.card) :
-    c.inputSupport.card ≤ 2 * c.size := by
-  classical
-  have hsupp : c.inputSupport = c.program.wireSupport (c.outputs 0) := by
-    ext x
-    simp [Subsingleton.elim _ (0 : Fin 1)]
-  have hnot_le_one : ¬ (c.program.wireSupport (c.outputs 0)).card ≤ 1 := by
-    rw [← hsupp]
-    omega
-  have hsub := wireSupport_subset_accumulatedSupport_union c.program (c.outputs 0)
-  simp only [smallWireSupport, hnot_le_one, ↓reduceIte, Finset.union_empty] at hsub
-  rw [hsupp]
-  exact (Finset.card_le_card hsub).trans (card_accumulatedSupport_le_two_mul_size c.program hfan)
-
-/-- Inputs accumulated only at charged (`and`/`or`) gates of a De Morgan program. -/
-noncomputable def deMorganChargedSupport {N : Nat} :
-    {g : Nat} → Program DeMorgan.signature N g → Finset (Fin N)
-  | _, .empty => ∅
-  | _, .gate q line =>
-      if DeMorgan.binaryCost line.op = 0 then
-        deMorganChargedSupport q
-      else
-        deMorganChargedSupport q ∪ line.inputSupport (smallWireSupport q)
-
-theorem wireSupport_subset_deMorganChargedSupport_union {N g : Nat}
-    (p : Program DeMorgan.signature N g) (w : Wire N g) :
-    p.wireSupport w ⊆ deMorganChargedSupport p ∪ smallWireSupport p w := by
-  classical
-  induction p with
-  | empty =>
-      cases w with
-      | input i =>
-          simp [smallWireSupport]
-      | gate k => exact Fin.elim0 k
-  | @gate g q line ih =>
-      by_cases hcard : ((q.gate line).wireSupport w).card ≤ 1
-      · intro x hx
-        exact Finset.mem_union_right _ (by simpa [smallWireSupport, hcard] using hx)
-      · induction w using Wire.lastCases with
-        | castSucc w₀ =>
-            have hcard₀ : ¬ (q.wireSupport w₀).card ≤ 1 := by
-              simpa using hcard
-            intro x hx
-            have hx₀ : x ∈ q.wireSupport w₀ := by simpa using hx
-            have hsub := ih w₀ hx₀
-            simp only [smallWireSupport, hcard₀, ↓reduceIte, Finset.union_empty] at hsub
-            unfold deMorganChargedSupport
-            split_ifs
-            · exact Finset.mem_union_left _ hsub
-            · exact Finset.mem_union_left _ (Finset.mem_union_left _ hsub)
-        | last =>
-            rcases line with ⟨op, wires⟩
-            cases op with
-            | false =>
-                exfalso
-                apply hcard
-                rw [Program.wireSupport_gate_last]
-                have hempty :
-                    (⟨DeMorgan.Op.false, wires⟩ : Line DeMorgan.signature N g).inputSupport
-                      q.wireSupport = ∅ := by
-                  ext x
-                  simp
-                rw [hempty]
-                simp
-            | true =>
-                exfalso
-                apply hcard
-                rw [Program.wireSupport_gate_last]
-                have hempty :
-                    (⟨DeMorgan.Op.true, wires⟩ : Line DeMorgan.signature N g).inputSupport
-                      q.wireSupport = ∅ := by
-                  ext x
-                  simp
-                rw [hempty]
-                simp
-            | id =>
-                let zeroArg : Fin (DeMorgan.signature.Arity DeMorgan.Op.id) := ⟨0, Nat.one_pos⟩
-                have heq :
-                    ((q.gate ⟨DeMorgan.Op.id, wires⟩).wireSupport (Wire.gate (Fin.last g))) =
-                      q.wireSupport (wires zeroArg) := by
-                  ext x
-                  rw [Program.wireSupport_gate_last, Line.mem_inputSupport]
-                  constructor
-                  · rintro ⟨arg, harg⟩
-                    have harg0 : arg = zeroArg :=
-                      Fin.ext (Nat.eq_zero_of_le_zero (Nat.le_of_lt_succ arg.isLt))
-                    rw [harg0] at harg
-                    exact harg
-                  · intro harg
-                    exact ⟨zeroArg, harg⟩
-                have hcard₀ : ¬ (q.wireSupport (wires zeroArg)).card ≤ 1 := by
-                  rw [← heq]
-                  exact hcard
-                intro x hx
-                rw [heq] at hx
-                have hsub := ih (wires zeroArg) hx
-                simp only [smallWireSupport, hcard₀, ↓reduceIte, Finset.union_empty] at hsub
-                simpa [deMorganChargedSupport] using Finset.mem_union_left _ hsub
-            | not =>
-                let zeroArg : Fin (DeMorgan.signature.Arity DeMorgan.Op.not) := ⟨0, Nat.one_pos⟩
-                have heq :
-                    ((q.gate ⟨DeMorgan.Op.not, wires⟩).wireSupport (Wire.gate (Fin.last g))) =
-                      q.wireSupport (wires zeroArg) := by
-                  ext x
-                  rw [Program.wireSupport_gate_last, Line.mem_inputSupport]
-                  constructor
-                  · rintro ⟨arg, harg⟩
-                    have harg0 : arg = zeroArg :=
-                      Fin.ext (Nat.eq_zero_of_le_zero (Nat.le_of_lt_succ arg.isLt))
-                    rw [harg0] at harg
-                    exact harg
-                  · intro harg
-                    exact ⟨zeroArg, harg⟩
-                have hcard₀ : ¬ (q.wireSupport (wires zeroArg)).card ≤ 1 := by
-                  rw [← heq]
-                  exact hcard
-                intro x hx
-                rw [heq] at hx
-                have hsub := ih (wires zeroArg) hx
-                simp only [smallWireSupport, hcard₀, ↓reduceIte, Finset.union_empty] at hsub
-                simpa [deMorganChargedSupport] using Finset.mem_union_left _ hsub
-            | and =>
-                intro x hx
-                rw [Program.wireSupport_gate_last, Line.mem_inputSupport] at hx
-                obtain ⟨arg, harg⟩ := hx
-                have hsub := ih (wires arg) harg
-                simp only [deMorganChargedSupport, DeMorgan.binaryCost_and,
-                  Nat.one_ne_zero, ↓reduceIte]
-                rcases Finset.mem_union.mp hsub with hacc | hsmall
-                · exact Finset.mem_union_left _ (Finset.mem_union_left _ hacc)
-                · exact Finset.mem_union_left _
-                    (Finset.mem_union_right _ (Line.mem_inputSupport.mpr ⟨arg, hsmall⟩))
-            | or =>
-                intro x hx
-                rw [Program.wireSupport_gate_last, Line.mem_inputSupport] at hx
-                obtain ⟨arg, harg⟩ := hx
-                have hsub := ih (wires arg) harg
-                simp only [deMorganChargedSupport, DeMorgan.binaryCost_or,
-                  Nat.one_ne_zero, ↓reduceIte]
-                rcases Finset.mem_union.mp hsub with hacc | hsmall
-                · exact Finset.mem_union_left _ (Finset.mem_union_left _ hacc)
-                · exact Finset.mem_union_left _
-                    (Finset.mem_union_right _ (Line.mem_inputSupport.mpr ⟨arg, hsmall⟩))
-
-theorem card_deMorganChargedSupport_le_two_mul_cost {N g : Nat}
-    (p : Program DeMorgan.signature N g) :
-    (deMorganChargedSupport p).card ≤ 2 * p.cost DeMorgan.binaryCost := by
-  classical
-  induction p with
-  | empty => simp [deMorganChargedSupport]
-  | @gate g q line ih =>
-      unfold deMorganChargedSupport
-      split_ifs with hzero
-      · simpa [Program.cost, hzero] using ih
-      · rcases line with ⟨op, wires⟩
-        have hcost1 : DeMorgan.binaryCost op = 1 := by
-          cases op <;> simp_all
-        have harity2 : DeMorgan.signature.Arity op = 2 := by
-          cases op <;> simp_all
-        calc
-          (deMorganChargedSupport q ∪
-              (⟨op, wires⟩ : Line DeMorgan.signature N g).inputSupport (smallWireSupport q)).card
-              ≤ (deMorganChargedSupport q).card +
-                  ((⟨op, wires⟩ : Line DeMorgan.signature N g).inputSupport
-                    (smallWireSupport q)).card :=
-            Finset.card_union_le _ _
-          _ ≤ 2 * q.cost DeMorgan.binaryCost + DeMorgan.signature.Arity op :=
-            Nat.add_le_add ih (card_inputSupport_smallWireSupport_le_arity q ⟨op, wires⟩)
-          _ = 2 * (q.cost DeMorgan.binaryCost + DeMorgan.binaryCost op) := by
-            rw [harity2, hcost1]
-            omega
-
-/-- For any single-output De Morgan circuit with `2 ≤ c.inputSupport.card`,
-`c.inputSupport.card ≤ 2 * c.cost DeMorgan.binaryCost`. -/
-theorem card_inputSupport_le_two_mul_binaryCost {N : Nat}
-    (c : Circuit DeMorgan.signature N 1) (htwo : 2 ≤ c.inputSupport.card) :
-    c.inputSupport.card ≤ 2 * c.cost DeMorgan.binaryCost := by
-  classical
-  have hsupp : c.inputSupport = c.program.wireSupport (c.outputs 0) := by
-    ext x
-    simp [Subsingleton.elim _ (0 : Fin 1)]
-  have hnot_le_one : ¬ (c.program.wireSupport (c.outputs 0)).card ≤ 1 := by
-    rw [← hsupp]
-    omega
-  have hsub := wireSupport_subset_deMorganChargedSupport_union c.program (c.outputs 0)
-  simp only [smallWireSupport, hnot_le_one, ↓reduceIte, Finset.union_empty] at hsub
-  rw [hsupp]
-  exact (Finset.card_le_card hsub).trans (card_deMorganChargedSupport_le_two_mul_cost c.program)
-
-/-! ## Unconditional essential-coordinates and `2 ^ (n - 1)` circuit size bounds for MCSP -/
+/-! ## Essential coordinates and `2 ^ n - 1` circuit size / cost bounds for non-constant MCSP -/
 
 /-- Whenever `mcspCostScalar DeMorgan.interpretation DeMorgan.binaryCost n s` is non-constant,
 every truth-table coordinate `i : Fin (2 ^ n)` is essential. -/
@@ -654,7 +428,7 @@ theorem mcspCostScalar_deMorgan_essentialAt {n s : Nat}
   essentialAt_all_of_tableTranslate_invariant
     (fun a tt => mcspCostScalar_deMorgan_comp_tableTranslate a tt) hne i
 
-/-- Any circuit computing non-constant
+/-- Any circuit (in any basis) computing non-constant
 `mcspCostTarget DeMorgan.interpretation DeMorgan.binaryCost n s` must include every truth-table
 coordinate in its `inputSupport`. -/
 theorem mcspCostTarget_deMorgan_inputSupport_eq_univ {σ : Signature}
@@ -665,38 +439,44 @@ theorem mcspCostTarget_deMorgan_inputSupport_eq_univ {σ : Signature}
     {c : Circuit σ (2 ^ n) 1}
     (hcomp : c.ComputesWith interpretation
       (mcspCostTarget DeMorgan.interpretation DeMorgan.binaryCost n s)) :
-    c.inputSupport = Finset.univ := by
-  ext i
-  simp only [Finset.mem_univ, iff_true]
-  have hess_scalar := mcspCostScalar_deMorgan_essentialAt hne i
-  have hess_target :
-      EssentialAt (mcspCostTarget DeMorgan.interpretation DeMorgan.binaryCost n s) i := by
-    obtain ⟨left, right, hagree, hdiff⟩ := hess_scalar
-    refine ⟨left, right, hagree, fun heq => hdiff (congrFun heq 0)⟩
-  exact hess_target.mem_support hcomp.dependsOnlyOn
+    c.inputSupport = Finset.univ :=
+  inputSupport_eq_univ_of_forall_essentialAt (fun _ => rfl)
+    (mcspCostScalar_deMorgan_essentialAt hne) hcomp
 
-/-- Unconditional `2 ^ n ≤ 2 * c.cost DeMorgan.binaryCost` lower bound for any De Morgan circuit
-computing non-constant `mcspCostTarget DeMorgan.interpretation DeMorgan.binaryCost n s`
-(`1 ≤ n`). -/
-theorem mcspCostTarget_deMorgan_binaryCost_lower_bound {n s : Nat} (hn : 1 ≤ n)
+/-- `2 ^ n ≤ c.cost DeMorgan.binaryCost + 1` for any De Morgan circuit computing
+`mcspCostTarget DeMorgan.interpretation DeMorgan.binaryCost n s`, provided this predicate is
+non-constant (`hne`). -/
+theorem mcspCostTarget_deMorgan_binaryCost_lower_bound {n s : Nat}
     {tt₀ tt₁ : Fin (2 ^ n) → Bool}
     (hne : mcspCostScalar DeMorgan.interpretation DeMorgan.binaryCost n s tt₀ ≠
       mcspCostScalar DeMorgan.interpretation DeMorgan.binaryCost n s tt₁)
     (c : Circuit DeMorgan.signature (2 ^ n) 1)
     (hcomp : c.ComputesWith DeMorgan.interpretation
       (mcspCostTarget DeMorgan.interpretation DeMorgan.binaryCost n s)) :
-    2 ^ n ≤ 2 * c.cost DeMorgan.binaryCost := by
-  have huniv := mcspCostTarget_deMorgan_inputSupport_eq_univ hne hcomp
+    2 ^ n ≤ c.cost DeMorgan.binaryCost + 1 := by
   have hcard : c.inputSupport.card = 2 ^ n := by
-    rw [huniv, Finset.card_univ, Fintype.card_fin]
-  have htwo : 2 ≤ c.inputSupport.card := by
-    rw [hcard]
-    calc
-      2 = 2 ^ 1 := rfl
-      _ ≤ 2 ^ n := Nat.pow_le_pow_right (by omega) hn
-  calc
-    2 ^ n = c.inputSupport.card := hcard.symm
-    _ ≤ 2 * c.cost DeMorgan.binaryCost := card_inputSupport_le_two_mul_binaryCost c htwo
+    rw [mcspCostTarget_deMorgan_inputSupport_eq_univ hne hcomp, Finset.card_univ,
+      Fintype.card_fin]
+  have hbound := card_inputSupport_le_binaryCost c
+  omega
+
+/-- `2 ^ n ≤ c.size + 1` for any fan-in-2 circuit (in any basis) computing
+`mcspCostTarget DeMorgan.interpretation DeMorgan.binaryCost n s`, provided this predicate is
+non-constant (`hne`). -/
+theorem mcspCostTarget_deMorgan_size_lower_bound {σ : Signature}
+    {interpretation : Interpretation σ Bool} {n s : Nat}
+    {tt₀ tt₁ : Fin (2 ^ n) → Bool}
+    (hne : mcspCostScalar DeMorgan.interpretation DeMorgan.binaryCost n s tt₀ ≠
+      mcspCostScalar DeMorgan.interpretation DeMorgan.binaryCost n s tt₁)
+    (c : Circuit σ (2 ^ n) 1) (hfan : c.FanInAtMost 2)
+    (hcomp : c.ComputesWith interpretation
+      (mcspCostTarget DeMorgan.interpretation DeMorgan.binaryCost n s)) :
+    2 ^ n ≤ c.size + 1 := by
+  have hcard : c.inputSupport.card = 2 ^ n := by
+    rw [mcspCostTarget_deMorgan_inputSupport_eq_univ hne hcomp, Finset.card_univ,
+      Fintype.card_fin]
+  have hbound : c.inputSupport.card ≤ 1 + (2 - 1) * c.size := c.card_inputSupport_le_size hfan
+  omega
 
 /-- Whenever `1 ≤ s` and `mcspScalar Binary.interpretation n s` is non-constant,
 every truth-table coordinate `i : Fin (2 ^ n)` is essential. -/
@@ -709,33 +489,35 @@ theorem mcspScalar_binary_essentialAt {n s : Nat} (hs : 1 ≤ s)
   essentialAt_all_of_tableTranslate_invariant
     (fun a tt => mcspScalar_binary_comp_tableTranslate hs a tt) hne i
 
-/-- Unconditional `2 ^ n ≤ 2 * c.size` lower bound for any fan-in-2 circuit computing
-non-constant `mcspTarget Binary.interpretation n s` (`1 ≤ n`, `1 ≤ s`). -/
+/-- Any circuit (in any basis) computing `mcspTarget Binary.interpretation n s` (`1 ≤ s`),
+provided this predicate is non-constant, must include every truth-table coordinate in its
+`inputSupport`. -/
+theorem mcspTarget_binary_inputSupport_eq_univ {σ : Signature}
+    {interpretation : Interpretation σ Bool} {n s : Nat} (hs : 1 ≤ s)
+    {tt₀ tt₁ : Fin (2 ^ n) → Bool}
+    (hne : mcspScalar Binary.interpretation n s tt₀ ≠
+      mcspScalar Binary.interpretation n s tt₁)
+    {c : Circuit σ (2 ^ n) 1}
+    (hcomp : c.ComputesWith interpretation (mcspTarget Binary.interpretation n s)) :
+    c.inputSupport = Finset.univ :=
+  inputSupport_eq_univ_of_forall_essentialAt (fun _ => rfl)
+    (mcspScalar_binary_essentialAt hs hne) hcomp
+
+/-- `2 ^ n ≤ c.size + 1` for any fan-in-2 circuit (in any basis) computing
+`mcspTarget Binary.interpretation n s` (`1 ≤ s`), provided this predicate is non-constant
+(`hne`). -/
 theorem mcspTarget_binary_size_lower_bound {σ : Signature}
-    {interpretation : Interpretation σ Bool} {n s : Nat} (hn : 1 ≤ n) (hs : 1 ≤ s)
+    {interpretation : Interpretation σ Bool} {n s : Nat} (hs : 1 ≤ s)
     {tt₀ tt₁ : Fin (2 ^ n) → Bool}
     (hne : mcspScalar Binary.interpretation n s tt₀ ≠
       mcspScalar Binary.interpretation n s tt₁)
     (c : Circuit σ (2 ^ n) 1) (hfan : c.FanInAtMost 2)
     (hcomp : c.ComputesWith interpretation (mcspTarget Binary.interpretation n s)) :
-    2 ^ n ≤ 2 * c.size := by
-  have huniv : c.inputSupport = Finset.univ := by
-    ext i
-    simp only [Finset.mem_univ, iff_true]
-    have hess_scalar := mcspScalar_binary_essentialAt hs hne i
-    have hess_target : EssentialAt (mcspTarget Binary.interpretation n s) i := by
-      obtain ⟨left, right, hagree, hdiff⟩ := hess_scalar
-      refine ⟨left, right, hagree, fun heq => hdiff (congrFun heq 0)⟩
-    exact hess_target.mem_support hcomp.dependsOnlyOn
+    2 ^ n ≤ c.size + 1 := by
   have hcard : c.inputSupport.card = 2 ^ n := by
-    rw [huniv, Finset.card_univ, Fintype.card_fin]
-  have htwo : 2 ≤ c.inputSupport.card := by
-    rw [hcard]
-    calc
-      2 = 2 ^ 1 := rfl
-      _ ≤ 2 ^ n := Nat.pow_le_pow_right (by omega) hn
-  calc
-    2 ^ n = c.inputSupport.card := hcard.symm
-    _ ≤ 2 * c.size := card_inputSupport_le_two_mul_size c hfan htwo
+    rw [mcspTarget_binary_inputSupport_eq_univ hs hne hcomp, Finset.card_univ,
+      Fintype.card_fin]
+  have hbound : c.inputSupport.card ≤ 1 + (2 - 1) * c.size := c.card_inputSupport_le_size hfan
+  omega
 
 end Algebraic.MCSP

@@ -43,14 +43,32 @@ This module proves **Foundational Lemma B (Exact-Complexity Subcube Repetition)*
    `(exactCostSet ... n s).card ≤ 2 ^ ((forward c.program S).card + (backward c.program S).card)`.
 3. **Khrapchenko formula and bounded-sharing De Morgan circuit lower bounds**:
    Every diagonal truth table `pairTruthTable tt tt` (`tt ∈ exactCostSet ... n s`, `1 ≤ s`) is a
-   `true`-input of `mcspCostScalar ... (n + 1) s` with full sensitivity `2 ^ (n + 1)`, yielding
-   Khrapchenko lower bounds for De Morgan formulas and bounded-sharing De Morgan circuits.
+   `true`-input of `mcspCostScalar ... (n + 1) s` with full sensitivity `2 ^ (n + 1)`, so every
+   Khrapchenko measure bound `M` satisfies `2 ^ (n + 1) ≤ M`. This yields
+   `2 ^ (n + 1) ≤ F.leaves` for De Morgan formulas and
+   `2 ^ (n + 1) ≤ (k + 1) * (c.cost DeMorgan.binaryCost + k + 1)` for De Morgan circuits with at
+   most `k` shared gates.
 4. **Nechiporuk subfunction and formula lower bounds**:
-   On any block `Y` contained in the left half (or right half) of `Fin (2 ^ (n + 1))`, distinct
-   restrictions of truth tables in `exactCostSet ... n s` to `Y` induce distinct point-indicator
-   subfunctions, yielding
-   `(exactCostSet ... n s).card ≤ 2 ^ (2 ^ n - Y.card) * (Nechiporuk.subfunctions ... Y).card`
-   and the corresponding `Binary.Formula` leaf lower bounds.
+   For any `Y₀ : Finset (Fin (2 ^ n))`, embedded into the left half of `Fin (2 ^ (n + 1))` as
+   `leftBlock Y₀`, distinct restrictions `restrictTo Y₀ tt` of truth tables
+   `tt ∈ exactCostSet ... n s` induce distinct subfunctions of `mcspCostScalar ... (n + 1) s` on
+   `leftBlock Y₀`:
+   `((exactCostSet ... n s).image (restrictTo Y₀)).card ≤
+     (Nechiporuk.subfunctions ... (leftBlock Y₀)).card`.
+   Taking `Y₀ = Finset.univ` gives
+   `(exactCostSet ... n s).card ≤ (Nechiporuk.subfunctions ... (leftBlock Finset.univ)).card`.
+   Combined with `Nechiporuk.card_subfunctions_le`, these give the corresponding
+   `Binary.Formula` leaf lower bounds `... ≤ 2 * 16 ^ F.leavesIn (leftBlock Y₀)`.
+
+All results above hold for every `s ≥ 1` such that some truth table has exact
+`DeMorgan.binaryCost` complexity `s` (hypothesis `htt` or a nonempty `exactCostSet`);
+`Complexitylib.Algebraic.LowerBound.MCSP.NonVacuity` exhibits such a table for `s = 1`.
+
+The resulting lower bounds are modest: writing `N = 2 ^ (n + 1)` for the number of MCSP inputs,
+the Khrapchenko consequences give `N ≤ F.leaves` (and the analogous linear bound with sharing),
+since the sensitivity argument uses a single `true`-input. The Nechiporuk consequences are also at
+most linear in `N`, because `(exactCostSet ... n s).card ≤ 2 ^ (2 ^ n) = 2 ^ (N / 2)`, so the
+bound on `F.leavesIn (leftBlock Finset.univ)` is at most about `N / 8`.
 -/
 
 @[expose] public section
@@ -61,6 +79,7 @@ open scoped BigOperators
 
 /-! ## Subcube repetition and `DeMorgan.binaryCost` gate elimination -/
 
+/-- Fixing coordinate `0 : Fin (n + 1)` to `b` sends `y : Fin n → Bool` to `Fin.cons b y`. -/
 @[simp]
 theorem fix_zero_apply {n : Nat} (b : Bool) (y : Fin n → Bool) :
     (InputSubstitution.fix (0 : Fin (n + 1)) b).apply y = Fin.cons b y := by
@@ -69,12 +88,14 @@ theorem fix_zero_apply {n : Nat} (b : Bool) (y : Fin n → Bool) :
   | zero => simp
   | succ j => exact InputSubstitution.fix_succAbove 0 b y j
 
+/-- Fixing the leading bit of `muxTarget u₀ u₁` to `false` recovers `u₀`. -/
 @[simp]
 theorem muxTarget_substitute_fix_false {n : Nat} (u₀ u₁ : Target Bool n 1) :
     (muxTarget u₀ u₁).substitute (InputSubstitution.fix 0 false) = u₀ := by
   funext y o
   simp
 
+/-- Fixing the leading bit of `muxTarget u₀ u₁` to `true` recovers `u₁`. -/
 @[simp]
 theorem muxTarget_substitute_fix_true {n : Nat} (u₀ u₁ : Target Bool n 1) :
     (muxTarget u₀ u₁).substitute (InputSubstitution.fix 0 true) = u₁ := by
@@ -96,42 +117,49 @@ theorem costComplexity_muxTarget_self_le {n : Nat} (u : Target Bool n 1) :
   have hle := (c.mapInputs Fin.succ).costComplexity_le DeMorgan.binaryCost hcomp
   simpa using hle
 
+/-- Restricting coordinate `0` of a De Morgan circuit computing `muxTarget u₀ u₁` to `b` yields a
+circuit computing the corresponding branch `cond b u₁ u₀`. -/
+theorem restrictCircuit_computes_muxTarget {n : Nat} {u₀ u₁ : Target Bool n 1}
+    {c : Circuit DeMorgan.signature (n + 1) 1}
+    (hc : c.ComputesWith DeMorgan.interpretation (muxTarget u₀ u₁)) (b : Bool) :
+    (DeMorgan.restrictCircuit c 0 b).result.ComputesWith DeMorgan.interpretation
+      (cond b u₁ u₀) := by
+  intro y
+  funext o
+  rw [(DeMorgan.restrictCircuit c 0 b).eval_eq y, hc ((InputSubstitution.fix 0 b).apply y),
+    fix_zero_apply]
+  cases b <;> simp
+
+/-- Restricting coordinate `0` to `b` shows
+`costComplexity (cond b u₁ u₀) ≤ costComplexity (muxTarget u₀ u₁)`. -/
+theorem costComplexity_le_muxTarget {n : Nat} (u₀ u₁ : Target Bool n 1) (b : Bool) :
+    Circuit.costComplexity DeMorgan.interpretation DeMorgan.binaryCost (cond b u₁ u₀) ≤
+      Circuit.costComplexity DeMorgan.interpretation DeMorgan.binaryCost (muxTarget u₀ u₁) := by
+  apply Circuit.le_costComplexity
+  intro c hc
+  let rest := DeMorgan.restrictCircuit c 0 b
+  have hcost : rest.result.cost DeMorgan.binaryCost ≤ c.cost DeMorgan.binaryCost := by
+    have := rest.cost_eq
+    omega
+  exact (rest.result.costComplexity_le DeMorgan.binaryCost
+    (restrictCircuit_computes_muxTarget hc b)).trans (by exact_mod_cast hcost)
+
 /-- Restricting coordinate `0` to `false` shows
 `costComplexity u₀ ≤ costComplexity (muxTarget u₀ u₁)`. -/
 theorem costComplexity_le_muxTarget_left {n : Nat} (u₀ u₁ : Target Bool n 1) :
     Circuit.costComplexity DeMorgan.interpretation DeMorgan.binaryCost u₀ ≤
-      Circuit.costComplexity DeMorgan.interpretation DeMorgan.binaryCost (muxTarget u₀ u₁) := by
-  apply Circuit.le_costComplexity
-  intro c hc
-  let rest := DeMorgan.restrictCircuit c 0 false
-  have hcomp : rest.result.ComputesWith DeMorgan.interpretation u₀ := by
-    intro y
-    funext o
-    rw [rest.eval_eq y, hc ((InputSubstitution.fix 0 false).apply y), fix_zero_apply,
-      muxTarget_cons_false]
-  have hcost : rest.result.cost DeMorgan.binaryCost ≤ c.cost DeMorgan.binaryCost := by
-    have := rest.cost_eq
-    omega
-  exact (rest.result.costComplexity_le DeMorgan.binaryCost hcomp).trans (by exact_mod_cast hcost)
+      Circuit.costComplexity DeMorgan.interpretation DeMorgan.binaryCost (muxTarget u₀ u₁) :=
+  costComplexity_le_muxTarget u₀ u₁ false
 
 /-- Restricting coordinate `0` to `true` shows
 `costComplexity u₁ ≤ costComplexity (muxTarget u₀ u₁)`. -/
 theorem costComplexity_le_muxTarget_right {n : Nat} (u₀ u₁ : Target Bool n 1) :
     Circuit.costComplexity DeMorgan.interpretation DeMorgan.binaryCost u₁ ≤
-      Circuit.costComplexity DeMorgan.interpretation DeMorgan.binaryCost (muxTarget u₀ u₁) := by
-  apply Circuit.le_costComplexity
-  intro c hc
-  let rest := DeMorgan.restrictCircuit c 0 true
-  have hcomp : rest.result.ComputesWith DeMorgan.interpretation u₁ := by
-    intro y
-    funext o
-    rw [rest.eval_eq y, hc ((InputSubstitution.fix 0 true).apply y), fix_zero_apply,
-      muxTarget_cons_true]
-  have hcost : rest.result.cost DeMorgan.binaryCost ≤ c.cost DeMorgan.binaryCost := by
-    have := rest.cost_eq
-    omega
-  exact (rest.result.costComplexity_le DeMorgan.binaryCost hcomp).trans (by exact_mod_cast hcost)
+      Circuit.costComplexity DeMorgan.interpretation DeMorgan.binaryCost (muxTarget u₀ u₁) :=
+  costComplexity_le_muxTarget u₀ u₁ true
 
+/-- **Subcube repetition**: repeating a target on both halves of the `(n + 1)`-cube preserves its
+`DeMorgan.binaryCost` complexity exactly. -/
 @[simp]
 theorem costComplexity_muxTarget_self {n : Nat} (u : Target Bool n 1) :
     Circuit.costComplexity DeMorgan.interpretation DeMorgan.binaryCost (muxTarget u u) =
@@ -253,37 +281,22 @@ theorem costComplexity_add_one_le_cost_of_computes_muxTarget {n : Nat}
           intro b
           exact Finset.card_pos.mpr
             ⟨first, DeMorgan.restrictProgram_deleted_of_readsInput c.program 0 b hreads⟩
-        constructor
-        · let rest₀ := DeMorgan.restrictCircuit c 0 false
-          have hcomp₀ : rest₀.result.ComputesWith DeMorgan.interpretation u₀ := by
-            intro z
-            funext o
-            rw [rest₀.eval_eq z, hc ((InputSubstitution.fix 0 false).apply z), fix_zero_apply,
-              muxTarget_cons_false]
-          have hcost₀ : rest₀.result.cost DeMorgan.binaryCost + 1 ≤ c.cost DeMorgan.binaryCost := by
-            have hceq := rest₀.cost_eq
-            have hd0 : 1 ≤ rest₀.deleted.card := hdel false
+        have hstep : ∀ b : Bool,
+            Circuit.costComplexity DeMorgan.interpretation DeMorgan.binaryCost (cond b u₁ u₀) + 1 ≤
+              (c.cost DeMorgan.binaryCost : ℕ∞) := by
+          intro b
+          let rest := DeMorgan.restrictCircuit c 0 b
+          have hcost : rest.result.cost DeMorgan.binaryCost + 1 ≤ c.cost DeMorgan.binaryCost := by
+            have hceq := rest.cost_eq
+            have hd : 1 ≤ rest.deleted.card := hdel b
             omega
           calc
-            Circuit.costComplexity DeMorgan.interpretation DeMorgan.binaryCost u₀ + 1
-                ≤ (rest₀.result.cost DeMorgan.binaryCost : ℕ∞) + 1 :=
-              add_le_add_left (rest₀.result.costComplexity_le DeMorgan.binaryCost hcomp₀) 1
-            _ ≤ (c.cost DeMorgan.binaryCost : ℕ∞) := by exact_mod_cast hcost₀
-        · let rest₁ := DeMorgan.restrictCircuit c 0 true
-          have hcomp₁ : rest₁.result.ComputesWith DeMorgan.interpretation u₁ := by
-            intro z
-            funext o
-            rw [rest₁.eval_eq z, hc ((InputSubstitution.fix 0 true).apply z), fix_zero_apply,
-              muxTarget_cons_true]
-          have hcost₁ : rest₁.result.cost DeMorgan.binaryCost + 1 ≤ c.cost DeMorgan.binaryCost := by
-            have hceq := rest₁.cost_eq
-            have hd1 : 1 ≤ rest₁.deleted.card := hdel true
-            omega
-          calc
-            Circuit.costComplexity DeMorgan.interpretation DeMorgan.binaryCost u₁ + 1
-                ≤ (rest₁.result.cost DeMorgan.binaryCost : ℕ∞) + 1 :=
-              add_le_add_left (rest₁.result.costComplexity_le DeMorgan.binaryCost hcomp₁) 1
-            _ ≤ (c.cost DeMorgan.binaryCost : ℕ∞) := by exact_mod_cast hcost₁
+            Circuit.costComplexity DeMorgan.interpretation DeMorgan.binaryCost (cond b u₁ u₀) + 1
+                ≤ (rest.result.cost DeMorgan.binaryCost : ℕ∞) + 1 :=
+              add_le_add_left (rest.result.costComplexity_le DeMorgan.binaryCost
+                (restrictCircuit_computes_muxTarget hc b)) 1
+            _ ≤ (c.cost DeMorgan.binaryCost : ℕ∞) := by exact_mod_cast hcost
+        exact ⟨hstep false, hstep true⟩
 
 /-- If `u₀ ≠ u₁` and at least one has positive `DeMorgan.binaryCost` complexity, then
 `muxTarget u₀ u₁` has `DeMorgan.binaryCost` complexity strictly greater than both `u₀` and `u₁`. -/
@@ -523,11 +536,11 @@ theorem sensitiveCoordinates_mcsp_pairTruthTable_eq_univ {n s : Nat} (hs : 1 ≤
     have := (mcspCostScalar_pairTruthTable_right_eq_true_iff hs htt _).mp heq
     exact flip_ne_self tt _ this
 
-/-- **Khrapchenko bound for MCSP**: Whenever `1 ≤ s` and `exactCostSet ... n s` is nonempty,
-any Khrapchenko measure bound `M` for `mcspCostScalar ... (n + 1) s` satisfies
-`(2 ^ (n + 1) * (exactCostSet ... n s).card) ^ 2 ≤
-  M * (exactCostSet ... n s).card * 2 ^ (2 ^ (n + 1))`
-and in particular `2 ^ (n + 1) ≤ M`. -/
+/-- **Khrapchenko bound for MCSP**: Whenever `1 ≤ s` and some truth table `tt` has exact
+`DeMorgan.binaryCost` complexity `s`, any Khrapchenko measure bound `M` for
+`mcspCostScalar ... (n + 1) s` satisfies `2 ^ (n + 1) ≤ M`. The proof applies the Khrapchenko
+inequality to the single `true`-input `pairTruthTable tt tt` and its `2 ^ (n + 1)` one-bit flips,
+so the bound is linear in the number `2 ^ (n + 1)` of inputs. -/
 theorem khrapchenkoBound_mcsp_lower_bound {n s M : Nat} (hs : 1 ≤ s)
     {tt : Fin (2 ^ n) → Bool}
     (htt : tt ∈ exactCostSet DeMorgan.interpretation DeMorgan.binaryCost n s)

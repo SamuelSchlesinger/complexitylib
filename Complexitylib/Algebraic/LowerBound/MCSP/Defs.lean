@@ -25,7 +25,20 @@ functions on truth tables of length `2 ^ n`.
 * `mcspCostScalar` / `mcspCostTarget`: operation-cost MCSP predicate (used in particular with
   `DeMorgan.binaryCost` where NOT gates are free).
 * `yesSet`, `costYesSet`, and `exactCostSet`: finite sets of truth tables with complexity `≤ s`
-  or `= s`, together with Shannon and Lupanov/sharp counting upper bounds.
+  or `= s`. For gate complexity, `|yesSet|` is bounded above by the ordered and sharp
+  Shannon-style circuit-counting budgets (`card_yesSet_le_orderedBudget`,
+  `card_yesSet_le_sharpBudget`); no counting bounds are given for `costYesSet` or `exactCostSet`.
+
+## Relation to `Complexity.MCSP`
+
+`Complexity.MCSP` (`Complexitylib/Metacomplexity/MCSP/Defs.lean`) is the language-level problem:
+encoded instances carrying an arity, a truth table, and a threshold, decided with respect to
+`Basis.andOr2` circuit size. The definitions here are the algebraic-circuit-model variant: for
+fixed `n` and `s`, MCSP is a Boolean function on `2 ^ n` truth-table bits, parametrized by an
+arbitrary basis interpretation and operation cost. The truth-table indexing also differs:
+`inputEquiv` is big-endian (`x 0` is the most significant bit, selecting the lower or upper half),
+whereas `Complexity.MCSP.Instance.inputIndex` is little-endian (variable `j` is bit `j` of the
+index).
 -/
 
 @[expose] public section
@@ -97,22 +110,26 @@ def inputEquiv : (n : Nat) → (Fin n → Bool) ≃ Fin (2 ^ n)
           dsimp only
           omega }
 
+/-- Inputs with leading bit `false` index the lower half of the truth table. -/
 @[simp]
 theorem inputEquiv_cons_false {n : Nat} (y : Fin n → Bool) :
     (inputEquiv (n + 1) (Fin.cons false y)).val = (inputEquiv n y).val := by
   simp [inputEquiv]
 
+/-- Inputs with leading bit `true` index the upper half of the truth table. -/
 @[simp]
 theorem inputEquiv_cons_true {n : Nat} (y : Fin n → Bool) :
     (inputEquiv (n + 1) (Fin.cons true y)).val = 2 ^ n + (inputEquiv n y).val := by
   simp [inputEquiv]
 
+/-- Lower-half indices decode to inputs with leading bit `false`. -/
 theorem inputEquiv_symm_lt {n : Nat} {i : Fin (2 ^ (n + 1))} (h : i.val < 2 ^ n) :
     (inputEquiv (n + 1)).symm i = Fin.cons false ((inputEquiv n).symm ⟨i.val, h⟩) := by
   conv_lhs => unfold inputEquiv
   dsimp only [Equiv.coe_fn_symm_mk]
   simp only [h, ↓reduceDIte]
 
+/-- Upper-half indices decode to inputs with leading bit `true`. -/
 theorem inputEquiv_symm_ge {n : Nat} {i : Fin (2 ^ (n + 1))} (h : ¬ i.val < 2 ^ n) :
     (inputEquiv (n + 1)).symm i =
       Fin.cons true ((inputEquiv n).symm ⟨i.val - 2 ^ n, by
@@ -127,11 +144,13 @@ theorem inputEquiv_symm_ge {n : Nat} {i : Fin (2 ^ (n + 1))} (h : ¬ i.val < 2 ^
 def truthTableEquiv (n : Nat) : (Fin (2 ^ n) → Bool) ≃ ScalarFunction Bool n :=
   Equiv.arrowCongr (inputEquiv n).symm (Equiv.refl Bool)
 
+/-- Evaluating the function of a truth table reads the entry at the input's index. -/
 @[simp]
 theorem truthTableEquiv_apply {n : Nat} (tt : Fin (2 ^ n) → Bool) (x : Fin n → Bool) :
     truthTableEquiv n tt x = tt (inputEquiv n x) :=
   rfl
 
+/-- The truth table of a function lists its value at each decoded index. -/
 @[simp]
 theorem truthTableEquiv_symm_apply {n : Nat} (f : ScalarFunction Bool n) (i : Fin (2 ^ n)) :
     (truthTableEquiv n).symm f i = f ((inputEquiv n).symm i) :=
@@ -158,12 +177,14 @@ def truthTableTargetEquiv (n : Nat) : (Fin (2 ^ n) → Bool) ≃ Target Bool n 1
     rw [Subsingleton.elim o 0]
     simp
 
+/-- Evaluating the target of a truth table reads the entry at the input's index. -/
 @[simp]
 theorem truthTableTargetEquiv_apply {n : Nat} (tt : Fin (2 ^ n) → Bool)
     (x : Fin n → Bool) (o : Fin 1) :
     truthTableTargetEquiv n tt x o = tt (inputEquiv n x) :=
   rfl
 
+/-- The truth table of a target lists its value at each decoded index. -/
 @[simp]
 theorem truthTableTargetEquiv_symm_apply {n : Nat} (target : Target Bool n 1)
     (i : Fin (2 ^ n)) :
@@ -174,12 +195,14 @@ theorem truthTableTargetEquiv_symm_apply {n : Nat} (target : Target Bool n 1)
 def muxTarget {n : Nat} (u₀ u₁ : Target Bool n 1) : Target Bool (n + 1) 1 :=
   fun x o => if x 0 then u₁ (Fin.tail x) o else u₀ (Fin.tail x) o
 
+/-- On the `x 0 = false` subcube, `muxTarget u₀ u₁` agrees with `u₀`. -/
 @[simp]
 theorem muxTarget_cons_false {n : Nat} (u₀ u₁ : Target Bool n 1)
     (y : Fin n → Bool) (o : Fin 1) :
     muxTarget u₀ u₁ (Fin.cons false y) o = u₀ y o := by
   simp [muxTarget]
 
+/-- On the `x 0 = true` subcube, `muxTarget u₀ u₁` agrees with `u₁`. -/
 @[simp]
 theorem muxTarget_cons_true {n : Nat} (u₀ u₁ : Target Bool n 1)
     (y : Fin n → Bool) (o : Fin 1) :
@@ -211,12 +234,14 @@ def rightHalf {n : Nat} (tt : Fin (2 ^ (n + 1)) → Bool) : Fin (2 ^ n) → Bool
     have := two_pow_succ_eq_add n
     omega⟩
 
+/-- The lower half of `pairTruthTable tt₀ tt₁` is `tt₀`. -/
 @[simp]
 theorem leftHalf_pairTruthTable {n : Nat} (tt₀ tt₁ : Fin (2 ^ n) → Bool) :
     leftHalf (pairTruthTable tt₀ tt₁) = tt₀ := by
   funext i
   simp [leftHalf, pairTruthTable, i.isLt]
 
+/-- The upper half of `pairTruthTable tt₀ tt₁` is `tt₁`. -/
 @[simp]
 theorem rightHalf_pairTruthTable {n : Nat} (tt₀ tt₁ : Fin (2 ^ n) → Bool) :
     rightHalf (pairTruthTable tt₀ tt₁) = tt₁ := by
@@ -224,6 +249,7 @@ theorem rightHalf_pairTruthTable {n : Nat} (tt₀ tt₁ : Fin (2 ^ n) → Bool) 
   have hlt : ¬ (2 ^ n + i.val < 2 ^ n) := by omega
   simp [rightHalf, pairTruthTable, hlt]
 
+/-- Every `2 ^ (n + 1)`-bit truth table is the pairing of its two halves. -/
 @[simp]
 theorem pairTruthTable_leftHalf_rightHalf {n : Nat} (tt : Fin (2 ^ (n + 1)) → Bool) :
     pairTruthTable (leftHalf tt) (rightHalf tt) = tt := by
@@ -236,11 +262,13 @@ theorem pairTruthTable_leftHalf_rightHalf {n : Nat} (tt : Fin (2 ^ (n + 1)) → 
     dsimp only
     omega
 
+/-- `pairTruthTable` is injective in its first (lower-half) argument. -/
 theorem pairTruthTable_injective_left {n : Nat} {tt₀ tt₀' tt₁ : Fin (2 ^ n) → Bool}
     (h : pairTruthTable tt₀ tt₁ = pairTruthTable tt₀' tt₁) : tt₀ = tt₀' := by
   have := congrArg leftHalf h
   simpa using this
 
+/-- `pairTruthTable` is injective in its second (upper-half) argument. -/
 theorem pairTruthTable_injective_right {n : Nat} {tt₀ tt₁ tt₁' : Fin (2 ^ n) → Bool}
     (h : pairTruthTable tt₀ tt₁ = pairTruthTable tt₀ tt₁') : tt₁ = tt₁' := by
   have := congrArg rightHalf h
@@ -323,6 +351,7 @@ noncomputable def mcspTarget {σ : Signature} (interpretation : Interpretation �
     (n s : Nat) : Target Bool (2 ^ n) 1 :=
   fun tt _ => mcspScalar interpretation n s tt
 
+/-- `mcspScalar` accepts exactly the truth tables of gate complexity at most `s`. -/
 @[simp]
 theorem mcspScalar_eq_true_iff {σ : Signature} (interpretation : Interpretation σ Bool)
     (n s : Nat) (tt : Fin (2 ^ n) → Bool) :
@@ -331,6 +360,7 @@ theorem mcspScalar_eq_true_iff {σ : Signature} (interpretation : Interpretation
   classical
   simp [mcspScalar]
 
+/-- `mcspScalar` rejects exactly the truth tables of gate complexity above `s`. -/
 @[simp]
 theorem mcspScalar_eq_false_iff {σ : Signature} (interpretation : Interpretation σ Bool)
     (n s : Nat) (tt : Fin (2 ^ n) → Bool) :
@@ -351,6 +381,7 @@ noncomputable def mcspCostTarget {σ : Signature} (interpretation : Interpretati
     (cost : OperationCost σ) (n s : Nat) : Target Bool (2 ^ n) 1 :=
   fun tt _ => mcspCostScalar interpretation cost n s tt
 
+/-- `mcspCostScalar` accepts exactly the truth tables of cost complexity at most `s`. -/
 @[simp]
 theorem mcspCostScalar_eq_true_iff {σ : Signature} (interpretation : Interpretation σ Bool)
     (cost : OperationCost σ) (n s : Nat) (tt : Fin (2 ^ n) → Bool) :
@@ -359,6 +390,7 @@ theorem mcspCostScalar_eq_true_iff {σ : Signature} (interpretation : Interpreta
   classical
   simp [mcspCostScalar]
 
+/-- `mcspCostScalar` rejects exactly the truth tables of cost complexity above `s`. -/
 @[simp]
 theorem mcspCostScalar_eq_false_iff {σ : Signature} (interpretation : Interpretation σ Bool)
     (cost : OperationCost σ) (n s : Nat) (tt : Fin (2 ^ n) → Bool) :
@@ -367,6 +399,7 @@ theorem mcspCostScalar_eq_false_iff {σ : Signature} (interpretation : Interpret
   classical
   simp [mcspCostScalar]
 
+/-- With unit operation cost, `mcspCostScalar` is gate-complexity `mcspScalar`. -/
 @[simp]
 theorem mcspCostScalar_unit {σ : Signature} (interpretation : Interpretation σ Bool)
     (n s : Nat) :
@@ -379,6 +412,7 @@ noncomputable def yesSet {σ : Signature} (interpretation : Interpretation σ Bo
   classical
   exact Finset.univ.filter fun tt => mcspScalar interpretation n s tt = true
 
+/-- Membership in `yesSet` is gate complexity at most `s`. -/
 @[simp]
 theorem mem_yesSet_iff {σ : Signature} (interpretation : Interpretation σ Bool)
     (n s : Nat) (tt : Fin (2 ^ n) → Bool) :
@@ -393,6 +427,7 @@ noncomputable def costYesSet {σ : Signature} (interpretation : Interpretation �
   classical
   exact Finset.univ.filter fun tt => mcspCostScalar interpretation cost n s tt = true
 
+/-- Membership in `costYesSet` is cost complexity at most `s`. -/
 @[simp]
 theorem mem_costYesSet_iff {σ : Signature} (interpretation : Interpretation σ Bool)
     (cost : OperationCost σ) (n s : Nat) (tt : Fin (2 ^ n) → Bool) :
@@ -408,6 +443,7 @@ noncomputable def exactCostSet {σ : Signature} (interpretation : Interpretation
   exact Finset.univ.filter fun tt =>
     Circuit.costComplexity interpretation cost (truthTableTargetEquiv n tt) = s
 
+/-- Membership in `exactCostSet` is cost complexity exactly `s`. -/
 @[simp]
 theorem mem_exactCostSet_iff {σ : Signature} (interpretation : Interpretation σ Bool)
     (cost : OperationCost σ) (n s : Nat) (tt : Fin (2 ^ n) → Bool) :
@@ -416,6 +452,7 @@ theorem mem_exactCostSet_iff {σ : Signature} (interpretation : Interpretation �
   classical
   simp [exactCostSet]
 
+/-- Truth tables of cost complexity exactly `s` are `yes` instances at threshold `s`. -/
 theorem exactCostSet_subset_costYesSet {σ : Signature} (interpretation : Interpretation σ Bool)
     (cost : OperationCost σ) (n s : Nat) :
     exactCostSet interpretation cost n s ⊆ costYesSet interpretation cost n s := by
