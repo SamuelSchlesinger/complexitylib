@@ -26,19 +26,19 @@ Several rely on the Gaussian layout coefficient `A = 2p ≈ 0.2807` of this corp
 | --- | --- | --- | --- |
 | B2 (any fan-in-2 basis), correlation with an explicit quadratic-form family | `2^{-Ω(n)}` below `(1 + 1/(2A))n ≈ 2.781n` gates | `2.5n` ([Chen–Kabanets, COCOON 2015](https://www2.cs.sfu.ca/~kabanets/papers/linsize-COCOON.pdf)), `2.6n` non-explicit (Golovnev–Kulikov–Smal–Tamaki, MFCS 2016) | Lean: `Complexity.Correlation.eventually_correlation_hardForm_le` |
 | De Morgan circuits with at most `k` gates of fan-out ≥ 2, parity | `n² ≤ (k+1)(size + k + 1)`, tight up to a constant | `L(f)/2^k` by unfolding | Lean: `Algebraic.KW.parity_sq_le_cost` and the `Sharing` modules |
-| Arbitrary fan-in-2 gates over a finite field (B2 over GF(2)), `n×n` matrix product | `(2 + 1/(4κ_E) − ε)n² ≈ 3.78n²` | about `2n²` | In progress |
-| Arithmetic circuits, `n×n` matrix product (all operations) | `≈ 4.227n²` | about `3.5n²` (Bläser's `5/2·n²` multiplications plus the outputs) | Paper |
-| Arithmetic circuits, product of two length-`n` polynomials | `≈ 5.5625n` | about `4n` (large fields), `5n` (small fields, Kaminski–Bshouty plus outputs) | In progress |
-| `(n, n/2)`-concentrators (edges) | `≈ 3.28n` | `2n − 2` (Pinsker, 1973) | In progress |
-| Hyperconcentrators (edges / fan-in-2 nodes) | `≈ 3.78N` / `≈ 2.78N` | `2N` (implied) | In progress |
-| Fan-in-2 linear circuits for the `N`-point DFT, any `N` (including the FFT matrix) | `≈ 2.78N` | none for composite `N` (Lokam 2009; [Ailon](https://arxiv.org/abs/1403.1307)) | In progress |
-| `ε`-halver comparator networks | `(1 + κ(1−2ε)/2 − δ)n` | `n − 1` | Paper |
-| Signed unbounded AND/OR/XOR, Gold map `x³` (odd `n`), all outputs | `≈ 1.7716n − 0.86` total gates; `(3n−3)/2` AND/OR gates | (new target; inversion `1.5659n` in the same model) | In progress |
-| Unbounded-fan-in AND gates with XOR free, an explicit `(n,n)` map | `(3n−3)/2` (Gold), `2n − 1` (field multiplication, `2n` inputs) | rank bound `n` | In progress |
+| Arbitrary fan-in-2 gates over a finite field (B2 over GF(2)), `n×n` matrix product | `(2 + 1/(4κ_E) − ε)n² ≈ 3.78n²` | about `2n²` | Lean: `Algebraic.Cutwidth.MultiOutput.eventually_lt_size_of_matMul`, `eventually_lt_size_matMul_zmod_two` |
+| Arithmetic circuits, `n×n` matrix product (all operations) | `≈ 4.227n²` | about `3.5n²` (Bläser's `5/2·n²` multiplications plus the outputs) | In progress |
+| Arithmetic circuits, product of two length-`n` polynomials | `≈ 5.5625n` | about `4n` (large fields), `5n` (small fields, Kaminski–Bshouty plus outputs) | Lean: `Algebraic.Cutwidth.MultiOutput.eventually_lt_size_of_polyMul` (any field, via the jet cut lemma `MultiOutput.Taylor`) |
+| `(n, n/2)`-concentrators (edges) | `≈ 3.28n` (beats `2n − 2` once `m ≥ 0.22n`) | `2n − 2` (Pinsker, 1973) | Lean: `Algebraic.Cutwidth.Multigraph.Concentrator.eventually_le_card_edges_half` |
+| Hyperconcentrators (edges / fan-in-2 nodes) | `≈ 3.78N` / `≈ 2.78N` | `2N` (implied) | Lean: `Algebraic.Cutwidth.Multigraph.Hyperconcentrator.eventually_le_card_edges` |
+| Fan-in-2 linear circuits for the `N`-point DFT, any `N` (including the FFT matrix) | `≈ 2.78N` | none for composite `N` (Lokam 2009; [Ailon](https://arxiv.org/abs/1403.1307)) | Lean: `Algebraic.Cutwidth.MultiOutput.Linear.eventually_lt_size_fft` |
+| `ε`-halver comparator networks | `(1 + κ(1−2ε)/2 − δ)n` | `n − 1` | In progress |
+| Signed unbounded AND/OR/XOR, Gold map `x³` (odd `n`), all outputs | `≈ 1.7716n − 0.86` total gates; `(3n−3)/2` AND/OR gates | (new target; inversion `1.5659n` in the same model) | Lean: `Algebraic.Aggregate.Geometry.Gold.gateCoefficient_mul_sub_constantPenalty_le_size` |
+| Unbounded-fan-in AND gates with XOR free, an explicit `(n,n)` map | `(3n−3)/2` (Gold), `2n − 1` (field multiplication, `2n` inputs) | rank bound `n` | Lean: `Gold.three_mul_input_le_two_mul_conjunctionCount_add_three`, `Algebraic.Aggregate.Geometry.FieldMul.two_mul_input_le_conjunctionCount_add_one` |
 | Signed unbounded AND/OR/XOR, field inversion | `1.6954n − 1.11` (elementary), `1.7716n` with the Weil bound | `1.5659n` (this corpus) | Paper |
-| `{AND, OR, NOT}` circuits with at most `t` NOT gates, Boolean matrix product | `n⌊n/2^t⌋²` AND gates | trivial | In progress |
-| OR of `k`-CNFs (`Σ3^k`), affine or sumset dispersers (including this corpus's family) | `2^{(1/k − o(1))n}`; `2^{(μ_k/(k−1) − o(1))n}` with PPSZ trees (`2^{0.6137n}` at `k = 3`) | `2^{0.064n}` at `k = 3`, `2^{n/(10k)}` (Frankl–Gryaznov–Talebanfard, ITCS 2022) | Paper |
-| Threshold circuits, arbitrary depth and weights | `(1/2 − o(1))n` gates; `n − o(n)` for few input-direction switches; `2^{n−o(n)}` levels for multilevel threshold representations | `n/4` for inner product (Gröger–Turán; Roychowdhury–Orlitsky–Siu 1994) | Paper |
+| `{AND, OR, NOT}` circuits with at most `t` NOT gates, Boolean matrix product | `n⌊n/2^t⌋²` AND gates | trivial | Lean: `Algebraic.Monotone.MatrixProduct.NegationLimited.mul_div_sq_le_andCost` |
+| OR of `k`-CNFs (`Σ3^k`), affine or sumset dispersers (including this corpus's family) | `2^{(1/k − o(1))n}`; `2^{(μ_k/(k−1) − o(1))n}` with PPSZ trees (`2^{0.6137n}` at `k = 3`) | `2^{0.064n}` at `k = 3`, `2^{n/(10k)}` (Frankl–Gryaznov–Talebanfard, ITCS 2022) | In progress (`1/k` version); PPSZ version Paper |
+| Threshold circuits, arbitrary depth and weights | `(1/2 − o(1))n` gates; `n − o(n)` for few input-direction switches; `2^{n−o(n)}` levels for multilevel threshold representations | `n/4` for inner product (Gröger–Turán; Roychowdhury–Orlitsky–Siu 1994) | In progress |
 | Linear (parity-query) branching programs, Gold map | `T·(S+1) ≥ n(n−4)/8` | (no multi-output result found) | Paper |
 
 ### Notes on individual results
@@ -103,3 +103,61 @@ Several rely on the Gaussian layout coefficient `A = 2p ≈ 0.2807` of this corp
   of Nechiporuk are known; for multilective planar circuits a single separator argument is capped
   near `2n log₂ n`, and subfunction counting gives at most `O(n)` for an indirect-access function
   with `4.2n`-gate planar circuits.
+
+## The 3SUM algorithm: no transfer found
+
+Alman and Vassilevska Williams ([arXiv:2610.06783](https://arxiv.org/abs/2610.06783), October 2026)
+give truly subquadratic 3SUM and subcubic APSP through a thin, sparse matrix product: for an
+`N × D` by `D × N` product with `D ≤ N^{1/18}` and a set `W` of at most `N²/√D` wanted entries,
+`O(N²/D^{0.063})` operations. A lane read the paper for lower-bound ideas and found none:
+
+- **Algorithms to lower bounds.** Splitting `n` variables into three blocks turns one integer
+  quadratic into an exact-weight triangle problem with `2^{n/3}` vertices per part, so deciding
+  whether a single degree-two threshold function is satisfiable takes `2^{(1−0.00057)n}` time
+  (Paper; a short corollary, earlier savings were about `√n`). Every circuit class this reaches
+  already has satisfiability algorithms and lower bounds (Limaye–Srinivasan–Srinivasan, MFCS 2025;
+  Williams' ACC∘THR), and the open depth-two threshold targets need the top gate's value on every
+  assignment rather than a count over a third block.
+- **Sparse products.** Cut-rank methods, including the matrix-multiplication argument above, are
+  capped by the number of inputs, which the outputs exceed polynomially in the thin regime; an
+  `ω(|W|)` bound would give a superlinear bound for an explicit cubic polynomial by Baur–Strassen.
+- **Sanity test.** For fixed `W` the algorithm is a bilinear circuit with coefficients in
+  `{0, ±1}`, so any method proving `|W| · D^{0.44}` for sparse thin products in a model containing
+  such circuits is unsound. Nothing in this corpus is refuted.
+
+## Future work
+
+Concrete next steps left open by this sweep, roughly in order of expected payoff.
+
+- **Correlation in P.** The `2.781n` family is uniform only in `E^NP`. A polynomial-time version
+  needs explicit graphs whose bisection cut rank is `(1/2 − τ)n` with `τ < 0.06` (equivalently,
+  binary `[2m, m]` codes in which every `m` columns have rank `(1 − τ)m`); the best explicit
+  construction known has rank about `n/105`. Beyond `2.781n` needs several cuts or bias bounds
+  for rectangles of size between `2^{n/3}` and `2^{n/2}`.
+- **U2 past `5n`.** Links need a lower bound on co-straddling (joint events of four to six
+  Gaussian scores); merging each copy with one consumer and placing the block at its information
+  median gives a deterministic `≈ 4.68n` only. A dichotomy (cyclic, correlated regions already have
+  cheap cuts; tree-like regions admit tree-value link bounds) is unexplored.
+- **Matrix and polynomial multiplication.** For arithmetic matrix multiplication, the full jet
+  measure (Jacobian plus restricted Hessian rank) appears to reach `(1 − o(1))n²` on every chain
+  tried, which would give the `5.5625n²` ceiling of cut methods (Conjecture); an arbitrary-gate
+  analogue of the Jacobian bounds over finite fields is open. For polynomial multiplication the full
+  measure gives `1.5n` on the degree chain, suggesting about `7.3n` (Conjecture).
+- **Depth three.** The PPSZ-level bound `2^{(μ_k/(k−1) − o(1))n}` for dispersers needs localized
+  critical-clause trees and resolution closure; unbounded bottom fan-in remains open.
+- **Inversion and power maps.** The elementary fourth-moment route gives `1.6954n` for inversion in
+  the signed model; the Weil bound gives `1.7716n`; Ben-Sasson–Kopparty's subspace-polynomial
+  dispersers would give `1.8477n` for `x^{15}`; the Gold map's `n(n−4)/8` time–space tradeoff for
+  linear branching programs is unformalized.
+- **Multiplicative complexity.** If `MC(y·f) = MC(f) + 1` for the six-variable functions of
+  multiplicative complexity six, then an explicit family has `MC ≥ n`, beating `n − 1`. Exact
+  search gives `MC(GF(32) inversion) = 9`, above `2n − 3`.
+- **Threshold circuits.** Conjecture: with `t` input directions interleaved arbitrarily, at least
+  `n − 2k − O(t log t)` input-reading gates; it would interpolate between the `n/2` and `n` bounds.
+- **Shared gates.** The B2 version with `r` XOR gates (factor `1 + k + 2r`) is proved on paper.
+- **Negation-limited circuits.** Conjecture: `t` NOT gates save only `Θ(2^t n)` AND gates for
+  Boolean matrix product; restriction methods are capped at a factor four per NOT gate.
+- **Parked work.** A formula-restriction calculus and Subbotovskaya's shrinkage step (toward
+  Andreev's `n^{5/2−o(1)}`) sit on the local branch `wip/shrinkage`. The MOD3 freezing tradeoff of
+  the [MOD3 note](../larger-gates/mod3-barrier.md) needs a `GF(4)` analogue of the Razborov–Smolensky
+  counting that is now formalized over `ZMod 3`.
