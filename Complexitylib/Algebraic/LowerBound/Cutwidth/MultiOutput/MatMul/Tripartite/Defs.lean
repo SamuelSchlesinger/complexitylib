@@ -30,6 +30,13 @@ terminals of each kind as a set of index pairs: `a` holds the pairs `(i, j)` wit
   Hessian of `∑ Λ i k C i k` (`chargeJ`).
 * `heavyI a c`, `heavyJ a b`, `heavyK b c`: the *heavy* vertices, with at least `n` placed
   terminals; `heavyCount a b c` counts them.
+* `excessI a c i`, `deficitI a c i`: the excess `deg - n` and deficit `n - deg` of a vertex of
+  `I` relative to the threshold `n`.
+* `colSetIn a R j` and `complColSetIn a R j`: the rows `i ∈ R` with `A i j` placed, resp.
+  unplaced.
+* `probeIJ a b c I₀` and `twoSubsetProbeIJ a b c I₀ I₁`: exploratory sums mixing the `I` and `J`
+  charges along subsets of `I`. They are combinatorial quantities only; no rank-cut theorem
+  relates them to the signals crossing a split.
 * `mixedPairs X Y`: the pairs `(x, y)` with exactly one of `x ∈ X` and `y ∈ Y`.
 * `lightHeavy a b c`: the number of terminals with exactly one heavy endpoint.
 * `place t S`: the index pairs whose terminal wire `t p` lies in a set of wires `S`.
@@ -92,6 +99,54 @@ def heavyK (b c : Finset (Fin n × Fin n)) : Finset (Fin n) :=
 /-- The number of heavy vertices. -/
 def heavyCount (a b c : Finset (Fin n × Fin n)) : Nat :=
   (heavyI a c).card + (heavyJ a b).card + (heavyK b c).card
+
+/-- The excess `degI a c i - n` of `i ∈ I` over the threshold `n` (zero unless `i` is heavy). -/
+def excessI (a c : Finset (Fin n × Fin n)) (i : Fin n) : Nat :=
+  degI a c i - n
+
+/-- The deficit `n - degI a c i` of `i ∈ I` below the threshold `n` (zero if `i` is heavy). -/
+def deficitI (a c : Finset (Fin n × Fin n)) (i : Fin n) : Nat :=
+  n - degI a c i
+
+/-- The first coordinates in `R` paired with `j` in `a`: the placed terminals `A i j` with
+`i ∈ R`. -/
+def colSetIn (a : Finset (Fin n × Fin n)) (R : Finset (Fin n)) (j : Fin n) : Finset (Fin n) :=
+  (colSet a j).filter (· ∈ R)
+
+/-- The first coordinates in `R` not paired with `j` in `a`: the unplaced terminals `A i j` with
+`i ∈ R`. -/
+def complColSetIn (a : Finset (Fin n × Fin n)) (R : Finset (Fin n)) (j : Fin n) :
+    Finset (Fin n) :=
+  R.filter (· ∉ colSet a j)
+
+/-- An exploratory probe mixing the `I` and `J` charges along a subset `I₀` of `I`: the
+`I`-charge `minority n (degI a c i)` of the rows `i ∈ I₀`, plus, at each `j ∈ J`, the two summands
+of `minority n (degJ a b j) = min x (n - y) + min (n - x) y` (`minority_add_eq`, with
+`x = (colSet a j).card`, `y = (rowSet b j).card`) with the `A`-terminals restricted to the rows of
+`I₀ᶜ`. It interpolates between `chargeJ` (`I₀ = ∅`) and `chargeI` (`I₀ = univ`).
+
+This is a combinatorial quantity only: no theorem bounds the number of signals crossing a split
+below by it. -/
+def probeIJ (a b c : Finset (Fin n × Fin n)) (I₀ : Finset (Fin n)) : Nat :=
+  ∑ i ∈ I₀, minority n (degI a c i) +
+    ∑ j, (min (colSetIn a I₀ᶜ j).card (n - (rowSet b j).card) +
+      min (complColSetIn a I₀ᶜ j).card (rowSet b j).card)
+
+/-- A two-subset variant of `probeIJ`. At `i ∈ I`, `minority n (degI a c i)` is the sum of
+`min r (n - s)` and `min (n - r) s` (`minority_add_eq`, with `r = (rowSet a i).card`,
+`s = (rowSet c i).card`); here the first summand is counted over `I₀` and the second over `I₁`.
+At each `j ∈ J`, the two summands of `minority n (degJ a b j)` are counted with the
+`A`-terminals restricted to the rows of `I₀ᶜ` and of `I₁ᶜ` respectively. As for `probeIJ`, the
+arguments are the rows charged on the `I` side, and
+`twoSubsetProbeIJ a b c I₀ I₀ = probeIJ a b c I₀`.
+
+This is a combinatorial quantity only: no theorem bounds the number of signals crossing a split
+below by it. -/
+def twoSubsetProbeIJ (a b c : Finset (Fin n × Fin n)) (I₀ I₁ : Finset (Fin n)) : Nat :=
+  ∑ i ∈ I₀, min (rowSet a i).card (n - (rowSet c i).card) +
+    ∑ i ∈ I₁, min (n - (rowSet a i).card) (rowSet c i).card +
+    ∑ j, (min (colSetIn a I₀ᶜ j).card (n - (rowSet b j).card) +
+      min (complColSetIn a I₁ᶜ j).card (rowSet b j).card)
 
 /-- The pairs `(x, y)` with exactly one of `x ∈ X` and `y ∈ Y`. -/
 def mixedPairs (X Y : Finset (Fin n)) : Finset (Fin n × Fin n) :=
