@@ -185,6 +185,12 @@ function, with `⊤` for an unrealizable function. The natural-valued
   `(2/5) · 2^ℓ` whenever `(40ℓ)^{2d} ≤ n`, by approximation with low-degree
   functions over `ZMod 3`.
 
+* **Exponentially small correlation** (`Correlation.eventually_correlation_hardForm_le`):
+  fan-in-two circuits over any basis with at most `c n` gates of positive arity, for any
+  `c < 1 + π/(6 arccos((1 + 2√2)/4)) ≈ 2.78`, have correlation `2^{-Ω(n)}` with an explicit
+  family of bilinear forms over `GF(2)`, by Lindsey's lemma on the rectangles of the frontier
+  method.
+
 ## Module structure
 
 Public modules (definitions a reviewer should read):
@@ -297,8 +303,8 @@ Theorem modules (re-export definitions + main results):
 * `Complexitylib.Circuits.LowerBound` — gate elimination lower bound
 * `Complexitylib.Circuits.Frontier` — the frontier method: circuit lower bounds from
   graph layouts over any finite alphabet, basis, and fan-in
-* `Complexitylib.Circuits.Correlation` — correlation of circuits with quadratic forms over
-  `GF(2)` through rectangle classes
+* `Complexitylib.Circuits.Correlation` — exponentially small correlation of fan-in-two
+  circuits with fewer than `2.78 n` gates with explicit quadratic forms over `GF(2)`
 * `Complexitylib.Circuits.Schnorr` — Schnorr's XOR lower bound
 * `Complexitylib.Circuits.Smolensky` — the Razborov–Smolensky lower bound for
   `AC0[3]`

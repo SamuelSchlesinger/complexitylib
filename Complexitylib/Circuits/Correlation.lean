@@ -7,6 +7,8 @@ module
 
 public import Complexitylib.Circuits.Correlation.Defs
 public import Complexitylib.Circuits.Correlation.Internal.Asymptotics
+public import Complexitylib.Circuits.Correlation.Internal.Bipartite
+public import Complexitylib.Circuits.Correlation.Internal.Counting
 public import Complexitylib.Circuits.Frontier.Layouts
 import Mathlib.Tactic
 
@@ -14,14 +16,14 @@ import Mathlib.Tactic
 # Exponentially small correlation with quadratic forms
 
 Fan-in-two circuits over any basis with at most `c n` gates of positive arity, for any
-`c < c* = 1 + 1/(2A) ≈ 2.78125`, have correlation `2^{-Ω(n)}` with every family of quadratic
-forms over `GF(2)` whose bisection cut rank is `⌊n/2⌋ - o(n)`. Here `A = 2p ≈ 0.2807` is the
-Gaussian layout coefficient of the frontier method (`Frontier.layoutBound_gaussian`). The
-circuit model, the gate count (`Cslib.Circuits.Circuit.innerSize`), and the agreement measure
-are those of the frontier method's average-case theorem `Frontier.averageCase_abs`, so the
-bounds are directly comparable. The best previously published average-case bounds for the full
-binary basis are `2.5 n` (Chen–Kabanets, COCOON 2015, for an explicit affine extractor) and
-`2.6 n` (Golovnev–Kulikov–Smal–Tamaki, MFCS 2016, for non-explicit quadratic extractors).
+`c < c* = 1 + 1/(2A) ≈ 2.78125`, have correlation `2^{-Ω(n)}` with an explicit family of
+bilinear forms `xᵀ R y` over `GF(2)`. Here `A = 2p ≈ 0.2807` is the Gaussian layout coefficient
+of the frontier method (`Frontier.layoutBound_gaussian`). The circuit model, the gate count
+(`Cslib.Circuits.Circuit.innerSize`), and the agreement measure are those of the frontier
+method's average-case theorem `Frontier.averageCase_abs`, so the bounds are directly
+comparable. The best previously published average-case bounds for the full binary basis are
+`2.5 n` (Chen–Kabanets, COCOON 2015, for an explicit affine extractor) and `2.6 n`
+(Golovnev–Kulikov–Smal–Tamaki, MFCS 2016, for non-explicit quadratic extractors).
 
 ## The argument
 
@@ -43,6 +45,19 @@ If every set of `⌊n/2⌋` coordinates has cut rank at least `⌊n/2⌋ - τ n`
 `(c* - c)/(2L)` for a sublinear deficiency (`eventually_correlation_le_of_isLittleO`,
 `eventually_correlation_le_gaussian`).
 
+## The explicit family
+
+A matrix is submatrix-robust with deficiency `t` when every square block with `k` rows has rank
+at least `k - t`. Counting spanning sets of columns shows that for `t = 2 ⌊√m⌋ + 1` such an
+`m × m` matrix exists (`exists_submatrixRobust`). The family `hardForm n = xᵀ R y` uses a fixed
+such matrix `robustMatrix (⌊n/2⌋)`, chosen once and for all by `Classical.choose`; its
+bisection cut rank is at least `⌊n/2⌋ - O(√n)` (`half_le_cutRank_hardMatrix`). Taking instead
+the lexicographically first robust matrix makes the family computable in `E^NP`: whether some
+robust matrix extends a given prefix is one `NP` query of length `2^{O(n)}` (guess the matrix
+and check its fewer than `4^{n/2}` pairs of row and column sets), so the matrix is found bit by
+bit in time `2^{O(n)}`. This uniformity is a remark about the construction and is not
+formalized.
+
 ## Main results
 
 * `correlation_sq_mul_two_pow_cutRank_le`: correlation through rectangle classes.
@@ -50,6 +65,10 @@ If every set of `⌊n/2⌋` coordinates has cut rank at least `⌊n/2⌋ - τ n`
 * `eventually_correlation_le`, `eventually_correlation_le_of_isLittleO`,
   `eventually_correlation_le_gaussian`: correlation `2^{-γ n}` for every family of quadratic
   forms whose bisection cut rank is `⌊n/2⌋ - o(n)`.
+* `exists_submatrixRobust`: robust matrices exist, by exact counting.
+* `eventually_correlation_hardForm_le`: the headline bound for the explicit family.
+* `exists_eventually_correlation_hardForm_le`: below `2.77 n` gates, the correlation with the
+  explicit family is `2^{-γ n}` for a fixed `γ > 0`.
 -/
 
 @[expose] public section
@@ -194,5 +213,88 @@ theorem eventually_correlation_le_gaussian {c γ : ℝ} (hc : 1 / 2 ≤ c)
     mul_pos two_pos Gaussian.gaussianCoefficient_pos
   refine eventually_correlation_le_of_isLittleO hA layoutBound_gaussian hc ?_ Q e he hQ
   rwa [gaussian_rate_eq]
+
+/-! ### Robust matrices and the explicit family -/
+
+/-- **Submatrix-robust matrices exist.** For every `m` some `m × m` matrix over `GF(2)` has
+every square block with `k` rows of rank at least `k - (2 ⌊√m⌋ + 1)`. The proof counts, for each
+block, the matrices whose columns there are spanned by few of them. -/
+theorem exists_submatrixRobust (m : ℕ) :
+    ∃ R : Matrix (Fin m) (Fin m) (ZMod 2), SubmatrixRobust R (robustDeficiency m) :=
+  exists_submatrixRobust_of_lt (three_mul_lt_robustDeficiency_add_one_sq m)
+
+/-- A fixed submatrix-robust `m × m` matrix, chosen once and for all. -/
+noncomputable def robustMatrix (m : ℕ) : Matrix (Fin m) (Fin m) (ZMod 2) :=
+  Classical.choose (exists_submatrixRobust m)
+
+theorem robustMatrix_submatrixRobust (m : ℕ) :
+    SubmatrixRobust (robustMatrix m) (robustDeficiency m) :=
+  Classical.choose_spec (exists_submatrixRobust m)
+
+/-- **The explicit hard family**: on inputs of length `n`, the bilinear form `xᵀ R y` of the
+fixed robust matrix `R = robustMatrix ⌊n/2⌋`. -/
+noncomputable def hardForm (n : ℕ) : (Fin n → Bool) → Bool :=
+  bilinForm (robustMatrix (n / 2))
+
+theorem hardForm_eq_quadForm (n : ℕ) :
+    hardForm n = quadForm (bipartiteMatrix n (robustMatrix (n / 2))) :=
+  bilinForm_eq_quadForm _
+
+/-- **Bisection cut rank of the explicit family.** Every set of `⌊n/2⌋` coordinates has cut rank
+at least `⌊n/2⌋ - (2 (2 ⌊√⌊n/2⌋⌋ + 1) + 1)` in the matrix of the explicit bilinear form. -/
+theorem half_le_cutRank_hardMatrix (n : ℕ) {U : Set (Fin n)} (hU : U.ncard = n / 2) :
+    n / 2 ≤ cutRank (bipartiteMatrix n (robustMatrix (n / 2))) U +
+      (2 * robustDeficiency (n / 2) + 1) :=
+  half_le_cutRank_bipartiteMatrix (robustMatrix_submatrixRobust (n / 2)) hU
+
+/-- **Headline: exponentially small correlation with an explicit family below `2.78 n` gates.**
+For every `c ≥ 1/2` and every `γ < (c* - c)/(2L)`, with
+`c* = 1 + π/(6 arccos((1 + 2√2)/4)) ≈ 2.78125` and `L = 1 + π/(3 arccos((1 + 2√2)/4)) ≈ 4.5625`,
+for all large `n` every fan-in-two circuit over any basis with at most `c n` gates of positive
+arity has correlation at most `2^{-γ n}` with `hardForm n`. -/
+theorem eventually_correlation_hardForm_le {c γ : ℝ} (hc : 1 / 2 ≤ c)
+    (hγ : γ < (1 + Real.pi / (6 * Real.arccos ((1 + 2 * Real.sqrt 2) / 4)) - c) /
+      (2 * (1 + Real.pi / (3 * Real.arccos ((1 + 2 * Real.sqrt 2) / 4))))) :
+    ∀ᶠ n in atTop, ∀ (σ : Cslib.Circuits.Signature.{v})
+      (I : Cslib.Circuits.Interpretation σ Bool) (C : Cslib.Circuits.Circuit σ n 1),
+      C.FanInAtMost 2 → (C.innerSize : ℝ) ≤ c * n →
+        correlation (hardForm n) (fun x => C.eval I x 0) ≤ (2 : ℝ) ^ (-γ * n) := by
+  have H := eventually_correlation_le_gaussian hc hγ
+    (fun n => bipartiteMatrix n (robustMatrix (n / 2)))
+    (fun n => ((2 * robustDeficiency (n / 2) + 1 : ℕ) : ℝ))
+    isLittleO_two_mul_robustDeficiency_add_one
+    (Eventually.of_forall fun n U hU => by exact_mod_cast half_le_cutRank_hardMatrix n hU)
+  filter_upwards [H] with n hn
+  simpa only [hardForm_eq_quadForm] using hn
+
+/-- **Below `2.77 n` gates.** Some fixed `γ > 0` bounds, for all large `n`, the correlation of
+every fan-in-two circuit over any basis with at most `2.77 n` gates of positive arity with
+`hardForm n` by `2^{-γ n}`. -/
+theorem exists_eventually_correlation_hardForm_le :
+    ∃ γ : ℝ, 0 < γ ∧ ∀ᶠ n in atTop, ∀ (σ : Cslib.Circuits.Signature.{v})
+      (I : Cslib.Circuits.Interpretation σ Bool) (C : Cslib.Circuits.Circuit σ n 1),
+      C.FanInAtMost 2 → (C.innerSize : ℝ) ≤ 277 / 100 * n →
+        correlation (hardForm n) (fun x => C.eval I x 0) ≤ (2 : ℝ) ^ (-γ * n) := by
+  set A := 2 * Gaussian.gaussianCoefficient with hAdef
+  have hA : 0 < A := mul_pos two_pos Gaussian.gaussianCoefficient_pos
+  have hA' : A ≤ 9 / 32 := Gaussian.two_mul_gaussianCoefficient_le
+  set r := (1 + 1 / (2 * A) - 277 / 100) / (2 * (1 + 1 / A)) with hr
+  have hr0 : 0 < r := by
+    have h1 : 16 / 9 ≤ 1 / (2 * A) := by
+      rw [le_div_iff₀ (by positivity)]
+      linarith
+    have h2 : 0 < 1 + 1 / A := by positivity
+    rw [hr]
+    apply div_pos _ (by positivity)
+    linarith
+  refine ⟨r / 2, by positivity, ?_⟩
+  have H := eventually_correlation_le_of_isLittleO (γ := r / 2) hA layoutBound_gaussian
+    (c := 277 / 100) (by norm_num) (by rw [← hr]; linarith)
+    (fun n => bipartiteMatrix n (robustMatrix (n / 2)))
+    (fun n => ((2 * robustDeficiency (n / 2) + 1 : ℕ) : ℝ))
+    isLittleO_two_mul_robustDeficiency_add_one
+    (Eventually.of_forall fun n U hU => by exact_mod_cast half_le_cutRank_hardMatrix n hU)
+  filter_upwards [H] with n hn
+  simpa only [hardForm_eq_quadForm] using hn
 
 end Complexity.Correlation
