@@ -32,7 +32,7 @@ Several rely on the Gaussian layout coefficient `A = 2p ≈ 0.2807` of this corp
 | `(n, n/2)`-concentrators (edges) | `≈ 3.28n` (beats `2n − 2` once `m ≥ 0.22n`) | `2n − 2` (Pinsker, 1973) | Lean: `Algebraic.Cutwidth.Multigraph.Concentrator.eventually_le_card_edges_half` |
 | Hyperconcentrators (edges / fan-in-2 nodes) | `≈ 3.78N` / `≈ 2.78N` | `2N` (implied) | Lean: `Algebraic.Cutwidth.Multigraph.Hyperconcentrator.eventually_le_card_edges` |
 | Fan-in-2 linear circuits for the `N`-point DFT, any `N` (including the FFT matrix) | `≈ 2.78N` | none for composite `N` (Lokam 2009; [Ailon](https://arxiv.org/abs/1403.1307)) | Lean: `Algebraic.Cutwidth.MultiOutput.Linear.eventually_lt_size_fft` |
-| `ε`-halver comparator networks | `(1 + κ(1−2ε)/2 − δ)n` | `n − 1` | In progress |
+| `ε`-halver comparator networks | `(1 + κ(1−2ε)/2 − δ)n` | `n − 1` | Lean: `Algebraic.Cutwidth.ComparatorNetwork.eventually_le_size_of_isHalver` |
 | Signed unbounded AND/OR/XOR, Gold map `x³` (odd `n`), all outputs | `≈ 1.7716n − 0.86` total gates; `(3n−3)/2` AND/OR gates | (new target; inversion `1.5659n` in the same model) | Lean: `Algebraic.Aggregate.Geometry.Gold.gateCoefficient_mul_sub_constantPenalty_le_size` |
 | Unbounded-fan-in AND gates with XOR free, an explicit `(n,n)` map | `(3n−3)/2` (Gold), `2n − 1` (field multiplication, `2n` inputs) | rank bound `n` | Lean: `Gold.three_mul_input_le_two_mul_conjunctionCount_add_three`, `Algebraic.Aggregate.Geometry.FieldMul.two_mul_input_le_conjunctionCount_add_one` |
 | Signed unbounded AND/OR/XOR, field inversion | `1.6954n − 1.11` (elementary), `1.7716n` with the Weil bound | `1.5659n` (this corpus) | Paper |
