@@ -67,6 +67,7 @@ public import Complexitylib.Algebraic.LowerBound.Cutwidth.MultiOutput.MatMul.Tri
 public import Complexitylib.Algebraic.LowerBound.Cutwidth.MultiOutput.MatMul
 public import Complexitylib.Algebraic.LowerBound.Cutwidth.MultiOutput.Taylor
 public import Complexitylib.Algebraic.LowerBound.Cutwidth.MultiOutput.PolyMul
+public import Complexitylib.Algebraic.LowerBound.Cutwidth.MultiOutput.MatMul.Arithmetic
 public import Complexitylib.Algebraic.LowerBound.Cutwidth.MultiOutput.Quadratic.Polynomial
 public import Complexitylib.Algebraic.LowerBound.Cutwidth.Extractor
 public import Complexitylib.Algebraic.LowerBound.Cutwidth.Extractor.Padding
