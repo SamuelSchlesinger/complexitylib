@@ -182,6 +182,12 @@ def headlineTheorems : List Name := [
   `Algebraic.Nechiporuk.eventually_sq_le_size_active,
   `Algebraic.Nechiporuk.eventually_sq_le_size_of_gateBlockSpan_le,
   `Algebraic.Nechiporuk.isLittleO_size_of_rectangleFree_active,
+  `Algebraic.Nechiporuk.gateBlockSpan_le_card_wireSupport,
+  `Algebraic.Nechiporuk.sharedFanOut_le_two_mul_size_add_one,
+  `Algebraic.Nechiporuk.sum_activeSharedFanOut_le_add_highSpanSharedFanOut,
+  `Algebraic.Nechiporuk.eventually_sq_le_size_of_highSpanSharedFanOut_le,
+  `Algebraic.Nechiporuk.eventually_sq_le_span_mul_size_of_gateBlockSpan_le,
+  `Algebraic.Nechiporuk.eventually_sq_le_size_of_card_wireSupport_le,
   -- MCSP in the algebraic-circuits model: all truth-table bits essential, subcube repetition,
   -- non-vacuity (exact complexity 1), and linear circuit / formula lower bounds
   `Algebraic.MCSP.mcspCostTarget_deMorgan_binaryCost_lower_bound,

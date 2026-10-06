@@ -55,6 +55,25 @@ gates (`exists_sharedProgram_of_circuit`) yields both:
   `Ω(n² / log n)` gates are still required
   (`eventually_sq_le_size_of_gateBlockSpan_le`). This locality restriction is
   essential: shared gates whose cones meet many blocks are charged on each of them.
+- **Span-threshold tradeoffs without a total shared-fan-out budget**
+  (`size_lower_bound_highSpanSharedFanOut`,
+  `eventually_sq_le_size_of_highSpanSharedFanOut_le`,
+  `eventually_sq_le_span_mul_size_of_gateBlockSpan_le`,
+  `eventually_sq_le_size_of_card_wireSupport_le`). Every single-output binary
+  circuit satisfies `sharedFanOut c ≤ 2 * c.size + 1`
+  (`sharedFanOut_le_two_mul_size_add_one`), so the fan-out of shared gates
+  active on at most `d` blocks, charged on each of those blocks, is absorbed
+  into a factor `d` on the circuit size:
+  `(n - b)(n - 2 b - 1) ≤ 5 n · s + (5 d + 4) b · (2 · c.size + 1)`, where `s`
+  bounds only `highSpanSharedFanOut c (block n b) d`, the fan-out of shared
+  gates active on more than `d` blocks. This trades the budget on
+  `sharedFanOut` for a loss of the factor `d`; it does not remove the locality
+  restriction, since high-span shared gates still need the budget `s`. When
+  every shared gate has block-span at most `d n` (for instance, syntactic input
+  support of size at most `d n`), `highSpanSharedFanOut` vanishes and
+  `n² ≤ 16 (5 · d n + 4) (c + 3) log₂ n · (2 · cir.size + 1)`, that is,
+  `Ω(n² / (d n · log n))` gates are required, with no hypothesis on
+  `sharedFanOut cir`.
 -/
 
 @[expose] public section
@@ -527,6 +546,35 @@ theorem size_lower_bound_active' {f : Cslib.BooleanFunction n} {K b : Nat}
     _ = 5 * b * (∑ i, activeSharedFanOut c (block n b i)) +
           4 * b * (c.size + KW.sharedGateCount c + 1) := by ring
 
+/-- **High-span shared fan-out circuit bound with consecutive blocks of size `b`.** Absorbing
+shared gates of block-span at most `d` into `2 * c.size + 1` via
+`sharedFanOut_le_two_mul_size_add_one` and `sum_activeSharedFanOut_le_add_highSpanSharedFanOut`
+yields `(n - b) · (n - 2 b - 1) ≤ 5 n · s + (5 d + 4) b · (2 · c.size + 1)` whenever
+`highSpanSharedFanOut c (block n b) d ≤ s`, with no bound on total `sharedFanOut c`. -/
+theorem size_lower_bound_highSpanSharedFanOut {f : Cslib.BooleanFunction n} {K b d s : Nat}
+    (hrect : RectangleFree f K) (hacc : 2 ^ (n - 2) ≤ (accepting f).card)
+    (hb : 0 < b) (hK : 8 * K ≤ 2 ^ b)
+    (c : Circuit Binary.signature n 1)
+    (hc : c.ComputesWith Binary.interpretation fun x _ => f x)
+    (hhigh : highSpanSharedFanOut c (block n b) d ≤ s) :
+    (n - b) * (n - 2 * b - 1) ≤
+      5 * n * s + (5 * d + 4) * b * (2 * c.size + 1) := by
+  have hact := size_lower_bound_active' hrect hacc hb hK c hc
+  have hsplit := sum_activeSharedFanOut_le_add_highSpanSharedFanOut c (block n b) d
+  have hfan := sharedFanOut_le_two_mul_size_add_one c
+  have hk := sharedGateCount_le_size c
+  have hsum : ∑ i, activeSharedFanOut c (block n b i) ≤ d * (2 * c.size + 1) + (n / b) * s :=
+    hsplit.trans (Nat.add_le_add (Nat.mul_le_mul_left _ hfan) (Nat.mul_le_mul_left _ hhigh))
+  calc (n - b) * (n - 2 * b - 1)
+      ≤ 5 * b * (∑ i, activeSharedFanOut c (block n b i)) +
+          4 * b * (c.size + KW.sharedGateCount c + 1) := hact
+    _ ≤ 5 * b * (d * (2 * c.size + 1) + (n / b) * s) + 4 * b * (2 * c.size + 1) :=
+        Nat.add_le_add (Nat.mul_le_mul_left _ hsum) (Nat.mul_le_mul_left _ (by omega))
+    _ = 5 * (b * (n / b)) * s + (5 * d + 4) * b * (2 * c.size + 1) := by ring
+    _ ≤ 5 * n * s + (5 * d + 4) * b * (2 * c.size + 1) :=
+        Nat.add_le_add_right
+          (Nat.mul_le_mul_right _ (Nat.mul_le_mul_left _ (Nat.mul_div_le n b))) _
+
 /-- **Nechiporuk's circuit bound with consecutive blocks of size `b`.** With `8 K ≤ 2 ^ b`,
 every single-output circuit `c` over `Binary.signature` computing a `K`-rectangle-free function
 with at least `2 ^ (n - 2)` accepting inputs and with `KW.sharedGateCount c ≤ k` and
@@ -689,6 +737,101 @@ theorem eventually_sq_le_size_of_gateBlockSpan_le (f : ∀ n, Cslib.BooleanFunct
         Nat.mul_le_mul (Nat.mul_le_mul_left _ hble) hsum
     _ = 40 * (c + 3) * Nat.log 2 n * span n * s n := by ring
     _ ≤ n * n := hspann
+
+/-- **Span-threshold tradeoff without a total shared-fan-out budget.** For a `K n`-rectangle-free
+family with `K n ≤ n ^ c` and at least `2 ^ (n - 2)` accepting inputs, if the fan-out of shared
+gates active on strictly more than `d n` logarithmic blocks is at most `s n` with `20 · s n ≤ n`
+eventually, then every full-binary-basis circuit `cir` computing `f n` satisfies
+`n² ≤ 16 (5 · d n + 4) (c + 3) log₂ n · (2 · cir.size + 1)` for all large `n`, so `cir` has
+`Ω(n² / ((d n + 1) log n))` gates. Shared gates of block-span at most `d n` need no fan-out budget;
+their fan-out is absorbed into the factor `d n` via `sharedFanOut_le_two_mul_size_add_one`. -/
+theorem eventually_sq_le_size_of_highSpanSharedFanOut_le
+    (f : ∀ n, Cslib.BooleanFunction n) (K d s : Nat → Nat) (c : Nat)
+    (hK : ∀ᶠ n in atTop, K n ≤ n ^ c)
+    (hacc : ∀ᶠ n in atTop, 2 ^ (n - 2) ≤ (accepting (f n)).card)
+    (hrect : ∀ᶠ n in atTop, RectangleFree (f n) (K n))
+    (hs : ∀ᶠ n in atTop, 20 * s n ≤ n) :
+    ∀ᶠ n in atTop, ∀ cir : Circuit Binary.signature n 1,
+      cir.ComputesWith Binary.interpretation (fun x _ => f n x) →
+      highSpanSharedFanOut cir (block n (nechiporukBlockSize c n)) (d n) ≤ s n →
+      (n : ℝ) ^ 2 ≤ 16 * (5 * d n + 4) * (c + 3) * Real.logb 2 n * (2 * cir.size + 1) := by
+  have hlog := Nat.eventually_mul_log_le (16 * (c + 3) * 1) one_lt_two
+  filter_upwards [hK, hacc, hrect, hs, hlog, eventually_ge_atTop 4] with
+    n hKn haccn hrectn hsn hlogn hn4
+  intro cir hcir hhigh
+  set b := nechiporukBlockSize c n
+  have h8b : 8 * b ≤ n := by
+    have := mul_nechiporukBlockSize_le (M := 1) hn4 hlogn
+    omega
+  have main := size_lower_bound_highSpanSharedFanOut hrectn haccn (nechiporukBlockSize_pos c n)
+    (eight_mul_le_two_pow_nechiporukBlockSize hKn) cir hcir hhigh
+  have h₁ : 3 * n ≤ 4 * (n - b) := by omega
+  have h₂ : 2 * n ≤ 4 * (n - 2 * b - 1) := by omega
+  have h₃ : 6 * (n * n) ≤ 4 * (n * n) + 16 * (5 * d n + 4) * b * (2 * cir.size + 1) := by
+    calc 6 * (n * n)
+        = (3 * n) * (2 * n) := by ring
+      _ ≤ (4 * (n - b)) * (4 * (n - 2 * b - 1)) := Nat.mul_le_mul h₁ h₂
+      _ = 16 * ((n - b) * (n - 2 * b - 1)) := by ring
+      _ ≤ 16 * (5 * n * s n + (5 * d n + 4) * b * (2 * cir.size + 1)) :=
+          Nat.mul_le_mul_left _ main
+      _ = 4 * (n * (20 * s n)) + 16 * (5 * d n + 4) * b * (2 * cir.size + 1) := by ring
+      _ ≤ 4 * (n * n) + 16 * (5 * d n + 4) * b * (2 * cir.size + 1) :=
+          Nat.add_le_add_right (Nat.mul_le_mul_left _ (Nat.mul_le_mul_left _ hsn)) _
+  have h₄ : n * n ≤ 8 * (5 * d n + 4) * b * (2 * cir.size + 1) := by nlinarith
+  have h₅ : (n : ℝ) ^ 2 ≤ 8 * (5 * d n + 4) * b * (2 * cir.size + 1) := by
+    have : ((n * n : Nat) : ℝ) ≤ ((8 * (5 * d n + 4) * b * (2 * cir.size + 1) : Nat) : ℝ) := by
+      exact_mod_cast h₄
+    push_cast at this
+    nlinarith
+  have hbR : (b : ℝ) ≤ 2 * (c + 3) * Nat.log 2 n := by
+    exact_mod_cast nechiporukBlockSize_le hn4
+  have hlogR := natLog_le_logb n
+  calc (n : ℝ) ^ 2
+      ≤ 8 * (5 * d n + 4) * b * (2 * cir.size + 1) := h₅
+    _ ≤ 8 * (5 * d n + 4) * (2 * (c + 3) * Nat.log 2 n) * (2 * cir.size + 1) := by gcongr
+    _ ≤ 8 * (5 * d n + 4) * (2 * (c + 3) * Real.logb 2 n) * (2 * cir.size + 1) := by gcongr
+    _ = 16 * (5 * d n + 4) * (c + 3) * Real.logb 2 n * (2 * cir.size + 1) := by ring
+
+/-- **Bounded-block-span circuit lower bound without a total shared-fan-out budget.** If every
+shared gate of `cir` is active on at most `d n` of the logarithmic Nechiporuk blocks, then
+`n² ≤ 16 (5 · d n + 4) (c + 3) log₂ n · (2 · cir.size + 1)` for all large `n`, that is,
+`Ω(n² / ((d n + 1) log n))` gates, with no bound on `sharedFanOut cir`. Compared with
+`eventually_sq_le_size_of_gateBlockSpan_le`, the budget on `sharedFanOut` is traded for the
+factor `d n`. -/
+theorem eventually_sq_le_span_mul_size_of_gateBlockSpan_le
+    (f : ∀ n, Cslib.BooleanFunction n) (K d : Nat → Nat) (c : Nat)
+    (hK : ∀ᶠ n in atTop, K n ≤ n ^ c)
+    (hacc : ∀ᶠ n in atTop, 2 ^ (n - 2) ≤ (accepting (f n)).card)
+    (hrect : ∀ᶠ n in atTop, RectangleFree (f n) (K n)) :
+    ∀ᶠ n in atTop, ∀ cir : Circuit Binary.signature n 1,
+      cir.ComputesWith Binary.interpretation (fun x _ => f n x) →
+      (∀ g : Fin cir.size, 2 ≤ KW.gateFanOut cir g →
+        gateBlockSpan (block n (nechiporukBlockSize c n)) cir.program g ≤ d n) →
+      (n : ℝ) ^ 2 ≤ 16 * (5 * d n + 4) * (c + 3) * Real.logb 2 n * (2 * cir.size + 1) := by
+  filter_upwards [eventually_sq_le_size_of_highSpanSharedFanOut_le f K d (fun _ => 0) c hK hacc
+    hrect (Eventually.of_forall fun _ => Nat.zero_le _)] with n hmain cir hcir hgate
+  apply hmain cir hcir
+  rw [highSpanSharedFanOut_eq_zero_of_gateBlockSpan_le cir _ hgate]
+
+/-- **Bounded-input-support circuit lower bound without a total shared-fan-out budget.** If the
+syntactic input support `cir.program.wireSupport (Wire.gate g)` of every shared gate `g` has
+cardinality at most `d n`, then `n² ≤ 16 (5 · d n + 4) (c + 3) log₂ n · (2 · cir.size + 1)` for
+all large `n`, that is, `Ω(n² / ((d n + 1) log n))` gates, with no bound on `sharedFanOut cir`. -/
+theorem eventually_sq_le_size_of_card_wireSupport_le
+    (f : ∀ n, Cslib.BooleanFunction n) (K d : Nat → Nat) (c : Nat)
+    (hK : ∀ᶠ n in atTop, K n ≤ n ^ c)
+    (hacc : ∀ᶠ n in atTop, 2 ^ (n - 2) ≤ (accepting (f n)).card)
+    (hrect : ∀ᶠ n in atTop, RectangleFree (f n) (K n)) :
+    ∀ᶠ n in atTop, ∀ cir : Circuit Binary.signature n 1,
+      cir.ComputesWith Binary.interpretation (fun x _ => f n x) →
+      (∀ g : Fin cir.size, 2 ≤ KW.gateFanOut cir g →
+        (cir.program.wireSupport (Wire.gate g)).card ≤ d n) →
+      (n : ℝ) ^ 2 ≤ 16 * (5 * d n + 4) * (c + 3) * Real.logb 2 n * (2 * cir.size + 1) := by
+  filter_upwards [eventually_sq_le_span_mul_size_of_gateBlockSpan_le f K d c hK hacc hrect] with
+    n hmain cir hcir hsupp
+  exact hmain cir hcir fun g hg =>
+    (gateBlockSpan_le_card_wireSupport (block_disjoint (nechiporukBlockSize_pos c n))
+      cir.program g).trans (hsupp g hg)
 
 /-- For any multiplier `M`, a rectangle-free family requires at least `M · n` gates in any
 full-binary-basis circuit whose active shared fan-out on the logarithmic blocks satisfies
