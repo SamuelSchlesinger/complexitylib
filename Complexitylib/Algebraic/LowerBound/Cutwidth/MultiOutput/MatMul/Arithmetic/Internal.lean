@@ -169,4 +169,237 @@ theorem jacobianChargeK_le_of_formal
 
 end Cut
 
+/-! ## One component -/
+
+section Component
+
+/-- A block with a nonzero entry has positive rank. -/
+theorem one_le_blockRank {L : Type*} [Field L] {m N : Nat} {M : Matrix (Fin m) (Fin N) L}
+    {Y : Finset (Fin m)} {X : Finset (Fin N)} {y : Fin m} {x : Fin N} (hy : y ∈ Y) (hx : x ∈ X)
+    (h : M y x ≠ 0) : 1 ≤ blockRank M Y X := by
+  have hdet : ((M.submatrix (fun i : ↥Y => (i : Fin m)) (fun j : ↥X => (j : Fin N))).submatrix
+      (fun _ : Unit => (⟨y, hy⟩ : ↥Y)) (fun _ : Unit => (⟨x, hx⟩ : ↥X))).det ≠ 0 := by
+    rw [Matrix.det_unique]
+    exact h
+  have hrank := Matrix.rank_of_det_ne_zero hdet
+  rw [Fintype.card_unit] at hrank
+  rw [blockRank, ← hrank]
+  exact Matrix.rank_submatrix_le _ _ _
+
+variable {σ : Signature} {s : Nat} {K : Type*} [Field K]
+  (P : (op : σ.Op) → MvPolynomial (Fin (σ.Arity op)) K) {p : Program σ (n * n + n * n) s}
+  {out : Fin (n * n) → Wire (n * n + n * n) s}
+
+/-- **All terminals lie in one component.** If the wires `out` of a program with polynomial
+gates carry the polynomials of matrix multiplication and `n ≥ 1`, the component of the output
+`C 0 0` contains every input and every output. -/
+theorem mem_component_of_formal (hn : 0 < n)
+    (hf : ∀ o, Taylor.wirePolynomial P p (out o) = matMulPolynomial K n o) :
+    (∀ x, Wire.input x ∈ component p (out (matMulOutput n ⟨0, hn⟩ ⟨0, hn⟩))) ∧
+      ∀ o, out o ∈ component p (out (matMulOutput n ⟨0, hn⟩ ⟨0, hn⟩)) := by
+  classical
+  set z₀ : Fin n := ⟨0, hn⟩
+  set W := component p (out (matMulOutput n z₀ z₀)) with hW
+  have hclosed := component_closed p (out (matMulOutput n z₀ z₀))
+  have hfwd : forward p W = ∅ := forward_eq_empty_of_closed hclosed
+  have hbwd : backward p W = ∅ := backward_eq_empty_of_closed hclosed
+  have h := Taylor.blockRank_jacobian_add_blockRank_le_of_trace P p out W
+    fun _ : Fin (n * n + n * n) => (1 : K)
+  rw [hfwd, hbwd, Finset.card_empty, add_zero] at h
+  simp only [hf] at h
+  have memOut : ∀ i k, matMulOutput n i k ∈ outputsIn out W ↔ out (matMulOutput n i k) ∈ W :=
+    fun i k => by simp [outputsIn]
+  -- An output and the inputs it depends on lie together in or out of the component.
+  have together : ∀ {y : Fin (n * n)} {x : Fin (n * n + n * n)},
+      Taylor.jacobian (fun o => matMulPolynomial K n o) (fun _ => (1 : K)) y x ≠ 0 →
+      (y ∈ outputsIn out W ↔ x ∈ inputsIn W) := by
+    intro y x hyx
+    constructor
+    · intro hy
+      by_contra hx
+      have := one_le_blockRank hy (Finset.mem_compl.mpr hx) hyx
+      omega
+    · intro hx
+      by_contra hy
+      have := one_le_blockRank (Finset.mem_compl.mpr hy) hx hyx
+      omega
+  have hA : ∀ i j k, (matMulOutput n i k ∈ outputsIn out W ↔ matMulLeft n i j ∈ inputsIn W) :=
+    fun i j k => together (by simp [jacobian_left])
+  have hB : ∀ i j k, (matMulOutput n i k ∈ outputsIn out W ↔ matMulRight n j k ∈ inputsIn W) :=
+    fun i j k => together (by simp [jacobian_right])
+  have hC₀ : matMulOutput n z₀ z₀ ∈ outputsIn out W := (memOut _ _).mpr (mem_component_self _ _)
+  have hCall : ∀ i k, matMulOutput n i k ∈ outputsIn out W := by
+    intro i k
+    rw [hB i z₀ k, ← hB z₀ z₀ k, hA z₀ z₀ k, ← hA z₀ z₀ z₀]
+    exact hC₀
+  refine ⟨fun x => ?_, fun o => ?_⟩
+  · rcases input_cases x with ⟨i, j, rfl⟩ | ⟨j, k, rfl⟩
+    · exact mem_inputsIn.mp ((hA i j z₀).mp (hCall i z₀))
+    · exact mem_inputsIn.mp ((hB z₀ j k).mp (hCall z₀ k))
+  · rw [output_eq o]
+    exact (memOut _ _).mp (hCall _ _)
+
+end Component
+
+/-! ## The finite bound -/
+
+section Finite
+
+variable {σ : Signature} {s : Nat} {K : Type*} [Field K]
+
+/-- **The finite bound.** A fan-in-two program with polynomial gates over a field, whose wires
+`out` carry the polynomials of matrix multiplication, has
+`(15 n² - 6 n - 9)/24 ≤ (A + η) (s - 2 n²)⁺ + 3 log₂ (2 n² + 3 s) + C`. -/
+theorem fifteen_mul_sq_sub_le {A η C : ℝ} (hAη : 0 ≤ A + η)
+    (order : Multigraph.OrderingBound A η C)
+    (P : (op : σ.Op) → MvPolynomial (Fin (σ.Arity op)) K) (p : Program σ (n * n + n * n) s)
+    (hp : p.FanInAtMost 2) (out : Fin (n * n) → Wire (n * n + n * n) s)
+    (hf : ∀ o, Taylor.wirePolynomial P p (out o) = matMulPolynomial K n o) :
+    (15 * (n : ℝ) ^ 2 - 6 * n - 9) / 24 ≤
+      (A + η) * max ((s : ℝ) - 2 * n ^ 2) 0 + 3 * Real.logb 2 (2 * n ^ 2 + 3 * s) + C := by
+  classical
+  have hC := orderingBound_nonneg order
+  have hlog : 0 ≤ Real.logb 2 (2 * (n : ℝ) ^ 2 + 3 * s) := by
+    rcases Nat.eq_zero_or_pos (2 * n ^ 2 + 3 * s) with h | h
+    · have : (2 * (n : ℝ) ^ 2 + 3 * s) = 0 := by exact_mod_cast h
+      rw [this, Real.logb_zero]
+    · exact Real.logb_nonneg one_lt_two (by exact_mod_cast h)
+  have hmax0 : 0 ≤ (A + η) * max ((s : ℝ) - 2 * n ^ 2) 0 := mul_nonneg hAη (le_max_right _ _)
+  rcases Nat.eq_zero_or_pos n with hn | hn
+  · have h0 : (n : ℝ) = 0 := by exact_mod_cast hn
+    have hneg : (15 * (n : ℝ) ^ 2 - 6 * n - 9) / 24 < 0 := by
+      rw [h0]
+      norm_num
+    exact hneg.le.trans (add_nonneg (add_nonneg hmax0 (by linarith)) hC)
+  -- All terminals lie in one component, on distinct wires.
+  obtain ⟨hin, houtW⟩ := mem_component_of_formal P hn hf
+  set W₀ := component p (out (matMulOutput n ⟨0, hn⟩ ⟨0, hn⟩)) with hW₀
+  have hterm := terminal_injective (trace_eq_matMul P hf)
+  -- The ranking and the threshold prefix.
+  obtain ⟨rank, hrank, hlt, hbound⟩ := exists_rank hAη order p hp
+  obtain ⟨t, ⟨x, hx⟩, hlo, hhi⟩ :=
+    exists_threshold hn (matMulTermA n s) (matMulTermB n s) (matMulTermC out) hterm rank hrank _ hlt
+  set S := prefixBelow rank (t + 1) with hS
+  set w₀ := Sum.elim (matMulTermA n s) (Sum.elim (matMulTermB n s) (matMulTermC out)) x
+    with hw₀def
+  have hprefix : S = prefixUpTo rank w₀ := by
+    ext v
+    simp only [hS, prefixBelow, prefixUpTo, Finset.mem_filter, Finset.mem_univ, true_and, hx]
+    omega
+  have hw₀ : w₀ ∈ W₀ := by
+    rcases x with q | q | q
+    · exact hin _
+    · exact hin _
+    · exact houtW _
+  have hcomp : component p w₀ = W₀ := component_eq_of_mem hw₀
+  have hinputs : (inputsIn W₀).card = n * n + n * n := by
+    have : inputsIn W₀ = Finset.univ := by
+      ext k
+      simp [mem_inputsIn, hin k]
+    rw [this, Finset.card_univ, Fintype.card_fin]
+  have hupper := hbound w₀
+  rw [← hprefix, hcomp, hinputs] at hupper
+  -- The charging inequality at the threshold prefix.
+  have hsq := fifteen_mul_sq_le _ _ _ hlo hhi
+  have hJ := chargeJ_le_of_formal P hf S
+  have hI := jacobianChargeI_le_of_formal P hf S
+  have hK := jacobianChargeK_le_of_formal P hf S
+  have hlower : 15 * n ^ 2 ≤ 24 * ((forward p S).card + (backward p S).card) + 6 * n + 9 := by
+    omega
+  have hgates : ((gatesIn W₀).card : ℝ) ≤ s := by
+    exact_mod_cast (by simpa using Finset.card_le_univ (gatesIn W₀))
+  have hNR : ((n * n + n * n : Nat) : ℝ) = 2 * (n : ℝ) ^ 2 := by
+    push_cast
+    ring
+  rw [hNR] at hupper
+  have hmax : (A + η) * max (((gatesIn W₀).card : ℝ) - 2 * n ^ 2) 0 ≤
+      (A + η) * max ((s : ℝ) - 2 * n ^ 2) 0 :=
+    mul_le_mul_of_nonneg_left (max_le_max (by linarith) le_rfl) hAη
+  have hlowerR : (15 * (n : ℝ) ^ 2 - 6 * n - 9) / 24 ≤
+      (((forward p S).card + (backward p S).card : Nat) : ℝ) := by
+    have : ((15 * n ^ 2 : Nat) : ℝ) ≤
+        ((24 * ((forward p S).card + (backward p S).card) + 6 * n + 9 : Nat) : ℝ) := by
+      exact_mod_cast hlower
+    push_cast at this ⊢
+    linarith
+  linarith
+
+end Finite
+
+/-! ## Asymptotics -/
+
+/-- **The asymptotic bound.** If the graph-ordering hypothesis holds with coefficient `A > 0` for
+every positive slack, then for every `ε > 0` and all large `n`, every size `s` satisfying the
+finite bound for every ordering has `s > (2 + 5/(8 A) - ε) n²`. -/
+theorem eventually_lt_of_le {A : ℝ} (hA : 0 < A)
+    (order : ∀ η : ℝ, 0 < η → ∃ C : ℝ, Multigraph.OrderingBound A η C) {ε : ℝ} (hε : 0 < ε) :
+    ∀ᶠ n : Nat in atTop, ∀ s : Nat, (∀ η C : ℝ, 0 ≤ A + η → Multigraph.OrderingBound A η C →
+      (15 * (n : ℝ) ^ 2 - 6 * n - 9) / 24 ≤
+        (A + η) * max ((s : ℝ) - 2 * n ^ 2) 0 + 3 * Real.logb 2 (2 * n ^ 2 + 3 * s) + C) →
+      (2 + 5 / (8 * A) - ε) * n ^ 2 < s := by
+  set ε' := min ε (5 / (8 * A)) with hε'
+  have hε'pos : 0 < ε' := lt_min hε (by positivity)
+  have hε'le : ε' ≤ ε := min_le_left _ _
+  have hε'A : ε' ≤ 5 / (8 * A) := min_le_right _ _
+  set η := A ^ 2 * ε' / 2 with hη
+  have hηpos : 0 < η := by positivity
+  obtain ⟨C, hC⟩ := order η hηpos
+  have hAη : 0 ≤ A + η := by linarith
+  set B : ℝ := 8 + 15 / (8 * A) with hB
+  have hBpos : 0 < B := by positivity
+  filter_upwards [eventually_mul_logb_add_lt 6 (3 * Real.logb 2 B + C + 1) one_pos,
+    eventually_ge_atTop 1, eventually_ge_atTop ⌈10 / (A * ε')⌉₊] with n hlog hn1 hnbig
+  intro s bound
+  by_contra hs
+  rw [not_lt] at hs
+  have hs' : (s : ℝ) ≤ (2 + 5 / (8 * A) - ε') * n ^ 2 :=
+    hs.trans (mul_le_mul_of_nonneg_right (by linarith) (by positivity))
+  have core := bound η C hAη hC
+  have hn1' : (1 : ℝ) ≤ n := by exact_mod_cast hn1
+  have hnbig' : 10 / (A * ε') ≤ (n : ℝ) := (Nat.le_ceil _).trans (by exact_mod_cast hnbig)
+  -- The cycle-rank term.
+  have hrest : 0 ≤ (5 / (8 * A) - ε') * n ^ 2 := mul_nonneg (by linarith) (by positivity)
+  have hmax : max ((s : ℝ) - 2 * n ^ 2) 0 ≤ (5 / (8 * A) - ε') * n ^ 2 :=
+    max_le (by linarith) hrest
+  have hcoef : (A + η) * (5 / (8 * A) - ε') ≤ 5 / 8 - A * ε' / 2 := by
+    have h₁ : (A + η) * (5 / (8 * A) - ε') = 5 / 8 - A * ε' + 5 * η / (8 * A) - η * ε' := by
+      field_simp
+      ring
+    have h₂ : 5 * η / (8 * A) = 5 * (A * ε') / 16 := by
+      rw [hη]
+      field_simp
+      ring
+    have h₃ : 0 ≤ η * ε' := by positivity
+    have h₄ : 0 ≤ A * ε' := by positivity
+    linarith
+  have hprod : (A + η) * max ((s : ℝ) - 2 * n ^ 2) 0 ≤ (5 / 8 - A * ε' / 2) * n ^ 2 := by
+    calc (A + η) * max ((s : ℝ) - 2 * n ^ 2) 0 ≤ (A + η) * ((5 / (8 * A) - ε') * n ^ 2) :=
+          mul_le_mul_of_nonneg_left hmax hAη
+      _ = (A + η) * (5 / (8 * A) - ε') * n ^ 2 := by ring
+      _ ≤ (5 / 8 - A * ε' / 2) * n ^ 2 := mul_le_mul_of_nonneg_right hcoef (by positivity)
+  -- The logarithmic term.
+  have hVle : 2 * (n : ℝ) ^ 2 + 3 * s ≤ B * n ^ 2 := by
+    have h₁ : (2 + 5 / (8 * A) - ε') * (n : ℝ) ^ 2 ≤ (2 + 5 / (8 * A)) * n ^ 2 :=
+      mul_le_mul_of_nonneg_right (by linarith) (by positivity)
+    have h₂ : B * (n : ℝ) ^ 2 = 2 * n ^ 2 + 3 * ((2 + 5 / (8 * A)) * n ^ 2) := by
+      rw [hB]
+      ring
+    linarith
+  have hVpos : (0 : ℝ) < 2 * n ^ 2 + 3 * s := by positivity
+  have hlogV : Real.logb 2 (2 * (n : ℝ) ^ 2 + 3 * s) ≤ Real.logb 2 B + 2 * Real.logb 2 n := by
+    calc Real.logb 2 (2 * (n : ℝ) ^ 2 + 3 * s) ≤ Real.logb 2 (B * n ^ 2) :=
+          (Real.logb_le_logb one_lt_two hVpos (by positivity)).mpr hVle
+      _ = Real.logb 2 B + 2 * Real.logb 2 n := by
+          rw [Real.logb_mul hBpos.ne' (by positivity), Real.logb_pow]
+          push_cast
+          ring
+  -- The quadratic gap beats the linear loss.
+  have hgap : 5 * (n : ℝ) ≤ A * ε' / 2 * n ^ 2 := by
+    have h₁ : 10 ≤ A * ε' * n := by
+      rw [div_le_iff₀ (by positivity)] at hnbig'
+      linarith
+    nlinarith
+  simp only [one_mul] at hlog
+  nlinarith
+
 end Algebraic.Cutwidth.MultiOutput.MatMul.ArithmeticInternal
