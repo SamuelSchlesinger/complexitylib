@@ -31,11 +31,12 @@ endpoint they are charged to, and `C` is the number of light–heavy `C` termina
 * **The column Jacobian charge** (`card_mixedPairs_add_le_jacobianChargeK`): the mirror image
   `C + A_I ≤ L_K + x (n - y - z)⁺ + (n - x) (y + z - n)⁺`, obtained by transposing the
   terminal graph (`swapPairs`).
-* **Near the threshold** (`fifteen_mul_sq_le`). If `3 n ≤ 2 (x + y + z) ≤ 3 n + 3`, the total
-  `P + C - corr` of these bounds is at least `(15 n² - 6 n - 9)/8`, so
-  `15 n² ≤ 8 (R_J + L_I + L_K) + 6 n + 9` (`fifteen_mul_sq_le_of_le`). With
-  `x = n/2 + u`, `z = n/2 + w` and `δ = x + y + z - 3 n/2`, the total is
-  `2 n² + φ(u) + φ(w)` with `φ(u) = u² - δ u - (n/2) |u - δ| ≥ -(n/2 + δ)²/4`.
+* **Near the threshold** (`fifteen_mul_sq_le_of_threshold`, `fifteen_mul_sq_le`). If
+  `3 n ≤ 2 (x + y + z) ≤ 3 n + 3`, the total `P + C - corr` of these bounds, with `P` the number
+  of light–heavy terminals and `corr` the two overshoot terms, is at least
+  `(15 n² - 6 n - 9)/8`, so `15 n² ≤ 8 (R_J + L_I + L_K) + 6 n + 9`. With `x = n/2 + u`,
+  `z = n/2 + w` and `δ = x + y + z - 3 n/2`, the total is `2 n² + φ(u) + φ(w)` with
+  `φ(u) = u² - δ u - (n/2) |u - δ| ≥ -(n/2 + δ)²/4`.
 -/
 
 @[expose] public section
