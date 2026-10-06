@@ -113,6 +113,12 @@ theorem mem_forced {ψ : ClauseSet N} {σ : Equiv.Perm (Fin N)} {x : BitString N
 
 end ClauseSet
 
+/-- A subcube of a set is a subcube of every larger set. -/
+theorem ContainsSubcube.mono {S T : Set (BitString N)} (hST : S ⊆ T) {d : ℕ}
+    (h : ContainsSubcube S d) : ContainsSubcube T d := by
+  obtain ⟨a, J, hJ, hsub⟩ := h
+  exact ⟨a, J, hJ, fun U hU => hST (hsub U hU)⟩
+
 /-- A CNF and its clause set have the same solutions. -/
 theorem CNF.sat_toClauseSet_iff (φ : CNF N) (x : BitString N) :
     φ.toClauseSet.Sat x ↔ φ.eval x = true := by
@@ -130,6 +136,12 @@ theorem CNF.card_le_width_of_mem_toClauseSet {φ : CNF N} {C : Finset (Literal N
 theorem CNF.mem_solutions_toClauseSet (φ : CNF N) (x : BitString N) :
     x ∈ φ.toClauseSet.solutions ↔ φ.eval x = true := by
   rw [ClauseSet.mem_solutions, CNF.sat_toClauseSet_iff]
+
+/-- The solutions of the clause set of a CNF, as a filter of the cube. -/
+theorem CNF.solutions_toClauseSet (φ : CNF N) :
+    φ.toClauseSet.solutions = univ.filter fun x => φ.eval x = true := by
+  ext x
+  rw [CNF.mem_solutions_toClauseSet, mem_filter, and_iff_right (mem_univ x)]
 
 /-- The CNF of a clause set accepts exactly its solutions. -/
 theorem ClauseSet.eval_toCNF_eq_true_iff (ψ : ClauseSet N) (x : BitString N) :

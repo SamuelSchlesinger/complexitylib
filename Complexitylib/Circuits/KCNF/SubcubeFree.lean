@@ -8,6 +8,7 @@ module
 public import Complexitylib.Circuits.KCNF.Basic
 public import Mathlib.Analysis.SpecialFunctions.Pow.Real
 import Complexitylib.Circuits.KCNF.Internal.Isolation
+import Complexitylib.Circuits.KCNF.Internal.SubcubeFree
 
 /-!
 # k-CNFs without large subcubes have few solutions
@@ -17,7 +18,14 @@ A *move* of a solution `x` of a clause set `ψ` is a nonempty set `T` of variabl
 combine freely (Lemma 3), so in a clause set whose co-occurrence graph has maximum degree `Δ` and
 whose solutions contain no subcube of dimension `D`, every solution has at most `(D - 1)(Δ + 1)`
 non-isolated directions (Lemma 4). The satisfiability coding lemma
-(`Complexitylib.Circuits.KCNF.Coding`) then bounds the number of solutions.
+(`Complexitylib.Circuits.KCNF.Coding`) then bounds the number of solutions. After sparsification
+(`Complexitylib.Circuits.KCNF.Sparsification`) every `k`-CNF is a union of at most `2 ^ (ε N)`
+such pieces, which gives Theorem A: a `k`-CNF whose solutions contain no subcube of dimension `D`
+has at most `2 ^ ((1 - 1/k + ε) N + C D)` solutions.
+
+The exponent `1 - 1/k` cannot be improved, already for `D = 1`: the `k`-CNF requiring even
+parity on each of `N/k` disjoint blocks of `k` variables has `2 ^ ((1 - 1/k) N)` solutions, no two
+of which are neighbours (this example is not formalized here).
 
 ## Main results
 
@@ -31,6 +39,9 @@ non-isolated directions (Lemma 4). The satisfiability coding lemma
 * `card_solutions_le_of_neighbors` (Theorem A, bounded degree): a clause set of width `k ≥ 1`
   and co-occurrence degree `Δ` whose solutions contain no subcube of dimension `D` has at most
   `2 ^ ((1 - 1/k) N + (D - 1)(Δ + 1)/k)` solutions.
+* `card_solutions_le_of_not_containsSubcube`, `CNF.card_accepting_le_of_not_containsSubcube`
+  (Theorem A): for every `k ≥ 1` and `ε > 0` there is `C` such that every `k`-CNF whose solutions
+  contain no subcube of dimension `D` has at most `2 ^ ((1 - 1/k + ε) N + C D)` solutions.
 -/
 
 @[expose] public section
@@ -90,4 +101,34 @@ theorem card_solutions_le_of_neighbors {ψ : ClauseSet N} {k Δ D : ℕ} (hk1 : 
       (2 : ℝ) ^ ((1 - 1 / (k : ℝ)) * N + (((D - 1) * (Δ + 1) : ℕ) : ℝ) / k) :=
   Isolation.card_solutions_le_of_neighbors hk1 hk hdeg hfree
 
+/-- **Theorem A.** For every `k ≥ 1` and `ε > 0` there is a constant `C ≥ 0` such that every
+clause set `φ` over `N` variables whose clauses have at most `k` literals, and whose solutions
+contain no subcube of dimension `D`, has at most `2 ^ ((1 - 1/k + ε) N + C D)` solutions. -/
+theorem card_solutions_le_of_not_containsSubcube (k : ℕ) (hk : 1 ≤ k) {ε : ℝ} (hε : 0 < ε) :
+    ∃ C : ℝ, 0 ≤ C ∧ ∀ (N : ℕ) (φ : ClauseSet N) (D : ℕ), (∀ C ∈ φ, C.card ≤ k) →
+      ¬ ContainsSubcube (φ.solutions : Set (BitString N)) D →
+      (φ.solutions.card : ℝ) ≤ 2 ^ ((1 - 1 / (k : ℝ) + ε) * N + C * D) :=
+  SubcubeFree.card_solutions_le k hk hε
+
 end Complexity.ClauseSet
+
+namespace Complexity
+
+/-- **Theorem A for CNFs.** For every `k ≥ 1` and `ε > 0` there is a constant `C ≥ 0` such that
+every CNF `φ` of width at most `k` over `N` variables whose accepted inputs contain no subcube of
+dimension `D` accepts at most `2 ^ ((1 - 1/k + ε) N + C D)` inputs. -/
+theorem CNF.card_accepting_le_of_not_containsSubcube (k : ℕ) (hk : 1 ≤ k) {ε : ℝ}
+    (hε : 0 < ε) :
+    ∃ C : ℝ, 0 ≤ C ∧ ∀ (N : ℕ) (φ : CNF N) (D : ℕ), φ.width ≤ k →
+      ¬ ContainsSubcube {x | φ.eval x = true} D →
+      ((Finset.univ.filter fun x => φ.eval x = true).card : ℝ) ≤
+        2 ^ ((1 - 1 / (k : ℝ) + ε) * N + C * D) := by
+  obtain ⟨C, hC, hbound⟩ := ClauseSet.card_solutions_le_of_not_containsSubcube k hk hε
+  refine ⟨C, hC, fun N φ D hφ hfree => ?_⟩
+  rw [← CNF.solutions_toClauseSet]
+  refine hbound N φ.toClauseSet D
+    (fun C hC => (CNF.card_le_width_of_mem_toClauseSet hC).trans hφ) fun h => hfree ?_
+  refine h.mono fun x hx => ?_
+  exact (CNF.mem_solutions_toClauseSet φ x).mp hx
+
+end Complexity
