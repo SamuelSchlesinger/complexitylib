@@ -109,7 +109,8 @@ variable (P : (op : σ.Op) → MvPolynomial (Fin (σ.Arity op)) K)
 
 /-- Evaluating a program with polynomial gates commutes with algebra homomorphisms. -/
 theorem map_trace_algebraInterpretation {A B : Type*} [CommSemiring A] [Algebra K A]
-    [CommSemiring B] [Algebra K B] (φ : A →ₐ[K] B) (p : Program σ n s) (x : Fin n → A) (w : Wire n s) :
+    [CommSemiring B] [Algebra K B] (φ : A →ₐ[K] B) (p : Program σ n s) (x : Fin n → A)
+    (w : Wire n s) :
     φ (p.trace (algebraInterpretation P A) x w) =
       p.trace (algebraInterpretation P B) (fun j => φ (x j)) w :=
   congrFun (p.map_trace ⟨φ, fun op y => comp_aeval_apply y φ (P op)⟩ x) w
@@ -177,8 +178,9 @@ theorem mem_cutKernel {δ : Fin n → L} :
 /-- The cut kernel has codimension at most the number of crossing signals. -/
 theorem le_finrank_cutKernel_add :
     n ≤ finrank L (cutKernel P p S a) + ((forward p S).card + (backward p S).card) := by
-  have hker := MultiOutput.Internal.finrank_ker_mulVecLin ((jacobian (wirePolynomial P p) a).submatrix
-    (fun c : ↥(forward p S ∪ backward p S) => (c : Wire n s)) id)
+  have hker := MultiOutput.Internal.finrank_ker_mulVecLin
+    ((jacobian (wirePolynomial P p) a).submatrix
+      (fun c : ↥(forward p S ∪ backward p S) => (c : Wire n s)) id)
   have hrank := Matrix.rank_le_card_height ((jacobian (wirePolynomial P p) a).submatrix
     (fun c : ↥(forward p S ∪ backward p S) => (c : Wire n s)) id)
   have hunion := Finset.card_union_le (forward p S) (backward p S)
@@ -401,7 +403,8 @@ dimension. -/
 theorem finrank_map_funLeft (V : Submodule L (Fin n → L)) (X : Finset (Fin n))
     (hV : ∀ v ∈ V, ∀ j, j ∉ X → v j = 0) :
     finrank L (V.map (LinearMap.funLeft L L (Subtype.val : ↥X → Fin n))) = finrank L V := by
-  have hinj : Function.Injective (LinearMap.funLeft L L (Subtype.val : ↥X → Fin n) ∘ₗ V.subtype) := by
+  have hinj :
+      Function.Injective (LinearMap.funLeft L L (Subtype.val : ↥X → Fin n) ∘ₗ V.subtype) := by
     intro v v' h
     apply Subtype.ext
     funext j
