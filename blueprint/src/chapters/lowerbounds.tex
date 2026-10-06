@@ -715,27 +715,42 @@ chapter.
     Algebraic.MCSP.mcsp_formula_leaves_lower_bound,
     Algebraic.MCSP.mcsp_sharedGateCount_cost_lower_bound,
     Algebraic.MCSP.mcsp_card_image_restrictTo_le_subfunctions_leftBlock,
-    Algebraic.MCSP.mcsp_binaryFormula_leavesIn_leftHalf_lower_bound}
+    Algebraic.MCSP.mcsp_binaryFormula_leavesIn_leftHalf_lower_bound,
+    Algebraic.MCSP.costComplexity_pairTruthTable_self,
+    Algebraic.MCSP.pairTruthTable_self_mem_exactCostSet,
+    Algebraic.MCSP.iterPairTruthTable_mem_exactCostSet,
+    Algebraic.MCSP.mcsp_card_image_restrictTo_le_subfunctions_rightBlock,
+    Algebraic.MCSP.card_subfunctions_mcspCostScalar_deMorgan_tableTranslate,
+    Algebraic.MCSP.mcsp_binaryFormula_leaves_lower_bound,
+    Algebraic.MCSP.mcsp_binary_circuit_active_sharing_lower_bound,
+    Algebraic.MCSP.mcsp_binary_circuit_sharing_lower_bound}
   \leanok
   \uses{thm:lowerbounds-algebraic-mcsp-subcube}
   Let $E$ be the set of $2^n$-bit truth tables of De Morgan AND/OR
-  complexity exactly $s \ge 1$, and suppose $E$ is nonempty. Write
-  $N = 2^{n+1}$. For any circuit computing $\cc{MCSP}_{n+1,s}$, every wire cut
-  separating the two halves of the truth table carries at least $\log_2 |E|$
-  bits. Every De Morgan formula computing it has at least $N$ leaves. A De
-  Morgan circuit with at most $k$ shared gates satisfies
-  $N \le (k+1)(\mathrm{cost} + k + 1)$. Every binary formula $F$ satisfies
-  $|E| \le 2 \cdot 16^{\ell}$, where $\ell$ is the number of leaves of $F$ in
-  the left half. All of these bounds are at most linear in $N$.
+  complexity exactly $s \ge 1$, and suppose $E$ is nonempty. Duplicating a
+  table in $E$ across both halves of the cube preserves its exact complexity,
+  so iterating $k$ times embeds $E$ injectively into the exact-complexity-$s$
+  tables on $n + k$ bits. Write $N = 2^{n+1}$. For any circuit computing
+  $\cc{MCSP}_{n+1,s}$, every wire cut separating the two halves of the truth
+  table carries at least $\log_2 |E|$ bits. Every De Morgan formula computing
+  it has at least $N$ leaves. A De Morgan circuit with at most $k$ shared
+  gates satisfies $N \le (k+1)(\mathrm{cost} + k + 1)$. Every binary formula
+  $F$ satisfies $|E| \le 2 \cdot 16^{\ell}$, where $\ell$ is the number of
+  leaves of $F$ in either half, and $|E|^2 \le 4 \cdot 16^{L}$, where $L$ is
+  the total number of leaves; the analogous bound holds for full-binary-basis
+  circuits with at most $k$ shared gates of total shared fan-out at most $f$,
+  with $L$ replaced by $\mathrm{size} + k + 1 + 2f$ and an extra factor
+  $4^k$. All of these bounds are at most linear in $N$.
 \end{theorem}
 \begin{proof}
   \leanok
   \uses{thm:lowerbounds-algebraic-khrapchenko-shared,
-    thm:lowerbounds-algebraic-nechiporuk}
+    thm:lowerbounds-algebraic-nechiporuk,
+    thm:lowerbounds-algebraic-nechiporuk-blockspan}
   The diagonal tables $(T, T)$ for $T \in E$ are yes instances whose one-bit
   flips are all no instances, and mixing two diagonals across the halves
   gives a no instance. Apply the single-cut, Khrapchenko, and Nechiporuk
-  arguments.
+  arguments on both halves of the truth table.
 \end{proof}
 
 \begin{theorem}[Polynomial circuit size hierarchy]

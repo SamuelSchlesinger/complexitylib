@@ -9,6 +9,7 @@ public import Complexitylib.Algebraic.LowerBound.MCSP.Defs
 public import Complexitylib.Algebraic.LowerBound.MCSP.Symmetry
 public import Complexitylib.Algebraic.LowerBound.MCSP.SubcubeRepetition
 public import Complexitylib.Algebraic.LowerBound.MCSP.NonVacuity
+public import Complexitylib.Algebraic.LowerBound.MCSP.Nechiporuk
 
 /-!
 # Minimum Circuit Size Problem (MCSP) lower bounds
@@ -44,4 +45,17 @@ This umbrella module exports the MCSP circuit and formula lower bound developmen
   hypothesis-free forms of the symmetry bounds
   (`mcspCostTarget_deMorgan_one_binaryCost_lower_bound`,
   `mcspCostTarget_deMorgan_one_size_lower_bound`, `mcsp_one_formula_leaves_lower_bound`).
+* `Complexitylib.Algebraic.LowerBound.MCSP.Nechiporuk`: Reusable infrastructure — exact-cost
+  persistence under iterated subcube duplication (`costComplexity_pairTruthTable_self`,
+  `iterPairTruthTable`, `card_exactCostSet_le_add`), coordinate-translation symmetry of
+  subfunction counts (`card_subfunctions_map_equiv`,
+  `card_subfunctions_mcspCostScalar_deMorgan_tableTranslate`), and right-half blocks obtained
+  from left-half blocks by flipping the leading bit (`rightBlock`,
+  `rightBlock_eq_map_tableTranslate`, `disjoint_leftBlock_rightBlock`,
+  `mcsp_card_image_restrictTo_le_subfunctions_rightBlock`) — together with two-half
+  `Binary.Formula` and bounded-sharing `Circuit Binary.signature` lower bounds
+  (`mcsp_binaryFormula_leaves_lower_bound`, `mcsp_binary_circuit_active_sharing_lower_bound`,
+  `mcsp_binary_circuit_sharing_lower_bound`). These bounds are linear in $N = 2^{n+1}$ (about
+  $N/4$, minus sharing terms for circuits) and are not stronger than the Khrapchenko formula bound
+  or the full-support circuit bound above.
 -/

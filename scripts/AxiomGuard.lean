@@ -201,6 +201,11 @@ def headlineTheorems : List Name := [
   `Algebraic.MCSP.mcsp_singleCut_card_exactCostSet_le,
   `Algebraic.MCSP.mcsp_sharedGateCount_cost_lower_bound,
   `Algebraic.MCSP.mcsp_binaryFormula_leavesIn_leftHalf_lower_bound,
+  `Algebraic.MCSP.iterPairTruthTable_mem_exactCostSet,
+  `Algebraic.MCSP.card_subfunctions_mcspCostScalar_deMorgan_tableTranslate,
+  `Algebraic.MCSP.mcsp_binaryFormula_leaves_lower_bound,
+  `Algebraic.MCSP.mcsp_binary_circuit_active_sharing_lower_bound,
+  `Algebraic.MCSP.mcsp_binary_circuit_sharing_lower_bound,
   -- Monotone CLIQUE needs more than 2^√k binary AND/OR gates when k ≤ n^(1/4)
   `Algebraic.Monotone.Clique.Asymptotic.twoPow_two_mul_sqrt_lt_circuitSize,
   `Algebraic.Monotone.Clique.Asymptotic.rpow_sqrt_lt_circuitSize,
