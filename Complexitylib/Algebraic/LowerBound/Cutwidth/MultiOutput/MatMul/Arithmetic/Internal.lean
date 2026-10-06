@@ -60,19 +60,6 @@ theorem eval_matMulPolynomial {K : Type*} [CommSemiring K] (z : Fin (n * n + n *
   rw [output_eq o, matMulPolynomial, matMul_output, matMul_output, map_sum]
   simp
 
-/-- Every output of matrix multiplication is a nonconstant function: it vanishes at zero and is
-one at `A = E i j`, `B = E j k`. -/
-theorem matMul_nonconstant {K : Type*} [Field K] (hn : 0 < n) (o : Fin (n * n)) :
-    ∃ x y : Fin (n * n + n * n) → K, matMul n x o ≠ matMul n y o := by
-  classical
-  rw [output_eq o]
-  set i := (finProdFinEquiv.symm o).1
-  set k := (finProdFinEquiv.symm o).2
-  refine ⟨0, matMulInput (Matrix.single i ⟨0, hn⟩ 1) (Matrix.single ⟨0, hn⟩ k 1), ?_⟩
-  rw [matMul_matMulInput, Matrix.single_mul_single_same, Matrix.single_apply_same, mul_one,
-    matMul_output]
-  simp
-
 /-! ## The cut bounds -/
 
 section Cut

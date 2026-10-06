@@ -68,11 +68,11 @@ threshold depends only on `ε`. The bound holds
 * for formal computation with polynomial gates over every field
   (`eventually_lt_size_of_matMul_formal`),
 * for computation of the product as a function with polynomial gates over every infinite field
-  (`eventually_lt_size_of_matMul_of_infinite`), and
+  (`eventually_lt_size_of_matMul_of_infinite_jacobian`), and
 * for the number of additions and multiplications of arithmetic circuits, with arbitrary
   constants free, computing the product over every infinite field
-  (`eventually_lt_arithmeticCost_of_matMul`) or formally computing the polynomials over every
-  field (`eventually_lt_arithmeticCost_of_matMul_formal`,
+  (`eventually_lt_arithmeticCost_of_matMul_jacobian`) or formally computing the polynomials over every
+  field (`eventually_lt_arithmeticCost_of_matMul_formal_jacobian`,
   `eventually_lt_arithmeticCost_of_matMul_formal_thirtyEight_div_nine`).
 
 *Prior art.* Bläser (*A 5/2 n²-lower bound for the multiplicative complexity of
@@ -105,11 +105,6 @@ theorem aeval_matMulPolynomial {K A : Type*} [CommSemiring K] [CommSemiring A] [
 theorem eval_matMulPolynomial {K : Type*} [CommSemiring K] (z : Fin (n * n + n * n) → K)
     (o : Fin (n * n)) : MvPolynomial.eval z (matMulPolynomial K n o) = matMul n z o :=
   MatMul.ArithmeticInternal.eval_matMulPolynomial z o
-
-/-- Every output of matrix multiplication is a nonconstant function. -/
-theorem matMul_nonconstant {K : Type*} [Field K] (hn : 0 < n) (o : Fin (n * n)) :
-    ∃ x y : Fin (n * n + n * n) → K, matMul n x o ≠ matMul n y o :=
-  MatMul.ArithmeticInternal.matMul_nonconstant hn o
 
 /-! ## The charging inequality -/
 
@@ -231,7 +226,7 @@ theorem eventually_lt_size_of_matMul_formal_thirtyEight_div_nine {ε : ℝ} (hε
 every infinite field, every circuit whose operations are polynomial functions of at most two
 arguments and which computes the product of two `n × n` matrices as a function has more than
 `(2 + 5/(16 κ_E) - ε) n²` gates. -/
-theorem eventually_lt_size_of_matMul_of_infinite {ε : ℝ} (hε : 0 < ε) :
+theorem eventually_lt_size_of_matMul_of_infinite_jacobian {ε : ℝ} (hε : 0 < ε) :
     ∀ᶠ n : Nat in atTop, ∀ (K : Type u) [Field K] [Infinite K] (σ : Signature.{v})
       (I : Interpretation σ K), Polynomial.IsPolynomial I →
       ∀ c : Circuit σ (n * n + n * n) (n * n), c.FanInAtMost 2 → c.Computes I (matMul n) →
@@ -247,18 +242,18 @@ theorem eventually_lt_size_of_matMul_of_infinite {ε : ℝ} (hε : 0 < ε) :
 infinite field, every circuit of additions, multiplications and constants computing the product
 of two `n × n` matrices performs more than `(2 + 5/(16 κ_E) - ε) n²` additions and
 multiplications; constants are free. -/
-theorem eventually_lt_arithmeticCost_of_matMul {ε : ℝ} (hε : 0 < ε) :
+theorem eventually_lt_arithmeticCost_of_matMul_jacobian {ε : ℝ} (hε : 0 < ε) :
     ∀ᶠ n : Nat in atTop, ∀ (K : Type u) [Field K] [Infinite K] (Kc : Type v) (constant : Kc → K)
       (c : Circuit (Arithmetic.signature Kc) (n * n + n * n) (n * n)),
         c.Computes (Arithmetic.interpretation constant) (matMul n) →
           (2 + 5 / (16 * Gaussian.frontierCoefficient) - ε) * n ^ 2 <
             c.cost Arithmetic.gateCost := by
-  filter_upwards [eventually_lt_size_of_matMul_of_infinite.{u, u} hε, eventually_gt_atTop 0]
+  filter_upwards [eventually_lt_size_of_matMul_of_infinite_jacobian.{u, u} hε, eventually_gt_atTop 0]
     with n bound hn
   intro K _ _ Kc constant c hc
   obtain ⟨d, size, fan, agrees⟩ := Polynomial.exists_polynomial_circuit_of_nonconstant
     (by positivity : 0 < n * n + n * n) constant c fun o => by
-      obtain ⟨x, y, hxy⟩ := matMul_nonconstant (K := K) hn o
+      obtain ⟨x, y, hxy⟩ := matMul_nonconstant (K := K) o
       exact ⟨x, y, by rwa [hc x, hc y]⟩
   have result := bound K (Polynomial.signature K) (Polynomial.interpretation K)
     Polynomial.isPolynomial_interpretation d fan fun x => (agrees x).trans (hc x)
@@ -269,14 +264,14 @@ large `n`, over every field `K`, every circuit of additions, multiplications and
 `K` formally computing the product of two `n × n` matrices performs more than
 `(2 + 5/(16 κ_E) - ε) n²` additions and multiplications; constants are free. The circuit run
 over the infinite field `K(t)` computes the product there. -/
-theorem eventually_lt_arithmeticCost_of_matMul_formal {ε : ℝ} (hε : 0 < ε) :
+theorem eventually_lt_arithmeticCost_of_matMul_formal_jacobian {ε : ℝ} (hε : 0 < ε) :
     ∀ᶠ n : Nat in atTop, ∀ (K : Type u) [Field K] (Kc : Type v) (constant : Kc → K)
       (c : Circuit (Arithmetic.signature Kc) (n * n + n * n) (n * n)),
         Taylor.FormallyComputes (Taylor.arithmeticPolynomial constant) c
             (matMulPolynomial K n) →
           (2 + 5 / (16 * Gaussian.frontierCoefficient) - ε) * n ^ 2 <
             c.cost Arithmetic.gateCost := by
-  filter_upwards [eventually_lt_arithmeticCost_of_matMul.{u, v} hε] with n bound
+  filter_upwards [eventually_lt_arithmeticCost_of_matMul_jacobian.{u, v} hε] with n bound
   intro K _ Kc constant c hc
   have : Infinite (RatFunc K) :=
     Infinite.of_injective _ (RatFunc.algebraMap_injective K)
@@ -296,7 +291,7 @@ theorem eventually_lt_arithmeticCost_of_matMul_formal_thirtyEight_div_nine {ε :
         Taylor.FormallyComputes (Taylor.arithmeticPolynomial constant) c
             (matMulPolynomial K n) →
           (38 / 9 - ε) * n ^ 2 < c.cost Arithmetic.gateCost := by
-  filter_upwards [eventually_lt_arithmeticCost_of_matMul_formal.{u, v} hε] with n hn
+  filter_upwards [eventually_lt_arithmeticCost_of_matMul_formal_jacobian.{u, v} hε] with n hn
   intro K _ Kc constant c hc
   refine lt_of_le_of_lt ?_ (hn K Kc constant c hc)
   exact mul_le_mul_of_nonneg_right (by linarith [thirtyEight_div_nine_le_two_add_five_div])

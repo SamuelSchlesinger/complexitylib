@@ -442,9 +442,9 @@ def headlineTheorems : List Name := [
   `Algebraic.Cutwidth.MultiOutput.fifteen_mul_sq_sub_le_of_matMul_formal,
   `Algebraic.Cutwidth.MultiOutput.eventually_lt_size_of_matMul_formal,
   `Algebraic.Cutwidth.MultiOutput.eventually_lt_size_of_matMul_formal_thirtyEight_div_nine,
-  `Algebraic.Cutwidth.MultiOutput.eventually_lt_size_of_matMul_of_infinite,
-  `Algebraic.Cutwidth.MultiOutput.eventually_lt_arithmeticCost_of_matMul,
-  `Algebraic.Cutwidth.MultiOutput.eventually_lt_arithmeticCost_of_matMul_formal,
+  `Algebraic.Cutwidth.MultiOutput.eventually_lt_size_of_matMul_of_infinite_jacobian,
+  `Algebraic.Cutwidth.MultiOutput.eventually_lt_arithmeticCost_of_matMul_jacobian,
+  `Algebraic.Cutwidth.MultiOutput.eventually_lt_arithmeticCost_of_matMul_formal_jacobian,
   `Algebraic.Cutwidth.MultiOutput.eventually_lt_arithmeticCost_of_matMul_formal_thirtyEight_div_nine,
   -- Quadratic forms: the (25/9 - ε) N bound for polynomial gates over every field
   `Algebraic.Cutwidth.MultiOutput.blockRank_add_transpose_le_of_formallyComputes,
