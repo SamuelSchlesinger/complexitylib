@@ -18,12 +18,13 @@ import Complexitylib.Algebraic.LowerBound.Cutwidth.MultiOutput.MatMul.Arithmetic
 Let `matMulPolynomial K n` be the `n²` outputs `C i k = ∑ j, A i j B j k` of the product of two
 `n × n` matrices, as polynomials in the `2 n²` inputs with coefficients in a field `K`
 (`MatMul.Arithmetic.Defs`). Consider circuits whose gates are polynomials with coefficients in
-`K`, of any degree, with at most two arguments (`Taylor.FormallyComputes`): every output wire
-carries the polynomial `C i k`. The size counts gates; inputs and output designations are free,
-and gate polynomials carry their coefficients, so only explicit nullary gate occurrences are
-counted beyond the operations. For circuits of additions, multiplications and constants
-(`Arithmetic.signature`) the cost counts the additions and multiplications and constants are
-free.
+`K`, of any degree and arity, that formally compute matrix multiplication
+(`Taylor.FormallyComputes`): every output wire carries the polynomial `C i k`. The size bounds
+are for circuits of fan-in at most two. The size counts gates; inputs and output designations
+are free, and gate polynomials carry their coefficients, so only explicit nullary gate
+occurrences are counted beyond the operations. For circuits of additions, multiplications and
+constants (`Arithmetic.signature`) the cost counts the additions and multiplications, and
+constants are free.
 
 **The cut bounds** (`charges_le_of_matMul_formal`). Let a split `S` of the wires be crossed by
 `w` forward and backward signals, and place the terminals as in `MatMul.Tripartite`, with

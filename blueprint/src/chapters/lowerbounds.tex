@@ -13470,6 +13470,181 @@ no superlinear unrestricted circuit theorem follows from them alone.
   the logarithmic term $O(\log n)$ are $o(n^2)$.
 \end{proof}
 
+\begin{definition}[The Jacobian charges of matrix multiplication]
+  \label{def:lowerbounds-algebraic-mat-mul-jacobian-charges}
+  \lean{Algebraic.Cutwidth.MultiOutput.matMulPolynomial,
+    Algebraic.Cutwidth.MultiOutput.Tripartite.jacobianRows,
+    Algebraic.Cutwidth.MultiOutput.Tripartite.jacobianCols,
+    Algebraic.Cutwidth.MultiOutput.Tripartite.jacobianChargeI,
+    Algebraic.Cutwidth.MultiOutput.Tripartite.jacobianChargeK}
+  \leanok
+  \uses{def:lowerbounds-algebraic-mat-mul,
+    def:lowerbounds-algebraic-mat-mul-terminal-graph}
+  Over a commutative semiring $K$, the outputs of $n\times n$ matrix
+  multiplication are the polynomials $C_{ik}=\sum_jA_{ij}B_{jk}$ in the
+  $2n^2$ inputs. For sets $c_Y$, $a_X$, $b_X$ of index pairs and a set $H$ of
+  row indices, the \emph{row Jacobian sum} is
+  \[
+    \sum_{i\in H}\min\{|\{k:(i,k)\in c_Y\}|,|\{j:(i,j)\in a_X\}|\}
+    + \sum_k\min\{|\{i\notin H:(i,k)\in c_Y\}|,|\{j:(j,k)\in b_X\}|\} ,
+  \]
+  and for a set $H$ of column indices the \emph{column Jacobian sum} is its
+  mirror image
+  \[
+    \sum_{k\in H}\min\{|\{i:(i,k)\in c_Y\}|,|\{j:(j,k)\in b_X\}|\}
+    + \sum_i\min\{|\{k\notin H:(i,k)\in c_Y\}|,|\{j:(i,j)\in a_X\}|\} .
+  \]
+  For placed terminals $a$, $b$, $c$ (the pairs $(i,j)$, $(j,k)$, $(i,k)$
+  whose terminals $A_{ij}$, $B_{jk}$, $C_{ik}$ are placed) with heavy rows
+  $H_I$ and heavy columns $H_K$, the \emph{row Jacobian charge} $L_I$ is the
+  row Jacobian sum of $(c^{\mathsf c},a,b,H_I)$ plus that of
+  $(c,a^{\mathsf c},b^{\mathsf c},H_I^{\mathsf c})$, and the \emph{column
+  Jacobian charge} $L_K$ is the column Jacobian sum of
+  $(c^{\mathsf c},a,b,H_K)$ plus that of
+  $(c,a^{\mathsf c},b^{\mathsf c},H_K^{\mathsf c})$.
+\end{definition}
+
+\begin{theorem}[Arithmetic matrix multiplication needs $(2+5/(16p)-\varepsilon)n^2$ gates]
+  \label{thm:lowerbounds-algebraic-mat-mul-arithmetic}
+  \lean{Algebraic.Cutwidth.MultiOutput.aeval_matMulPolynomial,
+    Algebraic.Cutwidth.MultiOutput.eval_matMulPolynomial,
+    Algebraic.Cutwidth.MultiOutput.matMul_nonconstant,
+    Algebraic.Cutwidth.MultiOutput.Tripartite.fifteen_mul_sq_le_eight_mul_charge,
+    Algebraic.Cutwidth.MultiOutput.charges_le_of_matMul_formal,
+    Algebraic.Cutwidth.MultiOutput.mem_component_of_matMul_formal,
+    Algebraic.Cutwidth.MultiOutput.fifteen_mul_sq_sub_le_of_matMul_formal,
+    Algebraic.Cutwidth.MultiOutput.eventually_lt_size_of_matMul_formal_of_orderingBound,
+    Algebraic.Cutwidth.MultiOutput.eventually_lt_size_of_matMul_formal,
+    Algebraic.Cutwidth.MultiOutput.thirtyEight_div_nine_le_two_add_five_div,
+    Algebraic.Cutwidth.MultiOutput.eventually_lt_size_of_matMul_formal_thirtyEight_div_nine,
+    Algebraic.Cutwidth.MultiOutput.eventually_lt_size_of_matMul_of_infinite,
+    Algebraic.Cutwidth.MultiOutput.eventually_lt_arithmeticCost_of_matMul,
+    Algebraic.Cutwidth.MultiOutput.eventually_lt_arithmeticCost_of_matMul_formal,
+    Algebraic.Cutwidth.MultiOutput.eventually_lt_arithmeticCost_of_matMul_formal_thirtyEight_div_nine}
+  \leanok
+  \uses{def:lowerbounds-algebraic-mat-mul,
+    def:lowerbounds-algebraic-mat-mul-terminal-graph,
+    def:lowerbounds-algebraic-mat-mul-jacobian-charges,
+    lem:lowerbounds-algebraic-mat-mul-charging,
+    def:lowerbounds-algebraic-taylor-formal,
+    lem:lowerbounds-algebraic-taylor-formal,
+    thm:lowerbounds-algebraic-taylor-rank,
+    lem:lowerbounds-algebraic-poly-mul-hessian,
+    thm:lowerbounds-algebraic-multi-output-ordering,
+    thm:lowerbounds-algebraic-gaussian-coefficient,
+    thm:lowerbounds-algebraic-arithmetic-free-constants}
+  Let a circuit with polynomial gates over a field $K$, of any degree and
+  arity and with any coefficients, formally compute $n\times n$
+  matrix multiplication: every output wire carries the polynomial
+  $C_{ik}=\sum_jA_{ij}B_{jk}$. Its size $s$ counts the gates; inputs and
+  output designations are free. If $n\ge1$, the component of the output
+  $C_{00}$ contains every input and every output. Let $S$ be a set of its
+  wires crossed by $w$ forward and backward signals, and let $R_J$, $L_I$,
+  $L_K$ be the charge of $J$ and the Jacobian charges of the terminals placed
+  in $S$. Then
+  \[
+    R_J,\ L_I,\ L_K \le w ,
+  \]
+  and if the number $h$ of heavy vertices satisfies $3n\le2h\le3n+3$, then
+  $15n^2\le8(R_J+L_I+L_K)+6n+9$. Under $\mathrm{OrderingBound}(A,\eta,C)$
+  with $A+\eta\ge0$, a circuit as above with fan-in at most two satisfies
+  \[
+    \frac{15n^2-6n-9}{24} \le (A+\eta)\max\{s-2n^2,0\} + 3\log_2(2n^2+3s) + C .
+  \]
+  Consequently, if the ordering hypothesis holds with coefficient $A>0$ at
+  every positive slack, then for every $\varepsilon>0$ and all large $n$,
+  independently of the field, the signature, and the gate polynomials, every
+  such circuit has more than $(2+5/(8A)-\varepsilon)n^2$ gates. With the
+  Gaussian pathwidth coefficient $p$ of
+  Theorem~\ref{thm:lowerbounds-algebraic-gaussian-coefficient} and $A=2p$
+  this is $(2+5/(16p)-\varepsilon)n^2\approx(4.2266-\varepsilon)n^2$, and as
+  $2p\le9/32$ it is more than $(38/9-\varepsilon)n^2$. The bound
+  $(2+5/(16p)-\varepsilon)n^2$ also holds for circuits whose operations are
+  polynomial functions of at most two arguments computing the product as a
+  function over an infinite field, and for the number of additions and
+  multiplications, with arbitrary constants free, of arithmetic circuits
+  computing the product as a function over an infinite field or formally
+  computing it over any field; for the last also with $38/9$.
+
+  Bläser (\emph{A $5/2\,n^2$-lower bound for the multiplicative complexity of
+  $n\times n$-matrix multiplication}, STACS 2001) proves that
+  $\tfrac52n^2-3n$ nonscalar multiplications are needed over every field;
+  counting about $n^2$ further gates for the outputs, this is about $3.5n^2$
+  operations in total. Shpilka (\emph{Lower bounds for matrix product},
+  SICOMP 2003) proves $3n^2-o(n^2)$ product gates over $\mathrm{GF}(2)$ for
+  quadratic circuits, about $4n^2$ operations with the outputs. The bound
+  here counts every gate of circuits with arbitrary fan-in-two polynomial
+  gates, and every addition and multiplication of arithmetic circuits.
+\end{theorem}
+\begin{proof}
+  \leanok
+  Over $K(t)$ the Hankel matrix $M=(t^{(i+j)^2})$ is totally regular
+  (Lemma~\ref{lem:lowerbounds-algebraic-poly-mul-hessian}), and the rank
+  consequences of the Taylor cut lemma
+  (Theorem~\ref{thm:lowerbounds-algebraic-taylor-rank}) hold over $K(t)$.
+  The Hessian of $\sum_{ik}M_{ik}C_{ik}$ pairs $A_{ij}$ with $B_{jk}$ through
+  $M_{ik}$ and has no other nonzero entries, so its cross block between the
+  inputs in $S$ and outside $S$ is block diagonal over $j$, with a block of
+  $M$ and one of $M^{\mathsf T}$ whose ranks sum to $g(d(j))$; hence
+  $R_J\le w$. The Jacobian at $A_0=B_0=M$ sends $(\delta A,\delta B)$ to
+  $\delta A\,B_0+A_0\,\delta B$: the derivative of $C_{ik}$ is
+  $[i=i']\,(B_0)_{jk}$ in $A_{i'j}$ and $[k=k']\,(A_0)_{ij}$ in $B_{jk'}$.
+  In the forward block (outputs outside $S$, inputs in $S$), choose for each
+  heavy row $i$ a square minor of $B_0$ between the outputs $C_{ik}$ and the
+  inputs $A_{ij}$, then for each column $k$ a square minor of $A_0$ between
+  the outputs $C_{ik}$ of light rows and the inputs $B_{jk}$. Ordered this
+  way the chosen square submatrix is block triangular, since an output of a
+  light row does not depend on the entries $A_{i'j}$ of another row, and its
+  diagonal blocks are nonsingular; the backward block, with the light rows
+  first, is the same. The two blocks have ranks summing to at most $w$, so
+  $L_I\le w$, and grouping by columns gives $L_K\le w$.
+
+  For the charging inequality, charge every terminal with one light and one
+  heavy endpoint to its light endpoint if it is placed and to its heavy one
+  otherwise, as in Lemma~\ref{lem:lowerbounds-algebraic-mat-mul-charging};
+  let $x$, $y$, $z$ be the numbers of heavy vertices in $I$, $J$, $K$ and
+  $C_{\mathrm{LH}}$ the number of light--heavy $C$ terminals. Then $R_J$ pays
+  for the $A$ and $B$ terminals charged to $J$. At a heavy row the forward
+  term of $L_I$ is the number of unplaced $C_{ik}$, at a light row the
+  backward term is the number of placed ones; at a heavy column $k$ the
+  forward term is the number of $C$ terminals charged to $k$ and the backward
+  term is at least the number of $B$ terminals charged to $k$ less the
+  unplaced heavy--heavy $C_{ik}$ and less $(n-x-y)^+$, and symmetrically at a
+  light column. The light--light and heavy--heavy $C$ terminals counted at
+  the rows and at the columns cancel, so
+  $L_I+z(n-x-y)^++(n-z)(x+y-n)^+$ is at least $C_{\mathrm{LH}}$ plus the
+  number of $B$ terminals charged to $K$; transposing the terminal graph
+  gives the mirror bound for $L_K$ with the $A$ terminals charged to $I$.
+  Summing, $R_J+L_I+L_K$ plus the two overshoot terms is at least the number
+  $P$ of light--heavy terminals plus $C_{\mathrm{LH}}$. With
+  $x=n/2+u$, $z=n/2+w'$ and $\delta=x+y+z-3n/2$, the total equals
+  $2n^2+\varphi(u)+\varphi(w')$ with
+  $\varphi(u)=u^2-\delta u-\tfrac n2|u-\delta|\ge-(n/2+\delta)^2/4$, so it is
+  at least $\tfrac{15}8n^2-n\delta/2-\delta^2/2$, and $0\le2\delta\le3$ at the
+  threshold.
+
+  The component of $C_{00}$ is crossed by no signal, so at the point where
+  every input is one both Jacobian blocks vanish; there $C_{ik}$ has
+  derivative one in every $A_{ij}$ and every $B_{jk}$, so $C_{ik}$, $A_{ij}$
+  and $B_{jk}$ lie together in or out of the component, which therefore
+  holds every terminal. The terminals lie on distinct wires, since the
+  circuit computes the product over $K$. Along the ranking of
+  Theorem~\ref{thm:lowerbounds-algebraic-multi-output-ordering}, the
+  threshold prefix of Lemma~\ref{lem:lowerbounds-algebraic-mat-mul-charging}
+  ends at a terminal and has $15n^2\le24w+6n+9$; it is charged to the
+  component holding all $2n^2$ inputs and at most $s$ gates. For the
+  asymptotic form, assume at most $(2+5/(8A)-\varepsilon)n^2$ gates and
+  choose $\eta=A^2\varepsilon/2$: the cycle term is at most
+  $(5/8-A\varepsilon/2)n^2$, while the linear loss and the logarithmic term
+  are $o(n^2)$. Over an infinite field a polynomial is determined by its
+  values (Lemma~\ref{lem:lowerbounds-algebraic-taylor-formal}), and every
+  output is nonconstant, so constant gates can be absorbed into the
+  coefficients
+  (Theorem~\ref{thm:lowerbounds-algebraic-arithmetic-free-constants}). An
+  arithmetic circuit formally computing the product over $K$ computes it as
+  a function over the infinite field $K(t)$.
+\end{proof}
+
 \begin{theorem}[Multiplication in $\mathrm{GF}(2^n)$ needs $2n-1$ conjunction gates]
   \label{thm:lowerbounds-algebraic-field-mul-conjunctions}
   \lean{Algebraic.Aggregate.Geometry.FieldMul.boolFieldMul,
