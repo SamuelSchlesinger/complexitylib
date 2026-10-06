@@ -151,8 +151,8 @@ theorem averageCase_gaussian {ε : ℝ} (hε : 0 < ε)
         (c.innerSize : ℝ) ≤
           (1 + Real.pi / (3 * Real.arccos ((1 + 2 * Real.sqrt 2) / 4)) - ε) * n →
         agreement (f n) (fun x => c.eval I x 0) ≤ 1 / 2 + b n + (2 : ℝ) ^ (-γ * n) := by
-  let A := 2 * Algebraic.Cutwidth.Gaussian.frontierCoefficient
-  have hA : 0 < A := two_mul_frontierCoefficient_pos
+  let A := 2 * Gaussian.gaussianCoefficient
+  have hA : 0 < A := mul_pos two_pos Gaussian.gaussianCoefficient_pos
   let γ := min 1 (A * ε) / 2
   have hγ : 0 < γ := by dsimp [γ]; positivity
   have hγ1 : γ < 1 := by have := min_le_left (1 : ℝ) (A * ε); dsimp [γ]; linarith
@@ -164,6 +164,6 @@ theorem averageCase_gaussian {ε : ℝ} (hε : 0 < ε)
   refine ⟨γ, hγ, ?_⟩
   have H := averageCase hA layoutBound_gaussian hε hγ1 hγε f K b hK2 hK hb hf
   dsimp [A] at H
-  rwa [Algebraic.Cutwidth.Gaussian.one_add_inv_two_mul_frontierCoefficient] at H
+  rwa [Gaussian.one_add_inv_two_mul_gaussianCoefficient] at H
 
 end Complexity.Frontier

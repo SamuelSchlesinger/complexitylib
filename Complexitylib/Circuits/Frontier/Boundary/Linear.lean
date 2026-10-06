@@ -5,7 +5,7 @@ Authors: Samuel Schlesinger
 -/
 module
 
-public import Complexitylib.Mathlib.SetNcard
+public import Complexitylib.Mathlib.Frontier.SetCard
 public import Mathlib.LinearAlgebra.FiniteDimensional.Lemmas
 public import Mathlib.FieldTheory.Finiteness
 

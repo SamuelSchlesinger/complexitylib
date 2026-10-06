@@ -7,6 +7,7 @@ module
 
 public import Complexitylib.Circuits.Frontier.AverageCase.Main
 import Mathlib.Algebra.BigOperators.Group.Finset.Sigma
+import Mathlib.Analysis.SpecialFunctions.Pow.Asymptotics
 import Mathlib.Tactic
 
 /-!
@@ -117,5 +118,35 @@ theorem averageCase_sumset {ε : ℝ} (hε : 0 < ε)
           (1 + Real.pi / (3 * Real.arccos ((1 + 2 * Real.sqrt 2) / 4)) - ε) * n →
         agreement (f n) (fun x => c.eval I x 0) ≤ 1 / 2 + b n + (2 : ℝ) ^ (-γ * n) :=
   averageCase_gaussian hε f K b hK2 hK hb (hf.mono fun _ h => h.rectangleBias)
+
+/-- Polynomially small extractor error gives polynomially small agreement advantage.
+The entropy hypothesis is still only `log K = o(n)`, allowing polylogarithmic entropy.
+The exponent `α` may be any real number; a positive exponent gives the intended decay. -/
+theorem averageCase_sumset_polynomial {ε : ℝ} (hε : 0 < ε)
+    (f : ∀ n, (Fin n → Bool) → Bool) (K : ℕ → ℕ) (b : ℕ → ℝ)
+    (hK2 : ∀ᶠ n in atTop, 1 < K n)
+    (hK : (fun n => Real.log (K n)) =o[atTop] fun n => (n : ℝ))
+    (hb : ∀ᶠ n in atTop, 0 ≤ b n)
+    (hf : ∀ᶠ n in atTop, FlatSumsetBias (f n) (K n) (2 * b n))
+    {α C : ℝ} (hpoly : ∀ᶠ n in atTop, b n ≤ C * (n : ℝ) ^ (-α)) :
+    ∀ᶠ n in atTop,
+      ∀ (σ : Signature.{v}) (I : Interpretation σ Bool) (c : Circuit σ n 1),
+        c.FanInAtMost 2 →
+        (c.innerSize : ℝ) ≤
+          (1 + Real.pi / (3 * Real.arccos ((1 + 2 * Real.sqrt 2) / 4)) - ε) * n →
+        agreement (f n) (fun x => c.eval I x 0) ≤
+          1 / 2 + (C + 1) * (n : ℝ) ^ (-α) := by
+  obtain ⟨γ, hγ, h⟩ := averageCase_sumset hε f K b hK2 hK hb hf
+  have hdecay := (isLittleO_exp_neg_mul_rpow_atTop
+    (mul_pos hγ (Real.log_pos (by norm_num : (1 : ℝ) < 2))) (-α)).comp_tendsto
+      (tendsto_natCast_atTop_atTop (R := ℝ))
+  filter_upwards [h, hpoly, hdecay.bound (by norm_num : (0 : ℝ) < 1)] with n hn hbnd hexp
+  intro σ I c hfan hsize
+  have htail : (2 : ℝ) ^ (-γ * n) ≤ (n : ℝ) ^ (-α) := by
+    simpa only [Function.comp_apply, Real.norm_eq_abs, abs_of_pos (Real.exp_pos _),
+      abs_of_nonneg (Real.rpow_nonneg (Nat.cast_nonneg _) _), one_mul,
+      Real.rpow_def_of_pos (by norm_num : (0 : ℝ) < 2),
+      show Real.log 2 * (-γ * n) = -(γ * Real.log 2) * n by ring] using hexp
+  linarith [hn σ I c hfan hsize]
 
 end Complexity.Frontier

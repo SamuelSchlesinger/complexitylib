@@ -24,8 +24,13 @@ public import Complexitylib.Circuits.Frontier.Signals
 public import Complexitylib.Circuits.Frontier.AverageCase.Extractor
 public import Complexitylib.Circuits.Frontier.Boundary.Code
 public import Complexitylib.Circuits.Frontier.AverageCase.Pruning
+public import Complexitylib.Circuits.Frontier.Boundary.Communication
 public import Complexitylib.Circuits.Frontier.Tree.Network
 public import Complexitylib.Circuits.Frontier.Layouts.Local
+public import Complexitylib.Circuits.Frontier.Decomposable
+public import Complexitylib.Circuits.Frontier.Boundary.Fiber
+public import Complexitylib.Circuits.Frontier.Boundary.MDS
+public import Complexitylib.Circuits.Frontier.Cutwidth
 public import Complexitylib.Circuits.Frontier.Explicit
 
 /-!
@@ -45,8 +50,9 @@ A circuit lower bound from graph layouts, in independent pieces:
 * `Frontier.Demand`: demand and supply, the comparison that ends every lower bound.
 * `Frontier.Reduction` and `Frontier.LowerBound`: a small circuit yields a graph of small cycle
   rank all of whose layouts are wide; the layout hypothesis finishes the proof.
-* `Frontier.Layouts`: Gaussian layouts for subcubic graphs and a spanning-tree layout bound
-  for every fixed maximum degree. `Frontier.Layouts.Local`: independent median updates
+* `Frontier.Layouts`: Gaussian cycle-rank layout bounds in every fixed degree, including
+  the sharper median-edge estimate for subcubic graphs.
+  `Frontier.Layouts.Local`: independent median updates
   cannot increase any threshold cut.
 * `Frontier.Linear`: totally regular linear maps, over finite fields with any basis and over
   infinite fields with polynomial operations; Cauchy matrices and arithmetic circuits.
@@ -57,9 +63,15 @@ A circuit lower bound from graph layouts, in independent pieces:
 * `Frontier.Signals`: frontier capacity measured by distinct circuit signals.
 * `Frontier.AverageCase`: coherent weighted peeling and average-case circuit hardness from
   rectangle bias or sumset bias, with an exponentially small remainder below `L n`.
+  Polynomially small sumset bias gives polynomially small agreement advantage.
 * `Frontier.Boundary`: hypergraph signal boundaries, exact linear syndrome states, and
-  transition codes. `Frontier.AverageCase.Pruning`: transition deletion with an explicit tail
-  budget. `Frontier.Tree`: weighted peeling on trees of regions, with joint merge capacity.
+  transition codes; mixed input-output fiber demand and nonlinear MDS lower bounds.
+  `Frontier.Decomposable`: threshold counting for smooth union/product DAGs with
+  overlapping certificates. `Frontier.AverageCase.Pruning`: transition deletion with an
+  explicit tail budget. `Frontier.Tree`: weighted peeling on trees of regions, with joint
+  merge capacity.
+  `Frontier.AverageCase.Capacity`: capped transition masses and square-root moments.
+  `Frontier.Boundary.Communication`: conditional prefix potentials for dependent encodings.
 
 The main theorem is `Frontier.lowerBound`: under `LayoutBound (r + 1) A`, circuits of fan-in at
 most `r` deciding dense rectangle-free sets satisfy `(r - 1) s > (1 + 1/A - ε) n`. For fan-in
@@ -69,4 +81,9 @@ two this is `s > (L - ε) n` with `L = 1 + 1/A`. The layout bound holds with
 coefficient holds for totally regular maps (`Frontier.lowerBound_linear`,
 `Frontier.arith_cauchy_gaussian`) and with sublinearly many fixed-monoid aggregate gates
 (`Frontier.lowerBound_ledger`, `Frontier.lowerBound_aggregate_gaussian`).
+The degree-four coefficient `2/5` gives `s > (7/4 - ε)n` for fan-in three
+(`Frontier.lowerBound_fanInThree`). Finite-alphabet MDS maps inherit these coefficients
+through `Frontier.lowerBound_mds`.
+For every fixed `r ≥ 2`, `Frontier.lowerBound_degree` gives
+`(r - 1)s > (1 + 1/A_(r+1) - ε)n`, where `A_d = 3d/(2d-3) * arccos(2√(d-1)/d)/π < 3/4`.
 -/

@@ -67,11 +67,11 @@ def peers (v : N) (x : ι → U) : Set (ι → U) := {y ∈ S | P.message v y = 
 def inside (v : N) (x : ι → U) : Set (P.region v → U) :=
   (P.region v).domRestrict '' P.peers v x
 
-/-- The restrictions of the peers of `x` at `v` to the complement of the region of `v`. -/
+/-- The restrictions of the peers of `x` at `v` to the complement of its region. -/
 def outside (v : N) (x : ι → U) : Set (↥(P.region v)ᶜ → U) :=
   (P.region v)ᶜ.domRestrict '' P.peers v x
 
-/-- The inputs of the region of `v` in neither child region: those read at `v` itself. -/
+/-- The inputs of the region of `v` in neither child region: those read at `v`. -/
 def localInputs (v : N) : Set ι := P.region v \ (P.region (P.left v) ∪ P.region (P.right v))
 
 /-- A merge includes all three messages, together with inputs read locally. -/

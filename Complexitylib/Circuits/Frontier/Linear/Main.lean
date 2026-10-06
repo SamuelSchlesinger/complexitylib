@@ -39,9 +39,12 @@ universe u v
 
 /-- The coefficient of the Gaussian layout bound. -/
 private theorem one_add_one_div_gaussian :
-    1 + 1 / (2 * Algebraic.Cutwidth.Gaussian.frontierCoefficient) =
+    1 + 1 / (2 * Gaussian.gaussianCoefficient) =
       1 + Real.pi / (3 * Real.arccos ((1 + 2 * Real.sqrt 2) / 4)) :=
-  Algebraic.Cutwidth.Gaussian.one_add_inv_two_mul_frontierCoefficient
+  Gaussian.one_add_inv_two_mul_gaussianCoefficient
+
+private theorem two_gaussian_pos : 0 < 2 * Gaussian.gaussianCoefficient :=
+  mul_pos two_pos Gaussian.gaussianCoefficient_pos
 
 /-- **Totally regular maps over finite fields**, for every basis of fan-in two. -/
 theorem linear_finite_gaussian {ε : ℝ} (hε : 0 < ε) :
@@ -50,8 +53,8 @@ theorem linear_finite_gaussian {ε : ℝ} (hε : 0 < ε) :
         TotallyRegular M → c.FanInAtMost 2 → c.Computes I (fun x => M *ᵥ x) →
           (1 + Real.pi / (3 * Real.arccos ((1 + 2 * Real.sqrt 2) / 4)) - ε) * N <
             c.innerSize := by
-  filter_upwards [lowerBound_linear_finite.{u, v} le_rfl two_mul_frontierCoefficient_pos
-    layoutBound_gaussian hε] with N hN
+  filter_upwards [lowerBound_linear_finite.{u, v} le_rfl two_gaussian_pos layoutBound_gaussian
+    hε] with N hN
   intro F _ _ σ I M c hM hfan hc
   have h := hN F σ I M c hM hfan hc
   rw [one_add_one_div_gaussian] at h
@@ -67,7 +70,7 @@ theorem linear_polynomial_gaussian {ε : ℝ} (hε : 0 < ε) :
           c.Computes I (fun x => M *ᵥ x) →
             (1 + Real.pi / (3 * Real.arccos ((1 + 2 * Real.sqrt 2) / 4)) - ε) * N <
               c.innerSize := by
-  filter_upwards [lowerBound_linear_polynomial.{u, v} le_rfl two_mul_frontierCoefficient_pos
+  filter_upwards [lowerBound_linear_polynomial.{u, v} le_rfl two_gaussian_pos
     layoutBound_gaussian hε] with N hN
   intro F _ _ σ I hI M c hM hfan hc
   have h := hN F σ I hI M c hM hfan hc
@@ -107,5 +110,54 @@ theorem cauchyZMod_gaussian {ε : ℝ} (hε : 0 < ε) :
   intro q _ hq σ I c hfan hc
   have : NeZero q := ⟨(Fact.out : q.Prime).ne_zero⟩
   exact hN (ZMod q) σ I _ c (totallyRegular_cauchyZMod q N hq) hfan hc
+
+/-- Totally regular maps over finite fields also have the ternary `7N/4 - o(N)` bound. -/
+theorem linear_finite_fanInThree {ε : ℝ} (hε : 0 < ε) :
+    ∀ᶠ N in atTop, ∀ (F : Type u) [Field F] [Finite F] (σ : Signature.{v})
+      (I : Interpretation σ F) (M : Matrix (Fin N) (Fin N) F) (c : Circuit σ N N),
+        TotallyRegular M → c.FanInAtMost 3 → c.Computes I (fun x => M *ᵥ x) →
+          (7 / 4 - ε) * N < c.innerSize := by
+  filter_upwards [lowerBound_linear_finite.{u, v} (by norm_num : 2 ≤ 3)
+    (by norm_num : (0 : ℝ) < 2 / 5) layoutBound_two_fifths
+    (show 0 < 2 * ε by positivity)] with N hN
+  intro F _ _ σ I M c hM hfan hc
+  have H := hN F σ I M c hM hfan hc
+  norm_num at H
+  linarith
+
+/-- **Every fixed fan-in over finite fields**, with the Gaussian degree coefficient. -/
+theorem linear_finite_degree {r : ℕ} (hr : 2 ≤ r) {ε : ℝ} (hε : 0 < ε) :
+    ∀ᶠ N in atTop, ∀ (F : Type u) [Field F] [Finite F] (σ : Signature.{v})
+      (I : Interpretation σ F) (M : Matrix (Fin N) (Fin N) F) (c : Circuit σ N N),
+        TotallyRegular M → c.FanInAtMost r → c.Computes I (fun x => M *ᵥ x) →
+          (1 + 1 / Gaussian.degreeCoefficient (r + 1) - ε) * N <
+            (r - 1) * c.innerSize :=
+  lowerBound_linear_finite hr (Gaussian.degreeCoefficient_pos (by lia))
+    (layoutBound_degree (by lia)) hε
+
+/-- **Every fixed fan-in over infinite fields**, for polynomial operations. -/
+theorem linear_polynomial_degree {r : ℕ} (hr : 2 ≤ r) {ε : ℝ} (hε : 0 < ε) :
+    ∀ᶠ N in atTop, ∀ (F : Type u) [Field F] [Infinite F] (σ : Signature.{v})
+      (I : Interpretation σ F), IsPolynomial I → ∀ (M : Matrix (Fin N) (Fin N) F)
+        (c : Circuit σ N N), TotallyRegular M → c.FanInAtMost r →
+          c.Computes I (fun x => M *ᵥ x) →
+            (1 + 1 / Gaussian.degreeCoefficient (r + 1) - ε) * N <
+              (r - 1) * c.innerSize :=
+  lowerBound_linear_polynomial hr (Gaussian.degreeCoefficient_pos (by lia))
+    (layoutBound_degree (by lia)) hε
+
+/-- The ternary bound over infinite fields with polynomial operations. -/
+theorem linear_polynomial_fanInThree {ε : ℝ} (hε : 0 < ε) :
+    ∀ᶠ N in atTop, ∀ (F : Type u) [Field F] [Infinite F] (σ : Signature.{v})
+      (I : Interpretation σ F), IsPolynomial I → ∀ (M : Matrix (Fin N) (Fin N) F)
+        (c : Circuit σ N N), TotallyRegular M → c.FanInAtMost 3 →
+          c.Computes I (fun x => M *ᵥ x) → (7 / 4 - ε) * N < c.innerSize := by
+  filter_upwards [lowerBound_linear_polynomial.{u, v} (by norm_num : 2 ≤ 3)
+    (by norm_num : (0 : ℝ) < 2 / 5) layoutBound_two_fifths
+    (show 0 < 2 * ε by positivity)] with N hN
+  intro F _ _ σ I hI M c hM hfan hc
+  have H := hN F σ I hI M c hM hfan hc
+  norm_num at H
+  linarith
 
 end Complexity.Frontier

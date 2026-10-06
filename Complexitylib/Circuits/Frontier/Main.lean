@@ -22,8 +22,12 @@ every circuit with fan-in at most two deciding `S_n`, over any basis on `U`, has
   (`lowerBound_gaussian`), and in particular
 * `(4 - ε) n` gates (`lowerBound_four`).
 
-For every fixed fan-in `r ≥ 2`, the general-degree spanning-tree bound gives
-`(r - 1) s > (2 - ε)n` (`lowerBound_all_fanIn`).
+For every fixed fan-in `r ≥ 2`, Gaussian vertex layouts give
+`(r - 1) s > (1 + 1/A_(r+1) - ε)n` (`lowerBound_degree`), with
+`A_d = 3d/(2d-3) * arccos(2√(d-1)/d)/π < 3/4`.
+The simpler spanning-tree bound gives `(r - 1) s > (2 - ε)n` (`lowerBound_all_fanIn`).
+At fan-in three the Gaussian vertex layout improves this to
+`s > (7/4 - ε)n` (`lowerBound_fanInThree`).
 
 Constant gates are free: the bounds hold for the number of gates of positive arity
 (`Cslib.Circuits.Circuit.innerSize`), and so for the size.
@@ -49,9 +53,9 @@ theorem lowerBound_gaussian (S : ∀ n, Set (Fin n → U)) (K : ℕ → ℕ)
     ∀ᶠ n in atTop, ∀ (σ : Signature.{v}) (I : Interpretation σ U) (Acc : Set U)
       (c : Circuit σ n 1), c.FanInAtMost 2 → Decides c I Acc (S n) →
         (1 + Real.pi / (3 * Real.arccos ((1 + 2 * Real.sqrt 2) / 4)) - ε) * n < c.innerSize := by
-  have h := lowerBound_fanInTwo two_mul_frontierCoefficient_pos
+  have h := lowerBound_fanInTwo (mul_pos two_pos Gaussian.gaussianCoefficient_pos)
     layoutBound_gaussian S K hfree hK hdense hε
-  rwa [Algebraic.Cutwidth.Gaussian.one_add_inv_two_mul_frontierCoefficient] at h
+  rwa [Gaussian.one_add_inv_two_mul_gaussianCoefficient] at h
 
 /-- **The `(4 - ε) n` lower bound.** -/
 theorem lowerBound_four (S : ∀ n, Set (Fin n → U)) (K : ℕ → ℕ)
@@ -66,7 +70,22 @@ theorem lowerBound_four (S : ∀ n, Set (Fin n → U)) (K : ℕ → ℕ)
   have h := lowerBound_fanInTwo (by norm_num) layoutBound_one_third S K hfree hK hdense hε
   rwa [show (1 : ℝ) + 1 / (1 / 3) = 4 by norm_num] at h
 
-/-- **Every fixed fan-in.** The general-degree layout bound gives
+/-- **Every fixed fan-in, with the Gaussian degree coefficient.** -/
+theorem lowerBound_degree {r : ℕ} (hr : 2 ≤ r)
+    (S : ∀ n, Set (Fin n → U)) (K : ℕ → ℕ)
+    (hfree : ∀ᶠ n in atTop, RectangleFree (S n) (K n))
+    (hK : (fun n => Real.log (K n)) =o[atTop] fun n => (n : ℝ))
+    (hdense : (fun n => n * Real.log (Nat.card U) - Real.log (S n).ncard) =o[atTop]
+      fun n => (n : ℝ))
+    {ε : ℝ} (hε : 0 < ε) :
+    ∀ᶠ n in atTop, ∀ (σ : Signature.{v}) (I : Interpretation σ U) (Acc : Set U)
+      (c : Circuit σ n 1), c.FanInAtMost r → Decides c I Acc (S n) →
+        (1 + 1 / Gaussian.degreeCoefficient (r + 1) - ε) * n <
+          (r - 1) * c.innerSize :=
+  lowerBound hr (Gaussian.degreeCoefficient_pos (by lia)) (layoutBound_degree (by lia))
+    S K hfree hK hdense hε
+
+/-- **Every fixed fan-in, with the spanning-tree coefficient.** The general-degree bound gives
 `(r - 1) s > (2 - ε)n` for every fixed `r ≥ 2`. The Gaussian theorem is sharper at `r = 2`. -/
 theorem lowerBound_all_fanIn {r : ℕ} (hr : 2 ≤ r)
     (S : ∀ n, Set (Fin n → U)) (K : ℕ → ℕ)
@@ -81,5 +100,23 @@ theorem lowerBound_all_fanIn {r : ℕ} (hr : 2 ≤ r)
   simpa only [div_one, one_add_one_eq_two] using
     lowerBound hr (by norm_num : (0 : ℝ) < 1) (layoutBound_one (r + 1))
       S K hfree hK hdense hε
+
+/-- **Ternary gates.** The degree-four layout coefficient `2/5` gives `7n/4 - o(n)` gates
+over every basis of fan-in at most three. -/
+theorem lowerBound_fanInThree (S : ∀ n, Set (Fin n → U)) (K : ℕ → ℕ)
+    (hfree : ∀ᶠ n in atTop, RectangleFree (S n) (K n))
+    (hK : (fun n => Real.log (K n)) =o[atTop] fun n => (n : ℝ))
+    (hdense : (fun n => n * Real.log (Nat.card U) - Real.log (S n).ncard) =o[atTop]
+      fun n => (n : ℝ))
+    {ε : ℝ} (hε : 0 < ε) :
+    ∀ᶠ n in atTop, ∀ (σ : Signature.{v}) (I : Interpretation σ U) (Acc : Set U)
+      (c : Circuit σ n 1), c.FanInAtMost 3 → Decides c I Acc (S n) →
+        (7 / 4 - ε) * n < c.innerSize := by
+  filter_upwards [lowerBound (by norm_num : 2 ≤ 3) (by norm_num : (0 : ℝ) < 2 / 5)
+    layoutBound_two_fifths S K hfree hK hdense (show 0 < 2 * ε by positivity)] with n hn
+  intro σ I Acc c hfan hc
+  have H := hn σ I Acc c hfan hc
+  norm_num at H
+  linarith
 
 end Complexity.Frontier

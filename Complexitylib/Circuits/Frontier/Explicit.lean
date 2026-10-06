@@ -5,12 +5,10 @@ Authors: Samuel Schlesinger
 -/
 module
 
+public import Complexitylib.Circuits.Frontier.Cutwidth
 public import Complexitylib.Circuits.Frontier.Main
 public import Complexitylib.Circuits.Frontier.Nondeterministic
 public import Complexitylib.Circuits.Frontier.Ledger.Main
-public import Complexitylib.Circuits.Frontier.AverageCase.Extractor
-public import Complexitylib.Algebraic.LowerBound.Cutwidth.Extractor.Defs
-public import Complexitylib.Algebraic.LowerBound.Cutwidth.Rectangle
 public import
   Complexitylib.Algebraic.LowerBound.Cutwidth.Extractor.SourceReduction.Construction.Uniform.Defs
 import Complexitylib.Algebraic.LowerBound.Cutwidth.Extractor.SourceReduction.Construction.Uniform
@@ -30,8 +28,11 @@ So every general lower bound of `Complexity.Frontier` applies to this explicit f
 * `sourceReductionHardFamily_lt_innerSize_gaussian`: every circuit of fan-in two, over
   any basis and with any accepting set, has more than `(L - ε) n` gates of positive arity,
   `L = 1 + π/(3 arccos ((1 + 2√2)/4)) ≈ 4.5625`. Constant gates are free.
-* `sourceReductionHardFamily_lt_innerSize_all_fanIn`: for every fan-in `r ≥ 2`,
-  `(r - 1) s > (2 - ε) n`.
+* `sourceReductionHardFamily_lt_innerSize_degree`: for every fan-in `r ≥ 2`,
+  `(r - 1) s > (1 + 1/A_(r+1) - ε) n` with the Gaussian degree coefficient
+  `A_d = 3d/(2d-3) · arccos(2√(d-1)/d)/π < 3/4`; in particular more than `(7/4 - ε) n` gates
+  at fan-in three (`sourceReductionHardFamily_lt_innerSize_fanInThree`), and the simpler
+  spanning-tree bound `(r - 1) s > (2 - ε) n` (`sourceReductionHardFamily_lt_innerSize_all_fanIn`).
 * `sourceReductionHardFamily_lt_innerSize_nondeterministic`: the Gaussian coefficient for
   verifier circuits over any basis, uniformly in the number of witness inputs.
 * `sourceReductionHardFamily_lt_innerGates_aggregate`: the Gaussian coefficient with
@@ -39,14 +40,15 @@ So every general lower bound of `Complexity.Frontier` applies to this explicit f
 
 The unpadded extractor `Algebraic.Cutwidth.Extractor.sourceReductionFamily`, which is also
 uniformly polynomial-time computable, has signed sumset bias `2 · 35/72`
-(`flatSumsetBias_of_flatSumsetExtractor`). The weighted frontier bound then gives explicit
-average-case hardness (`sourceReductionFamily_agreement_le`): every circuit of fan-in two over
-any basis with at most `(L - ε) n` gates of positive arity agrees with it on at most a
-`71/72 + 2^(-γ n)` fraction of inputs.
+(`flatSumsetBias_of_flatSumsetExtractor` in `Frontier.Cutwidth`). The weighted frontier bound
+then gives explicit average-case hardness (`sourceReductionFamily_agreement_le`): every
+circuit of fan-in two over any basis with at most `(L - ε) n` gates of positive arity agrees
+with it on at most a `71/72 + 2^(-γ n)` fraction of inputs.
 
 The cutwidth development proves the first bound for the full binary basis, counting every gate
 (`Algebraic.Cutwidth.sourceReductionHardFamily_eventually_lt_size_gaussian`).
-`rectangleFree_setOf` translates its Boolean rectangle-freeness to the frontier method's.
+`rectangleFree_setOf` (`Frontier.Cutwidth`) translates its Boolean rectangle-freeness to the
+frontier method's. This module is maintained in the library, not mirrored from upstream.
 -/
 
 @[expose] public section
@@ -54,52 +56,6 @@ The cutwidth development proves the first bound for the full binary basis, count
 namespace Complexity.Frontier
 
 open Cslib.Circuits Filter Asymptotics
-
-/-- **Boolean rectangle-freeness.** A Boolean function that is `K`-rectangle-free in the
-sense of the cutwidth development accepts a `K`-rectangle-free set. -/
-theorem rectangleFree_setOf {n K : ℕ} {f : Cslib.BooleanFunction n}
-    (h : Algebraic.Cutwidth.RectangleFree f K) : RectangleFree {x | f x = true} K := by
-  classical
-  intro X A B hAB
-  let U : Finset (Fin n) := X.toFinset
-  have hU (i : Fin n) : i ∈ U ↔ i ∈ X := Set.mem_toFinset
-  let left : (X → Bool) → (U → Bool) := fun a i => a ⟨i, (hU i).1 i.2⟩
-  let right : (↥Xᶜ → Bool) → (↥Uᶜ → Bool) := fun b i =>
-    b ⟨i, fun hi => Finset.mem_compl.1 i.2 ((hU i).2 hi)⟩
-  have injL : left.Injective := by
-    intro a a' haa'
-    funext i
-    simpa [left] using congrFun haa' ⟨i, (hU i).2 i.2⟩
-  have injR : right.Injective := by
-    intro b b' hbb'
-    funext i
-    simpa [right] using congrFun hbb' ⟨i, Finset.mem_compl.2 fun hi => i.2 ((hU i).1 hi)⟩
-  have hglue {a : X → Bool} (ha : a ∈ A) {b : ↥Xᶜ → Bool} (hb : b ∈ B) :
-      f (Algebraic.Cutwidth.glue U (left a) (right b)) = true := by
-    refine hAB (mem_rectangle.2 ⟨?_, ?_⟩)
-    · convert ha using 1
-      funext i
-      simp [Algebraic.Cutwidth.glue, left, (hU i).2 i.2]
-    · convert hb using 1
-      funext i
-      have hi : (i : Fin n) ∉ U := fun h' => i.2 ((hU i).1 h')
-      simp [Algebraic.Cutwidth.glue, right, hi]
-  have hrect := h U ((Set.toFinite A).toFinset.image left) ((Set.toFinite B).toFinset.image right)
-    (by
-      intro p hp q hq
-      obtain ⟨a, ha, rfl⟩ := Finset.mem_image.mp hp
-      obtain ⟨b, hb, rfl⟩ := Finset.mem_image.mp hq
-      exact hglue ((Set.Finite.mem_toFinset _).1 ha) ((Set.Finite.mem_toFinset _).1 hb))
-  rw [Finset.card_image_of_injective _ injL, Finset.card_image_of_injective _ injR] at hrect
-  rwa [Set.ncard_eq_toFinset_card A, Set.ncard_eq_toFinset_card B]
-
-/-- The accepted set of a Boolean function has as many elements as its accepting inputs. -/
-theorem ncard_setOf_eq_card_accepting {n : ℕ} (f : Cslib.BooleanFunction n) :
-    {x | f x = true}.ncard = (Algebraic.Cutwidth.accepting f).card := by
-  rw [← Set.ncard_coe_finset]
-  congr 1
-  ext x
-  simp [Algebraic.Cutwidth.mem_accepting]
 
 /-- **The explicit family satisfies the hypotheses of the frontier method**: its accepted
 sets are eventually rectangle-free with a threshold of logarithm `o(n)`, and their logarithmic
@@ -147,41 +103,6 @@ theorem sourceReductionHardFamily_frontierHypotheses :
     rw [Real.log_pow]
     ring
 
-/-- Signed sums of Boolean signs count the accepted elements twice, minus everything. -/
-private theorem sum_boolSign {β : Type*} (T : Finset β) (g : β → Bool) :
-    ∑ z ∈ T, boolSign (g z) = 2 * ((T.filter fun z => g z = true).card : ℝ) - T.card := by
-  have hsplit := Finset.card_filter_add_card_filter_not (s := T) (p := fun z => g z = true)
-  simp only [boolSign, Finset.sum_ite, Finset.sum_const, nsmul_eq_mul, mul_one, mul_neg]
-  have : ((T.filter fun z => ¬ g z = true).card : ℝ) =
-      T.card - (T.filter fun z => g z = true).card := by
-    rw [← hsplit]; push_cast; ring
-  simp only [Bool.not_eq_true] at this ⊢
-  rw [this]
-  ring
-
-/-- **Extractors have small signed sumset bias.** A flat-source sumset extractor with error
-`ν` has signed sumset bias `2 ν`. -/
-theorem flatSumsetBias_of_flatSumsetExtractor {n K : ℕ} {f : Cslib.BooleanFunction n} {ν : ℝ}
-    (h : Algebraic.Cutwidth.FlatSumsetExtractor f K ν) : FlatSumsetBias f K (2 * ν) := by
-  classical
-  intro A B hA hB
-  set P := (Set.toFinite A).toFinset
-  set Q := (Set.toFinite B).toFinset
-  have hPA : P.card = A.ncard := (Set.ncard_eq_toFinset_card A).symm
-  have hQB : Q.card = B.ncard := (Set.ncard_eq_toFinset_card B).symm
-  obtain ⟨hlo, hhi⟩ := h P Q (hPA ▸ hA) (hQB ▸ hB)
-  have hsum : sumOn (fun x => sumOn (fun y => boolSign (f (xorInputs x y))) B) A =
-      2 * ((Algebraic.Cutwidth.sumsetOnes f P Q).card : ℝ) - P.card * Q.card := by
-    simp only [sumOn]
-    rw [← Finset.sum_product' (s := P) (t := Q)
-      (f := fun x y => boolSign (f (xorInputs x y))), sum_boolSign, Finset.card_product]
-    simp only [Algebraic.Cutwidth.sumsetOnes, Nat.cast_mul]
-    rfl
-  rw [hsum, ← hPA, ← hQB]
-  push_cast
-  rw [abs_le]
-  constructor <;> nlinarith
-
 variable {ε : ℝ}
 
 universe v
@@ -209,6 +130,29 @@ theorem sourceReductionHardFamily_lt_innerSize_all_fanIn {r : ℕ} (hr : 2 ≤ r
           (2 - ε) * n < (r - 1) * c.innerSize := by
   obtain ⟨K, hfree, hK, hdense⟩ := sourceReductionHardFamily_frontierHypotheses
   exact lowerBound_all_fanIn hr _ K hfree hK hdense hε
+
+/-- **Every fixed fan-in, with the Gaussian degree coefficient, for the explicit family.** For
+every `r ≥ 2`, every circuit of fan-in at most `r` deciding the explicit family, over any basis
+on `Bool`, satisfies `(r - 1) s > (1 + 1/A_(r+1) - ε) n`, where `s` counts the gates of positive
+arity and `A_d = 3d/(2d-3) · arccos(2√(d-1)/d)/π` (`Gaussian.degreeCoefficient`). -/
+theorem sourceReductionHardFamily_lt_innerSize_degree {r : ℕ} (hr : 2 ≤ r) (hε : 0 < ε) :
+    ∀ᶠ n in atTop, ∀ (σ : Signature.{v}) (I : Interpretation σ Bool) (Acc : Set Bool)
+      (c : Cslib.Circuits.Circuit σ n 1), c.FanInAtMost r →
+        Decides c I Acc {x | Algebraic.Cutwidth.Extractor.sourceReductionHardFamily n x = true} →
+          (1 + 1 / Gaussian.degreeCoefficient (r + 1) - ε) * n < (r - 1) * c.innerSize := by
+  obtain ⟨K, hfree, hK, hdense⟩ := sourceReductionHardFamily_frontierHypotheses
+  exact lowerBound_degree hr _ K hfree hK hdense hε
+
+/-- **Ternary gates, for the explicit family.** Every circuit of fan-in at most three deciding
+the explicit family, over any basis on `Bool`, has more than `(7/4 - ε) n` gates of positive
+arity. -/
+theorem sourceReductionHardFamily_lt_innerSize_fanInThree (hε : 0 < ε) :
+    ∀ᶠ n in atTop, ∀ (σ : Signature.{v}) (I : Interpretation σ Bool) (Acc : Set Bool)
+      (c : Cslib.Circuits.Circuit σ n 1), c.FanInAtMost 3 →
+        Decides c I Acc {x | Algebraic.Cutwidth.Extractor.sourceReductionHardFamily n x = true} →
+          (7 / 4 - ε) * n < c.innerSize := by
+  obtain ⟨K, hfree, hK, hdense⟩ := sourceReductionHardFamily_frontierHypotheses
+  exact lowerBound_fanInThree _ K hfree hK hdense hε
 
 /-- **Verifier circuits for the explicit family.** The Gaussian coefficient holds for
 nondeterministic circuits of fan-in two over any basis on `Bool`, uniformly in the number `k`

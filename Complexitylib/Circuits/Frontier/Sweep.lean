@@ -6,7 +6,7 @@ Authors: Samuel Schlesinger
 module
 
 public import Complexitylib.Circuits.Frontier.Rectangle
-public import Complexitylib.Mathlib.SetNcard
+public import Complexitylib.Mathlib.Frontier.SetCard
 public import Mathlib.Order.Lattice.Nat
 import Mathlib.Algebra.BigOperators.Ring.Finset
 

@@ -43,11 +43,11 @@ theorem lowerBound_aggregate_gaussian (S : ∀ n, Set (Fin n → U)) (K : ℕ �
         Decides c I Acc (S n) →
           (1 + Real.pi / (3 * Real.arccos ((1 + 2 * Real.sqrt 2) / 4)) - ε) * n <
             (erase special c.program).innerGates.card := by
-  filter_upwards [lowerBound_aggregate le_rfl two_mul_frontierCoefficient_pos
+  filter_upwards [lowerBound_aggregate le_rfl (mul_pos two_pos Gaussian.gaussianCoefficient_pos)
     layoutBound_gaussian S K hfree hK hdense hβ hε] with n hn
   intro σ I Acc c special T _ _ hfan hagg hk hS
   have h := hn σ I Acc c special T hfan hagg hk hS
-  rw [Algebraic.Cutwidth.Gaussian.one_add_inv_two_mul_frontierCoefficient] at h
+  rw [Gaussian.one_add_inv_two_mul_gaussianCoefficient] at h
   norm_num at h ⊢
   exact h
 

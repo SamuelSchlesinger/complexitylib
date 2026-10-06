@@ -119,8 +119,8 @@ theorem lowerBound_nondeterministic_gaussian (S : ∀ n, Set (Fin n → U)) (K :
       (c : Circuit σ (n + k) 1), c.FanInAtMost 2 → NondeterministicDecides c I Acc (S n) →
         (1 + Real.pi / (3 * Real.arccos ((1 + 2 * Real.sqrt 2) / 4)) - ε) * n < c.innerSize := by
   have h := lowerBound_nondeterministic (r := 2) le_rfl
-    two_mul_frontierCoefficient_pos layoutBound_gaussian S K hfree hK hdense hε
-  rw [Algebraic.Cutwidth.Gaussian.one_add_inv_two_mul_frontierCoefficient] at h
+    (mul_pos two_pos Gaussian.gaussianCoefficient_pos) layoutBound_gaussian S K hfree hK hdense hε
+  rw [Gaussian.one_add_inv_two_mul_gaussianCoefficient] at h
   norm_num at h ⊢
   exact h
 
