@@ -363,6 +363,7 @@ section Component
 variable {F K : Type*} [Field F] [Fintype F] [DecidableEq F] [Field K] [Algebra F K]
   (b : Module.Basis (Fin n) F K)
 
+omit [Fintype F] [DecidableEq F] in
 /-- **All inputs and outputs lie in one component.** If the wires `out` of a program carry
 `fieldMul b` and `n ≥ 1`, the component of the first output contains every input and every
 output. -/

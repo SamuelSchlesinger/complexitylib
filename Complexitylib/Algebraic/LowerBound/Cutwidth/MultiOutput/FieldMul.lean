@@ -87,15 +87,14 @@ section Circuit
 variable {F K : Type*} [Field F] [Fintype F] [Field K] [Algebra F K]
   {b : Module.Basis (Fin n) F K} {I : Interpretation σ F} {c : Circuit σ (n + n) n}
 
-/-- **All inputs and outputs lie in one component.** If a circuit over a finite field, over any
+omit [Fintype F] in
+/-- **All inputs and outputs lie in one component.** If a circuit over a field, over any
 signature, computes multiplication in coordinates and `n ≥ 1`, the component of its first
 output in the wire graph contains every input and every output. -/
 theorem mem_component_of_fieldMul (hc : c.Computes I (fieldMul b)) (hn : 0 < n) :
     (∀ k, Wire.input k ∈ component c.program (c.outputs ⟨0, hn⟩)) ∧
-      ∀ i, c.outputs i ∈ component c.program (c.outputs ⟨0, hn⟩) := by
-  classical
-  exact Internal.mem_component_of_trace b hn c.program I c.outputs
-    fun z i => congrFun (hc z) i
+      ∀ i, c.outputs i ∈ component c.program (c.outputs ⟨0, hn⟩) :=
+  Internal.mem_component_of_trace b hn c.program I c.outputs fun z i => congrFun (hc z) i
 
 /-- **The cut bound for multiplication.** If a circuit over a finite field, over any signature,
 computes multiplication in coordinates, then every set `S` of its wires holding `a` inputs of

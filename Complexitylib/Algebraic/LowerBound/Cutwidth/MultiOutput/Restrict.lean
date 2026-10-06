@@ -222,6 +222,7 @@ theorem apply_eq_zero_of_backward_eq_empty_of_trace (p : Program σ n s) (I : In
     Internal.apply_eq_zero_of_backward_eq_empty (p := p) (I := I) (out := out) (f := f) hf S J z₀
       g hg hbwd hd hi
 
+omit [Fintype U] [DecidableEq U] in
 /-- **Closed sets separate.** If the wires `out` of a program carry `f`, the function changes
 by `g d` when its input changes by `d` on the inputs agreeing with `z₀` off `J`, and a split
 `S` has no forward and no backward signals, then `g` maps every vector supported on the free

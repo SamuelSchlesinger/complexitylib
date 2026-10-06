@@ -130,12 +130,14 @@ def unlast {n s : Nat} (w : Wire n (s + 1)) (hw : w ≠ Wire.gate (Fin.last s)) 
   Wire.lastCases (motive := fun w => w ≠ Wire.gate (Fin.last s) → Wire n s)
     (fun h => absurd rfl h) (fun w₀ _ => w₀) w hw
 
+/-- `unlast` inverts `Wire.castSucc`. -/
 @[simp] theorem castSucc_unlast {n s : Nat} (w : Wire n (s + 1))
     (hw : w ≠ Wire.gate (Fin.last s)) : (unlast w hw).castSucc = w := by
   induction w using Wire.lastCases with
   | last => exact absurd rfl hw
   | castSucc w₀ => simp [unlast]
 
+/-- A wire of `p.gate line` other than the last gate carries the same value in `p`. -/
 theorem trace_unlast {n s : Nat} {U : Type*} (p : Program σ n s) (line : Line σ n s)
     (I : Interpretation σ U) (x : Fin n → U) (w : Wire n (s + 1))
     (hw : w ≠ Wire.gate (Fin.last s)) :

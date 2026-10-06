@@ -120,18 +120,18 @@ end Values
 
 section Component
 
-variable {F : Type*} [Field F] [Fintype F] [DecidableEq F]
+variable {F : Type*} [Field F]
   {p : Program σ (n * n + n * n) s} {I : Interpretation σ F}
   {out : Fin (n * n) → Wire (n * n + n * n) s}
 
-omit [Fintype F] [DecidableEq F] in
 /-- A unit vector is supported on any set containing its coordinate. -/
 theorem single_supported {N : Nat} {x : Fin N} {P : Finset (Fin N)} (hx : x ∈ P) :
     ∀ y, y ∉ P → (Pi.single x (1 : F) : Fin N → F) y = 0 := fun y hy =>
   Pi.single_eq_of_ne (fun h : y = x => hy (h ▸ hx)) _
 
-/-- **All terminals lie in one component.** If the wires `out` carry `matMul n` and `n ≥ 1`, the
-component of the output `C 0 0` contains every input and every output. -/
+/-- **All terminals lie in one component.** If the wires `out` of a program over any field carry
+`matMul n` and `n ≥ 1`, the component of the output `C 0 0` contains every input and every
+output. -/
 theorem mem_component_of_trace (hn : 0 < n) (hf : ∀ z o, p.trace I z (out o) = matMul n z o) :
     (∀ x, Wire.input x ∈ component p (out (matMulOutput n ⟨0, hn⟩ ⟨0, hn⟩))) ∧
       ∀ o, out o ∈ component p (out (matMulOutput n ⟨0, hn⟩ ⟨0, hn⟩)) := by

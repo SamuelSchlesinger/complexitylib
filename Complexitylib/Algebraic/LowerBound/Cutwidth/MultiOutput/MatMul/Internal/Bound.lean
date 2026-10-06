@@ -46,84 +46,6 @@ section Finite
 variable {F : Type*} [Field F] [Fintype F] [DecidableEq F]
 
 omit [Fintype F] [DecidableEq F] in
-/-- **All terminals lie in one component (arbitrary field).** If the wires `out` of a program over
-any field `F` carry `matMul n` and `n ≥ 1`, the component of `C 0 0` contains every input and
-every output. -/
-theorem mem_component_of_trace_field {p : Program σ (n * n + n * n) s} {I : Interpretation σ F}
-    {out : Fin (n * n) → Wire (n * n + n * n) s} (hn : 0 < n)
-    (hf : ∀ z o, p.trace I z (out o) = matMul n z o) :
-    (∀ x, Wire.input x ∈ component p (out (matMulOutput n ⟨0, hn⟩ ⟨0, hn⟩))) ∧
-      ∀ o, out o ∈ component p (out (matMulOutput n ⟨0, hn⟩ ⟨0, hn⟩)) := by
-  set z₀ : Fin n := ⟨0, hn⟩
-  set W := component p (out (matMulOutput n z₀ z₀))
-  have hclosed := component_closed p (out (matMulOutput n z₀ z₀))
-  have hfwd := forward_eq_empty_of_closed hclosed
-  have hbwd := backward_eq_empty_of_closed hclosed
-  have hleft1 := fun B₀ : Matrix (Fin n) (Fin n) F =>
-    apply_eq_zero_of_forward_eq_empty_of_trace p I out hf W
-      (leftCoords n) (matMulInput 0 B₀) (shiftLeft B₀)
-      (fun z z' hz hz' => matMul_sub_left B₀ z z' hz hz') hfwd
-  have hleft2 := fun B₀ : Matrix (Fin n) (Fin n) F =>
-    apply_eq_zero_of_backward_eq_empty_of_trace p I out hf W
-      (leftCoords n) (matMulInput 0 B₀) (shiftLeft B₀)
-      (fun z z' hz hz' => matMul_sub_left B₀ z z' hz hz') hbwd
-  have hright1 := fun A₀ : Matrix (Fin n) (Fin n) F =>
-    apply_eq_zero_of_forward_eq_empty_of_trace p I out hf W
-      (rightCoords n) (matMulInput A₀ 0) (shiftRight A₀)
-      (fun z z' hz hz' => matMul_sub_right A₀ z z' hz hz') hfwd
-  have hright2 := fun A₀ : Matrix (Fin n) (Fin n) F =>
-    apply_eq_zero_of_backward_eq_empty_of_trace p I out hf W
-      (rightCoords n) (matMulInput A₀ 0) (shiftRight A₀)
-      (fun z z' hz hz' => matMul_sub_right A₀ z z' hz hz') hbwd
-  have memOut : ∀ i k, matMulOutput n i k ∈ outputsIn out W ↔ out (matMulOutput n i k) ∈ W :=
-    fun i k => by simp [outputsIn]
-  have hC₀ : matMulOutput n z₀ z₀ ∈ outputsIn out W := (memOut _ _).mpr (mem_component_self _ _)
-  have hA₀ : ∀ j, matMulLeft n z₀ j ∈ inputsIn W := by
-    intro j
-    by_contra hj
-    have h := hleft2 (Matrix.single j z₀ 1) _
-      (single_supported (Finset.mem_inter.mpr ⟨Finset.mem_compl.mpr hj,
-        matMulLeft_mem_leftCoords _ _⟩)) _ hC₀
-    rw [shiftLeft_single_single] at h
-    exact one_ne_zero h
-  have hC : ∀ k, matMulOutput n z₀ k ∈ outputsIn out W := by
-    intro k
-    by_contra hk
-    have h := hleft1 (Matrix.single z₀ k 1) _
-      (single_supported (Finset.mem_inter.mpr ⟨hA₀ z₀, matMulLeft_mem_leftCoords _ _⟩)) _ hk
-    rw [shiftLeft_single_single] at h
-    exact one_ne_zero h
-  have hB : ∀ j k, matMulRight n j k ∈ inputsIn W := by
-    intro j k
-    by_contra hjk
-    have h := hright2 (Matrix.single z₀ j 1) _
-      (single_supported (Finset.mem_inter.mpr ⟨Finset.mem_compl.mpr hjk,
-        matMulRight_mem_rightCoords _ _⟩)) _ (hC k)
-    rw [shiftRight_single_single] at h
-    exact one_ne_zero h
-  have hCall : ∀ i k, matMulOutput n i k ∈ outputsIn out W := by
-    intro i k
-    by_contra hik
-    have h := hright1 (Matrix.single i z₀ 1) _
-      (single_supported (Finset.mem_inter.mpr ⟨hB z₀ k, matMulRight_mem_rightCoords _ _⟩)) _ hik
-    rw [shiftRight_single_single] at h
-    exact one_ne_zero h
-  have hA : ∀ i j, matMulLeft n i j ∈ inputsIn W := by
-    intro i j
-    by_contra hij
-    have h := hleft2 (Matrix.single j z₀ 1) _
-      (single_supported (Finset.mem_inter.mpr ⟨Finset.mem_compl.mpr hij,
-        matMulLeft_mem_leftCoords _ _⟩)) _ (hCall i z₀)
-    rw [shiftLeft_single_single] at h
-    exact one_ne_zero h
-  refine ⟨fun x => ?_, fun o => ?_⟩
-  · rcases input_cases x with ⟨i, j, rfl⟩ | ⟨j, k, rfl⟩
-    · exact mem_inputsIn.mp (hA i j)
-    · exact mem_inputsIn.mp (hB j k)
-  · rw [output_eq o]
-    exact (memOut _ _).mp (hCall _ _)
-
-omit [Fintype F] [DecidableEq F] in
 /-- **The finite bound from the charges.** If every split of a fan-in-two program whose wires
 `out` carry `matMul n` has total charge at most three times its crossing signals plus `3 L`,
 then `(n² - 2 L - 1)/2 ≤ (A + η) (s - 2 n²)⁺ + 3 log₂ (2 n² + 3 s) + C`. -/
@@ -155,7 +77,7 @@ theorem sq_sub_le_of_charges {A η C : ℝ} (hAη : 0 ≤ A + η)
       linarith
     exact hneg.le.trans (add_nonneg (add_nonneg hmax0 (by linarith)) hC)
   -- All terminals lie in one component, on distinct wires.
-  obtain ⟨hin, houtW⟩ := mem_component_of_trace_field hn hf
+  obtain ⟨hin, houtW⟩ := mem_component_of_trace hn hf
   set W₀ := component p (out (matMulOutput n ⟨0, hn⟩ ⟨0, hn⟩)) with hW₀
   have hterm := terminal_injective hf
   -- The ranking and the threshold prefix.
@@ -242,6 +164,7 @@ section Polynomial
 
 open Matrix
 
+/-- Evaluating the formal matrix product at a point of an algebra gives the matrix product. -/
 theorem aeval_matMul_X {K R : Type*} [CommSemiring K] [CommSemiring R] [Algebra K R]
     (z : Fin (n * n + n * n) → R) (o : Fin (n * n)) :
     MvPolynomial.aeval z
@@ -249,6 +172,7 @@ theorem aeval_matMul_X {K R : Type*} [CommSemiring K] [CommSemiring R] [Algebra 
       matMul n z o := by
   simp [matMul]
 
+/-- Evaluating the formal matrix product at a point gives the matrix product. -/
 theorem eval_matMul_X {K : Type*} [CommSemiring K] (z : Fin (n * n + n * n) → K)
     (o : Fin (n * n)) :
     MvPolynomial.eval z
@@ -264,13 +188,6 @@ theorem matMul_nonconstant {K : Type*} [Field K] (o : Fin (n * n)) :
   refine ⟨0, matMulInput 1 (Matrix.single i k 1), ?_⟩
   rw [output_eq o, matMul_output, matMul_matMulInput]
   simp [i, k]
-
-theorem card_inter_add_card_compl_inter {α : Type*} [Fintype α] [DecidableEq α]
-    (X Y : Finset α) : (X ∩ Y).card + (Xᶜ ∩ Y).card = Y.card := by
-  rw [← Finset.card_union_of_disjoint
-    (Finset.disjoint_left.mpr fun _ hx hx' => (Finset.mem_compl.mp (Finset.mem_inter.mp hx').1)
-      (Finset.mem_inter.mp hx).1), ← Finset.union_inter_distrib_right, Finset.union_compl,
-    Finset.univ_inter]
 
 /-- **Subspace decomposition across totally regular blocks.** -/
 theorem finrank_add_sum_min_le {L : Type*} [Field L] {ι : Type*} [Fintype ι] {N : Nat}
@@ -315,6 +232,8 @@ variable {K L : Type*} [Field K] [Field L] [Algebra K L]
   (P : (op : σ.Op) → MvPolynomial (Fin (σ.Arity op)) K)
   (p : Program σ (n * n + n * n) s) (out : Fin (n * n) → Wire (n * n + n * n) s)
 
+/-- At `A = 0, B = M`, the Jacobian of formal matrix multiplication sends a direction `v`
+supported on `A` to `C i k = ∑ j, v (A i j) M j k`. -/
 theorem jacobian_matMulInput_zero_right
     (hf : ∀ o, Taylor.wirePolynomial P p (out o) = matMul n MvPolynomial.X o)
     (M : Matrix (Fin n) (Fin n) L) {v : Fin (n * n + n * n) → L}
@@ -333,6 +252,8 @@ theorem jacobian_matMulInput_zero_right
     hv _ (matMulRight_notMem_leftCoords j k)]
   simp [mul_comm]
 
+/-- At `A = M, B = 0`, the Jacobian of formal matrix multiplication sends a direction `v`
+supported on `B` to `C i k = ∑ j, M i j v (B j k)`. -/
 theorem jacobian_matMulInput_zero_left
     (hf : ∀ o, Taylor.wirePolynomial P p (out o) = matMul n MvPolynomial.X o)
     (M : Matrix (Fin n) (Fin n) L) {v : Fin (n * n + n * n) → L}
@@ -351,6 +272,7 @@ theorem jacobian_matMulInput_zero_left
     hv _ (matMulLeft_notMem_rightCoords i j)]
   simp
 
+/-- The Hessian of the output `C i k` of formal matrix multiplication, as a bilinear form. -/
 theorem dotProduct_hessian_matMulOutput
     (hf : ∀ o, Taylor.wirePolynomial P p (out o) = matMul n MvPolynomial.X o)
     (v u : Fin (n * n + n * n) → L) (i k : Fin n) :
@@ -368,6 +290,7 @@ theorem dotProduct_hessian_matMulOutput
     add_zero, DualNumber.snd_mul, mul_zero, zero_add]
 
 omit [Field K] [Algebra K L] in
+/-- The symmetrized bilinear form of `M` is the `M`-weighted sum of the output Hessian forms. -/
 theorem dotProduct_bilinForm_add_transpose (M : Matrix (Fin n) (Fin n) L)
     (v u : Fin (n * n + n * n) → L) :
     v ⬝ᵥ ((bilinForm M + (bilinForm M)ᵀ) *ᵥ u) =
@@ -385,6 +308,8 @@ theorem dotProduct_bilinForm_add_transpose (M : Matrix (Fin n) (Fin n) L)
     rw [Finset.sum_comm]
     exact Finset.sum_congr rfl fun k _ => Finset.sum_congr rfl fun j _ => by ring
 
+/-- **The charge `R_I` for polynomial gates.** With a totally regular matrix `M` over an
+extension field, `R_I` is at most the number of forward and backward signals. -/
 theorem chargeI_le_of_formallyComputes_of_totallyRegular
     (hf : ∀ o, Taylor.wirePolynomial P p (out o) = matMul n MvPolynomial.X o)
     {M : Matrix (Fin n) (Fin n) L} (hM : TotallyRegular M)
@@ -448,6 +373,8 @@ theorem chargeI_le_of_formallyComputes_of_totallyRegular
   rw [Finset.sum_add_distrib] at hsum_min hsum_card
   omega
 
+/-- **The charge `R_K` for polynomial gates.** With a totally regular matrix `M` over an
+extension field, `R_K` is at most the number of forward and backward signals. -/
 theorem chargeK_le_of_formallyComputes_of_totallyRegular
     (hf : ∀ o, Taylor.wirePolynomial P p (out o) = matMul n MvPolynomial.X o)
     {M : Matrix (Fin n) (Fin n) L} (hM : TotallyRegular M)
@@ -511,6 +438,9 @@ theorem chargeK_le_of_formallyComputes_of_totallyRegular
   rw [Finset.sum_add_distrib] at hsum_min hsum_card
   omega
 
+/-- **The charge `R_J` for polynomial gates.** With a totally regular matrix `M` over an
+extension field, `R_J` is at most the number of forward and backward signals, by the Hessian
+cut bound. -/
 theorem chargeJ_le_of_formallyComputes_of_totallyRegular
     (hf : ∀ o, Taylor.wirePolynomial P p (out o) = matMul n MvPolynomial.X o)
     {M : Matrix (Fin n) (Fin n) L} (hM : TotallyRegular M)

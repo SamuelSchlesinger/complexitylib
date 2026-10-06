@@ -322,6 +322,7 @@ def extendSub (X : Finset (Fin n)) : (↥X → L) →ₗ[L] (Fin n → L) where
     simp only [Pi.smul_apply, RingHom.id_apply]
     split_ifs <;> simp
 
+/-- Zero-extension is injective. -/
 theorem extendSub_injective (X : Finset (Fin n)) :
     Function.Injective (extendSub X : (↥X → L) →ₗ[L] (Fin n → L)) := fun v v' h => by
   funext ⟨j, hj⟩
@@ -371,6 +372,7 @@ noncomputable def matSubKer {α : Type*} (M : Matrix α (Fin n) L) (X : Finset (
     (fun c : ↥C => (c : α)) (fun j : ↥X => (j : Fin n))).mulVecLin).map (extendSub X)
 
 omit [CommRing K] [Algebra K L] in
+/-- Vectors of `matSubKer M X C` vanish outside `X`. -/
 theorem support_of_mem_matSubKer {α : Type*} {M : Matrix α (Fin n) L} {X : Finset (Fin n)}
     {C : Finset α} {v : Fin n → L} (hv : v ∈ matSubKer M X C) {j : Fin n} (hj : j ∉ X) :
     v j = 0 := by
@@ -378,6 +380,7 @@ theorem support_of_mem_matSubKer {α : Type*} {M : Matrix α (Fin n) L} {X : Fin
   simp [extendSub, hj]
 
 omit [CommRing K] [Algebra K L] in
+/-- Vectors of `matSubKer M X C` are annihilated by the rows `C` of `M`. -/
 theorem mulVec_eq_zero_of_mem_matSubKer {α : Type*} {M : Matrix α (Fin n) L} {X : Finset (Fin n)}
     {C : Finset α} {v : Fin n → L} (hv : v ∈ matSubKer M X C) {c : α} (hc : c ∈ C) :
     (M *ᵥ v) c = 0 := by
@@ -393,6 +396,7 @@ theorem mulVec_eq_zero_of_mem_matSubKer {α : Type*} {M : Matrix α (Fin n) L} {
   simp [extendSub, j.2]
 
 omit [CommRing K] [Algebra K L] in
+/-- Rank-nullity for `matSubKer`: `|X| ≤ dim (matSubKer M X C) + rank M[C, X]`. -/
 theorem card_le_finrank_matSubKer_add_rank {α : Type*} (M : Matrix α (Fin n) L)
     (X : Finset (Fin n)) (C : Finset α) :
     X.card ≤ finrank L (matSubKer M X C) +
@@ -408,6 +412,7 @@ theorem card_le_finrank_matSubKer_add_rank {α : Type*} (M : Matrix α (Fin n) L
   omega
 
 omit [CommRing K] [Algebra K L] in
+/-- `|X| ≤ dim (matSubKer M X C) + |C|`, as the block `M[C, X]` has at most `|C|` rows. -/
 theorem card_le_finrank_matSubKer_add {α : Type*} (M : Matrix α (Fin n) L)
     (X : Finset (Fin n)) (C : Finset α) :
     X.card ≤ finrank L (matSubKer M X C) + C.card := by
@@ -665,6 +670,9 @@ theorem blockRank_jacobian_add_blockRank_le (out : Fin m → Wire n s) :
   Nat.add_le_add (blockRank_jacobian_le_forward P p S a out)
     (blockRank_jacobian_le_backward P p S a out)
 
+/-- **The Hessian-type cut bound for any orthogonal form.** If a matrix `H` pairs to zero every
+`v` and `u` that every wire Hessian at `a` pairs to zero, then its block `H[X_S, X_T]` has rank at
+most the number of crossing signals. -/
 theorem blockRank_le_of_orthogonal (H : Matrix (Fin n) (Fin n) L)
     (hH_orth : ∀ v u, (∀ w, v ⬝ᵥ (hessian (wirePolynomial P p w) a *ᵥ u) = 0) →
       v ⬝ᵥ (H *ᵥ u) = 0) :

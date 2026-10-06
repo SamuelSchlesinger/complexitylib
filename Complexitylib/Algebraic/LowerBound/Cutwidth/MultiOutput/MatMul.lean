@@ -138,7 +138,7 @@ graph contains every input and every output. -/
 theorem mem_component_of_matMul (hc : c.Computes I (matMul n)) (hn : 0 < n) :
     (∀ x, Wire.input x ∈ component c.program (c.outputs (matMulOutput n ⟨0, hn⟩ ⟨0, hn⟩))) ∧
       ∀ o, c.outputs o ∈ component c.program (c.outputs (matMulOutput n ⟨0, hn⟩ ⟨0, hn⟩)) :=
-  MatMul.Internal.mem_component_of_trace_field hn fun z o => congrFun (hc z) o
+  MatMul.Internal.mem_component_of_trace hn fun z o => congrFun (hc z) o
 
 /-- **The charge bounds with a totally regular matrix.** If a circuit over a finite field with a
 totally regular `n × n` matrix computes `matMul n`, then for every set `S` of its wires each of

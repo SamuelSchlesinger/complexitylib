@@ -171,78 +171,12 @@ theorem card_inter_add_card_compl_inter (X J : Finset (Fin n)) :
   rw [Finset.inter_comm X J, Finset.inter_comm Xᶜ J, ← Finset.sdiff_eq_inter_compl,
     Finset.card_inter_add_card_sdiff]
 
-/-- If `h` determines `g` on `Z`, then `Z` has at most as many `g`-images as `h`-images. -/
-theorem card_image_le_of_eq_on {α β γ : Type*} [DecidableEq β] [DecidableEq γ]
-    (Z : Finset α) (g : α → β) (h : α → γ)
-    (hgh : ∀ x ∈ Z, ∀ x' ∈ Z, h x = h x' → g x = g x') :
-    (Z.image g).card ≤ (Z.image h).card := by
-  classical
-  have hm : ∀ y : ↥(Z.image g), ∃ x ∈ Z, g x = y.1 := fun y => Finset.mem_image.mp y.2
-  let φ : ↥(Z.image g) → ↥(Z.image h) := fun y =>
-    ⟨h (Classical.choose (hm y)), Finset.mem_image_of_mem h (Classical.choose_spec (hm y)).1⟩
-  have hinj : Function.Injective φ := by
-    intro y₁ y₂ heq
-    have h₁ := Classical.choose_spec (hm y₁)
-    have h₂ := Classical.choose_spec (hm y₂)
-    exact Subtype.ext
-      (h₁.2.symm.trans ((hgh _ h₁.1 _ h₂.1 (Subtype.ext_iff.mp heq)).trans h₂.2))
-  simpa only [Fintype.card_coe] using Fintype.card_le_of_injective φ hinj
-
 /-- Monotonicity of slices in the set of free coordinates. -/
 theorem slice_subset_slice {J₁ J₂ : Finset (Fin n)} (hJ : J₁ ⊆ J₂) (z₀ : Fin n → U) :
     slice J₁ z₀ ⊆ slice J₂ z₀ := by
   intro z hz
   rw [mem_slice] at hz ⊢
   exact fun k hk => hz k fun hk₁ => hk (hJ hk₁)
-
-/-- **One-sided forward image bound on a slice.** Fixing the coordinates outside `inputsIn S` to
-`z₀`, the outputs outside `S` are determined by the forward signals of `S`, so they take at most
-`|U| ^ |forward p S|` values. -/
-theorem card_image_restrict_compl_le_forward (p : Program σ n s) (I : Interpretation σ U)
-    (out : Fin m → Wire n s) (f : (Fin n → U) → Fin m → U)
-    (hf : ∀ x i, p.trace I x (out i) = f x i) (S : Finset (Wire n s)) (z₀ : Fin n → U) :
-    ((slice (inputsIn S) z₀).image (fun x (i : ↥(outputsIn out S)ᶜ) => f x i.1)).card ≤
-      Fintype.card U ^ (forward p S).card := by
-  have hle := card_image_le_of_eq_on (slice (inputsIn S) z₀)
-    (fun x (i : ↥(outputsIn out S)ᶜ) => f x i.1) (fun x => (boundaryKey p I S x).1)
-    fun x hx x' hx' hkey => by
-      funext i
-      have hin : ∀ j, j ∉ inputsIn S → x j = x' j := fun j hj => by
-        rw [mem_slice.mp hx j hj, mem_slice.mp hx' j hj]
-      have hfwd : ∀ w ∈ forward p S, p.trace I x w = p.trace I x' w :=
-        fun w hw => congrFun hkey ⟨w, hw⟩
-      have hout : out i.1 ∉ S := by simpa [outputsIn] using Finset.mem_compl.mp i.2
-      rw [← hf, ← hf]
-      exact trace_eq_of_agree_forward p I hin hfwd (out i.1) hout
-  refine hle.trans ?_
-  calc ((slice (inputsIn S) z₀).image (fun x => (boundaryKey p I S x).1)).card
-      ≤ Fintype.card (↥(forward p S) → U) := Finset.card_le_univ _
-    _ = Fintype.card U ^ (forward p S).card := by rw [Fintype.card_fun, Fintype.card_coe]
-
-/-- **One-sided backward image bound on a slice.** Fixing the coordinates in `inputsIn S` to `z₀`,
-the outputs in `S` are determined by the backward signals of `S`, so they take at most
-`|U| ^ |backward p S|` values. -/
-theorem card_image_restrict_le_backward (p : Program σ n s) (I : Interpretation σ U)
-    (out : Fin m → Wire n s) (f : (Fin n → U) → Fin m → U)
-    (hf : ∀ x i, p.trace I x (out i) = f x i) (S : Finset (Wire n s)) (z₀ : Fin n → U) :
-    ((slice (inputsIn S)ᶜ z₀).image (fun x (i : ↥(outputsIn out S)) => f x i.1)).card ≤
-      Fintype.card U ^ (backward p S).card := by
-  have hle := card_image_le_of_eq_on (slice (inputsIn S)ᶜ z₀)
-    (fun x (i : ↥(outputsIn out S)) => f x i.1) (fun x => (boundaryKey p I S x).2)
-    fun x hx x' hx' hkey => by
-      funext i
-      have hin : ∀ j ∈ inputsIn S, x j = x' j := fun j hj => by
-        have hj' : j ∉ (inputsIn S)ᶜ := by simpa using hj
-        rw [mem_slice.mp hx j hj', mem_slice.mp hx' j hj']
-      have hbwd : ∀ w ∈ backward p S, p.trace I x w = p.trace I x' w :=
-        fun w hw => congrFun hkey ⟨w, hw⟩
-      have hout : out i.1 ∈ S := by simpa [outputsIn] using i.2
-      rw [← hf, ← hf]
-      exact trace_eq_of_agree_backward p I hin hbwd (out i.1) hout
-  refine hle.trans ?_
-  calc ((slice (inputsIn S)ᶜ z₀).image (fun x => (boundaryKey p I S x).2)).card
-      ≤ Fintype.card (↥(backward p S) → U) := Finset.card_le_univ _
-    _ = Fintype.card U ^ (backward p S).card := by rw [Fintype.card_fun, Fintype.card_coe]
 
 /-- **One-sided forward fibre bound on a slice.** On the slice of inputs agreeing with `z₀`
 outside `J`, if every left fibre within `slice J z₀` has at most `DT` elements, then
@@ -510,6 +444,7 @@ theorem apply_eq_zero_of_backward_eq_empty (hf : ∀ x i, p.trace I x (out i) = 
   rw [add_sub_cancel_left, Pi.sub_apply, ← hf, ← hf, htr, sub_self] at hsub
   exact hsub.symm
 
+omit [Fintype U] [DecidableEq U] in
 /-- **Closed sets separate.** If a split has no forward and no backward signals, then `g` maps
 vectors supported on the free inputs in `S` to vectors vanishing on the outputs carried outside
 `S`, and vectors supported on the free inputs outside `S` to vectors vanishing on the outputs
@@ -523,9 +458,7 @@ theorem apply_eq_zero_of_closed (hf : ∀ x i, p.trace I x (out i) = f x i)
         ∀ i, i ∉ outputsIn out S → g d i = 0) ∧
       (∀ d : Fin n → U, (∀ k, k ∉ (inputsIn S)ᶜ ∩ J → d k = 0) →
         ∀ i ∈ outputsIn out S, g d i = 0) :=
-  ⟨fun d hd _ hi => by
-    have _ : d ∈ slice (inputsIn S ∩ J) 0 := mem_slice.mpr hd
-    exact apply_eq_zero_of_forward_eq_empty p out f I hf S J z₀ g hg hfwd hd hi,
+  ⟨fun _ hd _ hi => apply_eq_zero_of_forward_eq_empty p out f I hf S J z₀ g hg hfwd hd hi,
    fun _ hd _ hi => apply_eq_zero_of_backward_eq_empty p out f I hf S J z₀ g hg hbwd hd hi⟩
 
 end Kernel
