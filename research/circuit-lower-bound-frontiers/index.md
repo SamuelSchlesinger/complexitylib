@@ -154,6 +154,14 @@ The first two tasks above remain substantial changes to what the unrestricted B2
 measures. They should be pursued separately until one accounting inequality justifies combining
 savings; the [ledger](transfer-ledger.md) explains why coefficient gains do not simply add.
 
+## Other models: the October 2026 sweep
+
+A separate sweep took models this corpus does not otherwise treat — average-case correlation,
+circuits with few shared gates, matrix and polynomial multiplication, concentrators and the DFT,
+multiplicative complexity, depth-three circuits, threshold circuits, negation-limited circuits, and
+the U2 basis — and recorded new bounds, their status, and the barriers found. See the
+[sweep note](sota-sweep/index.md).
+
 ## Full map of the ten routes
 
 | Route | Main contribution or limiting test |
