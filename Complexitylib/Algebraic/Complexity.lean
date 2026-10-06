@@ -156,6 +156,44 @@ theorem _root_.Cslib.Circuits.Circuit.gateComplexity_le
 
 export Cslib.Circuits.Circuit (gateComplexity_le)
 
+/-- Characterization of a natural-number bound on weighted complexity by existence of a
+concrete circuit. -/
+theorem _root_.Cslib.Circuits.Circuit.costComplexity_le_nat_iff
+    (interpretation : Interpretation σ U) (operationCost : OperationCost σ)
+    (target : Target U n m) (s : Nat) :
+    Circuit.costComplexity interpretation operationCost target ≤ (s : ℕ∞) ↔
+      ∃ circuit : Circuit σ n m,
+        circuit.cost operationCost ≤ s ∧ circuit.ComputesWith interpretation target := by
+  constructor
+  · intro hle
+    by_contra hno
+    have hge : ((s + 1 : Nat) : ℕ∞) ≤
+        Circuit.costComplexity interpretation operationCost target := by
+      apply Circuit.le_costComplexity
+      intro circuit computes
+      have hlt : s < circuit.cost operationCost :=
+        lt_of_not_ge fun hcost => hno ⟨circuit, hcost, computes⟩
+      exact_mod_cast Nat.succ_le_of_lt hlt
+    have himpossible : ((s + 1 : Nat) : ℕ∞) ≤ (s : ℕ∞) := hge.trans hle
+    have : s + 1 ≤ s := by exact_mod_cast himpossible
+    omega
+  · rintro ⟨circuit, hcost, computes⟩
+    exact (circuit.costComplexity_le operationCost computes).trans (by exact_mod_cast hcost)
+
+export Cslib.Circuits.Circuit (costComplexity_le_nat_iff)
+
+/-- Characterization of a natural-number bound on gate complexity by existence of a
+concrete circuit. -/
+theorem _root_.Cslib.Circuits.Circuit.gateComplexity_le_nat_iff
+    (interpretation : Interpretation σ U) (target : Target U n m) (s : Nat) :
+    Circuit.gateComplexity interpretation target ≤ (s : ℕ∞) ↔
+      ∃ circuit : Circuit σ n m,
+        circuit.size ≤ s ∧ circuit.ComputesWith interpretation target := by
+  simpa [Circuit.gateComplexity, Circuit.cost_unit] using
+    Circuit.costComplexity_le_nat_iff interpretation OperationCost.unit target s
+
+export Cslib.Circuits.Circuit (gateComplexity_le_nat_iff)
+
 end Circuit
 
 namespace Translation

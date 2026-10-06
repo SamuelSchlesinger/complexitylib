@@ -457,7 +457,10 @@ chapter.
     Algebraic.KW.SharedProgram.threshold_mul_le_gates,
     Algebraic.KW.SharedProgram.majority_mul_le_gates,
     Algebraic.KW.exists_sharedProgram_of_circuit, Algebraic.KW.parity_sq_le_cost,
-    Algebraic.KW.mul_le_cost_of_parity, Algebraic.KW.isLittleO_cost_of_parity}
+    Algebraic.KW.mul_le_cost_of_parity, Algebraic.KW.isLittleO_cost_of_parity,
+    Algebraic.KW.threshold_mul_le_cost, Algebraic.KW.majority_mul_le_cost,
+    Algebraic.KW.majority_sq_le_cost_of_odd, Algebraic.KW.mul_le_cost_of_majority,
+    Algebraic.KW.isLittleO_cost_of_majority}
   \leanok
   \uses{thm:lowerbounds-algebraic-khrapchenko}
   A \emph{$k$-shared program} on $n$ inputs is a sequence of $k + 1$ De Morgan
@@ -498,6 +501,10 @@ chapter.
   $t(n + 1 - t) \le (k + 1)(s + k + 1)$, and one computing strict majority of
   $n \ge 1$ inputs satisfies
   $(n - \lfloor n/2 \rfloor)(\lfloor n/2 \rfloor + 1) \le (k + 1)(s + k + 1)$.
+  The same bounds hold for De Morgan circuits as above with at most $k$ gates
+  of fan-out at least two and cost $s$. For odd $n = 2m + 1$ this gives
+  $(m + 1)^2 \le (k + 1)(s + k + 1)$, hence $s \ge Cm$ whenever
+  $(k + 1)(C + 1) \le m$, and $m = o(s)$ along odd lengths when $k(m) = o(m)$.
 
   Unfolding every shared gate into a formula, which is the folklore argument,
   gives only $X \ge L(f)/2^k$ for the formula size $L(f)$, which is superlinear

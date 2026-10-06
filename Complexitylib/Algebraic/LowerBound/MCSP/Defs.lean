@@ -309,37 +309,6 @@ theorem truthTableTargetEquiv_pairTruthTable {n : Nat} (tt₀ tt₁ : Fin (2 ^ n
     dsimp only
     omega
 
-/-- Characterization of bounded weighted circuit complexity by existence of a concrete circuit. -/
-theorem costComplexity_le_nat_iff {σ : Signature} {n m : Nat}
-    (interpretation : Interpretation σ Bool) (cost : OperationCost σ)
-    (target : Target Bool n m) (s : Nat) :
-    Circuit.costComplexity interpretation cost target ≤ (s : ℕ∞) ↔
-      ∃ circuit : Circuit σ n m,
-        circuit.cost cost ≤ s ∧ circuit.ComputesWith interpretation target := by
-  constructor
-  · intro hle
-    by_contra hno
-    have hge : ((s + 1 : Nat) : ℕ∞) ≤ Circuit.costComplexity interpretation cost target := by
-      apply Circuit.le_costComplexity
-      intro circuit computes
-      have hlt : s < circuit.cost cost :=
-        lt_of_not_ge fun hcost => hno ⟨circuit, hcost, computes⟩
-      exact_mod_cast Nat.succ_le_of_lt hlt
-    have himpossible : ((s + 1 : Nat) : ℕ∞) ≤ (s : ℕ∞) := hge.trans hle
-    have : s + 1 ≤ s := by exact_mod_cast himpossible
-    omega
-  · rintro ⟨circuit, hcost, computes⟩
-    exact (circuit.costComplexity_le cost computes).trans (by exact_mod_cast hcost)
-
-/-- Characterization of bounded gate complexity by existence of a concrete circuit. -/
-theorem gateComplexity_le_nat_iff {σ : Signature} {n m : Nat}
-    (interpretation : Interpretation σ Bool) (target : Target Bool n m) (s : Nat) :
-    Circuit.gateComplexity interpretation target ≤ (s : ℕ∞) ↔
-      ∃ circuit : Circuit σ n m,
-        circuit.size ≤ s ∧ circuit.ComputesWith interpretation target := by
-  simpa [Circuit.gateComplexity, Circuit.cost_unit] using
-    costComplexity_le_nat_iff interpretation OperationCost.unit target s
-
 /-- Gate-complexity MCSP as a scalar Boolean function on `2 ^ n`-bit truth tables. -/
 noncomputable def mcspScalar {σ : Signature} (interpretation : Interpretation σ Bool)
     (n s : Nat) : ScalarFunction Bool (2 ^ n) := by
@@ -467,14 +436,15 @@ theorem card_yesSet_eq_card_functionsAtMost {σ : Signature} [Fintype σ.Op]
   classical
   apply Finset.card_bij (fun tt _ => truthTableTargetEquiv n tt)
   · intro tt htt
-    rw [mem_yesSet_iff, gateComplexity_le_nat_iff] at htt
+    rw [mem_yesSet_iff, Circuit.gateComplexity_le_nat_iff] at htt
     exact Circuit.mem_functionsAtMost_iff.mpr htt
   · intro tt₁ _ tt₂ _ heq
     exact (truthTableTargetEquiv n).injective heq
   · intro target htarget
     refine ⟨(truthTableTargetEquiv n).symm target, ?_,
       (truthTableTargetEquiv n).apply_symm_apply target⟩
-    rw [mem_yesSet_iff, (truthTableTargetEquiv n).apply_symm_apply, gateComplexity_le_nat_iff]
+    rw [mem_yesSet_iff, (truthTableTargetEquiv n).apply_symm_apply,
+      Circuit.gateComplexity_le_nat_iff]
     exact Circuit.mem_functionsAtMost_iff.mp htarget
 
 /-- Ordered-syntax Shannon upper bound on the number of `yes` truth tables of `MCSP`. -/

@@ -124,9 +124,10 @@ function, with `⊤` for an unrealizable function. The natural-valued
   Over every basis, essential inputs are bounded by total fan-in. For bounded
   fan-in `k` AND/OR this yields `n' ≤ k · size`.
 
-* **Schnorr's XOR lower bound** (`schnorr_lower_bound_circuit`):
-  Any fan-in-2 AND/OR circuit computing N-input XOR (or its complement)
-  requires at least `2(N − 1)` internal gates.
+* **Schnorr's XOR lower bound** (`schnorr_lower_bound_circuit`,
+  `parity_size_ge_three_mul`): Any fan-in-2 AND/OR circuit computing N-input
+  XOR (or its complement) requires at least `2(N − 1)` internal gates, and has
+  size at least `3(N − 1)` by three-gate elimination.
 
 * **CNF/DNF lower bound for XOR** (`DNF.two_pow_le_complexity_of_xorBool`,
   `CNF.two_pow_le_complexity_of_xorBool`): Any DNF (resp. CNF) computing N-input XOR
@@ -178,12 +179,14 @@ function, with `⊤` for an unrealizable function. The natural-valued
 * **Parity separates `AC0` from `TC0`** (`xorBool_not_mem_AC0`,
   `xorBool_mem_TC0`, `AC0_ssubset_TC0`): parity is not computed by any
   polynomial-size constant-depth unbounded AND/OR family, but depth-two
-  threshold circuits of size `N + 1` compute it, so `AC0 ⊂ TC0`.
+  threshold circuits of size `N + 1` compute it, so `AC0 ⊂ TC0`. Strict
+  majority is not in `AC0` either (`majority_not_mem_AC0`), by the top-down
+  gate-count bound.
 * **Razborov–Smolensky** (`xorBool_not_mem_AC0Mod_three`,
   `Smolensky.parity_size_lower_bound`): parity is not in `AC0[3]`; a depth-`d`
   AND/OR/`MOD_3` circuit computing `n`-bit parity has size at least
   `(2/5) · 2^ℓ` whenever `(40ℓ)^{2d} ≤ n`, by approximation with low-degree
-  functions over `ZMod 3`.
+  functions over `ZMod 3`. Hence `TC0 ⊄ AC0[3]` (`not_TC0_subset_AC0Mod_three`).
 
 * **Exponentially small correlation** (`Correlation.eventually_correlation_hardForm_le`):
   fan-in-two circuits over any basis with at most `c n` gates of positive arity, for any

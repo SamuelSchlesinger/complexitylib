@@ -40,6 +40,10 @@ with `Algebraic.DeMorgan.xorThreeGateEliminator`. The translation lives in
   `Circuit.sizeComplexity Basis.andOr2 (Schnorr.xorBool N) ≥ 2 * N - 1`
 * `sizeComplexity_xorBool_ge_three_mul` —
   `3 * (N - 1) ≤ Circuit.sizeComplexity Basis.andOr2 (Schnorr.xorBool N)`
+
+The hypotheses allow the circuit to compute either XOR or its complement
+(`comp = true` for complement). For a single-output circuit,
+`c.size = G + 1`, so `2N − 1 ≤ c.size` is equivalently `G ≥ 2(N − 1)`.
 -/
 
 

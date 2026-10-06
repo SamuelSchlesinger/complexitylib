@@ -124,7 +124,15 @@ In order. Each item says why it matters and roughly how large it is.
    about 14 parallel representations with 22 bridges, and binary counters
    exist in about 8 versions. One codec interface, one probability
    convention, and one formula type with substitution would absorb most of
-   them.
+   them. A concrete instance: `Algebraic.Nechiporuk.SharedProgram` and its
+   measures copy `Algebraic.KW.SharedProgram` for a different formula type,
+   and the circuit-to-shared-program decomposition (`lineFormula`,
+   `wireValues`, `exists_sharedProgram_of_program`) exists three times, for
+   the De Morgan basis (`KW.Sharing.Circuit`), the full binary basis
+   (`Nechiporuk.Sharing.Internal`), and the XOR-extended basis
+   (`KW.Sharing.Extended.Internal`). The majority arithmetic of
+   `KW.mul_le_cost_of_majority` and `KW.Extended.mul_le_cost_of_majority` is
+   likewise duplicated and could be stated once from a `KhrapchenkoBound`.
 7. **Move every circuit development to CSLib's circuit model.** CSLib's
    straight-line programs over a signature (`Cslib.Circuits`) become the only
    semantic circuit type, and our typed `Circuit` is retired. Nothing depends

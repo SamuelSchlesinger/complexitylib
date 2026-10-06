@@ -317,7 +317,7 @@ theorem mcspScalar_binary_comp_tableTranslate {n s : Nat} (hs : 1 ≤ s) (a : Fi
   classical
   apply Bool.eq_iff_iff.mpr
   simp only [mcspScalar_eq_true_iff, truthTableTargetEquiv_comp_tableTranslate,
-    gateComplexity_le_nat_iff]
+    Circuit.gateComplexity_le_nat_iff]
   constructor
   · rintro ⟨c, hsize, hcomp⟩
     obtain ⟨c', hsize', hcomp'⟩ := exists_binary_circuit_xorTranslate hs a hsize hcomp
