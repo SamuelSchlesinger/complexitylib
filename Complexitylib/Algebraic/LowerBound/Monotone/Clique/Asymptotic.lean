@@ -5,8 +5,10 @@ Authors: Samuel Schlesinger
 -/
 
 module
+public import Complexitylib.Algebraic.LowerBound.Monotone.Clique.Essential
 public import Complexitylib.Algebraic.LowerBound.Monotone.Clique.Exponential
 public import Mathlib.Analysis.SpecialFunctions.Pow.Real
+public import Mathlib.Tactic.IntervalCases
 
 /-!
 # A `2^√k` lower bound for monotone CLIQUE circuits
@@ -26,8 +28,13 @@ For a width `w` we use `w^2` sunflower petals.  Writing
   `6 * F^2 * 64^w < 4^(w^2)` once `w ≥ 16`.
 
 So every circuit computing `k`-CLIQUE has more than `64^w = 2^(6w)` gates
-(`sixtyFourPow_lt_circuitSize`).  Choosing `w = ⌊√(k-1)⌋ / 2` gives the
-general bound: for `1025 ≤ k` and `k^4 ≤ n` (that is, `k ≤ n^(1/4)`), every
+(`sixtyFourPow_lt_circuitSize`).  Choosing `w = ⌊√(k-1)⌋ / 2` handles
+`1025 ≤ k` (`twoPow_two_mul_sqrt_lt_circuitSize_of_large`).  Smaller clique
+sizes are covered by `Essential.lean`: for `2 ≤ k ≤ 1024` every edge variable
+is essential, which already forces `(n / 2)^2 - 1` gates, and for `k ≤ 1` no
+constant-free circuit computes `k`-CLIQUE at all.
+
+Together: for every `k` with `k^4 ≤ n` (that is, `k ≤ n^(1/4)`), every
 binary, constant-free monotone shared circuit computing `k`-CLIQUE on `n`
 vertices has more than `2^(2⌊√k⌋)` gates (`twoPow_two_mul_sqrt_lt_circuitSize`)
 and hence more than `2^√k` gates (`rpow_sqrt_lt_circuitSize`).  This is the
@@ -267,10 +274,10 @@ theorem sixtyFourPow_lt_circuitSize
     (negative_budget n k w sixteen_le widthSmall (by omega))
     circuit computes
 
-/-- **Monotone CLIQUE lower bound.**  For `1025 ≤ k` and `k^4 ≤ n`, every
-binary, constant-free monotone shared circuit computing `k`-CLIQUE on `n`
-vertices has more than `2^(2⌊√k⌋)` gates. -/
-theorem twoPow_two_mul_sqrt_lt_circuitSize
+/-- The approximation bound for large cliques: for `1025 ≤ k` and
+`k^4 ≤ n`, every binary, constant-free monotone shared circuit computing
+`k`-CLIQUE on `n` vertices has more than `2^(2⌊√k⌋)` gates. -/
+theorem twoPow_two_mul_sqrt_lt_circuitSize_of_large
     (n k : Nat)
     (cliqueLarge : 1025 ≤ k)
     (verticesLarge : k ^ 4 ≤ n)
@@ -309,20 +316,69 @@ theorem twoPow_two_mul_sqrt_lt_circuitSize
     _ = 64 ^ w := by rw [pow_mul]; norm_num
     _ < circuit.size := bound
 
-/-- **Monotone CLIQUE lower bound, real form.**  For `1025 ≤ k ≤ n^(1/4)`,
+/-- For `2 ≤ k ≤ 1024`, the edge count of `k^4` vertices exceeds
+`4^⌊√k⌋ + 1`. -/
+theorem fourPow_sqrt_add_two_le
+    (k : Nat)
+    (two_le : 2 ≤ k)
+    (k_le : k ≤ 1024) :
+    4 ^ Nat.sqrt k + 2 ≤ (k ^ 4 / 2) ^ 2 := by
+  have monotone : ∀ base, base ≤ k →
+      (base ^ 4 / 2) ^ 2 ≤ (k ^ 4 / 2) ^ 2 := fun base below =>
+    Nat.pow_le_pow_left (Nat.div_le_div_right (Nat.pow_le_pow_left below 4)) 2
+  have sqrtSmall : Nat.sqrt k ≤ 32 := by
+    have : Nat.sqrt k < 33 := Nat.sqrt_lt'.2 (by omega)
+    omega
+  have sqrtPositive : 1 ≤ Nat.sqrt k := Nat.le_sqrt.2 (by omega)
+  have squareBelow : Nat.sqrt k ^ 2 ≤ k := Nat.sqrt_le' k
+  generalize Nat.sqrt k = root at sqrtSmall sqrtPositive squareBelow ⊢
+  interval_cases root
+  · exact le_trans (by norm_num) (monotone 2 two_le)
+  all_goals exact le_trans (by norm_num) (monotone _ squareBelow)
+
+/-- **Monotone CLIQUE lower bound.**  For every `k` with `k^4 ≤ n`, that is
+`k ≤ n^(1/4)`, every binary, constant-free monotone shared circuit computing
+`k`-CLIQUE on `n` vertices has more than `2^(2⌊√k⌋)` gates.  For `k ≤ 1` no
+such circuit exists. -/
+theorem twoPow_two_mul_sqrt_lt_circuitSize
+    (n k : Nat)
+    (verticesLarge : k ^ 4 ≤ n)
+    (circuit : Circuit AndOr.signature (edgeCount n) 1)
+    (computes : ∀ assignment,
+      circuit.eval AndOr.boolInterpretation assignment 0 =
+        function n k assignment) :
+    2 ^ (2 * Nat.sqrt k) < circuit.size := by
+  have k_le_n : k ≤ n := (Nat.le_self_pow (by norm_num) k).trans verticesLarge
+  rcases Nat.lt_or_ge k 2 with small | two_le
+  · exact absurd computes (not_computes_of_le_one (by omega) k_le_n circuit)
+  rcases Nat.lt_or_ge k 1025 with medium | large
+  · have edges := edgeCount_le_succ_size two_le k_le_n circuit computes
+    have pairs := sq_half_le_edgeCount n
+    have arithmetic := fourPow_sqrt_add_two_le k two_le (by omega)
+    have scaled : (k ^ 4 / 2) ^ 2 ≤ (n / 2) ^ 2 :=
+      Nat.pow_le_pow_left (Nat.div_le_div_right verticesLarge) 2
+    rw [pow_mul]
+    norm_num
+    omega
+  · exact twoPow_two_mul_sqrt_lt_circuitSize_of_large n k large verticesLarge
+      circuit computes
+
+/-- **Monotone CLIQUE lower bound, real form.**  For every `k ≤ n^(1/4)`,
 every binary, constant-free monotone shared circuit computing `k`-CLIQUE on
 `n` vertices has more than `2^√k` gates. -/
 theorem rpow_sqrt_lt_circuitSize
     (n k : Nat)
-    (cliqueLarge : 1025 ≤ k)
     (verticesLarge : k ^ 4 ≤ n)
     (circuit : Circuit AndOr.signature (edgeCount n) 1)
     (computes : ∀ assignment,
       circuit.eval AndOr.boolInterpretation assignment 0 =
         function n k assignment) :
     (2 : ℝ) ^ Real.sqrt k < circuit.size := by
-  have natural := twoPow_two_mul_sqrt_lt_circuitSize n k cliqueLarge
-    verticesLarge circuit computes
+  have k_le_n : k ≤ n := (Nat.le_self_pow (by norm_num) k).trans verticesLarge
+  rcases Nat.lt_or_ge k 2 with small | two_le
+  · exact absurd computes (not_computes_of_le_one (by omega) k_le_n circuit)
+  have natural := twoPow_two_mul_sqrt_lt_circuitSize n k verticesLarge
+    circuit computes
   have sqrtPositive : 1 ≤ Nat.sqrt k := Nat.le_sqrt.2 (by omega)
   have exponentBound : Real.sqrt k ≤ ((2 * Nat.sqrt k : Nat) : ℝ) := by
     have := Real.real_sqrt_lt_nat_sqrt_succ (a := k)

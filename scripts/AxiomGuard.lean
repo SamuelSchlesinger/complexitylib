@@ -144,6 +144,7 @@ def headlineTheorems : List Name := [
   `Complexity.Smolensky.parity_size_lower_bound,
   `Complexity.xorBool_not_mem_AC0Mod_three,
   -- Monotone CLIQUE needs more than 2^√k binary AND/OR gates when 1025 ≤ k ≤ n^(1/4)
+  -- Monotone CLIQUE needs more than 2^√k binary AND/OR gates when k ≤ n^(1/4)
   `Algebraic.Monotone.Clique.Asymptotic.twoPow_two_mul_sqrt_lt_circuitSize,
   `Algebraic.Monotone.Clique.Asymptotic.rpow_sqrt_lt_circuitSize,
   -- The concrete uniform polynomial-time coefficient-four hard family
