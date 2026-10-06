@@ -278,6 +278,17 @@ def headlineTheorems : List Name := [
   `Algebraic.Cutwidth.MultiOutput.eventually_lt_size_of_fieldMul,
   `Algebraic.Cutwidth.MultiOutput.eventually_lt_size_of_fieldMul_fifty_div_nine,
   `Algebraic.Cutwidth.MultiOutput.eventually_lt_size_galoisField,
+  -- Matrix multiplication: charging the terminal graph and the (3.7812 - o(1)) n² bound
+  `Algebraic.Cutwidth.MultiOutput.blockRank_add_transpose_le_of_sum,
+  `Algebraic.Cutwidth.MultiOutput.Tripartite.three_mul_sq_le_two_mul_charge,
+  `Algebraic.Cutwidth.MultiOutput.Tripartite.exists_threshold,
+  `Algebraic.Cutwidth.MultiOutput.charges_le_of_matMul_of_totallyRegular,
+  `Algebraic.Cutwidth.MultiOutput.charges_le_add_of_matMul,
+  `Algebraic.Cutwidth.MultiOutput.half_sq_le_of_matMul_zmod,
+  `Algebraic.Cutwidth.MultiOutput.sq_sub_le_of_matMul,
+  `Algebraic.Cutwidth.MultiOutput.eventually_lt_size_of_matMul,
+  `Algebraic.Cutwidth.MultiOutput.eventually_lt_size_of_matMul_thirtyFour_div_nine,
+  `Algebraic.Cutwidth.MultiOutput.eventually_lt_size_matMul_zmod_two,
   -- Border substitution for tight tensors (coordinate form of Landsberg-Michałek Prop. 2.3)
   `Algebraic.Tensor3.BorderRankLE.map_of_ker,
   `Algebraic.Tensor3.BorderRankLE.exists_map_orthProj,

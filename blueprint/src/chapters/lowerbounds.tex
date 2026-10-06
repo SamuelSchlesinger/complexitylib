@@ -11995,7 +11995,9 @@ no superlinear unrestricted circuit theorem follows from them alone.
     Algebraic.Cutwidth.MultiOutput.quadForm_add_quadForm_eq,
     Algebraic.Cutwidth.MultiOutput.card_mul_card_le_of_dotProduct_mulVec_eq_zero,
     Algebraic.Cutwidth.MultiOutput.blockRank_add_transpose_le_of_trace,
-    Algebraic.Cutwidth.MultiOutput.blockRank_add_transpose_le}
+    Algebraic.Cutwidth.MultiOutput.blockRank_add_transpose_le,
+    Algebraic.Cutwidth.MultiOutput.blockRank_add_transpose_le_of_sum_of_trace,
+    Algebraic.Cutwidth.MultiOutput.blockRank_add_transpose_le_of_sum}
   \leanok
   \uses{def:lowerbounds-algebraic-quadratic-form,
     def:lowerbounds-algebraic-multi-output,
@@ -12007,6 +12009,9 @@ no superlinear unrestricted circuit theorem follows from them alone.
   \[
     \operatorname{rank} H[X_S, X_T] \le |A| + |B| .
   \]
+  The same holds for a circuit with several outputs $f_o$ when, for some
+  coefficients $c_o\in F$, the combination $x\mapsto\sum_o c_of_o(x)$ is
+  the quadratic form of $M$.
 \end{theorem}
 \begin{proof}
   \leanok
@@ -12026,7 +12031,9 @@ no superlinear unrestricted circuit theorem follows from them alone.
   $|P_S|\,|P_T|\le|F|^{|X_S|-\operatorname{rank}(H[X_S,X_T]V)+\operatorname{rank}V}
   \le|F|^{N-\operatorname{rank}H[X_S,X_T]}$. Summing over the at most
   $|F|^{|A|+|B|}$ classes gives $|F|^N\le|F|^{|A|+|B|}\,
-  |F|^{N-\operatorname{rank}H[X_S,X_T]}$.
+  |F|^{N-\operatorname{rank}H[X_S,X_T]}$. Only the vanishing of the mixed
+  second difference on the classes is used; for a combination of outputs it
+  vanishes for each output wire, hence for the combination.
 \end{proof}
 
 \begin{lemma}[A symmetric totally regular Cauchy matrix]
@@ -12249,6 +12256,229 @@ no superlinear unrestricted circuit theorem follows from them alone.
   gates. For the asymptotic form, assume at most $(2+1/A-\varepsilon)n$
   gates, choose $\eta=A^2\varepsilon/2$, and compare: the cycle term is at
   most $(1-A\varepsilon/2)n$, and the logarithmic term is $O(\log n)$.
+\end{proof}
+
+\begin{definition}[Matrix multiplication in coordinates]
+  \label{def:lowerbounds-algebraic-mat-mul}
+  \lean{Algebraic.Cutwidth.MultiOutput.matMul,
+    Algebraic.Cutwidth.MultiOutput.matMulLeft,
+    Algebraic.Cutwidth.MultiOutput.matMulRight,
+    Algebraic.Cutwidth.MultiOutput.matMulOutput,
+    Algebraic.Cutwidth.MultiOutput.matMulInput,
+    Algebraic.Cutwidth.MultiOutput.matMulTermA,
+    Algebraic.Cutwidth.MultiOutput.matMulTermB,
+    Algebraic.Cutwidth.MultiOutput.matMulTermC}
+  \leanok
+  \uses{def:lowerbounds-algebraic-multi-output}
+  The product $C=AB$ of two $n\times n$ matrices over a semiring $R$ is the
+  map $R^{n^2+n^2}\to R^{n^2}$ whose output $C_{ik}$ is
+  $\sum_jA_{ij}B_{jk}$: the first $n^2$ inputs hold the entries $A_{ij}$ of
+  the first factor and the last $n^2$ inputs the entries $B_{jk}$ of the
+  second, index pairs numbered row by row. In a circuit computing it, the
+  \emph{terminals} are the wires of the inputs $A_{ij}$ and $B_{jk}$ and the
+  output wires carrying $C_{ik}$.
+\end{definition}
+
+\begin{definition}[The terminal graph of matrix multiplication]
+  \label{def:lowerbounds-algebraic-mat-mul-terminal-graph}
+  \lean{Algebraic.Cutwidth.MultiOutput.Tripartite.rowSet,
+    Algebraic.Cutwidth.MultiOutput.Tripartite.colSet,
+    Algebraic.Cutwidth.MultiOutput.Tripartite.degI,
+    Algebraic.Cutwidth.MultiOutput.Tripartite.degJ,
+    Algebraic.Cutwidth.MultiOutput.Tripartite.degK,
+    Algebraic.Cutwidth.MultiOutput.Tripartite.minority,
+    Algebraic.Cutwidth.MultiOutput.Tripartite.chargeI,
+    Algebraic.Cutwidth.MultiOutput.Tripartite.chargeJ,
+    Algebraic.Cutwidth.MultiOutput.Tripartite.chargeK,
+    Algebraic.Cutwidth.MultiOutput.Tripartite.heavyI,
+    Algebraic.Cutwidth.MultiOutput.Tripartite.heavyJ,
+    Algebraic.Cutwidth.MultiOutput.Tripartite.heavyK,
+    Algebraic.Cutwidth.MultiOutput.Tripartite.heavyCount,
+    Algebraic.Cutwidth.MultiOutput.Tripartite.mixedPairs,
+    Algebraic.Cutwidth.MultiOutput.Tripartite.lightHeavy,
+    Algebraic.Cutwidth.MultiOutput.Tripartite.place}
+  \leanok
+  \uses{def:lowerbounds-algebraic-mat-mul}
+  The terminals of $n\times n$ matrix multiplication are the edges of the
+  complete tripartite graph on three copies $I$, $J$, $K$ of
+  $\{0,\dots,n-1\}$: $A_{ij}$ joins $i$ and $j$, $B_{jk}$ joins $j$ and $k$,
+  and $C_{ik}$ joins $i$ and $k$, so every vertex has degree $2n$. A set of
+  placed terminals (those whose wires lie in a split $S$) places $d(v)$
+  terminals at each vertex $v$. The \emph{minority} at $v$ is
+  $g(d(v))=\min\{d(v),2n-d(v)\}$, and the \emph{charges} are
+  $R_I=\sum_{i\in I}g(d(i))$, $R_J=\sum_{j\in J}g(d(j))$ and
+  $R_K=\sum_{k\in K}g(d(k))$. A vertex is \emph{heavy} when $d(v)\ge n$ and
+  light otherwise.
+\end{definition}
+
+\begin{lemma}[Charging the terminal graph]
+  \label{lem:lowerbounds-algebraic-mat-mul-charging}
+  \lean{Algebraic.Cutwidth.MultiOutput.Tripartite.minority_of_lt,
+    Algebraic.Cutwidth.MultiOutput.Tripartite.minority_of_le,
+    Algebraic.Cutwidth.MultiOutput.Tripartite.sum_card_row,
+    Algebraic.Cutwidth.MultiOutput.Tripartite.sum_card_col,
+    Algebraic.Cutwidth.MultiOutput.Tripartite.lightHeavy_le_charge,
+    Algebraic.Cutwidth.MultiOutput.Tripartite.card_mixedPairs,
+    Algebraic.Cutwidth.MultiOutput.Tripartite.three_mul_sq_le_two_mul_lightHeavy,
+    Algebraic.Cutwidth.MultiOutput.Tripartite.three_mul_sq_le_two_mul_charge,
+    Algebraic.Cutwidth.MultiOutput.Tripartite.heavyCount_le_add_two,
+    Algebraic.Cutwidth.MultiOutput.Tripartite.exists_threshold}
+  \leanok
+  \uses{def:lowerbounds-algebraic-mat-mul-terminal-graph,
+    def:lowerbounds-algebraic-multi-output}
+  For every set of placed terminals, the number $P$ of terminals with one
+  light and one heavy endpoint satisfies $P\le R_I+R_J+R_K$. If the number
+  $h$ of heavy vertices satisfies $3n\le2h\le3n+3$, then
+  \[
+    3n^2 \le 2P + 3 \le 2(R_I+R_J+R_K) + 3 .
+  \]
+  Placing one more terminal adds at most two heavy vertices. Consequently,
+  if $n\ge1$ and the $3n^2$ terminals of a program lie on distinct wires,
+  then along every injective ranking of the wires some prefix of the form
+  $\{w : \mathrm{rank}(w)\le\mathrm{rank}(w_0)\}$, with $w_0$ a terminal,
+  has $3n\le2h\le3n+3$.
+\end{lemma}
+\begin{proof}
+  \leanok
+  Charge a light--heavy terminal to its light endpoint if it is placed and
+  to its heavy endpoint otherwise. At a light vertex $g(d)=d$ counts its
+  placed terminals, at a heavy vertex $g(d)=2n-d$ counts its unplaced
+  ones, so every vertex pays for the terminals charged to it. With $x$, $y$,
+  $z$ heavy vertices in $I$, $J$, $K$ and $h=x+y+z$,
+  $P=x(n-y)+(n-x)y+y(n-z)+(n-y)z+x(n-z)+(n-x)z=2nh-2(xy+yz+zx)$, and
+  $3(xy+yz+zx)\le h^2$, so
+  $3(2P+3-3n^2)\ge9-(2h-3n)^2\ge0$. The degrees sum to twice the number of
+  placed terminals, so placing one terminal raises the degrees by two in
+  total and the heavy count by at most two. Along the ranking the heavy
+  count of the prefixes climbs from $0$ to $3n$ in steps of at most two; the
+  first prefix with at least $\lceil3n/2\rceil$ heavy vertices has at most
+  $\lceil3n/2\rceil+1$, and it ends at a terminal, since the heavy count
+  changes there.
+\end{proof}
+
+\begin{theorem}[The charges bound the crossing signals]
+  \label{thm:lowerbounds-algebraic-mat-mul-charges}
+  \lean{Algebraic.Cutwidth.MultiOutput.terminal_injective_of_matMul,
+    Algebraic.Cutwidth.MultiOutput.mem_component_of_matMul,
+    Algebraic.Cutwidth.MultiOutput.charges_le_of_matMul_of_totallyRegular,
+    Algebraic.Cutwidth.MultiOutput.charges_le_add_of_matMul}
+  \leanok
+  \uses{def:lowerbounds-algebraic-mat-mul-terminal-graph,
+    thm:lowerbounds-algebraic-restricted-rank-cut,
+    thm:lowerbounds-algebraic-quadratic-rank-cut,
+    lem:lowerbounds-algebraic-cauchy,
+    thm:lowerbounds-algebraic-multi-output-ordering}
+  Let a circuit over a finite field $F$, over any signature, compute
+  $n\times n$ matrix multiplication. Its $3n^2$ terminals lie on distinct
+  wires, and if $n\ge1$ they all lie in the component of the output
+  $C_{00}$ in the wire graph. Let $S$ be a set of its wires with forward
+  signals $A$ and backward signals $B$, and let $R_I$, $R_J$, $R_K$ be the
+  charges of the terminals placed in $S$. If $F$ has a totally regular
+  $n\times n$ matrix, in particular if $F=\mathbb{Z}/q$ for a prime
+  $q\ge2n$, then
+  \[
+    R_I,\ R_J,\ R_K \le |A| + |B| ;
+  \]
+  over every finite field, $R_I,R_J,R_K\le|A|+|B|+4n$.
+\end{theorem}
+\begin{proof}
+  \leanok
+  Fix the second factor to a matrix $B_0$. The product changes by
+  $\delta A\mapsto\delta A\,B_0$, which is block diagonal over the rows $i$,
+  and Theorem~\ref{thm:lowerbounds-algebraic-restricted-rank-cut} on these
+  inputs gives $|F|^{n^2}\le|F|^{|A|+|B|}\prod_i k_1(i)k_2(i)$, where
+  $k_1(i)$ and $k_2(i)$ count the left kernels of the blocks of $B_0$ with
+  rows the placed (respectively unplaced) entries $A_{ij}$ and columns the
+  unplaced (respectively placed) outputs $C_{ik}$. With $a$ and $c$ placed
+  entries of the two kinds at $i$, a totally regular $B_0$ gives these blocks
+  ranks $\min\{a,n-c\}$ and $\min\{n-a,c\}$, which sum to $g(a+c)$; so
+  $R_I\le|A|+|B|$. Fixing the first factor gives $R_K$ over the columns
+  $k$. For $R_J$, the combination $\sum_{ik}\Lambda_{ik}C_{ik}$ is a
+  quadratic form whose Hessian pairs $A_{ij}$ with $B_{jk}$ through
+  $\Lambda_{ik}$; by Theorem~\ref{thm:lowerbounds-algebraic-quadratic-rank-cut}
+  its cross block between the inputs in $S$ and outside $S$ has rank at most
+  $|A|+|B|$, and its kernel is block diagonal over $j$, with blocks of
+  $\Lambda$ and $\Lambda^{\mathsf T}$ whose ranks again sum to $g(d(j))$.
+  Over an arbitrary finite field, choose the matrix after $S$, uniformly at
+  random. For a block with columns $P$ and rows $Q$, a nonzero vector
+  supported on $P$ lies in the kernel for at most an $|F|^{-|Q|}$ fraction
+  of all matrices, so the kernel sizes average at most twice the ideal size
+  $|F|^e$, $e=|P|-\min\{|P|,|Q|\}$. A kernel of size $k$ has
+  $k<|F|^{d+1}$ with $d=\lfloor\log_{|F|}k\rfloor$, and its excess exponent
+  $d+1-e$ is at most $k/|F|^e$, so the excess averages at most $2$ for each
+  of the $2n$ blocks of a part; some matrix has total excess at most $4n$,
+  which is the loss.
+  The component of $C_{00}$ is crossed by no signal, so with a matrix unit
+  as the fixed factor the slices separate; the unit vector at $A_{ij}$ moves
+  $C_{ik}$ when $B_0=E_{jk}$, and the unit vector at $B_{jk}$ moves $C_{ik}$
+  when the first factor is $E_{ij}$, so the component spreads from $C_{00}$
+  to every terminal. Distinct terminals differ on a suitable input built
+  from matrix units.
+\end{proof}
+
+\begin{theorem}[Matrix multiplication needs $(2+1/(4p)-\varepsilon)n^2$ gates]
+  \label{thm:lowerbounds-algebraic-mat-mul}
+  \lean{Algebraic.Cutwidth.MultiOutput.matMul_matMulInput,
+    Algebraic.Cutwidth.MultiOutput.half_sq_le_of_matMul_of_totallyRegular,
+    Algebraic.Cutwidth.MultiOutput.half_sq_le_of_matMul_zmod,
+    Algebraic.Cutwidth.MultiOutput.sq_sub_le_of_matMul,
+    Algebraic.Cutwidth.MultiOutput.eventually_lt_size_of_matMul_of_orderingBound,
+    Algebraic.Cutwidth.MultiOutput.eventually_lt_size_of_matMul,
+    Algebraic.Cutwidth.MultiOutput.eventually_lt_size_of_matMul_thirtyFour_div_nine,
+    Algebraic.Cutwidth.MultiOutput.eventually_lt_size_matMul_zmod_two,
+    Algebraic.Cutwidth.MultiOutput.eventually_lt_size_matMul_zmod_two_thirtyFour_div_nine}
+  \leanok
+  \uses{def:lowerbounds-algebraic-mat-mul,
+    lem:lowerbounds-algebraic-mat-mul-charging,
+    thm:lowerbounds-algebraic-mat-mul-charges,
+    thm:lowerbounds-algebraic-multi-output-ordering,
+    thm:lowerbounds-algebraic-gaussian-coefficient}
+  Let a circuit over a finite field $F$, over any signature with fan-in at
+  most two (so with arbitrary functions $F\times F\to F$, unary functions,
+  and constants as gates), compute $n\times n$ matrix multiplication over
+  $F$ with $s$ gates. Under $\mathrm{OrderingBound}(A,\eta,C)$ with
+  $A+\eta\ge0$,
+  \[
+    \frac{n^2-8n-1}{2} \le (A+\eta)\max\{s-2n^2,0\} + 3\log_2(2n^2+3s) + C ,
+  \]
+  and the left side improves to $(n^2-1)/2$ when $F$ has a totally regular
+  $n\times n$ matrix, in particular over $\mathbb{Z}/q$ for a prime
+  $q\ge2n$. Consequently, if the ordering hypothesis holds with coefficient
+  $A>0$ at every positive slack, then for every $\varepsilon>0$ and all
+  large $n$, independently of the field and the signature, every such
+  circuit has more than $(2+1/(2A)-\varepsilon)n^2$ gates. With the Gaussian
+  pathwidth coefficient $p$ of
+  Theorem~\ref{thm:lowerbounds-algebraic-gaussian-coefficient} and $A=2p$
+  this is $(2+1/(4p)-\varepsilon)n^2\approx(3.7812-\varepsilon)n^2$, and as
+  $2p\le9/32$ it is more than $(34/9-\varepsilon)n^2$. In particular, every
+  circuit over the full binary basis computing the product of two
+  $n\times n$ matrices over $\mathrm{GF}(2)$ has more than
+  $(2+1/(4p)-\varepsilon)n^2$ gates.
+
+  Lower bounds for matrix multiplication usually count multiplications in
+  arithmetic or bilinear models: Bläser (STACS 2001) proves that
+  $\tfrac52n^2-3n$ nonscalar multiplications are needed, and Shpilka
+  (SICOMP 2003) $3n^2-o(n^2)$ product gates over $\mathrm{GF}(2)$ for
+  bilinear and quadratic circuits. We know of no earlier bound beyond about
+  $2n^2$ on the number of gates of circuits with arbitrary fan-in-two gates,
+  or over the full binary basis, computing the matrix product. The
+  coefficient is not claimed to be a record for explicit functions with
+  $2n^2$ inputs and $n^2$ outputs in general.
+\end{theorem}
+\begin{proof}
+  \leanok
+  By Theorem~\ref{thm:lowerbounds-algebraic-mat-mul-charges} the terminals
+  lie on distinct wires in one component. Along the ranking of
+  Theorem~\ref{thm:lowerbounds-algebraic-multi-output-ordering}, take the
+  threshold prefix of Lemma~\ref{lem:lowerbounds-algebraic-mat-mul-charging}:
+  it ends at a terminal and $3n^2\le2(R_I+R_J+R_K)+3$. Each charge is at most
+  the number $w$ of crossing signals plus a loss $L$ ($L=0$ with a totally
+  regular matrix, $L=4n$ in general), so $w\ge(n^2-2L-1)/2$, and the prefix
+  is charged to the component holding all $2n^2$ inputs and at most $s$
+  gates. For the asymptotic form, assume at most
+  $(2+1/(2A)-\varepsilon)n^2$ gates and choose $\eta=A^2\varepsilon$: the
+  cycle term is at most $(1/2-A\varepsilon/2)n^2$, while the loss $4n$ and
+  the logarithmic term $O(\log n)$ are $o(n^2)$.
 \end{proof}
 
 \begin{definition}[The KRW conjecture]
