@@ -22,7 +22,9 @@ theorem identifying formula depth and size with protocol depth and size (for
 statement of the Karchmer–Raz–Wigderson conjecture, Khrapchenko's quadratic lower bounds
 for parity, threshold functions and majority, and their extension to circuits in which at
 most `k` gates have fan-out at least two, stated both for programs with `k` shared gates and
-for the library's De Morgan circuits, with a matching upper bound for parity.
+for the library's De Morgan circuits, with a matching upper bound for parity, and the
+extension of these bounds to circuits that also have `r` binary XOR and EQUIV gates
+(`Algebraic.KW.Extended`).
 -/
 
 @[expose] public section
