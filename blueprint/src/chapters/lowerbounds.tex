@@ -11634,6 +11634,155 @@ Theorem~\ref{thm:lowerbounds-algebraic-explicit-four-n}.
   Divide by $2+2c>0$ for the normalized gate bound.
 \end{proof}
 
+\begin{definition}[Output components that stay nonaffine on large flats]
+  \label{def:lowerbounds-algebraic-geometry-restriction-rank}
+  \lean{Algebraic.Aggregate.Geometry.flatAffineFunctions,
+    Algebraic.Aggregate.Geometry.NonaffineOnFlats}
+  \leanok
+  \uses{def:lowerbounds-algebraic-geometry-nonlinear-rank}
+  A function $f:\mathbf F_2^n\to\mathbf F_2$ is affine on an affine flat $V$ when
+  $f(x+y+z)=f(x)+f(y)+f(z)$ for all $x,y,z\in V$; its values off $V$ are
+  unrestricted, and these functions form a subspace. A map
+  $F:\mathbf F_2^n\to\mathbf F_2^m$ is nonaffine on flats of $2^D$ points when no
+  nonzero component $w\cdot F$ is affine on a flat with at least $2^D$ points.
+  The least such $D$ is $D(F)=A(F)+1$, where $A(F)$ is the largest dimension of an
+  affine flat on which some nonzero component of $F$ is affine.
+\end{definition}
+
+\begin{theorem}[Restriction--rank bound for conjunction gates]
+  \label{thm:lowerbounds-algebraic-geometry-restriction-rank}
+  \lean{Algebraic.Aggregate.Geometry.exists_restriction_generators,
+    Algebraic.Aggregate.Geometry.NonaffineOnFlats.output_add_input_le_conjunctionCount_add}
+  \leanok
+  \uses{def:lowerbounds-algebraic-geometry-restriction-rank,
+    def:lowerbounds-algebraic-geometry-model,
+    thm:lowerbounds-algebraic-geometry-nonlinear-rank}
+  Let $F:\mathbf F_2^n\to\mathbf F_2^m$ with $m\ge1$ be nonaffine on flats of $2^D$
+  points, where $D\le n$. Every signed unbounded AND/OR/XOR circuit computing $F$
+  has at least
+  \[
+    m+n-D
+  \]
+  conjunction gates. Affine (XOR) gates of every fan-in are not counted, so this
+  also bounds the number of unbounded-fan-in AND/OR gates in circuits with free
+  XOR. Conjunction fan-in, fanout, depth, literal repetitions, and reuse of
+  nonlinear values are unrestricted.
+\end{theorem}
+\begin{proof}
+  \leanok
+  Process the gates in program order while maintaining an affine flat $V$ on
+  which every earlier gate is affine. While $|V|>2^D$, a conjunction with a literal
+  constant at its controlling value is already constant; otherwise fix one
+  nonconstant (affine) literal to its controlling value, which halves $V$ and makes
+  the gate constant; if all literals are constant at the other value the gate is
+  constant too. XOR gates of affine functions stay affine. Once $|V|=2^D$, every
+  later conjunction contributes one generator, and every gate lies in the functions
+  affine on $V$ plus the span of these generators. If $V$ never shrinks to $2^D$
+  points then all outputs are affine on a flat of more than $2^D$ points, which is
+  impossible for $m\ge1$. Otherwise at least $n-D$ conjunctions were used for
+  restrictions, and the $m$ outputs are independent modulo functions affine on $V$,
+  so at least $m$ generators remain.
+\end{proof}
+
+\begin{definition}[The Gold map in linear coordinates]
+  \label{def:lowerbounds-algebraic-geometry-gold}
+  \lean{Algebraic.Aggregate.Geometry.Gold.goldFunction}
+  \leanok
+  \uses{def:lowerbounds-algebraic-geometry-inversion}
+  Let $K$ be a binary field and fix a linear isomorphism
+  $e:\mathbf F_2^n\longrightarrow K$. The Boolean map $G_e$ encodes its input using
+  $e$, cubes it in $K$, and decodes all $n$ output bits in the same basis.
+\end{definition}
+
+\begin{theorem}[Affine restrictions of the Gold map]
+  \label{thm:lowerbounds-algebraic-geometry-gold-properties}
+  \lean{Algebraic.Aggregate.Geometry.Gold.cube_add_add,
+    Algebraic.Aggregate.Geometry.Gold.two_mul_finrank_le_of_isotropic,
+    Algebraic.Aggregate.Geometry.Gold.goldFunction_bijective,
+    Algebraic.Aggregate.Geometry.Gold.card_flat_le_two,
+    Algebraic.Aggregate.Geometry.Gold.goldFunction_nonaffineOnFlats,
+    Algebraic.Aggregate.Geometry.Gold.goldFunction_nonliteral}
+  \leanok
+  \uses{def:lowerbounds-algebraic-geometry-gold,
+    def:lowerbounds-algebraic-geometry-restriction-rank}
+  Let $n$ be odd. Then $G_e$ is a permutation, all of its output bits are
+  simultaneously affine only on flats of at most two points, and every nonzero
+  component of $G_e$ is affine only on flats of dimension at most $(n+1)/2$: $G_e$
+  is nonaffine on flats of $2^{(n+3)/2}$ points. For $n\ge3$ no output bit is a
+  signed primary literal.
+\end{theorem}
+\begin{proof}
+  \leanok
+  Since $n$ is odd, $3$ is coprime to $2^n-1$, so cubing is injective. In
+  characteristic two,
+  $(a+b+c)^3=a^3+b^3+c^3+(a+b)(b+c)(c+a)$, so cubing preserves ternary sums only on
+  sets with at most two points. A component $\ell(x^3)$ is affine on $a+U$ exactly
+  when $U$ is totally isotropic for the alternating form
+  $B(u,w)=\ell(u^2w+uw^2)$. A nonzero radical vector $u$ satisfies
+  $\ell(r)=\ell(r^2/u^3)$ for every $r$; since every element is a square and
+  $\ell\ne0$, this determines $u^3$, so the radical has dimension at most one. The
+  dimension formula for orthogonal complements then gives $2\dim U\le n+1$. The
+  trace form is not used. The almost perfect nonlinearity of the Gold map is
+  classical (R.~Gold, IEEE Trans.\ Inform.\ Theory 14 (1968); see also C.~Carlet,
+  \emph{Vectorial Boolean Functions for Cryptography}, Section~3.1).
+\end{proof}
+
+\begin{definition}[Gold-map gate constants]
+  \label{def:lowerbounds-algebraic-geometry-gold-coefficients}
+  \lean{Algebraic.Aggregate.Geometry.Gold.gateCoefficient,
+    Algebraic.Aggregate.Geometry.Gold.constantPenalty}
+  \leanok
+  With $c=1-H_2(1/4)$, put $C_{\mathrm G}=(7+4c)/(4+2c)\approx1.771556$ and
+  $P_{\mathrm G}=(3+4c)/(4+2c)\approx0.857781$.
+\end{definition}
+
+\begin{theorem}[Conjunction and gate bounds for the Gold map]
+  \label{thm:lowerbounds-algebraic-geometry-gold}
+  \lean{Algebraic.Aggregate.Geometry.conjunctionCount_entropy_mul_size_lower_bound,
+    Algebraic.Aggregate.Geometry.restriction_entropy_mul_size_lower_bound,
+    Algebraic.Aggregate.Geometry.Gold.seven_quarters_lt_gateCoefficient,
+    Algebraic.Aggregate.Geometry.Gold.three_mul_input_le_two_mul_conjunctionCount_add_three,
+    Algebraic.Aggregate.Geometry.Gold.entropy_mul_size_lower_bound,
+    Algebraic.Aggregate.Geometry.Gold.gateCoefficient_mul_sub_constantPenalty_le_size,
+    Algebraic.Aggregate.Geometry.Gold.exists_gateCoefficient_sub_mul_lt_size}
+  \leanok
+  \uses{thm:lowerbounds-algebraic-geometry-restriction-rank,
+    thm:lowerbounds-algebraic-geometry-gold-properties,
+    def:lowerbounds-algebraic-geometry-gold-coefficients,
+    thm:lowerbounds-algebraic-geometry-inversion-entropy}
+  Let $K$ be a finite field over $\mathbf F_2$ with a supplied linear isomorphism
+  $e:\mathbf F_2^n\longrightarrow K$, where $n\ge3$ is odd. Every signed unbounded
+  AND/OR/XOR circuit computing all $n$ coordinates of $G_e$ has at least
+  $(3n-3)/2$ conjunction gates, and its gate count $g$ satisfies, with
+  $c=1-H_2(1/4)$,
+  \[
+    (4+2c)g\ge(7+4c)n-(3+4c),
+    \qquad
+    g\ge C_{\mathrm G}\,n-P_{\mathrm G}\approx1.771556\,n-0.857781.
+  \]
+  For every $\varepsilon>0$ all sufficiently large odd $n$ require more than
+  $(C_{\mathrm G}-\varepsilon)n$ gates, uniformly over fields and bases.
+  Depth, fan-in, fanout, literal repetitions, and nonlinear reuse are
+  unrestricted. For comparison, the bound proved here for binary-field inversion
+  in the same model has leading coefficient about $1.5659$
+  (Theorem~\ref{thm:lowerbounds-algebraic-geometry-conditional}). In the fan-in-two
+  basis with free XOR, Boyar and Find (\emph{Theoretical Computer Science}, 2018)
+  give an explicit $(n,n)$ map needing $2n-3$ AND gates. The literature search
+  behind this result found no explicit $(n,n)$ map known to need more than $n$
+  unbounded-fan-in AND gates when XOR is free; the conjunction bound here exceeds
+  $n$ for $n\ge5$.
+\end{theorem}
+\begin{proof}
+  \leanok
+  Theorem~\ref{thm:lowerbounds-algebraic-geometry-restriction-rank} with $m=n$ and
+  $D=(n+3)/2$ gives $h\ge(3n-3)/2$ conjunctions. Let $o$ count conjunction output
+  gates and $h_2$ the multiple-primary conjunctions. Distinct outputs give
+  $n+h\le g+o$, biased primary messages give $n\le g-o-ch_2$, and affine pairing
+  with two-point flats ($r=1$) gives $2n\le g+h_2+2$. Eliminating $o$ and $h_2$
+  leaves $(2+c)g\ge(2+2c)n+h-2c$; substitute the conjunction bound and divide by
+  $4+2c>0$.
+\end{proof}
+
 \begin{definition}[Full Hamming residue modulo three]
   \label{def:lowerbounds-algebraic-modthree-residue}
   \lean{Algebraic.BooleanCube.ModThree.bit,
