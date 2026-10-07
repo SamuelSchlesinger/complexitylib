@@ -1318,3 +1318,381 @@ The following items are infrastructure rather than theorems.
     bind), and circuits built so that acyclicity holds by typing, would let
     restriction, unfolding and normalization lemmas be proved once.
 \end{itemize}
+
+\section{Unrestricted depth-three circuits beyond the square-root exponent}
+\label{sec:circuits-unrestricted-depth-three}
+
+This section imports OpenAI's \emph{Beyond the Square-Root Exponent for
+Depth-Three Boolean Circuits} (23 September 2026), including its proof at
+\href{https://github.com/openai/math/tree/adc7f1241b42e322a6451854ab7e4b4c146bf78a/lean/OAI/Computability/DepthThree}{openai/math}
+revision \texttt{adc7f1241b42e322a6451854ab7e4b4c146bf78a}.
+The construction includes an actual finite multitape decider. The definitions
+below specify the imported machine and circuit models. A checked simulator
+now transfers its polynomial-time bound to canonical $\mathsf P$, and
+normalization transfers balanced hardness to general CSLib depth-three circuits.
+
+\begin{definition}[Unrestricted OR-AND-OR circuits]
+  \label{def:circuits-openai-depth-three}
+  \lean{Complexity.DepthThreeLowerBound.Circuit3, Complexity.DepthThreeLowerBound.Circuit3.eval, Complexity.DepthThreeLowerBound.Circuit3.gateCount, Complexity.DepthThreeLowerBound.Circuit3.Computes}
+  \leanok
+  A depth-three circuit has bottom OR gates over signed literals and constants,
+  middle AND gates over selected bottom gates, and one top OR gate.
+  Lower gates can be shared. Fan-in is unrestricted at every layer.
+  The gate count is the number of bottom and middle gates plus one.
+\end{definition}
+
+\begin{definition}[The imported finite multitape machine model]
+  \label{def:circuits-openai-multitape}
+  \lean{Complexity.DepthThreeLowerBound.FiniteMultiTapeMachine, Complexity.DepthThreeLowerBound.MultiTapeHaltsIn}
+  \leanok
+  A machine has finite control, a finite alphabet with a distinguished blank,
+  and finitely many bilateral read-write tapes. One designated tape initially
+  holds the input bits. A step reads all tape heads, then writes and moves
+  them, or halts. A Boolean verdict is read from the halting control state.
+  The time bound counts transitions to a halting configuration.
+\end{definition}
+
+\begin{theorem}[An explicit language beyond every square-root exponent]
+  \label{thm:circuits-openai-unrestricted-depth-three}
+  \lean{Complexity.DepthThreeLowerBound.exists_polynomial_time_language_depth_three_lower_bound}
+  \leanok
+  \uses{def:circuits-openai-depth-three, def:circuits-openai-multitape}
+  There are a language $L$, a finite multitape machine $M$, and positive
+  integers $C,a$ such that $M$ decides $L$ within $C(n+1)^a$ steps and,
+  for every real $A>0$, eventually every OR-AND-OR circuit computing the
+  length-$n$ slice of $L$ has more than $2^{A\sqrt n}$ gates.
+\end{theorem}
+\begin{proof}
+  \leanok
+  OpenAI's construction parses a linear hash, a binary polynomial modulus,
+  and coefficient blocks, then evaluates a polynomial in the quotient ring.
+  Its finite tape program implements this evaluation in polynomial time.
+  The lower bound combines sparse-CNF decomposition, random restrictions,
+  hard parameter slices, and the resulting correlation estimates.
+\end{proof}
+
+\begin{definition}[CNF input substitution]
+  \label{def:circuits-openai-cnf-substitution}
+  \lean{Complexity.DepthThreeLowerBound.Clause.subst, Complexity.DepthThreeLowerBound.CNF.subst}
+  \leanok
+  Replace each input variable by another variable or a Boolean constant,
+  normalize each resulting clause, and discard tautological clauses.
+  A CNF's width is the maximum number of distinct variables in one clause.
+\end{definition}
+
+\begin{theorem}[Substitution preserves evaluation and width bounds]
+  \label{thm:circuits-openai-cnf-substitution}
+  \lean{Complexity.DepthThreeLowerBound.Clause.eval_subst, Complexity.DepthThreeLowerBound.Clause.width_subst_le, Complexity.DepthThreeLowerBound.CNF.eval_subst, Complexity.DepthThreeLowerBound.CNF.WidthAtMost.subst}
+  \leanok
+  \uses{def:circuits-openai-cnf-substitution}
+  A substituted CNF evaluates like the original on the induced assignment,
+  and substitution cannot increase its width. Variables may be identified.
+\end{theorem}
+\begin{proof}
+  \leanok
+  Every surviving variable is the image of a variable in the original
+  clause's scope. Its scope therefore has no greater cardinality.
+  Clause normalization preserves disjunctions; discarded clauses are true.
+\end{proof}
+
+\begin{corollary}[CNF threshold-weight lower bounds for the full language]
+  \label{cor:circuits-openai-threshold-weight}
+  \lean{Complexity.DepthThreeLowerBound.language_threshold_weight}
+  \leanok
+  \uses{thm:circuits-openai-unrestricted-depth-three, thm:circuits-openai-cnf-substitution}
+  Fix $s\ge0$, and write $d=\lfloor n/5\rfloor$ and
+  $k=\lceil3(s+1)\sqrt d\rceil$. Eventually, every finite collection of
+  width-$k$ CNFs $H_j$ and real coefficients $a_j$ satisfying
+  \[
+    (2L(x)-1)\sum_j a_j\mathbf1_{H_j(x)}\ge1
+    \quad\text{for every }x\in\{0,1\}^n
+  \]
+  has
+  \[
+    \sum_j|a_j|\ge \frac{2^{4(s+1)\sqrt d}}{6}.
+  \]
+  A bias is allowed by including the empty, identically true CNF as a feature.
+\end{corollary}
+\begin{proof}
+  \leanok
+  OpenAI's hard-slice theorem bounds every such CNF indicator's correlation
+  by $6\,2^{-4(s+1)\sqrt d}$ on a suitable restriction of the input.
+  Restrict all features together, preserving their widths and coefficients.
+  Average the margin inequality and use the triangle inequality.
+\end{proof}
+
+\begin{corollary}[Integer threshold representations need no margin hypothesis]
+  \label{cor:circuits-openai-integer-threshold-weight}
+  \lean{Complexity.DepthThreeLowerBound.language_integer_threshold_weight}
+  \leanok
+  \uses{cor:circuits-openai-threshold-weight}
+  Under the same eventual width bound, if integer coefficients $z_j$ satisfy
+  \[
+    L(x)=1\quad\Longleftrightarrow\quad
+      \sum_jz_j\mathbf1_{H_j(x)}\ge0,
+  \]
+  then
+  \[
+    \sum_j|z_j|\ge
+      \frac12\left(\frac{2^{4(s+1)\sqrt d}}6-1\right).
+  \]
+  An integer bias can again be included as the coefficient of the empty CNF.
+\end{corollary}
+\begin{proof}
+  \leanok
+  An integer score $t$ is nonnegative exactly when $2t+1$ is positive.
+  The new score has signed margin at least one and coefficient weight
+  $1+2\sum_j|z_j|$. Apply the preceding corollary.
+\end{proof}
+
+\begin{definition}[Balanced padding and the dual depth-three interpretation]
+  \label{def:circuits-openai-balanced}
+  \lean{Complexity.DepthThreeLowerBound.balancedLanguage, Complexity.DepthThreeLowerBound.balancedFamily, Complexity.DepthThreeLowerBound.Circuit3.dualEval, Complexity.DepthThreeLowerBound.Circuit3.ComputesDual}
+  \leanok
+  Set $F_{n+1}(b,x)=L(x)\mathbin\oplus b$. Interpret the same circuit wiring
+  dually by exchanging AND and OR at every layer and complementing its
+  literal and constant inputs. This gives an AND-OR-AND circuit with the
+  same gate count.
+\end{definition}
+
+\begin{theorem}[Exact balance and De Morgan duality]
+  \label{thm:circuits-openai-balanced}
+  \lean{Complexity.DepthThreeLowerBound.balancedLanguage_ofFn, Complexity.DepthThreeLowerBound.balancedFamily_card, Complexity.DepthThreeLowerBound.Circuit3.dualEval_eq_not_eval}
+  \leanok
+  \uses{def:circuits-openai-balanced}
+  The padded list language agrees with $F_{n+1}$ on length-$n+1$ inputs,
+  and $F_{n+1}$ accepts exactly $2^n$ of them. The dual interpretation
+  computes the complement of the original circuit.
+\end{theorem}
+\begin{proof}
+  \leanok
+  Exactly one fresh bit accepts for each assignment to the old inputs;
+  reuse the library's existing balanced-padding count. De Morgan's laws
+  exchange the three layers and complement the bottom inputs.
+\end{proof}
+
+\begin{corollary}[One balanced family is hard for both depth-three polarities]
+  \label{cor:circuits-openai-balanced-both-polarities}
+  \lean{Complexity.DepthThreeLowerBound.balancedFamily_lower_bound, Complexity.DepthThreeLowerBound.balancedFamily_both_polarities}
+  \leanok
+  \uses{thm:circuits-openai-unrestricted-depth-three, thm:circuits-openai-balanced}
+  For every $A>0$, eventually every OR-AND-OR or AND-OR-AND circuit computing
+  $F_{n+1}$ has more than $2^{A\sqrt{n+1}}$ gates. The same OR-AND-OR lower
+  bound holds for the complement of $F_{n+1}$.
+\end{corollary}
+\begin{proof}
+  \leanok
+  Fix the fresh bit to recover the original hard function from either
+  output polarity. Input substitution preserves the gate count. Apply the
+  source bound with exponent constant $2A$ and use
+  $\sqrt{n+1}\le2\sqrt n$ for $n\ge1$.
+\end{proof}
+
+
+\begin{theorem}[Finite multitape computations transfer to canonical polynomial time]
+  \label{thm:circuits-openai-machine-bridge}
+  \lean{Complexity.DepthThreeLowerBound.FiniteMultiTapeBridge.computes, Complexity.DepthThreeLowerBound.FiniteMultiTapeMachine.mem_P}
+  \leanok
+  \uses{def:circuits-openai-multitape}
+  A source computation of $T$ transitions on an $n$-bit input is simulated by
+  a binary CSLib machine in at most $2n+T+3$ steps. Consequently a polynomial-time
+  source decider defines a language in complexitylib's canonical $\mathsf P$.
+\end{theorem}
+\begin{proof}
+  \leanok
+  Represent each source tape by one binary track per alphabet symbol. Copy
+  and rewind the input in $2n+2$ steps, simulate each source step in one step,
+  then emit the verdict and halt in one step. Apply the existing CSLib machine bridge.
+\end{proof}
+
+\begin{corollary}[A balanced language in canonical P with both-polarity hardness]
+  \label{cor:circuits-openai-uniform-balanced}
+  \lean{Complexity.DepthThreeLowerBound.language_mem_P, Complexity.DepthThreeLowerBound.language_eval_mem_FP, Complexity.DepthThreeLowerBound.balancedLanguage_mem_P, Complexity.DepthThreeLowerBound.exists_balanced_language_in_P_depth_three_lower_bound}
+  \leanok
+  \uses{thm:circuits-openai-machine-bridge, cor:circuits-openai-balanced-both-polarities}
+  The original hard language belongs to $\mathsf P$, and its one-bit verdict
+  belongs to $\mathsf{FP}$. Its balanced padding belongs to $\mathsf P$, accepts
+  exactly half of every positive-length input cube, and eventually requires
+  more than $2^{A\sqrt n}$ gates for every $A>0$ in both depth-three polarities.
+\end{corollary}
+\begin{proof}
+  \leanok
+  Apply the machine bridge to the explicit decider. The verdict characterization
+  of $\mathsf P$ and the existing balanced-padding $\mathsf{FP}$ closure preserve
+  uniform polynomial time; the preceding lower-bound and counting theorems apply.
+\end{proof}
+
+
+\begin{definition}[Canonical CNF conversion]
+  \label{def:circuits-openai-canonical-cnf}
+  \lean{Complexity.CNF.toDepthThree, Complexity.DepthThreeLowerBound.Circuit3.ofCNFs}
+  \leanok
+  Convert each canonical clause to its finite set of signed literals. For an
+  OR of CNFs, place one bottom gate at every clause occurrence, one middle
+  gate per CNF, and one top OR gate.
+\end{definition}
+
+\begin{theorem}[Canonical CNFs preserve semantics and quantitative bounds]
+  \label{thm:circuits-openai-canonical-cnf}
+  \lean{Complexity.CNF.eval_toDepthThree, Complexity.CNF.width_toDepthThree, Complexity.DepthThreeLowerBound.Circuit3.eval_ofCNFs, Complexity.DepthThreeLowerBound.Circuit3.gateCount_ofCNFs}
+  \leanok
+  \uses{def:circuits-openai-canonical-cnf}
+  Conversion preserves evaluation, never increases width, and realizes an OR
+  of CNFs with exactly the sum of their clause counts plus their number plus one gates.
+\end{theorem}
+\begin{proof}
+  \leanok
+  Removing repeated literals does not change disjunction and only decreases
+  the number of distinct variables. Index bottom gates by a CNF and a clause
+  position, and evaluate each middle gate as that CNF.
+\end{proof}
+
+\begin{corollary}[Canonical CNF gate and threshold-weight lower bounds]
+  \label{cor:circuits-openai-canonical-cnf-bounds}
+  \lean{Complexity.DepthThreeLowerBound.language_or_cnf_lower_bound, Complexity.DepthThreeLowerBound.language_cnf_threshold_weight, Complexity.DepthThreeLowerBound.language_cnf_integer_threshold_weight}
+  \leanok
+  \uses{thm:circuits-openai-canonical-cnf, thm:circuits-openai-unrestricted-depth-three}
+  The imported language has the same unrestricted OR-of-CNF gate lower bound
+  and the same real-margin and integer threshold-weight bounds when formulas
+  are complexitylib's canonical CNFs. The gate bound counts all clauses and
+  conjunction gates, not merely top fan-in.
+\end{corollary}
+\begin{proof}
+  \leanok
+  Apply the source-model theorems to the semantics-preserving conversion and
+  use its gate-count equality and width bound.
+\end{proof}
+
+
+\begin{definition}[A CSLib circuit output as a negation-normal formula]
+  \label{def:circuits-openai-cslib-normalize}
+  \lean{Complexity.CslibAC0.outputFormula}
+  \leanok
+  Unfold the selected output wire over the unbounded AND/OR signature, pushing
+  edge negations to leaves and removing repeated signed wire incidences first.
+\end{definition}
+
+\begin{theorem}[Circuit and formula normalization]
+  \label{thm:circuits-openai-cslib-normalize}
+  \lean{Complexity.CslibAC0.outputFormula_spec, Complexity.AC0Formula.depth_three_source, Complexity.DepthThreeLowerBound.cslib_depth_three_source}
+  \leanok
+  \uses{def:circuits-openai-cslib-normalize, thm:circuits-openai-canonical-cnf}
+  A CSLib circuit with $n>0$ inputs, $s$ gates, and depth $d$ has an equivalent
+  formula of depth at most $d$ and size at most $(2(n+s)+1)^{d+1}$.
+  A depth-three formula or its complement has a source three-layer circuit
+  of at most twice its tree size plus one gates. Thus when $d\le3$, one
+  polarity has at most $2(2(n+s)+1)^4+1$ source gates.
+\end{theorem}
+\begin{proof}
+  \leanok
+  A program adapter preserves each wire's value and depth, so the existing
+  typed wire normalizer applies. Flatten adjacent equal-polarity formula
+  gates, and negate an AND root when necessary. Count clauses and conjunctions.
+\end{proof}
+
+\begin{theorem}[Balanced canonical P hardness for all depth-three CSLib circuits]
+  \label{thm:circuits-openai-cslib-lower-bound}
+  \lean{Complexity.DepthThreeLowerBound.balancedFamily_cslib_lower_bound, Complexity.DepthThreeLowerBound.exists_balanced_language_in_P_cslib_depth_three_lower_bound}
+  \leanok
+  \uses{cor:circuits-openai-uniform-balanced, thm:circuits-openai-cslib-normalize}
+  There is an exactly balanced language in canonical $\mathsf P$ such that,
+  for every $A>0$, eventually every CSLib unbounded AND/OR circuit of output
+  depth at most three computing its length-$n$ slice has more than
+  $2^{A\sqrt n}$ gates. Edge negations are free; gates can be shared, wiring
+  need not be layered, and any wire can be the designated output.
+\end{theorem}
+\begin{proof}
+  \leanok
+  The normalization theorem supplies a source circuit in one polarity,
+  covered by balanced hardness. Eventually $n\le2^{\sqrt n}$, and if
+  $s\le2^{A\sqrt n}$ the normalized gate count is at most
+  $2^{5(A+1)\sqrt n}$. Apply source hardness with the larger exponent constant.
+\end{proof}
+
+\section{Exact scalar Fourier circuits}
+
+This section adapts OpenAI's exact Fourier circuit solution from
+\texttt{openai/math}, revision
+\texttt{adc7f1241b42e322a6451854ab7e4b4c146bf78a}, and connects it to CSLib's
+circuit model and the existing DFT lower bounds. Scalar coefficients may be
+arbitrary complex numbers. These are exact arithmetic gate counts; no bound
+on coefficient magnitude, encoding length, or bit-operation time is asserted.
+
+\begin{definition}[Exact scalar Fourier circuits]
+  \label{def:circuits-exact-fourier}
+  \lean{Complexity.ExactFourier.Gate, Complexity.ExactFourier.Program, Complexity.ExactFourier.Circuit, Complexity.ExactFourier.Circuit.Computes, Complexity.ExactFourier.fourierMatrix, Complexity.ExactFourier.minimumSize}
+  \leanok
+  A circuit is a straight-line program with addition, subtraction, and
+  multiplication by a fixed complex scalar. Each operation costs one gate;
+  inputs, a zero wire, fanout, and output selection are free. It computes
+  $F_n$ when its output equals $F_nx$ for every complex input vector, where
+  $(F_n)_{jk}=\exp(2\pi i/n)^{jk}$. Write $L(n)$ for the least gate count of
+  such a circuit.
+\end{definition}
+
+\begin{theorem}[OpenAI's cofinal Fourier upper bound]
+  \label{thm:circuits-exact-fourier-source}
+  \lean{Complexity.ExactFourier.exists_small_fourier_circuit, Complexity.ExactFourier.minimumSize_normalized_liminf}
+  \leanok
+  \uses{def:circuits-exact-fourier}
+  For every $c>0$ and $N$, there exist $n\ge\max\{N,2\}$ and an exact
+  circuit for $F_n$ of size less than $cn\log_2n$. Equivalently,
+  $\liminf_{n\to\infty} L(n)/(n\log_2n)=0$.
+  The upper bound concerns arbitrarily large sizes, not every sufficiently
+  large size.
+\end{theorem}
+\begin{proof}
+  \leanok
+  Apply OpenAI's finite-win theorem and its tensor amplification and
+  Chinese-remainder Fourier factorization. The minimum is attained because
+  every finite matrix has a finite scalar circuit. Nonnegativity and the
+  cofinal upper bounds give the normalized liminf.
+\end{proof}
+
+\begin{definition}[The CSLib scalar signature and translation]
+  \label{def:circuits-exact-fourier-cslib}
+  \lean{Complexity.ExactFourier.ScalarOp, Complexity.ExactFourier.scalarSignature, Complexity.ExactFourier.scalarInterpretation, Complexity.ExactFourier.Circuit.toCslib}
+  \leanok
+  \uses{def:circuits-exact-fourier}
+  The signature has zero, binary addition and subtraction, and unary scaling
+  by each complex scalar. Translate the source's free zero wire to an
+  explicit zero gate, then copy each source gate and its wire references.
+\end{definition}
+
+\begin{theorem}[Exact output preservation with one additional gate]
+  \label{thm:circuits-exact-fourier-cslib}
+  \lean{Complexity.ExactFourier.Circuit.eval_toCslib, Complexity.ExactFourier.Circuit.size_toCslib, Complexity.ExactFourier.Circuit.Computes.toCslib, Complexity.ExactFourier.Circuit.toCslib_fanInAtMost, Complexity.ExactFourier.exists_small_cslib_fourier_circuit}
+  \leanok
+  \uses{def:circuits-exact-fourier-cslib, thm:circuits-exact-fourier-source}
+  Translation preserves every output and sharing, has fan-in at most two,
+  and changes the size from $s$ to exactly $s+1$. The cofinal upper bound
+  therefore also holds for ordinary CSLib gate count over this signature.
+\end{theorem}
+\begin{proof}
+  \leanok
+  Induct on the source program to identify every available wire with its
+  translated trace value. To absorb the zero gate, apply the source bound
+  with coefficient $c/2$ and choose the size large enough that
+  $(c/2)n\log_2n>1$.
+\end{proof}
+
+\begin{corollary}[Fourier upper and lower bounds in one circuit model]
+  \label{cor:circuits-exact-fourier-bounds}
+  \lean{Complexity.ExactFourier.eventually_lt_cslib_size, Complexity.ExactFourier.eventually_lt_source_size, Complexity.ExactFourier.exists_cslib_fourier_between_bounds, Complexity.ExactFourier.not_eventually_le_cslib_size}
+  \leanok
+  \uses{thm:circuits-exact-fourier-cslib, thm:lowerbounds-algebraic-dft}
+  For every $\varepsilon>0$, eventually every exact scalar Fourier circuit
+  has more than $(25/9-\varepsilon)n$ gates, in either representation.
+  For every $\varepsilon,c>0$, arbitrarily large sizes admit CSLib circuits
+  whose gate counts lie strictly between $(25/9-\varepsilon)n$ and
+  $cn\log_2n$. Consequently no positive eventual $n\log_2n$ lower bound
+  holds in this unrestricted scalar model.
+\end{corollary}
+\begin{proof}
+  \leanok
+  Scalar operations are polynomial, so the existing polynomial-circuit
+  linearization supplies the certificate required by the DFT lower bound.
+  Transfer this bound back through the one-gate translation and absorb the
+  constant using $\varepsilon/2$. Choose an upper-bound witness beyond the
+  lower-bound threshold to obtain the simultaneous inequalities.
+\end{proof}

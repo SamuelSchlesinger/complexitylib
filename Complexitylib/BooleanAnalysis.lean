@@ -13,6 +13,9 @@ public import Complexitylib.BooleanAnalysis.HarmonicMean
 public import Complexitylib.BooleanAnalysis.LightPatterns
 public import Complexitylib.BooleanAnalysis.MirrorSets
 public import Complexitylib.BooleanAnalysis.PolynomialCorrelation
+public import Complexitylib.BooleanAnalysis.PolynomialThreshold
+public import Complexitylib.BooleanAnalysis.Sensitivity
+public import Complexitylib.BooleanAnalysis.ThresholdWeight
 
 /-!
 # Analysis of Boolean functions
@@ -22,6 +25,12 @@ O'Donnell's *Analysis of Boolean Functions*. This subtheory grows inside the
 larger complexity-theory corpus, where the Fourier-analytic toolkit underpins
 circuit lower bounds (small-depth circuits, `AC⁰`), learning, property testing,
 and the natural-proofs barrier.
+
+The polynomial-threshold development imports OpenAI's (2026) Gotsman--Linial
+bound and transports it to total influence on the canonical cube. It includes
+multilinearization for arbitrary real polynomials and spectral noise and tail bounds.
+The sensitivity development imports OpenAI's superquadratic block-sensitivity
+separation and derives lower bounds for exact finite decision-tree depth.
 
 Currently formalized: Boolean functions and the Fourier expansion, with the
 parity functions as an orthonormal basis, Fourier coefficients and weights,

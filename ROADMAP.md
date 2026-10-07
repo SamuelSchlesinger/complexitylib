@@ -735,19 +735,104 @@ fixed-point logic and both capture directions. The ordered `FO[BIT]` capture of 
 `AC0` still needs a uniformity predicate and both capture directions. Domain restrictions
 and exact projections remain distinct extensions.
 
+## OpenAI TCS integrations
+
+The completed batch adapts actual solution modules from
+[`openai/math` at `adc7f1241b42e322a6451854ab7e4b4c146bf78a`](https://github.com/openai/math/tree/adc7f1241b42e322a6451854ab7e4b4c146bf78a).
+Imported files retain OpenAI's attribution and Apache 2.0 license. The
+[integration record](docs/OpenAIMath.md) distinguishes source results, new
+model translations, and checked corollaries; the
+[remaining catalogue](docs/OpenAIMathTriage.md) records source dependency sizes
+and model questions. The deductions carry no claim about novelty or the
+source authors' awareness.
+
+### Completed and checked
+
+| Family | Reusable result in complexitylib |
+| --- | --- |
+| [Polynomial thresholds](Complexitylib/BooleanAnalysis/PolynomialThreshold.lean) | Canonical-cube influence bound, degree-preserving multilinearization, and noise and Fourier-tail corollaries. |
+| [Automata liveness](Complexitylib/Models/FiniteAutomaton/OneWayLiveness.lean) | Ordinary-NFA and binary-encoding bridges, exponential two-way deterministic state lower bounds, and no polynomial simulation bound. |
+| [Depth-three circuits](Complexitylib/Circuits/DepthThree/LowerBound.lean) | A hard language in canonical `P`, CNF threshold-weight consequences, and normalization to CSLib AC0 circuits. |
+| [Sensitivity](Complexitylib/BooleanAnalysis/Sensitivity.lean) | Source separation transferred to canonical decision-tree depth, including unbounded quadratic and fixed-power separations. |
+| [Automata complementation](Complexitylib/Models/FiniteAutomaton/Complementation.lean) | State-preserving nondeterministic bridge and binary complementation lower bounds, ruling out a polynomial state bound. |
+| [Rational hitting lists](Complexitylib/RationalHitting.lean) | Total nonzeroness and domain tests, polynomial-dimensional domain witnesses, and a total binary generator in canonical `FP`. Evaluation bit complexity remains open in this integration. |
+| [Exact Fourier circuits](Complexitylib/Circuits/ExactFourier.lean) | CSLib translation and synthesis with the existing linear lower bound. The upper bound is cofinal, with unrestricted complex coefficients; it supplies neither an all-large-size bound nor a uniform bit-time algorithm. |
+
+The machine infrastructure is reusable: the
+[finite Mathlib `TM0` bridge](Complexitylib/Interop/Mathlib/TM0.lean) preserves
+complete binary outputs, the
+[regular-domain guard](Complexitylib/Interop/Mathlib/TM0/Guard.lean) handles
+malformed inputs, and the CSLib bridge now transfers full string computations
+in both directions at the level of polynomial-time classes.
+
+### Next: choiceless polynomial time with counting
+
+**Not integrated.** The exploratory port is excluded from this batch. The
+source supplies a GF(3) linear-consistency query, a finite `TM2` algorithm,
+and non-definability in its explicit hereditarily finite-set language. The
+source audit and literature comparison are recorded in
+[the choiceless notes](docs/OpenAIMathTriage.md#deferred-choiceless-polynomial-time-with-counting).
+Complete the following layers before asserting the standard-model separation:
+
+- [ ] **OAI-CPT-PORT:** Adapt the 26-module solution closure, documenting
+  definitions and passing the scoped build, linters, and axiom checks. Expose
+  both the cumulative active-object and intermediate-evaluation-object
+  non-definability statements, with their exact source semantics.
+- [ ] **OAI-CPT-SEMANTICS:** Translate the intended standard counting formalism
+  into the source language, preserving acceptance and polynomial resource
+  bounds. Reconcile numerical atoms versus finite ordinals, conflicting
+  updates, and object accounting; allow arbitrary finite rank. The proposed
+  proof that stuttering on a conflict preserves acceptance is unfinished.
+- [ ] **OAI-CPT-STRUCTURES:** Connect the eight binary relations to `FinStruct`
+  and an invariant `DecisionProblem`. Account for the library's `card ≥ 2`
+  convention, prove encoding correspondence, and handle malformed strings.
+- [ ] **OAI-TM2-BRIDGE:** Transfer finite Mathlib `TM2` stack computations to
+  the canonical machine model with a proved polynomial overhead and complete
+  input/output contracts. Reuse the existing CSLib bridges where applicable.
+  The `TM0` bridge and regular-domain guard alone do not cover this source.
+- [ ] **OAI-CPT-SEPARATION:** Prove membership of the full encoded query
+  language in canonical `P`, combine it with the audited non-definability
+  theorem, and add blueprint nodes and headline axiom checks. Do not identify
+  a source machine witness with canonical `P` before these bridges are proved.
+
+### Following layers
+
+- [ ] **OAI-HITTING-BITS:** Specify the binary formula and coefficient encoding
+  and prove rational bit-length and matrix-evaluation bounds. The current
+  exact decision procedures and `FP` list generator do not yet establish
+  polynomial-time identity or domain testing.
+- [ ] **OAI-THRESHOLD-NOISE:** Audit and integrate the source's stronger
+  dimension-free noise and learning results, stating the exact accuracy,
+  sampling, and runtime guarantees. The present noise corollary depends on
+  dimension.
+- [ ] **OAI-HARDNESS:** Triage the Unique Games, perfect-completeness, Max-Cut,
+  and Vertex Cover packages against the existing PCP and reduction APIs.
+  Share encodings and machine compilers; check fixed error parameters,
+  promises, and bit-time bounds before exposing canonical hardness theorems.
+- [ ] **OAI-ALGORITHMS:** Continue the catalogue's superstring, mean-payoff,
+  matching, matroid, bin-packing, and sparsest-cut audits. Keep approximation,
+  randomized success, oracle-query, and integrality-gap contracts distinct.
+- [ ] **OAI-FOURIER-EXTENSIONS (research):** Investigate constructive and
+  all-sufficiently-large-size bounds separately. Neither is supplied by the
+  imported cofinal theorem; additional arguments are required.
+
+Land each reusable layer with its source credit, explicit model boundary,
+blueprint status, and all repository gates passing.
+
 ## Quality gates
 
 Every change must leave these green (CI runs all of them):
 
 ```bash
 python3 scripts/lint_style.py
-lake build --wfail
-lake build --wfail Complexitylib.Classes.P.Cobham.Validation
-lake build --wfail Complexitylib.Models.TuringMachine.SingleTape.Validation
-lake build --wfail Complexitylib.Models.TuringMachine.Repetition.Validation
-lake build --wfail Complexitylib.Circuits.Encoding.Validation
-lake build --wfail Complexitylib.SAT.Tseitin.Machine.Validation
-lake exe runLinter Complexitylib   # plus the five validation roots
+python3 -m unittest discover -s scripts -p 'test_*.py'
+lake build --wfail Complexitylib \
+  Complexitylib.Classes.P.Cobham.Validation \
+  Complexitylib.Models.TuringMachine.SingleTape.Validation \
+  Complexitylib.Models.TuringMachine.Repetition.Validation \
+  Complexitylib.Circuits.Encoding.Validation \
+  Complexitylib.SAT.Tseitin.Machine.Validation ApiChecks runLinter
+lake env python3 scripts/lint_environment.py
 lake env lean scripts/AxiomGuard.lean
 lake env lean scripts/BlueprintCheck.lean
 ```

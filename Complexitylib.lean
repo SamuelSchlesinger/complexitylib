@@ -18,6 +18,8 @@ public import Complexitylib.BooleanAnalysis
 public import Complexitylib.DescriptiveComplexity
 public import Complexitylib.Interop
 public import Complexitylib.Algebraic
+public import Complexitylib.RationalHitting
+public import Complexitylib.RationalHitting.PolynomialTime
 public import Complexitylib.Tactic.PolyTime
 
 /-!

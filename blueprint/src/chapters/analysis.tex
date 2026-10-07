@@ -31,6 +31,9 @@ Section~\ref{sec:analysis-polynomial-correlation} also formalizes the exponentia
 correlation bound for XOR of majorities against low-degree binary polynomials.
 Its proof uses finite interpolation and dimension counting independently of
 the Fourier infrastructure.
+Section~\ref{sec:analysis-polynomial-threshold} integrates OpenAI's
+Gotsman--Linial average-sensitivity bound with the canonical influence API,
+including multilinearization and spectral noise and tail consequences.
 Section~\ref{sec:analysis-harmonic} develops Korten's harmonic mean transform,
 including its variational formula and the analytic inequality used in his
 top-down parity lower bound.
@@ -1309,4 +1312,196 @@ a coordinate set is also represented by its Boolean membership function.
   on the points in $Y$ that are $(q,194k)$-limits of $X$.
   The output mass of any set $A$ is at most $2^k|A|/|X|$, proving
   $|Y'|\ge2^{|I|-2k-2}$.
+\end{proof}
+
+\section{Polynomial threshold functions and the Gotsman--Linial bound}
+\label{sec:analysis-polynomial-threshold}
+
+This section uses OpenAI's \emph{Average Sensitivity of Polynomial Threshold
+Functions} (25 September 2026) and its Lean proof in
+\href{https://github.com/openai/math/tree/adc7f1241b42e322a6451854ab7e4b4c146bf78a/lean/OAI/Combinatorics/GotsmanLinial}{openai/math},
+at revision \texttt{adc7f1241b42e322a6451854ab7e4b4c146bf78a}.
+The imported matrix and weighted-grading argument is due to that source.
+Complexitylib supplies the coordinate equivalence, multilinear normal form,
+and the following connections to its existing Fourier API. The elementary
+corollaries are not assertions of research novelty. In particular, the noise
+estimate below is weaker than the source paper's dimension-free noise bound.
+
+\begin{definition}[Polynomial thresholds on the sign cube]
+  \label{def:analysis-polynomial-threshold}
+  \lean{Complexity.BooleanAnalysis.polynomialThreshold, Complexity.BooleanAnalysis.IsPolynomialThreshold, Complexity.BooleanAnalysis.signMultilinearize}
+  \leanok
+  \uses{def:analysis-parity}
+  For $p\in\mathbb R[X_1,\ldots,X_n]$, let
+  $f_p(x)=\operatorname{sign}(p(\chi(x_1),\ldots,\chi(x_n)))$, with
+  $\operatorname{sign}(0)=1$. A function is a degree-at-most-$d$ polynomial
+  threshold if it is $f_p$ for some $p$ of total degree at most $d$.
+  Its sign-cube multilinearization reduces each monomial exponent modulo two.
+\end{definition}
+
+\begin{theorem}[Multilinearization on the sign cube]
+  \label{thm:analysis-sign-multilinearize}
+  \lean{Complexity.BooleanAnalysis.signMultilinearize_totalDegree_le, Complexity.BooleanAnalysis.signMultilinearize_eval, Complexity.BooleanAnalysis.polynomialThreshold_signMultilinearize}
+  \leanok
+  \uses{def:analysis-polynomial-threshold}
+  Sign-cube multilinearization preserves evaluation whenever every coordinate
+  squares to one, does not increase total degree, and preserves the threshold
+  function, including its values at polynomial zeros.
+\end{theorem}
+\begin{proof}
+  \leanok
+  Use $x_i^a=x_i^{a\bmod 2}$ on the sign cube. Reducing an exponent modulo two
+  cannot increase it. Apply these facts termwise to the polynomial's support.
+\end{proof}
+
+\begin{theorem}[Gotsman--Linial average-sensitivity bound]
+  \label{thm:analysis-gotsman-linial}
+  \lean{Complexity.BooleanAnalysis.totalInfluence_polynomialThreshold_le, Complexity.BooleanAnalysis.IsPolynomialThreshold.totalInfluence_le, Complexity.BooleanAnalysis.isBooleanValued_polynomialThreshold}
+  \leanok
+  \uses{thm:analysis-sign-multilinearize, thm:analysis-influence-pivotal}
+  For every real polynomial $p$ of total degree at most $d$ in $n$ variables,
+  \[
+    I[f_p]\le 8d\sqrt n.
+  \]
+  This includes $n=0$ and $d=0$, allows zeros of $p$ on the cube, and does not
+  require the supplied polynomial to be multilinear.
+\end{theorem}
+\begin{proof}
+  \leanok
+  Multilinearize, apply OpenAI's weighted-grading and edge-recovery theorem,
+  and transport the Boolean sign encoding through the coordinate equivalence
+  that respects flips and uniform expectation. The combinatorial average
+  sensitivity equals the canonical total influence.
+\end{proof}
+
+\begin{corollary}[Spectral consequences for polynomial thresholds]
+  \label{cor:analysis-polynomial-threshold-spectral}
+  \lean{Complexity.BooleanAnalysis.IsPolynomialThreshold.noiseSensitivity_le, Complexity.BooleanAnalysis.IsPolynomialThreshold.fourierWeightAbove_le, Complexity.BooleanAnalysis.fourierWeightAbove_le_totalInfluence}
+  \leanok
+  \uses{thm:analysis-gotsman-linial, prop:analysis-noise-sensitivity-influence}
+  If $f$ is a degree-at-most-$d$ polynomial threshold, $0\le\rho\le1$, and
+  $m\in\mathbb N$, then
+  \[
+    \operatorname{NS}_{\rho}[f]\le4(1-\rho)d\sqrt n,
+    \qquad
+    \mathbf W^{>m}[f]\le\frac{8d\sqrt n}{m+1}.
+  \]
+  Here $\rho$ is the correlation parameter, so the corresponding bit-flip
+  rate is $(1-\rho)/2$.
+\end{corollary}
+\begin{proof}
+  \leanok
+  Noise sensitivity is bounded by $(1-\rho)I[f]/2$. Every Fourier coefficient
+  above degree $m$ contributes at least $m+1$ times its weight to $I[f]$.
+\end{proof}
+
+\section{Correlation and threshold weight}
+\label{sec:analysis-threshold-weight}
+
+The following finite duality inequality is a reusable step toward consequences
+of OpenAI's \emph{Beyond the Square-Root Exponent for Depth-Three Boolean
+Circuits} (23 September 2026). Its use with that paper's explicit hard function
+requires a separate correlation theorem; the statement here makes that
+hypothesis explicit.
+
+\begin{theorem}[Small correlations force large threshold weight]
+  \label{thm:analysis-correlation-threshold-weight}
+  \lean{Complexity.BooleanAnalysis.margin_le_correlation_mul_weight, Complexity.BooleanAnalysis.threshold_weight_lower_bound}
+  \leanok
+  Let $X$ be finite and nonempty, $J$ finite, and let
+  $g,H_j:X\to\mathbb R$ and $a_j\in\mathbb R$. If
+  $|\mathbb E_x[g(x)H_j(x)]|\le\varepsilon$ for every $j$ and
+  $g(x)\sum_j a_jH_j(x)\ge\gamma$ for every $x$, then
+  \[
+    \gamma\le\varepsilon\sum_j|a_j|.
+  \]
+  In particular, for $\varepsilon>0$ and margin $\gamma=1$, the sum of
+  absolute coefficient values is at least $1/\varepsilon$.
+  A constant bias can be included as another feature and must satisfy the
+  same correlation hypothesis. This is a coefficient-weight statement,
+  rather than a bound on arbitrary-weight gate counts or on coefficient
+  encoding lengths.
+\end{theorem}
+\begin{proof}
+  \leanok
+  Average the pointwise margin inequality, distribute the finite sum, and
+  apply the triangle inequality and the per-feature correlation bounds.
+\end{proof}
+
+\section{Sensitivity and exact query complexity}
+\label{sec:analysis-sensitivity}
+
+This section imports OpenAI's 2026 sensitivity separation from the pinned
+\texttt{openai/math} solution modules. It then connects block sensitivity to
+the finite decision trees already used in the switching-lemma development.
+The sensitivity here is a maximum over Boolean inputs, rather than the
+average sensitivity or Fourier total influence of the preceding sections.
+
+\begin{definition}[Sensitivity and block sensitivity]
+  \label{def:analysis-sensitivity}
+  \lean{Complexity.BooleanAnalysis.Sensitivity.flip, Complexity.BooleanAnalysis.Sensitivity.sensitivityAt, Complexity.BooleanAnalysis.Sensitivity.sensitivity, Complexity.BooleanAnalysis.Sensitivity.blockSensitivityAt, Complexity.BooleanAnalysis.Sensitivity.blockSensitivity}
+  \leanok
+  For a finite Boolean function $f$, let $s(f,x)$ count coordinates whose
+  individual flips change $f(x)$. Let $\operatorname{bs}(f,x)$ be the maximum
+  number of pairwise disjoint nonempty coordinate blocks whose flips change
+  $f(x)$. Write $s(f)$ and $\operatorname{bs}(f)$ for the maxima over inputs.
+\end{definition}
+
+\begin{theorem}[Block sensitivity bounds exact query depth]
+  \label{thm:analysis-block-sensitivity-query}
+  \lean{Complexity.BooleanAnalysis.Sensitivity.sensitivityAt_le_blockSensitivityAt, Complexity.BooleanAnalysis.Sensitivity.sensitivity_le_blockSensitivity, Complexity.BooleanAnalysis.Sensitivity.blockSensitivity_le_depth, Complexity.BooleanAnalysis.Sensitivity.exists_decisionTree, Complexity.BooleanAnalysis.Sensitivity.blockSensitivity_le_arity}
+  \leanok
+  \uses{def:analysis-sensitivity, def:lowerbounds-decision-tree}
+  Every exact decision tree $T$ computing $f$ satisfies
+  $s(f)\le\operatorname{bs}(f)\le\operatorname{depth}(T)$.
+  Every function on $n$ bits has an exact tree of depth at most $n$;
+  consequently $\operatorname{bs}(f)\le n$, including when $n=0$.
+\end{theorem}
+\begin{proof}
+  \leanok
+  Singleton sensitive coordinates are disjoint sensitive blocks. At a tree
+  node, at most one block contains the queried coordinate; the other blocks
+  remain sensitive for the selected subtree. Induct on the tree. For the
+  upper bound, query all coordinates and output the function's value.
+\end{proof}
+
+\begin{theorem}[Superquadratic block-sensitivity separation]
+  \label{thm:analysis-sensitivity-separation}
+  \lean{Complexity.BooleanAnalysis.Sensitivity.quantitative_separation, Complexity.BooleanAnalysis.Sensitivity.unbounded_quadratic_separation, Complexity.BooleanAnalysis.Sensitivity.fixed_power_separation}
+  \leanok
+  \uses{def:analysis-sensitivity}
+  For every integer $d\ge1$, some nonconstant $f$ with $f(0)=0$ satisfies
+  \[
+    \frac{\operatorname{bs}(f)}{s(f)^2}
+       \ge \frac{2^d}{4(d+2)^2}.
+  \]
+  Thus for every $C>0$, some such $f$ has $C s(f)^2<\operatorname{bs}(f)$.
+  Moreover, there are a fixed $\alpha>2$ and a family $F_m$ such that, for
+  $m\ge1$, the arity is positive, $F_m$ is nonconstant, $F_m(0)=0$, and
+  $s(F_m)^\alpha\le\operatorname{bs}(F_m,0)$, while
+  $\operatorname{bs}(F_m,0)$ tends to infinity.
+\end{theorem}
+\begin{proof}
+  \leanok
+  OpenAI's construction iterates nested Hamming-ball predicates using a
+  regular tournament with a suitable edge labeling. The four sensitivity
+  profiles give the quantitative ratio. Block composition of a seed with
+  ratio greater than one yields the fixed-power family.
+\end{proof}
+
+\begin{corollary}[Superquadratic exact query-depth separation]
+  \label{cor:analysis-sensitivity-query-separation}
+  \lean{Complexity.BooleanAnalysis.Sensitivity.unbounded_quadratic_query_separation, Complexity.BooleanAnalysis.Sensitivity.fixed_power_query_separation}
+  \leanok
+  \uses{thm:analysis-sensitivity-separation, thm:analysis-block-sensitivity-query}
+  For every $C>0$, some nonconstant finite Boolean function $f$ requires
+  exact decision-tree depth greater than $C s(f)^2$.
+  There are also a fixed $\alpha>2$ and a family $F_m$ such that every exact
+  tree computing $F_m$ has depth at least $s(F_m)^\alpha$ for $m\ge1$.
+  Every choice of exact trees for that family has depth tending to infinity.
+\end{corollary}
+\begin{proof}
+  \leanok
+  Apply the block-sensitivity bound to every exact tree. The lower bound at
+  the all-zero input also transfers the divergence of block sensitivity.
 \end{proof}

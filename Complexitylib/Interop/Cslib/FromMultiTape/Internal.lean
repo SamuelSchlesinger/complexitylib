@@ -298,6 +298,13 @@ structure OutRel (t : Tape) (out : List Bool) : Prop where
   start_iff : ∀ n, t.cells n = Γ.start ↔ n = 0
   /-- Cells `1, …, |out|` hold the output. -/
   cells : ∀ i (h : i < out.length), t.cells (i + 1) = Γ.ofBool out[i]
+  /-- All cells after the output are blank. -/
+  blank_tail : ∀ i, out.length + 1 ≤ i → t.cells i = Γ.blank
+
+/-- The complete output relation includes the terminating blank required by `HasOutput`. -/
+theorem OutRel.hasOutput {t : Tape} {out : List Bool} (h : OutRel t out) :
+    t.HasOutput out :=
+  ⟨h.cells, h.blank_tail _ le_rfl⟩
 
 /-- A tape whose only `▷` is cell 0, with its head off cell 0, stays put in the
 idle phases. -/
@@ -323,7 +330,7 @@ theorem OutRel.phase0 {t : Tape} {out : List Bool} (h : OutRel t out) (e : Optio
         { t with cells := Function.update t.cells t.head (Γw.ofBool b).toΓ } := by
       unfold Tape.write; simp only [hh, ↓reduceIte]
     simp only [outSym, outDir, Tape.writeAndMove, hw, Dir3.guard, hr, ↓reduceIte]
-    refine ⟨by simp [h.head], fun n => ?_, fun i hi => ?_⟩
+    refine ⟨by simp [h.head], fun n => ?_, fun i hi => ?_, fun i hi => ?_⟩
     · simp only [Tape.move_cells]
       by_cases hn : n = t.head
       · subst hn; simp only [Function.update_self]
@@ -340,6 +347,10 @@ theorem OutRel.phase0 {t : Tape} {out : List Bool} (h : OutRel t out) (e : Optio
         simp only [List.getElem_append_right (Nat.le_refl _), Nat.sub_self,
           List.getElem_cons_zero]
         cases b <;> rfl
+    · simp only [Tape.move_cells, Option.toList_some, List.length_append,
+        List.length_cons, List.length_nil] at hi ⊢
+      rw [Function.update_of_ne (by rw [h.head]; lia)]
+      exact h.blank_tail i (by lia)
 
 variable {k : ℕ} {S : Type}
 
@@ -487,7 +498,11 @@ theorem sim_init [DecidableEq S] [Fintype S] (M : Turing.MultiTapeTM k Bool S)
       obtain ⟨m, hm⟩ : ∃ m, fold y = m + 1 :=
         ⟨fold y - 1, by have := one_le_fold y; omega⟩
       simp only [hm, Tape.init_nil_cells_succ]; rfl
-    · exact ⟨rfl, init_nil_start_iff, fun i hi => absurd hi (by simp)⟩
+    · refine ⟨rfl, init_nil_start_iff, fun i hi => absurd hi (by simp), ?_⟩
+      intro i hi
+      cases i with
+      | zero => simp at hi
+      | succ i => exact Tape.init_nil_cells_succ i
   · simp [toTM, δ]
 
 /-- **The run.** While CSLib has not halted after `n` steps, the simulator
@@ -516,6 +531,28 @@ theorem sim_run [DecidableEq S] [Fintype S] (M : Turing.MultiTapeTM k Bool S)
       have := TM.reachesIn_trans _ hr hr'
       rwa [show 3 * n + 1 + 3 = 3 * (n + 1) + 1 by omega] at this
 
+/-- The simulator preserves every output bit and its terminating blank in time `3 * t`. -/
+theorem toTM_computes_output [DecidableEq S] [Fintype S] (M : Turing.MultiTapeTM k Bool S)
+    {x y : List Bool} {t s : ℕ} (hc : M.ComputesInTimeAndSpace x y t s) :
+    ∃ c' T, T ≤ 3 * t ∧ (toTM M).reachesIn T ((toTM M).initCfg x) c' ∧
+      (toTM M).halted c' ∧ c'.output.HasOutput y := by
+  obtain ⟨u, hu, hun, hmin⟩ := Turing.MultiTapeTM.exists_haltsAt (tm := M) (cfg := initD M x) hc.1
+  obtain ⟨v, rfl⟩ : ∃ v, u = v + 1 := by
+    rcases u with _ | v
+    · exact absurd hun (by simp [Turing.MultiTapeTM.runFrom])
+    · exact ⟨v, rfl⟩
+  obtain ⟨c, q, hr, hs, hq, hcs⟩ := sim_run M x v (hmin v (by lia))
+  have hsucc : M.runFrom (initD M x) (v + 1) = M.step (M.runFrom (initD M x) v) :=
+    Function.iterate_succ_apply' _ _ _
+  have ha : (M.tr q (M.runFrom (initD M x) v).inputSymbol
+      (M.runFrom (initD M x) v).workTapeSymbols).state = none := by
+    have := hun; rw [hsucc, cslib_step_eq M hq] at this; exact this
+  obtain ⟨c', hr', hst, hout⟩ := hs.step_halt hq hcs ha
+  have hfin : (M.step (M.runFrom (initD M x) v)).output = y := by
+    rw [← hsucc, ← M.runFrom_eq_of_halt _ hu hun]; exact hc.2.1
+  rw [hfin] at hout
+  exact ⟨c', 3 * v + 1 + 1, by lia, TM.reachesIn_trans _ hr hr', hst, hout.hasOutput⟩
+
 /-- **The simulator decides what CSLib decides.** If `M` computes the indicator
 of `L` within time `t`, the simulator decides `L` within time `3 t`. -/
 theorem toTM_decides [DecidableEq S] [Fintype S] (M : Turing.MultiTapeTM k Bool S)
@@ -527,24 +564,9 @@ theorem toTM_decides [DecidableEq S] [Fintype S] (M : Turing.MultiTapeTM k Bool 
       (toTM M).halted c' ∧ (x ∈ L → c'.output.cells 1 = Γ.one) ∧
       (x ∉ L → c'.output.cells 1 = Γ.zero) := by
   obtain ⟨t', ht', s', -, hc⟩ := hM x
-  obtain ⟨u, hu, hun, hmin⟩ := Turing.MultiTapeTM.exists_haltsAt (tm := M) (cfg := initD M x) hc.1
-  obtain ⟨v, rfl⟩ : ∃ v, u = v + 1 := by
-    rcases u with _ | v
-    · exact absurd hun (by simp [Turing.MultiTapeTM.runFrom])
-    · exact ⟨v, rfl⟩
-  obtain ⟨c, q, hr, hs, hq, hcs⟩ := sim_run M x v (hmin v (by omega))
-  have hsucc : M.runFrom (initD M x) (v + 1) = M.step (M.runFrom (initD M x) v) :=
-    Function.iterate_succ_apply' _ _ _
-  have ha : (M.tr q (M.runFrom (initD M x) v).inputSymbol
-      (M.runFrom (initD M x) v).workTapeSymbols).state = none := by
-    have := hun; rw [hsucc, cslib_step_eq M hq] at this; exact this
-  obtain ⟨c', hr', hst, hout⟩ := hs.step_halt hq hcs ha
-  have hfin : (M.step (M.runFrom (initD M x) v)).output = [Turing.MultiTapeTM.indicator L x] := by
-    rw [← hsucc, ← M.runFrom_eq_of_halt _ hu hun]; exact hc.2.1
-  rw [hfin] at hout
-  have h1 := hout.cells 0 (by simp)
-  simp only [List.getElem_cons_zero] at h1
-  refine ⟨c', 3 * v + 1 + 1, by omega, TM.reachesIn_trans _ hr hr', hst, fun hx => ?_,
+  obtain ⟨c', T, hT, hr, hh, hout⟩ := toTM_computes_output M hc
+  have h1 := hout.1 0 (by simp)
+  refine ⟨c', T, hT.trans (Nat.mul_le_mul_left 3 ht'), hr, hh, fun hx => ?_,
     fun hx => ?_⟩
   · rw [h1]; simp [Turing.MultiTapeTM.indicator, hx, Γ.ofBool]
   · rw [h1]; simp [Turing.MultiTapeTM.indicator, hx, Γ.ofBool]

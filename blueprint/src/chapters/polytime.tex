@@ -251,7 +251,7 @@ Cobham's theorem.
   right side with one polynomial bounding both time and space; the forward
   direction supplies the space bound, and the converse ignores it. This
   direction carries time only: the CSLib space bound is discarded, so there is
-  as yet no converse for $\cc{DTISP}$, $\cc{L}$, or $\cc{FP}$.
+  as yet no converse for $\cc{DTISP}$ or $\cc{L}$.
 \end{theorem}
 \begin{proof}
   \leanok
@@ -266,6 +266,86 @@ Cobham's theorem.
   Each CSLib step takes three of our steps. For $\cc{P}$, the time bound
   $3p(n)$ is again a polynomial, and the polynomial normal form of
   $\cc{P}$ (Lemma~\ref{lem:polytime-normal-form}) concludes.
+\end{proof}
+
+\begin{theorem}[CSLib's polynomial-time string functions are $\cc{FP}$]
+  \label{thm:polytime-cslib-FP-eq}
+  \lean{Complexity.FromMultiTape.toTM_computesInTime,
+    Complexity.computesInTime_of_computableInTimeAndSpace,
+    Complexity.mem_FP_of_computableInTimeAndSpace,
+    Complexity.mem_FP_iff_computableInTimeAndSpace}
+  \leanok
+  \uses{thm:polytime-cslib-multitape, lem:polytime-normal-form}
+  A CSLib machine computing a binary string function $f$ with identity input
+  and output encodings in time $t(|x|)$ yields a canonical machine computing
+  the same complete string in time $3t(|x|)$. Consequently $f\in\cc{FP}$ if
+  and only if a CSLib machine computes it with polynomial bounds on time
+  and space. The reverse transfer needs only the time bound.
+\end{theorem}
+\begin{proof}
+  \leanok
+  Strengthen the folded simulation's output invariant: the output prefix is
+  correct, the head is at its end, and every subsequent cell is blank.
+  Each emitted bit preserves this invariant. The halting configuration
+  therefore satisfies the complete string-output contract, including for
+  the empty string. The polynomial normal form and the forward simulator
+  finish the equivalence.
+\end{proof}
+
+\begin{definition}[Binary input and output for finite Mathlib machines]
+  \label{def:mathlib-tm0-binary-io}
+  \lean{Complexity.MathlibTM0.BinaryMachine,
+    Complexity.MathlibTM0.BinaryMachine.OutputsWithin}
+  \leanok
+  A source machine has finite alphabet and control state sets, distinguished
+  blank and initial states, and a faithful encoding of binary digits by tape
+  symbols. Blank terminates the decoded output. The bounded output contract
+  requires a halted source run from the literal encoded input whose entire
+  right-of-head tape is the encoded output followed by blanks.
+\end{definition}
+
+\begin{theorem}[Finite Mathlib string computations transfer to $\cc{FP}$]
+  \label{thm:mathlib-tm0-canonical-fp}
+  \lean{Complexity.MathlibTM0.BinaryMachine.computes_cslib,
+    Complexity.MathlibTM0.BinaryMachine.mem_FP}
+  \leanok
+  \uses{def:mathlib-tm0-binary-io, thm:polytime-cslib-FP-eq}
+  A source computation from input $x$ to output $y$ in at most $T$ steps
+  is simulated by a fixed finite-state binary CSLib machine in at most
+  $2|x|+T+|y|+4$ steps. Consequently, polynomial bounds on source time
+  and full output length on every binary input establish canonical
+  $\cc{FP}$ membership for the computed string function.
+\end{theorem}
+\begin{proof}
+  \leanok
+  Use one binary track per source symbol, with the blank encoded by all
+  blank tracks. Copying and rewinding the input take $2|x|+2$ steps.
+  Every source write or move then takes one step, preserving relative
+  tape contents. On source halting, enter an output phase that emits one
+  bit per step and halts at the first blank, taking $|y|+2$ additional
+  steps. Apply the complete-output CSLib-to-canonical simulation.
+\end{proof}
+
+\begin{theorem}[Regular input guards preserve polynomial time]
+  \label{thm:mathlib-tm0-regular-guard}
+  \lean{Complexity.MathlibTM0.BinaryMachine.guarded_outputsWithin,
+    Complexity.MathlibTM0.BinaryMachine.guarded_outputsWithin_empty,
+    Complexity.MathlibTM0.BinaryMachine.mem_FP_on_dfa}
+  \leanok
+  \uses{thm:mathlib-tm0-canonical-fp}
+  Suppose a finite Mathlib machine computes $f(x)$ with polynomial time
+  and output bounds for inputs accepted by a fixed DFA. Returning $f(x)$
+  on accepted inputs and the empty string on every other input defines a
+  total function in $\cc{FP}$. Validation adds $2|x|+2$ source steps on
+  accepted inputs; rejected inputs halt after $|x|$ steps.
+\end{theorem}
+\begin{proof}
+  \leanok
+  Scan the input without writing, retaining the DFA state. Rejection halts
+  on the first blank, whose entire right-hand tape is blank. On acceptance,
+  rewind to the blank preceding the input, move right to the original head,
+  and execute the source machine with unchanged tape contents. Apply the
+  finite-machine simulation and its complete-output polynomial bound.
 \end{proof}
 
 \section{Closure properties of P and FP}
@@ -1301,6 +1381,162 @@ these facts are stated in the chapter on encodings
   $\mathrm{INDSET} \le_p \mathrm{VC}$ by $\langle G, k \rangle \mapsto
   \langle G, n - k \rangle$, since $S$ is independent exactly when its
   complement is a cover.
+\end{proof}
+
+\section{Noncommutative rational hitting lists}
+
+\begin{definition}[Rational formulas and partial matrix evaluation]
+  \label{def:rational-formula-evaluation}
+  \lean{Complexity.RationalHitting.Formula, Complexity.RationalHitting.Formula.size,
+    Complexity.RationalHitting.Formula.Eval, Complexity.RationalHitting.Mat,
+    Complexity.RationalHitting.Tuple, Complexity.RationalHitting.Evaluates,
+    Complexity.RationalHitting.Admissible, Complexity.RationalHitting.Nonzero}
+  \leanok
+  A rational formula has rational constants, $n$ variables, addition, ordered
+  multiplication, and inverse. Its size counts all syntax nodes. Evaluation
+  at a tuple of rational matrices is partial: every inverse node requires
+  a two-sided inverse of its operand. A formula is admissible if it has a
+  defined evaluation in some positive matrix dimension, and nonzero if some
+  such evaluation has a nonzero value.
+\end{definition}
+
+\begin{definition}[Hitting output and exact binary generation]
+  \label{def:rational-hitting-output}
+  \lean{Complexity.RationalHitting.Output, Complexity.RationalHitting.Hits,
+    Complexity.RationalHitting.encodeOutput, Complexity.RationalHitting.OutputsWithin,
+    Complexity.RationalHitting.hittingList}
+  \leanok
+  \uses{def:rational-formula-evaluation}
+  An output is a finite list of matrix tuples with one common positive
+  dimension. It hits size $s$ if every admissible nonzero formula of size at
+  most $s$ has an invertible evaluation at a tuple in the list. The output
+  encoding includes its dimension, list length, and every reduced rational
+  entry. The generation contract counts ordinary Mathlib $\mathrm{TM0}$
+  transitions from the two unary parameters $n,s$, separated by a nonblank
+  symbol, to the complete binary output at and right of the halted head.
+\end{definition}
+
+\begin{theorem}[Uniform rational hitting-list generator]
+  \label{thm:rational-hitting-generator}
+  \lean{Complexity.RationalHitting.hittingList_hits,
+    Complexity.RationalHitting.hittingList_dimension_le,
+    Complexity.RationalHitting.hittingList_encoding_length_le,
+    Complexity.RationalHitting.exists_uniform_generator,
+    Complexity.RationalHitting.exists_polynomial_hitting_generator}
+  \leanok
+  \uses{def:rational-hitting-output}
+  OpenAI's generator produces a hitting list for every $s\geq 1$ and $n\geq 1$.
+  Its common dimension is at most $256(n+s+1)^{10}$, its full binary output
+  length is polynomial, and one fixed finite-state $\mathrm{TM0}$ machine
+  generates the list within a fixed polynomial number of transitions.
+  The mathematical hitting and dimension bounds also hold for $n=0$.
+\end{theorem}
+\begin{proof}
+  \leanok
+  Adapt the 53-module solution closure of OpenAI's rational hitting-list
+  formalization. The proof passes through affine realizations, rank expansion,
+  cyclotomic specialization, exact integer determinants, binary arithmetic,
+  and a finite-stack-to-tape compiler. The runtime theorem here uses the
+  source machine model; the following bridge transfers its exact encoding
+  to the library's canonical $\cc{FP}$ model.
+\end{proof}
+
+\begin{definition}[Total binary hitting-list generator]
+  \label{def:rational-total-generator}
+  \lean{Complexity.RationalHitting.binaryInput,
+    Complexity.RationalHitting.inputDFA,
+    Complexity.RationalHitting.hittingGenerator}
+  \leanok
+  \uses{def:rational-hitting-output}
+  The input is $\mathtt{true}^n\mathtt{false}\mathtt{true}^s$ with $n,s\geq1$.
+  A five-state DFA validates this format. The total generator returns the
+  complete binary encoding of the corresponding hitting list on valid
+  inputs, and the empty string on all malformed strings.
+\end{definition}
+
+\begin{theorem}[Canonical polynomial-time hitting-list generation]
+  \label{thm:rational-generator-fp}
+  \lean{Complexity.RationalHitting.inputDFA_accepts_iff,
+    Complexity.RationalHitting.hittingGenerator_binaryInput,
+    Complexity.RationalHitting.hittingGenerator_eq_nil,
+    Complexity.RationalHitting.hittingGenerator_mem_FP}
+  \leanok
+  \uses{def:rational-total-generator, thm:rational-hitting-generator,
+    thm:mathlib-tm0-regular-guard}
+  The total hitting-list generator belongs to canonical $\cc{FP}$. Its
+  output on every positive unary parameter pair is exactly the source's
+  complete reduced-rational binary encoding; all other inputs produce
+  empty output. This is a generation theorem, with no assertion about
+  polynomial bit complexity for evaluating formulas on the resulting list.
+\end{theorem}
+\begin{proof}
+  \leanok
+  Prove the five-state validator accepts precisely the two nonempty unary
+  blocks and their separator. Parsing recovers the original parameters,
+  and the input length is exactly $n+s+1$. Bundle the source machine with
+  its literal binary codec, apply its polynomial runtime and full output
+  length bounds, and use the regular-domain guard theorem.
+\end{proof}
+
+\begin{theorem}[Inverse domains and bounded matrix witnesses]
+  \label{thm:rational-inverse-domain}
+  \lean{Complexity.RationalHitting.admissible_inv_iff_nonzero,
+    Complexity.RationalHitting.Admissible.exists_dimension_le}
+  \leanok
+  \uses{thm:rational-hitting-generator}
+  The inverse formula $f^{-1}$ is admissible if and only if $f$ is nonzero.
+  Every admissible formula $f$ in $n$ variables has a defined evaluation
+  in some dimension $0<d\leq 256(n+|f|+3)^{10}$.
+\end{theorem}
+\begin{proof}
+  \leanok
+  A defined inverse supplies a nonzero operand in positive matrix dimension.
+  Conversely, an invertible hit for $f$ supplies a defined inverse.
+  For the dimension bound, use the list for size $|f|+2$: either $f$ or $f+1$
+  has a nonzero evaluation, so a hit for one supplies a defined evaluation
+  of $f$ in the list's polynomially bounded common dimension.
+\end{proof}
+
+\begin{definition}[Executable rational-formula tests]
+  \label{def:rational-finite-tests}
+  \lean{Complexity.RationalHitting.Formula.evalMatrix?,
+    Complexity.RationalHitting.Output.admissibilityTest,
+    Complexity.RationalHitting.Output.nonzeroTest,
+    Complexity.RationalHitting.Formula.admissible?,
+    Complexity.RationalHitting.Formula.nonzero?}
+  \leanok
+  \uses{def:rational-hitting-output}
+  Evaluate exactly over rational matrices, rejecting singular inverse operands.
+  On a list, the admissibility test searches for any defined value, and the
+  nonzeroness test searches for a value with nonzero determinant. For a formula
+  $f$, use the generated list for size $|f|+2$ for both tests.
+\end{definition}
+
+\begin{theorem}[Finite tests for nonzeroness and the inverse domain]
+  \label{thm:rational-finite-tests}
+  \lean{Complexity.RationalHitting.Formula.evalMatrix?_eq_some_iff,
+    Complexity.RationalHitting.Nonzero.admissible,
+    Complexity.RationalHitting.Hits.nonzero_iff,
+    Complexity.RationalHitting.Hits.admissible_iff,
+    Complexity.RationalHitting.Formula.admissible?_eq_true_iff,
+    Complexity.RationalHitting.Formula.nonzero?_eq_true_iff}
+  \leanok
+  \uses{def:rational-finite-tests, thm:rational-hitting-generator}
+  The executable evaluator returns exactly the relationally defined values.
+  A hitting list for size $s$ detects nonzeroness of every formula of size
+  at most $s$. A hitting list for size $s+2$ also detects admissibility of
+  every such formula, even when it is identically zero. Consequently the
+  two generated tests are total and correct, without an admissibility promise.
+  No polynomial bit-time bound for these evaluation tests is asserted here.
+\end{theorem}
+\begin{proof}
+  \leanok
+  At a defined point either $f$ is nonzero or $f+1$ is nonzero, and the latter
+  has only two more syntax nodes. An invertible hit for either formula supplies
+  a defined evaluation of $f$. Conversely, every list tuple has positive
+  dimension, so an invertible value is nonzero. The evaluator's inverse
+  branch uses the adjugate divided by the determinant; soundness and
+  completeness follow by induction on syntax and on the evaluation relation.
 \end{proof}
 
 \section{Open directions}

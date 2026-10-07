@@ -19,6 +19,8 @@ the universal machine is proved to reflect as well as preserve halting), a time
 hierarchy under the textbook time-constructibility hypothesis, a
 $T \log T$ simulation of Turing machines by random access machines, and
 space-level and variant-model robustness for random access machines.
+The finite-automata section also integrates OpenAI's exponential state lower
+bound for deterministic simulation of one-way nondeterministic automata.
 
 \section{Turing machines}
 
@@ -874,3 +876,225 @@ depend on the Turing-machine conventions.
   classes equal $\cc{P}$ as theorems rather than as separate class
   definitions.
 \end{theorem}
+
+\section{Finite automata and one-way liveness}
+\label{sec:models-finite-automata}
+
+This section imports OpenAI's \emph{An Exponential Two-Way Deterministic State
+Lower Bound for One-Way Liveness} (25 September 2026), including the formal
+proof in
+\href{https://github.com/openai/math/tree/adc7f1241b42e322a6451854ab7e4b4c146bf78a/lean/OAI/Combinatorics/Automata}{openai/math}
+at revision \texttt{adc7f1241b42e322a6451854ab7e4b4c146bf78a}.
+The crossing-diagram and relation-monoid argument is imported from that source;
+the ordinary Mathlib NFA bridge is supplied here. The alphabet in these
+statements is finite and depends on the parameter $h$.
+
+\begin{definition}[Two-way finite automata]
+  \label{def:models-finite-automata}
+  \lean{Complexity.FiniteAutomaton.Symbol, Complexity.FiniteAutomaton.Move, Complexity.FiniteAutomaton.DMachine, Complexity.FiniteAutomaton.NMachine, Complexity.FiniteAutomaton.FiniteRun, Complexity.FiniteAutomaton.DMachine.Accepts, Complexity.FiniteAutomaton.NMachine.Accepts, Complexity.FiniteAutomaton.NMachine.NoLeft, Complexity.FiniteAutomaton.DMachine.Recognizes, Complexity.FiniteAutomaton.NMachine.Recognizes}
+  \leanok
+  A finite automaton has states $\{0,\ldots,s-1\}$, an initial state,
+  accepting states, and deterministic or nondeterministic transitions.
+  Its input word is enclosed by distinct endmarkers that the head cannot cross.
+  The head can move left, right, or stay. A finite run from the initial
+  configuration accepts when it reaches an accepting state. Rejected inputs
+  need not halt. The \texttt{positive} convention excludes zero-length runs;
+  the other convention permits them. A one-way machine has no left moves.
+\end{definition}
+
+\begin{definition}[One-way liveness]
+  \label{def:models-one-way-liveness}
+  \lean{Complexity.FiniteAutomaton.BRel, Complexity.FiniteAutomaton.Alphabet, Complexity.FiniteAutomaton.oneWayLiveness, Complexity.FiniteAutomaton.livenessNFA}
+  \leanok
+  A letter is a binary relation on $\{0,\ldots,h-1\}$.
+  A word $(R_1,\ldots,R_k)$ is live if
+  $\exists x_0,\ldots,x_k\ \bigwedge_{i=1}^k R_i(x_{i-1},x_i)$,
+  equivalently if its relation product is nonempty. The standard NFA has
+  these $h$ points as states, all both initial and accepting, and uses the
+  relation in each letter as its transition relation.
+\end{definition}
+
+\begin{theorem}[One-way upper bound and the Mathlib NFA bridge]
+  \label{thm:models-one-way-liveness-upper}
+  \lean{Complexity.FiniteAutomaton.livenessNFA_accepts, Complexity.FiniteAutomaton.oneWayLiveness_small_nfa}
+  \leanok
+  \uses{def:models-finite-automata, def:models-one-way-liveness}
+  The standard $h$-state Mathlib NFA accepts exactly one-way liveness.
+  In the endmarker model, a one-way nondeterministic automaton with $h+3$
+  states recognizes it under both acceptance conventions.
+\end{theorem}
+\begin{proof}
+  \leanok
+  Choose an initial endpoint, follow an edge of each successive relation,
+  and accept at the right endmarker. The Mathlib bridge proves by induction
+  that its reachable states are precisely the endpoints of the relation product.
+\end{proof}
+
+\begin{theorem}[Exponential deterministic state lower bound]
+  \label{thm:models-one-way-liveness-lower}
+  \lean{Complexity.FiniteAutomaton.oneWayLiveness_deterministic_lower_bound, Complexity.FiniteAutomaton.livenessNFA_deterministic_lower_bound}
+  \leanok
+  \uses{def:models-one-way-liveness, thm:models-one-way-liveness-upper}
+  For $h\ge2$, every $s$-state two-way deterministic recognizer of one-way
+  liveness satisfies
+  \[
+    2^{\lfloor(h-2)/31\rfloor}\le4(s+\delta)^2,
+    \qquad
+    \delta=\begin{cases}2&\text{for positive runs},\\1&\text{otherwise}.
+    \end{cases}
+  \]
+  The same bound applies when the language is presented as the language
+  accepted by the standard Mathlib NFA above.
+\end{theorem}
+\begin{proof}
+  \leanok
+  Use OpenAI's rank-loss lower bound for the pairing representation of the
+  machine's crossing diagrams. The Mathlib statement follows from the
+  checked equality of the two accepted languages.
+\end{proof}
+
+\begin{corollary}[No polynomial deterministic simulation, even of one-way NFAs]
+  \label{cor:models-no-polynomial-automata-simulation}
+  \lean{Complexity.FiniteAutomaton.no_oneWay_polynomial_simulation, Complexity.FiniteAutomaton.no_polynomial_simulation}
+  \leanok
+  \uses{thm:models-one-way-liveness-lower}
+  Under either acceptance convention, there are no constants $C,c>0$
+  such that every $n$-state one-way nondeterministic automaton over every
+  finite alphabet has an equivalent two-way deterministic automaton with
+  at most $Cn^c$ states. Consequently, such a simulation is impossible for
+  unrestricted two-way nondeterministic automata as well.
+\end{corollary}
+\begin{proof}
+  \leanok
+  Apply the proposed simulation to the $(h+3)$-state liveness automata.
+  The lower bound is exponential in $h$, exceeding every fixed polynomial.
+\end{proof}
+
+\begin{corollary}[Liveness lower bounds survive arbitrary word encodings]
+  \label{cor:models-encoded-liveness-lower}
+  \lean{Complexity.FiniteAutomaton.encoded_oneWayLiveness_lower_bound}
+  \leanok
+  \uses{thm:models-one-way-liveness-lower}
+  Let $c$ map relation letters on $h\ge2$ points to words over any alphabet.
+  Extend $c$ to words by concatenation. If an $s$-state two-way deterministic
+  automaton accepts $c(w)$ exactly when $w$ is live, then
+  \[
+    2^{\lfloor(h-2)/31\rfloor}\le4(s+\delta)^2
+  \]
+  with the same acceptance-convention constant $\delta$ as above.
+  There is no code-length assumption or loss in the state bound. The
+  automaton's answers on other words are unrestricted by the hypothesis.
+\end{corollary}
+\begin{proof}
+  \leanok
+  Map a relation letter to the product of the crossing diagrams of its
+  codeword. Products respect concatenation, so OpenAI's relation-divisor
+  argument applies to this new map with the same boundary-port set.
+\end{proof}
+
+
+\begin{definition}[Binary liveness automata]
+  \label{def:models-binary-liveness}
+  \lean{Complexity.FiniteAutomaton.BinaryLivenessState, Complexity.FiniteAutomaton.binaryLivenessNFA, Complexity.FiniteAutomaton.binaryLivenessCode}
+  \leanok
+  For relations on $n+2$ vertices, encode each truth-table row with a row
+  marker, list its columns in decreasing order, and append a relation
+  terminator. Encode these four letters by pairs of bits. The NFA has three
+  groups of vertex counters (selecting a row, scanning columns, retaining a
+  target) and a three-valued buffer for the first bit of each pair.
+\end{definition}
+
+\begin{corollary}[Exponential separation over a fixed binary alphabet]
+  \label{cor:models-binary-liveness-lower}
+  \lean{Complexity.FiniteAutomaton.card_binaryLivenessState, Complexity.FiniteAutomaton.binaryLivenessNFA_accepts_code, Complexity.FiniteAutomaton.binaryLivenessNFA_deterministic_lower_bound}
+  \leanok
+  \uses{def:models-binary-liveness, cor:models-encoded-liveness-lower}
+  For every $n$, there is a binary Mathlib NFA with exactly $9(n+2)$ states
+  such that every $s$-state two-way deterministic recognizer of its language
+  satisfies
+  \[
+    2^{\lfloor n/31\rfloor}\le4(s+\delta)^2.
+  \]
+  Here $\delta=2$ for positive-run acceptance and $\delta=1$ otherwise.
+  This is a statement about the full language accepted by the NFA.
+\end{corollary}
+\begin{proof}
+  \leanok
+  A row counter chooses the source vertex. Counting down the columns lets
+  a nondeterministic branch remember the index of a true entry without a
+  second counter. At the relation terminator it resumes row selection for
+  that target vertex. Thus the transition relation across a codeword is
+  exactly the encoded relation. The two-bit compiler triples the state
+  count and preserves acceptance. Apply the encoding-transfer theorem.
+\end{proof}
+
+\subsection{Nondeterministic complementation}
+
+The next results import the complementation proof from OpenAI's 2026
+\texttt{TwoWayAutomata} solution modules and combine it with the one-way
+liveness and binary-scanner constructions above. In this subsection,
+finite-run acceptance permits a zero-step run. A checked translation to the
+source's endmarker and movement conventions preserves the number of states.
+
+\begin{theorem}[One-way liveness has an expensive nondeterministic complement]
+  \label{thm:models-liveness-complement-lower}
+  \lean{Complexity.FiniteAutomaton.livenessNFA_complement_lower_bound, Complexity.FiniteAutomaton.exists_oneWay_nfa_complementation_lower_bound}
+  \leanok
+  \uses{def:models-finite-automata, thm:models-one-way-liveness-upper}
+  For $h\ge2$, the complement of the ordinary $h$-state Mathlib liveness
+  NFA requires
+  \[
+    2^{\lfloor(h-2)/127\rfloor}\le2(s+1)
+  \]
+  for every equivalent $s$-state two-way NFA. There is also a witness in
+  the endmarker model with $h+3$ states and no left moves whose complement
+  satisfies the same lower bound.
+\end{theorem}
+\begin{proof}
+  \leanok
+  OpenAI's representation assigns a crossing diagram to every word with one
+  extra state label. Recognizing emptiness of relation products makes the
+  induced map reverse relation inclusion. The finite image theorem forces
+  the bound. Translate configurations and moves without adding states,
+  then identify the source's relation products with the existing liveness
+  language and apply its one-way upper bound.
+\end{proof}
+
+\begin{corollary}[Complementation hardness survives arbitrary word encodings]
+  \label{cor:models-encoded-complement-lower}
+  \lean{Complexity.FiniteAutomaton.encoded_oneWayLiveness_complement_lower_bound}
+  \leanok
+  \uses{thm:models-liveness-complement-lower}
+  For any alphabet and any code mapping relation letters on $h\ge2$
+  vertices to words, every $s$-state two-way NFA agreeing with the complement
+  of liveness on all encoded words satisfies
+  $2^{\lfloor(h-2)/127\rfloor}\le2(s+1)$.
+  The code lengths and behavior outside the encoded words are unrestricted.
+\end{corollary}
+\begin{proof}
+  \leanok
+  Compose the crossing-diagram map with word encoding. It still preserves
+  the empty word and concatenation, so the same image theorem applies with
+  the same number of state labels.
+\end{proof}
+
+\begin{corollary}[Exponential binary complementation cost]
+  \label{cor:models-binary-complement-lower}
+  \lean{Complexity.FiniteAutomaton.binaryLivenessNFA_complement_lower_bound, Complexity.FiniteAutomaton.no_binary_nfa_polynomial_complementation}
+  \leanok
+  \uses{def:models-binary-liveness, cor:models-encoded-complement-lower}
+  The binary NFA with $9(n+2)$ states constructed above has a complement
+  whose every $s$-state two-way nondeterministic recognizer satisfies
+  \[
+    2^{\lfloor n/127\rfloor}\le2(s+1).
+  \]
+  Consequently no real polynomial in the source state count bounds
+  complementation of all ordinary binary NFAs by two-way NFAs.
+  The statement concerns the complement of the full binary language.
+\end{corollary}
+\begin{proof}
+  \leanok
+  Apply the encoded-word theorem to the existing binary scanner. If a
+  polynomial bound existed, specialize to $n=127t$. The resulting inequality
+  would bound $2^t$ by a polynomial in $t$, contradicting exponential growth.
+\end{proof}

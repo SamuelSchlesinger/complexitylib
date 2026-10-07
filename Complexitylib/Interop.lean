@@ -12,11 +12,13 @@ public import Complexitylib.Interop.Cslib.FromMultiTape.PEquiv
 public import Complexitylib.Interop.Cslib.Circuit
 public import Complexitylib.Interop.Cslib.CircuitClasses
 public import Complexitylib.Interop.Cslib.CircuitDepth
+public import Complexitylib.Interop.Mathlib.TM0
+public import Complexitylib.Interop.Mathlib.TM0.Guard
 
 /-!
 # Interoperability
 
-Aggregation module for bridges to other libraries, currently CSLib.
+Aggregation module for bridges to CSLib and Mathlib.
 
 - `Complexitylib.Interop.Cslib` connects the machine model to CSLib's step
   relations and, through `Complexitylib.Interop.Cslib.Regular`, to the
@@ -28,11 +30,16 @@ Aggregation module for bridges to other libraries, currently CSLib.
 - `Complexitylib.Interop.Cslib.MultiTape` runs our machines on CSLib's
   multi-tape machines, transferring `DTIME`, `DTISP`, `P`, and `FP` to CSLib's
   time and space measures. `Complexitylib.Interop.Cslib.FromMultiTape` runs
-  CSLib's machines on ours, so `P` is exactly CSLib's polynomial time.
+  CSLib's machines on ours, giving equivalences for both `P` and `FP`.
 - `Complexitylib.Interop.Cslib.Circuit` translates between our fan-in-two
   circuits and CSLib's De Morgan circuits, transferring CSLib's Shannon and
   Lupanov bounds and characterizing `P/poly` in CSLib's circuit model.
   `Complexitylib.Interop.Cslib.CircuitClasses` lifts these to the `SIZE`
   classes, and `Complexitylib.Interop.Cslib.CircuitDepth` matches circuit
   depth in both directions.
+- `Complexitylib.Interop.Mathlib.TM0` simulates finite Mathlib machines with
+  binary input and output on CSLib symbol tracks. Polynomial source time and
+  output length on every input imply canonical `FP` membership.
+  Its `Guard` interface validates regular input formats and returns empty
+  output on malformed strings, extending source bounds on valid inputs to `FP`.
 -/

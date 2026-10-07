@@ -11,7 +11,7 @@ public import Complexitylib.Classes.P.NormalForm
 import Complexitylib.Interop.Cslib.FromMultiTape.Internal
 
 /-!
-# CSLib multi-tape deciders run on Complexitylib machines
+# CSLib multi-tape computations run on Complexitylib machines
 
 CSLib measures the complexity of a language through its multi-tape machines
 (`Turing.MultiTapeTM`): `MultiTapeTM.DecidableInTimeAndSpace L enc t s` says
@@ -20,11 +20,12 @@ that some machine over the binary alphabet with finitely many states decides
 bit `true` on inputs in `L` and `false` otherwise.
 
 This file proves the converse of `Complexitylib.Interop.Cslib.MultiTape`: a
-CSLib decider runs on our machines with a constant-factor time overhead. The
+CSLib computation runs on our machines with a constant-factor time overhead. The
 simulator `FromMultiTape.toTM`
 (`Complexitylib.Interop.Cslib.FromMultiTape.Defs`) folds each two-way CSLib
 work tape onto one of our one-sided work tapes and spends three of its steps
-on each CSLib step.
+on each CSLib step. It preserves the entire output string and its terminating
+blank, so the same simulation covers string functions, including empty outputs.
 
 ## Main results
 
@@ -34,6 +35,10 @@ on each CSLib step.
   time `t` implies `DTIME(t)`
 - `Complexity.mem_P_of_decidableInTimeAndSpace` — CSLib-decidable within
   polynomial time implies `P`
+- `Complexity.computesInTime_of_computableInTimeAndSpace` — a CSLib string
+  computation within time `t` yields a canonical computation within time `3 t`
+- `Complexity.mem_FP_of_computableInTimeAndSpace` — CSLib-computable string
+  functions within polynomial time belong to `FP`
 -/
 
 
@@ -42,6 +47,39 @@ public section
 namespace Complexity
 
 open Turing
+
+/-- A fixed CSLib machine computes the same complete string on the canonical simulator. -/
+theorem FromMultiTape.toTM_computesInTime {k : ℕ} {S : Type} [DecidableEq S] [Fintype S]
+    (M : Turing.MultiTapeTM k Bool S) {f : List Bool → List Bool} {t : ℕ → ℕ}
+    {s : List Bool → ℕ}
+    (h : M.ComputesFunInTimeAndSpace (Function.Embedding.refl _)
+      (Function.Embedding.refl _) f (fun x => t x.length) s) :
+    (FromMultiTape.toTM M).ComputesInTime f (fun n => 3 * t n) := by
+  intro x
+  obtain ⟨t', ht', s', _, hc⟩ := h x
+  obtain ⟨c', T, hT, hr, hh, hout⟩ := FromMultiTape.toTM_computes_output M hc
+  exact ⟨c', T, hT.trans (Nat.mul_le_mul_left 3 ht'), hr, hh, hout⟩
+
+/-- CSLib string computations transfer to the canonical machine model with time factor three. -/
+theorem computesInTime_of_computableInTimeAndSpace {f : List Bool → List Bool}
+    {t : ℕ → ℕ} {s : List Bool → ℕ}
+    (h : Turing.MultiTapeTM.ComputableInTimeAndSpace f (Function.Embedding.refl _)
+      (Function.Embedding.refl _) (fun x => t x.length) s) :
+    ∃ (k : ℕ) (tm : TM k), tm.ComputesInTime f (fun n => 3 * t n) := by
+  obtain ⟨k, S, hS, M, hM⟩ := h
+  have := Fintype.ofFinite S
+  classical
+  exact ⟨k, FromMultiTape.toTM M, FromMultiTape.toTM_computesInTime M hM⟩
+
+/-- Every polynomial-time CSLib string function belongs to canonical `FP`. -/
+theorem mem_FP_of_computableInTimeAndSpace {f : List Bool → List Bool}
+    {p : Polynomial ℕ} {s : List Bool → ℕ}
+    (h : Turing.MultiTapeTM.ComputableInTimeAndSpace f (Function.Embedding.refl _)
+      (Function.Embedding.refl _) (fun x => p.eval x.length) s) :
+    f ∈ FP := by
+  obtain ⟨k, tm, htm⟩ := computesInTime_of_computableInTimeAndSpace (t := p.eval) h
+  refine mem_FP_iff_computesInTime_polynomial.mpr ⟨k, tm, Polynomial.C 3 * p, ?_⟩
+  simpa using htm
 
 /-- **A CSLib decider runs on Complexitylib.** If a CSLib multi-tape machine
 decides `L` within time `t` in the input length (and any space), one of our

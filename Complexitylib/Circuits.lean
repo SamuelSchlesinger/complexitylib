@@ -60,6 +60,8 @@ public import Complexitylib.Circuits.KCNF.SubcubeFree
 public import Complexitylib.Circuits.KCNF.Sparsification
 public import Complexitylib.Circuits.DepthThree
 public import Complexitylib.Circuits.DepthThree.Explicit
+public import Complexitylib.Circuits.DepthThree.LowerBound
+public import Complexitylib.Circuits.ExactFourier
 public import Complexitylib.Circuits.AndOrNot
 public import Complexitylib.Circuits.AndOrMod.Defs
 public import Complexitylib.Circuits.BasisHom

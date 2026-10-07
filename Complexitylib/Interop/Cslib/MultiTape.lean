@@ -51,7 +51,8 @@ verdict.
   CSLib-computable within polynomial time and space
 
 The converse is `Complexitylib.Interop.Cslib.FromMultiTape`, and together the
-two directions give `mem_P_iff_decidableInTimeAndSpace`.
+two directions give `mem_P_iff_decidableInTimeAndSpace` and
+`mem_FP_iff_computableInTimeAndSpace`.
 -/
 
 

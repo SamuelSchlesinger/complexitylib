@@ -88,6 +88,8 @@ public import Complexitylib.Models.TuringMachine.UTM.ClockedUtm
 public import Complexitylib.Models.TuringMachine.UTM.HierarchySupport
 public import Complexitylib.Models.TuringMachine.UTM.Diagonal
 public import Complexitylib.Models.RandomAccessMachine
+public import Complexitylib.Models.FiniteAutomaton.OneWayLiveness
+public import Complexitylib.Models.FiniteAutomaton.Complementation
 public import Complexitylib.Models.RoseTreeMachine.Prog
 
 /-!

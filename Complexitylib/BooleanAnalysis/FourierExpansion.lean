@@ -936,6 +936,23 @@ noncomputable def totalInfluence (f : BooleanFunction n) : ℝ :=
 theorem totalInfluence_nonneg (f : BooleanFunction n) : 0 ≤ totalInfluence f :=
   Finset.sum_nonneg fun _ _ => mul_nonneg (by positivity) (sq_nonneg _)
 
+/-- Fourier weight above degree `k` is at most total influence divided by `k + 1`. -/
+theorem fourierWeightAbove_le_totalInfluence (f : BooleanFunction n) (k : ℕ) :
+    fourierWeightAbove f k ≤ totalInfluence f / (k + 1) := by
+  apply (le_div_iff₀ (by positivity : (0 : ℝ) < k + 1)).mpr
+  rw [fourierWeightAbove, Finset.sum_mul]
+  calc
+    _ ≤ ∑ S ∈ Finset.univ.filter (fun S : Finset (Fin n) => k < S.card),
+        (S.card : ℝ) * (𝓕 f S) ^ 2 := by
+      apply Finset.sum_le_sum
+      intro S hS
+      rw [fourierWeight, mul_comm]
+      apply mul_le_mul_of_nonneg_right _ (sq_nonneg _)
+      exact_mod_cast (Finset.mem_filter.mp hS).2
+    _ ≤ totalInfluence f :=
+      Finset.sum_le_sum_of_subset_of_nonneg (Finset.filter_subset _ _)
+        (fun S _ _ => mul_nonneg (Nat.cast_nonneg _) (sq_nonneg _))
+
 /-- **Total influence grouped by degree**: `I[f] = ∑_k k · 𝐖(f, k)`. -/
 theorem totalInfluence_eq_sum_weight (f : BooleanFunction n) :
     totalInfluence f = ∑ k ∈ Finset.range (n + 1), (k : ℝ) * 𝐖 f k := by
@@ -1098,6 +1115,14 @@ theorem sum_fourierCoeff_singleton_sq_eq_fourierWeightAtDegree_one (f : BooleanF
 
 /-- Flip coordinate `i` of a point of the Hamming cube. -/
 def flipCoord (i : Fin n) (x : Cube n) : Cube n := Function.update x i (x i + 1)
+
+/-- Flipping a coordinate adds one in `ZMod 2` at that coordinate. -/
+@[simp] theorem flipCoord_apply_same (i : Fin n) (x : Cube n) :
+    flipCoord i x i = x i + 1 := by simp [flipCoord]
+
+/-- A coordinate flip leaves every other coordinate unchanged. -/
+theorem flipCoord_apply_ne (i : Fin n) (x : Cube n) (j : Fin n) (h : j ≠ i) :
+    flipCoord i x j = x j := by simp [flipCoord, h]
 
 /-- The character `χ` negates under a bit flip: `χ(b + 1) = -χ(b)`. -/
 theorem chi_add_one (b : ZMod 2) : chi (b + 1) = - chi b := by
