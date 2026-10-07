@@ -182,8 +182,9 @@ gap for these specific affine generators** from Shalom's relative property
 linear-group property (T), Theorem 2.6. This remains an external ingredient.
 [shalom99][shalom99] [oai26][oai26]
 
-Free bits form another affine torus; frozen bits stay fixed. Updating one of
-the boundedly many independent components gives the conditional operator
+Pad each salt block to a multiple of four bits and concatenate all free bits
+into one affine torus; frozen bits stay fixed. Updating one of the boundedly
+many independent components gives the conditional operator
 $K$, with $\|K^d-\Pi\|_{8\to8}\le C2^{-cd}$, uniformly in the
 moduli and conditioned identifiers, by Lemma 6.2. To express a generator
 without retaining $y$, enumerate fixed-wrap variants

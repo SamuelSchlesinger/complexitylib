@@ -8,7 +8,8 @@ evaluated in deterministic logspace, a majority vote removes the randomness.
 This is a reduced exposition of OpenAI's proposed proof, pinned to revision
 `adc7f1241b42e322a6451854ab7e4b4c146bf78a` [oai26][oai26]. The supporting notes
 expose the estimator and its implementation; they are essential parts of the
-argument. The proof status and limits of this reconstruction are stated below.
+argument. Reviewed October 7, 2026; the proof status and limits of this
+reconstruction are stated below.
 
 ## The one construction the class equalities need
 
