@@ -137,8 +137,12 @@ rank-conditioned two-column channel. At rate $b_k=16^{-k}$, retain
 $y$ when $a(y)\in A_k=\{0,\ldots,L_k-1\}^4$, where
 $L_k=\lceil P2^{-k}\rceil$. Its probability is
 $\pi_k=(L_k/P)^4\in[b_k,16b_k]$ whenever $P2^{-k}\ge1$.
-Since every used rate has $k=O(B)$, choose $P=2^{O(B)}$ large enough
-for these requirements. This specializes Section 2 and Lemma 3.1.
+The [reachable-rate bound](../estimator/index.md#finite-parameters-close-the-construction)
+gives $k=O(B)$ even for descendant tasks. Once the reachable identifier and
+rate ranges are fixed, Section 12.1 chooses a sufficiently large prime
+$P=2^{O(B)}$ satisfying these requirements. Testing successive integers by
+trial division finds one in $O(B)$ space. This specializes Section 2,
+Lemma 3.1, and Section 12.1.
 [oai26][oai26]
 
 For distinct $x,y$, the map $(u,v)\mapsto(a(x),a(y))$ bijects onto

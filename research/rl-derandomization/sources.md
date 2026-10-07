@@ -45,6 +45,7 @@ derandomization construction.
 
 Stephen A. Cook and Pierre McKenzie. “Problems Complete for Deterministic
 Logarithmic Space.” *Journal of Algorithms* **8** (3), 385–394, 1987.
+[DOI: 10.1016/0196-6774(87)90018-6](https://doi.org/10.1016/0196-6774(87)90018-6).
 [Author-hosted paper](https://www.cs.toronto.edu/~sacook/homepage/cook_mckenzie.pdf).
 
 Proposition 1 (p. 387) supplies the forest permutation used for contour

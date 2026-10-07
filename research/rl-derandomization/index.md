@@ -84,8 +84,9 @@ this reduction possible.
 
 ## 2. Estimate that target with a short environment
 
-The estimator replaces dense rows by sparse random tables with the correct
-conditional means. It estimates successive **differences** between child
+First express the exact rows through sparse stochastic tables with matching
+conditional means. Recursive substitutions introduce bias that must be bounded.
+The estimator averages paired **differences** between successive child
 budgets, compresses their sums, and uses short fingerprints to compare
 endpoints without retaining full addresses. Adaptive candidates are handled by
 a comparison calculation that ignores the current block's fingerprint salt.
@@ -179,8 +180,13 @@ This is an exposition and mathematical reconstruction of a proposed proof,
 not a Lean verification of `RL = L`. The finite-action spectral-gap theorem is
 an external mathematical input. The detailed estimator inequalities and
 concrete recipe certificates remain attributed to the manuscript, with their
-mechanisms and dependencies exposed in the supporting notes. Review status and
-any unresolved findings will be recorded here when the draft has converged.
+mechanisms and dependencies exposed in the supporting notes. Review has checked
+the reductions, their source alignment, and the validation artifacts; it has
+not independently verified every lemma of the manuscript.
+
+A first bounded Lean slice would prove the vector invariant, the finite-family
+voting lemma, and the stack-potential telescope. Proving the full class equality
+also requires the sampler, estimator induction, and concrete machine realization.
 
 ## Supplementary Code
 

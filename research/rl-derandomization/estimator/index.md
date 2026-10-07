@@ -62,6 +62,21 @@ midpoint sampling. Approximate factors share randomness and are **not**
 assumed independent or unbiased (Lemma 7.1). Computed normalization uses
 the same clipped formula on estimated signals; it does not store $q$.
 
+For the reward update, let $\mathcal F_l$ be the true correction table,
+with conditional mean $E_l(x,z)/f$ when source and midpoint are retained.
+The true sample on the inherited source slice is
+$$
+T_l^{\rm rew}(x_i;\sigma)=r_i(x)\left(W_l(x)+\frac f{\pi_f}
+  \sum_{z:Z_f(z)=1}\mathcal F_l(x,z;\sigma)W_l(z)\right).
+$$
+Its conditional mean is exactly $W_{l+1}(x_i)$ (Lemma 7.1).
+A budget-$m$ sample substitutes budget-$m$ estimates for the earlier tables
+and vectors, including detector inputs to $r_i$; $r_0=1$ stays fixed.
+These recursive samples may be biased; the following difference schedule
+controls their error. [oai26][oai26]
+
+A port is a short index naming an exposed neighbor; a paired port also
+provides an inverse index for returning to the source.
 Access relations require more than numerical support. An exposed port may
 have weight zero, yet affect later representative selection. Every exposed
 class has bounded size and a smooth witness equal to one at all its ports.
@@ -90,8 +105,8 @@ This follows by counting incoming ports pointwise, without independence.
 
 Lemma 7.3 gives scale costs $b/a$ for $b\ge a$, and $(b/a)^7$ for
 $b<a$, in moment power. The latter exponent includes the narrower-slice
-importance correction. Assign tasks ranks $\iota$, decreasing on every
-dependency, and set
+importance correction. The fixed finite task order per stage gives ranks
+$\iota=O(l+1)$, decreasing on every input dependency. Set
 
 $$
  p=\frac{M}{K_{\rm prec}}-\frac12\log_2(1/a)
@@ -121,8 +136,14 @@ summing across scales possible.
 
 For each sample term $T_{b,m}$, average **paired differences**
 $T_{b,m}-T_{b,m-1}$, using identical walk words and wrap guesses.
-Budget-zero sample terms vanish; exact base contributions enter separately.
-At slack $d\le M-m<2d$, use a conditional walk of length $O(M-m)$.
+Budget-zero sample terms vanish. Group increments by dyadic slack
+$d\le M-m<2d$, using conditional walks of length $O(M-m)$.
+Add groups in decreasing powers of two down to $d=1$, with exact base
+contributions in the first group. A **prefix** is the sum through one group.
+A candidate **descriptor** records formula, copy and sign choices, scale
+and budget offsets, walk word, wraps, and bounded port choices. Included
+scale offsets and walks have length $O(d)$, so it occupies $O(d)$ bits
+(Lemma 7.5). It describes an immediate candidate, not its entire recursive path.
 Contributions at the same actual endpoint are combined before measuring
 the difference. Subtracting the same true stochastic term from both budgets
 gives absolute norm $C C_b2^{-p-A+O(d)}$; a full sample need not be this
@@ -152,8 +173,7 @@ copies participate in ranks but never in endpoint sums or access ports.
 
 An overflow means $u_0>\rho_d$. Before the first overflow, accumulated
 changes are much smaller than the next floor. At overflow, either many
-true entries exceed
-$\rho_d/4$, or many small-target entries have error at least
+true entries exceed $\rho_d/4$, or many small-target entries have error at least
 $c\rho_d$. The latter event is charged directly to prefix error power,
 with factor $O((n_d\rho_d^8)^{-1})$.
 
@@ -166,13 +186,12 @@ for it instead. Only one first-overflow event occurs per row.
 
 A stationary reference starting from truth plus earlier compression losses
 preserves the relevant row functions: its $K$th first-entry rank stays
-fixed or inside the flat full-gate region. If a gate is open, the
-entry/rank threshold separation $e_H>3g_H$ places every supported entry
+fixed or inside the flat full-gate region. When a gate is open, the separation
+between entry-support and rank-gate thresholds places every supported entry
 above $3u_0$, where compression is the identity. Saturation and a separate
 closed-gate case prevent large raw entries from causing uncontrolled
 relative error. Lipschitz propagation through the remaining dyadic groups
-costs only
-a polynomial in $d$. Taking $c_1>B_1$, then
+costs only a polynomial in $d$. Taking $c_1>B_1$, then
 $c_2>8c_1+8B_1$, makes all overflow charges summable
 (Lemmas 8.2–8.4, Proposition 8.5).
 Range clamps beyond all remaining additive variation preserve these row
@@ -238,6 +257,32 @@ $\lambda_M/4$ after fixed minimum-size padding. Coupling fits the
 reserved half; adding the clean error proves Theorem 9.8 [oai26][oai26].
 The earlier analytical constants are fixed before this choice of
 $\epsilon$; every resulting constant is independent of the input and $B$.
+
+## Finite parameters close the construction
+
+At the final reward task take $a=u=f=16^{-L}$. Its precision is
+$$
+p=M_{\rm top}/K_{\rm prec}-4L-A\iota.
+$$
+Since $L=O(B)$ and $\iota=O(L+1)$, choosing the fixed linear coefficient
+of $M_{\rm top}=O(B)$ sufficiently large attains the main argument's
+$p\ge(\log_2N)/8+O(1)$ requirement.
+
+For a sufficiently large fixed $c$, every requested retention rate $r$ at
+descendant budget $M$ obeys
+$\log_2(1/r)\le4L+c(M_{\rm top}-M)$. A child at slack $d$ can extend
+these logarithms by only $O(d)$ and loses at least $d$ of budget.
+Stage resets are covered by $4L$, usage rates are minima of available rates,
+and inherited suffixes add at most one copy digit per stage. Thus all
+descendant rate exponents and identifier lengths remain $O(B)$.
+
+Choose the field only after fixing these constants and ranges. For a large
+fixed $C_P$, a prime $2^{C_PB}\le P\le2^{C_PB+1}$ exceeds all identifiers
+and the copy radix and satisfies $P2^{-k}\ge1$ at every requested rate
+$16^{-k}$. Bertrand's postulate supplies the prime; trial division finds
+one using $O(B)$ space. The fixed number of rank channels and the $O(B)$
+raw salt bits therefore give a uniform $O(B)$-bit environment
+(Sections 7 and 12.1). [oai26][oai26]
 
 Exact threshold fractions and switch polynomials can disappear from this
 exposition; their separation, root-Lipschitz bounds, caps, and witnesses
