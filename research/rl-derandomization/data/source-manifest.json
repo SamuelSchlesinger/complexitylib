@@ -1,0 +1,109 @@
+{
+  "validates": "Byte identities of the manuscript and section sources used in this exposition; not their mathematical correctness.",
+  "source_key": "oai26",
+  "revision": "adc7f1241b42e322a6451854ab7e4b4c146bf78a",
+  "title": "Exact Derandomization of Logarithmic Space: L = RL = BPL",
+  "author": "OpenAI",
+  "manuscript_date": "2026-09-23",
+  "reviewed_on": "2026-10-07",
+  "files": [
+    {
+      "path": "build/sections/arithmetic.tex",
+      "url": "https://raw.githubusercontent.com/openai/math/adc7f1241b42e322a6451854ab7e4b4c146bf78a/preprints/Exact-Derandomization-of-Logarithmic-Space-L-equals-RL-equals-BPL-September-23-2026/build/sections/arithmetic.tex",
+      "bytes": 42625,
+      "git_blob_sha1": "0863c812aad4a2d77af5ca2ef50817e4782ab21e",
+      "sha256": "92cac15f287b23ca042a908495a483cefb4b8741423032633e6141f027f62da2"
+    },
+    {
+      "path": "build/sections/atoms.tex",
+      "url": "https://raw.githubusercontent.com/openai/math/adc7f1241b42e322a6451854ab7e4b4c146bf78a/preprints/Exact-Derandomization-of-Logarithmic-Space-L-equals-RL-equals-BPL-September-23-2026/build/sections/atoms.tex",
+      "bytes": 37228,
+      "git_blob_sha1": "84963cf6e03346e44ef76502a5b12a72f559f37c",
+      "sha256": "876c1a475bf64ed5bb0be23246f0b97815b9b609349e072ddd1a2a824e182225"
+    },
+    {
+      "path": "build/sections/averaging.tex",
+      "url": "https://raw.githubusercontent.com/openai/math/adc7f1241b42e322a6451854ab7e4b4c146bf78a/preprints/Exact-Derandomization-of-Logarithmic-Space-L-equals-RL-equals-BPL-September-23-2026/build/sections/averaging.tex",
+      "bytes": 12384,
+      "git_blob_sha1": "1efc5490a22703abcc17754f8656c3431c7d516c",
+      "sha256": "c1b692a28e18494b13b8d290c3d898d2039bece925fe016c2d414df693905192"
+    },
+    {
+      "path": "build/sections/compiler.tex",
+      "url": "https://raw.githubusercontent.com/openai/math/adc7f1241b42e322a6451854ab7e4b4c146bf78a/preprints/Exact-Derandomization-of-Logarithmic-Space-L-equals-RL-equals-BPL-September-23-2026/build/sections/compiler.tex",
+      "bytes": 28018,
+      "git_blob_sha1": "f2c25d6a02319c793ba2eaddb45c250cd7399808",
+      "sha256": "c9edf110e23b522052f88b76e0f4dd586a153f566d32f0d4d2b704ab74537d95"
+    },
+    {
+      "path": "build/sections/compression.tex",
+      "url": "https://raw.githubusercontent.com/openai/math/adc7f1241b42e322a6451854ab7e4b4c146bf78a/preprints/Exact-Derandomization-of-Logarithmic-Space-L-equals-RL-equals-BPL-September-23-2026/build/sections/compression.tex",
+      "bytes": 34392,
+      "git_blob_sha1": "cdc19f9c81c654c83b7b732687085730a085f6b8",
+      "sha256": "00e122febd59ded504dbe210a373502f557931320511456e01d475998297b60a"
+    },
+    {
+      "path": "build/sections/conclusion.tex",
+      "url": "https://raw.githubusercontent.com/openai/math/adc7f1241b42e322a6451854ab7e4b4c146bf78a/preprints/Exact-Derandomization-of-Logarithmic-Space-L-equals-RL-equals-BPL-September-23-2026/build/sections/conclusion.tex",
+      "bytes": 21489,
+      "git_blob_sha1": "cba0ac20874b5892a6468df7c0c40f4c5ce92e87",
+      "sha256": "0cc7b15ed30555f743b25444f15800b8799271f83187f5e2f6165e72c07fd3be"
+    },
+    {
+      "path": "build/sections/environment.tex",
+      "url": "https://raw.githubusercontent.com/openai/math/adc7f1241b42e322a6451854ab7e4b4c146bf78a/preprints/Exact-Derandomization-of-Logarithmic-Space-L-equals-RL-equals-BPL-September-23-2026/build/sections/environment.tex",
+      "bytes": 4557,
+      "git_blob_sha1": "5cc5ab2b135c707f2cb89b132616e978ac64702c",
+      "sha256": "2900193d899dbff8f2ab43762e2afef0d346163adb84f66a3bad2b0d3d9823d1"
+    },
+    {
+      "path": "build/sections/estimation.tex",
+      "url": "https://raw.githubusercontent.com/openai/math/adc7f1241b42e322a6451854ab7e4b4c146bf78a/preprints/Exact-Derandomization-of-Logarithmic-Space-L-equals-RL-equals-BPL-September-23-2026/build/sections/estimation.tex",
+      "bytes": 35774,
+      "git_blob_sha1": "8b8be6dd4bcbdda03190b667bf822e540c47185d",
+      "sha256": "4a58ee4e9e758073c26885bd57e0ff3cd9e2837f31ea4985ace843df214911bc"
+    },
+    {
+      "path": "build/sections/fingerprints.tex",
+      "url": "https://raw.githubusercontent.com/openai/math/adc7f1241b42e322a6451854ab7e4b4c146bf78a/preprints/Exact-Derandomization-of-Logarithmic-Space-L-equals-RL-equals-BPL-September-23-2026/build/sections/fingerprints.tex",
+      "bytes": 42171,
+      "git_blob_sha1": "31aebe4f647edc2eee9e515a877d9baa6ad31e7e",
+      "sha256": "1aa2574ca999714865c66f128e1fa0bf30ac204d4f5479114198ea4938f90921"
+    },
+    {
+      "path": "build/sections/hierarchy.tex",
+      "url": "https://raw.githubusercontent.com/openai/math/adc7f1241b42e322a6451854ab7e4b4c146bf78a/preprints/Exact-Derandomization-of-Logarithmic-Space-L-equals-RL-equals-BPL-September-23-2026/build/sections/hierarchy.tex",
+      "bytes": 28989,
+      "git_blob_sha1": "af1273885a523a71d630e8c201f60aaadc33184c",
+      "sha256": "bfd4e0124b594e3c21ec205706bf8d483bf2a05c7a1a3a0c5a9c89aef92ed6b7"
+    },
+    {
+      "path": "build/sections/implementation.tex",
+      "url": "https://raw.githubusercontent.com/openai/math/adc7f1241b42e322a6451854ab7e4b4c146bf78a/preprints/Exact-Derandomization-of-Logarithmic-Space-L-equals-RL-equals-BPL-September-23-2026/build/sections/implementation.tex",
+      "bytes": 75723,
+      "git_blob_sha1": "c05d7dd938f28eed705d14ae7d9dea1823031e1c",
+      "sha256": "3ef57af6017bf2442ee508a929d7145e1d3f7455b6eb740f93d212af6a94aaca"
+    },
+    {
+      "path": "build/sections/introduction.tex",
+      "url": "https://raw.githubusercontent.com/openai/math/adc7f1241b42e322a6451854ab7e4b4c146bf78a/preprints/Exact-Derandomization-of-Logarithmic-Space-L-equals-RL-equals-BPL-September-23-2026/build/sections/introduction.tex",
+      "bytes": 19782,
+      "git_blob_sha1": "46ca8910d9f4ea7e80485281b8be31e3cfea81b3",
+      "sha256": "21e5c9742800d38df65575b5577627046dd59d2f220e8987b7fca1d2cfb7a6bc"
+    },
+    {
+      "path": "build/sections/model.tex",
+      "url": "https://raw.githubusercontent.com/openai/math/adc7f1241b42e322a6451854ab7e4b4c146bf78a/preprints/Exact-Derandomization-of-Logarithmic-Space-L-equals-RL-equals-BPL-September-23-2026/build/sections/model.tex",
+      "bytes": 7656,
+      "git_blob_sha1": "1b74a91334ca9690802c0287bca110afda9e1937",
+      "sha256": "dff70ae5f6922daf34dbb1f11ba57a11c0d6a18e7281c8288a154b429855e9d9"
+    },
+    {
+      "path": "paper.pdf",
+      "url": "https://raw.githubusercontent.com/openai/math/adc7f1241b42e322a6451854ab7e4b4c146bf78a/preprints/Exact-Derandomization-of-Logarithmic-Space-L-equals-RL-equals-BPL-September-23-2026/paper.pdf",
+      "bytes": 1000094,
+      "git_blob_sha1": "4d6bc342e67e238b9e76e97b5d0e6e33869d2da6",
+      "sha256": "15030fab23d31a4d91bd944100a547c3e9eff6da8330a4fb94ea999f071fadfc"
+    }
+  ]
+}
