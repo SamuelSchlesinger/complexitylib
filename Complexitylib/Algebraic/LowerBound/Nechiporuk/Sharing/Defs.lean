@@ -21,8 +21,8 @@ statements (`Complexitylib.Algebraic.LowerBound.Nechiporuk.Sharing`) can refer t
   the per-block measures `SharedProgram.activeShared` and `SharedProgram.activeSharedLeaves`, which
   advance a block through each shared gate with `SharedProgram.stepBlock`;
 - the circuit-side sharing measures `sharedFanOut`, `activeSharedGateCount`,
-  `activeSharedFanOut`, and `gateBlockSpan`, where a gate is *active* on a block `Y` when its
-  syntactic input cone contains a coordinate of `Y` (`gateActive`).
+  `activeSharedFanOut`, `gateBlockSpan`, and `highSpanSharedFanOut`, where a gate is *active* on a
+  block `Y` when its syntactic input cone contains a coordinate of `Y` (`gateActive`).
 -/
 
 @[expose] public section
@@ -225,6 +225,13 @@ def activeSharedFanOut (c : Circuit σ n m) (Y : Finset (Fin n)) : Nat :=
 /-- The number of blocks in `Y : Fin B → Finset (Fin n)` on which gate `g` of `p` is active. -/
 def gateBlockSpan {B : Nat} (Y : Fin B → Finset (Fin n)) (p : Program σ n t) (g : Fin t) : Nat :=
   (Finset.univ.filter fun i : Fin B => gateActive (Y i) p g = true).card
+
+/-- The total fan-out of the shared gates of `c` that are active on strictly more than `d` of the
+blocks `Y`. -/
+def highSpanSharedFanOut {B : Nat} (c : Circuit σ n m) (Y : Fin B → Finset (Fin n))
+    (d : Nat) : Nat :=
+  ∑ g ∈ Finset.univ.filter (fun g => 2 ≤ KW.gateFanOut c g ∧ d < gateBlockSpan Y c.program g),
+    KW.gateFanOut c g
 
 end BinaryCircuits
 

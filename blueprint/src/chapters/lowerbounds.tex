@@ -310,10 +310,20 @@ chapter.
 \begin{theorem}[Nechiporuk for circuits with local shared gates]
   \label{thm:lowerbounds-algebraic-nechiporuk-blockspan}
   \lean{Algebraic.Nechiporuk.exists_sharedProgram_of_circuit,
+    Algebraic.Nechiporuk.wireActive_eq_true_iff,
+    Algebraic.Nechiporuk.gateActive_eq_true_iff,
+    Algebraic.Nechiporuk.gateBlockSpan_le_card_wireSupport,
+    Algebraic.Nechiporuk.sharedFanOut_le_two_mul_size_add_one,
+    Algebraic.Nechiporuk.highSpanSharedFanOut,
+    Algebraic.Nechiporuk.sum_activeSharedFanOut_le_add_highSpanSharedFanOut,
+    Algebraic.Nechiporuk.size_lower_bound_highSpanSharedFanOut,
     Algebraic.Nechiporuk.eventually_sq_le_size_active,
     Algebraic.Nechiporuk.eventually_mul_le_size_of_rectangleFree_active,
     Algebraic.Nechiporuk.isLittleO_size_of_rectangleFree_active,
-    Algebraic.Nechiporuk.eventually_sq_le_size_of_gateBlockSpan_le}
+    Algebraic.Nechiporuk.eventually_sq_le_size_of_gateBlockSpan_le,
+    Algebraic.Nechiporuk.eventually_sq_le_size_of_highSpanSharedFanOut_le,
+    Algebraic.Nechiporuk.eventually_sq_le_span_mul_size_of_gateBlockSpan_le,
+    Algebraic.Nechiporuk.eventually_sq_le_size_of_card_wireSupport_le}
   \leanok
   \uses{thm:lowerbounds-algebraic-nechiporuk}
   Under the hypotheses of Theorem~\ref{thm:lowerbounds-algebraic-nechiporuk},
@@ -323,14 +333,16 @@ chapter.
   If the shared gates whose input cone meets a block have total fan-out
   $a_i$ on block $i$, and $20\,b\sum_i a_i \le n^2$, then for all large $n$,
   $n^2 \le 64(c+3)\log_2 n\,(2\,\mathrm{size} + 1)$, and under this budget the
-  size is superlinear. In particular, suppose every shared gate has a
-  syntactic input cone meeting at most $\mathrm{span}(n)$ blocks, so that it
-  depends on fewer than $(\mathrm{span}(n) + 1)\,b = O(\mathrm{span}(n)\log n)$
-  inputs, and that the total fan-out $s(n)$ of the shared gates satisfies
-  $40(c+3)\lfloor\log_2 n\rfloor\cdot\mathrm{span}(n)\cdot s(n) \le n^2$. Then
-  the same bound holds. For $\mathrm{span}(n) = O(1)$ this allows superlinear
-  shared fan-out, up to $\Theta(n^2/\log n)$, but only from shared gates with
-  logarithmic-size input cones.
+  size is superlinear. More generally, every fan-in-two circuit has total
+  shared fan-out at most $2\,\mathrm{size} + 1$, so the fan-out of shared gates
+  active on at most $d(n)$ blocks can be absorbed into the right-hand side: if
+  the shared gates active on more than $d(n)$ blocks have total fan-out at most
+  $s(n)$ with $20\,s(n) \le n$, then
+  $n^2 \le 16(5 d(n) + 4)(c+3)\log_2 n\,(2\,\mathrm{size} + 1)$ for all large
+  $n$, with no hypothesis on total shared fan-out. Since a gate's block-span is
+  at most the cardinality of its syntactic input support, the same bound holds
+  with $s(n) = 0$ whenever every shared gate is active on at most $d(n)$ blocks
+  or depends on at most $d(n)$ inputs.
 \end{theorem}
 \begin{proof}
   \leanok
@@ -340,8 +352,10 @@ chapter.
   inputs are fixed, so only shared gates whose cone meets the block enter the
   subfunction count of Theorem~\ref{thm:lowerbounds-algebraic-nechiporuk}.
   Summed over the blocks, each shared gate is charged its fan-out times the
-  number of blocks its cone meets, which is at most
-  $\mathrm{span}(n)\,s(n)$ in total.
+  number of blocks its cone meets. Splitting at span threshold $d(n)$ bounds
+  the sum by $d(n)(2\,\mathrm{size} + 1) + (n/b)\,s(n)$, and pairwise
+  disjointness of the blocks injects the active blocks of a gate into its
+  syntactic input support.
 \end{proof}
 
 \begin{corollary}[Nechiporuk for circuits with sublinear shared fan-out]
@@ -701,27 +715,42 @@ chapter.
     Algebraic.MCSP.mcsp_formula_leaves_lower_bound,
     Algebraic.MCSP.mcsp_sharedGateCount_cost_lower_bound,
     Algebraic.MCSP.mcsp_card_image_restrictTo_le_subfunctions_leftBlock,
-    Algebraic.MCSP.mcsp_binaryFormula_leavesIn_leftHalf_lower_bound}
+    Algebraic.MCSP.mcsp_binaryFormula_leavesIn_leftHalf_lower_bound,
+    Algebraic.MCSP.costComplexity_pairTruthTable_self,
+    Algebraic.MCSP.pairTruthTable_self_mem_exactCostSet,
+    Algebraic.MCSP.iterPairTruthTable_mem_exactCostSet,
+    Algebraic.MCSP.mcsp_card_image_restrictTo_le_subfunctions_rightBlock,
+    Algebraic.MCSP.card_subfunctions_mcspCostScalar_deMorgan_tableTranslate,
+    Algebraic.MCSP.mcsp_binaryFormula_leaves_lower_bound,
+    Algebraic.MCSP.mcsp_binary_circuit_active_sharing_lower_bound,
+    Algebraic.MCSP.mcsp_binary_circuit_sharing_lower_bound}
   \leanok
   \uses{thm:lowerbounds-algebraic-mcsp-subcube}
   Let $E$ be the set of $2^n$-bit truth tables of De Morgan AND/OR
-  complexity exactly $s \ge 1$, and suppose $E$ is nonempty. Write
-  $N = 2^{n+1}$. For any circuit computing $\cc{MCSP}_{n+1,s}$, every wire cut
-  separating the two halves of the truth table carries at least $\log_2 |E|$
-  bits. Every De Morgan formula computing it has at least $N$ leaves. A De
-  Morgan circuit with at most $k$ shared gates satisfies
-  $N \le (k+1)(\mathrm{cost} + k + 1)$. Every binary formula $F$ satisfies
-  $|E| \le 2 \cdot 16^{\ell}$, where $\ell$ is the number of leaves of $F$ in
-  the left half. All of these bounds are at most linear in $N$.
+  complexity exactly $s \ge 1$, and suppose $E$ is nonempty. Duplicating a
+  table in $E$ across both halves of the cube preserves its exact complexity,
+  so iterating $k$ times embeds $E$ injectively into the exact-complexity-$s$
+  tables on $n + k$ bits. Write $N = 2^{n+1}$. For any circuit computing
+  $\cc{MCSP}_{n+1,s}$, every wire cut separating the two halves of the truth
+  table carries at least $\log_2 |E|$ bits. Every De Morgan formula computing
+  it has at least $N$ leaves. A De Morgan circuit with at most $k$ shared
+  gates satisfies $N \le (k+1)(\mathrm{cost} + k + 1)$. Every binary formula
+  $F$ satisfies $|E| \le 2 \cdot 16^{\ell}$, where $\ell$ is the number of
+  leaves of $F$ in either half, and $|E|^2 \le 4 \cdot 16^{L}$, where $L$ is
+  the total number of leaves; the analogous bound holds for full-binary-basis
+  circuits with at most $k$ shared gates of total shared fan-out at most $f$,
+  with $L$ replaced by $\mathrm{size} + k + 1 + 2f$ and an extra factor
+  $4^k$. All of these bounds are at most linear in $N$.
 \end{theorem}
 \begin{proof}
   \leanok
   \uses{thm:lowerbounds-algebraic-khrapchenko-shared,
-    thm:lowerbounds-algebraic-nechiporuk}
+    thm:lowerbounds-algebraic-nechiporuk,
+    thm:lowerbounds-algebraic-nechiporuk-blockspan}
   The diagonal tables $(T, T)$ for $T \in E$ are yes instances whose one-bit
   flips are all no instances, and mixing two diagonals across the halves
   gives a no instance. Apply the single-cut, Khrapchenko, and Nechiporuk
-  arguments.
+  arguments on both halves of the truth table.
 \end{proof}
 
 \begin{theorem}[Polynomial circuit size hierarchy]

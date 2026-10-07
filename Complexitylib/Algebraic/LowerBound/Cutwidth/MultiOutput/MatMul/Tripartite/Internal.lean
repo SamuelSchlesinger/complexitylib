@@ -24,6 +24,12 @@ public import Complexitylib.Algebraic.LowerBound.Cutwidth.MultiOutput.MatMul.Tri
   two. Along a ranking of the wires, the heavy count of the prefixes thus climbs from `0` to
   `3 n` in steps of at most two, and the first prefix with at least `⌈3 n/2⌉` heavy vertices
   ends at a terminal and has at most `⌈3 n/2⌉ + 1`.
+* **Exploratory probes** (`twoSubsetProbeIJ_add_eq`, `card_mixedPairs_le_twoSubsetProbeIJ`,
+  `sum_light_heavy_le_probeIJ`). Splitting each minority into its two summands
+  (`minority_add_eq`) and double counting the `A`-terminals by rows and by columns
+  (`sum_card_colSetIn`, `sum_card_complColSetIn`) gives the bookkeeping identity
+  `twoSubsetProbeIJ + (shortfalls) = n²`. These are combinatorial facts only; nothing here
+  relates the probes to the signals crossing a split.
 -/
 
 @[expose] public section
@@ -395,5 +401,360 @@ theorem exists_threshold (hn : 0 < n) (tA tB tC : Fin n × Fin n → Wire N s)
   omega
 
 end Threshold
+
+/-! ## Exploratory probes mixing the `I` and `J` charges -/
+
+section TwoSubsetProbes
+
+/-- At a vertex of degree `2 n` whose terminals split into two groups of `n`, with `x` and `y`
+placed, the minority is `min x (n - y) + min (n - x) y`. -/
+theorem minority_add_eq {x y : Nat} (hx : x ≤ n) (hy : y ≤ n) :
+    minority n (x + y) = min x (n - y) + min (n - x) y := by
+  unfold minority
+  omega
+
+/-- The minority, the excess `d - n` and the deficit `n - d` of `d ≤ 2 n` add up to `n`. -/
+theorem minority_add_excess_add_deficit {d : Nat} (hd : d ≤ 2 * n) :
+    minority n d + (d - n) + (n - d) = n := by
+  unfold minority
+  omega
+
+theorem colSetIn_eq_inter (a : Finset (Fin n × Fin n)) (R : Finset (Fin n)) (j : Fin n) :
+    colSetIn a R j = colSet a j ∩ R := by
+  ext i
+  simp [colSetIn]
+
+theorem complColSetIn_eq_inter_compl (a : Finset (Fin n × Fin n)) (R : Finset (Fin n))
+    (j : Fin n) :
+    complColSetIn a R j = (colSet a j)ᶜ ∩ R := by
+  ext i
+  simp [complColSetIn, and_comm]
+
+theorem card_inter_add_card_inter_compl (s t : Finset (Fin n)) :
+    (s ∩ t).card + (s ∩ tᶜ).card = s.card := by
+  have h : s ∩ t ∪ s ∩ tᶜ = s := by
+    ext x
+    simp only [mem_union, mem_inter, mem_compl]
+    tauto
+  have hdisj : Disjoint (s ∩ t) (s ∩ tᶜ) := by
+    rw [Finset.disjoint_left]
+    intro x hx₁ hx₂
+    exact (mem_compl.mp (mem_inter.mp hx₂).2) (mem_inter.mp hx₁).2
+  rw [← card_union_of_disjoint hdisj, h]
+
+theorem card_colSetIn_add_card_complColSetIn (a : Finset (Fin n × Fin n)) (R : Finset (Fin n))
+    (j : Fin n) :
+    (colSetIn a R j).card + (complColSetIn a R j).card = R.card := by
+  rw [colSetIn_eq_inter, complColSetIn_eq_inter_compl, Finset.inter_comm (colSet a j) R,
+    Finset.inter_comm (colSet a j)ᶜ R, card_inter_add_card_inter_compl]
+
+theorem card_colSetIn_add_compl (a : Finset (Fin n × Fin n)) (R : Finset (Fin n)) (j : Fin n) :
+    (colSetIn a R j).card + (colSetIn a Rᶜ j).card = (colSet a j).card := by
+  rw [colSetIn_eq_inter, colSetIn_eq_inter, card_inter_add_card_inter_compl]
+
+theorem card_complColSetIn_add_compl (a : Finset (Fin n × Fin n)) (R : Finset (Fin n))
+    (j : Fin n) :
+    (complColSetIn a R j).card + (complColSetIn a Rᶜ j).card = n - (colSet a j).card := by
+  rw [complColSetIn_eq_inter_compl, complColSetIn_eq_inter_compl,
+    card_inter_add_card_inter_compl, Finset.card_compl, Fintype.card_fin]
+
+theorem sum_card_colSetIn (a : Finset (Fin n × Fin n)) (R : Finset (Fin n)) :
+    ∑ j, (colSetIn a R j).card = ∑ i ∈ R, (rowSet a i).card := by
+  have hcol : ∀ j, (colSetIn a R j).card = ∑ i ∈ R, if (i, j) ∈ a then 1 else 0 := by
+    intro j
+    rw [colSetIn_eq_inter, Finset.inter_comm, ← Finset.filter_mem_eq_inter, Finset.card_filter]
+    refine Finset.sum_congr rfl fun i _ => ?_
+    simp [colSet]
+  simp_rw [hcol]
+  rw [Finset.sum_comm]
+  refine Finset.sum_congr rfl fun i _ => ?_
+  rw [card_eq_sum_ite]
+  refine Finset.sum_congr rfl fun j _ => ?_
+  simp [rowSet]
+
+theorem sum_card_complColSetIn (a : Finset (Fin n × Fin n)) (R : Finset (Fin n)) :
+    ∑ j, (complColSetIn a R j).card = ∑ i ∈ R, (n - (rowSet a i).card) := by
+  have hcol : ∀ j, (complColSetIn a R j).card = ∑ i ∈ R, if (i, j) ∉ a then 1 else 0 := by
+    intro j
+    rw [complColSetIn, Finset.card_filter]
+    refine Finset.sum_congr rfl fun i _ => ?_
+    simp [colSet]
+  simp_rw [hcol]
+  rw [Finset.sum_comm]
+  refine Finset.sum_congr rfl fun i _ => ?_
+  have hcompl : (rowSet a i)ᶜ.card = n - (rowSet a i).card := by
+    rw [Finset.card_compl, Fintype.card_fin]
+  rw [← hcompl, card_eq_sum_ite]
+  refine Finset.sum_congr rfl fun j _ => ?_
+  simp [rowSet]
+
+theorem probeIJ_empty (a b c : Finset (Fin n × Fin n)) :
+    probeIJ a b c ∅ = chargeJ a b := by
+  unfold probeIJ chargeJ
+  rw [Finset.sum_empty, zero_add, Finset.compl_empty]
+  refine Finset.sum_congr rfl fun j _ => ?_
+  have h1 : colSetIn a Finset.univ j = colSet a j := by
+    ext i
+    simp [colSetIn]
+  have h2 : (complColSetIn a Finset.univ j).card = n - (colSet a j).card := by
+    rw [complColSetIn_eq_inter_compl, Finset.inter_univ, Finset.card_compl, Fintype.card_fin]
+  have ha : (colSet a j).card ≤ n := by simpa using card_le_univ (colSet a j)
+  have hb : (rowSet b j).card ≤ n := by simpa using card_le_univ (rowSet b j)
+  rw [h1, h2, degJ, minority_add_eq ha hb]
+
+theorem probeIJ_univ (a b c : Finset (Fin n × Fin n)) :
+    probeIJ a b c Finset.univ = chargeI a c := by
+  unfold probeIJ chargeI
+  rw [Finset.compl_univ]
+  have h0 : ∀ j, min (colSetIn a ∅ j).card (n - (rowSet b j).card) +
+      min (complColSetIn a ∅ j).card (rowSet b j).card = 0 := by
+    intro j
+    simp [colSetIn, complColSetIn]
+  simp [h0]
+
+theorem twoSubsetProbeIJ_self (a b c : Finset (Fin n × Fin n)) (I₀ : Finset (Fin n)) :
+    twoSubsetProbeIJ a b c I₀ I₀ = probeIJ a b c I₀ := by
+  unfold twoSubsetProbeIJ probeIJ
+  rw [← Finset.sum_add_distrib]
+  congr 1
+  refine Finset.sum_congr rfl fun i _ => ?_
+  have ha : (rowSet a i).card ≤ n := by simpa using card_le_univ (rowSet a i)
+  have hc : (rowSet c i).card ≤ n := by simpa using card_le_univ (rowSet c i)
+  rw [degI, minority_add_eq ha hc]
+
+/-- The two `J`-summands of `twoSubsetProbeIJ` at `j` fall short of the restricted counts `x` and
+`x'` of `A`-terminals by `x + y - n` and `x' - y`. -/
+theorem min_colSetIn_add_min_complColSetIn_add_eq (a b : Finset (Fin n × Fin n))
+    (I₀ I₁ : Finset (Fin n)) (j : Fin n) :
+    min (colSetIn a I₀ᶜ j).card (n - (rowSet b j).card) +
+      min (complColSetIn a I₁ᶜ j).card (rowSet b j).card +
+      ((colSetIn a I₀ᶜ j).card + (rowSet b j).card - n) +
+      ((complColSetIn a I₁ᶜ j).card - (rowSet b j).card) =
+      (colSetIn a I₀ᶜ j).card + (complColSetIn a I₁ᶜ j).card := by
+  have hb : (rowSet b j).card ≤ n := by simpa using card_le_univ (rowSet b j)
+  omega
+
+/-- The single-subset case of `min_colSetIn_add_min_complColSetIn_add_eq`: the two `J`-summands
+restricted to the rows of `R` and their shortfalls add up to `R.card`. -/
+theorem min_colSetIn_add_min_complColSetIn_single_add_eq (a b : Finset (Fin n × Fin n))
+    (R : Finset (Fin n)) (j : Fin n) :
+    min (colSetIn a R j).card (n - (rowSet b j).card) +
+      min (complColSetIn a R j).card (rowSet b j).card +
+      (((colSetIn a R j).card + (rowSet b j).card - n) +
+        ((complColSetIn a R j).card - (rowSet b j).card)) = R.card := by
+  have h := min_colSetIn_add_min_complColSetIn_add_eq a b Rᶜ Rᶜ j
+  rw [compl_compl, card_colSetIn_add_card_complColSetIn] at h
+  omega
+
+theorem minority_degJ_le_min_add_min_add_sub (a b : Finset (Fin n × Fin n))
+    (R : Finset (Fin n)) (j : Fin n) :
+    minority n (degJ a b j) ≤
+      min (colSetIn a R j).card (n - (rowSet b j).card) +
+        min (complColSetIn a R j).card (rowSet b j).card + (n - R.card) := by
+  have hR : R.card ≤ n := by simpa using card_le_univ R
+  have ha : (colSet a j).card ≤ n := by simpa using card_le_univ (colSet a j)
+  have hb : (rowSet b j).card ≤ n := by simpa using card_le_univ (rowSet b j)
+  have hm := minority_add_eq (n := n) ha hb
+  have h1 := card_colSetIn_add_compl a R j
+  have h2 := card_complColSetIn_add_compl a R j
+  have h3 := card_colSetIn_add_card_complColSetIn a Rᶜ j
+  rw [Finset.card_compl, Fintype.card_fin] at h3
+  rw [degJ, hm]
+  omega
+
+theorem twoSubsetProbeIJ_add_eq (a b c : Finset (Fin n × Fin n)) (I₀ I₁ : Finset (Fin n)) :
+    twoSubsetProbeIJ a b c I₀ I₁ +
+      ∑ i ∈ I₀, excessI a c i + ∑ i ∈ I₁, deficitI a c i +
+      ∑ j, (((colSetIn a I₀ᶜ j).card + (rowSet b j).card - n) +
+        ((complColSetIn a I₁ᶜ j).card - (rowSet b j).card)) = n * n := by
+  unfold twoSubsetProbeIJ
+  have hI0 : ∀ i, min (rowSet a i).card (n - (rowSet c i).card) + excessI a c i =
+      (rowSet a i).card := by
+    intro i
+    have ha : (rowSet a i).card ≤ n := by simpa using card_le_univ (rowSet a i)
+    have hc : (rowSet c i).card ≤ n := by simpa using card_le_univ (rowSet c i)
+    unfold excessI degI
+    omega
+  have hI1 : ∀ i, min (n - (rowSet a i).card) (rowSet c i).card + deficitI a c i =
+      n - (rowSet a i).card := by
+    intro i
+    have ha : (rowSet a i).card ≤ n := by simpa using card_le_univ (rowSet a i)
+    have hc : (rowSet c i).card ≤ n := by simpa using card_le_univ (rowSet c i)
+    unfold deficitI degI
+    omega
+  have sI0 : ∑ i ∈ I₀, min (rowSet a i).card (n - (rowSet c i).card) + ∑ i ∈ I₀, excessI a c i =
+      ∑ i ∈ I₀, (rowSet a i).card := by
+    rw [← Finset.sum_add_distrib]
+    exact Finset.sum_congr rfl fun i _ => hI0 i
+  have sI1 : ∑ i ∈ I₁, min (n - (rowSet a i).card) (rowSet c i).card + ∑ i ∈ I₁, deficitI a c i =
+      ∑ i ∈ I₁, (n - (rowSet a i).card) := by
+    rw [← Finset.sum_add_distrib]
+    exact Finset.sum_congr rfl fun i _ => hI1 i
+  have sJ : ∑ j, (min (colSetIn a I₀ᶜ j).card (n - (rowSet b j).card) +
+        min (complColSetIn a I₁ᶜ j).card (rowSet b j).card) +
+      ∑ j, (((colSetIn a I₀ᶜ j).card + (rowSet b j).card - n) +
+        ((complColSetIn a I₁ᶜ j).card - (rowSet b j).card)) =
+      ∑ i ∈ I₀ᶜ, (rowSet a i).card + ∑ i ∈ I₁ᶜ, (n - (rowSet a i).card) := by
+    rw [← Finset.sum_add_distrib, ← sum_card_colSetIn a I₀ᶜ, ← sum_card_complColSetIn a I₁ᶜ,
+      ← Finset.sum_add_distrib]
+    refine Finset.sum_congr rfl fun j _ => ?_
+    have h := min_colSetIn_add_min_complColSetIn_add_eq a b I₀ I₁ j
+    omega
+  have tot0 : ∑ i ∈ I₀, (rowSet a i).card + ∑ i ∈ I₀ᶜ, (rowSet a i).card =
+      ∑ i, (rowSet a i).card :=
+    Finset.sum_add_sum_compl I₀ _
+  have tot1 : ∑ i ∈ I₁, (n - (rowSet a i).card) + ∑ i ∈ I₁ᶜ, (n - (rowSet a i).card) =
+      ∑ i, (n - (rowSet a i).card) :=
+    Finset.sum_add_sum_compl I₁ _
+  have tot : ∑ i, (rowSet a i).card + ∑ i, (n - (rowSet a i).card) = n * n := by
+    rw [← Finset.sum_add_distrib]
+    have h : ∀ i : Fin n, (rowSet a i).card + (n - (rowSet a i).card) = n := fun i => by
+      have ha : (rowSet a i).card ≤ n := by simpa using card_le_univ (rowSet a i)
+      omega
+    simp [h, Finset.sum_const]
+  omega
+
+theorem probeIJ_add_eq (a b c : Finset (Fin n × Fin n)) (I₀ : Finset (Fin n)) :
+    probeIJ a b c I₀ +
+      ∑ i ∈ I₀, (excessI a c i + deficitI a c i) +
+      ∑ j, (((colSetIn a I₀ᶜ j).card + (rowSet b j).card - n) +
+        ((complColSetIn a I₀ᶜ j).card - (rowSet b j).card)) = n * n := by
+  rw [← twoSubsetProbeIJ_self, Finset.sum_add_distrib]
+  have h := twoSubsetProbeIJ_add_eq a b c I₀ I₀
+  omega
+
+theorem twoSubsetProbeIJ_compl_heavyI_add_eq (a b c : Finset (Fin n × Fin n)) :
+    twoSubsetProbeIJ a b c (heavyI a c)ᶜ (heavyI a c) +
+      ∑ j, (((colSetIn a (heavyI a c) j).card + (rowSet b j).card - n) +
+        ((complColSetIn a (heavyI a c)ᶜ j).card - (rowSet b j).card)) = n * n := by
+  have h := twoSubsetProbeIJ_add_eq a b c (heavyI a c)ᶜ (heavyI a c)
+  rw [compl_compl] at h
+  have h0 : ∑ i ∈ (heavyI a c)ᶜ, excessI a c i = 0 := by
+    refine Finset.sum_eq_zero fun i hi => ?_
+    rw [Finset.mem_compl, mem_heavyI] at hi
+    unfold excessI degI
+    omega
+  have h1 : ∑ i ∈ heavyI a c, deficitI a c i = 0 := by
+    refine Finset.sum_eq_zero fun i hi => ?_
+    rw [mem_heavyI] at hi
+    unfold deficitI degI
+    omega
+  rw [h0, h1] at h
+  omega
+
+theorem card_mixedPairs_le_twoSubsetProbeIJ (a b c : Finset (Fin n × Fin n)) :
+    (mixedPairs (heavyI a c) (heavyJ a b)).card ≤
+      twoSubsetProbeIJ a b c (heavyI a c)ᶜ (heavyI a c) := by
+  unfold twoSubsetProbeIJ
+  have hI0 : (∑ i, if i ∈ heavyI a c then 0 else (rowSet a i ∩ heavyJ a b).card) ≤
+      ∑ i ∈ (heavyI a c)ᶜ, min (rowSet a i).card (n - (rowSet c i).card) := by
+    rw [← Finset.sum_filter_add_sum_filter_not univ (· ∈ heavyI a c)]
+    have hzero : ∑ i ∈ univ.filter (· ∈ heavyI a c),
+        (if i ∈ heavyI a c then 0 else (rowSet a i ∩ heavyJ a b).card) = 0 :=
+      Finset.sum_eq_zero fun i hi => by
+        simp only [Finset.mem_filter, Finset.mem_univ, true_and] at hi
+        simp [hi]
+    rw [hzero, zero_add]
+    have hflt : univ.filter (fun i => ¬i ∈ heavyI a c) = (heavyI a c)ᶜ := by
+      ext i
+      simp
+    rw [hflt]
+    refine Finset.sum_le_sum fun i hi => ?_
+    rw [Finset.mem_compl] at hi
+    rw [ite_eq_right hi]
+    rw [mem_heavyI] at hi
+    have hsub : (rowSet a i ∩ heavyJ a b).card ≤ (rowSet a i).card :=
+      card_le_card inter_subset_left
+    omega
+  have hI1 : (∑ i, if i ∈ heavyI a c then ((rowSet a i)ᶜ ∩ (heavyJ a b)ᶜ).card else 0) ≤
+      ∑ i ∈ heavyI a c, min (n - (rowSet a i).card) (rowSet c i).card := by
+    rw [← Finset.sum_filter_add_sum_filter_not univ (· ∈ heavyI a c)]
+    have hzero : ∑ i ∈ univ.filter (fun i => ¬i ∈ heavyI a c),
+        (if i ∈ heavyI a c then ((rowSet a i)ᶜ ∩ (heavyJ a b)ᶜ).card else 0) = 0 :=
+      Finset.sum_eq_zero fun i hi => by
+        simp only [Finset.mem_filter, Finset.mem_univ, true_and] at hi
+        simp [hi]
+    rw [hzero, add_zero, Finset.filter_mem_eq_inter, Finset.univ_inter]
+    refine Finset.sum_le_sum fun i hi => ?_
+    rw [ite_eq_left hi]
+    rw [mem_heavyI] at hi
+    have hsub : ((rowSet a i)ᶜ ∩ (heavyJ a b)ᶜ).card ≤ (rowSet a i)ᶜ.card :=
+      card_le_card inter_subset_left
+    rw [Finset.card_compl, Fintype.card_fin] at hsub
+    omega
+  have hJ : (∑ j, if j ∈ heavyJ a b then ((colSet a j)ᶜ ∩ (heavyI a c)ᶜ).card
+        else (colSet a j ∩ heavyI a c).card) ≤
+      ∑ j, (min (colSetIn a (heavyI a c)ᶜᶜ j).card (n - (rowSet b j).card) +
+        min (complColSetIn a (heavyI a c)ᶜ j).card (rowSet b j).card) := by
+    refine Finset.sum_le_sum fun j _ => ?_
+    rw [compl_compl, colSetIn_eq_inter, complColSetIn_eq_inter_compl]
+    have ha : (colSet a j).card ≤ n := by simpa using card_le_univ (colSet a j)
+    have hb : (rowSet b j).card ≤ n := by simpa using card_le_univ (rowSet b j)
+    have hsub1 : (colSet a j ∩ heavyI a c).card ≤ (colSet a j).card :=
+      card_le_card inter_subset_left
+    have hsub2 : ((colSet a j)ᶜ ∩ (heavyI a c)ᶜ).card ≤ (colSet a j)ᶜ.card :=
+      card_le_card inter_subset_left
+    rw [Finset.card_compl, Fintype.card_fin] at hsub2
+    split_ifs with hj
+    · rw [mem_heavyJ] at hj
+      omega
+    · rw [mem_heavyJ] at hj
+      omega
+  have hI_sum : (∑ i, if i ∈ heavyI a c then ((rowSet a i)ᶜ ∩ (heavyJ a b)ᶜ).card
+        else (rowSet a i ∩ heavyJ a b).card) =
+      (∑ i, if i ∈ heavyI a c then 0 else (rowSet a i ∩ heavyJ a b).card) +
+        (∑ i, if i ∈ heavyI a c then ((rowSet a i)ᶜ ∩ (heavyJ a b)ᶜ).card else 0) := by
+    rw [← Finset.sum_add_distrib]
+    refine Finset.sum_congr rfl fun i _ => ?_
+    split_ifs <;> omega
+  have eA := sum_ite_add_sum_ite_eq_card_mixedPairs a (heavyI a c) (heavyJ a b)
+  omega
+
+theorem sum_light_heavy_le_probeIJ (a b c : Finset (Fin n × Fin n)) :
+    (∑ i, if i ∈ heavyI a c then 0 else (rowSet a i).card + (rowSet c i).card) +
+      (∑ j, if j ∈ heavyJ a b then ((colSet a j)ᶜ ∩ heavyI a c).card
+        else (colSet a j ∩ heavyI a c).card) ≤
+      probeIJ a b c (heavyI a c)ᶜ := by
+  unfold probeIJ
+  rw [compl_compl]
+  have hI : (∑ i, if i ∈ heavyI a c then 0 else (rowSet a i).card + (rowSet c i).card) ≤
+      ∑ i ∈ (heavyI a c)ᶜ, minority n (degI a c i) := by
+    rw [← Finset.sum_filter_add_sum_filter_not univ (· ∈ heavyI a c)]
+    have hzero : ∑ i ∈ univ.filter (· ∈ heavyI a c),
+        (if i ∈ heavyI a c then 0 else (rowSet a i).card + (rowSet c i).card) = 0 :=
+      Finset.sum_eq_zero fun i hi => by
+        simp only [Finset.mem_filter, Finset.mem_univ, true_and] at hi
+        simp [hi]
+    rw [hzero, zero_add]
+    have hflt : univ.filter (fun i => ¬i ∈ heavyI a c) = (heavyI a c)ᶜ := by
+      ext i
+      simp
+    rw [hflt]
+    refine Finset.sum_le_sum fun i hi => ?_
+    rw [Finset.mem_compl] at hi
+    rw [ite_eq_right hi]
+    rw [mem_heavyI] at hi
+    rw [minority_of_lt (by unfold degI; omega), degI]
+  have hJ : (∑ j, if j ∈ heavyJ a b then ((colSet a j)ᶜ ∩ heavyI a c).card
+        else (colSet a j ∩ heavyI a c).card) ≤
+      ∑ j, (min (colSetIn a (heavyI a c) j).card (n - (rowSet b j).card) +
+        min (complColSetIn a (heavyI a c) j).card (rowSet b j).card) := by
+    refine Finset.sum_le_sum fun j _ => ?_
+    rw [colSetIn_eq_inter, complColSetIn_eq_inter_compl]
+    have ha : (colSet a j).card ≤ n := by simpa using card_le_univ (colSet a j)
+    have hb : (rowSet b j).card ≤ n := by simpa using card_le_univ (rowSet b j)
+    have hsub1 : (colSet a j ∩ heavyI a c).card ≤ (colSet a j).card :=
+      card_le_card inter_subset_left
+    have hsub2 : ((colSet a j)ᶜ ∩ heavyI a c).card ≤ (colSet a j)ᶜ.card :=
+      card_le_card inter_subset_left
+    rw [Finset.card_compl, Fintype.card_fin] at hsub2
+    split_ifs with hj
+    · rw [mem_heavyJ] at hj
+      omega
+    · rw [mem_heavyJ] at hj
+      omega
+  exact Nat.add_le_add hI hJ
+
+end TwoSubsetProbes
 
 end Algebraic.Cutwidth.MultiOutput.Tripartite.Internal

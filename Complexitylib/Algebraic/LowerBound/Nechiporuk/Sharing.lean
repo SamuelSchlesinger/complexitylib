@@ -38,7 +38,13 @@ most `sharedFanOut c` total shared-variable leaves, and on every block `Y ⊆ Fi
 `activeSharedGateCount c Y` active shared gates and `activeSharedFanOut c Y` active shared-variable
 leaves (`exists_sharedProgram_of_circuit`). Summed over a family of blocks, the active shared
 fan-out weights each shared gate by the number of blocks its syntactic input cone meets
-(`sum_activeSharedFanOut`, `sum_activeSharedFanOut_le_of_gateBlockSpan_le`).
+(`sum_activeSharedFanOut`, `sum_activeSharedFanOut_le_of_gateBlockSpan_le`,
+`sum_activeSharedFanOut_le_add_highSpanSharedFanOut`). Moreover, `wireActive` and `gateActive`
+coincide with having syntactic input support (`Program.wireSupport`) meeting `Y`
+(`wireActive_eq_true_iff`, `gateActive_eq_true_iff`), so over pairwise disjoint blocks a gate's
+block-span never exceeds the cardinality of its input support (`gateBlockSpan_le_card_wireSupport`),
+and in any single-output binary circuit `sharedFanOut c ≤ 2 * c.size + 1`
+(`sharedFanOut_le_two_mul_size_add_one`).
 
 The definitions live in `Complexitylib.Algebraic.LowerBound.Nechiporuk.Sharing.Defs` and the proof
 internals in `Complexitylib.Algebraic.LowerBound.Nechiporuk.Sharing.Internal`.
@@ -205,10 +211,35 @@ theorem activeSharedGateCount_le_activeSharedFanOut (c : Circuit σ n m) (Y : Fi
   have := (Finset.mem_filter.mp hg).2.1
   omega
 
+/-- Gate `g` is active on `Y` iff its syntactic input support intersects `Y`. -/
+theorem gateActive_eq_true_iff (Y : Finset (Fin n)) (p : Program σ n t) (g : Fin t) :
+    gateActive Y p g = true ↔ ∃ i ∈ Y, i ∈ p.wireSupport (Wire.gate g) :=
+  Internal.gateActive_eq_true_iff Y p g
+
+/-- Wire `w` is active on `Y` iff its syntactic input support intersects `Y`. -/
+theorem wireActive_eq_true_iff (Y : Finset (Fin n)) (p : Program σ n t) (w : Wire n t) :
+    wireActive Y p w = true ↔ ∃ i ∈ Y, i ∈ p.wireSupport w := by
+  cases w with
+  | input i => simp [wireActive]
+  | gate g => exact gateActive_eq_true_iff Y p g
+
+/-- Over pairwise disjoint blocks `Y`, the number of blocks on which gate `g` is active is at most
+the cardinality of its syntactic input support. -/
+theorem gateBlockSpan_le_card_wireSupport {B : Nat} {Y : Fin B → Finset (Fin n)}
+    (hdisj : Pairwise fun i j => Disjoint (Y i) (Y j)) (p : Program σ n t) (g : Fin t) :
+    gateBlockSpan Y p g ≤ (p.wireSupport (Wire.gate g)).card :=
+  Internal.gateBlockSpan_le_card_wireSupport hdisj p g
+
 /-- A gate is active on at most all `B` blocks. -/
 theorem gateBlockSpan_le {B : Nat} (Y : Fin B → Finset (Fin n)) (p : Program σ n t) (g : Fin t) :
     gateBlockSpan Y p g ≤ B :=
   (Finset.card_le_univ _).trans_eq (Fintype.card_fin B)
+
+/-- In any single-output circuit over `Binary.signature`, the total fan-out of all shared gates is
+at most `2 * c.size + 1`: each binary gate reads two wires and the circuit reads one output wire. -/
+theorem sharedFanOut_le_two_mul_size_add_one (c : Circuit Binary.signature n 1) :
+    sharedFanOut c ≤ 2 * c.size + 1 :=
+  Internal.sharedFanOut_le_two_mul_size_add_one c
 
 /-- Summing `activeSharedGateCount` over a family of blocks equals summing the block-spans of all
 shared gates. -/
@@ -252,6 +283,49 @@ theorem sum_activeSharedFanOut_le_of_gateBlockSpan_le {B s : Nat} (c : Circuit �
 theorem sum_activeSharedFanOut_le {B : Nat} (c : Circuit σ n m) (Y : Fin B → Finset (Fin n)) :
     ∑ i, activeSharedFanOut c (Y i) ≤ B * sharedFanOut c :=
   sum_activeSharedFanOut_le_of_gateBlockSpan_le c Y fun g _ => gateBlockSpan_le Y c.program g
+
+/-- When every shared gate of `c` is active on at most `d` blocks of `Y`,
+`highSpanSharedFanOut c Y d` vanishes. -/
+theorem highSpanSharedFanOut_eq_zero_of_gateBlockSpan_le {B d : Nat}
+    (c : Circuit σ n m) (Y : Fin B → Finset (Fin n))
+    (hd : ∀ g : Fin c.size, 2 ≤ KW.gateFanOut c g → gateBlockSpan Y c.program g ≤ d) :
+    highSpanSharedFanOut c Y d = 0 := by
+  rw [highSpanSharedFanOut, Finset.sum_eq_zero]
+  intro g hg
+  simp only [Finset.mem_filter, Finset.mem_univ, true_and] at hg
+  have := hd g hg.1
+  omega
+
+/-- Over pairwise disjoint blocks `Y`, if the syntactic input support of every shared gate has size
+at most `d`, then `highSpanSharedFanOut c Y d` vanishes. -/
+theorem highSpanSharedFanOut_eq_zero_of_card_wireSupport_le {B d : Nat}
+    (c : Circuit σ n m) {Y : Fin B → Finset (Fin n)}
+    (hdisj : Pairwise fun i j => Disjoint (Y i) (Y j))
+    (hd : ∀ g : Fin c.size, 2 ≤ KW.gateFanOut c g →
+      (c.program.wireSupport (Wire.gate g)).card ≤ d) :
+    highSpanSharedFanOut c Y d = 0 :=
+  highSpanSharedFanOut_eq_zero_of_gateBlockSpan_le c Y fun g hg =>
+    (gateBlockSpan_le_card_wireSupport hdisj c.program g).trans (hd g hg)
+
+/-- Splitting `∑ i, activeSharedFanOut c (Y i)` at block-span threshold `d`: shared gates active on
+at most `d` blocks contribute at most `d * sharedFanOut c`, while shared gates active on strictly
+more than `d` blocks are active on at most `B` blocks and contribute at most
+`B * highSpanSharedFanOut c Y d`. -/
+theorem sum_activeSharedFanOut_le_add_highSpanSharedFanOut {B : Nat}
+    (c : Circuit σ n m) (Y : Fin B → Finset (Fin n)) (d : Nat) :
+    ∑ i, activeSharedFanOut c (Y i) ≤
+      d * sharedFanOut c + B * highSpanSharedFanOut c Y d := by
+  rw [sum_activeSharedFanOut, sharedFanOut, highSpanSharedFanOut, Finset.sum_filter,
+    Finset.sum_filter, Finset.sum_filter, Finset.mul_sum, Finset.mul_sum, ← Finset.sum_add_distrib]
+  refine Finset.sum_le_sum fun g _ => ?_
+  have hB := gateBlockSpan_le Y c.program g
+  by_cases h2 : 2 ≤ KW.gateFanOut c g
+  · by_cases hd : d < gateBlockSpan Y c.program g
+    · simp only [h2, hd, and_self, ↓reduceIte]
+      nlinarith
+    · simp only [h2, hd, and_false, ↓reduceIte, mul_zero, add_zero]
+      nlinarith
+  · simp [h2]
 
 /-- **Full-binary-basis circuits as programs with shared gates.** Every single-output circuit `c`
 over `Binary.signature` computing `f` yields a `SharedProgram` computing `f` with at most

@@ -6,6 +6,7 @@ Authors: Samuel Schlesinger
 
 module
 public import Complexitylib.Algebraic.LowerBound.Nechiporuk.Sharing.Defs
+public import Complexitylib.Algebraic.Support
 
 /-!
 # Internals of programs with shared gates over the full binary basis
@@ -23,7 +24,11 @@ Proof internals for `Complexitylib.Algebraic.LowerBound.Nechiporuk.Sharing`:
   gates, occurrences, and active measures;
 - the translation of a full-binary-basis program into a `SharedProgram`, processing gates from
   the last one down (`exists_sharedProgram_of_program`): a gate read at least twice becomes a
-  shared gate, and any other gate is substituted into the program.
+  shared gate, and any other gate is substituted into the program;
+- the characterization of `gateActive` by the syntactic input support
+  (`Internal.gateActive_eq_true_iff`), the resulting block-span bound over disjoint blocks
+  (`Internal.gateBlockSpan_le_card_wireSupport`), and the counting of gate-argument uses behind
+  `Internal.sharedFanOut_le_two_mul_size_add_one`.
 -/
 
 @[expose] public section
@@ -1163,6 +1168,103 @@ theorem exists_sharedProgram_of_program {n : Nat} (f : Cslib.BooleanFunction n) 
         rw [activeSharedCount_gate, activeSharedFanOutCount_gate, ite_eq_right hne,
           ite_eq_right hne, Nat.zero_add, Nat.zero_add]
         exact ⟨hact1, hact2⟩
+
+namespace Internal
+
+/-- Gate `g` is active on `Y` iff its syntactic input support intersects `Y`. -/
+theorem gateActive_eq_true_iff (Y : Finset (Fin n)) (p : Program σ n t) (g : Fin t) :
+    gateActive Y p g = true ↔ ∃ i ∈ Y, i ∈ p.wireSupport (Wire.gate g) := by
+  induction p with
+  | empty => exact Fin.elim0 g
+  | @gate t p line ih =>
+    have hw : ∀ w : Wire n t, wireActive Y p w = true ↔ ∃ i ∈ Y, i ∈ p.wireSupport w := by
+      intro w
+      cases w with
+      | input i => simp [wireActive]
+      | gate g => exact ih g
+    refine Fin.lastCases ?_ (fun g => ?_) g
+    · rw [gateActive_gate_last, decide_eq_true_iff, Program.wireSupport_gate_last]
+      simp only [hw, Line.mem_inputSupport]
+      exact ⟨fun ⟨a, i, hiY, hi⟩ => ⟨i, hiY, a, hi⟩, fun ⟨i, hiY, a, hi⟩ => ⟨a, i, hiY, hi⟩⟩
+    · change gateActive Y (p.gate line) g.castSucc = true ↔
+        ∃ i ∈ Y, i ∈ (p.gate line).wireSupport (Wire.gate g).castSucc
+      rw [gateActive_gate_castSucc, Program.wireSupport_gate_castSucc, ih g]
+
+/-- Over pairwise disjoint blocks `Y`, the number of blocks on which gate `g` is active is at most
+the cardinality of its syntactic input support. -/
+theorem gateBlockSpan_le_card_wireSupport {B : Nat} {Y : Fin B → Finset (Fin n)}
+    (hdisj : Pairwise fun i j => Disjoint (Y i) (Y j)) (p : Program σ n t) (g : Fin t) :
+    gateBlockSpan Y p g ≤ (p.wireSupport (Wire.gate g)).card := by
+  set S := Finset.univ.filter fun b : Fin B => gateActive (Y b) p g = true
+  set W := p.wireSupport (Wire.gate g)
+  have h1 : ∀ b ∈ S, 1 ≤ (Y b ∩ W).card := by
+    intro b hb
+    obtain ⟨i, hiY, hiW⟩ := (gateActive_eq_true_iff (Y b) p g).mp (Finset.mem_filter.mp hb).2
+    exact Finset.one_le_card.mpr ⟨i, Finset.mem_inter.mpr ⟨hiY, hiW⟩⟩
+  have hbi : (S.biUnion fun b => Y b ∩ W).card = ∑ b ∈ S, (Y b ∩ W).card :=
+    Finset.card_biUnion fun b₁ _ b₂ _ hne =>
+      (hdisj hne).mono Finset.inter_subset_left Finset.inter_subset_left
+  calc gateBlockSpan Y p g
+      = ∑ _b ∈ S, 1 := Finset.card_eq_sum_ones S
+    _ ≤ ∑ b ∈ S, (Y b ∩ W).card := Finset.sum_le_sum h1
+    _ = (S.biUnion fun b => Y b ∩ W).card := hbi.symm
+    _ ≤ W.card :=
+        Finset.card_le_card (Finset.biUnion_subset.mpr fun _ _ => Finset.inter_subset_right)
+
+/-- A wire equals at most one gate wire, so its indicator sum over the gates is at most `1`. -/
+private theorem sum_ite_eq_gate_le_one (w : Wire n t) :
+    (∑ x : Fin t, if w = Wire.gate x then 1 else 0) ≤ 1 := by
+  cases w with
+  | input _ => simp
+  | gate g =>
+    have hcongr : (∑ x : Fin t, if (Wire.gate g : Wire n t) = Wire.gate x then 1 else 0) =
+        ∑ x : Fin t, if g = x then 1 else 0 :=
+      Finset.sum_congr rfl fun x _ => by simp
+    rw [hcongr, Finset.sum_ite_eq, ite_eq_left (Finset.mem_univ g)]
+
+/-- Each binary gate has two input wires, so it contributes at most `2` to the sum of `KW.argUses`
+across all earlier gates. -/
+private theorem sum_argUses_le_two (line : Line Binary.signature n t) :
+    ∑ g : Fin t, KW.argUses line g ≤ 2 := by
+  obtain ⟨op, w⟩ := line
+  simp only [KW.argUses, Finset.card_filter]
+  rw [Finset.sum_comm]
+  have huniv : (Finset.univ : Finset (Fin 2)) = {0, 1} := by decide
+  have hne : (0 : Fin 2) ≠ 1 := by decide
+  rw [huniv, Finset.sum_pair hne]
+  have := sum_ite_eq_gate_le_one (w 0)
+  have := sum_ite_eq_gate_le_one (w 1)
+  omega
+
+/-- Across a binary program of `t` gates, the total number of gate-argument uses is at most
+`2 * t`. -/
+private theorem sum_slotUses_le_two_mul :
+    ∀ {t : Nat} (p : Program Binary.signature n t), ∑ g : Fin t, KW.slotUses p g ≤ 2 * t
+  | 0, .empty => by simp
+  | t + 1, .gate p line => by
+    rw [Fin.sum_univ_castSucc]
+    simp only [KW.slotUses_gate_castSucc, KW.slotUses_gate_last, add_zero, Finset.sum_add_distrib]
+    have := sum_slotUses_le_two_mul p
+    have := sum_argUses_le_two line
+    omega
+
+/-- In any single-output circuit over `Binary.signature`, the total fan-out of all shared gates is
+at most `2 * c.size + 1`. -/
+theorem sharedFanOut_le_two_mul_size_add_one (c : Circuit Binary.signature n 1) :
+    sharedFanOut c ≤ 2 * c.size + 1 := by
+  have hsub : sharedFanOut c ≤ ∑ g : Fin c.size, KW.gateFanOut c g :=
+    Finset.sum_le_univ_sum_of_nonneg fun _ => Nat.zero_le _
+  have hout : (∑ g : Fin c.size,
+      (Finset.univ.filter fun o : Fin 1 => c.outputs o = Wire.gate g).card) ≤ 1 := by
+    simp only [Finset.card_filter, Fintype.sum_unique]
+    exact sum_ite_eq_gate_le_one (c.outputs 0)
+  have hslot := sum_slotUses_le_two_mul c.program
+  have htot : ∑ g : Fin c.size, KW.gateFanOut c g ≤ 2 * c.size + 1 := by
+    simp only [KW.gateFanOut, Finset.sum_add_distrib]
+    omega
+  exact hsub.trans htot
+
+end Internal
 
 end BinaryCircuits
 
