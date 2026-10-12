@@ -38,7 +38,7 @@ Several rely on the Gaussian layout coefficient `A = 2p ≈ 0.2807` of this corp
 | Signed unbounded AND/OR/XOR, field inversion | `1.6954n − 1.11` (elementary), `1.7716n` with the Weil bound | `1.5659n` (this corpus) | Paper |
 | `{AND, OR, NOT}` circuits with at most `t` NOT gates, Boolean matrix product | `n⌊n/2^t⌋²` AND gates | trivial | Lean: `Algebraic.Monotone.MatrixProduct.NegationLimited.mul_div_sq_le_andCost` |
 | OR of `k`-CNFs (`Σ3^k`), affine or sumset dispersers (including this corpus's family) | `2^{(1/k − o(1))n}`; `2^{(μ_k/(k−1) − o(1))n}` with PPSZ trees (`2^{0.6137n}` at `k = 3`) | `2^{0.064n}` at `k = 3`, `2^{n/(10k)}` (Frankl–Gryaznov–Talebanfard, ITCS 2022) | Lean (`1/k` version, with sparsification): `Complexity.sourceReductionHardFamily_two_rpow_le_sigmaThreeSize`; PPSZ version Paper |
-| Threshold circuits, arbitrary depth and weights | `(1/2 − o(1))n` gates; `n − o(n)` for few input-direction switches; `2^{n−o(n)}` levels for multilevel threshold representations | `n/4` for inner product (Gröger–Turán; Roychowdhury–Orlitsky–Siu 1994) | Lean: `Algebraic.Threshold.sourceReductionHardFamily_lt_inputGates` and its direction-run and multilevel variants |
+| Threshold circuits, arbitrary depth and weights | `(1/2 − o(1))n` gates; `n − o(n)` for few input-direction switches or when every gate reads at most two inputs (12 October 2026, component bound); `2^{n−o(n)}` levels for multilevel threshold representations | `n/4` for inner product (Gröger–Turán; Roychowdhury–Orlitsky–Siu 1994) | Lean: `Algebraic.Threshold.sourceReductionHardFamily_lt_inputGates`, its direction-run and multilevel variants, and `sourceReductionHardFamily_lt_inputGates_of_support_card_le_two` |
 | Linear (parity-query) branching programs, Gold map | `T·(S+1) ≥ n(n−4)/8` | (no multi-output result found) | Paper |
 
 ### Notes on individual results
@@ -94,7 +94,15 @@ Several rely on the Gaussian layout coefficient `A = 2p ≈ 0.2807` of this corp
   (`b`-factors of high-girth regular bipartite graphs), which caps one route of
   Frankl–Gryaznov–Talebanfard.
 - **Threshold circuits.** A fresh anti-diagonal gate costs any rectangle argument two bits, so
-  the `n/2` barrier sits in circuits that switch input direction linearly often.
+  the `n/2` barrier sits in circuits that switch input direction linearly often. The two bits are
+  paid only by gates that read both sides of the split. Choosing the split as a union of connected
+  components of the gates' input supports leaves no such gate, and each gate then costs one bit
+  on one side (the component bound, `TwoSidedRectangleFree.lt_of_support_card_le_two`). With
+  input fan-in two every component with `v` inputs has at least `v − 1` gates, which gives
+  `n − o(n)`; with larger fan-in the excess `v − e` of a component can be linear in `v`, and the
+  general form of the argument gives `s_in ≥ n − |F| − M − 2 log₂ K` after fixing any set `F` of
+  inputs, where `M` is the largest excess of a component of the residual support hypergraph (paper
+  deduction; only the fan-in-two case is formalized).
 - **Negation-limited circuits.** Restricting to product sub-instances cannot lose less than a
   factor four per NOT gate. Separately, the `6n` and `8n` negation-limited bounds of
   Iwama–Morizumi–Tarui rest on Long's unpublished `4n` majority bound; without it they become

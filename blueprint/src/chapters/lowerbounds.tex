@@ -15882,6 +15882,75 @@ before the rectangle becomes small. The development is in
   (C1) split the program into single-gate runs; for (C2) use one run.
 \end{proof}
 
+\begin{theorem}[Split lemma]
+  \label{thm:lowerbounds-threshold-split}
+  \lean{Algebraic.Threshold.Program.support,
+    Algebraic.Threshold.Program.exists_rectangle_of_split_internal}
+  \leanok
+  \uses{def:lowerbounds-threshold-program}
+  Let a weighted threshold program compute $f$, and write $S_j$ for the
+  \emph{support} of gate $j$, the inputs it reads with nonzero weight. Let $U$
+  be a set of inputs such that every $S_j$ lies inside $U$ or inside its
+  complement, and let $A\subseteq U$, $B\subseteq U^c$. Then $f$ is constant on
+  a rectangle $P\times Q$ with
+  $|P|\cdot2^{g_U}\ge2^{|U|-|A|}$ and $|Q|\cdot2^{g_{U^c}}\ge2^{|U^c|-|B|}$,
+  where $g_U$ counts the gates with $S_j\subseteq U$ and $S_j\not\subseteq A$,
+  and $g_{U^c}$ likewise with $U^c$ and $B$.
+\end{theorem}
+\begin{proof}
+  \leanok
+  Start from the inputs vanishing on $A$ and on $B$ and process the gates in
+  order, keeping every earlier gate constant on the current rectangle. Given
+  the earlier values, a gate with $S_j\subseteq U$ is a function of the $U$
+  side alone; if $S_j\subseteq A$ it is constant, and otherwise keeping the
+  larger of its two level sets halves $P$ at most and makes it constant.
+  Gates with $S_j\subseteq U^c$ are symmetric. The output gate is constant at
+  the end.
+\end{proof}
+
+\begin{lemma}[Component split]
+  \label{lem:lowerbounds-threshold-components}
+  \lean{Algebraic.Threshold.Program.supportGraph,
+    Algebraic.Threshold.Program.exists_split_of_support_card_le_two_internal}
+  \leanok
+  \uses{def:lowerbounds-threshold-program}
+  Suppose every gate reads at most two inputs and $L+s_{\mathrm{in}}\le n$.
+  Then there is a set $U$ of inputs such that every support lies inside $U$
+  or inside $U^c$, and $|U|=g_U+L$ where $g_U$ counts the gates with nonempty
+  support inside $U$.
+\end{lemma}
+\begin{proof}
+  \leanok
+  Join two inputs when some gate reads both. Each nonempty support lies in one
+  connected component, and a component with $v$ inputs contains at least $v-1$
+  gates, since its induced graph is connected and its edges inject into its
+  gates. Summing, at least $n-s_{\mathrm{in}}\ge L$ components are trees,
+  with exactly $v-1$ gates; take $U$ to be the union of $L$ of them.
+\end{proof}
+
+\begin{corollary}[The component bound for input fan-in two]
+  \label{cor:lowerbounds-threshold-component-bound}
+  \lean{Algebraic.Threshold.TwoSidedRectangleFree.lt_of_support_card_le_two,
+    Algebraic.Threshold.sourceReductionHardFamily_lt_inputGates_of_support_card_le_two}
+  \leanok
+  \uses{thm:lowerbounds-threshold-split, lem:lowerbounds-threshold-components,
+    thm:lowerbounds-threshold-family-rectangle}
+  Let $f$ be two-sided $K$-rectangle-free with $K\le2^k$, and let a weighted
+  threshold program in which every gate reads at most two inputs compute $f$.
+  Then (C5) $n<s_{\mathrm{in}}+2k$. For the explicit family
+  $\mathrm{sourceReductionHardFamily}$ and every $\varepsilon>0$, such programs
+  have more than $(1-\varepsilon)n$ input-reading gates for all large $n$,
+  twice the constant of (C1).
+\end{corollary}
+\begin{proof}
+  \leanok
+  If $s_{\mathrm{in}}+2k\le n$, the component split with $L=k$ and the split
+  lemma with $A=B=\emptyset$ give a constant rectangle with
+  $|P|\ge2^{|U|-g_U}=2^k\ge K$ and $|Q|\ge2^{n-|U|-g_{U^c}}\ge2^{n-s_{\mathrm{in}}-k}\ge2^k$,
+  contradicting rectangle-freeness. The family statement uses
+  $\log_2K(n)=o(n)$.
+\end{proof}
+
 \begin{corollary}[Multilevel thresholds and mixed gate costs]
   \label{cor:lowerbounds-threshold-multilevel-mixed}
   \lean{Algebraic.Threshold.TwoSidedRectangleFree.two_pow_lt_of_multilevel,

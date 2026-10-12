@@ -25,6 +25,8 @@ sufficiently large `n`:
 * `sourceReductionHardFamily_lt_inputGates` (C1): every weighted real threshold program of any
   depth and fan-out computing the family has more than `(1/2 - ε) n` input-reading gates;
   gates reading only other gates are free.
+* `sourceReductionHardFamily_lt_inputGates_of_support_card_le_two` (C5): if every gate reads at
+  most two inputs, more than `(1 - ε) n` input-reading gates.
 * `sourceReductionHardFamily_lt_inputGates_of_direction` (C2): if every input weight vector is a
   multiple of one vector, more than `(1 - ε) n` input-reading gates.
 * `sourceReductionHardFamily_lt_inputGates_add_runs` (C3): if the gates split into `B`
@@ -74,6 +76,19 @@ theorem sourceReductionHardFamily_lt_inputGates (hε : 0 < ε) :
     with n hfree hlog s C hC
   have h := hfree.lt_two_mul_add_two_mul_inputGates (familyThreshold_eq_two_pow n).le hC
   have h' : (n : ℝ) < 2 * familyLogThreshold n + 2 + 2 * C.inputGates.card := by
+    exact_mod_cast h
+  linarith
+
+/-- **C5 for the explicit family.** For every `ε > 0` and all large `n`, every weighted real
+threshold program, of any depth and fan-out, in which every gate reads at most two inputs,
+computing `sourceReductionHardFamily n`, has more than `(1 - ε) n` input-reading gates. -/
+theorem sourceReductionHardFamily_lt_inputGates_of_support_card_le_two (hε : 0 < ε) :
+    ∀ᶠ n in atTop, ∀ (s : ℕ) (C : Program n s), (∀ j, (C.support j).card ≤ 2) →
+      C.Computes (Extractor.sourceReductionHardFamily n) → (1 - ε) * n < C.inputGates.card := by
+  filter_upwards [sourceReductionHardFamily_twoSidedRectangleFree,
+    eventually_two_mul_familyLogThreshold_add_four_le hε] with n hfree hlog s C h2 hC
+  have h := hfree.lt_of_support_card_le_two (familyThreshold_eq_two_pow n).le hC h2
+  have h' : (n : ℝ) < C.inputGates.card + 2 * familyLogThreshold n := by
     exact_mod_cast h
   linarith
 

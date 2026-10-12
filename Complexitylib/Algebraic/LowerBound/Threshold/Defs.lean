@@ -133,6 +133,11 @@ open scoped Classical in
 noncomputable def inputGates (C : Program n s) : Finset (Fin s) :=
   Finset.univ.filter fun j => C.inputWeight j ≠ 0
 
+open scoped Classical in
+/-- The input support of gate `j`: the inputs it reads with a nonzero weight. -/
+noncomputable def support (C : Program n s) (j : Fin s) : Finset (Fin n) :=
+  Finset.univ.filter fun i => C.inputWeight j i ≠ 0
+
 /-- A split of the gates into `B` consecutive runs, numbered by the monotone map `run`, such
 that every gate of run `i` reads the inputs along the direction `dir i`: its input weight
 vector is a real multiple of `dir i`. A gate that reads no input fits every direction. -/

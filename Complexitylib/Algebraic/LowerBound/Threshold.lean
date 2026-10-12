@@ -8,6 +8,7 @@ module
 public import Complexitylib.Algebraic.LowerBound.Threshold.Defs
 import Complexitylib.Algebraic.LowerBound.Threshold.Internal.Corollaries
 import Complexitylib.Algebraic.LowerBound.Threshold.Internal.Activation
+import Complexitylib.Algebraic.LowerBound.Threshold.Internal.SplitBound
 import Mathlib.Tactic.Ring
 
 /-!
@@ -52,6 +53,11 @@ coordinates, every rectangle on which `f` is constant has a side with fewer than
   `ActivationProgram` whose input-reading gate `j` has an activation changing at most `T j`
   times, `2ⁿ < 4 K² · ∏ⱼ max 1 (4 T j)`; a threshold gate costs `4`, an exact-threshold or
   interval gate `8`, and gates reading only gates are free.
+* `TwoSidedRectangleFree.lt_of_support_card_le_two` (C5, the component bound): if every gate
+  reads at most two inputs, `n < s_in + 2k`, twice the gate count of (C1). Split the inputs
+  along the connected components of the gates' input supports (`Program.support`), so no gate
+  reads both sides, and make each gate constant by halving one side only
+  (`Complexitylib.Algebraic.LowerBound.Threshold.Internal.Split` and `Internal.Components`).
 
 The explicit polynomial-time family `sourceReductionHardFamily` is two-sided rectangle-free with
 `log₂ K = o(n)`; the asymptotic bounds for it are in
@@ -224,6 +230,16 @@ theorem two_pow_lt_of_activations (hf : TwoSidedRectangleFree f K) {C : Activati
     (hT : ∀ j ∈ C.inputGates, ChangesAtMost (C.activation j) (T j)) :
     2 ^ n < 4 * K ^ 2 * ∏ j ∈ C.inputGates, max 1 (4 * T j) :=
   two_pow_lt_of_activations_internal hf hC T hT
+
+/-- **The component bound (C5).** If every gate reads at most two inputs (`(C.support j).card ≤ 2`,
+with `C.support j` the inputs of nonzero weight in gate `j`), then `n < s_in + 2k` whenever
+`K ≤ 2 ^ k`: the input-reading gates number more than `n - 2k`, twice the general bound (C1).
+The proof splits the inputs along connected components of the gates' input supports, so that
+no gate reads both sides, and then makes each gate constant by halving one side only. -/
+theorem lt_of_support_card_le_two (hf : TwoSidedRectangleFree f K) {k : ℕ} (hK : K ≤ 2 ^ k)
+    {C : Program n s} (hC : C.Computes f) (h2 : ∀ j, (C.support j).card ≤ 2) :
+    n < C.inputGates.card + 2 * k :=
+  hf.lt_of_support_card_le_two_internal hC h2 hK
 
 end TwoSidedRectangleFree
 
