@@ -15951,6 +15951,32 @@ before the rectangle becomes small. The development is in
   $\log_2K(n)=o(n)$.
 \end{proof}
 
+\begin{theorem}[The excess bound]
+  \label{thm:lowerbounds-threshold-excess}
+  \lean{Algebraic.Threshold.exists_subset_sum_ge_internal,
+    Algebraic.Threshold.TwoSidedRectangleFree.lt_of_blocks}
+  \leanok
+  \uses{thm:lowerbounds-threshold-split}
+  Let $f$ be two-sided $K$-rectangle-free with $K\le2^k$, computed by a
+  weighted threshold program with $s_{\mathrm{in}}$ input-reading gates. Fix
+  any set $F$ of inputs and partition the remaining inputs into blocks such
+  that every gate reads, outside $F$, inputs of a single block. For a block
+  $b$ let $e_b$ count the gates whose support outside $F$ is nonempty and lies
+  in $b$, and suppose $|b|\le e_b+M$ for every block. Then (C6)
+  $n<|F|+s_{\mathrm{in}}+M+2k$.
+\end{theorem}
+\begin{proof}
+  \leanok
+  Set the inputs in $F$ to false; the residual program has supports $S_j\setminus F$.
+  Each block has excess $\varphi_b=(|b|-e_b)^+\le M$, and the excesses sum to
+  at least $n-|F|-s_{\mathrm{in}}\ge M+2k$, so a greedy choice of blocks gives
+  two groups of blocks with excess at least $k$ each. Take $U$ to be the union
+  of one group; no residual support meets both sides. Fix every input of a
+  saturated block ($|b|\le e_b$) and apply the split lemma: each side keeps at
+  least $2^{\sum\varphi_b}\ge2^k\ge K$ points, and the $2^{|F|}$ fibres of the
+  fixing on the $U^c$ side are paid by the $|F|$ inputs counted there.
+\end{proof}
+
 \begin{corollary}[Multilevel thresholds and mixed gate costs]
   \label{cor:lowerbounds-threshold-multilevel-mixed}
   \lean{Algebraic.Threshold.TwoSidedRectangleFree.two_pow_lt_of_multilevel,

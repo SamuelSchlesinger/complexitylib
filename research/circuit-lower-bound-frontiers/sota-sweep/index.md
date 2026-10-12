@@ -100,9 +100,12 @@ Several rely on the Gaussian layout coefficient `A = 2p ≈ 0.2807` of this corp
   on one side (the component bound, `TwoSidedRectangleFree.lt_of_support_card_le_two`). With
   input fan-in two every component with `v` inputs has at least `v − 1` gates, which gives
   `n − o(n)`; with larger fan-in the excess `v − e` of a component can be linear in `v`, and the
-  general form of the argument gives `s_in ≥ n − |F| − M − 2 log₂ K` after fixing any set `F` of
-  inputs, where `M` is the largest excess of a component of the residual support hypergraph (paper
-  deduction; only the fan-in-two case is formalized).
+  general form of the argument gives `s_in > n − |F| − M − 2 log₂ K` after fixing any set `F` of
+  inputs, where `M` is the largest excess of a block of any partition of the remaining inputs in
+  which every gate reads inside one block (the excess bound,
+  `TwoSidedRectangleFree.lt_of_blocks`, Lean). For the general program, where every gate reads
+  every input, the only partition is one block with excess `n − s_in`, and the bound is vacuous:
+  the `n/2` barrier stands for unstructured supports.
 - **Negation-limited circuits.** Restricting to product sub-instances cannot lose less than a
   factor four per NOT gate. Separately, the `6n` and `8n` negation-limited bounds of
   Iwama–Morizumi–Tarui rest on Long's unpublished `4n` majority bound; without it they become

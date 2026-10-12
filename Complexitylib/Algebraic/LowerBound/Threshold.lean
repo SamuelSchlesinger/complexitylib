@@ -9,6 +9,7 @@ public import Complexitylib.Algebraic.LowerBound.Threshold.Defs
 import Complexitylib.Algebraic.LowerBound.Threshold.Internal.Corollaries
 import Complexitylib.Algebraic.LowerBound.Threshold.Internal.Activation
 import Complexitylib.Algebraic.LowerBound.Threshold.Internal.SplitBound
+import Complexitylib.Algebraic.LowerBound.Threshold.Internal.Excess
 import Mathlib.Tactic.Ring
 
 /-!
@@ -58,6 +59,10 @@ coordinates, every rectangle on which `f` is constant has a side with fewer than
   along the connected components of the gates' input supports (`Program.support`), so no gate
   reads both sides, and make each gate constant by halving one side only
   (`Complexitylib.Algebraic.LowerBound.Threshold.Internal.Split` and `Internal.Components`).
+* `TwoSidedRectangleFree.lt_of_blocks` (C6, the excess bound): after fixing any set `F` of
+  inputs, partition the rest into blocks such that every gate reads inputs of one block outside
+  `F`; if every block `b` has `|b| ≤ e_b + M`, with `e_b` the gates reading inside `b`, then
+  `n < |F| + s_in + M + 2k` (`Internal.Excess`). (C5) is the case `F = ∅`, `M = 1`.
 
 The explicit polynomial-time family `sourceReductionHardFamily` is two-sided rectangle-free with
 `log₂ K = o(n)`; the asymptotic bounds for it are in
@@ -240,6 +245,23 @@ theorem lt_of_support_card_le_two (hf : TwoSidedRectangleFree f K) {k : ℕ} (hK
     {C : Program n s} (hC : C.Computes f) (h2 : ∀ j, (C.support j).card ≤ 2) :
     n < C.inputGates.card + 2 * k :=
   hf.lt_of_support_card_le_two_internal hC h2 hK
+
+/-- **The excess bound (C6).** Fix any set `F` of inputs and partition the remaining inputs
+into blocks `𝓑` such that every gate reads, outside `F`, inputs of a single block. For a block
+`b`, let `e_b` count the gates whose support outside `F` is nonempty and lies in `b`; suppose
+`|b| ≤ e_b + M` for every block. Then `n < |F| + s_in + M + 2k` whenever `K ≤ 2 ^ k`. Taking
+`F = ∅` and the blocks to be the connected components of the input supports recovers (C5),
+where `M = 1`; a block with many gates on few inputs has `|b| ≤ e_b` and costs nothing beyond
+its inputs. -/
+theorem lt_of_blocks (hf : TwoSidedRectangleFree f K) {k : ℕ} (hK : K ≤ 2 ^ k)
+    {C : Program n s} (hC : C.Computes f) (F : Finset (Fin n)) (𝓑 : Finset (Finset (Fin n)))
+    (hdisj : (𝓑 : Set (Finset (Fin n))).PairwiseDisjoint id)
+    (hcover : ∀ i, i ∉ F → ∃ b ∈ 𝓑, i ∈ b) (hF : ∀ b ∈ 𝓑, Disjoint b F)
+    (hblocks : ∀ j, C.support j ⊆ F ∨ ∃ b ∈ 𝓑, C.support j \ F ⊆ b) (M : ℕ)
+    (hM : ∀ b ∈ 𝓑, b.card ≤
+      (Finset.univ.filter fun j => ¬ C.support j ⊆ F ∧ C.support j \ F ⊆ b).card + M) :
+    n < F.card + C.inputGates.card + M + 2 * k :=
+  hf.lt_of_blocks_internal hC F 𝓑 hdisj hcover hF hblocks M hM hK
 
 end TwoSidedRectangleFree
 
