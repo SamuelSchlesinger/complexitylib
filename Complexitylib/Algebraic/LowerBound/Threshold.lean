@@ -10,6 +10,7 @@ import Complexitylib.Algebraic.LowerBound.Threshold.Internal.Corollaries
 import Complexitylib.Algebraic.LowerBound.Threshold.Internal.Activation
 import Complexitylib.Algebraic.LowerBound.Threshold.Internal.SplitBound
 import Complexitylib.Algebraic.LowerBound.Threshold.Internal.Excess
+import Complexitylib.Algebraic.LowerBound.Threshold.Internal.Cut
 import Mathlib.Tactic.Ring
 
 /-!
@@ -54,6 +55,11 @@ coordinates, every rectangle on which `f` is constant has a side with fewer than
   `ActivationProgram` whose input-reading gate `j` has an activation changing at most `T j`
   times, `2ⁿ < 4 K² · ∏ⱼ max 1 (4 T j)`; a threshold gate costs `4`, an exact-threshold or
   interval gate `8`, and gates reading only gates are free.
+* `TwoSidedRectangleFree.lt_of_split` (C0, the cut theorem) and
+  `TwoSidedRectangleFree.le_two_mul_add`: for every set `U` of inputs, `|U| < touch(U) + k` or
+  `|Uᶜ| < touch(Uᶜ) + k`, where `touch(S)` counts the gates reading some input of `S`; at a
+  balanced split, `n ≤ 2 (s_in + k)` (`Internal.Cut`). A gate pays one bit on every side it
+  reads, which is where the following structured bounds gain.
 * `TwoSidedRectangleFree.lt_of_support_card_le_two` (C5, the component bound): if every gate
   reads at most two inputs, `n < s_in + 2k`, twice the gate count of (C1). Split the inputs
   along the connected components of the gates' input supports (`Program.support`), so no gate
@@ -235,6 +241,24 @@ theorem two_pow_lt_of_activations (hf : TwoSidedRectangleFree f K) {C : Activati
     (hT : ∀ j ∈ C.inputGates, ChangesAtMost (C.activation j) (T j)) :
     2 ^ n < 4 * K ^ 2 * ∏ j ∈ C.inputGates, max 1 (4 * T j) :=
   two_pow_lt_of_activations_internal hf hC T hT
+
+/-- **The cut theorem (C0).** For every set `U` of inputs, with no assumption on the gates,
+`|U| < touch(U) + k` or `|Uᶜ| < touch(Uᶜ) + k`, where `touch(S)` counts the gates whose support
+meets `S`. Each gate pays one bit on every side it reads: given the earlier gates, a gate reading
+one side alone is a function of that side, and a gate reading both is monotone in the two
+weighted sums, so a quadrant at the medians makes it constant. -/
+theorem lt_of_split (hf : TwoSidedRectangleFree f K) {k : ℕ} (hK : K ≤ 2 ^ k)
+    {C : Program n s} (hC : C.Computes f) (U : Finset (Fin n)) :
+    U.card < (Finset.univ.filter fun j => (C.support j ∩ U).Nonempty).card + k ∨
+    Uᶜ.card < (Finset.univ.filter fun j => (C.support j ∩ Uᶜ).Nonempty).card + k :=
+  hf.lt_of_split_internal hC U hK
+
+/-- **The sharpened general bound.** Every weighted threshold program computing `f` has
+`n ≤ 2 (s_in + k)`: the cut theorem at a balanced split. This sharpens (C1), `n < 2k + 2 + 2 s_in`,
+by one. -/
+theorem le_two_mul_add (hf : TwoSidedRectangleFree f K) {k : ℕ} (hK : K ≤ 2 ^ k)
+    {C : Program n s} (hC : C.Computes f) : n ≤ 2 * (C.inputGates.card + k) :=
+  hf.le_two_mul_add_internal hC hK
 
 /-- **The component bound (C5).** If every gate reads at most two inputs (`(C.support j).card ≤ 2`,
 with `C.support j` the inputs of nonzero weight in gate `j`), then `n < s_in + 2k` whenever

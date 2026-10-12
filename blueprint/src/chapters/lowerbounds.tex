@@ -15882,6 +15882,35 @@ before the rectangle becomes small. The development is in
   (C1) split the program into single-gate runs; for (C2) use one run.
 \end{proof}
 
+\begin{theorem}[The cut theorem]
+  \label{thm:lowerbounds-threshold-cut}
+  \lean{Algebraic.Threshold.exists_median_internal,
+    Algebraic.Threshold.Program.exists_rectangle_of_cut_internal,
+    Algebraic.Threshold.TwoSidedRectangleFree.lt_of_split,
+    Algebraic.Threshold.TwoSidedRectangleFree.le_two_mul_add}
+  \leanok
+  \uses{def:lowerbounds-threshold-program}
+  Let $f$ be two-sided $K$-rectangle-free with $K\le2^k$, computed by a
+  weighted threshold program. For every set $U$ of inputs,
+  $|U|<\mathrm{touch}(U)+k$ or $|U^c|<\mathrm{touch}(U^c)+k$, where
+  $\mathrm{touch}(S)$ counts the gates reading some input of $S$ with nonzero
+  weight. In particular $n\le2(s_{\mathrm{in}}+k)$.
+\end{theorem}
+\begin{proof}
+  \leanok
+  Process the gates in order, keeping every earlier gate constant on a
+  rectangle $P\times Q$. Given the earlier values, a gate is a threshold of
+  $\alpha(p)+\beta(q)$. If it reads one side only it is a function of that
+  side; keep the larger level set. If it reads both sides, take medians
+  $\mu_P$ of $\alpha$ on $P$ and $\mu_Q$ of $\beta$ on $Q$: by monotonicity
+  the gate is constant on the quadrant above both medians or on the quadrant
+  below both, each of which keeps at least half of each side. A side therefore
+  loses one bit for every gate reading it, and a split with both
+  $|U|\ge\mathrm{touch}(U)+k$ and $|U^c|\ge\mathrm{touch}(U^c)+k$ would leave a
+  monochromatic rectangle with sides at least $2^k\ge K$. A balanced split
+  gives the last claim.
+\end{proof}
+
 \begin{theorem}[Split lemma]
   \label{thm:lowerbounds-threshold-split}
   \lean{Algebraic.Threshold.Program.support,

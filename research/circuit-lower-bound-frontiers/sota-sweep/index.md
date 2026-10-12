@@ -105,7 +105,34 @@ Several rely on the Gaussian layout coefficient `A = 2p ≈ 0.2807` of this corp
   which every gate reads inside one block (the excess bound,
   `TwoSidedRectangleFree.lt_of_blocks`, Lean). For the general program, where every gate reads
   every input, the only partition is one block with excess `n − s_in`, and the bound is vacuous:
-  the `n/2` barrier stands for unstructured supports.
+  the `n/2` barrier stands for unstructured supports. The cut theorem
+  (`TwoSidedRectangleFree.lt_of_split`) records exactly what any split costs: for every `U`,
+  `|U| < touch(U) + log₂ K` or `|Uᶜ| < touch(Uᶜ) + log₂ K`, where `touch(U)` counts the gates whose
+  support meets `U`; a gate pays one bit on every side it reads, so a balanced split gives
+  `n ≤ 2 (s_in + log₂ K)`.
+- **Why `n/2` is the limit of the rectangle hypothesis** (Paper deduction and Conjecture). The
+  gate values of a program with `s` input-reading gates partition the cube into at most `2^s`
+  cells, each the intersection of `s` halfspaces with the cube, and the output is constant on each
+  cell. Rectangle-freeness is contradicted only by a monochromatic rectangle, so the lower bound
+  `s > (1/2 − o(1)) n` is the best the hypothesis can give exactly when some program with
+  `(1/2 + δ) n` gates has every cell free of rectangles with sides `2^{o(n)}`. For `m = (1/2 + δ) n`
+  gates with independent uniformly random `{0,1}` weights and thresholds near `n/4`, a gate is
+  nonconstant on a fixed `d`-dimensional subcube with probability about `d/√n`, so the expected
+  number of monochromatic `d`-subcubes is about `2^n · exp(−c d √n)`: monochromatic subcubes of
+  dimension `Θ(√n)` exist and larger ones do not. The same window computation on a general
+  `2^{εn} × 2^{εn}` rectangle leaves about `(1 + 2δ) ε n` nonconstant gates, enough for a random
+  readout `F` of the gate values to be nonconstant on the rectangle after a union bound over
+  rectangles. We conjecture that such programs compute two-sided `2^{O(√n log n)}`-rectangle-free
+  functions; if so, no argument whose only hypothesis is two-sided rectangle-freeness at threshold
+  `2^{o(n)}` can prove more than `(1/2 + o(1)) n` input-reading gates for programs with
+  unstructured supports. Beating `n/2` there needs a hypothesis that random halfspace programs
+  violate. The natural one is *polytope dispersion*: `f` is nonconstant on every intersection of
+  `s` halfspaces containing at least `2^{n−s}` cube points. A polytope disperser for all
+  `s ≤ (1 − δ) n` needs more than `(1 − δ) n` input-reading gates in any depth, and a random
+  function is one up to `s = n − 3 log₂ n − O(1)` by counting halfspaces on the cube
+  (`2^{O(n²)}` of them). Whether the explicit sumset extractor is a polytope disperser is open;
+  its proof controls sumsets `A ⊕ B`, and the only sumsets inside a cell that we can exhibit are
+  shifted rectangles.
 - **Negation-limited circuits.** Restricting to product sub-instances cannot lose less than a
   factor four per NOT gate. Separately, the `6n` and `8n` negation-limited bounds of
   Iwama–Morizumi–Tarui rest on Long's unpublished `4n` majority bound; without it they become
