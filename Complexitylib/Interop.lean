@@ -12,8 +12,13 @@ public import Complexitylib.Interop.Cslib.FromMultiTape.PEquiv
 public import Complexitylib.Interop.Cslib.Circuit
 public import Complexitylib.Interop.Cslib.CircuitClasses
 public import Complexitylib.Interop.Cslib.CircuitDepth
+public import Complexitylib.Interop.Cslib.Guard
 public import Complexitylib.Interop.Mathlib.TM0
 public import Complexitylib.Interop.Mathlib.TM0.Guard
+public import Complexitylib.Interop.Mathlib.TM0.Marked
+public import Complexitylib.Interop.Mathlib.TM0.Alphabet
+public import Complexitylib.Interop.Mathlib.TM2
+public import Complexitylib.Interop.Mathlib.TM2.FP
 
 /-!
 # Interoperability
@@ -42,4 +47,20 @@ Aggregation module for bridges to CSLib and Mathlib.
   output length on every input imply canonical `FP` membership.
   Its `Guard` interface validates regular input formats and returns empty
   output on malformed strings, extending source bounds on valid inputs to `FP`.
+- `Complexitylib.Interop.Mathlib.TM2` proves quadratic transition overhead for
+  Mathlib's existing stack-to-tape compiler, preserving the complete stack-track
+  input and output tapes of bundled `FinTM2` computations.
+- `Complexitylib.Interop.Mathlib.TM2.FP` transfers total binary-string TM2
+  certificates with finite working alphabets to canonical `FP`, including the
+  marked empty-input representation and both reversals of stack order.
+  Its DFA-guarded theorem requires source bounds only on valid strings and
+  returns empty output on malformed strings.
+  Its encoded interface supports independent finite input and output alphabets,
+  including empty alphabets, through explicit palindromic symbol codes.
+- `Complexitylib.Interop.Mathlib.TM0.Marked` handles distinct input and output
+  formats, including first-cell and empty-input markers.
+- `Complexitylib.Interop.Mathlib.TM0.Alphabet` parses and emits codes for finite
+  source alphabets, rejecting invalid symbol codes before source execution.
+- `Complexitylib.Interop.Cslib.Guard` validates regular input domains before
+  starting an arbitrary binary CSLib machine.
 -/

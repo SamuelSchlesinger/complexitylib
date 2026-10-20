@@ -23,7 +23,7 @@ Shared dependencies mean the counts cannot be added to estimate total work.
 | [Two-way complementation](https://github.com/openai/math/blob/adc7f1241b42e322a6451854ab7e4b4c146bf78a/lean/OAI/Combinatorics/TwoWayAutomata/Main.lean) | Core: 19 modules; 4,088 lines. Extended explicit-family package: 41 modules; 8,477 lines. | Core integrated with a state-preserving `NMachine` bridge. New arbitrary-word-encoding and binary-NFA complementation bounds reuse the existing scanner, and rule out a polynomial binary complementation bound. The extended package's separate deterministic proof was not duplicated. |
 | [Rational hitting lists](https://github.com/openai/math/blob/adc7f1241b42e322a6451854ab7e4b4c146bf78a/lean/OAI/Computability/RationalHitting/Main.lean) | 53 modules; 15,304 lines | Integrated: canonical `FP` generator with exact unary input, complete rational binary output, and explicit malformed-input handling; executable matrix evaluation, finite nonzeroness and inverse-domain tests. Evaluation bit complexity remains separate. |
 | [Exact Fourier circuits](https://github.com/openai/math/blob/adc7f1241b42e322a6451854ab7e4b4c146bf78a/lean/OAI/Computability/FourierCircuit/Main.lean) | 51 modules; 19,103 lines | Integrated: complete source proof, CSLib translation, cofinal upper bound, and synthesis with the existing linear lower bound. Documentation, blueprint links, and all repository gates pass. The result concerns unrestricted scalar operations and arbitrarily large sizes. |
-| [Choiceless polynomial time](https://github.com/openai/math/blob/adc7f1241b42e322a6451854ab7e4b4c146bf78a/lean/OAI/ModelTheory/Choiceless/Separation.lean) | 26 modules; 18,461 lines | Deferred; incomplete port excluded from this batch. Finish the source port, semantic comparison, structure encodings, and finite `TM2` bridge before stating a canonical separation. See roadmap markers `OAI-CPT-*` and `OAI-TM2-BRIDGE`. |
+| [Choiceless polynomial time](https://github.com/openai/math/blob/adc7f1241b42e322a6451854ab7e4b4c146bf78a/lean/OAI/ModelTheory/Choiceless/Separation.lean) | 26 modules; 18,461 lines | Deferred; incomplete port excluded from this batch. The reusable finite-alphabet `TM2` bridge is implemented. Finish the source port, semantic comparison, structure encodings, and source-specific bridge application before stating a canonical separation. See roadmap markers `OAI-CPT-*` and `OAI-TM2-BRIDGE`. |
 
 ## Larger algorithms and hardness packages
 
@@ -103,13 +103,24 @@ Inspection of the source definitions identifies three distinct obligations:
   with finite stack alphabets and a polynomial bound measured in the encoded
   input length. This is a different source model from the hitting generator's
   `TM0`. Its input has a unary size header and a relation table; its runtime
-  theorem is stated on encoded structures. A canonical `P` integration needs
-  a stack-machine simulation and explicit handling of arbitrary binary inputs.
-  The existing regular-domain guard does not by itself supply that parser.
+  theorem is stated on encoded structures. The reusable
+  [stack-machine compiler](../Complexitylib/Interop/Mathlib/TM2.lean) now proves
+  quadratic transition overhead with exact stack-track input/output tapes. Its
+  [canonical `FP` interface](../Complexitylib/Interop/Mathlib/TM2/FP.lean) handles
+  independent finite input and output alphabets through explicit binary symbol
+  codes, as well as the original binary interface and DFA-recognized domains.
+  Working-alphabet finiteness is explicit and output-length bounds are automatic. A canonical
+  `P` integration still needs the source witness instantiated through this
+  compiler, encoding correspondence, and polynomial-time handling of arbitrary
+  binary inputs. The regular-domain guard does not by itself supply the
+  structure parser or prove that its valid encodings form a regular language.
+  The existing [canonical structure validator](../Complexitylib/DescriptiveComplexity/Encoding/Validity.lean)
+  is polynomial-time and can be reused after proving encoding correspondence.
 
-These are source-level findings, not a completed port or a checked bridge to
-complexitylib's descriptive-complexity and machine interfaces. The separate
-witnessed-choice theorem is outside this initial dependency closure.
+These source-level findings do not establish a completed choiceless port or a
+checked connection from its definitions to complexitylib's descriptive-complexity
+and canonical machine interfaces. The separate witnessed-choice theorem is
+outside this initial dependency closure.
 
 For the model comparison, Dawar, Richerby, and Rossman,
 [*Choiceless Polynomial Time, Counting and the Cai–Fürer–Immerman Graphs*,

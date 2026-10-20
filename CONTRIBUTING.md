@@ -167,7 +167,7 @@ lake env lean scripts/BlueprintCheck.lean
 
 All commands must pass before submitting changes; CI runs them on every push.
 The build checks the complete library, all five executable regression suites,
-and the seven separate API-check modules, treating warnings (including proof
+and the nine separate API-check modules, treating warnings (including proof
 placeholders) as failures. Both kinds of regressions remain outside the public
 import graph. One Lake invocation shares dependency-graph setup; unchanged
 API checks reuse normal Lake traces instead of re-elaborating every time.
@@ -237,7 +237,7 @@ on every contributor.
 
 For an isolated API regression, use `lake build --wfail VerifierApiCheck`
 (or the corresponding module name). `lake build --wfail ApiChecks` runs all
-seven as separate modules, preserving each file's public-only or compatibility
+nine as separate modules, preserving each file's public-only or compatibility
 imports. Lake rebuilds relevant changed imports before reusing a test artifact.
 The axiom and blueprint scripts are still executed on every full verification;
 they are deliberately excluded from the cached API target.

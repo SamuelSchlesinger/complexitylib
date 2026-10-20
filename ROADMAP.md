@@ -763,7 +763,11 @@ The machine infrastructure is reusable: the
 complete binary outputs, the
 [regular-domain guard](Complexitylib/Interop/Mathlib/TM0/Guard.lean) handles
 malformed inputs, and the CSLib bridge now transfers full string computations
-in both directions at the level of polynomial-time classes.
+in both directions at the level of polynomial-time classes. The
+[Mathlib `TM2` bridge](Complexitylib/Interop/Mathlib/TM2/FP.lean) adds quadratic
+stack-to-tape compilation and canonical `FP` transfer for finite working
+alphabets, with independent input/output alphabets, complete outputs, and
+regular-domain guards.
 
 ### Next: choiceless polynomial time with counting
 
@@ -786,14 +790,31 @@ Complete the following layers before asserting the standard-model separation:
 - [ ] **OAI-CPT-STRUCTURES:** Connect the eight binary relations to `FinStruct`
   and an invariant `DecisionProblem`. Account for the library's `card ≥ 2`
   convention, prove encoding correspondence, and handle malformed strings.
-- [ ] **OAI-TM2-BRIDGE:** Transfer finite Mathlib `TM2` stack computations to
+- [x] **OAI-TM2-BRIDGE:** Transfer finite Mathlib `TM2` stack computations to
   the canonical machine model with a proved polynomial overhead and complete
   input/output contracts. Reuse the existing CSLib bridges where applicable.
-  The `TM0` bridge and regular-domain guard alone do not cover this source.
+  The [efficient Mathlib compiler](Complexitylib/Interop/Mathlib/TM2.lean) now
+  transfers supported TM2 programs with finite auxiliary state and bundled
+  polynomial-time certificates to finite-state TM0 machines with quadratic
+  overhead and exact stack-track input/output tapes. The
+  [canonical FP interface](Complexitylib/Interop/Mathlib/TM2/FP.lean) supplies
+  marked input copying, output decoding, and both string reversals. It covers
+  independent finite input/output alphabets through explicit palindromic binary
+  symbol codes, with malformed codes rejected before source execution. The
+  original binary interface remains available without recoding. Both interfaces
+  support regular-domain source contracts and derive output-size bounds from
+  source time. Working-alphabet finiteness is explicit, since Mathlib's bundle
+  only supplies input-alphabet finiteness. This completes the reusable machine
+  bridge. Applying it to the choiceless source and its structure encoding remains
+  part of `OAI-CPT-STRUCTURES` and `OAI-CPT-SEPARATION`.
 - [ ] **OAI-CPT-SEPARATION:** Prove membership of the full encoded query
   language in canonical `P`, combine it with the audited non-definability
   theorem, and add blueprint nodes and headline axiom checks. Do not identify
   a source machine witness with canonical `P` before these bridges are proved.
+  Instantiate the TM2 bridge on the source witness, translate the input/output
+  encodings, and prove polynomial-time handling of arbitrary binary inputs.
+  Canonical structure-encoding validation already belongs to `P`; a DFA guard
+  alone does not validate the source's structure format.
 
 ### Following layers
 

@@ -221,6 +221,25 @@ without changing the input, rejects with empty output, and rewinds accepted
 words before executing the source. The extra source time is `2 * input.length + 2`.
 The hitting generator instantiates this with a checked five-state unary validator.
 
+The reusable [Mathlib TM2 compiler](../Complexitylib/Interop/Mathlib/TM2.lean)
+imports the stack-compiler timing arguments from the rational hitting-list
+development, leaving those proofs in their original modules and namespaces.
+For a fixed supported source program with finite auxiliary state, a run on a word of length `n` in
+`t` source steps takes at most
+`C * (n + t + 1)^2` TM0 transitions and preserves the complete stack-track tape.
+The [TM2-to-FP interface](../Complexitylib/Interop/Mathlib/TM2/FP.lean) adds marked
+input copying, output decoding, and string reversal. It transfers total
+word-function certificates with finite working alphabets to canonical `FP`
+without a separate output-length assumption. Independent input and output
+alphabets use explicit delimited, palindromic binary symbol codes; invalid codes
+halt with empty output before the source starts. Empty alphabets are supported,
+and the original binary-string interface remains available without recoding.
+The DFA-guarded variants require source bounds only on accepted encoded inputs
+and return empty output elsewhere.
+This reusable layer does not complete the deferred choiceless source's structure
+encoding and arbitrary-input contracts; those remain tracked in
+[the triage notes](OpenAIMathTriage.md#deferred-choiceless-polynomial-time-with-counting).
+
 New proofs in the [evaluation interface](../Complexitylib/RationalHitting/Evaluation.lean)
 establish several consequences:
 
