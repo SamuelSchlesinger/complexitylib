@@ -1,7 +1,7 @@
 # Complexitylib
 
 > **Current development takes place in
-> [complexitylib2](https://github.com/SamuelSchlesinger/complexitylib2).**
+> [cslib-community/complexitylib](https://github.com/cslib-community/complexitylib).**
 > Please visit that repository for the latest work and contributions.
 
 [![CI](https://github.com/SamuelSchlesinger/complexitylib/actions/workflows/lean_action_ci.yml/badge.svg)](https://github.com/SamuelSchlesinger/complexitylib/actions/workflows/lean_action_ci.yml)
