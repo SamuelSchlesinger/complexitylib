@@ -1,5 +1,9 @@
 # Complexitylib
 
+> **Current development takes place in
+> [complexitylib2](https://github.com/SamuelSchlesinger/complexitylib2).**
+> Please visit that repository for the latest work and contributions.
+
 [![CI](https://github.com/SamuelSchlesinger/complexitylib/actions/workflows/lean_action_ci.yml/badge.svg)](https://github.com/SamuelSchlesinger/complexitylib/actions/workflows/lean_action_ci.yml)
 
 A Lean 4 formalization of computational complexity theory, built on
