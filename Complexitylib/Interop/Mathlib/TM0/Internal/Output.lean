@@ -98,6 +98,40 @@ lemma Emitting.run {M : BinaryMachine} {input : List Bool} (output : List Bool)
       have hr := ih (h.step_bit hb) ht
       simpa [Turing.MultiTapeTM.runFrom, Function.iterate_succ_apply, List.append_assoc] using hr
 
+/-- Output emission only needs the decoded symbols, allowing distinct input and output formats. -/
+lemma Emitting.run_decoded {M : BinaryMachine} {input : List Bool} (output : List Bool)
+    {tape : Turing.Tape M.Alphabet} {emitted : List Bool}
+    {d : Turing.Cfg (Fintype.card M.Alphabet) Bool (Control M.State) input}
+    (h : Emitting M tape emitted d)
+    (ho : ∀ j : ℕ, M.readBit (tape.nth j) = output[j]?) :
+    ((machine M).runFrom d (output.length + 1)).state = none ∧
+      ((machine M).runFrom d (output.length + 1)).output = emitted ++ output := by
+  induction output generalizing tape emitted d with
+  | nil =>
+      have hb : M.readBit tape.head = none := by simpa using ho 0
+      change ((machine M).step d).state = none ∧
+        ((machine M).step d).output = emitted ++ []
+      rw [Turing.MultiTapeTM.step_apply_of_state h.state]
+      simp [machine, h.read, hb, idle, Turing.Action.apply, h.output]
+  | cons b output ih =>
+      have hb : M.readBit tape.head = some b := by simpa using ho 0
+      have hs : Emitting M (tape.move .right) (emitted ++ [b]) ((machine M).step d) := by
+        rw [Turing.MultiTapeTM.step_apply_of_state h.state]
+        simp only [machine, h.read, hb]
+        refine ⟨rfl, ?_, ?_⟩
+        · simp [Turing.Action.apply, h.output]
+        · intro i z
+          simp only [Turing.Action.apply, Turing.Tape.move_right_nth, SignType.coe_one]
+          convert h.tape i (z + 1) using 1
+          congr 1
+          lia
+      have ht : ∀ j : ℕ, M.readBit ((tape.move .right).nth j) = output[j]? := by
+        intro j
+        rw [Turing.Tape.move_right_nth]
+        simpa only [List.getElem?_cons_succ, Nat.cast_add, Nat.cast_one] using ho (j + 1)
+      simpa [Turing.MultiTapeTM.runFrom, Function.iterate_succ_apply, List.append_assoc] using
+        ih hs ht
+
 lemma computes_proof (M : BinaryMachine) {input output : List Bool} {time : ℕ}
     (h : M.OutputsWithin input output time) :
     (machine M).ComputesInTimeAndSpace input output

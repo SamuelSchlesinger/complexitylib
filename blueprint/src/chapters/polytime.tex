@@ -348,6 +348,140 @@ Cobham's theorem.
   finite-machine simulation and its complete-output polynomial bound.
 \end{proof}
 
+\begin{theorem}[Mathlib's stack compiler has quadratic overhead]
+  \label{thm:mathlib-tm2-efficient-compiler}
+  \lean{Complexity.MathlibTM2.exists_tm0_simulator,
+    Complexity.MathlibTM2.exists_tm0_computer,
+    Complexity.MathlibTM2.exists_tm0_polynomial_computer}
+  \leanok
+  A fixed finitely supported Mathlib TM2 program with finite auxiliary state
+  has one finite-state TM0 simulator. A terminating source run on a stack word
+  $w$ in $t$ steps takes at most $C(|w|+t+1)^2$ target transitions, for a
+  program-dependent constant $C$. The simulator preserves the complete
+  stack-track tape. For bundled computation certificates, both input and output
+  tapes are exactly Mathlib's bottom-first stack encoding with its bottom marker,
+  including for empty words. The track alphabet is finite when the stack index
+  set and each stack alphabet are finite. Polynomial-time source certificates
+  therefore give polynomial-time TM0 certificates in these explicit encodings;
+  the next theorem accounts for canonical binary-string conversion.
+\end{theorem}
+\begin{proof}
+  \leanok
+  Use Mathlib's existing TM2-to-TM1-to-TM0 compiler. A fixed source statement
+  accesses boundedly many stack cells, and stack lengths grow at most linearly
+  with the source step count. The scans in the TM2-to-TM1 simulation therefore
+  have quadratic total cost. TM1-to-TM0 compilation adds a fixed linear factor,
+  and restricting to the finite supported control states adds no overhead.
+  The stack-configuration relation determines the whole final tape, so a clean
+  output stack gives the exact output encoding, not only a projection of it.
+\end{proof}
+
+\begin{definition}[Binary codes for finite alphabets]
+  \label{def:finite-alphabet-code}
+  \lean{Complexity.FiniteAlphabetCode,
+    Complexity.FiniteAlphabetCode.symbol,
+    Complexity.FiniteAlphabetCode.encode,
+    Complexity.FiniteAlphabetCode.decode,
+    Complexity.FiniteAlphabetCode.map}
+  \leanok
+  Choose a numbering of an alphabet $A$ by $\{0,\ldots,a-1\}$.
+  Letter $i$ has binary code $0\,1^i\,0$, and a word is encoded by
+  concatenating its letter codes. The decoder rejects malformed delimiters
+  and out-of-range indices. For independent input and output codes, the coded
+  version of a word function returns the encoded result on valid inputs and
+  the empty word on invalid codes. An empty alphabet has only the empty word.
+\end{definition}
+
+\begin{lemma}[Exact finite-alphabet coding]
+  \label{lem:finite-alphabet-code}
+  \lean{Complexity.FiniteAlphabetCode.decode_encode,
+    Complexity.FiniteAlphabetCode.decode_eq_some_iff,
+    Complexity.FiniteAlphabetCode.encode_injective,
+    Complexity.FiniteAlphabetCode.length_le_encode,
+    Complexity.FiniteAlphabetCode.length_encode_le,
+    Complexity.FiniteAlphabetCode.encode_reverse_eq,
+    Complexity.FiniteAlphabetCode.decode_reverse_eq}
+  \leanok
+  Decoding recognizes exactly the chosen encodings. Encoding is injective,
+  and a word of length $n$ has encoded length between $n$ and $(a+1)n$.
+  Encoding commutes with reversal. Reversing any binary string preserves
+  whether it is a valid encoding and reverses its decoded word when valid.
+\end{lemma}
+\begin{proof}
+  \leanok
+  Induct on the input suffix and the parser's pending unary index. Each letter
+  has a nonempty code of length at most $a+1$. The codewords are palindromes,
+  so reversal reverses their concatenation without changing individual codes.
+\end{proof}
+
+\begin{theorem}[Mathlib TM2 computations transfer to canonical FP]
+  \label{thm:mathlib-tm2-canonical-fp}
+  \lean{Complexity.MathlibTM2.exists_output_length_bound,
+    Complexity.MathlibTM2.mem_FP,
+    Complexity.MathlibTM2.mem_FP_on_dfa,
+    Complexity.MathlibTM2.mem_FP_encoded,
+    Complexity.MathlibTM2.mem_FP_encoded_on_dfa}
+  \leanok
+  A polynomial-time Mathlib TM2 certificate for a total binary-string function
+  gives membership in canonical $\cc{FP}$ when every working stack alphabet is
+  finite. An output stack has length at most $n+Ct$ on input length $n$ after
+  $t$ source transitions, so no separate output-size hypothesis is needed.
+  More generally, a polynomial source bound on a DFA-recognized input domain
+  gives a total $\cc{FP}$ function equal to the source result on that domain and
+  the empty word elsewhere. Invalid inputs need no source halting bound.
+  Independent finite input and output alphabets use the explicit binary codes
+  of Definition~\ref{def:finite-alphabet-code}, with invalid symbol codes
+  rejected before source execution. Empty alphabets are included. The direct
+  binary-string interface does not require this recoding.
+\end{theorem}
+\begin{proof}
+  \leanok
+  Compile the source using Theorem~\ref{thm:mathlib-tm2-efficient-compiler}.
+  A marked-input copier constructs the stack-track representation in linear
+  time, including its empty-input marker. A separate decoder emits the complete
+  output. These operations leave both words in stack-bottom order; polynomial-time
+  reversal before and after the simulation restores their original order.
+  Stack-growth bounds give a polynomial output bound. For a regular domain,
+  guard the simulation with the reversed DFA before performing either source
+  execution or output emission; rejected inputs halt with empty output.
+  For finite alphabets, parse complete symbol codes before writing source cells
+  and emit complete symbol codes afterward. Lemma~\ref{lem:finite-alphabet-code}
+  bounds both costs linearly and lets binary reversal restore the source order.
+\end{proof}
+
+\begin{theorem}[Marked tape formats and regular-domain validation]
+  \label{thm:marked-tape-fp}
+  \lean{Complexity.MathlibTM0.MarkedMachine.computes_cslib,
+    Complexity.MathlibTM0.MarkedMachine.mem_FP,
+    Complexity.MathlibTM0.MarkedMachine.mem_FP_on_dfa,
+    Complexity.MathlibTM0.AlphabetMachine.computes_cslib,
+    Complexity.MathlibTM0.AlphabetMachine.mem_FP,
+    Complexity.MathlibTM0.AlphabetMachine.mem_FP_on_dfa,
+    Complexity.CslibGuard.computes_accepted,
+    Complexity.CslibGuard.computes_rejected,
+    Complexity.CslibGuard.mem_FP_on_dfa}
+  \leanok
+  A finite TM0 with a first-cell input marker, a marker for empty input, and
+  a separate output decoder is simulated by a binary CSLib machine in at most
+  $2n+t+m+4$ transitions, where $n,t,m$ are input length, source time, and output
+  length. A DFA guard adds $2n+2$ transitions on accepted inputs and rejects
+  other inputs with empty output in $n+1$ transitions. Polynomial source and
+  output bounds on the regular domain therefore imply canonical $\cc{FP}$
+  membership for the function extended by the empty word.
+  For finite input and output alphabets, the encoded simulator takes at most
+  $2N+t+(b+1)m+4$ transitions, where $N$ is binary input length, $m$ is the
+  number of output letters, and $b$ is the output alphabet size. Invalid symbol
+  codes halt with empty output during the initial scan.
+\end{theorem}
+\begin{proof}
+  \leanok
+  Copy the marked input to symbol tracks and rewind. Reuse the existing TM0
+  source-step simulation and decoded output emission. The DFA guard scans the
+  read-only input without changing work tapes or output; acceptance rewinds to
+  the original initial configuration, while rejection halts before the source
+  starts. Apply the CSLib-to-canonical machine simulation.
+\end{proof}
+
 \section{Closure properties of P and FP}
 
 The projections of the pairing codec, the pairing of two $\cc{FP}$ functions,

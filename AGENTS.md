@@ -27,7 +27,7 @@ lake build --wfail Complexitylib \
 ```
 
 Always verify the library, all five executable validation roots, and the
-seven isolated `ApiChecks` modules pass before considering a change complete.
+nine isolated `ApiChecks` modules pass before considering a change complete.
 One invocation shares Lake's dependency-graph work across the targets and
 builds the upstream `runLinter` executable needed below. Validation and API
 regressions remain outside the public import graph.

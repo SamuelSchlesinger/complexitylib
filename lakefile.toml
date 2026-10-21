@@ -27,4 +27,6 @@ roots = [
   "StackEncodingCheck",
   "PairBuildApiCheck",
   "PairBuildCompatibilityCheck",
+  "TM2ApiCheck",
+  "TM2FPApiCheck",
 ]
