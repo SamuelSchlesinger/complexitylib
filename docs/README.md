@@ -1,4 +1,4 @@
-# Complexitylib design notes
+# Complexitylib V1 design notes
 
 These documents explain the construction strategy behind several of the
 library's largest verified machines. They complement the public theorem
@@ -16,7 +16,7 @@ statements; they are not the source of truth for current proof status.
 | [Algebraic circuits](algebraic/README.md) | Guide to the imported algebraic-circuits library (`Complexitylib/Algebraic`) and its lower-bound developments | Imported wholesale; consolidation planned in `ROADMAP.md`, item 7 |
 
 For current status and future work, see the
-[blueprint](https://samuelschlesinger.github.io/complexitylib/blueprint/) and
+[blueprint](https://samuelschlesinger.github.io/complexitylib-v1/blueprint/) and
 the [roadmap](../ROADMAP.md). Track codes such as N0 or M1 refer to the
 pre-blueprint roadmap, preserved in git history (`git show f47e3c1:ROADMAP.md`).
 When a design plan is completed, preserve it if it still explains the

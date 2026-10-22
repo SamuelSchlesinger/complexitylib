@@ -1,7 +1,7 @@
-# Complexitylib roadmap
+# Complexitylib V1 roadmap
 
 The mathematical map of the library now lives in the
-[blueprint](https://samuelschlesinger.github.io/complexitylib/blueprint/)
+[blueprint](https://samuelschlesinger.github.io/complexitylib-v1/blueprint/)
 (sources in [`blueprint/`](blueprint/)). It lists every headline result and
 planned theorem with its Lean declaration, its status, and its dependencies;
 its dependency graph shows which planned results are ready to work on.

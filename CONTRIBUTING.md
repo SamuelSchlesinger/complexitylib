@@ -1,4 +1,4 @@
-# Contributing to Complexitylib
+# Contributing to Complexitylib V1
 
 ## Commit Format
 
@@ -289,7 +289,7 @@ Actions caches (or bump the workflow's cache version) to force a cold rebuild.
 
 ## Choosing a Contribution
 
-The [blueprint](https://samuelschlesinger.github.io/complexitylib/blueprint/)
+The [blueprint](https://samuelschlesinger.github.io/complexitylib-v1/blueprint/)
 lists every planned result with its dependencies; planned nodes whose
 dependencies are formalized are ready to work on. [ROADMAP.md](ROADMAP.md)
 covers proof strategy and infrastructure priorities. A contribution does not need to prove a headline theorem:

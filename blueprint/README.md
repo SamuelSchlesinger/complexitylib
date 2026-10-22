@@ -1,9 +1,9 @@
-# Complexitylib blueprint
+# Complexitylib V1 blueprint
 
 The blueprint is the library's map: what is formalized, what is planned, and
 how the pieces depend on each other. It is written in LaTeX with
 [leanblueprint](https://github.com/PatrickMassot/leanblueprint) and published
-at <https://samuelschlesinger.github.io/complexitylib/blueprint/>.
+at <https://samuelschlesinger.github.io/complexitylib-v1/blueprint/>.
 
 ## Building
 

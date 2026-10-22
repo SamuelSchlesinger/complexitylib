@@ -1,6 +1,6 @@
 # Dependency-boundary pilot: generic pair construction
 
-First ownership slice of [#57](https://github.com/SamuelSchlesinger/complexitylib/issues/57).
+First ownership slice of [#57](https://github.com/SamuelSchlesinger/complexitylib-v1/issues/57).
 The implementation has moved, unchanged, from
 `Classes.NP.Internal.PairBuildTM` to `Models.TuringMachine.Subroutines.PairBuild`.
 The latter is the supported direct import for generic machine clients.

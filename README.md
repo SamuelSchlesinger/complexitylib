@@ -1,10 +1,16 @@
-# Complexitylib
+# Complexitylib V1
 
 > **Current development takes place in
-> [cslib-community/complexitylib](https://github.com/cslib-community/complexitylib).**
+> [Complexitylib](https://github.com/cslib-community/complexitylib).**
 > Please visit that repository for the latest work and contributions.
 
-[![CI](https://github.com/SamuelSchlesinger/complexitylib/actions/workflows/lean_action_ci.yml/badge.svg)](https://github.com/SamuelSchlesinger/complexitylib/actions/workflows/lean_action_ci.yml)
+[![CI](https://github.com/SamuelSchlesinger/complexitylib-v1/actions/workflows/lean_action_ci.yml/badge.svg)](https://github.com/SamuelSchlesinger/complexitylib-v1/actions/workflows/lean_action_ci.yml)
+
+This repository preserves the original, API-incompatible V1 codebase and its
+history. Its Lake package is named `complexitylib-v1`, giving it the Reservoir
+coordinate `@SamuelSchlesinger/complexitylib-v1`; its Lean imports remain
+`Complexitylib.*`. The current project is indexed as
+`@cslib-community/complexitylib`.
 
 A Lean 4 formalization of computational complexity theory, built on
 [Mathlib](https://github.com/leanprover-community/mathlib4). The machine
@@ -14,9 +20,9 @@ precisely where they're used, with literature references where they help,
 and unafraid to diverge from any one text when a cleaner formalization
 exists.
 
-- 📖 **[API documentation](https://samuelschlesinger.github.io/complexitylib/)** —
+- 📖 **[API documentation](https://samuelschlesinger.github.io/complexitylib-v1/)** —
   the full library, searchable, rebuilt on every merge to `dev`.
-- 🗺️ **[Blueprint](https://samuelschlesinger.github.io/complexitylib/blueprint/)** —
+- 🗺️ **[Blueprint](https://samuelschlesinger.github.io/complexitylib-v1/blueprint/)** —
   what is formalized, what is planned, and how it all depends on each other.
 
 ## Main results
@@ -138,12 +144,12 @@ lake build --wfail
 CI additionally runs five executable regression suites and five quality gates;
 see [CONTRIBUTING.md](CONTRIBUTING.md) for the full list and the style guide.
 API documentation builds with doc-gen4 from `docbuild/` and publishes to
-[GitHub Pages](https://samuelschlesinger.github.io/complexitylib/) on every
+[GitHub Pages](https://samuelschlesinger.github.io/complexitylib-v1/) on every
 merge to `dev` (and weekly, plus on demand via the workflow).
 
 ## Contributing
 
-The [blueprint](https://samuelschlesinger.github.io/complexitylib/blueprint/)
+The [blueprint](https://samuelschlesinger.github.io/complexitylib-v1/blueprint/)
 shows which planned results are ready to work on; its sources are in
 [`blueprint/`](blueprint/). [ROADMAP.md](ROADMAP.md) covers how to prove things
 here and the infrastructure priorities. [CONTRIBUTING.md](CONTRIBUTING.md)

@@ -12,13 +12,13 @@ The new research artifact is linked separately from that snapshot.
 
 Samuel Schlesinger and contributors. *Complexitylib*,
   source snapshot `b030149cd09f755bfead55f473d670f0880eedb0`, inspected locally
-  2026-10-06. [Pinned repository](https://github.com/SamuelSchlesinger/complexitylib/tree/b030149cd09f755bfead55f473d670f0880eedb0).
+  2026-10-06. [Pinned repository](https://github.com/SamuelSchlesinger/complexitylib-v1/tree/b030149cd09f755bfead55f473d670f0880eedb0).
   Primary audited roots:
-  [algebraic MCSP](https://github.com/SamuelSchlesinger/complexitylib/blob/b030149cd09f755bfead55f473d670f0880eedb0/Complexitylib/Algebraic/LowerBound/MCSP.lean),
-  [canonical MCSP](https://github.com/SamuelSchlesinger/complexitylib/blob/b030149cd09f755bfead55f473d670f0880eedb0/Complexitylib/Metacomplexity/MCSP.lean),
-  [blueprint](https://github.com/SamuelSchlesinger/complexitylib/blob/b030149cd09f755bfead55f473d670f0880eedb0/blueprint/src/chapters/metacomplexity.tex),
-  [roadmap](https://github.com/SamuelSchlesinger/complexitylib/blob/b030149cd09f755bfead55f473d670f0880eedb0/ROADMAP.md).
-  The pinned [dependency file](https://github.com/SamuelSchlesinger/complexitylib/blob/b030149cd09f755bfead55f473d670f0880eedb0/lakefile.toml)
+  [algebraic MCSP](https://github.com/SamuelSchlesinger/complexitylib-v1/blob/b030149cd09f755bfead55f473d670f0880eedb0/Complexitylib/Algebraic/LowerBound/MCSP.lean),
+  [canonical MCSP](https://github.com/SamuelSchlesinger/complexitylib-v1/blob/b030149cd09f755bfead55f473d670f0880eedb0/Complexitylib/Metacomplexity/MCSP.lean),
+  [blueprint](https://github.com/SamuelSchlesinger/complexitylib-v1/blob/b030149cd09f755bfead55f473d670f0880eedb0/blueprint/src/chapters/metacomplexity.tex),
+  [roadmap](https://github.com/SamuelSchlesinger/complexitylib-v1/blob/b030149cd09f755bfead55f473d670f0880eedb0/ROADMAP.md).
+  The pinned [dependency file](https://github.com/SamuelSchlesinger/complexitylib-v1/blob/b030149cd09f755bfead55f473d670f0880eedb0/lakefile.toml)
   selects CSLib `311d27ad8458b61e9b7461fc83a480e4be97aef2` and Mathlib
   `728a93eeff833da3173895bb0575752fdc24edb0`; `lean-toolchain` selects
   `leanprover/lean4:v4.35.0-rc3`.

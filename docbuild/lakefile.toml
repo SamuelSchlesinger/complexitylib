@@ -12,7 +12,7 @@ reservoir = false
 packagesDir = "../.lake/packages"
 
 [[require]]
-name = "complexitylib"
+name = "complexitylib-v1"
 path = ".."
 
 [[require]]

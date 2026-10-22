@@ -1,4 +1,4 @@
-# Complexitylib — Agent Guide
+# Complexitylib V1 — Agent Guide
 
 This is the shared instruction source for coding agents in this repository.
 `CLAUDE.md` points here; maintain repository guidance in this file.
@@ -8,7 +8,7 @@ This is the shared instruction source for coding agents in this repository.
 A Lean 4 library formalizing computational complexity theory, built on Mathlib. The machine model is shaped by Arora and Barak's *Computational Complexity: A Modern Approach* — a concrete 4-symbol alphabet and separate deterministic/nondeterministic machine types — but the library sets its own conventions and diverges from any one text where a cleaner formalization exists. NTMs and PTMs share the same structure (two transition functions); they differ only in acceptance semantics (existential vs counting).
 
 For project direction, read the blueprint (`blueprint/`, published at
-https://samuelschlesinger.github.io/complexitylib/blueprint/) for what is
+https://samuelschlesinger.github.io/complexitylib-v1/blueprint/) for what is
 formalized and planned, and `ROADMAP.md` for proof strategy and infrastructure
 priorities, before beginning a large feature. Prefer landing one reusable
 definition or intermediate theorem layer at a time. When a change formalizes a

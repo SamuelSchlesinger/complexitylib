@@ -1,5 +1,7 @@
-name = "complexitylib"
+name = "complexitylib-v1"
 version = "0.1.0"
+description = "Legacy Complexitylib V1; development continues at cslib-community/complexitylib."
+homepage = "https://samuelschlesinger.github.io/complexitylib-v1/"
 defaultTargets = ["Complexitylib"]
 
 [[require]]

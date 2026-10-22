@@ -443,7 +443,7 @@ The API reference, including this library, is generated with
 cd docbuild && lake build Complexitylib:docs
 ```
 
-CI publishes it at <https://samuelschlesinger.github.io/complexitylib/>. The
+CI publishes it at <https://samuelschlesinger.github.io/complexitylib-v1/>. The
 first documentation build also processes imported Mathlib modules and can
 take substantially longer than later incremental builds.
 
